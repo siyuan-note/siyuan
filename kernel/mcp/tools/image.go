@@ -40,17 +40,17 @@ var ImageTool = &Tool{
 	Title: "Document images",
 	Description: "List and understand local images referenced by a SiYuan document, or generate an image asset. " +
 		"Use list before analyze. analyze sends the selected image to the configured vision provider. " +
-		"generate creates an asset; generate_title creates a wide image based on document content and sets it as the document title image.",
+		"generate creates a reusable image asset in the target document's notebook.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":       {Type: "string", Enum: []string{"list", "analyze", "generate", "generate_title"}},
+			"action":       {Type: "string", Enum: []string{"list", "analyze", "generate"}},
 			"documentID":   {Type: "string", Description: "Document or descendant block ID used to resolve the target document and notebook"},
 			"assetPath":    {Type: "string", Description: "Local assets/... path returned by list; required for analyze"},
 			"question":     {Type: "string", Description: "Question for the vision model"},
 			"detail":       {Type: "string", Enum: []string{"auto", "low", "high"}},
-			"prompt":       {Type: "string", Description: "Generation direction; generate_title also includes a bounded document excerpt"},
-			"size":         {Type: "string", Description: "Provider-supported image size, such as 1536x1024"},
+			"prompt":       {Type: "string", Description: "Prompt describing the image to generate"},
+			"size":         {Type: "string", Description: "Provider-supported image size, such as 1024x1024"},
 			"quality":      {Type: "string", Description: "Provider-supported image quality"},
 			"outputFormat": {Type: "string", Enum: []string{"png", "jpeg", "webp"}},
 		},
@@ -58,10 +58,9 @@ var ImageTool = &Tool{
 	},
 	EffectScope: EffectScopeMixed,
 	ActionEffects: map[string]ToolEffects{
-		"list":           {LocalRead: true},
-		"analyze":        {LocalRead: true, DataEgress: true, ExternalCost: true},
-		"generate":       {LocalWrite: true, DataEgress: true, ExternalCost: true},
-		"generate_title": {LocalRead: true, LocalWrite: true, DataEgress: true, ExternalCost: true},
+		"list":     {LocalRead: true},
+		"analyze":  {LocalRead: true, DataEgress: true, ExternalCost: true},
+		"generate": {LocalWrite: true, DataEgress: true, ExternalCost: true},
 	},
 	ContextHandler: imageHandler,
 }
@@ -115,10 +114,10 @@ func imageHandler(ctx context.Context, args map[string]any) (CallToolResult, err
 		return runImageOperation(ctx, imageOperationKey(args, action), meta, func() CallToolResult {
 			return imageAnalyze(ctx, documentID, args)
 		}), nil
-	case "generate", "generate_title":
+	case "generate":
 		meta := imageOperationMeta{Action: action, DocumentID: documentID}
 		return runImageOperation(ctx, imageOperationKey(args, action), meta, func() CallToolResult {
-			return imageGenerate(ctx, documentID, action == "generate_title", args)
+			return imageGenerate(ctx, documentID, args)
 		}), nil
 	default:
 		return imageError("unknown image action: " + action), nil
@@ -149,32 +148,26 @@ func imageAnalyze(ctx context.Context, documentID string, args map[string]any) C
 	return imageJSON(result)
 }
 
-func imageGenerate(ctx context.Context, documentID string, title bool, args map[string]any) CallToolResult {
+func imageGenerate(ctx context.Context, documentID string, args map[string]any) CallToolResult {
 	prompt, _ := args["prompt"].(string)
 	size, _ := args["size"].(string)
 	quality, _ := args["quality"].(string)
 	outputFormat, _ := args["outputFormat"].(string)
 	result, err := model.GenerateDocumentImage(ctx, model.GenerateDocumentImageRequest{
-		DocumentID:        documentID,
-		Prompt:            prompt,
-		Size:              size,
-		Quality:           quality,
-		OutputFormat:      outputFormat,
-		ApplyAsTitleImage: title,
+		DocumentID:   documentID,
+		Prompt:       prompt,
+		Size:         size,
+		Quality:      quality,
+		OutputFormat: outputFormat,
 	})
 	if err != nil {
 		return imageError(err.Error())
 	}
-	action := "generate"
-	if title {
-		action = "generate_title"
-	}
-	operationID := imageOperationKey(args, action)
+	operationID := imageOperationKey(args, "generate")
 	return imageJSON(map[string]any{
-		"operationId":         operationID,
-		"artifact":            result.Artifact,
-		"appliedAsTitleImage": result.AppliedAsTitleImage,
-		"revisedPrompt":       result.RevisedPrompt,
+		"operationId":   operationID,
+		"artifact":      result.Artifact,
+		"revisedPrompt": result.RevisedPrompt,
 	})
 }
 

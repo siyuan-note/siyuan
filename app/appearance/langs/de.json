@@ -1,6 +1,6 @@
 {
-  "aiImageUnderstandingTip": "Analysiert Bilder und Ressourcendateien in Dokumenten. Wählen Sie ein Modell mit Bildeingabe",
-  "aiImageGenerationTip": "Erzeugt normale Bilder und Dokument-Kopfbilder. Wählen Sie ein Modell mit Bildausgabe",
+  "aiImageUnderstandingTip": "Analysiert Bilder. Wählen Sie ein Modell mit Bildeingabe",
+  "aiImageGenerationTip": "Erzeugt Bilder. Wählen Sie ein Modell mit Bildausgabe",
   "aiImageUnderstanding": "Bildverständnis",
   "aiImageGeneration": "Bilderzeugung",
   "agentEffectDataEgress": "Dokument- oder Bilddaten werden an den konfigurierten API-Anbieter gesendet",

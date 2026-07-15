@@ -1,6 +1,6 @@
 {
-  "aiImageUnderstandingTip": "文書内の画像やリソースファイルを解析します。画像入力に対応したモデルを選択してください",
-  "aiImageGenerationTip": "通常の画像や文書のヘッダー画像を生成します。画像出力に対応したモデルを選択してください",
+  "aiImageUnderstandingTip": "画像を解析します。画像入力に対応したモデルを選択してください",
+  "aiImageGenerationTip": "画像を生成します。画像出力に対応したモデルを選択してください",
   "aiImageUnderstanding": "画像理解",
   "aiImageGeneration": "画像生成",
   "agentEffectDataEgress": "文書または画像のデータが設定済みの API プロバイダーに送信されます",

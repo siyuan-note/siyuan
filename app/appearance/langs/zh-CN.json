@@ -1,6 +1,6 @@
 {
-  "aiImageUnderstandingTip": "用于分析文档中的图片和资源文件，请选择支持图片输入的模型",
-  "aiImageGenerationTip": "用于生成普通图片和文档题头图，请选择支持图片输出的模型",
+  "aiImageUnderstandingTip": "用于分析图片，请选择支持图片输入的模型",
+  "aiImageGenerationTip": "用于生成图片，请选择支持图片输出的模型",
   "aiImageUnderstanding": "图片理解",
   "aiImageGeneration": "图片生成",
   "agentEffectDataEgress": "将向已配置的 API 提供商发送文档或图片数据",

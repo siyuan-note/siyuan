@@ -1,6 +1,6 @@
 {
-  "aiImageUnderstandingTip": "מנתח תמונות וקובצי משאבים במסמכים. יש לבחור מודל התומך בקלט תמונה",
-  "aiImageGenerationTip": "יוצר תמונות רגילות ותמונות כותרת למסמכים. יש לבחור מודל התומך בפלט תמונה",
+  "aiImageUnderstandingTip": "מנתח תמונות. יש לבחור מודל התומך בקלט תמונה",
+  "aiImageGenerationTip": "יוצר תמונות. יש לבחור מודל התומך בפלט תמונה",
   "aiImageUnderstanding": "הבנת תמונות",
   "aiImageGeneration": "יצירת תמונות",
   "agentEffectDataEgress": "נתוני המסמך או התמונה יישלחו לספק ה-API שהוגדר",

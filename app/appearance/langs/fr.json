@@ -1,6 +1,6 @@
 {
-  "aiImageUnderstandingTip": "Analyse les images et les fichiers de ressources des documents. Sélectionnez un modèle prenant en charge les images en entrée",
-  "aiImageGenerationTip": "Génère des images ordinaires et des images d’en-tête de document. Sélectionnez un modèle prenant en charge les images en sortie",
+  "aiImageUnderstandingTip": "Analyse les images. Sélectionnez un modèle prenant en charge les images en entrée",
+  "aiImageGenerationTip": "Génère des images. Sélectionnez un modèle prenant en charge les images en sortie",
   "aiImageUnderstanding": "Compréhension d’images",
   "aiImageGeneration": "Génération d’images",
   "agentEffectDataEgress": "Les données du document ou de l’image seront envoyées au fournisseur d’API configuré",

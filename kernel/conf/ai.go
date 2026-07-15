@@ -169,7 +169,7 @@ func defaultVision() *Vision {
 }
 
 func defaultImageGeneration() *ImageGeneration {
-	return &ImageGeneration{Size: "1536x1024", Quality: "auto", OutputFormat: "png"}
+	return &ImageGeneration{Size: "1024x1024", Quality: "auto", OutputFormat: "png"}
 }
 
 func NewAI() *AI {
@@ -426,7 +426,7 @@ func (ai *AI) Normalize() {
 	}
 	ai.ImageGeneration.Size = strings.TrimSpace(ai.ImageGeneration.Size)
 	if ai.ImageGeneration.Size == "" {
-		ai.ImageGeneration.Size = "1536x1024"
+		ai.ImageGeneration.Size = "1024x1024"
 	}
 	ai.ImageGeneration.Quality = strings.TrimSpace(ai.ImageGeneration.Quality)
 	if ai.ImageGeneration.Quality == "" {

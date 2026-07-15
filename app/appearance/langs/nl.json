@@ -1,6 +1,6 @@
 {
-  "aiImageUnderstandingTip": "Analyseert afbeeldingen en bronbestanden in documenten. Kies een model dat afbeeldingsinvoer ondersteunt",
-  "aiImageGenerationTip": "Genereert gewone afbeeldingen en kopafbeeldingen voor documenten. Kies een model dat afbeeldingsuitvoer ondersteunt",
+  "aiImageUnderstandingTip": "Analyseert afbeeldingen. Kies een model dat afbeeldingsinvoer ondersteunt",
+  "aiImageGenerationTip": "Genereert afbeeldingen. Kies een model dat afbeeldingsuitvoer ondersteunt",
   "aiImageUnderstanding": "Beeldbegrip",
   "aiImageGeneration": "Beeldgeneratie",
   "agentEffectDataEgress": "Document- of afbeeldingsgegevens worden naar de geconfigureerde API-provider verzonden",

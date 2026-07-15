@@ -1,6 +1,6 @@
 {
-  "aiImageUnderstandingTip": "Belgelerdeki görselleri ve kaynak dosyalarını analiz eder. Görsel girişini destekleyen bir model seçin",
-  "aiImageGenerationTip": "Normal görseller ve belge başlık görselleri oluşturur. Görsel çıktısını destekleyen bir model seçin",
+  "aiImageUnderstandingTip": "Görselleri analiz eder. Görsel girişini destekleyen bir model seçin",
+  "aiImageGenerationTip": "Görseller oluşturur. Görsel çıktısını destekleyen bir model seçin",
   "aiImageUnderstanding": "Görsel Anlama",
   "aiImageGeneration": "Görsel Oluşturma",
   "agentEffectDataEgress": "Belge veya görsel verileri yapılandırılmış API sağlayıcısına gönderilecek",

@@ -1,6 +1,6 @@
 {
-  "aiImageUnderstandingTip": "Analyzes images and resource files in documents. Select a model that supports image input",
-  "aiImageGenerationTip": "Generates regular images and document header images. Select a model that supports image output",
+  "aiImageUnderstandingTip": "Analyzes images. Select a model that supports image input",
+  "aiImageGenerationTip": "Generates images. Select a model that supports image output",
   "aiImageUnderstanding": "Image Understanding",
   "aiImageGeneration": "Image Generation",
   "agentEffectDataEgress": "Document or image data will be sent to the configured API provider",

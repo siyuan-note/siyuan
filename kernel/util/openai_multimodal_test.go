@@ -120,6 +120,9 @@ func TestOpenAIImageAdapterAnalyzeAndGenerate(t *testing.T) {
 			if !strings.Contains(string(encoded), "data:image/jpeg;base64,") {
 				t.Errorf("vision request does not contain an image data URL: %s", encoded)
 			}
+			if strings.Contains(string(encoded), "document task") || !strings.Contains(string(encoded), "user's task") {
+				t.Errorf("vision request is not task-generic: %s", encoded)
+			}
 			w.Header().Set("Content-Type", "application/json")
 			_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"a diagram"}}]}`))
 		case "/v1/images/generations":

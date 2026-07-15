@@ -9,7 +9,7 @@ import {focusBlock, focusByRange} from "../../util/selection";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType, getColId} from "./col";
-import {genAVValueHTML} from "./blockAttr";
+import {genAVValueHTML, getAVTemplateHTML} from "./blockAttr";
 import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
 import {getAssetName, pathPosix} from "../../../util/pathName";
@@ -20,7 +20,6 @@ import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
-import {getAVTemplateHTML} from "./template";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;

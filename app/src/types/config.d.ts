@@ -429,7 +429,7 @@ declare namespace Config {
         allowSVGScript: boolean;
 
         /**
-         * Whether to allow to execute javascript in the HTML block
+         * 是否允许在 HTML 内容中执行 JavaScript
          */
         allowHTMLBLockScript: boolean;
 

@@ -20,6 +20,7 @@ import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
+import {getAVTemplateHTML} from "./template";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -956,8 +957,7 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
 export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = true, type: TAVView = "table") => {
     let text = "";
     if ("template" === cellValue.type) {
-        // 使用 DOMPurify 过滤危险标签和事件属性，保留安全的 HTML 格式 https://github.com/siyuan-note/siyuan/issues/18169
-        text = `<span class="av__celltext">${cellValue ? window.DOMPurify.sanitize(cellValue.template.content || "") : ""}</span>`;
+        text = `<span class="av__celltext">${cellValue ? getAVTemplateHTML(cellValue.template.content || "") : ""}</span>`;
     } else if ("text" === cellValue.type) {
         text = `<span class="av__celltext">${cellValue ? Lute.EscapeHTMLStr(cellValue.text.content || "") : ""}</span>`;
     } else if (["email", "phone"].includes(cellValue.type)) {

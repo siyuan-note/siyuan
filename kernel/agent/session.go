@@ -307,9 +307,14 @@ func GetSessionState(id string, includeRuntime bool) (map[string]any, error) {
 }
 
 func SaveSession(data []byte) (int64, error) {
+	revision, _, err := SaveSessionState(data)
+	return revision, err
+}
+
+func SaveSessionState(data []byte) (int64, map[string]any, error) {
 	var meta sessionMeta
 	if err := gulu.JSON.UnmarshalJSON(data, &meta); err != nil || meta.ID == "" || !isValidSessionID(meta.ID) {
-		return 0, fmt.Errorf("invalid session data")
+		return 0, nil, fmt.Errorf("invalid session data")
 	}
 	lock := sessionLock(meta.ID)
 	lock.Lock()
@@ -320,7 +325,7 @@ func SaveSession(data []byte) (int64, error) {
 
 	var newData map[string]any
 	if err := gulu.JSON.UnmarshalJSON(data, &newData); err != nil {
-		return 0, fmt.Errorf("decode session data failed: %w", err)
+		return 0, nil, fmt.Errorf("decode session data failed: %w", err)
 	}
 	delete(newData, "expectedRevision")
 	delete(newData, "commitTurnID")
@@ -340,7 +345,7 @@ func SaveSession(data []byte) (int64, error) {
 	if err == nil && len(existing) > 0 {
 		var existingData map[string]any
 		if err := gulu.JSON.UnmarshalJSON(existing, &existingData); err != nil {
-			return 0, fmt.Errorf("decode existing session data failed: %w", err)
+			return 0, nil, fmt.Errorf("decode existing session data failed: %w", err)
 		} else {
 			currentRevision = numberToInt64(existingData["revision"])
 			currentCommittedTurnID, _ = existingData["lastCommittedTurnID"].(string)
@@ -350,10 +355,10 @@ func SaveSession(data []byte) (int64, error) {
 				if err := markRuntimeCommittedLocked(meta.ID, commitTurnID); err != nil {
 					logging.LogWarnf("clean committed agent runtime failed: %s", err)
 				}
-				return currentRevision, nil
+				return currentRevision, existingData, nil
 			}
 			if meta.ExpectedRevision != nil && *meta.ExpectedRevision != currentRevision {
-				return currentRevision, ErrSessionConflict
+				return currentRevision, nil, ErrSessionConflict
 			}
 			for k, v := range existingData {
 				if _, ok := newData[k]; !ok {
@@ -367,27 +372,27 @@ func SaveSession(data []byte) (int64, error) {
 			}
 		}
 	} else if err != nil && !os.IsNotExist(err) {
-		return 0, fmt.Errorf("read session file failed: %w", err)
+		return 0, nil, fmt.Errorf("read session file failed: %w", err)
 	} else if meta.ExpectedRevision != nil && *meta.ExpectedRevision != 0 {
-		return 0, ErrSessionConflict
+		return 0, nil, ErrSessionConflict
 	}
 	if commitTurnID != "" {
 		runtime, err := loadRuntimeLocked(meta.ID)
 		if err != nil {
-			return currentRevision, fmt.Errorf("read agent runtime failed: %w", err)
+			return currentRevision, nil, fmt.Errorf("read agent runtime failed: %w", err)
 		}
 		if runtime.ActiveTurn != nil {
 			if runtime.ActiveTurn.TurnID != commitTurnID {
-				return currentRevision, ErrSessionConflict
+				return currentRevision, nil, ErrSessionConflict
 			}
 			if !isRuntimeTurnTerminal(runtime.ActiveTurn) {
-				return currentRevision, ErrRuntimeNotFinalized
+				return currentRevision, nil, ErrRuntimeNotFinalized
 			}
 			if err := applyRuntimeTurnToSessionLocked(newData, runtime.ActiveTurn); err != nil {
-				return currentRevision, err
+				return currentRevision, nil, err
 			}
 		} else if currentCommittedTurnID != commitTurnID {
-			return currentRevision, ErrSessionConflict
+			return currentRevision, nil, ErrSessionConflict
 		}
 	}
 
@@ -398,14 +403,14 @@ func SaveSession(data []byte) (int64, error) {
 	}
 	data, err = gulu.JSON.MarshalIndentJSON(newData, "", "\t")
 	if err != nil {
-		return currentRevision, fmt.Errorf("encode session data failed: %w", err)
+		return currentRevision, nil, fmt.Errorf("encode session data failed: %w", err)
 	}
 
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		return currentRevision, fmt.Errorf("create session dir failed: %w", err)
+		return currentRevision, nil, fmt.Errorf("create session dir failed: %w", err)
 	}
 	if err := filelock.WriteFile(path, data); err != nil {
-		return currentRevision, fmt.Errorf("save session file failed: %w", err)
+		return currentRevision, nil, fmt.Errorf("save session file failed: %w", err)
 	}
 	if commitTurnID != "" {
 		if err := markRuntimeCommittedLocked(meta.ID, commitTurnID); err != nil {
@@ -427,7 +432,7 @@ func SaveSession(data []byte) (int64, error) {
 	}
 	UpdateSessionIndex(meta.ID, title, createdAt, updatedAt)
 
-	return newRevision, nil
+	return newRevision, newData, nil
 }
 
 func DeleteSession(id string) error {

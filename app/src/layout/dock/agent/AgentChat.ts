@@ -2837,17 +2837,27 @@ export class AgentChat extends Model {
     }
 
     private async postFrontendResult(callID: string, result: string, isError: boolean) {
-        try {
-            const resp = await fetch("/api/ai/agent/frontendToolResult", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({callID, result, isError}),
-            });
-            if (!resp.ok) {
-                console.error("agent frontend result request failed:", resp.status);
+        for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+                const resp = await fetch("/api/ai/agent/frontendToolResult", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({callID, result, isError}),
+                });
+                const response = await resp.json() as {code?: number};
+                if (resp.ok && response?.code === 0) {
+                    return;
+                }
+                if (resp.status === 409) {
+                    console.error("agent frontend result expired:", callID);
+                    return;
+                }
+            } catch (e) {
+                if (attempt === 2) {
+                    console.error("agent frontend result request error:", e);
+                }
             }
-        } catch (e) {
-            console.error("agent frontend result request error:", e);
+            await new Promise((resolve) => window.setTimeout(resolve, 200 * (attempt + 1)));
         }
     }
 
@@ -2865,6 +2875,16 @@ export class AgentChat extends Model {
         el.setAttribute("data-question-id", questionID);
 
         el.innerHTML = renderQuestionCardHTML(rawQuestions, questionID);
+        const sessionID = this.sessionId;
+        const questionEntryId = SessionStore.newSessionId();
+        el.setAttribute("data-message-id", questionEntryId);
+        this.entries.push({
+            id: questionEntryId,
+            type: "question",
+            questionID: questionID,
+            questions: rawQuestions,
+            status: "pending",
+        });
 
         el.querySelectorAll(".agent-chat__question-option").forEach((option) => {
             const input = option.querySelector("input") as HTMLInputElement;
@@ -2886,7 +2906,7 @@ export class AgentChat extends Model {
 
         const submitBtn = el.querySelector(".agent-chat__question-submit-btn");
         if (submitBtn) {
-            submitBtn.addEventListener("click", () => {
+            submitBtn.addEventListener("click", async () => {
                 const answers: string[] = [];
                 for (let qi = 0; qi < rawQuestions.length; qi++) {
                     const optEl = el.querySelector('.agent-chat__question-options[data-qi="' + qi + '"]');
@@ -2901,54 +2921,62 @@ export class AgentChat extends Model {
                         answers.push(customInput.value.trim());
                     }
                 }
+                const inputs = Array.from(el.querySelectorAll("input")) as HTMLInputElement[];
+                (submitBtn as HTMLButtonElement).disabled = true;
+                inputs.forEach((input) => input.disabled = true);
+                const accepted = await this.postQuestionAnswer(questionID, answers, sessionID, questionEntryId);
+                if (!accepted) {
+                    (submitBtn as HTMLButtonElement).disabled = false;
+                    inputs.forEach((input) => input.disabled = false);
+                    showMessage(window.siyuan.languages._kernel[28], 3000);
+                    return;
+                }
                 el.classList.add("agent-chat__msg--confirmed");
                 const actions = el.querySelector(".agent-chat__question-submit");
                 if (actions) {
                     (actions as HTMLElement).innerHTML = '<span class="agent-chat__confirm-done">' + (L.agentQuestionSubmitted || "Submitted") + "</span>";
                 }
-                // 提交后禁用所有输入，不可再修改。
-                el.querySelectorAll("input").forEach((inp) => {
-                    (inp as HTMLInputElement).disabled = true;
-                });
-                this.postQuestionAnswer(questionID, answers);
             });
         }
 
         this.insertBeforeAI(el);
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
-        const questionEntryId = SessionStore.newSessionId();
-        el.setAttribute("data-message-id", questionEntryId);
-        this.entries.push({
-            id: questionEntryId,
-            type: "question",
-            questionID: questionID,
-            questions: rawQuestions,
-            status: "pending",
-        });
     }
 
-    private async postQuestionAnswer(questionID: string, answers: string[]) {
+    private async postQuestionAnswer(questionID: string, answers: string[],
+                                     sessionID: string, questionEntryID: string): Promise<boolean> {
         try {
             const resp = await fetch("/api/ai/agent/question", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({questionID: questionID, answers: answers}),
             });
-            if (!resp.ok) {
+            const result = await resp.json() as {code?: number};
+            if (!resp.ok || result?.code !== 0) {
                 console.error("agent question request failed:", resp.status);
+                return false;
             }
         } catch (e) {
             console.error("agent question request error:", e);
+            return false;
         }
-        const entry = this.entries.find(e => e.type === "question" && e.questionID === questionID) as {
+        if (this.sessionId !== sessionID) {
+            return true;
+        }
+        const entry = this.entries.find(e => e.id === questionEntryID) as {
             status?: string; answers?: string[]
         } | undefined;
         if (entry) {
             entry.status = "submitted";
             entry.answers = answers;
         }
-        await this.saveSession();
+        try {
+            await this.saveSession();
+        } catch (e) {
+            console.error("save agent question state failed:", e);
+        }
+        return true;
     }
 
     private renderSingleThinkingCard(step: {

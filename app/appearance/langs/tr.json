@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Araç ek açıklamalarına güven",
+	"aiMcpTrustToolAnnotationsTip": "Bu sunucunun salt okunur araç ek açıklamalarının işlem onayını atlamasına izin verir. Yalnızca güvenilir sunucular için etkinleştirin.",
 	"testConnectionFailMsg": "Bağlantı başarısız: ${msg}",
 	"testConnectionSuccessDimensions": "Bağlantı başarılı (boyutlar ${dimensions})",
 	"masterPasswordMigrationPending": "Ana parola geçişi devam ediyor",

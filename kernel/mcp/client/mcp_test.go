@@ -17,8 +17,12 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"testing"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
 func TestIsReconnectableError(t *testing.T) {
@@ -30,5 +34,49 @@ func TestIsReconnectableError(t *testing.T) {
 	authErr := errors.New("401 Unauthorized: invalid_token")
 	if isReconnectableError(authErr) {
 		t.Fatal("expected auth error not to trigger reconnect")
+	}
+}
+
+func TestCallMCPToolOnceMarksTimeoutUnknownWithoutReconnect(t *testing.T) {
+	calls := 0
+	reconnects := 0
+	result := callMCPToolOnce(func() (*mcp.CallToolResult, error) {
+		calls++
+		return nil, context.DeadlineExceeded
+	}, func(error) {
+		reconnects++
+	})
+	if calls != 1 || reconnects != 0 {
+		t.Fatalf("unexpected call counts: calls=%d, reconnects=%d", calls, reconnects)
+	}
+	if !result.IsError || !result.ExecutionUnknown {
+		t.Fatalf("timed out call was not marked unknown: %#v", result)
+	}
+}
+
+func TestCallMCPToolOnceDoesNotReplayDisconnectedCall(t *testing.T) {
+	calls := 0
+	reconnects := 0
+	result := callMCPToolOnce(func() (*mcp.CallToolResult, error) {
+		calls++
+		return nil, errors.New("connection closed after request")
+	}, func(error) {
+		reconnects++
+	})
+	if calls != 1 || reconnects != 1 {
+		t.Fatalf("unexpected call counts: calls=%d, reconnects=%d", calls, reconnects)
+	}
+	if !result.IsError || !result.ExecutionUnknown {
+		t.Fatalf("disconnected call was not marked unknown: %#v", result)
+	}
+}
+
+func TestTrustedReadOnlyHint(t *testing.T) {
+	tool := &mcp.Tool{Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true}}
+	if trustedReadOnlyHint(conf.MCPServer{}, tool) {
+		t.Fatal("untrusted server annotation bypassed confirmation")
+	}
+	if !trustedReadOnlyHint(conf.MCPServer{TrustToolAnnotations: true}, tool) {
+		t.Fatal("trusted read-only annotation was ignored")
 	}
 }

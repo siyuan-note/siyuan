@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Considera attendibili le annotazioni degli strumenti",
+	"aiMcpTrustToolAnnotationsTip": "Consente alle annotazioni degli strumenti di sola lettura di questo server di ignorare la conferma delle operazioni. Abilita solo per server attendibili.",
 	"testConnectionFailMsg": "Connessione non riuscita: ${msg}",
 	"testConnectionSuccessDimensions": "Connessione riuscita (dimensioni ${dimensions})",
 	"masterPasswordMigrationPending": "Migrazione della password principale in corso",

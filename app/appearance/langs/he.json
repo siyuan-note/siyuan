@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "מתן אמון בהערות כלי",
+	"aiMcpTrustToolAnnotationsTip": "אפשר להערות כלי לקריאה בלבד משרת זה לדלג על אישור הפעולה. יש להפעיל רק עבור שרתים מהימנים.",
 	"testConnectionFailMsg": "החיבור נכשל: ${msg}",
 	"testConnectionSuccessDimensions": "החיבור הצליח (ממדים ${dimensions})",
 	"masterPasswordMigrationPending": "מעבר סיסמה ראשית בתהליך",

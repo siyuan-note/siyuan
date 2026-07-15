@@ -261,8 +261,13 @@ func agentChatQuestion(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	agent.AnswerQuestion(req.QuestionID, req.Answers)
 	ret := gulu.Ret.NewResult()
+	if !agent.AnswerQuestion(req.QuestionID, req.Answers) {
+		ret.Code = -1
+		ret.Msg = "agent question expired"
+		c.JSON(http.StatusConflict, ret)
+		return
+	}
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -281,8 +286,13 @@ func agentChatFrontendResult(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	agent.FrontendToolResult(req.CallID, req.Result, req.IsError)
 	ret := gulu.Ret.NewResult()
+	if !agent.FrontendToolResult(req.CallID, req.Result, req.IsError) {
+		ret.Code = -1
+		ret.Msg = "agent frontend tool call expired"
+		c.JSON(http.StatusConflict, ret)
+		return
+	}
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -550,17 +560,14 @@ func saveSession(c *gin.Context) {
 		}
 	}
 
-	revision, err := agent.SaveSession(body)
-	var canonicalSession map[string]any
+	revision, canonicalSession, err := agent.SaveSessionState(body)
+	if commitTurnID == "" {
+		canonicalSession = nil
+	}
 	if err == nil && running != nil {
 		if commitTurnID != "" && commitTurnID == running.turnID {
 			running.committed = true
 		}
-	}
-	if err == nil && commitTurnID != "" {
-		// 将提交后的权威会话随响应返回，前端无需再经历一次可能失败或乱序的 GET，下一轮保存也
-		// 不会把流式期间的局部快照重新覆盖到服务端。
-		canonicalSession, _ = agent.GetSessionState(meta.ID, false)
 	}
 	sessionsMu.Unlock()
 	if err != nil {

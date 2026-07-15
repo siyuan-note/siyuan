@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Werkzeuganmerkungen vertrauen",
+	"aiMcpTrustToolAnnotationsTip": "Erlaubt den Nur-Lese-Anmerkungen dieses Servers, die Bestätigung von Vorgängen zu überspringen. Nur für vertrauenswürdige Server aktivieren.",
 	"testConnectionFailMsg": "Verbindung fehlgeschlagen: ${msg}",
 	"testConnectionSuccessDimensions": "Verbindung erfolgreich (Dimensionen ${dimensions})",
 	"masterPasswordMigrationPending": "Master-Passwort-Migration läuft",

@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Ufaj adnotacjom narzędzi",
+	"aiMcpTrustToolAnnotationsTip": "Zezwala adnotacjom narzędzi tylko do odczytu z tego serwera na pomijanie potwierdzenia operacji. Włączaj tylko dla zaufanych serwerów.",
 	"testConnectionFailMsg": "Połączenie nie powiodło się: ${msg}",
 	"testConnectionSuccessDimensions": "Połączenie nawiązane (wymiary ${dimensions})",
 	"masterPasswordMigrationPending": "Trwa migracja hasła głównego",

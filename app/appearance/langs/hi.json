@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "टूल एनोटेशन पर भरोसा करें",
+	"aiMcpTrustToolAnnotationsTip": "इस सर्वर के केवल-पढ़ने योग्य टूल एनोटेशन को कार्रवाई की पुष्टि छोड़ने दें। इसे केवल विश्वसनीय सर्वर के लिए सक्षम करें।",
 	"testConnectionFailMsg": "कनेक्शन विफल: ${msg}",
 	"testConnectionSuccessDimensions": "कनेक्शन सफल (आयाम ${dimensions})",
 	"masterPasswordMigrationPending": "मास्टर पासवर्ड माइग्रेशन प्रगति पर है",

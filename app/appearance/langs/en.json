@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Trust tool annotations",
+	"aiMcpTrustToolAnnotationsTip": "Allow this server's read-only tool annotations to skip operation confirmation. Enable only for trusted servers.",
 	"testConnectionFailMsg": "Connection failed: ${msg}",
 	"testConnectionSuccessDimensions": "Connection successful (dimensions ${dimensions})",
 	"masterPasswordMigrationPending": "Master password migration in progress",

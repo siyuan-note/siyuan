@@ -226,6 +226,7 @@ declare namespace Config {
         args?: string[];
         headers?: Record<string, string>;
         timeout: number;
+        trustToolAnnotations: boolean;
     }
 
     /**

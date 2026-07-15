@@ -225,9 +225,12 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 	entries = recovered["entries"].([]any)
 	entries[1].(map[string]any)["content"] = "client truncated content"
 	recovered["expectedRevision"] = int64(1)
-	revision, err := SaveSession(marshalSession(t, recovered))
+	revision, canonicalState, err := SaveSessionState(marshalSession(t, recovered))
 	if err != nil || revision != 2 {
 		t.Fatalf("commit recovered session failed: revision=%d, err=%v", revision, err)
+	}
+	if entries := canonicalState["entries"].([]any); entries[1].(map[string]any)["content"] != "server authoritative content" {
+		t.Fatalf("save response did not return authoritative content: %#v", canonicalState)
 	}
 	committed, err := GetSession(testSessionID)
 	if err != nil {
@@ -249,8 +252,10 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 	// 模拟提交已落盘但响应丢失：客户端会携带旧修订号原样重试。
 	repeatedCommit["expectedRevision"] = int64(1)
 	repeatedCommit["commitTurnID"] = turn.TurnID
-	if revision, err := SaveSession(marshalSession(t, repeatedCommit)); err != nil || revision != 2 {
+	if revision, canonicalState, err := SaveSessionState(marshalSession(t, repeatedCommit)); err != nil || revision != 2 {
 		t.Fatalf("repeated commit was not idempotent: revision=%d, err=%v", revision, err)
+	} else if entries := canonicalState["entries"].([]any); entries[1].(map[string]any)["content"] != "server authoritative content" {
+		t.Fatalf("repeated commit did not return authoritative content: %#v", canonicalState)
 	}
 	committed, err = GetSession(testSessionID)
 	if err != nil {

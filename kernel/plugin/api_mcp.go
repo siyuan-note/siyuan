@@ -130,6 +130,7 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 				OutputSchema: outputSchema,
 				Source:       "plugin",
 				ReadOnlyHint: readOnlyHint,
+				EffectScope:  tools.EffectScopeUnknown,
 				Handler: func(args map[string]any) (tools.CallToolResult, error) {
 					return p.invokeMcpTool(handler, args)
 				},

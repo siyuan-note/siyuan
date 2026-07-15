@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "信任工具注解",
+	"aiMcpTrustToolAnnotationsTip": "允许此服务的只读工具注解跳过操作确认。仅对可信服务启用。",
 	"testConnectionFailMsg": "连接失败：${msg}",
 	"testConnectionSuccessDimensions": "连接成功（维度 ${dimensions}）",
 	"masterPasswordMigrationPending": "主密码迁移进行中",

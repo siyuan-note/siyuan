@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Percayai anotasi alat",
+	"aiMcpTrustToolAnnotationsTip": "Izinkan anotasi alat hanya-baca dari server ini melewati konfirmasi operasi. Aktifkan hanya untuk server tepercaya.",
 	"testConnectionFailMsg": "Koneksi gagal: ${msg}",
 	"testConnectionSuccessDimensions": "Koneksi berhasil (dimensi ${dimensions})",
 	"masterPasswordMigrationPending": "Migrasi kata sandi utama sedang berlangsung",

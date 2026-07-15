@@ -17,9 +17,11 @@
 package agent
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
+	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 )
 
@@ -94,13 +96,18 @@ func TestNeedsConfirmScopesReadOnlyActionsByToolSource(t *testing.T) {
 	const externalWrite = "test_external_write"
 	const externalRead = "test_external_read"
 	const nativeWrite = "test_native_write"
+	const nativeExternalWrite = "test_native_external_write"
 	tools.SetTool(externalWrite, &tools.Tool{Name: externalWrite, Source: "mcp"})
 	tools.SetTool(externalRead, &tools.Tool{Name: externalRead, Source: "mcp", ReadOnlyHint: true})
 	tools.SetTool(nativeWrite, &tools.Tool{Name: nativeWrite, Source: "native"})
+	tools.SetTool(nativeExternalWrite, &tools.Tool{
+		Name: nativeExternalWrite, Source: "native", EffectScope: tools.EffectScopeExternal,
+	})
 	t.Cleanup(func() {
 		tools.RemoveTool(externalWrite)
 		tools.RemoveTool(externalRead)
 		tools.RemoveTool(nativeWrite)
+		tools.RemoveTool(nativeExternalWrite)
 	})
 
 	if !needsConfirm(externalWrite, "", nil) {
@@ -117,6 +124,24 @@ func TestNeedsConfirmScopesReadOnlyActionsByToolSource(t *testing.T) {
 	}
 	if !needsLocalSnapshot(nativeWrite, "write") {
 		t.Fatal("native write should create a local repository snapshot")
+	}
+	if needsLocalSnapshot(nativeExternalWrite, "write") {
+		t.Fatal("native tool writing an external service cannot be rolled back by a local repository snapshot")
+	}
+	if !needsConfirm("import", "md", nil) || !needsLocalSnapshot("import", "md") {
+		t.Fatal("markdown import must require confirmation and a snapshot despite export using the same safe action name")
+	}
+	if !needsConfirm("unzip", "", nil) || !needsLocalSnapshot("unzip", "") {
+		t.Fatal("actionless write tool must require confirmation and create a local snapshot")
+	}
+	if needsConfirm("web_fetch", "", nil) || needsLocalSnapshot("web_fetch", "") {
+		t.Fatal("actionless read-only tool must not require confirmation or create a snapshot")
+	}
+	if needsConfirm("todo_write", "", nil) || needsLocalSnapshot("todo_write", "") {
+		t.Fatal("agent session todo updates must not require confirmation or create a repository snapshot")
+	}
+	if needsConfirm("http_request", "", nil) || needsLocalSnapshot("http_request", "") {
+		t.Fatal("http_request without an action defaults to a read-only GET")
 	}
 }
 
@@ -138,8 +163,149 @@ func TestConfirmSessionAcceptsResponseOnce(t *testing.T) {
 	if ConfirmSession(confirmID, false, false) {
 		t.Fatal("duplicate confirmation was accepted")
 	}
-	result := <-ch
-	if !result.approved || result.always {
-		t.Fatalf("unexpected confirmation result: %#v", result)
+	result, accepted := finishConfirmWait(confirmID, ch)
+	if !accepted || !result.approved || result.always {
+		t.Fatalf("unexpected confirmation result: %#v, accepted=%v", result, accepted)
+	}
+}
+
+func TestQuestionAndFrontendResultsAreAcceptedOnce(t *testing.T) {
+	const questionID = "test-question"
+	questionCh := make(chan QuestionAnswer, 1)
+	questionChannelsMu.Lock()
+	questionChannels[questionID] = questionCh
+	questionChannelsMu.Unlock()
+	if !AnswerQuestion(questionID, []string{"answer"}) || AnswerQuestion(questionID, []string{"duplicate"}) {
+		t.Fatal("question answer was not accepted exactly once")
+	}
+	if answer := <-questionCh; len(answer.Answers) != 1 || answer.Answers[0] != "answer" {
+		t.Fatalf("unexpected question answer: %#v", answer)
+	}
+
+	const callID = "test-frontend-call"
+	frontendCh := make(chan frontendCallResult, 1)
+	frontendCallChannelsMu.Lock()
+	frontendCallChannels[callID] = frontendCh
+	frontendCallChannelsMu.Unlock()
+	if !FrontendToolResult(callID, "result", false) || FrontendToolResult(callID, "duplicate", false) {
+		t.Fatal("frontend result was not accepted exactly once")
+	}
+	if result := <-frontendCh; result.result != "result" || result.isError {
+		t.Fatalf("unexpected frontend result: %#v", result)
+	}
+}
+
+func TestWaitCompletionKeepsConcurrentlyAcceptedResults(t *testing.T) {
+	const questionID = "test-question-timeout-race"
+	questionCh := make(chan QuestionAnswer, 1)
+	questionChannelsMu.Lock()
+	questionChannels[questionID] = questionCh
+	questionChannelsMu.Unlock()
+	if !AnswerQuestion(questionID, []string{"accepted"}) {
+		t.Fatal("question answer was rejected")
+	}
+	answer, accepted := finishQuestionWait(questionID, questionCh)
+	if !accepted || len(answer.Answers) != 1 || answer.Answers[0] != "accepted" {
+		t.Fatalf("accepted question answer was lost: %#v, accepted=%v", answer, accepted)
+	}
+
+	const callID = "test-frontend-timeout-race"
+	frontendCh := make(chan frontendCallResult, 1)
+	frontendCallChannelsMu.Lock()
+	frontendCallChannels[callID] = frontendCh
+	frontendCallChannelsMu.Unlock()
+	if !FrontendToolResult(callID, "accepted", false) {
+		t.Fatal("frontend result was rejected")
+	}
+	result, accepted := finishFrontendWait(callID, frontendCh)
+	if !accepted || result.result != "accepted" || result.isError {
+		t.Fatalf("accepted frontend result was lost: %#v, accepted=%v", result, accepted)
+	}
+}
+
+func TestExecuteToolPropagatesUnknownExecution(t *testing.T) {
+	const toolName = "test_unknown_execution"
+	tools.SetTool(toolName, &tools.Tool{
+		Name:   toolName,
+		Source: "mcp",
+		Handler: func(args map[string]any) (tools.CallToolResult, error) {
+			return tools.CallToolResult{
+				Content:          []tools.ContentItem{{Type: "text", Text: "result unknown"}},
+				IsError:          true,
+				ExecutionUnknown: true,
+			}, nil
+		},
+	})
+	t.Cleanup(func() { tools.RemoveTool(toolName) })
+
+	result, isErr, executionUnknown := executeTool(context.Background(), openai.ToolCall{
+		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
+	}, "")
+	if result != "result unknown" || !isErr || !executionUnknown {
+		t.Fatalf("unexpected tool result: result=%q, isErr=%v, executionUnknown=%v", result, isErr, executionUnknown)
+	}
+}
+
+func TestExecuteToolCancellationMarksExecutionUnknown(t *testing.T) {
+	const toolName = "test_cancelled_execution"
+	started := make(chan struct{})
+	release := make(chan struct{})
+	tools.SetTool(toolName, &tools.Tool{
+		Name: toolName,
+		Handler: func(args map[string]any) (tools.CallToolResult, error) {
+			close(started)
+			<-release
+			return tools.CallToolResult{Content: []tools.ContentItem{{Type: "text", Text: "late result"}}}, nil
+		},
+	})
+	t.Cleanup(func() {
+		close(release)
+		tools.RemoveTool(toolName)
+	})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	resultCh := make(chan struct {
+		text    string
+		isErr   bool
+		unknown bool
+	}, 1)
+	go func() {
+		text, isErr, unknown := executeTool(ctx, openai.ToolCall{
+			Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
+		}, "")
+		resultCh <- struct {
+			text    string
+			isErr   bool
+			unknown bool
+		}{text: text, isErr: isErr, unknown: unknown}
+	}()
+	<-started
+	cancel()
+	result := <-resultCh
+	if !result.isErr || !result.unknown || result.text == "" {
+		t.Fatalf("cancelled tool result was not marked unknown: %#v", result)
+	}
+}
+
+func TestExecuteToolDoesNotStartAfterCancellation(t *testing.T) {
+	const toolName = "test_pre_cancelled_execution"
+	invoked := false
+	tools.SetTool(toolName, &tools.Tool{
+		Name: toolName,
+		Handler: func(args map[string]any) (tools.CallToolResult, error) {
+			invoked = true
+			return tools.CallToolResult{}, nil
+		},
+	})
+	t.Cleanup(func() { tools.RemoveTool(toolName) })
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	result, isErr, executionUnknown := executeTool(ctx, openai.ToolCall{
+		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
+	}, "")
+	if invoked || result == "" || !isErr || executionUnknown {
+		t.Fatalf("pre-cancelled tool was handled incorrectly: invoked=%v, result=%q, isErr=%v, executionUnknown=%v",
+			invoked, result, isErr, executionUnknown)
 	}
 }

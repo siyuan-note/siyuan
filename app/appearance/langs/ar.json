@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "الوثوق بتعليقات الأدوات",
+	"aiMcpTrustToolAnnotationsTip": "السماح لتعليقات الأدوات للقراءة فقط من هذا الخادم بتخطي تأكيد العملية. فعّل هذا الخيار للخوادم الموثوقة فقط.",
 	"testConnectionFailMsg": "فشل الاتصال: ${msg}",
 	"testConnectionSuccessDimensions": "نجح الاتصال (الأبعاد ${dimensions})",
 	"masterPasswordMigrationPending": "جارٍ ترحيل كلمة المرور الرئيسية",

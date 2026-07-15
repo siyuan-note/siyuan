@@ -104,14 +104,15 @@ type MCP struct {
 }
 
 type MCPServer struct {
-	Name    string            `json:"name"`
-	Enabled bool              `json:"enabled"`
-	Type    string            `json:"type"`
-	Command string            `json:"command"`
-	Args    []string          `json:"args"`
-	URL     string            `json:"url"`
-	Headers map[string]string `json:"headers"`
-	Timeout int               `json:"timeout"`
+	Name                 string            `json:"name"`
+	Enabled              bool              `json:"enabled"`
+	Type                 string            `json:"type"`
+	Command              string            `json:"command"`
+	Args                 []string          `json:"args"`
+	URL                  string            `json:"url"`
+	Headers              map[string]string `json:"headers"`
+	Timeout              int               `json:"timeout"`
+	TrustToolAnnotations bool              `json:"trustToolAnnotations"`
 }
 
 func defaultEmbedding() *Embedding {
@@ -595,14 +596,15 @@ func migrateMCP(raw map[string]any) *MCP {
 			continue
 		}
 		mcp.Servers = append(mcp.Servers, MCPServer{
-			Name:    getString(sm, "name"),
-			Enabled: getBool(sm, "enabled"),
-			Type:    getString(sm, "type"),
-			Command: getString(sm, "command"),
-			Args:    getStringSlice(sm, "args"),
-			URL:     getString(sm, "url"),
-			Headers: getStringMap(sm, "headers"),
-			Timeout: getInt(sm, "timeout"),
+			Name:                 getString(sm, "name"),
+			Enabled:              getBool(sm, "enabled"),
+			Type:                 getString(sm, "type"),
+			Command:              getString(sm, "command"),
+			Args:                 getStringSlice(sm, "args"),
+			URL:                  getString(sm, "url"),
+			Headers:              getStringMap(sm, "headers"),
+			Timeout:              getInt(sm, "timeout"),
+			TrustToolAnnotations: getBool(sm, "trustToolAnnotations"),
 		})
 	}
 	return mcp

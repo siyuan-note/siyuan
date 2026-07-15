@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Доверять аннотациям инструментов",
+	"aiMcpTrustToolAnnotationsTip": "Разрешает аннотациям инструментов только для чтения с этого сервера пропускать подтверждение операций. Включайте только для доверенных серверов.",
 	"testConnectionFailMsg": "Ошибка подключения: ${msg}",
 	"testConnectionSuccessDimensions": "Подключение успешно (измерений: ${dimensions})",
 	"masterPasswordMigrationPending": "Выполняется миграция мастер-пароля",

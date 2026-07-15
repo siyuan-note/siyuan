@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Dôverovať anotáciám nástrojov",
+	"aiMcpTrustToolAnnotationsTip": "Umožní anotáciám nástrojov iba na čítanie z tohto servera preskočiť potvrdenie operácie. Povoľte iba pre dôveryhodné servery.",
 	"testConnectionFailMsg": "Pripojenie zlyhalo: ${msg}",
 	"testConnectionSuccessDimensions": "Pripojenie úspešné (rozmery ${dimensions})",
 	"masterPasswordMigrationPending": "Prebieha migrácia hlavného hesla",

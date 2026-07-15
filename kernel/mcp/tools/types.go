@@ -16,6 +16,15 @@
 
 package tools
 
+import "context"
+
+const (
+	EffectScopeLocal    = "local"
+	EffectScopeExternal = "external"
+	EffectScopeMixed    = "mixed"
+	EffectScopeUnknown  = "unknown"
+)
+
 type Tool struct {
 	Name         string      `json:"name"`
 	Title        string      `json:"title,omitempty"`
@@ -27,8 +36,11 @@ type Tool struct {
 	Source string `json:"source,omitempty"`
 	// ReadOnlyHint 仅在外部工具明确声明只读时为 true；未声明时按可能写入处理并要求确认。
 	ReadOnlyHint bool `json:"readOnlyHint,omitempty"`
+	// EffectScope 描述写操作影响范围，用于判断本地数据仓库快照是否具有回滚价值。
+	EffectScope string `json:"effectScope,omitempty"`
 
-	Handler func(args map[string]any) (CallToolResult, error) `json:"-"`
+	Handler        func(args map[string]any) (CallToolResult, error)                      `json:"-"`
+	ContextHandler func(ctx context.Context, args map[string]any) (CallToolResult, error) `json:"-"`
 }
 
 type ToolSchema struct {
@@ -56,8 +68,9 @@ type Property struct {
 }
 
 type CallToolResult struct {
-	Content []ContentItem `json:"content"`
-	IsError bool          `json:"isError,omitempty"`
+	Content          []ContentItem `json:"content"`
+	IsError          bool          `json:"isError,omitempty"`
+	ExecutionUnknown bool          `json:"-"`
 }
 
 type ContentItem struct {

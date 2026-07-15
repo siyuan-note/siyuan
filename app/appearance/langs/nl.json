@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Toolannotaties vertrouwen",
+	"aiMcpTrustToolAnnotationsTip": "Sta toe dat alleen-lezen-toolannotaties van deze server de bevestiging van bewerkingen overslaan. Schakel dit alleen in voor vertrouwde servers.",
 	"testConnectionFailMsg": "Verbinding mislukt: ${msg}",
 	"testConnectionSuccessDimensions": "Verbinding geslaagd (dimensies ${dimensions})",
 	"masterPasswordMigrationPending": "Migratie van hoofdwachtwoord is bezig",

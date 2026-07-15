@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "เชื่อถือคำอธิบายประกอบของเครื่องมือ",
+	"aiMcpTrustToolAnnotationsTip": "อนุญาตให้คำอธิบายประกอบเครื่องมือแบบอ่านอย่างเดียวจากเซิร์ฟเวอร์นี้ข้ามการยืนยันการดำเนินการ เปิดใช้เฉพาะกับเซิร์ฟเวอร์ที่เชื่อถือได้เท่านั้น",
 	"testConnectionFailMsg": "การเชื่อมต่อล้มเหลว: ${msg}",
 	"testConnectionSuccessDimensions": "เชื่อมต่อสำเร็จ (มิติ ${dimensions})",
 	"masterPasswordMigrationPending": "กำลังย้ายรหัสผ่านหลัก",

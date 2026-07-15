@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "Confiar en las anotaciones de herramientas",
+	"aiMcpTrustToolAnnotationsTip": "Permite que las anotaciones de herramientas de solo lectura de este servidor omitan la confirmación de operaciones. Actívalo solo para servidores de confianza.",
 	"testConnectionFailMsg": "Error de conexión: ${msg}",
 	"testConnectionSuccessDimensions": "Conexión exitosa (dimensiones ${dimensions})",
 	"masterPasswordMigrationPending": "Migración de contraseña maestra en progreso",

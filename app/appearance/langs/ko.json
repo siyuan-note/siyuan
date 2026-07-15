@@ -1,4 +1,6 @@
 {
+	"aiMcpTrustToolAnnotations": "도구 주석 신뢰",
+	"aiMcpTrustToolAnnotationsTip": "이 서버의 읽기 전용 도구 주석이 작업 확인을 건너뛰도록 허용합니다. 신뢰할 수 있는 서버에만 활성화하세요.",
 	"testConnectionFailMsg": "연결 실패: ${msg}",
 	"testConnectionSuccessDimensions": "연결 성공(차원 ${dimensions})",
 	"masterPasswordMigrationPending": "마스터 비밀번호 마이그레이션 진행 중",

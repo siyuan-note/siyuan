@@ -201,16 +201,14 @@ var confirmChannels = make(map[string]chan confirmResult)
 
 func ConfirmSession(id string, approved bool, always bool) bool {
 	confirmChannelsMu.Lock()
+	defer confirmChannelsMu.Unlock()
 	ch, ok := confirmChannels[id]
-	if ok {
-		delete(confirmChannels, id)
-	}
-	confirmChannelsMu.Unlock()
 	if !ok {
 		return false
 	}
 	select {
 	case ch <- confirmResult{approved: approved, always: always}:
+		delete(confirmChannels, id)
 		return true
 	default:
 		return false
@@ -224,15 +222,19 @@ type QuestionAnswer struct {
 var questionChannelsMu sync.Mutex
 var questionChannels = make(map[string]chan QuestionAnswer)
 
-func AnswerQuestion(id string, answers []string) {
+func AnswerQuestion(id string, answers []string) bool {
 	questionChannelsMu.Lock()
+	defer questionChannelsMu.Unlock()
 	ch, ok := questionChannels[id]
-	questionChannelsMu.Unlock()
-	if ok {
-		select {
-		case ch <- QuestionAnswer{Answers: answers}:
-		default:
-		}
+	if !ok {
+		return false
+	}
+	select {
+	case ch <- QuestionAnswer{Answers: answers}:
+		delete(questionChannels, id)
+		return true
+	default:
+		return false
 	}
 }
 
@@ -246,15 +248,19 @@ var frontendCallChannelsMu sync.Mutex
 var frontendCallChannels = make(map[string]chan frontendCallResult)
 
 // FrontendToolResult 由 API 在浏览器回传前端工具结果时调用，用于解除 Agent 的等待。
-func FrontendToolResult(callID string, result string, isError bool) {
+func FrontendToolResult(callID string, result string, isError bool) bool {
 	frontendCallChannelsMu.Lock()
+	defer frontendCallChannelsMu.Unlock()
 	ch, ok := frontendCallChannels[callID]
-	frontendCallChannelsMu.Unlock()
-	if ok {
-		select {
-		case ch <- frontendCallResult{result: result, isError: isError}:
-		default:
-		}
+	if !ok {
+		return false
+	}
+	select {
+	case ch <- frontendCallResult{result: result, isError: isError}:
+		delete(frontendCallChannels, callID)
+		return true
+	default:
+		return false
 	}
 }
 
@@ -770,9 +776,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 							delete(confirmChannels, confirmID)
 							confirmChannelsMu.Unlock()
 						case <-ctx.Done():
-							confirmChannelsMu.Lock()
-							delete(confirmChannels, confirmID)
-							confirmChannelsMu.Unlock()
+							if acceptedResult, accepted := finishConfirmWait(confirmID, ch2); accepted {
+								result = acceptedResult
+								break
+							}
 
 							cancelMsg := "Operation cancelled"
 							checkpointMsgs[assistantIdx].ToolCalls[i].Result = cancelMsg
@@ -799,9 +806,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 							}
 							return
 						case <-time.After(confirmTimeout):
-							confirmChannelsMu.Lock()
-							delete(confirmChannels, confirmID)
-							confirmChannelsMu.Unlock()
+							if acceptedResult, accepted := finishConfirmWait(confirmID, ch2); accepted {
+								result = acceptedResult
+								break
+							}
 							timedOut = true
 							rejectionMsg = "Confirmation timed out, operation skipped automatically"
 							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg})
@@ -891,12 +899,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 					var resultStr string
 					isErr := false
+					executionUnknown := false
 					if tc.Function.Name == "question" {
 						resultStr = handleQuestion(ctx, tc.Function.Arguments, ch, 5*time.Minute)
 					} else if tc.Function.Name == "frontend" {
-						resultStr = handleFrontendTool(ctx, tc, ch, confirmTimeout)
+						resultStr, executionUnknown = handleFrontendTool(ctx, tc, ch, confirmTimeout)
+						isErr = executionUnknown
 					} else {
-						resultStr, isErr = executeTool(tc, sessionID)
+						resultStr, isErr, executionUnknown = executeTool(ctx, tc, sessionID)
 					}
 					// rawResult 保留 wrap/truncate 之前的原始文本，用于判断是否为空。
 					rawResult := resultStr
@@ -916,8 +926,18 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						ToolCallID: tc.ID,
 					})
 					checkpointMsgs[assistantIdx].ToolCalls[i].Result = resultStr
-					checkpointMsgs[assistantIdx].ToolCalls[i].State = "finished"
-					if !saveTurn("running") {
+					checkpointState := "running"
+					if executionUnknown {
+						checkpointMsgs[assistantIdx].ToolCalls[i].State = "unknown"
+						checkpointState = "interrupted"
+					} else {
+						checkpointMsgs[assistantIdx].ToolCalls[i].State = "finished"
+					}
+					if !saveTurn(checkpointState) {
+						return
+					}
+					if executionUnknown {
+						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: rawResult})
 						return
 					}
 
@@ -1042,8 +1062,12 @@ var safeActions = map[string]bool{
 	"grep": true, "find": true, "stat": true, "unused": true,
 	"keys": true, "render": true, "diff": true,
 	"file_get": true, "file_open": true, "file_export": true,
-	"open": true, "close": true, "batch-get": true, "question": true, "todo_write": true,
+	"open": true, "close": true, "batch-get": true,
 	"md": true, "query": true,
+}
+
+var safeWholeTools = map[string]bool{
+	"question": true, "todo_write": true, "web_fetch": true, "web_search": true,
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
@@ -1056,11 +1080,17 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 		// 可能在外部服务中产生写入。仅工具明确声明只读时免确认，未知能力按写操作处理。
 		return !tool.ReadOnlyHint
 	}
+	if toolName == "http_request" && action == "" {
+		action = "get"
+	}
 	if action == "" {
-		return false
+		return !safeWholeTools[toolName]
 	}
 	if alwaysAllow[toolName+"::"+action] {
 		return false
+	}
+	if toolName == "import" && action == "md" {
+		return true
 	}
 	if safeActions[action] {
 		return false
@@ -1068,19 +1098,33 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 	if toolName == "sync" && action == "status" {
 		return false
 	}
-	if toolName == "import" && action == "md" {
-		return true
-	}
 	return true
 }
 
 func needsLocalSnapshot(toolName, action string) bool {
-	if action == "" || safeActions[action] || toolName == "frontend" || (toolName == "repo" && action == "create") {
+	if toolName == "http_request" && action == "" {
+		action = "get"
+	}
+	actionSafe := safeActions[action]
+	if toolName == "import" && action == "md" {
+		actionSafe = false
+	}
+	if safeWholeTools[toolName] || actionSafe || toolName == "frontend" || (toolName == "repo" && action == "create") {
 		return false
 	}
 	tool := tools.GetTool(toolName)
-	// 仓库快照只能回滚思源原生写操作，不能回滚外部 MCP 服务或插件自己的数据。
-	return tool != nil && (tool.Source == "" || tool.Source == "native")
+	if tool == nil {
+		return false
+	}
+	switch tool.EffectScope {
+	case tools.EffectScopeLocal, tools.EffectScopeMixed:
+		return true
+	case tools.EffectScopeExternal, tools.EffectScopeUnknown:
+		return false
+	default:
+		// 未声明范围的内置工具按本地数据操作处理，兼容现有工具；外部来源按未知范围处理。
+		return tool.Source == "" || tool.Source == "native"
+	}
 }
 
 func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, timeout time.Duration) string {
@@ -1101,15 +1145,17 @@ func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, 
 	select {
 	case answer = <-ch2:
 	case <-ctx.Done():
-		questionChannelsMu.Lock()
-		delete(questionChannels, questionID)
-		questionChannelsMu.Unlock()
-		return "Question cancelled."
+		if acceptedAnswer, accepted := finishQuestionWait(questionID, ch2); accepted {
+			answer = acceptedAnswer
+		} else {
+			return "Question cancelled."
+		}
 	case <-time.After(timeout):
-		questionChannelsMu.Lock()
-		delete(questionChannels, questionID)
-		questionChannelsMu.Unlock()
-		return "No answer received (timed out)."
+		if acceptedAnswer, accepted := finishQuestionWait(questionID, ch2); accepted {
+			answer = acceptedAnswer
+		} else {
+			return "No answer received (timed out)."
+		}
 	}
 
 	questionChannelsMu.Lock()
@@ -1123,8 +1169,46 @@ func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, 
 	return strings.Join(answer.Answers, ", ")
 }
 
+func finishQuestionWait(questionID string, ch chan QuestionAnswer) (QuestionAnswer, bool) {
+	questionChannelsMu.Lock()
+	registered, exists := questionChannels[questionID]
+	pending := exists && registered == ch
+	if pending {
+		delete(questionChannels, questionID)
+	}
+	questionChannelsMu.Unlock()
+	if pending {
+		return QuestionAnswer{}, false
+	}
+	select {
+	case answer := <-ch:
+		return answer, true
+	default:
+		return QuestionAnswer{}, false
+	}
+}
+
+func finishConfirmWait(confirmID string, ch chan confirmResult) (confirmResult, bool) {
+	confirmChannelsMu.Lock()
+	registered, exists := confirmChannels[confirmID]
+	pending := exists && registered == ch
+	if pending {
+		delete(confirmChannels, confirmID)
+	}
+	confirmChannelsMu.Unlock()
+	if pending {
+		return confirmResult{}, false
+	}
+	select {
+	case result := <-ch:
+		return result, true
+	default:
+		return confirmResult{}, false
+	}
+}
+
 // handleFrontendTool 通过 SSE 把前端工具操作发送到浏览器，并等待浏览器回传结果。
-func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- AgentEvent, timeout time.Duration) string {
+func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- AgentEvent, timeout time.Duration) (string, bool) {
 	args := parseToolArgs(tc.Function.Arguments)
 	callID := ast.NewNodeID()
 	ch2 := make(chan frontendCallResult, 1)
@@ -1143,15 +1227,17 @@ func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- Agent
 	select {
 	case fr = <-ch2:
 	case <-ctx.Done():
-		frontendCallChannelsMu.Lock()
-		delete(frontendCallChannels, callID)
-		frontendCallChannelsMu.Unlock()
-		return "Frontend action cancelled."
+		if acceptedResult, accepted := finishFrontendWait(callID, ch2); accepted {
+			fr = acceptedResult
+		} else {
+			return "Frontend action was interrupted; execution result is unknown and must not be retried automatically.", true
+		}
 	case <-time.After(timeout):
-		frontendCallChannelsMu.Lock()
-		delete(frontendCallChannels, callID)
-		frontendCallChannelsMu.Unlock()
-		return "Frontend action timed out (no response from the editor)."
+		if acceptedResult, accepted := finishFrontendWait(callID, ch2); accepted {
+			fr = acceptedResult
+		} else {
+			return "Frontend action timed out; execution result is unknown and must not be retried automatically.", true
+		}
 	}
 
 	frontendCallChannelsMu.Lock()
@@ -1159,9 +1245,28 @@ func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- Agent
 	frontendCallChannelsMu.Unlock()
 
 	if fr.isError {
-		return "Frontend action failed: " + fr.result
+		return "Frontend action failed: " + fr.result, false
 	}
-	return fr.result
+	return fr.result, false
+}
+
+func finishFrontendWait(callID string, ch chan frontendCallResult) (frontendCallResult, bool) {
+	frontendCallChannelsMu.Lock()
+	registered, exists := frontendCallChannels[callID]
+	pending := exists && registered == ch
+	if pending {
+		delete(frontendCallChannels, callID)
+	}
+	frontendCallChannelsMu.Unlock()
+	if pending {
+		return frontendCallResult{}, false
+	}
+	select {
+	case result := <-ch:
+		return result, true
+	default:
+		return frontendCallResult{}, false
+	}
 }
 
 func buildSystemPrompt(language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) string {

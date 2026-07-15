@@ -1168,6 +1168,7 @@ const openMcpServerDialog = (root: HTMLElement, serverName: string | null) => {
         url: "",
         headers: {},
         timeout: 30,
+        trustToolAnnotations: false,
     } : existingServer;
     const mcpTypeHidden = (fieldType: string) => initialServer.type !== fieldType ? " fn__none" : "";
     const argsText = (initialServer.args ?? []).join("\n");
@@ -1227,6 +1228,14 @@ const openMcpServerDialog = (root: HTMLElement, serverName: string | null) => {
             <span class="ft__on-surface fn__flex-center">s</span>
         </div>
     </div>
+    <div class="b3-label b3-label--inner fn__flex">
+        <div class="fn__flex-1">
+            <div class="config-name">${window.siyuan.languages.aiMcpTrustToolAnnotations}</div>
+            <div class="b3-label__text">${window.siyuan.languages.aiMcpTrustToolAnnotationsTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="aiMcpTrustToolAnnotations" type="checkbox"${initialServer.trustToolAnnotations ? " checked" : ""}/>
+    </div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -1263,6 +1272,7 @@ const openMcpServerDialog = (root: HTMLElement, serverName: string | null) => {
             url: dialog.element.querySelector<HTMLInputElement>("#aiMcpServerUrl").value,
             headers,
             timeout: dialog.element.querySelector<HTMLInputElement>("#aiMcpServerTimeout").valueAsNumber,
+            trustToolAnnotations: dialog.element.querySelector<HTMLInputElement>("#aiMcpTrustToolAnnotations").checked,
         };
         if (!nextServer.name) {
             showMessage(window.siyuan.languages.aiMcpServerNameRequired);

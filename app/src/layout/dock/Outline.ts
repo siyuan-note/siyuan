@@ -1073,6 +1073,13 @@ export class Outline extends Model {
 
                         const newId = Lute.NewNodeID();
                         const html = `<div data-subtype="h${currentLevel}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                        const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
+                        if (previousElement) {
+                            previousElement.insertAdjacentHTML("afterend", html);
+                            const newElement = previousElement.nextElementSibling;
+                            newElement.scrollIntoView();
+                            focusByWbr(newElement, document.createRange());
+                        }
                         transaction(data.protyle, [{
                             action: "insert",
                             data: html,
@@ -1082,12 +1089,6 @@ export class Outline extends Model {
                             action: "delete",
                             id: newId
                         }]);
-                        const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
-                        if (previousElement) {
-                            previousElement.insertAdjacentHTML("afterend", html);
-                            previousElement.nextElementSibling.scrollIntoView();
-                            focusByWbr(previousElement.nextElementSibling, document.createRange());
-                        }
                     });
                 }
             }).element);

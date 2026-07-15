@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20251021230320"
+		"updated": "20260715112109"
 	},
 	"Children": [
 		{
@@ -1793,7 +1793,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427231112-e7j3mqt",
-								"updated": "20240427231144"
+								"updated": "20260715112109"
 							},
 							"Children": [
 								{
@@ -1821,7 +1821,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Allow execution of scripts within HTML blocks"
+									"TextMarkTextContent": "Allow execution of scripts in HTML content"
 								},
 								{
 									"Type": "NodeText",

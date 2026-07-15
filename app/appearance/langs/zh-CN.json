@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "切换左侧面板布局",
+  "switchRightDock": "切换右侧面板布局",
+  "switchBottomDock": "切换底部面板布局",
   "aiImageUnderstandingTip": "用于分析图片，请选择支持图片输入的模型",
   "aiImageGenerationTip": "用于生成图片，请选择支持图片输出的模型",
   "aiImageUnderstanding": "图片理解",

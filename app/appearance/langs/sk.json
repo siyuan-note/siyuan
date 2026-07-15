@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Prepnúť rozloženie ľavého panela",
+  "switchRightDock": "Prepnúť rozloženie pravého panela",
+  "switchBottomDock": "Prepnúť rozloženie spodného panela",
   "aiImageUnderstandingTip": "Analyzuje obrázky. Vyberte model podporujúci obrazový vstup",
   "aiImageGenerationTip": "Generuje obrázky. Vyberte model podporujúci obrazový výstup",
   "aiImageUnderstanding": "Porozumenie obrázkom",

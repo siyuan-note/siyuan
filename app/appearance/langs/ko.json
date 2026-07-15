@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "왼쪽 패널 레이아웃 전환",
+  "switchRightDock": "오른쪽 패널 레이아웃 전환",
+  "switchBottomDock": "아래쪽 패널 레이아웃 전환",
   "aiImageUnderstandingTip": "이미지를 분석합니다. 이미지 입력을 지원하는 모델을 선택하세요",
   "aiImageGenerationTip": "이미지를 생성합니다. 이미지 출력을 지원하는 모델을 선택하세요",
   "aiImageUnderstanding": "이미지 이해",

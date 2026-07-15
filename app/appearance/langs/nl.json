@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Indeling van linkerpaneel wisselen",
+  "switchRightDock": "Indeling van rechterpaneel wisselen",
+  "switchBottomDock": "Indeling van onderpaneel wisselen",
   "aiImageUnderstandingTip": "Analyseert afbeeldingen. Kies een model dat afbeeldingsinvoer ondersteunt",
   "aiImageGenerationTip": "Genereert afbeeldingen. Kies een model dat afbeeldingsuitvoer ondersteunt",
   "aiImageUnderstanding": "Beeldbegrip",

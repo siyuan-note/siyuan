@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "切換左側面板佈局",
+  "switchRightDock": "切換右側面板佈局",
+  "switchBottomDock": "切換底部面板佈局",
   "aiImageUnderstandingTip": "用於分析圖片，請選擇支援圖片輸入的模型",
   "aiImageGenerationTip": "用於產生圖片，請選擇支援圖片輸出的模型",
   "aiImageUnderstanding": "圖片理解",

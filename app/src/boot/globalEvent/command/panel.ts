@@ -65,8 +65,8 @@ export const commandPanel = (app: App) => {
             "goForward", "goToEditTabNext", "goToEditTabPrev", "goToTab1", "goToTab2", "goToTab3", "goToTab4",
             "goToTab5", "goToTab6", "goToTab7", "goToTab8", "goToTab9", "goToTabNext", "goToTabPrev", "lockScreen",
             "mainMenu", "move", "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow",
-            "splitLR", "splitMoveB", "splitMoveR", "splitTB", "tabToWindow", "stickSearch", "toggleDock", "unsplitAll",
-            "unsplit", "recentClosed"];
+            "splitLR", "splitMoveB", "splitMoveR", "splitTB", "switchLeftDock", "switchRightDock", "switchBottomDock",
+            "tabToWindow", "stickSearch", "toggleDock", "unsplitAll", "unsplit", "recentClosed"];
         /// #if !BROWSER
         keys.push("toggleWin");
         /// #endif

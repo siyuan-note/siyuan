@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Cambiar el diseño del panel izquierdo",
+  "switchRightDock": "Cambiar el diseño del panel derecho",
+  "switchBottomDock": "Cambiar el diseño del panel inferior",
   "aiImageUnderstandingTip": "Analiza imágenes. Selecciona un modelo que admita entrada de imágenes",
   "aiImageGenerationTip": "Genera imágenes. Selecciona un modelo que admita salida de imágenes",
   "aiImageUnderstanding": "Comprensión de imágenes",

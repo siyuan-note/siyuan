@@ -239,6 +239,15 @@ export const globalCommand = (command: string, app: App) => {
         case "toggleDock":
             toggleDockBar(document.querySelector("#barDock use"));
             return true;
+        case "switchLeftDock":
+            window.siyuan.layout.leftDock.togglePin();
+            return true;
+        case "switchRightDock":
+            window.siyuan.layout.rightDock.togglePin();
+            return true;
+        case "switchBottomDock":
+            window.siyuan.layout.bottomDock.togglePin();
+            return true;
         case "toggleWin":
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_CMD, "hide");

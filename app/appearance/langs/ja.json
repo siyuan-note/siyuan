@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "左パネルのレイアウトを切り替える",
+  "switchRightDock": "右パネルのレイアウトを切り替える",
+  "switchBottomDock": "下パネルのレイアウトを切り替える",
   "aiImageUnderstandingTip": "画像を解析します。画像入力に対応したモデルを選択してください",
   "aiImageGenerationTip": "画像を生成します。画像出力に対応したモデルを選択してください",
   "aiImageUnderstanding": "画像理解",

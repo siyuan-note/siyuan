@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Alternar layout do painel esquerdo",
+  "switchRightDock": "Alternar layout do painel direito",
+  "switchBottomDock": "Alternar layout do painel inferior",
   "aiImageUnderstandingTip": "Analisa imagens. Selecione um modelo compatível com entrada de imagens",
   "aiImageGenerationTip": "Gera imagens. Selecione um modelo compatível com saída de imagens",
   "aiImageUnderstanding": "Compreensão de imagens",

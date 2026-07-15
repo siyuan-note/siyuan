@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Layout des linken Bereichs wechseln",
+  "switchRightDock": "Layout des rechten Bereichs wechseln",
+  "switchBottomDock": "Layout des unteren Bereichs wechseln",
   "aiImageUnderstandingTip": "Analysiert Bilder. Wählen Sie ein Modell mit Bildeingabe",
   "aiImageGenerationTip": "Erzeugt Bilder. Wählen Sie ein Modell mit Bildausgabe",
   "aiImageUnderstanding": "Bildverständnis",

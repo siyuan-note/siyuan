@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Przełącz układ lewego panelu",
+  "switchRightDock": "Przełącz układ prawego panelu",
+  "switchBottomDock": "Przełącz układ dolnego panelu",
   "aiImageUnderstandingTip": "Analizuje obrazy. Wybierz model obsługujący obrazy wejściowe",
   "aiImageGenerationTip": "Generuje obrazy. Wybierz model obsługujący obrazy wyjściowe",
   "aiImageUnderstanding": "Rozumienie obrazów",

@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "החלף את פריסת החלונית השמאלית",
+  "switchRightDock": "החלף את פריסת החלונית הימנית",
+  "switchBottomDock": "החלף את פריסת החלונית התחתונה",
   "aiImageUnderstandingTip": "מנתח תמונות. יש לבחור מודל התומך בקלט תמונה",
   "aiImageGenerationTip": "יוצר תמונות. יש לבחור מודל התומך בפלט תמונה",
   "aiImageUnderstanding": "הבנת תמונות",

@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "تبديل تخطيط اللوحة اليسرى",
+  "switchRightDock": "تبديل تخطيط اللوحة اليمنى",
+  "switchBottomDock": "تبديل تخطيط اللوحة السفلية",
   "aiImageUnderstandingTip": "يحلل الصور. اختر نموذجًا يدعم إدخال الصور",
   "aiImageGenerationTip": "ينشئ الصور. اختر نموذجًا يدعم إخراج الصور",
   "aiImageUnderstanding": "فهم الصور",

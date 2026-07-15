@@ -1365,6 +1365,21 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return;
     }
+    if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.switchLeftDock.custom, event)) {
+        window.siyuan.layout.leftDock.togglePin();
+        event.preventDefault();
+        return;
+    }
+    if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.switchRightDock.custom, event)) {
+        window.siyuan.layout.rightDock.togglePin();
+        event.preventDefault();
+        return;
+    }
+    if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.switchBottomDock.custom, event)) {
+        window.siyuan.layout.bottomDock.togglePin();
+        event.preventDefault();
+        return;
+    }
     if (!isTabWindow && !window.siyuan.config.readonly && matchHotKey(window.siyuan.config.keymap.general.config.custom, event)) {
         openSetting(app);
         event.preventDefault();

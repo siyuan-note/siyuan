@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Changer la disposition du panneau gauche",
+  "switchRightDock": "Changer la disposition du panneau droit",
+  "switchBottomDock": "Changer la disposition du panneau inférieur",
   "aiImageUnderstandingTip": "Analyse les images. Sélectionnez un modèle prenant en charge les images en entrée",
   "aiImageGenerationTip": "Génère des images. Sélectionnez un modèle prenant en charge les images en sortie",
   "aiImageUnderstanding": "Compréhension d’images",

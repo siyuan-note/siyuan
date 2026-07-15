@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "बाएँ पैनल का लेआउट बदलें",
+  "switchRightDock": "दाएँ पैनल का लेआउट बदलें",
+  "switchBottomDock": "निचले पैनल का लेआउट बदलें",
   "aiImageUnderstandingTip": "चित्रों का विश्लेषण करता है। चित्र इनपुट समर्थित मॉडल चुनें",
   "aiImageGenerationTip": "चित्र बनाता है। चित्र आउटपुट समर्थित मॉडल चुनें",
   "aiImageUnderstanding": "छवि समझ",

@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Ganti tata letak panel kiri",
+  "switchRightDock": "Ganti tata letak panel kanan",
+  "switchBottomDock": "Ganti tata letak panel bawah",
   "aiImageUnderstandingTip": "Menganalisis gambar. Pilih model yang mendukung masukan gambar",
   "aiImageGenerationTip": "Membuat gambar. Pilih model yang mendukung keluaran gambar",
   "aiImageUnderstanding": "Pemahaman Gambar",

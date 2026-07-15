@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Switch left panel layout",
+  "switchRightDock": "Switch right panel layout",
+  "switchBottomDock": "Switch bottom panel layout",
   "aiImageUnderstandingTip": "Analyzes images. Select a model that supports image input",
   "aiImageGenerationTip": "Generates images. Select a model that supports image output",
   "aiImageUnderstanding": "Image Understanding",

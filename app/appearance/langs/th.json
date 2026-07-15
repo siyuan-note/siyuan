@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "สลับเค้าโครงแผงด้านซ้าย",
+  "switchRightDock": "สลับเค้าโครงแผงด้านขวา",
+  "switchBottomDock": "สลับเค้าโครงแผงด้านล่าง",
   "aiImageUnderstandingTip": "วิเคราะห์รูปภาพ โปรดเลือกโมเดลที่รองรับอินพุตรูปภาพ",
   "aiImageGenerationTip": "สร้างรูปภาพ โปรดเลือกโมเดลที่รองรับเอาต์พุตรูปภาพ",
   "aiImageUnderstanding": "การทำความเข้าใจรูปภาพ",

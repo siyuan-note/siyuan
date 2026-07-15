@@ -1,4 +1,7 @@
 {
+  "switchLeftDock": "Sol panel düzenini değiştir",
+  "switchRightDock": "Sağ panel düzenini değiştir",
+  "switchBottomDock": "Alt panel düzenini değiştir",
   "aiImageUnderstandingTip": "Görselleri analiz eder. Görsel girişini destekleyen bir model seçin",
   "aiImageGenerationTip": "Görseller oluşturur. Görsel çıktısını destekleyen bir model seçin",
   "aiImageUnderstanding": "Görsel Anlama",

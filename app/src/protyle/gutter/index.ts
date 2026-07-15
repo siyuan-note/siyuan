@@ -2989,7 +2989,13 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
         this.element.innerHTML = html;
         this.element.classList.remove("fn__none");
         this.element.style.width = "";
-        const contentTop = protyle.contentElement.getBoundingClientRect().top;
+        let contentTop = protyle.contentElement.getBoundingClientRect().top;
+        if (protyle.options.backlinkData) {
+            const backlinkElement = protyle.element.closest(".backlinkList, .backlinkMList");
+            if (backlinkElement) {
+                contentTop = Math.max(contentTop, backlinkElement.getBoundingClientRect().top);
+            }
+        }
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
         if (listItem && !window.siyuan.config.editor.rtl && getComputedStyle(element).direction !== "rtl") {
@@ -3007,7 +3013,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                 marginHeight = 8;
             }
         }
-        this.element.style.top = `${Math.max(rect.top, contentTop) + marginHeight}px`;
+        this.element.style.top = `${Math.max(rect.top + marginHeight, contentTop)}px`;
         let left = rect.left - this.element.clientWidth - space;
         if ((nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1)) {
             // 嵌入块为列表时

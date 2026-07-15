@@ -400,11 +400,16 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
         // 表格的横向、纵向滚动均发生在首个子节点（contenteditable 容器，overflow:auto）上，
         // 更新块后需一并还原，否则固定表头长表格撤销/重做会跳回开头
         // https://github.com/siyuan-note/siyuan/issues/3650 https://github.com/siyuan-note/siyuan/issues/18035
+        // https://github.com/siyuan-note/siyuan/issues/18235
         let tableScrollLeft: number;
         let tableScrollTop: number;
+        let contentScrollTop: number;
         if (item.classList.contains("table")) {
             tableScrollLeft = (item.firstElementChild as HTMLElement).scrollLeft;
             tableScrollTop = (item.firstElementChild as HTMLElement).scrollTop;
+            if (isRangeBlock) {
+                contentScrollTop = protyle.contentElement.scrollTop;
+            }
         }
         item.insertAdjacentHTML("afterend",
             // 图标撤销后无法渲染
@@ -421,12 +426,16 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
             }
         }
         wbrElement?.remove();
-        // 聚焦后再还原滚动，避免 focusByWbr/focusBlock 改变滚动位置导致表格跳回开头
+        // update 操作会生成新表格并替换旧节点，聚焦后需还原滚动，避免表格跳回开头
         if (tableScrollLeft > 0) {
             (item.firstElementChild as HTMLElement).scrollLeft = tableScrollLeft;
         }
         if (tableScrollTop > 0) {
             (item.firstElementChild as HTMLElement).scrollTop = tableScrollTop;
+        }
+        if (contentScrollTop > 0) {
+            protyle.contentElement.scrollTop = contentScrollTop;
+            protyle.scroll.lastScrollTop = contentScrollTop - 1;
         }
 
         processRender(item);

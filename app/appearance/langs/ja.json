@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "再試行中 (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "ストリームのアイドルタイムアウト",
 	"agentStreamIdleTimeoutTip": "モデルから出力がない状態でリクエストを停止するまでの最大時間",
 	"aiMcpTrustToolAnnotations": "ツール注釈を信頼する",

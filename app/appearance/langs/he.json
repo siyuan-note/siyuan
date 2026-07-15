@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "מנסה שוב (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "זמן קצוב לחוסר פעילות בזרם",
 	"agentStreamIdleTimeoutTip": "משך הזמן המרבי ללא פלט מהמודל לפני עצירת הבקשה",
 	"aiMcpTrustToolAnnotations": "מתן אמון בהערות כלי",

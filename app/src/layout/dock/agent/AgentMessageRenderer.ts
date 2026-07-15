@@ -111,9 +111,12 @@ export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknow
 };
 
 export const renderRetryCardHTML = (attempt: number, maxRetries: number): string => {
+    const text = (window.siyuan.languages.agentRetrying || "Retrying (${attempt}/${maxRetries})...")
+        .replace("${attempt}", attempt.toString())
+        .replace("${maxRetries}", maxRetries.toString());
     return '<div class="agent-chat__thinking-card">' +
     '<div class="agent-chat__thinking-header">' +
-        '<span class="agent-chat__thinking-text">' + escapeHtml("Retrying (" + attempt + "/" + maxRetries + ")...") + "</span>" +
+        '<span class="agent-chat__thinking-text">' + escapeHtml(text) + "</span>" +
     "</div>" +
 "</div>";
 };

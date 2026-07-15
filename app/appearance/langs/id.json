@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "Mencoba lagi (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Batas waktu diam aliran",
 	"agentStreamIdleTimeoutTip": "Waktu maksimum tanpa keluaran model sebelum permintaan dihentikan",
 	"aiMcpTrustToolAnnotations": "Percayai anotasi alat",

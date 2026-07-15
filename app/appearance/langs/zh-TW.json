@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "正在重試（${attempt}/${maxRetries}）...",
 	"agentStreamIdleTimeout": "串流閒置逾時時間",
 	"agentStreamIdleTimeoutTip": "模型持續無輸出多久後停止本次請求",
 	"aiMcpTrustToolAnnotations": "信任工具註解",

@@ -158,15 +158,8 @@ func agentChat(c *gin.Context) {
 		return
 	}
 
-	totalTimeout := time.Duration(model.Conf.AI.Agent.SessionTimeout) * time.Second
-	if totalTimeout > 3600*time.Second {
-		totalTimeout = 3600 * time.Second
-	}
-	var deadline <-chan time.Time
-	var deadlineTimer *time.Timer
-	if totalTimeout > 0 {
-		deadlineTimer = time.NewTimer(totalTimeout)
-		deadline = deadlineTimer.C
+	deadlineTimer, deadline := newAgentSessionDeadline(model.Conf.AI.Agent.SessionTimeout)
+	if deadlineTimer != nil {
 		defer deadlineTimer.Stop()
 	}
 
@@ -194,6 +187,17 @@ func agentChat(c *gin.Context) {
 			return
 		}
 	}
+}
+
+func newAgentSessionDeadline(timeoutSeconds int) (*time.Timer, <-chan time.Time) {
+	if timeoutSeconds <= 0 {
+		return nil, nil
+	}
+	if timeoutSeconds > 3600 {
+		timeoutSeconds = 3600
+	}
+	timer := time.NewTimer(time.Duration(timeoutSeconds) * time.Second)
+	return timer, timer.C
 }
 
 func recordRunningEvent(sessionID string, running *runningSession, event agent.AgentEvent) {

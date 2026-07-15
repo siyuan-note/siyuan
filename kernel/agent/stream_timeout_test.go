@@ -20,6 +20,8 @@ import (
 	"time"
 
 	openai "github.com/sashabaranov/go-openai"
+	kernelConf "github.com/siyuan-note/siyuan/kernel/conf"
+	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 )
 
 func TestStreamIdleTimeoutResetsAfterEachChunk(t *testing.T) {
@@ -141,6 +143,100 @@ func TestCreateStreamRequestTimeoutAndZeroRetries(t *testing.T) {
 	}
 	if requests.Load() != 1 {
 		t.Fatalf("request count = %d, want 1", requests.Load())
+	}
+}
+
+func TestCreateStreamRetriesRequestTimeoutWithFreshContext(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		attempt := requests.Add(1)
+		if attempt == 1 {
+			select {
+			case <-r.Context().Done():
+			case <-time.After(200 * time.Millisecond):
+			}
+			return
+		}
+		flusher := prepareTestStream(t, w)
+		writeTestStreamChunk(t, w, flusher, "success")
+		writeTestStreamDone(t, w, flusher)
+	}))
+	defer server.Close()
+
+	client := newTestOpenAIClient(server.URL)
+	stream, first, cancel, err := createStreamWithRetry(context.Background(), client, testChatRequest(), 1, 50*time.Millisecond, time.Second, noRetryDelay, make(chan AgentEvent, 2))
+	if err != nil {
+		t.Fatalf("create stream failed: %v", err)
+	}
+	defer cancel()
+	defer stream.Close()
+	if requests.Load() != 2 {
+		t.Fatalf("request count = %d, want 2", requests.Load())
+	}
+	if len(first.Choices) != 1 || first.Choices[0].Delta.Content != "success" {
+		t.Fatalf("unexpected first response: %#v", first)
+	}
+}
+
+func TestAgentChatPartialStreamTimeoutSavesInterruptedWithoutRetry(t *testing.T) {
+	useTestDataDir(t)
+	originalConf := kernelModel.Conf
+	kernelModel.Conf = kernelModel.NewAppConf()
+	kernelModel.Conf.AI = kernelConf.NewAI()
+	kernelModel.Conf.AI.MCP = nil
+	kernelModel.Conf.AI.Agent.MaxToolCallRounds = 1
+	kernelModel.Conf.Variables = kernelConf.NewVariables()
+	t.Cleanup(func() {
+		kernelModel.Conf = originalConf
+	})
+
+	session := map[string]any{
+		"id":        testSessionID,
+		"title":     "timeout test",
+		"createdAt": int64(1),
+		"updatedAt": int64(1),
+		"entries":   []any{map[string]any{"id": "user-1", "type": "user", "content": "hello"}},
+	}
+	if revision, err := SaveSession(marshalSession(t, session)); err != nil || revision != 1 {
+		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
+	}
+
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		flusher := prepareTestStream(t, w)
+		writeTestStreamChunk(t, w, flusher, "partial")
+		<-r.Context().Done()
+	}))
+	defer server.Close()
+
+	events := AgentChat(context.Background(), newTestOpenAIClient(server.URL), "test-model", testSessionID, "user-1", 1, "hello", "English", nil, EditorContext{}, nil, false, time.Second, 3, "", time.Second, 50*time.Millisecond)
+	contentSeen := false
+	errorSeen := false
+	for event := range events {
+		if event.Type == "content" && event.Token == "partial" {
+			contentSeen = true
+		}
+		if event.Type == "error" {
+			errorSeen = true
+		}
+	}
+	if !contentSeen || !errorSeen {
+		t.Fatalf("unexpected events: contentSeen=%v, errorSeen=%v", contentSeen, errorSeen)
+	}
+	if requests.Load() != 1 {
+		t.Fatalf("request count = %d, want 1", requests.Load())
+	}
+
+	runtime, err := loadRuntimeState(testSessionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if runtime.ActiveTurn == nil || runtime.ActiveTurn.State != "interrupted" {
+		t.Fatalf("runtime turn was not interrupted: %#v", runtime.ActiveTurn)
+	}
+	if len(runtime.ActiveTurn.Delta) != 1 || runtime.ActiveTurn.Delta[0].Role != "assistant" || runtime.ActiveTurn.Delta[0].Content != "partial" {
+		t.Fatalf("partial response was not checkpointed: %#v", runtime.ActiveTurn.Delta)
 	}
 }
 

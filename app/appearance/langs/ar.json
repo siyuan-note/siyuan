@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "جارٍ إعادة المحاولة (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "مهلة خمول التدفق",
 	"agentStreamIdleTimeoutTip": "أقصى مدة دون إخراج من النموذج قبل إيقاف الطلب",
 	"aiMcpTrustToolAnnotations": "الوثوق بتعليقات الأدوات",

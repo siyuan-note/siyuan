@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "Retrying (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Stream Idle Timeout",
 	"agentStreamIdleTimeoutTip": "Maximum time without model output before the request is stopped",
 	"aiMcpTrustToolAnnotations": "Trust tool annotations",

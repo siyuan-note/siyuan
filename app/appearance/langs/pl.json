@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "Ponawianie próby (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Limit bezczynności strumienia",
 	"agentStreamIdleTimeoutTip": "Maksymalny czas bez odpowiedzi modelu przed zatrzymaniem żądania",
 	"aiMcpTrustToolAnnotations": "Ufaj adnotacjom narzędzi",

@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "Nouvelle tentative (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Délai d'inactivité du flux",
 	"agentStreamIdleTimeoutTip": "Durée maximale sans sortie du modèle avant l'arrêt de la requête",
 	"aiMcpTrustToolAnnotations": "Faire confiance aux annotations des outils",

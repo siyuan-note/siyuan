@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "Opakovaný pokus (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Časový limit nečinnosti toku",
 	"agentStreamIdleTimeoutTip": "Maximálny čas bez výstupu modelu pred zastavením požiadavky",
 	"aiMcpTrustToolAnnotations": "Dôverovať anotáciám nástrojov",

@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "Opnieuw proberen (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Time-out bij inactiviteit van stream",
 	"agentStreamIdleTimeoutTip": "Maximale tijd zonder modeluitvoer voordat de aanvraag wordt gestopt",
 	"aiMcpTrustToolAnnotations": "Toolannotaties vertrouwen",

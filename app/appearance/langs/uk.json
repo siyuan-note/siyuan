@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "Повторна спроба (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Тайм-аут бездіяльності потоку",
 	"agentStreamIdleTimeoutTip": "Максимальний час без виводу моделі до зупинки запиту",
 	"aiMcpTrustToolAnnotations": "Довіряти анотаціям інструментів",

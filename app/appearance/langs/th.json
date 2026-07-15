@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "กำลังลองใหม่ (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "หมดเวลาว่างของสตรีม",
 	"agentStreamIdleTimeoutTip": "เวลาสูงสุดที่ไม่มีเอาต์พุตจากโมเดลก่อนหยุดคำขอ",
 	"aiMcpTrustToolAnnotations": "เชื่อถือคำอธิบายประกอบของเครื่องมือ",

@@ -1,4 +1,5 @@
 {
+	"agentRetrying": "पुनः प्रयास जारी है (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "स्ट्रीम निष्क्रियता समय सीमा",
 	"agentStreamIdleTimeoutTip": "अनुरोध रोकने से पहले मॉडल आउटपुट के बिना अधिकतम समय",
 	"aiMcpTrustToolAnnotations": "टूल एनोटेशन पर भरोसा करें",

@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "Okunamayan dosyalar: ${count}; başvurulmayan bu dosyalar okunamadı ve içe aktarılmayacak",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Diğer biçimlerden veya uygulamalardan içe aktar",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "Obsidian Vault içe aktarma görevi artık iptal edilemez",
 		"332": "Obsidian Vault analizi hazır değil veya süresi doldu",
 		"333": "Obsidian Vault analiz edilemedi",
-		"334": "Obsidian Vault içe aktarılamadı"
+		"334": "Obsidian Vault içe aktarılamadı",
+		"335": " (İçe aktarma tamamlanmadı)",
+		"336": "Seçilen Obsidian Vault okunamıyor",
+		"337": "Seçilen yol bir klasör değil",
+		"338": "Seçilen Vault yolu desteklenmiyor; SiYuan çalışma alanının dışında normal bir klasör seçin",
+		"339": "Yalnızca varsayılan .obsidian klasörünü kullanan Obsidian Vaults desteklenir",
+		"340": "Seçilen Vault, okunabilir ve gizli olmayan bir Markdown dosyası içermiyor"
 	}
 	}

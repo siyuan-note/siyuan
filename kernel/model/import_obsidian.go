@@ -202,11 +202,18 @@ type obsidianScanResult struct {
 }
 
 var (
-	obsidianTasksMu sync.Mutex
-	obsidianTasks   = map[string]*obsidianTask{}
-	obsidianActive  string
+	obsidianTasksMu                 sync.Mutex
+	obsidianTasks                   = map[string]*obsidianTask{}
+	obsidianActive                  string
+	errObsidianVaultUnreadable      = errors.New("Obsidian Vault is unreadable")
+	errObsidianVaultNotDirectory    = errors.New("Obsidian Vault path is not a directory")
+	errObsidianVaultUnsafePath      = errors.New("Obsidian Vault path is unsafe")
+	errObsidianVaultConfigMissing   = errors.New("Obsidian Vault config directory is missing")
+	errObsidianVaultMarkdownMissing = errors.New("Obsidian Vault has no readable Markdown")
 
 	obsidianBlockIDPattern  = regexp.MustCompile(`(?m)(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$`)
+	obsidianQuotePattern    = regexp.MustCompile(`^((?:[ \t]*>[ \t]?)+)(.*)$`)
+	obsidianListItemPattern = regexp.MustCompile(`^([ \t]*(?:[-+*]|\d+[.)])[ \t]+)(.*)$`)
 	obsidianFootnotePattern = regexp.MustCompile(`(?m)\[\^[^\]\r\n]+\]`)
 )
 
@@ -337,6 +344,7 @@ func finishObsidianTaskLocked(task *obsidianTask, state, message, errMessage str
 	task.State = state
 	task.Message = message
 	task.Err = errMessage
+	task.Context = nil
 	if state == ObsidianTaskStateCompleted {
 		task.Progress = 100
 	}
@@ -369,12 +377,16 @@ func failObsidianTask(taskID, stage string, err error, result *ObsidianVaultImpo
 	userError := Conf.Language(334)
 	if stage == "analyzing" {
 		userError = Conf.Language(333)
+		if language := obsidianVaultErrorLanguage(err); language > 0 {
+			userError = Conf.Language(language)
+		}
 	}
 	obsidianTasksMu.Lock()
 	if task := obsidianTasks[taskID]; task != nil && !isObsidianTerminalState(task.State) {
 		if result != nil {
-			if result.Incomplete && !strings.HasSuffix(result.NotebookName, "（导入未完成）") {
-				result.NotebookName += "（导入未完成）"
+			incompleteSuffix := Conf.Language(335)
+			if result.Incomplete && !strings.HasSuffix(result.NotebookName, incompleteSuffix) {
+				result.NotebookName += incompleteSuffix
 			}
 			result.FailedStage = stage
 			task.Result = result
@@ -382,6 +394,23 @@ func failObsidianTask(taskID, stage string, err error, result *ObsidianVaultImpo
 		finishObsidianTaskLocked(task, ObsidianTaskStateFailed, "Import failed", userError)
 	}
 	obsidianTasksMu.Unlock()
+}
+
+func obsidianVaultErrorLanguage(err error) int {
+	switch {
+	case errors.Is(err, errObsidianVaultUnreadable):
+		return 336
+	case errors.Is(err, errObsidianVaultNotDirectory):
+		return 337
+	case errors.Is(err, errObsidianVaultUnsafePath):
+		return 338
+	case errors.Is(err, errObsidianVaultConfigMissing):
+		return 339
+	case errors.Is(err, errObsidianVaultMarkdownMissing):
+		return 340
+	default:
+		return 0
+	}
 }
 
 func analyzeObsidianVaultTask(ctx context.Context, taskID, localPath string) {
@@ -392,7 +421,7 @@ func analyzeObsidianVaultTask(ctx context.Context, taskID, localPath string) {
 		updateObsidianTask(taskID, ObsidianTaskStateAnalyzing, progress, message)
 	})
 	if err != nil {
-		if errors.Is(err, context.Canceled) {
+		if errors.Is(err, context.Canceled) || ctx.Err() != nil {
 			return
 		}
 		failObsidianTask(taskID, "analyzing", err, nil)
@@ -465,33 +494,39 @@ func analyzeObsidianVault(ctx context.Context, localPath string, progress func(i
 
 func validateObsidianVaultRoot(localPath string) (string, error) {
 	if strings.TrimSpace(localPath) == "" {
-		return "", errors.New("Vault path must not be empty")
+		return "", fmt.Errorf("%w: path is empty", errObsidianVaultUnreadable)
 	}
 	abs, err := filepath.Abs(filepath.Clean(localPath))
 	if err != nil {
-		return "", fmt.Errorf("normalize Vault path: %w", err)
+		return "", fmt.Errorf("%w: normalize Vault path: %v", errObsidianVaultUnreadable, err)
 	}
 	info, err := os.Lstat(abs)
 	if err != nil {
-		return "", fmt.Errorf("read Vault root: %w", err)
+		return "", fmt.Errorf("%w: read Vault root: %v", errObsidianVaultUnreadable, err)
 	}
 	if !info.IsDir() {
-		return "", errors.New("the selected path is not a directory")
+		return "", errObsidianVaultNotDirectory
 	}
 	if info.Mode()&os.ModeSymlink != 0 || isObsidianResolvedLink(abs) {
-		return "", errors.New("the Vault root must not be a symbolic link or reparse point")
+		return "", fmt.Errorf("%w: Vault root is a symbolic link or reparse point", errObsidianVaultUnsafePath)
 	}
 	if util.IsSensitivePath(abs) {
-		return "", errors.New("the selected Vault path is sensitive")
+		return "", fmt.Errorf("%w: selected Vault path is sensitive", errObsidianVaultUnsafePath)
 	}
 	workspace, _ := filepath.Abs(filepath.Clean(util.WorkspaceDir))
 	if sameObsidianPath(abs, workspace) || gulu.File.IsSubPath(workspace, abs) || gulu.File.IsSubPath(abs, workspace) {
-		return "", errors.New("the Vault root and the SiYuan workspace must not contain each other")
+		return "", fmt.Errorf("%w: Vault root and SiYuan workspace contain each other", errObsidianVaultUnsafePath)
 	}
 	configPath := filepath.Join(abs, ".obsidian")
 	configInfo, statErr := os.Lstat(configPath)
-	if statErr != nil || !configInfo.IsDir() || configInfo.Mode()&os.ModeSymlink != 0 || isObsidianResolvedLink(configPath) {
-		return "", errors.New("only Vaults with a real .obsidian directory are supported")
+	if statErr != nil {
+		if os.IsNotExist(statErr) {
+			return "", errObsidianVaultConfigMissing
+		}
+		return "", fmt.Errorf("%w: read Vault config directory: %v", errObsidianVaultUnreadable, statErr)
+	}
+	if !configInfo.IsDir() || configInfo.Mode()&os.ModeSymlink != 0 || isObsidianResolvedLink(configPath) {
+		return "", errObsidianVaultConfigMissing
 	}
 	return abs, nil
 }
@@ -524,7 +559,7 @@ func scanObsidianVaultFiles(ctx context.Context, vault *obsidianVaultContext, re
 			if entry.IsDir() || strings.EqualFold(filepath.Ext(name), ".md") {
 				return fmt.Errorf("read Vault path [%s]: %w", rel, infoErr)
 			}
-			vault.Analysis.Warnings = append(vault.Analysis.Warnings, fmt.Sprintf("Skipped unreadable unreferenced file [%s]", rel))
+			vault.Analysis.Warnings = append(vault.Analysis.Warnings, rel)
 			continue
 		}
 		if entry.Type()&os.ModeSymlink != 0 || entryInfo.Mode()&os.ModeSymlink != 0 || isObsidianResolvedLink(abs) {
@@ -599,7 +634,7 @@ func planObsidianDocuments(ctx context.Context, vault *obsidianVaultContext) err
 		}
 	}
 	if len(mdFiles) == 0 {
-		return errors.New("the Vault does not contain a readable non-hidden Markdown file")
+		return errObsidianVaultMarkdownMissing
 	}
 	sort.Slice(mdFiles, func(i, j int) bool { return strings.ToLower(mdFiles[i].RelPath) < strings.ToLower(mdFiles[j].RelPath) })
 
@@ -738,13 +773,6 @@ func uniqueObsidianTitle(parent, title string, uses map[string]map[string]int, a
 }
 
 func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, progress func(int, string)) error {
-	type docScan struct {
-		doc  *obsidianDocPlan
-		data []byte
-		scan *obsidianScanResult
-		tree *parse.Tree
-	}
-	var scans []*docScan
 	sourceCount := countObsidianSourceDocs(vault.Docs)
 	processed := 0
 	for _, doc := range vault.Docs {
@@ -762,11 +790,6 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 			return fmt.Errorf("Markdown [%s] is not valid UTF-8", doc.Source.RelPath)
 		}
 		scan := scanObsidianSource(data)
-		tree, _, _, _ := parseStdMd(data)
-		if tree == nil {
-			return fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath)
-		}
-		buildObsidianHeadingIndex(doc, tree)
 		for _, blockID := range scan.BlockIDs {
 			if scan.Duplicates[blockID] {
 				doc.DuplicateBlocks[blockID] = true
@@ -775,22 +798,34 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 				doc.BlockIDs[blockID] = ast.NewNodeID()
 			}
 		}
+		tree, _, _, _ := parseStdMd(data)
+		if tree == nil {
+			return fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath)
+		}
+		buildObsidianHeadingIndex(doc, tree)
 		vault.Analysis.WikiLinkCount += countObsidianNonEmbedTokens(scan.Wikis)
 		vault.Analysis.EmbedCount += countObsidianEmbedTokens(scan.Wikis)
 		vault.Analysis.CommentCount += len(scan.Comments)
 		vault.Analysis.FootnoteCount += scan.Footnotes
 		vault.Analysis.BlockIDCount += len(scan.BlockIDs)
-		scans = append(scans, &docScan{doc: doc, data: data, scan: scan, tree: tree})
 		processed++
 		progress(35+processed*30/maxInt(sourceCount, 1), "Analyzing Markdown syntax")
 	}
 
-	for _, item := range scans {
+	for _, doc := range vault.Docs {
+		if doc.Synthetic {
+			continue
+		}
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		for _, token := range item.scan.Wikis {
-			resolved := resolveObsidianTarget(vault, item.doc, token.Target)
+		data, err := readStableObsidianFile(doc.Source)
+		if err != nil {
+			return fmt.Errorf("read Markdown [%s]: %w", doc.Source.RelPath, err)
+		}
+		scan := scanObsidianSource(data)
+		for _, token := range scan.Wikis {
+			resolved := resolveObsidianTarget(vault, doc, token.Target)
 			if resolved.Ambiguous {
 				vault.Analysis.AmbiguousCount++
 			}
@@ -805,7 +840,11 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 				}
 			}
 		}
-		analyzeObsidianMarkdownLinks(vault, item.doc, item.tree)
+		tree, _, _, _ := parseStdMd(data)
+		if tree == nil {
+			return fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath)
+		}
+		analyzeObsidianMarkdownLinks(vault, doc, tree)
 	}
 	return nil
 }
@@ -852,7 +891,7 @@ func buildObsidianHeadingIndex(doc *obsidianDocPlan, tree *parse.Tree) {
 		if !entering || node.Type != ast.NodeHeading {
 			return ast.WalkContinue
 		}
-		text := strings.TrimSpace(node.Text())
+		text, blockID := splitObsidianBlockID(strings.TrimSpace(node.Text()))
 		if text == "" {
 			return ast.WalkContinue
 		}
@@ -870,12 +909,24 @@ func buildObsidianHeadingIndex(doc *obsidianDocPlan, tree *parse.Tree) {
 				chainParts = append(chainParts, stack[i])
 			}
 		}
-		heading := &obsidianHeading{Level: level, Text: text, Chain: strings.Join(chainParts, "#"), ID: ast.NewNodeID()}
+		headingID := doc.BlockIDs[blockID]
+		if headingID == "" {
+			headingID = ast.NewNodeID()
+		}
+		heading := &obsidianHeading{Level: level, Text: text, Chain: strings.Join(chainParts, "#"), ID: headingID}
 		doc.Headings = append(doc.Headings, heading)
 		doc.HeadingByText[strings.ToLower(text)] = append(doc.HeadingByText[strings.ToLower(text)], heading.ID)
 		doc.HeadingByChain[strings.ToLower(heading.Chain)] = append(doc.HeadingByChain[strings.ToLower(heading.Chain)], heading.ID)
 		return ast.WalkContinue
 	})
+}
+
+func splitObsidianBlockID(text string) (content, blockID string) {
+	match := obsidianBlockIDPattern.FindStringSubmatchIndex(text)
+	if len(match) == 0 {
+		return text, ""
+	}
+	return strings.TrimSpace(text[:match[0]]), text[match[2]:match[3]]
 }
 
 func countObsidianNonEmbedTokens(tokens []obsidianWikiToken) int {
@@ -1183,6 +1234,7 @@ func scanObsidianSource(data []byte) *obsidianScanResult {
 			pos = end
 		}
 	}
+	protectObsidianIndentedCode(data, protected, markProtected)
 
 	var fenceMarker byte
 	fenceLen := 0
@@ -1314,6 +1366,44 @@ func scanObsidianSource(data []byte) *obsidianScanResult {
 	}
 	ret.Footnotes = len(obsidianFootnotePattern.FindAll(masked, -1))
 	return ret
+}
+
+func protectObsidianIndentedCode(data []byte, protected []bool, markProtected func(start, end int)) {
+	previousBlank := true
+	inCodeBlock := false
+	for lineStart := 0; lineStart < len(data); {
+		lineEnd := bytes.IndexByte(data[lineStart:], '\n')
+		if lineEnd < 0 {
+			lineEnd = len(data)
+		} else {
+			lineEnd += lineStart + 1
+		}
+		line := bytes.TrimRight(data[lineStart:lineEnd], "\r\n")
+		blank := len(bytes.TrimSpace(line)) == 0
+		indent := 0
+		for _, token := range line {
+			if token == ' ' {
+				indent++
+			} else if token == '\t' {
+				indent = 4
+				break
+			} else {
+				break
+			}
+		}
+		indented := indent >= 4
+		if inCodeBlock && !blank && !indented {
+			inCodeBlock = false
+		}
+		if !inCodeBlock && previousBlank && indented && !blank {
+			inCodeBlock = true
+		}
+		if inCodeBlock || protected[lineStart] {
+			markProtected(lineStart, lineEnd)
+		}
+		previousBlank = blank
+		lineStart = lineEnd
+	}
 }
 
 func protectObsidianHTML(data []byte, protected []bool, markProtected func(start, end int)) {
@@ -1728,6 +1818,9 @@ func renderObsidianWikiToken(token obsidianWikiToken, resolved obsidianResolvedT
 		}
 		stats.ConvertedLinks++
 		anchor := obsidianWikiLinkAnchor(token, resolved.Doc)
+		if token.Alias == "" {
+			return "((" + resolved.ID + " '" + escapeObsidianDynamicBlockRefText(anchor) + "'))"
+		}
 		return "((" + resolved.ID + " \"" + escapeObsidianBlockRefText(anchor) + "\"))"
 	}
 	if resolved.Asset == nil {
@@ -1783,6 +1876,10 @@ func obsidianWikiLinkAnchor(token obsidianWikiToken, doc *obsidianDocPlan) strin
 
 func escapeObsidianBlockRefText(text string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(text, "\\", "\\\\"), "\"", "\\\"")
+}
+
+func escapeObsidianDynamicBlockRefText(text string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(text, "\\", "\\\\"), "'", "\\'")
 }
 
 func escapeObsidianMarkdownText(text string) string {
@@ -1951,10 +2048,26 @@ func injectObsidianBlockIAL(data []byte, doc *obsidianDocPlan) []byte {
 		if doc.BlockIDs[blockID] == "" || (doc.DuplicateBlocks[blockID] && firstMatches[blockID] != index) {
 			continue
 		}
-		replacement := []byte("\n{: id=\"" + doc.BlockIDs[blockID] + "\"}")
+		lineStart := bytes.LastIndexByte(data[:match[0]], '\n') + 1
+		linePrefix := strings.TrimRight(string(data[lineStart:match[0]]), " \t")
+		quotePrefix, blockPrefix := splitObsidianQuotePrefix(linePrefix)
+		if listItemMatch := obsidianListItemPattern.FindStringSubmatch(blockPrefix); len(listItemMatch) == 3 {
+			replacement := []byte(quotePrefix + listItemMatch[1] + "{: id=\"" + doc.BlockIDs[blockID] + "\"}" + listItemMatch[2])
+			ret = append(ret[:lineStart], append(replacement, ret[match[1]:]...)...)
+			continue
+		}
+		replacement := []byte("\n" + quotePrefix + "{: id=\"" + doc.BlockIDs[blockID] + "\"}")
 		ret = append(ret[:match[0]], append(replacement, ret[match[1]:]...)...)
 	}
 	return ret
+}
+
+func splitObsidianQuotePrefix(line string) (prefix, content string) {
+	match := obsidianQuotePattern.FindStringSubmatch(line)
+	if len(match) != 3 {
+		return "", line
+	}
+	return match[1], match[2]
 }
 
 func maskObsidianProtected(data []byte, spans []obsidianSpan) []byte {
@@ -2234,7 +2347,7 @@ func markObsidianNotebookIncomplete(boxID, originalName string) {
 		return
 	}
 	conf := box.GetConf()
-	conf.Name = originalName + "（导入未完成）"
+	conf.Name = originalName + Conf.Language(335)
 	if err := box.SaveConf(conf); err != nil {
 		logging.LogErrorf("mark incomplete Obsidian notebook [%s] failed: %s", boxID, err)
 	}

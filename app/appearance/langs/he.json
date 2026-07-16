@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "קבצים שאינם ניתנים לקריאה: ${count}; לא ניתן היה לקרוא קבצים אלה שאינם מוזכרים, והם לא ייובאו",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "ייבוא מפורמטים או יישומים אחרים",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "לא ניתן עוד לבטל את משימת הייבוא של Obsidian Vault",
 		"332": "הניתוח של Obsidian Vault אינו מוכן או שפג תוקפו",
 		"333": "ניתוח Obsidian Vault נכשל",
-		"334": "ייבוא Obsidian Vault נכשל"
+		"334": "ייבוא Obsidian Vault נכשל",
+		"335": " (הייבוא לא הושלם)",
+		"336": "לא ניתן לקרוא את ה־Obsidian Vault שנבחר",
+		"337": "הנתיב שנבחר אינו תיקייה",
+		"338": "נתיב ה־Vault שנבחר אינו נתמך; יש לבחור תיקייה רגילה מחוץ למרחב העבודה של SiYuan",
+		"339": "נתמכים רק Obsidian Vaults המשתמשים בתיקיית ברירת המחדל .obsidian",
+		"340": "ה־Vault שנבחר אינו מכיל קובץ Markdown קריא שאינו מוסתר"
 	}
 	}

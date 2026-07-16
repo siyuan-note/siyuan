@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "अपठनीय फ़ाइलें: ${count}; इन असंदर्भित फ़ाइलों को पढ़ा नहीं जा सका और इन्हें आयात नहीं किया जाएगा",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "अन्य फ़ॉर्मेट या ऐप से आयात करें",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "Obsidian Vault आयात कार्य अब रद्द नहीं किया जा सकता",
 		"332": "Obsidian Vault विश्लेषण तैयार नहीं है या उसकी समय-सीमा समाप्त हो गई है",
 		"333": "Obsidian Vault का विश्लेषण विफल रहा",
-		"334": "Obsidian Vault का आयात विफल रहा"
+		"334": "Obsidian Vault का आयात विफल रहा",
+		"335": " (आयात अधूरा)",
+		"336": "चुने गए Obsidian Vault को पढ़ा नहीं जा सकता",
+		"337": "चुना गया पथ कोई फ़ोल्डर नहीं है",
+		"338": "चुना गया Vault पथ समर्थित नहीं है; SiYuan कार्यस्थान के बाहर कोई सामान्य फ़ोल्डर चुनें",
+		"339": "केवल डिफ़ॉल्ट .obsidian फ़ोल्डर का उपयोग करने वाले Obsidian Vault समर्थित हैं",
+		"340": "चुने गए Vault में पढ़ने योग्य गैर-छिपी Markdown फ़ाइल नहीं है"
 	}
 	}

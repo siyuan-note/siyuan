@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "無法讀取的檔案：${count}，這些未被引用的檔案無法讀取且不會匯入",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "從其他格式或應用程式匯入",
 	"obsidianSyntaxStats": "WikiLink：${wikiLink} · ![[Embed]]：${embed} · ^block-id：${blockID} · Footnote：${footnote} · %%comment%%：${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "Obsidian Vault 匯入工作已無法取消",
 		"332": "Obsidian Vault 分析尚未完成或已過期",
 		"333": "分析 Obsidian Vault 失敗",
-		"334": "匯入 Obsidian Vault 失敗"
+		"334": "匯入 Obsidian Vault 失敗",
+		"335": "（匯入未完成）",
+		"336": "無法讀取所選 Obsidian Vault",
+		"337": "所選路徑不是資料夾",
+		"338": "不支援所選 Vault 路徑，請選擇思源工作空間以外的一般資料夾",
+		"339": "僅支援使用預設 .obsidian 資料夾的 Obsidian Vault",
+		"340": "所選 Vault 中沒有可讀取的非隱藏 Markdown 檔案"
 	}
 	}

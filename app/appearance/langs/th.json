@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "ไฟล์ที่อ่านไม่ได้: ${count}; ไม่สามารถอ่านไฟล์ที่ไม่มีการอ้างอิงเหล่านี้ได้และจะไม่นำเข้า",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "นำเข้าจากรูปแบบหรือแอปอื่น",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "ไม่สามารถยกเลิกงานนำเข้า Obsidian Vault ได้อีก",
 		"332": "การวิเคราะห์ Obsidian Vault ยังไม่พร้อมหรือหมดอายุแล้ว",
 		"333": "วิเคราะห์ Obsidian Vault ไม่สำเร็จ",
-		"334": "นำเข้า Obsidian Vault ไม่สำเร็จ"
+		"334": "นำเข้า Obsidian Vault ไม่สำเร็จ",
+		"335": " (นำเข้าไม่สมบูรณ์)",
+		"336": "ไม่สามารถอ่าน Obsidian Vault ที่เลือกได้",
+		"337": "เส้นทางที่เลือกไม่ใช่โฟลเดอร์",
+		"338": "ไม่รองรับเส้นทาง Vault ที่เลือก โปรดเลือกโฟลเดอร์ปกติที่อยู่นอกพื้นที่ทำงาน SiYuan",
+		"339": "รองรับเฉพาะ Obsidian Vault ที่ใช้โฟลเดอร์ .obsidian เริ่มต้นเท่านั้น",
+		"340": "Vault ที่เลือกไม่มีไฟล์ Markdown ที่อ่านได้และไม่ถูกซ่อน"
 	}
 	}

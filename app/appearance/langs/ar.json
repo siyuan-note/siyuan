@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "ملفات غير قابلة للقراءة: ${count}؛ تعذر قراءة هذه الملفات غير المشار إليها ولن يتم استيرادها",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "الاستيراد من تنسيقات أو تطبيقات أخرى",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "لم يعد من الممكن إلغاء مهمة استيراد Obsidian Vault",
 		"332": "تحليل Obsidian Vault غير جاهز أو انتهت صلاحيته",
 		"333": "فشل تحليل Obsidian Vault",
-		"334": "فشل استيراد Obsidian Vault"
+		"334": "فشل استيراد Obsidian Vault",
+		"335": " (الاستيراد غير مكتمل)",
+		"336": "تعذر قراءة Obsidian Vault المحدد",
+		"337": "المسار المحدد ليس مجلدًا",
+		"338": "مسار Vault المحدد غير مدعوم؛ اختر مجلدًا عاديًا خارج مساحة عمل SiYuan",
+		"339": "يتم دعم Obsidian Vaults التي تستخدم مجلد .obsidian الافتراضي فقط",
+		"340": "لا يحتوي Vault المحدد على ملف Markdown غير مخفي يمكن قراءته"
 	}
 	}

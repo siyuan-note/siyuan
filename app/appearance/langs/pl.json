@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "Nieczytelne pliki: ${count}; tych plików bez odwołań nie można odczytać i nie zostaną zaimportowane",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Importuj z innych formatów lub aplikacji",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "Zadania importu Obsidian Vault nie można już anulować",
 		"332": "Analiza Obsidian Vault nie jest gotowa lub wygasła",
 		"333": "Nie udało się przeanalizować Obsidian Vault",
-		"334": "Nie udało się zaimportować Obsidian Vault"
+		"334": "Nie udało się zaimportować Obsidian Vault",
+		"335": " (Import niekompletny)",
+		"336": "Nie można odczytać wybranego Obsidian Vault",
+		"337": "Wybrana ścieżka nie jest folderem",
+		"338": "Wybrana ścieżka Vault nie jest obsługiwana; wybierz zwykły folder poza obszarem roboczym SiYuan",
+		"339": "Obsługiwane są tylko Obsidian Vaults używające domyślnego folderu .obsidian",
+		"340": "Wybrany Vault nie zawiera czytelnego, nieukrytego pliku Markdown"
 	}
 	}

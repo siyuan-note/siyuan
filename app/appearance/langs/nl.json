@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "Onleesbare bestanden: ${count}; deze bestanden zonder verwijzingen konden niet worden gelezen en worden niet geïmporteerd",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Importeren uit andere indelingen of apps",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "De Obsidian Vault-importtaak kan niet meer worden geannuleerd",
 		"332": "De Obsidian Vault-analyse is niet gereed of verlopen",
 		"333": "Analyse van de Obsidian Vault mislukt",
-		"334": "Importeren van de Obsidian Vault mislukt"
+		"334": "Importeren van de Obsidian Vault mislukt",
+		"335": " (Import onvolledig)",
+		"336": "De geselecteerde Obsidian Vault kan niet worden gelezen",
+		"337": "Het geselecteerde pad is geen map",
+		"338": "Het geselecteerde Vault-pad wordt niet ondersteund; selecteer een normale map buiten de SiYuan-werkruimte",
+		"339": "Alleen Obsidian Vaults die de standaardmap .obsidian gebruiken worden ondersteund",
+		"340": "De geselecteerde Vault bevat geen leesbaar, niet-verborgen Markdown-bestand"
 	}
 	}

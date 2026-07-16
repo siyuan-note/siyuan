@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "File illeggibili: ${count}; questi file senza riferimenti non possono essere letti e non verranno importati",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Importa da altri formati o app",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "L’attività di importazione di Obsidian Vault non può più essere annullata",
 		"332": "L’analisi di Obsidian Vault non è pronta o è scaduta",
 		"333": "Analisi di Obsidian Vault non riuscita",
-		"334": "Importazione di Obsidian Vault non riuscita"
+		"334": "Importazione di Obsidian Vault non riuscita",
+		"335": " (Importazione incompleta)",
+		"336": "Impossibile leggere l’Obsidian Vault selezionato",
+		"337": "Il percorso selezionato non è una cartella",
+		"338": "Il percorso del Vault selezionato non è supportato; seleziona una cartella normale esterna allo spazio di lavoro di SiYuan",
+		"339": "Sono supportati solo gli Obsidian Vault che utilizzano la cartella .obsidian predefinita",
+		"340": "Il Vault selezionato non contiene file Markdown leggibili e non nascosti"
 	}
 	}

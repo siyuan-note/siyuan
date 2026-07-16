@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "Nečitateľné súbory: ${count}; tieto súbory bez odkazov sa nepodarilo prečítať a nebudú importované",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Importovať z iných formátov alebo aplikácií",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "Úlohu importu Obsidian Vault už nemožno zrušiť",
 		"332": "Analýza Obsidian Vault nie je pripravená alebo jej platnosť vypršala",
 		"333": "Analýza Obsidian Vault zlyhala",
-		"334": "Import Obsidian Vault zlyhal"
+		"334": "Import Obsidian Vault zlyhal",
+		"335": " (Import neúplný)",
+		"336": "Vybraný Obsidian Vault sa nedá prečítať",
+		"337": "Vybraná cesta nie je priečinok",
+		"338": "Vybraná cesta k Vault nie je podporovaná; vyberte bežný priečinok mimo pracovného priestoru SiYuan",
+		"339": "Podporované sú iba Obsidian Vaults používajúce predvolený priečinok .obsidian",
+		"340": "Vybraný Vault neobsahuje čitateľný neskrývaný súbor Markdown"
 	}
 	}

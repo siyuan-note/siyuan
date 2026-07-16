@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "File tidak dapat dibaca: ${count}; file yang tidak dirujuk ini tidak dapat dibaca dan tidak akan diimpor",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Impor dari format atau aplikasi lain",
 	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "Tugas impor Obsidian Vault tidak dapat dibatalkan lagi",
 		"332": "Analisis Obsidian Vault belum siap atau telah kedaluwarsa",
 		"333": "Gagal menganalisis Obsidian Vault",
-		"334": "Gagal mengimpor Obsidian Vault"
+		"334": "Gagal mengimpor Obsidian Vault",
+		"335": " (Impor tidak lengkap)",
+		"336": "Obsidian Vault yang dipilih tidak dapat dibaca",
+		"337": "Jalur yang dipilih bukan folder",
+		"338": "Jalur Vault yang dipilih tidak didukung; pilih folder biasa di luar ruang kerja SiYuan",
+		"339": "Hanya Obsidian Vault yang menggunakan folder .obsidian bawaan yang didukung",
+		"340": "Vault yang dipilih tidak berisi file Markdown tak tersembunyi yang dapat dibaca"
 	}
 	}

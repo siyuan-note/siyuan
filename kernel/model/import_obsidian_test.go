@@ -10,6 +10,7 @@ package model
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -43,8 +44,32 @@ func TestAnalyzeObsidianVault(t *testing.T) {
 	}
 }
 
+func TestObsidianVaultValidationErrors(t *testing.T) {
+	notDirectory := filepath.Join(t.TempDir(), "vault.md")
+	if err := os.WriteFile(notDirectory, []byte("content"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := validateObsidianVaultRoot(notDirectory); !errors.Is(err, errObsidianVaultNotDirectory) || obsidianVaultErrorLanguage(err) != 337 {
+		t.Fatalf("unexpected non-directory error: %v", err)
+	}
+
+	missingConfig := t.TempDir()
+	if _, err := validateObsidianVaultRoot(missingConfig); !errors.Is(err, errObsidianVaultConfigMissing) || obsidianVaultErrorLanguage(err) != 339 {
+		t.Fatalf("unexpected missing config error: %v", err)
+	}
+
+	missingMarkdown := t.TempDir()
+	if err := os.Mkdir(filepath.Join(missingMarkdown, ".obsidian"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	_, err := analyzeObsidianVault(context.Background(), missingMarkdown, func(int, string) {})
+	if !errors.Is(err, errObsidianVaultMarkdownMissing) || obsidianVaultErrorLanguage(err) != 340 {
+		t.Fatalf("unexpected missing Markdown error: %v", err)
+	}
+}
+
 func TestScanObsidianSourceContexts(t *testing.T) {
-	source := []byte("---\ntitle: [[YAML]]\n---\n[[Note]] %% [[Commented]] %%\n`[[Code]]`\n```md\n[[Fence]]\n```\n![[image.png|100]]\nParagraph ^block-id\n%%unclosed\n")
+	source := []byte("---\ntitle: [[YAML]]\n---\n[[Note]] %% [[Commented]] %%\n`[[Code]]`\n```md\n[[Fence]]\n```\n\n    [[IndentedCode]]\n\n![[image.png|100]]\nParagraph ^block-id\n%%unclosed\n")
 	scan := scanObsidianSource(source)
 	if len(scan.Wikis) != 2 {
 		t.Fatalf("expected 2 Wikilinks, got %d", len(scan.Wikis))
@@ -209,7 +234,7 @@ func TestTransformAndParseObsidianMarkdown(t *testing.T) {
 		t.Fatalf("脚注引用未转换为静态块引用：\n%s", transformedText)
 	}
 	footnoteID := footnoteMatch[1]
-	for _, expected := range []string{"((" + note.ID + " \"Alias\"))", "((" + note.ID + " \"Note\"))", "((" + headingID + " \"Section\"))", "{{SELECT * FROM blocks WHERE id = '" + headingID + "'}}", "assets/" + asset.FinalName, "width: 100px", "{: id=\"" + current.BlockIDs["paragraph"] + "\"}"} {
+	for _, expected := range []string{"((" + note.ID + " \"Alias\"))", "((" + note.ID + " 'Note'))", "((" + headingID + " 'Section'))", "{{SELECT * FROM blocks WHERE id = '" + headingID + "'}}", "assets/" + asset.FinalName, "width: 100px", "{: id=\"" + current.BlockIDs["paragraph"] + "\"}"} {
 		if !strings.Contains(transformedText, expected) {
 			t.Fatalf("transformed Markdown does not contain %q:\n%s", expected, transformedText)
 		}
@@ -225,7 +250,7 @@ func TestTransformAndParseObsidianMarkdown(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var blockRefs, embeds, images, links int
+	var blockRefs, dynamicBlockRefs, embeds, images, links int
 	var foundParagraphID, foundFootnoteID, foundSuperscriptFootnote bool
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -233,6 +258,9 @@ func TestTransformAndParseObsidianMarkdown(t *testing.T) {
 		}
 		if treenode.IsBlockRef(node) {
 			blockRefs++
+			if node.TextMarkBlockRefSubtype == "d" {
+				dynamicBlockRefs++
+			}
 		}
 		if node.Type == ast.NodeBlockQueryEmbed && treenode.GetEmbedBlockRef(node) == headingID {
 			embeds++
@@ -257,8 +285,61 @@ func TestTransformAndParseObsidianMarkdown(t *testing.T) {
 	if blockRefs < 5 {
 		t.Fatalf("expected document, Markdown and footnote block refs, got %d", blockRefs)
 	}
-	if embeds != 1 || images != 1 || links < 1 || !foundParagraphID || !foundFootnoteID || !foundSuperscriptFootnote {
-		t.Fatalf("unexpected parsed tree: embeds=%d images=%d links=%d paragraphID=%v footnoteID=%v superscriptFootnote=%v", embeds, images, links, foundParagraphID, foundFootnoteID, foundSuperscriptFootnote)
+	if dynamicBlockRefs != 2 || embeds != 1 || images != 1 || links < 1 || !foundParagraphID || !foundFootnoteID || !foundSuperscriptFootnote {
+		t.Fatalf("unexpected parsed tree: dynamicBlockRefs=%d embeds=%d images=%d links=%d paragraphID=%v footnoteID=%v superscriptFootnote=%v", dynamicBlockRefs, embeds, images, links, foundParagraphID, foundFootnoteID, foundSuperscriptFootnote)
+	}
+}
+
+func TestObsidianBlockIDsOnStructuredBlocks(t *testing.T) {
+	doc := newObsidianTestDoc("Current")
+	doc.TargetPath = "/" + doc.ID + ".sy"
+	doc.HPath = "/Current"
+	source := []byte("# Heading ^heading\n\n- Item ^item\n\n- [?] Task ^task\n\n> Quote\n\n^quote\n\n> # Quoted heading ^quoted-heading\n>\n> - Quoted item ^quoted-item\n> > - Nested quoted item ^nested-quoted-item\n\n| Column |\n| --- |\n| Value |\n\n^table\n\n> [!note]\n> Callout\n\n^callout\n\n> [!warning]\n> # Callout heading ^callout-heading\n> - [?] Callout task ^callout-task\n")
+	scan := scanObsidianSource(source)
+	for _, blockID := range scan.BlockIDs {
+		doc.BlockIDs[blockID] = ast.NewNodeID()
+	}
+	analysisTree, _, _, _ := parseStdMd(source)
+	buildObsidianHeadingIndex(doc, analysisTree)
+	headingIDs := map[string]string{}
+	for _, heading := range doc.Headings {
+		headingIDs[heading.Text] = heading.ID
+	}
+	for text, blockID := range map[string]string{
+		"Heading":         "heading",
+		"Quoted heading":  "quoted-heading",
+		"Callout heading": "callout-heading",
+	} {
+		if headingIDs[text] != doc.BlockIDs[blockID] {
+			t.Fatalf("heading [%s] did not use block ID [%s]: %#v", text, blockID, doc.Headings)
+		}
+	}
+	transformed, stats := transformObsidianMarkdown(nil, doc, source)
+	tree, err := parseObsidianMd(transformed, nil, doc, stats)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]bool{
+		doc.BlockIDs["heading"]:            true,
+		doc.BlockIDs["item"]:               true,
+		doc.BlockIDs["task"]:               true,
+		doc.BlockIDs["quote"]:              true,
+		doc.BlockIDs["quoted-heading"]:     true,
+		doc.BlockIDs["quoted-item"]:        true,
+		doc.BlockIDs["nested-quoted-item"]: true,
+		doc.BlockIDs["table"]:              true,
+		doc.BlockIDs["callout"]:            true,
+		doc.BlockIDs["callout-heading"]:    true,
+		doc.BlockIDs["callout-task"]:       true,
+	}
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && want[node.ID] {
+			delete(want, node.ID)
+		}
+		return ast.WalkContinue
+	})
+	if len(want) != 0 {
+		t.Fatalf("structured block IDs were not assigned: %#v\n%s", want, transformed)
 	}
 }
 
@@ -310,7 +391,7 @@ func TestStartObsidianVaultAnalysisReplacesPreImportTask(t *testing.T) {
 	}
 
 	oldContext, oldCancel := context.WithCancel(context.Background())
-	oldTask := &obsidianTask{TaskID: ast.NewNodeID(), State: ObsidianTaskStateReady, Cancel: oldCancel}
+	oldTask := &obsidianTask{TaskID: ast.NewNodeID(), State: ObsidianTaskStateReady, Context: &obsidianVaultContext{}, Cancel: oldCancel}
 	obsidianTasksMu.Lock()
 	previousTasks, previousActive := obsidianTasks, obsidianActive
 	obsidianTasks = map[string]*obsidianTask{oldTask.TaskID: oldTask}
@@ -341,6 +422,9 @@ func TestStartObsidianVaultAnalysisReplacesPreImportTask(t *testing.T) {
 	}
 	if oldTask.State != ObsidianTaskStateCancelled {
 		t.Fatalf("unexpected stale task state: %s", oldTask.State)
+	}
+	if oldTask.Context != nil {
+		t.Fatal("the stale task retained its Vault analysis context")
 	}
 }
 

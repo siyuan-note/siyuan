@@ -149,7 +149,7 @@ const showProgress = async (taskID: string, importing: boolean) => {
         cancelElement.disabled = !cancellableStates.includes(updatedTask.state);
     });
     dialog.destroy();
-    if (!task && !cancelled) {
+    if (cancelled || !task) {
         return undefined;
     }
     return task;
@@ -173,6 +173,7 @@ const showFailure = (task: IObsidianTask) => {
 
 const showConfirmation = (taskID: string, analysis: IObsidianAnalysis) => {
     const skippedCount = analysis.skippedHiddenCount + analysis.skippedLinkCount + analysis.skippedNestedVaultCount;
+    const warnings = analysis.warnings || [];
     const basicStats = formatBasicStats(analysis);
     const syntaxStats = formatSyntaxStats(analysis);
     const issues = [
@@ -187,6 +188,7 @@ const showConfirmation = (taskID: string, analysis: IObsidianAnalysis) => {
     <div class="b3-label">${escapeHtml(analysis.vaultName)}${basicStats ? `<div>${escapeHtml(basicStats)}</div>` : ""}</div>
     ${syntaxStats ? `<div class="b3-label">${escapeHtml(syntaxStats)}</div>` : ""}
     ${issues.length > 0 ? `<div class="b3-label">${window.siyuan.languages.obsidianIssueSummary}<div class="b3-label__text">${issues.join("<br>")}</div></div>` : ""}
+    ${warnings.length > 0 ? `<div class="b3-label">${window.siyuan.languages.obsidianUnreadableFiles.replace("${count}", warnings.length.toString())}<div class="b3-label__text">${warnings.map((item) => escapeHtml(item)).join("<br>")}</div></div>` : ""}
     ${skippedCount > 0 ? `<div class="b3-label">${window.siyuan.languages.obsidianSkippedSummary.replace("${count}", skippedCount.toString())}</div>` : ""}
     ${analysis.unreferencedFileCount > 0 ? `<div class="b3-label">${window.siyuan.languages.obsidianUnreferencedTip.replace("${count}", analysis.unreferencedFileCount.toString())}</div>` : ""}
     <label class="b3-label" style="display: flex;align-items: center"><span style="white-space: nowrap">${window.siyuan.languages.newNotebook}</span><span class="fn__space"></span><input class="b3-text-field fn__flex-1" data-type="notebook-name" value="${escapeAttr(analysis.notebookName)}"></label>

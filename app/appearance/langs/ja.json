@@ -1,4 +1,5 @@
 {
+	"obsidianUnreadableFiles": "読み取れないファイル：${count}。これらの参照されていないファイルは読み取れないため、インポートされません",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "その他の形式またはアプリからインポート",
 	"obsidianSyntaxStats": "WikiLink：${wikiLink} · ![[Embed]]：${embed} · ^block-id：${blockID} · Footnote：${footnote} · %%comment%%：${comment}",
@@ -2186,6 +2187,12 @@
 		"331": "Obsidian Vault のインポートタスクはキャンセルできません",
 		"332": "Obsidian Vault の分析が完了していないか、有効期限が切れています",
 		"333": "Obsidian Vault の分析に失敗しました",
-		"334": "Obsidian Vault のインポートに失敗しました"
+		"334": "Obsidian Vault のインポートに失敗しました",
+		"335": "（インポート未完了）",
+		"336": "選択した Obsidian Vault を読み取れません",
+		"337": "選択したパスはフォルダーではありません",
+		"338": "選択した Vault のパスはサポートされていません。SiYuan ワークスペース外の通常のフォルダーを選択してください",
+		"339": "既定の .obsidian フォルダーを使用する Obsidian Vault のみサポートされています",
+		"340": "選択した Vault に読み取り可能な非表示ではない Markdown ファイルがありません"
 	}
 	}

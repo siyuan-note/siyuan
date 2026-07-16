@@ -391,6 +391,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/import/importZipMd", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importZipMd)
 	ginServer.Handle("POST", "/api/import/importData", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importData)
 	ginServer.Handle("POST", "/api/import/importSY", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importSY)
+	ginServer.Handle("POST", "/api/import/importSYNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importSYNotebook)
 	ginServer.Handle("POST", "/api/import/startObsidianVaultAnalysis", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, startObsidianVaultAnalysis)
 	ginServer.Handle("POST", "/api/import/getObsidianVaultTask", model.CheckAuth, model.CheckAdminRole, getObsidianVaultTask)
 	ginServer.Handle("POST", "/api/import/startObsidianVaultImport", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, startObsidianVaultImport)

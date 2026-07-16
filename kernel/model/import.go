@@ -50,6 +50,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -113,7 +114,15 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse
 }
 
 func ImportSY(zipPath, boxID, toPath string) (err error) {
-	toPath = normalizeBoxDocTarget(boxID, toPath)
+	_, err = importSY(zipPath, boxID, toPath, false)
+	return
+}
+
+func ImportSYNotebook(zipPath string) (boxID string, err error) {
+	return importSY(zipPath, "", "/", true)
+}
+
+func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID string, err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
@@ -149,16 +158,75 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		logging.LogErrorf("read unzip dir [%s] failed: %s", unzipPath, err)
 		return
 	}
-	if 1 != len(entries) {
+	if 1 != len(entries) || !entries[0].IsDir() || len(syPaths) < 1 {
 		logging.LogErrorf("invalid .sy.zip [%v]", entries)
-		return errors.New(Conf.Language(199))
+		err = errors.New(Conf.Language(199))
+		return
 	}
 	unzipRootPath := filepath.Join(unzipPath, entries[0].Name())
 	name := filepath.Base(unzipRootPath)
 	if strings.HasPrefix(name, "data-20") && len("data-20230321175442") == len(name) {
 		logging.LogErrorf("invalid .sy.zip [unzipRootPath=%s, baseName=%s]", unzipRootPath, name)
-		return errors.New(Conf.Language(199))
+		err = errors.New(Conf.Language(199))
+		return
 	}
+	var importedBoxConf *conf.BoxConf
+	importedConfPath := filepath.Join(unzipRootPath, ".siyuan", "conf.json")
+	if filelock.IsExist(importedConfPath) {
+		confData, readErr := filelock.ReadFile(importedConfPath)
+		if readErr == nil {
+			importedBoxConf = conf.NewBoxConf()
+			if unmarshalErr := gulu.JSON.UnmarshalJSON(confData, importedBoxConf); unmarshalErr != nil {
+				logging.LogWarnf("parse imported notebook conf failed: %s", unmarshalErr)
+				importedBoxConf = nil
+			}
+		} else {
+			logging.LogWarnf("read imported notebook conf failed: %s", readErr)
+		}
+		if removeErr := filelock.Remove(importedConfPath); removeErr != nil {
+			err = removeErr
+			return
+		}
+	}
+	if createNotebook {
+		if importedBoxConf != nil && importedBoxConf.Name != "" {
+			name = importedBoxConf.Name
+		}
+		boxID, err = CreateBox(util.RemoveInvalid(name))
+		if err != nil {
+			return "", err
+		}
+		createdBoxID = boxID
+		defer func() {
+			if err == nil {
+				return
+			}
+			treenode.RemoveBlockTreesByBoxID(boxID)
+			sql.DeleteBoxQueue(boxID)
+			if removeErr := filelock.Remove(filepath.Join(util.DataDir, boxID)); removeErr != nil {
+				logging.LogErrorf("remove notebook [%s] after import failed: %s", boxID, removeErr)
+			}
+		}()
+		if importedBoxConf != nil {
+			box := &Box{ID: boxID}
+			boxConf := box.GetConf()
+			boxConf.Icon = importedBoxConf.Icon
+			if strings.Contains(boxConf.Icon, ".") {
+				boxConf.Icon = util.FilterUploadEmojiFileName(boxConf.Icon)
+			}
+			boxConf.RefCreateSavePath = importedBoxConf.RefCreateSavePath
+			boxConf.DocCreateSavePath = importedBoxConf.DocCreateSavePath
+			boxConf.DailyNoteSavePath = importedBoxConf.DailyNoteSavePath
+			boxConf.DailyNoteTemplatePath = importedBoxConf.DailyNoteTemplatePath
+			boxConf.SortMode = importedBoxConf.SortMode
+			if err = box.SaveConf(boxConf); err != nil {
+				return createdBoxID, err
+			}
+		}
+	} else {
+		createdBoxID = boxID
+	}
+	toPath = normalizeBoxDocTarget(boxID, toPath)
 
 	luteEngine := util.NewLute()
 	blockIDs := map[string]string{}
@@ -284,7 +352,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			data, readErr := os.ReadFile(oldPath)
 			if nil != readErr {
 				logging.LogErrorf("read av file [%s] failed: %s", oldPath, readErr)
-				return nil
+				err = readErr
+				return
 			}
 
 			// 将数据库文件中的 ID 替换为新的 ID
@@ -296,7 +365,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if !bytes.Equal(data, newData) {
 				if writeErr := os.WriteFile(oldPath, newData, 0644); nil != writeErr {
 					logging.LogErrorf("write av file [%s] failed: %s", oldPath, writeErr)
-					return nil
+					err = writeErr
+					return
 				}
 			}
 
@@ -552,7 +622,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		newPath := renamePaths[oldPath]
 		if err = filelock.Rename(oldPath, newPath); err != nil {
 			logging.LogErrorf("rename path from [%s] to [%s] failed: %s", oldPath, renamePaths[oldPath], err)
-			return errors.New("rename path failed")
+			err = errors.New("rename path failed")
+			return
 		}
 
 		delete(renamePaths, oldPath)
@@ -698,7 +769,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		block := treenode.GetBlockTreeRootByPath(boxID, toPath)
 		if nil == block {
 			logging.LogErrorf("not found block by path [%s]", toPath)
-			return nil
+			return createdBoxID, nil
 		}
 		baseTargetPath = strings.TrimSuffix(block.Path, ".sy")
 	}

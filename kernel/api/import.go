@@ -17,8 +17,10 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -38,86 +40,14 @@ func importSY(c *gin.Context) {
 	util.PushEndlessProgress(model.Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
-	form, err := c.MultipartForm()
+	form, writePath, cleanup, err := saveImportUpload(c)
 	if err != nil {
-		logging.LogErrorf("parse import .sy.zip failed: %s", err)
+		logging.LogErrorf("save import .sy.zip failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-
-	files := form.File["file"]
-	if 1 > len(files) {
-		logging.LogErrorf("parse import .sy.zip failed, no file found")
-		ret.Code = -1
-		ret.Msg = "no file found"
-		return
-	}
-	file := files[0]
-	importDir := filepath.Join(util.TempDir, "import")
-	if err = os.MkdirAll(importDir, 0755); err != nil {
-		logging.LogErrorf("make import dir [%s] failed: %s", importDir, err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	writePath := filepath.Join(importDir, file.Filename)
-	if !gulu.File.IsSubPath(importDir, writePath) {
-		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
-		ret.Code = -1
-		ret.Msg = "import path is not sub path of import dir"
-		return
-	}
-
-	defer os.RemoveAll(writePath)
-
-	var reader io.ReadCloser
-	var writer *os.File
-	defer func() {
-		if writer != nil {
-			_ = writer.Close()
-		}
-		if reader != nil {
-			_ = reader.Close()
-		}
-	}()
-
-	reader, err = file.Open()
-	if err != nil {
-		logging.LogErrorf("read import .sy.zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	writer, err = os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		logging.LogErrorf("open import .sy.zip [%s] failed: %s", writePath, err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	if _, err = io.Copy(writer, reader); err != nil {
-		logging.LogErrorf("write import .sy.zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	if err = writer.Close(); err != nil {
-		logging.LogErrorf("close import .sy.zip [%s] failed: %s", writePath, err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	writer = nil
-	if err = reader.Close(); err != nil {
-		logging.LogErrorf("close import upload reader failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	reader = nil
+	defer cleanup()
 
 	notebook := form.Value["notebook"][0]
 	toPath := form.Value["toPath"][0]
@@ -128,6 +58,77 @@ func importSY(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+}
+
+func importSYNotebook(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	util.PushEndlessProgress(model.Conf.Language(73))
+	defer util.ClearPushProgress(100)
+
+	_, writePath, cleanup, err := saveImportUpload(c)
+	if err != nil {
+		logging.LogErrorf("save notebook import .sy.zip failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	defer cleanup()
+
+	id, err := model.ImportSYNotebook(writePath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	existed, err := model.Mount(id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	box := model.Conf.Box(id)
+	if box == nil {
+		ret.Code = -1
+		ret.Msg = "opened notebook [" + id + "] not found"
+		return
+	}
+
+	ret.Data = map[string]any{"notebook": box}
+	event := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
+	event.Data = map[string]any{"box": box, "existed": existed}
+	util.PushEvent(event)
+}
+
+func saveImportUpload(c *gin.Context) (form *multipart.Form, writePath string, cleanup func(), err error) {
+	form, err = c.MultipartForm()
+	if err != nil {
+		return
+	}
+	files := form.File["file"]
+	if len(files) < 1 {
+		err = errors.New("no file found")
+		return
+	}
+
+	importDir := filepath.Join(util.TempDir, "import", gulu.Rand.String(7))
+	if err = os.MkdirAll(importDir, 0755); err != nil {
+		return
+	}
+	cleanup = func() { _ = os.RemoveAll(importDir) }
+	writePath = filepath.Join(importDir, filepath.Base(files[0].Filename))
+	if !gulu.File.IsSubPath(importDir, writePath) {
+		err = errors.New("import path is not sub path of import dir")
+		cleanup()
+		return
+	}
+
+	if err = c.SaveUploadedFile(files[0], writePath); err != nil {
+		cleanup()
+	}
+	return
 }
 
 func importData(c *gin.Context) {

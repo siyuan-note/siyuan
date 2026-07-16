@@ -54,6 +54,7 @@ let workspaces = []; // workspaceDir, id, browserWindow, tray, hideShortcut
 let kernelPort = 6806;
 let resetWindowStateOnRestart = false;
 let openAsHidden = false;
+let isSystemShuttingDown = false;
 const isOpenAsHidden = function () {
     return 1 === workspaces.length && openAsHidden;
 };
@@ -363,6 +364,22 @@ const getServer = (port = kernelPort) => {
     return localServer + ":" + port;
 };
 
+// 系统关机时设置标志位并通知各工作空间内核退出，供 render-process-gone 与关机事件共用
+const handleSystemShutdown = () => {
+    if (isSystemShuttingDown) {
+        return;
+    }
+    isSystemShuttingDown = true;
+    workspaces.forEach(item => {
+        try {
+            const currentURL = new URL(item.browserWindow.getURL());
+            net.fetch(getServer(currentURL.port) + "/api/system/exit", {method: "POST"});
+        } catch (e) {
+            // load file is not a url
+        }
+    });
+};
+
 const sleep = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
@@ -498,6 +515,13 @@ const initMainWindow = () => {
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
     remote.enable(currentWindow.webContents);
+    if (process.platform === "win32") {
+        // query-session-end 通常早于 render-process-gone，用于尽早设置关机标志位
+        currentWindow.on("query-session-end", () => {
+            writeLog("query-session-end");
+            handleSystemShutdown();
+        });
+    }
 
     if (resetToCenter) {
         currentWindow.center();
@@ -870,6 +894,10 @@ app.whenReady().then(() => {
     // 渲染进程崩溃监听，应用级别监听比 webContents 级别更早注册、更可靠（可覆盖所有渲染进程）
     app.on("render-process-gone", (event, webContents, details) => {
         writeLog("Render process gone [reason=" + details.reason + ", exitCode=" + details.exitCode + "]");
+        if (isSystemShuttingDown) {
+            writeLog("Render process gone during system shutdown, crash log ignored");
+            return;
+        }
         writeAppCrashLog(details.reason, details.exitCode);
         exitApp(kernelPort); // 退出当前工作空间的窗口和内核进程，下次启动时由用户选择是否以安全模式启动
     });
@@ -1663,10 +1691,7 @@ app.whenReady().then(() => {
     });
     powerMonitor.on("shutdown", () => {
         writeLog("system shutdown");
-        workspaces.forEach(item => {
-            const currentURL = new URL(item.browserWindow.getURL());
-            net.fetch(getServer(currentURL.port) + "/api/system/exit", {method: "POST"});
-        });
+        handleSystemShutdown();
     });
     powerMonitor.on("lock-screen", () => {
         writeLog("system lock-screen");

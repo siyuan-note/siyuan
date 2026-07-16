@@ -1,4 +1,5 @@
 {
+	"insertImage": "Insert image",
 	"obsidianUnreadableFiles": "Unreadable files: ${count}; these unreferenced files could not be read and will not be imported",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Import from other formats or apps",

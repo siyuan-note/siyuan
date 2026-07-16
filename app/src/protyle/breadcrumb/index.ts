@@ -285,6 +285,23 @@ ${padHTML}
                 } else {
                     uploadHTML += ">";
                 }
+                if (isInAndroid()) {
+                    const imageUploadMenu = new MenuItem({
+                        id: "insertImage",
+                        icon: "iconImage",
+                        label: `${window.siyuan.languages.insertImage}<input class="b3-form__upload" type="file" multiple="multiple" accept="image/*,application/x-siyuan-image-picker">`,
+                    }).element;
+                    imageUploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & {
+                        target: HTMLInputElement
+                    }) => {
+                        if (event.target.files.length === 0) {
+                            return;
+                        }
+                        uploadFiles(protyle, event.target.files, event.target);
+                        window.siyuan.menus.menu.remove();
+                    });
+                    window.siyuan.menus.menu.append(imageUploadMenu);
+                }
                 const uploadMenu = new MenuItem({
                     id: "insertAsset",
                     icon: "iconDownload",

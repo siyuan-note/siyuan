@@ -1,4 +1,5 @@
 {
+	"insertImage": "Görsel ekle",
 	"obsidianUnreadableFiles": "Okunamayan dosyalar: ${count}; başvurulmayan bu dosyalar okunamadı ve içe aktarılmayacak",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Diğer biçimlerden veya uygulamalardan içe aktar",

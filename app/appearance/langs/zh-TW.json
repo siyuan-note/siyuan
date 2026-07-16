@@ -1,4 +1,5 @@
 {
+	"insertImage": "插入圖片",
 	"obsidianUnreadableFiles": "無法讀取的檔案：${count}，這些未被引用的檔案無法讀取且不會匯入",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "從其他格式或應用程式匯入",

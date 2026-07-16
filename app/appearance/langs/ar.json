@@ -1,4 +1,5 @@
 {
+	"insertImage": "إدراج صورة",
 	"obsidianUnreadableFiles": "ملفات غير قابلة للقراءة: ${count}؛ تعذر قراءة هذه الملفات غير المشار إليها ولن يتم استيرادها",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "الاستيراد من تنسيقات أو تطبيقات أخرى",

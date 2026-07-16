@@ -29,17 +29,18 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/job"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/synccommit"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 //export StartKernelFast
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs *C.char) {
+	synccommit.SetRecoveryPending()
 	go server.Serve(true, model.Conf.CookieKey)
 }
 
@@ -52,7 +53,6 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 	util.BootMobile(C.GoString(container), C.GoString(appDir), C.GoString(workspaceBaseDir), C.GoString(lang))
 
 	model.InitConf()
-	go server.Serve(false, model.Conf.CookieKey)
 	go func() {
 		model.InitAppearance()
 		sql.InitDatabase(false)
@@ -60,9 +60,11 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 		sql.InitAssetContentDatabase(false)
 		sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 		sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
-		if err := api.RecoverKernelSyncCommits(); err != nil {
+		if err := synccommit.Recover(); err != nil {
 			logging.LogErrorf("recover kernel sync commits failed: %s", err)
+			return
 		}
+		go server.Serve(false, model.Conf.CookieKey)
 
 		model.BootSyncData()
 		model.InitBoxes()

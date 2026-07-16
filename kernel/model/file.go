@@ -1010,28 +1010,49 @@ func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
 }
 
 func indexWriteTreeIndexQueue(tree *parse.Tree) (err error) {
-	treenode.IndexBlockTree(tree)
-	_, err = filesys.WriteTree(tree)
+	transaction := BeginDocumentMutation()
+	defer transaction.Abort()
+	if _, err = transaction.Index(tree); err != nil {
+		return
+	}
+	_, err = transaction.Write(tree)
 	if err != nil {
 		return
 	}
 	sql.IndexTreeQueue(tree)
+	transaction.Commit()
 	return
 }
 
 func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {
-	treenode.UpsertBlockTree(tree)
-	return writeTreeUpsertQueue(tree)
+	transaction := BeginDocumentMutation()
+	defer transaction.Abort()
+	if _, err = transaction.ReplaceIndex(tree); err != nil {
+		return
+	}
+	size, err := transaction.Write(tree)
+	if err != nil {
+		return err
+	}
+	sql.UpsertTreeQueue(tree)
+	refreshDocInfoWithSize(tree, size)
+	transaction.Commit()
+	return nil
 }
 
 func renameWriteJSONQueue(tree *parse.Tree) (err error) {
-	size, err := filesys.WriteTree(tree)
+	transaction := BeginDocumentMutation()
+	defer transaction.Abort()
+	size, err := transaction.Write(tree)
 	if err != nil {
 		return
 	}
 	sql.RenameTreeQueue(tree)
-	treenode.UpsertBlockTree(tree)
+	if _, err = transaction.ReplaceIndex(tree); err != nil {
+		return
+	}
 	refreshDocInfoWithSize(tree, size)
+	transaction.Commit()
 	return
 }
 

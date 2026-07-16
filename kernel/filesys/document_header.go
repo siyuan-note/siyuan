@@ -13,11 +13,30 @@ import (
 	"slices"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/dataparser"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const MaxValidatedDocumentBlockIDs = 100_000
+
+type RepairMask uint8
+
+const (
+	RepairParser RepairMask = 1 << iota
+	RepairSpec
+	RepairAttributes
+	RepairBlockIdentities
+)
+
+// ValidatedDocument 保存一次读取和解析得到的最终文档对象。
+type ValidatedDocument struct {
+	Tree       *parse.Tree
+	BlockIDs   []string
+	RepairMask RepairMask
+	Size       int64
+}
 
 type documentHeader struct {
 	ID         string `json:"ID"`
@@ -61,7 +80,7 @@ func ValidateDocumentHeader(reader io.Reader, size int64, expectedID string, max
 // loading. Header-only decoding is insufficient because malformed Children or
 // nested nodes can otherwise be committed before indexing discovers them.
 func ValidateDocumentPayload(reader io.Reader, size int64, expectedID string, maxBytes int64) error {
-	_, err := ValidateDocumentPayloadBlockIDs(reader, size, expectedID, maxBytes)
+	_, err := ValidateDocument(reader, size, expectedID, maxBytes)
 	return err
 }
 
@@ -69,6 +88,14 @@ func ValidateDocumentPayload(reader io.Reader, size int64, expectedID string, ma
 // block IDs from the already-parsed tree. Raw document publishers use this to
 // reject cross-document ID collisions without parsing a large payload twice.
 func ValidateDocumentPayloadBlockIDs(reader io.Reader, size int64, expectedID string, maxBytes int64) ([]string, error) {
+	document, err := ValidateDocument(reader, size, expectedID, maxBytes)
+	if document == nil {
+		return nil, err
+	}
+	return document.BlockIDs, err
+}
+
+func ValidateDocument(reader io.Reader, size int64, expectedID string, maxBytes int64) (*ValidatedDocument, error) {
 	if size < 2 || size > maxBytes {
 		return nil, errors.New("document size is outside the supported range")
 	}
@@ -79,7 +106,15 @@ func ValidateDocumentPayloadBlockIDs(reader io.Reader, size int64, expectedID st
 	if int64(len(data)) != size {
 		return nil, errors.New("document size changed while validating")
 	}
-	if err = ValidateDocumentHeader(bytes.NewReader(data), size, expectedID, maxBytes); err != nil {
+	return ValidateDocumentBytes(data, expectedID, maxBytes)
+}
+
+func ValidateDocumentBytes(data []byte, expectedID string, maxBytes int64) (*ValidatedDocument, error) {
+	size := int64(len(data))
+	if size < 2 || size > maxBytes {
+		return nil, errors.New("document size is outside the supported range")
+	}
+	if err := ValidateDocumentHeader(bytes.NewReader(data), size, expectedID, maxBytes); err != nil {
 		return nil, err
 	}
 	luteEngine := util.NewLute()
@@ -104,14 +139,28 @@ func ValidateDocumentPayloadBlockIDs(reader io.Reader, size int64, expectedID st
 	if err != nil {
 		return nil, err
 	}
+	repairMask := RepairMask(0)
+	if needFix {
+		repairMask |= RepairParser
+	}
+	if treenode.UpgradeSpec(parsedTree) {
+		repairMask |= RepairSpec
+	}
+	if escapeAttributeValues(parsedTree) {
+		repairMask |= RepairAttributes
+	}
 	parsedBlockIDs, err := collectParsedDocumentBlockIDs(parsedTree.Root)
 	if err != nil {
 		return nil, err
 	}
-	if needFix || !slices.Equal(blockIDs, parsedBlockIDs) {
-		return nil, errors.New("document requires parser repair or generated block identities")
+	if !slices.Equal(blockIDs, parsedBlockIDs) {
+		repairMask |= RepairBlockIdentities
 	}
-	return blockIDs, nil
+	document := &ValidatedDocument{Tree: parsedTree, BlockIDs: blockIDs, RepairMask: repairMask, Size: size}
+	if repairMask != 0 {
+		return document, errors.New("document requires parser repair or generated block identities")
+	}
+	return document, nil
 }
 
 func collectStrictDocumentBlockIDs(root *ast.Node) ([]string, error) {

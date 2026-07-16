@@ -530,7 +530,13 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 		tree.Root.SetIALAttr("updated", updated)
 		indexWriteTreeUpsertQueue(tree)
 	} else {
-		treenode.UpsertBlockTree(tree)
+		documentTxn := BeginDocumentMutation()
+		if _, err := documentTxn.ReplaceIndex(tree); err != nil {
+			documentTxn.Abort()
+			logging.LogErrorf("upsert reindexed blocktree [%s] failed: %s", tree.ID, err)
+			return
+		}
+		documentTxn.Commit()
 		sql.IndexTreeQueue(tree)
 	}
 

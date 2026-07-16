@@ -5,6 +5,7 @@
 package api
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
@@ -23,6 +24,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/synccommit"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -41,6 +43,14 @@ var (
 	kernelSyncTerminals      = map[string]kernelSyncTerminal{}
 	kernelSyncReloadFiletree = model.ReloadFiletree
 	kernelSyncIncSync        = model.IncSync
+	kernelSyncEngine         = synccommit.NewEngine(synccommit.Options{
+		Reload: func() { kernelSyncReloadFiletree() },
+		Advance: func() uint64 {
+			kernelSyncIncSync()
+			return model.WorkspaceGeneration()
+		},
+		FaultHook: func(point string, index int) error { return injectKernelSyncCommitFault(point, index) },
+	})
 )
 
 type kernelSyncTerminal struct {
@@ -69,6 +79,9 @@ type kernelSyncSession struct {
 	stagedBytes int64
 	closed      bool
 	committing  bool
+	decided     bool
+	inFlight    int
+	stageDone   *sync.Cond
 	done        chan struct{}
 }
 
@@ -81,8 +94,10 @@ type kernelSyncBeginRequest struct {
 }
 
 type kernelSyncChange struct {
+	mu          sync.Mutex
 	Operation   string
 	Path        string
+	TargetKey   string
 	StagePath   string
 	Size        int64
 	Hash        string
@@ -168,11 +183,21 @@ func recordKernelSyncTerminal(session *kernelSyncSession, committed bool, genera
 }
 
 func lookupKernelSyncTerminal(c *gin.Context, sessionID string) (kernelSyncTerminal, bool) {
+	owner := kernelSyncRequestOwner(c)
 	kernelSyncSessionsMu.Lock()
-	defer kernelSyncSessionsMu.Unlock()
 	pruneKernelSyncTerminalsLocked(time.Now())
 	terminal, exists := kernelSyncTerminals[sessionID]
-	return terminal, exists && terminal.owner == kernelSyncRequestOwner(c)
+	kernelSyncSessionsMu.Unlock()
+	if exists && terminal.owner == owner {
+		return terminal, true
+	}
+	if receipt, receiptExists := synccommit.LookupReceipt(sessionID, owner); receiptExists {
+		return kernelSyncTerminal{
+			owner: owner, committed: true, generation: receipt.Generation, changes: receipt.Changes,
+			expiresAt: receipt.CommittedAt.Add(24 * time.Hour),
+		}, true
+	}
+	return kernelSyncTerminal{}, false
 }
 
 func beginKernelSync(c *gin.Context) {
@@ -228,6 +253,7 @@ func beginKernelSync(c *gin.Context) {
 		generation: model.WorkspaceGeneration(), stageDir: stageDir, lease: lease,
 		changes: map[string]*kernelSyncChange{}, done: make(chan struct{}),
 	}
+	session.stageDone = sync.NewCond(&session.mu)
 	kernelSyncSessionsMu.Lock()
 	pruneKernelSyncTerminalsLocked(time.Now())
 	kernelSyncSessions[id] = session
@@ -280,6 +306,9 @@ func (session *kernelSyncSession) closeOperationLocked(unlockLease bool) {
 	}
 	session.closed = true
 	close(session.done)
+	for session.inFlight > 0 {
+		session.stageDone.Wait()
+	}
 	session.mu.Unlock()
 	kernelSyncSessionsMu.Lock()
 	if kernelSyncSessions[session.id] == session {
@@ -323,8 +352,41 @@ func abortKernelSync(c *gin.Context) {
 		ret.Data = map[string]any{"aborted": false}
 		return
 	}
+	session.operationMu.Lock()
+	defer session.operationMu.Unlock()
+	session.mu.Lock()
+	closed := session.closed
+	session.mu.Unlock()
+	if closed {
+		if terminal, exists := lookupKernelSyncTerminal(c, sessionID); exists {
+			ret.Data = map[string]any{"aborted": !terminal.committed, "committed": terminal.committed}
+			return
+		}
+		ret.Data = map[string]any{"aborted": false}
+		return
+	}
+	session.mu.Lock()
+	decided := session.decided
+	session.mu.Unlock()
+	if !decided {
+		_, statErr := os.Lstat(synccommit.IntentPath(session.id))
+		decided = statErr == nil
+	}
+	if decided {
+		result, resumeErr := kernelSyncEngine.Resume(session.id, session.owner)
+		if resumeErr != nil {
+			ret.Code = http.StatusInternalServerError
+			ret.Msg = resumeErr.Error()
+			ret.Data = map[string]any{"aborted": false, "commitDecided": true}
+			return
+		}
+		recordKernelSyncTerminal(session, true, result.Receipt.Generation, result.Receipt.Changes)
+		session.closeOperationLocked(true)
+		ret.Data = map[string]any{"aborted": false, "committed": true}
+		return
+	}
 	recordKernelSyncTerminal(session, false, session.generation, 0)
-	session.close(true)
+	session.closeOperationLocked(true)
 	ret.Data = map[string]any{"aborted": true}
 }
 
@@ -412,6 +474,7 @@ type kernelSyncStageMetadata struct {
 	sessionID   string
 	operation   string
 	path        string
+	targetKey   string
 	offset      int64
 	size        int64
 	hash        string
@@ -444,6 +507,7 @@ func parseKernelSyncStageMetadata(c *gin.Context) (kernelSyncStageMetadata, erro
 		return metadata, errors.New("invalid kernel sync workspace path")
 	}
 	metadata.path = "/" + filepath.ToSlash(relativePath)
+	metadata.targetKey = workspacePathComparisonKey(guard.resolvedPath)
 	if metadata.ifMatch != "" && !strings.HasPrefix(metadata.ifMatch, syncContentSHA256Prefix) {
 		return metadata, errors.New("ifMatch must use sha256")
 	}
@@ -491,72 +555,107 @@ func stageKernelSyncBatch(c *gin.Context) {
 		return
 	}
 	session.mu.Lock()
-	defer session.mu.Unlock()
 	if session.closed || session.generation != model.WorkspaceGeneration() {
+		session.mu.Unlock()
 		ret.Code = http.StatusConflict
 		ret.Msg = "workspace generation changed"
 		return
 	}
 	if session.committing {
+		session.mu.Unlock()
 		ret.Code = http.StatusConflict
 		ret.Msg = "kernel sync session is committing"
 		return
 	}
-	change := session.changes[metadata.path]
+	change := session.changes[metadata.targetKey]
+	if change != nil && change.Path != metadata.path {
+		session.mu.Unlock()
+		ret.Code = http.StatusConflict
+		ret.Msg = "physical target already has a staged change"
+		return
+	}
 	if metadata.operation == "delete" {
 		if change != nil && change.Operation != "delete" {
+			session.mu.Unlock()
 			ret.Code = http.StatusConflict
 			ret.Msg = "path already has a staged write"
 			return
 		}
 		if change == nil {
 			if len(session.changes) >= kernelSyncMaxChanges {
+				session.mu.Unlock()
 				ret.Code = http.StatusRequestEntityTooLarge
 				ret.Msg = "staged change limit exceeded"
 				return
 			}
-			session.changes[metadata.path] = &kernelSyncChange{
-				Operation: "delete", Path: metadata.path, IfMatch: metadata.ifMatch, IfNoneMatch: metadata.ifNoneMatch, Complete: true,
+			session.changes[metadata.targetKey] = &kernelSyncChange{
+				Operation: "delete", Path: metadata.path, TargetKey: metadata.targetKey,
+				IfMatch: metadata.ifMatch, IfNoneMatch: metadata.ifNoneMatch, Complete: true,
 			}
 		}
+		session.mu.Unlock()
 		ret.Data = map[string]any{"staged": true}
 		return
 	}
 	if change == nil {
 		if len(session.changes) >= kernelSyncMaxChanges {
+			session.mu.Unlock()
 			ret.Code = http.StatusRequestEntityTooLarge
 			ret.Msg = "staged change limit exceeded"
 			return
 		}
 		if session.stagedBytes+metadata.size > kernelSyncMaxStagedBytes {
+			session.mu.Unlock()
 			ret.Code = http.StatusRequestEntityTooLarge
 			ret.Msg = "session staged byte limit exceeded"
 			return
 		}
 		stagePath := filepath.Join(session.stageDir, fmt.Sprintf("%08d.data", len(session.changes)))
 		change = &kernelSyncChange{
-			Operation: "write", Path: metadata.path, StagePath: stagePath, Size: metadata.size, Hash: metadata.hash,
+			Operation: "write", Path: metadata.path, TargetKey: metadata.targetKey,
+			StagePath: stagePath, Size: metadata.size, Hash: metadata.hash,
 			ModTime: metadata.modTime, IfMatch: metadata.ifMatch, IfNoneMatch: metadata.ifNoneMatch,
 		}
-		session.changes[metadata.path] = change
+		session.changes[metadata.targetKey] = change
 		session.stagedBytes += metadata.size
 	} else if change.Operation != "write" || change.Size != metadata.size || change.Hash != metadata.hash ||
 		!change.ModTime.Equal(metadata.modTime) || change.IfMatch != metadata.ifMatch || change.IfNoneMatch != metadata.ifNoneMatch {
+		session.mu.Unlock()
 		ret.Code = http.StatusConflict
 		ret.Msg = "staged write metadata changed"
 		return
 	}
+	session.inFlight++
+	session.mu.Unlock()
+	change.mu.Lock()
+	defer func() {
+		change.mu.Unlock()
+		session.mu.Lock()
+		session.inFlight--
+		session.stageDone.Broadcast()
+		session.mu.Unlock()
+	}()
 	if change.Complete {
 		ret.Data = map[string]any{"staged": true, "complete": true, "size": change.Size, "hash": change.Hash}
 		return
 	}
-	chunk, err := io.ReadAll(io.LimitReader(c.Request.Body, kernelSyncMaxChunkBytes+1))
-	if err != nil || int64(len(chunk)) > kernelSyncMaxChunkBytes {
+	chunkFile, chunkSize, err := streamKernelSyncChunk(session.stageDir, c.Request.Body)
+	if err != nil || chunkSize > kernelSyncMaxChunkBytes {
+		if chunkFile != nil {
+			chunkPath := chunkFile.Name()
+			_ = chunkFile.Close()
+			_ = os.Remove(chunkPath)
+		}
 		ret.Code = http.StatusRequestEntityTooLarge
 		ret.Msg = "staged chunk exceeds transfer limit"
 		return
 	}
-	if metadata.offset+int64(len(chunk)) > change.Size {
+	chunkPath := chunkFile.Name()
+	defer func() {
+		_ = chunkFile.Close()
+		_ = os.Remove(chunkPath)
+	}()
+	if metadata.offset+chunkSize > change.Size {
 		ret.Code = http.StatusBadRequest
 		ret.Msg = "staged chunk exceeds declared size"
 		return
@@ -580,17 +679,20 @@ func stageKernelSyncBatch(c *gin.Context) {
 		ret.Msg = "staged chunks must be contiguous"
 		return
 	}
-	if metadata.offset < info.Size() {
-		overlap := min(int64(len(chunk)), info.Size()-metadata.offset)
-		existing := make([]byte, overlap)
-		if _, err = file.ReadAt(existing, metadata.offset); err != nil || !equalBytes(existing, chunk[:overlap]) {
+	overlap := min(chunkSize, max(int64(0), info.Size()-metadata.offset))
+	if overlap > 0 {
+		matches, compareErr := equalKernelSyncRanges(io.NewSectionReader(file, metadata.offset, overlap), chunkFile, overlap)
+		if compareErr != nil || !matches {
 			_ = file.Close()
 			ret.Code = http.StatusConflict
 			ret.Msg = "retried staged chunk content differs"
 			return
 		}
 	}
-	if _, err = file.WriteAt(chunk, metadata.offset); err == nil && metadata.final {
+	if _, err = chunkFile.Seek(overlap, io.SeekStart); err == nil {
+		err = writeKernelSyncChunk(file, chunkFile, metadata.offset+overlap, chunkSize-overlap)
+	}
+	if err == nil && metadata.final {
 		err = file.Sync()
 	}
 	closeErr := file.Close()
@@ -609,7 +711,7 @@ func stageKernelSyncBatch(c *gin.Context) {
 			ret.Msg = "staged write is incomplete"
 			return
 		}
-		actual, hashErr := syncContentHashFile(change.StagePath, change.Hash)
+		actual, hashErr := syncContentHashFile(change.StagePath)
 		if hashErr != nil || actual != change.Hash {
 			ret.Code = http.StatusUnprocessableEntity
 			ret.Msg = "staged write hash mismatch"
@@ -617,19 +719,65 @@ func stageKernelSyncBatch(c *gin.Context) {
 		}
 		change.Complete = true
 	}
-	ret.Data = map[string]any{"staged": true, "complete": change.Complete, "received": metadata.offset + int64(len(chunk))}
+	ret.Data = map[string]any{"staged": true, "complete": change.Complete, "received": metadata.offset + chunkSize}
 }
 
-func equalBytes(left, right []byte) bool {
-	if len(left) != len(right) {
-		return false
+func streamKernelSyncChunk(stageDir string, reader io.Reader) (*os.File, int64, error) {
+	file, err := os.CreateTemp(stageDir, ".chunk-")
+	if err != nil {
+		return nil, 0, err
 	}
-	for index := range left {
-		if left[index] != right[index] {
-			return false
+	size, err := io.Copy(file, io.LimitReader(reader, kernelSyncMaxChunkBytes+1))
+	if err == nil {
+		_, err = file.Seek(0, io.SeekStart)
+	}
+	if err != nil {
+		path := file.Name()
+		_ = file.Close()
+		_ = os.Remove(path)
+		return nil, 0, err
+	}
+	return file, size, nil
+}
+
+func equalKernelSyncRanges(left io.Reader, right io.Reader, size int64) (bool, error) {
+	leftBuffer := make([]byte, 64*1024)
+	rightBuffer := make([]byte, len(leftBuffer))
+	for remaining := size; remaining > 0; {
+		chunkSize := min(int64(len(leftBuffer)), remaining)
+		if _, err := io.ReadFull(left, leftBuffer[:chunkSize]); err != nil {
+			return false, err
 		}
+		if _, err := io.ReadFull(right, rightBuffer[:chunkSize]); err != nil {
+			return false, err
+		}
+		if !bytes.Equal(leftBuffer[:chunkSize], rightBuffer[:chunkSize]) {
+			return false, nil
+		}
+		remaining -= chunkSize
 	}
-	return true
+	return true, nil
+}
+
+func writeKernelSyncChunk(target *os.File, source io.Reader, offset, size int64) error {
+	buffer := make([]byte, 64*1024)
+	for remaining := size; remaining > 0; {
+		chunkSize := min(int64(len(buffer)), remaining)
+		read, err := io.ReadFull(source, buffer[:chunkSize])
+		if err != nil {
+			return err
+		}
+		written, err := target.WriteAt(buffer[:read], offset)
+		if err != nil {
+			return err
+		}
+		if written != read {
+			return io.ErrShortWrite
+		}
+		offset += int64(written)
+		remaining -= int64(written)
+	}
+	return nil
 }
 
 func sortedKernelSyncChanges(session *kernelSyncSession) ([]*kernelSyncChange, error) {
@@ -641,28 +789,24 @@ func sortedKernelSyncChanges(session *kernelSyncSession) ([]*kernelSyncChange, e
 	if session.committing {
 		return nil, errors.New("kernel sync session is already committing")
 	}
+	session.committing = true
+	for session.inFlight > 0 {
+		session.stageDone.Wait()
+	}
 	changes := make([]*kernelSyncChange, 0, len(session.changes))
 	for _, change := range session.changes {
 		if !change.Complete {
+			session.committing = false
 			return nil, fmt.Errorf("staged change is incomplete: %s", change.Path)
 		}
-		copy := *change
-		changes = append(changes, &copy)
+		changes = append(changes, &kernelSyncChange{
+			Operation: change.Operation, Path: change.Path, TargetKey: change.TargetKey, StagePath: change.StagePath,
+			Size: change.Size, Hash: change.Hash, ModTime: change.ModTime, IfMatch: change.IfMatch,
+			IfNoneMatch: change.IfNoneMatch, Complete: change.Complete,
+		})
 	}
 	sort.Slice(changes, func(left, right int) bool { return changes[left].Path < changes[right].Path })
-	session.committing = true
 	return changes, nil
-}
-
-type preparedKernelSyncChange struct {
-	change     *kernelSyncChange
-	guard      workspacePathGuard
-	parent     *os.Root
-	targetName string
-	stagedName string
-	backupName string
-	existed    bool
-	published  bool
 }
 
 func commitKernelSync(c *gin.Context) {
@@ -683,352 +827,87 @@ func commitKernelSync(c *gin.Context) {
 	}
 	session.operationMu.Lock()
 	defer session.operationMu.Unlock()
-	kernelSyncCommitRecoveryMu.Lock()
-	defer kernelSyncCommitRecoveryMu.Unlock()
+	session.mu.Lock()
+	closed := session.closed
+	session.mu.Unlock()
+	if closed {
+		if terminal, exists := lookupKernelSyncTerminal(c, sessionID); exists && terminal.committed {
+			ret.Data = map[string]any{
+				"committed": true, "generation": terminal.generation, "changes": terminal.changes, "alreadyTerminal": true,
+			}
+			return
+		}
+		ret.Code = http.StatusConflict
+		ret.Msg = "kernel sync session is closed"
+		return
+	}
 	changes, err := sortedKernelSyncChanges(session)
 	if err != nil {
 		ret.Code = http.StatusConflict
 		ret.Msg = err.Error()
 		return
 	}
-	committed := false
-	defer func() {
-		if !committed {
-			session.mu.Lock()
-			session.committing = false
-			session.mu.Unlock()
-		}
-	}()
 	if session.generation != model.WorkspaceGeneration() {
+		session.mu.Lock()
+		session.committing = false
+		session.mu.Unlock()
 		ret.Code = http.StatusConflict
 		ret.Msg = "workspace generation changed"
 		return
 	}
 	if len(changes) == 0 {
 		recordKernelSyncTerminal(session, true, session.generation, 0)
-		committed = true
 		session.closeOperationLocked(true)
 		ret.Data = map[string]any{"committed": true, "generation": session.generation, "changes": 0}
 		return
 	}
-	if !session.lease.EnterCritical() {
-		ret.Code = http.StatusLocked
-		ret.Msg = "kernel sync lease cannot enter commit"
-		return
+	request := synccommit.CommitRequest{
+		SessionID: session.id, Owner: session.owner, ExpectedGeneration: session.generation,
+		Changes: make([]synccommit.Change, 0, len(changes)),
 	}
-
-	guards := make([]workspacePathGuard, 0, len(changes))
-	prepared := make([]*preparedKernelSyncChange, 0, len(changes))
-	documentTargets := make([]model.RawDocumentIndexTarget, 0)
-	documentLocations := map[string]kernelSyncDocumentLocation{}
 	for _, change := range changes {
-		guard, resolveErr := resolveWorkspacePath(change.Path, true)
-		if resolveErr != nil {
-			ret.Code = http.StatusForbidden
-			ret.Msg = resolveErr.Error()
-			return
+		request.Changes = append(request.Changes, synccommit.Change{
+			Operation: synccommit.Operation(change.Operation), Path: change.Path, StagePath: change.StagePath,
+			Size: change.Size, Hash: change.Hash, ModTime: change.ModTime, IfMatch: change.IfMatch,
+			IfNoneMatch: change.IfNoneMatch,
+		})
+	}
+	enteredCritical := false
+	request.EnterCritical = func() bool {
+		enteredCritical = session.lease.EnterCritical()
+		return enteredCritical
+	}
+	result, commitErr := kernelSyncEngine.Commit(request)
+	if commitErr != nil {
+		kind, decided := synccommit.ErrorInfo(commitErr)
+		session.mu.Lock()
+		session.committing = false
+		session.decided = session.decided || decided
+		session.mu.Unlock()
+		if enteredCritical && !decided {
+			recordKernelSyncTerminal(session, false, session.generation, 0)
+			session.closeOperationLocked(true)
 		}
-		if guard.rejectsEncryptedBox() {
-			ret.Code = http.StatusForbidden
-			ret.Msg = "kernel sync does not support encrypted notebook files"
-			return
-		}
-		_, location, documentPath, locationErr := kernelSyncNotebookDocumentLocation(guard)
-		if locationErr != nil {
+		switch kind {
+		case synccommit.ErrorInvalid:
 			ret.Code = http.StatusUnprocessableEntity
-			ret.Msg = locationErr.Error()
-			return
-		}
-		if documentPath {
-			documentTargets = append(documentTargets, model.RawDocumentIndexTarget{BoxID: location.boxID, DocumentPath: location.path})
-			documentLocations[change.Path] = location
-		}
-		guards = append(guards, guard)
-		prepared = append(prepared, &preparedKernelSyncChange{change: change, guard: guard})
-	}
-
-	var indexBatch *model.RawDocumentIndexBatch
-	if len(documentTargets) > 0 {
-		indexBatch, err = model.LockRawDocumentIndexBatch(documentTargets)
-		if err != nil {
-			ret.Code = http.StatusUnprocessableEntity
-			ret.Msg = err.Error()
-			return
-		}
-		defer indexBatch.Unlock()
-	}
-	unlocks := lockWorkspacePaths(guards...)
-	defer unlocks()
-	preserveRecoveryFiles := false
-	defer func() {
-		for _, item := range prepared {
-			if item.parent != nil {
-				if !preserveRecoveryFiles && item.stagedName != "" {
-					_ = item.parent.Remove(item.stagedName)
-				}
-				if !preserveRecoveryFiles && item.backupName != "" {
-					_ = item.parent.Remove(item.backupName)
-				}
-				_ = item.parent.Close()
-			}
-		}
-	}()
-
-	for _, item := range prepared {
-		if err = item.guard.revalidate(); err != nil {
+		case synccommit.ErrorForbidden:
 			ret.Code = http.StatusForbidden
-			ret.Msg = err.Error()
-			return
-		}
-		workspaceRoot, relativePath, openErr := item.guard.openWorkspaceRoot()
-		if openErr != nil {
-			ret.Code = http.StatusForbidden
-			ret.Msg = openErr.Error()
-			return
-		}
-		parent, targetName, parentErr := openRootParentForCommit(workspaceRoot, relativePath, item.change.Operation == "write")
-		_ = workspaceRoot.Close()
-		if parentErr != nil {
-			ret.Code = http.StatusInternalServerError
-			ret.Msg = parentErr.Error()
-			return
-		}
-		item.parent, item.targetName = parent, targetName
-		exists, preconditionOK, message, preconditionErr := checkRootFilePreconditionLocked(parent, targetName, item.change.IfMatch, item.change.IfNoneMatch)
-		if preconditionErr != nil {
-			ret.Code = http.StatusInternalServerError
-			ret.Msg = preconditionErr.Error()
-			return
-		}
-		if !preconditionOK {
+		case synccommit.ErrorConflict:
 			ret.Code = http.StatusConflict
-			ret.Msg = message
-			return
+		case synccommit.ErrorLocked:
+			ret.Code = http.StatusLocked
+		default:
+			ret.Code = http.StatusInternalServerError
 		}
-		item.existed = exists
-		if exists {
-			info, statErr := parent.Stat(targetName)
-			if statErr != nil {
-				ret.Code = http.StatusInternalServerError
-				ret.Msg = statErr.Error()
-				return
-			}
-			if info.IsDir() {
-				ret.Code = http.StatusConflict
-				ret.Msg = "kernel sync batch only accepts file changes"
-				return
-			}
-		}
-		if item.change.Operation == "delete" && !exists {
-			ret.Code = http.StatusConflict
-			ret.Msg = "delete target no longer exists"
-			return
-		}
-		if item.change.Operation == "write" {
-			staged, openErr := os.Open(item.change.StagePath)
-			if openErr != nil {
-				ret.Code = http.StatusInternalServerError
-				ret.Msg = openErr.Error()
-				return
-			}
-			item.stagedName, err = stageFileForRootCommit(parent, staged, 0644, item.change.ModTime)
-			closeErr := staged.Close()
-			if err == nil {
-				err = closeErr
-			}
-			if err != nil {
-				ret.Code = http.StatusInternalServerError
-				ret.Msg = err.Error()
-				return
-			}
-		}
-	}
-
-	if indexBatch != nil {
-		for _, item := range prepared {
-			location, documentPath := documentLocations[item.change.Path]
-			if !documentPath {
-				continue
-			}
-			if item.change.Operation == "delete" {
-				if _, err = indexBatch.PrepareRemoval(location.boxID, location.path); err != nil {
-					ret.Code = http.StatusConflict
-					ret.Msg = err.Error()
-					return
-				}
-				continue
-			}
-			staged, openErr := item.parent.Open(item.stagedName)
-			if openErr != nil {
-				ret.Code = http.StatusInternalServerError
-				ret.Msg = openErr.Error()
-				return
-			}
-			info, statErr := staged.Stat()
-			if statErr == nil {
-				_, statErr = indexBatch.PrepareUpsert(location.boxID, location.path, staged, info.Size())
-			}
-			closeErr := staged.Close()
-			if statErr == nil {
-				statErr = closeErr
-			}
-			if statErr != nil {
-				ret.Code = http.StatusUnprocessableEntity
-				ret.Msg = statErr.Error()
-				return
-			}
-		}
-	}
-	if session.generation != model.WorkspaceGeneration() {
-		ret.Code = http.StatusConflict
-		ret.Msg = "workspace generation changed"
+		ret.Msg = commitErr.Error()
+		ret.Data = map[string]any{"commitDecided": decided}
 		return
 	}
-
-	for _, item := range prepared {
-		if item.existed {
-			item.backupName, err = newKernelSyncSiblingName(".siyuan-sync-backup-")
-			if err == nil {
-				err = item.parent.Link(item.targetName, item.backupName)
-			}
-			if err != nil {
-				ret.Code = http.StatusInternalServerError
-				ret.Msg = err.Error()
-				return
-			}
-		}
-	}
-	walPath, err := writeKernelSyncCommitWAL(session.id, prepared)
-	if err != nil {
-		ret.Code = http.StatusInternalServerError
-		ret.Msg = err.Error()
-		return
-	}
-	preserveRecoveryFiles = true
-
-	var publishErr error
-	for _, item := range prepared {
-		if item.change.Operation == "delete" {
-			publishErr = item.parent.Remove(item.targetName)
-		} else {
-			publishErr = commitRootStagedFile(item.parent, item.stagedName, item.targetName, false)
-		}
-		if publishErr != nil {
-			break
-		}
-		item.published = true
-	}
-	if publishErr == nil {
-		syncedParents := map[string]struct{}{}
-		for _, item := range prepared {
-			parentPath := filepath.Clean(filepath.Dir(item.guard.absPath))
-			if _, synced := syncedParents[parentPath]; synced {
-				continue
-			}
-			if publishErr = syncKernelSyncCommitParent(item.parent); publishErr != nil {
-				break
-			}
-			syncedParents[parentPath] = struct{}{}
-		}
-	}
-	if publishErr == nil && indexBatch != nil {
-		publishErr = indexBatch.Commit()
-	}
-	if publishErr != nil {
-		rollbackErr := rollbackKernelSyncFiles(prepared)
-		if rollbackErr == nil {
-			if walErr := removeKernelSyncCommitWAL(walPath); walErr == nil {
-				preserveRecoveryFiles = false
-			} else {
-				rollbackErr = walErr
-			}
-		}
-		ret.Code = http.StatusInternalServerError
-		ret.Msg = errors.Join(publishErr, rollbackErr).Error()
-		return
-	}
-	for _, item := range prepared {
-		if item.backupName != "" {
-			if cleanupErr := item.parent.Remove(item.backupName); cleanupErr != nil && !os.IsNotExist(cleanupErr) {
-				ret.Code = http.StatusInternalServerError
-				ret.Msg = cleanupErr.Error()
-				return
-			}
-			item.backupName = ""
-		}
-	}
-	if err = syncPreparedKernelSyncParents(prepared); err != nil {
-		ret.Code = http.StatusInternalServerError
-		ret.Msg = err.Error()
-		return
-	}
-	if err = removeKernelSyncCommitWAL(walPath); err != nil {
-		ret.Code = http.StatusInternalServerError
-		ret.Msg = err.Error()
-		return
-	}
-	preserveRecoveryFiles = false
-
-	kernelSyncReloadFiletree()
-	kernelSyncIncSync()
-	newGeneration := model.WorkspaceGeneration()
-	recordKernelSyncTerminal(session, true, newGeneration, len(prepared))
-	committed = true
+	recordKernelSyncTerminal(session, true, result.Receipt.Generation, result.Receipt.Changes)
 	session.closeOperationLocked(true)
-	ret.Data = map[string]any{"committed": true, "generation": newGeneration, "changes": len(prepared)}
-}
-
-func newKernelSyncSiblingName(prefix string) (string, error) {
-	var value [16]byte
-	if _, err := rand.Read(value[:]); err != nil {
-		return "", err
+	ret.Data = map[string]any{
+		"committed": true, "generation": result.Receipt.Generation, "changes": result.Receipt.Changes,
+		"resumed": result.Resumed, "cleanupPending": result.CleanupPending,
 	}
-	return prefix + hex.EncodeToString(value[:]) + ".tmp", nil
-}
-
-func rollbackKernelSyncFiles(prepared []*preparedKernelSyncChange) error {
-	var errs []error
-	for index := len(prepared) - 1; index >= 0; index-- {
-		item := prepared[index]
-		if !item.published {
-			continue
-		}
-		if item.change.Operation == "write" && item.stagedName != "" {
-			if preserveErr := item.parent.Link(item.targetName, item.stagedName); preserveErr != nil && !os.IsExist(preserveErr) {
-				errs = append(errs, fmt.Errorf("preserve published %s: %w", item.change.Path, preserveErr))
-				continue
-			}
-		}
-		if removeErr := item.parent.Remove(item.targetName); removeErr != nil && !os.IsNotExist(removeErr) {
-			errs = append(errs, fmt.Errorf("remove published %s: %w", item.change.Path, removeErr))
-			continue
-		}
-		if item.existed {
-			if restoreErr := item.parent.Link(item.backupName, item.targetName); restoreErr != nil {
-				errs = append(errs, fmt.Errorf("restore %s: %w", item.change.Path, restoreErr))
-			}
-		}
-	}
-	if syncErr := syncPreparedKernelSyncParents(prepared); syncErr != nil {
-		errs = append(errs, syncErr)
-	}
-	return errors.Join(errs...)
-}
-
-func syncPreparedKernelSyncParents(prepared []*preparedKernelSyncChange) error {
-	syncedParents := map[string]struct{}{}
-	for _, item := range prepared {
-		if item.parent == nil {
-			continue
-		}
-		parentPath := filepath.Clean(filepath.Dir(item.guard.absPath))
-		if _, synced := syncedParents[parentPath]; synced {
-			continue
-		}
-		if err := syncKernelSyncCommitParent(item.parent); err != nil {
-			return err
-		}
-		syncedParents[parentPath] = struct{}{}
-	}
-	return nil
 }

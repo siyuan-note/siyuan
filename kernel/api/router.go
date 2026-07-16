@@ -318,12 +318,18 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/sync/performBootSync", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performBootSync)
 	ginServer.Handle("POST", "/api/sync/getBootSync", model.CheckAuth, getBootSync)
 	ginServer.Handle("POST", "/api/sync/getSyncInfo", model.CheckAuth, model.CheckAdminRole, getSyncInfo)
-	ginServer.Handle("POST", "/api/sync/kernel/begin", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, beginKernelSync)
-	ginServer.Handle("POST", "/api/sync/kernel/readManifest", model.CheckAuth, model.CheckAdminRole, readKernelSyncManifest)
-	ginServer.Handle("GET", "/api/sync/kernel/readChunk", model.CheckAuth, model.CheckAdminRole, readKernelSyncChunk)
-	ginServer.Handle("POST", "/api/sync/kernel/stageBatch", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, stageKernelSyncBatch)
-	ginServer.Handle("POST", "/api/sync/kernel/commit", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, commitKernelSync)
-	ginServer.Handle("POST", "/api/sync/kernel/abort", model.CheckAuth, model.CheckAdminRole, abortKernelSync)
+	ginServer.Handle("POST", "/api/sync/kernel/begin", requireKernelSyncRecoveryReady, model.CheckAuth,
+		model.CheckAdminRole, model.CheckReadonly, beginKernelSync)
+	ginServer.Handle("POST", "/api/sync/kernel/readManifest", requireKernelSyncRecoveryReady, model.CheckAuth,
+		model.CheckAdminRole, readKernelSyncManifest)
+	ginServer.Handle("GET", "/api/sync/kernel/readChunk", requireKernelSyncRecoveryReady, model.CheckAuth,
+		model.CheckAdminRole, readKernelSyncChunk)
+	ginServer.Handle("POST", "/api/sync/kernel/stageBatch", requireKernelSyncRecoveryReady, model.CheckAuth,
+		model.CheckAdminRole, model.CheckReadonly, stageKernelSyncBatch)
+	ginServer.Handle("POST", "/api/sync/kernel/commit", requireKernelSyncRecoveryReady, model.CheckAuth,
+		model.CheckAdminRole, model.CheckReadonly, commitKernelSync)
+	ginServer.Handle("POST", "/api/sync/kernel/abort", requireKernelSyncRecoveryReady, model.CheckAuth,
+		model.CheckAdminRole, abortKernelSync)
 	ginServer.Handle("POST", "/api/sync/exportSyncProviderS3", model.CheckAuth, model.CheckAdminRole, exportSyncProviderS3)
 	ginServer.Handle("POST", "/api/sync/importSyncProviderS3", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importSyncProviderS3)
 	ginServer.Handle("POST", "/api/sync/exportSyncProviderWebDAV", model.CheckAuth, model.CheckAdminRole, exportSyncProviderWebDAV)

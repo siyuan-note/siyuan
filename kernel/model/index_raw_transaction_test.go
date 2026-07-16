@@ -5,110 +5,159 @@
 package model
 
 import (
-	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestCommitPreparedDocumentIndexRequiresLiveIdentityGuard(t *testing.T) {
+func TestRawDocumentIndexBatchRefreshesUnchangedDescendants(t *testing.T) {
 	const (
-		boxID = "20260101000000-abcdefg"
-		path  = "/20260101000001-abcdefg.sy"
+		boxID    = "20260101000000-abcdefg"
+		parentID = "20260101000001-abcdefg"
+		childID  = "20260101000002-abcdefg"
 	)
-	previousReplace := replaceIndexedTree
-	previousQueue := queueIndexedTree
-	previousGetBlocks := getIndexedRootBlocks
+	previousDataDir := util.DataDir
+	previousLookupRoots := lookupIndexedRootLocations
+	previousLookupBlocks := lookupIndexedBlockLocations
+	previousPathBlocks := getIndexedPathBlocks
+	util.DataDir = filepath.Join(t.TempDir(), "data")
 	defer func() {
-		replaceIndexedTree = previousReplace
-		queueIndexedTree = previousQueue
-		getIndexedRootBlocks = previousGetBlocks
+		util.DataDir = previousDataDir
+		lookupIndexedRootLocations = previousLookupRoots
+		lookupIndexedBlockLocations = previousLookupBlocks
+		getIndexedPathBlocks = previousPathBlocks
 	}()
-
-	replaced := 0
-	replaceIndexedTree = func(guard treenode.DocumentIdentitySetGuard, tree *parse.Tree) error {
-		if err := treenode.ValidateDocumentIdentitySetGuard(guard); err != nil {
-			return err
+	parentPath := "/" + parentID + ".sy"
+	childPath := "/" + parentID + "/" + childID + ".sy"
+	if err := os.MkdirAll(filepath.Join(util.DataDir, boxID, parentID), 0755); err != nil {
+		t.Fatal(err)
+	}
+	luteEngine := util.NewLute()
+	parent := treenode.NewTree(boxID, parentPath, "/New Parent", "New Parent")
+	diskParent := treenode.NewTree(boxID, parentPath, "/Old Parent", "Old Parent")
+	child := treenode.NewTree(boxID, childPath, "/Old Parent/Child", "Child")
+	parentData := render.NewJSONRenderer(diskParent, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()
+	childData := render.NewJSONRenderer(child, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()
+	if err := os.WriteFile(filepath.Join(util.DataDir, boxID, parentID+".sy"), parentData, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(util.DataDir, boxID, parentID, childID+".sy"), childData, 0644); err != nil {
+		t.Fatal(err)
+	}
+	lookupIndexedRootLocations = func(rootID string) ([]*treenode.BlockTree, error) {
+		switch rootID {
+		case parentID:
+			return []*treenode.BlockTree{{ID: parentID, RootID: parentID, BoxID: boxID, Path: parentPath, HPath: "/Old Parent"}}, nil
+		case childID:
+			return []*treenode.BlockTree{{ID: childID, RootID: childID, BoxID: boxID, Path: childPath, HPath: "/Old Parent/Child"}}, nil
+		default:
+			return nil, nil
 		}
-		replaced++
-		return nil
 	}
-	queueIndexedTree = func(*parse.Tree) {}
-	getIndexedRootBlocks = func(string, string) []*treenode.BlockTree { return nil }
-	prepared := &PreparedDocumentIndex{tree: treenode.NewTree(boxID, path, "/Test", "Test")}
-
-	guard := treenode.LockDocumentIdentitySet()
-	if err := CommitPreparedDocumentIndexIdentityLocked(guard, prepared); err != nil {
-		guard.Unlock()
-		t.Fatalf("commit prepared index: %v", err)
+	lookupIndexedBlockLocations = func(ids []string) ([]*treenode.BlockTree, error) {
+		for _, id := range ids {
+			if id == parentID {
+				return []*treenode.BlockTree{{ID: parentID, RootID: parentID, BoxID: boxID, Path: parentPath, HPath: "/Old Parent"}}, nil
+			}
+		}
+		return []*treenode.BlockTree{{ID: childID, RootID: childID, BoxID: boxID, Path: childPath, HPath: "/Old Parent/Child"}}, nil
 	}
-	guard.Unlock()
-	if replaced != 1 {
-		t.Fatalf("expected one index replacement, got %d", replaced)
+	getIndexedPathBlocks = func(actualBoxID, prefix string) []*treenode.BlockTree {
+		if actualBoxID != boxID || prefix != "/"+parentID+"/" {
+			t.Fatalf("unexpected descendant lookup: %s %s", actualBoxID, prefix)
+		}
+		return []*treenode.BlockTree{{ID: childID, RootID: childID, BoxID: boxID, Path: childPath, HPath: "/Old Parent/Child"}}
 	}
-	if err := CommitPreparedDocumentIndexIdentityLocked(guard, prepared); err == nil {
-		t.Fatal("released identity guard must not authorize a second commit")
+	key := rawDocumentLocationKey(boxID, parentPath)
+	batch := &RawDocumentIndexBatch{
+		identityGuard: treenode.LockDocumentIdentitySet(),
+		rootIDs:       map[string]struct{}{parentID: {}},
+		locations:     map[string]string{key: parentID},
+		identities:    map[string]string{},
+		prepared: map[string]*PreparedRawDocumentIndexMutation{
+			key: {tree: parent, blockIDs: parent.Root.BlockIDs()},
+		},
+		derived: map[string]*parse.Tree{},
+	}
+	batch.active.Store(true)
+	defer batch.Unlock()
+	titles := map[string]string{filesys.DocumentTitleOverlayKey(boxID, parentPath): "New Parent"}
+	if err := batch.PrepareHPathProjection(titles); err != nil {
+		t.Fatal(err)
+	}
+	derived := batch.derived[rawDocumentLocationKey(boxID, childPath)]
+	if derived == nil || derived.HPath != "/New Parent/Child" {
+		t.Fatalf("unchanged descendant was not refreshed: %+v", derived)
 	}
 }
 
-func TestPrepareDocumentIndexRemovalExactConflictAndIdempotency(t *testing.T) {
+func TestRawDocumentIndexBatchInvalidatesRemovedAndInsertedBlockIALs(t *testing.T) {
 	const (
 		boxID   = "20260101000000-abcdefg"
 		rootID  = "20260101000001-abcdefg"
 		docPath = "/20260101000001-abcdefg.sy"
+		oldID   = "20260101000002-abcdefg"
+		newID   = "20260101000003-abcdefg"
 	)
-	previousLookup := lookupIndexedRootLocations
-	previousRemove := removeIndexedRootLocation
+	previousApply := applyRawDocumentIndexBatch
+	previousQueue := queueIndexedTree
+	previousGetBlocks := getIndexedRootBlocks
+	previousRemoveIAL := removeCachedBlockIAL
 	defer func() {
-		lookupIndexedRootLocations = previousLookup
-		removeIndexedRootLocation = previousRemove
+		applyRawDocumentIndexBatch = previousApply
+		queueIndexedTree = previousQueue
+		getIndexedRootBlocks = previousGetBlocks
+		removeCachedBlockIAL = previousRemoveIAL
 	}()
 
-	guard := treenode.LockDocumentIdentitySet()
-	defer guard.Unlock()
-	lookupIndexedRootLocations = func(string) ([]*treenode.BlockTree, error) {
-		return []*treenode.BlockTree{{RootID: rootID, BoxID: boxID, Path: docPath}}, nil
-	}
-	removed := 0
-	removeIndexedRootLocation = func(candidate treenode.DocumentIdentitySetGuard, actualBoxID, actualRootID, actualPath string) error {
-		if err := treenode.ValidateDocumentIdentitySetGuard(candidate); err != nil {
+	applied := false
+	applyRawDocumentIndexBatch = func(guard treenode.DocumentIdentitySetGuard, mutations []treenode.RawDocumentIndexMutation) error {
+		if err := treenode.ValidateDocumentIdentitySetGuard(guard); err != nil {
 			return err
 		}
-		if actualBoxID != boxID || actualRootID != rootID || actualPath != docPath {
-			t.Fatalf("unexpected removal location: %s %s %s", actualBoxID, actualRootID, actualPath)
+		if len(mutations) != 1 || mutations[0].Tree == nil {
+			t.Fatalf("unexpected mutations: %+v", mutations)
 		}
-		removed++
+		applied = true
 		return nil
 	}
-	prepared, err := PrepareDocumentIndexRemovalIdentityLocked(guard, boxID, rootID, docPath)
+	queueIndexedTree = func(*parse.Tree) {}
+	getIndexedRootBlocks = func(string, string) []*treenode.BlockTree {
+		blockID := oldID
+		if applied {
+			blockID = newID
+		}
+		return []*treenode.BlockTree{{ID: blockID, RootID: rootID, BoxID: boxID, Path: docPath}}
+	}
+	invalidated := map[string]bool{}
+	removeCachedBlockIAL = func(blockID string) { invalidated[blockID] = true }
+	tree := treenode.NewTree(boxID, docPath, "/Test", "Test")
+	guard := treenode.LockDocumentIdentitySet()
+	batch := &RawDocumentIndexBatch{
+		identityGuard: guard,
+		rootIDs:       map[string]struct{}{rootID: {}},
+		locations:     map[string]string{rawDocumentLocationKey(boxID, docPath): rootID},
+		prepared: map[string]*PreparedRawDocumentIndexMutation{
+			rawDocumentLocationKey(boxID, docPath): {tree: tree},
+		},
+	}
+	batch.active.Store(true)
+	defer batch.Unlock()
+	deltas, err := batch.Commit()
 	if err != nil {
-		t.Fatalf("prepare exact removal: %v", err)
+		t.Fatal(err)
 	}
-	if err = CommitPreparedDocumentIndexRemovalIdentityLocked(guard, prepared); err != nil {
-		t.Fatalf("commit exact removal: %v", err)
+	if len(deltas) != 1 || deltas[0].Revision == 0 || len(deltas[0].BeforeIDs) != 1 ||
+		len(deltas[0].AfterIDs) != 1 || deltas[0].BeforeIDs[0] != oldID || deltas[0].AfterIDs[0] != newID {
+		t.Fatalf("unexpected index delta: %+v", deltas)
 	}
-	if removed != 1 {
-		t.Fatalf("expected exact index removal, got %d", removed)
-	}
-
-	lookupIndexedRootLocations = func(string) ([]*treenode.BlockTree, error) { return nil, nil }
-	prepared, err = PrepareDocumentIndexRemovalIdentityLocked(guard, boxID, rootID, docPath)
-	if err != nil {
-		t.Fatalf("prepare idempotent removal: %v", err)
-	}
-	if err = CommitPreparedDocumentIndexRemovalIdentityLocked(guard, prepared); err != nil {
-		t.Fatalf("commit idempotent removal: %v", err)
-	}
-	if removed != 1 {
-		t.Fatalf("idempotent removal mutated the index: %d", removed)
-	}
-
-	lookupIndexedRootLocations = func(string) ([]*treenode.BlockTree, error) {
-		return []*treenode.BlockTree{{RootID: rootID, BoxID: "20260101000002-abcdefg", Path: docPath}}, nil
-	}
-	_, err = PrepareDocumentIndexRemovalIdentityLocked(guard, boxID, rootID, docPath)
-	if !errors.Is(err, ErrIndexPathConflict) {
-		t.Fatalf("expected path conflict, got %v", err)
+	if !invalidated[oldID] || !invalidated[newID] {
+		t.Fatalf("cache projection was not fully invalidated: %+v", invalidated)
 	}
 }

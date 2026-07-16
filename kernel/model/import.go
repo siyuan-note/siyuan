@@ -50,7 +50,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -743,8 +742,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		absPath := filepath.Join(targetDir, treePath)
 		p := strings.TrimPrefix(absPath, boxAbsPath)
 		p = filepath.ToSlash(p)
-		tree, err := filesys.LoadTree(boxID, p, luteEngine)
+		documentTxn := BeginDocumentMutation()
+		tree, err := documentTxn.LoadForUpdate(boxID, p, luteEngine)
 		if err != nil {
+			documentTxn.Abort()
 			logging.LogErrorf("load tree [%s] failed: %s", treePath, err)
 			continue
 		}
@@ -752,10 +753,19 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		// 加密笔记本：更新文档内的 assets 引用路径（原始名 → 脱敏名）
 		if IsEncryptedBox(boxID) && 0 < len(assetNameMap) {
 			updateImportedAssetRefs(tree, assetNameMap)
-			indexWriteTreeIndexQueue(tree)
+			if _, writeErr := documentTxn.Write(tree); writeErr != nil {
+				documentTxn.Abort()
+				logging.LogErrorf("write imported tree [%s] failed: %s", tree.ID, writeErr)
+				continue
+			}
 		}
 
-		treenode.IndexBlockTree(tree)
+		if _, indexErr := documentTxn.Index(tree); indexErr != nil {
+			documentTxn.Abort()
+			logging.LogErrorf("index imported blocktree [%s] failed: %s", tree.ID, indexErr)
+			continue
+		}
+		documentTxn.Commit()
 		sql.IndexTreeQueue(tree)
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 	}

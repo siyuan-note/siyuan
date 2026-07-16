@@ -252,12 +252,19 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 
 func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 	luteEngine := util.NewLute()
-	ret, needFix, err := filesys.LoadTreeWithFix(bt.BoxID, bt.Path, luteEngine)
+	documentTxn := BeginDocumentMutation()
+	defer documentTxn.Abort()
+	ret, needFix, err := documentTxn.LoadWithFixForUpdate(bt.BoxID, bt.Path, luteEngine)
 	if nil != err {
 		return
 	}
 	if needFix {
-		treenode.UpsertBlockTree(ret)
+		if _, err = documentTxn.ReplaceIndex(ret); err != nil {
+			return nil, err
+		}
+	}
+	documentTxn.Commit()
+	if needFix {
 		sql.IndexTreeQueue(ret)
 	}
 	return
@@ -339,13 +346,18 @@ func indexTreeInFilesystem(blockID string) error {
 		return ErrTreeNotFound
 	}
 
-	tree, err := filesys.LoadTree(boxID, unindexedTreePath, util.NewLute())
+	documentTxn := BeginDocumentMutation()
+	defer documentTxn.Abort()
+	tree, err := documentTxn.LoadForUpdate(boxID, unindexedTreePath, util.NewLute())
 	if err != nil {
 		logging.LogErrorf("load tree [%s] failed: %s", unindexedTreePath, err)
 		return err
 	}
 
-	treenode.UpsertBlockTree(tree)
+	if _, err = documentTxn.ReplaceIndex(tree); err != nil {
+		return err
+	}
+	documentTxn.Commit()
 	sql.IndexTreeQueue(tree)
 	logging.LogInfof("reindexed tree by filesystem [blockID=%s]", blockID)
 	return nil

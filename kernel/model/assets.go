@@ -1205,13 +1205,6 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 				}
 
 				data = bytes.Replace(data, []byte(oldName), []byte(newName), -1)
-				if writeErr := filelock.WriteFile(treeAbsPath, data); nil != writeErr {
-					logging.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
-					err = writeErr
-					return
-				}
-
-				cache.RemoveTreeData(util.GetTreeID(treeAbsPath))
 				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, notebook.ID)))
 				tree, parseErr := filesys.LoadTreeByData(data, notebook.ID, p, luteEngine)
 				if nil != parseErr {
@@ -1219,8 +1212,22 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 					continue
 				}
 
+				documentTxn := BeginDocumentMutation()
+				if writeErr := filelock.WriteFile(treeAbsPath, data); nil != writeErr {
+					documentTxn.Abort()
+					logging.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
+					err = writeErr
+					return
+				}
+
+				cache.RemoveTreeData(util.GetTreeID(treeAbsPath))
+				if _, upsertErr := documentTxn.ReplaceIndex(tree); upsertErr != nil {
+					documentTxn.Abort()
+					logging.LogErrorf("upsert history blocktree [%s] failed: %s", tree.ID, upsertErr)
+					continue
+				}
+				documentTxn.Commit()
 				generateTreeHistory(tree, historyDir)
-				treenode.UpsertBlockTree(tree)
 				sql.UpsertTreeQueue(tree)
 
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))

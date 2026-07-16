@@ -36,7 +36,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -386,6 +385,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
+		tx.rollback()
 		return &TxErr{code: TxErrCodePushMsg, msg: cr.Error()}
 	}
 	return
@@ -993,7 +993,10 @@ func (tx *Transaction) doLargeDelete(operations []*Operation) {
 		ids = append(ids, deletedNode.BlockIDs()...)
 	}
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
-	treenode.RemoveBlockTreesByIDs(tree.Box, ids)
+	if err := tx.documentTxn.RemoveBlockIDs(tree.Box, ids); err != nil {
+		logging.LogErrorf("remove transaction blocktrees failed: %s", err)
+		tx.recordIdentityError(err)
+	}
 	tx.writeTree(tree)
 }
 
@@ -1019,7 +1022,10 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	// 同步清理被删除容器块的索引节点及其子节点，否则删除列表/超级块等容器块后其子节点依然存在，ExistBlockTree 仍返回 true
 	// Improve editor state synchronization when deleting blocks https://github.com/siyuan-note/siyuan/issues/17742
 	deletedIDs := deletedNode.BlockIDs()
-	treenode.RemoveBlockTreesByIDs(tree.Box, deletedIDs)
+	if err := tx.documentTxn.RemoveBlockIDs(tree.Box, deletedIDs); err != nil {
+		logging.LogErrorf("remove transaction blocktrees failed: %s", err)
+		tx.recordIdentityError(err)
+	}
 	tx.writeTree(tree)
 	return
 }
@@ -1150,7 +1156,19 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 
 		for _, tree := range trees {
 			if nodeTree.ID != tree.ID {
-				indexWriteTreeUpsertQueue(tree)
+				if _, err := tx.documentTxn.ReplaceIndex(tree); err != nil {
+					logging.LogErrorf("write related transaction tree failed: %s", err)
+					tx.recordIdentityError(err)
+					continue
+				}
+				size, err := tx.documentTxn.Write(tree)
+				if err != nil {
+					logging.LogErrorf("write related transaction tree failed: %s", err)
+					tx.recordIdentityError(err)
+					continue
+				}
+				sql.UpsertTreeQueue(tree)
+				refreshDocInfoWithSize(tree, size)
 			}
 		}
 		return ast.WalkContinue
@@ -1977,9 +1995,11 @@ type Transaction struct {
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
 
-	luteEngine *lute.Lute
-	m          *sync.Mutex
-	state      atomic.Int32 // 0: 初始化，1：未提交，:2: 已提交，3: 已回滚
+	luteEngine  *lute.Lute
+	m           *sync.Mutex
+	state       atomic.Int32 // 0: 初始化，1：未提交，:2: 已提交，3: 已回滚
+	documentTxn *DocumentMutationTxn
+	identityErr error
 }
 
 func (tx *Transaction) GetChangedRootIDs() (ret []string) {
@@ -2028,16 +2048,24 @@ func (tx *Transaction) begin() (err error) {
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
 	tx.luteEngine = util.NewLute()
+	tx.identityErr = nil
 	tx.m.Lock()
+	tx.documentTxn = BeginDocumentMutation()
 	tx.state.Store(1)
 	return
 }
 
 func (tx *Transaction) commit() (err error) {
+	if tx.identityErr != nil {
+		return fmt.Errorf("update transaction document identity: %w", tx.identityErr)
+	}
 	for _, tree := range tx.trees {
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		var size uint64
+		if size, err = tx.documentTxn.Write(tree); err != nil {
 			return
 		}
+		sql.UpsertTreeQueue(tree)
+		refreshDocInfoWithSize(tree, size)
 
 		var sources []any
 		sources = append(sources, tx)
@@ -2045,6 +2073,7 @@ func (tx *Transaction) commit() (err error) {
 
 		checkUpsertInUserGuide(tree)
 	}
+	tx.commitDocumentMutation()
 	tx.changedRootIDs = refreshDynamicRefTexts(tx.nodes, tx.trees)
 
 	tx.relatedAvIDs = gulu.Str.RemoveDuplicatedElem(tx.relatedAvIDs)
@@ -2070,8 +2099,26 @@ func (tx *Transaction) commit() (err error) {
 func (tx *Transaction) rollback() {
 	tx.trees, tx.nodes = nil, nil
 	tx.state.Store(3)
+	if tx.documentTxn != nil {
+		tx.documentTxn.Abort()
+		tx.documentTxn = nil
+	}
 	tx.m.Unlock()
 	return
+}
+
+func (tx *Transaction) commitDocumentMutation() {
+	if tx.documentTxn == nil {
+		return
+	}
+	tx.documentTxn.Commit()
+	tx.documentTxn = nil
+}
+
+func (tx *Transaction) recordIdentityError(err error) {
+	if err != nil && tx.identityErr == nil {
+		tx.identityErr = err
+	}
 }
 
 func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
@@ -2084,7 +2131,7 @@ func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.T
 		return
 	}
 
-	ret, err = filesys.LoadTree(bt.BoxID, bt.Path, tx.luteEngine)
+	ret, err = tx.documentTxn.LoadForUpdate(bt.BoxID, bt.Path, tx.luteEngine)
 	if err != nil {
 		return
 	}
@@ -2116,7 +2163,7 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 		return
 	}
 
-	ret, err = filesys.LoadTree(box, p, tx.luteEngine)
+	ret, err = tx.documentTxn.LoadForUpdate(box, p, tx.luteEngine)
 	if err != nil {
 		return
 	}
@@ -2126,7 +2173,10 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 
 func (tx *Transaction) writeTree(tree *parse.Tree) {
 	tx.trees[tree.ID] = tree
-	treenode.UpsertBlockTree(tree)
+	if _, err := tx.documentTxn.ReplaceIndex(tree); err != nil {
+		logging.LogErrorf("upsert transaction blocktree failed: %s", err)
+		tx.recordIdentityError(err)
+	}
 	return
 }
 

@@ -24,6 +24,7 @@ import (
 	"io"
 	"maps"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -288,10 +289,11 @@ func LoadTreeReadOnly(boxID, p string, luteEngine *lute.Lute, maxDocumentBytes i
 		return nil, err
 	}
 	rootID := util.GetTreeID(p)
-	if _, err = ValidateDocumentPayloadBlockIDs(bytes.NewReader(data), int64(len(data)), rootID, maxDocumentBytes); err != nil {
+	document, err := ValidateDocumentBytes(data, rootID, maxDocumentBytes)
+	if err != nil {
 		return nil, err
 	}
-	return loadTreeByData(data, boxID, p, luteEngine, false, nil)
+	return document.BindTree(boxID, p, luteEngine, true)
 }
 
 // LoadTreeReaderReadOnly strictly parses an unencrypted document stream
@@ -302,18 +304,33 @@ func LoadTreeReaderReadOnly(boxID, p string, reader io.Reader, size int64, luteE
 	if maxDocumentBytes < 2 || maxDocumentBytes == 1<<63-1 || size < 2 || size > maxDocumentBytes {
 		return nil, errors.New("document size is outside the supported range")
 	}
-	data, err := io.ReadAll(io.LimitReader(reader, maxDocumentBytes+1))
+	rootID := util.GetTreeID(p)
+	document, err := ValidateDocument(reader, size, rootID, maxDocumentBytes)
 	if err != nil {
 		return nil, err
 	}
-	if int64(len(data)) != size || int64(len(data)) > maxDocumentBytes {
-		return nil, errors.New("document stream size does not match metadata")
+	return document.BindTree(boxID, p, luteEngine, true)
+}
+
+// BindTree 将已验证 AST 绑定到目标笔记本和路径，可选地计算当前磁盘视图下的 HPath。
+func (document *ValidatedDocument) BindTree(boxID, p string, luteEngine *lute.Lute, refreshHPath bool) (*parse.Tree, error) {
+	if document == nil || document.Tree == nil || document.Tree.Root == nil {
+		return nil, errors.New("validated document is nil")
 	}
 	rootID := util.GetTreeID(p)
-	if _, err = ValidateDocumentPayloadBlockIDs(bytes.NewReader(data), int64(len(data)), rootID, maxDocumentBytes); err != nil {
-		return nil, err
+	if document.Tree.Root.ID != rootID {
+		return nil, fmt.Errorf("validated document root does not match %s", rootID)
 	}
-	return loadTreeByData(data, boxID, p, luteEngine, false, nil)
+	tree := document.Tree
+	tree.Box = boxID
+	tree.Path = p
+	tree.Root.Path = p
+	if refreshHPath {
+		if err := refreshTreeHPath(tree, luteEngine, false, nil); err != nil {
+			return nil, err
+		}
+	}
+	return tree, nil
 }
 
 func loadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute, rebuildMissingParents bool, guard treenode.DocumentIdentityMutationGuard) (ret *parse.Tree, err error) {
@@ -324,20 +341,43 @@ func loadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute, rebuild
 	}
 	ret.Path = p
 	ret.Root.Path = p
+	err = refreshTreeHPath(ret, luteEngine, rebuildMissingParents, guard)
+	return
+}
 
-	hPath := "/" + strings.TrimPrefix(filepath.ToSlash(p), "/")
+// RefreshTreeHPathReadOnly 根据当前已发布的父文档元数据重新计算树的层级路径。
+func RefreshTreeHPathReadOnly(tree *parse.Tree, luteEngine *lute.Lute) error {
+	return refreshTreeHPath(tree, luteEngine, false, nil)
+}
+
+func RefreshTreeHPathWithOverlay(tree *parse.Tree, luteEngine *lute.Lute, titles map[string]string) error {
+	return refreshTreeHPathWithOverlay(tree, luteEngine, false, nil, titles)
+}
+
+func DocumentTitleOverlayKey(boxID, documentPath string) string {
+	return boxID + path.Clean("/"+strings.TrimPrefix(filepath.ToSlash(documentPath), "/"))
+}
+
+func refreshTreeHPath(tree *parse.Tree, luteEngine *lute.Lute, rebuildMissingParents bool, guard treenode.DocumentIdentityMutationGuard) error {
+	return refreshTreeHPathWithOverlay(tree, luteEngine, rebuildMissingParents, guard, nil)
+}
+
+func refreshTreeHPathWithOverlay(tree *parse.Tree, luteEngine *lute.Lute, rebuildMissingParents bool,
+	guard treenode.DocumentIdentityMutationGuard, titles map[string]string) error {
+	if tree == nil || tree.Root == nil {
+		return errors.New("tree is nil")
+	}
+	hPath := "/" + strings.TrimPrefix(filepath.ToSlash(tree.Path), "/")
 	parts := strings.Split(hPath, "/")
 	if len(parts) < 2 {
-		logging.LogErrorf("parse tree [%s] failed: invalid path", p)
-		err = errors.New("invalid path")
-		return
+		return errors.New("invalid path")
 	}
 
 	parts = parts[1 : len(parts)-1] // 去掉开头的斜杆和结尾的自己
 	if 1 > len(parts) {
-		ret.HPath = "/" + ret.Root.IALAttr("title")
-		ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
-		return
+		tree.HPath = "/" + tree.Root.IALAttr("title")
+		tree.Hash = treenode.NodeHash(tree.Root, tree, luteEngine)
+		return nil
 	}
 
 	// 构造 HPath
@@ -352,10 +392,12 @@ func loadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute, rebuild
 		}
 		parentAbsPath += ".sy"
 		parentPath := parentAbsPath
-		parentAbsPath = filepath.Join(util.DataDir, boxID, parentAbsPath)
+		parentAbsPath = filepath.Join(util.DataDir, tree.Box, parentAbsPath)
 
 		var parentDocIAL map[string]string
-		if rebuildMissingParents {
+		if title, exists := titles[DocumentTitleOverlayKey(tree.Box, parentPath)]; exists {
+			parentDocIAL = map[string]string{"title": title}
+		} else if rebuildMissingParents {
 			parentDocIAL = DocIAL(parentAbsPath)
 		} else if _, statErr := os.Lstat(parentAbsPath); statErr == nil {
 			parentDocIAL = DocIAL(parentAbsPath)
@@ -365,7 +407,7 @@ func loadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute, rebuild
 		if 1 > len(parentDocIAL) {
 			if rebuildMissingParents {
 				// 子文档缺失父文档时自动补全 https://github.com/siyuan-note/siyuan/issues/7376
-				parentTree := treenode.NewTree(boxID, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
+				parentTree := treenode.NewTree(tree.Box, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
 				if _, writeErr := WriteTreeIdentityLocked(guard, parentTree); nil != writeErr {
 					logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
 				} else {
@@ -386,10 +428,10 @@ func loadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute, rebuild
 		hPathBuilder.WriteString(title)
 		hPathBuilder.WriteString("/")
 	}
-	hPathBuilder.WriteString(ret.Root.IALAttr("title"))
-	ret.HPath = hPathBuilder.String()
-	ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
-	return
+	hPathBuilder.WriteString(tree.Root.IALAttr("title"))
+	tree.HPath = hPathBuilder.String()
+	tree.Hash = treenode.NodeHash(tree.Root, tree, luteEngine)
+	return nil
 }
 
 func DocIAL(absPath string) (ret map[string]string) {

@@ -25,7 +25,6 @@ import (
 	"os"
 	"runtime"
 	"runtime/debug"
-	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -85,7 +84,6 @@ var (
 
 	initDatabaseLock     = sync.RWMutex{}
 	documentIdentityLock sync.RWMutex
-	rootIdentityLocks    [256]sync.Mutex
 )
 
 // LockDocumentIdentitySet serializes raw document publication with index
@@ -161,51 +159,6 @@ func ValidateDocumentIdentityMutationGuard(guard DocumentIdentityMutationGuard) 
 func lockDocumentIdentityMutation() func() {
 	guard := LockDocumentIdentityMutation()
 	return guard.Unlock
-}
-
-// LockRootIdentity serializes operations which move or publish the same
-// document root across different notebook paths. The fixed stripe table keeps
-// lock identity stable for the process lifetime without an unbounded map or an
-// unsafe delete/recreate race. Hash collisions only add harmless contention.
-func LockRootIdentity(rootID string) func() {
-	index := rootIdentityLockIndex(rootID)
-	lock := &rootIdentityLocks[index]
-	lock.Lock()
-	return lock.Unlock
-}
-
-func rootIdentityLockIndex(rootID string) uint32 {
-	hash := uint32(2166136261)
-	for index := 0; index < len(rootID); index++ {
-		hash ^= uint32(rootID[index])
-		hash *= 16777619
-	}
-	return hash % uint32(len(rootIdentityLocks))
-}
-
-// LockRootIdentities acquires the unique root-identity stripes for a batch in
-// stable order. Deduplicating stripes is required because distinct root IDs
-// can hash to the same non-reentrant mutex.
-func LockRootIdentities(rootIDs []string) func() {
-	indices := make([]int, 0, len(rootIDs))
-	seen := map[uint32]struct{}{}
-	for _, rootID := range rootIDs {
-		index := rootIdentityLockIndex(rootID)
-		if _, exists := seen[index]; exists {
-			continue
-		}
-		seen[index] = struct{}{}
-		indices = append(indices, int(index))
-	}
-	sort.Ints(indices)
-	for _, index := range indices {
-		rootIdentityLocks[index].Lock()
-	}
-	return func() {
-		for index := len(indices) - 1; index >= 0; index-- {
-			rootIdentityLocks[indices[index]].Unlock()
-		}
-	}
 }
 
 func initDatabase(forceRebuild bool) {
@@ -677,7 +630,9 @@ func CheckListItemNesting(parentID, childID string) error {
 func SetBlockTreePath(tree *parse.Tree) {
 	guard := LockDocumentIdentityMutation()
 	defer guard.Unlock()
-	_ = SetBlockTreePathMutationLocked(guard, tree)
+	if err := SetBlockTreePathMutationLocked(guard, tree); err != nil {
+		logging.LogErrorf("set blocktree path [%s] failed: %s", tree.ID, err)
+	}
 }
 
 // SetBlockTreePathMutationLocked updates one tree while reusing the caller's
@@ -686,32 +641,35 @@ func SetBlockTreePathMutationLocked(guard DocumentIdentityMutationGuard, tree *p
 	if err := requireDocumentIdentityMutationGuard(guard); err != nil {
 		return err
 	}
-	removeBlockTreesByRootID(tree.Box, tree.ID)
-	indexBlockTree(tree)
-	return nil
+	if err := removeBlockTreesByRootID(tree.Box, tree.ID); err != nil {
+		return err
+	}
+	return indexBlockTree(tree)
 }
 
 func RemoveBlockTreesByRootID(boxID, rootID string) {
 	guard := LockDocumentIdentityMutation()
 	defer guard.Unlock()
-	_ = RemoveBlockTreesByRootIDMutationLocked(guard, boxID, rootID)
+	if err := RemoveBlockTreesByRootIDMutationLocked(guard, boxID, rootID); err != nil {
+		logging.LogErrorf("remove blocktrees by root [%s] failed: %s", rootID, err)
+	}
 }
 
 func RemoveBlockTreesByRootIDMutationLocked(guard DocumentIdentityMutationGuard, boxID, rootID string) error {
 	if err := requireDocumentIdentityMutationGuard(guard); err != nil {
 		return err
 	}
-	removeBlockTreesByRootID(boxID, rootID)
-	return nil
+	return removeBlockTreesByRootID(boxID, rootID)
 }
 
-func removeBlockTreesByRootID(boxID, rootID string) {
+func removeBlockTreesByRootID(boxID, rootID string) error {
 	sqlStmt := "DELETE FROM blocktrees WHERE root_id = ? AND box_id = ?"
 	_, err := execForBox(boxID, sqlStmt, rootID, boxID)
 	if err != nil {
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
-		return
+		return err
 	}
+	return nil
 }
 
 // RemoveBlockTreesByRootPath deletes one exact indexed document location and
@@ -989,10 +947,10 @@ func RemoveBlockTree(boxID, id string) {
 
 var indexBlockTreeLock = sync.Mutex{}
 
-func IndexBlockTree(tree *parse.Tree) {
+func IndexBlockTree(tree *parse.Tree) error {
 	guard := LockDocumentIdentityMutation()
 	defer guard.Unlock()
-	_ = IndexBlockTreeMutationLocked(guard, tree)
+	return IndexBlockTreeMutationLocked(guard, tree)
 }
 
 // IndexBlockTreeMutationLocked indexes a complete tree while reusing the
@@ -1001,11 +959,10 @@ func IndexBlockTreeMutationLocked(guard DocumentIdentityMutationGuard, tree *par
 	if err := requireDocumentIdentityMutationGuard(guard); err != nil {
 		return err
 	}
-	indexBlockTree(tree)
-	return nil
+	return indexBlockTree(tree)
 }
 
-func indexBlockTree(tree *parse.Tree) {
+func indexBlockTree(tree *parse.Tree) error {
 	var changedNodes []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() || "" == n.ID {
@@ -1017,7 +974,7 @@ func indexBlockTree(tree *parse.Tree) {
 	})
 
 	if 1 > len(changedNodes) {
-		return
+		return nil
 	}
 
 	indexBlockTreeLock.Lock()
@@ -1025,27 +982,27 @@ func indexBlockTree(tree *parse.Tree) {
 
 	// 加密笔记本用独立 blocktree db；非加密笔记本用全局 db（两者都可能为 nil——重建过程中）
 	if nil == db && getEncryptedBlockTreeDB(tree.Box) == nil {
-		logging.LogErrorf("database is nil")
-		return
+		return errors.New("blocktree database is nil")
 	}
 
 	tx, err := beginTxForBox(tree.Box)
 	if err != nil {
-		logging.LogErrorf("begin transaction failed: %s", err)
-		return
+		return fmt.Errorf("begin blocktree index: %w", err)
 	}
-
-	execInsertBlocktrees(tx, tree, changedNodes)
-
+	defer tx.Rollback()
+	if err = execInsertBlocktreesChecked(tx, tree, changedNodes); err != nil {
+		return err
+	}
 	if err = tx.Commit(); err != nil {
-		logging.LogErrorf("commit transaction failed: %s", err)
+		return fmt.Errorf("commit blocktree index: %w", err)
 	}
+	return nil
 }
 
-func UpsertBlockTree(tree *parse.Tree) {
+func UpsertBlockTree(tree *parse.Tree) error {
 	guard := LockDocumentIdentityMutation()
 	defer guard.Unlock()
-	_ = UpsertBlockTreeMutationLocked(guard, tree)
+	return UpsertBlockTreeMutationLocked(guard, tree)
 }
 
 // UpsertBlockTreeMutationLocked incrementally updates a tree while reusing the
@@ -1054,11 +1011,10 @@ func UpsertBlockTreeMutationLocked(guard DocumentIdentityMutationGuard, tree *pa
 	if err := requireDocumentIdentityMutationGuard(guard); err != nil {
 		return err
 	}
-	upsertBlockTree(tree)
-	return nil
+	return upsertBlockTree(tree)
 }
 
-func upsertBlockTree(tree *parse.Tree) {
+func upsertBlockTree(tree *parse.Tree) error {
 	oldBts := map[string]*BlockTree{}
 	bts := GetBlockTreesByRootIDInBox(tree.ID, tree.Box)
 	for _, bt := range bts {
@@ -1084,7 +1040,7 @@ func upsertBlockTree(tree *parse.Tree) {
 	})
 
 	if 1 > len(changedNodes) {
-		return
+		return nil
 	}
 
 	ids := bytes.Buffer{}
@@ -1101,29 +1057,27 @@ func upsertBlockTree(tree *parse.Tree) {
 	defer indexBlockTreeLock.Unlock()
 
 	if nil == db && getEncryptedBlockTreeDB(tree.Box) == nil {
-		logging.LogErrorf("database is nil")
-		return
+		return errors.New("blocktree database is nil")
 	}
 
 	tx, err := beginTxForBox(tree.Box)
 	if err != nil {
-		logging.LogErrorf("begin transaction failed: %s", err)
-		return
+		return fmt.Errorf("begin blocktree upsert: %w", err)
 	}
+	defer tx.Rollback()
 
 	sqlStmt := "DELETE FROM blocktrees WHERE id IN (" + ids.String() + ")"
 	_, err = tx.Exec(sqlStmt)
 	if err != nil {
-		tx.Rollback()
-		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
-		return
+		return fmt.Errorf("delete changed blocktrees: %w", err)
 	}
-
-	execInsertBlocktrees(tx, tree, changedNodes)
-
+	if err = execInsertBlocktreesChecked(tx, tree, changedNodes); err != nil {
+		return err
+	}
 	if err = tx.Commit(); err != nil {
-		logging.LogErrorf("commit transaction failed: %s", err)
+		return fmt.Errorf("commit blocktree upsert: %w", err)
 	}
+	return nil
 }
 
 // ReplaceBlockTree atomically replaces the complete blocktree rows for one
@@ -1292,43 +1246,6 @@ func execInsertBlocktreesChecked(tx *sql.Tx, tree *parse.Tree, nodes []*ast.Node
 		}
 	}
 	return nil
-}
-
-func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node) {
-	sqlStmt := "INSERT INTO blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-	stmt, err := tx.Prepare(sqlStmt)
-	if err != nil {
-		tx.Rollback()
-		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
-
-		if strings.Contains(err.Error(), "database disk image is malformed") {
-			closeDatabase()
-			util.RemoveDatabaseFile(util.BlockTreeDBPath)
-			initDatabase(true)
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
-		}
-		return
-	}
-	defer stmt.Close()
-
-	for _, n := range changedNodes {
-		var parentID string
-		if nil != n.Parent {
-			parentID = n.Parent.ID
-		}
-		if _, err = tx.Exec(sqlStmt, n.ID, tree.ID, parentID, tree.Box, tree.Path, tree.HPath, n.IALAttr("updated"), TypeAbbr(n.Type.String())); err != nil {
-			tx.Rollback()
-			logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
-
-			if strings.Contains(err.Error(), "database disk image is malformed") {
-				closeDatabase()
-				util.RemoveDatabaseFile(util.BlockTreeDBPath)
-				initDatabase(true)
-				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
-			}
-			return
-		}
-	}
 }
 
 func InitBlockTree(force bool) {

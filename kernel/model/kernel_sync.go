@@ -109,18 +109,24 @@ func (lock *SyncIdleLock) EnterCritical() bool {
 		return false
 	}
 	lock.mu.Lock()
-	defer lock.mu.Unlock()
 	if lock.released {
+		lock.mu.Unlock()
 		return false
 	}
 	if lock.critical {
+		lock.mu.Unlock()
 		return true
 	}
-	if !lock.hardExpiresAt.After(time.Now()) || officialSyncWaiters.Load() > 0 {
+	now := time.Now()
+	if !lock.expiresAt.After(now) || !lock.hardExpiresAt.After(now) || officialSyncWaiters.Load() > 0 {
+		lock.releaseLocked()
+		lock.mu.Unlock()
+		syncLock.Unlock()
 		return false
 	}
 	lock.critical = true
 	lock.timer.Stop()
+	lock.mu.Unlock()
 	return true
 }
 
@@ -153,6 +159,10 @@ func (lock *SyncIdleLock) releaseLocked() {
 func (lock *SyncIdleLock) expire() {
 	lock.mu.Lock()
 	if lock.released {
+		lock.mu.Unlock()
+		return
+	}
+	if lock.critical {
 		lock.mu.Unlock()
 		return
 	}

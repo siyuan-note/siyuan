@@ -5,12 +5,14 @@
 package api
 
 import (
+	"container/heap"
 	"crypto/sha256"
 	"fmt"
 	"io"
 	"net/http"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -67,9 +69,19 @@ type kernelSyncManifestResult struct {
 }
 
 type kernelSyncGlobMatcher struct {
-	includes        []*regexp.Regexp
-	excludes        []*regexp.Regexp
 	includePrefixes []string
+	hasIncludes     bool
+	includeIndex    kernelSyncGlobIndex
+	excludeIndex    kernelSyncGlobIndex
+}
+
+type kernelSyncGlobIndex struct {
+	root kernelSyncGlobIndexNode
+}
+
+type kernelSyncGlobIndexNode struct {
+	children    map[byte]*kernelSyncGlobIndexNode
+	expressions []*regexp.Regexp
 }
 
 func compileKernelSyncGlob(pattern string) (*regexp.Regexp, error) {
@@ -111,13 +123,13 @@ func newKernelSyncGlobMatcher(includes, excludes []string) (*kernelSyncGlobMatch
 	if len(includes) > 10_000 || len(excludes) > 10_000 {
 		return nil, fmt.Errorf("sync scope contains too many patterns")
 	}
-	matcher := &kernelSyncGlobMatcher{}
+	matcher := &kernelSyncGlobMatcher{hasIncludes: len(includes) > 0}
 	for _, pattern := range includes {
 		compiled, err := compileKernelSyncGlob(pattern)
 		if err != nil {
 			return nil, err
 		}
-		matcher.includes = append(matcher.includes, compiled)
+		matcher.includeIndex.add(pattern, compiled)
 		wildcard := strings.IndexAny(pattern, "?*")
 		literal := pattern
 		if wildcard >= 0 {
@@ -137,18 +149,54 @@ func newKernelSyncGlobMatcher(includes, excludes []string) (*kernelSyncGlobMatch
 		if err != nil {
 			return nil, err
 		}
-		matcher.excludes = append(matcher.excludes, compiled)
+		matcher.excludeIndex.add(pattern, compiled)
 	}
 	return matcher, nil
 }
 
-func (matcher *kernelSyncGlobMatcher) excluded(relative string) bool {
-	for _, expression := range matcher.excludes {
-		if expression.MatchString(relative) || expression.MatchString(relative+"/__siyuan_sync_probe__") {
+func (index *kernelSyncGlobIndex) add(pattern string, expression *regexp.Regexp) {
+	literal := pattern
+	if wildcard := strings.IndexAny(pattern, "?*"); wildcard >= 0 {
+		literal = pattern[:wildcard]
+	}
+	node := &index.root
+	for offset := 0; offset < len(literal); offset++ {
+		if node.children == nil {
+			node.children = map[byte]*kernelSyncGlobIndexNode{}
+		}
+		child := node.children[literal[offset]]
+		if child == nil {
+			child = &kernelSyncGlobIndexNode{}
+			node.children[literal[offset]] = child
+		}
+		node = child
+	}
+	node.expressions = append(node.expressions, expression)
+}
+
+func (index *kernelSyncGlobIndex) matches(relative string) bool {
+	node := &index.root
+	for _, expression := range node.expressions {
+		if expression.MatchString(relative) {
 			return true
 		}
 	}
+	for offset := 0; offset < len(relative); offset++ {
+		node = node.children[relative[offset]]
+		if node == nil {
+			return false
+		}
+		for _, expression := range node.expressions {
+			if expression.MatchString(relative) {
+				return true
+			}
+		}
+	}
 	return false
+}
+
+func (matcher *kernelSyncGlobMatcher) excluded(relative string) bool {
+	return matcher.excludeIndex.matches(relative) || matcher.excludeIndex.matches(relative+"/__siyuan_sync_probe__")
 }
 
 func (matcher *kernelSyncGlobMatcher) descend(relative string) bool {
@@ -158,7 +206,7 @@ func (matcher *kernelSyncGlobMatcher) descend(relative string) bool {
 	if matcher.excluded(relative) {
 		return false
 	}
-	if len(matcher.includes) == 0 {
+	if !matcher.hasIncludes {
 		return true
 	}
 	for _, prefix := range matcher.includePrefixes {
@@ -173,20 +221,36 @@ func (matcher *kernelSyncGlobMatcher) matches(relative string) bool {
 	if matcher.excluded(relative) {
 		return false
 	}
-	if len(matcher.includes) == 0 {
+	if !matcher.hasIncludes {
 		return true
 	}
-	for _, expression := range matcher.includes {
-		if expression.MatchString(relative) {
-			return true
-		}
-	}
-	return false
+	return matcher.includeIndex.matches(relative)
 }
 
 type kernelSyncScanFrame struct {
 	path     string
 	relative string
+}
+
+type kernelSyncScanFrameHeap []kernelSyncScanFrame
+
+func (frames kernelSyncScanFrameHeap) Len() int { return len(frames) }
+func (frames kernelSyncScanFrameHeap) Less(left, right int) bool {
+	return frames[left].path < frames[right].path
+}
+func (frames kernelSyncScanFrameHeap) Swap(left, right int) {
+	frames[left], frames[right] = frames[right], frames[left]
+}
+func (frames *kernelSyncScanFrameHeap) Push(value any) {
+	*frames = append(*frames, value.(kernelSyncScanFrame))
+}
+func (frames *kernelSyncScanFrameHeap) Pop() any {
+	old := *frames
+	last := len(old) - 1
+	value := old[last]
+	old[last] = kernelSyncScanFrame{}
+	*frames = old[:last]
+	return value
 }
 
 type kernelSyncScanCandidate struct {
@@ -242,11 +306,11 @@ func buildKernelSyncManifest(session *kernelSyncSession, matcher *kernelSyncGlob
 		LocalDeviceID: session.localID, RemoteDeviceID: session.remoteID, RulesFingerprint: session.rulesHash,
 		ProtocolVersion: session.syncVersion, ServiceVersion: kernelSyncProtocolVersion,
 	}
-	frames := []kernelSyncScanFrame{{path: "/data"}}
+	frames := &kernelSyncScanFrameHeap{{path: "/data"}}
+	heap.Init(frames)
 	var candidates []kernelSyncScanCandidate
-	for len(frames) > 0 {
-		frame := frames[0]
-		frames = frames[1:]
+	for frames.Len() > 0 {
+		frame := heap.Pop(frames).(kernelSyncScanFrame)
 		guard, err := resolveWorkspacePath(frame.path, false)
 		if err != nil {
 			return nil, fmt.Errorf("resolve manifest directory %s: %w", frame.path, err)
@@ -302,7 +366,7 @@ func buildKernelSyncManifest(session *kernelSyncSession, matcher *kernelSyncGlob
 				if rejectEncryptedBoxPath(childAbs) || !matcher.descend(childRelative) {
 					result.OpaqueRoots = append(result.OpaqueRoots, childPath)
 				} else {
-					frames = append(frames, kernelSyncScanFrame{path: childPath, relative: childRelative})
+					heap.Push(frames, kernelSyncScanFrame{path: childPath, relative: childRelative})
 				}
 				continue
 			}
@@ -327,16 +391,13 @@ func buildKernelSyncManifest(session *kernelSyncSession, matcher *kernelSyncGlob
 		}
 		_ = directory.Close()
 		unlock()
-		sort.Slice(frames, func(left, right int) bool { return frames[left].path < frames[right].path })
 	}
 	sort.Slice(candidates, func(left, right int) bool { return candidates[left].path < candidates[right].path })
-	for _, candidate := range candidates {
-		entry, err := hashKernelSyncManifestCandidate(candidate)
-		if err != nil {
-			return nil, err
-		}
-		result.Entries = append(result.Entries, entry)
+	entries, err := hashKernelSyncManifestCandidates(candidates)
+	if err != nil {
+		return nil, err
 	}
+	result.Entries = append(result.Entries, entries...)
 	sort.Strings(result.ObservedFiles)
 	sort.Strings(result.OpaqueRoots)
 	sort.Strings(result.CoveredDirs)
@@ -402,4 +463,41 @@ func hashKernelSyncManifestCandidate(candidate kernelSyncScanCandidate) (kernelS
 		Path: candidate.path, Hash: hash, Size: candidate.size,
 		Mtime: candidate.mtime, ChangeToken: candidate.changeToken,
 	}, nil
+}
+
+var kernelSyncHashCandidate = hashKernelSyncManifestCandidate
+
+func hashKernelSyncManifestCandidates(candidates []kernelSyncScanCandidate) ([]kernelSyncManifestEntry, error) {
+	if len(candidates) == 0 {
+		return nil, nil
+	}
+	workerCount := min(8, runtime.GOMAXPROCS(0), len(candidates))
+	entries := make([]kernelSyncManifestEntry, len(candidates))
+	jobs := make(chan int)
+	var waitGroup sync.WaitGroup
+	var firstErr error
+	var errorOnce sync.Once
+	for worker := 0; worker < workerCount; worker++ {
+		waitGroup.Add(1)
+		go func() {
+			defer waitGroup.Done()
+			for index := range jobs {
+				entry, err := kernelSyncHashCandidate(candidates[index])
+				if err != nil {
+					errorOnce.Do(func() { firstErr = err })
+					continue
+				}
+				entries[index] = entry
+			}
+		}()
+	}
+	for index := range candidates {
+		jobs <- index
+	}
+	close(jobs)
+	waitGroup.Wait()
+	if firstErr != nil {
+		return nil, firstErr
+	}
+	return entries, nil
 }

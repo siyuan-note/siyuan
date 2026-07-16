@@ -37,7 +37,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -308,6 +307,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 		if !strings.HasSuffix(removeFile, ".sy") {
 			continue
 		}
+		transaction := BeginDocumentMutation()
 
 		rootID := util.GetTreeID(removeFile)
 		removeRootIDs = append(removeRootIDs, rootID)
@@ -328,7 +328,10 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 		for _, b := range bts {
 			cache.RemoveBlockIAL(b.ID)
 		}
-		treenode.RemoveBlockTreesByRootID(boxID, rootID)
+		if _, err := transaction.RemoveIndex(boxID, rootID); err != nil {
+			logging.LogErrorf("remove synced blocktree [%s] failed: %s", rootID, err)
+		}
+		transaction.Commit()
 	}
 
 	if 1 > len(removeRootIDs) {
@@ -361,11 +364,18 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 
 		rootID := util.GetTreeID(p)
 		cache.RemoveTreeData(rootID)
-		tree, err0 := filesys.LoadTree(box, p, luteEngine)
+		transaction := BeginDocumentMutation()
+		tree, err0 := transaction.LoadForUpdate(box, p, luteEngine)
 		if nil != err0 {
+			transaction.Abort()
 			continue
 		}
-		treenode.UpsertBlockTree(tree)
+		if _, err0 = transaction.ReplaceIndex(tree); err0 != nil {
+			transaction.Abort()
+			logging.LogErrorf("upsert synced blocktree [%s] failed: %s", rootID, err0)
+			continue
+		}
+		transaction.Commit()
 		sql.UpsertTreeQueue(tree)
 
 		bts := treenode.GetBlockTreesByRootIDInBox(rootID, tree.Box)

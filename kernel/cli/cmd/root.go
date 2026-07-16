@@ -27,6 +27,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/synccommit"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
@@ -112,6 +113,9 @@ var rootCmd = &cobra.Command{
 		sql.InitAssetContentDatabase(false)
 		sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 		sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
+		if err := synccommit.Recover(); err != nil {
+			return fmt.Errorf("recover kernel sync commits: %w", err)
+		}
 		// 让 CLI 一次性命令（如 search -m 4）也能命中语义搜索：StartEmbeddingIndexer 是死循环不能用于会立即退出的进程，这里只把开关置真
 		model.PrepareEmbeddingSearch()
 		if err := rejectEncryptedNotebookCLI(cmd, args); err != nil {

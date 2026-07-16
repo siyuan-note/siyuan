@@ -20,7 +20,7 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
             ${window.siyuan.languages.icon}
         </div>
         <span class="fn__space"></span>
-        <div class="protyle-wysiwyg" style="padding: 0" data-readonly="false">
+        <div class="protyle-wysiwyg" style="padding: 0;font-size: 16px" data-readonly="false">
             <span class="callout-icon">${blockCalloutElement.innerHTML}</span>
         </div>
     </label>

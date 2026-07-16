@@ -140,6 +140,7 @@ body {
       height: 42px;
       position: absolute;
       width: 100%;
+      z-index: 1;
     }
 
     .layout__dockl:not(.layout--float),

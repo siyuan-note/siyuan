@@ -788,6 +788,12 @@
     @include mixin.text-clamp(1);
     opacity: .38;
 
+    // 隐藏容器块的后续子块，避免光标移入折叠内容带来的一系列问题
+    &.bq > [data-node-id] ~ [data-node-id],
+    &.callout > .callout-content > [data-node-id] ~ [data-node-id] {
+      display: none;
+    }
+
     .protyle-attr {
       opacity: 0;
     }
@@ -802,6 +808,7 @@
 
     &.sb {
       height: calc(1.625em + 14px);
+      display: flex;
     }
 
     &.list {

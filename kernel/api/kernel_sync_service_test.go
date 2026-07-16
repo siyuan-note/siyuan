@@ -125,6 +125,14 @@ func TestKernelSyncServiceStagesAndCommitsWithCAS(t *testing.T) {
 	if err != nil || !bytes.Equal(after, newContent) {
 		t.Fatalf("unexpected committed content: %q %v", after, err)
 	}
+	leftovers, err := filepath.Glob(filepath.Join(filepath.Dir(target), ".siyuan-*.tmp"))
+	if err != nil || len(leftovers) != 0 {
+		t.Fatalf("commit left recovery files: %v %v", leftovers, err)
+	}
+	walEntries, err := os.ReadDir(kernelSyncCommitWALDir())
+	if err != nil || len(walEntries) != 0 {
+		t.Fatalf("commit left recovery WAL entries: %v %v", walEntries, err)
+	}
 	retried := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/commit?sessionId="+session.SessionID, nil, commitKernelSync)
 	if retried.Code != 0 || !bytes.Contains(retried.Data, []byte(`"alreadyTerminal":true`)) {
 		t.Fatalf("commit retry did not return the terminal receipt: %s %s", retried.Msg, retried.Data)

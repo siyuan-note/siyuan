@@ -683,6 +683,8 @@ func commitKernelSync(c *gin.Context) {
 	}
 	session.operationMu.Lock()
 	defer session.operationMu.Unlock()
+	kernelSyncCommitRecoveryMu.Lock()
+	defer kernelSyncCommitRecoveryMu.Unlock()
 	changes, err := sortedKernelSyncChanges(session)
 	if err != nil {
 		ret.Code = http.StatusConflict
@@ -757,13 +759,14 @@ func commitKernelSync(c *gin.Context) {
 	}
 	unlocks := lockWorkspacePaths(guards...)
 	defer unlocks()
+	preserveRecoveryFiles := false
 	defer func() {
 		for _, item := range prepared {
 			if item.parent != nil {
-				if item.stagedName != "" {
+				if !preserveRecoveryFiles && item.stagedName != "" {
 					_ = item.parent.Remove(item.stagedName)
 				}
-				if item.backupName != "" {
+				if !preserveRecoveryFiles && item.backupName != "" {
 					_ = item.parent.Remove(item.backupName)
 				}
 				_ = item.parent.Close()
@@ -895,6 +898,13 @@ func commitKernelSync(c *gin.Context) {
 			}
 		}
 	}
+	walPath, err := writeKernelSyncCommitWAL(session.id, prepared)
+	if err != nil {
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = err.Error()
+		return
+	}
+	preserveRecoveryFiles = true
 
 	var publishErr error
 	for _, item := range prepared {
@@ -902,24 +912,62 @@ func commitKernelSync(c *gin.Context) {
 			publishErr = item.parent.Remove(item.targetName)
 		} else {
 			publishErr = commitRootStagedFile(item.parent, item.stagedName, item.targetName, false)
-			if publishErr == nil {
-				item.stagedName = ""
-			}
 		}
 		if publishErr != nil {
 			break
 		}
 		item.published = true
 	}
+	if publishErr == nil {
+		syncedParents := map[string]struct{}{}
+		for _, item := range prepared {
+			parentPath := filepath.Clean(filepath.Dir(item.guard.absPath))
+			if _, synced := syncedParents[parentPath]; synced {
+				continue
+			}
+			if publishErr = syncKernelSyncCommitParent(item.parent); publishErr != nil {
+				break
+			}
+			syncedParents[parentPath] = struct{}{}
+		}
+	}
 	if publishErr == nil && indexBatch != nil {
 		publishErr = indexBatch.Commit()
 	}
 	if publishErr != nil {
 		rollbackErr := rollbackKernelSyncFiles(prepared)
+		if rollbackErr == nil {
+			if walErr := removeKernelSyncCommitWAL(walPath); walErr == nil {
+				preserveRecoveryFiles = false
+			} else {
+				rollbackErr = walErr
+			}
+		}
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = errors.Join(publishErr, rollbackErr).Error()
 		return
 	}
+	for _, item := range prepared {
+		if item.backupName != "" {
+			if cleanupErr := item.parent.Remove(item.backupName); cleanupErr != nil && !os.IsNotExist(cleanupErr) {
+				ret.Code = http.StatusInternalServerError
+				ret.Msg = cleanupErr.Error()
+				return
+			}
+			item.backupName = ""
+		}
+	}
+	if err = syncPreparedKernelSyncParents(prepared); err != nil {
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = err.Error()
+		return
+	}
+	if err = removeKernelSyncCommitWAL(walPath); err != nil {
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = err.Error()
+		return
+	}
+	preserveRecoveryFiles = false
 
 	kernelSyncReloadFiletree()
 	kernelSyncIncSync()
@@ -945,6 +993,12 @@ func rollbackKernelSyncFiles(prepared []*preparedKernelSyncChange) error {
 		if !item.published {
 			continue
 		}
+		if item.change.Operation == "write" && item.stagedName != "" {
+			if preserveErr := item.parent.Link(item.targetName, item.stagedName); preserveErr != nil && !os.IsExist(preserveErr) {
+				errs = append(errs, fmt.Errorf("preserve published %s: %w", item.change.Path, preserveErr))
+				continue
+			}
+		}
 		if removeErr := item.parent.Remove(item.targetName); removeErr != nil && !os.IsNotExist(removeErr) {
 			errs = append(errs, fmt.Errorf("remove published %s: %w", item.change.Path, removeErr))
 			continue
@@ -955,5 +1009,26 @@ func rollbackKernelSyncFiles(prepared []*preparedKernelSyncChange) error {
 			}
 		}
 	}
+	if syncErr := syncPreparedKernelSyncParents(prepared); syncErr != nil {
+		errs = append(errs, syncErr)
+	}
 	return errors.Join(errs...)
+}
+
+func syncPreparedKernelSyncParents(prepared []*preparedKernelSyncChange) error {
+	syncedParents := map[string]struct{}{}
+	for _, item := range prepared {
+		if item.parent == nil {
+			continue
+		}
+		parentPath := filepath.Clean(filepath.Dir(item.guard.absPath))
+		if _, synced := syncedParents[parentPath]; synced {
+			continue
+		}
+		if err := syncKernelSyncCommitParent(item.parent); err != nil {
+			return err
+		}
+		syncedParents[parentPath] = struct{}{}
+	}
+	return nil
 }

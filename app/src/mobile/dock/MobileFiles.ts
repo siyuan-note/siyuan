@@ -647,7 +647,7 @@ export class MobileFiles extends Model {
 </li>`;
         } else {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sortmode="${item.sortMode}">
-<li class="b3-list-item" data-type="navigation-root" data-path="/" data-node-id="${item.boxDocID || ""}" style="--file-toggle-width:24px">
+<li class="b3-list-item" data-type="navigation-root" data-path="/" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? (item.boxDocID || "") : ""}" style="--file-toggle-width:24px">
     <span class="b3-list-item__toggle${item.closed ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1012,7 +1012,9 @@ export class MobileFiles extends Model {
             // 有文件树和编辑器的布局初始化时，文件树还未挂载
             return;
         }
-        const boxDocID = window.siyuan.notebooks.find((item) => item.id === notebookId)?.boxDocID;
+        const boxDocID = window.siyuan.config.fileTree.boxDocEnabled
+            ? window.siyuan.notebooks.find((item) => item.id === notebookId)?.boxDocID
+            : "";
         if (boxDocID && filePath === `/${boxDocID}.sy`) {
             const boxDocElement = treeElement.querySelector("[data-type=\"navigation-root\"]") as HTMLElement;
             if (isSetCurrent) {

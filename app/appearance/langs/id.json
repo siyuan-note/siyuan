@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Aktifkan dokumen buku catatan tingkat teratas",
+	"boxDocEnabledTip": "Jika diaktifkan, buku catatan itu sendiri juga dapat digunakan untuk mencatat konten",
 	"insertImage": "Sisipkan gambar",
 	"obsidianUnreadableFiles": "File tidak dapat dibaca: ${count}; file yang tidak dirujuk ini tidak dapat dibaca dan tidak akan diimpor",
 	"obsidianStatsSeparator": " · ",

@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Enable top-level notebook documents",
+	"boxDocEnabledTip": "When enabled, the notebook itself can also be used to record content",
 	"insertImage": "Insert image",
 	"obsidianUnreadableFiles": "Unreadable files: ${count}; these unreferenced files could not be read and will not be imported",
 	"obsidianStatsSeparator": " · ",

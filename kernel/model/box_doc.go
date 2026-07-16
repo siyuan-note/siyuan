@@ -109,6 +109,10 @@ func supportsBoxDoc(boxID string) bool {
 	return !IsUserGuide(boxID) && !IsEncryptedBox(boxID)
 }
 
+func IsBoxDocEnabled() bool {
+	return nil != Conf && nil != Conf.FileTree && nil != Conf.FileTree.BoxDocEnabled && *Conf.FileTree.BoxDocEnabled
+}
+
 func EnsureBoxDoc(boxID string) (boxDocID string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
@@ -141,6 +145,9 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 		}
 		return
 	}
+	if !IsBoxDocEnabled() {
+		return
+	}
 
 	boxDocID, err = findBoxDocByMarker(box)
 	if err != nil {
@@ -165,6 +172,17 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 	IncSync()
 	logging.LogInfof("initialized box document [box=%s, id=%s]", boxID, boxDocID)
 	return
+}
+
+func RefreshBoxDocFeature() {
+	if IsBoxDocEnabled() {
+		for _, box := range Conf.GetOpenedBoxes() {
+			if _, err := EnsureBoxDoc(box.ID); nil != err {
+				logging.LogErrorf("ensure box document [%s] after enabling feature failed: %s", box.ID, err)
+			}
+		}
+	}
+	ReloadFiletree()
 }
 
 func findBoxDocByMarker(box *Box) (ret string, err error) {

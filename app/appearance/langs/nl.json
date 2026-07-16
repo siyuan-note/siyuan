@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Notebookdocumenten op het hoogste niveau inschakelen",
+	"boxDocEnabledTip": "Indien ingeschakeld kan ook het notebook zelf worden gebruikt om inhoud vast te leggen",
 	"insertImage": "Afbeelding invoegen",
 	"obsidianUnreadableFiles": "Onleesbare bestanden: ${count}; deze bestanden zonder verwijzingen konden niet worden gelezen en worden niet geïmporteerd",
 	"obsidianStatsSeparator": " · ",

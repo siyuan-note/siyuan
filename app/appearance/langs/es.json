@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Habilitar documentos de nivel superior del cuaderno",
+	"boxDocEnabledTip": "Al habilitarlo, el propio cuaderno también se puede utilizar para registrar contenido",
 	"insertImage": "Insertar imagen",
 	"obsidianUnreadableFiles": "Archivos ilegibles: ${count}; estos archivos sin referencias no se pudieron leer y no se importarán",
 	"obsidianStatsSeparator": " · ",

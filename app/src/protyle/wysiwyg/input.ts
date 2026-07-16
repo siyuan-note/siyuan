@@ -8,6 +8,7 @@ import {
     fixAdjacentTags,
     getContenteditableElement,
     getNextBlockSibling,
+    getParentBlock,
     getPreviousBlockSibling,
     hasNextSibling,
     hasPreviousSibling,
@@ -380,7 +381,7 @@ const updateInput = (html: string, protyle: IProtyle, id: string) => {
                 data: item.outerHTML,
                 id: tempId,
                 previousID: index === 0 ? (firstElement ? getPreviousBlockSibling(firstElement)?.getAttribute("data-node-id") : undefined) : item.previousElementSibling.getAttribute("data-node-id"),
-                parentID: firstElement?.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+                parentID: firstElement ? (getParentBlock(firstElement).getAttribute("data-node-id") || protyle.block.parentID) : protyle.block.parentID
             });
             undoOperations.push({
                 id: tempId,

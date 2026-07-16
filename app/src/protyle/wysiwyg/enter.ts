@@ -149,7 +149,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             parentBlockElement.after(blockElement);
         } else {
             doInsert.previousID = getPreviousBlockSibling(topElement)?.getAttribute("data-node-id");
-            doInsert.parentID = topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID;
+            doInsert.parentID = getParentBlock(topElement).getAttribute("data-node-id") || protyle.block.parentID;
             undoInsert.previousID = doInsert.previousID;
             undoInsert.parentID = doInsert.parentID;
             topElement.after(blockElement);

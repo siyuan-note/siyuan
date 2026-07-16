@@ -431,7 +431,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
             action: "insert",
             data: listItemElement.parentElement.outerHTML,
             previousID: getPreviousBlockSibling(listItemElement.parentElement)?.getAttribute("data-node-id"),
-            parentID: listItemElement.parentElement.parentElement.getAttribute("data-node-id") || protyle.block.rootID
+            parentID: getParentBlock(listItemElement.parentElement).getAttribute("data-node-id") || protyle.block.rootID
         });
         listItemElement.parentElement.remove();
         doOperations.push({
@@ -878,7 +878,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
             data: parentLiItemElement.outerHTML,
             previousID: getPreviousBlockSibling(parentLiItemElement)?.getAttribute("data-node-id"),
             // https://github.com/siyuan-note/siyuan/issues/9237 无 previousID
-            parentID: parentLiItemElement.parentElement.getAttribute("data-node-id"),
+            parentID: getParentBlock(parentLiItemElement).getAttribute("data-node-id"),
         });
         parentLiItemElement.remove();
     } else if (liElement.childElementCount === 1) {

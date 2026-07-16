@@ -1,4 +1,4 @@
-import {getNextBlockSibling, getPreviousBlockSibling, getTopAloneElement} from "./getBlock";
+import {getNextBlockSibling, getParentBlock, getPreviousBlockSibling, getTopAloneElement} from "./getBlock";
 import {hasClosestByAttribute} from "../util/hasClosest";
 import {updateListOrder} from "./list";
 import {transaction, updateTransaction} from "./transaction";
@@ -109,7 +109,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
             action: "move",
             id,
             previousID: getPreviousBlockSibling(previousElement)?.getAttribute("data-node-id"),
-            parentID: previousElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+            parentID: getParentBlock(previousElement).getAttribute("data-node-id") || protyle.block.parentID
         }]);
         sourceElements[sourceElements.length - 1].after(previousElement);
         refreshSbResize(sourceElements[0].parentElement);
@@ -209,7 +209,7 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
             action: "move",
             id,
             previousID: getPreviousBlockSibling(sourceElements[0])?.getAttribute("data-node-id"),
-            parentID: nextElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+            parentID: getParentBlock(nextElement).getAttribute("data-node-id") || protyle.block.parentID
         }], [{
             action: "move",
             id,

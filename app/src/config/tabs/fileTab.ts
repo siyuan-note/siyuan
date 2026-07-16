@@ -46,11 +46,6 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.parentDocClickExpand,
         desc: window.siyuan.languages.parentDocClickExpandTip,
     });
-};
-
-const registerFileTabsGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("tabs", window.siyuan.languages.configGroupTabs);
-
     group.switch("fileTree.alwaysSelectOpenedFile", {
         title: window.siyuan.languages.selectOpen,
         desc: window.siyuan.languages.fileTree2,
@@ -279,7 +274,6 @@ const registerFileOthersGroup = (tab: SettingTabBuilder) => {
 export const registerFileTab = (tab: SettingTabBuilder) => {
     /// #if !MOBILE
     registerFileTreeBehaviorGroup(tab);
-    registerFileTabsGroup(tab);
     /// #endif
     registerFileNewDocumentGroup(tab);
     registerFileManagementGroup(tab);

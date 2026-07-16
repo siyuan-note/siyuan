@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "מתבצע אישור",
+	"mcpStatusAuthorizationRequired": "נדרש אישור",
+	"mcpAuthorize": "אישור",
+	"mcpDisconnectAuthorization": "ניתוק האישור",
+	"mcpDisconnectAuthorizationConfirm": "לנתק את אישור OAuth עבור שירות מרוחק זה?",
   "switchLeftDock": "החלף את פריסת החלונית השמאלית",
   "switchRightDock": "החלף את פריסת החלונית הימנית",
   "switchBottomDock": "החלף את פריסת החלונית התחתונה",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "שם",
 	"aiMcpServerNameTip": "חייב להיות ייחודי בין שרתי MCP",
 	"connectionType": "סוג חיבור",
-	"aiMcpTypeStdio": "קלט/פלט סטנדרטי (stdio)",
-	"aiMcpTypeHttp": "שירות HTTP (http)",
+	"aiMcpTypeStdio": "שורת פקודה מקומית (stdio)",
+	"aiMcpTypeHttp": "שירות מרוחק (HTTP/OAuth)",
 	"command": "פקודה",
 	"aiMcpCommandTip": "קובץ הרצה, למשל npx, node, python, uvx",
 	"args": "ארגומנטים",
@@ -2151,6 +2156,10 @@
 		"321": "Access to encrypted notebook data is not supported via this API",
 		"322": "המחברת המוצפנת [%s] נעלה אוטומטית עקב חוסר פעילות",
 		"323": "לא ניתן להשבית מחברות מוצפנות: ההיסטוריה של מחברות שנמחקו עדיין תלויה בגיבוי המפתח הנוכחי. נקה היסטוריה זו תחילה",
-		"324": "לא ניתן לייבא גיבוי מפתח כאשר מחברות מוצפנות מופעלות. השבת אותן תחילה"
+		"324": "לא ניתן לייבא גיבוי מפתח כאשר מחברות מוצפנות מופעלות. השבת אותן תחילה",
+		"325": "ההרשאה הושלמה",
+		"326": "ניתן לסגור דף זה ולחזור אל SiYuan כדי לבדוק את מצב החיבור",
+		"327": "ההרשאה לא הושלמה",
+		"328": "ניתן לסגור דף זה ולחזור אל SiYuan כדי לנסות שוב."
 	}
 	}

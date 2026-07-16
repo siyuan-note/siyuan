@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "Authorizing",
+	"mcpStatusAuthorizationRequired": "Authorization required",
+	"mcpAuthorize": "Authorize",
+	"mcpDisconnectAuthorization": "Disconnect authorization",
+	"mcpDisconnectAuthorizationConfirm": "Disconnect OAuth authorization for this remote service?",
   "switchLeftDock": "Switch left panel layout",
   "switchRightDock": "Switch right panel layout",
   "switchBottomDock": "Switch bottom panel layout",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "Name",
 	"aiMcpServerNameTip": "Must be unique among MCP servers",
 	"connectionType": "Connection type",
-	"aiMcpTypeStdio": "Standard I/O (stdio)",
-	"aiMcpTypeHttp": "HTTP service (http)",
+	"aiMcpTypeStdio": "Local command line (stdio)",
+	"aiMcpTypeHttp": "Remote service (HTTP/OAuth)",
 	"command": "Command",
 	"aiMcpCommandTip": "Executable, e.g. npx, node, python, uvx",
 	"args": "Arguments",
@@ -2151,6 +2156,10 @@
 		"321": "Access to encrypted notebook data is not supported via this API",
 		"322": "Encrypted notebook [%s] has been automatically locked due to inactivity",
 		"323": "Cannot disable encrypted notebooks: deleted-notebook history still depends on the current key backup. Clear that history first",
-		"324": "Cannot import a key backup while encrypted notebooks are enabled. Disable it first"
+		"324": "Cannot import a key backup while encrypted notebooks are enabled. Disable it first",
+		"325": "Authorization completed",
+		"326": "You can close this page and return to SiYuan to check the connection status",
+		"327": "Authorization was not completed",
+		"328": "You can close this page and return to SiYuan to try again."
 	}
 	}

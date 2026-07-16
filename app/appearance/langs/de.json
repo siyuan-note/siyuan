@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "Autorisierung läuft",
+	"mcpStatusAuthorizationRequired": "Autorisierung erforderlich",
+	"mcpAuthorize": "Autorisieren",
+	"mcpDisconnectAuthorization": "Autorisierung trennen",
+	"mcpDisconnectAuthorizationConfirm": "OAuth-Autorisierung für diesen Remotedienst trennen?",
   "switchLeftDock": "Layout des linken Bereichs wechseln",
   "switchRightDock": "Layout des rechten Bereichs wechseln",
   "switchBottomDock": "Layout des unteren Bereichs wechseln",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "Name",
 	"aiMcpServerNameTip": "Muss unter MCP-Servern eindeutig sein",
 	"connectionType": "Verbindungstyp",
-	"aiMcpTypeStdio": "Standard-Ein-/Ausgabe (stdio)",
-	"aiMcpTypeHttp": "HTTP-Dienst (http)",
+	"aiMcpTypeStdio": "Lokale Befehlszeile (stdio)",
+	"aiMcpTypeHttp": "Remotedienst (HTTP/OAuth)",
 	"command": "Befehl",
 	"aiMcpCommandTip": "Ausführbare Datei, z. B. npx, node, python, uvx",
 	"args": "Argumente",
@@ -2151,6 +2156,10 @@
 		"321": "Der Zugriff auf verschlüsselte Notizbuchdaten wird über diese API nicht unterstützt",
 		"322": "Verschlüsseltes Notizbuch [%s] wurde wegen Inaktivität automatisch gesperrt",
 		"323": "Verschlüsselte Notizbücher können nicht deaktiviert werden: Der Verlauf gelöschter Notizbücher hängt noch vom aktuellen Schlüssel-Backup ab. Löschen Sie diesen Verlauf zuerst",
-		"324": "Ein Schlüssel-Backup kann nicht importiert werden, während verschlüsselte Notizbücher aktiviert sind. Deaktivieren Sie es zuerst"
+		"324": "Ein Schlüssel-Backup kann nicht importiert werden, während verschlüsselte Notizbücher aktiviert sind. Deaktivieren Sie es zuerst",
+		"325": "Autorisierung abgeschlossen",
+		"326": "Sie können diese Seite schließen und zu SiYuan zurückkehren, um den Verbindungsstatus zu prüfen",
+		"327": "Autorisierung nicht abgeschlossen",
+		"328": "Sie können diese Seite schließen und zu SiYuan zurückkehren, um es erneut zu versuchen."
 	}
 	}

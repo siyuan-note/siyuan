@@ -229,10 +229,7 @@ func handleDiscover(req *JsonRpcRequest) *JsonRpcResponse {
 }
 
 func handleToolsList2026(id any) *JsonRpcResponse {
-	toolList := make([]*tools.Tool, 0, len(tools.Registry))
-	for _, t := range tools.Registry {
-		toolList = append(toolList, t)
-	}
+	toolList := tools.GetAllTools()
 	return &JsonRpcResponse{
 		JsonRpc: "2.0",
 		Result: map[string]any{

@@ -19,10 +19,12 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -199,17 +201,61 @@ func setAI(c *gin.Context) {
 		return
 	}
 
-	model.Conf.AI = ai
-
-	model.Conf.AI.Normalize()
-	model.Conf.Save()
+	var oldServers []conf.MCPServer
+	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
+		oldServers = append(oldServers, model.Conf.AI.MCP.Servers...)
+	}
+	if ai.MCP != nil {
+		preserveMCPServerIDs(oldServers, ai.MCP.Servers)
+	}
+	ai.Normalize()
+	model.Conf.SetAI(ai)
 
 	// MCP 配置可能变更（开关切换、编辑、增删 server），异步重连让连接立即跟上。
 	if model.Conf.AI.MCP != nil {
-		mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers)
+		newServers := model.Conf.AI.MCP.Servers
+		oldByID := make(map[string]conf.MCPServer, len(oldServers))
+		newByID := make(map[string]conf.MCPServer, len(newServers))
+		for _, server := range oldServers {
+			oldByID[server.ID] = server
+		}
+		for _, server := range newServers {
+			newByID[server.ID] = server
+		}
+
+		var interactiveServerIDs []string
+		for _, server := range newServers {
+			old, existed := oldByID[server.ID]
+			if server.Enabled && server.Type == "http" && (!existed || !reflect.DeepEqual(old, server)) {
+				interactiveServerIDs = append(interactiveServerIDs, server.ID)
+			}
+		}
+		for _, server := range oldServers {
+			updated, exists := newByID[server.ID]
+			if !exists || (server.Type == "http" && (updated.Type != "http" || updated.URL != server.URL)) {
+				if revokeErr := mcpclient.DisconnectMCPOAuth(server.ID); revokeErr != nil {
+					logging.LogWarnf("mcp oauth: disconnect server [%s] failed: %s", server.Name, revokeErr)
+				}
+			}
+		}
+		if !reflect.DeepEqual(oldServers, newServers) {
+			mcpclient.ReconnectMCPAsync(newServers, nil, interactiveServerIDs)
+		}
 	}
 
 	ret.Data = model.Conf.AI
+}
+
+func preserveMCPServerIDs(oldServers, newServers []conf.MCPServer) {
+	oldIDsByName := make(map[string]string, len(oldServers))
+	for _, server := range oldServers {
+		oldIDsByName[server.Name] = server.ID
+	}
+	for i := range newServers {
+		if newServers[i].ID == "" {
+			newServers[i].ID = oldIDsByName[newServers[i].Name]
+		}
+	}
 }
 
 func setSecrets(c *gin.Context) {

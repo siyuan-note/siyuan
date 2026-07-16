@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
+	"github.com/google/uuid"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -126,6 +127,7 @@ type MCP struct {
 }
 
 type MCPServer struct {
+	ID                   string            `json:"id"`
 	Name                 string            `json:"name"`
 	Enabled              bool              `json:"enabled"`
 	Type                 string            `json:"type"`
@@ -367,6 +369,13 @@ func (ai *AI) Normalize() {
 		ai.MCP = &MCP{Servers: []MCPServer{}}
 	} else if ai.MCP.Servers == nil {
 		ai.MCP.Servers = []MCPServer{}
+	}
+	serverIDs := map[string]bool{}
+	for i := range ai.MCP.Servers {
+		if ai.MCP.Servers[i].ID == "" || serverIDs[ai.MCP.Servers[i].ID] {
+			ai.MCP.Servers[i].ID = uuid.New().String()
+		}
+		serverIDs[ai.MCP.Servers[i].ID] = true
 	}
 	if ai.Agent == nil {
 		ai.Agent = defaultAgent()
@@ -711,6 +720,7 @@ func migrateMCP(raw map[string]any) *MCP {
 			continue
 		}
 		mcp.Servers = append(mcp.Servers, MCPServer{
+			ID:                   getString(sm, "id"),
 			Name:                 getString(sm, "name"),
 			Enabled:              getBool(sm, "enabled"),
 			Type:                 getString(sm, "type"),

@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "Autorizando",
+	"mcpStatusAuthorizationRequired": "Se requiere autorización",
+	"mcpAuthorize": "Autorizar",
+	"mcpDisconnectAuthorization": "Desconectar autorización",
+	"mcpDisconnectAuthorizationConfirm": "¿Desconectar la autorización OAuth de este servicio remoto?",
   "switchLeftDock": "Cambiar el diseño del panel izquierdo",
   "switchRightDock": "Cambiar el diseño del panel derecho",
   "switchBottomDock": "Cambiar el diseño del panel inferior",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "Nombre",
 	"aiMcpServerNameTip": "Debe ser único entre los servidores MCP",
 	"connectionType": "Tipo de conexión",
-	"aiMcpTypeStdio": "Entrada/salida estándar (stdio)",
-	"aiMcpTypeHttp": "Servicio HTTP (http)",
+	"aiMcpTypeStdio": "Línea de comandos local (stdio)",
+	"aiMcpTypeHttp": "Servicio remoto (HTTP/OAuth)",
 	"command": "Comando",
 	"aiMcpCommandTip": "Ejecutable, p. ej. npx, node, python, uvx",
 	"args": "Argumentos",
@@ -2151,6 +2156,10 @@
 		"321": "El acceso a datos de cuadernos cifrados no está soportado a través de esta API",
 		"322": "El cuaderno cifrado [%s] se ha bloqueado automáticamente por inactividad",
 		"323": "No se pueden desactivar los cuadernos cifrados: el historial de cuadernos eliminados aún depende de la copia de seguridad de claves actual. Borre ese historial primero",
-		"324": "No se puede importar una copia de seguridad de claves mientras los cuadernos cifrados estén activados. Desactívelos primero"
+		"324": "No se puede importar una copia de seguridad de claves mientras los cuadernos cifrados estén activados. Desactívelos primero",
+		"325": "Autorización completada",
+		"326": "Puede cerrar esta página y volver a SiYuan para comprobar el estado de la conexión",
+		"327": "La autorización no se completó",
+		"328": "Puede cerrar esta página y volver a SiYuan para intentarlo de nuevo."
 	}
 	}

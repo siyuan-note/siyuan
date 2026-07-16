@@ -238,6 +238,7 @@ declare namespace Config {
     }
 
     export interface IMCPServer {
+        id: string;
         enabled: boolean;
         name: string;
         url: string;

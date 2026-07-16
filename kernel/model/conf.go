@@ -86,6 +86,8 @@ type AppConf struct {
 	DataIndexState int                  `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
 	CookieKey      string               `json:"cookieKey"`      // 用于加密 Cookie 的密钥
 
+	MCPOAuth string `json:"mcpOAuth"` // MCP OAuth 凭据密文
+
 	m        *sync.RWMutex // 配置数据锁
 	userLock *sync.RWMutex // 用户数据独立锁，避免与配置保存操作竞争
 }
@@ -96,6 +98,26 @@ func NewAppConf() *AppConf {
 		m:        &sync.RWMutex{},
 		userLock: &sync.RWMutex{},
 	}
+}
+
+func (conf *AppConf) GetMCPOAuth() string {
+	conf.m.RLock()
+	defer conf.m.RUnlock()
+	return conf.MCPOAuth
+}
+
+func (conf *AppConf) SetMCPOAuth(value string) {
+	conf.m.Lock()
+	conf.MCPOAuth = value
+	conf.m.Unlock()
+	conf.Save()
+}
+
+func (conf *AppConf) SetAI(ai *conf.AI) {
+	conf.m.Lock()
+	conf.AI = ai
+	conf.m.Unlock()
+	conf.Save()
 }
 
 func (conf *AppConf) GetUILayout() *conf.UILayout {
@@ -998,26 +1020,35 @@ func (conf *AppConf) Save() {
 		return
 	}
 
-	Conf.m.Lock()
-	defer Conf.m.Unlock()
+	conf.m.Lock()
+	defer conf.m.Unlock()
 
-	if nil != Conf.AI {
-		Conf.AI.EncryptAPIKeys()
-		defer Conf.AI.DecryptAPIKeys()
+	plainData, err := gulu.JSON.MarshalJSON(conf)
+	if err != nil {
+		logging.LogErrorf("marshal conf failed: %s", err)
+		return
 	}
-
-	if nil != Conf.Secrets {
-		Conf.Secrets.Encrypt()
-		defer Conf.Secrets.Decrypt()
+	snapshot := NewAppConf()
+	if err = gulu.JSON.UnmarshalJSON(plainData, snapshot); err != nil {
+		logging.LogErrorf("copy conf failed: %s", err)
+		return
 	}
-
+	if snapshot.AI != nil {
+		snapshot.AI.EncryptAPIKeys()
+	}
+	if snapshot.Secrets != nil {
+		snapshot.Secrets.Encrypt()
+	}
 	// safeMode 是纯运行时状态（由 --safe-mode 注入），不随 conf.json 持久化，避免跨启动残留。
-	// 序列化写盘时临时清零，写完恢复内存值（供 getConf 等运行时读取）。
-	safeMode := Conf.System.SafeMode
-	Conf.System.SafeMode = false
-	defer func() { Conf.System.SafeMode = safeMode }()
+	if snapshot.System != nil {
+		snapshot.System.SafeMode = false
+	}
 
-	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
+	newData, err := gulu.JSON.MarshalIndentJSON(snapshot, "", "  ")
+	if err != nil {
+		logging.LogErrorf("marshal conf snapshot failed: %s", err)
+		return
+	}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	oldData, err := filelock.ReadFile(confPath)
 	if err != nil {
@@ -1194,6 +1225,7 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	}
 
 	ret.UserData = MaskedUserData
+	ret.MCPOAuth = ""
 	if "" != ret.AccessAuthCode {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
@@ -1204,6 +1236,7 @@ func GetMaskedConf() (ret *AppConf, err error) {
 // REF: https://github.com/siyuan-note/siyuan/issues/11364
 func HideConfSecret(c *AppConf) {
 	c.AI = &conf.AI{}
+	c.MCPOAuth = ""
 	c.Api = &conf.API{}
 	c.Flashcard = &conf.Flashcard{}
 	c.ServerAddrs = []string{}

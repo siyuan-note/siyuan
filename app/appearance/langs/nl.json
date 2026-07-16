@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "Bezig met autoriseren",
+	"mcpStatusAuthorizationRequired": "Autorisatie vereist",
+	"mcpAuthorize": "Autoriseren",
+	"mcpDisconnectAuthorization": "Autorisatie verbreken",
+	"mcpDisconnectAuthorizationConfirm": "OAuth-autorisatie voor deze externe service verbreken?",
   "switchLeftDock": "Indeling van linkerpaneel wisselen",
   "switchRightDock": "Indeling van rechterpaneel wisselen",
   "switchBottomDock": "Indeling van onderpaneel wisselen",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "Naam",
 	"aiMcpServerNameTip": "Moet uniek zijn onder MCP-servers",
 	"connectionType": "Verbindingstype",
-	"aiMcpTypeStdio": "Standaard I/O (stdio)",
-	"aiMcpTypeHttp": "HTTP-service (http)",
+	"aiMcpTypeStdio": "Lokale opdrachtregel (stdio)",
+	"aiMcpTypeHttp": "Externe service (HTTP/OAuth)",
 	"command": "Opdracht",
 	"aiMcpCommandTip": "Uitvoerbaar bestand, bijv. npx, node, python, uvx",
 	"args": "Argumenten",
@@ -2151,6 +2156,10 @@
 		"321": "Access to encrypted notebook data is not supported via this API",
 		"322": "Versleuteld notitieboek [%s] is automatisch vergrendeld wegens inactiviteit",
 		"323": "Kan versleutelde notitieboeken niet uitschakelen: de geschiedenis van verwijderde notitieboeken is nog afhankelijk van de huidige sleutelback-up. Wis die geschiedenis eerst",
-		"324": "Kan geen sleutelback-up importeren terwijl versleutelde notitieboeken zijn ingeschakeld. Schakel ze eerst uit"
+		"324": "Kan geen sleutelback-up importeren terwijl versleutelde notitieboeken zijn ingeschakeld. Schakel ze eerst uit",
+		"325": "Autorisatie voltooid",
+		"326": "U kunt deze pagina sluiten en terugkeren naar SiYuan om de verbindingsstatus te controleren",
+		"327": "Autorisatie niet voltooid",
+		"328": "U kunt deze pagina sluiten en terugkeren naar SiYuan om het opnieuw te proberen."
 	}
 	}

@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "Autorizando",
+	"mcpStatusAuthorizationRequired": "Autorização necessária",
+	"mcpAuthorize": "Autorizar",
+	"mcpDisconnectAuthorization": "Desconectar autorização",
+	"mcpDisconnectAuthorizationConfirm": "Desconectar a autorização OAuth deste serviço remoto?",
   "switchLeftDock": "Alternar layout do painel esquerdo",
   "switchRightDock": "Alternar layout do painel direito",
   "switchBottomDock": "Alternar layout do painel inferior",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "Nome",
 	"aiMcpServerNameTip": "Deve ser único entre os servidores MCP",
 	"connectionType": "Tipo de conexão",
-	"aiMcpTypeStdio": "Entrada/saída padrão (stdio)",
-	"aiMcpTypeHttp": "Serviço HTTP (http)",
+	"aiMcpTypeStdio": "Linha de comando local (stdio)",
+	"aiMcpTypeHttp": "Serviço remoto (HTTP/OAuth)",
 	"command": "Comando",
 	"aiMcpCommandTip": "Executável, ex. npx, node, python, uvx",
 	"args": "Argumentos",
@@ -2151,6 +2156,10 @@
 		"321": "O acesso a dados de notebooks criptografados não é suportado via esta API",
 		"322": "O notebook criptografado [%s] foi bloqueado automaticamente por inatividade",
 		"323": "Não é possível desativar notebooks criptografados: o histórico de notebooks excluídos ainda depende do backup de chaves atual. Limpe esse histórico primeiro",
-		"324": "Não é possível importar um backup de chaves enquanto os notebooks criptografados estão ativados. Desative-os primeiro"
+		"324": "Não é possível importar um backup de chaves enquanto os notebooks criptografados estão ativados. Desative-os primeiro",
+		"325": "Autorização concluída",
+		"326": "Você pode fechar esta página e voltar ao SiYuan para verificar o status da conexão",
+		"327": "A autorização não foi concluída",
+		"328": "Você pode fechar esta página e voltar ao SiYuan para tentar novamente."
 	}
 	}

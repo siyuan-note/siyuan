@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "인증 중",
+	"mcpStatusAuthorizationRequired": "인증 필요",
+	"mcpAuthorize": "인증",
+	"mcpDisconnectAuthorization": "인증 연결 해제",
+	"mcpDisconnectAuthorizationConfirm": "이 원격 서비스의 OAuth 인증 연결을 해제하시겠습니까?",
   "switchLeftDock": "왼쪽 패널 레이아웃 전환",
   "switchRightDock": "오른쪽 패널 레이아웃 전환",
   "switchBottomDock": "아래쪽 패널 레이아웃 전환",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "이름",
 	"aiMcpServerNameTip": "다른 MCP 서비스 이름과 중복될 수 없습니다",
 	"connectionType": "연결 유형",
-	"aiMcpTypeStdio": "표준 입출력 (stdio)",
-	"aiMcpTypeHttp": "HTTP 서비스 (http)",
+	"aiMcpTypeStdio": "로컬 명령줄 (stdio)",
+	"aiMcpTypeHttp": "원격 서비스 (HTTP/OAuth)",
 	"command": "명령",
 	"aiMcpCommandTip": "실행 파일, 예: npx, node, python, uvx",
 	"args": "인수",
@@ -2151,6 +2156,10 @@
 		"321": "이 API를 통해 암호화된 노트북의 데이터를 조작할 수 없습니다",
 		"322": "암호화된 노트북 [%s]이(가) 장시간 미사용으로 자동 잠금되었습니다",
 		"323": "암호화 노트북을 비활성화할 수 없습니다: 삭제된 노트북의 기록이 여전히 현재 키 백업에 의존합니다. 먼저 해당 기록을 삭제하세요",
-		"324": "암호화 노트북이 활성화되어 있는 동안에는 키 백업을 가져올 수 없습니다. 먼저 비활성화하세요"
+		"324": "암호화 노트북이 활성화되어 있는 동안에는 키 백업을 가져올 수 없습니다. 먼저 비활성화하세요",
+		"325": "인증이 완료되었습니다",
+		"326": "이 페이지를 닫고 SiYuan으로 돌아가 연결 상태를 확인할 수 있습니다",
+		"327": "인증이 완료되지 않았습니다",
+		"328": "이 페이지를 닫고 SiYuan으로 돌아가 다시 시도할 수 있습니다."
 	}
 	}

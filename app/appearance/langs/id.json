@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "Mengotorisasi",
+	"mcpStatusAuthorizationRequired": "Otorisasi diperlukan",
+	"mcpAuthorize": "Otorisasi",
+	"mcpDisconnectAuthorization": "Putuskan otorisasi",
+	"mcpDisconnectAuthorizationConfirm": "Putuskan otorisasi OAuth untuk layanan jarak jauh ini?",
   "switchLeftDock": "Ganti tata letak panel kiri",
   "switchRightDock": "Ganti tata letak panel kanan",
   "switchBottomDock": "Ganti tata letak panel bawah",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "Nama",
 	"aiMcpServerNameTip": "Harus unik di antara server MCP",
 	"connectionType": "Jenis koneksi",
-	"aiMcpTypeStdio": "Input/output standar (stdio)",
-	"aiMcpTypeHttp": "Layanan HTTP (http)",
+	"aiMcpTypeStdio": "Baris perintah lokal (stdio)",
+	"aiMcpTypeHttp": "Layanan jarak jauh (HTTP/OAuth)",
 	"command": "Perintah",
 	"aiMcpCommandTip": "File yang dapat dieksekusi, mis. npx, node, python, uvx",
 	"args": "Argumen",
@@ -2151,6 +2156,10 @@
 		"321": "Access to encrypted notebook data is not supported via this API",
 		"322": "Notebook terenkripsi [%s] telah dikunci otomatis karena tidak aktif",
 		"323": "Tidak dapat menonaktifkan notebook terenkripsi: riwayat notebook yang dihapus masih bergantung pada cadangan kunci saat ini. Hapus riwayat tersebut terlebih dahulu",
-		"324": "Tidak dapat mengimpor cadangan kunci saat notebook terenkripsi diaktifkan. Nonaktifkan terlebih dahulu"
+		"324": "Tidak dapat mengimpor cadangan kunci saat notebook terenkripsi diaktifkan. Nonaktifkan terlebih dahulu",
+		"325": "Otorisasi selesai",
+		"326": "Anda dapat menutup halaman ini dan kembali ke SiYuan untuk memeriksa status koneksi",
+		"327": "Otorisasi tidak selesai",
+		"328": "Anda dapat menutup halaman ini dan kembali ke SiYuan untuk mencoba lagi."
 	}
 	}

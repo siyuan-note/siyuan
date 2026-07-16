@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "正在授權",
+	"mcpStatusAuthorizationRequired": "需要授權",
+	"mcpAuthorize": "授權",
+	"mcpDisconnectAuthorization": "中斷授權",
+	"mcpDisconnectAuthorizationConfirm": "確定要中斷該遠端服務的 OAuth 授權嗎？",
   "switchLeftDock": "切換左側面板佈局",
   "switchRightDock": "切換右側面板佈局",
   "switchBottomDock": "切換底部面板佈局",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "名稱",
 	"aiMcpServerNameTip": "不能與其他 MCP 服務名稱重複",
 	"connectionType": "連線類型",
-	"aiMcpTypeStdio": "標準輸入輸出 (stdio)",
-	"aiMcpTypeHttp": "HTTP 服務 (http)",
+	"aiMcpTypeStdio": "本機命令列（stdio）",
+	"aiMcpTypeHttp": "遠端服務（HTTP/OAuth）",
 	"command": "命令",
 	"aiMcpCommandTip": "可執行檔，如 npx、node、python、uvx 等",
 	"args": "參數",
@@ -2151,6 +2156,10 @@
 		"321": "不支援透過此 API 操作加密筆記本內的資料",
 		"322": "加密筆記本 [%s] 因長時間未操作已自動鎖定",
 		"323": "無法停用加密筆記本：已刪除筆記本的歷史仍依賴目前金鑰備份，請先清除該歷史",
-		"324": "無法匯入金鑰備份：加密筆記本功能已啟用，請先停用"
+		"324": "無法匯入金鑰備份：加密筆記本功能已啟用，請先停用",
+		"325": "授權已完成",
+		"326": "可以關閉此頁面並返回思源查看連線狀態",
+		"327": "未完成授權",
+		"328": "可以關閉此頁面並返回思源重新授權。"
 	}
 	}

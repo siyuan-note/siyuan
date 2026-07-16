@@ -39,6 +39,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/loginAuth", model.LoginAuth)
 	ginServer.Handle("POST", "/api/system/logoutAuth", model.LogoutAuth)
 	ginServer.Handle("GET", "/api/system/getCaptcha", model.GetCaptcha)
+	ginServer.Handle("GET", "/api/ai/mcp/oauth/callback/:flowID", mcpOAuthCallback)
 	// 需要鉴权
 
 	ginServer.Handle("GET", "/api/icon/getDynamicIcon", model.CheckAuth, getDynamicIcon)
@@ -555,6 +556,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/listModels", model.CheckAuth, model.CheckAdminRole, listModels)
 	ginServer.Handle("POST", "/api/ai/embeddingStat", model.CheckAuth, model.CheckAdminRole, embeddingStat)
 	ginServer.Handle("POST", "/api/ai/mcpStatus", model.CheckAuth, model.CheckAdminRole, mcpStatus)
+	ginServer.Handle("POST", "/api/ai/mcpOAuthAuthorize", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, mcpOAuthAuthorize)
+	ginServer.Handle("POST", "/api/ai/mcpOAuthDisconnect", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, mcpOAuthDisconnect)
 	ginServer.Handle("POST", "/api/ai/reindexEmbedding", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reindexEmbedding)
 	ginServer.Handle("POST", "/api/ai/retryFailedEmbedding", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, retryFailedEmbedding)
 	ginServer.Handle("POST", "/api/ai/agent/chat", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChat)

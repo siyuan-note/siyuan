@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "認可中",
+	"mcpStatusAuthorizationRequired": "認可が必要です",
+	"mcpAuthorize": "認可",
+	"mcpDisconnectAuthorization": "認可を解除",
+	"mcpDisconnectAuthorizationConfirm": "このリモートサービスの OAuth 認可を解除しますか？",
   "switchLeftDock": "左パネルのレイアウトを切り替える",
   "switchRightDock": "右パネルのレイアウトを切り替える",
   "switchBottomDock": "下パネルのレイアウトを切り替える",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "名前",
 	"aiMcpServerNameTip": "他の MCP サービス名と重複できません",
 	"connectionType": "接続タイプ",
-	"aiMcpTypeStdio": "標準入出力 (stdio)",
-	"aiMcpTypeHttp": "HTTP サービス (http)",
+	"aiMcpTypeStdio": "ローカルコマンドライン (stdio)",
+	"aiMcpTypeHttp": "リモートサービス (HTTP/OAuth)",
 	"command": "コマンド",
 	"aiMcpCommandTip": "実行ファイル（npx、node、python、uvx など）",
 	"args": "引数",
@@ -2151,6 +2156,10 @@
 		"321": "この API では暗号化ノートブックのデータ操作はサポートされていません",
 		"322": "暗号化ノートブック [%s] は操作がないため自動的にロックされました",
 		"323": "暗号化ノートブックを無効化できません：削除されたノートブックの履歴が現在のキーバックアップに依存しています。先にその履歴を削除してください",
-		"324": "暗号化ノートブックが有効な間はキーバックアップをインポートできません。先に無効化してください"
+		"324": "暗号化ノートブックが有効な間はキーバックアップをインポートできません。先に無効化してください",
+		"325": "認可が完了しました",
+		"326": "このページを閉じて SiYuan に戻り、接続状態を確認できます",
+		"327": "認可が完了しませんでした",
+		"328": "このページを閉じて SiYuan に戻り、もう一度お試しください。"
 	}
 	}

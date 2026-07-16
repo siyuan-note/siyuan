@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "Prebieha autorizácia",
+	"mcpStatusAuthorizationRequired": "Vyžaduje sa autorizácia",
+	"mcpAuthorize": "Autorizovať",
+	"mcpDisconnectAuthorization": "Odpojiť autorizáciu",
+	"mcpDisconnectAuthorizationConfirm": "Odpojiť autorizáciu OAuth pre túto vzdialenú službu?",
   "switchLeftDock": "Prepnúť rozloženie ľavého panela",
   "switchRightDock": "Prepnúť rozloženie pravého panela",
   "switchBottomDock": "Prepnúť rozloženie spodného panela",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "Názov",
 	"aiMcpServerNameTip": "Musí byť jedinečný medzi servermi MCP",
 	"connectionType": "Typ pripojenia",
-	"aiMcpTypeStdio": "Štandardný vstup/výstup (stdio)",
-	"aiMcpTypeHttp": "HTTP služba (http)",
+	"aiMcpTypeStdio": "Lokálny príkazový riadok (stdio)",
+	"aiMcpTypeHttp": "Vzdialená služba (HTTP/OAuth)",
 	"command": "Príkaz",
 	"aiMcpCommandTip": "Spustiteľný súbor, napr. npx, node, python, uvx",
 	"args": "Argumenty",
@@ -2151,6 +2156,10 @@
 		"321": "Access to encrypted notebook data is not supported via this API",
 		"322": "Šifrovaný zápisník [%s] bol automaticky uzamknutý z dôvodu nečinnosti",
 		"323": "Nie je možné zakázať šifrované zápisníky: história zmazaných zápisníkov stále závisí od aktuálnej zálohy kľúčov. Najprv túto históriu vymažte",
-		"324": "Nie je možné importovať zálohu kľúčov, kým sú šifrované zápisníky povolené. Najprv ich zakážte"
+		"324": "Nie je možné importovať zálohu kľúčov, kým sú šifrované zápisníky povolené. Najprv ich zakážte",
+		"325": "Autorizácia dokončená",
+		"326": "Túto stránku môžete zavrieť a vrátiť sa do SiYuan, kde skontrolujete stav pripojenia",
+		"327": "Autorizácia nebola dokončená",
+		"328": "Túto stránku môžete zavrieť a vrátiť sa do SiYuan, kde to môžete skúsiť znova."
 	}
 	}

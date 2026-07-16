@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "جارٍ التفويض",
+	"mcpStatusAuthorizationRequired": "التفويض مطلوب",
+	"mcpAuthorize": "تفويض",
+	"mcpDisconnectAuthorization": "قطع التفويض",
+	"mcpDisconnectAuthorizationConfirm": "هل تريد قطع تفويض OAuth لهذه الخدمة البعيدة؟",
   "switchLeftDock": "تبديل تخطيط اللوحة اليسرى",
   "switchRightDock": "تبديل تخطيط اللوحة اليمنى",
   "switchBottomDock": "تبديل تخطيط اللوحة السفلية",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "الاسم",
 	"aiMcpServerNameTip": "يجب أن يكون فريدًا بين خوادم MCP",
 	"connectionType": "نوع الاتصال",
-	"aiMcpTypeStdio": "إدخال/إخراج قياسي (stdio)",
-	"aiMcpTypeHttp": "خدمة HTTP (http)",
+	"aiMcpTypeStdio": "سطر أوامر محلي (stdio)",
+	"aiMcpTypeHttp": "خدمة بعيدة (HTTP/OAuth)",
 	"command": "أمر",
 	"aiMcpCommandTip": "ملف قابل للتنفيذ، مثل npx وnode وpython وuvx",
 	"args": "وسائط",
@@ -2151,6 +2156,10 @@
 		"321": "Access to encrypted notebook data is not supported via this API",
 		"322": "تم قفل دفتر التشفير [%s] تلقائياً بسبب عدم النشاط",
 		"323": "تعذر تعطيل دفاتر التشفير: ما زال سجل الدفاتر المحذوفة يعتمد على نسخة المفتاح الاحتياطية الحالية. امسح هذا السجل أولاً",
-		"324": "تعذر استيراد نسخة مفتاح احتياطية أثناء تفعيل دفاتر التشفير. عطلها أولاً"
+		"324": "تعذر استيراد نسخة مفتاح احتياطية أثناء تفعيل دفاتر التشفير. عطلها أولاً",
+		"325": "اكتمل التفويض",
+		"326": "يمكنك إغلاق هذه الصفحة والعودة إلى SiYuan للتحقق من حالة الاتصال",
+		"327": "لم يكتمل التفويض",
+		"328": "يمكنك إغلاق هذه الصفحة والعودة إلى SiYuan للمحاولة مرة أخرى."
 	}
 	}

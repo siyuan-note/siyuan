@@ -18,11 +18,13 @@ package client
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os/exec"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -40,50 +42,111 @@ const (
 )
 
 type Connection struct {
-	ServerName string
-	Session    *mcp.ClientSession
-	Cmd        *exec.Cmd
-	Tools      int // 已注册的工具数量，供状态查询展示
+	ServerID        string
+	ServerName      string
+	Session         *mcp.ClientSession
+	Cmd             *exec.Cmd
+	Tools           int
+	RegisteredTools map[string]*tools.Tool
+	Config          conf.MCPServer
+}
+
+type mcpRuntimeState struct {
+	Status           string
+	Tools            int
+	Error            string
+	AuthorizationURL string
 }
 
 var (
-	mcpMu           sync.Mutex
-	mcpConns        []Connection
-	mcpServers      []conf.MCPServer
-	mcpConnecting   bool // 是否有后台连接 goroutine 正在进行，防止重复启动
-	mcpDisconnected bool // 连接期间是否被 DisconnectMCP 要求放弃结果
+	mcpMu            sync.Mutex
+	mcpConns         []Connection
+	mcpServers       []conf.MCPServer
+	mcpConnecting    bool // 是否有后台连接 goroutine 正在进行，防止重复启动
+	mcpConnectCancel context.CancelFunc
+	mcpGeneration    uint64
+	mcpRuntime       = map[string]mcpRuntimeState{}
 )
+
+type mcpGenerationContextKey struct{}
+
+func setMCPRuntimeState(serverID, status string, toolsCount int, errMsg, authorizationURL string) {
+	mcpMu.Lock()
+	setMCPRuntimeStateLocked(serverID, status, toolsCount, errMsg, authorizationURL)
+	mcpMu.Unlock()
+}
+
+func setMCPRuntimeStateForContext(ctx context.Context, serverID, status string, toolsCount int, errMsg, authorizationURL string) {
+	generation, ok := ctx.Value(mcpGenerationContextKey{}).(uint64)
+	mcpMu.Lock()
+	if ok && generation != mcpGeneration {
+		mcpMu.Unlock()
+		return
+	}
+	setMCPRuntimeStateLocked(serverID, status, toolsCount, errMsg, authorizationURL)
+	mcpMu.Unlock()
+}
+
+func setOAuthRetryStateForError(ctx context.Context, serverID, errMsg string) bool {
+	generation, ok := ctx.Value(mcpGenerationContextKey{}).(uint64)
+	mcpMu.Lock()
+	defer mcpMu.Unlock()
+	if ok && generation != mcpGeneration {
+		return false
+	}
+	status := mcpRuntime[serverID].Status
+	if status == "oauth_retrying" && !isOAuthAuthenticationError(errMsg) {
+		return false
+	}
+	if status != "authorizing" && status != "authorization_required" && status != "oauth_retrying" {
+		return false
+	}
+	setMCPRuntimeStateLocked(serverID, "authorization_required", 0, errMsg, "")
+	return true
+}
+
+func isOAuthAuthenticationError(errMsg string) bool {
+	message := strings.ToLower(errMsg)
+	return strings.Contains(message, "401") || strings.Contains(message, "403") ||
+		strings.Contains(message, "unauthorized") || strings.Contains(message, "forbidden") ||
+		strings.Contains(message, "invalid_token")
+}
+
+func setMCPRuntimeStateLocked(serverID, status string, toolsCount int, errMsg, authorizationURL string) {
+	mcpRuntime[serverID] = mcpRuntimeState{
+		Status:           status,
+		Tools:            toolsCount,
+		Error:            errMsg,
+		AuthorizationURL: authorizationURL,
+	}
+}
 
 // EnsureMCPConnected 确保 MCP server 已连接。
 // 首次调用时在后台异步连接，立即返回不阻塞调用方（如 Agent 请求路径）。
 // 连接完成前发起的 Agent 请求本轮可能看不到 MCP 工具，下轮即可用。
 // 后续调用若已连接则直接返回；若后台连接仍在进行则也直接返回，等其完成。
 func EnsureMCPConnected(servers []conf.MCPServer) {
+	servers = append([]conf.MCPServer(nil), servers...)
 	mcpMu.Lock()
-	mcpServers = servers
-	if len(mcpConns) > 0 || mcpConnecting {
+	if mcpConnecting {
 		mcpMu.Unlock()
 		return
 	}
-	mcpConnecting = true
-	mcpDisconnected = false
-	mcpMu.Unlock()
-
-	// 后台连接：耗时操作（握手 + 拉取工具列表）不阻塞调用方。
-	go func() {
-		conns := connectServers(servers)
-		mcpMu.Lock()
-		mcpConnecting = false
-		if mcpDisconnected {
-			// 连接期间被 DisconnectMCP 要求放弃，丢弃结果并关闭刚建好的连接避免泄漏。
-			mcpDisconnected = false
-			mcpMu.Unlock()
-			closeConnections(conns)
-			return
+	connected := make(map[string]bool, len(mcpConns))
+	for _, connection := range mcpConns {
+		connected[connection.ServerID] = true
+	}
+	needsConnect := len(mcpServers) == 0
+	for _, server := range servers {
+		if server.Enabled && !connected[server.ID] && mcpRuntime[server.ID].Status != "authorization_required" {
+			needsConnect = true
+			break
 		}
-		mcpConns = conns
-		mcpMu.Unlock()
-	}()
+	}
+	mcpMu.Unlock()
+	if needsConnect {
+		ReconnectMCPAsync(servers, nil, nil)
+	}
 }
 
 // serverTimeout 归一化服务器配置的超时（秒），未配置或非法时回退到默认值。
@@ -113,79 +176,192 @@ func (h *headerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 func DisconnectMCP() {
 	mcpMu.Lock()
 	defer mcpMu.Unlock()
+	if mcpConnectCancel != nil {
+		mcpConnectCancel()
+		mcpConnectCancel = nil
+	}
+	mcpGeneration++
+	mcpConnecting = false
 	closeConnections(mcpConns)
 	mcpConns = nil
-	// 若后台仍有连接 goroutine 在进行，标记其结果应被丢弃。
-	mcpDisconnected = true
 }
 
-func connectServers(servers []conf.MCPServer) []Connection {
-	var connections []Connection
-
+func connectServers(ctx context.Context, servers []conf.MCPServer, interactive map[string]bool, connected func(Connection) bool) {
 	for _, server := range servers {
+		if ctx.Err() != nil {
+			break
+		}
 		if !server.Enabled {
+			setMCPRuntimeStateForContext(ctx, server.ID, "disabled", 0, "", "")
 			continue
 		}
-
-		session, cmd, err := connectServer(server)
-		if err != nil {
-			logging.LogWarnf("mcp: server [%s] connect failed: %s", server.Name, err)
-			continue
+		setMCPRuntimeStateForContext(ctx, server.ID, "connecting", 0, "", "")
+		connection := connectOneServer(ctx, server, interactive[server.ID])
+		if connection != nil && !connected(*connection) {
+			closeConnections([]Connection{*connection})
 		}
+	}
+}
 
-		listCtx, listCancel := context.WithTimeout(context.Background(), serverTimeout(server))
-		toolList, err := session.ListTools(listCtx, nil)
-		listCancel()
-		if err != nil {
-			logging.LogWarnf("mcp: server [%s] list tools failed: %s", server.Name, err)
+func connectOneServer(ctx context.Context, server conf.MCPServer, interactive bool) *Connection {
+	session, cmd, oauthHandler, err := connectServer(ctx, server, interactive)
+	if err != nil {
+		if ctx.Err() != nil {
+			return nil
+		}
+		if errors.Is(err, errOAuthAuthorizationRequired) {
+			return nil
+		}
+		if setOAuthRetryStateForError(ctx, server.ID, err.Error()) {
+			if markErr := markOAuthCredentialRejected(server.ID, server.URL); markErr != nil {
+				logging.LogWarnf("mcp oauth: mark rejected credentials failed: %s", markErr)
+			}
+			return nil
+		}
+		setMCPRuntimeStateForContext(ctx, server.ID, "failed", 0, err.Error(), "")
+		logging.LogWarnf("mcp: server [%s] connect failed: %s", server.Name, err)
+		return nil
+	}
+	if ctx.Err() != nil {
+		session.Close()
+		if cmd != nil && cmd.Process != nil {
+			cmd.Process.Kill()
+			cmd.Wait()
+		}
+		return nil
+	}
+
+	listCtx, listCancel := context.WithTimeout(ctx, serverTimeout(server))
+	toolList, err := session.ListTools(listCtx, nil)
+	listCancel()
+	if err != nil {
+		if ctx.Err() != nil {
 			session.Close()
 			if cmd != nil && cmd.Process != nil {
 				cmd.Process.Kill()
 				cmd.Wait()
 			}
-			continue
+			return nil
 		}
-
-		registered := 0
-		for _, t := range toolList.Tools {
-			tool := t
-			name := "mcp_" + sanitize(server.Name) + "_" + sanitize(tool.Name)
-			desc := tool.Description
-			if !strings.HasPrefix(desc, "[MCP]") {
-				desc = "[MCP:" + server.Name + "] " + desc
+		if errors.Is(err, errOAuthAuthorizationRequired) || setOAuthRetryStateForError(ctx, server.ID, err.Error()) {
+			if markErr := markOAuthCredentialRejected(server.ID, server.URL); markErr != nil {
+				logging.LogWarnf("mcp oauth: mark rejected credentials failed: %s", markErr)
 			}
-
-			readOnlyHint := trustedReadOnlyHint(server, tool)
-			handler := mcpToolContextHandler(server.Name, tool.Name, serverTimeout(server))
-			tools.SetTool(name, &tools.Tool{
-				Name:         name,
-				Description:  desc,
-				InputSchema:  convertMCPSchema(tool.InputSchema),
-				Source:       "mcp",
-				ReadOnlyHint: readOnlyHint,
-				EffectScope:  tools.EffectScopeExternal,
-				Handler: func(args map[string]any) (tools.CallToolResult, error) {
-					return handler(context.Background(), args)
-				},
-				ContextHandler: handler,
-			})
-			registered++
+			session.Close()
+			if cmd != nil && cmd.Process != nil {
+				cmd.Process.Kill()
+				cmd.Wait()
+			}
+			return nil
 		}
-
-		connections = append(connections, Connection{
-			ServerName: server.Name,
-			Session:    session,
-			Cmd:        cmd,
-			Tools:      registered,
-		})
-		logging.LogInfof("mcp: server [%s] connected, %d tools registered", server.Name, registered)
+		setMCPRuntimeStateForContext(ctx, server.ID, "failed", 0, err.Error(), "")
+		logging.LogWarnf("mcp: server [%s] list tools failed: %s", server.Name, err)
+		session.Close()
+		if cmd != nil && cmd.Process != nil {
+			cmd.Process.Kill()
+			cmd.Wait()
+		}
+		return nil
+	}
+	if oauthHandler != nil {
+		oauthHandler.disableInteractive()
 	}
 
-	return connections
+	baseNameCounts := make(map[string]int, len(toolList.Tools))
+	for _, tool := range toolList.Tools {
+		baseNameCounts["mcp_"+sanitize(server.Name)+"_"+sanitize(tool.Name)]++
+	}
+	serverNameCollision := sanitizedServerNameCollision(server)
+	registeredTools := map[string]*tools.Tool{}
+	for _, t := range toolList.Tools {
+		tool := t
+		baseName := "mcp_" + sanitize(server.Name) + "_" + sanitize(tool.Name)
+		name := mcpToolName(server, tool.Name,
+			serverNameCollision || baseNameCounts[baseName] > 1 || tools.LookupTool(baseName) != nil)
+		desc := tool.Description
+		if !strings.HasPrefix(desc, "[MCP]") {
+			desc = "[MCP:" + server.Name + "] " + desc
+		}
+
+		readOnlyHint := trustedReadOnlyHint(server, tool)
+		handler := mcpToolContextHandler(server.Name, tool.Name, serverTimeout(server))
+		registeredTool := &tools.Tool{
+			Name:         name,
+			Description:  desc,
+			InputSchema:  convertMCPSchema(tool.InputSchema),
+			Source:       "mcp",
+			ReadOnlyHint: readOnlyHint,
+			EffectScope:  tools.EffectScopeExternal,
+			Handler: func(args map[string]any) (tools.CallToolResult, error) {
+				return handler(context.Background(), args)
+			},
+			ContextHandler: handler,
+		}
+		registeredTools[name] = registeredTool
+	}
+	if !registerMCPToolsForContext(ctx, registeredTools) {
+		session.Close()
+		if cmd != nil && cmd.Process != nil {
+			cmd.Process.Kill()
+			cmd.Wait()
+		}
+		return nil
+	}
+	registered := len(registeredTools)
+
+	connection := &Connection{
+		ServerID:        server.ID,
+		ServerName:      server.Name,
+		Session:         session,
+		Cmd:             cmd,
+		Tools:           registered,
+		RegisteredTools: registeredTools,
+		Config:          server,
+	}
+	setMCPRuntimeStateForContext(ctx, server.ID, "connected", registered, "", "")
+	logging.LogInfof("mcp: server [%s] connected, %d tools registered", server.Name, registered)
+	return connection
+}
+
+func sanitizedServerNameCollision(server conf.MCPServer) bool {
+	mcpMu.Lock()
+	defer mcpMu.Unlock()
+	sanitizedName := sanitize(server.Name)
+	for _, configured := range mcpServers {
+		if configured.ID != server.ID && sanitize(configured.Name) == sanitizedName {
+			return true
+		}
+	}
+	return false
+}
+
+func mcpToolName(server conf.MCPServer, toolName string, collision bool) string {
+	name := "mcp_" + sanitize(server.Name) + "_" + sanitize(toolName)
+	if !collision {
+		return name
+	}
+	hash := sha256.Sum256([]byte(server.ID + "\x00" + toolName))
+	return fmt.Sprintf("%s_%x", name, hash[:6])
+}
+
+func registerMCPToolsForContext(ctx context.Context, registeredTools map[string]*tools.Tool) bool {
+	generation, ok := ctx.Value(mcpGenerationContextKey{}).(uint64)
+	mcpMu.Lock()
+	defer mcpMu.Unlock()
+	if ctx.Err() != nil || ok && generation != mcpGeneration {
+		return false
+	}
+	for name, tool := range registeredTools {
+		tools.SetTool(name, tool)
+	}
+	return true
 }
 
 func closeConnections(connections []Connection) {
 	for _, conn := range connections {
+		for toolName, registeredTool := range conn.RegisteredTools {
+			tools.RemoveToolIf(toolName, registeredTool)
+		}
 		if conn.Session != nil {
 			conn.Session.Close()
 		}
@@ -196,20 +372,21 @@ func closeConnections(connections []Connection) {
 	}
 }
 
-func connectServer(server conf.MCPServer) (*mcp.ClientSession, *exec.Cmd, error) {
+func connectServer(ctx context.Context, server conf.MCPServer, interactive bool) (*mcp.ClientSession, *exec.Cmd, *mcpOAuthHandler, error) {
 	c := mcp.NewClient(&mcp.Implementation{Name: "siyuan", Version: "3.0"}, nil)
 
 	switch server.Type {
 	case "stdio":
-		return connectStdio(c, server)
+		session, cmd, err := connectStdio(ctx, c, server)
+		return session, cmd, nil, err
 	case "http":
-		return connectHTTP(c, server)
+		return connectHTTP(ctx, c, server, interactive)
 	default:
-		return nil, nil, fmt.Errorf("unsupported server type: %s", server.Type)
+		return nil, nil, nil, fmt.Errorf("unsupported server type: %s", server.Type)
 	}
 }
 
-func connectStdio(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession, *exec.Cmd, error) {
+func connectStdio(ctx context.Context, client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession, *exec.Cmd, error) {
 	if server.Command == "" {
 		return nil, nil, fmt.Errorf("command is required for stdio server")
 	}
@@ -229,7 +406,7 @@ func connectStdio(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession
 		return nil, nil, fmt.Errorf("start command: %w", err)
 	}
 
-	connectCtx, connectCancel := context.WithTimeout(context.Background(), serverTimeout(server))
+	connectCtx, connectCancel := context.WithTimeout(ctx, serverTimeout(server))
 	defer connectCancel()
 	transport := &mcp.IOTransport{Reader: stdout, Writer: stdin}
 	session, err := client.Connect(connectCtx, transport, nil)
@@ -242,13 +419,18 @@ func connectStdio(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession
 	return session, cmd, nil
 }
 
-func connectHTTP(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession, *exec.Cmd, error) {
+func connectHTTP(ctx context.Context, client *mcp.Client, server conf.MCPServer, interactive bool) (*mcp.ClientSession, *exec.Cmd, *mcpOAuthHandler, error) {
 	if server.URL == "" {
-		return nil, nil, fmt.Errorf("url is required for http server")
+		return nil, nil, nil, fmt.Errorf("url is required for http server")
 	}
 
 	transport := &mcp.StreamableClientTransport{
 		Endpoint: server.URL,
+	}
+	var oauthHandler *mcpOAuthHandler
+	if !hasAuthorizationHeader(server.Headers) {
+		oauthHandler = newMCPOAuthHandler(server, interactive)
+		transport.OAuthHandler = oauthHandler
 	}
 	// 所有 MCP HTTP 出站请求统一带上 SiYuan UA，便于第三方 MCP server 识别客户端身份
 	uaBase := httpclient.NewUserAgentRoundTripper(http.DefaultTransport)
@@ -263,26 +445,78 @@ func connectHTTP(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession,
 		transport.HTTPClient = &http.Client{Transport: uaBase}
 	}
 
-	connectCtx, connectCancel := context.WithTimeout(context.Background(), serverTimeout(server))
+	connectTimeout := serverTimeout(server)
+	if interactive {
+		connectTimeout += oauthAuthorizationTimeout
+	}
+	connectCtx, connectCancel := context.WithTimeout(ctx, connectTimeout)
 	defer connectCancel()
 	session, err := client.Connect(connectCtx, transport, nil)
 	if err != nil {
-		return nil, nil, fmt.Errorf("connect: %w", err)
+		return nil, nil, oauthHandler, fmt.Errorf("connect: %w", err)
 	}
 
-	return session, nil, nil
+	return session, nil, oauthHandler, nil
+}
+
+func hasAuthorizationHeader(headers map[string]string) bool {
+	for name := range headers {
+		if strings.EqualFold(name, "Authorization") {
+			return true
+		}
+	}
+	return false
 }
 
 func mcpToolContextHandler(serverName, toolName string, timeout time.Duration) func(context.Context, map[string]any) (tools.CallToolResult, error) {
 	return func(ctx context.Context, args map[string]any) (tools.CallToolResult, error) {
 		result := callMCPToolOnce(func() (*mcp.CallToolResult, error) {
-			return callMCPTool(ctx, serverName, toolName, timeout, args)
+			result, err := callMCPTool(ctx, serverName, toolName, timeout, args)
+			updateMCPRuntimeAfterToolCall(serverName, err)
+			return result, err
 		}, func(err error) {
 			logging.LogWarnf("mcp: server [%s] tool [%s] disconnected (%s), reconnecting", serverName, toolName, err)
-			go reconnectMCP()
+			go reconnectMCP(serverName)
 		})
 		return result, nil
 	}
+}
+
+func updateMCPRuntimeAfterToolCall(serverName string, callErr error) {
+	mcpMu.Lock()
+	connectionIndex := -1
+	for i := range mcpConns {
+		if mcpConns[i].ServerName == serverName {
+			connectionIndex = i
+			break
+		}
+	}
+	if connectionIndex < 0 {
+		mcpMu.Unlock()
+		return
+	}
+	connection := mcpConns[connectionIndex]
+	status := mcpRuntime[connection.ServerID].Status
+	if status != "oauth_retrying" && status != "authorization_required" {
+		mcpMu.Unlock()
+		return
+	}
+	if (callErr != nil && isOAuthAuthenticationError(callErr.Error())) || status == "authorization_required" {
+		errMsg := ""
+		if callErr != nil {
+			errMsg = callErr.Error()
+		}
+		setMCPRuntimeStateLocked(connection.ServerID, "authorization_required", 0, errMsg, "")
+		mcpConns = append(mcpConns[:connectionIndex], mcpConns[connectionIndex+1:]...)
+		mcpMu.Unlock()
+		if markErr := markOAuthCredentialRejected(connection.ServerID, connection.Config.URL); markErr != nil {
+			logging.LogWarnf("mcp oauth: mark rejected credentials failed: %s", markErr)
+		}
+		closeConnections([]Connection{connection})
+		return
+	}
+	setMCPRuntimeStateLocked(connection.ServerID, "connected", connection.Tools, "", "")
+	mcpMu.Unlock()
 }
 
 // callMCPToolOnce 保证一次工具请求最多发送一次。断线时只恢复后续调用所需的连接，不重放当前请求。
@@ -357,62 +591,108 @@ func getMCPSession(serverName string) *mcp.ClientSession {
 }
 
 // reconnectMCP 关闭现有连接并重新注册工具。
-func reconnectMCP() bool {
+func reconnectMCP(serverName string) bool {
 	mcpMu.Lock()
-	// 后台首次连接仍在进行时，重连无意义（连接尚未就绪，工具调用本不会到达这里）。
-	if mcpConnecting || len(mcpServers) == 0 {
+	if mcpConnecting {
 		mcpMu.Unlock()
 		return false
 	}
-	closeConnections(mcpConns)
-	mcpConns = nil
-	mcpConnecting = true
-	mcpMu.Unlock()
-
-	conns := connectServers(mcpServers)
-	mcpMu.Lock()
-	mcpConnecting = false
-	if mcpDisconnected {
-		mcpDisconnected = false
-		mcpMu.Unlock()
-		closeConnections(conns)
-		return false
-	}
-	mcpConns = conns
-	for _, conn := range mcpConns {
-		if conn.Session != nil {
-			logging.LogInfof("mcp: reconnected server [%s]", conn.ServerName)
-			mcpMu.Unlock()
-			return true
+	servers := append([]conf.MCPServer(nil), mcpServers...)
+	serverID := ""
+	for _, server := range servers {
+		if server.Name == serverName {
+			serverID = server.ID
+			break
 		}
 	}
 	mcpMu.Unlock()
-	return false
+	if serverID == "" {
+		return false
+	}
+	ReconnectMCPAsync(servers, []string{serverID}, nil)
+	return true
 }
 
 // ReconnectMCPAsync 用最新的 server 配置异步重连，不阻塞调用方（如 setAI 配置保存）。
 // 适用于配置变更（开关切换、编辑、增删 server）后让连接立即跟上，而非等下次 Agent 请求。
-func ReconnectMCPAsync(servers []conf.MCPServer) {
+func ReconnectMCPAsync(servers []conf.MCPServer, forceServerIDs, interactiveServerIDs []string) {
+	servers = append([]conf.MCPServer(nil), servers...)
+	force := make(map[string]bool, len(forceServerIDs))
+	for _, serverID := range forceServerIDs {
+		force[serverID] = true
+	}
+	interactive := make(map[string]bool, len(interactiveServerIDs))
+	for _, serverID := range interactiveServerIDs {
+		interactive[serverID] = true
+	}
 	mcpMu.Lock()
+	if mcpConnectCancel != nil {
+		mcpConnectCancel()
+	}
+	mcpGeneration++
+	generation := mcpGeneration
+	connectCtx, connectCancel := context.WithCancel(context.WithValue(context.Background(), mcpGenerationContextKey{}, generation))
+	mcpConnectCancel = connectCancel
 	mcpServers = servers
-	mcpConnecting = true
-	mcpDisconnected = false
-	closeConnections(mcpConns)
-	mcpConns = nil
+	serverByID := make(map[string]conf.MCPServer, len(servers))
+	for _, server := range servers {
+		serverByID[server.ID] = server
+	}
+	var kept, closing []Connection
+	connected := map[string]bool{}
+	for _, connection := range mcpConns {
+		server, exists := serverByID[connection.ServerID]
+		if exists && server.Enabled && !force[server.ID] && reflect.DeepEqual(connection.Config, server) {
+			kept = append(kept, connection)
+			connected[server.ID] = true
+		} else {
+			closing = append(closing, connection)
+		}
+	}
+	mcpConns = kept
+	var connectingServers []conf.MCPServer
+	for _, server := range servers {
+		if !server.Enabled {
+			setMCPRuntimeStateLocked(server.ID, "disabled", 0, "", "")
+		} else if !connected[server.ID] {
+			setMCPRuntimeStateLocked(server.ID, "connecting", 0, "", "")
+			connectingServers = append(connectingServers, server)
+		}
+	}
+	for serverID := range mcpRuntime {
+		if _, exists := serverByID[serverID]; !exists {
+			delete(mcpRuntime, serverID)
+		}
+	}
+	mcpConnecting = len(connectingServers) > 0
+	if !mcpConnecting {
+		mcpConnectCancel = nil
+		connectCancel()
+	}
 	mcpMu.Unlock()
+	closeConnections(closing)
+	if len(connectingServers) == 0 {
+		return
+	}
 
 	go func() {
-		conns := connectServers(servers)
+		defer connectCancel()
+		connectServers(connectCtx, connectingServers, interactive, func(connection Connection) bool {
+			mcpMu.Lock()
+			defer mcpMu.Unlock()
+			if generation != mcpGeneration {
+				return false
+			}
+			mcpConns = append(mcpConns, connection)
+			return true
+		})
 		mcpMu.Lock()
-		mcpConnecting = false
-		if mcpDisconnected {
-			// 连接期间被 DisconnectMCP 要求放弃，丢弃结果并关闭刚建好的连接避免泄漏。
-			mcpDisconnected = false
+		if generation != mcpGeneration {
 			mcpMu.Unlock()
-			closeConnections(conns)
 			return
 		}
-		mcpConns = conns
+		mcpConnecting = false
+		mcpConnectCancel = nil
 		mcpMu.Unlock()
 	}()
 }
@@ -464,39 +744,43 @@ func sanitize(s string) string {
 
 // MCPStatusItem 描述单个 MCP server 的连接状态，供前端展示。
 type MCPStatusItem struct {
-	Name   string `json:"name"`
-	Status string `json:"status"` // connected | connecting | failed | disabled
-	Tools  int    `json:"tools"`  // 已注册工具数（仅 connected 时有意义）
+	ID               string `json:"id"`
+	Name             string `json:"name"`
+	Status           string `json:"status"` // connected | connecting | authorizing | authorization_required | failed | disabled
+	Tools            int    `json:"tools"`  // 已注册工具数（仅 connected 时有意义）
+	Error            string `json:"error,omitempty"`
+	AuthorizationURL string `json:"authorizationURL,omitempty"`
+	Authorized       bool   `json:"authorized"`
 }
 
 // MCPStatus 返回所有已配置 MCP server 的当前连接状态。
 func MCPStatus() []MCPStatusItem {
 	mcpMu.Lock()
-	servers := mcpServers
-	conns := mcpConns
-	connecting := mcpConnecting
-	mcpMu.Unlock()
-
-	// 建立已连接 server 名 → 连接信息的索引。
-	connMap := make(map[string]*Connection, len(conns))
-	for i := range conns {
-		connMap[conns[i].ServerName] = &conns[i]
+	servers := append([]conf.MCPServer(nil), mcpServers...)
+	runtimeStates := make(map[string]mcpRuntimeState, len(mcpRuntime))
+	for serverID, state := range mcpRuntime {
+		runtimeStates[serverID] = state
 	}
+	mcpMu.Unlock()
 
 	items := make([]MCPStatusItem, 0, len(servers))
 	for _, srv := range servers {
-		item := MCPStatusItem{Name: srv.Name}
-		switch {
-		case !srv.Enabled:
-			item.Status = "disabled"
-		case connecting && connMap[srv.Name] == nil:
-			// 后台连接仍在进行，且该 server 尚未出现在已连接列表中。
+		state := runtimeStates[srv.ID]
+		item := MCPStatusItem{
+			ID:               srv.ID,
+			Name:             srv.Name,
+			Status:           state.Status,
+			Tools:            state.Tools,
+			Error:            state.Error,
+			AuthorizationURL: state.AuthorizationURL,
+			Authorized:       srv.Type == "http" && hasOAuthCredential(srv.ID, srv.URL),
+		}
+		if item.Status == "oauth_retrying" {
 			item.Status = "connecting"
-		case connMap[srv.Name] != nil:
-			item.Status = "connected"
-			item.Tools = connMap[srv.Name].Tools
-		default:
-			// 已启用但既未连上、也不在连接中（连接失败或尚未触发首次连接）。
+		}
+		if !srv.Enabled {
+			item.Status = "disabled"
+		} else if item.Status == "" {
 			item.Status = "failed"
 		}
 		items = append(items, item)

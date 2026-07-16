@@ -1,4 +1,9 @@
 {
+	"mcpStatusAuthorizing": "Autoryzowanie",
+	"mcpStatusAuthorizationRequired": "Wymagana autoryzacja",
+	"mcpAuthorize": "Autoryzuj",
+	"mcpDisconnectAuthorization": "Odłącz autoryzację",
+	"mcpDisconnectAuthorizationConfirm": "Odłączyć autoryzację OAuth dla tej usługi zdalnej?",
   "switchLeftDock": "Przełącz układ lewego panelu",
   "switchRightDock": "Przełącz układ prawego panelu",
   "switchBottomDock": "Przełącz układ dolnego panelu",
@@ -199,8 +204,8 @@
 	"aiMcpServerName": "Nazwa",
 	"aiMcpServerNameTip": "Musi być unikalna wśród serwerów MCP",
 	"connectionType": "Typ połączenia",
-	"aiMcpTypeStdio": "Standardowe we/wy (stdio)",
-	"aiMcpTypeHttp": "Usługa HTTP (http)",
+	"aiMcpTypeStdio": "Lokalny wiersz poleceń (stdio)",
+	"aiMcpTypeHttp": "Usługa zdalna (HTTP/OAuth)",
 	"command": "Polecenie",
 	"aiMcpCommandTip": "Plik wykonywalny, np. npx, node, python, uvx",
 	"args": "Argumenty",
@@ -2151,6 +2156,10 @@
 		"321": "Access to encrypted notebook data is not supported via this API",
 		"322": "Zaszyfrowany notatnik [%s] został automatycznie zablokowany z powodu braku aktywności",
 		"323": "Nie można wyłączyć zaszyfrowanych notatników: historia usuniętych notatników nadal zależy od bieżącej kopii zapasowej kluczy. Wyczyść tę historię najpierw",
-		"324": "Nie można zaimportować kopii zapasowej kluczy, gdy zaszyfrowane notatniki są włączone. Najpierw je wyłącz"
+		"324": "Nie można zaimportować kopii zapasowej kluczy, gdy zaszyfrowane notatniki są włączone. Najpierw je wyłącz",
+		"325": "Autoryzacja zakończona",
+		"326": "Możesz zamknąć tę stronę i wrócić do SiYuan, aby sprawdzić stan połączenia",
+		"327": "Autoryzacja nie została zakończona",
+		"328": "Możesz zamknąć tę stronę i wrócić do SiYuan, aby spróbować ponownie."
 	}
 	}

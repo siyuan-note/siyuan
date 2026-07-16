@@ -18,8 +18,8 @@ package conf
 
 import "testing"
 
-func TestNormalizeMultimodalDefaultsAndCapabilities(t *testing.T) {
-	ai := &AI{Providers: []*Provider{{Enabled: true, Models: []*Model{{Enabled: true, Name: " vision ", Capabilities: []string{" Image-Input ", "image-input", " image-output "}}}}}}
+func TestNormalizeMultimodalDefaults(t *testing.T) {
+	ai := &AI{Providers: []*Provider{{Enabled: true, Models: []*Model{{Enabled: true, Name: " vision "}}}}}
 	ai.Normalize()
 	if ai.Vision == nil || ai.Vision.RequestTimeout != 300 || ai.Vision.MaxImageBytes != 20*1024*1024 || ai.Vision.MaxEdge != 2048 {
 		t.Fatalf("unexpected vision defaults: %#v", ai.Vision)
@@ -31,9 +31,8 @@ func TestNormalizeMultimodalDefaultsAndCapabilities(t *testing.T) {
 	if provider.Protocol != "openai" {
 		t.Fatalf("unexpected provider protocol: %q", provider.Protocol)
 	}
-	capabilities := provider.Models[0].Capabilities
-	if len(capabilities) != 2 || capabilities[0] != "image-input" || capabilities[1] != "image-output" {
-		t.Fatalf("unexpected normalized capabilities: %#v", capabilities)
+	if provider.Models[0].Name != "vision" {
+		t.Fatalf("unexpected normalized model name: %q", provider.Models[0].Name)
 	}
 }
 

@@ -74,6 +74,30 @@ func TestRunImageOperationAllowsRetryAfterError(t *testing.T) {
 	}
 }
 
+func TestRunImageOperationDoesNotRetryUnknownExecution(t *testing.T) {
+	useImageOperationTestDataDir(t)
+	key := imageOperationKey(map[string]any{"_sessionID": "session", "_toolCallID": "unknown-call"}, "generate")
+	imageOperations.Delete(key)
+	t.Cleanup(func() {
+		imageOperations.Delete(key)
+		removeImageOperationRecord(key)
+	})
+	var executions atomic.Int32
+	meta := imageOperationMeta{Action: "generate", DocumentID: "document"}
+	first := runImageOperation(context.Background(), key, meta, func() CallToolResult {
+		executions.Add(1)
+		return imageUnknown("provider result is unknown")
+	})
+	imageOperations.Delete(key)
+	second := runImageOperation(context.Background(), key, meta, func() CallToolResult {
+		executions.Add(1)
+		return CallToolResult{}
+	})
+	if executions.Load() != 1 || !first.ExecutionUnknown || !second.ExecutionUnknown {
+		t.Fatalf("unknown external operation was retried: executions=%d first=%#v second=%#v", executions.Load(), first, second)
+	}
+}
+
 func TestRunImageOperationBlocksUnknownPendingOperation(t *testing.T) {
 	useImageOperationTestDataDir(t)
 	key := imageOperationKey(map[string]any{"_sessionID": "session", "_toolCallID": "pending-call"}, "generate")

@@ -115,11 +115,10 @@ type Provider struct {
 // MaxContexts remain the persisted UI-facing config (the settings page still
 // reads/writes them). Editing holds the runtime view derived from them.
 type Model struct {
-	ID           string   `json:"id"`
-	DisplayName  string   `json:"displayName,omitempty"`
-	Enabled      bool     `json:"enabled"`
-	Name         string   `json:"name"`
-	Capabilities []string `json:"capabilities,omitempty"`
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName,omitempty"`
+	Enabled     bool   `json:"enabled"`
+	Name        string `json:"name"`
 }
 
 type MCP struct {
@@ -481,17 +480,6 @@ func (ai *AI) Normalize() {
 				m.Name = "model"
 			}
 			m.DisplayName = strings.TrimSpace(m.DisplayName)
-			capabilities := make([]string, 0, len(m.Capabilities))
-			seenCapabilities := map[string]bool{}
-			for _, capability := range m.Capabilities {
-				capability = strings.ToLower(strings.TrimSpace(capability))
-				if capability == "" || seenCapabilities[capability] {
-					continue
-				}
-				seenCapabilities[capability] = true
-				capabilities = append(capabilities, capability)
-			}
-			m.Capabilities = capabilities
 			if !ast.IsNodeIDPattern(m.ID) {
 				m.ID = ast.NewNodeID()
 			}

@@ -228,7 +228,6 @@ declare namespace Config {
         enabled: boolean;
         name: string;
         displayName?: string;
-        capabilities?: string[];
     }
 
     /**

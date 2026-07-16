@@ -102,7 +102,7 @@ func databaseSearch(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "keyword is required"}}, IsError: true}, nil
 	}
 
-	results := model.SearchAttributeView(keyword, nil)
+	results := model.SearchAttributeView(keyword, nil, "", "")
 	if len(results) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no attribute views found"}}}, nil
 	}

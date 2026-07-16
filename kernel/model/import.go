@@ -343,9 +343,6 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				return ast.WalkContinue
 			})
 
-			// 关联数据库和块
-			avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
-			av.BatchUpsertBlockRel(avNodes)
 		}
 
 		// 如果数据库中绑定的块不在导入的文档中，则需要单独更新这些绑定块的属性
@@ -739,6 +736,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	boxAbsPath := filepath.Join(util.DataDir, boxID)
+	importedAvIDs := map[string]struct{}{}
+	for _, importedAvID := range avIDs {
+		importedAvIDs[importedAvID] = struct{}{}
+	}
 	for _, treePath := range treePaths {
 		absPath := filepath.Join(targetDir, treePath)
 		p := strings.TrimPrefix(absPath, boxAbsPath)
@@ -756,6 +757,13 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 
 		treenode.IndexBlockTree(tree)
+		var avNodes []*ast.Node
+		for _, avNode := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+			if _, ok := importedAvIDs[avNode.AttributeViewID]; ok {
+				avNodes = append(avNodes, avNode)
+			}
+		}
+		av.BatchUpsertBlockRel(avNodes)
 		sql.IndexTreeQueue(tree)
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 	}

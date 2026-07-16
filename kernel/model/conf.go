@@ -1344,6 +1344,7 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "queue.wal"))
 	os.RemoveAll(filepath.Join(util.TempDir, "queue.wal.lock"))
 	os.RemoveAll(filepath.Join(util.DataDir, "storage", "ai", "agent", "todos"))
+	os.RemoveAll(filepath.Join(util.DataDir, "storage", "ai", "agent", "operations", "image"))
 
 	logging.LogInfof("cleared workspace temp")
 }

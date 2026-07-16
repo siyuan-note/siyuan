@@ -26,7 +26,7 @@ import (
 	"image"
 	_ "image/gif"
 	"image/jpeg"
-	_ "image/png"
+	"image/png"
 	"io"
 	"maps"
 	"net"
@@ -232,11 +232,6 @@ func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string) *openai.Client {
 // 返回值：available 为可用模型清单（仅 ListModels 成功时填充），matched 表示 model 是否可用，
 // err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
 func TestModel(apiKey, apiBaseURL, model string, timeout int) (available []string, matched bool, err error) {
-	return TestModelWithCapabilities(apiKey, apiBaseURL, model, nil, timeout)
-}
-
-// TestModelWithCapabilities 根据模型能力选择安全的回退测试。图片生成模型不会为测试连接而产生计费图片。
-func TestModelWithCapabilities(apiKey, apiBaseURL, model string, capabilities []string, timeout int) (available []string, matched bool, err error) {
 	if 1 > timeout {
 		timeout = 30
 	}
@@ -258,28 +253,9 @@ func TestModelWithCapabilities(apiKey, apiBaseURL, model string, capabilities []
 		return
 	}
 
-	if hasModelCapability(capabilities, "image-output") {
-		return nil, false, fmt.Errorf("list models failed and image generation capability cannot be tested without creating a potentially billed image: %w", listErr)
-	}
-
 	// ListModels 不可用时回退到极简 Chat Completion 验证连通性与鉴权
 	logging.LogInfof("list models failed [%s], fallback to chat completion: %s", apiBaseURL, listErr)
 	messages := []openai.ChatCompletionMessage{{Role: "user", Content: "1"}}
-	if hasModelCapability(capabilities, "image-input") {
-		messages = []openai.ChatCompletionMessage{{
-			Role: openai.ChatMessageRoleUser,
-			MultiContent: []openai.ChatMessagePart{
-				{Type: openai.ChatMessagePartTypeText, Text: "Reply with 1."},
-				{
-					Type: openai.ChatMessagePartTypeImageURL,
-					ImageURL: &openai.ChatMessageImageURL{
-						URL:    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-						Detail: openai.ImageURLDetailLow,
-					},
-				},
-			},
-		}}
-	}
 	_, err = client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Model:               model,
 		Messages:            messages,
@@ -292,15 +268,6 @@ func TestModelWithCapabilities(apiKey, apiBaseURL, model string, capabilities []
 	matched = true
 	available = nil
 	return
-}
-
-func hasModelCapability(capabilities []string, target string) bool {
-	for _, capability := range capabilities {
-		if strings.EqualFold(strings.TrimSpace(capability), target) {
-			return true
-		}
-	}
-	return false
 }
 
 // TestEmbeddingModel 测试嵌入模型可用性，发送极简文本并返回首个向量维度。
@@ -570,7 +537,7 @@ func TestRerankModel(apiKey, apiBaseURL, model string, timeout int) (matched boo
 	return
 }
 
-// PrepareForVision 校验并缩放图片，统一编码为适合视觉模型输入的 JPEG。
+// PrepareForVision 校验并按需缩放图片，尽量保留视觉模型支持的原始格式和图片质量。
 func PrepareForVision(data []byte, maxBytes, maxPixels, maxEdge int) (PreparedImage, error) {
 	if len(data) == 0 {
 		return PreparedImage{}, errors.New("image data is empty")
@@ -581,6 +548,11 @@ func PrepareForVision(data []byte, maxBytes, maxPixels, maxEdge int) (PreparedIm
 	mimeType := mimetype.Detect(data).String()
 	if strings.Contains(mimeType, "svg") || bytes.Contains(bytes.ToLower(data[:min(len(data), 512)]), []byte("<svg")) {
 		return PreparedImage{}, errors.New("SVG images are not accepted by vision models")
+	}
+	switch mimeType {
+	case "image/gif", "image/jpeg", "image/png", "image/webp":
+	default:
+		return PreparedImage{}, fmt.Errorf("unsupported image type: %s", mimeType)
 	}
 	config, _, err := image.DecodeConfig(bytes.NewReader(data))
 	if err != nil {
@@ -594,17 +566,43 @@ func PrepareForVision(data []byte, maxBytes, maxPixels, maxEdge int) (PreparedIm
 	if err != nil {
 		return PreparedImage{}, errors.New("decode image failed: " + err.Error())
 	}
-	if maxEdge > 0 && (decoded.Bounds().Dx() > maxEdge || decoded.Bounds().Dy() > maxEdge) {
+	bounds := decoded.Bounds()
+	needsResize := maxEdge > 0 && (bounds.Dx() > maxEdge || bounds.Dy() > maxEdge)
+	if !needsResize && bounds.Dx() == config.Width && bounds.Dy() == config.Height && mimeType != "image/gif" {
+		return PreparedImage{
+			Data:       data,
+			MIMEType:   mimeType,
+			Width:      bounds.Dx(),
+			Height:     bounds.Dy(),
+			SourceSize: len(data),
+		}, nil
+	}
+	if needsResize {
 		decoded = imaging.Fit(decoded, maxEdge, maxEdge, imaging.Lanczos)
 	}
+	bounds = decoded.Bounds()
+	if mimeType == "image/png" || mimeType == "image/webp" {
+		var output bytes.Buffer
+		if err = png.Encode(&output, decoded); err != nil {
+			return PreparedImage{}, errors.New("encode image failed: " + err.Error())
+		}
+		if maxBytes <= 0 || output.Len() <= maxBytes {
+			return PreparedImage{
+				Data:       output.Bytes(),
+				MIMEType:   "image/png",
+				Width:      bounds.Dx(),
+				Height:     bounds.Dy(),
+				SourceSize: len(data),
+			}, nil
+		}
+	}
 	var output bytes.Buffer
-	if err = jpeg.Encode(&output, decoded, &jpeg.Options{Quality: 88}); err != nil {
+	if err = jpeg.Encode(&output, decoded, &jpeg.Options{Quality: 92}); err != nil {
 		return PreparedImage{}, errors.New("encode image failed: " + err.Error())
 	}
 	if maxBytes > 0 && output.Len() > maxBytes {
 		return PreparedImage{}, fmt.Errorf("prepared image exceeds size limit: %d bytes", maxBytes)
 	}
-	bounds := decoded.Bounds()
 	return PreparedImage{
 		Data:       output.Bytes(),
 		MIMEType:   "image/jpeg",
@@ -752,19 +750,7 @@ func downloadGeneratedImage(ctx context.Context, rawURL string) ([]byte, error) 
 	if err = CheckHostSSRF(parsed.Hostname()); err != nil {
 		return nil, err
 	}
-	client := &http.Client{
-		Timeout: 60 * time.Second,
-		Transport: &http.Transport{
-			Proxy:       http.ProxyFromEnvironment,
-			DialContext: generatedImageDialer().DialContext,
-		},
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 3 || req.URL.Scheme != "https" {
-				return errors.New("generated image redirect is not allowed")
-			}
-			return CheckHostSSRF(req.URL.Hostname())
-		},
-	}
+	client := generatedImageHTTPClient()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return nil, err
@@ -788,6 +774,21 @@ func downloadGeneratedImage(ctx context.Context, rawURL string) ([]byte, error) 
 		return nil, errors.New("generated image exceeds size limit")
 	}
 	return data, nil
+}
+
+func generatedImageHTTPClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			Proxy:       http.ProxyFromEnvironment,
+			DialContext: generatedImageDialer().DialContext,
+		},
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= 3 || req.URL.Scheme != "https" {
+				return errors.New("generated image redirect is not allowed")
+			}
+			return CheckHostSSRF(req.URL.Hostname())
+		},
+	}
 }
 
 func generatedImageDialer() *net.Dialer {

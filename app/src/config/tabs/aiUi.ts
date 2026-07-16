@@ -9,18 +9,6 @@ import {aiConfigApi} from "./aiRuntime";
 
 type ModelPickerGroup = "editing" | "agent" | "vision" | "imageGeneration";
 
-const modelCapabilities = ["text-input", "text-output", "tool-calling", "image-input", "image-output"];
-
-const capabilityForGroup = (group: ModelPickerGroup): string => {
-    if (group === "vision") {
-        return "image-input";
-    }
-    if (group === "imageGeneration") {
-        return "image-output";
-    }
-    return "";
-};
-
 export const getProvidersBlockKeywords = (): string[] => [
     window.siyuan.languages.apiProvider,
     window.siyuan.languages.apiProviderTip,
@@ -642,7 +630,7 @@ const syncModelPickerSelects = (root: HTMLElement) => {
 
         // 提供商优先级：UI 选中（已启用）→ 配置归属（已启用）→ 空
         const providerId = pickProviderId(enabledProviders, [uiProviderId, savedProviderId]);
-        const enabledModels = getEnabledModels(providerId, group);
+        const enabledModels = getEnabledModels(providerId);
         // 模型优先级：UI 选中 → 配置保存值，无效时回退到第一个可用模型
         const modelId = pickModelId(enabledModels, [uiModelId, storedModelId]);
 
@@ -678,13 +666,12 @@ const lookupModelOwner = (modelId: string): {providerId: string; modelId: string
 const getEnabledProviders = () =>
     window.siyuan.config.ai.providers.filter((provider) => provider.enabled);
 
-const getEnabledModels = (providerId: string, group?: ModelPickerGroup): Config.IModel[] => {
+const getEnabledModels = (providerId: string): Config.IModel[] => {
     const provider = findProvider(providerId);
     if (!provider) {
         return [];
     }
-    const requiredCapability = group ? capabilityForGroup(group) : "";
-    return provider.models.filter((model) => model.enabled && (!requiredCapability || !model.capabilities?.length || model.capabilities.includes(requiredCapability)));
+    return provider.models.filter((model) => model.enabled);
 };
 
 const buildProviderOptionsHtml = (enabledProviders: Config.IProvider[], providerId: string): string =>
@@ -732,7 +719,6 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
         id: "",
         name: "",
         enabled: true,
-        capabilities: ["text-input", "text-output"],
     } : provider.models.find((item) => item.id === modelId);
     if (!isNew && !initialModel) {
         return;
@@ -759,11 +745,6 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
         <div class="fn__hr"></div>
         <input class="b3-text-field fn__block" id="aiModelDisplayName" type="text" spellcheck="false" value="${Lute.EscapeHTMLStr(initialModel.displayName ?? "")}"/>
     </div>
-    <div class="b3-label b3-label--inner">
-        <div class="config-name">${window.siyuan.languages.type}</div>
-        <div class="fn__hr--small"></div>
-        ${modelCapabilities.map((capability) => `<label class="b3-label__text" style="display: block;margin: 6px 0;"><input type="checkbox" data-type="aiModelCapability" value="${capability}"${initialModel.capabilities?.includes(capability) ? " checked" : ""}/> <code class="fn__code">${capability}</code></label>`).join("")}
-    </div>
     <div style="text-align: right;">
         <button class="b3-button b3-button--outline" id="aiModelTestBtn"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button>
     </div>
@@ -781,7 +762,6 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
         const el = dialog.element.querySelector<HTMLInputElement | HTMLSelectElement>("#aiModelName");
         return (el?.value ?? "").trim();
     };
-    const getModelCapabilities = () => Array.from(dialog.element.querySelectorAll<HTMLInputElement>("[data-type='aiModelCapability']:checked")).map((item) => item.value);
     btns[0].addEventListener("click", () => dialog.destroy());
     // 拉取 Provider 可用模型清单，成功后把文本框替换为下拉框供选择
     dialog.element.querySelector<HTMLElement>("#aiModelFetchBtn")?.addEventListener("click", () => {
@@ -838,7 +818,7 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
             svgEl.style.animation = "";
             labelSpan.textContent = window.siyuan.languages.testConnection;
         };
-        fetchPost("/api/ai/testModel", {provider: providerId, model: modelName, capabilities: getModelCapabilities()}, (response) => {
+        fetchPost("/api/ai/testModel", {provider: providerId, model: modelName}, (response) => {
             restoreBtn();
             const data = response.data || {};
             if (data.matched) {
@@ -868,7 +848,6 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
             ...initialModel,
             name: modelName,
             displayName: dialog.element.querySelector<HTMLInputElement>("#aiModelDisplayName").value,
-            capabilities: getModelCapabilities(),
         };
         const nextProviders = window.siyuan.config.ai.providers.map((item) => {
             if (item.id !== providerId) {
@@ -913,7 +892,7 @@ export const genModelPickerHtml = (group: ModelPickerGroup): string => {
     const savedModelId = window.siyuan.config.ai[group].modelId;
     const {providerId, modelId: storedModelId} = lookupModelOwner(savedModelId);
     const enabledProviders = getEnabledProviders();
-    const enabledModels = getEnabledModels(providerId, group);
+    const enabledModels = getEnabledModels(providerId);
     const modelId = pickModelId(enabledModels, [storedModelId]);
     let desc: string;
     if (group === "editing") {
@@ -965,7 +944,7 @@ export const mountModelPickerBlock = (root: HTMLElement, group: ModelPickerGroup
         }
         const providerId = providerSelect.value;
         const {modelId: storedModelId} = lookupModelOwner(window.siyuan.config.ai[group].modelId);
-        const enabledModels = getEnabledModels(providerId, group);
+        const enabledModels = getEnabledModels(providerId);
         const isProviderChange = selectEl.dataset.type === "modelPickerProvider";
         const modelId = pickModelId(enabledModels, isProviderChange ? [storedModelId] : [modelSelect.value]);
         if (isProviderChange) {

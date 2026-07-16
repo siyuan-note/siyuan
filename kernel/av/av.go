@@ -467,6 +467,15 @@ func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
 	return getAttributeViewNameByPathInBox(avJSONPath, "")
 }
 
+// GetAttributeViewNameInBox 获取指定笔记本中的数据库名称。
+func GetAttributeViewNameInBox(avID, boxID string) (ret string, err error) {
+	avJSONPath, _ := FindAttributeViewPathInBox(avID, boxID)
+	if avJSONPath == "" {
+		return
+	}
+	return getAttributeViewNameByPathInBox(avJSONPath, boxID)
+}
+
 func GetAttributeViewContent(avID string) (content string) {
 	if "" == avID {
 		return

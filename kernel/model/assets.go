@@ -283,11 +283,6 @@ type ImageArtifactRef struct {
 	DocumentID string `json:"documentId,omitempty"`
 }
 
-const (
-	capabilityImageInput  = "image-input"
-	capabilityImageOutput = "image-output"
-)
-
 type DocumentImageList struct {
 	DocumentID string             `json:"documentId"`
 	Images     []ImageArtifactRef `json:"images"`
@@ -338,6 +333,31 @@ type GenerateDocumentImageRequest struct {
 type GenerateDocumentImageResult struct {
 	Artifact      ImageArtifactRef `json:"artifact"`
 	RevisedPrompt string           `json:"revisedPrompt,omitempty"`
+}
+
+type imageExecutionUnknownError struct {
+	err error
+}
+
+func (err *imageExecutionUnknownError) Error() string {
+	return err.err.Error()
+}
+
+func (err *imageExecutionUnknownError) Unwrap() error {
+	return err.err
+}
+
+// IsImageExecutionUnknown 判断图片提供商调用是否已经开始，调用方不得自动重试这类错误。
+func IsImageExecutionUnknown(err error) bool {
+	var target *imageExecutionUnknownError
+	return errors.As(err, &target)
+}
+
+func markImageExecutionUnknown(err error) error {
+	if err == nil || IsImageExecutionUnknown(err) {
+		return err
+	}
+	return &imageExecutionUnknownError{err: err}
 }
 
 // ListDocumentImages 返回文档引用的本地图片，供智能体工具和编辑器功能复用。
@@ -399,7 +419,7 @@ func AnalyzeImage(ctx context.Context, data []byte, question, detail string) (An
 		return AnalyzeImageResult{}, errors.New("AI configuration is unavailable")
 	}
 	provider, visionModel := Conf.AI.GetVisionModel()
-	if err := validateMultimodalModel(provider, visionModel, capabilityImageInput); err != nil {
+	if err := validateImageModel(provider, visionModel); err != nil {
 		return AnalyzeImageResult{}, err
 	}
 	prepared, err := util.PrepareForVision(data, Conf.AI.Vision.MaxImageBytes, Conf.AI.Vision.MaxPixels, Conf.AI.Vision.MaxEdge)
@@ -410,7 +430,7 @@ func AnalyzeImage(ctx context.Context, data []byte, question, detail string) (An
 		provider.APIKey, provider.BaseURL, visionModel.Name, Conf.AI.Vision.RequestTimeout,
 	).Analyze(ctx, prepared, question, detail)
 	if err != nil {
-		return AnalyzeImageResult{}, fmt.Errorf("analyze image failed: %w", err)
+		return AnalyzeImageResult{}, markImageExecutionUnknown(fmt.Errorf("analyze image failed: %w", err))
 	}
 	return AnalyzeImageResult{Analysis: analysis, Width: prepared.Width, Height: prepared.Height}, nil
 }
@@ -421,7 +441,7 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 		return GenerateImageResult{}, errors.New("AI configuration is unavailable")
 	}
 	provider, generationModel := Conf.AI.GetImageGenerationModel()
-	if err := validateMultimodalModel(provider, generationModel, capabilityImageOutput); err != nil {
+	if err := validateImageModel(provider, generationModel); err != nil {
 		return GenerateImageResult{}, err
 	}
 	prompt := strings.TrimSpace(request.Prompt)
@@ -440,10 +460,10 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 		Prompt: prompt, Size: size, Quality: quality, OutputFormat: outputFormat,
 	})
 	if err != nil {
-		return GenerateImageResult{}, fmt.Errorf("generate image failed: %w", err)
+		return GenerateImageResult{}, markImageExecutionUnknown(fmt.Errorf("generate image failed: %w", err))
 	}
 	if ctx.Err() != nil {
-		return GenerateImageResult{}, errors.New("image generation was cancelled")
+		return GenerateImageResult{}, markImageExecutionUnknown(errors.New("image generation was cancelled"))
 	}
 	return GenerateImageResult{
 		Data: generated.Data, MIMEType: generated.MIMEType, Extension: generated.Extension, RevisedPrompt: generated.RevisedPrompt,
@@ -464,7 +484,7 @@ func GenerateDocumentImage(ctx context.Context, request GenerateDocumentImageReq
 	}
 	assetPath, _, err := InsertAssetBytes(bt.RootID, "ai-image"+generated.Extension, generated.Data)
 	if err != nil {
-		return GenerateDocumentImageResult{}, fmt.Errorf("save generated image failed: %w", err)
+		return GenerateDocumentImageResult{}, markImageExecutionUnknown(fmt.Errorf("save generated image failed: %w", err))
 	}
 	return GenerateDocumentImageResult{
 		Artifact: ImageArtifactRef{
@@ -482,23 +502,14 @@ func resolveMultimodalDocument(documentID string) (*treenode.BlockTree, error) {
 	return bt, nil
 }
 
-func validateMultimodalModel(provider *conf.Provider, imageModel *conf.Model, capability string) error {
+func validateImageModel(provider *conf.Provider, imageModel *conf.Model) error {
 	if provider == nil || imageModel == nil {
-		return fmt.Errorf("model for capability %s is not configured", capability)
+		return errors.New("image model is not configured")
 	}
 	if provider.Protocol != "" && provider.Protocol != "openai" {
 		return fmt.Errorf("unsupported multimodal provider protocol: %s", provider.Protocol)
 	}
-	if len(imageModel.Capabilities) == 0 {
-		// 旧配置没有能力声明时保持兼容，新配置通过能力标记收窄选择范围。
-		return nil
-	}
-	for _, current := range imageModel.Capabilities {
-		if current == capability {
-			return nil
-		}
-	}
-	return fmt.Errorf("model %s does not declare capability %s", imageModel.Name, capability)
+	return nil
 }
 
 func documentReferencesImage(rootID, assetPath string) bool {

@@ -748,6 +748,14 @@ declare namespace Config {
          */
         alwaysSelectOpenedFile: boolean;
         /**
+         * Whether clicking a document icon expands or collapses its child documents
+         */
+        docIconClickExpand: boolean;
+        /**
+         * Whether clicking a parent document title expands or collapses its child documents
+         */
+        parentDocClickExpand: boolean;
+        /**
          * Whether to close all tabs when starting
          */
         closeTabsOnStart: boolean;

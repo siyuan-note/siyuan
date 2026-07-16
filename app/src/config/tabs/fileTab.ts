@@ -7,6 +7,9 @@ import type {SettingTabBuilder} from "../setting/builder";
 import {controlNumber, controlSelect, controlString} from "../setting/control";
 import {genConfigItemName} from "../render/fragments";
 import {genButtonHtml, genNumberInputHtml} from "../render/render";
+/// #if !MOBILE
+import {getAllModels} from "../../layout/getAll";
+/// #endif
 
 const isMobileKernelContainer = () =>
     ["android", "ios", "harmony"].includes(window.siyuan.config.system.container);
@@ -29,6 +32,22 @@ const genNotebookSavePathHtml = (
 </div>`;
 
 /// #if !MOBILE
+const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("behavior", window.siyuan.languages.configGroupBehavior);
+
+    group.switch("fileTree.docIconClickExpand", {
+        title: window.siyuan.languages.docIconClickExpand,
+        desc: window.siyuan.languages.docIconClickExpandTip,
+        save: (value) => fileConfigApi.patch("docIconClickExpand", value, () => {
+            getAllModels().files.forEach((files) => files.updateDocIconAction());
+        }),
+    });
+    group.switch("fileTree.parentDocClickExpand", {
+        title: window.siyuan.languages.parentDocClickExpand,
+        desc: window.siyuan.languages.parentDocClickExpandTip,
+    });
+};
+
 const registerFileTabsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("tabs", window.siyuan.languages.configGroupTabs);
 
@@ -259,6 +278,7 @@ const registerFileOthersGroup = (tab: SettingTabBuilder) => {
 
 export const registerFileTab = (tab: SettingTabBuilder) => {
     /// #if !MOBILE
+    registerFileTreeBehaviorGroup(tab);
     registerFileTabsGroup(tab);
     /// #endif
     registerFileNewDocumentGroup(tab);

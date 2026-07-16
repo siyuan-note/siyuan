@@ -1,5 +1,6 @@
 import {
     hasClosestBlock,
+    hasClosestByAttribute,
     hasClosestByClassName,
     hasClosestByTag,
     hasTopClosestByClassName,
@@ -3013,7 +3014,8 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                 marginHeight = 8;
             }
         }
-        this.element.style.top = `${Math.max(rect.top + marginHeight, contentTop)}px`;
+        const foldElement = hasClosestByAttribute(element.parentElement, "fold", "1") as HTMLElement;
+        this.element.style.top = `${Math.max(rect.top + marginHeight, contentTop, foldElement ? foldElement.getBoundingClientRect().top : 0)}px`;
         let left = rect.left - this.element.clientWidth - space;
         if ((nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1)) {
             // 嵌入块为列表时

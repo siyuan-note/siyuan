@@ -371,3 +371,90 @@ func importZipMd(c *gin.Context) {
 		return
 	}
 }
+
+func startObsidianVaultAnalysis(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var localPath string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("localPath", &localPath, true, true)) {
+		return
+	}
+	task, err := model.StartObsidianVaultAnalysis(localPath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = task
+}
+
+func getObsidianVaultTask(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var taskID string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("taskID", &taskID, true, true)) || util.InvalidIDPattern(taskID, ret) {
+		return
+	}
+	task, err := model.GetObsidianVaultTask(taskID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = task
+}
+
+func startObsidianVaultImport(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var taskID, notebookName string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("taskID", &taskID, true, true),
+		util.BindJsonArg("notebookName", &notebookName, true, true)) || util.InvalidIDPattern(taskID, ret) {
+		return
+	}
+	task, err := model.StartObsidianVaultImport(taskID, notebookName)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = task
+}
+
+func cancelObsidianVaultTask(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var taskID string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("taskID", &taskID, true, true)) || util.InvalidIDPattern(taskID, ret) {
+		return
+	}
+	task, err := model.CancelObsidianVaultTask(taskID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = task
+		return
+	}
+	ret.Data = task
+}

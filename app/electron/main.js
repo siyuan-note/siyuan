@@ -47,13 +47,24 @@ const appVer = app.getVersion();
 const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
 const appCrashLogPath = path.join(confDir, "app.crash.log");
+const appCrashMarkerPath = path.join(confDir, "app.crash.json");
+const systemShutdownNone = 0;
+const systemShutdownQueried = 1;
+const systemShutdownEnding = 2;
+const safeModeReasons = new Set(["abnormal-exit", "killed", "crashed", "oom", "memory-eviction"]);
+const noSafeModeReasons = new Set(["clean-exit", "launch-failed", "integrity-failure"]);
+const expectedRendererExitIds = new Set();
+const handledCrashWebContents = new Set();
 let bootWindow;
 let latestActiveWindow;
 let firstOpen = false;
-let workspaces = []; // workspaceDir, id, browserWindow, tray, hideShortcut
+let workspaces = []; // workspaceDir, id, port, webContentsId, browserWindow, tray, hideShortcut
 let kernelPort = 6806;
 let resetWindowStateOnRestart = false;
 let openAsHidden = false;
+let systemShutdownState = systemShutdownNone;
+let systemShutdownResetTimer;
+const openDialogSingletons = new Set();
 const isOpenAsHidden = function () {
     return 1 === workspaces.length && openAsHidden;
 };
@@ -283,22 +294,24 @@ const resolveAppLanguage = (languageTags) => {
     return languageMapping[language] || "en";
 };
 
+const markExpectedRendererExit = (window) => {
+    if (window && !window.isDestroyed()) {
+        expectedRendererExitIds.add(window.webContents.id);
+    }
+};
+
 const exitApp = (port, errorWindowId) => {
-    let tray;
-    let mainWindow;
+    const workspaceIndex = workspaces.findIndex((item) => port.toString() === item.port.toString());
+    const workspace = -1 < workspaceIndex ? workspaces[workspaceIndex] : undefined;
+    const mainWindow = workspace ? workspace.browserWindow : undefined;
+    const tray = workspace ? workspace.tray : undefined;
 
     // 关闭端口相同的所有非主窗口
     BrowserWindow.getAllWindows().forEach((item) => {
         try {
             const currentURL = new URL(item.getURL());
             if (port.toString() === currentURL.port.toString()) {
-                const hasMain = workspaces.find((workspaceItem) => {
-                    if (workspaceItem.browserWindow.id === item.id) {
-                        mainWindow = item;
-                        return true;
-                    }
-                });
-                if (!hasMain) {
+                if (!mainWindow || mainWindow.id !== item.id) {
                     item.destroy();
                 }
             }
@@ -306,16 +319,13 @@ const exitApp = (port, errorWindowId) => {
             // load file is not a url
         }
     });
-    workspaces.find((item, index) => {
-        if (mainWindow && mainWindow.id === item.browserWindow.id) {
-            if (workspaces.length > 1) {
-                item.browserWindow.destroy();
-            }
-            workspaces.splice(index, 1);
-            tray = item.tray;
-            return true;
+    if (workspace) {
+        if (workspaces.length > 1 && mainWindow && !mainWindow.isDestroyed()) {
+            markExpectedRendererExit(mainWindow);
+            mainWindow.destroy();
         }
-    });
+        workspaces.splice(workspaceIndex, 1);
+    }
     if (tray && ("win32" === process.platform || "linux" === process.platform)) {
         tray.destroy();
     }
@@ -344,12 +354,14 @@ const exitApp = (port, errorWindowId) => {
         }
 
         if (errorWindowId) {
+            markExpectedRendererExit(mainWindow);
             BrowserWindow.getAllWindows().forEach((item) => {
                 if (errorWindowId !== item.id) {
                     item.destroy();
                 }
             });
         } else {
+            markExpectedRendererExit(mainWindow);
             app.exit();
         }
         globalShortcut.unregisterAll();
@@ -362,6 +374,69 @@ const localServer = "https://127.0.0.1";
 const getServer = (port = kernelPort) => {
     return localServer + ":" + port;
 };
+
+const requestKernelExit = (port, options = {}) => {
+    if (!port) {
+        return Promise.resolve();
+    }
+
+    const exitOptions = Object.assign({
+        force: false,
+        setCurrentWorkspace: true,
+        execInstallPkg: 1,
+    }, options);
+    return net.fetch(getServer(port) + "/api/system/exit", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(exitOptions),
+    }).catch((error) => {
+        writeLog("shutdown kernel failed [port=" + port + "]: " + error);
+    });
+};
+
+const markSystemShutdownQueried = () => {
+    if (systemShutdownState === systemShutdownEnding) {
+        return;
+    }
+
+    systemShutdownState = systemShutdownQueried;
+    clearTimeout(systemShutdownResetTimer);
+    systemShutdownResetTimer = setTimeout(() => {
+        systemShutdownState = systemShutdownNone;
+        writeLog("system shutdown query expired");
+    }, 30000);
+};
+
+const beginSystemShutdown = () => {
+    if (systemShutdownState === systemShutdownEnding) {
+        return;
+    }
+
+    systemShutdownState = systemShutdownEnding;
+    clearTimeout(systemShutdownResetTimer);
+    workspaces.forEach((workspaceItem) => {
+        requestKernelExit(workspaceItem.port, {
+            force: true,
+            setCurrentWorkspace: false,
+        });
+    });
+};
+
+if (process.platform === "win32") {
+    // Windows 关机、重启或注销时，先标记查询状态，确定会话结束后再通知内核退出。
+    app.on("browser-window-created", (event, window) => {
+        window.on("query-session-end", () => {
+            writeLog("query-session-end");
+            markSystemShutdownQueried();
+        });
+        window.on("session-end", () => {
+            writeLog("session-end");
+            beginSystemShutdown();
+        });
+    });
+}
 
 const sleep = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -398,7 +473,7 @@ const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️") => {
     return errWindow.id;
 };
 
-const initMainWindow = () => {
+const initMainWindow = (currentKernelPort = kernelPort) => {
     if (!app.isReady()) {
         writeLog("initMainWindow: app not ready, skipping");
         return;
@@ -511,9 +586,9 @@ const initMainWindow = () => {
     // pending（既不 resolve 也不 reject），会导致 loadURL 永不执行，主窗口卡在启动页无法显示。
     // 这里无论 setProxy 是否完成，最多等待 5 秒后强制加载主界面。
     const loadMainURL = () => {
-        currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + Date.now());
+        currentWindow.loadURL(getServer(currentKernelPort) + "/stage/build/app/?v=" + Date.now());
     };
-    net.fetch(getServer() + "/api/system/getNetwork", {method: "POST"}).then((response) => {
+    net.fetch(getServer(currentKernelPort) + "/api/system/getNetwork", {method: "POST"}).then((response) => {
         return response.json();
     }).then((response) => {
         const setProxyDone = setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents);
@@ -619,6 +694,8 @@ const initMainWindow = () => {
     });
     workspaces.push({
         browserWindow: currentWindow,
+        webContentsId: currentWindow.webContents.id,
+        port: currentKernelPort,
     });
     // loadURL 后设置超时兜底：前端 app bundle 加载或初始化异常导致 siyuan-ready-to-show 迟迟不发时，
     // 强制销毁 boot 窗口并显示主窗口，避免永久卡在启动页
@@ -722,7 +799,8 @@ const initKernel = (workspace, port, lang, safeMode) => {
             resolve(false);
             return;
         }
-        const cmds = ["serve", "--port", kernelPort, "--wd", appDir, "--attach-ui"];
+        const currentKernelPort = kernelPort;
+        const cmds = ["serve", "--port", currentKernelPort, "--wd", appDir, "--attach-ui"];
         if (isDevEnv && workspaces.length === 0) {
             cmds.push("--mode", "dev");
         }
@@ -744,8 +822,7 @@ const initKernel = (workspace, port, lang, safeMode) => {
                 stdio: "ignore",
             },);
 
-            const currentKernelPort = kernelPort;
-            writeLog("booted kernel process [pid=" + kernelProcess.pid + ", port=" + kernelPort + "]");
+            writeLog("booted kernel process [pid=" + kernelProcess.pid + ", port=" + currentKernelPort + "]");
             kernelProcess.on("close", (code) => {
                 writeLog(`kernel [pid=${kernelProcess.pid}, port=${currentKernelPort}] exited with code [${code}]`);
                 if (0 !== code) {
@@ -789,7 +866,7 @@ const initKernel = (workspace, port, lang, safeMode) => {
         writeLog("checking kernel version");
         for (; ;) {
             try {
-                const apiResult = await net.fetch(getServer() + "/api/system/version");
+                const apiResult = await net.fetch(getServer(currentKernelPort) + "/api/system/version");
                 apiData = await apiResult.json();
                 break;
             } catch (e) {
@@ -809,7 +886,7 @@ const initKernel = (workspace, port, lang, safeMode) => {
             writeLog("got kernel version [" + apiData.data + "]");
             if (!isDevEnv && apiData.data !== appVer) {
                 writeLog(`kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`);
-                net.fetch(getServer() + "/api/system/exit", {method: "POST"});
+                requestKernelExit(currentKernelPort);
                 bootWindow.destroy();
                 resolve(false);
             } else {
@@ -824,26 +901,26 @@ const initKernel = (workspace, port, lang, safeMode) => {
                         showErrorWindow("启动超时", "Boot timeout",
                             "<div>内核启动超时，请查看 工作空间/temp/siyuan.log 获取详细报错信息，或尝试重启思源。</div>" +
                             "<div>Kernel boot timed out. Please check workspace/temp/siyuan.log for details, or try restarting SiYuan.</div>");
-                        net.fetch(getServer() + "/api/system/exit", {method: "POST"});
+                        requestKernelExit(currentKernelPort);
                         bootWindow.destroy();
                         resolve(false);
                         progressing = true;
                         break;
                     }
                     try {
-                        const progressResult = await net.fetch(getServer() + "/api/system/bootProgress");
+                        const progressResult = await net.fetch(getServer(currentKernelPort) + "/api/system/bootProgress");
                         const progressData = await progressResult.json();
                         if (progressData.data.progress >= 100) {
                             // 内核完成后等待动画快进收尾（200ms）再进入主窗口
                             await sleep(200);
-                            resolve(true);
+                            resolve(currentKernelPort);
                             progressing = true;
                         } else {
                             await sleep(100);
                         }
                     } catch (e) {
                         writeLog("get boot progress failed: " + e.message);
-                        net.fetch(getServer() + "/api/system/exit", {method: "POST"});
+                        requestKernelExit(currentKernelPort);
                         bootWindow.destroy();
                         resolve(false);
                         progressing = true;
@@ -867,11 +944,38 @@ app.whenReady().then(() => {
         }
     });
 
-    // 渲染进程崩溃监听，应用级别监听比 webContents 级别更早注册、更可靠（可覆盖所有渲染进程）
+    // 渲染进程崩溃监听，只有工作空间主窗口的非预期崩溃才会触发安全模式。
     app.on("render-process-gone", (event, webContents, details) => {
         writeLog("Render process gone [reason=" + details.reason + ", exitCode=" + details.exitCode + "]");
-        writeAppCrashLog(details.reason, details.exitCode);
-        exitApp(kernelPort); // 退出当前工作空间的窗口和内核进程，下次启动时由用户选择是否以安全模式启动
+        if (systemShutdownState !== systemShutdownNone) {
+            writeLog("ignore renderer exit during system shutdown [webContentsId=" + webContents.id + "]");
+            return;
+        }
+        if (expectedRendererExitIds.delete(webContents.id)) {
+            writeLog("ignore expected renderer exit [webContentsId=" + webContents.id + "]");
+            return;
+        }
+
+        const workspace = workspaces.find((item) => item.webContentsId === webContents.id);
+        if (!workspace) {
+            writeLog("ignore non-workspace renderer exit [webContentsId=" + webContents.id + "]");
+            return;
+        }
+        if (!safeModeReasons.has(details.reason)) {
+            writeLog("ignore renderer exit reason [reason=" + details.reason + "]");
+            return;
+        }
+        if (handledCrashWebContents.has(webContents.id)) {
+            return;
+        }
+
+        handledCrashWebContents.add(webContents.id);
+        writeAppCrashMarker(workspace, details);
+        requestKernelExit(workspace.port, {
+            force: true,
+            setCurrentWorkspace: false,
+        });
+        exitApp(workspace.port); // 退出崩溃的工作空间，下次启动时由用户选择启动方式。
     });
 
     const resetTrayMenu = (tray, lang, mainWindow) => {
@@ -982,6 +1086,19 @@ app.whenReady().then(() => {
             return clipboard.read(data.format);
         }
         if (data.cmd === "showOpenDialog") {
+            if (data.singleton) {
+                const singleton = `${event.sender.id}:${data.singleton}`;
+                if (openDialogSingletons.has(singleton)) {
+                    return {canceled: true, filePaths: []};
+                }
+                openDialogSingletons.add(singleton);
+                const options = {...data};
+                delete options.cmd;
+                delete options.singleton;
+                return dialog.showOpenDialog(options).finally(() => {
+                    openDialogSingletons.delete(singleton);
+                });
+            }
             return dialog.showOpenDialog(data);
         }
         if (data.cmd === "getContentsId") {
@@ -1352,17 +1469,17 @@ app.whenReady().then(() => {
             }
         });
         if (!foundWorkspace) {
-            initKernel(data.workspace, "", "").then((isSucc) => {
-                if (isSucc) {
-                    initMainWindow();
+            initKernel(data.workspace, "", "").then((startedKernelPort) => {
+                if (startedKernelPort) {
+                    initMainWindow(startedKernelPort);
                 }
             });
         }
     });
     ipcMain.handle("siyuan-init", async (event, data) => {
         const exitWS = workspaces.find(item => {
-            if (event.sender.id === item.browserWindow.webContents.id && item.workspaceDir) {
-                if (item.tray && "win32" === process.platform || "linux" === process.platform) {
+            if (event.sender.id === item.webContentsId && item.workspaceDir) {
+                if (item.tray && ("win32" === process.platform || "linux" === process.platform)) {
                     // Tray menu text does not change with the appearance language https://github.com/siyuan-note/siyuan/issues/7935
                     resetTrayMenu(item.tray, data.languages, item.browserWindow);
                 }
@@ -1373,27 +1490,27 @@ app.whenReady().then(() => {
             return;
         }
 
-        workspaces.find(item => {
-            if (!item.workspaceDir) {
-                item.workspaceDir = data.workspaceDir;
-                let tray;
-                if ("win32" === process.platform || "linux" === process.platform) {
-                    // 系统托盘
-                    tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
-                    tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
-                    const mainWindow = getWindowByContentId(event.sender.id);
-                    if (!mainWindow || mainWindow.isDestroyed()) {
-                        return;
-                    }
+        const workspaceItem = workspaces.find((item) => event.sender.id === item.webContentsId);
+        if (workspaceItem) {
+            workspaceItem.workspaceDir = data.workspaceDir;
+            let tray;
+            if ("win32" === process.platform || "linux" === process.platform) {
+                // 系统托盘
+                tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
+                tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
+                const mainWindow = getWindowByContentId(event.sender.id);
+                if (!mainWindow || mainWindow.isDestroyed()) {
+                    tray.destroy();
+                    tray = undefined;
+                } else {
                     resetTrayMenu(tray, data.languages, mainWindow);
                     tray.on("click", () => {
                         showHideWindow(tray, data.languages, mainWindow);
                     });
                 }
-                item.tray = tray;
-                return true;
             }
-        });
+            workspaceItem.tray = tray;
+        }
         await net.fetch(getServer(data.port) + "/api/system/uiproc?pid=" + process.pid, {method: "POST"});
     });
     ipcMain.on("siyuan-hotkey", (event, data) => {
@@ -1476,6 +1593,7 @@ app.whenReady().then(() => {
             args: data.openAsHidden ? ["--openAsHidden"] : ""
         });
     });
+    const appCrashInfo = readAppCrashInfo();
     if (firstOpen) {
         const firstOpenWindow = new BrowserWindow({
             width: Math.floor(screen.getPrimaryDisplay().size.width * 0.6),
@@ -1508,15 +1626,15 @@ app.whenReady().then(() => {
         firstOpenWindow.show();
         // 初始化启动
         ipcMain.on("siyuan-first-init", (event, data) => {
-            initKernel(data.workspace, "", data.lang).then((isSucc) => {
-                if (isSucc) {
-                    initMainWindow();
+            initKernel(data.workspace, "", data.lang).then((startedKernelPort) => {
+                if (startedKernelPort) {
+                    initMainWindow(startedKernelPort);
                 }
             });
             firstOpenWindow.destroy();
         });
-    } else if (hasAppCrashLog()) {
-        // 上次渲染进程崩溃，弹出安全模式选择窗口
+    } else if (appCrashInfo) {
+        // 上次工作空间渲染进程崩溃，弹出安全模式选择窗口。
         const safeModeWindow = new BrowserWindow({
             width: Math.floor(screen.getPrimaryDisplay().size.width * 0.55),
             height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.65),
@@ -1537,12 +1655,11 @@ app.whenReady().then(() => {
         // 改进桌面端初始化时使用的外观语言 https://github.com/siyuan-note/siyuan/issues/6803
         const languages = app.getPreferredSystemLanguages();
         const language = resolveAppLanguage(languages);
-        let crashInfo = "";
-        try {
-            crashInfo = fs.readFileSync(appCrashLogPath, "utf8");
-        } catch (e) {
-            writeLog("read crash log failed: " + e);
+        let crashWorkspace = appCrashInfo.workspaceDir || lastWorkspacePath;
+        if (!appCrashInfo.workspaceDir && !isDirectory(crashWorkspace)) {
+            crashWorkspace = availableWorkspaces[availableWorkspaces.length - 1] || lastWorkspacePath;
         }
+        const crashWorkspaceMissing = !isDirectory(crashWorkspace);
         safeModeWindow.loadFile(safeModeHTMLPath, {
             query: {
                 lang: language,
@@ -1550,17 +1667,19 @@ app.whenReady().then(() => {
                 v: appVer,
                 icon: path.join(appDir, "stage", "icon-large.png"),
                 crash: "1",
-                workspace: lastWorkspacePath,
-                crashInfo: crashInfo,
+                workspace: crashWorkspace,
+                crashWorkspaceMissing: crashWorkspaceMissing ? "1" : "0",
+                missing: crashWorkspaceMissing ? crashWorkspace : "",
+                crashInfo: appCrashInfo.crashInfo,
             },
         });
         safeModeWindow.show();
-        // 用户选择启动方式后启动内核，仅在崩溃恢复路径下、内核启动成功后删除崩溃日志
+        // 用户选择启动方式后启动内核，仅在内核启动成功后删除崩溃信息。
         ipcMain.on("siyuan-select-workspace", (event, data) => {
-            initKernel(data.workspace, "", data.lang, data.safeMode).then((isSucc) => {
-                if (isSucc) {
-                    clearAppCrashLog();
-                    initMainWindow();
+            initKernel(data.workspace, "", data.lang, data.safeMode).then((startedKernelPort) => {
+                if (startedKernelPort) {
+                    clearAppCrashInfo();
+                    initMainWindow(startedKernelPort);
                 }
             });
             safeModeWindow.destroy();
@@ -1600,9 +1719,9 @@ app.whenReady().then(() => {
         missingWorkspaceWindow.show();
         // 选择工作空间后启动内核
         ipcMain.on("siyuan-select-workspace", (event, data) => {
-            initKernel(data.workspace, "", data.lang).then((isSucc) => {
-                if (isSucc) {
-                    initMainWindow();
+            initKernel(data.workspace, "", data.lang).then((startedKernelPort) => {
+                if (startedKernelPort) {
+                    initMainWindow(startedKernelPort);
                 }
             });
             missingWorkspaceWindow.destroy();
@@ -1620,9 +1739,9 @@ app.whenReady().then(() => {
         if (safeMode) {
             writeLog("got arg [--safe-mode=true]");
         }
-        initKernel(workspace, port, "", safeMode).then((isSucc) => {
-            if (isSucc) {
-                initMainWindow();
+        initKernel(workspace, port, "", safeMode).then((startedKernelPort) => {
+            if (startedKernelPort) {
+                initMainWindow(startedKernelPort);
             }
         });
     }
@@ -1663,10 +1782,7 @@ app.whenReady().then(() => {
     });
     powerMonitor.on("shutdown", () => {
         writeLog("system shutdown");
-        workspaces.forEach(item => {
-            const currentURL = new URL(item.browserWindow.getURL());
-            net.fetch(getServer(currentURL.port) + "/api/system/exit", {method: "POST"});
-        });
+        beginSystemShutdown();
     });
     powerMonitor.on("lock-screen", () => {
         writeLog("system lock-screen");
@@ -1727,9 +1843,9 @@ app.on("second-instance", (event, argv) => {
         return;
     }
     if (workspace) {
-        initKernel(workspace, port, "").then((isSucc) => {
-            if (isSucc) {
-                initMainWindow();
+        initKernel(workspace, port, "").then((startedKernelPort) => {
+            if (startedKernelPort) {
+                initMainWindow(startedKernelPort);
             }
         });
         return;
@@ -1802,33 +1918,121 @@ function writeLog(out) {
     }
 }
 
-// 记录渲染进程崩溃信息，多次崩溃追加记录，供下次启动时判断是否进入安全模式
-const writeAppCrashLog = (reason, exitCode) => {
+// 同步记录工作空间主渲染进程崩溃标记，确保主进程退出前落盘。
+const writeAppCrashMarker = (workspace, details) => {
+    const timestamp = new Date().toISOString();
+    const marker = {
+        version: 1,
+        timestamp: timestamp,
+        reason: details.reason,
+        exitCode: details.exitCode,
+        workspaceDir: workspace.workspaceDir || "",
+    };
+
     try {
-        const line = new Date().toISOString().replace(/T/, " ").replace(/\..+/, "") +
-            " Render process gone [reason=" + reason + ", exitCode=" + exitCode + "]\n";
-        // 与 writeLog 一致，用 readFileSync + writeFileSync 实现，确保同步落盘
+        fs.writeFileSync(appCrashMarkerPath, JSON.stringify(marker, null, 2));
+    } catch (e) {
+        console.error(e);
+    }
+
+    try {
+        const line = timestamp.replace(/T/, " ").replace(/\..+/, "") +
+            " Render process gone [reason=" + details.reason + ", exitCode=" + details.exitCode +
+            ", workspace=" + JSON.stringify(marker.workspaceDir) + "]";
         let log = "";
         if (fs.existsSync(appCrashLogPath)) {
-            log = fs.readFileSync(appCrashLogPath).toString();
+            log = fs.readFileSync(appCrashLogPath, "utf8");
         }
-        log += line;
-        fs.writeFileSync(appCrashLogPath, log);
+        const lines = (log + line).trimEnd().split("\n").slice(-20);
+        fs.writeFileSync(appCrashLogPath, lines.join("\n") + "\n");
     } catch (e) {
         console.error(e);
     }
 };
 
-// 删除崩溃日志，在内核启动成功后调用
-const clearAppCrashLog = () => {
+const isDirectory = (filePath) => {
+    if (!filePath) {
+        return false;
+    }
+
     try {
-        fs.unlinkSync(appCrashLogPath);
+        return fs.statSync(filePath).isDirectory();
     } catch (e) {
-        // 文件不存在等异常忽略
+        return false;
     }
 };
 
-// 是否存在崩溃日志（上次渲染进程崩溃）
-const hasAppCrashLog = () => {
-    return fs.existsSync(appCrashLogPath);
+// 优先读取结构化标记，并兼容旧版本的 app.crash.log。
+const readAppCrashInfo = () => {
+    if (fs.existsSync(appCrashMarkerPath)) {
+        try {
+            const markerText = fs.readFileSync(appCrashMarkerPath, "utf8");
+            const marker = JSON.parse(markerText);
+            if (noSafeModeReasons.has(marker.reason)) {
+                fs.unlinkSync(appCrashMarkerPath);
+            } else {
+                let crashInfo = markerText;
+                if (fs.existsSync(appCrashLogPath)) {
+                    crashInfo = fs.readFileSync(appCrashLogPath, "utf8");
+                }
+                return {
+                    workspaceDir: typeof marker.workspaceDir === "string" ? marker.workspaceDir : "",
+                    crashInfo: crashInfo,
+                };
+            }
+        } catch (e) {
+            writeLog("read crash marker failed: " + e);
+            try {
+                return {
+                    workspaceDir: "",
+                    crashInfo: fs.readFileSync(appCrashMarkerPath, "utf8"),
+                };
+            } catch (readError) {
+                writeLog("read invalid crash marker failed: " + readError);
+                return {
+                    workspaceDir: "",
+                    crashInfo: "Invalid renderer crash marker",
+                };
+            }
+        }
+    }
+
+    if (!fs.existsSync(appCrashLogPath)) {
+        return undefined;
+    }
+
+    try {
+        const crashInfo = fs.readFileSync(appCrashLogPath, "utf8");
+        const legacyLines = crashInfo.split(/\r?\n/).filter((line) => line.trim());
+        const reasons = legacyLines.map((line) => {
+            const match = line.match(/reason=([^,\]]+)/);
+            return match ? match[1] : undefined;
+        });
+        if (reasons.length > 0 && reasons.every((reason) => reason && noSafeModeReasons.has(reason))) {
+            fs.unlinkSync(appCrashLogPath);
+            writeLog("ignored legacy crash log without safe mode reason");
+            return undefined;
+        }
+        return {
+            workspaceDir: "",
+            crashInfo: crashInfo,
+        };
+    } catch (e) {
+        writeLog("read crash log failed: " + e);
+        return {
+            workspaceDir: "",
+            crashInfo: "Unreadable renderer crash log",
+        };
+    }
+};
+
+// 安全模式选择后内核启动成功，删除本次恢复所使用的崩溃信息。
+const clearAppCrashInfo = () => {
+    [appCrashMarkerPath, appCrashLogPath].forEach((filePath) => {
+        try {
+            fs.unlinkSync(filePath);
+        } catch (e) {
+            // 文件不存在等异常忽略。
+        }
+    });
 };

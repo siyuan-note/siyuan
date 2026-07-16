@@ -24,7 +24,7 @@ const getSearch = (key) => {
 const I18N_BASE = {
     "zh-CN": {
         title: "思源笔记",
-        crashTip: "⚠️ 思源上次异常退出（渲染进程崩溃），可能是代码片段、插件或自定义主题/图标导致。建议以安全模式启动（将禁用代码片段、插件、自定义主题和图标）",
+        crashTip: "⚠️ 检测到渲染进程曾异常退出，可能与插件、代码片段或自定义主题和图标有关，建议以安全模式启动。安全模式会禁用所有插件和代码片段，并切换为默认主题和图标；相关内容不会被删除，但这些设置需要在启动后手动恢复。",
         safeModeBtn: "🛡️ 安全模式启动",
         normalBtn: "正常启动",
         slogan: "重构你的思维",
@@ -54,7 +54,7 @@ const I18N_BASE = {
     },
     "zh-TW": {
         title: "思源筆記",
-        crashTip: "⚠️ 思源上次異常退出（渲染處理程序崩潰），可能是程式碼片段、外掛或自訂主題/圖示導致。建議以安全模式啟動（將停用程式碼片段、外掛、自訂主題和圖示）",
+        crashTip: "⚠️ 偵測到渲染處理程序曾異常結束，可能與外掛、程式碼片段或自訂主題和圖示有關。建議以安全模式啟動。安全模式會停用所有外掛和程式碼片段，並切換為預設主題和圖示；相關內容不會被刪除，但這些設定需要在啟動後手動還原。",
         safeModeBtn: "🛡️ 安全模式啟動",
         normalBtn: "正常啟動",
         slogan: "重構你的思維",
@@ -84,7 +84,7 @@ const I18N_BASE = {
     },
     "en": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan exited unexpectedly last time (renderer process crashed). This may be caused by code snippets, plugins, or a custom theme/icon. It is recommended to start in safe mode (which disables code snippets, plugins, and the custom theme and icon).",
+        crashTip: "⚠️ A renderer process previously exited unexpectedly. This may be related to plugins, code snippets, or a custom theme and icon. Starting in safe mode is recommended. Safe mode disables all plugins and code snippets and switches to the default theme and icon. Related content is not deleted, but these settings must be restored manually after startup.",
         safeModeBtn: "🛡️ Start in safe mode",
         normalBtn: "Start normally",
         slogan: "Refactor your thinking",
@@ -114,7 +114,7 @@ const I18N_BASE = {
     },
     "ar": {
         title: "SiYuan",
-        crashTip: "⚠️ خرج SiYuan بشكل غير متوقع في المرة الأخيرة (تعطل عملية العارض). قد يكون ذلك بسبب مقتطفات التعليمات البرمجية أو الإضافات أو سمة/أيقونة مخصصة. يُوصى بالبدء في الوضع الآمن (والذي يعطّل مقتطفات التعليمات البرمجية والإضافات والسمة والأيقونة المخصصة).",
+        crashTip: "⚠️ تم اكتشاف خروج غير متوقع سابق لعملية العارض، وقد يكون مرتبطًا بالمكونات الإضافية أو مقتطفات التعليمات البرمجية أو السمات والأيقونات المخصصة. نوصي بالبدء في الوضع الآمن. يعطّل الوضع الآمن جميع المكونات الإضافية ومقتطفات التعليمات البرمجية ويستخدم السمة والأيقونة الافتراضيتين؛ لن يُحذف المحتوى ذو الصلة، ولكن يجب استعادة هذه الإعدادات يدويًا بعد بدء التشغيل.",
         safeModeBtn: "🛡️ البدء في الوضع الآمن",
         normalBtn: "البدء بشكل طبيعي",
         slogan: "أعد هيكلة تفكيرك",
@@ -144,7 +144,7 @@ const I18N_BASE = {
     },
     "de": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan wurde beim letzten Mal unerwartet beendet (Renderer-Prozess abgestürzt). Dies kann durch Code-Snippets, Plugins oder ein benutzerdefiniertes Design/Icon verursacht worden sein. Es wird empfohlen, im abgesicherten Modus zu starten (der Code-Snippets, Plugins sowie das benutzerdefinierte Design und Icon deaktiviert).",
+        crashTip: "⚠️ Ein Renderer-Prozess wurde zuvor unerwartet beendet. Dies kann mit Plugins, Code-Snippets oder benutzerdefinierten Designs und Symbolen zusammenhängen. Es wird empfohlen, im abgesicherten Modus zu starten. Dieser deaktiviert alle Plugins und Code-Snippets und wechselt zum Standarddesign und -symbol. Die zugehörigen Inhalte werden nicht gelöscht, diese Einstellungen müssen nach dem Start jedoch manuell wiederhergestellt werden.",
         safeModeBtn: "🛡️ Im abgesicherten Modus starten",
         normalBtn: "Normal starten",
         slogan: "Strukturiere dein Denken",
@@ -174,7 +174,7 @@ const I18N_BASE = {
     },
     "es": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan se cerró inesperadamente la última vez (el proceso de renderizado falló). Esto puede deberse a fragmentos de código, complementos o un tema/icono personalizado. Se recomienda iniciar en modo seguro (que desactiva los fragmentos de código, los complementos y el tema e icono personalizados).",
+        crashTip: "⚠️ Se detectó que un proceso de renderizado se cerró inesperadamente. Esto puede estar relacionado con complementos, fragmentos de código o temas e iconos personalizados. Se recomienda iniciar en modo seguro. El modo seguro desactiva todos los complementos y fragmentos de código y cambia al tema y al icono predeterminados. El contenido relacionado no se eliminará, pero estas opciones deberán restaurarse manualmente después del inicio.",
         safeModeBtn: "🛡️ Iniciar en modo seguro",
         normalBtn: "Iniciar normalmente",
         slogan: "Reestructura tu pensamiento",
@@ -204,7 +204,7 @@ const I18N_BASE = {
     },
     "fr": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan s'est fermé de manière inattendue la dernière fois (le processus de rendu a planté). Cela peut être dû à des extraits de code, des plugins ou un thème/icône personnalisé. Il est recommandé de démarrer en mode sans échec (qui désactive les extraits de code, les plugins, ainsi que le thème et l'icône personnalisés).",
+        crashTip: "⚠️ Un processus de rendu s'est précédemment arrêté de manière inattendue. Cela peut être lié aux extensions, aux extraits de code ou aux thèmes et icônes personnalisés. Il est recommandé de démarrer en mode sans échec. Celui-ci désactive toutes les extensions et tous les extraits de code, puis utilise le thème et l'icône par défaut. Le contenu associé ne sera pas supprimé, mais ces réglages devront être restaurés manuellement après le démarrage.",
         safeModeBtn: "🛡️ Démarrer en mode sans échec",
         normalBtn: "Démarrer normalement",
         slogan: "Restructurez votre pensée",
@@ -234,7 +234,7 @@ const I18N_BASE = {
     },
     "he": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan נסגר באופן בלתי צפוי בפעם האחרונה (תהליך העיבוד קרס). ייתכן שהדבר נגרם על ידי קטעי קוד, תוספים או ערכת נושא/סמל מותאמים אישית. מומלץ להפעיל במצב בטוח (אשר משבית קטעי קוד, תוספים וכן את ערכת הנושא והסמל המותאמים אישית).",
+        crashTip: "⚠️ זוהה שתהליך עיבוד הסתיים בעבר באופן בלתי צפוי. ייתכן שהדבר קשור לתוספים, לקטעי קוד או לערכת נושא וסמלים מותאמים אישית. מומלץ להפעיל במצב בטוח. מצב בטוח משבית את כל התוספים וקטעי הקוד ועובר לערכת הנושא ולסמל שברירת המחדל. התוכן הקשור לא יימחק, אך יש לשחזר הגדרות אלה ידנית לאחר ההפעלה.",
         safeModeBtn: "🛡️ הפעלה במצב בטוח",
         normalBtn: "הפעלה רגילה",
         slogan: "ארגן מחדש את החשיבה שלך",
@@ -264,7 +264,7 @@ const I18N_BASE = {
     },
     "hi": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan पिछली बार अप्रत्याशित रूप से बंद हो गया (रेंडरर प्रक्रिया क्रैश हो गई)। यह कोड स्निपेट, प्लगइन्स, या कस्टम थीम/आइकन के कारण हो सकता है। सुरक्षित मोड में प्रारंभ करने की अनुशंसा की जाती है (जो कोड स्निपेट, प्लगइन्स और कस्टम थीम तथा आइकन को अक्षम कर देता है)।",
+        crashTip: "⚠️ एक रेंडरर प्रक्रिया के पहले अप्रत्याशित रूप से बंद होने का पता चला। यह प्लगइन, कोड स्निपेट या कस्टम थीम और आइकन से संबंधित हो सकता है। सुरक्षित मोड में प्रारंभ करने की सलाह दी जाती है। सुरक्षित मोड सभी प्लगइन और कोड स्निपेट को अक्षम कर देता है और डिफ़ॉल्ट थीम और आइकन पर स्विच करता है। संबंधित सामग्री हटाई नहीं जाएगी, लेकिन शुरू होने के बाद इन सेटिंग्स को मैन्युअल रूप से पुनर्स्थापित करना होगा।",
         safeModeBtn: "🛡️ सुरक्षित मोड में प्रारंभ करें",
         normalBtn: "सामान्य रूप से प्रारंभ करें",
         slogan: "अपनी सोच को पुनर्गठित करें",
@@ -294,7 +294,7 @@ const I18N_BASE = {
     },
     "id": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan tertutup secara tak terduga terakhir kali (proses renderer mogok). Hal ini mungkin disebabkan oleh cuplikan kode, plugin, atau tema/ikon kustom. Disarankan untuk memulai dalam mode aman (yang menonaktifkan cuplikan kode, plugin, serta tema dan ikon kustom).",
+        crashTip: "⚠️ Proses renderer terdeteksi pernah berhenti secara tidak terduga. Hal ini mungkin terkait dengan plugin, cuplikan kode, atau tema dan ikon kustom. Disarankan untuk memulai dalam mode aman. Mode aman menonaktifkan semua plugin dan cuplikan kode serta beralih ke tema dan ikon default. Konten terkait tidak akan dihapus, tetapi pengaturan ini harus dipulihkan secara manual setelah aplikasi dimulai.",
         safeModeBtn: "🛡️ Mulai dalam mode aman",
         normalBtn: "Mulai secara normal",
         slogan: "Restruktur pemikiran Anda",
@@ -324,7 +324,7 @@ const I18N_BASE = {
     },
     "it": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan si è chiuso in modo imprevisto l'ultima volta (il processo di rendering si è arrestato in modo anomalo). Ciò potrebbe essere causato da snippet di codice, plugin o un tema/icona personalizzato. Si consiglia di avviare in modalità sicura (che disabilita gli snippet di codice, i plugin e il tema e l'icona personalizzati).",
+        crashTip: "⚠️ È stato rilevato che un processo di rendering si è chiuso inaspettatamente. Ciò potrebbe essere correlato a plugin, snippet di codice o temi e icone personalizzati. Si consiglia di avviare in modalità sicura. La modalità sicura disabilita tutti i plugin e gli snippet di codice e passa al tema e all'icona predefiniti. I contenuti correlati non verranno eliminati, ma queste impostazioni dovranno essere ripristinate manualmente dopo l'avvio.",
         safeModeBtn: "🛡️ Avvia in modalità sicura",
         normalBtn: "Avvia normalmente",
         slogan: "Ristruttura il tuo pensiero",
@@ -354,7 +354,7 @@ const I18N_BASE = {
     },
     "ja": {
         title: "SiYuan",
-        crashTip: "⚠️ 前回 SiYuan が予期せず終了しました（レンダラープロセスがクラッシュしました）。コードスニペット、プラグイン、またはカスタムテーマ/アイコンが原因の可能性があります。セーフモードで起動することをお勧めします（コードスニペット、プラグイン、カスタムテーマとアイコンを無効にします）。",
+        crashTip: "⚠️ レンダラープロセスが以前予期せず終了したことが検出されました。プラグイン、コードスニペット、またはカスタムテーマとアイコンが関係している可能性があります。セーフモードでの起動をお勧めします。セーフモードでは、すべてのプラグインとコードスニペットが無効になり、デフォルトのテーマとアイコンに切り替わります。関連コンテンツは削除されませんが、起動後にこれらの設定を手動で復元する必要があります。",
         safeModeBtn: "🛡️ セーフモードで起動",
         normalBtn: "通常起動",
         slogan: "思考を再構築する",
@@ -384,7 +384,7 @@ const I18N_BASE = {
     },
     "ko": {
         title: "SiYuan",
-        crashTip: "⚠️ 지난번에 SiYuan이 예기치 않게 종료되었습니다(렌더러 프로세스 충돌). 코드 스니펫, 플러그인 또는 사용자 지정 테마/아이콘 때문일 수 있습니다. 안전 모드로 시작하는 것을 권장합니다(코드 스니펫, 플러그인, 사용자 지정 테마 및 아이콘이 비활성화됨).",
+        crashTip: "⚠️ 렌더러 프로세스가 이전에 예기치 않게 종료된 것이 감지되었습니다. 플러그인, 코드 스니펫 또는 사용자 지정 테마와 아이콘과 관련이 있을 수 있습니다. 안전 모드로 시작하는 것이 권장됩니다. 안전 모드에서는 모든 플러그인과 코드 스니펫이 비활성화되고 기본 테마와 아이콘으로 전환됩니다. 관련 콘텐츠는 삭제되지 않지만 시작 후 이 설정을 수동으로 복원해야 합니다.",
         safeModeBtn: "🛡️ 안전 모드로 시작",
         normalBtn: "정상적으로 시작",
         slogan: "당신의 사고를 재구성하세요",
@@ -414,7 +414,7 @@ const I18N_BASE = {
     },
     "nl": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan is de laatste keer onverwacht afgesloten (het renderer-proces is gecrasht). Dit kan worden veroorzaakt door codefragmenten, plug-ins of een aangepast thema/pictogram. Het wordt aanbevolen om te starten in de veilige modus (die codefragmenten, plug-ins en het aangepaste thema en pictogram uitschakelt).",
+        crashTip: "⚠️ Er is gedetecteerd dat een renderer-proces eerder onverwacht is afgesloten. Dit kan verband houden met plug-ins, codefragmenten of een aangepast thema en pictogram. Het wordt aanbevolen om in de veilige modus te starten. De veilige modus schakelt alle plug-ins en codefragmenten uit en gebruikt het standaardthema en -pictogram. Gerelateerde inhoud wordt niet verwijderd, maar deze instellingen moeten na het opstarten handmatig worden hersteld.",
         safeModeBtn: "🛡️ Start in veilige modus",
         normalBtn: "Normaal starten",
         slogan: "Herstructureer je denken",
@@ -444,7 +444,7 @@ const I18N_BASE = {
     },
     "pl": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan zakończył działanie niespodziewanie za ostatnim razem (awaria procesu renderowania). Może to być spowodowane przez fragmenty kodu, wtyczki lub niestandardowy motyw/ikonę. Zaleca się uruchomienie w trybie awaryjnym (który wyłącza fragmenty kodu, wtyczki oraz niestandardowy motyw i ikonę).",
+        crashTip: "⚠️ Wykryto, że proces renderowania zakończył się wcześniej w nieoczekiwany sposób. Może to mieć związek z wtyczkami, fragmentami kodu albo niestandardowym motywem i ikoną. Zaleca się uruchomienie w trybie awaryjnym. Tryb awaryjny wyłącza wszystkie wtyczki i fragmenty kodu oraz przełącza na domyślny motyw i ikonę. Powiązana zawartość nie zostanie usunięta, ale po uruchomieniu te ustawienia trzeba przywrócić ręcznie.",
         safeModeBtn: "🛡️ Uruchom w trybie awaryjnym",
         normalBtn: "Uruchom normalnie",
         slogan: "Zrestrukturyzuj swoje myślenie",
@@ -474,7 +474,7 @@ const I18N_BASE = {
     },
     "pt-BR": {
         title: "SiYuan",
-        crashTip: "⚠️ O SiYuan fechou inesperadamente na última vez (o processo de renderização travou). Isso pode ter sido causado por trechos de código, plug-ins ou um tema/ícone personalizado. Recomenda-se iniciar no modo de segurança (que desativa trechos de código, plug-ins e o tema e ícone personalizados).",
+        crashTip: "⚠️ Foi detectado que um processo de renderização foi encerrado inesperadamente anteriormente. Isso pode estar relacionado a plug-ins, trechos de código ou temas e ícones personalizados. Recomenda-se iniciar no modo de segurança. O modo de segurança desativa todos os plug-ins e trechos de código e muda para o tema e o ícone padrão. O conteúdo relacionado não será excluído, mas essas configurações deverão ser restauradas manualmente após a inicialização.",
         safeModeBtn: "🛡️ Iniciar no modo de segurança",
         normalBtn: "Iniciar normalmente",
         slogan: "Restruture seu pensamento",
@@ -504,7 +504,7 @@ const I18N_BASE = {
     },
     "ru": {
         title: "SiYuan",
-        crashTip: "⚠️ В прошлый раз SiYuan завершился неожиданно (сбой процесса отрисовки). Это могло быть вызвано фрагментами кода, плагинами или пользовательской темой/значком. Рекомендуется запустить в безопасном режиме (отключаются фрагменты кода, плагины, а также пользовательские тема и значок).",
+        crashTip: "⚠️ Обнаружено, что процесс отрисовки ранее неожиданно завершился. Это может быть связано с плагинами, фрагментами кода или пользовательскими темами и значками. Рекомендуется запуск в безопасном режиме. Безопасный режим отключает все плагины и фрагменты кода, а также переключает на стандартные тему и значок. Связанные материалы не удаляются, но после запуска эти настройки нужно восстановить вручную.",
         safeModeBtn: "🛡️ Запустить в безопасном режиме",
         normalBtn: "Запустить в обычном режиме",
         slogan: "Реструктурируйте своё мышление",
@@ -534,7 +534,7 @@ const I18N_BASE = {
     },
     "sk": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan sa naposledy neočakávane ukončil (proces vykresľovania zlyhal). Môže to byť spôsobené úryvkami kódu, doplnkami alebo vlastným motívom/ikonou. Odporúča sa spustiť v núdzovom režime (ktorý zakáže úryvky kódu, doplnky a vlastný motív a ikonu).",
+        crashTip: "⚠️ Zistilo sa, že proces vykresľovania sa predtým neočakávane ukončil. Môže to súvisieť s doplnkami, úryvkami kódu alebo vlastnými motívmi a ikonami. Odporúča sa spustiť v núdzovom režime. Núdzový režim zakáže všetky doplnky a úryvky kódu a prepne na predvolený motív a ikonu. Súvisiaci obsah sa neodstráni, ale tieto nastavenia bude potrebné po spustení obnoviť manuálne.",
         safeModeBtn: "🛡️ Spustiť v núdzovom režime",
         normalBtn: "Spustiť normálne",
         slogan: "Reštrukturalizujte svoje myslenie",
@@ -564,7 +564,7 @@ const I18N_BASE = {
     },
     "th": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan ปิดตัวลงอย่างกะทันหันในครั้งก่อน (กระบวนการเรนเดอเรอร์ขัดข้อง) อาจเกิดจากส่วนย่อยของโค้ด ปลั๊กอิน หรือธีม/ไอคอนที่กำหนดเอง ขอแนะนำให้เริ่มในโหมดปลอดภัย (ซึ่งจะปิดใช้งานส่วนย่อยของโค้ด ปลั๊กอิน และธีมพร้อมไอคอนที่กำหนดเอง)",
+        crashTip: "⚠️ ตรวจพบว่ากระบวนการเรนเดอร์เคยปิดตัวลงอย่างไม่คาดคิด ซึ่งอาจเกี่ยวข้องกับปลั๊กอิน สนิปเป็ตโค้ด หรือธีมและไอคอนที่กำหนดเอง ขอแนะนำให้เริ่มในโหมดปลอดภัย โหมดปลอดภัยจะปิดใช้งานปลั๊กอินและสนิปเป็ตโค้ดทั้งหมด พร้อมทั้งเปลี่ยนไปใช้ธีมและไอคอนเริ่มต้น เนื้อหาที่เกี่ยวข้องจะไม่ถูกลบ แต่ต้องคืนค่าการตั้งค่าเหล่านี้ด้วยตนเองหลังจากเริ่มต้นแล้ว",
         safeModeBtn: "🛡️ เริ่มในโหมดปลอดภัย",
         normalBtn: "เริ่มแบบปกติ",
         slogan: "ปรับโครงสร้างความคิดของคุณ",
@@ -594,7 +594,7 @@ const I18N_BASE = {
     },
     "tr": {
         title: "SiYuan",
-        crashTip: "⚠️ SiYuan en son beklenmedik şekilde kapandı (işleyici işlemi çöktü). Bu, kod parçacıkları, eklentiler veya özel bir tema/simge nedeniyle olabilir. Güvenli modda başlatılması önerilir (kod parçacıklarını, eklentileri ve özel tema ile simgeyi devre dışı bırakır).",
+        crashTip: "⚠️ Bir işleyici işleminin daha önce beklenmedik şekilde sonlandığı algılandı. Bu durum eklentiler, kod parçacıkları veya özel tema ve simgelerle ilgili olabilir. Güvenli modda başlatılması önerilir. Güvenli mod tüm eklentileri ve kod parçacıklarını devre dışı bırakır ve varsayılan tema ile simgeye geçer. İlgili içerik silinmez, ancak bu ayarlar başlatmadan sonra elle geri yüklenmelidir.",
         safeModeBtn: "🛡️ Güvenli modda başlat",
         normalBtn: "Normal şekilde başlat",
         slogan: "Düşüncenizi yeniden yapılandırın",
@@ -624,7 +624,7 @@ const I18N_BASE = {
     },
     "uk": {
         title: "SiYuan",
-        crashTip: "⚠️ Минулого разу SiYuan несподівано завершив роботу (аварійна зупинка процесу відображення). Це могло бути спричинено фрагментами коду, плагінами або власною темою/піктограмою. Рекомендується запустити в безпечному режимі (вимикаються фрагменти коду, плагіни, а також власні тема та піктограма).",
+        crashTip: "⚠️ Виявлено, що процес відображення раніше несподівано завершився. Це може бути пов'язано з плагінами, фрагментами коду або власними темами та піктограмами. Рекомендується запуск у безпечному режимі. Безпечний режим вимикає всі плагіни та фрагменти коду і перемикає на тему та піктограму за замовчуванням. Пов'язані матеріали не видаляються, але після запуску ці налаштування потрібно відновити вручну.",
         safeModeBtn: "🛡️ Запустити в безпечному режимі",
         normalBtn: "Запустити у звичайному режимі",
         slogan: "Реструктуруйте своє мислення",

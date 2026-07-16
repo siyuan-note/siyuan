@@ -116,6 +116,7 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
    - New keys go at the **top** of each `langs/*.json` object; add to every language file (reference `en.json`)
    - Exception: inside the `_kernel` object, append new entries at the **end** using the next incremental numeric key
    - Each language must be properly translated — do NOT copy the same text across all language files
+   - Use three ASCII periods (`...`) for ellipses in all localized strings; do not use Unicode ellipsis characters (`…` or `……`)
    - Domains: `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
    - After modifying i18n files, run `python scripts/check-lang-keys.py` to verify key completeness across all language files
 2. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
@@ -126,7 +127,7 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 7. **Git:**
    - **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
    - When you do commit, follow the style of recent commits (gitmoji prefix + subject, in English)
-   - Append the full issue/PR URL (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; do not fabricate one
+   - Append the full issue/PR URL to the end of the commit title (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; never put the URL in the commit body, and do not fabricate one
 
 ---
 

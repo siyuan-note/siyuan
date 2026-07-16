@@ -1,4 +1,5 @@
 {
+	"insertImage": "Sisipkan gambar",
 	"obsidianUnreadableFiles": "File tidak dapat dibaca: ${count}; file yang tidak dirujuk ini tidak dapat dibaca dan tidak akan diimpor",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Impor dari format atau aplikasi lain",

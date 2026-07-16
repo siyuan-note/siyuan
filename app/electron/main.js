@@ -49,8 +49,9 @@ const windowStatePath = path.join(confDir, "windowState.json");
 const appCrashLogPath = path.join(confDir, "app.crash.log");
 const appCrashMarkerPath = path.join(confDir, "app.crash.json");
 const systemShutdownNone = 0;
-const systemShutdownQueried = 1;
-const systemShutdownEnding = 2;
+const systemShutdownEnding = 1;
+const systemShutdownForced = 2;
+const systemShutdownExitTimeout = 30000;
 const safeModeReasons = new Set(["abnormal-exit", "killed", "crashed", "oom", "memory-eviction"]);
 const noSafeModeReasons = new Set(["clean-exit", "launch-failed", "integrity-failure"]);
 const expectedRendererExitIds = new Set();
@@ -63,7 +64,8 @@ let kernelPort = 6806;
 let resetWindowStateOnRestart = false;
 let openAsHidden = false;
 let systemShutdownState = systemShutdownNone;
-let systemShutdownResetTimer;
+let gracefulSystemShutdownPromise;
+let keepAppOpenDuringSystemShutdown = false;
 const openDialogSingletons = new Set();
 const isOpenAsHidden = function () {
     return 1 === workspaces.length && openAsHidden;
@@ -362,7 +364,11 @@ const exitApp = (port, errorWindowId) => {
             });
         } else {
             markExpectedRendererExit(mainWindow);
-            app.exit();
+            if (keepAppOpenDuringSystemShutdown) {
+                mainWindow.destroy();
+            } else {
+                app.exit();
+            }
         }
         globalShortcut.unregisterAll();
         writeLog("exited ui");
@@ -375,7 +381,7 @@ const getServer = (port = kernelPort) => {
     return localServer + ":" + port;
 };
 
-const requestKernelExit = (port, options = {}) => {
+const requestKernelExit = (port, options = {}, signal) => {
     if (!port) {
         return Promise.resolve();
     }
@@ -391,33 +397,122 @@ const requestKernelExit = (port, options = {}) => {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(exitOptions),
+        signal,
     }).catch((error) => {
         writeLog("shutdown kernel failed [port=" + port + "]: " + error);
     });
 };
 
-const markSystemShutdownQueried = () => {
-    if (systemShutdownState === systemShutdownEnding) {
+const getSystemShutdownPorts = () => {
+    const ports = new Set();
+    workspaces.forEach((workspaceItem) => {
+        if (workspaceItem.port) {
+            ports.add(workspaceItem.port);
+        }
+    });
+    if (bootWindow && !bootWindow.isDestroyed() && kernelPort) {
+        ports.add(kernelPort);
+    }
+    return Array.from(ports);
+};
+
+const requestGracefulKernelExit = async (port) => {
+    const abortController = new AbortController();
+    const timeout = setTimeout(() => abortController.abort(), systemShutdownExitTimeout);
+    try {
+        const response = await requestKernelExit(port, {
+            force: false,
+            setCurrentWorkspace: false,
+            execInstallPkg: 1,
+        }, abortController.signal);
+        if (!response) {
+            return false;
+        }
+
+        const apiData = await response.json();
+        if (apiData.code !== 0) {
+            writeLog("graceful system shutdown failed [port=" + port + ", code=" + apiData.code + "]");
+            return false;
+        }
+        writeLog("graceful system shutdown succeeded [port=" + port + "]");
+        return true;
+    } catch (error) {
+        writeLog("parse graceful system shutdown response failed [port=" + port + "]: " + error);
+        return false;
+    } finally {
+        clearTimeout(timeout);
+    }
+};
+
+const resetSystemShutdown = (ports) => {
+    if (systemShutdownState === systemShutdownForced) {
         return;
     }
 
-    systemShutdownState = systemShutdownQueried;
-    clearTimeout(systemShutdownResetTimer);
-    systemShutdownResetTimer = setTimeout(() => {
-        systemShutdownState = systemShutdownNone;
-        writeLog("system shutdown query expired");
-    }, 30000);
+    systemShutdownState = systemShutdownNone;
+    gracefulSystemShutdownPromise = undefined;
+    keepAppOpenDuringSystemShutdown = false;
+    writeLog("system shutdown canceled because SiYuan failed to exit gracefully [ports=" + ports.join(",") + "]");
+    ports.forEach((port) => {
+        const workspace = workspaces.find((item) => port.toString() === item.port.toString());
+        if (workspace && workspace.browserWindow && !workspace.browserWindow.isDestroyed()) {
+            showWindow(workspace.browserWindow);
+        }
+    });
+    if (bootWindow && !bootWindow.isDestroyed() && ports.includes(kernelPort)) {
+        showWindow(bootWindow);
+    }
 };
 
-const beginSystemShutdown = () => {
-    if (systemShutdownState === systemShutdownEnding) {
+const beginGracefulSystemShutdown = () => {
+    if (gracefulSystemShutdownPromise || systemShutdownState === systemShutdownForced) {
         return;
     }
 
     systemShutdownState = systemShutdownEnding;
-    clearTimeout(systemShutdownResetTimer);
-    workspaces.forEach((workspaceItem) => {
-        requestKernelExit(workspaceItem.port, {
+    const ports = getSystemShutdownPorts();
+    if (ports.length === 0) {
+        app.exit();
+        return;
+    }
+
+    keepAppOpenDuringSystemShutdown = true;
+    gracefulSystemShutdownPromise = Promise.all(ports.map(async (port) => {
+        return {
+            port,
+            success: await requestGracefulKernelExit(port),
+        };
+    })).then((results) => {
+        const succeededPorts = results.filter((item) => item.success).map((item) => item.port);
+        const failedPorts = results.filter((item) => !item.success).map((item) => item.port);
+        succeededPorts.forEach((port) => exitApp(port));
+        if (bootWindow && !bootWindow.isDestroyed() && succeededPorts.includes(kernelPort)) {
+            bootWindow.destroy();
+        }
+
+        const remainingPorts = getSystemShutdownPorts();
+        const incompletePorts = Array.from(new Set(failedPorts.concat(remainingPorts)));
+        if (incompletePorts.length > 0) {
+            resetSystemShutdown(incompletePorts);
+            return;
+        }
+        keepAppOpenDuringSystemShutdown = false;
+        app.exit();
+    }).catch((error) => {
+        writeLog("graceful system shutdown failed: " + error);
+        resetSystemShutdown(getSystemShutdownPorts());
+    });
+};
+
+const beginForcedSystemShutdown = () => {
+    if (systemShutdownState === systemShutdownForced) {
+        return;
+    }
+
+    systemShutdownState = systemShutdownForced;
+    keepAppOpenDuringSystemShutdown = false;
+    getSystemShutdownPorts().forEach((port) => {
+        requestKernelExit(port, {
             force: true,
             setCurrentWorkspace: false,
         });
@@ -425,15 +520,16 @@ const beginSystemShutdown = () => {
 };
 
 if (process.platform === "win32") {
-    // Windows 关机、重启或注销时，先标记查询状态，确定会话结束后再通知内核退出。
+    // Windows 关机、重启或注销时取消本次会话结束，等待内核安全退出后再关闭思源。
     app.on("browser-window-created", (event, window) => {
-        window.on("query-session-end", () => {
+        window.on("query-session-end", (sessionEvent) => {
             writeLog("query-session-end");
-            markSystemShutdownQueried();
+            sessionEvent.preventDefault();
+            beginGracefulSystemShutdown();
         });
         window.on("session-end", () => {
             writeLog("session-end");
-            beginSystemShutdown();
+            beginForcedSystemShutdown();
         });
     });
 }
@@ -1782,7 +1878,7 @@ app.whenReady().then(() => {
     });
     powerMonitor.on("shutdown", () => {
         writeLog("system shutdown");
-        beginSystemShutdown();
+        beginForcedSystemShutdown();
     });
     powerMonitor.on("lock-screen", () => {
         writeLog("system lock-screen");

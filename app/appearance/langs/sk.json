@@ -1,4 +1,5 @@
 {
+	"insertImage": "Vložiť obrázok",
 	"obsidianUnreadableFiles": "Nečitateľné súbory: ${count}; tieto súbory bez odkazov sa nepodarilo prečítať a nebudú importované",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Importovať z iných formátov alebo aplikácií",

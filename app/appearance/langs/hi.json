@@ -1,4 +1,5 @@
 {
+	"insertImage": "छवि डालें",
 	"obsidianUnreadableFiles": "अपठनीय फ़ाइलें: ${count}; इन असंदर्भित फ़ाइलों को पढ़ा नहीं जा सका और इन्हें आयात नहीं किया जाएगा",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "अन्य फ़ॉर्मेट या ऐप से आयात करें",

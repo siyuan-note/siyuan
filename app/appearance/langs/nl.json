@@ -1,4 +1,5 @@
 {
+	"insertImage": "Afbeelding invoegen",
 	"obsidianUnreadableFiles": "Onleesbare bestanden: ${count}; deze bestanden zonder verwijzingen konden niet worden gelezen en worden niet geïmporteerd",
 	"obsidianStatsSeparator": " · ",
 	"importFromMoreApps": "Importeren uit andere indelingen of apps",

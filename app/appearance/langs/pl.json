@@ -1,8 +1,9 @@
 {
+	"openDocument": "Otwórz dokument",
 	"docIconClickExpand": "Kliknij ikonę dokumentu, aby rozwinąć lub zwinąć dokumenty podrzędne",
 	"docIconClickExpandTip": "Po włączeniu kliknięcie ikony dokumentu rozwija lub zwija dokumenty podrzędne, a gdy ich nie ma, nie wykonuje żadnej czynności; po wyłączeniu kliknięcie ikony dokumentu zmienia ikonę",
 	"parentDocClickExpand": "Kliknij tytuł dokumentu nadrzędnego, aby rozwinąć lub zwinąć dokumenty podrzędne",
-	"parentDocClickExpandTip": "Po włączeniu kliknięcie tytułu dokumentu nadrzędnego rozwija lub zwija dokumenty podrzędne, a dokument nadrzędny można otworzyć za pomocą opcji „Otwórz” w menu kontekstowym; gdy nie ma dokumentów podrzędnych, kliknięcie nadal otwiera dokument bezpośrednio",
+	"parentDocClickExpandTip": "Po włączeniu kliknięcie tytułu dokumentu nadrzędnego rozwija lub zwija dokumenty podrzędne, a dokument nadrzędny można otworzyć za pomocą opcji „Otwórz dokument” w menu kontekstowym; gdy nie ma dokumentów podrzędnych, kliknięcie nadal otwiera dokument bezpośrednio",
 	"mcpStatusAuthorizing": "Autoryzowanie",
 	"mcpStatusAuthorizationRequired": "Wymagana autoryzacja",
 	"mcpAuthorize": "Autoryzuj",

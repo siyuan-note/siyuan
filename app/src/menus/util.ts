@@ -120,21 +120,6 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
             }
         }
     }];
-    if (notebookId && window.siyuan.config.fileTree.parentDocClickExpand) {
-        openSubmenus.unshift({
-            id: "openDefault",
-            icon: "iconOpen",
-            label: window.siyuan.config.fileTree.openFilesUseCurrentTab ?
-                window.siyuan.languages.fileTree7 : window.siyuan.languages.openInNewTab,
-            click: () => {
-                openFileById({
-                    app,
-                    id: ids[0],
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
-                });
-            }
-        });
-    }
     if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
         openSubmenus.push({
             id: "openInNewTab",

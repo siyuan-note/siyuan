@@ -1,8 +1,9 @@
 {
+	"openDocument": "打开文档",
 	"docIconClickExpand": "单击文档图标展开或折叠下级文档",
 	"docIconClickExpandTip": "启用后单击文档图标将展开或折叠下级文档，没有下级文档时不执行任何操作；关闭后单击文档图标将修改图标",
 	"parentDocClickExpand": "单击父文档标题时展开或折叠下级文档",
-	"parentDocClickExpandTip": "启用后单击父文档标题将展开或折叠下级文档，可通过右键菜单中的“打开”打开父文档；没有子文档时仍会直接打开文档",
+	"parentDocClickExpandTip": "启用后单击父文档标题将展开或折叠下级文档，可通过右键菜单中的“打开文档”打开父文档；没有子文档时仍会直接打开文档",
 	"mcpStatusAuthorizing": "正在授权",
 	"mcpStatusAuthorizationRequired": "需要授权",
 	"mcpAuthorize": "授权",

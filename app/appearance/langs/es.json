@@ -1,8 +1,9 @@
 {
+	"openDocument": "Abrir documento",
 	"docIconClickExpand": "Haz clic en el icono del documento para expandir o contraer los documentos secundarios",
 	"docIconClickExpandTip": "Cuando está activado, al hacer clic en el icono de un documento se expanden o contraen los documentos secundarios, y no ocurre nada si no hay documentos secundarios; cuando está desactivado, al hacer clic en el icono se cambia el icono",
 	"parentDocClickExpand": "Haz clic en el título del documento principal para expandir o contraer los documentos secundarios",
-	"parentDocClickExpandTip": "Cuando está activado, al hacer clic en el título de un documento principal se expanden o contraen los documentos secundarios; el documento principal puede abrirse mediante «Abrir» en el menú contextual. Si no hay documentos secundarios, el documento se seguirá abriendo directamente",
+	"parentDocClickExpandTip": "Cuando está activado, al hacer clic en el título de un documento principal se expanden o contraen los documentos secundarios; el documento principal puede abrirse mediante «Abrir documento» en el menú contextual. Si no hay documentos secundarios, el documento se seguirá abriendo directamente",
 	"mcpStatusAuthorizing": "Autorizando",
 	"mcpStatusAuthorizationRequired": "Se requiere autorización",
 	"mcpAuthorize": "Autorizar",

@@ -1,8 +1,9 @@
 {
+	"openDocument": "Open document",
 	"docIconClickExpand": "Click document icon to expand or collapse child documents",
 	"docIconClickExpandTip": "When enabled, clicking a document icon expands or collapses child documents, and does nothing when there are no child documents; when disabled, clicking a document icon changes the icon",
 	"parentDocClickExpand": "Click parent document title to expand or collapse child documents",
-	"parentDocClickExpandTip": "When enabled, clicking a parent document title expands or collapses child documents, and the parent document can be opened using Open in the context menu; when there are no child documents, clicking still opens the document directly",
+	"parentDocClickExpandTip": "When enabled, clicking a parent document title expands or collapses child documents, and the parent document can be opened using Open document in the context menu; when there are no child documents, clicking still opens the document directly",
 	"mcpStatusAuthorizing": "Authorizing",
 	"mcpStatusAuthorizationRequired": "Authorization required",
 	"mcpAuthorize": "Authorize",

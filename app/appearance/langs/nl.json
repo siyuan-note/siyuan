@@ -1,8 +1,9 @@
 {
+	"openDocument": "Document openen",
 	"docIconClickExpand": "Klik op het documentpictogram om onderliggende documenten uit of in te klappen",
 	"docIconClickExpandTip": "Indien ingeschakeld, worden onderliggende documenten uit- of ingeklapt door op het documentpictogram te klikken en gebeurt er niets als er geen onderliggende documenten zijn; indien uitgeschakeld, wordt het pictogram gewijzigd",
 	"parentDocClickExpand": "Klik op de titel van het bovenliggende document om onderliggende documenten uit of in te klappen",
-	"parentDocClickExpandTip": "Indien ingeschakeld, worden onderliggende documenten uit- of ingeklapt door op de titel van het bovenliggende document te klikken; het bovenliggende document kan worden geopend via ‘Openen’ in het contextmenu. Zonder onderliggende documenten wordt het document nog steeds direct geopend",
+	"parentDocClickExpandTip": "Indien ingeschakeld, worden onderliggende documenten uit- of ingeklapt door op de titel van het bovenliggende document te klikken; het bovenliggende document kan worden geopend via ‘Document openen’ in het contextmenu. Zonder onderliggende documenten wordt het document nog steeds direct geopend",
 	"mcpStatusAuthorizing": "Bezig met autoriseren",
 	"mcpStatusAuthorizationRequired": "Autorisatie vereist",
 	"mcpAuthorize": "Autoriseren",

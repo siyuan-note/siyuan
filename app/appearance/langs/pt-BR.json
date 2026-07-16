@@ -1,8 +1,9 @@
 {
+	"openDocument": "Abrir documento",
 	"docIconClickExpand": "Clique no ícone do documento para expandir ou recolher documentos filhos",
 	"docIconClickExpandTip": "Quando ativado, clicar no ícone de um documento expande ou recolhe os documentos filhos e não executa nenhuma ação quando não há documentos filhos; quando desativado, clicar no ícone altera o ícone",
 	"parentDocClickExpand": "Clique no título do documento pai para expandir ou recolher documentos filhos",
-	"parentDocClickExpandTip": "Quando ativado, clicar no título de um documento pai expande ou recolhe os documentos filhos, e o documento pai pode ser aberto usando “Abrir” no menu de contexto; quando não há documentos filhos, clicar ainda abre o documento diretamente",
+	"parentDocClickExpandTip": "Quando ativado, clicar no título de um documento pai expande ou recolhe os documentos filhos, e o documento pai pode ser aberto usando “Abrir documento” no menu de contexto; quando não há documentos filhos, clicar ainda abre o documento diretamente",
 	"mcpStatusAuthorizing": "Autorizando",
 	"mcpStatusAuthorizationRequired": "Autorização necessária",
 	"mcpAuthorize": "Autorizar",

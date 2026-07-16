@@ -1,8 +1,9 @@
 {
+	"openDocument": "문서 열기",
 	"docIconClickExpand": "문서 아이콘을 클릭하여 하위 문서 펼치기 또는 접기",
 	"docIconClickExpandTip": "활성화하면 문서 아이콘을 클릭하여 하위 문서를 펼치거나 접을 수 있으며 하위 문서가 없으면 아무 작업도 하지 않습니다. 비활성화하면 문서 아이콘을 클릭하여 아이콘을 변경합니다",
 	"parentDocClickExpand": "상위 문서 제목을 클릭하여 하위 문서 펼치기 또는 접기",
-	"parentDocClickExpandTip": "활성화하면 상위 문서 제목을 클릭하여 하위 문서를 펼치거나 접을 수 있으며, 상황에 맞는 메뉴의 ‘열기’를 사용하여 상위 문서를 열 수 있습니다. 하위 문서가 없으면 클릭할 때 문서가 바로 열립니다",
+	"parentDocClickExpandTip": "활성화하면 상위 문서 제목을 클릭하여 하위 문서를 펼치거나 접을 수 있으며, 상황에 맞는 메뉴의 ‘문서 열기’를 사용하여 상위 문서를 열 수 있습니다. 하위 문서가 없으면 클릭할 때 문서가 바로 열립니다",
 	"mcpStatusAuthorizing": "인증 중",
 	"mcpStatusAuthorizationRequired": "인증 필요",
 	"mcpAuthorize": "인증",

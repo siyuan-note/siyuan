@@ -19,6 +19,9 @@ import {Constants} from "../constants";
 import {newFileInTree} from "../util/newFile";
 import {hasClosestByTag, hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
+/// #if !MOBILE
+import {openFileById} from "../editor/util";
+/// #endif
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
 import {openCardByData} from "../card/openCard";
@@ -448,6 +451,22 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     const id = liElement.getAttribute("data-node-id");
     let name = liElement.getAttribute("data-name");
     name = getDisplayName(name, false, true);
+    /// #if !MOBILE
+    if (window.siyuan.config.fileTree.parentDocClickExpand && Number(liElement.getAttribute("data-count")) > 0) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "openDocument",
+            label: window.siyuan.languages.openDocument,
+            icon: "iconOpen",
+            click: () => {
+                openFileById({
+                    app,
+                    id,
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                });
+            }
+        }).element);
+    }
+    /// #endif
     if (!window.siyuan.config.readonly) {
         const topElement = hasTopClosestByTag(liElement, "UL");
         if (window.siyuan.config.fileTree.sort === 6 || (topElement && topElement.dataset.sortmode === "6")) {

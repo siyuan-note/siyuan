@@ -1,8 +1,9 @@
 {
+	"openDocument": "Apri documento",
 	"docIconClickExpand": "Fai clic sull’icona del documento per espandere o comprimere i documenti secondari",
 	"docIconClickExpandTip": "Quando è attiva, facendo clic sull’icona di un documento si espandono o comprimono i documenti secondari e non accade nulla se non sono presenti; quando è disattiva, facendo clic sull’icona la si modifica",
 	"parentDocClickExpand": "Fai clic sul titolo del documento principale per espandere o comprimere i documenti secondari",
-	"parentDocClickExpandTip": "Quando è attiva, facendo clic sul titolo di un documento principale si espandono o comprimono i documenti secondari; il documento principale può essere aperto tramite “Apri” nel menu contestuale. Se non sono presenti documenti secondari, il documento viene comunque aperto direttamente",
+	"parentDocClickExpandTip": "Quando è attiva, facendo clic sul titolo di un documento principale si espandono o comprimono i documenti secondari; il documento principale può essere aperto tramite “Apri documento” nel menu contestuale. Se non sono presenti documenti secondari, il documento viene comunque aperto direttamente",
 	"mcpStatusAuthorizing": "Autorizzazione in corso",
 	"mcpStatusAuthorizationRequired": "Autorizzazione richiesta",
 	"mcpAuthorize": "Autorizza",

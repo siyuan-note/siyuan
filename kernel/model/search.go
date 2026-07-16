@@ -1198,6 +1198,9 @@ func FullTextSearchBlockInBox(query string, boxes, paths []string, types, subTyp
 	}
 
 	query = filterQueryInvisibleChars(query)
+	if 2 != method && 3 != method && ast.IsNodeIDPattern(query) && isHiddenBoxDocBlock(query, boxID) {
+		return
+	}
 	var ignoreFilter string
 	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
 		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
@@ -1216,6 +1219,9 @@ func FullTextSearchBlockInBox(query string, boxes, paths []string, types, subTyp
 	case 1: // 查询语法
 		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
+		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
+		boxFilter += boxDocFilter
+		boxArgs = append(boxArgs, boxDocArgs...)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
 			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize, boxID)
@@ -1227,11 +1233,17 @@ func FullTextSearchBlockInBox(query string, boxes, paths []string, types, subTyp
 	case 3: // 正则表达式
 		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
+		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
+		boxFilter += boxDocFilter
+		boxArgs = append(boxArgs, boxDocArgs...)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexpInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 	default: // 关键字
 		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
+		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
+		boxFilter += boxDocFilter
+		boxArgs = append(boxArgs, boxDocArgs...)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
 			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize, boxID)
@@ -1434,6 +1446,29 @@ func buildPathsFilter(paths []string, alias ...string) (clause string, args []an
 		if i < len(paths)-1 {
 			builder.WriteString(" OR ")
 		}
+	}
+	builder.WriteString(")")
+	clause = builder.String()
+	return
+}
+
+// buildRootIDExclusionFilter 构造根文档 ID 排除子句，ID 通过绑定参数传递。
+func buildRootIDExclusionFilter(rootIDs []string, alias ...string) (clause string, args []any) {
+	if 0 == len(rootIDs) {
+		return
+	}
+	prefix := ""
+	if 0 < len(alias) && "" != alias[0] {
+		prefix = alias[0]
+	}
+	builder := bytes.Buffer{}
+	builder.WriteString(fmt.Sprintf(" AND %sroot_id NOT IN (", prefix))
+	for i, rootID := range rootIDs {
+		if 0 < i {
+			builder.WriteString(", ")
+		}
+		builder.WriteString("?")
+		args = append(args, rootID)
 	}
 	builder.WriteString(")")
 	clause = builder.String()

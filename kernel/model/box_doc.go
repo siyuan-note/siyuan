@@ -113,6 +113,31 @@ func IsBoxDocEnabled() bool {
 	return nil != Conf && nil != Conf.FileTree && nil != Conf.FileTree.BoxDocEnabled && *Conf.FileTree.BoxDocEnabled
 }
 
+func hiddenBoxDocRootIDs() (ret []string) {
+	if IsBoxDocEnabled() || nil == Conf {
+		return
+	}
+	for _, box := range Conf.GetOpenedBoxes() {
+		if "" != box.BoxDocID {
+			ret = append(ret, box.BoxDocID)
+		}
+	}
+	return
+}
+
+func isHiddenBoxDocBlock(id, boxID string) bool {
+	if IsBoxDocEnabled() {
+		return false
+	}
+	var bt *treenode.BlockTree
+	if "" == boxID {
+		bt = treenode.GetBlockTree(id)
+	} else {
+		bt = treenode.GetBlockTreeInBox(id, boxID)
+	}
+	return nil != bt && IsBoxDoc(bt.BoxID, bt.RootID)
+}
+
 func EnsureBoxDoc(boxID string) (boxDocID string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
@@ -125,7 +150,7 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 		return
 	}
 
-	box := Conf.Box(boxID)
+	box := Conf.GetBox(boxID)
 	if nil == box {
 		return "", ErrBoxNotFound
 	}
@@ -186,28 +211,16 @@ func RefreshBoxDocFeature() {
 }
 
 func findBoxDocByMarker(box *Box) (ret string, err error) {
-	files, _, err := box.Ls("/")
+	boxDocID := deterministicBoxDocID(box.ID)
+	if "" == boxDocID || !box.Exist(boxDocPath(boxDocID)) {
+		return
+	}
+	tree, err := filesys.LoadTree(box.ID, boxDocPath(boxDocID), util.NewLute())
 	if err != nil {
 		return "", err
 	}
-
-	luteEngine := util.NewLute()
-	for _, file := range files {
-		if file.isdir || !strings.HasSuffix(file.path, ".sy") {
-			continue
-		}
-		id := util.GetTreeID(file.path)
-		if !ast.IsNodeIDPattern(id) {
-			continue
-		}
-		tree, loadErr := filesys.LoadTree(box.ID, file.path, luteEngine)
-		if loadErr != nil || box.ID != tree.Root.IALAttr(BoxDocAttr) {
-			continue
-		}
-		if "" != ret && ret != id {
-			return "", fmt.Errorf("multiple box documents found in notebook [%s]", box.ID)
-		}
-		ret = id
+	if box.ID == tree.Root.IALAttr(BoxDocAttr) {
+		ret = boxDocID
 	}
 	return
 }

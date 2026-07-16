@@ -462,7 +462,8 @@ func lsNotebooks(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"notebooks": notebooks,
+		"notebooks":     notebooks,
+		"boxDocEnabled": model.IsBoxDocEnabled(),
 	}
 }
 

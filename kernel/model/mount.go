@@ -48,16 +48,12 @@ func GetBoxByName(name string) (ret *Box) {
 }
 
 func CreateBox(name string) (id string, err error) {
-	name = util.RemoveInvalid(name)
+	name = normalizeBoxName(name)
 	if 512 < utf8.RuneCountInString(name) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))
 		return
 	}
-	if "" == name {
-		name = Conf.language(105)
-	}
-
 	FlushTxQueue()
 
 	createDocLock.Lock()
@@ -104,14 +100,11 @@ func RenameBox(boxID, name string) (err error) {
 		return errors.New(Conf.Language(0))
 	}
 
+	name = normalizeBoxName(name)
 	if 512 < utf8.RuneCountInString(name) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))
 		return
-	}
-
-	if "" == name {
-		name = Conf.language(105)
 	}
 
 	boxConf := box.GetConf()
@@ -128,6 +121,14 @@ func RenameBox(boxID, name string) (err error) {
 	IncSync()
 	logging.LogInfof("renamed box [%s] to [%s]", boxID, name)
 	return
+}
+
+func normalizeBoxName(name string) string {
+	name = normalizeDocTitle(name)
+	if "" == name {
+		name = normalizeDocTitle(Conf.language(105))
+	}
+	return name
 }
 
 var boxLock = sync.Map{}

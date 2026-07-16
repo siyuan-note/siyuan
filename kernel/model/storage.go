@@ -480,7 +480,6 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 			changed = true
 			continue
 		}
-
 		// 文档块可能已经转换成标题块 https://github.com/siyuan-note/siyuan/pull/16727#issuecomment-3810081850
 		if doc.RootID != bt.RootID {
 			changed = true
@@ -521,12 +520,30 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 			logging.LogErrorf("update storage [recent-doc] failed in getRecentDocs: %s", errSet)
 		}
 	}
+	if !IsBoxDocEnabled() {
+		filtered := make([]*RecentDoc, 0, len(ret))
+		for _, doc := range ret {
+			bt := bts[doc.RootID]
+			if nil == bt || !IsBoxDoc(bt.BoxID, bt.RootID) {
+				filtered = append(filtered, doc)
+			}
+		}
+		ret = filtered
+	}
 
 	// 根据排序参数进行排序
 	switch sortBy {
 	case "updated": // 按更新时间排序
 		// 从数据库查询最近修改的文档
-		sqlBlocks := sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC", 1, Conf.FileTree.RecentDocsMaxListCount)
+		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
+		var sqlBlocks []*sql.Block
+		if "" == boxDocFilter {
+			sqlBlocks = sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC", 1, Conf.FileTree.RecentDocsMaxListCount)
+		} else {
+			stmt := "SELECT * FROM blocks WHERE type = 'd'" + boxDocFilter + " ORDER BY updated DESC" +
+				fmt.Sprintf(" LIMIT %d", Conf.FileTree.RecentDocsMaxListCount)
+			sqlBlocks = sql.SelectBlocksRawStmtArgs(stmt, boxDocArgs, Conf.FileTree.RecentDocsMaxListCount)
+		}
 		ret = []*RecentDoc{}
 		if 1 > len(sqlBlocks) {
 			return

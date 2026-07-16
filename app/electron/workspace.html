@@ -145,6 +145,11 @@
             min-width: 180px;
         }
 
+        .crash-actions .b3-button:disabled {
+            cursor: not-allowed;
+            opacity: .5;
+        }
+
         .b3-button--safe {
             color: #fff;
             background-color: #3575f0;
@@ -373,35 +378,43 @@
 
     initWindowChrome()
 
-    // 渲染进程崩溃恢复：显示安全模式选择，隐藏工作空间选择相关 UI
-    const isCrash = "1" === getSearch("crash")
-    const crashWorkspace = decodeURIComponent(getSearch("workspace"))
+    // 渲染进程崩溃恢复：显示安全模式选择，工作空间丢失时要求用户重新选择。
+    const isCrash = "1" === getSearch("crash");
+    const isCrashWorkspaceMissing = "1" === getSearch("crashWorkspaceMissing");
+    let crashWorkspace = decodeURIComponent(getSearch("workspace"));
+    const safeModeButton = document.querySelector(".safeMode");
+    const normalButton = document.querySelector(".normal");
     if (isCrash) {
-        document.querySelector(".wsPanel").classList.add("fn__none")
-        document.querySelector(".missing-tip").classList.add("fn__none")
-        document.querySelectorAll(".b3-label").forEach(item => item.classList.add("fn__none"))
-        const crashLogEl = document.querySelector(".crash-log")
-        const crashInfo = decodeURIComponent(getSearch("crashInfo"))
-        if (crashInfo) {
-            crashLogEl.textContent = crashInfo
+        document.querySelector(".wsPanel").classList.add("fn__none");
+        if (isCrashWorkspaceMissing) {
+            safeModeButton.disabled = true;
+            normalButton.disabled = true;
         } else {
-            crashLogEl.classList.add("fn__none")
+            document.querySelector(".missing-tip").classList.add("fn__none");
+            document.querySelectorAll(".b3-label").forEach(item => item.classList.add("fn__none"));
         }
-        document.querySelector(".crash-tip").classList.remove("fn__none")
-        document.querySelector(".safeMode").addEventListener("click", () => {
+        const crashLogEl = document.querySelector(".crash-log");
+        const crashInfo = decodeURIComponent(getSearch("crashInfo"));
+        if (crashInfo) {
+            crashLogEl.textContent = crashInfo;
+        } else {
+            crashLogEl.classList.add("fn__none");
+        }
+        document.querySelector(".crash-tip").classList.remove("fn__none");
+        safeModeButton.addEventListener("click", () => {
             ipcRenderer.send("siyuan-select-workspace", {
                 workspace: crashWorkspace,
                 lang: currentLang,
                 safeMode: true,
-            })
-        })
-        document.querySelector(".normal").addEventListener("click", () => {
+            });
+        });
+        normalButton.addEventListener("click", () => {
             ipcRenderer.send("siyuan-select-workspace", {
                 workspace: crashWorkspace,
                 lang: currentLang,
                 safeMode: false,
-            })
-        })
+            });
+        });
     } else if (0 < wsList.length) {
         // 存在可用工作空间时渲染左列列表
         renderWsList()
@@ -412,15 +425,22 @@
     }
 
     document.querySelector(".choosePath").addEventListener("click", async () => {
-        const initPath = await chooseWorkspacePath(langData)
+        const initPath = await chooseWorkspacePath(langData);
         if (null === initPath) {
-            return
+            return;
+        }
+        if (isCrash && isCrashWorkspaceMissing) {
+            crashWorkspace = initPath;
+            document.querySelector(".missing-tip").classList.add("fn__none");
+            safeModeButton.disabled = false;
+            normalButton.disabled = false;
+            return;
         }
         ipcRenderer.send("siyuan-select-workspace", {
             workspace: initPath,
             lang: currentLang,
-        })
-    })
+        });
+    });
 </script>
 </body>
 </html>

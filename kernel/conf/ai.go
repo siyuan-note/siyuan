@@ -191,7 +191,7 @@ func NewAI() *AI {
 	apiModel := os.Getenv("SIYUAN_OPENAI_API_MODEL")
 	apiBaseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL")
 
-	if apiKey != "" && apiModel != "" && apiBaseURL != "" {
+	if apiModel != "" && apiBaseURL != "" {
 		provider := &Provider{
 			BaseURL:        apiBaseURL,
 			RequestTimeout: 120,
@@ -281,9 +281,9 @@ func NewAI() *AI {
 
 func (ai *AI) HasAnyProvider() bool {
 	for _, p := range ai.Providers {
-		if p != nil && len(p.APIKey) > 0 && p.Enabled {
+		if p != nil && p.Enabled {
 			for _, m := range p.Models {
-				if m.Name != "" && m.Enabled {
+				if m != nil && m.Name != "" && m.Enabled {
 					return true
 				}
 			}
@@ -298,33 +298,33 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.ID == id && m.Enabled {
+			if m != nil && m.ID == id && m.Enabled {
 				return p, m
 			}
 		}
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.DisplayName == id && m.Enabled {
+			if m != nil && m.DisplayName == id && m.Enabled {
 				return p, m
 			}
 		}
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.Name == id && m.Enabled {
+			if m != nil && m.Name == id && m.Enabled {
 				return p, m
 			}
 		}
@@ -666,7 +666,7 @@ func assignDefaultModelIDs(ai *AI) {
 	}
 	var m *Model
 	for _, p := range ai.Providers {
-		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, model := range p.Models {

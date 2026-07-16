@@ -668,11 +668,11 @@ func InitConf() {
 	}
 
 	for _, p := range Conf.AI.Providers {
-		if p == nil || len(p.APIKey) == 0 {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.Name == "" {
+			if m == nil || m.Name == "" || !m.Enabled {
 				continue
 			}
 			logging.LogInfof("AI provider enabled\n"+

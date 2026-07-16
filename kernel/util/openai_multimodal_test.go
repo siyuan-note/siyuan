@@ -31,9 +31,12 @@ import (
 	"testing"
 )
 
-func TestModelFallsBackToChatCompletion(t *testing.T) {
+func TestKeylessModelFallsBackToChatCompletion(t *testing.T) {
 	var chatRequests atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if authorization := r.Header.Get("Authorization"); authorization != "" {
+			t.Errorf("unexpected Authorization header: %q", authorization)
+		}
 		switch r.URL.Path {
 		case "/v1/models":
 			http.Error(w, "unsupported", http.StatusNotFound)
@@ -54,7 +57,7 @@ func TestModelFallsBackToChatCompletion(t *testing.T) {
 	}))
 	defer server.Close()
 
-	_, matched, err := TestModel("test", server.URL+"/v1", "test-model", 5)
+	_, matched, err := TestModel("", server.URL+"/v1", "test-model", 5)
 	if err != nil || !matched || chatRequests.Load() != 1 {
 		t.Fatalf("unexpected model test result: matched=%v requests=%d err=%v", matched, chatRequests.Load(), err)
 	}

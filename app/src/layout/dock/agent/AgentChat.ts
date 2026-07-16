@@ -201,7 +201,7 @@ export class AgentChat extends Model {
     private static countUsableModels(aiConfig: Config.IAI): number {
         let count = 0;
         for (const prov of aiConfig.providers || []) {
-            if (!prov.enabled || !prov.apiKey) {
+            if (!prov.enabled) {
                 continue;
             }
             for (const m of prov.models) {
@@ -386,13 +386,13 @@ export class AgentChat extends Model {
     }
 
     // 从 window.siyuan.config.ai 重新计算可用模型列表，幂等可重复调用。
-    // 与后端 HasAnyProvider()/GetModel() 判定一致：provider 需 enabled 且 apiKey 非空，model 需 enabled。
+    // 与后端 HasAnyProvider()/GetModel() 判定一致：provider 和 model 均需 enabled。
     // 零模型时显式置空 selectedModel（避免 undefined 透传到后端），失效选择自动重置。
     refreshModelOptions() {
         const aiConfig = window.siyuan.config.ai;
         const newOptions: Array<{ id: string; name: string }> = [];
         for (const prov of aiConfig.providers || []) {
-            if (!prov.enabled || !prov.apiKey) {
+            if (!prov.enabled) {
                 continue;
             }
             for (const m of prov.models) {

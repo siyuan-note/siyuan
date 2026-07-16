@@ -50,6 +50,34 @@ func rejectEncryptedBoxPath(absPath string) bool {
 	return model.EncryptedRawPathBoxID(absPath) != ""
 }
 
+// rejectWorkspaceTempPath 检查路径是否位于工作空间临时目录，包含经符号链接解析后的目标路径。
+// 原始文件 API 不允许访问该目录，避免内核管理的导出、转换和仓库临时明文绕过专用下载守卫。
+func rejectWorkspaceTempPath(p string) bool {
+	if !filepath.IsAbs(p) {
+		p = filepath.Join(util.WorkspaceDir, p)
+	}
+	isTempPath := func(candidate string) bool {
+		tempDir := normalizeAndResolve(util.TempDir)
+		candidate = normalizeAndResolve(candidate)
+		return candidate == tempDir || gulu.File.IsSubPath(tempDir, candidate)
+	}
+	if isTempPath(p) {
+		return true
+	}
+	return isTempPath(util.ResolveLongestExistingParent(p))
+}
+
+func rejectWorkspaceTempPaths(ret *gulu.Result, paths ...string) bool {
+	for _, p := range paths {
+		if rejectWorkspaceTempPath(p) {
+			ret.Code = http.StatusForbidden
+			ret.Msg = "access to workspace temp files is not supported via this API"
+			return true
+		}
+	}
+	return false
+}
+
 // copyDecryptedAsset 将加密 asset 解密后复制到目标路径（dest 必须在工作区外）。
 func copyDecryptedAsset(src, dest string) error {
 	// 安全守卫：dest 必须在工作区外，防止解密后的明文落入工作区普通目录
@@ -94,6 +122,9 @@ func getUniqueFilename(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("path", &filePath, true, true),
 	) {
+		return
+	}
+	if rejectWorkspaceTempPaths(ret, filePath) {
 		return
 	}
 
@@ -154,6 +185,9 @@ func globalCopyFiles(c *gin.Context) {
 			ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", src)
 			return
 		}
+		if rejectWorkspaceTempPaths(ret, absSrc) {
+			return
+		}
 
 		if rejectEncryptedBoxPath(absSrc) {
 			ret.Code = -3
@@ -168,6 +202,9 @@ func globalCopyFiles(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
+		return
+	}
+	if rejectWorkspaceTempPaths(ret, destDir) {
 		return
 	}
 	// 在 MkdirAll 前拒绝加密笔记本目录，避免在加密笔记本内创建明文目录
@@ -199,6 +236,9 @@ func globalCopyFiles(c *gin.Context) {
 
 	for _, src := range srcs {
 		dest := filepath.Join(destDir, filepath.Base(src))
+		if rejectWorkspaceTempPaths(ret, dest) {
+			return
+		}
 		if rejectEncryptedBoxPath(dest) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
@@ -276,6 +316,9 @@ func workspaceCopyFiles(c *gin.Context) {
 			ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", src)
 			return
 		}
+		if rejectWorkspaceTempPaths(ret, absSrc) {
+			return
+		}
 		if rejectEncryptedBoxPath(absSrc) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
@@ -288,6 +331,9 @@ func workspaceCopyFiles(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
+		return
+	}
+	if rejectWorkspaceTempPaths(ret, destDir) {
 		return
 	}
 	// 在 MkdirAll 前拒绝加密笔记本目录，避免在加密笔记本内创建明文目录
@@ -319,6 +365,9 @@ func workspaceCopyFiles(c *gin.Context) {
 
 	for _, absSrc := range absSrcs {
 		dest := filepath.Join(destDir, filepath.Base(absSrc))
+		if rejectWorkspaceTempPaths(ret, dest) {
+			return
+		}
 		if rejectEncryptedBoxPath(dest) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
@@ -371,6 +420,9 @@ func copyFile(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+	if rejectWorkspaceTempPaths(ret, src, dest) {
 		return
 	}
 
@@ -448,6 +500,10 @@ func getFile(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
+		c.JSON(http.StatusAccepted, ret)
+		return
+	}
+	if rejectWorkspaceTempPaths(ret, fileAbsPath) {
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
@@ -617,6 +673,9 @@ func readDir(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if rejectWorkspaceTempPaths(ret, dirAbsPath) {
+		return
+	}
 	// 加密笔记本的任何目录都不允许通过原始文件 API 枚举（不只 .sy）：
 	// 目录结构、文档 ID、随机化资产名和时间戳可能泄漏信息；合法读取走专用 API（已加密感知）
 	if rejectEncryptedBoxPath(dirAbsPath) {
@@ -696,6 +755,9 @@ func renameFile(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if rejectWorkspaceTempPaths(ret, srcAbsPath) {
+		return
+	}
 	srcInfo, srcStatErr := os.Stat(srcAbsPath)
 	if os.IsNotExist(srcStatErr) {
 		ret.Code = http.StatusNotFound
@@ -713,6 +775,9 @@ func renameFile(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
+		return
+	}
+	if rejectWorkspaceTempPaths(ret, destAbsPath) {
 		return
 	}
 	// 加密笔记本的文件不允许通过原始文件 API 重命名（会破坏加密存储结构/跨 box 搬运密文）
@@ -789,6 +854,9 @@ func removeFile(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if rejectWorkspaceTempPaths(ret, fileAbsPath) {
+		return
+	}
 	// 加密笔记本的文件不允许通过原始文件 API 删除（破坏加密存储结构）
 	if rejectEncryptedBoxPath(fileAbsPath) {
 		ret.Code = -3
@@ -837,6 +905,9 @@ func putFile(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
+		return
+	}
+	if rejectWorkspaceTempPaths(ret, fileAbsPath) {
 		return
 	}
 

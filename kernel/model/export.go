@@ -989,10 +989,17 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		}
 
 		tmpDir := filepath.Join(util.TempDir, "export", gulu.Rand.String(7))
+		if bt := treenode.GetBlockTree(id); bt != nil && IsEncryptedBox(bt.BoxID) {
+			exportID, idErr := newManagedEncryptedExportID()
+			if idErr != nil {
+				return idErr
+			}
+			tmpDir = filepath.Join(util.TempDir, "export", bt.BoxID, "docx", exportID)
+		}
 		if mkdirErr := os.MkdirAll(tmpDir, 0755); mkdirErr != nil {
 			return mkdirErr
 		}
-		defer os.Remove(tmpDir)
+		defer os.RemoveAll(tmpDir)
 		name, content := ExportMarkdownHTML(id, tmpDir, true, merge)
 		content = strings.ReplaceAll(content, "  \n", "<br>\n")
 

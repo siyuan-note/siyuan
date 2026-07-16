@@ -202,7 +202,11 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 
 	// 历史目录中存在已删除加密笔记本的历史时拒绝导入：导入会用新 MasterSalt 覆盖当前配置，
 	// 这些历史的恢复仍依赖原 MasterSalt，覆盖后永久锁死（与 EnableEncryptedNotebook 的对称守卫一致）
-	if HasEncryptedNotebookHistory() {
+	hasHistory, historyErr := scanEncryptedNotebookHistory()
+	if historyErr != nil {
+		return fmt.Errorf("check encrypted notebook history failed: %w", historyErr)
+	}
+	if hasHistory {
 		return errors.New(Conf.Language(323))
 	}
 
@@ -314,7 +318,12 @@ func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto, kek []byte) error {
 // GetBoxEncryption 报错时 fail-closed（元数据损坏的加密笔记本不能静默跳过）。
 // 全部通过或不存在加密笔记本时返回 true。
 func verifyKEKAgainstExistingBoxes(kek []byte) bool {
-	for _, id := range ListAllEncryptedBoxIDs() {
+	boxIDs, err := listAllEncryptedBoxIDs()
+	if err != nil {
+		logging.LogErrorf("list encrypted notebooks failed: %s", err)
+		return false
+	}
+	for _, id := range boxIDs {
 		boxCrypt, err := GetBoxEncryption(id)
 		if err != nil {
 			return false // 元数据读取失败 → fail-closed
@@ -524,8 +533,9 @@ func recoverMasterPasswordMigration() {
 
 // hasEncryptedNotebook 检查数据目录中是否存在加密笔记本，不依赖全局加密功能是否启用。
 // EnableEncryptedNotebook 用它避免重新生成 MasterSalt，从而孤立旧 WrappedDEK。
-func hasEncryptedNotebook() bool {
-	return len(ListAllEncryptedBoxIDs()) > 0
+func hasEncryptedNotebook() (bool, error) {
+	ids, err := listAllEncryptedBoxIDs()
+	return len(ids) > 0, err
 }
 
 // HasEncryptedNotebookHistory 检查历史目录中是否存在加密笔记本的历史快照。
@@ -538,10 +548,13 @@ func hasEncryptedNotebook() bool {
 // 判定信号：历史条目 <HistoryDir>/<ts>-<op>/<boxID>/.siyuan/ 下存在
 // notebook-crypt-backup.json（专为 box 删除后的恢复设计），或 conf.json 标记 Encrypted=true。
 // boxID 用 ast.IsNodeIDPattern 校验，避免误判 assets/storage 等非 box 目录。
-func HasEncryptedNotebookHistory() bool {
+func scanEncryptedNotebookHistory() (bool, error) {
 	entries, err := os.ReadDir(util.HistoryDir)
 	if err != nil {
-		return false // 历史目录不存在或不可读 → 无依赖
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, fmt.Errorf("read history dir failed: %w", err)
 	}
 	for _, entry := range entries {
 		if !entry.IsDir() {
@@ -551,41 +564,61 @@ func HasEncryptedNotebookHistory() bool {
 		snapshotDir := filepath.Join(util.HistoryDir, entry.Name())
 		boxEntries, readErr := os.ReadDir(snapshotDir)
 		if readErr != nil {
-			continue
+			return false, fmt.Errorf("read history snapshot [%s] failed: %w", entry.Name(), readErr)
 		}
 		for _, boxEntry := range boxEntries {
 			if !boxEntry.IsDir() || !ast.IsNodeIDPattern(boxEntry.Name()) {
 				continue
 			}
-			if isEncryptedHistoryBoxDir(filepath.Join(snapshotDir, boxEntry.Name())) {
-				return true
+			encrypted, checkErr := isEncryptedHistoryBoxDir(filepath.Join(snapshotDir, boxEntry.Name()))
+			if checkErr != nil {
+				return false, checkErr
+			}
+			if encrypted {
+				return true, nil
 			}
 		}
 	}
-	return false
+	return false, nil
+}
+
+// HasEncryptedNotebookHistory 在扫描失败时按存在依赖处理，避免调用方因 I/O 或权限错误删除恢复材料。
+func HasEncryptedNotebookHistory() bool {
+	hasHistory, err := scanEncryptedNotebookHistory()
+	if err != nil {
+		logging.LogErrorf("scan encrypted notebook history failed: %s", err)
+		return true
+	}
+	return hasHistory
 }
 
 // isEncryptedHistoryBoxDir 判断历史目录中的 boxID 子目录是否属于加密笔记本。
 // 优先看 notebook-crypt-backup.json（删除前随 box 目录整体备份，是加密身份的权威标识），
 // 再 fallback 到 conf.json 的 Encrypted 标志。
-func isEncryptedHistoryBoxDir(boxDir string) bool {
+func isEncryptedHistoryBoxDir(boxDir string) (bool, error) {
 	siyuanDir := filepath.Join(boxDir, ".siyuan")
-	if filelock.IsExist(filepath.Join(siyuanDir, "notebook-crypt-backup.json")) {
-		return true
+	backupPath := filepath.Join(siyuanDir, "notebook-crypt-backup.json")
+	if _, err := os.Stat(backupPath); err == nil {
+		return true, nil
+	} else if !os.IsNotExist(err) {
+		return false, fmt.Errorf("stat encrypted notebook history backup [%s] failed: %w", boxDir, err)
 	}
 	confPath := filepath.Join(siyuanDir, "conf.json")
-	if !filelock.IsExist(confPath) {
-		return false
+	if _, err := os.Stat(confPath); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, fmt.Errorf("stat encrypted notebook history conf [%s] failed: %w", boxDir, err)
 	}
 	data, err := filelock.ReadFile(confPath)
 	if err != nil {
-		return false
+		return false, fmt.Errorf("read encrypted notebook history conf [%s] failed: %w", boxDir, err)
 	}
 	var boxConf conf.BoxConf
 	if err = gulu.JSON.UnmarshalJSON(data, &boxConf); err != nil {
-		return false
+		return false, fmt.Errorf("parse encrypted notebook history conf [%s] failed: %w", boxDir, err)
 	}
-	return boxConf.Encrypted
+	return boxConf.Encrypted, nil
 }
 
 // cachedDEKs 缓存已解锁加密笔记本的 DEK，按 boxID 索引。
@@ -621,7 +654,11 @@ func EnableEncryptedNotebook(password string) error {
 	// 防呆：若已存在加密笔记本（磁盘上有 Encrypted=true 的 box），不能重新生成 MasterSalt。
 	// conf.json 丢失后重新启用会派生新 KEK，导致旧 WrappedDEK 用相同主密码也无法解开（数据永久锁死）。
 	// 此时必须从 DataDir 备份恢复原 MasterSalt/KEKVerifier，并用主密码校验通过后才算恢复成功。
-	if hasEncryptedNotebook() {
+	hasEncrypted, listErr := hasEncryptedNotebook()
+	if listErr != nil {
+		return fmt.Errorf("list encrypted notebooks failed: %w", listErr)
+	}
+	if hasEncrypted {
 		if _, restoreErr := tryRestoreNotebookCryptoFromBackupLocked(password); restoreErr != nil {
 			// 恢复失败：主密码错（恢复函数返回 311 文案）保持原提示；其余（备份缺失/损坏）提示需恢复备份
 			if strings.Contains(restoreErr.Error(), Conf.Language(311)) {
@@ -636,7 +673,11 @@ func EnableEncryptedNotebook(password string) error {
 	// 防呆：历史目录中存在已删除加密笔记本的历史快照时，禁止重新生成 MasterSalt。
 	// 这些历史的恢复仍依赖原 MasterSalt/KEKVerifier，生成新 salt 会让其永久锁死（违反设计 §4.1
 	// “内核可枚举的加密恢复数据存在时禁止重新生成 MasterSalt”）。此时应先恢复全局密钥备份或清除历史。
-	if HasEncryptedNotebookHistory() {
+	hasHistory, historyErr := scanEncryptedNotebookHistory()
+	if historyErr != nil {
+		return fmt.Errorf("check encrypted notebook history failed: %w", historyErr)
+	}
+	if hasHistory {
 		return errors.New(Conf.Language(323))
 	}
 
@@ -666,6 +707,7 @@ func EnableEncryptedNotebook(password string) error {
 	}
 
 	Conf.m.Lock()
+	previous := *Conf.NotebookCrypto
 	Conf.NotebookCrypto.Enabled = true
 	Conf.NotebookCrypto.MasterSalt = salt
 	Conf.NotebookCrypto.KDFParams = params
@@ -673,20 +715,18 @@ func EnableEncryptedNotebook(password string) error {
 	Conf.NotebookCrypto.VerifierNonce = verifierNonce
 	Conf.m.Unlock()
 
-	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）
-	Conf.Save()
+	// 先持久化恢复备份，再提交 conf。此时尚无加密笔记本和历史依赖，任一步失败都不会孤立既有密文。
 	if err := saveNotebookCryptoBackup(kek); err != nil {
-		// 备份写失败则回滚启用状态，避免 UI 显示启用成功但恢复链条缺失
+		// 备份写失败则恢复启用前的内存配置；conf 尚未写入，无需再执行磁盘回滚。
 		logging.LogErrorf("save notebook crypto backup failed: %s", err)
 		Conf.m.Lock()
-		Conf.NotebookCrypto.Enabled = false
-		Conf.NotebookCrypto.MasterSalt = nil
-		Conf.NotebookCrypto.KEKVerifier = nil
-		Conf.NotebookCrypto.VerifierNonce = nil
+		*Conf.NotebookCrypto = previous
 		Conf.m.Unlock()
-		Conf.Save()
 		return fmt.Errorf("enable encrypted notebook failed: failed to persist key backup: %w", err)
 	}
+	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）。
+	// 即使配置写入失败，已落盘的备份仍可在下次启动时恢复同一套密钥材料。
+	Conf.Save()
 	return nil
 }
 
@@ -698,12 +738,20 @@ func DisableEncryptedNotebook() error {
 	defer notebookCryptoMu.Unlock()
 
 	// 检查是否还有加密笔记本（含 conf 损坏但存在备份的）
-	if ids := ListAllEncryptedBoxIDs(); len(ids) > 0 {
+	ids, listErr := listAllEncryptedBoxIDs()
+	if listErr != nil {
+		return fmt.Errorf("list encrypted notebooks failed: %w", listErr)
+	}
+	if len(ids) > 0 {
 		return errors.New("cannot disable encrypted notebook feature while encrypted notebooks exist, remove them first")
 	}
 	// 检查历史目录中是否存在已删除加密笔记本的历史快照：其恢复仍依赖当前 MasterSalt/KEKVerifier，
 	// 删除备份前必须先清除这些历史（详见设计 §19）
-	if HasEncryptedNotebookHistory() {
+	hasHistory, historyErr := scanEncryptedNotebookHistory()
+	if historyErr != nil {
+		return fmt.Errorf("check encrypted notebook history failed: %w", historyErr)
+	}
+	if hasHistory {
 		return errors.New(Conf.Language(323))
 	}
 
@@ -830,9 +878,11 @@ func deriveKEK(password string) ([]byte, error) {
 
 	decrypted, err := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
 	if err != nil {
+		zeroAndClear(kek)
 		return nil, errors.New(Conf.Language(311))
 	}
 	if string(decrypted) != string(kekVerifierMagic) {
+		zeroAndClear(kek)
 		return nil, errors.New(Conf.Language(311))
 	}
 
@@ -1166,7 +1216,10 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 
 	// Phase 0: 遍历所有加密笔记本（含 conf 损坏但存在备份的），预计算新 WrappedDEK（内存操作）
 	// 允许 entries 为空：用户可能已启用加密功能但尚未创建加密笔记本，此时仍需更新全局 verifier 和 backup。
-	encBoxIDs := ListAllEncryptedBoxIDs()
+	encBoxIDs, listErr := listAllEncryptedBoxIDs()
+	if listErr != nil {
+		return fmt.Errorf("list encrypted notebooks failed: %w", listErr)
+	}
 	var entries []migrationBoxEntry
 	for _, id := range encBoxIDs {
 		dek, _, dErr := decryptBoxCrypt(id, oldKEK)
@@ -1343,12 +1396,15 @@ func DeepCopyBoxEncryption(src *conf.BoxEncryption) *conf.BoxEncryption {
 // ListAllEncryptedBoxIDs 扫描 data 目录下所有含 notebook-crypt-backup.json 的 box 目录，
 // 补全 ListNotebooks 可能遗漏的 conf 损坏加密笔记本。供改密/禁用/检测等关键路径使用。
 // 统一使用 IsEncryptedBox 作为"是否加密"的唯一判定入口。
-func ListAllEncryptedBoxIDs() []string {
+func listAllEncryptedBoxIDs() ([]string, error) {
 	var ids []string
 	seen := map[string]bool{}
 
 	// Pass 1: ListNotebooks 已返回的
-	boxes, _ := ListNotebooks()
+	boxes, err := ListNotebooks()
+	if err != nil {
+		return nil, err
+	}
 	for _, b := range boxes {
 		seen[b.ID] = true
 		if IsEncryptedBox(b.ID) {
@@ -1358,7 +1414,7 @@ func ListAllEncryptedBoxIDs() []string {
 	// Pass 2: 扫描 backup 文件，补充 ListNotebooks 遗漏的
 	dirs, err := os.ReadDir(util.DataDir)
 	if err != nil {
-		return ids
+		return nil, err
 	}
 	for _, dir := range dirs {
 		if !dir.IsDir() || !ast.IsNodeIDPattern(dir.Name()) || seen[dir.Name()] {
@@ -1367,6 +1423,17 @@ func ListAllEncryptedBoxIDs() []string {
 		if IsEncryptedBox(dir.Name()) {
 			ids = append(ids, dir.Name())
 		}
+	}
+	return ids, nil
+}
+
+// ListAllEncryptedBoxIDs 返回所有可枚举的加密笔记本。扫描失败时记录错误并返回空列表；
+// 涉及密钥覆盖或删除的调用方必须直接使用 listAllEncryptedBoxIDs 并处理错误。
+func ListAllEncryptedBoxIDs() []string {
+	ids, err := listAllEncryptedBoxIDs()
+	if err != nil {
+		logging.LogErrorf("list encrypted notebooks failed: %s", err)
+		return nil
 	}
 	return ids
 }

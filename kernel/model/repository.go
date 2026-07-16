@@ -803,22 +803,43 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 		return
 	}
 
+	repoRel := strings.TrimPrefix(file.Path, "/")
+	repoParts := strings.SplitN(repoRel, "/", 2)
+	var encryptedBoxID string
+	if len(repoParts) >= 1 && ast.IsNodeIDPattern(repoParts[0]) && IsEncryptedBox(repoParts[0]) {
+		encryptedBoxID = repoParts[0]
+	}
+
 	// 加密笔记本的 .sy 在仓库里是密文，按路径提取 boxID 解密
 	data = decryptRepoDataIfNeeded(data, file.Path)
 	// 如果加密 box 已锁定，decryptRepoDataIfNeeded 返回原密文，应拒绝导出
-	repoRel := strings.TrimPrefix(file.Path, "/")
-	repoParts := strings.SplitN(repoRel, "/", 2)
-	if len(repoParts) >= 1 && ast.IsNodeIDPattern(repoParts[0]) && IsEncryptedBox(repoParts[0]) {
-		HoldBoxReadLock(repoParts[0])
-		defer ReleaseBoxReadLock(repoParts[0])
-		if _, dekErr := GetDEKIfUnlocked(repoParts[0]); dekErr != nil {
+	if encryptedBoxID != "" {
+		HoldBoxReadLock(encryptedBoxID)
+		defer ReleaseBoxReadLock(encryptedBoxID)
+		if _, dekErr := GetDEKIfUnlocked(encryptedBoxID); dekErr != nil {
 			err = errors.New(Conf.Language(314))
 			return
 		}
 	}
 
 	name := path.Base(file.Path)
-	exportDir := filepath.Join(util.TempDir, "export", "repo")
+	exportRoot := filepath.Join(util.TempDir, "export", "repo")
+	managedKind := ""
+	if encryptedBoxID != "" {
+		var exportID string
+		exportID, err = newManagedEncryptedExportID()
+		if err != nil {
+			return
+		}
+		managedKind = path.Join("repo", exportID)
+		exportRoot = filepath.Join(util.TempDir, "export", encryptedBoxID, "repo", exportID)
+		defer func() {
+			if err != nil {
+				_ = os.RemoveAll(exportRoot)
+			}
+		}()
+	}
+	exportDir := exportRoot
 
 	// 如果是 .sy 文件需要打包为 .sy.zip 以便导入
 	var docTitle string
@@ -831,7 +852,10 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 			return
 		}
 
-		docTitle = tree.Root.IALAttr("title")
+		docTitle = util.FilterFileName(tree.Root.IALAttr("title"))
+		if docTitle == "" {
+			docTitle = strings.TrimSuffix(name, ".sy")
+		}
 		exportDir = filepath.Join(exportDir, docTitle)
 	}
 
@@ -847,12 +871,19 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 	}
 
 	if strings.HasSuffix(file.Path, ".sy") {
-		zipPath := filepath.Join(util.TempDir, "export", "repo", docTitle+".sy.zip")
+		zipPath := filepath.Join(exportRoot, docTitle+".sy.zip")
 		zip, zipErr := gulu.Zip.Create(zipPath)
 		if zipErr != nil {
 			logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportDir, zipErr)
+			err = zipErr
 			return
 		}
+		zipClosed := false
+		defer func() {
+			if !zipClosed {
+				_ = zip.Close()
+			}
+		}()
 
 		if err = zip.AddDirectory(docTitle, exportDir); err != nil {
 			logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportDir, err)
@@ -863,12 +894,22 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 			logging.LogErrorf("close export .sy.zip failed: %s", err)
 			return
 		}
+		zipClosed = true
+		_ = os.RemoveAll(exportDir)
 
-		exportPath = path.Join("/export/repo", url.PathEscape(filepath.Base(zipPath)))
+		if encryptedBoxID != "" {
+			exportPath = path.Join("/export", registerManagedEncryptedExport(encryptedBoxID, managedKind, zipPath))
+		} else {
+			exportPath = path.Join("/export/repo", url.PathEscape(filepath.Base(zipPath)))
+		}
 		return
 	}
 
-	exportPath = path.Join("/export/repo", url.PathEscape(name))
+	if encryptedBoxID != "" {
+		exportPath = path.Join("/export", registerManagedEncryptedExport(encryptedBoxID, managedKind, exportFilePath))
+	} else {
+		exportPath = path.Join("/export/repo", url.PathEscape(name))
+	}
 	return
 }
 

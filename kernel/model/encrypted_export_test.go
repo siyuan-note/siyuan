@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestManagedEncryptedExportRevocation(t *testing.T) {
@@ -22,6 +24,42 @@ func TestManagedEncryptedExportRevocation(t *testing.T) {
 	RevokeManagedEncryptedExportsForBox(boxID)
 	if _, _, ok = ResolveManagedEncryptedExport(relativePath); ok {
 		t.Fatal("revoked managed export remained downloadable")
+	}
+}
+
+func TestLockBoxRevokesAndRemovesManagedExport(t *testing.T) {
+	boxID := "20260711211244-abcdefg"
+	originalTempDir := util.TempDir
+	util.TempDir = t.TempDir()
+	defer func() {
+		LockBox(boxID)
+		util.TempDir = originalTempDir
+	}()
+
+	dek, err := util.GenerateDEK()
+	if err != nil {
+		t.Fatal(err)
+	}
+	setDEKForTest(boxID, dek)
+	exportID, err := newManagedEncryptedExportID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	artifact := filepath.Join(util.TempDir, "export", boxID, "repo", exportID, "document.sy.zip")
+	if err = os.MkdirAll(filepath.Dir(artifact), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(artifact, []byte("plaintext"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	relativePath := registerManagedEncryptedExport(boxID, filepath.Join("repo", exportID), artifact)
+
+	LockBox(boxID)
+	if _, _, ok := ResolveManagedEncryptedExport(relativePath); ok {
+		t.Fatal("locking the notebook should revoke the managed export")
+	}
+	if _, statErr := os.Stat(artifact); !os.IsNotExist(statErr) {
+		t.Fatalf("locking the notebook should remove the managed export artifact: %v", statErr)
 	}
 }
 

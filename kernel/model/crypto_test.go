@@ -618,3 +618,63 @@ func TestSaveNotebookCryptoBackupRejectsNilKEK(t *testing.T) {
 		t.Fatal("writeNotebookCryptoBackupData(nc, nil) should be rejected")
 	}
 }
+
+func TestEncryptedNotebookHistoryScanFailsClosed(t *testing.T) {
+	originalHistoryDir := util.HistoryDir
+	historyPath := filepath.Join(t.TempDir(), "history") + "\x00"
+	util.HistoryDir = historyPath
+	defer func() { util.HistoryDir = originalHistoryDir }()
+
+	if _, err := scanEncryptedNotebookHistory(); err == nil {
+		t.Fatal("unreadable history structure should return an error")
+	}
+	if !HasEncryptedNotebookHistory() {
+		t.Fatal("public history dependency check should fail closed on scan errors")
+	}
+}
+
+func TestListEncryptedNotebooksReturnsScanError(t *testing.T) {
+	originalDataDir := util.DataDir
+	dataPath := filepath.Join(t.TempDir(), "data") + "\x00"
+	util.DataDir = dataPath
+	defer func() { util.DataDir = originalDataDir }()
+
+	if _, err := listAllEncryptedBoxIDs(); err == nil {
+		t.Fatal("invalid data directory should return a scan error")
+	}
+}
+
+func TestEnableEncryptedNotebookRestoresConfigWhenBackupWriteFails(t *testing.T) {
+	originalConf := Conf
+	originalDataDir := util.DataDir
+	originalHistoryDir := util.HistoryDir
+	dataDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dataDir, ".siyuan"), []byte("not a directory"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	Conf.FileTree = conf.NewFileTree()
+	util.DataDir = dataDir
+	util.HistoryDir = filepath.Join(dataDir, "history")
+	defer func() {
+		Conf = originalConf
+		util.DataDir = originalDataDir
+		util.HistoryDir = originalHistoryDir
+	}()
+
+	before, err := json.Marshal(Conf.NotebookCrypto)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = EnableEncryptedNotebook("backup-write-failure"); err == nil {
+		t.Fatal("enable encrypted notebook should fail when the recovery backup cannot be written")
+	}
+	after, err := json.Marshal(Conf.NotebookCrypto)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(before, after) {
+		t.Fatal("failed enable should restore the complete in-memory notebook crypto configuration")
+	}
+}

@@ -206,7 +206,14 @@ func CheckReadonly(c *gin.Context) {
 
 func CheckAuth(c *gin.Context) {
 	// 已通过 JWT 认证
-	if role := GetGinContextRole(c); IsValidRole(role, []Role{
+	if role := GetGinContextRole(c); role == RoleKernelPlugin {
+		if isKernelPluginRequestAllowed(c.Request.URL.Path) {
+			c.Next()
+		} else {
+			c.AbortWithStatus(http.StatusForbidden)
+		}
+		return
+	} else if IsValidRole(role, []Role{
 		RoleAdministrator,
 		RoleEditor,
 		RoleReader,
@@ -383,8 +390,15 @@ func CheckAuth(c *gin.Context) {
 	c.Next()
 }
 
+func isKernelPluginRequestAllowed(path string) bool {
+	return strings.HasPrefix(path, "/api/sync/kernel/") ||
+		path == "/api/notebook/lsNotebooks" ||
+		path == "/ws/network/proxy"
+}
+
 func CheckAdminRole(c *gin.Context) {
-	if IsAdminRoleContext(c) {
+	if IsAdminRoleContext(c) ||
+		(GetGinContextRole(c) == RoleKernelPlugin && c.Request.URL.Path == "/ws/network/proxy") {
 		c.Next()
 	} else {
 		c.AbortWithStatus(http.StatusForbidden)

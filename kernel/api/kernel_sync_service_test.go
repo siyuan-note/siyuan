@@ -76,14 +76,57 @@ func invokeKernelSyncTestHandlerResult(method, target string, body []byte, handl
 
 func kernelSyncTestBeginBody(t *testing.T) []byte {
 	t.Helper()
+	rulesFingerprint, err := kernelSyncRulesFingerprint(nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	body, err := json.Marshal(kernelSyncBeginRequest{
 		RunID: "run-test", LocalDeviceID: "device-local", RemoteDeviceID: "device-remote",
-		RulesFingerprint: "sha256:" + string(bytes.Repeat([]byte{'a'}, 64)), ProtocolVersion: "2",
+		RulesFingerprint: rulesFingerprint, ProtocolVersion: "2",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	return body
+}
+
+func TestKernelSyncRulesFingerprintContract(t *testing.T) {
+	fingerprint, err := kernelSyncRulesFingerprint(nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const expected = "sha256:a653890d22c753fa88c4c842b16fa4d4f5ab5b67315344710171d5d9e644add6"
+	if fingerprint != expected {
+		t.Fatalf("rules fingerprint contract changed: %s", fingerprint)
+	}
+}
+
+func TestKernelSyncRequestOwnerUsesStablePluginSubject(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	if err := model.InitJwtKey(); err != nil {
+		t.Fatal(err)
+	}
+	first, err := model.CreatePluginJWT("test-plugin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := model.CreatePluginJWT("test-plugin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		model.RevokePluginJWT(first)
+		model.RevokePluginJWT(second)
+	})
+	owner := func(token string) string {
+		context, _ := gin.CreateTestContext(httptest.NewRecorder())
+		context.Request = httptest.NewRequest(http.MethodPost, "/api/sync/kernel/begin", nil)
+		context.Request.Header.Set(model.XAuthTokenKey, token)
+		return kernelSyncRequestOwner(context)
+	}
+	if firstOwner, secondOwner := owner(first), owner(second); firstOwner != "plugin:test-plugin" || firstOwner != secondOwner {
+		t.Fatalf("expected stable plugin owner, got %q and %q", firstOwner, secondOwner)
+	}
 }
 
 func TestKernelSyncRecoveryReadinessGate(t *testing.T) {
@@ -158,7 +201,7 @@ func TestKernelSyncServiceStagesAndCommitsWithCAS(t *testing.T) {
 		t.Fatal(err)
 	}
 	if manifestResult.RunID != "run-test" || manifestResult.LocalDeviceID != "device-local" ||
-		manifestResult.RemoteDeviceID != "device-remote" || manifestResult.RulesFingerprint != "sha256:"+string(bytes.Repeat([]byte{'a'}, 64)) ||
+		manifestResult.RemoteDeviceID != "device-remote" ||
 		manifestResult.ProtocolVersion != "2" || manifestResult.ServiceVersion != kernelSyncProtocolVersion {
 		t.Fatalf("manifest did not preserve session binding: %+v", manifestResult)
 	}
@@ -201,6 +244,66 @@ func TestKernelSyncServiceStagesAndCommitsWithCAS(t *testing.T) {
 	released := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/abort?sessionId="+session.SessionID, nil, abortKernelSync)
 	if released.Code != 0 || !bytes.Contains(released.Data, []byte(`"committed":true`)) {
 		t.Fatalf("abort did not recognize committed terminal state: %s %s", released.Msg, released.Data)
+	}
+}
+
+func TestKernelSyncServiceRejectsManifestRulesOutsideSessionBinding(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	workspace := t.TempDir()
+	previousWorkspace, previousData, previousTemp := util.WorkspaceDir, util.DataDir, util.TempDir
+	util.WorkspaceDir = workspace
+	util.DataDir = filepath.Join(workspace, "data")
+	util.TempDir = filepath.Join(workspace, "temp")
+	defer func() { util.WorkspaceDir, util.DataDir, util.TempDir = previousWorkspace, previousData, previousTemp }()
+	if err := os.MkdirAll(util.DataDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	begin := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/begin", kernelSyncTestBeginBody(t), beginKernelSync)
+	var session struct {
+		SessionID string `json:"sessionId"`
+	}
+	if begin.Code != 0 || json.Unmarshal(begin.Data, &session) != nil {
+		t.Fatalf("begin failed: %s", begin.Msg)
+	}
+	body, err := json.Marshal(kernelSyncManifestRequest{SessionID: session.SessionID, Includes: []string{"assets/**"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/readManifest", body, readKernelSyncManifest)
+	if manifest.Code != http.StatusConflict {
+		t.Fatalf("expected manifest binding conflict, got %d: %s", manifest.Code, manifest.Msg)
+	}
+	aborted := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/abort?sessionId="+session.SessionID, nil, abortKernelSync)
+	if aborted.Code != 0 {
+		t.Fatalf("abort failed: %s", aborted.Msg)
+	}
+}
+
+func TestKernelSyncServiceExplicitRenewal(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	workspace := t.TempDir()
+	previousWorkspace, previousData, previousTemp := util.WorkspaceDir, util.DataDir, util.TempDir
+	util.WorkspaceDir = workspace
+	util.DataDir = filepath.Join(workspace, "data")
+	util.TempDir = filepath.Join(workspace, "temp")
+	defer func() { util.WorkspaceDir, util.DataDir, util.TempDir = previousWorkspace, previousData, previousTemp }()
+	if err := os.MkdirAll(util.DataDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	begin := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/begin", kernelSyncTestBeginBody(t), beginKernelSync)
+	var session struct {
+		SessionID string `json:"sessionId"`
+	}
+	if begin.Code != 0 || json.Unmarshal(begin.Data, &session) != nil {
+		t.Fatalf("begin failed: %s", begin.Msg)
+	}
+	renewed := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/renew?sessionId="+session.SessionID, nil, renewKernelSync)
+	if renewed.Code != 0 || !bytes.Contains(renewed.Data, []byte(`"renewed":true`)) {
+		t.Fatalf("renew failed: %s %s", renewed.Msg, renewed.Data)
+	}
+	aborted := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/abort?sessionId="+session.SessionID, nil, abortKernelSync)
+	if aborted.Code != 0 {
+		t.Fatalf("abort failed: %s", aborted.Msg)
 	}
 }
 
@@ -269,6 +372,46 @@ func TestKernelSyncServiceRejectsChangedPreconditionWithoutPublication(t *testin
 	after, err := os.ReadFile(target)
 	if err != nil || string(after) != "current" {
 		t.Fatalf("precondition failure changed the workspace: %q %v", after, err)
+	}
+}
+
+func TestKernelSyncServiceDeletesHistoryTreeRecursively(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	previousReload, previousIncSync := kernelSyncReloadFiletree, kernelSyncIncSync
+	kernelSyncReloadFiletree, kernelSyncIncSync = func() {}, func() { model.AdvanceWorkspaceGeneration() }
+	defer func() { kernelSyncReloadFiletree, kernelSyncIncSync = previousReload, previousIncSync }()
+	workspace := t.TempDir()
+	previousWorkspace, previousData, previousTemp := util.WorkspaceDir, util.DataDir, util.TempDir
+	util.WorkspaceDir = workspace
+	util.DataDir = filepath.Join(workspace, "data")
+	util.TempDir = filepath.Join(workspace, "temp")
+	defer func() { util.WorkspaceDir, util.DataDir, util.TempDir = previousWorkspace, previousData, previousTemp }()
+	tree := filepath.Join(util.DataDir, "storage", "petal", "test-plugin", "history", "run", "nested")
+	if err := os.MkdirAll(tree, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(tree, "payload.bin"), []byte("payload"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	begin := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/begin", kernelSyncTestBeginBody(t), beginKernelSync)
+	var session struct {
+		SessionID string `json:"sessionId"`
+	}
+	if begin.Code != 0 || json.Unmarshal(begin.Data, &session) != nil {
+		t.Fatalf("begin failed: %s", begin.Msg)
+	}
+	path := "/data/storage/petal/test-plugin/history/run"
+	query := url.Values{"sessionId": {session.SessionID}, "operation": {"delete"}, "path": {path}}
+	staged := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/stageBatch?"+query.Encode(), nil, stageKernelSyncBatch)
+	if staged.Code != 0 {
+		t.Fatalf("stage delete %s failed: %s", path, staged.Msg)
+	}
+	commit := invokeKernelSyncTestHandler(t, http.MethodPost, "/api/sync/kernel/commit?sessionId="+session.SessionID, nil, commitKernelSync)
+	if commit.Code != 0 {
+		t.Fatalf("commit failed: %s", commit.Msg)
+	}
+	if _, err := os.Lstat(filepath.Join(util.DataDir, "storage", "petal", "test-plugin", "history", "run")); !os.IsNotExist(err) {
+		t.Fatalf("history tree still exists: %v", err)
 	}
 }
 

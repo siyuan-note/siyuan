@@ -168,7 +168,7 @@ func (execution *execution) openAndCheckParents() error {
 			if statErr != nil {
 				return wrapError(ErrorInternal, false, statErr)
 			}
-			if info.IsDir() {
+			if info.IsDir() && item.change.Operation != OperationDelete {
 				return wrapError(ErrorConflict, false, errors.New("kernel sync batch only accepts file changes"))
 			}
 		}
@@ -296,6 +296,15 @@ func (execution *execution) recheckPreconditions() error {
 			return wrapError(ErrorConflict, false, errors.New(message))
 		}
 		item.existed = exists
+		if exists {
+			info, statErr := item.group.parent.Stat(item.targetName)
+			if statErr != nil {
+				return wrapError(ErrorInternal, false, statErr)
+			}
+			if info.IsDir() && item.change.Operation != OperationDelete {
+				return wrapError(ErrorConflict, false, errors.New("kernel sync batch only accepts file changes"))
+			}
+		}
 		if item.change.Operation == OperationDelete && !exists {
 			return wrapError(ErrorConflict, false, errors.New("delete target no longer exists"))
 		}
@@ -315,8 +324,18 @@ func checkFilePrecondition(root *os.Root, relativePath, ifMatch string, ifNoneMa
 		return false, false, "", err
 	}
 	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return true, false, "", err
+	}
 	if ifNoneMatch {
 		return true, false, "precondition failed: target already exists", nil
+	}
+	if info.IsDir() {
+		if ifMatch != "" {
+			return true, false, "precondition failed: directory hashes are not supported", nil
+		}
+		return true, true, "", nil
 	}
 	if ifMatch != "" {
 		actual, hashErr := hashReader(file)
@@ -340,7 +359,11 @@ func hashReader(reader io.Reader) (string, error) {
 
 func (execution *execution) createBackups() error {
 	for _, item := range execution.items {
-		if !item.existed {
+		// Deletes do not mutate the target until after the durable intent is
+		// installed, and a decided delete is always rolled forward. Keeping a
+		// hard-link backup is therefore unnecessary and would exclude
+		// directories, which cannot be hard-linked.
+		if !item.existed || item.change.Operation == OperationDelete {
 			continue
 		}
 		name, err := siblingName(".siyuan-sync-backup-")

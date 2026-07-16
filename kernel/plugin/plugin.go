@@ -92,8 +92,9 @@ func (s PluginState) String() string {
 // KernelPlugin represents a single kernel-side plugin instance.
 type KernelPlugin struct {
 	*model.Petal
-	token string // JWT for this plugin
-	file  string // kernel.js file path named in js runtime (e.g. "plugin-name/kernel.js")
+	tokenMu sync.Mutex
+	token   string // JWT for this plugin
+	file    string // kernel.js file path named in js runtime (e.g. "plugin-name/kernel.js")
 
 	pluginDir  string // Base directory for this plugin (e.g. /path/to/workspace/data/plugins/plugin-name)
 	storageDir string // Base directory for this plugin's storage (e.g. /path/to/workspace/data/storage/petal/plugin-name)
@@ -149,6 +150,29 @@ func NewKernelPlugin(ctx context.Context, petal *model.Petal) *KernelPlugin {
 
 	plugin.updateState(PluginStateReady)
 	return plugin
+}
+
+func (p *KernelPlugin) authToken() (string, error) {
+	p.tokenMu.Lock()
+	defer p.tokenMu.Unlock()
+	if p.token != "" && !model.PluginJWTNeedsRefresh(p.token) {
+		return p.token, nil
+	}
+	token, err := model.CreatePluginJWT(p.Name)
+	if err != nil {
+		return "", err
+	}
+	model.RevokePluginJWT(p.token)
+	p.token = token
+	return token, nil
+}
+
+func (p *KernelPlugin) revokeAuthToken() {
+	p.tokenMu.Lock()
+	token := p.token
+	p.token = ""
+	p.tokenMu.Unlock()
+	model.RevokePluginJWT(token)
 }
 
 // createEventMessage creates a standardized event message with a unique ID, type, and detail payload.
@@ -226,6 +250,7 @@ func (p *KernelPlugin) Eval(rt *goja.Runtime, code string) (goja.Value, error) {
 
 // close interrupts the goja runtime and clears the pointer.
 func (p *KernelPlugin) close() (err error) {
+	defer p.revokeAuthToken()
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("goja panic during close runtime: %v", r)

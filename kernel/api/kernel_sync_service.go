@@ -23,6 +23,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/kernelsync"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/synccommit"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -30,7 +31,6 @@ import (
 
 const (
 	kernelSyncLeaseTTL        = 3 * time.Minute
-	kernelSyncRenewInterval   = time.Minute
 	kernelSyncMaxChunkBytes   = int64(8 * 1024 * 1024)
 	kernelSyncMaxStagedBytes  = int64(4 * 1024 * 1024 * 1024)
 	kernelSyncMaxChanges      = 100_000
@@ -38,9 +38,7 @@ const (
 )
 
 var (
-	kernelSyncSessionsMu     sync.Mutex
-	kernelSyncSessions       = map[string]*kernelSyncSession{}
-	kernelSyncTerminals      = map[string]kernelSyncTerminal{}
+	kernelSyncManager        = kernelsync.NewManager[*kernelSyncSession]()
 	kernelSyncReloadFiletree = model.ReloadFiletree
 	kernelSyncIncSync        = model.IncSync
 	kernelSyncEngine         = synccommit.NewEngine(synccommit.Options{
@@ -52,14 +50,6 @@ var (
 		FaultHook: func(point string, index int) error { return injectKernelSyncCommitFault(point, index) },
 	})
 )
-
-type kernelSyncTerminal struct {
-	owner      string
-	committed  bool
-	generation uint64
-	changes    int
-	expiresAt  time.Time
-}
 
 type kernelSyncSession struct {
 	id          string
@@ -74,15 +64,17 @@ type kernelSyncSession struct {
 	lease       *model.SyncIdleLock
 	operationMu sync.Mutex
 
-	mu          sync.Mutex
-	changes     map[string]*kernelSyncChange
-	stagedBytes int64
-	closed      bool
-	committing  bool
-	decided     bool
-	inFlight    int
-	stageDone   *sync.Cond
-	done        chan struct{}
+	mu             sync.Mutex
+	changes        map[string]*kernelSyncChange
+	stagedBytes    int64
+	closed         bool
+	committing     bool
+	decided        bool
+	inFlight       int
+	stageDone      *sync.Cond
+	done           chan struct{}
+	recoverOnce    sync.Once
+	recoveryResult *synccommit.Result
 }
 
 type kernelSyncBeginRequest struct {
@@ -109,6 +101,11 @@ type kernelSyncChange struct {
 
 func kernelSyncRequestOwner(c *gin.Context) string {
 	if token := c.GetHeader(model.XAuthTokenKey); token != "" {
+		if parsed := model.ParseXAuthToken(c.Request); parsed != nil {
+			if subject := model.GetPluginJWTSubject(parsed); subject != "" {
+				return "plugin:" + subject
+			}
+		}
 		digest := sha256.Sum256([]byte(token))
 		return "token:" + hex.EncodeToString(digest[:])
 	}
@@ -155,49 +152,24 @@ func newKernelSyncID() (string, error) {
 	return hex.EncodeToString(value[:]), nil
 }
 
-func pruneKernelSyncTerminalsLocked(now time.Time) {
-	for id, terminal := range kernelSyncTerminals {
-		if !terminal.expiresAt.After(now) {
-			delete(kernelSyncTerminals, id)
-		}
-	}
-}
-
 func recordKernelSyncTerminal(session *kernelSyncSession, committed bool, generation uint64, changes int) {
-	kernelSyncSessionsMu.Lock()
-	defer kernelSyncSessionsMu.Unlock()
-	pruneKernelSyncTerminalsLocked(time.Now())
-	if len(kernelSyncTerminals) >= 1024 {
-		var oldestID string
-		var oldest time.Time
-		for id, terminal := range kernelSyncTerminals {
-			if oldestID == "" || terminal.expiresAt.Before(oldest) {
-				oldestID, oldest = id, terminal.expiresAt
-			}
-		}
-		delete(kernelSyncTerminals, oldestID)
-	}
-	kernelSyncTerminals[session.id] = kernelSyncTerminal{
-		owner: session.owner, committed: committed, generation: generation, changes: changes, expiresAt: time.Now().Add(time.Hour),
-	}
+	kernelSyncManager.RecordTerminal(session.id, session.owner, kernelsync.Terminal{
+		Committed: committed, Generation: generation, Changes: changes,
+	})
 }
 
-func lookupKernelSyncTerminal(c *gin.Context, sessionID string) (kernelSyncTerminal, bool) {
+func lookupKernelSyncTerminal(c *gin.Context, sessionID string) (kernelsync.Terminal, bool) {
 	owner := kernelSyncRequestOwner(c)
-	kernelSyncSessionsMu.Lock()
-	pruneKernelSyncTerminalsLocked(time.Now())
-	terminal, exists := kernelSyncTerminals[sessionID]
-	kernelSyncSessionsMu.Unlock()
-	if exists && terminal.owner == owner {
+	if terminal, exists := kernelSyncManager.LookupTerminal(sessionID, owner); exists {
 		return terminal, true
 	}
 	if receipt, receiptExists := synccommit.LookupReceipt(sessionID, owner); receiptExists {
-		return kernelSyncTerminal{
-			owner: owner, committed: true, generation: receipt.Generation, changes: receipt.Changes,
-			expiresAt: receipt.CommittedAt.Add(24 * time.Hour),
+		return kernelsync.Terminal{
+			Committed: true, Generation: receipt.Generation, Changes: receipt.Changes,
+			ExpiresAt: receipt.CommittedAt.Add(24 * time.Hour),
 		}, true
 	}
-	return kernelSyncTerminal{}, false
+	return kernelsync.Terminal{}, false
 }
 
 func beginKernelSync(c *gin.Context) {
@@ -254,11 +226,8 @@ func beginKernelSync(c *gin.Context) {
 		changes: map[string]*kernelSyncChange{}, done: make(chan struct{}),
 	}
 	session.stageDone = sync.NewCond(&session.mu)
-	kernelSyncSessionsMu.Lock()
-	pruneKernelSyncTerminalsLocked(time.Now())
-	kernelSyncSessions[id] = session
-	kernelSyncSessionsMu.Unlock()
-	go session.maintainLease()
+	kernelSyncManager.Add(id, session.owner, session)
+	go session.watchLease()
 	ret.Data = map[string]any{
 		"sessionId": id, "leaseId": id, "generation": session.generation, "protocolVersion": kernelSyncProtocolVersion,
 		"maxChunkBytes": kernelSyncMaxChunkBytes, "maxStagedBytes": kernelSyncMaxStagedBytes,
@@ -267,29 +236,47 @@ func beginKernelSync(c *gin.Context) {
 	}
 }
 
-func (session *kernelSyncSession) maintainLease() {
-	ticker := time.NewTicker(kernelSyncRenewInterval)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-session.done:
-			return
-		case <-session.lease.Done():
-			session.close(false)
-			return
-		case <-ticker.C:
-			session.mu.Lock()
-			committing := session.committing
-			session.mu.Unlock()
-			if committing {
-				continue
-			}
-			if !session.lease.Renew(kernelSyncLeaseTTL) {
-				session.close(false)
-				return
-			}
-		}
+func (session *kernelSyncSession) watchLease() {
+	select {
+	case <-session.done:
+	case <-session.lease.Done():
+		session.close(false)
 	}
+}
+
+func (session *kernelSyncSession) renewLease() bool {
+	session.mu.Lock()
+	closed := session.closed
+	session.mu.Unlock()
+	return !closed && session.lease.Renew(kernelSyncLeaseTTL)
+}
+
+func (session *kernelSyncSession) recoverDecidedCommit() {
+	session.recoverOnce.Do(func() {
+		go func() {
+			kernelsync.SuperviseRecovery(session.done, func() error {
+				session.operationMu.Lock()
+				result, err := kernelSyncEngine.Resume(session.id, session.owner)
+				session.operationMu.Unlock()
+				if err == nil {
+					session.mu.Lock()
+					session.recoveryResult = &result
+					session.mu.Unlock()
+				}
+				return err
+			}, func() {
+				session.operationMu.Lock()
+				session.mu.Lock()
+				result := session.recoveryResult
+				session.mu.Unlock()
+				if result != nil {
+					recordKernelSyncTerminal(session, true, result.Receipt.Generation, result.Receipt.Changes)
+					session.closeOperationLocked(true)
+				}
+				session.operationMu.Unlock()
+			})
+		}()
+	})
 }
 
 func (session *kernelSyncSession) close(unlockLease bool) {
@@ -310,11 +297,7 @@ func (session *kernelSyncSession) closeOperationLocked(unlockLease bool) {
 		session.stageDone.Wait()
 	}
 	session.mu.Unlock()
-	kernelSyncSessionsMu.Lock()
-	if kernelSyncSessions[session.id] == session {
-		delete(kernelSyncSessions, session.id)
-	}
-	kernelSyncSessionsMu.Unlock()
+	kernelSyncManager.Delete(session.id, func(candidate *kernelSyncSession) bool { return candidate == session })
 	if unlockLease {
 		session.lease.Unlock()
 	}
@@ -325,10 +308,8 @@ func lookupKernelSyncSession(c *gin.Context, sessionID string) (*kernelSyncSessi
 	if len(sessionID) != 48 {
 		return nil, errors.New("invalid kernel sync session")
 	}
-	kernelSyncSessionsMu.Lock()
-	session := kernelSyncSessions[sessionID]
-	kernelSyncSessionsMu.Unlock()
-	if session == nil || session.owner != kernelSyncRequestOwner(c) {
+	session, exists := kernelSyncManager.Lookup(sessionID, kernelSyncRequestOwner(c))
+	if !exists || session == nil {
 		return nil, errors.New("kernel sync session is not active")
 	}
 	select {
@@ -336,7 +317,22 @@ func lookupKernelSyncSession(c *gin.Context, sessionID string) (*kernelSyncSessi
 		return nil, errors.New("kernel sync lease expired")
 	default:
 	}
+	if !session.renewLease() {
+		return nil, errors.New("kernel sync lease expired")
+	}
 	return session, nil
+}
+
+func renewKernelSync(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	session, err := lookupKernelSyncSession(c, strings.TrimSpace(c.Query("sessionId")))
+	if err != nil {
+		ret.Code = http.StatusLocked
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{"renewed": true, "sessionId": session.id}
 }
 
 func abortKernelSync(c *gin.Context) {
@@ -346,7 +342,7 @@ func abortKernelSync(c *gin.Context) {
 	session, err := lookupKernelSyncSession(c, sessionID)
 	if err != nil {
 		if terminal, exists := lookupKernelSyncTerminal(c, sessionID); exists {
-			ret.Data = map[string]any{"aborted": !terminal.committed, "committed": terminal.committed}
+			ret.Data = map[string]any{"aborted": !terminal.Committed, "committed": terminal.Committed}
 			return
 		}
 		ret.Data = map[string]any{"aborted": false}
@@ -359,7 +355,7 @@ func abortKernelSync(c *gin.Context) {
 	session.mu.Unlock()
 	if closed {
 		if terminal, exists := lookupKernelSyncTerminal(c, sessionID); exists {
-			ret.Data = map[string]any{"aborted": !terminal.committed, "committed": terminal.committed}
+			ret.Data = map[string]any{"aborted": !terminal.Committed, "committed": terminal.Committed}
 			return
 		}
 		ret.Data = map[string]any{"aborted": false}
@@ -805,7 +801,17 @@ func sortedKernelSyncChanges(session *kernelSyncSession) ([]*kernelSyncChange, e
 			IfNoneMatch: change.IfNoneMatch, Complete: change.Complete,
 		})
 	}
-	sort.Slice(changes, func(left, right int) bool { return changes[left].Path < changes[right].Path })
+	sort.Slice(changes, func(left, right int) bool {
+		if changes[left].Operation == "delete" && changes[right].Operation == "delete" {
+			leftDepth := strings.Count(changes[left].Path, "/")
+			rightDepth := strings.Count(changes[right].Path, "/")
+			if leftDepth != rightDepth {
+				return leftDepth > rightDepth
+			}
+			return changes[left].Path > changes[right].Path
+		}
+		return changes[left].Path < changes[right].Path
+	})
 	return changes, nil
 }
 
@@ -815,9 +821,9 @@ func commitKernelSync(c *gin.Context) {
 	sessionID := strings.TrimSpace(c.Query("sessionId"))
 	session, err := lookupKernelSyncSession(c, sessionID)
 	if err != nil {
-		if terminal, exists := lookupKernelSyncTerminal(c, sessionID); exists && terminal.committed {
+		if terminal, exists := lookupKernelSyncTerminal(c, sessionID); exists && terminal.Committed {
 			ret.Data = map[string]any{
-				"committed": true, "generation": terminal.generation, "changes": terminal.changes, "alreadyTerminal": true,
+				"committed": true, "generation": terminal.Generation, "changes": terminal.Changes, "alreadyTerminal": true,
 			}
 			return
 		}
@@ -831,9 +837,9 @@ func commitKernelSync(c *gin.Context) {
 	closed := session.closed
 	session.mu.Unlock()
 	if closed {
-		if terminal, exists := lookupKernelSyncTerminal(c, sessionID); exists && terminal.committed {
+		if terminal, exists := lookupKernelSyncTerminal(c, sessionID); exists && terminal.Committed {
 			ret.Data = map[string]any{
-				"committed": true, "generation": terminal.generation, "changes": terminal.changes, "alreadyTerminal": true,
+				"committed": true, "generation": terminal.Generation, "changes": terminal.Changes, "alreadyTerminal": true,
 			}
 			return
 		}
@@ -884,6 +890,9 @@ func commitKernelSync(c *gin.Context) {
 		session.committing = false
 		session.decided = session.decided || decided
 		session.mu.Unlock()
+		if decided {
+			session.recoverDecidedCommit()
+		}
 		if enteredCritical && !decided {
 			recordKernelSyncTerminal(session, false, session.generation, 0)
 			session.closeOperationLocked(true)

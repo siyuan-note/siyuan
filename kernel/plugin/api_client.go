@@ -121,7 +121,12 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				for k, v := range headers {
 					r.SetHeader(k, v)
 				}
-				r.SetHeader(model.XAuthTokenKey, p.token)
+				token, tokenErr := p.authToken()
+				if tokenErr != nil {
+					err = fmt.Errorf("create plugin authorization: %w", tokenErr)
+					return
+				}
+				r.SetHeader(model.XAuthTokenKey, token)
 
 				if bodyString != nil {
 					r.SetBody(*bodyString)
@@ -235,7 +240,12 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 			wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s", util.ServerPort, path)
 			wsHeader := http.Header{}
-			wsHeader.Set(model.XAuthTokenKey, p.token)
+			token, tokenErr := p.authToken()
+			if tokenErr != nil {
+				err = fmt.Errorf("create plugin authorization: %w", tokenErr)
+				return
+			}
+			wsHeader.Set(model.XAuthTokenKey, token)
 			if len(protocols) > 0 {
 				wsHeader.Set("Sec-WebSocket-Protocol", strings.Join(protocols, ", "))
 			}
@@ -714,7 +724,12 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}()
 
 				sseClient := sse.NewClient(esURL)
-				sseClient.Headers[model.XAuthTokenKey] = p.token
+				token, tokenErr := p.authToken()
+				if tokenErr != nil {
+					err = fmt.Errorf("create plugin authorization: %w", tokenErr)
+					return
+				}
+				sseClient.Headers[model.XAuthTokenKey] = token
 
 				sseClient.OnConnect(func(_ *sse.Client) {
 					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {

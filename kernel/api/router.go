@@ -322,6 +322,8 @@ func ServeAPI(ginServer *gin.Engine) {
 		model.CheckAdminRole, model.CheckReadonly, beginKernelSync)
 	ginServer.Handle("POST", "/api/sync/kernel/readManifest", requireKernelSyncRecoveryReady, model.CheckAuth,
 		model.CheckAdminRole, readKernelSyncManifest)
+	ginServer.Handle("POST", "/api/sync/kernel/renew", requireKernelSyncRecoveryReady, model.CheckAuth,
+		model.CheckAdminRole, renewKernelSync)
 	ginServer.Handle("GET", "/api/sync/kernel/readChunk", requireKernelSyncRecoveryReady, model.CheckAuth,
 		model.CheckAdminRole, readKernelSyncChunk)
 	ginServer.Handle("POST", "/api/sync/kernel/stageBatch", requireKernelSyncRecoveryReady, model.CheckAuth,

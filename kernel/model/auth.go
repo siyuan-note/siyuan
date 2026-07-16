@@ -18,8 +18,11 @@ package model
 
 import (
 	"crypto/rand"
+	"errors"
 	"net/http"
+	"slices"
 	"sync"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -45,6 +48,8 @@ const (
 	iss = "siyuan-kernel" // token 的发行者
 
 	ClaimsKeyRole string = "role"
+
+	pluginJWTAudience = "siyuan-kernel-plugin"
 )
 
 var (
@@ -53,13 +58,23 @@ var (
 	sessionLock = sync.Mutex{}
 
 	jwtKey = make([]byte, 32)
+
+	activePluginJWTs      sync.Map
+	pluginJWTLifetime     = 12 * time.Hour
+	pluginJWTRefreshAhead = 30 * time.Minute
 )
+
+type pluginJWTRegistration struct {
+	name      string
+	expiresAt time.Time
+}
 
 func InitJwtKey() error {
 	if _, err := rand.Read(jwtKey); err != nil {
 		logging.LogErrorf("generate JWT signing key failed: %s", err)
 		return err
 	}
+	activePluginJWTs.Clear()
 	return nil
 }
 
@@ -107,6 +122,7 @@ func InitPublishJWT() {
 		logging.LogErrorf("generate JWT signing key failed: %s", err)
 		return
 	}
+	activePluginJWTs.Clear()
 
 	for username, account := range accountsMap {
 		// REF: https://golang-jwt.github.io/jwt/usage/create/
@@ -130,36 +146,77 @@ func InitPublishJWT() {
 	}
 }
 
-// CreatePluginJWT 为指定名称的内核插件创建一个 JWT，包含管理员权限。插件使用这个 JWT 调用内核 API。
+// CreatePluginJWT 为指定名称的内核插件创建一个短期、可撤销的受限 JWT。
 func CreatePluginJWT(name string) (string, error) {
+	now := time.Now().UTC()
+	expiresAt := now.Add(pluginJWTLifetime)
 	t := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"iss": iss,
 			"sub": name,
-			"aud": "siyuan-kernel-plugin",
+			"aud": pluginJWTAudience,
 			"jti": uuid.New().String(),
+			"iat": now.Unix(),
+			"nbf": now.Add(-time.Minute).Unix(),
+			"exp": expiresAt.Unix(),
 
-			ClaimsKeyRole: RoleAdministrator,
+			ClaimsKeyRole: RoleKernelPlugin,
 		},
 	)
 	if token, err := t.SignedString(jwtKey); err != nil {
 		logging.LogErrorf("JWT signature failed: %s", err)
 		return "", err
 	} else {
+		activePluginJWTs.Store(token, pluginJWTRegistration{name: name, expiresAt: expiresAt})
 		return token, nil
 	}
 }
 
+// RevokePluginJWT 撤销内核插件令牌。
+func RevokePluginJWT(tokenString string) {
+	if tokenString != "" {
+		activePluginJWTs.Delete(tokenString)
+	}
+}
+
+// PluginJWTNeedsRefresh 判断内核插件令牌是否需要轮换。
+func PluginJWTNeedsRefresh(tokenString string) bool {
+	value, ok := activePluginJWTs.Load(tokenString)
+	if !ok {
+		return true
+	}
+	registration, ok := value.(pluginJWTRegistration)
+	return !ok || time.Until(registration.expiresAt) <= pluginJWTRefreshAhead
+}
+
 func ParseJWT(tokenString string) (*jwt.Token, error) {
 	// REF: https://golang-jwt.github.io/jwt/usage/parse/
-	return jwt.Parse(
+	token, err := jwt.Parse(
 		tokenString,
 		func(token *jwt.Token) (any, error) {
 			return jwtKey, nil
 		},
 		jwt.WithIssuer(iss),
 	)
+	if err != nil {
+		return nil, err
+	}
+	claims := GetTokenClaims(token)
+	audiences, audienceErr := claims.GetAudience()
+	if audienceErr == nil && slices.Contains(audiences, pluginJWTAudience) {
+		value, ok := activePluginJWTs.Load(tokenString)
+		if !ok {
+			return nil, errors.New("kernel plugin JWT is not active")
+		}
+		registration, ok := value.(pluginJWTRegistration)
+		subject, subjectErr := claims.GetSubject()
+		if !ok || subjectErr != nil || subject != registration.name || !registration.expiresAt.After(time.Now()) {
+			activePluginJWTs.Delete(tokenString)
+			return nil, errors.New("kernel plugin JWT registration does not match")
+		}
+	}
+	return token, nil
 }
 
 func ParseXAuthToken(r *http.Request) *jwt.Token {
@@ -185,14 +242,30 @@ func GetClaimRole(claims jwt.MapClaims) Role {
 	return RoleVisitor
 }
 
+// GetPluginJWTSubject 返回内核插件令牌的稳定主体。
+func GetPluginJWTSubject(token *jwt.Token) string {
+	if token == nil || !token.Valid {
+		return ""
+	}
+	claims := GetTokenClaims(token)
+	audiences, err := claims.GetAudience()
+	if err != nil || !slices.Contains(audiences, pluginJWTAudience) {
+		return ""
+	}
+	subject, err := claims.GetSubject()
+	if err != nil {
+		return ""
+	}
+	return subject
+}
+
 // IsPublishServiceToken 检查 token 是否来自发布服务
 func IsPublishServiceToken(token *jwt.Token) bool {
 	if token == nil || !token.Valid {
 		return false
 	}
 	claims := GetTokenClaims(token)
-	if tokenIssuer, ok := claims["iss"].(string); ok {
-		return tokenIssuer == iss
-	}
-	return false
+	tokenIssuer, issuerOK := claims["iss"].(string)
+	audiences, audienceErr := claims.GetAudience()
+	return issuerOK && tokenIssuer == iss && audienceErr == nil && slices.Contains(audiences, "siyuan-publish-server")
 }

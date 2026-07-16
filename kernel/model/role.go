@@ -31,6 +31,7 @@ const (
 	RoleEditor                    // 编辑者
 	RoleReader                    // 读者
 	RoleVisitor                   // 匿名访问者
+	RoleKernelPlugin              // 内核插件
 )
 
 func IsValidRole(role Role, roles []Role) bool {

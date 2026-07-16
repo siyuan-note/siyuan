@@ -19,14 +19,19 @@ package plugin
 import (
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/dop251/goja"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -159,7 +164,7 @@ type ResponseSerializedData struct {
 
 type ResponseFile struct {
 	Name string `json:"name"` // e.g. "index.html". If Name is not empty, the file will be sent with Content-Disposition header.
-	Path string `json:"path"` // e.g. "/data/plugins/<plugin-name>/app/index.html"
+	Path string `json:"path"` // 仅允许 /data/plugins/<plugin-name>/ 或 /data/storage/petal/<plugin-name>/ 下的文件。
 }
 
 type ResponseString struct {
@@ -229,12 +234,15 @@ func copyProxyHeaders(dst http.Header, src http.Header) {
 func newProxyHTTPClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
-			DialContext:        util.SSRFSafeDialer(30 * time.Second).DialContext,
+			DialContext:        util.SSRFStrictDialer(30 * time.Second).DialContext,
 			DisableCompression: true,
 		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= 10 {
 				return fmt.Errorf("stopped after 10 redirects")
+			}
+			if err := util.CheckHostSSRF(req.URL.Hostname()); err != nil {
+				return err
 			}
 			req.Header.Del("Referer")
 			return nil
@@ -255,6 +263,14 @@ func writeProxyResponse(c *gin.Context, proxy *ResponseProxy) {
 	}
 	if targetURL.Scheme != "http" && targetURL.Scheme != "https" {
 		c.String(http.StatusBadRequest, "only http/https proxy url is allowed")
+		return
+	}
+	if targetURL.Hostname() == "" {
+		c.String(http.StatusBadRequest, "proxy url has no host")
+		return
+	}
+	if err = util.CheckHostSSRF(targetURL.Hostname()); err != nil {
+		c.String(http.StatusForbidden, "proxy target is not allowed: %s", err.Error())
 		return
 	}
 
@@ -364,9 +380,11 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 		}
 	}
 
-	headers := map[string][]string(c.Request.Header.Clone())
-	delete(headers, "Cookie")
-	delete(headers, "Authorization")
+	requestHeaders := c.Request.Header.Clone()
+	requestHeaders.Del("Cookie")
+	requestHeaders.Del("Authorization")
+	requestHeaders.Del(model.XAuthTokenKey)
+	headers := map[string][]string(requestHeaders)
 
 	cookies := make(map[string][]string)
 	for _, cookie := range c.Request.Cookies() {
@@ -421,6 +439,73 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 		},
 	}
 	return
+}
+
+func openPluginResponseFile(p *KernelPlugin, responseFile *ResponseFile) (*os.File, os.FileInfo, error) {
+	if p == nil || responseFile == nil {
+		return nil, nil, fmt.Errorf("plugin response file is missing")
+	}
+	virtualPath := strings.ReplaceAll(strings.TrimSpace(responseFile.Path), "\\", "/")
+	pluginPrefix := "/data/plugins/" + p.Name + "/"
+	storagePrefix := "/data/storage/petal/" + p.Name + "/"
+	rootPath := ""
+	relativePath := ""
+	switch {
+	case strings.HasPrefix(virtualPath, pluginPrefix):
+		rootPath = p.pluginDir
+		relativePath = strings.TrimPrefix(virtualPath, pluginPrefix)
+	case strings.HasPrefix(virtualPath, storagePrefix):
+		rootPath = p.storageDir
+		relativePath = strings.TrimPrefix(virtualPath, storagePrefix)
+	default:
+		return nil, nil, fmt.Errorf("plugin response file must be inside the plugin or storage directory")
+	}
+	if relativePath == "" || strings.ContainsRune(relativePath, '\x00') || path.Clean("/"+relativePath) != "/"+relativePath {
+		return nil, nil, fmt.Errorf("invalid plugin response file path")
+	}
+	root, err := os.OpenRoot(rootPath)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer root.Close()
+	file, err := root.Open(filepath.FromSlash(relativePath))
+	if err != nil {
+		return nil, nil, err
+	}
+	info, err := file.Stat()
+	if err != nil {
+		file.Close()
+		return nil, nil, err
+	}
+	if info.IsDir() {
+		file.Close()
+		return nil, nil, fmt.Errorf("plugin response file path is a directory")
+	}
+	return file, info, nil
+}
+
+func writePluginFileResponse(c *gin.Context, p *KernelPlugin, responseFile *ResponseFile) {
+	file, info, err := openPluginResponseFile(p, responseFile)
+	if err != nil {
+		status := http.StatusForbidden
+		if os.IsNotExist(err) {
+			status = http.StatusNotFound
+		}
+		c.String(status, "open plugin response file failed: %s", err.Error())
+		return
+	}
+	defer file.Close()
+	name := info.Name()
+	if responseFile.Name != "" {
+		if responseFile.Name == "." || responseFile.Name == ".." || filepath.Base(responseFile.Name) != responseFile.Name ||
+			strings.ContainsAny(responseFile.Name, "\r\n") {
+			c.String(http.StatusBadRequest, "invalid plugin response file name")
+			return
+		}
+		name = responseFile.Name
+		c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": name}))
+	}
+	http.ServeContent(c.Writer, c.Request, name, info.ModTime(), file)
 }
 
 func HandleHttpRequest(c *gin.Context, scope AccessScope) {
@@ -516,13 +601,7 @@ func HandleHttpRequest(c *gin.Context, scope AccessScope) {
 			}
 			return
 		} else if response.Body.File != nil {
-			// If Path is not empty, use it as the file content and ignore Data.
-			// This is for streaming large files without loading the whole content into memory.
-			if response.Body.File.Name != "" {
-				c.FileAttachment(response.Body.File.Path, response.Body.File.Name)
-			} else {
-				c.File(response.Body.File.Path)
-			}
+			writePluginFileResponse(c, p, response.Body.File)
 			return
 		} else if response.Body.String != nil {
 			// Format the string with the provided values and write it to the response.

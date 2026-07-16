@@ -206,7 +206,10 @@ func (engine *Engine) resumeExecution(intentPath string, execution *execution) (
 			return Result{Decided: true}, err
 		}
 		if item.change.Operation == OperationDelete {
-			if err := item.group.parent.Remove(item.targetName); err != nil && !os.IsNotExist(err) {
+			// RemoveAll is anchored to the already-validated parent Root. It is
+			// idempotent for recovery and lets the kernel, rather than the
+			// plugin, own recursive directory deletion semantics.
+			if err := item.group.parent.RemoveAll(item.targetName); err != nil && !os.IsNotExist(err) {
 				return Result{Decided: true}, err
 			}
 			continue

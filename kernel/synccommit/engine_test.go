@@ -7,6 +7,7 @@ package synccommit
 import (
 	"bytes"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -198,6 +199,78 @@ func TestEngineRecoversPartialWriteAndDelete(t *testing.T) {
 	}
 	if _, err = os.Stat(deleteTarget); !os.IsNotExist(err) {
 		t.Fatalf("delete recovery mismatch: %v", err)
+	}
+}
+
+func TestEngineRecoversRecursiveDirectoryDelete(t *testing.T) {
+	withEngineWorkspace(t)
+	target := filepath.Join(util.DataDir, "assets", "history-run")
+	if err := os.MkdirAll(filepath.Join(target, "nested"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(target, "nested", "payload.bin"), []byte("payload"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	sessionID := "121212121212121212121212121212121212121212121212"
+	fired := false
+	engine := NewEngine(Options{
+		Advance: func() uint64 { return model.AdvanceWorkspaceGeneration() },
+		FaultHook: func(point string, _ int) error {
+			if point == "intent-renamed" && !fired {
+				fired = true
+				return errors.New("injected directory delete interruption")
+			}
+			return nil
+		},
+	})
+	request := CommitRequest{
+		SessionID: sessionID, Owner: "test-owner", ExpectedGeneration: model.WorkspaceGeneration(),
+		EnterCritical: func() bool { return true },
+		Changes:       []Change{{Operation: OperationDelete, Path: "/data/assets/history-run"}},
+	}
+	if result, err := engine.Commit(request); err == nil || !result.Decided {
+		t.Fatalf("directory delete did not retain a decided intent: %+v %v", result, err)
+	}
+	if _, err := os.Stat(target); err != nil {
+		t.Fatalf("directory changed before recovery: %v", err)
+	}
+	engine.options.FaultHook = nil
+	if _, err := engine.Resume(sessionID, request.Owner); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Lstat(target); !os.IsNotExist(err) {
+		t.Fatalf("directory delete was not rolled forward: %v", err)
+	}
+}
+
+func TestEngineRecursiveDeleteDoesNotFollowNestedSymlink(t *testing.T) {
+	withEngineWorkspace(t)
+	target := filepath.Join(util.DataDir, "assets", "history-run")
+	outside := filepath.Join(t.TempDir(), "outside.bin")
+	if err := os.MkdirAll(target, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(outside, []byte("outside"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(target, "outside-link")); err != nil {
+		t.Skipf("symlinks are unavailable: %v", err)
+	}
+	sessionID := "131313131313131313131313131313131313131313131313"
+	engine := NewEngine(Options{Advance: func() uint64 { return model.AdvanceWorkspaceGeneration() }})
+	request := CommitRequest{
+		SessionID: sessionID, Owner: "test-owner", ExpectedGeneration: model.WorkspaceGeneration(),
+		EnterCritical: func() bool { return true },
+		Changes:       []Change{{Operation: OperationDelete, Path: "/data/assets/history-run"}},
+	}
+	if _, err := engine.Commit(request); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Lstat(target); !os.IsNotExist(err) {
+		t.Fatalf("directory delete did not remove the target: %v", err)
+	}
+	if content, err := os.ReadFile(outside); err != nil || string(content) != "outside" {
+		t.Fatalf("recursive delete escaped through a symlink: %q %v", content, err)
 	}
 }
 

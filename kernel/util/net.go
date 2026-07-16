@@ -125,6 +125,15 @@ func IsLocalOrigin(origin string) bool {
 
 // SSRFSafeDialer returns a net.Dialer whose Control hook blocks private, loopback, link-local and unspecified IPs.
 func SSRFSafeDialer(timeout time.Duration) *net.Dialer {
+	return newSSRFDialer(timeout, false)
+}
+
+// SSRFStrictDialer 返回始终阻断内网、回环、链路本地和未指定地址的连接器。
+func SSRFStrictDialer(timeout time.Duration) *net.Dialer {
+	return newSSRFDialer(timeout, true)
+}
+
+func newSSRFDialer(timeout time.Duration, strict bool) *net.Dialer {
 	return &net.Dialer{
 		Timeout: timeout,
 		Control: func(network, address string, _ syscall.RawConn) error {
@@ -136,7 +145,7 @@ func SSRFSafeDialer(timeout time.Duration) *net.Dialer {
 				if _, loaded := auditedAddresses.LoadOrStore(address, struct{}{}); !loaded {
 					logging.LogWarnf("Establishing a connection to the private network [address=%s, network=%s]", address, network)
 				}
-				if SafeMode {
+				if strict || SafeMode {
 					return fmt.Errorf("ip address [%s] is prohibited", host)
 				}
 			}

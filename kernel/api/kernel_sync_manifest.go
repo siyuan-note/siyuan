@@ -7,6 +7,7 @@ package api
 import (
 	"container/heap"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -43,6 +44,44 @@ type kernelSyncManifestRequest struct {
 	Includes     []string `json:"includes"`
 	Excludes     []string `json:"excludes"`
 	AssetFormats []string `json:"assetFormats"`
+}
+
+type kernelSyncCanonicalRules struct {
+	Includes     []string `json:"includes"`
+	Excludes     []string `json:"excludes"`
+	AssetFormats []string `json:"assetFormats"`
+}
+
+func normalizeKernelSyncRules(values []string, normalize func(string) string) []string {
+	unique := map[string]struct{}{}
+	for _, value := range values {
+		value = normalize(value)
+		if value != "" {
+			unique[value] = struct{}{}
+		}
+	}
+	ret := make([]string, 0, len(unique))
+	for value := range unique {
+		ret = append(ret, value)
+	}
+	sort.Strings(ret)
+	return ret
+}
+
+func kernelSyncRulesFingerprint(includes, excludes, assetFormats []string) (string, error) {
+	rules := kernelSyncCanonicalRules{
+		Includes: normalizeKernelSyncRules(includes, strings.TrimSpace),
+		Excludes: normalizeKernelSyncRules(excludes, strings.TrimSpace),
+		AssetFormats: normalizeKernelSyncRules(assetFormats, func(value string) string {
+			return strings.ToLower(strings.TrimPrefix(strings.TrimSpace(value), "."))
+		}),
+	}
+	raw, err := json.Marshal(rules)
+	if err != nil {
+		return "", err
+	}
+	digest := sha256.Sum256(raw)
+	return fmt.Sprintf("%s%x", syncContentSHA256Prefix, digest[:]), nil
 }
 
 type kernelSyncManifestEntry struct {
@@ -273,6 +312,12 @@ func readKernelSyncManifest(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusLocked
 		ret.Msg = err.Error()
+		return
+	}
+	rulesFingerprint, err := kernelSyncRulesFingerprint(request.Includes, request.Excludes, request.AssetFormats)
+	if err != nil || rulesFingerprint != session.rulesHash {
+		ret.Code = http.StatusConflict
+		ret.Msg = "kernel sync manifest rules differ from the session binding"
 		return
 	}
 	matcher, err := newKernelSyncGlobMatcher(request.Includes, request.Excludes)

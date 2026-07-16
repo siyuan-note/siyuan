@@ -1,4 +1,19 @@
 {
+	"obsidianStatsSeparator": " · ",
+	"importFromMoreApps": "Impor dari format atau aplikasi lain",
+	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
+	"obsidianBasicStats": "Markdown: ${markdown} · ${assets}: ${count} (${size})",
+	"obsidianMissingTargets": "Target yang hilang: ${count}; berkas atau blok yang dirujuk oleh tautan atau sematan tidak ditemukan, sehingga teks asli akan dipertahankan",
+	"obsidianAmbiguousTargets": "Target ambigu: ${count}; beberapa target cocok, sehingga kecocokan pertama akan digunakan",
+	"obsidianUnsupportedTargets": "Target yang tidak didukung: ${count}; jenis atau sintaks target tidak dapat dikonversi secara andal, sehingga teks asli akan dipertahankan",
+	"obsidianVaultImport": "Impor Obsidian Vault",
+	"obsidianAnalyzing": "Menganalisis Obsidian Vault...",
+	"obsidianImporting": "Mengimpor Obsidian Vault...",
+	"obsidianCompatibilityTip": "Obsidian menggunakan beberapa sintaks Markdown privat yang tidak standar. Kami telah mencurahkan upaya pengembangan khusus untuk menyesuaikannya dan kini dapat menangani sebagian besar kasus umum; konten yang tidak dapat dikonversi secara andal akan dipertahankan apa adanya",
+	"obsidianIssueSummary": "Potensi masalah",
+	"obsidianSkippedSummary": "Jalur yang dilewati: ${count}; berkas tersembunyi, tautan simbolis, dan Vault bersarang tidak akan diimpor",
+	"obsidianUnreferencedTip": "${count} file yang tidak dirujuk tidak akan diimpor",
+	"obsidianImportFailed": "Impor Obsidian Vault gagal",
 	"openDocument": "Buka dokumen",
 	"docIconClickExpand": "Klik ikon dokumen untuk memperluas atau menciutkan dokumen anak",
 	"docIconClickExpandTip": "Jika diaktifkan, mengeklik ikon dokumen akan memperluas atau menciutkan dokumen anak dan tidak melakukan apa pun jika tidak ada dokumen anak; jika dinonaktifkan, mengeklik ikon dokumen akan mengubah ikon",
@@ -2165,6 +2180,12 @@
 		"325": "Otorisasi selesai",
 		"326": "Anda dapat menutup halaman ini dan kembali ke SiYuan untuk memeriksa status koneksi",
 		"327": "Otorisasi tidak selesai",
-		"328": "Anda dapat menutup halaman ini dan kembali ke SiYuan untuk mencoba lagi."
+		"328": "Anda dapat menutup halaman ini dan kembali ke SiYuan untuk mencoba lagi.",
+		"329": "Tugas impor Obsidian Vault sedang berjalan",
+		"330": "Tugas impor Obsidian Vault tidak ditemukan atau telah kedaluwarsa",
+		"331": "Tugas impor Obsidian Vault tidak dapat dibatalkan lagi",
+		"332": "Analisis Obsidian Vault belum siap atau telah kedaluwarsa",
+		"333": "Gagal menganalisis Obsidian Vault",
+		"334": "Gagal mengimpor Obsidian Vault"
 	}
 	}

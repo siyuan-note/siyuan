@@ -1,4 +1,19 @@
 {
+	"obsidianStatsSeparator": " · ",
+	"importFromMoreApps": "その他の形式またはアプリからインポート",
+	"obsidianSyntaxStats": "WikiLink：${wikiLink} · ![[Embed]]：${embed} · ^block-id：${blockID} · Footnote：${footnote} · %%comment%%：${comment}",
+	"obsidianBasicStats": "Markdown：${markdown} · ${assets}：${count}（${size}）",
+	"obsidianMissingTargets": "見つからない対象：${count}、リンクまたは埋め込みの参照先ファイルやブロックが見つからないため、原文を保持します",
+	"obsidianAmbiguousTargets": "曖昧な対象：${count}、複数の対象が一致した場合は最初の一致を使用します",
+	"obsidianUnsupportedTargets": "未対応の対象：${count}、対象の種類または構文を確実に変換できないため、原文を保持します",
+	"obsidianVaultImport": "Obsidian Vault をインポート",
+	"obsidianAnalyzing": "Obsidian Vault を分析しています...",
+	"obsidianImporting": "Obsidian Vault をインポートしています...",
+	"obsidianCompatibilityTip": "Obsidian は非標準の独自 Markdown 構文を使用しています。これらへの対応に専門的な開発作業を行い、現在では一般的なケースの大部分を処理できます。確実に変換できない内容は原文のまま保持されます",
+	"obsidianIssueSummary": "潜在的な問題",
+	"obsidianSkippedSummary": "スキップしたパス：${count}、隠しファイル、シンボリックリンク、入れ子の Vault はインポートしません",
+	"obsidianUnreferencedTip": "参照されていない ${count} 個のファイルはインポートされません",
+	"obsidianImportFailed": "Obsidian Vault のインポートに失敗しました",
 	"openDocument": "文書を開く",
 	"docIconClickExpand": "文書アイコンをクリックして子文書を展開または折りたたむ",
 	"docIconClickExpandTip": "有効にすると、文書アイコンをクリックして子文書を展開または折りたためます。子文書がない場合は何も実行されません。無効にすると、文書アイコンをクリックしてアイコンを変更できます",
@@ -2165,6 +2180,12 @@
 		"325": "認可が完了しました",
 		"326": "このページを閉じて SiYuan に戻り、接続状態を確認できます",
 		"327": "認可が完了しませんでした",
-		"328": "このページを閉じて SiYuan に戻り、もう一度お試しください。"
+		"328": "このページを閉じて SiYuan に戻り、もう一度お試しください。",
+		"329": "Obsidian Vault のインポートタスクがすでに実行中です",
+		"330": "Obsidian Vault のインポートタスクが見つからないか、有効期限が切れています",
+		"331": "Obsidian Vault のインポートタスクはキャンセルできません",
+		"332": "Obsidian Vault の分析が完了していないか、有効期限が切れています",
+		"333": "Obsidian Vault の分析に失敗しました",
+		"334": "Obsidian Vault のインポートに失敗しました"
 	}
 	}

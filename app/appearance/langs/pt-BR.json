@@ -1,4 +1,19 @@
 {
+	"obsidianStatsSeparator": " · ",
+	"importFromMoreApps": "Importar de outros formatos ou aplicativos",
+	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
+	"obsidianBasicStats": "Markdown: ${markdown} · ${assets}: ${count} (${size})",
+	"obsidianMissingTargets": "Destinos ausentes: ${count}; o arquivo ou bloco referenciado por um link ou uma incorporação não foi encontrado, portanto o texto original será preservado",
+	"obsidianAmbiguousTargets": "Destinos ambíguos: ${count}; vários destinos correspondem, portanto a primeira correspondência será usada",
+	"obsidianUnsupportedTargets": "Destinos não compatíveis: ${count}; o tipo ou a sintaxe do destino não pode ser convertido com segurança, portanto o texto original será preservado",
+	"obsidianVaultImport": "Importar Obsidian Vault",
+	"obsidianAnalyzing": "Analisando Obsidian Vault...",
+	"obsidianImporting": "Importando Obsidian Vault...",
+	"obsidianCompatibilityTip": "O Obsidian usa algumas sintaxes Markdown privadas e não padronizadas. Dedicamos trabalho específico de desenvolvimento para adaptá-las e agora conseguimos tratar a maioria dos casos comuns; o conteúdo que não puder ser convertido com segurança será preservado como está",
+	"obsidianIssueSummary": "Possíveis problemas",
+	"obsidianSkippedSummary": "Caminhos ignorados: ${count}; arquivos ocultos, links simbólicos e Vaults aninhados não serão importados",
+	"obsidianUnreferencedTip": "${count} arquivos sem referência não serão importados",
+	"obsidianImportFailed": "Falha ao importar Obsidian Vault",
 	"openDocument": "Abrir documento",
 	"docIconClickExpand": "Clique no ícone do documento para expandir ou recolher documentos filhos",
 	"docIconClickExpandTip": "Quando ativado, clicar no ícone de um documento expande ou recolhe os documentos filhos e não executa nenhuma ação quando não há documentos filhos; quando desativado, clicar no ícone altera o ícone",
@@ -2165,6 +2180,12 @@
 		"325": "Autorização concluída",
 		"326": "Você pode fechar esta página e voltar ao SiYuan para verificar o status da conexão",
 		"327": "A autorização não foi concluída",
-		"328": "Você pode fechar esta página e voltar ao SiYuan para tentar novamente."
+		"328": "Você pode fechar esta página e voltar ao SiYuan para tentar novamente.",
+		"329": "Uma tarefa de importação do Obsidian Vault já está em execução",
+		"330": "A tarefa de importação do Obsidian Vault não foi encontrada ou expirou",
+		"331": "A tarefa de importação do Obsidian Vault não pode mais ser cancelada",
+		"332": "A análise do Obsidian Vault não está pronta ou expirou",
+		"333": "Falha ao analisar o Obsidian Vault",
+		"334": "Falha ao importar o Obsidian Vault"
 	}
 	}

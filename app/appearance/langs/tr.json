@@ -1,4 +1,19 @@
 {
+	"obsidianStatsSeparator": " · ",
+	"importFromMoreApps": "Diğer biçimlerden veya uygulamalardan içe aktar",
+	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
+	"obsidianBasicStats": "Markdown: ${markdown} · ${assets}: ${count} (${size})",
+	"obsidianMissingTargets": "Eksik hedefler: ${count}; bağlantı veya gömmenin başvurduğu dosya ya da blok bulunamadığından özgün metin korunacak",
+	"obsidianAmbiguousTargets": "Belirsiz hedefler: ${count}; birden fazla hedef eşleştiği için ilk eşleşme kullanılacak",
+	"obsidianUnsupportedTargets": "Desteklenmeyen hedefler: ${count}; hedef türü veya sözdizimi güvenilir biçimde dönüştürülemediğinden özgün metin korunacak",
+	"obsidianVaultImport": "Obsidian Vault'u içe aktar",
+	"obsidianAnalyzing": "Obsidian Vault analiz ediliyor...",
+	"obsidianImporting": "Obsidian Vault içe aktarılıyor...",
+	"obsidianCompatibilityTip": "Obsidian, standart dışı bazı özel Markdown söz dizimleri kullanır. Bunları uyarlamak için özel geliştirme çalışması yaptık ve artık yaygın durumların çoğunu işleyebiliyoruz; güvenilir biçimde dönüştürülemeyen içerik olduğu gibi korunacaktır",
+	"obsidianIssueSummary": "Olası sorunlar",
+	"obsidianSkippedSummary": "Atlanan yollar: ${count}; gizli dosyalar, sembolik bağlantılar ve iç içe Vaultlar içe aktarılmayacak",
+	"obsidianUnreferencedTip": "Başvurulmayan ${count} dosya içe aktarılmayacak",
+	"obsidianImportFailed": "Obsidian Vault içe aktarılamadı",
 	"openDocument": "Belgeyi aç",
 	"docIconClickExpand": "Alt belgeleri genişletmek veya daraltmak için belge simgesine tıklayın",
 	"docIconClickExpandTip": "Etkinleştirildiğinde belge simgesine tıklamak alt belgeleri genişletir veya daraltır ve alt belge yoksa hiçbir işlem yapmaz; devre dışı bırakıldığında belge simgesine tıklamak simgeyi değiştirir",
@@ -2165,6 +2180,12 @@
 		"325": "Yetkilendirme tamamlandı",
 		"326": "Bu sayfayı kapatıp bağlantı durumunu kontrol etmek için SiYuan'a dönebilirsiniz",
 		"327": "Yetkilendirme tamamlanmadı",
-		"328": "Bu sayfayı kapatıp yeniden denemek için SiYuan'a dönebilirsiniz."
+		"328": "Bu sayfayı kapatıp yeniden denemek için SiYuan'a dönebilirsiniz.",
+		"329": "Bir Obsidian Vault içe aktarma görevi zaten çalışıyor",
+		"330": "Obsidian Vault içe aktarma görevi bulunamadı veya süresi doldu",
+		"331": "Obsidian Vault içe aktarma görevi artık iptal edilemez",
+		"332": "Obsidian Vault analizi hazır değil veya süresi doldu",
+		"333": "Obsidian Vault analiz edilemedi",
+		"334": "Obsidian Vault içe aktarılamadı"
 	}
 	}

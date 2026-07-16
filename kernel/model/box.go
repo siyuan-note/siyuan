@@ -771,6 +771,9 @@ func ClearTempFiles() {
 }
 
 func clearTempDir(dir string, count *int, size *int64) {
+	if IsObsidianVaultTaskActive() && sameObsidianPath(dir, filepath.Join(util.TempDir, "import", "obsidian")) {
+		return
+	}
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return

@@ -1,4 +1,19 @@
 {
+	"obsidianStatsSeparator": " · ",
+	"importFromMoreApps": "从其他格式或者应用导入",
+	"obsidianSyntaxStats": "WikiLink：${wikiLink} · ![[Embed]]：${embed} · ^block-id：${blockID} · Footnote：${footnote} · %%comment%%：${comment}",
+	"obsidianBasicStats": "Markdown：${markdown} · ${assets}：${count}（${size}）",
+	"obsidianMissingTargets": "目标缺失：${count}，未找到链接或嵌入指向的文件或块，将保留原文",
+	"obsidianAmbiguousTargets": "目标有歧义：${count}，存在多个匹配目标，将使用第一个匹配到的目标",
+	"obsidianUnsupportedTargets": "不支持的目标：${count}，目标类型或写法无法可靠转换，将保留原文",
+	"obsidianVaultImport": "导入 Obsidian Vault",
+	"obsidianAnalyzing": "正在分析 Obsidian Vault...",
+	"obsidianImporting": "正在导入 Obsidian Vault...",
+	"obsidianCompatibilityTip": "Obsidian 使用了一些非标准 Markdown 私有语法。我们已投入专门开发工作进行适配，目前能够处理大部分常见情形；无法可靠转换的内容将保留原文",
+	"obsidianIssueSummary": "潜在问题",
+	"obsidianSkippedSummary": "已跳过路径：${count}，隐藏文件、符号链接和嵌套 Vault 不会导入",
+	"obsidianUnreferencedTip": "${count} 个未被引用的文件不会导入",
+	"obsidianImportFailed": "Obsidian Vault 导入失败",
 	"openDocument": "打开文档",
 	"docIconClickExpand": "单击文档图标展开或折叠下级文档",
 	"docIconClickExpandTip": "启用后单击文档图标将展开或折叠下级文档，没有下级文档时不执行任何操作；关闭后单击文档图标将修改图标",
@@ -2165,6 +2180,12 @@
 		"325": "授权已完成",
 		"326": "可以关闭此页面并返回思源查看连接状态",
 		"327": "未完成授权",
-		"328": "可以关闭此页面并返回思源重新授权。"
+		"328": "可以关闭此页面并返回思源重新授权。",
+		"329": "已有 Obsidian Vault 导入任务正在运行",
+		"330": "未找到 Obsidian Vault 导入任务或任务已过期",
+		"331": "Obsidian Vault 导入任务已无法取消",
+		"332": "Obsidian Vault 分析尚未完成或已过期",
+		"333": "分析 Obsidian Vault 失败",
+		"334": "导入 Obsidian Vault 失败"
 	}
 	}

@@ -54,6 +54,7 @@ let workspaces = []; // workspaceDir, id, browserWindow, tray, hideShortcut
 let kernelPort = 6806;
 let resetWindowStateOnRestart = false;
 let openAsHidden = false;
+const openDialogSingletons = new Set();
 const isOpenAsHidden = function () {
     return 1 === workspaces.length && openAsHidden;
 };
@@ -982,6 +983,19 @@ app.whenReady().then(() => {
             return clipboard.read(data.format);
         }
         if (data.cmd === "showOpenDialog") {
+            if (data.singleton) {
+                const singleton = `${event.sender.id}:${data.singleton}`;
+                if (openDialogSingletons.has(singleton)) {
+                    return {canceled: true, filePaths: []};
+                }
+                openDialogSingletons.add(singleton);
+                const options = {...data};
+                delete options.cmd;
+                delete options.singleton;
+                return dialog.showOpenDialog(options).finally(() => {
+                    openDialogSingletons.delete(singleton);
+                });
+            }
             return dialog.showOpenDialog(data);
         }
         if (data.cmd === "getContentsId") {

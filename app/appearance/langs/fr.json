@@ -1,4 +1,19 @@
 {
+	"obsidianStatsSeparator": " · ",
+	"importFromMoreApps": "Importer depuis d’autres formats ou applications",
+	"obsidianSyntaxStats": "WikiLink : ${wikiLink} · ![[Embed]] : ${embed} · ^block-id : ${blockID} · Footnote : ${footnote} · %%comment%% : ${comment}",
+	"obsidianBasicStats": "Markdown : ${markdown} · ${assets} : ${count} (${size})",
+	"obsidianMissingTargets": "Cibles manquantes : ${count} ; le fichier ou le bloc référencé par un lien ou une intégration est introuvable, le texte d’origine sera donc conservé",
+	"obsidianAmbiguousTargets": "Cibles ambiguës : ${count} ; plusieurs cibles correspondent, la première correspondance sera donc utilisée",
+	"obsidianUnsupportedTargets": "Cibles non prises en charge : ${count} ; le type ou la syntaxe de la cible ne peut pas être converti de manière fiable, le texte d’origine sera donc conservé",
+	"obsidianVaultImport": "Importer un coffre Obsidian",
+	"obsidianAnalyzing": "Analyse du coffre Obsidian...",
+	"obsidianImporting": "Importation du coffre Obsidian...",
+	"obsidianCompatibilityTip": "Obsidian utilise certaines syntaxes Markdown privées et non standard. Nous avons consacré un effort de développement spécifique à leur adaptation et pouvons désormais traiter la plupart des cas courants ; le contenu qui ne peut pas être converti de manière fiable sera conservé tel quel",
+	"obsidianIssueSummary": "Problèmes potentiels",
+	"obsidianSkippedSummary": "Chemins ignorés : ${count} ; les fichiers cachés, les liens symboliques et les Vaults imbriqués ne seront pas importés",
+	"obsidianUnreferencedTip": "${count} fichiers non référencés ne seront pas importés",
+	"obsidianImportFailed": "Échec de l’importation du coffre Obsidian",
 	"openDocument": "Ouvrir le document",
 	"docIconClickExpand": "Cliquer sur l’icône du document pour développer ou réduire les documents enfants",
 	"docIconClickExpandTip": "Lorsque cette option est activée, cliquer sur l’icône d’un document développe ou réduit ses documents enfants et ne produit aucun effet s’il n’en existe pas ; lorsqu’elle est désactivée, cliquer sur l’icône permet de la modifier",
@@ -2165,6 +2180,12 @@
 		"325": "Autorisation terminée",
 		"326": "Vous pouvez fermer cette page et revenir dans SiYuan pour vérifier l’état de la connexion",
 		"327": "L’autorisation n’a pas abouti",
-		"328": "Vous pouvez fermer cette page et revenir dans SiYuan pour réessayer."
+		"328": "Vous pouvez fermer cette page et revenir dans SiYuan pour réessayer.",
+		"329": "Une tâche d’importation d’Obsidian Vault est déjà en cours",
+		"330": "La tâche d’importation d’Obsidian Vault est introuvable ou a expiré",
+		"331": "La tâche d’importation d’Obsidian Vault ne peut plus être annulée",
+		"332": "L’analyse d’Obsidian Vault n’est pas prête ou a expiré",
+		"333": "Échec de l’analyse d’Obsidian Vault",
+		"334": "Échec de l’importation d’Obsidian Vault"
 	}
 	}

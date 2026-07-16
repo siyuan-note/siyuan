@@ -1,4 +1,19 @@
 {
+	"obsidianStatsSeparator": " · ",
+	"importFromMoreApps": "الاستيراد من تنسيقات أو تطبيقات أخرى",
+	"obsidianSyntaxStats": "WikiLink: ${wikiLink} · ![[Embed]]: ${embed} · ^block-id: ${blockID} · Footnote: ${footnote} · %%comment%%: ${comment}",
+	"obsidianBasicStats": "Markdown: ${markdown} · ${assets}: ${count} (${size})",
+	"obsidianMissingTargets": "الأهداف المفقودة: ${count}؛ لم يتم العثور على الملف أو الكتلة المشار إليها بواسطة رابط أو تضمين، لذا سيُحتفظ بالنص الأصلي",
+	"obsidianAmbiguousTargets": "الأهداف الملتبسة: ${count}؛ تطابقت عدة أهداف، لذا سيُستخدم أول تطابق",
+	"obsidianUnsupportedTargets": "الأهداف غير المدعومة: ${count}؛ لا يمكن تحويل نوع الهدف أو صيغته بصورة موثوقة، لذا سيُحتفظ بالنص الأصلي",
+	"obsidianVaultImport": "استيراد Obsidian Vault",
+	"obsidianAnalyzing": "جارٍ تحليل Obsidian Vault...",
+	"obsidianImporting": "جارٍ استيراد Obsidian Vault...",
+	"obsidianCompatibilityTip": "يستخدم Obsidian بعض صيغ Markdown الخاصة وغير القياسية. لقد خصصنا جهداً تطويرياً لدعمها، وأصبح بإمكاننا الآن معالجة معظم الحالات الشائعة؛ وسيُحتفظ بالمحتوى الذي لا يمكن تحويله بصورة موثوقة كما هو",
+	"obsidianIssueSummary": "مشكلات محتملة",
+	"obsidianSkippedSummary": "المسارات المتخطاة: ${count}؛ لن تُستورد الملفات المخفية والروابط الرمزية وVaults المتداخلة",
+	"obsidianUnreferencedTip": "لن يتم استيراد ${count} من الملفات غير المشار إليها",
+	"obsidianImportFailed": "فشل استيراد Obsidian Vault",
 	"openDocument": "فتح المستند",
 	"docIconClickExpand": "انقر فوق أيقونة المستند لتوسيع المستندات الفرعية أو طيها",
 	"docIconClickExpandTip": "عند التمكين، يؤدي النقر فوق أيقونة المستند إلى توسيع المستندات الفرعية أو طيها، ولا يحدث شيء إذا لم توجد مستندات فرعية؛ وعند التعطيل، يؤدي النقر فوق أيقونة المستند إلى تغيير الأيقونة",
@@ -2165,6 +2180,12 @@
 		"325": "اكتمل التفويض",
 		"326": "يمكنك إغلاق هذه الصفحة والعودة إلى SiYuan للتحقق من حالة الاتصال",
 		"327": "لم يكتمل التفويض",
-		"328": "يمكنك إغلاق هذه الصفحة والعودة إلى SiYuan للمحاولة مرة أخرى."
+		"328": "يمكنك إغلاق هذه الصفحة والعودة إلى SiYuan للمحاولة مرة أخرى.",
+		"329": "مهمة استيراد Obsidian Vault قيد التشغيل بالفعل",
+		"330": "لم يتم العثور على مهمة استيراد Obsidian Vault أو انتهت صلاحيتها",
+		"331": "لم يعد من الممكن إلغاء مهمة استيراد Obsidian Vault",
+		"332": "تحليل Obsidian Vault غير جاهز أو انتهت صلاحيته",
+		"333": "فشل تحليل Obsidian Vault",
+		"334": "فشل استيراد Obsidian Vault"
 	}
 	}

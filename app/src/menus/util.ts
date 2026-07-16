@@ -275,4 +275,3 @@ export const copyPNGByLink = (link: string) => {
         tempElement.src = link;
     });
 };
-

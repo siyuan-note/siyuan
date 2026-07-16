@@ -79,6 +79,14 @@ func RemoveTool(name string) {
 	delete(Registry, name)
 }
 
+func RemoveToolIf(name string, tool *Tool) {
+	registryMu.Lock()
+	defer registryMu.Unlock()
+	if Registry[name] == tool {
+		delete(Registry, name)
+	}
+}
+
 func register(t *Tool) {
 	if t.Source == "" {
 		t.Source = "native"

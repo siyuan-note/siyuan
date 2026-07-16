@@ -203,9 +203,16 @@ export class Files extends Model {
                     if (isNotCtrl(event) && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
                         event.preventDefault();
                         event.stopPropagation();
+                        const liElement = target.parentElement;
+                        if (liElement.getAttribute("data-type") === "navigation-file" && window.siyuan.config.fileTree.docIconClickExpand) {
+                            if (Number(liElement.getAttribute("data-count")) > 0) {
+                                this.getLeaf(liElement, notebookId);
+                            }
+                            break;
+                        }
                         const rect = target.getBoundingClientRect();
-                        if (target.parentElement.getAttribute("data-type") === "navigation-file") {
-                            openEmojiPanel(target.parentElement.getAttribute("data-node-id"), "doc", {
+                        if (liElement.getAttribute("data-type") === "navigation-file") {
+                            openEmojiPanel(liElement.getAttribute("data-node-id"), "doc", {
                                 x: rect.left,
                                 y: rect.bottom,
                                 h: rect.height,
@@ -267,6 +274,16 @@ export class Files extends Model {
                         }
                         event.preventDefault();
                         event.stopPropagation();
+                        break;
+                    } else if (event.button === 0 && isNotCtrl(event) && !event.altKey && !event.shiftKey &&
+                        target.classList.contains("b3-list-item__text") &&
+                        target.parentElement.getAttribute("data-type") === "navigation-file" &&
+                        window.siyuan.config.fileTree.parentDocClickExpand &&
+                        Number(target.parentElement.getAttribute("data-count")) > 0) {
+                        this.getLeaf(target.parentElement, notebookId);
+                        event.preventDefault();
+                        event.stopPropagation();
+                        window.siyuan.menus.menu.remove();
                         break;
                     } else if (target.tagName === "LI") {
                         if (isOnlyMeta(event) && !event.altKey && !event.shiftKey) {
@@ -900,7 +917,36 @@ export class Files extends Model {
             } else {
                 liElement.querySelector(".b3-list-item__toggle")?.classList.remove("fn__hidden");
             }
+            this.updateDocIconElement(liElement as HTMLElement);
         }
+    }
+
+    private updateDocIconElement(liElement: HTMLElement) {
+        const iconElement = liElement.querySelector<HTMLElement>(".b3-list-item__icon");
+        if (!iconElement) {
+            return;
+        }
+        const expand = window.siyuan.config.fileTree.docIconClickExpand;
+        const hasChildren = Number(liElement.getAttribute("data-count")) > 0;
+        iconElement.classList.toggle("b3-tooltips", !expand || hasChildren);
+        if (expand) {
+            if (hasChildren) {
+                iconElement.setAttribute("aria-label", window.siyuan.languages.docIconClickExpand);
+                iconElement.removeAttribute("aria-disabled");
+            } else {
+                iconElement.removeAttribute("aria-label");
+                iconElement.setAttribute("aria-disabled", "true");
+            }
+        } else {
+            iconElement.setAttribute("aria-label", window.siyuan.languages.changeIcon);
+            iconElement.removeAttribute("aria-disabled");
+        }
+    }
+
+    public updateDocIconAction() {
+        this.element.querySelectorAll<HTMLElement>('li[data-type="navigation-file"]').forEach((item) => {
+            this.updateDocIconElement(item);
+        });
     }
 
     private updateItemArrow(notebookId: string, filePath: string) {
@@ -1415,6 +1461,9 @@ data-type="navigation-root" data-path="/">
         const ariaLabel = this.genDocAriaLabel(item, escapeAriaLabel);
         const paddingLeft = (item.path.split("/").length - 1) * 18;
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
+        const iconExpands = window.siyuan.config.fileTree.docIconClickExpand;
+        const iconHasAction = !iconExpands || item.subFileCount > 0;
+        const iconAriaLabel = iconExpands ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.changeIcon;
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px" 
@@ -1422,7 +1471,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block${editingPublishAccess ? " fn__none" : ""}" data-id="${item.id}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__icon${iconHasAction ? " b3-tooltips" : ""} b3-tooltips__n popover__block${editingPublishAccess ? " fn__none" : ""}" data-id="${item.id}"${iconHasAction ? ` aria-label="${iconAriaLabel}"` : ' aria-disabled="true"'}>${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE"
 aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>

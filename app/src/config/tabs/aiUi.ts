@@ -6,6 +6,10 @@ import {Constants} from "../../constants";
 import {isMobile} from "../../util/functions";
 import {fetchPost} from "../../util/fetch";
 import {aiConfigApi} from "./aiRuntime";
+import {openByMobile} from "../../editor/openLink";
+/// #if !BROWSER
+import {shell} from "electron";
+/// #endif
 
 type ModelPickerGroup = "editing" | "agent" | "vision" | "imageGeneration";
 
@@ -960,6 +964,8 @@ export const mountModelPickerBlock = (root: HTMLElement, group: ModelPickerGroup
 export const getMcpServersBlockKeywords = (): string[] => [
     window.siyuan.languages.mcpStatusConnected,
     window.siyuan.languages.mcpStatusConnecting,
+    window.siyuan.languages.mcpStatusAuthorizing,
+    window.siyuan.languages.mcpStatusAuthorizationRequired,
     window.siyuan.languages.mcpStatusFailed,
     window.siyuan.languages.mcpStatusDisabled,
     window.siyuan.languages.mcpStatusTools,
@@ -979,7 +985,11 @@ export const getMcpServersBlockKeywords = (): string[] => [
     window.siyuan.languages.aiMcpUrlTip,
     window.siyuan.languages.aiMcpHttpHeaders,
     window.siyuan.languages.apiTimeout,
+    window.siyuan.languages.mcpAuthorize,
+    window.siyuan.languages.mcpDisconnectAuthorization,
 ];
+
+const openedMcpOAuthURLs = new Map<string, string>();
 
 export const genMcpServersBlockHtml = (): string => `<div class="b3-label config-item" id="aiMcpServersBlock">
     <div class="fn__flex" style="align-items:center;">
@@ -1008,13 +1018,23 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
     // 轮询 MCP 连接状态，刷新每个 server 名称旁的状态圆点颜色、tooltip，以及标题右侧的汇总。
     const renderMcpStatus = () => {
         fetchPost("/api/ai/mcpStatus", {}, (response) => {
-            const items = response.data as Array<{name: string; status: string; tools: number}>;
+            const items = response.data as Array<{
+                id: string;
+                name: string;
+                status: string;
+                tools: number;
+                error?: string;
+                authorizationURL?: string;
+                authorized: boolean;
+            }>;
             if (!items) {
                 return;
             }
             const colorMap: Record<string, string> = {
                 connected: "#65b84f",
                 connecting: "#d97706",
+                authorizing: "#d97706",
+                authorization_required: "#d97706",
                 failed: "#d23f31",
                 disabled: "var(--b3-theme-on-surface-light)",
             };
@@ -1025,7 +1045,20 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
                     connectedCount++;
                     totalTools += item.tools;
                 }
-                const dotWrap = block.querySelector<HTMLElement>(`[data-mcp-status-name="${CSS.escape(item.name)}"]`);
+                if (item.authorizationURL && openedMcpOAuthURLs.get(item.id) !== item.authorizationURL) {
+                    openedMcpOAuthURLs.set(item.id, item.authorizationURL);
+                    /// #if !BROWSER
+                    void shell.openExternal(item.authorizationURL).catch((error: Error) => {
+                        if (openedMcpOAuthURLs.get(item.id) === item.authorizationURL) {
+                            openedMcpOAuthURLs.delete(item.id);
+                        }
+                        showMessage(error.message);
+                    });
+                    /// #else
+                    openByMobile(item.authorizationURL);
+                    /// #endif
+                }
+                const dotWrap = block.querySelector<HTMLElement>(`[data-mcp-status-id="${CSS.escape(item.id)}"]`);
                 if (!dotWrap) {
                     continue;
                 }
@@ -1034,7 +1067,7 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
                     dot.style.backgroundColor = colorMap[item.status] || colorMap.disabled;
                 }
                 // 每个 server 行上显示其工具数（仅已连接且有工具时）。
-                const toolsEl = block.querySelector<HTMLElement>(`[data-mcp-tools-count="${CSS.escape(item.name)}"]`);
+                const toolsEl = block.querySelector<HTMLElement>(`[data-mcp-tools-count="${CSS.escape(item.id)}"]`);
                 if (toolsEl) {
                     toolsEl.textContent = item.status === "connected" && item.tools > 0 ? window.siyuan.languages.mcpStatusTools.replace("${x}", String(item.tools)) : "";
                 }
@@ -1046,13 +1079,27 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
                     case "connecting":
                         label = window.siyuan.languages.mcpStatusConnecting;
                         break;
+                    case "authorizing":
+                        label = window.siyuan.languages.mcpStatusAuthorizing;
+                        break;
+                    case "authorization_required":
+                        label = window.siyuan.languages.mcpStatusAuthorizationRequired;
+                        break;
                     case "failed":
                         label = window.siyuan.languages.mcpStatusFailed;
                         break;
                     default:
                         label = window.siyuan.languages.mcpStatusDisabled;
                 }
-                dotWrap.setAttribute("aria-label", label);
+                dotWrap.setAttribute("aria-label", item.error ? `${label}: ${item.error}` : label);
+                block.querySelector<HTMLElement>(`[data-mcp-authorize-id="${CSS.escape(item.id)}"]`)?.classList.toggle("fn__none", item.status !== "authorization_required");
+                block.querySelector<HTMLElement>(`[data-mcp-disconnect-oauth-id="${CSS.escape(item.id)}"]`)?.classList.toggle("fn__none", !item.authorized);
+            }
+            const configuredServerIDs = new Set(items.map((item) => item.id));
+            for (const serverID of openedMcpOAuthURLs.keys()) {
+                if (!configuredServerIDs.has(serverID)) {
+                    openedMcpOAuthURLs.delete(serverID);
+                }
             }
             // 标题右侧汇总：已连接 server 数 + 总工具数。
             const summaryEl = block.querySelector<HTMLElement>("#aiMcpStatusSummary");
@@ -1080,6 +1127,9 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
 
     const getMcpServerName = (el: HTMLElement): string | undefined => {
         return el.closest<HTMLElement>("[data-mcp-server-name]")?.dataset.mcpServerName;
+    };
+    const getMcpServerID = (el: HTMLElement): string | undefined => {
+        return el.closest<HTMLElement>("[data-mcp-server-id]")?.dataset.mcpServerId;
     };
     block.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
@@ -1116,6 +1166,35 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
             });
             return;
         }
+        if (type === "authorizeAiMcpServer") {
+            const serverID = getMcpServerID(actionEl);
+            if (serverID) {
+                fetchPost("/api/ai/mcpOAuthAuthorize", {id: serverID}, (response) => {
+                    if (response.code !== 0) {
+                        showMessage(response.msg);
+                    }
+                });
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        if (type === "disconnectAiMcpOAuth") {
+            const serverID = getMcpServerID(actionEl);
+            if (serverID) {
+                confirmDialog(window.siyuan.languages.mcpDisconnectAuthorization,
+                    window.siyuan.languages.mcpDisconnectAuthorizationConfirm, () => {
+                        fetchPost("/api/ai/mcpOAuthDisconnect", {id: serverID}, (response) => {
+                            if (response.code !== 0) {
+                                showMessage(response.msg);
+                            }
+                        });
+                    });
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
     });
 
     block.addEventListener("change", (event) => {
@@ -1149,10 +1228,16 @@ const renderMcpServerList = (root: HTMLElement) => {
         return;
     }
     const serversHtml = servers.map((server) => {
-        return `<div class="b3-list-item b3-list-item--narrow${hideActionClass}" data-type="aiMcpServer" data-mcp-server-name="${Lute.EscapeHTMLStr(server.name)}">
-    <span class="mcp-status-dot b3-tooltips b3-tooltips__n" data-mcp-status-name="${Lute.EscapeHTMLStr(server.name)}" aria-label="${server.enabled ? window.siyuan.languages.mcpStatusConnecting : window.siyuan.languages.mcpStatusDisabled}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;margin-right:4px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${server.enabled ? "#d97706" : "var(--b3-theme-on-surface-light)"};"></span></span>
+        return `<div class="b3-list-item b3-list-item--narrow${hideActionClass}" data-type="aiMcpServer" data-mcp-server-id="${Lute.EscapeHTMLStr(server.id)}" data-mcp-server-name="${Lute.EscapeHTMLStr(server.name)}">
+    <span class="mcp-status-dot b3-tooltips b3-tooltips__n" data-mcp-status-id="${Lute.EscapeHTMLStr(server.id)}" aria-label="${server.enabled ? window.siyuan.languages.mcpStatusConnecting : window.siyuan.languages.mcpStatusDisabled}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;margin-right:4px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${server.enabled ? "#d97706" : "var(--b3-theme-on-surface-light)"};"></span></span>
     <span class="b3-list-item__text">${Lute.EscapeHTMLStr(server.name)}</span>
-    <span class="ft__on-surface fn__flex-center" data-mcp-tools-count="${Lute.EscapeHTMLStr(server.name)}" style="font-size:12px;margin-right:8px;"></span>
+    <span class="ft__on-surface fn__flex-center" data-mcp-tools-count="${Lute.EscapeHTMLStr(server.id)}" style="font-size:12px;margin-right:8px;"></span>
+    <span data-type="authorizeAiMcpServer" data-mcp-authorize-id="${Lute.EscapeHTMLStr(server.id)}" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.mcpAuthorize}">
+        <svg><use xlink:href="#iconKey"></use></svg>
+    </span>
+    <span data-type="disconnectAiMcpOAuth" data-mcp-disconnect-oauth-id="${Lute.EscapeHTMLStr(server.id)}" class="fn__none b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.mcpDisconnectAuthorization}">
+        <svg><use xlink:href="#iconLinkOff"></use></svg>
+    </span>
     <span data-type="deleteAiMcpServer" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
         <svg><use xlink:href="#iconTrashcan"></use></svg>
     </span>
@@ -1173,6 +1258,7 @@ const openMcpServerDialog = (root: HTMLElement, serverName: string | null) => {
         return;
     }
     const initialServer: Config.IMCPServer = isNew ? {
+        id: "",
         name: "",
         enabled: true,
         type: "stdio",

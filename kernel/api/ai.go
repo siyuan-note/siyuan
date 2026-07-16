@@ -17,6 +17,7 @@
 package api
 
 import (
+	"html"
 	"net/http"
 
 	"github.com/88250/gulu"
@@ -229,6 +230,87 @@ func mcpStatus(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 	ret.Data = mcpclient.MCPStatus()
+}
+
+func mcpOAuthAuthorize(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	serverID, _ := arg["id"].(string)
+	if model.Conf.AI == nil || model.Conf.AI.MCP == nil {
+		ret.Code = -1
+		ret.Msg = "MCP server not found"
+		return
+	}
+	for _, server := range model.Conf.AI.MCP.Servers {
+		if server.ID == serverID && server.Enabled && server.Type == "http" {
+			mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, []string{serverID}, []string{serverID})
+			return
+		}
+	}
+	ret.Code = -1
+	ret.Msg = "MCP server not found"
+}
+
+func mcpOAuthDisconnect(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	serverID, _ := arg["id"].(string)
+	if err := mcpclient.DisconnectMCPOAuth(serverID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
+		mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, []string{serverID}, nil)
+	}
+}
+
+func mcpOAuthCallback(c *gin.Context) {
+	if !mcpclient.IsLoopbackCallback(c.Request.RemoteAddr) {
+		c.String(http.StatusForbidden, "Forbidden")
+		return
+	}
+	c.Header("Cache-Control", "no-store")
+	c.Header("Referrer-Policy", "no-referrer")
+	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'")
+	callbackError := c.Query("error")
+	if err := mcpclient.CompleteMCPOAuth(c.Param("flowID"), c.Query("code"), c.Query("state"), callbackError); err != nil {
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", renderMCPOAuthCallbackPage(
+			util.LangToBCP47(model.Conf.Lang), model.Conf.Language(327), model.Conf.Language(328), false))
+		return
+	}
+	if callbackError != "" {
+		c.Data(http.StatusOK, "text/html; charset=utf-8", renderMCPOAuthCallbackPage(
+			util.LangToBCP47(model.Conf.Lang), model.Conf.Language(327), model.Conf.Language(328), false))
+		return
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", renderMCPOAuthCallbackPage(
+		util.LangToBCP47(model.Conf.Lang), model.Conf.Language(325), model.Conf.Language(326), true))
+}
+
+func renderMCPOAuthCallbackPage(lang, title, message string, success bool) []byte {
+	markClass, mark := " mark--error", "!"
+	if success {
+		markClass, mark = "", "✓"
+	}
+	return []byte(`<!doctype html><html lang="` + html.EscapeString(lang) + `"><head><meta charset="utf-8">` +
+		`<meta name="viewport" content="width=device-width,initial-scale=1"><title>` + html.EscapeString(title) + `</title>` +
+		`<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f5f5f5;color:#202124;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}` +
+		`main{box-sizing:border-box;width:min(480px,calc(100vw - 32px));padding:40px 32px;text-align:center;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 24px #00000014}` +
+		`.mark{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 24px;border-radius:50%;background:#2e7d32;color:#fff;font-size:32px}.mark--error{background:#c62828}` +
+		`h1{margin:0 0 12px;font-size:24px;font-weight:600}p{margin:0;color:#5f6368;font-size:15px;line-height:1.7}` +
+		`@media(prefers-color-scheme:dark){body{background:#171717;color:#eee}main{background:#242424;border-color:#3c3c3c;box-shadow:none}p{color:#bbb}}</style>` +
+		`</head><body><main><div class="mark` + markClass + `" aria-hidden="true">` + mark + `</div><h1>` + html.EscapeString(title) +
+		`</h1><p>` + html.EscapeString(message) + `</p></main></body></html>`)
 }
 
 // reindexEmbedding 清空嵌入向量表并触发后台索引器重新计算所有块，异步执行。

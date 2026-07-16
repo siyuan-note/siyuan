@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
+	"github.com/google/uuid"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -126,6 +127,7 @@ type MCP struct {
 }
 
 type MCPServer struct {
+	ID                   string            `json:"id"`
 	Name                 string            `json:"name"`
 	Enabled              bool              `json:"enabled"`
 	Type                 string            `json:"type"`
@@ -189,7 +191,7 @@ func NewAI() *AI {
 	apiModel := os.Getenv("SIYUAN_OPENAI_API_MODEL")
 	apiBaseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL")
 
-	if apiKey != "" && apiModel != "" && apiBaseURL != "" {
+	if apiModel != "" && apiBaseURL != "" {
 		provider := &Provider{
 			BaseURL:        apiBaseURL,
 			RequestTimeout: 120,
@@ -279,9 +281,9 @@ func NewAI() *AI {
 
 func (ai *AI) HasAnyProvider() bool {
 	for _, p := range ai.Providers {
-		if p != nil && len(p.APIKey) > 0 && p.Enabled {
+		if p != nil && p.Enabled {
 			for _, m := range p.Models {
-				if m.Name != "" && m.Enabled {
+				if m != nil && m.Name != "" && m.Enabled {
 					return true
 				}
 			}
@@ -296,33 +298,33 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.ID == id && m.Enabled {
+			if m != nil && m.ID == id && m.Enabled {
 				return p, m
 			}
 		}
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.DisplayName == id && m.Enabled {
+			if m != nil && m.DisplayName == id && m.Enabled {
 				return p, m
 			}
 		}
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.Name == id && m.Enabled {
+			if m != nil && m.Name == id && m.Enabled {
 				return p, m
 			}
 		}
@@ -367,6 +369,13 @@ func (ai *AI) Normalize() {
 		ai.MCP = &MCP{Servers: []MCPServer{}}
 	} else if ai.MCP.Servers == nil {
 		ai.MCP.Servers = []MCPServer{}
+	}
+	serverIDs := map[string]bool{}
+	for i := range ai.MCP.Servers {
+		if ai.MCP.Servers[i].ID == "" || serverIDs[ai.MCP.Servers[i].ID] {
+			ai.MCP.Servers[i].ID = uuid.New().String()
+		}
+		serverIDs[ai.MCP.Servers[i].ID] = true
 	}
 	if ai.Agent == nil {
 		ai.Agent = defaultAgent()
@@ -657,7 +666,7 @@ func assignDefaultModelIDs(ai *AI) {
 	}
 	var m *Model
 	for _, p := range ai.Providers {
-		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, model := range p.Models {
@@ -711,6 +720,7 @@ func migrateMCP(raw map[string]any) *MCP {
 			continue
 		}
 		mcp.Servers = append(mcp.Servers, MCPServer{
+			ID:                   getString(sm, "id"),
 			Name:                 getString(sm, "name"),
 			Enabled:              getBool(sm, "enabled"),
 			Type:                 getString(sm, "type"),

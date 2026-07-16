@@ -238,6 +238,7 @@ declare namespace Config {
     }
 
     export interface IMCPServer {
+        id: string;
         enabled: boolean;
         name: string;
         url: string;
@@ -746,6 +747,14 @@ declare namespace Config {
          * Whether to automatically locate the currently open document in the document tree
          */
         alwaysSelectOpenedFile: boolean;
+        /**
+         * Whether clicking a document icon expands or collapses its child documents
+         */
+        docIconClickExpand: boolean;
+        /**
+         * Whether clicking a parent document title expands or collapses its child documents
+         */
+        parentDocClickExpand: boolean;
         /**
          * Whether to close all tabs when starting
          */

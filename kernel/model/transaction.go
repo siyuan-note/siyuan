@@ -1914,6 +1914,15 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 		logging.LogErrorf("unmarshal attrs failed: %s", err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
+	if IsBoxDoc(tree.Box, tree.ID) {
+		attrs[BoxDocAttr] = tree.Box
+		attrs[DocHiddenAttr] = "true"
+		if icon, ok := attrs["icon"]; ok {
+			icon = filterBoxIcon(icon)
+			attrs["icon"] = icon
+			tx.boxIcons[tree.Box] = icon
+		}
+	}
 
 	if _, setErr := setNodeAttrs0(node, attrs, tree.Box); nil != setErr {
 		logging.LogErrorf("set attrs failed: %s", setErr)
@@ -1969,6 +1978,7 @@ type Transaction struct {
 	nodes          map[string]*ast.Node   // 事务中变更的节点
 	relatedAvIDs   []string               // 事务中变更的属性视图 ID
 	changedRootIDs []string               // 变更的树 ID 列表（包含了变更定义块后影响的动态锚文本所在的树）
+	boxIcons       map[string]string      // 事务提交后需要同步的笔记本图标
 
 	isGlobalAssetsInit bool   // 是否初始化过全局资源判断
 	isGlobalAssets     bool   // 是否属于全局资源
@@ -2027,6 +2037,7 @@ func (tx *Transaction) WaitForCommit() {
 func (tx *Transaction) begin() (err error) {
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
+	tx.boxIcons = map[string]string{}
 	tx.luteEngine = util.NewLute()
 	tx.m.Lock()
 	tx.state.Store(1)
@@ -2044,6 +2055,17 @@ func (tx *Transaction) commit() (err error) {
 		util.PushSaveDoc(tree.ID, "tx", sources)
 
 		checkUpsertInUserGuide(tree)
+	}
+	for boxID, icon := range tx.boxIcons {
+		box := &Box{ID: boxID}
+		boxConf := box.GetConf()
+		boxConf.Icon = icon
+		if err = box.SaveConf(boxConf); err != nil {
+			return
+		}
+	}
+	if 0 < len(tx.boxIcons) {
+		ReloadFiletree()
 	}
 	tx.changedRootIDs = refreshDynamicRefTexts(tx.nodes, tx.trees)
 
@@ -2068,7 +2090,7 @@ func (tx *Transaction) commit() (err error) {
 }
 
 func (tx *Transaction) rollback() {
-	tx.trees, tx.nodes = nil, nil
+	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
 	tx.state.Store(3)
 	tx.m.Unlock()
 	return

@@ -110,8 +110,9 @@ export class MobileFiles extends Model {
                     break;
                 } else if (target.classList.contains("b3-list-item__switch")) {
                     const rect = target.getBoundingClientRect();
-                    openPublishAccessDialog(target.parentElement.getAttribute("data-node-id") ||
-                        target.parentElement.parentElement.getAttribute("data-url"), {
+                    const rootUL = hasTopClosestByTag(target, "UL");
+                    openPublishAccessDialog(target.parentElement.getAttribute("data-type") === "navigation-root" ?
+                        rootUL?.getAttribute("data-url") : target.parentElement.getAttribute("data-node-id"), {
                         x: rect.left,
                         y: rect.bottom,
                         h: rect.height,
@@ -210,8 +211,11 @@ export class MobileFiles extends Model {
                     if (target.getAttribute("data-type") === "navigation-file") {
                         openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL]);
                     } else if (target.getAttribute("data-type") === "navigation-root") {
+                        const boxDocID = target.getAttribute("data-node-id");
                         const ulElement = hasTopClosestByTag(target, "UL");
-                        if (ulElement) {
+                        if (boxDocID) {
+                            openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL]);
+                        } else if (ulElement) {
                             const notebookId = ulElement.getAttribute("data-url");
                             this.getLeaf(target, notebookId);
                         }
@@ -535,9 +539,14 @@ export class MobileFiles extends Model {
                 case "reloadDocInfo":
                     this.updateDocInfo(data);
                     break;
-                case "renamenotebook":
+                case "renamenotebook": {
+                    const notebook = window.siyuan.notebooks.find((item) => item.id === data.data.box);
+                    if (notebook) {
+                        notebook.name = data.data.name;
+                    }
                     this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = escapeHtml(data.data.name);
                     break;
+                }
                 case "rename":
                     this.onRename(data.data);
                     break;
@@ -605,7 +614,7 @@ export class MobileFiles extends Model {
     }
 
     private updateDocInfo(data: IWebSocketData) {
-        const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`);
+        const liElement = this.element.querySelector(`li[data-type="navigation-file"][data-node-id="${data.data.rootID}"]`);
         if (liElement) {
             liElement.setAttribute("data-count", data.data.subFileCount);
             if (data.data.subFileCount === 0) {
@@ -638,7 +647,7 @@ export class MobileFiles extends Model {
 </li>`;
         } else {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sortmode="${item.sortMode}">
-<li class="b3-list-item" data-type="navigation-root" data-path="/" style="--file-toggle-width:24px">
+<li class="b3-list-item" data-type="navigation-root" data-path="/" data-node-id="${item.boxDocID || ""}" style="--file-toggle-width:24px">
     <span class="b3-list-item__toggle${item.closed ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1003,6 +1012,14 @@ export class MobileFiles extends Model {
             // 有文件树和编辑器的布局初始化时，文件树还未挂载
             return;
         }
+        const boxDocID = window.siyuan.notebooks.find((item) => item.id === notebookId)?.boxDocID;
+        if (boxDocID && filePath === `/${boxDocID}.sy`) {
+            const boxDocElement = treeElement.querySelector("[data-type=\"navigation-root\"]") as HTMLElement;
+            if (isSetCurrent) {
+                this.setCurrent(boxDocElement);
+            }
+            return boxDocElement;
+        }
         let currentPath = filePath;
         let liElement: HTMLElement;
         while (!liElement) {
@@ -1108,7 +1125,7 @@ class="b3-list-item" data-path="${item.path}" style="--file-toggle-width:${paddi
         }
         const ids: string[] = [];
         this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")));
-        this.element.querySelectorAll("[data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")));
+        this.element.querySelectorAll("[data-type=\"navigation-file\"][data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")));
         fetchPost("/api/filetree/getPublishAccess", {
             ids
         }, response => {

@@ -1121,7 +1121,7 @@ func (conf *AppConf) GetBoxes() (ret []*Box) {
 		name := notebook.Name
 		closed := notebook.Closed
 		encrypted := IsEncryptedBox(id) // 使用 IsEncryptedBox 统一判定（含 backup fallback）
-		box := &Box{ID: id, Name: name, Closed: closed, Encrypted: encrypted}
+		box := &Box{ID: id, BoxDocID: notebook.BoxDocID, Name: name, Closed: closed, Encrypted: encrypted}
 		ret = append(ret, box)
 	}
 	return
@@ -1176,6 +1176,9 @@ func InitBoxes() {
 	blockCount := treenode.CountBlocks()
 	initialized := 0 < blockCount
 	for _, box := range Conf.GetOpenedBoxes() {
+		if _, err := EnsureBoxDoc(box.ID); nil != err {
+			logging.LogErrorf("ensure box document [%s] failed: %s", box.ID, err)
+		}
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
 		if !initialized {

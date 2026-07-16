@@ -160,7 +160,9 @@ var documentRemoveCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		model.RemoveDoc(tree.Box, tree.Path)
+		if err = model.RemoveDoc(tree.Box, tree.Path); err != nil {
+			return err
+		}
 		model.AppendPushRemoveEntry(tree.Box, tree.Path, id)
 		parentPath := path.Dir(tree.Path) + ".sy"
 		if parentPath != "/.sy" {

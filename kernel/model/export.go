@@ -583,8 +583,15 @@ func ExportSYs(ids []string) (zipPath string) {
 		docPaths = append(docPaths, bt.Path)
 
 		if Conf.Export.IncludeSubDocs {
-			docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
+			listPath := strings.TrimSuffix(bt.Path, ".sy")
+			if IsBoxDoc(bt.BoxID, bt.RootID) {
+				listPath = "/"
+			}
+			docFiles := box.ListFiles(listPath)
 			for _, docFile := range docFiles {
+				if docFile.path == bt.Path {
+					continue
+				}
 				docPaths = append(docPaths, docFile.path)
 			}
 		}
@@ -2143,8 +2150,15 @@ func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath s
 		docPaths = append(docPaths, bt.Path)
 
 		if Conf.Export.IncludeSubDocs {
-			docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
+			listPath := strings.TrimSuffix(bt.Path, ".sy")
+			if IsBoxDoc(bt.BoxID, bt.RootID) {
+				listPath = "/"
+			}
+			docFiles := box.ListFiles(listPath)
 			for _, docFile := range docFiles {
+				if docFile.path == bt.Path {
+					continue
+				}
 				docPaths = append(docPaths, docFile.path)
 			}
 		}

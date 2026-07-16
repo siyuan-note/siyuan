@@ -660,6 +660,9 @@ func getTreeSubTreeChildBlocks(rootID string) (treeBlockIDsMap map[string]bool, 
 	if nil == root {
 		return
 	}
+	if IsBoxDoc(root.BoxID, rootID) {
+		return getBoxBlocks(root.BoxID)
+	}
 
 	bts := treenode.GetBlockTreesByPathPrefix(root.BoxID, strings.TrimSuffix(root.Path, ".sy"))
 	for _, bt := range bts {

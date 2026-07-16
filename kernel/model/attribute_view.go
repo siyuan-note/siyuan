@@ -4138,7 +4138,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tree) (err error) {
 	attrs := parse.IAL2Map(node.KramdownIAL)
-	if ast.NodeDocument == node.Type {
+	if ast.NodeDocument == node.Type && !IsBoxDoc(tree.Box, tree.ID) {
 		delete(attrs, DocHiddenAttr)
 		node.RemoveIALAttr(DocHiddenAttr)
 	}

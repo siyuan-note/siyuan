@@ -2194,6 +2194,7 @@
 		"337": "Vybraná cesta nie je priečinok",
 		"338": "Vybraná cesta k Vault nie je podporovaná; vyberte bežný priečinok mimo pracovného priestoru SiYuan",
 		"339": "Podporované sú iba Obsidian Vaults používajúce predvolený priečinok .obsidian",
-		"340": "Vybraný Vault neobsahuje čitateľný neskrývaný súbor Markdown"
+		"340": "Vybraný Vault neobsahuje čitateľný neskrývaný súbor Markdown",
+		"341": "Dokument zápisníka najvyššej úrovne nemožno odstrániť ani presunúť"
 	}
 	}

@@ -2194,6 +2194,7 @@
 		"337": "Seçilen yol bir klasör değil",
 		"338": "Seçilen Vault yolu desteklenmiyor; SiYuan çalışma alanının dışında normal bir klasör seçin",
 		"339": "Yalnızca varsayılan .obsidian klasörünü kullanan Obsidian Vaults desteklenir",
-		"340": "Seçilen Vault, okunabilir ve gizli olmayan bir Markdown dosyası içermiyor"
+		"340": "Seçilen Vault, okunabilir ve gizli olmayan bir Markdown dosyası içermiyor",
+		"341": "Üst düzey not defteri belgesi silinemez veya taşınamaz"
 	}
 	}

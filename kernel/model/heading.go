@@ -153,6 +153,10 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		err = ErrBlockNotFound
 		return
 	}
+	if IsBoxDoc(srcTree.Box, srcTree.ID) {
+		err = errors.New(Conf.Language(341))
+		return
+	}
 
 	subDir := filepath.Join(util.DataDir, srcTree.Box, strings.TrimSuffix(srcTree.Path, ".sy"))
 	if gulu.File.IsDir(subDir) {
@@ -307,6 +311,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 }
 
 func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toTop bool) (srcRootBlockID, newTargetPath string, err error) {
+	targetPath = normalizeBoxDocTarget(targetBoxID, targetPath)
 	FlushTxQueue()
 
 	srcTree, _ := LoadTreeByBlockID(srcHeadingID)

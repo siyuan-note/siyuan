@@ -2194,6 +2194,7 @@
 		"337": "Wybrana ścieżka nie jest folderem",
 		"338": "Wybrana ścieżka Vault nie jest obsługiwana; wybierz zwykły folder poza obszarem roboczym SiYuan",
 		"339": "Obsługiwane są tylko Obsidian Vaults używające domyślnego folderu .obsidian",
-		"340": "Wybrany Vault nie zawiera czytelnego, nieukrytego pliku Markdown"
+		"340": "Wybrany Vault nie zawiera czytelnego, nieukrytego pliku Markdown",
+		"341": "Dokument notatnika najwyższego poziomu nie może zostać usunięty ani przeniesiony"
 	}
 	}

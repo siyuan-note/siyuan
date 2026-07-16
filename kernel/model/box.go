@@ -50,6 +50,7 @@ import (
 // Box 笔记本。
 type Box struct {
 	ID       string `json:"id"`
+	BoxDocID string `json:"boxDocID"`
 	Name     string `json:"name"`
 	Icon     string `json:"icon"`
 	Sort     int    `json:"sort"`
@@ -163,8 +164,18 @@ func ListNotebooks() (ret []*Box, err error) {
 			icon = util.FilterUploadEmojiFileName(icon)
 		}
 
+		var boxDocID string
+		if !boxConf.Encrypted && !IsUserGuide(id) {
+			var readBoxDocErr error
+			boxDocID, readBoxDocErr = readBoxDocID(id)
+			if nil != readBoxDocErr {
+				logging.LogErrorf("read box document metadata [%s] failed: %s", id, readBoxDocErr)
+			}
+		}
+
 		box := &Box{
 			ID:        id,
+			BoxDocID:  boxDocID,
 			Name:      boxConf.Name,
 			Icon:      icon,
 			Sort:      boxConf.Sort,
@@ -504,7 +515,9 @@ func (box *Box) GetInfo() (ret *BoxInfo) {
 			continue
 		}
 
-		ret.DocCount++
+		if id != box.BoxDocID {
+			ret.DocCount++
+		}
 		ret.Size += uint64(info.Size())
 		docModT := info.ModTime()
 		if docModT.After(docLatestModTime) {
@@ -925,15 +938,28 @@ func ChangeBoxSort(boxIDs []string) {
 }
 
 func SetBoxIcon(boxID, icon string) {
-	if strings.Contains(icon, ".") {
-		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadEmojiFileName(icon)
-	}
+	icon = filterBoxIcon(icon)
 
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	boxConf.Icon = icon
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box icon [%s] failed: %s", boxID, err)
+		return
+	}
+	if err := setBoxDocIcon(boxID, icon); err != nil {
+		logging.LogErrorf("set box document icon [%s] failed: %s", boxID, err)
+		return
+	}
+	IncSync()
+}
+
+func filterBoxIcon(icon string) string {
+	if strings.Contains(icon, ".") {
+		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+		icon = util.FilterUploadEmojiFileName(icon)
+	}
+	return icon
 }
 
 func (box *Box) UpdateHistoryGenerated() {

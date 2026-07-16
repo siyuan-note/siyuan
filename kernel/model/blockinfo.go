@@ -135,12 +135,16 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 	}
 
 	var subFileCount int
-	boxLocalPath := filepath.Join(util.DataDir, tree.Box)
-	subFiles, err := os.ReadDir(filepath.Join(boxLocalPath, strings.TrimSuffix(tree.Path, ".sy")))
-	if err == nil {
-		for _, subFile := range subFiles {
-			if strings.HasSuffix(subFile.Name(), ".sy") {
-				subFileCount++
+	if IsBoxDoc(tree.Box, tree.ID) {
+		subFileCount = boxDocSubFileCount(tree.Box)
+	} else {
+		boxLocalPath := filepath.Join(util.DataDir, tree.Box)
+		subFiles, readErr := os.ReadDir(filepath.Join(boxLocalPath, strings.TrimSuffix(tree.Path, ".sy")))
+		if readErr == nil {
+			for _, subFile := range subFiles {
+				if strings.HasSuffix(subFile.Name(), ".sy") {
+					subFileCount++
+				}
 			}
 		}
 	}
@@ -239,12 +243,16 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 		}
 
 		var subFileCount int
-		boxLocalPath := filepath.Join(util.DataDir, tree.Box)
-		subFiles, err := os.ReadDir(filepath.Join(boxLocalPath, strings.TrimSuffix(tree.Path, ".sy")))
-		if err == nil {
-			for _, subFile := range subFiles {
-				if strings.HasSuffix(subFile.Name(), ".sy") {
-					subFileCount++
+		if IsBoxDoc(tree.Box, tree.ID) {
+			subFileCount = boxDocSubFileCount(tree.Box)
+		} else {
+			boxLocalPath := filepath.Join(util.DataDir, tree.Box)
+			subFiles, readErr := os.ReadDir(filepath.Join(boxLocalPath, strings.TrimSuffix(tree.Path, ".sy")))
+			if readErr == nil {
+				for _, subFile := range subFiles {
+					if strings.HasSuffix(subFile.Name(), ".sy") {
+						subFileCount++
+					}
 				}
 			}
 		}
@@ -576,7 +584,11 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 
 		name := parent.IALAttr("name")
 		if ast.NodeDocument == parent.Type {
-			name = box.Name + hPath
+			if IsBoxDoc(node.Box, parent.ID) {
+				name = box.Name
+			} else {
+				name = box.Name + hPath
+			}
 		} else if ast.NodeAttributeView == parent.Type {
 			name, _ = av.GetAttributeViewName(parent.AttributeViewID)
 		} else {

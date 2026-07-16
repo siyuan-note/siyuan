@@ -302,6 +302,9 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	var docs []*File
 	for _, file := range files {
+		if "/" == listPath && "" != box.BoxDocID && box.BoxDocID == util.GetTreeID(file.path) {
+			continue
+		}
 		if file.isdir {
 			if !ast.IsNodeIDPattern(file.name) {
 				continue
@@ -1039,8 +1042,12 @@ func DuplicateDoc(tree *parse.Tree) {
 	msgId := util.PushMsg(Conf.Language(116), 30000)
 	defer util.PushClearMsg(msgId)
 
+	isBoxDoc := IsBoxDoc(tree.Box, tree.ID)
 	previousPath := tree.Path
 	resetTree(tree, "Duplicated", false)
+	if isBoxDoc {
+		removeBoxDocAttrs(tree)
+	}
 
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
@@ -1285,6 +1292,10 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 		hPath = "/"
 		return
 	}
+	if IsBoxDocPath(boxID, p) {
+		hPath = "/"
+		return
+	}
 
 	bt := treenode.GetBlockTreeByBoxPath(boxID, p)
 	if nil == bt {
@@ -1309,7 +1320,11 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
-		hPaths = append(hPaths, box.Name+bt.HPath)
+		if box.BoxDocID == bt.RootID {
+			hPaths = append(hPaths, box.Name)
+		} else {
+			hPaths = append(hPaths, box.Name+bt.HPath)
+		}
 	}
 	return
 }
@@ -1317,6 +1332,10 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 func GetHPathByID(id string) (hPath string, err error) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
+		return
+	}
+	if IsBoxDoc(tree.Box, tree.ID) {
+		hPath = "/"
 		return
 	}
 	hPath = tree.HPath
@@ -1345,12 +1364,21 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 		err = ErrBoxNotFound
 		return
 	}
+	if box.BoxDocID == tree.ID {
+		hPath = box.Name
+		return
+	}
 	hPath = box.Name + tree.HPath
 	return
 }
 
 func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
 	ret = []string{}
+	if "/" == hpath {
+		if box := Conf.Box(boxID); nil != box && "" != box.BoxDocID {
+			return []string{box.BoxDocID}, nil
+		}
+	}
 	roots := treenode.GetBlockTreeRootsByHPath(boxID, hpath)
 	if 1 > len(roots) {
 		return
@@ -1372,6 +1400,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 		err = errors.New(Conf.Language(0))
 		return
 	}
+	toPath = normalizeBoxDocTarget(toBoxID, toPath)
 
 	fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
 	if 1 > len(fromPaths) {
@@ -1379,6 +1408,11 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 	}
 
 	pathsBoxes := getBoxesByPaths(fromPaths)
+	for fromPath, fromBox := range pathsBoxes {
+		if nil != fromBox && IsBoxDocPath(fromBox.ID, fromPath) {
+			return errors.New(Conf.Language(341))
+		}
+	}
 
 	if 1 == len(fromPaths) {
 		// 移动到自己的父文档下的情况相当于不移动，直接返回
@@ -1600,10 +1634,13 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	return
 }
 
-func RemoveDoc(boxID, p string) {
+func RemoveDoc(boxID, p string) error {
 	box := Conf.Box(boxID)
 	if nil == box {
-		return
+		return ErrBoxNotFound
+	}
+	if IsBoxDocPath(boxID, p) {
+		return errors.New(Conf.Language(341))
 	}
 
 	FlushTxQueue()
@@ -1612,14 +1649,20 @@ func RemoveDoc(boxID, p string) {
 	IncSync()
 
 	refreshParentDocInfo(tree)
+	return nil
 }
 
-func RemoveDocs(paths []string) {
+func RemoveDocs(paths []string) error {
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
 
 	paths = util.FilterSelfChildDocs(paths)
 	pathsBoxes := getBoxesByPaths(paths)
+	for p, box := range pathsBoxes {
+		if nil != box && IsBoxDocPath(box.ID, p) {
+			return errors.New(Conf.Language(341))
+		}
+	}
 	FlushTxQueue()
 	luteEngine := util.NewLute()
 
@@ -1639,6 +1682,7 @@ func RemoveDocs(paths []string) {
 	for _, parentTree := range parentTrees {
 		refreshDocInfo(parentTree)
 	}
+	return nil
 }
 
 func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
@@ -1738,6 +1782,22 @@ func removeDoc0(tree *parse.Tree, childrenDir string) {
 }
 
 func RenameDoc(boxID, p, title string) (err error) {
+	if IsBoxDocPath(boxID, p) {
+		if err = RenameBox(boxID, title); err != nil {
+			return
+		}
+		box := Conf.Box(boxID)
+		if nil != box {
+			evt := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
+			evt.Data = map[string]any{"box": boxID, "name": box.Name}
+			util.PushEvent(evt)
+		}
+		return
+	}
+	return renameDoc0(boxID, p, title)
+}
+
+func renameDoc0(boxID, p, title string) (err error) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		err = errors.New(Conf.Language(0))
@@ -1827,6 +1887,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 }
 
 func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
+	p = normalizeBoxDocPath(boxID, p)
 	title = normalizeDocTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299

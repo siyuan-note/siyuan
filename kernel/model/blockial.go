@@ -148,6 +148,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 
 	trees := filesys.LoadTrees(blockIDs)
 	var nodes []*ast.Node
+	boxIcons := map[string]string{}
 	for _, blockAttr := range blockAttrs {
 		id := blockAttr["id"].(string)
 		tree := trees[id]
@@ -161,6 +162,14 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 		}
 
 		attrs := blockAttr["attrs"].(map[string]string)
+		if IsBoxDoc(tree.Box, tree.ID) {
+			attrs[BoxDocAttr] = tree.Box
+			attrs[DocHiddenAttr] = "true"
+			if icon, ok := attrs["icon"]; ok {
+				boxIcons[tree.Box] = filterBoxIcon(icon)
+				attrs["icon"] = boxIcons[tree.Box]
+			}
+		}
 		oldAttrs, e := setNodeAttrs0(node, attrs, tree.Box)
 		if nil != e {
 			return e
@@ -176,6 +185,17 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 			return
 		}
 	}
+	for boxID, icon := range boxIcons {
+		box := &Box{ID: boxID}
+		boxConf := box.GetConf()
+		boxConf.Icon = icon
+		if err = box.SaveConf(boxConf); err != nil {
+			return
+		}
+	}
+	if 0 < len(boxIcons) {
+		ReloadFiletree()
+	}
 
 	IncSync()
 	// 不做锚文本刷新
@@ -185,6 +205,9 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	if util.ReadOnly {
 		return
+	}
+	if nil == nameValues {
+		nameValues = map[string]string{}
 	}
 
 	FlushTxQueue()
@@ -199,7 +222,25 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return fmt.Errorf(Conf.Language(15), id)
 	}
 
+	if IsBoxDoc(tree.Box, tree.ID) {
+		nameValues[BoxDocAttr] = tree.Box
+		nameValues[DocHiddenAttr] = "true"
+		if icon, ok := nameValues["icon"]; ok {
+			nameValues["icon"] = filterBoxIcon(icon)
+		}
+	}
 	err = setNodeAttrs(node, tree, nameValues)
+	if nil == err && IsBoxDoc(tree.Box, tree.ID) {
+		if icon, ok := nameValues["icon"]; ok {
+			box := &Box{ID: tree.Box}
+			boxConf := box.GetConf()
+			boxConf.Icon = icon
+			err = box.SaveConf(boxConf)
+			if nil == err {
+				ReloadFiletree()
+			}
+		}
+	}
 	return
 }
 

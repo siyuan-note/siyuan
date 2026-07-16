@@ -2194,6 +2194,7 @@
 		"337": "Le chemin sélectionné n’est pas un dossier",
 		"338": "Le chemin du Vault sélectionné n’est pas pris en charge ; sélectionnez un dossier normal en dehors de l’espace de travail SiYuan",
 		"339": "Seuls les Obsidian Vaults utilisant le dossier .obsidian par défaut sont pris en charge",
-		"340": "Le Vault sélectionné ne contient aucun fichier Markdown lisible et non masqué"
+		"340": "Le Vault sélectionné ne contient aucun fichier Markdown lisible et non masqué",
+		"341": "Le document de niveau supérieur du carnet ne peut pas être supprimé ni déplacé"
 	}
 	}

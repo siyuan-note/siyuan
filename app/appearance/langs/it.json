@@ -2194,6 +2194,7 @@
 		"337": "Il percorso selezionato non è una cartella",
 		"338": "Il percorso del Vault selezionato non è supportato; seleziona una cartella normale esterna allo spazio di lavoro di SiYuan",
 		"339": "Sono supportati solo gli Obsidian Vault che utilizzano la cartella .obsidian predefinita",
-		"340": "Il Vault selezionato non contiene file Markdown leggibili e non nascosti"
+		"340": "Il Vault selezionato non contiene file Markdown leggibili e non nascosti",
+		"341": "Il documento di primo livello del taccuino non può essere eliminato o spostato"
 	}
 	}

@@ -135,7 +135,9 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	}
 
 	subFileCount := 0
-	if "true" != tree.Root.IALAttr(DocHiddenAttr) {
+	if IsBoxDoc(tree.Box, tree.ID) {
+		subFileCount = boxDocSubFileCount(tree.Box)
+	} else if "true" != tree.Root.IALAttr(DocHiddenAttr) {
 		subDir := filepath.Join(util.DataDir, tree.Box, strings.TrimSuffix(tree.Path, ".sy"))
 		subFiles, err := os.ReadDir(subDir)
 		if err == nil {

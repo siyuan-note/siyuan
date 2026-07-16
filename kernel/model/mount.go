@@ -85,6 +85,14 @@ func CreateBox(name string) (id string, err error) {
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", id, err)
 	}
+	if _, err = ensureBoxDoc0(id); err != nil {
+		treenode.RemoveBlockTreesByBoxID(id)
+		sql.DeleteBoxQueue(id)
+		if removeErr := filelock.Remove(boxLocalPath); nil != removeErr {
+			logging.LogErrorf("remove box [%s] after initializing box document failed: %s", id, removeErr)
+		}
+		return "", err
+	}
 	IncSync()
 	logging.LogInfof("created box [%s]", id)
 	return
@@ -109,8 +117,13 @@ func RenameBox(boxID, name string) (err error) {
 	boxConf := box.GetConf()
 	boxConf.Name = name
 	box.Name = name
-	if err := box.SaveConf(boxConf); err != nil {
+	if err = box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
+		return
+	}
+	if err = renameBoxDoc(boxID, name); err != nil {
+		logging.LogErrorf("rename box document [box=%s] failed: %s", boxID, err)
+		return
 	}
 	IncSync()
 	logging.LogInfof("renamed box [%s] to [%s]", boxID, name)
@@ -361,10 +374,14 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
 	}
+	if _, ensureErr := EnsureBoxDoc(boxID); nil != ensureErr {
+		logging.LogErrorf("ensure box document [%s] failed: %s", boxID, ensureErr)
+	}
 
 	// 缓存根一级的文档树展开
 	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
-	if 0 < len(files) {
+	box = Conf.Box(boxID)
+	if 0 < len(files) || (nil != box && "" != box.BoxDocID) {
 		box.Index()
 	}
 

@@ -2194,6 +2194,7 @@
 		"337": "Jalur yang dipilih bukan folder",
 		"338": "Jalur Vault yang dipilih tidak didukung; pilih folder biasa di luar ruang kerja SiYuan",
 		"339": "Hanya Obsidian Vault yang menggunakan folder .obsidian bawaan yang didukung",
-		"340": "Vault yang dipilih tidak berisi file Markdown tak tersembunyi yang dapat dibaca"
+		"340": "Vault yang dipilih tidak berisi file Markdown tak tersembunyi yang dapat dibaca",
+		"341": "Dokumen buku catatan tingkat teratas tidak dapat dihapus atau dipindahkan"
 	}
 	}

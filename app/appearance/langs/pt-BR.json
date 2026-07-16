@@ -2194,6 +2194,7 @@
 		"337": "O caminho selecionado não é uma pasta",
 		"338": "O caminho do Vault selecionado não é compatível; selecione uma pasta normal fora do espaço de trabalho do SiYuan",
 		"339": "Somente Obsidian Vaults que usam a pasta .obsidian padrão são compatíveis",
-		"340": "O Vault selecionado não contém um arquivo Markdown legível e não oculto"
+		"340": "O Vault selecionado não contém um arquivo Markdown legível e não oculto",
+		"341": "O documento de nível superior do caderno não pode ser removido nem movido"
 	}
 	}

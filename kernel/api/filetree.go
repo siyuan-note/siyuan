@@ -613,7 +613,10 @@ func removeDoc(c *gin.Context) {
 	}
 
 	p := arg["path"].(string)
-	model.RemoveDoc(notebook, p)
+	if err := model.RemoveDoc(notebook, p); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 func removeDocByID(c *gin.Context) {
@@ -638,7 +641,10 @@ func removeDocByID(c *gin.Context) {
 		return
 	}
 
-	model.RemoveDoc(tree.Box, tree.Path)
+	if err = model.RemoveDoc(tree.Box, tree.Path); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 func removeDocs(c *gin.Context) {
@@ -655,7 +661,10 @@ func removeDocs(c *gin.Context) {
 	for _, path := range pathsArg {
 		paths = append(paths, path.(string))
 	}
-	model.RemoveDocs(paths)
+	if err := model.RemoveDocs(paths); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 func renameDoc(c *gin.Context) {

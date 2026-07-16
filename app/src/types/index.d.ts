@@ -510,6 +510,7 @@ interface IEmoji {
 interface INotebook {
     name: string;
     id: string;
+    boxDocID: string;
     closed: boolean;
     icon: string;
     sort: number;

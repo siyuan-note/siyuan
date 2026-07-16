@@ -2194,6 +2194,7 @@
 		"337": "Der ausgewählte Pfad ist kein Ordner",
 		"338": "Der ausgewählte Vault-Pfad wird nicht unterstützt; wähle einen normalen Ordner außerhalb des SiYuan-Arbeitsbereichs",
 		"339": "Es werden nur Obsidian Vaults mit dem standardmäßigen .obsidian-Ordner unterstützt",
-		"340": "Der ausgewählte Vault enthält keine lesbare, nicht ausgeblendete Markdown-Datei"
+		"340": "Der ausgewählte Vault enthält keine lesbare, nicht ausgeblendete Markdown-Datei",
+		"341": "Das Notizbuchdokument auf oberster Ebene kann nicht gelöscht oder verschoben werden"
 	}
 	}

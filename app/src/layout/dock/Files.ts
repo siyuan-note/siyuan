@@ -175,7 +175,7 @@ export class Files extends Model {
             }
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                if (target.tagName === "LI" && !target.getAttribute("data-opening")) {
+                if (target.tagName === "LI" && target.getAttribute("data-node-id") && !target.getAttribute("data-opening")) {
                     target.setAttribute("data-opening", "true");
                     openFileById({
                         app: options.app,
@@ -204,14 +204,16 @@ export class Files extends Model {
                         event.preventDefault();
                         event.stopPropagation();
                         const liElement = target.parentElement;
-                        if (liElement.getAttribute("data-type") === "navigation-file" && window.siyuan.config.fileTree.docIconClickExpand) {
-                            if (Number(liElement.getAttribute("data-count")) > 0) {
+                        const isFile = liElement.getAttribute("data-type") === "navigation-file";
+                        const isBoxDoc = liElement.getAttribute("data-type") === "navigation-root" && liElement.getAttribute("data-node-id");
+                        if ((isFile || isBoxDoc) && window.siyuan.config.fileTree.docIconClickExpand) {
+                            if (isBoxDoc || Number(liElement.getAttribute("data-count")) > 0) {
                                 this.getLeaf(liElement, notebookId);
                             }
                             break;
                         }
                         const rect = target.getBoundingClientRect();
-                        if (liElement.getAttribute("data-type") === "navigation-file") {
+                        if (isFile) {
                             openEmojiPanel(liElement.getAttribute("data-node-id"), "doc", {
                                 x: rect.left,
                                 y: rect.bottom,
@@ -237,8 +239,8 @@ export class Files extends Model {
                         event.preventDefault();
                         event.stopPropagation();
                         const rect = target.getBoundingClientRect();
-                        openPublishAccessDialog(target.parentElement.getAttribute("data-node-id") ||
-                            target.parentElement.parentElement.getAttribute("data-url"), {
+                        openPublishAccessDialog(target.parentElement.getAttribute("data-type") === "navigation-root" ?
+                            notebookId : target.parentElement.getAttribute("data-node-id"), {
                             x: rect.left,
                             y: rect.bottom,
                             h: rect.height,
@@ -277,9 +279,11 @@ export class Files extends Model {
                         break;
                     } else if (event.button === 0 && isNotCtrl(event) && !event.altKey && !event.shiftKey &&
                         target.classList.contains("b3-list-item__text") &&
-                        target.parentElement.getAttribute("data-type") === "navigation-file" &&
+                        (target.parentElement.getAttribute("data-type") === "navigation-file" ||
+                            (target.parentElement.getAttribute("data-type") === "navigation-root" && target.parentElement.getAttribute("data-node-id"))) &&
                         window.siyuan.config.fileTree.parentDocClickExpand &&
-                        Number(target.parentElement.getAttribute("data-count")) > 0) {
+                        (target.parentElement.getAttribute("data-type") === "navigation-root" ||
+                            Number(target.parentElement.getAttribute("data-count")) > 0)) {
                         this.getLeaf(target.parentElement, notebookId);
                         event.preventDefault();
                         event.stopPropagation();
@@ -322,7 +326,8 @@ export class Files extends Model {
                         } else {
                             this.lastSelectedElement = target;
                             this.setCurrent(target, false);
-                            if (target.getAttribute("data-type") === "navigation-file") {
+                            if (target.getAttribute("data-type") === "navigation-file" ||
+                                (target.getAttribute("data-type") === "navigation-root" && target.getAttribute("data-node-id"))) {
                                 // 更新最后点击的文档项
                                 needFocus = false;
                                 if (target.getAttribute("data-opening")) {
@@ -897,9 +902,14 @@ export class Files extends Model {
                 case "li2doc":
                     this.selectItem(data.data.box.id, data.data.path);
                     break;
-                case "renamenotebook":
+                case "renamenotebook": {
+                    const notebook = window.siyuan.notebooks.find((item) => item.id === data.data.box);
+                    if (notebook) {
+                        notebook.name = data.data.name;
+                    }
                     this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = escapeHtml(data.data.name);
                     break;
+                }
                 case "rename":
                     this.onRename(data.data);
                     break;
@@ -908,7 +918,7 @@ export class Files extends Model {
     }
 
     private updateDocInfo(data: IWebSocketData) {
-        const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`);
+        const liElement = this.element.querySelector(`li[data-type="navigation-file"][data-node-id="${data.data.rootID}"]`);
         if (liElement) {
             liElement.setAttribute("data-count", data.data.subFileCount);
             liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeLessThans));
@@ -1006,7 +1016,7 @@ export class Files extends Model {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}">
 <li class="b3-list-item b3-list-item--hide-action" ${window.siyuan.config.fileTree.sort === 6 ? 'draggable="true"' : ""} 
 style="--file-toggle-width:22px" 
-data-type="navigation-root" data-path="/">
+data-type="navigation-root" data-path="/" data-node-id="${item.boxDocID || ""}">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1371,6 +1381,14 @@ data-type="navigation-root" data-path="/">
             // 有文件树和编辑器的布局初始化时，文件树还未挂载
             return;
         }
+        const boxDocID = window.siyuan.notebooks.find((item) => item.id === notebookId)?.boxDocID;
+        if (boxDocID && filePath === `/${boxDocID}.sy`) {
+            const boxDocElement = treeElement.querySelector("[data-type=\"navigation-root\"]") as HTMLElement;
+            if (isSetCurrent) {
+                this.setCurrent(boxDocElement);
+            }
+            return boxDocElement;
+        }
         let currentPath = filePath;
         let liElement: HTMLElement;
         const visitedPaths = new Set<string>();
@@ -1563,7 +1581,7 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
         }
         const ids: string[] = [];
         this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")));
-        this.element.querySelectorAll("[data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")));
+        this.element.querySelectorAll("[data-type=\"navigation-file\"][data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")));
         fetchPost("/api/filetree/getPublishAccess", {
             ids
         }, response => {

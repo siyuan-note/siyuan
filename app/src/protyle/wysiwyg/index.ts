@@ -116,6 +116,7 @@ export class WYSIWYG {
     public preventKeyup: boolean;
 
     private preventClick: boolean;
+    private preventInput: boolean;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -1777,7 +1778,12 @@ export class WYSIWYG {
                                                 selectCellElements[0].colSpan = colSpan;
                                                 selectCellElements[0].rowSpan = rowSpan;
                                                 focusByWbr(selectCellElements[0], document.createRange());
-                                                document.execCommand("insertHTML", false, "");
+                                                this.preventInput = true;
+                                                try {
+                                                    document.execCommand("insertHTML", false, "");
+                                                } finally {
+                                                    this.preventInput = false;
+                                                }
                                                 updateTransaction(protyle, tableBlockElement, oldHTML);
                                             }
                                         });
@@ -2830,6 +2836,10 @@ export class WYSIWYG {
 
         let timeout: number;
         this.element.addEventListener("input", (event: InputEvent) => {
+            if (this.preventInput) {
+                event.stopPropagation();
+                return;
+            }
             const target = event.target as HTMLElement;
             if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo") {
                 return;

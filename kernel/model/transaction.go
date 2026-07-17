@@ -207,10 +207,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		if e := recover(); nil != e {
 			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, logging.ShortStack())
 			logging.LogError(msg)
+			ret = &TxErr{code: TxErrCodePushMsg, msg: fmt.Sprintf("transaction panic: %v", e)}
 
 			if 1 == tx.state.Load() {
 				tx.rollback()
-				return
 			}
 		}
 	}()
@@ -1501,13 +1501,19 @@ func (tx *Transaction) processGlobalAssets(tree *parse.Tree) {
 
 func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
+	updateData, ok := operation.Data.(string)
+	if !ok || "" == updateData {
+		logging.LogErrorf("update data is nil")
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+	}
+
 	tree, err := tx.loadTree(id)
 	if err != nil {
 		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
-	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
+	data := strings.ReplaceAll(updateData, editor.FrontEndCaret, "")
 	if "" == data {
 		logging.LogErrorf("update data is nil")
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}

@@ -439,6 +439,21 @@ declare namespace Config {
     }
 
     /**
+     * Link open action type
+     */
+    type TLinkOpenAction = "current-tab" | "right-tab" | "open-app" | "show-folder";
+
+    /**
+     * Link open behavior configuration
+     */
+    interface IOpenLink {
+        click: TLinkOpenAction;
+        ctrlClick: TLinkOpenAction;
+        altClick: TLinkOpenAction;
+        shiftClick: TLinkOpenAction;
+    }
+
+    /**
      * SiYuan editor related configuration
      */
     export interface IEditor {
@@ -591,6 +606,10 @@ declare namespace Config {
          * Whether to enable the `[[` symbol to search only for document blocks
          */
         onlySearchForDoc: boolean;
+        /**
+         * Link open behavior configuration
+         */
+        openLink: IOpenLink;
         /**
          * PlantUML rendering service address
          */

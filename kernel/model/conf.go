@@ -386,6 +386,9 @@ func InitConf() {
 	if 5120 < Conf.Editor.BlockRefDynamicAnchorTextMaxLen {
 		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 5120
 	}
+	if nil == Conf.Editor.OpenLink {
+		Conf.Editor.OpenLink = defaultEditor.OpenLink
+	}
 	if 1440 < Conf.Editor.GenerateHistoryInterval {
 		Conf.Editor.GenerateHistoryInterval = 1440
 	}

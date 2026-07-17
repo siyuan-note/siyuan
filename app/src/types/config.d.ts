@@ -59,10 +59,6 @@ declare namespace Config {
          * Log level
          */
         logLevel: TLogLevel;
-        /**
-         * Whether to open the user guide after startup
-         */
-        openHelp: boolean;
         onboarding: {
             state: "pending" | "notebook-created" | "completed";
             newUser: boolean;

@@ -80,7 +80,6 @@ type AppConf struct {
 	NotebookCrypto *conf.NotebookCrypto `json:"notebookCrypto"` // 加密笔记本密钥管理
 	Publish        *conf.Publish        `json:"publish"`        // 发布服务
 	Onboarding     *conf.Onboarding     `json:"onboarding"`     // 首次使用引导
-	OpenHelp       bool                 `json:"openHelp"`       // 启动后是否需要打开用户指南
 	ShowChangelog  bool                 `json:"showChangelog"`  // 是否显示版本更新日志
 	CloudRegion    int                  `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
 	Snippet        *conf.Snpt           `json:"snippet"`        // 代码片段
@@ -456,7 +455,6 @@ func InitConf() {
 	if boxes, listErr := ListNotebooks(); listErr == nil {
 		prepareOnboardingForEmptyWorkspace(Conf.Onboarding, util.ReadOnly, len(boxes))
 	}
-	Conf.OpenHelp = false
 	if nil == Conf.System.NetworkProxy {
 		Conf.System.NetworkProxy = &conf.NetworkProxy{}
 	}
@@ -559,10 +557,6 @@ func InitConf() {
 	if nil == Conf.Publish {
 		Conf.Publish = conf.NewPublish()
 	}
-	if Conf.OpenHelp && Conf.Publish.Enable {
-		Conf.OpenHelp = false
-	}
-
 	if nil == Conf.Repo {
 		Conf.Repo = conf.NewRepo()
 	}

@@ -146,7 +146,7 @@ const renderOnboarding = (app: App) => {
     containerElement.append(element);
     /// #if MOBILE
     mobileKeyboardHandler = (event: Event) => {
-        element.classList.toggle("fn__none", (event as CustomEvent<boolean>).detail);
+        element.classList.toggle("onboarding--keyboard", (event as CustomEvent<boolean>).detail);
     };
     window.addEventListener("siyuan-mobile-keyboard-change", mobileKeyboardHandler);
     /// #endif
@@ -173,8 +173,8 @@ export const openMobileOnboarding = (app: App) => {
     if (!shouldShowOnboarding()) {
         return false;
     }
-    openMobileFileById(app, window.siyuan.config.onboarding.documentID, [Constants.CB_GET_CONTEXT]);
     renderOnboarding(app);
+    openMobileFileById(app, window.siyuan.config.onboarding.documentID, [Constants.CB_GET_CONTEXT]);
     return true;
 };
 /// #endif

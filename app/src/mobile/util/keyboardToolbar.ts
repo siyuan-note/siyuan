@@ -427,11 +427,11 @@ export const showKeyboardToolbar = () => {
         hideKeyboardToolbarUtil();
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
+    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
     if (!toolbarElement.classList.contains("fn__none") || getSelection().rangeCount === 0) {
         return;
     }
     toolbarElement.classList.remove("fn__none");
-    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateY(0px)") {
@@ -482,6 +482,7 @@ export const showKeyboardToolbar = () => {
 export const hideKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     clearTimeout(scrollSelectionIntoViewTimeout);
+    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: false}));
     if (showUtil) {
         return;
     }
@@ -490,7 +491,6 @@ export const hideKeyboardToolbar = () => {
         return;
     }
     toolbarElement.classList.add("fn__none");
-    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: false}));
     toolbarElement.style.height = "";
     const editor = getCurrentEditor();
     if (editor) {

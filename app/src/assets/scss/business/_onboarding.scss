@@ -11,6 +11,10 @@
   background-color: var(--b3-theme-background);
   box-shadow: var(--b3-dialog-shadow);
 
+  &--editor {
+    position: absolute;
+  }
+
   &__close {
     position: absolute;
     top: 8px;

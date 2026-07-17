@@ -431,6 +431,7 @@ export const showKeyboardToolbar = () => {
         return;
     }
     toolbarElement.classList.remove("fn__none");
+    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateY(0px)") {
@@ -489,6 +490,7 @@ export const hideKeyboardToolbar = () => {
         return;
     }
     toolbarElement.classList.add("fn__none");
+    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: false}));
     toolbarElement.style.height = "";
     const editor = getCurrentEditor();
     if (editor) {

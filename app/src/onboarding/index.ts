@@ -36,6 +36,7 @@ const shouldShowOnboarding = () => {
 
 let pendingLoginHandler: (() => void) | undefined;
 let pendingSyncHandler: (() => void) | undefined;
+let mobileKeyboardHandler: EventListener | undefined;
 
 const dismissOnboarding = () => {
     if (pendingLoginHandler) {
@@ -45,6 +46,10 @@ const dismissOnboarding = () => {
     if (pendingSyncHandler) {
         window.removeEventListener("siyuan-sync-success", pendingSyncHandler);
         pendingSyncHandler = undefined;
+    }
+    if (mobileKeyboardHandler) {
+        window.removeEventListener("siyuan-mobile-keyboard-change", mobileKeyboardHandler);
+        mobileKeyboardHandler = undefined;
     }
     document.querySelector(".onboarding")?.remove();
     window.siyuan.config.onboarding.dismissed = true;
@@ -129,7 +134,22 @@ const renderOnboarding = (app: App) => {
                 break;
         }
     });
-    document.body.append(element);
+    let containerElement = document.body;
+    /// #if !MOBILE
+    const editorContainerElement = (document.querySelector(".layout__center .layout__wnd--active .layout-tab-container") ||
+        document.querySelector(".layout__center .layout-tab-container")) as HTMLElement;
+    if (editorContainerElement) {
+        containerElement = editorContainerElement;
+        element.classList.add("onboarding--editor");
+    }
+    /// #endif
+    containerElement.append(element);
+    /// #if MOBILE
+    mobileKeyboardHandler = (event: Event) => {
+        element.classList.toggle("fn__none", (event as CustomEvent<boolean>).detail);
+    };
+    window.addEventListener("siyuan-mobile-keyboard-change", mobileKeyboardHandler);
+    /// #endif
 };
 
 /// #if !MOBILE
@@ -141,7 +161,7 @@ export const openDesktopOnboarding = (app: App) => {
         openFileById({
             app,
             id: window.siyuan.config.onboarding.documentID,
-            action: [Constants.CB_GET_FOCUS],
+            action: [Constants.CB_GET_FOCUSFIRST],
         });
         renderOnboarding(app);
     });

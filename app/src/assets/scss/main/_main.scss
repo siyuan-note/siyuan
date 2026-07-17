@@ -288,6 +288,38 @@ html[data-frontend="browser-desktop"] {
     transition: var(--b3-transition);
   }
 
+  &__item--icon-expand {
+    > .b3-list-item__icon {
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: -3px 0;
+      }
+    }
+
+    > .b3-list-item__toggle:hover,
+    > .b3-list-item__icon:hover {
+      background-color: transparent;
+    }
+
+    &:has(> .b3-list-item__toggle:hover, > .b3-list-item__icon:hover)::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--file-action-width);
+      background-color: var(--b3-list-icon-hover);
+      border-radius: var(--b3-border-radius);
+      pointer-events: none;
+    }
+  }
+
+  &__item--title-expand > .b3-list-item__text {
+    margin-left: -4px;
+    padding-left: 4px;
+  }
+
   &.sy__file--disablehover {
     .b3-list--background .b3-list-item {
       &:not(.b3-list-item--focus):hover {

@@ -40,12 +40,15 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.docIconClickExpand,
         desc: window.siyuan.languages.docIconClickExpandTip,
         save: (value) => fileConfigApi.patch("docIconClickExpand", value, () => {
-            getAllModels().files.forEach((files) => files.updateDocIconAction());
+            getAllModels().files.forEach((files) => files.updateDocActions());
         }),
     });
     group.switch("fileTree.parentDocClickExpand", {
         title: window.siyuan.languages.parentDocClickExpand,
         desc: window.siyuan.languages.parentDocClickExpandTip,
+        save: (value) => fileConfigApi.patch("parentDocClickExpand", value, () => {
+            getAllModels().files.forEach((files) => files.updateDocActions());
+        }),
     });
     group.switch("fileTree.alwaysSelectOpenedFile", {
         title: window.siyuan.languages.selectOpen,

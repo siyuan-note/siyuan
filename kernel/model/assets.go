@@ -976,17 +976,11 @@ func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
 	p := filepath.Join(util.DataDir, boxID, relativePath)
 	if gulu.File.IsExist(p) {
 		if !gulu.File.IsSubPath(util.WorkspaceDir, p) {
-			logging.LogWarnf("resolve box asset failed: path is outside workspace [relativePath=%s, boxID=%s, path=%s, workspaceDir=%s]", relativePath, boxID, p, util.WorkspaceDir)
 			return "", fmt.Errorf("[%s] is not sub path of workspace", p)
 		}
 		// 解析符号链接/目录联接，防止软链接跳出资产根目录
-		realP, evalErr := filepath.EvalSymlinks(p)
-		if evalErr != nil {
-			logging.LogWarnf("resolve box asset symlink failed [relativePath=%s, boxID=%s, path=%s, workspaceDir=%s, err=%s]", relativePath, boxID, p, util.WorkspaceDir, evalErr)
-		} else if realP != p {
+		if realP, evalErr := filepath.EvalSymlinks(p); evalErr == nil && realP != p {
 			if !gulu.File.IsSubPath(util.WorkspaceDir, realP) {
-				resolvedWorkspaceDir, workspaceEvalErr := filepath.EvalSymlinks(util.WorkspaceDir)
-				logging.LogWarnf("resolve box asset failed: resolved path is outside workspace [relativePath=%s, boxID=%s, path=%s, resolvedPath=%s, workspaceDir=%s, resolvedWorkspaceDir=%s, workspaceEvalErr=%v]", relativePath, boxID, p, realP, util.WorkspaceDir, resolvedWorkspaceDir, workspaceEvalErr)
 				return "", fmt.Errorf("symlink [%s] resolves outside workspace: [%s]", p, realP)
 			}
 			// 验证解析后的路径仍在 <boxID>/assets/ 或全局 data/assets/ 下
@@ -995,8 +989,6 @@ func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
 				expectedPrefix = filepath.Join(util.DataDir, boxID, "assets")
 			}
 			if !gulu.File.IsSubPath(expectedPrefix, realP) {
-				resolvedExpectedPrefix, prefixEvalErr := filepath.EvalSymlinks(expectedPrefix)
-				logging.LogWarnf("resolve box asset failed: resolved path is outside assets directory [relativePath=%s, boxID=%s, path=%s, resolvedPath=%s, assetsRoot=%s, resolvedAssetsRoot=%s, rootEvalErr=%v]", relativePath, boxID, p, realP, expectedPrefix, resolvedExpectedPrefix, prefixEvalErr)
 				return "", fmt.Errorf("symlink [%s] resolves outside assets directory: [%s]", p, realP)
 			}
 		}
@@ -1034,21 +1026,20 @@ func getAssetAbsPath(relativePath string, includeEncrypted bool) (absPath string
 	p := filepath.Join(util.DataDir, relativePath)
 	if gulu.File.IsExist(p) {
 		if !gulu.File.IsSubPath(util.WorkspaceDir, p) {
-			logging.LogWarnf("resolve asset failed: path is outside workspace [relativePath=%s, path=%s, workspaceDir=%s]", relativePath, p, util.WorkspaceDir)
 			return "", fmt.Errorf("[%s] is not sub path of workspace", p)
 		}
 		// 解析符号链接，验证真实路径仍在 data/assets/ 下
-		realP, evalErr := filepath.EvalSymlinks(p)
-		if evalErr != nil {
-			logging.LogWarnf("resolve asset symlink failed [relativePath=%s, path=%s, dataDir=%s, workspaceDir=%s, err=%s]", relativePath, p, util.DataDir, util.WorkspaceDir, evalErr)
-		} else if realP != p {
+		if realP, evalErr := filepath.EvalSymlinks(p); evalErr == nil && realP != p {
 			assetsRoot := util.GetDataAssetsAbsPath()
-			if !gulu.File.IsSubPath(assetsRoot, realP) {
-				resolvedAssetsRoot, rootEvalErr := filepath.EvalSymlinks(assetsRoot)
-				logging.LogWarnf("resolve asset failed: resolved path is outside data assets [relativePath=%s, path=%s, resolvedPath=%s, assetsRoot=%s, resolvedAssetsRoot=%s, dataDir=%s, workspaceDir=%s, rootEvalErr=%v]", relativePath, p, realP, assetsRoot, resolvedAssetsRoot, util.DataDir, util.WorkspaceDir, rootEvalErr)
+			realAssetsRoot, rootEvalErr := filepath.EvalSymlinks(assetsRoot)
+			if rootEvalErr != nil {
+				return "", fmt.Errorf("resolve assets root [%s] failed: %w", assetsRoot, rootEvalErr)
+			}
+			if !gulu.File.IsSubPath(realAssetsRoot, realP) {
 				return "", fmt.Errorf("symlink [%s] resolves outside data/assets: [%s]", p, realP)
 			}
-			return realP, nil
+			// 安全校验使用解析后的路径，返回原路径以便下游与 DataDir 保持同一路径形式
+			return p, nil
 		}
 		return p, nil
 	}

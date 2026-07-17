@@ -187,6 +187,51 @@ func TestNormalizeMissingAssetLinkDest(t *testing.T) {
 	}
 }
 
+func TestGetAssetAbsPathWithSymlinkedWorkspaceAncestor(t *testing.T) {
+	originalDataDir, originalWorkspaceDir := util.DataDir, util.WorkspaceDir
+	t.Cleanup(func() {
+		util.DataDir, util.WorkspaceDir = originalDataDir, originalWorkspaceDir
+	})
+
+	realWorkspaceDir := t.TempDir()
+	aliasBaseDir := t.TempDir()
+	aliasWorkspaceDir := filepath.Join(aliasBaseDir, "workspace")
+	if err := os.Symlink(realWorkspaceDir, aliasWorkspaceDir); err != nil {
+		t.Skipf("create workspace symlink failed: %s", err)
+	}
+	util.WorkspaceDir = aliasWorkspaceDir
+	util.DataDir = filepath.Join(aliasWorkspaceDir, "data")
+
+	assetPath := filepath.Join(util.DataDir, "assets", "image.png")
+	if err := os.MkdirAll(filepath.Dir(assetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(assetPath, []byte("image"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := GetAssetAbsPath("assets/image.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != assetPath {
+		t.Fatalf("get global asset path: got %q, want %q", got, assetPath)
+	}
+
+	outsideDir := t.TempDir()
+	outsidePath := filepath.Join(outsideDir, "outside.png")
+	if err = os.WriteFile(outsidePath, []byte("outside"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	linkedAssetPath := filepath.Join(util.DataDir, "assets", "outside.png")
+	if err = os.Symlink(outsidePath, linkedAssetPath); err != nil {
+		t.Skipf("create asset symlink failed: %s", err)
+	}
+	if _, err = GetAssetAbsPath("assets/outside.png"); err == nil {
+		t.Fatal("asset symlink outside data/assets should be rejected")
+	}
+}
+
 func TestGetAssetLinkDestsByNode(t *testing.T) {
 	const blockID = "20200101000000-abcdefg"
 	root := &ast.Node{Type: ast.NodeDocument}

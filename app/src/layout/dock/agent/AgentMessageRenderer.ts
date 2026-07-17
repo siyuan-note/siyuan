@@ -11,6 +11,15 @@ import {abcRender} from "../../../protyle/render/abcRender";
 import {plantumlRender} from "../../../protyle/render/plantumlRender";
 import {htmlRender} from "../../../protyle/render/htmlRender";
 import {showMessage} from "../../../dialog/message";
+import {openLink} from "../../../editor/openLink";
+import {previewImages} from "../../../protyle/preview/image";
+import {getDiagramBlock, previewDiagram} from "../../../protyle/preview/diagram";
+import {removeCompressURL} from "../../../util/image";
+/// #if !MOBILE
+import {openGlobalSearch} from "../../../search/util";
+/// #else
+import {popSearch} from "../../../mobile/menu/search";
+/// #endif
 
 import type {App} from "../../../index";
 
@@ -269,12 +278,12 @@ export const postRender = (container: HTMLElement, app?: App): void => {
             code.parentElement?.setAttribute("data-language", match[1]);
         }
     });
-    // Agent 内容由 ProtylePreview 生成，结构与官方 preview 一致，复用 highlightRender 渲染高亮。
-    // 容器自身可能是 b3-typography（流式更新），也可能外层包裹含 b3-typography 的后代，两种情况都需覆盖。
-    const typographyElements = container.classList.contains("b3-typography")
+    // Assistant 使用 b3-typography，用户消息使用只读 protyle-wysiwyg，两种结构都复用 highlightRender。
+    const contentSelector = ".b3-typography, .protyle-wysiwyg";
+    const contentElements = container.matches(contentSelector)
         ? [container as HTMLElement]
-        : Array.from(container.querySelectorAll<HTMLElement>(".b3-typography"));
-    typographyElements.forEach((item) => highlightRender(item));
+        : Array.from(container.querySelectorAll<HTMLElement>(contentSelector));
+    contentElements.forEach((item) => highlightRender(item));
     mathRender(container);
     mermaidRender(container);
     flowchartRender(container);
@@ -285,19 +294,94 @@ export const postRender = (container: HTMLElement, app?: App): void => {
     plantumlRender(container);
     htmlRender(container);
     addCopyButtons(container);
+    if (container.dataset.agentPreviewBound !== "true") {
+        container.dataset.agentPreviewBound = "true";
+        container.addEventListener("dblclick", (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            const img = target.closest("img:not(.emoji)") as HTMLImageElement;
+            if (!img || !container.contains(img)) {
+                const diagramElement = getDiagramBlock(target.closest("[data-subtype]") as HTMLElement);
+                if (diagramElement && container.contains(diagramElement)) {
+                    previewDiagram(diagramElement);
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                return;
+            }
+            const srcList = Array.from(container.querySelectorAll<HTMLImageElement>("img:not(.emoji)"))
+                .map((item) => removeCompressURL(item.dataset.src || item.getAttribute("src") || ""));
+            const currentSrc = removeCompressURL(img.dataset.src || img.getAttribute("src") || "");
+            if (currentSrc) {
+                previewImages(srcList, currentSrc);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    }
     if (!app) {
         return;
     }
-    // MarkdownStr 渲染出的 siyuan:// 块链接只是普通 <a href>，需补全 data-type/data-href
-    // 才能接入全局 popover 浮窗系统；dock 内无 protyle 点击链路，需自行绑定点击打开块。
-    container.querySelectorAll<HTMLAnchorElement>('a[href^="siyuan://"]').forEach((a) => {
-        const href = a.getAttribute("href") || "";
-        a.setAttribute("data-type", "a");
-        a.setAttribute("data-href", href);
-        a.addEventListener("click", (event: MouseEvent) => {
+    container.querySelectorAll<HTMLAnchorElement>('a[href^="siyuan://"]').forEach((link) => {
+        const href = link.getAttribute("href") || "";
+        link.setAttribute("data-type", "a");
+        link.setAttribute("data-href", href);
+    });
+    if (container.dataset.agentLinkBound === "true") {
+        return;
+    }
+    container.dataset.agentLinkBound = "true";
+    // dock 内没有 Protyle WYSIWYG 的点击分派，使用事件委托覆盖流式及嵌入块异步插入的内容。
+    container.addEventListener("click", (event: MouseEvent) => {
+        if (event.defaultPrevented) {
+            return;
+        }
+        const target = event.target as HTMLElement;
+        const ref = target.closest('[data-type~="block-ref"]') as HTMLElement;
+        const refID = ref?.dataset.id;
+        if (refID && container.contains(ref)) {
             event.preventDefault();
             event.stopPropagation();
-            void processSiYuanUri(app, href);
-        });
+            void processSiYuanUri(app, "siyuan://blocks/" + refID);
+            return;
+        }
+        const fileRef = target.closest('[data-type~="file-annotation-ref"][data-id]') as HTMLElement;
+        const fileID = fileRef?.dataset.id;
+        if (fileID && container.contains(fileRef)) {
+            event.preventDefault();
+            event.stopPropagation();
+            openLink(app, fileID, event, event.ctrlKey || event.metaKey);
+            return;
+        }
+        const tag = target.closest('[data-type~="tag"]') as HTMLElement;
+        if (tag && container.contains(tag)) {
+            event.preventDefault();
+            event.stopPropagation();
+            /// #if !MOBILE
+            openGlobalSearch(app, `#${tag.textContent}#`, true, {method: 0});
+            /// #else
+            popSearch(app, {
+                hasReplace: false,
+                method: 0,
+                hPath: "",
+                idPath: [],
+                k: `#${tag.textContent}#`,
+                r: "",
+                page: 1,
+            });
+            /// #endif
+            return;
+        }
+        const link = target.closest('[data-type~="a"][data-href], a[href]') as HTMLElement;
+        if (!link || !container.contains(link)) {
+            return;
+        }
+        const href = link.getAttribute("data-href") || link.getAttribute("href") || "";
+        if (href) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!processSiYuanUri(app, href)) {
+                openLink(app, href, event, event.ctrlKey || event.metaKey);
+            }
+        }
     });
 };

@@ -4,6 +4,7 @@ import {App} from "../../../index";
 import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult, IToolEffects} from "./agentSSE";
 import {genUUID} from "../../../util/genID";
 import {mountComposer} from "./AgentComposer";
+import {disabledWYSIWYG} from "../../../protyle/util/onGet";
 import {getAllEditor} from "../../getAll";
 import "./frontendActions";
 import {listActions, lookupAction} from "./frontendActions";
@@ -37,8 +38,10 @@ const maxVisibleBlockIDs = 50;
 
 type EntryBase = { id?: string };
 
+type UserEntry = EntryBase & { type: "user"; content: string; blockHTML?: string; timestamp?: number };
+
 type SessionEntry =
-    | (EntryBase & { type: "user"; content: string; timestamp?: number })
+    | UserEntry
     | (EntryBase & {
     type: "thinking";
     steps: Array<{
@@ -561,12 +564,7 @@ export class AgentChat extends Model {
 
     private rebuildNavMarkers() {
         this.navRail.innerHTML = "";
-        const userEntries = this.entries.filter((e): e is {
-            id?: string;
-            type: "user";
-            content: string;
-            timestamp?: number
-        } => e.type === "user");
+        const userEntries = this.entries.filter((entry): entry is UserEntry => entry.type === "user");
         if (userEntries.length === 0) {
             return;
         }
@@ -1260,9 +1258,8 @@ export class AgentChat extends Model {
             const entryId = (entry as { id?: string }).id;
             switch (entry.type) {
                 case "user":
-                    this.appendUserMessage((entry as { content: string }).content, (entry as {
-                        timestamp?: number
-                    }).timestamp, entryId);
+                    this.appendUserMessage((entry as UserEntry).content, (entry as UserEntry).timestamp, entryId,
+                        (entry as UserEntry).blockHTML);
                     break;
                 case "thinking":
                     if (entry.steps && entry.steps.length > 0) {
@@ -1467,6 +1464,7 @@ export class AgentChat extends Model {
         }
         const sendData = this.composer.getSendData();
         const text = sendData.text;
+        const blockHTML = sendData.blockHTML;
         const refs = sendData.references;
         const editorContext = this.captureEditorContext();
         const pluginActions = listActions()
@@ -1485,11 +1483,11 @@ export class AgentChat extends Model {
         this.composer.clear();
 
         const userEntryId = SessionStore.newSessionId();
-        this.entries.push({id: userEntryId, type: "user", content: text, timestamp: Date.now()});
+        this.entries.push({id: userEntryId, type: "user", content: text, blockHTML, timestamp: Date.now()});
         if (this.entries.length === 1) {
             this.messagesContainer.innerHTML = "";
         }
-        this.appendUserMessage(text, Date.now(), userEntryId);
+        this.appendUserMessage(text, Date.now(), userEntryId, blockHTML);
         this.rebuildNavMarkers();
         this.tryGenerateTitle();
         if (this.composer) {
@@ -1904,21 +1902,26 @@ export class AgentChat extends Model {
         this.flushThinkingStep();
     }
 
-    private appendUserMessage(text: string, timestamp?: number, entryId?: string) {
+    private appendUserMessage(text: string, timestamp?: number, entryId?: string, blockHTML?: string) {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--user";
         if (entryId) {
             el.setAttribute("data-message-id", entryId);
         }
-        let html = '<div class="agent-chat__body b3-typography">' + escapeHtml(text) + "</div>";
-        html += '<div class="agent-chat__msg-actions">';
+        const bodyElement = document.createElement("div");
+        bodyElement.className = "agent-chat__body protyle-wysiwyg";
+        bodyElement.setAttribute("contenteditable", "false");
+        bodyElement.setAttribute("data-readonly", "true");
+        bodyElement.innerHTML = blockHTML || this.lute.Md2BlockDOM(text);
+        el.appendChild(bodyElement);
+        let actionsHTML = '<div class="agent-chat__msg-actions">';
         if (timestamp) {
-            html += '<span class="agent-chat__msg-meta agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
+            actionsHTML += '<span class="agent-chat__msg-meta agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
         }
-        html += '<span class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.copy + '"><svg><use xlink:href="#iconCopy"></use></svg></span>' +
+        actionsHTML += '<span class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.copy + '"><svg><use xlink:href="#iconCopy"></use></svg></span>' +
             "</div>";
-        el.innerHTML = html;
-        el.querySelector(".block__icon")?.addEventListener("click", (e) => {
+        el.insertAdjacentHTML("beforeend", actionsHTML);
+        el.querySelector(".agent-chat__msg-actions .block__icon")?.addEventListener("click", (e) => {
             e.stopPropagation();
             navigator.clipboard.writeText(text).then(() => {
                 showMessage(window.siyuan.languages.copied, 2000);
@@ -1927,6 +1930,11 @@ export class AgentChat extends Model {
             });
         });
         this.messagesContainer.appendChild(el);
+        postRender(el, this.app);
+        this.composer?.renderBlockHTML(bodyElement, () => {
+            disabledWYSIWYG(bodyElement);
+        });
+        disabledWYSIWYG(bodyElement);
         this.scrollToBottom(true);
     }
 
@@ -2520,7 +2528,7 @@ export class AgentChat extends Model {
         }
         this.hasTitled = true;
         const requestSessionID = this.sessionId;
-        const userEntry = this.entries.find((e): e is { type: "user"; content: string } => e.type === "user");
+        const userEntry = this.entries.find((entry): entry is UserEntry => entry.type === "user");
         const userMsg = userEntry?.content?.slice(0, 500) || "";
         fetch("/api/ai/agent/title", {
             method: "POST",

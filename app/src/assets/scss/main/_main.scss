@@ -289,8 +289,24 @@ html[data-frontend="browser-desktop"] {
   }
 
   &__item--icon-expand {
+    > .b3-list-item__toggle {
+      position: relative;
+      z-index: 1;
+    }
+
     > .b3-list-item__icon {
       position: relative;
+      z-index: 0;
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: -3px 0;
+        left: calc(-1 * var(--file-action-offset));
+        border-radius: var(--b3-border-radius);
+        pointer-events: none;
+        z-index: -1;
+      }
 
       &::after {
         content: "";
@@ -304,14 +320,9 @@ html[data-frontend="browser-desktop"] {
       background-color: transparent;
     }
 
-    &:has(> .b3-list-item__toggle:hover, > .b3-list-item__icon:hover)::before {
-      content: "";
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: var(--file-action-width);
+    > .b3-list-item__toggle:hover ~ .b3-list-item__icon::before,
+    > .b3-list-item__icon:hover::before {
       background-color: var(--b3-list-icon-hover);
-      border-radius: var(--b3-border-radius);
-      pointer-events: none;
     }
   }
 
@@ -335,6 +346,10 @@ html[data-frontend="browser-desktop"] {
       }
     }
   }
+}
+
+.body--windows .sy__file .b3-list-item__icon {
+  font-size: 16px;
 }
 
 .counter {

@@ -34,6 +34,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -76,6 +77,22 @@ func RemoveTemplate(p string) (err error) {
 	return
 }
 
+// getTemplateReadmePaths 返回模板包 README 的相对包根路径集合：恒含 README.md，并合并 template.json 的 readme 字段（大小写敏感）。
+func getTemplateReadmePaths(templateDir string) map[string]struct{} {
+	paths := map[string]struct{}{"README.md": {}}
+	pkg, err := bazaar.ParsePackageJSON(filepath.Join(templateDir, "template.json"))
+	if err != nil {
+		return paths
+	}
+	for _, v := range pkg.Readme {
+		v = strings.TrimSpace(v)
+		if "" != v {
+			paths[v] = struct{}{}
+		}
+	}
+	return paths
+}
+
 func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 	ret = []*TemplateSearchResult{}
 
@@ -108,6 +125,7 @@ func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 
 		if group.IsDir() {
 			templateDir := filepath.Join(templates, group.Name())
+			readmePaths := getTemplateReadmePaths(templateDir)
 			filelock.Walk(templateDir, func(path string, d fs.DirEntry, err error) error {
 				name := strings.ToLower(d.Name())
 				if strings.HasPrefix(name, ".") {
@@ -117,7 +135,14 @@ func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 					return nil
 				}
 
-				if !strings.HasSuffix(name, ".md") || strings.HasPrefix(name, "readme") {
+				if !strings.HasSuffix(name, ".md") {
+					return nil
+				}
+				rel, relErr := filepath.Rel(templateDir, path)
+				if relErr != nil {
+					return nil
+				}
+				if _, skip := readmePaths[filepath.ToSlash(rel)]; skip {
 					return nil
 				}
 
@@ -146,7 +171,7 @@ func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 			})
 		} else {
 			name := strings.ToLower(group.Name())
-			if strings.HasPrefix(name, ".") || !strings.HasSuffix(name, ".md") || "readme.md" == name {
+			if strings.HasPrefix(name, ".") || !strings.HasSuffix(name, ".md") || "README.md" == group.Name() {
 				continue
 			}
 

@@ -2365,6 +2365,13 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 			logging.LogErrorf("write export notebook conf failed: %s", writeErr)
 			return
 		}
+		sourceBoxDocMetaPath := boxDocMetaPath(boxID)
+		if filelock.IsExist(sourceBoxDocMetaPath) {
+			if copyErr := filelock.Copy(sourceBoxDocMetaPath, filepath.Join(confDir, boxDocMetaName)); copyErr != nil {
+				logging.LogErrorf("copy export notebook document metadata failed: %s", copyErr)
+				return
+			}
+		}
 	}
 
 	trees := map[string]*parse.Tree{}

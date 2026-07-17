@@ -188,6 +188,27 @@ func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID 
 			return
 		}
 	}
+	var importedBoxDocID string
+	importedBoxDocPath := filepath.Join(unzipRootPath, ".siyuan", boxDocMetaName)
+	if filelock.IsExist(importedBoxDocPath) {
+		metaData, readErr := filelock.ReadFile(importedBoxDocPath)
+		if readErr == nil {
+			meta := &boxDocMeta{}
+			if unmarshalErr := gulu.JSON.UnmarshalJSON(metaData, meta); unmarshalErr != nil {
+				logging.LogWarnf("parse imported notebook document metadata failed: %s", unmarshalErr)
+			} else if meta.Spec != boxDocMetaSpec || !ast.IsNodeIDPattern(meta.BoxDocID) {
+				logging.LogWarnf("invalid imported notebook document metadata [spec=%d, id=%s]", meta.Spec, meta.BoxDocID)
+			} else {
+				importedBoxDocID = meta.BoxDocID
+			}
+		} else {
+			logging.LogWarnf("read imported notebook document metadata failed: %s", readErr)
+		}
+		if removeErr := filelock.Remove(importedBoxDocPath); removeErr != nil {
+			err = removeErr
+			return
+		}
+	}
 	if createNotebook {
 		if importedBoxConf != nil && importedBoxConf.Name != "" {
 			name = importedBoxConf.Name
@@ -231,6 +252,7 @@ func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID 
 	luteEngine := util.NewLute()
 	blockIDs := map[string]string{}
 	trees := map[string]*parse.Tree{}
+	importedBoxDoc := false
 
 	// 重新生成块 ID
 	for i, syPath := range syPaths {
@@ -246,6 +268,7 @@ func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID 
 			err = parseErr
 			return
 		}
+		oldRootID := tree.Root.ID
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || "" == n.ID {
 				return ast.WalkContinue
@@ -254,6 +277,9 @@ func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID 
 			// 新 ID 保留时间部分，仅修改随机值，避免时间变化导致更新时间早于创建时间
 			// Keep original creation time when importing .sy.zip https://github.com/siyuan-note/siyuan/issues/9923
 			newNodeID := util.TimeFromID(n.ID) + "-" + util.RandString(7)
+			if createNotebook && oldRootID == importedBoxDocID && n.ID == importedBoxDocID {
+				newNodeID = deterministicBoxDocID(boxID)
+			}
 			blockIDs[n.ID] = newNodeID
 			n.ID = newNodeID
 			n.SetIALAttr("id", newNodeID)
@@ -268,11 +294,20 @@ func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID 
 		})
 		tree.ID = tree.Root.ID
 		tree.Path = filepath.ToSlash(strings.TrimPrefix(syPath, unzipRootPath))
-		if "" != tree.Root.IALAttr(BoxDocAttr) {
+		if createNotebook && oldRootID == importedBoxDocID {
+			importedBoxDoc = true
+			tree.Root.SetIALAttr(BoxDocAttr, boxID)
+			tree.Root.SetIALAttr(DocHiddenAttr, "true")
+		} else if "" != tree.Root.IALAttr(BoxDocAttr) {
 			removeBoxDocAttrs(tree)
 		}
 		trees[tree.ID] = tree
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d", i+1, len(syPaths))))
+	}
+	if importedBoxDoc {
+		if err = writeBoxDocID(boxID, deterministicBoxDocID(boxID)); err != nil {
+			return
+		}
 	}
 
 	// 引用和嵌入指向重新生成的块 ID

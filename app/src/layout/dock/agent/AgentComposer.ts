@@ -168,12 +168,14 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     };
     updatePlaceholder();
 
-    wysiwyg.element.addEventListener("input", () => {
+    // Protyle 的粘贴、块删除和程序化插入会直接修改 DOM，不一定派发 input，需以实际 DOM 变化为准刷新状态。
+    const contentObserver = new MutationObserver(() => {
         updatePlaceholder();
         if (onChange) {
             onChange();
         }
     });
+    contentObserver.observe(wysiwyg.element, {childList: true, characterData: true, subtree: true});
 
     // capture 阶段拦截 hint 选择、Enter 发送、历史翻页；undo/redo 交给 protyle 的 keydown（调 LocalUndo）。
     wysiwyg.element.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -234,7 +236,10 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
     return {
         focus: () => protyle.focus(),
-        destroy: () => protyle.destroy(),
+        destroy: () => {
+            contentObserver.disconnect();
+            protyle.destroy();
+        },
         getSendData: () => {
             const references: { id: string; title: string }[] = [];
             wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach((ref) => {

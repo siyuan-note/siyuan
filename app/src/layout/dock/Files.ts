@@ -209,6 +209,21 @@ export class Files extends Model {
                         if ((isFile || isBoxDoc) && window.siyuan.config.fileTree.docIconClickExpand) {
                             if (isBoxDoc || Number(liElement.getAttribute("data-count")) > 0) {
                                 this.getLeaf(liElement, notebookId);
+                            } else {
+                                needFocus = false;
+                                if (!liElement.getAttribute("data-opening")) {
+                                    this.lastSelectedElement = liElement;
+                                    this.setCurrent(liElement, false);
+                                    liElement.setAttribute("data-opening", "true");
+                                    openFileById({
+                                        app: options.app,
+                                        id: liElement.getAttribute("data-node-id"),
+                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        afterOpen() {
+                                            liElement.removeAttribute("data-opening");
+                                        }
+                                    });
+                                }
                             }
                             break;
                         }
@@ -1482,8 +1497,9 @@ data-type="navigation-root" data-path="/" data-node-id="${window.siyuan.config.f
         const paddingLeft = (item.path.split("/").length - 1) * 18;
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
         const iconExpands = window.siyuan.config.fileTree.docIconClickExpand;
-        const iconHasAction = !iconExpands || item.subFileCount > 0;
-        const iconAriaLabel = iconExpands ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.changeIcon;
+        const iconAriaLabel = iconExpands ?
+            (item.subFileCount > 0 ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) :
+            window.siyuan.languages.changeIcon;
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px" 
@@ -1491,7 +1507,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon${iconHasAction ? " b3-tooltips" : ""} b3-tooltips__n popover__block${editingPublishAccess ? " fn__none" : ""}" data-id="${item.id}"${iconHasAction ? ` aria-label="${iconAriaLabel}"` : ' aria-disabled="true"'}>${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block${editingPublishAccess ? " fn__none" : ""}" data-id="${item.id}" aria-label="${iconAriaLabel}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE"
 aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>

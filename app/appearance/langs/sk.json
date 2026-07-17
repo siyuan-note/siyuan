@@ -20,7 +20,7 @@
 	"obsidianImportFailed": "Import Obsidian Vault zlyhal",
 	"openDocument": "Otvoriť dokument",
 	"docIconClickExpand": "Kliknutím na ikonu dokumentu rozbaliť alebo zbaliť podradené dokumenty",
-	"docIconClickExpandTip": "Ak je možnosť zapnutá, kliknutie na ikonu dokumentu rozbalí alebo zbalí podradené dokumenty a ak žiadne nie sú, nevykoná sa nič; ak je vypnutá, kliknutie na ikonu dokumentu zmení ikonu",
+	"docIconClickExpandTip": "Ak je možnosť zapnutá, kliknutie na ikonu dokumentu rozbalí alebo zbalí podradené dokumenty a ak žiadne nie sú, otvorí dokument; ak je vypnutá, kliknutie na ikonu dokumentu zmení ikonu",
 	"parentDocClickExpand": "Kliknutím na nadpis nadradeného dokumentu rozbaliť alebo zbaliť podradené dokumenty",
 	"parentDocClickExpandTip": "Ak je možnosť zapnutá, kliknutie na nadpis nadradeného dokumentu rozbalí alebo zbalí podradené dokumenty a nadradený dokument možno otvoriť pomocou položky „Otvoriť dokument“ v kontextovej ponuke; ak neexistujú podradené dokumenty, kliknutie dokument naďalej otvorí priamo",
 	"mcpStatusAuthorizing": "Prebieha autorizácia",

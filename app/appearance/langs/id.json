@@ -20,7 +20,7 @@
 	"obsidianImportFailed": "Impor Obsidian Vault gagal",
 	"openDocument": "Buka dokumen",
 	"docIconClickExpand": "Klik ikon dokumen untuk memperluas atau menciutkan dokumen anak",
-	"docIconClickExpandTip": "Jika diaktifkan, mengeklik ikon dokumen akan memperluas atau menciutkan dokumen anak dan tidak melakukan apa pun jika tidak ada dokumen anak; jika dinonaktifkan, mengeklik ikon dokumen akan mengubah ikon",
+	"docIconClickExpandTip": "Jika diaktifkan, mengeklik ikon dokumen akan memperluas atau menciutkan dokumen anak dan membuka dokumen jika tidak ada dokumen anak; jika dinonaktifkan, mengeklik ikon dokumen akan mengubah ikon",
 	"parentDocClickExpand": "Klik judul dokumen induk untuk memperluas atau menciutkan dokumen anak",
 	"parentDocClickExpandTip": "Jika diaktifkan, mengeklik judul dokumen induk akan memperluas atau menciutkan dokumen anak, dan dokumen induk dapat dibuka melalui “Buka dokumen” di menu konteks; jika tidak ada dokumen anak, mengeklik tetap akan membuka dokumen secara langsung",
 	"mcpStatusAuthorizing": "Mengotorisasi",

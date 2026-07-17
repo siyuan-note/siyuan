@@ -20,7 +20,7 @@
 	"obsidianImportFailed": "Import des Obsidian Vault fehlgeschlagen",
 	"openDocument": "Dokument öffnen",
 	"docIconClickExpand": "Dokumentsymbol zum Ein- oder Ausklappen untergeordneter Dokumente anklicken",
-	"docIconClickExpandTip": "Wenn aktiviert, werden untergeordnete Dokumente durch Anklicken des Dokumentsymbols ein- oder ausgeklappt; ohne untergeordnete Dokumente geschieht nichts. Wenn deaktiviert, wird durch Anklicken des Dokumentsymbols das Symbol geändert",
+	"docIconClickExpandTip": "Wenn aktiviert, werden untergeordnete Dokumente durch Anklicken des Dokumentsymbols ein- oder ausgeklappt; ohne untergeordnete Dokumente wird das Dokument geöffnet. Wenn deaktiviert, wird durch Anklicken des Dokumentsymbols das Symbol geändert",
 	"parentDocClickExpand": "Titel des übergeordneten Dokuments zum Ein- oder Ausklappen untergeordneter Dokumente anklicken",
 	"parentDocClickExpandTip": "Wenn aktiviert, werden untergeordnete Dokumente durch Anklicken des Titels des übergeordneten Dokuments ein- oder ausgeklappt; das übergeordnete Dokument kann über „Dokument öffnen“ im Kontextmenü geöffnet werden. Ohne untergeordnete Dokumente wird das Dokument weiterhin direkt geöffnet",
 	"mcpStatusAuthorizing": "Autorisierung läuft",

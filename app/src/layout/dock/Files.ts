@@ -936,7 +936,7 @@ export class Files extends Model {
         const liElement = this.element.querySelector(`li[data-type="navigation-file"][data-node-id="${data.data.rootID}"]`);
         if (liElement) {
             liElement.setAttribute("data-count", data.data.subFileCount);
-            liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeLessThans));
+            liElement.querySelector(".b3-list-item__text.ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeLessThans));
             if (data.data.subFileCount === 0) {
                 liElement.querySelector(".b3-list-item__toggle")?.classList.add("fn__hidden");
             } else {
@@ -953,19 +953,9 @@ export class Files extends Model {
         }
         const expand = window.siyuan.config.fileTree.docIconClickExpand;
         const hasChildren = Number(liElement.getAttribute("data-count")) > 0;
-        iconElement.classList.toggle("b3-tooltips", !expand || hasChildren);
-        if (expand) {
-            if (hasChildren) {
-                iconElement.setAttribute("aria-label", window.siyuan.languages.docIconClickExpand);
-                iconElement.removeAttribute("aria-disabled");
-            } else {
-                iconElement.removeAttribute("aria-label");
-                iconElement.setAttribute("aria-disabled", "true");
-            }
-        } else {
-            iconElement.setAttribute("aria-label", window.siyuan.languages.changeIcon);
-            iconElement.removeAttribute("aria-disabled");
-        }
+        iconElement.setAttribute("aria-label", expand ?
+            (hasChildren ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) :
+            window.siyuan.languages.changeIcon);
     }
 
     public updateDocIconAction() {
@@ -1013,7 +1003,10 @@ export class Files extends Model {
         const iconContent = (item.encrypted && item.closed)
             ? "🔒️"
             : unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note);
-        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? " fn__none" : ""}" aria-label="${window.siyuan.languages.changeIcon}">${iconContent}</span>`;
+        const iconExpands = !item.closed && window.siyuan.config.fileTree.boxDocEnabled && item.boxDocID &&
+            window.siyuan.config.fileTree.docIconClickExpand;
+        const iconAriaLabel = iconExpands ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.changeIcon;
+        const emojiHTML = `<span class="b3-list-item__icon ariaLabel${editingPublishAccess ? " fn__none" : ""}" data-position="parentE" aria-label="${iconAriaLabel}">${iconContent}</span>`;
         const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action"${item.encrypted ? ' data-encrypted="true"' : ""}>
@@ -1507,7 +1500,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block${editingPublishAccess ? " fn__none" : ""}" data-id="${item.id}" aria-label="${iconAriaLabel}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__icon ariaLabel popover__block${editingPublishAccess ? " fn__none" : ""}" data-position="parentE" data-id="${item.id}" aria-label="${iconAriaLabel}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE"
 aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>

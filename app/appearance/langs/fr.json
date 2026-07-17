@@ -20,7 +20,7 @@
 	"obsidianImportFailed": "Échec de l’importation du coffre Obsidian",
 	"openDocument": "Ouvrir le document",
 	"docIconClickExpand": "Cliquer sur l’icône du document pour développer ou réduire les documents enfants",
-	"docIconClickExpandTip": "Lorsque cette option est activée, cliquer sur l’icône d’un document développe ou réduit ses documents enfants et ne produit aucun effet s’il n’en existe pas ; lorsqu’elle est désactivée, cliquer sur l’icône permet de la modifier",
+	"docIconClickExpandTip": "Lorsque cette option est activée, cliquer sur l’icône d’un document développe ou réduit ses documents enfants et ouvre le document s’il n’en existe pas ; lorsqu’elle est désactivée, cliquer sur l’icône permet de la modifier",
 	"parentDocClickExpand": "Cliquer sur le titre du document parent pour développer ou réduire les documents enfants",
 	"parentDocClickExpandTip": "Lorsque cette option est activée, cliquer sur le titre d’un document parent développe ou réduit ses documents enfants ; le document parent peut être ouvert avec « Ouvrir le document » dans le menu contextuel. En l’absence de documents enfants, le document s’ouvre toujours directement",
 	"mcpStatusAuthorizing": "Autorisation en cours",

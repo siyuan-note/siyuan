@@ -16,7 +16,7 @@ import {
 } from "./util/pathName";
 import {registerServiceWorker} from "./util/serviceWorker";
 import {openFileById} from "./editor/util";
-import {ensureOnboarding} from "./onboarding";
+import {activateOnboarding, ensureOnboarding} from "./onboarding";
 import {
     bootSync,
     downloadProgress,
@@ -184,6 +184,13 @@ export class App {
                                     }
                                 }
                             });
+                            if (window.siyuan.config.onboarding?.newUser && !window.siyuan.config.onboarding.dismissed &&
+                                data.data.ids.includes(window.siyuan.config.onboarding.documentID)) {
+                                void activateOnboarding(this, window.siyuan.config.onboarding);
+                            }
+                            break;
+                        case "onboarding":
+                            void activateOnboarding(this, data.data);
                             break;
                         case "statusbar":
                             progressStatus(data);

@@ -241,6 +241,9 @@ func Unmount(boxID string) {
 		"box": boxID,
 	}
 	util.PushEvent(evt)
+	if cmdName == "removeBox" {
+		TriggerOnboardingIfEmpty()
+	}
 }
 
 // clearDEKIfUnlockedEncryptedBox 清除已解锁但未挂载的加密笔记本的 DEK。

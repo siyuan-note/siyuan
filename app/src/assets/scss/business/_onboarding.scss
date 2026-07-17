@@ -1,3 +1,7 @@
+.onboarding-container {
+  position: relative;
+}
+
 .onboarding {
   position: fixed;
   right: 24px;
@@ -10,9 +14,18 @@
   border-radius: var(--b3-border-radius-b);
   background-color: var(--b3-theme-background);
   box-shadow: var(--b3-dialog-shadow);
+  transition: transform .2s cubic-bezier(0, 0, .2, 1), opacity .15s linear, visibility 0s;
 
   &--editor {
     position: absolute;
+  }
+
+  &--keyboard {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(100%);
+    pointer-events: none;
+    transition: transform .2s cubic-bezier(.4, 0, 1, 1), opacity .15s linear, visibility 0s .2s;
   }
 
   &__close {
@@ -59,15 +72,6 @@
     padding: 20px max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
     border-width: 1px 0 0;
     border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
-    transition: transform .2s cubic-bezier(0, 0, .2, 1), opacity .15s linear, visibility 0s;
-
-    &--keyboard {
-      visibility: hidden;
-      opacity: 0;
-      transform: translateY(100%);
-      pointer-events: none;
-      transition: transform .2s cubic-bezier(.4, 0, 1, 1), opacity .15s linear, visibility 0s .2s;
-    }
   }
 }
 

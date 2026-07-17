@@ -166,6 +166,7 @@ func removeNotebook(c *gin.Context) {
 		"box": notebook,
 	}
 	util.PushEvent(evt)
+	model.TriggerOnboardingIfEmpty()
 }
 
 func createNotebook(c *gin.Context) {

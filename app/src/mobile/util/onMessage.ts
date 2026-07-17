@@ -13,6 +13,7 @@ import {renderSnippet} from "../../config/util/snippets";
 import {redirectToCheckAuth} from "../../util/pathName";
 import {reloadSync} from "../../util/reloadSync";
 import {setEmpty} from "./setEmpty";
+import {activateOnboarding} from "../../onboarding";
 import {clearMobileBackForward} from "./MobileBackFoward";
 
 let statusTimeout: number;
@@ -87,6 +88,15 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 }
                 break;
             }
+            case "onboarding":
+                void activateOnboarding(app, data.data);
+                break;
+            case "removeDoc":
+                if (window.siyuan.config.onboarding?.newUser && !window.siyuan.config.onboarding.dismissed &&
+                    data.data.ids.includes(window.siyuan.config.onboarding.documentID)) {
+                    void activateOnboarding(app, window.siyuan.config.onboarding);
+                }
+                break;
             case "setLocalStorageVal":
                 window.siyuan.storage[data.data.key] = data.data.val;
                 break;

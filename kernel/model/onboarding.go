@@ -23,6 +23,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -41,6 +42,44 @@ func prepareOnboardingForEmptyWorkspace(onboarding *conf.Onboarding, readOnly bo
 	return true
 }
 
+func reconcileOnboarding(onboarding *conf.Onboarding, boxes []*Box, documentExists bool) bool {
+	if !onboarding.NewUser || onboarding.Dismissed {
+		return false
+	}
+
+	notebookExists := false
+	for _, box := range boxes {
+		if box.ID == onboarding.NotebookID {
+			notebookExists = true
+			break
+		}
+	}
+	if onboarding.NotebookID != "" && !notebookExists {
+		if len(boxes) == 0 {
+			return prepareOnboardingForEmptyWorkspace(onboarding, false, 0)
+		}
+		onboarding.State = conf.OnboardingCompleted
+		onboarding.NewUser = false
+		onboarding.NotebookID = ""
+		onboarding.DocumentID = ""
+		return true
+	}
+	if onboarding.State == conf.OnboardingCompleted && (!notebookExists || onboarding.DocumentID == "" || !documentExists) {
+		if !notebookExists {
+			if len(boxes) == 0 {
+				return prepareOnboardingForEmptyWorkspace(onboarding, false, 0)
+			}
+			onboarding.NewUser = false
+			onboarding.NotebookID = ""
+		} else {
+			onboarding.State = conf.OnboardingNotebookCreated
+		}
+		onboarding.DocumentID = ""
+		return true
+	}
+	return false
+}
+
 func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) {
 	onboardingLock.Lock()
 	defer onboardingLock.Unlock()
@@ -50,6 +89,19 @@ func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) 
 		Conf.Save()
 	}
 	onboarding := Conf.Onboarding
+	if !onboarding.NewUser || onboarding.Dismissed {
+		return cloneOnboarding(onboarding), false, nil
+	}
+
+	boxes, listErr := ListNotebooks()
+	if listErr != nil {
+		return cloneOnboarding(onboarding), false, listErr
+	}
+	documentExists := onboarding.NotebookID != "" && onboarding.DocumentID != "" && filelock.IsExist(filepath.Join(
+		util.DataDir, onboarding.NotebookID, onboarding.DocumentID+".sy"))
+	if reconcileOnboarding(onboarding, boxes, documentExists) {
+		Conf.Save()
+	}
 	if !onboarding.NewUser || onboarding.State == conf.OnboardingCompleted {
 		return cloneOnboarding(onboarding), false, nil
 	}
@@ -58,9 +110,7 @@ func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) 
 	}
 
 	if onboarding.NotebookID == "" {
-		if boxes, listErr := ListNotebooks(); listErr != nil {
-			return cloneOnboarding(onboarding), false, listErr
-		} else if len(boxes) > 0 {
+		if len(boxes) > 0 {
 			if len(boxes) == 1 && boxes[0].Name == Conf.Language(342) {
 				onboarding.NotebookID = boxes[0].ID
 				onboarding.State = conf.OnboardingNotebookCreated
@@ -102,6 +152,29 @@ func EnsureOnboarding() (ret *conf.Onboarding, notebookCreated bool, err error) 
 	onboarding.State = conf.OnboardingCompleted
 	Conf.Save()
 	return cloneOnboarding(onboarding), notebookCreated, nil
+}
+
+// TriggerOnboardingIfEmpty 在最后一个笔记本被删除后重置状态，并通知已连接的界面立即重新进入引导。
+func TriggerOnboardingIfEmpty() {
+	onboardingLock.Lock()
+	defer onboardingLock.Unlock()
+
+	if nil == Conf.Onboarding {
+		Conf.Onboarding = &conf.Onboarding{State: conf.OnboardingCompleted}
+	}
+	boxes, err := ListNotebooks()
+	if err != nil {
+		logging.LogErrorf("list notebooks before triggering onboarding failed: %s", err)
+		return
+	}
+	publishEnabled := Conf.Publish != nil && Conf.Publish.Enable
+	if !prepareOnboardingForEmptyWorkspace(Conf.Onboarding, util.ReadOnly || publishEnabled, len(boxes)) {
+		return
+	}
+	Conf.Save()
+	evt := util.NewCmdResult("onboarding", 0, util.PushModeBroadcast)
+	evt.Data = cloneOnboarding(Conf.Onboarding)
+	util.PushEvent(evt)
 }
 
 func DismissOnboarding() *conf.Onboarding {

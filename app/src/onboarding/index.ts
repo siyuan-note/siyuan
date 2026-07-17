@@ -5,6 +5,7 @@ import {mountHelp} from "../util/mount";
 import {syncGuide} from "../sync/syncGuide";
 import {openSetting} from "../config";
 import {isPaidUser} from "../util/needSubscribe";
+import {setNoteBook} from "../util/pathName";
 import type {App} from "../index";
 /// #if MOBILE
 import {openMobileFileById} from "../mobile/editor";
@@ -14,7 +15,7 @@ import {openFileById} from "../editor/util";
 
 export const ensureOnboarding = async () => {
     const onboarding = window.siyuan.config.onboarding;
-    if (!onboarding?.newUser || onboarding.state === "completed" || window.siyuan.config.readonly || window.siyuan.isPublish) {
+    if (!onboarding?.newUser || onboarding.dismissed || window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
     try {
@@ -51,7 +52,9 @@ const dismissOnboarding = () => {
         window.removeEventListener("siyuan-mobile-keyboard-change", mobileKeyboardHandler);
         mobileKeyboardHandler = undefined;
     }
-    document.querySelector(".onboarding")?.remove();
+    const onboardingElement = document.querySelector(".onboarding");
+    onboardingElement?.parentElement?.classList.remove("onboarding-container");
+    onboardingElement?.remove();
     window.siyuan.config.onboarding.dismissed = true;
     fetchPost("/api/system/dismissOnboarding", {});
 };
@@ -136,10 +139,10 @@ const renderOnboarding = (app: App) => {
     });
     let containerElement = document.body;
     /// #if !MOBILE
-    const editorContainerElement = (document.querySelector(".layout__center .layout__wnd--active .layout-tab-container") ||
-        document.querySelector(".layout__center .layout-tab-container")) as HTMLElement;
+    const editorContainerElement = document.querySelector(".layout__center") as HTMLElement;
     if (editorContainerElement) {
         containerElement = editorContainerElement;
+        containerElement.classList.add("onboarding-container");
         element.classList.add("onboarding--editor");
     }
     /// #endif
@@ -178,3 +181,15 @@ export const openMobileOnboarding = (app: App) => {
     return true;
 };
 /// #endif
+
+export const activateOnboarding = async (app: App, onboarding: Config.IConf["onboarding"]) => {
+    window.siyuan.config.onboarding = onboarding;
+    await ensureOnboarding();
+    setNoteBook(() => {
+        /// #if MOBILE
+        openMobileOnboarding(app);
+        /// #else
+        openDesktopOnboarding(app);
+        /// #endif
+    });
+};

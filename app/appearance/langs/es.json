@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Los mensajes posteriores incluyen llamadas a herramientas ya ejecutadas. Volver a enviar eliminará la conversación posterior, pero no deshará las operaciones que ya se hayan ejecutado. ¿Continuar?",
 	"boxDocEnabled": "Habilitar documentos de nivel superior del cuaderno",
 	"boxDocEnabledTip": "Al habilitarlo, el propio cuaderno también se puede utilizar para registrar contenido",
 	"insertImage": "Insertar imagen",

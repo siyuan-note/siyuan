@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Les messages suivants comprennent des appels d’outils déjà exécutés. Le renvoi supprimera la suite de la conversation, mais n’annulera pas les opérations déjà exécutées. Continuer ?",
 	"boxDocEnabled": "Activer les documents de carnet de niveau supérieur",
 	"boxDocEnabledTip": "Lorsque cette option est activée, le carnet lui-même peut également servir à consigner du contenu",
 	"insertImage": "Insérer une image",

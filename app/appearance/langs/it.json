@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "I messaggi successivi includono chiamate a strumenti già eseguite. Il nuovo invio eliminerà la conversazione successiva, ma non annullerà le operazioni già eseguite. Continuare?",
 	"boxDocEnabled": "Abilita i documenti di primo livello del taccuino",
 	"boxDocEnabledTip": "Se abilitato, anche il taccuino stesso può essere usato per registrare contenuti",
 	"insertImage": "Inserisci immagine",

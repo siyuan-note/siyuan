@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Neskoršie správy obsahujú vykonané volania nástrojov. Opätovné odoslanie odstráni nasledujúcu konverzáciu, ale nezruší už vykonané operácie. Pokračovať?",
 	"boxDocEnabled": "Povoliť dokumenty zápisníka najvyššej úrovne",
 	"boxDocEnabledTip": "Po povolení možno na zaznamenávanie obsahu použiť aj samotný zápisník",
 	"insertImage": "Vložiť obrázok",

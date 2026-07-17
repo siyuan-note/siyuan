@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Spätere Nachrichten enthalten ausgeführte Werkzeugaufrufe. Durch erneutes Senden wird der nachfolgende Gesprächsverlauf gelöscht, bereits ausgeführte Vorgänge werden jedoch nicht rückgängig gemacht. Fortfahren?",
 	"boxDocEnabled": "Notebook-Dokumente auf oberster Ebene aktivieren",
 	"boxDocEnabledTip": "Wenn aktiviert, kann auch das Notizbuch selbst zum Erfassen von Inhalten verwendet werden",
 	"insertImage": "Bild einfügen",

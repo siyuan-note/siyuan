@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Późniejsze wiadomości zawierają wykonane wywołania narzędzi. Ponowne wysłanie usunie dalszą część rozmowy, ale nie cofnie już wykonanych operacji. Kontynuować?",
 	"boxDocEnabled": "Włącz dokumenty notatnika najwyższego poziomu",
 	"boxDocEnabledTip": "Po włączeniu sam notatnik może również służyć do zapisywania treści",
 	"insertImage": "Wstaw obraz",

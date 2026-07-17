@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Later messages include executed tool calls. Resending will delete the later conversation, but it will not undo operations that have already run. Continue?",
 	"boxDocEnabled": "Enable top-level notebook documents",
 	"boxDocEnabledTip": "When enabled, the notebook itself can also be used to record content",
 	"insertImage": "Insert image",

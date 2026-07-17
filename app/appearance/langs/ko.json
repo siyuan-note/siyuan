@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "이후 메시지에 이미 실행된 도구 호출이 포함되어 있습니다. 다시 보내면 이후 대화는 삭제되지만 이미 실행된 작업은 되돌려지지 않습니다. 계속하시겠습니까?",
 	"boxDocEnabled": "최상위 노트북 문서 활성화",
 	"boxDocEnabledTip": "활성화하면 노트북 자체에도 내용을 기록할 수 있습니다",
 	"insertImage": "이미지 삽입",

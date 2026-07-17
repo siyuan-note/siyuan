@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Pesan berikutnya berisi pemanggilan alat yang telah dijalankan. Mengirim ulang akan menghapus percakapan setelahnya, tetapi tidak akan membatalkan operasi yang sudah dijalankan. Lanjutkan?",
 	"boxDocEnabled": "Aktifkan dokumen buku catatan tingkat teratas",
 	"boxDocEnabledTip": "Jika diaktifkan, buku catatan itu sendiri juga dapat digunakan untuk mencatat konten",
 	"insertImage": "Sisipkan gambar",

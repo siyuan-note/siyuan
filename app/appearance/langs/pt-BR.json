@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "As mensagens posteriores incluem chamadas de ferramentas já executadas. Reenviar excluirá a conversa posterior, mas não desfará as operações já executadas. Continuar?",
 	"boxDocEnabled": "Habilitar documentos de nível superior do caderno",
 	"boxDocEnabledTip": "Quando ativado, o próprio caderno também pode ser usado para registrar conteúdo",
 	"insertImage": "Inserir imagem",

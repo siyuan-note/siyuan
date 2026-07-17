@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Sonraki iletilerde yürütülmüş araç çağrıları bulunuyor. Yeniden gönderme sonraki konuşmayı silecek, ancak daha önce yürütülen işlemleri geri almayacaktır. Devam edilsin mi?",
 	"boxDocEnabled": "Üst düzey not defteri belgelerini etkinleştir",
 	"boxDocEnabledTip": "Etkinleştirildiğinde not defterinin kendisi de içerik kaydetmek için kullanılabilir",
 	"insertImage": "Görsel ekle",

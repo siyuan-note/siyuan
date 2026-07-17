@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "后续消息包含已执行的工具调用。重新发送将删除后续对话，但不会撤销已经执行的操作。是否继续？",
 	"boxDocEnabled": "启用顶层笔记本文档",
 	"boxDocEnabledTip": "启用后笔记本本身也可用于记录内容",
 	"insertImage": "插入图片",

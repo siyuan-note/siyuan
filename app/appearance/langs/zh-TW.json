@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "後續訊息包含已執行的工具呼叫。重新傳送將刪除後續對話，但不會撤銷已經執行的操作。是否繼續？",
 	"boxDocEnabled": "啟用頂層筆記本文檔",
 	"boxDocEnabledTip": "啟用後筆記本本身也可用於記錄內容",
 	"insertImage": "插入圖片",

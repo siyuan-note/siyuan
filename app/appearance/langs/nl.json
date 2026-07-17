@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Latere berichten bevatten uitgevoerde toolaanroepen. Opnieuw verzenden verwijdert het latere gesprek, maar maakt reeds uitgevoerde bewerkingen niet ongedaan. Doorgaan?",
 	"boxDocEnabled": "Notebookdocumenten op het hoogste niveau inschakelen",
 	"boxDocEnabledTip": "Indien ingeschakeld kan ook het notebook zelf worden gebruikt om inhoud vast te leggen",
 	"insertImage": "Afbeelding invoegen",

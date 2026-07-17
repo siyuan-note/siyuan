@@ -359,6 +359,7 @@ type SessionEntry struct {
 	ID            string             `json:"id,omitempty"`
 	Type          string             `json:"type"` // user|thinking|assistant|confirm|snapshot|rollback
 	Content       string             `json:"content,omitempty"`
+	References    []Reference        `json:"references,omitempty"`
 	Steps         []SessionEntryStep `json:"steps,omitempty"`        // 仅 thinking
 	ToolCalls     []AgentToolCall    `json:"toolCalls,omitempty"`    // 仅 assistant
 	Duration      float64            `json:"duration,omitempty"`     // 秒（thinking/assistant 均可能带）
@@ -425,6 +426,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		default:
 		}
 
+		rawUserMessage := userMessage
 		// 变量（非敏感）在用户消息注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
 		// 在此统一解析一次，后续 checkpoint 与消息重建均使用解析后的值，保证全链路一致。
 		userMessage = kernelModel.Conf.Variables.Resolve(userMessage)
@@ -507,6 +509,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		if regenerate {
 			turn.Mode = "regenerate"
 			turn.TargetUserEntryID = userEntryID
+			turn.UserContent = rawUserMessage
+			userReferences := append([]Reference(nil), references...)
+			turn.UserReferences = &userReferences
 		}
 		select {
 		case <-ctx.Done():

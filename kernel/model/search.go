@@ -1476,6 +1476,7 @@ func buildRootIDExclusionFilter(rootIDs []string, alias ...string) (clause strin
 }
 
 func buildOrderBy(query string, method, orderBy int) string {
+	escapedQuery := strings.ReplaceAll(query, "'", "''")
 	switch orderBy {
 	case 1:
 		return "ORDER BY created ASC"
@@ -1495,15 +1496,23 @@ func buildOrderBy(query string, method, orderBy int) string {
 		if 0 != method && 1 != method {
 			return "ORDER BY sort ASC, updated DESC"
 		}
-		return "ORDER BY rank" // 默认是按相关度降序
+		clause := "ORDER BY CASE " +
+			"WHEN content = '${keyword}' AND type = 'd' THEN 10 " +
+			"WHEN content = '${keyword}' AND type = 'h' THEN 20 " +
+			"ELSE 65535 END ASC, rank"
+		return strings.ReplaceAll(clause, "${keyword}", escapedQuery) // 默认是按相关度降序
 	default:
 		clause := "ORDER BY CASE " +
 			"WHEN name = '${keyword}' THEN 10 " +
 			"WHEN alias = '${keyword}' THEN 20 " +
+			"WHEN content = '${keyword}' AND type = 'd' THEN 30 " +
+			"WHEN content LIKE '%${keyword}%' AND type = 'd' THEN 40 " +
 			"WHEN name LIKE '%${keyword}%' THEN 50 " +
 			"WHEN alias LIKE '%${keyword}%' THEN 60 " +
+			"WHEN content = '${keyword}' AND type = 'h' THEN 70 " +
+			"WHEN content LIKE '%${keyword}%' AND type = 'h' THEN 80 " +
 			"ELSE 65535 END ASC, sort ASC, updated DESC"
-		clause = strings.ReplaceAll(clause, "${keyword}", strings.ReplaceAll(query, "'", "''"))
+		clause = strings.ReplaceAll(clause, "${keyword}", escapedQuery)
 		return clause
 	}
 }

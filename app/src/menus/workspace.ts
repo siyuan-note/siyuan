@@ -535,14 +535,16 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "importData",
-                label: window.siyuan.languages.import,
-                icon: "iconDownload",
-                click: () => {
-                    openImportData();
-                }
-            }).element);
+            if (!window.siyuan.config.readonly) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "importData",
+                    label: window.siyuan.languages.import,
+                    icon: "iconDownload",
+                    click: () => {
+                        openImportData();
+                    }
+                }).element);
+            }
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({

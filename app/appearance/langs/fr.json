@@ -1,6 +1,6 @@
 {
 	"onboardingWelcome": "Bienvenue dans SiYuan",
-	"onboardingDescription": "Votre premier carnet est prêt. Vous pouvez commencer à écrire immédiatement.",
+	"onboardingDescription": "Votre premier carnet est prêt. Notez ce qui vous passe par la tête !",
 	"importExistingData": "Importer des données existantes",
 	"loginAndSync": "Se connecter et synchroniser",
 	"agentEditHistoryWarning": "Les messages suivants comprennent des appels d’outils déjà exécutés. Le renvoi supprimera la suite de la conversation, mais n’annulera pas les opérations déjà exécutées. Continuer ?",

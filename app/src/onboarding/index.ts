@@ -10,7 +10,6 @@ import type {App} from "../index";
 import {openMobileFileById} from "../mobile/editor";
 /// #else
 import {openFileById} from "../editor/util";
-import {getAllEditor} from "../layout/getAll";
 /// #endif
 
 export const ensureOnboarding = async () => {
@@ -36,22 +35,40 @@ const shouldShowOnboarding = () => {
 };
 
 let pendingLoginHandler: (() => void) | undefined;
+let pendingSyncHandler: (() => void) | undefined;
 
 const dismissOnboarding = () => {
     if (pendingLoginHandler) {
         window.removeEventListener("siyuan-login-success", pendingLoginHandler);
         pendingLoginHandler = undefined;
     }
+    if (pendingSyncHandler) {
+        window.removeEventListener("siyuan-sync-success", pendingSyncHandler);
+        pendingSyncHandler = undefined;
+    }
     document.querySelector(".onboarding")?.remove();
     window.siyuan.config.onboarding.dismissed = true;
     fetchPost("/api/system/dismissOnboarding", {});
 };
 
+const syncAndDismissOnSuccess = (app: App) => {
+    if (pendingSyncHandler) {
+        window.removeEventListener("siyuan-sync-success", pendingSyncHandler);
+    }
+    pendingSyncHandler = () => {
+        pendingSyncHandler = undefined;
+        dismissOnboarding();
+    };
+    window.addEventListener("siyuan-sync-success", pendingSyncHandler, {once: true});
+    syncGuide(app);
+};
+
 const loginAndSync = (app: App) => {
     if (window.siyuan.user) {
-        syncGuide(app);
         if (isPaidUser()) {
-            dismissOnboarding();
+            syncAndDismissOnSuccess(app);
+        } else {
+            syncGuide(app);
         }
         return;
     }
@@ -59,9 +76,9 @@ const loginAndSync = (app: App) => {
         window.removeEventListener("siyuan-login-success", pendingLoginHandler);
     }
     pendingLoginHandler = () => {
+        pendingLoginHandler = undefined;
         if (isPaidUser()) {
-            syncGuide(app);
-            dismissOnboarding();
+            syncAndDismissOnSuccess(app);
         }
     };
     window.addEventListener("siyuan-login-success", pendingLoginHandler, {once: true});
@@ -121,13 +138,11 @@ export const openDesktopOnboarding = (app: App) => {
         return;
     }
     window.setTimeout(() => {
-        if (getAllEditor().length === 0) {
-            openFileById({
-                app,
-                id: window.siyuan.config.onboarding.documentID,
-                action: [Constants.CB_GET_FOCUS],
-            });
-        }
+        openFileById({
+            app,
+            id: window.siyuan.config.onboarding.documentID,
+            action: [Constants.CB_GET_FOCUS],
+        });
         renderOnboarding(app);
     });
 };

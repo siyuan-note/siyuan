@@ -1,6 +1,6 @@
 {
 	"onboardingWelcome": "Willkommen bei SiYuan",
-	"onboardingDescription": "Ihr erstes Notizbuch ist bereit. Sie können sofort mit dem Schreiben beginnen.",
+	"onboardingDescription": "Ihr erstes Notizbuch ist bereit. Halten Sie fest, was Ihnen gerade durch den Kopf geht!",
 	"importExistingData": "Vorhandene Daten importieren",
 	"loginAndSync": "Anmelden und synchronisieren",
 	"agentEditHistoryWarning": "Spätere Nachrichten enthalten ausgeführte Werkzeugaufrufe. Durch erneutes Senden wird der nachfolgende Gesprächsverlauf gelöscht, bereits ausgeführte Vorgänge werden jedoch nicht rückgängig gemacht. Fortfahren?",

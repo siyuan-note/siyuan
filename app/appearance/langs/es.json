@@ -1,6 +1,6 @@
 {
 	"onboardingWelcome": "Te damos la bienvenida a SiYuan",
-	"onboardingDescription": "Tu primer cuaderno está listo. Puedes empezar a escribir de inmediato.",
+	"onboardingDescription": "Tu primer cuaderno ya está listo. ¡Anota lo que tienes en mente!",
 	"importExistingData": "Importar datos existentes",
 	"loginAndSync": "Iniciar sesión y sincronizar",
 	"agentEditHistoryWarning": "Los mensajes posteriores incluyen llamadas a herramientas ya ejecutadas. Volver a enviar eliminará la conversación posterior, pero no deshará las operaciones que ya se hayan ejecutado. ¿Continuar?",

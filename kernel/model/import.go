@@ -129,6 +129,10 @@ func ImportSYAuto(zipPath, boxID, toPath string) (createdBoxID string, notebook 
 	return
 }
 
+func isSYNotebookExport(hasBoxConf, hasBoxDocMeta bool) bool {
+	return hasBoxConf || hasBoxDocMeta
+}
+
 func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (createdBoxID string, err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
@@ -179,16 +183,20 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 	}
 	var importedBoxConf *conf.BoxConf
 	importedConfPath := filepath.Join(unzipRootPath, ".siyuan", "conf.json")
-	if filelock.IsExist(importedConfPath) {
+	hasImportedBoxConf := filelock.IsExist(importedConfPath)
+	var importedMetadataErr error
+	if hasImportedBoxConf {
 		confData, readErr := filelock.ReadFile(importedConfPath)
 		if readErr == nil {
 			importedBoxConf = conf.NewBoxConf()
 			if unmarshalErr := gulu.JSON.UnmarshalJSON(confData, importedBoxConf); unmarshalErr != nil {
 				logging.LogWarnf("parse imported notebook conf failed: %s", unmarshalErr)
 				importedBoxConf = nil
+				importedMetadataErr = unmarshalErr
 			}
 		} else {
 			logging.LogWarnf("read imported notebook conf failed: %s", readErr)
+			importedMetadataErr = readErr
 		}
 		if removeErr := filelock.Remove(importedConfPath); removeErr != nil {
 			err = removeErr
@@ -197,19 +205,23 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 	}
 	var importedBoxDocID string
 	importedBoxDocPath := filepath.Join(unzipRootPath, ".siyuan", boxDocMetaName)
-	if filelock.IsExist(importedBoxDocPath) {
+	hasImportedBoxDocMeta := filelock.IsExist(importedBoxDocPath)
+	if hasImportedBoxDocMeta {
 		metaData, readErr := filelock.ReadFile(importedBoxDocPath)
 		if readErr == nil {
 			meta := &boxDocMeta{}
 			if unmarshalErr := gulu.JSON.UnmarshalJSON(metaData, meta); unmarshalErr != nil {
 				logging.LogWarnf("parse imported notebook document metadata failed: %s", unmarshalErr)
+				importedMetadataErr = unmarshalErr
 			} else if meta.Spec != boxDocMetaSpec || !ast.IsNodeIDPattern(meta.BoxDocID) {
 				logging.LogWarnf("invalid imported notebook document metadata [spec=%d, id=%s]", meta.Spec, meta.BoxDocID)
+				importedMetadataErr = errors.New("invalid imported notebook document metadata")
 			} else {
 				importedBoxDocID = meta.BoxDocID
 			}
 		} else {
 			logging.LogWarnf("read imported notebook document metadata failed: %s", readErr)
+			importedMetadataErr = readErr
 		}
 		if removeErr := filelock.Remove(importedBoxDocPath); removeErr != nil {
 			err = removeErr
@@ -217,7 +229,11 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 		}
 	}
 	if autoDetect {
-		createNotebook = importedBoxConf != nil || importedBoxDocID != ""
+		if importedMetadataErr != nil {
+			err = errors.New(Conf.Language(199))
+			return
+		}
+		createNotebook = isSYNotebookExport(hasImportedBoxConf, hasImportedBoxDocMeta)
 	}
 	if !createNotebook && nil == Conf.Box(boxID) {
 		err = errors.New(Conf.Language(0))

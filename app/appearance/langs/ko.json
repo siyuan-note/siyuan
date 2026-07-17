@@ -1,6 +1,6 @@
 {
 	"onboardingWelcome": "SiYuan에 오신 것을 환영합니다",
-	"onboardingDescription": "첫 번째 노트북을 만들었습니다. 바로 기록을 시작할 수 있습니다.",
+	"onboardingDescription": "첫 번째 노트북이 준비됐어요. 지금 떠오르는 생각을 적어 보세요!",
 	"importExistingData": "기존 데이터 가져오기",
 	"loginAndSync": "로그인 및 동기화",
 	"agentEditHistoryWarning": "이후 메시지에 이미 실행된 도구 호출이 포함되어 있습니다. 다시 보내면 이후 대화는 삭제되지만 이미 실행된 작업은 되돌려지지 않습니다. 계속하시겠습니까?",

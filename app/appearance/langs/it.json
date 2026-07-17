@@ -1,6 +1,6 @@
 {
 	"onboardingWelcome": "Benvenuto in SiYuan",
-	"onboardingDescription": "Il tuo primo taccuino è pronto. Puoi iniziare subito a scrivere.",
+	"onboardingDescription": "Il tuo primo taccuino è pronto. Scrivi ciò che hai in mente!",
 	"importExistingData": "Importa dati esistenti",
 	"loginAndSync": "Accedi e sincronizza",
 	"agentEditHistoryWarning": "I messaggi successivi includono chiamate a strumenti già eseguite. Il nuovo invio eliminerà la conversazione successiva, ma non annullerà le operazioni già eseguite. Continuare?",

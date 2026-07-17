@@ -1,6 +1,6 @@
 {
 	"onboardingWelcome": "欢迎使用思源",
-	"onboardingDescription": "已经为你创建了第一个笔记本，可以直接开始记录。",
+	"onboardingDescription": "你的第一个笔记本已经准备好啦，写下此刻的想法吧！",
 	"importExistingData": "导入已有数据",
 	"loginAndSync": "登录并同步",
 	"agentEditHistoryWarning": "后续消息包含已执行的工具调用。重新发送将删除后续对话，但不会撤销已经执行的操作。是否继续？",

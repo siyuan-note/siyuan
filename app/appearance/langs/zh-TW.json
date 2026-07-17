@@ -1,6 +1,6 @@
 {
 	"onboardingWelcome": "歡迎使用思源",
-	"onboardingDescription": "已經為你建立了第一個筆記本，可以直接開始記錄。",
+	"onboardingDescription": "你的第一個筆記本已經準備好啦，寫下此刻的想法吧！",
 	"importExistingData": "匯入已有資料",
 	"loginAndSync": "登入並同步",
 	"agentEditHistoryWarning": "後續訊息包含已執行的工具呼叫。重新傳送將刪除後續對話，但不會撤銷已經執行的操作。是否繼續？",

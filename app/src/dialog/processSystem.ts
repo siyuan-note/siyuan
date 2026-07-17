@@ -410,6 +410,9 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
 };
 
 export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
+    if (data?.code === 1) {
+        window.dispatchEvent(new CustomEvent("siyuan-sync-success"));
+    }
     /// #if MOBILE
     const menuSyncUseElement = document.querySelector("#menuSyncNow use");
     const barSyncUseElement = document.querySelector("#toolbarSync use");

@@ -1,6 +1,6 @@
 {
 	"onboardingWelcome": "SiYuanへようこそ",
-	"onboardingDescription": "最初のノートブックを作成しました。すぐに記録を始められます。",
+	"onboardingDescription": "最初のノートブックができました。今のアイデアを書き留めてみましょう！",
 	"importExistingData": "既存データをインポート",
 	"loginAndSync": "ログインして同期",
 	"agentEditHistoryWarning": "後続のメッセージには実行済みのツール呼び出しが含まれています。再送信すると後続の会話は削除されますが、すでに実行された操作は元に戻りません。続行しますか？",

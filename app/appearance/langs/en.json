@@ -1,6 +1,6 @@
 {
 	"onboardingWelcome": "Welcome to SiYuan",
-	"onboardingDescription": "Your first notebook is ready. You can start writing right away.",
+	"onboardingDescription": "Your first notebook is ready. Write down what's on your mind!",
 	"importExistingData": "Import existing data",
 	"loginAndSync": "Log in and sync",
 	"agentEditHistoryWarning": "Later messages include executed tool calls. Resending will delete the later conversation, but it will not undo operations that have already run. Continue?",

@@ -160,20 +160,19 @@ func setBazaar(c *gin.Context) {
 		return
 	}
 
-	if bazaar.PetalDisabled || !bazaar.Trust {
-		// disable all kernel plugins
-		if model.OnKernelPluginsStop != nil {
-			model.OnKernelPluginsStop()
-		}
-	} else {
-		// enable all kernel plugins
-		if model.OnKernelPluginsStart != nil {
-			model.OnKernelPluginsStart()
-		}
-	}
-
+	petalsEnabled := model.IsPetalsEnabled()
 	model.Conf.Bazaar = bazaar
 	model.Conf.Save()
+	newPetalsEnabled := model.IsPetalsEnabled()
+	if petalsEnabled != newPetalsEnabled {
+		if newPetalsEnabled {
+			if model.OnKernelPluginsStart != nil {
+				model.OnKernelPluginsStart()
+			}
+		} else if model.OnKernelPluginsStop != nil {
+			model.OnKernelPluginsStop()
+		}
+	}
 
 	ret.Data = bazaar
 }

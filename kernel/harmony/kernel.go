@@ -32,6 +32,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/job"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin"
 	"github.com/siyuan-note/siyuan/kernel/server"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -71,6 +72,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 		job.StartCron()
 		go model.AutoGenerateFileHistory()
 		go cache.LoadAssets()
+		go plugin.InitManager()
 	}()
 }
 

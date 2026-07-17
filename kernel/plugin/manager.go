@@ -150,7 +150,7 @@ func (m *PluginManager) Start() {
 		return
 	}
 
-	if model.Conf.Bazaar.PetalDisabled || !model.Conf.Bazaar.Trust {
+	if !model.IsPetalsEnabled() {
 		logging.LogInfof("kernel plugins are disabled by configuration, skipping start")
 		return
 	}
@@ -229,7 +229,7 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 		}
 	}()
 
-	if model.Conf.Bazaar.PetalDisabled || !model.Conf.Bazaar.Trust {
+	if !model.IsPetalsEnabled() {
 		ok = false
 		return
 	}

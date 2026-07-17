@@ -720,6 +720,7 @@ func serveAssets(ginServer *gin.Engine) {
 			p, err = model.GetAssetAbsPath(cleanPath)
 		}
 		if err != nil || p == "" {
+			logging.LogWarnf("serve asset failed: resolve path failed [requestPath=%s, cleanPath=%s, boxID=%s, dataDir=%s, workspaceDir=%s, err=%v]", requestPath, cleanPath, boxID, util.DataDir, util.WorkspaceDir, err)
 			context.Status(http.StatusNotFound)
 			return
 		}
@@ -731,14 +732,19 @@ func serveAssets(ginServer *gin.Engine) {
 			assetsRoot = filepath.Join(util.DataDir, boxIDFromPath, "assets")
 		}
 		if boxID != "" && boxID != boxIDFromPath {
+			logging.LogWarnf("serve asset blocked: box mismatch [requestPath=%s, boxID=%s, resolvedBoxID=%s, path=%s]", requestPath, boxID, boxIDFromPath, p)
 			context.Status(http.StatusForbidden)
 			return
 		}
 		if boxID == "" && model.IsEncryptedAssetPath(p) {
+			logging.LogWarnf("serve asset blocked: encrypted asset has no box parameter [requestPath=%s, path=%s]", requestPath, p)
 			context.Status(http.StatusForbidden)
 			return
 		}
 		if !gulu.File.IsSubPath(assetsRoot, p) {
+			resolvedAssetsRoot, rootEvalErr := filepath.EvalSymlinks(assetsRoot)
+			resolvedPath, pathEvalErr := filepath.EvalSymlinks(p)
+			logging.LogWarnf("serve asset blocked: path is outside assets root [requestPath=%s, boxID=%s, path=%s, resolvedPath=%s, assetsRoot=%s, resolvedAssetsRoot=%s, pathEvalErr=%v, rootEvalErr=%v]", requestPath, boxID, p, resolvedPath, assetsRoot, resolvedAssetsRoot, pathEvalErr, rootEvalErr)
 			context.Status(http.StatusForbidden)
 			return
 		}
@@ -756,6 +762,15 @@ func serveAssets(ginServer *gin.Engine) {
 			context.Status(http.StatusForbidden)
 			return
 		}
+
+		resolvedAssetsRoot, rootEvalErr := filepath.EvalSymlinks(assetsRoot)
+		resolvedPath, pathEvalErr := filepath.EvalSymlinks(p)
+		assetSize := int64(-1)
+		assetInfo, statErr := os.Stat(p)
+		if statErr == nil {
+			assetSize = assetInfo.Size()
+		}
+		logging.LogInfof("serve asset path resolved [requestPath=%s, boxID=%s, path=%s, resolvedPath=%s, assetsRoot=%s, resolvedAssetsRoot=%s, size=%d, pathEvalErr=%v, rootEvalErr=%v, statErr=%v]", requestPath, boxID, p, resolvedPath, assetsRoot, resolvedAssetsRoot, assetSize, pathEvalErr, rootEvalErr, statErr)
 
 		if serveThumbnail(context, p, requestPath) || serveSVG(context, p) {
 			return

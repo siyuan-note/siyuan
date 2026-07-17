@@ -34,6 +34,11 @@ var SQLTool = &Tool{
 		},
 		Required: []string{"action", "stmt"},
 	},
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"":      {LocalRead: true},
+		"query": {LocalRead: true},
+	},
 	Handler: sqlHandler,
 }
 

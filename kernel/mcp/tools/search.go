@@ -44,6 +44,13 @@ var SearchTool = &Tool{
 		},
 		Required: []string{"action"},
 	},
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"fulltext": {LocalRead: true},
+		"semantic": {LocalRead: true},
+		"asset":    {LocalRead: true},
+		"getasset": {LocalRead: true},
+	},
 	Handler: searchHandler,
 }
 

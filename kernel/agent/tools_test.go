@@ -160,6 +160,28 @@ func TestImageToolActionEffects(t *testing.T) {
 	}
 }
 
+func TestQueryToolActionEffects(t *testing.T) {
+	tests := []struct {
+		toolName string
+		action   string
+	}{
+		{toolName: "sql", action: "query"},
+		{toolName: "sql", action: ""},
+		{toolName: "search", action: "fulltext"},
+		{toolName: "search", action: "semantic"},
+		{toolName: "search", action: "asset"},
+		{toolName: "search", action: "getasset"},
+	}
+	for _, test := range tests {
+		if needsConfirm(test.toolName, test.action, nil) {
+			t.Errorf("read-only action %s::%s must not require confirmation", test.toolName, test.action)
+		}
+		if needsLocalSnapshot(test.toolName, test.action) {
+			t.Errorf("read-only action %s::%s must not create a local snapshot", test.toolName, test.action)
+		}
+	}
+}
+
 func TestConfirmSessionAcceptsResponseOnce(t *testing.T) {
 	const confirmID = "test-confirm"
 	ch := make(chan confirmResult, 1)

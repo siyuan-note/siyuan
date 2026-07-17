@@ -1075,6 +1075,7 @@ var safeActions = map[string]bool{
 
 var safeWholeTools = map[string]bool{
 	"question": true, "todo_write": true, "web_fetch": true, "web_search": true,
+	"search": true, "sql": true,
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
@@ -1096,8 +1097,11 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 	if toolName == "http_request" && action == "" {
 		action = "get"
 	}
+	if safeWholeTools[toolName] {
+		return false
+	}
 	if action == "" {
-		return !safeWholeTools[toolName]
+		return true
 	}
 	if toolName == "import" && action == "md" {
 		return true

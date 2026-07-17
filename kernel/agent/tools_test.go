@@ -162,19 +162,23 @@ func TestImageToolActionEffects(t *testing.T) {
 
 func TestQueryToolActionEffects(t *testing.T) {
 	tests := []struct {
-		toolName string
-		action   string
+		toolName     string
+		action       string
+		needsConfirm bool
 	}{
 		{toolName: "sql", action: "query"},
 		{toolName: "sql", action: ""},
+		{toolName: "sql", action: "select"},
 		{toolName: "search", action: "fulltext"},
-		{toolName: "search", action: "semantic"},
+		{toolName: "search", action: "semantic", needsConfirm: true},
 		{toolName: "search", action: "asset"},
 		{toolName: "search", action: "getasset"},
+		{toolName: "search", action: "unknown"},
 	}
 	for _, test := range tests {
-		if needsConfirm(test.toolName, test.action, nil) {
-			t.Errorf("read-only action %s::%s must not require confirmation", test.toolName, test.action)
+		if actual := needsConfirm(test.toolName, test.action, nil); actual != test.needsConfirm {
+			t.Errorf("unexpected confirmation decision for %s::%s: got %t, want %t",
+				test.toolName, test.action, actual, test.needsConfirm)
 		}
 		if needsLocalSnapshot(test.toolName, test.action) {
 			t.Errorf("read-only action %s::%s must not create a local snapshot", test.toolName, test.action)

@@ -1594,7 +1594,7 @@ export const openMenuPanel = (options: {
                         previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
                             options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "");
                     } else {
-                        openLink(options.protyle, assetLink, event, event.ctrlKey || event.metaKey);
+                        openLink(options.protyle.app, assetLink, event, event.ctrlKey || event.metaKey);
                     }
                     event.preventDefault();
                     event.stopPropagation();

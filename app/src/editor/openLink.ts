@@ -11,8 +11,9 @@ import {openAsset, openBy} from "./util";
 /// #endif
 import {showMessage} from "../dialog/message";
 import {isInIOS, isInAndroid, isInHarmony} from "../protyle/util/compatibility";
+import type {App} from "../index";
 
-export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, ctrlIsPressed = false) => {
+export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPressed = false) => {
     let linkAddress = Lute.UnEscapeHTMLStr(aLink);
     let pdfParams;
     if (isLocalPath(linkAddress) && !linkAddress.startsWith("file://") && linkAddress.indexOf(".pdf") > -1) {
@@ -37,7 +38,7 @@ export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, c
             )
         ) {
             if (event && event.altKey) {
-                openAsset(protyle.app, linkAddress, pdfParams);
+                openAsset(app, linkAddress, pdfParams);
             } else if (event && event.shiftKey) {
                 /// #if !BROWSER
                 openBy(linkAddress, "app");
@@ -51,7 +52,7 @@ export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, c
                 openByMobile(linkAddress);
                 /// #endif
             } else {
-                openAsset(protyle.app, linkAddress, pdfParams, !window.siyuan.config.fileTree.noSplitScreenWhenOpenTab ? "right" : null);
+                openAsset(app, linkAddress, pdfParams, !window.siyuan.config.fileTree.noSplitScreenWhenOpenTab ? "right" : null);
             }
         } else {
             /// #if !BROWSER

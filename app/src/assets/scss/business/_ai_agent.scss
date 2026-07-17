@@ -256,9 +256,10 @@
   }
 }
 
-// 覆盖 b3-typography 的基础字号：b3-typography 默认用 --b3-font-size-editor（跟随编辑器字号，默认 16px），
+// 覆盖消息排版的基础字号：b3-typography 和 protyle-wysiwyg 默认使用编辑器字号，
 // 在 dock 面板里偏大。压回面板级 14px，与大纲/书签等其他 dock 面板对齐。
-// 排版（行高、段落间距等）仍沿用 b3-typography 全局规范。
+// 行高、段落间距等仍沿用各自的全局排版规范。
+.agent-chat__msg--user .agent-chat__body.protyle-wysiwyg,
 .agent-chat__body.b3-typography,
 .agent-chat__thinking-chat.b3-typography {
   font-size: var(--b3-font-size);
@@ -302,6 +303,10 @@
 
 .agent-chat__body .protyle-icons {
   display: flex;
+}
+
+.agent-chat__msg--user .agent-chat__body .protyle-icons {
+  display: none;
 }
 
 // hover 显隐：对齐原 agent-chat__copy-wrap 行为，opacity 渐显。

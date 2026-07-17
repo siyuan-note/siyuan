@@ -3196,7 +3196,7 @@ export class WYSIWYG {
             if (fileElement && range.toString() === "") {
                 event.stopPropagation();
                 event.preventDefault();
-                openLink(protyle, fileElement.getAttribute("data-id"), event, ctrlIsPressed);
+                openLink(protyle.app, fileElement.getAttribute("data-id"), event, ctrlIsPressed);
                 return;
             }
 
@@ -3207,7 +3207,7 @@ export class WYSIWYG {
                 aLink) {
                 event.stopPropagation();
                 event.preventDefault();
-                openLink(protyle, aLink, event, ctrlIsPressed);
+                openLink(protyle.app, aLink, event, ctrlIsPressed);
                 return;
             }
 

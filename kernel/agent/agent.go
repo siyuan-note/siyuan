@@ -359,6 +359,7 @@ type SessionEntry struct {
 	ID            string             `json:"id,omitempty"`
 	Type          string             `json:"type"` // user|thinking|assistant|confirm|snapshot|rollback
 	Content       string             `json:"content,omitempty"`
+	BlockHTML     string             `json:"blockHTML,omitempty"`    // 仅 user，用于保留发送框的 BlockDOM 展示结构
 	Steps         []SessionEntryStep `json:"steps,omitempty"`        // 仅 thinking
 	ToolCalls     []AgentToolCall    `json:"toolCalls,omitempty"`    // 仅 assistant
 	Duration      float64            `json:"duration,omitempty"`     // 秒（thinking/assistant 均可能带）

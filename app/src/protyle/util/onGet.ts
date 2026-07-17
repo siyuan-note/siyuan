@@ -379,6 +379,31 @@ export const disabledForeverProtyle = (protyle: IProtyle) => {
     protyle.element.setAttribute("disabled-forever", "true");
 };
 
+export const disabledWYSIWYG = (element: HTMLElement) => {
+    element.querySelectorAll(".protyle-icons--show").forEach(item => {
+        item.classList.remove("protyle-icons--show");
+    });
+    element.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
+        item.classList.remove("av__gallery-fields--edit");
+    });
+    element.querySelectorAll(".render-node .protyle-action__edit").forEach(item => {
+        item.classList.add("fn__none");
+        if (item.classList.contains("protyle-icon--first")) {
+            item.nextElementSibling?.classList.add("protyle-icon--first");
+        }
+    });
+    element.style.userSelect = "text";
+    element.setAttribute("contenteditable", "false");
+    // 用于区分移动端样式
+    element.setAttribute("data-readonly", "true");
+    element.querySelectorAll('[contenteditable="true"][spellcheck]').forEach(item => {
+        item.setAttribute("contenteditable", "false");
+    });
+    element.querySelectorAll('.protyle-action[draggable="true"]').forEach(item => {
+        item.setAttribute("draggable", "false");
+    });
+};
+
 /** 禁用编辑器 */
 export const disabledProtyle = (protyle: IProtyle) => {
     window.siyuan.menus.menu.remove();
@@ -395,28 +420,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
         protyle.background.element.classList.remove("protyle-background--enable");
         protyle.background.element.classList.remove("protyle-background--mobileshow");
     }
-    protyle.wysiwyg.element.querySelectorAll(".protyle-icons--show").forEach(item => {
-        item.classList.remove("protyle-icons--show");
-    });
-    protyle.wysiwyg.element.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
-        item.classList.remove("av__gallery-fields--edit");
-    });
-    protyle.wysiwyg.element.querySelectorAll(".render-node .protyle-action__edit").forEach(item => {
-        item.classList.add("fn__none");
-        if (item.classList.contains("protyle-icon--first")) {
-            item.nextElementSibling?.classList.add("protyle-icon--first");
-        }
-    });
-    protyle.wysiwyg.element.style.userSelect = "text";
-    protyle.wysiwyg.element.setAttribute("contenteditable", "false");
-    // 用于区分移动端样式
-    protyle.wysiwyg.element.setAttribute("data-readonly", "true");
-    protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck]').forEach(item => {
-        item.setAttribute("contenteditable", "false");
-    });
-    protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="true"]').forEach(item => {
-        item.setAttribute("draggable", "false");
-    });
+    disabledWYSIWYG(protyle.wysiwyg.element);
     if (protyle.breadcrumb) {
         const readonlyButton = protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]');
         readonlyButton.querySelector("use").setAttribute("xlink:href", "#iconLock");

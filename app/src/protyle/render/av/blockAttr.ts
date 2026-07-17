@@ -512,7 +512,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                 if (target.tagName === "IMG") {
                     previewImages([removeCompressURL(target.getAttribute("src"))]);
                 } else {
-                    openLink(protyle, target.dataset.url, event, event.ctrlKey || event.metaKey);
+                    openLink(protyle.app, target.dataset.url, event, event.ctrlKey || event.metaKey);
                 }
             }
             event.stopPropagation();

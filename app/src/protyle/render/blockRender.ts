@@ -9,8 +9,9 @@ import {isEncryptedBox} from "../../util/pathName";
 
 /**
  * 渲染嵌入块
+ * onEmbedRender 在每个异步查询结果写入 DOM 后调用。
  */
-export const blockRender = (protyle: IProtyle, element: Element, top?: number) => {
+export const blockRender = (protyle: IProtyle, element: Element, top?: number, onEmbedRender?: () => void) => {
     let blockElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeBlockQueryEmbed" && element.getAttribute("data-render") !== "true") {
         blockElements = [element];
@@ -58,13 +59,13 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                                 headingMode: ["0", "1", "2"].includes(item.getAttribute("custom-heading-mode")) ? parseInt(item.getAttribute("custom-heading-mode")) : window.siyuan.config.editor.headingEmbedMode,
                                 breadcrumb
                             }, (response) => {
-                                renderEmbed(response.data.blocks || [], protyle, item, top);
+                                renderEmbed(response.data.blocks || [], protyle, item, top, undefined, onEmbedRender);
                             });
                         } else {
                             return;
                         }
                     }).catch((e) => {
-                        renderEmbed([], protyle, item, top, e);
+                        renderEmbed([], protyle, item, top, e, onEmbedRender);
                     });
                 } else if (Array.isArray(includeIDs)) {
                     fetchPost("/api/search/getEmbedBlock", {
@@ -73,13 +74,13 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                         headingMode: ["0", "1", "2"].includes(item.getAttribute("custom-heading-mode")) ? parseInt(item.getAttribute("custom-heading-mode")) : window.siyuan.config.editor.headingEmbedMode,
                         breadcrumb
                     }, (response) => {
-                        renderEmbed(response.data.blocks || [], protyle, item, top);
+                        renderEmbed(response.data.blocks || [], protyle, item, top, undefined, onEmbedRender);
                     });
                 } else {
                     return;
                 }
             } catch (e) {
-                renderEmbed([], protyle, item, top, e);
+                renderEmbed([], protyle, item, top, e, onEmbedRender);
             }
         } else {
             fetchPost("/api/search/searchEmbedBlock", {
@@ -90,7 +91,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                 breadcrumb,
                 notebook: isEncryptedBox(protyle.notebookId) ? protyle.notebookId : ""
             }, (response) => {
-                renderEmbed(response.data.blocks, protyle, item, top);
+                renderEmbed(response.data.blocks, protyle, item, top, undefined, onEmbedRender);
             });
         }
     });
@@ -99,7 +100,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
 const renderEmbed = (blocks: {
     block: IBlock,
     blockPaths: IBreadcrumb[]
-}[], protyle: IProtyle, item: HTMLElement, top?: number, errorTip?: string) => {
+}[], protyle: IProtyle, item: HTMLElement, top?: number, errorTip?: string, onEmbedRender?: () => void) => {
     const rotateElement = item.querySelector(".fn__rotate");
     if (rotateElement) {
         rotateElement.classList.remove("fn__rotate");
@@ -145,8 +146,9 @@ ${popover}${breadcrumbHTML}${blocksItem.block.content}
     }
     if (maxDeep < 4) {
         item.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach(embedElement => {
-            blockRender(protyle, embedElement);
+            blockRender(protyle, embedElement, undefined, onEmbedRender);
         });
     }
     item.style.height = "";
+    onEmbedRender?.();
 };

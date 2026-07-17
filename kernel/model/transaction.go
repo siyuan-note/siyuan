@@ -1915,7 +1915,6 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 	if IsBoxDoc(tree.Box, tree.ID) {
-		attrs[BoxDocAttr] = tree.Box
 		attrs[DocHiddenAttr] = "true"
 		if icon, ok := attrs["icon"]; ok {
 			icon = filterBoxIcon(icon)

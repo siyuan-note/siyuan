@@ -50,6 +50,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -296,10 +297,9 @@ func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID 
 		tree.Path = filepath.ToSlash(strings.TrimPrefix(syPath, unzipRootPath))
 		if createNotebook && oldRootID == importedBoxDocID {
 			importedBoxDoc = true
-			tree.Root.SetIALAttr(BoxDocAttr, boxID)
 			tree.Root.SetIALAttr(DocHiddenAttr, "true")
-		} else if "" != tree.Root.IALAttr(BoxDocAttr) {
-			removeBoxDocAttrs(tree)
+		} else if oldRootID == importedBoxDocID {
+			removeBoxDocHiddenAttr(tree)
 		}
 		trees[tree.ID] = tree
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d", i+1, len(syPaths))))
@@ -854,6 +854,8 @@ func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID 
 		absPath := filepath.Join(targetDir, treePath)
 		p := strings.TrimPrefix(absPath, boxAbsPath)
 		p = filepath.ToSlash(p)
+		cache.RemoveTreeDataInBox(util.GetTreeID(p), boxID)
+		cache.RemoveDocIALInBox(p, boxID)
 		tree, err := filesys.LoadTree(boxID, p, luteEngine)
 		if err != nil {
 			logging.LogErrorf("load tree [%s] failed: %s", treePath, err)
@@ -867,6 +869,7 @@ func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID 
 		}
 
 		treenode.IndexBlockTree(tree)
+		cache.PutDocIALInBox(tree.Path, tree.Box, parse.IAL2Map(tree.Root.KramdownIAL))
 		var avNodes []*ast.Node
 		for _, avNode := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
 			if _, ok := importedAvIDs[avNode.AttributeViewID]; ok {

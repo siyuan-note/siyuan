@@ -40,7 +40,6 @@ import (
 const (
 	boxDocMetaSpec = 1
 	boxDocMetaName = "boxDoc.json"
-	BoxDocAttr     = "custom-sy-box-doc"
 )
 
 type boxDocMeta struct {
@@ -174,7 +173,7 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 		return
 	}
 
-	boxDocID, err = findBoxDocByMarker(box)
+	boxDocID, err = findBoxDoc(box)
 	if err != nil {
 		return "", err
 	}
@@ -210,19 +209,12 @@ func RefreshBoxDocFeature() {
 	ReloadFiletree()
 }
 
-func findBoxDocByMarker(box *Box) (ret string, err error) {
+func findBoxDoc(box *Box) (ret string, err error) {
 	boxDocID := deterministicBoxDocID(box.ID)
 	if "" == boxDocID || !box.Exist(boxDocPath(boxDocID)) {
 		return
 	}
-	tree, err := filesys.LoadTree(box.ID, boxDocPath(boxDocID), util.NewLute())
-	if err != nil {
-		return "", err
-	}
-	if box.ID == tree.Root.IALAttr(BoxDocAttr) {
-		ret = boxDocID
-	}
-	return
+	return boxDocID, nil
 }
 
 func createBoxDoc(box *Box, boxDocID string) error {
@@ -233,7 +225,6 @@ func createBoxDoc(box *Box, boxDocID string) error {
 	}
 	p := boxDocPath(boxDocID)
 	tree := treenode.NewTree(box.ID, p, "/"+title, html.EscapeAttrVal(title))
-	tree.Root.SetIALAttr(BoxDocAttr, box.ID)
 	tree.Root.SetIALAttr(DocHiddenAttr, "true")
 	if "" != boxConf.Icon {
 		tree.Root.SetIALAttr("icon", boxConf.Icon)
@@ -270,14 +261,13 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 		title = Conf.Language(16)
 	}
 	titleChanged := tree.Root.IALAttr("title") != title
-	changed := titleChanged || tree.HPath != "/"+title || tree.Root.IALAttr(BoxDocAttr) != box.ID ||
-		tree.Root.IALAttr(DocHiddenAttr) != "true" || tree.Root.IALAttr("icon") != boxConf.Icon
+	changed := titleChanged || tree.HPath != "/"+title || tree.Root.IALAttr(DocHiddenAttr) != "true" ||
+		tree.Root.IALAttr("icon") != boxConf.Icon
 	if !changed {
 		return nil
 	}
 	tree.HPath = "/" + title
 	tree.Root.SetIALAttr("title", title)
-	tree.Root.SetIALAttr(BoxDocAttr, box.ID)
 	tree.Root.SetIALAttr(DocHiddenAttr, "true")
 	if "" == boxConf.Icon {
 		tree.Root.RemoveIALAttr("icon")
@@ -387,10 +377,9 @@ func setBoxDocIcon(boxID, icon string) error {
 	return nil
 }
 
-func removeBoxDocAttrs(tree *parse.Tree) {
+func removeBoxDocHiddenAttr(tree *parse.Tree) {
 	if nil == tree || nil == tree.Root {
 		return
 	}
-	tree.Root.RemoveIALAttr(BoxDocAttr)
 	tree.Root.RemoveIALAttr(DocHiddenAttr)
 }

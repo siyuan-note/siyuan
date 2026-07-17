@@ -1049,7 +1049,7 @@ func DuplicateDoc(tree *parse.Tree) {
 	previousPath := tree.Path
 	resetTree(tree, "Duplicated", false)
 	if isBoxDoc {
-		removeBoxDocAttrs(tree)
+		removeBoxDocHiddenAttr(tree)
 	}
 
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

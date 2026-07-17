@@ -222,6 +222,23 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOK);
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
+    /// #if !MOBILE
+    const boxDocID = liElement.getAttribute("data-node-id");
+    if (boxDocID && window.siyuan.config.fileTree.parentDocClickExpand) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "openDocument",
+            label: window.siyuan.languages.openDocument,
+            icon: "iconOpen",
+            click: () => {
+                openFileById({
+                    app,
+                    id: boxDocID,
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                });
+            }
+        }).element);
+    }
+    /// #endif
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(renameMenu({
             path: "/",

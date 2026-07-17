@@ -7,6 +7,8 @@ import {isMobile} from "../../util/functions";
 import {fetchPost} from "../../util/fetch";
 import {aiConfigApi} from "./aiRuntime";
 import {openByMobile} from "../../editor/openLink";
+import {Menu} from "../../plugin/Menu";
+import {upDownHint} from "../../util/upDownHint";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
@@ -713,6 +715,104 @@ const pickModelId = (enabledModels: Config.IModel[], preferredModelIds: string[]
     return enabledModels[0].id ?? "";
 };
 
+const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[]) => {
+    const menu = new Menu();
+    menu.addItem({
+        iconHTML: "",
+        type: "empty",
+        label: `<div class="fn__flex-column b3-menu__filter">
+    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
+    <div class="fn__hr"></div>
+    <div class="b3-list fn__flex-1 b3-list--background">
+        ${models.map((model) => `<div class="b3-list-item b3-list-item--narrow" data-model="${Lute.EscapeHTMLStr(model)}">
+    <span class="b3-list-item__text">${Lute.EscapeHTMLStr(model)}</span>
+    ${model === modelInput.value ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+</div>`).join("")}
+        <div class="b3-list--empty fn__none" data-type="empty">${window.siyuan.languages.emptyContent}</div>
+    </div>
+</div>`,
+        bind(element) {
+            const listElement = element.querySelector<HTMLElement>(".b3-list");
+            const searchInput = element.querySelector<HTMLInputElement>("input");
+            const emptyElement = element.querySelector<HTMLElement>("[data-type='empty']");
+            const selectModel = (item: HTMLElement) => {
+                modelInput.value = item.dataset.model;
+                menu.close();
+                modelInput.focus();
+            };
+            const filterModels = () => {
+                const keyword = searchInput.value.toLowerCase().trim();
+                let firstVisibleItem: HTMLElement;
+                listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
+                    item.classList.remove("b3-list-item--focus");
+                    const hidden = !item.dataset.model.toLowerCase().includes(keyword);
+                    item.classList.toggle("fn__none", hidden);
+                    if (!hidden && !firstVisibleItem) {
+                        firstVisibleItem = item;
+                    }
+                });
+                firstVisibleItem?.classList.add("b3-list-item--focus");
+                emptyElement.classList.toggle("fn__none", !!firstVisibleItem);
+            };
+            filterModels();
+            searchInput.addEventListener("keydown", (event: KeyboardEvent) => {
+                event.stopPropagation();
+                if (event.isComposing) {
+                    return;
+                }
+                upDownHint(listElement, event);
+                if (event.key === "Enter") {
+                    const item = listElement.querySelector<HTMLElement>(".b3-list-item--focus");
+                    if (item) {
+                        selectModel(item);
+                    }
+                    event.preventDefault();
+                } else if (event.key === "Escape") {
+                    menu.close();
+                    modelInput.focus();
+                    event.preventDefault();
+                }
+            });
+            searchInput.addEventListener("input", (event: InputEvent) => {
+                if (!event.isComposing) {
+                    filterModels();
+                }
+            });
+            searchInput.addEventListener("compositionend", filterModels);
+            listElement.addEventListener("click", (event) => {
+                const item = (event.target as HTMLElement).closest<HTMLElement>(".b3-list-item");
+                if (item) {
+                    selectModel(item);
+                }
+            });
+        },
+    });
+    const rect = modelInput.getBoundingClientRect();
+    menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
+    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+    menu.element.querySelector<HTMLInputElement>("input").focus();
+};
+
+const replaceModelInputWithPicker = (inputElement: HTMLElement, models: string[], current: string) => {
+    const modelInput = document.createElement("input");
+    modelInput.className = "b3-select fn__flex-1";
+    modelInput.id = "aiModelName";
+    modelInput.type = "text";
+    modelInput.spellcheck = false;
+    modelInput.readOnly = true;
+    modelInput.placeholder = window.siyuan.languages.selectModel;
+    modelInput.value = current && models.includes(current) ? current : "";
+    const openMenu = () => openAvailableModelMenu(modelInput, models);
+    modelInput.addEventListener("click", openMenu);
+    modelInput.addEventListener("keydown", (event) => {
+        if (["Enter", " ", "ArrowDown"].includes(event.key)) {
+            event.preventDefault();
+            openMenu();
+        }
+    });
+    inputElement.replaceWith(modelInput);
+};
+
 const openModelDialog = (root: HTMLElement, providerId: string, modelId: string | null) => {
     const provider = findProvider(providerId);
     if (!provider) {
@@ -786,18 +886,10 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
                 showMessage(`${window.siyuan.languages.fetchAvailableModelsFail}${data.msg ? "：" + data.msg : ""}`, undefined, "error");
                 return;
             }
-            // 用下拉框替换原文本框，保留当前已填值
+            // 用可搜索选择器替换原文本框，保留当前已填值
             const current = getModelName();
             const inputEl = dialog.element.querySelector<HTMLElement>("#aiModelName");
-            const selectEl = document.createElement("select");
-            selectEl.className = "b3-select fn__flex-1";
-            selectEl.id = "aiModelName";
-            selectEl.innerHTML = `<option value="">${window.siyuan.languages.selectModel}</option>` +
-                models.map((m) => `<option value="${Lute.EscapeHTMLStr(m)}"${m === current ? " selected" : ""}>${Lute.EscapeHTMLStr(m)}</option>`).join("");
-            if (current && models.includes(current)) {
-                selectEl.value = current;
-            }
-            inputEl.replaceWith(selectEl);
+            replaceModelInputWithPicker(inputEl, models, current);
             showMessage(window.siyuan.languages.fetchAvailableModelsSuccess, undefined, "info");
         });
     });

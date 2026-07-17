@@ -79,6 +79,7 @@ type AppConf struct {
 	Repo           *conf.Repo           `json:"repo"`           // 数据仓库
 	NotebookCrypto *conf.NotebookCrypto `json:"notebookCrypto"` // 加密笔记本密钥管理
 	Publish        *conf.Publish        `json:"publish"`        // 发布服务
+	Onboarding     *conf.Onboarding     `json:"onboarding"`     // 首次使用引导
 	OpenHelp       bool                 `json:"openHelp"`       // 启动后是否需要打开用户指南
 	ShowChangelog  bool                 `json:"showChangelog"`  // 是否显示版本更新日志
 	CloudRegion    int                  `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
@@ -434,9 +435,9 @@ func InitConf() {
 		Conf.Graph = conf.NewGraph()
 	}
 
-	if nil == Conf.System {
+	isNewWorkspace := nil == Conf.System
+	if isNewWorkspace {
 		Conf.System = conf.NewSystem()
-		Conf.OpenHelp = true
 	} else {
 		cmp := semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion)
 		if 0 < cmp {
@@ -449,6 +450,13 @@ func InitConf() {
 		Conf.System.KernelVersion = util.Ver
 		Conf.System.IsInsider = util.IsInsider
 	}
+	if nil == Conf.Onboarding {
+		Conf.Onboarding = &conf.Onboarding{State: conf.OnboardingCompleted}
+	}
+	if boxes, listErr := ListNotebooks(); listErr == nil {
+		prepareOnboardingForEmptyWorkspace(Conf.Onboarding, util.ReadOnly, len(boxes))
+	}
+	Conf.OpenHelp = false
 	if nil == Conf.System.NetworkProxy {
 		Conf.System.NetworkProxy = &conf.NetworkProxy{}
 	}

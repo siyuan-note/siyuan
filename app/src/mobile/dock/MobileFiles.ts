@@ -13,7 +13,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
 import {unicode2Emoji} from "../../emoji";
-import {mountHelp, newNotebook, openEncryptedNotebook} from "../../util/mount";
+import {newNotebook, openEncryptedNotebook} from "../../util/mount";
 import {newFileInTree} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
@@ -482,9 +482,6 @@ export class MobileFiles extends Model {
             this.touchDragState = null;
         });
         this.init();
-        if (window.siyuan.config.openHelp) {
-            mountHelp();
-        }
     }
 
     private handleMsgCallback(data: IWebSocketData) {

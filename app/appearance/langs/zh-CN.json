@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "欢迎使用思源",
+	"onboardingDescription": "已经为你创建了第一个笔记本，可以直接开始记录。",
+	"importExistingData": "导入已有数据",
+	"loginAndSync": "登录并同步",
 	"agentEditHistoryWarning": "后续消息包含已执行的工具调用。重新发送将删除后续对话，但不会撤销已经执行的操作。是否继续？",
 	"boxDocEnabled": "启用顶层笔记本文档",
 	"boxDocEnabledTip": "启用后笔记本本身也可用于记录内容",
@@ -2198,6 +2202,8 @@
 		"338": "不支持所选 Vault 路径，请选择思源工作空间以外的普通文件夹",
 		"339": "仅支持使用默认 .obsidian 文件夹的 Obsidian Vault",
 		"340": "所选 Vault 中没有可读取的非隐藏 Markdown 文件",
-		"341": "顶层笔记本文档不能被删除或移动"
+		"341": "顶层笔记本文档不能被删除或移动",
+		"342": "我的笔记本",
+		"343": "全新的开始"
 	}
 	}

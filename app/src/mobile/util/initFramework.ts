@@ -1,6 +1,7 @@
 import {Constants} from "../../constants";
 import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
+import {openMobileOnboarding} from "../../onboarding";
 import {validateName} from "../../editor/rename";
 import {getEventName} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
@@ -195,6 +196,9 @@ export const initFramework = (app: App, isStart: boolean) => {
         if (info.id) {
             openMobileFileById(app, info.id,
                 info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+            return;
+        }
+        if (openMobileOnboarding(app)) {
             return;
         }
         if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {

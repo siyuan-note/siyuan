@@ -29,6 +29,7 @@ import {correctHotkey} from "./globalEvent/commonHotkey";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
 import {processSiYuanUri} from "../util/uri";
 import {getAllEditor} from "../layout/getAll";
+import {openDesktopOnboarding} from "../onboarding";
 
 export const onGetConfig = (isStart: boolean, app: App) => {
     correctHotkey(app);
@@ -68,6 +69,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         } catch (e) {
             resetLayout();
         }
+        openDesktopOnboarding(app);
     });
     initBar(app);
     initStatus();

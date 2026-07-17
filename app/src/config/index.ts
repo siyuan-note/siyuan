@@ -12,7 +12,7 @@ import {getFrontend} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {escapeHtml} from "../util/escape";
 /// #endif
-import {getSettingTabDefs} from "./setting/tabs";
+import {getSettingTabDefs, settingTabToMenuId} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
 import {clearSyncTabElement} from "./tabs/syncRuntime";
 import type {TSettingTab} from "./setting/tabs";
@@ -81,6 +81,11 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
 export const openSetting = (app: App, tab?: TSettingTab) => {
     /// #if MOBILE
     popMenu();
+    if (tab) {
+        window.setTimeout(() => {
+            document.getElementById(settingTabToMenuId(tab))?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        }, 200);
+    }
     /// #else
     return openSettingDialog(app, tab);
     /// #endif

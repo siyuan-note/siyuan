@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "SiYuan'a hoş geldiniz",
+	"onboardingDescription": "İlk not defteriniz hazır. Hemen yazmaya başlayabilirsiniz.",
+	"importExistingData": "Mevcut verileri içe aktar",
+	"loginAndSync": "Giriş yap ve eşitle",
 	"agentEditHistoryWarning": "Sonraki iletilerde yürütülmüş araç çağrıları bulunuyor. Yeniden gönderme sonraki konuşmayı silecek, ancak daha önce yürütülen işlemleri geri almayacaktır. Devam edilsin mi?",
 	"boxDocEnabled": "Üst düzey not defteri belgelerini etkinleştir",
 	"boxDocEnabledTip": "Etkinleştirildiğinde not defterinin kendisi de içerik kaydetmek için kullanılabilir",
@@ -2198,6 +2202,8 @@
 		"338": "Seçilen Vault yolu desteklenmiyor; SiYuan çalışma alanının dışında normal bir klasör seçin",
 		"339": "Yalnızca varsayılan .obsidian klasörünü kullanan Obsidian Vaults desteklenir",
 		"340": "Seçilen Vault, okunabilir ve gizli olmayan bir Markdown dosyası içermiyor",
-		"341": "Üst düzey not defteri belgesi silinemez veya taşınamaz"
+		"341": "Üst düzey not defteri belgesi silinemez veya taşınamaz",
+		"342": "Not Defterim",
+		"343": "Yeni Bir Başlangıç"
 	}
 	}

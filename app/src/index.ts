@@ -16,6 +16,7 @@ import {
 } from "./util/pathName";
 import {registerServiceWorker} from "./util/serviceWorker";
 import {openFileById} from "./editor/util";
+import {ensureOnboarding} from "./onboarding";
 import {
     bootSync,
     downloadProgress,
@@ -252,18 +253,21 @@ export class App {
                     window.siyuan.languages = lauguages;
                     window.siyuan.menus = new Menus(this);
                     bootSync();
-                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;
-                        onGetConfig(response.data.start, this);
-                        onSetaccount();
-                        setTitle("", true);
-                        initMessage();
-                        /// #if BROWSER && !MOBILE
-                        if (!isInMobileApp() && !window.siyuan.config.readonly && !window.siyuan.isPublish && !isChromeBrowser()
-                            && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
-                            showMessage(window.siyuan.languages.useChrome, 0, "error");
-                        }
-                        /// #endif
+                        await ensureOnboarding();
+                        setNoteBook(() => {
+                            onGetConfig(response.data.start, this);
+                            onSetaccount();
+                            setTitle("", true);
+                            initMessage();
+                            /// #if BROWSER && !MOBILE
+                            if (!isInMobileApp() && !window.siyuan.config.readonly && !window.siyuan.isPublish && !isChromeBrowser()
+                                && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
+                                showMessage(window.siyuan.languages.useChrome, 0, "error");
+                            }
+                            /// #endif
+                        });
                     });
                 });
             });

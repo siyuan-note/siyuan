@@ -18,6 +18,7 @@ import {bindSettingSaveDelegation} from "../../config/setting/save";
 import {isMobile} from "../../util/functions";
 import {openModel} from "./model";
 import {getCurrentEditor} from "../editor";
+import {openImportData} from "../../menus/importData";
 
 const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSettingTab> | undefined => {
     const item = target.closest(".b3-menu__item") as HTMLElement | null;
@@ -68,6 +69,9 @@ export const initRightMenu = (app: App) => {
     </div>
     <div class="b3-menu__item${(window.siyuan.config.readonly || !window.siyuan.config.notebookCrypto?.enabled) ? " fn__none" : ""}" id="menuNewEncryptedNotebook">
         <svg class="b3-menu__icon"><use xlink:href="#iconLock"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newEncryptedNotebook}</span>
+    </div>
+    <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuImport">
+        <svg class="b3-menu__icon"><use xlink:href="#iconDownload"></use></svg><span class="b3-menu__label">${window.siyuan.languages.import}</span>
     </div>
     <div class="b3-menu__separator"></div>
     <div id="menuNewDaily" class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}">
@@ -150,6 +154,12 @@ export const initRightMenu = (app: App) => {
             } else if (target.id === "menuNewEncryptedNotebook") {
                 newEncryptedNotebook();
                 closePanel();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuImport") {
+                closePanel();
+                openImportData();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

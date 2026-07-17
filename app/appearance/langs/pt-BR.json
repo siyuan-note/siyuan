@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "Boas-vindas ao SiYuan",
+	"onboardingDescription": "Seu primeiro caderno está pronto. Você pode começar a escrever agora mesmo.",
+	"importExistingData": "Importar dados existentes",
+	"loginAndSync": "Entrar e sincronizar",
 	"agentEditHistoryWarning": "As mensagens posteriores incluem chamadas de ferramentas já executadas. Reenviar excluirá a conversa posterior, mas não desfará as operações já executadas. Continuar?",
 	"boxDocEnabled": "Habilitar documentos de nível superior do caderno",
 	"boxDocEnabledTip": "Quando ativado, o próprio caderno também pode ser usado para registrar conteúdo",
@@ -2198,6 +2202,8 @@
 		"338": "O caminho do Vault selecionado não é compatível; selecione uma pasta normal fora do espaço de trabalho do SiYuan",
 		"339": "Somente Obsidian Vaults que usam a pasta .obsidian padrão são compatíveis",
 		"340": "O Vault selecionado não contém um arquivo Markdown legível e não oculto",
-		"341": "O documento de nível superior do caderno não pode ser removido nem movido"
+		"341": "O documento de nível superior do caderno não pode ser removido nem movido",
+		"342": "Meu caderno",
+		"343": "Um novo começo"
 	}
 	}

@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "Welcome to SiYuan",
+	"onboardingDescription": "Your first notebook is ready. You can start writing right away.",
+	"importExistingData": "Import existing data",
+	"loginAndSync": "Log in and sync",
 	"agentEditHistoryWarning": "Later messages include executed tool calls. Resending will delete the later conversation, but it will not undo operations that have already run. Continue?",
 	"boxDocEnabled": "Enable top-level notebook documents",
 	"boxDocEnabledTip": "When enabled, the notebook itself can also be used to record content",
@@ -2198,6 +2202,8 @@
 		"338": "The selected Vault path is not supported; select a normal directory outside the SiYuan workspace",
 		"339": "Only Obsidian Vaults using the default .obsidian directory are supported",
 		"340": "The selected Vault does not contain a readable non-hidden Markdown file",
-		"341": "The top-level notebook document cannot be removed or moved"
+		"341": "The top-level notebook document cannot be removed or moved",
+		"342": "My Notebook",
+		"343": "A Fresh Start"
 	}
 	}

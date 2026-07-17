@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "Witamy w SiYuan",
+	"onboardingDescription": "Twój pierwszy notatnik jest gotowy. Możesz od razu zacząć pisać.",
+	"importExistingData": "Importuj istniejące dane",
+	"loginAndSync": "Zaloguj się i synchronizuj",
 	"agentEditHistoryWarning": "Późniejsze wiadomości zawierają wykonane wywołania narzędzi. Ponowne wysłanie usunie dalszą część rozmowy, ale nie cofnie już wykonanych operacji. Kontynuować?",
 	"boxDocEnabled": "Włącz dokumenty notatnika najwyższego poziomu",
 	"boxDocEnabledTip": "Po włączeniu sam notatnik może również służyć do zapisywania treści",
@@ -2198,6 +2202,8 @@
 		"338": "Wybrana ścieżka Vault nie jest obsługiwana; wybierz zwykły folder poza obszarem roboczym SiYuan",
 		"339": "Obsługiwane są tylko Obsidian Vaults używające domyślnego folderu .obsidian",
 		"340": "Wybrany Vault nie zawiera czytelnego, nieukrytego pliku Markdown",
-		"341": "Dokument notatnika najwyższego poziomu nie może zostać usunięty ani przeniesiony"
+		"341": "Dokument notatnika najwyższego poziomu nie może zostać usunięty ani przeniesiony",
+		"342": "Mój notatnik",
+		"343": "Nowy początek"
 	}
 	}

@@ -27,6 +27,7 @@ import {isBrowser} from "../util/functions";
 import {openRecentDocs} from "../business/openRecentDocs";
 import * as dayjs from "dayjs";
 import {upDownHint} from "../util/upDownHint";
+import {openImportData} from "./importData";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({
@@ -532,6 +533,14 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 accelerator: window.siyuan.config.keymap.general.dataHistory.custom,
                 click: () => {
                     openHistory(app);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "importData",
+                label: window.siyuan.languages.import,
+                icon: "iconDownload",
+                click: () => {
+                    openImportData();
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);

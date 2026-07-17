@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "Bienvenue dans SiYuan",
+	"onboardingDescription": "Votre premier carnet est prêt. Vous pouvez commencer à écrire immédiatement.",
+	"importExistingData": "Importer des données existantes",
+	"loginAndSync": "Se connecter et synchroniser",
 	"agentEditHistoryWarning": "Les messages suivants comprennent des appels d’outils déjà exécutés. Le renvoi supprimera la suite de la conversation, mais n’annulera pas les opérations déjà exécutées. Continuer ?",
 	"boxDocEnabled": "Activer les documents de carnet de niveau supérieur",
 	"boxDocEnabledTip": "Lorsque cette option est activée, le carnet lui-même peut également servir à consigner du contenu",
@@ -2198,6 +2202,8 @@
 		"338": "Le chemin du Vault sélectionné n’est pas pris en charge ; sélectionnez un dossier normal en dehors de l’espace de travail SiYuan",
 		"339": "Seuls les Obsidian Vaults utilisant le dossier .obsidian par défaut sont pris en charge",
 		"340": "Le Vault sélectionné ne contient aucun fichier Markdown lisible et non masqué",
-		"341": "Le document de niveau supérieur du carnet ne peut pas être supprimé ni déplacé"
+		"341": "Le document de niveau supérieur du carnet ne peut pas être supprimé ni déplacé",
+		"342": "Mon carnet",
+		"343": "Un nouveau départ"
 	}
 	}

@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "Willkommen bei SiYuan",
+	"onboardingDescription": "Ihr erstes Notizbuch ist bereit. Sie können sofort mit dem Schreiben beginnen.",
+	"importExistingData": "Vorhandene Daten importieren",
+	"loginAndSync": "Anmelden und synchronisieren",
 	"agentEditHistoryWarning": "Spätere Nachrichten enthalten ausgeführte Werkzeugaufrufe. Durch erneutes Senden wird der nachfolgende Gesprächsverlauf gelöscht, bereits ausgeführte Vorgänge werden jedoch nicht rückgängig gemacht. Fortfahren?",
 	"boxDocEnabled": "Notebook-Dokumente auf oberster Ebene aktivieren",
 	"boxDocEnabledTip": "Wenn aktiviert, kann auch das Notizbuch selbst zum Erfassen von Inhalten verwendet werden",
@@ -2198,6 +2202,8 @@
 		"338": "Der ausgewählte Vault-Pfad wird nicht unterstützt; wähle einen normalen Ordner außerhalb des SiYuan-Arbeitsbereichs",
 		"339": "Es werden nur Obsidian Vaults mit dem standardmäßigen .obsidian-Ordner unterstützt",
 		"340": "Der ausgewählte Vault enthält keine lesbare, nicht ausgeblendete Markdown-Datei",
-		"341": "Das Notizbuchdokument auf oberster Ebene kann nicht gelöscht oder verschoben werden"
+		"341": "Das Notizbuchdokument auf oberster Ebene kann nicht gelöscht oder verschoben werden",
+		"342": "Mein Notizbuch",
+		"343": "Ein neuer Anfang"
 	}
 	}

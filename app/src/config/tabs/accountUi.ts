@@ -415,6 +415,7 @@ const bindAccountAuthForm = (
                 renderAccount(accountSettingsRoot!);
                 onSetaccount();
                 refreshSyncCloudSpaceGroup(accountSettingsRoot!);
+                window.dispatchEvent(new CustomEvent("siyuan-login-success"));
             });
         } else if (mode === "deactivate") {
             confirmDeactivateAccount();

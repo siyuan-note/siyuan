@@ -51,6 +51,20 @@ type System struct {
 	SafeMode bool `json:"safeMode"` // 是否以安全模式运行（纯运行时状态，由 --safe-mode 注入，不随 conf.json 持久化）
 }
 
+const (
+	OnboardingPending         = "pending"
+	OnboardingNotebookCreated = "notebook-created"
+	OnboardingCompleted       = "completed"
+)
+
+type Onboarding struct {
+	State      string `json:"state"`
+	NewUser    bool   `json:"newUser"`
+	Dismissed  bool   `json:"dismissed"`
+	NotebookID string `json:"notebookID"`
+	DocumentID string `json:"documentID"`
+}
+
 func NewSystem() *System {
 	return &System{
 		ID:                 util.GetDeviceID(),

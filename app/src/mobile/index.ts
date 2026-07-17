@@ -22,6 +22,7 @@ import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {getLocalStorage, isChromeBrowser, isInMobileApp, writeText} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
+import {ensureOnboarding} from "../onboarding";
 import {checkPublishServiceClosed} from "../util/processMessage";
 import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
@@ -172,8 +173,9 @@ class App {
                             showMessage(window.siyuan.languages.useChrome, 0, "error");
                         }
                     }
-                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;
+                        await ensureOnboarding();
                         fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
                             setNoteBook(() => {

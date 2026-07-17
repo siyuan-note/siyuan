@@ -115,15 +115,21 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse
 }
 
 func ImportSY(zipPath, boxID, toPath string) (err error) {
-	_, err = importSY(zipPath, boxID, toPath, false)
+	_, err = importSY(zipPath, boxID, toPath, false, false)
 	return
 }
 
 func ImportSYNotebook(zipPath string) (boxID string, err error) {
-	return importSY(zipPath, "", "/", true)
+	return importSY(zipPath, "", "/", true, false)
 }
 
-func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID string, err error) {
+func ImportSYAuto(zipPath, boxID, toPath string) (createdBoxID string, notebook bool, err error) {
+	createdBoxID, err = importSY(zipPath, boxID, toPath, false, true)
+	notebook = err == nil && createdBoxID != boxID
+	return
+}
+
+func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (createdBoxID string, err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
@@ -209,6 +215,13 @@ func importSY(zipPath, boxID, toPath string, createNotebook bool) (createdBoxID 
 			err = removeErr
 			return
 		}
+	}
+	if autoDetect {
+		createNotebook = importedBoxConf != nil || importedBoxDocID != ""
+	}
+	if !createNotebook && nil == Conf.Box(boxID) {
+		err = errors.New(Conf.Language(0))
+		return
 	}
 	if createNotebook {
 		if importedBoxConf != nil && importedBoxConf.Name != "" {

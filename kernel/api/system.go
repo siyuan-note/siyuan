@@ -587,6 +587,33 @@ func getConf(c *gin.Context) {
 	}
 }
 
+func ensureOnboarding(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	onboarding, notebookCreated, err := model.EnsureOnboarding()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if notebookCreated {
+		box := model.Conf.Box(onboarding.NotebookID)
+		if nil != box {
+			evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
+			evt.Data = map[string]any{"box": box, "existed": false}
+			util.PushEvent(evt)
+		}
+	}
+	ret.Data = onboarding
+}
+
+func dismissOnboarding(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	ret.Data = model.DismissOnboarding()
+}
+
 func setUILayout(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

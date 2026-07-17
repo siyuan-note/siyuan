@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "Selamat datang di SiYuan",
+	"onboardingDescription": "Buku catatan pertama Anda sudah siap. Anda dapat langsung mulai menulis.",
+	"importExistingData": "Impor data yang ada",
+	"loginAndSync": "Masuk dan sinkronkan",
 	"agentEditHistoryWarning": "Pesan berikutnya berisi pemanggilan alat yang telah dijalankan. Mengirim ulang akan menghapus percakapan setelahnya, tetapi tidak akan membatalkan operasi yang sudah dijalankan. Lanjutkan?",
 	"boxDocEnabled": "Aktifkan dokumen buku catatan tingkat teratas",
 	"boxDocEnabledTip": "Jika diaktifkan, buku catatan itu sendiri juga dapat digunakan untuk mencatat konten",
@@ -2198,6 +2202,8 @@
 		"338": "Jalur Vault yang dipilih tidak didukung; pilih folder biasa di luar ruang kerja SiYuan",
 		"339": "Hanya Obsidian Vault yang menggunakan folder .obsidian bawaan yang didukung",
 		"340": "Vault yang dipilih tidak berisi file Markdown tak tersembunyi yang dapat dibaca",
-		"341": "Dokumen buku catatan tingkat teratas tidak dapat dihapus atau dipindahkan"
+		"341": "Dokumen buku catatan tingkat teratas tidak dapat dihapus atau dipindahkan",
+		"342": "Buku Catatan Saya",
+		"343": "Awal yang Baru"
 	}
 	}

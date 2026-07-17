@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "Benvenuto in SiYuan",
+	"onboardingDescription": "Il tuo primo taccuino è pronto. Puoi iniziare subito a scrivere.",
+	"importExistingData": "Importa dati esistenti",
+	"loginAndSync": "Accedi e sincronizza",
 	"agentEditHistoryWarning": "I messaggi successivi includono chiamate a strumenti già eseguite. Il nuovo invio eliminerà la conversazione successiva, ma non annullerà le operazioni già eseguite. Continuare?",
 	"boxDocEnabled": "Abilita i documenti di primo livello del taccuino",
 	"boxDocEnabledTip": "Se abilitato, anche il taccuino stesso può essere usato per registrare contenuti",
@@ -2198,6 +2202,8 @@
 		"338": "Il percorso del Vault selezionato non è supportato; seleziona una cartella normale esterna allo spazio di lavoro di SiYuan",
 		"339": "Sono supportati solo gli Obsidian Vault che utilizzano la cartella .obsidian predefinita",
 		"340": "Il Vault selezionato non contiene file Markdown leggibili e non nascosti",
-		"341": "Il documento di primo livello del taccuino non può essere eliminato o spostato"
+		"341": "Il documento di primo livello del taccuino non può essere eliminato o spostato",
+		"342": "Il mio taccuino",
+		"343": "Un nuovo inizio"
 	}
 	}

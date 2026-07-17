@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "Welkom bij SiYuan",
+	"onboardingDescription": "Je eerste notitieboek is klaar. Je kunt meteen beginnen met schrijven.",
+	"importExistingData": "Bestaande gegevens importeren",
+	"loginAndSync": "Inloggen en synchroniseren",
 	"agentEditHistoryWarning": "Latere berichten bevatten uitgevoerde toolaanroepen. Opnieuw verzenden verwijdert het latere gesprek, maar maakt reeds uitgevoerde bewerkingen niet ongedaan. Doorgaan?",
 	"boxDocEnabled": "Notebookdocumenten op het hoogste niveau inschakelen",
 	"boxDocEnabledTip": "Indien ingeschakeld kan ook het notebook zelf worden gebruikt om inhoud vast te leggen",
@@ -2198,6 +2202,8 @@
 		"338": "Het geselecteerde Vault-pad wordt niet ondersteund; selecteer een normale map buiten de SiYuan-werkruimte",
 		"339": "Alleen Obsidian Vaults die de standaardmap .obsidian gebruiken worden ondersteund",
 		"340": "De geselecteerde Vault bevat geen leesbaar, niet-verborgen Markdown-bestand",
-		"341": "Het notebookdocument op het hoogste niveau kan niet worden verwijderd of verplaatst"
+		"341": "Het notebookdocument op het hoogste niveau kan niet worden verwijderd of verplaatst",
+		"342": "Mijn notitieboek",
+		"343": "Een nieuw begin"
 	}
 	}

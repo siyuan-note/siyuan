@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "Vitajte v SiYuan",
+	"onboardingDescription": "Váš prvý zápisník je pripravený. Môžete začať hneď písať.",
+	"importExistingData": "Importovať existujúce údaje",
+	"loginAndSync": "Prihlásiť sa a synchronizovať",
 	"agentEditHistoryWarning": "Neskoršie správy obsahujú vykonané volania nástrojov. Opätovné odoslanie odstráni nasledujúcu konverzáciu, ale nezruší už vykonané operácie. Pokračovať?",
 	"boxDocEnabled": "Povoliť dokumenty zápisníka najvyššej úrovne",
 	"boxDocEnabledTip": "Po povolení možno na zaznamenávanie obsahu použiť aj samotný zápisník",
@@ -2198,6 +2202,8 @@
 		"338": "Vybraná cesta k Vault nie je podporovaná; vyberte bežný priečinok mimo pracovného priestoru SiYuan",
 		"339": "Podporované sú iba Obsidian Vaults používajúce predvolený priečinok .obsidian",
 		"340": "Vybraný Vault neobsahuje čitateľný neskrývaný súbor Markdown",
-		"341": "Dokument zápisníka najvyššej úrovne nemožno odstrániť ani presunúť"
+		"341": "Dokument zápisníka najvyššej úrovne nemožno odstrániť ani presunúť",
+		"342": "Môj zápisník",
+		"343": "Nový začiatok"
 	}
 	}

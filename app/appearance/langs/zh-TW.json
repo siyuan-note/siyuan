@@ -1,4 +1,8 @@
 {
+	"onboardingWelcome": "歡迎使用思源",
+	"onboardingDescription": "已經為你建立了第一個筆記本，可以直接開始記錄。",
+	"importExistingData": "匯入已有資料",
+	"loginAndSync": "登入並同步",
 	"agentEditHistoryWarning": "後續訊息包含已執行的工具呼叫。重新傳送將刪除後續對話，但不會撤銷已經執行的操作。是否繼續？",
 	"boxDocEnabled": "啟用頂層筆記本文檔",
 	"boxDocEnabledTip": "啟用後筆記本本身也可用於記錄內容",
@@ -2198,6 +2202,8 @@
 		"338": "不支援所選 Vault 路徑，請選擇思源工作空間以外的一般資料夾",
 		"339": "僅支援使用預設 .obsidian 資料夾的 Obsidian Vault",
 		"340": "所選 Vault 中沒有可讀取的非隱藏 Markdown 檔案",
-		"341": "頂層筆記本文檔不能被刪除或移動"
+		"341": "頂層筆記本文檔不能被刪除或移動",
+		"342": "我的筆記本",
+		"343": "全新的開始"
 	}
 	}

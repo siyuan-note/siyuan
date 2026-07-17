@@ -49,8 +49,14 @@ func importSY(c *gin.Context) {
 	}
 	defer cleanup()
 
-	notebook := form.Value["notebook"][0]
-	toPath := form.Value["toPath"][0]
+	var notebook string
+	if values := form.Value["notebook"]; len(values) > 0 {
+		notebook = values[0]
+	}
+	toPath := "/"
+	if values := form.Value["toPath"]; len(values) > 0 {
+		toPath = values[0]
+	}
 
 	err = model.ImportSY(writePath, notebook, toPath)
 	if err != nil {
@@ -97,6 +103,59 @@ func importSYNotebook(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{"notebook": box}
+	event := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
+	event.Data = map[string]any{"box": box, "existed": existed}
+	util.PushEvent(event)
+}
+
+func importSYAuto(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	util.PushEndlessProgress(model.Conf.Language(73))
+	defer util.ClearPushProgress(100)
+
+	form, writePath, cleanup, err := saveImportUpload(c)
+	if err != nil {
+		logging.LogErrorf("save automatic import .sy.zip failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	defer cleanup()
+
+	var notebook string
+	if values := form.Value["notebook"]; len(values) > 0 {
+		notebook = values[0]
+	}
+	toPath := "/"
+	if values := form.Value["toPath"]; len(values) > 0 {
+		toPath = values[0]
+	}
+	createdBoxID, createdNotebook, err := model.ImportSYAuto(writePath, notebook, toPath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]any{"type": "document"}
+	if !createdNotebook {
+		return
+	}
+	existed, err := model.Mount(createdBoxID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	box := model.Conf.Box(createdBoxID)
+	if nil == box {
+		ret.Code = -1
+		ret.Msg = "opened notebook [" + createdBoxID + "] not found"
+		return
+	}
+	ret.Data = map[string]any{"type": "notebook", "notebook": box}
 	event := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
 	event.Data = map[string]any{"box": box, "existed": existed}
 	util.PushEvent(event)

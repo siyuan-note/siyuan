@@ -63,6 +63,13 @@ declare namespace Config {
          * Whether to open the user guide after startup
          */
         openHelp: boolean;
+        onboarding: {
+            state: "pending" | "notebook-created" | "completed";
+            newUser: boolean;
+            dismissed: boolean;
+            notebookID: string;
+            documentID: string;
+        };
         /**
          * Publish service
          * 发布服务

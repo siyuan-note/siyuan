@@ -9,8 +9,8 @@ interface IObsidianAnalysis {
     markdownCount: number;
     syntheticParentCount: number;
     nameAdjustmentCount: number;
-    referencedAttachmentCount: number;
-    referencedAttachmentSize: number;
+    importableAssetCount: number;
+    importableAssetSize: number;
     unreferencedFileCount: number;
     wikiLinkCount: number;
     embedCount: number;
@@ -22,6 +22,7 @@ interface IObsidianAnalysis {
     unsupportedCount: number;
     skippedHiddenCount: number;
     skippedLinkCount: number;
+    skippedSpecialCount: number;
     skippedNestedVaultCount: number;
     warnings: string[];
 }
@@ -77,12 +78,12 @@ const formatNonZeroStats = (template: string, counts: number[], values: Record<s
 
 const formatBasicStats = (analysis: IObsidianAnalysis) => formatNonZeroStats(
     window.siyuan.languages.obsidianBasicStats,
-    [analysis.markdownCount, analysis.referencedAttachmentCount],
+    [analysis.markdownCount, analysis.importableAssetCount],
     {
         markdown: analysis.markdownCount,
         assets: window.siyuan.languages.assets,
-        count: analysis.referencedAttachmentCount,
-        size: formatSize(analysis.referencedAttachmentSize),
+        count: analysis.importableAssetCount,
+        size: formatSize(analysis.importableAssetSize),
     });
 
 const formatSyntaxStats = (analysis: IObsidianAnalysis) => formatNonZeroStats(
@@ -172,7 +173,7 @@ const showFailure = (task: IObsidianTask) => {
 };
 
 const showConfirmation = (taskID: string, analysis: IObsidianAnalysis) => {
-    const skippedCount = analysis.skippedHiddenCount + analysis.skippedLinkCount + analysis.skippedNestedVaultCount;
+    const skippedCount = analysis.skippedHiddenCount + analysis.skippedLinkCount + analysis.skippedSpecialCount + analysis.skippedNestedVaultCount;
     const warnings = analysis.warnings || [];
     const basicStats = formatBasicStats(analysis);
     const syntaxStats = formatSyntaxStats(analysis);

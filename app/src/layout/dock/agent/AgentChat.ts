@@ -4,6 +4,7 @@ import {App} from "../../../index";
 import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult, IToolEffects} from "./agentSSE";
 import {genUUID} from "../../../util/genID";
 import {mountComposer} from "./AgentComposer";
+import {disabledWYSIWYG} from "../../../protyle/util/onGet";
 import {getAllEditor} from "../../getAll";
 import "./frontendActions";
 import {listActions, lookupAction} from "./frontendActions";
@@ -43,9 +44,16 @@ const maxVisibleBlockIDs = 50;
 
 type EntryBase = { id?: string };
 type AgentReference = { id: string; title: string };
+type UserEntry = EntryBase & {
+    type: "user";
+    content: string;
+    blockHTML?: string;
+    references?: AgentReference[];
+    timestamp?: number
+};
 
 type SessionEntry =
-    | (EntryBase & { type: "user"; content: string; references?: AgentReference[]; timestamp?: number })
+    | UserEntry
     | (EntryBase & {
     type: "thinking";
     steps: Array<{
@@ -571,12 +579,7 @@ export class AgentChat extends Model {
 
     private rebuildNavMarkers() {
         this.navRail.innerHTML = "";
-        const userEntries = this.entries.filter((e): e is {
-            id?: string;
-            type: "user";
-            content: string;
-            timestamp?: number
-        } => e.type === "user");
+        const userEntries = this.entries.filter((entry): entry is UserEntry => entry.type === "user");
         if (userEntries.length === 0) {
             return;
         }
@@ -1277,9 +1280,8 @@ export class AgentChat extends Model {
             const entryId = (entry as { id?: string }).id;
             switch (entry.type) {
                 case "user":
-                    this.appendUserMessage((entry as { content: string }).content, (entry as {
-                        timestamp?: number
-                    }).timestamp, entryId);
+                    this.appendUserMessage((entry as UserEntry).content, (entry as UserEntry).timestamp, entryId,
+                        (entry as UserEntry).blockHTML);
                     break;
                 case "thinking":
                     if (entry.steps && entry.steps.length > 0) {
@@ -1485,6 +1487,7 @@ export class AgentChat extends Model {
         }
         const sendData = this.composer.getSendData();
         const text = sendData.text;
+        const blockHTML = sendData.blockHTML;
         const refs = sendData.references;
         const editorContext = this.captureEditorContext();
         const pluginActions = this.getPluginActions();
@@ -1505,13 +1508,14 @@ export class AgentChat extends Model {
             id: userEntryId,
             type: "user",
             content: text,
+            blockHTML,
             references: refs.length > 0 ? refs : undefined,
             timestamp: Date.now(),
         });
         if (this.entries.length === 1) {
             this.messagesContainer.innerHTML = "";
         }
-        this.appendUserMessage(text, Date.now(), userEntryId);
+        this.appendUserMessage(text, Date.now(), userEntryId, blockHTML);
         this.rebuildNavMarkers();
         this.tryGenerateTitle();
         if (this.composer) {
@@ -1951,21 +1955,26 @@ export class AgentChat extends Model {
         this.flushThinkingStep();
     }
 
-    private createUserMessage(text: string, timestamp?: number, entryId?: string): HTMLElement {
+    private createUserMessage(text: string, timestamp?: number, entryId?: string, blockHTML?: string): HTMLElement {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--user";
         if (entryId) {
             el.setAttribute("data-message-id", entryId);
         }
-        let html = '<div class="agent-chat__body b3-typography">' + escapeHtml(text) + "</div>";
-        html += '<div class="agent-chat__msg-actions">';
+        const body = document.createElement("div");
+        body.className = "agent-chat__body protyle-wysiwyg";
+        body.setAttribute("contenteditable", "false");
+        body.setAttribute("data-readonly", "true");
+        body.innerHTML = blockHTML || this.lute.Md2BlockDOM(text);
+        el.appendChild(body);
+        let actionsHTML = '<div class="agent-chat__msg-actions">';
         if (timestamp) {
-            html += '<span class="agent-chat__msg-meta agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
+            actionsHTML += '<span class="agent-chat__msg-meta agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
         }
-        html += '<span class="block__icon block__icon--show ariaLabel agent-chat__user-copy" data-position="north" aria-label="' + window.siyuan.languages.copy + '"><svg><use xlink:href="#iconCopy"></use></svg></span>' +
+        actionsHTML += '<span class="block__icon block__icon--show ariaLabel agent-chat__user-copy" data-position="north" aria-label="' + window.siyuan.languages.copy + '"><svg><use xlink:href="#iconCopy"></use></svg></span>' +
             '<span class="block__icon block__icon--show ariaLabel agent-chat__user-edit" data-position="north" aria-label="' + window.siyuan.languages.edit + '"><svg><use xlink:href="#iconEdit"></use></svg></span>' +
             "</div>";
-        el.innerHTML = html;
+        el.insertAdjacentHTML("beforeend", actionsHTML);
         el.querySelector(".agent-chat__user-copy")?.addEventListener("click", (e) => {
             e.stopPropagation();
             navigator.clipboard.writeText(text).then(() => {
@@ -1986,13 +1995,29 @@ export class AgentChat extends Model {
             e.stopPropagation();
             edit(true);
         });
-        el.querySelector(".agent-chat__body")?.addEventListener("click", () => edit());
+        body.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+            if (!target.closest('[data-type~="a"], [data-type~="block-ref"], ' +
+                '[data-type~="file-annotation-ref"], [data-type~="tag"], [data-subtype], a[href], img')) {
+                edit();
+            }
+        });
         return el;
     }
 
-    private appendUserMessage(text: string, timestamp?: number, entryId?: string) {
-        const el = this.createUserMessage(text, timestamp, entryId);
+    private renderUserMessage(el: HTMLElement) {
+        const body = el.querySelector(".agent-chat__body") as HTMLElement;
+        postRender(el, this.app);
+        this.composer?.renderBlockHTML(body, () => {
+            disabledWYSIWYG(body);
+        });
+        disabledWYSIWYG(body);
+    }
+
+    private appendUserMessage(text: string, timestamp?: number, entryId?: string, blockHTML?: string) {
+        const el = this.createUserMessage(text, timestamp, entryId, blockHTML);
         this.messagesContainer.appendChild(el);
+        this.renderUserMessage(el);
         this.scrollToBottom(true);
     }
 
@@ -2000,11 +2025,7 @@ export class AgentChat extends Model {
         if (this.editingUserEntryID || this.isStreaming || this.mirrorLocked) {
             return;
         }
-        const entry = this.entries.find((item): item is EntryBase & {
-            type: "user";
-            content: string;
-            timestamp?: number
-        } => item.type === "user" && item.id === entryID);
+        const entry = this.entries.find((item): item is UserEntry => item.type === "user" && item.id === entryID);
         if (!entry) {
             return;
         }
@@ -2032,7 +2053,9 @@ export class AgentChat extends Model {
             if (this.pendingEditDraft?.entryID === entryID) {
                 this.pendingEditDraft = null;
             }
-            el.replaceWith(this.createUserMessage(entry.content, entry.timestamp, entry.id));
+            const replacement = this.createUserMessage(entry.content, entry.timestamp, entry.id, entry.blockHTML);
+            el.replaceWith(replacement);
+            this.renderUserMessage(replacement);
         };
         cancel.addEventListener("click", restore);
         submit.addEventListener("click", async () => {
@@ -2467,7 +2490,11 @@ export class AgentChat extends Model {
             content: editedContent,
         };
         if (editedContent !== undefined) {
+            const contentChanged = editedContent !== targetEntry.content;
             targetEntry.content = editedContent;
+            if (contentChanged) {
+                targetEntry.blockHTML = undefined;
+            }
             const references = filterAgentReferencesForContent(targetEntry.references || [], editedContent);
             targetEntry.references = references.length > 0 ? references : undefined;
         }
@@ -2483,7 +2510,10 @@ export class AgentChat extends Model {
                 sibling = next;
             }
             if (editedContent !== undefined) {
-                targetEl.replaceWith(this.createUserMessage(targetEntry.content, targetEntry.timestamp, targetEntry.id));
+                const replacement = this.createUserMessage(targetEntry.content, targetEntry.timestamp, targetEntry.id,
+                    targetEntry.blockHTML);
+                targetEl.replaceWith(replacement);
+                this.renderUserMessage(replacement);
             }
         }
         this.currentAIElement = null;

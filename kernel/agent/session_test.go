@@ -289,6 +289,73 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 	}
 }
 
+func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
+	useTestDataDir(t)
+	base := map[string]any{
+		"id":        testSessionID,
+		"title":     "base",
+		"createdAt": int64(1),
+		"updatedAt": int64(1),
+		"entries": []any{
+			map[string]any{
+				"id": "user-1", "type": "user", "content": "original prompt",
+				"references": []any{map[string]any{"id": "block-1", "title": "First block"}},
+			},
+			map[string]any{"id": "assistant-1", "type": "assistant", "content": "old answer"},
+			map[string]any{"id": "user-2", "type": "user", "content": "later prompt"},
+			map[string]any{"id": "assistant-2", "type": "assistant", "content": "later answer"},
+		},
+	}
+	if revision, err := SaveSession(marshalSession(t, base)); err != nil || revision != 1 {
+		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
+	}
+
+	turn := &agentRuntimeTurn{
+		TurnID:       "20260715120008-abcdefg",
+		Mode:         "regenerate",
+		UserEntryID:  "user-1",
+		UserContent:  "edited prompt",
+		BaseRevision: 1,
+		State:        "running",
+		UpdatedAt:    2,
+		Delta: []AgentMessage{{
+			Role:    "assistant",
+			Content: "new answer",
+		}},
+	}
+	emptyReferences := []Reference{}
+	turn.UserReferences = &emptyReferences
+	if err := beginRuntimeTurn(testSessionID, turn, false); err != nil {
+		t.Fatal(err)
+	}
+	turn.State = "interrupted"
+	if err := saveRuntimeTurn(testSessionID, turn, false); err != nil {
+		t.Fatal(err)
+	}
+
+	recovered, err := GetSession(testSessionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	entries := recovered["entries"].([]any)
+	if len(entries) != 2 || entries[0].(map[string]any)["content"] != "edited prompt" ||
+		entries[1].(map[string]any)["content"] != "new answer" {
+		t.Fatalf("regenerated runtime was not recovered consistently: %#v", entries)
+	}
+	if _, ok := entries[0].(map[string]any)["references"]; ok {
+		t.Fatalf("references removed by the edit were restored: %#v", entries[0])
+	}
+	recovered["expectedRevision"] = int64(1)
+	revision, canonical, err := SaveSessionState(marshalSession(t, recovered))
+	if err != nil || revision != 2 {
+		t.Fatalf("commit recovered regenerate turn failed: revision=%d, err=%v", revision, err)
+	}
+	committedEntries := canonical["entries"].([]any)
+	if len(committedEntries) != 2 || committedEntries[0].(map[string]any)["content"] != "edited prompt" {
+		t.Fatalf("committed regenerate turn lost edited content: %#v", committedEntries)
+	}
+}
+
 func TestRejectedNewSessionDoesNotCreateDirectory(t *testing.T) {
 	useTestDataDir(t)
 	const sessionID = "20260715120009-abcdefg"
@@ -552,6 +619,41 @@ func TestApplyRuntimePreservesUIOrderAndReplacesAssistant(t *testing.T) {
 	if entries[2].(map[string]any)["content"] != "server one" ||
 		entries[4].(map[string]any)["content"] != "server two" {
 		t.Fatalf("client assistant content was not replaced: %#v", entries)
+	}
+}
+
+func TestApplyRegenerateRuntimeReplacesUserContent(t *testing.T) {
+	session := map[string]any{
+		"entries": []any{
+			map[string]any{"id": "user-1", "type": "user", "content": "original prompt"},
+			map[string]any{"id": "assistant-1", "type": "assistant", "content": "old answer"},
+			map[string]any{"id": "user-2", "type": "user", "content": "later prompt"},
+			map[string]any{"id": "assistant-2", "type": "assistant", "content": "later answer"},
+		},
+	}
+	turn := &agentRuntimeTurn{
+		TurnID:      "20260715120007-abcdefg",
+		Mode:        "regenerate",
+		UserEntryID: "user-1",
+		UserContent: "edited prompt",
+		UpdatedAt:   1,
+		Delta: []AgentMessage{{
+			Role:    "assistant",
+			Content: "new answer",
+		}},
+	}
+	if err := applyRuntimeTurnToSessionLocked(session, turn); err != nil {
+		t.Fatal(err)
+	}
+	entries := session["entries"].([]any)
+	if len(entries) != 2 {
+		t.Fatalf("regenerated history was not truncated: %#v", entries)
+	}
+	if content := entries[0].(map[string]any)["content"]; content != "edited prompt" {
+		t.Fatalf("edited user content was not restored: %v", content)
+	}
+	if content := entries[1].(map[string]any)["content"]; content != "new answer" {
+		t.Fatalf("regenerated assistant content was not restored: %v", content)
 	}
 }
 

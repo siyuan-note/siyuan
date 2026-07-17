@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "後続のメッセージには実行済みのツール呼び出しが含まれています。再送信すると後続の会話は削除されますが、すでに実行された操作は元に戻りません。続行しますか？",
 	"boxDocEnabled": "最上位のノートブック文書を有効にする",
 	"boxDocEnabledTip": "有効にすると、ノートブック自体にも内容を記録できます",
 	"insertImage": "画像を挿入",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "Obsidian Vault をインポートしています...",
 	"obsidianCompatibilityTip": "Obsidian は非標準の独自 Markdown 構文を使用しています。これらへの対応に専門的な開発作業を行い、現在では一般的なケースの大部分を処理できます。確実に変換できない内容は原文のまま保持されます",
 	"obsidianIssueSummary": "潜在的な問題",
-	"obsidianSkippedSummary": "スキップしたパス：${count}、隠しファイル、シンボリックリンク、入れ子の Vault はインポートしません",
-	"obsidianUnreferencedTip": "参照されていない ${count} 個のファイルはインポートされません",
+	"obsidianSkippedSummary": "スキップしたパス：${count}、隠しファイル、シンボリックリンク、特殊ファイル、入れ子の Vault はインポートしません",
+	"obsidianUnreferencedTip": "参照されていない ${count} 個のファイルは未参照アセットとしてインポートされます",
 	"obsidianImportFailed": "Obsidian Vault のインポートに失敗しました",
 	"openDocument": "文書を開く",
 	"docIconClickExpand": "文書アイコンをクリックして子文書を展開または折りたたむ",

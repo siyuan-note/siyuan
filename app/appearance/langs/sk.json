@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Neskoršie správy obsahujú vykonané volania nástrojov. Opätovné odoslanie odstráni nasledujúcu konverzáciu, ale nezruší už vykonané operácie. Pokračovať?",
 	"boxDocEnabled": "Povoliť dokumenty zápisníka najvyššej úrovne",
 	"boxDocEnabledTip": "Po povolení možno na zaznamenávanie obsahu použiť aj samotný zápisník",
 	"insertImage": "Vložiť obrázok",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "Importuje sa Obsidian Vault...",
 	"obsidianCompatibilityTip": "Obsidian používa niektoré neštandardné súkromné syntaxe Markdown. Venovali sme osobitné vývojové úsilie ich podpore a teraz dokážeme spracovať väčšinu bežných prípadov; obsah, ktorý nemožno spoľahlivo skonvertovať, zostane zachovaný bez zmeny",
 	"obsidianIssueSummary": "Možné problémy",
-	"obsidianSkippedSummary": "Preskočené cesty: ${count}; skryté súbory, symbolické odkazy a vnorené Vaulty sa neimportujú",
-	"obsidianUnreferencedTip": "${count} neodkazovaných súborov sa nebude importovať",
+	"obsidianSkippedSummary": "Preskočené cesty: ${count}; skryté súbory, symbolické odkazy, špeciálne súbory a vnorené Vaulty sa neimportujú",
+	"obsidianUnreferencedTip": "${count} neodkazovaných súborov sa importuje ako neodkazované prílohy",
 	"obsidianImportFailed": "Import Obsidian Vault zlyhal",
 	"openDocument": "Otvoriť dokument",
 	"docIconClickExpand": "Kliknutím na ikonu dokumentu rozbaliť alebo zbaliť podradené dokumenty",

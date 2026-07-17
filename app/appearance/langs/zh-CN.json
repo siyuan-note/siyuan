@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "后续消息包含已执行的工具调用。重新发送将删除后续对话，但不会撤销已经执行的操作。是否继续？",
 	"boxDocEnabled": "启用顶层笔记本文档",
 	"boxDocEnabledTip": "启用后笔记本本身也可用于记录内容",
 	"insertImage": "插入图片",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "正在导入 Obsidian Vault...",
 	"obsidianCompatibilityTip": "Obsidian 使用了一些非标准 Markdown 私有语法。我们已投入专门开发工作进行适配，目前能够处理大部分常见情形；无法可靠转换的内容将保留原文",
 	"obsidianIssueSummary": "潜在问题",
-	"obsidianSkippedSummary": "已跳过路径：${count}，隐藏文件、符号链接和嵌套 Vault 不会导入",
-	"obsidianUnreferencedTip": "${count} 个未被引用的文件不会导入",
+	"obsidianSkippedSummary": "已跳过路径：${count}，隐藏文件、符号链接、特殊文件和嵌套 Vault 不会导入",
+	"obsidianUnreferencedTip": "${count} 个未被引用的文件将作为未引用的资源文件导入",
 	"obsidianImportFailed": "Obsidian Vault 导入失败",
 	"openDocument": "打开文档",
 	"docIconClickExpand": "单击文档图标展开或折叠下级文档",

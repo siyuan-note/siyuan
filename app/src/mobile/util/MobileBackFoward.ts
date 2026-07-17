@@ -17,6 +17,20 @@ import {isEncryptedBox} from "../../util/pathName";
 
 const forwardStack: IBackStack[] = [];
 
+export const clearMobileBackForward = (notebookId?: string) => {
+    if (!notebookId) {
+        window.siyuan.backStack = [];
+        forwardStack.length = 0;
+        return;
+    }
+    window.siyuan.backStack = window.siyuan.backStack.filter(item => item.data?.notebookId !== notebookId);
+    for (let i = forwardStack.length - 1; i >= 0; i--) {
+        if (forwardStack[i].data?.notebookId === notebookId) {
+            forwardStack.splice(i, 1);
+        }
+    }
+};
+
 const focusStack = (backStack: IBackStack) => {
     const protyle = getCurrentEditor().protyle;
     // 前进后快速后退会导致滚动错位 https://ld246.com/article/1734018624070

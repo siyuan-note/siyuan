@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Pesan berikutnya berisi pemanggilan alat yang telah dijalankan. Mengirim ulang akan menghapus percakapan setelahnya, tetapi tidak akan membatalkan operasi yang sudah dijalankan. Lanjutkan?",
 	"boxDocEnabled": "Aktifkan dokumen buku catatan tingkat teratas",
 	"boxDocEnabledTip": "Jika diaktifkan, buku catatan itu sendiri juga dapat digunakan untuk mencatat konten",
 	"insertImage": "Sisipkan gambar",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "Mengimpor Obsidian Vault...",
 	"obsidianCompatibilityTip": "Obsidian menggunakan beberapa sintaks Markdown privat yang tidak standar. Kami telah mencurahkan upaya pengembangan khusus untuk menyesuaikannya dan kini dapat menangani sebagian besar kasus umum; konten yang tidak dapat dikonversi secara andal akan dipertahankan apa adanya",
 	"obsidianIssueSummary": "Potensi masalah",
-	"obsidianSkippedSummary": "Jalur yang dilewati: ${count}; berkas tersembunyi, tautan simbolis, dan Vault bersarang tidak akan diimpor",
-	"obsidianUnreferencedTip": "${count} file yang tidak dirujuk tidak akan diimpor",
+	"obsidianSkippedSummary": "Jalur yang dilewati: ${count}; berkas tersembunyi, tautan simbolis, berkas khusus, dan Vault bersarang tidak akan diimpor",
+	"obsidianUnreferencedTip": "${count} file yang tidak dirujuk akan diimpor sebagai aset yang tidak dirujuk",
 	"obsidianImportFailed": "Impor Obsidian Vault gagal",
 	"openDocument": "Buka dokumen",
 	"docIconClickExpand": "Klik ikon dokumen untuk memperluas atau menciutkan dokumen anak",

@@ -288,6 +288,49 @@ html[data-frontend="browser-desktop"] {
     transition: var(--b3-transition);
   }
 
+  &__item--icon-expand {
+    > .b3-list-item__toggle {
+      position: relative;
+      z-index: 1;
+    }
+
+    > .b3-list-item__icon {
+      position: relative;
+      z-index: 0;
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: -3px 0;
+        left: calc(-1 * var(--file-action-offset));
+        border-radius: var(--b3-border-radius);
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: -3px 0;
+      }
+    }
+
+    > .b3-list-item__toggle:hover,
+    > .b3-list-item__icon:hover {
+      background-color: transparent;
+    }
+
+    > .b3-list-item__toggle:hover ~ .b3-list-item__icon::before,
+    > .b3-list-item__icon:hover::before {
+      background-color: var(--b3-list-icon-hover);
+    }
+  }
+
+  &__item--title-expand > .b3-list-item__text {
+    margin-left: -4px;
+    padding-left: 4px;
+  }
+
   &.sy__file--disablehover {
     .b3-list--background .b3-list-item {
       &:not(.b3-list-item--focus):hover {
@@ -303,6 +346,10 @@ html[data-frontend="browser-desktop"] {
       }
     }
   }
+}
+
+.body--windows .sy__file .b3-list-item__icon {
+  font-size: 16px;
 }
 
 .counter {

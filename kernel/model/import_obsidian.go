@@ -67,28 +67,29 @@ const (
 )
 
 type ObsidianVaultAnalysis struct {
-	VaultName                 string   `json:"vaultName"`
-	VaultPath                 string   `json:"vaultPath"`
-	NotebookName              string   `json:"notebookName"`
-	MarkdownCount             int      `json:"markdownCount"`
-	SyntheticParentCount      int      `json:"syntheticParentCount"`
-	NameAdjustmentCount       int      `json:"nameAdjustmentCount"`
-	ReferencedAttachmentCount int      `json:"referencedAttachmentCount"`
-	ReferencedAttachmentSize  int64    `json:"referencedAttachmentSize"`
-	UnreferencedFileCount     int      `json:"unreferencedFileCount"`
-	WikiLinkCount             int      `json:"wikiLinkCount"`
-	EmbedCount                int      `json:"embedCount"`
-	BlockIDCount              int      `json:"blockIDCount"`
-	FootnoteCount             int      `json:"footnoteCount"`
-	CommentCount              int      `json:"commentCount"`
-	MissingCount              int      `json:"missingCount"`
-	AmbiguousCount            int      `json:"ambiguousCount"`
-	UnsupportedCount          int      `json:"unsupportedCount"`
-	SkippedHiddenCount        int      `json:"skippedHiddenCount"`
-	SkippedLinkCount          int      `json:"skippedLinkCount"`
-	SkippedNestedVaultCount   int      `json:"skippedNestedVaultCount"`
-	BlockingErrors            []string `json:"blockingErrors"`
-	Warnings                  []string `json:"warnings"`
+	VaultName               string   `json:"vaultName"`
+	VaultPath               string   `json:"vaultPath"`
+	NotebookName            string   `json:"notebookName"`
+	MarkdownCount           int      `json:"markdownCount"`
+	SyntheticParentCount    int      `json:"syntheticParentCount"`
+	NameAdjustmentCount     int      `json:"nameAdjustmentCount"`
+	ImportableAssetCount    int      `json:"importableAssetCount"`
+	ImportableAssetSize     int64    `json:"importableAssetSize"`
+	UnreferencedFileCount   int      `json:"unreferencedFileCount"`
+	WikiLinkCount           int      `json:"wikiLinkCount"`
+	EmbedCount              int      `json:"embedCount"`
+	BlockIDCount            int      `json:"blockIDCount"`
+	FootnoteCount           int      `json:"footnoteCount"`
+	CommentCount            int      `json:"commentCount"`
+	MissingCount            int      `json:"missingCount"`
+	AmbiguousCount          int      `json:"ambiguousCount"`
+	UnsupportedCount        int      `json:"unsupportedCount"`
+	SkippedHiddenCount      int      `json:"skippedHiddenCount"`
+	SkippedLinkCount        int      `json:"skippedLinkCount"`
+	SkippedSpecialCount     int      `json:"skippedSpecialCount"`
+	SkippedNestedVaultCount int      `json:"skippedNestedVaultCount"`
+	BlockingErrors          []string `json:"blockingErrors"`
+	Warnings                []string `json:"warnings"`
 }
 
 type ObsidianVaultImportResult struct {
@@ -162,6 +163,7 @@ type obsidianVaultContext struct {
 	DocsByBase       map[string][]*obsidianDocPlan
 	Assets           map[string]*obsidianAssetPlan
 	ReferencedAssets map[string]*obsidianAssetPlan
+	ImportAssets     map[string]*obsidianAssetPlan
 	Analysis         *ObsidianVaultAnalysis
 }
 
@@ -460,7 +462,7 @@ func analyzeObsidianVault(ctx context.Context, localPath string, progress func(i
 	ret := &obsidianVaultContext{
 		Root: root, Files: map[string]*obsidianSourceFile{}, DocsByRel: map[string]*obsidianDocPlan{},
 		DocsByBase: map[string][]*obsidianDocPlan{}, Assets: map[string]*obsidianAssetPlan{},
-		ReferencedAssets: map[string]*obsidianAssetPlan{}, Analysis: &ObsidianVaultAnalysis{
+		ReferencedAssets: map[string]*obsidianAssetPlan{}, ImportAssets: map[string]*obsidianAssetPlan{}, Analysis: &ObsidianVaultAnalysis{
 			VaultName: filepath.Base(root), VaultPath: root, NotebookName: filepath.Base(root), BlockingErrors: []string{}, Warnings: []string{},
 		},
 	}
@@ -477,16 +479,30 @@ func analyzeObsidianVault(ctx context.Context, localPath string, progress func(i
 		return nil, err
 	}
 	ret.Analysis.MarkdownCount = countObsidianSourceDocs(ret.Docs)
-	ret.Analysis.UnreferencedFileCount = len(ret.Assets) - len(ret.ReferencedAssets)
+	var assetKeys []string
+	for key := range ret.Assets {
+		assetKeys = append(assetKeys, key)
+	}
+	sort.Strings(assetKeys)
+	for _, key := range assetKeys {
+		if err = ctx.Err(); err != nil {
+			return nil, err
+		}
+		asset := ret.Assets[key]
+		if err = validateObsidianReadableFile(asset.Source); err != nil {
+			if ret.ReferencedAssets[key] != nil {
+				return nil, fmt.Errorf("read referenced attachment [%s]: %w", asset.Source.RelPath, err)
+			}
+			ret.Analysis.Warnings = append(ret.Analysis.Warnings, asset.Source.RelPath)
+			continue
+		}
+		ret.ImportAssets[key] = asset
+		ret.Analysis.ImportableAssetCount++
+		ret.Analysis.ImportableAssetSize += asset.Source.Size
+	}
+	ret.Analysis.UnreferencedFileCount = len(ret.ImportAssets) - len(ret.ReferencedAssets)
 	if ret.Analysis.UnreferencedFileCount < 0 {
 		ret.Analysis.UnreferencedFileCount = 0
-	}
-	for _, asset := range ret.ReferencedAssets {
-		if err = validateObsidianReadableFile(asset.Source); err != nil {
-			return nil, fmt.Errorf("read referenced attachment [%s]: %w", asset.Source.RelPath, err)
-		}
-		ret.Analysis.ReferencedAttachmentCount++
-		ret.Analysis.ReferencedAttachmentSize += asset.Source.Size
 	}
 	progress(100, "Analysis completed")
 	return ret, nil
@@ -579,6 +595,10 @@ func scanObsidianVaultFiles(ctx context.Context, vault *obsidianVaultContext, re
 			}
 			continue
 		}
+		if !isObsidianImportableFileMode(entryInfo.Mode()) {
+			vault.Analysis.SkippedSpecialCount++
+			continue
+		}
 
 		ext := strings.ToLower(filepath.Ext(name))
 		isMD := ext == ".md"
@@ -594,6 +614,10 @@ func scanObsidianVaultFiles(ctx context.Context, vault *obsidianVaultContext, re
 		}
 	}
 	return nil
+}
+
+func isObsidianImportableFileMode(mode fs.FileMode) bool {
+	return mode.IsRegular()
 }
 
 func isObsidianResolvedLink(p string) bool {
@@ -1541,7 +1565,8 @@ func importObsidianVaultTask(ctx context.Context, taskID, notebookName string) {
 		SyntheticParentCount: vault.Analysis.SyntheticParentCount, NameAdjustmentCount: vault.Analysis.NameAdjustmentCount,
 		UnreferencedFileCount:    vault.Analysis.UnreferencedFileCount,
 		PreservedUnresolvedCount: vault.Analysis.MissingCount + vault.Analysis.UnsupportedCount,
-		SkippedPathCount:         vault.Analysis.SkippedHiddenCount + vault.Analysis.SkippedLinkCount + vault.Analysis.SkippedNestedVaultCount,
+		SkippedPathCount: vault.Analysis.SkippedHiddenCount + vault.Analysis.SkippedLinkCount + vault.Analysis.SkippedSpecialCount +
+			vault.Analysis.SkippedNestedVaultCount,
 	}
 	for index, doc := range vault.Docs {
 		if err := ctx.Err(); err != nil {
@@ -1584,7 +1609,7 @@ func importObsidianVaultTask(ctx context.Context, taskID, notebookName string) {
 		return
 	}
 	var assetKeys []string
-	for key := range vault.ReferencedAssets {
+	for key := range vault.ImportAssets {
 		assetKeys = append(assetKeys, key)
 	}
 	sort.Strings(assetKeys)
@@ -1593,7 +1618,7 @@ func importObsidianVaultTask(ctx context.Context, taskID, notebookName string) {
 			removeObsidianTemp(taskID)
 			return
 		}
-		asset := vault.ReferencedAssets[key]
+		asset := vault.ImportAssets[key]
 		destination := filepath.Join(assetsTemp, asset.FinalName)
 		if err := copyStableObsidianFile(asset.Source, destination); err != nil {
 			failObsidianTask(taskID, "staging", fmt.Errorf("copy attachment [%s]: %w", asset.Source.RelPath, err), nil)
@@ -1601,7 +1626,7 @@ func importObsidianVaultTask(ctx context.Context, taskID, notebookName string) {
 			return
 		}
 		result.ImportedAttachmentCount++
-		updateObsidianTask(taskID, ObsidianTaskStateStaging, 65+(index+1)*15/maxInt(len(assetKeys), 1), "Copying referenced attachments")
+		updateObsidianTask(taskID, ObsidianTaskStateStaging, 65+(index+1)*15/maxInt(len(assetKeys), 1), "Copying attachments")
 	}
 	if err := writeObsidianSortFile(tempRoot, vault.Docs); err != nil {
 		failObsidianTask(taskID, "staging", err, nil)
@@ -1664,7 +1689,7 @@ func importObsidianVaultTask(ctx context.Context, taskID, notebookName string) {
 	}
 
 	for _, key := range assetKeys {
-		asset := vault.ReferencedAssets[key]
+		asset := vault.ImportAssets[key]
 		source := filepath.Join(assetsTemp, asset.FinalName)
 		destination := filepath.Join(util.DataDir, "assets", asset.FinalName)
 		if filelock.IsExist(destination) {
@@ -1740,6 +1765,14 @@ func revalidateObsidianVault(ctx context.Context, vault *obsidianVaultContext) e
 			return errors.New("the Markdown file list changed after analysis")
 		}
 	}
+	if len(vault.Assets) != len(fresh.Assets) {
+		return errors.New("the attachment file list changed after analysis")
+	}
+	for key := range vault.Assets {
+		if fresh.Assets[key] == nil {
+			return errors.New("the attachment file list changed after analysis")
+		}
+	}
 	for _, doc := range vault.Docs {
 		if doc.Synthetic {
 			continue
@@ -1751,7 +1784,7 @@ func revalidateObsidianVault(ctx context.Context, vault *obsidianVaultContext) e
 			return fmt.Errorf("Markdown [%s] changed after analysis: %w", doc.Source.RelPath, err)
 		}
 	}
-	for _, asset := range vault.ReferencedAssets {
+	for _, asset := range vault.ImportAssets {
 		if err := ctx.Err(); err != nil {
 			return err
 		}

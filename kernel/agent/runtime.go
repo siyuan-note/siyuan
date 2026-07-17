@@ -45,6 +45,8 @@ type agentRuntimeTurn struct {
 	Mode              string         `json:"mode"`
 	UserEntryID       string         `json:"userEntryID"`
 	TargetUserEntryID string         `json:"targetUserEntryID,omitempty"`
+	UserContent       string         `json:"userContent,omitempty"`
+	UserReferences    *[]Reference   `json:"userReferences,omitempty"`
 	BaseRevision      int64          `json:"baseRevision"`
 	State             string         `json:"state"`
 	Delta             []AgentMessage `json:"delta,omitempty"`
@@ -319,6 +321,17 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 	anchor := findRuntimeUserAnchor(session, turn.UserEntryID)
 	if anchor < 0 {
 		return fmt.Errorf("agent runtime user entry not found")
+	}
+	if turn.Mode == "regenerate" && turn.UserContent != "" {
+		entry, _ := entries[anchor].(map[string]any)
+		entry["content"] = turn.UserContent
+		if turn.UserReferences != nil {
+			if len(*turn.UserReferences) > 0 {
+				entry["references"] = *turn.UserReferences
+			} else {
+				delete(entry, "references")
+			}
+		}
 	}
 
 	// 当前 turn 的 assistant 内容以 runtime 为权威；前端只补充 thinking/confirm/question 等 UI 条目。

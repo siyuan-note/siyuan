@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Sonraki iletilerde yürütülmüş araç çağrıları bulunuyor. Yeniden gönderme sonraki konuşmayı silecek, ancak daha önce yürütülen işlemleri geri almayacaktır. Devam edilsin mi?",
 	"boxDocEnabled": "Üst düzey not defteri belgelerini etkinleştir",
 	"boxDocEnabledTip": "Etkinleştirildiğinde not defterinin kendisi de içerik kaydetmek için kullanılabilir",
 	"insertImage": "Görsel ekle",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "Obsidian Vault içe aktarılıyor...",
 	"obsidianCompatibilityTip": "Obsidian, standart dışı bazı özel Markdown söz dizimleri kullanır. Bunları uyarlamak için özel geliştirme çalışması yaptık ve artık yaygın durumların çoğunu işleyebiliyoruz; güvenilir biçimde dönüştürülemeyen içerik olduğu gibi korunacaktır",
 	"obsidianIssueSummary": "Olası sorunlar",
-	"obsidianSkippedSummary": "Atlanan yollar: ${count}; gizli dosyalar, sembolik bağlantılar ve iç içe Vaultlar içe aktarılmayacak",
-	"obsidianUnreferencedTip": "Başvurulmayan ${count} dosya içe aktarılmayacak",
+	"obsidianSkippedSummary": "Atlanan yollar: ${count}; gizli dosyalar, sembolik bağlantılar, özel dosyalar ve iç içe Vaultlar içe aktarılmayacak",
+	"obsidianUnreferencedTip": "Başvurulmayan ${count} dosya, başvurulmamış varlıklar olarak içe aktarılacak",
 	"obsidianImportFailed": "Obsidian Vault içe aktarılamadı",
 	"openDocument": "Belgeyi aç",
 	"docIconClickExpand": "Alt belgeleri genişletmek veya daraltmak için belge simgesine tıklayın",

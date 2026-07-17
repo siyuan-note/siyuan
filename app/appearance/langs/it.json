@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "I messaggi successivi includono chiamate a strumenti già eseguite. Il nuovo invio eliminerà la conversazione successiva, ma non annullerà le operazioni già eseguite. Continuare?",
 	"boxDocEnabled": "Abilita i documenti di primo livello del taccuino",
 	"boxDocEnabledTip": "Se abilitato, anche il taccuino stesso può essere usato per registrare contenuti",
 	"insertImage": "Inserisci immagine",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "Importazione di Obsidian Vault...",
 	"obsidianCompatibilityTip": "Obsidian utilizza alcune sintassi Markdown private e non standard. Abbiamo dedicato uno specifico lavoro di sviluppo al loro adattamento e ora possiamo gestire la maggior parte dei casi comuni; i contenuti che non possono essere convertiti in modo affidabile verranno conservati così come sono",
 	"obsidianIssueSummary": "Possibili problemi",
-	"obsidianSkippedSummary": "Percorsi ignorati: ${count}; file nascosti, collegamenti simbolici e Vault annidati non verranno importati",
-	"obsidianUnreferencedTip": "${count} file non referenziati non verranno importati",
+	"obsidianSkippedSummary": "Percorsi ignorati: ${count}; file nascosti, collegamenti simbolici, file speciali e Vault annidati non verranno importati",
+	"obsidianUnreferencedTip": "${count} file non referenziati verranno importati come risorse non referenziate",
 	"obsidianImportFailed": "Importazione di Obsidian Vault non riuscita",
 	"openDocument": "Apri documento",
 	"docIconClickExpand": "Fai clic sull’icona del documento per espandere o comprimere i documenti secondari",

@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "後續訊息包含已執行的工具呼叫。重新傳送將刪除後續對話，但不會撤銷已經執行的操作。是否繼續？",
 	"boxDocEnabled": "啟用頂層筆記本文檔",
 	"boxDocEnabledTip": "啟用後筆記本本身也可用於記錄內容",
 	"insertImage": "插入圖片",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "正在匯入 Obsidian Vault...",
 	"obsidianCompatibilityTip": "Obsidian 使用了一些非標準 Markdown 私有語法。我們已投入專門開發工作進行適配，目前能夠處理大部分常見情形；無法可靠轉換的內容將保留原文",
 	"obsidianIssueSummary": "潛在問題",
-	"obsidianSkippedSummary": "已略過路徑：${count}，隱藏檔案、符號連結和巢狀 Vault 不會匯入",
-	"obsidianUnreferencedTip": "${count} 個未被引用的檔案不會匯入",
+	"obsidianSkippedSummary": "已略過路徑：${count}，隱藏檔案、符號連結、特殊檔案和巢狀 Vault 不會匯入",
+	"obsidianUnreferencedTip": "${count} 個未被引用的檔案將作為未引用的資料文件匯入",
 	"obsidianImportFailed": "Obsidian Vault 匯入失敗",
 	"openDocument": "開啟文件",
 	"docIconClickExpand": "點擊文件圖示展開或折疊下級文件",

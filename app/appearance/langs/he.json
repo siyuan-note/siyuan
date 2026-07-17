@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "ההודעות הבאות כוללות קריאות לכלים שכבר בוצעו. שליחה מחדש תמחק את המשך השיחה, אך לא תבטל פעולות שכבר בוצעו. להמשיך?",
 	"boxDocEnabled": "הפעלת מסמכי מחברת ברמה העליונה",
 	"boxDocEnabledTip": "כאשר האפשרות מופעלת, ניתן להשתמש גם במחברת עצמה לתיעוד תוכן",
 	"insertImage": "הוספת תמונה",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "מתבצע ייבוא של Obsidian Vault...",
 	"obsidianCompatibilityTip": "Obsidian משתמש בתחבירי Markdown פרטיים ולא תקניים. השקענו מאמץ פיתוח ייעודי בהתאמתם וכעת ניתן לטפל ברוב המצבים הנפוצים; תוכן שלא ניתן להמיר באופן אמין יישמר כפי שהוא",
 	"obsidianIssueSummary": "בעיות אפשריות",
-	"obsidianSkippedSummary": "נתיבים שדולגו: ${count}; קבצים מוסתרים, קישורים סמליים ו-Vaults מקוננים לא ייובאו",
-	"obsidianUnreferencedTip": "${count} קבצים ללא הפניה לא ייובאו",
+	"obsidianSkippedSummary": "נתיבים שדולגו: ${count}; קבצים מוסתרים, קישורים סמליים, קבצים מיוחדים ו-Vaults מקוננים לא ייובאו",
+	"obsidianUnreferencedTip": "${count} קבצים ללא הפניה ייובאו כנכסים ללא הפניה",
 	"obsidianImportFailed": "ייבוא Obsidian Vault נכשל",
 	"openDocument": "פתיחת מסמך",
 	"docIconClickExpand": "לחיצה על סמל המסמך כדי להרחיב או לכווץ מסמכי משנה",

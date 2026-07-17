@@ -32,6 +32,7 @@ import {getAllEditor} from "../layout/getAll";
 
 export const onGetConfig = (isStart: boolean, app: App) => {
     correctHotkey(app);
+    document.body.classList.toggle("body--windows", isWindows());
     /// #if !BROWSER
     ipcRenderer.invoke(Constants.SIYUAN_INIT, {
         languages: window.siyuan.languages["_trayMenu"],

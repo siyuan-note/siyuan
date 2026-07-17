@@ -206,6 +206,23 @@
   box-sizing: border-box;
 }
 
+.agent-chat__msg--editing .agent-chat__body {
+  width: min(100%, 560px);
+}
+
+.agent-chat__edit-textarea {
+  display: block;
+  min-height: 96px;
+  width: 100%;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.agent-chat__msg--editing .agent-chat__msg-actions {
+  margin-top: 8px;
+  opacity: 1;
+}
+
 .agent-chat__msg-meta {
   font-size: 13px;
   color: var(--b3-theme-on-surface-light);

@@ -167,3 +167,48 @@ func TestBuildRefUsedOrderByEmpty(t *testing.T) {
 		t.Fatalf("空记录不应生成排序语句：%q", orderBy)
 	}
 }
+
+func TestBuildOrderByPrioritizesExactDocumentAndHeading(t *testing.T) {
+	orderBy := buildOrderBy("数学", 0, 0)
+	assertOrderBySequence(t, orderBy,
+		"content = '数学' AND type = 'd'",
+		"content LIKE '%数学%' AND type = 'd'",
+		"content = '数学' AND type = 'h'",
+		"content LIKE '%数学%' AND type = 'h'",
+		"sort ASC",
+	)
+
+	orderBy = buildOrderBy("数学", 0, 7)
+	assertOrderBySequence(t, orderBy,
+		"content = '数学' AND type = 'd'",
+		"content = '数学' AND type = 'h'",
+		"rank",
+	)
+
+	orderBy = buildOrderBy("数学", 0, 6)
+	if strings.Contains(orderBy, "content = '数学'") {
+		t.Fatalf("按相关度升序不应将完全命中结果置顶：%q", orderBy)
+	}
+}
+
+func TestBuildOrderByEscapesKeyword(t *testing.T) {
+	orderBy := buildOrderBy("O'Reilly", 0, 7)
+	if !strings.Contains(orderBy, "content = 'O''Reilly'") {
+		t.Fatalf("排序语句中的关键词未正确转义：%q", orderBy)
+	}
+}
+
+func assertOrderBySequence(t *testing.T, orderBy string, fragments ...string) {
+	t.Helper()
+	previous := -1
+	for _, fragment := range fragments {
+		current := strings.Index(orderBy, fragment)
+		if 0 > current {
+			t.Fatalf("排序语句缺少 %q：%q", fragment, orderBy)
+		}
+		if current <= previous {
+			t.Fatalf("排序优先级顺序错误，%q 未出现在预期位置：%q", fragment, orderBy)
+		}
+		previous = current
+	}
+}

@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Later messages include executed tool calls. Resending will delete the later conversation, but it will not undo operations that have already run. Continue?",
 	"boxDocEnabled": "Enable top-level notebook documents",
 	"boxDocEnabledTip": "When enabled, the notebook itself can also be used to record content",
 	"insertImage": "Insert image",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "Importing Obsidian Vault...",
 	"obsidianCompatibilityTip": "Obsidian uses some non-standard private Markdown syntax. We have invested dedicated development effort in adapting it and can now handle most common cases; content that cannot be converted reliably will be preserved as-is",
 	"obsidianIssueSummary": "Potential issues",
-	"obsidianSkippedSummary": "Skipped paths: ${count}; hidden files, symbolic links, and nested Vaults will not be imported",
-	"obsidianUnreferencedTip": "${count} unreferenced files will not be imported",
+	"obsidianSkippedSummary": "Skipped paths: ${count}; hidden files, symbolic links, special files, and nested Vaults will not be imported",
+	"obsidianUnreferencedTip": "${count} unreferenced files will be imported as unreferenced assets",
 	"obsidianImportFailed": "Obsidian Vault import failed",
 	"openDocument": "Open document",
 	"docIconClickExpand": "Click document icon to expand or collapse child documents",

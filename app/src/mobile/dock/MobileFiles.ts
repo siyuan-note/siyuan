@@ -208,15 +208,15 @@ export class MobileFiles extends Model {
                     break;
                 } else if (target.tagName === "LI") {
                     this.setCurrent(target);
+                    const ulElement = hasTopClosestByTag(target, "UL");
+                    const notebookId = ulElement ? ulElement.getAttribute("data-url") : "";
                     if (target.getAttribute("data-type") === "navigation-file") {
-                        openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL]);
+                        openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL], undefined, notebookId);
                     } else if (target.getAttribute("data-type") === "navigation-root") {
                         const boxDocID = target.getAttribute("data-node-id");
-                        const ulElement = hasTopClosestByTag(target, "UL");
                         if (boxDocID) {
-                            openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL]);
+                            openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL], undefined, notebookId);
                         } else if (ulElement) {
-                            const notebookId = ulElement.getAttribute("data-url");
                             this.getLeaf(target, notebookId);
                         }
                     }

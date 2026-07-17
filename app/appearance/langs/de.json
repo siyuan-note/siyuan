@@ -1,4 +1,5 @@
 {
+	"agentEditHistoryWarning": "Spätere Nachrichten enthalten ausgeführte Werkzeugaufrufe. Durch erneutes Senden wird der nachfolgende Gesprächsverlauf gelöscht, bereits ausgeführte Vorgänge werden jedoch nicht rückgängig gemacht. Fortfahren?",
 	"boxDocEnabled": "Notebook-Dokumente auf oberster Ebene aktivieren",
 	"boxDocEnabledTip": "Wenn aktiviert, kann auch das Notizbuch selbst zum Erfassen von Inhalten verwendet werden",
 	"insertImage": "Bild einfügen",
@@ -15,8 +16,8 @@
 	"obsidianImporting": "Obsidian Vault wird importiert...",
 	"obsidianCompatibilityTip": "Obsidian verwendet einige nicht standardisierte private Markdown-Syntaxen. Wir haben gezielt Entwicklungsarbeit in ihre Anpassung investiert und können nun die meisten üblichen Fälle verarbeiten; Inhalte, die nicht zuverlässig konvertiert werden können, bleiben unverändert erhalten",
 	"obsidianIssueSummary": "Mögliche Probleme",
-	"obsidianSkippedSummary": "Übersprungene Pfade: ${count}; versteckte Dateien, symbolische Links und verschachtelte Vaults werden nicht importiert",
-	"obsidianUnreferencedTip": "${count} nicht referenzierte Dateien werden nicht importiert",
+	"obsidianSkippedSummary": "Übersprungene Pfade: ${count}; versteckte Dateien, symbolische Links, spezielle Dateien und verschachtelte Vaults werden nicht importiert",
+	"obsidianUnreferencedTip": "${count} nicht referenzierte Dateien werden als nicht referenzierte Assets importiert",
 	"obsidianImportFailed": "Import des Obsidian Vault fehlgeschlagen",
 	"openDocument": "Dokument öffnen",
 	"docIconClickExpand": "Dokumentsymbol zum Ein- oder Ausklappen untergeordneter Dokumente anklicken",

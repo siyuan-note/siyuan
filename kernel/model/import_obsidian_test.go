@@ -32,15 +32,48 @@ func TestAnalyzeObsidianVault(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "image.png"), []byte("image"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.WriteFile(filepath.Join(root, "archive.zip"), []byte("archive"), 0644); err != nil {
+		t.Fatal(err)
+	}
 	vault, err := analyzeObsidianVault(context.Background(), root, func(int, string) {})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if vault.Analysis.MarkdownCount != 1 || vault.Analysis.ReferencedAttachmentCount != 1 || vault.Analysis.UnreferencedFileCount != 0 {
+	if vault.Analysis.MarkdownCount != 1 || vault.Analysis.ImportableAssetCount != 2 || vault.Analysis.ImportableAssetSize != 12 ||
+		vault.Analysis.UnreferencedFileCount != 1 {
 		t.Fatalf("分析统计不正确：%+v", vault.Analysis)
+	}
+	if len(vault.ImportAssets) != 2 || vault.ImportAssets[obsidianPathKey("archive.zip")] == nil {
+		t.Fatalf("未引用资源文件未加入导入计划：%+v", vault.ImportAssets)
 	}
 	if vault.Analysis.SkippedHiddenCount != 0 {
 		t.Fatalf("Vault 配置目录不应计入跳过路径：%d", vault.Analysis.SkippedHiddenCount)
+	}
+}
+
+func TestRevalidateObsidianVaultDetectsAttachmentListChanges(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, ".obsidian"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "Note.md"), []byte("content\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "archive.zip"), []byte("archive"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	vault, err := analyzeObsidianVault(context.Background(), root, func(int, string) {})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = revalidateObsidianVault(context.Background(), vault); err != nil {
+		t.Fatalf("未变更的 Vault 重新校验失败：%v", err)
+	}
+	if err = os.WriteFile(filepath.Join(root, "added.pdf"), []byte("added"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err = revalidateObsidianVault(context.Background(), vault); err == nil || !strings.Contains(err.Error(), "attachment file list changed") {
+		t.Fatalf("资源文件列表变更未被检出：%v", err)
 	}
 }
 
@@ -65,6 +98,17 @@ func TestObsidianVaultValidationErrors(t *testing.T) {
 	_, err := analyzeObsidianVault(context.Background(), missingMarkdown, func(int, string) {})
 	if !errors.Is(err, errObsidianVaultMarkdownMissing) || obsidianVaultErrorLanguage(err) != 340 {
 		t.Fatalf("unexpected missing Markdown error: %v", err)
+	}
+}
+
+func TestIsObsidianImportableFileMode(t *testing.T) {
+	if !isObsidianImportableFileMode(0644) {
+		t.Fatal("普通文件应允许导入")
+	}
+	for _, mode := range []os.FileMode{os.ModeDir, os.ModeNamedPipe, os.ModeSocket, os.ModeDevice, os.ModeCharDevice, os.ModeIrregular} {
+		if isObsidianImportableFileMode(mode) {
+			t.Fatalf("特殊文件不应允许导入：%v", mode)
+		}
 	}
 }
 

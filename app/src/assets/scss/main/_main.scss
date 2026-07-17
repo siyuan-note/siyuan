@@ -169,6 +169,12 @@ html[data-frontend="browser-desktop"] {
     display: flex;
     z-index: 502;
 
+    &-drag {
+      width: 26px;
+      flex-shrink: 0;
+      -webkit-app-region: drag;
+    }
+
     .toolbar__item {
       padding: 13.25px;
       height: 42px;

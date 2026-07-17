@@ -296,6 +296,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             cmd: "isAlwaysOnTop",
         });
         document.body.insertAdjacentHTML("beforeend", `<div class="toolbar__window">
+<div class="toolbar__window-drag"></div>
 <div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages[isAlwaysOnTop ? "unpin" : "pin"]}" id="pinWindow">
     <svg>
         <use xlink:href="#icon${isAlwaysOnTop ? "Unpin" : "Pin"}"></use>

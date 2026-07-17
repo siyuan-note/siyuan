@@ -76,7 +76,7 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
 
             if (isWindowMode) {
                 if (headerRect.right === centerRect.right) {
-                    (headerElement.lastElementChild as HTMLElement).style.marginRight = document.querySelector(".toolbar__window").clientWidth + "px";
+                    (headerElement.lastElementChild as HTMLElement).style.marginRight = document.querySelector(".toolbar__window").clientWidth - 4 + "px";
                 }
             } else {
                 if (headerRect.right < toolbarDragRect.right && headerRect.right === centerRect.right) {

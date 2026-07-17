@@ -102,6 +102,34 @@ func TestBuildBoxesPathFiltersArgCount(t *testing.T) {
 	}
 }
 
+func TestBuildRootIDExclusionFilter(t *testing.T) {
+	rootIDs := []string{"20260716120000-abcdefg", "20260716120001-hijklmn"}
+	clause, args := buildRootIDExclusionFilter(rootIDs, "b.")
+	if " AND b.root_id NOT IN (?, ?)" != clause {
+		t.Fatalf("unexpected root ID exclusion filter: %q", clause)
+	}
+	if countPlaceholder(clause) != len(args) || len(rootIDs) != len(args) {
+		t.Fatalf("root ID filter placeholder/arg mismatch: %q vs %d args", clause, len(args))
+	}
+	for i, arg := range args {
+		if rootIDs[i] != arg {
+			t.Fatalf("root ID arg %d should be %q, got %v", i, rootIDs[i], arg)
+		}
+	}
+
+	clause, args = buildRootIDExclusionFilter(nil)
+	if "" != clause || 0 != len(args) {
+		t.Fatalf("empty root IDs should not generate a filter: %q, %v", clause, args)
+	}
+}
+
+func TestNormalizeBoxName(t *testing.T) {
+	name := "  notebook/name\x00  "
+	if normalized := normalizeBoxName(name); "notebookname" != normalized {
+		t.Fatalf("unexpected normalized notebook name: %q", normalized)
+	}
+}
+
 func countPlaceholder(s string) (n int) {
 	for i := 0; i < len(s); i++ {
 		if s[i] == '?' {

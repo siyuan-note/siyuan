@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "启用顶层笔记本文档",
+	"boxDocEnabledTip": "启用后笔记本本身也可用于记录内容",
 	"insertImage": "插入图片",
 	"obsidianUnreadableFiles": "无法读取的文件：${count}，这些未被引用的文件无法读取且不会导入",
 	"obsidianStatsSeparator": " · ",

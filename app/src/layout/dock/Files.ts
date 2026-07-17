@@ -1016,7 +1016,7 @@ export class Files extends Model {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}">
 <li class="b3-list-item b3-list-item--hide-action" ${window.siyuan.config.fileTree.sort === 6 ? 'draggable="true"' : ""} 
 style="--file-toggle-width:22px" 
-data-type="navigation-root" data-path="/" data-node-id="${item.boxDocID || ""}">
+data-type="navigation-root" data-path="/" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? (item.boxDocID || "") : ""}">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1381,7 +1381,9 @@ data-type="navigation-root" data-path="/" data-node-id="${item.boxDocID || ""}">
             // 有文件树和编辑器的布局初始化时，文件树还未挂载
             return;
         }
-        const boxDocID = window.siyuan.notebooks.find((item) => item.id === notebookId)?.boxDocID;
+        const boxDocID = window.siyuan.config.fileTree.boxDocEnabled
+            ? window.siyuan.notebooks.find((item) => item.id === notebookId)?.boxDocID
+            : "";
         if (boxDocID && filePath === `/${boxDocID}.sy`) {
             const boxDocElement = treeElement.querySelector("[data-type=\"navigation-root\"]") as HTMLElement;
             if (isSetCurrent) {

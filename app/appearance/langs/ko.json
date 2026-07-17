@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "최상위 노트북 문서 활성화",
+	"boxDocEnabledTip": "활성화하면 노트북 자체에도 내용을 기록할 수 있습니다",
 	"insertImage": "이미지 삽입",
 	"obsidianUnreadableFiles": "읽을 수 없는 파일: ${count}; 참조되지 않은 이 파일들은 읽을 수 없어 가져오지 않습니다",
 	"obsidianStatsSeparator": " · ",

@@ -163,7 +163,6 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 
 		attrs := blockAttr["attrs"].(map[string]string)
 		if IsBoxDoc(tree.Box, tree.ID) {
-			attrs[BoxDocAttr] = tree.Box
 			attrs[DocHiddenAttr] = "true"
 			if icon, ok := attrs["icon"]; ok {
 				boxIcons[tree.Box] = filterBoxIcon(icon)
@@ -223,7 +222,6 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	}
 
 	if IsBoxDoc(tree.Box, tree.ID) {
-		nameValues[BoxDocAttr] = tree.Box
 		nameValues[DocHiddenAttr] = "true"
 		if icon, ok := nameValues["icon"]; ok {
 			nameValues["icon"] = filterBoxIcon(icon)

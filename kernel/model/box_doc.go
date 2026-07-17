@@ -40,7 +40,6 @@ import (
 const (
 	boxDocMetaSpec = 1
 	boxDocMetaName = "boxDoc.json"
-	BoxDocAttr     = "custom-sy-box-doc"
 )
 
 type boxDocMeta struct {
@@ -109,6 +108,35 @@ func supportsBoxDoc(boxID string) bool {
 	return !IsUserGuide(boxID) && !IsEncryptedBox(boxID)
 }
 
+func IsBoxDocEnabled() bool {
+	return nil != Conf && nil != Conf.FileTree && nil != Conf.FileTree.BoxDocEnabled && *Conf.FileTree.BoxDocEnabled
+}
+
+func hiddenBoxDocRootIDs() (ret []string) {
+	if IsBoxDocEnabled() || nil == Conf {
+		return
+	}
+	for _, box := range Conf.GetOpenedBoxes() {
+		if "" != box.BoxDocID {
+			ret = append(ret, box.BoxDocID)
+		}
+	}
+	return
+}
+
+func isHiddenBoxDocBlock(id, boxID string) bool {
+	if IsBoxDocEnabled() {
+		return false
+	}
+	var bt *treenode.BlockTree
+	if "" == boxID {
+		bt = treenode.GetBlockTree(id)
+	} else {
+		bt = treenode.GetBlockTreeInBox(id, boxID)
+	}
+	return nil != bt && IsBoxDoc(bt.BoxID, bt.RootID)
+}
+
 func EnsureBoxDoc(boxID string) (boxDocID string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
@@ -121,7 +149,7 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 		return
 	}
 
-	box := Conf.Box(boxID)
+	box := Conf.GetBox(boxID)
 	if nil == box {
 		return "", ErrBoxNotFound
 	}
@@ -141,8 +169,11 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 		}
 		return
 	}
+	if !IsBoxDocEnabled() {
+		return
+	}
 
-	boxDocID, err = findBoxDocByMarker(box)
+	boxDocID, err = findBoxDoc(box)
 	if err != nil {
 		return "", err
 	}
@@ -167,31 +198,23 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 	return
 }
 
-func findBoxDocByMarker(box *Box) (ret string, err error) {
-	files, _, err := box.Ls("/")
-	if err != nil {
-		return "", err
+func RefreshBoxDocFeature() {
+	if IsBoxDocEnabled() {
+		for _, box := range Conf.GetOpenedBoxes() {
+			if _, err := EnsureBoxDoc(box.ID); nil != err {
+				logging.LogErrorf("ensure box document [%s] after enabling feature failed: %s", box.ID, err)
+			}
+		}
 	}
+	ReloadFiletree()
+}
 
-	luteEngine := util.NewLute()
-	for _, file := range files {
-		if file.isdir || !strings.HasSuffix(file.path, ".sy") {
-			continue
-		}
-		id := util.GetTreeID(file.path)
-		if !ast.IsNodeIDPattern(id) {
-			continue
-		}
-		tree, loadErr := filesys.LoadTree(box.ID, file.path, luteEngine)
-		if loadErr != nil || box.ID != tree.Root.IALAttr(BoxDocAttr) {
-			continue
-		}
-		if "" != ret && ret != id {
-			return "", fmt.Errorf("multiple box documents found in notebook [%s]", box.ID)
-		}
-		ret = id
+func findBoxDoc(box *Box) (ret string, err error) {
+	boxDocID := deterministicBoxDocID(box.ID)
+	if "" == boxDocID || !box.Exist(boxDocPath(boxDocID)) {
+		return
 	}
-	return
+	return boxDocID, nil
 }
 
 func createBoxDoc(box *Box, boxDocID string) error {
@@ -202,7 +225,6 @@ func createBoxDoc(box *Box, boxDocID string) error {
 	}
 	p := boxDocPath(boxDocID)
 	tree := treenode.NewTree(box.ID, p, "/"+title, html.EscapeAttrVal(title))
-	tree.Root.SetIALAttr(BoxDocAttr, box.ID)
 	tree.Root.SetIALAttr(DocHiddenAttr, "true")
 	if "" != boxConf.Icon {
 		tree.Root.SetIALAttr("icon", boxConf.Icon)
@@ -239,14 +261,13 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 		title = Conf.Language(16)
 	}
 	titleChanged := tree.Root.IALAttr("title") != title
-	changed := titleChanged || tree.HPath != "/"+title || tree.Root.IALAttr(BoxDocAttr) != box.ID ||
-		tree.Root.IALAttr(DocHiddenAttr) != "true" || tree.Root.IALAttr("icon") != boxConf.Icon
+	changed := titleChanged || tree.HPath != "/"+title || tree.Root.IALAttr(DocHiddenAttr) != "true" ||
+		tree.Root.IALAttr("icon") != boxConf.Icon
 	if !changed {
 		return nil
 	}
 	tree.HPath = "/" + title
 	tree.Root.SetIALAttr("title", title)
-	tree.Root.SetIALAttr(BoxDocAttr, box.ID)
 	tree.Root.SetIALAttr(DocHiddenAttr, "true")
 	if "" == boxConf.Icon {
 		tree.Root.RemoveIALAttr("icon")
@@ -356,10 +377,9 @@ func setBoxDocIcon(boxID, icon string) error {
 	return nil
 }
 
-func removeBoxDocAttrs(tree *parse.Tree) {
+func removeBoxDocHiddenAttr(tree *parse.Tree) {
 	if nil == tree || nil == tree.Root {
 		return
 	}
-	tree.Root.RemoveIALAttr(BoxDocAttr)
 	tree.Root.RemoveIALAttr(DocHiddenAttr)
 }

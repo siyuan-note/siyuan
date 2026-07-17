@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Üst düzey not defteri belgelerini etkinleştir",
+	"boxDocEnabledTip": "Etkinleştirildiğinde not defterinin kendisi de içerik kaydetmek için kullanılabilir",
 	"insertImage": "Görsel ekle",
 	"obsidianUnreadableFiles": "Okunamayan dosyalar: ${count}; başvurulmayan bu dosyalar okunamadı ve içe aktarılmayacak",
 	"obsidianStatsSeparator": " · ",

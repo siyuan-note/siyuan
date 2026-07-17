@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "最上位のノートブック文書を有効にする",
+	"boxDocEnabledTip": "有効にすると、ノートブック自体にも内容を記録できます",
 	"insertImage": "画像を挿入",
 	"obsidianUnreadableFiles": "読み取れないファイル：${count}。これらの参照されていないファイルは読み取れないため、インポートされません",
 	"obsidianStatsSeparator": " · ",

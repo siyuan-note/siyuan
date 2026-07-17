@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Włącz dokumenty notatnika najwyższego poziomu",
+	"boxDocEnabledTip": "Po włączeniu sam notatnik może również służyć do zapisywania treści",
 	"insertImage": "Wstaw obraz",
 	"obsidianUnreadableFiles": "Nieczytelne pliki: ${count}; tych plików bez odwołań nie można odczytać i nie zostaną zaimportowane",
 	"obsidianStatsSeparator": " · ",

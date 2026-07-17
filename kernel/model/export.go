@@ -596,7 +596,7 @@ func ExportSYs(ids []string) (zipPath string) {
 			}
 		}
 	}
-	zipPath = exportSYZip(block.BoxID, path.Dir(block.Path), baseFolderName, docPaths)
+	zipPath = exportSYZip(block.BoxID, path.Dir(block.Path), baseFolderName, docPaths, false)
 	return
 }
 
@@ -2300,11 +2300,11 @@ func exportBoxSYZip(boxID string) (zipPath string) {
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
-	zipPath = exportSYZip(boxID, "/", baseFolderName, docPaths)
+	zipPath = exportSYZip(boxID, "/", baseFolderName, docPaths, true)
 	return
 }
 
-func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (zipPath string) {
+func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, includeBoxConf bool) (zipPath string) {
 	defer util.ClearPushProgress(100)
 
 	dir, name := path.Split(baseFolderName)
@@ -2342,6 +2342,36 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	if err := os.MkdirAll(exportDir, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
+	}
+	if includeBoxConf {
+		boxConf := box.GetConf()
+		boxConf.Sort = 0
+		boxConf.Closed = true
+		boxConf.RefCreateSaveBox = ""
+		boxConf.DocCreateSaveBox = ""
+		boxConf.Encrypted = false
+		boxConf.BoxCrypt = nil
+		confData, marshalErr := gulu.JSON.MarshalIndentJSON(boxConf, "", "  ")
+		if marshalErr != nil {
+			logging.LogErrorf("marshal export notebook conf failed: %s", marshalErr)
+			return
+		}
+		confDir := filepath.Join(exportDir, ".siyuan")
+		if mkdirErr := os.MkdirAll(confDir, 0755); mkdirErr != nil {
+			logging.LogErrorf("create export notebook conf dir failed: %s", mkdirErr)
+			return
+		}
+		if writeErr := os.WriteFile(filepath.Join(confDir, "conf.json"), confData, 0644); writeErr != nil {
+			logging.LogErrorf("write export notebook conf failed: %s", writeErr)
+			return
+		}
+		sourceBoxDocMetaPath := boxDocMetaPath(boxID)
+		if filelock.IsExist(sourceBoxDocMetaPath) {
+			if copyErr := filelock.Copy(sourceBoxDocMetaPath, filepath.Join(confDir, boxDocMetaName)); copyErr != nil {
+				logging.LogErrorf("copy export notebook document metadata failed: %s", copyErr)
+				return
+			}
+		}
 	}
 
 	trees := map[string]*parse.Tree{}

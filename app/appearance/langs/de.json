@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Notebook-Dokumente auf oberster Ebene aktivieren",
+	"boxDocEnabledTip": "Wenn aktiviert, kann auch das Notizbuch selbst zum Erfassen von Inhalten verwendet werden",
 	"insertImage": "Bild einfügen",
 	"obsidianUnreadableFiles": "Nicht lesbare Dateien: ${count}; diese nicht referenzierten Dateien konnten nicht gelesen werden und werden nicht importiert",
 	"obsidianStatsSeparator": " · ",

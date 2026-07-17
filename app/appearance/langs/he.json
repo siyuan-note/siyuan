@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "הפעלת מסמכי מחברת ברמה העליונה",
+	"boxDocEnabledTip": "כאשר האפשרות מופעלת, ניתן להשתמש גם במחברת עצמה לתיעוד תוכן",
 	"insertImage": "הוספת תמונה",
 	"obsidianUnreadableFiles": "קבצים שאינם ניתנים לקריאה: ${count}; לא ניתן היה לקרוא קבצים אלה שאינם מוזכרים, והם לא ייובאו",
 	"obsidianStatsSeparator": " · ",

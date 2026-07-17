@@ -756,6 +756,10 @@ declare namespace Config {
          */
         parentDocClickExpand: boolean;
         /**
+         * Whether to enable top-level notebook documents
+         */
+        boxDocEnabled: boolean;
+        /**
          * Whether to close all tabs when starting
          */
         closeTabsOnStart: boolean;

@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Povoliť dokumenty zápisníka najvyššej úrovne",
+	"boxDocEnabledTip": "Po povolení možno na zaznamenávanie obsahu použiť aj samotný zápisník",
 	"insertImage": "Vložiť obrázok",
 	"obsidianUnreadableFiles": "Nečitateľné súbory: ${count}; tieto súbory bez odkazov sa nepodarilo prečítať a nebudú importované",
 	"obsidianStatsSeparator": " · ",

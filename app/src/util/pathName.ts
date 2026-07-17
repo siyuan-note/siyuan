@@ -764,6 +764,7 @@ export const setNoteBook = (cb?: (notebook: INotebook[]) => void, flashcard = fa
     }, (response) => {
         if (!flashcard) {
             window.siyuan.notebooks = response.data.notebooks;
+            window.siyuan.config.fileTree.boxDocEnabled = response.data.boxDocEnabled;
         }
         if (cb) {
             cb(response.data.notebooks);

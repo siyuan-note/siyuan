@@ -230,6 +230,9 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 		if nil == b {
 			continue
 		}
+		if !IsBoxDocEnabled() && IsBoxDoc(rootBlock.Box, rootBlock.RootID) {
+			continue
+		}
 		hPath := b.Name + rootBlock.HPath
 		if flashcard {
 			newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootBlock.ID, deck, deckBlockIDs)
@@ -1046,7 +1049,7 @@ func DuplicateDoc(tree *parse.Tree) {
 	previousPath := tree.Path
 	resetTree(tree, "Duplicated", false)
 	if isBoxDoc {
-		removeBoxDocAttrs(tree)
+		removeBoxDocHiddenAttr(tree)
 	}
 
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1374,7 +1377,7 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 
 func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
 	ret = []string{}
-	if "/" == hpath {
+	if IsBoxDocEnabled() && "/" == hpath {
 		if box := Conf.Box(boxID); nil != box && "" != box.BoxDocID {
 			return []string{box.BoxDocID}, nil
 		}

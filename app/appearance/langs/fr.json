@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Activer les documents de carnet de niveau supérieur",
+	"boxDocEnabledTip": "Lorsque cette option est activée, le carnet lui-même peut également servir à consigner du contenu",
 	"insertImage": "Insérer une image",
 	"obsidianUnreadableFiles": "Fichiers illisibles : ${count} ; ces fichiers non référencés n’ont pas pu être lus et ne seront pas importés",
 	"obsidianStatsSeparator": " · ",

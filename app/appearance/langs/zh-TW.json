@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "啟用頂層筆記本文檔",
+	"boxDocEnabledTip": "啟用後筆記本本身也可用於記錄內容",
 	"insertImage": "插入圖片",
 	"obsidianUnreadableFiles": "無法讀取的檔案：${count}，這些未被引用的檔案無法讀取且不會匯入",
 	"obsidianStatsSeparator": " · ",

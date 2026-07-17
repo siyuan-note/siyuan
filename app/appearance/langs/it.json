@@ -1,4 +1,6 @@
 {
+	"boxDocEnabled": "Abilita i documenti di primo livello del taccuino",
+	"boxDocEnabledTip": "Se abilitato, anche il taccuino stesso può essere usato per registrare contenuti",
 	"insertImage": "Inserisci immagine",
 	"obsidianUnreadableFiles": "File illeggibili: ${count}; questi file senza riferimenti non possono essere letti e non verranno importati",
 	"obsidianStatsSeparator": " · ",

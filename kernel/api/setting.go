@@ -522,11 +522,20 @@ func setFiletree(c *gin.Context) {
 	}
 
 	fileTree := conf.NewFileTree()
+	fileTree.BoxDocEnabled = nil
 	if err = gulu.JSON.UnmarshalJSON(param, fileTree); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+	if nil == fileTree.BoxDocEnabled {
+		if nil != model.Conf.FileTree && nil != model.Conf.FileTree.BoxDocEnabled {
+			fileTree.BoxDocEnabled = model.Conf.FileTree.BoxDocEnabled
+		} else {
+			fileTree.BoxDocEnabled = func() *bool { b := false; return &b }()
+		}
+	}
+	oldBoxDocEnabled := model.IsBoxDocEnabled()
 
 	fileTree.DocCreateSavePath = util.TrimSpaceInPath(fileTree.DocCreateSavePath)
 
@@ -555,6 +564,9 @@ func setFiletree(c *gin.Context) {
 
 	model.Conf.FileTree = fileTree
 	model.Conf.Save()
+	if oldBoxDocEnabled != model.IsBoxDocEnabled() {
+		model.RefreshBoxDocFeature()
+	}
 
 	util.UseSingleLineSave = model.Conf.FileTree.UseSingleLineSave
 	util.LargeFileWarningSize = model.Conf.FileTree.LargeFileWarningSize

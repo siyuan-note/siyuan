@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {openDataMigration} from "../menus/importData";
+import {openDataMigration} from "../menus/dataMigration";
 import {mountHelp} from "../util/mount";
 import {syncGuide} from "../sync/syncGuide";
 import {openSetting} from "../config";
@@ -126,7 +126,7 @@ const renderOnboarding = (app: App) => {
                 openDataMigration({
                     mode: "onboarding",
                     notebookID: window.siyuan.config.onboarding.notebookID,
-                    onContentComplete: dismissOnboarding,
+                    onContentImportComplete: dismissOnboarding,
                 });
                 break;
             case "sync":

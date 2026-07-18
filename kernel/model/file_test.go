@@ -1,0 +1,153 @@
+// SiYuan - Refactor your thinking
+// Copyright (c) 2020-present, b3log.org
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+package model
+
+import (
+	"errors"
+	"path"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+type fileOperationTestFixture struct {
+	box        *Box
+	sourcePath string
+	targetPath string
+	sourceID   string
+	childID    string
+}
+
+func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
+	originalConf := Conf
+	originalDataDir := util.DataDir
+	originalBlockTreeDBPath := util.BlockTreeDBPath
+	tempDir := t.TempDir()
+	util.DataDir = filepath.Join(tempDir, "data")
+	util.BlockTreeDBPath = filepath.Join(tempDir, "blocktree.db")
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+
+	box := &Box{ID: "20260718000000-abcdefg"}
+	boxConf := conf.NewBoxConf()
+	boxConf.Name = "File operation test"
+	boxConf.Closed = false
+	if err := box.SaveConf(boxConf); err != nil {
+		t.Fatalf("save test notebook conf failed: %v", err)
+	}
+
+	treenode.InitBlockTree(true)
+	sourcePath := "/20260718000001-abcdefg.sy"
+	targetPath := "/20260718000002-abcdefg.sy"
+	sourceTree := treenode.NewTree(box.ID, sourcePath, "/Source", "Source")
+	targetTree := treenode.NewTree(box.ID, targetPath, "/Target", "Target")
+	for _, tree := range []*parse.Tree{sourceTree, targetTree} {
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatalf("write test tree failed: %v", err)
+		}
+		treenode.UpsertBlockTree(tree)
+	}
+
+	t.Cleanup(func() {
+		cache.RemoveTreeData(sourceTree.ID)
+		cache.RemoveTreeData(targetTree.ID)
+		cache.RemoveDocIAL(sourceTree.Path)
+		cache.RemoveDocIAL(targetTree.Path)
+		treenode.CloseDatabase()
+		Conf = originalConf
+		util.DataDir = originalDataDir
+		util.BlockTreeDBPath = originalBlockTreeDBPath
+		if "" != originalBlockTreeDBPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+
+	return &fileOperationTestFixture{
+		box:        box,
+		sourcePath: sourcePath,
+		targetPath: targetPath,
+		sourceID:   sourceTree.ID,
+		childID:    sourceTree.Root.FirstChild.ID,
+	}
+}
+
+func TestRemoveDocRejectsInvalidPath(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+
+	if err := RemoveDoc(fixture.box.ID, "/_REPRO_FLAT"); !errors.Is(err, ErrBlockNotFound) {
+		t.Fatalf("expected invalid document path to return ErrBlockNotFound, got [%v]", err)
+	}
+}
+
+func TestGetBoxesByPathsStrictRejectsInvalidPaths(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	tests := []struct {
+		name  string
+		paths []string
+	}{
+		{name: "empty", paths: nil},
+		{name: "hpath", paths: []string{"/_REPRO_TEST/Sub_Note"}},
+		{name: "hpath with extension", paths: []string{"/_REPRO_FLAT.sy"}},
+		{name: "wrong parent", paths: []string{"/20260718000003-abcdefg/" + fixture.sourceID + ".sy"}},
+		{name: "parent traversal", paths: []string{"/../" + fixture.sourceID + ".sy"}},
+		{name: "child block", paths: []string{"/" + fixture.childID + ".sy"}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if _, err := getBoxesByPathsStrict(test.paths); !errors.Is(err, ErrBlockNotFound) {
+				t.Fatalf("expected invalid document paths [%v] to return ErrBlockNotFound, got [%v]", test.paths, err)
+			}
+		})
+	}
+
+	if _, err := getBoxesByPathsStrict([]string{strings.TrimPrefix(fixture.sourcePath, "/")}); err != nil {
+		t.Fatalf("expected document path without leading slash to remain supported, got [%v]", err)
+	}
+}
+
+func TestMoveDocsRejectsInvalidPathsBeforeMoving(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	newPath := path.Join(strings.TrimSuffix(fixture.targetPath, ".sy"), fixture.sourceID+".sy")
+	tests := []struct {
+		name      string
+		fromPaths []string
+	}{
+		{name: "hpath", fromPaths: []string{"/_REPRO_TEST/Sub_Note"}},
+		{name: "mixed", fromPaths: []string{fixture.sourcePath, "/_REPRO_TEST/Sub_Note"}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if err := MoveDocs(test.fromPaths, fixture.box.ID, fixture.targetPath, nil); !errors.Is(err, ErrBlockNotFound) {
+				t.Fatalf("expected invalid source paths [%v] to return ErrBlockNotFound, got [%v]", test.fromPaths, err)
+			}
+			if !fixture.box.Exist(fixture.sourcePath) {
+				t.Fatalf("source document was moved for invalid source paths [%v]", test.fromPaths)
+			}
+			if fixture.box.Exist(newPath) {
+				t.Fatalf("target document was created for invalid source paths [%v]", test.fromPaths)
+			}
+		})
+	}
+}

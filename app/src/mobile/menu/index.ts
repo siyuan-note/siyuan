@@ -18,7 +18,7 @@ import {bindSettingSaveDelegation} from "../../config/setting/save";
 import {isMobile} from "../../util/functions";
 import {openModel} from "./model";
 import {getCurrentEditor} from "../editor";
-import {openDataMigration} from "../../menus/importData";
+import {openDataMigration} from "../../menus/dataMigration";
 
 const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSettingTab> | undefined => {
     const item = target.closest(".b3-menu__item") as HTMLElement | null;

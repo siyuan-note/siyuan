@@ -128,7 +128,8 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
    - **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
    - When you do commit, follow the style of recent commits (gitmoji prefix + subject, in English)
    - Append the full issue/PR URL to the end of the commit title (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; never put the URL in the commit body, and do not fabricate one
-8. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request; do not start it with `Fix`, and describe the observed behavior directly instead
+8. **GitHub:** Prefer the GitHub CLI (`gh`) for all GitHub operations, including reading issues, comments, pull requests, commits, statuses, and metadata. If `gh` is unavailable or does not support the operation, fall back to the GitHub API or web interface
+9. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request; do not start it with `Fix`, and describe the observed behavior directly instead
 
 ---
 

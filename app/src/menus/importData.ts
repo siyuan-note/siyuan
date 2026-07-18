@@ -136,44 +136,39 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         ${nativeImportHTML}
     </div>
     <div class="fn__hr"></div>
-    <button class="b3-list-item fn__block data-migration__toggle" data-type="advanced-toggle" aria-expanded="false">
-        <span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
-        <span class="b3-list-item__text">${window.siyuan.languages.settingsAndSync}</span>
-    </button>
-    <div class="fn__none" data-type="advanced">
-        <div class="b3-list b3-list--background">
-            <div class="b3-list-item fn__flex-wrap data-migration__item">
-                <svg class="b3-list-item__graphic"><use xlink:href="#iconSettings"></use></svg>
-                <span class="b3-list-item__text">${window.siyuan.languages.config}</span>
-                <span class="data-migration__actions">
-                    ${getImportButton("conf", "application/zip,application/json")}
-                    ${getExportButton("export-conf", mode)}
-                </span>
-            </div>
-            <div class="b3-list-item fn__flex-wrap data-migration__item">
-                <svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg>
-                <span class="b3-list-item__text">S3</span>
-                <span class="data-migration__actions">
-                    ${getImportButton("s3", "application/zip")}
-                    ${getExportButton("export-s3", mode)}
-                </span>
-            </div>
-            <div class="b3-list-item fn__flex-wrap data-migration__item">
-                <svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg>
-                <span class="b3-list-item__text">WebDAV</span>
-                <span class="data-migration__actions">
-                    ${getImportButton("webdav", "application/zip")}
-                    ${getExportButton("export-webdav", mode)}
-                </span>
-            </div>
-            ${mode === "onboarding" && hasRepoKey ? "" : `<div class="b3-list-item fn__flex-wrap data-migration__item" data-type="repo-key">
-                <svg class="b3-list-item__graphic"><use xlink:href="#iconKey"></use></svg>
-                <span class="b3-list-item__text">${window.siyuan.languages.dataRepoKey}</span>
-                <span class="data-migration__actions">
-                    ${hasRepoKey ? `<button class="b3-button b3-button--outline" data-action="copy-key"><svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}</button>` : `<button class="b3-button b3-button--outline" data-action="import-key"><svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}</button>`}
-                </span>
-            </div>`}
+    <div class="b3-label__text">${window.siyuan.languages.settingsAndSync}</div>
+    <div class="b3-list b3-list--background">
+        <div class="b3-list-item fn__flex-wrap data-migration__item">
+            <svg class="b3-list-item__graphic"><use xlink:href="#iconSettings"></use></svg>
+            <span class="b3-list-item__text">${window.siyuan.languages.config}</span>
+            <span class="data-migration__actions">
+                ${getImportButton("conf", "application/zip,application/json")}
+                ${getExportButton("export-conf", mode)}
+            </span>
         </div>
+        <div class="b3-list-item fn__flex-wrap data-migration__item">
+            <svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg>
+            <span class="b3-list-item__text">S3</span>
+            <span class="data-migration__actions">
+                ${getImportButton("s3", "application/zip")}
+                ${getExportButton("export-s3", mode)}
+            </span>
+        </div>
+        <div class="b3-list-item fn__flex-wrap data-migration__item">
+            <svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg>
+            <span class="b3-list-item__text">WebDAV</span>
+            <span class="data-migration__actions">
+                ${getImportButton("webdav", "application/zip")}
+                ${getExportButton("export-webdav", mode)}
+            </span>
+        </div>
+        ${mode === "onboarding" && hasRepoKey ? "" : `<div class="b3-list-item fn__flex-wrap data-migration__item" data-type="repo-key">
+            <svg class="b3-list-item__graphic"><use xlink:href="#iconKey"></use></svg>
+            <span class="b3-list-item__text">${window.siyuan.languages.dataRepoKey}</span>
+            <span class="data-migration__actions">
+                ${hasRepoKey ? `<button class="b3-button b3-button--outline" data-action="copy-key"><svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}</button>` : `<button class="b3-button b3-button--outline" data-action="import-key"><svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}</button>`}
+            </span>
+        </div>`}
     </div>
 </div>`,
         width: "560px",
@@ -291,13 +286,6 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         });
     });
 
-    dialog.element.querySelector('[data-type="advanced-toggle"]').addEventListener("click", (event) => {
-        const toggleElement = event.currentTarget as HTMLElement;
-        const expanded = toggleElement.getAttribute("aria-expanded") === "true";
-        toggleElement.setAttribute("aria-expanded", String(!expanded));
-        toggleElement.querySelector(".b3-list-item__arrow")?.classList.toggle("b3-list-item__arrow--open", !expanded);
-        dialog.element.querySelector('[data-type="advanced"]')?.classList.toggle("fn__none", expanded);
-    });
     dialog.element.addEventListener("click", (event) => {
         const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]")?.dataset.action;
         const exports: Record<string, string> = {

@@ -1370,41 +1370,44 @@ data-type="navigation-root" data-path="/" data-node-id="${window.siyuan.config.f
 
     public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
-        // 获取当前节点后面的兄弟节点（可能是ul，可能没有）
         const leafElement = liElement.nextElementSibling as HTMLElement;
-        // 正在折叠时返回，避免同时执行折叠动画。
+        // 动画结束前忽略重复操作，避免同时修改同一个子列表的展开状态。
         if (leafElement?.dataset.collapsing === "true") {
             return;
         }
         if (toggleElement.classList.contains("b3-list-item__arrow--open") && !focusUpdate) {
             toggleElement.classList.remove("b3-list-item__arrow--open");
-            // 判断后面的兄弟节点是否是子节点
             if (leafElement?.tagName === "UL") {
-                // 标记正在折叠，防止重复执行
                 leafElement.dataset.collapsing = "true";
-                // css 处理
+                // 将 auto 高度固定为当前内容高度，为 height 过渡提供明确的起点。
                 leafElement.style.height = `${leafElement.scrollHeight}px`;
                 leafElement.style.overflow = "hidden";
-                leafElement.classList.add("file-tree__sliderDown");
+                // 折叠使用独立类，避免展开动画的全量清理中断当前过渡。
+                leafElement.classList.add("file-tree__sliderUp");
+                // 下一帧再设置终点，确保浏览器已应用起始高度并触发过渡。
                 requestAnimationFrame(() => {
                     leafElement.style.height = "0";
                 });
 
                 // transitionend 在窗口失焦或关闭动画时可能不触发，超时回调用于确保子列表最终被移除。
                 let removed = false;
+                const onTransitionEnd = (event: TransitionEvent) => {
+                    // 忽略子元素冒泡的过渡事件，仅响应当前列表自身的高度变化。
+                    if (event.target !== leafElement || event.propertyName !== "height") {
+                        return;
+                    }
+                    removeLeaf();
+                };
                 const removeLeaf = () => {
                     if (removed) {
                         return;
                     }
                     removed = true;
+                    leafElement.removeEventListener("transitionend", onTransitionEnd);
                     leafElement.remove();
                     this.getOpenPaths();
                 };
-                leafElement.addEventListener("transitionend", (event) => {
-                    if (event.propertyName === "height") {
-                        removeLeaf();
-                    }
-                }, {once: true});
+                leafElement.addEventListener("transitionend", onTransitionEnd);
                 // 保险，未触发时兜底300ms后强制删除
                 setTimeout(removeLeaf, 300);
             } else {

@@ -245,7 +245,7 @@ export class Files extends Model {
                         }
                         break;
                     } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__toggle")) {
-                        this.getLeaf(target.parentElement, notebookId);
+                        this.getLeaf(target.parentElement, notebookId, false, true);
                         event.preventDefault();
                         event.stopPropagation();
                         window.siyuan.menus.menu.remove();
@@ -1368,16 +1368,26 @@ data-type="navigation-root" data-path="/" data-node-id="${window.siyuan.config.f
         }
     }
 
-    public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {
+    public getLeaf(liElement: Element, notebookId: string, focusUpdate = false, animateCollapse = false) {
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
         const leafElement = liElement.nextElementSibling as HTMLElement;
         // 动画结束前忽略重复操作，避免同时修改同一个子列表的展开状态。
         if (leafElement?.dataset.collapsing === "true") {
+            if (!animateCollapse) {
+                leafElement.remove();
+                this.getOpenPaths();
+            }
             return;
         }
         if (toggleElement.classList.contains("b3-list-item__arrow--open") && !focusUpdate) {
             toggleElement.classList.remove("b3-list-item__arrow--open");
             if (leafElement?.tagName === "UL") {
+                // 仅当手动点击折叠按钮时才需要动画，其他情况下默认直接移除列表容器。
+                if (!animateCollapse) {
+                    leafElement.remove();
+                    this.getOpenPaths();
+                    return;
+                }
                 leafElement.dataset.collapsing = "true";
                 // 将 auto 高度固定为当前内容高度，为 height 过渡提供明确的起点。
                 leafElement.style.height = `${leafElement.scrollHeight}px`;

@@ -430,6 +430,7 @@ func FilterAttributeViewBacklinksByPublishAccess(c *gin.Context, publishAccess P
 	publishIgnore := GetDisablePublishAccess(publishAccess)
 	accessibleTargetAvIDs := map[string]bool{}
 	checkedTargetAvIDs := map[string]bool{}
+	cachedBlockTrees := map[string]map[string]*treenode.BlockTree{}
 	for _, backlink := range backlinks.Items {
 		var relations []*AttributeViewBacklinkRelation
 		for _, relation := range backlink.Relations {
@@ -454,7 +455,16 @@ func FilterAttributeViewBacklinksByPublishAccess(c *gin.Context, publishAccess P
 		backlink.Relations = relations
 
 		databaseAccessible := false
-		for _, bt := range treenode.GetBlockTrees(backlink.BlockIDs) {
+		blockTrees := cachedBlockTrees[backlink.AvID]
+		if nil == blockTrees {
+			blockTrees = treenode.GetBlockTrees(backlink.BlockIDs)
+			cachedBlockTrees[backlink.AvID] = blockTrees
+		}
+		for _, blockID := range backlink.BlockIDs {
+			bt := blockTrees[blockID]
+			if nil == bt {
+				continue
+			}
 			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 			if ("" == password || CheckPublishAuthCookie(c, passwordID, password)) &&
 				CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {

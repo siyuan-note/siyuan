@@ -1868,7 +1868,9 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         label: window.siyuan.languages.rename,
         icon: "iconEdit",
         click() {
-            renameTag(tagElement.textContent.replace(Constants.ZWSP, ""));
+            const tagName = tagElement.textContent.replace(Constants.ZWSP, "");
+            window.siyuan.menus.menu.remove();
+            renameTag(tagName);
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);

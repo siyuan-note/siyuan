@@ -2214,6 +2214,10 @@ declare namespace Config {
          */
         blockId: string;
         /**
+         * 数据库行预览块 ID
+         */
+        databaseRowId?: string;
+        /**
          * Object name
          */
         instance: "Editor";

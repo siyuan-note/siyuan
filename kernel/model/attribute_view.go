@@ -3474,6 +3474,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 				},
 				Pin:   col.Pin,
 				Width: col.Width,
+				Align: col.Align,
 				Calc:  col.Calc,
 			})
 		}
@@ -3578,7 +3579,9 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 		switch firstView.LayoutType {
 		case av.LayoutTypeTable:
 			for _, col := range firstView.Table.Columns {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: col.ID}, Width: col.Width})
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{
+					BaseField: &av.BaseField{ID: col.ID}, Width: col.Width, Align: col.Align,
+				})
 			}
 		case av.LayoutTypeGallery:
 			for _, field := range firstView.Gallery.CardFields {
@@ -4607,6 +4610,7 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 							},
 							Pin:   column.Pin,
 							Width: column.Width,
+							Align: column.Align,
 						},
 					}, view.Table.Columns[i+1:]...)...)
 					break
@@ -4680,6 +4684,45 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 		}
 	case av.LayoutTypeGallery, av.LayoutTypeKanban:
 		return
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColumnAlign(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColAlign(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColAlign(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return
+	}
+
+	if av.LayoutTypeTable != view.LayoutType {
+		return
+	}
+
+	alignValue, ok := operation.Data.(string)
+	align := av.TableColumnAlign(alignValue)
+	if !ok || !align.IsValid() {
+		return av.ErrInvalidColumnAlign
+	}
+	for _, column := range view.Table.Columns {
+		if column.ID == operation.ID {
+			column.Align = align
+			break
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)

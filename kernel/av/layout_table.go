@@ -20,6 +20,22 @@ import (
 	"github.com/88250/lute/ast"
 )
 
+// TableColumnAlign 描述了表格列内容的对齐方式。
+type TableColumnAlign string
+
+const (
+	TableColumnAlignDefault TableColumnAlign = ""
+	TableColumnAlignLeft    TableColumnAlign = "left"
+	TableColumnAlignCenter  TableColumnAlign = "center"
+	TableColumnAlignRight   TableColumnAlign = "right"
+)
+
+// IsValid 判断表格列内容的对齐方式是否合法。
+func (align TableColumnAlign) IsValid() bool {
+	return TableColumnAlignDefault == align || TableColumnAlignLeft == align || TableColumnAlignCenter == align ||
+		TableColumnAlignRight == align
+}
+
 // LayoutTable 描述了表格布局的结构。
 type LayoutTable struct {
 	*BaseLayout
@@ -45,9 +61,10 @@ func NewLayoutTable() *LayoutTable {
 type ViewTableColumn struct {
 	*BaseField
 
-	Pin   bool       `json:"pin"`            // 是否固定
-	Width string     `json:"width"`          // 列宽度
-	Calc  *FieldCalc `json:"calc,omitempty"` // 计算规则
+	Pin   bool             `json:"pin"`             // 是否固定
+	Width string           `json:"width"`           // 列宽度
+	Align TableColumnAlign `json:"align,omitempty"` // 内容对齐方式
+	Calc  *FieldCalc       `json:"calc,omitempty"`  // 计算规则
 }
 
 // Table 描述了表格视图实例的结构。
@@ -63,8 +80,9 @@ type Table struct {
 type TableColumn struct {
 	*BaseInstanceField
 
-	Pin   bool   `json:"pin"`   // 是否固定
-	Width string `json:"width"` // 列宽度
+	Pin   bool             `json:"pin"`   // 是否固定
+	Width string           `json:"width"` // 列宽度
+	Align TableColumnAlign `json:"align"` // 内容对齐方式
 }
 
 // TableRow 描述了表格实例行的结构。

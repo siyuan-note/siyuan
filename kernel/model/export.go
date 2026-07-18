@@ -3329,10 +3329,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
 		av.Sort(table, attrView)
 
-		var aligns []int
-		for range table.Columns {
-			aligns = append(aligns, 0)
-		}
+		aligns := getAttrViewTableAligns(table, avHiddenCol)
 		mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
 		mdTableHead := &ast.Node{Type: ast.NodeTableHead}
 		mdTable.AppendChild(mdTableHead)
@@ -4349,6 +4346,26 @@ func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (
 
 	depth := 1
 	ret = sql.RenderAttributeViewTable(attrView, view, query, &depth, map[string]*av.AttributeView{}, false)
+	return
+}
+
+func getAttrViewTableAligns(table *av.Table, hiddenCol bool) (ret []int) {
+	for _, column := range table.Columns {
+		if hiddenCol && column.Hidden {
+			continue
+		}
+
+		align := 0
+		switch column.Align {
+		case av.TableColumnAlignLeft:
+			align = 1
+		case av.TableColumnAlignCenter:
+			align = 2
+		case av.TableColumnAlignRight:
+			align = 3
+		}
+		ret = append(ret, align)
+	}
 	return
 }
 

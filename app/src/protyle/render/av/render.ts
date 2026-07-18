@@ -165,7 +165,7 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
         }
         contentHTML += `<div class="av__cell av__cell--header" data-col-id="${column.id}"  draggable="true" 
 data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
-data-desc="${escapeAttr(column.desc)}" data-position="north" 
+data-desc="${escapeAttr(column.desc)}" data-align="${column.align || ""}" data-position="north"
 style="width: ${column.width || "200px"};">
     ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${escapeHtml(column.name)}</span>
@@ -631,6 +631,14 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             }
             item.querySelectorAll(".av__row").forEach(rowItem => {
                 (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
+            });
+        });
+        return;
+    }
+    if (operation.action === "setAttrViewColAlign") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"]`).forEach((cellElement: HTMLElement) => {
+                cellElement.dataset.align = operation.data;
             });
         });
         return;

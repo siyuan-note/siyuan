@@ -1,4 +1,5 @@
 {
+	"alignment": "Wyrównanie",
 	"newItemTemplateUnavailableNotebookTip": "Notatnik wybrany wcześniej dla tego szablonu jest zamknięty lub niedostępny. Wybierz ponownie lokalizację zapisu",
 	"specificTime": "Określona data i godzina",
 	"savePath": "Ścieżka zapisu",

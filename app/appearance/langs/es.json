@@ -1,4 +1,5 @@
 {
+	"alignment": "Alineación",
 	"newItemTemplateUnavailableNotebookTip": "El cuaderno seleccionado anteriormente para esta plantilla está cerrado o no disponible. Vuelve a seleccionar una ubicación de guardado",
 	"specificTime": "Fecha y hora específicas",
 	"savePath": "Ruta de guardado",

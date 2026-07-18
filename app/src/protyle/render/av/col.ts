@@ -639,7 +639,7 @@ const addAttrViewColAnimation = (options: {
             }
             let html = "";
             if (item.classList.contains("av__row--header")) {
-                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
+                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" data-align="" style="width: 200px;">
     ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${options.name}</span>
     <div class="av__widthdrag"></div>
@@ -955,6 +955,69 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             }]);
             updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {pin: !isPin});
         }
+    });
+    const align = (cellElement.dataset.align || "") as TAVAlign;
+    const setAlign = (newAlign: TAVAlign) => {
+        if (newAlign === align) {
+            return;
+        }
+        transaction(protyle, [{
+            action: "setAttrViewColAlign",
+            id: colId,
+            avID,
+            data: newAlign,
+            blockID,
+            viewID
+        }], [{
+            action: "setAttrViewColAlign",
+            id: colId,
+            avID,
+            data: align,
+            blockID,
+            viewID
+        }]);
+    };
+    menu.addItem({
+        id: "alignment",
+        icon: "iconAlignSettings",
+        label: window.siyuan.languages.alignment,
+        type: "submenu",
+        submenu: [{
+            id: "alignLeft",
+            icon: "iconAlignLeft",
+            label: window.siyuan.languages.alignLeft,
+            checked: align === "left",
+            click() {
+                setAlign("left");
+            }
+        }, {
+            id: "alignCenter",
+            icon: "iconAlignCenter",
+            label: window.siyuan.languages.alignCenter,
+            checked: align === "center",
+            click() {
+                setAlign("center");
+            }
+        }, {
+            id: "alignRight",
+            icon: "iconAlignRight",
+            label: window.siyuan.languages.alignRight,
+            checked: align === "right",
+            click() {
+                setAlign("right");
+            }
+        }, {
+            id: "separator_1",
+            type: "separator"
+        }, {
+            id: "useDefaultAlign",
+            icon: "",
+            label: window.siyuan.languages.useDefaultAlign,
+            checked: align === "",
+            click() {
+                setAlign("");
+            }
+        }]
     });
     if (type !== "block") {
         menu.addItem({
@@ -1907,6 +1970,7 @@ const genColDataByType = (type: TAVCol, id: string, name: string) => {
         template: "",
         type,
         width: "",
+        align: "",
         wrap: undefined,
         calc: null
     };

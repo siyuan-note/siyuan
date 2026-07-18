@@ -31,6 +31,7 @@ type TOperation =
     | "setAttrViewColHidden"
     | "setAttrViewColWrap"
     | "setAttrViewColWidth"
+    | "setAttrViewColAlign"
     | "updateAttrViewColOptions"
     | "removeAttrViewColOption"
     | "updateAttrViewColOption"
@@ -98,6 +99,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "code-language-update" | "code-language-change" |
     "kernel-plugin-state-change"
 type TAVView = "table" | "gallery" | "kanban"
+type TAVAlign = "" | "left" | "center" | "right"
 type TAVCol =
     "text"
     | "date"
@@ -1102,6 +1104,7 @@ interface IAVSort {
 
 interface IAVColumn {
     width: string,
+    align: TAVAlign,
     icon: string,
     id: string,
     name: string,

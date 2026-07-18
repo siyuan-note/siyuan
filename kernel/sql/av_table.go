@@ -67,6 +67,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			},
 			Width: col.Width,
 			Pin:   col.Pin,
+			Align: col.Align,
 		})
 	}
 

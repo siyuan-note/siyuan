@@ -188,9 +188,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         html += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-col-id="${column.id}" 
 data-wrap="${column.wrap}" 
 data-dtype="${column.type}" 
+data-align="${column.align || ""}"
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${column.width || "200px"};
-${cell.valueType === "number" ? "text-align: right;" : ""}
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
 ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, tableData.showIcon)}</div>`;
 
@@ -375,7 +375,8 @@ export const insertAttrViewBlockAnimation = (options: {
         cellsHTML += `<div class="av__cell${colType === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${item.dataset.colId}" 
 data-wrap="${item.dataset.wrap}" 
 data-dtype="${item.dataset.dtype}" 
-style="width: ${item.style.width};${item.dataset.dtype === "number" ? "text-align: right;" : ""}" 
+data-align="${item.dataset.align || ""}"
+style="width: ${item.style.width};"
 ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(colType, null), lineNumber)}</div>`;
         if (pinIndex === index) {
             cellsHTML += "</div>";

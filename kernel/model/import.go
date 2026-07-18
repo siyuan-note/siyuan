@@ -123,6 +123,8 @@ func ImportSYNotebook(zipPath string) (boxID string, err error) {
 	return importSY(zipPath, "", "/", true, false)
 }
 
+var ErrSYTargetNotebookRequired = errors.New("target notebook required")
+
 func ImportSYAuto(zipPath, boxID, toPath string) (createdBoxID string, notebook bool, err error) {
 	createdBoxID, err = importSY(zipPath, boxID, toPath, false, true)
 	notebook = err == nil && createdBoxID != boxID
@@ -234,6 +236,10 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 			return
 		}
 		createNotebook = isSYNotebookExport(hasImportedBoxConf, hasImportedBoxDocMeta)
+	}
+	if autoDetect && !createNotebook && boxID == "" {
+		err = ErrSYTargetNotebookRequired
+		return
 	}
 	if !createNotebook && nil == Conf.Box(boxID) {
 		err = errors.New(Conf.Language(0))

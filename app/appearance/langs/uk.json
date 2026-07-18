@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Цільовий нотатник",
+	"dataMigration": "Перенесення даних",
+	"settingsAndSync": "Налаштування та синхронізація",
 	"onboardingWelcome": "Ласкаво просимо до SiYuan",
 	"onboardingDescription": "Ваш перший нотатник готовий. Запишіть те, що зараз у вас на думці!",
 	"importExistingData": "Імпортувати наявні дані",

@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "対象ノートブック",
+	"dataMigration": "データ移行",
+	"settingsAndSync": "設定と同期",
 	"onboardingWelcome": "SiYuanへようこそ",
 	"onboardingDescription": "最初のノートブックができました。今のアイデアを書き留めてみましょう！",
 	"importExistingData": "既存データをインポート",

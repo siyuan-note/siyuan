@@ -172,7 +172,7 @@ const showFailure = (task: IObsidianTask) => {
     });
 };
 
-const showConfirmation = (taskID: string, analysis: IObsidianAnalysis) => {
+const showConfirmation = (taskID: string, analysis: IObsidianAnalysis, onComplete?: () => void) => {
     const skippedCount = analysis.skippedHiddenCount + analysis.skippedLinkCount + analysis.skippedSpecialCount + analysis.skippedNestedVaultCount;
     const warnings = analysis.warnings || [];
     const basicStats = formatBasicStats(analysis);
@@ -225,13 +225,14 @@ const showConfirmation = (taskID: string, analysis: IObsidianAnalysis) => {
         const task = await showProgress(taskID, true);
         if (task?.state === "completed" && task.result) {
             showMessage(window.siyuan.languages.imported);
+            onComplete?.();
         } else if (task?.state === "failed") {
             showFailure(task);
         }
     });
 };
 
-export const importObsidianVault = async (localPath: string) => {
+export const importObsidianVault = async (localPath: string, onComplete?: () => void) => {
     const response = await fetchSyncPost("/api/import/startObsidianVaultAnalysis", {localPath});
     if (response.code !== 0) {
         return;
@@ -239,7 +240,7 @@ export const importObsidianVault = async (localPath: string) => {
     const startedTask = response.data as IObsidianTask;
     const task = await showProgress(startedTask.taskID, false);
     if (task?.state === "ready" && task.analysis) {
-        showConfirmation(task.taskID, task.analysis);
+        showConfirmation(task.taskID, task.analysis, onComplete);
     } else if (task?.state === "failed") {
         showFailure(task);
     }

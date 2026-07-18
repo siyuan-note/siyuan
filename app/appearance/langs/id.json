@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Buku catatan tujuan",
+	"dataMigration": "Migrasi data",
+	"settingsAndSync": "Pengaturan dan sinkronisasi",
 	"onboardingWelcome": "Selamat datang di SiYuan",
 	"onboardingDescription": "Buku catatan pertama Anda sudah siap. Tuliskan apa yang sedang Anda pikirkan!",
 	"importExistingData": "Impor data yang ada",

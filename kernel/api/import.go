@@ -25,6 +25,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -32,6 +34,10 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+const stagedSYImportTTL = 30 * time.Minute
+
+var stagedSYImportLock sync.Mutex
 
 func importSY(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -133,6 +139,16 @@ func importSYAuto(c *gin.Context) {
 		toPath = values[0]
 	}
 	createdBoxID, createdNotebook, err := model.ImportSYAuto(writePath, notebook, toPath)
+	if errors.Is(err, model.ErrSYTargetNotebookRequired) {
+		token, stageErr := stageSYImport(writePath)
+		if stageErr != nil {
+			ret.Code = -1
+			ret.Msg = stageErr.Error()
+			return
+		}
+		ret.Data = map[string]any{"type": "document", "token": token}
+		return
+	}
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -159,6 +175,139 @@ func importSYAuto(c *gin.Context) {
 	event := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
 	event.Data = map[string]any{"box": box, "existed": existed}
 	util.PushEvent(event)
+}
+
+func continueImportSY(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var token, notebook string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("token", &token, true, true),
+		util.BindJsonArg("notebook", &notebook, true, true)) {
+		return
+	}
+	zipPath, err := claimStagedSYImport(token)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	defer os.Remove(zipPath)
+	if err = model.ImportSY(zipPath, notebook, "/"); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{"type": "document"}
+}
+
+func cancelImportSY(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var token string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("token", &token, true, true)) {
+		return
+	}
+	if !isValidSYImportToken(token) {
+		ret.Code = -1
+		ret.Msg = "invalid import token"
+		return
+	}
+	stagedSYImportLock.Lock()
+	defer stagedSYImportLock.Unlock()
+	cleanupStagedSYImports()
+	if err := os.Remove(stagedSYImportPath(token)); err != nil && !os.IsNotExist(err) {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+}
+
+func stageSYImport(srcPath string) (token string, err error) {
+	stagedSYImportLock.Lock()
+	defer stagedSYImportLock.Unlock()
+	cleanupStagedSYImports()
+	if err = os.MkdirAll(stagedSYImportDir(), 0755); err != nil {
+		return
+	}
+	for {
+		token = gulu.Rand.String(32)
+		_, statErr := os.Stat(stagedSYImportPath(token))
+		if os.IsNotExist(statErr) {
+			break
+		}
+		if statErr != nil {
+			return "", statErr
+		}
+	}
+	err = os.Rename(srcPath, stagedSYImportPath(token))
+	return
+}
+
+func claimStagedSYImport(token string) (path string, err error) {
+	if !isValidSYImportToken(token) {
+		return "", errors.New("invalid import token")
+	}
+	stagedSYImportLock.Lock()
+	defer stagedSYImportLock.Unlock()
+	cleanupStagedSYImports()
+	srcPath := stagedSYImportPath(token)
+	if _, err = os.Stat(srcPath); err != nil {
+		if os.IsNotExist(err) {
+			err = errors.New("import task not found or expired")
+		}
+		return "", err
+	}
+	path = filepath.Join(stagedSYImportDir(), token+"-importing.zip")
+	err = os.Rename(srcPath, path)
+	return
+}
+
+func cleanupStagedSYImports() {
+	entries, err := os.ReadDir(stagedSYImportDir())
+	if err != nil {
+		return
+	}
+	now := time.Now()
+	for _, entry := range entries {
+		name := entry.Name()
+		if !strings.HasSuffix(name, ".zip") || !isValidSYImportToken(strings.TrimSuffix(name, ".zip")) {
+			continue
+		}
+		info, infoErr := entry.Info()
+		if infoErr == nil && now.Sub(info.ModTime()) > stagedSYImportTTL {
+			_ = os.Remove(filepath.Join(stagedSYImportDir(), name))
+		}
+	}
+}
+
+func stagedSYImportDir() string {
+	return filepath.Join(util.TempDir, "import", "sy")
+}
+
+func stagedSYImportPath(token string) string {
+	return filepath.Join(stagedSYImportDir(), token+".zip")
+}
+
+func isValidSYImportToken(token string) bool {
+	if len(token) != 32 {
+		return false
+	}
+	for _, char := range token {
+		if !(char >= 'a' && char <= 'z') && !(char >= 'A' && char <= 'Z') && !(char >= '0' && char <= '9') {
+			return false
+		}
+	}
+	return true
 }
 
 func saveImportUpload(c *gin.Context) (form *multipart.Form, writePath string, cleanup func(), err error) {

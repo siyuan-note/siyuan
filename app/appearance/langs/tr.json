@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Hedef not defteri",
+	"dataMigration": "Veri taşıma",
+	"settingsAndSync": "Ayarlar ve eşitleme",
 	"onboardingWelcome": "SiYuan'a hoş geldiniz",
 	"onboardingDescription": "İlk not defteriniz hazır. Şu anda aklınızdakileri yazın!",
 	"importExistingData": "Mevcut verileri içe aktar",

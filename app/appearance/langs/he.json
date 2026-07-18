@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "מחברת יעד",
+	"dataMigration": "העברת נתונים",
+	"settingsAndSync": "הגדרות וסנכרון",
 	"onboardingWelcome": "ברוכים הבאים ל-SiYuan",
 	"onboardingDescription": "המחברת הראשונה שלך מוכנה. זה הזמן לכתוב את מה שעובר לך בראש!",
 	"importExistingData": "ייבוא נתונים קיימים",

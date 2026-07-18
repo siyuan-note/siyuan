@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "대상 노트북",
+	"dataMigration": "데이터 마이그레이션",
+	"settingsAndSync": "설정 및 동기화",
 	"onboardingWelcome": "SiYuan에 오신 것을 환영합니다",
 	"onboardingDescription": "첫 번째 노트북이 준비됐어요. 지금 떠오르는 생각을 적어 보세요!",
 	"importExistingData": "기존 데이터 가져오기",

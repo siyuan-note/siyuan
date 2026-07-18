@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Carnet cible",
+	"dataMigration": "Migration des données",
+	"settingsAndSync": "Paramètres et synchronisation",
 	"onboardingWelcome": "Bienvenue dans SiYuan",
 	"onboardingDescription": "Votre premier carnet est prêt. Notez ce qui vous passe par la tête !",
 	"importExistingData": "Importer des données existantes",

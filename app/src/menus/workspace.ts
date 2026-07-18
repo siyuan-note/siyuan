@@ -27,7 +27,7 @@ import {isBrowser} from "../util/functions";
 import {openRecentDocs} from "../business/openRecentDocs";
 import * as dayjs from "dayjs";
 import {upDownHint} from "../util/upDownHint";
-import {openImportData} from "./importData";
+import {openDataMigration} from "./importData";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({
@@ -538,10 +538,10 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             if (!window.siyuan.config.readonly) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "importData",
-                    label: window.siyuan.languages.import,
-                    icon: "iconDownload",
+                    label: window.siyuan.languages.dataMigration,
+                    icon: "iconDatabaseBackup",
                     click: () => {
-                        openImportData();
+                        openDataMigration();
                     }
                 }).element);
             }

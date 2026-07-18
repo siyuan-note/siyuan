@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Caderno de destino",
+	"dataMigration": "Migração de dados",
+	"settingsAndSync": "Configurações e sincronização",
 	"onboardingWelcome": "Boas-vindas ao SiYuan",
 	"onboardingDescription": "Seu primeiro caderno está pronto. Anote o que está passando pela sua cabeça!",
 	"importExistingData": "Importar dados existentes",

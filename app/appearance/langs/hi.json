@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "लक्ष्य नोटबुक",
+	"dataMigration": "डेटा माइग्रेशन",
+	"settingsAndSync": "सेटिंग्स और सिंक",
 	"onboardingWelcome": "SiYuan में आपका स्वागत है",
 	"onboardingDescription": "आपकी पहली नोटबुक तैयार है। अभी मन में चल रहे विचार लिखें!",
 	"importExistingData": "मौजूदा डेटा आयात करें",

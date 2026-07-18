@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Zielnotizbuch",
+	"dataMigration": "Datenmigration",
+	"settingsAndSync": "Einstellungen und Synchronisierung",
 	"onboardingWelcome": "Willkommen bei SiYuan",
 	"onboardingDescription": "Ihr erstes Notizbuch ist bereit. Halten Sie fest, was Ihnen gerade durch den Kopf geht!",
 	"importExistingData": "Vorhandene Daten importieren",

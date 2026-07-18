@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Cieľový zápisník",
+	"dataMigration": "Migrácia údajov",
+	"settingsAndSync": "Nastavenia a synchronizácia",
 	"onboardingWelcome": "Vitajte v SiYuan",
 	"onboardingDescription": "Váš prvý zápisník je pripravený. Zapíšte si, čo vám práve napadlo!",
 	"importExistingData": "Importovať existujúce údaje",

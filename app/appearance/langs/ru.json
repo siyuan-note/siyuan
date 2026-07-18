@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Целевой блокнот",
+	"dataMigration": "Миграция данных",
+	"settingsAndSync": "Настройки и синхронизация",
 	"onboardingWelcome": "Добро пожаловать в SiYuan",
 	"onboardingDescription": "Ваш первый блокнот готов. Запишите то, что сейчас у вас на уме!",
 	"importExistingData": "Импортировать существующие данные",

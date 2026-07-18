@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "目標筆記本",
+	"dataMigration": "資料遷移",
+	"settingsAndSync": "設定與同步",
 	"onboardingWelcome": "歡迎使用思源",
 	"onboardingDescription": "你的第一個筆記本已經準備好啦，寫下此刻的想法吧！",
 	"importExistingData": "匯入已有資料",

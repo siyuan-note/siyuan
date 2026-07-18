@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "دفتر الملاحظات الهدف",
+	"dataMigration": "ترحيل البيانات",
+	"settingsAndSync": "الإعدادات والمزامنة",
 	"onboardingWelcome": "مرحبًا بك في SiYuan",
 	"onboardingDescription": "دفتر ملاحظاتك الأول جاهز! دوّن ما يدور في ذهنك الآن.",
 	"importExistingData": "استيراد البيانات الموجودة",

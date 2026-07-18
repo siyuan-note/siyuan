@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Taccuino di destinazione",
+	"dataMigration": "Migrazione dei dati",
+	"settingsAndSync": "Impostazioni e sincronizzazione",
 	"onboardingWelcome": "Benvenuto in SiYuan",
 	"onboardingDescription": "Il tuo primo taccuino è pronto. Scrivi ciò che hai in mente!",
 	"importExistingData": "Importa dati esistenti",

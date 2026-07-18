@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Target notebook",
+	"dataMigration": "Data migration",
+	"settingsAndSync": "Settings and sync",
 	"onboardingWelcome": "Welcome to SiYuan",
 	"onboardingDescription": "Your first notebook is ready. Write down what's on your mind!",
 	"importExistingData": "Import existing data",

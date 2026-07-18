@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "สมุดบันทึกเป้าหมาย",
+	"dataMigration": "การย้ายข้อมูล",
+	"settingsAndSync": "การตั้งค่าและการซิงค์",
 	"onboardingWelcome": "ยินดีต้อนรับสู่ SiYuan",
 	"onboardingDescription": "สมุดบันทึกแรกของคุณพร้อมแล้ว มาเขียนสิ่งที่กำลังคิดอยู่กันเถอะ!",
 	"importExistingData": "นำเข้าข้อมูลที่มีอยู่",

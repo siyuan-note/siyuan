@@ -1,4 +1,7 @@
 {
+	"targetNotebook": "Doelnotitieboek",
+	"dataMigration": "Gegevensmigratie",
+	"settingsAndSync": "Instellingen en synchronisatie",
 	"onboardingWelcome": "Welkom bij SiYuan",
 	"onboardingDescription": "Je eerste notitieboek is klaar. Schrijf op wat er nu in je opkomt!",
 	"importExistingData": "Bestaande gegevens importeren",

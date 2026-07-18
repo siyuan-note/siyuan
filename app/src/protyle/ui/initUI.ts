@@ -340,6 +340,9 @@ export const setPadding = (protyle: IProtyle) => {
         // pc 端 文档名 attr 过长和添加标签等按钮重合
         protyle.title.element.style.margin = `16px ${paddingRight}px 0 ${paddingLeft}px`;
     }
+    if (protyle.databaseAttributePanel) {
+        protyle.databaseAttributePanel.element.style.margin = `8px ${paddingRight}px 8px ${paddingLeft}px`;
+    }
 
     // https://github.com/siyuan-note/siyuan/issues/15021
     protyle.element.style.setProperty("--b3-width-protyle", protyle.element.clientWidth + "px");

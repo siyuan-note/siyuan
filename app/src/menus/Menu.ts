@@ -72,6 +72,21 @@ export class Menu {
         }
         const itemRect = subMenuElement.parentElement.getBoundingClientRect();
         const subMenuRect = subMenuElement.getBoundingClientRect();
+        if (subMenuElement.dataset.anchor === "action" && !this.element.classList.contains("b3-menu--fullscreen")) {
+            const actionElement = subMenuElement.parentElement.querySelector(":scope > .b3-menu__action") as HTMLElement;
+            if (actionElement) {
+                const actionRect = actionElement.getBoundingClientRect();
+                if (actionRect.right + subMenuRect.width <= window.innerWidth) {
+                    subMenuElement.style.left = `${actionRect.right}px`;
+                    subMenuElement.style.top = `${Math.max(getTopBarHeight(), Math.min(actionRect.top - 9, window.innerHeight - subMenuRect.height - 1))}px`;
+                } else {
+                    subMenuElement.style.left = `${Math.max(0, Math.min(actionRect.right - subMenuRect.width, window.innerWidth - subMenuRect.width))}px`;
+                    const below = actionRect.bottom;
+                    subMenuElement.style.top = `${below + subMenuRect.height <= window.innerHeight ? below : Math.max(getTopBarHeight(), actionRect.top - subMenuRect.height)}px`;
+                }
+                return;
+            }
+        }
 
         // 垂直方向位置调整
         // 减 9px 是为了尽量对齐菜单选项（b3-menu__submenu 的默认 padding-top 加上子菜单首个 b3-menu__item 的默认 margin-top）

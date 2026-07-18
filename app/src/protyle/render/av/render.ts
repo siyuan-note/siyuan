@@ -80,7 +80,10 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             viewData = item;
         }
     });
-    return `<div class="av__header">
+    const defaultTemplate = data.newItemTemplates?.find(item => item.id === data.defaultTemplateID);
+    const defaultTemplateID = defaultTemplate && (defaultTemplate.targetType !== "detached" ||
+        defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
+    return `<div class="av__header" data-default-template-id="${defaultTemplateID}">
         <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
             <div class="layout-tab-bar fn__flex">
                 ${tabHTML}
@@ -116,9 +119,10 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <svg><use xlink:href="#iconSettings"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-add-more" class="block__icon ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.newRow}">
-                <svg><use xlink:href="#iconAdd"></use></svg>
-            </span>
+            ${editable ? `<div class="av__new fn__flex">
+                <button data-type="av-add-more" class="b3-button b3-button--small">${window.siyuan.languages.new}</button>
+                <button data-type="av-add-template" class="b3-button b3-button--small ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.template}"><svg><use xlink:href="#iconDown"></use></svg></button>
+            </div>` : ""}
             <div class="fn__space"></div>
             ${data.isMirror ? ` <span data-av-id="${data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.mirrorTip}">
     <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}

@@ -1,4 +1,11 @@
 {
+	"specificTime": "Waktu tertentu",
+	"savePath": "Jalur penyimpanan",
+	"contentTemplate": "Templat konten",
+	"createDetachedBlock": "Buat blok tidak terikat",
+	"createBoundBlock": "Buat blok terikat",
+	"useTemplate": "Gunakan templat untuk ${x}",
+	"setAsDefault": "Tetapkan sebagai default",
 	"avBacklinks": "${count} tautan balik basis data",
 	"databaseAttrViewMode": "Status default properti basis data",
 	"databaseAttrViewModeTip": "Atur apakah properti basis data diperluas saat membuka dokumen",
@@ -1861,6 +1868,7 @@
 		"quit": "Keluar aplikasi"
 	},
 	"_attrView": {
+		"empty": "Kosong",
 		"table": "Tabel",
 		"gallery": "Kartu",
 		"kanban": "Kanban",

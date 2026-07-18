@@ -1,4 +1,11 @@
 {
+	"specificTime": "具体时间",
+	"savePath": "存放路径",
+	"contentTemplate": "内容模板",
+	"createDetachedBlock": "创建非绑定块",
+	"createBoundBlock": "创建绑定块",
+	"useTemplate": "${x} 使用模板",
+	"setAsDefault": "设为默认",
 	"avBacklinks": "${count} 个反向关联",
 	"databaseAttrViewMode": "数据库属性默认状态",
 	"databaseAttrViewModeTip": "设置打开文档时是否展开数据库属性",
@@ -1861,6 +1868,7 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
+		"empty": "空白",
 		"table": "表格",
 		"gallery": "卡片",
 		"kanban": "看板",

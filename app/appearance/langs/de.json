@@ -1,4 +1,11 @@
 {
+	"specificTime": "Bestimmter Zeitpunkt",
+	"savePath": "Speicherpfad",
+	"contentTemplate": "Inhaltsvorlage",
+	"createDetachedBlock": "Ungebundenen Block erstellen",
+	"createBoundBlock": "Gebundenen Block erstellen",
+	"useTemplate": "Vorlagen für ${x} verwenden",
+	"setAsDefault": "Als Standard festlegen",
 	"avBacklinks": "${count} Datenbank-Rückverknüpfungen",
 	"databaseAttrViewMode": "Standardstatus der Datenbankeigenschaften",
 	"databaseAttrViewModeTip": "Legt fest, ob Datenbankeigenschaften beim Öffnen eines Dokuments erweitert sind",
@@ -1861,6 +1868,7 @@
 		"quit": "Anwendung beenden"
 	},
 	"_attrView": {
+		"empty": "Leer",
 		"table": "Tabelle",
 		"gallery": "Karte",
 		"kanban": "Kanban",

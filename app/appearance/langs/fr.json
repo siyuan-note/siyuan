@@ -1,4 +1,11 @@
 {
+	"specificTime": "Date et heure précises",
+	"savePath": "Chemin d’enregistrement",
+	"contentTemplate": "Modèle de contenu",
+	"createDetachedBlock": "Créer un bloc non lié",
+	"createBoundBlock": "Créer un bloc lié",
+	"useTemplate": "Utiliser des modèles pour ${x}",
+	"setAsDefault": "Définir par défaut",
 	"avBacklinks": "${count} liens retour de base de données",
 	"databaseAttrViewMode": "État par défaut des propriétés de la base de données",
 	"databaseAttrViewModeTip": "Définit si les propriétés de la base de données sont développées à l'ouverture d'un document",
@@ -1861,6 +1868,7 @@
 		"quit": "Quitter le programme"
 	},
 	"_attrView": {
+		"empty": "Vide",
 		"table": "Tableau",
 		"gallery": "Carte",
 		"kanban": "Kanban",

@@ -1,4 +1,11 @@
 {
+	"specificTime": "วันที่และเวลาที่ระบุ",
+	"savePath": "พาธที่บันทึก",
+	"contentTemplate": "เทมเพลตเนื้อหา",
+	"createDetachedBlock": "สร้างบล็อกที่ไม่ผูก",
+	"createBoundBlock": "สร้างบล็อกที่ผูก",
+	"useTemplate": "ใช้เทมเพลตสำหรับ ${x}",
+	"setAsDefault": "ตั้งเป็นค่าเริ่มต้น",
 	"avBacklinks": "ลิงก์ย้อนกลับฐานข้อมูล ${count} รายการ",
 	"databaseAttrViewMode": "สถานะเริ่มต้นของคุณสมบัติฐานข้อมูล",
 	"databaseAttrViewModeTip": "กำหนดว่าจะขยายคุณสมบัติฐานข้อมูลเมื่อเปิดเอกสารหรือไม่",
@@ -1861,6 +1868,7 @@
 		"quit": "ออก"
 	},
 	"_attrView": {
+		"empty": "ว่างเปล่า",
 		"table": "ตาราง",
 		"gallery": "การ์ด",
 		"kanban": "คัมบัง",

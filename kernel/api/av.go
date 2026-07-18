@@ -729,6 +729,39 @@ func getAttributeView(c *gin.Context) {
 	}
 }
 
+func createAttributeViewItem(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var avID, blockID, viewID, templateID, previousID, groupID, app, session string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("avID", &avID, true, false),
+		util.BindJsonArg("blockID", &blockID, true, false),
+		util.BindJsonArg("viewID", &viewID, false, false),
+		util.BindJsonArg("templateID", &templateID, false, false),
+		util.BindJsonArg("previousID", &previousID, false, false),
+		util.BindJsonArg("groupID", &groupID, false, false),
+		util.BindJsonArg("app", &app, false, false),
+		util.BindJsonArg("session", &session, false, false),
+	) {
+		return
+	}
+	result, err := model.CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = result
+	if nil != result.Transaction {
+		pushTransactions(app, session, []*model.Transaction{result.Transaction})
+	}
+}
+
 func searchAttributeView(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -791,13 +824,15 @@ func renderSnapshotAttributeView(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"name":     attrView.Name,
-		"id":       attrView.ID,
-		"viewType": view.GetType(),
-		"viewID":   view.GetID(),
-		"views":    views,
-		"view":     view,
-		"isMirror": av.IsMirror(attrView.ID),
+		"name":              attrView.Name,
+		"id":                attrView.ID,
+		"viewType":          view.GetType(),
+		"viewID":            view.GetID(),
+		"views":             views,
+		"view":              view,
+		"isMirror":          av.IsMirror(attrView.ID),
+		"newItemTemplates":  attrView.NewItemTemplates,
+		"defaultTemplateID": attrView.DefaultTemplateID,
 	}
 }
 
@@ -867,13 +902,15 @@ func renderHistoryAttributeView(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"name":     attrView.Name,
-		"id":       attrView.ID,
-		"viewType": view.GetType(),
-		"viewID":   view.GetID(),
-		"views":    views,
-		"view":     view,
-		"isMirror": av.IsMirror(attrView.ID),
+		"name":              attrView.Name,
+		"id":                attrView.ID,
+		"viewType":          view.GetType(),
+		"viewID":            view.GetID(),
+		"views":             views,
+		"view":              view,
+		"isMirror":          av.IsMirror(attrView.ID),
+		"newItemTemplates":  attrView.NewItemTemplates,
+		"defaultTemplateID": attrView.DefaultTemplateID,
 	}
 }
 
@@ -975,13 +1012,15 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	}
 
 	ret.Data = map[string]any{
-		"name":     attrView.Name,
-		"id":       attrView.ID,
-		"viewType": view.GetType(),
-		"viewID":   view.GetID(),
-		"views":    views,
-		"view":     view,
-		"isMirror": av.IsMirror(attrView.ID),
+		"name":              attrView.Name,
+		"id":                attrView.ID,
+		"viewType":          view.GetType(),
+		"viewID":            view.GetID(),
+		"views":             views,
+		"view":              view,
+		"isMirror":          av.IsMirror(attrView.ID),
+		"newItemTemplates":  attrView.NewItemTemplates,
+		"defaultTemplateID": attrView.DefaultTemplateID,
 	}
 	return
 }

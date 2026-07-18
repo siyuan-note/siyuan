@@ -26,6 +26,7 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -45,13 +46,20 @@ import (
 
 // TemplateSearchResult 描述了模板搜索结果。
 type TemplateSearchResult struct {
-	Path    string `json:"path"`
-	Content string `json:"content"`
+	Path         string `json:"path"`
+	RelativePath string `json:"relativePath"`
+	Content      string `json:"content"`
 }
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
+	return RenderGoTemplateAt(templateContent, time.Now())
+}
+
+// RenderGoTemplateAt 使用固定时间渲染 Go 模板，保证同一次业务操作中的多个模板结果一致。
+func RenderGoTemplateAt(templateContent string, now time.Time) (ret string, err error) {
 	tmpl := template.New("")
 	tplFuncMap := filesys.BuiltInTemplateFuncs()
+	tplFuncMap["now"] = func() time.Time { return now }
 	sql.SQLTemplateFuncs(&tplFuncMap)
 	tmpl = tmpl.Funcs(tplFuncMap)
 	tpl, err := tmpl.Parse(templateContent)
@@ -164,7 +172,11 @@ func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 					content = strings.TrimSuffix(content, ".md")
 					content = filepath.ToSlash(content)
 					_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, Conf.Search.CaseSensitive)
-					b := &TemplateSearchResult{Path: path, Content: content}
+					relativePath, relErr := filepath.Rel(templates, path)
+					if nil != relErr {
+						return nil
+					}
+					b := &TemplateSearchResult{Path: path, RelativePath: filepath.ToSlash(relativePath), Content: content}
 					results = append(results, &result{item: b, score: score})
 				}
 				return nil
@@ -190,7 +202,7 @@ func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 			if hit {
 				content = filepath.ToSlash(content)
 				_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, Conf.Search.CaseSensitive)
-				b := &TemplateSearchResult{Path: filepath.Join(templates, group.Name()), Content: content}
+				b := &TemplateSearchResult{Path: filepath.Join(templates, group.Name()), RelativePath: group.Name(), Content: content}
 				results = append(results, &result{item: b, score: score})
 			}
 		}

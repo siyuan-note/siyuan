@@ -1,4 +1,11 @@
 {
+	"specificTime": "זמן מסוים",
+	"savePath": "נתיב שמירה",
+	"contentTemplate": "תבנית תוכן",
+	"createDetachedBlock": "יצירת בלוק לא מקושר",
+	"createBoundBlock": "יצירת בלוק מקושר",
+	"useTemplate": "שימוש בתבניות עבור ${x}",
+	"setAsDefault": "הגדרה כברירת מחדל",
 	"avBacklinks": "${count} קישורים חוזרים למסד נתונים",
 	"databaseAttrViewMode": "מצב ברירת המחדל של מאפייני מסד הנתונים",
 	"databaseAttrViewModeTip": "הגדר אם מאפייני מסד הנתונים יורחבו בעת פתיחת מסמך",
@@ -1861,6 +1868,7 @@
 		"quit": "צא מהאפליקציה"
 	},
 	"_attrView": {
+		"empty": "ריק",
 		"table": "טבלה",
 		"gallery": "כרטיס",
 		"kanban": "קאנבן",

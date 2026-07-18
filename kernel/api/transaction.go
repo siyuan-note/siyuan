@@ -97,9 +97,7 @@ func pushTransactions(app, session string, transactions []*model.Transaction) {
 	if 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
 		model.FlushTxQueue() // 等待文件写入完成，后续渲染才能读取到最新的数据
 
-		action := transactions[0].DoOperations[0].Action
-		isAttrViewTx := strings.Contains(strings.ToLower(action), "attrview")
-		if isAttrViewTx && "setAttrViewName" != action {
+		if shouldBroadcastAttrViewTransactions(transactions) {
 			pushMode = util.PushModeBroadcast
 		}
 	}
@@ -328,9 +326,7 @@ func pushUndoTransactions(app, session string, transactions []*model.Transaction
 		pushMode = util.PushModeBroadcast
 	}
 	if !includeSelf && 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
-		action := transactions[0].DoOperations[0].Action
-		isAttrViewTx := strings.Contains(strings.ToLower(action), "attrview")
-		if isAttrViewTx && "setAttrViewName" != action {
+		if shouldBroadcastAttrViewTransactions(transactions) {
 			pushMode = util.PushModeBroadcast
 		}
 	}
@@ -364,4 +360,15 @@ func pushUndoTransactions(app, session string, transactions []*model.Transaction
 		tx.WaitForCommit()
 	}
 	util.PushEvent(evt)
+}
+
+func shouldBroadcastAttrViewTransactions(transactions []*model.Transaction) bool {
+	for _, tx := range transactions {
+		for _, operation := range tx.DoOperations {
+			if nil != operation && "setAttrViewName" != operation.Action && strings.Contains(strings.ToLower(operation.Action), "attrview") {
+				return true
+			}
+		}
+	}
+	return false
 }

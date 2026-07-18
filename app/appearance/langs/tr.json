@@ -1,4 +1,11 @@
 {
+	"specificTime": "Belirli tarih ve saat",
+	"savePath": "Kaydetme yolu",
+	"contentTemplate": "İçerik şablonu",
+	"createDetachedBlock": "Bağlanmamış blok oluştur",
+	"createBoundBlock": "Bağlı blok oluştur",
+	"useTemplate": "${x} için şablon kullan",
+	"setAsDefault": "Varsayılan olarak ayarla",
 	"avBacklinks": "${count} veritabanı geri bağlantısı",
 	"databaseAttrViewMode": "Veritabanı özelliklerinin varsayılan durumu",
 	"databaseAttrViewModeTip": "Belge açılırken veritabanı özelliklerinin genişletilip genişletilmeyeceğini ayarlayın",
@@ -1861,6 +1868,7 @@
 		"quit": "Uygulamadan çık"
 	},
 	"_attrView": {
+		"empty": "Boş",
 		"table": "Tablo",
 		"gallery": "Kart görünümü",
 		"kanban": "Kanban",

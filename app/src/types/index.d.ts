@@ -5,6 +5,8 @@ type TDock = "file" | "outline" | "inbox" | "bookmark" | "tag" | "graph" | "glob
 type TTab = "Outline" | "Graph" | "Backlink" | "Asset" | "Editor" | "Search" | "siyuan-card"
 type TOperation =
     "insert"
+    | "restoreCreatedDoc"
+    | "removeCreatedDoc"
     | "update"
     | "delete"
     | "move"
@@ -33,6 +35,7 @@ type TOperation =
     | "removeAttrViewColOption"
     | "updateAttrViewColOption"
     | "setAttrViewName"
+    | "setAttrViewNewItemTemplates"
     | "doUpdateUpdated"
     | "duplicateAttrViewKey"
     | "setAttrViewColIcon"
@@ -977,6 +980,31 @@ interface IAV {
     viewType: TAVView;
     views: IAVView[];
     isMirror?: boolean;
+    newItemTemplates?: IAVNewItemTemplate[];
+    defaultTemplateID?: string;
+}
+
+type TAVNewItemTarget = "detached" | "document";
+type TAVNewItemFieldValueMode = "static" | "currentTime";
+
+interface IAVNewItemSaveLocation {
+    boxID?: string;
+    pathTemplate: string;
+}
+
+interface IAVNewItemFieldValue {
+    mode: TAVNewItemFieldValueMode;
+    value?: IAVCellValue;
+}
+
+interface IAVNewItemTemplate {
+    id: string;
+    name: string;
+    targetType: TAVNewItemTarget;
+    primaryKeyTemplate?: string;
+    fieldValues?: Record<string, IAVNewItemFieldValue>;
+    saveLocation?: IAVNewItemSaveLocation;
+    contentTemplatePath?: string;
 }
 
 interface IAVView {

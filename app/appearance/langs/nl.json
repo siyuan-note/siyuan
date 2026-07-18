@@ -1,4 +1,11 @@
 {
+	"specificTime": "Specifiek tijdstip",
+	"savePath": "Opslagpad",
+	"contentTemplate": "Inhoudssjabloon",
+	"createDetachedBlock": "Niet-gebonden blok maken",
+	"createBoundBlock": "Gebonden blok maken",
+	"useTemplate": "Sjablonen gebruiken voor ${x}",
+	"setAsDefault": "Instellen als standaard",
 	"avBacklinks": "${count} databasebacklinks",
 	"databaseAttrViewMode": "Standaardstatus van database-eigenschappen",
 	"databaseAttrViewModeTip": "Stel in of database-eigenschappen worden uitgevouwen bij het openen van een document",
@@ -1861,6 +1868,7 @@
 		"quit": "Applicatie afsluiten"
 	},
 	"_attrView": {
+		"empty": "Leeg",
 		"table": "Tabel",
 		"gallery": "Kaart",
 		"kanban": "Kanbanbord",

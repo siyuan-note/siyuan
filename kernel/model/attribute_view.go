@@ -3770,6 +3770,30 @@ func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 	return
 }
 
+func (tx *Transaction) doSetAttrViewNewItemTemplates(operation *Operation) (ret *TxErr) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+
+	data, err := gulu.JSON.MarshalJSON(operation.Data)
+	if nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	config := &av.NewItemTemplatesConfig{}
+	if err = gulu.JSON.UnmarshalJSON(data, config); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	if err = attrView.SetNewItemTemplates(config); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	ReloadAttrView(operation.AvID)
+	return
+}
+
 const attrAvNameTpl = `<span data-av-id="${avID}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${avName}</span>`
 
 func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
@@ -5391,7 +5415,6 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 			break
 		}
 	}
-
 	if nil != removedKey && av.KeyTypeRelation == removedKey.Type && nil != removedKey.Relation {
 		if removedKey.Relation.IsTwoWay {
 			var destAv *av.AttributeView

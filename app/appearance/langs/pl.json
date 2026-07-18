@@ -1,4 +1,11 @@
 {
+	"specificTime": "Określona data i godzina",
+	"savePath": "Ścieżka zapisu",
+	"contentTemplate": "Szablon treści",
+	"createDetachedBlock": "Utwórz niepowiązany blok",
+	"createBoundBlock": "Utwórz powiązany blok",
+	"useTemplate": "Użyj szablonów dla ${x}",
+	"setAsDefault": "Ustaw jako domyślny",
 	"avBacklinks": "${count} linków zwrotnych bazy danych",
 	"databaseAttrViewMode": "Domyślny stan właściwości bazy danych",
 	"databaseAttrViewModeTip": "Ustaw, czy właściwości bazy danych mają być rozwinięte podczas otwierania dokumentu",
@@ -1861,6 +1868,7 @@
 		"quit": "Zamknij aplikację"
 	},
 	"_attrView": {
+		"empty": "Pusty",
 		"table": "Tabela",
 		"gallery": "Karta",
 		"kanban": "Kanban",

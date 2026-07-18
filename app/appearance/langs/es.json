@@ -1,4 +1,11 @@
 {
+	"specificTime": "Fecha y hora específicas",
+	"savePath": "Ruta de guardado",
+	"contentTemplate": "Plantilla de contenido",
+	"createDetachedBlock": "Crear bloque no vinculado",
+	"createBoundBlock": "Crear bloque vinculado",
+	"useTemplate": "Usar plantillas para ${x}",
+	"setAsDefault": "Establecer como predeterminado",
 	"avBacklinks": "${count} enlaces inversos de base de datos",
 	"databaseAttrViewMode": "Estado predeterminado de las propiedades de la base de datos",
 	"databaseAttrViewModeTip": "Define si las propiedades de la base de datos se expanden al abrir un documento",
@@ -1861,6 +1868,7 @@
 		"quit": "Salir de la aplicación"
 	},
 	"_attrView": {
+		"empty": "Vacío",
 		"table": "Tabla",
 		"gallery": "Tarjeta",
 		"kanban": "Kanban",

@@ -1,4 +1,11 @@
 {
+	"specificTime": "Data e ora specifiche",
+	"savePath": "Percorso di salvataggio",
+	"contentTemplate": "Modello di contenuto",
+	"createDetachedBlock": "Crea blocco non associato",
+	"createBoundBlock": "Crea blocco associato",
+	"useTemplate": "Usa modelli per ${x}",
+	"setAsDefault": "Imposta come predefinito",
 	"avBacklinks": "${count} backlink del database",
 	"databaseAttrViewMode": "Stato predefinito delle proprietà del database",
 	"databaseAttrViewModeTip": "Imposta se le proprietà del database vengono espanse all'apertura di un documento",
@@ -1861,6 +1868,7 @@
 		"quit": "Esci dall'applicazione"
 	},
 	"_attrView": {
+		"empty": "Vuoto",
 		"table": "Tabella",
 		"gallery": "Scheda",
 		"kanban": "Kanban",

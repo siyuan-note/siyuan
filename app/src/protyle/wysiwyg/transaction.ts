@@ -75,7 +75,8 @@ const promiseTransaction = (options: {
     protyle: IProtyle,
     doOperations: IOperation[],
     undoOperations: IOperation[],
-    skipSync: boolean
+    skipSync: boolean,
+    callback?: () => void,
 }) => {
     const protyle = options.protyle;
     // 受影响的嵌入块需推迟到事务提交后再渲染，否则其查询请求会早于写入到达内核而拿到旧数据
@@ -348,6 +349,7 @@ const promiseTransaction = (options: {
                 blockRender(protyle, item);
             }
         });
+        options.callback?.();
     });
 };
 
@@ -1009,7 +1011,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         if (["addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
             "updateAttrViewColOption", "updateAttrViewCell", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
             "setAttrViewColWrap", "setAttrViewColWidth", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
-            "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "removeAttrViewBlock",
+            "setAttrViewSorts", "setAttrViewNewItemTemplates", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "removeAttrViewBlock",
             "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColPin", "addAttrViewView", "setAttrViewColIcon",
             "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "duplicateAttrViewRow", "sortAttrViewView",
             "updateAttrViewColRelation", "setAttrViewPageSize", "updateAttrViewColRollup", "sortAttrViewKey", "setAttrViewColDesc",
@@ -1480,7 +1482,8 @@ export const turnsOneInto = async (options: {
 
 export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoOperations?: IOperation[],
                             options?: {
-                                skipSync?: boolean
+                                skipSync?: boolean,
+                                callback?: () => void,
                             }) => {
     if (doOperations.length === 0) {
         return;
@@ -1493,7 +1496,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             transactions: [{
                 doOperations
             }]
-        });
+        }, options?.callback);
         return;
     }
     if (undoOperations) {
@@ -1511,6 +1514,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         doOperations: doOperations,
         undoOperations: undoOperations,
         skipSync: options?.skipSync,
+        callback: options?.callback,
     });
     // 插入块后会导致高度变化，从而产生再次定位 https://github.com/siyuan-note/siyuan/issues/11798
     doOperations.find(item => {

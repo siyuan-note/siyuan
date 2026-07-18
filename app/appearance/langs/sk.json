@@ -1,4 +1,11 @@
 {
+	"specificTime": "Konkrétny dátum a čas",
+	"savePath": "Cesta uloženia",
+	"contentTemplate": "Šablóna obsahu",
+	"createDetachedBlock": "Vytvoriť neviazaný blok",
+	"createBoundBlock": "Vytvoriť viazaný blok",
+	"useTemplate": "Použiť šablóny pre ${x}",
+	"setAsDefault": "Nastaviť ako predvolené",
 	"avBacklinks": "${count} spätných odkazov databázy",
 	"databaseAttrViewMode": "Predvolený stav vlastností databázy",
 	"databaseAttrViewModeTip": "Nastaví, či sa vlastnosti databázy rozbalia pri otvorení dokumentu",
@@ -1861,6 +1868,7 @@
 		"quit": "Ukončiť aplikáciu"
 	},
 	"_attrView": {
+		"empty": "Prázdne",
 		"table": "Tabuľka",
 		"gallery": "Karta",
 		"kanban": "Kanban",

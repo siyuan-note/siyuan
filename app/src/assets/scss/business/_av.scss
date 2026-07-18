@@ -108,6 +108,29 @@
     }
   }
 
+  &__new {
+    .b3-button {
+      min-height: 24px;
+
+      &:first-child {
+        border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
+        padding: 0 8px;
+      }
+
+      &:last-child {
+        border-left: 1px solid rgba(255, 255, 255, .25);
+        border-radius: 0 var(--b3-border-radius) var(--b3-border-radius) 0;
+        padding: 0 4px;
+
+        svg {
+          height: 12px;
+          margin: 0;
+          width: 12px;
+        }
+      }
+    }
+  }
+
   &__title {
     outline: none;
     font-weight: bold;

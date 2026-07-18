@@ -1,4 +1,11 @@
 {
+	"specificTime": "विशिष्ट समय",
+	"savePath": "सहेजने का पथ",
+	"contentTemplate": "सामग्री टेम्पलेट",
+	"createDetachedBlock": "अनबाउंड ब्लॉक बनाएँ",
+	"createBoundBlock": "बाउंड ब्लॉक बनाएँ",
+	"useTemplate": "${x} के लिए टेम्पलेट का उपयोग करें",
+	"setAsDefault": "डिफ़ॉल्ट के रूप में सेट करें",
 	"avBacklinks": "${count} डेटाबेस बैकलिंक",
 	"databaseAttrViewMode": "डेटाबेस गुणों की डिफ़ॉल्ट स्थिति",
 	"databaseAttrViewModeTip": "तय करें कि दस्तावेज़ खोलते समय डेटाबेस गुण विस्तृत हों या नहीं",
@@ -1861,6 +1868,7 @@
 		"quit": "एप्लिकेशन से बाहर निकलें"
 	},
 	"_attrView": {
+		"empty": "खाली",
 		"table": "तालिका",
 		"gallery": "कार्ड",
 		"kanban": "कानबन",

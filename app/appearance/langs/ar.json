@@ -1,4 +1,11 @@
 {
+	"specificTime": "وقت محدد",
+	"savePath": "مسار الحفظ",
+	"contentTemplate": "قالب المحتوى",
+	"createDetachedBlock": "إنشاء كتلة غير مرتبطة",
+	"createBoundBlock": "إنشاء كتلة مرتبطة",
+	"useTemplate": "استخدام القوالب لـ ${x}",
+	"setAsDefault": "تعيين كافتراضي",
 	"avBacklinks": "${count} روابط عكسية لقاعدة البيانات",
 	"databaseAttrViewMode": "الحالة الافتراضية لخصائص قاعدة البيانات",
 	"databaseAttrViewModeTip": "تحديد ما إذا كانت خصائص قاعدة البيانات موسعة عند فتح مستند",
@@ -1861,6 +1868,7 @@
 		"quit": "خروج من التطبيق"
 	},
 	"_attrView": {
+		"empty": "فارغ",
 		"table": "جدول",
 		"gallery": "بطاقة",
 		"kanban": "Kanban",

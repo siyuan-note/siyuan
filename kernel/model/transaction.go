@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -226,6 +227,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			switch op.Action {
 			case "create":
 				ret = tx.doCreate(op)
+			case "restoreCreatedDoc":
+				ret = tx.doRestoreCreatedDoc(op)
+			case "removeCreatedDoc":
+				ret = tx.doRemoveCreatedDoc(op)
 			case "update":
 				ret = tx.doUpdate(op)
 			case "insert":
@@ -256,6 +261,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doRemoveFlashcards(op)
 			case "setAttrViewName":
 				ret = tx.doSetAttrViewName(op)
+			case "setAttrViewNewItemTemplates":
+				ret = tx.doSetAttrViewNewItemTemplates(op)
 			case "setAttrViewFilters":
 				ret = tx.doSetAttrViewFilters(op)
 			case "setAttrViewSorts":
@@ -387,6 +394,9 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
+		if 1 == tx.state.Load() {
+			tx.rollback()
+		}
 		return &TxErr{code: TxErrCodePushMsg, msg: cr.Error()}
 	}
 	return
@@ -1911,6 +1921,41 @@ func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	return
 }
 
+// doRestoreCreatedDoc 在首次执行时登记已创建文档，在重做时从快照恢复该文档。
+func (tx *Transaction) doRestoreCreatedDoc(operation *Operation) (ret *TxErr) {
+	tree := operation.Tree
+	if nil == tree || nil == tree.Root || operation.ID != tree.Root.ID {
+		return &TxErr{code: TxErrCodePushMsg, msg: "invalid created doc snapshot", id: operation.ID}
+	}
+	if existing, err := LoadTreeByBlockID(tree.Root.ID); nil == err && nil != existing {
+		if tx.isReplay || existing.Box != tree.Box || existing.Path != tree.Path {
+			return &TxErr{code: TxErrCodePushMsg, msg: "created doc already exists", id: operation.ID}
+		}
+		tx.writeTree(existing)
+		return
+	}
+	if ret = tx.doCreate(&Operation{Action: "create", Data: tree}); nil == ret {
+		tx.restoredCreatedDocs = append(tx.restoredCreatedDocs, tree)
+	}
+	return
+}
+
+// doRemoveCreatedDoc 将本次新增条目生成的文档登记为提交阶段删除，删除前会进入文档历史。
+func (tx *Transaction) doRemoveCreatedDoc(operation *Operation) (ret *TxErr) {
+	if nil == operation.Tree || nil == operation.Tree.Root || operation.ID != operation.Tree.Root.ID {
+		return &TxErr{code: TxErrCodePushMsg, msg: "invalid created doc snapshot", id: operation.ID}
+	}
+	tree, err := LoadTreeByBlockID(operation.ID)
+	if nil != err {
+		if errors.Is(err, ErrBlockNotFound) {
+			return
+		}
+		return &TxErr{code: TxErrCodeBlockNotFound, msg: err.Error(), id: operation.ID}
+	}
+	tx.removedCreatedDocs = append(tx.removedCreatedDocs, tree)
+	return
+}
+
 func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	tree, err := tx.loadTree(id)
@@ -1961,7 +2006,8 @@ type Operation struct {
 	BlockIDs   []string `json:"blockIDs"`
 	BlockID    string   `json:"blockID"`
 
-	DeckID string `json:"deckID"` // 用于添加/删除闪卡
+	DeckID string      `json:"deckID"` // 用于添加/删除闪卡
+	Tree   *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
 
 	AvID              string           `json:"avID"`              // 属性视图 ID
 	SrcIDs            []string         `json:"srcIDs"`            // 用于从属性视图中删除行
@@ -1995,9 +2041,11 @@ type Transaction struct {
 	changedRootIDs []string               // 变更的树 ID 列表（包含了变更定义块后影响的动态锚文本所在的树）
 	boxIcons       map[string]string      // 事务提交后需要同步的笔记本图标
 
-	isGlobalAssetsInit bool   // 是否初始化过全局资源判断
-	isGlobalAssets     bool   // 是否属于全局资源
-	assetsDir          string // 资源目录路径
+	isGlobalAssetsInit  bool   // 是否初始化过全局资源判断
+	isGlobalAssets      bool   // 是否属于全局资源
+	assetsDir           string // 资源目录路径
+	removedCreatedDocs  []*parse.Tree
+	restoredCreatedDocs []*parse.Tree
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
@@ -2053,6 +2101,8 @@ func (tx *Transaction) begin() (err error) {
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
 	tx.boxIcons = map[string]string{}
+	tx.removedCreatedDocs = nil
+	tx.restoredCreatedDocs = nil
 	tx.luteEngine = util.NewLute()
 	tx.m.Lock()
 	tx.state.Store(1)
@@ -2095,6 +2145,23 @@ func (tx *Transaction) commit() (err error) {
 		av.SaveAttributeView(destAv)
 		ReloadAttrView(avID)
 	}
+	for _, tree := range tx.removedCreatedDocs {
+		box := Conf.Box(tree.Box)
+		if nil == box {
+			return ErrBoxNotFound
+		}
+		if _, err = removeDoc(box, tree.Path, util.NewLute()); nil != err {
+			return err
+		}
+	}
+	for _, tree := range tx.restoredCreatedDocs {
+		box := Conf.Box(tree.Box)
+		if nil == box {
+			return ErrBoxNotFound
+		}
+		box.setSortByConf(path.Dir(tree.Path), tree.ID)
+		PushCreate(box, tree.Path, nil)
+	}
 
 	IncSync()
 	tx.state.Store(2)
@@ -2105,7 +2172,7 @@ func (tx *Transaction) commit() (err error) {
 }
 
 func (tx *Transaction) rollback() {
-	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
+	tx.trees, tx.nodes, tx.boxIcons, tx.removedCreatedDocs, tx.restoredCreatedDocs = nil, nil, nil, nil, nil
 	tx.state.Store(3)
 	tx.m.Unlock()
 	return

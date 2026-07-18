@@ -1,4 +1,11 @@
 {
+	"specificTime": "특정 날짜 및 시간",
+	"savePath": "저장 경로",
+	"contentTemplate": "콘텐츠 템플릿",
+	"createDetachedBlock": "바인딩되지 않은 블록 만들기",
+	"createBoundBlock": "바인딩된 블록 만들기",
+	"useTemplate": "${x}에 템플릿 사용",
+	"setAsDefault": "기본값으로 설정",
 	"avBacklinks": "데이터베이스 백링크 ${count}개",
 	"databaseAttrViewMode": "데이터베이스 속성 기본 상태",
 	"databaseAttrViewModeTip": "문서를 열 때 데이터베이스 속성을 펼칠지 설정합니다",
@@ -1861,6 +1868,7 @@
 		"quit": "애플리케이션 종료"
 	},
 	"_attrView": {
+		"empty": "비어 있음",
 		"table": "표",
 		"gallery": "카드",
 		"kanban": "칸반",

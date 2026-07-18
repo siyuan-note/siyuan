@@ -1,4 +1,11 @@
 {
+	"specificTime": "Data e hora específicas",
+	"savePath": "Caminho de salvamento",
+	"contentTemplate": "Modelo de conteúdo",
+	"createDetachedBlock": "Criar bloco não vinculado",
+	"createBoundBlock": "Criar bloco vinculado",
+	"useTemplate": "Usar modelos para ${x}",
+	"setAsDefault": "Definir como padrão",
 	"avBacklinks": "${count} backlinks de banco de dados",
 	"databaseAttrViewMode": "Estado padrão das propriedades do banco de dados",
 	"databaseAttrViewModeTip": "Define se as propriedades do banco de dados são expandidas ao abrir um documento",
@@ -1861,6 +1868,7 @@
 		"quit": "Sair do aplicativo"
 	},
 	"_attrView": {
+		"empty": "Vazio",
 		"table": "Tabela",
 		"gallery": "Cartão",
 		"kanban": "Kanban",

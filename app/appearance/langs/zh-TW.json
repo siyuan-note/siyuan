@@ -1,4 +1,11 @@
 {
+	"specificTime": "具體時間",
+	"savePath": "存放路徑",
+	"contentTemplate": "內容範本",
+	"createDetachedBlock": "建立非綁定區塊",
+	"createBoundBlock": "建立綁定區塊",
+	"useTemplate": "${x} 使用範本",
+	"setAsDefault": "設為預設",
 	"avBacklinks": "${count} 個反向關聯",
 	"databaseAttrViewMode": "資料庫屬性預設狀態",
 	"databaseAttrViewModeTip": "設定開啟文件時是否展開資料庫屬性",
@@ -1861,6 +1868,7 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
+		"empty": "空白",
 		"table": "表格",
 		"gallery": "卡片",
 		"kanban": "看板",

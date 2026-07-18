@@ -40,6 +40,7 @@ import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
 import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
+import {createAttributeViewItem, openNewItemTemplateMenu} from "./newItemTemplate";
 /// #if !MOBILE
 import {openDatabaseRowByData} from "./openDatabaseRow";
 
@@ -121,13 +122,23 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add-more" && !protyle.disabled) {
-            insertRows({
-                blockElement,
-                protyle,
-                count: 1,
-                previousID: "",
-                groupID: blockElement.querySelector(".av__body")?.getAttribute("data-group-id") || ""
-            });
+            const templateID = blockElement.querySelector<HTMLElement>(".av__header")?.dataset.defaultTemplateId;
+            if (templateID) {
+                createAttributeViewItem({blockElement, protyle, templateID});
+            } else {
+                insertRows({
+                    blockElement,
+                    protyle,
+                    count: 1,
+                    previousID: "",
+                    groupID: blockElement.querySelector(".av__body")?.getAttribute("data-group-id") || "",
+                });
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-add-template" && !protyle.disabled) {
+            openNewItemTemplateMenu({protyle, blockElement, target});
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -191,25 +202,27 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (type === "av-add-bottom" && !protyle.disabled) {
             const bodyElement = hasClosestByClassName(target, "av__body");
-            insertRows({
-                blockElement, protyle,
-                count: 1,
-                previousID: (bodyElement && bodyElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id")) ||
-                    target.previousElementSibling?.getAttribute("data-id") || undefined,
-                groupID: bodyElement ? bodyElement.getAttribute("data-group-id") : ""
-            });
+            const previousID = (bodyElement && bodyElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id")) ||
+                target.previousElementSibling?.getAttribute("data-id") || undefined;
+            const groupID = bodyElement ? bodyElement.getAttribute("data-group-id") : "";
+            const templateID = blockElement.querySelector<HTMLElement>(".av__header")?.dataset.defaultTemplateId;
+            if (templateID) {
+                createAttributeViewItem({blockElement, protyle, templateID, position: {previousID, groupID}});
+            } else {
+                insertRows({blockElement, protyle, count: 1, previousID, groupID});
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;
         } else if (type === "av-add-top" && !protyle.disabled) {
             const titleElement = hasClosestByClassName(target, "av__group-title");
-            insertRows({
-                blockElement,
-                protyle,
-                count: 1,
-                previousID: "",
-                groupID: titleElement ? titleElement.nextElementSibling.getAttribute("data-group-id") : ""
-            });
+            const groupID = titleElement ? titleElement.nextElementSibling.getAttribute("data-group-id") : "";
+            const templateID = blockElement.querySelector<HTMLElement>(".av__header")?.dataset.defaultTemplateId;
+            if (templateID) {
+                createAttributeViewItem({blockElement, protyle, templateID, position: {previousID: "", groupID}});
+            } else {
+                insertRows({blockElement, protyle, count: 1, previousID: "", groupID});
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;

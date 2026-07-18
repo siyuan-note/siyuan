@@ -47,7 +47,8 @@ export const genNotebookOption = (id: string, notebookId?: string, noCurrent?: b
 };
 
 export const onGetnotebookconf = (data: INotebookConf) => {
-    const titleHTML = `<div class="fn__flex">${escapeHtml(data.name)}
+    const titleHTML = `<div class="fn__flex">
+<div class="fn__ellipsis" style="white-space: nowrap">${escapeHtml(data.name)}</div>
 <div class="fn__space"></div>
 <button class="b3-button b3-button--small fn__flex-center">${window.siyuan.languages.copy} ID</button></div>`;
     const contentHTML = `<div class="b3-dialog__content">

@@ -1370,10 +1370,47 @@ data-type="navigation-root" data-path="/" data-node-id="${window.siyuan.config.f
 
     public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
+        // 获取当前节点后面的兄弟节点（可能是ul，可能没有）
+        const leafElement = liElement.nextElementSibling as HTMLElement;
+        // 正在折叠时返回，避免同时执行折叠动画。
+        if (leafElement?.dataset.collapsing === "true") {
+            return;
+        }
         if (toggleElement.classList.contains("b3-list-item__arrow--open") && !focusUpdate) {
             toggleElement.classList.remove("b3-list-item__arrow--open");
-            liElement.nextElementSibling?.remove();
-            this.getOpenPaths();
+            // 判断后面的兄弟节点是否是子节点
+            if (leafElement?.tagName === "UL") {
+                // 标记正在折叠，防止重复执行
+                leafElement.dataset.collapsing = "true";
+                // css 处理
+                leafElement.style.height = `${leafElement.scrollHeight}px`;
+                leafElement.style.overflow = "hidden";
+                leafElement.classList.add("file-tree__sliderDown");
+                requestAnimationFrame(() => {
+                    leafElement.style.height = "0";
+                });
+
+                // transitionend 在窗口失焦或关闭动画时可能不触发，超时回调用于确保子列表最终被移除。
+                let removed = false;
+                const removeLeaf = () => {
+                    if (removed) {
+                        return;
+                    }
+                    removed = true;
+                    leafElement.remove();
+                    this.getOpenPaths();
+                };
+                leafElement.addEventListener("transitionend", (event) => {
+                    if (event.propertyName === "height") {
+                        removeLeaf();
+                    }
+                }, {once: true});
+                // 保险，未触发时兜底300ms后强制删除
+                setTimeout(removeLeaf, 300);
+            } else {
+                // 没有UL，直接更新路径
+                this.getOpenPaths();
+            }
             return;
         }
         fetchPost("/api/filetree/listDocsByPath", {

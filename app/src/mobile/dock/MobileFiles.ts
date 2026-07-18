@@ -112,7 +112,7 @@ export class MobileFiles extends Model {
                     const rect = target.getBoundingClientRect();
                     const rootUL = hasTopClosestByTag(target, "UL");
                     openPublishAccessDialog(target.parentElement.getAttribute("data-type") === "navigation-root" ?
-                        rootUL?.getAttribute("data-url") : target.parentElement.getAttribute("data-node-id"), {
+                        rootUL ? rootUL.getAttribute("data-url") : "" : target.parentElement.getAttribute("data-node-id"), {
                         x: rect.left,
                         y: rect.bottom,
                         h: rect.height,

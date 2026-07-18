@@ -421,6 +421,70 @@ func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess P
 	return
 }
 
+func FilterAttributeViewBacklinksByPublishAccess(c *gin.Context, publishAccess PublishAccess, backlinks *AttributeViewBacklinks) (ret *AttributeViewBacklinks) {
+	ret = &AttributeViewBacklinks{Items: []*AttributeViewBacklink{}}
+	if nil == backlinks {
+		return
+	}
+
+	publishIgnore := GetDisablePublishAccess(publishAccess)
+	accessibleTargetAvIDs := map[string]bool{}
+	checkedTargetAvIDs := map[string]bool{}
+	for _, backlink := range backlinks.Items {
+		var relations []*AttributeViewBacklinkRelation
+		for _, relation := range backlink.Relations {
+			if !checkedTargetAvIDs[relation.TargetAvID] {
+				checkedTargetAvIDs[relation.TargetAvID] = true
+				for _, bt := range treenode.GetBlockTrees(treenode.GetMirrorAttrViewBlockIDs(relation.TargetAvID)) {
+					passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+					if ("" == password || CheckPublishAuthCookie(c, passwordID, password)) &&
+						CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+						accessibleTargetAvIDs[relation.TargetAvID] = true
+						break
+					}
+				}
+			}
+			if accessibleTargetAvIDs[relation.TargetAvID] {
+				relations = append(relations, relation)
+			}
+		}
+		if 1 > len(relations) {
+			continue
+		}
+		backlink.Relations = relations
+
+		databaseAccessible := false
+		for _, bt := range treenode.GetBlockTrees(backlink.BlockIDs) {
+			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+			if ("" == password || CheckPublishAuthCookie(c, passwordID, password)) &&
+				CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+				databaseAccessible = true
+				backlink.DatabaseBlockID = bt.ID
+				backlink.BoxID = bt.BoxID
+				backlink.DatabasePath = bt.HPath
+				break
+			}
+		}
+		if !databaseAccessible {
+			continue
+		}
+		if "" != backlink.BoundBlockID && !backlink.IsDetached {
+			bt := treenode.GetBlockTree(backlink.BoundBlockID)
+			if nil == bt {
+				continue
+			}
+			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+			if ("" != password && !CheckPublishAuthCookie(c, passwordID, password)) ||
+				!CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+				continue
+			}
+		}
+		ret.Items = append(ret.Items, backlink)
+	}
+	ret.Total = len(ret.Items)
+	return
+}
+
 func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess PublishAccess, info *BlockInfo) (ret *BlockInfo) {
 	ret = info
 	if info == nil {

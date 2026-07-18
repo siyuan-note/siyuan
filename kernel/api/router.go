@@ -524,6 +524,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/renderHistoryAttributeView", model.CheckAuth, model.CheckAdminRole, renderHistoryAttributeView)
 	ginServer.Handle("POST", "/api/av/renderSnapshotAttributeView", model.CheckAuth, model.CheckAdminRole, renderSnapshotAttributeView)
 	ginServer.Handle("POST", "/api/av/getAttributeViewKeys", model.CheckAuth, getAttributeViewKeys)
+	ginServer.Handle("POST", "/api/av/getAttributeViewBacklinks", model.CheckAuth, getAttributeViewBacklinks)
 	ginServer.Handle("POST", "/api/av/setAttributeViewBlockAttr", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAttributeViewBlockAttr)
 	ginServer.Handle("POST", "/api/av/batchSetAttributeViewBlockAttrs", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchSetAttributeViewBlockAttrs)
 	ginServer.Handle("POST", "/api/av/searchAttributeView", model.CheckAuth, model.CheckReadonly, searchAttributeView)

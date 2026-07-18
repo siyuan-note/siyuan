@@ -1,4 +1,6 @@
 {
+	"avBacklinks": "${count} קישורים חוזרים למסד נתונים",
+	"avBacklinksTitle": "מקושר לפריט זה",
 	"databaseAttrViewMode": "מצב ברירת המחדל של מאפייני מסד הנתונים",
 	"databaseAttrViewModeTip": "הגדר אם מאפייני מסד הנתונים יורחבו בעת פתיחת מסמך",
 	"bind": "קישור",

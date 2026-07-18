@@ -1,4 +1,6 @@
 {
+	"avBacklinks": "${count} 个反向关联",
+	"avBacklinksTitle": "关联到此条目",
 	"databaseAttrViewMode": "数据库属性默认状态",
 	"databaseAttrViewModeTip": "设置打开文档时是否展开数据库属性",
 	"bind": "绑定",

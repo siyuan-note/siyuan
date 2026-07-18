@@ -41,40 +41,10 @@ import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 /// #if !MOBILE
-import {openFile, openFileById} from "../../../editor/util";
-import {Editor} from "../../../editor";
-import {getAllTabs} from "../../../layout/getAll";
+import {openDatabaseRowByData} from "./openDatabaseRow";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
-};
-
-const showDatabaseRowPreview = (model: Editor, blockID: string) => {
-    if (!model?.editor?.protyle) {
-        return;
-    }
-    model.editor.protyle.element.dataset.databaseRowId = blockID;
-    model.editor.protyle.databaseAttributePanel?.expand();
-    model.editor.protyle.contentElement.scrollTop = 0;
-};
-
-const getDatabaseRowPreviewTab = (blockID: string) => {
-    return getAllTabs().find((tab) => {
-        if (tab.model instanceof Editor) {
-            return tab.model.editor.protyle.element.dataset.databaseRowId === blockID;
-        }
-        const initData = tab.headElement?.getAttribute("data-initdata");
-        if (!initData) {
-            return false;
-        }
-        try {
-            const initObj = JSON.parse(initData) as ILayoutJSON;
-            return initObj.instance === "Editor" && initObj.databaseRowId === blockID;
-        } catch (e) {
-            console.warn("Failed to parse database row tab init data:", e);
-            return false;
-        }
-    });
 };
 
 const openDatabaseRow = (protyle: IProtyle, target: HTMLElement, blockElement: HTMLElement) => {
@@ -83,51 +53,16 @@ const openDatabaseRow = (protyle: IProtyle, target: HTMLElement, blockElement: H
     if (!cellElement || !rowElement) {
         return;
     }
-    const title = cellElement.querySelector(".av__celltext")?.textContent.trim() || window.siyuan.languages.untitled;
-    if (isDetachedDatabaseCell(cellElement)) {
-        openFile({
-            app: protyle.app,
-            position: "right",
-            removeCurrentTab: false,
-            custom: {
-                id: "siyuan-database-row",
-                icon: "iconDatabase",
-                title,
-                data: {
-                    avID: blockElement.dataset.avId,
-                    blockID: blockElement.dataset.nodeId,
-                    notebookId: protyle.notebookId,
-                    itemID: rowElement.getAttribute("data-id"),
-                    valueID: cellElement.dataset.id,
-                    title,
-                },
-            },
-        });
-        return;
-    }
-    const blockID = cellElement.querySelector<HTMLElement>(".av__celltext--ref")?.dataset.id;
-    if (blockID) {
-        const openedTab = getDatabaseRowPreviewTab(blockID);
-        if (openedTab) {
-            openedTab.parent.switchTab(openedTab.headElement);
-            openedTab.parent.showHeading();
-            if (openedTab.model instanceof Editor) {
-                showDatabaseRowPreview(openedTab.model, blockID);
-            }
-            return;
-        }
-        openFileById({
-            app: protyle.app,
-            id: blockID,
-            position: "right",
-            openNewTab: true,
-            removeCurrentTab: false,
-            zoomIn: true,
-            afterOpen(model: Editor) {
-                showDatabaseRowPreview(model, blockID);
-            },
-        });
-    }
+    openDatabaseRowByData(protyle, {
+        avID: blockElement.dataset.avId,
+        databaseBlockID: blockElement.dataset.nodeId,
+        notebookID: protyle.notebookId,
+        itemID: rowElement.getAttribute("data-id"),
+        valueID: cellElement.dataset.id,
+        title: cellElement.querySelector(".av__celltext")?.textContent.trim(),
+        boundBlockID: cellElement.querySelector<HTMLElement>(".av__celltext--ref")?.dataset.id,
+        isDetached: isDetachedDatabaseCell(cellElement),
+    });
 };
 
 const openDatabaseRowMore = (protyle: IProtyle, target: HTMLElement) => {

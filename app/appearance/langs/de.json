@@ -1,4 +1,6 @@
 {
+	"avBacklinks": "${count} Datenbank-Rückverknüpfungen",
+	"avBacklinksTitle": "Mit diesem Eintrag verknüpft",
 	"databaseAttrViewMode": "Standardstatus der Datenbankeigenschaften",
 	"databaseAttrViewModeTip": "Legt fest, ob Datenbankeigenschaften beim Öffnen eines Dokuments erweitert sind",
 	"bind": "Verknüpfen",

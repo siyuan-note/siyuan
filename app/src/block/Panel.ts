@@ -176,6 +176,7 @@ export class BlockPanel {
                 action.push(Constants.CB_GET_BACKLINK);
             }
             const editor = new Protyle(this.app, editorElement, {
+                databaseAttr: true,
                 blockId: this.refDefs[index].refID,
                 defIds: this.refDefs[index].defIDs || [],
                 originalRefBlockIDs: this.isBacklink ? this.originalRefBlockIDs : undefined,

@@ -114,6 +114,14 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.embedBlockBreadcrumb,
         desc: window.siyuan.languages.embedBlockBreadcrumbTip,
     });
+    group.select("editor.databaseAttrViewMode", {
+        title: window.siyuan.languages.databaseAttrViewMode,
+        desc: window.siyuan.languages.databaseAttrViewModeTip,
+        options: [
+            {value: 0, label: window.siyuan.languages.expand},
+            {value: 1, label: window.siyuan.languages.collapse},
+        ],
+    });
     group.select("editor.headingEmbedMode", {
         title: window.siyuan.languages.headingEmbedMode,
         desc: window.siyuan.languages.headingEmbedModeTip,

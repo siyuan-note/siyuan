@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "資料庫屬性預設狀態",
+	"databaseAttrViewModeTip": "設定開啟文件時是否展開資料庫屬性",
+	"bind": "綁定",
 	"targetNotebook": "目標筆記本",
 	"dataMigration": "資料遷移",
 	"settingsAndSync": "設定與同步",

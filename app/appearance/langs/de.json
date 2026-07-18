@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "Standardstatus der Datenbankeigenschaften",
+	"databaseAttrViewModeTip": "Legt fest, ob Datenbankeigenschaften beim Öffnen eines Dokuments erweitert sind",
+	"bind": "Verknüpfen",
 	"targetNotebook": "Zielnotizbuch",
 	"dataMigration": "Datenmigration",
 	"settingsAndSync": "Einstellungen und Synchronisierung",

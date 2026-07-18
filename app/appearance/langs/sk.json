@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "Predvolený stav vlastností databázy",
+	"databaseAttrViewModeTip": "Nastaví, či sa vlastnosti databázy rozbalia pri otvorení dokumentu",
+	"bind": "Prepojiť",
 	"targetNotebook": "Cieľový zápisník",
 	"dataMigration": "Migrácia údajov",
 	"settingsAndSync": "Nastavenia a synchronizácia",

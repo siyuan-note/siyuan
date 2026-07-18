@@ -49,6 +49,7 @@ export class Editor extends Model {
         afterInitProtyle?: (editor: Protyle) => void,
     }) {
         this.editor = new Protyle(this.app, this.element, {
+            databaseAttr: true,
             action: options.action || [],
             blockId: options.blockId,
             rootId: options.rootId,

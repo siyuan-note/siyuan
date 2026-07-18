@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "Status default properti basis data",
+	"databaseAttrViewModeTip": "Atur apakah properti basis data diperluas saat membuka dokumen",
+	"bind": "Tautkan",
 	"targetNotebook": "Buku catatan tujuan",
 	"dataMigration": "Migrasi data",
 	"settingsAndSync": "Pengaturan dan sinkronisasi",

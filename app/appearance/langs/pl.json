@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "Domyślny stan właściwości bazy danych",
+	"databaseAttrViewModeTip": "Ustaw, czy właściwości bazy danych mają być rozwinięte podczas otwierania dokumentu",
+	"bind": "Powiąż",
 	"targetNotebook": "Notatnik docelowy",
 	"dataMigration": "Migracja danych",
 	"settingsAndSync": "Ustawienia i synchronizacja",

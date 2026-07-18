@@ -172,10 +172,12 @@ export const genAVValueHTML = (value: IAVCellValue) => {
     return html;
 };
 
-export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle, cb?: (element: HTMLElement) => void) => {
-    fetchPost("/api/av/getAttributeViewKeys", {id}, (response) => {
+export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle, cb?: (element: HTMLElement) => void,
+                                  row?: { avID: string, itemID: string, valueID: string }) => {
+    fetchPost("/api/av/getAttributeViewKeys", row ? {id, avID: row.avID, itemID: row.itemID, valueID: row.valueID} : {id}, (response) => {
         let html = "";
-        response.data.forEach((table: {
+        const tables = Array.isArray(response.data) ? response.data : [];
+        tables.forEach((table: {
             keyValues: {
                 key: {
                     type: TAVCol,
@@ -192,6 +194,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     keyID: string,
                     id: string,
                     blockID: string,
+                    isDetached?: boolean,
                     type: TAVCol & IAVCellValue
                 }  []
             }[],
@@ -214,7 +217,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}
         <span>${escapeHtml(item.key.name)}</span>
     </div>
-    <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-row-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
+    <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-row-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}"${item.values[0].isDetached ? ' data-detached="true"' : ""}
 data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}" 
 ${["text", "number", "date", "url", "phone", "template", "email"].includes(item.values[0].type) ? "" : `placeholder="${window.siyuan.languages.empty}"`}  
 class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(item.values[0].type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(item.values[0])}</div>
@@ -443,9 +446,9 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     value = {
                         block: {
                             content: item.value,
-                            id: item.dataset.id,
+                            id: item.parentElement.dataset.detached === "true" ? "" : item.dataset.id,
                         },
-                        isDetached: false
+                        isDetached: item.parentElement.dataset.detached === "true"
                     };
                 }
                 fetchPost("/api/av/setAttributeViewBlockAttr", {

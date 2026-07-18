@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "데이터베이스 속성 기본 상태",
+	"databaseAttrViewModeTip": "문서를 열 때 데이터베이스 속성을 펼칠지 설정합니다",
+	"bind": "연결",
 	"targetNotebook": "대상 노트북",
 	"dataMigration": "데이터 마이그레이션",
 	"settingsAndSync": "설정 및 동기화",

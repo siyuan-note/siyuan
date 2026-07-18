@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "الحالة الافتراضية لخصائص قاعدة البيانات",
+	"databaseAttrViewModeTip": "تحديد ما إذا كانت خصائص قاعدة البيانات موسعة عند فتح مستند",
+	"bind": "ربط",
 	"targetNotebook": "دفتر الملاحظات الهدف",
 	"dataMigration": "ترحيل البيانات",
 	"settingsAndSync": "الإعدادات والمزامنة",

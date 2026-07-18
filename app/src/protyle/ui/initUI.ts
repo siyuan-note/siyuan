@@ -23,6 +23,9 @@ import {
     isInEmbedBlock
 } from "../util/hasClosest";
 import {hideElements} from "./hideElements";
+/// #if !MOBILE
+import {AVAttributePanel} from "../render/av/attributePanel";
+/// #endif
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -37,6 +40,19 @@ export const initUI = (protyle: IProtyle) => {
             protyle.contentElement.firstElementChild.appendChild(protyle.title.element);
         }
     }
+
+    /// #if !MOBILE
+    if (protyle.options.databaseAttr && !protyle.options.action.includes(Constants.CB_GET_HISTORY) && !protyle.options.backlinkData) {
+        let topElement = protyle.contentElement.querySelector(".protyle-top");
+        if (!topElement) {
+            topElement = document.createElement("div");
+            topElement.className = "protyle-top";
+            protyle.contentElement.appendChild(topElement);
+        }
+        protyle.databaseAttributePanel = new AVAttributePanel(protyle);
+        topElement.appendChild(protyle.databaseAttributePanel.element);
+    }
+    /// #endif
 
     protyle.contentElement.appendChild(protyle.wysiwyg.element);
     if (!protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
@@ -195,6 +211,9 @@ export const initUI = (protyle: IProtyle) => {
     protyle.element.addEventListener("mouseover", (event: KeyboardEvent & {
         target: HTMLElement
     }) => {
+        if (hasClosestByClassName(event.target, "protyle-db-attr")) {
+            return;
+        }
         // attr
         const attrElement = hasClosestByClassName(event.target, "protyle-attr");
         if (attrElement && !attrElement.parentElement.classList.contains("protyle-title")) {

@@ -966,10 +966,16 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if (cellValue.type === "block") {
         // 不可使用换行 https://github.com/siyuan-note/siyuan/issues/11365
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext">${Lute.EscapeHTMLStr(cellValue.block.content || "")}</span><span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
+            text = `<span class="av__celltext">${Lute.EscapeHTMLStr(cellValue.block.content || "")}</span>`;
         } else {
-            text = `<span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${cellValue.block.icon || ""}">${unicode2Emoji(cellValue.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(cellValue.block.content)}</span><span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.update}</span>`;
+            text = `<span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${cellValue.block.icon || ""}">${unicode2Emoji(cellValue.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(cellValue.block.content)}</span>`;
         }
+        /// #if !MOBILE
+        text += `<span class="av__row-actions"><button class="av__row-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-row-more"><svg><use xlink:href="#iconMore"></use></svg></button></span>`;
+        /// #endif
+        /// #if MOBILE
+        text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${cellValue?.isDetached ? window.siyuan.languages.more : window.siyuan.languages.update}</span>`;
+        /// #endif
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {

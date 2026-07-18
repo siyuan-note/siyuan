@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "データベースプロパティのデフォルト状態",
+	"databaseAttrViewModeTip": "文書を開いたときにデータベースプロパティを展開するかどうかを設定します",
+	"bind": "紐付け",
 	"targetNotebook": "対象ノートブック",
 	"dataMigration": "データ移行",
 	"settingsAndSync": "設定と同期",

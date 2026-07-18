@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "מצב ברירת המחדל של מאפייני מסד הנתונים",
+	"databaseAttrViewModeTip": "הגדר אם מאפייני מסד הנתונים יורחבו בעת פתיחת מסמך",
+	"bind": "קישור",
 	"targetNotebook": "מחברת יעד",
 	"dataMigration": "העברת נתונים",
 	"settingsAndSync": "הגדרות וסנכרון",

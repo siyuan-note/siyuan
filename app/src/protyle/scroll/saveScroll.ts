@@ -8,7 +8,8 @@ import {isSupportCSSHL} from "../render/searchMarkRender";
 import {isEncryptedBox} from "../../util/pathName";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
-    if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly) {
+    if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly ||
+        (protyle.element.dataset.databaseRowPreview === "true" && !getObject)) {
         // 报错或者空白页面
         return undefined;
     }

@@ -5,6 +5,8 @@ import {openGlobalSearch} from "../../search/util";
 /// #endif
 import {isMobile} from "../../util/functions";
 import {isOnlyMeta} from "../util/compatibility";
+import {hasClosestBlock} from "../util/hasClosest";
+import {zoomOut} from "../../menus/protyle";
 
 export const commonClick = (event: MouseEvent & {
     target: HTMLElement
@@ -47,9 +49,21 @@ export const commonClick = (event: MouseEvent & {
     const avElement = hasClosestByClassName(event.target, "protyle-attr--av");
     if (avElement) {
         if (data) {
-            openFileAttr(data, "av", protyle);
+            if (protyle.databaseAttributePanel) {
+                protyle.databaseAttributePanel.toggle();
+            } else {
+                openFileAttr(data, "av", protyle);
+            }
         } else {
-            openAttr(avElement.parentElement.parentElement, "av", protyle);
+            const blockElement = hasClosestBlock(avElement);
+            const blockID = blockElement ? blockElement.getAttribute("data-node-id") : "";
+            if (!protyle.databaseAttributePanel) {
+                openAttr(avElement.parentElement.parentElement, "av", protyle);
+            } else if (blockID && protyle.block.showAll && blockID === protyle.block.id) {
+                protyle.databaseAttributePanel?.toggle();
+            } else if (blockID) {
+                zoomOut({protyle, id: blockID});
+            }
         }
         event.stopPropagation();
         return true;

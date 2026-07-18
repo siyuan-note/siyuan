@@ -752,6 +752,7 @@ interface IOpenFileOptions {
         title: string,
         icon: string,
         data?: any
+        protyle?: IProtyle,
         id: string,
         fn?: (options: {
             tab: import("../layout/Tab").Tab,

@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "Veritabanı özelliklerinin varsayılan durumu",
+	"databaseAttrViewModeTip": "Belge açılırken veritabanı özelliklerinin genişletilip genişletilmeyeceğini ayarlayın",
+	"bind": "Bağla",
 	"targetNotebook": "Hedef not defteri",
 	"dataMigration": "Veri taşıma",
 	"settingsAndSync": "Ayarlar ve eşitleme",

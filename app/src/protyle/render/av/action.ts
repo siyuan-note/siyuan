@@ -40,6 +40,98 @@ import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
 import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
+/// #if !MOBILE
+import {openFile, openFileById} from "../../../editor/util";
+import {Editor} from "../../../editor";
+import {getAllModels} from "../../../layout/getAll";
+
+const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
+    return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
+};
+
+const openDatabaseRow = (protyle: IProtyle, target: HTMLElement, blockElement: HTMLElement) => {
+    const cellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;
+    const rowElement = hasClosestByClassName(target, "av__row") || hasClosestByClassName(target, "av__gallery-item");
+    if (!cellElement || !rowElement) {
+        return;
+    }
+    const title = cellElement.querySelector(".av__celltext")?.textContent.trim() || window.siyuan.languages.untitled;
+    if (isDetachedDatabaseCell(cellElement)) {
+        openFile({
+            app: protyle.app,
+            position: "right",
+            removeCurrentTab: false,
+            custom: {
+                id: "siyuan-database-row",
+                icon: "iconDatabase",
+                title,
+                data: {
+                    avID: blockElement.dataset.avId,
+                    itemID: rowElement.getAttribute("data-id"),
+                    valueID: cellElement.dataset.id,
+                    title,
+                },
+                protyle,
+            },
+        });
+        return;
+    }
+    const blockID = cellElement.querySelector<HTMLElement>(".av__celltext--ref")?.dataset.id;
+    if (blockID) {
+        const openedEditor = getAllModels().editor.find((item) => {
+            return item.editor.protyle.element.dataset.databaseRowId === blockID;
+        });
+        if (openedEditor) {
+            openedEditor.parent.parent.switchTab(openedEditor.parent.headElement);
+            openedEditor.parent.parent.showHeading();
+            openedEditor.editor.protyle.databaseAttributePanel?.expand();
+            openedEditor.editor.protyle.contentElement.scrollTop = 0;
+            return;
+        }
+        openFileById({
+            app: protyle.app,
+            id: blockID,
+            position: "right",
+            openNewTab: true,
+            removeCurrentTab: false,
+            zoomIn: true,
+            afterOpen(model: Editor) {
+                if (!model?.editor?.protyle) {
+                    return;
+                }
+                model.editor.protyle.element.dataset.databaseRowPreview = "true";
+                model.editor.protyle.element.dataset.databaseRowId = blockID;
+                model.editor.protyle.databaseAttributePanel?.expand();
+                model.editor.protyle.contentElement.scrollTop = 0;
+            },
+        });
+    }
+};
+
+const openDatabaseRowMore = (protyle: IProtyle, target: HTMLElement) => {
+    const cellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;
+    if (!cellElement) {
+        return;
+    }
+    const isDetached = isDetachedDatabaseCell(cellElement);
+    const menu = new Menu("av-row-more");
+    menu.addItem({
+        icon: isDetached ? "iconLink" : "iconRefresh",
+        label: isDetached ? window.siyuan.languages.bind : window.siyuan.languages.update,
+        click() {
+            const textElement = cellElement.querySelector<HTMLElement>(".av__celltext");
+            protyle.toolbar.range = document.createRange();
+            protyle.toolbar.range.selectNodeContents(textElement);
+            focusByRange(protyle.toolbar.range);
+            cellElement.classList.add("av__cell--select");
+            addDragFill(cellElement);
+            hintRef(textElement.textContent.trim(), protyle, "av");
+        },
+    });
+    const rect = target.getBoundingClientRect();
+    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+};
+/// #endif
 
 let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
@@ -107,19 +199,29 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        /// #if !MOBILE
+        } else if (type === "av-row-open") {
+            openDatabaseRow(protyle, target, blockElement);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-row-more" && !protyle.disabled) {
+            openDatabaseRowMore(protyle, target);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        /// #endif
+        /// #if MOBILE
         } else if (type === "block-more" && !protyle.disabled) {
             window.siyuan.menus.menu.remove();
             protyle.toolbar.range = document.createRange();
             protyle.toolbar.range.selectNodeContents(target);
             focusByRange(protyle.toolbar.range);
-            if (viewType === "table") {
-                target.parentElement.classList.add("av__cell--select");
-                addDragFill(target.parentElement);
-            }
             hintRef(target.previousElementSibling.textContent.trim(), protyle, "av");
             event.preventDefault();
             event.stopPropagation();
             return true;
+        /// #endif
         } else if (type === "set-page-size" && !protyle.disabled) {
             setPageSize({
                 target,

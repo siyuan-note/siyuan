@@ -2078,6 +2078,71 @@ type BlockAttributeViewKeys struct {
 	KeyValues []*av.KeyValues `json:"keyValues"`
 }
 
+func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttributeViewKeys) {
+	waitForSyncingStorages()
+
+	ret = []*BlockAttributeViewKeys{}
+	attrView, err := av.ParseAttributeView(avID)
+	if nil == attrView {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+	if nil == attrView.GetBlockValue(itemID) && "" != valueID {
+		blockKeyValues := attrView.GetBlockKeyValues()
+		if nil != blockKeyValues {
+			for _, value := range blockKeyValues.Values {
+				if value.ID == valueID {
+					itemID = value.BlockID
+					break
+				}
+			}
+		}
+	}
+	if nil == attrView.GetBlockValue(itemID) {
+		return
+	}
+
+	view, err := getRenderAttributeViewView(attrView, "", "")
+	if nil != err {
+		return
+	}
+	sql.RenderView(attrView, view, "", false)
+
+	var keyValues []*av.KeyValues
+	for _, kv := range attrView.KeyValues {
+		if av.KeyTypeLineNumber == kv.Key.Type {
+			continue
+		}
+
+		itemKeyValues := &av.KeyValues{Key: kv.Key}
+		for _, value := range kv.Values {
+			if value.BlockID == itemID {
+				itemKeyValues.Values = append(itemKeyValues.Values, value)
+			}
+		}
+		if 0 < len(itemKeyValues.Values) {
+			keyValues = append(keyValues, itemKeyValues)
+		}
+	}
+
+	refreshAttrViewKeyIDs(attrView, true)
+	sorts := map[string]int{}
+	for i, keyID := range attrView.KeyIDs {
+		sorts[keyID] = i
+	}
+	sort.Slice(keyValues, func(i, j int) bool {
+		return sorts[keyValues[i].Key.ID] < sorts[keyValues[j].Key.ID]
+	})
+
+	ret = append(ret, &BlockAttributeViewKeys{
+		AvID:      avID,
+		AvName:    getAttrViewName(attrView),
+		BlockIDs:  treenode.GetMirrorAttrViewBlockIDs(avID),
+		KeyValues: keyValues,
+	})
+	return
+}
+
 func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 

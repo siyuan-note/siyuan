@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "สถานะเริ่มต้นของคุณสมบัติฐานข้อมูล",
+	"databaseAttrViewModeTip": "กำหนดว่าจะขยายคุณสมบัติฐานข้อมูลเมื่อเปิดเอกสารหรือไม่",
+	"bind": "ผูก",
 	"targetNotebook": "สมุดบันทึกเป้าหมาย",
 	"dataMigration": "การย้ายข้อมูล",
 	"settingsAndSync": "การตั้งค่าและการซิงค์",

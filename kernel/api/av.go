@@ -1026,8 +1026,16 @@ func getAttributeViewKeys(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	blockAttributeViewKeys := model.GetBlockAttributeViewKeys(id)
+	id, _ := arg["id"].(string)
+	avID, _ := arg["avID"].(string)
+	itemID, _ := arg["itemID"].(string)
+	valueID, _ := arg["valueID"].(string)
+	var blockAttributeViewKeys []*model.BlockAttributeViewKeys
+	if "" != avID && ("" != itemID || "" != valueID) {
+		blockAttributeViewKeys = model.GetAttributeViewItemKeys(avID, itemID, valueID)
+	} else {
+		blockAttributeViewKeys = model.GetBlockAttributeViewKeys(id)
+	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blockAttributeViewKeys = model.FilterBlockAttributeViewKeysByPublishAccess(c, publishAccess, blockAttributeViewKeys)

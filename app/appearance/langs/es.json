@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "Estado predeterminado de las propiedades de la base de datos",
+	"databaseAttrViewModeTip": "Define si las propiedades de la base de datos se expanden al abrir un documento",
+	"bind": "Vincular",
 	"targetNotebook": "Cuaderno de destino",
 	"dataMigration": "Migración de datos",
 	"settingsAndSync": "Ajustes y sincronización",

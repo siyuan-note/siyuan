@@ -164,6 +164,16 @@ export class Protyle {
                                 item.removeAttribute("data-render");
                                 avRender(item, this.protyle);
                             });
+                            if (this.protyle.databaseAttributePanel?.hasDatabase(data.data.id)) {
+                                this.protyle.databaseAttributePanel.refresh();
+                            }
+                            /// #if !MOBILE
+                            getAllModels().custom.forEach((item) => {
+                                if (item.type === "siyuan-database-row" && item.data.avID === data.data.id) {
+                                    item.update?.();
+                                }
+                            });
+                            /// #endif
                             break;
                         case "addLoading":
                             if (data.data === this.protyle.block.rootID) {

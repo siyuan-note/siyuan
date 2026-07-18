@@ -25,6 +25,7 @@ import {showMessage} from "../dialog/message";
 import {isEncryptedBox, parseUriInfo} from "../util/pathName";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
+import {newDatabaseRowModel} from "../editor/databaseRow";
 import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
@@ -772,6 +773,12 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
                 app,
                 tab: tab,
                 data: json.customModelData
+            });
+        } else if (json.customModelType === "siyuan-database-row") {
+            model = newDatabaseRowModel({
+                app,
+                tab,
+                data: json.customModelData,
             });
         } else {
             app.plugins.find(item => {

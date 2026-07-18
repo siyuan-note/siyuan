@@ -1,4 +1,7 @@
 {
+	"databaseAttrViewMode": "Stato predefinito delle proprietà del database",
+	"databaseAttrViewModeTip": "Imposta se le proprietà del database vengono espanse all'apertura di un documento",
+	"bind": "Collega",
 	"targetNotebook": "Taccuino di destinazione",
 	"dataMigration": "Migrazione dei dati",
 	"settingsAndSync": "Impostazioni e sincronizzazione",

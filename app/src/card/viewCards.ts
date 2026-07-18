@@ -21,6 +21,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         page: pageIndex
     }, (response) => {
         const dialog = new Dialog({
+            hideCloseIcon: true,
             positionId: Constants.DIALOG_VIEWCARDS,
             content: `<div class="fn__flex-column" style="height: 100%">
     <div class="block__icons" style="border-bottom: 1px solid var(--b3-border-color)">

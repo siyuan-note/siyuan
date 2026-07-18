@@ -811,6 +811,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         cardsData = await app.plugins[i].updateCards(cardsData);
     }
     const dialog = new Dialog({
+        hideCloseIcon: true,
         positionId: Constants.DIALOG_OPENCARD,
         content: genCardHTML({id, cardType, cardsData, isTab: false}),
         width: isMobile() ? "100vw" : "80vw",

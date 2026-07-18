@@ -108,8 +108,9 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
     /// #endif
     const dialog = new Dialog({
         title: window.siyuan.languages.dataMigration,
-        content: `<div class="b3-dialog__content data-migration">
+        content: `<div class="b3-dialog__content">
     <div class="b3-label__text">SiYuan</div>
+    <div class="fn__hr"></div>
     <div class="b3-list b3-list--background">
         <label class="b3-list-item">
             <svg class="b3-list-item__graphic"><use xlink:href="#iconSiYuan"></use></svg>
@@ -127,6 +128,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
     </div>
     <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.importFromMoreApps}</div>
+    <div class="fn__hr"></div>
     <div class="b3-list b3-list--background">
         <label class="b3-list-item${notebooks.length === 0 ? " data-migration__disabled" : ""}">
             <svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg>
@@ -137,6 +139,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
     </div>
     <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.settingsAndSync}</div>
+    <div class="fn__hr"></div>
     <div class="b3-list b3-list--background">
         <div class="b3-list-item fn__flex-wrap data-migration__item">
             <svg class="b3-list-item__graphic"><use xlink:href="#iconSettings"></use></svg>

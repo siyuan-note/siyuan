@@ -19,7 +19,7 @@ import {afterExport} from "../protyle/export/util";
 interface IDataMigrationOptions {
     mode?: "manage" | "onboarding";
     notebookID?: string;
-    onContentComplete?: () => void;
+    onContentImportComplete?: () => void;
 }
 
 const getExportButton = (action: string, mode: IDataMigrationOptions["mode"]) => mode === "manage" ?
@@ -177,9 +177,9 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         width: "560px",
     });
 
-    const completeContent = () => {
+    const completeContentImport = () => {
         dialog.destroy();
-        options.onContentComplete?.();
+        options.onContentImportComplete?.();
     };
     let targetNotebookID = selectedNotebookID || "";
     const selectTargetNotebook = (callback: (notebookID: string) => void, onCancel?: () => void) => {
@@ -216,7 +216,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         });
     };
     const postFile = (url: string, file: File, extra: Record<string, string> = {},
-                      callback: (response: IWebSocketData) => void = completeContent) => {
+                      callback: (response: IWebSocketData) => void = completeContentImport) => {
         const formData = new FormData();
         formData.append("file", file);
         Object.entries(extra).forEach(([key, value]) => formData.append(key, value));
@@ -237,11 +237,11 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         postFile("/api/import/importSYAuto", file, {notebook: "", toPath: "/"}, (response) => {
             const token = response.data?.token as string | undefined;
             if (response.data?.type !== "document" || !token) {
-                completeContent();
+                completeContentImport();
                 return;
             }
             selectTargetNotebook((notebookID) => {
-                fetchPost("/api/import/continueImportSY", {token, notebook: notebookID}, completeContent);
+                fetchPost("/api/import/continueImportSY", {token, notebook: notebookID}, completeContentImport);
             }, () => {
                 fetchPost("/api/import/cancelImportSY", {token});
             });
@@ -338,7 +338,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
                 notebook: notebookID,
                 localPath: localPath.filePaths[0],
                 toPath: "/",
-            }, completeContent);
+            }, completeContentImport);
         });
     };
     dialog.element.querySelector('[data-type="markdown-file"]')?.addEventListener("click", () => void importMarkdown(true));
@@ -354,7 +354,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
             return;
         }
         dialog.destroy();
-        await importObsidianVault(localPath.filePaths[0], options.onContentComplete);
+        await importObsidianVault(localPath.filePaths[0], options.onContentImportComplete);
     });
     /// #endif
 };

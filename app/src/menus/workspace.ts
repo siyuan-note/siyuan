@@ -27,7 +27,7 @@ import {isBrowser} from "../util/functions";
 import {openRecentDocs} from "../business/openRecentDocs";
 import * as dayjs from "dayjs";
 import {upDownHint} from "../util/upDownHint";
-import {openDataMigration} from "./importData";
+import {openDataMigration} from "./dataMigration";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({

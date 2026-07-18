@@ -213,11 +213,11 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         }
     });
     const dialog = new Dialog({
-        width: isMobile() ? "92vw" : "50vw",
+        width: isMobile() ? "100vw" : "50vw",
         containerClassName: "b3-dialog__container--theme",
-        height: "80vh",
+        height: isMobile() ? "100vh" : "80vh",
         content: `<div class="fn__flex-column">
-    <div class="layout-tab-bar fn__flex" style="flex-shrink:0;border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
+    <div class="layout-tab-bar fn__flex" style="${isMobile() ? "padding-right: 38px;" : ""}flex-shrink:0;border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
         <div class="item item--full item--focus" data-type="attr">
             <span class="fn__flex-1"></span>
             <span class="item__text">${window.siyuan.languages.builtIn}</span>

@@ -98,6 +98,7 @@
     opacity: .68;
     color: var(--b3-theme-on-surface);
     padding: 8px;
+    z-index: 1;
 
     &:hover {
       opacity: 1;

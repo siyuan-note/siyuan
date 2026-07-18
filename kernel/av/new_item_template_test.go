@@ -95,14 +95,6 @@ func TestEmptyNewItemTemplatesUseVirtualDefault(t *testing.T) {
 	}
 }
 
-func TestUpgradeSpec6UsesVirtualDefault(t *testing.T) {
-	attrView := &AttributeView{Spec: 5, ID: ast.NewNodeID()}
-	UpgradeSpec(attrView)
-	if CurrentSpec != attrView.Spec || 0 != len(attrView.NewItemTemplates) || "" != attrView.DefaultTemplateID {
-		t.Fatalf("expected spec 6 virtual default template: %+v", attrView)
-	}
-}
-
 func TestMaintainNewItemTemplateFieldValues(t *testing.T) {
 	selectKey := NewKey(ast.NewNodeID(), "Select", "", KeyTypeMSelect)
 	relationKey := NewKey(ast.NewNodeID(), "Relation", "", KeyTypeRelation)

@@ -24,7 +24,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const CurrentSpec = 6
+const CurrentSpec = 5
 
 const MaxFilterNestingDepth = 3
 
@@ -38,7 +38,6 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec3(av)
 	upgradeSpec4(av)
 	upgradeSpec5(av)
-	upgradeSpec6(av)
 }
 
 func CheckSpec(av *AttributeView) (err error) {
@@ -48,17 +47,6 @@ func CheckSpec(av *AttributeView) (err error) {
 		return
 	}
 	return
-}
-
-// upgradeSpec6 增加数据库新增条目模板配置。
-func upgradeSpec6(av *AttributeView) {
-	if 6 <= av.Spec {
-		return
-	}
-
-	av.NewItemTemplates = nil
-	av.DefaultTemplateID = ""
-	av.Spec = 6
 }
 
 // upgradeSpec5 将旧的扁平过滤规则数组包装为单个隐式 AND 根组，支持递归嵌套分组。

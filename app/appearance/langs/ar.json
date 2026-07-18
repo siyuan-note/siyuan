@@ -1,4 +1,5 @@
 {
+	"newItemTemplateUnavailableNotebookTip": "دفتر الملاحظات المحدد سابقًا لهذا القالب مغلق أو غير متاح. يرجى تحديد موقع الحفظ مرة أخرى.",
 	"specificTime": "وقت محدد",
 	"savePath": "مسار الحفظ",
 	"contentTemplate": "قالب المحتوى",

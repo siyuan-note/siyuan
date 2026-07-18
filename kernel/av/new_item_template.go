@@ -65,17 +65,14 @@ func (av *AttributeView) SetNewItemTemplates(config *NewItemTemplatesConfig) err
 		}
 		templates = append(templates, itemTemplate)
 	}
-	if 0 == len(templates) {
-		defaultTemplate := newDefaultNewItemTemplate()
-		templates = append(templates, defaultTemplate)
-		defaultTemplateID = defaultTemplate.ID
-		templateIDs[defaultTemplate.ID] = true
-	}
-
 	if "" != defaultTemplateID && !templateIDs[defaultTemplateID] {
 		return fmt.Errorf("default new item template [%s] not found", defaultTemplateID)
 	}
-	av.NewItemTemplates = templates
+	if 0 == len(templates) {
+		av.NewItemTemplates = nil
+	} else {
+		av.NewItemTemplates = templates
+	}
 	av.DefaultTemplateID = defaultTemplateID
 	return nil
 }
@@ -88,6 +85,178 @@ func (av *AttributeView) GetNewItemTemplate(id string) *NewItemTemplate {
 		}
 	}
 	return nil
+}
+
+// RemoveNewItemTemplateFieldValue 删除所有新增条目模板中指定字段的配置。
+func (av *AttributeView) RemoveNewItemTemplateFieldValue(keyID string) (changed bool) {
+	for _, itemTemplate := range av.NewItemTemplates {
+		if nil == itemTemplate || nil == itemTemplate.FieldValues {
+			continue
+		}
+		if _, ok := itemTemplate.FieldValues[keyID]; ok {
+			delete(itemTemplate.FieldValues, keyID)
+			changed = true
+		}
+		if 0 == len(itemTemplate.FieldValues) {
+			itemTemplate.FieldValues = nil
+		}
+	}
+	return
+}
+
+// RemoveNewItemTemplateSelectOption 删除所有新增条目模板中指定字段的候选值。
+func (av *AttributeView) RemoveNewItemTemplateSelectOption(keyID, optionName string) (changed bool) {
+	return av.updateNewItemTemplateSelectOption(keyID, optionName, "", "", true)
+}
+
+// RenameNewItemTemplateSelectOption 同步修改所有新增条目模板中的候选值。
+func (av *AttributeView) RenameNewItemTemplateSelectOption(keyID, oldName, newName, newColor string) (changed bool) {
+	return av.updateNewItemTemplateSelectOption(keyID, oldName, newName, newColor, false)
+}
+
+func (av *AttributeView) updateNewItemTemplateSelectOption(keyID, oldName, newName, newColor string, remove bool) (changed bool) {
+	for _, itemTemplate := range av.NewItemTemplates {
+		if nil == itemTemplate || nil == itemTemplate.FieldValues {
+			continue
+		}
+		fieldValue := itemTemplate.FieldValues[keyID]
+		if nil == fieldValue || NewItemFieldValueStatic != fieldValue.Mode || nil == fieldValue.Value {
+			continue
+		}
+		value := fieldValue.Value
+		if KeyTypeSelect != value.Type && KeyTypeMSelect != value.Type {
+			continue
+		}
+
+		selections := make([]*ValueSelect, 0, len(value.MSelect))
+		selectedNames := map[string]bool{}
+		for _, selection := range value.MSelect {
+			if nil == selection {
+				continue
+			}
+			if oldName == selection.Content {
+				changed = true
+				if remove {
+					continue
+				}
+				selection.Content = newName
+				selection.Color = newColor
+			}
+			if "" == selection.Content || selectedNames[selection.Content] {
+				continue
+			}
+			selectedNames[selection.Content] = true
+			selections = append(selections, selection)
+		}
+		value.MSelect = selections
+		if 0 == len(selections) {
+			delete(itemTemplate.FieldValues, keyID)
+		}
+		if 0 == len(itemTemplate.FieldValues) {
+			itemTemplate.FieldValues = nil
+		}
+	}
+	return
+}
+
+// RemoveNewItemTemplateRelationItems 删除所有新增条目模板中指向指定数据库条目的关联值。
+func (av *AttributeView) RemoveNewItemTemplateRelationItems(targetAvID string, itemIDs []string) (changed bool) {
+	if 0 == len(itemIDs) {
+		return
+	}
+	removedIDs := map[string]bool{}
+	for _, itemID := range itemIDs {
+		removedIDs[itemID] = true
+	}
+	relationKeyIDs := map[string]bool{}
+	for _, keyValues := range av.KeyValues {
+		if nil != keyValues && nil != keyValues.Key && KeyTypeRelation == keyValues.Key.Type &&
+			nil != keyValues.Key.Relation && targetAvID == keyValues.Key.Relation.AvID {
+			relationKeyIDs[keyValues.Key.ID] = true
+		}
+	}
+
+	for _, itemTemplate := range av.NewItemTemplates {
+		if nil == itemTemplate || nil == itemTemplate.FieldValues {
+			continue
+		}
+		for keyID := range relationKeyIDs {
+			fieldValue := itemTemplate.FieldValues[keyID]
+			if nil == fieldValue || NewItemFieldValueStatic != fieldValue.Mode || nil == fieldValue.Value ||
+				nil == fieldValue.Value.Relation {
+				continue
+			}
+			blockIDs := fieldValue.Value.Relation.BlockIDs[:0]
+			for _, blockID := range fieldValue.Value.Relation.BlockIDs {
+				if removedIDs[blockID] {
+					changed = true
+					continue
+				}
+				blockIDs = append(blockIDs, blockID)
+			}
+			fieldValue.Value.Relation.BlockIDs = blockIDs
+			if 0 == len(blockIDs) {
+				delete(itemTemplate.FieldValues, keyID)
+			}
+		}
+		if 0 == len(itemTemplate.FieldValues) {
+			itemTemplate.FieldValues = nil
+		}
+	}
+	return
+}
+
+// PruneInvalidNewItemTemplateFieldValues 清理因字段结构或候选值变化而失效的模板字段值。
+func (av *AttributeView) PruneInvalidNewItemTemplateFieldValues() {
+	for _, itemTemplate := range av.NewItemTemplates {
+		if nil == itemTemplate || nil == itemTemplate.FieldValues {
+			continue
+		}
+		for keyID, fieldValue := range itemTemplate.FieldValues {
+			key, err := av.GetKey(keyID)
+			if nil != err || nil == key || !isNewItemTemplateEditableKeyType(key.Type) || nil == fieldValue {
+				delete(itemTemplate.FieldValues, keyID)
+				continue
+			}
+			if "" == fieldValue.Mode {
+				fieldValue.Mode = NewItemFieldValueStatic
+			}
+			if NewItemFieldValueCurrentTime == fieldValue.Mode {
+				if KeyTypeDate != key.Type {
+					delete(itemTemplate.FieldValues, keyID)
+				} else {
+					fieldValue.Value = nil
+				}
+				continue
+			}
+			if NewItemFieldValueStatic != fieldValue.Mode || nil == fieldValue.Value {
+				delete(itemTemplate.FieldValues, keyID)
+				continue
+			}
+			normalized, normalizeErr := normalizeNewItemTemplateValue(fieldValue.Value, key)
+			if nil != normalizeErr {
+				delete(itemTemplate.FieldValues, keyID)
+				continue
+			}
+			if KeyTypeSelect == key.Type || KeyTypeMSelect == key.Type {
+				selections := normalized.MSelect[:0]
+				for _, selection := range normalized.MSelect {
+					if nil != selection && nil != key.GetOption(selection.Content) {
+						selections = append(selections, selection)
+					}
+				}
+				normalized.MSelect = selections
+				if 0 == len(selections) {
+					delete(itemTemplate.FieldValues, keyID)
+					continue
+				}
+			}
+			fieldValue.Value = normalized
+		}
+		if 0 == len(itemTemplate.FieldValues) {
+			itemTemplate.FieldValues = nil
+		}
+	}
 }
 
 func (av *AttributeView) normalizeNewItemTemplateFieldValues(itemTemplate *NewItemTemplate) error {

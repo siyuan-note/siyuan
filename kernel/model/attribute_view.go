@@ -3151,6 +3151,9 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 
 		break
 	}
+	if oldDestAvID != operation.ID {
+		srcAv.RemoveNewItemTemplateFieldValue(operation.KeyID)
+	}
 
 	destAdded := false
 	backRelKey, _ := destAv.GetKey(operation.BackRelationKeyID)
@@ -4442,11 +4445,15 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 			view.ItemIDs = gulu.Str.RemoveElem(view.ItemIDs, blockID)
 		}
 	}
+	attrView.RemoveNewItemTemplateRelationItems(avID, srcIDs)
 
 	regenAttrViewGroups(attrView)
 
 	err = av.SaveAttributeView(attrView)
 	if nil != err {
+		return
+	}
+	if err = removeRelatedNewItemTemplateRelationItems(avID, srcIDs); nil != err {
 		return
 	}
 
@@ -4490,6 +4497,26 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 	}
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	return
+}
+
+func removeRelatedNewItemTemplateRelationItems(avID string, itemIDs []string) (err error) {
+	for _, relatedAvID := range av.GetSrcAvIDs(avID) {
+		if relatedAvID == avID {
+			continue
+		}
+		relatedAv, parseErr := av.ParseAttributeView(relatedAvID)
+		if nil != parseErr || nil == relatedAv {
+			continue
+		}
+		if !relatedAv.RemoveNewItemTemplateRelationItems(avID, itemIDs) {
+			continue
+		}
+		if err = av.SaveAttributeView(relatedAv); nil != err {
+			return
+		}
+		ReloadAttrView(relatedAvID)
+	}
 	return
 }
 
@@ -5344,6 +5371,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 	}
 
 	if changeType {
+		attrView.RemoveNewItemTemplateFieldValue(operation.ID)
 		for _, view := range attrView.Views {
 			if nil != view.Group {
 				if groupKey := view.GetGroupKey(attrView); nil != groupKey && groupKey.ID == operation.ID {
@@ -5412,6 +5440,7 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 		if keyValues.Key.ID == keyID {
 			attrView.KeyValues = append(attrView.KeyValues[:i], attrView.KeyValues[i+1:]...)
 			removedKey = keyValues.Key
+			attrView.RemoveNewItemTemplateFieldValue(keyID)
 			break
 		}
 	}
@@ -5436,6 +5465,7 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 					if keyValues.Key.ID == removedKey.Relation.BackKeyID {
 						if removeRelationDest { // 删除双向关联的目标字段
 							destAv.KeyValues = append(destAv.KeyValues[:i], destAv.KeyValues[i+1:]...)
+							destAv.RemoveNewItemTemplateFieldValue(removedKey.Relation.BackKeyID)
 						}
 						continue
 					}
@@ -6230,6 +6260,7 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 			break
 		}
 	}
+	attrView.RemoveNewItemTemplateSelectOption(operation.ID, optName)
 
 	for _, keyValues := range attrView.KeyValues {
 		if keyValues.Key.ID != operation.ID {
@@ -6304,6 +6335,9 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 				break
 			}
 		}
+	}
+	if rename {
+		attrView.RenameNewItemTemplateSelectOption(operation.ID, oldName, newName, newColor)
 	}
 
 	if !found {

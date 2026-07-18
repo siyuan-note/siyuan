@@ -56,9 +56,8 @@ func upgradeSpec6(av *AttributeView) {
 		return
 	}
 
-	defaultTemplate := newDefaultNewItemTemplate()
-	av.NewItemTemplates = []*NewItemTemplate{defaultTemplate}
-	av.DefaultTemplateID = defaultTemplate.ID
+	av.NewItemTemplates = nil
+	av.DefaultTemplateID = ""
 	av.Spec = 6
 }
 

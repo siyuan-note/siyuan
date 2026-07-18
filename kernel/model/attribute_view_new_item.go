@@ -68,6 +68,7 @@ func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 		itemTemplate = &av.NewItemTemplate{TargetType: av.NewItemTargetDetached}
 	} else {
 		cloned := *attrView
+		cloned.PruneInvalidNewItemTemplateFieldValues()
 		if err = cloned.SetNewItemTemplates(&av.NewItemTemplatesConfig{Templates: []*av.NewItemTemplate{itemTemplate}}); nil != err {
 			return nil, err
 		}
@@ -224,6 +225,9 @@ func resolveNewItemSaveConfig(currentBoxID string, location *av.NewItemSaveLocat
 		if nil == Conf.Box(boxID) {
 			return "", "", false, ErrBoxNotFound
 		}
+		if err = validateNewItemSaveBox(currentBoxID, boxID); nil != err {
+			return "", "", false, err
+		}
 		return boxID, location.PathTemplate, false, nil
 	}
 
@@ -246,7 +250,15 @@ func resolveNewItemSaveConfig(currentBoxID string, location *av.NewItemSaveLocat
 	if "" == pathTemplate {
 		pathTemplate = Conf.FileTree.DocCreateSavePath
 	}
+	err = validateNewItemSaveBox(currentBoxID, boxID)
 	return
+}
+
+func validateNewItemSaveBox(currentBoxID, targetBoxID string) error {
+	if IsEncryptedBox(currentBoxID) && currentBoxID != targetBoxID {
+		return errors.New("new attribute view item document in an encrypted notebook must be saved in the current notebook")
+	}
+	return nil
 }
 
 func newItemParentPathTemplate(renderedPath string) string {
@@ -298,12 +310,44 @@ func resolveNewItemFieldValues(attrView *av.AttributeView, itemTemplate *av.NewI
 				return nil, fmt.Errorf("new item template field [%s] value is invalid", keyID)
 			}
 			value = fieldValue.Value.Clone()
+			if av.KeyTypeRelation == key.Type {
+				filterNewItemTemplateRelationValue(attrView, key, value)
+				if nil == value.Relation || 0 == len(value.Relation.BlockIDs) {
+					continue
+				}
+			}
 		default:
 			return nil, fmt.Errorf("new item template field [%s] value mode is invalid", keyID)
 		}
 		ret[keyID] = value
 	}
 	return
+}
+
+func filterNewItemTemplateRelationValue(attrView *av.AttributeView, key *av.Key, value *av.Value) {
+	if nil == key.Relation || nil == value.Relation {
+		return
+	}
+	targetAv := attrView
+	if key.Relation.AvID != attrView.ID {
+		targetAv, _ = av.ParseAttributeView(key.Relation.AvID)
+	}
+	if nil == targetAv {
+		value.Relation.BlockIDs = nil
+		return
+	}
+	blockKey := targetAv.GetBlockKey()
+	if nil == blockKey {
+		value.Relation.BlockIDs = nil
+		return
+	}
+	blockIDs := value.Relation.BlockIDs[:0]
+	for _, blockID := range value.Relation.BlockIDs {
+		if nil != targetAv.GetValue(blockKey.ID, blockID) {
+			blockIDs = append(blockIDs, blockID)
+		}
+	}
+	value.Relation.BlockIDs = blockIDs
 }
 
 func buildNewItemFieldValueOperations(attrView *av.AttributeView, fieldValues map[string]*av.Value, itemID string) (ret []*Operation) {

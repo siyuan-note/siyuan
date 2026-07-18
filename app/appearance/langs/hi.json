@@ -1,4 +1,5 @@
 {
+	"newItemTemplateUnavailableNotebookTip": "इस टेम्पलेट के लिए पहले चुनी गई नोटबुक बंद है या उपलब्ध नहीं है। कृपया सहेजने का स्थान फिर से चुनें।",
 	"specificTime": "विशिष्ट समय",
 	"savePath": "सहेजने का पथ",
 	"contentTemplate": "सामग्री टेम्पलेट",

@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestSetNewItemTemplates(t *testing.T) {
@@ -82,33 +81,63 @@ func TestSetNewItemTemplatesRejectsInvalidConfig(t *testing.T) {
 	}
 }
 
-func TestEmptyNewItemTemplatesRestoreEditableDefault(t *testing.T) {
-	setTestAttrViewLang(t)
-
+func TestEmptyNewItemTemplatesUseVirtualDefault(t *testing.T) {
 	attrView := &AttributeView{Spec: CurrentSpec, ID: ast.NewNodeID()}
 	config := &NewItemTemplatesConfig{}
 	if err := attrView.SetNewItemTemplates(config); nil != err {
 		t.Fatalf("restore default new item template failed: %s", err)
 	}
-	if 1 != len(attrView.NewItemTemplates) {
-		t.Fatalf("expected one default template, got %d", len(attrView.NewItemTemplates))
-	}
-	itemTemplate := attrView.NewItemTemplates[0]
-	if "Empty" != itemTemplate.Name || NewItemTargetDetached != itemTemplate.TargetType || itemTemplate.ID != attrView.DefaultTemplateID {
-		t.Fatalf("unexpected default template: %+v", itemTemplate)
+	if 0 != len(attrView.NewItemTemplates) || "" != attrView.DefaultTemplateID {
+		t.Fatalf("expected virtual default template, got templates=%+v default=%q", attrView.NewItemTemplates, attrView.DefaultTemplateID)
 	}
 	if "" != config.DefaultTemplateID || 0 != len(config.Templates) {
 		t.Fatal("input config was mutated")
 	}
 }
 
-func setTestAttrViewLang(t *testing.T) {
-	originalLang := util.Lang
-	originalLangs := util.AttrViewLangs
-	util.Lang = "test"
-	util.AttrViewLangs = map[string]map[string]any{"test": {"empty": "Empty"}}
-	t.Cleanup(func() {
-		util.Lang = originalLang
-		util.AttrViewLangs = originalLangs
-	})
+func TestUpgradeSpec6UsesVirtualDefault(t *testing.T) {
+	attrView := &AttributeView{Spec: 5, ID: ast.NewNodeID()}
+	UpgradeSpec(attrView)
+	if CurrentSpec != attrView.Spec || 0 != len(attrView.NewItemTemplates) || "" != attrView.DefaultTemplateID {
+		t.Fatalf("expected spec 6 virtual default template: %+v", attrView)
+	}
+}
+
+func TestMaintainNewItemTemplateFieldValues(t *testing.T) {
+	selectKey := NewKey(ast.NewNodeID(), "Select", "", KeyTypeMSelect)
+	relationKey := NewKey(ast.NewNodeID(), "Relation", "", KeyTypeRelation)
+	relationKey.Relation = &Relation{AvID: ast.NewNodeID()}
+	relationItemID := ast.NewNodeID()
+	attrView := &AttributeView{
+		KeyValues: []*KeyValues{{Key: selectKey}, {Key: relationKey}},
+		NewItemTemplates: []*NewItemTemplate{{
+			ID: ast.NewNodeID(), Name: "Template", TargetType: NewItemTargetDetached,
+			FieldValues: map[string]*NewItemFieldValue{
+				selectKey.ID: {
+					Mode: NewItemFieldValueStatic,
+					Value: &Value{Type: KeyTypeMSelect, MSelect: []*ValueSelect{
+						{Content: "Old", Color: "1"}, {Content: "Keep", Color: "2"},
+					}},
+				},
+				relationKey.ID: {
+					Mode:  NewItemFieldValueStatic,
+					Value: &Value{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{relationItemID}}},
+				},
+			},
+		}},
+	}
+
+	attrView.RenameNewItemTemplateSelectOption(selectKey.ID, "Old", "Renamed", "3")
+	selections := attrView.NewItemTemplates[0].FieldValues[selectKey.ID].Value.MSelect
+	if 2 != len(selections) || "Renamed" != selections[0].Content || "3" != selections[0].Color {
+		t.Fatalf("unexpected renamed selections: %+v", selections)
+	}
+	attrView.RemoveNewItemTemplateRelationItems(relationKey.Relation.AvID, []string{relationItemID})
+	if nil != attrView.NewItemTemplates[0].FieldValues[relationKey.ID] {
+		t.Fatal("removed relation item should be removed from the template")
+	}
+	attrView.RemoveNewItemTemplateFieldValue(selectKey.ID)
+	if nil != attrView.NewItemTemplates[0].FieldValues {
+		t.Fatalf("empty field values should be nil: %+v", attrView.NewItemTemplates[0].FieldValues)
+	}
 }

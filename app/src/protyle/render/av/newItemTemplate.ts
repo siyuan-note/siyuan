@@ -21,18 +21,11 @@ interface ICreatePosition {
 
 const cloneTemplates = (templates?: IAVNewItemTemplate[]) => JSON.parse(JSON.stringify(templates || [])) as IAVNewItemTemplate[];
 
-const isLegacyBuiltInBlankTemplate = (itemTemplate: IAVNewItemTemplate, defaultTemplateID?: string) => {
-    return itemTemplate.id === defaultTemplateID && itemTemplate.targetType === "detached" &&
-        !itemTemplate.primaryKeyTemplate && !itemTemplate.contentTemplatePath &&
-        !itemTemplate.saveLocation && !Object.keys(itemTemplate.fieldValues || {}).length;
-};
-
 const getCustomTemplateData = (data: IAV) => {
-    const hasLegacyBuiltInBlank = data.newItemTemplates?.some(item => isLegacyBuiltInBlankTemplate(item, data.defaultTemplateID));
     return {
         ...data,
-        newItemTemplates: cloneTemplates(data.newItemTemplates).filter(item => !isLegacyBuiltInBlankTemplate(item, data.defaultTemplateID)),
-        defaultTemplateID: hasLegacyBuiltInBlank ? "" : data.defaultTemplateID || "",
+        newItemTemplates: cloneTemplates(data.newItemTemplates),
+        defaultTemplateID: data.defaultTemplateID || "",
     };
 };
 
@@ -455,14 +448,20 @@ const collectTemplate = (root: HTMLElement, itemTemplate: IAVNewItemTemplate, fi
 const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn | undefined, fields: IAVColumn[], currentNotebookID: string) => {
     const currentNotebook = window.siyuan.notebooks?.find(item => item.id === currentNotebookID);
     const forceCurrentNotebook = !!currentNotebook?.encrypted;
+    const isDocument = itemTemplate.targetType === "document";
+    const savedNotebook = window.siyuan.notebooks?.find(item => item.id === itemTemplate.saveLocation?.boxID);
+    const unavailableNotebookID = !forceCurrentNotebook && itemTemplate.saveLocation?.boxID &&
+        (!savedNotebook || savedNotebook.closed) ? itemTemplate.saveLocation.boxID : "";
+    const unavailableNotebookOption = unavailableNotebookID ?
+        `<option value="${escapeAttr(unavailableNotebookID)}" data-unavailable="true" selected disabled>${escapeHtml(savedNotebook?.name || unavailableNotebookID)}</option>` : "";
     const currentNotebookSelected = forceCurrentNotebook || !!itemTemplate.saveLocation &&
         (!itemTemplate.saveLocation.boxID || itemTemplate.saveLocation.boxID === currentNotebookID);
     const notebookOptions = (forceCurrentNotebook ? "" :
         `<option value="__default__"${itemTemplate.saveLocation ? "" : " selected"}>${window.siyuan.languages.default}</option>`) +
         `<option value=""${currentNotebookSelected ? " selected" : ""}>${window.siyuan.languages.currentNotebook}</option>` +
+        unavailableNotebookOption +
         (forceCurrentNotebook ? "" : (window.siyuan.notebooks || []).filter(item => !item.closed && item.id !== currentNotebookID)
             .map(item => `<option value="${item.id}"${item.id === itemTemplate.saveLocation?.boxID ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join(""));
-    const isDocument = itemTemplate.targetType === "document";
     return `<div data-role="template-editor" style="padding:16px;overflow:auto;flex:1">
     <div class="custom-attr">
         <div class="block__icons av__row">
@@ -538,6 +537,7 @@ export const openNewItemTemplateDialog = (options: {
     const root = dialog.element;
     const listElement = root.querySelector('[data-role="template-list"]') as HTMLElement;
     const hostElement = root.querySelector('[data-role="editor-host"]') as HTMLElement;
+    const warnedUnavailableNotebooks = new Set<string>();
 
     const collectCurrent = () => {
         const editor = root.querySelector('[data-role="template-editor"]') as HTMLElement;
@@ -554,6 +554,11 @@ export const openNewItemTemplateDialog = (options: {
         const target = hostElement.querySelector('[data-role="target-type"]') as HTMLSelectElement;
         target?.addEventListener("change", () => hostElement.querySelector('[data-role="document-options"]')?.classList.toggle("fn__none", target.value !== "document"));
         const boxIDElement = hostElement.querySelector('[data-role="box-id"]') as HTMLSelectElement;
+        const unavailableOption = boxIDElement?.selectedOptions[0]?.dataset.unavailable === "true";
+        if (target?.value === "document" && unavailableOption && !warnedUnavailableNotebooks.has(templates[selectedIndex].id)) {
+            warnedUnavailableNotebooks.add(templates[selectedIndex].id);
+            showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
+        }
         boxIDElement?.addEventListener("change", () => {
             const pathElement = hostElement.querySelector('[data-role="path-template"]') as HTMLInputElement;
             const useDefaultPath = boxIDElement.value === "__default__";
@@ -697,6 +702,12 @@ export const openNewItemTemplateDialog = (options: {
     });
     root.querySelector('[data-role="cancel"]').addEventListener("click", () => dialog.destroy());
     root.querySelector('[data-role="confirm"]').addEventListener("click", () => {
+        const boxIDElement = hostElement.querySelector('[data-role="box-id"]') as HTMLSelectElement;
+        const target = hostElement.querySelector('[data-role="target-type"]') as HTMLSelectElement;
+        if (target?.value === "document" && boxIDElement?.selectedOptions[0]?.dataset.unavailable === "true") {
+            showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
+            return;
+        }
         collectCurrent();
         if (templates.some(item => !item.name)) {
             showMessage(window.siyuan.languages.nameEmpty, 6000, "error");
@@ -924,6 +935,13 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
         });
         let draggedTemplateID = "";
         let draggedTemplateMoved = false;
+        let resetDraggedTemplateMovedTimer = 0;
+        const resetDraggedTemplateMoved = () => {
+            window.clearTimeout(resetDraggedTemplateMovedTimer);
+            resetDraggedTemplateMovedTimer = window.setTimeout(() => {
+                draggedTemplateMoved = false;
+            });
+        };
         (menuData.newItemTemplates || []).forEach(item => menu.addItem({
             iconHTML: "",
             label: escapeHtml(item.name),
@@ -977,6 +995,7 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
             }
             draggedTemplateID = target.dataset.templateId;
             draggedTemplateMoved = false;
+            window.clearTimeout(resetDraggedTemplateMovedTimer);
             event.dataTransfer.effectAllowed = "move";
             event.dataTransfer.setData("text/plain", draggedTemplateID);
             target.style.opacity = ".38";
@@ -1004,6 +1023,7 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
             if (oldIndex < 0 || targetIndex < 0 || oldIndex === targetIndex) {
                 draggedTemplateID = "";
                 clearTemplateDragStyles();
+                resetDraggedTemplateMoved();
                 return;
             }
             const rect = target.getBoundingClientRect();
@@ -1031,10 +1051,12 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
             });
             draggedTemplateID = "";
             clearTemplateDragStyles();
+            resetDraggedTemplateMoved();
         };
         menu.element.ondragend = () => {
             draggedTemplateID = "";
             clearTemplateDragStyles();
+            resetDraggedTemplateMoved();
         };
         menu.addItem({type: "separator"});
         menu.addItem({

@@ -461,26 +461,15 @@ type Viewable interface {
 
 func NewAttributeView(id string) (ret *AttributeView) {
 	view, blockKey, selectKey := NewTableViewWithBlockKey(ast.NewNodeID())
-	defaultTemplate := newDefaultNewItemTemplate()
 	ret = &AttributeView{
 		Spec:              CurrentSpec,
 		ID:                id,
 		KeyValues:         []*KeyValues{{Key: blockKey}, {Key: selectKey}},
 		ViewID:            view.ID,
 		Views:             []*View{view},
-		NewItemTemplates:  []*NewItemTemplate{defaultTemplate},
-		DefaultTemplateID: defaultTemplate.ID,
 		RenderedViewables: map[string]Viewable{},
 	}
 	return
-}
-
-func newDefaultNewItemTemplate() *NewItemTemplate {
-	return &NewItemTemplate{
-		ID:         ast.NewNodeID(),
-		Name:       GetAttributeViewI18n("empty"),
-		TargetType: NewItemTargetDetached,
-	}
 }
 
 func GetAttributeViewName(avID string) (ret string, err error) {

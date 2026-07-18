@@ -347,16 +347,23 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
     const eventCode = Constants.KEYCODELIST[event.keyCode];
     if (window.siyuan.menus.menu.element.contains(target) && ["INPUT", "TEXTAREA"].includes(target.tagName)) {
-        //TODO
-        if (eventCode === "→" || eventCode === "←") {
-            return false;
-        }
-        if (["INPUT", "TEXTAREA"].includes(target.tagName)) {
-            electronUndo(event);
-        }
         if (target.getAttribute(Constants.ATTRIBUTE_MENU_KEYMAP)) {
-            if (!window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current")) {
-                window.siyuan.menus.menu.element.querySelector(".b3-menu__items").firstElementChild.classList.add("b3-menu__item--current");
+            const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");
+            const inputItemElement = Array.from(target.closest(".b3-menu__items")?.children || []).find((item) => item.contains(target));
+            if (!currentElement || currentElement === inputItemElement) {
+                if (eventCode === "↩") {
+                    window.siyuan.menus.menu.remove();
+                    return true;
+                }
+                if (eventCode === "→" || eventCode === "←") {
+                    return false;
+                }
+            }
+            if (!currentElement) {
+                inputItemElement?.classList.add("b3-menu__item--current");
+            }
+            if (["INPUT", "TEXTAREA"].includes(target.tagName)) {
+                electronUndo(event);
             }
         } else {
             return false;
@@ -390,10 +397,11 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
             }
         }
         if (actionMenuElement) {
-            if (actionMenuElement.classList.contains("b3-menu__item")) {
+            const keymapInputElement = actionMenuElement.querySelector(`[${Constants.ATTRIBUTE_MENU_KEYMAP}]`) as HTMLInputElement;
+            if (actionMenuElement.classList.contains("b3-menu__item") || keymapInputElement) {
                 actionMenuElement.classList.add("b3-menu__item--current");
             }
-            const inputElement = actionMenuElement.querySelector(":scope > .b3-text-field") as HTMLInputElement;
+            const inputElement = actionMenuElement.querySelector(":scope > .b3-text-field") as HTMLInputElement || keymapInputElement;
             if (inputElement) {
                 inputElement.focus();
             }

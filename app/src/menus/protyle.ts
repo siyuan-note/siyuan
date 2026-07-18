@@ -354,7 +354,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             id: "anchor",
             iconHTML: "",
             type: "readonly",
-            label: `<input style="margin: 4px 0" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.anchor}">`,
+            label: `<input ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" style="margin: 4px 0" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.anchor}">`,
             bind(menuItemElement) {
                 const inputElement = menuItemElement.querySelector("input");
                 inputElement.value = element.getAttribute("data-subtype") === "d" ? "" : element.textContent;
@@ -368,16 +368,6 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                         });
                     }
                     element.setAttribute("data-subtype", inputElement.value ? "s" : "d");
-                });
-                inputElement.addEventListener("keydown", (event) => {
-                    if (event.isComposing) {
-                        return;
-                    }
-                    if (event.key === "Enter" && !event.isComposing) {
-                        window.siyuan.menus.menu.remove();
-                    } else if (electronUndo(event)) {
-                        return;
-                    }
                 });
             }
         }).element);
@@ -1802,7 +1792,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         id: "tag",
         iconHTML: "",
         type: "readonly",
-        label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.tag}">
+        label: `<input ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.tag}">
 <div class="fn__none b3-list fn__flex-1 b3-list--background protyle-hint" style="position: fixed"></div>`,
         bind(element) {
             const listElement = element.querySelector(".b3-list") as HTMLElement;
@@ -1820,27 +1810,23 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
                 }
             });
             inputElement.addEventListener("keydown", (event) => {
-                event.stopPropagation();
                 if (event.isComposing) {
                     return;
                 }
-                if (event.key === "Enter" || event.key === "Escape") {
-                    if (!listElement.classList.contains("fn__none")) {
-                        listElement.classList.add("fn__none");
-                        if (event.key === "Enter") {
-                            const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
-                            inputElement.value = currentElement.dataset.type === "new" ? currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim();
-                        }
-                        return;
-                    }
-                    if (event.key === "Escape") {
-                        window.siyuan.menus.menu.removeCB = null;
-                    }
-                    window.siyuan.menus.menu.remove();
-                    event.preventDefault();
-                } else {
-                    electronUndo(event);
+                if (!listElement.classList.contains("fn__none")) {
                     upDownHint(listElement, event);
+                    if (event.key === "Enter" || event.key === "Escape") {
+                        listElement.classList.add("fn__none");
+                    }
+                    if (event.key === "Enter") {
+                        const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
+                        inputElement.value = currentElement.dataset.type === "new" ? currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim();
+                    }
+                    event.stopPropagation();
+                    return;
+                }
+                if (event.key === "Escape") {
+                    window.siyuan.menus.menu.removeCB = null;
                 }
             });
             listElement.addEventListener("click", (event) => {

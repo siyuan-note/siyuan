@@ -4,6 +4,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 import {getTopBarHeight} from "../layout/getTopBarHeight";
+import {electronUndo} from "../protyle/undo";
 
 export class Menu {
     public element: HTMLElement;
@@ -340,15 +341,31 @@ const getActionMenu = (element: Element, next: boolean) => {
 };
 
 export const bindMenuKeydown = (event: KeyboardEvent) => {
-    if (window.siyuan.menus.menu.element.classList.contains("fn__none")
-        || event.altKey || event.shiftKey || event.ctrlKey || event.metaKey) {
+    if (window.siyuan.menus.menu.element.classList.contains("fn__none") || event.isComposing) {
         return false;
     }
     const target = event.target as HTMLElement;
+    const eventCode = Constants.KEYCODELIST[event.keyCode];
     if (window.siyuan.menus.menu.element.contains(target) && ["INPUT", "TEXTAREA"].includes(target.tagName)) {
+        //TODO
+        if (eventCode === "→" || eventCode === "←") {
+            return false;
+        }
+        if (["INPUT", "TEXTAREA"].includes(target.tagName)) {
+            electronUndo(event);
+        }
+        if (target.getAttribute(Constants.ATTRIBUTE_MENU_KEYMAP)) {
+            if (!window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current")) {
+                window.siyuan.menus.menu.element.querySelector(".b3-menu__items").firstElementChild.classList.add("b3-menu__item--current");
+            }
+        } else {
+            return false;
+        }
+    }
+    // 支持输入框中的 undo & redo
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
         return false;
     }
-    const eventCode = Constants.KEYCODELIST[event.keyCode];
     if (eventCode === "↓" || eventCode === "↑") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");
         let actionMenuElement;

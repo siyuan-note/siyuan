@@ -750,7 +750,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     <div class="fn__space"></div>
     <span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>
     <div class="b3-form__icona fn__block">
-        <input class="b3-text-field b3-form__icona-input" type="text">
+        <input ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" class="b3-text-field b3-form__icona-input" type="text">
         <svg data-position="north" class="b3-form__icona-icon ariaLabel" aria-label="${oldDesc ? escapeAriaLabel(oldDesc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
     </div>
     <div class="fn__space"></div>
@@ -793,15 +793,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             });
             const inputElement = element.querySelector("input");
             inputElement.value = oldValue;
-            inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                if (event.isComposing) {
-                    return;
-                }
-                if (event.key === "Enter") {
-                    menu.close();
-                    event.preventDefault();
-                }
-            });
             const descElement = element.querySelector("textarea");
             inputElement.nextElementSibling.addEventListener("click", () => {
                 const descPanelElement = descElement.parentElement.parentElement;

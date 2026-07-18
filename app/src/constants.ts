@@ -69,6 +69,7 @@ export abstract class Constants {
     public static readonly ATTRIBUTE_EDITING = "data-editing";
     public static readonly ATTRIBUTE_V_SCROLL = "data-v-scroll";
     public static readonly ATTRIBUTE_DOCK_WIDTH = "data-dock-width";
+    public static readonly ATTRIBUTE_MENU_KEYMAP = "data-menu-keymap";
 
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;

@@ -207,11 +207,12 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		if e := recover(); nil != e {
 			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, logging.ShortStack())
 			logging.LogError(msg)
-			ret = &TxErr{code: TxErrCodePushMsg, msg: fmt.Sprintf("transaction panic: %v", e)}
 
-			if 1 == tx.state.Load() {
+			state := tx.state.Load()
+			if 1 == state {
 				tx.rollback()
 			}
+			ret = txErrFromPanic(state, e)
 		}
 	}()
 
@@ -389,6 +390,13 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		return &TxErr{code: TxErrCodePushMsg, msg: cr.Error()}
 	}
 	return
+}
+
+func txErrFromPanic(state int32, recovered any) *TxErr {
+	if 2 == state {
+		return nil
+	}
+	return &TxErr{code: TxErrCodePushMsg, msg: fmt.Sprintf("transaction panic: %v", recovered)}
 }
 
 func (tx *Transaction) processLargeDelete() bool {
@@ -1503,8 +1511,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	updateData, ok := operation.Data.(string)
 	if !ok || "" == updateData {
-		logging.LogErrorf("update data is nil")
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+		msg := "update data is invalid"
+		logging.LogError(msg)
+		return &TxErr{code: TxErrCodePushMsg, msg: msg, id: id}
 	}
 
 	tree, err := tx.loadTree(id)
@@ -1515,8 +1524,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	data := strings.ReplaceAll(updateData, editor.FrontEndCaret, "")
 	if "" == data {
-		logging.LogErrorf("update data is nil")
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+		msg := "update data is invalid"
+		logging.LogError(msg)
+		return &TxErr{code: TxErrCodePushMsg, msg: msg, id: id}
 	}
 
 	subTree := tx.luteEngine.BlockDOM2Tree(data)

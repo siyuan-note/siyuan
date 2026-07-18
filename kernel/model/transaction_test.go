@@ -26,5 +26,17 @@ func TestDoUpdateRejectsInvalidData(t *testing.T) {
 		if nil == err {
 			t.Fatalf("expected invalid update data [%v] to be rejected", data)
 		}
+		if TxErrCodePushMsg != err.Code() {
+			t.Fatalf("expected invalid update data [%v] to return code [%d], got [%d]", data, TxErrCodePushMsg, err.Code())
+		}
+	}
+}
+
+func TestTxErrFromPanic(t *testing.T) {
+	if err := txErrFromPanic(1, "test"); nil == err {
+		t.Fatal("expected an active transaction panic to return an error")
+	}
+	if err := txErrFromPanic(2, "test"); nil != err {
+		t.Fatal("expected a committed transaction panic to preserve the committed result")
 	}
 }

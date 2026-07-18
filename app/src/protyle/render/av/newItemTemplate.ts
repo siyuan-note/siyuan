@@ -38,8 +38,21 @@ const getSelectedOptionNames = (element: HTMLElement) => {
 };
 
 const getSelectedOptionsHTML = (column: IAVColumn, selected: string[]) => {
-    const selectedSet = new Set(selected);
-    return (column.options || []).filter(item => selectedSet.has(item.name)).map(item => `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">${escapeHtml(item.name)}</span>`).join("");
+    return selected.map(name => (column.options || []).find(item => item.name === name)).filter(item => item).map(item => `<span class="b3-chip b3-chip--middle" style="max-width:100%;background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})"><span class="fn__ellipsis">${escapeHtml(item.name)}</span></span>`).join("");
+};
+
+const getFieldSelectMenuHTML = (column: IAVColumn, selected: string[], keyword = "") => {
+    const selectedHTML = selected.map(name => (column.options || []).find(item => item.name === name)).filter(item => item).map(item => `<div class="b3-chip b3-chip--middle" data-name="${escapeAttr(item.name)}" style="white-space:nowrap;max-width:100%;background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})"><span class="fn__ellipsis">${escapeHtml(item.name)}</span><svg class="b3-chip__close" data-role="remove-field-option"><use xlink:href="#iconClose"></use></svg></div>`).join("");
+    const normalizedKeyword = keyword.toLowerCase();
+    const options = (column.options || []).filter(item => !normalizedKeyword ||
+        item.name.toLowerCase().includes(normalizedKeyword) || normalizedKeyword.includes(item.name.toLowerCase()));
+    const optionsHTML = options.map((option, index) => `<button class="b3-menu__item${index === 0 ? " b3-menu__item--current" : ""}" data-role="field-option" data-name="${escapeAttr(option.name)}">
+    <div class="fn__flex-1">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(option.color)});color:var(--b3-font-color${escapeAttr(option.color)})"><span class="fn__ellipsis">${escapeHtml(option.name)}</span></span>
+    </div>
+    ${selected.includes(option.name) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+</button>`).join("");
+    return `<div class="b3-chips">${selectedHTML}<input value="${escapeAttr(keyword)}"></div><div data-role="field-options" style="flex:1;overflow:auto">${optionsHTML}</div>`;
 };
 
 const getFieldText = (value: IAVCellValue) => {
@@ -196,48 +209,81 @@ const hasFieldValue = (column: IAVColumn, value: IAVCellValue) => {
 };
 
 const openFieldSelectMenu = (target: HTMLElement, column: IAVColumn) => {
-    const selected = getSelectedOptionNames(target);
-    const selectedSet = new Set(selected);
     const menu = new Menu("av-new-item-template-field-value");
     if (menu.isOpen) {
         return;
     }
-    if (column.type === "select") {
-        menu.addItem({
-            label: window.siyuan.languages.empty,
-            checked: selected.length === 0,
-            click: () => {
-                selected.splice(0, selected.length);
-                target.dataset.selected = "[]";
+    menu.addItem({
+        type: "empty",
+        label: `<div class="fn__flex fn__flex-column" style="max-height:calc(100vh - 60px)">${getFieldSelectMenuHTML(column, getSelectedOptionNames(target))}</div>`,
+        bind: element => {
+            const panelElement = element.firstElementChild as HTMLElement;
+            const render = (keyword = "") => {
+                panelElement.innerHTML = getFieldSelectMenuHTML(column, getSelectedOptionNames(target), keyword);
+                const inputElement = panelElement.querySelector("input") as HTMLInputElement;
+                inputElement.focus();
+                inputElement.setSelectionRange(keyword.length, keyword.length);
+                window.siyuan.menus.menu.resetPosition();
+            };
+            const updateSelected = (selected: string[]) => {
+                target.dataset.selected = JSON.stringify(selected);
                 target.innerHTML = getSelectedOptionsHTML(column, selected);
-            },
-        });
-        menu.addSeparator();
-    }
-    (column.options || []).forEach(option => menu.addItem({
-        label: `<span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(option.color)});color:var(--b3-font-color${escapeAttr(option.color)})">${escapeHtml(option.name)}</span>`,
-        checked: selectedSet.has(option.name),
-        click: (element) => {
-            if (column.type === "select") {
-                selected.splice(0, selected.length, option.name);
-            } else if (selectedSet.has(option.name)) {
-                selectedSet.delete(option.name);
-                selected.splice(selected.indexOf(option.name), 1);
-            } else {
-                selectedSet.add(option.name);
-                selected.push(option.name);
-            }
-            target.dataset.selected = JSON.stringify(selected);
-            target.innerHTML = getSelectedOptionsHTML(column, selected);
-            if (column.type === "mSelect") {
-                element.querySelector(".b3-menu__checked")?.remove();
-                if (selectedSet.has(option.name)) {
-                    element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
+            };
+            element.addEventListener("click", event => {
+                const removeElement = (event.target as HTMLElement).closest<HTMLElement>('[data-role="remove-field-option"]');
+                const optionElement = (event.target as HTMLElement).closest<HTMLElement>('[data-role="field-option"]');
+                if (!removeElement && !optionElement) {
+                    return;
                 }
-                return true;
-            }
+                const selected = getSelectedOptionNames(target);
+                const name = removeElement?.closest<HTMLElement>("[data-name]")?.dataset.name || optionElement?.dataset.name;
+                const selectedIndex = selected.indexOf(name);
+                if (selectedIndex > -1) {
+                    selected.splice(selectedIndex, 1);
+                    updateSelected(selected);
+                    render((panelElement.querySelector("input") as HTMLInputElement)?.value || "");
+                } else if (optionElement) {
+                    if (column.type === "select") {
+                        selected.splice(0, selected.length, name);
+                    } else {
+                        selected.push(name);
+                    }
+                    updateSelected(selected);
+                    if (column.type === "select") {
+                        menu.close();
+                    } else {
+                        render((panelElement.querySelector("input") as HTMLInputElement)?.value || "");
+                    }
+                }
+                event.preventDefault();
+                event.stopPropagation();
+            });
+            element.addEventListener("input", (event: InputEvent) => {
+                if (!event.isComposing && (event.target as HTMLElement).matches("input")) {
+                    render((event.target as HTMLInputElement).value);
+                }
+            });
+            element.addEventListener("compositionend", event => {
+                if ((event.target as HTMLElement).matches("input")) {
+                    render((event.target as HTMLInputElement).value);
+                }
+            });
+            element.addEventListener("keydown", event => {
+                const inputElement = event.target as HTMLInputElement;
+                if (event.isComposing || !inputElement.matches("input")) {
+                    return;
+                }
+                const optionsElement = panelElement.querySelector('[data-role="field-options"]') as HTMLElement;
+                const currentElement = upDownHint(optionsElement, event, "b3-menu__item--current", optionsElement.firstElementChild);
+                if (event.key === "Enter") {
+                    currentElement?.click();
+                } else if (event.key === "Backspace" && !inputElement.value) {
+                    (inputElement.previousElementSibling?.querySelector('[data-role="remove-field-option"]') as HTMLElement)?.click();
+                }
+            });
+            setTimeout(() => (panelElement.querySelector("input") as HTMLInputElement)?.focus());
         },
-    }));
+    });
     const rect = target.getBoundingClientRect();
     menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
 };
@@ -751,6 +797,10 @@ export const createAttributeViewItem = (options: {
         app: options.protyle.app.appId,
         session: options.protyle.id,
     }, response => {
+        if (response.code === 1 && response.data?.unavailableNotebook) {
+            showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
+            return;
+        }
         const warnings = (response.data?.warnings || []) as string[];
         if (warnings.length) {
             showMessage(warnings.join("<br>"));

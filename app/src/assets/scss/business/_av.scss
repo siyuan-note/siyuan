@@ -1432,3 +1432,31 @@ img.av__cellassetimg {
     }
   }
 }
+
+.b3-menu[data-name="av-new-item-template-field-value"] {
+  &:not(.b3-menu--fullscreen) {
+    min-width: 290px;
+    max-width: 290px;
+  }
+
+  .b3-menu__item .b3-chip {
+    max-width: 100%;
+    margin: 3px 0;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    float: left;
+  }
+
+  .b3-chips {
+    padding: 0;
+
+    input {
+      outline: none;
+      border: 0;
+      background-color: var(--b3-menu-background);
+      flex: 1;
+      height: 32px;
+      color: var(--b3-theme-on-background);
+    }
+  }
+}

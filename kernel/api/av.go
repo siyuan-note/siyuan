@@ -752,6 +752,11 @@ func createAttributeViewItem(c *gin.Context) {
 	}
 	result, err := model.CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID)
 	if nil != err {
+		if errors.Is(err, model.ErrBoxNotFound) {
+			ret.Code = 1
+			ret.Data = map[string]any{"unavailableNotebook": true}
+			return
+		}
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

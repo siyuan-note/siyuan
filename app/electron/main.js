@@ -117,7 +117,7 @@ if (!app.isPackaged) {
 
 for (let i = argStart; i < process.argv.length; i++) {
     let arg = process.argv[i];
-    if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") || arg.startsWith("--safe-mode=") || arg.startsWith("siyuan://")) {
+    if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") || arg.startsWith("--safe-mode=") || arg.startsWith("--lang=") || arg.startsWith("siyuan://")) {
         // 跳过内置参数
         if (arg.startsWith("--openAsHidden")) {
             openAsHidden = true;
@@ -1835,7 +1835,11 @@ app.whenReady().then(() => {
         if (safeMode) {
             writeLog("got arg [--safe-mode=true]");
         }
-        initKernel(workspace, port, "", safeMode).then((startedKernelPort) => {
+        const lang = getArg("--lang") || "";
+        if (lang) {
+            writeLog("got arg [--lang=" + lang + "]");
+        }
+        initKernel(workspace, port, lang, safeMode).then((startedKernelPort) => {
             if (startedKernelPort) {
                 initMainWindow(startedKernelPort);
             }
@@ -1927,6 +1931,13 @@ app.on("second-instance", (event, argv) => {
     } else {
         port = 0;
     }
+    let lang = argv.find((arg) => arg.startsWith("--lang="));
+    if (lang) {
+        lang = lang.split("=")[1];
+        writeLog("got second-instance arg [--lang=" + lang + "]");
+    } else {
+        lang = "";
+    }
     const foundWorkspace = workspaces.find(item => {
         if (item.browserWindow && !item.browserWindow.isDestroyed()) {
             if (workspace && workspace === item.workspaceDir) {
@@ -1939,7 +1950,7 @@ app.on("second-instance", (event, argv) => {
         return;
     }
     if (workspace) {
-        initKernel(workspace, port, "").then((startedKernelPort) => {
+        initKernel(workspace, port, lang).then((startedKernelPort) => {
             if (startedKernelPort) {
                 initMainWindow(startedKernelPort);
             }

@@ -1043,6 +1043,27 @@ func getAttributeViewKeys(c *gin.Context) {
 	ret.Data = blockAttributeViewKeys
 }
 
+func getAttributeViewBacklinks(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id, _ := arg["id"].(string)
+	avID, _ := arg["avID"].(string)
+	itemID, _ := arg["itemID"].(string)
+	valueID, _ := arg["valueID"].(string)
+	backlinks := model.GetAttributeViewBacklinks(id, avID, itemID, valueID)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		backlinks = model.FilterAttributeViewBacklinksByPublishAccess(c, publishAccess, backlinks)
+	}
+	ret.Data = backlinks
+}
+
 func setAttributeViewBlockAttr(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

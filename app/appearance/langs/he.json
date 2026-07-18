@@ -1,4 +1,5 @@
 {
+	"avBacklinks": "${count} קישורים חוזרים למסד נתונים",
 	"databaseAttrViewMode": "מצב ברירת המחדל של מאפייני מסד הנתונים",
 	"databaseAttrViewModeTip": "הגדר אם מאפייני מסד הנתונים יורחבו בעת פתיחת מסמך",
 	"bind": "קישור",

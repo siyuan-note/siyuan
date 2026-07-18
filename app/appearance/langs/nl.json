@@ -1,4 +1,5 @@
 {
+	"avBacklinks": "${count} databasebacklinks",
 	"databaseAttrViewMode": "Standaardstatus van database-eigenschappen",
 	"databaseAttrViewModeTip": "Stel in of database-eigenschappen worden uitgevouwen bij het openen van een document",
 	"bind": "Koppelen",

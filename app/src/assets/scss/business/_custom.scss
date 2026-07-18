@@ -1,5 +1,96 @@
 .custom-attr {
 
+  &__avbacklinks {
+    border-bottom: 1px solid var(--b3-border-color);
+    padding: 4px 8px 8px 36px;
+
+    &[data-expanded="false"] .custom-attr__avbacklinks-body {
+      display: none;
+    }
+  }
+
+  &__avbacklinks-toggle,
+  &__avbacklink {
+    align-items: center;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    box-sizing: border-box;
+    color: var(--b3-theme-on-surface);
+    display: flex;
+    font: inherit;
+    text-align: left;
+    width: 100%;
+
+    &:hover {
+      background-color: var(--b3-theme-surface-light);
+    }
+  }
+
+  &__avbacklinks-toggle {
+    cursor: pointer;
+    gap: 8px;
+    min-height: 34px;
+    padding: 4px 8px;
+
+    svg {
+      height: 14px;
+      width: 14px;
+    }
+  }
+
+  &__avbacklinks-body {
+    padding-top: 4px;
+  }
+
+  &__avbacklink {
+    cursor: pointer;
+    gap: 8px;
+    min-height: 42px;
+    padding: 4px 8px 4px 30px;
+
+    & > .fn__flex-1 {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+  }
+
+  &__avbacklinkicon,
+  &__avbacklinkopen {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    height: 16px;
+    justify-content: center;
+    width: 16px;
+
+    img,
+    svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+
+  &__avbacklinkopen {
+    color: var(--b3-theme-on-surface-light);
+    opacity: 0;
+  }
+
+  &__avbacklink:hover &__avbacklinkopen {
+    opacity: 1;
+  }
+
+  &__avbacklinktitle,
+  &__avbacklinkpath {
+    display: block;
+  }
+
+  &__avbacklinkpath {
+    color: var(--b3-theme-on-surface-light);
+    font-size: 12px;
+  }
+
   &__avvalue {
     cursor: pointer;
     transition: var(--b3-background-transition);
@@ -149,8 +240,22 @@
 
   &__header {
     align-items: center;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    box-sizing: border-box;
+    color: var(--b3-theme-on-surface);
+    cursor: pointer;
+    font: inherit;
     min-height: 34px;
     padding: 0 8px;
+    text-align: left;
+    transition: var(--b3-background-transition);
+    width: 100%;
+
+    &:hover {
+      background-color: var(--b3-theme-surface-light);
+    }
 
     .block__logo {
       min-height: 34px;

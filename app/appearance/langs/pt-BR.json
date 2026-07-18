@@ -1,4 +1,5 @@
 {
+	"avBacklinks": "${count} backlinks de banco de dados",
 	"databaseAttrViewMode": "Estado padrão das propriedades do banco de dados",
 	"databaseAttrViewModeTip": "Define se as propriedades do banco de dados são expandidas ao abrir um documento",
 	"bind": "Vincular",

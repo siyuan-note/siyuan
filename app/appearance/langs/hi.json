@@ -1,4 +1,5 @@
 {
+	"avBacklinks": "${count} डेटाबेस बैकलिंक",
 	"databaseAttrViewMode": "डेटाबेस गुणों की डिफ़ॉल्ट स्थिति",
 	"databaseAttrViewModeTip": "तय करें कि दस्तावेज़ खोलते समय डेटाबेस गुण विस्तृत हों या नहीं",
 	"bind": "बाँधें",

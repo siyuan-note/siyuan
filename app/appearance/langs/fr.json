@@ -1,4 +1,5 @@
 {
+	"avBacklinks": "${count} liens retour de base de données",
 	"databaseAttrViewMode": "État par défaut des propriétés de la base de données",
 	"databaseAttrViewModeTip": "Définit si les propriétés de la base de données sont développées à l'ouverture d'un document",
 	"bind": "Lier",

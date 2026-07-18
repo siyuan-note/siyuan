@@ -1,4 +1,5 @@
 {
+	"avBacklinks": "${count} spätných odkazov databázy",
 	"databaseAttrViewMode": "Predvolený stav vlastností databázy",
 	"databaseAttrViewModeTip": "Nastaví, či sa vlastnosti databázy rozbalia pri otvorení dokumentu",
 	"bind": "Prepojiť",

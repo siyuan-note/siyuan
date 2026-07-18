@@ -1,4 +1,5 @@
 {
+	"avBacklinks": "${count} tautan balik basis data",
 	"databaseAttrViewMode": "Status default properti basis data",
 	"databaseAttrViewModeTip": "Atur apakah properti basis data diperluas saat membuka dokumen",
 	"bind": "Tautkan",

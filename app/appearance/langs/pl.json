@@ -1,4 +1,5 @@
 {
+	"avBacklinks": "${count} linków zwrotnych bazy danych",
 	"databaseAttrViewMode": "Domyślny stan właściwości bazy danych",
 	"databaseAttrViewModeTip": "Ustaw, czy właściwości bazy danych mają być rozwinięte podczas otwierania dokumentu",
 	"bind": "Powiąż",

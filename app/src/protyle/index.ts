@@ -169,7 +169,8 @@ export class Protyle {
                             }
                             /// #if !MOBILE
                             getAllModels().custom.forEach((item) => {
-                                if (item.type === "siyuan-database-row" && item.data.avID === data.data.id) {
+                                if (item.type === "siyuan-database-row" && (item.data.avID === data.data.id ||
+                                    item.element.querySelector(`[data-av-id="${data.data.id}"]`))) {
                                     item.update?.();
                                 }
                             });

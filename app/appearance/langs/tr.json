@@ -1,4 +1,5 @@
 {
+	"avBacklinks": "${count} veritabanı geri bağlantısı",
 	"databaseAttrViewMode": "Veritabanı özelliklerinin varsayılan durumu",
 	"databaseAttrViewModeTip": "Belge açılırken veritabanı özelliklerinin genişletilip genişletilmeyeceğini ayarlayın",
 	"bind": "Bağla",

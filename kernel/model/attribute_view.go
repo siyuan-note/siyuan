@@ -2078,6 +2078,252 @@ type BlockAttributeViewKeys struct {
 	KeyValues []*av.KeyValues `json:"keyValues"`
 }
 
+type AttributeViewBacklinkRelation struct {
+	KeyID        string `json:"keyID"`
+	KeyName      string `json:"keyName"`
+	TargetAvID   string `json:"targetAvID"`
+	TargetItemID string `json:"targetItemID"`
+}
+
+type AttributeViewBacklink struct {
+	AvID            string                           `json:"avID"`
+	AvName          string                           `json:"avName"`
+	BlockIDs        []string                         `json:"blockIDs"`
+	DatabaseBlockID string                           `json:"databaseBlockID"`
+	BoxID           string                           `json:"boxID"`
+	DatabasePath    string                           `json:"databasePath"`
+	ItemID          string                           `json:"itemID"`
+	ValueID         string                           `json:"valueID"`
+	Title           string                           `json:"title"`
+	Icon            string                           `json:"icon"`
+	BoundBlockID    string                           `json:"boundBlockID"`
+	IsDetached      bool                             `json:"isDetached"`
+	Relations       []*AttributeViewBacklinkRelation `json:"relations"`
+}
+
+type AttributeViewBacklinks struct {
+	Total int                      `json:"total"`
+	Items []*AttributeViewBacklink `json:"items"`
+}
+
+type attributeViewBacklinkTarget struct {
+	avID   string
+	itemID string
+}
+
+func getAttributeViewBacklinkMatches(srcAttrView *av.AttributeView, target *attributeViewBacklinkTarget) (ret map[string][]*AttributeViewBacklinkRelation) {
+	ret = map[string][]*AttributeViewBacklinkRelation{}
+	seenRelations := map[string]bool{}
+	for _, keyValues := range srcAttrView.KeyValues {
+		key := keyValues.Key
+		if av.KeyTypeRelation != key.Type || nil == key.Relation || key.Relation.AvID != target.avID {
+			continue
+		}
+
+		for _, value := range keyValues.Values {
+			if nil == value.Relation || !slices.Contains(value.Relation.BlockIDs, target.itemID) {
+				continue
+			}
+
+			relationID := value.BlockID + "\x00" + key.ID + "\x00" + target.avID + "\x00" + target.itemID
+			if seenRelations[relationID] {
+				continue
+			}
+			seenRelations[relationID] = true
+			ret[value.BlockID] = append(ret[value.BlockID], &AttributeViewBacklinkRelation{
+				KeyID:        key.ID,
+				KeyName:      key.Name,
+				TargetAvID:   target.avID,
+				TargetItemID: target.itemID,
+			})
+		}
+	}
+	return
+}
+
+func getAttributeViewBacklinkBlockValues(attrView *av.AttributeView) (ret map[string]*av.Value) {
+	ret = map[string]*av.Value{}
+	blockKeyValues := attrView.GetBlockKeyValues()
+	if nil == blockKeyValues {
+		return
+	}
+	for _, value := range blockKeyValues.Values {
+		ret[value.BlockID] = value
+	}
+	return
+}
+
+func resolveAttributeViewBacklinkItemID(attrView *av.AttributeView, itemID, valueID string) string {
+	if nil != attrView.GetBlockValue(itemID) {
+		return itemID
+	}
+	if "" == valueID {
+		return ""
+	}
+	for _, value := range getAttributeViewBacklinkBlockValues(attrView) {
+		if value.ID == valueID {
+			return value.BlockID
+		}
+	}
+	return ""
+}
+
+func sortAttributeViewBacklinkBlockIDs(blockIDs []string, blockTrees map[string]*treenode.BlockTree) {
+	sort.Slice(blockIDs, func(i, j int) bool {
+		left, right := blockTrees[blockIDs[i]], blockTrees[blockIDs[j]]
+		if nil == left || nil == right {
+			if nil == left && nil != right {
+				return false
+			}
+			if nil != left && nil == right {
+				return true
+			}
+			return blockIDs[i] < blockIDs[j]
+		}
+		if left.HPath != right.HPath {
+			return left.HPath < right.HPath
+		}
+		if left.BoxID != right.BoxID {
+			return left.BoxID < right.BoxID
+		}
+		return blockIDs[i] < blockIDs[j]
+	})
+}
+
+func GetAttributeViewBacklinks(nodeID, avID, itemID, valueID string) (ret *AttributeViewBacklinks) {
+	waitForSyncingStorages()
+
+	ret = &AttributeViewBacklinks{Items: []*AttributeViewBacklink{}}
+	targets := getAttributeViewBacklinkTargets(nodeID, avID, itemID, valueID)
+	if 1 > len(targets) {
+		return
+	}
+
+	backlinks := map[string]*AttributeViewBacklink{}
+	relationKeys := map[string]map[string]bool{}
+	cachedAttrViews := map[string]*av.AttributeView{}
+	cachedBlockValues := map[string]map[string]*av.Value{}
+	cachedBlockIDs := map[string][]string{}
+	cachedBlockTrees := map[string]map[string]*treenode.BlockTree{}
+	for _, target := range targets {
+		for _, srcAvID := range av.GetSrcAvIDs(target.avID) {
+			srcAttrView := cachedAttrViews[srcAvID]
+			if nil == srcAttrView {
+				var err error
+				srcAttrView, err = av.ParseAttributeView(srcAvID)
+				if nil == srcAttrView {
+					logging.LogErrorf("parse attribute view [%s] failed: %s", srcAvID, err)
+					continue
+				}
+				cachedAttrViews[srcAvID] = srcAttrView
+			}
+
+			blockValues := cachedBlockValues[srcAvID]
+			if nil == blockValues {
+				blockValues = getAttributeViewBacklinkBlockValues(srcAttrView)
+				cachedBlockValues[srcAvID] = blockValues
+			}
+			for sourceItemID, relations := range getAttributeViewBacklinkMatches(srcAttrView, target) {
+				blockValue := blockValues[sourceItemID]
+				if nil == blockValue || nil == blockValue.Block {
+					continue
+				}
+
+				backlinkID := srcAvID + "\x00" + sourceItemID
+				backlink := backlinks[backlinkID]
+				if nil == backlink {
+					blockIDs, cached := cachedBlockIDs[srcAvID]
+					blockTrees := cachedBlockTrees[srcAvID]
+					if !cached {
+						blockIDs = treenode.GetMirrorAttrViewBlockIDs(srcAvID)
+						blockTrees = treenode.GetBlockTrees(blockIDs)
+						sortAttributeViewBacklinkBlockIDs(blockIDs, blockTrees)
+						cachedBlockIDs[srcAvID] = blockIDs
+						cachedBlockTrees[srcAvID] = blockTrees
+					}
+					backlink = &AttributeViewBacklink{
+						AvID:         srcAvID,
+						AvName:       getAttrViewName(srcAttrView),
+						BlockIDs:     blockIDs,
+						ItemID:       sourceItemID,
+						ValueID:      blockValue.ID,
+						Title:        blockValue.Block.Content,
+						Icon:         blockValue.Block.Icon,
+						BoundBlockID: blockValue.Block.ID,
+						IsDetached:   blockValue.IsDetached || "" == blockValue.Block.ID,
+						Relations:    []*AttributeViewBacklinkRelation{},
+					}
+					if 0 < len(blockIDs) {
+						backlink.DatabaseBlockID = blockIDs[0]
+						if bt := blockTrees[blockIDs[0]]; nil != bt {
+							backlink.BoxID = bt.BoxID
+							backlink.DatabasePath = bt.HPath
+						}
+					}
+					backlinks[backlinkID] = backlink
+					relationKeys[backlinkID] = map[string]bool{}
+				}
+
+				for _, relation := range relations {
+					relationID := relation.KeyID + "\x00" + relation.TargetAvID + "\x00" + relation.TargetItemID
+					if relationKeys[backlinkID][relationID] {
+						continue
+					}
+					relationKeys[backlinkID][relationID] = true
+					backlink.Relations = append(backlink.Relations, relation)
+				}
+			}
+		}
+	}
+
+	for _, backlink := range backlinks {
+		ret.Items = append(ret.Items, backlink)
+	}
+	sort.Slice(ret.Items, func(i, j int) bool {
+		if ret.Items[i].AvName != ret.Items[j].AvName {
+			return ret.Items[i].AvName < ret.Items[j].AvName
+		}
+		if ret.Items[i].Title != ret.Items[j].Title {
+			return ret.Items[i].Title < ret.Items[j].Title
+		}
+		return ret.Items[i].ItemID < ret.Items[j].ItemID
+	})
+	ret.Total = len(ret.Items)
+	return
+}
+
+func getAttributeViewBacklinkTargets(nodeID, avID, itemID, valueID string) (ret []*attributeViewBacklinkTarget) {
+	if "" != avID && ("" != itemID || "" != valueID) {
+		attrView, err := av.ParseAttributeView(avID)
+		if nil == attrView {
+			logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+			return
+		}
+		itemID = resolveAttributeViewBacklinkItemID(attrView, itemID, valueID)
+		if "" != itemID {
+			ret = append(ret, &attributeViewBacklinkTarget{avID: avID, itemID: itemID})
+		}
+		return
+	}
+
+	attrs := sql.GetBlockAttrs(nodeID)
+	for targetAvID := range strings.SplitSeq(attrs[av.NodeAttrNameAvs], ",") {
+		if "" == targetAvID {
+			continue
+		}
+		attrView, err := av.ParseAttributeView(targetAvID)
+		if nil == attrView {
+			logging.LogErrorf("parse attribute view [%s] failed: %s", targetAvID, err)
+			continue
+		}
+		blockValue := attrView.GetBlockValueByBoundID(nodeID)
+		if nil != blockValue {
+			ret = append(ret, &attributeViewBacklinkTarget{avID: targetAvID, itemID: blockValue.BlockID})
+		}
+	}
+	return
+}
+
 func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 
@@ -2855,6 +3101,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		destAv = srcAv
 	}
 
+	oldDestAvID := ""
 	for _, keyValues := range srcAv.KeyValues {
 		if keyValues.Key.ID != operation.KeyID {
 			continue
@@ -2863,6 +3110,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		srcRel := keyValues.Key.Relation
 		// 已经设置过双向关联的话需要先断开双向关联
 		if nil != srcRel {
+			oldDestAvID = srcRel.AvID
 			if srcRel.IsTwoWay {
 				oldDestAv, _ := av.ParseAttributeView(srcRel.AvID)
 				if nil != oldDestAv {
@@ -2995,6 +3243,9 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	av.UpsertAvBackRel(srcAv.ID, destAv.ID)
 	if operation.IsTwoWay && !isSameAv {
 		av.UpsertAvBackRel(destAv.ID, srcAv.ID)
+	}
+	if "" != oldDestAvID && oldDestAvID != operation.ID && oldDestAvID != srcAv.ID {
+		ReloadAttrView(oldDestAvID)
 	}
 	return
 }
@@ -4110,6 +4361,18 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 	if err != nil {
 		return
 	}
+	relationDestAvIDs := map[string]bool{}
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeRelation != keyValues.Key.Type || nil == keyValues.Key.Relation {
+			continue
+		}
+		for _, value := range keyValues.Values {
+			if gulu.Str.Contains(value.BlockID, srcIDs) {
+				relationDestAvIDs[keyValues.Key.Relation.AvID] = true
+				break
+			}
+		}
+	}
 
 	trees := map[string]*parse.Tree{}
 	for _, keyValues := range attrView.KeyValues {
@@ -4164,6 +4427,11 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 	}
 
 	refreshRelatedSrcAvs(avID, tx)
+	for destAvID := range relationDestAvIDs {
+		if "" != destAvID && destAvID != avID {
+			ReloadAttrView(destAvID)
+		}
+	}
 
 	historyDir, err := getHistoryDir(HistoryOpUpdate)
 	if err != nil {
@@ -5244,6 +5512,10 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 	if err = av.SaveAttributeView(attrView); nil != err {
 		return
 	}
+	if nil != removedKey && av.KeyTypeRelation == removedKey.Type && nil != removedKey.Relation &&
+		"" != removedKey.Relation.AvID && removedKey.Relation.AvID != avID {
+		ReloadAttrView(removedKey.Relation.AvID)
+	}
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {
@@ -5598,6 +5870,9 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	regenAttrViewGroups(attrView)
 	if err = av.SaveAttributeView(attrView); nil != err {
 		return
+	}
+	if 0 != relationChangeMode && nil != key && nil != key.Relation && "" != key.Relation.AvID && key.Relation.AvID != avID {
+		ReloadAttrView(key.Relation.AvID)
 	}
 
 	refreshRelatedSrcAvs(avID, tx)

@@ -952,11 +952,14 @@ export class Files extends Model {
             Boolean(liElement.getAttribute("data-node-id"));
         const hasChildren = isBoxDoc || (isFile && Number(liElement.getAttribute("data-count")) > 0);
         const iconUsesDocAction = window.siyuan.config.fileTree.docIconClickExpand && (isFile || isBoxDoc);
+        const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
         iconElement.setAttribute("aria-label", iconUsesDocAction ?
             (hasChildren ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) :
             window.siyuan.languages.changeIcon);
         liElement.classList.toggle("file-tree__item--icon-expand", hasChildren && iconUsesDocAction &&
-            !this.element.classList.contains("file-tree__publish-access--active"));
+            !editingPublishAccess);
+        liElement.classList.toggle("file-tree__item--icon-open", isFile && !hasChildren && iconUsesDocAction &&
+            !editingPublishAccess);
         liElement.classList.toggle("file-tree__item--title-expand", hasChildren &&
             window.siyuan.config.fileTree.parentDocClickExpand);
     }
@@ -1502,6 +1505,7 @@ data-type="navigation-root" data-path="/" data-node-id="${window.siyuan.config.f
             (item.subFileCount > 0 ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) :
             window.siyuan.languages.changeIcon;
         const actionClasses = `${iconExpands && item.subFileCount > 0 && !editingPublishAccess ? " file-tree__item--icon-expand" : ""}${
+            iconExpands && item.subFileCount === 0 && !editingPublishAccess ? " file-tree__item--icon-open" : ""}${
             window.siyuan.config.fileTree.parentDocClickExpand && item.subFileCount > 0 ? " file-tree__item--title-expand" : ""}`;
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 

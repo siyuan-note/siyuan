@@ -1,6 +1,5 @@
 {
 	"avBacklinks": "${count} روابط عكسية لقاعدة البيانات",
-	"avBacklinksTitle": "مرتبط بهذا العنصر",
 	"databaseAttrViewMode": "الحالة الافتراضية لخصائص قاعدة البيانات",
 	"databaseAttrViewModeTip": "تحديد ما إذا كانت خصائص قاعدة البيانات موسعة عند فتح مستند",
 	"bind": "ربط",

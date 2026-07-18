@@ -13,10 +13,10 @@ export class AVAttributePanel {
         this.collapsed = window.siyuan.config.editor.databaseAttrViewMode === 1;
         this.element = document.createElement("div");
         this.element.className = "protyle-db-attr fn__none";
-        this.element.innerHTML = `<div class="protyle-db-attr__header fn__flex">
-    <button class="block__icon block__icon--show fn__flex-center" data-type="toggle" aria-label="${window.siyuan.languages.database}"><svg><use xlink:href="#iconRight"></use></svg></button>
-    <div class="block__logo fn__flex-1"><svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg><span>${window.siyuan.languages.database}</span></div>
-</div>`;
+        this.element.innerHTML = `<button type="button" class="protyle-db-attr__header fn__flex" data-type="toggle" aria-expanded="${!this.collapsed}" aria-label="${window.siyuan.languages.database}">
+    <span class="block__icon block__icon--show fn__flex-center"><svg><use xlink:href="#iconRight"></use></svg></span>
+    <span class="block__logo fn__flex-1"><svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg><span>${window.siyuan.languages.database}</span></span>
+</button>`;
         this.bodyElement = document.createElement("div");
         this.bodyElement.className = "custom-attr protyle-db-attr__body";
         this.element.appendChild(this.bodyElement);
@@ -73,7 +73,9 @@ export class AVAttributePanel {
 
     private updateCollapsedState() {
         this.element.classList.toggle("protyle-db-attr--collapsed", this.collapsed);
-        const useElement = this.element.querySelector('[data-type="toggle"] use');
+        const toggleElement = this.element.querySelector('[data-type="toggle"]');
+        toggleElement?.setAttribute("aria-expanded", (!this.collapsed).toString());
+        const useElement = toggleElement?.querySelector("use");
         useElement?.setAttribute("xlink:href", this.collapsed ? "#iconRight" : "#iconDown");
     }
 }

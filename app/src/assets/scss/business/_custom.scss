@@ -43,12 +43,6 @@
     padding-top: 4px;
   }
 
-  &__avbacklinks-title {
-    color: var(--b3-theme-on-surface-light);
-    font-size: 12px;
-    padding: 4px 8px;
-  }
-
   &__avbacklink {
     cursor: pointer;
     gap: 8px;
@@ -246,8 +240,22 @@
 
   &__header {
     align-items: center;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    box-sizing: border-box;
+    color: var(--b3-theme-on-surface);
+    cursor: pointer;
+    font: inherit;
     min-height: 34px;
     padding: 0 8px;
+    text-align: left;
+    transition: var(--b3-background-transition);
+    width: 100%;
+
+    &:hover {
+      background-color: var(--b3-theme-surface-light);
+    }
 
     .block__logo {
       min-height: 34px;

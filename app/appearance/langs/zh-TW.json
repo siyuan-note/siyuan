@@ -1,6 +1,5 @@
 {
 	"avBacklinks": "${count} 個反向關聯",
-	"avBacklinksTitle": "關聯到此條目",
 	"databaseAttrViewMode": "資料庫屬性預設狀態",
 	"databaseAttrViewModeTip": "設定開啟文件時是否展開資料庫屬性",
 	"bind": "綁定",

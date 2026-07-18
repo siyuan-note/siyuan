@@ -1,6 +1,5 @@
 {
 	"avBacklinks": "データベースのバックリンク ${count} 件",
-	"avBacklinksTitle": "この項目へのリンク",
 	"databaseAttrViewMode": "データベースプロパティのデフォルト状態",
 	"databaseAttrViewModeTip": "文書を開いたときにデータベースプロパティを展開するかどうかを設定します",
 	"bind": "紐付け",

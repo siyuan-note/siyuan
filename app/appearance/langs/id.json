@@ -1,6 +1,5 @@
 {
 	"avBacklinks": "${count} tautan balik basis data",
-	"avBacklinksTitle": "Ditautkan ke item ini",
 	"databaseAttrViewMode": "Status default properti basis data",
 	"databaseAttrViewModeTip": "Atur apakah properti basis data diperluas saat membuka dokumen",
 	"bind": "Tautkan",

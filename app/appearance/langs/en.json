@@ -1,6 +1,5 @@
 {
 	"avBacklinks": "${count} database backlinks",
-	"avBacklinksTitle": "Linked to this item",
 	"databaseAttrViewMode": "Default state of database attributes",
 	"databaseAttrViewModeTip": "Set whether database attributes are expanded when opening a document",
 	"bind": "Bind",

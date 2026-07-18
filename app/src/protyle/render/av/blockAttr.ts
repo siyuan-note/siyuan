@@ -551,12 +551,12 @@ const renderAttributeViewBacklinks = (element: HTMLElement, id: string, renderID
                 const title = item.title || window.siyuan.languages.untitled;
                 const databasePath = item.databasePath ? `${item.databasePath} / ${item.avName}` : item.avName;
                 itemsHTML += `<button type="button" class="custom-attr__avbacklink" data-type="av-backlink-open" data-av-id="${escapeAttr(item.avID)}" data-database-block-id="${escapeAttr(item.databaseBlockID)}" data-box-id="${escapeAttr(item.boxID)}" data-item-id="${escapeAttr(item.itemID)}" data-value-id="${escapeAttr(item.valueID)}" data-title="${escapeAttr(title)}" data-bound-block-id="${escapeAttr(item.boundBlockID)}" data-detached="${item.isDetached}">
-    <span class="custom-attr__avbacklinkicon">${item.icon ? unicode2Emoji(item.icon, "", true) : "<svg><use xlink:href=\"#iconBack\"></use></svg>"}</span>
+    ${item.icon ? `<span class="custom-attr__avbacklinkicon">${unicode2Emoji(item.icon, "", true)}</span>` : ""}
     <span class="fn__flex-1 fn__ellipsis">
         <span class="custom-attr__avbacklinktitle fn__ellipsis">${escapeHtml(title)}</span>
         <span class="custom-attr__avbacklinkpath fn__ellipsis">${escapeHtml(databasePath || window.siyuan.languages.database)}</span>
     </span>
-    <svg class="custom-attr__avbacklinkopen"><use xlink:href="#iconOpen"></use></svg>
+    <span class="custom-attr__avbacklinkopen b3-tooltips b3-tooltips__w" aria-label="${escapeAttr(window.siyuan.languages.openBy)}"><svg><use xlink:href="#iconOpen"></use></svg></span>
 </button>`;
             });
             element.insertAdjacentHTML("afterbegin", `<div class="custom-attr__avbacklinks" data-expanded="${currentExpanded}">
@@ -566,7 +566,6 @@ const renderAttributeViewBacklinks = (element: HTMLElement, id: string, renderID
         <span class="fn__flex-1">${escapeHtml(countLabel)}</span>
     </button>
     <div class="custom-attr__avbacklinks-body">
-        <div class="custom-attr__avbacklinks-title">${escapeHtml(window.siyuan.languages.avBacklinksTitle)}</div>
         ${itemsHTML}
     </div>
 </div>`);

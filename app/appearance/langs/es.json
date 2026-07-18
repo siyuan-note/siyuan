@@ -1,6 +1,5 @@
 {
 	"avBacklinks": "${count} enlaces inversos de base de datos",
-	"avBacklinksTitle": "Vinculado a este elemento",
 	"databaseAttrViewMode": "Estado predeterminado de las propiedades de la base de datos",
 	"databaseAttrViewModeTip": "Define si las propiedades de la base de datos se expanden al abrir un documento",
 	"bind": "Vincular",

@@ -1,6 +1,5 @@
 {
 	"avBacklinks": "${count} backlink del database",
-	"avBacklinksTitle": "Collegato a questo elemento",
 	"databaseAttrViewMode": "Stato predefinito delle proprietà del database",
 	"databaseAttrViewModeTip": "Imposta se le proprietà del database vengono espanse all'apertura di un documento",
 	"bind": "Collega",

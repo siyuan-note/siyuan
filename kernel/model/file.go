@@ -1471,6 +1471,9 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 		return
 	}
 	toPath = normalizeBoxDocTarget(toBoxID, toPath)
+	if _, err = getBoxesByPathsStrict(fromPaths); err != nil {
+		return
+	}
 
 	fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
 	if 1 > len(fromPaths) {
@@ -1715,7 +1718,10 @@ func RemoveDoc(boxID, p string) error {
 
 	FlushTxQueue()
 	luteEngine := util.NewLute()
-	tree := removeDoc(box, p, luteEngine)
+	tree, err := removeDoc(box, p, luteEngine)
+	if err != nil {
+		return err
+	}
 	IncSync()
 
 	refreshParentDocInfo(tree)
@@ -1726,6 +1732,9 @@ func RemoveDocs(paths []string) error {
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
 
+	if _, err := getBoxesByPathsStrict(paths); err != nil {
+		return err
+	}
 	paths = util.FilterSelfChildDocs(paths)
 	pathsBoxes := getBoxesByPaths(paths)
 	for p, box := range pathsBoxes {
@@ -1738,7 +1747,10 @@ func RemoveDocs(paths []string) error {
 
 	var trees []*parse.Tree
 	for p, box := range pathsBoxes {
-		tree := removeDoc(box, p, luteEngine)
+		tree, removeErr := removeDoc(box, p, luteEngine)
+		if removeErr != nil {
+			return removeErr
+		}
 		trees = append(trees, tree)
 	}
 
@@ -1755,10 +1767,10 @@ func RemoveDocs(paths []string) error {
 	return nil
 }
 
-func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
-	ret, _ = filesys.LoadTree(box.ID, p, luteEngine)
-	if nil == ret {
-		return
+func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	ret, err = filesys.LoadTree(box.ID, p, luteEngine)
+	if err != nil || nil == ret {
+		return nil, ErrBlockNotFound
 	}
 
 	historyDir, err := getHistoryDir(HistoryOpDelete)

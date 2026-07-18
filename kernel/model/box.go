@@ -982,3 +982,46 @@ func getBoxesByPaths(paths []string) (ret map[string]*Box) {
 	}
 	return
 }
+
+func getBoxesByPathsStrict(paths []string) (ret map[string]*Box, err error) {
+	if 1 > len(paths) {
+		return nil, ErrBlockNotFound
+	}
+
+	var ids []string
+	for _, p := range paths {
+		id := util.GetTreeID(p)
+		if !ast.IsNodeIDPattern(id) {
+			return nil, ErrBlockNotFound
+		}
+		ids = append(ids, id)
+	}
+
+	ret = map[string]*Box{}
+	bts := treenode.GetBlockTrees(ids)
+	for i, id := range ids {
+		bt := bts[id]
+		if nil == bt || "d" != bt.Type || bt.ID != bt.RootID {
+			return nil, ErrBlockNotFound
+		}
+
+		box := Conf.Box(bt.BoxID)
+		if nil == box {
+			return nil, ErrBoxNotFound
+		}
+
+		p := filepath.ToSlash(paths[i])
+		if !strings.HasPrefix(p, "/") {
+			p = "/" + p
+		}
+		if _, validateErr := filesys.ValidateBoxRelativePath(bt.BoxID, p); validateErr != nil {
+			return nil, ErrBlockNotFound
+		}
+		p = normalizeBoxDocPath(bt.BoxID, path.Clean(p))
+		if p != path.Clean(bt.Path) {
+			return nil, ErrBlockNotFound
+		}
+		ret[bt.Path] = box
+	}
+	return
+}

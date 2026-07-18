@@ -230,7 +230,7 @@ export const newEncryptedNotebook = () => {
 </div>`,
             width: isMobile() ? "92vw" : "520px"
         });
-        const btnsElement = dialog.element.querySelectorAll(".b3-button");
+        const btnsElement = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-button");
         const inputs = dialog.element.querySelectorAll("input");
         dialog.bindInput(inputs[0], () => {
             btnsElement[1].dispatchEvent(new CustomEvent("click"));
@@ -277,7 +277,7 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
 </div>`,
         width: isMobile() ? "92vw" : "520px"
     });
-    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    const btnsElement = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-button");
     const inputElement = dialog.element.querySelector("input");
     dialog.bindInput(inputElement, () => {
         btnsElement[1].dispatchEvent(new CustomEvent("click"));

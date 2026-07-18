@@ -393,12 +393,14 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 const backlinkToggleElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "av-backlinks-toggle");
                 if (backlinkToggleElement) {
                     const backlinksElement = hasClosestByClassName(backlinkToggleElement, "custom-attr__avbacklinks");
-                    const expanded = backlinksElement.dataset.expanded !== "true";
-                    backlinksElement.dataset.expanded = expanded.toString();
-                    backlinkToggleElement.setAttribute("aria-expanded", expanded.toString());
-                    backlinkToggleElement.querySelector("use").setAttribute("xlink:href", expanded ? "#iconDown" : "#iconRight");
-                    event.stopPropagation();
-                    return;
+                    if (backlinksElement) {
+                        const expanded = backlinksElement.dataset.expanded !== "true";
+                        backlinksElement.dataset.expanded = expanded.toString();
+                        backlinkToggleElement.setAttribute("aria-expanded", expanded.toString());
+                        backlinkToggleElement.querySelector("use").setAttribute("xlink:href", expanded ? "#iconDown" : "#iconRight");
+                        event.stopPropagation();
+                        return;
+                    }
                 }
                 const backlinkOpenElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "av-backlink-open");
                 if (backlinkOpenElement) {

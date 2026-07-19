@@ -1005,7 +1005,7 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
             type: "readonly",
         });
         menu.addItem({
-            iconHTML: "",
+            iconHTML: '<svg class="b3-menu__icon fn__hidden"><use xlink:href="#iconDrag"></use></svg>',
             label: window.siyuan.languages.empty,
             accelerator: menuData.defaultTemplateID ? "" : window.siyuan.languages.default,
             action: "iconMore",

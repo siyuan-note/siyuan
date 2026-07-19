@@ -481,12 +481,12 @@ Liste öğesinin altındaki ilk alt blok, blok simgesi görünmeyen bloktur. İm
 ### Veri deposu anahtarı (data repo key) kaybolursa ne yapmalıyım?
 
 - Eğer daha önce birden fazla cihazda doğru şekilde başlatıldıysa, tüm cihazlarda aynı anahtar kullanılır. Bu durumda anahtarı şu adımlarla kopyalayabilirsin:
-  <kbd>Ayarlar</kbd> → <kbd>Hakkında</kbd> → <kbd>Veri deposu anahtarı</kbd> → <kbd>Anahtar dizgesini kopyala</kbd>  
+  <kbd>Ayarlar</kbd> → <kbd>Hesap ve Senkronizasyon</kbd> → <kbd>Yerel Veri Deposu</kbd> → <kbd>Veri deposu anahtarı</kbd> → <kbd>Anahtar dizgesini kopyala</kbd>
 
 - Eğer cihazlar arasında farklı anahtarlar kullanılmışsa veya hiçbiri erişilebilir değilse, aşağıdaki adımlarla yeni bir anahtar oluşturabilirsin:
 
   1. Verilerini manuel olarak yedekle (<kbd>Verileri Dışa Aktar</kbd> seçeneğiyle veya dosya sisteminde `workspace/data/` klasörünü kopyalayarak).  
-  2. <kbd>Ayarlar</kbd> → <kbd>Hakkında</kbd> → <kbd>Veri deposu anahtarı</kbd> → <kbd>Veri deposunu sıfırla</kbd>.  
+  2. <kbd>Ayarlar</kbd> → <kbd>Hesap ve Senkronizasyon</kbd> → <kbd>Yerel Veri Deposu</kbd> → <kbd>Veri deposu anahtarı</kbd> → <kbd>Veri deposunu sıfırla</kbd>.
   3. Anahtarı yeniden başlat. Bir cihazda oluşturduktan sonra diğer cihazlara bu anahtarı aktar.  
   4. Bulutta yeni senkronizasyon dizinini kullan; eski dizin artık erişilemez ve silinebilir.  
   5. Mevcut bulut anlık görüntüleri (snapshot) artık geçerli değildir, bunlar da silinebilir.

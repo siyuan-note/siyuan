@@ -493,11 +493,11 @@ The block icon is omitted for the first sub-block under the list item. You can m
 
 ### What should I do if the data repo key is lost?
 
-- If the data repo key is correctly initialized on multiple devices previously, the key is the same on all devices and can be retrieved in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data repo key</kbd> - <kbd>Copy key string</kbd>
+- If the data repo key is correctly initialized on multiple devices previously, the key is the same on all devices and can be retrieved in <kbd>Settings</kbd> - <kbd>Account & Sync</kbd> - <kbd>Local Data Repo</kbd> - <kbd>Data repo key</kbd> - <kbd>Copy key string</kbd>
 - If it has not been configured correctly before (for example, the keys on multiple devices are inconsistent) or all devices are unavailable and the key string cannot be obtained, you can reset the key by following the steps below:
 
   1. Manually back up the data, you can use <kbd>Export Data</kbd> or directly copy the <kbd>workspace/data/</kbd> folder on the file system
-  2. <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data repo key</kbd> - <kbd>Reset data repo</kbd>
+  2. <kbd>Settings</kbd> - <kbd>Account & Sync</kbd> - <kbd>Local Data Repo</kbd> - <kbd>Data repo key</kbd> - <kbd>Reset data repo</kbd>
   3. Reinitialize the data repo key. After initializing the key on one device, other devices import the key
   4. The cloud uses the new synchronization directory, the old synchronization directory is no longer available and can be deleted
   5. The existing cloud snapshots are no longer available and can be deleted

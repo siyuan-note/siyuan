@@ -38,7 +38,6 @@
 - [💡 简介](#-简介)
 - [🔮 特性](#-特性)
 - [🏗️ 架构和生态](#️-架构和生态)
-- [🌟 星标历史](#-星标历史)
 - [🗺️ 路线图](#️-路线图)
 - [🚀 下载安装](#-下载安装)
   - [应用市场](#应用市场)
@@ -133,16 +132,6 @@
 | [ios](https://github.com/siyuan-note/siyuan-ios)         | iOS App      | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-ios)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-ios)     |
 | [harmony](https://github.com/siyuan-note/siyuan-harmony)         | 鸿蒙 App       | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-harmony)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-harmony)     |
 | [riff](https://github.com/siyuan-note/riff)              | 间隔重复         | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/riff)           | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/riff)           |
-
-## 🌟 星标历史
-
-<a href="https://star-history.com/#siyuan-note/siyuan&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
- </picture>
-</a>
 
 ## 🗺️ 路线图
 

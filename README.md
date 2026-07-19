@@ -38,7 +38,6 @@
 - [💡 Introduction](#-introduction)
 - [🔮 Features](#-features)
 - [🏗️ Architecture and Ecosystem](#-architecture-and-ecosystem)
-- [🌟 Star History](#-star-history)
 - [🗺️ Roadmap](#️-roadmap)
 - [🚀 Download Setup](#-download-setup)
   - [App Market](#app-market)
@@ -130,16 +129,6 @@ Some features are only available to paid members, for more details please refer 
 | [ios](https://github.com/siyuan-note/siyuan-ios)         | iOS App               | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-ios)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-ios)     |
 | [harmony](https://github.com/siyuan-note/siyuan-harmony) | HarmonyOS App         | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-harmony) | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-harmony) |
 | [riff](https://github.com/siyuan-note/riff)              | Spaced repetition     | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/riff)           | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/riff)           |
-
-## 🌟 Star History
-
-<a href="https://star-history.com/#siyuan-note/siyuan&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
- </picture>
-</a>
 
 ## 🗺️ Roadmap
 

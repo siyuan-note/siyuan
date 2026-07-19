@@ -38,7 +38,6 @@
 - [💡 Giriş](#-giriş)
 - [🔮 Özellikler](#-özellikler)
 - [🏗️ Mimari ve Ekosistem](#-mimari-ve-ekosistem)
-- [🌟 Yıldız Geçmişi](#-yıldız-geçmişi)
 - [🗺️ Yol Haritası](#️-yol-haritası)
 - [🚀 İndirme ve Kurulum](#-indirme-ve-kurulum)
   - [Uygulama Mağazası](#uygulama-mağazası)
@@ -130,16 +129,6 @@ Bazı özellikler yalnızca ücretli üyeler için geçerlidir. Detaylar için [
 | [ios](https://github.com/siyuan-note/siyuan-ios)         | iOS uygulaması        | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-ios)    | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-ios)   |
 | [harmony](https://github.com/siyuan-note/siyuan-harmony) | HarmonyOS uygulaması  | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-harmony)| ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-harmony)|
 | [riff](https://github.com/siyuan-note/riff)              | Aralıklı tekrar motoru| ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/riff)          | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/riff)         |
-
-## 🌟 Yıldız Geçmişi
-
-<a href="https://star-history.com/#siyuan-note/siyuan&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
-   <img alt="Yıldız Geçmişi Grafiği" src="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
- </picture>
-</a>
 
 ## 🗺️ Yol Haritası
 

@@ -12,7 +12,7 @@ import {openMobileFileById} from "../mobile/editor";
 import {isValidBazaarPackageName} from "./bazaarPackage";
 
 import type {App} from "../index";
-import {queueAVLocateRequest} from "../protyle/render/av/locate";
+import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
 
 const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
     const blockInfo = parseSiYuanUriInfo(uriObj);
@@ -33,11 +33,22 @@ const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
                     openFileById({
                         app,
                         id,
-                        action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                        zoomIn: zoomIn || focus
+                        action: blockInfo.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
+                            ((zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
+                        zoomIn: blockInfo.avItemID ? false : zoomIn || focus,
+                        afterOpen: (model) => {
+                            const protyle = (model as { editor?: { protyle?: IProtyle } })?.editor?.protyle;
+                            if (protyle) {
+                                activateQueuedAVLocate(protyle, id);
+                            }
+                        },
                     });
                     /// #else
-                    openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                    if (blockInfo.avItemID) {
+                        activateQueuedAVLocate(window.siyuan.mobile.editor?.protyle, id);
+                    }
+                    openMobileFileById(app, id, blockInfo.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
+                        ((zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]));
                     /// #endif
                 });
                 /// #if !BROWSER

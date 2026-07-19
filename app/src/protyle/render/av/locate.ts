@@ -9,15 +9,52 @@ export interface IAVLocateRequest {
     groupID?: string;
     viewID?: string;
     select?: boolean;
+    highlight?: boolean;
     previousViewID?: string;
     messageShown?: boolean;
 }
 
 const locateRequests = new WeakMap<HTMLElement, IAVLocateRequest>();
 const queuedLocateRequests = new Map<string, IAVLocateRequest>();
+const renderTokens = new WeakMap<HTMLElement, symbol>();
+const highlightTimers = new WeakMap<HTMLElement, number>();
+
+const highlightTemporarily = (blockElement: HTMLElement, targetElement: HTMLElement, className: string) => {
+    window.clearTimeout(highlightTimers.get(blockElement));
+    targetElement.classList.add(className);
+    const timer = window.setTimeout(() => {
+        targetElement.classList.remove(className);
+        if (highlightTimers.get(blockElement) === timer) {
+            highlightTimers.delete(blockElement);
+        }
+    }, 1024);
+    highlightTimers.set(blockElement, timer);
+};
+
+export const beginAVRender = (blockElement: HTMLElement) => {
+    const token = Symbol();
+    renderTokens.set(blockElement, token);
+    return token;
+};
+
+export const isCurrentAVRender = (blockElement: HTMLElement, token: symbol) => {
+    return renderTokens.get(blockElement) === token;
+};
 
 export const queueAVLocateRequest = (blockID: string, request: IAVLocateRequest) => {
-    queuedLocateRequests.set(blockID, request);
+    queuedLocateRequests.set(blockID, {...request, select: false, highlight: true});
+};
+
+export const activateQueuedAVLocate = (protyle: IProtyle, blockID: string) => {
+    const request = queuedLocateRequests.get(blockID);
+    const blockElement = protyle?.wysiwyg.element.querySelector(`.av[data-node-id="${blockID}"]`) as HTMLElement;
+    if (!request || !blockElement) {
+        return false;
+    }
+    locateRequests.set(blockElement, request);
+    blockElement.removeAttribute("data-render");
+    import("./render").then(({avRender}) => avRender(blockElement, protyle));
+    return true;
 };
 
 export const setAVLocateRequest = (blockElement: HTMLElement, request: IAVLocateRequest) => {
@@ -29,7 +66,6 @@ const getAVLocateRequest = (blockElement: HTMLElement) => {
     if (!request) {
         request = queuedLocateRequests.get(blockElement.dataset.nodeId);
         if (request) {
-            queuedLocateRequests.delete(blockElement.dataset.nodeId);
             locateRequests.set(blockElement, request);
         }
     }
@@ -54,7 +90,7 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
     pageSizes: { [key: string]: string },
 }) => {
     const request = getAVLocateRequest(blockElement);
-    if (!request || !data.target) {
+    if (!blockElement.isConnected || !request || !data.target || data.target.itemID !== request.itemID) {
         return;
     }
     if (data.target.status !== "visible") {
@@ -97,7 +133,11 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
 
 export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, data: IAV) => {
     const request = getAVLocateRequest(blockElement);
-    if (!request) {
+    if (!request || !data.target || data.target.itemID !== request.itemID) {
+        return;
+    }
+    if (!blockElement.isConnected) {
+        locateRequests.delete(blockElement);
         return;
     }
     const currentViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || request.previousViewID || data.viewID;
@@ -118,6 +158,7 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
     }
     if (data.target?.status !== "visible") {
         locateRequests.delete(blockElement);
+        queuedLocateRequests.delete(blockElement.dataset.nodeId);
         return;
     }
     const groupQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";
@@ -128,7 +169,14 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
     }
     let targetElement: HTMLElement;
     if (data.viewType === "table") {
-        targetElement = bodyElement?.querySelector(`.av__row[data-id="${request.itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
+        const rowElement = bodyElement?.querySelector(`.av__row[data-id="${request.itemID}"]`) as HTMLElement;
+        targetElement = rowElement?.querySelector(".av__cell[data-dtype=\"block\"]") as HTMLElement;
+        if (rowElement && request.highlight) {
+            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl").forEach(item => {
+                item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
+            });
+            highlightTemporarily(blockElement, rowElement, "av__row--hl");
+        }
         if (targetElement && request.select !== false) {
             clearSelect(["cell"], blockElement);
             targetElement.classList.add("av__cell--select");
@@ -136,9 +184,13 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         }
     } else {
         targetElement = bodyElement?.querySelector(`.av__gallery-item[data-id="${request.itemID}"]`) as HTMLElement;
-        if (targetElement && request.select !== false) {
+        if (targetElement && (request.select !== false || request.highlight)) {
             blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => item.classList.remove("av__gallery-item--select"));
-            targetElement.classList.add("av__gallery-item--select");
+            if (request.highlight) {
+                highlightTemporarily(blockElement, targetElement, "av__gallery-item--select");
+            } else {
+                targetElement.classList.add("av__gallery-item--select");
+            }
         }
     }
     if (!targetElement) {
@@ -151,4 +203,5 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         targetElement.scrollIntoView({block: "center", inline: "nearest"});
     }
     locateRequests.delete(blockElement);
+    queuedLocateRequests.delete(blockElement.dataset.nodeId);
 };

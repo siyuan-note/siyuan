@@ -12,7 +12,7 @@ import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
 import {addBaseURL, parseSiYuanUriInfo, setNoteBook} from "../util/pathName";
-import {queueAVLocateRequest} from "../protyle/render/av/locate";
+import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
 import {handleTouchEnd, handleTouchMove, handleTouchStart, handleTouchUp} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
@@ -267,8 +267,11 @@ window.openFileByURL = (openURL) => {
                 groupID: blockInfo.avGroupID,
             });
         }
-        openMobileFileById(siyuanApp, blockInfo.id,
-            blockInfo.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+        if (blockInfo.avItemID) {
+            activateQueuedAVLocate(window.siyuan.mobile.editor?.protyle, blockInfo.id);
+        }
+        openMobileFileById(siyuanApp, blockInfo.id, blockInfo.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
+            (blockInfo.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]));
         return true;
     }
     return false;

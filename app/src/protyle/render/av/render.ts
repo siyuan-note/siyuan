@@ -20,7 +20,7 @@ import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
 import {getBodyVirtualData, initVirtualScroll} from "./virtualScroll";
-import {finishAVLocate, getAVLocateParams, prepareAVLocate, setAVLocateRequest} from "./locate";
+import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate, setAVLocateRequest} from "./locate";
 
 interface IIds {
     groupId: string,
@@ -382,8 +382,8 @@ const afterRenderTable = (options: ITableOptions) => {
     if (options.cb) {
         options.cb(options.data);
     }
-    finishAVLocate(options.blockElement, options.protyle, options.data);
     if (!options.renderAll) {
+        finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
     }
     bindAvSearch({
@@ -393,6 +393,7 @@ const afterRenderTable = (options: ITableOptions) => {
         onChange: () => updateSearch(options.blockElement, options.protyle),
     });
     initVirtualScroll(options);
+    finishAVLocate(options.blockElement, options.protyle, options.data);
 };
 
 export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, avData?: IAV) => {
@@ -414,6 +415,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         if (isMobile() || isInMobileApp()) {
             e.classList.add("av--touch");
         }
+        const renderToken = beginAVRender(e);
 
         if (e.getAttribute("data-av-type") === "gallery") {
             await renderGallery({blockElement: e, protyle, cb, renderAll});
@@ -532,6 +534,9 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             data = response.data;
         } else {
             data = avData;
+        }
+        if (!isCurrentAVRender(e, renderToken)) {
+            continue;
         }
         prepareAVLocate(e, data, resetData);
         if (data.viewType === "gallery") {

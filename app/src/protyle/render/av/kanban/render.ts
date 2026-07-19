@@ -7,7 +7,7 @@ import {afterRenderGallery, renderGallery} from "../gallery/render";
 import {escapeHtml} from "../../../../util/escape";
 import {getRowHTML} from "../row";
 import {getBodyVirtualData} from "../virtualScroll";
-import {getAVLocateParams, prepareAVLocate} from "../locate";
+import {beginAVRender, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 
 interface IIds {
     groupId: string,
@@ -71,6 +71,7 @@ export const renderKanban = async (options: {
     renderAll: boolean,
     data?: IAV,
 }) => {
+    const renderToken = beginAVRender(options.blockElement);
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
     const editIds: IIds[] = [];
     options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
@@ -144,6 +145,9 @@ export const renderKanban = async (options: {
             targetGroupID: locateParams?.targetGroupID || "",
         });
         data = response.data;
+    }
+    if (!isCurrentAVRender(options.blockElement, renderToken)) {
+        return;
     }
     prepareAVLocate(options.blockElement, data, resetData);
     if (data.viewType === "table") {

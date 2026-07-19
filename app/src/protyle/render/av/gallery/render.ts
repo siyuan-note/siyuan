@@ -9,7 +9,7 @@ import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
 import {getBodyVirtualData, initVirtualScroll} from "../virtualScroll";
 import {getRowHTML, updateHeader} from "../row";
-import {finishAVLocate, getAVLocateParams, prepareAVLocate} from "../locate";
+import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 
 interface IIds {
     groupId: string,
@@ -154,8 +154,8 @@ export const afterRenderGallery = (options: ITableOptions) => {
     if (options.cb) {
         options.cb(options.data);
     }
-    finishAVLocate(options.blockElement, options.protyle, options.data);
     if (!options.renderAll) {
+        finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
     }
     bindAvSearch({
@@ -165,6 +165,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
         onChange: () => updateSearch(options.blockElement, options.protyle),
     });
     initVirtualScroll(options);
+    finishAVLocate(options.blockElement, options.protyle, options.data);
 };
 
 export const renderGallery = async (options: {
@@ -174,6 +175,7 @@ export const renderGallery = async (options: {
     renderAll: boolean,
     data?: IAV,
 }) => {
+    const renderToken = beginAVRender(options.blockElement);
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const editIds: IIds[] = [];
     options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
@@ -246,6 +248,9 @@ export const renderGallery = async (options: {
             targetGroupID: locateParams?.targetGroupID || "",
         });
         data = response.data;
+    }
+    if (!isCurrentAVRender(options.blockElement, renderToken)) {
+        return;
     }
     prepareAVLocate(options.blockElement, data, resetData);
     if (data.viewType === "table") {

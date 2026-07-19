@@ -25,7 +25,7 @@ import {MobileCustom} from "../dock/MobileCustom";
 import {Menu} from "../../plugin/Menu";
 import {showMessage} from "../../dialog/message";
 import {setTitle} from "../../util/processTitle";
-import {queueAVLocateRequest} from "../../protyle/render/av/locate";
+import {activateQueuedAVLocate, queueAVLocateRequest} from "../../protyle/render/av/locate";
 
 let custom: MobileCustom;
 const openDockMenu = (app: App) => {
@@ -202,8 +202,11 @@ export const initFramework = (app: App, isStart: boolean) => {
                     groupID: info.avGroupID,
                 });
             }
-            openMobileFileById(app, info.id,
-                info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+            if (info.avItemID) {
+                activateQueuedAVLocate(window.siyuan.mobile.editor?.protyle, info.id);
+            }
+            openMobileFileById(app, info.id, info.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
+                (info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]));
             return;
         }
         if (openMobileOnboarding(app)) {

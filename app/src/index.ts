@@ -15,7 +15,7 @@ import {
     setNoteBook
 } from "./util/pathName";
 import {registerServiceWorker} from "./util/serviceWorker";
-import {queueAVLocateRequest} from "./protyle/render/av/locate";
+import {activateQueuedAVLocate, queueAVLocateRequest} from "./protyle/render/av/locate";
 import {openFileById} from "./editor/util";
 import {activateOnboarding, ensureOnboarding} from "./onboarding";
 import {
@@ -300,8 +300,15 @@ window.openFileByURL = (openURL) => {
         openFileById({
             app: siyuanApp,
             id: blockInfo.id,
-            action: blockInfo.focus ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-            zoomIn: blockInfo.focus
+            action: blockInfo.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
+                (blockInfo.focus ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
+            zoomIn: blockInfo.avItemID ? false : blockInfo.focus,
+            afterOpen: (model) => {
+                const protyle = (model as { editor?: { protyle?: IProtyle } })?.editor?.protyle;
+                if (protyle) {
+                    activateQueuedAVLocate(protyle, blockInfo.id);
+                }
+            },
         });
         return true;
     }

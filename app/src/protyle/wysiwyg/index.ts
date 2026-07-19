@@ -108,7 +108,8 @@ import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
-import {isEncryptedBox} from "../../util/pathName";
+import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
+import {processSiYuanUri} from "../../util/uri";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -3108,6 +3109,14 @@ export class WYSIWYG {
             }
 
             const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
+            const siyuanURIInfo = aLink.startsWith("siyuan://blocks/") ? parseSiYuanUriInfo(aLink) : undefined;
+            if (siyuanURIInfo?.avItemID && (range.toString() === "" || event.shiftKey)) {
+                event.stopPropagation();
+                event.preventDefault();
+                hideElements(["dialog", "toolbar"], protyle);
+                processSiYuanUri(protyle.app, aLink);
+                return;
+            }
             if (blockRefElement || aLink.startsWith("siyuan://blocks/")) {
                 event.stopPropagation();
                 event.preventDefault();

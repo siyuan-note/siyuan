@@ -165,6 +165,24 @@ const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean)
     }).catch(() => {
         showMessage(window.siyuan.languages._kernel[104], 7000, "error");
     });
+    /// #else
+    fetchPost("/api/system/exit", {
+        force: true,
+        setCurrentWorkspace,
+        execInstallPkg: 1,
+    }, () => {
+        if (isInAndroid()) {
+            window.JSAndroid.exit();
+            return;
+        }
+        if (isInIOS()) {
+            window.webkit.messageHandlers.exit.postMessage("");
+            return;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.exit();
+        }
+    });
     /// #endif
 };
 
@@ -208,9 +226,11 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
         } else if (response.code === 2) { // 提示新安装包
             hideMessage();
 
+            /// #if !BROWSER
             if ("std" === window.siyuan.config.system.container) {
                 ipcRenderer.send(Constants.SIYUAN_SHOW_WINDOW);
             }
+            /// #endif
 
             confirmDialog(window.siyuan.languages.updateVersion, response.msg, () => {
                 installNewVersion(response.data.installPkgPath, setCurrentWorkspace);

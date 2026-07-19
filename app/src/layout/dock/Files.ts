@@ -1054,7 +1054,7 @@ export class Files extends Model {
         const actionClasses = `${iconUsesDocAction && hasChildren && !editingPublishAccess ? " file-tree__item--icon-expand" : ""}${
             iconUsesDocAction && !hasChildren && !editingPublishAccess ? " file-tree__item--icon-open" : ""}${
             hasChildren && window.siyuan.config.fileTree.parentDocClickExpand ? " file-tree__item--title-expand" : ""}`;
-        const emojiHTML = `<span class="b3-list-item__icon ariaLabel${editingPublishAccess ? " fn__none" : ""}" data-position="8east" aria-label="${iconAriaLabel}">${iconContent}</span>`;
+        const emojiHTML = `<span class="b3-list-item__icon ariaLabel${isBoxDoc ? " popover__block" : ""}${editingPublishAccess ? " fn__none" : ""}" data-position="8east"${isBoxDoc ? ` data-id="${item.boxDocID}"` : ""} aria-label="${iconAriaLabel}">${iconContent}</span>`;
         const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action"${item.encrypted ? ' data-encrypted="true"' : ""}>

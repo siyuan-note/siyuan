@@ -653,6 +653,16 @@ export class MobileFiles extends Model {
         } else {
             liElement.querySelector(".b3-list-item__toggle")?.classList.remove("fn__hidden");
         }
+        this.updateDocActionElement(liElement);
+    }
+
+    private updateDocActionElement(liElement: HTMLElement) {
+        if (liElement.getAttribute("data-type") !== "navigation-root" || !liElement.getAttribute("data-node-id")) {
+            return;
+        }
+        liElement.querySelector(".b3-list-item__icon")?.setAttribute("aria-label",
+            Number(liElement.getAttribute("data-count")) > 0 ?
+                window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument);
     }
 
     private genNotebook(item: INotebook) {
@@ -663,7 +673,10 @@ export class MobileFiles extends Model {
             : unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note);
         const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled && Boolean(item.boxDocID);
         const hasChildren = isBoxDoc && item.subFileCount > 0;
-        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? " fn__none" : ""}" aria-label="${window.siyuan.languages.changeIcon}">${iconContent}</span>`;
+        const iconAriaLabel = isBoxDoc ?
+            (hasChildren ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) :
+            window.siyuan.languages.changeIcon;
+        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? " fn__none" : ""}" aria-label="${iconAriaLabel}">${iconContent}</span>`;
         const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item"${item.encrypted ? ' data-encrypted="true"' : ""}>
@@ -759,6 +772,7 @@ export class MobileFiles extends Model {
                     }
                     parentLiElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
                     parentLiElement.setAttribute("data-count", "0");
+                    this.updateDocActionElement(parentLiElement);
                     const emojiElement = parentLiElement.querySelector(".b3-list-item__icon");
                     if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder)) {
                         emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file);
@@ -785,6 +799,7 @@ export class MobileFiles extends Model {
             newElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
             if (newElement.getAttribute("data-type") === "navigation-root") {
                 newElement.setAttribute("data-count", Math.max(1, Number(newElement.getAttribute("data-count"))).toString());
+                this.updateDocActionElement(newElement);
             }
             newElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
             if (newElement.nextElementSibling && newElement.nextElementSibling.tagName === "UL") {
@@ -845,6 +860,7 @@ export class MobileFiles extends Model {
                             iconElement.parentElement.classList.add("fn__hidden");
                         }
                         parentElement.setAttribute("data-count", "0");
+                        this.updateDocActionElement(parentElement);
                         const emojiElement = iconElement.parentElement.nextElementSibling;
                         if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder)) {
                             emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file);

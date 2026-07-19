@@ -512,7 +512,7 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
     <div class="custom-attr">
         <div class="block__icons av__row">
             <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconEdit"></use></svg><span>${window.siyuan.languages.title}</span></div>
-            <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><input class="b3-text-field b3-text-field--text fn__flex-1" data-role="template-name" value="${escapeAttr(itemTemplate.name)}"><span class="fn__space"></span><button class="block__icon block__icon--warning" data-role="delete-template" type="button" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button></div>
+            <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><input class="b3-text-field b3-text-field--text fn__flex-1" data-role="template-name" value="${escapeAttr(itemTemplate.name)}"></div>
         </div>
         <div class="block__icons av__row">
             <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconAdd"></use></svg><span>${window.siyuan.languages.type}</span></div>
@@ -596,7 +596,7 @@ export const openNewItemTemplateDialog = (options: {
 
     const render = () => {
         listElement.innerHTML = `<li class="b3-list-item" data-role="add-template"><svg class="b3-list-item__graphic"><use xlink:href="#iconAdd"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newTemplate}</span></li><li class="b3-menu__separator"></li>` +
-            templates.map((item, index) => `<li class="b3-list-item${index === selectedIndex ? " b3-list-item--focus" : ""}" data-index="${index}" draggable="true"><svg class="b3-list-item__graphic fn__grab"><use xlink:href="#iconDrag"></use></svg><span class="b3-list-item__text">${escapeHtml(item.name)}</span></li>`).join("");
+            templates.map((item, index) => `<li class="b3-list-item b3-list-item--hide-action${index === selectedIndex ? " b3-list-item--focus" : ""}" data-index="${index}" draggable="true"><svg class="b3-list-item__graphic fn__grab"><use xlink:href="#iconDrag"></use></svg><span class="b3-list-item__text">${escapeHtml(item.name)}</span>${item.id === defaultTemplateID ? `<span class="b3-list-item__meta">${window.siyuan.languages.default}</span>` : ""}<span class="b3-list-item__action ariaLabel" data-menu="true" data-position="4west" data-role="template-action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span></li>`).join("");
         hostElement.innerHTML = selectedIndex < 0 ? "" : getEditorHTML(templates[selectedIndex], primaryKey, fields, options.protyle.notebookId);
         const target = hostElement.querySelector('[data-role="target-type"]') as HTMLSelectElement;
         target?.addEventListener("change", () => hostElement.querySelector('[data-role="document-options"]')?.classList.toggle("fn__none", target.value !== "document"));
@@ -657,17 +657,54 @@ export const openNewItemTemplateDialog = (options: {
                 getRelationOptions(column, relationOptions => renderRelationFieldValue(item, relationOptions));
             }
         });
-        hostElement.querySelector('[data-role="delete-template"]')?.addEventListener("click", (event: MouseEvent) => {
-            event.preventDefault();
-            event.stopPropagation();
-            const deletedID = templates[selectedIndex].id;
-            templates.splice(selectedIndex, 1);
-            if (defaultTemplateID === deletedID) {
-                defaultTemplateID = "";
-            }
-            selectedIndex = Math.min(selectedIndex, templates.length - 1);
-            render();
+    };
+
+    const openTemplateActionMenu = (target: HTMLElement, itemTemplate: IAVNewItemTemplate) => {
+        const menu = new Menu(`av-new-item-template-dialog-${itemTemplate.id}`);
+        menu.addItem({
+            icon: "iconEdit",
+            label: window.siyuan.languages.edit,
+            click: () => {
+                collectCurrent();
+                selectedIndex = templates.findIndex(item => item.id === itemTemplate.id);
+                render();
+            },
         });
+        menu.addItem({
+            icon: "iconSelect",
+            label: window.siyuan.languages.setAsDefault,
+            disabled: itemTemplate.id === defaultTemplateID,
+            click: () => {
+                collectCurrent();
+                defaultTemplateID = itemTemplate.id;
+                render();
+            },
+        });
+        menu.addItem({type: "separator"});
+        menu.addItem({
+            icon: "iconTrashcan",
+            label: window.siyuan.languages.delete,
+            warning: true,
+            click: () => {
+                collectCurrent();
+                const deletedIndex = templates.findIndex(item => item.id === itemTemplate.id);
+                if (deletedIndex < 0) {
+                    return;
+                }
+                templates.splice(deletedIndex, 1);
+                if (defaultTemplateID === itemTemplate.id) {
+                    defaultTemplateID = "";
+                }
+                if (selectedIndex === deletedIndex) {
+                    selectedIndex = Math.min(deletedIndex, templates.length - 1);
+                } else if (deletedIndex < selectedIndex) {
+                    selectedIndex--;
+                }
+                render();
+            },
+        });
+        const rect = target.getBoundingClientRect();
+        menu.open({x: rect.right, y: rect.top, h: rect.height});
     };
 
     let draggingIndex = -1;
@@ -736,18 +773,25 @@ export const openNewItemTemplateDialog = (options: {
         clearDragStyles();
     });
     listElement.addEventListener("click", (event: MouseEvent) => {
-        const target = (event.target as HTMLElement).closest<HTMLElement>("[data-index], [data-role]");
-        if (!target) {
+        const target = event.target as HTMLElement;
+        const roleElement = target.closest<HTMLElement>("[data-role]");
+        const itemElement = target.closest<HTMLElement>("[data-index]");
+        if (!roleElement && !itemElement) {
             return;
         }
-        if (target.dataset.role === "add-template") {
+        if (roleElement?.dataset.role === "add-template") {
             collectCurrent();
             templates.push({id: Lute.NewNodeID(), name: window.siyuan.languages.template, targetType: "detached"});
             selectedIndex = templates.length - 1;
             render();
-        } else if (target.dataset.index) {
+        } else if (roleElement?.dataset.role === "template-action" && itemElement) {
+            const itemTemplate = templates[parseInt(itemElement.dataset.index)];
+            if (itemTemplate) {
+                openTemplateActionMenu(roleElement, itemTemplate);
+            }
+        } else if (itemElement) {
             collectCurrent();
-            selectedIndex = parseInt(target.dataset.index);
+            selectedIndex = parseInt(itemElement.dataset.index);
             render();
         }
     });

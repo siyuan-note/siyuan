@@ -287,6 +287,18 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 
 // BoxDocSubFileCount 返回笔记本顶层文档的可见下级文档数。
 func BoxDocSubFileCount(boxID, boxDocID string) int {
+	return boxDocSubFileCount(boxID, boxDocID, nil)
+}
+
+// BoxDocSubFileCountForPublish 返回发布访问控制下笔记本顶层文档的可见下级文档数。
+func BoxDocSubFileCountForPublish(boxID, boxDocID string, publishAccess PublishAccess) int {
+	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	return boxDocSubFileCount(boxID, boxDocID, func(p string) bool {
+		return CheckPathAccessableByPublishIgnore(boxID, p, publishIgnore)
+	})
+}
+
+func boxDocSubFileCount(boxID, boxDocID string, include func(string) bool) int {
 	if "" == boxDocID {
 		return 0
 	}
@@ -301,6 +313,10 @@ func BoxDocSubFileCount(boxID, boxDocID string) int {
 		}
 		id := strings.TrimSuffix(entry.Name(), ".sy")
 		if id == boxDocID || !ast.IsNodeIDPattern(id) {
+			continue
+		}
+		p := "/" + entry.Name()
+		if nil != include && !include(p) {
 			continue
 		}
 		ial := filesys.DocIAL(filepath.Join(util.DataDir, boxID, entry.Name()))

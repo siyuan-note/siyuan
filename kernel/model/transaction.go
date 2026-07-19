@@ -2152,9 +2152,11 @@ func (tx *Transaction) commit() (err error) {
 		if nil == box {
 			return ErrBoxNotFound
 		}
-		if _, err = removeDoc(box, tree.Path, util.NewLute()); nil != err {
+		removedTree, err := removeDoc(box, tree.Path, util.NewLute())
+		if nil != err {
 			return err
 		}
+		refreshBoxDocInfo(removedTree)
 	}
 	for _, tree := range tx.restoredCreatedDocs {
 		box := Conf.Box(tree.Box)

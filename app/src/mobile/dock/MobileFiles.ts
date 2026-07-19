@@ -26,6 +26,7 @@ export class MobileFiles extends Model {
     public element: HTMLElement;
     private actionsElement: HTMLElement;
     private closeElement: HTMLElement;
+    private reloadNotebookInfoTimeout: number;
     private touchDragState: {
         selectedElement: HTMLElement;
         startX: number;
@@ -495,6 +496,21 @@ export class MobileFiles extends Model {
                         this.init(false);
                     });
                     break;
+                case "reloadNotebookInfo":
+                    window.clearTimeout(this.reloadNotebookInfoTimeout);
+                    this.reloadNotebookInfoTimeout = window.setTimeout(() => {
+                        setNoteBook((notebooks) => {
+                            notebooks.forEach((notebook) => {
+                                const liElement = this.element.querySelector<HTMLElement>(
+                                    `ul[data-url="${notebook.id}"] > li[data-type="navigation-root"]`
+                                );
+                                if (liElement) {
+                                    this.updateSubFileCount(liElement, notebook.subFileCount);
+                                }
+                            });
+                        });
+                    }, 128);
+                    break;
                 case "mount":
                     this.onMount(data);
                     break;
@@ -590,10 +606,6 @@ export class MobileFiles extends Model {
                 const dirname = pathPosix().dirname(currentPath);
                 if (dirname === "/") {
                     const rootElement = treeElement.firstElementChild as HTMLElement;
-                    if (rootElement.getAttribute("data-node-id")) {
-                        rootElement.setAttribute("data-count", Math.max(1, Number(rootElement.getAttribute("data-count"))).toString());
-                        rootElement.querySelector(".b3-list-item__toggle")?.classList.remove("fn__hidden");
-                    }
                     if (rootElement.querySelector(".b3-list-item__arrow--open")) {
                         this.getLeaf(rootElement, notebookId, true);
                     }
@@ -616,21 +628,30 @@ export class MobileFiles extends Model {
     }
 
     private updateDocInfo(data: IWebSocketData) {
+        const notebook = window.siyuan.notebooks.find((item) => item.boxDocID === data.data.rootID);
+        const subFileCount = notebook && window.siyuan.isPublish ? notebook.subFileCount : data.data.subFileCount;
+        if (notebook) {
+            notebook.subFileCount = subFileCount;
+        }
         const liElement = this.element.querySelector(
             `li[data-node-id="${data.data.rootID}"][data-type="navigation-file"], ` +
             `li[data-node-id="${data.data.rootID}"][data-type="navigation-root"]`
         );
         if (liElement) {
-            liElement.setAttribute("data-count", data.data.subFileCount);
-            if (data.data.subFileCount === 0) {
-                liElement.querySelector(".b3-list-item__toggle")?.classList.add("fn__hidden");
-                liElement.querySelector(".b3-list-item__arrow")?.classList.remove("b3-list-item__arrow--open");
-                if (liElement.nextElementSibling?.tagName === "UL") {
-                    liElement.nextElementSibling.remove();
-                }
-            } else {
-                liElement.querySelector(".b3-list-item__toggle")?.classList.remove("fn__hidden");
+            this.updateSubFileCount(liElement as HTMLElement, subFileCount);
+        }
+    }
+
+    private updateSubFileCount(liElement: HTMLElement, subFileCount: number) {
+        liElement.setAttribute("data-count", subFileCount.toString());
+        if (subFileCount === 0) {
+            liElement.querySelector(".b3-list-item__toggle")?.classList.add("fn__hidden");
+            liElement.querySelector(".b3-list-item__arrow")?.classList.remove("b3-list-item__arrow--open");
+            if (liElement.nextElementSibling?.tagName === "UL") {
+                liElement.nextElementSibling.remove();
             }
+        } else {
+            liElement.querySelector(".b3-list-item__toggle")?.classList.remove("fn__hidden");
         }
     }
 

@@ -70,4 +70,12 @@ func TestBoxDocSubFileCount(t *testing.T) {
 	if actual := BoxDocSubFileCount(boxID, boxDocID); actual != 1 {
 		t.Fatalf("unexpected box document subfile count [%d]", actual)
 	}
+	publishAccess := PublishAccess{{ID: "20260716120002-abcdefg", Visible: false}}
+	if actual := BoxDocSubFileCountForPublish(boxID, boxDocID, publishAccess); actual != 0 {
+		t.Fatalf("unexpected published box document subfile count [%d]", actual)
+	}
+	publishAccess[0].Visible = true
+	if actual := BoxDocSubFileCountForPublish(boxID, boxDocID, publishAccess); actual != 1 {
+		t.Fatalf("unexpected visible published box document subfile count [%d]", actual)
+	}
 }

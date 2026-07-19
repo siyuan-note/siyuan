@@ -141,11 +141,7 @@ func refreshBoxDocInfoByBoxID(boxID string) {
 	if nil == box || "" == box.BoxDocID {
 		return
 	}
-	boxDocTree, err := filesys.LoadTree(boxID, boxDocPath(box.BoxDocID), util.NewLute())
-	if nil != err {
-		return
-	}
-	refreshDocInfo(boxDocTree)
+	util.BroadcastByType("filetree", "reloadNotebookInfo", 0, "", boxID)
 }
 
 func refreshDocInfo0(tree *parse.Tree, size uint64) {

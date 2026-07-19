@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "Copy item link",
+	"databaseViewNotFound": "Database view not found",
+	"databaseItemNotFound": "Database item not found",
 	"alignment": "Alignment",
 	"newItemTemplateUnavailableNotebookTip": "The notebook previously selected for this template is closed or unavailable. Please select a save location again",
 	"specificTime": "Specific date/time",

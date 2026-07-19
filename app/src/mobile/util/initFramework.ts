@@ -25,6 +25,7 @@ import {MobileCustom} from "../dock/MobileCustom";
 import {Menu} from "../../plugin/Menu";
 import {showMessage} from "../../dialog/message";
 import {setTitle} from "../../util/processTitle";
+import {queueAVLocateRequest} from "../../protyle/render/av/locate";
 
 let custom: MobileCustom;
 const openDockMenu = (app: App) => {
@@ -194,6 +195,13 @@ export const initFramework = (app: App, isStart: boolean) => {
         }
         const info = parseUriInfo();
         if (info.id) {
+            if (info.avItemID) {
+                queueAVLocateRequest(info.id, {
+                    itemID: info.avItemID,
+                    viewID: info.avViewID,
+                    groupID: info.avGroupID,
+                });
+            }
             openMobileFileById(app, info.id,
                 info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
             return;

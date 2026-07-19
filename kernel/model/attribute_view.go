@@ -911,7 +911,7 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 			for _, g := range view.Groups {
 				groupViewable := sql.RenderGroupView(attrView, view, g, "")
 				// 必须经过渲染才能得到最终的条目数
-				renderViewableInstance(groupViewable, view, attrView, 1, -1, false)
+				renderViewableInstance(groupViewable, view, attrView, 1, -1, false, "")
 				if g.GroupHidden == 0 && 1 > groupViewable.(av.Collection).CountItems() {
 					g.GroupHidden = 1
 				}
@@ -920,7 +920,7 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 		if oldHideEmpty && !view.Group.HideEmpty { // 禁用隐藏空分组
 			for _, g := range view.Groups {
 				groupViewable := sql.RenderGroupView(attrView, view, g, "")
-				renderViewableInstance(groupViewable, view, attrView, 1, -1, false)
+				renderViewableInstance(groupViewable, view, attrView, 1, -1, false, "")
 				if g.GroupHidden == 1 && 1 > groupViewable.(av.Collection).CountItems() {
 					g.GroupHidden = 0
 				}
@@ -5637,20 +5637,21 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 }
 
 func (tx *Transaction) doReplaceAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := replaceAttributeViewBlock(operation.AvID, operation.PreviousID, operation.NextID, operation.IsDetached, tx)
+	targetItemID, duplicate, err := replaceAttributeViewBlock(operation.AvID, operation.PreviousID, operation.NextID, operation.IsDetached, tx)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID}
 	}
+	operation.RetData = map[string]any{"targetItemID": targetItemID, "duplicate": duplicate}
 	return
 }
 
-func replaceAttributeViewBlock(avID, oldBlockID, newBlockID string, isDetached bool, tx *Transaction) (err error) {
+func replaceAttributeViewBlock(avID, oldBlockID, newBlockID string, isDetached bool, tx *Transaction) (targetItemID string, duplicate bool, err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
 	}
 
-	if err = replaceAttributeViewBlock0(attrView, oldBlockID, newBlockID, isDetached, tx); nil != err {
+	if targetItemID, duplicate, err = replaceAttributeViewBlock0(attrView, oldBlockID, newBlockID, isDetached, tx); nil != err {
 		return
 	}
 
@@ -5660,8 +5661,9 @@ func replaceAttributeViewBlock(avID, oldBlockID, newBlockID string, isDetached b
 	return
 }
 
-func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeID string, isDetached bool, tx *Transaction) (err error) {
+func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeID string, isDetached bool, tx *Transaction) (targetItemID string, duplicate bool, err error) {
 	avID := attrView.ID
+	targetItemID = oldBlockID
 	var tree *parse.Tree
 	var node *ast.Node
 	if !isDetached {
@@ -5679,6 +5681,8 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 			blockVal.Block.Icon, blockVal.Block.Content = icon, content
 			blockVal.UpdatedAt = now
 			regenAttrViewGroups(attrView)
+			targetItemID = blockVal.BlockID
+			duplicate = blockVal.BlockID != oldBlockID
 			return
 		}
 	}
@@ -5720,7 +5724,7 @@ func BatchReplaceAttributeViewBlocks(avID string, isDetached bool, oldNew []map[
 
 	for _, oldNewMap := range oldNew {
 		for oldBlockID, newNodeID := range oldNewMap {
-			if err = replaceAttributeViewBlock0(attrView, oldBlockID, newNodeID, isDetached, nil); nil != err {
+			if _, _, err = replaceAttributeViewBlock0(attrView, oldBlockID, newNodeID, isDetached, nil); nil != err {
 				return
 			}
 		}

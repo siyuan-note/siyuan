@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "आइटम लिंक कॉपी करें",
+	"databaseViewNotFound": "डेटाबेस दृश्य नहीं मिला",
+	"databaseItemNotFound": "डेटाबेस आइटम नहीं मिला",
 	"alignment": "संरेखण",
 	"newItemTemplateUnavailableNotebookTip": "इस टेम्पलेट के लिए पहले चुनी गई नोटबुक बंद है या उपलब्ध नहीं है। कृपया सहेजने का स्थान फिर से चुनें",
 	"specificTime": "विशिष्ट समय",

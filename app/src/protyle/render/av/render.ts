@@ -20,6 +20,7 @@ import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
 import {getBodyVirtualData, initVirtualScroll} from "./virtualScroll";
+import {finishAVLocate, getAVLocateParams, prepareAVLocate, setAVLocateRequest} from "./locate";
 
 interface IIds {
     groupId: string,
@@ -381,6 +382,7 @@ const afterRenderTable = (options: ITableOptions) => {
     if (options.cb) {
         options.cb(options.data);
     }
+    finishAVLocate(options.blockElement, options.protyle, options.data);
     if (!options.renderAll) {
         return;
     }
@@ -509,6 +511,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             e.firstElementChild.innerHTML = html;
         }
         const avPageSize = getPageSize(e);
+        const locateParams = getAVLocateParams(e);
         let data: IAV;
         if (!avData) {
             const created = protyle.options.history?.created;
@@ -519,15 +522,18 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 snapshot,
                 pageSize: avPageSize.unGroupPageSize,
                 groupPaging: avPageSize.groupPageSize,
-                viewID: e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+                viewID: locateParams?.viewID || e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 query: resetData.query.trim(),
                 blockID: e.getAttribute("data-node-id"),
                 createIfNotExist: !protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE),
+                targetItemID: locateParams?.targetItemID || "",
+                targetGroupID: locateParams?.targetGroupID || "",
             });
             data = response.data;
         } else {
             data = avData;
         }
+        prepareAVLocate(e, data, resetData);
         if (data.viewType === "gallery") {
             e.setAttribute("data-av-type", data.viewType);
             await renderGallery({blockElement: e, protyle, cb, renderAll, data});
@@ -878,6 +884,14 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         }
         getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
+            if (operation.action === "replaceAttrViewBlock" && operation.retData?.duplicate &&
+                (!operation.blockID || operation.blockID === item.dataset.nodeId) &&
+                (!operation.context?.protyleID || operation.context.protyleID === protyle.id)) {
+                setAVLocateRequest(item, {
+                    itemID: operation.retData.targetItemID,
+                    select: true,
+                });
+            }
             if (operation.action === "sortAttrViewRow") {
                 clearSelect(["cell"], item);
             } else if (operation.action === "sortAttrViewCol") {

@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "نسخ رابط العنصر",
+	"databaseViewNotFound": "تعذر العثور على عرض قاعدة البيانات",
+	"databaseItemNotFound": "تعذر العثور على عنصر قاعدة البيانات",
 	"alignment": "طريقة المحاذاة",
 	"newItemTemplateUnavailableNotebookTip": "دفتر الملاحظات المحدد سابقًا لهذا القالب مغلق أو غير متاح. يرجى تحديد موقع الحفظ مرة أخرى",
 	"specificTime": "وقت محدد",

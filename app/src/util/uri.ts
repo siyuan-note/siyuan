@@ -12,11 +12,19 @@ import {openMobileFileById} from "../mobile/editor";
 import {isValidBazaarPackageName} from "./bazaarPackage";
 
 import type {App} from "../index";
+import {queueAVLocateRequest} from "../protyle/render/av/locate";
 
 const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
     const blockInfo = parseSiYuanUriInfo(uriObj);
     if (blockInfo != null) {
         const {id, focus} = blockInfo;
+        if (blockInfo.avItemID) {
+            queueAVLocateRequest(id, {
+                itemID: blockInfo.avItemID,
+                viewID: blockInfo.avViewID,
+                groupID: blockInfo.avGroupID,
+            });
+        }
         window.siyuan.editorIsFullscreen = blockInfo.fullscreen;
         fetchPost("/api/block/checkBlockExist", { id }, existResponse => {
             if (existResponse.data) {

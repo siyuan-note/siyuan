@@ -1,4 +1,4 @@
-import {focusByWbr, getEditorRange} from "../protyle/util/selection";
+import {focusByWbr, getEditorRange, getUndoFocusContext} from "../protyle/util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {
     getContenteditableElement,
@@ -237,6 +237,7 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     if (!blockElement) {
         return;
     }
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
     protyle.observerLoad?.disconnect();
     let newElement = genEmptyElement(false, true);
     let orderIndex = 1;
@@ -260,7 +261,7 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     if (blockElement.getAttribute("data-type") === "NodeListItem" && blockElement.getAttribute("data-subtype") === "o" &&
         !newElement.parentElement.classList.contains("protyle-wysiwyg")) {
         updateListOrder(newElement.parentElement, orderIndex);
-        updateTransaction(protyle, newElement.parentElement, parentOldHTML);
+        updateTransaction(protyle, newElement.parentElement, parentOldHTML, undoFocusContext);
     } else {
         let doOperations: IOperation[];
         if (position === "beforebegin") {
@@ -281,6 +282,7 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
         const undoOperations: IOperation[] = [{
             action: "delete",
             id: newId,
+            context: undoFocusContext,
         }];
         if (blockElement.parentElement.classList.contains("sb") &&
             blockElement.parentElement.getAttribute("data-sb-layout") === "col") {

@@ -59,10 +59,20 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
             return null;
         }
         if (uriObj.hostname === "blocks" && /^\/\d{14}-\w{7}/.test(uriObj.pathname)) {
+            const avItemID = uriObj.searchParams.get("avItemID") || undefined;
+            const avViewID = uriObj.searchParams.get("avViewID") || undefined;
+            const avGroupID = uriObj.searchParams.get("avGroupID") || undefined;
+            const isNodeID = (id?: string) => !id || /^\d{14}-\w{7}$/.test(id);
+            if (!isNodeID(avItemID) || !isNodeID(avViewID) || !isNodeID(avGroupID)) {
+                return null;
+            }
             return {
                 id: uriObj.pathname.substring(1, 1 + 22),
                 focus: uriObj.searchParams.get("focus") === "1",
                 fullscreen: uriObj.searchParams.get("fullscreen") === "1",
+                avItemID,
+                avViewID,
+                avGroupID,
             };
         }
         return null;

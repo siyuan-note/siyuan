@@ -9,6 +9,7 @@ import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
 import {getBodyVirtualData, initVirtualScroll} from "../virtualScroll";
 import {getRowHTML, updateHeader} from "../row";
+import {finishAVLocate, getAVLocateParams, prepareAVLocate} from "../locate";
 
 interface IIds {
     groupId: string,
@@ -153,6 +154,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
     if (options.cb) {
         options.cb(options.data);
     }
+    finishAVLocate(options.blockElement, options.protyle, options.data);
     if (!options.renderAll) {
         return;
     }
@@ -230,17 +232,22 @@ export const renderGallery = async (options: {
     let data: IAV = options.data;
     if (!data) {
         const avPageSize = getPageSize(options.blockElement);
+        const locateParams = getAVLocateParams(options.blockElement);
         const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
             id: options.blockElement.getAttribute("data-av-id"),
             created,
             snapshot,
             pageSize: avPageSize.unGroupPageSize,
             groupPaging: avPageSize.groupPageSize,
-            viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
-            query: resetData.query.trim()
+            viewID: locateParams?.viewID || options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+            query: resetData.query.trim(),
+            blockID: options.blockElement.getAttribute("data-node-id"),
+            targetItemID: locateParams?.targetItemID || "",
+            targetGroupID: locateParams?.targetGroupID || "",
         });
         data = response.data;
     }
+    prepareAVLocate(options.blockElement, data, resetData);
     if (data.viewType === "table") {
         options.blockElement.setAttribute("data-av-type", data.viewType);
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);

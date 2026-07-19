@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "העתק קישור לפריט",
+	"databaseViewNotFound": "תצוגת מסד הנתונים לא נמצאה",
+	"databaseItemNotFound": "פריט מסד הנתונים לא נמצא",
 	"alignment": "יישור",
 	"newItemTemplateUnavailableNotebookTip": "המחברת שנבחרה קודם לכן עבור תבנית זו סגורה או אינה זמינה. יש לבחור שוב מיקום שמירה",
 	"specificTime": "זמן מסוים",

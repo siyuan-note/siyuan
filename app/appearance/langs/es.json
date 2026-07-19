@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "Copiar enlace del elemento",
+	"databaseViewNotFound": "No se encontró la vista de la base de datos",
+	"databaseItemNotFound": "No se encontró el elemento de la base de datos",
 	"alignment": "Alineación",
 	"newItemTemplateUnavailableNotebookTip": "El cuaderno seleccionado anteriormente para esta plantilla está cerrado o no disponible. Vuelve a seleccionar una ubicación de guardado",
 	"specificTime": "Fecha y hora específicas",

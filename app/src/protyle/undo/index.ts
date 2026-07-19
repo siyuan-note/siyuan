@@ -3,6 +3,7 @@ import {preventScroll} from "../scroll/preventScroll";
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {matchHotKey} from "../util/hotKey";
+import {restoreUndoFocus} from "../util/selection";
 import {ipcRenderer} from "electron";
 import {markMirror, refreshUndoButtons, requestRedo, requestUndo} from "./globalUndo";
 import {scrollCenter} from "../../util/highlightById";
@@ -25,6 +26,12 @@ interface IOperations {
     doOperations: IOperation[];
     undoOperations: IOperation[];
 }
+
+const syncToolbarRange = (protyle: IProtyle) => {
+    if (getSelection().rangeCount > 0) {
+        protyle.toolbar.range = getSelection().getRangeAt(0);
+    }
+};
 
 // 撤销权威栈已下沉到 kernel（GlobalUndoLog），前端按 rootID 共享。
 // 本类仅保留发起窗口本地乐观应用的渲染逻辑（renderLocal，走 isUndo=true 分支，
@@ -62,13 +69,14 @@ export class Undo implements IUndo {
             }
         }
         onTransaction(protyle, operations, true);
+        if (restoreUndoFocus(protyle, operations)) {
+            scrollCenter(protyle);
+        }
         document.querySelector(".av__panel")?.remove();
         preventScroll(protyle);
         // 同步 toolbar range，避免 undo/redo 替换 DOM 后 range 变为 detached，
         // 导致后续异步操作（如 F3 创建子文档）读到无效 range 而报错 https://github.com/siyuan-note/siyuan/issues/17896
-        if (getSelection().rangeCount > 0) {
-            protyle.toolbar.range = getSelection().getRangeAt(0);
-        }
+        syncToolbarRange(protyle);
     }
 
     // add 降级为：不压栈（kernel 已在 commit 后 Record），仅置位本地镜像 + 刷新按钮态。
@@ -157,6 +165,7 @@ export class LocalUndo implements IUndo {
             }
             onTransaction(protyle, state.undoOperations, true);
             transaction(protyle, state.undoOperations, undefined, {skipSync: true});
+            restoreUndoFocus(protyle, state.undoOperations);
         } else {
             for (let i = state.doOperations.length - 1; i >= 0; i--) {
                 if (state.doOperations[i].action === "insert") {
@@ -171,6 +180,7 @@ export class LocalUndo implements IUndo {
             onTransaction(protyle, state.doOperations, true);
             transaction(protyle, state.doOperations, undefined, {skipSync: true});
         }
+        syncToolbarRange(protyle);
         document.querySelector(".av__panel")?.remove();
         preventScroll(protyle);
         scrollCenter(protyle);

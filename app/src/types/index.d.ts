@@ -984,6 +984,15 @@ interface IAV {
     isMirror?: boolean;
     newItemTemplates?: IAVNewItemTemplate[];
     defaultTemplateID?: string;
+    target?: IAVRenderTarget;
+}
+
+interface IAVRenderTarget {
+    status: "visible" | "filtered" | "itemNotFound" | "viewNotFound" | "groupHidden";
+    itemID: string;
+    groupID?: string;
+    index: number;
+    pageSize: number;
 }
 
 type TAVNewItemTarget = "detached" | "document";
@@ -1377,4 +1386,7 @@ interface ISiYuanUriBlockInfo {
      * @defaultValue false
      */
     fullscreen: boolean;
+    avItemID?: string;
+    avViewID?: string;
+    avGroupID?: string;
 }

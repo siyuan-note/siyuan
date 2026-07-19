@@ -188,8 +188,9 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 }
 
 type EmbedBlock struct {
-	Block      *Block       `json:"block"`
-	BlockPaths []*BlockPath `json:"blockPaths"`
+	Block               *Block       `json:"block"`
+	BlockPaths          []*BlockPath `json:"blockPaths"`
+	AllowChildOperation bool         `json:"allowChildOperation"`
 }
 
 func UpdateEmbedBlock(id, content string) (err error) {
@@ -231,7 +232,7 @@ func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, br
 		return m[sqlBlocks[i].ID] < m[sqlBlocks[j].ID]
 	})
 
-	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, sqlBlocks)
+	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, "", sqlBlocks)
 	return
 }
 
@@ -248,11 +249,12 @@ func SearchEmbedBlockInBox(embedBlockID, stmt string, excludeIDs []string, headi
 	} else {
 		sqlBlocks = sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	}
-	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, sqlBlocks)
+	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, treenode.GetEmbedBlockRefID(stmt), sqlBlocks)
 	return
 }
 
-func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, breadcrumb bool, sqlBlocks []*sql.Block) (ret []*EmbedBlock) {
+func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, breadcrumb bool, embedBlockRefID string,
+	sqlBlocks []*sql.Block) (ret []*EmbedBlock) {
 	var tmp []*sql.Block
 	for _, b := range sqlBlocks {
 		if "query_embed" == b.Type { // 嵌入块不再嵌入
@@ -289,8 +291,9 @@ func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, 
 			continue
 		}
 		ret = append(ret, &EmbedBlock{
-			Block:      block,
-			BlockPaths: blockPaths,
+			Block:               block,
+			BlockPaths:          blockPaths,
+			AllowChildOperation: embedBlockRefID == block.ID && block.IsContainerBlock(),
 		})
 	}
 

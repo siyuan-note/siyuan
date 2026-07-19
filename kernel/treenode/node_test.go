@@ -57,3 +57,43 @@ func TestGetDocTitleImgPath(t *testing.T) {
 		})
 	}
 }
+
+func TestGetEmbedBlockRef(t *testing.T) {
+	const blockID = "20060102150405-1a2b3c4"
+	tests := []struct {
+		name     string
+		stmt     string
+		expected string
+	}{
+		{name: "exact ID", stmt: "SELECT * FROM blocks WHERE id = '" + blockID + "'", expected: blockID},
+		{name: "quoted ID column", stmt: "SELECT * FROM blocks WHERE `id` = '" + blockID + "'", expected: blockID},
+		{name: "qualified ID column", stmt: "SELECT * FROM blocks WHERE blocks.id = '" + blockID + "'", expected: blockID},
+		{name: "parenthesized condition", stmt: "SELECT * FROM blocks WHERE ((id = '" + blockID + "'))", expected: blockID},
+		{name: "limited exact ID", stmt: "SELECT * FROM blocks WHERE id = '" + blockID + "' LIMIT 1", expected: blockID},
+		{name: "not equal", stmt: "SELECT * FROM blocks WHERE id != '" + blockID + "'"},
+		{name: "additional condition", stmt: "SELECT * FROM blocks WHERE id = '" + blockID + "' AND type = 'd'"},
+		{name: "alternative condition", stmt: "SELECT * FROM blocks WHERE id = '" + blockID + "' OR type = 'd'"},
+		{name: "ID list", stmt: "SELECT * FROM blocks WHERE id IN ('" + blockID + "')"},
+		{name: "ID pattern", stmt: "SELECT * FROM blocks WHERE id LIKE '" + blockID + "'"},
+		{name: "reversed comparison", stmt: "SELECT * FROM blocks WHERE '" + blockID + "' = id"},
+		{name: "other column", stmt: "SELECT * FROM blocks WHERE parent_id = '" + blockID + "'"},
+		{name: "numeric value", stmt: "SELECT * FROM blocks WHERE id = 20060102150405"},
+		{name: "invalid ID", stmt: "SELECT * FROM blocks WHERE id = 'invalid'"},
+		{name: "non-select statement", stmt: "DELETE FROM blocks WHERE id = '" + blockID + "'"},
+		{name: "invalid SQL", stmt: "SELECT FROM"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := GetEmbedBlockRefID(test.stmt); test.expected != actual {
+				t.Fatalf("expected raw statement result %q, got %q", test.expected, actual)
+			}
+
+			embedNode := &ast.Node{Type: ast.NodeBlockQueryEmbed}
+			embedNode.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte(test.stmt)})
+			if actual := GetEmbedBlockRef(embedNode); test.expected != actual {
+				t.Fatalf("expected %q, got %q", test.expected, actual)
+			}
+		})
+	}
+}

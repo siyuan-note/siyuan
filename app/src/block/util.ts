@@ -2,6 +2,7 @@ import {focusByWbr, getEditorRange} from "../protyle/util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {
     getContenteditableElement,
+    getEmbedChildOperationParentID,
     getParentBlock,
     getPreviousBlockSibling,
     getTopAloneElement
@@ -29,7 +30,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
     nodeElement.querySelectorAll(".sb__resize").forEach(handle => handle.remove());
     const sbElement = nodeElement.cloneNode() as HTMLElement;
     sbElement.innerHTML = nodeElement.lastElementChild.outerHTML;
-    let parentID = getParentBlock(nodeElement)?.getAttribute("data-node-id");
+    let parentID = getEmbedChildOperationParentID(nodeElement) || getParentBlock(nodeElement)?.getAttribute("data-node-id");
     // 缩放和反链需要接口获取
     if (!previousId && !parentID) {
         if (protyle.block.showAll || protyle.options.backlinkData) {

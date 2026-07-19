@@ -1,5 +1,41 @@
-import {hasClosestBlock, isInEmbedBlock} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
+
+export interface IEmbedChildOperationContext {
+    resultElement: HTMLElement;
+    targetID: string;
+    targetElement?: Element;
+    boundaryElement: Element;
+}
+
+export const getEmbedChildOperationContext = (element: Node): IEmbedChildOperationContext | undefined => {
+    const resultElement = hasClosestByClassName(element, "protyle-wysiwyg__embed");
+    if (!resultElement || resultElement.getAttribute("data-allow-child-operation") !== "true") {
+        return;
+    }
+
+    const targetID = resultElement.getAttribute("data-id");
+    if (!targetID) {
+        return;
+    }
+    // 单独查询列表项时，渲染器会在目标外补充一个无 ID 的列表节点。
+    const targetElement = Array.from(resultElement.querySelectorAll(`[data-node-id="${targetID}"]`)).find(item =>
+        item.getAttribute("data-type")?.startsWith("Node") &&
+        hasClosestByClassName(item, "protyle-wysiwyg__embed") === resultElement);
+    return {
+        resultElement,
+        targetID,
+        targetElement,
+        // 文档块不会渲染自身节点，查询结果容器就是它的子块边界。
+        boundaryElement: targetElement || resultElement,
+    };
+};
+
+export const getEmbedChildOperationParentID = (element: Element, context = getEmbedChildOperationContext(element)) => {
+    if (context && !context.targetElement && element.parentElement === context.resultElement) {
+        return context.targetID;
+    }
+};
 
 export const getParentBlock = (element: Element) => {
     if (element.parentElement.classList.contains("callout-content") ||
@@ -23,6 +59,10 @@ export const getPreviousBlock = (element: Element) => {
         }
         if (previous) {
             return previous;
+        }
+        if (parentElement.parentElement?.classList.contains("protyle-wysiwyg__embed") &&
+            parentElement.parentElement.getAttribute("data-allow-child-operation") === "true") {
+            return false;
         }
         const pElement = hasClosestBlock(parentElement.parentElement);
         if (pElement) {
@@ -83,6 +123,10 @@ export const getNextBlock = (element: Element) => {
         }
         if (next) {
             return next as HTMLElement;
+        }
+        if (parentElement.parentElement?.classList.contains("protyle-wysiwyg__embed") &&
+            parentElement.parentElement.getAttribute("data-allow-child-operation") === "true") {
+            return false;
         }
         const pElement = hasClosestBlock(parentElement.parentElement);
         if (pElement) {
@@ -160,9 +204,10 @@ export const isNotEditBlock = (element: Element) => {
         (element.getAttribute("data-type") === "NodeCodeBlock" && element.classList.contains("render-node"));
 };
 
-export const getTopEmptyElement = (element: Element) => {
+export const getTopEmptyElement = (element: Element, boundaryElement?: Element) => {
     let topElement = element;
-    while (topElement.parentElement && !topElement.parentElement.classList.contains("protyle-wysiwyg")) {
+    while (topElement.parentElement && topElement.parentElement !== boundaryElement &&
+        !topElement.parentElement.classList.contains("protyle-wysiwyg")) {
         if (!topElement.parentElement.getAttribute("data-node-id") && !topElement.parentElement.classList.contains("callout-content")) {
             topElement = topElement.parentElement;
         } else {

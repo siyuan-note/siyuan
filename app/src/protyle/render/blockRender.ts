@@ -99,7 +99,8 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
 
 const renderEmbed = (blocks: {
     block: IBlock,
-    blockPaths: IBreadcrumb[]
+    blockPaths: IBreadcrumb[],
+    allowChildOperation: boolean
 }[], protyle: IProtyle, item: HTMLElement, top?: number, errorTip?: string, onEmbedRender?: () => void) => {
     const rotateElement = item.querySelector(".fn__rotate");
     if (rotateElement) {
@@ -120,7 +121,8 @@ const renderEmbed = (blocks: {
                 popoverElement.setAttribute("data-id", blocksItem.block.id);
             }
         }
-        html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">
+        const childOperationAttr = blocksItem.allowChildOperation ? " data-allow-child-operation=\"true\"" : "";
+        html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}"${childOperationAttr}>
 ${popover}${breadcrumbHTML}${blocksItem.block.content}
 </div>`;
     });

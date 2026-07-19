@@ -66,43 +66,47 @@ func GetEmbedBlockRef(embedNode *ast.Node) (blockRefID string) {
 		return
 	}
 
-	stmt := scriptNode.TokensStr()
+	return GetEmbedBlockRefID(scriptNode.TokensStr())
+}
+
+func GetEmbedBlockRefID(stmt string) (blockRefID string) {
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if err != nil {
 		return
 	}
 
-	switch parsedStmt.(type) {
-	case *sqlparser.Select:
-		slct := parsedStmt.(*sqlparser.Select)
-		if nil == slct.Where || nil == slct.Where.Expr {
-			return
-		}
+	slct, ok := parsedStmt.(*sqlparser.Select)
+	if !ok || nil == slct.Where || nil == slct.Where.Expr {
+		return
+	}
 
-		switch slct.Where.Expr.(type) {
-		case *sqlparser.ComparisonExpr: // WHERE id = '20060102150405-1a2b3c4'
-			comp := slct.Where.Expr.(*sqlparser.ComparisonExpr)
-			switch comp.Left.(type) {
-			case *sqlparser.ColName:
-				col := comp.Left.(*sqlparser.ColName)
-				if nil == col || "id" != col.Name.Lowered() {
-					return
-				}
-			}
-			switch comp.Right.(type) {
-			case *sqlparser.SQLVal:
-				val := comp.Right.(*sqlparser.SQLVal)
-				if nil == val || sqlparser.StrVal != val.Type {
-					return
-				}
-
-				idVal := string(val.Val)
-				if !ast.IsNodeIDPattern(idVal) {
-					return
-				}
-				blockRefID = idVal
-			}
+	expr := slct.Where.Expr
+	for {
+		paren, isParen := expr.(*sqlparser.ParenExpr)
+		if !isParen {
+			break
 		}
+		expr = paren.Expr
+	}
+
+	comp, ok := expr.(*sqlparser.ComparisonExpr) // 仅匹配 WHERE id = '20060102150405-1a2b3c4'
+	if !ok || sqlparser.EqualStr != comp.Operator {
+		return
+	}
+
+	col, ok := comp.Left.(*sqlparser.ColName)
+	if !ok || nil == col || "id" != col.Name.Lowered() {
+		return
+	}
+
+	val, ok := comp.Right.(*sqlparser.SQLVal)
+	if !ok || nil == val || sqlparser.StrVal != val.Type {
+		return
+	}
+
+	idVal := string(val.Val)
+	if ast.IsNodeIDPattern(idVal) {
+		blockRefID = idVal
 	}
 	return
 }

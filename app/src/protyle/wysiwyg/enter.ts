@@ -2,11 +2,14 @@ import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/
 import {focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement, getParentBlock,
+    getEmbedChildOperationContext,
+    getEmbedChildOperationParentID,
     getPreviousBlockSibling,
     getTopEmptyElement,
     hasNextSibling,
     hasPreviousSibling,
-    isNotEditBlock
+    isNotEditBlock,
+    IEmbedChildOperationContext
 } from "./getBlock";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
 import {breakList, genListItemElement, listOutdent, updateListOrder} from "./list";
@@ -22,7 +25,9 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
 
 export const enter = async (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    if (hasClosestByClassName(blockElement, "protyle-wysiwyg__embed") && !blockElement.classList.contains("code-block")) {
+    const embedResultElement = hasClosestByClassName(blockElement, "protyle-wysiwyg__embed");
+    const embedContext = getEmbedChildOperationContext(blockElement);
+    if (embedResultElement && !embedContext && !blockElement.classList.contains("code-block")) {
         return;
     }
     const disableElement = isNotEditBlock(blockElement);
@@ -128,8 +133,11 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         ((blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
                 blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") ||
             (blockElement.parentElement.classList.contains("callout-content") && !blockElement.nextElementSibling))) {
+        if (embedContext && !embedContext.boundaryElement.contains(getParentBlock(blockElement).parentElement)) {
+            return;
+        }
         range.insertNode(document.createElement("wbr"));
-        const topElement = getTopEmptyElement(blockElement);
+        const topElement = getTopEmptyElement(blockElement, embedContext?.boundaryElement);
         const blockId = blockElement.getAttribute("data-node-id");
         const topId = topElement.getAttribute("data-node-id");
         const doInsert: IOperation = {
@@ -149,7 +157,8 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             parentBlockElement.after(blockElement);
         } else {
             doInsert.previousID = getPreviousBlockSibling(topElement)?.getAttribute("data-node-id");
-            doInsert.parentID = getParentBlock(topElement).getAttribute("data-node-id") || protyle.block.parentID;
+            doInsert.parentID = getEmbedChildOperationParentID(topElement, embedContext) ||
+                getParentBlock(topElement).getAttribute("data-node-id") || protyle.block.parentID;
             undoInsert.previousID = doInsert.previousID;
             undoInsert.parentID = doInsert.parentID;
             topElement.after(blockElement);
@@ -190,9 +199,14 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             (blockElement.nextElementSibling.classList.contains("list") && blockElement.previousElementSibling?.classList.contains("protyle-action")) ||
             (position.start === 0 && blockElement.previousElementSibling.classList.contains("protyle-action")) ||
             blockElement.parentElement.getAttribute("fold") === "1"
-        ) && listEnter(protyle, blockElement, range)
-    ) {
-        return true;
+        )) {
+        const embedListEnterMode = embedContext ? getEmbedListEnterMode(blockElement, embedContext) : "list";
+        if ("none" === embedListEnterMode) {
+            return;
+        }
+        if ("list" === embedListEnterMode && listEnter(protyle, blockElement, range)) {
+            return true;
+        }
     }
 
     // 段首换行
@@ -387,6 +401,23 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
     focusByWbr(currentElement, range);
     scrollCenter(protyle);
     return true;
+};
+
+const getEmbedListEnterMode = (blockElement: HTMLElement, embedContext: IEmbedChildOperationContext) => {
+    const listItemElement = blockElement.parentElement;
+    // 单独查询列表项时外层列表是渲染器补充的，回车只能在目标列表项内部创建普通子块。
+    if (listItemElement === embedContext.targetElement) {
+        return "block";
+    }
+    const listElement = listItemElement.parentElement;
+    const editableElement = getContenteditableElement(blockElement);
+    const exitsList = ["", "\n"].includes(editableElement.textContent) &&
+        blockElement.previousElementSibling.classList.contains("protyle-action") &&
+        !blockElement.querySelector("img");
+    if (exitsList && listElement.parentElement === embedContext.resultElement) {
+        return "none";
+    }
+    return embedContext.boundaryElement.contains(exitsList ? listElement.parentElement : listElement) ? "list" : "none";
 };
 
 const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {

@@ -5,7 +5,7 @@ import * as dayjs from "dayjs";
 import {Constants} from "../../constants";
 import {moveToPrevious, removeBlock} from "./remove";
 import {hasClosestByClassName, isBlockElement} from "../util/hasClosest";
-import {getParentBlock, getPreviousBlockSibling} from "./getBlock";
+import {getEmbedChildOperationContext, getParentBlock, getPreviousBlockSibling} from "./getBlock";
 import {setFold} from "../util/blockFold";
 import {scrollCenter} from "../../util/highlightById";
 
@@ -485,8 +485,11 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
     }
     const parentLiItemElement = getParentBlock(liElement);
     const parentParentElement = parentLiItemElement.parentElement;
-    if (parentLiItemElement.classList.contains("protyle-wysiwyg__embed") ||
-        parentParentElement.classList.contains("protyle-wysiwyg__embed")) {
+    const embedContext = getEmbedChildOperationContext(liElement);
+    if (embedContext?.targetElement === parentLiItemElement ||
+        (embedContext && !embedContext.boundaryElement.contains(parentLiItemElement)) ||
+        (!embedContext && (parentLiItemElement.classList.contains("protyle-wysiwyg__embed") ||
+            parentParentElement.classList.contains("protyle-wysiwyg__embed")))) {
         return;
     }
     if (liElement.previousElementSibling?.classList.contains("protyle-action") && !parentParentElement.getAttribute("data-node-id")) {

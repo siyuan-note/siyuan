@@ -10,7 +10,7 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {transaction, turnsIntoTransaction} from "../../protyle/wysiwyg/transaction";
 import {mathRender} from "../../protyle/render/mathRender";
 import {genEmptyElement} from "../../block/util";
-import {focusBlock, focusByWbr} from "../../protyle/util/selection";
+import {focusBlock} from "../../protyle/util/selection";
 import {openMobileFileById} from "../editor";
 import {Model} from "../../layout/Model";
 import {genUUID} from "../../util/genID";
@@ -918,8 +918,7 @@ export class MobileOutline extends Model {
                     const previousID = data.blockElement.previousElementSibling?.getAttribute("data-node-id");
                     data.blockElement.insertAdjacentHTML("beforebegin", html);
                     const newElement = data.blockElement.previousElementSibling;
-                    newElement.scrollIntoView();
-                    focusByWbr(newElement, document.createRange());
+                    this.focusInsertedHeading(newElement);
                     transaction(data.protyle, [{
                         action: "insert",
                         data: html,
@@ -939,14 +938,20 @@ export class MobileOutline extends Model {
                 icon: "iconAfter",
                 label: window.siyuan.languages.insertSameLevelHeadingAfter,
                 click: () => {
+                    const data = this.getProtyleAndBlockElement(element);
+                    if (!data) {
+                        return;
+                    }
+                    const rootID = data.protyle.block.rootID;
+                    closePanel();
+                    focusBlock(data.blockElement);
                     fetchPost("/api/block/getHeadingDeleteTransaction", {
                         id,
                     }, (deleteResponse) => {
-                        const data = this.getProtyleAndBlockElement(element);
-                        if (!data || !deleteResponse.data?.doOperations?.length) {
+                        if (window.siyuan.mobile.editor?.protyle !== data.protyle || this.blockId !== rootID ||
+                            !deleteResponse.data?.doOperations?.length) {
                             return;
                         }
-                        closePanel();
                         const previousID = deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id;
 
                         const newId = Lute.NewNodeID();
@@ -955,8 +960,7 @@ export class MobileOutline extends Model {
                         if (previousElement) {
                             previousElement.insertAdjacentHTML("afterend", html);
                             const newElement = previousElement.nextElementSibling;
-                            newElement.scrollIntoView();
-                            focusByWbr(newElement, document.createRange());
+                            this.focusInsertedHeading(newElement);
                         }
                         transaction(data.protyle, [{
                             action: "insert",
@@ -978,10 +982,18 @@ export class MobileOutline extends Model {
                     icon: "iconAdd",
                     label: window.siyuan.languages.addChildHeading,
                     click: () => {
+                        const data = this.getProtyleAndBlockElement(element);
+                        if (!data) {
+                            return;
+                        }
+                        const rootID = data.protyle.block.rootID;
+                        closePanel();
+                        focusBlock(data.blockElement);
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
                         }, (deleteResponse) => {
-                            if (!deleteResponse.data?.doOperations?.length || !deleteResponse.data?.undoOperations) {
+                            if (window.siyuan.mobile.editor?.protyle !== data.protyle || this.blockId !== rootID ||
+                                !deleteResponse.data?.doOperations?.length || !deleteResponse.data?.undoOperations) {
                                 return;
                             }
                             let previousID = deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id;
@@ -992,21 +1004,13 @@ export class MobileOutline extends Model {
                                     return true;
                                 }
                             });
-
-
-                            const data = this.getProtyleAndBlockElement(element);
-                            if (!data) {
-                                return;
-                            }
-                            closePanel();
                             const newId = Lute.NewNodeID();
                             const html = `<div data-subtype="h${currentLevel + 1}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel + 1}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
                             const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
                             if (previousElement) {
                                 previousElement.insertAdjacentHTML("afterend", html);
                                 const newElement = previousElement.nextElementSibling;
-                                newElement.scrollIntoView();
-                                focusByWbr(newElement, document.createRange());
+                                this.focusInsertedHeading(newElement);
                             }
                             transaction(data.protyle, [{
                                 action: "insert",
@@ -1207,6 +1211,13 @@ export class MobileOutline extends Model {
         return {
             protyle: window.siyuan.mobile.editor.protyle, blockElement
         };
+    }
+
+    private focusInsertedHeading(element: Element) {
+        element.scrollIntoView();
+        element.querySelector("wbr")?.remove();
+        (element.querySelector('[contenteditable="true"]') as HTMLElement)?.focus({preventScroll: true});
+        focusBlock(element);
     }
 
     /**

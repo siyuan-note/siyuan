@@ -225,7 +225,8 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     const name = getNotebookName(notebookId);
     /// #if !MOBILE
     const boxDocID = liElement.getAttribute("data-node-id");
-    if (boxDocID && window.siyuan.config.fileTree.parentDocClickExpand) {
+    if (boxDocID && window.siyuan.config.fileTree.parentDocClickExpand &&
+        Number(liElement.getAttribute("data-count")) > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "openDocument",
             label: window.siyuan.languages.openDocument,

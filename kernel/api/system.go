@@ -1142,7 +1142,7 @@ func exit(c *gin.Context) {
 		force = forceArg.(bool)
 	}
 
-	execInstallPkgArg := arg["execInstallPkg"] // 0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
+	execInstallPkgArg := arg["execInstallPkg"] // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
 	execInstallPkg := 0
 	if nil != execInstallPkgArg {
 		execInstallPkg = int(execInstallPkgArg.(float64))
@@ -1154,15 +1154,18 @@ func exit(c *gin.Context) {
 		setCurrentWorkspace = setCurrentWorkspaceArg.(bool)
 	}
 
-	exitCode := model.Close(force, setCurrentWorkspace, execInstallPkg)
+	exitCode, installPkgPath := model.Close(force, setCurrentWorkspace, execInstallPkg)
 	ret.Code = exitCode
+	data := map[string]any{"closeTimeout": 0}
+	if "" != installPkgPath {
+		data["installPkgPath"] = installPkgPath
+	}
+	ret.Data = data
 	switch exitCode {
 	case 0:
 	case 1: // 同步执行失败
 		ret.Msg = model.Conf.Language(96) + "<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">" + model.Conf.Language(97) + "</button>"
-		ret.Data = map[string]any{"closeTimeout": 0}
 	case 2: // 提示新安装包
 		ret.Msg = model.Conf.Language(61)
-		ret.Data = map[string]any{"closeTimeout": 0}
 	}
 }

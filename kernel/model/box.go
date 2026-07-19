@@ -49,13 +49,14 @@ import (
 
 // Box 笔记本。
 type Box struct {
-	ID       string `json:"id"`
-	BoxDocID string `json:"boxDocID"`
-	Name     string `json:"name"`
-	Icon     string `json:"icon"`
-	Sort     int    `json:"sort"`
-	SortMode int    `json:"sortMode"`
-	Closed   bool   `json:"closed"`
+	ID           string `json:"id"`
+	BoxDocID     string `json:"boxDocID"`
+	Name         string `json:"name"`
+	Icon         string `json:"icon"`
+	Sort         int    `json:"sort"`
+	SortMode     int    `json:"sortMode"`
+	Closed       bool   `json:"closed"`
+	SubFileCount int    `json:"subFileCount"`
 
 	NewFlashcardCount int `json:"newFlashcardCount"`
 	DueFlashcardCount int `json:"dueFlashcardCount"`

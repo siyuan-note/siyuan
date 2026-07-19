@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -37,26 +36,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
 )
-
-func execNewVerInstallPkg(newVerInstallPkgPath string) {
-	logging.LogInfof("installing the new version [%s]", newVerInstallPkgPath)
-	var cmd *exec.Cmd
-	if gulu.OS.IsWindows() {
-		cmd = exec.Command(newVerInstallPkgPath)
-	} else if gulu.OS.IsDarwin() {
-		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
-		cmd = exec.Command("open", newVerInstallPkgPath)
-	} else {
-		logging.LogErrorf("unsupported platform for auto-installing package")
-		return
-	}
-	gulu.CmdAttr(cmd)
-	cmdErr := cmd.Run()
-	if nil != cmdErr {
-		logging.LogErrorf("exec install new version failed: %s", cmdErr)
-		return
-	}
-}
 
 func getNewVerInstallPkgPath() string {
 	if skipNewVerInstallPkg() {

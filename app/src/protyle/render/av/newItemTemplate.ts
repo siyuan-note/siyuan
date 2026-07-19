@@ -162,7 +162,7 @@ const getFieldsHTML = (fields: IAVColumn[], itemTemplate: IAVNewItemTemplate) =>
     const selectAttrs = ["select", "mSelect"].includes(column.type) ?
         ` data-role="field-value" data-value-type="${column.type}" data-selected="${escapeAttr(JSON.stringify(selected))}"` : "";
     return `<div class="block__icons av__row" data-field-id="${column.id}">
-    <div class="block__logo block__logo--icon fn__pointer" title="${escapeAttr(column.name)}">${icon}<span>${escapeHtml(column.name)}</span></div>
+    <div class="block__logo block__logo--icon" title="${escapeAttr(column.name)}">${icon}<span>${escapeHtml(column.name)}</span></div>
     <div class="fn__flex-1 fn__flex custom-attr__avvalue" data-type="${column.type}"${selectAttrs} style="align-items:center">
         ${column.type === "date" ? `<select class="b3-select" data-role="field-mode"><option value="static"${fieldValue?.mode !== "currentTime" ? " selected" : ""}>${window.siyuan.languages.specificTime}</option><option value="currentTime"${fieldValue?.mode === "currentTime" ? " selected" : ""}>${window.siyuan.languages.current}</option></select><span class="fn__space"></span>` : ""}
         ${getValueInputHTML(column, fieldValue)}
@@ -175,7 +175,7 @@ const getPrimaryKeyHTML = (primaryKey: IAVColumn | undefined, itemTemplate: IAVN
     const icon = primaryKey?.icon ? unicode2Emoji(primaryKey.icon, "block__logoicon", true) :
         '<svg class="block__logoicon"><use xlink:href="#iconKey"></use></svg>';
     return `<div class="block__icons av__row">
-    <div class="block__logo block__logo--icon fn__pointer" title="${escapeAttr(name)}">${icon}<span>${escapeHtml(name)}</span></div>
+    <div class="block__logo block__logo--icon" title="${escapeAttr(name)}">${icon}<span>${escapeHtml(name)}</span></div>
     <div class="fn__flex-1 fn__flex custom-attr__avvalue" data-type="block" style="align-items:center">
         <input class="b3-text-field b3-text-field--text fn__flex-1" data-role="primary-key" value="${escapeAttr(itemTemplate.primaryKeyTemplate || "")}">
     </div>
@@ -508,14 +508,14 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
         unavailableNotebookOption +
         (forceCurrentNotebook ? "" : (window.siyuan.notebooks || []).filter(item => !item.closed && item.id !== currentNotebookID)
             .map(item => `<option value="${item.id}"${item.id === itemTemplate.saveLocation?.boxID ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join(""));
-    return `<div data-role="template-editor" style="padding:16px;overflow:auto;flex:1">
+    return `<div class="av__template-editor" data-role="template-editor" style="padding:16px;overflow:auto;flex:1">
     <div class="custom-attr">
         <div class="block__icons av__row">
-            <div class="block__logo block__logo--icon fn__pointer"><svg class="block__logoicon"><use xlink:href="#iconEdit"></use></svg><span>${window.siyuan.languages.title}</span></div>
+            <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconEdit"></use></svg><span>${window.siyuan.languages.title}</span></div>
             <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><input class="b3-text-field b3-text-field--text fn__flex-1" data-role="template-name" value="${escapeAttr(itemTemplate.name)}"><span class="fn__space"></span><button class="block__icon block__icon--warning" data-role="delete-template" type="button" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button></div>
         </div>
         <div class="block__icons av__row">
-            <div class="block__logo block__logo--icon fn__pointer"><svg class="block__logoicon"><use xlink:href="#iconAdd"></use></svg><span>${window.siyuan.languages.type}</span></div>
+            <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconAdd"></use></svg><span>${window.siyuan.languages.type}</span></div>
             <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><select class="b3-select fn__flex-1" data-role="target-type"><option value="detached"${isDocument ? "" : " selected"}>${window.siyuan.languages.createDetachedBlock}</option><option value="document"${isDocument ? " selected" : ""}>${window.siyuan.languages.createBoundBlock}</option></select></div>
         </div>
     </div>
@@ -523,11 +523,11 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
         <div class="fn__hr"></div>
         <div class="custom-attr">
             <div class="block__icons av__row">
-                <div class="block__logo block__logo--icon fn__pointer ariaLabel" data-position="parentE" aria-label="${escapeAttr(`${window.siyuan.languages.fileTree14}<br>${window.siyuan.languages.fileTree13}`)}"><svg class="block__logoicon"><use xlink:href="#iconFolder"></use></svg><span>${window.siyuan.languages.savePath}</span></div>
+                <div class="block__logo block__logo--icon ariaLabel" data-position="parentE" aria-label="${escapeAttr(`${window.siyuan.languages.fileTree14}<br>${window.siyuan.languages.fileTree13}`)}"><svg class="block__logoicon"><use xlink:href="#iconFolder"></use></svg><span>${window.siyuan.languages.savePath}</span></div>
                 <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><select class="b3-select" data-role="box-id" style="width:160px">${notebookOptions}</select><span class="fn__space${itemTemplate.saveLocation || forceCurrentNotebook ? "" : " fn__none"}" data-role="path-space"></span><input class="b3-text-field fn__flex-1${itemTemplate.saveLocation || forceCurrentNotebook ? "" : " fn__none"}" data-role="path-template" value="${escapeAttr(itemTemplate.saveLocation?.pathTemplate || "")}"${itemTemplate.saveLocation || forceCurrentNotebook ? "" : " disabled"}></div>
             </div>
             <div class="block__icons av__row">
-                <div class="block__logo block__logo--icon fn__pointer"><svg class="block__logoicon"><use xlink:href="#iconFile"></use></svg><span>${window.siyuan.languages.contentTemplate}</span></div>
+                <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconFile"></use></svg><span>${window.siyuan.languages.contentTemplate}</span></div>
                 <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><button class="b3-text-field b3-text-field--text fn__flex-1 fn__flex" data-role="content-template" data-value="${escapeAttr(itemTemplate.contentTemplatePath || "")}" type="button" style="align-items:center;text-align:left"><span class="fn__flex-1 fn__ellipsis${itemTemplate.contentTemplatePath ? "" : " ft__on-surface"}">${escapeHtml(itemTemplate.contentTemplatePath || window.siyuan.languages.empty)}</span><svg style="height:14px;width:14px"><use xlink:href="#iconDown"></use></svg></button></div>
             </div>
         </div>
@@ -569,12 +569,13 @@ export const openNewItemTemplateDialog = (options: {
     }
     let defaultTemplateID = options.data.defaultTemplateID || "";
     const dialog = new Dialog({
-        title: `${window.siyuan.languages.newRow} ${window.siyuan.languages.template}`,
+        title: window.siyuan.languages.itemTemplate,
         width: "820px",
         height: "70vh",
+        containerClassName: "b3-dialog__container--theme",
         content: `<div class="fn__flex fn__flex-column" style="height:100%">
     <div class="fn__flex fn__flex-1" style="min-height:0">
-        <div data-role="template-list" style="width:200px;padding:8px;border-right:1px solid var(--b3-border-color);overflow:auto"></div>
+        <ul class="av__template-list b3-list b3-list--background" data-role="template-list"></ul>
         <div data-role="editor-host" class="fn__flex-1 fn__flex"></div>
     </div>
     <div class="b3-dialog__action"><button class="b3-button b3-button--cancel" data-role="cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text" data-role="confirm">${window.siyuan.languages.confirm}</button></div>
@@ -594,8 +595,8 @@ export const openNewItemTemplateDialog = (options: {
     };
 
     const render = () => {
-        listElement.innerHTML = `<button class="b3-menu__item" data-role="add-template"><svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newRow} ${window.siyuan.languages.template}</span></button><button class="b3-menu__separator"></button>` +
-            templates.map((item, index) => `<button class="b3-menu__item${index === selectedIndex ? " b3-menu__item--current" : ""}" data-index="${index}" draggable="true"><svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg><span class="b3-menu__label fn__ellipsis">${escapeHtml(item.name)}</span></button>`).join("");
+        listElement.innerHTML = `<li class="b3-list-item" data-role="add-template"><svg class="b3-list-item__graphic"><use xlink:href="#iconAdd"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newTemplate}</span></li><li class="b3-menu__separator"></li>` +
+            templates.map((item, index) => `<li class="b3-list-item${index === selectedIndex ? " b3-list-item--focus" : ""}" data-index="${index}" draggable="true"><svg class="b3-list-item__graphic fn__grab"><use xlink:href="#iconDrag"></use></svg><span class="b3-list-item__text">${escapeHtml(item.name)}</span></li>`).join("");
         hostElement.innerHTML = selectedIndex < 0 ? "" : getEditorHTML(templates[selectedIndex], primaryKey, fields, options.protyle.notebookId);
         const target = hostElement.querySelector('[data-role="target-type"]') as HTMLSelectElement;
         target?.addEventListener("change", () => hostElement.querySelector('[data-role="document-options"]')?.classList.toggle("fn__none", target.value !== "document"));
@@ -670,10 +671,14 @@ export const openNewItemTemplateDialog = (options: {
     };
 
     let draggingIndex = -1;
-    const clearDragStyles = () => {
+    const clearDragover = () => {
         listElement.querySelectorAll<HTMLElement>("[data-index]").forEach(item => {
-            item.style.borderTop = "";
-            item.style.borderBottom = "";
+            item.classList.remove("dragover__top", "dragover__bottom");
+        });
+    };
+    const clearDragStyles = () => {
+        clearDragover();
+        listElement.querySelectorAll<HTMLElement>("[data-index]").forEach(item => {
             item.style.opacity = "";
         });
     };
@@ -693,9 +698,9 @@ export const openNewItemTemplateDialog = (options: {
             return;
         }
         event.preventDefault();
-        clearDragStyles();
+        clearDragover();
         const before = event.clientY < target.getBoundingClientRect().top + target.getBoundingClientRect().height / 2;
-        target.style[before ? "borderTop" : "borderBottom"] = "2px solid var(--b3-theme-primary-lighter)";
+        target.classList.add(before ? "dragover__top" : "dragover__bottom");
     });
     listElement.addEventListener("drop", (event: DragEvent) => {
         const target = (event.target as HTMLElement).closest<HTMLElement>("[data-index]");
@@ -952,7 +957,7 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
         const menu = new Menu("av-new-item-template");
         menu.addItem({
             iconHTML: "",
-            label: window.siyuan.languages.useTemplate.replace("${x}", escapeHtml(data.name || "")),
+            label: window.siyuan.languages.newItemWithTemplate,
             type: "readonly",
         });
         menu.addItem({
@@ -1031,10 +1036,14 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
                 });
             },
         }));
-        const clearTemplateDragStyles = () => {
+        const clearTemplateDragover = () => {
             menu.element.querySelectorAll<HTMLElement>("[data-template-id]").forEach(element => {
-                element.style.borderTop = "";
-                element.style.borderBottom = "";
+                element.classList.remove("dragover__top", "dragover__bottom");
+            });
+        };
+        const clearTemplateDragStyles = () => {
+            clearTemplateDragover();
+            menu.element.querySelectorAll<HTMLElement>("[data-template-id]").forEach(element => {
                 element.style.opacity = "";
             });
         };
@@ -1057,9 +1066,9 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
             }
             event.preventDefault();
             draggedTemplateMoved = true;
-            clearTemplateDragStyles();
+            clearTemplateDragover();
             const rect = target.getBoundingClientRect();
-            target.style[event.clientY < rect.top + rect.height / 2 ? "borderTop" : "borderBottom"] = "2px solid var(--b3-theme-primary-lighter)";
+            target.classList.add(event.clientY < rect.top + rect.height / 2 ? "dragover__top" : "dragover__bottom");
         };
         menu.element.ondrop = (event: DragEvent) => {
             const target = (event.target as HTMLElement).closest<HTMLElement>("[data-template-id]");
@@ -1111,7 +1120,7 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
         menu.addItem({type: "separator"});
         menu.addItem({
             iconHTML: "",
-            label: `${window.siyuan.languages.new} ${window.siyuan.languages.template}`,
+            label: window.siyuan.languages.newTemplate,
             click: () => openNewItemTemplateDialog({
                 protyle: options.protyle,
                 blockElement: options.blockElement,

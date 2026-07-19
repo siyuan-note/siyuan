@@ -44,11 +44,9 @@ const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
                         },
                     });
                     /// #else
-                    if (blockInfo.avItemID) {
-                        activateQueuedAVLocate(window.siyuan.mobile.editor?.protyle, id);
-                    }
                     openMobileFileById(app, id, blockInfo.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
-                        ((zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]));
+                        ((zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
+                    undefined, undefined, blockInfo.avItemID ? (protyle) => activateQueuedAVLocate(protyle, id) : undefined);
                     /// #endif
                 });
                 /// #if !BROWSER

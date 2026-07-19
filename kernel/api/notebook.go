@@ -427,6 +427,8 @@ func lsNotebooks(c *gin.Context) {
 	}
 
 	var notebooks []*model.Box
+	var publishAccess model.PublishAccess
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	if flashcard {
 		notebooks = model.GetFlashcardNotebooks()
 	} else {
@@ -435,8 +437,8 @@ func lsNotebooks(c *gin.Context) {
 		if err != nil {
 			return
 		}
-		if model.IsReadOnlyRoleContext(c) {
-			publishAccess := model.GetPublishAccess()
+		if isReadOnlyRole {
+			publishAccess = model.GetPublishAccess()
 			tempNotebooks := []*model.Box{}
 			for _, notebook := range notebooks {
 				// 筛除关闭的笔记本
@@ -462,9 +464,22 @@ func lsNotebooks(c *gin.Context) {
 		}
 	}
 
+	boxDocEnabled := model.IsBoxDocEnabled()
+	if !flashcard && boxDocEnabled {
+		for _, notebook := range notebooks {
+			if !notebook.Closed && notebook.BoxDocID != "" {
+				if isReadOnlyRole {
+					notebook.SubFileCount = model.BoxDocSubFileCountForPublish(notebook.ID, notebook.BoxDocID, publishAccess)
+				} else {
+					notebook.SubFileCount = model.BoxDocSubFileCount(notebook.ID, notebook.BoxDocID)
+				}
+			}
+		}
+	}
+
 	ret.Data = map[string]any{
 		"notebooks":     notebooks,
-		"boxDocEnabled": model.IsBoxDocEnabled(),
+		"boxDocEnabled": boxDocEnabled,
 	}
 }
 

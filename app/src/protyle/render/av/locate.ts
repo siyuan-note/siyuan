@@ -3,6 +3,7 @@ import {showMessage} from "../../../dialog/message";
 import {transaction} from "../../wysiwyg/transaction";
 import {clearSelect} from "../../util/clear";
 import {addDragFill} from "./cell";
+import {scrollCenter} from "../../../util/highlightById";
 
 export interface IAVLocateRequest {
     itemID: string;
@@ -10,25 +11,68 @@ export interface IAVLocateRequest {
     viewID?: string;
     select?: boolean;
     highlight?: boolean;
+    persistView?: boolean;
     previousViewID?: string;
     messageShown?: boolean;
 }
 
 const locateRequests = new WeakMap<HTMLElement, IAVLocateRequest>();
-const queuedLocateRequests = new Map<string, IAVLocateRequest>();
+const locateQueueTimeout = 30000;
+const locateRenderSize = 200;
+const queuedLocateRequests = new Map<string, {
+    request: IAVLocateRequest,
+    timer: number,
+    activationToken?: symbol,
+}>();
 const renderTokens = new WeakMap<HTMLElement, symbol>();
-const highlightTimers = new WeakMap<HTMLElement, number>();
+const highlightTokens = new WeakMap<HTMLElement, symbol>();
+const highlightStates = new WeakMap<HTMLElement, {element: HTMLElement, className: string, timer: number}>();
 
-const highlightTemporarily = (blockElement: HTMLElement, targetElement: HTMLElement, className: string) => {
-    window.clearTimeout(highlightTimers.get(blockElement));
-    targetElement.classList.add(className);
-    const timer = window.setTimeout(() => {
-        targetElement.classList.remove(className);
-        if (highlightTimers.get(blockElement) === timer) {
-            highlightTimers.delete(blockElement);
+const clearLocatedHighlight = (blockElement: HTMLElement) => {
+    highlightTokens.delete(blockElement);
+    const state = highlightStates.get(blockElement);
+    if (!state) {
+        return;
+    }
+    window.clearTimeout(state.timer);
+    state.element.classList.remove(state.className);
+    highlightStates.delete(blockElement);
+};
+
+const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, viewType: TAVView,
+                              groupQuery: string, itemID: string) => {
+    clearLocatedHighlight(blockElement);
+    const token = Symbol();
+    highlightTokens.set(blockElement, token);
+    const className = viewType === "table" ? "av__row--locate" : "av__gallery-item--locate";
+    const targetQuery = viewType === "table" ? `.av__row[data-id="${itemID}"]` : `.av__gallery-item[data-id="${itemID}"]`;
+    requestAnimationFrame(() => {
+        if (!blockElement.isConnected || highlightTokens.get(blockElement) !== token) {
+            return;
         }
-    }, 1024);
-    highlightTimers.set(blockElement, timer);
+        const targetElement = blockElement.querySelector(groupQuery)?.querySelector(targetQuery) as HTMLElement;
+        if (!targetElement) {
+            highlightTokens.delete(blockElement);
+            return;
+        }
+        blockElement.querySelectorAll(`.${className}`).forEach(item => item.classList.remove(className));
+        if (viewType === "table") {
+            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl").forEach(item => {
+                item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
+            });
+        }
+        targetElement.classList.add(className);
+        const timer = window.setTimeout(() => {
+            targetElement.classList.remove(className);
+            if (highlightStates.get(blockElement)?.timer === timer) {
+                highlightStates.delete(blockElement);
+            }
+            if (highlightTokens.get(blockElement) === token) {
+                highlightTokens.delete(blockElement);
+            }
+        }, 1024);
+        highlightStates.set(blockElement, {element: targetElement, className, timer});
+    });
 };
 
 export const beginAVRender = (blockElement: HTMLElement) => {
@@ -42,7 +86,17 @@ export const isCurrentAVRender = (blockElement: HTMLElement, token: symbol) => {
 };
 
 export const queueAVLocateRequest = (blockID: string, request: IAVLocateRequest) => {
-    queuedLocateRequests.set(blockID, {...request, select: false, highlight: true});
+    const previous = queuedLocateRequests.get(blockID);
+    if (previous) {
+        window.clearTimeout(previous.timer);
+    }
+    const locateRequest = {...request, select: true, highlight: true};
+    const timer = window.setTimeout(() => {
+        if (queuedLocateRequests.get(blockID)?.request === locateRequest) {
+            queuedLocateRequests.delete(blockID);
+        }
+    }, locateQueueTimeout);
+    queuedLocateRequests.set(blockID, {request: locateRequest, timer});
 };
 
 export const activateAVLocate = (protyle: IProtyle, blockID: string, request?: IAVLocateRequest) => {
@@ -50,6 +104,7 @@ export const activateAVLocate = (protyle: IProtyle, blockID: string, request?: I
     if (!request || !blockElement) {
         return false;
     }
+    clearLocatedHighlight(blockElement);
     locateRequests.set(blockElement, request);
     blockElement.removeAttribute("data-render");
     import("./render").then(({avRender}) => avRender(blockElement, protyle));
@@ -57,7 +112,37 @@ export const activateAVLocate = (protyle: IProtyle, blockID: string, request?: I
 };
 
 export const activateQueuedAVLocate = (protyle: IProtyle, blockID: string) => {
-    return activateAVLocate(protyle, blockID, queuedLocateRequests.get(blockID));
+    const queued = queuedLocateRequests.get(blockID);
+    if (!queued || !protyle) {
+        return false;
+    }
+    const clearQueued = () => {
+        window.clearTimeout(queued.timer);
+        if (queuedLocateRequests.get(blockID) === queued) {
+            queuedLocateRequests.delete(blockID);
+        }
+    };
+    if (activateAVLocate(protyle, blockID, queued.request)) {
+        clearQueued();
+        return true;
+    }
+    const activationToken = Symbol();
+    queued.activationToken = activationToken;
+    const timeout = performance.now() + locateQueueTimeout;
+    const retry = () => {
+        if (queuedLocateRequests.get(blockID) !== queued || queued.activationToken !== activationToken) {
+            return;
+        }
+        if (activateAVLocate(protyle, blockID, queued.request)) {
+            clearQueued();
+            return;
+        }
+        if (performance.now() < timeout) {
+            window.setTimeout(retry, 50);
+        }
+    };
+    window.setTimeout(retry, 50);
+    return false;
 };
 
 export const setAVLocateRequest = (blockElement: HTMLElement, request: IAVLocateRequest) => {
@@ -65,25 +150,23 @@ export const setAVLocateRequest = (blockElement: HTMLElement, request: IAVLocate
 };
 
 const getAVLocateRequest = (blockElement: HTMLElement) => {
-    let request = locateRequests.get(blockElement);
-    if (!request) {
-        request = queuedLocateRequests.get(blockElement.dataset.nodeId);
-        if (request) {
-            locateRequests.set(blockElement, request);
-        }
-    }
-    return request;
+    return locateRequests.get(blockElement);
 };
 
 const clearAVLocateRequest = (blockElement: HTMLElement, request: IAVLocateRequest) => {
-    locateRequests.delete(blockElement);
-    if (queuedLocateRequests.get(blockElement.dataset.nodeId) === request) {
-        queuedLocateRequests.delete(blockElement.dataset.nodeId);
+    if (locateRequests.get(blockElement) === request) {
+        locateRequests.delete(blockElement);
     }
 };
 
-export const getAVLocateParams = (blockElement: HTMLElement) => {
+export const getAVLocateParams = (blockElement: HTMLElement, enabled = true) => {
     const request = getAVLocateRequest(blockElement);
+    if (!enabled) {
+        if (request) {
+            clearAVLocateRequest(blockElement, request);
+        }
+        return;
+    }
     if (request?.viewID && request.previousViewID === undefined) {
         request.previousViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
             blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") || "";
@@ -97,7 +180,6 @@ export const getAVLocateParams = (blockElement: HTMLElement) => {
 
 export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData: {
     virtualData: { [key: string]: IAVVirtualData },
-    pageSizes: { [key: string]: string },
 }) => {
     const request = getAVLocateRequest(blockElement);
     if (!blockElement.isConnected || !request || !data.target || data.target.itemID !== request.itemID) {
@@ -107,7 +189,7 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
         if (!request.messageShown) {
             request.messageShown = true;
             if (data.target.status === "filtered" || data.target.status === "groupHidden") {
-                showMessage(window.siyuan.languages.insertRowTip);
+                showMessage(window.siyuan.languages.databaseItemFiltered);
             } else if (data.target.status === "viewNotFound") {
                 showMessage(window.siyuan.languages.databaseViewNotFound);
             } else {
@@ -117,54 +199,74 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
         return;
     }
     const key = data.target.groupID || "all";
-    let start = Math.max(0, data.target.index - 20);
+    if (request.persistView === false && request.viewID) {
+        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, request.viewID);
+    }
+    const view = (data.target.groupID ? data.view.groups?.find(item => item.id === data.target.groupID) : data.view) as IAVTable | IAVGallery | IAVKanban;
+    const itemLength = data.viewType === "table" ? (view as IAVTable).rows.length : (view as IAVGallery | IAVKanban).cards.length;
+    const offset = data.target.offset || 0;
+    const localIndex = Math.max(0, data.target.index - offset);
+    let renderedStart = Math.max(0, localIndex - locateRenderSize / 2);
+    const renderedEnd = Math.min(itemLength - 1, renderedStart + locateRenderSize - 1);
+    renderedStart = Math.max(0, renderedEnd - locateRenderSize + 1);
     let topSpacerHeight: number;
+    const bodyQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";
+    const currentBody = blockElement.querySelector(bodyQuery);
     if (data.viewType === "table") {
-        const rowHeight = (blockElement.querySelector(".av__row[data-id]") as HTMLElement)?.offsetHeight || 36;
-        topSpacerHeight = start * rowHeight;
+        const rowHeight = (currentBody?.querySelector(".av__row[data-id]") as HTMLElement)?.offsetHeight || 36;
+        topSpacerHeight = renderedStart * rowHeight;
     } else {
-        const itemHeight = (blockElement.querySelector(".av__gallery-item") as HTMLElement)?.offsetHeight || 180;
+        const itemHeight = (currentBody?.querySelector(".av__gallery-item") as HTMLElement)?.offsetHeight || 180;
         let columns = 1;
         if (data.viewType === "gallery") {
-            const view = (data.target.groupID ? data.view.groups?.find(item => item.id === data.target.groupID) : data.view) as IAVGallery;
-            const minWidth = view?.cardSize === 0 ? 180 : (view?.cardSize === 2 ? 320 : 260);
+            const minWidth = (view as IAVGallery)?.cardSize === 0 ? 180 : ((view as IAVGallery)?.cardSize === 2 ? 320 : 260);
             columns = Math.max(1, Math.floor((blockElement.clientWidth + 16) / (minWidth + 16)));
-            start -= start % columns;
+            renderedStart -= renderedStart % columns;
         }
-        topSpacerHeight = Math.floor(start / columns) * (itemHeight + 16);
+        topSpacerHeight = Math.floor(renderedStart / columns) * (itemHeight + 16);
+    }
+    if (itemLength > 100) {
+        blockElement.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
     }
     resetData.virtualData[key] = {
-        renderedStart: start,
-        renderedEnd: data.target.index + 20,
+        renderedStart,
+        renderedEnd,
         topSpacerHeight,
+        rowOffset: offset,
+        locate: true,
     };
-    resetData.pageSizes[data.target.groupID || "unGroup"] = data.target.pageSize.toString();
 };
 
 export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, data: IAV) => {
     const request = getAVLocateRequest(blockElement);
-    if (!request || !data.target || data.target.itemID !== request.itemID) {
+    if (!request) {
+        return;
+    }
+    if (!data.target || data.target.itemID !== request.itemID) {
+        clearAVLocateRequest(blockElement, request);
         return;
     }
     if (!blockElement.isConnected) {
         locateRequests.delete(blockElement);
         return;
     }
-    const currentViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || request.previousViewID || data.viewID;
-    if (data.target?.status !== "viewNotFound" && !protyle.disabled && request.viewID && request.viewID !== currentViewID) {
+    const currentViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ?? request.previousViewID ?? data.viewID;
+    if (data.target?.status !== "viewNotFound" && request.viewID && request.viewID !== currentViewID) {
         blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, request.viewID);
-        transaction(protyle, [{
-            action: "setAttrViewBlockView",
-            blockID: blockElement.dataset.nodeId,
-            id: request.viewID,
-            avID: blockElement.dataset.avId,
-        }], [{
-            action: "setAttrViewBlockView",
-            blockID: blockElement.dataset.nodeId,
-            id: currentViewID,
-            avID: blockElement.dataset.avId,
-        }]);
-        return;
+        if (!protyle.disabled && request.persistView !== false) {
+            transaction(protyle, [{
+                action: "setAttrViewBlockView",
+                blockID: blockElement.dataset.nodeId,
+                id: request.viewID,
+                avID: blockElement.dataset.avId,
+            }], [{
+                action: "setAttrViewBlockView",
+                blockID: blockElement.dataset.nodeId,
+                id: currentViewID,
+                avID: blockElement.dataset.avId,
+            }]);
+            return;
+        }
     }
     if (data.target?.status !== "visible") {
         clearAVLocateRequest(blockElement, request);
@@ -180,12 +282,6 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
     if (data.viewType === "table") {
         const rowElement = bodyElement?.querySelector(`.av__row[data-id="${request.itemID}"]`) as HTMLElement;
         targetElement = rowElement?.querySelector(".av__cell[data-dtype=\"block\"]") as HTMLElement;
-        if (rowElement && request.highlight) {
-            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl").forEach(item => {
-                item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
-            });
-            highlightTemporarily(blockElement, rowElement, "av__row--hl");
-        }
         if (targetElement && request.select !== false) {
             clearSelect(["cell"], blockElement);
             targetElement.classList.add("av__cell--select");
@@ -193,23 +289,34 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         }
     } else {
         targetElement = bodyElement?.querySelector(`.av__gallery-item[data-id="${request.itemID}"]`) as HTMLElement;
-        if (targetElement && (request.select !== false || request.highlight)) {
+        if (targetElement && request.select !== false && !request.highlight) {
             blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => item.classList.remove("av__gallery-item--select"));
-            if (request.highlight) {
-                highlightTemporarily(blockElement, targetElement, "av__gallery-item--select");
-            } else {
-                targetElement.classList.add("av__gallery-item--select");
-            }
+            targetElement.classList.add("av__gallery-item--select");
         }
     }
     if (!targetElement) {
+        clearAVLocateRequest(blockElement, request);
+        if (!request.messageShown) {
+            showMessage(window.siyuan.languages.databaseItemNotFound);
+        }
         return;
     }
     if (data.viewType === "table" && data.target.index === 0 && !data.target.groupID) {
         const contentRect = protyle.contentElement.getBoundingClientRect();
         protyle.contentElement.scrollTop += blockElement.getBoundingClientRect().top - contentRect.top;
     } else {
-        targetElement.scrollIntoView({block: "center", inline: "nearest"});
+        scrollCenter(protyle, targetElement, "center");
+    }
+    if (data.viewType === "kanban") {
+        const kanbanElement = blockElement.querySelector(".av__kanban") as HTMLElement;
+        const kanbanRect = kanbanElement?.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+        if (kanbanElement && (targetRect.left < kanbanRect.left || targetRect.right > kanbanRect.right)) {
+            kanbanElement.scrollLeft += targetRect.left + targetRect.width / 2 - (kanbanRect.left + kanbanRect.width / 2);
+        }
+    }
+    if (request.highlight) {
+        highlightLocatedItem(blockElement, protyle, data.viewType, groupQuery, request.itemID);
     }
     clearAVLocateRequest(blockElement, request);
 };

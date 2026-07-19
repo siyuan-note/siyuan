@@ -202,11 +202,9 @@ export const initFramework = (app: App, isStart: boolean) => {
                     groupID: info.avGroupID,
                 });
             }
-            if (info.avItemID) {
-                activateQueuedAVLocate(window.siyuan.mobile.editor?.protyle, info.id);
-            }
             openMobileFileById(app, info.id, info.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
-                (info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]));
+                (info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
+            undefined, undefined, info.avItemID ? (protyle) => activateQueuedAVLocate(protyle, info.id) : undefined);
             return;
         }
         if (openMobileOnboarding(app)) {

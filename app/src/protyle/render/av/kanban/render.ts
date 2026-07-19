@@ -37,19 +37,23 @@ const getKanbanTitleHTML = (group: IAVView, counter: number) => {
 const getKanbanHTML = (data: IAVKanban, e: HTMLElement, virtualData: IAVVirtualData) => {
     let galleryHTML = "";
     // body
-    data.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
-        if (virtualData && virtualData.renderedEnd) {
+    data.cards.find((item: IAVGalleryItem, rowIndex: number) => {
+        if (virtualData && typeof virtualData.renderedEnd === "number") {
             if (rowIndex === 0) {
                 e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             }
-            if (rowIndex > virtualData.renderedEnd || rowIndex < virtualData.renderedStart) {
+            if (rowIndex > virtualData.renderedEnd) {
+                return true;
+            }
+            if (rowIndex < virtualData.renderedStart) {
                 return;
             }
         } else if (data.pageSize > 100 && rowIndex > 99) {
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
-        galleryHTML += getRowHTML({data, row: item, rowIndex, type: "kanban"});
+        galleryHTML += getRowHTML({data, row: item, rowIndex: rowIndex + (virtualData?.rowOffset || 0), type: "kanban"});
+        return false;
     });
     galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.newRow}</div>`;
     return `<div class="av__gallery av__gallery--small">
@@ -94,6 +98,9 @@ export const renderKanban = async (options: {
     const virtualData: { [key: string]: IAVVirtualData } = {};
     options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
         pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
+        if (item.dataset.avLocateWindow === "true") {
+            return;
+        }
         if (!item.querySelector(".av__gallery-item") || options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
             return;
         }
@@ -131,7 +138,7 @@ export const renderKanban = async (options: {
     let data: IAV = options.data;
     if (!data) {
         const avPageSize = getPageSize(options.blockElement);
-        const locateParams = getAVLocateParams(options.blockElement);
+        const locateParams = getAVLocateParams(options.blockElement, !created && !snapshot);
         const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
             id: options.blockElement.getAttribute("data-av-id"),
             created,
@@ -186,7 +193,7 @@ export const renderKanban = async (options: {
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}"${selectBg}>
     ${getKanbanTitleHTML(group, group.cardCount)}
-    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body">${getKanbanHTML(group, options.blockElement, virtualData[group.id])}</div>
+    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getKanbanHTML(group, options.blockElement, virtualData[group.id])}</div>
 </div>`;
         }
     });

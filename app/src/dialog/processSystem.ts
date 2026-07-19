@@ -149,6 +149,43 @@ export const forceQuit = () => {
     /// #endif
 };
 
+const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean) => {
+    if (!installPkgPath) {
+        showMessage(window.siyuan.languages._kernel[104], 7000, "error");
+        return;
+    }
+    /// #if !BROWSER
+    ipcRenderer.invoke(Constants.SIYUAN_INSTALL_UPDATE, {
+        port: location.port,
+        setCurrentWorkspace,
+    }).then((accepted: boolean) => {
+        if (!accepted) {
+            showMessage(window.siyuan.languages._kernel[104], 7000, "error");
+        }
+    }).catch(() => {
+        showMessage(window.siyuan.languages._kernel[104], 7000, "error");
+    });
+    /// #else
+    fetchPost("/api/system/exit", {
+        force: true,
+        setCurrentWorkspace,
+        execInstallPkg: 1,
+    }, () => {
+        if (isInAndroid()) {
+            window.JSAndroid.exit();
+            return;
+        }
+        if (isInIOS()) {
+            window.webkit.messageHandlers.exit.postMessage("");
+            return;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.exit();
+        }
+    });
+    /// #endif
+};
+
 export const exitSiYuan = async (setCurrentWorkspace = true) => {
     hideAllElements(["util"]);
     /// #if MOBILE
@@ -162,6 +199,10 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
             const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
             if (buttonElement) {
                 buttonElement.addEventListener("click", () => {
+                    if (response.data.installPkgPath) {
+                        installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
+                        return;
+                    }
                     fetchPost("/api/system/exit", {force: true, setCurrentWorkspace}, () => {
                         /// #if !BROWSER
                         ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
@@ -185,33 +226,19 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
         } else if (response.code === 2) { // 提示新安装包
             hideMessage();
 
+            /// #if !BROWSER
             if ("std" === window.siyuan.config.system.container) {
                 ipcRenderer.send(Constants.SIYUAN_SHOW_WINDOW);
             }
+            /// #endif
 
             confirmDialog(window.siyuan.languages.updateVersion, response.msg, () => {
-                fetchPost("/api/system/exit", {
-                    force: true,
-                    setCurrentWorkspace,
-                    execInstallPkg: 2 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
-                }, () => {
-                    /// #if !BROWSER
-                    // 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
-                    // 这里先将主界面隐藏
-                    setTimeout(() => {
-                        ipcRenderer.send(Constants.SIYUAN_CMD, "hide");
-                    }, 2000);
-                    // 然后等待一段时间后再退出，避免界面主进程退出以后内核子进程被杀死
-                    setTimeout(() => {
-                        ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-                    }, 4000);
-                    /// #endif
-                });
+                installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
             }, () => {
                 fetchPost("/api/system/exit", {
                     force: true,
                     setCurrentWorkspace,
-                    execInstallPkg: 1 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
+                    execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
                 }, () => {
                     /// #if !BROWSER
                     ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);

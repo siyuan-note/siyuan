@@ -287,6 +287,7 @@
   transform: translateY(-50%);
   transition: opacity 120ms ease-in-out;
   background-color: inherit;
+  border-radius: var(--b3-border-radius);
 
   .av__row-action {
     align-items: center;

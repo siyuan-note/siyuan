@@ -80,6 +80,7 @@ FunctionEnd
 !macroend
 
 !macro customInstall
+    !insertmacro WriteInstallLog "payload-extracted version=${VERSION} target=$INSTDIR"
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
     nsExec::ExecToLog 'cmd /c mklink /H "$INSTDIR\resources\kernel\siyuan.exe" "$INSTDIR\resources\kernel\SiYuan-Kernel.exe" 2>nul || ver>nul'
     ${If} $installMode == "all"
@@ -88,18 +89,6 @@ FunctionEnd
         nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");if((-not $p) -or -not ($p.Split(\";\") -contains $k)){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")}else{Write-Host \"already in PATH\"}"'
     ${EndIf}
     !insertmacro WriteInstallLog "install-complete version=${VERSION} target=$INSTDIR"
-!macroend
-
-!macro customFiles_x64
-    !insertmacro WriteInstallLog "payload-extracted version=${VERSION} architecture=x64 target=$INSTDIR"
-!macroend
-
-!macro customFiles_arm64
-    !insertmacro WriteInstallLog "payload-extracted version=${VERSION} architecture=arm64 target=$INSTDIR"
-!macroend
-
-!macro customFiles_ia32
-    !insertmacro WriteInstallLog "payload-extracted version=${VERSION} architecture=ia32 target=$INSTDIR"
 !macroend
 
 !macro customUnInstall

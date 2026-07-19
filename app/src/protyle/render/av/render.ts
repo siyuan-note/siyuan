@@ -165,7 +165,7 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
         }
         contentHTML += `<div class="av__cell av__cell--header" data-col-id="${column.id}"  draggable="true" 
 data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
-data-desc="${escapeAttr(column.desc)}" data-position="north" 
+data-desc="${escapeAttr(column.desc)}" data-align="${column.align || ""}" data-position="north"
 style="width: ${column.width || "200px"};">
     ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${escapeHtml(column.name)}</span>
@@ -611,6 +611,84 @@ const isItemInData = (data: IAV, itemID: string): boolean => {
     return items?.some((item: IAVRow | IAVGalleryItem) => item.id === itemID);
 };
 
+const addingFocusTokens = new Map<string, symbol>();
+
+const scrollAddingCellIntoView = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
+    const rowElement = hasClosestByClassName(cellElement, "av__row");
+    const bodyElement = hasClosestByClassName(cellElement, "av__body");
+    if (rowElement && rowElement.dataset.index === "0" && bodyElement && !bodyElement.dataset.groupId) {
+        const contentRect = protyle.contentElement.getBoundingClientRect();
+        const blockRect = blockElement.getBoundingClientRect();
+        protyle.contentElement.scrollTop += blockRect.top - contentRect.top;
+        return;
+    }
+    cellScrollIntoView(blockElement, cellElement, false);
+};
+
+const getAddingCellElement = (options: {
+    protyle: IProtyle;
+    avID: string;
+    blockID: string;
+    itemID: string;
+    groupID?: string;
+}) => {
+    const blockElement = Array.from(options.protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${options.avID}"]`)).find((item: HTMLElement) => {
+        return item.dataset.nodeId === options.blockID;
+    }) as HTMLElement;
+    if (!blockElement) {
+        return;
+    }
+    const groupQuery = options.groupID ? `[data-group-id="${options.groupID}"]` : "";
+    let cellElement = blockElement.querySelector(`.av__body${groupQuery} [data-id="${options.itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
+    if (!cellElement) {
+        const cellElements = blockElement.querySelectorAll(`.av__body [data-id="${options.itemID}"] .av__cell[data-dtype="block"]`);
+        if (cellElements.length === 1) {
+            cellElement = cellElements[0] as HTMLElement;
+        }
+    }
+    if (!cellElement) {
+        return;
+    }
+    return {blockElement, cellElement};
+};
+
+const waitForAddingCellPosition = async (options: {
+    protyle: IProtyle;
+    avID: string;
+    blockID: string;
+    itemID: string;
+    groupID?: string;
+}) => {
+    let previousRect: DOMRect;
+    let previousScrollTop: number;
+    let stableFrames = 0;
+    for (let i = 0; i < 120; i++) {
+        await new Promise<void>((resolve) => {
+            requestAnimationFrame(() => resolve());
+        });
+        const result = getAddingCellElement(options);
+        if (!result || result.cellElement.getBoundingClientRect().height === 0) {
+            stableFrames = 0;
+            continue;
+        }
+        const rect = result.cellElement.getBoundingClientRect();
+        const scrollTop = options.protyle.contentElement.scrollTop;
+        if (!options.protyle.wysiwyg.element.hasAttribute("data-top") && previousRect &&
+            Math.abs(previousRect.top - rect.top) < 0.5 && Math.abs(previousRect.left - rect.left) < 0.5 &&
+            Math.abs(previousRect.width - rect.width) < 0.5 && Math.abs(previousRect.height - rect.height) < 0.5 &&
+            previousScrollTop === scrollTop) {
+            stableFrames++;
+            if (stableFrames === 2) {
+                return result;
+            }
+        } else {
+            stableFrames = 0;
+        }
+        previousRect = rect;
+        previousScrollTop = scrollTop;
+    }
+};
+
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "setAttrViewName") {
         getAVElements(protyle, operation.id).forEach((item) => {
@@ -631,6 +709,14 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             }
             item.querySelectorAll(".av__row").forEach(rowItem => {
                 (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
+            });
+        });
+        return;
+    }
+    if (operation.action === "setAttrViewColAlign") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"]`).forEach((cellElement: HTMLElement) => {
+                cellElement.dataset.align = operation.data;
             });
         });
         return;
@@ -772,6 +858,13 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
         return;
     }
+    const addingFocusKey = `${protyle.id}-${operation.avID}`;
+    const addingFocusToken = Symbol();
+    if (operation.action === "insertAttrViewBlock") {
+        addingFocusTokens.set(addingFocusKey, addingFocusToken);
+    } else {
+        addingFocusTokens.delete(addingFocusKey);
+    }
     // 只能 setTimeout，以前方案快速输入后最后一次修改会被忽略；必须为每一个 protyle 单独设置，否则有多个 protyle 时，其余无法被执行
     clearTimeout(refreshTimeouts[protyle.id]);
     refreshTimeouts[protyle.id] = window.setTimeout(() => {
@@ -831,6 +924,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 }
                             });
                         }
+                        let isAddingFocusPending = false;
                         if (operation.srcs.length === 1) {
                             let popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
                             if (!popCellElement) {
@@ -842,8 +936,38 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                             if (popCellElement && popCellElement.getAttribute("data-detached") === "true" &&
                                 popCellElement.querySelector(".av__celltext").textContent === "" &&
                                 popCellElement.getBoundingClientRect().height !== 0 && hasGhost) {
-                                popTextCell(protyle, [popCellElement], "block");
+                                if (item.getAttribute("data-av-type") !== "table") {
+                                    if (addingFocusTokens.get(addingFocusKey) === addingFocusToken) {
+                                        addingFocusTokens.delete(addingFocusKey);
+                                        popTextCell(protyle, [popCellElement], "block");
+                                    }
+                                } else {
+                                    isAddingFocusPending = true;
+                                    const addingCellOptions = {
+                                        protyle,
+                                        avID,
+                                        blockID: item.dataset.nodeId,
+                                        itemID: operation.srcs[0].itemID,
+                                        groupID: operation.groupID,
+                                    };
+                                    scrollAddingCellIntoView(protyle, item, popCellElement);
+                                    waitForAddingCellPosition(addingCellOptions).then((result) => {
+                                        if (addingFocusTokens.get(addingFocusKey) !== addingFocusToken) {
+                                            return;
+                                        }
+                                        addingFocusTokens.delete(addingFocusKey);
+                                        if (!result || result.cellElement.getAttribute("data-detached") !== "true" ||
+                                            result.cellElement.querySelector(".av__celltext").textContent !== "") {
+                                            return;
+                                        }
+                                        popTextCell(protyle, [result.cellElement], "block", {scrollIntoView: false});
+                                    });
+                                }
                             }
+                        }
+                        if (hasGhost && !isAddingFocusPending &&
+                            addingFocusTokens.get(addingFocusKey) === addingFocusToken) {
+                            addingFocusTokens.delete(addingFocusKey);
                         }
                         operation.srcs.find((srcItem) => {
                             // 虚拟滚动/分页下条目可能不在 DOM 中，需通过渲染数据判断是否被过滤

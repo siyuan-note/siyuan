@@ -482,7 +482,9 @@ export const getTypeByCellElement = (cellElement: Element) => {
     return scrollElement.querySelector(".av__row--header").querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
 };
 
-export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol) => {
+export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol, options?: {
+    scrollIntoView?: boolean;
+}) => {
     if (cellElements.length === 0 || (cellElements.length === 1 && !cellElements[0])) {
         return;
     }
@@ -499,7 +501,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     let cellRect = cellElements[0].getBoundingClientRect();
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
-    if (viewType === "table") {
+    if (viewType === "table" && options?.scrollIntoView !== false) {
         cellScrollIntoView(blockElement, cellElements[0], false);
     }
     cellRect = cellElements[0].getBoundingClientRect();
@@ -1056,7 +1058,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         cellValue.type === "lineNumber" ||
         (cellValue.type === "number" && cellValue.number?.isNotEmpty) ||
         (cellValue.type === "block" && cellValue.block?.content)) {
-        text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
+        text += '<span data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>';
     }
     return text;
 };

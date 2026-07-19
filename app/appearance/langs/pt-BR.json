@@ -1,4 +1,5 @@
 {
+	"alignment": "Alinhamento",
 	"newItemTemplateUnavailableNotebookTip": "O caderno selecionado anteriormente para este modelo está fechado ou indisponível. Selecione novamente um local de salvamento",
 	"specificTime": "Data e hora específicas",
 	"savePath": "Caminho de salvamento",

@@ -636,6 +636,52 @@
     cursor: pointer;
     //  display: flex; 不需要使用，否则 av__celltext 会占满单元格，导致链接列点击空白无法进行编辑
 
+    &:not(.av__cell--header) {
+      &[data-dtype="number"][data-align=""],
+      &[data-align="right"] {
+        text-align: right;
+      }
+
+      &[data-align="left"] {
+        text-align: left;
+      }
+
+      &[data-align="center"] {
+        text-align: center;
+      }
+
+      &[data-align="left"] > .fn__flex {
+        justify-content: flex-start;
+      }
+
+      &[data-align="center"] > .fn__flex {
+        justify-content: center;
+      }
+
+      &[data-align="right"] > .fn__flex {
+        justify-content: flex-end;
+      }
+
+      &[data-dtype="number"]:not([data-align]) > .block__icon[data-type="copy"],
+      &[data-dtype="number"][data-align=""] > .block__icon[data-type="copy"],
+      &[data-align="right"] > .block__icon[data-type="copy"] {
+        right: auto;
+        left: 5px;
+      }
+
+      &[data-align="right"] > [data-type="block-more"] {
+        right: auto;
+        left: 5px;
+      }
+
+      &[data-align="right"] > .av__row-actions {
+        right: auto;
+        left: 4px;
+        padding-right: 6px;
+        padding-left: 0;
+      }
+    }
+
     [data-type="block-more"] {
       display: none;
       position: absolute;
@@ -705,6 +751,25 @@
       align-items: center;
       overflow: inherit; // 保证列宽和顺序调整的拖拽点样式
       border-right-color: transparent;
+
+      &[data-dtype="number"][data-align=""],
+      &[data-align="right"] {
+        justify-content: flex-end;
+      }
+
+      &[data-align="center"] {
+        justify-content: center;
+      }
+
+      &[data-align="left"] {
+        justify-content: flex-start;
+      }
+
+      &[data-dtype="number"][data-align=""] .av__celltext,
+      &[data-align="center"] .av__celltext,
+      &[data-align="right"] .av__celltext {
+        flex: 0 1 auto;
+      }
 
       &:hover {
         background-color: var(--b3-list-hover);

@@ -1087,6 +1087,7 @@ var (
 	ErrViewNotFound          = errors.New("view not found")
 	ErrKeyNotFound           = errors.New("key not found")
 	ErrWrongLayoutType       = errors.New("wrong layout type")
+	ErrInvalidColumnAlign    = errors.New("invalid column align")
 	ErrSpecTooNew            = errors.New("attribute view spec is too new")
 	ErrFilterTooDeep         = errors.New("filter nesting depth exceeds the maximum allowed")
 )

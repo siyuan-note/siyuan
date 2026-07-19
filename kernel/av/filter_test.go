@@ -323,8 +323,6 @@ func TestRemapFilterColumns(t *testing.T) {
 }
 
 func TestUpgradeSpec5(t *testing.T) {
-	setTestAttrViewLang(t)
-
 	// spec 4 + 扁平叶子 → 包装成根组
 	av4 := &AttributeView{Spec: 4, Views: []*View{{Filters: []*ViewFilter{leaf("c1"), leaf("c2")}}}}
 	UpgradeSpec(av4)

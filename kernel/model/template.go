@@ -461,10 +461,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 
 					table := getAttrViewTable(attrView, view, "")
 
-					var aligns []int
-					for range table.Columns {
-						aligns = append(aligns, 0)
-					}
+					aligns := getAttrViewTableAligns(table, false)
 					mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
 					mdTableHead := &ast.Node{Type: ast.NodeTableHead}
 					mdTable.AppendChild(mdTableHead)

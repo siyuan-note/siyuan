@@ -3,6 +3,7 @@ import {focusBlock, focusByWbr, focusSideBlock, getEditorRange} from "../util/se
 import {
     getContenteditableElement,
     getEmbedChildOperationContext,
+    getEmbedChildOperationParentID,
     getFirstBlock,
     getNextBlockSibling,
     getParentBlock,
@@ -309,6 +310,7 @@ const promiseTransaction = (options: {
                         }
                         if (getPreviousBlockSibling(item)?.getAttribute("data-node-id") !== operation.id &&
                             (!range || !item.contains(range.startContainer)) &&
+                            !hasClosestByAttribute(item, "data-node-id", operation.id) &&
                             !item.parentElement.classList.contains("protyle-wysiwyg__embed")) {
                             item.insertAdjacentHTML("beforebegin", operation.data);
                             cursorElements.push(item.previousElementSibling);
@@ -1212,7 +1214,8 @@ export const turnsIntoOneTransaction = async (options: {
         parentElement.innerHTML = html + '<div class="protyle-attr" contenteditable="false"></div>';
     }
     const previousId = options.selectsElement[0].getAttribute("data-node-id");
-    const parentId = getParentBlock(options.selectsElement[0]).getAttribute("data-node-id") || options.protyle.block.parentID;
+    const parentId = getEmbedChildOperationParentID(options.selectsElement[0]) ||
+        getParentBlock(options.selectsElement[0]).getAttribute("data-node-id") || options.protyle.block.parentID;
     const doOperations: IOperation[] = [{
         action: "insert",
         id,
@@ -1380,7 +1383,8 @@ export const turnsIntoTransaction = (options: {
                     id,
                     previousID: previousId || getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
                     data: item.outerHTML,
-                    parentID: getParentBlock(item)?.getAttribute("data-node-id") || options.protyle.block.parentID || options.protyle.block.rootID,
+                    parentID: getEmbedChildOperationParentID(item) || getParentBlock(item)?.getAttribute("data-node-id") ||
+                        options.protyle.block.parentID || options.protyle.block.rootID,
                 });
                 Array.from(tempElement.content.children).forEach((tempItem: HTMLElement) => {
                     const tempItemId = tempItem.getAttribute("data-node-id");
@@ -1389,7 +1393,8 @@ export const turnsIntoTransaction = (options: {
                         id: tempItemId,
                         previousID: tempItem.previousElementSibling?.getAttribute("data-node-id") || getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
                         data: tempItem.outerHTML,
-                        parentID: getParentBlock(item)?.getAttribute("data-node-id") || options.protyle.block.parentID || options.protyle.block.rootID,
+                        parentID: getEmbedChildOperationParentID(item) || getParentBlock(item)?.getAttribute("data-node-id") ||
+                            options.protyle.block.parentID || options.protyle.block.rootID,
                     });
                     undoOperations.splice(0, 0, {
                         action: "delete",
@@ -1440,7 +1445,8 @@ export const turnsIntoTransaction = (options: {
                 id,
                 previousID: doOperations[doOperations.length - 1]?.id || getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
                 data: item.outerHTML,
-                parentID: getParentBlock(item)?.getAttribute("data-node-id") || options.protyle.block.parentID || options.protyle.block.rootID,
+                parentID: getEmbedChildOperationParentID(item) || getParentBlock(item)?.getAttribute("data-node-id") ||
+                    options.protyle.block.parentID || options.protyle.block.rootID,
             });
             doOperations.push({
                 action: "delete",
@@ -1457,7 +1463,8 @@ export const turnsIntoTransaction = (options: {
                         id: tempItemId,
                         previousID: tempItem.previousElementSibling?.getAttribute("data-node-id") || getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
                         data: tempItem.outerHTML,
-                        parentID: getParentBlock(item)?.getAttribute("data-node-id") || options.protyle.block.parentID || options.protyle.block.rootID,
+                        parentID: getEmbedChildOperationParentID(item) || getParentBlock(item)?.getAttribute("data-node-id") ||
+                            options.protyle.block.parentID || options.protyle.block.rootID,
                     });
                     undoOperations.splice(0, 0, {
                         action: "delete",
@@ -1531,7 +1538,8 @@ export const turnsOneInto = async (options: {
         });
         previousId = response.data.previousID;
     }
-    const parentId = getParentBlock(options.nodeElement).getAttribute("data-node-id") || options.protyle.block.parentID;
+    const parentId = getEmbedChildOperationParentID(options.nodeElement) ||
+        getParentBlock(options.nodeElement).getAttribute("data-node-id") || options.protyle.block.parentID;
     // @ts-ignore
     const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);

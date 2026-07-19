@@ -3,6 +3,7 @@ import {focusByRange} from "../util/selection";
 import {openByMobile} from "../../editor/openLink";
 import {showMessage} from "../../dialog/message";
 import {isLocalPath, pathPosix} from "../../util/pathName";
+import {processSiYuanUri} from "../../util/uri";
 import {previewDocImage} from "./image";
 import {getDiagramBlock, previewDiagram} from "./diagram";
 import {needSubscribe} from "../../util/needSubscribe";
@@ -106,6 +107,9 @@ export class Preview {
                         }
                         /// #endif
                     } else {
+                        if (processSiYuanUri(protyle.app, linkAddress)) {
+                            break;
+                        }
                         /// #if !BROWSER
                         shell.openExternal(linkAddress).catch((e) => {
                             showMessage(e);

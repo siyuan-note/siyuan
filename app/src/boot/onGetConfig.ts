@@ -1,6 +1,9 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs, setTabPosition} from "../layout/tabUtil";
-import {initNativeDialogOverride, isWindows, setStorageVal} from "../protyle/util/compatibility";
+import {initWindowOpenOverride, isWindows, setStorageVal} from "../protyle/util/compatibility";
+/// #if !BROWSER
+import {initNativeDialogOverride} from "../protyle/util/compatibility";
+/// #endif
 /// #if !BROWSER
 import {ipcRenderer, webFrame} from "electron";
 import * as fs from "fs";
@@ -74,6 +77,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     initBar(app);
     initStatus();
     initWindow(app);
+    initWindowOpenOverride(app);
     /// #if !BROWSER
     initNativeDialogOverride();
     /// #endif

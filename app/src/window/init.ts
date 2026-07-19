@@ -12,6 +12,7 @@ import {initWindow} from "../boot/onGetConfig";
 import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
+import {initWindowOpenOverride} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
 /// #endif
@@ -60,6 +61,7 @@ export const init = (app: App) => {
     });
     initStatus(true);
     initWindow(app);
+    initWindowOpenOverride(app);
     /// #if !BROWSER
     initNativeDialogOverride();
     /// #endif

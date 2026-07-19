@@ -21,7 +21,7 @@ import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {getLocalStorage, isChromeBrowser, isInMobileApp, writeText} from "../protyle/util/compatibility";
+import {getLocalStorage, initWindowOpenOverride, isChromeBrowser, isInMobileApp, writeText} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
 import {ensureOnboarding} from "../onboarding";
 import {checkPublishServiceClosed} from "../util/processMessage";
@@ -228,6 +228,7 @@ class App {
 
 const siyuanApp = new App();
 
+initWindowOpenOverride(siyuanApp);
 // https://github.com/siyuan-note/siyuan/issues/8441
 window.reconnectWebSocket = () => {
     // 后台唤醒时任一 socket 可能仍在 CONNECTING，调用 send 会抛 InvalidStateError，

@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -150,9 +151,40 @@ func TestClearWorkspaceTempRemovesImageOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clearWorkspaceTemp()
+	clearWorkspaceTemp(false)
 	if _, err := os.Stat(operationDir); !os.IsNotExist(err) {
 		t.Fatalf("image operation directory was not removed: %v", err)
+	}
+}
+
+func TestClearWorkspaceTempPreservesInstallPackages(t *testing.T) {
+	originalDataDir, originalTempDir, originalWorkspaceDir := util.DataDir, util.TempDir, util.WorkspaceDir
+	t.Cleanup(func() {
+		util.DataDir, util.TempDir, util.WorkspaceDir = originalDataDir, originalTempDir, originalWorkspaceDir
+	})
+	root := t.TempDir()
+	util.DataDir = filepath.Join(root, "data")
+	util.TempDir = filepath.Join(root, "temp")
+	util.WorkspaceDir = root
+	installPkgPath := filepath.Join(util.TempDir, "install", "siyuan-test-win.exe")
+	if err := os.MkdirAll(filepath.Dir(installPkgPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(installPkgPath, []byte("test"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	oldTime := time.Now().Add(-8 * 24 * time.Hour)
+	if err := os.Chtimes(installPkgPath, oldTime, oldTime); err != nil {
+		t.Fatal(err)
+	}
+
+	clearWorkspaceTemp(true)
+	if _, err := os.Stat(installPkgPath); err != nil {
+		t.Fatalf("install package should be preserved during update: %v", err)
+	}
+	clearWorkspaceTemp(false)
+	if _, err := os.Stat(installPkgPath); !os.IsNotExist(err) {
+		t.Fatalf("old install package should be removed during normal exit: %v", err)
 	}
 }
 

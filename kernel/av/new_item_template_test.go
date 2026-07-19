@@ -24,6 +24,7 @@ func TestSetNewItemTemplates(t *testing.T) {
 		Templates: []*NewItemTemplate{{
 			ID:         templateID,
 			Name:       " Document ",
+			Icon:       " 1f4c4 ",
 			TargetType: NewItemTargetDocument,
 			FieldValues: map[string]*NewItemFieldValue{
 				textKey.ID: {Mode: NewItemFieldValueStatic, Value: &Value{
@@ -41,6 +42,9 @@ func TestSetNewItemTemplates(t *testing.T) {
 	if "Document" != got.Name {
 		t.Fatalf("unexpected normalized name: %q", got.Name)
 	}
+	if "1f4c4" != got.Icon {
+		t.Fatalf("unexpected normalized icon: %q", got.Icon)
+	}
 	value := got.FieldValues[textKey.ID].Value
 	if KeyTypeText != value.Type || "" != value.ID || "" != value.KeyID || "" != value.BlockID {
 		t.Fatalf("unexpected normalized value: %+v", value)
@@ -50,6 +54,9 @@ func TestSetNewItemTemplates(t *testing.T) {
 	}
 	if " Document " != config.Templates[0].Name {
 		t.Fatal("input config was mutated")
+	}
+	if " 1f4c4 " != config.Templates[0].Icon {
+		t.Fatal("input icon was mutated")
 	}
 }
 
@@ -92,6 +99,22 @@ func TestEmptyNewItemTemplatesUseVirtualDefault(t *testing.T) {
 	}
 	if "" != config.DefaultTemplateID || 0 != len(config.Templates) {
 		t.Fatal("input config was mutated")
+	}
+}
+
+func TestDetachedNewItemTemplateDropsIcon(t *testing.T) {
+	attrView := &AttributeView{Spec: CurrentSpec, ID: ast.NewNodeID()}
+	config := &NewItemTemplatesConfig{Templates: []*NewItemTemplate{{
+		ID: ast.NewNodeID(), Name: "Detached", Icon: "1f4c4", TargetType: NewItemTargetDetached,
+	}}}
+	if err := attrView.SetNewItemTemplates(config); nil != err {
+		t.Fatalf("set detached new item template failed: %s", err)
+	}
+	if "" != attrView.NewItemTemplates[0].Icon {
+		t.Fatalf("detached template icon should be empty: %q", attrView.NewItemTemplates[0].Icon)
+	}
+	if "1f4c4" != config.Templates[0].Icon {
+		t.Fatal("input icon was mutated")
 	}
 }
 

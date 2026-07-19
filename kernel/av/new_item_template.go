@@ -42,6 +42,7 @@ func (av *AttributeView) SetNewItemTemplates(config *NewItemTemplatesConfig) err
 			return errors.New("clone new item template failed")
 		}
 		itemTemplate.Name = strings.TrimSpace(itemTemplate.Name)
+		itemTemplate.Icon = strings.TrimSpace(itemTemplate.Icon)
 		if "" == itemTemplate.Name {
 			return errors.New("new item template name is empty")
 		}
@@ -54,6 +55,9 @@ func (av *AttributeView) SetNewItemTemplates(config *NewItemTemplatesConfig) err
 		templateIDs[itemTemplate.ID] = true
 		if NewItemTargetDetached != itemTemplate.TargetType && NewItemTargetDocument != itemTemplate.TargetType {
 			return fmt.Errorf("invalid new item template target type [%s]", itemTemplate.TargetType)
+		}
+		if NewItemTargetDocument != itemTemplate.TargetType {
+			itemTemplate.Icon = ""
 		}
 		itemTemplate.ContentTemplatePath = strings.TrimSpace(itemTemplate.ContentTemplatePath)
 		if nil != itemTemplate.SaveLocation {
@@ -426,6 +430,7 @@ func cloneNewItemTemplate(itemTemplate *NewItemTemplate) *NewItemTemplate {
 	ret := &NewItemTemplate{
 		ID:                  itemTemplate.ID,
 		Name:                itemTemplate.Name,
+		Icon:                itemTemplate.Icon,
 		TargetType:          itemTemplate.TargetType,
 		PrimaryKeyTemplate:  itemTemplate.PrimaryKeyTemplate,
 		ContentTemplatePath: itemTemplate.ContentTemplatePath,

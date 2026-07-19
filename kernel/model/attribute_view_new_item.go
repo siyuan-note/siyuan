@@ -113,6 +113,13 @@ func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 		if nil != err {
 			return nil, newItemCreationError(err, removeCreatedNewItemDoc(boundBlockID))
 		}
+		if "" != itemTemplate.Icon {
+			createdTree.Root.SetIALAttr("icon", itemTemplate.Icon)
+			if err = indexWriteTreeUpsertQueue(createdTree); nil != err {
+				return nil, newItemCreationError(err, removeCreatedNewItemDoc(boundBlockID))
+			}
+			FlushTxQueue()
+		}
 	}
 
 	doOperations := []*Operation{}

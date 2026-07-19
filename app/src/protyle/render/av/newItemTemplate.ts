@@ -9,7 +9,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {avRender} from "./render";
 import {getFieldsByData} from "./view";
 import {getColIconByType} from "./col";
-import {unicode2Emoji} from "../../../emoji";
+import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {upDownHint} from "../../../util/upDownHint";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
@@ -468,6 +468,8 @@ const openContentTemplateMenu = (target: HTMLElement) => {
 const collectTemplate = (root: HTMLElement, itemTemplate: IAVNewItemTemplate, fields: IAVColumn[]) => {
     itemTemplate.name = (root.querySelector('[data-role="template-name"]') as HTMLInputElement).value.trim();
     itemTemplate.targetType = (root.querySelector('[data-role="target-type"]') as HTMLSelectElement).value as TAVNewItemTarget;
+    itemTemplate.icon = itemTemplate.targetType === "document" ?
+        (root.querySelector('[data-role="template-icon"]') as HTMLElement).dataset.value || "" : "";
     itemTemplate.primaryKeyTemplate = (root.querySelector('[data-role="primary-key"]') as HTMLInputElement).value;
     itemTemplate.contentTemplatePath = (root.querySelector('[data-role="content-template"]') as HTMLElement).dataset.value || "";
     const boxID = (root.querySelector('[data-role="box-id"]') as HTMLSelectElement).value;
@@ -522,6 +524,10 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
     <div data-role="document-options" class="${isDocument ? "" : "fn__none"}">
         <div class="fn__hr"></div>
         <div class="custom-attr">
+            <div class="block__icons av__row">
+                <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconEmoji"></use></svg><span>${window.siyuan.languages.icon}</span></div>
+                <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><button class="b3-text-field b3-text-field--text fn__flex-1 fn__flex" data-role="template-icon" data-value="${escapeAttr(itemTemplate.icon || "")}" type="button" style="align-items:center;text-align:left"><span class="b3-menu__avemoji">${unicode2Emoji(itemTemplate.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span></button></div>
+            </div>
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon ariaLabel" data-position="parentE" aria-label="${escapeAttr(`${window.siyuan.languages.fileTree14}<br>${window.siyuan.languages.fileTree13}`)}"><svg class="block__logoicon"><use xlink:href="#iconFolder"></use></svg><span>${window.siyuan.languages.savePath}</span></div>
                 <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><select class="b3-select" data-role="box-id" style="width:160px">${notebookOptions}</select><span class="fn__space${itemTemplate.saveLocation || forceCurrentNotebook ? "" : " fn__none"}" data-role="path-space"></span><input class="b3-text-field fn__flex-1${itemTemplate.saveLocation || forceCurrentNotebook ? "" : " fn__none"}" data-role="path-template" value="${escapeAttr(itemTemplate.saveLocation?.pathTemplate || "")}"${itemTemplate.saveLocation || forceCurrentNotebook ? "" : " disabled"}></div>
@@ -617,6 +623,22 @@ export const openNewItemTemplateDialog = (options: {
             event.preventDefault();
             event.stopPropagation();
             openContentTemplateMenu(event.currentTarget as HTMLElement);
+        });
+        hostElement.querySelector<HTMLElement>('[data-role="template-icon"]')?.addEventListener("click", event => {
+            const iconElement = event.currentTarget as HTMLElement;
+            const emojiElement = iconElement.querySelector(".b3-menu__avemoji") as HTMLElement;
+            const rect = emojiElement.getBoundingClientRect();
+            openEmojiPanel("", "av", {
+                x: rect.left,
+                y: rect.bottom + 4,
+                h: rect.height,
+                w: rect.width,
+            }, unicode => {
+                iconElement.dataset.value = unicode;
+                emojiElement.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
+            }, emojiElement.querySelector("img"));
+            event.preventDefault();
+            event.stopPropagation();
         });
         hostElement.querySelectorAll<HTMLSelectElement>('[data-role="field-mode"]').forEach(modeElement => {
             modeElement.addEventListener("change", () => {

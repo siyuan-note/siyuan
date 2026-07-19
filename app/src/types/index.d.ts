@@ -1016,6 +1016,7 @@ interface IAVNewItemFieldValue {
 interface IAVNewItemTemplate {
     id: string;
     name: string;
+    icon?: string;
     targetType: TAVNewItemTarget;
     primaryKeyTemplate?: string;
     fieldValues?: Record<string, IAVNewItemFieldValue>;

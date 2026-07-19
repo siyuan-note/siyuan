@@ -84,6 +84,7 @@ type NewItemFieldValue struct {
 type NewItemTemplate struct {
 	ID                  string                        `json:"id"`
 	Name                string                        `json:"name"`
+	Icon                string                        `json:"icon,omitempty"`
 	TargetType          NewItemTargetType             `json:"targetType"`
 	PrimaryKeyTemplate  string                        `json:"primaryKeyTemplate,omitempty"`
 	FieldValues         map[string]*NewItemFieldValue `json:"fieldValues,omitempty"`

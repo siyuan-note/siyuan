@@ -460,6 +460,9 @@ export const initVirtualScroll = (options: {
     });
 
     options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+        if (item.dataset.avLocateWindow === "true") {
+            return;
+        }
         // 从现存 DOM 初始化选中行 ID 快照，重渲后保留选中态
         const selectedRowIds = new Set<string>();
         item.querySelectorAll(options.data.viewType === "table" ? ".av__row--select" : ".av__gallery-item--select").forEach((row: HTMLElement) => {

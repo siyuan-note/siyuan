@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "Element jest filtrowany. Usuń filtr lub ustawienia grupowania, aby go wyświetlić.",
 	"copyDatabaseItemLink": "Kopiuj łącze elementu",
 	"databaseViewNotFound": "Nie znaleziono widoku bazy danych",
 	"databaseItemNotFound": "Nie znaleziono elementu bazy danych",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "Ostatni czas przeglądu",
 	"cardStatus": "Status karty",
 	"noSupportTip": "Ta funkcja nie wspiera użycia zestawów kart",
-	"insertRowTip": "Nowy element został przefiltrowany, anuluj filtrowanie lub ustawienia grupowania, aby wyświetlić",
 	"insertPhoto": "Zrób zdjęcie i wstaw je",
 	"relativeToToday": "W odniesieniu do dzisiaj",
 	"current": "Ten",

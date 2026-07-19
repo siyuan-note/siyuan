@@ -198,6 +198,7 @@ export class BlockPanel {
                             groupID: refDef.avGroupID,
                             select: false,
                             highlight: true,
+                            persistView: false,
                         });
                     }
                     if (response.data.rootID !== this.refDefs[index].refID) {

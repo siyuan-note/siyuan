@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "Het item is gefilterd. Verwijder het filter of de groeperingsinstellingen om het te bekijken.",
 	"copyDatabaseItemLink": "Itemkoppeling kopiëren",
 	"databaseViewNotFound": "Databaseweergave niet gevonden",
 	"databaseItemNotFound": "Database-item niet gevonden",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "Laatste herhalingstijd",
 	"cardStatus": "Kaartstatus",
 	"noSupportTip": "Deze functie ondersteunt geen flashcard-decks",
-	"insertRowTip": "Nieuw item is gefilterd; annuleer filter of pas groepering aan om te bekijken",
 	"insertPhoto": "Foto maken en invoegen",
 	"relativeToToday": "Relatief ten opzichte van vandaag",
 	"current": "Dit",

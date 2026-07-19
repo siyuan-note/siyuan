@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "L'elemento è filtrato. Rimuovi il filtro o le impostazioni di raggruppamento per visualizzarlo.",
 	"copyDatabaseItemLink": "Copia link elemento",
 	"databaseViewNotFound": "Vista del database non trovata",
 	"databaseItemNotFound": "Elemento del database non trovato",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "Ultima revisione",
 	"cardStatus": "Stato della carta",
 	"noSupportTip": "Questa funzione non supporta l'uso di mazzi di carte",
-	"insertRowTip": "Il nuovo elemento è stato filtrato, annulla il filtro o modifica le impostazioni di raggruppamento per visualizzarlo",
 	"insertPhoto": "Scatta una foto e inseriscila",
 	"relativeToToday": "Relativo a oggi",
 	"current": "Questo",

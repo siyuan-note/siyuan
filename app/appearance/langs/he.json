@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "הפריט מסונן. יש להסיר את המסנן או את הגדרות הקיבוץ כדי להציג אותו.",
 	"copyDatabaseItemLink": "העתק קישור לפריט",
 	"databaseViewNotFound": "תצוגת מסד הנתונים לא נמצאה",
 	"databaseItemNotFound": "פריט מסד הנתונים לא נמצא",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "זמן הסקירה האחרון",
 	"cardStatus": "סטטוס כרטיס",
 	"noSupportTip": "תכונה זו אינה תומכת בשימוש בערימות כרטיסים",
-	"insertRowTip": "הפריט החדש סונן, בטל את הסינון או שנה את הגדרות הקיבוץ לצפייה",
 	"insertPhoto": "צלם תמונה והכנס אותה",
 	"relativeToToday": "יחסי להיום",
 	"current": "זה",

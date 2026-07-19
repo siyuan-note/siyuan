@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "Der Eintrag wird gefiltert. Entferne den Filter oder die Gruppierungseinstellungen, um ihn anzuzeigen.",
 	"copyDatabaseItemLink": "Eintragslink kopieren",
 	"databaseViewNotFound": "Datenbankansicht nicht gefunden",
 	"databaseItemNotFound": "Datenbankeintrag nicht gefunden",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "Letzte Überprüfungszeit",
 	"cardStatus": "Kartenstatus",
 	"noSupportTip": "Diese Funktion unterstützt die Verwendung von Kartenstapeln nicht.",
-	"insertRowTip": "Das neue Element wurde gefiltert, heben Sie die Filterung auf oder passen Sie die Gruppierungseinstellungen an, um es anzuzeigen",
 	"insertPhoto": "Foto aufnehmen und einfügen",
 	"relativeToToday": "Bezogen auf heute",
 	"current": "Aktuell",

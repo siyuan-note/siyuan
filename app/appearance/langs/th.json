@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "รายการถูกกรองอยู่ โปรดนำตัวกรองหรือการตั้งค่าการจัดกลุ่มออกเพื่อดูรายการ",
 	"copyDatabaseItemLink": "คัดลอกลิงก์รายการ",
 	"databaseViewNotFound": "ไม่พบมุมมองฐานข้อมูล",
 	"databaseItemNotFound": "ไม่พบรายการฐานข้อมูล",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "ทบทวนล่าสุด",
 	"cardStatus": "สถานะการ์ด",
 	"noSupportTip": "ไม่รองรับสำรับการ์ด",
-	"insertRowTip": "รายการใหม่ถูกกรอง ยกเลิกตัวกรองหรือปรับกลุ่มเพื่อดู",
 	"insertPhoto": "ถ่ายรูปแทรก",
 	"relativeToToday": "เทียบวันนี้",
 	"current": "นี้",

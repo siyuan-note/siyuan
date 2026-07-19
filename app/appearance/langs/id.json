@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "Item difilter. Hapus filter atau pengaturan pengelompokan untuk melihatnya.",
 	"copyDatabaseItemLink": "Salin tautan item",
 	"databaseViewNotFound": "Tampilan basis data tidak ditemukan",
 	"databaseItemNotFound": "Item basis data tidak ditemukan",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "Waktu ulasan terakhir",
 	"cardStatus": "Status kartu",
 	"noSupportTip": "Fungsi ini tidak mendukung penggunaan deck kartu",
-	"insertRowTip": "Item baru telah difilter, batalkan filter atau sesuaikan pengaturan grup untuk melihatnya",
 	"insertPhoto": "Ambil foto dan sisipkan",
 	"relativeToToday": "Relatif terhadap hari ini",
 	"current": "Ini",

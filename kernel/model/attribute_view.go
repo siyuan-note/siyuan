@@ -2348,7 +2348,7 @@ func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttribu
 		return
 	}
 
-	view, err := getRenderAttributeViewView(attrView, "", "")
+	view, err := getRenderAttributeViewView(attrView, "", "", true)
 	if nil != err {
 		return
 	}
@@ -2426,7 +2426,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		itemID := blockVal.BlockID
-		view, err := getRenderAttributeViewView(attrView, "", nodeID)
+		view, err := getRenderAttributeViewView(attrView, "", nodeID, true)
 		if nil != err {
 			continue
 		}

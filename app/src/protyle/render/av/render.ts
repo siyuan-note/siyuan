@@ -202,19 +202,22 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
     }
     // body
     data.rows.find((row: IAVRow, rowIndex: number) => {
-        if (virtualData && virtualData.renderedEnd) {
+        if (!virtualData?.locate && virtualData && virtualData.renderedEnd) {
             if (rowIndex === 0) {
                 e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             }
             if (rowIndex > virtualData.renderedEnd || rowIndex < virtualData.renderedStart) {
                 return;
             }
-        } else if (data.pageSize > 100 && rowIndex > 99) {
+        } else if (!virtualData?.locate && data.pageSize > 100 && rowIndex > 99) {
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
-        contentHTML += getRowHTML({data, row, rowIndex, pinIndex, type: "table"});
+        contentHTML += getRowHTML({data, row, rowIndex: rowIndex + (virtualData?.rowOffset || 0), pinIndex, type: "table"});
     });
+    if (virtualData?.bottomSpacerHeight) {
+        contentHTML += `<div class="av__spacer" style="height: ${virtualData.bottomSpacerHeight}px;"></div>`;
+    }
     return `${contentHTML}<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
     <div class="av__colsticky">
         <button class="b3-button av__button" data-type="av-add-bottom">
@@ -264,7 +267,7 @@ const renderGroupTable = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVTable) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.rowCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${options.resetData.virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
         }
     });
     if (options.renderAll) {
@@ -467,6 +470,9 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const virtualData: { [key: string]: IAVVirtualData } = {};
         e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
             pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
+            if (item.dataset.avLocateWindow === "true") {
+                return;
+            }
             // 守卫只保证至少 1 个 .av__row，但首行索引取的是 [1]（首个数据行，[0] 为表头）。
             // 虚拟滚动 trim 后某分组可能只剩表头，[1] 不存在时需跳过，避免解引用 undefined.getAttribute
             const secondRow = item.querySelectorAll(".av__row")[1] as HTMLElement;
@@ -513,11 +519,11 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             e.firstElementChild.innerHTML = html;
         }
         const avPageSize = getPageSize(e);
-        const locateParams = getAVLocateParams(e);
+        const created = protyle.options.history?.created;
+        const snapshot = protyle.options.history?.snapshot;
+        const locateParams = getAVLocateParams(e, !created && !snapshot);
         let data: IAV;
         if (!avData) {
-            const created = protyle.options.history?.created;
-            const snapshot = protyle.options.history?.snapshot;
             const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
@@ -554,7 +560,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             renderGroupTable({blockElement: e, protyle, cb, renderAll, data, resetData});
             continue;
         }
-        const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${view.pageSize}" style="float: left">
+        const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${view.pageSize}"${resetData.virtualData.all?.locate ? ' data-av-locate-window="true"' : ""} style="float: left">
     ${getTableHTMLs(view, e, resetData.virtualData.all)}
 </div>`;
         if (renderAll) {
@@ -991,7 +997,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         operation.srcs.find((srcItem) => {
                             // 虚拟滚动/分页下条目可能不在 DOM 中，需通过渲染数据判断是否被过滤
                             if (!isItemInData(data, srcItem.itemID)) {
-                                showMessage(window.siyuan.languages.insertRowTip);
+                                showMessage(window.siyuan.languages.databaseItemFiltered);
                                 return true;
                             }
                         });

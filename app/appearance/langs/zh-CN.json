@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "条目已被过滤，可取消过滤或分组设置后进行查看",
 	"copyDatabaseItemLink": "复制条目链接",
 	"databaseViewNotFound": "未找到数据库视图",
 	"databaseItemNotFound": "未找到数据库条目",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "最后复习时间",
 	"cardStatus": "卡片状态",
 	"noSupportTip": "该功能不支持卡包使用",
-	"insertRowTip": "新增条目已被过滤，可取消过滤或分组设置后进行查看",
 	"insertPhoto": "拍照并插入",
 	"relativeToToday": "相对于今天",
 	"current": "当前",

@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "Položka je filtrovaná. Ak ju chcete zobraziť, odstráňte filter alebo nastavenia zoskupenia.",
 	"copyDatabaseItemLink": "Kopírovať odkaz na položku",
 	"databaseViewNotFound": "Zobrazenie databázy sa nenašlo",
 	"databaseItemNotFound": "Položka databázy sa nenašla",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "Posledná revízia",
 	"cardStatus": "Stav karty",
 	"noSupportTip": "Táto funkcia nepodporuje používanie balíčkov kariet",
-	"insertRowTip": "Nová položka bola odfiltrovaná; zrušte filter alebo upravte zoskupenie",
 	"insertPhoto": "Odfotiť a vložiť",
 	"relativeToToday": "Relatívne k dnešku",
 	"current": "Tento",

@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "The item is filtered. Remove the filter or grouping settings to view it.",
 	"copyDatabaseItemLink": "Copy item link",
 	"databaseViewNotFound": "Database view not found",
 	"databaseItemNotFound": "Database item not found",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "Last review time",
 	"cardStatus": "Card status",
 	"noSupportTip": "This function does not support the use of card decks",
-	"insertRowTip": "The new item has been filtered, cancel the filter or adjust the grouping settings to view it",
 	"insertPhoto": "Take a photo and insert it",
 	"relativeToToday": "Relative to today",
 	"current": "This",

@@ -42,6 +42,7 @@ type AttributeViewRenderTarget struct {
 	ItemID   string `json:"itemID"`
 	GroupID  string `json:"groupID,omitempty"`
 	Index    int    `json:"index"`
+	Offset   int    `json:"offset"`
 	PageSize int    `json:"pageSize"`
 }
 
@@ -155,7 +156,7 @@ const (
 
 func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows bool, target *AttributeViewRenderTarget, targetGroupID string) (viewable av.Viewable, err error) {
 	// 获取待渲染的视图
-	view, err := getRenderAttributeViewView(attrView, viewID, nodeID)
+	view, err := getRenderAttributeViewView(attrView, viewID, nodeID, nil == target)
 	if nil != err {
 		return
 	}
@@ -170,13 +171,13 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query strin
 	if view.IsGroupView() || view.LayoutType == av.LayoutTypeKanban {
 		renderTargetItemID = ""
 	}
-	var targetIndex int
-	targetIndex, err = renderViewableInstance(viewable, view, attrView, page, pageSize, ignoreRows, renderTargetItemID)
+	var targetIndex, targetOffset int
+	targetIndex, targetOffset, err = renderViewableInstance(viewable, view, attrView, page, pageSize, ignoreRows, renderTargetItemID)
 	if nil != err {
 		return
 	}
 	if nil != target && target.Status != "viewNotFound" && targetIndex >= 0 && !view.IsGroupView() && view.LayoutType != av.LayoutTypeKanban {
-		setAttributeViewRenderTarget(target, "", targetIndex, pageSize, view.PageSize)
+		setAttributeViewRenderTarget(target, "", targetIndex, targetOffset, view.PageSize)
 	}
 
 	// 渲染分组视图。当 ignoreRows 时若有已生成的分组则渲染元数据供面板使用，无分组则跳过（生成分组需要行数据）
@@ -266,6 +267,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	}
 
 	sortGroupViews(attrView, view)
+	targetGroupID = resolveAttributeViewTargetGroupID(view, target, targetGroupID)
 
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
@@ -290,7 +292,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 				groupTargetItemID = target.ItemID
 			}
 		}
-		targetIndex, renderErr := renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize, ignoreRows, groupTargetItemID)
+		targetIndex, targetOffset, renderErr := renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize, ignoreRows, groupTargetItemID)
 		err = renderErr
 		if nil != err {
 			return
@@ -301,7 +303,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		if nil != target && target.Status != "viewNotFound" && targetIndex >= 0 {
 			if groupViewable.GetGroupHidden() == 0 {
 				if target.Status != "visible" || groupView.ID == targetGroupID {
-					setAttributeViewRenderTarget(target, groupView.ID, targetIndex, groupPageSize, view.PageSize)
+					setAttributeViewRenderTarget(target, groupView.ID, targetIndex, targetOffset, view.PageSize)
 				}
 			} else if target.Status != "visible" {
 				target.Status = "groupHidden"
@@ -513,7 +515,7 @@ func isGroupByTemplate(attrView *av.AttributeView, view *av.View) bool {
 	return av.KeyTypeTemplate == groupKey.Type
 }
 
-func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int, ignoreRows bool, targetItemID string) (targetIndex int, err error) {
+func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int, ignoreRows bool, targetItemID string) (targetIndex, targetOffset int, err error) {
 	targetIndex = -1
 	if nil == viewable {
 		err = av.ErrViewNotFound
@@ -542,9 +544,10 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		if 1 > pageSize {
 			pageSize = table.PageSize
 		}
-		page, pageSize = expandAttributeViewTargetPage(page, pageSize, targetIndex, table.PageSize)
-		start := (page - 1) * pageSize
-		end := min(len(table.Rows), start+pageSize)
+		start, end := getAttributeViewRenderRange(page, pageSize, targetIndex, table.PageSize, len(table.Rows))
+		if targetIndex >= 0 {
+			targetOffset = start
+		}
 		table.Rows = table.Rows[start:end]
 	case av.LayoutTypeGallery:
 		gallery := viewable.(*av.Gallery)
@@ -554,9 +557,10 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		if 1 > pageSize {
 			pageSize = gallery.PageSize
 		}
-		page, pageSize = expandAttributeViewTargetPage(page, pageSize, targetIndex, gallery.PageSize)
-		start := (page - 1) * pageSize
-		end := min(len(gallery.Cards), start+pageSize)
+		start, end := getAttributeViewRenderRange(page, pageSize, targetIndex, gallery.PageSize, len(gallery.Cards))
+		if targetIndex >= 0 {
+			targetOffset = start
+		}
 		gallery.Cards = gallery.Cards[start:end]
 	case av.LayoutTypeKanban:
 		kanban := viewable.(*av.Kanban)
@@ -566,9 +570,10 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		if 1 > pageSize {
 			pageSize = kanban.PageSize
 		}
-		page, pageSize = expandAttributeViewTargetPage(page, pageSize, targetIndex, kanban.PageSize)
-		start := (page - 1) * pageSize
-		end := min(len(kanban.Cards), start+pageSize)
+		start, end := getAttributeViewRenderRange(page, pageSize, targetIndex, kanban.PageSize, len(kanban.Cards))
+		if targetIndex >= 0 {
+			targetOffset = start
+		}
 		kanban.Cards = kanban.Cards[start:end]
 	}
 	return
@@ -593,21 +598,46 @@ func findAttributeViewTargetIndex(targetItemID string, length int, getID func(in
 	return -1
 }
 
-func expandAttributeViewTargetPage(page, pageSize, targetIndex, defaultPageSize int) (int, int) {
-	if targetIndex < 0 {
-		return page, pageSize
+func getAttributeViewRenderRange(page, pageSize, targetIndex, defaultPageSize, length int) (start, end int) {
+	if 1 > defaultPageSize {
+		defaultPageSize = av.ViewDefaultPageSize
 	}
-	return 1, max(pageSize, targetIndex+defaultPageSize)
+	if 1 > pageSize {
+		pageSize = defaultPageSize
+	}
+	if targetIndex < 0 {
+		start = min(length, max(0, (page-1)*pageSize))
+		end = min(length, start+pageSize)
+		return
+	}
+
+	windowSize := min(max(defaultPageSize, pageSize), av.ViewDefaultPageSize*4)
+	start = max(0, targetIndex-windowSize/2)
+	end = min(length, start+windowSize)
+	start = max(0, end-windowSize)
+	return
 }
 
-func setAttributeViewRenderTarget(target *AttributeViewRenderTarget, groupID string, index, pageSize, defaultPageSize int) {
+func resolveAttributeViewTargetGroupID(view *av.View, target *AttributeViewRenderTarget, targetGroupID string) string {
+	if targetGroupID == "" || nil == target {
+		return targetGroupID
+	}
+	targetGroup := view.GetGroupByID(targetGroupID)
+	if nil == targetGroup || !gulu.Str.Contains(target.ItemID, targetGroup.GroupItemIDs) {
+		return ""
+	}
+	return targetGroupID
+}
+
+func setAttributeViewRenderTarget(target *AttributeViewRenderTarget, groupID string, index, offset, pageSize int) {
 	target.Status = "visible"
 	target.GroupID = groupID
 	target.Index = index
-	target.PageSize = max(pageSize, index+defaultPageSize)
+	target.Offset = offset
+	target.PageSize = pageSize
 }
 
-func getRenderAttributeViewView(attrView *av.AttributeView, viewID, nodeID string) (ret *av.View, err error) {
+func getRenderAttributeViewView(attrView *av.AttributeView, viewID, nodeID string, persistView bool) (ret *av.View, err error) {
 	if 1 > len(attrView.Views) {
 		view, _, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
@@ -627,7 +657,7 @@ func getRenderAttributeViewView(attrView *av.AttributeView, viewID, nodeID strin
 
 	if "" != viewID {
 		ret, _ = attrView.GetCurrentView(viewID)
-		if nil != ret && ret.ID != attrView.ViewID {
+		if persistView && nil != ret && ret.ID != attrView.ViewID {
 			attrView.ViewID = ret.ID
 			if err = av.SaveAttributeView(attrView); err != nil {
 				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)

@@ -1,4 +1,5 @@
 {
+	"databaseItemFiltered": "Öğe filtrelendi. Görüntülemek için filtreyi veya gruplama ayarlarını kaldırın.",
 	"copyDatabaseItemLink": "Öğe bağlantısını kopyala",
 	"databaseViewNotFound": "Veritabanı görünümü bulunamadı",
 	"databaseItemNotFound": "Veritabanı öğesi bulunamadı",
@@ -571,7 +572,6 @@
 	"lastReviewTime": "Son gözden geçirme zamanı",
 	"cardStatus": "Kart durumu",
 	"noSupportTip": "Bu işlev kart desteleriyle uyumlu değil",
-	"insertRowTip": "Yeni öğe filtrelenmiş durumda, görüntülemek için filtreyi kaldır veya gruplama ayarlarını değiştir",
 	"insertPhoto": "Fotoğraf çek ve ekle",
 	"relativeToToday": "Bugüne göre",
 	"current": "Bu",

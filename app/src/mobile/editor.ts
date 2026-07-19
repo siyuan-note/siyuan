@@ -21,7 +21,9 @@ export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
 };
 
-export const openMobileFileById = (app: App, id: string, action: TProtyleAction[] = [Constants.CB_GET_HL], scrollPosition?: ScrollLogicalPosition, notebookId?: string) => {
+export const openMobileFileById = (app: App, id: string, action: TProtyleAction[] = [Constants.CB_GET_HL],
+                                   scrollPosition?: ScrollLogicalPosition, notebookId?: string,
+                                   afterOpen?: (protyle: IProtyle) => void) => {
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id};
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
     const avPanelElement = document.querySelector(".av__panel");
@@ -51,6 +53,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             closePanel();
             // 更新文档浏览时间
             fetchPost("/api/storage/updateRecentDocViewTime", {rootID: window.siyuan.mobile.editor.protyle.block.rootID});
+            afterOpen?.(window.siyuan.mobile.editor.protyle);
             return;
         }
     }
@@ -81,7 +84,8 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             typewriterMode: true,
             preview: {
                 actions: ["mp-wechat", "zhihu", "yuque"]
-            }
+            },
+            after: (editor) => afterOpen?.(editor.protyle),
         };
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.notebookId = data.data.box;
@@ -103,6 +107,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                         app.plugins.forEach(item => {
                             item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                         });
+                        afterOpen?.(window.siyuan.mobile.editor.protyle);
                     }
                 });
             } else {
@@ -124,6 +129,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                             app.plugins.forEach(item => {
                                 item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                             });
+                            afterOpen?.(window.siyuan.mobile.editor.protyle);
                         }
                     });
                 });

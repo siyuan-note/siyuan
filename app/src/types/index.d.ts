@@ -995,6 +995,7 @@ interface IAVRenderTarget {
     itemID: string;
     groupID?: string;
     index: number;
+    offset: number;
     pageSize: number;
 }
 
@@ -1051,6 +1052,9 @@ interface IAVVirtualData {
     renderedStart: number;
     renderedEnd: number;
     topSpacerHeight: number;
+    bottomSpacerHeight?: number;
+    rowOffset?: number;
+    locate?: boolean;
 }
 
 interface IAVGallery extends IAVView {

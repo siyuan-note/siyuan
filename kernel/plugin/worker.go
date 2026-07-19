@@ -18,6 +18,7 @@ package plugin
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/eventloop"
@@ -51,14 +52,15 @@ func (w *Worker) Run(executor TaskExecutor, callback TaskCallback) error {
 
 		defer func() {
 			defer func() {
-				// catch panic from callback
+				// 捕获回调中的 panic 并保留原始调用栈，便于定位 Promise 处理异常。
 				if r := recover(); r != nil {
-					logging.LogErrorf("task callback panicked: %v\n", r)
+					logging.LogErrorf("task callback panicked: %v\n%s", r, debug.Stack())
 				}
 			}()
 
-			// catch panic from executor
+			// 捕获执行器中的 panic 并保留原始调用栈，同时将错误传给回调。
 			if r := recover(); r != nil {
+				logging.LogErrorf("task executor panicked: %v\n%s", r, debug.Stack())
 				err = fmt.Errorf("task executor panicked: %v", r)
 			}
 			if callback != nil {

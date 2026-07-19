@@ -165,6 +165,14 @@
     }
   }
 
+  &__template-editor .custom-attr .block__logo:not(.popover__block) {
+    cursor: default;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
   &__title {
     outline: none;
     font-weight: bold;

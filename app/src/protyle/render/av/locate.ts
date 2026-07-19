@@ -45,8 +45,7 @@ export const queueAVLocateRequest = (blockID: string, request: IAVLocateRequest)
     queuedLocateRequests.set(blockID, {...request, select: false, highlight: true});
 };
 
-export const activateQueuedAVLocate = (protyle: IProtyle, blockID: string) => {
-    const request = queuedLocateRequests.get(blockID);
+export const activateAVLocate = (protyle: IProtyle, blockID: string, request?: IAVLocateRequest) => {
     const blockElement = protyle?.wysiwyg.element.querySelector(`.av[data-node-id="${blockID}"]`) as HTMLElement;
     if (!request || !blockElement) {
         return false;
@@ -55,6 +54,10 @@ export const activateQueuedAVLocate = (protyle: IProtyle, blockID: string) => {
     blockElement.removeAttribute("data-render");
     import("./render").then(({avRender}) => avRender(blockElement, protyle));
     return true;
+};
+
+export const activateQueuedAVLocate = (protyle: IProtyle, blockID: string) => {
+    return activateAVLocate(protyle, blockID, queuedLocateRequests.get(blockID));
 };
 
 export const setAVLocateRequest = (blockElement: HTMLElement, request: IAVLocateRequest) => {
@@ -70,6 +73,13 @@ const getAVLocateRequest = (blockElement: HTMLElement) => {
         }
     }
     return request;
+};
+
+const clearAVLocateRequest = (blockElement: HTMLElement, request: IAVLocateRequest) => {
+    locateRequests.delete(blockElement);
+    if (queuedLocateRequests.get(blockElement.dataset.nodeId) === request) {
+        queuedLocateRequests.delete(blockElement.dataset.nodeId);
+    }
 };
 
 export const getAVLocateParams = (blockElement: HTMLElement) => {
@@ -157,8 +167,7 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         return;
     }
     if (data.target?.status !== "visible") {
-        locateRequests.delete(blockElement);
-        queuedLocateRequests.delete(blockElement.dataset.nodeId);
+        clearAVLocateRequest(blockElement, request);
         return;
     }
     const groupQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";
@@ -202,6 +211,5 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
     } else {
         targetElement.scrollIntoView({block: "center", inline: "nearest"});
     }
-    locateRequests.delete(blockElement);
-    queuedLocateRequests.delete(blockElement.dataset.nodeId);
+    clearAVLocateRequest(blockElement, request);
 };

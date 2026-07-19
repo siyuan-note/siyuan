@@ -357,7 +357,10 @@ interface IClipboardData {
 
 interface IRefDefs {
     refID: string,
-    defIDs?: string[]
+    defIDs?: string[],
+    avItemID?: string,
+    avViewID?: string,
+    avGroupID?: string,
 }
 
 interface IFilesPath {

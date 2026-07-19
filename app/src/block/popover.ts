@@ -452,10 +452,22 @@ export const showPopover = async (app: App, showRef = false) => {
         refDefs = postResponse.data.refDefs;
     } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
         // 以思源协议开头的链接
-        refDefs = [{refID: parseSiYuanUriInfo(popoverTargetElement.getAttribute("data-href"))?.id ?? ""}];
+        const blockInfo = parseSiYuanUriInfo(popoverTargetElement.getAttribute("data-href"));
+        refDefs = [{
+            refID: blockInfo?.id ?? "",
+            avItemID: blockInfo?.avItemID,
+            avViewID: blockInfo?.avViewID,
+            avGroupID: blockInfo?.avGroupID,
+        }];
     } else if (popoverTargetElement.dataset.type === "url") {
         // 在 database 的 url 列中以思源协议开头的链接
-        refDefs = [{refID: parseSiYuanUriInfo(popoverTargetElement.textContent.trim())?.id ?? ""}];
+        const blockInfo = parseSiYuanUriInfo(popoverTargetElement.dataset.href || popoverTargetElement.textContent.trim());
+        refDefs = [{
+            refID: blockInfo?.id ?? "",
+            avItemID: blockInfo?.avItemID,
+            avViewID: blockInfo?.avViewID,
+            avGroupID: blockInfo?.avGroupID,
+        }];
     } else if (popoverTargetElement.dataset.popoverUrl) {
         // 镜像数据库
         const postResponse = await fetchSyncPost(popoverTargetElement.dataset.popoverUrl, {avID: popoverTargetElement.dataset.avId});

@@ -18,6 +18,7 @@ package model
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -125,6 +126,28 @@ func refreshParentDocInfo(tree *parse.Tree) {
 	refreshDocInfo0(parentTree, uint64(len(data)))
 }
 
+func refreshBoxDocInfo(tree *parse.Tree) {
+	if nil == tree || path.Dir(tree.Path) != "/" || IsBoxDoc(tree.Box, tree.ID) {
+		return
+	}
+	refreshBoxDocInfoByBoxID(tree.Box)
+}
+
+func refreshBoxDocInfoByBoxID(boxID string) {
+	if !IsBoxDocEnabled() {
+		return
+	}
+	box := Conf.Box(boxID)
+	if nil == box || "" == box.BoxDocID {
+		return
+	}
+	boxDocTree, err := filesys.LoadTree(boxID, boxDocPath(box.BoxDocID), util.NewLute())
+	if nil != err {
+		return
+	}
+	refreshDocInfo(boxDocTree)
+}
+
 func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	cTime, _ := time.ParseInLocation("20060102150405", tree.ID[:14], time.Local)
 	mTime := cTime
@@ -136,7 +159,7 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 
 	subFileCount := 0
 	if IsBoxDoc(tree.Box, tree.ID) {
-		subFileCount = boxDocSubFileCount(tree.Box)
+		subFileCount = BoxDocSubFileCount(tree.Box, tree.ID)
 	} else if "true" != tree.Root.IALAttr(DocHiddenAttr) {
 		subDir := filepath.Join(util.DataDir, tree.Box, strings.TrimSuffix(tree.Path, ".sy"))
 		subFiles, err := os.ReadDir(subDir)

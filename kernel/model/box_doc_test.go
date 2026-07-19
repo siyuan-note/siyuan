@@ -17,9 +17,12 @@
 package model
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestDeterministicBoxDocID(t *testing.T) {
@@ -33,5 +36,38 @@ func TestDeterministicBoxDocID(t *testing.T) {
 	}
 	if boxDocID == deterministicBoxDocID("20260716120000-hijklmn") {
 		t.Fatalf("different boxes generated the same document ID [%s]", boxDocID)
+	}
+}
+
+func TestBoxDocSubFileCount(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	boxID := "20260716120000-abcdefg"
+	boxDocID := "20260716120001-abcdefg"
+	boxDir := filepath.Join(util.DataDir, boxID)
+	if err := os.MkdirAll(boxDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	writeDoc := func(id, properties string) {
+		t.Helper()
+		data := []byte(`{"Properties":` + properties + `}`)
+		if err := os.WriteFile(filepath.Join(boxDir, id+".sy"), data, 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeDoc(boxDocID, `{}`)
+	writeDoc("20260716120002-abcdefg", `{}`)
+	writeDoc("20260716120003-abcdefg", `{"custom-hidden":"true"}`)
+	writeDoc("invalid", `{}`)
+	if err := os.Mkdir(filepath.Join(boxDir, "20260716120004-abcdefg.sy"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	if actual := BoxDocSubFileCount(boxID, boxDocID); actual != 1 {
+		t.Fatalf("unexpected box document subfile count [%d]", actual)
 	}
 }

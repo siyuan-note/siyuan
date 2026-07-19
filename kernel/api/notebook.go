@@ -462,9 +462,18 @@ func lsNotebooks(c *gin.Context) {
 		}
 	}
 
+	boxDocEnabled := model.IsBoxDocEnabled()
+	if !flashcard && boxDocEnabled {
+		for _, notebook := range notebooks {
+			if !notebook.Closed && notebook.BoxDocID != "" {
+				notebook.SubFileCount = model.BoxDocSubFileCount(notebook.ID, notebook.BoxDocID)
+			}
+		}
+	}
+
 	ret.Data = map[string]any{
 		"notebooks":     notebooks,
-		"boxDocEnabled": model.IsBoxDocEnabled(),
+		"boxDocEnabled": boxDocEnabled,
 	}
 }
 

@@ -285,9 +285,9 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 	return nil
 }
 
-func boxDocSubFileCount(boxID string) int {
-	box := Conf.Box(boxID)
-	if nil == box || "" == box.BoxDocID {
+// BoxDocSubFileCount 返回笔记本顶层文档的可见下级文档数。
+func BoxDocSubFileCount(boxID, boxDocID string) int {
+	if "" == boxDocID {
 		return 0
 	}
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
@@ -300,7 +300,7 @@ func boxDocSubFileCount(boxID string) int {
 			continue
 		}
 		id := strings.TrimSuffix(entry.Name(), ".sy")
-		if id == box.BoxDocID || !ast.IsNodeIDPattern(id) {
+		if id == boxDocID || !ast.IsNodeIDPattern(id) {
 			continue
 		}
 		ial := filesys.DocIAL(filepath.Join(util.DataDir, boxID, entry.Name()))

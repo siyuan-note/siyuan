@@ -1073,12 +1073,16 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 }
 
 func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
+	isNew := !filelock.IsExist(filepath.Join(util.DataDir, tree.Box, tree.Path))
 	size, err := filesys.WriteTree(tree)
 	if err != nil {
 		return
 	}
 	sql.UpsertTreeQueue(tree)
 	refreshDocInfoWithSize(tree, size)
+	if isNew {
+		refreshBoxDocInfo(tree)
+	}
 	return
 }
 
@@ -1704,6 +1708,13 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	util.PushEvent(evt)
 
 	refreshDocInfo(fromParentTree)
+	fromRoot := path.Dir(fromPath) == "/"
+	if fromRoot {
+		refreshBoxDocInfoByBoxID(fromBox.ID)
+	}
+	if moveToRoot && (!isSameBox || !fromRoot) {
+		refreshBoxDocInfoByBoxID(toBox.ID)
+	}
 	return
 }
 
@@ -1725,6 +1736,7 @@ func RemoveDoc(boxID, p string) error {
 	IncSync()
 
 	refreshParentDocInfo(tree)
+	refreshBoxDocInfo(tree)
 	return nil
 }
 
@@ -1755,14 +1767,21 @@ func RemoveDocs(paths []string) error {
 	}
 
 	parentTrees := map[string]*parse.Tree{}
+	boxDocBoxes := map[string]struct{}{}
 	for _, tree := range trees {
 		parentTree := loadParentTree(tree)
 		if nil != parentTree {
 			parentTrees[parentTree.ID] = parentTree
 		}
+		if path.Dir(tree.Path) == "/" && !IsBoxDoc(tree.Box, tree.ID) {
+			boxDocBoxes[tree.Box] = struct{}{}
+		}
 	}
 	for _, parentTree := range parentTrees {
 		refreshDocInfo(parentTree)
+	}
+	for boxID := range boxDocBoxes {
+		refreshBoxDocInfoByBoxID(boxID)
 	}
 	return nil
 }

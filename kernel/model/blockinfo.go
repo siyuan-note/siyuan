@@ -136,7 +136,7 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 
 	var subFileCount int
 	if IsBoxDoc(tree.Box, tree.ID) {
-		subFileCount = boxDocSubFileCount(tree.Box)
+		subFileCount = BoxDocSubFileCount(tree.Box, tree.ID)
 	} else {
 		boxLocalPath := filepath.Join(util.DataDir, tree.Box)
 		subFiles, readErr := os.ReadDir(filepath.Join(boxLocalPath, strings.TrimSuffix(tree.Path, ".sy")))
@@ -244,7 +244,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 
 		var subFileCount int
 		if IsBoxDoc(tree.Box, tree.ID) {
-			subFileCount = boxDocSubFileCount(tree.Box)
+			subFileCount = BoxDocSubFileCount(tree.Box, tree.ID)
 		} else {
 			boxLocalPath := filepath.Join(util.DataDir, tree.Box)
 			subFiles, readErr := os.ReadDir(filepath.Join(boxLocalPath, strings.TrimSuffix(tree.Path, ".sy")))

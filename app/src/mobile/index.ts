@@ -41,6 +41,7 @@ import {armKeyboardLock, callMobileAppShowKeyboard, canInput, setWebViewFocusabl
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {initTouchDragBridge} from "../util/touchDragBridge";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
+import {openByMobile} from "../editor/openLink";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -228,7 +229,7 @@ class App {
 
 const siyuanApp = new App();
 
-initWindowOpenOverride(siyuanApp);
+initWindowOpenOverride(siyuanApp, openByMobile);
 // https://github.com/siyuan-note/siyuan/issues/8441
 window.reconnectWebSocket = () => {
     // 后台唤醒时任一 socket 可能仍在 CONNECTING，调用 send 会抛 InvalidStateError，

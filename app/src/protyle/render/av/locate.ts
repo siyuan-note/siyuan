@@ -18,6 +18,7 @@ export interface IAVLocateRequest {
 
 const locateRequests = new WeakMap<HTMLElement, IAVLocateRequest>();
 const locateQueueTimeout = 30000;
+const locateRenderSize = 200;
 const queuedLocateRequests = new Map<string, {
     request: IAVLocateRequest,
     timer: number,
@@ -198,33 +199,39 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
         return;
     }
     const key = data.target.groupID || "all";
+    if (request.persistView === false && request.viewID) {
+        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, request.viewID);
+    }
     const view = (data.target.groupID ? data.view.groups?.find(item => item.id === data.target.groupID) : data.view) as IAVTable | IAVGallery | IAVKanban;
     const itemLength = data.viewType === "table" ? (view as IAVTable).rows.length : (view as IAVGallery | IAVKanban).cards.length;
-    const itemCount = data.viewType === "table" ? (view as IAVTable).rowCount : (view as IAVGallery | IAVKanban).cardCount;
     const offset = data.target.offset || 0;
+    const localIndex = Math.max(0, data.target.index - offset);
+    let renderedStart = Math.max(0, localIndex - locateRenderSize / 2);
+    const renderedEnd = Math.min(itemLength - 1, renderedStart + locateRenderSize - 1);
+    renderedStart = Math.max(0, renderedEnd - locateRenderSize + 1);
+    let topSpacerHeight: number;
     const bodyQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";
     const currentBody = blockElement.querySelector(bodyQuery);
-    let topSpacerHeight: number;
-    let bottomSpacerHeight: number;
     if (data.viewType === "table") {
         const rowHeight = (currentBody?.querySelector(".av__row[data-id]") as HTMLElement)?.offsetHeight || 36;
-        topSpacerHeight = offset * rowHeight;
-        bottomSpacerHeight = Math.max(0, itemCount - offset - itemLength) * rowHeight;
+        topSpacerHeight = renderedStart * rowHeight;
     } else {
         const itemHeight = (currentBody?.querySelector(".av__gallery-item") as HTMLElement)?.offsetHeight || 180;
         let columns = 1;
         if (data.viewType === "gallery") {
             const minWidth = (view as IAVGallery)?.cardSize === 0 ? 180 : ((view as IAVGallery)?.cardSize === 2 ? 320 : 260);
             columns = Math.max(1, Math.floor((blockElement.clientWidth + 16) / (minWidth + 16)));
+            renderedStart -= renderedStart % columns;
         }
-        topSpacerHeight = Math.floor(offset / columns) * (itemHeight + 16);
-        bottomSpacerHeight = Math.ceil(Math.max(0, itemCount - offset - itemLength) / columns) * (itemHeight + 16);
+        topSpacerHeight = Math.floor(renderedStart / columns) * (itemHeight + 16);
+    }
+    if (itemLength > 100) {
+        blockElement.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
     }
     resetData.virtualData[key] = {
-        renderedStart: 0,
-        renderedEnd: Math.max(0, itemLength - 1),
+        renderedStart,
+        renderedEnd,
         topSpacerHeight,
-        bottomSpacerHeight,
         rowOffset: offset,
         locate: true,
     };

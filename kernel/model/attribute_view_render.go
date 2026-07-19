@@ -611,7 +611,7 @@ func getAttributeViewRenderRange(page, pageSize, targetIndex, defaultPageSize, l
 		return
 	}
 
-	windowSize := min(max(defaultPageSize, pageSize), av.ViewDefaultPageSize*4)
+	windowSize := min(length, max(defaultPageSize, av.ViewDefaultPageSize*4))
 	start = max(0, targetIndex-windowSize/2)
 	end = min(length, start+windowSize)
 	start = max(0, end-windowSize)

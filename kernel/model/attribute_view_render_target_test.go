@@ -13,11 +13,11 @@ func TestGetAttributeViewRenderRange(t *testing.T) {
 		wantStart, wantEnd                         int
 	}{
 		{name: "normal page", page: 2, pageSize: 50, target: -1, defaultSize: 50, total: 200, wantStart: 50, wantEnd: 100},
-		{name: "target middle", page: 1, pageSize: 50, target: 9500, defaultSize: 50, total: 10000, wantStart: 9475, wantEnd: 9525},
-		{name: "target end", page: 1, pageSize: 50, target: 9999, defaultSize: 50, total: 10000, wantStart: 9950, wantEnd: 10000},
+		{name: "target middle", page: 1, pageSize: 50, target: 9500, defaultSize: 50, total: 10000, wantStart: 9400, wantEnd: 9600},
+		{name: "target end", page: 1, pageSize: 50, target: 9999, defaultSize: 50, total: 10000, wantStart: 9800, wantEnd: 10000},
 		{name: "target window capped", page: 1, pageSize: 100000, target: 9500, defaultSize: 50, total: 10000, wantStart: 9400, wantEnd: 9600},
-		{name: "large default size capped", page: 1, pageSize: 1000, target: 9500, defaultSize: 1000, total: 10000, wantStart: 9400, wantEnd: 9600},
-		{name: "invalid sizes", page: 1, pageSize: -1, target: 75, defaultSize: -1, total: 200, wantStart: 50, wantEnd: 100},
+		{name: "configured size respected", page: 1, pageSize: 50, target: 9500, defaultSize: 1000, total: 10000, wantStart: 9000, wantEnd: 10000},
+		{name: "invalid sizes", page: 1, pageSize: -1, target: 75, defaultSize: -1, total: 200, wantStart: 0, wantEnd: 200},
 		{name: "page past end", page: 20, pageSize: 50, target: -1, defaultSize: 50, total: 100, wantStart: 100, wantEnd: 100},
 	}
 	for _, test := range tests {

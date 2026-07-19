@@ -522,6 +522,7 @@ interface INotebook {
     closed: boolean;
     icon: string;
     sort: number;
+    subFileCount: number;
     dueFlashcardCount?: string;
     newFlashcardCount?: string;
     flashcardCount?: string;
@@ -1052,7 +1053,6 @@ interface IAVVirtualData {
     renderedStart: number;
     renderedEnd: number;
     topSpacerHeight: number;
-    bottomSpacerHeight?: number;
     rowOffset?: number;
     locate?: boolean;
 }

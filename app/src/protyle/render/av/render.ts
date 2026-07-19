@@ -202,22 +202,22 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
     }
     // body
     data.rows.find((row: IAVRow, rowIndex: number) => {
-        if (!virtualData?.locate && virtualData && virtualData.renderedEnd) {
+        if (virtualData && typeof virtualData.renderedEnd === "number") {
             if (rowIndex === 0) {
                 e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             }
-            if (rowIndex > virtualData.renderedEnd || rowIndex < virtualData.renderedStart) {
+            if (rowIndex > virtualData.renderedEnd) {
+                return true;
+            }
+            if (rowIndex < virtualData.renderedStart) {
                 return;
             }
-        } else if (!virtualData?.locate && data.pageSize > 100 && rowIndex > 99) {
+        } else if (data.pageSize > 100 && rowIndex > 99) {
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
         contentHTML += getRowHTML({data, row, rowIndex: rowIndex + (virtualData?.rowOffset || 0), pinIndex, type: "table"});
     });
-    if (virtualData?.bottomSpacerHeight) {
-        contentHTML += `<div class="av__spacer" style="height: ${virtualData.bottomSpacerHeight}px;"></div>`;
-    }
     return `${contentHTML}<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
     <div class="av__colsticky">
         <button class="b3-button av__button" data-type="av-add-bottom">

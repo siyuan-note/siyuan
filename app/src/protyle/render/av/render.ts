@@ -127,7 +127,6 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <button data-type="av-add-more" class="b3-button">${window.siyuan.languages.new}</button>
                 <button data-type="av-add-template" class="b3-button ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.template}"><svg><use xlink:href="#iconDown"></use></svg></button>
             </div>` : ""}
-            <div class="fn__space"></div>
         </div>
         <div contenteditable="${editable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${Lute.EscapeHTMLStr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${Lute.EscapeHTMLStr(data.name || "")}</div>
         <div class="av__counter fn__none"></div>

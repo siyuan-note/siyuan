@@ -377,9 +377,17 @@ export const getUndoFocusContext = (editorElement: Element, range?: Range): Reco
     if (!blockElement || !blockElement.contains(range.endContainer)) {
         return undefined;
     }
-    const position = getSelectionOffset(blockElement, undefined, range);
+    const editableElement = getContenteditableElement(blockElement) || blockElement;
+    if (!editableElement.contains(range.startContainer) || !editableElement.contains(range.endContainer)) {
+        return undefined;
+    }
+    const blockElements = Array.from(editorElement.querySelectorAll(
+        `[data-node-id="${blockElement.getAttribute("data-node-id")}"]`
+    ));
+    const position = getSelectionOffset(editableElement, undefined, range);
     return {
         undoFocusId: blockElement.getAttribute("data-node-id"),
+        undoFocusIndex: blockElements.indexOf(blockElement).toString(),
         undoFocusStart: position.start.toString(),
         undoFocusEnd: position.end.toString(),
     };
@@ -399,7 +407,9 @@ export const restoreUndoFocus = (protyle: IProtyle, operations: IOperation[]) =>
     const blockElements = Array.from(protyle.wysiwyg.element.querySelectorAll(
         `[data-node-id="${operation.context.undoFocusId}"]`
     ));
-    const blockElement = blockElements.find(item => !isInEmbedBlock(item, false)) || blockElements[0];
+    const index = Number(operation.context.undoFocusIndex);
+    const indexedElement = Number.isInteger(index) && index >= 0 ? blockElements[index] : undefined;
+    const blockElement = indexedElement || blockElements.find(item => !isInEmbedBlock(item, false)) || blockElements[0];
     if (!blockElement) {
         return false;
     }

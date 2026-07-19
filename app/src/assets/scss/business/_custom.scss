@@ -297,10 +297,10 @@
     color: var(--b3-theme-on-surface);
     cursor: pointer;
     display: inline-flex;
-    height: 22px;
+    height: calc(1.625em - 4px);
     justify-content: center;
     padding: 0;
-    width: 22px;
+    width: calc(1.625em - 4px);
 
     &:hover,
     &:focus-visible {
@@ -310,9 +310,9 @@
     }
 
     svg {
-      height: 14px;
+      height: calc(1em - 2px);
       pointer-events: none;
-      width: 14px;
+      width: calc(1em - 2px);
     }
   }
 }

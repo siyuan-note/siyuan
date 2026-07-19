@@ -593,11 +593,15 @@
       word-break: break-word;
       white-space: break-spaces;
       line-height: normal;
-      padding: 4px 0;
 
       & > span {
         flex-grow: 1;
         width: 0;
+        padding: 4px 0;
+
+        &:empty {
+          display: none;
+        }
       }
     }
   }

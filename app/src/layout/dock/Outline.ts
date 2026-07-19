@@ -1041,21 +1041,26 @@ export class Outline extends Model {
                 label: window.siyuan.languages.insertSameLevelHeadingBefore,
                 click: () => {
                     const data = this.getProtyleAndBlockElement(element);
+                    if (!data) {
+                        return;
+                    }
                     const newId = Lute.NewNodeID();
                     const html = `<div data-subtype="h${currentLevel}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                    const previousID = data.blockElement.previousElementSibling?.getAttribute("data-node-id");
+                    data.blockElement.insertAdjacentHTML("beforebegin", html);
+                    const newElement = data.blockElement.previousElementSibling;
+                    newElement.scrollIntoView();
+                    focusByWbr(newElement, document.createRange());
                     transaction(data.protyle, [{
                         action: "insert",
                         data: html,
                         id: newId,
-                        previousID: data.blockElement.previousElementSibling?.getAttribute("data-node-id"),
+                        previousID,
                         parentID: data.blockElement.parentElement.getAttribute("data-node-id") || data.protyle.block.parentID,
                     }], [{
                         action: "delete",
                         id: newId
                     }]);
-                    data.blockElement.insertAdjacentHTML("beforebegin", html);
-                    data.blockElement.previousElementSibling.scrollIntoView();
-                    focusByWbr(data.blockElement.previousElementSibling, document.createRange());
                 }
             }).element);
 
@@ -1069,6 +1074,9 @@ export class Outline extends Model {
                         id,
                     }, (deleteResponse) => {
                         const data = this.getProtyleAndBlockElement(element);
+                        if (!data || !deleteResponse.data?.doOperations?.length) {
+                            return;
+                        }
                         const previousID = deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id;
 
                         const newId = Lute.NewNodeID();
@@ -1103,10 +1111,13 @@ export class Outline extends Model {
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
                         }, (deleteResponse) => {
+                            if (!deleteResponse.data?.doOperations?.length || !deleteResponse.data?.undoOperations) {
+                                return;
+                            }
                             let previousID = deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id;
                             deleteResponse.data.undoOperations.find((operationsItem: IOperation, index: number) => {
                                 const startIndex = operationsItem.data.indexOf(' data-subtype="h');
-                                if (startIndex > -1 && startIndex < 260 && parseInt(operationsItem.data.substring(startIndex + 16, startIndex + 17)) === currentLevel + 1) {
+                                if (index > 0 && startIndex > -1 && startIndex < 260 && parseInt(operationsItem.data.substring(startIndex + 16, startIndex + 17)) === currentLevel + 1) {
                                     previousID = deleteResponse.data.undoOperations[index - 1].id;
                                     return true;
                                 }
@@ -1114,8 +1125,18 @@ export class Outline extends Model {
 
 
                             const data = this.getProtyleAndBlockElement(element);
+                            if (!data) {
+                                return;
+                            }
                             const newId = Lute.NewNodeID();
                             const html = `<div data-subtype="h${currentLevel + 1}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel + 1}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                            const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
+                            if (previousElement) {
+                                previousElement.insertAdjacentHTML("afterend", html);
+                                const newElement = previousElement.nextElementSibling;
+                                newElement.scrollIntoView();
+                                focusByWbr(newElement, document.createRange());
+                            }
                             transaction(data.protyle, [{
                                 action: "insert",
                                 data: html,
@@ -1125,12 +1146,6 @@ export class Outline extends Model {
                                 action: "delete",
                                 id: newId
                             }]);
-                            const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
-                            if (previousElement) {
-                                previousElement.insertAdjacentHTML("afterend", html);
-                                previousElement.nextElementSibling.scrollIntoView();
-                                focusByWbr(previousElement.nextElementSibling, document.createRange());
-                            }
                         });
                     }
                 }).element);

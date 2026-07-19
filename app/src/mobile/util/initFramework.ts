@@ -8,7 +8,7 @@ import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
 import {setEmpty} from "./setEmpty";
-import {getOpenNotebookCount, isEncryptedBox, parseUriInfo} from "../../util/pathName";
+import {getOpenNotebookCount, parseUriInfo} from "../../util/pathName";
 import {popMenu} from "../menu";
 import {MobileFiles} from "../dock/MobileFiles";
 import {MobileOutline} from "../dock/MobileOutline";
@@ -104,16 +104,7 @@ export const initFramework = (app: App, isStart: boolean) => {
                             isPreview: window.siyuan.mobile.editor ? !window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none") : false
                         });
                     } else {
-                        const outlineParam: IObject = {
-                            id: window.siyuan.mobile.editor.protyle.block.rootID,
-                            preview: window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")
-                        };
-                        if (isEncryptedBox(window.siyuan.mobile.editor.protyle.notebookId)) {
-                            outlineParam.notebook = window.siyuan.mobile.editor.protyle.notebookId;
-                        }
-                        fetchPost("/api/outline/getDocOutline", outlineParam, response => {
-                            window.siyuan.mobile.docks.outline.update(response);
-                        });
+                        window.siyuan.mobile.docks.outline.reload();
                     }
                 } else if (type === "sidebar-backlink-tab") {
                     if (!window.siyuan.mobile.docks.backlink) {
@@ -160,16 +151,7 @@ export const initFramework = (app: App, isStart: boolean) => {
         sidebarElement.style.transform = "translateX(0px)";
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");
         if (type === "sidebar-outline-tab") {
-            const outlineParam: IObject = {
-                id: window.siyuan.mobile.editor.protyle.block.rootID,
-                preview: window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")
-            };
-            if (isEncryptedBox(window.siyuan.mobile.editor.protyle.notebookId)) {
-                outlineParam.notebook = window.siyuan.mobile.editor.protyle.notebookId;
-            }
-            fetchPost("/api/outline/getDocOutline", outlineParam, response => {
-                window.siyuan.mobile.docks.outline.update(response);
-            });
+            window.siyuan.mobile.docks.outline.reload();
         } else if (type === "sidebar-backlink-tab") {
             window.siyuan.mobile.docks.backlink.update();
         } else if (type === "sidebar-bookmark-tab") {

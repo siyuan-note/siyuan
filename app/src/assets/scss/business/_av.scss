@@ -146,6 +146,7 @@
   }
 
   &__template-list {
+    --file-toggle-width: 0px;
     border-right: 1px solid var(--b3-border-color);
     box-sizing: border-box;
     flex-shrink: 0;
@@ -1577,5 +1578,27 @@ img.av__cellassetimg {
       height: 32px;
       color: var(--b3-theme-on-background);
     }
+  }
+}
+
+.b3-menu[data-name="av-new-item-template"] [data-template-id] {
+  &.dragover__top::after,
+  &.dragover__bottom::after {
+    background-color: var(--b3-theme-primary-lighter);
+    content: '';
+    height: 4px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    z-index: 3;
+  }
+
+  &.dragover__top::after {
+    top: -3px;
+  }
+
+  &.dragover__bottom::after {
+    bottom: -2px;
   }
 }

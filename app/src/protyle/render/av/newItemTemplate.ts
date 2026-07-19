@@ -671,10 +671,14 @@ export const openNewItemTemplateDialog = (options: {
     };
 
     let draggingIndex = -1;
-    const clearDragStyles = () => {
+    const clearDragover = () => {
         listElement.querySelectorAll<HTMLElement>("[data-index]").forEach(item => {
-            item.style.borderTop = "";
-            item.style.borderBottom = "";
+            item.classList.remove("dragover__top", "dragover__bottom");
+        });
+    };
+    const clearDragStyles = () => {
+        clearDragover();
+        listElement.querySelectorAll<HTMLElement>("[data-index]").forEach(item => {
             item.style.opacity = "";
         });
     };
@@ -694,9 +698,9 @@ export const openNewItemTemplateDialog = (options: {
             return;
         }
         event.preventDefault();
-        clearDragStyles();
+        clearDragover();
         const before = event.clientY < target.getBoundingClientRect().top + target.getBoundingClientRect().height / 2;
-        target.style[before ? "borderTop" : "borderBottom"] = "2px solid var(--b3-theme-primary-lighter)";
+        target.classList.add(before ? "dragover__top" : "dragover__bottom");
     });
     listElement.addEventListener("drop", (event: DragEvent) => {
         const target = (event.target as HTMLElement).closest<HTMLElement>("[data-index]");
@@ -1032,10 +1036,14 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
                 });
             },
         }));
-        const clearTemplateDragStyles = () => {
+        const clearTemplateDragover = () => {
             menu.element.querySelectorAll<HTMLElement>("[data-template-id]").forEach(element => {
-                element.style.borderTop = "";
-                element.style.borderBottom = "";
+                element.classList.remove("dragover__top", "dragover__bottom");
+            });
+        };
+        const clearTemplateDragStyles = () => {
+            clearTemplateDragover();
+            menu.element.querySelectorAll<HTMLElement>("[data-template-id]").forEach(element => {
                 element.style.opacity = "";
             });
         };
@@ -1058,9 +1066,9 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
             }
             event.preventDefault();
             draggedTemplateMoved = true;
-            clearTemplateDragStyles();
+            clearTemplateDragover();
             const rect = target.getBoundingClientRect();
-            target.style[event.clientY < rect.top + rect.height / 2 ? "borderTop" : "borderBottom"] = "2px solid var(--b3-theme-primary-lighter)";
+            target.classList.add(event.clientY < rect.top + rect.height / 2 ? "dragover__top" : "dragover__bottom");
         };
         menu.element.ondrop = (event: DragEvent) => {
             const target = (event.target as HTMLElement).closest<HTMLElement>("[data-template-id]");

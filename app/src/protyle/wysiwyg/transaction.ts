@@ -71,6 +71,20 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     }
 };
 
+const syncFoldAttr = (element: Element, operation: IOperation) => {
+    const attrs = JSON.parse(operation.data);
+    if (!Object.prototype.hasOwnProperty.call(attrs, "fold")) {
+        return;
+    }
+    element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+        if (attrs.fold === "1") {
+            item.setAttribute("fold", "1");
+        } else {
+            item.removeAttribute("fold");
+        }
+    });
+};
+
 // 用于执行操作，外加处理当前编辑器中块引用、嵌入块的更新
 const promiseTransaction = (options: {
     protyle: IProtyle,
@@ -356,6 +370,7 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "setAttrs") {
+                syncFoldAttr(protyle.wysiwyg.element, operation);
                 const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
                 if (gutterFoldElement) {
                     gutterFoldElement.removeAttribute("disabled");
@@ -552,13 +567,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             updateElements.push(item);
         });
         if (operation.action === "setAttrs") {
-            protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-                if (JSON.parse(operation.data).fold === "1") {
-                    item.setAttribute("fold", "1");
-                } else {
-                    item.removeAttribute("fold");
-                }
-            });
+            syncFoldAttr(protyle.wysiwyg.element, operation);
             return;
         }
         if (operation.action === "unfoldHeading") {
@@ -1637,6 +1646,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
                     blockRender(protyle, embedElement);
                     return;
                 }
+                item.removeAttribute("fold");
                 if (!item.lastElementChild.classList.contains("protyle-attr")) {
                     item.lastElementChild.remove();
                 }
@@ -1675,6 +1685,9 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             if (embedElement) {
                 embedElement.removeAttribute("data-render");
                 blockRender(protyle, embedElement);
+            } else {
+                item.setAttribute("fold", "1");
+                removeFoldHeading(item);
             }
         });
         // 折叠移除子块后，刷新折叠标题所在超级块的拖拽手柄（子块数变化）

@@ -207,11 +207,13 @@ export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "par
     });
 };
 
-export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPosition, id?: string) => {
+export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPosition, target?: string | Element) => {
     const range = getEditorRange(protyle.wysiwyg.element);
     let blockElement: Element;
-    if (id) {
-        blockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+    if (typeof target === "string") {
+        blockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${target}"]`);
+    } else if (target) {
+        blockElement = target;
     } else {
         const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
         if (selectElements.length > 0) {

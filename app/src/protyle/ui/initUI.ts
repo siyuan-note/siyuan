@@ -8,7 +8,7 @@ import {fetchPost} from "../../util/fetch";
 import {lineNumberRender} from "../render/highlightRender";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {genUUID} from "../../util/genID";
-import {getContenteditableElement, getLastBlock} from "../wysiwyg/getBlock";
+import {getContenteditableElement, getEmbedChildOperationContext, getLastBlock} from "../wysiwyg/getBlock";
 import {genEmptyElement, genHeadingElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {focusByRange} from "../util/selection";
@@ -240,7 +240,8 @@ export const initUI = (protyle: IProtyle) => {
             }
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
-                protyle.gutter.render(protyle, embedElement);
+                protyle.gutter.render(protyle,
+                    getEmbedChildOperationContext(nodeElement) ? nodeElement : embedElement, event.target);
                 return;
             }
             protyle.gutter.render(protyle, nodeElement, event.target);
@@ -257,26 +258,24 @@ export const initUI = (protyle: IProtyle) => {
                 });
                 return;
             }
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
-                if (!isInEmbedBlock(item) && protyle.gutter.isMatchNode(item)) {
-                    const bodyQueryClass = (buttonElement.dataset.groupId && buttonElement.dataset.groupId !== "undefined") ? `.av__body[data-group-id="${buttonElement.dataset.groupId}"] ` : "";
-                    const rowItem = item.querySelector(bodyQueryClass + `.av__row[data-id="${buttonElement.dataset.rowId}"]`);
-                    Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
-                        if (item !== hlItem) {
-                            hlItem.classList.remove("protyle-wysiwyg--hl");
-                        }
-                        if (rowItem && rowItem !== hlItem) {
-                            rowItem.classList.remove("av__row--hl");
-                        }
-                    });
-                    if (type === "NodeAttributeViewRowMenu") {
-                        rowItem.classList.add("av__row--hl");
-                    } else {
-                        item.classList.add("protyle-wysiwyg--hl");
+            const gutterNodeElement = protyle.gutter.getNodeElement(protyle, buttonElement);
+            if (gutterNodeElement) {
+                const bodyQueryClass = (buttonElement.dataset.groupId && buttonElement.dataset.groupId !== "undefined") ? `.av__body[data-group-id="${buttonElement.dataset.groupId}"] ` : "";
+                const rowItem = gutterNodeElement.querySelector(bodyQueryClass + `.av__row[data-id="${buttonElement.dataset.rowId}"]`);
+                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
+                    if (gutterNodeElement !== hlItem) {
+                        hlItem.classList.remove("protyle-wysiwyg--hl");
                     }
-                    return true;
+                    if (rowItem && rowItem !== hlItem) {
+                        rowItem.classList.remove("av__row--hl");
+                    }
+                });
+                if (type === "NodeAttributeViewRowMenu") {
+                    rowItem.classList.add("av__row--hl");
+                } else {
+                    gutterNodeElement.classList.add("protyle-wysiwyg--hl");
                 }
-            });
+            }
             event.preventDefault();
             return;
         }

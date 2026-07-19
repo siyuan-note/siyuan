@@ -12,6 +12,7 @@ import {isChromeBrowser, isInAndroid, isInHarmony, isIPhone} from "../../protyle
 import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 import {Constants} from "../../constants";
+import {getEmbedChildOperationContext} from "../../protyle/wysiwyg/getBlock";
 
 let clientX: number;
 let clientY: number;
@@ -107,7 +108,8 @@ export const handleTouchEnd = (event: TouchEvent) => {
             }
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
-                editor.protyle.gutter.render(editor.protyle, embedElement);
+                editor.protyle.gutter.render(editor.protyle,
+                    getEmbedChildOperationContext(nodeElement) ? nodeElement : embedElement, target);
                 return;
             }
             editor.protyle.gutter.render(editor.protyle, nodeElement, target);

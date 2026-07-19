@@ -92,7 +92,7 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 								return
 							}
 						}
-						if readOnlyValue := configObj.Get("readOnly"); !goja.IsUndefined(readOnlyValue) && !goja.IsNull(readOnlyValue) {
+						if readOnlyValue := configObj.Get("readOnly"); isJsValueNotNull(readOnlyValue) {
 							var ok bool
 							if readOnlyHint, ok = readOnlyValue.Export().(bool); !ok {
 								err = fmt.Errorf("config.readOnly must be a boolean")

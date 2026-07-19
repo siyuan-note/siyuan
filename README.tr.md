@@ -454,11 +454,6 @@ Veriler, çalışma alanı klasöründeki `data` klasöründe saklanır:
 
 Bununla birlikte, üyelik avantajları kapsamında **üçüncü taraf bulut depolama hizmetleriyle bağlantı** desteklenmektedir.
 
-Alternatif olarak, verileri **elle dışa aktarıp içe aktararak** senkronizasyon sağlayabilirsin:
-
-- Masaüstü: <kbd>Ayarlar</kbd> → <kbd>Dışa Aktar</kbd> → <kbd>Verileri Dışa Aktar / Verileri İçe Aktar</kbd>  
-- Mobil: <kbd>Sağ panel</kbd> → <kbd>Hakkında</kbd> → <kbd>Verileri Dışa Aktar / Verileri İçe Aktar</kbd>
-
 ### SiYuan açık kaynak mı?
 
 Evet, SiYuan tamamen açık kaynaklıdır ve katkılara açıktır:

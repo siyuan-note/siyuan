@@ -467,11 +467,6 @@ Data synchronization through third-party synchronization disks is not supported,
 
 Although it does not support third-party sync disks, it supports connecting with third-party cloud storage (Members' privileges).
 
-In addition, you can also consider manually exporting and importing data to achieve data synchronization:
-
-- Desktop: <kbd>Settings</kbd> - <kbd>Export</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
-- Mobile: <kbd>Right column</kbd> - <kbd>About</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
-
 ### Is SiYuan open source?
 
 SiYuan is completely open source, and contributions are welcome:

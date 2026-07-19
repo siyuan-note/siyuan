@@ -572,9 +572,10 @@ export const openNewItemTemplateDialog = (options: {
         title: window.siyuan.languages.itemTemplate,
         width: "820px",
         height: "70vh",
+        containerClassName: "b3-dialog__container--theme",
         content: `<div class="fn__flex fn__flex-column" style="height:100%">
     <div class="fn__flex fn__flex-1" style="min-height:0">
-        <div data-role="template-list" style="width:200px;padding:8px;border-right:1px solid var(--b3-border-color);overflow:auto"></div>
+        <ul class="av__template-list b3-list b3-list--background" data-role="template-list"></ul>
         <div data-role="editor-host" class="fn__flex-1 fn__flex"></div>
     </div>
     <div class="b3-dialog__action"><button class="b3-button b3-button--cancel" data-role="cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text" data-role="confirm">${window.siyuan.languages.confirm}</button></div>
@@ -594,8 +595,8 @@ export const openNewItemTemplateDialog = (options: {
     };
 
     const render = () => {
-        listElement.innerHTML = `<button class="b3-menu__item" data-role="add-template"><svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newTemplate}</span></button><button class="b3-menu__separator"></button>` +
-            templates.map((item, index) => `<button class="b3-menu__item${index === selectedIndex ? " b3-menu__item--current" : ""}" data-index="${index}" draggable="true"><svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg><span class="b3-menu__label fn__ellipsis">${escapeHtml(item.name)}</span></button>`).join("");
+        listElement.innerHTML = `<li class="b3-list-item" data-role="add-template"><svg class="b3-list-item__graphic"><use xlink:href="#iconAdd"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newTemplate}</span></li><li class="b3-menu__separator"></li>` +
+            templates.map((item, index) => `<li class="b3-list-item${index === selectedIndex ? " b3-list-item--focus" : ""}" data-index="${index}" draggable="true"><svg class="b3-list-item__graphic fn__grab"><use xlink:href="#iconDrag"></use></svg><span class="b3-list-item__text">${escapeHtml(item.name)}</span></li>`).join("");
         hostElement.innerHTML = selectedIndex < 0 ? "" : getEditorHTML(templates[selectedIndex], primaryKey, fields, options.protyle.notebookId);
         const target = hostElement.querySelector('[data-role="target-type"]') as HTMLSelectElement;
         target?.addEventListener("change", () => hostElement.querySelector('[data-role="document-options"]')?.classList.toggle("fn__none", target.value !== "document"));

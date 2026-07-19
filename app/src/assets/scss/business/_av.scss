@@ -145,6 +145,26 @@
     }
   }
 
+  &__template-list {
+    border-right: 1px solid var(--b3-border-color);
+    box-sizing: border-box;
+    flex-shrink: 0;
+    list-style: none;
+    margin: 0;
+    overflow: auto;
+    padding: 8px 0;
+    width: 200px;
+
+    .b3-list-item {
+      line-height: 32px;
+      margin: 8px;
+
+      &__graphic {
+        padding: 0 6px 0 4px;
+      }
+    }
+  }
+
   &__title {
     outline: none;
     font-weight: bold;

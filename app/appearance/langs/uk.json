@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "Створити елемент за шаблоном",
+	"newTemplate": "Новий шаблон",
+	"itemTemplate": "Шаблон елемента",
 	"databaseItemFiltered": "Елемент відфільтровано. Видаліть фільтр або налаштування групування, щоб переглянути його.",
 	"copyDatabaseItemLink": "Копіювати посилання на елемент",
 	"databaseViewNotFound": "Подання бази даних не знайдено",
@@ -10,7 +13,6 @@
 	"contentTemplate": "Шаблон вмісту",
 	"createDetachedBlock": "Створити неприв’язаний блок",
 	"createBoundBlock": "Створити прив’язаний блок",
-	"useTemplate": "Використовувати шаблони для ${x}",
 	"setAsDefault": "Установити за замовчуванням",
 	"avBacklinks": "${count} зворотних посилань бази даних",
 	"databaseAttrViewMode": "Типовий стан властивостей бази даних",

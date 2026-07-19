@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "Utwórz element z szablonu",
+	"newTemplate": "Nowy szablon",
+	"itemTemplate": "Szablon elementu",
 	"databaseItemFiltered": "Element jest filtrowany. Usuń filtr lub ustawienia grupowania, aby go wyświetlić.",
 	"copyDatabaseItemLink": "Kopiuj łącze elementu",
 	"databaseViewNotFound": "Nie znaleziono widoku bazy danych",
@@ -10,7 +13,6 @@
 	"contentTemplate": "Szablon treści",
 	"createDetachedBlock": "Utwórz niepowiązany blok",
 	"createBoundBlock": "Utwórz powiązany blok",
-	"useTemplate": "Użyj szablonów dla ${x}",
 	"setAsDefault": "Ustaw jako domyślny",
 	"avBacklinks": "${count} linków zwrotnych bazy danych",
 	"databaseAttrViewMode": "Domyślny stan właściwości bazy danych",

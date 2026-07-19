@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "टेम्पलेट से आइटम बनाएँ",
+	"newTemplate": "नया टेम्पलेट",
+	"itemTemplate": "आइटम टेम्पलेट",
 	"databaseItemFiltered": "आइटम फ़िल्टर किया गया है। इसे देखने के लिए फ़िल्टर या समूहीकरण सेटिंग हटाएँ।",
 	"copyDatabaseItemLink": "आइटम लिंक कॉपी करें",
 	"databaseViewNotFound": "डेटाबेस दृश्य नहीं मिला",
@@ -10,7 +13,6 @@
 	"contentTemplate": "सामग्री टेम्पलेट",
 	"createDetachedBlock": "अनबाउंड ब्लॉक बनाएँ",
 	"createBoundBlock": "बाउंड ब्लॉक बनाएँ",
-	"useTemplate": "${x} के लिए टेम्पलेट का उपयोग करें",
 	"setAsDefault": "डिफ़ॉल्ट के रूप में सेट करें",
 	"avBacklinks": "${count} डेटाबेस बैकलिंक",
 	"databaseAttrViewMode": "डेटाबेस गुणों की डिफ़ॉल्ट स्थिति",

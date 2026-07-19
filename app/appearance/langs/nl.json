@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "Item maken met sjabloon",
+	"newTemplate": "Nieuwe sjabloon",
+	"itemTemplate": "Itemsjabloon",
 	"databaseItemFiltered": "Het item is gefilterd. Verwijder het filter of de groeperingsinstellingen om het te bekijken.",
 	"copyDatabaseItemLink": "Itemkoppeling kopiëren",
 	"databaseViewNotFound": "Databaseweergave niet gevonden",
@@ -10,7 +13,6 @@
 	"contentTemplate": "Inhoudssjabloon",
 	"createDetachedBlock": "Niet-gebonden blok maken",
 	"createBoundBlock": "Gebonden blok maken",
-	"useTemplate": "Sjablonen gebruiken voor ${x}",
 	"setAsDefault": "Instellen als standaard",
 	"avBacklinks": "${count} databasebacklinks",
 	"databaseAttrViewMode": "Standaardstatus van database-eigenschappen",

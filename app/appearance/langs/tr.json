@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "Şablonla öge oluştur",
+	"newTemplate": "Yeni şablon",
+	"itemTemplate": "Öge şablonu",
 	"databaseItemFiltered": "Öğe filtrelendi. Görüntülemek için filtreyi veya gruplama ayarlarını kaldırın.",
 	"copyDatabaseItemLink": "Öğe bağlantısını kopyala",
 	"databaseViewNotFound": "Veritabanı görünümü bulunamadı",
@@ -10,7 +13,6 @@
 	"contentTemplate": "İçerik şablonu",
 	"createDetachedBlock": "Bağlanmamış blok oluştur",
 	"createBoundBlock": "Bağlı blok oluştur",
-	"useTemplate": "${x} için şablon kullan",
 	"setAsDefault": "Varsayılan olarak ayarla",
 	"avBacklinks": "${count} veritabanı geri bağlantısı",
 	"databaseAttrViewMode": "Veritabanı özelliklerinin varsayılan durumu",

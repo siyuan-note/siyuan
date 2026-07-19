@@ -121,8 +121,8 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             </span>
             <div class="fn__space"></div>
             ${editable ? `<div class="av__new fn__flex">
-                <button data-type="av-add-more" class="b3-button b3-button--small">${window.siyuan.languages.new}</button>
-                <button data-type="av-add-template" class="b3-button b3-button--small ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.template}"><svg><use xlink:href="#iconDown"></use></svg></button>
+                <button data-type="av-add-more" class="b3-button">${window.siyuan.languages.new}</button>
+                <button data-type="av-add-template" class="b3-button ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.template}"><svg><use xlink:href="#iconDown"></use></svg></button>
             </div>` : ""}
             <div class="fn__space"></div>
             ${data.isMirror ? ` <span data-av-id="${data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.mirrorTip}">

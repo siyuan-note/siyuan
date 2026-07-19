@@ -110,22 +110,36 @@
 
   &__new {
     .b3-button {
+      font-size: inherit;
+      line-height: 1.625;
       min-height: 24px;
+      transition: var(--b3-background-transition);
+
+      &:hover,
+      &:focus {
+        background-color: color-mix(in srgb, var(--b3-theme-primary) 88%, black);
+        box-shadow: none;
+      }
+
+      &:active {
+        background-color: color-mix(in srgb, var(--b3-theme-primary) 80%, black);
+        box-shadow: none;
+      }
 
       &:first-child {
         border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
-        padding: 0 8px;
+        padding: 0 .5em;
       }
 
       &:last-child {
         border-left: 1px solid rgba(255, 255, 255, .25);
         border-radius: 0 var(--b3-border-radius) var(--b3-border-radius) 0;
-        padding: 0 4px;
+        padding: 0 .25em;
 
         svg {
-          height: 12px;
+          height: 1em;
           margin: 0;
-          width: 12px;
+          width: 1em;
         }
       }
     }

@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "Create item with template",
+	"newTemplate": "New template",
+	"itemTemplate": "Item template",
 	"databaseItemFiltered": "The item is filtered. Remove the filter or grouping settings to view it.",
 	"copyDatabaseItemLink": "Copy item link",
 	"databaseViewNotFound": "Database view not found",
@@ -10,7 +13,6 @@
 	"contentTemplate": "Content template",
 	"createDetachedBlock": "Create unbound block",
 	"createBoundBlock": "Create bound block",
-	"useTemplate": "Use templates for ${x}",
 	"setAsDefault": "Set as default",
 	"avBacklinks": "${count} database backlinks",
 	"databaseAttrViewMode": "Default state of database attributes",

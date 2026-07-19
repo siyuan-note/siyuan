@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "テンプレートで項目を新規作成",
+	"newTemplate": "新規テンプレート",
+	"itemTemplate": "項目テンプレート",
 	"databaseItemFiltered": "項目はフィルターされています。表示するには、フィルターまたはグループ設定を解除してください。",
 	"copyDatabaseItemLink": "項目のリンクをコピー",
 	"databaseViewNotFound": "データベースビューが見つかりません",
@@ -10,7 +13,6 @@
 	"contentTemplate": "コンテンツテンプレート",
 	"createDetachedBlock": "未バインドブロックを作成",
 	"createBoundBlock": "バインドブロックを作成",
-	"useTemplate": "${x} でテンプレートを使用",
 	"setAsDefault": "デフォルトに設定",
 	"avBacklinks": "データベースのバックリンク ${count} 件",
 	"databaseAttrViewMode": "データベースプロパティのデフォルト状態",

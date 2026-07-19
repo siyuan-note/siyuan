@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "Crear elemento con una plantilla",
+	"newTemplate": "Nueva plantilla",
+	"itemTemplate": "Plantilla de elemento",
 	"databaseItemFiltered": "El elemento está filtrado. Elimina el filtro o la configuración de agrupación para verlo.",
 	"copyDatabaseItemLink": "Copiar enlace del elemento",
 	"databaseViewNotFound": "No se encontró la vista de la base de datos",
@@ -10,7 +13,6 @@
 	"contentTemplate": "Plantilla de contenido",
 	"createDetachedBlock": "Crear bloque no vinculado",
 	"createBoundBlock": "Crear bloque vinculado",
-	"useTemplate": "Usar plantillas para ${x}",
 	"setAsDefault": "Establecer como predeterminado",
 	"avBacklinks": "${count} enlaces inversos de base de datos",
 	"databaseAttrViewMode": "Estado predeterminado de las propiedades de la base de datos",

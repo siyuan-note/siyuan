@@ -569,7 +569,7 @@ export const openNewItemTemplateDialog = (options: {
     }
     let defaultTemplateID = options.data.defaultTemplateID || "";
     const dialog = new Dialog({
-        title: `${window.siyuan.languages.newRow} ${window.siyuan.languages.template}`,
+        title: window.siyuan.languages.itemTemplate,
         width: "820px",
         height: "70vh",
         content: `<div class="fn__flex fn__flex-column" style="height:100%">
@@ -594,7 +594,7 @@ export const openNewItemTemplateDialog = (options: {
     };
 
     const render = () => {
-        listElement.innerHTML = `<button class="b3-menu__item" data-role="add-template"><svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newRow} ${window.siyuan.languages.template}</span></button><button class="b3-menu__separator"></button>` +
+        listElement.innerHTML = `<button class="b3-menu__item" data-role="add-template"><svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newTemplate}</span></button><button class="b3-menu__separator"></button>` +
             templates.map((item, index) => `<button class="b3-menu__item${index === selectedIndex ? " b3-menu__item--current" : ""}" data-index="${index}" draggable="true"><svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg><span class="b3-menu__label fn__ellipsis">${escapeHtml(item.name)}</span></button>`).join("");
         hostElement.innerHTML = selectedIndex < 0 ? "" : getEditorHTML(templates[selectedIndex], primaryKey, fields, options.protyle.notebookId);
         const target = hostElement.querySelector('[data-role="target-type"]') as HTMLSelectElement;
@@ -952,7 +952,7 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
         const menu = new Menu("av-new-item-template");
         menu.addItem({
             iconHTML: "",
-            label: window.siyuan.languages.useTemplate.replace("${x}", escapeHtml(data.name || "")),
+            label: window.siyuan.languages.newItemWithTemplate,
             type: "readonly",
         });
         menu.addItem({
@@ -1111,7 +1111,7 @@ export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElemen
         menu.addItem({type: "separator"});
         menu.addItem({
             iconHTML: "",
-            label: `${window.siyuan.languages.new} ${window.siyuan.languages.template}`,
+            label: window.siyuan.languages.newTemplate,
             click: () => openNewItemTemplateDialog({
                 protyle: options.protyle,
                 blockElement: options.blockElement,

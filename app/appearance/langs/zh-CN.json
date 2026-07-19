@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "使用模板新建条目",
+	"newTemplate": "新建模板",
+	"itemTemplate": "条目模板",
 	"databaseItemFiltered": "条目已被过滤，可取消过滤或分组设置后进行查看",
 	"copyDatabaseItemLink": "复制条目链接",
 	"databaseViewNotFound": "未找到数据库视图",
@@ -10,7 +13,6 @@
 	"contentTemplate": "内容模板",
 	"createDetachedBlock": "创建非绑定块",
 	"createBoundBlock": "创建绑定块",
-	"useTemplate": "${x} 使用模板",
 	"setAsDefault": "设为默认",
 	"avBacklinks": "${count} 个反向关联",
 	"databaseAttrViewMode": "数据库属性默认状态",

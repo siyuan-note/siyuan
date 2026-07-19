@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "Eintrag mit Vorlage erstellen",
+	"newTemplate": "Neue Vorlage",
+	"itemTemplate": "Eintragsvorlage",
 	"databaseItemFiltered": "Der Eintrag wird gefiltert. Entferne den Filter oder die Gruppierungseinstellungen, um ihn anzuzeigen.",
 	"copyDatabaseItemLink": "Eintragslink kopieren",
 	"databaseViewNotFound": "Datenbankansicht nicht gefunden",
@@ -10,7 +13,6 @@
 	"contentTemplate": "Inhaltsvorlage",
 	"createDetachedBlock": "Ungebundenen Block erstellen",
 	"createBoundBlock": "Gebundenen Block erstellen",
-	"useTemplate": "Vorlagen für ${x} verwenden",
 	"setAsDefault": "Als Standard festlegen",
 	"avBacklinks": "${count} Datenbank-Rückverknüpfungen",
 	"databaseAttrViewMode": "Standardstatus der Datenbankeigenschaften",

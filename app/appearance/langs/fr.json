@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "Créer un élément avec un modèle",
+	"newTemplate": "Nouveau modèle",
+	"itemTemplate": "Modèle d'élément",
 	"databaseItemFiltered": "L’élément est filtré. Supprimez le filtre ou les paramètres de regroupement pour l’afficher.",
 	"copyDatabaseItemLink": "Copier le lien de l’élément",
 	"databaseViewNotFound": "Vue de base de données introuvable",
@@ -10,7 +13,6 @@
 	"contentTemplate": "Modèle de contenu",
 	"createDetachedBlock": "Créer un bloc non lié",
 	"createBoundBlock": "Créer un bloc lié",
-	"useTemplate": "Utiliser des modèles pour ${x}",
 	"setAsDefault": "Définir par défaut",
 	"avBacklinks": "${count} liens retour de base de données",
 	"databaseAttrViewMode": "État par défaut des propriétés de la base de données",

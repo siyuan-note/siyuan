@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "템플릿으로 항목 만들기",
+	"newTemplate": "새 템플릿",
+	"itemTemplate": "항목 템플릿",
 	"databaseItemFiltered": "항목이 필터링되었습니다. 보려면 필터 또는 그룹 설정을 해제하세요.",
 	"copyDatabaseItemLink": "항목 링크 복사",
 	"databaseViewNotFound": "데이터베이스 보기를 찾을 수 없습니다",
@@ -10,7 +13,6 @@
 	"contentTemplate": "콘텐츠 템플릿",
 	"createDetachedBlock": "바인딩되지 않은 블록 만들기",
 	"createBoundBlock": "바인딩된 블록 만들기",
-	"useTemplate": "${x}에 템플릿 사용",
 	"setAsDefault": "기본값으로 설정",
 	"avBacklinks": "데이터베이스 백링크 ${count}개",
 	"databaseAttrViewMode": "데이터베이스 속성 기본 상태",

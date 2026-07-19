@@ -1,4 +1,7 @@
 {
+	"newItemWithTemplate": "Создать элемент по шаблону",
+	"newTemplate": "Новый шаблон",
+	"itemTemplate": "Шаблон элемента",
 	"databaseItemFiltered": "Элемент отфильтрован. Удалите фильтр или настройки группировки, чтобы просмотреть его.",
 	"copyDatabaseItemLink": "Копировать ссылку на элемент",
 	"databaseViewNotFound": "Представление базы данных не найдено",
@@ -10,7 +13,6 @@
 	"contentTemplate": "Шаблон содержимого",
 	"createDetachedBlock": "Создать непривязанный блок",
 	"createBoundBlock": "Создать привязанный блок",
-	"useTemplate": "Использовать шаблоны для ${x}",
 	"setAsDefault": "Установить по умолчанию",
 	"avBacklinks": "${count} обратных ссылок базы данных",
 	"databaseAttrViewMode": "Состояние свойств базы данных по умолчанию",

@@ -135,6 +135,7 @@ export class MobileOutline extends Model {
                 this.saveExpendIds();
             },
             blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
+            topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
         });
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
@@ -256,7 +257,7 @@ export class MobileOutline extends Model {
                 const ghostElement = state.selectedElement.cloneNode(true) as HTMLElement;
                 ghostElement.setAttribute("id", "dragGhost");
                 ghostElement.firstElementChild.setAttribute("style", "padding-left:4px");
-                ghostElement.setAttribute("style", `border-radius: var(--b3-border-radius);background-color: var(--b3-list-hover);position: fixed; top: ${touch.clientY}px; left: ${touch.clientX}px; z-index:999997;`);
+                ghostElement.setAttribute("style", `border-radius: var(--b3-border-radius);background-color: var(--b3-list-hover);pointer-events:none;position: fixed; top: ${touch.clientY}px; left: ${touch.clientX}px; z-index:999997;`);
                 document.body.append(ghostElement);
                 state.ghostElement = ghostElement;
             }
@@ -271,7 +272,11 @@ export class MobileOutline extends Model {
             // 通过 elementFromPoint 定位手指下的目标项
             const target = document.elementFromPoint(touch.clientX, touch.clientY);
             const selectItem = target?.closest(".b3-list-item") as HTMLElement;
-            if (!selectItem || selectItem.tagName !== "LI") return;
+            if (!selectItem || selectItem.tagName !== "LI" || !scrollElement.contains(selectItem)) {
+                this.clearDragIndicators();
+                state.selectItem = null;
+                return;
+            }
 
             this.clearDragIndicators();
             if (selectItem === state.selectedElement) {
@@ -408,7 +413,9 @@ export class MobileOutline extends Model {
         if (!nodeElement) {
             return;
         }
-        if (nodeElement.getAttribute("data-type") === "NodeHeading") {
+        if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
+            !hasClosestByClassName(nodeElement, "bq") &&
+            !hasClosestByClassName(nodeElement, "callout-content")) {
             this.setCurrentById(nodeElement.getAttribute("data-node-id"));
         } else {
             let previousElement = getPreviousBlock(nodeElement);
@@ -464,6 +471,9 @@ export class MobileOutline extends Model {
             item.classList.remove("b3-list-item--focus");
         });
         let currentElement = this.element.querySelector(`.b3-list-item[data-node-id="${id}"]`) as HTMLElement;
+        if (!currentElement) {
+            return;
+        }
         if (window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand) {
             let ulElement = currentElement.parentElement;
             while (ulElement && !ulElement.classList.contains("b3-list") && ulElement.tagName === "UL") {
@@ -479,8 +489,9 @@ export class MobileOutline extends Model {
         }
         if (currentElement) {
             currentElement.classList.add("b3-list-item--focus");
-            const elementRect = this.element.getBoundingClientRect();
-            this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
+            const elementRect = this.tree.element.getBoundingClientRect();
+            this.tree.element.scrollTop += currentElement.getBoundingClientRect().top -
+                (elementRect.top + elementRect.height / 2);
         }
     }
 
@@ -494,7 +505,7 @@ export class MobileOutline extends Model {
         if (blockId !== this.blockId) {
             this.tree.updateData(null);
             this.updateDocTitle();
-            this.element.scrollTop = 0;
+            this.tree.element.scrollTop = 0;
         }
         this.blockId = blockId;
         this.isPreview = isPreview;
@@ -522,19 +533,19 @@ export class MobileOutline extends Model {
         if (currentElement) {
             currentId = currentElement.getAttribute("data-node-id");
         }
-        const scrollTop = this.element.scrollTop;
+        const scrollTop = this.tree.element.scrollTop;
         this.tree.updateData(data.data);
 
         if (this.isPreview) {
             this.tree.element.querySelectorAll(".popover__block").forEach(item => {
                 item.classList.remove("popover__block");
             });
-            this.element.scrollTop = scrollTop;
+            this.tree.element.scrollTop = scrollTop;
         } else if (this.blockId) {
             if ((this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement).value) {
                 this.setFilter();
             }
-            this.element.scrollTop = scrollTop;
+            this.tree.element.scrollTop = scrollTop;
         }
         if (currentId) {
             currentElement = this.element.querySelector(`[data-node-id="${currentId}"]`);

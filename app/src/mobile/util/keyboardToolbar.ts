@@ -487,17 +487,17 @@ export const hideKeyboardToolbar = () => {
         return;
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
-    if (toolbarElement.classList.contains("fn__none")) {
-        return;
-    }
+    const toolbarHidden = toolbarElement.classList.contains("fn__none");
     toolbarElement.classList.add("fn__none");
     toolbarElement.style.height = "";
     const editor = getCurrentEditor();
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = "";
-        editor.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("mobile-keyboard-hide");
-        });
+        if (!toolbarHidden) {
+            editor.protyle.app.plugins.forEach(item => {
+                item.eventBus.emit("mobile-keyboard-hide");
+            });
+        }
     }
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateY(0px)") {

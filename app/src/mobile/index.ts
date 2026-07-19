@@ -21,7 +21,14 @@ import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {getLocalStorage, initWindowOpenOverride, isChromeBrowser, isInMobileApp, writeText} from "../protyle/util/compatibility";
+import {
+    getLocalStorage,
+    initWindowOpenOverride,
+    isChromeBrowser,
+    isInIOS,
+    isInMobileApp,
+    writeText
+} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
 import {ensureOnboarding} from "../onboarding";
 import {checkPublishServiceClosed} from "../util/processMessage";
@@ -170,10 +177,15 @@ class App {
                     if (!isInMobileApp()) {
                         if (isChromeBrowser()) {
                             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
-                        } else if (!window.siyuan.config.readonly && !window.siyuan.isPublish
-                            && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
-                            showMessage(window.siyuan.languages.useChrome, 0, "error");
+                        } else {
+                            document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-visual, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
+                            if (!window.siyuan.config.readonly && !window.siyuan.isPublish
+                                && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
+                                showMessage(window.siyuan.languages.useChrome, 0, "error");
+                            }
                         }
+                    } else if (!isInIOS()) {
+                        document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-visual, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
                     }
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;

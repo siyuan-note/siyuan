@@ -6,7 +6,7 @@ import {
     isContainerBlock,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByTag} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByTag, isInEmbedBlock} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
@@ -366,6 +366,44 @@ export const getSelectionOffset = (selectElement: Node, editorElement?: Element,
     position.start = preSelectionRange.toString().length + preSelectionRange.cloneContents().querySelectorAll("br, .emoji").length;
     position.end = position.start + range.toString().length + range.cloneContents().querySelectorAll("br, .emoji").length;
     return position;
+};
+
+// 记录插入块前的焦点位置，供撤销回放完成后恢复。
+export const getUndoFocusContext = (editorElement: Element, range?: Range): Record<string, string> | undefined => {
+    if (!range || !editorElement.contains(range.startContainer) || !editorElement.contains(range.endContainer)) {
+        return undefined;
+    }
+    const blockElement = hasClosestBlock(range.startContainer);
+    if (!blockElement || !blockElement.contains(range.endContainer)) {
+        return undefined;
+    }
+    const position = getSelectionOffset(blockElement, undefined, range);
+    return {
+        undoFocusId: blockElement.getAttribute("data-node-id"),
+        undoFocusStart: position.start.toString(),
+        undoFocusEnd: position.end.toString(),
+    };
+};
+
+// 在撤销操作全部应用后，根据插入前保存的焦点位置重建选区。
+export const restoreUndoFocus = (protyle: IProtyle, operations: IOperation[]) => {
+    const operation = operations.find(item => item.context?.undoFocusId);
+    if (!operation) {
+        return false;
+    }
+    const start = Number(operation.context.undoFocusStart);
+    const end = Number(operation.context.undoFocusEnd);
+    if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < 0) {
+        return false;
+    }
+    const blockElements = Array.from(protyle.wysiwyg.element.querySelectorAll(
+        `[data-node-id="${operation.context.undoFocusId}"]`
+    ));
+    const blockElement = blockElements.find(item => !isInEmbedBlock(item, false)) || blockElements[0];
+    if (!blockElement) {
+        return false;
+    }
+    return !!focusByOffset(blockElement, start, end);
 };
 
 const searchNode = (
@@ -827,4 +865,3 @@ export const focusSideBlock = (updateElement: Element) => {
     }
     focusByRange(range);
 };
-

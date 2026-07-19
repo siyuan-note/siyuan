@@ -3,6 +3,7 @@ import {preventScroll} from "../scroll/preventScroll";
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {matchHotKey} from "../util/hotKey";
+import {restoreUndoFocus} from "../util/selection";
 import {ipcRenderer} from "electron";
 import {markMirror, refreshUndoButtons, requestRedo, requestUndo} from "./globalUndo";
 import {scrollCenter} from "../../util/highlightById";
@@ -62,6 +63,9 @@ export class Undo implements IUndo {
             }
         }
         onTransaction(protyle, operations, true);
+        if (restoreUndoFocus(protyle, operations)) {
+            scrollCenter(protyle);
+        }
         document.querySelector(".av__panel")?.remove();
         preventScroll(protyle);
         // 同步 toolbar range，避免 undo/redo 替换 DOM 后 range 变为 detached，
@@ -157,6 +161,7 @@ export class LocalUndo implements IUndo {
             }
             onTransaction(protyle, state.undoOperations, true);
             transaction(protyle, state.undoOperations, undefined, {skipSync: true});
+            restoreUndoFocus(protyle, state.undoOperations);
         } else {
             for (let i = state.doOperations.length - 1; i >= 0; i--) {
                 if (state.doOperations[i].action === "insert") {

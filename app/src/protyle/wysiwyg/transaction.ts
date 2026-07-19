@@ -1704,7 +1704,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
     }
 };
 
-export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: string) => {
+export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: string, undoContext?: Record<string, string>) => {
     const id = element.getAttribute("data-node-id");
     const newHTML = element.outerHTML;
     if (newHTML === oldHTML.replace("<wbr>", "")) {
@@ -1718,7 +1718,8 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
     }], [{
         id,
         data: oldHTML,
-        action: "update"
+        action: "update",
+        context: undoContext,
     }]);
 };
 

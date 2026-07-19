@@ -81,7 +81,8 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         // 数据行数不超过 trim 有效范围（视口 + 上下 buffer）时不 trim（如看板中较短的分组），
         // 全部渲染即可，避免短列因 trim 导致 spacer 抖动或全部移除后无法回填
         const trimRange = viewportHeight + buffer * 2;
-        if (dataRows.length <= Math.ceil(trimRange / Math.max(state.rowHeight || currentRows[0].offsetHeight, 1))) {
+        if (bodyEl.dataset.avLocateWindow !== "true" &&
+            dataRows.length <= Math.ceil(trimRange / Math.max(state.rowHeight || currentRows[0].offsetHeight, 1))) {
             // 清理可能残留的 spacer 和状态，恢复全部渲染
             const spacerEl = bodyEl.querySelector(".av__spacer") as HTMLElement;
             if (spacerEl) {

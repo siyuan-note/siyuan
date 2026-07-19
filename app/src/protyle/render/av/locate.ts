@@ -25,6 +25,7 @@ const queuedLocateRequests = new Map<string, {
     activationToken?: symbol,
 }>();
 const renderTokens = new WeakMap<HTMLElement, symbol>();
+const renderedAVData = new WeakMap<HTMLElement, IAV>();
 const highlightTokens = new WeakMap<HTMLElement, symbol>();
 const highlightStates = new WeakMap<HTMLElement, {element: HTMLElement, className: string, timer: number}>();
 
@@ -85,6 +86,48 @@ export const isCurrentAVRender = (blockElement: HTMLElement, token: symbol) => {
     return renderTokens.get(blockElement) === token;
 };
 
+const getLocalAVLocateData = (data: IAV | undefined, request: IAVLocateRequest) => {
+    if (!data || (request.viewID && request.viewID !== data.viewID)) {
+        return;
+    }
+    const findTarget = (view: IAVTable | IAVGallery | IAVKanban, groupID = "") => {
+        const items = data.viewType === "table" ? (view as IAVTable).rows : (view as IAVGallery | IAVKanban).cards;
+        const localIndex = items?.findIndex(item => item.id === request.itemID) ?? -1;
+        if (localIndex < 0) {
+            return;
+        }
+        const offset = data.target?.status === "visible" && (data.target.groupID || "") === groupID ? data.target.offset : 0;
+        return {
+            status: "visible" as const,
+            itemID: request.itemID,
+            groupID: groupID || undefined,
+            index: offset + localIndex,
+            offset,
+            pageSize: view.pageSize,
+        };
+    };
+    const view = data.view as IAVTable | IAVGallery | IAVKanban;
+    let target: IAVRenderTarget | undefined;
+    if (view.groups?.length > 0) {
+        const groups = request.groupID ? [
+            ...view.groups.filter(group => group.id === request.groupID),
+            ...view.groups.filter(group => group.id !== request.groupID),
+        ] : view.groups;
+        for (const group of groups as Array<IAVTable | IAVGallery | IAVKanban>) {
+            target = findTarget(group, group.id);
+            if (target) {
+                break;
+            }
+        }
+    } else {
+        target = findTarget(view);
+    }
+    if (!target) {
+        return;
+    }
+    return {...data, target};
+};
+
 export const queueAVLocateRequest = (blockID: string, request: IAVLocateRequest) => {
     const previous = queuedLocateRequests.get(blockID);
     if (previous) {
@@ -101,14 +144,28 @@ export const queueAVLocateRequest = (blockID: string, request: IAVLocateRequest)
 
 export const activateAVLocate = (protyle: IProtyle, blockID: string, request?: IAVLocateRequest) => {
     const blockElement = protyle?.wysiwyg.element.querySelector(`.av[data-node-id="${blockID}"]`) as HTMLElement;
-    if (!request || !blockElement) {
+    if (!request || !blockElement || blockElement.getAttribute("data-render") !== "true") {
         return false;
     }
     clearLocatedHighlight(blockElement);
     locateRequests.set(blockElement, request);
     blockElement.removeAttribute("data-render");
-    import("./render").then(({avRender}) => avRender(blockElement, protyle));
+    const localData = getLocalAVLocateData(renderedAVData.get(blockElement), request);
+    import("./render").then(({avRender}) => avRender(blockElement, protyle, undefined, true, localData));
     return true;
+};
+
+export const activateAVLocateWithRetry = (protyle: IProtyle, blockID: string, request: IAVLocateRequest) => {
+    const timeout = performance.now() + locateQueueTimeout;
+    const retry = () => {
+        if (activateAVLocate(protyle, blockID, request)) {
+            return;
+        }
+        if (protyle.element.isConnected && performance.now() < timeout) {
+            window.setTimeout(retry, 50);
+        }
+    };
+    retry();
 };
 
 export const activateQueuedAVLocate = (protyle: IProtyle, blockID: string) => {
@@ -181,6 +238,7 @@ export const getAVLocateParams = (blockElement: HTMLElement, enabled = true) => 
 export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData: {
     virtualData: { [key: string]: IAVVirtualData },
 }) => {
+    renderedAVData.set(blockElement, data);
     const request = getAVLocateRequest(blockElement);
     if (!blockElement.isConnected || !request || !data.target || data.target.itemID !== request.itemID) {
         return;

@@ -43,7 +43,12 @@ export class Menu {
             if (itemElement.classList.contains("b3-menu__item--readonly")) {
                 return;
             }
-            const subMenuElement = itemElement.querySelector(".b3-menu__submenu") as HTMLElement;
+            const subMenuElement = itemElement.querySelector(":scope > .b3-menu__submenu") as HTMLElement;
+            // 子菜单容器的 mouseover 会向上匹配到所属菜单项，无需重新定位已打开的子菜单
+            if (subMenuElement?.contains(target)) {
+                return;
+            }
+            const isSubMenuShown = itemElement.classList.contains("b3-menu__item--show");
             this.element.querySelectorAll(".b3-menu__item--show").forEach((item) => {
                 if (!item.contains(itemElement) && item !== itemElement && !itemElement.contains(item)) {
                     item.classList.remove("b3-menu__item--show");
@@ -57,7 +62,7 @@ export class Menu {
                 return;
             }
             itemElement.classList.add("b3-menu__item--show");
-            if (!this.element.classList.contains("b3-menu--fullscreen")) {
+            if (!isSubMenuShown && !this.element.classList.contains("b3-menu--fullscreen")) {
                 this.showSubMenu(subMenuElement);
             }
         });

@@ -285,16 +285,21 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		}
 
 		groupTargetItemID := ""
-		if nil != target && target.Status != "viewNotFound" && (target.Status != "visible" || groupView.ID == targetGroupID) {
-			groupTargetItemID = target.ItemID
+		if nil != target && target.Status != "viewNotFound" {
+			if (targetGroupID != "" && groupView.ID == targetGroupID) || (targetGroupID == "" && target.Status != "visible") {
+				groupTargetItemID = target.ItemID
+			}
 		}
 		targetIndex, renderErr := renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize, ignoreRows, groupTargetItemID)
 		err = renderErr
 		if nil != err {
 			return
 		}
+		if !ignoreRows {
+			hideEmptyGroupViews(view, groupViewable)
+		}
 		if nil != target && target.Status != "viewNotFound" && targetIndex >= 0 {
-			if groupView.GroupHidden == 0 {
+			if groupViewable.GetGroupHidden() == 0 {
 				if target.Status != "visible" || groupView.ID == targetGroupID {
 					setAttributeViewRenderTarget(target, groupView.ID, targetIndex, groupPageSize, view.PageSize)
 				}
@@ -304,9 +309,6 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			}
 		}
 
-		if !ignoreRows {
-			hideEmptyGroupViews(view, groupViewable)
-		}
 		groups = append(groups, groupViewable)
 
 		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）

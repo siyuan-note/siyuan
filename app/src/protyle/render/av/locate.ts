@@ -3,6 +3,7 @@ import {showMessage} from "../../../dialog/message";
 import {transaction} from "../../wysiwyg/transaction";
 import {clearSelect} from "../../util/clear";
 import {addDragFill} from "./cell";
+import {scrollCenter} from "../../../util/highlightById";
 
 export interface IAVLocateRequest {
     itemID: string;
@@ -17,18 +18,67 @@ export interface IAVLocateRequest {
 const locateRequests = new WeakMap<HTMLElement, IAVLocateRequest>();
 const queuedLocateRequests = new Map<string, IAVLocateRequest>();
 const renderTokens = new WeakMap<HTMLElement, symbol>();
-const highlightTimers = new WeakMap<HTMLElement, number>();
+const highlightTokens = new WeakMap<HTMLElement, symbol>();
 
-const highlightTemporarily = (blockElement: HTMLElement, targetElement: HTMLElement, className: string) => {
-    window.clearTimeout(highlightTimers.get(blockElement));
-    targetElement.classList.add(className);
-    const timer = window.setTimeout(() => {
-        targetElement.classList.remove(className);
-        if (highlightTimers.get(blockElement) === timer) {
-            highlightTimers.delete(blockElement);
+const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, viewType: TAVView,
+                              groupQuery: string, itemID: string) => {
+    const token = Symbol();
+    highlightTokens.set(blockElement, token);
+    const waitStartedAt = performance.now();
+    let highlightStartedAt: number;
+    let previousRect: DOMRect;
+    let stableFrames = 0;
+    const className = viewType === "table" ? "av__row--locate" : "av__gallery-item--locate";
+    const targetQuery = viewType === "table" ? `.av__row[data-id="${itemID}"]` : `.av__gallery-item[data-id="${itemID}"]`;
+    const clearHighlight = () => {
+        blockElement.querySelectorAll(`.${className}`).forEach(item => item.classList.remove(className));
+    };
+    const frame = () => {
+        if (highlightTokens.get(blockElement) !== token || !blockElement.isConnected) {
+            return;
         }
-    }, 1024);
-    highlightTimers.set(blockElement, timer);
+        const now = performance.now();
+        const targetElement = blockElement.querySelector(groupQuery)?.querySelector(targetQuery) as HTMLElement;
+        if (targetElement) {
+            const rect = targetElement.getBoundingClientRect();
+            const contentRect = protyle.contentElement.getBoundingClientRect();
+            const visible = rect.height > 0 && rect.bottom > contentRect.top && rect.top < contentRect.bottom;
+            if (visible && previousRect && Math.abs(previousRect.top - rect.top) < 0.5 &&
+                Math.abs(previousRect.left - rect.left) < 0.5 && Math.abs(previousRect.width - rect.width) < 0.5 &&
+                Math.abs(previousRect.height - rect.height) < 0.5) {
+                stableFrames++;
+            } else {
+                stableFrames = 0;
+            }
+            previousRect = rect;
+            if (stableFrames >= 2) {
+                if (highlightStartedAt === undefined) {
+                    highlightStartedAt = now;
+                    clearHighlight();
+                    if (viewType === "table") {
+                        protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl").forEach(item => {
+                            item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
+                        });
+                    }
+                }
+                targetElement.classList.add(className);
+            }
+        } else {
+            previousRect = undefined;
+            stableFrames = 0;
+        }
+        if (highlightStartedAt !== undefined && now - highlightStartedAt >= 1024) {
+            clearHighlight();
+            highlightTokens.delete(blockElement);
+            return;
+        }
+        if (highlightStartedAt === undefined && now - waitStartedAt >= 10000) {
+            highlightTokens.delete(blockElement);
+            return;
+        }
+        requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
 };
 
 export const beginAVRender = (blockElement: HTMLElement) => {
@@ -180,12 +230,6 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
     if (data.viewType === "table") {
         const rowElement = bodyElement?.querySelector(`.av__row[data-id="${request.itemID}"]`) as HTMLElement;
         targetElement = rowElement?.querySelector(".av__cell[data-dtype=\"block\"]") as HTMLElement;
-        if (rowElement && request.highlight) {
-            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl").forEach(item => {
-                item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
-            });
-            highlightTemporarily(blockElement, rowElement, "av__row--hl");
-        }
         if (targetElement && request.select !== false) {
             clearSelect(["cell"], blockElement);
             targetElement.classList.add("av__cell--select");
@@ -193,13 +237,9 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         }
     } else {
         targetElement = bodyElement?.querySelector(`.av__gallery-item[data-id="${request.itemID}"]`) as HTMLElement;
-        if (targetElement && (request.select !== false || request.highlight)) {
+        if (targetElement && request.select !== false && !request.highlight) {
             blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => item.classList.remove("av__gallery-item--select"));
-            if (request.highlight) {
-                highlightTemporarily(blockElement, targetElement, "av__gallery-item--select");
-            } else {
-                targetElement.classList.add("av__gallery-item--select");
-            }
+            targetElement.classList.add("av__gallery-item--select");
         }
     }
     if (!targetElement) {
@@ -209,7 +249,10 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         const contentRect = protyle.contentElement.getBoundingClientRect();
         protyle.contentElement.scrollTop += blockElement.getBoundingClientRect().top - contentRect.top;
     } else {
-        targetElement.scrollIntoView({block: "center", inline: "nearest"});
+        scrollCenter(protyle, targetElement, "center");
+    }
+    if (request.highlight) {
+        highlightLocatedItem(blockElement, protyle, data.viewType, groupQuery, request.itemID);
     }
     clearAVLocateRequest(blockElement, request);
 };

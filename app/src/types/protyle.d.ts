@@ -386,6 +386,8 @@ interface IMenuItem {
     hotkey?: string;
     /** 提示的位置 */
     tipPosition?: string;
+    /** 是否在精简版中显示。默认值：false */
+    showInLite?: boolean;
 
     click?(protyle: import("../protyle").Protyle): void;
 }

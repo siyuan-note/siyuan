@@ -53,6 +53,23 @@ import {escapeHtml} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 
+const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
+    if (!lite) {
+        return toolbar;
+    }
+    const filtered = toolbar.filter(item => typeof item === "string" ||
+        Constants.INLINE_TYPE.concat("|").includes(item.name) || item.showInLite);
+    return filtered.filter((item, index) => {
+        const name = typeof item === "string" ? item : item.name;
+        if (name !== "|") {
+            return true;
+        }
+        const previous = filtered[index - 1];
+        const next = filtered[index + 1];
+        return previous && next && (typeof previous === "string" ? previous : previous.name) !== "|";
+    });
+};
+
 export class Toolbar {
     public element: HTMLElement;
     public subElement: HTMLElement;
@@ -76,7 +93,7 @@ export class Toolbar {
         this.toolbarHeight = 29;
         const inlineToolbarElement = document.querySelector('#keyboardToolbar .keyboard__action[data-type="inline-memo"]')?.parentElement;
         protyle.app.plugins.forEach(item => {
-            const pluginToolbar = item.updateProtyleToolbar(options.toolbar);
+            const pluginToolbar = filterPluginToolbar(item.updateProtyleToolbar(options.toolbar), protyle.lite);
             pluginToolbar.forEach(toolbarItem => {
                 if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
                     return;
@@ -144,7 +161,7 @@ export class Toolbar {
             "inline-memo",
         ]);
         protyle.app.plugins.forEach(item => {
-            const pluginToolbar = item.updateProtyleToolbar(protyle.options.toolbar);
+            const pluginToolbar = filterPluginToolbar(item.updateProtyleToolbar(protyle.options.toolbar), protyle.lite);
             pluginToolbar.forEach(toolbarItem => {
                 if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
                     return;

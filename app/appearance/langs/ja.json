@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "項目のリンクをコピー",
+	"databaseViewNotFound": "データベースビューが見つかりません",
+	"databaseItemNotFound": "データベース項目が見つかりません",
 	"alignment": "揃え",
 	"newItemTemplateUnavailableNotebookTip": "このテンプレートで以前選択したノートブックは閉じられているか、利用できません。保存先を選択し直してください",
 	"specificTime": "具体的な日時",

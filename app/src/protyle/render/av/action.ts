@@ -512,6 +512,27 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             });
             writeText(text);
         }
+    }, {
+        id: "copyDatabaseItemLink",
+        iconHTML: "",
+        label: window.siyuan.languages.copyDatabaseItemLink,
+        click() {
+            const databaseBlockID = blockElement.dataset.nodeId;
+            const viewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
+                blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") || "";
+            const links = Array.from(rowElements).map((item: HTMLElement) => {
+                const params = new URLSearchParams({
+                    avViewID: viewID,
+                    avItemID: item.dataset.id,
+                });
+                const groupID = (hasClosestByClassName(item, "av__body") as HTMLElement)?.dataset.groupId;
+                if (groupID) {
+                    params.set("avGroupID", groupID);
+                }
+                return `siyuan://blocks/${databaseBlockID}?${params.toString()}`;
+            });
+            writeText(links.join("\n"));
+        }
     }];
     if (hasBlock) {
         copyMenu.splice(1, 0, {

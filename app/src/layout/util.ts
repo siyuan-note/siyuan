@@ -32,6 +32,7 @@ import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {adjustDockPadding} from "./dock/util";
 import {setTitle} from "../util/processTitle";
+import {queueAVLocateRequest} from "../protyle/render/av/locate";
 
 const isBuiltInCustomModel = (type: string) => {
     return type === "siyuan-card" || type === "siyuan-database-row";
@@ -516,6 +517,13 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
 
     const info = parseUriInfo();
     if (info.id) {
+        if (info.avItemID) {
+            queueAVLocateRequest(info.id, {
+                itemID: info.avItemID,
+                viewID: info.avViewID,
+                groupID: info.avGroupID,
+            });
+        }
         openFileById({
             app,
             id: info.id,

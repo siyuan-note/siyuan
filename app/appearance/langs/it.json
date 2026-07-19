@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "Copia link elemento",
+	"databaseViewNotFound": "Vista del database non trovata",
+	"databaseItemNotFound": "Elemento del database non trovato",
 	"alignment": "Allineamento",
 	"newItemTemplateUnavailableNotebookTip": "Il taccuino selezionato in precedenza per questo modello è chiuso o non disponibile. Seleziona nuovamente una posizione di salvataggio",
 	"specificTime": "Data e ora specifiche",

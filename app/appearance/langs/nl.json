@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "Itemkoppeling kopiëren",
+	"databaseViewNotFound": "Databaseweergave niet gevonden",
+	"databaseItemNotFound": "Database-item niet gevonden",
 	"alignment": "Uitlijning",
 	"newItemTemplateUnavailableNotebookTip": "Het eerder voor deze sjabloon geselecteerde notitieboek is gesloten of niet beschikbaar. Selecteer opnieuw een opslaglocatie",
 	"specificTime": "Specifiek tijdstip",

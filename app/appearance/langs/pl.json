@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "Kopiuj łącze elementu",
+	"databaseViewNotFound": "Nie znaleziono widoku bazy danych",
+	"databaseItemNotFound": "Nie znaleziono elementu bazy danych",
 	"alignment": "Wyrównanie",
 	"newItemTemplateUnavailableNotebookTip": "Notatnik wybrany wcześniej dla tego szablonu jest zamknięty lub niedostępny. Wybierz ponownie lokalizację zapisu",
 	"specificTime": "Określona data i godzina",

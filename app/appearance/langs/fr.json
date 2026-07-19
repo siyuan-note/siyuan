@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "Copier le lien de l’élément",
+	"databaseViewNotFound": "Vue de base de données introuvable",
+	"databaseItemNotFound": "Élément de base de données introuvable",
 	"alignment": "Alignement",
 	"newItemTemplateUnavailableNotebookTip": "Le carnet précédemment sélectionné pour ce modèle est fermé ou indisponible. Veuillez sélectionner à nouveau un emplacement d'enregistrement",
 	"specificTime": "Date et heure précises",

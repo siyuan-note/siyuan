@@ -491,7 +491,6 @@ ${genHintItemHTML(item)}
                 const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 const newID = Lute.NewNodeID();
-                rowElement.dataset.id = newID;
                 newFileByRefHint(protyle, realFileName, () => {
                     transaction(protyle, [{
                         action: "replaceAttrViewBlock",
@@ -499,12 +498,15 @@ ${genHintItemHTML(item)}
                         previousID,
                         nextID: newID,
                         isDetached: false,
+                        blockID: nodeElement.dataset.nodeId,
+                        context: {protyleID: protyle.id},
                     }], [{
                         action: "replaceAttrViewBlock",
                         avID,
-                        previousID: newID,
-                        nextID: previousID,
+                        previousID,
                         isDetached: true,
+                        blockID: nodeElement.dataset.nodeId,
+                        context: {protyleID: protyle.id},
                     }]);
                 }, newID);
                 updateAttrViewCellAnimation(cellElement, {
@@ -514,19 +516,21 @@ ${genHintItemHTML(item)}
                 });
             } else {
                 const sourceId = tempElement.getAttribute("data-id");
-                rowElement.dataset.id = sourceId;
                 transaction(protyle, [{
                     action: "replaceAttrViewBlock",
                     avID,
                     previousID,
                     nextID: sourceId,
                     isDetached: false,
+                    blockID: nodeElement.dataset.nodeId,
+                    context: {protyleID: protyle.id},
                 }], [{
                     action: "replaceAttrViewBlock",
                     avID,
-                    previousID: sourceId,
-                    nextID: previousID,
+                    previousID,
                     isDetached: true,
+                    blockID: nodeElement.dataset.nodeId,
+                    context: {protyleID: protyle.id},
                 }]);
                 updateAttrViewCellAnimation(cellElement, {
                     type: "block",

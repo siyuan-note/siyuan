@@ -15,6 +15,7 @@ import {
     setNoteBook
 } from "./util/pathName";
 import {registerServiceWorker} from "./util/serviceWorker";
+import {queueAVLocateRequest} from "./protyle/render/av/locate";
 import {openFileById} from "./editor/util";
 import {activateOnboarding, ensureOnboarding} from "./onboarding";
 import {
@@ -289,6 +290,13 @@ const siyuanApp = new App();
 window.openFileByURL = (openURL) => {
     const blockInfo = parseSiYuanUriInfo(openURL);
     if (blockInfo != null) {
+        if (blockInfo.avItemID) {
+            queueAVLocateRequest(blockInfo.id, {
+                itemID: blockInfo.avItemID,
+                viewID: blockInfo.avViewID,
+                groupID: blockInfo.avGroupID,
+            });
+        }
         openFileById({
             app: siyuanApp,
             id: blockInfo.id,

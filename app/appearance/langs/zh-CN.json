@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "复制条目链接",
+	"databaseViewNotFound": "未找到数据库视图",
+	"databaseItemNotFound": "未找到数据库条目",
 	"alignment": "对齐方式",
 	"newItemTemplateUnavailableNotebookTip": "该模板原先选择的笔记本已关闭或不可用，请重新选择存放位置",
 	"specificTime": "具体时间",

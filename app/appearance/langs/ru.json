@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "Копировать ссылку на элемент",
+	"databaseViewNotFound": "Представление базы данных не найдено",
+	"databaseItemNotFound": "Элемент базы данных не найден",
 	"alignment": "Выравнивание",
 	"newItemTemplateUnavailableNotebookTip": "Блокнот, ранее выбранный для этого шаблона, закрыт или недоступен. Выберите место сохранения заново",
 	"specificTime": "Конкретные дата и время",

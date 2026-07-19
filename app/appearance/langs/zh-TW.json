@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "複製條目連結",
+	"databaseViewNotFound": "找不到資料庫檢視",
+	"databaseItemNotFound": "找不到資料庫條目",
 	"alignment": "對齊方式",
 	"newItemTemplateUnavailableNotebookTip": "該範本原先選擇的筆記本已關閉或無法使用，請重新選擇存放位置",
 	"specificTime": "具體時間",

@@ -1,4 +1,7 @@
 {
+	"copyDatabaseItemLink": "Eintragslink kopieren",
+	"databaseViewNotFound": "Datenbankansicht nicht gefunden",
+	"databaseItemNotFound": "Datenbankeintrag nicht gefunden",
 	"alignment": "Ausrichtung",
 	"newItemTemplateUnavailableNotebookTip": "Das zuvor für diese Vorlage ausgewählte Notizbuch ist geschlossen oder nicht verfügbar. Bitte wähle den Speicherort erneut aus",
 	"specificTime": "Bestimmter Zeitpunkt",

@@ -25,7 +25,7 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
             linkAddress = linkAddress.split("?page")[0];
         }
     }
-    if (processSiYuanUri(protyle.app, linkAddress)) {
+    if (processSiYuanUri(app, linkAddress)) {
         return;
     }
     /// #if MOBILE

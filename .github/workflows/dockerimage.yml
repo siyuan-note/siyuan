@@ -4,9 +4,11 @@ on:
   push:
     tags:
       - 'v*'
+      - '!*alpha*'
+      - '!*beta*'
+      - '!*rc*'
   workflow_dispatch:
 
-# ref https://docs.github.com/zh/actions/learn-github-actions/variables
 env:
   package_json: "app/package.json"
   docker_hub_owner: "b3log"
@@ -14,9 +16,7 @@ env:
 
 jobs:
   build:
-    # 仅 stable 版本（tag 不含 alpha/beta/rc）才构建 Docker 镜像，
-    # alpha/beta/rc 预发布版本跳过整个构建流程
-    if: ${{ github.repository_owner == 'siyuan-note' && !contains(github.ref_name, '-alpha') && !contains(github.ref_name, '-beta') && !contains(github.ref_name, '-rc') }}
+    if: ${{ github.repository_owner == 'siyuan-note' }}
     name: build
     runs-on: ubuntu-latest
     permissions:

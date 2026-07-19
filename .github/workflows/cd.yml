@@ -8,7 +8,6 @@ on:
       - '*-rc*'
   workflow_dispatch:
 
-# ref https://docs.github.com/zh/actions/learn-github-actions/variables
 env:
   package_json: "app/package.json"
 

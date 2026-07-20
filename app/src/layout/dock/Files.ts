@@ -955,7 +955,7 @@ export class Files extends Model {
     }
 
     private updateDocInfo(data: IWebSocketData) {
-        const notebook = window.siyuan.notebooks.find((item) => item.boxDocID === data.data.rootID);
+        const notebook = window.siyuan.notebooks.find((item) => item.id === data.data.rootID);
         const subFileCount = notebook && window.siyuan.isPublish ? notebook.subFileCount : data.data.subFileCount;
         if (notebook) {
             notebook.subFileCount = subFileCount;
@@ -1056,7 +1056,7 @@ export class Files extends Model {
         const iconContent = (item.encrypted && item.closed)
             ? "🔒️"
             : unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note);
-        const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled && Boolean(item.boxDocID);
+        const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled;
         const hasChildren = isBoxDoc && item.subFileCount > 0;
         const iconUsesDocAction = isBoxDoc && window.siyuan.config.fileTree.docIconClickExpand;
         const iconAriaLabel = iconUsesDocAction ?
@@ -1065,7 +1065,7 @@ export class Files extends Model {
         const actionClasses = `${iconUsesDocAction && hasChildren && !editingPublishAccess ? " file-tree__item--icon-expand" : ""}${
             iconUsesDocAction && !hasChildren && !editingPublishAccess ? " file-tree__item--icon-open" : ""}${
             hasChildren && window.siyuan.config.fileTree.parentDocClickExpand ? " file-tree__item--title-expand" : ""}`;
-        const emojiHTML = `<span class="b3-list-item__icon ariaLabel${isBoxDoc ? " popover__block" : ""}${editingPublishAccess ? " fn__none" : ""}" data-position="8east"${isBoxDoc ? ` data-id="${item.boxDocID}"` : ""} aria-label="${iconAriaLabel}">${iconContent}</span>`;
+        const emojiHTML = `<span class="b3-list-item__icon ariaLabel${isBoxDoc ? " popover__block" : ""}${editingPublishAccess ? " fn__none" : ""}" data-position="8east"${isBoxDoc ? ` data-id="${item.id}"` : ""} aria-label="${iconAriaLabel}">${iconContent}</span>`;
         const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action"${item.encrypted ? ' data-encrypted="true"' : ""}>
@@ -1083,7 +1083,7 @@ export class Files extends Model {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}">
 <li class="b3-list-item b3-list-item--hide-action${actionClasses}" ${window.siyuan.config.fileTree.sort === 6 ? 'draggable="true"' : ""}
 style="--file-toggle-width:22px;--file-action-offset:22px"
-data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? (item.boxDocID || "") : ""}">
+data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? item.id : ""}">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl${isBoxDoc && !hasChildren ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1464,9 +1464,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
             // 有文件树和编辑器的布局初始化时，文件树还未挂载
             return;
         }
-        const boxDocID = window.siyuan.config.fileTree.boxDocEnabled
-            ? window.siyuan.notebooks.find((item) => item.id === notebookId)?.boxDocID
-            : "";
+        const boxDocID = window.siyuan.config.fileTree.boxDocEnabled ? notebookId : "";
         if (boxDocID && filePath === `/${boxDocID}.sy`) {
             const boxDocElement = treeElement.querySelector("[data-type=\"navigation-root\"]") as HTMLElement;
             if (isSetCurrent) {

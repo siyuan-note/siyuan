@@ -357,7 +357,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	var docs []*File
 	for _, file := range files {
-		if "/" == listPath && "" != box.BoxDocID && box.BoxDocID == util.GetTreeID(file.path) {
+		if "/" == listPath && box.ID == util.GetTreeID(file.path) {
 			continue
 		}
 		if file.isdir {
@@ -1446,7 +1446,7 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
-		if box.BoxDocID == bt.RootID {
+		if IsBoxDoc(box.ID, bt.RootID) {
 			hPaths = append(hPaths, box.Name)
 		} else {
 			hPaths = append(hPaths, box.Name+bt.HPath)
@@ -1490,7 +1490,7 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 		err = ErrBoxNotFound
 		return
 	}
-	if box.BoxDocID == tree.ID {
+	if IsBoxDoc(box.ID, tree.ID) {
 		hPath = box.Name
 		return
 	}
@@ -1501,8 +1501,8 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
 	ret = []string{}
 	if IsBoxDocEnabled() && "/" == hpath {
-		if box := Conf.Box(boxID); nil != box && "" != box.BoxDocID {
-			return []string{box.BoxDocID}, nil
+		if box := Conf.Box(boxID); nil != box {
+			return []string{box.ID}, nil
 		}
 	}
 	roots := treenode.GetBlockTreeRootsByHPath(boxID, hpath)

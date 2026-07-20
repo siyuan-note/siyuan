@@ -21,21 +21,64 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestDeterministicBoxDocID(t *testing.T) {
+func TestBoxDocMetadataMatchesBoxID(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
 	boxID := "20260716120000-abcdefg"
-	boxDocID := deterministicBoxDocID(boxID)
-	if !ast.IsNodeIDPattern(boxDocID) {
-		t.Fatalf("invalid box document ID [%s]", boxDocID)
+	if err := os.MkdirAll(filepath.Dir(boxDocMetaPath(boxID)), 0755); err != nil {
+		t.Fatal(err)
 	}
-	if boxDocID != deterministicBoxDocID(boxID) {
-		t.Fatalf("box document ID is not deterministic [%s]", boxDocID)
+	if err := writeBoxDocID(boxID); err != nil {
+		t.Fatal(err)
 	}
-	if boxDocID == deterministicBoxDocID("20260716120000-hijklmn") {
-		t.Fatalf("different boxes generated the same document ID [%s]", boxDocID)
+	if boxDocID, err := readBoxDocID(boxID); err != nil || boxDocID != boxID {
+		t.Fatalf("unexpected box document metadata [id=%s, err=%v]", boxDocID, err)
+	}
+
+	data := []byte(`{"spec":1,"boxDocID":"20260716120001-abcdefg"}`)
+	if err := os.WriteFile(boxDocMetaPath(boxID), data, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := readBoxDocID(boxID); err == nil {
+		t.Fatal("mismatched box document ID was accepted")
+	}
+}
+
+func TestFindBoxDocRejectsOrdinaryDocument(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	boxID := "20260716120010-abcdefg"
+	if err := os.MkdirAll(filepath.Join(util.DataDir, boxID), 0755); err != nil {
+		t.Fatal(err)
+	}
+	tree := treenode.NewTree(boxID, boxDocPath(boxID), "/Existing", "Existing")
+	if _, err := filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	box := &Box{ID: boxID}
+	if _, err := findBoxDoc(box); err == nil {
+		t.Fatal("ordinary document was accepted as the box document")
+	}
+
+	tree.Root.SetIALAttr(DocHiddenAttr, "true")
+	if _, err := filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	if boxDocID, err := findBoxDoc(box); err != nil || boxDocID != boxID {
+		t.Fatalf("unexpected recovered box document [id=%s, err=%v]", boxDocID, err)
 	}
 }
 
@@ -47,7 +90,7 @@ func TestBoxDocSubFileCount(t *testing.T) {
 	})
 
 	boxID := "20260716120000-abcdefg"
-	boxDocID := "20260716120001-abcdefg"
+	boxDocID := boxID
 	boxDir := filepath.Join(util.DataDir, boxID)
 	if err := os.MkdirAll(boxDir, 0755); err != nil {
 		t.Fatal(err)
@@ -67,15 +110,15 @@ func TestBoxDocSubFileCount(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if actual := BoxDocSubFileCount(boxID, boxDocID); actual != 1 {
+	if actual := BoxDocSubFileCount(boxID); actual != 1 {
 		t.Fatalf("unexpected box document subfile count [%d]", actual)
 	}
 	publishAccess := PublishAccess{{ID: "20260716120002-abcdefg", Visible: false}}
-	if actual := BoxDocSubFileCountForPublish(boxID, boxDocID, publishAccess); actual != 0 {
+	if actual := BoxDocSubFileCountForPublish(boxID, publishAccess); actual != 0 {
 		t.Fatalf("unexpected published box document subfile count [%d]", actual)
 	}
 	publishAccess[0].Visible = true
-	if actual := BoxDocSubFileCountForPublish(boxID, boxDocID, publishAccess); actual != 1 {
+	if actual := BoxDocSubFileCountForPublish(boxID, publishAccess); actual != 1 {
 		t.Fatalf("unexpected visible published box document subfile count [%d]", actual)
 	}
 }

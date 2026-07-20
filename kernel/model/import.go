@@ -314,7 +314,7 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 			// Keep original creation time when importing .sy.zip https://github.com/siyuan-note/siyuan/issues/9923
 			newNodeID := util.TimeFromID(n.ID) + "-" + util.RandString(7)
 			if createNotebook && oldRootID == importedBoxDocID && n.ID == importedBoxDocID {
-				newNodeID = deterministicBoxDocID(boxID)
+				newNodeID = boxID
 			}
 			blockIDs[n.ID] = newNodeID
 			n.ID = newNodeID
@@ -340,7 +340,7 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d", i+1, len(syPaths))))
 	}
 	if importedBoxDoc {
-		if err = writeBoxDocID(boxID, deterministicBoxDocID(boxID)); err != nil {
+		if err = writeBoxDocID(boxID); err != nil {
 			return
 		}
 	}

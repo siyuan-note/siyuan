@@ -50,7 +50,6 @@ import (
 // Box 笔记本。
 type Box struct {
 	ID           string `json:"id"`
-	BoxDocID     string `json:"boxDocID"`
 	Name         string `json:"name"`
 	Icon         string `json:"icon"`
 	Sort         int    `json:"sort"`
@@ -165,18 +164,8 @@ func ListNotebooks() (ret []*Box, err error) {
 			icon = util.FilterUploadEmojiFileName(icon)
 		}
 
-		var boxDocID string
-		if !boxConf.Encrypted && !IsUserGuide(id) {
-			var readBoxDocErr error
-			boxDocID, readBoxDocErr = readBoxDocID(id)
-			if nil != readBoxDocErr {
-				logging.LogErrorf("read box document metadata [%s] failed: %s", id, readBoxDocErr)
-			}
-		}
-
 		box := &Box{
 			ID:        id,
-			BoxDocID:  boxDocID,
 			Name:      boxConf.Name,
 			Icon:      icon,
 			Sort:      boxConf.Sort,
@@ -516,7 +505,7 @@ func (box *Box) GetInfo() (ret *BoxInfo) {
 			continue
 		}
 
-		if id != box.BoxDocID {
+		if id != box.ID {
 			ret.DocCount++
 		}
 		ret.Size += uint64(info.Size())

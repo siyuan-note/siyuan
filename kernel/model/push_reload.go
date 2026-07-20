@@ -138,7 +138,7 @@ func refreshBoxDocInfoByBoxID(boxID string) {
 		return
 	}
 	box := Conf.Box(boxID)
-	if nil == box || "" == box.BoxDocID {
+	if nil == box {
 		return
 	}
 	util.BroadcastByType("filetree", "reloadNotebookInfo", 0, "", boxID)
@@ -155,7 +155,7 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 
 	subFileCount := 0
 	if IsBoxDoc(tree.Box, tree.ID) {
-		subFileCount = BoxDocSubFileCount(tree.Box, tree.ID)
+		subFileCount = BoxDocSubFileCount(tree.Box)
 	} else if "true" != tree.Root.IALAttr(DocHiddenAttr) {
 		subDir := filepath.Join(util.DataDir, tree.Box, strings.TrimSuffix(tree.Path, ".sy"))
 		subFiles, err := os.ReadDir(subDir)

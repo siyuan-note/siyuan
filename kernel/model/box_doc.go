@@ -144,7 +144,7 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 	if err != nil {
 		return "", err
 	}
-	changed := false
+	created, changed := false, false
 	if "" == boxDocID {
 		boxDocID = boxID
 		if box.Exist(boxDocPath(boxDocID)) || nil != treenode.GetBlockTree(boxDocID) || "" != findUnindexedTreePathInAllBoxes(boxDocID) {
@@ -153,6 +153,7 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 		if err = createBoxDoc(box, boxDocID); err != nil {
 			return "", err
 		}
+		created = true
 		changed = true
 	} else {
 		indexBoxDocIfNeeded(boxID, boxDocID)
@@ -171,7 +172,9 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 	if changed {
 		IncSync()
 	}
-	logging.LogInfof("initialized box document [box=%s, id=%s]", boxID, boxDocID)
+	if created {
+		logging.LogInfof("initialized box document [box=%s, id=%s]", boxID, boxDocID)
+	}
 	return
 }
 

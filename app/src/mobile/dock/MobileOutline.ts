@@ -16,7 +16,6 @@ import {Model} from "../../layout/Model";
 import {genUUID} from "../../util/genID";
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
-import {closePanel} from "../util/closePanel";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 
@@ -848,7 +847,6 @@ export class MobileOutline extends Model {
                     click: () => {
                         const data = this.getProtyleAndBlockElement(element);
                         if (data) {
-                            closePanel();
                             turnsIntoTransaction({
                                 protyle: data.protyle,
                                 selectsElement: [data.blockElement],
@@ -869,7 +867,6 @@ export class MobileOutline extends Model {
                     click: () => {
                         const data = this.getProtyleAndBlockElement(element);
                         if (data) {
-                            closePanel();
                             turnsIntoTransaction({
                                 protyle: data.protyle,
                                 selectsElement: [data.blockElement],
@@ -923,7 +920,6 @@ export class MobileOutline extends Model {
                     if (!data) {
                         return;
                     }
-                    closePanel();
                     const newId = Lute.NewNodeID();
                     const html = `<div data-subtype="h${currentLevel}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
                     const previousID = data.blockElement.previousElementSibling?.getAttribute("data-node-id");
@@ -954,7 +950,6 @@ export class MobileOutline extends Model {
                         return;
                     }
                     const rootID = data.protyle.block.rootID;
-                    closePanel();
                     focusBlock(data.blockElement);
                     fetchPost("/api/block/getHeadingDeleteTransaction", {
                         id,
@@ -998,7 +993,6 @@ export class MobileOutline extends Model {
                             return;
                         }
                         const rootID = data.protyle.block.rootID;
-                        closePanel();
                         focusBlock(data.blockElement);
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
@@ -1246,7 +1240,6 @@ export class MobileOutline extends Model {
                     return;
                 }
                 const rootID = protyle.block.rootID;
-                closePanel();
                 getSelection()?.removeAllRanges();
                 fetchPost("/api/block/getHeadingLevelTransaction", {
                     id,

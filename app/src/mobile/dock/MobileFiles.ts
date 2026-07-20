@@ -21,6 +21,12 @@ import {refreshFileTree} from "../../dialog/processSystem";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {showMessage} from "../../dialog/message";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
+import {
+    cancelFileTreeCollapse,
+    collapseFileTree,
+    expandFileTree,
+    isFileTreeCollapsing
+} from "../../layout/dock/fileTreeAnimation";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -152,8 +158,8 @@ export class MobileFiles extends Model {
                         const notebookId = ulElement.getAttribute("data-url");
                         const liElement = target.parentElement;
                         if (liElement.querySelector(".b3-list-item__arrow--open")) {
-                            this.collapseLeaf(liElement);
-                        } else if ((liElement.nextElementSibling as HTMLElement)?.dataset.collapsing !== "true") {
+                            collapseFileTree(liElement, () => this.getOpenPaths());
+                        } else if (!isFileTreeCollapsing(liElement)) {
                             this.getLeaf(liElement, notebookId);
                         }
                         this.setCurrent(target.parentElement);
@@ -965,18 +971,13 @@ export class MobileFiles extends Model {
             return;
         }
         liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
-        liElement.insertAdjacentHTML("afterend", `<ul class="file-tree__sliderDown">${fileHTML}</ul>`);
+        liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
         nextElement = liElement.nextElementSibling;
-        setTimeout(() => {
-            nextElement.setAttribute("style", `height:${nextElement.childElementCount * liElement.clientHeight}px;`);
-            setTimeout(() => {
-                nextElement.classList.remove("file-tree__sliderDown");
-                nextElement.removeAttribute("style");
-                if (typeof scrollTop === "number") {
-                    this.element.scroll({top: scrollTop, behavior: "smooth"});
-                }
-            }, 200);
-        }, 2);
+        expandFileTree(nextElement as HTMLElement, () => {
+            if (typeof scrollTop === "number") {
+                this.element.scroll({top: scrollTop, behavior: "smooth"});
+            }
+        });
         this.refreshPublishAccessSwitch();
     }
 
@@ -1040,40 +1041,15 @@ export class MobileFiles extends Model {
         }
     }
 
-    private collapseLeaf(liElement: Element) {
-        const toggleElement = liElement.querySelector(".b3-list-item__arrow");
-        const leafElement = liElement.nextElementSibling as HTMLElement;
-        toggleElement.classList.remove("b3-list-item__arrow--open");
-        if (leafElement?.tagName !== "UL") {
-            this.getOpenPaths();
-            return;
-        }
-
-        // 仅当手动点击折叠按钮时才需要动画，其他情况下默认直接移除列表容器。
-        leafElement.dataset.collapsing = "true";
-        leafElement.style.height = `${leafElement.scrollHeight}px`;
-        leafElement.style.overflow = "hidden";
-        leafElement.classList.add("file-tree__sliderUp");
-        window.setTimeout(() => {
-            leafElement.style.height = "0";
-            window.setTimeout(() => {
-                if (!leafElement.isConnected) {
-                    return;
-                }
-                leafElement.remove();
-                this.getOpenPaths();
-            }, 200);
-        }, 2);
-    }
-
     public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
-        const leafElement = liElement.nextElementSibling as HTMLElement;
-        if (leafElement?.dataset.collapsing === "true") {
-            leafElement.remove();
+        if (cancelFileTreeCollapse(liElement)) {
             this.getOpenPaths();
-            return;
+            if (!focusUpdate) {
+                return;
+            }
         }
+        const leafElement = liElement.nextElementSibling as HTMLElement;
         if (toggleElement.classList.contains("b3-list-item__arrow--open") && !focusUpdate) {
             toggleElement.classList.remove("b3-list-item__arrow--open");
             leafElement?.remove();

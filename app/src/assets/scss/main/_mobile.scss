@@ -73,13 +73,6 @@
   }
 }
 
-.file-tree__sliderDown,
-.file-tree__sliderUp {
-  height: 0;
-  overflow: hidden;
-  transition: var(--b3-transition);
-}
-
 .counter {
   margin-left: 4px;
   padding: 0 8px;

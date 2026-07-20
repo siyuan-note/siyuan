@@ -282,13 +282,6 @@ html[data-frontend="browser-desktop"] {
     transition: var(--b3-transition);
   }
 
-  &__sliderDown,
-  &__sliderUp {
-    height: 0;
-    overflow: hidden;
-    transition: var(--b3-transition);
-  }
-
   &__item--icon-expand {
     > .b3-list-item__toggle {
       position: relative;

@@ -17,6 +17,7 @@ import {matchHotKey} from "../protyle/util/hotKey";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {mergePathSegments} from "./mergePathSegments";
+import {expandFileTree} from "../layout/dock/fileTreeAnimation";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     /// #if !BROWSER
@@ -715,15 +716,8 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
             return;
         }
         toggleElement.classList.add("b3-list-item__arrow--open");
-        liElement.insertAdjacentHTML("afterend", `<ul class="file-tree__sliderDown">${fileHTML}</ul>`);
-        const nextElement = liElement.nextElementSibling;
-        setTimeout(() => {
-            nextElement.setAttribute("style", `height:${nextElement.childElementCount * liElement.clientHeight}px;`);
-            setTimeout(() => {
-                nextElement.classList.remove("file-tree__sliderDown");
-                nextElement.removeAttribute("style");
-            }, 120);
-        }, 2);
+        liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
+        expandFileTree(liElement.nextElementSibling as HTMLElement);
     });
 };
 

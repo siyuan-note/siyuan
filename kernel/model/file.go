@@ -155,6 +155,7 @@ func (box *Box) moveCorruptedData(filePath string) {
 
 func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[string]string) {
 	ret = []map[string]string{}
+	var results []searchDocResult
 
 	var deck *riff.Deck
 	var deckBlockIDs []string
@@ -177,50 +178,41 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 
 	var rootBlocks []*sql.Block
 	if ast.IsNodeIDPattern(keyword) {
-		rootBlocks = sql.QueryRootBlockByCondition("id='"+keyword+"'", 1)
+		rootBlocks = sql.QueryRootBlockByCondition("id = ?", keyword, 1, keyword)
 	} else {
 		keywords := strings.Fields(keyword)
 		if 0 < len(keywords) {
 			for _, box := range boxes {
 				if util.ContainsSubStr(box.Name, keywords) {
+					data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
 					if flashcard {
 						newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
-						if 0 < flashcardCount {
-							ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
+						if 1 > flashcardCount {
+							continue
 						}
-					} else {
-						ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+						data["newFlashcardCount"] = strconv.Itoa(newFlashcardCount)
+						data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
+						data["flashcardCount"] = strconv.Itoa(flashcardCount)
 					}
+					results = append(results, searchDocResult{data: data, exact: box.Name == keyword})
 				}
 			}
 
-			var condition strings.Builder
-			for i, k := range keywords {
-				condition.WriteString("(hpath LIKE '%" + k + "%'")
-				namCondition := Conf.Search.NAMFilter(k)
-				condition.WriteString(" " + namCondition)
-				condition.WriteString(")")
-
-				if i < len(keywords)-1 {
-					condition.WriteString(" AND ")
-				}
-			}
-
-			for _, excludeID := range excludeIDs {
-				condition.WriteString(fmt.Sprintf(" AND path NOT LIKE '%%%s%%' ", excludeID))
-			}
-
-			rootBlocks = sql.QueryRootBlockByCondition(condition.String(), Conf.Search.Limit)
+			condition, args := buildSearchDocsCondition(keywords, excludeIDs, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo)
+			rootBlocks = sql.QueryRootBlockByCondition(condition, keyword, Conf.Search.Limit, args...)
 		} else {
 			for _, box := range boxes {
+				data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
 				if flashcard {
 					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
-					if 0 < flashcardCount {
-						ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
+					if 1 > flashcardCount {
+						continue
 					}
-				} else {
-					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+					data["newFlashcardCount"] = strconv.Itoa(newFlashcardCount)
+					data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
+					data["flashcardCount"] = strconv.Itoa(flashcardCount)
 				}
+				results = append(results, searchDocResult{data: data})
 			}
 		}
 	}
@@ -234,20 +226,80 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 			continue
 		}
 		hPath := b.Name + rootBlock.HPath
+		data := map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon}
 		if flashcard {
 			newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootBlock.ID, deck, deckBlockIDs)
-			if 0 < flashcardCount {
-				ret = append(ret, map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
+			if 1 > flashcardCount {
+				continue
 			}
-		} else {
-			ret = append(ret, map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon})
+			data["newFlashcardCount"] = strconv.Itoa(newFlashcardCount)
+			data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
+			data["flashcardCount"] = strconv.Itoa(flashcardCount)
 		}
+		results = append(results, searchDocResult{data: data, exact: rootBlock.Content == keyword})
 	}
 
-	sort.Slice(ret, func(i, j int) bool {
-		return ret[i]["hPath"] < ret[j]["hPath"]
-	})
+	sortSearchDocResults(results)
+	for _, result := range results {
+		ret = append(ret, result.data)
+	}
 	return
+}
+
+func sortSearchDocResults(results []searchDocResult) {
+	sort.SliceStable(results, func(i, j int) bool {
+		if results[i].exact != results[j].exact {
+			return results[i].exact
+		}
+		return results[i].data["hPath"] < results[j].data["hPath"]
+	})
+}
+
+type searchDocResult struct {
+	data  map[string]string
+	exact bool
+}
+
+func buildSearchDocsCondition(keywords, excludeIDs []string, searchName, searchAlias, searchMemo bool) (condition string, args []any) {
+	var ret strings.Builder
+	for i, keyword := range keywords {
+		pattern := "%" + escapeSearchDocLikePattern(keyword) + "%"
+		ret.WriteString("(hpath LIKE ? ESCAPE '\\'")
+		args = append(args, pattern)
+		if searchName {
+			ret.WriteString(" OR name LIKE ? ESCAPE '\\'")
+			args = append(args, pattern)
+		}
+		if searchAlias {
+			ret.WriteString(" OR alias LIKE ? ESCAPE '\\'")
+			args = append(args, pattern)
+		}
+		if searchMemo {
+			ret.WriteString(" OR memo LIKE ? ESCAPE '\\'")
+			args = append(args, pattern)
+		}
+		ret.WriteString(")")
+		if i < len(keywords)-1 {
+			ret.WriteString(" AND ")
+		}
+	}
+	for _, excludeID := range excludeIDs {
+		ret.WriteString(" AND path NOT LIKE ? ESCAPE '\\'")
+		args = append(args, "%"+escapeSearchDocLikePattern(excludeID)+"%")
+	}
+	return ret.String(), args
+}
+
+func escapeSearchDocLikePattern(s string) string {
+	var ret strings.Builder
+	ret.Grow(len(s))
+	for _, r := range s {
+		if '%' == r || '_' == r || '\\' == r {
+			ret.WriteRune('\\')
+		}
+		ret.WriteRune(r)
+	}
+	return ret.String()
 }
 
 type FileInfo struct {

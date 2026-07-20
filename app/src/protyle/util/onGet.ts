@@ -507,7 +507,8 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
             }
         });
     }
-    if (!focusElement && protyle.block.id === protyle.block.rootID && protyle.title?.editElement) {
+    if (!focusElement && protyle.title?.editElement &&
+        (protyle.block.id === protyle.block.rootID || scrollAttr?.focusId === protyle.block.rootID)) {
         focusElement = protyle.title.editElement;
     }
     if (protyle.block.mode === 4) {
@@ -552,9 +553,21 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     // 使用 AbortController 监听用户手势（滚轮/触摸/方向键），一旦用户主动滚动即停止强制定位，否则顶部为数据库等异步渲染块撑高内容时会反复重置滚动位置
     const userScrollAbort = new AbortController();
     const onUserScroll = () => userScrollAbort.abort();
-    protyle.contentElement.addEventListener("wheel", onUserScroll, {capture: true, passive: true, signal: userScrollAbort.signal});
-    protyle.contentElement.addEventListener("touchstart", onUserScroll, {capture: true, passive: true, signal: userScrollAbort.signal});
-    protyle.contentElement.addEventListener("touchmove", onUserScroll, {capture: true, passive: true, signal: userScrollAbort.signal});
+    protyle.contentElement.addEventListener("wheel", onUserScroll, {
+        capture: true,
+        passive: true,
+        signal: userScrollAbort.signal
+    });
+    protyle.contentElement.addEventListener("touchstart", onUserScroll, {
+        capture: true,
+        passive: true,
+        signal: userScrollAbort.signal
+    });
+    protyle.contentElement.addEventListener("touchmove", onUserScroll, {
+        capture: true,
+        passive: true,
+        signal: userScrollAbort.signal
+    });
     protyle.contentElement.addEventListener("keydown", (event: KeyboardEvent) => {
         // 仅拦截会触发滚动的按键，避免影响正常编辑输入
         if (["PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown", " "].includes(event.key)) {

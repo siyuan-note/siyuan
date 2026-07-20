@@ -117,13 +117,26 @@ const focusStack = async (app: App, stack: IBackStack) => {
         }
     }
 
-    if (stack.protyle.block.rootID === stack.id) {
+    const currentZoomId = stack.protyle.block.showAll ? stack.protyle.block.id : undefined;
+    const focusTitle = () => {
         if (stack.protyle.title.editElement.getBoundingClientRect().height === 0) {
             // 切换 tab
             stack.protyle.model.parent.parent.switchTab(stack.protyle.model.parent.headElement);
             stack.protyle.toolbar.range = undefined;
         }
         focusByOffset(stack.protyle.title.editElement, stack.position.start, stack.position.end);
+    };
+    if (stack.protyle.block.rootID === stack.id) {
+        if (currentZoomId !== stack.zoomId) {
+            zoomOut({
+                protyle: stack.protyle,
+                id: stack.zoomId || stack.protyle.block.rootID,
+                isPushBack: false,
+                callback: focusTitle,
+            });
+        } else {
+            focusTitle();
+        }
         return true;
     }
     Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
@@ -134,7 +147,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
     });
     if (blockElement &&
         // 即使块存在，折叠的情况需要也需要 zoomOut，否则折叠块内的光标无法定位
-        (!stack.zoomId || (stack.zoomId && stack.zoomId === stack.protyle.block.id))
+        currentZoomId === stack.zoomId
     ) {
         if (blockElement.getBoundingClientRect().height === 0) {
             // 切换 tab

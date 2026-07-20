@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Bangun ulang indeks riwayat",
+	"rebuildAssetContentIndex": "Bangun ulang indeks konten aset",
 	"newItemWithTemplate": "Buat item dengan templat",
 	"newTemplate": "Templat baru",
 	"itemTemplate": "Templat item",
@@ -161,7 +163,7 @@
 	"retryFailedEmbedding": "Coba lagi yang gagal: ",
 	"retryFailedEmbeddingTip": "Mencoba kembali mengindeks blok yang gagal",
 	"retryFailedEmbeddingStarted": "Mencoba kembali blok yang gagal dimulai",
-	"rebuildEmbeddingIndex": "Bangun ulang indeks",
+	"rebuildEmbeddingIndex": "Bangun ulang indeks embedding",
 	"rebuildEmbeddingIndexTip": "Hapus dan hitung ulang vektor embedding untuk semua blok",
 	"rebuildEmbeddingIndexConfirmTip": "Apakah Anda yakin ingin menghapus dan membuat ulang semua vektor embedding? Ini mungkin memakan waktu lama.",
 	"rebuildEmbeddingIndexStarted": "Pembangunan ulang indeks embedding dimulai",

@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Rebuild history index",
+	"rebuildAssetContentIndex": "Rebuild asset content index",
 	"newItemWithTemplate": "Create item with template",
 	"newTemplate": "New template",
 	"itemTemplate": "Item template",
@@ -161,7 +163,7 @@
 	"retryFailedEmbedding": "Retry failed: ",
 	"retryFailedEmbeddingTip": "Re-attempt indexing failed blocks",
 	"retryFailedEmbeddingStarted": "Re-attempting failed blocks started",
-	"rebuildEmbeddingIndex": "Rebuild index",
+	"rebuildEmbeddingIndex": "Rebuild embedding index",
 	"rebuildEmbeddingIndexTip": "Clear and recalculate embedding vectors for all blocks",
 	"rebuildEmbeddingIndexConfirmTip": "Are you sure to clear and regenerate all embedding vectors? This may take a long time.",
 	"rebuildEmbeddingIndexStarted": "Rebuilding embedding index started",

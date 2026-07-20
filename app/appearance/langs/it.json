@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Ricostruisci indice cronologia",
+	"rebuildAssetContentIndex": "Ricostruisci indice contenuto risorse",
 	"newItemWithTemplate": "Crea elemento con modello",
 	"newTemplate": "Nuovo modello",
 	"itemTemplate": "Modello elemento",
@@ -161,7 +163,7 @@
 	"retryFailedEmbedding": "Riprova falliti: ",
 	"retryFailedEmbeddingTip": "Nuovo tentativo di indicizzare i blocchi falliti",
 	"retryFailedEmbeddingStarted": "Nuovo tentativo dei blocchi falliti avviato",
-	"rebuildEmbeddingIndex": "Ricostruisci indice",
+	"rebuildEmbeddingIndex": "Ricostruisci indice embedding",
 	"rebuildEmbeddingIndexTip": "Cancella e ricalcola i vettori di embedding di tutti i blocchi",
 	"rebuildEmbeddingIndexConfirmTip": "Sei sicuro di cancellare e rigenerare tutti i vettori di embedding? Questo può richiedere molto tempo.",
 	"rebuildEmbeddingIndexStarted": "Ricostruzione indice embedding avviata",

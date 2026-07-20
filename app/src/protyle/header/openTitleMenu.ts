@@ -44,7 +44,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
     fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_TITLE);
-        const isBoxDoc = window.siyuan.notebooks.find((item) => item.id === protyle.notebookId)?.boxDocID === protyle.block.rootID;
+        const isBoxDoc = protyle.notebookId === protyle.block.rootID;
         const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
         window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover-" + from : "app-" + from);
         const submenu = copySubMenu([protyle.block.rootID], true, undefined, protyle.block.showAll ? protyle.block.id : protyle.block.rootID);

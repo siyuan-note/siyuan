@@ -467,11 +467,11 @@ func lsNotebooks(c *gin.Context) {
 	boxDocEnabled := model.IsBoxDocEnabled()
 	if !flashcard && boxDocEnabled {
 		for _, notebook := range notebooks {
-			if !notebook.Closed && notebook.BoxDocID != "" {
+			if !notebook.Closed {
 				if isReadOnlyRole {
-					notebook.SubFileCount = model.BoxDocSubFileCountForPublish(notebook.ID, notebook.BoxDocID, publishAccess)
+					notebook.SubFileCount = model.BoxDocSubFileCountForPublish(notebook.ID, publishAccess)
 				} else {
-					notebook.SubFileCount = model.BoxDocSubFileCount(notebook.ID, notebook.BoxDocID)
+					notebook.SubFileCount = model.BoxDocSubFileCount(notebook.ID)
 				}
 			}
 		}

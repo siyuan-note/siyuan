@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "기록 인덱스 재구축",
+	"rebuildAssetContentIndex": "에셋 콘텐츠 인덱스 재구축",
 	"newItemWithTemplate": "템플릿으로 항목 만들기",
 	"newTemplate": "새 템플릿",
 	"itemTemplate": "항목 템플릿",
@@ -161,7 +163,7 @@
 	"retryFailedEmbedding": "실패 재시도: ",
 	"retryFailedEmbeddingTip": "실패한 블록 인덱싱을 다시 시도",
 	"retryFailedEmbeddingStarted": "실패한 블록 재시도가 시작되었습니다",
-	"rebuildEmbeddingIndex": "인덱스 재구축",
+	"rebuildEmbeddingIndex": "임베딩 인덱스 재구축",
 	"rebuildEmbeddingIndexTip": "모든 블록의 임베딩 벡터를 지우고 다시 계산",
 	"rebuildEmbeddingIndexConfirmTip": "모든 임베딩 벡터를 지우고 다시 생성하시겠습니까? 오랜 시간이 걸릴 수 있습니다.",
 	"rebuildEmbeddingIndexStarted": "임베딩 인덱스 재구축이 시작되었습니다",

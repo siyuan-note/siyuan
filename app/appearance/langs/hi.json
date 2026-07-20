@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "इतिहास इंडेक्स पुनर्निर्माण करें",
+	"rebuildAssetContentIndex": "एसेट सामग्री इंडेक्स पुनर्निर्माण करें",
 	"newItemWithTemplate": "टेम्पलेट से आइटम बनाएँ",
 	"newTemplate": "नया टेम्पलेट",
 	"itemTemplate": "आइटम टेम्पलेट",
@@ -161,7 +163,7 @@
 	"retryFailedEmbedding": "विफल पुनः प्रयास: ",
 	"retryFailedEmbeddingTip": "विफल ब्लॉकों को इंडेक्स करने का पुनः प्रयास",
 	"retryFailedEmbeddingStarted": "विफल ब्लॉकों का पुनः प्रयास शुरू हुआ",
-	"rebuildEmbeddingIndex": "इंडेक्स पुनर्निर्माण करें",
+	"rebuildEmbeddingIndex": "एम्बेडिंग इंडेक्स पुनर्निर्माण करें",
 	"rebuildEmbeddingIndexTip": "सभी ब्लॉकों के एम्बेडिंग वेक्टर को साफ़ करें और पुनर्गणना करें",
 	"rebuildEmbeddingIndexConfirmTip": "क्या आप वाकई सभी एम्बेडिंग वेक्टर को साफ़ और पुनः उत्पन्न करना चाहते हैं? इसमें काफ़ी समय लग सकता है।",
 	"rebuildEmbeddingIndexStarted": "एम्बेडिंग इंडेक्स पुनर्निर्माण शुरू हुआ",

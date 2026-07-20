@@ -116,6 +116,7 @@ const focusStack = (backStack: IBackStack) => {
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element, protyle);
         blockRender(protyle, protyle.wysiwyg.element, backStack.scrollTop);
+        protyle.databaseAttributePanel?.render();
         if (getResponse.data.isSyncing) {
             disabledForeverProtyle(protyle);
         } else {

@@ -1,7 +1,11 @@
 name: 🐛 缺陷报告
 description: 报告缺陷以帮助我们改进
-title: "请输入缺陷报告标题"
 body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!WARNING]
+        > 请勿公开报告安全漏洞，请改为创建[私密安全公告](https://github.com/siyuan-note/siyuan/security/advisories/new)。
   - type: checkboxes
     attributes:
       label: 是否存在已有相关 issue？
@@ -38,6 +42,17 @@ body:
       required: true
   - type: textarea
     attributes:
+      label: 重现步骤
+      description: |
+        请提供重现该问题所需的确切步骤，最好同时提供最小可重现示例。
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
       label: 预期结果
       description: |
         请尽可能清晰准确地描述您期望的结果。
@@ -57,16 +72,15 @@ body:
         - 版本：
         - 操作系统：
         - 浏览器（如果使用了）：
-      render: markdown
     validations:
       required: true
   - type: textarea
     attributes:
       label: 日志文件
       description: |
-        程序日志文件位于 `工作空间/temp/siyuan.log`
+        程序日志文件位于 `工作空间/temp/siyuan.log`。请在移除隐私信息后附上相关日志；如果没有相关日志，可以留空。
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: 更多信息

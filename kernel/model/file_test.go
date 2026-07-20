@@ -151,3 +151,41 @@ func TestMoveDocsRejectsInvalidPathsBeforeMoving(t *testing.T) {
 		})
 	}
 }
+
+func TestSortSearchDocResults(t *testing.T) {
+	results := []searchDocResult{
+		{data: map[string]string{"hPath": "A/初中数学"}},
+		{data: map[string]string{"hPath": "Z/数学"}, exact: true},
+		{data: map[string]string{"hPath": "A/数学/"}, exact: true},
+		{data: map[string]string{"hPath": "B/高等数学"}},
+	}
+
+	sortSearchDocResults(results)
+	expected := []string{"A/数学/", "Z/数学", "A/初中数学", "B/高等数学"}
+	for i, hPath := range expected {
+		if hPath != results[i].data["hPath"] {
+			t.Fatalf("unexpected search result order at %d: got %q, want %q", i, results[i].data["hPath"], hPath)
+		}
+	}
+}
+
+func TestBuildSearchDocsCondition(t *testing.T) {
+	condition, args := buildSearchDocsCondition([]string{"O'Reilly", "100%_done\\file"}, []string{"20260720000000-abc_def"}, true, true, true)
+	if strings.Contains(condition, "O'Reilly") || strings.Contains(condition, "100%_done") {
+		t.Fatalf("search condition should contain placeholders instead of keywords: %q", condition)
+	}
+	if placeholderCount := strings.Count(condition, "?"); placeholderCount != len(args) {
+		t.Fatalf("search condition placeholder/arg mismatch: %d placeholders, %d args", placeholderCount, len(args))
+	}
+
+	expectedArgs := []string{
+		"%O'Reilly%", "%O'Reilly%", "%O'Reilly%", "%O'Reilly%",
+		"%100\\%\\_done\\\\file%", "%100\\%\\_done\\\\file%", "%100\\%\\_done\\\\file%", "%100\\%\\_done\\\\file%",
+		"%20260720000000-abc\\_def%",
+	}
+	for i, expected := range expectedArgs {
+		if actual := args[i].(string); expected != actual {
+			t.Fatalf("unexpected search arg at %d: got %q, want %q", i, actual, expected)
+		}
+	}
+}

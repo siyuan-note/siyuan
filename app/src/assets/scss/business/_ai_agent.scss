@@ -524,6 +524,33 @@
   white-space: nowrap;
 }
 
+.agent-chat__thinking-tool--running::after {
+  content: "...";
+  display: inline-block;
+  width: 1.2em;
+  margin-left: 3px;
+  overflow: hidden;
+  vertical-align: bottom;
+  animation: agent-tool-running 1.2s steps(4, end) infinite;
+}
+
+@keyframes agent-tool-running {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-chat__thinking-tool--running::after {
+    animation: none;
+    opacity: 0.65;
+  }
+}
+
 .agent-chat__confirm-card {
   font-size: 13px;
 }

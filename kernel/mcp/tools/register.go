@@ -17,6 +17,7 @@
 package tools
 
 import (
+	"sort"
 	"strings"
 	"sync"
 )
@@ -64,6 +65,9 @@ func GetAllTools() []*Tool {
 	for _, t := range Registry {
 		result = append(result, t)
 	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Name < result[j].Name
+	})
 	return result
 }
 

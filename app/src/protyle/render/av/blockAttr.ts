@@ -17,9 +17,7 @@ import {webUtils} from "electron";
 import {isBrowser} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
-/// #if !MOBILE
 import {openDatabaseRowByData} from "./openDatabaseRow";
-/// #endif
 
 export const getAVTemplateHTML = (content: string) => {
     if (window.siyuan.config.editor.allowHTMLBLockScript) {
@@ -404,7 +402,6 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 }
                 const backlinkOpenElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "av-backlink-open");
                 if (backlinkOpenElement) {
-                    /// #if !MOBILE
                     openDatabaseRowByData(protyle, {
                         avID: backlinkOpenElement.dataset.avId,
                         databaseBlockID: backlinkOpenElement.dataset.databaseBlockId,
@@ -415,7 +412,6 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                         boundBlockID: backlinkOpenElement.dataset.boundBlockId,
                         isDetached: backlinkOpenElement.dataset.detached === "true",
                     });
-                    /// #endif
                     event.stopPropagation();
                     return;
                 }

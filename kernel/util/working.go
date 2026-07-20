@@ -45,7 +45,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.7.3-beta.2"
+	Ver       = "3.7.3-beta.3"
 	IsInsider = false
 )
 
@@ -365,7 +365,7 @@ func initWorkspaceDir(workspaceArg string) {
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
 	os.RemoveAll(filepath.Join(TempDir, "repo"))
-	// export 目录仅保存内核管理的临时导出文件。启动后所有加密笔记本均为锁定状态，不能保留上次异常退出的明文导出。
+	// export 目录只保存临时文件，启动时统一清理；插件不得依赖其中的文件跨进程存续。
 	os.RemoveAll(filepath.Join(TempDir, "export"))
 	os.Setenv("TMPDIR", osTmpDir)
 	os.Setenv("TEMP", osTmpDir)

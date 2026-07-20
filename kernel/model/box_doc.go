@@ -17,7 +17,6 @@
 package model
 
 import (
-	"crypto/sha256"
 	"errors"
 	"fmt"
 	"os"
@@ -51,11 +50,11 @@ func boxDocMetaPath(boxID string) string {
 	return filepath.Join(util.DataDir, boxID, ".siyuan", boxDocMetaName)
 }
 
-func boxDocPath(boxDocID string) string {
-	if "" == boxDocID {
+func boxDocPath(boxID string) string {
+	if "" == boxID {
 		return ""
 	}
-	return "/" + boxDocID + ".sy"
+	return "/" + boxID + ".sy"
 }
 
 func readBoxDocID(boxID string) (ret string, err error) {
@@ -77,35 +76,19 @@ func readBoxDocID(boxID string) (ret string, err error) {
 	if !ast.IsNodeIDPattern(meta.BoxDocID) {
 		return "", fmt.Errorf("invalid box document ID [%s]", meta.BoxDocID)
 	}
-	return meta.BoxDocID, nil
+	if boxID != meta.BoxDocID {
+		return "", fmt.Errorf("box document ID [%s] does not match box ID [%s]", meta.BoxDocID, boxID)
+	}
+	return boxID, nil
 }
 
-func writeBoxDocID(boxID, boxDocID string) error {
-	meta := &boxDocMeta{Spec: boxDocMetaSpec, BoxDocID: boxDocID}
+func writeBoxDocID(boxID string) error {
+	meta := &boxDocMeta{Spec: boxDocMetaSpec, BoxDocID: boxID}
 	data, err := gulu.JSON.MarshalIndentJSON(meta, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal box document metadata failed: %w", err)
 	}
 	return filelock.WriteFile(boxDocMetaPath(boxID), data)
-}
-
-// deterministicBoxDocID 保证多台离线设备迁移同一笔记本时生成相同的文档 ID。
-func deterministicBoxDocID(boxID string) string {
-	if !ast.IsNodeIDPattern(boxID) {
-		return ""
-	}
-
-	const alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
-	digest := sha256.Sum256([]byte("siyuan-box-doc:" + boxID))
-	suffix := make([]byte, 7)
-	for i := range suffix {
-		suffix[i] = alphabet[int(digest[i])%len(alphabet)]
-	}
-	return boxID[:14] + "-" + string(suffix)
-}
-
-func supportsBoxDoc(boxID string) bool {
-	return !IsUserGuide(boxID) && !IsEncryptedBox(boxID)
 }
 
 func IsBoxDocEnabled() bool {
@@ -117,9 +100,7 @@ func hiddenBoxDocRootIDs() (ret []string) {
 		return
 	}
 	for _, box := range Conf.GetOpenedBoxes() {
-		if "" != box.BoxDocID {
-			ret = append(ret, box.BoxDocID)
-		}
+		ret = append(ret, box.ID)
 	}
 	return
 }
@@ -145,8 +126,8 @@ func EnsureBoxDoc(boxID string) (boxDocID string, err error) {
 
 // ensureBoxDoc0 的调用方必须持有 createDocLock。
 func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
-	if !supportsBoxDoc(boxID) {
-		return
+	if !ast.IsNodeIDPattern(boxID) {
+		return "", fmt.Errorf("invalid box ID [%s]", boxID)
 	}
 
 	box := Conf.GetBox(boxID)
@@ -154,46 +135,42 @@ func ensureBoxDoc0(boxID string) (boxDocID string, err error) {
 		return "", ErrBoxNotFound
 	}
 
-	boxDocID, err = readBoxDocID(boxID)
-	if err != nil {
-		logging.LogErrorf("read box document metadata [%s] failed: %s", boxID, err)
-		return "", err
-	}
-	if "" != boxDocID {
-		if !box.Exist(boxDocPath(boxDocID)) {
-			return "", fmt.Errorf("box document [%s] is missing", boxDocID)
-		}
-		indexBoxDocIfNeeded(boxID, boxDocID)
-		if err = reconcileBoxDoc(box, boxDocID); err != nil {
-			return "", err
-		}
-		return
-	}
 	if !IsBoxDocEnabled() {
 		return
 	}
+	boxDocID = boxID
 
 	boxDocID, err = findBoxDoc(box)
 	if err != nil {
 		return "", err
 	}
+	changed := false
 	if "" == boxDocID {
-		boxDocID = deterministicBoxDocID(boxID)
-		if "" == boxDocID {
-			return "", fmt.Errorf("invalid box ID [%s]", boxID)
-		}
+		boxDocID = boxID
 		if box.Exist(boxDocPath(boxDocID)) || nil != treenode.GetBlockTree(boxDocID) || "" != findUnindexedTreePathInAllBoxes(boxDocID) {
 			return "", fmt.Errorf("box document ID [%s] is already in use", boxDocID)
 		}
 		if err = createBoxDoc(box, boxDocID); err != nil {
 			return "", err
 		}
+		changed = true
+	} else {
+		indexBoxDocIfNeeded(boxID, boxDocID)
+		if err = reconcileBoxDoc(box, boxDocID); err != nil {
+			return "", err
+		}
 	}
 
-	if err = writeBoxDocID(boxID, boxDocID); err != nil {
-		return "", err
+	storedBoxDocID, _ := readBoxDocID(boxID)
+	if storedBoxDocID != boxID {
+		if err = writeBoxDocID(boxID); err != nil {
+			return "", err
+		}
+		changed = true
 	}
-	IncSync()
+	if changed {
+		IncSync()
+	}
 	logging.LogInfof("initialized box document [box=%s, id=%s]", boxID, boxDocID)
 	return
 }
@@ -210,9 +187,16 @@ func RefreshBoxDocFeature() {
 }
 
 func findBoxDoc(box *Box) (ret string, err error) {
-	boxDocID := deterministicBoxDocID(box.ID)
-	if "" == boxDocID || !box.Exist(boxDocPath(boxDocID)) {
+	boxDocID := box.ID
+	if !box.Exist(boxDocPath(boxDocID)) {
 		return
+	}
+	tree, err := filesys.LoadTree(box.ID, boxDocPath(boxDocID), util.NewLute())
+	if err != nil {
+		return "", err
+	}
+	if tree.ID != boxDocID || tree.Root.IALAttr(DocHiddenAttr) != "true" {
+		return "", fmt.Errorf("box document ID [%s] is already in use", boxDocID)
 	}
 	return boxDocID, nil
 }
@@ -286,22 +270,19 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 }
 
 // BoxDocSubFileCount 返回笔记本顶层文档的可见下级文档数。
-func BoxDocSubFileCount(boxID, boxDocID string) int {
-	return boxDocSubFileCount(boxID, boxDocID, nil)
+func BoxDocSubFileCount(boxID string) int {
+	return boxDocSubFileCount(boxID, nil)
 }
 
 // BoxDocSubFileCountForPublish 返回发布访问控制下笔记本顶层文档的可见下级文档数。
-func BoxDocSubFileCountForPublish(boxID, boxDocID string, publishAccess PublishAccess) int {
+func BoxDocSubFileCountForPublish(boxID string, publishAccess PublishAccess) int {
 	publishIgnore := GetInvisiblePublishAccess(publishAccess)
-	return boxDocSubFileCount(boxID, boxDocID, func(p string) bool {
+	return boxDocSubFileCount(boxID, func(p string) bool {
 		return CheckPathAccessableByPublishIgnore(boxID, p, publishIgnore)
 	})
 }
 
-func boxDocSubFileCount(boxID, boxDocID string, include func(string) bool) int {
-	if "" == boxDocID {
-		return 0
-	}
+func boxDocSubFileCount(boxID string, include func(string) bool) int {
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
 	if err != nil {
 		return 0
@@ -312,7 +293,7 @@ func boxDocSubFileCount(boxID, boxDocID string, include func(string) bool) int {
 			continue
 		}
 		id := strings.TrimSuffix(entry.Name(), ".sy")
-		if id == boxDocID || !ast.IsNodeIDPattern(id) {
+		if id == boxID || !ast.IsNodeIDPattern(id) {
 			continue
 		}
 		p := "/" + entry.Name()
@@ -330,7 +311,7 @@ func boxDocSubFileCount(boxID, boxDocID string, include func(string) bool) int {
 
 func IsBoxDoc(boxID, id string) bool {
 	box := Conf.Box(boxID)
-	return nil != box && "" != box.BoxDocID && box.BoxDocID == id
+	return nil != box && box.ID == id
 }
 
 func IsBoxDocPath(boxID, p string) bool {
@@ -340,10 +321,10 @@ func IsBoxDocPath(boxID, p string) bool {
 // normalizeBoxDocPath 将虚拟根文档下的路径映射到笔记本物理根路径。
 func normalizeBoxDocPath(boxID, p string) string {
 	box := Conf.Box(boxID)
-	if nil == box || "" == box.BoxDocID {
+	if nil == box {
 		return p
 	}
-	prefix := "/" + box.BoxDocID + "/"
+	prefix := "/" + box.ID + "/"
 	if strings.HasPrefix(p, prefix) {
 		return "/" + strings.TrimPrefix(p, prefix)
 	}
@@ -352,10 +333,10 @@ func normalizeBoxDocPath(boxID, p string) string {
 
 func normalizeBoxDocTarget(boxID, p string) string {
 	box := Conf.Box(boxID)
-	if nil == box || "" == box.BoxDocID {
+	if nil == box {
 		return p
 	}
-	if boxDocPath(box.BoxDocID) == p {
+	if boxDocPath(box.ID) == p {
 		return "/"
 	}
 	return normalizeBoxDocPath(boxID, p)
@@ -363,18 +344,18 @@ func normalizeBoxDocTarget(boxID, p string) string {
 
 func renameBoxDoc(boxID, name string) error {
 	box := Conf.Box(boxID)
-	if nil == box || "" == box.BoxDocID || !box.Exist(boxDocPath(box.BoxDocID)) {
+	if nil == box || !box.Exist(boxDocPath(box.ID)) {
 		return nil
 	}
-	return renameDoc0(boxID, boxDocPath(box.BoxDocID), name)
+	return renameDoc0(boxID, boxDocPath(box.ID), name)
 }
 
 func setBoxDocIcon(boxID, icon string) error {
 	box := Conf.Box(boxID)
-	if nil == box || "" == box.BoxDocID {
+	if nil == box || !box.Exist(boxDocPath(box.ID)) {
 		return nil
 	}
-	tree, err := filesys.LoadTree(boxID, boxDocPath(box.BoxDocID), util.NewLute())
+	tree, err := filesys.LoadTree(boxID, boxDocPath(box.ID), util.NewLute())
 	if err != nil {
 		return err
 	}

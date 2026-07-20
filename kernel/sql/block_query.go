@@ -70,9 +70,11 @@ func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string) {
 	return
 }
 
-func QueryRootBlockByCondition(condition string, limit int) (ret []*Block) {
-	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition + " ORDER BY box DESC,lv ASC LIMIT " + strconv.Itoa(limit)
-	rows, err := query(sqlStmt)
+func QueryRootBlockByCondition(condition, exactKeyword string, limit int, args ...any) (ret []*Block) {
+	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition +
+		" ORDER BY CASE WHEN content = ? THEN 0 ELSE 1 END ASC, box DESC, lv ASC LIMIT ?"
+	args = append(args, exactKeyword, limit)
+	rows, err := query(sqlStmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return

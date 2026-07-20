@@ -639,7 +639,7 @@ export class MobileFiles extends Model {
     }
 
     private updateDocInfo(data: IWebSocketData) {
-        const notebook = window.siyuan.notebooks.find((item) => item.boxDocID === data.data.rootID);
+        const notebook = window.siyuan.notebooks.find((item) => item.id === data.data.rootID);
         const subFileCount = notebook && window.siyuan.isPublish ? notebook.subFileCount : data.data.subFileCount;
         if (notebook) {
             notebook.subFileCount = subFileCount;
@@ -682,7 +682,7 @@ export class MobileFiles extends Model {
         const iconContent = (item.encrypted && item.closed)
             ? "🔒️"
             : unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note);
-        const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled && Boolean(item.boxDocID);
+        const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled;
         const hasChildren = isBoxDoc && item.subFileCount > 0;
         const iconAriaLabel = isBoxDoc ?
             (hasChildren ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) :
@@ -703,7 +703,7 @@ export class MobileFiles extends Model {
 </li>`;
         } else {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sortmode="${item.sortMode}">
-<li class="b3-list-item" data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? (item.boxDocID || "") : ""}" style="--file-toggle-width:24px">
+<li class="b3-list-item" data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? item.id : ""}" style="--file-toggle-width:24px">
     <span class="b3-list-item__toggle${isBoxDoc && !hasChildren ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1080,9 +1080,7 @@ export class MobileFiles extends Model {
             // 有文件树和编辑器的布局初始化时，文件树还未挂载
             return;
         }
-        const boxDocID = window.siyuan.config.fileTree.boxDocEnabled
-            ? window.siyuan.notebooks.find((item) => item.id === notebookId)?.boxDocID
-            : "";
+        const boxDocID = window.siyuan.config.fileTree.boxDocEnabled ? notebookId : "";
         if (boxDocID && filePath === `/${boxDocID}.sy`) {
             const boxDocElement = treeElement.querySelector("[data-type=\"navigation-root\"]") as HTMLElement;
             if (isSetCurrent) {

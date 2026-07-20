@@ -267,6 +267,10 @@
     display: none;
   }
 
+  &__body > [data-type="NodeAttributeView"] > .fn__hr--b {
+    display: none;
+  }
+
   .custom-attr__avheader {
     padding-left: 40px;
   }

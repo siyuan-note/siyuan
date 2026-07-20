@@ -380,7 +380,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	// 缓存根一级的文档树展开
 	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
 	box = Conf.Box(boxID)
-	if 0 < len(files) || (nil != box && "" != box.BoxDocID) {
+	if 0 < len(files) || (nil != box && box.Exist(boxDocPath(box.ID))) {
 		box.Index()
 	}
 

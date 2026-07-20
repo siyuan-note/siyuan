@@ -41,7 +41,6 @@ import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {createAttributeViewItem, openNewItemTemplateMenu} from "./newItemTemplate";
-/// #if !MOBILE
 import {openDatabaseRowByData} from "./openDatabaseRow";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
@@ -86,10 +85,13 @@ const openDatabaseRowMore = (protyle: IProtyle, target: HTMLElement) => {
             hintRef(textElement.textContent.trim(), protyle, "av");
         },
     });
+    /// #if MOBILE
+    menu.fullscreen("bottom");
+    /// #else
     const rect = target.getBoundingClientRect();
     menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+    /// #endif
 };
-/// #endif
 
 let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
@@ -167,7 +169,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        /// #if !MOBILE
         } else if (type === "av-row-open") {
             openDatabaseRow(protyle, target, blockElement);
             event.preventDefault();
@@ -178,18 +179,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        /// #endif
-        /// #if MOBILE
-        } else if (type === "block-more" && !protyle.disabled) {
-            window.siyuan.menus.menu.remove();
-            protyle.toolbar.range = document.createRange();
-            protyle.toolbar.range.selectNodeContents(target);
-            focusByRange(protyle.toolbar.range);
-            hintRef(target.previousElementSibling.textContent.trim(), protyle, "av");
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-        /// #endif
         } else if (type === "set-page-size" && !protyle.disabled) {
             setPageSize({
                 target,

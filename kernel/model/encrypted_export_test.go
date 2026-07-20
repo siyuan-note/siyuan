@@ -63,6 +63,35 @@ func TestLockBoxRevokesAndRemovesManagedExport(t *testing.T) {
 	}
 }
 
+func TestClearEncryptedExportTempOnBoot(t *testing.T) {
+	originalTempDir := util.TempDir
+	util.TempDir = t.TempDir()
+	defer func() {
+		util.TempDir = originalTempDir
+	}()
+
+	staleEncryptedExport := filepath.Join(util.TempDir, "export", "20260720120000-abcdefg", "markdown", "artifact.zip")
+	pluginTemp := filepath.Join(util.TempDir, "export", "temp_plugin_package.zip")
+	if err := os.MkdirAll(filepath.Dir(staleEncryptedExport), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(staleEncryptedExport, []byte("plaintext"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(pluginTemp, []byte("plugin"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	clearEncryptedExportTempOnBoot()
+
+	if _, err := os.Stat(filepath.Join(util.TempDir, "export", "20260720120000-abcdefg")); !os.IsNotExist(err) {
+		t.Fatalf("stale encrypted export temp should be removed: %v", err)
+	}
+	if _, err := os.Stat(pluginTemp); err != nil {
+		t.Fatalf("plugin temp should be preserved: %v", err)
+	}
+}
+
 func TestCopyExportResourceDirectory(t *testing.T) {
 	source := filepath.Join(t.TempDir(), "assets")
 	nested := filepath.Join(source, "nested")

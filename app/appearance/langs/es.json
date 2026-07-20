@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Reconstruir índice del historial",
+	"rebuildAssetContentIndex": "Reconstruir índice de contenido de recursos",
 	"newItemWithTemplate": "Crear elemento con una plantilla",
 	"newTemplate": "Nueva plantilla",
 	"itemTemplate": "Plantilla de elemento",
@@ -161,7 +163,7 @@
 	"retryFailedEmbedding": "Reintentar fallidos: ",
 	"retryFailedEmbeddingTip": "Reintentar indexar los bloques fallidos",
 	"retryFailedEmbeddingStarted": "Reintento de bloques fallidos iniciado",
-	"rebuildEmbeddingIndex": "Reconstruir índice",
+	"rebuildEmbeddingIndex": "Reconstruir índice de incrustación",
 	"rebuildEmbeddingIndexTip": "Borrar y recalcular los vectores de incrustación de todos los bloques",
 	"rebuildEmbeddingIndexConfirmTip": "¿Está seguro de borrar y regenerar todos los vectores de incrustación? Esto puede tardar mucho tiempo.",
 	"rebuildEmbeddingIndexStarted": "Reconstrucción del índice de incrustación iniciada",

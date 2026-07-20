@@ -38,8 +38,8 @@ import {
     renderWelcomeHTML
 } from "./AgentMessageRenderer";
 
-// Limit on the number of visible block IDs injected into the system prompt to control token usage.
-// Mirrors kernel/agent/agent.go maxVisibleBlockIDs.
+// 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
+// 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
 const maxVisibleBlockIDs = 50;
 
 type EntryBase = { id?: string };
@@ -49,6 +49,7 @@ type UserEntry = EntryBase & {
     content: string;
     blockHTML?: string;
     references?: AgentReference[];
+    editorContext?: IEditorContext;
     timestamp?: number
 };
 
@@ -115,6 +116,7 @@ export class AgentChat extends Model {
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
     private currentToolCalls: Array<{ name: string; arguments: Record<string, unknown>; result?: string }> = [];
+    private toolCallStartedAt = new Map<string, number>();
     private abortController: AbortController | null = null;
     private currentThinkingText = "";
     private currentThinkingReasoning = "";
@@ -1510,6 +1512,7 @@ export class AgentChat extends Model {
             content: text,
             blockHTML,
             references: refs.length > 0 ? refs : undefined,
+            editorContext,
             timestamp: Date.now(),
         });
         if (this.entries.length === 1) {
@@ -1593,10 +1596,9 @@ export class AgentChat extends Model {
         }
     }
 
-    // Capture a read-only snapshot of the user's editor to inject into the system prompt.
-    // Strategy: scan ALL editors. Prefer one that (a) is visible and (b) has selected blocks;
-    // this directly targets "user selected blocks here" regardless of which window has focus.
-    // Falls back to the editor hosting the DOM selection, then the most-recently-activated tab.
+    // 捕获发送消息时的只读编辑器快照，并注入对应的用户轮次上下文。
+    // 扫描全部编辑器，优先选择可见且包含选中块的编辑器，以匹配用户所指的“这里选中的块”。
+    // 若未找到，则依次使用 DOM 选区所在编辑器和最近激活的页签。
     private captureEditorContext(): IEditorContext | undefined {
         /// #if MOBILE
         const mobEditor = window.siyuan.mobile.editor || window.siyuan.mobile.popEditor;
@@ -1783,14 +1785,20 @@ export class AgentChat extends Model {
                     break;
                 case "tool_call":
                     this.currentToolCalls.push({name: event.name, arguments: event.arguments});
+                    this.appendToolCall(event.name);
                     break;
                 case "confirm":
+                    this.setToolCallRunning(event.name, false);
                     this.appendConfirm(event.name, event.arguments, event.confirmID, event.effects);
                     break;
                 case "tool_result":
-                    if (this.currentToolCalls.length > 0) {
-                        this.currentToolCalls[this.currentToolCalls.length - 1].result = event.result;
+                    {
+                        const toolCall = this.currentToolCalls.find((item) => item.name === event.name && item.result === undefined);
+                        if (toolCall) {
+                            toolCall.result = event.result;
+                        }
                     }
+                    this.finishToolCall(event.name);
                     this.appendToolResult(event.name, event.result);
                     break;
                 case "done":
@@ -2169,6 +2177,66 @@ export class AgentChat extends Model {
         }
     }
 
+    private appendToolCall(name: string) {
+        const body = this.messagesContainer.querySelector(
+            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body"
+        ) as HTMLElement;
+        if (!body) {
+            return;
+        }
+        this.toolCallStartedAt.set(name, Date.now());
+        if (this.renderedToolNames[name]) {
+            this.setToolCallRunning(name, true);
+            return;
+        }
+
+        this.renderedToolNames[name] = true;
+        const lastElement = body.lastElementChild as HTMLElement;
+        if (lastElement?.classList.contains("agent-chat__thinking-tools-line")) {
+            const toolElement = document.createElement("span");
+            toolElement.className = "agent-chat__thinking-tool agent-chat__thinking-tool--running";
+            toolElement.textContent = name;
+            lastElement.appendChild(toolElement);
+        } else {
+            body.insertAdjacentHTML("beforeend", renderToolsLineHTML([{name, running: true}]));
+        }
+        body.scrollTop = body.scrollHeight;
+        this.scrollToBottom();
+    }
+
+    private setToolCallRunning(name: string, running: boolean) {
+        const selector = running
+            ? ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-tool"
+            : ".agent-chat__thinking-tool--running";
+        const toolElements = this.messagesContainer.querySelectorAll(selector);
+        for (let i = toolElements.length - 1; i >= 0; i--) {
+            const toolElement = toolElements[i];
+            if (toolElement.textContent === name) {
+                toolElement.classList.toggle("agent-chat__thinking-tool--running", running);
+                if (running) {
+                    return;
+                }
+            }
+        }
+    }
+
+    private finishToolCall(name: string) {
+        const stillRunning = this.currentToolCalls.some((item) => item.name === name && item.result === undefined);
+        if (stillRunning) {
+            return;
+        }
+        const startedAt = this.toolCallStartedAt.get(name);
+        const remaining = startedAt ? Math.max(600 - (Date.now() - startedAt), 0) : 0;
+        window.setTimeout(() => {
+            if (this.toolCallStartedAt.get(name) !== startedAt ||
+                this.currentToolCalls.some((item) => item.name === name && item.result === undefined)) {
+                return;
+            }
+            this.setToolCallRunning(name, false);
+            this.toolCallStartedAt.delete(name);
+        }, remaining);
+    }
+
     private appendToolResult(name: string, result: string) {
         if (name !== "todo_write") {
             return;
@@ -2208,12 +2276,16 @@ export class AgentChat extends Model {
 
         let detailLines = "";
         if (reasoning === "processing" && this.currentToolCalls.length > 0) {
-            const newTools: Array<{ name: string }> = [];
+            const newTools: Array<{ name: string; running: boolean }> = [];
             for (let i = 0; i < this.currentToolCalls.length; i++) {
                 const tc = this.currentToolCalls[i];
                 if (!this.renderedToolNames[tc.name]) {
                     this.renderedToolNames[tc.name] = true;
-                    newTools.push({name: tc.name});
+                    const running = tc.result === undefined;
+                    if (running) {
+                        this.toolCallStartedAt.set(tc.name, Date.now());
+                    }
+                    newTools.push({name: tc.name, running});
                 }
             }
             if (newTools.length > 0) {
@@ -2540,6 +2612,7 @@ export class AgentChat extends Model {
         const lastUserEntry = targetEntry;
         const lastUserText = lastUserEntry.content;
         const editorContext = this.captureEditorContext();
+        lastUserEntry.editorContext = editorContext;
         const pluginActions = this.getPluginActions();
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;

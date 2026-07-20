@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Reconstruir índice do histórico",
+	"rebuildAssetContentIndex": "Reconstruir índice de conteúdo de recursos",
 	"newItemWithTemplate": "Criar item com modelo",
 	"newTemplate": "Novo modelo",
 	"itemTemplate": "Modelo de item",
@@ -161,7 +163,7 @@
 	"retryFailedEmbedding": "Retentar falhos: ",
 	"retryFailedEmbeddingTip": "Tentar novamente indexar os blocos falhos",
 	"retryFailedEmbeddingStarted": "Nova tentativa dos blocos falhos iniciada",
-	"rebuildEmbeddingIndex": "Reconstruir índice",
+	"rebuildEmbeddingIndex": "Reconstruir índice de embedding",
 	"rebuildEmbeddingIndexTip": "Limpar e recalcular os vetores de embedding de todos os blocos",
 	"rebuildEmbeddingIndexConfirmTip": "Tem certeza de que deseja limpar e regenerar todos os vetores de embedding? Isso pode demorar muito.",
 	"rebuildEmbeddingIndexStarted": "Reconstrução do índice de embedding iniciada",

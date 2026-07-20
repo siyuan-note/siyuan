@@ -281,7 +281,7 @@ export const transactionError = (msg?: string) => {
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--text">${window.siyuan.languages._kernel[97]}</button>
     <div class="fn__space"></div>
-    <button class="b3-button">${window.siyuan.languages.rebuildIndex}</button>
+    <button class="b3-button">${window.siyuan.languages.rebuildDataIndex}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });

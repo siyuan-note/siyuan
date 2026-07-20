@@ -11,6 +11,9 @@ export class Tree {
     private data: IBlockTree[];
     private blockExtHTML: string;
     private topExtHTML: string;
+    private blockDraggable: boolean;
+    private dragStart: (element: HTMLElement, event: DragEvent) => boolean;
+    private dragEnd: (element: HTMLElement, event: DragEvent) => boolean;
 
     public click: (element: Element, event?: MouseEvent) => void;
     private ctrlClick: (element: HTMLElement, event: MouseEvent) => void;
@@ -24,12 +27,15 @@ export class Tree {
         data: IBlockTree[],
         blockExtHTML?: string,
         topExtHTML?: string,
+        blockDraggable?: boolean,
         click?(element: HTMLElement, event: MouseEvent): void
         ctrlClick?(element: HTMLElement, event: MouseEvent): void
         altClick?(element: HTMLElement, event: MouseEvent): void
         shiftClick?(element: HTMLElement): void
         toggleClick?(element: HTMLElement): void
         rightClick?(element: HTMLElement, event: MouseEvent): void
+        dragStart?(element: HTMLElement, event: DragEvent): boolean
+        dragEnd?(element: HTMLElement, event: DragEvent): boolean
     }) {
         this.click = options.click;
         this.ctrlClick = options.ctrlClick;
@@ -40,6 +46,9 @@ export class Tree {
         this.element = options.element;
         this.blockExtHTML = options.blockExtHTML;
         this.topExtHTML = options.topExtHTML;
+        this.blockDraggable = options.blockDraggable;
+        this.dragStart = options.dragStart;
+        this.dragEnd = options.dragEnd;
         this.updateData(options.data);
         this.bindEvent();
     }
@@ -145,7 +154,7 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
             } else {
                 style = `padding-left: ${item.depth * 18 || 4}px;margin-right: 2px`;
             }
-            html += `<li class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}"  
+            html += `<li class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}" ${this.blockDraggable ? 'draggable="true"' : ""}
 style="--file-toggle-width:${item.depth === 0 ? 22 : ((item.depth + 1) * 18)}px" 
 data-node-id="${item.id}" 
 data-ref-text="${encodeURIComponent(item.refText)}" 
@@ -260,6 +269,9 @@ data-def-path="${item.defPath}">
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
+                if (this.dragStart?.(liElement, event)) {
+                    return;
+                }
                 event.dataTransfer.setData("text/html", liElement.outerHTML);
                 // 设置了的话 drop 就无法监听 alt event.dataTransfer.dropEffect = "move";
                 liElement.style.opacity = "0.38";
@@ -269,6 +281,9 @@ data-def-path="${item.defPath}">
         this.element.addEventListener("dragend", (event: DragEvent & { target: HTMLElement }) => {
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
+                if (this.dragEnd?.(liElement, event)) {
+                    return;
+                }
                 liElement.style.opacity = "1";
             }
             window.siyuan.dragElement = undefined;

@@ -38,6 +38,16 @@ var SkillTool = &Tool{
 		},
 		Required: []string{"action"},
 	},
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"":        {LocalRead: true},
+		"load":    {LocalRead: true},
+		"save":    {LocalWrite: true},
+		"install": {LocalWrite: true},
+		"remove":  {LocalWrite: true},
+		"rename":  {LocalWrite: true},
+		"list":    {LocalRead: true},
+	},
 	Handler: skillHandler,
 }
 

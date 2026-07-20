@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20250115153528"
+		"updated": "20260720201253"
 	},
 	"Children": [
 		{
@@ -579,7 +579,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135308-yvsiton",
-								"updated": "20250115153512"
+								"updated": "20260720201253"
 							},
 							"Children": [
 								{
@@ -625,7 +625,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Reindex"
+									"TextMarkTextContent": "Rebuild history index"
 								},
 								{
 									"Type": "NodeText",
@@ -1050,7 +1050,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-3fqyf3h",
-				"updated": "20220830230506"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
@@ -1096,7 +1096,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Reindex"
+					"TextMarkTextContent": "Rebuild history index"
 				},
 				{
 					"Type": "NodeText",

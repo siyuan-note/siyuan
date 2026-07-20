@@ -148,6 +148,7 @@ func InitConf() {
 	initLang()
 
 	Conf = NewAppConf()
+	clearEncryptedExportTempOnBoot()
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if gulu.File.IsExist(confPath) {
 		if data, err := os.ReadFile(confPath); err != nil {
@@ -1120,7 +1121,7 @@ func (conf *AppConf) GetBoxes() (ret []*Box) {
 		name := notebook.Name
 		closed := notebook.Closed
 		encrypted := IsEncryptedBox(id) // 使用 IsEncryptedBox 统一判定（含 backup fallback）
-		box := &Box{ID: id, BoxDocID: notebook.BoxDocID, Name: name, Closed: closed, Encrypted: encrypted}
+		box := &Box{ID: id, Name: name, Closed: closed, Encrypted: encrypted}
 		ret = append(ret, box)
 	}
 	return

@@ -47,6 +47,7 @@ type agentRuntimeTurn struct {
 	TargetUserEntryID string         `json:"targetUserEntryID,omitempty"`
 	UserContent       string         `json:"userContent,omitempty"`
 	UserReferences    *[]Reference   `json:"userReferences,omitempty"`
+	UserEditorContext *EditorContext `json:"userEditorContext,omitempty"`
 	BaseRevision      int64          `json:"baseRevision"`
 	State             string         `json:"state"`
 	Delta             []AgentMessage `json:"delta,omitempty"`
@@ -331,6 +332,11 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 			} else {
 				delete(entry, "references")
 			}
+		}
+		if turn.UserEditorContext != nil {
+			entry["editorContext"] = turn.UserEditorContext
+		} else {
+			delete(entry, "editorContext")
 		}
 	}
 

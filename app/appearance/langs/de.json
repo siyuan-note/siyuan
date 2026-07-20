@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Verlaufsindex neu aufbauen",
+	"rebuildAssetContentIndex": "Index für Asset-Inhalte neu aufbauen",
 	"newItemWithTemplate": "Eintrag mit Vorlage erstellen",
 	"newTemplate": "Neue Vorlage",
 	"itemTemplate": "Eintragsvorlage",
@@ -161,7 +163,7 @@
 	"retryFailedEmbedding": "Fehlgeschlagene erneut versuchen: ",
 	"retryFailedEmbeddingTip": "Erneuter Versuch, fehlgeschlagene Blöcke zu indexieren",
 	"retryFailedEmbeddingStarted": "Erneuter Versuch fehlgeschlagener Blöcke gestartet",
-	"rebuildEmbeddingIndex": "Index neu aufbauen",
+	"rebuildEmbeddingIndex": "Einbettungsindex neu aufbauen",
 	"rebuildEmbeddingIndexTip": "Einbettungsvektoren für alle Blöcke löschen und neu berechnen",
 	"rebuildEmbeddingIndexConfirmTip": "Möchten Sie wirklich alle Einbettungsvektoren löschen und neu generieren? Dies kann lange dauern.",
 	"rebuildEmbeddingIndexStarted": "Neuaufbau des Einbettungsindex gestartet",

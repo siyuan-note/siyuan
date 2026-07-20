@@ -244,9 +244,7 @@ const setHTML = (options: {
     highlightRender(protyle.wysiwyg.element);
     avRender(protyle.wysiwyg.element, protyle);
     blockRender(protyle, protyle.wysiwyg.element);
-    /// #if !MOBILE
     protyle.databaseAttributePanel?.render();
-    /// #endif
     if (options.action.includes(Constants.CB_GET_HISTORY)) {
         return;
     }

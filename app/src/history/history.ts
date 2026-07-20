@@ -520,7 +520,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                         ${notebookSelectHTML}
                     </select>
                     <span class="fn__space"></span>
-                    <button data-type="rebuildIndex" class="b3-button b3-button--outline">${window.siyuan.languages.rebuildIndex}</button>
+                    <button data-type="rebuildIndex" class="b3-button b3-button--outline">${window.siyuan.languages.rebuildHistoryIndex}</button>
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">

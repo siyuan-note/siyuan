@@ -23,7 +23,7 @@ export const getCurrentEditor = () => {
 
 export const openMobileFileById = (app: App, id: string, action: TProtyleAction[] = [Constants.CB_GET_HL],
                                    scrollPosition?: ScrollLogicalPosition, notebookId?: string,
-                                   afterOpen?: (protyle: IProtyle) => void) => {
+                                   afterOpen?: (protyle: IProtyle) => void, forceReload = false) => {
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id};
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
     const avPanelElement = document.querySelector(".av__panel");
@@ -43,7 +43,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                 return true;
             }
         });
-        if (blockElement) {
+        if (blockElement && !forceReload) {
             pushBack();
             if (action.includes(Constants.CB_GET_HL)) {
                 highlightById(window.siyuan.mobile.editor.protyle, id, scrollPosition);
@@ -69,6 +69,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             return;
         }
         const protyleOptions: IProtyleOptions = {
+            databaseAttr: true,
             blockId: id,
             rootId: data.data.rootID,
             notebookId: data.data.box,

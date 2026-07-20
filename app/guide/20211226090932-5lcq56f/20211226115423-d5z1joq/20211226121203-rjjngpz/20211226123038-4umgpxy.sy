@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20250115152754"
+		"updated": "20260720201253"
 	},
 	"Children": [
 		{
@@ -1257,12 +1257,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414203058-pvk5pnz",
-				"updated": "20230414203058"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "調整完以後需要手動重建索引。"
+					"Data": "調整完以後需要手動重建資源檔案索引。"
 				}
 			]
 		}

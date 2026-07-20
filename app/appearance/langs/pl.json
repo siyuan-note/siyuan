@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Odbuduj indeks historii",
+	"rebuildAssetContentIndex": "Odbuduj indeks zawartości zasobów",
 	"newItemWithTemplate": "Utwórz element z szablonu",
 	"newTemplate": "Nowy szablon",
 	"itemTemplate": "Szablon elementu",
@@ -161,7 +163,7 @@
 	"retryFailedEmbedding": "Ponów nieudane: ",
 	"retryFailedEmbeddingTip": "Ponowna próba zindeksowania nieudanych bloków",
 	"retryFailedEmbeddingStarted": "Ponowienie nieudanych bloków rozpoczęte",
-	"rebuildEmbeddingIndex": "Odbuduj indeks",
+	"rebuildEmbeddingIndex": "Odbuduj indeks osadzania",
 	"rebuildEmbeddingIndexTip": "Wyczyść i przelicz ponownie wektory osadzania wszystkich bloków",
 	"rebuildEmbeddingIndexConfirmTip": "Czy na pewno wyczyścić i wygenerować ponownie wszystkie wektory osadzania? Może to zająć dużo czasu.",
 	"rebuildEmbeddingIndexStarted": "Rozpoczęto odbudowę indeksu osadzania",

@@ -7,7 +7,7 @@
 		"id": "20240530101000-txrc7z1",
 		"title": "データ履歴",
 		"type": "doc",
-		"updated": "20250115153506"
+		"updated": "20260720201253"
 	},
 	"Children": [
 		{
@@ -569,7 +569,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-jxujzyn",
-								"updated": "20250115153501"
+								"updated": "20260720201253"
 							},
 							"Children": [
 								{
@@ -620,7 +620,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "インデックスの再構築"
+									"TextMarkTextContent": "履歴インデックスを再構築"
 								},
 								{
 									"Type": "NodeText",
@@ -1095,7 +1095,7 @@
 			"Properties": {
 				"ID": "20240530101000-sclv8jy",
 				"id": "20240530101000-dbujj1h",
-				"updated": "20240530101000"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
@@ -1168,7 +1168,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "インデックスを再構築"
+					"TextMarkTextContent": "履歴インデックスを再構築"
 				},
 				{
 					"Type": "NodeText",

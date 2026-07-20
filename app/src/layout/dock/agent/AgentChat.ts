@@ -38,8 +38,8 @@ import {
     renderWelcomeHTML
 } from "./AgentMessageRenderer";
 
-// Limit on the number of visible block IDs injected into the system prompt to control token usage.
-// Mirrors kernel/agent/agent.go maxVisibleBlockIDs.
+// 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
+// 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
 const maxVisibleBlockIDs = 50;
 
 type EntryBase = { id?: string };
@@ -1596,10 +1596,9 @@ export class AgentChat extends Model {
         }
     }
 
-    // Capture a read-only snapshot of the user's editor to inject into the system prompt.
-    // Strategy: scan ALL editors. Prefer one that (a) is visible and (b) has selected blocks;
-    // this directly targets "user selected blocks here" regardless of which window has focus.
-    // Falls back to the editor hosting the DOM selection, then the most-recently-activated tab.
+    // 捕获发送消息时的只读编辑器快照，并注入对应的用户轮次上下文。
+    // 扫描全部编辑器，优先选择可见且包含选中块的编辑器，以匹配用户所指的“这里选中的块”。
+    // 若未找到，则依次使用 DOM 选区所在编辑器和最近激活的页签。
     private captureEditorContext(): IEditorContext | undefined {
         /// #if MOBILE
         const mobEditor = window.siyuan.mobile.editor || window.siyuan.mobile.popEditor;

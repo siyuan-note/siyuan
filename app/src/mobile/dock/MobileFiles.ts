@@ -149,7 +149,12 @@ export class MobileFiles extends Model {
                     const ulElement = hasTopClosestByTag(target, "UL");
                     if (ulElement) {
                         const notebookId = ulElement.getAttribute("data-url");
-                        this.getLeaf(target.parentElement, notebookId);
+                        const liElement = target.parentElement;
+                        if (liElement.querySelector(".b3-list-item__arrow--open")) {
+                            this.collapseLeaf(liElement);
+                        } else if ((liElement.nextElementSibling as HTMLElement)?.dataset.collapsing !== "true") {
+                            this.getLeaf(liElement, notebookId);
+                        }
                         this.setCurrent(target.parentElement);
                         window.siyuan.menus.menu.remove();
                     }
@@ -908,14 +913,12 @@ export class MobileFiles extends Model {
         setTimeout(() => {
             nextElement.setAttribute("style", `height:${nextElement.childElementCount * liElement.clientHeight}px;`);
             setTimeout(() => {
-                this.element.querySelectorAll(".file-tree__sliderDown").forEach(item => {
-                    item.classList.remove("file-tree__sliderDown");
-                    item.removeAttribute("style");
-                });
+                nextElement.classList.remove("file-tree__sliderDown");
+                nextElement.removeAttribute("style");
                 if (typeof scrollTop === "number") {
                     this.element.scroll({top: scrollTop, behavior: "smooth"});
                 }
-            }, 120);
+            }, 200);
         }, 2);
         this.refreshPublishAccessSwitch();
     }
@@ -980,11 +983,43 @@ export class MobileFiles extends Model {
         }
     }
 
+    private collapseLeaf(liElement: Element) {
+        const toggleElement = liElement.querySelector(".b3-list-item__arrow");
+        const leafElement = liElement.nextElementSibling as HTMLElement;
+        toggleElement.classList.remove("b3-list-item__arrow--open");
+        if (leafElement?.tagName !== "UL") {
+            this.getOpenPaths();
+            return;
+        }
+
+        // 仅当手动点击折叠按钮时才需要动画，其他情况下默认直接移除列表容器。
+        leafElement.dataset.collapsing = "true";
+        leafElement.style.height = `${leafElement.scrollHeight}px`;
+        leafElement.style.overflow = "hidden";
+        leafElement.classList.add("file-tree__sliderUp");
+        window.setTimeout(() => {
+            leafElement.style.height = "0";
+            window.setTimeout(() => {
+                if (!leafElement.isConnected) {
+                    return;
+                }
+                leafElement.remove();
+                this.getOpenPaths();
+            }, 200);
+        }, 2);
+    }
+
     public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
+        const leafElement = liElement.nextElementSibling as HTMLElement;
+        if (leafElement?.dataset.collapsing === "true") {
+            leafElement.remove();
+            this.getOpenPaths();
+            return;
+        }
         if (toggleElement.classList.contains("b3-list-item__arrow--open") && !focusUpdate) {
             toggleElement.classList.remove("b3-list-item__arrow--open");
-            liElement.nextElementSibling?.remove();
+            leafElement?.remove();
             this.getOpenPaths();
             return;
         }

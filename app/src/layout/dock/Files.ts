@@ -245,7 +245,12 @@ export class Files extends Model {
                         }
                         break;
                     } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__toggle")) {
-                        this.getLeaf(target.parentElement, notebookId, false, true);
+                        const liElement = target.parentElement;
+                        if (liElement.querySelector(".b3-list-item__arrow--open")) {
+                            this.collapseLeaf(liElement);
+                        } else if ((liElement.nextElementSibling as HTMLElement)?.dataset.collapsing !== "true") {
+                            this.getLeaf(liElement, notebookId);
+                        }
                         event.preventDefault();
                         event.stopPropagation();
                         window.siyuan.menus.menu.remove();
@@ -1293,14 +1298,12 @@ data-type="navigation-root" data-path="/" data-node-id="${window.siyuan.config.f
         setTimeout(() => {
             nextElement.setAttribute("style", `top: -1px;position: relative;height:${nextElement.childElementCount * (liElement.clientHeight + 1) - 1}px;`);
             setTimeout(() => {
-                this.element.querySelectorAll(".file-tree__sliderDown").forEach(item => {
-                    item.classList.remove("file-tree__sliderDown");
-                    item.removeAttribute("style");
-                });
+                nextElement.classList.remove("file-tree__sliderDown");
+                nextElement.removeAttribute("style");
                 if (typeof scrollTop === "number") {
                     this.element.scroll({top: scrollTop, behavior: "smooth"});
                 }
-            }, 120);
+            }, 200);
         }, 2);
         this.refreshPublishAccessSwitch();
     }
@@ -1368,58 +1371,45 @@ data-type="navigation-root" data-path="/" data-node-id="${window.siyuan.config.f
         }
     }
 
-    public getLeaf(liElement: Element, notebookId: string, focusUpdate = false, animateCollapse = false) {
+    private collapseLeaf(liElement: Element) {
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
         const leafElement = liElement.nextElementSibling as HTMLElement;
-        // 动画结束前忽略重复操作，避免同时修改同一个子列表的展开状态。
-        if (leafElement?.dataset.collapsing === "true") {
-            if (!animateCollapse) {
+        toggleElement.classList.remove("b3-list-item__arrow--open");
+        if (leafElement?.tagName !== "UL") {
+            this.getOpenPaths();
+            return;
+        }
+
+        // 仅当手动点击折叠按钮时才需要动画，其他情况下默认直接移除列表容器。
+        leafElement.dataset.collapsing = "true";
+        leafElement.style.height = `${leafElement.scrollHeight}px`;
+        leafElement.style.overflow = "hidden";
+        leafElement.classList.add("file-tree__sliderUp");
+        window.setTimeout(() => {
+            leafElement.style.height = "0";
+            window.setTimeout(() => {
+                if (!leafElement.isConnected) {
+                    return;
+                }
                 leafElement.remove();
                 this.getOpenPaths();
-            }
+            }, 200);
+        }, 2);
+    }
+
+    public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {
+        const toggleElement = liElement.querySelector(".b3-list-item__arrow");
+        const leafElement = liElement.nextElementSibling as HTMLElement;
+        if (leafElement?.dataset.collapsing === "true") {
+            leafElement.remove();
+            this.getOpenPaths();
             return;
         }
         if (toggleElement.classList.contains("b3-list-item__arrow--open") && !focusUpdate) {
             toggleElement.classList.remove("b3-list-item__arrow--open");
             if (leafElement?.tagName === "UL") {
-                // 仅当手动点击折叠按钮时才需要动画，其他情况下默认直接移除列表容器。
-                if (!animateCollapse) {
-                    leafElement.remove();
-                    this.getOpenPaths();
-                    return;
-                }
-                leafElement.dataset.collapsing = "true";
-                // 将 auto 高度固定为当前内容高度，为 height 过渡提供明确的起点。
-                leafElement.style.height = `${leafElement.scrollHeight}px`;
-                leafElement.style.overflow = "hidden";
-                // 折叠使用独立类，避免展开动画的全量清理中断当前过渡。
-                leafElement.classList.add("file-tree__sliderUp");
-                // 下一帧再设置终点，确保浏览器已应用起始高度并触发过渡。
-                requestAnimationFrame(() => {
-                    leafElement.style.height = "0";
-                });
-
-                // transitionend 在窗口失焦或关闭动画时可能不触发，超时回调用于确保子列表最终被移除。
-                let removed = false;
-                const onTransitionEnd = (event: TransitionEvent) => {
-                    // 忽略子元素冒泡的过渡事件，仅响应当前列表自身的高度变化。
-                    if (event.target !== leafElement || event.propertyName !== "height") {
-                        return;
-                    }
-                    removeLeaf();
-                };
-                const removeLeaf = () => {
-                    if (removed) {
-                        return;
-                    }
-                    removed = true;
-                    leafElement.removeEventListener("transitionend", onTransitionEnd);
-                    leafElement.remove();
-                    this.getOpenPaths();
-                };
-                leafElement.addEventListener("transitionend", onTransitionEnd);
-                // 保险，未触发时兜底300ms后强制删除
-                setTimeout(removeLeaf, 300);
+                leafElement.remove();
+                this.getOpenPaths();
             } else {
                 // 没有UL，直接更新路径
                 this.getOpenPaths();

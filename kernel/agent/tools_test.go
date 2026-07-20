@@ -160,6 +160,19 @@ func TestImageToolActionEffects(t *testing.T) {
 	}
 }
 
+func TestSkillToolActionEffects(t *testing.T) {
+	for _, action := range []string{"", "load", "list"} {
+		if needsConfirm("skill", action, nil) || needsLocalSnapshot("skill", action) {
+			t.Errorf("read-only skill action %q must not require confirmation or create a snapshot", action)
+		}
+	}
+	for _, action := range []string{"save", "install", "remove", "rename"} {
+		if !needsConfirm("skill", action, nil) || !needsLocalSnapshot("skill", action) {
+			t.Errorf("write skill action %q must require confirmation and create a snapshot", action)
+		}
+	}
+}
+
 func TestQueryToolActionEffects(t *testing.T) {
 	tests := []struct {
 		toolName     string

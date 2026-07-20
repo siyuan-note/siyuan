@@ -31,7 +31,9 @@ SiYuan 工作区是一棵**自描述**的目录树：笔记本、文档、附件
 │   └── <boxID>/                # ★笔记本(目录名 = 笔记本 ID)
 │       ├── .siyuan/
 │       │   ├── conf.json       # ★笔记本配置(BoxConf:name/icon/closed...)
-│       │   └── sort.json       # 自定义排序映射 {docID: order}
+│       │   ├── sort.json       # 自定义排序映射 {docID: order}
+│       │   └── boxDoc.json     # 可选的顶层笔记本文档标记，用于 .sy.zip 导入导出
+│       ├── <boxID>.sy          # 可选的顶层笔记本文档（rootID = 笔记本 ID）
 │       ├── <docID>.sy          # 文档(JSON 树;文件名 = 文档 rootID)
 │       └── <docID>/            # ★该文档的子文档目录(同名配对)
 │           ├── <childID>.sy
@@ -114,16 +116,34 @@ func IsReservedFilename(baseName string) bool {
 
 > ⚠️ 这意味着：**移动 / 改名一个有子文档的文档，必须同步移动它的同名目录**,否则子文档会失联。
 
+### 顶层笔记本文档例外
+
+启用顶层笔记本文档功能后，内核会在笔记本目录中直接创建 `<boxID>.sy`。该文档的 rootID 就是笔记本 ID，因此笔记本与其顶层文档共用同一个 ID。
+
+顶层笔记本文档是笔记本根层所有普通文档的虚拟父文档。与普通父文档不同，它的子文档仍然位于笔记本目录中，**不会**移动到 `<boxID>/<boxID>/` 目录。例如：
+
+```
+data/<boxID>/
+├── <boxID>.sy       # 顶层笔记本文档
+├── <docA>.sy        # <boxID>.sy 的逻辑子文档
+├── <docA>/          # docA 的物理子文档目录
+│   └── <docB>.sy
+└── <docC>.sy        # <boxID>.sy 的另一个逻辑子文档
+```
+
+内核会将以 `/<boxID>/` 开头的虚拟路径映射回笔记本物理根路径。顶层笔记本文档不能移动或删除。该文档创建后，关闭功能只会在常规界面和搜索结果中隐藏它，不会删除对应的 `.sy` 文件。
+
 ---
 
-## 5. 笔记本元数据：`<boxID>/.siyuan/conf.json`
+## 5. 笔记本元数据：`<boxID>/.siyuan/`
 
-每个笔记本目录下有一个 `.siyuan/` 隐藏目录，内含：
+每个笔记本目录下都有一个 `.siyuan/` 隐藏目录，其中可以包含：
 
 | 文件 | 用途 |
 |---|---|
 | `conf.json` | 笔记本配置（BoxConf） |
 | `sort.json` | 文档自定义排序映射 `{docID: order}` |
+| `boxDoc.json` | 可选；在笔记本 `.sy.zip` 导入导出中标识顶层笔记本文档 |
 
 `BoxConf` 结构：
 
@@ -144,6 +164,8 @@ func IsReservedFilename(baseName string) bool {
 > ⚠️ **笔记本 ID 不在 `conf.json` 里**——ID 就是笔记本目录名本身（见 §3 的判定规则）。
 
 读写位置：`GetConf` / `SaveConf`。路径硬编码为 `<DataDir>/<boxID>/.siyuan/conf.json`。
+
+`boxDoc.json` 包含元数据规范版本和顶层文档 ID。运行时内核直接从 `box.ID` 推导该文档 ID；保留此元数据文件是为了让 `.sy.zip` 导入过程能够识别源笔记本的顶层文档，并将其重新映射为目标笔记本 ID。
 
 ---
 
@@ -193,8 +215,8 @@ func IsReservedFilename(baseName string) bool {
 
 ### ID 格式
 
-- **笔记本 ID**:`YYYYMMDDHHMMSS-xxxxxx`（14 位时间戳 + `-` + 6 位随机）。
-- **文档 ID**:`YYYYMMDDHHMMSS-xxxxxxx`（14 位时间戳 + `-` + 7 位随机）。
+- **NodeID**：`YYYYMMDDHHMMSS-xxxxxxx`（14 位时间戳 + `-` + 7 位随机字符）。
+- 笔记本 ID 和文档 ID 使用相同的 NodeID 格式，顶层笔记本文档直接使用所属笔记本的 NodeID。
 - 前 14 位即创建时间（`TimeFromID` 提取）。
 - 随机字符集 `[a-z0-9]`。
 
@@ -202,6 +224,7 @@ func IsReservedFilename(baseName string) bool {
 
 - 文档的 `.sy` 文件名（去 `.sy` 后缀）= 文档 rootID。
 - 笔记本的目录名 = 笔记本 ID。
+- 顶层笔记本文档的文件名和 rootID 都等于笔记本 ID，即 `<boxID>.sy`。
 - 内核强制 `文件名 ID == root.ID`，不一致会自动订正。
 
 ### 文档绝对路径
@@ -223,6 +246,8 @@ HPath **不存储**,加载文档时现场计算（`LoadTreeByData`）:
 
 > 这是「目录结构即数据」的根本原因：**移动或重命名文件/目录，会直接改变文档的 HPath 与面包屑**——因为 HPath 完全派生自目录链。
 
+顶层笔记本文档会进行特殊处理：其 API HPath 为 `/`，完整的人类可读路径为笔记本名称；根层普通文档在逻辑上显示为它的下级文档，但文件仍然直接存放在笔记本目录中。
+
 ---
 
 ## 11. 直接操作文件系统的注意事项
@@ -234,8 +259,9 @@ HPath **不存储**,加载文档时现场计算（`LoadTreeByData`）:
 1. ☐ 笔记本/文档命名符合 NodeID 格式，且**避开保留名**(§3)。
 2. ☐ 文档 `.sy` 文件名 == 文档 rootID(§9)。
 3. ☐ 有子文档的文档，必须**配套同名目录**；移动父文档时连带移动同名目录（§4）。
-4. ☐ 笔记本的名称/图标/关闭状态写在 `<boxID>/.siyuan/conf.json`，不在 `.sy` 里（§5）。
-5. ☐ 改动后通常需要**重建索引**,否则搜索/块引用/面包屑会失效。
+4. ☐ 不要将根层文档移动到 `<boxID>/<boxID>/` 中；顶层笔记本文档使用虚拟父子路径映射（§4）。
+5. ☐ 笔记本的名称、图标和关闭状态写在 `<boxID>/.siyuan/conf.json` 中；当 `<boxID>.sy` 存在时，名称和图标会与它同步（§5）。
+6. ☐ 改动后通常需要**重建索引**，否则搜索、块引用和面包屑会失效。
 
 ---
 
@@ -247,4 +273,3 @@ HPath **不存储**,加载文档时现场计算（`LoadTreeByData`）:
 | **SY-FORMAT** | AST 层 | 「一个 `.sy` 文件内部的 JSON 树长什么样？有哪些节点类型/字段？」 |
 
 两者互补：本文档告诉你 `.sy` 文件**放在哪、叫什么名、与谁同目录**；SY-FORMAT 告诉你 `.sy` 文件**里面写什么**。
-

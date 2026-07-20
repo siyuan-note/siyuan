@@ -31,7 +31,9 @@ A SiYuan workspace is a **self-describing** directory tree: notebooks, documents
 │   └── <boxID>/                # ★Notebook (dir name = notebook ID)
 │       ├── .siyuan/
 │       │   ├── conf.json       # ★Notebook config (BoxConf: name/icon/closed...)
-│       │   └── sort.json       # Custom sort mapping {docID: order}
+│       │   ├── sort.json       # Custom sort mapping {docID: order}
+│       │   └── boxDoc.json     # Optional top-level notebook document marker for .sy.zip import/export
+│       ├── <boxID>.sy          # Optional top-level notebook document (rootID = notebook ID)
 │       ├── <docID>.sy          # Document (JSON tree; filename = doc rootID)
 │       └── <docID>/            # ★Children of that document (same-named pair)
 │           ├── <childID>.sy
@@ -114,16 +116,34 @@ Code evidence:
 
 > ⚠️ This means: **moving or renaming a document that has children must also move its same-named directory**, otherwise the children get orphaned.
 
+### Top-level notebook document exception
+
+When the top-level notebook document feature is enabled, the kernel creates `<boxID>.sy` directly inside the notebook directory. Its document rootID is exactly the notebook ID, so the notebook and its top-level document share one ID.
+
+The top-level notebook document is a virtual parent for every ordinary document stored directly under `<boxID>/`. Unlike an ordinary parent document, its children remain in the notebook directory and are **not** moved into a `<boxID>/<boxID>/` directory. For example:
+
+```
+data/<boxID>/
+├── <boxID>.sy       # Top-level notebook document
+├── <docA>.sy        # Logical child of <boxID>.sy
+├── <docA>/          # Physical children of docA
+│   └── <docB>.sy
+└── <docC>.sy        # Another logical child of <boxID>.sy
+```
+
+The kernel maps virtual paths beginning with `/<boxID>/` back to the notebook's physical root. The top-level notebook document cannot be moved or deleted. After it has been created, disabling the feature hides it from normal UI and search results but does not remove its `.sy` file.
+
 ---
 
-## 5. Notebook metadata: `<boxID>/.siyuan/conf.json`
+## 5. Notebook metadata: `<boxID>/.siyuan/`
 
-Each notebook directory contains a `.siyuan/` hidden folder with:
+Each notebook directory contains a `.siyuan/` hidden folder, which can contain:
 
 | File | Purpose |
 |---|---|
 | `conf.json` | Notebook config (BoxConf) |
 | `sort.json` | Custom sort mapping `{docID: order}` |
+| `boxDoc.json` | Optional; identifies the top-level notebook document in `.sy.zip` notebook exports/imports |
 
 The `BoxConf` struct:
 
@@ -144,6 +164,8 @@ The `BoxConf` struct:
 > ⚠️ **The notebook ID is NOT in `conf.json`** — the ID is the notebook directory name itself (see §3).
 
 Read/write sites: `GetConf` / `SaveConf`. The path is hard-coded as `<DataDir>/<boxID>/.siyuan/conf.json`.
+
+`boxDoc.json` contains a metadata spec version and the top-level document ID. At runtime the kernel derives that document ID directly from `box.ID`; the metadata file is retained so `.sy.zip` import can identify the source notebook's top-level document and remap it to the destination notebook ID.
 
 ---
 
@@ -193,8 +215,8 @@ Asset-link prefix recognition: only `assets/`, `emojis/`, `plugins/`, `public/`,
 
 ### ID format
 
-- **Notebook ID:** `YYYYMMDDHHMMSS-xxxxxx` (14-digit timestamp + `-` + 6 random chars).
-- **Document ID:** `YYYYMMDDHHMMSS-xxxxxxx` (14-digit timestamp + `-` + 7 random chars).
+- **NodeID:** `YYYYMMDDHHMMSS-xxxxxxx` (14-digit timestamp + `-` + 7 random characters).
+- Notebook and document IDs use the same NodeID format. A top-level notebook document uses its notebook's NodeID directly.
 - The first 14 digits encode the creation time (extracted by `TimeFromID`).
 - Random alphabet is `[a-z0-9]`.
 
@@ -202,6 +224,7 @@ Asset-link prefix recognition: only `assets/`, `emojis/`, `plugins/`, `public/`,
 
 - A document's `.sy` filename (without `.sy`) = the document rootID.
 - A notebook's directory name = the notebook ID.
+- A top-level notebook document's filename and rootID both equal the notebook ID: `<boxID>.sy`.
 - The kernel enforces `filename ID == root.ID` and auto-corrects mismatches.
 
 ### Document absolute path
@@ -223,6 +246,8 @@ HPath is **not stored** — it is computed on the fly when loading a document (`
 
 > This is the fundamental reason "directory structure is data": **moving or renaming a file/directory directly changes the document's HPath and breadcrumbs** — because HPath is entirely derived from the directory chain.
 
+The top-level notebook document is handled specially: its API HPath is `/`, its full human-readable path is the notebook name, and root-level ordinary documents appear beneath it logically even though their files remain directly under the notebook directory.
+
 ---
 
 ## 11. Notes on operating the file system directly
@@ -234,8 +259,9 @@ When writing files directly:
 1. ☐ Notebook/document names must match the NodeID format and **avoid reserved names** (§3).
 2. ☐ A document's `.sy` filename equals its rootID (§9).
 3. ☐ A document with children must have the **paired same-named directory**; moving the parent means moving that directory too (§4).
-4. ☐ A notebook's name/icon/closed state lives in `<boxID>/.siyuan/conf.json`, not in `.sy` (§5).
-5. ☐ After changes you usually need to **rebuild the index**, or search/block-refs/breadcrumbs will be stale.
+4. ☐ Do not move root-level documents into `<boxID>/<boxID>/`; the top-level notebook document uses a virtual parent-child mapping (§4).
+5. ☐ A notebook's name/icon/closed state lives in `<boxID>/.siyuan/conf.json`; the name and icon are synchronized with `<boxID>.sy` when that document exists (§5).
+6. ☐ After changes you usually need to **rebuild the index**, or search/block-refs/breadcrumbs will be stale.
 
 ---
 
@@ -247,4 +273,3 @@ When writing files directly:
 | **SY-FORMAT** | AST layer | "What does the JSON tree inside a `.sy` file look like? What node types/fields exist?" |
 
 The two are complementary: this document tells you where a `.sy` file **lives, what it's named, and who shares its directory**; SY-FORMAT tells you **what's inside** it.
-

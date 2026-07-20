@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "重建歷史索引",
+	"rebuildAssetContentIndex": "重建資源檔案索引",
 	"newItemWithTemplate": "使用範本新增條目",
 	"newTemplate": "新增範本",
 	"itemTemplate": "條目範本",

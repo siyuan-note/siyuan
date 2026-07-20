@@ -1612,7 +1612,7 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
         }
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconRefresh",
-            label: window.siyuan.languages.rebuildIndex,
+            label: window.siyuan.languages.rebuildDataIndex,
             click: () => {
                 if (!this.element.getAttribute("disabled")) {
                     this.element.setAttribute("disabled", "disabled");

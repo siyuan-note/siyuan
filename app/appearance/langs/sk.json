@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Znovu vytvoriť index histórie",
+	"rebuildAssetContentIndex": "Znovu vytvoriť index obsahu zdrojov",
 	"newItemWithTemplate": "Vytvoriť položku zo šablóny",
 	"newTemplate": "Nová šablóna",
 	"itemTemplate": "Šablóna položky",

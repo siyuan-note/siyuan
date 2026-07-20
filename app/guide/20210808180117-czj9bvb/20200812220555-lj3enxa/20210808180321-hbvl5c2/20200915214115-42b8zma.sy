@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20250115152751"
+		"updated": "20260720201253"
 	},
 	"Children": [
 		{
@@ -1273,12 +1273,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414202749-qbcnypq",
-				"updated": "20230414202900"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "调整完以后需要手动重建索引。"
+					"Data": "调整完以后需要手动重建资源文件索引。"
 				}
 			]
 		}

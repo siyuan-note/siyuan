@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Geschiedenisindex herbouwen",
+	"rebuildAssetContentIndex": "Index voor assetinhoud herbouwen",
 	"newItemWithTemplate": "Item maken met sjabloon",
 	"newTemplate": "Nieuwe sjabloon",
 	"itemTemplate": "Itemsjabloon",

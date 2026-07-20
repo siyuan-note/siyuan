@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20250115152723"
+		"updated": "20260720201253"
 	},
 	"Children": [
 		{
@@ -1264,12 +1264,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414203027-chylp3d",
-				"updated": "20230414203027"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After the adjustment, you need to manually rebuild the index."
+					"Data": "After the adjustment, you need to manually rebuild the asset content index."
 				}
 			]
 		}

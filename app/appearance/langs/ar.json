@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "إعادة بناء فهرس السجل",
+	"rebuildAssetContentIndex": "إعادة بناء فهرس محتوى الأصول",
 	"newItemWithTemplate": "إنشاء عنصر باستخدام قالب",
 	"newTemplate": "قالب جديد",
 	"itemTemplate": "قالب العنصر",

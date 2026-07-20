@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Reconstruir índice del historial",
+	"rebuildAssetContentIndex": "Reconstruir índice de contenido de recursos",
 	"newItemWithTemplate": "Crear elemento con una plantilla",
 	"newTemplate": "Nueva plantilla",
 	"itemTemplate": "Plantilla de elemento",

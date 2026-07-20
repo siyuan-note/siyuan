@@ -6,7 +6,7 @@
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
 		"type": "doc",
-		"updated": "20250115153534"
+		"updated": "20260720201253"
 	},
 	"Children": [
 		{
@@ -563,7 +563,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135052-o3r30jj",
-								"updated": "20250115153518"
+								"updated": "20260720201253"
 							},
 							"Children": [
 								{
@@ -609,7 +609,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "重建索引"
+									"TextMarkTextContent": "重建历史索引"
 								},
 								{
 									"Type": "NodeText",
@@ -1034,7 +1034,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615115625-3dx0t1j",
-				"updated": "20220830230414"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
@@ -1089,7 +1089,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "重建索引"
+					"TextMarkTextContent": "重建历史索引"
 				},
 				{
 					"Type": "NodeText",

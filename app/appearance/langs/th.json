@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "สร้างดัชนีประวัติใหม่",
+	"rebuildAssetContentIndex": "สร้างดัชนีเนื้อหาสินทรัพย์ใหม่",
 	"newItemWithTemplate": "สร้างรายการด้วยเทมเพลต",
 	"newTemplate": "เทมเพลตใหม่",
 	"itemTemplate": "เทมเพลตรายการ",

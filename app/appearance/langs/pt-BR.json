@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Reconstruir índice do histórico",
+	"rebuildAssetContentIndex": "Reconstruir índice de conteúdo de recursos",
 	"newItemWithTemplate": "Criar item com modelo",
 	"newTemplate": "Novo modelo",
 	"itemTemplate": "Modelo de item",

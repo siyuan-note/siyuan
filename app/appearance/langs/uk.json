@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Перебудувати індекс історії",
+	"rebuildAssetContentIndex": "Перебудувати індекс вмісту ресурсів",
 	"newItemWithTemplate": "Створити елемент за шаблоном",
 	"newTemplate": "Новий шаблон",
 	"itemTemplate": "Шаблон елемента",

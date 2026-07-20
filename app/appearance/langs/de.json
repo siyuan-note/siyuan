@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Verlaufsindex neu aufbauen",
+	"rebuildAssetContentIndex": "Index für Asset-Inhalte neu aufbauen",
 	"newItemWithTemplate": "Eintrag mit Vorlage erstellen",
 	"newTemplate": "Neue Vorlage",
 	"itemTemplate": "Eintragsvorlage",

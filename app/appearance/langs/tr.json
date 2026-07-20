@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Geçmiş indeksini yeniden oluştur",
+	"rebuildAssetContentIndex": "Varlık içeriği indeksini yeniden oluştur",
 	"newItemWithTemplate": "Şablonla öge oluştur",
 	"newTemplate": "Yeni şablon",
 	"itemTemplate": "Öge şablonu",

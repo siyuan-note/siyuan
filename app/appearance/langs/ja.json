@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "履歴インデックスを再構築",
+	"rebuildAssetContentIndex": "アセットコンテンツインデックスを再構築",
 	"newItemWithTemplate": "テンプレートで項目を新規作成",
 	"newTemplate": "新規テンプレート",
 	"itemTemplate": "項目テンプレート",

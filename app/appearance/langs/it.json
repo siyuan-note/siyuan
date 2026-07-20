@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Ricostruisci indice cronologia",
+	"rebuildAssetContentIndex": "Ricostruisci indice contenuto risorse",
 	"newItemWithTemplate": "Crea elemento con modello",
 	"newTemplate": "Nuovo modello",
 	"itemTemplate": "Modello elemento",

@@ -6,7 +6,7 @@
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
 		"type": "doc",
-		"updated": "20250115153525"
+		"updated": "20260720201253"
 	},
 	"Children": [
 		{
@@ -547,7 +547,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135134-n7t2zfn",
-								"updated": "20250115153515"
+								"updated": "20260720201253"
 							},
 							"Children": [
 								{
@@ -593,7 +593,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "重建索引"
+									"TextMarkTextContent": "重建歷史索引"
 								},
 								{
 									"Type": "NodeText",
@@ -1018,7 +1018,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120134-aiy219j",
-				"updated": "20220830230528"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
@@ -1073,7 +1073,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "重建索引"
+					"TextMarkTextContent": "重建歷史索引"
 				},
 				{
 					"Type": "NodeText",

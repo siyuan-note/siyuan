@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "Bangun ulang indeks riwayat",
+	"rebuildAssetContentIndex": "Bangun ulang indeks konten aset",
 	"newItemWithTemplate": "Buat item dengan templat",
 	"newTemplate": "Templat baru",
 	"itemTemplate": "Templat item",

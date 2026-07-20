@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "기록 인덱스 재구축",
+	"rebuildAssetContentIndex": "에셋 콘텐츠 인덱스 재구축",
 	"newItemWithTemplate": "템플릿으로 항목 만들기",
 	"newTemplate": "새 템플릿",
 	"itemTemplate": "항목 템플릿",

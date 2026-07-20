@@ -1,4 +1,6 @@
 {
+	"rebuildHistoryIndex": "בנה מחדש את אינדקס ההיסטוריה",
+	"rebuildAssetContentIndex": "בנה מחדש את אינדקס תוכן הנכסים",
 	"newItemWithTemplate": "יצירת פריט באמצעות תבנית",
 	"newTemplate": "תבנית חדשה",
 	"itemTemplate": "תבנית פריט",

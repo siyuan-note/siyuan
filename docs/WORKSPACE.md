@@ -6,7 +6,7 @@
 
 ## 0. In one sentence
 
-A SiYuan workspace is a **self-describing** directory tree: notebooks, documents, and assets all live on disk as readable files and directories. **The filename is the ID; the directory structure is the document hierarchy.** There is no binary database recording "where documents are" — the file system itself is the single source of truth. The kernel reconstructs all notebooks and documents simply by walking the directories.
+A SiYuan workspace is a **self-describing** directory tree: notebooks, documents, and assets live on disk as files and directories. **The filename is the ID; the directory structure is the document hierarchy.** The file system contains the authoritative source content, while SQLite databases under `temp/` are rebuildable indexes and caches. Normal-notebook content is readable directly; encrypted-notebook content is ciphertext and must be accessed through the unlocked kernel.
 
 ---
 
@@ -14,12 +14,16 @@ A SiYuan workspace is a **self-describing** directory tree: notebooks, documents
 
 ```
 <workspace root>/   e.g. F:\SiYuan\
+├── .lock                       # Runtime workspace lock
 ├── conf/
 │   ├── conf.json              # ★Workspace-level config (appearance/system/sync/editor...)
-│   ├── ca.crt / cert.pem / key.pem   # TLS certificates
-│   └── windowState.json
+│   ├── appearance/             # Installed themes, icons, and language resources
+│   ├── ca.crt / ca.key / cert.pem / key.pem   # TLS certificates and keys
+│   └── windowState.json        # Desktop window state
 ├── data/                       # DataDir — root of all notebook data
-│   ├── .siyuan/                # Workspace-level hidden config (*ignore rules, etc.)
+│   ├── .siyuan/                # Workspace-level hidden config
+│   │   ├── syncignore / searchignore / embeddingignore / indexignore / refsearchignore
+│   │   └── notebook-crypto-backup.json # Optional encrypted-notebook global recovery metadata
 │   ├── assets/                 # ★Global assets (images/audio/video/files)
 │   ├── templates/              # Global templates (.md)
 │   ├── widgets/                # Widgets
@@ -27,20 +31,27 @@ A SiYuan workspace is a **self-describing** directory tree: notebooks, documents
 │   ├── emojis/                 # Custom emoji
 │   ├── snippets/               # Code snippets (CSS/JS)
 │   ├── public/                 # Static resources
-│   ├── storage/                # Runtime indexes / cache / databases
+│   ├── storage/                # Persistent structured data (attribute views, plugins, etc.)
 │   └── <boxID>/                # ★Notebook (dir name = notebook ID)
 │       ├── .siyuan/
 │       │   ├── conf.json       # ★Notebook config (BoxConf: name/icon/closed...)
-│       │   ├── sort.json       # Custom sort mapping {docID: order}
-│       │   └── boxDoc.json     # Optional top-level notebook document marker for .sy.zip import/export
+│       │   ├── sort.json       # Optional custom sort mapping {docID: order}
+│       │   ├── boxDoc.json     # Optional top-level notebook document marker for .sy.zip import/export
+│       │   └── notebook-crypt-backup.json # Optional encrypted-notebook key-envelope backup
 │       ├── <boxID>.sy          # Optional top-level notebook document (rootID = notebook ID)
 │       ├── <docID>.sy          # Document (JSON tree; filename = doc rootID)
-│       └── <docID>/            # ★Children of that document (same-named pair)
-│           ├── <childID>.sy
-│           └── <childID>/ ...  # Nesting of arbitrary depth
+│       ├── <docID>/            # ★Children of that document (same-named pair)
+│       │   ├── <childID>.sy
+│       │   └── <childID>/ ...  # Nesting of arbitrary depth
+│       ├── assets/             # Notebook-local assets (mandatory for encrypted notebooks)
+│       └── storage/av/         # Encrypted-notebook attribute-view definitions
 ├── repo/                       # Data repo (snapshots/sync)
 ├── history/                    # Edit-history archive
-└── temp/                       # Temp/export files
+├── corrupted/                  # Optional quarantine for corrupted data
+└── temp/                       # Rebuildable indexes, queues, caches, logs, and exports
+    ├── siyuan.db / blocktree.db / asset_content.db / history.db
+    ├── siyuan-encrypted-<boxID>.db / siyuan-encrypted-<boxID>-blocktree.db
+    └── queue/ / export/ / os/ / siyuan.log
 ```
 
 ---
@@ -49,16 +60,17 @@ A SiYuan workspace is a **self-describing** directory tree: notebooks, documents
 
 The workspace root is chosen by the user (e.g. `F:\SiYuan\`). Whether a directory is a valid workspace is decided by: `conf/conf.json` exists and contains a `kernelVersion` field.
 
-Fixed sub-directories under the root:
+Workspace-root entries:
 
-| Sub-dir | Purpose |
+| Entry | Purpose |
 |---|---|
-| `conf/` | Workspace-level config + TLS certificates |
+| `.lock` | Runtime lock preventing two kernels from opening the same workspace |
+| `conf/` | Workspace-level config, appearance resources, and TLS material |
 | `data/` | **All notebook data** (the core of this document) |
 | `repo/` | Data-snapshot repo (used for sync/history) |
 | `history/` | Edit-history archive |
-| `temp/` | Temp/export files |
-| `corrupted/` | Quarantine for corrupted data (auto-moved by the kernel) |
+| `temp/` | Rebuildable indexes, queues, caches, logs, and exports |
+| `corrupted/` | Optional quarantine for corrupted data (auto-created when needed) |
 
 ---
 
@@ -66,7 +78,7 @@ Fixed sub-directories under the root:
 
 The first level of `data/` mixes two kinds of entries:
 
-1. **Reserved resource directories:** `.siyuan/`, `assets/`, `templates/`, `widgets/`, `plugins/`, `emojis/`, `snippets/`, `public/`, `storage/`.
+1. **Fixed data directories:** `.siyuan/`, `assets/`, `templates/`, `widgets/`, `plugins/`, `emojis/`, `snippets/`, `public/`, `storage/`.
 2. **Notebook directories:** each is a folder named with the notebook ID.
 
 ### Reserved-filename list (★ avoid when writing files)
@@ -80,7 +92,11 @@ func IsReservedFilename(baseName string) bool {
 }
 ```
 
-That is, `assets` / `templates` / `widgets` / `emojis` / `.siyuan`, as well as anything starting with `.`, **cannot** be used as a notebook or document name.
+That is, the physical path segments `assets` / `templates` / `widgets` / `emojis` / `.siyuan`, as well as anything starting with `.`, are reserved. This restriction applies to on-disk IDs and path segments, not to the notebook names or document titles displayed to users.
+
+### Persistent data vs rebuildable indexes
+
+`data/storage/` contains persistent structured data such as attribute-view definitions and plugin state. The SQLite files in `temp/` are derived indexes and caches: normal notebooks use the global `siyuan.db` and `blocktree.db`, while each unlocked encrypted notebook uses independent SQLCipher databases. Deleting or rebuilding an index must not be confused with deleting the source `.sy`, asset, or database-definition files.
 
 ### How a notebook is recognized
 
@@ -120,6 +136,8 @@ Code evidence:
 
 When the top-level notebook document feature is enabled, the kernel creates `<boxID>.sy` directly inside the notebook directory. Its document rootID is exactly the notebook ID, so the notebook and its top-level document share one ID.
 
+The switch is stored at `fileTree.boxDocEnabled` in `conf/conf.json`. It defaults to enabled for new workspaces; an existing configuration that does not contain the field is initialized as disabled.
+
 The top-level notebook document is a virtual parent for every ordinary document stored directly under `<boxID>/`. Unlike an ordinary parent document, its children remain in the notebook directory and are **not** moved into a `<boxID>/<boxID>/` directory. For example:
 
 ```
@@ -142,8 +160,9 @@ Each notebook directory contains a `.siyuan/` hidden folder, which can contain:
 | File | Purpose |
 |---|---|
 | `conf.json` | Notebook config (BoxConf) |
-| `sort.json` | Custom sort mapping `{docID: order}` |
+| `sort.json` | Optional custom sort mapping `{docID: order}` |
 | `boxDoc.json` | Optional; identifies the top-level notebook document in `.sy.zip` notebook exports/imports |
+| `notebook-crypt-backup.json` | Optional; encrypted-notebook backup of the wrapped notebook data-encryption key |
 
 The `BoxConf` struct:
 
@@ -160,12 +179,16 @@ The `BoxConf` struct:
 | `dailyNoteSavePath` | string | Storage path for new daily notes (supports templates) |
 | `dailyNoteTemplatePath` | string | Template path for new daily notes |
 | `sortMode` | int | Sort mode |
+| `encrypted` | bool | Whether this is an encrypted notebook |
+| `boxCrypt` | object or null | Wrapped notebook data-encryption key and envelope metadata; non-null for encrypted notebooks |
 
 > ⚠️ **The notebook ID is NOT in `conf.json`** — the ID is the notebook directory name itself (see §3).
 
 Read/write sites: `GetConf` / `SaveConf`. The path is hard-coded as `<DataDir>/<boxID>/.siyuan/conf.json`.
 
 `boxDoc.json` contains a metadata spec version and the top-level document ID. At runtime the kernel derives that document ID directly from `box.ID`; the metadata file is retained so `.sy.zip` import can identify the source notebook's top-level document and remap it to the destination notebook ID.
+
+Encrypted notebooks retain recovery metadata in `conf.json` and `notebook-crypt-backup.json`, but their `.sy`, notebook-local assets, and attribute-view definitions are ciphertext. See [ENCRYPTED-NOTEBOOK.md](./ENCRYPTED-NOTEBOOK.md) for the encryption boundary, database isolation, and recovery design.
 
 ---
 
@@ -178,7 +201,7 @@ Be careful to distinguish the two `conf.json` files:
 | `conf/conf.json` | **Workspace root** | Workspace-level global config (appearance / langs / system / editor / sync / repo, etc.) |
 | `<boxID>/.siyuan/conf.json` | **Inside a notebook** | That notebook only (BoxConf) |
 
-In practice `conf/conf.json` is ~42 KB and holds UI appearance, account, sync, AI, flashcard, and all other workspace-level settings.
+`conf/conf.json` holds UI appearance, account, sync, AI, flashcard, and other workspace-level settings.
 
 ---
 
@@ -195,6 +218,10 @@ In practice `conf/conf.json` is ~42 KB and holds UI appearance, account, sync, A
 | `refsearchignore` | Ref-search ignore rules |
 | `publishAccess.json` | Publishing access control |
 | `filesys_status_check/` | File-system consistency-check state |
+| `notebook-crypto-backup.json` | Global encrypted-notebook KDF and verifier backup used for sync/recovery |
+| `master-password-migration.json` | Temporary crash-recovery state during master-password migration |
+
+Most entries are optional and are created only when the corresponding feature is used.
 
 > There is **no** `conf.json` here — the workspace config lives at the workspace root's `conf/conf.json` (see §6).
 
@@ -204,10 +231,12 @@ In practice `conf/conf.json` is ~42 KB and holds UI appearance, account, sync, A
 
 Two coexisting locations:
 
-1. **Global `data/assets/`** — the main one. Naming convention looks like `<orig-name>-<docID-suffix>.<ext>` (e.g. `640-20240927104411-0jh7x96.webp`). Referenced inside documents as the relative path `assets/xxx`.
-2. **Per-notebook `<notebook>/assets/`** — mostly used by the built-in guide notebook; ordinary user notebooks generally don't have one.
+1. **Global `data/assets/`** — the main one. Naming convention looks like `<original-base>-<NodeID>.<ext>` (e.g. `640-20240927104411-0jh7x96.webp`). Referenced inside documents as the relative path `assets/xxx`.
+2. **Per-notebook `<notebook>/assets/`** — used by the built-in guide and required for encrypted notebooks; ordinary unencrypted user notebooks generally don't have one.
 
 Asset-link prefix recognition: only `assets/`, `emojis/`, `plugins/`, `public/`, and `widgets/` are accepted as legal asset-link prefixes.
+
+Encrypted notebooks must use notebook-local assets. Their contents and `.names.json` original-name mapping are encrypted, and their physical filenames use a desensitized `<16-random-characters>-<blockID>.<ext>` form; direct inspection does not recover the original asset name. See [ENCRYPTED-NOTEBOOK.md §7](./ENCRYPTED-NOTEBOOK.md#7-sy--assets--database-file-encryption).
 
 ---
 
@@ -225,7 +254,9 @@ Asset-link prefix recognition: only `assets/`, `emojis/`, `plugins/`, `public/`,
 - A document's `.sy` filename (without `.sy`) = the document rootID.
 - A notebook's directory name = the notebook ID.
 - A top-level notebook document's filename and rootID both equal the notebook ID: `<boxID>.sy`.
-- The kernel enforces `filename ID == root.ID` and auto-corrects mismatches.
+- The kernel enforces `filename ID == root.ID`; unencrypted documents are auto-corrected on mismatch, while encrypted documents reject the mismatch.
+
+These are physical identifiers. A notebook's display name comes from `BoxConf.name`, and a document's displayed title comes from its root attributes; neither display value has to match the NodeID format.
 
 ### Document absolute path
 
@@ -237,10 +268,10 @@ Extracting the doc ID from a path (`GetTreeID`): simply `filepath.Base(path)` wi
 
 ## 10. How HPath (human-readable path) is derived
 
-HPath is **not stored** — it is computed on the fly when loading a document (`LoadTreeByData`):
+HPath is **not authoritative data stored in the `.sy` source file** — it is derived when loading a document (`LoadTreeByData`) and may be cached in rebuildable indexes such as `blocktree.db`:
 
 1. Split the document's own relative path by `/`, drop the leading empty segment and the trailing self segment, yielding the **ID segments of each ancestor document**.
-2. For each ancestor ID, build `<ancestorID>.sy` and read its `title` via `DocIAL()` (a **streaming read of `Properties` only**, without parsing the whole tree).
+2. For each ancestor ID, build `<ancestorID>.sy` and read its `title` via `DocIAL()` (a **streaming read of `Properties` only**, without parsing the whole tree). Encrypted `.sy` files must first be read and decrypted in full before the properties can be parsed.
 3. Join the titles with `/` and append the current document's title → an HPath like `/Parent/Child/Current`.
 4. If some ancestor `.sy` is missing, the kernel **auto-creates** an `Untitled` parent (issue #7376).
 
@@ -252,16 +283,19 @@ The top-level notebook document is handled specially: its API HPath is `/`, its 
 
 ## 11. Notes on operating the file system directly
 
-> Consistent with [SY-FORMAT.md §0.5](./SY-FORMAT.md): **prefer HTTP API / MCP / CLI** for mutating data, so the kernel handles index synchronization. Direct file-system operations are only for bulk offline migration, cold init, and similar scenarios.
+> Consistent with [SY-FORMAT.md §0.5](./SY-FORMAT.md#05-when-to-readwrite-sy-directly-priority-order): **prefer HTTP API / MCP / CLI** for mutating data, so the kernel handles index synchronization. Direct file-system operations are only for bulk offline migration, cold init, and similar scenarios.
+
+Do not directly mutate encrypted-notebook persistent files. Raw file APIs reject reading, enumerating, or modifying encrypted-notebook directories. Offline inspection of protected content exposes ciphertext, although non-content metadata such as `conf.json` remains readable. Use the dedicated APIs after unlocking the notebook so encryption, authentication, and isolated indexes remain consistent.
 
 When writing files directly:
 
-1. ☐ Notebook/document names must match the NodeID format and **avoid reserved names** (§3).
+1. ☐ Notebook and document physical IDs must match the NodeID format and **avoid reserved names** (§3).
 2. ☐ A document's `.sy` filename equals its rootID (§9).
 3. ☐ A document with children must have the **paired same-named directory**; moving the parent means moving that directory too (§4).
 4. ☐ Do not move root-level documents into `<boxID>/<boxID>/`; the top-level notebook document uses a virtual parent-child mapping (§4).
 5. ☐ A notebook's name/icon/closed state lives in `<boxID>/.siyuan/conf.json`; the name and icon are synchronized with `<boxID>.sy` when that document exists (§5).
-6. ☐ After changes you usually need to **rebuild the index**, or search/block-refs/breadcrumbs will be stale.
+6. ☐ Treat `data/storage/` as persistent source data and `temp/*.db` as rebuildable indexes; do not interchange their lifecycle (§3).
+7. ☐ After changes you usually need to **rebuild the index**, or search/block-refs/breadcrumbs will be stale.
 
 ---
 

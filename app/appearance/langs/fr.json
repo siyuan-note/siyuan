@@ -161,7 +161,7 @@
 	"retryFailedEmbedding": "Réessayer les échecs : ",
 	"retryFailedEmbeddingTip": "Réessayer d'indexer les blocs échoués",
 	"retryFailedEmbeddingStarted": "Nouvelle tentative des blocs échoués démarrée",
-	"rebuildEmbeddingIndex": "Reconstruire l'index",
+	"rebuildEmbeddingIndex": "Reconstruire l'index d'intégration",
 	"rebuildEmbeddingIndexTip": "Effacer et recalculer les vecteurs d'intégration de tous les blocs",
 	"rebuildEmbeddingIndexConfirmTip": "Voulez-vous vraiment effacer et régénérer tous les vecteurs d'intégration ? Cela peut prendre beaucoup de temps.",
 	"rebuildEmbeddingIndexStarted": "Reconstruction de l'index d'intégration démarrée",

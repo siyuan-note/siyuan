@@ -161,7 +161,7 @@
 	"retryFailedEmbedding": "Başarısızları yeniden dene: ",
 	"retryFailedEmbeddingTip": "Başarısız blokları yeniden indekslemeyi dene",
 	"retryFailedEmbeddingStarted": "Başarısız bloklar yeniden denenmeye başlandı",
-	"rebuildEmbeddingIndex": "İndeksi yeniden oluştur",
+	"rebuildEmbeddingIndex": "Gömme indeksini yeniden oluştur",
 	"rebuildEmbeddingIndexTip": "Tüm blokların gömme vektörlerini temizle ve yeniden hesapla",
 	"rebuildEmbeddingIndexConfirmTip": "Tüm gömme vektörlerini temizlemek ve yeniden oluşturmak istediğinizden emin misiniz? Bu uzun sürebilir.",
 	"rebuildEmbeddingIndexStarted": "Gömme indeksi yeniden oluşturma başladı",

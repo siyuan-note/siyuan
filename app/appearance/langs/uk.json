@@ -161,7 +161,7 @@
 	"retryFailedEmbedding": "Повторити невдалі: ",
 	"retryFailedEmbeddingTip": "Повторити індексацію невдалих блоків",
 	"retryFailedEmbeddingStarted": "Повторення невдалих блоків розпочато",
-	"rebuildEmbeddingIndex": "Перебудувати індекс",
+	"rebuildEmbeddingIndex": "Перебудувати індекс вкладень",
 	"rebuildEmbeddingIndexTip": "Очистити та переобчислити вектори вкладень для всіх блоків",
 	"rebuildEmbeddingIndexConfirmTip": "Ви впевнені, що хочете очистити та заново створити всі вектори вкладень? Це може зайняти багато часу.",
 	"rebuildEmbeddingIndexStarted": "Перебудову індексу вкладень розпочато",

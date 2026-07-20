@@ -161,7 +161,7 @@
 	"retryFailedEmbedding": "ลองใหม่ที่ล้มเหลว: ",
 	"retryFailedEmbeddingTip": "ลอง index บล็อกที่ล้มเหลวอีกครั้ง",
 	"retryFailedEmbeddingStarted": "เริ่มลองบล็อกที่ล้มเหลวอีกครั้งแล้ว",
-	"rebuildEmbeddingIndex": "สร้างดัชนีใหม่",
+	"rebuildEmbeddingIndex": "สร้างดัชนีการฝังใหม่",
 	"rebuildEmbeddingIndexTip": "ล้างและคำนวณเวกเตอร์การฝังใหม่สำหรับบล็อกทั้งหมด",
 	"rebuildEmbeddingIndexConfirmTip": "คุณแน่ใจหรือไม่ว่าต้องการล้างและสร้างเวกเตอร์การฝังทั้งหมดใหม่? อาจใช้เวลานาน",
 	"rebuildEmbeddingIndexStarted": "เริ่มการสร้างดัชนีการฝังใหม่แล้ว",

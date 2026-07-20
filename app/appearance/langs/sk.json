@@ -161,7 +161,7 @@
 	"retryFailedEmbedding": "Zopakovať zlyhané: ",
 	"retryFailedEmbeddingTip": "Opätovný pokus o indexáciu zlyhaných blokov",
 	"retryFailedEmbeddingStarted": "Opätovný pokus zlyhaných blokov začal",
-	"rebuildEmbeddingIndex": "Znovu vytvoriť index",
+	"rebuildEmbeddingIndex": "Znovu vytvoriť index embeddingov",
 	"rebuildEmbeddingIndexTip": "Vymazať a prepočítať vektory embeddingov všetkých blokov",
 	"rebuildEmbeddingIndexConfirmTip": "Naozaj chcete vymazať a znovu vytvoriť všetky vektory embeddingov? Môže to trvať dlho.",
 	"rebuildEmbeddingIndexStarted": "Znovu vytváranie indexu embeddingov začalo",

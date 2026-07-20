@@ -161,7 +161,7 @@
 	"retryFailedEmbedding": "נסה שוב כישלונות: ",
 	"retryFailedEmbeddingTip": "ניסיון חוזר לאנדקס בלוקים שנכשלו",
 	"retryFailedEmbeddingStarted": "החל ניסיון חוזר לבלוקים שנכשלו",
-	"rebuildEmbeddingIndex": "בנה מחדש אינדקס",
+	"rebuildEmbeddingIndex": "בנה מחדש את אינדקס השיבוץ",
 	"rebuildEmbeddingIndexTip": "נקה וחשב מחדש וקטורי שיבוץ עבור כל הבלוקים",
 	"rebuildEmbeddingIndexConfirmTip": "האם אתה בטוח שברצונך לנקות וליצור מחדש את כל וקטורי השיבוץ? פעולה זו עשויה לארוך זמן רב.",
 	"rebuildEmbeddingIndexStarted": "בניית אינדקס השיבוץ מחדש החלה",

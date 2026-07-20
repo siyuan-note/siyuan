@@ -161,7 +161,7 @@
 	"retryFailedEmbedding": "失敗を再試行：",
 	"retryFailedEmbeddingTip": "失敗したブロックのインデックスを再試行",
 	"retryFailedEmbeddingStarted": "失敗したブロックの再試行を開始しました",
-	"rebuildEmbeddingIndex": "インデックスを再構築",
+	"rebuildEmbeddingIndex": "埋め込みインデックスを再構築",
 	"rebuildEmbeddingIndexTip": "すべてのブロックの埋め込みベクトルをクリアして再計算",
 	"rebuildEmbeddingIndexConfirmTip": "すべての埋め込みベクトルをクリアして再生成しますか？時間がかかる場合があります。",
 	"rebuildEmbeddingIndexStarted": "埋め込みインデックスの再構築を開始しました",

@@ -161,7 +161,7 @@
 	"retryFailedEmbedding": "重试失败：",
 	"retryFailedEmbeddingTip": "重新尝试索引失败的块",
 	"retryFailedEmbeddingStarted": "已开始重试失败的块",
-	"rebuildEmbeddingIndex": "重建索引",
+	"rebuildEmbeddingIndex": "重建嵌入索引",
 	"rebuildEmbeddingIndexTip": "清空并重新计算所有块的嵌入向量",
 	"rebuildEmbeddingIndexConfirmTip": "确定要清空并重新生成所有嵌入向量吗？此操作可能耗时较长。",
 	"rebuildEmbeddingIndexStarted": "已开始重建嵌入索引",

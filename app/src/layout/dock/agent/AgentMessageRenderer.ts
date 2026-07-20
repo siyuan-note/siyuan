@@ -130,10 +130,11 @@ export const renderRetryCardHTML = (attempt: number, maxRetries: number): string
 "</div>";
 };
 
-export const renderToolsLineHTML = (newTools: Array<{name: string}>): string => {
+export const renderToolsLineHTML = (newTools: Array<{name: string; running?: boolean}>): string => {
     let detailLines = "<div class=\"agent-chat__thinking-tools-line\"><span class=\"agent-chat__thinking-summary\">Tool calls:</span>";
     for (let i = 0; i < newTools.length; i++) {
-        detailLines += '<span class="agent-chat__thinking-tool">' + escapeHtml(newTools[i].name) + "</span>";
+        const runningClass = newTools[i].running ? " agent-chat__thinking-tool--running" : "";
+        detailLines += '<span class="agent-chat__thinking-tool' + runningClass + '">' + escapeHtml(newTools[i].name) + "</span>";
     }
     detailLines += "</div>";
     return detailLines;

@@ -115,6 +115,7 @@ export class AgentChat extends Model {
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
     private currentToolCalls: Array<{ name: string; arguments: Record<string, unknown>; result?: string }> = [];
+    private toolCallStartedAt = new Map<string, number>();
     private abortController: AbortController | null = null;
     private currentThinkingText = "";
     private currentThinkingReasoning = "";
@@ -1783,14 +1784,20 @@ export class AgentChat extends Model {
                     break;
                 case "tool_call":
                     this.currentToolCalls.push({name: event.name, arguments: event.arguments});
+                    this.appendToolCall(event.name);
                     break;
                 case "confirm":
+                    this.setToolCallRunning(event.name, false);
                     this.appendConfirm(event.name, event.arguments, event.confirmID, event.effects);
                     break;
                 case "tool_result":
-                    if (this.currentToolCalls.length > 0) {
-                        this.currentToolCalls[this.currentToolCalls.length - 1].result = event.result;
+                    {
+                        const toolCall = this.currentToolCalls.find((item) => item.name === event.name && item.result === undefined);
+                        if (toolCall) {
+                            toolCall.result = event.result;
+                        }
                     }
+                    this.finishToolCall(event.name);
                     this.appendToolResult(event.name, event.result);
                     break;
                 case "done":
@@ -2169,6 +2176,66 @@ export class AgentChat extends Model {
         }
     }
 
+    private appendToolCall(name: string) {
+        const body = this.messagesContainer.querySelector(
+            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body"
+        ) as HTMLElement;
+        if (!body) {
+            return;
+        }
+        this.toolCallStartedAt.set(name, Date.now());
+        if (this.renderedToolNames[name]) {
+            this.setToolCallRunning(name, true);
+            return;
+        }
+
+        this.renderedToolNames[name] = true;
+        const lastElement = body.lastElementChild as HTMLElement;
+        if (lastElement?.classList.contains("agent-chat__thinking-tools-line")) {
+            const toolElement = document.createElement("span");
+            toolElement.className = "agent-chat__thinking-tool agent-chat__thinking-tool--running";
+            toolElement.textContent = name;
+            lastElement.appendChild(toolElement);
+        } else {
+            body.insertAdjacentHTML("beforeend", renderToolsLineHTML([{name, running: true}]));
+        }
+        body.scrollTop = body.scrollHeight;
+        this.scrollToBottom();
+    }
+
+    private setToolCallRunning(name: string, running: boolean) {
+        const selector = running
+            ? ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-tool"
+            : ".agent-chat__thinking-tool--running";
+        const toolElements = this.messagesContainer.querySelectorAll(selector);
+        for (let i = toolElements.length - 1; i >= 0; i--) {
+            const toolElement = toolElements[i];
+            if (toolElement.textContent === name) {
+                toolElement.classList.toggle("agent-chat__thinking-tool--running", running);
+                if (running) {
+                    return;
+                }
+            }
+        }
+    }
+
+    private finishToolCall(name: string) {
+        const stillRunning = this.currentToolCalls.some((item) => item.name === name && item.result === undefined);
+        if (stillRunning) {
+            return;
+        }
+        const startedAt = this.toolCallStartedAt.get(name);
+        const remaining = startedAt ? Math.max(600 - (Date.now() - startedAt), 0) : 0;
+        window.setTimeout(() => {
+            if (this.toolCallStartedAt.get(name) !== startedAt ||
+                this.currentToolCalls.some((item) => item.name === name && item.result === undefined)) {
+                return;
+            }
+            this.setToolCallRunning(name, false);
+            this.toolCallStartedAt.delete(name);
+        }, remaining);
+    }
+
     private appendToolResult(name: string, result: string) {
         if (name !== "todo_write") {
             return;
@@ -2208,12 +2275,16 @@ export class AgentChat extends Model {
 
         let detailLines = "";
         if (reasoning === "processing" && this.currentToolCalls.length > 0) {
-            const newTools: Array<{ name: string }> = [];
+            const newTools: Array<{ name: string; running: boolean }> = [];
             for (let i = 0; i < this.currentToolCalls.length; i++) {
                 const tc = this.currentToolCalls[i];
                 if (!this.renderedToolNames[tc.name]) {
                     this.renderedToolNames[tc.name] = true;
-                    newTools.push({name: tc.name});
+                    const running = tc.result === undefined;
+                    if (running) {
+                        this.toolCallStartedAt.set(tc.name, Date.now());
+                    }
+                    newTools.push({name: tc.name, running});
                 }
             }
             if (newTools.length > 0) {

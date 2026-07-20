@@ -1,7 +1,11 @@
 name: 🐛 Bug report
 description: Report defects to help us improve
-title: "Please enter the title of the bug report"
 body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!WARNING]
+        > Do not publicly report security vulnerabilities. Please create a [private security advisory](https://github.com/siyuan-note/siyuan/security/advisories/new) instead.
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
@@ -38,6 +42,17 @@ body:
       required: true
   - type: textarea
     attributes:
+      label: Steps to reproduce
+      description: |
+        Please provide the exact steps needed to reproduce the problem, preferably with a minimal reproducible example.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
       label: Expected result
       description: |
         Please be as clear and accurate as possible to describe the results you are looking for.
@@ -57,16 +72,15 @@ body:
         - Version: 
         - Operating System: 
         - Browser (if used): 
-      render: markdown
     validations:
       required: true
   - type: textarea
     attributes:
       label: Log file
       description: |
-        The program log file is located at `workspace/temp/siyuan.log`
+        The program log file is located at `workspace/temp/siyuan.log`. Please attach relevant logs after removing private information, or leave this field blank if no relevant log is available.
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: More information

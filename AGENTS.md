@@ -24,7 +24,7 @@ SiYuan spans several repos. This repo (`siyuan`) holds the kernel + Electron/web
 | `siyuan` | **This repo** — kernel + Electron/web/tablet UI |
 | `siyuan-android` / `siyuan-ios` / `siyuan-harmony` | Native apps wrapping the gomobile kernel; build steps differ per platform — see each project's README |
 | `siyuan-chrome` | Browser extension (web clipper); talks to the running kernel over HTTP only |
-| `siyuan-testing` | Playwright end-to-end tests for a running SiYuan instance; test data belongs in the `Test` notebook — see that repository's `AGENTS.md` |
+| `siyuan-testing` | Playwright end-to-end tests for a running SiYuan instance; test data belongs in the `SiYuan Testing` notebook — see that repository's `AGENTS.md` |
 | `petal` | SiYuan Plugin API declaration (the plugin system is named "petal"); consumed by plugins, not a kernel Go dependency |
 | `lute` | Markdown/Kramdown AST engine — the editor + `.sy` format; also the source of the bundled `lute.min.js` (a GopherJS build served to the frontend). **Lives under `$GOPATH/src/github.com/88250/lute`, not as a sibling repo** |
 | `dejavu` | Data repo / sync engine (encrypted snapshots) |

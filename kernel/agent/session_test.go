@@ -299,7 +299,8 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 		"entries": []any{
 			map[string]any{
 				"id": "user-1", "type": "user", "content": "original prompt",
-				"references": []any{map[string]any{"id": "block-1", "title": "First block"}},
+				"references":    []any{map[string]any{"id": "block-1", "title": "First block"}},
+				"editorContext": map[string]any{"activeDocID": "old-doc"},
 			},
 			map[string]any{"id": "assistant-1", "type": "assistant", "content": "old answer"},
 			map[string]any{"id": "user-2", "type": "user", "content": "later prompt"},
@@ -325,6 +326,7 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 	}
 	emptyReferences := []Reference{}
 	turn.UserReferences = &emptyReferences
+	turn.UserEditorContext = &EditorContext{ActiveDocID: "new-doc"}
 	if err := beginRuntimeTurn(testSessionID, turn, false); err != nil {
 		t.Fatal(err)
 	}
@@ -345,6 +347,10 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 	if _, ok := entries[0].(map[string]any)["references"]; ok {
 		t.Fatalf("references removed by the edit were restored: %#v", entries[0])
 	}
+	editorContext := entries[0].(map[string]any)["editorContext"].(*EditorContext)
+	if editorContext.ActiveDocID != "new-doc" {
+		t.Fatalf("regenerated editor context was not restored: %#v", entries[0])
+	}
 	recovered["expectedRevision"] = int64(1)
 	revision, canonical, err := SaveSessionState(marshalSession(t, recovered))
 	if err != nil || revision != 2 {
@@ -353,6 +359,19 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 	committedEntries := canonical["entries"].([]any)
 	if len(committedEntries) != 2 || committedEntries[0].(map[string]any)["content"] != "edited prompt" {
 		t.Fatalf("committed regenerate turn lost edited content: %#v", committedEntries)
+	}
+	committedEditorContext := committedEntries[0].(map[string]any)["editorContext"].(*EditorContext)
+	if committedEditorContext.ActiveDocID != "new-doc" {
+		t.Fatalf("committed regenerate turn lost editor context: %#v", committedEntries[0])
+	}
+	persisted, err := GetSession(testSessionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	persistedEntries := persisted["entries"].([]any)
+	persistedEditorContext := persistedEntries[0].(map[string]any)["editorContext"].(map[string]any)
+	if persistedEditorContext["activeDocID"] != "new-doc" {
+		t.Fatalf("persisted regenerate turn lost editor context: %#v", persistedEntries[0])
 	}
 }
 

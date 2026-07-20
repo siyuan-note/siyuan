@@ -23,8 +23,8 @@ import (
 	"io"
 	"math/rand/v2"
 	"os"
-
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -313,10 +313,12 @@ type AgentEvent struct {
 }
 
 type AgentMessage struct {
-	Role      string          `json:"role"`
-	Content   string          `json:"content"`
-	ToolCalls []AgentToolCall `json:"toolCalls,omitempty"`
-	EntryID   string          `json:"entryID,omitempty"`
+	Role          string          `json:"role"`
+	Content       string          `json:"content"`
+	References    []Reference     `json:"references,omitempty"`
+	EditorContext *EditorContext  `json:"editorContext,omitempty"`
+	ToolCalls     []AgentToolCall `json:"toolCalls,omitempty"`
+	EntryID       string          `json:"entryID,omitempty"`
 }
 
 type AgentToolCall struct {
@@ -344,6 +346,27 @@ type EditorContext struct {
 	VisibleBlockIDs  []string `json:"visibleBlockIDs,omitempty"`  // 视口内可见块 ID 列表（已截断至上限）
 }
 
+func cloneEditorContext(editorCtx EditorContext) *EditorContext {
+	if editorCtx.ActiveDocID == "" && editorCtx.ActiveDocTitle == "" && editorCtx.NotebookID == "" &&
+		editorCtx.FocusedBlockID == "" && len(editorCtx.SelectedBlockIDs) == 0 && len(editorCtx.VisibleBlockIDs) == 0 {
+		return nil
+	}
+	cloned := editorCtx
+	cloned.SelectedBlockIDs = append([]string(nil), editorCtx.SelectedBlockIDs...)
+	cloned.VisibleBlockIDs = append([]string(nil), editorCtx.VisibleBlockIDs...)
+	return &cloned
+}
+
+func newAgentUserMessage(content, entryID string, references []Reference, editorCtx EditorContext) AgentMessage {
+	return AgentMessage{
+		Role:          "user",
+		Content:       content,
+		References:    append([]Reference(nil), references...),
+		EditorContext: cloneEditorContext(editorCtx),
+		EntryID:       entryID,
+	}
+}
+
 // PluginAction describes a frontend action registered by a plugin (via Plugin.addAction()).
 // The frontend serializes the list of currently-registered plugin actions into each chat
 // request, and the backend injects them into the system prompt so the LLM can discover and
@@ -360,6 +383,7 @@ type SessionEntry struct {
 	Type          string             `json:"type"` // user|thinking|assistant|confirm|snapshot|rollback
 	Content       string             `json:"content,omitempty"`
 	References    []Reference        `json:"references,omitempty"`
+	EditorContext *EditorContext     `json:"editorContext,omitempty"`
 	BlockHTML     string             `json:"blockHTML,omitempty"`    // 仅 user，用于保留发送框的 BlockDOM 展示结构
 	Steps         []SessionEntryStep `json:"steps,omitempty"`        // 仅 thinking
 	ToolCalls     []AgentToolCall    `json:"toolCalls,omitempty"`    // 仅 assistant
@@ -483,9 +507,17 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 					checkpointMsgs = truncated
 					if regenerate || !currentUserExists {
-						checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage, EntryID: userEntryID})
+						checkpointMsgs = append(checkpointMsgs, newAgentUserMessage(userMessage, userEntryID, references, editorCtx))
+					} else {
+						for i := len(checkpointMsgs) - 1; i >= 0; i-- {
+							if checkpointMsgs[i].Role == "user" {
+								checkpointMsgs[i].References = append([]Reference(nil), references...)
+								checkpointMsgs[i].EditorContext = cloneEditorContext(editorCtx)
+								break
+							}
+						}
 					}
-					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references, editorCtx, pluginActions)
+					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, pluginActions)
 				}
 			}
 			if runtime, err := loadRuntimeState(sessionID); err == nil && runtime != nil && runtime.AlwaysAllow {
@@ -494,7 +526,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		}
 
 		if messages == nil {
-			checkpointMsgs = []AgentMessage{{Role: "user", Content: userMessage, EntryID: userEntryID}}
+			checkpointMsgs = []AgentMessage{newAgentUserMessage(userMessage, userEntryID, references, editorCtx)}
 			messages = buildInitialMessages(userMessage, language, references, editorCtx, pluginActions)
 		}
 
@@ -513,6 +545,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			turn.UserContent = rawUserMessage
 			userReferences := append([]Reference(nil), references...)
 			turn.UserReferences = &userReferences
+			turn.UserEditorContext = cloneEditorContext(editorCtx)
 		}
 		select {
 		case <-ctx.Done():
@@ -1292,7 +1325,7 @@ func finishFrontendWait(callID string, ch chan frontendCallResult) (frontendCall
 	}
 }
 
-func buildSystemPrompt(language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) string {
+func buildSystemPrompt(language string, pluginActions []PluginAction) string {
 	var sb strings.Builder
 	sb.WriteString(systemPrompt)
 	sb.WriteString("\n\n<env>\nWorkspace: ")
@@ -1323,6 +1356,10 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 	}
 
 	if len(pluginActions) > 0 {
+		pluginActions = append([]PluginAction(nil), pluginActions...)
+		sort.Slice(pluginActions, func(i, j int) bool {
+			return pluginActions[i].Name < pluginActions[j].Name
+		})
 		sb.WriteString("\n\n<plugin_actions>\n")
 		sb.WriteString("The following frontend actions were registered by plugins. Invoke them via the \"frontend\" tool with action set to the full name shown below.\n")
 		for _, a := range pluginActions {
@@ -1345,8 +1382,18 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 	sb.WriteString("\n\nIn the user's language, a daily note is called: ")
 	sb.WriteString(util.I18nTerm(language, "dailyNote"))
 	sb.WriteString(". When the user asks to write or create this, use dailynote.create, not document.create.")
+	return sb.String()
+}
+
+func buildUserMessageContent(userMessage string, references []Reference, editorCtx *EditorContext) string {
+	if len(references) == 0 && editorCtx == nil {
+		return userMessage
+	}
+
+	var sb strings.Builder
+	sb.WriteString("<turn_context>\n")
 	if len(references) > 0 {
-		sb.WriteString("\n\nThe user has referenced the following content blocks:\n")
+		sb.WriteString("The user referenced the following content blocks when sending this message:\n")
 		for _, ref := range references {
 			sb.WriteString("- ")
 			sb.WriteString(ref.Title)
@@ -1354,11 +1401,10 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 			sb.WriteString(ref.ID)
 			sb.WriteString(")\n")
 		}
-		sb.WriteString("Use the block tools to fetch their actual content before responding.")
+		sb.WriteString("Use the block tools to fetch their actual content before responding.\n")
 	}
-	if editorCtx.ActiveDocID != "" || editorCtx.ActiveDocTitle != "" || editorCtx.NotebookID != "" ||
-		len(editorCtx.SelectedBlockIDs) > 0 || editorCtx.FocusedBlockID != "" || len(editorCtx.VisibleBlockIDs) > 0 {
-		sb.WriteString("\n\n<editor_context>\n")
+	if editorCtx != nil {
+		sb.WriteString("<editor_context>\n")
 		sb.WriteString("This is the user's editor state at the moment they sent the message. It may be stale by now.\n")
 		if editorCtx.ActiveDocID != "" || editorCtx.ActiveDocTitle != "" {
 			sb.WriteString("Active document: ")
@@ -1420,13 +1466,15 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 		sb.WriteString("Use the block tools (e.g. block with action \"get\") to fetch actual content before responding.")
 		sb.WriteString("\n</editor_context>")
 	}
+	sb.WriteString("\n</turn_context>\n\n")
+	sb.WriteString(userMessage)
 	return sb.String()
 }
 
 func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) []openai.ChatCompletionMessage {
 	return []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx, pluginActions)},
-		{Role: openai.ChatMessageRoleUser, Content: userMessage},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, pluginActions)},
+		{Role: openai.ChatMessageRoleUser, Content: buildUserMessageContent(userMessage, references, cloneEditorContext(editorCtx))},
 	}
 }
 
@@ -1492,7 +1540,16 @@ func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 		e := &entries[i]
 		switch e.Type {
 		case "user":
-			msgs = append(msgs, AgentMessage{Role: "user", Content: e.Content, EntryID: e.ID})
+			m := AgentMessage{
+				Role:       "user",
+				Content:    e.Content,
+				References: append([]Reference(nil), e.References...),
+				EntryID:    e.ID,
+			}
+			if e.EditorContext != nil {
+				m.EditorContext = cloneEditorContext(*e.EditorContext)
+			}
+			msgs = append(msgs, m)
 		case "assistant":
 			m := AgentMessage{Role: "assistant", Content: e.Content, EntryID: e.ID}
 			if len(e.ToolCalls) > 0 {
@@ -1510,16 +1567,16 @@ func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 	return msgs
 }
 
-func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) []openai.ChatCompletionMessage {
+func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, pluginActions []PluginAction) []openai.ChatCompletionMessage {
 	msgs := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx, pluginActions)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, pluginActions)},
 	}
 
 	for cmi := range checkpointMsgs {
 		cm := &checkpointMsgs[cmi]
 		switch cm.Role {
 		case "user":
-			content := cm.Content
+			content := buildUserMessageContent(cm.Content, cm.References, cm.EditorContext)
 			if content == "" {
 				content = " "
 			}
@@ -1594,10 +1651,16 @@ func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 			if id == "" {
 				id = fmt.Sprintf("cp_%d", i)
 			}
+			var editorCtx *EditorContext
+			if m.EditorContext != nil {
+				editorCtx = cloneEditorContext(*m.EditorContext)
+			}
 			entries = append(entries, SessionEntry{
-				ID:      id,
-				Type:    "user",
-				Content: m.Content,
+				ID:            id,
+				Type:          "user",
+				Content:       m.Content,
+				References:    append([]Reference(nil), m.References...),
+				EditorContext: editorCtx,
 			})
 		case "assistant":
 			id := m.EntryID

@@ -49,6 +49,7 @@ type UserEntry = EntryBase & {
     content: string;
     blockHTML?: string;
     references?: AgentReference[];
+    editorContext?: IEditorContext;
     timestamp?: number
 };
 
@@ -1511,6 +1512,7 @@ export class AgentChat extends Model {
             content: text,
             blockHTML,
             references: refs.length > 0 ? refs : undefined,
+            editorContext,
             timestamp: Date.now(),
         });
         if (this.entries.length === 1) {
@@ -2611,6 +2613,7 @@ export class AgentChat extends Model {
         const lastUserEntry = targetEntry;
         const lastUserText = lastUserEntry.content;
         const editorContext = this.captureEditorContext();
+        lastUserEntry.editorContext = editorContext;
         const pluginActions = this.getPluginActions();
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;

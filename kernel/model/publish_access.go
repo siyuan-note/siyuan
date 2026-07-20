@@ -639,6 +639,25 @@ func FilterBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, bl
 	return
 }
 
+func FilterSearchDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess, docs []map[string]string) (ret []map[string]string) {
+	ret = []map[string]string{}
+
+	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+
+	for _, doc := range docs {
+		box, docPath := doc["box"], doc["path"]
+		if !ast.IsNodeIDPattern(box) || (docPath != "/" && !strings.HasPrefix(docPath, "/")) {
+			continue
+		}
+		passwordID, password := GetPathPasswordByPublishAccess(box, docPath, publishAccess)
+		if CheckPathAccessableByPublishIgnore(box, docPath, publishIgnore) &&
+			(password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+			ret = append(ret, doc)
+		}
+	}
+	return
+}
+
 func FilterBlockTreesByPublishIgnore(publishIgnore PublishAccess, bts map[string]*treenode.BlockTree) (ret map[string]*treenode.BlockTree) {
 	ret = map[string]*treenode.BlockTree{}
 	for id, bt := range bts {

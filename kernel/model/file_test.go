@@ -189,3 +189,21 @@ func TestBuildSearchDocsCondition(t *testing.T) {
 		}
 	}
 }
+
+func TestBuildSearchDocsConditionBindsInjectionPayload(t *testing.T) {
+	payload := "poc%')/**/union/**/select/**/'poc'--"
+	condition, args := buildSearchDocsCondition([]string{payload}, nil, true, true, true)
+	if strings.Contains(condition, payload) || strings.Contains(strings.ToLower(condition), "union") {
+		t.Fatalf("search condition should not contain payload SQL: %q", condition)
+	}
+
+	expected := "%" + escapeSearchDocLikePattern(payload) + "%"
+	if len(args) != 4 {
+		t.Fatalf("unexpected search arg count: got %d, want 4", len(args))
+	}
+	for i, arg := range args {
+		if actual := arg.(string); expected != actual {
+			t.Fatalf("unexpected search arg at %d: got %q, want %q", i, actual, expected)
+		}
+	}
+}

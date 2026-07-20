@@ -1096,7 +1096,12 @@ func searchDocs(c *gin.Context) {
 	}
 
 	k := arg["k"].(string)
-	ret.Data = model.SearchDocs(k, flashcard, excludeIDs)
+	docs := model.SearchDocs(k, flashcard, excludeIDs)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		docs = model.FilterSearchDocsByPublishAccess(c, publishAccess, docs)
+	}
+	ret.Data = docs
 }
 
 func listDocsByPath(c *gin.Context) {

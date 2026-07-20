@@ -52,6 +52,11 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 }
 
 func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidID
+		return
+	}
+
 	waitForSyncingStorages()
 
 	// 加密笔记本的 AV 定义存笔记本级路径，通过 blockID 反查 boxID
@@ -90,11 +95,6 @@ func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 	if !filelock.IsExist(existPath) {
 		if !createIfNotExist {
 			err = av.ErrAttributeViewNotFound
-			return
-		}
-
-		if !ast.IsNodeIDPattern(avID) {
-			err = ErrInvalidID
 			return
 		}
 
@@ -687,6 +687,11 @@ func avBoxIDFromRepoPath(repoPath string) string {
 }
 
 func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidID
+		return
+	}
+
 	repo, err := newRepository()
 	if err != nil {
 		return
@@ -711,11 +716,6 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	}
 
 	if nil == avFile {
-		if !ast.IsNodeIDPattern(avID) {
-			err = ErrInvalidID
-			return
-		}
-
 		attrView = av.NewAttributeView(avID)
 		err = av.ErrAttributeViewNotFound
 		return
@@ -739,11 +739,6 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		data = dec
 	}
 
-	if !ast.IsNodeIDPattern(avID) {
-		err = ErrInvalidID
-		return
-	}
-
 	attrView = av.NewAttributeView(avID)
 	if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
@@ -755,6 +750,11 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 }
 
 func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidID
+		return
+	}
+
 	createdUnix, parseErr := strconv.ParseInt(created, 10, 64)
 	if nil != parseErr {
 		logging.LogErrorf("parse created [%s] failed: %s", created, parseErr)
@@ -801,11 +801,6 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	}
 	if !gulu.File.IsExist(avJSONPath) {
 		logging.LogWarnf("attribute view [%s] not found in current data", avID)
-		if !ast.IsNodeIDPattern(avID) {
-			err = ErrInvalidID
-			return
-		}
-
 		attrView = av.NewAttributeView(avID)
 		err = av.ErrAttributeViewNotFound
 		return
@@ -846,11 +841,6 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 				break
 			}
 		}
-	}
-
-	if !ast.IsNodeIDPattern(avID) {
-		err = ErrInvalidID
-		return
 	}
 
 	attrView = av.NewAttributeView(avID)

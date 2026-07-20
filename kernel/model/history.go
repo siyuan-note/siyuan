@@ -489,7 +489,7 @@ func getRollbackDockPath(boxID, historyPath string, workingDoc *treenode.BlockTr
 		parentWorkingDoc = treenode.GetBlockTree(parentID)
 	}
 
-	if nil != parentWorkingDoc {
+	if nil != parentWorkingDoc && !IsBoxDoc(boxID, parentWorkingDoc.RootID) {
 		// 父路径如果是文档，则恢复到父路径下
 		parentDir := strings.TrimSuffix(parentWorkingDoc.Path, ".sy")
 		parentDir = filepath.Join(util.DataDir, boxID, parentDir)

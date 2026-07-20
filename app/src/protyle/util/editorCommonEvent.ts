@@ -1324,8 +1324,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
 
                     // 非列表项源（如段落）拖到子列表首项上方间隙：列表只能包含列表项，段落无法成为 .li 的同级，
                     // 而该间隙的语义实为"插入到父列表项内容末尾（子列表之前）"，故锚点改为父列表项，
-                    // 将段落作为父列表项内容插到子列表之前。命中后需跳过下方 isChild/sibling 链，避免重复插入。
-                    let liGapIntercepted = false;
+                    // 将段落作为父列表项内容插到子列表之前。命中后立即结束落盘，避免后续通用分支重复移动。
                     if (hasContentBlockSource && !isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
                         const parentLi = targetElement.parentElement?.parentElement;
                         if (targetClass.some((c: string) => c.indexOf("dragover__top--sibling") === 0) &&
@@ -1336,22 +1335,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const anchorBlock = contentBlocks.length > 0 ? contentBlocks[contentBlocks.length - 1] : null;
                             if (anchorBlock) {
                                 // 插到最后一个内容块之后：moveTo 会把段落放在子列表之前，形成列表项内容
-                                dragSame(protyle, sourceElements, anchorBlock, true, isCopyDrag);
+                                await dragSame(protyle, sourceElements, anchorBlock, true, isCopyDrag);
                             } else {
-                                dragSame(protyle, sourceElements, contentLi, isBottom, isCopyDrag);
+                                await dragSame(protyle, sourceElements, contentLi, isBottom, isCopyDrag);
                             }
-                            liGapIntercepted = true;
+                            dragoverElement = undefined;
+                            return;
                         }
                     }
 
-                    if (!liGapIntercepted && hasContentBlockSource && !isChild &&
+                    if (hasContentBlockSource && !isChild &&
                         targetElement.getAttribute("data-type") === "NodeListItem") {
                         // 普通内容块不能成为列表块的直接子节点。
                         dragoverElement = undefined;
                         return;
                     }
 
-                    if (!liGapIntercepted && isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
+                    if (isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
                         const nestedList = Array.from(targetElement.children).find(c => c.classList.contains("list"));
                         let nestedTarget: Element;
                         if (nestedList) {

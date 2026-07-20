@@ -10,7 +10,7 @@ import {getRecentDocs} from "./getRecentDocs";
 import {App} from "../../index";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {newFile} from "../../util/newFile";
-import {afterLoadPlugin} from "../../plugin/loader";
+import {afterLayoutReady} from "../../plugin/loader";
 import {commandPanel} from "../../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../../plugin/openTopBarMenu";
 import {settingTabToMenuId, getSettingTab, getSettingTabDefs, type ISettingTabShell, type TSettingTab} from "../../config/setting/tabs";
@@ -105,9 +105,7 @@ export const initRightMenu = (app: App) => {
     </a>
 </div>`;
     processSync();
-    app.plugins.forEach(item => {
-        afterLoadPlugin(item);
-    });
+    afterLayoutReady(app);
     // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628
     menuElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;

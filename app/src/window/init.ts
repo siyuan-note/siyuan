@@ -10,7 +10,7 @@ import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
 import {initWindow} from "../boot/onGetConfig";
 import {App} from "../index";
-import {afterLoadPlugin} from "../plugin/loader";
+import {afterLayoutReady} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
 import {initWindowOpenOverride} from "../protyle/util/compatibility";
 /// #if !BROWSER
@@ -92,9 +92,7 @@ export const init = (app: App) => {
 };
 
 const afterLayout = (app: App) => {
-    app.plugins.forEach(item => {
-        afterLoadPlugin(item);
-    });
+    afterLayoutReady(app);
     document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
         const tab = getInstanceById(item.getAttribute("data-id")) as Tab;
         tab.parent.switchTab(item, false, false);

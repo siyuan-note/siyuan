@@ -27,7 +27,7 @@ import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
 import {newDatabaseRowModel} from "../editor/databaseRow";
 import {App} from "../index";
-import {afterLoadPlugin} from "../plugin/loader";
+import {afterLayoutReady} from "../plugin/loader";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {adjustDockPadding} from "./dock/util";
@@ -560,9 +560,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         });
     }
     // 需放在 tab.parent.switchTab 后，否则当前 tab 永远为最后一个
-    app.plugins.forEach(item => {
-        afterLoadPlugin(item);
-    });
+    afterLayoutReady(app);
     saveLayout();
     // https://github.com/siyuan-note/siyuan/issues/17779
     if (window.siyuan.layout.rightDock.layout.children[0].element.classList.contains("fn__none") &&

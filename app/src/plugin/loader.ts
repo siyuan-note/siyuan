@@ -28,6 +28,8 @@ const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
 };
 
+const pluginLoadPromises = new WeakMap<Plugin, Promise<void>>();
+
 export const loadPlugins = async (app: App, names?: string[], init = true) => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
     const pluginsStyle = getPluginsStyle();
@@ -70,12 +72,16 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
         i18n: item.i18n
     }) as Plugin;
     app.plugins.push(plugin);
-    try {
-        await plugin.onload();
-    } catch (e) {
-        console.error(`plugin ${item.name} onload error:`, e);
-    }
-    await plugin.kernel.init();
+    const loadPromise = (async () => {
+        try {
+            await plugin.onload();
+        } catch (e) {
+            console.error(`plugin ${item.name} onload error:`, e);
+        }
+        await plugin.kernel.init();
+    })();
+    pluginLoadPromises.set(plugin, loadPromise);
+    await loadPromise;
     return plugin;
 };
 
@@ -177,6 +183,19 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     resizeTopBar();
     /// #endif
     addPluginDock(plugin);
+};
+
+export const afterLayoutReady = (app: App) => {
+    app.plugins.forEach((plugin) => {
+        const loadPromise = pluginLoadPromises.get(plugin);
+        if (loadPromise) {
+            loadPromise.then(() => {
+                afterLoadPlugin(plugin);
+            });
+        } else {
+            afterLoadPlugin(plugin);
+        }
+    });
 };
 
 export const addPluginDock = (plugin: Plugin) => {

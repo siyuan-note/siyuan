@@ -847,11 +847,13 @@ export class MobileOutline extends Model {
                     click: () => {
                         const data = this.getProtyleAndBlockElement(element);
                         if (data) {
+                            getSelection()?.removeAllRanges();
                             turnsIntoTransaction({
                                 protyle: data.protyle,
                                 selectsElement: [data.blockElement],
                                 type: "Blocks2Hs",
-                                level: currentLevel - 1
+                                level: currentLevel - 1,
+                                unfocus: true,
                             });
                         }
                     }
@@ -867,11 +869,13 @@ export class MobileOutline extends Model {
                     click: () => {
                         const data = this.getProtyleAndBlockElement(element);
                         if (data) {
+                            getSelection()?.removeAllRanges();
                             turnsIntoTransaction({
                                 protyle: data.protyle,
                                 selectsElement: [data.blockElement],
                                 type: "Blocks2Hs",
-                                level: currentLevel + 1
+                                level: currentLevel + 1,
+                                unfocus: true,
                             });
                         }
                     }
@@ -1265,7 +1269,6 @@ export class MobileOutline extends Model {
                         }
                     });
                     transaction(protyle, response.data.doOperations, response.data.undoOperations);
-                    focusBlock(protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`));
                 });
             }
         };

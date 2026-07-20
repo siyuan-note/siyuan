@@ -2,6 +2,11 @@ name: ✨ 新功能请求
 description: 提出您期望的功能
 title: "请输入功能请求标题"
 body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!IMPORTANT]
+        > 我们目前不再接受关系图相关的新功能提议。
   - type: textarea
     attributes:
       label: 您在什么场景下需要这个功能？

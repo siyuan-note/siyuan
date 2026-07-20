@@ -2,6 +2,11 @@ name: ✨ Request new features
 description: Come up with the features you expected
 title: "Please enter the title of the feature request"
 body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!IMPORTANT]
+        > We are currently not accepting new feature requests for Graph View.
   - type: textarea
     attributes:
       label: In what scenarios do you need this feature?

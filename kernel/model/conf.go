@@ -148,6 +148,7 @@ func InitConf() {
 	initLang()
 
 	Conf = NewAppConf()
+	clearEncryptedExportTempOnBoot()
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if gulu.File.IsExist(confPath) {
 		if data, err := os.ReadFile(confPath); err != nil {

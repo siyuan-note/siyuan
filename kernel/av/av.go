@@ -581,6 +581,11 @@ func IsAttributeViewExist(avID string) bool {
 }
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidAttributeViewID
+		return
+	}
+
 	// 加密笔记本的 AV 定义存笔记本级路径，通过 fallback 自动查找并解密
 	avJSONPath, boxID := FindAttributeViewPath(avID)
 	if avJSONPath == "" {
@@ -595,6 +600,15 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 }
 
 func ParseAttributeViewInBox(avID, boxID string) (ret *AttributeView, err error) {
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidAttributeViewID
+		return
+	}
+	if boxID != "" && !ast.IsNodeIDPattern(boxID) {
+		err = ErrInvalidBoxID
+		return
+	}
+
 	avJSONPath, avBoxID := FindAttributeViewPathInBox(avID, boxID)
 	if avJSONPath == "" {
 		avJSONPath = attributeViewDataPathByBox(avID, boxID)
@@ -710,8 +724,8 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 }
 
 func SaveAttributeView(av *AttributeView) (err error) {
-	if "" == av.ID {
-		err = errors.New("av id is empty")
+	if !ast.IsNodeIDPattern(av.ID) {
+		err = ErrInvalidAttributeViewID
 		logging.LogErrorf("save attribute view failed: %s", err)
 		return
 	}
@@ -1068,6 +1082,10 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 }
 
 func GetAttributeViewDataPath(avID string) (ret string) {
+	if !ast.IsNodeIDPattern(avID) {
+		return
+	}
+
 	av := filepath.Join(util.DataDir, "storage", "av")
 	ret = filepath.Join(av, avID+".json")
 	if !gulu.File.IsDir(av) {
@@ -1084,13 +1102,15 @@ func GetAttributeViewI18n(key string) string {
 }
 
 var (
-	ErrAttributeViewNotFound = errors.New("attribute view not found")
-	ErrViewNotFound          = errors.New("view not found")
-	ErrKeyNotFound           = errors.New("key not found")
-	ErrWrongLayoutType       = errors.New("wrong layout type")
-	ErrInvalidColumnAlign    = errors.New("invalid column align")
-	ErrSpecTooNew            = errors.New("attribute view spec is too new")
-	ErrFilterTooDeep         = errors.New("filter nesting depth exceeds the maximum allowed")
+	ErrAttributeViewNotFound  = errors.New("attribute view not found")
+	ErrInvalidAttributeViewID = errors.New("invalid attribute view id")
+	ErrInvalidBoxID           = errors.New("invalid box id")
+	ErrViewNotFound           = errors.New("view not found")
+	ErrKeyNotFound            = errors.New("key not found")
+	ErrWrongLayoutType        = errors.New("wrong layout type")
+	ErrInvalidColumnAlign     = errors.New("invalid column align")
+	ErrSpecTooNew             = errors.New("attribute view spec is too new")
+	ErrFilterTooDeep          = errors.New("filter nesting depth exceeds the maximum allowed")
 )
 
 const (

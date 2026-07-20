@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -68,6 +69,10 @@ func GetAVBoxID(avID string) string {
 // 加密 box：<DataDir>/<boxID>/storage/av/<avID>.json
 // 普通 box（boxID 为空）：<DataDir>/storage/av/<avID>.json
 func attributeViewDataPathByBox(avID, boxID string) string {
+	if !ast.IsNodeIDPattern(avID) || (boxID != "" && !ast.IsNodeIDPattern(boxID)) {
+		return ""
+	}
+
 	if boxID != "" {
 		return filepath.Join(util.DataDir, boxID, "storage", "av", avID+".json")
 	}
@@ -80,6 +85,10 @@ func attributeViewDataPathByBox(avID, boxID string) string {
 // 3. 遍历已打开的加密笔记本查找
 // 返回找到的路径和对应的 boxID（普通 box 返回空 boxID）。找不到返回空串。
 func FindAttributeViewPath(avID string) (path string, boxID string) {
+	if !ast.IsNodeIDPattern(avID) {
+		return
+	}
+
 	// 先查 pendingAVBox（首次创建场景），不要求文件存在
 	if pendingBoxID := GetAVBoxID(avID); pendingBoxID != "" {
 		encPath := attributeViewDataPathByBox(avID, pendingBoxID)
@@ -105,6 +114,10 @@ func FindAttributeViewPath(avID string) (path string, boxID string) {
 
 // FindAttributeViewPathInBox 只在指定 box 内查找 AV 定义，避免加密上下文落回全局路径。
 func FindAttributeViewPathInBox(avID, boxID string) (path string, retBoxID string) {
+	if !ast.IsNodeIDPattern(avID) || (boxID != "" && !ast.IsNodeIDPattern(boxID)) {
+		return
+	}
+
 	if pendingBoxID := GetAVBoxID(avID); pendingBoxID != "" {
 		if pendingBoxID == boxID {
 			// pending 匹配目标 box，直接返回（首次创建时文件尚不存在）
@@ -167,6 +180,13 @@ func ReadAttributeViewDataInBox(avID, boxID string) ([]byte, error) {
 // writeAttributeViewData 写入 AV 定义数据（自动加密）。
 // boxID 为空时写全局路径（普通 box），非空时写加密笔记本路径并加密。
 func writeAttributeViewData(avID, boxID string, data []byte) error {
+	if !ast.IsNodeIDPattern(avID) {
+		return ErrInvalidAttributeViewID
+	}
+	if boxID != "" && !ast.IsNodeIDPattern(boxID) {
+		return ErrInvalidBoxID
+	}
+
 	path := attributeViewDataPathByBox(avID, boxID)
 	// 确保目录存在
 	dir := filepath.Dir(path)

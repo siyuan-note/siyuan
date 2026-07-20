@@ -282,7 +282,8 @@ html[data-frontend="browser-desktop"] {
     transition: var(--b3-transition);
   }
 
-  &__sliderDown {
+  &__sliderDown,
+  &__sliderUp {
     height: 0;
     overflow: hidden;
     transition: var(--b3-transition);

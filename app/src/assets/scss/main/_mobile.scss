@@ -73,7 +73,8 @@
   }
 }
 
-.file-tree__sliderDown {
+.file-tree__sliderDown,
+.file-tree__sliderUp {
   height: 0;
   overflow: hidden;
   transition: var(--b3-transition);

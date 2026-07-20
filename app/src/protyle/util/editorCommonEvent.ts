@@ -1319,12 +1319,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             sourceElements.push(...expandedElements);
                         }
                     }
+                    const hasContentBlockSource = sourceElements.some(item =>
+                        !["NodeList", "NodeListItem"].includes(item.getAttribute("data-type")));
 
                     // 非列表项源（如段落）拖到子列表首项上方间隙：列表只能包含列表项，段落无法成为 .li 的同级，
                     // 而该间隙的语义实为"插入到父列表项内容末尾（子列表之前）"，故锚点改为父列表项，
                     // 将段落作为父列表项内容插到子列表之前。命中后需跳过下方 isChild/sibling 链，避免重复插入。
                     let liGapIntercepted = false;
-                    if (!isListItemSource && !isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
+                    if (hasContentBlockSource && !isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
                         const parentLi = targetElement.parentElement?.parentElement;
                         if (targetClass.some((c: string) => c.indexOf("dragover__top--sibling") === 0) &&
                             parentLi?.classList.contains("li")) {
@@ -1340,6 +1342,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             }
                             liGapIntercepted = true;
                         }
+                    }
+
+                    if (!liGapIntercepted && hasContentBlockSource && !isChild &&
+                        targetElement.getAttribute("data-type") === "NodeListItem") {
+                        // 普通内容块不能成为列表块的直接子节点。
+                        dragoverElement = undefined;
+                        return;
                     }
 
                     if (!liGapIntercepted && isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
@@ -1597,7 +1606,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let dragCache: { nodeId: string, indent: number, rgb: { r: number, g: number, b: number }, guides: string };
     let disabledPosition: string;
     // 列表项目标的插入点与提示处理：设置 class、CSS 变量、showDragTip
-    const applyLiTarget = (htmlTarget: HTMLElement, event: DragEvent): void => {
+    const applyLiTarget = (htmlTarget: HTMLElement, event: DragEvent, canDropAsSibling = true): void => {
         cleanupDragIndicators(editorElement);
         const nodeId = htmlTarget.getAttribute("data-node-id");
         // Cache expensive computations per target element (never changes while hovering same element)
@@ -1636,6 +1645,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 因此有子列表的列表项内容区域全部作为 sibling（在目标后插入同级），无子列表时用 offsetX 判断 child/sibling
         const hasChildList = !!Array.from(htmlTarget.children).find(c => c.classList.contains("list"));
         const isChild = position === "bottom" && !hasChildList && offsetX >= indent;
+        if (!canDropAsSibling && !isChild) {
+            hideDragTip();
+            return;
+        }
         // 源列表项拖到自身、子孙中、或原位置时不显示高亮与提示
         const sourceElements = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select")) as HTMLElement[];
         const isNoOp = sourceElements.some(source =>
@@ -1802,6 +1815,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         targetElement = hasClosestByClassName(event.target, "av__gallery-item") || hasClosestByClassName(event.target, "av__gallery-add") ||
             hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") ||
             hasClosestBlock(event.target);
+        const directTargetElement = targetElement;
         if (targetElement && ["gallery", "kanban"].includes(targetElement.getAttribute("data-av-type")) && event.target.classList.contains("av__gallery")) {
             // 拖拽到属性视图 gallery 内，但没选中 item
             return;
@@ -2015,13 +2029,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
         }
-        // For list items, resolve to the .li ancestor (but keep targetElement for validation)
-        // 命中子列表容器(.list)时不解析为 liTarget，走通用分支处理（与列表块拖拽行为一致）
-        let liTarget = targetElement.classList.contains("list") ? null :
+        const isListSource = gutterTypes[0] === "nodelistitem" || gutterTypes[0] === "nodelist";
+        const isContentBlockSource = !!gutterType && !isListSource && !isAvSubType;
+        // 仅真正命中列表项内部内容块时保留精确目标；由列表项间隙修正出的内容块仍按列表项处理。
+        const keepLiContentTarget = targetElement === directTargetElement && isContentBlockSource &&
+            targetElement.parentElement?.getAttribute("data-type") === "NodeListItem";
+        // 命中子列表容器或列表项内部内容块时不解析为 liTarget，走通用分支处理。
+        let liTarget = targetElement.classList.contains("list") || keepLiContentTarget ? null :
             (targetElement.getAttribute("data-type") === "NodeListItem"
                 ? targetElement : targetElement.parentElement?.getAttribute("data-type") === "NodeListItem"
                     ? targetElement.parentElement : null);
-        const isListSource = gutterTypes[0] === "nodelistitem" || gutterTypes[0] === "nodelist";
         // 列表项或列表块拖到列表外紧邻块时无操作，避免源被移出形成独立列表（含多级嵌套）
         if (isListSource && !liTarget) {
             const sourceSelected = editorElement.querySelector(".protyle-wysiwyg--select") as HTMLElement;
@@ -2121,7 +2138,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (isLeftEdge || isRightEdge) {
                 liTarget = null;
             } else {
-                applyLiTarget(liTarget as HTMLElement, event);
+                applyLiTarget(liTarget as HTMLElement, event, !isContentBlockSource);
                 return;
             }
         }

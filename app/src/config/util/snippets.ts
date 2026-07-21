@@ -100,7 +100,7 @@ export const openSnippets = () => {
             }
         });
         response.data.snippets.forEach((item: ISnippet) => {
-            const nameElement = (dialog.element.querySelector(`[data-id="${item.id}"] input`) as HTMLInputElement);
+            const nameElement = (dialog.element.querySelector(`[data-id="${item.id}"] input.b3-text-field`) as HTMLInputElement);
             nameElement.value = item.name;
             const contentElement = dialog.element.querySelector(`[data-id="${item.id}"] textarea`) as HTMLTextAreaElement;
             contentElement.textContent = item.content;
@@ -173,7 +173,7 @@ export const openSnippets = () => {
 
 const filterSnippet = (dialog: Dialog, inputItem: HTMLInputElement) => {
     dialog.element.querySelectorAll(`.fn__flex-1 > div > [data-type="${inputItem.dataset.type}"]`).forEach((snippetPanel: Element) => {
-        const snippetName = snippetPanel.querySelector("input").value.toLowerCase();
+        const snippetName = (snippetPanel.querySelector("input.b3-text-field") as HTMLInputElement).value.toLowerCase();
         const snippetContent = snippetPanel.querySelector("textarea").value.toLowerCase();
         const searchValue = inputItem.value.toLowerCase();
         if (!searchValue ||
@@ -231,7 +231,7 @@ const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[]
         snippets.push({
             disabledInPublish: !(item.querySelector('.b3-switch[data-type="disabledInPublish"]') as HTMLInputElement).checked,
             id: item.getAttribute("data-id"),
-            name: item.querySelector("input").value,
+            name: (item.querySelector("input.b3-text-field") as HTMLInputElement).value,
             type: item.getAttribute("data-type"),
             content: item.querySelector("textarea").value,
             enabled: (item.querySelector('.b3-switch[data-type="snippet"]') as HTMLInputElement).checked

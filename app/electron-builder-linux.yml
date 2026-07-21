@@ -1,5 +1,6 @@
 productName: "SiYuan"
 appId: "org.b3log.siyuan"
+publish: null
 asar: false
 compression: "normal"
 copyright: "© 2020-present Yunnan Liandi Technology Co., Ltd."

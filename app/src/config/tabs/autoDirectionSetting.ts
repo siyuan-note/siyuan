@@ -2,11 +2,12 @@ import type {SettingTabBuilder} from "../setting/builder";
 import {fetchPost} from "../../util/fetch";
 import {editorConfigApi} from "./editorRuntime";
 
-const saveAutoTextDirection = (value: boolean) => {
+const saveAutoTextDirection = (value: unknown) => {
+    const enabled = value === true;
     const payload: Config.IEditor = {
         ...window.siyuan.config.editor,
-        autoTextDirection: value,
-        rtl: value ? false : window.siyuan.config.editor.rtl,
+        autoTextDirection: enabled,
+        rtl: enabled ? false : window.siyuan.config.editor.rtl,
     };
     fetchPost("/api/setting/setEditor", payload, (response) => {
         editorConfigApi.apply(response.data as Config.IEditor);
@@ -40,6 +41,7 @@ export const registerAutoDirectionAppearanceSetting = (tab: SettingTabBuilder) =
     const group = tab.group("content", window.siyuan.languages.configGroupContent);
     group.switch("editor.autoTextDirection", {
         title: `A↔א · ${window.siyuan.languages.ltr} / ${window.siyuan.languages.rtl}`,
+        readConfig: () => window.siyuan.config.editor.autoTextDirection && !window.siyuan.config.editor.rtl,
         save: saveAutoTextDirection,
         afterMount: bindDirectionModeExclusivity,
     });

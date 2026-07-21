@@ -23,7 +23,13 @@ describe("classifyTextDirection", () => {
         assert.equal(classifyTextDirection("$100 + €20"), "neutral");
     });
 
-    it("uses the dominant strong-script ratio for mixed content", () => {
+    it("requires at least two RTL letters", () => {
+        assert.equal(classifyTextDirection("س"), "neutral");
+        assert.equal(classifyTextDirection("א"), "neutral");
+        assert.equal(classifyTextDirection("A س"), "ltr");
+    });
+
+    it("uses the balanced RTL ratio for mixed content", () => {
         assert.equal(classifyTextDirection("GPT-5 برای نوشتن این متن فارسی استفاده شده است"), "rtl");
         assert.equal(classifyTextDirection("API تست فارسی"), "rtl");
         assert.equal(classifyTextDirection("This is a mostly English sentence with متن"), "ltr");

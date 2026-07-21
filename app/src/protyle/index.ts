@@ -336,6 +336,7 @@ export class Protyle {
             this.protyle.preview.render(this.protyle);
             return;
         }
+        const hadContent = this.protyle.wysiwyg.element.childElementCount > 0;
         let needCreateAction = "";
         let hasDeleteOp = false;
         data.data[0].doOperations.find((item: IOperation) => {
@@ -380,7 +381,8 @@ export class Protyle {
             });
             return;
         }
-        if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID && needCreateAction) {
+        if (this.protyle.element.dataset.loading === "finished" && hadContent &&
+            this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID && needCreateAction) {
             if (needCreateAction === "delete" && this.protyle.block.showAll) {
                 if (this.protyle.options.handleEmptyContent) {
                     this.protyle.options.handleEmptyContent();

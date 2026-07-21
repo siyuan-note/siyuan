@@ -23,6 +23,7 @@ import (
 	"path"
 	"path/filepath"
 	"slices"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -57,7 +58,7 @@ func IsMoveOutlineHeading(transactions *[]*Transaction) bool {
 
 func FlushTxQueue() {
 	time.Sleep(time.Duration(50) * time.Millisecond)
-	for 0 < len(txQueue) || isFlushing {
+	for 0 < txQueueSize() || isFlushing.Load() {
 		time.Sleep(10 * time.Millisecond)
 	}
 }
@@ -72,9 +73,9 @@ func PerformTxSync(tx *Transaction) (err error) {
 		tx.m = &sync.Mutex{}
 	}
 	flushLock.Lock()
-	isFlushing = true
+	isFlushing.Store(true)
 	defer func() {
-		isFlushing = false
+		isFlushing.Store(false)
 		flushLock.Unlock()
 	}()
 	if txErr := performTx(tx); nil != txErr {
@@ -84,9 +85,10 @@ func PerformTxSync(tx *Transaction) (err error) {
 }
 
 var (
-	txQueue    = make(chan *Transaction, 7)
-	flushLock  = sync.Mutex{}
-	isFlushing = false
+	txQueue     []*Transaction
+	txQueueLock sync.Mutex
+	flushLock   sync.Mutex
+	isFlushing  atomic.Bool
 )
 
 func init() {
@@ -94,22 +96,22 @@ func init() {
 }
 
 func flushQueue() {
-	for {
-		select {
-		case tx := <-txQueue:
+	ticker := time.NewTicker(50 * time.Millisecond)
+	defer ticker.Stop()
+	for range ticker.C {
+		flushLock.Lock()
+		isFlushing.Store(true)
+		transactions := takeQueuedTransactions()
+		for _, tx := range transactions {
 			flushTx(tx)
 		}
+		isFlushing.Store(false)
+		flushLock.Unlock()
 	}
 }
 
 func flushTx(tx *Transaction) {
 	defer logging.Recover()
-	flushLock.Lock()
-	isFlushing = true
-	defer func() {
-		isFlushing = false
-		flushLock.Unlock()
-	}()
 
 	start := time.Now()
 	if txErr := performTx(tx); nil != txErr {
@@ -150,10 +152,29 @@ func flushTx(tx *Transaction) {
 }
 
 func PerformTransactions(transactions *[]*Transaction) {
+	txQueueLock.Lock()
+	defer txQueueLock.Unlock()
 	for _, tx := range *transactions {
 		tx.m = &sync.Mutex{}
-		txQueue <- tx
+		txQueue = append(txQueue, tx)
 	}
+	sort.SliceStable(txQueue, func(i, j int) bool {
+		return txQueue[i].Timestamp < txQueue[j].Timestamp
+	})
+}
+
+func takeQueuedTransactions() (ret []*Transaction) {
+	txQueueLock.Lock()
+	defer txQueueLock.Unlock()
+	ret = txQueue
+	txQueue = nil
+	return
+}
+
+func txQueueSize() int {
+	txQueueLock.Lock()
+	defer txQueueLock.Unlock()
+	return len(txQueue)
 }
 
 const (

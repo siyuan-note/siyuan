@@ -86,6 +86,8 @@ const syncFoldAttr = (element: Element, operation: IOperation) => {
     });
 };
 
+const transactionQueues = new WeakMap<IProtyle, Promise<void>>();
+
 // 用于执行操作，外加处理当前编辑器中块引用、嵌入块的更新
 const promiseTransaction = (options: {
     protyle: IProtyle,
@@ -402,7 +404,8 @@ const promiseTransaction = (options: {
             focusByWbr(emptyElement, range);
         }
     }
-    fetchPost("/api/transactions", {
+    const previousTransaction = transactionQueues.get(protyle) || Promise.resolve();
+    const currentTransaction = previousTransaction.then(() => fetchPost("/api/transactions", {
         session: protyle.id,
         app: Constants.SIYUAN_APPID,
         transactions: [{
@@ -431,7 +434,8 @@ const promiseTransaction = (options: {
             }
         });
         options.callback?.();
-    });
+    }));
+    transactionQueues.set(protyle, currentTransaction);
 };
 
 const containsOperationAnchor = (element: Element, operation: IOperation) => {

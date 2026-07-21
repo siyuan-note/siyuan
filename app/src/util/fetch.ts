@@ -42,7 +42,7 @@ export const fetchPost = (
         init.signal = signal;
     }
     let isGetFile202 = false;
-    fetch(url, init).then((response) => {
+    return fetch(url, init).then((response) => {
         switch (response.status) {
             case 403:
             case 404:

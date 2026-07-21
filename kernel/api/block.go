@@ -407,6 +407,10 @@ func getDocInfo(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if !checkBlockInfoPublishAccess(c, id, ret) {
+		return
+	}
+
 	var info *model.BlockInfo
 	var err error
 	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
@@ -439,9 +443,22 @@ func getDocsInfo(c *gin.Context) {
 		return
 	}
 	idsArg := arg["ids"].([]any)
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	var publishAccess model.PublishAccess
+	if isReadOnlyRole {
+		publishAccess = model.GetPublishAccess()
+	}
 	var ids []string
 	for _, id := range idsArg {
-		ids = append(ids, id.(string))
+		idStr := id.(string)
+		if isReadOnlyRole && !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, idStr) {
+			continue
+		}
+		ids = append(ids, idStr)
+	}
+	if isReadOnlyRole && 0 < len(idsArg) && len(ids) == 0 {
+		ret.Data = []*model.BlockInfo{}
+		return
 	}
 	queryRefCount := arg["refCount"].(bool)
 	queryAv := arg["av"].(bool)
@@ -451,8 +468,7 @@ func getDocsInfo(c *gin.Context) {
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), ids)
 		return
 	}
-	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
+	if isReadOnlyRole {
 		for i, docinfo := range info {
 			info[i] = model.FilterBlockInfoByPublishAccess(c, publishAccess, docinfo)
 		}
@@ -725,6 +741,9 @@ func getBlockInfo(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if !checkBlockInfoPublishAccess(c, id, ret) {
+		return
+	}
 
 	// 仅在此处使用带重建索引的加载函数，其他地方不要使用
 	var tree *parse.Tree
@@ -799,6 +818,21 @@ func getBlockInfo(c *gin.Context) {
 		"rootChildID":    rootChildID,
 		"rootIcon":       icon,
 	}
+}
+
+func checkBlockInfoPublishAccess(c *gin.Context, id string, ret *gulu.Result) bool {
+	if !model.IsReadOnlyRoleContext(c) {
+		return true
+	}
+
+	publishAccess := model.GetPublishAccess()
+	if model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
+		return true
+	}
+
+	ret.Code = -1
+	ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+	return false
 }
 
 func getBlockDOM(c *gin.Context) {

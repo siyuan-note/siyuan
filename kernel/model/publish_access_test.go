@@ -62,3 +62,36 @@ func TestFilterSearchDocsByPublishAccess(t *testing.T) {
 		t.Fatalf("unexpected authenticated search docs: %v", filtered)
 	}
 }
+
+func TestFilterEmbedBlocksByPublishAccessRemovesInternalFields(t *testing.T) {
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	embedBlocks := []*EmbedBlock{{
+		Block: &Block{
+			Box:      "20260720000000-boxid01",
+			Path:     "/20260720000004-public1.sy",
+			HPath:    "/private/path",
+			ID:       "20260720000005-block01",
+			Content:  "<div>visible</div>",
+			Markdown: "sensitive markdown",
+			IAL:      map[string]string{"custom-secret": "sensitive ial"},
+		},
+		BlockPaths:          []*BlockPath{{ID: "20260720000004-public1", Name: "Public"}},
+		AllowChildOperation: true,
+	}}
+
+	filtered := FilterEmbedBlocksByPublishAccess(c, PublishAccess{}, embedBlocks)
+	if 1 != len(filtered) {
+		t.Fatalf("unexpected filtered embed block count: %d", len(filtered))
+	}
+	block := filtered[0].Block
+	if "20260720000005-block01" != block.ID || "<div>visible</div>" != block.Content {
+		t.Fatalf("required embed block fields were not preserved: %+v", block)
+	}
+	if "" != block.Box || "" != block.Path || "" != block.HPath || "" != block.Markdown || nil != block.IAL {
+		t.Fatalf("internal embed block fields were not removed: %+v", block)
+	}
+	if 1 != len(filtered[0].BlockPaths) || !filtered[0].AllowChildOperation {
+		t.Fatalf("embed rendering metadata was not preserved: %+v", filtered[0])
+	}
+}

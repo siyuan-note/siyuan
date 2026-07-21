@@ -593,8 +593,33 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, b
 func FilterEmbedBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, embedBlocks []*EmbedBlock) (ret []*EmbedBlock) {
 	ret = []*EmbedBlock{}
 	for _, embedBlock := range embedBlocks {
-		embedBlock.Block.Content = FilterContentByPublishAccess(c, publishAccess, embedBlock.Block.Box, embedBlock.Block.Path, embedBlock.Block.Content, false)
-		ret = append(ret, embedBlock)
+		if nil == embedBlock || nil == embedBlock.Block {
+			continue
+		}
+
+		block := embedBlock.Block
+		publishIgnore := GetDisablePublishAccess(publishAccess)
+		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+		accessible := CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) &&
+			(password == "" || CheckPublishAuthCookie(c, passwordID, password))
+		if accessible {
+			ret = append(ret, &EmbedBlock{
+				Block: &Block{
+					ID:      block.ID,
+					Content: block.Content,
+				},
+				BlockPaths:          embedBlock.BlockPaths,
+				AllowChildOperation: embedBlock.AllowChildOperation,
+			})
+			continue
+		}
+
+		ret = append(ret, &EmbedBlock{
+			Block: &Block{
+				Content: FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, block.Content, false),
+			},
+			BlockPaths: []*BlockPath{},
+		})
 	}
 	return
 }

@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	stdhtml "html"
 	"math"
 	"os"
 	"path"
@@ -43,6 +44,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -216,23 +218,75 @@ func UpdateEmbedBlock(id, content string) (err error) {
 }
 
 func GetEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
-	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb)
+	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb, true)
 }
 
-func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
-	stmt := "SELECT * FROM `blocks` WHERE `id` IN ('" + strings.Join(includeIDs, "','") + "')"
-	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 1024)
+func GetEmbedBlockForPublish(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
+	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb, false)
+}
+
+func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb, updateIndex bool) (ret []*EmbedBlock) {
+	var validIDs []string
+	for _, id := range includeIDs {
+		if ast.IsNodeIDPattern(id) {
+			validIDs = append(validIDs, id)
+		}
+		if 1024 <= len(validIDs) {
+			break
+		}
+	}
+	sqlBlocks := sql.GetBlocks(validIDs)
+	var existingBlocks []*sql.Block
+	for _, block := range sqlBlocks {
+		if nil != block {
+			existingBlocks = append(existingBlocks, block)
+		}
+	}
+	sqlBlocks = existingBlocks
 
 	// 根据 includeIDs 的顺序排序 Improve `//!js` query embed block result sorting https://github.com/siyuan-note/siyuan/issues/9977
 	m := map[string]int{}
-	for i, id := range includeIDs {
+	for i, id := range validIDs {
 		m[id] = i
 	}
 	sort.Slice(sqlBlocks, func(i, j int) bool {
 		return m[sqlBlocks[i].ID] < m[sqlBlocks[j].ID]
 	})
 
-	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, "", sqlBlocks)
+	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, "", sqlBlocks, updateIndex)
+	return
+}
+
+func GetQueryEmbedStatement(embedBlockID string) (stmt, boxID string, err error) {
+	bt := treenode.GetBlockTree(embedBlockID)
+	if nil == bt {
+		err = ErrBlockNotFound
+		return
+	}
+	if treenode.TypeAbbr(ast.NodeBlockQueryEmbed.String()) != bt.Type {
+		err = errors.New("not query embed block")
+		return
+	}
+
+	tree, loadErr := filesys.LoadTree(bt.BoxID, bt.Path, util.NewLute())
+	if nil != loadErr {
+		err = loadErr
+		return
+	}
+	node := treenode.GetNodeInTree(tree, embedBlockID)
+	if nil == node || ast.NodeBlockQueryEmbed != node.Type {
+		err = ErrBlockNotFound
+		return
+	}
+	scriptNode := node.ChildByType(ast.NodeBlockQueryEmbedScript)
+	if nil == scriptNode {
+		err = errors.New("query embed block statement not found")
+		return
+	}
+
+	stmt = stdhtml.UnescapeString(scriptNode.TokensStr())
+	stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
+	boxID = bt.BoxID
 	return
 }
 
@@ -243,18 +297,28 @@ func SearchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 // SearchEmbedBlockInBox 与 SearchEmbedBlock 一致，但按 boxID 路由 SQL 到加密 content db。
 // 加密笔记本的嵌入块查询走独立加密库（全局 siyuan.db 不含加密数据），boxID 为空时落回全局库。
 func SearchEmbedBlockInBox(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool, boxID string) (ret []*EmbedBlock) {
+	return searchEmbedBlockInBox(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb, boxID, true)
+}
+
+func SearchEmbedBlockForPublish(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool,
+	boxID string) (ret []*EmbedBlock) {
+	return searchEmbedBlockInBox(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb, boxID, false)
+}
+
+func searchEmbedBlockInBox(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool, boxID string,
+	updateIndex bool) (ret []*EmbedBlock) {
 	var sqlBlocks []*sql.Block
 	if "" != boxID {
 		sqlBlocks = sql.SelectBlocksRawStmtNoParseInBox(stmt, Conf.Search.Limit, boxID)
 	} else {
 		sqlBlocks = sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	}
-	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, treenode.GetEmbedBlockRefID(stmt), sqlBlocks)
+	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, treenode.GetEmbedBlockRefID(stmt), sqlBlocks, updateIndex)
 	return
 }
 
 func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, breadcrumb bool, embedBlockRefID string,
-	sqlBlocks []*sql.Block) (ret []*EmbedBlock) {
+	sqlBlocks []*sql.Block, updateIndex bool) (ret []*EmbedBlock) {
 	var tmp []*sql.Block
 	for _, b := range sqlBlocks {
 		if "query_embed" == b.Type { // 嵌入块不再嵌入
@@ -297,8 +361,10 @@ func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, 
 		})
 	}
 
-	// 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
-	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, updateEmbedBlockContent, embedBlockID, ret)
+	if updateIndex {
+		// 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
+		task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, updateEmbedBlockContent, embedBlockID, ret)
+	}
 
 	// 添加笔记本名称
 	var boxIDs []string

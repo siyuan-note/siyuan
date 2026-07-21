@@ -18,6 +18,7 @@ package sql
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -162,11 +163,29 @@ func CheckSingleStatement(stmt string) error {
 // 注意：若字符串里在语法上还有第二条及以后的语句，本函数只针对「首条」对应的 stmt 做判断，
 // 不会拒绝多语句。与 CheckSingleStatement 组合即可得到「单条 + 只读」策略。
 func CheckReadonlyStatement(stmt string) error {
+	return checkReadonlyStatement(stmt, db)
+}
+
+// CheckReadonlyStatementInBox 在指定笔记本对应的数据库连接上检查 SQL 是否只读。
+func CheckReadonlyStatementInBox(stmt, boxID string) error {
+	targetDB := db
+	if boxDB := GetEncryptedDB(boxID); nil != boxDB {
+		targetDB = boxDB
+	} else if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) {
+		return errors.New("encrypted box db not opened for box " + boxID)
+	}
+	return checkReadonlyStatement(stmt, targetDB)
+}
+
+func checkReadonlyStatement(stmt string, targetDB *sql.DB) error {
 	if strings.TrimSpace(stmt) == "" {
 		return errors.New("SQL statement is empty")
 	}
+	if nil == targetDB {
+		return errors.New("database is nil")
+	}
 	ctx := context.Background()
-	conn, err := db.Conn(ctx)
+	conn, err := targetDB.Conn(ctx)
 	if err != nil {
 		return err
 	}

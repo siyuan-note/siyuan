@@ -21,7 +21,6 @@ const bindDirectionModeExclusivity = (root: HTMLElement) => {
         return;
     }
 
-    // Capture before the existing RTL save handler so its payload already contains autoTextDirection=false.
     rtlElement.addEventListener("change", () => {
         if (!rtlElement.checked) {
             return;

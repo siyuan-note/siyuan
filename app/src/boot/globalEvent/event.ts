@@ -16,18 +16,21 @@ import {getDockByType} from "../../layout/tabUtil";
 import {fetchPost} from "../../util/fetch";
 
 export const initWindowEvent = (app: App) => {
-	let lastEncryptedNotebookTouch = 0;
-	const touchEncryptedNotebooks = () => {
-		const now = Date.now();
-		if (now - lastEncryptedNotebookTouch < 30000) {
-			return;
-		}
-		lastEncryptedNotebookTouch = now;
-		fetchPost("/api/notebook/touchEncryptedNotebooks", {});
-	};
-	window.addEventListener("pointerdown", touchEncryptedNotebooks, {passive: true});
-	window.addEventListener("keydown", touchEncryptedNotebooks);
-	document.addEventListener("touchstart", touchEncryptedNotebooks, {passive: true});
+    let lastEncryptedNotebookTouch = 0;
+    const touchEncryptedNotebooks = () => {
+        if (window.siyuan.isPublish) {
+            return;
+        }
+        const now = Date.now();
+        if (now - lastEncryptedNotebookTouch < 30000) {
+            return;
+        }
+        lastEncryptedNotebookTouch = now;
+        fetchPost("/api/notebook/touchEncryptedNotebooks", {});
+    };
+    window.addEventListener("pointerdown", touchEncryptedNotebooks, {passive: true});
+    window.addEventListener("keydown", touchEncryptedNotebooks);
+    document.addEventListener("touchstart", touchEncryptedNotebooks, {passive: true});
 
     document.body.addEventListener("mouseleave", () => {
         if (window.siyuan.layout.leftDock) {

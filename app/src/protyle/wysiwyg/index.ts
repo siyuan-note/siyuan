@@ -118,6 +118,34 @@ export class WYSIWYG {
 
     private preventClick: boolean;
     private preventInput: boolean;
+    private inputTimeout: number;
+    private pendingInputTimeouts = new Map<number, () => void>();
+
+    private scheduleInput(callback: () => void, delay = 0, replace = true) {
+        if (replace && this.inputTimeout) {
+            clearTimeout(this.inputTimeout);
+            this.pendingInputTimeouts.delete(this.inputTimeout);
+        }
+        const timeout = window.setTimeout(() => {
+            this.pendingInputTimeouts.delete(timeout);
+            if (this.inputTimeout === timeout) {
+                this.inputTimeout = undefined;
+            }
+            callback();
+        }, delay);
+        this.pendingInputTimeouts.set(timeout, callback);
+        if (replace) {
+            this.inputTimeout = timeout;
+        }
+    }
+
+    public flushPendingInput() {
+        const callbacks = Array.from(this.pendingInputTimeouts.values());
+        this.pendingInputTimeouts.forEach((callback, timeout) => clearTimeout(timeout));
+        this.pendingInputTimeouts.clear();
+        this.inputTimeout = undefined;
+        callbacks.forEach(callback => callback());
+    }
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -2835,7 +2863,6 @@ export class WYSIWYG {
             }
         });
 
-        let timeout: number;
         this.element.addEventListener("input", (event: InputEvent) => {
             if (this.preventInput) {
                 event.stopPropagation();
@@ -2872,18 +2899,16 @@ export class WYSIWYG {
                 // 百度输入法中文反双引号 https://github.com/siyuan-note/siyuan/issues/9686
                 event.data === "”" ||
                 event.data === "「")) {
-                clearTimeout(timeout);  // https://github.com/siyuan-note/siyuan/issues/9179
-                timeout = window.setTimeout(() => {
+                this.scheduleInput(() => {
                     input(protyle, blockElement, range, true); // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
                 });
             } else {
                 if (isMac() && event.data === "【】") {
-                    setTimeout(() => {
+                    this.scheduleInput(() => {
                         input(protyle, blockElement, range, true, event);
-                    }, Constants.TIMEOUT_INPUT);
+                    }, Constants.TIMEOUT_INPUT, false);
                 } else {
-                    clearTimeout(timeout); // https://github.com/siyuan-note/siyuan/issues/9179
-                    timeout = window.setTimeout(() => {
+                    this.scheduleInput(() => {
                         input(protyle, blockElement, range, true, event);
                     });
                 }

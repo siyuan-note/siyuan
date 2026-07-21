@@ -2,6 +2,7 @@ import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
+import {waitForPendingTransactions} from "../util/transactionQueue";
 /// #if !MOBILE
 import {getActiveTab} from "../../layout/tabUtil";
 /// #endif
@@ -151,6 +152,7 @@ export const requestUndo = async (protyle: IProtyle) => {
 
     // 尽早置锁，阻止确认对话框期间触发新的撤销/重做（含 peek 与确认阶段）
     isUndoing = true;
+    await waitForPendingTransactions(protyle);
 
     // 跨文档提示（标准①）：先 peek 栈顶的 mutatedRootIDs
     let peekMutatedRootIDs: string[] = [];
@@ -243,6 +245,7 @@ export const requestRedo = async (protyle: IProtyle) => {
     }
 
     isUndoing = true;
+    await waitForPendingTransactions(protyle);
     fetchPost("/api/transactions/redo", {
         rootID,
         app: Constants.SIYUAN_APPID,

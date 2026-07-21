@@ -41,6 +41,7 @@ export class Undo implements IUndo {
         if (protyle.disabled) {
             return;
         }
+        protyle.wysiwyg.flushPendingInput();
         // 转发到全局 Manager，由 kernel 弹栈 + 广播，发起窗口本地乐观应用
         requestUndo(protyle);
     }
@@ -49,6 +50,7 @@ export class Undo implements IUndo {
         if (protyle.disabled) {
             return;
         }
+        protyle.wysiwyg.flushPendingInput();
         requestRedo(protyle);
     }
 
@@ -83,7 +85,7 @@ export class Undo implements IUndo {
     // 保留签名以兼容 transaction.ts 的调用点。
     public add(doOperations: IOperation[], undoOperations: IOperation[], protyle: IProtyle) {
         if (protyle.block?.rootID) {
-            markMirror(protyle.block.rootID, {canUndo: true});
+            markMirror(protyle.block.rootID, {canUndo: true, canRedo: false});
         }
         refreshUndoButtons(protyle);
     }
@@ -110,6 +112,7 @@ export class LocalUndo implements IUndo {
         if (protyle.disabled) {
             return;
         }
+        protyle.wysiwyg.flushPendingInput();
         if (this.undoStack.length === 0) {
             return;
         }
@@ -132,6 +135,7 @@ export class LocalUndo implements IUndo {
         if (protyle.disabled) {
             return;
         }
+        protyle.wysiwyg.flushPendingInput();
         if (this.redoStack.length === 0) {
             return;
         }

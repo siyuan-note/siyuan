@@ -33,6 +33,7 @@ import {processClonePHElement} from "../render/util";
 import {scrollCenter} from "../../util/highlightById";
 import {setFold} from "../util/blockFold";
 import {isEncryptedBox} from "../../util/pathName";
+import {queueTransaction} from "../util/transactionQueue";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -85,8 +86,6 @@ const syncFoldAttr = (element: Element, operation: IOperation) => {
         }
     });
 };
-
-const transactionQueues = new WeakMap<IProtyle, Promise<void>>();
 
 // 用于执行操作，外加处理当前编辑器中块引用、嵌入块的更新
 const promiseTransaction = (options: {
@@ -404,8 +403,7 @@ const promiseTransaction = (options: {
             focusByWbr(emptyElement, range);
         }
     }
-    const previousTransaction = transactionQueues.get(protyle) || Promise.resolve();
-    const currentTransaction = previousTransaction.then(() => fetchPost("/api/transactions", {
+    queueTransaction(protyle, () => fetchPost("/api/transactions", {
         session: protyle.id,
         app: Constants.SIYUAN_APPID,
         transactions: [{
@@ -435,7 +433,6 @@ const promiseTransaction = (options: {
         });
         options.callback?.();
     }));
-    transactionQueues.set(protyle, currentTransaction);
 };
 
 const containsOperationAnchor = (element: Element, operation: IOperation) => {

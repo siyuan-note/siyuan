@@ -285,3 +285,27 @@ func createDocHistory(c *gin.Context) {
 		return
 	}
 }
+
+func createAssetHistory(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var assetPath string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("path", &assetPath, true, true),
+	) {
+		return
+	}
+
+	err := model.CreateAssetHistory(assetPath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}

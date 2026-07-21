@@ -774,23 +774,51 @@ func generateAssetsHistory() {
 	if 1 > len(assets) {
 		return
 	}
+	if err := createAssetsHistory(assets); err != nil {
+		logging.LogErrorf("generate assets history failed: %s", err)
+	}
+}
 
+// CreateAssetHistory 为指定资源文件创建历史快照。
+func CreateAssetHistory(assetPath string) (err error) {
+	assetPath = strings.TrimPrefix(filepath.ToSlash(filepath.Clean(filepath.FromSlash(assetPath))), "/")
+	if !strings.HasPrefix(assetPath, "assets/") {
+		return errors.New("asset path must be under assets")
+	}
+
+	assetAbsPath := filepath.Join(util.DataDir, filepath.FromSlash(assetPath))
+	assetsDir := filepath.Join(util.DataDir, "assets")
+	if !gulu.File.IsSubPath(assetsDir, assetAbsPath) {
+		return errors.New("asset path must be under assets")
+	}
+	info, statErr := os.Stat(assetAbsPath)
+	if statErr != nil {
+		return statErr
+	}
+	if info.IsDir() {
+		return errors.New("asset path must be a file")
+	}
+	return createAssetsHistory([]string{assetAbsPath})
+}
+
+func createAssetsHistory(assets []string) (err error) {
 	historyDir, err := getHistoryDir(HistoryOpUpdate)
 	if err != nil {
-		logging.LogErrorf("get history dir failed: %s", err)
-		return
+		return fmt.Errorf("get history directory failed: %w", err)
 	}
 
 	for _, file := range assets {
-		historyPath := filepath.Join(historyDir, "assets", strings.TrimPrefix(file, filepath.Join(util.DataDir, "assets")))
+		assetRelPath, relErr := filepath.Rel(filepath.Join(util.DataDir, "assets"), file)
+		if relErr != nil || assetRelPath == "." || strings.HasPrefix(assetRelPath, ".."+string(filepath.Separator)) {
+			return errors.New("asset path must be under assets")
+		}
+		historyPath := filepath.Join(historyDir, "assets", assetRelPath)
 		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
-			logging.LogErrorf("generate history failed: %s", err)
-			return
+			return fmt.Errorf("create history directory [%s] failed: %w", filepath.Dir(historyPath), err)
 		}
 
 		if err = filelock.Copy(file, historyPath); err != nil {
-			logging.LogErrorf("copy file [%s] to [%s] failed: %s", file, historyPath, err)
-			return
+			return fmt.Errorf("copy asset [%s] to [%s] failed: %w", file, historyPath, err)
 		}
 	}
 

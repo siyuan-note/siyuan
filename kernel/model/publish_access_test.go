@@ -22,8 +22,45 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260721000000-boxid01"
+		docID             = "20260721000001-docid01"
+		protectedPassword = "password"
+	)
+	bt := &treenode.BlockTree{
+		ID:    docID,
+		BoxID: boxID,
+		Path:  "/" + docID + ".sy",
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+
+	if checkBlockTreeAccessableByPublishAccess(c, PublishAccess{{ID: docID, Disable: true}}, bt) {
+		t.Fatal("publish-disabled document should not be accessible")
+	}
+
+	protectedAccess := PublishAccess{{ID: docID, Visible: true, Password: protectedPassword}}
+	if checkBlockTreeAccessableByPublishAccess(c, protectedAccess, bt) {
+		t.Fatal("password-protected document should not be accessible without authorization")
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + docID,
+		Value: util.SHA256Hash([]byte(docID + protectedPassword)),
+	})
+	if !checkBlockTreeAccessableByPublishAccess(c, protectedAccess, bt) {
+		t.Fatal("password-protected document should be accessible after authorization")
+	}
+
+	if !checkBlockTreeAccessableByPublishAccess(c, PublishAccess{{ID: docID, Visible: false}}, bt) {
+		t.Fatal("hidden document should remain directly accessible")
+	}
+}
 
 func TestFilterSearchDocsByPublishAccess(t *testing.T) {
 	const (

@@ -40,6 +40,14 @@ func refreshBacklink(c *gin.Context) {
 	model.FlushTxQueue()
 }
 
+func isBacklinkDocAccessible(c *gin.Context, refTreeID string) bool {
+	if !model.IsReadOnlyRoleContext(c) {
+		return true
+	}
+
+	return model.CheckBlockIdAccessableByPublishAccess(c, model.GetPublishAccess(), refTreeID)
+}
+
 func getBackmentionDoc(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -51,6 +59,13 @@ func getBackmentionDoc(c *gin.Context) {
 
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
+	if !isBacklinkDocAccessible(c, refTreeID) {
+		ret.Data = map[string]any{
+			"backmentions": []*model.Backlink{},
+			"keywords":     []string{},
+		}
+		return
+	}
 	keyword := arg["keyword"].(string)
 	var notebook string
 	if val, ok := arg["notebook"]; ok {
@@ -88,6 +103,13 @@ func getBacklinkDoc(c *gin.Context) {
 
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
+	if !isBacklinkDocAccessible(c, refTreeID) {
+		ret.Data = map[string]any{
+			"backlinks": []*model.Backlink{},
+			"keywords":  []string{},
+		}
+		return
+	}
 	keyword := arg["keyword"].(string)
 	var notebook string
 	if val, ok := arg["notebook"]; ok {

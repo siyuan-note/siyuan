@@ -217,11 +217,16 @@ func GetPathPasswordByPublishAccess(box string, blockPath string, publishAccess 
 }
 
 func CheckBlockIdAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockID string) bool {
-	publishIgnore := GetDisablePublishAccess(publishAccess)
 	bt := treenode.GetBlockTree(blockID)
+	return checkBlockTreeAccessableByPublishAccess(c, publishAccess, bt)
+}
+
+func checkBlockTreeAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) bool {
 	if bt == nil {
 		return false
 	}
+
+	publishIgnore := GetDisablePublishAccess(publishAccess)
 	passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 	return CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
 }

@@ -49,9 +49,9 @@ func TestNewAIReadsAgentStreamIdleTimeoutFromEnvironment(t *testing.T) {
 }
 
 func TestAINormalizeProviderRequestTimeout(t *testing.T) {
-	ai := &AI{Providers: []*Provider{{RequestTimeout: 0}, {RequestTimeout: 30}, {RequestTimeout: 601}}}
+	ai := &AI{Providers: []*Provider{{RequestTimeout: -1}, {RequestTimeout: 0}, {RequestTimeout: 30}, {RequestTimeout: 601}}}
 	ai.Normalize()
-	want := []int{120, 30, 600}
+	want := []int{120, 120, 30, 600}
 	for i, provider := range ai.Providers {
 		if provider.RequestTimeout != want[i] {
 			t.Errorf("provider %d request timeout = %d, want %d", i, provider.RequestTimeout, want[i])

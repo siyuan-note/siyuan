@@ -130,10 +130,36 @@ func fullTextSearchAssetContent(c *gin.Context) {
 	}
 
 	page, pageSize, query, types, method, orderBy := parseSearchAssetContentArgs(arg)
-	assetContents, matchedAssetCount, pageCount := model.FullTextSearchAssetContent(query, types, method, orderBy, page, pageSize)
-	if model.IsReadOnlyRoleContext(c) {
+	if method == 2 && !model.IsAdminRoleContext(c) {
+		ret.Code = -1
+		ret.Msg = "SQL search requires administrator privileges"
+		return
+	}
+
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	searchPage, searchPageSize := page, pageSize
+	if isReadOnlyRole {
+		searchPage = 1
+		searchPageSize = model.Conf.Search.Limit
+	}
+	assetContents, matchedAssetCount, pageCount, err := model.FullTextSearchAssetContent(query, types, method, orderBy, searchPage, searchPageSize)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
 		assetContents = model.FilterAssetContentByPublishAccess(c, publishAccess, assetContents)
+		matchedAssetCount = len(assetContents)
+		pageCount = (matchedAssetCount + pageSize - 1) / pageSize
+		if page > pageCount {
+			assetContents = []*model.AssetContent{}
+		} else {
+			from := (page - 1) * pageSize
+			to := min(from+pageSize, matchedAssetCount)
+			assetContents = assetContents[from:to]
+		}
 	}
 	ret.Data = map[string]any{
 		"assetContents":     assetContents,

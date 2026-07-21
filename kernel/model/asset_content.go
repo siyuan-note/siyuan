@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -68,15 +69,17 @@ func GetAssetContent(id, query string, queryMethod int) (ret *AssetContent) {
 	}
 
 	table := "asset_contents_fts_case_insensitive"
-	filter := " id = '" + id + "'"
+	filter := "id = ?"
+	args := []any{id}
 	if "" != query {
-		filter += " AND `" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
+		filter += " AND `" + table + "` MATCH ?"
+		args = append(args, buildAssetContentColumnFilter()+":("+query+")")
 	}
 
 	projections := "id, name, ext, path, size, updated, " +
 		"highlight(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS content"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + filter
-	assetContents := sql.SelectAssetContentsRawStmt(stmt, 1, 1)
+	assetContents := sql.SelectAssetContentsRawStmtNoParseArgs(stmt, args, 1)
 	results := fromSQLAssetContents(&assetContents)
 	if 1 > len(results) {
 		return
@@ -97,10 +100,8 @@ func GetAssetContentByPath(path string) (ret *AssetContent) {
 	}
 
 	table := "asset_contents_fts_case_insensitive"
-	// path 来自用户输入，拼接进 SQL 前需转义单引号，与现有 SQL 拼接风格一致
-	escapedPath := strings.ReplaceAll(path, "'", "''")
-	stmt := "SELECT id, name, ext, path, size, updated, content FROM " + table + " WHERE path = '" + escapedPath + "' LIMIT 1"
-	assetContents := sql.SelectAssetContentsRawStmt(stmt, 1, 1)
+	stmt := "SELECT id, name, ext, path, size, updated, content FROM " + table + " WHERE path = ? LIMIT 1"
+	assetContents := sql.SelectAssetContentsRawStmtNoParseArgs(stmt, []any{path}, 1)
 	results := fromSQLAssetContents(&assetContents)
 	if 1 > len(results) {
 		return
@@ -113,21 +114,24 @@ func GetAssetContentByPath(path string) (ret *AssetContent) {
 //
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 // orderBy: 0：按相关度降序，1：按相关度升序，2：按更新时间升序，3：按更新时间降序
-func FullTextSearchAssetContent(query string, types map[string]bool, method, orderBy, page, pageSize int) (ret []*AssetContent, matchedAssetCount, pageCount int) {
+func FullTextSearchAssetContent(query string, types map[string]bool, method, orderBy, page, pageSize int) (ret []*AssetContent, matchedAssetCount, pageCount int, err error) {
 	query = strings.TrimSpace(query)
 	orderByClause := buildAssetContentOrderBy(orderBy)
 	switch method {
 	case 1: // 查询语法
-		filter := buildAssetContentTypeFilter(types)
-		ret, matchedAssetCount = fullTextSearchAssetContentByQuerySyntax(query, filter, orderByClause, page, pageSize)
+		filter, filterArgs := buildAssetContentTypeFilter(types)
+		ret, matchedAssetCount = fullTextSearchAssetContentByQuerySyntax(query, filter, filterArgs, orderByClause, page, pageSize)
 	case 2: // SQL
-		ret, matchedAssetCount = searchAssetContentBySQL(query, page, pageSize)
+		ret, matchedAssetCount, err = searchAssetContentBySQL(query, page, pageSize)
+		if err != nil {
+			return
+		}
 	case 3: // 正则表达式
-		typeFilter := buildAssetContentTypeFilter(types)
-		ret, matchedAssetCount = fullTextSearchAssetContentByRegexp(query, typeFilter, orderByClause, page, pageSize)
+		typeFilter, typeArgs := buildAssetContentTypeFilter(types)
+		ret, matchedAssetCount = fullTextSearchAssetContentByRegexp(query, typeFilter, typeArgs, orderByClause, page, pageSize)
 	default: // 关键字
-		filter := buildAssetContentTypeFilter(types)
-		ret, matchedAssetCount = fullTextSearchAssetContentByKeyword(query, filter, orderByClause, page, pageSize)
+		filter, filterArgs := buildAssetContentTypeFilter(types)
+		ret, matchedAssetCount = fullTextSearchAssetContentByKeyword(query, filter, filterArgs, orderByClause, page, pageSize)
 	}
 	pageCount = (matchedAssetCount + pageSize - 1) / pageSize
 
@@ -137,48 +141,46 @@ func FullTextSearchAssetContent(query string, types map[string]bool, method, ord
 	return
 }
 
-func fullTextSearchAssetContentByQuerySyntax(query, typeFilter, orderBy string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
+func fullTextSearchAssetContentByQuerySyntax(query, typeFilter string, typeArgs []any, orderBy string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
 	query = filterQueryInvisibleChars(query)
-	return fullTextSearchAssetContentByFTS(query, typeFilter, orderBy, page, pageSize)
+	return fullTextSearchAssetContentByFTS(query, typeFilter, typeArgs, orderBy, page, pageSize)
 }
 
-func fullTextSearchAssetContentByKeyword(query, typeFilter, orderBy string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
+func fullTextSearchAssetContentByKeyword(query, typeFilter string, typeArgs []any, orderBy string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
 	query = filterQueryInvisibleChars(query)
 	query = stringQuery(query)
-	return fullTextSearchAssetContentByFTS(query, typeFilter, orderBy, page, pageSize)
+	return fullTextSearchAssetContentByFTS(query, typeFilter, typeArgs, orderBy, page, pageSize)
 }
 
-func fullTextSearchAssetContentByRegexp(exp, typeFilter, orderBy string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
+func fullTextSearchAssetContentByRegexp(exp, typeFilter string, typeArgs []any, orderBy string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
 	exp = filterQueryInvisibleChars(exp)
-	fieldFilter := assetContentFieldRegexp(exp)
-	stmt := "SELECT * FROM `asset_contents_fts_case_insensitive` WHERE " + fieldFilter + " AND ext IN " + typeFilter
+	fieldFilter, args := assetContentFieldRegexp(exp)
+	args = append(args, typeArgs...)
+	stmt := "SELECT * FROM `asset_contents_fts_case_insensitive` WHERE " + fieldFilter + typeFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	assetContents := sql.SelectAssetContentsRawStmtNoParse(stmt, Conf.Search.Limit)
+	assetContents := sql.SelectAssetContentsRawStmtNoParseArgs(stmt, args, Conf.Search.Limit)
 	ret = fromSQLAssetContents(&assetContents)
 	if 1 > len(ret) {
 		ret = []*AssetContent{}
 	}
 
-	matchedAssetCount = fullTextSearchAssetContentCountByRegexp(exp, typeFilter)
+	matchedAssetCount = fullTextSearchAssetContentCountByRegexp(exp, typeFilter, typeArgs)
 	return
 }
 
-func assetContentFieldRegexp(exp string) string {
-	buf := bytes.Buffer{}
-	buf.WriteString("(name REGEXP '")
-	buf.WriteString(exp)
-	buf.WriteString("' OR content REGEXP '")
-	buf.WriteString(exp)
-	buf.WriteString("')")
-	return buf.String()
+func assetContentFieldRegexp(exp string) (clause string, args []any) {
+	clause = "(name REGEXP ? OR content REGEXP ?)"
+	args = []any{exp, exp}
+	return
 }
 
-func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string) (matchedAssetCount int) {
+func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string, typeArgs []any) (matchedAssetCount int) {
 	table := "asset_contents_fts_case_insensitive"
-	fieldFilter := assetContentFieldRegexp(exp)
-	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE " + fieldFilter + " AND ext IN " + typeFilter
-	result, _ := sql.QueryAssetContentNoLimit(stmt)
+	fieldFilter, args := assetContentFieldRegexp(exp)
+	args = append(args, typeArgs...)
+	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE " + fieldFilter + typeFilter
+	result, _ := sql.QueryAssetContentNoLimitArgs(stmt, args...)
 	if 1 > len(result) {
 		return
 	}
@@ -186,27 +188,34 @@ func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string) (matchedAss
 	return
 }
 
-func fullTextSearchAssetContentByFTS(query, typeFilter, orderBy string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
+func fullTextSearchAssetContentByFTS(query, typeFilter string, typeArgs []any, orderBy string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
 	table := "asset_contents_fts_case_insensitive"
 	projections := "id, name, ext, path, size, updated, " +
 		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS content"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
-	stmt += ") AND ext IN " + typeFilter
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE `" + table + "` MATCH ?" + typeFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	assetContents := sql.SelectAssetContentsRawStmt(stmt, page, pageSize)
+	args := []any{buildAssetContentColumnFilter() + ":(" + query + ")"}
+	args = append(args, typeArgs...)
+	assetContents := sql.SelectAssetContentsRawStmtNoParseArgs(stmt, args, Conf.Search.Limit)
 	ret = fromSQLAssetContents(&assetContents)
 	if 1 > len(ret) {
 		ret = []*AssetContent{}
 	}
 
-	matchedAssetCount = fullTextSearchAssetContentCount(query, typeFilter)
+	matchedAssetCount = fullTextSearchAssetContentCount(query, typeFilter, typeArgs)
 	return
 }
 
-func searchAssetContentBySQL(stmt string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
+func searchAssetContentBySQL(stmt string, page, pageSize int) (ret []*AssetContent, matchedAssetCount int, err error) {
 	stmt = filterQueryInvisibleChars(stmt)
 	stmt = strings.TrimSpace(stmt)
+	if err = sql.CheckSingleStatement(stmt); err != nil {
+		return
+	}
+	if err = sql.CheckAssetContentReadonlyStatement(stmt); err != nil {
+		return
+	}
 	assetContents := sql.SelectAssetContentsRawStmt(stmt, page, pageSize)
 	ret = fromSQLAssetContents(&assetContents)
 	if 1 > len(ret) {
@@ -222,17 +231,20 @@ func searchAssetContentBySQL(stmt string, page, pageSize int) (ret []*AssetConte
 		return
 	}
 
-	matchedAssetCount = int(result[0]["assets"].(int64))
+	if assets, ok := result[0]["assets"].(int64); ok {
+		matchedAssetCount = int(assets)
+	}
 	return
 }
 
-func fullTextSearchAssetContentCount(query, typeFilter string) (matchedAssetCount int) {
+func fullTextSearchAssetContentCount(query, typeFilter string, typeArgs []any) (matchedAssetCount int) {
 	query = filterQueryInvisibleChars(query)
 
 	table := "asset_contents_fts_case_insensitive"
-	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
-	stmt += ") AND ext IN " + typeFilter
-	result, _ := sql.QueryAssetContentNoLimit(stmt)
+	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE `" + table + "` MATCH ?" + typeFilter
+	args := []any{buildAssetContentColumnFilter() + ":(" + query + ")"}
+	args = append(args, typeArgs...)
+	result, _ := sql.QueryAssetContentNoLimitArgs(stmt, args...)
 	if 1 > len(result) {
 		return
 	}
@@ -271,30 +283,29 @@ func buildAssetContentColumnFilter() string {
 	return "{name content}"
 }
 
-func buildAssetContentTypeFilter(types map[string]bool) string {
+func buildAssetContentTypeFilter(types map[string]bool) (clause string, args []any) {
 	if 0 == len(types) {
-		return ""
+		return
 	}
 
-	var buf bytes.Buffer
-	buf.WriteString("(")
+	var enabledTypes []string
 	for k, enabled := range types {
-		if !enabled {
-			continue
+		if enabled {
+			enabledTypes = append(enabledTypes, k)
 		}
-
-		buf.WriteString("'")
-		buf.WriteString(k)
-		buf.WriteString("',")
 	}
-	if 1 == buf.Len() {
-		buf.WriteString(")")
-		return buf.String()
+	if 0 == len(enabledTypes) {
+		clause = " AND 1 = 0"
+		return
 	}
 
-	buf.Truncate(buf.Len() - 1)
-	buf.WriteString(")")
-	return buf.String()
+	sort.Strings(enabledTypes)
+	placeholders := strings.TrimSuffix(strings.Repeat("?, ", len(enabledTypes)), ", ")
+	clause = " AND ext IN (" + placeholders + ")"
+	for _, assetType := range enabledTypes {
+		args = append(args, assetType)
+	}
+	return
 }
 
 func buildAssetContentOrderBy(orderBy int) string {

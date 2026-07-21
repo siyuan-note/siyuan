@@ -162,8 +162,14 @@ func CheckSingleStatement(stmt string) error {
 //
 // 注意：若字符串里在语法上还有第二条及以后的语句，本函数只针对「首条」对应的 stmt 做判断，
 // 不会拒绝多语句。与 CheckSingleStatement 组合即可得到「单条 + 只读」策略。
+// 仅允许 SELECT 和 WITH 查询，避免 SQLite 将 ATTACH、DETACH 和事务控制语句标记为只读后放行。
 func CheckReadonlyStatement(stmt string) error {
 	return checkReadonlyStatement(stmt, db)
+}
+
+// CheckAssetContentReadonlyStatement 在资源文件内容数据库连接上检查 SQL 是否只读。
+func CheckAssetContentReadonlyStatement(stmt string) error {
+	return checkReadonlyStatement(stmt, assetContentDB)
 }
 
 // CheckReadonlyStatementInBox 在指定笔记本对应的数据库连接上检查 SQL 是否只读。
@@ -180,6 +186,9 @@ func CheckReadonlyStatementInBox(stmt, boxID string) error {
 func checkReadonlyStatement(stmt string, targetDB *sql.DB) error {
 	if strings.TrimSpace(stmt) == "" {
 		return errors.New("SQL statement is empty")
+	}
+	if !isReadonlyQueryStatement(stmt) {
+		return errors.New("SQL statement is not a read-only query")
 	}
 	if nil == targetDB {
 		return errors.New("database is nil")
@@ -211,4 +220,39 @@ func checkReadonlyStatement(stmt string, targetDB *sql.DB) error {
 		}
 		return nil
 	})
+}
+
+// isReadonlyQueryStatement 仅允许查询语句进入 SQLite prepare，提前拒绝会被 sqlite3_stmt_readonly
+// 视为只读的 ATTACH、DETACH 和事务控制语句。WITH 中的写操作仍由 sqlite3_stmt_readonly 拒绝。
+func isReadonlyQueryStatement(stmt string) bool {
+	stmt = strings.TrimSpace(stmt)
+	for "" != stmt {
+		switch {
+		case strings.HasPrefix(stmt, "--"):
+			if lineEnd := strings.IndexByte(stmt, '\n'); 0 <= lineEnd {
+				stmt = strings.TrimSpace(stmt[lineEnd+1:])
+				continue
+			}
+			return false
+		case strings.HasPrefix(stmt, "/*"):
+			if commentEnd := strings.Index(stmt[2:], "*/"); 0 <= commentEnd {
+				stmt = strings.TrimSpace(stmt[commentEnd+4:])
+				continue
+			}
+			return false
+		}
+		break
+	}
+
+	keywordEnd := strings.IndexFunc(stmt, func(r rune) bool {
+		return !unicode.IsLetter(r)
+	})
+	if 0 > keywordEnd {
+		keywordEnd = len(stmt)
+	}
+	switch strings.ToUpper(stmt[:keywordEnd]) {
+	case "SELECT", "WITH":
+		return true
+	}
+	return false
 }

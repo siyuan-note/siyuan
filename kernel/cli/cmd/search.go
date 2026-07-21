@@ -97,7 +97,10 @@ func runAssetSearch(cmd *cobra.Command, query string, method, orderBy, page, pag
 	extFlags, _ := cmd.Flags().GetStringArray("ext")
 	types := stringSliceToMap(extFlags)
 
-	assetContents, matchedAssetCount, pageCount := model.FullTextSearchAssetContent(query, types, method, orderBy, page, pageSize)
+	assetContents, matchedAssetCount, pageCount, err := model.FullTextSearchAssetContent(query, types, method, orderBy, page, pageSize)
+	if err != nil {
+		return err
+	}
 
 	switch outputFormat {
 	case "json":

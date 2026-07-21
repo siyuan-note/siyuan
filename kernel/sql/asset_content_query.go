@@ -28,11 +28,22 @@ import (
 )
 
 func QueryAssetContentNoLimit(stmt string) (ret []map[string]any, err error) {
-	return queryAssetContentRawStmt(stmt, math.MaxInt)
+	if err = CheckSingleStatement(stmt); err != nil {
+		return
+	}
+	if err = CheckAssetContentReadonlyStatement(stmt); err != nil {
+		return
+	}
+	return queryAssetContentRawStmt(stmt, nil, math.MaxInt)
 }
 
-func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]any, err error) {
-	rows, err := queryAssetContent(stmt)
+// QueryAssetContentNoLimitArgs 使用绑定参数查询资源文件内容数据库。
+func QueryAssetContentNoLimitArgs(stmt string, args ...any) (ret []map[string]any, err error) {
+	return queryAssetContentRawStmt(stmt, args, math.MaxInt)
+}
+
+func queryAssetContentRawStmt(stmt string, args []any, limit int) (ret []map[string]any, err error) {
+	rows, err := queryAssetContent(stmt, args...)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
 			return
@@ -75,9 +86,12 @@ func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]any, err
 }
 
 func SelectAssetContentsRawStmt(stmt string, page, limit int) (ret []*AssetContent) {
+	if CheckSingleStatement(stmt) != nil || CheckAssetContentReadonlyStatement(stmt) != nil {
+		return
+	}
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if err != nil {
-		return selectAssetContentsRawStmt(stmt, limit)
+		return selectAssetContentsRawStmt(stmt, nil, limit)
 	}
 
 	switch parsedStmt.(type) {
@@ -139,11 +153,19 @@ func SelectAssetContentsRawStmt(stmt string, page, limit int) (ret []*AssetConte
 }
 
 func SelectAssetContentsRawStmtNoParse(stmt string, limit int) (ret []*AssetContent) {
-	return selectAssetContentsRawStmt(stmt, limit)
+	if CheckSingleStatement(stmt) != nil || CheckAssetContentReadonlyStatement(stmt) != nil {
+		return
+	}
+	return selectAssetContentsRawStmt(stmt, nil, limit)
 }
 
-func selectAssetContentsRawStmt(stmt string, limit int) (ret []*AssetContent) {
-	rows, err := queryAssetContent(stmt)
+// SelectAssetContentsRawStmtNoParseArgs 使用绑定参数查询资源文件内容，并保留调用方构造的 SQL。
+func SelectAssetContentsRawStmtNoParseArgs(stmt string, args []any, limit int) (ret []*AssetContent) {
+	return selectAssetContentsRawStmt(stmt, args, limit)
+}
+
+func selectAssetContentsRawStmt(stmt string, args []any, limit int) (ret []*AssetContent) {
+	rows, err := queryAssetContent(stmt, args...)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
 			return

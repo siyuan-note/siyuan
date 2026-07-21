@@ -221,7 +221,10 @@ func assetSearch(args map[string]any) (CallToolResult, error) {
 		orderBy = int(v)
 	}
 
-	assetContents, matchedAssetCount, pageCount := model.FullTextSearchAssetContent(query, types, method, orderBy, page, pageSize)
+	assetContents, matchedAssetCount, pageCount, err := model.FullTextSearchAssetContent(query, types, method, orderBy, page, pageSize)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
 
 	if matchedAssetCount == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "No asset content results found."}}}, nil

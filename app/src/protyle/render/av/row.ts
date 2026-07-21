@@ -742,12 +742,15 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     });
     rowElements.forEach(item => {
         const blockValue = genCellValueByElement("block", item.querySelector('.av__cell[data-dtype="block"]'));
+        const itemID = Lute.NewNodeID();
+        // 撤销会使用新的条目 ID 恢复该行，重做时需要同时删除这个新条目。
+        blockIds.push(itemID);
         undoOperations.push({
             action: "insertAttrViewBlock",
             avID,
             previousID: item.previousElementSibling?.getAttribute("data-id") || "",
             srcs: [{
-                itemID: Lute.NewNodeID(),
+                itemID,
                 id: item.getAttribute("data-id"),
                 isDetached: blockValue.isDetached,
                 content: blockValue.block.content

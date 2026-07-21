@@ -1,5 +1,6 @@
 import {stopScrollAnimation} from "../boot/globalEvent/dragover";
 import {Constants} from "../constants";
+import {isInAndroid} from "../plugin/platformUtils";
 
 // 长按门槛共享状态：触摸后短时间内滑动视为滚动放行原生滚动，长按静止后再滑动才进入拖拽
 interface LongPressGate {
@@ -47,96 +48,28 @@ const shouldYieldToScroll = (gate: LongPressGate, clientX: number, clientY: numb
     return false;
 };
 
-interface TouchDragState {
+interface DragPoint {
+    clientX: number;
+    clientY: number;
+}
+
+interface DragState {
     dataTransfer: DataTransfer | null;
     ghostElement: HTMLElement | null;
     isDragging: boolean;
     draggableElement: HTMLElement;
-    editorElement: HTMLElement | null;
+    inputType: "touch" | "pointer";
+    pointerId?: number;
+    restoreDraggable?: boolean;
 }
 
-let dragState: (TouchDragState & LongPressGate) | null = null;
+let dragState: (DragState & LongPressGate) | null = null;
 let lastDragOverElement: Element | null = null;
 
 let manualState: (LongPressGate) | null = null;
 
 // 最近一次 pointerdown 的输入源，pointerType 是唯一可靠区分 mouse/touch/pen 的字段
 let lastPointerType: string = "";
-
-const initDragEventDebug = () => {
-    if (window.siyuan.config.system.container !== "android") {
-        return;
-    }
-
-    let sequence = 0;
-    const startTime = performance.now();
-    const moveLogTimes: Record<string, number> = {};
-    const moveEventTypes = new Set(["pointermove", "touchmove", "mousemove", "drag", "dragover"]);
-    const eventTypes = [
-        "pointerdown", "pointermove", "pointerup", "pointercancel",
-        "touchstart", "touchmove", "touchend", "touchcancel",
-        "mousedown", "mousemove", "mouseup",
-        "dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend",
-    ];
-
-    console.log(`[drag-debug] ${JSON.stringify({
-        type: "init",
-        version: Constants.SIYUAN_VERSION,
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        maxTouchPoints: navigator.maxTouchPoints,
-    })}`);
-
-    eventTypes.forEach((type) => {
-        document.addEventListener(type, (event: Event) => {
-            const now = performance.now();
-            if (moveEventTypes.has(type) && now - (moveLogTimes[type] || 0) < 50) {
-                return;
-            }
-            moveLogTimes[type] = now;
-
-            const eventSequence = ++sequence;
-            queueMicrotask(() => {
-                const pointerEvent = event instanceof PointerEvent ? event : undefined;
-                const touchEvent = event instanceof TouchEvent ? event : undefined;
-                const mouseEvent = event instanceof MouseEvent ? event : undefined;
-                const dragEvent = event instanceof DragEvent ? event : undefined;
-                const touch = touchEvent?.touches[0] || touchEvent?.changedTouches[0];
-                const target = event.target instanceof HTMLElement ? event.target : undefined;
-                const draggable = target?.closest<HTMLElement>('[draggable="true"]');
-                const dataTransfer = dragEvent?.dataTransfer;
-
-                console.log(`[drag-debug] ${JSON.stringify({
-                    sequence: eventSequence,
-                    elapsed: Math.round(now - startTime),
-                    type: event.type,
-                    trusted: event.isTrusted,
-                    defaultPrevented: event.defaultPrevented,
-                    pointerType: pointerEvent?.pointerType,
-                    pointerId: pointerEvent?.pointerId,
-                    button: mouseEvent?.button,
-                    buttons: mouseEvent?.buttons,
-                    touchCount: touchEvent?.touches.length,
-                    x: touch?.clientX ?? mouseEvent?.clientX,
-                    y: touch?.clientY ?? mouseEvent?.clientY,
-                    radiusX: touch?.radiusX,
-                    radiusY: touch?.radiusY,
-                    targetTag: target?.tagName,
-                    targetClass: target?.className,
-                    targetType: target?.dataset.type,
-                    targetNodeId: target?.dataset.nodeId,
-                    draggableTag: draggable?.tagName,
-                    draggableClass: draggable?.className,
-                    draggableType: draggable?.dataset.type,
-                    dataTypes: dataTransfer ? Array.from(dataTransfer.types) : undefined,
-                    effectAllowed: dataTransfer?.effectAllowed,
-                    dropEffect: dataTransfer?.dropEffect,
-                    touchDragActive: window.siyuan.touchDragActive,
-                })}`);
-            });
-        }, {capture: true, passive: true});
-    });
-};
 
 // 判定当前输入源是否为鼠标：部分平板 WebView 会把鼠标合成成 touch 事件
 // pointerType === "mouse" 且接触面积为 0（radiusX/radiusY 为 0）时判定为鼠标
@@ -155,34 +88,26 @@ export const isLastPointerMouse = (): boolean => {
 
 // 触摸起始：先判断是否命中原生 Drag API（draggable="true"），命中则走原生路径；否则判断手动 mousedown 白名单
 const handleTouchStart = (e: TouchEvent) => {
-    if (dragState || manualState) return;
     if (e.touches.length !== 1) return;
 
     const target = e.target as HTMLElement;
+    const touch = e.touches[0];
+
+    // 部分 Android WebView 会在鼠标 Pointer 事件后继续合成 Touch 事件，此时沿用候选状态并切换为 Touch 驱动。
+    if (dragState?.inputType === "pointer" && isMouseInput(touch)) {
+        dragState.inputType = "touch";
+        dragState.startX = touch.clientX;
+        dragState.startY = touch.clientY;
+        dragState.touchStartTime = Date.now();
+        return;
+    }
+    if (dragState || manualState) return;
 
     // 原生 Drag 路径：元素有 draggable="true" 祖先（如文件树、列表标记、AV 行拖拽），优先走 Drag API
     if (!target.classList.contains("av__widthdrag")) {
         const draggable = getDraggableAncestor(target);
         if (draggable) {
-            const touch = e.touches[0];
-            dragState = {
-                dataTransfer: null,
-                ghostElement: null,
-                isDragging: false,
-                draggableElement: draggable,
-                editorElement: null,
-                startX: touch.clientX,
-                startY: touch.clientY,
-                touchStartTime: Date.now(),
-                // 文件树、画廊、页签和列表操作需长按，以避免与滚动冲突
-                requireLongPress: draggable.closest(".sy__file") !== null ||
-                    draggable.closest(".sy__outline") !== null ||
-                    draggable.closest(".av__gallery-item") !== null ||
-                    draggable.closest(".layout-tab-bar") !== null ||
-                    draggable.closest(".protyle-action") !== null,
-                longPressCancelled: false,
-                isMouse: isMouseInput(touch),
-            };
+            dragState = createDragState(draggable, touch, "touch", isMouseInput(touch));
             return;
         }
     }
@@ -203,7 +128,7 @@ const handleTouchStart = (e: TouchEvent) => {
         !target.closest(".layout__dockresize") &&
         !target.closest(".layout__dockresize--lr") &&
         !target.closest(".search__drag") &&
-        // Editor-internal resize handles (not native Drag API)
+        // 编辑器内部调整大小的控件不使用原生 Drag API。
         !target.closest(".av__widthdrag") &&
         !target.closest(".av__drag-fill") &&
         !target.closest(".protyle-action__drag") &&
@@ -212,7 +137,6 @@ const handleTouchStart = (e: TouchEvent) => {
         !target.closest(".protyle-background__img") &&
         !target.closest(".b3-chip")) return;
 
-    const touch = e.touches[0];
     const mouseEvent = new MouseEvent("mousedown", {
         bubbles: true,
         cancelable: true,
@@ -243,11 +167,11 @@ const handleTouchMove = (e: TouchEvent) => {
                 return;
             }
             e.preventDefault();
-            startTouchDrag(touch);
+            startBridgeDrag(touch);
             return;
         }
         e.preventDefault();
-        continueTouchDrag(touch);
+        continueBridgeDrag(touch);
         return;
     }
 
@@ -280,7 +204,7 @@ const handleTouchEnd = (e: TouchEvent) => {
     if (dragState) {
         if (dragState.isDragging) {
             e.preventDefault();
-            endTouchDrag(e.changedTouches[0]);
+            endBridgeDrag(e.changedTouches[0]);
         }
         cleanupDrag();
         return;
@@ -290,10 +214,10 @@ const handleTouchEnd = (e: TouchEvent) => {
     cancelManualTouch();
 };
 
-const getDraggableAncestor = (el: HTMLElement): HTMLElement | null => {
-    let current: HTMLElement | null = el;
+const getDraggableAncestor = (el: Element): HTMLElement | null => {
+    let current: HTMLElement | null = el instanceof HTMLElement ? el : el.parentElement;
     while (current) {
-        if (current.getAttribute?.("draggable") === "true") {
+        if (current.getAttribute("draggable") === "true") {
             return current;
         }
         if (current === document.body) break;
@@ -302,7 +226,101 @@ const getDraggableAncestor = (el: HTMLElement): HTMLElement | null => {
     return null;
 };
 
-const getElementUnderTouch = (clientX: number, clientY: number): Element | null => {
+const createDragState = (draggableElement: HTMLElement, point: DragPoint, inputType: "touch" | "pointer",
+                         isMouse: boolean, pointerId?: number): DragState & LongPressGate => {
+    return {
+        dataTransfer: null,
+        ghostElement: null,
+        isDragging: false,
+        draggableElement,
+        inputType,
+        pointerId,
+        startX: point.clientX,
+        startY: point.clientY,
+        touchStartTime: Date.now(),
+        // 文件树、画廊、页签和列表操作需长按，以避免与滚动冲突。
+        requireLongPress: draggableElement.closest(".sy__file") !== null ||
+            draggableElement.closest(".sy__outline") !== null ||
+            draggableElement.closest(".av__gallery-item") !== null ||
+            draggableElement.closest(".layout-tab-bar") !== null ||
+            draggableElement.closest(".protyle-action") !== null,
+        longPressCancelled: false,
+        isMouse,
+    };
+};
+
+let suppressMouseClick = false;
+
+const handlePointerDown = (event: PointerEvent) => {
+    if (event.pointerType !== "mouse" || event.button !== 0 || dragState || manualState ||
+        !(event.target instanceof Element) || event.target.closest(".av__widthdrag")) {
+        return;
+    }
+
+    const draggable = getDraggableAncestor(event.target);
+    if (!draggable) {
+        return;
+    }
+
+    dragState = createDragState(draggable, event, "pointer", true, event.pointerId);
+    // Android WebView 会在原生 dragstart 后取消 Pointer 流，临时关闭 draggable 以保留 pointermove 和 pointerup。
+    draggable.setAttribute("draggable", "false");
+    dragState.restoreDraggable = true;
+};
+
+const handlePointerMove = (event: PointerEvent) => {
+    if (dragState?.inputType !== "pointer" || dragState.pointerId !== event.pointerId) {
+        return;
+    }
+    if ((event.buttons & 1) === 0) {
+        cleanupDrag();
+        return;
+    }
+    if (!dragState.isDragging) {
+        if (shouldYieldToScroll(dragState, event.clientX, event.clientY)) {
+            return;
+        }
+        event.preventDefault();
+        startBridgeDrag(event);
+        return;
+    }
+    event.preventDefault();
+    continueBridgeDrag(event);
+};
+
+const handlePointerUp = (event: PointerEvent) => {
+    if (dragState?.inputType !== "pointer" || dragState.pointerId !== event.pointerId) {
+        return;
+    }
+    const isDragging = dragState.isDragging;
+    if (isDragging) {
+        event.preventDefault();
+        endBridgeDrag(event);
+    }
+    cleanupDrag();
+    if (isDragging) {
+        suppressMouseClick = true;
+        setTimeout(() => {
+            suppressMouseClick = false;
+        });
+    }
+};
+
+const handlePointerCancel = (event: PointerEvent) => {
+    if (dragState?.inputType === "pointer" && dragState.pointerId === event.pointerId) {
+        cleanupDrag();
+    }
+};
+
+const handleMouseClick = (event: MouseEvent) => {
+    if (suppressMouseClick) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        suppressMouseClick = false;
+    }
+};
+
+const getElementUnderPoint = (clientX: number, clientY: number): Element | null => {
     if (dragState?.ghostElement) {
         dragState.ghostElement.style.display = "none";
     }
@@ -315,7 +333,7 @@ const getElementUnderTouch = (clientX: number, clientY: number): Element | null 
 
 const positionGhost = (clientX: number, clientY: number) => {
     if (dragState?.ghostElement) {
-        // Offset ghost so it's visible beside the finger, not hidden under it
+        // 将拖拽影像偏移到指针旁边，避免被手指遮挡。
         dragState.ghostElement.style.left = `${clientX + 12}px`;
         dragState.ghostElement.style.top = `${clientY + 12}px`;
     }
@@ -327,12 +345,12 @@ const clearDragoverClasses = () => {
     });
 };
 
-const startTouchDrag = (touch: Touch) => {
+const startBridgeDrag = (touch: DragPoint) => {
     const dt = new DataTransfer();
     dragState.dataTransfer = dt;
     dragState.isDragging = true;
 
-    dragState.editorElement = dragState.draggableElement.closest(".protyle-wysiwyg") as HTMLElement;
+    const editorElement = dragState.draggableElement.closest(".protyle-wysiwyg") as HTMLElement;
 
     window.siyuan.touchDragActive = true;
     window.siyuan.touchDragGhost = null;
@@ -351,12 +369,12 @@ const startTouchDrag = (touch: Touch) => {
     if (dragState.ghostElement) {
         dragState.ghostElement.style.pointerEvents = "none";
         dragState.ghostElement.style.zIndex = (++window.siyuan.zIndex).toString();
-        // Position first, then show — avoids flash at wrong position
+        // 先定位再显示，避免拖拽影像在错误位置闪现。
         positionGhost(touch.clientX, touch.clientY);
         dragState.ghostElement.style.opacity = "0.6";
     }
 
-    if (dragState.editorElement) {
+    if (editorElement) {
         const dragEnterEvent = new DragEvent("dragenter", {
             bubbles: false,
             cancelable: true,
@@ -365,18 +383,16 @@ const startTouchDrag = (touch: Touch) => {
             dataTransfer: dt,
             view: window,
         });
-        dragState.editorElement.dispatchEvent(dragEnterEvent);
+        editorElement.dispatchEvent(dragEnterEvent);
     }
 };
 
-const continueTouchDrag = (touch: Touch) => {
+const continueBridgeDrag = (touch: DragPoint) => {
     if (!dragState.isDragging) return;
 
-    const elementUnderTouch = getElementUnderTouch(touch.clientX, touch.clientY);
+    const elementUnderTouch = getElementUnderPoint(touch.clientX, touch.clientY);
 
-    // Track dragenter / dragleave across container-level elements.
-    // Only dispatch when element's parent changes, to avoid flickering
-    // when moving between siblings of the same parent.
+    // 仅在目标元素的父容器变化时派发 dragenter 和 dragleave，避免同级元素之间移动时闪烁。
     if (elementUnderTouch !== lastDragOverElement) {
         const prevContainer = lastDragOverElement?.parentElement;
         const currContainer = elementUnderTouch?.parentElement;
@@ -422,10 +438,10 @@ const continueTouchDrag = (touch: Touch) => {
     positionGhost(touch.clientX, touch.clientY);
 };
 
-const endTouchDrag = (touch: Touch) => {
+const endBridgeDrag = (touch: DragPoint) => {
     if (!dragState.isDragging) return;
 
-    const elementUnderTouch = getElementUnderTouch(touch.clientX, touch.clientY);
+    const elementUnderTouch = getElementUnderPoint(touch.clientX, touch.clientY);
     if (elementUnderTouch) {
         const dropEvent = new DragEvent("drop", {
             bubbles: true,
@@ -447,14 +463,15 @@ const endTouchDrag = (touch: Touch) => {
         view: window,
     });
     dragState.draggableElement.dispatchEvent(dragEndEvent);
-
-    clearDragoverClasses();
 };
 
 const cleanupDrag = () => {
     stopScrollAnimation();
     clearDragoverClasses();
 
+    if (dragState?.restoreDraggable) {
+        dragState.draggableElement.setAttribute("draggable", "true");
+    }
     if (dragState?.ghostElement) {
         dragState.ghostElement.remove();
     }
@@ -482,13 +499,24 @@ export const cancelManualTouch = () => {
 };
 
 export const initTouchDragBridge = () => {
-    // 临时记录 Android 外接鼠标的完整事件链，用于定位原生拖拽未触发 drop 的问题。
-    initDragEventDebug();
+    // 所有平台都需记录输入源，供 Touch 回调识别鼠标合成事件。
+    document.addEventListener("pointerdown", (event: PointerEvent) => {
+        lastPointerType = event.pointerType;
+    }, {capture: true, passive: true});
 
-    // 记录输入源，供 touchstart 回调区分鼠标合成 touch 的场景（部分平板把鼠标合成成 touch 事件）
-    document.addEventListener("pointerdown", (e: PointerEvent) => {
-        lastPointerType = e.pointerType;
-    }, {passive: true});
+    if (isInAndroid()) {
+        // Android 外接鼠标由 Pointer 路径驱动，避免原生 Drag API 在 dragstart 后取消事件流且不派发 drop。
+        document.addEventListener("pointerdown", handlePointerDown, {capture: true, passive: true});
+        document.addEventListener("pointermove", handlePointerMove, {capture: true, passive: false});
+        document.addEventListener("pointerup", handlePointerUp, {capture: true, passive: false});
+        document.addEventListener("pointercancel", handlePointerCancel, {capture: true, passive: true});
+        document.addEventListener("click", handleMouseClick, {capture: true, passive: false});
+        window.addEventListener("blur", () => {
+            if (dragState?.inputType === "pointer") {
+                cleanupDrag();
+            }
+        });
+    }
 
     // 触摸事件桥接：原生 Drag API（draggable="true"）与手动 mousedown 拖拽（dock/outline/resize 把手）统一入口
     document.addEventListener("touchstart", handleTouchStart, {passive: false});

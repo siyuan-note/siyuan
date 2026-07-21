@@ -1,6 +1,7 @@
 const RTL_RE = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF\u{10D00}-\u{10D3F}\u{1E900}-\u{1E95F}]/u;
 const LETTER_RE = /\p{Letter}/u;
 
+const RTL_MIN_LETTERS = 2;
 const RTL_RATIO_THRESHOLD = 0.35;
 const AUTO_DIRECTION_TYPES = new Set(["NodeParagraph", "NodeHeading", "NodeListItem"]);
 const SKIP_TEXT_SELECTOR = '[data-type~="code"], [data-type~="kbd"], [data-type~="inline-math"], code, pre, kbd, samp';
@@ -43,7 +44,11 @@ export const classifyTextDirection = (value: string): TAutoTextDirection => {
     if (strongCount === 0) {
         return "neutral";
     }
-    return rtlCount > 0 && rtlCount / strongCount >= RTL_RATIO_THRESHOLD ? "rtl" : "ltr";
+    const ratio = rtlCount / strongCount;
+    if (rtlCount >= RTL_MIN_LETTERS && ratio >= RTL_RATIO_THRESHOLD) {
+        return "rtl";
+    }
+    return ltrCount > 0 ? "ltr" : "neutral";
 };
 
 const isAutoDirectionBlock = (block: Element): block is HTMLElement => {

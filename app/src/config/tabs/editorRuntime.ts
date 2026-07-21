@@ -3,14 +3,12 @@ import {getAllEditor} from "../../layout/getAll";
 import {setInlineStyle} from "../../util/assets";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {resize} from "../../protyle/util/resize";
-import {syncAutoDirectionRuntime} from "../../protyle/util/autoDirection";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 
 const applyEditorConfig = (data: Config.IEditor) => {
     window.siyuan.config.editor = data;
     getAllEditor().forEach((editorItem) => {
         const protyle = editorItem.protyle;
-        syncAutoDirectionRuntime(protyle);
         reloadProtyle(protyle, false);
         let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
         if (!isFullWidth) {

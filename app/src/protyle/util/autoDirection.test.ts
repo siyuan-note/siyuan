@@ -18,6 +18,8 @@ describe("classifyTextDirection", () => {
 
     it("keeps numbers, punctuation, whitespace, and symbols neutral", () => {
         assert.equal(classifyTextDirection("12345 - 67890 !!!"), "neutral");
+        assert.equal(classifyTextDirection("۱۲۳۴۵، ۶۷۸۹۰ !!!"), "neutral");
+        assert.equal(classifyTextDirection("١٢٣٤٥، ٦٧٨٩٠ !!!"), "neutral");
         assert.equal(classifyTextDirection("$100 + €20"), "neutral");
     });
 
@@ -29,6 +31,7 @@ describe("classifyTextDirection", () => {
 
     it("does not let leading numbers decide the direction", () => {
         assert.equal(classifyTextDirection("2026 سلام دنیا"), "rtl");
+        assert.equal(classifyTextDirection("۲۰۲۶ سلام دنیا"), "rtl");
         assert.equal(classifyTextDirection("2026 Hello world"), "ltr");
     });
 });

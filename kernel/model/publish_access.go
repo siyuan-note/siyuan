@@ -602,23 +602,18 @@ func FilterEmbedBlocksByPublishAccess(c *gin.Context, publishAccess PublishAcces
 		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
 		accessible := CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) &&
 			(password == "" || CheckPublishAuthCookie(c, passwordID, password))
-		if accessible {
-			ret = append(ret, &EmbedBlock{
-				Block: &Block{
-					ID:      block.ID,
-					Content: block.Content,
-				},
-				BlockPaths:          embedBlock.BlockPaths,
-				AllowChildOperation: embedBlock.AllowChildOperation,
-			})
+		if !accessible {
+			// 不返回不可访问的查询结果，避免泄漏结果数量、顺序和访问控制边界。
 			continue
 		}
 
 		ret = append(ret, &EmbedBlock{
 			Block: &Block{
-				Content: FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, block.Content, false),
+				ID:      block.ID,
+				Content: block.Content,
 			},
-			BlockPaths: []*BlockPath{},
+			BlockPaths:          embedBlock.BlockPaths,
+			AllowChildOperation: embedBlock.AllowChildOperation,
 		})
 	}
 	return

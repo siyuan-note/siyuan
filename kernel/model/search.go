@@ -226,15 +226,7 @@ func GetEmbedBlockForPublish(embedBlockID string, includeIDs []string, headingMo
 }
 
 func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb, updateIndex bool) (ret []*EmbedBlock) {
-	var validIDs []string
-	for _, id := range includeIDs {
-		if ast.IsNodeIDPattern(id) {
-			validIDs = append(validIDs, id)
-		}
-		if 1024 <= len(validIDs) {
-			break
-		}
-	}
+	validIDs := validEmbedBlockIDs(includeIDs, 1024)
 	sqlBlocks := sql.GetBlocks(validIDs)
 	var existingBlocks []*sql.Block
 	for _, block := range sqlBlocks {
@@ -254,6 +246,27 @@ func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, br
 	})
 
 	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, "", sqlBlocks, updateIndex)
+	return
+}
+
+func validEmbedBlockIDs(includeIDs []string, limit int) (ret []string) {
+	if 1 > limit {
+		return
+	}
+	seen := map[string]struct{}{}
+	for _, id := range includeIDs {
+		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		ret = append(ret, id)
+		if limit <= len(ret) {
+			break
+		}
+	}
 	return
 }
 

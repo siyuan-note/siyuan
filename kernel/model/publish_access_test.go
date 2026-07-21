@@ -95,3 +95,35 @@ func TestFilterEmbedBlocksByPublishAccessRemovesInternalFields(t *testing.T) {
 		t.Fatalf("embed rendering metadata was not preserved: %+v", filtered[0])
 	}
 }
+
+func TestFilterEmbedBlocksByPublishAccessDropsInaccessibleResults(t *testing.T) {
+	const (
+		boxID             = "20260720000000-boxid01"
+		hiddenDocID       = "20260720000002-hiddend"
+		protectedDocID    = "20260720000003-protect"
+		protectedPassword = "password"
+	)
+	publishAccess := PublishAccess{
+		{ID: hiddenDocID, Disable: true},
+		{ID: protectedDocID, Visible: true, Password: protectedPassword},
+	}
+	embedBlocks := []*EmbedBlock{
+		{Block: &Block{ID: "20260720000004-hidden1", Box: boxID, Path: "/" + hiddenDocID + ".sy", Content: "hidden"}},
+		{Block: &Block{ID: "20260720000005-protect", Box: boxID, Path: "/" + protectedDocID + ".sy", Content: "protected"}},
+	}
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	if filtered := FilterEmbedBlocksByPublishAccess(c, publishAccess, embedBlocks); 0 != len(filtered) {
+		t.Fatalf("不可访问的嵌入块结果不应返回：%+v", filtered)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedDocID,
+		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+	})
+	filtered := FilterEmbedBlocksByPublishAccess(c, publishAccess, embedBlocks)
+	if 1 != len(filtered) || "20260720000005-protect" != filtered[0].Block.ID {
+		t.Fatalf("密码验证后应仅返回已授权结果：%+v", filtered)
+	}
+}

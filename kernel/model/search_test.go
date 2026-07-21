@@ -17,9 +17,20 @@
 package model
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
+
+func TestValidEmbedBlockIDs(t *testing.T) {
+	firstID := "20260721120000-block01"
+	secondID := "20260721120001-block02"
+	thirdID := "20260721120002-block03"
+	ids := validEmbedBlockIDs([]string{firstID, "invalid", firstID, secondID, thirdID}, 2)
+	if !slices.Equal(ids, []string{firstID, secondID}) {
+		t.Fatalf("嵌入块 ID 应保持顺序、去重并限制数量：%v", ids)
+	}
+}
 
 // TestIsValidSearchBoxPath 覆盖搜索入参的笔记本 ID 与文档路径校验，阻止 SQL 元字符进入语句拼接。
 // 回归用例参考 /api/search/fullTextSearchBlock 的 SQL 注入报告（paths[] 投毒）。

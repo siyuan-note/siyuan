@@ -940,11 +940,19 @@ export class Files extends Model {
                     this.selectItem(data.data.box.id, data.data.path);
                     break;
                 case "renamenotebook": {
+                    const name = data.data.name;
+                    if (typeof name !== "string") {
+                        break;
+                    }
                     const notebook = window.siyuan.notebooks.find((item) => item.id === data.data.box);
                     if (notebook) {
-                        notebook.name = data.data.name;
+                        notebook.name = name;
                     }
-                    this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = escapeHtml(data.data.name);
+                    const textElement = this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`) ||
+                        this.closeElement.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`);
+                    if (textElement) {
+                        textElement.textContent = name;
+                    }
                     break;
                 }
                 case "rename":

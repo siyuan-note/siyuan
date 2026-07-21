@@ -16,6 +16,7 @@ interface IAutoDirectionRuntime {
     observer: MutationObserver;
     directions: Map<string, TResolvedTextDirection>;
     queue: Set<HTMLElement>;
+    stylesDirty: boolean;
     frame?: number;
 }
 
@@ -100,7 +101,7 @@ const renderStyles = (runtime: IAutoDirectionRuntime) => {
 const updateBlockDirection = (runtime: IAutoDirectionRuntime, block: HTMLElement, deferRender = false) => {
     const id = block.getAttribute("data-node-id");
     if (!id || !isAutoDirectionBlock(block)) {
-        return;
+        return false;
     }
 
     const direction = classifyTextDirection(extractDirectionalText(block));
@@ -111,9 +112,11 @@ const updateBlockDirection = (runtime: IAutoDirectionRuntime, block: HTMLElement
         runtime.directions.set(id, direction);
     }
 
-    if (!deferRender && previous !== runtime.directions.get(id)) {
+    const changed = previous !== runtime.directions.get(id);
+    if (changed && !deferRender) {
         renderStyles(runtime);
     }
+    return changed;
 };
 
 const queueBlockAndParents = (runtime: IAutoDirectionRuntime, element: Element | null) => {
@@ -137,13 +140,13 @@ const queueTree = (runtime: IAutoDirectionRuntime, element: Element) => {
 
 const removeTree = (runtime: IAutoDirectionRuntime, element: Element) => {
     const id = element.getAttribute("data-node-id");
-    if (id) {
-        runtime.directions.delete(id);
+    if (id && runtime.directions.delete(id)) {
+        runtime.stylesDirty = true;
     }
     element.querySelectorAll<HTMLElement>("[data-node-id]").forEach((block) => {
         const childId = block.getAttribute("data-node-id");
-        if (childId) {
-            runtime.directions.delete(childId);
+        if (childId && runtime.directions.delete(childId)) {
+            runtime.stylesDirty = true;
         }
     });
 };
@@ -154,13 +157,17 @@ const scheduleFlush = (runtime: IAutoDirectionRuntime) => {
     }
     runtime.frame = requestAnimationFrame(() => {
         runtime.frame = undefined;
+        let stylesChanged = runtime.stylesDirty;
+        runtime.stylesDirty = false;
         runtime.queue.forEach((block) => {
-            if (block.isConnected) {
-                updateBlockDirection(runtime, block, true);
+            if (block.isConnected && updateBlockDirection(runtime, block, true)) {
+                stylesChanged = true;
             }
         });
         runtime.queue.clear();
-        renderStyles(runtime);
+        if (stylesChanged) {
+            renderStyles(runtime);
+        }
     });
 };
 
@@ -203,17 +210,18 @@ const startAutoDirectionRuntime = (protyle: IProtyle) => {
     runtime.styleElement = styleElement;
     runtime.directions = new Map();
     runtime.queue = new Set();
+    runtime.stylesDirty = false;
     runtime.observer = new MutationObserver((mutations) => {
-        let changed = false;
+        let shouldFlush = false;
         mutations.forEach((mutation) => {
             if (mutation.type === "characterData") {
                 queueBlockAndParents(runtime, mutation.target.parentElement);
-                changed = true;
+                shouldFlush = true;
                 return;
             }
             if (mutation.type === "attributes") {
                 queueBlockAndParents(runtime, mutation.target as Element);
-                changed = true;
+                shouldFlush = true;
                 return;
             }
             queueBlockAndParents(runtime, mutation.target as Element);
@@ -229,9 +237,9 @@ const startAutoDirectionRuntime = (protyle: IProtyle) => {
                     removeTree(runtime, node as Element);
                 }
             });
-            changed = true;
+            shouldFlush = true;
         });
-        if (changed) {
+        if (shouldFlush) {
             scheduleFlush(runtime);
         }
     });
@@ -258,6 +266,10 @@ const stopAutoDirectionRuntime = (protyle: IProtyle) => {
     runtime.styleElement.remove();
     protyle.element.removeAttribute(SCOPE_ATTRIBUTE);
     runtimes.delete(protyle.wysiwyg.element);
+};
+
+export const destroyAutoDirectionRuntime = (protyle: IProtyle) => {
+    stopAutoDirectionRuntime(protyle);
 };
 
 export const syncAutoDirectionRuntime = (protyle: IProtyle) => {

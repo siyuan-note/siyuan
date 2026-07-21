@@ -63,6 +63,81 @@ let manualState: (LongPressGate) | null = null;
 // 最近一次 pointerdown 的输入源，pointerType 是唯一可靠区分 mouse/touch/pen 的字段
 let lastPointerType: string = "";
 
+const initDragEventDebug = () => {
+    if (window.siyuan.config.system.container !== "android") {
+        return;
+    }
+
+    let sequence = 0;
+    const startTime = performance.now();
+    const moveLogTimes: Record<string, number> = {};
+    const moveEventTypes = new Set(["pointermove", "touchmove", "mousemove", "drag", "dragover"]);
+    const eventTypes = [
+        "pointerdown", "pointermove", "pointerup", "pointercancel",
+        "touchstart", "touchmove", "touchend", "touchcancel",
+        "mousedown", "mousemove", "mouseup",
+        "dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend",
+    ];
+
+    console.log(`[drag-debug] ${JSON.stringify({
+        type: "init",
+        version: Constants.SIYUAN_VERSION,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        maxTouchPoints: navigator.maxTouchPoints,
+    })}`);
+
+    eventTypes.forEach((type) => {
+        document.addEventListener(type, (event: Event) => {
+            const now = performance.now();
+            if (moveEventTypes.has(type) && now - (moveLogTimes[type] || 0) < 50) {
+                return;
+            }
+            moveLogTimes[type] = now;
+
+            const eventSequence = ++sequence;
+            queueMicrotask(() => {
+                const pointerEvent = event instanceof PointerEvent ? event : undefined;
+                const touchEvent = event instanceof TouchEvent ? event : undefined;
+                const mouseEvent = event instanceof MouseEvent ? event : undefined;
+                const dragEvent = event instanceof DragEvent ? event : undefined;
+                const touch = touchEvent?.touches[0] || touchEvent?.changedTouches[0];
+                const target = event.target instanceof HTMLElement ? event.target : undefined;
+                const draggable = target?.closest<HTMLElement>('[draggable="true"]');
+                const dataTransfer = dragEvent?.dataTransfer;
+
+                console.log(`[drag-debug] ${JSON.stringify({
+                    sequence: eventSequence,
+                    elapsed: Math.round(now - startTime),
+                    type: event.type,
+                    trusted: event.isTrusted,
+                    defaultPrevented: event.defaultPrevented,
+                    pointerType: pointerEvent?.pointerType,
+                    pointerId: pointerEvent?.pointerId,
+                    button: mouseEvent?.button,
+                    buttons: mouseEvent?.buttons,
+                    touchCount: touchEvent?.touches.length,
+                    x: touch?.clientX ?? mouseEvent?.clientX,
+                    y: touch?.clientY ?? mouseEvent?.clientY,
+                    radiusX: touch?.radiusX,
+                    radiusY: touch?.radiusY,
+                    targetTag: target?.tagName,
+                    targetClass: target?.className,
+                    targetType: target?.dataset.type,
+                    targetNodeId: target?.dataset.nodeId,
+                    draggableTag: draggable?.tagName,
+                    draggableClass: draggable?.className,
+                    draggableType: draggable?.dataset.type,
+                    dataTypes: dataTransfer ? Array.from(dataTransfer.types) : undefined,
+                    effectAllowed: dataTransfer?.effectAllowed,
+                    dropEffect: dataTransfer?.dropEffect,
+                    touchDragActive: window.siyuan.touchDragActive,
+                })}`);
+            });
+        }, {capture: true, passive: true});
+    });
+};
+
 // 判定当前输入源是否为鼠标：部分平板 WebView 会把鼠标合成成 touch 事件
 // pointerType === "mouse" 且接触面积为 0（radiusX/radiusY 为 0）时判定为鼠标
 // radiusX > 0 单向可信：非零一定是真手指，据此否决鼠标判断，避免把手指误判成鼠标跳过长按
@@ -407,6 +482,9 @@ export const cancelManualTouch = () => {
 };
 
 export const initTouchDragBridge = () => {
+    // 临时记录 Android 外接鼠标的完整事件链，用于定位原生拖拽未触发 drop 的问题。
+    initDragEventDebug();
+
     // 记录输入源，供 touchstart 回调区分鼠标合成 touch 的场景（部分平板把鼠标合成成 touch 事件）
     document.addEventListener("pointerdown", (e: PointerEvent) => {
         lastPointerType = e.pointerType;

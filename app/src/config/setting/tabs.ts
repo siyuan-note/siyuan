@@ -26,6 +26,7 @@ import {registerSecretsVariablesTab} from "../tabs/secretsVariablesTab";
 import {registerExportTab} from "../tabs/exportTab";
 import {registerSearchTab} from "../tabs/searchTab";
 import {registerAppearanceTab} from "../tabs/appearanceTab";
+import {registerAutoDirectionAppearanceSetting} from "../tabs/autoDirectionSetting";
 import {registerSyncTab} from "../tabs/syncTab";
 import {registerAccessTab} from "../tabs/accessTab";
 import {registerAppTab} from "../tabs/appTab";
@@ -50,7 +51,10 @@ const settingTabs = {
         icon: "iconTheme",
         title: () => window.siyuan.languages.appearance,
         defaultSave: appearanceConfigApi.patch,
-    }, registerAppearanceTab),
+    }, (tab) => {
+        registerAppearanceTab(tab);
+        registerAutoDirectionAppearanceSetting(tab);
+    }),
     /// #if !MOBILE
     bazaar: setting.panel({
         id: "bazaar",

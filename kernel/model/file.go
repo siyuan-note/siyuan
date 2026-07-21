@@ -599,7 +599,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	FlushTxQueue() // 写入数据时阻塞，避免获取到的数据不一致
 
 	inputIndex := index
-	tree, err := loadTreeByBlockIDInBox(id, boxID)
+	tree, err := loadTreeByBlockIDInBox0(id, boxID, false)
 	if err != nil {
 		if errors.Is(err, ErrBlockNotFound) {
 			if 0 == mode {
@@ -1491,7 +1491,7 @@ func GetHPathByID(id string) (hPath string, err error) {
 }
 
 func GetPathByID(id string) (path, boxID string, err error) {
-	tree, err := LoadTreeByBlockID(id)
+	tree, err := loadTreeByBlockIDWithoutNotFoundLog(id)
 	if err != nil {
 		return
 	}

@@ -182,7 +182,9 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 	filePath := filepath.Join(util.DataDir, boxID, p)
 	data, err := filelock.ReadFile(filePath)
 	if nil != err {
-		logging.LogErrorf("load tree [%s] failed: %s", p, err)
+		if !os.IsNotExist(err) {
+			logging.LogErrorf("load tree [%s] failed: %s", p, err)
+		}
 		return
 	}
 

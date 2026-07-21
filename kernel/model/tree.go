@@ -250,6 +250,10 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 	return loadTreeByBlockIDInBox(id, "")
 }
 
+func loadTreeByBlockIDWithoutNotFoundLog(id string) (ret *parse.Tree, err error) {
+	return loadTreeByBlockIDInBox0(id, "", false)
+}
+
 func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 	luteEngine := util.NewLute()
 	ret, needFix, err := filesys.LoadTreeWithFix(bt.BoxID, bt.Path, luteEngine)
@@ -265,6 +269,10 @@ func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 
 // loadTreeByBlockIDInBox 与 LoadTreeByBlockID 一致，但按 boxID 路由 blocktree 查询到加密 db 或全局 db。
 func loadTreeByBlockIDInBox(id, boxID string) (ret *parse.Tree, err error) {
+	return loadTreeByBlockIDInBox0(id, boxID, true)
+}
+
+func loadTreeByBlockIDInBox0(id, boxID string, logNotFound bool) (ret *parse.Tree, err error) {
 	if !ast.IsNodeIDPattern(id) {
 		stack := logging.ShortStack()
 		logging.LogErrorf("block id is invalid [id=%s], stack: [%s]", id, stack)
@@ -287,9 +295,9 @@ func loadTreeByBlockIDInBox(id, boxID string) (ret *parse.Tree, err error) {
 			return
 		}
 
-		stack := logging.ShortStack()
-		if !strings.Contains(stack, "BuildBlockBreadcrumb") {
-			if "dev" == util.Mode {
+		if logNotFound && "dev" == util.Mode {
+			stack := logging.ShortStack()
+			if !strings.Contains(stack, "BuildBlockBreadcrumb") {
 				logging.LogWarnf("block tree not found [id=%s], stack: [%s]", id, stack)
 			}
 		}

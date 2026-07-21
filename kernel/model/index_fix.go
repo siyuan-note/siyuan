@@ -410,6 +410,9 @@ func fixBlockTreeByFileSys() {
 	// 清理已关闭的笔记本块树
 	boxes = Conf.GetClosedBoxes()
 	for _, box := range boxes {
+		if IsEncryptedBox(box.ID) && !IsBoxUnlocked(box.ID) {
+			continue
+		}
 		treenode.RemoveBlockTreesByBoxID(box.ID)
 	}
 }

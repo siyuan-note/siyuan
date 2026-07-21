@@ -140,6 +140,9 @@ func QueryRootChildrenRefCount(defRootID string) (ret map[string]int) {
 
 func QueryRootBlockRefCount() (ret map[string]int) {
 	ret = map[string]int{}
+	if nil == db {
+		return
+	}
 
 	// 全局 refs
 	rows, err := query("SELECT def_block_root_id, COUNT(DISTINCT block_id) AS ref_cnt FROM refs GROUP BY def_block_root_id")

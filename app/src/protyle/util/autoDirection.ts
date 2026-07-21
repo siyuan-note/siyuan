@@ -84,10 +84,12 @@ const extractDirectionalText = (block: HTMLElement) => {
 
 const renderStyles = (runtime: IAutoDirectionRuntime) => {
     const scopeSelector = `[${SCOPE_ATTRIBUTE}="${runtime.scope}"]`;
-    const rules: string[] = [];
+    const rules = [
+        `${scopeSelector} .protyle-wysiwyg :is(${SKIP_TEXT_SELECTOR}) { direction: ltr; unicode-bidi: isolate; }`
+    ];
     runtime.directions.forEach((direction, id) => {
         const selector = `${scopeSelector} .protyle-wysiwyg [data-node-id="${CSS.escape(id)}"]`;
-        rules.push(`${selector} { direction: ${direction}; text-align: start; unicode-bidi: isolate; }`);
+        rules.push(`${selector} { direction: ${direction}; unicode-bidi: isolate; }`);
         if (direction === "rtl") {
             const autoListSelector = `${selector}.li:not([style*="direction"])`;
             rules.push(`${autoListSelector} > .protyle-action { right: 0; left: auto; direction: rtl; }`);

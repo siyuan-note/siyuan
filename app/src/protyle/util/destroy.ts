@@ -1,10 +1,12 @@
 import {hideElements} from "../ui/hideElements";
 import {isSupportCSSHL} from "../render/searchMarkRender";
+import {destroyAutoDirectionRuntime} from "./autoDirection";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    destroyAutoDirectionRuntime(protyle);
     hideElements(["util"], protyle);
     if (isSupportCSSHL()) {
         protyle.highlight.markHL.clear();

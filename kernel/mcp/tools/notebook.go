@@ -117,9 +117,12 @@ func notebookRename(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "rename notebook failed: " + err.Error()}}, IsError: true}, nil
 	}
 
-	evt := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
-	evt.Data = map[string]any{"box": id}
-	util.PushEvent(evt)
+	if box := model.Conf.Box(id); nil != box {
+		name = box.Name
+		evt := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
+		evt.Data = map[string]any{"box": id, "name": name}
+		util.PushEvent(evt)
+	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook renamed: " + id + " -> " + name}}}, nil
 }

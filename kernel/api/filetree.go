@@ -434,7 +434,10 @@ func getPathByID(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
 	if util.InvalidIDPattern(id, ret) {
 		return
 	}
@@ -628,12 +631,15 @@ func removeDocByID(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
 	if util.InvalidIDPattern(id, ret) {
 		return
 	}
 
-	tree, err := model.LoadTreeByBlockID(id)
+	p, notebook, err := model.GetPathByID(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -641,7 +647,7 @@ func removeDocByID(c *gin.Context) {
 		return
 	}
 
-	if err = model.RemoveDoc(tree.Box, tree.Path); err != nil {
+	if err = model.RemoveDoc(notebook, p); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 	}
@@ -1195,6 +1201,9 @@ func getDoc(c *gin.Context) {
 
 	var id string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if util.InvalidIDPattern(id, ret) {
 		return
 	}
 	idx := arg["index"]

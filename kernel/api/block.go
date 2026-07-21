@@ -748,7 +748,13 @@ func getBlockInfo(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
 	if !checkBlockPublishAccess(c, id, ret) {
 		return
 	}

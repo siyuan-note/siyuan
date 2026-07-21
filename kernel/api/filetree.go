@@ -1193,7 +1193,10 @@ func getDoc(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
 	idx := arg["index"]
 	index := 0
 	if nil != idx {

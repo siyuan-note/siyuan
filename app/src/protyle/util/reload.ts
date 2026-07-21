@@ -9,6 +9,7 @@ import {isSupportCSSHL, searchMarkRender} from "../render/searchMarkRender";
 import {hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 /// #endif
 import {restoreLuteMarkdownSyntax} from "./paste";
+import {syncAutoDirectionRuntime} from "./autoDirection";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
     /// #if MOBILE
@@ -30,6 +31,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
     } else {
         protyle.element.classList.remove("rtl");
     }
+    syncAutoDirectionRuntime(protyle);
     if (protyle.title) {
         protyle.title.element.removeAttribute("data-render");
         protyle.title.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());

@@ -28,11 +28,13 @@ export const classifyTextDirection = (value: string): TAutoTextDirection => {
     let ltrCount = 0;
 
     for (const character of text) {
-        if (RTL_RE.test(character)) {
-            rtlCount++;
+        // Numbers, punctuation, symbols and combining marks do not determine base text direction.
+        if (!LETTER_RE.test(character)) {
             continue;
         }
-        if (LETTER_RE.test(character)) {
+        if (RTL_RE.test(character)) {
+            rtlCount++;
+        } else {
             ltrCount++;
         }
     }
@@ -134,11 +136,15 @@ const queueTree = (runtime: IAutoDirectionRuntime, element: Element) => {
 };
 
 const removeTree = (runtime: IAutoDirectionRuntime, element: Element) => {
-    if (element.hasAttribute("data-node-id")) {
-        runtime.directions.delete(element.getAttribute("data-node-id"));
+    const id = element.getAttribute("data-node-id");
+    if (id) {
+        runtime.directions.delete(id);
     }
     element.querySelectorAll<HTMLElement>("[data-node-id]").forEach((block) => {
-        runtime.directions.delete(block.getAttribute("data-node-id"));
+        const childId = block.getAttribute("data-node-id");
+        if (childId) {
+            runtime.directions.delete(childId);
+        }
     });
 };
 
@@ -159,9 +165,20 @@ const scheduleFlush = (runtime: IAutoDirectionRuntime) => {
 };
 
 const scanEditor = (runtime: IAutoDirectionRuntime) => {
+    const activeIds = new Set<string>();
     runtime.protyle.wysiwyg.element.querySelectorAll<HTMLElement>("[data-node-id]").forEach((block) => {
-        if (isAutoDirectionBlock(block)) {
-            updateBlockDirection(runtime, block, true);
+        if (!isAutoDirectionBlock(block)) {
+            return;
+        }
+        const id = block.getAttribute("data-node-id");
+        if (id) {
+            activeIds.add(id);
+        }
+        updateBlockDirection(runtime, block, true);
+    });
+    runtime.directions.forEach((_direction, id) => {
+        if (!activeIds.has(id)) {
+            runtime.directions.delete(id);
         }
     });
     renderStyles(runtime);
@@ -244,7 +261,8 @@ const stopAutoDirectionRuntime = (protyle: IProtyle) => {
 };
 
 export const syncAutoDirectionRuntime = (protyle: IProtyle) => {
-    if (window.siyuan?.config?.editor?.autoTextDirection) {
+    // The existing global RTL mode is explicit and therefore takes precedence over automatic direction.
+    if (window.siyuan?.config?.editor?.autoTextDirection && !window.siyuan.config.editor.rtl) {
         startAutoDirectionRuntime(protyle);
     } else {
         stopAutoDirectionRuntime(protyle);

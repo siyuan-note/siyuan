@@ -169,6 +169,47 @@ func TestSortSearchDocResults(t *testing.T) {
 	}
 }
 
+func TestSearchDocTextMatching(t *testing.T) {
+	exactCases := []struct {
+		name          string
+		value         string
+		keyword       string
+		caseSensitive bool
+		expected      bool
+	}{
+		{name: "same case sensitive", value: "Math", keyword: "Math", caseSensitive: true, expected: true},
+		{name: "different case sensitive", value: "Math", keyword: "math", caseSensitive: true, expected: false},
+		{name: "different case insensitive", value: "Math", keyword: "math", caseSensitive: false, expected: true},
+	}
+	for _, test := range exactCases {
+		t.Run("exact/"+test.name, func(t *testing.T) {
+			if actual := isExactSearchDocMatch(test.value, test.keyword, test.caseSensitive); test.expected != actual {
+				t.Fatalf("unexpected exact match result: got %t, want %t", actual, test.expected)
+			}
+		})
+	}
+
+	containsCases := []struct {
+		name          string
+		value         string
+		keywords      []string
+		caseSensitive bool
+		expected      bool
+	}{
+		{name: "same case sensitive", value: "Math Notes", keywords: []string{"Math"}, caseSensitive: true, expected: true},
+		{name: "different case sensitive", value: "Math Notes", keywords: []string{"math"}, caseSensitive: true, expected: false},
+		{name: "different case insensitive", value: "Math Notes", keywords: []string{"math"}, caseSensitive: false, expected: true},
+		{name: "preserve any keyword matching", value: "Math Notes", keywords: []string{"missing", "notes"}, caseSensitive: false, expected: true},
+	}
+	for _, test := range containsCases {
+		t.Run("contains/"+test.name, func(t *testing.T) {
+			if actual := containsSearchDocKeyword(test.value, test.keywords, test.caseSensitive); test.expected != actual {
+				t.Fatalf("unexpected contains result: got %t, want %t", actual, test.expected)
+			}
+		})
+	}
+}
+
 func TestBuildSearchDocsCondition(t *testing.T) {
 	condition, args := buildSearchDocsCondition([]string{"O'Reilly", "100%_done\\file"}, []string{"20260720000000-abc_def"}, true, true, true)
 	if strings.Contains(condition, "O'Reilly") || strings.Contains(condition, "100%_done") {

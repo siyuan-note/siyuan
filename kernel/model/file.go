@@ -183,7 +183,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 		keywords := strings.Fields(keyword)
 		if 0 < len(keywords) {
 			for _, box := range boxes {
-				if util.ContainsSubStr(box.Name, keywords) {
+				if containsSearchDocKeyword(box.Name, keywords, Conf.Search.CaseSensitive) {
 					data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
 					if flashcard {
 						newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
@@ -194,7 +194,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 						data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
 						data["flashcardCount"] = strconv.Itoa(flashcardCount)
 					}
-					results = append(results, searchDocResult{data: data, exact: box.Name == keyword})
+					results = append(results, searchDocResult{data: data, exact: isExactSearchDocMatch(box.Name, keyword, Conf.Search.CaseSensitive)})
 				}
 			}
 
@@ -236,7 +236,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 			data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
 			data["flashcardCount"] = strconv.Itoa(flashcardCount)
 		}
-		results = append(results, searchDocResult{data: data, exact: rootBlock.Content == keyword})
+		results = append(results, searchDocResult{data: data, exact: isExactSearchDocMatch(rootBlock.Content, keyword, Conf.Search.CaseSensitive)})
 	}
 
 	sortSearchDocResults(results)
@@ -258,6 +258,28 @@ func sortSearchDocResults(results []searchDocResult) {
 type searchDocResult struct {
 	data  map[string]string
 	exact bool
+}
+
+func containsSearchDocKeyword(value string, keywords []string, caseSensitive bool) bool {
+	if !caseSensitive {
+		value = strings.ToLower(value)
+	}
+	for _, keyword := range keywords {
+		if !caseSensitive {
+			keyword = strings.ToLower(keyword)
+		}
+		if strings.Contains(value, keyword) {
+			return true
+		}
+	}
+	return false
+}
+
+func isExactSearchDocMatch(value, keyword string, caseSensitive bool) bool {
+	if caseSensitive {
+		return value == keyword
+	}
+	return strings.EqualFold(value, keyword)
 }
 
 func buildSearchDocsCondition(keywords, excludeIDs []string, searchName, searchAlias, searchMemo bool) (condition string, args []any) {

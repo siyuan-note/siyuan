@@ -15,6 +15,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
     /// #if MOBILE
     hideKeyboardToolbar();
     /// #endif
+    syncAutoDirectionRuntime(protyle);
     if (!protyle.preview.element.classList.contains("fn__none")) {
         protyle.preview.render(protyle);
         removeLoading(protyle);
@@ -31,7 +32,6 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
     } else {
         protyle.element.classList.remove("rtl");
     }
-    syncAutoDirectionRuntime(protyle);
     if (protyle.title) {
         protyle.title.element.removeAttribute("data-render");
         protyle.title.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());

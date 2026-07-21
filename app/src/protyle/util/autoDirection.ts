@@ -29,7 +29,6 @@ export const classifyTextDirection = (value: string): TAutoTextDirection => {
     let ltrCount = 0;
 
     for (const character of text) {
-        // Numbers, punctuation, symbols and combining marks do not determine base text direction.
         if (!LETTER_RE.test(character)) {
             continue;
         }
@@ -275,7 +274,6 @@ export const destroyAutoDirectionRuntime = (protyle: IProtyle) => {
 };
 
 export const syncAutoDirectionRuntime = (protyle: IProtyle) => {
-    // The existing global RTL mode is explicit and therefore takes precedence over automatic direction.
     if (window.siyuan?.config?.editor?.autoTextDirection && !window.siyuan.config.editor.rtl) {
         startAutoDirectionRuntime(protyle);
     } else {

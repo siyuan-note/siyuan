@@ -188,6 +188,10 @@ func getHeadingChildrenIDs(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if !checkBlockPublishAccess(c, id, ret) {
+		return
+	}
+
 	ids := model.GetHeadingChildrenIDs(id)
 	ret.Data = ids
 }
@@ -216,6 +220,10 @@ func getHeadingChildrenDOM(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if !checkBlockPublishAccess(c, id, ret) {
+		return
+	}
+
 	removeFoldAttr := true
 	if nil != arg["removeFoldAttr"] {
 		removeFoldAttr = arg["removeFoldAttr"].(bool)
@@ -407,7 +415,7 @@ func getDocInfo(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	if !checkBlockInfoPublishAccess(c, id, ret) {
+	if !checkBlockPublishAccess(c, id, ret) {
 		return
 	}
 
@@ -741,7 +749,7 @@ func getBlockInfo(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	if !checkBlockInfoPublishAccess(c, id, ret) {
+	if !checkBlockPublishAccess(c, id, ret) {
 		return
 	}
 
@@ -820,7 +828,7 @@ func getBlockInfo(c *gin.Context) {
 	}
 }
 
-func checkBlockInfoPublishAccess(c *gin.Context, id string, ret *gulu.Result) bool {
+func checkBlockPublishAccess(c *gin.Context, id string, ret *gulu.Result) bool {
 	if !model.IsReadOnlyRoleContext(c) {
 		return true
 	}

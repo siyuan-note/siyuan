@@ -1995,7 +1995,7 @@ export class WYSIWYG {
                     ids.push(item.getAttribute("data-node-id"));
                 });
                 countBlockWord(ids);
-                // 划选后不能存在跨块的 range https://github.com/siyuan-note/siyuan/issues/4473
+                // 修正三击及跨块选区落在块边界时的 range
                 if (getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);
                     if (range.toString() === "" ||
@@ -2050,8 +2050,6 @@ export class WYSIWYG {
                             setFirstNodeRange(getContenteditableElement(endBlockElement), range);
                         } else if (range.endOffset === 0 && range.endContainer.nodeType === 1 && (range.endContainer as HTMLElement).tagName === "DIV") {
                             setLastNodeRange(getContenteditableElement(startBlockElement), range, false);
-                        } else {
-                            range.collapse(true);
                         }
                     }
                 }

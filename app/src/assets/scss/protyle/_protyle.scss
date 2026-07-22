@@ -214,7 +214,7 @@
   flex-shrink: 0;
   box-sizing: border-box;
   min-height: 42px;
-  z-index: 1;
+  z-index: 4; // 需大于 protyle-select
   font-size: 14px;
   border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
 

@@ -214,9 +214,14 @@ export class Toolbar {
         const rangePosition = getSelectionPosition(nodeElement, range, true);
         this.element.classList.remove("fn__none");
         this.toolbarHeight = this.element.clientHeight;
+        const protyleRect = protyle.element.getBoundingClientRect();
+        const rangeRects = range.getClientRects();
+        const rangeRect = rangePosition.isBottom ? rangeRects[rangeRects.length - 1] : rangeRects[0];
+        const above = rangeRect.top - this.toolbarHeight - 4;
+        const below = rangeRect.bottom + 4;
         const y = rangePosition.isBottom ?
-            Math.min(rangePosition.top + 4, protyle.element.getBoundingClientRect().bottom - this.toolbarHeight) :
-            Math.max(rangePosition.top - this.toolbarHeight - 4, protyle.element.getBoundingClientRect().top + 30);
+            (below + this.toolbarHeight <= protyleRect.bottom ? below : Math.max(above, protyleRect.top + 30)) :
+            (above >= protyleRect.top + 30 ? above : Math.min(below, protyleRect.bottom - this.toolbarHeight));
         this.element.setAttribute("data-inity", y + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
         setPosition(this.element, rangePosition.left - this.element.clientWidth / 4, y);
 

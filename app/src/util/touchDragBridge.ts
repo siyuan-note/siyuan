@@ -99,6 +99,7 @@ const handleTouchStart = (e: TouchEvent) => {
         dragState.startX = touch.clientX;
         dragState.startY = touch.clientY;
         dragState.touchStartTime = Date.now();
+        dragState.requireLongPress = requiresLongPress(dragState.draggableElement);
         return;
     }
     if (dragState || manualState) return;
@@ -226,6 +227,14 @@ const getDraggableAncestor = (el: Element): HTMLElement | null => {
     return null;
 };
 
+const requiresLongPress = (draggableElement: HTMLElement) => {
+    return draggableElement.closest(".sy__file") !== null ||
+        draggableElement.closest(".sy__outline") !== null ||
+        draggableElement.closest(".av__gallery-item") !== null ||
+        draggableElement.closest(".layout-tab-bar") !== null ||
+        draggableElement.closest(".protyle-action") !== null;
+};
+
 const createDragState = (draggableElement: HTMLElement, point: DragPoint, inputType: "touch" | "pointer",
                          isMouse: boolean, pointerId?: number): DragState & LongPressGate => {
     return {
@@ -238,12 +247,8 @@ const createDragState = (draggableElement: HTMLElement, point: DragPoint, inputT
         startX: point.clientX,
         startY: point.clientY,
         touchStartTime: Date.now(),
-        // 文件树、画廊、页签和列表操作需长按，以避免与滚动冲突。
-        requireLongPress: draggableElement.closest(".sy__file") !== null ||
-            draggableElement.closest(".sy__outline") !== null ||
-            draggableElement.closest(".av__gallery-item") !== null ||
-            draggableElement.closest(".layout-tab-bar") !== null ||
-            draggableElement.closest(".protyle-action") !== null,
+        // Touch 操作文件树、画廊、页签和列表时需长按，以避免与滚动冲突；Pointer 鼠标仅使用位移门槛。
+        requireLongPress: inputType === "touch" && requiresLongPress(draggableElement),
         longPressCancelled: false,
         isMouse,
     };

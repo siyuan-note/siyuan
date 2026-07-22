@@ -254,18 +254,12 @@
     transition: var(--b3-background-transition);
     width: 100%;
 
-    &:hover {
-      background-color: var(--b3-theme-surface-light);
-    }
-
     & > .block__icon:first-child {
-      margin-left: -4px;
+      margin-left: -8px;
     }
 
     .block__logo {
       margin-left: 4px;
-      min-height: 34px;
-      font-weight: 500;
     }
   }
 

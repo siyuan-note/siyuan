@@ -15,6 +15,7 @@ import {checkFold} from "../../util/noRelyPCFunction";
 export class Bookmark extends Model {
     private openNodes: string[];
     private preFilterOpenNodes: string[];
+    private data: IBlockTree[] = [];
     public tree: Tree;
     private element: Element;
     private updating = false;
@@ -61,17 +62,13 @@ export class Bookmark extends Model {
                 filterIconElement.classList.remove("block__icon--active");
                 filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
             }
-            if (inputElement.dataset.value !== value) {
-                inputElement.dataset.value = value;
-                this.update();
+        });
+        inputElement.addEventListener("input", (event: InputEvent) => {
+            if (!event.isComposing) {
+                this.filter();
             }
         });
-        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (!event.isComposing && event.key === "Enter") {
-                inputElement.dataset.value = inputElement.value;
-                this.update();
-            }
-        });
+        inputElement.addEventListener("compositionend", () => this.filter());
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
             data: null,
@@ -236,51 +233,57 @@ export class Bookmark extends Model {
 
     public update() {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
-        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
-        const keywords = inputElement.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
-        const hasKeyword = keywords.length > 0;
         if (this.updating) {
             this.updatePending = true;
             return;
         }
-        if (hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
-            this.preFilterOpenNodes = this.tree.getExpandIds();
-        }
         this.updating = true;
         element.classList.add("fn__rotate");
         fetchPost("/api/bookmark/getBookmark", {}, response => {
-            const data = hasKeyword ? response.data.filter((item: IBlockTree) => {
-                const name = item.name.toLowerCase();
-                return keywords.every(keyword => name.includes(keyword));
-            }) : response.data;
-            if (!hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
-                this.openNodes = this.tree.getExpandIds();
-            }
-            this.tree.updateData(data);
-            if (hasKeyword) {
-                this.tree.expandAll();
-            } else if (this.preFilterOpenNodes !== undefined) {
-                this.tree.collapseAll();
-                this.tree.setExpandIds(this.preFilterOpenNodes);
-                this.openNodes = this.preFilterOpenNodes;
-                this.preFilterOpenNodes = undefined;
-            } else if (this.openNodes !== undefined) {
-                this.tree.collapseAll();
-                this.tree.setExpandIds(this.openNodes);
-            } else {
-                this.openNodes = this.tree.getExpandIds();
-            }
-            this.tree.element.querySelectorAll(":scope > ul > li[data-treetype=\"bookmark\"]:not([data-node-id])").forEach((item: HTMLElement, index) => {
-                const bookmark = data[index];
-                if (bookmark) {
-                    item.dataset.bookmark = bookmark.name;
-                }
-            });
-            element.classList.remove("fn__rotate");
-            this.updating = false;
             if (this.updatePending) {
                 this.updatePending = false;
+                this.updating = false;
                 this.update();
+                return;
+            }
+            this.data = response.data;
+            this.filter();
+            element.classList.remove("fn__rotate");
+            this.updating = false;
+        });
+    }
+
+    private filter() {
+        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
+        const keywords = inputElement.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+        const hasKeyword = keywords.length > 0;
+        if (hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
+            this.preFilterOpenNodes = this.tree.getExpandIds();
+        } else if (!hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
+            this.openNodes = this.tree.getExpandIds();
+        }
+        const data = hasKeyword ? this.data.filter(item => {
+            const name = item.name.toLowerCase();
+            return keywords.every(keyword => name.includes(keyword));
+        }) : this.data;
+        this.tree.updateData(data);
+        if (hasKeyword) {
+            this.tree.expandAll();
+        } else if (this.preFilterOpenNodes !== undefined) {
+            this.tree.collapseAll();
+            this.tree.setExpandIds(this.preFilterOpenNodes);
+            this.openNodes = this.preFilterOpenNodes;
+            this.preFilterOpenNodes = undefined;
+        } else if (this.openNodes !== undefined) {
+            this.tree.collapseAll();
+            this.tree.setExpandIds(this.openNodes);
+        } else {
+            this.openNodes = this.tree.getExpandIds();
+        }
+        this.tree.element.querySelectorAll(":scope > ul > li[data-treetype=\"bookmark\"]:not([data-node-id])").forEach((item: HTMLElement, index) => {
+            const bookmark = data[index];
+            if (bookmark) {
+                item.dataset.bookmark = bookmark.name;
             }
         });
     }

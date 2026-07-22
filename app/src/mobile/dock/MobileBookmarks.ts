@@ -12,6 +12,7 @@ export class MobileBookmarks {
     private tree: Tree;
     private openNodes: string[];
     private preFilterOpenNodes: string[];
+    private data: IBlockTree[] = [];
     private updating = false;
     private updatePending = false;
 
@@ -42,17 +43,13 @@ export class MobileBookmarks {
             } else {
                 filterIconElement.classList.remove("toolbar__icon--active");
             }
-            if (inputElement.dataset.value !== value) {
-                inputElement.dataset.value = value;
-                this.update();
+        });
+        inputElement.addEventListener("input", (event: InputEvent) => {
+            if (!event.isComposing) {
+                this.filter();
             }
         });
-        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (!event.isComposing && event.key === "Enter") {
-                inputElement.dataset.value = inputElement.value;
-                this.update();
-            }
-        });
+        inputElement.addEventListener("compositionend", () => this.filter());
 
         this.tree = new Tree({
             element: this.element.querySelector(".bookmarkList") as HTMLElement,
@@ -105,42 +102,48 @@ export class MobileBookmarks {
             this.updatePending = true;
             return;
         }
+        this.updating = true;
+        this.element.lastElementChild.classList.remove("fn__none");
+        fetchPost("/api/bookmark/getBookmark", {}, response => {
+            if (this.updatePending) {
+                this.updatePending = false;
+                this.updating = false;
+                this.update();
+                return;
+            }
+            this.data = response.data;
+            this.filter();
+            this.updating = false;
+            this.element.lastElementChild.classList.add("fn__none");
+        });
+    }
+
+    private filter() {
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
         const keywords = inputElement.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
         const hasKeyword = keywords.length > 0;
         if (hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
             this.preFilterOpenNodes = this.tree.getExpandIds();
+        } else if (!hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
+            this.openNodes = this.tree.getExpandIds();
         }
-        this.updating = true;
-        this.element.lastElementChild.classList.remove("fn__none");
-        fetchPost("/api/bookmark/getBookmark", {}, response => {
-            const data = hasKeyword ? response.data.filter((item: IBlockTree) => {
-                const name = item.name.toLowerCase();
-                return keywords.every(keyword => name.includes(keyword));
-            }) : response.data;
-            if (!hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
-                this.openNodes = this.tree.getExpandIds();
-            }
-            this.tree.updateData(data);
-            if (hasKeyword) {
-                this.tree.expandAll();
-            } else if (this.preFilterOpenNodes !== undefined) {
-                this.tree.collapseAll();
-                this.tree.setExpandIds(this.preFilterOpenNodes);
-                this.openNodes = this.preFilterOpenNodes;
-                this.preFilterOpenNodes = undefined;
-            } else if (this.openNodes !== undefined) {
-                this.tree.collapseAll();
-                this.tree.setExpandIds(this.openNodes);
-            } else {
-                this.openNodes = this.tree.getExpandIds();
-            }
-            this.updating = false;
-            this.element.lastElementChild.classList.add("fn__none");
-            if (this.updatePending) {
-                this.updatePending = false;
-                this.update();
-            }
-        });
+        const data = hasKeyword ? this.data.filter(item => {
+            const name = item.name.toLowerCase();
+            return keywords.every(keyword => name.includes(keyword));
+        }) : this.data;
+        this.tree.updateData(data);
+        if (hasKeyword) {
+            this.tree.expandAll();
+        } else if (this.preFilterOpenNodes !== undefined) {
+            this.tree.collapseAll();
+            this.tree.setExpandIds(this.preFilterOpenNodes);
+            this.openNodes = this.preFilterOpenNodes;
+            this.preFilterOpenNodes = undefined;
+        } else if (this.openNodes !== undefined) {
+            this.tree.collapseAll();
+            this.tree.setExpandIds(this.openNodes);
+        } else {
+            this.openNodes = this.tree.getExpandIds();
+        }
     }
 }

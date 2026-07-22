@@ -466,28 +466,32 @@ export class Backlink extends Model {
         };
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: sort === "0" ? "iconSelect" : undefined,
+            checked: sort === "0",
+            iconHTML: "",
             label: window.siyuan.languages.fileNameASC,
             click: () => {
                 clickEvent("0");
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: sort === "1" ? "iconSelect" : undefined,
+            checked: sort === "1",
+            iconHTML: "",
             label: window.siyuan.languages.fileNameDESC,
             click: () => {
                 clickEvent("1");
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: sort === "4" ? "iconSelect" : undefined,
+            checked: sort === "4",
+            iconHTML: "",
             label: window.siyuan.languages.fileNameNatASC,
             click: () => {
                 clickEvent("4");
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: sort === "5" ? "iconSelect" : undefined,
+            checked: sort === "5",
+            iconHTML: "",
             label: window.siyuan.languages.fileNameNatDESC,
             click: () => {
                 clickEvent("5");
@@ -495,28 +499,32 @@ export class Backlink extends Model {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: sort === "9" ? "iconSelect" : undefined,
+            checked: sort === "9",
+            iconHTML: "",
             label: window.siyuan.languages.createdASC,
             click: () => {
                 clickEvent("9");
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: sort === "10" ? "iconSelect" : undefined,
+            checked: sort === "10",
+            iconHTML: "",
             label: window.siyuan.languages.createdDESC,
             click: () => {
                 clickEvent("10");
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: sort === "2" ? "iconSelect" : undefined,
+            checked: sort === "2",
+            iconHTML: "",
             label: window.siyuan.languages.modifiedASC,
             click: () => {
                 clickEvent("2");
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: sort === "3" ? "iconSelect" : undefined,
+            checked: sort === "3",
+            iconHTML: "",
             label: window.siyuan.languages.modifiedDESC,
             click: () => {
                 clickEvent("3");

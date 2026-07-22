@@ -248,11 +248,16 @@ type Tag struct {
 type Tags []*Tag
 
 func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) (ret *Tags) {
+	return BuildTagsByKeyword(ignoreMaxListHintArg, appID, sortVal, "", nil)
+}
+
+func BuildTagsByKeyword(ignoreMaxListHintArg bool, appID string, sortVal int, keyword string, publishIgnore PublishAccess) (ret *Tags) {
 	FlushTxQueue()
 	sql.FlushQueue()
 
 	ret = &Tags{}
-	labels := labelTags()
+	labels := labelTags(publishIgnore)
+	filterTagLabels(labels, keyword)
 	tags := Tags{}
 	for label := range labels {
 		tags = buildTags(tags, strings.Split(label, "/"), 0)
@@ -275,6 +280,23 @@ func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) (ret *Tags)
 
 	ret = tmp
 	return
+}
+
+func filterTagLabels(labels map[string]Tags, keyword string) {
+	keywords := strings.Fields(strings.ToLower(keyword))
+	if 1 > len(keywords) {
+		return
+	}
+
+	for label := range labels {
+		normalizedLabel := strings.ToLower(label)
+		for _, k := range keywords {
+			if !strings.Contains(normalizedLabel, k) {
+				delete(labels, label)
+				break
+			}
+		}
+	}
 }
 
 func countTag(tag *Tag, total *int) {
@@ -374,11 +396,14 @@ func labelBlocksByKeyword(keyword string) (ret map[string]TagBlocks) {
 	return
 }
 
-func labelTags() (ret map[string]Tags) {
+func labelTags(publishIgnore PublishAccess) (ret map[string]Tags) {
 	ret = map[string]Tags{}
 
 	tagSpans := sql.QueryTagSpans("")
 	for _, tagSpan := range tagSpans {
+		if !CheckPathAccessableByPublishIgnore(tagSpan.Box, tagSpan.Path, publishIgnore) {
+			continue
+		}
 		label := util.UnescapeHTML(tagSpan.Content)
 		if _, ok := ret[label]; ok {
 			ret[label] = append(ret[label], &Tag{})

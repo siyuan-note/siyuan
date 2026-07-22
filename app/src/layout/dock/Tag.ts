@@ -14,6 +14,9 @@ import {Constants} from "../../constants";
 
 export class Tag extends Model {
     private openNodes: string[];
+    private preFilterOpenNodes: string[];
+    private updating = false;
+    private pendingUpdate: boolean;
     public tree: Tree;
     private element: Element;
 
@@ -30,6 +33,9 @@ export class Tag extends Model {
 
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo fn__flex-1">${window.siyuan.languages.tag}</div>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
+    <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
+    <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="sort" class="block__icon ariaLabel${window.siyuan.config.readonly ? " fn__none" : ""}" data-position="north" aria-label="${window.siyuan.languages.sort}">
@@ -47,6 +53,29 @@ export class Tag extends Model {
     <span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="fn__flex-1" style="margin-bottom: 8px"></div>`;
+        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
+        inputElement.addEventListener("blur", () => {
+            inputElement.classList.add("fn__none");
+            const filterIconElement = inputElement.nextElementSibling as HTMLElement;
+            const value = inputElement.value;
+            if (value.trim()) {
+                filterIconElement.classList.add("block__icon--active");
+                filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + value);
+            } else {
+                filterIconElement.classList.remove("block__icon--active");
+                filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
+            }
+            if (inputElement.dataset.value !== value) {
+                inputElement.dataset.value = value;
+                this.update();
+            }
+        });
+        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (!event.isComposing && event.key === "Enter") {
+                inputElement.dataset.value = inputElement.value;
+                this.update();
+            }
+        });
 
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
@@ -76,6 +105,9 @@ export class Tag extends Model {
             this.tree.expandAll();
         });
         this.element.addEventListener("click", (event: MouseEvent) => {
+            if ((event.target as HTMLElement).tagName === "INPUT") {
+                return;
+            }
             setPanelFocus(this.element);
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
@@ -142,6 +174,10 @@ export class Tag extends Model {
                         case "refresh":
                             this.update();
                             break;
+                        case "search":
+                            inputElement.classList.remove("fn__none");
+                            inputElement.select();
+                            break;
                     }
                 }
                 target = target.parentElement;
@@ -179,25 +215,50 @@ export class Tag extends Model {
     }
 
     public update(ignoreMaxListHint = true) {
-        const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
-        if (element.classList.contains("fn__rotate")) {
+        if (this.updating) {
+            this.pendingUpdate = ignoreMaxListHint;
             return;
+        }
+        this.updating = true;
+        const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
+        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
+        const keyword = inputElement.value;
+        const hasKeyword = keyword.trim().length > 0;
+        if (hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
+            this.preFilterOpenNodes = this.tree.getExpandIds();
         }
         element.classList.add("fn__rotate");
         fetchPost("/api/tag/getTag", {
             sort: window.siyuan.config.tag.sort,
             app: Constants.SIYUAN_APPID,
-            ignoreMaxListHint
+            ignoreMaxListHint,
+            k: keyword,
         }, response => {
-            if (this.openNodes) {
+            if (this.pendingUpdate !== undefined) {
+                const pendingUpdate = this.pendingUpdate;
+                this.pendingUpdate = undefined;
+                this.updating = false;
+                this.update(pendingUpdate);
+                return;
+            }
+            if (!hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
                 this.openNodes = this.tree.getExpandIds();
             }
             this.tree.updateData(response.data);
-            if (this.openNodes) {
+            if (hasKeyword) {
+                this.tree.expandAll();
+            } else if (this.preFilterOpenNodes !== undefined) {
+                this.tree.collapseAll();
+                this.tree.setExpandIds(this.preFilterOpenNodes);
+                this.openNodes = this.preFilterOpenNodes;
+                this.preFilterOpenNodes = undefined;
+            } else if (this.openNodes !== undefined) {
+                this.tree.collapseAll();
                 this.tree.setExpandIds(this.openNodes);
             } else {
                 this.openNodes = this.tree.getExpandIds();
             }
+            this.updating = false;
             element.classList.remove("fn__rotate");
         });
     }

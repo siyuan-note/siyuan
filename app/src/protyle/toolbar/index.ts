@@ -9,7 +9,6 @@ import {
     getEditorRange,
     getSelectionPosition,
     selectAll,
-    setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
@@ -181,9 +180,9 @@ export class Toolbar {
         });
     }
 
-    public render(protyle: IProtyle, range: Range, event?: KeyboardEvent) {
+    public render(protyle: IProtyle, range: Range) {
         this.range = range;
-        let nodeElement = hasClosestBlock(range.startContainer);
+        const nodeElement = hasClosestBlock(range.startContainer);
         if (isMobile() || !nodeElement || protyle.disabled || nodeElement.classList.contains("av") ||
             hasClosestByTag(range.startContainer, "CAPTION")) {
             this.element.classList.add("fn__none");
@@ -208,35 +207,6 @@ export class Toolbar {
             this.element.classList.add("fn__none");
             return;
         }
-        // shift+方向键或三击选中，不同的块 https://github.com/siyuan-note/siyuan/issues/3891
-        const startElement = hasClosestBlock(range.startContainer);
-        const endElement = hasClosestBlock(range.endContainer);
-        if (startElement && endElement && startElement !== endElement) {
-            if (event) { // 在 keyup 中使用 shift+方向键选中
-                if (event.key === "ArrowLeft") {
-                    this.range = setLastNodeRange(getContenteditableElement(startElement), range, false);
-                } else if (event.key === "ArrowRight") {
-                    this.range = setFirstNodeRange(getContenteditableElement(endElement), range);
-                    this.range.collapse(false);
-                } else if (event.key === "ArrowUp") {
-                    this.range = setFirstNodeRange(getContenteditableElement(endElement), range);
-                    nodeElement = hasClosestBlock(endElement);
-                    if (!nodeElement) {
-                        return;
-                    }
-                } else if (event.key === "ArrowDown") {
-                    this.range = setLastNodeRange(getContenteditableElement(startElement), range, false);
-                }
-            } else {
-                this.range = setLastNodeRange(getContenteditableElement(nodeElement), range, false);
-            }
-            focusByRange(this.range);
-            if (this.range.toString() === "") {
-                this.element.classList.add("fn__none");
-                return;
-            }
-        }
-        // 需放在 range 修改之后，否则 https://github.com/siyuan-note/siyuan/issues/4726
         if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             this.element.classList.add("fn__none");
             return;

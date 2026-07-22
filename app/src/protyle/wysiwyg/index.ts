@@ -840,6 +840,9 @@ export class WYSIWYG {
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
             const mostLeft = wysiwygRect.left + (parseInt(wysiwygStyle.paddingLeft) || 24) + 1;
             const mostRight = wysiwygRect.right - (parseInt(wysiwygStyle.paddingRight) || 16) - 2;
+            const startsFromPadding = event.clientX < mostLeft - 1 || event.clientX > mostRight + 2 ||
+                event.clientY < wysiwygRect.top + (parseFloat(wysiwygStyle.paddingTop) || 0) ||
+                event.clientY > wysiwygRect.bottom - (parseFloat(wysiwygStyle.paddingBottom) || 0);
 
             const protyleRect = protyle.element.getBoundingClientRect();
             const mostBottom = protyleRect.bottom;
@@ -1342,19 +1345,18 @@ export class WYSIWYG {
                 return;
             }
 
-            // 多选节点
-            // 起点落在内容区域外的 padding 上时，需用内容区内的坐标定位起始块
-            let fromOutsideX: number;
-            if (event.clientX > mostRight) {
-                fromOutsideX = mostRight - 10;
-            } else if (event.clientX < mostLeft) {
-                fromOutsideX = mostLeft + 10;
+            // 内容区域使用浏览器原生选区，跨块选择时保留各行内元素自身的选中样式。
+            if (!startsFromPadding && !tableBlockElement) {
+                return;
             }
+
+            // 多选节点
             const lastRect = protyle.wysiwyg.element.lastElementChild.getBoundingClientRect();
-            // 起点落在 padding 外或块间空白（target 为 wysiwyg 容器本身）时，需用 elementFromPoint 定位起始块
-            if (fromOutsideX !== undefined || target.classList.contains("protyle-wysiwyg")) {
-                const startX = fromOutsideX !== undefined ? fromOutsideX : event.clientX;
-                // 块间缝隙或 wysiwyg padding 较大（如打字机模式）时，需沿 y 轴循环探测直到命中块
+            // 起点落在 padding 时，需用内容区内的坐标定位起始块
+            if (startsFromPadding) {
+                const startX = event.clientX > mostRight ? mostRight - 10 :
+                    (event.clientX < mostLeft ? mostLeft + 10 : event.clientX);
+                // wysiwyg padding 较大（如打字机模式）时，需沿 y 轴循环探测直到命中块
                 nodeElement = hasClosestBlock(document.elementFromPoint(startX, event.clientY)) as HTMLElement;
                 if (!nodeElement) {
                     const probe = (step: number, limit: number) => {
@@ -1374,8 +1376,7 @@ export class WYSIWYG {
                     }
                 }
             }
-            // 落点是否在块外（padding/缝隙），此时 nodeElement 为探测所得，向上划选的遍历终点应用落点 y 而非 nodeElement 边
-            const startOutsideBlock = fromOutsideX !== undefined || target.classList.contains("protyle-wysiwyg");
+            // 起点在 padding 时 nodeElement 为探测所得，向上划选的遍历终点应用落点 y 而非 nodeElement 边
             if (!nodeElement) {
                 const breadElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
                 if (breadElement) {
@@ -1546,7 +1547,7 @@ export class WYSIWYG {
                 // 落点在缝隙/padding 时 nodeElement 为探测所得的块，其边会超出落点 y 导致误选，故以落点 y 为终点
                 const startBlockRect = nodeElement.getBoundingClientRect();
                 const selectBottom = moveEvent.clientY <= selectStartY
-                    ? (startOutsideBlock ? y : startBlockRect.bottom)
+                    ? (startsFromPadding ? y : startBlockRect.bottom)
                     : (newTop + newHeight);
                 // newLeft 落在 padding 内时 elementFromPoint 会命中 wysiwyg 容器，需钳制到内容区
                 const detectX = Math.max(mostLeft, Math.min(newLeft, mostRight));
@@ -2944,7 +2945,7 @@ export class WYSIWYG {
 
             if ((event.shiftKey || isOnlyMeta(event)) && !event.isComposing && range.toString() !== "") {
                 // 工具栏
-                protyle.toolbar.render(protyle, range, event);
+                protyle.toolbar.render(protyle, range);
                 countSelectWord(range);
             }
 

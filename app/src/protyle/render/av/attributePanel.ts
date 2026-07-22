@@ -47,17 +47,27 @@ export class AVAttributePanel {
         if (!targetID || (!force && targetID === this.targetID && this.element.dataset.rendered === "true")) {
             return;
         }
+        const currentBodyElement = this.bodyElement;
+        const keepCurrentBody = force && targetID === this.targetID;
         this.targetID = targetID;
         this.element.dataset.nodeId = targetID;
-        this.element.removeAttribute("data-rendered");
+        if (!keepCurrentBody) {
+            this.element.removeAttribute("data-rendered");
+        }
         const token = ++this.renderToken;
         const bodyElement = document.createElement("div");
         bodyElement.className = "custom-attr protyle-db-attr__body";
-        this.bodyElement.replaceWith(bodyElement);
-        this.bodyElement = bodyElement;
+        if (!keepCurrentBody) {
+            currentBodyElement.replaceWith(bodyElement);
+            this.bodyElement = bodyElement;
+        }
         renderAVAttribute(bodyElement, targetID, this.protyle, (renderedElement) => {
             if (token !== this.renderToken) {
                 return;
+            }
+            if (keepCurrentBody) {
+                currentBodyElement.replaceWith(renderedElement);
+                this.bodyElement = renderedElement;
             }
             this.element.dataset.rendered = "true";
             this.updateTabs();

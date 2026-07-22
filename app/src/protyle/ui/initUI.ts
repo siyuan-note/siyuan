@@ -203,10 +203,12 @@ export const initUI = (protyle: IProtyle) => {
         }
     });
     let overAttr = false;
-    /// #if !MOBILE
-    protyle.element.addEventListener("mouseover", (event: KeyboardEvent & {
+    protyle.element.addEventListener(isMobile() ? "pointerover" : "mouseover", (event: PointerEvent & {
         target: HTMLElement
     }) => {
+        if (isMobile() && event.pointerType !== "mouse") {
+            return;
+        }
         if (hasClosestByClassName(event.target, "protyle-db-attr")) {
             return;
         }
@@ -290,7 +292,6 @@ export const initUI = (protyle: IProtyle) => {
             }
         }
     });
-    /// #endif
 };
 
 export const addLoading = (protyle: IProtyle, msg?: string) => {

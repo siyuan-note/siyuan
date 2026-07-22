@@ -1,4 +1,6 @@
 {
+  "flashcardCallout": "Bilgi kutusu kartları",
+  "flashcardCalloutTip": "Etkinleştirildiğinde, bilgi kutusunun başlığı soru, içeriği ise yanıt olarak tanınır",
   "flashcardBlockquote": "Alıntı bloğu kartları",
   "flashcardBlockquoteTip": "Etkinleştirildiğinde, alıntı bloğunun ilk alt bloğu soru, kalan alt blokları ise yanıt olarak tanınır",
   "headingNumber": "Otomatik başlık numaralandırma",

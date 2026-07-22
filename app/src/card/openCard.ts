@@ -177,6 +177,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                     let hasHide = false;
                     if (!window.siyuan.config.flashcard.superBlock &&
                         !window.siyuan.config.flashcard.blockquote &&
+                        !window.siyuan.config.flashcard.callout &&
                         !window.siyuan.config.flashcard.heading &&
                         !window.siyuan.config.flashcard.list &&
                         !window.siyuan.config.flashcard.mark) {
@@ -191,6 +192,13 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                             const blockquoteElement = protyle.wysiwyg.element.querySelector(":scope > .bq[custom-riff-decks]");
                             if (blockquoteElement?.querySelector(":scope > [data-node-id] ~ [data-node-id]")) {
                                 blockquoteElement.removeAttribute("fold");
+                                hasHide = true;
+                            }
+                        }
+                        if (window.siyuan.config.flashcard.callout) {
+                            const calloutElement = protyle.wysiwyg.element.querySelector(":scope > .callout[custom-riff-decks]");
+                            if (calloutElement?.querySelector(":scope > .callout-content > [data-node-id]")) {
+                                calloutElement.removeAttribute("fold");
                                 hasHide = true;
                             }
                         }
@@ -212,7 +220,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                     }
                     const actionElements = element.querySelectorAll(".card__action");
                     if (!hasHide) {
-                        protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hidebq", "card__block--hideh");
+                        protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hidebq", "card__block--hidecallout", "card__block--hideh");
                         actionElements[0].classList.add("fn__none");
                         actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
                             if (btnIndex < 2) {
@@ -227,6 +235,9 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                         }
                         if (window.siyuan.config.flashcard.blockquote) {
                             protyle.element.classList.add("card__block--hidebq");
+                        }
+                        if (window.siyuan.config.flashcard.callout) {
+                            protyle.element.classList.add("card__block--hidecallout");
                         }
                         if (window.siyuan.config.flashcard.heading) {
                             protyle.element.classList.add("card__block--hideh");
@@ -697,7 +708,7 @@ export const bindCardEvent = async (options: {
             if (actionElements[0].classList.contains("fn__none")) {
                 type = "3";
             } else {
-                editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hidebq", "card__block--hideh");
+                editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hidebq", "card__block--hidecallout", "card__block--hideh");
                 actionElements[0].classList.add("fn__none");
                 actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
                     if (btnIndex < 2) {

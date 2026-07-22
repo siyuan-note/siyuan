@@ -1,4 +1,6 @@
 {
+  "flashcardCallout": "Flashcards van uitgelichte blokken",
+  "flashcardCalloutTip": "Indien ingeschakeld, wordt de titel van een uitgelicht blok herkend als vraag en de inhoud als antwoord",
   "flashcardBlockquote": "Flashcards van citaatblokken",
   "flashcardBlockquoteTip": "Indien ingeschakeld, wordt het eerste onderliggende blok van een citaatblok herkend als vraag en worden de overige onderliggende blokken herkend als antwoorden",
   "headingNumber": "Automatische kopnummering",

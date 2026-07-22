@@ -1,4 +1,6 @@
 {
+  "flashcardCallout": "Fiszki z bloku wyróżnienia",
+  "flashcardCalloutTip": "Po włączeniu tytuł bloku wyróżnienia jest rozpoznawany jako pytanie, a jego zawartość jako odpowiedź",
   "flashcardBlockquote": "Fiszki z bloku cytatu",
   "flashcardBlockquoteTip": "Po włączeniu pierwszy blok podrzędny bloku cytatu jest rozpoznawany jako pytanie, a pozostałe bloki podrzędne jako odpowiedzi",
   "headingNumber": "Automatyczna numeracja nagłówków",

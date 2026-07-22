@@ -1,4 +1,6 @@
 {
+  "flashcardCallout": "Schede da blocchi di richiamo",
+  "flashcardCalloutTip": "Quando è abilitato, il titolo di un blocco di richiamo viene riconosciuto come domanda e il suo contenuto come risposta",
   "flashcardBlockquote": "Schede da blocchi citazione",
   "flashcardBlockquoteTip": "Quando è abilitato, il primo blocco figlio di un blocco citazione viene riconosciuto come domanda e gli altri blocchi figli come risposte",
   "headingNumber": "Numerazione automatica dei titoli",

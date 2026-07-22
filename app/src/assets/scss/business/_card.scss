@@ -100,6 +100,10 @@
       display: none;
     }
 
+    &--hidecallout .protyle-wysiwyg > .callout[custom-riff-decks] > .callout-content {
+      display: none;
+    }
+
     &--hideh .protyle-wysiwyg > div[data-type="NodeHeading"][custom-riff-decks] ~ div {
       display: none;
     }

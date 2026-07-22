@@ -1,4 +1,6 @@
 {
+  "flashcardCallout": "提示塊製卡",
+  "flashcardCalloutTip": "啟用後支援提示塊製卡，提示塊的標題被識別為問題，內容識別為答案",
   "flashcardBlockquote": "引述塊製卡",
   "flashcardBlockquoteTip": "啟用後支援引述塊製卡，引述塊的第一個子塊被識別為問題，其餘子塊識別為答案",
   "headingNumber": "標題自動編號",

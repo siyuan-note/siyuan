@@ -875,6 +875,10 @@ declare namespace Config {
          */
         blockquote: boolean;
         /**
+         * Whether to enable callout card making
+         */
+        callout: boolean;
+        /**
          * Whether to enable deck card making
          */
         deck: boolean;

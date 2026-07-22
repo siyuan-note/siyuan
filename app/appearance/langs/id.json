@@ -1,4 +1,6 @@
 {
+  "flashcardCallout": "Kartu blok sorotan",
+  "flashcardCalloutTip": "Jika diaktifkan, judul blok sorotan dikenali sebagai pertanyaan dan isinya dikenali sebagai jawaban",
   "flashcardBlockquote": "Kartu blok kutipan",
   "flashcardBlockquoteTip": "Jika diaktifkan, blok anak pertama dari blok kutipan dikenali sebagai pertanyaan dan blok anak lainnya dikenali sebagai jawaban",
   "headingNumber": "Penomoran judul otomatis",

@@ -1,4 +1,6 @@
 {
+  "flashcardCallout": "コールアウトブロックカード",
+  "flashcardCalloutTip": "有効にすると、コールアウトのタイトルが質問として認識され、その内容が回答として認識されます",
   "flashcardBlockquote": "引用ブロックカード",
   "flashcardBlockquoteTip": "有効にすると、引用ブロックの最初の子ブロックが質問として認識され、残りの子ブロックが回答として認識されます",
   "headingNumber": "見出しの自動番号付け",

@@ -1,4 +1,6 @@
 {
+  "flashcardCallout": "Tarjetas de bloques de aviso",
+  "flashcardCalloutTip": "Cuando está habilitado, el título de un bloque de aviso se reconoce como pregunta y su contenido como respuesta",
   "flashcardBlockquote": "Tarjetas de bloques de cita",
   "flashcardBlockquoteTip": "Cuando está habilitado, el primer bloque secundario de un bloque de cita se reconoce como pregunta y los demás bloques secundarios como respuestas",
   "headingNumber": "Numeración automática de encabezados",

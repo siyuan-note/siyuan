@@ -21,7 +21,11 @@ import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {isEncryptedBox} from "../../util/pathName";
-import {queueHeadingNumberRefresh, renderHeadingNumbers} from "./headingNumber";
+import {
+    invalidateHeadingNumberRefresh,
+    queueHeadingNumberRefresh,
+    renderHeadingNumbers
+} from "./headingNumber";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -77,6 +81,7 @@ export const onGet = (options: {
     const refreshHeadingNumbers = replacesDocument && !options.data.data.headingNumbers &&
         window.siyuan.config.editor.headingNumber;
     if (replacesDocument) {
+        invalidateHeadingNumberRefresh(options.protyle);
         options.protyle.block.headingNumbers = options.data.data.headingNumbers || {};
     } else if (options.data.data.headingNumbers) {
         options.protyle.block.headingNumbers = options.data.data.headingNumbers;

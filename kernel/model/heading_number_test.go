@@ -120,11 +120,13 @@ func TestHeadingNumberFormatPresets(t *testing.T) {
 
 func TestChineseNumber(t *testing.T) {
 	tests := map[int]string{
-		1:     "一",
-		10:    "十",
-		11:    "十一",
-		101:   "一百零一",
-		10010: "一万零一十",
+		1:        "一",
+		10:       "十",
+		11:       "十一",
+		101:      "一百零一",
+		10010:    "一万零一十",
+		11000:    "一万一千",
+		10010001: "一千零一万零一",
 	}
 	for number, want := range tests {
 		if got := chineseNumber(number); got != want {

@@ -269,6 +269,7 @@ func chineseNumber(number int) string {
 	bigUnits := []string{"", "万", "亿", "万亿"}
 	ret := ""
 	zeroPending := false
+	lowerSection := 0
 	unitIndex := 0
 	for 0 < number {
 		section := number % 10000
@@ -281,12 +282,13 @@ func chineseNumber(number int) string {
 				return strconv.Itoa(original)
 			}
 			sectionText := chineseSection(section) + bigUnits[unitIndex]
-			if "" != ret && (zeroPending || 1000 > section) {
+			if "" != ret && (zeroPending || 1000 > lowerSection) {
 				sectionText += "零"
 			}
 			ret = sectionText + ret
 			zeroPending = false
 		}
+		lowerSection = section
 		number /= 10000
 		unitIndex++
 	}

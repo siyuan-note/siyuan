@@ -593,10 +593,10 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         : "";
     const chips = options.map((option: { name: string; color: string; desc?: string }) => {
         const selected = selectedValues.some((s: IAVCellSelectValue) => s.content === option.name);
-        return `<span class="b3-chip b3-chip--middle${selected ? " b3-chip--primary" : ""} av__select-option" data-name="${escapeAttr(option.name)}" data-color="${option.color}" data-type="selectOption" data-path="${path}" style="background-color:var(--b3-font-background${option.color});color:var(--b3-font-color${option.color})">
-<svg class="icon"><use xlink:href="#${selected ? "iconCheck" : "iconUncheck"}"></use></svg>
-<span class="fn__ellipsis">${escapeHtml(option.name)}</span>
-</span>`;
+        return `<button type="button" class="av__select-option" data-name="${escapeAttr(option.name)}" data-color="${option.color}" data-type="selectOption" data-path="${path}">
+<svg class="av__select-option-check"><use xlink:href="#${selected ? "iconCheck" : "iconUncheck"}"></use></svg>
+<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${option.color});color:var(--b3-font-color${option.color})"><span class="fn__ellipsis">${escapeHtml(option.name)}</span></span>
+</button>`;
     }).join("");
     const dropdown = `<div class="av__select-dropdown" data-type="selectDropdown" data-path="${path}" data-single="${isSingle ? "true" : "false"}" style="display:none;">
 ${searchInput}<div class="av__select-options" data-type="selectOptions" data-path="${path}">${chips}</div>
@@ -673,10 +673,10 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
         const mSelect: IAVCellSelectValue[] = [];
         const dropdown = document.querySelector(`[data-type="selectDropdown"][data-path="${path}"]`);
         const searchRoot = dropdown || rowElement; // 兜底：兼容旧结构
-        searchRoot.querySelectorAll('[data-type="selectOption"]').forEach((chip: HTMLElement) => {
-            const useEl = chip.querySelector("use");
+        searchRoot.querySelectorAll('[data-type="selectOption"]').forEach((option: HTMLElement) => {
+            const useEl = option.querySelector(".av__select-option-check use");
             if (useEl && useEl.getAttribute("xlink:href") === "#iconCheck") {
-                mSelect.push({content: chip.dataset.name, color: chip.dataset.color});
+                mSelect.push({content: option.dataset.name, color: option.dataset.color});
             }
         });
         newValue = mSelect.length > 0 ? genCellValue(valueType, mSelect) : genEmptyCellValue(valueType);
@@ -897,42 +897,41 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             event.stopImmediatePropagation();
             return;
         }
-        // 再处理 selectOption chip 点击（切换选中态）
-        const chip = target.closest('[data-type="selectOption"]') as HTMLElement;
-        if (!chip) return;
-        const path = chip.dataset.path;
-        const row = getRow(chip);
+        // 再处理 selectOption 点击（切换选中态）
+        const option = target.closest('[data-type="selectOption"]') as HTMLElement;
+        if (!option) return;
+        const path = option.dataset.path;
+        const row = getRow(option);
         if (!path || !row) return;
         const dropdown = menuElement.querySelector(`[data-type="selectDropdown"][data-path="${path}"]`) as HTMLElement;
         const isSingle = dropdown?.dataset.single === "true";
-        const useEl = chip.querySelector("use");
+        const useEl = option.querySelector(".av__select-option-check use");
+        if (!useEl) return;
         const isCheck = useEl.getAttribute("xlink:href") === "#iconCheck";
         if (isSingle && !isCheck) {
             // 单选：点击新选项时，先取消该下拉内所有其它已选项
-            dropdown.querySelectorAll('[data-type="selectOption"]').forEach((c: HTMLElement) => {
-                if (c !== chip) {
-                    const u = c.querySelector("use");
-                    if (u && u.getAttribute("xlink:href") === "#iconCheck") {
-                        u.setAttribute("xlink:href", "#iconUncheck");
-                        c.classList.remove("b3-chip--primary");
+            dropdown.querySelectorAll('[data-type="selectOption"]').forEach((item: HTMLElement) => {
+                if (item !== option) {
+                    const itemUseElement = item.querySelector(".av__select-option-check use");
+                    if (itemUseElement && itemUseElement.getAttribute("xlink:href") === "#iconCheck") {
+                        itemUseElement.setAttribute("xlink:href", "#iconUncheck");
                     }
                 }
             });
         }
-        // toggle 当前项 iconCheck/iconUncheck + primary 类
+        // 切换当前项 iconCheck/iconUncheck
         useEl.setAttribute("xlink:href", isCheck ? "#iconUncheck" : "#iconCheck");
-        chip.classList.toggle("b3-chip--primary", !isCheck);
         // 更新触发器显示（重建 chip 列表，与表格单元格样式一致）
         const triggerEl = menuElement.querySelector(`[data-type="selectTrigger"][data-path="${path}"]`) as HTMLElement;
         if (triggerEl && dropdown) {
             const isSingleSel = dropdown.dataset.single === "true";
             const placeholderStr = isSingleSel ? window.siyuan.languages.select : window.siyuan.languages.multiSelect;
             const selectedChips: string[] = [];
-            dropdown.querySelectorAll('[data-type="selectOption"]').forEach((c: HTMLElement) => {
-                const u = c.querySelector("use");
-                if (u && u.getAttribute("xlink:href") === "#iconCheck") {
-                    const name = c.dataset.name;
-                    const color = c.dataset.color;
+            dropdown.querySelectorAll('[data-type="selectOption"]').forEach((item: HTMLElement) => {
+                const itemUseElement = item.querySelector(".av__select-option-check use");
+                if (itemUseElement && itemUseElement.getAttribute("xlink:href") === "#iconCheck") {
+                    const name = item.dataset.name;
+                    const color = item.dataset.color;
                     selectedChips.push(`<span class="b3-chip b3-chip--middle av__select-chip" style="background-color:var(--b3-font-background${color});color:var(--b3-font-color${color})">${escapeHtml(name)}</span>`);
                 }
             });
@@ -967,9 +966,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             const dropdown = menuElement.querySelector(`[data-type="selectDropdown"][data-path="${path}"]`);
             if (!dropdown) return;
             const key = (target as HTMLInputElement).value.toLowerCase();
-            dropdown.querySelectorAll('[data-type="selectOption"]').forEach((chip: HTMLElement) => {
-                const name = (chip.dataset.name || "").toLowerCase();
-                chip.style.display = (!key || name.indexOf(key) > -1 || key.indexOf(name) > -1) ? "" : "none";
+            dropdown.querySelectorAll('[data-type="selectOption"]').forEach((option: HTMLElement) => {
+                const name = (option.dataset.name || "").toLowerCase();
+                option.style.display = (!key || name.indexOf(key) > -1 || key.indexOf(name) > -1) ? "" : "none";
             });
         } else if (target.dataset.type === "filterValue" && target.dataset.typeRel === "relation") {
             // 关联筛选按主键显示文本匹配，输入内容同时作为候选搜索关键字和筛选值。

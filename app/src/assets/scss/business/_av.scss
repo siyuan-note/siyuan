@@ -1319,21 +1319,41 @@
         margin: 1px 2px;
       }
 
-      // 下拉面板内的选项 chip
+      // 下拉面板内的选项
       .av__select-option {
         margin: 2px 0;
-        cursor: pointer;
         width: 100%;
+        padding: 0;
+        border: 0;
+        border-radius: var(--b3-border-radius);
+        background-color: transparent;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
         box-sizing: border-box;
         overflow: hidden;
 
-        svg {
+        &:hover,
+        &:focus-visible {
+          background-color: var(--b3-list-hover);
+        }
+
+        &-check {
           width: 12px;
           height: 12px;
           flex-shrink: 0;
         }
 
-        .fn__ellipsis {
+        .b3-chip {
+          max-width: calc(100% - 18px);
+          overflow: hidden;
+        }
+
+        .b3-chip .fn__ellipsis {
           min-width: 0;
         }
       }

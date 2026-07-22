@@ -1354,7 +1354,7 @@ export class WYSIWYG {
             }
 
             // 多选节点
-            const lastRect = protyle.wysiwyg.element.lastElementChild.getBoundingClientRect();
+            const lastBlockRect = protyle.wysiwyg.element.lastElementChild.getBoundingClientRect();
             // 起点落在 padding 时，需用内容区内的坐标定位起始块
             if (startsFromPadding) {
                 const startX = event.clientX > mostRight ? mostRight - 10 :
@@ -1362,24 +1362,18 @@ export class WYSIWYG {
                 // wysiwyg padding 较大（如打字机模式）时，需沿 y 轴循环探测直到命中块
                 nodeElement = hasClosestBlock(document.elementFromPoint(startX, event.clientY)) as HTMLElement;
                 if (!nodeElement) {
-                    const probe = (step: number, limit: number) => {
-                        let probeY = event.clientY;
-                        while (!nodeElement && (step > 0 ? probeY < limit : probeY > limit)) {
-                            probeY += step;
-                            const probeElement = document.elementFromPoint(startX, probeY);
-                            if (probeElement && !probeElement.classList.contains("protyle-wysiwyg")) {
-                                nodeElement = hasClosestBlock(probeElement) as HTMLElement;
-                            }
+                    let probeY = event.clientY;
+                    const probeStep = event.clientY > lastBlockRect.bottom ? -8 : 8;
+                    const probeLimit = probeStep > 0 ? lastBlockRect.bottom : wysiwygRect.top;
+                    while (!nodeElement && (probeStep > 0 ? probeY < probeLimit : probeY > probeLimit)) {
+                        probeY += probeStep;
+                        const probeElement = document.elementFromPoint(startX, probeY);
+                        if (probeElement && !probeElement.classList.contains("protyle-wysiwyg")) {
+                            nodeElement = hasClosestBlock(probeElement) as HTMLElement;
                         }
-                    };
-                    if (event.clientY > lastRect.bottom) {
-                        probe(-8, wysiwygRect.top);
-                    } else {
-                        probe(8, lastRect.bottom);
                     }
                 }
             }
-            // 起点在 padding 时 nodeElement 为探测所得，向上划选的遍历终点应用落点 y 而非 nodeElement 边
             if (!nodeElement) {
                 const breadElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
                 if (breadElement) {
@@ -1387,7 +1381,7 @@ export class WYSIWYG {
                 }
             }
             const mostTop = protyleRect.top + (protyle.options.render.breadcrumb ? protyle.breadcrumb.element.parentElement.clientHeight : 0);
-            let mouseElement: Element;
+            const selectStartScrollTop = protyle.contentElement.scrollTop;
             let moveCellElement: HTMLElement;
             this.element.querySelectorAll("iframe").forEach(item => {
                 item.style.pointerEvents = "none";
@@ -1492,82 +1486,42 @@ export class WYSIWYG {
                 if (!nodeElement) {
                     return;
                 }
-                protyle.selectElement.classList.remove("fn__none");
                 // 向左选择，遇到 gutter 就不会弹出 toolbar
                 hideElements(["gutter"], protyle);
-                const selectStartY = nodeElement.getBoundingClientRect().top;
-                let newTop = 0;
-                let newLeft = 0;
-                let newWidth = 0;
-                let newHeight = 0;
-                if (moveEvent.clientX < event.clientX) {
-                    // 向左：左边缘跟随鼠标，右边缘固定为起点
-                    newLeft = Math.max(moveEvent.clientX, wysiwygRect.left);
-                    newWidth = Math.min(event.clientX, wysiwygRect.right) - newLeft;
-                } else {
-                    // 向右：左边缘固定为起点，右边缘跟随鼠标
-                    newLeft = Math.max(event.clientX, wysiwygRect.left);
-                    newWidth = Math.min(moveEvent.clientX, wysiwygRect.right) - newLeft;
-                }
-
-                if (moveEvent.clientY > y) {
-                    if (moveEvent.clientY > mostBottom) {
-                        // 向下越界
-                        newTop = y;
-                        newHeight = mostBottom - y;
-                    } else {
-                        // 向下
-                        newTop = y;
-                        newHeight = moveEvent.clientY - y;
-                    }
-                } else {
-                    if (moveEvent.clientY < mostTop) {
-                        // 向上越界
-                        newTop = mostTop;
-                    } else {
-                        // 向上
-                        newTop = moveEvent.clientY;
-                    }
-                    newHeight = y - newTop;
-                }
-                if (newHeight < 4) {
+                const scrollTop = protyle.contentElement.scrollTop;
+                const startY = y + selectStartScrollTop;
+                const moveY = Math.max(mostTop, Math.min(moveEvent.clientY, mostBottom)) + scrollTop;
+                const selectLeft = Math.max(Math.min(event.clientX, moveEvent.clientX), wysiwygRect.left);
+                const selectRight = Math.min(Math.max(event.clientX, moveEvent.clientX), wysiwygRect.right);
+                const selectTop = Math.min(startY, moveY) - scrollTop;
+                const selectHeight = Math.abs(moveY - startY);
+                if (selectHeight < 4) {
+                    hideElements(["select"], protyle);
+                    protyle.selectElement.classList.add("fn__none");
+                    protyle.selectElement.removeAttribute("style");
                     return;
                 }
-                protyle.selectElement.setAttribute("style", `top:${newTop}px;height:${newHeight}px;left:${newLeft + 2}px;width:${newWidth - 2}px;`);
-                const newMouseElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-                if (mouseElement && mouseElement === newMouseElement && !mouseElement.classList.contains("protyle-wysiwyg") &&
-                    !mouseElement.classList.contains("list") && !mouseElement.classList.contains("bq") &&
-                    !mouseElement.classList.contains("sb") && !mouseElement.classList.contains("callout")) {
-                    // 性能优化，同一个p元素不进行选中计算
-                    return;
-                } else {
-                    mouseElement = newMouseElement;
-                }
+                protyle.selectElement.classList.remove("fn__none");
+                protyle.selectElement.setAttribute("style", `top:${selectTop - protyleRect.top}px;height:${selectHeight}px;left:${selectLeft - protyleRect.left}px;width:${selectRight - selectLeft}px;`);
+                const selectRect = protyle.selectElement.getBoundingClientRect();
                 hideElements(["select"], protyle);
-                // 块选择判定用的右边界需落在内容区，避免矩形右边缘在 padding 内时选不中块
-                const selectRight = Math.max(newLeft + newWidth, mostLeft);
-                // 向上划选时以 nodeElement 的实时边作为遍历终点（兼容滚动 https://github.com/siyuan-note/siyuan/issues/14664）；
-                // 落点在缝隙/padding 时 nodeElement 为探测所得的块，其边会超出落点 y 导致误选，故以落点 y 为终点
-                const startBlockRect = nodeElement.getBoundingClientRect();
-                const selectBottom = moveEvent.clientY <= selectStartY
-                    ? (startsFromPadding ? y : startBlockRect.bottom)
-                    : (newTop + newHeight);
-                // newLeft 落在 padding 内时 elementFromPoint 会命中 wysiwyg 容器，需钳制到内容区
-                const detectX = Math.max(mostLeft, Math.min(newLeft, mostRight));
+                // 矩形左边缘落在 padding 内时 elementFromPoint 会命中 wysiwyg 容器，需钳制到内容区
+                const detectX = Math.max(mostLeft, Math.min(selectRect.left, mostRight));
                 let firstElement;
-                if (moveEvent.clientY > selectStartY) {
+                const isDown = moveY > startY;
+                if (isDown) {
                     firstElement = nodeElement;
                 } else {
-                    firstElement = document.elementFromPoint(detectX, newTop);
+                    firstElement = document.elementFromPoint(detectX, selectRect.top);
                 }
                 if (!firstElement) {
                     return;
                 }
                 // 向上划选且落点在 padding/缝隙时，elementFromPoint 易命中 wysiwyg 容器或容器类元素，
                 // 需沿 y 轴循环向下探测以定位到实际块，避免回退到文档首块导致误选上部所有块
-                if (moveEvent.clientY <= selectStartY && isContainer(firstElement)) {
-                    let probeY = newTop;
-                    while (probeY < selectBottom) {
+                if (!isDown && isContainer(firstElement)) {
+                    let probeY = selectRect.top;
+                    while (probeY < selectRect.bottom) {
                         probeY += 8;
                         const probeElement = document.elementFromPoint(detectX, probeY);
                         // 命中非容器元素或容器块（list/sb 等 hasClosestBlock 可识别）即采用
@@ -1584,16 +1538,16 @@ export class WYSIWYG {
                 if (!firstBlockElement && firstElement.classList.contains("protyle-breadcrumb__bar")) {
                     firstBlockElement = firstElement.nextElementSibling as HTMLElement;
                 }
-                if (moveEvent.clientY <= selectStartY && !firstBlockElement &&
+                if (!isDown && !firstBlockElement &&
                     // https://github.com/siyuan-note/siyuan/issues/7580
-                    moveEvent.clientY < lastRect.bottom) {
+                    moveEvent.clientY < lastBlockRect.bottom) {
                     firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
                     if (firstBlockElement.classList.contains("protyle-breadcrumb__bar")) {
                         firstBlockElement = firstBlockElement.nextElementSibling as HTMLElement;
                     }
                 }
                 let selectElements: Element[] = [];
-                let currentElement: Element | boolean = firstBlockElement;
+                let currentElement: Element | false = firstBlockElement;
 
                 if (currentElement) {
                     // 从下往上划选遇到嵌入块时，选中整个嵌入块
@@ -1605,52 +1559,60 @@ export class WYSIWYG {
 
                 let hasJump = false;
                 while (currentElement) {
-                    if (currentElement && !currentElement.classList.contains("protyle-attr")) {
-                        const currentRect = currentElement.getBoundingClientRect();
-                        if (currentRect.height > 0 && currentRect.top < selectBottom && currentRect.left < selectRight) {
-                            if (hasJump) {
-                                // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
-                                if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
-                                    const nextRect = currentElement.nextElementSibling.getBoundingClientRect();
-                                    if (nextRect.top < selectBottom && nextRect.left < selectRight) {
-                                        selectElements = [currentElement];
-                                        currentElement = currentElement.nextElementSibling;
-                                        hasJump = false;
-                                    } else if (currentElement.parentElement.classList.contains("sb")) {
-                                        currentElement = hasClosestBlock(currentElement.parentElement);
-                                        hasJump = true;
-                                    } else {
-                                        break;
-                                    }
-                                } else {
-                                    currentElement = hasClosestBlock(currentElement.parentElement);
-                                    hasJump = true;
-                                }
-                            } else {
-                                if (!currentElement.classList.contains("protyle-breadcrumb__bar") &&
-                                    !currentElement.classList.contains("protyle-breadcrumb__item") &&
-                                    !currentElement.classList.contains("sb__resize")) {
-                                    selectElements.push(currentElement);
-                                }
-                                if (!currentElement.nextElementSibling && currentElement.parentElement.classList.contains("callout-content")) {
-                                    currentElement = currentElement.parentElement.nextElementSibling;
-                                } else {
-                                    currentElement = currentElement.nextElementSibling;
-                                }
-                            }
-                        } else if (currentElement.parentElement.classList.contains("sb")) {
+                    if (currentElement.classList.contains("protyle-attr")) {
+                        currentElement = hasClosestBlock(currentElement.parentElement);
+                        hasJump = true;
+                        continue;
+                    }
+                    const currentRect = currentElement.getBoundingClientRect();
+                    const currentInRange = currentRect.height > 0 && currentRect.top < selectRect.bottom &&
+                        currentRect.bottom > selectRect.top && currentRect.left < selectRect.right &&
+                        currentRect.right > selectRect.left;
+                    if (!currentInRange) {
+                        if (currentElement.parentElement.classList.contains("sb")) {
                             // 跳出超级块横向排版中的未选中元素
                             currentElement = hasClosestBlock(currentElement.parentElement);
                             hasJump = true;
-                        } else if (currentRect.height === 0 && currentRect.width === 0 && currentElement.parentElement.getAttribute("fold") === "1") {
+                            continue;
+                        }
+                        if (currentRect.height === 0 && currentRect.width === 0 &&
+                            currentElement.parentElement.getAttribute("fold") === "1") {
                             currentElement = currentElement.parentElement;
                             selectElements = [];
-                        } else {
-                            break;
+                            continue;
                         }
+                        break;
+                    }
+                    if (hasJump) {
+                        const nextElement = currentElement.nextElementSibling;
+                        if (!nextElement || nextElement.classList.contains("protyle-attr")) {
+                            currentElement = hasClosestBlock(currentElement.parentElement);
+                            continue;
+                        }
+                        const nextRect = nextElement.getBoundingClientRect();
+                        const nextInRange = nextRect.top < selectRect.bottom && nextRect.bottom > selectRect.top &&
+                            nextRect.left < selectRect.right && nextRect.right > selectRect.left;
+                        if (nextInRange) {
+                            selectElements = [currentElement];
+                            currentElement = nextElement;
+                            hasJump = false;
+                            continue;
+                        }
+                        if (currentElement.parentElement.classList.contains("sb")) {
+                            currentElement = hasClosestBlock(currentElement.parentElement);
+                            continue;
+                        }
+                        break;
+                    }
+                    if (!currentElement.classList.contains("protyle-breadcrumb__bar") &&
+                        !currentElement.classList.contains("protyle-breadcrumb__item") &&
+                        !currentElement.classList.contains("sb__resize")) {
+                        selectElements.push(currentElement);
+                    }
+                    if (!currentElement.nextElementSibling && currentElement.parentElement.classList.contains("callout-content")) {
+                        currentElement = currentElement.parentElement.nextElementSibling;
                     } else {
-                        currentElement = hasClosestBlock(currentElement.parentElement);
-                        hasJump = true;
+                        currentElement = currentElement.nextElementSibling;
                     }
                 }
                 selectElements.forEach(item => {

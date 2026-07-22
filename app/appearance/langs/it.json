@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "Schede da blocchi citazione",
+  "flashcardBlockquoteTip": "Quando è abilitato, il primo blocco figlio di un blocco citazione viene riconosciuto come domanda e gli altri blocchi figli come risposte",
   "headingNumber": "Numerazione automatica dei titoli",
   "headingNumberTip": "Mostra automaticamente numeri gerarchici prima dei titoli",
   "headingNumberFormat": "Formato di numerazione dei titoli",

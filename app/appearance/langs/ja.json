@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "引用ブロックカード",
+  "flashcardBlockquoteTip": "有効にすると、引用ブロックの最初の子ブロックが質問として認識され、残りの子ブロックが回答として認識されます",
   "headingNumber": "見出しの自動番号付け",
   "headingNumberTip": "見出しの前に階層番号を自動表示します",
   "headingNumberFormat": "見出し番号の形式",

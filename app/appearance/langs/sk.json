@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "Kartičky z bloku citácie",
+  "flashcardBlockquoteTip": "Po zapnutí sa prvý podradený blok bloku citácie rozpozná ako otázka a ostatné podradené bloky ako odpovede",
   "headingNumber": "Automatické číslovanie nadpisov",
   "headingNumberTip": "Automaticky zobrazovať hierarchické čísla pred nadpismi",
   "headingNumberFormat": "Formát číslovania nadpisov",

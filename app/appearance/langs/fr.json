@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "Cartes de blocs de citation",
+  "flashcardBlockquoteTip": "Lorsque cette option est activée, le premier bloc enfant d'un bloc de citation est reconnu comme une question et les autres blocs enfants comme des réponses",
   "headingNumber": "Numérotation automatique des titres",
   "headingNumberTip": "Afficher automatiquement des numéros hiérarchiques avant les titres",
   "headingNumberFormat": "Format de numérotation des titres",

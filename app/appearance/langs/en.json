@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "Blockquote Carding",
+  "flashcardBlockquoteTip": "When enabled, the first child block of a blockquote is recognized as a question, and the rest of the child blocks are recognized as answers",
   "headingNumber": "Automatic heading numbering",
   "headingNumberTip": "Automatically display hierarchical numbers before headings",
   "headingNumberFormat": "Heading numbering format",

@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "Blockzitat-Karten",
+  "flashcardBlockquoteTip": "Wenn aktiviert, wird der erste untergeordnete Block eines Blockzitats als Frage und die übrigen untergeordneten Blöcke als Antworten erkannt",
   "headingNumber": "Automatische Überschriftennummerierung",
   "headingNumberTip": "Hierarchische Nummern automatisch vor Überschriften anzeigen",
   "headingNumberFormat": "Format der Überschriftennummerierung",

@@ -12,6 +12,10 @@ const registerFlashcardCreationGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.flashcardList,
         desc: window.siyuan.languages.flashcardListTip,
     });
+    group.switch("flashcard.blockquote", {
+        title: window.siyuan.languages.flashcardBlockquote,
+        desc: window.siyuan.languages.flashcardBlockquoteTip,
+    });
     group.switch("flashcard.heading", {
         title: window.siyuan.languages.flashcardHeading,
         desc: window.siyuan.languages.flashcardHeadingTip,

@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "引述塊製卡",
+  "flashcardBlockquoteTip": "啟用後支援引述塊製卡，引述塊的第一個子塊被識別為問題，其餘子塊識別為答案",
   "headingNumber": "標題自動編號",
   "headingNumberTip": "在標題前自動顯示層級編號",
   "headingNumberFormat": "標題編號格式",

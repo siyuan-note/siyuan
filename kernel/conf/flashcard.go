@@ -28,6 +28,7 @@ type Flashcard struct {
 	ReviewCardLimit int  `json:"reviewCardLimit"` // 复习卡上限 https://github.com/siyuan-note/siyuan/issues/7703
 	Mark            bool `json:"mark"`            // 是否启用标记制卡 https://github.com/siyuan-note/siyuan/issues/7794
 	List            bool `json:"list"`            // 是否启用列表块制卡 https://github.com/siyuan-note/siyuan/issues/7701
+	Blockquote      bool `json:"blockquote"`      // 是否启用引述块制卡 https://github.com/siyuan-note/siyuan/issues/11728
 	SuperBlock      bool `json:"superBlock"`      // 是否启用超级块制卡 https://github.com/siyuan-note/siyuan/issues/7702
 	Heading         bool `json:"heading"`         // 是否启用标题块制卡 https://github.com/siyuan-note/siyuan/issues/9005
 	Deck            bool `json:"deck"`            // 是否启用卡包制卡 https://github.com/siyuan-note/siyuan/issues/7724
@@ -46,6 +47,7 @@ func NewFlashcard() *Flashcard {
 		ReviewCardLimit:  200,
 		Mark:             true,
 		List:             true,
+		Blockquote:       true,
 		SuperBlock:       true,
 		Heading:          true,
 		Deck:             false,

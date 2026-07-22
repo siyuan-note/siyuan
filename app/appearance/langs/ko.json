@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "인용 블록 카드 만들기",
+  "flashcardBlockquoteTip": "활성화하면 인용 블록의 첫 번째 하위 블록은 질문으로, 나머지 하위 블록은 답변으로 인식됩니다",
   "headingNumber": "제목 자동 번호 매기기",
   "headingNumberTip": "제목 앞에 계층 번호를 자동으로 표시합니다",
   "headingNumberFormat": "제목 번호 형식",

@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "Kartu blok kutipan",
+  "flashcardBlockquoteTip": "Jika diaktifkan, blok anak pertama dari blok kutipan dikenali sebagai pertanyaan dan blok anak lainnya dikenali sebagai jawaban",
   "headingNumber": "Penomoran judul otomatis",
   "headingNumberTip": "Tampilkan nomor hierarkis secara otomatis sebelum judul",
   "headingNumberFormat": "Format penomoran judul",

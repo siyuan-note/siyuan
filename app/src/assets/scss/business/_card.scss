@@ -96,6 +96,10 @@
       display: none;
     }
 
+    &--hidebq .protyle-wysiwyg > .bq[custom-riff-decks] > [data-node-id] ~ [data-node-id] {
+      display: none;
+    }
+
     &--hideh .protyle-wysiwyg > div[data-type="NodeHeading"][custom-riff-decks] ~ div {
       display: none;
     }

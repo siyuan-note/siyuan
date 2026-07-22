@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "Fiszki z bloku cytatu",
+  "flashcardBlockquoteTip": "Po włączeniu pierwszy blok podrzędny bloku cytatu jest rozpoznawany jako pytanie, a pozostałe bloki podrzędne jako odpowiedzi",
   "headingNumber": "Automatyczna numeracja nagłówków",
   "headingNumberTip": "Automatycznie wyświetlaj numery hierarchiczne przed nagłówkami",
   "headingNumberFormat": "Format numeracji nagłówków",

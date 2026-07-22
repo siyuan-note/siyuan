@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "Alıntı bloğu kartları",
+  "flashcardBlockquoteTip": "Etkinleştirildiğinde, alıntı bloğunun ilk alt bloğu soru, kalan alt blokları ise yanıt olarak tanınır",
   "headingNumber": "Otomatik başlık numaralandırma",
   "headingNumberTip": "Başlıkların önünde hiyerarşik numaraları otomatik olarak göster",
   "headingNumberFormat": "Başlık numaralandırma biçimi",

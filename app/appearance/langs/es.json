@@ -1,4 +1,6 @@
 {
+  "flashcardBlockquote": "Tarjetas de bloques de cita",
+  "flashcardBlockquoteTip": "Cuando está habilitado, el primer bloque secundario de un bloque de cita se reconoce como pregunta y los demás bloques secundarios como respuestas",
   "headingNumber": "Numeración automática de encabezados",
   "headingNumberTip": "Mostrar automáticamente números jerárquicos antes de los encabezados",
   "headingNumberFormat": "Formato de numeración de encabezados",

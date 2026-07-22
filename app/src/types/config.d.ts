@@ -871,6 +871,10 @@ declare namespace Config {
      */
     export interface IFlashCard {
         /**
+         * Whether to enable blockquote card making
+         */
+        blockquote: boolean;
+        /**
          * Whether to enable deck card making
          */
         deck: boolean;

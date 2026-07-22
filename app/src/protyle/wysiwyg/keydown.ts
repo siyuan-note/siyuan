@@ -131,7 +131,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // https://ld246.com/article/1694506408293
         const endElement = hasClosestBlock(range.endContainer);
-        if (!matchHotKey("⌘C", event) && endElement && nodeElement !== endElement) {
+        if (!matchHotKey("⌘C", event) && event.key !== "Escape" && endElement && nodeElement !== endElement) {
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -1367,7 +1367,22 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     hideElements(["select"], protyle);
                 }
             } else {
-                if (!protyle.toolbar.element.classList.contains("fn__none") ||
+                if (endElement && nodeElement !== endElement) {
+                    hideElements(["toolbar", "hint", "util", "select"], protyle);
+                    const selectElements: HTMLElement[] = [];
+                    protyle.wysiwyg.element.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
+                        if (!item.querySelector("[data-node-id]") && range.intersectsNode(item)) {
+                            const embedElement = isInEmbedBlock(item);
+                            const selectElement = getTopAloneElement(embedElement || item) as HTMLElement;
+                            if (!selectElements.includes(selectElement)) {
+                                selectElements.push(selectElement);
+                                selectElement.classList.add("protyle-wysiwyg--select");
+                            }
+                        }
+                    });
+                    range.collapse(false);
+                    countBlockWord(selectElements.map(item => item.getAttribute("data-node-id")), protyle.block.rootID);
+                } else if (!protyle.toolbar.element.classList.contains("fn__none") ||
                     !protyle.hint.element.classList.contains("fn__none") ||
                     !protyle.toolbar.subElement.classList.contains("fn__none")) {
                     hideElements(["toolbar", "hint", "util"], protyle);

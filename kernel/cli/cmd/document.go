@@ -124,19 +124,12 @@ var documentGetCmd = &cobra.Command{
 			fmt.Println(string(data))
 		default:
 			fmt.Printf("ID:       %s\n", block.ID)
-			fmt.Printf("Title:    %s\n", block.Name)
+			fmt.Printf("Title:    %s\n", block.Content)
 			fmt.Printf("Type:     %s\n", block.Type)
 			fmt.Printf("Box:      %s\n", block.Box)
 			fmt.Printf("HPath:    %s\n", block.HPath)
 			fmt.Printf("Created:  %s\n", block.Created)
 			fmt.Printf("Updated:  %s\n", block.Updated)
-			if block.Content != "" {
-				preview := block.Content
-				if len(preview) > 200 {
-					preview = preview[:200] + "..."
-				}
-				fmt.Printf("Content:  %s\n", preview)
-			}
 		}
 		return nil
 	},

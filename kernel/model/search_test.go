@@ -17,6 +17,7 @@
 package model
 
 import (
+	gosql "database/sql"
 	"slices"
 	"strings"
 	"testing"
@@ -206,6 +207,8 @@ func TestBuildRefUsedOrderByEmpty(t *testing.T) {
 }
 
 func TestBuildOrderByPrioritizesExactDocumentAndHeading(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+
 	orderBy := buildOrderBy("数学", 0, 0)
 	assertOrderBySequence(t, orderBy,
 		"content = '数学' AND type = 'd'",
@@ -228,11 +231,82 @@ func TestBuildOrderByPrioritizesExactDocumentAndHeading(t *testing.T) {
 	}
 }
 
-func TestBuildOrderByEscapesKeyword(t *testing.T) {
-	orderBy := buildOrderBy("O'Reilly", 0, 7)
-	if !strings.Contains(orderBy, "content = 'O''Reilly'") {
-		t.Fatalf("排序语句中的关键词未正确转义：%q", orderBy)
+func TestBuildOrderByPrioritizesCaseInsensitiveExactMatches(t *testing.T) {
+	setSearchCaseSensitive(t, false)
+
+	orderBy := buildOrderBy("seo", 0, 0)
+	assertOrderBySequence(t, orderBy,
+		"name LIKE 'seo' ESCAPE '\\'",
+		"alias LIKE 'seo' ESCAPE '\\'",
+		"content LIKE 'seo' ESCAPE '\\' AND type = 'd'",
+		"content LIKE '%seo%' AND type = 'd'",
+		"content LIKE 'seo' ESCAPE '\\' AND type = 'h'",
+		"content LIKE '%seo%' AND type = 'h'",
+		"sort ASC",
+	)
+
+	orderBy = buildOrderBy("seo", 0, 7)
+	assertOrderBySequence(t, orderBy,
+		"content LIKE 'seo' ESCAPE '\\' AND type = 'd'",
+		"content LIKE 'seo' ESCAPE '\\' AND type = 'h'",
+		"rank",
+	)
+
+	orderBy = buildOrderBy("seo", 0, 6)
+	if strings.Contains(orderBy, "content LIKE 'seo'") {
+		t.Fatalf("按相关度升序不应将完全命中结果置顶：%q", orderBy)
 	}
+}
+
+func TestBuildOrderByRanksCaseInsensitiveExactContentFirst(t *testing.T) {
+	setSearchCaseSensitive(t, false)
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		testDB.Close()
+	})
+	if _, err = testDB.Exec("CREATE TABLE blocks (name TEXT, alias TEXT, content TEXT, type TEXT, sort INTEGER, updated TEXT)"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = testDB.Exec("INSERT INTO blocks VALUES ('', '', 'Learn seo', 'd', 0, ''), ('', '', 'SEO', 'd', 1, '')"); err != nil {
+		t.Fatal(err)
+	}
+
+	row := testDB.QueryRow("SELECT content FROM blocks " + buildOrderBy("seo", 0, 0) + " LIMIT 1")
+	var content string
+	if err = row.Scan(&content); err != nil {
+		t.Fatal(err)
+	}
+	if "SEO" != content {
+		t.Fatalf("忽略大小写搜索时，完全命中的内容应排在首位：%q", content)
+	}
+}
+
+func TestBuildExactSearchOrderConditionEscapesKeyword(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	condition := buildExactSearchOrderCondition("content", "O'Reilly%_\\")
+	if expected := "content = 'O''Reilly%_\\'"; expected != condition {
+		t.Fatalf("区分大小写的完全命中条件错误：got %q, want %q", condition, expected)
+	}
+
+	Conf.Search.CaseSensitive = false
+	condition = buildExactSearchOrderCondition("content", "O'Reilly%_\\")
+	if expected := "content LIKE 'O''Reilly\\%\\_\\\\' ESCAPE '\\'"; expected != condition {
+		t.Fatalf("忽略大小写的完全命中条件错误：got %q, want %q", condition, expected)
+	}
+}
+
+func setSearchCaseSensitive(t *testing.T, caseSensitive bool) {
+	t.Helper()
+	previousConf := Conf
+	Conf = NewAppConf()
+	Conf.Search = conf.NewSearch()
+	Conf.Search.CaseSensitive = caseSensitive
+	t.Cleanup(func() {
+		Conf = previousConf
+	})
 }
 
 func assertOrderBySequence(t *testing.T, orderBy string, fragments ...string) {

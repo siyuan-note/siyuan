@@ -1578,25 +1578,38 @@ func buildOrderBy(query string, method, orderBy int) string {
 		if 0 != method && 1 != method {
 			return "ORDER BY sort ASC, updated DESC"
 		}
+		exactContent := buildExactSearchOrderCondition("content", query)
 		clause := "ORDER BY CASE " +
-			"WHEN content = '${keyword}' AND type = 'd' THEN 10 " +
-			"WHEN content = '${keyword}' AND type = 'h' THEN 20 " +
+			"WHEN " + exactContent + " AND type = 'd' THEN 10 " +
+			"WHEN " + exactContent + " AND type = 'h' THEN 20 " +
 			"ELSE 65535 END ASC, rank"
-		return strings.ReplaceAll(clause, "${keyword}", escapedQuery) // 默认是按相关度降序
+		return clause // 默认是按相关度降序
 	default:
+		exactName := buildExactSearchOrderCondition("name", query)
+		exactAlias := buildExactSearchOrderCondition("alias", query)
+		exactContent := buildExactSearchOrderCondition("content", query)
 		clause := "ORDER BY CASE " +
-			"WHEN name = '${keyword}' THEN 10 " +
-			"WHEN alias = '${keyword}' THEN 20 " +
-			"WHEN content = '${keyword}' AND type = 'd' THEN 30 " +
+			"WHEN " + exactName + " THEN 10 " +
+			"WHEN " + exactAlias + " THEN 20 " +
+			"WHEN " + exactContent + " AND type = 'd' THEN 30 " +
 			"WHEN content LIKE '%${keyword}%' AND type = 'd' THEN 40 " +
 			"WHEN name LIKE '%${keyword}%' THEN 50 " +
 			"WHEN alias LIKE '%${keyword}%' THEN 60 " +
-			"WHEN content = '${keyword}' AND type = 'h' THEN 70 " +
+			"WHEN " + exactContent + " AND type = 'h' THEN 70 " +
 			"WHEN content LIKE '%${keyword}%' AND type = 'h' THEN 80 " +
 			"ELSE 65535 END ASC, sort ASC, updated DESC"
 		clause = strings.ReplaceAll(clause, "${keyword}", escapedQuery)
 		return clause
 	}
+}
+
+func buildExactSearchOrderCondition(field, query string) string {
+	escapedQuery := strings.ReplaceAll(query, "'", "''")
+	if Conf.Search.CaseSensitive {
+		return field + " = '" + escapedQuery + "'"
+	}
+	escapedQuery = strings.NewReplacer("\\", "\\\\", "%", "\\%", "_", "\\_").Replace(escapedQuery)
+	return field + " LIKE '" + escapedQuery + "' ESCAPE '\\'"
 }
 
 // buildTypeFilter returns a complete SQL predicate (including outer parens)

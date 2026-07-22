@@ -525,17 +525,22 @@ export class Backlink extends Model {
         }
         svgElement.setAttribute("disabled", "disabled");
         const docId = liElement.getAttribute("data-node-id");
+        const editor = this.editors.find(item => item.protyle.element === liElement.nextElementSibling);
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
-            this.editors.find((item, index) => {
-                if (item.protyle.block.rootID === docId && liElement.nextElementSibling && item.protyle.element === liElement.nextElementSibling) {
-                    item.destroy();
-                    this.editors.splice(index, 1);
-                    liElement.nextElementSibling.remove();
-                    return true;
-                }
-            });
+            if (editor && this.type === "bottom") {
+                editor.protyle.element.classList.add("fn__none");
+            } else if (editor) {
+                editor.destroy();
+                this.editors.splice(this.editors.indexOf(editor), 1);
+                editor.protyle.element.remove();
+            }
             svgElement.removeAttribute("disabled");
+            this.updateBottomBacklinkSpacing();
+        } else if (editor) {
+            editor.protyle.element.classList.remove("fn__none");
+            svgElement.removeAttribute("disabled");
+            svgElement.classList.add("b3-list-item__arrow--open");
             this.updateBottomBacklinkSpacing();
         } else {
             const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value;

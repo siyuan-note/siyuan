@@ -1349,6 +1349,9 @@ export class WYSIWYG {
             if (!startsFromPadding && !tableBlockElement) {
                 return;
             }
+            if (startsFromPadding) {
+                protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
+            }
 
             // 多选节点
             const lastRect = protyle.wysiwyg.element.lastElementChild.getBoundingClientRect();
@@ -1650,19 +1653,11 @@ export class WYSIWYG {
                         hasJump = true;
                     }
                 }
-                if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
-                    !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
-                    !selectElements[0].classList.contains("sb")) {
-                    // 只有一个 p 时不选中块
-                    protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
-                } else {
-                    protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
-                    selectElements.forEach(item => {
-                        if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
-                            item.classList.add("protyle-wysiwyg--select");
-                        }
-                    });
-                }
+                selectElements.forEach(item => {
+                    if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
+                        item.classList.add("protyle-wysiwyg--select");
+                    }
+                });
             };
 
             documentSelf.onmouseup = (mouseUpEvent) => {
@@ -1673,6 +1668,9 @@ export class WYSIWYG {
                 documentSelf.onselect = null;
                 // 多选表格单元格后，选择菜单中的居左，然后 shift+左 选中的文字无法显示选中背景，因此需移除
                 // 多选块后 shift+左 选中的文字无法显示选中背景，因此需移除
+                if (startsFromPadding) {
+                    getSelection().removeAllRanges();
+                }
                 protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                 this.element.querySelectorAll("iframe").forEach(item => {
                     item.style.pointerEvents = "";

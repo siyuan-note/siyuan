@@ -434,7 +434,10 @@ func getPathByID(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
 	if util.InvalidIDPattern(id, ret) {
 		return
 	}
@@ -628,12 +631,15 @@ func removeDocByID(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
 	if util.InvalidIDPattern(id, ret) {
 		return
 	}
 
-	tree, err := model.LoadTreeByBlockID(id)
+	p, notebook, err := model.GetPathByID(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -641,7 +647,7 @@ func removeDocByID(c *gin.Context) {
 		return
 	}
 
-	if err = model.RemoveDoc(tree.Box, tree.Path); err != nil {
+	if err = model.RemoveDoc(notebook, p); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 	}
@@ -1073,6 +1079,73 @@ func changeSort(c *gin.Context) {
 	model.ChangeFileTreeSort(notebook, paths)
 }
 
+type sortRequestItem struct {
+	ID   string `json:"id"`
+	Sort *int   `json:"sort"`
+}
+
+func setSort(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	request := &struct {
+		NotebookSorts []*sortRequestItem `json:"notebookSorts"`
+		DocSorts      []*sortRequestItem `json:"docSorts"`
+	}{}
+	if err := c.ShouldBindJSON(request); err != nil {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf("Parses request [%s] failed: %s", c.Request.URL.Path, err)
+		return
+	}
+	if 1 > len(request.NotebookSorts)+len(request.DocSorts) {
+		ret.Code = -1
+		ret.Msg = "Fields [notebookSorts] and [docSorts] must not both be empty"
+		return
+	}
+	notebookSorts, ok := parseSortItems("notebookSorts", request.NotebookSorts, ret)
+	if !ok {
+		return
+	}
+	docSorts, ok := parseSortItems("docSorts", request.DocSorts, ret)
+	if !ok {
+		return
+	}
+
+	result, err := model.SetFileTreeSort(notebookSorts, docSorts)
+	ret.Data = result
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+}
+
+func parseSortItems(field string, items []*sortRequestItem, ret *gulu.Result) (retItems []*model.SortItem, ok bool) {
+	ids := map[string]struct{}{}
+	for i, item := range items {
+		if nil == item {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [%s][%d] must not be null", field, i)
+			return
+		}
+		if util.InvalidIDPattern(item.ID, ret) {
+			return
+		}
+		if nil == item.Sort {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [%s][%d].sort is required", field, i)
+			return
+		}
+		if _, ok := ids[item.ID]; ok {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [%s] contains duplicate ID [%s]", field, item.ID)
+			return nil, false
+		}
+		ids[item.ID] = struct{}{}
+		retItems = append(retItems, &model.SortItem{ID: item.ID, Sort: *item.Sort})
+	}
+	return retItems, true
+}
+
 func searchDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -1193,7 +1266,13 @@ func getDoc(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
 	idx := arg["index"]
 	index := 0
 	if nil != idx {

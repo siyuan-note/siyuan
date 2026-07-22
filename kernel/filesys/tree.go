@@ -182,7 +182,9 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 	filePath := filepath.Join(util.DataDir, boxID, p)
 	data, err := filelock.ReadFile(filePath)
 	if nil != err {
-		logging.LogErrorf("load tree [%s] failed: %s", p, err)
+		if !os.IsNotExist(err) {
+			logging.LogErrorf("load tree [%s] failed: %s", p, err)
+		}
 		return
 	}
 
@@ -284,7 +286,9 @@ func DocIAL(absPath string) (ret map[string]string) {
 			// 注意：filelock.ReadFile 内部已加锁，不能在外面再 Lock/Unlock（会死锁）
 			raw, readErr := filelock.ReadFile(absPath)
 			if readErr != nil {
-				logging.LogErrorf("read file [%s] failed: %s", absPath, readErr)
+				if !errors.Is(readErr, os.ErrNotExist) {
+					logging.LogErrorf("read file [%s] failed: %s", absPath, readErr)
+				}
 				return nil
 			}
 			relPath := filepath.ToSlash(strings.TrimPrefix(absPath, filepath.Join(util.DataDir, boxID)+string(os.PathSeparator)))
@@ -314,7 +318,9 @@ func DocIAL(absPath string) (ret map[string]string) {
 	filelock.Lock(absPath)
 	file, err := os.Open(absPath)
 	if err != nil {
-		logging.LogErrorf("open file [%s] failed: %s", absPath, err)
+		if !errors.Is(err, os.ErrNotExist) {
+			logging.LogErrorf("open file [%s] failed: %s", absPath, err)
+		}
 		filelock.Unlock(absPath)
 		return nil
 	}

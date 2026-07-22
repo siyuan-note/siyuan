@@ -17,6 +17,7 @@
 package model
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -63,7 +64,11 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 
 	tree, err := loadTreeByBlockIDInBox(blockID, boxID)
 	if err != nil {
-		logging.LogErrorf("load tree by root id [%s] failed: %s", blockID, err)
+		if errors.Is(err, ErrIndexing) {
+			logging.LogWarnf("load tree by root id [%s] failed: %s", blockID, err)
+		} else {
+			logging.LogErrorf("load tree by root id [%s] failed: %s", blockID, err)
+		}
 		return
 	}
 

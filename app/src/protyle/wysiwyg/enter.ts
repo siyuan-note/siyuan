@@ -1,5 +1,5 @@
 import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/util";
-import {focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
+import {focusByRange, focusByWbr, getSelectionOffset, getUndoFocusContext, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement, getParentBlock,
     getEmbedChildOperationContext,
@@ -234,6 +234,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         removeEmptyNode(newElement);
         return true;
     }
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
     range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;
     const parentHTML = getParentBlock(blockElement).outerHTML;
@@ -314,6 +315,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
                 action: "update",
                 data: html,
                 id,
+                context: undoFocusContext,
             });
         } else {
             doOperation.push({

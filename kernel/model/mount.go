@@ -48,6 +48,10 @@ func GetBoxByName(name string) (ret *Box) {
 }
 
 func CreateBox(name string) (id string, err error) {
+	return createBox(name, true)
+}
+
+func createBox(name string, initializeBoxDoc bool) (id string, err error) {
 	name = normalizeBoxName(name)
 	if 512 < utf8.RuneCountInString(name) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
@@ -81,13 +85,15 @@ func CreateBox(name string) (id string, err error) {
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", id, err)
 	}
-	if _, err = ensureBoxDoc0(id); err != nil {
-		treenode.RemoveBlockTreesByBoxID(id)
-		sql.DeleteBoxQueue(id)
-		if removeErr := filelock.Remove(boxLocalPath); nil != removeErr {
-			logging.LogErrorf("remove box [%s] after initializing box document failed: %s", id, removeErr)
+	if initializeBoxDoc {
+		if _, err = ensureBoxDoc0(id); err != nil {
+			treenode.RemoveBlockTreesByBoxID(id)
+			sql.DeleteBoxQueue(id)
+			if removeErr := filelock.Remove(boxLocalPath); nil != removeErr {
+				logging.LogErrorf("remove box [%s] after initializing box document failed: %s", id, removeErr)
+			}
+			return "", err
 		}
-		return "", err
 	}
 	IncSync()
 	logging.LogInfof("created box [%s]", id)

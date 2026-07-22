@@ -599,7 +599,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	FlushTxQueue() // 写入数据时阻塞，避免获取到的数据不一致
 
 	inputIndex := index
-	tree, err := loadTreeByBlockIDInBox(id, boxID)
+	tree, err := loadTreeByBlockIDInBox0(id, boxID, false)
 	if err != nil {
 		if errors.Is(err, ErrBlockNotFound) {
 			if 0 == mode {
@@ -1491,7 +1491,7 @@ func GetHPathByID(id string) (hPath string, err error) {
 }
 
 func GetPathByID(id string) (path, boxID string, err error) {
-	tree, err := LoadTreeByBlockID(id)
+	tree, err := loadTreeByBlockIDWithoutNotFoundLog(id)
 	if err != nil {
 		return
 	}
@@ -2226,6 +2226,8 @@ func moveSorts(rootID, fromBox, toBox string) {
 	if nil == root {
 		return
 	}
+	fileTreeSortLock.Lock()
+	defer fileTreeSortLock.Unlock()
 
 	fromRootSorts := map[string]int{}
 	ids := treenode.RootChildIDs(rootID)
@@ -2275,6 +2277,8 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	}
 
 	FlushTxQueue()
+	fileTreeSortLock.Lock()
+	defer fileTreeSortLock.Unlock()
 	box := Conf.Box(boxID)
 	sortIDs := map[string]int{}
 	max := 0
@@ -2331,6 +2335,176 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	pushFiletreeSortChanged(sortFolderIDs)
 }
 
+var fileTreeSortLock sync.Mutex
+
+type SortItem struct {
+	ID   string `json:"id"`
+	Sort int    `json:"sort"`
+}
+
+type SetFileTreeSortResult struct {
+	NotebookIDs []string `json:"notebookIDs"`
+	DocIDs      []string `json:"docIDs"`
+}
+
+type notebookSortPlan struct {
+	item *SortItem
+	box  *Box
+}
+
+type docSortPlan struct {
+	item       *SortItem
+	boxID      string
+	parentPath string
+}
+
+type docSortGroup struct {
+	fullSortIDs  map[string]int
+	changed      map[string]int
+	parentSorts  map[string]map[string]int
+	writeSuccess bool
+}
+
+func SetFileTreeSort(notebookSorts, docSorts []*SortItem) (ret *SetFileTreeSortResult, err error) {
+	ret = &SetFileTreeSortResult{
+		NotebookIDs: []string{},
+		DocIDs:      []string{},
+	}
+
+	FlushTxQueue()
+	fileTreeSortLock.Lock()
+	defer fileTreeSortLock.Unlock()
+	boxes := map[string]*Box{}
+	for _, box := range Conf.GetBoxes() {
+		boxes[box.ID] = box
+	}
+	openedBoxes := map[string]*Box{}
+	for _, box := range Conf.GetOpenedBoxes() {
+		openedBoxes[box.ID] = box
+	}
+
+	notebookPlans := make([]*notebookSortPlan, 0, len(notebookSorts))
+	notebookIDs := map[string]struct{}{}
+	for _, item := range notebookSorts {
+		if nil == item {
+			return ret, errors.New("notebook sort item must not be nil")
+		}
+		if _, ok := notebookIDs[item.ID]; ok {
+			return ret, fmt.Errorf("duplicate notebook ID [%s]", item.ID)
+		}
+		notebookIDs[item.ID] = struct{}{}
+
+		box := boxes[item.ID]
+		if nil == box {
+			return ret, fmt.Errorf("notebook [%s] not found", item.ID)
+		}
+		notebookPlans = append(notebookPlans, &notebookSortPlan{item: item, box: box})
+	}
+
+	docPlans := make([]*docSortPlan, 0, len(docSorts))
+	docIDs := map[string]struct{}{}
+	for _, item := range docSorts {
+		if nil == item {
+			return ret, errors.New("document sort item must not be nil")
+		}
+		if _, ok := docIDs[item.ID]; ok {
+			return ret, fmt.Errorf("duplicate document ID [%s]", item.ID)
+		}
+		docIDs[item.ID] = struct{}{}
+
+		bt := treenode.GetBlockTree(item.ID)
+		if nil == bt || nil == openedBoxes[bt.BoxID] {
+			return ret, fmt.Errorf("document [%s] not found in opened and unlocked notebooks", item.ID)
+		}
+		if bt.ID != bt.RootID || "d" != bt.Type || IsBoxDoc(bt.BoxID, bt.RootID) {
+			return ret, fmt.Errorf("block [%s] is not a sortable document", item.ID)
+		}
+		if nil == boxes[bt.BoxID] {
+			return ret, fmt.Errorf("notebook [%s] not found for document [%s]", bt.BoxID, item.ID)
+		}
+		docPlans = append(docPlans, &docSortPlan{item: item, boxID: bt.BoxID, parentPath: path.Dir(bt.Path)})
+	}
+
+	docGroups := map[string]*docSortGroup{}
+	for _, plan := range docPlans {
+		group := docGroups[plan.boxID]
+		if nil == group {
+			confPath := filepath.Join(util.DataDir, plan.boxID, ".siyuan", "sort.json")
+			fullSortIDs, readErr := readSortConfMap(confPath)
+			if readErr != nil {
+				return ret, readErr
+			}
+			group = &docSortGroup{
+				fullSortIDs: fullSortIDs,
+				changed:     map[string]int{},
+				parentSorts: map[string]map[string]int{},
+			}
+			docGroups[plan.boxID] = group
+		}
+
+		if group.fullSortIDs[plan.item.ID] == plan.item.Sort {
+			continue
+		}
+		group.changed[plan.item.ID] = plan.item.Sort
+		if nil == group.parentSorts[plan.parentPath] {
+			group.parentSorts[plan.parentPath] = map[string]int{}
+		}
+		group.parentSorts[plan.parentPath][plan.item.ID] = plan.item.Sort
+	}
+
+	var writeErr error
+	for _, plan := range notebookPlans {
+		boxConf := plan.box.GetConf()
+		if boxConf.Sort == plan.item.Sort {
+			continue
+		}
+		boxConf.Sort = plan.item.Sort
+		if saveErr := plan.box.SaveConf(boxConf); saveErr != nil {
+			writeErr = errors.Join(writeErr, saveErr)
+			continue
+		}
+		ret.NotebookIDs = append(ret.NotebookIDs, plan.item.ID)
+	}
+
+	for boxID, group := range docGroups {
+		if 0 == len(group.changed) {
+			continue
+		}
+		maps.Copy(group.fullSortIDs, group.changed)
+		confPath := filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
+		if writeErr0 := writeSortConfMap(confPath, group.fullSortIDs); writeErr0 != nil {
+			writeErr = errors.Join(writeErr, writeErr0)
+			continue
+		}
+		group.writeSuccess = true
+	}
+
+	for _, plan := range docPlans {
+		group := docGroups[plan.boxID]
+		if group.writeSuccess {
+			if _, ok := group.changed[plan.item.ID]; ok {
+				ret.DocIDs = append(ret.DocIDs, plan.item.ID)
+			}
+		}
+	}
+
+	if 0 < len(ret.NotebookIDs) {
+		pushNotebookSortChanged()
+	}
+	for _, group := range docGroups {
+		if !group.writeSuccess {
+			continue
+		}
+		for _, parentSorts := range group.parentSorts {
+			pushFiletreeSortChanged(parentSorts)
+		}
+	}
+	if 0 < len(ret.NotebookIDs)+len(ret.DocIDs) {
+		IncSync()
+	}
+	return ret, writeErr
+}
+
 func (box *Box) fillSort(files *[]*File) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
 	fullSortIDs, err := readSortConfMap(confPath)
@@ -2345,6 +2519,9 @@ func (box *Box) fillSort(files *[]*File) {
 }
 
 func (box *Box) removeSort(ids []string) {
+	fileTreeSortLock.Lock()
+	defer fileTreeSortLock.Unlock()
+
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
 	if !filelock.IsExist(confPath) {
 		return
@@ -2417,6 +2594,9 @@ func (box *Box) addMinSort(parentPath, id string) {
 }
 
 func (box *Box) setSortVal(id string, sortVal int) {
+	fileTreeSortLock.Lock()
+	defer fileTreeSortLock.Unlock()
+
 	var err error
 	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
 	if err = os.MkdirAll(confDir, 0755); err != nil {
@@ -2436,6 +2616,9 @@ func (box *Box) setSortVal(id string, sortVal int) {
 }
 
 func (box *Box) addSort(previousPath, id string) {
+	fileTreeSortLock.Lock()
+	defer fileTreeSortLock.Unlock()
+
 	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
 	if err := os.MkdirAll(confDir, 0755); err != nil {
 		logging.LogErrorf("create conf dir failed: %s", err)
@@ -2475,6 +2658,9 @@ func (box *Box) addSort(previousPath, id string) {
 }
 
 func (box *Box) setSort(sortIDVals map[string]int) {
+	fileTreeSortLock.Lock()
+	defer fileTreeSortLock.Unlock()
+
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
 	if !filelock.IsExist(confPath) {
 		return
@@ -2515,6 +2701,7 @@ func pushFiletreeSortChanged(sortIDs map[string]int) {
 
 	parentPath := path.Dir(bt.Path)
 	util.BroadcastByType("main", "filetreeSortChanged", 0, "", map[string]any{
+		"notebook":   bt.BoxID,
 		"parentPath": parentPath,
 		"childIDs":   childIDs,
 	})

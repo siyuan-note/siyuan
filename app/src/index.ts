@@ -43,6 +43,7 @@ import {processIOSPurchaseResponse} from "./util/iOSPurchase";
 import {ipcRenderer} from "electron";
 /// #endif
 import {getDockByType} from "./layout/tabUtil";
+import {Files} from "./layout/dock/Files";
 import {Tag} from "./layout/dock/Tag";
 import {appearanceConfigApi} from "./config/tabs/appearanceRuntime";
 import {renderSnippet} from "./config/util/snippets";
@@ -218,6 +219,20 @@ export class App {
                         case "openFileById":
                             openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                             break;
+                        case "filetreeSortChanged": {
+                            const fileDock = getDockByType("file");
+                            if (fileDock) {
+                                (fileDock.data.file as Files).onFiletreeSortChanged(data.data);
+                            }
+                            break;
+                        }
+                        case "notebookSortChanged": {
+                            const fileDock = getDockByType("file");
+                            if (fileDock) {
+                                (fileDock.data.file as Files).onNotebookSortChanged();
+                            }
+                            break;
+                        }
                         case "exit":
                             if (isBrowser() && !isInMobileApp()) {
                                 window.location.href = "about:blank";

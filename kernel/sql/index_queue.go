@@ -262,42 +262,42 @@ func indexEntryToOp(e indexEntry, luteEngine *lute.Lute, prefix string) *dbQueue
 	case "upsert":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
-			logging.LogWarnf("%s upsert: load tree [%s/%s] failed: %s", prefix, e.Box, e.Path, err)
+			logIndexEntryLoadError(prefix, "upsert", e, err)
 			return nil
 		}
 		return &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "upsert"}
 	case "index":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
-			logging.LogWarnf("%s index: load tree [%s/%s] failed: %s", prefix, e.Box, e.Path, err)
+			logIndexEntryLoadError(prefix, "index", e, err)
 			return nil
 		}
 		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "index"}
 	case "rename":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
-			logging.LogWarnf("%s rename: load tree [%s/%s] failed: %s", prefix, e.Box, e.Path, err)
+			logIndexEntryLoadError(prefix, "rename", e, err)
 			return nil
 		}
 		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "rename"}
 	case "move":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
-			logging.LogWarnf("%s move: load tree [%s/%s] failed: %s", prefix, e.Box, e.Path, err)
+			logIndexEntryLoadError(prefix, "move", e, err)
 			return nil
 		}
 		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "move"}
 	case "update_refs":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
-			logging.LogWarnf("%s update_refs: load tree [%s/%s] failed: %s", prefix, e.Box, e.Path, err)
+			logIndexEntryLoadError(prefix, "update_refs", e, err)
 			return nil
 		}
 		return &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "update_refs"}
 	case "delete_refs":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
-			logging.LogWarnf("%s delete_refs: load tree [%s/%s] failed: %s", prefix, e.Box, e.Path, err)
+			logIndexEntryLoadError(prefix, "delete_refs", e, err)
 			return nil
 		}
 		return &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "delete_refs"}
@@ -317,4 +317,10 @@ func indexEntryToOp(e indexEntry, luteEngine *lute.Lute, prefix string) *dbQueue
 		return &dbQueueOperation{id: e.ID, box: e.Box, inQueueTime: time.Now(), action: "index_node"}
 	}
 	return nil
+}
+
+func logIndexEntryLoadError(prefix, action string, entry indexEntry, err error) {
+	if !os.IsNotExist(err) {
+		logging.LogWarnf("%s %s: load tree [%s/%s] failed: %s", prefix, action, entry.Box, entry.Path, err)
+	}
 }

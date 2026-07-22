@@ -21,6 +21,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/go-humanize"
@@ -355,7 +356,7 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 				for _, defNode := range changedDefNodes {
 					switch defNode.refType {
 					case "ref-d":
-						task.AppendAsyncTaskWithDelay(task.SetRefDynamicText, 200*time.Millisecond, util.PushSetRefDynamicText, refTreeID, n.ID, defNode.id, defNode.refText, refTree.Box)
+						appendSetRefDynamicTextTask(refTreeID, n.ID, defNode.id, defNode.refText, refTree.Box)
 					}
 				}
 				return ast.WalkContinue
@@ -377,6 +378,36 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 		indexWriteTreeUpsertQueue(tree)
 	}
 	return
+}
+
+var (
+	setRefDynamicTextTaskLock     sync.Mutex
+	setRefDynamicTextTaskSequence uint64
+	setRefDynamicTextLatestTasks  = map[string]uint64{}
+)
+
+func appendSetRefDynamicTextTask(rootID, blockID, defBlockID, refText, boxID string) {
+	key := rootID + "\x00" + blockID + "\x00" + defBlockID
+	setRefDynamicTextTaskLock.Lock()
+	setRefDynamicTextTaskSequence++
+	sequence := setRefDynamicTextTaskSequence
+	setRefDynamicTextLatestTasks[key] = sequence
+	setRefDynamicTextTaskLock.Unlock()
+
+	task.AppendAsyncTaskWithDelay(task.SetRefDynamicText, 200*time.Millisecond, pushLatestRefDynamicText,
+		key, sequence, rootID, blockID, defBlockID, refText, boxID)
+}
+
+func pushLatestRefDynamicText(key string, sequence uint64, rootID, blockID, defBlockID, refText, boxID string) {
+	setRefDynamicTextTaskLock.Lock()
+	latest := setRefDynamicTextLatestTasks[key] == sequence
+	if latest {
+		delete(setRefDynamicTextLatestTasks, key)
+	}
+	setRefDynamicTextTaskLock.Unlock()
+	if latest {
+		util.PushSetRefDynamicText(rootID, blockID, defBlockID, refText, boxID)
+	}
 }
 
 func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {

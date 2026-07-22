@@ -911,13 +911,19 @@ func fullReindex() {
 }
 
 func ChangeBoxSort(boxIDs []string) {
+	fileTreeSortLock.Lock()
+	defer fileTreeSortLock.Unlock()
+
 	for i, boxID := range boxIDs {
 		box := &Box{ID: boxID}
 		boxConf := box.GetConf()
 		boxConf.Sort = i + 1
 		box.SaveConf(boxConf)
 	}
+	pushNotebookSortChanged()
+}
 
+func pushNotebookSortChanged() {
 	var notebookIDs []string
 	for _, box := range Conf.GetOpenedBoxes() {
 		notebookIDs = append(notebookIDs, box.ID)

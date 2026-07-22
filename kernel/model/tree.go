@@ -250,6 +250,10 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 	return loadTreeByBlockIDInBox(id, "")
 }
 
+func loadTreeByBlockIDWithoutNotFoundLog(id string) (ret *parse.Tree, err error) {
+	return loadTreeByBlockIDInBox0(id, "", false)
+}
+
 func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 	luteEngine := util.NewLute()
 	ret, needFix, err := filesys.LoadTreeWithFix(bt.BoxID, bt.Path, luteEngine)
@@ -265,6 +269,10 @@ func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 
 // loadTreeByBlockIDInBox 与 LoadTreeByBlockID 一致，但按 boxID 路由 blocktree 查询到加密 db 或全局 db。
 func loadTreeByBlockIDInBox(id, boxID string) (ret *parse.Tree, err error) {
+	return loadTreeByBlockIDInBox0(id, boxID, true)
+}
+
+func loadTreeByBlockIDInBox0(id, boxID string, logNotFound bool) (ret *parse.Tree, err error) {
 	if !ast.IsNodeIDPattern(id) {
 		stack := logging.ShortStack()
 		logging.LogErrorf("block id is invalid [id=%s], stack: [%s]", id, stack)
@@ -287,9 +295,9 @@ func loadTreeByBlockIDInBox(id, boxID string) (ret *parse.Tree, err error) {
 			return
 		}
 
-		stack := logging.ShortStack()
-		if !strings.Contains(stack, "BuildBlockBreadcrumb") {
-			if "dev" == util.Mode {
+		if logNotFound && "dev" == util.Mode {
+			stack := logging.ShortStack()
+			if !strings.Contains(stack, "BuildBlockBreadcrumb") {
 				logging.LogWarnf("block tree not found [id=%s], stack: [%s]", id, stack)
 			}
 		}
@@ -370,6 +378,7 @@ func loadParentTree(tree *parse.Tree) (ret *parse.Tree) {
 
 func findUnindexedTreePathInAllBoxes(id string) (ret string) {
 	boxes := Conf.GetBoxes()
+	luteEngine := util.NewLute()
 	for _, box := range boxes {
 		root := filepath.Join(util.DataDir, box.ID)
 		paths := search.FindAllMatchedPaths(root, []string{id})
@@ -393,10 +402,36 @@ func findUnindexedTreePathInAllBoxes(id string) (ret string) {
 
 		result := treenode.ExistBlockTrees(rootIDs)
 		for rootID, exist := range result {
-			if !exist {
-				return rootIDPaths[rootID]
+			if exist {
+				continue
+			}
+
+			matchedPath := rootIDPaths[rootID]
+			relPath, relErr := filepath.Rel(root, matchedPath)
+			if nil != relErr {
+				return matchedPath
+			}
+			// 全文匹配只用于筛选候选文件，解析树后再确认是否存在真实块 ID。
+			treePath := "/" + filepath.ToSlash(relPath)
+			tree, loadErr := filesys.LoadTree(box.ID, treePath, luteEngine)
+			if nil != loadErr || treeContainsBlockID(tree, id) {
+				return matchedPath
 			}
 		}
 	}
+	return
+}
+
+func treeContainsBlockID(tree *parse.Tree, id string) (ret bool) {
+	if nil == tree || nil == tree.Root || "" == id {
+		return
+	}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.IsBlock() && n.ID == id {
+			ret = true
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
 	return
 }

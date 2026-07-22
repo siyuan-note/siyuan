@@ -19,6 +19,7 @@
     * [Rename a document](#Rename-a-document)
     * [Remove a document](#Remove-a-document)
     * [Move documents](#Move-documents)
+    * [Set notebook and document sort values](#Set-notebook-and-document-sort-values)
     * [Get human-readable path based on path](#Get-human-readable-path-based-on-path)
     * [Get human-readable path based on ID](#Get-human-readable-path-based-on-ID)
     * [Get storage path based on ID](#Get-storage-path-based-on-ID)
@@ -507,6 +508,45 @@ Move documents by `id`:
     "code": 0,
     "msg": "",
     "data": null
+  }
+  ```
+
+### Set notebook and document sort values
+
+* `/api/filetree/setSort`
+* Parameters
+
+  ```json
+  {
+    "notebookSorts": [
+      {
+        "id": "20210817205410-2kvfpfn",
+        "sort": -10
+      }
+    ],
+    "docSorts": [
+      {
+        "id": "20210917220056-yxtyl7i",
+        "sort": -8
+      }
+    ]
+  }
+  ```
+
+    * `notebookSorts`: Notebook IDs and their sort values, optional
+    * `docSorts`: Document IDs and their sort values, optional
+    * Documents in `docSorts` must belong to opened and unlocked notebooks; notebook root document IDs are not accepted
+    * At least one of `notebookSorts` and `docSorts` must be non-empty. Array order does not affect sorting; each `sort` value is stored directly
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "notebookIDs": ["20210817205410-2kvfpfn"],
+      "docIDs": ["20210917220056-yxtyl7i"]
+    }
   }
   ```
 

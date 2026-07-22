@@ -1,0 +1,23 @@
+{
+	"ID": "20211226090932-5lcq56f",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"custom-hidden": "true",
+		"icon": "1f4d4",
+		"id": "20211226090932-5lcq56f",
+		"title": "思源筆記用戶指南",
+		"type": "doc",
+		"updated": "20211226090932"
+	},
+	"Children": [
+		{
+			"ID": "20260722113917-mft5i5n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260722113917-mft5i5n",
+				"updated": "20260722113917"
+			}
+		}
+	]
+}

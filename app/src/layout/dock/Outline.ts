@@ -102,16 +102,13 @@ export class Outline extends Model {
                 filterIconElement.classList.remove("block__icon--active");
                 filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
             }
-            if (inputElement.dataset.value !== value) {
+        });
+        inputElement.addEventListener("input", (event: InputEvent) => {
+            if (!event.isComposing) {
                 this.setFilter();
             }
         });
-        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (!event.isComposing && event.key === "Enter") {
-                inputElement.dataset.value = inputElement.value;
-                this.setFilter();
-            }
-        });
+        inputElement.addEventListener("compositionend", () => this.setFilter());
         this.tree = new Tree({
             element: this.element,
             data: null,

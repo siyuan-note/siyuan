@@ -686,6 +686,15 @@ func setAssetsAttachmentDisposition(c *gin.Context, pathForBaseName string) {
 	c.Header("Content-Disposition", formatContentDispositionAttachment(filepath.Base(pathForBaseName)))
 }
 
+func isValidAssetRequestPath(requestPath string) bool {
+	relativePath := strings.TrimPrefix(requestPath, "/")
+	if relativePath == "" || relativePath == "." {
+		return false
+	}
+	_, err := filepath.Localize(relativePath)
+	return err == nil
+}
+
 func serveAssets(ginServer *gin.Engine) {
 	ginServer.POST("/upload", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.Upload)
 
@@ -698,7 +707,7 @@ func serveAssets(ginServer *gin.Engine) {
 		}
 
 		// 硬边界：拒绝路径遍历
-		if strings.Contains(requestPath, "..") {
+		if !isValidAssetRequestPath(requestPath) {
 			context.Status(http.StatusForbidden)
 			return
 		}

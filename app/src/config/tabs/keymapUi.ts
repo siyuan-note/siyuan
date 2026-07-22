@@ -7,6 +7,7 @@ import {Constants} from "../../constants";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {exportLayout} from "../../layout/util";
+import {updateDockHotkeyDom} from "../../layout/dock/hotkey";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/keydown";
 import {normalizeSearchText} from "../search/normalize";
@@ -650,24 +651,26 @@ const setKeymapFromDom = (root: HTMLElement) => {
         const newHotkey = item.getAttribute("data-value");
         if (keys[0] === "general") {
             data[keys[0]][keys[1]].custom = newHotkey;
+            updateDockHotkeyDom(`[data-hotkeylangid="${keys[1]}"]`, newHotkey);
         } else if (keys[0] === "editor" && isEditorKeymapSegment(keys[1])) {
             data.editor[keys[1]][keys[2]].custom = newHotkey;
         } else if (keys[0] === "plugin") {
             data.plugin[keys[1]][keys[2]].custom = newHotkey;
             const plugin = window.siyuan.ws.app.plugins.find((item) => item.name === keys[1]);
             const command = plugin?.commands.find((item) => item.langKey === keys[2]);
-            if (!command) {
-                return;
+            if (command) {
+                /// #if !BROWSER
+                if (command.globalCallback && command.customHotkey && command.customHotkey !== newHotkey) {
+                    ipcRenderer.send(Constants.SIYUAN_CMD, {
+                        cmd: "unregisterGlobalShortcut",
+                        accelerator: command.customHotkey,
+                    });
+                }
+                /// #endif
+                command.customHotkey = newHotkey;
+            } else if (plugin?.docks[keys[2]]) {
+                updateDockHotkeyDom(`.dock__item[data-type="${keys[2]}"]`, newHotkey);
             }
-            /// #if !BROWSER
-            if (command.globalCallback && command.customHotkey && command.customHotkey !== newHotkey) {
-                ipcRenderer.send(Constants.SIYUAN_CMD, {
-                    cmd: "unregisterGlobalShortcut",
-                    accelerator: command.customHotkey,
-                });
-            }
-            /// #endif
-            command.customHotkey = newHotkey;
         }
     });
     const oldToggleWin = window.siyuan.config.keymap.general.toggleWin.custom;

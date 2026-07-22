@@ -5,6 +5,7 @@ import {escapeHtml} from "../util/escape";
 import {isWindow} from "../util/functions";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {getAllDocks} from "../layout/getAll";
+import {getDockHotkey} from "../layout/dock/hotkey";
 import {Dialog} from "../dialog";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -55,7 +56,7 @@ const renderRecentDocsContent = async (data: {
                 dockHtml += `<li data-type="${item.type}" data-index="${docIndex}" class="b3-list-item${!switchPath ? " b3-list-item--focus" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
     <span class="b3-list-item__text">${item.title}</span>
-    <span class="b3-list-item__meta">${updateHotkeyTip(item.hotkey)}</span>
+    <span class="b3-list-item__meta">${updateHotkeyTip(getDockHotkey(item))}</span>
 </li>`;
                 if (!switchPath) {
                     switchPath = item.title;

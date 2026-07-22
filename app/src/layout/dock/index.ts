@@ -1,4 +1,4 @@
-import {setStorageVal, updateHotkeyTip} from "../../protyle/util/compatibility";
+import {setStorageVal} from "../../protyle/util/compatibility";
 import {Layout} from "../index";
 import {Wnd} from "../Wnd";
 import {Tab} from "../Tab";
@@ -22,6 +22,7 @@ import {Plugin} from "../../plugin";
 import {Custom} from "./Custom";
 import {clearBeforeResizeTop, recordBeforeResizeTop} from "../../protyle/util/resize";
 import {Constants} from "../../constants";
+import {getDockHotkey, genDockItemAriaLabel} from "./hotkey";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 
@@ -896,7 +897,8 @@ export class Dock {
             } else if (item.type === "tags") {
                 item.icon = "iconTag";
             }
-            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
+            const hotkey = getDockHotkey(item);
+            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="${genDockItemAriaLabel(item.title, hotkey)}">
     <svg><use xlink:href="#${item.icon}"></use></svg>
 </span>`;
             this.data[item.type] = true;

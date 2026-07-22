@@ -11,6 +11,7 @@ import {isInAndroid, isInHarmony, isInMobileApp, isIPad, setStorageVal, writeTex
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
+import {getDockHotkey} from "../layout/dock/hotkey";
 import {exportLayout, getAllLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
 import {exitSiYuan, lockScreen} from "../dialog/processSystem";
@@ -163,7 +164,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             dockMenu.push({
                 id: item.type,
                 icon: item.icon,
-                accelerator: item.hotkey,
+                accelerator: getDockHotkey(item),
                 label: item.title,
                 click() {
                     getDockByType(item.type).toggleModel(item.type);

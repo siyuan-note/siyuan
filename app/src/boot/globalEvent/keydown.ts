@@ -30,6 +30,7 @@ import {goBack, goForward} from "../../util/backForward";
 import {getDisplayName, getNotebookName, isEncryptedBox} from "../../util/pathName";
 import {openFileById} from "../../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../../layout/getAll";
+import {getDockHotkey} from "../../layout/dock/hotkey";
 import {focusBlock, focusByRange} from "../../protyle/util/selection";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {bindMenuKeydown} from "../../menus/Menu";
@@ -1236,7 +1237,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
                 dockHtml += `<li data-type="${item.type}" data-index="${index + 1}" class="b3-list-item">
     <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
     <span class="b3-list-item__text">${item.title}</span>
-    <span class="b3-list-item__meta">${updateHotkeyTip(item.hotkey || "")}</span>
+    <span class="b3-list-item__meta">${updateHotkeyTip(getDockHotkey(item))}</span>
 </li>`;
             });
             dockHtml = dockHtml + "</ul>";
@@ -1390,7 +1391,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     const matchDock = getAllDocks().find(item => {
-        if (matchHotKey(item.hotkey, event)) {
+        if (matchHotKey(getDockHotkey(item), event)) {
             getDockByType(item.type).toggleModel(item.type);
             event.preventDefault();
             return true;

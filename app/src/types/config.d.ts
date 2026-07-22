@@ -1956,10 +1956,6 @@ declare namespace Config {
      */
     export interface IUILayoutDockTab {
         /**
-         * Dock tab hotkey
-         */
-        hotkey?: string;
-        /**
          * Hotkey description ID
          */
         hotkeyLangId?: string;

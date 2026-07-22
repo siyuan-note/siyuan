@@ -18,6 +18,7 @@ import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
+import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
 
 export class MobileOutline extends Model {
     public tree: Tree;
@@ -226,7 +227,7 @@ export class MobileOutline extends Model {
                 startY: touch.clientY,
                 isDragging: false,
                 ghostElement: null,
-                startTime: Date.now(),
+                startTime: Date.now() - (isMousePointerTouchEvent(event) ? Constants.TIMEOUT_LONGPRESS : 0),
                 selectItem: null,
             };
         }, {passive: false});
@@ -377,6 +378,7 @@ export class MobileOutline extends Model {
             this.clearDragIndicators();
             this.touchDragState = null;
         });
+        bindMousePointerTouchBridge(this.element);
     }
 
     // 清理拖拽指示线

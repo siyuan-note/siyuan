@@ -27,6 +27,7 @@ import {
     expandFileTree,
     isFileTreeCollapsing
 } from "../../layout/dock/fileTreeAnimation";
+import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -263,7 +264,7 @@ export class MobileFiles extends Model {
                 startX: touch.clientX,
                 startY: touch.clientY,
                 ghostElement: null,
-                startTime: Date.now(),
+                startTime: Date.now() - (isMousePointerTouchEvent(event) ? Constants.TIMEOUT_LONGPRESS : 0),
             };
         }, {passive: false});
 
@@ -493,6 +494,7 @@ export class MobileFiles extends Model {
             this.clearDragIndicators();
             this.touchDragState = null;
         });
+        bindMousePointerTouchBridge(filesElement);
         this.init();
     }
 

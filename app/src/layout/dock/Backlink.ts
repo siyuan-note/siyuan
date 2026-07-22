@@ -13,6 +13,7 @@ import {App} from "../../index";
 import {isSupportCSSHL, searchMarkRender} from "../../protyle/render/searchMarkRender";
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {getAllModels} from "../getAll";
+import {hideElements} from "../../protyle/ui/hideElements";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -256,6 +257,7 @@ export class Backlink extends Model {
         });
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
+            this.hideEditorGutters(this.tree.element);
             this.tree.element.querySelectorAll(".protyle").forEach(item => {
                 item.classList.add("fn__none");
             });
@@ -295,6 +297,7 @@ export class Backlink extends Model {
                             event.stopPropagation();
                             break;
                         case "mCollapse":
+                            this.hideEditorGutters(this.mTree.element);
                             this.mTree.element.querySelectorAll(".protyle").forEach(item => {
                                 item.classList.add("fn__none");
                             });
@@ -414,6 +417,9 @@ export class Backlink extends Model {
 
     private setBottomLayout(element: HTMLElement, listElement: HTMLElement) {
         const folded = !listElement.classList.contains("fn__none");
+        if (folded) {
+            this.hideEditorGutters(listElement);
+        }
         listElement.classList.toggle("fn__none", folded);
         if (folded) {
             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
@@ -529,6 +535,7 @@ export class Backlink extends Model {
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
             if (editor && this.type === "bottom") {
+                hideElements(["gutter"], editor.protyle);
                 editor.protyle.element.classList.add("fn__none");
             } else if (editor) {
                 editor.destroy();
@@ -583,6 +590,14 @@ export class Backlink extends Model {
                 this.editors.push(editor);
             });
         }
+    }
+
+    private hideEditorGutters(element: Element) {
+        this.editors.forEach(editor => {
+            if (editor.protyle.element === element || element.contains(editor.protyle.element)) {
+                hideElements(["gutter"], editor.protyle);
+            }
+        });
     }
 
     private updateBottomBacklinkSpacing() {

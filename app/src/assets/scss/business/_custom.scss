@@ -259,12 +259,11 @@
     }
 
     & > .block__icon:first-child {
-      padding-left: 0;
-      padding-right: 0;
+      margin-left: -4px;
     }
 
     .block__logo {
-      margin-left: 0;
+      margin-left: 4px;
       min-height: 34px;
       font-weight: 500;
     }

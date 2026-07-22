@@ -46,6 +46,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// databaseIndexDataLock 用于避免索引任务读取正在被替换或删除的笔记本目录。
+var databaseIndexDataLock sync.Mutex
+
 func UpsertIndexes(paths []string) {
 	var syFiles []string
 	for _, p := range paths {
@@ -132,10 +135,15 @@ func removeBoxRefs(boxID string) {
 }
 
 func indexBox(boxID string) {
+	databaseIndexDataLock.Lock()
+	defer databaseIndexDataLock.Unlock()
+
 	box := Conf.Box(boxID)
 	if nil == box {
 		return
 	}
+	// 全量索引使用纯 INSERT，开始前必须清理该笔记本的旧数据，避免重复任务叠加相同行。
+	sql.DeleteBoxQueue(boxID)
 
 	util.SetBootDetails(Conf.Language(303))
 	files := box.ListFiles("/")
@@ -220,6 +228,9 @@ func indexBox(boxID string) {
 }
 
 func IndexRefs() {
+	databaseIndexDataLock.Lock()
+	defer databaseIndexDataLock.Unlock()
+
 	start := time.Now()
 	util.SetBootDetails(Conf.Language(304))
 	util.PushStatusBar(Conf.Language(54))

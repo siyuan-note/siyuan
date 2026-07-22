@@ -662,8 +662,11 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
         return;
     }
 
-    if (liElement.childElementCount === 2 && parentLiItemElement.childElementCount === 3) {
-        // 列表项里仅有包含一个列表项的列表，如 1. 1. 1 https://github.com/siyuan-note/insider/issues/494
+    if (liElement.childElementCount === 2 &&
+        (parentLiItemElement.childElementCount === 3 ||
+            (window.siyuan.config.editor.listLogicalOutdent &&
+                liElement.previousElementSibling?.classList.contains("protyle-action")))) {
+        // 父列表项仅包含单项子列表，或开启大纲反向缩进且单项子列表为首个内容块时，原地展开子列表
         range.collapse(false);
         moveToPrevious(deleteElement, range, isDelete);
         range.insertNode(document.createElement("wbr"));

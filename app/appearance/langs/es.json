@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Ocultar atributos vacíos de la base de datos",
+	"databaseAttrUseTabs": "Usar pestañas para los atributos de la base de datos",
 	"rebuildHistoryIndex": "Reconstruir índice del historial",
 	"rebuildAssetContentIndex": "Reconstruir índice de contenido de recursos",
 	"newItemWithTemplate": "Crear elemento con una plantilla",
@@ -2228,6 +2230,14 @@
 		"340": "El Vault seleccionado no contiene ningún archivo Markdown legible y no oculto",
 		"341": "El documento de nivel superior del cuaderno no se puede eliminar ni mover",
 		"342": "Mi cuaderno",
-		"343": "Un nuevo comienzo"
+		"343": "Un nuevo comienzo",
+		"344": "El archivo Markdown [%s] no está codificado en UTF-8",
+		"345": "No se puede leer el archivo Markdown [%s]",
+		"346": "El archivo [%s] cambió después del análisis; vuelva a analizar el Vault",
+		"347": "No se puede convertir el archivo Markdown [%s]",
+		"348": "No se puede importar el archivo de recursos [%s]",
+		"349": "El contenido del Vault cambió después del análisis; vuelva a analizarlo",
+		"350": "No se pudo terminar de escribir o indexar el nuevo cuaderno; se ha marcado como incompleto",
+		"351": "Se produjo un error inesperado; consulte el registro del sistema para la tarea [%s]"
 	}
 	}

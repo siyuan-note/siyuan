@@ -11,6 +11,7 @@ package model
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -98,6 +99,50 @@ func TestObsidianVaultValidationErrors(t *testing.T) {
 	_, err := analyzeObsidianVault(context.Background(), missingMarkdown, func(int, string) {})
 	if !errors.Is(err, errObsidianVaultMarkdownMissing) || obsidianVaultErrorLanguage(err) != 340 {
 		t.Fatalf("unexpected missing Markdown error: %v", err)
+	}
+}
+
+func TestAnalyzeObsidianVaultReportsMarkdownEncodingPath(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, ".obsidian"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "invalid.md"), []byte{0xff}, 0644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := analyzeObsidianVault(context.Background(), root, func(int, string) {})
+	language, relPath, ok := obsidianUserErrorData(err)
+	if !ok || language != 344 || relPath != "invalid.md" {
+		t.Fatalf("unexpected Markdown encoding diagnostic: language=%d, path=%q, error=%v", language, relPath, err)
+	}
+}
+
+func TestObsidianUserErrorDataDoesNotExposeCause(t *testing.T) {
+	err := newObsidianUserError(345, "Note.md", errors.New(`open C:\Users\example\Vault\Note.md: access denied`))
+	language, relPath, ok := obsidianUserErrorData(err)
+	if !ok || language != 345 || relPath != "Note.md" {
+		t.Fatalf("unexpected user error data: language=%d, path=%q", language, relPath)
+	}
+	if strings.Contains(relPath, `C:\Users`) {
+		t.Fatalf("absolute path leaked into user error data: %q", relPath)
+	}
+	language, argument := obsidianTaskDetailData(errors.New(`open C:\Users\example\Vault\Secret.md: access denied`),
+		"task-id", "staging", nil)
+	if language != 351 || argument != "task-id" {
+		t.Fatalf("unexpected fallback detail data: language=%d, argument=%q", language, argument)
+	}
+	changedErr := newObsidianReadUserError(&obsidianSourceFile{RelPath: "Note.md"},
+		fmt.Errorf("%w while reading", errObsidianSourceChanged))
+	language, relPath, ok = obsidianUserErrorData(changedErr)
+	if !ok || language != 346 || relPath != "Note.md" {
+		t.Fatalf("unexpected changed source detail data: language=%d, path=%q", language, relPath)
+	}
+}
+
+func TestSnapshotObsidianTaskIncludesDetail(t *testing.T) {
+	snapshot := snapshotObsidianTask(&obsidianTask{TaskID: "task-id", Detail: "detail"})
+	if snapshot.Detail != "detail" {
+		t.Fatalf("task detail missing from snapshot: %#v", snapshot)
 	}
 }
 

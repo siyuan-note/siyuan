@@ -139,6 +139,19 @@ func normalizeBoxName(name string) string {
 
 var boxLock = sync.Map{}
 
+// removeBoxDir 重试删除刚完成读写的笔记本目录，避免 Windows 延迟释放句柄导致瞬时失败。
+func removeBoxDir(p string) (err error) {
+	for i := 0; i < 5; i++ {
+		if err = filelock.RemoveWithoutFatal(p); nil == err {
+			return
+		}
+		if i < 4 {
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+	return
+}
+
 func RemoveBox(boxID string) (err error) {
 	if _, ok := boxLock.Load(boxID); ok {
 		err = errors.New(Conf.language(239))
@@ -154,6 +167,8 @@ func RemoveBox(boxID string) (err error) {
 
 	FlushTxQueue()
 	isUserGuide := IsUserGuide(boxID)
+	databaseIndexDataLock.Lock()
+	defer databaseIndexDataLock.Unlock()
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -165,10 +180,12 @@ func RemoveBox(boxID string) (err error) {
 		return fmt.Errorf("can not remove [%s] caused by it is not a dir", boxID)
 	}
 
-	unmount0(boxID)
-
 	// 删目录前缓存加密状态：删目录后 conf.json 不复存在，IsEncryptedBox 会返回 false
 	isEncrypted := IsEncryptedBox(boxID)
+	unmount0(boxID)
+	if !isEncrypted {
+		unindex(boxID)
+	}
 
 	if !isUserGuide {
 		var historyDir string
@@ -201,7 +218,7 @@ func RemoveBox(boxID string) (err error) {
 		RevokeManagedEncryptedExportsForBox(boxID)
 	}
 
-	if err = filelock.Remove(localPath); err != nil {
+	if err = removeBoxDir(localPath); err != nil {
 		return
 	}
 	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
@@ -305,6 +322,9 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	localPath := filepath.Join(util.DataDir, boxID)
 	var reMountGuide bool
 	if isUserGuide {
+		databaseIndexDataLock.Lock()
+		defer databaseIndexDataLock.Unlock()
+
 		// 重新挂载帮助文档
 
 		guideBox := Conf.Box(boxID)
@@ -312,8 +332,9 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			unmount0(guideBox.ID)
 			reMountGuide = true
 		}
+		unindex(boxID)
 
-		if err = filelock.Remove(localPath); err != nil {
+		if err = removeBoxDir(localPath); err != nil {
 			return
 		}
 

@@ -2264,6 +2264,8 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		Type:     treenode.FromAbbrType(sqlBlock.Type),
 		SubType:  sqlBlock.SubType,
 		Sort:     sqlBlock.Sort,
+		Created:  sqlBlock.Created,
+		Updated:  sqlBlock.Updated,
 	}
 	if "" != sqlBlock.IAL {
 		block.IAL = map[string]string{}

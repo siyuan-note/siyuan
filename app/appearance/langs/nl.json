@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Lege databasekenmerken verbergen",
+	"databaseAttrUseTabs": "Tabbladen gebruiken voor databasekenmerken",
 	"rebuildHistoryIndex": "Geschiedenisindex herbouwen",
 	"rebuildAssetContentIndex": "Index voor assetinhoud herbouwen",
 	"newItemWithTemplate": "Item maken met sjabloon",
@@ -2228,6 +2230,14 @@
 		"340": "De geselecteerde Vault bevat geen leesbaar, niet-verborgen Markdown-bestand",
 		"341": "Het notebookdocument op het hoogste niveau kan niet worden verwijderd of verplaatst",
 		"342": "Mijn notitieboek",
-		"343": "Een nieuw begin"
+		"343": "Een nieuw begin",
+		"344": "Markdown-bestand [%s] is niet UTF-8-gecodeerd",
+		"345": "Kan Markdown-bestand [%s] niet lezen",
+		"346": "Bestand [%s] is na de analyse gewijzigd; analyseer de Vault opnieuw",
+		"347": "Kan Markdown-bestand [%s] niet converteren",
+		"348": "Kan bronbestand [%s] niet importeren",
+		"349": "De inhoud van de Vault is na de analyse gewijzigd; voer de analyse opnieuw uit",
+		"350": "Het schrijven of indexeren van het nieuwe notitieboek kon niet worden voltooid; het is als onvolledig gemarkeerd",
+		"351": "Er is een onverwachte fout opgetreden; controleer het systeemlogboek voor taak [%s]"
 	}
 	}

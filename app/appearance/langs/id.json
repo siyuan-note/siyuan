@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Sembunyikan atribut basis data yang kosong",
+	"databaseAttrUseTabs": "Gunakan tab untuk atribut basis data",
 	"rebuildHistoryIndex": "Bangun ulang indeks riwayat",
 	"rebuildAssetContentIndex": "Bangun ulang indeks konten aset",
 	"newItemWithTemplate": "Buat item dengan templat",
@@ -2228,6 +2230,14 @@
 		"340": "Vault yang dipilih tidak berisi file Markdown tak tersembunyi yang dapat dibaca",
 		"341": "Dokumen buku catatan tingkat teratas tidak dapat dihapus atau dipindahkan",
 		"342": "Buku Catatan Saya",
-		"343": "Awal yang Baru"
+		"343": "Awal yang Baru",
+		"344": "File Markdown [%s] tidak dikodekan dalam UTF-8",
+		"345": "Tidak dapat membaca file Markdown [%s]",
+		"346": "File [%s] berubah setelah analisis; analisis Vault lagi",
+		"347": "Tidak dapat mengonversi file Markdown [%s]",
+		"348": "Tidak dapat mengimpor file sumber daya [%s]",
+		"349": "Isi Vault berubah setelah analisis; lakukan analisis lagi",
+		"350": "Tidak dapat menyelesaikan penulisan atau pengindeksan buku catatan baru; buku catatan telah ditandai belum lengkap",
+		"351": "Terjadi kesalahan tak terduga; periksa log sistem untuk tugas [%s]"
 	}
 	}

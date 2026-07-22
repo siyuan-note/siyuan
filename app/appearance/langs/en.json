@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Hide empty database attributes",
+	"databaseAttrUseTabs": "Use tabs for database attributes",
 	"rebuildHistoryIndex": "Rebuild history index",
 	"rebuildAssetContentIndex": "Rebuild asset content index",
 	"newItemWithTemplate": "Create item with template",
@@ -2228,6 +2230,14 @@
 		"340": "The selected Vault does not contain a readable non-hidden Markdown file",
 		"341": "The top-level notebook document cannot be removed or moved",
 		"342": "My Notebook",
-		"343": "A Fresh Start"
+		"343": "A Fresh Start",
+		"344": "Markdown file [%s] is not UTF-8 encoded",
+		"345": "Unable to read Markdown file [%s]",
+		"346": "File [%s] changed after analysis; analyze the Vault again",
+		"347": "Unable to convert Markdown file [%s]",
+		"348": "Unable to import asset file [%s]",
+		"349": "The Vault contents changed after analysis; analyze the Vault again",
+		"350": "Unable to finish writing or indexing the new notebook; it has been marked as incomplete",
+		"351": "An unexpected error occurred; check the system log for task [%s]"
 	}
 	}

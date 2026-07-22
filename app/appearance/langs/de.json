@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Leere Datenbankattribute ausblenden",
+	"databaseAttrUseTabs": "Registerkarten für Datenbankattribute verwenden",
 	"rebuildHistoryIndex": "Verlaufsindex neu aufbauen",
 	"rebuildAssetContentIndex": "Index für Asset-Inhalte neu aufbauen",
 	"newItemWithTemplate": "Eintrag mit Vorlage erstellen",
@@ -2228,6 +2230,14 @@
 		"340": "Der ausgewählte Vault enthält keine lesbare, nicht ausgeblendete Markdown-Datei",
 		"341": "Das Notizbuchdokument auf oberster Ebene kann nicht gelöscht oder verschoben werden",
 		"342": "Mein Notizbuch",
-		"343": "Ein neuer Anfang"
+		"343": "Ein neuer Anfang",
+		"344": "Die Markdown-Datei [%s] ist nicht UTF-8-kodiert",
+		"345": "Die Markdown-Datei [%s] kann nicht gelesen werden",
+		"346": "Die Datei [%s] wurde nach der Analyse geändert; analysieren Sie den Vault erneut",
+		"347": "Die Markdown-Datei [%s] kann nicht konvertiert werden",
+		"348": "Die Ressourcendatei [%s] kann nicht importiert werden",
+		"349": "Der Inhalt des Vaults wurde nach der Analyse geändert; führen Sie die Analyse erneut aus",
+		"350": "Das Schreiben oder Indizieren des neuen Notizbuchs konnte nicht abgeschlossen werden; es wurde als unvollständig markiert",
+		"351": "Ein unerwarteter Fehler ist aufgetreten; prüfen Sie das Systemprotokoll für die Aufgabe [%s]"
 	}
 	}

@@ -20,7 +20,33 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 )
+
+func TestFromSQLBlockMapsTimestamps(t *testing.T) {
+	previousConf := Conf
+	Conf = NewAppConf()
+	Conf.Search = conf.NewSearch()
+	t.Cleanup(func() {
+		Conf = previousConf
+	})
+
+	sqlBlock := &sql.Block{
+		ID:      "20260722120000-abcdefg",
+		Created: "20260722120000",
+		Updated: "20260722123000",
+	}
+
+	block := fromSQLBlock(sqlBlock, "", 0)
+	if block.Created != sqlBlock.Created {
+		t.Fatalf("created = %q, want %q", block.Created, sqlBlock.Created)
+	}
+	if block.Updated != sqlBlock.Updated {
+		t.Fatalf("updated = %q, want %q", block.Updated, sqlBlock.Updated)
+	}
+}
 
 func TestValidEmbedBlockIDs(t *testing.T) {
 	firstID := "20260721120000-block01"

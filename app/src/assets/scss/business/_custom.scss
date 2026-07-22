@@ -235,8 +235,9 @@
 }
 
 .protyle-db-attr {
+  border-bottom: 1px solid var(--b3-border-color);
   margin: 8px 16px 8px 24px;
-  border-radius: var(--b3-border-radius);
+  padding-bottom: 8px;
 
   &__header {
     align-items: center;
@@ -257,7 +258,13 @@
       background-color: var(--b3-theme-surface-light);
     }
 
+    & > .block__icon:first-child {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
     .block__logo {
+      margin-left: 0;
       min-height: 34px;
       font-weight: 500;
     }
@@ -267,12 +274,92 @@
     display: none;
   }
 
+  &--hide-empty &__body > [data-av-id] .av__row[data-empty="true"]:not([data-primary="true"]) {
+    display: none;
+  }
+
+  &__tabs {
+    background-color: transparent;
+    margin: 0 8px 4px;
+    max-width: 100%;
+    padding: 0;
+
+    .item {
+      background-color: transparent;
+      border: 0;
+      font: inherit;
+      margin: 2px 4px 2px 0;
+      max-width: 220px;
+      min-height: 28px;
+      padding: 0 8px;
+
+      &--focus {
+        background-color: var(--b3-theme-primary-lightest);
+        box-shadow: 0 0 0 1px var(--b3-theme-primary-lighter) inset;
+        color: var(--b3-theme-on-background);
+      }
+
+      &__text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+
   &__body > [data-type="NodeAttributeView"] > .fn__hr--b {
     display: none;
   }
 
-  .custom-attr__avheader {
-    padding-left: 40px;
+}
+
+.protyle-db-attr__body,
+.protyle-db-row__body {
+  container-type: inline-size;
+
+  & > [data-av-id] {
+    display: grid;
+    gap: 0 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    .custom-attr__avheader,
+    .fn__hr,
+    .b3-button[data-type="addColumn"],
+    .fn__hr--b {
+      grid-column: 1 / -1;
+    }
+  }
+
+  & > [data-av-id] {
+    .custom-attr__avheader {
+      padding-left: 0;
+    }
+
+    .block__icons {
+      padding-left: 0;
+      position: relative;
+    }
+
+    .block__icons > .block__icon:first-child {
+      left: -24px;
+      position: absolute;
+    }
+
+    .block__logo:not(.popover__block) {
+      margin-left: 0;
+      padding-left: 0;
+    }
+
+    .b3-button[data-type="addColumn"] {
+      margin-left: 0;
+    }
+  }
+}
+
+@container (max-width: 900px) {
+  .protyle-db-attr__body > [data-av-id],
+  .protyle-db-row__body > [data-av-id] {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

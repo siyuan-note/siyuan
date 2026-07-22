@@ -2072,10 +2072,57 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 }
 
 type BlockAttributeViewKeys struct {
-	AvID      string          `json:"avID"`
-	AvName    string          `json:"avName"`
-	BlockIDs  []string        `json:"blockIDs"`
-	KeyValues []*av.KeyValues `json:"keyValues"`
+	AvID          string                       `json:"avID"`
+	AvName        string                       `json:"avName"`
+	BlockIDs      []string                     `json:"blockIDs"`
+	KeyValues     []*av.KeyValues              `json:"keyValues"`
+	ItemPositions []*AttributeViewItemPosition `json:"itemPositions"`
+}
+
+type AttributeViewItemPosition struct {
+	ViewID     string                            `json:"viewID"`
+	PreviousID string                            `json:"previousID"`
+	Groups     []*AttributeViewGroupItemPosition `json:"groups"`
+}
+
+type AttributeViewGroupItemPosition struct {
+	GroupID    string `json:"groupID"`
+	PreviousID string `json:"previousID"`
+}
+
+func getAttributeViewItemPositions(attrView *av.AttributeView, itemID string) (ret []*AttributeViewItemPosition) {
+	for _, view := range attrView.Views {
+		previousID, found := getAttributeViewPreviousItemID(view.ItemIDs, itemID)
+		if !found {
+			continue
+		}
+
+		position := &AttributeViewItemPosition{ViewID: view.ID, PreviousID: previousID}
+		for _, group := range view.Groups {
+			groupPreviousID, groupFound := getAttributeViewPreviousItemID(group.GroupItemIDs, itemID)
+			if groupFound {
+				position.Groups = append(position.Groups, &AttributeViewGroupItemPosition{
+					GroupID: group.ID, PreviousID: groupPreviousID,
+				})
+			}
+		}
+		ret = append(ret, position)
+	}
+	return
+}
+
+func getAttributeViewPreviousItemID(itemIDs []string, itemID string) (previousID string, found bool) {
+	for i, currentID := range itemIDs {
+		if currentID != itemID {
+			continue
+		}
+		if 0 < i {
+			previousID = itemIDs[i-1]
+		}
+		found = true
+		return
+	}
+	return
 }
 
 type AttributeViewBacklinkRelation struct {
@@ -2381,10 +2428,11 @@ func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttribu
 	})
 
 	ret = append(ret, &BlockAttributeViewKeys{
-		AvID:      avID,
-		AvName:    getAttrViewName(attrView),
-		BlockIDs:  treenode.GetMirrorAttrViewBlockIDs(avID),
-		KeyValues: keyValues,
+		AvID:          avID,
+		AvName:        getAttrViewName(attrView),
+		BlockIDs:      treenode.GetMirrorAttrViewBlockIDs(avID),
+		KeyValues:     keyValues,
+		ItemPositions: getAttributeViewItemPositions(attrView, itemID),
 	})
 	return
 }
@@ -2501,10 +2549,11 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		ret = append(ret, &BlockAttributeViewKeys{
-			AvID:      avID,
-			AvName:    getAttrViewName(attrView),
-			BlockIDs:  blockIDs,
-			KeyValues: keyValues,
+			AvID:          avID,
+			AvName:        getAttrViewName(attrView),
+			BlockIDs:      blockIDs,
+			KeyValues:     keyValues,
+			ItemPositions: getAttributeViewItemPositions(attrView, itemID),
 		})
 	}
 	return
@@ -4932,9 +4981,17 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
-	if err != nil {
-		return
+	var view *av.View
+	if "" != operation.ViewID {
+		view = attrView.GetView(operation.ViewID)
+		if nil == view {
+			return av.ErrViewNotFound
+		}
+	} else {
+		view, err = getAttrViewViewByBlockID(attrView, operation.BlockID)
+		if err != nil {
+			return
+		}
 	}
 
 	var itemID string

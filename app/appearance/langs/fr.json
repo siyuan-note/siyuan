@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Masquer les attributs de base de données vides",
+	"databaseAttrUseTabs": "Utiliser des onglets pour les attributs de base de données",
 	"rebuildHistoryIndex": "Reconstruire l'index de l'historique",
 	"rebuildAssetContentIndex": "Reconstruire l'index du contenu des ressources",
 	"newItemWithTemplate": "Créer un élément avec un modèle",
@@ -2228,6 +2230,14 @@
 		"340": "Le Vault sélectionné ne contient aucun fichier Markdown lisible et non masqué",
 		"341": "Le document de niveau supérieur du carnet ne peut pas être supprimé ni déplacé",
 		"342": "Mon carnet",
-		"343": "Un nouveau départ"
+		"343": "Un nouveau départ",
+		"344": "Le fichier Markdown [%s] n’est pas encodé en UTF-8",
+		"345": "Impossible de lire le fichier Markdown [%s]",
+		"346": "Le fichier [%s] a changé après l’analyse ; analysez à nouveau le Vault",
+		"347": "Impossible de convertir le fichier Markdown [%s]",
+		"348": "Impossible d’importer le fichier de ressource [%s]",
+		"349": "Le contenu du Vault a changé après l’analyse ; relancez l’analyse",
+		"350": "Impossible de terminer l’écriture ou l’indexation du nouveau carnet ; il a été marqué comme incomplet",
+		"351": "Une erreur inattendue s’est produite ; consultez le journal système pour la tâche [%s]"
 	}
 	}

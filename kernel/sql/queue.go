@@ -27,7 +27,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
@@ -132,7 +131,6 @@ func FlushQueue() {
 	ops, indexSnapshot := getOperations()
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {
-		processDiskQueue()
 		return
 	}
 
@@ -238,8 +236,8 @@ func FlushQueue() {
 
 	eventbus.Publish(eventbus.EvtSQLIndexFlushed)
 
+	// 刷新期间追加的操作仍在内存队列中，磁盘队列仅用于进程重启恢复，不能在这里重复执行。
 	clearIndexQueue(indexSnapshot)
-	processDiskQueue()
 }
 
 func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error) {
@@ -527,42 +525,4 @@ func appendOperation(op *dbQueueOperation) {
 	operationQueue = append(operationQueue, op)
 	appendToIndexQueue(op)
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)
-}
-
-func processDiskQueue() {
-	entries := loadIndexQueue()
-	if 1 > len(entries) {
-		return
-	}
-
-	logging.LogInfof("flushing [%d] disk index queue operations", len(entries))
-
-	luteEngine := lute.New()
-	context := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	groupOpsCurrent := map[string]int{}
-	for _, e := range entries {
-		op := indexEntryToOp(e, luteEngine, "flush disk queue")
-		if nil == op {
-			continue
-		}
-		tx, err := beginTxForBox(op.boxID())
-		if err != nil {
-			return
-		}
-		groupOpsCurrent[op.action]++
-		context["current"] = groupOpsCurrent[op.action]
-		context["total"] = len(entries)
-		if err = execOp(op, tx, context); err != nil {
-			tx.Rollback()
-			closeTxPreparedStmts(tx)
-			logging.LogErrorf("queue operation [%s] failed: %s", op.action, err)
-			continue
-		}
-		if err = commitTx(tx); err != nil {
-			logging.LogErrorf("commit tx failed: %s", err)
-			continue
-		}
-	}
-
-	clearIndexQueueEntries()
 }

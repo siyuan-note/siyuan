@@ -3,6 +3,7 @@ import {Tab} from "../layout/Tab";
 import {App} from "../index";
 import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 import {Protyle} from "../protyle";
+import {getEditorHorizontalPadding} from "../protyle/ui/padding";
 
 export const newDatabaseRowModel = (options: {
     app: App,
@@ -19,7 +20,21 @@ export const newDatabaseRowModel = (options: {
     let customModel: Custom;
     let contextProtyle: IProtyle;
     let ghostProtyle: Protyle;
+    let resizeObserver: ResizeObserver;
     let destroyed = false;
+    const updateLayout = (custom: Custom) => {
+        const width = custom.element.clientWidth;
+        const padding = getEditorHorizontalPadding(width, window.siyuan.config.editor.fullWidth);
+        const titleElement = custom.element.querySelector<HTMLElement>(".protyle-db-row__title");
+        const bodyElement = custom.element.querySelector<HTMLElement>(".protyle-db-row__body");
+        if (titleElement) {
+            titleElement.style.margin = `16px ${padding.right}px 0 ${padding.left}px`;
+            titleElement.style.padding = "8px 0";
+        }
+        if (bodyElement) {
+            bodyElement.style.margin = `8px ${padding.right}px 8px ${padding.left}px`;
+        }
+    };
     const render = (custom: Custom) => {
         const previousBodyElement = custom.element.querySelector<HTMLElement>(".protyle-db-row__body");
         if (!previousBodyElement || !contextProtyle) {
@@ -28,6 +43,7 @@ export const newDatabaseRowModel = (options: {
         const bodyElement = document.createElement("div");
         bodyElement.className = "custom-attr protyle-db-row__body";
         previousBodyElement.replaceWith(bodyElement);
+        updateLayout(custom);
         renderAVAttribute(bodyElement, options.data.itemID, contextProtyle, undefined,
             {avID: options.data.avID, itemID: options.data.itemID, valueID: options.data.valueID});
     };
@@ -47,6 +63,9 @@ export const newDatabaseRowModel = (options: {
     </div>
 </div>`;
             custom.element.querySelector(".protyle-db-row__title span").textContent = options.data.title || window.siyuan.languages.untitled;
+            updateLayout(custom);
+            resizeObserver = new ResizeObserver(() => updateLayout(custom));
+            resizeObserver.observe(custom.element);
             ghostProtyle = new Protyle(options.app, document.createElement("div"), {
                 blockId: options.data.blockID,
                 notebookId: options.data.notebookId,
@@ -61,6 +80,7 @@ export const newDatabaseRowModel = (options: {
         },
         destroy() {
             destroyed = true;
+            resizeObserver?.disconnect();
             ghostProtyle?.destroy();
         },
         update() {

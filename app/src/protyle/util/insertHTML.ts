@@ -542,15 +542,21 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     const isFirstBlockInLi = hasClosestByClassName(blockElement, "li") &&
         blockElement.previousElementSibling?.classList.contains("protyle-action");
     const cursorLiElement = hasClosestByClassName(blockElement, "li");
-    // 粘贴列表到已有列表内时统一列表类型 https://github.com/siyuan-note/siyuan/issues/17890
-    if (cursorLiElement) {
+    const firstPastedElement = tempElement.content.firstElementChild;
+    const isPastedListItem = firstPastedElement?.getAttribute("data-type") === "NodeListItem";
+    const pastedListElement = firstPastedElement?.getAttribute("data-type") === "NodeList" ? firstPastedElement : undefined;
+    const pastedListHasRefCount = pastedListElement?.querySelector(".protyle-attr--refcount");
+    const shouldFlattenList = Boolean(cursorLiElement && isFirstBlockInLi && pastedListElement && !pastedListHasRefCount);
+    const shouldMergeIntoTargetList = Boolean(cursorLiElement && (isPastedListItem || shouldFlattenList));
+    // 列表项并入目标列表时统一顶层列表类型 https://github.com/siyuan-note/siyuan/issues/17890
+    if (shouldMergeIntoTargetList && cursorLiElement && firstPastedElement) {
         const targetSubtype = cursorLiElement.getAttribute("data-subtype");
-        const firstChild = tempElement.content.firstElementChild;
-        if (firstChild && (firstChild.getAttribute("data-type") === "NodeList" ||
-            firstChild.getAttribute("data-type") === "NodeListItem") &&
-            firstChild.getAttribute("data-subtype") !== targetSubtype) {
-            tempElement.content.querySelectorAll(".li").forEach(li => {
+        if (firstPastedElement.getAttribute("data-subtype") !== targetSubtype) {
+            const listItemElements = Array.from(pastedListElement?.children || tempElement.content.children).filter(item =>
+                item.getAttribute("data-type") === "NodeListItem");
+            listItemElements.forEach(li => {
                 li.setAttribute("data-subtype", targetSubtype);
+                li.classList.remove("protyle-task--done");
                 const actionElement = li.querySelector(".protyle-action");
                 if (!actionElement) return;
                 if (targetSubtype === "o") {
@@ -573,15 +579,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                     actionElement.innerHTML = "<svg><use xlink:href=\"#iconDot\"></use></svg>";
                 }
             });
-            tempElement.content.querySelectorAll("[data-type='NodeList']").forEach(list => {
-                list.setAttribute("data-subtype", targetSubtype);
-            });
         }
     }
     let isListPaste = false;
     let keepEmptyBlock = false;
     // 列表项不能单独进行粘贴 https://ld246.com/article/1628681120576/comment/1628681209731#comments
-    if (tempElement.content.children[0]?.getAttribute("data-type") === "NodeListItem") {
+    if (isPastedListItem) {
         isListPaste = true;
         if (cursorLiElement) {
             blockElement = cursorLiElement;
@@ -592,29 +595,23 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             const subType = liItemElement.getAttribute("data-subtype");
             tempElement.innerHTML = `<div${subType === "o" ? " data-marker=\"1.\"" : ""} data-subtype="${subType}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
         }
-    } else if (isFirstBlockInLi && cursorLiElement &&
-        tempElement.content.children[0]?.getAttribute("data-type") === "NodeList") {
-        const sourceList = tempElement.content.children[0] as HTMLElement;
-        const hasRefCount = sourceList.querySelector(".protyle-attr--refcount");
-        if (!hasRefCount) {
-            isListPaste = true;
-            // 顶层空列表项粘贴列表块时拆开为同级列表项 https://github.com/siyuan-note/siyuan/issues/17890
-            blockElement = cursorLiElement as HTMLElement;
-            id = blockElement.getAttribute("data-node-id");
-            oldHTML = blockElement.outerHTML;
-            const listElement = tempElement.content.children[0] as HTMLElement;
-            tempElement.innerHTML = "";
-            while (listElement.firstElementChild) {
-                if (listElement.firstElementChild.classList.contains("protyle-attr")) {
-                    listElement.firstElementChild.remove();
-                    continue;
-                }
-                tempElement.content.appendChild(listElement.firstElementChild);
+    } else if (shouldFlattenList && cursorLiElement && pastedListElement) {
+        isListPaste = true;
+        // 列表项首个内容块粘贴列表块时拆开为同级列表项 https://github.com/siyuan-note/siyuan/issues/17890
+        blockElement = cursorLiElement;
+        id = blockElement.getAttribute("data-node-id");
+        oldHTML = blockElement.outerHTML;
+        tempElement.innerHTML = "";
+        while (pastedListElement.firstElementChild) {
+            if (pastedListElement.firstElementChild.classList.contains("protyle-attr")) {
+                pastedListElement.firstElementChild.remove();
+                continue;
             }
-        } else {
-            // 有 refcount 的列表直接作为子列表插入到空段落后，不拆开不清理 https://github.com/siyuan-note/siyuan/issues/17890
-            keepEmptyBlock = true;
+            tempElement.content.appendChild(pastedListElement.firstElementChild);
         }
+    } else if (isFirstBlockInLi && cursorLiElement && pastedListElement) {
+        // 有 refcount 的列表直接作为子列表插入到空段落后，不拆开不清理 https://github.com/siyuan-note/siyuan/issues/17890
+        keepEmptyBlock = true;
     }
     let lastElement: Element;
     let insertBefore = false;

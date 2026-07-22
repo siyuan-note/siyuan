@@ -420,6 +420,7 @@ func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess P
 			}
 		}
 		if accessable {
+			blockAttributeViewKey.ItemPositions = nil
 			ret = append(ret, blockAttributeViewKey)
 		}
 	}

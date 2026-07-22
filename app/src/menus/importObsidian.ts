@@ -46,6 +46,7 @@ interface IObsidianTask {
     state: string;
     progress: number;
     error?: string;
+    detail?: string;
     analysis?: IObsidianAnalysis;
     result?: IObsidianResult;
 }
@@ -157,16 +158,15 @@ const showProgress = async (taskID: string, importing: boolean) => {
 };
 
 const showFailure = (task: IObsidianTask) => {
-    if (!task.result?.incomplete) {
+    if (!task.result?.incomplete && !task.detail) {
         showMessage(task.error || window.siyuan.languages.obsidianImportFailed, 0, "error");
         return;
     }
     new Dialog({
-        title: window.siyuan.languages.obsidianImportFailed,
+        title: task.error || window.siyuan.languages.obsidianImportFailed,
         content: `<div class="b3-dialog__content">
-    <div class="ft__breakword">${escapeHtml(task.error || window.siyuan.languages.obsidianImportFailed)}</div>
-    <div class="fn__hr"></div>
-    <div class="b3-label">${escapeHtml(task.result.notebookName)}</div>
+    ${task.detail ? `<div class="ft__breakword">${escapeHtml(task.detail)}</div>` : ""}
+    ${task.result?.incomplete ? `${task.detail ? "<div class=\"fn__hr\"></div>" : ""}<div class="b3-label">${escapeHtml(task.result.notebookName)}</div>` : ""}
 </div>`,
         width: "520px",
     });

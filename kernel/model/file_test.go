@@ -49,6 +49,7 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 	Conf = NewAppConf()
 	Conf.FileTree = conf.NewFileTree()
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	Conf.Sync = conf.NewSync()
 
 	box := &Box{ID: "20260718000000-abcdefg"}
 	boxConf := conf.NewBoxConf()
@@ -149,6 +150,97 @@ func TestMoveDocsRejectsInvalidPathsBeforeMoving(t *testing.T) {
 				t.Fatalf("target document was created for invalid source paths [%v]", test.fromPaths)
 			}
 		})
+	}
+}
+
+func TestSetFileTreeSort(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+
+	result, err := SetFileTreeSort(
+		[]*SortItem{{ID: fixture.box.ID, Sort: -10}},
+		[]*SortItem{{ID: fixture.sourceID, Sort: -8}},
+	)
+	if err != nil {
+		t.Fatalf("set file tree sort failed: %v", err)
+	}
+	if len(result.NotebookIDs) != 1 || result.NotebookIDs[0] != fixture.box.ID {
+		t.Fatalf("unexpected changed notebook IDs: %v", result.NotebookIDs)
+	}
+	if len(result.DocIDs) != 1 || result.DocIDs[0] != fixture.sourceID {
+		t.Fatalf("unexpected changed document IDs: %v", result.DocIDs)
+	}
+	if sortVal := fixture.box.GetConf().Sort; sortVal != -10 {
+		t.Fatalf("unexpected notebook sort: got %d, want -10", sortVal)
+	}
+	sortConfPath := filepath.Join(util.DataDir, fixture.box.ID, ".siyuan", "sort.json")
+	sortValues, err := readSortConfMap(sortConfPath)
+	if err != nil {
+		t.Fatalf("read sort conf failed: %v", err)
+	}
+	if sortVal := sortValues[fixture.sourceID]; sortVal != -8 {
+		t.Fatalf("unexpected document sort: got %d, want -8", sortVal)
+	}
+
+	result, err = SetFileTreeSort(
+		[]*SortItem{{ID: fixture.box.ID, Sort: -10}},
+		[]*SortItem{{ID: fixture.sourceID, Sort: -8}},
+	)
+	if err != nil {
+		t.Fatalf("repeat file tree sort failed: %v", err)
+	}
+	if 0 != len(result.NotebookIDs) || 0 != len(result.DocIDs) {
+		t.Fatalf("unchanged sorts reported changes: %+v", result)
+	}
+}
+
+func TestSetFileTreeSortValidatesBeforeWriting(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+
+	if _, err := SetFileTreeSort(
+		[]*SortItem{{ID: fixture.box.ID, Sort: -10}},
+		[]*SortItem{{ID: fixture.childID, Sort: -8}},
+	); err == nil {
+		t.Fatal("expected a child block ID to be rejected")
+	}
+	if sortVal := fixture.box.GetConf().Sort; sortVal != 0 {
+		t.Fatalf("notebook sort changed before request validation completed: %d", sortVal)
+	}
+}
+
+func TestSetFileTreeSortRejectsNotebookRootDocument(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	boxDocPath := "/" + fixture.box.ID + ".sy"
+	boxDocTree := treenode.NewTree(fixture.box.ID, boxDocPath, "/File operation test", "File operation test")
+	if _, err := filesys.WriteTree(boxDocTree); err != nil {
+		t.Fatalf("write notebook root document failed: %v", err)
+	}
+	treenode.UpsertBlockTree(boxDocTree)
+	t.Cleanup(func() {
+		cache.RemoveTreeData(boxDocTree.ID)
+		cache.RemoveDocIAL(boxDocTree.Path)
+	})
+
+	if _, err := SetFileTreeSort(
+		[]*SortItem{{ID: fixture.box.ID, Sort: -10}},
+		[]*SortItem{{ID: fixture.box.ID, Sort: -8}},
+	); err == nil {
+		t.Fatal("expected a notebook root document ID to be rejected")
+	}
+	if sortVal := fixture.box.GetConf().Sort; sortVal != 0 {
+		t.Fatalf("notebook sort changed before notebook root document validation completed: %d", sortVal)
+	}
+}
+
+func TestSetFileTreeSortRejectsDocumentInClosedNotebook(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	boxConf := fixture.box.GetConf()
+	boxConf.Closed = true
+	if err := fixture.box.SaveConf(boxConf); err != nil {
+		t.Fatalf("close test notebook failed: %v", err)
+	}
+
+	if _, err := SetFileTreeSort(nil, []*SortItem{{ID: fixture.sourceID, Sort: -8}}); err == nil {
+		t.Fatal("expected a document in a closed notebook to be rejected")
 	}
 }
 

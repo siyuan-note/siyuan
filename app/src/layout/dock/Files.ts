@@ -1268,6 +1268,39 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(data.title);
     }
 
+    public onFiletreeSortChanged(data: { notebook: string, parentPath: string }) {
+        const notebookElement = this.element.querySelector(`ul[data-url="${data.notebook}"]`);
+        if (!notebookElement) {
+            return;
+        }
+        const sortMode = notebookElement.getAttribute("data-sortmode");
+        if (sortMode !== "6" && !(sortMode === "15" && window.siyuan.config.fileTree.sort === 6)) {
+            return;
+        }
+
+        const listPath = data.parentPath === "/" ? "/" : `${data.parentPath}.sy`;
+        const liElement = notebookElement.querySelector(`li[data-path="${listPath}"]`);
+        if (!liElement?.nextElementSibling || liElement.nextElementSibling.tagName !== "UL") {
+            return;
+        }
+        fetchPost("/api/filetree/listDocsByPath", {
+            notebook: data.notebook,
+            path: listPath,
+            app: Constants.SIYUAN_APPID,
+        }, response => {
+            this.onLsHTML(response.data);
+        });
+    }
+
+    public onNotebookSortChanged() {
+        if (window.siyuan.config.fileTree.sort !== 6) {
+            return;
+        }
+        setNoteBook(() => {
+            this.init(false);
+        });
+    }
+
     private onMove(response: IWebSocketData) {
         const sourceElement = this.element.querySelector(`ul[data-url="${response.data.fromNotebook}"] li[data-path="${response.data.fromPath}"]`) as HTMLElement;
         if (sourceElement) {
@@ -1340,8 +1373,10 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                 const openLiElement = hasClosestByClassName(item, "b3-list-item");
                 if (openLiElement) {
                     const tempOpenLiElement = tempElement.content.querySelector(`.b3-list-item[data-node-id="${openLiElement.getAttribute("data-node-id")}"]`);
-                    tempOpenLiElement.after(openLiElement.nextElementSibling);
-                    tempOpenLiElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
+                    if (tempOpenLiElement) {
+                        tempOpenLiElement.after(openLiElement.nextElementSibling);
+                        tempOpenLiElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
+                    }
                 }
             });
             nextElement.innerHTML = tempElement.innerHTML;

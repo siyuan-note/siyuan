@@ -141,6 +141,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/getRefCreateSavePath", model.CheckAuth, getRefCreateSavePath)
 	ginServer.Handle("POST", "/api/filetree/getShorthandSavePath", model.CheckAuth, getShorthandSavePath)
 	ginServer.Handle("POST", "/api/filetree/changeSort", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeSort)
+	ginServer.Handle("POST", "/api/filetree/setSort", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setSort)
 	ginServer.Handle("POST", "/api/filetree/createDocWithMd", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createDocWithMd)
 	ginServer.Handle("POST", "/api/filetree/createDailyNote", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createDailyNote)
 	ginServer.Handle("POST", "/api/filetree/createDoc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createDoc)

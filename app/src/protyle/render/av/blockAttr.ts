@@ -2,7 +2,7 @@ import {fetchPost} from "../../../util/fetch";
 import {addCol, getColIconByType} from "./col";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import * as dayjs from "dayjs";
-import {popTextCell, updateCellsValue} from "./cell";
+import {cellValueIsEmpty, popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
@@ -18,6 +18,50 @@ import {isBrowser} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
 import {openDatabaseRowByData} from "./openDatabaseRow";
+import {confirmDialog} from "../../../dialog/confirmDialog";
+
+interface IAVAttributeTableData {
+    avID: string;
+    blockIDs: string[];
+    itemPositions?: {
+        viewID: string;
+        previousID: string;
+        groups?: {
+            groupID: string;
+            previousID: string;
+        }[];
+    }[];
+    keyValues: {
+        key: {
+            id: string;
+            type: TAVCol;
+        };
+        values: IAVCellValue[];
+    }[];
+}
+
+const attributeTableData = new WeakMap<HTMLElement, IAVAttributeTableData>();
+
+const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string) => ({
+    type,
+    keyID,
+    blockID,
+    block: {id: "", content: ""},
+    text: {content: ""},
+    number: {content: 0, isNotEmpty: false, formattedContent: ""},
+    url: {content: ""},
+    phone: {content: ""},
+    email: {content: ""},
+    template: {content: ""},
+    date: {isNotEmpty: false, isNotEmpty2: false},
+    created: {isNotEmpty: false},
+    updated: {isNotEmpty: false},
+    checkbox: {checked: false},
+    mSelect: [],
+    mAsset: [],
+    relation: {blockIDs: [], contents: []},
+    rollup: {contents: []},
+} as IAVCellValue);
 
 export const getAVTemplateHTML = (content: string) => {
     if (window.siyuan.config.editor.allowHTMLBLockScript) {
@@ -204,31 +248,33 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     blockID: string,
                     isDetached?: boolean,
                     type: TAVCol & IAVCellValue
-                }  []
+                }[]
             }[],
             blockIDs: string[],
             avID: string
             avName: string
         }) => {
+            const primaryValue = table.keyValues.find(item => item.key.type === "block")?.values[0] || table.keyValues[0]?.values[0];
             let innerHTML = `<div class="custom-attr__avheader">
     <div class="block__logo block__logo--icon popover__block" style="max-width:calc(100% - 40px)" data-id='${JSON.stringify(table.blockIDs)}'>
         <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg>
         <span class="fn__ellipsis">${table.avName || window.siyuan.languages.database}</span>
     </div>
     <div class="fn__flex-1"></div>
-    <span data-type="remove" data-row-id="${table.keyValues && table.keyValues[0].values[0].blockID}" class="block__icon block__icon--warning block__icon--show b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
+    <span data-type="remove" data-row-id="${primaryValue?.blockID || ""}" class="block__icon block__icon--warning block__icon--show b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
 </div>`;
             table.keyValues?.forEach(item => {
-                innerHTML += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
+                const value = item.values[0] || createEmptyAVValue(item.key.id, item.key.type, primaryValue?.blockID);
+                innerHTML += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}" data-empty="${cellValueIsEmpty(value)}"${item.key.type === "block" ? ' data-primary="true"' : ""}>
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo block__logo--icon ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAriaLabel(item.key.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.key.desc)}</div>">
         ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}
         <span>${escapeHtml(item.key.name)}</span>
     </div>
-    <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-row-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}"${item.values[0].isDetached ? ' data-detached="true"' : ""}
-data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}" 
-${["text", "number", "date", "url", "phone", "template", "email"].includes(item.values[0].type) ? "" : `placeholder="${window.siyuan.languages.empty}"`}  
-class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(item.values[0].type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(item.values[0])}</div>
+    <div data-av-id="${table.avID}" data-col-id="${value.keyID}" data-row-id="${value.blockID}" data-id="${value.id}" data-type="${value.type}"${value.isDetached ? ' data-detached="true"' : ""}
+data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"
+${["text", "number", "date", "url", "phone", "template", "email"].includes(value.type) ? "" : `placeholder="${window.siyuan.languages.empty}"`}
+class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"].includes(value.type) ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(value)}</div>
 </div>`;
             });
             innerHTML += `<div class="fn__hr"></div>
@@ -419,24 +465,86 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 if (removeElement) {
                     const blockElement = hasClosestBlock(removeElement);
                     if (blockElement) {
-                        transaction(protyle, [{
+                        const table = attributeTableData.get(blockElement as HTMLElement);
+                        const rowID = removeElement.dataset.rowId;
+                        const avID = blockElement.dataset.avId;
+                        const primaryKeyValues = table?.keyValues.find(item => item.key.type === "block");
+                        const primaryValue = primaryKeyValues?.values.find(item => item.blockID === rowID) || primaryKeyValues?.values[0];
+                        if (!table || !rowID || !avID || !primaryValue || !table.blockIDs[0]) {
+                            event.stopPropagation();
+                            return;
+                        }
+                        const isDetached = primaryValue?.isDetached === true || !primaryValue?.block?.id;
+                        const restoreBlockID = primaryValue?.block?.id || Lute.NewNodeID();
+                        const undoOperations: IOperation[] = [];
+                        undoOperations.push({
+                            action: "insertAttrViewBlock",
+                            avID,
+                            blockID: table.blockIDs[0],
+                            ignoreDefaultFill: true,
+                            srcs: [{
+                                itemID: rowID,
+                                id: restoreBlockID,
+                                isDetached,
+                                content: primaryValue.block?.content || "",
+                            }],
+                        });
+                        table.keyValues.forEach(item => {
+                            const value = item.values.find(itemValue => itemValue.blockID === rowID) || item.values[0];
+                            if (!value || item.key.type === "rollup") {
+                                return;
+                            }
+                            const valueData = JSON.parse(JSON.stringify(value)) as IAVCellValue;
+                            undoOperations.push({
+                                action: "updateAttrViewCell",
+                                avID,
+                                keyID: item.key.id,
+                                rowID,
+                                data: valueData,
+                            });
+                        });
+                        table.itemPositions?.forEach(position => {
+                            undoOperations.push({
+                                action: "sortAttrViewRow",
+                                avID,
+                                viewID: position.viewID,
+                                id: rowID,
+                                previousID: position.previousID,
+                            });
+                            position.groups?.forEach(group => {
+                                undoOperations.push({
+                                    action: "sortAttrViewRow",
+                                    avID,
+                                    viewID: position.viewID,
+                                    id: rowID,
+                                    previousID: group.previousID,
+                                    groupID: group.groupID,
+                                    targetGroupID: group.groupID,
+                                });
+                            });
+                        });
+                        const doOperations: IOperation[] = [{
                             action: "removeAttrViewBlock",
-                            srcIDs: [removeElement.dataset.rowId],
-                            avID: blockElement.dataset.avId,
-                        }, {
-                            action: "doUpdateUpdated",
-                            id: removeElement.dataset.rowId,
-                            data: dayjs().format("YYYYMMDDHHmmss"),
-                        }]);
-                        blockElement.remove();
-                        if (!element.innerHTML) {
-                            window.siyuan.dialogs.find(item => {
-                                if (item.element.getAttribute("data-key") === Constants.DIALOG_ATTR) {
-                                    item.destroy();
-                                    return true;
+                            srcIDs: [rowID],
+                            avID,
+                        }];
+                        confirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {
+                            removeElement.setAttribute("disabled", "true");
+                            transaction(protyle, doOperations, undoOperations.length > 0 ? undoOperations : undefined, {
+                                callback: () => {
+                                    blockElement.remove();
+                                    protyle.databaseAttributePanel?.refresh();
+                                    if (!element.querySelector("[data-av-id]")) {
+                                        window.siyuan.dialogs.find(item => {
+                                            if (item.element.getAttribute("data-key") === Constants.DIALOG_ATTR) {
+                                                item.destroy();
+                                                return true;
+                                            }
+                                        });
+                                    }
                                 }
                             });
-                        }
+                        }, undefined, true);
                     }
                     event.stopPropagation();
                     return;
@@ -448,6 +556,12 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
             });
             element.innerHTML = html;
         }
+        tables.forEach((table: IAVAttributeTableData) => {
+            const blockElement = element.querySelector<HTMLElement>(`[data-node-id="${id}"][data-av-id="${table.avID}"]`);
+            if (blockElement) {
+                attributeTableData.set(blockElement, table);
+            }
+        });
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;

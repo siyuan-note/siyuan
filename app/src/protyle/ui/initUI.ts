@@ -24,6 +24,7 @@ import {
 } from "../util/hasClosest";
 import {hideElements} from "./hideElements";
 import {AVAttributePanel} from "../render/av/attributePanel";
+import {getEditorHorizontalPadding} from "./padding";
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -364,19 +365,9 @@ export const getPadding = (protyle: IProtyle) => {
         if (!isFullWidth) {
             isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
         }
-        let padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2;
-        if (isFullWidth === "false" && padding > 96) {
-            if (padding > Constants.SIZE_EDITOR_WIDTH) {
-                // 超宽屏调整 https://ld246.com/article/1668266637363
-                padding = protyle.element.clientWidth * .382 / 1.382;
-            }
-            padding = Math.ceil(padding);
-            left = padding;
-            right = padding;
-        } else if (protyle.element.clientWidth > Constants.SIZE_EDITOR_WIDTH) {
-            left = 96;
-            right = 96;
-        }
+        const padding = getEditorHorizontalPadding(protyle.element.clientWidth, isFullWidth !== "false");
+        left = padding.left;
+        right = padding.right;
     }
     return {
         left, right, bottom, top: 16

@@ -187,10 +187,14 @@ func printSearchResult(blocks []*model.Block, matchedBlockCount, matchedRootCoun
 }
 
 func truncate(s string, maxLen int) string {
-	if len(s) <= maxLen {
+	runes := []rune(s)
+	if len(runes) <= maxLen {
 		return s
 	}
-	return s[:maxLen] + "..."
+	if maxLen < 1 {
+		return "..."
+	}
+	return string(runes[:maxLen]) + "..."
 }
 
 func stringSliceToMap(s []string) map[string]bool {

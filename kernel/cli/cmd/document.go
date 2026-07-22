@@ -271,7 +271,7 @@ var documentInfoCmd = &cobra.Command{
 		default:
 			fmt.Printf("ID:           %s\n", info.ID)
 			fmt.Printf("RootID:       %s\n", info.RootID)
-			fmt.Printf("Name:         %s\n", info.Name)
+			fmt.Printf("Title:        %s\n", info.Name)
 			fmt.Printf("RefCount:     %d\n", info.RefCount)
 			fmt.Printf("SubFileCount: %d\n", info.SubFileCount)
 		}
@@ -311,15 +311,24 @@ var documentSearchCmd = &cobra.Command{
 				return nil
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-			fmt.Fprintln(w, "NAME\tID\tHPATH")
+			fmt.Fprintln(w, "TYPE\tID\tNAME\tHPATH")
 			for _, d := range docs {
-				fmt.Fprintf(w, "%s\t%s\t%s\n", d["name"], d["id"], d["hPath"])
+				typ, id, name := documentSearchDisplayFields(d)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", typ, id, name, d["hPath"])
 			}
 			w.Flush()
 			fmt.Printf("\n%d document(s)\n", len(docs))
 		}
 		return nil
 	},
+}
+
+func documentSearchDisplayFields(doc map[string]string) (typ, id, name string) {
+	hPath := strings.TrimSuffix(doc["hPath"], "/")
+	if "/" == doc["path"] {
+		return "NOTEBOOK", doc["box"], path.Base(hPath)
+	}
+	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), path.Base(hPath)
 }
 
 func printDocumentTable(files []*model.File) {

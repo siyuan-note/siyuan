@@ -65,32 +65,18 @@ const openDatabaseRow = (protyle: IProtyle, target: HTMLElement, blockElement: H
     });
 };
 
-const openDatabaseRowMore = (protyle: IProtyle, target: HTMLElement) => {
+const updateDatabaseRow = (protyle: IProtyle, target: HTMLElement) => {
     const cellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;
     if (!cellElement) {
         return;
     }
-    const isDetached = isDetachedDatabaseCell(cellElement);
-    const menu = new Menu("av-row-more");
-    menu.addItem({
-        icon: isDetached ? "iconLink" : "iconRefresh",
-        label: isDetached ? window.siyuan.languages.bind : window.siyuan.languages.update,
-        click() {
-            const textElement = cellElement.querySelector<HTMLElement>(".av__celltext");
-            protyle.toolbar.range = document.createRange();
-            protyle.toolbar.range.selectNodeContents(textElement);
-            focusByRange(protyle.toolbar.range);
-            cellElement.classList.add("av__cell--select");
-            addDragFill(cellElement);
-            hintRef(textElement.textContent.trim(), protyle, "av");
-        },
-    });
-    /// #if MOBILE
-    menu.fullscreen("bottom");
-    /// #else
-    const rect = target.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
-    /// #endif
+    const textElement = cellElement.querySelector<HTMLElement>(".av__celltext");
+    protyle.toolbar.range = document.createRange();
+    protyle.toolbar.range.selectNodeContents(textElement);
+    focusByRange(protyle.toolbar.range);
+    cellElement.classList.add("av__cell--select");
+    addDragFill(cellElement);
+    hintRef(textElement.textContent.trim(), protyle, "av");
 };
 
 let foldTimeout: number;
@@ -174,8 +160,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-row-more" && !protyle.disabled) {
-            openDatabaseRowMore(protyle, target);
+        } else if (type === "av-row-update" && !protyle.disabled) {
+            updateDatabaseRow(protyle, target);
             event.preventDefault();
             event.stopPropagation();
             return true;

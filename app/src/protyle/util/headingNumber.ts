@@ -3,7 +3,8 @@ import {fetchPost} from "../../util/fetch";
 import {isEncryptedBox} from "../../util/pathName";
 
 const HEADING_SELECTOR = '[data-node-id][data-type="NodeHeading"]';
-const NUMBERED_HEADING_SELECTOR = `${HEADING_SELECTOR}[data-heading-number]`;
+const NUMBERED_HEADING_SELECTOR = `${HEADING_SELECTOR}[data-heading-number], ` +
+    `${HEADING_SELECTOR} > [contenteditable][data-heading-number]`;
 const REFRESH_DELAY = 300;
 const refreshTimers = new WeakMap<IProtyle, number>();
 const refreshVersions = new WeakMap<IProtyle, number>();
@@ -36,13 +37,15 @@ export const renderHeadingNumbers = (
     protyle.wysiwyg.element.querySelectorAll(HEADING_SELECTOR).forEach(item => {
         const id = item.getAttribute("data-node-id");
         const number = id ? numbers[id] : "";
+        const editElement = item.querySelector(":scope > [contenteditable]");
+        item.removeAttribute("data-heading-number");
         if (id) {
             levels[id] = item.getAttribute("data-subtype") || "";
         }
-        if (number && isNumberedHeadingTarget(item)) {
-            item.setAttribute("data-heading-number", number);
+        if (editElement && number && isNumberedHeadingTarget(item)) {
+            editElement.setAttribute("data-heading-number", number);
         } else {
-            item.removeAttribute("data-heading-number");
+            editElement?.removeAttribute("data-heading-number");
         }
     });
     protyle.block.headingNumberLevels = levels;

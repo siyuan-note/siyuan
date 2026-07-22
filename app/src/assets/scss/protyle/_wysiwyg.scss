@@ -23,7 +23,7 @@
   [data-node-id] {
     position: relative;
 
-    &[data-type="NodeHeading"][data-heading-number] > [contenteditable]::before {
+    &[data-type="NodeHeading"] > [contenteditable][data-heading-number]::before {
       content: attr(data-heading-number);
       margin-inline-end: .5em;
       color: var(--b3-theme-on-surface-light);

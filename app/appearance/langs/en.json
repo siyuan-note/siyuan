@@ -1,4 +1,7 @@
 {
+  "headingNumber": "Automatic heading numbering",
+  "headingNumberTip": "Automatically display hierarchical numbers before headings",
+  "headingNumberFormat": "Heading numbering format",
 	"backlinkShowBottom": "Show backlinks at the bottom of the document",
 	"databaseAttrHideEmpty": "Hide empty database attributes",
 	"databaseAttrUseTabs": "Use tabs for database attributes",

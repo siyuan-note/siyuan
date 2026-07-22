@@ -1,4 +1,7 @@
 {
+  "headingNumber": "Automatické číslovanie nadpisov",
+  "headingNumberTip": "Automaticky zobrazovať hierarchické čísla pred nadpismi",
+  "headingNumberFormat": "Formát číslovania nadpisov",
 	"backlinkShowBottom": "Zobraziť spätné odkazy v spodnej časti dokumentu",
 	"databaseAttrHideEmpty": "Skryť prázdne atribúty databázy",
 	"databaseAttrUseTabs": "Používať karty pre atribúty databázy",

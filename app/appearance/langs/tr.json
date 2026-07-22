@@ -1,4 +1,7 @@
 {
+  "headingNumber": "Otomatik başlık numaralandırma",
+  "headingNumberTip": "Başlıkların önünde hiyerarşik numaraları otomatik olarak göster",
+  "headingNumberFormat": "Başlık numaralandırma biçimi",
 	"backlinkShowBottom": "Belgenin altında geri bağlantıları göster",
 	"databaseAttrHideEmpty": "Boş veritabanı özniteliklerini gizle",
 	"databaseAttrUseTabs": "Veritabanı öznitelikleri için sekmeleri kullan",

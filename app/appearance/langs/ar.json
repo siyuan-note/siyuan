@@ -1,4 +1,7 @@
 {
+  "headingNumber": "ترقيم العناوين التلقائي",
+  "headingNumberTip": "عرض أرقام هرمية تلقائيًا قبل العناوين",
+  "headingNumberFormat": "تنسيق ترقيم العناوين",
 	"backlinkShowBottom": "إظهار الروابط المرجعية في أسفل المستند",
 	"databaseAttrHideEmpty": "إخفاء السمات الفارغة لقاعدة البيانات",
 	"databaseAttrUseTabs": "استخدام علامات تبويب لسمات قاعدة البيانات",

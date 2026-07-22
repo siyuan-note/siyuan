@@ -1,4 +1,7 @@
 {
+  "headingNumber": "Numeración automática de encabezados",
+  "headingNumberTip": "Mostrar automáticamente números jerárquicos antes de los encabezados",
+  "headingNumberFormat": "Formato de numeración de encabezados",
 	"backlinkShowBottom": "Mostrar enlaces entrantes al final del documento",
 	"databaseAttrHideEmpty": "Ocultar atributos vacíos de la base de datos",
 	"databaseAttrUseTabs": "Usar pestañas para los atributos de la base de datos",

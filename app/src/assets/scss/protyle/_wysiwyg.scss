@@ -23,6 +23,15 @@
   [data-node-id] {
     position: relative;
 
+    &[data-type="NodeHeading"][data-heading-number] > [contenteditable]::before {
+      content: attr(data-heading-number);
+      margin-inline-end: .5em;
+      color: var(--b3-theme-on-surface-light);
+      unicode-bidi: isolate;
+      user-select: none;
+      pointer-events: none;
+    }
+
     &.dragover {
       &__left::after,
       &__right::after,

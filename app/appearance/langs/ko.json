@@ -1,4 +1,7 @@
 {
+  "headingNumber": "제목 자동 번호 매기기",
+  "headingNumberTip": "제목 앞에 계층 번호를 자동으로 표시합니다",
+  "headingNumberFormat": "제목 번호 형식",
 	"backlinkShowBottom": "문서 하단에 백링크 표시",
 	"databaseAttrHideEmpty": "빈 데이터베이스 속성 숨기기",
 	"databaseAttrUseTabs": "데이터베이스 속성에 탭 사용",

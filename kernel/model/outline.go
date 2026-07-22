@@ -217,6 +217,10 @@ func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err e
 	if nil == tree {
 		return
 	}
+	headingNumbers := map[string]string{}
+	if Conf.Editor.HeadingNumber {
+		headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
+	}
 
 	if preview && Conf.Export.AddTitle {
 		if root, _ := getBlock(tree.ID, tree); nil != root {
@@ -237,6 +241,7 @@ func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err e
 	}
 
 	ret = outline(tree)
+	applyOutlineHeadingNumbers(ret, headingNumbers)
 
 	storage, _ := GetOutlineStorage(rootID)
 	if nil == storage || 0 == len(storage) {
@@ -304,25 +309,21 @@ func walkChildren(b *Block, expandIDs []string) {
 func outline(tree *parse.Tree) (ret []*Path) {
 	luteEngine := NewLute()
 	var headings []*Block
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
-			n.Box, n.Path = tree.Box, tree.Path
-			block := &Block{
-				RootID:  tree.Root.ID,
-				Depth:   n.HeadingLevel,
-				Box:     n.Box,
-				Path:    n.Path,
-				ID:      n.ID,
-				Content: renderOutline(n, luteEngine),
-				Type:    n.Type.String(),
-				SubType: treenode.SubTypeAbbr(n),
-				Folded:  true,
-			}
-			headings = append(headings, block)
-			return ast.WalkSkipChildren
+	for _, n := range collectOutlineHeadings(tree) {
+		n.Box, n.Path = tree.Box, tree.Path
+		block := &Block{
+			RootID:  tree.Root.ID,
+			Depth:   n.HeadingLevel,
+			Box:     n.Box,
+			Path:    n.Path,
+			ID:      n.ID,
+			Content: renderOutline(n, luteEngine),
+			Type:    n.Type.String(),
+			SubType: treenode.SubTypeAbbr(n),
+			Folded:  true,
 		}
-		return ast.WalkContinue
-	})
+		headings = append(headings, block)
+	}
 
 	if 1 > len(headings) {
 		return
@@ -371,6 +372,21 @@ func outline(tree *parse.Tree) (ret []*Path) {
 		}
 	}
 	return
+}
+
+func applyOutlineHeadingNumbers(paths []*Path, numbers map[string]string) {
+	for _, path := range paths {
+		path.Number = numbers[path.ID]
+		applyBlockHeadingNumbers(path.Blocks, numbers)
+		applyOutlineHeadingNumbers(path.Children, numbers)
+	}
+}
+
+func applyBlockHeadingNumbers(blocks []*Block, numbers map[string]string) {
+	for _, block := range blocks {
+		block.Number = numbers[block.ID]
+		applyBlockHeadingNumbers(block.Children, numbers)
+	}
 }
 
 func resetDepth(b *Block, depth int) {

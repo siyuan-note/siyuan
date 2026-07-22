@@ -1,4 +1,7 @@
 {
+  "headingNumber": "स्वचालित शीर्षक क्रमांकन",
+  "headingNumberTip": "शीर्षकों से पहले पदानुक्रमित संख्याएँ स्वचालित रूप से दिखाएँ",
+  "headingNumberFormat": "शीर्षक क्रमांकन प्रारूप",
 	"backlinkShowBottom": "दस्तावेज़ के नीचे बैकलिंक्स दिखाएँ",
 	"databaseAttrHideEmpty": "खाली डेटाबेस विशेषताएँ छिपाएँ",
 	"databaseAttrUseTabs": "डेटाबेस विशेषताओं के लिए टैब का उपयोग करें",

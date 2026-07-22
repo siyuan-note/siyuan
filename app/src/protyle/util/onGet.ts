@@ -21,6 +21,7 @@ import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {isEncryptedBox} from "../../util/pathName";
+import {renderHeadingNumbers} from "./headingNumber";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -72,6 +73,9 @@ export const onGet = (options: {
     options.protyle.block.blockCount = options.data.data.blockCount;
     options.protyle.block.scroll = options.data.data.scroll;
     options.protyle.block.action = options.action;
+    if (options.data.data.headingNumbers) {
+        options.protyle.block.headingNumbers = options.data.data.headingNumbers;
+    }
     if (!options.action.includes(Constants.CB_GET_UNCHANGEID)) {
         options.protyle.block.id = options.data.data.id;    // 非缩放情况时不一定是 rootID（搜索打开页签）；缩放时必为缩放 id，否则需查看代码
         options.protyle.scroll.lastScrollTop = 0;
@@ -253,6 +257,7 @@ const setHTML = (options: {
     highlightRender(protyle.wysiwyg.element);
     avRender(protyle.wysiwyg.element, protyle);
     blockRender(protyle, protyle.wysiwyg.element);
+    renderHeadingNumbers(protyle);
     protyle.databaseAttributePanel?.render();
     if (options.action.includes(Constants.CB_GET_HISTORY)) {
         return;

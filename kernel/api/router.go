@@ -188,6 +188,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/history/createAssetHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createAssetHistory)
 
 	ginServer.Handle("POST", "/api/outline/getDocOutline", model.CheckAuth, getDocOutline)
+	ginServer.Handle("POST", "/api/outline/getDocHeadingNumbers", model.CheckAuth, getDocHeadingNumbers)
 
 	ginServer.Handle("POST", "/api/bookmark/getBookmark", model.CheckAuth, getBookmark)
 	ginServer.Handle("POST", "/api/bookmark/renameBookmark", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameBookmark)

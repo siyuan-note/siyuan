@@ -1,4 +1,7 @@
 {
+  "headingNumber": "標題自動編號",
+  "headingNumberTip": "在標題前自動顯示層級編號",
+  "headingNumberFormat": "標題編號格式",
 	"backlinkShowBottom": "在文件底部顯示反向連結",
 	"databaseAttrHideEmpty": "資料庫屬性隱藏空欄位",
 	"databaseAttrUseTabs": "資料庫屬性使用頁籤",

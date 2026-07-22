@@ -1,4 +1,7 @@
 {
+  "headingNumber": "見出しの自動番号付け",
+  "headingNumberTip": "見出しの前に階層番号を自動表示します",
+  "headingNumberFormat": "見出し番号の形式",
 	"backlinkShowBottom": "文書の下部にバックリンクを表示",
 	"databaseAttrHideEmpty": "空のデータベース属性を非表示",
 	"databaseAttrUseTabs": "データベース属性にタブを使用",

@@ -1,4 +1,7 @@
 {
+  "headingNumber": "Numeração automática de títulos",
+  "headingNumberTip": "Exibir automaticamente números hierárquicos antes dos títulos",
+  "headingNumberFormat": "Formato de numeração de títulos",
 	"backlinkShowBottom": "Mostrar backlinks na parte inferior do documento",
 	"databaseAttrHideEmpty": "Ocultar atributos vazios do banco de dados",
 	"databaseAttrUseTabs": "Usar abas para atributos do banco de dados",

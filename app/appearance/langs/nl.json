@@ -1,4 +1,7 @@
 {
+  "headingNumber": "Automatische kopnummering",
+  "headingNumberTip": "Hiërarchische nummers automatisch voor koppen weergeven",
+  "headingNumberFormat": "Indeling voor kopnummering",
 	"backlinkShowBottom": "Terugverwijzingen onderaan het document weergeven",
 	"databaseAttrHideEmpty": "Lege databasekenmerken verbergen",
 	"databaseAttrUseTabs": "Tabbladen gebruiken voor databasekenmerken",

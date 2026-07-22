@@ -864,6 +864,7 @@ interface IFile {
 
 interface IBlockTree {
     box: string,
+    number?: string,
     nodeType: string,
     hPath: string,
     subType: string,
@@ -888,6 +889,7 @@ interface IBlock {
     rootID?: string;
     type?: string;
     content?: string;
+    number?: string;
     def?: IBlock;
     defID?: string
     defPath?: string

@@ -537,6 +537,14 @@ declare namespace Config {
          */
         embedBlockBreadcrumb: boolean;
         /**
+         * Whether to display automatic heading numbers
+         */
+        headingNumber: boolean;
+        /**
+         * The automatic heading numbering format preset
+         */
+        headingNumberFormat: string;
+        /**
          * Heading embed mode for embedded blocks
          * - `0`: Show title with blocks below (default)
          * - `1`: Show only title

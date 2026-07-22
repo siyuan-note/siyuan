@@ -547,6 +547,8 @@ interface IProtyle {
         mode?: number
         blockCount?: number
         action?: TProtyleAction[]
+        headingNumbers?: Record<string, string>
+        headingNumberLevels?: Record<string, string>
     },
     disabled: boolean,
     lite?: boolean,

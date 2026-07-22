@@ -1,4 +1,7 @@
 {
+  "headingNumber": "Automatische Überschriftennummerierung",
+  "headingNumberTip": "Hierarchische Nummern automatisch vor Überschriften anzeigen",
+  "headingNumberFormat": "Format der Überschriftennummerierung",
 	"backlinkShowBottom": "Backlinks am Dokumentende anzeigen",
 	"databaseAttrHideEmpty": "Leere Datenbankattribute ausblenden",
 	"databaseAttrUseTabs": "Registerkarten für Datenbankattribute verwenden",

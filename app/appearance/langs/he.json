@@ -1,4 +1,7 @@
 {
+  "headingNumber": "מספור אוטומטי של כותרות",
+  "headingNumberTip": "הצגת מספרים היררכיים באופן אוטומטי לפני כותרות",
+  "headingNumberFormat": "תבנית מספור כותרות",
 	"backlinkShowBottom": "הצגת קישורים אחוריים בתחתית המסמך",
 	"databaseAttrHideEmpty": "הסתרת מאפייני מסד נתונים ריקים",
 	"databaseAttrUseTabs": "שימוש בכרטיסיות עבור מאפייני מסד נתונים",

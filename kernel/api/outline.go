@@ -77,3 +77,51 @@ func getDocOutline(c *gin.Context) {
 	}
 	ret.Data = headings
 }
+
+func getDocHeadingNumbers(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	rootID, ok := arg["id"].(string)
+	if !ok || util.InvalidIDPattern(rootID, ret) {
+		return
+	}
+
+	numbers := map[string]string{}
+	var err error
+	if model.Conf.Editor.HeadingNumber {
+		if notebook, ok := arg["notebook"].(string); ok && "" != notebook && model.IsEncryptedBox(notebook) {
+			numbers, err = model.GetHeadingNumbers(rootID, notebook)
+		} else {
+			numbers, err = model.GetHeadingNumbers(rootID, "")
+		}
+	}
+	if nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		bt := treenode.GetBlockTree(rootID)
+		if nil == bt {
+			numbers = map[string]string{}
+		} else {
+			passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+			if "" != password && !model.CheckPublishAuthCookie(c, passwordID, password) {
+				numbers = map[string]string{}
+			}
+			publishIgnore := model.GetDisablePublishAccess(publishAccess)
+			if !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+				numbers = map[string]string{}
+			}
+		}
+	}
+
+	ret.Data = numbers
+}

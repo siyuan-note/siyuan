@@ -114,6 +114,24 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.embedBlockBreadcrumb,
         desc: window.siyuan.languages.embedBlockBreadcrumbTip,
     });
+    group.switch("editor.headingNumber", {
+        title: window.siyuan.languages.headingNumber,
+        desc: window.siyuan.languages.headingNumberTip,
+    });
+    group.select("editor.headingNumberFormat", {
+        title: window.siyuan.languages.headingNumberFormat,
+        options: [
+            {value: "decimal-hierarchical", label: "1.2.3"},
+            {value: "upper-alpha-hierarchical", label: "A.B.C"},
+            {value: "lower-alpha-hierarchical", label: "a.b.c"},
+            {value: "upper-roman-hierarchical", label: "I.II.III"},
+            {value: "lower-roman-hierarchical", label: "i.ii.iii"},
+            {value: "upper-greek-hierarchical", label: "Α.Β.Γ"},
+            {value: "lower-greek-hierarchical", label: "α.β.γ"},
+            {value: "decimal-parenthesized", label: "1）"},
+            {value: "chinese-document", label: "一、（一）1."},
+        ],
+    });
     group.select("editor.databaseAttrViewMode", {
         title: window.siyuan.languages.databaseAttrViewMode,
         desc: window.siyuan.languages.databaseAttrViewModeTip,

@@ -69,9 +69,12 @@ export const initUI = (protyle: IProtyle) => {
 
     protyle.element.appendChild(protyle.hint.element);
 
+    const selectContainer = document.createElement("div");
+    selectContainer.className = "protyle-select__container";
     protyle.selectElement = document.createElement("div");
     protyle.selectElement.className = "protyle-select fn__none";
-    protyle.element.appendChild(protyle.selectElement);
+    selectContainer.appendChild(protyle.selectElement);
+    protyle.element.appendChild(selectContainer);
 
     protyle.element.appendChild(protyle.toolbar.element);
     protyle.element.appendChild(protyle.toolbar.subElement);

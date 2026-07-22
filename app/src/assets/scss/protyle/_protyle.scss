@@ -194,11 +194,17 @@
   }
 }
 
+.protyle-select__container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 3; // 需大于 database header and footer
+  pointer-events: none; // 划选矩形不拦截鼠标事件，避免 elementFromPoint 命中自身
+}
+
 .protyle-select {
   position: absolute;
   background-color: var(--b3-theme-primary-lightest);
-  z-index: 3; // 需大于 database header and footer
-  pointer-events: none; // 划选矩形不拦截鼠标事件，避免 elementFromPoint 命中自身
 }
 
 .protyle-breadcrumb {

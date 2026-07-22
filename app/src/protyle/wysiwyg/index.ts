@@ -98,6 +98,7 @@ import {openLink} from "../../editor/openLink";
 import {mathRender} from "../render/mathRender";
 import {editAssetItem} from "../render/av/asset";
 import {img3115} from "../../boot/compatibleVersion";
+import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {globalClickHideMenu} from "../../boot/globalEvent/click";
 import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
@@ -1386,12 +1387,17 @@ export class WYSIWYG {
             this.element.querySelectorAll("iframe").forEach(item => {
                 item.style.pointerEvents = "none";
             });
-            const needScroll = ["IMG", "VIDEO", "AUDIO"].includes(target.tagName) || target.classList.contains("img");
             // 容器类元素判断（划选时 elementFromPoint 命中它们的边缘/空白需继续探测子块）
             const isContainer = (el: Element) => el.classList.contains("protyle-wysiwyg") || el.classList.contains("list") ||
                 el.classList.contains("li") || el.classList.contains("sb") ||
                 el.classList.contains("callout") || el.classList.contains("bq");
+            let lastMoveEvent: MouseEvent;
+            const selectScrollEvent = () => lastMoveEvent && documentSelf.onmousemove?.(lastMoveEvent);
+            if (startsFromPadding) {
+                protyle.contentElement.addEventListener("scroll", selectScrollEvent);
+            }
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                lastMoveEvent = moveEvent;
                 let moveTarget: boolean | HTMLElement = moveEvent.target as HTMLElement;
                 // table cell select
                 if (tableBlockElement &&
@@ -1475,13 +1481,15 @@ export class WYSIWYG {
                 }
                 // 在包含 img， video， audio 的元素上划选后无法上下滚动 https://ld246.com/article/1681778773806
                 // 在包含 img， video， audio 的元素上拖拽无法划选 https://github.com/siyuan-note/siyuan/issues/11763
-                if (needScroll) {
-                    if (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || moveEvent.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
-                        protyle.contentElement.scroll({
-                            top: protyle.contentElement.scrollTop + (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
-                            behavior: "smooth"
-                        });
-                    }
+                if (startsFromPadding) {
+                    dragOverScroll(moveEvent, contentRect, protyle.contentElement);
+                } else if ((moveEvent.target as HTMLElement).closest("img, video, audio, .img") &&
+                    (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ||
+                        moveEvent.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB)) {
+                    protyle.contentElement.scroll({
+                        top: protyle.contentElement.scrollTop + (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
+                        behavior: "smooth"
+                    });
                 }
                 if (!nodeElement) {
                     return;
@@ -1623,6 +1631,10 @@ export class WYSIWYG {
             };
 
             documentSelf.onmouseup = (mouseUpEvent) => {
+                protyle.contentElement.removeEventListener("scroll", selectScrollEvent);
+                if (startsFromPadding) {
+                    stopScrollAnimation();
+                }
                 documentSelf.onmousemove = null;
                 documentSelf.onmouseup = null;
                 documentSelf.ondragstart = null;

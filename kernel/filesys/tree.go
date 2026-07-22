@@ -286,7 +286,9 @@ func DocIAL(absPath string) (ret map[string]string) {
 			// 注意：filelock.ReadFile 内部已加锁，不能在外面再 Lock/Unlock（会死锁）
 			raw, readErr := filelock.ReadFile(absPath)
 			if readErr != nil {
-				logging.LogErrorf("read file [%s] failed: %s", absPath, readErr)
+				if !errors.Is(readErr, os.ErrNotExist) {
+					logging.LogErrorf("read file [%s] failed: %s", absPath, readErr)
+				}
 				return nil
 			}
 			relPath := filepath.ToSlash(strings.TrimPrefix(absPath, filepath.Join(util.DataDir, boxID)+string(os.PathSeparator)))
@@ -316,7 +318,9 @@ func DocIAL(absPath string) (ret map[string]string) {
 	filelock.Lock(absPath)
 	file, err := os.Open(absPath)
 	if err != nil {
-		logging.LogErrorf("open file [%s] failed: %s", absPath, err)
+		if !errors.Is(err, os.ErrNotExist) {
+			logging.LogErrorf("open file [%s] failed: %s", absPath, err)
+		}
 		filelock.Unlock(absPath)
 		return nil
 	}

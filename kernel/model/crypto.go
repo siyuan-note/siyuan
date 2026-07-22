@@ -1719,7 +1719,7 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	}
 	defer zeroAndClear(kek)
 
-	id, err = CreateBox(name)
+	id, err = createBox(name, false)
 	if err != nil {
 		return "", err
 	}
@@ -1728,6 +1728,12 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	boxCreated := true
 	defer func() {
 		if err != nil && boxCreated {
+			cachedDEKsLock.Lock()
+			if cachedDEK, ok := cachedDEKs[id]; ok {
+				zeroAndClear(cachedDEK)
+				delete(cachedDEKs, id)
+			}
+			cachedDEKsLock.Unlock()
 			sql.RemoveEncryptedDBFile(id)
 			treenode.RemoveEncryptedBlockTreeDBFile(id)
 			boxDir := filepath.Join(util.DataDir, id)
@@ -1762,15 +1768,21 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 
 	// 复用刚派生的 DEK 直接开 db + 缓存，省去再次 Argon2id 解锁
 	cachedDEKsLock.Lock()
-	defer cachedDEKsLock.Unlock()
 	if err = sql.OpenEncryptedDB(id, dek); err != nil {
+		cachedDEKsLock.Unlock()
 		return "", err
 	}
 	if err = treenode.OpenEncryptedBlockTreeDB(id, dek); err != nil {
 		sql.CloseEncryptedDB(id)
+		cachedDEKsLock.Unlock()
 		return "", err
 	}
 	cachedDEKs[id] = dek
+	cachedDEKsLock.Unlock()
+
+	if _, err = EnsureBoxDoc(id); err != nil {
+		return "", fmt.Errorf("initialize encrypted notebook document failed: %w", err)
+	}
 
 	// 初始化自动锁定访问时间戳，与 UnlockBox 对称
 	newVal := &atomic.Int64{}

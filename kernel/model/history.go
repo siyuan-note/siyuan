@@ -818,6 +818,9 @@ func createAssetsHistory(assets []string) (err error) {
 		}
 
 		if err = filelock.Copy(file, historyPath); err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
 			return fmt.Errorf("copy asset [%s] to [%s] failed: %w", file, historyPath, err)
 		}
 	}
@@ -1135,6 +1138,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	})
 
 	var histories []*sql.History
+	encryptedHistoryBoxes := map[string]bool{}
 	for _, doc := range docs {
 		relDoc := strings.TrimPrefix(doc, entryPath+string(os.PathSeparator))
 		relDoc = filepath.ToSlash(relDoc)
@@ -1146,7 +1150,22 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		p := strings.TrimPrefix(doc, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
 
-		if histBoxID != "" && IsEncryptedBox(histBoxID) {
+		isEncrypted := IsEncryptedBox(histBoxID)
+		if histBoxID != "" && !isEncrypted {
+			if cached, ok := encryptedHistoryBoxes[histBoxID]; ok {
+				isEncrypted = cached
+			} else {
+				boxConfData, readErr := os.ReadFile(filepath.Join(entryPath, histBoxID, ".siyuan", "conf.json"))
+				if readErr == nil {
+					boxConf := &conf.BoxConf{}
+					if json.Unmarshal(boxConfData, boxConf) == nil {
+						isEncrypted = boxConf.Encrypted
+					}
+				}
+				encryptedHistoryBoxes[histBoxID] = isEncrypted
+			}
+		}
+		if isEncrypted {
 			// 加密笔记本：content 留空，只存路径用于文件列表展示
 			docID := strings.TrimSuffix(filepath.Base(doc), ".sy")
 			histories = append(histories, &sql.History{

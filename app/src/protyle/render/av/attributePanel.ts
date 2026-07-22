@@ -1,34 +1,7 @@
 import {renderAVAttribute} from "./blockAttr";
-import {fetchPost} from "../../../util/fetch";
 
 const updateEmptyState = (element: HTMLElement, hideEmpty: boolean) => {
     element.classList.toggle("protyle-db-attr--hide-empty", hideEmpty);
-    const useElement = element.querySelector('[data-type="hideEmpty"] use');
-    useElement?.setAttribute("xlink:href", hideEmpty ? "#iconEyeoff" : "#iconEye");
-    const toggleElement = element.querySelector('[data-type="hideEmpty"]');
-    toggleElement?.setAttribute("aria-label", hideEmpty ? window.siyuan.languages.displayEmptyFields : window.siyuan.languages.hideEmptyFields);
-};
-
-let hideEmptySaving = false;
-let hideEmptySavePending = false;
-const saveHideEmpty = () => {
-    if (hideEmptySaving) {
-        hideEmptySavePending = true;
-        return;
-    }
-    hideEmptySaving = true;
-    const hideEmpty = window.siyuan.config.editor.databaseAttrHideEmpty;
-    void fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-        if (!hideEmptySavePending && window.siyuan.config.editor.databaseAttrHideEmpty === hideEmpty) {
-            window.siyuan.config.editor.databaseAttrHideEmpty = response.data.databaseAttrHideEmpty;
-        }
-    }).finally(() => {
-        hideEmptySaving = false;
-        if (hideEmptySavePending) {
-            hideEmptySavePending = false;
-            saveHideEmpty();
-        }
-    });
 };
 
 export class AVAttributePanel {
@@ -48,21 +21,13 @@ export class AVAttributePanel {
         this.element.innerHTML = `<button type="button" class="protyle-db-attr__header fn__flex" data-type="toggle" aria-expanded="${!this.collapsed}" aria-label="${window.siyuan.languages.database}">
     <span class="block__icon block__icon--show fn__flex-center"><svg><use xlink:href="#iconRight"></use></svg></span>
     <span class="block__logo fn__flex-1"><svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg><span>${window.siyuan.languages.database}</span></span>
-    <span class="block__icon block__icon--show ariaLabel" data-type="hideEmpty" data-position="north" aria-label="${window.siyuan.languages.hideEmptyFields}"><svg><use xlink:href="#iconEye"></use></svg></span>
 </button>`;
         this.bodyElement = document.createElement("div");
         this.bodyElement.className = "custom-attr protyle-db-attr__body";
         this.element.appendChild(this.bodyElement);
         this.element.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
-            if (target.closest('[data-type="hideEmpty"]')) {
-                const hideEmpty = !window.siyuan.config.editor.databaseAttrHideEmpty;
-                window.siyuan.config.editor.databaseAttrHideEmpty = hideEmpty;
-                document.querySelectorAll<HTMLElement>(".protyle-db-attr").forEach(item => updateEmptyState(item, hideEmpty));
-                saveHideEmpty();
-                event.preventDefault();
-                event.stopPropagation();
-            } else if (target.closest('[data-type="av-tab"]')) {
+            if (target.closest('[data-type="av-tab"]')) {
                 this.activeAvID = (target.closest('[data-type="av-tab"]') as HTMLElement).dataset.id || "";
                 this.updateTabs();
                 event.preventDefault();
@@ -152,12 +117,12 @@ export class AVAttributePanel {
         if (useTabs && databaseElements.length > 1) {
             if (!tabsElement) {
                 tabsElement = document.createElement("div");
-                tabsElement.className = "protyle-db-attr__tabs";
+                tabsElement.className = "protyle-db-attr__tabs layout-tab-bar fn__flex";
                 this.bodyElement.prepend(tabsElement);
             }
             tabsElement.innerHTML = databaseElements.map(item => {
                 const title = item.querySelector(".custom-attr__avheader .block__logo span")?.textContent || window.siyuan.languages.database;
-                return `<button type="button" class="b3-button${item.dataset.avId === this.activeAvID ? " b3-button--outline" : ""}" data-type="av-tab" data-id="${item.dataset.avId}">${Lute.EscapeHTMLStr(title)}</button>`;
+                return `<button type="button" class="item${item.dataset.avId === this.activeAvID ? " item--focus" : ""}" data-type="av-tab" data-id="${item.dataset.avId}"><span class="item__text">${Lute.EscapeHTMLStr(title)}</span></button>`;
             }).join("");
         } else {
             tabsElement?.remove();
@@ -170,7 +135,7 @@ export class AVAttributePanel {
         });
         if (tabsElement) {
             tabsElement.querySelectorAll("[data-type=\"av-tab\"]").forEach(item => {
-                item.classList.toggle("b3-button--outline", item.getAttribute("data-id") === this.activeAvID);
+                item.classList.toggle("item--focus", item.getAttribute("data-id") === this.activeAvID);
             });
         }
     }

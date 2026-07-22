@@ -235,8 +235,10 @@
 }
 
 .protyle-db-attr {
-  margin: 8px 16px 8px 24px;
+  border-bottom: 1px solid var(--b3-border-color);
   border-radius: var(--b3-border-radius);
+  margin: 8px 16px 8px 24px;
+  padding-bottom: 8px;
 
   &__header {
     align-items: center;
@@ -272,20 +274,31 @@
   }
 
   &__tabs {
-    align-items: center;
-    display: flex;
-    gap: 4px;
+    background-color: transparent;
     margin: 0 8px 4px;
     max-width: 100%;
-    overflow-x: auto;
-    padding: 4px 0;
+    padding: 0;
 
-    .b3-button {
-      flex-shrink: 0;
+    .item {
+      background-color: transparent;
+      border: 0;
+      font: inherit;
+      margin: 2px 4px 2px 0;
       max-width: 220px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      min-height: 28px;
+      padding: 0 8px;
+
+      &--focus {
+        background-color: var(--b3-theme-primary-lightest);
+        box-shadow: 0 0 0 1px var(--b3-theme-primary-lighter) inset;
+        color: var(--b3-theme-on-background);
+      }
+
+      &__text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
 

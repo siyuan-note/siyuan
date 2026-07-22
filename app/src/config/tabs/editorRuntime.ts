@@ -9,6 +9,7 @@ const applyEditorConfig = (data: Config.IEditor) => {
     window.siyuan.config.editor = data;
     getAllEditor().forEach((editorItem) => {
         const protyle = editorItem.protyle;
+        protyle.databaseAttributePanel?.updateDisplayConfig();
         reloadProtyle(protyle, false);
         let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
         if (!isFullWidth) {

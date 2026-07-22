@@ -70,6 +70,11 @@ export class AVAttributePanel {
         this.render(true);
     }
 
+    public updateDisplayConfig() {
+        this.updateTabs();
+        this.updateEmptyState();
+    }
+
     public hasDatabase(avID: string) {
         return Boolean(this.bodyElement.querySelector(`[data-av-id="${avID}"]`));
     }
@@ -83,6 +88,11 @@ export class AVAttributePanel {
             return;
         }
         if (operation.action === "insertAttrViewBlock" && operation.srcs?.some(item => item.id === this.targetID)) {
+            this.refresh();
+            return;
+        }
+        if (operation.action === "updateAttrViewCell" && operation.data?.type === "block" && operation.rowID &&
+            this.hasItem(operation.rowID)) {
             this.refresh();
             return;
         }

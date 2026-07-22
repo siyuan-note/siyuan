@@ -145,6 +145,10 @@ export const initUI = (protyle: IProtyle) => {
         }, Constants.TIMEOUT_LOAD);
     }, {passive: true});
     protyle.contentElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+        const eventProtyleElement = hasClosestByClassName(event.target, "protyle", true);
+        if (eventProtyleElement && eventProtyleElement !== protyle.element) {
+            return;
+        }
         hideElements(["hint", "util"], protyle);
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009
         if (protyle.disabled ||
@@ -210,6 +214,10 @@ export const initUI = (protyle: IProtyle) => {
     protyle.element.addEventListener(isMobile() ? "pointerover" : "mouseover", (event: PointerEvent & {
         target: HTMLElement
     }) => {
+        const eventProtyleElement = hasClosestByClassName(event.target, "protyle", true);
+        if (eventProtyleElement && eventProtyleElement !== protyle.element) {
+            return;
+        }
         if (isMobile() && event.pointerType !== "mouse") {
             return;
         }
@@ -327,11 +335,14 @@ export const setPadding = (protyle: IProtyle) => {
     const padding = getPadding(protyle);
     const paddingLeft = padding.left;
     const paddingRight = padding.right;
+    const backlinkBottomElement = protyle.contentElement.querySelector(".sy__backlink--bottom") as HTMLElement;
+    const backlinkBottomVisible = backlinkBottomElement && !backlinkBottomElement.classList.contains("fn__none");
 
     if (protyle.options.backlinkData) {
         protyle.wysiwyg.element.style.padding = `4px ${paddingRight}px 4px ${paddingLeft}px`;
     } else {
-        protyle.wysiwyg.element.style.padding = `${padding.top}px ${paddingRight}px ${padding.bottom}px ${paddingLeft}px`;
+        const paddingBottom = backlinkBottomVisible && protyle.options.typewriterMode ? 16 : padding.bottom;
+        protyle.wysiwyg.element.style.padding = `${padding.top}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`;
     }
     if (protyle.options.render.background) {
         protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${paddingLeft}px;margin-right:${paddingRight}px`);
@@ -342,6 +353,11 @@ export const setPadding = (protyle: IProtyle) => {
     }
     if (protyle.databaseAttributePanel) {
         protyle.databaseAttributePanel.element.style.margin = `8px ${paddingRight}px 8px ${paddingLeft}px`;
+    }
+    if (backlinkBottomElement) {
+        backlinkBottomElement.style.padding = `0 ${paddingRight}px 16px ${paddingLeft}px`;
+        backlinkBottomElement.style.marginBottom = backlinkBottomVisible && protyle.options.typewriterMode ?
+            `${Math.max(padding.bottom - 16, 0)}px` : "";
     }
 
     // https://github.com/siyuan-note/siyuan/issues/15021

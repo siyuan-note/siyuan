@@ -290,8 +290,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     } else {
                         /// #if !MOBILE
                         const allEditor = getAllEditor();
+                        const sourceProtyleElement = hasClosestByClassName(topSourceParentElement, "protyle", true);
                         for (let i = 0; i < allEditor.length; i++) {
-                            if (allEditor[i].protyle.element.contains(topSourceParentElement)) {
+                            if (allEditor[i].protyle.element === sourceProtyleElement) {
                                 const otherSbData = await cancelSB(allEditor[i].protyle, topSourceParentElement);
                                 doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
                                 undoOperations.push(otherSbData.undoOperations[1], otherSbData.undoOperations[0]);
@@ -311,8 +312,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 } else {
                     /// #if !MOBILE
                     const allEditor = getAllEditor();
+                    const sourceProtyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
                     for (let i = 0; i < allEditor.length; i++) {
-                        if (allEditor[i].protyle.element.contains(oldSourceParentElement)) {
+                        if (allEditor[i].protyle.element === sourceProtyleElement) {
                             const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
                             doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
                             undoOperations.push(otherSbData.undoOperations[1], otherSbData.undoOperations[0]);
@@ -326,7 +328,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 /// #if !MOBILE
                 // 拖拽后，根文档原内容为空
                 getAllEditor().find(item => {
-                    if (item.protyle.element.contains(oldSourceParentElement)) {
+                    if (item.protyle.wysiwyg.element === oldSourceParentElement) {
                         if (!item.protyle.block.showAll) {
                             const newId = Lute.NewNodeID();
                             doOperations.splice(0, 0, {

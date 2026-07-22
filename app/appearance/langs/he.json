@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "הצגת קישורים אחוריים בתחתית המסמך",
 	"databaseAttrHideEmpty": "הסתרת מאפייני מסד נתונים ריקים",
 	"databaseAttrUseTabs": "שימוש בכרטיסיות עבור מאפייני מסד נתונים",
 	"rebuildHistoryIndex": "בנה מחדש את אינדקס ההיסטוריה",

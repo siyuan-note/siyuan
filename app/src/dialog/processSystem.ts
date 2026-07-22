@@ -5,7 +5,7 @@ import {exportLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
 /// #endif
-import {getAllEditor} from "../layout/getAll";
+import {getAllEditor, getAllModels} from "../layout/getAll";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -21,6 +21,22 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {Plugin} from "../plugin";
 
+const BACKLINK_REFRESH_DELAY = 3600;
+let backlinkRefreshTimeout: number;
+
+export const scheduleBacklinkRefresh = () => {
+    window.clearTimeout(backlinkRefreshTimeout);
+    // 等待索引队列写入后再查询提及，并合并连续事务触发的刷新。
+    backlinkRefreshTimeout = window.setTimeout(() => {
+        getAllModels().backlink.forEach(item => {
+            if (item.type === "bottom") {
+                item.markDirty();
+                item.refreshIfVisible();
+            }
+        });
+    }, BACKLINK_REFRESH_DELAY);
+};
+
 export const setRefDynamicText = (data: {
     "blockID": string,
     "defBlockID": string,
@@ -33,14 +49,27 @@ export const setRefDynamicText = (data: {
             item.innerHTML = data.refText;
         });
     });
+    scheduleBacklinkRefresh();
 };
 
 export const setDefRefCount = (data: {
     "blockID": string,
+    "defIDs"?: string[],
     "refCount": number,
     "rootRefCount": number,
     "rootID": string
 }) => {
+    /// #if !MOBILE
+    getAllModels().backlink.forEach(item => {
+        const containsChangedBlock = window.siyuan.config.editor.backlinkContainChildren && item.rootId === data.rootID;
+        if (item.type !== "bottom" || (!containsChangedBlock &&
+            item.blockId !== data.rootID && item.blockId !== data.blockID && !data.defIDs?.includes(item.blockId))) {
+            return;
+        }
+        item.markDirty();
+        item.refreshIfVisible();
+    });
+    /// #endif
     getAllEditor().forEach(editor => {
         if (editor.protyle.block.rootID === data.rootID && editor.protyle.title) {
             const attrElement = editor.protyle.title.element.querySelector(".protyle-attr");

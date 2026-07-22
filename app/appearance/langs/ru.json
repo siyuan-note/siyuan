@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "Показывать обратные ссылки внизу документа",
 	"databaseAttrHideEmpty": "Скрывать пустые атрибуты базы данных",
 	"databaseAttrUseTabs": "Использовать вкладки для атрибутов базы данных",
 	"rebuildHistoryIndex": "Перестроить индекс истории",

@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "Mostra i backlink in fondo al documento",
 	"databaseAttrHideEmpty": "Nascondi gli attributi vuoti del database",
 	"databaseAttrUseTabs": "Usa schede per gli attributi del database",
 	"rebuildHistoryIndex": "Ricostruisci indice cronologia",

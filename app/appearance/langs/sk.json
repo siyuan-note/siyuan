@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "Zobraziť spätné odkazy v spodnej časti dokumentu",
 	"databaseAttrHideEmpty": "Skryť prázdne atribúty databázy",
 	"databaseAttrUseTabs": "Používať karty pre atribúty databázy",
 	"rebuildHistoryIndex": "Znovu vytvoriť index histórie",

@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "문서 하단에 백링크 표시",
 	"databaseAttrHideEmpty": "빈 데이터베이스 속성 숨기기",
 	"databaseAttrUseTabs": "데이터베이스 속성에 탭 사용",
 	"rebuildHistoryIndex": "기록 인덱스 재구축",

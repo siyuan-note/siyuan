@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "在文档底部显示反链",
 	"databaseAttrHideEmpty": "数据库属性隐藏空字段",
 	"databaseAttrUseTabs": "数据库属性使用页签",
 	"rebuildHistoryIndex": "重建历史索引",

@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "Terugverwijzingen onderaan het document weergeven",
 	"databaseAttrHideEmpty": "Lege databasekenmerken verbergen",
 	"databaseAttrUseTabs": "Tabbladen gebruiken voor databasekenmerken",
 	"rebuildHistoryIndex": "Geschiedenisindex herbouwen",

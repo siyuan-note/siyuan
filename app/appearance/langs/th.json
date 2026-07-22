@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "แสดงลิงก์ย้อนกลับที่ด้านล่างของเอกสาร",
 	"databaseAttrHideEmpty": "ซ่อนแอตทริบิวต์ฐานข้อมูลที่ว่างเปล่า",
 	"databaseAttrUseTabs": "ใช้แท็บสำหรับแอตทริบิวต์ฐานข้อมูล",
 	"rebuildHistoryIndex": "สร้างดัชนีประวัติใหม่",

@@ -92,6 +92,7 @@ export const onGet = (options: {
         // 防止动态加载加载过多的内容
         setHTML({
             content: options.data.data.content,
+            eof: options.data.data.eof,
             expand: options.data.data.isBacklinkExpand,
             action: options.action,
             scrollAttr: options.scrollAttr,
@@ -123,6 +124,7 @@ export const onGet = (options: {
 
         setHTML({
             content: options.data.data.content,
+            eof: options.data.data.eof,
             expand: options.data.data.isBacklinkExpand,
             action: options.action,
             scrollAttr: options.scrollAttr,
@@ -137,6 +139,7 @@ export const onGet = (options: {
 
 const setHTML = (options: {
     content: string,
+    eof: boolean,
     action?: string[],
     isSyncing: boolean,
     expand: boolean,
@@ -215,6 +218,12 @@ const setHTML = (options: {
             protyle.contentElement.scrollTop = options.scrollAttr.scrollTop;
             protyle.scroll.lastScrollTop = options.scrollAttr.scrollTop;
         }
+    }
+
+    if (options.eof) {
+        const eofElement = options.action.includes(Constants.CB_GET_BEFORE) ?
+            protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
+        eofElement?.setAttribute("data-eof", options.action.includes(Constants.CB_GET_BEFORE) ? "1" : "2");
     }
 
     /// #if MOBILE

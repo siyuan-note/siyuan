@@ -17,9 +17,10 @@ import {getAllModels} from "../getAll";
 export class Backlink extends Model {
     public element: HTMLElement;
     public inputsElement: NodeListOf<HTMLInputElement>;
-    public type: "pin" | "local";
+    public type: "pin" | "local" | "bottom";
     public blockId: string;
-    public rootId: string; // "local" 必传
+    public rootId: string; // "local" 和 "bottom" 必传
+    public ownerProtyle?: IProtyle;
     public tree: Tree;
     private notebookId: string;
     public mTree: Tree;
@@ -32,35 +33,51 @@ export class Backlink extends Model {
             mScrollTop: number,
             backlinkOpenIds: string[],
             backlinkMOpenIds: string[],
-            backlinkMStatus: number // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
+            backlinkMStatus: number, // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
+            backlinkFolded?: boolean,
+            backmentionFolded?: boolean
         }
     } = {};
+    private dirty = false;
+    private destroyed = false;
 
     constructor(options: {
         app: App,
-        tab: Tab,
+        tab?: Tab,
+        element?: HTMLElement,
         blockId: string,
         rootId?: string,
-        type: "pin" | "local"
+        type: "pin" | "local" | "bottom",
+        ownerProtyle?: IProtyle
     }) {
         super({app: options.app});
 
-        this.connect({
-            id: options.tab.id,
-            type: "backlink",
-            callback: this.handelCallback.bind(this),
-            msgCallback: this.handleMsgCallback.bind(this),
-        });
+        if (options.type !== "bottom") {
+            this.connect({
+                id: options.tab.id,
+                type: "backlink",
+                callback: this.handelCallback.bind(this),
+                msgCallback: this.handleMsgCallback.bind(this),
+            });
+        }
 
         this.blockId = options.blockId;
         this.rootId = options.rootId;
         this.type = options.type;
-        this.element = options.tab.panelElement;
+        this.ownerProtyle = options.ownerProtyle;
+        this.element = options.element || options.tab.panelElement;
         this.element.classList.add("fn__flex-column", "file-tree", "sy__backlink", "dockPanel");
+        if (this.type === "bottom") {
+            this.element.classList.add("sy__backlink--bottom");
+            this.element.tabIndex = -1;
+            this.element.addEventListener("focusout", () => {
+                window.setTimeout(() => this.refreshIfVisible());
+            });
+        }
         const backlinkSort = window.siyuan.config.editor.backlinkSort;
         const backmentionSort = window.siyuan.config.editor.backmentionSort;
         this.element.innerHTML = `<div class="block__icons">
-    <div class="block__logo fn__flex-1">${window.siyuan.languages.backlinks}</div>
+    <div class="block__logo fn__flex-1${this.type === "bottom" ? " fn__pointer" : ""}"${this.type === "bottom" ? ' data-type="backlink"' : ""}>${window.siyuan.languages.backlinks}</div>
     <span class="counter listCount" style="margin-left: 0"></span>
     <span class="fn__space"></span>
     <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
@@ -77,8 +94,10 @@ export class Backlink extends Model {
     <span data-type="collapse" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.collapse}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
-    <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
-    <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
+    <span class="${this.type === "bottom" ? "" : "fn__none "}fn__space"></span>
+    <span data-type="bLayout" class="${this.type === "bottom" ? "" : "fn__none "}block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.collapse}"><svg><use xlink:href='#iconDown'></use></svg></span>
+    <span class="${this.type !== "pin" ? "fn__none " : ""}fn__space"></span>
+    <span data-type="min" class="${this.type !== "pin" ? "fn__none " : ""}block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="backlinkList fn__flex-1"></div>
 <div class="block__icons">
@@ -240,8 +259,11 @@ export class Backlink extends Model {
             });
         });
         this.element.addEventListener("click", (event) => {
-            this.setFocus();
             let target = event.target as HTMLElement;
+            const eventProtyleElement = target.closest(".protyle");
+            if (this.type !== "bottom" || !eventProtyleElement || !this.element.contains(eventProtyleElement)) {
+                this.setFocus();
+            }
             while (target && !target.isEqualNode(this.element)) {
                 if ((target.classList.contains("block__icon") || target.classList.contains("block__logo")) &&
                     target.parentElement.parentElement === this.element) {
@@ -284,11 +306,29 @@ export class Backlink extends Model {
                             event.stopPropagation();
                             break;
                         case "layout":
-                            this.setLayout(target);
+                            if (this.type === "bottom") {
+                                this.setBottomLayout(target, this.mTree.element);
+                            } else {
+                                this.setLayout(target);
+                            }
                             event.stopPropagation();
                             break;
+                        case "bLayout":
+                            this.setBottomLayout(target, this.tree.element);
+                            event.stopPropagation();
+                            break;
+                        case "backlink":
+                            if (this.type === "bottom") {
+                                this.setBottomLayout(target.parentElement.querySelector('[data-type="bLayout"]'), this.tree.element);
+                                event.stopPropagation();
+                            }
+                            break;
                         case "mention":
-                            this.setLayout(target.parentElement.querySelector('[data-type="layout"]'));
+                            if (this.type === "bottom") {
+                                this.setBottomLayout(target.parentElement.querySelector('[data-type="layout"]'), this.mTree.element);
+                            } else {
+                                this.setLayout(target.parentElement.querySelector('[data-type="layout"]'));
+                            }
                             event.stopPropagation();
                             break;
                     }
@@ -363,11 +403,34 @@ export class Backlink extends Model {
         this.mTree.element.dispatchEvent(new CustomEvent("scroll"));
     }
 
+    private setBottomLayout(element: HTMLElement, listElement: HTMLElement) {
+        const folded = !listElement.classList.contains("fn__none");
+        listElement.classList.toggle("fn__none", folded);
+        if (folded) {
+            listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+        }
+        element.setAttribute("aria-label", folded ? window.siyuan.languages.expand : window.siyuan.languages.collapse);
+        element.querySelector("use").setAttribute("xlink:href", folded ? "#iconRight" : "#iconDown");
+        this.saveStatus();
+    }
+
     private setFocus() {
+        if (this.type === "bottom") {
+            this.setOwnerFocus();
+            this.element.focus({preventScroll: true});
+            return;
+        }
         if (this.type === "local") {
             setPanelFocus(this.element.parentElement.parentElement);
         } else {
             setPanelFocus(this.element);
+        }
+    }
+
+    private setOwnerFocus() {
+        const wndElement = this.ownerProtyle.element.closest('[data-type="wnd"]');
+        if (wndElement) {
+            setPanelFocus(wndElement);
         }
     }
 
@@ -466,17 +529,21 @@ export class Backlink extends Model {
             svgElement.removeAttribute("disabled");
         } else {
             const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value;
+            const blockId = this.blockId;
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
-                defID: this.blockId,
+                defID: blockId,
                 refTreeID: docId,
                 highlight: !isSupportCSSHL(),
                 keyword,
             }, (response) => {
+                if (this.destroyed || blockId !== this.blockId || !liElement.isConnected) {
+                    return;
+                }
                 svgElement.removeAttribute("disabled");
                 svgElement.classList.add("b3-list-item__arrow--open");
                 const editorElement = document.createElement("div");
                 editorElement.style.minHeight = "auto";
-                editorElement.setAttribute("data-defid", this.blockId);
+                editorElement.setAttribute("data-defid", blockId);
                 editorElement.setAttribute("data-ismention", isMention ? "true" : "false");
                 liElement.after(editorElement);
                 const editor = new Protyle(this.app, editorElement, {
@@ -492,6 +559,9 @@ export class Backlink extends Model {
                         breadcrumb: false,
                     }
                 });
+                if (this.type === "bottom") {
+                    editor.protyle.wysiwyg.element.addEventListener("focusin", () => this.setOwnerFocus());
+                }
                 editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
                 searchMarkRender(editor.protyle, response.data.keywords);
                 this.editors.push(editor);
@@ -505,9 +575,13 @@ export class Backlink extends Model {
             return;
         }
         element.classList.add("fn__rotate");
+        this.dirty = false;
         fetchPost("/api/ref/refreshBacklink", {
             id: this.blockId,
         }, () => {
+            if (this.destroyed) {
+                return;
+            }
             element.classList.remove("fn__rotate");
             this.searchBacklinks();
         });
@@ -519,6 +593,7 @@ export class Backlink extends Model {
             return;
         }
         element.classList.add("fn__rotate");
+        this.dirty = false;
         // 解析当前反链面板所属 box：优先用已记录的 notebookId，首次为空时按 rootId 在已打开的编辑器里查找
         let notebookId = this.notebookId;
         if (!notebookId && this.rootId) {
@@ -536,14 +611,21 @@ export class Backlink extends Model {
             mk: this.inputsElement[1].value,
             id: this.blockId,
         };
+        const blockId = this.blockId;
         if (isEncryptedBox(notebookId)) {
             param.notebook = notebookId;
         }
         fetchPost("/api/ref/getBacklink2", param, response => {
+            if (this.destroyed || blockId !== this.blockId) {
+                return;
+            }
             if (!init) {
                 this.saveStatus();
             }
             this.render(response.data);
+            if (this.type === "bottom" && this.dirty) {
+                this.refreshIfVisible();
+            }
         });
     }
 
@@ -555,7 +637,9 @@ export class Backlink extends Model {
             mScrollTop: this.mTree.element.scrollTop,
             backlinkOpenIds: [],
             backlinkMOpenIds: [],
-            backlinkMStatus: 3 // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
+            backlinkMStatus: 3, // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
+            backlinkFolded: this.tree.element.classList.contains("fn__none"),
+            backmentionFolded: this.mTree.element.classList.contains("fn__none")
         };
         this.tree.element.querySelectorAll(".b3-list-item__arrow--open").forEach(item => {
             this.status[this.blockId].backlinkOpenIds.push(item.parentElement.parentElement.getAttribute("data-node-id"));
@@ -611,14 +695,14 @@ export class Backlink extends Model {
         this.mTree.updateData(data.backmentions);
 
         const countElement = this.element.querySelector(".listCount");
-        if (data.linkRefsCount === 0) {
+        if (data.linkRefsCount === 0 && this.type !== "bottom") {
             countElement.classList.add("fn__none");
         } else {
             countElement.classList.remove("fn__none");
             countElement.textContent = data.linkRefsCount.toString();
         }
         const mCountElement = this.element.querySelector(".listMCount");
-        if (data.mentionsCount === 0) {
+        if (data.mentionsCount === 0 && this.type !== "bottom") {
             mCountElement.classList.add("fn__none");
         } else {
             mCountElement.classList.remove("fn__none");
@@ -633,7 +717,9 @@ export class Backlink extends Model {
                 mScrollTop: 0,
                 backlinkOpenIds: [],
                 backlinkMOpenIds: [],
-                backlinkMStatus: 3
+                backlinkMStatus: 3,
+                backlinkFolded: false,
+                backmentionFolded: false
             };
             if (data.mentionsCount === 0 || window.siyuan.config.editor.backmentionExpandCount === -1) {
                 this.status[this.blockId].backlinkMStatus = 3;
@@ -675,28 +761,35 @@ export class Backlink extends Model {
                 this.toggleItem(liElement, true);
             }
         });
-        // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
-        const layoutElement = this.mTree.element.previousElementSibling.querySelector('[data-type="layout"]');
-        if (this.status[this.blockId].backlinkMStatus === 2 || this.status[this.blockId].backlinkMStatus === 1) {
-            this.tree.element.classList.remove("fn__none");
-            this.mTree.element.removeAttribute("style");
-            if (this.status[this.blockId].backlinkMStatus === 1) {
-                layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
-                layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
-            } else {
+        if (this.type === "bottom") {
+            this.restoreBottomLayout(this.tree.element.previousElementSibling.querySelector('[data-type="bLayout"]'), this.tree.element,
+                this.status[this.blockId].backlinkFolded);
+            this.restoreBottomLayout(this.mTree.element.previousElementSibling.querySelector('[data-type="layout"]'), this.mTree.element,
+                this.status[this.blockId].backmentionFolded);
+        } else {
+            // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
+            const layoutElement = this.mTree.element.previousElementSibling.querySelector('[data-type="layout"]');
+            if (this.status[this.blockId].backlinkMStatus === 2 || this.status[this.blockId].backlinkMStatus === 1) {
+                this.tree.element.classList.remove("fn__none");
+                this.mTree.element.removeAttribute("style");
+                if (this.status[this.blockId].backlinkMStatus === 1) {
+                    layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
+                    layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
+                } else {
+                    layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
+                    layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
+                }
+            } else if (this.status[this.blockId].backlinkMStatus === 3) {
+                this.tree.element.classList.remove("fn__none");
+                this.mTree.element.setAttribute("style", "flex:none;height:0px");
                 layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
                 layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
+            } else {
+                this.tree.element.classList.add("fn__none");
+                this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
+                layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
+                layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
             }
-        } else if (this.status[this.blockId].backlinkMStatus === 3) {
-            this.tree.element.classList.remove("fn__none");
-            this.mTree.element.setAttribute("style", "flex:none;height:0px");
-            layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
-            layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
-        } else {
-            this.tree.element.classList.add("fn__none");
-            this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
-            layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
-            layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
         }
         this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').setAttribute("data-sort", this.status[this.blockId].sort.toString());
         this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').setAttribute("data-sort", this.status[this.blockId].mSort.toString());
@@ -705,5 +798,52 @@ export class Backlink extends Model {
             this.tree.element.scrollTop = this.status[this.blockId].scrollTop;
             this.mTree.element.scrollTop = this.status[this.blockId].mScrollTop;
         }, Constants.TIMEOUT_LOAD);
+    }
+
+    private restoreBottomLayout(element: HTMLElement, listElement: HTMLElement, folded: boolean) {
+        listElement.classList.toggle("fn__none", folded);
+        element.setAttribute("aria-label", folded ? window.siyuan.languages.expand : window.siyuan.languages.collapse);
+        element.querySelector("use").setAttribute("xlink:href", folded ? "#iconRight" : "#iconDown");
+    }
+
+    public markDirty() {
+        this.dirty = true;
+    }
+
+    public refreshIfVisible() {
+        if (this.type !== "bottom" || !this.dirty) {
+            return;
+        }
+        const activeProtyleElement = document.activeElement?.closest(".protyle");
+        if (activeProtyleElement && this.element.contains(activeProtyleElement)) {
+            return;
+        }
+        if (this.element.classList.contains("fn__none") ||
+            !this.element.isConnected || this.element.getClientRects().length === 0 ||
+            this.ownerProtyle.element.getClientRects().length === 0) {
+            return;
+        }
+        const rect = this.element.getBoundingClientRect();
+        const ownerRect = this.ownerProtyle.contentElement.getBoundingClientRect();
+        if (rect.top > ownerRect.bottom + 640 || rect.bottom < ownerRect.top - 640) {
+            return;
+        }
+        this.searchBacklinks();
+    }
+
+    public refreshDirty() {
+        if (this.dirty) {
+            this.refreshIfVisible();
+        }
+    }
+
+    public destroy() {
+        this.destroyed = true;
+        this.editors.forEach(item => item.destroy());
+        this.editors = [];
+        if (this.ws) {
+            this.ws.onclose = null;
+            this.ws.close();
+        }
     }
 }

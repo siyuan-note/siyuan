@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "Pokaż odniesienia zwrotne na dole dokumentu",
 	"databaseAttrHideEmpty": "Ukryj puste atrybuty bazy danych",
 	"databaseAttrUseTabs": "Używaj kart dla atrybutów bazy danych",
 	"rebuildHistoryIndex": "Odbuduj indeks historii",

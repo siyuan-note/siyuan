@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "文書の下部にバックリンクを表示",
 	"databaseAttrHideEmpty": "空のデータベース属性を非表示",
 	"databaseAttrUseTabs": "データベース属性にタブを使用",
 	"rebuildHistoryIndex": "履歴インデックスを再構築",

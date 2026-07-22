@@ -230,7 +230,7 @@ export const clearOBG = () => {
         }
     });
     models.backlink.forEach(item => {
-        if (item.type === "local") {
+        if (item.type !== "pin") {
             return;
         }
         if ("" === item.blockId) {

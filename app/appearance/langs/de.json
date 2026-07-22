@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "Backlinks am Dokumentende anzeigen",
 	"databaseAttrHideEmpty": "Leere Datenbankattribute ausblenden",
 	"databaseAttrUseTabs": "Registerkarten für Datenbankattribute verwenden",
 	"rebuildHistoryIndex": "Verlaufsindex neu aufbauen",

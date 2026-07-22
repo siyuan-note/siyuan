@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "Afficher les backlinks au bas du document",
 	"databaseAttrHideEmpty": "Masquer les attributs de base de données vides",
 	"databaseAttrUseTabs": "Utiliser des onglets pour les attributs de base de données",
 	"rebuildHistoryIndex": "Reconstruire l'index de l'historique",

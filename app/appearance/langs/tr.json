@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "Belgenin altında geri bağlantıları göster",
 	"databaseAttrHideEmpty": "Boş veritabanı özniteliklerini gizle",
 	"databaseAttrUseTabs": "Veritabanı öznitelikleri için sekmeleri kullan",
 	"rebuildHistoryIndex": "Geçmiş indeksini yeniden oluştur",

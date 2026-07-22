@@ -216,7 +216,7 @@ export const execByCommand = async (options: {
         const activeTab = getActiveTab();
         if (!protyle && activeTab) {
             if (activeTab.model instanceof Editor) {
-                protyle = activeTab.model.editor.protyle;
+                protyle = activeTab.model.getCurrentProtyle(range);
             } else if (activeTab.model instanceof Search) {
                 if (activeTab.model.element.querySelector("#searchUnRefPanel").classList.contains("fn__none")) {
                     protyle = activeTab.model.editors.edit.protyle;

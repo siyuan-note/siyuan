@@ -1,4 +1,5 @@
 {
+	"backlinkShowBottom": "在文件底部顯示反向連結",
 	"databaseAttrHideEmpty": "資料庫屬性隱藏空欄位",
 	"databaseAttrUseTabs": "資料庫屬性使用頁籤",
 	"rebuildHistoryIndex": "重建歷史索引",

@@ -1,5 +1,5 @@
 import {Constants} from "../../constants";
-import {getAllEditor} from "../../layout/getAll";
+import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {setInlineStyle} from "../../util/assets";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {resize} from "../../protyle/util/resize";
@@ -7,6 +7,7 @@ import {createConfigNamespaceApi} from "../util/namespaceApi";
 
 const applyEditorConfig = (data: Config.IEditor) => {
     window.siyuan.config.editor = data;
+    getAllModels().editor.forEach(item => item.updateBacklinkPanel());
     getAllEditor().forEach((editorItem) => {
         const protyle = editorItem.protyle;
         protyle.databaseAttributePanel?.updateDisplayConfig();

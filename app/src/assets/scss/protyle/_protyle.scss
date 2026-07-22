@@ -358,6 +358,24 @@
   }
 }
 
+.sy__backlink--bottom {
+  box-sizing: border-box;
+  min-height: 32px;
+  outline: none;
+
+  > .block__icons {
+    border-top: 1px solid var(--b3-border-color);
+    flex-shrink: 0;
+  }
+
+  > .backlinkList,
+  > .backlinkMList {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+}
+
 .protyle-top:hover .protyle-background--enable {
   .protyle-background__action,
   .protyle-background__img .protyle-icons {

@@ -81,6 +81,9 @@ export const getAllModels = () => {
                 const model = item.model;
                 if (model instanceof Editor) {
                     models.editor.push(model);
+                    if (model.backlink) {
+                        models.backlink.push(model.backlink);
+                    }
                 } else if (model instanceof Graph) {
                     models.graph.push(model);
                 } else if (model instanceof Outline) {

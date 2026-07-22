@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Ocultar atributos vazios do banco de dados",
+	"databaseAttrUseTabs": "Usar abas para atributos do banco de dados",
 	"rebuildHistoryIndex": "Reconstruir índice do histórico",
 	"rebuildAssetContentIndex": "Reconstruir índice de conteúdo de recursos",
 	"newItemWithTemplate": "Criar item com modelo",

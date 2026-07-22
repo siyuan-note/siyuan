@@ -122,6 +122,12 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
             {value: 1, label: window.siyuan.languages.collapse},
         ],
     });
+    group.switch("editor.databaseAttrHideEmpty", {
+        title: window.siyuan.languages.databaseAttrHideEmpty,
+    });
+    group.switch("editor.databaseAttrUseTabs", {
+        title: window.siyuan.languages.databaseAttrUseTabs,
+    });
     group.select("editor.headingEmbedMode", {
         title: window.siyuan.languages.headingEmbedMode,
         desc: window.siyuan.languages.headingEmbedModeTip,

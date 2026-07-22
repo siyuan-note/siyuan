@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "הסתרת מאפייני מסד נתונים ריקים",
+	"databaseAttrUseTabs": "שימוש בכרטיסיות עבור מאפייני מסד נתונים",
 	"rebuildHistoryIndex": "בנה מחדש את אינדקס ההיסטוריה",
 	"rebuildAssetContentIndex": "בנה מחדש את אינדקס תוכן הנכסים",
 	"newItemWithTemplate": "יצירת פריט באמצעות תבנית",

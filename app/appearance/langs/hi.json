@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "खाली डेटाबेस विशेषताएँ छिपाएँ",
+	"databaseAttrUseTabs": "डेटाबेस विशेषताओं के लिए टैब का उपयोग करें",
 	"rebuildHistoryIndex": "इतिहास इंडेक्स पुनर्निर्माण करें",
 	"rebuildAssetContentIndex": "एसेट सामग्री इंडेक्स पुनर्निर्माण करें",
 	"newItemWithTemplate": "टेम्पलेट से आइटम बनाएँ",

@@ -365,6 +365,9 @@ func InitConf() {
 	if nil == Conf.Editor.BackmentionSort {
 		Conf.Editor.BackmentionSort = defaultEditor.BackmentionSort
 	}
+	if nil == Conf.Editor.DatabaseAttrUseTabs {
+		Conf.Editor.DatabaseAttrUseTabs = defaultEditor.DatabaseAttrUseTabs
+	}
 	if 1 > len(Conf.Editor.Emoji) {
 		Conf.Editor.Emoji = []string{}
 	}

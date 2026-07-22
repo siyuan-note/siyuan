@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Nascondi gli attributi vuoti del database",
+	"databaseAttrUseTabs": "Usa schede per gli attributi del database",
 	"rebuildHistoryIndex": "Ricostruisci indice cronologia",
 	"rebuildAssetContentIndex": "Ricostruisci indice contenuto risorse",
 	"newItemWithTemplate": "Crea elemento con modello",

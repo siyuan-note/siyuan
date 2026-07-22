@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Skryť prázdne atribúty databázy",
+	"databaseAttrUseTabs": "Používať karty pre atribúty databázy",
 	"rebuildHistoryIndex": "Znovu vytvoriť index histórie",
 	"rebuildAssetContentIndex": "Znovu vytvoriť index obsahu zdrojov",
 	"newItemWithTemplate": "Vytvoriť položku zo šablóny",

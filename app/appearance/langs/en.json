@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Hide empty database attributes",
+	"databaseAttrUseTabs": "Use tabs for database attributes",
 	"rebuildHistoryIndex": "Rebuild history index",
 	"rebuildAssetContentIndex": "Rebuild asset content index",
 	"newItemWithTemplate": "Create item with template",

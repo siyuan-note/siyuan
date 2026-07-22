@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Ukryj puste atrybuty bazy danych",
+	"databaseAttrUseTabs": "Używaj kart dla atrybutów bazy danych",
 	"rebuildHistoryIndex": "Odbuduj indeks historii",
 	"rebuildAssetContentIndex": "Odbuduj indeks zawartości zasobów",
 	"newItemWithTemplate": "Utwórz element z szablonu",

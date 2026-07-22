@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Masquer les attributs de base de données vides",
+	"databaseAttrUseTabs": "Utiliser des onglets pour les attributs de base de données",
 	"rebuildHistoryIndex": "Reconstruire l'index de l'historique",
 	"rebuildAssetContentIndex": "Reconstruire l'index du contenu des ressources",
 	"newItemWithTemplate": "Créer un élément avec un modèle",

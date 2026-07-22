@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Sembunyikan atribut basis data yang kosong",
+	"databaseAttrUseTabs": "Gunakan tab untuk atribut basis data",
 	"rebuildHistoryIndex": "Bangun ulang indeks riwayat",
 	"rebuildAssetContentIndex": "Bangun ulang indeks konten aset",
 	"newItemWithTemplate": "Buat item dengan templat",

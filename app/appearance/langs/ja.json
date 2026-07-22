@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "空のデータベース属性を非表示",
+	"databaseAttrUseTabs": "データベース属性にタブを使用",
 	"rebuildHistoryIndex": "履歴インデックスを再構築",
 	"rebuildAssetContentIndex": "アセットコンテンツインデックスを再構築",
 	"newItemWithTemplate": "テンプレートで項目を新規作成",

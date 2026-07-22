@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Ocultar atributos vacíos de la base de datos",
+	"databaseAttrUseTabs": "Usar pestañas para los atributos de la base de datos",
 	"rebuildHistoryIndex": "Reconstruir índice del historial",
 	"rebuildAssetContentIndex": "Reconstruir índice de contenido de recursos",
 	"newItemWithTemplate": "Crear elemento con una plantilla",

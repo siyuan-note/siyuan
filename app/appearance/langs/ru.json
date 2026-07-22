@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Скрывать пустые атрибуты базы данных",
+	"databaseAttrUseTabs": "Использовать вкладки для атрибутов базы данных",
 	"rebuildHistoryIndex": "Перестроить индекс истории",
 	"rebuildAssetContentIndex": "Перестроить индекс содержимого ресурсов",
 	"newItemWithTemplate": "Создать элемент по шаблону",

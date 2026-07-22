@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Lege databasekenmerken verbergen",
+	"databaseAttrUseTabs": "Tabbladen gebruiken voor databasekenmerken",
 	"rebuildHistoryIndex": "Geschiedenisindex herbouwen",
 	"rebuildAssetContentIndex": "Index voor assetinhoud herbouwen",
 	"newItemWithTemplate": "Item maken met sjabloon",

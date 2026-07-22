@@ -517,6 +517,14 @@ declare namespace Config {
          */
         databaseAttrViewMode: number;
         /**
+         * Whether to hide empty database attributes
+         */
+        databaseAttrHideEmpty: boolean;
+        /**
+         * Whether to use tabs for database attributes
+         */
+        databaseAttrUseTabs: boolean;
+        /**
          * The number of blocks loaded each time they are dynamically loaded
          */
         dynamicLoadBlocks: number;

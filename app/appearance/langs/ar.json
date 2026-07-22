@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "إخفاء السمات الفارغة لقاعدة البيانات",
+	"databaseAttrUseTabs": "استخدام علامات تبويب لسمات قاعدة البيانات",
 	"rebuildHistoryIndex": "إعادة بناء فهرس السجل",
 	"rebuildAssetContentIndex": "إعادة بناء فهرس محتوى الأصول",
 	"newItemWithTemplate": "إنشاء عنصر باستخدام قالب",

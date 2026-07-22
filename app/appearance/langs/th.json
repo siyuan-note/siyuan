@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "ซ่อนแอตทริบิวต์ฐานข้อมูลที่ว่างเปล่า",
+	"databaseAttrUseTabs": "ใช้แท็บสำหรับแอตทริบิวต์ฐานข้อมูล",
 	"rebuildHistoryIndex": "สร้างดัชนีประวัติใหม่",
 	"rebuildAssetContentIndex": "สร้างดัชนีเนื้อหาสินทรัพย์ใหม่",
 	"newItemWithTemplate": "สร้างรายการด้วยเทมเพลต",

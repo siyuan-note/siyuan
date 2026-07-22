@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "資料庫屬性隱藏空欄位",
+	"databaseAttrUseTabs": "資料庫屬性使用頁籤",
 	"rebuildHistoryIndex": "重建歷史索引",
 	"rebuildAssetContentIndex": "重建資源檔案索引",
 	"newItemWithTemplate": "使用範本新增條目",

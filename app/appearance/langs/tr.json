@@ -1,4 +1,6 @@
 {
+	"databaseAttrHideEmpty": "Boş veritabanı özniteliklerini gizle",
+	"databaseAttrUseTabs": "Veritabanı öznitelikleri için sekmeleri kullan",
 	"rebuildHistoryIndex": "Geçmiş indeksini yeniden oluştur",
 	"rebuildAssetContentIndex": "Varlık içeriği indeksini yeniden oluştur",
 	"newItemWithTemplate": "Şablonla öge oluştur",

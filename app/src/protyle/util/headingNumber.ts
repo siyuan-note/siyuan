@@ -25,8 +25,7 @@ export const renderHeadingNumbers = (
     if (typeof headingNumbers !== "undefined") {
         protyle.block.headingNumbers = headingNumbers || {};
     }
-    if (!window.siyuan.config.editor.headingNumber ||
-        protyle.options.backlinkData ||
+    if (protyle.options.backlinkData ||
         protyle.block.action?.includes(Constants.CB_GET_HISTORY)) {
         clearHeadingNumbers(protyle);
         return;
@@ -119,8 +118,12 @@ export const operationsMayChangeHeadingNumbers = (
 };
 
 export const queueHeadingNumberRefresh = (protyle: IProtyle, operations?: IOperation[]) => {
-    if (!window.siyuan.config.editor.headingNumber ||
-        protyle.options.backlinkData ||
+    if (!window.siyuan.config.editor.headingNumber) {
+        renderHeadingNumbers(protyle, {});
+        return;
+    }
+    if (protyle.options.backlinkData ||
+        protyle.block.action?.includes(Constants.CB_GET_HISTORY) ||
         !protyle.block.rootID ||
         (operations && !operationsMayChangeHeadingNumbers(
             operations,

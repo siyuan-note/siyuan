@@ -21,7 +21,7 @@ import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {isEncryptedBox} from "../../util/pathName";
-import {renderHeadingNumbers} from "./headingNumber";
+import {queueHeadingNumberRefresh, renderHeadingNumbers} from "./headingNumber";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -73,7 +73,12 @@ export const onGet = (options: {
     options.protyle.block.blockCount = options.data.data.blockCount;
     options.protyle.block.scroll = options.data.data.scroll;
     options.protyle.block.action = options.action;
-    if (options.data.data.headingNumbers) {
+    const replacesDocument = options.data.data.mode === 0 || options.data.data.mode === 3;
+    const refreshHeadingNumbers = replacesDocument && !options.data.data.headingNumbers &&
+        window.siyuan.config.editor.headingNumber;
+    if (replacesDocument) {
+        options.protyle.block.headingNumbers = options.data.data.headingNumbers || {};
+    } else if (options.data.data.headingNumbers) {
         options.protyle.block.headingNumbers = options.data.data.headingNumbers;
     }
     if (!options.action.includes(Constants.CB_GET_UNCHANGEID)) {
@@ -102,6 +107,7 @@ export const onGet = (options: {
             scrollAttr: options.scrollAttr,
             updateReadonly: options.updateReadonly,
             isSyncing: options.data.data.isSyncing,
+            refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition
         }, options.protyle);
@@ -134,6 +140,7 @@ export const onGet = (options: {
             scrollAttr: options.scrollAttr,
             updateReadonly: options.updateReadonly,
             isSyncing: options.data.data.isSyncing,
+            refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition
         }, options.protyle);
@@ -150,6 +157,7 @@ const setHTML = (options: {
     updateReadonly?: boolean,
     scrollAttr?: IScrollAttr,
     scrollPosition?: ScrollLogicalPosition,
+    refreshHeadingNumbers?: boolean,
     afterCB?: () => void
 }, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
@@ -258,6 +266,9 @@ const setHTML = (options: {
     avRender(protyle.wysiwyg.element, protyle);
     blockRender(protyle, protyle.wysiwyg.element);
     renderHeadingNumbers(protyle);
+    if (options.refreshHeadingNumbers) {
+        queueHeadingNumberRefresh(protyle);
+    }
     protyle.databaseAttributePanel?.render();
     if (options.action.includes(Constants.CB_GET_HISTORY)) {
         return;

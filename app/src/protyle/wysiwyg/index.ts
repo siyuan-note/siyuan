@@ -1348,6 +1348,18 @@ export class WYSIWYG {
 
             // 内容区域使用浏览器原生选区，跨块选择时保留各行内元素自身的选中样式。
             if (!startsFromPadding && !tableBlockElement) {
+                documentSelf.onmouseup = () => {
+                    documentSelf.onmouseup = null;
+                    setTimeout(() => {
+                        if (getSelection().rangeCount > 0) {
+                            const range = getSelection().getRangeAt(0);
+                            if (range.toString().replace(Constants.ZWSP, "") !== "") {
+                                protyle.toolbar.render(protyle, range);
+                                countSelectWord(range, protyle.block.rootID);
+                            }
+                        }
+                    });
+                };
                 return;
             }
             if (startsFromPadding) {

@@ -1653,8 +1653,7 @@ export class WYSIWYG {
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
                     !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
                     !selectElements[0].classList.contains("sb")) {
-                    // 只有一个 p 时不选中，用 data 属性标记未选中状态（矩形视觉保持可见）
-                    protyle.selectElement.setAttribute("data-empty", "true");
+                    // 只有一个 p 时不选中块
                     protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                 } else {
                     protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
@@ -1663,7 +1662,6 @@ export class WYSIWYG {
                             item.classList.add("protyle-wysiwyg--select");
                         }
                     });
-                    protyle.selectElement.removeAttribute("data-empty");
                 }
             };
 
@@ -1681,7 +1679,6 @@ export class WYSIWYG {
                 });
                 protyle.selectElement.classList.add("fn__none");
                 protyle.selectElement.removeAttribute("style");
-                protyle.selectElement.removeAttribute("data-empty");
                 if (tableBlockElement) {
                     // @ts-ignore
                     tableBlockElement.firstElementChild.style.webkitUserModify = "";

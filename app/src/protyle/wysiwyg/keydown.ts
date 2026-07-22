@@ -108,7 +108,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         if (protyle.disabled ||
-            (!protyle.selectElement.classList.contains("fn__none") && !protyle.selectElement.getAttribute("data-empty") &&
+            (!protyle.selectElement.classList.contains("fn__none") &&
              // 框选块时放行 ⌘C，以便复制选中的块 https://github.com/siyuan-note/siyuan/issues/18043
              !matchHotKey("⌘C", event))) {
             event.stopPropagation();

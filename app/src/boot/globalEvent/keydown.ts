@@ -1022,12 +1022,16 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
     if (matchCommand) {
         return true;
     }
-    if (!matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) &&
-        !matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) &&
+    const matchCollapse = matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event);
+    const matchExpand = matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event);
+    if (bottomBacklink && (matchCollapse || matchExpand)) {
+        return false;
+    }
+    if (!matchCollapse && !matchExpand &&
         !event.key.startsWith("Arrow") && event.key !== "Enter") {
         return false;
     }
-    if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event)) {
+    if (!event.repeat && matchCollapse) {
         const collapseElement = activePanelElement.querySelector('.block__icon[data-type="collapse"]');
         if (collapseElement) {
             collapseElement.dispatchEvent(new CustomEvent("click"));
@@ -1035,7 +1039,7 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
             return true;
         }
     }
-    if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event)) {
+    if (!event.repeat && matchExpand) {
         const expandElement = activePanelElement.querySelector('.block__icon[data-type="expand"]');
         if (expandElement) {
             expandElement.dispatchEvent(new CustomEvent("click"));

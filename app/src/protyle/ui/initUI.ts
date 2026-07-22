@@ -333,8 +333,8 @@ export const setPadding = (protyle: IProtyle) => {
         };
     }
     const padding = getPadding(protyle);
-    const paddingLeft = padding.left;
-    const paddingRight = padding.right;
+    const paddingLeft = protyle.options.backlinkData ? 24 : padding.left;
+    const paddingRight = protyle.options.backlinkData ? 16 : padding.right;
     const backlinkBottomElement = protyle.contentElement.querySelector(".sy__backlink--bottom") as HTMLElement;
     const backlinkBottomVisible = backlinkBottomElement && !backlinkBottomElement.classList.contains("fn__none");
 

@@ -716,7 +716,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             item.inputsElement[0].value = backlinkKeyword;
             item.inputsElement[1].value = backmentionKeyword;
             item.markDirty();
-            item.refreshIfVisible();
+            item.refreshIfVisible(true);
             return;
         }
         if (item.type === "local" && item.rootId !== protyle?.block?.rootID) {

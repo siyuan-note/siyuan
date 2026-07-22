@@ -162,7 +162,8 @@ export class Editor extends Model {
             return;
         }
         const lastElement = this.editor.protyle.wysiwyg.element.lastElementChild;
-        const hidden = lastElement?.getAttribute("data-eof") !== "2";
+        const hidden = !this.editor.protyle.block.showAll && this.editor.protyle.block.scroll &&
+            lastElement?.getAttribute("data-eof") !== "2";
         if (this.backlinkElement.classList.contains("fn__none") !== hidden) {
             this.backlinkElement.classList.toggle("fn__none", hidden);
             setPadding(this.editor.protyle);

@@ -180,6 +180,10 @@
       background-size: 50px 50px;
     }
   }
+
+  &__pointer_events_none {
+    pointer-events: none;
+  }
 }
 
 .ft {

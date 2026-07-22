@@ -912,6 +912,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
         let range: Range;
         resizeElement.addEventListener("mousedown", (event: MouseEvent) => {
             event.preventDefault();
+            disableIframePointerEvents();
             getAllModels().editor.forEach((item) => {
                 if (item.editor && item.editor.protyle && item.element.parentElement) {
                     hideElements(["gutter"], item.editor.protyle);
@@ -981,6 +982,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             };
 
             documentSelf.onmouseup = () => {
+                restoreIframePointerEvents();
                 documentSelf.onmousemove = null;
                 documentSelf.onmouseup = null;
                 documentSelf.ondragstart = null;
@@ -1152,4 +1154,18 @@ export const fixWndFlex1 = (layout: Layout) => {
             flex1Element.classList.add("fn__flex-1");
         }
     }
+};
+
+const pointerEventsNoneClass = "fn__pointer_events_none";
+
+export const disableIframePointerEvents = (root: ParentNode = document) => {
+    root.querySelectorAll("iframe").forEach((iframe) => {
+        iframe.classList.toggle(pointerEventsNoneClass, true);
+    });
+};
+
+export const restoreIframePointerEvents = (root: ParentNode = document) => {
+    root.querySelectorAll(`iframe.${pointerEventsNoneClass}`).forEach((iframe) => {
+        iframe.classList.toggle(pointerEventsNoneClass, false);
+    });
 };

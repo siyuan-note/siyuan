@@ -35,13 +35,12 @@ func getTag(c *gin.Context) {
 	}
 
 	var ignoreMaxListHint bool
-	var app, keyword string
+	var app string
 	var sortVal float64
 	if !util.ParseJsonArgs(arg, ret,
 		// API `getTag` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/16000
 		util.BindJsonArg("ignoreMaxListHint", &ignoreMaxListHint, false, false),
 		util.BindJsonArg("app", &app, false, false),
-		util.BindJsonArg("k", &keyword, false, false),
 		util.BindJsonArg("sort", &sortVal, false, false),
 	) {
 		return
@@ -52,12 +51,13 @@ func getTag(c *gin.Context) {
 		model.Conf.Save()
 	}
 
-	var publishIgnore model.PublishAccess
+	tags := model.BuildTags(ignoreMaxListHint, app, int(sortVal))
+
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		publishIgnore = model.GetInvisiblePublishAccess(publishAccess)
+		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
+		tags = model.FilterTagsByPublishIgnore(publishIgnore, tags)
 	}
-	tags := model.BuildTagsByKeyword(ignoreMaxListHint, app, int(sortVal), keyword, publishIgnore)
 	ret.Data = tags
 }
 

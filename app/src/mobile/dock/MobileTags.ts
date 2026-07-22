@@ -6,14 +6,18 @@ import {popSearch} from "../menu/search";
 import {App} from "../../index";
 import {openTagMenu} from "../../menus/tag";
 import {Constants} from "../../constants";
+import {filterTagData, getTagFilterKeywords} from "../../layout/dock/tagFilter";
 
 export class MobileTags {
     public element: HTMLElement;
     private tree: Tree;
     private openNodes: string[];
     private preFilterOpenNodes: string[];
+    private data: IBlockTree[] = [];
+    private filterData: IBlockTree[];
     private updating = false;
     private pendingUpdate: boolean;
+    private filterLoadPending = false;
 
     constructor(app: App) {
         this.element = document.querySelector('#sidebar [data-type="sidebar-tag"]');
@@ -44,17 +48,13 @@ export class MobileTags {
             } else {
                 filterIconElement.classList.remove("toolbar__icon--active");
             }
-            if (inputElement.dataset.value !== value) {
-                inputElement.dataset.value = value;
-                this.update();
+        });
+        inputElement.addEventListener("input", (event: InputEvent) => {
+            if (!event.isComposing) {
+                this.filter();
             }
         });
-        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (!event.isComposing && event.key === "Enter") {
-                inputElement.dataset.value = inputElement.value;
-                this.update();
-            }
-        });
+        inputElement.addEventListener("compositionend", () => this.filter());
 
         this.tree = new Tree({
             element: this.element.querySelector(".tagList") as HTMLElement,
@@ -173,17 +173,12 @@ export class MobileTags {
         }
         this.updating = true;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
-        const keyword = inputElement.value;
-        const hasKeyword = keyword.trim().length > 0;
-        if (hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
-            this.preFilterOpenNodes = this.tree.getExpandIds();
-        }
+        const ignoreMaxListHintArg = getTagFilterKeywords(inputElement.value).length > 0 || ignoreMaxListHint;
         this.element.lastElementChild.classList.remove("fn__none");
         fetchPost("/api/tag/getTag", {
             sort: window.siyuan.config.tag.sort,
             app: Constants.SIYUAN_APPID,
-            ignoreMaxListHint,
-            k: keyword,
+            ignoreMaxListHint: ignoreMaxListHintArg,
         }, response => {
             if (this.pendingUpdate !== undefined) {
                 const pendingUpdate = this.pendingUpdate;
@@ -192,25 +187,78 @@ export class MobileTags {
                 this.update(pendingUpdate);
                 return;
             }
-            if (!hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
-                this.openNodes = this.tree.getExpandIds();
+            this.data = response.data;
+            this.filterData = ignoreMaxListHintArg ? response.data : undefined;
+            this.filter();
+            this.updating = false;
+            this.element.lastElementChild.classList.add("fn__none");
+            if (this.filterLoadPending) {
+                this.filterLoadPending = false;
+                this.loadFilterData();
             }
-            this.tree.updateData(response.data);
-            if (hasKeyword) {
-                this.tree.expandAll();
-            } else if (this.preFilterOpenNodes !== undefined) {
-                this.tree.collapseAll();
-                this.tree.setExpandIds(this.preFilterOpenNodes);
-                this.openNodes = this.preFilterOpenNodes;
-                this.preFilterOpenNodes = undefined;
-            } else if (this.openNodes !== undefined) {
-                this.tree.collapseAll();
-                this.tree.setExpandIds(this.openNodes);
-            } else {
-                this.openNodes = this.tree.getExpandIds();
+        });
+    }
+
+    private loadFilterData() {
+        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
+        if (getTagFilterKeywords(inputElement.value).length === 0 || this.filterData) {
+            this.filter();
+            return;
+        }
+        if (this.updating) {
+            this.filterLoadPending = true;
+            return;
+        }
+        this.updating = true;
+        this.element.lastElementChild.classList.remove("fn__none");
+        fetchPost("/api/tag/getTag", {
+            sort: window.siyuan.config.tag.sort,
+            app: Constants.SIYUAN_APPID,
+            ignoreMaxListHint: true,
+        }, response => {
+            if (this.pendingUpdate !== undefined) {
+                const pendingUpdate = this.pendingUpdate;
+                this.pendingUpdate = undefined;
+                this.filterLoadPending = false;
+                this.updating = false;
+                this.update(pendingUpdate);
+                return;
             }
+            this.filterData = response.data;
+            this.filterLoadPending = false;
+            this.filter();
             this.updating = false;
             this.element.lastElementChild.classList.add("fn__none");
         });
+    }
+
+    private filter() {
+        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
+        const keywords = getTagFilterKeywords(inputElement.value);
+        const hasKeyword = keywords.length > 0;
+        if (hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
+            this.preFilterOpenNodes = this.tree.getExpandIds();
+        } else if (!hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
+            this.openNodes = this.tree.getExpandIds();
+        }
+        if (hasKeyword && !this.filterData) {
+            this.loadFilterData();
+            return;
+        }
+        const data = hasKeyword ? filterTagData(this.filterData, keywords) : this.data;
+        this.tree.updateData(data);
+        if (hasKeyword) {
+            this.tree.expandAll();
+        } else if (this.preFilterOpenNodes !== undefined) {
+            this.tree.collapseAll();
+            this.tree.setExpandIds(this.preFilterOpenNodes);
+            this.openNodes = this.preFilterOpenNodes;
+            this.preFilterOpenNodes = undefined;
+        } else if (this.openNodes !== undefined) {
+            this.tree.collapseAll();
+            this.tree.setExpandIds(this.openNodes);
+        } else {
+            this.openNodes = this.tree.getExpandIds();
+        }
     }
 }

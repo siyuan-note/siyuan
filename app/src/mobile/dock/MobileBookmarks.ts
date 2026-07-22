@@ -11,6 +11,9 @@ export class MobileBookmarks {
     public element: HTMLElement;
     private tree: Tree;
     private openNodes: string[];
+    private preFilterOpenNodes: string[];
+    private updating = false;
+    private updatePending = false;
 
     constructor(app: App) {
         this.element = document.querySelector('#sidebar [data-type="sidebar-bookmark"]');
@@ -20,12 +23,36 @@ export class MobileBookmarks {
         ${window.siyuan.languages.bookmark}
     </div>
     <span class="fn__space"></span>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
+    <svg data-type="search" class="toolbar__icon"><use xlink:href='#iconFilter'></use></svg>
+    <span class="fn__space"></span>
     <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
     <span class="fn__space"></span>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
 </div>
 <div class="fn__flex-1 bookmarkList"></div>
 <img style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 30vw;box-sizing: border-box;" src="/stage/loading-pure.svg">`;
+        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
+        inputElement.addEventListener("blur", () => {
+            inputElement.classList.add("fn__none");
+            const filterIconElement = inputElement.nextElementSibling as HTMLElement;
+            const value = inputElement.value;
+            if (value.trim()) {
+                filterIconElement.classList.add("toolbar__icon--active");
+            } else {
+                filterIconElement.classList.remove("toolbar__icon--active");
+            }
+            if (inputElement.dataset.value !== value) {
+                inputElement.dataset.value = value;
+                this.update();
+            }
+        });
+        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (!event.isComposing && event.key === "Enter") {
+                inputElement.dataset.value = inputElement.value;
+                this.update();
+            }
+        });
 
         this.tree = new Tree({
             element: this.element.querySelector(".bookmarkList") as HTMLElement,
@@ -47,6 +74,9 @@ export class MobileBookmarks {
             topExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>'
         });
         this.element.addEventListener("click", (event) => {
+            if ((event.target as HTMLElement).tagName === "INPUT") {
+                return;
+            }
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.classList.contains("toolbar__icon")) {
@@ -58,6 +88,10 @@ export class MobileBookmarks {
                         case "expand":
                             this.tree.expandAll();
                             break;
+                        case "search":
+                            inputElement.classList.remove("fn__none");
+                            inputElement.select();
+                            break;
                     }
                 }
                 target = target.parentElement;
@@ -67,18 +101,46 @@ export class MobileBookmarks {
     }
 
     public update() {
+        if (this.updating) {
+            this.updatePending = true;
+            return;
+        }
+        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
+        const keywords = inputElement.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+        const hasKeyword = keywords.length > 0;
+        if (hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
+            this.preFilterOpenNodes = this.tree.getExpandIds();
+        }
+        this.updating = true;
         this.element.lastElementChild.classList.remove("fn__none");
         fetchPost("/api/bookmark/getBookmark", {}, response => {
-            if (this.openNodes) {
+            const data = hasKeyword ? response.data.filter((item: IBlockTree) => {
+                const name = item.name.toLowerCase();
+                return keywords.every(keyword => name.includes(keyword));
+            }) : response.data;
+            if (!hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
                 this.openNodes = this.tree.getExpandIds();
             }
-            this.tree.updateData(response.data);
-            if (this.openNodes) {
+            this.tree.updateData(data);
+            if (hasKeyword) {
+                this.tree.expandAll();
+            } else if (this.preFilterOpenNodes !== undefined) {
+                this.tree.collapseAll();
+                this.tree.setExpandIds(this.preFilterOpenNodes);
+                this.openNodes = this.preFilterOpenNodes;
+                this.preFilterOpenNodes = undefined;
+            } else if (this.openNodes !== undefined) {
+                this.tree.collapseAll();
                 this.tree.setExpandIds(this.openNodes);
             } else {
                 this.openNodes = this.tree.getExpandIds();
             }
+            this.updating = false;
             this.element.lastElementChild.classList.add("fn__none");
+            if (this.updatePending) {
+                this.updatePending = false;
+                this.update();
+            }
         });
     }
 }

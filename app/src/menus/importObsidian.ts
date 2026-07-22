@@ -163,11 +163,10 @@ const showFailure = (task: IObsidianTask) => {
         return;
     }
     new Dialog({
-        title: window.siyuan.languages.obsidianImportFailed,
-    content: `<div class="b3-dialog__content">
-    <div class="ft__breakword">${escapeHtml(task.error || window.siyuan.languages.obsidianImportFailed)}</div>
-    ${task.detail ? `<div class="fn__hr"></div><div class="ft__breakword">${escapeHtml(task.detail)}</div>` : ""}
-    ${task.result?.incomplete ? `<div class="fn__hr"></div><div class="b3-label">${escapeHtml(task.result.notebookName)}</div>` : ""}
+        title: task.error || window.siyuan.languages.obsidianImportFailed,
+        content: `<div class="b3-dialog__content">
+    ${task.detail ? `<div class="ft__breakword">${escapeHtml(task.detail)}</div>` : ""}
+    ${task.result?.incomplete ? `${task.detail ? "<div class=\"fn__hr\"></div>" : ""}<div class="b3-label">${escapeHtml(task.result.notebookName)}</div>` : ""}
 </div>`,
         width: "520px",
     });

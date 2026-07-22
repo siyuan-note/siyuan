@@ -2229,6 +2229,13 @@
 		"341": "O documento de nível superior do caderno não pode ser removido nem movido",
 		"342": "Meu caderno",
 		"343": "Um novo começo",
-		"344": "O arquivo Markdown [%s] não está codificado em UTF-8"
+		"344": "O arquivo Markdown [%s] não está codificado em UTF-8",
+		"345": "Não foi possível ler o arquivo Markdown [%s]",
+		"346": "O arquivo [%s] foi alterado após a análise; analise o Vault novamente",
+		"347": "Não foi possível converter o arquivo Markdown [%s]",
+		"348": "Não foi possível importar o arquivo de recurso [%s]",
+		"349": "O conteúdo do Vault mudou após a análise; faça a análise novamente",
+		"350": "Não foi possível concluir a gravação ou indexação do novo caderno; ele foi marcado como incompleto",
+		"351": "Ocorreu um erro inesperado; verifique o registro do sistema para a tarefa [%s]"
 	}
 	}

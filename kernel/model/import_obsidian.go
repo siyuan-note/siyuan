@@ -205,12 +205,22 @@ type obsidianScanResult struct {
 	Duplicates map[string]bool
 }
 
-type obsidianMarkdownEncodingError struct {
-	Path string
+type obsidianUserError struct {
+	DetailLanguage int
+	RelPath        string
+	Cause          error
 }
 
-func (err *obsidianMarkdownEncodingError) Error() string {
-	return fmt.Sprintf("Markdown [%s] is not valid UTF-8", err.Path)
+func (err *obsidianUserError) Error() string {
+	return err.Cause.Error()
+}
+
+func (err *obsidianUserError) Unwrap() error {
+	return err.Cause
+}
+
+func newObsidianUserError(detailLanguage int, relPath string, cause error) error {
+	return &obsidianUserError{DetailLanguage: detailLanguage, RelPath: relPath, Cause: cause}
 }
 
 var (
@@ -222,6 +232,7 @@ var (
 	errObsidianVaultUnsafePath      = errors.New("Obsidian Vault path is unsafe")
 	errObsidianVaultConfigMissing   = errors.New("Obsidian Vault config directory is missing")
 	errObsidianVaultMarkdownMissing = errors.New("Obsidian Vault has no readable Markdown")
+	errObsidianSourceChanged        = errors.New("Obsidian source file changed")
 
 	obsidianBlockIDPattern  = regexp.MustCompile(`(?m)(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$`)
 	obsidianQuotePattern    = regexp.MustCompile(`^((?:[ \t]*>[ \t]?)+)(.*)$`)
@@ -387,12 +398,14 @@ func updateObsidianTask(taskID, state string, progress int, message string) bool
 func failObsidianTask(taskID, stage string, err error, result *ObsidianVaultImportResult) {
 	logging.LogErrorf("Obsidian Vault import task [%s] failed at [%s]: %s", taskID, stage, err)
 	userError := Conf.Language(334)
-	userDetail := err.Error()
+	detailLanguage, detailArgument := obsidianTaskDetailData(err, taskID, stage, result)
+	userDetail := Conf.Language(detailLanguage)
+	if detailArgument != "" {
+		userDetail = fmt.Sprintf(userDetail, detailArgument)
+	}
 	if stage == "analyzing" {
 		userError = Conf.Language(333)
-		if markdownPath, ok := obsidianMarkdownEncodingPath(err); ok {
-			userDetail = fmt.Sprintf(Conf.Language(344), markdownPath)
-		} else if language := obsidianVaultErrorLanguage(err); language > 0 {
+		if language := obsidianVaultErrorLanguage(err); language > 0 {
 			userError = Conf.Language(language)
 			userDetail = ""
 		}
@@ -413,12 +426,22 @@ func failObsidianTask(taskID, stage string, err error, result *ObsidianVaultImpo
 	obsidianTasksMu.Unlock()
 }
 
-func obsidianMarkdownEncodingPath(err error) (string, bool) {
-	var encodingErr *obsidianMarkdownEncodingError
-	if !errors.As(err, &encodingErr) {
-		return "", false
+func obsidianUserErrorData(err error) (detailLanguage int, relPath string, ok bool) {
+	var userErr *obsidianUserError
+	if !errors.As(err, &userErr) {
+		return 0, "", false
 	}
-	return encodingErr.Path, true
+	return userErr.DetailLanguage, userErr.RelPath, true
+}
+
+func obsidianTaskDetailData(err error, taskID, stage string, result *ObsidianVaultImportResult) (language int, argument string) {
+	if detailLanguage, relPath, ok := obsidianUserErrorData(err); ok {
+		return detailLanguage, relPath
+	}
+	if result != nil && result.Incomplete && (stage == "writing" || stage == "indexing") {
+		return 350, ""
+	}
+	return 351, taskID
 }
 
 func obsidianVaultErrorLanguage(err error) int {
@@ -514,7 +537,8 @@ func analyzeObsidianVault(ctx context.Context, localPath string, progress func(i
 		asset := ret.Assets[key]
 		if err = validateObsidianReadableFile(asset.Source); err != nil {
 			if ret.ReferencedAssets[key] != nil {
-				return nil, fmt.Errorf("read referenced attachment [%s]: %w", asset.Source.RelPath, err)
+				return nil, newObsidianUserError(348, asset.Source.RelPath,
+					fmt.Errorf("read referenced attachment [%s]: %w", asset.Source.RelPath, err))
 			}
 			ret.Analysis.Warnings = append(ret.Analysis.Warnings, asset.Source.RelPath)
 			continue
@@ -831,10 +855,11 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 		}
 		data, err := readStableObsidianFile(doc.Source)
 		if err != nil {
-			return fmt.Errorf("read Markdown [%s]: %w", doc.Source.RelPath, err)
+			return newObsidianReadUserError(doc.Source, err)
 		}
 		if !utf8.Valid(data) {
-			return &obsidianMarkdownEncodingError{Path: doc.Source.RelPath}
+			return newObsidianUserError(344, doc.Source.RelPath,
+				fmt.Errorf("Markdown [%s] is not valid UTF-8", doc.Source.RelPath))
 		}
 		scan := scanObsidianSource(data)
 		for _, blockID := range scan.BlockIDs {
@@ -847,7 +872,8 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 		}
 		tree, _, _, _ := parseStdMd(data)
 		if tree == nil {
-			return fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath)
+			return newObsidianUserError(347, doc.Source.RelPath,
+				fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath))
 		}
 		buildObsidianHeadingIndex(doc, tree)
 		vault.Analysis.WikiLinkCount += countObsidianNonEmbedTokens(scan.Wikis)
@@ -868,7 +894,7 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 		}
 		data, err := readStableObsidianFile(doc.Source)
 		if err != nil {
-			return fmt.Errorf("read Markdown [%s]: %w", doc.Source.RelPath, err)
+			return newObsidianReadUserError(doc.Source, err)
 		}
 		scan := scanObsidianSource(data)
 		for _, token := range scan.Wikis {
@@ -889,7 +915,8 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 		}
 		tree, _, _, _ := parseStdMd(data)
 		if tree == nil {
-			return fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath)
+			return newObsidianUserError(347, doc.Source.RelPath,
+				fmt.Errorf("parse Markdown [%s] failed", doc.Source.RelPath))
 		}
 		analyzeObsidianMarkdownLinks(vault, doc, tree)
 	}
@@ -902,7 +929,7 @@ func readStableObsidianFile(file *obsidianSourceFile) ([]byte, error) {
 		return nil, err
 	}
 	if before.Size() != file.Size || !before.ModTime().Equal(file.ModTime) {
-		return nil, errors.New("source file changed during analysis")
+		return nil, fmt.Errorf("%w during analysis", errObsidianSourceChanged)
 	}
 	data, err := os.ReadFile(file.AbsPath)
 	if err != nil {
@@ -913,9 +940,17 @@ func readStableObsidianFile(file *obsidianSourceFile) ([]byte, error) {
 		return nil, err
 	}
 	if before.Size() != after.Size() || !before.ModTime().Equal(after.ModTime()) {
-		return nil, errors.New("source file changed while reading")
+		return nil, fmt.Errorf("%w while reading", errObsidianSourceChanged)
 	}
 	return data, nil
+}
+
+func newObsidianReadUserError(file *obsidianSourceFile, err error) error {
+	language := 345
+	if errors.Is(err, errObsidianSourceChanged) {
+		language = 346
+	}
+	return newObsidianUserError(language, file.RelPath, fmt.Errorf("read Markdown [%s]: %w", file.RelPath, err))
 }
 
 func validateObsidianReadableFile(file *obsidianSourceFile) error {
@@ -1602,14 +1637,15 @@ func importObsidianVaultTask(ctx context.Context, taskID, notebookName string) {
 		} else {
 			data, err := readStableObsidianFile(doc.Source)
 			if err != nil {
-				failObsidianTask(taskID, "staging", fmt.Errorf("read Markdown [%s]: %w", doc.Source.RelPath, err), nil)
+				failObsidianTask(taskID, "staging", newObsidianReadUserError(doc.Source, err), nil)
 				removeObsidianTemp(taskID)
 				return
 			}
 			transformed, stats := transformObsidianMarkdown(vault, doc, data)
 			tree, err = parseObsidianMd(transformed, vault, doc, stats)
 			if err != nil {
-				failObsidianTask(taskID, "staging", fmt.Errorf("convert Markdown [%s]: %w", doc.Source.RelPath, err), nil)
+				failObsidianTask(taskID, "staging", newObsidianUserError(347, doc.Source.RelPath,
+					fmt.Errorf("convert Markdown [%s]: %w", doc.Source.RelPath, err)), nil)
 				removeObsidianTemp(taskID)
 				return
 			}
@@ -1644,7 +1680,8 @@ func importObsidianVaultTask(ctx context.Context, taskID, notebookName string) {
 		asset := vault.ImportAssets[key]
 		destination := filepath.Join(assetsTemp, asset.FinalName)
 		if err := copyStableObsidianFile(asset.Source, destination); err != nil {
-			failObsidianTask(taskID, "staging", fmt.Errorf("copy attachment [%s]: %w", asset.Source.RelPath, err), nil)
+			failObsidianTask(taskID, "staging", newObsidianUserError(348, asset.Source.RelPath,
+				fmt.Errorf("copy attachment [%s]: %w", asset.Source.RelPath, err)), nil)
 			removeObsidianTemp(taskID)
 			return
 		}
@@ -1781,19 +1818,19 @@ func revalidateObsidianVault(ctx context.Context, vault *obsidianVaultContext) e
 		}
 	}
 	if len(originalMarkdown) != len(currentMarkdown) {
-		return errors.New("the Markdown file list changed after analysis")
+		return newObsidianUserError(349, "", errors.New("the Markdown file list changed after analysis"))
 	}
 	for key := range originalMarkdown {
 		if !currentMarkdown[key] {
-			return errors.New("the Markdown file list changed after analysis")
+			return newObsidianUserError(349, "", errors.New("the Markdown file list changed after analysis"))
 		}
 	}
 	if len(vault.Assets) != len(fresh.Assets) {
-		return errors.New("the attachment file list changed after analysis")
+		return newObsidianUserError(349, "", errors.New("the attachment file list changed after analysis"))
 	}
 	for key := range vault.Assets {
 		if fresh.Assets[key] == nil {
-			return errors.New("the attachment file list changed after analysis")
+			return newObsidianUserError(349, "", errors.New("the attachment file list changed after analysis"))
 		}
 	}
 	for _, doc := range vault.Docs {
@@ -1804,7 +1841,8 @@ func revalidateObsidianVault(ctx context.Context, vault *obsidianVaultContext) e
 			return err
 		}
 		if err := validateObsidianSourceMetadata(doc.Source); err != nil {
-			return fmt.Errorf("Markdown [%s] changed after analysis: %w", doc.Source.RelPath, err)
+			return newObsidianUserError(346, doc.Source.RelPath,
+				fmt.Errorf("Markdown [%s] changed after analysis: %w", doc.Source.RelPath, err))
 		}
 	}
 	for _, asset := range vault.ImportAssets {
@@ -1812,7 +1850,8 @@ func revalidateObsidianVault(ctx context.Context, vault *obsidianVaultContext) e
 			return err
 		}
 		if err := validateObsidianSourceMetadata(asset.Source); err != nil {
-			return fmt.Errorf("attachment [%s] changed after analysis: %w", asset.Source.RelPath, err)
+			return newObsidianUserError(346, asset.Source.RelPath,
+				fmt.Errorf("attachment [%s] changed after analysis: %w", asset.Source.RelPath, err))
 		}
 	}
 	return nil

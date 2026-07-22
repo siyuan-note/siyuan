@@ -2229,6 +2229,13 @@
 		"341": "Dokument notatnika najwyższego poziomu nie może zostać usunięty ani przeniesiony",
 		"342": "Mój notatnik",
 		"343": "Nowy początek",
-		"344": "Plik Markdown [%s] nie jest zakodowany w UTF-8"
+		"344": "Plik Markdown [%s] nie jest zakodowany w UTF-8",
+		"345": "Nie można odczytać pliku Markdown [%s]",
+		"346": "Plik [%s] zmienił się po analizie; przeanalizuj Vault ponownie",
+		"347": "Nie można przekonwertować pliku Markdown [%s]",
+		"348": "Nie można zaimportować pliku zasobu [%s]",
+		"349": "Zawartość Vault zmieniła się po analizie; wykonaj analizę ponownie",
+		"350": "Nie można ukończyć zapisywania lub indeksowania nowego notatnika; został oznaczony jako niekompletny",
+		"351": "Wystąpił nieoczekiwany błąd; sprawdź dziennik systemowy zadania [%s]"
 	}
 	}

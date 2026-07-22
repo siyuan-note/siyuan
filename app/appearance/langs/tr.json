@@ -2229,6 +2229,13 @@
 		"341": "Üst düzey not defteri belgesi silinemez veya taşınamaz",
 		"342": "Not Defterim",
 		"343": "Yeni Bir Başlangıç",
-		"344": "Markdown dosyası [%s] UTF-8 ile kodlanmamış"
+		"344": "Markdown dosyası [%s] UTF-8 ile kodlanmamış",
+		"345": "Markdown dosyası [%s] okunamıyor",
+		"346": "Dosya [%s] analizden sonra değişti; Vault'u yeniden analiz edin",
+		"347": "Markdown dosyası [%s] dönüştürülemiyor",
+		"348": "Kaynak dosyası [%s] içe aktarılamıyor",
+		"349": "Vault içeriği analizden sonra değişti; yeniden analiz edin",
+		"350": "Yeni not defterinin yazılması veya dizine eklenmesi tamamlanamadı; eksik olarak işaretlendi",
+		"351": "Beklenmeyen bir hata oluştu; görev [%s] için sistem günlüğünü kontrol edin"
 	}
 	}

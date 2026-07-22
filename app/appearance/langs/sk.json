@@ -2229,6 +2229,13 @@
 		"341": "Dokument zápisníka najvyššej úrovne nemožno odstrániť ani presunúť",
 		"342": "Môj zápisník",
 		"343": "Nový začiatok",
-		"344": "Súbor Markdown [%s] nie je kódovaný v UTF-8"
+		"344": "Súbor Markdown [%s] nie je kódovaný v UTF-8",
+		"345": "Súbor Markdown [%s] sa nepodarilo prečítať",
+		"346": "Súbor [%s] sa po analýze zmenil; znova analyzujte Vault",
+		"347": "Súbor Markdown [%s] sa nepodarilo skonvertovať",
+		"348": "Súbor zdroja [%s] sa nepodarilo importovať",
+		"349": "Obsah Vault sa po analýze zmenil; spustite analýzu znova",
+		"350": "Zápis alebo indexovanie nového zápisníka sa nepodarilo dokončiť; bol označený ako neúplný",
+		"351": "Vyskytla sa neočakávaná chyba; skontrolujte systémový denník úlohy [%s]"
 	}
 	}

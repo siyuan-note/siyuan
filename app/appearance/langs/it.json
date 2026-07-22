@@ -2229,6 +2229,13 @@
 		"341": "Il documento di primo livello del taccuino non può essere eliminato o spostato",
 		"342": "Il mio taccuino",
 		"343": "Un nuovo inizio",
-		"344": "Il file Markdown [%s] non è codificato in UTF-8"
+		"344": "Il file Markdown [%s] non è codificato in UTF-8",
+		"345": "Impossibile leggere il file Markdown [%s]",
+		"346": "Il file [%s] è cambiato dopo l’analisi; analizza nuovamente il Vault",
+		"347": "Impossibile convertire il file Markdown [%s]",
+		"348": "Impossibile importare il file di risorse [%s]",
+		"349": "Il contenuto del Vault è cambiato dopo l’analisi; esegui nuovamente l’analisi",
+		"350": "Impossibile completare la scrittura o l’indicizzazione del nuovo taccuino; è stato contrassegnato come incompleto",
+		"351": "Si è verificato un errore imprevisto; controlla il registro di sistema per l’attività [%s]"
 	}
 	}

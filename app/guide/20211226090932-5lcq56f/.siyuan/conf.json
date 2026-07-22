@@ -1,6 +1,6 @@
 {
   "name": "思源筆記用戶指南",
-  "sort": 3,
+  "sort": 4,
   "icon": "1f4d4",
   "closed": false,
   "refCreateSaveBox": "",
@@ -9,5 +9,7 @@
   "docCreateSavePath": "",
   "dailyNoteSavePath": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}",
   "dailyNoteTemplatePath": "",
-  "sortMode": 15
+  "sortMode": 15,
+  "encrypted": false,
+  "boxCrypt": null
 }

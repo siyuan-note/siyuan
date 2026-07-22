@@ -378,6 +378,7 @@ func loadParentTree(tree *parse.Tree) (ret *parse.Tree) {
 
 func findUnindexedTreePathInAllBoxes(id string) (ret string) {
 	boxes := Conf.GetBoxes()
+	luteEngine := util.NewLute()
 	for _, box := range boxes {
 		root := filepath.Join(util.DataDir, box.ID)
 		paths := search.FindAllMatchedPaths(root, []string{id})
@@ -401,10 +402,36 @@ func findUnindexedTreePathInAllBoxes(id string) (ret string) {
 
 		result := treenode.ExistBlockTrees(rootIDs)
 		for rootID, exist := range result {
-			if !exist {
-				return rootIDPaths[rootID]
+			if exist {
+				continue
+			}
+
+			matchedPath := rootIDPaths[rootID]
+			relPath, relErr := filepath.Rel(root, matchedPath)
+			if nil != relErr {
+				return matchedPath
+			}
+			// 全文匹配只用于筛选候选文件，解析树后再确认是否存在真实块 ID。
+			treePath := "/" + filepath.ToSlash(relPath)
+			tree, loadErr := filesys.LoadTree(box.ID, treePath, luteEngine)
+			if nil != loadErr || treeContainsBlockID(tree, id) {
+				return matchedPath
 			}
 		}
 	}
+	return
+}
+
+func treeContainsBlockID(tree *parse.Tree, id string) (ret bool) {
+	if nil == tree || nil == tree.Root || "" == id {
+		return
+	}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.IsBlock() && n.ID == id {
+			ret = true
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
 	return
 }

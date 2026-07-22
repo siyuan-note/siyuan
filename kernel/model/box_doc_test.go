@@ -21,6 +21,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -79,6 +82,58 @@ func TestFindBoxDocRejectsOrdinaryDocument(t *testing.T) {
 	}
 	if boxDocID, err := findBoxDoc(box); err != nil || boxDocID != boxID {
 		t.Fatalf("unexpected recovered box document [id=%s, err=%v]", boxDocID, err)
+	}
+}
+
+func TestFindUnindexedTreePathIgnoresTextMatch(t *testing.T) {
+	originalConf := Conf
+	originalDataDir := util.DataDir
+	originalBlockTreeDBPath := util.BlockTreeDBPath
+	tempDir := t.TempDir()
+	util.DataDir = filepath.Join(tempDir, "data")
+	util.BlockTreeDBPath = filepath.Join(tempDir, "blocktree.db")
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	Conf.Sync = conf.NewSync()
+
+	box := &Box{ID: "20260716120010-abcdefg"}
+	boxConf := conf.NewBoxConf()
+	boxConf.Name = "Unindexed tree test"
+	if err := box.SaveConf(boxConf); nil != err {
+		t.Fatal(err)
+	}
+	treenode.InitBlockTree(true)
+	docID := "20260716120011-abcdefg"
+	targetID := "20210808180117-6v0mkxr"
+	tree := treenode.NewTree(box.ID, "/"+docID+".sy", "/Test", "Test")
+	paragraph := &ast.Node{Type: ast.NodeParagraph, ID: "20260716120012-abcdefg"}
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(targetID)})
+	tree.Root.AppendChild(paragraph)
+	if _, err := filesys.WriteTree(tree); nil != err {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		cache.RemoveTreeDataInBox(docID, box.ID)
+		treenode.CloseDatabase()
+		Conf = originalConf
+		util.DataDir = originalDataDir
+		util.BlockTreeDBPath = originalBlockTreeDBPath
+		if "" != originalBlockTreeDBPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+
+	if matchedPath := findUnindexedTreePathInAllBoxes(targetID); "" != matchedPath {
+		t.Fatalf("text content was recognized as a block ID [path=%s]", matchedPath)
+	}
+	paragraph.ID = targetID
+	if _, err := filesys.WriteTree(tree); nil != err {
+		t.Fatal(err)
+	}
+	if matchedPath := findUnindexedTreePathInAllBoxes(targetID); "" == matchedPath {
+		t.Fatal("actual block ID was not found")
 	}
 }
 

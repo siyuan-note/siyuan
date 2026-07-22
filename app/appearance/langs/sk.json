@@ -2228,6 +2228,7 @@
 		"340": "Vybraný Vault neobsahuje čitateľný neskrývaný súbor Markdown",
 		"341": "Dokument zápisníka najvyššej úrovne nemožno odstrániť ani presunúť",
 		"342": "Môj zápisník",
-		"343": "Nový začiatok"
+		"343": "Nový začiatok",
+		"344": "Súbor Markdown [%s] nie je kódovaný v UTF-8"
 	}
 	}

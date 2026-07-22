@@ -2228,6 +2228,7 @@
 		"340": "Il Vault selezionato non contiene file Markdown leggibili e non nascosti",
 		"341": "Il documento di primo livello del taccuino non può essere eliminato o spostato",
 		"342": "Il mio taccuino",
-		"343": "Un nuovo inizio"
+		"343": "Un nuovo inizio",
+		"344": "Il file Markdown [%s] non è codificato in UTF-8"
 	}
 	}

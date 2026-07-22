@@ -116,6 +116,7 @@ type ObsidianVaultTask struct {
 	Progress int                        `json:"progress"`
 	Message  string                     `json:"message"`
 	Error    string                     `json:"error,omitempty"`
+	Detail   string                     `json:"detail,omitempty"`
 	Analysis *ObsidianVaultAnalysis     `json:"analysis,omitempty"`
 	Result   *ObsidianVaultImportResult `json:"result,omitempty"`
 }
@@ -173,6 +174,7 @@ type obsidianTask struct {
 	Progress  int
 	Message   string
 	Err       string
+	Detail    string
 	Analysis  *ObsidianVaultAnalysis
 	Result    *ObsidianVaultImportResult
 	Context   *obsidianVaultContext
@@ -201,6 +203,14 @@ type obsidianScanResult struct {
 	Footnotes  int
 	BlockIDs   []string
 	Duplicates map[string]bool
+}
+
+type obsidianMarkdownEncodingError struct {
+	Path string
+}
+
+func (err *obsidianMarkdownEncodingError) Error() string {
+	return fmt.Sprintf("Markdown [%s] is not valid UTF-8", err.Path)
 }
 
 var (
@@ -325,7 +335,7 @@ func IsObsidianVaultTaskActive() bool {
 func snapshotObsidianTask(task *obsidianTask) *ObsidianVaultTask {
 	return &ObsidianVaultTask{
 		TaskID: task.TaskID, State: task.State, Progress: task.Progress, Message: task.Message,
-		Error: task.Err, Analysis: task.Analysis, Result: task.Result,
+		Error: task.Err, Detail: task.Detail, Analysis: task.Analysis, Result: task.Result,
 	}
 }
 
@@ -377,14 +387,19 @@ func updateObsidianTask(taskID, state string, progress int, message string) bool
 func failObsidianTask(taskID, stage string, err error, result *ObsidianVaultImportResult) {
 	logging.LogErrorf("Obsidian Vault import task [%s] failed at [%s]: %s", taskID, stage, err)
 	userError := Conf.Language(334)
+	userDetail := err.Error()
 	if stage == "analyzing" {
 		userError = Conf.Language(333)
-		if language := obsidianVaultErrorLanguage(err); language > 0 {
+		if markdownPath, ok := obsidianMarkdownEncodingPath(err); ok {
+			userDetail = fmt.Sprintf(Conf.Language(344), markdownPath)
+		} else if language := obsidianVaultErrorLanguage(err); language > 0 {
 			userError = Conf.Language(language)
+			userDetail = ""
 		}
 	}
 	obsidianTasksMu.Lock()
 	if task := obsidianTasks[taskID]; task != nil && !isObsidianTerminalState(task.State) {
+		task.Detail = userDetail
 		if result != nil {
 			incompleteSuffix := Conf.Language(335)
 			if result.Incomplete && !strings.HasSuffix(result.NotebookName, incompleteSuffix) {
@@ -396,6 +411,14 @@ func failObsidianTask(taskID, stage string, err error, result *ObsidianVaultImpo
 		finishObsidianTaskLocked(task, ObsidianTaskStateFailed, "Import failed", userError)
 	}
 	obsidianTasksMu.Unlock()
+}
+
+func obsidianMarkdownEncodingPath(err error) (string, bool) {
+	var encodingErr *obsidianMarkdownEncodingError
+	if !errors.As(err, &encodingErr) {
+		return "", false
+	}
+	return encodingErr.Path, true
 }
 
 func obsidianVaultErrorLanguage(err error) int {
@@ -811,7 +834,7 @@ func analyzeObsidianDocuments(ctx context.Context, vault *obsidianVaultContext, 
 			return fmt.Errorf("read Markdown [%s]: %w", doc.Source.RelPath, err)
 		}
 		if !utf8.Valid(data) {
-			return fmt.Errorf("Markdown [%s] is not valid UTF-8", doc.Source.RelPath)
+			return &obsidianMarkdownEncodingError{Path: doc.Source.RelPath}
 		}
 		scan := scanObsidianSource(data)
 		for _, blockID := range scan.BlockIDs {

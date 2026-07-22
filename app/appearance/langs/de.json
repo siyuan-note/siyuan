@@ -2228,6 +2228,7 @@
 		"340": "Der ausgewählte Vault enthält keine lesbare, nicht ausgeblendete Markdown-Datei",
 		"341": "Das Notizbuchdokument auf oberster Ebene kann nicht gelöscht oder verschoben werden",
 		"342": "Mein Notizbuch",
-		"343": "Ein neuer Anfang"
+		"343": "Ein neuer Anfang",
+		"344": "Die Markdown-Datei [%s] ist nicht UTF-8-kodiert"
 	}
 	}

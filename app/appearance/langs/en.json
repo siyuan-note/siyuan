@@ -2228,6 +2228,7 @@
 		"340": "The selected Vault does not contain a readable non-hidden Markdown file",
 		"341": "The top-level notebook document cannot be removed or moved",
 		"342": "My Notebook",
-		"343": "A Fresh Start"
+		"343": "A Fresh Start",
+		"344": "Markdown file [%s] is not UTF-8 encoded"
 	}
 	}

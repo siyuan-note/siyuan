@@ -2228,6 +2228,7 @@
 		"340": "Seçilen Vault, okunabilir ve gizli olmayan bir Markdown dosyası içermiyor",
 		"341": "Üst düzey not defteri belgesi silinemez veya taşınamaz",
 		"342": "Not Defterim",
-		"343": "Yeni Bir Başlangıç"
+		"343": "Yeni Bir Başlangıç",
+		"344": "Markdown dosyası [%s] UTF-8 ile kodlanmamış"
 	}
 	}

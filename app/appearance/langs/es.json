@@ -2228,6 +2228,7 @@
 		"340": "El Vault seleccionado no contiene ningún archivo Markdown legible y no oculto",
 		"341": "El documento de nivel superior del cuaderno no se puede eliminar ni mover",
 		"342": "Mi cuaderno",
-		"343": "Un nuevo comienzo"
+		"343": "Un nuevo comienzo",
+		"344": "El archivo Markdown [%s] no está codificado en UTF-8"
 	}
 	}

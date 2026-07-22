@@ -2228,6 +2228,7 @@
 		"340": "De geselecteerde Vault bevat geen leesbaar, niet-verborgen Markdown-bestand",
 		"341": "Het notebookdocument op het hoogste niveau kan niet worden verwijderd of verplaatst",
 		"342": "Mijn notitieboek",
-		"343": "Een nieuw begin"
+		"343": "Een nieuw begin",
+		"344": "Markdown-bestand [%s] is niet UTF-8-gecodeerd"
 	}
 	}

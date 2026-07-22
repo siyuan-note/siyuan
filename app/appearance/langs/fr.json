@@ -2228,6 +2228,7 @@
 		"340": "Le Vault sélectionné ne contient aucun fichier Markdown lisible et non masqué",
 		"341": "Le document de niveau supérieur du carnet ne peut pas être supprimé ni déplacé",
 		"342": "Mon carnet",
-		"343": "Un nouveau départ"
+		"343": "Un nouveau départ",
+		"344": "Le fichier Markdown [%s] n’est pas encodé en UTF-8"
 	}
 	}

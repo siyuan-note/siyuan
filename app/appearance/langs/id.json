@@ -2228,6 +2228,7 @@
 		"340": "Vault yang dipilih tidak berisi file Markdown tak tersembunyi yang dapat dibaca",
 		"341": "Dokumen buku catatan tingkat teratas tidak dapat dihapus atau dipindahkan",
 		"342": "Buku Catatan Saya",
-		"343": "Awal yang Baru"
+		"343": "Awal yang Baru",
+		"344": "File Markdown [%s] tidak dikodekan dalam UTF-8"
 	}
 	}

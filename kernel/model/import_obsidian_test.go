@@ -101,6 +101,21 @@ func TestObsidianVaultValidationErrors(t *testing.T) {
 	}
 }
 
+func TestAnalyzeObsidianVaultReportsMarkdownEncodingPath(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, ".obsidian"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "invalid.md"), []byte{0xff}, 0644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := analyzeObsidianVault(context.Background(), root, func(int, string) {})
+	path, ok := obsidianMarkdownEncodingPath(err)
+	if !ok || path != "invalid.md" {
+		t.Fatalf("unexpected Markdown encoding diagnostic: path=%q, error=%v", path, err)
+	}
+}
+
 func TestIsObsidianImportableFileMode(t *testing.T) {
 	if !isObsidianImportableFileMode(0644) {
 		t.Fatal("普通文件应允许导入")

@@ -76,16 +76,13 @@ export class MobileOutline extends Model {
             } else {
                 filterIconElement.classList.remove("toolbar__icon--active");
             }
-            if (inputElement.dataset.value !== value) {
+        });
+        inputElement.addEventListener("input", (event: InputEvent) => {
+            if (!event.isComposing) {
                 this.setFilter();
             }
         });
-        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (!event.isComposing && event.key === "Enter") {
-                inputElement.dataset.value = inputElement.value;
-                this.setFilter();
-            }
-        });
+        inputElement.addEventListener("compositionend", () => this.setFilter());
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
             data: null,

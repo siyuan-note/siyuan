@@ -553,7 +553,7 @@ func createEncryptedNotebook(c *gin.Context) {
 		return
 	}
 
-	box := model.Conf.GetBox(id)
+	box := model.Conf.Box(id)
 	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
 		"box":     box,

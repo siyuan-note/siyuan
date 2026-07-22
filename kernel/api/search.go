@@ -515,6 +515,11 @@ func fullTextSearchBlock(c *gin.Context) {
 	var docMode bool
 	// 加密笔记本的全文搜索走 InBox 版（查加密 content db + blocks_fts）
 	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		if !model.IsBoxUnlocked(notebook) {
+			ret.Code = -1
+			ret.Msg = "encrypted notebook locked"
+			return
+		}
 		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBox(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, notebook)
 	} else {
 		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize)

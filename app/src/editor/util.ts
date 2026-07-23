@@ -709,10 +709,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             }
             const backlinkKeyword = item.inputsElement[0].value;
             const backmentionKeyword = item.inputsElement[1].value;
-            item.saveStatus();
-            item.blockId = blockId;
-            item.rootId = protyle.block.rootID;
-            item.render(undefined);
+            item.prepareForBlock(blockId, protyle.block.rootID);
             item.inputsElement[0].value = backlinkKeyword;
             item.inputsElement[1].value = backmentionKeyword;
             item.markDirty();

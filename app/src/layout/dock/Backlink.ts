@@ -14,6 +14,7 @@ import {isSupportCSSHL, searchMarkRender} from "../../protyle/render/searchMarkR
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {getAllModels} from "../getAll";
 import {hideElements} from "../../protyle/ui/hideElements";
+import {shouldRenderBacklinkResponse, shouldSaveBacklinkStatus} from "./backlinkRefresh";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -42,7 +43,11 @@ export class Backlink extends Model {
     private dirty = false;
     private destroyed = false;
     private refreshQueued = false;
+    private searchQueued = false;
     private ignoreFocusOnNextRefresh = false;
+    private requestID = 0;
+    private showingLoading = false;
+    private contextRequestVersions = [0, 0];
     private ownerFocusoutListener?: (event: FocusEvent) => void;
 
     constructor(options: {
@@ -133,7 +138,7 @@ export class Backlink extends Model {
             item.addEventListener("blur", (event: KeyboardEvent) => {
                 const inputElement = event.target as HTMLInputElement;
                 inputElement.classList.add("fn__none");
-                const filterIconElement = inputElement.nextElementSibling;
+                const filterIconElement = inputElement.parentElement.querySelector('[data-type="search"]');
                 if (inputElement.value) {
                     filterIconElement.classList.add("block__icon--active");
                     filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + inputElement.value);
@@ -257,6 +262,7 @@ export class Backlink extends Model {
         });
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
+            this.cancelContextRequests(this.tree.element, false);
             this.hideEditorGutters(this.tree.element);
             this.tree.element.querySelectorAll(".protyle").forEach(item => {
                 item.classList.add("fn__none");
@@ -297,6 +303,7 @@ export class Backlink extends Model {
                             event.stopPropagation();
                             break;
                         case "mCollapse":
+                            this.cancelContextRequests(this.mTree.element, true);
                             this.hideEditorGutters(this.mTree.element);
                             this.mTree.element.querySelectorAll(".protyle").forEach(item => {
                                 item.classList.add("fn__none");
@@ -418,6 +425,7 @@ export class Backlink extends Model {
     private setBottomLayout(element: HTMLElement, listElement: HTMLElement) {
         const folded = !listElement.classList.contains("fn__none");
         if (folded) {
+            this.cancelContextRequests(listElement, listElement === this.mTree.element);
             this.hideEditorGutters(listElement);
         }
         listElement.classList.toggle("fn__none", folded);
@@ -560,13 +568,15 @@ export class Backlink extends Model {
         } else {
             const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value;
             const blockId = this.blockId;
+            const contextRequestVersion = this.contextRequestVersions[isMention ? 1 : 0];
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: blockId,
                 refTreeID: docId,
                 highlight: !isSupportCSSHL(),
                 keyword,
             }, (response) => {
-                if (this.destroyed || blockId !== this.blockId || !liElement.isConnected) {
+                if (this.destroyed || blockId !== this.blockId || !liElement.isConnected ||
+                    contextRequestVersion !== this.contextRequestVersions[isMention ? 1 : 0]) {
                     return;
                 }
                 svgElement.removeAttribute("disabled");
@@ -608,6 +618,13 @@ export class Backlink extends Model {
         });
     }
 
+    private cancelContextRequests(element: Element, isMention: boolean) {
+        this.contextRequestVersions[isMention ? 1 : 0]++;
+        element.querySelectorAll(".b3-list-item__arrow[disabled]").forEach(item => {
+            item.removeAttribute("disabled");
+        });
+    }
+
     private updateBottomBacklinkSpacing() {
         if (this.type !== "bottom") {
             return;
@@ -621,12 +638,53 @@ export class Backlink extends Model {
         if (this.type !== "bottom") {
             return;
         }
+        this.showingLoading = true;
+        this.cancelContextRequests(this.tree.element, false);
+        this.cancelContextRequests(this.mTree.element, true);
         this.editors.forEach(item => item.destroy());
         this.editors = [];
         const loadingHTML = '<div class="backlinkList__loading"><img width="32px" height="32px" src="/stage/loading-pure.svg"></div>';
         this.tree.element.innerHTML = loadingHTML;
         this.mTree.element.innerHTML = loadingHTML;
+        this.element.querySelector(".listCount").textContent = "";
+        this.element.querySelector(".listMCount").textContent = "";
         this.updateBottomBacklinkSpacing();
+    }
+
+    public prepareForBlock(blockId: string, rootId: string) {
+        if (!this.showingLoading) {
+            this.saveStatus();
+        }
+        this.requestID++;
+        this.refreshQueued = false;
+        this.searchQueued = false;
+        this.dirty = false;
+        this.ignoreFocusOnNextRefresh = false;
+        this.notebookId = "";
+        this.blockId = blockId;
+        this.rootId = rootId;
+        this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
+        this.showBottomLoading();
+    }
+
+    private finishRequest(requestID: number) {
+        if (this.destroyed || requestID !== this.requestID) {
+            return false;
+        }
+        this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
+        return true;
+    }
+
+    private runQueuedRequest() {
+        if (this.refreshQueued) {
+            this.refresh();
+            return true;
+        }
+        if (this.searchQueued) {
+            this.searchBacklinks();
+            return true;
+        }
+        return false;
     }
 
     public refresh() {
@@ -636,7 +694,9 @@ export class Backlink extends Model {
         }
         if (element.classList.contains("fn__rotate")) {
             if (!this.refreshQueued && this.type === "bottom") {
-                this.saveStatus();
+                if (!this.showingLoading) {
+                    this.saveStatus();
+                }
                 this.showBottomLoading();
             }
             this.refreshQueued = true;
@@ -645,22 +705,36 @@ export class Backlink extends Model {
         this.refreshQueued = false;
         element.classList.add("fn__rotate");
         this.dirty = false;
+        const requestID = ++this.requestID;
+        let responseHandled = false;
         fetchPost("/api/ref/refreshBacklink", {
             id: this.blockId,
         }, () => {
-            if (this.destroyed) {
+            responseHandled = true;
+            if (!this.finishRequest(requestID)) {
                 return;
             }
-            element.classList.remove("fn__rotate");
-            this.searchBacklinks();
+            if (!this.runQueuedRequest()) {
+                this.searchBacklinks();
+            }
+        }).finally(() => {
+            if (responseHandled || !this.finishRequest(requestID)) {
+                return;
+            }
+            if (!this.runQueuedRequest()) {
+                // 即使重建索引失败，也重新读取已有的反链数据并释放加载状态。
+                this.searchBacklinks();
+            }
         });
     }
 
     private searchBacklinks(init = false) {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
         if (element.classList.contains("fn__rotate")) {
+            this.searchQueued = true;
             return;
         }
+        this.searchQueued = false;
         element.classList.add("fn__rotate");
         this.dirty = false;
         this.ignoreFocusOnNextRefresh = false;
@@ -685,20 +759,29 @@ export class Backlink extends Model {
         if (isEncryptedBox(notebookId)) {
             param.notebook = notebookId;
         }
+        const requestID = ++this.requestID;
+        let responseHandled = false;
         fetchPost("/api/ref/getBacklink2", param, response => {
-            if (this.destroyed || blockId !== this.blockId) {
+            responseHandled = true;
+            if (!this.finishRequest(requestID) || blockId !== this.blockId) {
                 return;
             }
-            if (this.refreshQueued) {
-                element.classList.remove("fn__rotate");
-                this.refresh();
+            if (!shouldRenderBacklinkResponse(this.refreshQueued, this.searchQueued)) {
+                this.runQueuedRequest();
                 return;
             }
-            if (!init) {
+            if (shouldSaveBacklinkStatus(init, this.showingLoading)) {
                 this.saveStatus();
             }
             this.render(response.data);
             if (this.type === "bottom" && this.dirty) {
+                this.refreshIfVisible();
+            }
+        }).finally(() => {
+            if (responseHandled || !this.finishRequest(requestID) || blockId !== this.blockId) {
+                return;
+            }
+            if (!this.runQueuedRequest() && this.type === "bottom" && this.dirty) {
                 this.refreshIfVisible();
             }
         });
@@ -757,6 +840,7 @@ export class Backlink extends Model {
                 mk: ""
             };
         }
+        this.showingLoading = false;
 
         this.editors.forEach(item => {
             item.destroy();

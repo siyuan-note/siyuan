@@ -1725,21 +1725,10 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	}
 
 	// 若后续步骤失败，清理已创建的 box 目录和加密 db 文件，避免半创建状态
-	boxCreated := true
+	createdBoxID := id
 	defer func() {
-		if err != nil && boxCreated {
-			cachedDEKsLock.Lock()
-			if cachedDEK, ok := cachedDEKs[id]; ok {
-				zeroAndClear(cachedDEK)
-				delete(cachedDEKs, id)
-			}
-			cachedDEKsLock.Unlock()
-			sql.RemoveEncryptedDBFile(id)
-			treenode.RemoveEncryptedBlockTreeDBFile(id)
-			boxDir := filepath.Join(util.DataDir, id)
-			if rmErr := filelock.Remove(boxDir); rmErr != nil {
-				logging.LogErrorf("cleanup failed encrypted box [%s]: %s", id, rmErr)
-			}
+		if err != nil {
+			cleanupFailedEncryptedBox(createdBoxID)
 			id = ""
 		}
 	}()
@@ -1791,6 +1780,33 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 
 	IncSync()
 	return id, nil
+}
+
+// cleanupFailedEncryptedBox 清理创建失败的加密笔记本，清理目标必须是 DataDir 下的有效笔记本目录。
+func cleanupFailedEncryptedBox(boxID string) {
+	if !ast.IsNodeIDPattern(boxID) {
+		logging.LogErrorf("refuse to cleanup failed encrypted box with invalid ID [%s]", boxID)
+		return
+	}
+
+	dataDir := filepath.Clean(util.DataDir)
+	boxDir := filepath.Clean(filepath.Join(dataDir, boxID))
+	if boxDir == dataDir || filepath.Dir(boxDir) != dataDir {
+		logging.LogErrorf("refuse to cleanup failed encrypted box outside data directory [%s]", boxDir)
+		return
+	}
+
+	cachedDEKsLock.Lock()
+	if cachedDEK, ok := cachedDEKs[boxID]; ok {
+		zeroAndClear(cachedDEK)
+		delete(cachedDEKs, boxID)
+	}
+	cachedDEKsLock.Unlock()
+	sql.RemoveEncryptedDBFile(boxID)
+	treenode.RemoveEncryptedBlockTreeDBFile(boxID)
+	if err := filelock.Remove(boxDir); err != nil {
+		logging.LogErrorf("cleanup failed encrypted box [%s]: %s", boxID, err)
+	}
 }
 
 // zeroAndClear 把密钥字节清零后再置空，尽量减少密钥在内存中的残留时间。

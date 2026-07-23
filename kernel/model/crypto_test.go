@@ -678,3 +678,50 @@ func TestEnableEncryptedNotebookRestoresConfigWhenBackupWriteFails(t *testing.T)
 		t.Fatal("failed enable should restore the complete in-memory notebook crypto configuration")
 	}
 }
+
+func TestCleanupFailedEncryptedBoxNeverRemovesDataDir(t *testing.T) {
+	originalDataDir := util.DataDir
+	originalTempDir := util.TempDir
+	rootDir := t.TempDir()
+	dataDir := filepath.Join(rootDir, "data")
+	tempDir := filepath.Join(rootDir, "temp")
+	if err := os.MkdirAll(dataDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(tempDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	util.DataDir = dataDir
+	util.TempDir = tempDir
+	defer func() {
+		util.DataDir = originalDataDir
+		util.TempDir = originalTempDir
+	}()
+
+	sentinelPath := filepath.Join(dataDir, "sentinel")
+	if err := os.WriteFile(sentinelPath, []byte("keep"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	cleanupFailedEncryptedBox("")
+	if _, err := os.Stat(sentinelPath); err != nil {
+		t.Fatalf("invalid cleanup target removed data directory contents: %v", err)
+	}
+
+	boxID := "20260723120000-abcdefg"
+	boxDir := filepath.Join(dataDir, boxID)
+	if err := os.MkdirAll(boxDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(boxDir, "conf.json"), []byte("{}"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	cleanupFailedEncryptedBox(boxID)
+	if _, err := os.Stat(boxDir); !os.IsNotExist(err) {
+		t.Fatalf("failed encrypted notebook directory should be removed, stat error: %v", err)
+	}
+	if _, err := os.Stat(sentinelPath); err != nil {
+		t.Fatalf("cleanup removed unrelated data directory contents: %v", err)
+	}
+}

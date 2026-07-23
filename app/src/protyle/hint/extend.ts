@@ -258,7 +258,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         id: "insertAsset",
         value: Constants.ZWSP + 3,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDownload"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.insertAsset}</span>
-<input class="b3-form__upload" type="file" ${protyle.options.upload.accept ? 'multiple="' + protyle.options.upload.accept + '"' : ""}></div>`,
+<input class="b3-form__upload" type="file" multiple="multiple"${protyle.options.upload.accept ? ' accept="' + protyle.options.upload.accept + '"' : ""}></div>`,
     }, {
         filter: [window.siyuan.languages.insertIframeURL, "insert iframe link", "插入 iframe 链接", "charuiframelianjie", "criframelj"],
         id: "insertIframeURL",

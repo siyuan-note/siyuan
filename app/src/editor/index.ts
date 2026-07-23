@@ -19,6 +19,7 @@ export class Editor extends Model {
     private backlinkElement?: HTMLElement;
     private backlinkIntersectionObserver?: IntersectionObserver;
     private backlinkMutationObserver?: MutationObserver;
+    private backlinkEmpty = false;
 
     constructor(options: {
         app: App,
@@ -97,7 +98,7 @@ export class Editor extends Model {
         }
 
         const backlinkElement = document.createElement("div");
-        backlinkElement.className = "fn__none sy__backlink--bottom";
+        backlinkElement.className = "fn__none sy__backlink--bottom sy__backlink--pending";
         this.backlinkElement = backlinkElement;
         this.editor.protyle.wysiwyg.element.after(backlinkElement);
         setPadding(this.editor.protyle);
@@ -115,6 +116,24 @@ export class Editor extends Model {
                     type: "bottom",
                     element: backlinkElement,
                     ownerProtyle: this.editor.protyle,
+                    emptyChange: (empty) => {
+                        if (this.backlinkElement !== backlinkElement) {
+                            return;
+                        }
+                        const pending = backlinkElement.classList.contains("sy__backlink--pending");
+                        if (!pending && this.backlinkEmpty === empty) {
+                            return;
+                        }
+                        const contentElement = this.editor.protyle.contentElement;
+                        contentElement.classList.add("protyle-content--backlink-reveal");
+                        backlinkElement.classList.remove("sy__backlink--pending");
+                        this.backlinkEmpty = empty;
+                        this.updateBacklinkVisibility(pending);
+                        contentElement.getBoundingClientRect();
+                        requestAnimationFrame(() => {
+                            contentElement.classList.remove("protyle-content--backlink-reveal");
+                        });
+                    },
                 });
             } else {
                 this.backlink.refreshDirty();
@@ -157,14 +176,14 @@ export class Editor extends Model {
         return protyle.block.showAll ? protyle.block.id : (protyle.block.parentID || protyle.block.rootID);
     }
 
-    private updateBacklinkVisibility() {
+    private updateBacklinkVisibility(forcePadding = false) {
         if (!this.backlinkElement) {
             return;
         }
         const lastElement = this.editor.protyle.wysiwyg.element.lastElementChild;
-        const hidden = !this.editor.protyle.block.showAll && this.editor.protyle.block.scroll &&
-            lastElement?.getAttribute("data-eof") !== "2";
-        if (this.backlinkElement.classList.contains("fn__none") !== hidden) {
+        const hidden = this.backlinkEmpty || (!this.editor.protyle.block.showAll && this.editor.protyle.block.scroll &&
+            lastElement?.getAttribute("data-eof") !== "2");
+        if (this.backlinkElement.classList.contains("fn__none") !== hidden || forcePadding) {
             this.backlinkElement.classList.toggle("fn__none", hidden);
             setPadding(this.editor.protyle);
         }
@@ -180,6 +199,7 @@ export class Editor extends Model {
         this.backlinkMutationObserver = undefined;
         this.backlink = undefined;
         this.backlinkElement = undefined;
+        this.backlinkEmpty = false;
         if (hasBacklinkElement) {
             setPadding(this.editor.protyle);
         }

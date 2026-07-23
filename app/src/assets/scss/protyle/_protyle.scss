@@ -357,12 +357,28 @@
       transition: margin .3s cubic-bezier(.25, .46, .45, .94) 0ms;
     }
   }
+
+  &--backlink-reveal {
+    > .protyle-wysiwyg,
+    > .sy__backlink--bottom {
+      transition: none;
+    }
+  }
 }
 
 .sy__backlink--bottom {
   box-sizing: border-box;
   min-height: 32px;
   outline: none;
+
+  &.sy__backlink--pending {
+    height: 1px;
+    min-height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    padding-bottom: 0 !important;
+    pointer-events: none;
+  }
 
   > .block__icons {
     border-top: 1px solid var(--b3-border-color);

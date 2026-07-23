@@ -14,7 +14,11 @@ import {isSupportCSSHL, searchMarkRender} from "../../protyle/render/searchMarkR
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {getAllModels} from "../getAll";
 import {hideElements} from "../../protyle/ui/hideElements";
-import {shouldRenderBacklinkResponse, shouldSaveBacklinkStatus} from "./backlinkRefresh";
+import {
+    shouldHideBottomBacklinks,
+    shouldRenderBacklinkResponse,
+    shouldSaveBacklinkStatus
+} from "./backlinkRefresh";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -49,6 +53,8 @@ export class Backlink extends Model {
     private showingLoading = false;
     private contextRequestVersions = [0, 0];
     private ownerFocusoutListener?: (event: FocusEvent) => void;
+    private empty = false;
+    private emptyChange?: (empty: boolean) => void;
 
     constructor(options: {
         app: App,
@@ -57,7 +63,8 @@ export class Backlink extends Model {
         blockId: string,
         rootId?: string,
         type: "pin" | "local" | "bottom",
-        ownerProtyle?: IProtyle
+        ownerProtyle?: IProtyle,
+        emptyChange?: (empty: boolean) => void,
     }) {
         super({app: options.app});
 
@@ -74,6 +81,7 @@ export class Backlink extends Model {
         this.rootId = options.rootId;
         this.type = options.type;
         this.ownerProtyle = options.ownerProtyle;
+        this.emptyChange = options.emptyChange;
         this.element = options.element || options.tab.panelElement;
         this.element.classList.add("fn__flex-column", "file-tree", "sy__backlink", "dockPanel");
         if (this.type === "bottom") {
@@ -868,7 +876,6 @@ export class Backlink extends Model {
             mCountElement.classList.remove("fn__none");
             mCountElement.textContent = data.mentionsCount.toString();
         }
-
         if (!this.status[this.blockId]) {
             this.status[this.blockId] = {
                 sort: window.siyuan.config.editor.backlinkSort,
@@ -953,6 +960,11 @@ export class Backlink extends Model {
         }
         this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').setAttribute("data-sort", this.status[this.blockId].sort.toString());
         this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').setAttribute("data-sort", this.status[this.blockId].mSort.toString());
+        if (this.type === "bottom") {
+            const empty = shouldHideBottomBacklinks(data.linkRefsCount, data.mentionsCount, data.k, data.mk);
+            this.empty = empty;
+            this.emptyChange?.(empty);
+        }
 
         setTimeout(() => {
             this.tree.element.scrollTop = this.status[this.blockId].scrollTop;
@@ -980,12 +992,18 @@ export class Backlink extends Model {
         if (ignoreFocus) {
             this.ignoreFocusOnNextRefresh = true;
         }
+        if (!this.element.isConnected || this.ownerProtyle.element.getClientRects().length === 0) {
+            return;
+        }
+        if (this.empty) {
+            this.searchBacklinks();
+            return;
+        }
         if (!this.ignoreFocusOnNextRefresh && this.ownerProtyle.element.contains(document.activeElement)) {
             return;
         }
         if (this.element.classList.contains("fn__none") ||
-            !this.element.isConnected || this.element.getClientRects().length === 0 ||
-            this.ownerProtyle.element.getClientRects().length === 0) {
+            this.element.getClientRects().length === 0) {
             return;
         }
         const rect = this.element.getBoundingClientRect();

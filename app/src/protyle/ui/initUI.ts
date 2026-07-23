@@ -336,7 +336,9 @@ export const setPadding = (protyle: IProtyle) => {
     const paddingLeft = protyle.options.backlinkData ? 24 : padding.left;
     const paddingRight = protyle.options.backlinkData ? 16 : padding.right;
     const backlinkBottomElement = protyle.contentElement.querySelector(".sy__backlink--bottom") as HTMLElement;
-    const backlinkBottomVisible = backlinkBottomElement && !backlinkBottomElement.classList.contains("fn__none");
+    const backlinkBottomVisible = backlinkBottomElement &&
+        !backlinkBottomElement.classList.contains("fn__none") &&
+        !backlinkBottomElement.classList.contains("sy__backlink--pending");
 
     if (protyle.options.backlinkData) {
         protyle.wysiwyg.element.style.padding = `4px ${paddingRight}px 4px ${paddingLeft}px`;

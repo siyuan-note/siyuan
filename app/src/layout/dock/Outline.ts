@@ -40,6 +40,7 @@ export class Outline extends Model {
     public isPreview: boolean;
     public protyle: IProtyle;
     private preFilterExpandIds: string[] | null = null;
+    private refreshId = 0;
 
     constructor(options: {
         app: App,
@@ -728,6 +729,35 @@ export class Outline extends Model {
             }
         }
         this.element.removeAttribute("data-loading");
+    }
+
+    public refresh() {
+        if (!this.blockId) {
+            return;
+        }
+        const blockId = this.blockId;
+        const refreshId = ++this.refreshId;
+        const outlineParam: IObject = {
+            id: blockId,
+            preview: this.isPreview,
+        };
+        let protyle: IProtyle;
+        getAllModels().editor.some(item => {
+            if (item.editor.protyle.block.rootID === blockId) {
+                protyle = item.editor.protyle;
+                return true;
+            }
+        });
+        if (isEncryptedBox(protyle?.notebookId)) {
+            outlineParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/outline/getDocOutline", outlineParam, response => {
+            if (refreshId !== this.refreshId || blockId !== this.blockId) {
+                return;
+            }
+            this.update(response);
+            this.updateDocTitle(protyle?.background?.ial, response.data?.length || 0);
+        });
     }
 
     public saveExpendIds() {

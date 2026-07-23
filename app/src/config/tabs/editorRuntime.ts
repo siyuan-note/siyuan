@@ -6,8 +6,11 @@ import {resize} from "../../protyle/util/resize";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 
 const applyEditorConfig = (data: Config.IEditor) => {
+    const refreshHeadingNumbers = window.siyuan.config.editor.headingNumber !== data.headingNumber ||
+        window.siyuan.config.editor.headingNumberFormat !== data.headingNumberFormat;
     window.siyuan.config.editor = data;
-    getAllModels().editor.forEach(item => item.updateBacklinkPanel());
+    const models = getAllModels();
+    models.editor.forEach(item => item.updateBacklinkPanel());
     getAllEditor().forEach((editorItem) => {
         const protyle = editorItem.protyle;
         protyle.databaseAttributePanel?.updateDisplayConfig();
@@ -26,6 +29,13 @@ const applyEditorConfig = (data: Config.IEditor) => {
             protyle.contentElement.removeAttribute("data-fullwidth");
         }
     });
+    if (refreshHeadingNumbers) {
+        /// #if MOBILE
+        window.siyuan.mobile.docks.outline?.reload();
+        /// #else
+        models.outline.forEach(item => item.refresh());
+        /// #endif
+    }
 
     void setInlineStyle();
 };

@@ -5,12 +5,17 @@ const HEADING_NUMBER_MEASURE_CLASS = "protyle-heading-number__measure";
 const HEADING_NUMBER_WIDTH_PROPERTY = "--b3-protyle-heading-number-width";
 const NUMBERED_HEADING_SELECTOR = `${HEADING_SELECTOR}[data-heading-number], ` +
     `${HEADING_SELECTOR} > [contenteditable][data-heading-number]`;
+const HEADING_CONTAINER_TYPES = new Set(["NodeDocument", "NodeList", "NodeListItem", "NodeSuperBlock"]);
 const headingNumberMeasurements = new WeakMap<Element, {key: string, offset: string}>();
 
 export interface IHeadingNumberStyle {
     id: string;
     number: string;
     offset: string;
+}
+
+interface IHeadingNumberTarget extends IHeadingNumberStyle {
+    element: Element;
 }
 
 export const clearHeadingNumberElements = (root: Element) => {
@@ -30,26 +35,34 @@ const isNumberedHeadingTarget = (element: Element) => {
     return !element.closest(".bq, .callout, .protyle-wysiwyg__embed");
 };
 
-const measureHeadingNumber = (heading: Element, number: string) => {
-    const measureElement = heading.ownerDocument.createElement("span");
-    measureElement.classList.add(HEADING_NUMBER_MEASURE_CLASS);
-    measureElement.setAttribute("aria-hidden", "true");
-    measureElement.textContent = number;
-    heading.appendChild(measureElement);
-    const width = measureElement.getBoundingClientRect().width;
-    measureElement.remove();
-    return 0 < width ? `${width}px` : `${Array.from(number).length}ch`;
-};
-
-const getHeadingNumberOffset = (heading: Element, number: string) => {
-    const key = `${heading.getAttribute("data-subtype") || ""}\u0000${number}`;
-    const measurement = headingNumberMeasurements.get(heading);
-    if (measurement?.key === key) {
-        return measurement.offset;
-    }
-    const offset = measureHeadingNumber(heading, number);
-    headingNumberMeasurements.set(heading, {key, offset});
-    return offset;
+const measureHeadingNumbers = (targets: IHeadingNumberTarget[]) => {
+    const pending: {
+        key: string,
+        measureElement: HTMLElement,
+        target: IHeadingNumberTarget,
+    }[] = [];
+    targets.forEach(target => {
+        const key = `${target.element.getAttribute("data-subtype") || ""}\u0000${target.number}`;
+        const measurement = headingNumberMeasurements.get(target.element);
+        if (measurement?.key === key) {
+            target.offset = measurement.offset;
+            return;
+        }
+        const measureElement = target.element.ownerDocument.createElement("span");
+        measureElement.classList.add(HEADING_NUMBER_MEASURE_CLASS);
+        measureElement.setAttribute("aria-hidden", "true");
+        measureElement.textContent = target.number;
+        target.element.appendChild(measureElement);
+        pending.push({key, measureElement, target});
+    });
+    pending.forEach(item => {
+        const width = item.measureElement.getBoundingClientRect().width;
+        const offset = 0 < width ? `${width}px` : `${Array.from(item.target.number).length}ch`;
+        item.target.offset = offset;
+        headingNumberMeasurements.set(item.target.element, {key: item.key, offset});
+    });
+    pending.forEach(item => item.measureElement.remove());
+    return targets.map(target => ({id: target.id, number: target.number, offset: target.offset}));
 };
 
 const escapeCSSString = (value: string) => Array.from(value).map(character => {
@@ -90,7 +103,7 @@ export const buildHeadingNumberStyles = (scope: string, styles: IHeadingNumberSt
 export const renderHeadingNumberElements = (root: Element, numbers: Record<string, string>) => {
     const levels: Record<string, string> = {};
     const containers = new Set<string>();
-    const styles: IHeadingNumberStyle[] = [];
+    const targets: IHeadingNumberTarget[] = [];
     root.querySelectorAll(HEADING_SELECTOR).forEach(item => {
         const id = item.getAttribute("data-node-id");
         const number = id ? numbers[id] : "";
@@ -104,7 +117,7 @@ export const renderHeadingNumberElements = (root: Element, numbers: Record<strin
             levels[id] = item.getAttribute("data-subtype") || "";
         }
         if (id && editElement && number && isNumberedHeadingTarget(item)) {
-            styles.push({id, number, offset: getHeadingNumberOffset(item, number)});
+            targets.push({element: item, id, number, offset: ""});
             let ancestor = item.parentElement;
             while (ancestor && ancestor !== root) {
                 const ancestorID = ancestor.getAttribute("data-node-id");
@@ -115,6 +128,7 @@ export const renderHeadingNumberElements = (root: Element, numbers: Record<strin
             }
         }
     });
+    const styles = measureHeadingNumbers(targets);
     return {containers, levels, styles};
 };
 
@@ -175,6 +189,14 @@ const operationHeadingLevel = (operation: IOperation) => {
     return element?.getAttribute("data-subtype") || "";
 };
 
+const operationDataIsHeadingContainer = (data: unknown) => {
+    if (typeof data !== "string") {
+        return false;
+    }
+    const match = data.match(/^\s*<[^>]*\bdata-type=(["'])([^"']+)\1/);
+    return match ? HEADING_CONTAINER_TYPES.has(match[2]) : false;
+};
+
 export const operationsMayChangeHeadingNumbers = (
     operations: IOperation[],
     headingNumbers: Record<string, string> = {},
@@ -195,6 +217,9 @@ export const operationsMayChangeHeadingNumbers = (
                 return oldLevel !== newLevel;
             }
             if (headingNumbers[operation.id]) {
+                return true;
+            }
+            if (operationDataIsHeadingContainer(operation.data)) {
                 return true;
             }
         }

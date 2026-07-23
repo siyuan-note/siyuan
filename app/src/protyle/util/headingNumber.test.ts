@@ -15,6 +15,8 @@ class TestElement {
     appendCount = 0;
     queryElements: TestElement[] = [];
     textContent = "";
+    constructor(public name = "", public events?: string[]) {}
+
     styleProperties = new Map<string, string>();
     style = {
         getPropertyValue: (name: string) => this.styleProperties.get(name) || "",
@@ -59,6 +61,7 @@ class TestElement {
     }
 
     appendChild(element: TestElement) {
+        this.events?.push(`${this.name}:append`);
         this.appendCount++;
         this.appendedElement = element;
         element.parentElement = this;
@@ -66,10 +69,12 @@ class TestElement {
     }
 
     getBoundingClientRect() {
+        this.parentElement?.events?.push(`${this.parentElement.name}:measure`);
         return {width: 12};
     }
 
     remove() {
+        this.parentElement?.events?.push(`${this.parentElement.name}:remove`);
         if (this.parentElement?.appendedElement === this) {
             this.parentElement.appendedElement = null;
         }
@@ -129,6 +134,36 @@ describe("renderHeadingNumbers", () => {
         assert.doesNotMatch(css, /text-indent/);
         assert.equal(buildHeadingNumberStyles("scope", []), "");
     });
+
+    it("批量插入、测量并移除编号测量节点", () => {
+        const events: string[] = [];
+        const root = new TestElement();
+        const firstHeading = new TestElement("first", events);
+        const secondHeading = new TestElement("second", events);
+        [firstHeading, secondHeading].forEach((heading, index) => {
+            heading.setAttribute("data-node-id", `heading-${index + 1}`);
+            heading.setAttribute("data-type", "NodeHeading");
+            heading.setAttribute("data-subtype", "h1");
+            heading.parentElement = root;
+            heading.editElement = new TestElement();
+            heading.editElement.parentElement = heading;
+        });
+        root.queryElements = [firstHeading, secondHeading];
+
+        renderHeadingNumberElements(root as unknown as Element, {
+            "heading-1": "1",
+            "heading-2": "2",
+        });
+
+        assert.deepEqual(events, [
+            "first:append",
+            "second:append",
+            "first:measure",
+            "second:measure",
+            "first:remove",
+            "second:remove",
+        ]);
+    });
 });
 
 describe("operationsMayChangeHeadingNumbers", () => {
@@ -149,5 +184,15 @@ describe("operationsMayChangeHeadingNumbers", () => {
         ]);
 
         assert.equal(changed, false);
+    });
+
+    it("未加载容器移除标题时使编号失效", () => {
+        const changed = operationsMayChangeHeadingNumbers([{
+            action: "update",
+            id: "unloaded-list",
+            data: '<div data-node-id="unloaded-list" data-type="NodeList"></div>',
+        }]);
+
+        assert.equal(changed, true);
     });
 });

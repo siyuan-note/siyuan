@@ -1473,13 +1473,21 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     }
 };
 
-export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText = false) => {
+export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText = false,
+                         linkElements = [linkElement], oldHTMLs?: Map<string, string>) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_INLINE_A);
     const nodeElement = hasClosestBlock(linkElement);
     if (!nodeElement) {
         return;
     }
+    const linkBlockElements: Element[] = [];
+    linkElements.forEach(item => {
+        const blockElement = hasClosestBlock(item);
+        if (blockElement && !linkBlockElements.includes(blockElement)) {
+            linkBlockElements.push(blockElement);
+        }
+    });
     hideTooltip();
     hideElements(["util", "toolbar", "hint"], protyle);
     let html = nodeElement.outerHTML;
@@ -1733,16 +1741,20 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         inputElements[0].select();
     }
     window.siyuan.menus.menu.removeCB = () => {
-        if (inputElements[2].value) {
-            linkElement.setAttribute("data-title", Lute.EscapeHTMLStr(inputElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
-        } else {
-            linkElement.removeAttribute("data-title");
-        }
-        if (linkElement.getAttribute("data-type").indexOf("a") > -1) {
-            linkElement.setAttribute("data-href", Lute.EscapeHTMLStr(inputElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
-        } else {
-            linkElement.removeAttribute("data-href");
-        }
+        const title = Lute.EscapeHTMLStr(inputElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
+        const href = Lute.EscapeHTMLStr(inputElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
+        linkElements.forEach(item => {
+            if (title) {
+                item.setAttribute("data-title", title);
+            } else {
+                item.removeAttribute("data-title");
+            }
+            if (item.getAttribute("data-type").indexOf("a") > -1) {
+                item.setAttribute("data-href", href);
+            } else {
+                item.removeAttribute("data-href");
+            }
+        });
         if (!inputElements[1].value && (inputElements[0].value || inputElements[2].value)) {
             linkElement.textContent = "*";
         }
@@ -1753,9 +1765,24 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
             focusByRange(protyle.toolbar.range);
         }
         if (!inputElements[1].value && !inputElements[0].value && !inputElements[2].value) {
-            linkElement.remove();
+            linkElements.forEach(item => item.remove());
         }
-        if (html !== nodeElement.outerHTML) {
+        if (oldHTMLs) {
+            const operations: IOperation[] = [];
+            const undoOperations: IOperation[] = [];
+            linkBlockElements.forEach(item => {
+                const id = item.getAttribute("data-node-id");
+                const oldHTML = oldHTMLs.get(id);
+                if (oldHTML && item.outerHTML !== oldHTML) {
+                    item.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                    operations.push({action: "update", id, data: item.outerHTML});
+                    undoOperations.push({action: "update", id, data: oldHTML});
+                }
+            });
+            if (operations.length > 0) {
+                transaction(protyle, operations, undoOperations);
+            }
+        } else if (html !== nodeElement.outerHTML) {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, nodeElement, html);
         }

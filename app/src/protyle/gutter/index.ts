@@ -2874,6 +2874,17 @@ export class Gutter {
         if (selectElement && !selectElement.classList.contains("fn__none")) {
             return;
         }
+        document.querySelectorAll(".protyle-gutters").forEach(item => {
+            if (item !== this.element) {
+                item.classList.add("fn__none");
+                item.innerHTML = "";
+            }
+        });
+        document.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl").forEach(item => {
+            if (item.closest(".protyle") !== protyle.element) {
+                item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
+            }
+        });
         let html = "";
         let nodeElement = element;
         let space = 0;

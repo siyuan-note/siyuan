@@ -175,6 +175,11 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
 };
 
 const editKeydown = (app: App, event: KeyboardEvent) => {
+    const eventTarget = event.target as HTMLElement;
+    if (hasClosestByClassName(eventTarget, "sy__backlink--bottom", true) &&
+        !hasClosestByClassName(eventTarget, "protyle", true)) {
+        return false;
+    }
     let protyle: IProtyle;
     let range: Range;
     if (getSelection().rangeCount > 0) {
@@ -205,7 +210,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     const activeTab = getActiveTab();
     if (!protyle && activeTab) {
         if (activeTab.model instanceof Editor) {
-            protyle = activeTab.model.editor.protyle;
+            protyle = activeTab.model.getCurrentProtyle(range);
         } else if (activeTab.model instanceof Search) {
             if (activeTab.model.element.querySelector("#searchUnRefPanel").classList.contains("fn__none")) {
                 protyle = activeTab.model.editors.edit.protyle;
@@ -980,7 +985,10 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
 
-    let activePanelElement = document.querySelector(".layout__tab--active");
+    const bottomBacklinkElement = hasClosestByClassName(target, "sy__backlink--bottom", true);
+    const bottomBacklink = bottomBacklinkElement ? getAllModels().backlink.find(item =>
+        item.type === "bottom" && item.element === bottomBacklinkElement) : undefined;
+    let activePanelElement = bottomBacklinkElement || document.querySelector(".layout__tab--active");
     if (!activePanelElement) {
         Array.from(document.querySelectorAll(".layout__wnd--active .layout-tab-container > div")).find(item => {
             if (!item.classList.contains("fn__none") && item.className.indexOf("sy__") > -1) {
@@ -997,27 +1005,33 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
     }
 
     let matchCommand = false;
-    app.plugins.find(item => {
-        item.commands.find(command => {
-            if (command.dockCallback && matchHotKey(command.customHotkey, event)) {
-                matchCommand = true;
-                command.dockCallback(activePanelElement as HTMLElement);
+    if (!bottomBacklink) {
+        app.plugins.find(item => {
+            item.commands.find(command => {
+                if (command.dockCallback && matchHotKey(command.customHotkey, event)) {
+                    matchCommand = true;
+                    command.dockCallback(activePanelElement as HTMLElement);
+                    return true;
+                }
+            });
+            if (matchCommand) {
                 return true;
             }
         });
-        if (matchCommand) {
-            return true;
-        }
-    });
+    }
     if (matchCommand) {
         return true;
     }
-    if (!matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) &&
-        !matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) &&
+    const matchCollapse = matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event);
+    const matchExpand = matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event);
+    if (bottomBacklink && (matchCollapse || matchExpand)) {
+        return false;
+    }
+    if (!matchCollapse && !matchExpand &&
         !event.key.startsWith("Arrow") && event.key !== "Enter") {
         return false;
     }
-    if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event)) {
+    if (!event.repeat && matchCollapse) {
         const collapseElement = activePanelElement.querySelector('.block__icon[data-type="collapse"]');
         if (collapseElement) {
             collapseElement.dispatchEvent(new CustomEvent("click"));
@@ -1025,7 +1039,7 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
             return true;
         }
     }
-    if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event)) {
+    if (!event.repeat && matchExpand) {
         const expandElement = activePanelElement.querySelector('.block__icon[data-type="expand"]');
         if (expandElement) {
             expandElement.dispatchEvent(new CustomEvent("click"));
@@ -1038,22 +1052,41 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
         activePanelElement.classList.contains("sy__graph")) {
         return false;
     }
-    const model = (getInstanceById(activePanelElement.getAttribute("data-id"), window.siyuan.layout.layout) as Tab)?.model;
+    const model = bottomBacklink ||
+        (getInstanceById(activePanelElement.getAttribute("data-id"), window.siyuan.layout.layout) as Tab)?.model;
     if (!model) {
         return false;
     }
-    let activeItemElement = activePanelElement.querySelector(".b3-list-item--focus");
+    const visibleTreeElements = bottomBacklink ? [bottomBacklink.tree.element, bottomBacklink.mTree.element].filter(item =>
+        !item.classList.contains("fn__none")) : [];
+    let activeItemElement: Element;
+    if (bottomBacklink) {
+        visibleTreeElements.find(item => {
+            activeItemElement = item.querySelector(".b3-list-item--focus");
+            return !!activeItemElement;
+        });
+    } else {
+        activeItemElement = activePanelElement.querySelector(".b3-list-item--focus");
+    }
     if (!activeItemElement) {
-        activeItemElement = activePanelElement.querySelector(".b3-list .b3-list-item");
+        if (bottomBacklink) {
+            visibleTreeElements.find(item => {
+                activeItemElement = item.querySelector(".b3-list-item");
+                return !!activeItemElement;
+            });
+        } else {
+            activeItemElement = activePanelElement.querySelector(".b3-list .b3-list-item");
+        }
         if (activeItemElement) {
             activeItemElement.classList.add("b3-list-item--focus");
         }
         return false;
     }
 
-    let tree = (model as Backlink).tree;
-    if (activeItemElement.parentElement.parentElement.classList.contains("backlinkMList")) {
-        tree = (model as Backlink).mTree;
+    const backlinkModel = model as Backlink;
+    let tree = backlinkModel.tree;
+    if (backlinkModel.mTree?.element.contains(activeItemElement)) {
+        tree = backlinkModel.mTree;
     }
     if (!tree) {
         return false;
@@ -1699,7 +1732,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     // 面板的操作
-    if (!isTabWindow && panelTreeKeydown(app, event)) {
+    if ((!isTabWindow || hasClosestByClassName(target, "sy__backlink--bottom", true)) && panelTreeKeydown(app, event)) {
         return;
     }
 

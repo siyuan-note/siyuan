@@ -699,6 +699,23 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
         }
     });
     models.backlink.forEach(item => {
+        if (item.type === "bottom") {
+            if (!protyle || item.ownerProtyle !== protyle) {
+                return;
+            }
+            const blockId = protyle.block.showAll ? protyle.block.id : (protyle.block.parentID || protyle.block.rootID);
+            if (blockId === item.blockId) {
+                return;
+            }
+            const backlinkKeyword = item.inputsElement[0].value;
+            const backmentionKeyword = item.inputsElement[1].value;
+            item.prepareForBlock(blockId, protyle.block.rootID);
+            item.inputsElement[0].value = backlinkKeyword;
+            item.inputsElement[1].value = backmentionKeyword;
+            item.markDirty();
+            item.refreshIfVisible(true);
+            return;
+        }
         if (item.type === "local" && item.rootId !== protyle?.block?.rootID) {
             return;
         }

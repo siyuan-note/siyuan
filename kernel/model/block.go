@@ -51,6 +51,7 @@ type Block struct {
 	Memo     string            `json:"memo"`
 	Tag      string            `json:"tag"`
 	Content  string            `json:"content"`
+	Number   string            `json:"number,omitempty"`
 	FContent string            `json:"fcontent"`
 	Markdown string            `json:"markdown"`
 	Folded   bool              `json:"folded"`
@@ -98,6 +99,7 @@ type Path struct {
 	ID       string   `json:"id"`                 // 块 ID
 	Box      string   `json:"box"`                // 块 Box
 	Name     string   `json:"name"`               // 当前路径
+	Number   string   `json:"number,omitempty"`   // 标题编号
 	HPath    string   `json:"hPath"`              // 人类可读路径
 	Type     string   `json:"type"`               // "path"
 	NodeType string   `json:"nodeType"`           // 节点类型

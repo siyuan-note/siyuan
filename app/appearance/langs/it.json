@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "Schede da blocchi di richiamo",
+  "flashcardCalloutTip": "Quando è abilitato, il titolo di un blocco di richiamo viene riconosciuto come domanda e il suo contenuto come risposta",
+  "flashcardBlockquote": "Schede da blocchi citazione",
+  "flashcardBlockquoteTip": "Quando è abilitato, il primo blocco figlio di un blocco citazione viene riconosciuto come domanda e gli altri blocchi figli come risposte",
+  "headingNumber": "Numerazione automatica dei titoli",
+  "headingNumberTip": "Mostra automaticamente numeri gerarchici prima dei titoli",
+  "headingNumberFormat": "Formato di numerazione dei titoli",
+	"backlinkShowBottom": "Mostra i backlink in fondo al documento",
 	"databaseAttrHideEmpty": "Nascondi gli attributi vuoti del database",
 	"databaseAttrUseTabs": "Usa schede per gli attributi del database",
 	"rebuildHistoryIndex": "Ricostruisci indice cronologia",

@@ -9,11 +9,16 @@ import {countBlockWord} from "../layout/status";
 import {App} from "../index";
 import {fullscreen} from "../protyle/breadcrumb/action";
 import {fetchPost} from "../util/fetch";
+import {Backlink} from "../layout/dock/Backlink";
 
 export class Editor extends Model {
     public element: HTMLElement;
     public editor: Protyle;
     public headElement: HTMLElement;
+    public backlink?: Backlink;
+    private backlinkElement?: HTMLElement;
+    private backlinkIntersectionObserver?: IntersectionObserver;
+    private backlinkMutationObserver?: MutationObserver;
 
     constructor(options: {
         app: App,
@@ -74,9 +79,109 @@ export class Editor extends Model {
                 if (options.afterInitProtyle) {
                     options.afterInitProtyle(editor);
                 }
+                this.updateBacklinkPanel();
             },
         });
         // 需在 after 回调之前，否则不会聚焦 https://github.com/siyuan-note/siyuan/issues/5303
         this.editor.protyle.model = this;
+    }
+
+    public updateBacklinkPanel() {
+        if (!window.siyuan.config.editor.backlinkShowBottom) {
+            this.destroyBacklinkPanel();
+            return;
+        }
+        if (this.backlinkElement) {
+            this.updateBacklinkVisibility();
+            return;
+        }
+
+        const backlinkElement = document.createElement("div");
+        backlinkElement.className = "fn__none sy__backlink--bottom";
+        this.backlinkElement = backlinkElement;
+        this.editor.protyle.wysiwyg.element.after(backlinkElement);
+        setPadding(this.editor.protyle);
+
+        this.backlinkIntersectionObserver = new IntersectionObserver((entries) => {
+            if (this.backlinkElement !== backlinkElement || !entries[0].isIntersecting ||
+                backlinkElement.classList.contains("fn__none")) {
+                return;
+            }
+            if (!this.backlink) {
+                this.backlink = new Backlink({
+                    app: this.app,
+                    blockId: this.getBacklinkBlockId(),
+                    rootId: this.editor.protyle.block.rootID,
+                    type: "bottom",
+                    element: backlinkElement,
+                    ownerProtyle: this.editor.protyle,
+                });
+            } else {
+                this.backlink.refreshDirty();
+            }
+        }, {
+            root: this.editor.protyle.contentElement,
+            rootMargin: "640px 0px",
+        });
+        this.backlinkIntersectionObserver.observe(backlinkElement);
+
+        this.backlinkMutationObserver = new MutationObserver(() => {
+            this.updateBacklinkVisibility();
+        });
+        this.backlinkMutationObserver.observe(this.editor.protyle.wysiwyg.element, {
+            attributes: true,
+            attributeFilter: ["data-eof"],
+            childList: true,
+            subtree: true,
+        });
+        this.updateBacklinkVisibility();
+    }
+
+    public destroy() {
+        this.destroyBacklinkPanel();
+        this.editor.destroy();
+    }
+
+    public getCurrentProtyle(range?: Range) {
+        if (range) {
+            const backlinkEditor = this.backlink?.editors.find(item => item.protyle.element.contains(range.startContainer));
+            if (backlinkEditor) {
+                return backlinkEditor.protyle;
+            }
+        }
+        return this.editor.protyle;
+    }
+
+    private getBacklinkBlockId() {
+        const protyle = this.editor.protyle;
+        return protyle.block.showAll ? protyle.block.id : (protyle.block.parentID || protyle.block.rootID);
+    }
+
+    private updateBacklinkVisibility() {
+        if (!this.backlinkElement) {
+            return;
+        }
+        const lastElement = this.editor.protyle.wysiwyg.element.lastElementChild;
+        const hidden = !this.editor.protyle.block.showAll && this.editor.protyle.block.scroll &&
+            lastElement?.getAttribute("data-eof") !== "2";
+        if (this.backlinkElement.classList.contains("fn__none") !== hidden) {
+            this.backlinkElement.classList.toggle("fn__none", hidden);
+            setPadding(this.editor.protyle);
+        }
+    }
+
+    private destroyBacklinkPanel() {
+        const hasBacklinkElement = !!this.backlinkElement;
+        this.backlinkIntersectionObserver?.disconnect();
+        this.backlinkMutationObserver?.disconnect();
+        this.backlink?.destroy();
+        this.backlinkElement?.remove();
+        this.backlinkIntersectionObserver = undefined;
+        this.backlinkMutationObserver = undefined;
+        this.backlink = undefined;
+        this.backlinkElement = undefined;
+        if (hasBacklinkElement) {
+            setPadding(this.editor.protyle);
+        }
     }
 }

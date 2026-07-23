@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "Fiszki z bloku wyróżnienia",
+  "flashcardCalloutTip": "Po włączeniu tytuł bloku wyróżnienia jest rozpoznawany jako pytanie, a jego zawartość jako odpowiedź",
+  "flashcardBlockquote": "Fiszki z bloku cytatu",
+  "flashcardBlockquoteTip": "Po włączeniu pierwszy blok podrzędny bloku cytatu jest rozpoznawany jako pytanie, a pozostałe bloki podrzędne jako odpowiedzi",
+  "headingNumber": "Automatyczna numeracja nagłówków",
+  "headingNumberTip": "Automatycznie wyświetlaj numery hierarchiczne przed nagłówkami",
+  "headingNumberFormat": "Format numeracji nagłówków",
+	"backlinkShowBottom": "Pokaż odniesienia zwrotne na dole dokumentu",
 	"databaseAttrHideEmpty": "Ukryj puste atrybuty bazy danych",
 	"databaseAttrUseTabs": "Używaj kart dla atrybutów bazy danych",
 	"rebuildHistoryIndex": "Odbuduj indeks historii",

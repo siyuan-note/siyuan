@@ -25,6 +25,7 @@ import {
     progressBackgroundTask,
     progressLoading,
     progressStatus,
+    scheduleBacklinkRefresh,
     setDefRefCount,
     setRefDynamicText,
     transactionError
@@ -87,6 +88,9 @@ export class App {
                         case "setDefRefCount":
                             setDefRefCount(data.data);
                             break;
+                        case "transactions":
+                            scheduleBacklinkRefresh();
+                            break;
                         case "reloadTag":
                             if (getDockByType("tag")?.data.tag instanceof Tag) {
                                 (getDockByType("tag").data.tag as Tag).update();
@@ -148,6 +152,7 @@ export class App {
                             });
                             break;
                         case "rename":
+                            scheduleBacklinkRefresh();
                             getAllTabs().forEach((tab) => {
                                 if (tab.headElement) {
                                     const initTab = tab.headElement.getAttribute("data-initdata");

@@ -358,6 +358,52 @@
   }
 }
 
+.sy__backlink--bottom {
+  box-sizing: border-box;
+  min-height: 32px;
+  outline: none;
+
+  > .block__icons {
+    border-top: 1px solid var(--b3-border-color);
+    flex-shrink: 0;
+    position: relative;
+
+    > .block__icon.backlinkList__toggle {
+      display: flex;
+      margin-left: -8px;
+      opacity: 1;
+
+      + .block__logo {
+        margin-left: 4px;
+      }
+    }
+
+    > .search__label {
+      top: 7px;
+      max-width: calc(100% - 16px);
+      box-sizing: border-box;
+    }
+  }
+
+  > .backlinkList,
+  > .backlinkMList {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .backlinkList__loading {
+    align-items: center;
+    display: flex;
+    height: 40px;
+    justify-content: center;
+  }
+
+  > .backlinkList--divider-spacing:not(.fn__none) + .block__icons {
+    margin-top: 8px;
+  }
+}
+
 .protyle-top:hover .protyle-background--enable {
   .protyle-background__action,
   .protyle-background__img .protyle-icons {

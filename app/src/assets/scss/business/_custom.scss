@@ -254,19 +254,12 @@
     transition: var(--b3-background-transition);
     width: 100%;
 
-    &:hover {
-      background-color: var(--b3-theme-surface-light);
-    }
-
     & > .block__icon:first-child {
-      padding-left: 0;
-      padding-right: 0;
+      margin-left: -8px;
     }
 
     .block__logo {
-      margin-left: 0;
-      min-height: 34px;
-      font-weight: 500;
+      margin-left: 4px;
     }
   }
 

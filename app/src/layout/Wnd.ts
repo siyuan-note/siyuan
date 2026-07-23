@@ -746,7 +746,7 @@ export class Wnd {
                     item.destroy();
                 }
             });
-            model.editor.destroy();
+            model.destroy();
             return;
         }
         if (model instanceof Search) {

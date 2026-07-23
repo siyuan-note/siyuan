@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "Bilgi kutusu kartları",
+  "flashcardCalloutTip": "Etkinleştirildiğinde, bilgi kutusunun başlığı soru, içeriği ise yanıt olarak tanınır",
+  "flashcardBlockquote": "Alıntı bloğu kartları",
+  "flashcardBlockquoteTip": "Etkinleştirildiğinde, alıntı bloğunun ilk alt bloğu soru, kalan alt blokları ise yanıt olarak tanınır",
+  "headingNumber": "Otomatik başlık numaralandırma",
+  "headingNumberTip": "Başlıkların önünde hiyerarşik numaraları otomatik olarak göster",
+  "headingNumberFormat": "Başlık numaralandırma biçimi",
+	"backlinkShowBottom": "Belgenin altında geri bağlantıları göster",
 	"databaseAttrHideEmpty": "Boş veritabanı özniteliklerini gizle",
 	"databaseAttrUseTabs": "Veritabanı öznitelikleri için sekmeleri kullan",
 	"rebuildHistoryIndex": "Geçmiş indeksini yeniden oluştur",

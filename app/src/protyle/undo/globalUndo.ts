@@ -86,6 +86,10 @@ export const getActiveProtyle = (): IProtyle => {
     /// #else
     const activeTab = getActiveTab();
     const model = activeTab?.model;
+    if (model && (model as any).getCurrentProtyle) {
+        const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
+        return (model as any).getCurrentProtyle(range);
+    }
     if (model && (model as any).editor?.protyle) {
         return (model as any).editor.protyle;
     }

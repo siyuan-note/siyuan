@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "Kartu blok sorotan",
+  "flashcardCalloutTip": "Jika diaktifkan, judul blok sorotan dikenali sebagai pertanyaan dan isinya dikenali sebagai jawaban",
+  "flashcardBlockquote": "Kartu blok kutipan",
+  "flashcardBlockquoteTip": "Jika diaktifkan, blok anak pertama dari blok kutipan dikenali sebagai pertanyaan dan blok anak lainnya dikenali sebagai jawaban",
+  "headingNumber": "Penomoran judul otomatis",
+  "headingNumberTip": "Tampilkan nomor hierarkis secara otomatis sebelum judul",
+  "headingNumberFormat": "Format penomoran judul",
+	"backlinkShowBottom": "Tampilkan pranala balik di bagian bawah dokumen",
 	"databaseAttrHideEmpty": "Sembunyikan atribut basis data yang kosong",
 	"databaseAttrUseTabs": "Gunakan tab untuk atribut basis data",
 	"rebuildHistoryIndex": "Bangun ulang indeks riwayat",

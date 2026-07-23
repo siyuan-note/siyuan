@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "Callout Carding",
+  "flashcardCalloutTip": "When enabled, the title of a callout is recognized as a question, and its content is recognized as an answer",
+  "flashcardBlockquote": "Blockquote Carding",
+  "flashcardBlockquoteTip": "When enabled, the first child block of a blockquote is recognized as a question, and the rest of the child blocks are recognized as answers",
+  "headingNumber": "Automatic heading numbering",
+  "headingNumberTip": "Automatically display hierarchical numbers before headings",
+  "headingNumberFormat": "Heading numbering format",
+	"backlinkShowBottom": "Show backlinks at the bottom of the document",
 	"databaseAttrHideEmpty": "Hide empty database attributes",
 	"databaseAttrUseTabs": "Use tabs for database attributes",
 	"rebuildHistoryIndex": "Rebuild history index",

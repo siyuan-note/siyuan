@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "Kartičky z bloku zvýraznenia",
+  "flashcardCalloutTip": "Po zapnutí sa názov bloku zvýraznenia rozpozná ako otázka a jeho obsah ako odpoveď",
+  "flashcardBlockquote": "Kartičky z bloku citácie",
+  "flashcardBlockquoteTip": "Po zapnutí sa prvý podradený blok bloku citácie rozpozná ako otázka a ostatné podradené bloky ako odpovede",
+  "headingNumber": "Automatické číslovanie nadpisov",
+  "headingNumberTip": "Automaticky zobrazovať hierarchické čísla pred nadpismi",
+  "headingNumberFormat": "Formát číslovania nadpisov",
+	"backlinkShowBottom": "Zobraziť spätné odkazy v spodnej časti dokumentu",
 	"databaseAttrHideEmpty": "Skryť prázdne atribúty databázy",
 	"databaseAttrUseTabs": "Používať karty pre atribúty databázy",
 	"rebuildHistoryIndex": "Znovu vytvoriť index histórie",

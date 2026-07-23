@@ -26,6 +26,7 @@ import {updateCardHV} from "./util";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {transaction} from "../protyle/wysiwyg/transaction";
+import {hideFlashcardAnswer, prepareCalloutFlashcard, showFlashcardAnswer} from "./flashcardMode";
 
 const genCardCount = (cardsData: ICardData, allIndex = 0) => {
     let newIndex = 0;
@@ -176,6 +177,8 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                     }
                     let hasHide = false;
                     if (!window.siyuan.config.flashcard.superBlock &&
+                        !window.siyuan.config.flashcard.blockquote &&
+                        !window.siyuan.config.flashcard.callout &&
                         !window.siyuan.config.flashcard.heading &&
                         !window.siyuan.config.flashcard.list &&
                         !window.siyuan.config.flashcard.mark) {
@@ -185,6 +188,16 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                             if (protyle.wysiwyg.element.querySelector(":scope > .sb")) {
                                 hasHide = true;
                             }
+                        }
+                        if (window.siyuan.config.flashcard.blockquote) {
+                            const blockquoteElement = protyle.wysiwyg.element.querySelector(":scope > .bq[custom-riff-decks]");
+                            if (blockquoteElement?.querySelector(":scope > [data-node-id] ~ [data-node-id]")) {
+                                blockquoteElement.removeAttribute("fold");
+                                hasHide = true;
+                            }
+                        }
+                        if (prepareCalloutFlashcard(protyle.wysiwyg.element, window.siyuan.config.flashcard.callout)) {
+                            hasHide = true;
                         }
                         if (window.siyuan.config.flashcard.heading) {
                             if (protyle.wysiwyg.element.querySelector(':scope > [data-type="NodeHeading"]')) {
@@ -204,7 +217,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                     }
                     const actionElements = element.querySelectorAll(".card__action");
                     if (!hasHide) {
-                        protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hideh");
+                        showFlashcardAnswer(protyle.element);
                         actionElements[0].classList.add("fn__none");
                         actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
                             if (btnIndex < 2) {
@@ -214,18 +227,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                         });
                         actionElements[1].classList.remove("fn__none");
                     } else {
-                        if (window.siyuan.config.flashcard.superBlock) {
-                            protyle.element.classList.add("card__block--hidesb");
-                        }
-                        if (window.siyuan.config.flashcard.heading) {
-                            protyle.element.classList.add("card__block--hideh");
-                        }
-                        if (window.siyuan.config.flashcard.list) {
-                            protyle.element.classList.add("card__block--hideli");
-                        }
-                        if (window.siyuan.config.flashcard.mark) {
-                            protyle.element.classList.add("card__block--hidemark");
-                        }
+                        hideFlashcardAnswer(protyle.element, window.siyuan.config.flashcard);
                         actionElements[0].classList.remove("fn__none");
                         actionElements[1].classList.add("fn__none");
                     }
@@ -686,7 +688,7 @@ export const bindCardEvent = async (options: {
             if (actionElements[0].classList.contains("fn__none")) {
                 type = "3";
             } else {
-                editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hideh");
+                showFlashcardAnswer(editor.protyle.element);
                 actionElements[0].classList.add("fn__none");
                 actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
                     if (btnIndex < 2) {

@@ -30,6 +30,7 @@ import {genEmptyElement} from "../../block/util";
 import {focusBlock, focusByWbr} from "../../protyle/util/selection";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {getDocDisplayName} from "../../util/pathName";
+import {operationsMayChangeOutline} from "../../protyle/util/headingNumberCore";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -40,6 +41,7 @@ export class Outline extends Model {
     public isPreview: boolean;
     public protyle: IProtyle;
     private preFilterExpandIds: string[] | null = null;
+    private refreshId = 0;
 
     constructor(options: {
         app: App,
@@ -311,7 +313,12 @@ export class Outline extends Model {
         if (isEncryptedBox(notebookId)) {
             outlineParam.notebook = notebookId;
         }
+        const refreshId = ++this.refreshId;
+        const blockId = this.blockId;
         fetchPost("/api/outline/getDocOutline", outlineParam, response => {
+            if (refreshId !== this.refreshId || blockId !== this.blockId) {
+                return;
+            }
             this.update(response);
             if (this.blockId) {
                 this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, response.data?.length || 0);
@@ -545,29 +552,12 @@ export class Outline extends Model {
         if (data.data.rootID !== this.blockId) {
             return;
         }
-        let needReload = false;
         const ops = data.data.sources[0];
-        ops.doOperations.find((item: IOperation) => {
-            if (item.action === "update" &&
-                (this.element.querySelector(`.b3-list-item[data-node-id="${item.id}"]`) || item.data.indexOf('data-type="NodeHeading"') > -1)) {
-                needReload = true;
-                return true;
-            } else if (item.action === "insert" && item.data.indexOf('data-type="NodeHeading"') > -1) {
-                needReload = true;
-                return true;
-            } else if (item.action === "delete" || item.action === "move") {
-                needReload = true;
-                return true;
-            }
-        });
-        if (!needReload && ops.undoOperations) {
-            ops.undoOperations.find((item: IOperation) => {
-                if (item.action === "update" && item.data?.indexOf('data-type="NodeHeading"') > -1) {
-                    needReload = true;
-                    return true;
-                }
-            });
-        }
+        const headingIDs = new Set(Array.from(this.element.querySelectorAll<HTMLElement>(
+            ".b3-list-item[data-node-id]"
+        )).map(item => item.dataset.nodeId!));
+        const needReload = operationsMayChangeOutline(ops.doOperations, headingIDs) ||
+            operationsMayChangeOutline(ops.undoOperations, headingIDs);
         if (needReload) {
             const outlineParam: IObject = {
                 id: this.blockId,
@@ -584,9 +574,10 @@ export class Outline extends Model {
             if (isEncryptedBox(notebookId)) {
                 outlineParam.notebook = notebookId;
             }
+            const refreshId = ++this.refreshId;
             fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                 // 文档切换后不再更新原有推送 https://github.com/siyuan-note/siyuan/issues/13409
-                if (data.data.rootID !== this.blockId) {
+                if (refreshId !== this.refreshId || data.data.rootID !== this.blockId) {
                     return;
                 }
                 this.update(response);
@@ -728,6 +719,35 @@ export class Outline extends Model {
             }
         }
         this.element.removeAttribute("data-loading");
+    }
+
+    public refresh() {
+        if (!this.blockId) {
+            return;
+        }
+        const blockId = this.blockId;
+        const refreshId = ++this.refreshId;
+        const outlineParam: IObject = {
+            id: blockId,
+            preview: this.isPreview,
+        };
+        let protyle: IProtyle;
+        getAllModels().editor.some(item => {
+            if (item.editor.protyle.block.rootID === blockId) {
+                protyle = item.editor.protyle;
+                return true;
+            }
+        });
+        if (isEncryptedBox(protyle?.notebookId)) {
+            outlineParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/outline/getDocOutline", outlineParam, response => {
+            if (refreshId !== this.refreshId || blockId !== this.blockId) {
+                return;
+            }
+            this.update(response);
+            this.updateDocTitle(protyle?.background?.ial, response.data?.length || 0);
+        });
     }
 
     public saveExpendIds() {

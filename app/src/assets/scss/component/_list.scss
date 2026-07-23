@@ -261,6 +261,14 @@
       }
     }
 
+    &__number {
+      flex-shrink: 0;
+      margin-inline-end: 4px;
+      color: var(--b3-theme-on-surface-light);
+      unicode-bidi: isolate;
+      user-select: none;
+    }
+
     &__showall {
       line-height: 1;
       word-break: break-all;

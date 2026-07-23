@@ -474,6 +474,10 @@ declare namespace Config {
          */
         backlinkContainChildren: boolean;
         /**
+         * Whether to show backlinks at the bottom of the document
+         */
+        backlinkShowBottom: boolean;
+        /**
          * Backlink sort mode
          */
         backlinkSort: number;
@@ -532,6 +536,14 @@ declare namespace Config {
          * Whether the embedded block displays breadcrumbs
          */
         embedBlockBreadcrumb: boolean;
+        /**
+         * Whether to display automatic heading numbers
+         */
+        headingNumber: boolean;
+        /**
+         * The automatic heading numbering format preset
+         */
+        headingNumberFormat: string;
         /**
          * Heading embed mode for embedded blocks
          * - `0`: Show title with blocks below (default)
@@ -858,6 +870,14 @@ declare namespace Config {
      * Flashcard related configuration
      */
     export interface IFlashCard {
+        /**
+         * Whether to enable blockquote card making
+         */
+        blockquote: boolean;
+        /**
+         * Whether to enable callout card making
+         */
+        callout: boolean;
         /**
          * Whether to enable deck card making
          */

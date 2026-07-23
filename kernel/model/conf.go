@@ -417,6 +417,9 @@ func InitConf() {
 	if -1 > Conf.Editor.BackmentionExpandCount {
 		Conf.Editor.BackmentionExpandCount = -1
 	}
+	if "" == Conf.Editor.HeadingNumberFormat {
+		Conf.Editor.HeadingNumberFormat = conf.DefaultHeadingNumberFormat
+	}
 	if nil == Conf.Editor.Markdown {
 		Conf.Editor.Markdown = &util.Markdown{}
 	}

@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "Hinweisblock-Karten",
+  "flashcardCalloutTip": "Wenn aktiviert, wird der Titel eines Hinweisblocks als Frage und sein Inhalt als Antwort erkannt",
+  "flashcardBlockquote": "Blockzitat-Karten",
+  "flashcardBlockquoteTip": "Wenn aktiviert, wird der erste untergeordnete Block eines Blockzitats als Frage und die übrigen untergeordneten Blöcke als Antworten erkannt",
+  "headingNumber": "Automatische Überschriftennummerierung",
+  "headingNumberTip": "Hierarchische Nummern automatisch vor Überschriften anzeigen",
+  "headingNumberFormat": "Format der Überschriftennummerierung",
+	"backlinkShowBottom": "Backlinks am Dokumentende anzeigen",
 	"databaseAttrHideEmpty": "Leere Datenbankattribute ausblenden",
 	"databaseAttrUseTabs": "Registerkarten für Datenbankattribute verwenden",
 	"rebuildHistoryIndex": "Verlaufsindex neu aufbauen",

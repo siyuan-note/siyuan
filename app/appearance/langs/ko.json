@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "콜아웃 블록 카드 만들기",
+  "flashcardCalloutTip": "활성화하면 콜아웃의 제목은 질문으로, 내용은 답변으로 인식됩니다",
+  "flashcardBlockquote": "인용 블록 카드 만들기",
+  "flashcardBlockquoteTip": "활성화하면 인용 블록의 첫 번째 하위 블록은 질문으로, 나머지 하위 블록은 답변으로 인식됩니다",
+  "headingNumber": "제목 자동 번호 매기기",
+  "headingNumberTip": "제목 앞에 계층 번호를 자동으로 표시합니다",
+  "headingNumberFormat": "제목 번호 형식",
+	"backlinkShowBottom": "문서 하단에 백링크 표시",
 	"databaseAttrHideEmpty": "빈 데이터베이스 속성 숨기기",
 	"databaseAttrUseTabs": "데이터베이스 속성에 탭 사용",
 	"rebuildHistoryIndex": "기록 인덱스 재구축",

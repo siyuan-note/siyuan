@@ -23,6 +23,16 @@
   [data-node-id] {
     position: relative;
 
+    &[data-type="NodeHeading"] {
+      & > .protyle-heading-number__measure {
+        position: absolute;
+        visibility: hidden;
+        white-space: pre;
+        color: var(--b3-theme-on-surface-light);
+        pointer-events: none;
+      }
+    }
+
     &.dragover {
       &__left::after,
       &__right::after,

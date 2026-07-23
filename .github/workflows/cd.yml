@@ -204,6 +204,92 @@ jobs:
           GOPATH: ${{ github.workspace }}/go
           GOARCH: ${{ matrix.config.goarch }}
 
+      - name: Checkout siyuan-testing
+        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        continue-on-error: true
+        uses: actions/checkout@v6
+        with:
+          repository: siyuan-note/siyuan-testing
+          ref: main
+          path: ${{ github.workspace }}/siyuan-testing
+
+      - name: Install End-to-End Test Dependencies
+        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        continue-on-error: true
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ github.workspace }}/siyuan-testing
+
+      - name: Start Kernel for End-to-End Tests
+        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        continue-on-error: true
+        shell: bash
+        run: |
+          TEST_WORKSPACE="${RUNNER_TEMP}/siyuan-e2e-workspace"
+          APP_DIR="${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app"
+          KERNEL_PATH="${APP_DIR}/kernel-darwin-arm64/SiYuan-Kernel"
+          mkdir -p "${TEST_WORKSPACE}"
+          "${KERNEL_PATH}" --workspace="${TEST_WORKSPACE}" serve --wd="${APP_DIR}" --port=6806 \
+            > "${RUNNER_TEMP}/siyuan-e2e-kernel-console.log" 2>&1 &
+          echo "SIYUAN_E2E_KERNEL_PID=$!" >> "${GITHUB_ENV}"
+          echo "SIYUAN_E2E_WORKSPACE=${TEST_WORKSPACE}" >> "${GITHUB_ENV}"
+
+      - name: Wait for End-to-End Test Kernel
+        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        continue-on-error: true
+        shell: bash
+        run: |
+          for attempt in {1..60}; do
+            if curl --fail --silent --request POST http://127.0.0.1:6806/api/system/getWorkspaceInfo > /dev/null; then
+              exit 0
+            fi
+            if ! kill -0 "${SIYUAN_E2E_KERNEL_PID}" 2>/dev/null; then
+              cat "${RUNNER_TEMP}/siyuan-e2e-kernel-console.log"
+              exit 1
+            fi
+            sleep 1
+          done
+          cat "${RUNNER_TEMP}/siyuan-e2e-kernel-console.log"
+          exit 1
+
+      - name: Run End-to-End Tests
+        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        continue-on-error: true
+        timeout-minutes: 30
+        run: |
+          pnpm run typecheck
+          SIYUAN_EXPECT_WORKSPACE="${SIYUAN_E2E_WORKSPACE}" pnpm exec playwright test --reporter=line,html
+        working-directory: ${{ github.workspace }}/siyuan-testing
+
+      - name: Stop End-to-End Test Kernel
+        if: always() && matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        continue-on-error: true
+        shell: bash
+        run: |
+          if [ -n "${SIYUAN_E2E_KERNEL_PID:-}" ] && kill -0 "${SIYUAN_E2E_KERNEL_PID}" 2>/dev/null; then
+            kill -TERM "${SIYUAN_E2E_KERNEL_PID}"
+            for attempt in {1..30}; do
+              if ! kill -0 "${SIYUAN_E2E_KERNEL_PID}" 2>/dev/null; then
+                exit 0
+              fi
+              sleep 1
+            done
+            kill -KILL "${SIYUAN_E2E_KERNEL_PID}"
+          fi
+
+      - name: Upload End-to-End Test Results
+        if: always() && matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: siyuan-e2e-macos-arm64
+          path: |
+            ${{ github.workspace }}/siyuan-testing/playwright-report
+            ${{ github.workspace }}/siyuan-testing/test-results
+            ${{ runner.temp }}/siyuan-e2e-kernel-console.log
+            ${{ runner.temp }}/siyuan-e2e-workspace/temp/siyuan.log
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Install RPM build tools
         if: matrix.config.goos == 'linux'
         run: sudo apt-get install -y rpm

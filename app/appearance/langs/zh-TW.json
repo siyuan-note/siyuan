@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "提示塊製卡",
+  "flashcardCalloutTip": "啟用後支援提示塊製卡，提示塊的標題被識別為問題，內容識別為答案",
+  "flashcardBlockquote": "引述塊製卡",
+  "flashcardBlockquoteTip": "啟用後支援引述塊製卡，引述塊的第一個子塊被識別為問題，其餘子塊識別為答案",
+  "headingNumber": "標題自動編號",
+  "headingNumberTip": "在標題前自動顯示層級編號",
+  "headingNumberFormat": "標題編號格式",
+	"backlinkShowBottom": "在文件底部顯示反向連結",
 	"databaseAttrHideEmpty": "資料庫屬性隱藏空欄位",
 	"databaseAttrUseTabs": "資料庫屬性使用頁籤",
 	"rebuildHistoryIndex": "重建歷史索引",

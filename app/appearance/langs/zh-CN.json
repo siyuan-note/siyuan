@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "提示块制卡",
+  "flashcardCalloutTip": "启用后支持提示块制卡，提示块的标题被识别为问题，内容识别为答案",
+  "flashcardBlockquote": "引述块制卡",
+  "flashcardBlockquoteTip": "启用后支持引述块制卡，引述块的第一个子块被识别为问题，其余子块识别为答案",
+  "headingNumber": "标题自动编号",
+  "headingNumberTip": "在标题前自动显示层级编号",
+  "headingNumberFormat": "标题编号格式",
+	"backlinkShowBottom": "在文档底部显示反链",
 	"databaseAttrHideEmpty": "数据库属性隐藏空字段",
 	"databaseAttrUseTabs": "数据库属性使用页签",
 	"rebuildHistoryIndex": "重建历史索引",

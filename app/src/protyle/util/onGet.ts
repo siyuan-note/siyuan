@@ -21,6 +21,11 @@ import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {isEncryptedBox} from "../../util/pathName";
+import {
+    invalidateHeadingNumberRefresh,
+    queueHeadingNumberRefresh,
+    renderHeadingNumbers
+} from "./headingNumber";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -72,6 +77,15 @@ export const onGet = (options: {
     options.protyle.block.blockCount = options.data.data.blockCount;
     options.protyle.block.scroll = options.data.data.scroll;
     options.protyle.block.action = options.action;
+    const replacesDocument = options.data.data.mode === 0 || options.data.data.mode === 3;
+    const refreshHeadingNumbers = replacesDocument && !options.data.data.headingNumbers &&
+        window.siyuan.config.editor.headingNumber;
+    if (replacesDocument) {
+        invalidateHeadingNumberRefresh(options.protyle);
+        options.protyle.block.headingNumbers = options.data.data.headingNumbers || {};
+    } else if (options.data.data.headingNumbers) {
+        options.protyle.block.headingNumbers = options.data.data.headingNumbers;
+    }
     if (!options.action.includes(Constants.CB_GET_UNCHANGEID)) {
         options.protyle.block.id = options.data.data.id;    // 非缩放情况时不一定是 rootID（搜索打开页签）；缩放时必为缩放 id，否则需查看代码
         options.protyle.scroll.lastScrollTop = 0;
@@ -92,11 +106,13 @@ export const onGet = (options: {
         // 防止动态加载加载过多的内容
         setHTML({
             content: options.data.data.content,
+            eof: options.data.data.eof,
             expand: options.data.data.isBacklinkExpand,
             action: options.action,
             scrollAttr: options.scrollAttr,
             updateReadonly: options.updateReadonly,
             isSyncing: options.data.data.isSyncing,
+            refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition
         }, options.protyle);
@@ -123,11 +139,13 @@ export const onGet = (options: {
 
         setHTML({
             content: options.data.data.content,
+            eof: options.data.data.eof,
             expand: options.data.data.isBacklinkExpand,
             action: options.action,
             scrollAttr: options.scrollAttr,
             updateReadonly: options.updateReadonly,
             isSyncing: options.data.data.isSyncing,
+            refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition
         }, options.protyle);
@@ -137,12 +155,14 @@ export const onGet = (options: {
 
 const setHTML = (options: {
     content: string,
+    eof: boolean,
     action?: string[],
     isSyncing: boolean,
     expand: boolean,
     updateReadonly?: boolean,
     scrollAttr?: IScrollAttr,
     scrollPosition?: ScrollLogicalPosition,
+    refreshHeadingNumbers?: boolean,
     afterCB?: () => void
 }, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
@@ -217,6 +237,12 @@ const setHTML = (options: {
         }
     }
 
+    if (options.eof) {
+        const eofElement = options.action.includes(Constants.CB_GET_BEFORE) ?
+            protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
+        eofElement?.setAttribute("data-eof", options.action.includes(Constants.CB_GET_BEFORE) ? "1" : "2");
+    }
+
     /// #if MOBILE
     protyle.wysiwyg.element.querySelectorAll("video, audio").forEach(item => {
         item.addEventListener("playing", () => {
@@ -244,6 +270,10 @@ const setHTML = (options: {
     highlightRender(protyle.wysiwyg.element);
     avRender(protyle.wysiwyg.element, protyle);
     blockRender(protyle, protyle.wysiwyg.element);
+    renderHeadingNumbers(protyle);
+    if (options.refreshHeadingNumbers) {
+        queueHeadingNumberRefresh(protyle);
+    }
     protyle.databaseAttributePanel?.render();
     if (options.action.includes(Constants.CB_GET_HISTORY)) {
         return;

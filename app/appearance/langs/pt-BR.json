@@ -1,4 +1,12 @@
 {
+  "flashcardCallout": "Cartões de bloco de destaque",
+  "flashcardCalloutTip": "Quando ativado, o título de um bloco de destaque é reconhecido como pergunta e seu conteúdo como resposta",
+  "flashcardBlockquote": "Cartões de bloco de citação",
+  "flashcardBlockquoteTip": "Quando ativado, o primeiro bloco filho de um bloco de citação é reconhecido como pergunta e os demais blocos filhos como respostas",
+  "headingNumber": "Numeração automática de títulos",
+  "headingNumberTip": "Exibir automaticamente números hierárquicos antes dos títulos",
+  "headingNumberFormat": "Formato de numeração de títulos",
+	"backlinkShowBottom": "Mostrar backlinks na parte inferior do documento",
 	"databaseAttrHideEmpty": "Ocultar atributos vazios do banco de dados",
 	"databaseAttrUseTabs": "Usar abas para atributos do banco de dados",
 	"rebuildHistoryIndex": "Reconstruir índice do histórico",

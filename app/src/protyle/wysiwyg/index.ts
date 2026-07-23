@@ -1348,8 +1348,11 @@ export class WYSIWYG {
 
             // 内容区域使用浏览器原生选区，跨块选择时保留各行内元素自身的选中样式。
             if (!startsFromPadding && !tableBlockElement) {
-                documentSelf.onmouseup = () => {
+                documentSelf.onmouseup = (mouseUpEvent) => {
                     documentSelf.onmouseup = null;
+                    if (this.element.contains(mouseUpEvent.target as Node)) {
+                        return;
+                    }
                     setTimeout(() => {
                         if (getSelection().rangeCount > 0) {
                             const range = getSelection().getRangeAt(0);

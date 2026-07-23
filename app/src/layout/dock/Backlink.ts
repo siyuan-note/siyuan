@@ -542,20 +542,15 @@ export class Backlink extends Model {
 
     private toggleItem(liElement: HTMLElement, isMention: boolean) {
         const svgElement = liElement.firstElementChild?.firstElementChild;
-        if (!svgElement || (svgElement.getAttribute("disabled") &&
-            !svgElement.classList.contains("b3-list-item__arrow--open"))) {
+        if (!svgElement || svgElement.getAttribute("disabled")) {
             return;
         }
         svgElement.setAttribute("disabled", "disabled");
         const docId = liElement.getAttribute("data-node-id");
-        const loadingElement = liElement.nextElementSibling?.classList.contains("backlinkList__context-loading") ?
-            liElement.nextElementSibling as HTMLElement : undefined;
         const editor = this.editors.find(item => item.protyle.element === liElement.nextElementSibling);
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
-            if (loadingElement) {
-                loadingElement.remove();
-            } else if (editor && this.type === "bottom") {
+            if (editor && this.type === "bottom") {
                 hideElements(["gutter"], editor.protyle);
                 editor.protyle.element.classList.add("fn__none");
             } else if (editor) {
@@ -574,41 +569,24 @@ export class Backlink extends Model {
             const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value;
             const blockId = this.blockId;
             const contextRequestVersion = this.contextRequestVersions[isMention ? 1 : 0];
-            let editorElement: HTMLElement | undefined;
-            if (this.type === "bottom") {
-                editorElement = document.createElement("div");
-                editorElement.className = "backlinkList__loading backlinkList__context-loading";
-                editorElement.innerHTML = '<img width="32px" height="32px" src="/stage/loading-pure.svg">';
-                liElement.after(editorElement);
-                svgElement.classList.add("b3-list-item__arrow--open");
-                this.updateBottomBacklinkSpacing();
-            }
-            let responseHandled = false;
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: blockId,
                 refTreeID: docId,
                 highlight: !isSupportCSSHL(),
                 keyword,
             }, (response) => {
-                responseHandled = true;
                 if (this.destroyed || blockId !== this.blockId || !liElement.isConnected ||
-                    contextRequestVersion !== this.contextRequestVersions[isMention ? 1 : 0] ||
-                    (this.type === "bottom" && (!editorElement?.isConnected ||
-                        !svgElement.classList.contains("b3-list-item__arrow--open")))) {
+                    contextRequestVersion !== this.contextRequestVersions[isMention ? 1 : 0]) {
                     return;
                 }
                 svgElement.removeAttribute("disabled");
                 svgElement.classList.add("b3-list-item__arrow--open");
                 this.updateBottomBacklinkSpacing();
-                if (!editorElement) {
-                    editorElement = document.createElement("div");
-                    liElement.after(editorElement);
-                } else {
-                    editorElement.classList.remove("backlinkList__loading", "backlinkList__context-loading");
-                }
+                const editorElement = document.createElement("div");
                 editorElement.style.minHeight = "auto";
                 editorElement.setAttribute("data-defid", blockId);
                 editorElement.setAttribute("data-ismention", isMention ? "true" : "false");
+                liElement.after(editorElement);
                 const editor = new Protyle(this.app, editorElement, {
                     blockId: docId,
                     click: {
@@ -628,16 +606,6 @@ export class Backlink extends Model {
                 editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
                 searchMarkRender(editor.protyle, response.data.keywords);
                 this.editors.push(editor);
-            }).finally(() => {
-                if (responseHandled || this.destroyed || blockId !== this.blockId || !liElement.isConnected ||
-                    contextRequestVersion !== this.contextRequestVersions[isMention ? 1 : 0] ||
-                    (this.type === "bottom" && !editorElement?.isConnected)) {
-                    return;
-                }
-                svgElement.removeAttribute("disabled");
-                svgElement.classList.remove("b3-list-item__arrow--open");
-                editorElement?.remove();
-                this.updateBottomBacklinkSpacing();
             });
         }
     }
@@ -652,12 +620,6 @@ export class Backlink extends Model {
 
     private cancelContextRequests(element: Element, isMention: boolean) {
         this.contextRequestVersions[isMention ? 1 : 0]++;
-        element.querySelectorAll(".backlinkList__context-loading").forEach(item => {
-            const arrowElement = item.previousElementSibling?.querySelector(".b3-list-item__arrow");
-            arrowElement?.classList.remove("b3-list-item__arrow--open");
-            arrowElement?.removeAttribute("disabled");
-            item.remove();
-        });
         element.querySelectorAll(".b3-list-item__arrow[disabled]").forEach(item => {
             item.removeAttribute("disabled");
         });

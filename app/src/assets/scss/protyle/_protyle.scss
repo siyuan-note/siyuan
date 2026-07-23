@@ -346,8 +346,8 @@
   }
 
   &--transition {
-    .protyle-wysiwyg,
-    .sy__backlink--bottom {
+    > .protyle-wysiwyg,
+    > .sy__backlink--bottom {
       transition: padding .3s cubic-bezier(.25, .46, .45, .94) 0ms;
     }
 
@@ -363,7 +363,6 @@
   box-sizing: border-box;
   min-height: 32px;
   outline: none;
-  overflow-anchor: none;
 
   > .block__icons {
     border-top: 1px solid var(--b3-border-color);

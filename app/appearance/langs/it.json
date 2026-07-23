@@ -2116,7 +2116,7 @@
 		"218": "Sono stati rilevati troppi snapshot del repository dati, il che rallenta l'avvio del programma e la sincronizzazione dei dati. Si prega di considerare l'esecuzione di [Impostazioni - Account e Sincronizzazione - Pulizia repository dati]",
 		"219": "Il servizio di archiviazione cloud non è disponibile, si prega di riprovare più tardi",
 		"220": "A causa di un difetto nella versione precedente, i dati cloud sono corrotti. Si prega di consultare la Guida dell'utente-FAQ-Passi per chiave persa per ripristinare il repository dati locale e la directory cloud",
-		"221": "L'operazione di sostituzione non è supportata dopo la raggruppamento per documento. Si prega di utilizzare lo sblocco e quindi sostituire",
+		"221": "",
 		"222": "La sincronizzazione dei dati è in corso, si prega di attendere il completamento della sincronizzazione dei dati e riprovare",
 		"223": "Purgando l'archiviazione cloud...",
 		"224": "Elenco degli oggetti dati nell'archiviazione cloud...",

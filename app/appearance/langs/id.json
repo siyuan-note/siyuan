@@ -2116,7 +2116,7 @@
 		"218": "Terlalu banyak snapshot repositori data terdeteksi, yang memperlambat startup program dan sinkronisasi data. Harap pertimbangkan untuk menjalankan [Pengaturan - Akun & Sinkronisasi - Pembersihan repositori data]",
 		"219": "Layanan penyimpanan cloud tidak tersedia, silakan coba lagi nanti",
 		"220": "Karena cacat pada versi sebelumnya, data cloud rusak. Silakan lihat langkah-langkah Panduan Pengguna-FAQ-Kunci Hilang untuk mereset repositori data lokal dan direktori cloud",
-		"221": "Operasi penggantian tidak didukung setelah pengelompokan berdasarkan dokumen. Silakan gunakan batalkan pengelompokan lalu ganti",
+		"221": "",
 		"222": "Sinkronisasi data sedang berlangsung, harap tunggu hingga sinkronisasi data selesai dan coba lagi",
 		"223": "Membersihkan penyimpanan cloud...",
 		"224": "Mendaftar objek data penyimpanan cloud...",

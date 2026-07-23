@@ -2116,7 +2116,7 @@
 		"218": "Muitos snapshots do repositório de dados foram detectados, o que retarda a inicialização do programa e a sincronização de dados. Por favor, considere executar [Configurações - Conta e Sincronização - Limpar repositório de dados]",
 		"219": "O serviço de armazenamento em nuvem está indisponível, por favor tente novamente mais tarde",
 		"220": "Devido a um defeito na versão anterior, os dados na nuvem estão corrompidos. Por favor, consulte as etapas do Guia do Usuário-FAQ-Chave Perdida para redefinir o repositório de dados local e o diretório na nuvem",
-		"221": "A operação de substituição não é suportada após agrupamento por documento. Por favor, use desagrupamento e depois substitua",
+		"221": "",
 		"222": "A sincronização de dados está em progresso, por favor aguarde até que a sincronização seja concluída e tente novamente",
 		"223": "Purgando armazenamento em nuvem...",
 		"224": "Listando objetos de dados do armazenamento em nuvem...",

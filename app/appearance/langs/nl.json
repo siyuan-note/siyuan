@@ -2116,7 +2116,7 @@
 		"218": "Te veel momentopnamen gedetecteerd; overweeg [Instellingen - Account en synchronisatie - Data-repo opschonen] uit te voeren",
 		"219": "Cloudopslag niet beschikbaar; probeer later",
 		"220": "Door een defect in de vorige versie zijn de cloudgegevens beschadigd. Raadpleeg de stappen in de gebruikersgids - FAQ - Sleutel verloren om de lokale gegevensopslag en cloudmap te resetten",
-		"221": "Vervanging niet ondersteund na groepering; degroepeer eerst",
+		"221": "",
 		"222": "Gegevenssynchronisatie is bezig; wacht tot de synchronisatie is voltooid en probeer het opnieuw",
 		"223": "Cloudopslag opschonen...",
 		"224": "Cloudopslag objecten weergeven...",

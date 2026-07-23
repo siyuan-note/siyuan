@@ -1156,16 +1156,25 @@ export const fixWndFlex1 = (layout: Layout) => {
     }
 };
 
-const pointerEventsNoneClass = "fn__pointer_events_none";
+const pointerEventsNoneDataSetKey = "resizing";
+const pointerEventsNoneDataSetValue = "layout";
 
-export const disableIframePointerEvents = (root: ParentNode = document) => {
-    root.querySelectorAll("iframe").forEach((iframe) => {
-        iframe.classList.toggle(pointerEventsNoneClass, true);
+export const disableIframePointerEvents = (
+    rootElement: ParentNode = document,
+    dataSetKey: string = pointerEventsNoneDataSetKey,
+    dataSetValue: string = pointerEventsNoneDataSetValue,
+) => {
+    rootElement.querySelectorAll<HTMLIFrameElement>(`iframe:not([data-${dataSetKey}="${dataSetValue}"])`).forEach((iframe) => {
+        iframe.dataset[dataSetKey] = dataSetValue;
     });
 };
 
-export const restoreIframePointerEvents = (root: ParentNode = document) => {
-    root.querySelectorAll(`iframe.${pointerEventsNoneClass}`).forEach((iframe) => {
-        iframe.classList.toggle(pointerEventsNoneClass, false);
+export const restoreIframePointerEvents = (
+    rootElement: ParentNode = document,
+    dataSetKey: string = pointerEventsNoneDataSetKey,
+    dataSetValue: string = pointerEventsNoneDataSetValue,
+) => {
+    rootElement.querySelectorAll<HTMLIFrameElement>(`iframe[data-${dataSetKey}="${dataSetValue}"]`).forEach((iframe) => {
+        delete iframe.dataset[dataSetKey];
     });
 };

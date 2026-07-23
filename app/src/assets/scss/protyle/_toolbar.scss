@@ -34,7 +34,11 @@
         color: var(--b3-theme-primary);
       }
 
-      &:hover {
+      &:disabled {
+        opacity: .38;
+      }
+
+      &:hover:not(:disabled) {
         background-color: var(--b3-list-hover);
       }
 

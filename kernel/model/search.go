@@ -588,6 +588,12 @@ func prependNotebookNameInHPath(blocks []*Block) {
 }
 
 func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types, subTypes map[string]bool, method, orderBy, groupBy int) (err error) {
+	// orderBy 和 groupBy 仅用于兼容现有调用，替换目标不依赖搜索结果的展示顺序和分组方式。
+	return FindReplaceInBox(keyword, replacement, replaceTypes, ids, paths, boxes, types, subTypes, method, "")
+}
+
+// FindReplaceInBox 与 FindReplace 一致，但按 boxID 路由到加密 db 或全局 db。
+func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types, subTypes map[string]bool, method int, boxID string) (err error) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
 	if 2 == method {
 		err = errors.New(Conf.Language(132))
@@ -598,13 +604,6 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		// 将查询语法等价于关键字，因为 keyword 参数已经是结果关键字了
 		// Find and replace supports query syntax https://github.com/siyuan-note/siyuan/issues/14937
 		method = 0
-	}
-
-	if 0 != groupBy {
-		// 按文档分组后不支持替换 Need to be reminded that replacement operations are not supported after grouping by doc https://github.com/siyuan-note/siyuan/issues/10161
-		// 因为分组条件传入以后搜索只能命中文档块，会导致 全部替换 失效
-		err = errors.New(Conf.Language(221))
-		return
 	}
 
 	// No longer trim spaces for the keyword and replacement https://github.com/siyuan-note/siyuan/issues/9229
@@ -629,7 +628,9 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	if 1 > len(ids) {
 		// `Replace All` is no longer affected by pagination https://github.com/siyuan-note/siyuan/issues/8265
-		blocks, _, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, subTypes, method, orderBy, groupBy, 1, math.MaxInt)
+		// 替换目标始终使用未分组的块级结果，分组仅影响搜索结果展示
+		// https://github.com/siyuan-note/siyuan/issues/10825
+		blocks, _, _, _, _ := FullTextSearchBlockInBox(keyword, boxes, paths, types, subTypes, method, 0, 0, 1, math.MaxInt, boxID)
 		for _, block := range blocks {
 			ids = append(ids, block.ID)
 		}

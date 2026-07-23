@@ -19,6 +19,7 @@ package model
 import (
 	"crypto/rand"
 	"net/http"
+	"slices"
 	"sync"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -42,7 +43,8 @@ const (
 
 	ClaimsContextKey = "claims"
 
-	iss = "siyuan-kernel" // token 的发行者
+	iss                    = "siyuan-kernel"         // token 的发行者
+	publishServiceAudience = "siyuan-publish-server" // 发布服务 token 的受众
 
 	ClaimsKeyRole string = "role"
 )
@@ -113,10 +115,10 @@ func InitPublishJWT() {
 		t := jwt.NewWithClaims(
 			jwt.SigningMethodHS256,
 			jwt.MapClaims{
-				"iss": iss,                     // token 的发行者
-				"sub": username,                // token 代表的主体
-				"aud": "siyuan-publish-server", // token 的受众
-				"jti": uuid.New().String(),     // token 的唯一标识
+				"iss": iss,                    // token 的发行者
+				"sub": username,               // token 代表的主体
+				"aud": publishServiceAudience, // token 的受众
+				"jti": uuid.New().String(),    // token 的唯一标识
 
 				ClaimsKeyRole: RoleReader, // 角色
 			},
@@ -191,8 +193,10 @@ func IsPublishServiceToken(token *jwt.Token) bool {
 		return false
 	}
 	claims := GetTokenClaims(token)
-	if tokenIssuer, ok := claims["iss"].(string); ok {
-		return tokenIssuer == iss
+	tokenIssuer, ok := claims["iss"].(string)
+	if !ok || tokenIssuer != iss {
+		return false
 	}
-	return false
+	audience, err := claims.GetAudience()
+	return err == nil && slices.Contains(audience, publishServiceAudience)
 }

@@ -49,6 +49,9 @@ func BroadcastByTypeAndExcludeApp(excludeApp, typ, cmd string, code int, msg str
 
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
+			if isPublishSession(session) {
+				return true
+			}
 			if t, ok := session.Get("type"); ok && typ == t {
 				event := NewResult()
 				event.Cmd = cmd
@@ -71,6 +74,9 @@ func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data any)
 
 	appSessions.(*sync.Map).Range(func(key, value any) bool {
 		session := value.(*melody.Session)
+		if isPublishSession(session) {
+			return true
+		}
 		if t, ok := session.Get("type"); ok && typ == t {
 			event := NewResult()
 			event.Cmd = cmd
@@ -103,6 +109,9 @@ func SessionsByType(typ string) (ret []*melody.Session) {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
+			if isPublishSession(session) {
+				return true
+			}
 			if t, ok := session.Get("type"); ok && typ == t {
 				ret = append(ret, session)
 			}
@@ -111,6 +120,11 @@ func SessionsByType(typ string) (ret []*melody.Session) {
 		return true
 	})
 	return
+}
+
+func isPublishSession(session *melody.Session) bool {
+	isPublish, ok := session.Get("isPublish")
+	return ok && isPublish == true
 }
 
 func AddPushChan(session *melody.Session) {
@@ -441,6 +455,9 @@ func Broadcast(msg []byte) {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
+			if isPublishSession(session) {
+				return true
+			}
 			session.Write(msg)
 			return true
 		})
@@ -453,6 +470,9 @@ func broadcastOtherApps(msg []byte, excludeApp string) {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
+			if isPublishSession(session) {
+				return true
+			}
 			if app, _ := session.Get("app"); app == excludeApp {
 				return true
 			}
@@ -468,6 +488,9 @@ func broadcastOtherAppMains(msg []byte, excludeApp string) {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
+			if isPublishSession(session) {
+				return true
+			}
 			if app, _ := session.Get("app"); app == excludeApp {
 				return true
 			}
@@ -488,6 +511,9 @@ func broadcastApp(msg []byte, app string) {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
+			if isPublishSession(session) {
+				return true
+			}
 			if sessionApp, _ := session.Get("app"); sessionApp != app {
 				return true
 			}
@@ -503,6 +529,9 @@ func broadcastOthers(msg []byte, excludeSID string) {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
+			if isPublishSession(session) {
+				return true
+			}
 			if id, _ := session.Get("id"); id == excludeSID {
 				return true
 			}
@@ -537,7 +566,7 @@ func ClosePublishServiceSessions() {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
-			if isPublish, ok := session.Get("isPublish"); ok && isPublish == true {
+			if isPublishSession(session) {
 				publishSessions = append(publishSessions, session)
 			}
 			return true

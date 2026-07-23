@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "すべてのビューで表示",
+  "hideInAllViews": "すべてのビューで非表示",
+  "fieldVisibility": "フィールドの表示",
   "flashcardCallout": "コールアウトブロックカード",
   "flashcardCalloutTip": "有効にすると、コールアウトのタイトルが質問として認識され、その内容が回答として認識されます",
   "flashcardBlockquote": "引用ブロックカード",

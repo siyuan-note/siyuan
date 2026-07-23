@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "在所有视图中显示",
+  "hideInAllViews": "在所有视图中隐藏",
+  "fieldVisibility": "字段可见性",
   "flashcardCallout": "提示块制卡",
   "flashcardCalloutTip": "启用后支持提示块制卡，提示块的标题被识别为问题，内容识别为答案",
   "flashcardBlockquote": "引述块制卡",

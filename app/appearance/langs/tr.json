@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "Tüm görünümlerde göster",
+  "hideInAllViews": "Tüm görünümlerde gizle",
+  "fieldVisibility": "Alan görünürlüğü",
   "flashcardCallout": "Bilgi kutusu kartları",
   "flashcardCalloutTip": "Etkinleştirildiğinde, bilgi kutusunun başlığı soru, içeriği ise yanıt olarak tanınır",
   "flashcardBlockquote": "Alıntı bloğu kartları",

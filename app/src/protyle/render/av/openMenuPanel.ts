@@ -74,6 +74,7 @@ import {
     goGroupsSort,
     setGroupMethod
 } from "./groups";
+import {openFieldVisibilityPanel} from "./fieldVisibility";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -724,6 +725,18 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "fieldVisibility") {
+                    const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
+                    openFieldVisibilityPanel({
+                        protyle: options.protyle,
+                        blockElement: options.blockElement,
+                        colId,
+                        menuElement,
+                        field: fields.find((item) => item.id === colId),
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "go-layout") {
                     menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getLayoutHTML(data);
@@ -1140,13 +1153,15 @@ export const openMenuPanel = (options: {
                                 avID,
                                 data: false,
                                 blockID,
+                                viewID: data.viewID,
                             });
                             undoOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
                                 avID,
                                 data: true,
-                                blockID
+                                blockID,
+                                viewID: data.viewID,
                             });
                             item.hidden = false;
                         }
@@ -1169,14 +1184,16 @@ export const openMenuPanel = (options: {
                                 id: item.id,
                                 avID,
                                 data: true,
-                                blockID
+                                blockID,
+                                viewID: data.viewID,
                             });
                             undoOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
                                 avID,
                                 data: false,
-                                blockID
+                                blockID,
+                                viewID: data.viewID,
                             });
                             item.hidden = true;
                         }
@@ -1365,13 +1382,15 @@ export const openMenuPanel = (options: {
                         id: colId,
                         avID,
                         data: true,
-                        blockID
+                        blockID,
+                        viewID: data.viewID,
                     }], [{
                         action: "setAttrViewColHidden",
                         id: colId,
                         avID,
                         data: false,
-                        blockID
+                        blockID,
+                        viewID: data.viewID,
                     }]);
                     fields.find((item: IAVColumn) => item.id === colId).hidden = true;
                     if (isEdit) {
@@ -1397,13 +1416,15 @@ export const openMenuPanel = (options: {
                         id: colId,
                         avID,
                         data: false,
-                        blockID
+                        blockID,
+                        viewID: data.viewID,
                     }], [{
                         action: "setAttrViewColHidden",
                         id: colId,
                         avID,
                         data: true,
-                        blockID
+                        blockID,
+                        viewID: data.viewID,
                     }]);
                     fields.find((item: IAVColumn) => item.id === colId).hidden = false;
                     if (isEdit) {

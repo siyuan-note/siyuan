@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "Mostrar en todas las vistas",
+  "hideInAllViews": "Ocultar en todas las vistas",
+  "fieldVisibility": "Visibilidad del campo",
   "flashcardCallout": "Tarjetas de bloques de aviso",
   "flashcardCalloutTip": "Cuando está habilitado, el título de un bloque de aviso se reconoce como pregunta y su contenido como respuesta",
   "flashcardBlockquote": "Tarjetas de bloques de cita",

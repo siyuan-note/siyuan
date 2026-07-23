@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "Mostra in tutte le viste",
+  "hideInAllViews": "Nascondi in tutte le viste",
+  "fieldVisibility": "Visibilità del campo",
   "flashcardCallout": "Schede da blocchi di richiamo",
   "flashcardCalloutTip": "Quando è abilitato, il titolo di un blocco di richiamo viene riconosciuto come domanda e il suo contenuto come risposta",
   "flashcardBlockquote": "Schede da blocchi citazione",

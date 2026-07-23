@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "Show in all views",
+  "hideInAllViews": "Hide in all views",
+  "fieldVisibility": "Field visibility",
   "flashcardCallout": "Callout Carding",
   "flashcardCalloutTip": "When enabled, the title of a callout is recognized as a question, and its content is recognized as an answer",
   "flashcardBlockquote": "Blockquote Carding",

@@ -2048,6 +2048,7 @@ type Operation struct {
 	GroupID           string           `json:"groupID"`           // 属性视图分组视图 ID
 	TargetGroupID     string           `json:"targetGroupID"`     // 属性视图目标分组视图 ID
 	ViewID            string           `json:"viewID"`            // 属性视图视图 ID
+	ViewIDs           []string         `json:"viewIDs,omitempty"` // 数据库视图 ID 列表
 	IgnoreDefaultFill bool             `json:"ignoreDefaultFill"` // 是否忽略默认填充
 
 	Context map[string]any `json:"context"` // 上下文信息

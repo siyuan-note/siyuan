@@ -368,6 +368,99 @@ export const getSelectionOffset = (selectElement: Node, editorElement?: Element,
     return position;
 };
 
+export interface IBlockRange {
+    blockElement: HTMLElement;
+    editableElement: Element;
+    range: Range;
+    start: number;
+    end: number;
+}
+
+export const getBlockRanges = (editorElement: Element, selectedRange: Range, excludeTypes: string[] = []) => {
+    const ranges: IBlockRange[] = [];
+    if (!editorElement.contains(selectedRange.startContainer) || !editorElement.contains(selectedRange.endContainer)) {
+        return ranges;
+    }
+    const startElement = hasClosestBlock(selectedRange.startContainer);
+    const endElement = hasClosestBlock(selectedRange.endContainer);
+    const blockWalker = document.createTreeWalker(editorElement, NodeFilter.SHOW_ELEMENT, {
+        acceptNode(node) {
+            const element = node as HTMLElement;
+            if (element.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+                return NodeFilter.FILTER_REJECT;
+            }
+            return element.hasAttribute("data-node-id") ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+        }
+    });
+    let item = startElement as HTMLElement;
+    if (item) {
+        blockWalker.currentNode = item;
+    } else {
+        item = blockWalker.nextNode() as HTMLElement;
+    }
+    let rangeStarted = false;
+    while (item) {
+        const editableElement = getContenteditableElement(item);
+        const isEditableBlock = editableElement && hasClosestBlock(editableElement) === item;
+        const intersects = isEditableBlock && selectedRange.intersectsNode(editableElement);
+        if (intersects) {
+            rangeStarted = true;
+        } else if (rangeStarted && isEditableBlock) {
+            break;
+        }
+        if (!intersects || excludeTypes.includes(item.getAttribute("data-type")) || isInEmbedBlock(item)) {
+            item = blockWalker.nextNode() as HTMLElement;
+            continue;
+        }
+        if (item.getAttribute("data-type") === "NodeTable") {
+            editableElement.querySelectorAll("th, td").forEach(cellElement => {
+                if (!selectedRange.intersectsNode(cellElement)) {
+                    return;
+                }
+                const cellRange = document.createRange();
+                cellRange.selectNodeContents(cellElement);
+                if (cellElement.contains(selectedRange.startContainer)) {
+                    cellRange.setStart(selectedRange.startContainer, selectedRange.startOffset);
+                }
+                if (cellElement.contains(selectedRange.endContainer)) {
+                    cellRange.setEnd(selectedRange.endContainer, selectedRange.endOffset);
+                }
+                if (!cellRange.collapsed) {
+                    const position = getSelectionOffset(cellElement, undefined, cellRange);
+                    ranges.push({
+                        blockElement: item,
+                        editableElement: cellElement,
+                        range: cellRange,
+                        start: position.start,
+                        end: position.end,
+                    });
+                }
+            });
+        } else {
+            const blockRange = document.createRange();
+            blockRange.selectNodeContents(editableElement);
+            if (item === startElement) {
+                blockRange.setStart(selectedRange.startContainer, selectedRange.startOffset);
+            }
+            if (item === endElement) {
+                blockRange.setEnd(selectedRange.endContainer, selectedRange.endOffset);
+            }
+            if (!blockRange.collapsed) {
+                const position = getSelectionOffset(editableElement, undefined, blockRange);
+                ranges.push({
+                    blockElement: item,
+                    editableElement,
+                    range: blockRange,
+                    start: position.start,
+                    end: position.end,
+                });
+            }
+        }
+        item = blockWalker.nextNode() as HTMLElement;
+    }
+    return ranges;
+};
+
 // 记录插入块前的焦点位置，供撤销回放完成后恢复。
 export const getUndoFocusContext = (editorElement: Element, range?: Range): Record<string, string> | undefined => {
     if (!range || !editorElement.contains(range.startContainer) || !editorElement.contains(range.endContainer)) {

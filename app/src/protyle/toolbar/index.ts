@@ -184,8 +184,13 @@ export class Toolbar {
     public render(protyle: IProtyle, range: Range) {
         this.range = range;
         const nodeElement = hasClosestBlock(range.startContainer);
-        if (isMobile() || !nodeElement || protyle.disabled || nodeElement.classList.contains("av") ||
-            hasClosestByTag(range.startContainer, "CAPTION")) {
+        const endElement = hasClosestBlock(range.endContainer);
+        const isCrossBlock = !!nodeElement && !!endElement && nodeElement !== endElement;
+        if (isMobile() || !nodeElement || protyle.disabled || (!isCrossBlock && (
+            nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
+            nodeElement.classList.contains("av") ||
+            hasClosestByTag(range.startContainer, "CAPTION")
+        ))) {
             this.element.classList.add("fn__none");
             return;
         }
@@ -208,10 +213,6 @@ export class Toolbar {
             this.element.classList.add("fn__none");
             return;
         }
-        if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
-            this.element.classList.add("fn__none");
-            return;
-        }
         const rangePosition = getSelectionPosition(nodeElement, range, true);
         this.element.classList.remove("fn__none");
         this.toolbarHeight = this.element.clientHeight;
@@ -230,8 +231,7 @@ export class Toolbar {
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
             item.classList.remove("protyle-toolbar__item--current");
         });
-        this.element.querySelector('[data-type="a"]')?.toggleAttribute("disabled",
-            nodeElement !== hasClosestBlock(range.endContainer));
+        this.element.querySelector('[data-type="a"]')?.toggleAttribute("disabled", isCrossBlock);
         const types = this.getCurrentType();
         types.forEach(item => {
             if (["search-mark", "a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math",
@@ -289,6 +289,23 @@ export class Toolbar {
         return types;
     }
 
+    private hasInlineMark(editableElement: Element, range: Range, type: string) {
+        const walker = document.createTreeWalker(editableElement, NodeFilter.SHOW_TEXT);
+        let textNode = walker.nextNode() as Text;
+        while (textNode) {
+            if (range.intersectsNode(textNode)) {
+                const start = range.startContainer === textNode ? range.startOffset : 0;
+                const end = range.endContainer === textNode ? range.endOffset : textNode.data.length;
+                if (start < end && textNode.data.substring(start, end).split(Constants.ZWSP).join("") &&
+                    !hasClosestByAttribute(textNode, "data-type", type)) {
+                    return false;
+                }
+            }
+            textNode = walker.nextNode() as Text;
+        }
+        return true;
+    }
+
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
@@ -312,14 +329,18 @@ export class Toolbar {
 
     private setBlockRangesInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",
                                      textObj?: ITextOption) {
-        const ranges = getBlockRanges(protyle.wysiwyg.element, this.range.cloneRange(), ["NodeCodeBlock"]);
+        const selectedRange = this.range.cloneRange();
+        const ranges = getBlockRanges(protyle.wysiwyg.element, selectedRange,
+            ["NodeCodeBlock", "NodeAttributeView"]);
         if (ranges.length === 0) {
             return;
         }
+        const preserveStart = !ranges.some(item => item.editableElement.contains(selectedRange.startContainer));
+        const preserveEnd = !ranges.some(item => item.editableElement.contains(selectedRange.endContainer));
 
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const remove = type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
-            (!textObj && ranges.every(item => this.getCurrentType(item.range).includes(type)));
+            (!textObj && ranges.every(item => this.hasInlineMark(item.editableElement, item.range, type)));
         const rangesByBlock = new Map<HTMLElement, typeof ranges>();
         ranges.forEach(item => {
             const blockRanges = rangesByBlock.get(item.blockElement) || [];
@@ -333,7 +354,12 @@ export class Toolbar {
         let selectionRange: Range;
         updateBatchTransaction(blockElements, protyle, blockElement => {
             rangesByBlock.get(blockElement).forEach(item => {
-                this.range = item.range;
+                const range = blockElement.getAttribute("data-type") === "NodeTable" ?
+                    focusByOffset(item.editableElement, item.start, item.end, false) : item.range;
+                if (!range || range.collapsed) {
+                    return;
+                }
+                this.range = range;
                 const rangeNodes = this.setInlineMarkInBlock(protyle, type, action, textObj, remove) || [];
                 const connectedNodes = rangeNodes.filter(node => node.isConnected);
                 let offsetRange: Range;
@@ -355,6 +381,12 @@ export class Toolbar {
             });
         });
         if (selectionRange) {
+            if (preserveStart) {
+                selectionRange.setStart(selectedRange.startContainer, selectedRange.startOffset);
+            }
+            if (preserveEnd) {
+                selectionRange.setEnd(selectedRange.endContainer, selectedRange.endOffset);
+            }
             this.range = selectionRange;
             focusByRange(this.range);
         }

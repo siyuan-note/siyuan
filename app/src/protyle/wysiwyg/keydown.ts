@@ -788,11 +788,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         const endElement = hasClosestBlock(range.endContainer);
+        const isCrossBlock = !!endElement && nodeElement !== endElement;
         // 删除，不可使用 isNotCtrl(event)，否则软删除回导致 https://github.com/siyuan-note/siyuan/issues/5607
         // 不可使用 !event.shiftKey，否则 https://ld246.com/article/1666434796806
         if ((!event.altKey && (event.key === "Backspace" || event.key === "Delete")) ||
             matchHotKey("⌃D", event)) {
-            if (endElement && nodeElement !== endElement && selectText !== "") {
+            if (isCrossBlock && selectText !== "") {
                 const ranges = getBlockRanges(protyle.wysiwyg.element, range);
                 if (ranges.length > 0) {
                     const firstRange = ranges[0];
@@ -1402,7 +1403,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     hideElements(["select"], protyle);
                 }
             } else {
-                if (endElement && nodeElement !== endElement) {
+                if (isCrossBlock) {
                     hideElements(["toolbar", "hint", "util", "select"], protyle);
                     const selectElements: HTMLElement[] = [];
                     protyle.wysiwyg.element.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
@@ -1585,7 +1586,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (!nodeElement.classList.contains("code-block") && !event.repeat) {
+        if ((!nodeElement.classList.contains("code-block") || isCrossBlock) && !event.repeat) {
             let findToolbar = false;
             protyle.options.toolbar.find((menuItem: IMenuItem) => {
                 if (!menuItem.hotkey) {

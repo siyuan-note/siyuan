@@ -2,10 +2,12 @@ import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {isEncryptedBox} from "../../util/pathName";
 import {
+    buildHeadingNumberStyles,
     clearHeadingNumberElements,
     operationsMayChangeHeadingNumbers,
     renderHeadingNumberElements
 } from "./headingNumberCore";
+import type {IHeadingNumberStyle} from "./headingNumberCore";
 
 export {cleanHeadingNumberHTML, cleanHeadingNumberOperations} from "./headingNumberCore";
 
@@ -13,9 +15,48 @@ const REFRESH_DELAY = 300;
 const refreshTimers = new WeakMap<IProtyle, number>();
 const refreshVersions = new WeakMap<IProtyle, number>();
 const headingNumberContainers = new WeakMap<IProtyle, Set<string>>();
+const headingNumberStyleStates = new WeakMap<IProtyle, {
+    css: string,
+    element: HTMLStyleElement,
+    scope: string,
+}>();
+const HEADING_NUMBER_SCOPE_ATTRIBUTE = "data-heading-number-scope";
+const headingNumberScopePrefix = Date.now().toString(36);
+let headingNumberScopeID = 0;
+
+const clearHeadingNumberStyles = (protyle: IProtyle) => {
+    protyle.wysiwyg.element.removeAttribute(HEADING_NUMBER_SCOPE_ATTRIBUTE);
+    headingNumberStyleStates.get(protyle)?.element.remove();
+    headingNumberStyleStates.delete(protyle);
+};
 
 const clearHeadingNumbers = (protyle: IProtyle) => {
     clearHeadingNumberElements(protyle.wysiwyg.element);
+    clearHeadingNumberStyles(protyle);
+};
+
+const applyHeadingNumberStyles = (protyle: IProtyle, styles: IHeadingNumberStyle[]) => {
+    if (styles.length === 0) {
+        clearHeadingNumberStyles(protyle);
+        return;
+    }
+    let state = headingNumberStyleStates.get(protyle);
+    if (!state) {
+        const scope = `heading-number-${headingNumberScopePrefix}-${++headingNumberScopeID}`;
+        const element = protyle.element.ownerDocument.createElement("style");
+        element.setAttribute("data-heading-number-style", scope);
+        state = {css: "", element, scope};
+        headingNumberStyleStates.set(protyle, state);
+    }
+    const css = buildHeadingNumberStyles(state.scope, styles);
+    if (state.css !== css) {
+        state.element.textContent = css;
+        state.css = css;
+    }
+    if (!state.element.isConnected) {
+        protyle.element.appendChild(state.element);
+    }
+    protyle.wysiwyg.element.setAttribute(HEADING_NUMBER_SCOPE_ATTRIBUTE, state.scope);
 };
 
 export const renderHeadingNumbers = (
@@ -33,7 +74,8 @@ export const renderHeadingNumbers = (
     }
 
     const numbers = protyle.block.headingNumbers || {};
-    const {containers, levels} = renderHeadingNumberElements(protyle.wysiwyg.element, numbers);
+    const {containers, levels, styles} = renderHeadingNumberElements(protyle.wysiwyg.element, numbers);
+    applyHeadingNumberStyles(protyle, styles);
     protyle.block.headingNumberLevels = levels;
     headingNumberContainers.set(protyle, containers);
 };

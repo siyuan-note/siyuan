@@ -23,13 +23,14 @@
   [data-node-id] {
     position: relative;
 
-    &[data-type="NodeHeading"] > [contenteditable][data-heading-number]::before {
-      content: attr(data-heading-number);
-      margin-inline-end: .5em;
-      color: var(--b3-theme-on-surface-light);
-      unicode-bidi: isolate;
-      user-select: none;
-      pointer-events: none;
+    &[data-type="NodeHeading"] {
+      & > .protyle-heading-number__measure {
+        position: absolute;
+        visibility: hidden;
+        white-space: pre;
+        color: var(--b3-theme-on-surface-light);
+        pointer-events: none;
+      }
     }
 
     &.dragover {

@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "Tampilkan di semua tampilan",
+  "hideInAllViews": "Sembunyikan di semua tampilan",
+  "fieldVisibility": "Visibilitas bidang",
   "flashcardCallout": "Kartu blok sorotan",
   "flashcardCalloutTip": "Jika diaktifkan, judul blok sorotan dikenali sebagai pertanyaan dan isinya dikenali sebagai jawaban",
   "flashcardBlockquote": "Kartu blok kutipan",

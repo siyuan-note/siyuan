@@ -666,6 +666,7 @@ interface IOperation {
     srcs?: IOperationSrcs[] // insertAttrViewBlock 专享
     ignoreDefaultFill?: boolean // insertAttrViewBlock 专享
     viewID?: string // 多个属性视图操作使用，用于推送时不影响其他视图
+    viewIDs?: string[] // setAttrViewColHidden 批量指定数据库视图
     name?: string // addAttrViewCol 专享
     type?: TAVCol // addAttrViewCol 专享
     deckID?: string // add/removeFlashcards 专享
@@ -1043,6 +1044,14 @@ interface IAVView {
     group: IAVGroup
     groupKey: IAVColumn
     groupValue: IAVCellValue
+}
+
+interface IAVFieldView {
+    id: string;
+    name: string;
+    icon: string;
+    type: TAVView;
+    hidden: boolean;
 }
 
 interface IAVTable extends IAVView {

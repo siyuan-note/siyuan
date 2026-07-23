@@ -919,6 +919,9 @@ func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
 		}
 
 		tree := prepareExportTree(bt)
+		if numberErr := applyHeadingNumbersForExport(tree, bt, false); nil != numberErr {
+			return numberErr
+		}
 		tree = exportTree(tree, false, false, true,
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
@@ -1087,6 +1090,10 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 				logging.LogErrorf("merge sub docs failed: %s", mergeErr)
 				return nil
 			}
+		}
+
+		if numberErr := applyHeadingNumbersForExport(tree, bt, merge); nil != numberErr {
+			return numberErr
 		}
 
 		blockRefMode := Conf.Export.BlockRefMode
@@ -1272,17 +1279,14 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom strin
 			}
 		}
 
+		if numberErr := applyHeadingNumbersForExport(tree, bt, merge); nil != numberErr {
+			return numberErr
+		}
+
 		blockRefMode := Conf.Export.BlockRefMode
 		var headings []*ast.Node
 		if pdf { // 导出 PDF 需要标记目录书签
-			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
-					headings = append(headings, n)
-					return ast.WalkSkipChildren
-				}
-				return ast.WalkContinue
-			})
-
+			headings = collectOutlineHeadings(tree)
 			for _, h := range headings {
 				link := &ast.Node{Type: ast.NodeLink}
 				link.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
@@ -1450,6 +1454,31 @@ func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 	return
 }
 
+func applyHeadingNumbersForExport(tree *parse.Tree, bt *treenode.BlockTree, merged bool) (err error) {
+	if !Conf.Editor.HeadingNumber || nil == tree || nil == tree.Root {
+		return
+	}
+
+	numberingTree := tree
+	if !merged && "d" != bt.Type {
+		luteEngine := NewLute()
+		if numberingTree, err = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine); err != nil {
+			return
+		}
+	}
+
+	materializeHeadingNumbers(tree, headingNumberLabels(numberingTree, Conf.Editor.HeadingNumberFormat))
+	return
+}
+
+func materializeHeadingNumbers(tree *parse.Tree, numbers map[string]string) {
+	for _, heading := range collectOutlineHeadings(tree) {
+		if number := numbers[heading.ID]; "" != number {
+			heading.PrependChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(number + " ")})
+		}
+	}
+}
+
 func processIFrame(tree *parse.Tree) {
 	// 导出 PDF/Word 时 IFrame 块使用超链接 https://github.com/siyuan-note/siyuan/issues/4035
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1494,19 +1523,12 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 			}
 		}
 
-		var headings []*ast.Node
 		assetDests := getAssetsLinkDests(tree.Root, false)
-		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
-				return ast.WalkContinue
-			}
-
-			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
-				headings = append(headings, n)
-				return ast.WalkSkipChildren
-			}
-			return ast.WalkContinue
-		})
+		headings := collectOutlineHeadings(tree)
+		var headingNumbers map[string]string
+		if Conf.Editor.HeadingNumber {
+			headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
+		}
 
 		api.DisableConfigDir()
 		font.UserFontDir = filepath.Join(util.HomeDir, ".config", "siyuan", "fonts")
@@ -1524,7 +1546,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 			return nil
 		}
 
-		processPDFBookmarks(pdfCtx, headings)
+		processPDFBookmarks(pdfCtx, headings, headingNumbers)
 		processPDFLinkEmbedAssets(pdfCtx, assetDests, tree.Box, removeAssets)
 		processPDFWatermark(pdfCtx, watermark)
 
@@ -1645,7 +1667,7 @@ func processPDFWatermark(pdfCtx *model.Context, watermark bool) {
 	}
 }
 
-func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
+func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node, headingNumbers map[string]string) {
 	links, err := PdfListToCLinks(pdfCtx)
 	if err != nil {
 		return
@@ -1666,6 +1688,7 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
 		}
 		title := b.Content
 		title, _ = url.QueryUnescape(title)
+		title = headingTitleWithNumber(title, linkID, headingNumbers)
 		for {
 			if _, ok := titles[title]; ok {
 				title += "\x01"
@@ -1720,6 +1743,13 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
 		logging.LogErrorf("add bookmark failed: %s", err)
 		return
 	}
+}
+
+func headingTitleWithNumber(title, headingID string, headingNumbers map[string]string) string {
+	if number := headingNumbers[headingID]; "" != number {
+		return number + " " + title
+	}
+	return title
 }
 
 // processPDFLinkEmbedAssets 处理资源文件超链接，根据 removeAssets 参数决定是否将资源文件嵌入到 PDF 中。

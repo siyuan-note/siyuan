@@ -18,6 +18,7 @@ import {Dialog} from "../../../dialog";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {getFieldsByData} from "./view";
 import {hasClosestByClassName} from "../../util/hasClosest";
+import {openFieldVisibility} from "./fieldVisibility";
 
 export const getColId = (element: Element, viewType: TAVView) => {
     if (viewType === "table" || hasClosestByClassName(element, "custom-attr")) {
@@ -204,7 +205,12 @@ export const getEditHTML = (options: {
     <input type="checkbox" data-type="wrap" class="b3-switch b3-switch--menu"${colData.wrap ? " checked" : ""}>
 </label>`;
     if (colData.type !== "block") {
-        html += `<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
+        html += `${options.isCustomAttr ? "" : `<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
+    <svg class="b3-menu__icon"><use xlink:href="#${colData.hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
+    <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hide}</span>
+    <svg class="b3-menu__action ariaLabel" data-position="4west" aria-label="${window.siyuan.languages.fieldVisibility}" data-type="fieldVisibility"><use xlink:href="#iconEdit"></use></svg>
+</button>`}
+<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
 </button>
@@ -1024,20 +1030,39 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             id: "hide",
             icon: "iconEyeoff",
             label: window.siyuan.languages.hide,
+            action: "iconEdit",
             click() {
                 transaction(protyle, [{
                     action: "setAttrViewColHidden",
                     id: colId,
                     avID,
                     data: true,
-                    blockID
+                    blockID,
+                    viewID,
                 }], [{
                     action: "setAttrViewColHidden",
                     id: colId,
                     avID,
                     data: false,
-                    blockID
+                    blockID,
+                    viewID,
                 }]);
+            },
+            bind(element) {
+                const actionElement = element.querySelector(".b3-menu__action") as HTMLElement;
+                actionElement.classList.add("ariaLabel");
+                actionElement.setAttribute("data-position", "4west");
+                actionElement.setAttribute("aria-label", window.siyuan.languages.fieldVisibility);
+                actionElement.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    openFieldVisibility({
+                        protyle,
+                        blockElement,
+                        colId,
+                        anchorElement: cellElement,
+                    });
+                });
             }
         });
     }

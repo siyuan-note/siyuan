@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "Afficher dans toutes les vues",
+  "hideInAllViews": "Masquer dans toutes les vues",
+  "fieldVisibility": "Visibilité du champ",
   "flashcardCallout": "Cartes de blocs d'information",
   "flashcardCalloutTip": "Lorsque cette option est activée, le titre d'un bloc d'information est reconnu comme une question et son contenu comme une réponse",
   "flashcardBlockquote": "Cartes de blocs de citation",

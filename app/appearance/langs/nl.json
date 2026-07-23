@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "Tonen in alle weergaven",
+  "hideInAllViews": "Verbergen in alle weergaven",
+  "fieldVisibility": "Zichtbaarheid van veld",
   "flashcardCallout": "Flashcards van uitgelichte blokken",
   "flashcardCalloutTip": "Indien ingeschakeld, wordt de titel van een uitgelicht blok herkend als vraag en de inhoud als antwoord",
   "flashcardBlockquote": "Flashcards van citaatblokken",

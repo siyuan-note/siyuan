@@ -413,7 +413,12 @@ func removeUnusedAsset(c *gin.Context) {
 	}
 
 	p := arg["path"].(string)
-	asset := model.RemoveUnusedAsset(p)
+	asset, err := model.RemoveUnusedAsset(p)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	ret.Data = map[string]any{
 		"path": asset,
 	}

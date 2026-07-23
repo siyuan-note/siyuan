@@ -270,6 +270,7 @@ export abstract class Constants {
 
     public static readonly MENU_AV_VIEW = "av-view"; // 数据库视图标题菜单
     public static readonly MENU_AV_HEADER_CELL = "av-header-cell"; // 数据库字段标题菜单
+    public static readonly MENU_AV_FIELD_VISIBILITY = "av-field-visibility"; // 数据库字段可见性菜单
     public static readonly MENU_AV_HEADER_ADD = "av-header-add"; // 数据库添加字段菜单
     public static readonly MENU_AV_ADD_FILTER = "av-add-filter"; // 数据库添加筛选条件菜单
     public static readonly MENU_AV_ADD_SORT = "av-add-sort"; // 数据库添加排序条件菜单

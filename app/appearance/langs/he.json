@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "הצגה בכל התצוגות",
+  "hideInAllViews": "הסתרה בכל התצוגות",
+  "fieldVisibility": "נראות השדה",
   "flashcardCallout": "יצירת כרטיסים מבלוק הערה",
   "flashcardCalloutTip": "כאשר האפשרות מופעלת, הכותרת של בלוק הערה מזוהה כשאלה והתוכן שלו מזוהה כתשובה",
   "flashcardBlockquote": "יצירת כרטיסים מבלוק ציטוט",

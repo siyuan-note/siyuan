@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "In allen Ansichten anzeigen",
+  "hideInAllViews": "In allen Ansichten ausblenden",
+  "fieldVisibility": "Feldsichtbarkeit",
   "flashcardCallout": "Hinweisblock-Karten",
   "flashcardCalloutTip": "Wenn aktiviert, wird der Titel eines Hinweisblocks als Frage und sein Inhalt als Antwort erkannt",
   "flashcardBlockquote": "Blockzitat-Karten",

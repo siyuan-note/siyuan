@@ -25,8 +25,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -261,6 +263,168 @@ func TestGetAssetAbsPathWithSymlinkedWorkspaceAncestor(t *testing.T) {
 	}
 	if _, err = GetAssetAbsPath("assets/outside.png"); err == nil {
 		t.Fatal("asset symlink outside data/assets should be rejected")
+	}
+}
+
+func TestResolveDataAssetPath(t *testing.T) {
+	originalDataDir := util.DataDir
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	util.DataDir = t.TempDir()
+	globalAssetPath := filepath.Join(util.DataDir, "assets", "image.png")
+	if err := os.MkdirAll(filepath.Dir(globalAssetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(globalAssetPath, []byte("image"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	relativePath, absPath, err := ResolveDataAssetPath("assets/image.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if relativePath != "assets/image.png" || absPath != globalAssetPath {
+		t.Fatalf("resolve global asset: got [%q, %q], want [%q, %q]", relativePath, absPath, "assets/image.png", globalAssetPath)
+	}
+
+	const boxID = "20260723000000-abcdefg"
+	notebookAssetPath := filepath.Join(util.DataDir, boxID, "20260723000001-abcdefg", "assets", "document.pdf")
+	boxConfPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err = os.MkdirAll(filepath.Dir(boxConfPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(boxConfPath, []byte(`{"name":"Notebook"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.MkdirAll(filepath.Dir(notebookAssetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(notebookAssetPath, []byte("pdf"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	notebookRelativePath := filepath.ToSlash(strings.TrimPrefix(notebookAssetPath, util.DataDir+string(filepath.Separator)))
+	relativePath, absPath, err = ResolveDataAssetPath(notebookRelativePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if relativePath != notebookRelativePath || absPath != notebookAssetPath {
+		t.Fatalf("resolve notebook asset: got [%q, %q], want [%q, %q]",
+			relativePath, absPath, notebookRelativePath, notebookAssetPath)
+	}
+	unusedRelativePath, ok := unusedAssetRelativePath(filepath.Join(util.DataDir, "assets"), notebookAssetPath)
+	if !ok || unusedRelativePath != notebookRelativePath {
+		t.Fatalf("build notebook unused asset path: got [%q, %v], want [%q, true]",
+			unusedRelativePath, ok, notebookRelativePath)
+	}
+
+	outsideNotebookDir := t.TempDir()
+	outsideNotebookAssetPath := filepath.Join(outsideNotebookDir, "assets", "outside.png")
+	if err = os.MkdirAll(filepath.Dir(outsideNotebookAssetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(outsideNotebookAssetPath, []byte("outside"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	notebookLinkPath := filepath.Join(util.DataDir, boxID, "linked")
+	if err = os.Symlink(outsideNotebookDir, notebookLinkPath); err == nil {
+		linkedAssetPath := path.Join(boxID, "linked", "assets", "outside.png")
+		if _, _, resolveErr := ResolveDataAssetPath(linkedAssetPath); resolveErr == nil {
+			t.Error("notebook asset path through symlink outside notebook should be rejected")
+		}
+	} else {
+		t.Logf("skip notebook symlink assertion: %s", err)
+	}
+
+	outsidePath := filepath.Join(t.TempDir(), "outside.txt")
+	if err = os.WriteFile(outsidePath, []byte("outside"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	invalidPaths := []string{
+		"",
+		".",
+		"..",
+		string(filepath.Separator) + filepath.Join("assets", "image.png"),
+		"assets",
+		"assets/..",
+		"assets/../storage/file.txt",
+		"storage/file.txt",
+		outsidePath,
+	}
+	for _, invalidPath := range invalidPaths {
+		if _, _, resolveErr := ResolveDataAssetPath(invalidPath); resolveErr == nil {
+			t.Errorf("path [%s] should be rejected", invalidPath)
+		}
+	}
+
+	outsideDir := t.TempDir()
+	outsideAssetPath := filepath.Join(outsideDir, "outside.png")
+	if err = os.WriteFile(outsideAssetPath, []byte("outside"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	linkedDir := filepath.Join(util.DataDir, "assets", "linked")
+	if err = os.Symlink(outsideDir, linkedDir); err == nil {
+		if _, _, resolveErr := ResolveDataAssetPath("assets/linked/outside.png"); resolveErr == nil {
+			t.Error("asset path through symlink outside assets directory should be rejected")
+		}
+	} else {
+		t.Logf("skip child symlink assertion: %s", err)
+	}
+}
+
+func TestResolveDataAssetPathWithSymlinkedAssetsRoot(t *testing.T) {
+	originalDataDir := util.DataDir
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	util.DataDir = t.TempDir()
+	realAssetsDir := t.TempDir()
+	assetPath := filepath.Join(realAssetsDir, "image.png")
+	if err := os.WriteFile(assetPath, []byte("image"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(realAssetsDir, filepath.Join(util.DataDir, "assets")); err != nil {
+		t.Skipf("create assets directory symlink failed: %s", err)
+	}
+
+	relativePath, absPath, err := ResolveDataAssetPath("assets/image.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantAbsPath := filepath.Join(util.DataDir, "assets", "image.png")
+	if relativePath != "assets/image.png" || absPath != wantAbsPath {
+		t.Fatalf("resolve asset under symlinked root: got [%q, %q], want [%q, %q]",
+			relativePath, absPath, "assets/image.png", wantAbsPath)
+	}
+	if !unusedAssetsContainPath(relativePath, absPath, []*UnusedItem{{Item: "physical/path.png", AbsPath: assetPath}}) {
+		t.Fatal("asset under symlinked root should match unused item by resolved path")
+	}
+	unusedRelativePath, ok := unusedAssetRelativePath(realAssetsDir, assetPath)
+	if !ok || unusedRelativePath != "assets/image.png" {
+		t.Fatalf("build unused asset path under symlinked root: got [%q, %v], want [%q, true]",
+			unusedRelativePath, ok, "assets/image.png")
+	}
+}
+
+func TestUnusedAssetsContainPath(t *testing.T) {
+	assetPath := filepath.Join(t.TempDir(), "image.png")
+	if err := os.WriteFile(assetPath, []byte("image"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	items := []*UnusedItem{
+		{Item: "unexpected/path.png", AbsPath: assetPath},
+		{Item: "20260723000000-abcdefg/assets/folder/"},
+	}
+	if !unusedAssetsContainPath("assets/image.png", assetPath, items) {
+		t.Fatal("global unused asset should be found by its absolute path")
+	}
+	if !unusedAssetsContainPath("20260723000000-abcdefg/assets/folder", "", items) {
+		t.Fatal("notebook unused asset directory should be found after normalization")
+	}
+	if unusedAssetsContainPath("assets/referenced.png", "", items) {
+		t.Fatal("referenced asset should not be found in unused assets")
 	}
 }
 

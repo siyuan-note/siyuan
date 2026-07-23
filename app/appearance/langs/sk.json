@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "Zobraziť vo všetkých zobrazeniach",
+  "hideInAllViews": "Skryť vo všetkých zobrazeniach",
+  "fieldVisibility": "Viditeľnosť poľa",
   "flashcardCallout": "Kartičky z bloku zvýraznenia",
   "flashcardCalloutTip": "Po zapnutí sa názov bloku zvýraznenia rozpozná ako otázka a jeho obsah ako odpoveď",
   "flashcardBlockquote": "Kartičky z bloku citácie",

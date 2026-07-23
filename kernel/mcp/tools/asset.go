@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var AssetTool = &Tool{
@@ -109,9 +108,16 @@ func assetUnused(args map[string]any) (CallToolResult, error) {
 }
 
 func assetClean(args map[string]any) (CallToolResult, error) {
-	singlePath, _ := args["path"].(string)
-	if singlePath != "" {
-		ret := model.RemoveUnusedAsset(singlePath)
+	pathValue, pathSet := args["path"]
+	if pathSet {
+		singlePath, _ := pathValue.(string)
+		if singlePath == "" {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path must not be empty"}}, IsError: true}, nil
+		}
+		ret, err := model.RemoveUnusedAsset(singlePath)
+		if err != nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "clean failed: " + err.Error()}}, IsError: true}, nil
+		}
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("removed: %v", ret)}}}, nil
 	}
 	removed := model.RemoveUnusedAssets()
@@ -132,7 +138,10 @@ func assetStat(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
 	}
 
-	abs := filepath.Join(util.DataDir, p)
+	relativePath, abs, err := model.ResolveDataAssetPath(p)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "stat failed: " + err.Error()}}, IsError: true}, nil
+	}
 	info, err := os.Stat(abs)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "stat failed: " + err.Error()}}, IsError: true}, nil
@@ -140,6 +149,6 @@ func assetStat(args map[string]any) (CallToolResult, error) {
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf(
 		"Path: %s\nSize: %d\nIsDir: %v\nModTime: %s",
-		p, info.Size(), info.IsDir(), info.ModTime().Format("2006-01-02 15:04:05"),
+		relativePath, info.Size(), info.IsDir(), info.ModTime().Format("2006-01-02 15:04:05"),
 	)}}}, nil
 }

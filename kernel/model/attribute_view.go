@@ -1893,6 +1893,39 @@ func GetAttributeView(avID string) (ret *av.AttributeView) {
 	return
 }
 
+type AttributeViewFieldView struct {
+	ID     string        `json:"id"`
+	Icon   string        `json:"icon"`
+	Name   string        `json:"name"`
+	Type   av.LayoutType `json:"type"`
+	Hidden bool          `json:"hidden"`
+}
+
+func GetAttributeViewFieldViews(avID, keyID string) (ret []*AttributeViewFieldView, err error) {
+	waitForSyncingStorages()
+
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return
+	}
+
+	for _, view := range attrView.Views {
+		field := getAttributeViewField(view, keyID)
+		if nil == field {
+			err = fmt.Errorf("field [%s] not found in view [%s]", keyID, view.ID)
+			return
+		}
+		ret = append(ret, &AttributeViewFieldView{
+			ID:     view.ID,
+			Icon:   view.Icon,
+			Name:   view.Name,
+			Type:   view.LayoutType,
+			Hidden: field.Hidden,
+		})
+	}
+	return
+}
+
 type AvSearchResult struct {
 	AvID       string            `json:"avID"`
 	AvName     string            `json:"avName"`
@@ -4844,36 +4877,87 @@ func setAttributeViewColHidden(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	viewIDs := operation.ViewIDs
+	if 1 > len(viewIDs) {
+		if "" != operation.ViewID {
+			viewIDs = []string{operation.ViewID}
+		} else {
+			var view *av.View
+			view, err = getAttrViewViewByBlockID(attrView, operation.BlockID)
+			if err != nil {
+				return
+			}
+			viewIDs = []string{view.ID}
+		}
+	}
+
+	err = setAttributeViewFieldsHidden(attrView, operation.ID, viewIDs, operation.Data.(bool))
 	if err != nil {
 		return
 	}
+	err = av.SaveAttributeView(attrView)
+	return
+}
 
+func setAttributeViewFieldsHidden(attrView *av.AttributeView, keyID string, viewIDs []string, hidden bool) (err error) {
+	var fields []*av.BaseField
+	seen := map[string]bool{}
+	for _, viewID := range viewIDs {
+		if seen[viewID] {
+			continue
+		}
+		seen[viewID] = true
+
+		view := attrView.GetView(viewID)
+		if nil == view {
+			return fmt.Errorf("view [%s] not found", viewID)
+		}
+		field := getAttributeViewField(view, keyID)
+		if nil == field {
+			return fmt.Errorf("field [%s] not found in view [%s]", keyID, viewID)
+		}
+		fields = append(fields, field)
+	}
+
+	if 1 > len(fields) {
+		return errors.New("view IDs is empty")
+	}
+	for _, field := range fields {
+		field.Hidden = hidden
+	}
+	return
+}
+
+func getAttributeViewField(view *av.View, keyID string) (ret *av.BaseField) {
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
+		if nil == view.Table {
+			return
+		}
 		for _, column := range view.Table.Columns {
-			if column.ID == operation.ID {
-				column.Hidden = operation.Data.(bool)
-				break
+			if column.ID == keyID {
+				return column.BaseField
 			}
 		}
 	case av.LayoutTypeGallery:
+		if nil == view.Gallery {
+			return
+		}
 		for _, field := range view.Gallery.CardFields {
-			if field.ID == operation.ID {
-				field.Hidden = operation.Data.(bool)
-				break
+			if field.ID == keyID {
+				return field.BaseField
 			}
 		}
 	case av.LayoutTypeKanban:
+		if nil == view.Kanban {
+			return
+		}
 		for _, field := range view.Kanban.Fields {
-			if field.ID == operation.ID {
-				field.Hidden = operation.Data.(bool)
-				break
+			if field.ID == keyID {
+				return field.BaseField
 			}
 		}
 	}
-
-	err = av.SaveAttributeView(attrView)
 	return
 }
 

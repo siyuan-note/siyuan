@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "모든 뷰에서 표시",
+  "hideInAllViews": "모든 뷰에서 숨기기",
+  "fieldVisibility": "필드 표시",
   "flashcardCallout": "콜아웃 블록 카드 만들기",
   "flashcardCalloutTip": "활성화하면 콜아웃의 제목은 질문으로, 내용은 답변으로 인식됩니다",
   "flashcardBlockquote": "인용 블록 카드 만들기",

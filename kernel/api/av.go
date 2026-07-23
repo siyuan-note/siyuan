@@ -729,6 +729,37 @@ func getAttributeView(c *gin.Context) {
 	}
 }
 
+func getAttributeViewFieldViews(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var avID, keyID string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("avID", &avID, true, true),
+		util.BindJsonArg("keyID", &keyID, true, true),
+	) {
+		return
+	}
+	if util.InvalidIDPattern(avID, ret) || util.InvalidIDPattern(keyID, ret) {
+		return
+	}
+
+	views, err := model.GetAttributeViewFieldViews(avID, keyID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{
+		"views": views,
+	}
+}
+
 func createAttributeViewItem(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

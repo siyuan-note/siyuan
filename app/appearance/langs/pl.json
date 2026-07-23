@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "Pokaż we wszystkich widokach",
+  "hideInAllViews": "Ukryj we wszystkich widokach",
+  "fieldVisibility": "Widoczność pola",
   "flashcardCallout": "Fiszki z bloku wyróżnienia",
   "flashcardCalloutTip": "Po włączeniu tytuł bloku wyróżnienia jest rozpoznawany jako pytanie, a jego zawartość jako odpowiedź",
   "flashcardBlockquote": "Fiszki z bloku cytatu",

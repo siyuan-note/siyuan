@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "إظهار في جميع العروض",
+  "hideInAllViews": "إخفاء في جميع العروض",
+  "fieldVisibility": "إمكانية رؤية الحقل",
   "flashcardCallout": "إنشاء بطاقات من كتل التنبيه",
   "flashcardCalloutTip": "عند التمكين، يتم التعرف على عنوان كتلة التنبيه كسؤال ومحتواها كإجابة",
   "flashcardBlockquote": "إنشاء بطاقات من كتل الاقتباس",

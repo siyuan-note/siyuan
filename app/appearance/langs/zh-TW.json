@@ -1,4 +1,7 @@
 {
+  "showInAllViews": "在所有視圖中顯示",
+  "hideInAllViews": "在所有視圖中隱藏",
+  "fieldVisibility": "欄位可見性",
   "flashcardCallout": "提示塊製卡",
   "flashcardCalloutTip": "啟用後支援提示塊製卡，提示塊的標題被識別為問題，內容識別為答案",
   "flashcardBlockquote": "引述塊製卡",

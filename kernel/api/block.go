@@ -68,7 +68,9 @@ func getBlockTreeInfos(c *gin.Context) {
 		ids = append(ids, id.(string))
 	}
 
-	ret.Data = model.GetBlockTreeInfosInBox(ids, encryptedNotebookFromArg(arg))
+	boxID := encryptedNotebookFromArg(arg)
+	ids = filterBlockIDsByPublishAccess(c, ids, boxID)
+	ret.Data = model.GetBlockTreeInfosInBox(ids, boxID)
 }
 
 func getBlockSiblingID(c *gin.Context) {
@@ -81,7 +83,17 @@ func getBlockSiblingID(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	parent, previous, next := model.GetBlockSiblingIDInBox(id, encryptedNotebookFromArg(arg))
+	boxID := encryptedNotebookFromArg(arg)
+	if !isBlockPublishAccessible(c, id, boxID) {
+		ret.Data = map[string]string{
+			"parent":   "",
+			"next":     "",
+			"previous": "",
+		}
+		return
+	}
+
+	parent, previous, next := model.GetBlockSiblingIDInBox(id, boxID)
 	ret.Data = map[string]string{
 		"parent":   parent,
 		"next":     next,
@@ -99,7 +111,17 @@ func getBlockRelevantIDs(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	parentID, previousID, nextID, err := model.GetBlockRelevantIDsInBox(id, encryptedNotebookFromArg(arg))
+	boxID := encryptedNotebookFromArg(arg)
+	if !isBlockPublishAccessible(c, id, boxID) {
+		ret.Data = map[string]string{
+			"parentID":   "",
+			"previousID": "",
+			"nextID":     "",
+		}
+		return
+	}
+
+	parentID, previousID, nextID, err := model.GetBlockRelevantIDsInBox(id, boxID)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -415,14 +437,15 @@ func getDocInfo(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	if !checkBlockPublishAccess(c, id, ret) {
+	boxID := encryptedNotebookFromArg(arg)
+	if !checkBlockPublishAccessInBox(c, id, boxID, ret) {
 		return
 	}
 
 	var info *model.BlockInfo
 	var err error
-	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
-		info, err = model.GetDocInfoInBox(id, notebook)
+	if boxID != "" {
+		info, err = model.GetDocInfoInBox(id, boxID)
 	} else {
 		info, err = model.GetDocInfo(id)
 	}
@@ -575,10 +598,16 @@ func getRefText(c *gin.Context) {
 		return
 	}
 
+	boxID := encryptedNotebookFromArg(arg)
+	if !isBlockPublishAccessible(c, id, boxID) {
+		ret.Data = model.ErrBlockNotFound.Error()
+		return
+	}
+
 	// 加密笔记本的块引解析走 InBox 版（查加密 blocktree + content db）
 	var refText string
-	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
-		refText = model.GetBlockRefTextInBox(id, notebook)
+	if boxID != "" {
+		refText = model.GetBlockRefTextInBox(id, boxID)
 	} else {
 		refText = model.GetBlockRefText(id)
 	}
@@ -691,10 +720,16 @@ func getBlockBreadcrumb(c *gin.Context) {
 		}
 	}
 
+	boxID := encryptedNotebookFromArg(arg)
+	if !isBlockPublishAccessible(c, id, boxID) {
+		ret.Data = []*model.BlockPath{}
+		return
+	}
+
 	var blockPath []*model.BlockPath
 	var err error
-	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
-		blockPath, err = model.BuildBlockBreadcrumbInBox(id, excludeTypes, notebook)
+	if boxID != "" {
+		blockPath, err = model.BuildBlockBreadcrumbInBox(id, excludeTypes, boxID)
 	} else {
 		blockPath, err = model.BuildBlockBreadcrumb(id, excludeTypes)
 	}
@@ -755,15 +790,16 @@ func getBlockInfo(c *gin.Context) {
 	if util.InvalidIDPattern(id, ret) {
 		return
 	}
-	if !checkBlockPublishAccess(c, id, ret) {
+	boxID := encryptedNotebookFromArg(arg)
+	if !checkBlockPublishAccessInBox(c, id, boxID, ret) {
 		return
 	}
 
 	// 仅在此处使用带重建索引的加载函数，其他地方不要使用
 	var tree *parse.Tree
 	var err error
-	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
-		tree, err = model.LoadTreeByBlockIDWithReindexInBox(id, notebook)
+	if boxID != "" {
+		tree, err = model.LoadTreeByBlockIDWithReindexInBox(id, boxID)
 	} else {
 		tree, err = model.LoadTreeByBlockIDWithReindex(id)
 	}
@@ -835,18 +871,40 @@ func getBlockInfo(c *gin.Context) {
 }
 
 func checkBlockPublishAccess(c *gin.Context, id string, ret *gulu.Result) bool {
-	if !model.IsReadOnlyRoleContext(c) {
-		return true
-	}
+	return checkBlockPublishAccessInBox(c, id, "", ret)
+}
 
-	publishAccess := model.GetPublishAccess()
-	if model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
+func checkBlockPublishAccessInBox(c *gin.Context, id, boxID string, ret *gulu.Result) bool {
+	if isBlockPublishAccessible(c, id, boxID) {
 		return true
 	}
 
 	ret.Code = -1
 	ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
 	return false
+}
+
+func isBlockPublishAccessible(c *gin.Context, id, boxID string) bool {
+	if !model.IsReadOnlyRoleContext(c) {
+		return true
+	}
+
+	return model.CheckBlockIdAccessableByPublishAccessInBox(c, model.GetPublishAccess(), id, boxID)
+}
+
+func filterBlockIDsByPublishAccess(c *gin.Context, ids []string, boxID string) []string {
+	if !model.IsReadOnlyRoleContext(c) {
+		return ids
+	}
+
+	publishAccess := model.GetPublishAccess()
+	ret := make([]string, 0, len(ids))
+	for _, id := range ids {
+		if model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, id, boxID) {
+			ret = append(ret, id)
+		}
+	}
+	return ret
 }
 
 func getBlockDOM(c *gin.Context) {

@@ -46,3 +46,26 @@ func TestResolveAttributeViewTargetGroupID(t *testing.T) {
 		t.Fatalf("missing group should fall back, got %q", got)
 	}
 }
+
+func TestGetAttributeViewPasteRowsFromTable(t *testing.T) {
+	table := &av.Table{Rows: []*av.TableRow{
+		{ID: "20260723000000-itemaaa"},
+		{ID: "20260723000000-itembbb"},
+		{ID: "20260723000000-itemccc"},
+	}}
+
+	rows, err := getAttributeViewPasteRowsFromTable(table, "20260723000000-itembbb", 3)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if 2 != len(rows) || "20260723000000-itembbb" != rows[0].ID || "20260723000000-itemccc" != rows[1].ID {
+		t.Fatalf("unexpected paste rows: %+v", rows)
+	}
+
+	if _, err = getAttributeViewPasteRowsFromTable(table, "20260723000000-missing", 1); nil == err {
+		t.Fatal("missing start item should return an error")
+	}
+	if _, err = getAttributeViewPasteRowsFromTable(table, "20260723000000-itemaaa", 0); nil == err {
+		t.Fatal("invalid count should return an error")
+	}
+}

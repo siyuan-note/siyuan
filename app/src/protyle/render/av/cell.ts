@@ -717,7 +717,8 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
 };
 
 export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLElement, value?: any,
-                                       cElements?: HTMLElement[], columns?: IAVColumn[], html?: string, getOperations = false) => {
+                                       cElements?: HTMLElement[], columns?: IAVColumn[], html?: string, getOperations = false,
+                                       forceOperation = false) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -885,14 +886,19 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         // formattedContent 在单元格渲染时没有用到，需对比保持一致
         if (type === "date") {
             if (!(value && typeof value === "object" && typeof value.isNotTime === "boolean")) {
-                const response = await fetchSyncPost("/api/av/getAttributeViewKeysByID", {avID: avID, keyIDs: [colId]});
-                if (response.data[0].date) {
-                    cellValue.date.isNotTime = !response.data[0].date.fillSpecificTime;
+                const column = columns?.find(item => item.id === colId);
+                if (column?.date) {
+                    cellValue.date.isNotTime = !column.date.fillSpecificTime;
+                } else {
+                    const response = await fetchSyncPost("/api/av/getAttributeViewKeysByID", {avID: avID, keyIDs: [colId]});
+                    if (response.data[0].date) {
+                        cellValue.date.isNotTime = !response.data[0].date.fillSpecificTime;
+                    }
                 }
             }
             cellValue.date.formattedContent = oldValue.date.formattedContent;
         }
-        if (!objEquals(cellValue, oldValue)) {
+        if (forceOperation || !objEquals(cellValue, oldValue)) {
             doOperations.push({
                 action: "updateAttrViewCell",
                 id: cellId,

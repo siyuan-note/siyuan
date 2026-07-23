@@ -18,6 +18,7 @@ package model
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"slices"
@@ -49,6 +50,57 @@ type AttributeViewRenderTarget struct {
 func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	viewable, attrView, _, err = RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, createIfNotExist, ignoreRows, "", "")
 	return
+}
+
+// GetAttributeViewPasteRows 返回当前表格视图中从指定条目开始的连续行，供粘贴覆盖未加载条目。
+func GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID string, count int) (table *av.Table, err error) {
+	viewable, _, err := RenderAttributeView(blockID, avID, viewID, query, 1, math.MaxInt, nil, false, false)
+	if nil != err {
+		return nil, err
+	}
+
+	table, ok := viewable.(*av.Table)
+	if !ok {
+		return nil, fmt.Errorf("attribute view [%s] is not a table", avID)
+	}
+	if "" != groupID {
+		var groupTable *av.Table
+		for _, group := range table.Groups {
+			if group.GetID() == groupID {
+				groupTable, _ = group.(*av.Table)
+				break
+			}
+		}
+		if nil == groupTable {
+			return nil, fmt.Errorf("attribute view group [%s] not found", groupID)
+		}
+		table = groupTable
+	}
+
+	rows, err := getAttributeViewPasteRowsFromTable(table, startItemID, count)
+	if nil != err {
+		return nil, err
+	}
+	table.Rows = rows
+	return table, nil
+}
+
+func getAttributeViewPasteRowsFromTable(table *av.Table, startItemID string, count int) (rows []*av.TableRow, err error) {
+	if count < 1 {
+		return nil, fmt.Errorf("invalid paste row count [%d]", count)
+	}
+	start := -1
+	for i, row := range table.Rows {
+		if row.ID == startItemID {
+			start = i
+			break
+		}
+	}
+	if 0 > start {
+		return nil, fmt.Errorf("attribute view item [%s] not found", startItemID)
+	}
+	end := start + min(count, len(table.Rows)-start)
+	return table.Rows[start:end], nil
 }
 
 func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {

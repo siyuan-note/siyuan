@@ -739,6 +739,50 @@ func getAttributeView(c *gin.Context) {
 	}
 }
 
+func getAttributeViewPasteRows(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var avID, blockID, viewID, groupID, query, startItemID string
+	var countArg float64
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("avID", &avID, true, true),
+		util.BindJsonArg("blockID", &blockID, true, true),
+		util.BindJsonArg("viewID", &viewID, false, false),
+		util.BindJsonArg("groupID", &groupID, false, false),
+		util.BindJsonArg("query", &query, false, false),
+		util.BindJsonArg("startItemID", &startItemID, true, true),
+		util.BindJsonArg("count", &countArg, true, false),
+	) {
+		return
+	}
+	if util.InvalidIDPattern(avID, ret) || util.InvalidIDPattern(blockID, ret) ||
+		util.InvalidIDPattern(startItemID, ret) ||
+		("" != viewID && util.InvalidIDPattern(viewID, ret)) ||
+		("" != groupID && util.InvalidIDPattern(groupID, ret)) {
+		return
+	}
+	count := int(countArg)
+	if countArg != float64(count) || count < 1 || 100000 < count {
+		ret.Code = -1
+		ret.Msg = "invalid paste row count"
+		return
+	}
+
+	view, err := model.GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID, count)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{"view": view}
+}
+
 func getAttributeViewFieldViews(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

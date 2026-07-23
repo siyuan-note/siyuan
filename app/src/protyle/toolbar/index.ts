@@ -5,16 +5,17 @@ import {
     fixTableRange,
     focusBlock,
     focusByRange,
+    focusByOffset,
     focusByWbr,
+    getBlockRanges,
     getEditorRange,
     getSelectionPosition,
-    selectAll,
-    setLastNodeRange
+    selectAll
 } from "../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
 import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
-import {transaction, updateTransaction} from "../wysiwyg/transaction";
+import {transaction, updateBatchTransaction, updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
 import {
     copyPlainText,
@@ -216,7 +217,8 @@ export class Toolbar {
         this.toolbarHeight = this.element.clientHeight;
         const protyleRect = protyle.element.getBoundingClientRect();
         const rangeRects = range.getClientRects();
-        const rangeRect = rangePosition.isBottom ? rangeRects[rangeRects.length - 1] : rangeRects[0];
+        const rangeRect = (rangePosition.isBottom ? rangeRects[rangeRects.length - 1] : rangeRects[0]) ||
+            range.getBoundingClientRect();
         const above = rangeRect.top - this.toolbarHeight - 4;
         const below = rangeRect.bottom + 4;
         const y = rangePosition.isBottom ?
@@ -228,6 +230,8 @@ export class Toolbar {
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
             item.classList.remove("protyle-toolbar__item--current");
         });
+        this.element.querySelector('[data-type="a"]')?.toggleAttribute("disabled",
+            nodeElement !== hasClosestBlock(range.endContainer));
         const types = this.getCurrentType();
         types.forEach(item => {
             if (["search-mark", "a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math",
@@ -287,18 +291,91 @@ export class Toolbar {
 
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
-        if (!nodeElement || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
+        if (!nodeElement) {
             return;
         }
         const endElement = hasClosestBlock(this.range.endContainer);
         if (!endElement) {
             return;
         }
-        // 三击后还没有重新纠正 range 时使用快捷键标记会导致异常 https://github.com/siyuan-note/siyuan/issues/7068
         if (nodeElement !== endElement) {
-            this.range = setLastNodeRange(getContenteditableElement(nodeElement), this.range, false);
+            if (type === "a") {
+                return;
+            }
+            return this.setBlockRangesInlineMark(protyle, type, action, textObj);
+        }
+        if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
+            return;
+        }
+        return this.setInlineMarkInBlock(protyle, type, action, textObj);
+    }
+
+    private setBlockRangesInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",
+                                     textObj?: ITextOption) {
+        const ranges = getBlockRanges(protyle.wysiwyg.element, this.range.cloneRange(), ["NodeCodeBlock"]);
+        if (ranges.length === 0) {
+            return;
         }
 
+        const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
+        const remove = type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
+            (!textObj && ranges.every(item => this.getCurrentType(item.range).includes(type)));
+        const rangesByBlock = new Map<HTMLElement, typeof ranges>();
+        ranges.forEach(item => {
+            const blockRanges = rangesByBlock.get(item.blockElement) || [];
+            blockRanges.push(item);
+            rangesByBlock.set(item.blockElement, blockRanges);
+        });
+        const blockElements = Array.from(rangesByBlock.keys());
+        const memoOldHTMLs = type === "inline-memo" ?
+            new Map(blockElements.map(item => [item.getAttribute("data-node-id"), item.outerHTML])) : undefined;
+        const newNodes: Node[] = [];
+        let selectionRange: Range;
+        updateBatchTransaction(blockElements, protyle, blockElement => {
+            rangesByBlock.get(blockElement).forEach(item => {
+                this.range = item.range;
+                const rangeNodes = this.setInlineMarkInBlock(protyle, type, action, textObj, remove) || [];
+                const connectedNodes = rangeNodes.filter(node => node.isConnected);
+                let offsetRange: Range;
+                if (["block-ref", "file-annotation-ref", "inline-math"].includes(type) && connectedNodes.length > 0) {
+                    offsetRange = document.createRange();
+                    offsetRange.setStartBefore(connectedNodes[0]);
+                    offsetRange.setEndAfter(connectedNodes[connectedNodes.length - 1]);
+                } else {
+                    offsetRange = focusByOffset(item.editableElement, item.start, item.end, false) as Range;
+                }
+                if (offsetRange) {
+                    if (selectionRange) {
+                        selectionRange.setEnd(offsetRange.endContainer, offsetRange.endOffset);
+                    } else {
+                        selectionRange = offsetRange.cloneRange();
+                    }
+                }
+                newNodes.push(...connectedNodes);
+            });
+        });
+        if (selectionRange) {
+            this.range = selectionRange;
+            focusByRange(this.range);
+        }
+        if (memoOldHTMLs) {
+            const memoElements = newNodes.filter(item => item.nodeType !== 3 &&
+                ((item as HTMLElement).getAttribute("data-type") || "").split(" ").includes("inline-memo")) as HTMLElement[];
+            const memoElement = memoElements[0];
+            if (memoElement && !memoElement.getAttribute("data-inline-memo-content")) {
+                this.showRender(protyle, memoElement, memoElements, memoOldHTMLs);
+            }
+        }
+        return newNodes;
+    }
+
+    private setInlineMarkInBlock(protyle: IProtyle, type: string, action: "range" | "toolbar",
+                                 textObj?: ITextOption, remove?: boolean) {
+        const nodeElement = hasClosestBlock(this.range.startContainer);
+        if (!nodeElement || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
+            return;
+        }
+        const isBatch = remove !== undefined;
         let rangeTypes: string[] = [];
         this.range.cloneContents().childNodes.forEach((item: HTMLElement) => {
             if (item.nodeType !== 3) {
@@ -458,9 +535,11 @@ export class Toolbar {
         let endContainer: Node;
         let startOffset: number;
         let endOffset: number;
-        if (type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") || (
+        const shouldRemove = remove ?? (type === "clear" ||
+            actionBtn?.classList.contains("protyle-toolbar__item--current") || (
             action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && !textObj
-        )) {
+        ));
+        if (shouldRemove) {
             // 移除
             if (type === "clear") {
                 toolbarElement.querySelectorAll('[data-type="strong"],[data-type="em"],[data-type="u"],[data-type="s"],[data-type="mark"],[data-type="sup"],[data-type="sub"],[data-type="kbd"],[data-type="mark"],[data-type="code"]').forEach(item => {
@@ -857,7 +936,9 @@ export class Toolbar {
             }
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        updateTransaction(protyle, nodeElement, html);
+        if (!isBatch) {
+            updateTransaction(protyle, nodeElement, html);
+        }
         nodeElement.querySelectorAll("wbr").forEach(item => {
             item.remove();
         });
@@ -876,23 +957,25 @@ export class Toolbar {
                 this.range.setEnd(endContainer.firstChild, endOffset);
             }
         }
-        focusByRange(this.range);
+        if (!isBatch) {
+            focusByRange(this.range);
+        }
 
         const showMenuElement = newNodes[0] as HTMLElement;
-        if (showMenuElement.nodeType !== 3) {
+        if (showMenuElement && showMenuElement.nodeType !== 3) {
             const showMenuTypes = (showMenuElement.getAttribute("data-type") || "").split(" ");
             if (type === "inline-math") {
                 mathRender(nodeElement);
-                if (selectText === "" && showMenuTypes.includes("inline-math")) {
+                if (!isBatch && selectText === "" && showMenuTypes.includes("inline-math")) {
                     protyle.toolbar.showRender(protyle, showMenuElement, undefined, html);
                 }
             } else if (type === "inline-memo") {
-                if (!showMenuElement.getAttribute("data-inline-memo-content") &&
+                if (!isBatch && !showMenuElement.getAttribute("data-inline-memo-content") &&
                     showMenuTypes.includes("inline-memo")) {
                     protyle.toolbar.showRender(protyle, showMenuElement, newNodes as Element[], html);
                 }
             } else if (type === "a") {
-                if (showMenuTypes.includes("a") &&
+                if (!isBatch && showMenuTypes.includes("a") &&
                     (showMenuElement.textContent.replace(Constants.ZWSP, "") === "" || !showMenuElement.getAttribute("data-href"))) {
                     linkMenu(protyle, showMenuElement, showMenuElement.getAttribute("data-href") ? true : false);
                 }
@@ -901,7 +984,8 @@ export class Toolbar {
         return newNodes;
     }
 
-    public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[], oldHTML?: string) {
+    public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[],
+                      oldHTML?: string | Map<string, string>) {
         const nodeElement = hasClosestBlock(renderElement);
         if (!nodeElement) {
             return;
@@ -912,7 +996,17 @@ export class Toolbar {
         window.siyuan.menus.menu.remove();
         const id = nodeElement.getAttribute("data-node-id");
         const types = (renderElement.getAttribute("data-type") || "").split(" ");
-        const html = oldHTML || nodeElement.outerHTML;
+        const html = oldHTML instanceof Map ? oldHTML.get(id) || nodeElement.outerHTML :
+            oldHTML || nodeElement.outerHTML;
+        const updateBlockElements = new Set<Element>();
+        if (oldHTML instanceof Map) {
+            updateElements?.forEach(item => {
+                const blockElement = hasClosestBlock(item);
+                if (blockElement) {
+                    updateBlockElements.add(blockElement);
+                }
+            });
+        }
         let title = "HTML";
         let placeholder = "";
         const isInlineMemo = types.includes("inline-memo");
@@ -1282,7 +1376,30 @@ export class Toolbar {
                 nodeElement.querySelector("wbr")?.remove();
             }
 
-            if (!noChange && nodeElement.outerHTML !== html) {
+            if (!noChange && oldHTML instanceof Map && updateElements) {
+                const operations: IOperation[] = [];
+                const undoOperations: IOperation[] = [];
+                const editingAttr = ` ${Constants.ATTRIBUTE_EDITING}="true"`;
+                updateBlockElements.forEach(item => {
+                    const itemOldHTML = oldHTML.get(item.getAttribute("data-node-id"));
+                    if (itemOldHTML && item.outerHTML.replace(editingAttr, "") !== itemOldHTML) {
+                        item.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                        operations.push({
+                            action: "update",
+                            id: item.getAttribute("data-node-id"),
+                            data: item.outerHTML.replace(editingAttr, ""),
+                        });
+                        undoOperations.push({
+                            action: "update",
+                            id: item.getAttribute("data-node-id"),
+                            data: itemOldHTML,
+                        });
+                    }
+                });
+                if (operations.length > 0) {
+                    transaction(protyle, operations, undoOperations);
+                }
+            } else if (!noChange && nodeElement.outerHTML !== html) {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 updateTransaction(protyle, nodeElement, html);
             }

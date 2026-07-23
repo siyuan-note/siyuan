@@ -919,6 +919,128 @@ func GetAssetAbsPath(relativePath string) (string, error) {
 	return GetAssetAbsPathWithOpt(relativePath, false)
 }
 
+// ResolveDataAssetPath 解析 data 相对资源路径，并确保目标位于全局或普通笔记本的资源目录中。
+func ResolveDataAssetPath(assetPath string) (relativePath, absPath string, err error) {
+	if assetPath == "" {
+		err = errors.New("asset path is required")
+		return
+	}
+
+	nativePath := filepath.FromSlash(assetPath)
+	if filepath.IsAbs(nativePath) || filepath.VolumeName(nativePath) != "" ||
+		(len(nativePath) > 0 && os.IsPathSeparator(nativePath[0])) {
+		err = fmt.Errorf("asset path must be relative to data directory: %s", assetPath)
+		return
+	}
+
+	nativePath = filepath.Clean(nativePath)
+	absPath = filepath.Join(util.DataDir, nativePath)
+	dataRelativePath, relErr := filepath.Rel(util.DataDir, absPath)
+	if relErr != nil || dataRelativePath == "." || dataRelativePath == ".." ||
+		strings.HasPrefix(dataRelativePath, ".."+string(filepath.Separator)) {
+		err = fmt.Errorf("asset path escapes data directory: %s", assetPath)
+		return
+	}
+
+	parts := strings.Split(filepath.ToSlash(dataRelativePath), "/")
+	assetDirIndex := -1
+	switch {
+	case len(parts) > 1 && parts[0] == "assets":
+		assetDirIndex = 0
+	case len(parts) > 2 && ast.IsNodeIDPattern(parts[0]):
+		for i := 1; i < len(parts)-1; i++ {
+			if parts[i] == "assets" {
+				assetDirIndex = i
+				break
+			}
+		}
+		if assetDirIndex > 0 {
+			boxConfPath := filepath.Join(util.DataDir, parts[0], ".siyuan", "conf.json")
+			if !filelock.IsExist(boxConfPath) {
+				err = fmt.Errorf("asset path does not belong to a notebook: %s", assetPath)
+				return
+			}
+			if IsEncryptedBox(parts[0]) {
+				err = fmt.Errorf("accessing assets in encrypted notebook [%s] is not supported", parts[0])
+				return
+			}
+		}
+	}
+	if assetDirIndex < 0 {
+		err = fmt.Errorf("path is not under an assets directory: %s", assetPath)
+		return
+	}
+
+	assetRootParts := parts[:assetDirIndex+1]
+	assetRoot := filepath.Join(util.DataDir, filepath.FromSlash(strings.Join(assetRootParts, "/")))
+	if !gulu.File.IsSubPath(assetRoot, absPath) {
+		err = fmt.Errorf("path is not a child of assets directory: %s", assetPath)
+		return
+	}
+
+	resolvedRoot, evalErr := filepath.EvalSymlinks(assetRoot)
+	if evalErr != nil {
+		err = fmt.Errorf("resolve assets directory [%s] failed: %w", assetRoot, evalErr)
+		return
+	}
+	if assetDirIndex > 0 {
+		notebookRoot := filepath.Join(util.DataDir, parts[0])
+		resolvedDataDir, dataEvalErr := filepath.EvalSymlinks(util.DataDir)
+		resolvedNotebookRoot, notebookEvalErr := filepath.EvalSymlinks(notebookRoot)
+		if dataEvalErr != nil || notebookEvalErr != nil ||
+			!gulu.File.IsSubPath(resolvedDataDir, resolvedNotebookRoot) ||
+			!gulu.File.IsSubPath(resolvedNotebookRoot, resolvedRoot) {
+			err = fmt.Errorf("notebook asset path resolves outside notebook directory: %s", assetPath)
+			return
+		}
+	}
+	resolvedPath, evalErr := filepath.EvalSymlinks(absPath)
+	if evalErr != nil {
+		err = fmt.Errorf("resolve asset [%s] failed: %w", absPath, evalErr)
+		return
+	}
+	if !gulu.File.IsSubPath(resolvedRoot, resolvedPath) {
+		err = fmt.Errorf("asset path resolves outside assets directory: %s", assetPath)
+		return
+	}
+
+	relativePath = filepath.ToSlash(dataRelativePath)
+	return
+}
+
+// ResolveUnusedDataAssetPath 解析 data 相对资源路径，并确认目标当前未被引用。
+func ResolveUnusedDataAssetPath(assetPath string) (relativePath, absPath string, err error) {
+	relativePath, absPath, err = ResolveDataAssetPath(assetPath)
+	if err != nil {
+		return
+	}
+
+	if unusedAssetsContainPath(relativePath, absPath, UnusedAssets(false)) {
+		return
+	}
+	err = fmt.Errorf("asset is not unused: %s", relativePath)
+	return
+}
+
+func unusedAssetsContainPath(relativePath, absPath string, items []*UnusedItem) bool {
+	resolvedPath, _ := filepath.EvalSymlinks(absPath)
+	for _, item := range items {
+		if item.AbsPath != "" {
+			resolvedItemPath, evalErr := filepath.EvalSymlinks(item.AbsPath)
+			samePath, relErr := filepath.Rel(resolvedPath, resolvedItemPath)
+			if resolvedPath != "" && evalErr == nil && relErr == nil && samePath == "." {
+				return true
+			}
+			continue
+		}
+		itemPath := filepath.ToSlash(filepath.Clean(filepath.FromSlash(item.Item)))
+		if itemPath == relativePath {
+			return true
+		}
+	}
+	return false
+}
+
 // AssetPathWithoutQuery 返回去掉查询参数后的资源路径，用于复制到导出目录等磁盘路径场景。
 func AssetPathWithoutQuery(relativePath string) string {
 	relativePath = strings.TrimSpace(relativePath)
@@ -1324,35 +1446,26 @@ func RemoveUnusedAssets() (ret []string) {
 	return
 }
 
-func RemoveUnusedAsset(p string) (ret string) {
-	absPath := filepath.Join(util.DataDir, p)
-	if !filelock.IsExist(absPath) {
-		return absPath
+func RemoveUnusedAsset(p string) (ret string, err error) {
+	relativePath, absPath, err := ResolveUnusedDataAssetPath(p)
+	if err != nil {
+		return
 	}
-
-	// 加密笔记本的资源不参与未引用清理（与批量版 RemoveUnusedAssets 经 UnusedAssets 的排除一致），
-	// 否则未解锁时 admin 可删加密 box 的资源，破坏可用性且留下悬空的文件名映射。
-	if IsEncryptedAssetPath(absPath) {
-		return absPath
-	}
-
 	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
 
-	newP := strings.TrimPrefix(absPath, util.DataDir)
-	historyPath := filepath.Join(historyDir, newP)
-	if filelock.IsExist(absPath) {
-		if err = filelock.Copy(absPath, historyPath); err != nil {
-			return
-		}
-
-		hash, _ := util.GetEtag(absPath)
-		sql.BatchRemoveAssetsQueue([]string{hash})
-		cache.RemoveAssetHash(hash)
+	historyPath := filepath.Join(historyDir, filepath.FromSlash(relativePath))
+	if err = filelock.Copy(absPath, historyPath); err != nil {
+		err = fmt.Errorf("copy unused asset [%s] to history failed: %w", absPath, err)
+		return
 	}
+
+	hash, _ := util.GetEtag(absPath)
+	sql.BatchRemoveAssetsQueue([]string{hash})
+	cache.RemoveAssetHash(hash)
 
 	if util.IsMobileContainer() {
 		HandleAssetsRemoveEvent(absPath)
@@ -1361,16 +1474,17 @@ func RemoveUnusedAsset(p string) (ret string) {
 	if err = filelock.RemoveWithoutFatal(absPath); err != nil {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 		util.PushErrMsg(fmt.Sprintf("%s", err), 7000)
+		err = fmt.Errorf("remove unused asset [%s] failed: %w", absPath, err)
 		return
 	}
 	ret = absPath
 
-	util.RemoveAssetText(p)
+	util.RemoveAssetText(relativePath)
 
 	IncSync()
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
-	cache.RemoveAsset(p)
+	cache.RemoveAsset(relativePath)
 	return
 }
 
@@ -1542,6 +1656,7 @@ type UnusedItem struct {
 	Name     string    `json:"name"`
 	BlockIDs []string  `json:"blockIDs,omitempty"`
 	ModTime  time.Time `json:"-"`
+	AbsPath  string    `json:"-"`
 }
 
 func UnusedAssets(sorted bool) (ret []*UnusedItem) {
@@ -1700,13 +1815,11 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 			continue
 		}
 
-		var p string
-		if strings.HasPrefix(dataAssetsAbsPath, assetAbsPath) {
-			p = assetAbsPath[strings.Index(assetAbsPath, "assets"):]
-		} else {
-			p = strings.TrimPrefix(assetAbsPath, filepath.Dir(dataAssetsAbsPath))
+		p, ok := unusedAssetRelativePath(dataAssetsAbsPath, assetAbsPath)
+		if !ok {
+			logging.LogWarnf("skip unused asset outside data asset roots [%s]", assetAbsPath)
+			continue
 		}
-		p = strings.TrimPrefix(filepath.ToSlash(p), "/")
 		name := path.Base(p)
 
 		var modTime time.Time
@@ -1716,7 +1829,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 			}
 		}
 
-		ret = append(ret, &UnusedItem{Item: p, Name: name, ModTime: modTime})
+		ret = append(ret, &UnusedItem{Item: p, Name: name, ModTime: modTime, AbsPath: assetAbsPath})
 	}
 
 	if sorted {
@@ -1728,6 +1841,24 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 		})
 	}
 	return
+}
+
+func unusedAssetRelativePath(dataAssetsAbsPath, assetAbsPath string) (string, bool) {
+	if gulu.File.IsSubPath(dataAssetsAbsPath, assetAbsPath) {
+		relativePath, err := filepath.Rel(dataAssetsAbsPath, assetAbsPath)
+		if err != nil {
+			return "", false
+		}
+		return path.Join("assets", filepath.ToSlash(relativePath)), true
+	}
+	if gulu.File.IsSubPath(util.DataDir, assetAbsPath) {
+		relativePath, err := filepath.Rel(util.DataDir, assetAbsPath)
+		if err != nil {
+			return "", false
+		}
+		return filepath.ToSlash(relativePath), true
+	}
+	return "", false
 }
 
 func MissingAssets() (ret []*UnusedItem) {

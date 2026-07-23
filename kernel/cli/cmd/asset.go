@@ -24,7 +24,6 @@ import (
 	"text/tabwriter"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/spf13/cobra"
 )
@@ -113,12 +112,22 @@ var assetCleanCmd = &cobra.Command{
 	Short: "Clean unused assets",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		singlePath, _ := cmd.Flags().GetString("path")
-		if singlePath != "" {
+		if cmd.Flags().Changed("path") {
+			if singlePath == "" {
+				return fmt.Errorf("--path must not be empty")
+			}
 			if dryRun {
-				fmt.Printf("[dry-run] Would remove unused asset: %s\n", singlePath)
+				relativePath, _, err := model.ResolveUnusedDataAssetPath(singlePath)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("[dry-run] Would remove unused asset: %s\n", relativePath)
 				return nil
 			}
-			ret := model.RemoveUnusedAsset(singlePath)
+			ret, err := model.RemoveUnusedAsset(singlePath)
+			if err != nil {
+				return err
+			}
 			fmt.Println(ret)
 			return nil
 		}
@@ -149,7 +158,10 @@ var assetStatCmd = &cobra.Command{
 		if p == "" {
 			return fmt.Errorf("--path is required")
 		}
-		abs := filepath.Join(util.DataDir, p)
+		relativePath, abs, err := model.ResolveDataAssetPath(p)
+		if err != nil {
+			return err
+		}
 		info, err := os.Stat(abs)
 		if err != nil {
 			return err
@@ -157,14 +169,14 @@ var assetStatCmd = &cobra.Command{
 		switch outputFormat {
 		case "json":
 			data, _ := json.MarshalIndent(map[string]any{
-				"path":    p,
+				"path":    relativePath,
 				"size":    info.Size(),
 				"isDir":   info.IsDir(),
 				"modTime": info.ModTime().Format("2006-01-02 15:04:05"),
 			}, "", "  ")
 			fmt.Println(string(data))
 		default:
-			fmt.Printf("Path:    %s\n", p)
+			fmt.Printf("Path:    %s\n", relativePath)
 			fmt.Printf("Size:    %d\n", info.Size())
 			fmt.Printf("IsDir:   %v\n", info.IsDir())
 			fmt.Printf("ModTime: %s\n", info.ModTime().Format("2006-01-02 15:04:05"))

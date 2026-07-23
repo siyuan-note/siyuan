@@ -6,7 +6,7 @@ const HEADING_NUMBER_WIDTH_PROPERTY = "--b3-protyle-heading-number-width";
 const NUMBERED_HEADING_SELECTOR = `${HEADING_SELECTOR}[data-heading-number], ` +
     `${HEADING_SELECTOR} > [contenteditable][data-heading-number]`;
 const HEADING_CONTAINER_TYPES = new Set(["NodeDocument", "NodeList", "NodeListItem", "NodeSuperBlock"]);
-const headingNumberMeasurements = new WeakMap<Element, {key: string, offset: string}>();
+let headingNumberMeasurements = new WeakMap<Element, {key: string, offset: string}>();
 
 export interface IHeadingNumberStyle {
     id: string;
@@ -17,6 +17,10 @@ export interface IHeadingNumberStyle {
 interface IHeadingNumberTarget extends IHeadingNumberStyle {
     element: Element;
 }
+
+export const invalidateHeadingNumberMeasurements = () => {
+    headingNumberMeasurements = new WeakMap<Element, {key: string, offset: string}>();
+};
 
 export const clearHeadingNumberElements = (root: Element) => {
     root.querySelectorAll(NUMBERED_HEADING_SELECTOR).forEach(item => {
@@ -195,6 +199,20 @@ const operationDataIsHeadingContainer = (data: unknown) => {
     }
     const match = data.match(/^\s*<[^>]*\bdata-type=(["'])([^"']+)\1/);
     return match ? HEADING_CONTAINER_TYPES.has(match[2]) : false;
+};
+
+export const operationsMayChangeOutline = (operations: IOperation[] = [], headingIDs: Set<string> = new Set()) => {
+    return operations.some(operation => {
+        if (["append", "delete", "move", "moveOutlineHeading"].includes(operation.action)) {
+            return true;
+        }
+        if (operation.action === "update" && operation.id && headingIDs.has(operation.id)) {
+            return true;
+        }
+        return ["appendInsert", "insert", "prependInsert", "update"].includes(operation.action) &&
+            (operationDataHasHeading(operation.data) ||
+                (operation.action === "update" && operationDataIsHeadingContainer(operation.data)));
+    });
 };
 
 export const operationsMayChangeHeadingNumbers = (

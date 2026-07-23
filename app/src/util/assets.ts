@@ -1,8 +1,10 @@
 import {Constants} from "../constants";
 import {addScript} from "../protyle/util/addScript";
 import {addStyle} from "../protyle/util/addStyle";
+import {getAllEditor, getAllModels} from "../layout/getAll";
+import {invalidateHeadingNumberMeasurements} from "../protyle/util/headingNumberCore";
+import {renderHeadingNumbers} from "../protyle/util/headingNumber";
 /// #if !MOBILE
-import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
 import {fetchPost} from "./fetch";
@@ -20,7 +22,31 @@ import {setCodeTheme} from "../protyle/render/util";
 import {getBackend, getFrontend} from "./functions";
 import {getWorkspaceName} from "./processTitle";
 
+let headingNumberMeasurementRefreshTimer: number;
+
+export const refreshHeadingNumberMeasurements = () => {
+    invalidateHeadingNumberMeasurements();
+    if (!window.siyuan.config.editor.headingNumber) {
+        return;
+    }
+    getAllEditor().forEach(item => renderHeadingNumbers(item.protyle));
+};
+
+const scheduleHeadingNumberMeasurementRefresh = (styleElements: HTMLLinkElement[]) => {
+    const schedule = (delay = 0) => {
+        window.clearTimeout(headingNumberMeasurementRefreshTimer);
+        headingNumberMeasurementRefreshTimer = window.setTimeout(refreshHeadingNumberMeasurements, delay);
+    };
+    styleElements.forEach(item => {
+        item.addEventListener("load", () => schedule(), {once: true});
+        item.addEventListener("error", () => schedule(), {once: true});
+    });
+    schedule(styleElements.length > 0 ? Constants.TIMEOUT_LOAD : 0);
+};
+
 export const loadAssets = (data: Config.IAppearance) => {
+    const changedThemeStyleElements: HTMLLinkElement[] = [];
+    let themeStylesChanged = false;
     const htmlElement = document.getElementsByTagName("html")[0];
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
     htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
@@ -41,6 +67,8 @@ export const loadAssets = (data: Config.IAppearance) => {
     if (defaultStyleElement) {
         if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
             const newStyleElement = document.createElement("link");
+            changedThemeStyleElements.push(newStyleElement);
+            themeStylesChanged = true;
             // 等待新样式表加载完成再移除旧样式表
             new Promise((resolve) => {
                 newStyleElement.rel = "stylesheet";
@@ -54,19 +82,29 @@ export const loadAssets = (data: Config.IAppearance) => {
         }
     } else {
         addStyle(defaultThemeAddress, "themeDefaultStyle");
+        changedThemeStyleElements.push(document.getElementById("themeDefaultStyle") as HTMLLinkElement);
+        themeStylesChanged = true;
     }
     const styleElement = document.getElementById("themeStyle");
     if ((data.mode === 1 && data.themeDark !== "midnight") || (data.mode === 0 && data.themeLight !== "daylight")) {
         const themeAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.css?v=${data.themeVer}`;
         if (styleElement) {
             if (!styleElement.getAttribute("href").startsWith(themeAddress)) {
+                changedThemeStyleElements.push(styleElement as HTMLLinkElement);
+                themeStylesChanged = true;
                 styleElement.setAttribute("href", themeAddress);
             }
         } else {
             addStyle(themeAddress, "themeStyle");
+            changedThemeStyleElements.push(document.getElementById("themeStyle") as HTMLLinkElement);
+            themeStylesChanged = true;
         }
     } else if (styleElement) {
         styleElement.remove();
+        themeStylesChanged = true;
+    }
+    if (themeStylesChanged) {
+        scheduleHeadingNumberMeasurementRefresh(changedThemeStyleElements);
     }
     /// #if !MOBILE
     getAllModels().graph.forEach(item => {

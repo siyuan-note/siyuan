@@ -19,6 +19,7 @@ import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragov
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
+import {operationsMayChangeOutline} from "../../protyle/util/headingNumberCore";
 
 export class MobileOutline extends Model {
     public tree: Tree;
@@ -789,29 +790,12 @@ export class MobileOutline extends Model {
         if (data.data.rootID !== this.blockId) {
             return;
         }
-        let needReload = false;
         const ops = data.data.sources[0];
-        ops.doOperations.find((item: IOperation) => {
-            if (item.action === "update" &&
-                (this.element.querySelector(`.b3-list-item[data-node-id="${item.id}"]`) || item.data.indexOf('data-type="NodeHeading"') > -1)) {
-                needReload = true;
-                return true;
-            } else if (item.action === "insert" && item.data.indexOf('data-type="NodeHeading"') > -1) {
-                needReload = true;
-                return true;
-            } else if (item.action === "delete" || item.action === "move") {
-                needReload = true;
-                return true;
-            }
-        });
-        if (!needReload && ops.undoOperations) {
-            ops.undoOperations.find((item: IOperation) => {
-                if (item.action === "update" && item.data?.indexOf('data-type="NodeHeading"') > -1) {
-                    needReload = true;
-                    return true;
-                }
-            });
-        }
+        const headingIDs = new Set(Array.from(this.element.querySelectorAll<HTMLElement>(
+            ".b3-list-item[data-node-id]"
+        )).map(item => item.dataset.nodeId!));
+        const needReload = operationsMayChangeOutline(ops.doOperations, headingIDs) ||
+            operationsMayChangeOutline(ops.undoOperations, headingIDs);
         if (needReload) {
             this.reload(() => {
                 // https://github.com/siyuan-note/siyuan/issues/8372

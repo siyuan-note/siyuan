@@ -3,9 +3,11 @@ import {Dialog} from "../../dialog";
 import {isMobile, objEquals} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
+import {refreshHeadingNumberMeasurements} from "../../util/assets";
 
 export const renderSnippet = () => {
     fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
+        let cssChanged = false;
         response.data.snippets.forEach((item: ISnippet) => {
             const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
             let exitElement = document.getElementById(id) as HTMLScriptElement | HTMLStyleElement;
@@ -13,12 +15,14 @@ export const renderSnippet = () => {
                 (!window.siyuan.config.snippet.enabledJS && item.type === "js")) {
                 if (exitElement) {
                     exitElement.remove();
+                    cssChanged = cssChanged || item.type === "css";
                 }
                 return;
             }
             if (!item.enabled) {
                 if (exitElement) {
                     exitElement.remove();
+                    cssChanged = cssChanged || item.type === "css";
                 }
                 return;
             }
@@ -27,12 +31,14 @@ export const renderSnippet = () => {
                     return;
                 }
                 exitElement.remove();
+                cssChanged = cssChanged || item.type === "css";
             }
             if (item.type === "css") {
                 const styleEl = document.createElement("style");
                 styleEl.id = id;
                 styleEl.textContent = item.content;
                 document.head.appendChild(styleEl);
+                cssChanged = true;
             } else if (item.type === "js") {
                 exitElement = document.createElement("script");
                 exitElement.type = "text/javascript";
@@ -41,6 +47,9 @@ export const renderSnippet = () => {
                 document.head.appendChild(exitElement);
             }
         });
+        if (cssChanged) {
+            refreshHeadingNumberMeasurements();
+        }
     });
 };
 
@@ -212,12 +221,17 @@ const genSnippet = (options: ISnippet) => {
 
 const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[]) => {
     fetchPost("/api/snippet/setSnippet", {snippets}, () => {
+        let cssChanged = false;
         removeIds.forEach(item => {
             const rmElement = document.querySelector(item);
             if (rmElement) {
                 rmElement.remove();
+                cssChanged = cssChanged || item.startsWith("#snippetCSS");
             }
         });
+        if (cssChanged) {
+            refreshHeadingNumberMeasurements();
+        }
         window.siyuan.config.snippet.enabledCSS = (dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement).checked;
         window.siyuan.config.snippet.enabledJS = (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked;
         fetchPost("/api/setting/setSnippet", window.siyuan.config.snippet);

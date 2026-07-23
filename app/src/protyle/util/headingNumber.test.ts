@@ -2,7 +2,9 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     buildHeadingNumberStyles,
+    invalidateHeadingNumberMeasurements,
     operationsMayChangeHeadingNumbers,
+    operationsMayChangeOutline,
     renderHeadingNumberElements
 } from "./headingNumberCore";
 
@@ -114,6 +116,11 @@ describe("renderHeadingNumbers", () => {
 
         assert.equal(heading.appendCount, 1);
 
+        invalidateHeadingNumberMeasurements();
+        renderHeadingNumberElements(root as unknown as Element, {heading: "1"});
+
+        assert.equal(heading.appendCount, 2);
+
         const emptyResult = renderHeadingNumberElements(root as unknown as Element, {});
 
         assert.equal(heading.getAttribute("data-heading-number"), null);
@@ -194,5 +201,37 @@ describe("operationsMayChangeHeadingNumbers", () => {
         }]);
 
         assert.equal(changed, true);
+    });
+});
+
+describe("operationsMayChangeOutline", () => {
+    it("API 更新容器并移除标题时刷新大纲", () => {
+        const changed = operationsMayChangeOutline([{
+            action: "update",
+            id: "list-item",
+            data: '<div data-node-id="list-item" data-type="NodeListItem"></div>',
+        }]);
+
+        assert.equal(changed, true);
+    });
+
+    it("已有标题转换为普通块时刷新大纲", () => {
+        const changed = operationsMayChangeOutline([{
+            action: "update",
+            id: "heading",
+            data: '<div data-node-id="heading" data-type="NodeParagraph"></div>',
+        }], new Set(["heading"]));
+
+        assert.equal(changed, true);
+    });
+
+    it("普通块内容更新时不刷新大纲", () => {
+        const changed = operationsMayChangeOutline([{
+            action: "update",
+            id: "paragraph",
+            data: '<div data-node-id="paragraph" data-type="NodeParagraph"></div>',
+        }]);
+
+        assert.equal(changed, false);
     });
 });

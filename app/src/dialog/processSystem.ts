@@ -20,6 +20,7 @@ import {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {Plugin} from "../plugin";
+import {shouldForceBacklinkRefresh} from "../layout/dock/backlinkRefresh";
 
 const BACKLINK_REFRESH_DELAY = 3600;
 let backlinkRefreshTimeout: number;
@@ -66,8 +67,9 @@ export const setDefRefCount = (data: {
             item.blockId !== data.rootID && item.blockId !== data.blockID && !data.defIDs?.includes(item.blockId))) {
             return;
         }
-        item.markDirty();
-        item.refreshIfVisible();
+        const ignoreFocus = shouldForceBacklinkRefresh(item.rootId, data.rootID);
+        item.markDirty(ignoreFocus);
+        item.refreshIfVisible(ignoreFocus);
     });
     /// #endif
     getAllEditor().forEach(editor => {

@@ -41,6 +41,8 @@ export class Backlink extends Model {
     } = {};
     private dirty = false;
     private destroyed = false;
+    private refreshQueued = false;
+    private ignoreFocusOnNextRefresh = false;
     private ownerFocusoutListener?: (event: FocusEvent) => void;
 
     constructor(options: {
@@ -621,6 +623,8 @@ export class Backlink extends Model {
         if (this.type !== "bottom") {
             return;
         }
+        this.editors.forEach(item => item.destroy());
+        this.editors = [];
         const loadingHTML = '<div class="backlinkList__loading"><img width="32px" height="32px" src="/stage/loading-pure.svg"></div>';
         this.tree.element.innerHTML = loadingHTML;
         this.mTree.element.innerHTML = loadingHTML;
@@ -629,9 +633,18 @@ export class Backlink extends Model {
 
     public refresh() {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
-        if (!this.blockId || element.classList.contains("fn__rotate")) {
+        if (!this.blockId) {
             return;
         }
+        if (element.classList.contains("fn__rotate")) {
+            if (!this.refreshQueued && this.type === "bottom") {
+                this.saveStatus();
+                this.showBottomLoading();
+            }
+            this.refreshQueued = true;
+            return;
+        }
+        this.refreshQueued = false;
         element.classList.add("fn__rotate");
         this.dirty = false;
         fetchPost("/api/ref/refreshBacklink", {
@@ -652,6 +665,7 @@ export class Backlink extends Model {
         }
         element.classList.add("fn__rotate");
         this.dirty = false;
+        this.ignoreFocusOnNextRefresh = false;
         // 解析当前反链面板所属 box：优先用已记录的 notebookId，首次为空时按 rootId 在已打开的编辑器里查找
         let notebookId = this.notebookId;
         if (!notebookId && this.rootId) {
@@ -675,6 +689,11 @@ export class Backlink extends Model {
         }
         fetchPost("/api/ref/getBacklink2", param, response => {
             if (this.destroyed || blockId !== this.blockId) {
+                return;
+            }
+            if (this.refreshQueued) {
+                element.classList.remove("fn__rotate");
+                this.refresh();
                 return;
             }
             if (!init) {
@@ -865,15 +884,21 @@ export class Backlink extends Model {
         element.querySelector("use").setAttribute("xlink:href", folded ? "#iconRight" : "#iconDown");
     }
 
-    public markDirty() {
+    public markDirty(ignoreFocus = false) {
         this.dirty = true;
+        if (ignoreFocus) {
+            this.ignoreFocusOnNextRefresh = true;
+        }
     }
 
     public refreshIfVisible(ignoreFocus = false) {
         if (this.type !== "bottom" || !this.dirty) {
             return;
         }
-        if (!ignoreFocus && this.ownerProtyle.element.contains(document.activeElement)) {
+        if (ignoreFocus) {
+            this.ignoreFocusOnNextRefresh = true;
+        }
+        if (!this.ignoreFocusOnNextRefresh && this.ownerProtyle.element.contains(document.activeElement)) {
             return;
         }
         if (this.element.classList.contains("fn__none") ||

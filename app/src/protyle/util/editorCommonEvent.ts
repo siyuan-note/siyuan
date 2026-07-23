@@ -54,6 +54,7 @@ import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
+import {isSameDragEditor, uniqueDragIds} from "./dragDocument";
 
 const convertListItemSubtype = (listItem: Element, subtype: string) => {
     const actionElement = listItem.querySelector(".protyle-action");
@@ -91,7 +92,7 @@ const getTargetListItem = (targetElement: Element, isBottom: boolean) => {
 
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
-                      isSameDoc: boolean, position: InsertPosition, isCopy: boolean) => {
+                      isSameEditor: boolean, position: InsertPosition, isCopy: boolean) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
@@ -192,7 +193,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 parentID: srcPos.parentID,
             });
         }
-        if (!isSameDoc && !isCopy) {
+        if (!isSameEditor && !isCopy) {
             // 打开两个相同的文档
             const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
             if (sameElement) {
@@ -274,7 +275,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 });
                 const topSourceParentElement = topSourceElement.parentElement;
                 topSourceElement.remove();
-                if (!isSameDoc) {
+                if (!isSameEditor) {
                     // 打开两个相同的文档
                     const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${topSourceElement.getAttribute("data-node-id")}"]`);
                     if (sameElement) {
@@ -283,7 +284,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 }
                 if (topSourceParentElement.classList.contains("sb") && getSbChildBlockCount(topSourceParentElement) === 1) {
                     // 拖拽后，sb 只剩下一个元素
-                    if (isSameDoc) {
+                    if (isSameEditor) {
                         const sbData = await cancelSB(protyle, topSourceParentElement);
                         doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
                         undoOperations.push(sbData.undoOperations[1], sbData.undoOperations[0]);
@@ -305,7 +306,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 }
             } else if (oldSourceParentElement.classList.contains("sb") && getSbChildBlockCount(oldSourceParentElement) === 1) {
                 // 拖拽后，sb 只剩下一个元素
-                if (isSameDoc) {
+                if (isSameEditor) {
                     const sbData = await cancelSB(protyle, oldSourceParentElement);
                     doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
                     undoOperations.push(sbData.undoOperations[1], sbData.undoOperations[0]);
@@ -447,7 +448,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 
 const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean,
                       direct: "col" | "row", isCopy: boolean) => {
-    const isSameDoc = protyle.element.contains(sourceElements[0]);
+    // 底部反链 Protyle 嵌套在正文 Protyle 中，仅 wysiwyg 包含关系能表示同一编辑器。
+    const isSameEditor = isSameDragEditor(protyle.wysiwyg.element, sourceElements[0]);
     // 移动前记录源块所在的超级块，移动后刷新其手柄（移出后需重建）https://github.com/siyuan-note/siyuan/issues/9521
     const originSbSet = new Set<Element>();
     sourceElements.forEach(el => {
@@ -458,7 +460,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
     });
     // 把列表块中的唯一一个列表项块拖拽到列表块的左侧 https://github.com/siyuan-note/siyuan/issues/16315
-    if (isSameDoc && sourceElements[0].classList.contains("li") && targetElement === sourceElements[0].parentElement &&
+    if (isSameEditor && sourceElements[0].classList.contains("li") && targetElement === sourceElements[0].parentElement &&
         targetElement.childElementCount === sourceElements.length + 1) {
         const outLiElement = sourceElements.find((element) => {
             if (!targetElement.contains(element)) {
@@ -491,7 +493,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     }];
     // 临时插入，防止后面计算错误，最终再移动矫正
     sbElement.lastElementChild.before(targetElement);
-    const moveToResult = await moveTo(protyle, sourceElements, sbElement, isSameDoc, "afterbegin", isCopy);
+    const moveToResult = await moveTo(protyle, sourceElements, sbElement, isSameEditor, "afterbegin", isCopy);
     doOperations.push(...moveToResult.doOperations);
     undoOperations.push(...moveToResult.undoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
@@ -571,7 +573,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 };
 
 const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, isCopy: boolean) => {
-    const isSameDoc = protyle.element.contains(sourceElements[0]);
+    const isSameEditor = isSameDragEditor(protyle.wysiwyg.element, sourceElements[0]);
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     // 移动前记录源块所在的超级块，移动后刷新其手柄（移出后需重建）
@@ -583,7 +585,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         }
     });
 
-    const moveToResult = await moveTo(protyle, sourceElements, targetElement, isSameDoc, isBottom ? "afterend" : "beforebegin", isCopy);
+    const moveToResult = await moveTo(protyle, sourceElements, targetElement, isSameEditor, isBottom ? "afterend" : "beforebegin", isCopy);
     doOperations.push(...moveToResult.doOperations);
     undoOperations.push(...moveToResult.undoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
@@ -947,7 +949,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // gutter 或反链面板拖拽
             const sourceElements: Element[] = [];
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
-            const selectedIds = gutterTypes[2].split(",");
+            const selectedIds = uniqueDragIds(gutterTypes[2].split(","));
             if (event.altKey || event.shiftKey) {
                 if (event.y > protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
                     insertEmptyBlock(protyle, "afterend", protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"));
@@ -976,11 +978,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectedIds.forEach(item => {
                     queryClass += `[data-node-id="${item}"],`;
                 });
+                const sourceElementIds = new Set<string>();
+                const appendSourceElement = (elementItem: Element) => {
+                    const id = elementItem.getAttribute("data-node-id");
+                    if (!id || sourceElementIds.has(id) || isInEmbedBlock(elementItem)) {
+                        return;
+                    }
+                    sourceElementIds.add(id);
+                    sourceElements.push(elementItem);
+                };
                 if (window.siyuan.dragElement) {
                     window.siyuan.dragElement.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
-                        if (!isInEmbedBlock(elementItem)) {
-                            sourceElements.push(elementItem);
-                        }
+                        appendSourceElement(elementItem);
                     });
                 } else if (window.siyuan.config.system.workspaceDir.toLowerCase() === gutterTypes[3]) {
                     // 跨窗口拖拽
@@ -988,9 +997,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const targetProtyleElement = document.createElement("template");
                     targetProtyleElement.innerHTML = `<div>${event.dataTransfer.getData(gutterType)}</div>`;
                     targetProtyleElement.content.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
-                        if (!isInEmbedBlock(elementItem)) {
-                            sourceElements.push(elementItem);
-                        }
+                        appendSourceElement(elementItem);
                     });
                 }
 

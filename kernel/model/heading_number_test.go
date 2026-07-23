@@ -72,6 +72,53 @@ func TestBuildHeadingNumberEntriesExcludesOutlineContainers(t *testing.T) {
 	}
 }
 
+func TestMaterializeHeadingNumbersPreservesSourceContext(t *testing.T) {
+	sourceTree := newHeadingNumberTestTree(1, 2, 2)
+	numbers := headingNumberLabels(sourceTree, "decimal-hierarchical")
+
+	root := &ast.Node{Type: ast.NodeDocument, ID: "root"}
+	heading := &ast.Node{Type: ast.NodeHeading, ID: "heading-3", HeadingLevel: 2}
+	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Title")})
+	root.AppendChild(heading)
+	materializeHeadingNumbers(&parse.Tree{Root: root}, numbers)
+
+	if got := string(heading.FirstChild.Tokens); "1.2 " != got {
+		t.Fatalf("unexpected materialized heading number: got %q, want %q", got, "1.2 ")
+	}
+	if nil == heading.FirstChild.Next || "Title" != string(heading.FirstChild.Next.Tokens) {
+		t.Fatal("heading content should follow the materialized heading number")
+	}
+}
+
+func TestMaterializeHeadingNumbersSkipsSyntheticTitle(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument, ID: "root"}
+	title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
+	title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Document")})
+	root.AppendChild(title)
+	heading := &ast.Node{Type: ast.NodeHeading, ID: "heading-1", HeadingLevel: 1}
+	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Heading")})
+	root.AppendChild(heading)
+
+	materializeHeadingNumbers(&parse.Tree{Root: root}, map[string]string{"heading-1": "1"})
+
+	if got := string(title.FirstChild.Tokens); "Document" != got {
+		t.Fatalf("synthetic document title should not be numbered: got %q", got)
+	}
+	if got := string(heading.FirstChild.Tokens); "1 " != got {
+		t.Fatalf("unexpected materialized heading number: got %q, want %q", got, "1 ")
+	}
+}
+
+func TestHeadingTitleWithNumber(t *testing.T) {
+	numbers := map[string]string{"heading-1": "2.3"}
+	if got := headingTitleWithNumber("Title", "heading-1", numbers); "2.3 Title" != got {
+		t.Fatalf("unexpected numbered heading title: got %q", got)
+	}
+	if got := headingTitleWithNumber("Title", "heading-2", numbers); "Title" != got {
+		t.Fatalf("heading without a number should remain unchanged: got %q", got)
+	}
+}
+
 func TestHeadingNumberFormats(t *testing.T) {
 	tests := []struct {
 		name   string

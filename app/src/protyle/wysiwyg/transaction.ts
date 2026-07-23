@@ -1507,12 +1507,13 @@ export const turnsOneInto = async (options: {
     nodeElement: Element,
     id: string,
     type: string,
-    level?: number
+    level?: number,
+    targetListType?: "u" | "o" | "t",
 }) => {
     if (!options.nodeElement.querySelector("wbr")) {
         getContenteditableElement(options.nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
     }
-    if (["CancelBlockquote", "CancelList", "CancelCallout"].includes(options.type)) {
+    if (["CancelBlockquote", "CancelList", "CancelListRecursively", "CancelCallout"].includes(options.type)) {
         for (const item of options.nodeElement.querySelectorAll('[data-type="NodeHeading"][fold="1"]')) {
             const itemId = item.getAttribute("data-node-id");
             item.removeAttribute("fold");
@@ -1552,12 +1553,17 @@ export const turnsOneInto = async (options: {
     }
     const parentId = getEmbedChildOperationParentID(options.nodeElement) ||
         getParentBlock(options.nodeElement).getAttribute("data-node-id") || options.protyle.block.parentID;
-    // @ts-ignore
-    const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    let newHTML: string;
+    if (options.type === "ConvertListType") {
+        newHTML = options.protyle.lute.ConvertListType(options.nodeElement.outerHTML, options.targetListType!);
+    } else {
+        // @ts-ignore
+        newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    }
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);
     options.nodeElement = options.nodeElement.nextElementSibling as HTMLElement;
     options.nodeElement.previousElementSibling.remove();
-    if (["CancelBlockquote", "CancelList", "CancelCallout"].includes(options.type)) {
+    if (["CancelBlockquote", "CancelList", "CancelListRecursively", "CancelCallout"].includes(options.type)) {
         const tempElement = document.createElement("template");
         tempElement.innerHTML = newHTML;
         const doOperations: IOperation[] = [{

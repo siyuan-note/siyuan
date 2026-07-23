@@ -733,7 +733,8 @@ export class Gutter {
         nodeElement: Element,
         accelerator?: string
         type: string,
-        level?: number
+        level?: number,
+        targetListType?: "u" | "o" | "t",
     }) {
         return {
             id: options.menuId,
@@ -1459,7 +1460,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
                 protyle,
                 nodeElement,
-                type: "CancelList"
+                type: "CancelListRecursively"
             }));
             turnIntoSubmenu.push(this.turnsIntoOne({
                 menuId: "quote",
@@ -1487,7 +1488,8 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     protyle,
                     nodeElement,
-                    type: "OL2UL"
+                    type: "ConvertListType",
+                    targetListType: "u",
                 }));
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "check",
@@ -1497,7 +1499,8 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     nodeElement,
-                    type: "UL2TL"
+                    type: "ConvertListType",
+                    targetListType: "t",
                 }));
             } else if (nodeElement.getAttribute("data-subtype") === "t") {
                 turnIntoSubmenu.push(this.turnsOneInto({
@@ -1508,7 +1511,8 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     protyle,
                     nodeElement,
-                    type: "TL2UL"
+                    type: "ConvertListType",
+                    targetListType: "u",
                 }));
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "orderedList",
@@ -1518,7 +1522,8 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     nodeElement,
-                    type: "TL2OL"
+                    type: "ConvertListType",
+                    targetListType: "o",
                 }));
             } else {
                 turnIntoSubmenu.push(this.turnsOneInto({
@@ -1529,7 +1534,8 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     nodeElement,
-                    type: "UL2OL"
+                    type: "ConvertListType",
+                    targetListType: "o",
                 }));
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "check",
@@ -1539,7 +1545,8 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     nodeElement,
-                    type: "OL2TL"
+                    type: "ConvertListType",
+                    targetListType: "t",
                 }));
             }
         } else if (type === "NodeBlockquote" && allowStructuralMutation) {

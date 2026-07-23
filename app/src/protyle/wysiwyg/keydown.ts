@@ -1466,7 +1466,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         protyle,
                         nodeElement: selectsElement[0],
                         id: selectsElement[0].getAttribute("data-node-id"),
-                        type: "CancelList",
+                        type: "CancelListRecursively",
                     });
                 } else if (type === "NodeBlockquote") {
                     turnsOneInto({
@@ -1705,21 +1705,24 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 protyle,
                                 nodeElement: selectsElement[0],
                                 id,
-                                type: isMatchCheck ? "UL2TL" : "OL2UL",
+                                type: "ConvertListType",
+                                targetListType: isMatchCheck ? "t" : "u",
                             });
                         } else if (subType === "t" && (isMatchList || isMatchOList)) {
                             turnsOneInto({
                                 protyle,
                                 nodeElement: selectsElement[0],
                                 id,
-                                type: isMatchList ? "TL2UL" : "TL2OL",
+                                type: "ConvertListType",
+                                targetListType: isMatchList ? "u" : "o",
                             });
                         } else if (subType === "u" && (isMatchCheck || isMatchOList)) {
                             turnsOneInto({
                                 protyle,
                                 nodeElement: selectsElement[0],
                                 id,
-                                type: isMatchCheck ? "OL2TL" : "UL2OL",
+                                type: "ConvertListType",
+                                targetListType: isMatchCheck ? "t" : "o",
                             });
                         }
                     } else {

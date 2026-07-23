@@ -1778,9 +1778,24 @@ func closeDatabase() {
 }
 
 func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
+	readonlyStmts := &sync.Map{}
+	isReadonlyStmt := func(stmt string) bool {
+		if _, ok := readonlyStmts.Load(stmt); ok {
+			return true
+		}
+		if CheckSingleStatement(stmt) != nil || CheckReadonlyStatement(stmt) != nil {
+			return false
+		}
+		readonlyStmts.Store(stmt, struct{}{})
+		return true
+	}
+
 	(*templateFuncMap)["queryBlocks"] = func(stmt string, args ...string) (retBlocks []*Block) {
 		for _, arg := range args {
 			stmt = strings.Replace(stmt, "?", arg, 1)
+		}
+		if !isReadonlyStmt(stmt) {
+			return
 		}
 		retBlocks = SelectBlocksRawStmt(stmt, 1, 512)
 		return
@@ -1800,11 +1815,14 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		for _, arg := range args {
 			stmt = strings.Replace(stmt, "?", arg, 1)
 		}
+		if !isReadonlyStmt(stmt) {
+			return
+		}
 		retSpans = SelectSpansRawStmt(stmt, 512)
 		return
 	}
 	(*templateFuncMap)["querySQL"] = func(stmt string) (ret []map[string]any) {
-		if err := CheckSingleStatement(stmt); err != nil {
+		if !isReadonlyStmt(stmt) {
 			return
 		}
 		ret, _ = Query(stmt, 1024)

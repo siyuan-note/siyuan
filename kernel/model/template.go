@@ -324,8 +324,7 @@ func RenderDynamicIconContentTemplate(content, id string) (ret string) {
 	dataModel["alias"] = block.Alias
 
 	goTpl := template.New("").Delims(".action{", "}")
-	tplFuncMap := filesys.BuiltInTemplateFuncs()
-	sql.SQLTemplateFuncs(&tplFuncMap)
+	tplFuncMap := dynamicIconTemplateFuncs()
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(content)
 	if err != nil {
@@ -341,6 +340,10 @@ func RenderDynamicIconContentTemplate(content, id string) (ret string) {
 	}
 	ret = buf.String()
 	return
+}
+
+func dynamicIconTemplateFuncs() template.FuncMap {
+	return filesys.BuiltInTemplateFuncs()
 }
 
 func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, err error) {

@@ -112,12 +112,8 @@ func QueryRefsByDefIDInBox(defBlockID string, containChildren bool, boxID string
 	var sqlStmt string
 	var args []any
 	if containChildren {
-		blockIDs := queryBlockChildrenIDsForBox(defBlockID, boxID)
-		sqlStmt = "SELECT * FROM refs WHERE def_block_id IN (" + strings.Repeat("?,", len(blockIDs)-1) + "?)"
-		args = make([]any, len(blockIDs))
-		for i, id := range blockIDs {
-			args[i] = id
-		}
+		sqlStmt = queryRefsByDefIDWithChildren
+		args = []any{defBlockID}
 	} else {
 		sqlStmt = "SELECT * FROM refs WHERE def_block_id = ?"
 		args = []any{defBlockID}

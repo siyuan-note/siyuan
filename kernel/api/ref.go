@@ -35,7 +35,10 @@ func refreshBacklink(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) || util.InvalidIDPattern(id, ret) {
+		return
+	}
 	model.RefreshBacklink(id)
 	model.FlushTxQueue()
 }

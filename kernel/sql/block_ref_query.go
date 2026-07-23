@@ -436,12 +436,7 @@ func QueryRefsByDefID(defBlockID string, containChildren bool) (ret []*Ref) {
 	var rows *sql.Rows
 	var err error
 	if containChildren {
-		blockIDs := queryBlockChildrenIDs(defBlockID)
-		var params []string
-		for _, id := range blockIDs {
-			params = append(params, "\""+id+"\"")
-		}
-		rows, err = query("SELECT * FROM refs WHERE def_block_id IN (" + strings.Join(params, ",") + ")")
+		rows, err = query(queryRefsByDefIDWithChildren, defBlockID)
 	} else {
 		rows, err = query("SELECT * FROM refs WHERE def_block_id = ?", defBlockID)
 	}
@@ -456,6 +451,13 @@ func QueryRefsByDefID(defBlockID string, containChildren bool) (ret []*Ref) {
 	}
 	return
 }
+
+const queryRefsByDefIDWithChildren = `WITH RECURSIVE child_ids(id) AS (
+	SELECT ?
+	UNION
+	SELECT blocks.id FROM blocks JOIN child_ids ON blocks.parent_id = child_ids.id
+)
+SELECT refs.* FROM refs JOIN child_ids ON refs.def_block_id = child_ids.id`
 
 func QueryRefsByDefIDRefID(defBlockID, refBlockID string) (ret []*Ref) {
 	stmt := "SELECT * FROM refs WHERE def_block_id = ? AND block_id = ?"

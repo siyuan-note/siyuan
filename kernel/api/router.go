@@ -291,7 +291,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/file/readDir", model.CheckAuth, model.CheckAdminRole, readDir)
 	ginServer.Handle("POST", "/api/file/getUniqueFilename", model.CheckAuth, getUniqueFilename)
 
-	ginServer.Handle("POST", "/api/ref/refreshBacklink", model.CheckAuth, refreshBacklink)
+	ginServer.Handle("POST", "/api/ref/refreshBacklink", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, refreshBacklink)
 	ginServer.Handle("POST", "/api/ref/getBacklink", model.CheckAuth, getBacklink)
 	ginServer.Handle("POST", "/api/ref/getBacklink2", model.CheckAuth, getBacklink2)
 	ginServer.Handle("POST", "/api/ref/getBacklinkDoc", model.CheckAuth, getBacklinkDoc)

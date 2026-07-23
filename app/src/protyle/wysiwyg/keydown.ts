@@ -3,7 +3,9 @@ import {isMac, isNotCtrl, isOnlyMeta, writeText} from "../util/compatibility";
 import {
     focusBlock,
     focusByRange,
+    focusByOffset,
     focusByWbr,
+    getBlockRanges,
     getEditorRange,
     getSelectionOffset,
     getSelectionPosition,
@@ -29,6 +31,7 @@ import {
     getParentBlock,
     getPreviousBlock,
     getTopAloneElement,
+    fixAdjacentTags,
     hasNextSibling,
     hasPreviousSibling,
     isEndOfBlock,
@@ -129,13 +132,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        // https://ld246.com/article/1694506408293
-        const endElement = hasClosestBlock(range.endContainer);
-        if (!matchHotKey("⌘C", event) && event.key !== "Escape" && endElement && nodeElement !== endElement) {
-            event.stopPropagation();
-            event.preventDefault();
-            return;
-        }
         if (document.querySelector(".av__panel")) {
             return;
         }
@@ -791,10 +787,38 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
+        const endElement = hasClosestBlock(range.endContainer);
         // 删除，不可使用 isNotCtrl(event)，否则软删除回导致 https://github.com/siyuan-note/siyuan/issues/5607
         // 不可使用 !event.shiftKey，否则 https://ld246.com/article/1666434796806
         if ((!event.altKey && (event.key === "Backspace" || event.key === "Delete")) ||
             matchHotKey("⌃D", event)) {
+            if (endElement && nodeElement !== endElement && selectText !== "") {
+                const ranges = getBlockRanges(protyle.wysiwyg.element, range);
+                if (ranges.length > 0) {
+                    const firstRange = ranges[0];
+                    const blockElements = [...new Set(ranges.map(item => item.blockElement))];
+                    updateBatchTransaction(blockElements, protyle, blockElement => {
+                        ranges.filter(item => item.blockElement === blockElement).forEach(item => {
+                            item.range.deleteContents();
+                            item.editableElement.querySelectorAll("span").forEach(spanElement => {
+                                if (spanElement.textContent === "" && !spanElement.querySelector("img")) {
+                                    spanElement.remove();
+                                }
+                            });
+                            fixAdjacentTags(item.editableElement);
+                        });
+                        blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                    });
+                    focusByOffset(firstRange.editableElement, firstRange.start, firstRange.start);
+                    blockElements.filter(item => item.getAttribute("data-type") === "NodeCodeBlock").forEach(item => {
+                        item.querySelector(".hljs")?.removeAttribute("data-render");
+                        highlightRender(item);
+                    });
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
                 removeBlock(protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete");
                 event.stopPropagation();

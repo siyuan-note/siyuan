@@ -138,6 +138,11 @@ var (
 func Serve(fastMode bool, cookieKey string) {
 	gin.SetMode(gin.ReleaseMode)
 	ginServer := gin.New()
+	if err := ginServer.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
+		logging.LogFatalf(logging.ExitCodeSecurityRisk, "set trusted proxies failed: %s", err)
+	}
+	ginServer.ForwardedByClientIP = true
+	ginServer.RemoteIPHeaders = []string{"X-Forwarded-For"}
 	ginServer.MaxMultipartMemory = 1024 * 1024 * 32 // 插入较大的资源文件时内存占用较大 https://github.com/siyuan-note/siyuan/issues/5023
 	ginServer.Use(
 		model.ControlConcurrency, // 请求串行化 Concurrency control when requesting the kernel API https://github.com/siyuan-note/siyuan/issues/9939

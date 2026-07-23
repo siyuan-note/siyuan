@@ -2116,7 +2116,7 @@
 		"218": "Es wurden zu viele Momentaufnahmen des Datenrepositories festgestellt, die das Programmstart und die Datensynchronisation verlangsamen. Bitte in Betracht ziehen, [Einstellungen - Konto & Synchronisierung - Daten-Repo bereinigen] auszuführen",
 		"219": "Der Cloud-Speicherdienst ist nicht verfügbar, bitte versuchen Sie es später erneut",
 		"220": "Aufgrund eines Fehlers in der vorherigen Version wurden die Cloud-Daten beschädigt. Bitte beziehen Sie sich auf das Benutzerhandbuch - FAQ - Schritte zum Zurücksetzen des lokalen Daten-Repositorys und des Cloud-Verzeichnisses",
-		"221": "Die Ersetzungsoperation wird nicht unterstützt, nachdem nach Dokument gruppiert wurde. Bitte verwenden Sie die Ungruppierung und dann ersetzen",
+		"221": "",
 		"222": "Datensynchronisation läuft, bitte warten Sie bis zur Fertigstellung der Datensynchronisation und versuchen Sie es erneut",
 		"223": "Cloud-Speicher wird bereinigt...",
 		"224": "Cloud-Speicherdatenobjekte auflisten...",

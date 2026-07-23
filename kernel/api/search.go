@@ -177,7 +177,7 @@ func findReplace(c *gin.Context) {
 		return
 	}
 
-	_, _, _, paths, boxes, types, subTypes, method, orderBy, groupBy := parseSearchBlockArgs(arg)
+	_, _, _, paths, boxes, types, subTypes, method, _, _ := parseSearchBlockArgs(arg)
 
 	k := arg["k"].(string)
 	r := arg["r"].(string)
@@ -197,7 +197,17 @@ func findReplace(c *gin.Context) {
 		}
 	}
 
-	err := model.FindReplace(k, r, replaceTypes, ids, paths, boxes, types, subTypes, method, orderBy, groupBy)
+	boxID := ""
+	if 1 == len(boxes) && model.IsEncryptedBox(boxes[0]) {
+		boxID = boxes[0]
+		if !model.IsBoxUnlocked(boxID) {
+			ret.Code = 1
+			ret.Msg = model.Conf.Language(309)
+			return
+		}
+	}
+
+	err := model.FindReplaceInBox(k, r, replaceTypes, ids, paths, boxes, types, subTypes, method, boxID)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()

@@ -275,7 +275,7 @@ func mcpOAuthDisconnect(c *gin.Context) {
 }
 
 func mcpOAuthCallback(c *gin.Context) {
-	if !mcpclient.IsLoopbackCallback(c.Request.RemoteAddr) {
+	if !model.IsLocalRequest(c) {
 		c.String(http.StatusForbidden, "Forbidden")
 		return
 	}

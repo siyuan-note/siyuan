@@ -2116,7 +2116,7 @@
 		"218": "Wykryto zbyt wiele zrzutów repozytorium danych, co powoduje spowolnienie uruchamiania programu i synchronizacji danych. Zastanów się nad wykonaniem [Ustawienia - Konto i Synchronizacja - Oczyszczanie repozytorium danych]",
 		"219": "Usługa przechowywania w chmurze jest niedostępna, proszę spróbować ponownie później",
 		"220": "Z powodu defektu w poprzedniej wersji dane w chmurze uległy uszkodzeniu. Proszę odwołać się do przewodnika użytkownika - FAQ - Kroki w celu resetowania lokalnego repozytorium danych i katalogu w chmurze",
-		"221": "Operacja zamiany nie jest wspierana po grupowaniu według dokumentu. Proszę najpierw użyć rozgrupowywania, a następnie zamienić",
+		"221": "",
 		"222": "Synchronizacja danych jest w toku, proszę czekać, aż synchronizacja danych zostanie zakończona i spróbować ponownie",
 		"223": "Opróżnianie przechowywania w chmurze...",
 		"224": "Wymienianie obiektów danych przechowywania w chmurze...",

@@ -2116,7 +2116,7 @@
 		"218": "Çok fazla veri deposu anlık görüntüsü tespit edildi, bu durum program açılışını ve senkronizasyonu yavaşlatıyor. Lütfen [Ayarlar - Hesap ve Senkronizasyon - Veri deposunu temizle] işlemini yapmayı düşün",
 		"219": "Bulut depolama hizmeti şu anda kullanılamıyor, lütfen daha sonra tekrar dene",
 		"220": "Önceki sürümdeki bir hata nedeniyle bulut verileri bozulmuş. Lütfen Kullanıcı Kılavuzu - SSS - Anahtar Kaybı adımlarını izleyerek yerel veri deposunu ve bulut klasörünü sıfırla",
-		"221": "Belgeye göre gruplanmışken değiştirme işlemi desteklenmez. Lütfen gruplandırmayı kaldırıp sonra değiştir",
+		"221": "",
 		"222": "Veri senkronizasyonu devam ediyor, lütfen tamamlanmasını bekleyip tekrar dene",
 		"223": "Bulut depolama temizleniyor...",
 		"224": "Bulut depolama veri nesneleri listeleniyor...",

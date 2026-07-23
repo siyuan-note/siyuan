@@ -17,9 +17,12 @@
 package api
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
@@ -52,5 +55,24 @@ func TestRenderMCPOAuthCallbackPage(t *testing.T) {
 	failurePage := string(renderMCPOAuthCallbackPage("en", "Authorization failed", "Try again", false))
 	if !strings.Contains(failurePage, `class="mark mark--error"`) {
 		t.Fatalf("OAuth failure callback page does not use the error state: %s", failurePage)
+	}
+}
+
+func TestMCPOAuthCallbackRejectsRemoteClientThroughLocalProxy(t *testing.T) {
+	engine := gin.New()
+	if err := engine.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
+		t.Fatal(err)
+	}
+	engine.RemoteIPHeaders = []string{"X-Forwarded-For"}
+	engine.GET("/api/ai/mcp/oauth/callback/:flowID", mcpOAuthCallback)
+
+	request := httptest.NewRequest(http.MethodGet, "/api/ai/mcp/oauth/callback/test-flow", nil)
+	request.RemoteAddr = "127.0.0.1:1234"
+	request.Header.Set("X-Forwarded-For", "192.0.2.10")
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusForbidden)
 	}
 }

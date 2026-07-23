@@ -255,7 +255,7 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
-	localhost := util.IsLocalHost(c.Request.RemoteAddr)
+	localhost := IsLocalRequest(c)
 
 	// 未设置锁屏密码
 	if "" == Conf.AccessAuthCode {
@@ -381,6 +381,12 @@ func CheckAuth(c *gin.Context) {
 
 	c.Set(RoleContextKey, RoleAdministrator)
 	c.Next()
+}
+
+// IsLocalRequest 判断请求是否由本机客户端直接发起或经可信本机代理转发。
+func IsLocalRequest(c *gin.Context) bool {
+	// 仅当直接连接和可信代理解析出的原始客户端均为环回地址时，才视为本机请求。
+	return util.IsLocalHost(c.Request.RemoteAddr) && util.IsLocalHostname(c.ClientIP())
 }
 
 func CheckAdminRole(c *gin.Context) {

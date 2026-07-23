@@ -294,30 +294,13 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 
 func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, viewable av.Viewable) (ret av.Viewable) {
 	ret = viewable
-	publishIgnore := GetDisablePublishAccess(publishAccess)
 
 	switch ret.GetType() {
 	case av.LayoutTypeTable:
 		table := ret.(*av.Table)
 		filteredRows := []*av.TableRow{}
 		for _, row := range table.Rows {
-			// 默认第一个属性是文档块
-			var bt *treenode.BlockTree
-			if len(row.Cells) > 0 {
-				if row.Cells[0].Value.Block != nil {
-					id := row.Cells[0].Value.Block.ID
-					if id != "" {
-						bt = treenode.GetBlockTree(id)
-					}
-				}
-			}
-			if bt != nil {
-				// 不显示禁止文档
-				if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-					row = nil
-				}
-			}
-			if row != nil {
+			if checkAttributeViewItemAccessableByPublishAccess(c, publishAccess, row) {
 				filteredRows = append(filteredRows, row)
 			}
 		}
@@ -331,30 +314,7 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 		gallery := ret.(*av.Gallery)
 		filteredCards := []*av.GalleryCard{}
 		for _, card := range gallery.Cards {
-			// 默认第一个属性是文档块
-			var bt *treenode.BlockTree
-			if len(card.Values) > 0 {
-				if card.Values[0].Value.Block != nil {
-					id := card.Values[0].Value.Block.ID
-					if id != "" {
-						bt = treenode.GetBlockTree(id)
-					}
-				}
-			}
-			if bt != nil {
-				// 替换封面
-				newCoverContent := FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, card.CoverContent, true)
-				if card.CoverContent != newCoverContent {
-					card.CoverContent = newCoverContent
-					card.CoverURL = ""
-				}
-
-				// 不显示禁止文档
-				if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-					card = nil
-				}
-			}
-			if card != nil {
+			if checkAttributeViewItemAccessableByPublishAccess(c, publishAccess, card) {
 				filteredCards = append(filteredCards, card)
 			}
 		}
@@ -368,30 +328,7 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 		kanban := ret.(*av.Kanban)
 		filteredCards := []*av.KanbanCard{}
 		for _, card := range kanban.Cards {
-			// 默认第一个属性是文档块
-			var bt *treenode.BlockTree
-			if len(card.Values) > 0 {
-				if card.Values[0].Value.Block != nil {
-					id := card.Values[0].Value.Block.ID
-					if id != "" {
-						bt = treenode.GetBlockTree(id)
-					}
-				}
-			}
-			if bt != nil {
-				// 替换封面
-				newCoverContent := FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, card.CoverContent, true)
-				if card.CoverContent != newCoverContent {
-					card.CoverContent = newCoverContent
-					card.CoverURL = ""
-				}
-
-				// 不显示禁止文档
-				if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-					card = nil
-				}
-			}
-			if card != nil {
+			if checkAttributeViewItemAccessableByPublishAccess(c, publishAccess, card) {
 				filteredCards = append(filteredCards, card)
 			}
 		}
@@ -404,6 +341,18 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 		}
 	}
 	return
+}
+
+func checkAttributeViewItemAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, item av.Item) bool {
+	if nil == item {
+		return false
+	}
+
+	blockValue := item.GetBlockValue()
+	if nil == blockValue || blockValue.IsDetached || nil == blockValue.Block || "" == blockValue.Block.ID {
+		return true
+	}
+	return CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockValue.Block.ID)
 }
 
 func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockAttributeViewKeys []*BlockAttributeViewKeys) (ret []*BlockAttributeViewKeys) {

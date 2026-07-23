@@ -796,12 +796,23 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const ranges = getBlockRanges(protyle.wysiwyg.element, range);
                 if (ranges.length > 0) {
                     const firstRange = ranges[0];
-                    const blockElements = [...new Set(ranges.map(item => item.blockElement))];
+                    const rangesByBlock = new Map<HTMLElement, typeof ranges>();
+                    ranges.forEach(item => {
+                        const blockRanges = rangesByBlock.get(item.blockElement) || [];
+                        blockRanges.push(item);
+                        rangesByBlock.set(item.blockElement, blockRanges);
+                    });
+                    const blockElements = Array.from(rangesByBlock.keys());
                     updateBatchTransaction(blockElements, protyle, blockElement => {
-                        ranges.filter(item => item.blockElement === blockElement).forEach(item => {
+                        rangesByBlock.get(blockElement).forEach(item => {
+                            const boundarySpans = new Set<HTMLElement>([
+                                hasClosestByTag(item.range.startContainer, "SPAN"),
+                                hasClosestByTag(item.range.endContainer, "SPAN"),
+                            ].filter(Boolean) as HTMLElement[]);
                             item.range.deleteContents();
-                            item.editableElement.querySelectorAll("span").forEach(spanElement => {
-                                if (spanElement.textContent === "" && !spanElement.querySelector("img")) {
+                            boundarySpans.forEach(spanElement => {
+                                if (spanElement.isConnected && spanElement.textContent === "" &&
+                                    !spanElement.querySelector("img")) {
                                     spanElement.remove();
                                 }
                             });

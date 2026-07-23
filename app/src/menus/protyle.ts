@@ -1060,7 +1060,8 @@ export const zoomOut = (options: {
                 });
                 return;
             }
-        } else if (options.id !== options.protyle.block.rootID) {
+        } else if (options.id !== options.protyle.block.rootID &&
+            !window.siyuan.config.editor.backlinkShowBottom) {
             options.protyle.wysiwyg.element.classList.add("protyle-wysiwyg--animate");
             setTimeout(() => {
                 options.protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--animate");

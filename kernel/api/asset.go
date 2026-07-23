@@ -289,7 +289,7 @@ func setFileAnnotation(c *gin.Context) {
 	p := arg["path"].(string)
 	p = strings.ReplaceAll(p, "%23", "#")
 	data := arg["data"].(string)
-	writePath, err := resolveFileAnnotationAbsPath(p)
+	writePath, _, err := resolveFileAnnotationAbsPath(p)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -342,12 +342,20 @@ func getFileAnnotation(c *gin.Context) {
 
 	p := arg["path"].(string)
 	p = strings.ReplaceAll(p, "%23", "#")
-	readPath, err := resolveFileAnnotationAbsPath(p)
+	readPath, assetAbsPath, err := resolveFileAnnotationAbsPath(p)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
+	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		if !model.CheckAbsPathAccessableByPublishAccess(c, assetAbsPath, publishAccess) {
+			ret.Code = http.StatusForbidden
+			ret.Msg = http.StatusText(http.StatusForbidden)
+			return
+		}
 	}
 	if !filelock.IsExist(readPath) {
 		ret.Code = 1
@@ -383,15 +391,15 @@ func getFileAnnotation(c *gin.Context) {
 	}
 }
 
-func resolveFileAnnotationAbsPath(assetRelPath string) (ret string, err error) {
+func resolveFileAnnotationAbsPath(assetRelPath string) (annotationAbsPath, assetAbsPath string, err error) {
 	// .sya 在 URL 末尾，例如 assets/a.pdf?box=<id>.sya
 	// TrimSuffix 去掉 .sya 得到 assets/a.pdf?box=<id>，保留 query 供 box-aware 解析
 	filePath := strings.TrimSuffix(assetRelPath, ".sya")
-	absPath, err := model.GetAssetAbsPathInBox(filePath, "")
+	assetAbsPath, err = model.GetAssetAbsPathInBox(filePath, "")
 	if err != nil {
 		return
 	}
-	ret = absPath + ".sya"
+	annotationAbsPath = assetAbsPath + ".sya"
 	return
 }
 

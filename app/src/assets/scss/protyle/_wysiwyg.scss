@@ -16,6 +16,10 @@
     font-size: 14px;
   }
 
+  .sy__backlink & > .protyle-breadcrumb__bar {
+    user-select: none;
+  }
+
   &:focus {
     outline: none;
   }

@@ -428,7 +428,17 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 	if keywordArg := arg["keyword"]; nil != keywordArg {
 		keyword = keywordArg.(string)
 	}
-	attributeViewName, databaseBlockIDs, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, page, pageSize)
+	var blockIDs []string
+	if blockIDsArg := arg["blockIDs"]; nil != blockIDsArg {
+		if blockIDArgs, ok := blockIDsArg.([]any); ok {
+			for _, blockIDArg := range blockIDArgs {
+				if blockID, ok := blockIDArg.(string); ok && "" != blockID {
+					blockIDs = append(blockIDs, blockID)
+				}
+			}
+		}
+	}
+	attributeViewName, databaseBlockIDs, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, blockIDs, page, pageSize)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

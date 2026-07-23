@@ -235,6 +235,171 @@ func TestRemoveSelectOptionFromFilters(t *testing.T) {
 	}
 }
 
+func TestExactRelationFilter(t *testing.T) {
+	value := &Value{
+		Type: KeyTypeRelation,
+		Relation: &ValueRelation{
+			BlockIDs: []string{"row-a", "row-b"},
+			Contents: []*Value{{Type: KeyTypeBlock, Block: &ValueBlock{Content: "同名主键"}}},
+		},
+	}
+	filter := &ViewFilter{
+		Operator: FilterOperatorContainsAnyItem,
+		Value: &Value{
+			Type:     KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"row-b", "row-c"}},
+		},
+	}
+	if !value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("relation containing a selected row ID should pass")
+	}
+
+	filter.Operator = FilterOperatorDoesNotContainAnyItem
+	if value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("relation containing a selected row ID should fail the negative operator")
+	}
+
+	filter.Value.Relation.BlockIDs = []string{"row-c"}
+	if !value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("relation without selected row IDs should pass the negative operator")
+	}
+
+	filter.Operator = FilterOperatorContainsAnyItem
+	if value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("relation without selected row IDs should fail the positive operator")
+	}
+
+	filter.Value.Relation.BlockIDs = nil
+	if !value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("an unconfigured exact relation filter should be ignored")
+	}
+
+	filter.Value.Relation.BlockIDs = []string{"row-c"}
+	filter.Operator = FilterOperatorDoesNotContainAnyItem
+	emptyValue := &Value{Type: KeyTypeRelation}
+	if !emptyValue.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("an empty relation should pass the negative exact operator")
+	}
+}
+
+func TestExactRelationFilterWithMissingCell(t *testing.T) {
+	filter := &ViewFilter{
+		Column:   "relation",
+		Operator: FilterOperatorDoesNotContainAnyItem,
+		Value: &Value{
+			Type:     KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"row-a"}},
+		},
+	}
+	columnIndexes := map[string]int{"relation": 0}
+	if !evalNode(filter, []*Value{nil}, columnIndexes, nil, "", nil, nil) {
+		t.Fatalf("a missing relation cell should pass the negative exact operator")
+	}
+	if !evalNode(filter, nil, columnIndexes, nil, "", nil, nil) {
+		t.Fatalf("an absent relation value should pass the negative exact operator")
+	}
+
+	filter.Operator = FilterOperatorContainsAnyItem
+	if evalNode(filter, []*Value{nil}, columnIndexes, nil, "", nil, nil) {
+		t.Fatalf("a missing relation cell should fail the positive exact operator")
+	}
+
+	filter.Value.Relation.BlockIDs = nil
+	if !evalNode(filter, []*Value{nil}, columnIndexes, nil, "", nil, nil) {
+		t.Fatalf("an unconfigured exact filter should be ignored for a missing relation cell")
+	}
+}
+
+func TestRemoveRelationItemsFromFilters(t *testing.T) {
+	exact := func(column string, operator FilterOperator, blockIDs ...string) *ViewFilter {
+		return &ViewFilter{
+			Column:   column,
+			Operator: operator,
+			Value: &Value{
+				Type:     KeyTypeRelation,
+				Relation: &ValueRelation{BlockIDs: blockIDs},
+			},
+		}
+	}
+	keyword := exact("relation", FilterOperatorContains, "同名主键")
+	root := group(FilterCombinationAnd,
+		exact("relation", FilterOperatorContainsAnyItem, "row-a", "row-b"),
+		group(FilterCombinationOr, exact("relation", FilterOperatorDoesNotContainAnyItem, "row-a")),
+		keyword,
+	)
+
+	got, changed := RemoveRelationItemsFromFilters([]*ViewFilter{root}, "relation", []string{"row-a"})
+	if !changed || 1 != len(got) || 2 != len(got[0].Filters) {
+		t.Fatalf("expected the deleted row ID and emptied nested group to be pruned")
+	}
+	remaining := got[0].Filters[0].Value.Relation.BlockIDs
+	if 1 != len(remaining) || "row-b" != remaining[0] {
+		t.Fatalf("unexpected remaining exact relation IDs: %v", remaining)
+	}
+	if got[0].Filters[1] != keyword {
+		t.Fatalf("keyword relation filter should remain unchanged")
+	}
+}
+
+func TestRemoveExactRelationFiltersByColumn(t *testing.T) {
+	exact := &ViewFilter{
+		Column:   "relation",
+		Operator: FilterOperatorContainsAnyItem,
+		Value:    &Value{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{"row-a"}}},
+	}
+	keyword := &ViewFilter{
+		Column:   "relation",
+		Operator: FilterOperatorContains,
+		Value:    &Value{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{"主键"}}},
+	}
+	got, changed := RemoveExactRelationFiltersByColumn(
+		[]*ViewFilter{group(FilterCombinationAnd, exact, keyword)}, "relation")
+	if !changed || 1 != len(got) || 1 != len(got[0].Filters) || got[0].Filters[0] != keyword {
+		t.Fatalf("only exact filters for the retargeted relation column should be removed")
+	}
+}
+
+func TestAttributeViewRemoveRelationFilterItems(t *testing.T) {
+	exact := func(column string, blockIDs ...string) *ViewFilter {
+		return &ViewFilter{
+			Column:   column,
+			Operator: FilterOperatorContainsAnyItem,
+			Value: &Value{
+				Type:     KeyTypeRelation,
+				Relation: &ValueRelation{BlockIDs: blockIDs},
+			},
+		}
+	}
+	attrView := &AttributeView{
+		KeyValues: []*KeyValues{
+			{Key: &Key{ID: "target-relation", Type: KeyTypeRelation, Relation: &Relation{AvID: "target"}}},
+			{Key: &Key{ID: "other-relation", Type: KeyTypeRelation, Relation: &Relation{AvID: "other"}}},
+		},
+		Views: []*View{
+			{Filters: []*ViewFilter{group(FilterCombinationAnd,
+				exact("target-relation", "row-a"),
+				exact("other-relation", "row-a"),
+			)}},
+		},
+	}
+	if !attrView.RemoveRelationFilterItems("target", []string{"row-a"}) {
+		t.Fatalf("removing a selected target row should report a filter change")
+	}
+	filters := attrView.Views[0].Filters
+	if 1 != len(filters) || 1 != len(filters[0].Filters) ||
+		"other-relation" != filters[0].Filters[0].Column {
+		t.Fatalf("only filters for relation columns pointing to the target database should change")
+	}
+
+	if !attrView.RemoveRelationFilterItems("other", []string{"row-a"}) {
+		t.Fatalf("removing the final selected row should report a filter change")
+	}
+	if 1 != len(attrView.Views[0].Filters) || !attrView.Views[0].Filters[0].IsGroup() ||
+		0 != len(attrView.Views[0].Filters[0].Filters) {
+		t.Fatalf("an emptied filter tree should retain an empty AND root group")
+	}
+}
+
 func TestRenameSelectOptionInFilters(t *testing.T) {
 	sel := &ViewFilter{Column: "c1", Operator: FilterOperatorContains, Value: &Value{
 		Type:    KeyTypeMSelect,

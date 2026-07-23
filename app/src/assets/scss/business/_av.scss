@@ -1365,6 +1365,122 @@
         font-size: 14px;
         width: 100%;
       }
+
+      .av__relation-filter-trigger {
+        max-width: 280px;
+
+        .av__relation-filter-chip {
+          max-width: 112px;
+        }
+      }
+
+      .av__relation-filter-dropdown {
+        display: flex;
+        flex-direction: column;
+        max-height: 320px;
+        overflow: hidden;
+      }
+
+      .av__relation-filter-selected {
+        display: flex;
+        align-items: flex-start;
+        gap: 4px;
+        margin-bottom: 4px;
+
+        &:empty {
+          display: none;
+        }
+      }
+
+      .av__relation-filter-selected-chips {
+        display: flex;
+        flex: 1;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-height: 88px;
+        overflow-y: auto;
+      }
+
+      .av__relation-filter-chip {
+        display: inline-flex;
+        align-items: center;
+        min-width: 0;
+        max-width: 180px;
+        gap: 4px;
+        background-color: var(--b3-list-hover);
+        color: var(--b3-theme-on-background);
+      }
+
+      .av__relation-filter-id,
+      .av__relation-filter-option-id {
+        flex-shrink: 0;
+        color: var(--b3-theme-on-surface);
+        font-size: 11px;
+      }
+
+      .av__relation-filter-remove {
+        display: inline-flex;
+        flex-shrink: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--b3-theme-on-surface);
+        cursor: pointer;
+
+        svg {
+          width: 12px;
+          height: 12px;
+        }
+      }
+
+      .av__relation-filter-clear {
+        flex-shrink: 0;
+        padding: 2px 4px;
+      }
+
+      .av__relation-filter-count {
+        flex-shrink: 0;
+      }
+
+      .av__relation-filter-options {
+        display: flex;
+        flex-direction: column;
+        min-height: 28px;
+        max-height: 180px;
+        overflow-y: auto;
+      }
+
+      .av__relation-filter-option {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        min-height: 30px;
+        padding: 4px 6px;
+        border: 0;
+        border-radius: var(--b3-border-radius);
+        background: transparent;
+        color: var(--b3-theme-on-background);
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+          background-color: var(--b3-list-hover);
+        }
+      }
+
+      .av__relation-filter-option-icon,
+      .av__relation-filter-option-check {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+      }
+
+      .av__relation-filter-option-check {
+        margin-left: auto;
+      }
     }
   }
 

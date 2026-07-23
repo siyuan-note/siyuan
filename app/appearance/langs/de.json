@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "Verknüpfte Einträge auswählen",
+  "filterOperatorContainsAnyItem": "Enthält eines",
+  "filterOperatorDoesNotContainAnyItem": "Enthält keines",
+  "filterOperatorContainsKeyword": "Enthält Schlüsselwort",
+  "filterOperatorDoesNotContainKeyword": "Enthält Schlüsselwort nicht",
   "showInAllViews": "In allen Ansichten anzeigen",
   "hideInAllViews": "In allen Ansichten ausblenden",
   "fieldVisibility": "Feldsichtbarkeit",

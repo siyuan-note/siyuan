@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "İlişkili öğeleri seç",
+  "filterOperatorContainsAnyItem": "Herhangi bir öğeyi içerir",
+  "filterOperatorDoesNotContainAnyItem": "Hiçbir öğeyi içermez",
+  "filterOperatorContainsKeyword": "Anahtar sözcük içerir",
+  "filterOperatorDoesNotContainKeyword": "Anahtar sözcük içermez",
   "showInAllViews": "Tüm görünümlerde göster",
   "hideInAllViews": "Tüm görünümlerde gizle",
   "fieldVisibility": "Alan görünürlüğü",

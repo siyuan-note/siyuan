@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "Seleziona elementi collegati",
+  "filterOperatorContainsAnyItem": "Contiene almeno un elemento",
+  "filterOperatorDoesNotContainAnyItem": "Non contiene alcun elemento",
+  "filterOperatorContainsKeyword": "Contiene parola chiave",
+  "filterOperatorDoesNotContainKeyword": "Non contiene parola chiave",
   "showInAllViews": "Mostra in tutte le viste",
   "hideInAllViews": "Nascondi in tutte le viste",
   "fieldVisibility": "Visibilità del campo",

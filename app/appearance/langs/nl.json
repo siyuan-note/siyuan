@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "Gerelateerde items selecteren",
+  "filterOperatorContainsAnyItem": "Bevat een van de items",
+  "filterOperatorDoesNotContainAnyItem": "Bevat geen van de items",
+  "filterOperatorContainsKeyword": "Bevat trefwoord",
+  "filterOperatorDoesNotContainKeyword": "Bevat trefwoord niet",
   "showInAllViews": "Tonen in alle weergaven",
   "hideInAllViews": "Verbergen in alle weergaven",
   "fieldVisibility": "Zichtbaarheid van veld",

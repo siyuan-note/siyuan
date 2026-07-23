@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "Вибрати пов’язані елементи",
+  "filterOperatorContainsAnyItem": "Містить будь-який елемент",
+  "filterOperatorDoesNotContainAnyItem": "Не містить жодного елемента",
+  "filterOperatorContainsKeyword": "Містить ключове слово",
+  "filterOperatorDoesNotContainKeyword": "Не містить ключового слова",
   "showInAllViews": "Показати в усіх поданнях",
   "hideInAllViews": "Приховати в усіх поданнях",
   "fieldVisibility": "Видимість поля",

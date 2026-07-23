@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "Select entries",
+  "filterOperatorContainsAnyItem": "Contains any item",
+  "filterOperatorDoesNotContainAnyItem": "Does not contain any item",
+  "filterOperatorContainsKeyword": "Contains keyword",
+  "filterOperatorDoesNotContainKeyword": "Does not contain keyword",
   "showInAllViews": "Show in all views",
   "hideInAllViews": "Hide in all views",
   "fieldVisibility": "Field visibility",

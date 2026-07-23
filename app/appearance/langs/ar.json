@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "اختر العناصر المرتبطة",
+  "filterOperatorContainsAnyItem": "يحتوي على أي عنصر",
+  "filterOperatorDoesNotContainAnyItem": "لا يحتوي على أي عنصر",
+  "filterOperatorContainsKeyword": "يحتوي على كلمة مفتاحية",
+  "filterOperatorDoesNotContainKeyword": "لا يحتوي على كلمة مفتاحية",
   "showInAllViews": "إظهار في جميع العروض",
   "hideInAllViews": "إخفاء في جميع العروض",
   "fieldVisibility": "إمكانية رؤية الحقل",

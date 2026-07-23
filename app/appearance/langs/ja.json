@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "関連項目を選択",
+  "filterOperatorContainsAnyItem": "いずれかを含む",
+  "filterOperatorDoesNotContainAnyItem": "いずれも含まない",
+  "filterOperatorContainsKeyword": "キーワードを含む",
+  "filterOperatorDoesNotContainKeyword": "キーワードを含まない",
   "showInAllViews": "すべてのビューで表示",
   "hideInAllViews": "すべてのビューで非表示",
   "fieldVisibility": "フィールドの表示",

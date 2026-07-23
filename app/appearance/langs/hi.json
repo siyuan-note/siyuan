@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "संबंधित आइटम चुनें",
+  "filterOperatorContainsAnyItem": "किसी भी आइटम को शामिल करता है",
+  "filterOperatorDoesNotContainAnyItem": "किसी भी आइटम को शामिल नहीं करता",
+  "filterOperatorContainsKeyword": "कीवर्ड शामिल करता है",
+  "filterOperatorDoesNotContainKeyword": "कीवर्ड शामिल नहीं करता",
   "showInAllViews": "सभी दृश्यों में दिखाएँ",
   "hideInAllViews": "सभी दृश्यों में छिपाएँ",
   "fieldVisibility": "फ़ील्ड दृश्यता",

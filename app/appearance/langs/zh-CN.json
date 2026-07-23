@@ -1,4 +1,9 @@
 {
+  "selectRelationItems": "选择条目",
+  "filterOperatorContainsAnyItem": "包含任一",
+  "filterOperatorDoesNotContainAnyItem": "不包含任一",
+  "filterOperatorContainsKeyword": "包含关键字",
+  "filterOperatorDoesNotContainKeyword": "不包含关键字",
   "showInAllViews": "在所有视图中显示",
   "hideInAllViews": "在所有视图中隐藏",
   "fieldVisibility": "字段可见性",

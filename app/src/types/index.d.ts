@@ -127,6 +127,8 @@ type TAVFilterOperator =
     | "<="
     | "Contains"
     | "Does not contains"
+    | "Contains any item"
+    | "Does not contain any item"
     | "Is empty"
     | "Is not empty"
     | "Starts with"

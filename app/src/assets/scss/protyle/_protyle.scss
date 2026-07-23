@@ -346,7 +346,8 @@
   }
 
   &--transition {
-    .protyle-wysiwyg {
+    .protyle-wysiwyg,
+    .sy__backlink--bottom {
       transition: padding .3s cubic-bezier(.25, .46, .45, .94) 0ms;
     }
 

@@ -1,22 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
-    shouldForceBacklinkRefresh,
+    shouldDeferBottomBacklinkRefresh,
     shouldHideBottomBacklinks,
     shouldRenderBacklinkResponse,
     shouldSaveBacklinkStatus
 } from "./backlinkRefresh";
-
-describe("shouldForceBacklinkRefresh", () => {
-    it("refreshes reference changes in the owner document while it is focused", () => {
-        assert.equal(shouldForceBacklinkRefresh("owner", "owner"), true);
-    });
-
-    it("keeps unrelated document changes deferred", () => {
-        assert.equal(shouldForceBacklinkRefresh("owner", "other"), false);
-        assert.equal(shouldForceBacklinkRefresh("", "other"), false);
-    });
-});
 
 describe("shouldRenderBacklinkResponse", () => {
     it("skips a stale response when a newer search or refresh is queued", () => {
@@ -31,6 +20,17 @@ describe("shouldSaveBacklinkStatus", () => {
         assert.equal(shouldSaveBacklinkStatus(false, false), true);
         assert.equal(shouldSaveBacklinkStatus(true, false), false);
         assert.equal(shouldSaveBacklinkStatus(false, true), false);
+    });
+});
+
+describe("shouldDeferBottomBacklinkRefresh", () => {
+    it("defers automatic refreshes while the owner editor is focused", () => {
+        assert.equal(shouldDeferBottomBacklinkRefresh(true, false), true);
+        assert.equal(shouldDeferBottomBacklinkRefresh(false, false), false);
+    });
+
+    it("allows explicit refreshes to bypass the focus guard", () => {
+        assert.equal(shouldDeferBottomBacklinkRefresh(true, true), false);
     });
 });
 

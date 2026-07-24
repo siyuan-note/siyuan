@@ -54,6 +54,7 @@ type Editor struct {
 	DynamicLoadBlocks               int            `json:"dynamicLoadBlocks"`               // 块动态数，下限 48
 	Justify                         bool           `json:"justify"`                         // 是否两端对齐
 	RTL                             bool           `json:"rtl"`                             // 是否从右到左显示
+	AutoTextDirection               bool           `json:"autoTextDirection"`               // 是否按块自动检测文本方向
 	Spellcheck                      bool           `json:"spellcheck"`                      // 是否启用拼写检查
 	SpellcheckLanguages             []string       `json:"spellcheckLanguages"`             // 拼写检查语言
 	OnlySearchForDoc                bool           `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
@@ -105,6 +106,7 @@ func NewEditor() *Editor {
 		DynamicLoadBlocks:               192,
 		Justify:                         false,
 		RTL:                             false,
+		AutoTextDirection:               false,
 		Spellcheck:                      false,
 		SpellcheckLanguages:             []string{"en-US"},
 		BacklinkExpandCount:             8,

@@ -9,11 +9,13 @@ import {isSupportCSSHL, searchMarkRender} from "../render/searchMarkRender";
 import {hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 /// #endif
 import {restoreLuteMarkdownSyntax} from "./paste";
+import {syncAutoDirectionRuntime} from "./autoDirection";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
     /// #if MOBILE
     hideKeyboardToolbar();
     /// #endif
+    syncAutoDirectionRuntime(protyle);
     if (!protyle.preview.element.classList.contains("fn__none")) {
         protyle.preview.render(protyle);
         removeLoading(protyle);

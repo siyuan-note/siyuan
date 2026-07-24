@@ -1,4 +1,5 @@
 {
+  "createDocAndBind": "文書を作成して紐付け",
   "includeSublists": "サブリストを含める",
   "selectRelationItems": "関連項目を選択",
   "filterOperatorContainsAnyItem": "いずれかを含む",

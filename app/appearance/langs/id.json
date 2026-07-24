@@ -1,4 +1,5 @@
 {
+  "createDocAndBind": "Buat dokumen dan tautkan",
   "includeSublists": "Sertakan subdaftar",
   "selectRelationItems": "Pilih item terkait",
   "filterOperatorContainsAnyItem": "Berisi salah satu item",

@@ -1,4 +1,5 @@
 {
+  "createDocAndBind": "יצירת מסמך וקישורו",
   "includeSublists": "כלול רשימות משנה",
   "selectRelationItems": "בחירת פריטים מקושרים",
   "filterOperatorContainsAnyItem": "מכיל פריט כלשהו",

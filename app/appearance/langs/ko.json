@@ -1,4 +1,5 @@
 {
+  "createDocAndBind": "문서 생성 및 연결",
   "includeSublists": "하위 목록 포함",
   "selectRelationItems": "연결 항목 선택",
   "filterOperatorContainsAnyItem": "항목 중 하나 포함",

@@ -1,4 +1,5 @@
 {
+  "createDocAndBind": "Utwórz dokument i powiąż",
   "includeSublists": "Uwzględnij podlisty",
   "selectRelationItems": "Wybierz powiązane elementy",
   "filterOperatorContainsAnyItem": "Zawiera dowolny element",

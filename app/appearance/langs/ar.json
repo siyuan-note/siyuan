@@ -1,4 +1,5 @@
 {
+  "createDocAndBind": "إنشاء مستند وربطه",
   "includeSublists": "تضمين القوائم الفرعية",
   "selectRelationItems": "اختر العناصر المرتبطة",
   "filterOperatorContainsAnyItem": "يحتوي على أي عنصر",

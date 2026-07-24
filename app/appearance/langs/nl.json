@@ -1,4 +1,5 @@
 {
+  "createDocAndBind": "Document maken en koppelen",
   "includeSublists": "Sublijsten opnemen",
   "selectRelationItems": "Gerelateerde items selecteren",
   "filterOperatorContainsAnyItem": "Bevat een van de items",

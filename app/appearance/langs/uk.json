@@ -1,4 +1,5 @@
 {
+  "createDocAndBind": "Створити документ і прив’язати",
   "includeSublists": "Включити вкладені списки",
   "selectRelationItems": "Вибрати пов’язані елементи",
   "filterOperatorContainsAnyItem": "Містить будь-який елемент",

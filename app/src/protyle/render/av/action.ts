@@ -17,7 +17,7 @@ import {
 } from "./cell";
 import {addCol, getColIconByType, showColMenu} from "./col";
 import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHeader} from "./row";
-import {resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
+import {getAVSelectedItems, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
@@ -40,7 +40,7 @@ import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
 import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
-import {createAttributeViewItem, openNewItemTemplateMenu} from "./newItemTemplate";
+import {createAttributeViewItem, createAttributeViewItemDocs, openNewItemTemplateMenu} from "./newItemTemplate";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
@@ -439,6 +439,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     }
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
+    const selectedItems = getAVSelectedItems(blockElement);
     const keyCellElement = rowElements[0].querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
     const ids = Array.from(rowElements).map(item => item.querySelector('[data-dtype="block"] .av__celltext').getAttribute("data-id"));
     if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") !== "true") {
@@ -673,6 +674,23 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         submenu: copyMenu
     });
     if (!protyle.disabled) {
+        const detachedItemIDs = selectedItems.filter(item => item.isDetached).map(item => item.itemID);
+        if (detachedItemIDs.length > 0) {
+            menu.addItem({
+                id: "createDocAndBind",
+                label: window.siyuan.languages.createDocAndBind,
+                icon: "iconFile",
+                accelerator: window.siyuan.config.keymap.editor.general.newNameSettingFile.custom,
+                click() {
+                    createAttributeViewItemDocs({
+                        protyle,
+                        blockElement,
+                        itemIDs: detachedItemIDs,
+                        saveMode: "template",
+                    });
+                }
+            });
+        }
         menu.addItem({
             id: "addToDatabase",
             label: window.siyuan.languages.addToDatabase,

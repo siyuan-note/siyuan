@@ -852,6 +852,50 @@ func createAttributeViewItem(c *gin.Context) {
 	}
 }
 
+func createAttributeViewItemDocs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var itemIDsArg []any
+	var avID, blockID, saveMode, app, session string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("avID", &avID, true, false),
+		util.BindJsonArg("blockID", &blockID, true, false),
+		util.BindJsonArg("saveMode", &saveMode, true, false),
+		util.BindJsonArg("itemIDs", &itemIDsArg, true, false),
+		util.BindJsonArg("app", &app, false, false),
+		util.BindJsonArg("session", &session, false, false),
+	) {
+		return
+	}
+	var itemIDs []string
+	for _, itemIDArg := range itemIDsArg {
+		itemID, itemOK := itemIDArg.(string)
+		if itemOK && "" != itemID {
+			itemIDs = append(itemIDs, itemID)
+		}
+	}
+	result, err := model.CreateAttributeViewItemDocs(avID, blockID, saveMode, itemIDs)
+	if nil != err {
+		if errors.Is(err, model.ErrBoxNotFound) {
+			ret.Code = 1
+			ret.Data = map[string]any{"unavailableNotebook": true}
+			return
+		}
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = result
+	if nil != result.Transaction {
+		pushTransactions(app, session, []*model.Transaction{result.Transaction})
+	}
+}
+
 func searchAttributeView(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

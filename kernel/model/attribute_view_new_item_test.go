@@ -66,6 +66,70 @@ func TestBuildNewItemFieldValueOperationsWithoutKeyIDs(t *testing.T) {
 	}
 }
 
+func TestAttributeViewItemDocumentTemplate(t *testing.T) {
+	documentTemplate := &av.NewItemTemplate{ID: ast.NewNodeID(), TargetType: av.NewItemTargetDocument, Icon: "1f4c4"}
+	attrView := &av.AttributeView{
+		DefaultTemplateID: documentTemplate.ID,
+		NewItemTemplates:  []*av.NewItemTemplate{documentTemplate},
+	}
+	actual, err := attributeViewItemDocumentTemplate(attrView, CreateAttributeViewItemDocsSaveModeTemplate)
+	if nil != err || actual != documentTemplate {
+		t.Fatalf("the default document template should be reused: template=%+v err=%v", actual, err)
+	}
+
+	actual, err = attributeViewItemDocumentTemplate(attrView, CreateAttributeViewItemDocsSaveModeSubDoc)
+	if nil != err || nil == actual.SaveLocation || av.NewItemTargetDocument != actual.TargetType {
+		t.Fatalf("the child document mode should use the current document as its parent: template=%+v err=%v", actual, err)
+	}
+
+	attrView.DefaultTemplateID = ""
+	actual, err = attributeViewItemDocumentTemplate(attrView, CreateAttributeViewItemDocsSaveModeTemplate)
+	if nil != err || nil != actual.SaveLocation || av.NewItemTargetDocument != actual.TargetType {
+		t.Fatalf("a blank document template should inherit the document creation location: template=%+v err=%v", actual, err)
+	}
+
+	detachedTemplate := &av.NewItemTemplate{ID: ast.NewNodeID(), TargetType: av.NewItemTargetDetached}
+	attrView.DefaultTemplateID = detachedTemplate.ID
+	attrView.NewItemTemplates = []*av.NewItemTemplate{detachedTemplate}
+	actual, err = attributeViewItemDocumentTemplate(attrView, CreateAttributeViewItemDocsSaveModeTemplate)
+	if nil != err || actual == detachedTemplate || av.NewItemTargetDocument != actual.TargetType {
+		t.Fatalf("a detached default template should fall back to a blank document template: template=%+v err=%v", actual, err)
+	}
+
+	if _, err = attributeViewItemDocumentTemplate(attrView, "invalid"); nil == err {
+		t.Fatal("an invalid save mode should be rejected")
+	}
+}
+
+func TestLockAttributeViewItemDocs(t *testing.T) {
+	avID := ast.NewNodeID()
+	unlock := lockAttributeViewItemDocs(avID)
+	started := make(chan struct{})
+	acquired := make(chan struct{})
+	go func() {
+		close(started)
+		release := lockAttributeViewItemDocs(avID)
+		close(acquired)
+		release()
+	}()
+	<-started
+	acquiredWhileLocked := false
+	select {
+	case <-acquired:
+		acquiredWhileLocked = true
+	default:
+	}
+	unlock()
+	if acquiredWhileLocked {
+		t.Fatal("the same attribute view should not be processed concurrently")
+	}
+	select {
+	case <-acquired:
+	case <-time.After(time.Second):
+		t.Fatal("the waiting attribute view operation should continue after unlocking")
+	}
+}
+
 func TestRenderGoTemplateAt(t *testing.T) {
 	now := time.Date(2026, time.July, 18, 9, 8, 7, 0, time.Local)
 	actual, err := RenderGoTemplateAt(`{{now | date "2006-01-02 15:04:05"}}`, now)

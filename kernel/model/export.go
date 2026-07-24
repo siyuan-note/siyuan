@@ -1766,33 +1766,40 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 		return
 	}
 
-	assetLinks, otherLinks, listErr := PdfListLinks(pdfCtx)
-	if nil != listErr {
-		logging.LogErrorf("list asset links failed: %s", listErr)
-		return
-	}
-
+	assetLinks := pdfListAssetLinks(pdfCtx)
 	if 1 > len(assetLinks) {
 		return
 	}
 
-	if _, removeErr := pdfcpu.RemoveAnnotations(pdfCtx, nil, nil, nil, false); nil != removeErr {
-		logging.LogWarnf("remove annotations failed: %s", removeErr)
+	assetLinkObjectNumbers := map[int][]int{}
+	for _, assetLink := range assetLinks {
+		if 1 > assetLink.objectNumber {
+			logging.LogWarnf("asset link annotation on page [%d] is not an indirect object", assetLink.annotation.Page)
+			return
+		}
+		assetLinkObjectNumbers[assetLink.annotation.Page] = append(
+			assetLinkObjectNumbers[assetLink.annotation.Page], assetLink.objectNumber)
 	}
 
-	linkMap := map[int][]model.AnnotationRenderer{}
-	for _, link := range otherLinks {
-		link.URI, _ = url.PathUnescape(link.URI)
-		if 1 > len(linkMap[link.Page]) {
-			linkMap[link.Page] = []model.AnnotationRenderer{link}
-		} else {
-			linkMap[link.Page] = append(linkMap[link.Page], link)
+	// 只移除资源链接注解，保留 PDF 原有的内部跳转和其他注解。
+	for page, objectNumbers := range assetLinkObjectNumbers {
+		removed, removeErr := pdfcpu.RemoveAnnotations(
+			pdfCtx, types.IntSet{page: true}, nil, objectNumbers, false)
+		if nil != removeErr {
+			logging.LogWarnf("remove asset link annotations on page [%d] failed: %s", page, removeErr)
+			return
+		}
+		if !removed {
+			logging.LogWarnf("no asset link annotation removed on page [%d]", page)
+			return
 		}
 	}
 
+	linkMap := map[int][]model.AnnotationRenderer{}
 	attachmentMap := map[int][]*types.IndirectRef{}
 	now := types.StringLiteral(types.DateString(time.Now()))
-	for _, link := range assetLinks {
+	for _, assetLink := range assetLinks {
+		link := assetLink.annotation
 		for _, scheme := range []string{"http", "https"} {
 			link.URI = strings.ReplaceAll(link.URI, scheme+"://"+util.LocalHost+":"+util.ServerPort+"/export/temp/", "")
 			link.URI = strings.ReplaceAll(link.URI, scheme+"://"+util.LocalHost+":6806/export/temp/", "")

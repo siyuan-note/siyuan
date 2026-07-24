@@ -15,23 +15,23 @@ interface IProviderPreset {
     category: "official" | "aggregator" | "local" | "custom";
     region?: "china" | "international";
     icon?: string;
-    preserveIconColor?: boolean;
+    iconColor?: string;
 }
 
 const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "openai", name: "OpenAI", baseURL: "https://api.openai.com/v1", category: "official", icon: "/stage/images/ai-providers/openai.svg"},
-    {id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", icon: "/stage/images/ai-providers/deepseek.svg"},
+    {id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", icon: "/stage/images/ai-providers/deepseek.svg", iconColor: "#5786FE"},
     {id: "moonshot", name: "Moonshot AI", baseURL: "https://api.moonshot.cn/v1", category: "official", icon: "/stage/images/ai-providers/moonshot.svg"},
-    {id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/minimax.svg"},
-    {id: "minimax-cn", name: "MiniMax", baseURL: "https://api.minimaxi.com/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/minimax.svg"},
-    {id: "aliyun", name: "Alibaba Model Studio", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/aliyun.svg"},
-    {id: "aliyun-intl", name: "Alibaba Model Studio", baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/aliyun.svg"},
-    {id: "volcengine", name: "Volcengine Ark", baseURL: "https://ark.cn-beijing.volces.com/api/v3", category: "official", icon: "/stage/images/ai-providers/volcengine.svg", preserveIconColor: true},
-    {id: "zhipu", name: "Zhipu AI", baseURL: "https://open.bigmodel.cn/api/paas/v4", category: "official", icon: "/stage/images/ai-providers/zhipu.svg", preserveIconColor: true},
-    {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", icon: "/stage/images/ai-providers/gemini.svg"},
-    {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", icon: "/stage/images/ai-providers/mistral.svg"},
-    {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", icon: "/stage/images/ai-providers/siliconflow.svg", preserveIconColor: true},
-    {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", icon: "/stage/images/ai-providers/openrouter.svg"},
+    {id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/minimax.svg", iconColor: "#E73562"},
+    {id: "minimax-cn", name: "MiniMax", baseURL: "https://api.minimaxi.com/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/minimax.svg", iconColor: "#E73562"},
+    {id: "aliyun", name: "Alibaba Model Studio", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/aliyun.svg", iconColor: "#FF6A00"},
+    {id: "aliyun-intl", name: "Alibaba Model Studio", baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/aliyun.svg", iconColor: "#FF6A00"},
+    {id: "volcengine", name: "Volcengine Ark", baseURL: "https://ark.cn-beijing.volces.com/api/v3", category: "official", icon: "/stage/images/ai-providers/volcengine.svg"},
+    {id: "zhipu", name: "Zhipu AI", baseURL: "https://open.bigmodel.cn/api/paas/v4", category: "official", icon: "/stage/images/ai-providers/zhipu.svg"},
+    {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", icon: "/stage/images/ai-providers/gemini.svg", iconColor: "#8E75B2"},
+    {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", icon: "/stage/images/ai-providers/mistral.svg", iconColor: "#FA520F"},
+    {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", icon: "/stage/images/ai-providers/siliconflow.svg"},
+    {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", icon: "/stage/images/ai-providers/openrouter.svg", iconColor: "#94A3B8"},
     {id: "groq", name: "Groq", baseURL: "https://api.groq.com/openai/v1", category: "aggregator"},
     {id: "ollama", name: "Ollama", baseURL: "http://localhost:11434/v1", category: "local", icon: "/stage/images/ai-providers/ollama.svg"},
     {id: "lmstudio", name: "LM Studio", baseURL: "http://localhost:1234/v1", category: "local", icon: "/stage/images/ai-providers/lmstudio.svg"},
@@ -80,26 +80,47 @@ const getCategoryTitle = (category: IProviderPreset["category"]) => {
 const getProviderAvatarHTML = (provider: Config.IProvider, preset = findPreset(provider)) => {
     const title = providerTitle(provider);
     if (preset?.icon) {
-        const colorClass = preset.preserveIconColor ? " config-ai-provider__logo--color" : "";
-        return `<img class="config-ai-provider__logo config-ai-provider__logo--${preset.id}${colorClass}" src="${preset.icon}" alt="${escapeHTML(title)}" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+        if (preset.iconColor) {
+            return `<span class="config-ai-provider__logo config-ai-provider__logo--brand" style="--config-ai-provider-logo-color: ${preset.iconColor}; --config-ai-provider-logo-image: url('${preset.icon}')" role="img" aria-label="${escapeHTML(title)}"></span>`;
+        }
+        return `<img class="config-ai-provider__logo config-ai-provider__logo--${preset.id}" src="${preset.icon}" alt="${escapeHTML(title)}" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
 <span class="config-ai-provider__initial" hidden>${escapeHTML(title.slice(0, 1).toUpperCase())}</span>`;
     }
     return `<span class="config-ai-provider__initial">${escapeHTML(title.slice(0, 1).toUpperCase() || "AI")}</span>`;
 };
 
 const getProviderViewHost = (root: HTMLElement) =>
-    root.closest<HTMLElement>(".config__tab-container") || root;
+    root.closest<HTMLElement>(".config__panel") ||
+    root.closest<HTMLElement>(".config__tab-container") ||
+    root;
 
-const removeProviderView = (root: HTMLElement) => {
-    getProviderViewHost(root).querySelector(".config-ai-provider__view")?.remove();
+const getProviderViews = (root: HTMLElement) => {
+    return Array.from(getProviderViewHost(root).children).filter((element): element is HTMLElement =>
+        element instanceof HTMLElement && element.classList.contains("config-ai-provider__view"));
 };
 
-const createProviderView = (root: HTMLElement, title: string) => {
-    removeProviderView(root);
+const removeProviderView = (root: HTMLElement, view?: HTMLElement) => {
     const host = getProviderViewHost(root);
-    host.scrollTop = 0;
+    if (view) {
+        view.remove();
+    } else {
+        getProviderViews(root).forEach((item) => item.remove());
+    }
+    if (getProviderViews(root).length === 0) {
+        host.classList.remove("config-ai-provider__view-host");
+    }
+};
+
+const createProviderView = (root: HTMLElement, title: string, stacked = false) => {
+    if (!stacked) {
+        removeProviderView(root);
+    }
+    const host = getProviderViewHost(root);
+    const layer = getProviderViews(root).length;
+    host.classList.add("config-ai-provider__view-host");
     const view = document.createElement("div");
     view.className = "config-ai-provider__view";
+    view.style.zIndex = String(3 + layer);
     view.innerHTML = `<div class="config-ai-provider__view-head">
     <button class="block__icon block__icon--show" data-action="back" aria-label="${window.siyuan.languages.back}">
         <svg><use xlink:href="#iconLeft"></use></svg>
@@ -194,7 +215,7 @@ const openProviderCatalog = (root: HTMLElement) => {
     view.addEventListener("click", (event) => {
         const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
         if (action?.dataset.action === "back") {
-            removeProviderView(root);
+            removeProviderView(root, view);
             return;
         }
         const presetCard = (event.target as HTMLElement).closest<HTMLElement>("[data-preset-id]");
@@ -344,7 +365,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         models: [],
     };
     const initialJSON = JSON.stringify(draft);
-    const view = createProviderView(root, providerTitle(draft));
+    const view = createProviderView(root, providerTitle(draft), !existing && !!preset);
     const body = view.querySelector<HTMLElement>(".config-ai-provider__view-body");
     body.innerHTML = `<div class="config-ai-provider__detail">
     <div class="config-ai-provider__section">
@@ -358,6 +379,10 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 <span>${window.siyuan.languages.apiBaseURL}</span>
                 <input class="b3-text-field" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}">
             </label>
+            <label class="config-ai-provider__field">
+                <span>${window.siyuan.languages.apiTimeout}</span>
+                <input class="b3-text-field" data-provider-field="requestTimeout" type="number" min="1" max="600" value="${draft.requestTimeout}">
+            </label>
             <div class="config-ai-provider__field">
                 <span>${window.siyuan.languages.apiKey}</span>
                 <div class="b3-form__icona config-ai-provider__api-key-input">
@@ -365,10 +390,6 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
                 </div>
             </div>
-            <label class="config-ai-provider__field">
-                <span>${window.siyuan.languages.apiTimeout}</span>
-                <input class="b3-text-field" data-provider-field="requestTimeout" type="number" min="1" max="600" value="${draft.requestTimeout}">
-            </label>
         </div>
     </div>
     <div class="config-ai-provider__section">
@@ -396,9 +417,18 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
 </div>`;
     bindPasswordIconaToggle(view, "aiProviderDetailApiKey");
     const modelsContainer = view.querySelector<HTMLElement>(".config-ai-provider__models");
+    const addModelButton = view.querySelector<HTMLButtonElement>("[data-action='addModel']");
+    const fetchModelsButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
+    const confirmButton = view.querySelector<HTMLButtonElement>("[data-action='confirm']");
     let availableModels: string[] = [];
     let hasFetchedModels = false;
     let fetchingModels = false;
+    const updateModelActionButtons = () => {
+        const disabled = fetchingModels || !draft.apiKey.trim();
+        addModelButton.disabled = disabled;
+        fetchModelsButton.disabled = disabled;
+    };
+    updateModelActionButtons();
     renderDraftModels(modelsContainer, draft.models, availableModels);
 
     const addDraftModel = () => {
@@ -421,6 +451,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         if (fetchingModels) {
             return;
         }
+        if (!draft.apiKey.trim()) {
+            view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
+            showMessage(window.siyuan.languages.apiKeyTip, undefined, "error");
+            return;
+        }
         if (!draft.baseURL.trim()) {
             view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
             showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
@@ -428,12 +463,8 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         }
         hasFetchedModels = true;
         fetchingModels = true;
-        const fetchButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
-        const addButton = view.querySelector<HTMLButtonElement>("[data-action='addModel']");
-        const confirmButton = view.querySelector<HTMLButtonElement>("[data-action='confirm']");
-        const icon = fetchButton?.querySelector<SVGSVGElement>(".b3-button__icon");
-        fetchButton.disabled = true;
-        addButton.disabled = true;
+        const icon = fetchModelsButton.querySelector<SVGSVGElement>(".b3-button__icon");
+        updateModelActionButtons();
         confirmButton.disabled = true;
         icon?.classList.add("fn__rotate");
         fetchPost("/api/ai/listModels", {providerConfig: draft}, (response) => {
@@ -476,8 +507,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             if (!view.isConnected) {
                 return;
             }
-            fetchButton.disabled = false;
-            addButton.disabled = false;
+            updateModelActionButtons();
             confirmButton.disabled = false;
             icon?.classList.remove("fn__rotate");
             onFinished?.();
@@ -485,11 +515,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     };
 
     const leaveDetail = () => {
-        if (!existing && preset) {
-            openProviderCatalog(root);
-        } else {
-            removeProviderView(root);
-        }
+        removeProviderView(root, view);
     };
 
     const closeDetail = () => {
@@ -512,6 +538,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 draft.requestTimeout = Number.isFinite(target.valueAsNumber) ? target.valueAsNumber : 120;
             } else {
                 draft[providerField] = target.value;
+            }
+            if (providerField === "apiKey") {
+                updateModelActionButtons();
             }
             view.querySelector<HTMLElement>(".config-ai-provider__view-title").textContent = providerTitle(draft);
             return;
@@ -555,6 +584,10 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "addModel") {
+            if (!draft.apiKey.trim()) {
+                view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
+                return;
+            }
             if (!hasFetchedModels) {
                 const modelCount = draft.models.length;
                 fetchModels(() => {

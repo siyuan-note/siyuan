@@ -522,7 +522,6 @@ export class Background {
             if (protyle.disabled) return;
 
             const target = event.target as HTMLElement;
-            const isCloseBtn = !!target.closest(".b3-chip__close");
             let chipElement = target.closest(".b3-chip") as HTMLElement;
 
             // 自动定位最近的标签逻辑
@@ -637,9 +636,6 @@ export class Background {
                             attrs: {"tags": tagsString}
                         });
                     }
-                } else if (isCloseBtn) {
-                    // 如果没拖拽且点在关闭按钮上
-                    target.closest(".b3-chip__close").dispatchEvent(new MouseEvent("click", {bubbles: true}));
                 }
             };
 

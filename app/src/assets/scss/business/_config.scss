@@ -503,6 +503,15 @@
     font-size: 12px;
   }
 
+  &__model-menu-group {
+    font-weight: 600;
+    line-height: 28px;
+    margin: 1px 0;
+    max-width: none;
+    white-space: nowrap;
+    word-break: normal;
+  }
+
   &__actions {
     padding: 0 12px 0 0;
     gap: 8px;

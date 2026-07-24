@@ -1,4 +1,4 @@
-import {bindPasswordIconaToggle} from "../render/fragments";
+import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
@@ -228,7 +228,7 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
         return;
     }
     const modelInputClass = availableModels.length > 0 ? "b3-select" : "b3-text-field";
-    const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" readonly' : "";
+    const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" data-menu="true" readonly' : "";
     container.innerHTML = models.map((model, index) => `<div class="config-ai-provider__model" data-model-index="${index}">
     <input class="b3-switch" data-model-field="enabled" type="checkbox"${model.enabled ? " checked" : ""} aria-label="${window.siyuan.languages.enable}">
     <input class="${modelInputClass}" data-model-field="name" type="text"${modelInputAction} spellcheck="false" placeholder="${window.siyuan.languages.selectModel}" value="${escapeHTML(model.name)}">
@@ -716,28 +716,91 @@ const getSelectedModelId = (group: ModelPickerGroup) => {
     return getFirstEnabledModelId();
 };
 
-const buildGroupedModelOptions = (group: ModelPickerGroup, selectedModelId: string) => {
+const getModelPickerLabel = (modelId: string) => {
+    for (const {models} of getEnabledModelGroups()) {
+        const model = models.find((item) => item.id === modelId);
+        if (model) {
+            return model.displayName || model.name;
+        }
+    }
+    return window.siyuan.languages.noModelConfigured;
+};
+
+const updateGroupedModelPicker = (input: HTMLInputElement, group: ModelPickerGroup) => {
+    const selectedModelId = getSelectedModelId(group);
+    input.dataset.modelId = selectedModelId;
+    input.value = getModelPickerLabel(selectedModelId);
+    input.disabled = getEnabledModelGroups().length === 0;
+};
+
+const getGroupedModelMenuId = (group: ModelPickerGroup) => `ai-model-picker-${group}`;
+
+const isGroupedModelMenuOpen = (group: ModelPickerGroup) => {
+    const menuElement = window.siyuan.menus.menu.element;
+    return !menuElement.classList.contains("fn__none") &&
+        menuElement.getAttribute("data-name") === getGroupedModelMenuId(group);
+};
+
+const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group: ModelPickerGroup) => {
+    if (input.disabled) {
+        return;
+    }
+    const modelGroups = getEnabledModelGroups();
+    const selectedModelId = input.dataset.modelId || "";
+    const menu = new Menu(getGroupedModelMenuId(group));
+    if (menu.isOpen) {
+        return;
+    }
+    const selectModel = (modelId: string, label: string) => {
+        if (modelId === input.dataset.modelId) {
+            return;
+        }
+        input.dataset.modelId = modelId;
+        input.value = label;
+        aiConfigApi.patch(`${group}.modelId`, modelId, () => syncGroupedModelPickers(root));
+    };
     const optional = group === "vision" || group === "imageGeneration";
-    const emptyOption = optional || getEnabledModelGroups().length === 0
-        ? `<option value="">${window.siyuan.languages.noModelConfigured}</option>`
-        : "";
-    return emptyOption + getEnabledModelGroups().map(({provider, models}) =>
-        `<optgroup label="${escapeHTML(providerTitle(provider))}">${models.map((model) =>
-            `<option value="${escapeHTML(model.id)}"${model.id === selectedModelId ? " selected" : ""}>${escapeHTML(model.displayName || model.name)}</option>`
-        ).join("")}</optgroup>`
-    ).join("");
+    if (optional) {
+        menu.addItem({
+            iconHTML: "",
+            label: window.siyuan.languages.noModelConfigured,
+            current: selectedModelId === "",
+            click: () => selectModel("", window.siyuan.languages.noModelConfigured),
+        });
+        menu.addSeparator();
+    }
+    modelGroups.forEach(({provider, models}, index) => {
+        if (index > 0) {
+            menu.addSeparator();
+        }
+        menu.addItem({
+            iconHTML: "",
+            type: "readonly",
+            label: escapeHTML(providerTitle(provider)),
+            bind: (element) => element.classList.add("config-ai-provider__model-menu-group"),
+        });
+        models.forEach((model) => {
+            const label = model.displayName || model.name;
+            menu.addItem({
+                iconHTML: "",
+                label: escapeHTML(label),
+                current: model.id === selectedModelId,
+                click: () => selectModel(model.id, label),
+            });
+        });
+    });
+    const rect = input.getBoundingClientRect();
+    menu.element.style.minWidth = `${rect.width}px`;
+    menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
 };
 
 const syncGroupedModelPickers = (root: HTMLElement) => {
     (["editing", "agent", "vision", "imageGeneration"] as const).forEach((group) => {
-        const select = root.querySelector<HTMLSelectElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
-        if (!select) {
+        const input = root.querySelector<HTMLInputElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
+        if (!input) {
             return;
         }
-        const selectedModelId = getSelectedModelId(group);
-        select.innerHTML = buildGroupedModelOptions(group, selectedModelId);
-        select.value = selectedModelId;
-        select.disabled = getEnabledModelGroups().length === 0;
+        updateGroupedModelPicker(input, group);
     });
 };
 
@@ -754,24 +817,28 @@ export const genGroupedModelPickerHtml = (group: ModelPickerGroup): string => {
     }
     const selectedModelId = getSelectedModelId(group);
     const disabled = getEnabledModelGroups().length === 0 ? " disabled" : "";
-    return `<div class="b3-label config-item" id="aiModelPickerBlock-${group}" data-type="aiModelPicker" data-name="${group}">
-    <div class="fn__block">
-        <div class="config-name">${window.siyuan.languages.defaultModel}</div>
-        <div class="b3-label__text">${desc}</div>
-        <div class="fn__hr--small"></div>
-        <select class="b3-select fn__block" data-type="groupedModelPicker" data-group="${group}"${disabled}>
-            ${buildGroupedModelOptions(group, selectedModelId)}
-        </select>
-    </div>
+    const modelLabel = getModelPickerLabel(selectedModelId);
+    return `<div class="fn__flex b3-label config-item config-wrap" id="aiModelPickerBlock-${group}" data-type="aiModelPicker" data-name="${group}">
+    ${genConfigItemMainHtml(window.siyuan.languages.defaultModel, desc)}
+    <span class="fn__space"></span>
+    <input class="b3-select fn__flex-center fn__size200" data-type="groupedModelPicker" data-group="${group}" data-model-id="${escapeHTML(selectedModelId)}" data-menu="true" type="text" value="${escapeHTML(modelLabel)}" readonly${disabled}>
 </div>`;
 };
 
 export const mountGroupedModelPicker = (root: HTMLElement, group: ModelPickerGroup) => {
-    const select = root.querySelector<HTMLSelectElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
-    if (!select) {
+    const input = root.querySelector<HTMLInputElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
+    if (!input) {
         return;
     }
-    select.addEventListener("change", () => {
-        aiConfigApi.patch(`${group}.modelId`, select.value, () => syncGroupedModelPickers(root));
+    input.addEventListener("click", () => openGroupedModelMenu(root, input, group));
+    input.addEventListener("keydown", (event) => {
+        if (!["Enter", " ", "ArrowDown"].includes(event.key)) {
+            return;
+        }
+        if (isGroupedModelMenuOpen(group)) {
+            return;
+        }
+        event.preventDefault();
+        openGroupedModelMenu(root, input, group);
     });
 };

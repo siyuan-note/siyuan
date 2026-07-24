@@ -17,8 +17,10 @@
 package api
 
 import (
+	"errors"
 	"html"
 	"net/http"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -28,6 +30,36 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func resolveAIProvider(arg map[string]any) (*conf.Provider, error) {
+	if providerConfig, ok := arg["providerConfig"]; ok && providerConfig != nil {
+		data, err := gulu.JSON.MarshalJSON(providerConfig)
+		if err != nil {
+			return nil, err
+		}
+		provider := &conf.Provider{}
+		if err = gulu.JSON.UnmarshalJSON(data, provider); err != nil {
+			return nil, err
+		}
+		if strings.TrimSpace(provider.BaseURL) == "" {
+			return nil, errors.New("provider base URL is required")
+		}
+		ai := &conf.AI{Providers: []*conf.Provider{provider}}
+		ai.Normalize()
+		if len(ai.Providers) != 1 {
+			return nil, errors.New("invalid provider config")
+		}
+		return ai.Providers[0], nil
+	}
+
+	providerID, _ := arg["provider"].(string)
+	for _, provider := range model.Conf.AI.Providers {
+		if provider != nil && provider.ID == providerID {
+			return provider, nil
+		}
+	}
+	return nil, errors.New("provider not found")
+}
 
 func chatGPT(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -63,7 +95,7 @@ func chatGPTWithAction(c *gin.Context) {
 	ret.Data = model.ChatGPTWithAction(ids, action)
 }
 
-// testModel 测试 AI 模型可用性。用该 Provider 已保存的 baseURL/APIKey/超时，
+// testModel 测试 AI 模型可用性。使用已保存的 Provider 或详情页草稿中的 baseURL/APIKey/超时，
 // 校验指定模型是否可用。优先通过 ListModels 拉取可用模型清单精确匹配，
 // 若该端点不可用则回退到极简 Chat Completion 验证连通性。
 func testModel(c *gin.Context) {
@@ -75,25 +107,18 @@ func testModel(c *gin.Context) {
 		return
 	}
 
-	var providerID, modelName string
+	var modelName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("provider", &providerID, true, true),
 		util.BindJsonArg("model", &modelName, true, true),
 	) {
 		return
 	}
 
-	// 按 ID 查找 Provider（不限制启用状态，便于测试尚未启用的配置）
-	var provider *conf.Provider
-	for _, p := range model.Conf.AI.Providers {
-		if p != nil && p.ID == providerID {
-			provider = p
-			break
-		}
-	}
-	if nil == provider {
+	// 支持已保存的 Provider ID 和详情页尚未保存的草稿配置。
+	provider, err := resolveAIProvider(arg)
+	if err != nil {
 		ret.Code = -1
-		ret.Msg = "provider not found"
+		ret.Msg = err.Error()
 		return
 	}
 
@@ -188,23 +213,10 @@ func listModels(c *gin.Context) {
 		return
 	}
 
-	var providerID string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("provider", &providerID, true, true),
-	) {
-		return
-	}
-
-	var provider *conf.Provider
-	for _, p := range model.Conf.AI.Providers {
-		if p != nil && p.ID == providerID {
-			provider = p
-			break
-		}
-	}
-	if nil == provider {
+	provider, err := resolveAIProvider(arg)
+	if err != nil {
 		ret.Code = -1
-		ret.Msg = "provider not found"
+		ret.Msg = err.Error()
 		return
 	}
 

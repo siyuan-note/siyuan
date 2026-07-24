@@ -3,12 +3,8 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {
-    genProvidersBlockHtml,
     getProvidersBlockKeywords,
-    mountProvidersBlock,
-    genModelPickerHtml,
     getModelPickerKeywords,
-    mountModelPickerBlock,
     genMcpServersBlockHtml,
     getMcpServersBlockKeywords,
     mountMcpServersBlock,
@@ -18,6 +14,12 @@ import {
     mountEmbeddingTestBtn,
     mountRerankTestBtn,
 } from "./aiUi";
+import {
+    genProviderCardsHtml,
+    mountProviderCards,
+    genGroupedModelPickerHtml,
+    mountGroupedModelPicker,
+} from "./aiProviderUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -25,8 +27,8 @@ const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "providers",
         keywords: getProvidersBlockKeywords(),
-        html: genProvidersBlockHtml,
-        afterMount: mountProvidersBlock,
+        html: genProviderCardsHtml,
+        afterMount: mountProviderCards,
     });
 };
 
@@ -37,8 +39,8 @@ const registerAiEditingGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "editingModelPicker",
         keywords: getModelPickerKeywords(groupId),
-        html: () => genModelPickerHtml(groupId),
-        afterMount: (root) => mountModelPickerBlock(root, groupId),
+        html: () => genGroupedModelPickerHtml(groupId),
+        afterMount: (root) => mountGroupedModelPicker(root, groupId),
     });
     group.number("ai.editing.maxCompletionTokens", {
         title: window.siyuan.languages.apiMaxTokens,
@@ -67,8 +69,8 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "agentModelPicker",
         keywords: getModelPickerKeywords(groupId),
-        html: () => genModelPickerHtml(groupId),
-        afterMount: (root) => mountModelPickerBlock(root, groupId),
+        html: () => genGroupedModelPickerHtml(groupId),
+        afterMount: (root) => mountGroupedModelPicker(root, groupId),
     });
     group.number("ai.agent.maxCompletionTokens", {
         title: window.siyuan.languages.apiMaxTokens,
@@ -122,8 +124,8 @@ const registerAiVisionGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "visionModelPicker",
         keywords: getModelPickerKeywords(groupId),
-        html: () => genModelPickerHtml(groupId),
-        afterMount: (root) => mountModelPickerBlock(root, groupId),
+        html: () => genGroupedModelPickerHtml(groupId),
+        afterMount: (root) => mountGroupedModelPicker(root, groupId),
     });
     group.number("ai.vision.requestTimeout", {
         title: window.siyuan.languages.apiTimeout,
@@ -141,8 +143,8 @@ const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "imageGenerationModelPicker",
         keywords: getModelPickerKeywords(groupId),
-        html: () => genModelPickerHtml(groupId),
-        afterMount: (root) => mountModelPickerBlock(root, groupId),
+        html: () => genGroupedModelPickerHtml(groupId),
+        afterMount: (root) => mountGroupedModelPicker(root, groupId),
     });
     group.number("ai.imageGeneration.requestTimeout", {
         title: window.siyuan.languages.apiTimeout,

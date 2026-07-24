@@ -85,3 +85,34 @@ func TestAssignDefaultModelIDsUsesKeylessProvider(t *testing.T) {
 		t.Fatalf("unexpected default model IDs: agent=%q editing=%q", ai.Agent.ModelID, ai.Editing.ModelID)
 	}
 }
+
+func TestReconcileModelIDs(t *testing.T) {
+	first := &Model{ID: "first-model", Name: "first", Enabled: true}
+	second := &Model{ID: "second-model", Name: "second", DisplayName: "Second", Enabled: true}
+	ai := &AI{
+		Providers: []*Provider{
+			{Enabled: false, Models: []*Model{{ID: "disabled-provider-model", Name: "disabled", Enabled: true}}},
+			{Enabled: true, Models: []*Model{{ID: "disabled-model", Name: "disabled"}}},
+			{Enabled: true, Models: []*Model{first, second}},
+		},
+		Editing:         &Editing{ModelID: "missing"},
+		Agent:           &Agent{ModelID: second.Name},
+		Vision:          &Vision{ModelID: "missing"},
+		ImageGeneration: &ImageGeneration{ModelID: second.DisplayName},
+	}
+
+	ai.ReconcileModelIDs()
+
+	if ai.Editing.ModelID != first.ID {
+		t.Fatalf("editing model ID = %q, want %q", ai.Editing.ModelID, first.ID)
+	}
+	if ai.Agent.ModelID != second.ID {
+		t.Fatalf("agent model ID = %q, want %q", ai.Agent.ModelID, second.ID)
+	}
+	if ai.Vision.ModelID != "" {
+		t.Fatalf("vision model ID = %q, want empty", ai.Vision.ModelID)
+	}
+	if ai.ImageGeneration.ModelID != second.ID {
+		t.Fatalf("image generation model ID = %q, want %q", ai.ImageGeneration.ModelID, second.ID)
+	}
+}

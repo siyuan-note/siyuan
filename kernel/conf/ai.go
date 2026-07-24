@@ -361,6 +361,61 @@ func (ai *AI) GetImageGenerationModel() (*Provider, *Model) {
 	return ai.GetModel(ai.ImageGeneration.ModelID)
 }
 
+// ReconcileModelIDs 校正各使用场景引用的模型，并将旧版名称引用转换为模型 ID。
+// 编辑器和智能体始终回退到首个可用模型，可选的图片理解和图片生成场景仅清理失效引用。
+func (ai *AI) ReconcileModelIDs() {
+	firstModelID := ""
+	for _, p := range ai.Providers {
+		if p == nil || !p.Enabled {
+			continue
+		}
+		for _, m := range p.Models {
+			if m != nil && m.Enabled && m.Name != "" {
+				firstModelID = m.ID
+				break
+			}
+		}
+		if firstModelID != "" {
+			break
+		}
+	}
+
+	if ai.Editing == nil {
+		ai.Editing = defaultEditing()
+	}
+	if _, m := ai.GetModel(ai.Editing.ModelID); m == nil {
+		ai.Editing.ModelID = firstModelID
+	} else {
+		ai.Editing.ModelID = m.ID
+	}
+	if ai.Agent == nil {
+		ai.Agent = defaultAgent()
+	}
+	if _, m := ai.GetModel(ai.Agent.ModelID); m == nil {
+		ai.Agent.ModelID = firstModelID
+	} else {
+		ai.Agent.ModelID = m.ID
+	}
+	if ai.Vision != nil {
+		if _, m := ai.GetModel(ai.Vision.ModelID); ai.Vision.ModelID != "" {
+			if m == nil {
+				ai.Vision.ModelID = ""
+			} else {
+				ai.Vision.ModelID = m.ID
+			}
+		}
+	}
+	if ai.ImageGeneration != nil {
+		if _, m := ai.GetModel(ai.ImageGeneration.ModelID); ai.ImageGeneration.ModelID != "" {
+			if m == nil {
+				ai.ImageGeneration.ModelID = ""
+			} else {
+				ai.ImageGeneration.ModelID = m.ID
+			}
+		}
+	}
+}
+
 func (ai *AI) Normalize() {
 	if ai.Providers == nil {
 		ai.Providers = []*Provider{}

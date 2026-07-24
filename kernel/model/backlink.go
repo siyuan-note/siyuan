@@ -1036,8 +1036,8 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 			continue
 		}
 
-		newText := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
-		if text != newText {
+		newText, matched := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
+		if matched {
 			tmp = append(tmp, b)
 
 			k := gulu.Str.SubstringsBetween(newText, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())

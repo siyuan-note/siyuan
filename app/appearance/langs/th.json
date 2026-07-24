@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "สร้างเอกสารย่อยและเชื่อมโยง",
+  "createDocAndBind": "สร้างเอกสารและเชื่อมโยง",
+  "includeSublists": "รวมรายการย่อย",
+  "selectRelationItems": "เลือกรายการที่เชื่อมโยง",
+  "filterOperatorContainsAnyItem": "มีรายการใดรายการหนึ่ง",
+  "filterOperatorDoesNotContainAnyItem": "ไม่มีรายการใดเลย",
+  "filterOperatorContainsKeyword": "มีคำสำคัญ",
+  "filterOperatorDoesNotContainKeyword": "ไม่มีคำสำคัญ",
   "showInAllViews": "แสดงในทุกมุมมอง",
   "hideInAllViews": "ซ่อนในทุกมุมมอง",
   "fieldVisibility": "การมองเห็นฟิลด์",

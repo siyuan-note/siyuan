@@ -428,7 +428,17 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 	if keywordArg := arg["keyword"]; nil != keywordArg {
 		keyword = keywordArg.(string)
 	}
-	attributeViewName, databaseBlockIDs, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, page, pageSize)
+	var blockIDs []string
+	if blockIDsArg := arg["blockIDs"]; nil != blockIDsArg {
+		if blockIDArgs, ok := blockIDsArg.([]any); ok {
+			for _, blockIDArg := range blockIDArgs {
+				if blockID, ok := blockIDArg.(string); ok && "" != blockID {
+					blockIDs = append(blockIDs, blockID)
+				}
+			}
+		}
+	}
+	attributeViewName, databaseBlockIDs, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, blockIDs, page, pageSize)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -729,6 +739,50 @@ func getAttributeView(c *gin.Context) {
 	}
 }
 
+func getAttributeViewPasteRows(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var avID, blockID, viewID, groupID, query, startItemID string
+	var countArg float64
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("avID", &avID, true, true),
+		util.BindJsonArg("blockID", &blockID, true, true),
+		util.BindJsonArg("viewID", &viewID, false, false),
+		util.BindJsonArg("groupID", &groupID, false, false),
+		util.BindJsonArg("query", &query, false, false),
+		util.BindJsonArg("startItemID", &startItemID, true, true),
+		util.BindJsonArg("count", &countArg, true, false),
+	) {
+		return
+	}
+	if util.InvalidIDPattern(avID, ret) || util.InvalidIDPattern(blockID, ret) ||
+		util.InvalidIDPattern(startItemID, ret) ||
+		("" != viewID && util.InvalidIDPattern(viewID, ret)) ||
+		("" != groupID && util.InvalidIDPattern(groupID, ret)) {
+		return
+	}
+	count := int(countArg)
+	if countArg != float64(count) || count < 1 || 100000 < count {
+		ret.Code = -1
+		ret.Msg = "invalid paste row count"
+		return
+	}
+
+	view, err := model.GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID, count)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{"view": view}
+}
+
 func getAttributeViewFieldViews(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -782,6 +836,50 @@ func createAttributeViewItem(c *gin.Context) {
 		return
 	}
 	result, err := model.CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID)
+	if nil != err {
+		if errors.Is(err, model.ErrBoxNotFound) {
+			ret.Code = 1
+			ret.Data = map[string]any{"unavailableNotebook": true}
+			return
+		}
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = result
+	if nil != result.Transaction {
+		pushTransactions(app, session, []*model.Transaction{result.Transaction})
+	}
+}
+
+func createAttributeViewItemDocs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var itemIDsArg []any
+	var avID, blockID, saveMode, app, session string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("avID", &avID, true, false),
+		util.BindJsonArg("blockID", &blockID, true, false),
+		util.BindJsonArg("saveMode", &saveMode, true, false),
+		util.BindJsonArg("itemIDs", &itemIDsArg, true, false),
+		util.BindJsonArg("app", &app, false, false),
+		util.BindJsonArg("session", &session, false, false),
+	) {
+		return
+	}
+	var itemIDs []string
+	for _, itemIDArg := range itemIDsArg {
+		itemID, itemOK := itemIDArg.(string)
+		if itemOK && "" != itemID {
+			itemIDs = append(itemIDs, itemID)
+		}
+	}
+	result, err := model.CreateAttributeViewItemDocs(avID, blockID, saveMode, itemIDs)
 	if nil != err {
 		if errors.Is(err, model.ErrBoxNotFound) {
 			ret.Code = 1

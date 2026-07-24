@@ -131,7 +131,12 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
    - When you do commit, follow the style of recent commits (gitmoji prefix + subject, in English)
    - Append the full issue/PR URL to the end of the commit title (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; never put the URL in the commit body, and do not fabricate one
 9. **GitHub:** Prefer the GitHub CLI (`gh`) for all GitHub operations, including reading issues, comments, pull requests, commits, statuses, and metadata. If `gh` is unavailable or does not support the operation, fall back to the GitHub API or web interface
-10. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request; do not start it with `Fix`, and describe the observed behavior directly instead
+10. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request, and do not start it with `Fix`
+    - If the issue is labeled `Bug`, write the title from a bug-fix perspective without starting it with `Fix`
+    - If the issue is labeled `Enhancement`:
+      - For improvements to existing functionality, write the title from an improvement perspective and prefer `Improve ...`
+      - For capabilities that did not previously exist, write the title from a support perspective and prefer `Support ...`
+    - If no applicable label is available, infer the perspective from the issue content
 11. **LD246:** When accessing `ld246.com`, set the HTTP `User-Agent` header to `SiYuan-Coding-Agent`
 
 ---

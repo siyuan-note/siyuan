@@ -6,6 +6,8 @@ import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
 import {upDownHint} from "../../../util/upDownHint";
 import {clearSelect} from "../../util/clear";
+import {getAVSelectedItems} from "./virtualScroll";
+import {createAttributeViewItemDocs} from "./newItemTemplate";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
     if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
@@ -17,6 +19,38 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     // 避免浏览器默认快捷键
     if (matchHotKey("⌘B", event) || matchHotKey("⌘I", event) || matchHotKey("⌘U", event)) {
         event.preventDefault();
+        return true;
+    }
+    const isNewNameFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile.custom, event);
+    const isNewNameSettingFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameSettingFile.custom, event);
+    if (isNewNameFile || isNewNameSettingFile) {
+        if (event.repeat) {
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        const itemIDs = getAVSelectedItems(nodeElement).map(item => item.itemID);
+        if (itemIDs.length === 0) {
+            const currentCell = nodeElement.querySelector(".av__cell--select, .av__cell--active") as HTMLElement;
+            let currentItem: HTMLElement;
+            if (currentCell) {
+                currentItem = (hasClosestByClassName(currentCell, "av__row") ||
+                    hasClosestByClassName(currentCell, "av__gallery-item")) as HTMLElement;
+            }
+            if (currentItem?.dataset.id) {
+                itemIDs.push(currentItem.dataset.id);
+            }
+        }
+        if (!protyle.disabled && itemIDs.length > 0) {
+            createAttributeViewItemDocs({
+                protyle,
+                blockElement: nodeElement,
+                itemIDs,
+                saveMode: isNewNameFile ? "subDoc" : "template",
+            });
+        }
+        event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     const selectCellElement = nodeElement.querySelector(".av__cell--select") as HTMLElement;

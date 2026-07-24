@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "建立子文檔並綁定",
+  "createDocAndBind": "建立文檔並綁定",
+  "includeSublists": "包括子清單",
+  "selectRelationItems": "選擇項目",
+  "filterOperatorContainsAnyItem": "包含任一項",
+  "filterOperatorDoesNotContainAnyItem": "不包含任一項",
+  "filterOperatorContainsKeyword": "包含關鍵字",
+  "filterOperatorDoesNotContainKeyword": "不包含關鍵字",
   "showInAllViews": "在所有視圖中顯示",
   "hideInAllViews": "在所有視圖中隱藏",
   "fieldVisibility": "欄位可見性",

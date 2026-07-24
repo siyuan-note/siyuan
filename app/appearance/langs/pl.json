@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "Utwórz dokument podrzędny i powiąż",
+  "createDocAndBind": "Utwórz dokument i powiąż",
+  "includeSublists": "Uwzględnij podlisty",
+  "selectRelationItems": "Wybierz powiązane elementy",
+  "filterOperatorContainsAnyItem": "Zawiera dowolny element",
+  "filterOperatorDoesNotContainAnyItem": "Nie zawiera żadnego elementu",
+  "filterOperatorContainsKeyword": "Zawiera słowo kluczowe",
+  "filterOperatorDoesNotContainKeyword": "Nie zawiera słowa kluczowego",
   "showInAllViews": "Pokaż we wszystkich widokach",
   "hideInAllViews": "Ukryj we wszystkich widokach",
   "fieldVisibility": "Widoczność pola",

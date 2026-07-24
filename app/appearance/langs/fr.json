@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "Créer un document enfant et le lier",
+  "createDocAndBind": "Créer un document et le lier",
+  "includeSublists": "Inclure les sous-listes",
+  "selectRelationItems": "Sélectionner des éléments liés",
+  "filterOperatorContainsAnyItem": "Contient au moins un élément",
+  "filterOperatorDoesNotContainAnyItem": "Ne contient aucun élément",
+  "filterOperatorContainsKeyword": "Contient le mot-clé",
+  "filterOperatorDoesNotContainKeyword": "Ne contient pas le mot-clé",
   "showInAllViews": "Afficher dans toutes les vues",
   "hideInAllViews": "Masquer dans toutes les vues",
   "fieldVisibility": "Visibilité du champ",

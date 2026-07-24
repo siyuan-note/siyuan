@@ -25,6 +25,7 @@ import {
 } from "../util/compatibility";
 import {
     transaction,
+    turnListsRecursively,
     turnsIntoOneTransaction,
     turnsIntoTransaction,
     turnsOneInto,
@@ -733,7 +734,7 @@ export class Gutter {
         nodeElement: Element,
         accelerator?: string
         type: string,
-        level?: number
+        level?: number,
     }) {
         return {
             id: options.menuId,
@@ -743,6 +744,63 @@ export class Gutter {
             click() {
                 turnsOneInto(options);
             }
+        };
+    }
+
+    private recursiveListMenu(protyle: IProtyle, nodeElements: Element[]): IMenu {
+        const listElements = nodeElements.filter((item, index, elements) => {
+            return item.getAttribute("data-type") === "NodeList" &&
+                !elements.some((parent, parentIndex) => parentIndex !== index &&
+                    parent.getAttribute("data-type") === "NodeList" && parent.contains(item));
+        });
+        const submenu: IMenu[] = [{
+            id: "recursiveParagraph",
+            icon: "iconParagraph",
+            label: window.siyuan.languages.paragraph,
+            click() {
+                turnListsRecursively({
+                    protyle,
+                    nodeElements: listElements,
+                    type: "CancelListRecursively"
+                });
+            }
+        }];
+        [{
+            id: "recursiveList",
+            icon: "iconList",
+            label: window.siyuan.languages.list,
+            targetListType: "u" as const,
+        }, {
+            id: "recursiveOrderedList",
+            icon: "iconOrderedList",
+            label: window.siyuan.languages["ordered-list"],
+            targetListType: "o" as const,
+        }, {
+            id: "recursiveCheck",
+            icon: "iconCheck",
+            label: window.siyuan.languages.check,
+            targetListType: "t" as const,
+        }].forEach((item) => {
+            submenu.push({
+                id: item.id,
+                icon: item.icon,
+                label: item.label,
+                click() {
+                    turnListsRecursively({
+                        protyle,
+                        nodeElements: listElements,
+                        type: "ConvertListType",
+                        targetListType: item.targetListType
+                    });
+                }
+            });
+        });
+        return {
+            id: "includeSublists",
+            icon: "iconListItem",
+            label: window.siyuan.languages.includeSublists,
+            type: "submenu",
+            submenu
         };
     }
 
@@ -876,6 +934,9 @@ export class Gutter {
                 type: "Blocks2Ps",
                 isContinue
             }));
+            if (selectsElement.some((item) => item.getAttribute("data-type") === "NodeList")) {
+                turnIntoSubmenu.push(this.recursiveListMenu(protyle, selectsElement));
+            }
             turnIntoSubmenu.push(this.turnsInto({
                 menuId: "heading1",
                 icon: "iconH1",
@@ -1478,7 +1539,8 @@ export class Gutter {
                 selectsElement: [nodeElement],
                 type: "Blocks2Callout"
             }));
-            if (nodeElement.getAttribute("data-subtype") === "o") {
+            const listSubtype = nodeElement.getAttribute("data-subtype");
+            if (listSubtype === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "list",
                     id,
@@ -1499,7 +1561,7 @@ export class Gutter {
                     nodeElement,
                     type: "UL2TL"
                 }));
-            } else if (nodeElement.getAttribute("data-subtype") === "t") {
+            } else if (listSubtype === "t") {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "list",
                     id,
@@ -1542,6 +1604,7 @@ export class Gutter {
                     type: "OL2TL"
                 }));
             }
+            turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
         } else if (type === "NodeBlockquote" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",

@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "Vytvoriť podradený dokument a prepojiť",
+  "createDocAndBind": "Vytvoriť dokument a prepojiť",
+  "includeSublists": "Zahrnúť vnorené zoznamy",
+  "selectRelationItems": "Vybrať súvisiace položky",
+  "filterOperatorContainsAnyItem": "Obsahuje ľubovoľnú položku",
+  "filterOperatorDoesNotContainAnyItem": "Neobsahuje žiadnu položku",
+  "filterOperatorContainsKeyword": "Obsahuje kľúčové slovo",
+  "filterOperatorDoesNotContainKeyword": "Neobsahuje kľúčové slovo",
   "showInAllViews": "Zobraziť vo všetkých zobrazeniach",
   "hideInAllViews": "Skryť vo všetkých zobrazeniach",
   "fieldVisibility": "Viditeľnosť poľa",

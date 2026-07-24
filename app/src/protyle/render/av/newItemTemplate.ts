@@ -881,6 +881,39 @@ export const createAttributeViewItem = (options: {
     });
 };
 
+export const createAttributeViewItemDocs = (options: {
+    protyle: IProtyle;
+    blockElement: HTMLElement;
+    itemIDs: string[];
+    saveMode: "subDoc" | "template";
+}) => {
+    if (options.blockElement.dataset.createDocAndBind === "true") {
+        return;
+    }
+    options.blockElement.dataset.createDocAndBind = "true";
+    fetchPost("/api/av/createAttributeViewItemDocs", {
+        avID: options.blockElement.dataset.avId,
+        blockID: options.blockElement.dataset.nodeId,
+        itemIDs: options.itemIDs,
+        saveMode: options.saveMode,
+        app: options.protyle.app.appId,
+        session: options.protyle.id,
+    }, response => {
+        if (response.code === 1 && response.data?.unavailableNotebook) {
+            showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
+            return;
+        }
+        const warnings = (response.data?.warnings || []) as string[];
+        if (warnings.length) {
+            showMessage(warnings.join("<br>"));
+        }
+        options.blockElement.removeAttribute("data-render");
+        avRender(options.blockElement, options.protyle);
+    }).finally(() => {
+        delete options.blockElement.dataset.createDocAndBind;
+    });
+};
+
 const saveNewItemTemplateConfig = (options: {
     protyle: IProtyle;
     blockElement: HTMLElement;

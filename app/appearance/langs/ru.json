@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "Создать дочерний документ и привязать",
+  "createDocAndBind": "Создать документ и привязать",
+  "includeSublists": "Включить вложенные списки",
+  "selectRelationItems": "Выбрать связанные элементы",
+  "filterOperatorContainsAnyItem": "Содержит любой элемент",
+  "filterOperatorDoesNotContainAnyItem": "Не содержит ни одного элемента",
+  "filterOperatorContainsKeyword": "Содержит ключевое слово",
+  "filterOperatorDoesNotContainKeyword": "Не содержит ключевое слово",
   "showInAllViews": "Показать во всех представлениях",
   "hideInAllViews": "Скрыть во всех представлениях",
   "fieldVisibility": "Видимость поля",

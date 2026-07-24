@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "יצירת מסמך צאצא וקישורו",
+  "createDocAndBind": "יצירת מסמך וקישורו",
+  "includeSublists": "כלול רשימות משנה",
+  "selectRelationItems": "בחירת פריטים מקושרים",
+  "filterOperatorContainsAnyItem": "מכיל פריט כלשהו",
+  "filterOperatorDoesNotContainAnyItem": "אינו מכיל אף פריט",
+  "filterOperatorContainsKeyword": "מכיל מילת מפתח",
+  "filterOperatorDoesNotContainKeyword": "אינו מכיל מילת מפתח",
   "showInAllViews": "הצגה בכל התצוגות",
   "hideInAllViews": "הסתרה בכל התצוגות",
   "fieldVisibility": "נראות השדה",

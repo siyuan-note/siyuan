@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "Buat dokumen anak dan tautkan",
+  "createDocAndBind": "Buat dokumen dan tautkan",
+  "includeSublists": "Sertakan subdaftar",
+  "selectRelationItems": "Pilih item terkait",
+  "filterOperatorContainsAnyItem": "Berisi salah satu item",
+  "filterOperatorDoesNotContainAnyItem": "Tidak berisi item apa pun",
+  "filterOperatorContainsKeyword": "Berisi kata kunci",
+  "filterOperatorDoesNotContainKeyword": "Tidak berisi kata kunci",
   "showInAllViews": "Tampilkan di semua tampilan",
   "hideInAllViews": "Sembunyikan di semua tampilan",
   "fieldVisibility": "Visibilitas bidang",

@@ -217,7 +217,11 @@ func GetPathPasswordByPublishAccess(box string, blockPath string, publishAccess 
 }
 
 func CheckBlockIdAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockID string) bool {
-	bt := treenode.GetBlockTree(blockID)
+	return CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, "")
+}
+
+func CheckBlockIdAccessableByPublishAccessInBox(c *gin.Context, publishAccess PublishAccess, blockID, boxID string) bool {
+	bt := treenode.GetBlockTreeInBox(blockID, boxID)
 	return checkBlockTreeAccessableByPublishAccess(c, publishAccess, bt)
 }
 

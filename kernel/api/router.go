@@ -533,6 +533,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/batchSetAttributeViewBlockAttrs", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchSetAttributeViewBlockAttrs)
 	ginServer.Handle("POST", "/api/av/searchAttributeView", model.CheckAuth, model.CheckReadonly, searchAttributeView)
 	ginServer.Handle("POST", "/api/av/getAttributeView", model.CheckAuth, model.CheckReadonly, getAttributeView)
+	ginServer.Handle("POST", "/api/av/getAttributeViewPasteRows", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewPasteRows)
 	ginServer.Handle("POST", "/api/av/searchAttributeViewRelationKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, searchAttributeViewRelationKey)
 	ginServer.Handle("POST", "/api/av/searchAttributeViewNonRelationKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deprecated) // TODO 请勿使用，该端点将于 2026 年 12 月 1 日后删除
 	ginServer.Handle("POST", "/api/av/searchAttributeViewRollupDestKeys", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, searchAttributeViewRollupDestKeys)
@@ -561,6 +562,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/getAttributeViewItemIDsByBoundIDs", model.CheckAuth, model.CheckAdminRole, getAttributeViewItemIDsByBoundIDs)
 	ginServer.Handle("POST", "/api/av/getUnusedAttributeViews", model.CheckAuth, model.CheckAdminRole, getUnusedAttributeViews)
 	ginServer.Handle("POST", "/api/av/createAttributeViewItem", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createAttributeViewItem)
+	ginServer.Handle("POST", "/api/av/createAttributeViewItemDocs", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createAttributeViewItemDocs)
 	ginServer.Handle("POST", "/api/av/removeUnusedAttributeViews", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeUnusedAttributeViews)
 	ginServer.Handle("POST", "/api/av/removeUnusedAttributeView", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeUnusedAttributeView)
 

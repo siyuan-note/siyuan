@@ -1779,7 +1779,7 @@ func SetDatabaseBlockView(blockID, avID, viewID string) (err error) {
 	return
 }
 
-func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) (attributeViewName string, databaseBlockIDs []string, keyValues *av.KeyValues, err error) {
+func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, page, pageSize int) (attributeViewName string, databaseBlockIDs []string, keyValues *av.KeyValues, err error) {
 	waitForSyncingStorages()
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -1792,15 +1792,31 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(avID)
 
 	keyValues = attrView.GetBlockKeyValues()
+	if nil == keyValues {
+		keyValues = &av.KeyValues{}
+		return
+	}
 	var values []*av.Value
+	valuesByBlockID := map[string]*av.Value{}
 	for _, kv := range keyValues.Values {
 		if !kv.IsDetached && !treenode.ExistBlockTree(kv.Block.ID) {
 			continue
 		}
 
+		valuesByBlockID[kv.BlockID] = kv
 		if strings.Contains(strings.ToLower(kv.String(true)), strings.ToLower(keyword)) {
 			values = append(values, kv)
 		}
+	}
+	if 0 < len(blockIDs) {
+		values = nil
+		for _, blockID := range blockIDs {
+			if value := valuesByBlockID[blockID]; nil != value {
+				values = append(values, value)
+			}
+		}
+		keyValues.Values = values
+		return
 	}
 	keyValues.Values = values
 
@@ -1812,6 +1828,9 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 		pageSize = 16
 	}
 	start := (page - 1) * pageSize
+	if len(keyValues.Values) < start {
+		start = len(keyValues.Values)
+	}
 	end := min(len(keyValues.Values), start+pageSize)
 	keyValues.Values = keyValues.Values[start:end]
 	return
@@ -3235,6 +3254,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 	if oldDestAvID != operation.ID {
 		srcAv.RemoveNewItemTemplateFieldValue(operation.KeyID)
+		srcAv.RemoveExactRelationFilters(operation.KeyID)
 	}
 
 	destAdded := false
@@ -4531,6 +4551,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		}
 	}
 	attrView.RemoveNewItemTemplateRelationItems(avID, srcIDs)
+	attrView.RemoveRelationFilterItems(avID, srcIDs)
 
 	regenAttrViewGroups(attrView)
 
@@ -4538,7 +4559,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 	if nil != err {
 		return
 	}
-	if err = removeRelatedNewItemTemplateRelationItems(avID, srcIDs); nil != err {
+	if err = removeRelatedRelationItems(avID, srcIDs); nil != err {
 		return
 	}
 
@@ -4585,7 +4606,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 	return
 }
 
-func removeRelatedNewItemTemplateRelationItems(avID string, itemIDs []string) (err error) {
+func removeRelatedRelationItems(avID string, itemIDs []string) (err error) {
 	for _, relatedAvID := range av.GetSrcAvIDs(avID) {
 		if relatedAvID == avID {
 			continue
@@ -4594,7 +4615,9 @@ func removeRelatedNewItemTemplateRelationItems(avID string, itemIDs []string) (e
 		if nil != parseErr || nil == relatedAv {
 			continue
 		}
-		if !relatedAv.RemoveNewItemTemplateRelationItems(avID, itemIDs) {
+		templateChanged := relatedAv.RemoveNewItemTemplateRelationItems(avID, itemIDs)
+		filterChanged := relatedAv.RemoveRelationFilterItems(avID, itemIDs)
+		if !templateChanged && !filterChanged {
 			continue
 		}
 		if err = av.SaveAttributeView(relatedAv); nil != err {

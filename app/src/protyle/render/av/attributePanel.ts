@@ -112,9 +112,13 @@ export class AVAttributePanel {
         }
     }
 
-    public expand() {
+    public expand(avID?: string) {
+        if (avID) {
+            this.activeAvID = avID;
+        }
         this.collapsed = false;
         this.updateCollapsedState();
+        this.updateTabs();
     }
 
     public toggle() {
@@ -147,7 +151,7 @@ export class AVAttributePanel {
         } else {
             tabsElement?.remove();
         }
-        if (!databaseElements.some(item => item.dataset.avId === this.activeAvID)) {
+        if (databaseElements.length > 0 && !databaseElements.some(item => item.dataset.avId === this.activeAvID)) {
             this.activeAvID = databaseElements[0]?.dataset.avId || "";
         }
         databaseElements.forEach(item => {

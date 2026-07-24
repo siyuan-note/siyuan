@@ -48,9 +48,15 @@ export const commonClick = (event: MouseEvent & {
 
     const avElement = hasClosestByClassName(event.target, "protyle-attr--av");
     if (avElement) {
+        const avIDElement = event.target.closest("[data-av-id]") as HTMLElement;
+        const avID = avIDElement && avElement.contains(avIDElement) ? avIDElement.dataset.avId : "";
         if (data) {
             if (protyle.databaseAttributePanel) {
-                protyle.databaseAttributePanel.toggle();
+                if (avID) {
+                    protyle.databaseAttributePanel.expand(avID);
+                } else {
+                    protyle.databaseAttributePanel.toggle();
+                }
             } else {
                 openFileAttr(data, "av", protyle);
             }
@@ -60,9 +66,17 @@ export const commonClick = (event: MouseEvent & {
             if (!protyle.databaseAttributePanel) {
                 openAttr(avElement.parentElement.parentElement, "av", protyle);
             } else if (blockID && protyle.block.showAll && blockID === protyle.block.id) {
-                protyle.databaseAttributePanel?.toggle();
+                if (avID) {
+                    protyle.databaseAttributePanel.expand(avID);
+                } else {
+                    protyle.databaseAttributePanel.toggle();
+                }
             } else if (blockID) {
-                zoomOut({protyle, id: blockID});
+                zoomOut({
+                    protyle,
+                    id: blockID,
+                    callback: avID ? () => protyle.databaseAttributePanel?.expand(avID) : undefined,
+                });
             }
         }
         event.stopPropagation();

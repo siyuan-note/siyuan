@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "Створити дочірній документ і прив’язати",
+  "createDocAndBind": "Створити документ і прив’язати",
+  "includeSublists": "Включити вкладені списки",
+  "selectRelationItems": "Вибрати пов’язані елементи",
+  "filterOperatorContainsAnyItem": "Містить будь-який елемент",
+  "filterOperatorDoesNotContainAnyItem": "Не містить жодного елемента",
+  "filterOperatorContainsKeyword": "Містить ключове слово",
+  "filterOperatorDoesNotContainKeyword": "Не містить ключового слова",
   "showInAllViews": "Показати в усіх поданнях",
   "hideInAllViews": "Приховати в усіх поданнях",
   "fieldVisibility": "Видимість поля",

@@ -17,7 +17,7 @@ import {
 } from "./cell";
 import {addCol, getColIconByType, showColMenu} from "./col";
 import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHeader} from "./row";
-import {resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
+import {getAVSelectedItems, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
@@ -40,7 +40,7 @@ import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
 import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
-import {createAttributeViewItem, openNewItemTemplateMenu} from "./newItemTemplate";
+import {createAttributeViewItem, createAttributeViewItemDocs, openNewItemTemplateMenu} from "./newItemTemplate";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
@@ -439,6 +439,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     }
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
+    const selectedItems = getAVSelectedItems(blockElement);
     const keyCellElement = rowElements[0].querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
     const ids = Array.from(rowElements).map(item => item.querySelector('[data-dtype="block"] .av__celltext').getAttribute("data-id"));
     if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") !== "true") {
@@ -673,6 +674,37 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         submenu: copyMenu
     });
     if (!protyle.disabled) {
+        const detachedItemIDs = selectedItems.filter(item => item.isDetached).map(item => item.itemID);
+        if (detachedItemIDs.length > 0) {
+            menu.addItem({
+                id: "createSubDocAndBind",
+                label: window.siyuan.languages.createSubDocAndBind,
+                icon: "iconFile",
+                accelerator: window.siyuan.config.keymap.editor.general.newNameFile.custom,
+                click() {
+                    createAttributeViewItemDocs({
+                        protyle,
+                        blockElement,
+                        itemIDs: detachedItemIDs,
+                        saveMode: "subDoc",
+                    });
+                }
+            });
+            menu.addItem({
+                id: "createDocAndBind",
+                label: window.siyuan.languages.createDocAndBind,
+                icon: "iconFile",
+                accelerator: window.siyuan.config.keymap.editor.general.newNameSettingFile.custom,
+                click() {
+                    createAttributeViewItemDocs({
+                        protyle,
+                        blockElement,
+                        itemIDs: detachedItemIDs,
+                        saveMode: "template",
+                    });
+                }
+            });
+        }
         menu.addItem({
             id: "addToDatabase",
             label: window.siyuan.languages.addToDatabase,
@@ -962,10 +994,52 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
     }
 };
 
-export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {
-    blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
-        item.remove();
+export const updateAttrViewColAnimation = (protyle: IProtyle, avID: string, colID: string, headerValue: {
+    icon?: string,
+    name?: string,
+    pin?: boolean,
+    type?: TAVCol
+}) => {
+    protyle.wysiwyg.element.querySelectorAll<HTMLElement>(
+        `.av[data-av-id="${avID}"] .av__row--header .av__cell[data-col-id="${colID}"]`
+    ).forEach(item => {
+        updateAttrViewCellAnimation(item, undefined, headerValue);
     });
+    document.querySelectorAll<HTMLElement>(
+        `.custom-attr [data-av-id="${avID}"] > .av__row[data-col-id="${colID}"]`
+    ).forEach(item => {
+        if (typeof headerValue.name !== "undefined") {
+            const nameElement = item.querySelector(".block__logo span");
+            if (nameElement) {
+                nameElement.textContent = headerValue.name;
+            }
+        }
+        if (typeof headerValue.icon !== "undefined") {
+            const iconElement = item.querySelector(".block__logoicon");
+            const type = item.querySelector<HTMLElement>(":scope > [data-type][data-col-id]")?.dataset.type as TAVCol;
+            if (iconElement && type) {
+                iconElement.outerHTML = headerValue.icon ?
+                    unicode2Emoji(headerValue.icon, "block__logoicon", true) :
+                    `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
+            }
+        }
+    });
+};
+
+export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {
+    const avID = blockElement.getAttribute("data-av-id");
+    if (avID) {
+        document.querySelectorAll(`.av[data-av-id="${avID}"] .av__cell[data-col-id="${id}"]`).forEach(item => {
+            item.remove();
+        });
+        document.querySelectorAll(`.custom-attr [data-av-id="${avID}"] > .av__row[data-col-id="${id}"]`).forEach(item => {
+            item.remove();
+        });
+    } else {
+        blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
+            item.remove();
+        });
+    }
 };
 
 export const duplicateCompletely = (protyle: IProtyle, nodeElement: HTMLElement) => {

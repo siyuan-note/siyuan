@@ -1502,6 +1502,186 @@ export const turnsIntoTransaction = (options: {
     hideElements(["gutter"], options.protyle);
 };
 
+type TRecursiveListConversion = {
+    type: "CancelListRecursively",
+} | {
+    type: "ConvertListType",
+    targetListType: "u" | "o" | "t",
+};
+
+const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) => {
+    const unfoldedIds = new Set<string>();
+    const foldOperations: IOperation[] = [];
+    while (true) {
+        let foldedHeading: Element;
+        nodeElements.find((nodeElement) => {
+            foldedHeading = Array.from(nodeElement.querySelectorAll('[data-type="NodeHeading"][fold="1"]')).find((item) => {
+                return !unfoldedIds.has(item.getAttribute("data-node-id"));
+            });
+            return !!foldedHeading;
+        });
+        if (!foldedHeading) {
+            break;
+        }
+        const itemId = foldedHeading.getAttribute("data-node-id");
+        unfoldedIds.add(itemId);
+        foldedHeading.removeAttribute("fold");
+        const response = await fetchSyncPost("/api/transactions", {
+            session: protyle.id,
+            app: Constants.SIYUAN_APPID,
+            transactions: [{
+                doOperations: [{
+                    action: "unfoldHeading",
+                    id: itemId,
+                }],
+                undoOperations: [{
+                    action: "foldHeading",
+                    id: itemId
+                }],
+            }]
+        });
+        foldedHeading.insertAdjacentHTML("afterend", response.data[0].doOperations[0].retData);
+        foldOperations.push({
+            action: "foldHeading",
+            id: itemId
+        });
+    }
+    return foldOperations.reverse();
+};
+
+export const turnListsRecursively = async (options: {
+    protyle: IProtyle,
+    nodeElements: Element[],
+} & TRecursiveListConversion) => {
+    const listElements = options.nodeElements.filter((item, index, elements) => {
+        return item.getAttribute("data-type") === "NodeList" &&
+            !elements.some((parent, parentIndex) => parentIndex !== index &&
+                parent.getAttribute("data-type") === "NodeList" && parent.contains(item));
+    });
+    if (listElements.length === 0) {
+        return;
+    }
+    if (!listElements[0].querySelector("wbr")) {
+        getContenteditableElement(listElements[0])?.insertAdjacentHTML("afterbegin", "<wbr>");
+    }
+    options.nodeElements.forEach((nodeElement) => {
+        nodeElement.classList.remove("protyle-wysiwyg--select");
+        nodeElement.removeAttribute("select-start");
+        nodeElement.removeAttribute("select-end");
+    });
+    const contexts = await Promise.all(listElements.map(async (nodeElement) => {
+        const previousBlockElement = getPreviousBlockSibling(nodeElement);
+        let previousId = previousBlockElement?.getAttribute("data-node-id");
+        if (!previousBlockElement && options.type === "CancelListRecursively" && options.protyle.block.showAll) {
+            const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
+                id: nodeElement.getAttribute("data-node-id"),
+                notebook: options.protyle.notebookId,
+            });
+            previousId = response.data.previousID;
+        }
+        return {
+            id: nodeElement.getAttribute("data-node-id"),
+            nodeElement,
+            parentId: getEmbedChildOperationParentID(nodeElement) ||
+                getParentBlock(nodeElement).getAttribute("data-node-id") ||
+                options.protyle.block.parentID ||
+                options.protyle.block.rootID,
+            previousId,
+        };
+    }));
+    const foldOperations = await unfoldListHeadings(options.protyle, listElements);
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    contexts.forEach((context) => {
+        const nodeElement = context.nodeElement;
+        const oldHTML = cleanHeadingNumberHTML(nodeElement.outerHTML);
+        const newHTML = cleanHeadingNumberHTML(options.type === "ConvertListType" ?
+            options.protyle.lute.ConvertListType(nodeElement.outerHTML, options.targetListType) :
+            options.protyle.lute.CancelListRecursively(nodeElement.outerHTML));
+        if (options.type === "ConvertListType") {
+            if (newHTML === oldHTML) {
+                return;
+            }
+            doOperations.push({
+                action: "update",
+                id: context.id,
+                data: newHTML
+            });
+            undoOperations.push({
+                action: "update",
+                id: context.id,
+                data: oldHTML
+            });
+            nodeElement.insertAdjacentHTML("afterend", newHTML);
+            const newElement = nodeElement.nextElementSibling as HTMLElement;
+            nodeElement.remove();
+            newElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+            return;
+        }
+
+        const doPreviousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id") || context.previousId;
+        doOperations.push({
+            action: "delete",
+            id: context.id
+        });
+        const tempElement = document.createElement("template");
+        tempElement.innerHTML = newHTML;
+        let tempPreviousId = doPreviousId;
+        Array.from(tempElement.content.children).forEach((item) => {
+            const tempId = item.getAttribute("data-node-id");
+            doOperations.push({
+                action: "insert",
+                data: item.outerHTML,
+                id: tempId,
+                previousID: tempPreviousId,
+                parentID: context.parentId
+            });
+            undoOperations.push({
+                action: "delete",
+                id: tempId
+            });
+            tempPreviousId = tempId;
+        });
+        undoOperations.push({
+            action: "insert",
+            data: oldHTML,
+            id: context.id,
+            previousID: context.previousId,
+            parentID: context.parentId
+        });
+        nodeElement.insertAdjacentHTML("afterend", newHTML);
+        nodeElement.remove();
+    });
+    const doFoldOperations = foldOperations.map((operation) => ({...operation}));
+    const undoFoldOperations = foldOperations.map((operation) => ({...operation}));
+    if (doOperations.length === 0) {
+        if (doFoldOperations.length > 0) {
+            await fetchSyncPost("/api/transactions", {
+                session: options.protyle.id,
+                app: Constants.SIYUAN_APPID,
+                transactions: [{
+                    doOperations: doFoldOperations
+                }]
+            });
+        }
+    } else {
+        transaction(options.protyle, doOperations.concat(doFoldOperations), undoOperations.concat(undoFoldOperations));
+    }
+    onTransaction(options.protyle, doFoldOperations, false);
+    focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));
+    options.protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
+        if (item.textContent === "") {
+            fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
+                item.innerHTML = response.data;
+            });
+        }
+    });
+    blockRender(options.protyle, options.protyle.wysiwyg.element);
+    processRender(options.protyle.wysiwyg.element);
+    highlightRender(options.protyle.wysiwyg.element);
+    avRender(options.protyle.wysiwyg.element, options.protyle);
+};
+
 export const turnsOneInto = async (options: {
     protyle: IProtyle,
     nodeElement: Element,

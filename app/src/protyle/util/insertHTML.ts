@@ -15,52 +15,180 @@ import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAttrViewCellAnimation, updateAVName} from "../render/av/action";
-import {updateCellsValue} from "../render/av/cell";
+import {genCellValue, updateCellsValue} from "../render/av/cell";
 import {input} from "../wysiwyg/input";
 import {updateListOrder} from "../wysiwyg/list";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {getTableRangeCells, isIncludeCell} from "./table";
 import {getFieldIdByCellElement, getRowHTML} from "../render/av/row";
-import {getAvBodyData} from "../render/av/virtualScroll";
 import {processClonePHElement} from "../render/util";
 import {setFold} from "./blockFold";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
 
-// 获取当前数据行的下一行。虚拟滚动会把视口外的数据行裁掉，此时 nextElementSibling 指向的是
-// .av__row--util 等非数据行。此处按 data-index 递增，若目标行未渲染则按数据源生成占位行插入后再返回，
-// 使粘贴可以覆盖视口外（被虚拟滚动裁掉的）数据行。nextIndex 超出已有行数时返回 null 以终止遍历。
-// 占位行带 av__row--placeholder 标记，由调用方在粘贴循环结束后移除，以免破坏虚拟滚动状态。
-const getNextDataRow = (currentRowElement: Element): HTMLElement => {
-    const nextSibling = currentRowElement.nextElementSibling as HTMLElement;
-    if (nextSibling && nextSibling.classList.contains("av__row") &&
-        !nextSibling.classList.contains("av__row--util") &&
-        !nextSibling.classList.contains("av__row--footer") &&
-        !nextSibling.classList.contains("av__row--header")) {
-        return nextSibling;
-    }
-    const nextIndex = parseInt(currentRowElement.getAttribute("data-index")) + 1;
-    const bodyElement = hasClosestByClassName(currentRowElement, "av__body") as HTMLElement;
-    if (!bodyElement) {
-        return null;
-    }
-    const view = getAvBodyData(bodyElement) as IAVTable;
-    if (!view || !view.rows || nextIndex >= view.rows.length) {
-        return null;
-    }
-    const pinIndex = parseInt(bodyElement.querySelector(".av__row--header > .block__icons")?.getAttribute("data-pinindex") || "-1");
-    const rowHTML = getRowHTML({data: view, row: view.rows[nextIndex], rowIndex: nextIndex, pinIndex, type: "table"});
-    const bottomElement = bodyElement.querySelector(".av__row--util");
-    bottomElement.insertAdjacentHTML("beforebegin", rowHTML);
-    const newRowElement = bottomElement.previousElementSibling as HTMLElement;
-    newRowElement.classList.add(PLACEHOLDER_ROW_CLASS);
-    return newRowElement;
-};
-
 // 移除粘贴过程中插入的占位行，使 DOM 恢复到与虚拟滚动 bodyStates 一致的裁剪状态
 const removePlaceholderRows = (blockElement: HTMLElement) => {
     blockElement.querySelectorAll("." + PLACEHOLDER_ROW_CLASS).forEach(item => item.remove());
+};
+
+const genEmptyAVRow = (view: IAVTable, rowID: string): IAVRow => {
+    return {
+        id: rowID,
+        cells: view.columns.map(column => {
+            const id = Lute.NewNodeID();
+            const value = genCellValue(column.type, null);
+            value.id = id;
+            value.keyID = column.id;
+            value.blockID = rowID;
+            if (column.type === "block") {
+                value.isDetached = true;
+            }
+            return {
+                id,
+                color: "",
+                bgColor: "",
+                value,
+                valueType: column.type,
+            };
+        }),
+    };
+};
+
+const insertAVPastePlaceholder = (bodyElement: HTMLElement, view: IAVTable, row: IAVRow, rowIndex: number) => {
+    const pinIndex = parseInt(bodyElement.querySelector(".av__row--header > .block__icons")?.getAttribute("data-pinindex") || "-1");
+    const bottomElement = bodyElement.querySelector(".av__row--util");
+    bottomElement.insertAdjacentHTML("beforebegin", getRowHTML({data: view, row, rowIndex, pinIndex, type: "table"}));
+    const rowElement = bottomElement.previousElementSibling as HTMLElement;
+    rowElement.classList.add(PLACEHOLDER_ROW_CLASS);
+    return rowElement;
+};
+
+const pasteAVMatrix = async (options: {
+    values: string[][],
+    protyle: IProtyle,
+    blockElement: HTMLElement,
+    startCell: HTMLElement,
+    columns: IAVColumn[],
+    html: string,
+    tempElement: HTMLTemplateElement,
+}) => {
+    const startRowElement = hasClosestByClassName(options.startCell, "av__row") as HTMLElement;
+    if (!startRowElement || options.values.length === 0) {
+        return;
+    }
+    const bodyElement = hasClosestByClassName(startRowElement, "av__body") as HTMLElement;
+    if (!bodyElement) {
+        return;
+    }
+
+    const groupID = bodyElement.dataset.groupId || "";
+    const response = await fetchSyncPost("/api/av/getAttributeViewPasteRows", {
+        avID: options.blockElement.dataset.avId,
+        blockID: options.blockElement.dataset.nodeId,
+        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+        groupID,
+        query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent || "",
+        startItemID: startRowElement.dataset.id,
+        count: options.values.length,
+    });
+    const view = response.data?.view as IAVTable;
+    const rows = view?.rows;
+    if (response.code !== 0 || !Array.isArray(rows) || rows.length === 0) {
+        return;
+    }
+
+    const rowElements: HTMLElement[] = [];
+    const startIndex = parseInt(startRowElement.dataset.index || "0");
+    rows.forEach((row, index) => {
+        let rowElement = bodyElement.querySelector(`.av__row[data-id="${row.id}"]`) as HTMLElement;
+        if (!rowElement) {
+            rowElement = insertAVPastePlaceholder(bodyElement, view, row, startIndex + index);
+        }
+        rowElements.push(rowElement);
+    });
+
+    const srcs: IOperationSrcs[] = [];
+    const newRowIDs: string[] = [];
+    for (let i = rows.length; i < options.values.length; i++) {
+        const rowID = Lute.NewNodeID();
+        newRowIDs.push(rowID);
+        srcs.push({
+            itemID: rowID,
+            id: Lute.NewNodeID(),
+            isDetached: true,
+            content: "",
+        });
+        rowElements.push(insertAVPastePlaceholder(bodyElement, view, genEmptyAVRow(view, rowID), startIndex + i));
+    }
+
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    if (srcs.length > 0) {
+        doOperations.push({
+            action: "insertAttrViewBlock",
+            avID: options.blockElement.dataset.avId,
+            previousID: rows[rows.length - 1].id,
+            srcs,
+            blockID: options.blockElement.dataset.nodeId,
+            viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+            groupID,
+        });
+    }
+
+    const newRowIDSet = new Set(newRowIDs);
+    const firstColID = options.startCell.dataset.colId;
+    try {
+        for (let i = 0; i < options.values.length; i++) {
+            let cellElement = rowElements[i].querySelector(`.av__cell[data-col-id="${firstColID}"]`) as HTMLElement;
+            for (let j = 0; j < options.values[i].length && cellElement?.classList.contains("av__cell"); j++) {
+                const operations = await updateCellsValue(options.protyle, options.blockElement, options.values[i][j],
+                    [cellElement], options.columns,
+                    cellElement.dataset.dtype === "mAsset" ? (options.tempElement.content.children[i * (j + 1) + j]?.outerHTML || "") : options.html,
+                    true, newRowIDSet.has(rowElements[i].dataset.id));
+                if (operations.doOperations.length > 0) {
+                    doOperations.push(...operations.doOperations);
+                    if (newRowIDSet.has(rowElements[i].dataset.id)) {
+                        undoOperations.push(...operations.undoOperations.filter(operation =>
+                            operation.action !== "updateAttrViewCell" || operation.rowID !== rowElements[i].dataset.id));
+                    } else {
+                        undoOperations.push(...operations.undoOperations);
+                    }
+                }
+                if (cellElement.nextElementSibling) {
+                    cellElement = cellElement.nextElementSibling as HTMLElement;
+                } else if (cellElement.parentElement.classList.contains("av__colsticky")) {
+                    cellElement = cellElement.parentElement.nextElementSibling as HTMLElement;
+                } else {
+                    cellElement = undefined;
+                }
+            }
+        }
+    } finally {
+        removePlaceholderRows(options.blockElement);
+    }
+
+    if (doOperations.length === 0) {
+        return;
+    }
+    if (newRowIDs.length > 0) {
+        undoOperations.push({
+            action: "removeAttrViewBlock",
+            srcIDs: newRowIDs,
+            avID: options.blockElement.dataset.avId,
+        });
+    }
+    doOperations.push({
+        action: "doUpdateUpdated",
+        id: options.blockElement.dataset.nodeId,
+        data: dayjs().format("YYYYMMDDHHmmss"),
+    });
+    undoOperations.push({
+        action: "doUpdateUpdated",
+        id: options.blockElement.dataset.nodeId,
+        data: options.blockElement.getAttribute("updated"),
+    });
+    transaction(options.protyle, doOperations, undoOperations);
 };
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
@@ -96,57 +224,16 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             if (cellElements.length === 0) {
                 cellElements.push(blockElement.querySelector(".av__row:not(.av__row--header) .av__cell"));
             }
-            const doOperations: IOperation[] = [];
-            const undoOperations: IOperation[] = [];
-
-            const id = blockElement.dataset.nodeId;
-            let currentRowElement: Element;
-            const firstColIndex = cellElements[0].getAttribute("data-col-id");
-            for (let i = 0; i < values.length; i++) {
-                if (!currentRowElement) {
-                    currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
-                } else {
-                    currentRowElement = getNextDataRow(currentRowElement);
-                }
-                if (!currentRowElement) {
-                    break;
-                }
-                let cellElement: HTMLElement;
-                for (let j = 0; j < values[i].length; j++) {
-                    const cellValue = values[i][j];
-                    if (!cellElement) {
-                        cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
-                    } else {
-                        if (cellElement.nextElementSibling) {
-                            cellElement = cellElement.nextElementSibling as HTMLElement;
-                        } else if (cellElement.parentElement.classList.contains("av__colsticky")) {
-                            cellElement = cellElement.parentElement.nextElementSibling as HTMLElement;
-                        }
-                    }
-                    if (!cellElement.classList.contains("av__cell")) {
-                        break;
-                    }
-                    const operations = await updateCellsValue(protyle, blockElement as HTMLElement,
-                        cellValue, [cellElement], columns, html, true);
-                    if (operations.doOperations.length > 0) {
-                        doOperations.push(...operations.doOperations);
-                        undoOperations.push(...operations.undoOperations);
-                    }
-                }
-            }
-            removePlaceholderRows(blockElement as HTMLElement);
-            if (doOperations.length > 0) {
-                doOperations.push({
-                    action: "doUpdateUpdated",
-                    id,
-                    data: dayjs().format("YYYYMMDDHHmmss"),
+            if (cellElements[0]) {
+                await pasteAVMatrix({
+                    values,
+                    protyle,
+                    blockElement,
+                    startCell: cellElements[0],
+                    columns,
+                    html,
+                    tempElement,
                 });
-                undoOperations.push({
-                    action: "doUpdateUpdated",
-                    id,
-                    data: blockElement.getAttribute("updated"),
-                });
-                transaction(protyle, doOperations, undoOperations);
             }
             return;
         }
@@ -180,17 +267,19 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         }
 
         const text = protyle.lute.BlockDOM2Content(html);
-        const rowsElement = blockElement.querySelectorAll(".av__row--select");
+        const rowsElement = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
 
-        const textJSON: string[][] = [];
-        text.split("\n").forEach(row => {
-            textJSON.push(row.split("\t"));
-        });
+        const textRows = text.split("\n");
+        while (textRows.length > 1 && textRows[textRows.length - 1] === "") {
+            textRows.pop();
+        }
+        const normalizedText = textRows.join("\n");
+        const textJSON = textRows.map(row => row.split("\t"));
         if (rowsElement.length > 0 && textJSON.length === 1 && textJSON[0].length === 1) {
-            updateCellsValue(protyle, blockElement as HTMLElement, text, undefined, columns, html);
+            updateCellsValue(protyle, blockElement as HTMLElement, normalizedText, undefined, columns, html);
             return;
         }
-        if (rowsElement.length > 0) {
+        if (cellElements.length === 0 && rowsElement.length > 0) {
             rowsElement.forEach(rowElement => {
                 rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
                     cellElements.push(cellElement);
@@ -199,59 +288,17 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         }
         if (cellElements.length > 0) {
             if (textJSON.length === 1 && textJSON[0].length === 1) {
-                updateCellsValue(protyle, blockElement as HTMLElement, text, cellElements, columns, html);
+                updateCellsValue(protyle, blockElement as HTMLElement, normalizedText, cellElements, columns, html);
             } else {
-                let currentRowElement: Element;
-                const doOperations: IOperation[] = [];
-                const undoOperations: IOperation[] = [];
-                const firstColIndex = cellElements[0].getAttribute("data-col-id");
-                for (let i = 0; i < textJSON.length; i++) {
-                    if (!currentRowElement) {
-                        currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
-                    } else {
-                        currentRowElement = getNextDataRow(currentRowElement);
-                    }
-                    if (!currentRowElement) {
-                        break;
-                    }
-                    let cellElement: HTMLElement;
-                    for (let j = 0; j < textJSON[i].length; j++) {
-                        if (!cellElement) {
-                            cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
-                        } else {
-                            if (cellElement.nextElementSibling) {
-                                cellElement = cellElement.nextElementSibling as HTMLElement;
-                            } else if (cellElement.parentElement.classList.contains("av__colsticky")) {
-                                cellElement = cellElement.parentElement.nextElementSibling as HTMLElement;
-                            }
-                        }
-                        if (!cellElement.classList.contains("av__cell")) {
-                            break;
-                        }
-                        const cellValue = textJSON[i][j];
-                        const operations = await updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns,
-                            cellElement.getAttribute("data-dtype") === "mAsset" ? (tempElement.content.children[i * (j + 1) + j]?.outerHTML || "") : html, true);
-                        if (operations.doOperations.length > 0) {
-                            doOperations.push(...operations.doOperations);
-                            undoOperations.push(...operations.undoOperations);
-                        }
-                    }
-                }
-                removePlaceholderRows(blockElement as HTMLElement);
-                if (doOperations.length > 0) {
-                    const id = blockElement.getAttribute("data-node-id");
-                    doOperations.push({
-                        action: "doUpdateUpdated",
-                        id,
-                        data: dayjs().format("YYYYMMDDHHmmss"),
-                    });
-                    undoOperations.push({
-                        action: "doUpdateUpdated",
-                        id,
-                        data: blockElement.getAttribute("updated"),
-                    });
-                    transaction(protyle, doOperations, undoOperations);
-                }
+                await pasteAVMatrix({
+                    values: textJSON,
+                    protyle,
+                    blockElement,
+                    startCell: cellElements[0],
+                    columns,
+                    html,
+                    tempElement,
+                });
             }
             document.querySelector(".av__panel")?.remove();
         } else if (hasClosestByClassName(range.startContainer, "av__title")) {

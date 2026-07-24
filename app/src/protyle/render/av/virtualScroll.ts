@@ -429,6 +429,50 @@ export const getAVSelectStat = (bodyEl: HTMLElement): { selectCount: number, loa
     };
 };
 
+export const getAVSelectedItems = (blockElement: HTMLElement): { itemID: string, isDetached: boolean }[] => {
+    const selectedItems = new Map<string, boolean>();
+    blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
+        const state = bodyStates.get(bodyElement);
+        if (state?.selectedRowIds) {
+            const rows = (state.view as IAVTable).rows;
+            const cards = (state.view as IAVGallery).cards;
+            const items = new Map<string, IAVRow | IAVGalleryItem>();
+            rows?.forEach(row => items.set(row.id, row));
+            cards?.forEach(card => items.set(card.id, card));
+            const renderedItems = new Map<string, HTMLElement>();
+            bodyElement.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]").forEach(item => {
+                renderedItems.set(item.dataset.id, item);
+            });
+            state.selectedRowIds.forEach(itemID => {
+                const item = items.get(itemID);
+                let values: IAVCell[];
+                if (item && "cells" in item) {
+                    values = item.cells;
+                } else if (item) {
+                    values = (item as IAVGalleryItem).values;
+                }
+                const blockValue = values?.find(cell => cell.value?.type === "block")?.value;
+                if (blockValue) {
+                    selectedItems.set(itemID, blockValue.isDetached === true);
+                } else {
+                    const itemElement = renderedItems.get(itemID);
+                    const blockCell = itemElement?.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
+                    selectedItems.set(itemID, blockCell?.dataset.detached === "true");
+                }
+            });
+            return;
+        }
+        bodyElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select").forEach((item: HTMLElement) => {
+            const itemID = item.dataset.id;
+            const blockCell = item.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
+            if (itemID && blockCell) {
+                selectedItems.set(itemID, blockCell.dataset.detached === "true");
+            }
+        });
+    });
+    return Array.from(selectedItems, ([itemID, isDetached]) => ({itemID, isDetached}));
+};
+
 export const trimAVRows = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     if (blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true" || trimPending.has(blockElement)) {
         return;

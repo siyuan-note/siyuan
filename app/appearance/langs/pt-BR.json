@@ -1,4 +1,12 @@
 {
+  "createSubDocAndBind": "Criar documento filho e vinculá-lo",
+  "createDocAndBind": "Criar documento e vinculá-lo",
+  "includeSublists": "Incluir sublistas",
+  "selectRelationItems": "Selecionar itens relacionados",
+  "filterOperatorContainsAnyItem": "Contém qualquer item",
+  "filterOperatorDoesNotContainAnyItem": "Não contém nenhum item",
+  "filterOperatorContainsKeyword": "Contém palavra-chave",
+  "filterOperatorDoesNotContainKeyword": "Não contém palavra-chave",
   "showInAllViews": "Mostrar em todas as visualizações",
   "hideInAllViews": "Ocultar em todas as visualizações",
   "fieldVisibility": "Visibilidade do campo",

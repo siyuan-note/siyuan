@@ -79,21 +79,23 @@ type RelativeDate struct {
 type FilterOperator string
 
 const (
-	FilterOperatorIsEqual          FilterOperator = "="
-	FilterOperatorIsNotEqual       FilterOperator = "!="
-	FilterOperatorIsGreater        FilterOperator = ">"
-	FilterOperatorIsGreaterOrEqual FilterOperator = ">="
-	FilterOperatorIsLess           FilterOperator = "<"
-	FilterOperatorIsLessOrEqual    FilterOperator = "<="
-	FilterOperatorContains         FilterOperator = "Contains"
-	FilterOperatorDoesNotContain   FilterOperator = "Does not contains"
-	FilterOperatorIsEmpty          FilterOperator = "Is empty"
-	FilterOperatorIsNotEmpty       FilterOperator = "Is not empty"
-	FilterOperatorStartsWith       FilterOperator = "Starts with"
-	FilterOperatorEndsWith         FilterOperator = "Ends with"
-	FilterOperatorIsBetween        FilterOperator = "Is between"
-	FilterOperatorIsTrue           FilterOperator = "Is true"
-	FilterOperatorIsFalse          FilterOperator = "Is false"
+	FilterOperatorIsEqual               FilterOperator = "="
+	FilterOperatorIsNotEqual            FilterOperator = "!="
+	FilterOperatorIsGreater             FilterOperator = ">"
+	FilterOperatorIsGreaterOrEqual      FilterOperator = ">="
+	FilterOperatorIsLess                FilterOperator = "<"
+	FilterOperatorIsLessOrEqual         FilterOperator = "<="
+	FilterOperatorContains              FilterOperator = "Contains"
+	FilterOperatorDoesNotContain        FilterOperator = "Does not contains"
+	FilterOperatorContainsAnyItem       FilterOperator = "Contains any item"
+	FilterOperatorDoesNotContainAnyItem FilterOperator = "Does not contain any item"
+	FilterOperatorIsEmpty               FilterOperator = "Is empty"
+	FilterOperatorIsNotEmpty            FilterOperator = "Is not empty"
+	FilterOperatorStartsWith            FilterOperator = "Starts with"
+	FilterOperatorEndsWith              FilterOperator = "Ends with"
+	FilterOperatorIsBetween             FilterOperator = "Is between"
+	FilterOperatorIsTrue                FilterOperator = "Is true"
+	FilterOperatorIsFalse               FilterOperator = "Is false"
 )
 
 type FilterQuantifier string
@@ -242,21 +244,35 @@ func evalNode(node *ViewFilter, values []*Value, colIndexByColumn map[string]int
 // evalLeaf 对叶子过滤节点做单元格级判定，保留扁平时代 Filter() 的空值特判与 text 豁免语义。
 func evalLeaf(filter *ViewFilter, values []*Value, index int, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
 	if 0 > index || index >= len(values) {
-		return false
+		return evalMissingLeaf(filter)
 	}
 
-	operator := filter.Operator
 	if nil == values[index] {
-		// 单元格无值：Is not empty 不过、Is empty 过、其余操作符一律不过
-		if FilterOperatorIsNotEmpty == operator {
-			return false
-		} else if FilterOperatorIsEmpty == operator {
-			return true
-		}
-		return false
+		return evalMissingLeaf(filter)
 	}
 
 	return values[index].Filter(filter, attrView, itemID, rollupFurtherCollections, cachedAttrViews)
+}
+
+func evalMissingLeaf(filter *ViewFilter) bool {
+	if nil == filter {
+		return false
+	}
+	switch filter.Operator {
+	case FilterOperatorIsEmpty:
+		return true
+	case FilterOperatorIsNotEmpty:
+		return false
+	case FilterOperatorContainsAnyItem, FilterOperatorDoesNotContainAnyItem:
+		if !isExactRelationFilter(filter) || nil == filter.Value.Relation ||
+			1 > len(filter.Value.Relation.BlockIDs) {
+			return true
+		}
+		return FilterOperatorDoesNotContainAnyItem == filter.Operator
+	default:
+		// 单元格无值时，其余操作符一律不过。
+		return false
+	}
 }
 
 // remapFilterColumns 递归将过滤节点树中所有叶子引用的列 ID 映射为新 ID（用于复制视图）。
@@ -359,6 +375,128 @@ func RemoveSelectOptionFromFilters(filters []*ViewFilter, column, optionContent 
 			continue // 选项删空则移除该过滤条件
 		}
 		ret = append(ret, f)
+	}
+	return
+}
+
+// RemoveRelationItemsFromFilters 递归移除精确关联筛选中的指定行 ID，并裁剪删空的叶子与分组。
+func RemoveRelationItemsFromFilters(filters []*ViewFilter, column string, itemIDs []string) (ret []*ViewFilter, changed bool) {
+	removedIDs := map[string]bool{}
+	for _, itemID := range itemIDs {
+		removedIDs[itemID] = true
+	}
+
+	for _, filter := range filters {
+		if nil == filter {
+			continue
+		}
+		if filter.IsGroup() {
+			children, childrenChanged := RemoveRelationItemsFromFilters(filter.Filters, column, itemIDs)
+			if !childrenChanged {
+				ret = append(ret, filter)
+				continue
+			}
+			changed = true
+			filter.Filters = children
+			if 0 < len(children) {
+				ret = append(ret, filter)
+			}
+			continue
+		}
+		if filter.Column != column || !isExactRelationFilter(filter) {
+			ret = append(ret, filter)
+			continue
+		}
+		if nil == filter.Value.Relation {
+			changed = true
+			continue
+		}
+
+		blockIDs := filter.Value.Relation.BlockIDs[:0]
+		for _, blockID := range filter.Value.Relation.BlockIDs {
+			if removedIDs[blockID] {
+				changed = true
+				continue
+			}
+			blockIDs = append(blockIDs, blockID)
+		}
+		filter.Value.Relation.BlockIDs = blockIDs
+		if 0 < len(blockIDs) {
+			ret = append(ret, filter)
+		} else {
+			changed = true
+		}
+	}
+	return
+}
+
+// RemoveExactRelationFiltersByColumn 递归移除指定关联列的精确筛选，并裁剪变空的分组。
+func RemoveExactRelationFiltersByColumn(filters []*ViewFilter, column string) (ret []*ViewFilter, changed bool) {
+	for _, filter := range filters {
+		if nil == filter {
+			continue
+		}
+		if filter.IsGroup() {
+			children, childrenChanged := RemoveExactRelationFiltersByColumn(filter.Filters, column)
+			if !childrenChanged {
+				ret = append(ret, filter)
+				continue
+			}
+			changed = true
+			filter.Filters = children
+			if 0 < len(children) {
+				ret = append(ret, filter)
+			}
+			continue
+		}
+		if filter.Column == column && isExactRelationFilter(filter) {
+			changed = true
+			continue
+		}
+		ret = append(ret, filter)
+	}
+	return
+}
+
+func isExactRelationFilter(filter *ViewFilter) bool {
+	return nil != filter && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
+		(FilterOperatorContainsAnyItem == filter.Operator || FilterOperatorDoesNotContainAnyItem == filter.Operator)
+}
+
+// RemoveRelationFilterItems 移除所有指向目标数据库的精确关联筛选项。
+func (attrView *AttributeView) RemoveRelationFilterItems(targetAvID string, itemIDs []string) (changed bool) {
+	for _, keyValues := range attrView.KeyValues {
+		key := keyValues.Key
+		if nil == key || KeyTypeRelation != key.Type || nil == key.Relation || targetAvID != key.Relation.AvID {
+			continue
+		}
+		for _, view := range attrView.Views {
+			filters, filtersChanged := RemoveRelationItemsFromFilters(view.Filters, key.ID, itemIDs)
+			if !filtersChanged {
+				continue
+			}
+			changed = true
+			view.Filters = filters
+			if 0 == len(view.Filters) {
+				view.Filters = []*ViewFilter{{Combination: FilterCombinationAnd}}
+			}
+		}
+	}
+	return
+}
+
+// RemoveExactRelationFilters 移除指定关联列的全部精确筛选。
+func (attrView *AttributeView) RemoveExactRelationFilters(column string) (changed bool) {
+	for _, view := range attrView.Views {
+		filters, filtersChanged := RemoveExactRelationFiltersByColumn(view.Filters, column)
+		if !filtersChanged {
+			continue
+		}
+		changed = true
+		view.Filters = filters
+		if 0 == len(view.Filters) {
+			view.Filters = []*ViewFilter{{Combination: FilterCombinationAnd}}
+		}
 	}
 	return
 }
@@ -609,12 +747,30 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		}
 	}
 
-	// 单独处理关联
+	// 单独处理精确关联
+	if KeyTypeRelation == value.Type && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
+		isExactRelationFilter(filter) {
+		if nil == filter.Value.Relation || 1 > len(filter.Value.Relation.BlockIDs) {
+			return true
+		}
+
+		if nil != value.Relation {
+			for _, blockID := range value.Relation.BlockIDs {
+				for _, filterBlockID := range filter.Value.Relation.BlockIDs {
+					if blockID == filterBlockID {
+						return FilterOperatorContainsAnyItem == filter.Operator
+					}
+				}
+			}
+		}
+		return FilterOperatorDoesNotContainAnyItem == filter.Operator
+	}
+
+	// 单独处理关键字关联
 	if nil != value.Relation && KeyTypeRelation == value.Type && nil != filter.Value && KeyTypeRelation == filter.Value.Type && nil != filter.Value.Relation {
 		if 1 > len(filter.Value.Relation.BlockIDs) {
 			return true
 		}
-
 		for _, relationValue := range value.Relation.Contents {
 			filterValue := &Value{Type: KeyTypeBlock, Block: &ValueBlock{Content: filter.Value.Relation.BlockIDs[0]}}
 
@@ -1346,6 +1502,9 @@ func (filter *ViewFilter) IsValid() bool {
 	}
 
 	if FilterOperatorIsEmpty != filter.Operator && FilterOperatorIsNotEmpty != filter.Operator {
+		if isExactRelationFilter(filter) {
+			return nil != filter.Value.Relation && 0 < len(filter.Value.Relation.BlockIDs)
+		}
 		if filter.Value.IsEmpty() && nil == filter.RelativeDate {
 			return false
 		}

@@ -204,7 +204,7 @@ export const genAVAttributeRowHTML = (options: {
         ${options.icon ? unicode2Emoji(options.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${options.typeIcon}"></use></svg>`}
         <span>${escapeHtml(options.name)}</span>
     </div>
-    <div data-av-id="${options.avID}" data-col-id="${value.keyID}" data-row-id="${value.blockID}"${value.id ? ` data-id="${value.id}"` : ""} data-value="${escapeAttr(JSON.stringify(value))}" data-type="${value.type}"${value.isDetached ? ' data-detached="true"' : ""}
+    <div data-av-id="${options.avID}" data-col-id="${value.keyID}" data-row-id="${value.blockID}"${value.id ? ` data-id="${value.id}"` : ""} data-cell-value="${encodeURIComponent(JSON.stringify(value))}" data-type="${value.type}"${value.isDetached ? ' data-detached="true"' : ""}
 data-options="${options.selectOptions ? escapeAttr(JSON.stringify(options.selectOptions)) : "[]"}"
 ${hasOwnPlaceholder ? "" : `placeholder="${window.siyuan.languages.empty}"`}
 class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(value)}</div>

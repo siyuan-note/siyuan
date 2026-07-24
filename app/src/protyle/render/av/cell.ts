@@ -64,8 +64,8 @@ export const getCellText = (cellElement: HTMLElement | false) => {
 };
 
 export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
-    if (cellElement.dataset.avId && cellElement.dataset.value) {
-        return JSON.parse(cellElement.dataset.value) as IAVCellValue;
+    if (cellElement.dataset.avId && cellElement.dataset.cellValue) {
+        return JSON.parse(decodeURIComponent(cellElement.dataset.cellValue)) as IAVCellValue;
     }
     const cellValue: IAVCellValue = {
         type: colType,
@@ -961,7 +961,7 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
         } else {
             cellElement.removeAttribute("data-id");
         }
-        cellElement.dataset.value = JSON.stringify(value);
+        cellElement.dataset.cellValue = encodeURIComponent(JSON.stringify(value));
         cellElement.parentElement.dataset.empty = cellValueIsEmpty(value).toString();
     };
     if (sourceElement?.dataset.avId) {

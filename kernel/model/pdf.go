@@ -30,7 +30,8 @@ func PdfListLinks(ctx *model.Context) (assets, others []model.LinkAnnotation, er
 					link := va.ContentString()
 					l := va.(model.LinkAnnotation)
 					l.Page = pg
-					if strings.HasPrefix(link, "http://127.0.0.1:") && strings.Contains(link, "/assets/") {
+					if (strings.HasPrefix(link, "http://127.0.0.1:") ||
+						strings.HasPrefix(link, "https://127.0.0.1:")) && strings.Contains(link, "/assets/") {
 						assets = append(assets, l)
 					} else {
 						others = append(others, l)

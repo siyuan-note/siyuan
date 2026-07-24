@@ -421,14 +421,430 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 	return
 }
 
+func CheckAttributeViewAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, avID string) bool {
+	return CheckAttributeViewBlockAccessableByPublishAccess(c, publishAccess, avID, "")
+}
+
+func CheckAttributeViewBlockAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, avID, blockID string) bool {
+	if !ast.IsNodeIDPattern(avID) {
+		return false
+	}
+	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
+	if "" != blockID {
+		if !slices.Contains(blockIDs, blockID) {
+			node, _, _ := getNodeByBlockID(nil, blockID)
+			if nil == node || ast.NodeAttributeView != node.Type || avID != node.AttributeViewID {
+				return false
+			}
+		}
+		blockTree := treenode.GetBlockTree(blockID)
+		if nil == blockTree {
+			for _, encryptedBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+				if encryptedBlockTree := treenode.GetBlockTreeInBox(blockID, encryptedBoxID); nil != encryptedBlockTree {
+					blockTree = encryptedBlockTree
+					break
+				}
+			}
+		}
+		return checkBlockTreeAccessableByPublishAccess(c, publishAccess, blockTree)
+	}
+	return checkAttributeViewBlockTreesAccessableByPublishAccess(c, publishAccess, treenode.GetBlockTrees(blockIDs))
+}
+
+func checkAttributeViewBlockTreesAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockTrees map[string]*treenode.BlockTree) bool {
+	for _, blockTree := range blockTrees {
+		if checkBlockTreeAccessableByPublishAccess(c, publishAccess, blockTree) {
+			return true
+		}
+	}
+	return false
+}
+
+func FilterAttributeViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, avID, blockID string, viewable av.Viewable) av.Viewable {
+	viewable = FilterViewByPublishAccess(c, publishAccess, viewable)
+	attrView, boxID := parseAttributeViewForPublishAccess(avID, blockID)
+	filter := &attributeViewPublishAccessFilter{
+		c:               c,
+		publishAccess:   publishAccess,
+		boxID:           boxID,
+		attributeViews:  map[string]*av.AttributeView{},
+		attributeAccess: map[string]bool{},
+		itemAccess:      map[string]map[string]bool{},
+	}
+	if nil != attrView {
+		filter.attributeViews[attrView.ID] = attrView
+	}
+	filter.filterViewable(attrView, viewable)
+	return viewable
+}
+
+func parseAttributeViewForPublishAccess(avID, blockID string) (attrView *av.AttributeView, boxID string) {
+	if "" != blockID {
+		blockTree := treenode.GetBlockTree(blockID)
+		if nil == blockTree {
+			for _, encryptedBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+				if encryptedBlockTree := treenode.GetBlockTreeInBox(blockID, encryptedBoxID); nil != encryptedBlockTree {
+					blockTree = encryptedBlockTree
+					break
+				}
+			}
+		}
+		if nil != blockTree && IsEncryptedBox(blockTree.BoxID) {
+			boxID = blockTree.BoxID
+		}
+	}
+	if "" != boxID {
+		attrView, _ = av.ParseAttributeViewInBox(avID, boxID)
+	} else {
+		attrView, _ = av.ParseAttributeView(avID)
+	}
+	return
+}
+
+type attributeViewPublishAccessFilter struct {
+	c               *gin.Context
+	publishAccess   PublishAccess
+	boxID           string
+	attributeViews  map[string]*av.AttributeView
+	attributeAccess map[string]bool
+	itemAccess      map[string]map[string]bool
+}
+
+func (filter *attributeViewPublishAccessFilter) filterViewable(attrView *av.AttributeView, viewable av.Viewable) {
+	if nil == viewable {
+		return
+	}
+
+	switch viewable.GetType() {
+	case av.LayoutTypeTable:
+		table := viewable.(*av.Table)
+		filter.filterGroupValue(attrView, table.BaseInstance)
+		for _, row := range table.Rows {
+			if nil == row {
+				continue
+			}
+			for _, cell := range row.Cells {
+				if nil == cell {
+					continue
+				}
+				filter.filterBaseValue(attrView, row.ID, cell.BaseValue)
+			}
+		}
+		for _, group := range table.Groups {
+			filter.filterViewable(attrView, group)
+		}
+	case av.LayoutTypeGallery:
+		gallery := viewable.(*av.Gallery)
+		filter.filterGroupValue(attrView, gallery.BaseInstance)
+		for _, card := range gallery.Cards {
+			if nil == card {
+				continue
+			}
+			for _, value := range card.Values {
+				if nil == value {
+					continue
+				}
+				filter.filterBaseValue(attrView, card.ID, value.BaseValue)
+			}
+		}
+		for _, group := range gallery.Groups {
+			filter.filterViewable(attrView, group)
+		}
+	case av.LayoutTypeKanban:
+		kanban := viewable.(*av.Kanban)
+		filter.filterGroupValue(attrView, kanban.BaseInstance)
+		for _, card := range kanban.Cards {
+			if nil == card {
+				continue
+			}
+			for _, value := range card.Values {
+				if nil == value {
+					continue
+				}
+				filter.filterBaseValue(attrView, card.ID, value.BaseValue)
+			}
+		}
+		for _, group := range kanban.Groups {
+			filter.filterViewable(attrView, group)
+		}
+	}
+}
+
+func (filter *attributeViewPublishAccessFilter) filterGroupValue(attrView *av.AttributeView, instance *av.BaseInstance) {
+	if nil == instance || nil == instance.GroupValue {
+		return
+	}
+	value, changed := filter.filterValue(attrView, instance.GroupKey, instance.GroupValue, instance.GroupValue.BlockID)
+	if changed {
+		instance.GroupValue = value
+	}
+}
+
+func (filter *attributeViewPublishAccessFilter) filterBaseValue(attrView *av.AttributeView, itemID string, baseValue *av.BaseValue) {
+	if nil == baseValue || nil == baseValue.Value {
+		return
+	}
+	var key *av.Key
+	if nil != attrView {
+		key, _ = attrView.GetKey(baseValue.Value.KeyID)
+	}
+	value, changed := filter.filterValue(attrView, key, baseValue.Value, itemID)
+	if changed {
+		baseValue.Value = value
+	}
+}
+
+func (filter *attributeViewPublishAccessFilter) filterValue(attrView *av.AttributeView, key *av.Key, value *av.Value, itemID string) (*av.Value, bool) {
+	if nil == value {
+		return value, false
+	}
+	switch value.Type {
+	case av.KeyTypeRelation:
+		return filter.filterRelationValue(key, value)
+	case av.KeyTypeRollup:
+		return filter.filterRollupValue(attrView, key, value, itemID)
+	default:
+		return value, false
+	}
+}
+
+func (filter *attributeViewPublishAccessFilter) filterRelationValue(key *av.Key, value *av.Value) (*av.Value, bool) {
+	if nil == value.Relation {
+		return value, false
+	}
+	if 1 > len(value.Relation.BlockIDs) && 1 > len(value.Relation.Contents) {
+		return value, false
+	}
+	if nil == key || nil == key.Relation || "" == key.Relation.AvID {
+		return clearAttributeViewSensitiveValue(value), true
+	}
+
+	targetAttrView := filter.getAttributeView(key.Relation.AvID)
+	if nil == targetAttrView || !filter.isAttributeViewAccessable(targetAttrView.ID) {
+		return clearAttributeViewSensitiveValue(value), true
+	}
+
+	allowedItemIDs := map[string]bool{}
+	changed := false
+	for _, itemID := range value.Relation.BlockIDs {
+		if filter.isItemAccessable(targetAttrView, itemID) {
+			allowedItemIDs[itemID] = true
+		} else {
+			changed = true
+		}
+	}
+	for _, content := range value.Relation.Contents {
+		if nil == content || "" == content.BlockID || !allowedItemIDs[content.BlockID] {
+			changed = true
+		}
+	}
+	if !changed {
+		return value, false
+	}
+
+	ret := cloneAttributeViewSensitiveValue(value)
+	ret.Relation.BlockIDs = ret.Relation.BlockIDs[:0]
+	for _, itemID := range value.Relation.BlockIDs {
+		if allowedItemIDs[itemID] {
+			ret.Relation.BlockIDs = append(ret.Relation.BlockIDs, itemID)
+		}
+	}
+	ret.Relation.Contents = ret.Relation.Contents[:0]
+	for _, content := range value.Relation.Contents {
+		if nil != content && allowedItemIDs[content.BlockID] {
+			ret.Relation.Contents = append(ret.Relation.Contents, content.Clone())
+		}
+	}
+	return ret, true
+}
+
+func (filter *attributeViewPublishAccessFilter) filterRollupValue(attrView *av.AttributeView, key *av.Key, value *av.Value, itemID string) (*av.Value, bool) {
+	if nil == value.Rollup || 1 > len(value.Rollup.Contents) {
+		return value, false
+	}
+
+	targetAttrView, targetKey, targetItemIDs, ok := filter.getRollupTarget(attrView, key, itemID)
+	if !ok {
+		return clearAttributeViewSensitiveValue(value), true
+	}
+	for _, targetItemID := range targetItemIDs {
+		if !filter.isItemAccessable(targetAttrView, targetItemID) ||
+			!filter.checkKeyDependencies(targetAttrView, targetKey, targetItemID, map[string]bool{}) {
+			return clearAttributeViewSensitiveValue(value), true
+		}
+	}
+
+	var ret *av.Value
+	for i, content := range value.Rollup.Contents {
+		if nil == content {
+			return clearAttributeViewSensitiveValue(value), true
+		}
+		filteredContent, changed := filter.filterValue(targetAttrView, targetKey, content, content.BlockID)
+		if !changed {
+			continue
+		}
+		if nil == ret {
+			ret = cloneAttributeViewSensitiveValue(value)
+		}
+		ret.Rollup.Contents[i] = filteredContent
+	}
+	if nil == ret {
+		return value, false
+	}
+	return ret, true
+}
+
+func (filter *attributeViewPublishAccessFilter) getRollupTarget(attrView *av.AttributeView, key *av.Key, itemID string) (targetAttrView *av.AttributeView, targetKey *av.Key, targetItemIDs []string, ok bool) {
+	if nil == attrView || nil == key || nil == key.Rollup || "" == itemID {
+		return
+	}
+	relationKey, _ := attrView.GetKey(key.Rollup.RelationKeyID)
+	if nil == relationKey || nil == relationKey.Relation || "" == relationKey.Relation.AvID {
+		return
+	}
+	relationValue := attrView.GetValue(relationKey.ID, itemID)
+	if nil == relationValue || nil == relationValue.Relation {
+		return
+	}
+
+	targetAttrView = filter.getAttributeView(relationKey.Relation.AvID)
+	if nil == targetAttrView || !filter.isAttributeViewAccessable(targetAttrView.ID) {
+		return nil, nil, nil, false
+	}
+	targetKey, _ = targetAttrView.GetKey(key.Rollup.KeyID)
+	if nil == targetKey {
+		return nil, nil, nil, false
+	}
+	targetItemIDs = relationValue.Relation.BlockIDs
+	ok = true
+	return
+}
+
+func (filter *attributeViewPublishAccessFilter) checkKeyDependencies(attrView *av.AttributeView, key *av.Key, itemID string, visited map[string]bool) bool {
+	if nil == attrView || nil == key || "" == itemID {
+		return false
+	}
+	visitKey := attrView.ID + "\x00" + key.ID + "\x00" + itemID
+	if visited[visitKey] {
+		return true
+	}
+	visited[visitKey] = true
+
+	switch key.Type {
+	case av.KeyTypeRelation:
+		if nil == key.Relation || "" == key.Relation.AvID {
+			return false
+		}
+		value := attrView.GetValue(key.ID, itemID)
+		if nil == value || nil == value.Relation || 1 > len(value.Relation.BlockIDs) {
+			return true
+		}
+		targetAttrView := filter.getAttributeView(key.Relation.AvID)
+		if nil == targetAttrView || !filter.isAttributeViewAccessable(targetAttrView.ID) {
+			return false
+		}
+		for _, targetItemID := range value.Relation.BlockIDs {
+			if !filter.isItemAccessable(targetAttrView, targetItemID) {
+				return false
+			}
+		}
+	case av.KeyTypeRollup:
+		targetAttrView, targetKey, targetItemIDs, ok := filter.getRollupTarget(attrView, key, itemID)
+		if !ok {
+			value := attrView.GetValue(key.ID, itemID)
+			return nil == value || nil == value.Rollup || 1 > len(value.Rollup.Contents)
+		}
+		for _, targetItemID := range targetItemIDs {
+			if !filter.isItemAccessable(targetAttrView, targetItemID) ||
+				!filter.checkKeyDependencies(targetAttrView, targetKey, targetItemID, visited) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func (filter *attributeViewPublishAccessFilter) getAttributeView(avID string) *av.AttributeView {
+	if attrView, ok := filter.attributeViews[avID]; ok {
+		return attrView
+	}
+	var attrView *av.AttributeView
+	if "" != filter.boxID {
+		attrView, _ = av.ParseAttributeViewInBox(avID, filter.boxID)
+	} else {
+		attrView, _ = av.ParseAttributeView(avID)
+	}
+	filter.attributeViews[avID] = attrView
+	return attrView
+}
+
+func (filter *attributeViewPublishAccessFilter) isAttributeViewAccessable(avID string) bool {
+	if accessable, ok := filter.attributeAccess[avID]; ok {
+		return accessable
+	}
+	accessable := CheckAttributeViewAccessableByPublishAccess(filter.c, filter.publishAccess, avID)
+	filter.attributeAccess[avID] = accessable
+	return accessable
+}
+
+func (filter *attributeViewPublishAccessFilter) isItemAccessable(attrView *av.AttributeView, itemID string) bool {
+	if nil == attrView || "" == itemID {
+		return false
+	}
+	access := filter.itemAccess[attrView.ID]
+	if nil == access {
+		access = map[string]bool{}
+		filter.itemAccess[attrView.ID] = access
+	}
+	if accessable, ok := access[itemID]; ok {
+		return accessable
+	}
+	accessable := checkAttributeViewItemIDAccessableByPublishAccess(filter.c, filter.publishAccess, attrView, itemID)
+	access[itemID] = accessable
+	return accessable
+}
+
+func cloneAttributeViewSensitiveValue(value *av.Value) *av.Value {
+	ret := value.Clone()
+	if nil != ret {
+		return ret
+	}
+	return &av.Value{
+		ID:         value.ID,
+		KeyID:      value.KeyID,
+		BlockID:    value.BlockID,
+		Type:       value.Type,
+		IsDetached: value.IsDetached,
+		CreatedAt:  value.CreatedAt,
+		UpdatedAt:  value.UpdatedAt,
+	}
+}
+
+func clearAttributeViewSensitiveValue(value *av.Value) *av.Value {
+	ret := cloneAttributeViewSensitiveValue(value)
+	switch value.Type {
+	case av.KeyTypeRelation:
+		ret.Relation = &av.ValueRelation{}
+	case av.KeyTypeRollup:
+		ret.Rollup = &av.ValueRollup{}
+	}
+	return ret
+}
+
 func checkAttributeViewItemAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, item av.Item) bool {
 	if nil == item {
 		return false
 	}
 
 	blockValue := item.GetBlockValue()
-	if nil == blockValue || blockValue.IsDetached || nil == blockValue.Block || "" == blockValue.Block.ID {
+	if nil == blockValue {
+		return false
+	}
+	if blockValue.IsDetached {
 		return true
+	}
+	if nil == blockValue.Block || "" == blockValue.Block.ID {
+		return false
 	}
 	return CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockValue.Block.ID)
 }
@@ -447,8 +863,11 @@ func checkAttributeViewItemIDAccessableByPublishAccess(
 	if nil == blockValue {
 		return false
 	}
-	if blockValue.IsDetached || nil == blockValue.Block || "" == blockValue.Block.ID {
+	if blockValue.IsDetached {
 		return true
+	}
+	if nil == blockValue.Block || "" == blockValue.Block.ID {
+		return false
 	}
 	return CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockValue.Block.ID)
 }

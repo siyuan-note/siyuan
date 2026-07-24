@@ -225,6 +225,331 @@ func TestCheckAttributeViewItemIDAccessableByPublishAccess(t *testing.T) {
 	if checkAttributeViewItemIDAccessableByPublishAccess(c, PublishAccess{}, attrView, "missing-item") {
 		t.Fatal("attribute view item without a primary value should not expose assets")
 	}
+
+	detachedRow := &av.TableRow{Cells: []*av.TableCell{{
+		BaseValue: &av.BaseValue{
+			ValueType: av.KeyTypeBlock,
+			Value:     &av.Value{Type: av.KeyTypeBlock, IsDetached: true},
+		},
+	}}}
+	if !checkAttributeViewItemAccessableByPublishAccess(c, PublishAccess{}, detachedRow) {
+		t.Fatal("detached attribute view row should remain accessible")
+	}
+
+	missingPrimaryRow := &av.TableRow{Cells: []*av.TableCell{{
+		BaseValue: &av.BaseValue{
+			ValueType: av.KeyTypeText,
+			Value:     &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "text"}},
+		},
+	}}}
+	if checkAttributeViewItemAccessableByPublishAccess(c, PublishAccess{}, missingPrimaryRow) {
+		t.Fatal("attribute view row without a primary value should not be accessible")
+	}
+
+	malformedPrimaryRow := &av.TableRow{Cells: []*av.TableCell{{
+		BaseValue: &av.BaseValue{
+			ValueType: av.KeyTypeBlock,
+			Value:     &av.Value{Type: av.KeyTypeBlock},
+		},
+	}}}
+	if checkAttributeViewItemAccessableByPublishAccess(c, PublishAccess{}, malformedPrimaryRow) {
+		t.Fatal("non-detached attribute view row without a block should not be accessible")
+	}
+}
+
+func TestCheckAttributeViewBlockTreesAccessableByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260726000000-boxid01"
+		publicID          = "20260726000001-public1"
+		forbiddenID       = "20260726000002-forbid1"
+		protectedID       = "20260726000003-protect"
+		protectedPassword = "password"
+	)
+	newBlockTree := func(id string) *treenode.BlockTree {
+		return &treenode.BlockTree{
+			ID:    id,
+			BoxID: boxID,
+			Path:  "/" + id + ".sy",
+		}
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+
+	if checkAttributeViewBlockTreesAccessableByPublishAccess(c, PublishAccess{}, nil) {
+		t.Fatal("attribute view without a mirror should not be accessible")
+	}
+	if !checkAttributeViewBlockTreesAccessableByPublishAccess(c, PublishAccess{}, map[string]*treenode.BlockTree{
+		publicID: newBlockTree(publicID),
+	}) {
+		t.Fatal("attribute view with a public mirror should be accessible")
+	}
+	if checkAttributeViewBlockTreesAccessableByPublishAccess(c, PublishAccess{{ID: forbiddenID, Disable: true}}, map[string]*treenode.BlockTree{
+		forbiddenID: newBlockTree(forbiddenID),
+	}) {
+		t.Fatal("attribute view with only a forbidden mirror should not be accessible")
+	}
+	if !checkAttributeViewBlockTreesAccessableByPublishAccess(c, PublishAccess{{ID: forbiddenID, Disable: true}}, map[string]*treenode.BlockTree{
+		forbiddenID: newBlockTree(forbiddenID),
+		publicID:    newBlockTree(publicID),
+	}) {
+		t.Fatal("attribute view should be accessible when any mirror is public")
+	}
+
+	protectedAccess := PublishAccess{{ID: protectedID, Visible: true, Password: protectedPassword}}
+	protectedTrees := map[string]*treenode.BlockTree{protectedID: newBlockTree(protectedID)}
+	if checkAttributeViewBlockTreesAccessableByPublishAccess(c, protectedAccess, protectedTrees) {
+		t.Fatal("attribute view with only a protected mirror should require authorization")
+	}
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedID,
+		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+	})
+	if !checkAttributeViewBlockTreesAccessableByPublishAccess(c, protectedAccess, protectedTrees) {
+		t.Fatal("attribute view with a protected mirror should be accessible after authorization")
+	}
+}
+
+func TestFilterAttributeViewRelatedValuesByPublishAccess(t *testing.T) {
+	const (
+		sourceAvID       = "20260726000100-source1"
+		targetAvID       = "20260726000101-target1"
+		sourceItemID     = "20260726000102-sourcei"
+		publicItemID     = "20260726000103-publici"
+		privateItemID    = "20260726000104-private"
+		blockKeyID       = "20260726000105-blockky"
+		relationKeyID    = "20260726000106-relkey1"
+		rollupKeyID      = "20260726000107-rollkey"
+		targetBlockKeyID = "20260726000108-tblockk"
+		targetTextKeyID  = "20260726000109-ttextk"
+	)
+	publicBlock := &av.Value{
+		KeyID:      targetBlockKeyID,
+		BlockID:    publicItemID,
+		Type:       av.KeyTypeBlock,
+		IsDetached: true,
+		Block:      &av.ValueBlock{Content: "public"},
+	}
+	privateBlock := &av.Value{
+		KeyID:      targetBlockKeyID,
+		BlockID:    privateItemID,
+		Type:       av.KeyTypeBlock,
+		IsDetached: true,
+		Block:      &av.ValueBlock{Content: "private"},
+	}
+	relationValue := &av.Value{
+		KeyID:   relationKeyID,
+		BlockID: sourceItemID,
+		Type:    av.KeyTypeRelation,
+		Relation: &av.ValueRelation{
+			BlockIDs: []string{publicItemID, privateItemID},
+			Contents: []*av.Value{publicBlock, privateBlock},
+		},
+	}
+	rollupValue := &av.Value{
+		KeyID:   rollupKeyID,
+		BlockID: sourceItemID,
+		Type:    av.KeyTypeRollup,
+		Rollup: &av.ValueRollup{Contents: []*av.Value{
+			{KeyID: targetTextKeyID, BlockID: publicItemID, Type: av.KeyTypeText, Text: &av.ValueText{Content: "public rollup"}},
+			{KeyID: targetTextKeyID, BlockID: privateItemID, Type: av.KeyTypeText, Text: &av.ValueText{Content: "private rollup"}},
+		}},
+	}
+	groupValue := relationValue.Clone()
+
+	relationKey := &av.Key{
+		ID:       relationKeyID,
+		Type:     av.KeyTypeRelation,
+		Relation: &av.Relation{AvID: targetAvID},
+	}
+	rollupKey := &av.Key{
+		ID:   rollupKeyID,
+		Type: av.KeyTypeRollup,
+		Rollup: &av.Rollup{
+			RelationKeyID: relationKeyID,
+			KeyID:         targetTextKeyID,
+		},
+	}
+	sourceAttrView := &av.AttributeView{
+		ID: sourceAvID,
+		KeyValues: []*av.KeyValues{
+			{Key: &av.Key{ID: blockKeyID, Type: av.KeyTypeBlock}},
+			{Key: relationKey, Values: []*av.Value{relationValue}},
+			{Key: rollupKey, Values: []*av.Value{rollupValue}},
+		},
+	}
+	targetAttrView := &av.AttributeView{
+		ID: targetAvID,
+		KeyValues: []*av.KeyValues{
+			{Key: &av.Key{ID: targetBlockKeyID, Type: av.KeyTypeBlock}, Values: []*av.Value{publicBlock, privateBlock}},
+			{Key: &av.Key{ID: targetTextKeyID, Type: av.KeyTypeText}, Values: []*av.Value{
+				{KeyID: targetTextKeyID, BlockID: publicItemID, Type: av.KeyTypeText, Text: &av.ValueText{Content: "public rollup"}},
+				{KeyID: targetTextKeyID, BlockID: privateItemID, Type: av.KeyTypeText, Text: &av.ValueText{Content: "private rollup"}},
+			}},
+		},
+	}
+	table := &av.Table{
+		BaseInstance: &av.BaseInstance{GroupKey: relationKey, GroupValue: groupValue},
+		Rows: []*av.TableRow{{
+			ID: sourceItemID,
+			Cells: []*av.TableCell{
+				{BaseValue: &av.BaseValue{Value: relationValue, ValueType: av.KeyTypeRelation}},
+				{BaseValue: &av.BaseValue{Value: rollupValue, ValueType: av.KeyTypeRollup}},
+			},
+		}},
+	}
+	filter := &attributeViewPublishAccessFilter{
+		attributeViews: map[string]*av.AttributeView{
+			sourceAvID: sourceAttrView,
+			targetAvID: targetAttrView,
+		},
+		attributeAccess: map[string]bool{
+			sourceAvID: true,
+			targetAvID: true,
+		},
+		itemAccess: map[string]map[string]bool{
+			targetAvID: {
+				publicItemID:  true,
+				privateItemID: false,
+			},
+		},
+	}
+
+	filter.filterViewable(sourceAttrView, table)
+
+	filteredRelation := table.Rows[0].Cells[0].Value
+	if filteredRelation == relationValue {
+		t.Fatal("filtered relation should use a response-only clone")
+	}
+	if 1 != len(filteredRelation.Relation.BlockIDs) || publicItemID != filteredRelation.Relation.BlockIDs[0] {
+		t.Fatalf("unexpected filtered relation IDs: %v", filteredRelation.Relation.BlockIDs)
+	}
+	if 1 != len(filteredRelation.Relation.Contents) || publicItemID != filteredRelation.Relation.Contents[0].BlockID {
+		t.Fatalf("unexpected filtered relation contents: %v", filteredRelation.Relation.Contents)
+	}
+	if 2 != len(relationValue.Relation.BlockIDs) || 2 != len(relationValue.Relation.Contents) {
+		t.Fatal("filtering the response should not mutate the source relation")
+	}
+
+	filteredRollup := table.Rows[0].Cells[1].Value
+	if filteredRollup == rollupValue || 0 != len(filteredRollup.Rollup.Contents) {
+		t.Fatal("rollup containing an inaccessible target should be cleared on a response-only clone")
+	}
+	if 2 != len(rollupValue.Rollup.Contents) {
+		t.Fatal("filtering the response should not mutate the source rollup")
+	}
+
+	if table.GroupValue == groupValue || 1 != len(table.GroupValue.Relation.BlockIDs) ||
+		publicItemID != table.GroupValue.Relation.BlockIDs[0] {
+		t.Fatal("relation group value should be filtered on a response-only clone")
+	}
+	if 2 != len(groupValue.Relation.BlockIDs) {
+		t.Fatal("filtering the group value should not mutate the source value")
+	}
+}
+
+func TestFilterAttributeViewRelatedValuesKeepsPublicResponse(t *testing.T) {
+	const (
+		sourceAvID    = "20260726000200-source1"
+		targetAvID    = "20260726000201-target1"
+		sourceItemID  = "20260726000202-sourcei"
+		targetItemID  = "20260726000203-targeti"
+		relationKeyID = "20260726000204-relkey1"
+		targetKeyID   = "20260726000205-blockky"
+		rollupKeyID   = "20260726000206-rollkey"
+		targetTextID  = "20260726000207-textkey"
+	)
+	targetBlock := &av.Value{
+		KeyID:      targetKeyID,
+		BlockID:    targetItemID,
+		Type:       av.KeyTypeBlock,
+		IsDetached: true,
+		Block:      &av.ValueBlock{Content: "public"},
+	}
+	relationValue := &av.Value{
+		KeyID:   relationKeyID,
+		BlockID: sourceItemID,
+		Type:    av.KeyTypeRelation,
+		Relation: &av.ValueRelation{
+			BlockIDs: []string{targetItemID},
+			Contents: []*av.Value{targetBlock},
+		},
+	}
+	rollupValue := &av.Value{
+		KeyID:   rollupKeyID,
+		BlockID: sourceItemID,
+		Type:    av.KeyTypeRollup,
+		Rollup: &av.ValueRollup{Contents: []*av.Value{{
+			KeyID: targetTextID, BlockID: targetItemID, Type: av.KeyTypeText, Text: &av.ValueText{Content: "public rollup"},
+		}}},
+	}
+	relationKey := &av.Key{ID: relationKeyID, Type: av.KeyTypeRelation, Relation: &av.Relation{AvID: targetAvID}}
+	rollupKey := &av.Key{
+		ID:   rollupKeyID,
+		Type: av.KeyTypeRollup,
+		Rollup: &av.Rollup{
+			RelationKeyID: relationKeyID,
+			KeyID:         targetTextID,
+		},
+	}
+	sourceAttrView := &av.AttributeView{
+		ID: sourceAvID,
+		KeyValues: []*av.KeyValues{
+			{Key: relationKey, Values: []*av.Value{relationValue}},
+			{Key: rollupKey, Values: []*av.Value{rollupValue}},
+		},
+	}
+	targetAttrView := &av.AttributeView{
+		ID: targetAvID,
+		KeyValues: []*av.KeyValues{
+			{
+				Key:    &av.Key{ID: targetKeyID, Type: av.KeyTypeBlock},
+				Values: []*av.Value{targetBlock},
+			},
+			{
+				Key: &av.Key{ID: targetTextID, Type: av.KeyTypeText},
+				Values: []*av.Value{{
+					KeyID: targetTextID, BlockID: targetItemID, Type: av.KeyTypeText, Text: &av.ValueText{Content: "public rollup"},
+				}},
+			},
+		},
+	}
+	table := &av.Table{
+		BaseInstance: &av.BaseInstance{},
+		Rows: []*av.TableRow{{
+			ID: sourceItemID,
+			Cells: []*av.TableCell{
+				{BaseValue: &av.BaseValue{Value: relationValue, ValueType: av.KeyTypeRelation}},
+				{BaseValue: &av.BaseValue{Value: rollupValue, ValueType: av.KeyTypeRollup}},
+			},
+		}},
+	}
+	filter := &attributeViewPublishAccessFilter{
+		attributeViews: map[string]*av.AttributeView{
+			sourceAvID: sourceAttrView,
+			targetAvID: targetAttrView,
+		},
+		attributeAccess: map[string]bool{sourceAvID: true, targetAvID: true},
+		itemAccess: map[string]map[string]bool{
+			targetAvID: {targetItemID: true},
+		},
+	}
+
+	filter.filterViewable(sourceAttrView, table)
+	if table.Rows[0].Cells[0].Value != relationValue {
+		t.Fatal("fully accessible relation should remain unchanged")
+	}
+	if table.Rows[0].Cells[1].Value != rollupValue {
+		t.Fatal("fully accessible rollup should remain unchanged")
+	}
+
+	filter.attributeAccess[targetAvID] = false
+	filter.filterViewable(sourceAttrView, table)
+	if table.Rows[0].Cells[0].Value == relationValue || 0 != len(table.Rows[0].Cells[0].Value.Relation.BlockIDs) {
+		t.Fatal("relation to an inaccessible attribute view should be cleared on a response-only clone")
+	}
+	if 1 != len(relationValue.Relation.BlockIDs) {
+		t.Fatal("clearing the response should not mutate the source relation")
+	}
 }
 
 func TestFilterSearchDocsByPublishAccess(t *testing.T) {

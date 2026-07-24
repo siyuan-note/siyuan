@@ -387,27 +387,38 @@ ${getIconScript(servePath)}
     const fixBlockWidth = () => {
         const isLandscape = document.querySelector("#landscape").checked;
         let width = 800
+        let height = 1131
         switch (document.querySelector("#action #pageSize").value) {
             case "A3":
-              width = isLandscape ? 1587.84 : 1122.24 
+              width = isLandscape ? 1587.84 : 1122.24
+              height = isLandscape ? 1122.24 : 1587.84
               break;
             case "A4":
               width = isLandscape ? 1122.24 : 793.92
+              height = isLandscape ? 793.92 : 1122.24
               break;
             case "A5":
               width = isLandscape ? 793.92 : 559.68
+              height = isLandscape ? 559.68 : 793.92
               break;
             case "Legal":
-              width = isLandscape ? 1344: 816 
+              width = isLandscape ? 1344: 816
+              height = isLandscape ? 816 : 1344
               break;
             case "Letter":
               width = isLandscape ? 1056 : 816
+              height = isLandscape ? 816 : 1056
               break;
             case "Tabloid":
               width = isLandscape ? 1632 : 1056
+              height = isLandscape ? 1056 : 1632
               break;
         }
-        width = width / parseFloat(document.querySelector("#scale").value);
+        const scale = parseFloat(document.querySelector("#scale").value);
+        width = width / scale;
+        height = (height -
+            (parseFloat(document.querySelector("#marginsTop").value) +
+                parseFloat(document.querySelector("#marginsBottom").value)) * 96) / scale;
         previewElement.style.width = width + "px";
         width = width - parseFloat(previewElement.style.paddingLeft) * 96 * 2;
         // 为保持代码块宽度一致，全部都进行宽度设定 https://github.com/siyuan-note/siyuan/issues/7692 
@@ -425,7 +436,7 @@ ${getIconScript(servePath)}
             item.removeAttribute('data-render');
         })
         previewElement.querySelectorAll('[data-type="NodeCodeBlock"][data-subtype="mermaid"] svg').forEach((item) => {
-            item.style.maxHeight = width * 1.414 + "px";
+            item.style.maxHeight = height + "px";
         })
         Protyle.mathRender(previewElement, "${servePath}stage/protyle", true);
         previewElement.querySelectorAll("table").forEach(item => {

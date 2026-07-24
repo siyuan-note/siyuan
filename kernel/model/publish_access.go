@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"os"
 	"path"
@@ -849,28 +850,79 @@ func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[strin
 	return
 }
 
-func FilterGraphByPublishIgnore(publishIgnore PublishAccess, nodes []*GraphNode, links []*GraphLink) (retNodes []*GraphNode, retLinks []*GraphLink) {
+func FilterGraphByPublishAccess(c *gin.Context, publishAccess PublishAccess, nodes []*GraphNode, links []*GraphLink) (retNodes []*GraphNode, retLinks []*GraphLink) {
 	retNodes = []*GraphNode{}
 	retLinks = []*GraphLink{}
-	ignoreNodeIDs := []string{}
+
+	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	nodeByID := make(map[string]*GraphNode, len(nodes))
+	virtualNodeIDs := map[string]bool{}
+	nodeBaseSizes := make(map[string]float64, len(nodes))
 	for _, node := range nodes {
-		if CheckPathAccessableByPublishIgnore(node.Box, node.Path, publishIgnore) {
-			retNodes = append(retNodes, node)
+		if node.Box == "" && node.Path == "" {
+			nodeByID[node.ID] = node
+			virtualNodeIDs[node.ID] = true
 		} else {
-			ignoreNodeIDs = append(ignoreNodeIDs, node.ID)
+			if node.Box == "" || node.Path == "" || !CheckPathAccessableByPublishIgnore(node.Box, node.Path, publishIgnore) {
+				continue
+			}
+			passwordID, password := GetPathPasswordByPublishAccess(node.Box, node.Path, publishAccess)
+			if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
+				continue
+			}
+			nodeByID[node.ID] = node
+		}
+
+		baseSize := node.Size
+		if 0 < node.Defs {
+			baseSize /= math.Log2(float64(node.Defs)) + 1
+		}
+		nodeBaseSizes[node.ID] = baseSize
+	}
+
+	filteredLinks := make([]*GraphLink, 0, len(links))
+	for _, link := range links {
+		if link.From == link.To || nodeByID[link.From] == nil || nodeByID[link.To] == nil {
+			continue
+		}
+		filteredLinks = append(filteredLinks, link)
+	}
+
+	reachableNodeIDs := make(map[string]bool, len(nodeByID))
+	for nodeID := range nodeByID {
+		if !virtualNodeIDs[nodeID] {
+			reachableNodeIDs[nodeID] = true
 		}
 	}
-	for _, link := range links {
-		ignore := false
-		for _, ignoreNodeID := range ignoreNodeIDs {
-			if ignoreNodeID == link.From || ignoreNodeID == link.To {
-				ignore = true
-				break
-			}
+	for _, link := range filteredLinks {
+		if virtualNodeIDs[link.From] && !virtualNodeIDs[link.To] {
+			reachableNodeIDs[link.From] = true
 		}
-		if !ignore {
-			retLinks = append(retLinks, link)
+		if virtualNodeIDs[link.To] && !virtualNodeIDs[link.From] {
+			reachableNodeIDs[link.To] = true
 		}
+	}
+
+	for _, node := range nodes {
+		if nodeByID[node.ID] != nil && reachableNodeIDs[node.ID] {
+			node.Refs = 0
+			node.Defs = 0
+			node.Size = nodeBaseSizes[node.ID]
+			retNodes = append(retNodes, node)
+		}
+	}
+	for _, link := range filteredLinks {
+		from, fromOK := nodeByID[link.From]
+		to, toOK := nodeByID[link.To]
+		if !fromOK || !toOK || !reachableNodeIDs[link.From] || !reachableNodeIDs[link.To] {
+			continue
+		}
+		from.Refs++
+		if link.Ref {
+			to.Defs++
+			to.Size = (math.Log2(float64(to.Defs)) + 1) * nodeBaseSizes[to.ID]
+		}
+		retLinks = append(retLinks, link)
 	}
 	return
 }

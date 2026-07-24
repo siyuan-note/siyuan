@@ -123,6 +123,68 @@ func TestFilterSearchDocsByPublishAccess(t *testing.T) {
 	}
 }
 
+func TestFilterGraphByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260724000000-boxid01"
+		publicDocID       = "20260724000001-public1"
+		protectedDocID    = "20260724000002-protect"
+		protectedBlockID  = "20260724000003-block01"
+		hiddenDocID       = "20260724000004-hidden1"
+		protectedPassword = "password"
+		sharedTagID       = "shared"
+		protectedTagID    = "protected"
+	)
+	publishAccess := PublishAccess{
+		{ID: protectedDocID, Visible: true, Password: protectedPassword},
+		{ID: hiddenDocID, Visible: false},
+	}
+	newGraph := func() ([]*GraphNode, []*GraphLink) {
+		return []*GraphNode{
+				{ID: publicDocID, Box: boxID, Path: "/" + publicDocID + ".sy", Size: 10, Type: "NodeDocument"},
+				{ID: protectedBlockID, Box: boxID, Path: "/" + protectedDocID + "/" + protectedBlockID + ".sy", Size: 10, Type: "NodeParagraph"},
+				{ID: hiddenDocID, Box: boxID, Path: "/" + hiddenDocID + ".sy", Size: 10, Type: "NodeDocument"},
+				{ID: sharedTagID, Label: sharedTagID, Size: 10, Type: "NodeTag"},
+				{ID: protectedTagID, Label: protectedTagID, Size: 10, Type: "NodeTag"},
+			}, []*GraphLink{
+				{From: sharedTagID, To: publicDocID},
+				{From: sharedTagID, To: protectedBlockID},
+				{From: protectedTagID, To: protectedBlockID},
+				{From: publicDocID, To: protectedBlockID, Ref: true},
+				{From: publicDocID, To: hiddenDocID, Ref: true},
+			}
+	}
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	nodes, links := newGraph()
+	filteredNodes, filteredLinks := FilterGraphByPublishAccess(c, publishAccess, nodes, links)
+	if len(filteredNodes) != 2 || filteredNodes[0].ID != publicDocID || filteredNodes[1].ID != sharedTagID {
+		t.Fatalf("unexpected unauthenticated graph nodes: %+v", filteredNodes)
+	}
+	if len(filteredLinks) != 1 || filteredLinks[0].From != sharedTagID || filteredLinks[0].To != publicDocID {
+		t.Fatalf("unexpected unauthenticated graph links: %+v", filteredLinks)
+	}
+	if filteredNodes[0].Refs != 0 || filteredNodes[0].Defs != 0 || filteredNodes[1].Refs != 1 {
+		t.Fatalf("unexpected unauthenticated graph counts: %+v", filteredNodes)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedDocID,
+		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+	})
+	nodes, links = newGraph()
+	filteredNodes, filteredLinks = FilterGraphByPublishAccess(c, publishAccess, nodes, links)
+	if len(filteredNodes) != 4 || filteredNodes[1].ID != protectedBlockID || filteredNodes[3].ID != protectedTagID {
+		t.Fatalf("unexpected authenticated graph nodes: %+v", filteredNodes)
+	}
+	if len(filteredLinks) != 4 {
+		t.Fatalf("unexpected authenticated graph links: %+v", filteredLinks)
+	}
+	if filteredNodes[0].Refs != 1 || filteredNodes[1].Defs != 1 || filteredNodes[1].Size != 10 {
+		t.Fatalf("unexpected authenticated graph counts: %+v", filteredNodes)
+	}
+}
+
 func TestFilterEmbedBlocksByPublishAccessRemovesInternalFields(t *testing.T) {
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)

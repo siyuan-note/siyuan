@@ -1896,6 +1896,7 @@
     "data": {
       "name": "API 测试",
       "blockIDs": ["20240118120201-kldj15t"],
+      "total": 1,
       "rows": {
         "key": {
           "id": "20240118120204-w6cggab",
@@ -1929,6 +1930,7 @@
 
     * `data.rows`: 一个 `KeyValues` 对象，包含主键（`block`）字段及其分页后的值
     * `data.blockIDs`: 引用该数据库的所有数据库块（镜像）ID
+    * `data.total`: 过滤后、分页前的主键值数量
 
 ### 搜索
 

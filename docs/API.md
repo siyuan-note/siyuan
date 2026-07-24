@@ -1907,6 +1907,7 @@ The field types (`keyType`) are:
     "data": {
       "name": "API 测试",
       "blockIDs": ["20240118120201-kldj15t"],
+      "total": 1,
       "rows": {
         "key": {
           "id": "20240118120204-w6cggab",
@@ -1940,6 +1941,7 @@ The field types (`keyType`) are:
 
     * `data.rows`: A `KeyValues` object holding the primary-key (`block`) field and its paginated values
     * `data.blockIDs`: IDs of all database blocks (mirrors) that reference this database
+    * `data.total`: Number of primary-key values after filtering and before pagination
 
 ### Search
 

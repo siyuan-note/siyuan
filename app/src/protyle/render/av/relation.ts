@@ -15,6 +15,7 @@ import {getFieldIdByCellElement} from "./row";
 import {isMobile} from "../../../util/functions";
 import {showMessage} from "../../../dialog/message";
 import {writeText} from "../../util/compatibility";
+import {Constants} from "../../../constants";
 
 interface IAVItem {
     avID: string;
@@ -25,6 +26,8 @@ interface IAVItem {
     viewID: string;
     viewLayout: string;
 }
+
+const RELATION_PAGE_SIZE = 16;
 
 const genSearchList = (element: Element, keyword: string, avId?: string, excludes = true, blockID?: string, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeView", {
@@ -280,66 +283,74 @@ const genSelectItemHTML = (options: {
     }
     if (options.type === "empty") {
         if (options.newName) {
-            return `<button class="b3-menu__item" data-type="setRelationCell">
+            return `<button class="b3-menu__item" data-type="setRelationCell" data-relation-type="create">
     <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", options.text).replace("${y}", options.newName)}</span>
 </button>`;
         }
-        return `<button class="b3-menu__item">
+        return `<button class="b3-menu__item" data-relation-type="empty">
     <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
 </button>`;
     }
     if (options.type == "unselect") {
-        return `<button data-row-id="${options.rowId}" class="${options.className || "b3-menu__item ariaLabel"}" data-position="west" data-type="setRelationCell">
+        return `<button data-row-id="${options.rowId}" class="${options.className || "b3-menu__item ariaLabel"}" data-position="west" data-type="setRelationCell" data-relation-type="candidate">
     <span class="b3-menu__label fn__ellipsis${options.isDetached ? "" : " popover__block"}" ${options.isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${options.id}">${options.text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconAdd"></use></svg>
 </button>`;
     }
 };
 
-const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: string) => {
-    fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
-        id: menuElement.firstElementChild.getAttribute("data-av-id"),
-        keyword,
-    }, response => {
-        const cells = response.data.rows.values as IAVCellValue[] || [];
-        let html = "";
-        let selectHTML = "";
-        const hasIds: string[] = [];
-        cellElement.querySelectorAll(".av__cell--relation").forEach((relationItem: HTMLElement) => {
-            const item = relationItem.querySelector(".av__celltext") as HTMLElement;
-            hasIds.push(relationItem.dataset.rowId);
-            selectHTML += `<button data-row-id="${relationItem.dataset.rowId}" data-position="west" data-type="setRelationCell" 
-class="b3-menu__item ariaLabel${item.textContent.indexOf(keyword) > -1 ? "" : " fn__none"}" 
+const genSelectedItemsHTML = (cellElement: HTMLElement, keyword: string) => {
+    let html = "";
+    const selectedIDs = new Set<string>();
+    const lowerKeyword = keyword.toLowerCase();
+    cellElement.querySelectorAll(".av__cell--relation").forEach((relationItem: HTMLElement) => {
+        const item = relationItem.querySelector(".av__celltext") as HTMLElement;
+        selectedIDs.add(relationItem.dataset.rowId);
+        html += `<button data-row-id="${relationItem.dataset.rowId}" data-position="west" data-type="setRelationCell" data-relation-type="selected"
+class="b3-menu__item ariaLabel${item.textContent.toLowerCase().includes(lowerKeyword) ? "" : " fn__none"}"
 draggable="true">${genSelectItemHTML({
-                type: "selected",
-                id: item.dataset.id,
-                isDetached: !item.classList.contains("av__celltext--ref"),
-                text: Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled)
-            })}</button>`;
-        });
-        cells.forEach((item) => {
-            if (!hasIds.includes(item.blockID)) {
-                html += genSelectItemHTML({
-                    type: "unselect",
-                    rowId: item.blockID,
-                    id: item.block.id,
-                    isDetached: item.isDetached,
-                    text: Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)
-                });
-            }
-        });
+            type: "selected",
+            id: item.dataset.id,
+            isDetached: !item.classList.contains("av__celltext--ref"),
+            text: Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled)
+        })}</button>`;
+    });
+    return {html, selectedIDs};
+};
+
+const genCandidateItemsHTML = (cells: IAVCellValue[], excludedIDs: Set<string>) => {
+    let html = "";
+    cells.forEach((item) => {
+        if (!excludedIDs.has(item.blockID)) {
+            html += genSelectItemHTML({
+                type: "unselect",
+                rowId: item.blockID,
+                id: item.block.id,
+                isDetached: item.isDetached,
+                text: Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)
+            });
+        }
+    });
+    return html;
+};
+
+const genRelationFooterHTML = (menuElement: HTMLElement, keyword: string, hasCandidates: boolean, hasMore: boolean) => {
+    if (keyword) {
         const refElement = menuElement.querySelector(".popover__block");
-        menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
-<button class="b3-menu__separator"></button>
-${html}
-${keyword ? genSelectItemHTML({
+        return genSelectItemHTML({
             type: "empty",
             newName: Lute.EscapeHTMLStr(keyword),
             text: `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block" data-id="${refElement.getAttribute("data-id")}">${refElement.textContent}</span>`,
-        }) : (html ? "" : genSelectItemHTML({type: "empty"}))}`;
-        menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
-        updateCopyRelatedItems(menuElement);
-    });
+        });
+    }
+    if (!hasCandidates && !hasMore) {
+        return genSelectItemHTML({type: "empty"});
+    }
+    return "";
+};
+
+const genRelationLoaderHTML = (loading: boolean) => {
+    return `<img data-relation-type="loader" class="${loading ? "" : "fn__none"}" style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">`;
 };
 
 export const bindRelationEvent = (options: {
@@ -348,92 +359,184 @@ export const bindRelationEvent = (options: {
     blockElement: Element,
     cellElements: HTMLElement[]
 }) => {
-    fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
-        id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
+    const inputElement = options.menuElement.querySelector("input");
+    const listElement = options.menuElement.querySelector(".b3-menu__items") as HTMLElement;
+    const state = {
+        page: 0,
+        total: 0,
         keyword: "",
-    }, response => {
-        const cells = response.data.rows.values as IAVCellValue[] || [];
-        let html = "";
-        let selectHTML = "";
-        const hasIds: string[] = [];
-        options.cellElements[0].querySelectorAll(".av__cell--relation").forEach((relationItem: HTMLElement) => {
-            const item = relationItem.querySelector(".av__celltext") as HTMLElement;
-            hasIds.push(relationItem.dataset.rowId);
-            selectHTML += `<button data-row-id="${relationItem.dataset.rowId}" data-position="west" data-type="setRelationCell" class="b3-menu__item ariaLabel" 
-draggable="true">${genSelectItemHTML({
-                type: "selected",
-                id: item.dataset.id,
-                isDetached: !item.classList.contains("av__celltext--ref"),
-                text: Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled)
-            })}</button>`;
-        });
-        cells.forEach((item) => {
-            if (!hasIds.includes(item.blockID)) {
-                html += genSelectItemHTML({
-                    type: "unselect",
-                    rowId: item.blockID,
-                    id: item.block.id,
-                    isDetached: item.isDetached,
-                    text: Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)
-                });
-            }
-        });
-        options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
-<button class="b3-menu__separator"></button>
-${html || genSelectItemHTML({type: "empty"})}`;
-        const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-        setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
-        options.menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
-        const inputElement = options.menuElement.querySelector("input");
-        inputElement.focus();
-        const databaseName = inputElement.parentElement.parentElement.querySelector(".popover__block");
-        databaseName.innerHTML = Lute.EscapeHTMLStr(response.data.name);
-        databaseName.setAttribute("data-id", response.data.blockIDs[0]);
-        const listElement = options.menuElement.querySelector(".b3-menu__items");
-        inputElement.addEventListener("keydown", (event) => {
-            if (event.isComposing) {
+        loading: false,
+        controller: undefined as AbortController | undefined,
+    };
+    let searchTimer: number;
+
+    const setLoading = (loading: boolean) => {
+        listElement.querySelector('[data-relation-type="loader"]')?.classList.toggle("fn__none", !loading);
+    };
+    const hasMore = () => state.page * RELATION_PAGE_SIZE < state.total;
+    const ensureListFilled = () => {
+        requestAnimationFrame(() => {
+            if (!listElement.isConnected || state.loading || !hasMore()) {
                 return;
             }
-            upDownHint(listElement, event, "b3-menu__item--current");
-            const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
-            if (event.key === "Enter" && currentElement && currentElement.getAttribute("data-type") === "setRelationCell") {
-                setRelationCell(options.protyle, options.blockElement as HTMLElement, currentElement, options.cellElements);
-                event.preventDefault();
-                event.stopPropagation();
+            if (listElement.scrollHeight <= listElement.clientHeight + 30) {
+                loadPage(false);
             }
         });
-        inputElement.addEventListener("input", (event: InputEvent) => {
-            if (event.isComposing) {
-                return;
+    };
+    const renderPage = (cells: IAVCellValue[], reset: boolean) => {
+        let excludedIDs: Set<string>;
+        let selectedHTML = "";
+        if (reset) {
+            const selected = genSelectedItemsHTML(options.cellElements[0], state.keyword);
+            excludedIDs = selected.selectedIDs;
+            selectedHTML = selected.html;
+        } else {
+            excludedIDs = new Set(Array.from(listElement.querySelectorAll(
+                '[data-relation-type="selected"], [data-relation-type="candidate"]'
+            )).map((item: HTMLElement) => item.dataset.rowId));
+        }
+        const candidateHTML = genCandidateItemsHTML(cells, excludedIDs);
+        const more = hasMore();
+        listElement.dataset.hasMore = more.toString();
+        if (reset) {
+            listElement.innerHTML = `${selectedHTML}
+<button class="b3-menu__separator" data-relation-type="separator"></button>
+${candidateHTML}
+${genRelationFooterHTML(options.menuElement, state.keyword, !!candidateHTML, more)}
+${genRelationLoaderHTML(state.loading)}`;
+        } else {
+            if (candidateHTML) {
+                listElement.querySelector('[data-relation-type="empty"]')?.remove();
+                const anchorElement = listElement.querySelector('[data-relation-type="create"], [data-relation-type="loader"]');
+                anchorElement.insertAdjacentHTML("beforebegin", candidateHTML);
+            } else if (!state.keyword && !more && !listElement.querySelector('[data-relation-type="candidate"], [data-relation-type="empty"]')) {
+                listElement.querySelector('[data-relation-type="loader"]').insertAdjacentHTML("beforebegin", genSelectItemHTML({type: "empty"}));
             }
-            filterItem(options.menuElement, options.cellElements[0], inputElement.value);
-            event.stopPropagation();
-        });
-        inputElement.addEventListener("compositionend", (event) => {
-            event.stopPropagation();
-            filterItem(options.menuElement, options.cellElements[0], inputElement.value);
-        });
+        }
+        if (!listElement.querySelector(".b3-menu__item--current")) {
+            listElement.querySelector(".b3-menu__item:not(.fn__none)")?.classList.add("b3-menu__item--current");
+        }
         updateCopyRelatedItems(options.menuElement);
-        options.menuElement.querySelector('[data-type="copyRelatedItems"]').addEventListener("click", () => {
-            let copyText = "";
-            const selectedElements = options.menuElement.querySelectorAll('.b3-menu__item[draggable="true"]');
-            selectedElements.forEach((item: HTMLElement) => {
-                if (selectedElements.length > 1) {
-                    copyText += "- ";
-                }
-                const textElement = item.querySelector(".b3-menu__label") as HTMLElement;
-                if (!textElement.dataset.id || textElement.dataset.id === "undefined") {
-                    copyText += textElement.textContent + "\n";
-                } else {
-                    copyText += `((${textElement.dataset.id} "${textElement.textContent}"))\n`;
-                }
-            });
-            if (copyText) {
-                writeText(copyText.trimEnd());
-                showMessage(window.siyuan.languages.copied);
+    };
+    const loadPage = (reset: boolean) => {
+        if (state.loading && !reset) {
+            return;
+        }
+        if (reset) {
+            state.controller?.abort();
+            state.page = 0;
+            state.total = 0;
+        } else if (!hasMore()) {
+            return;
+        }
+        const page = reset ? 1 : state.page + 1;
+        const keyword = state.keyword;
+        const controller = new AbortController();
+        state.controller = controller;
+        state.loading = true;
+        setLoading(true);
+        let succeeded = false;
+        fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
+            id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
+            keyword,
+            page,
+            pageSize: RELATION_PAGE_SIZE,
+        }, response => {
+            if (controller.signal.aborted || keyword !== state.keyword) {
+                return;
+            }
+            const cells = response.data.rows?.values as IAVCellValue[] || [];
+            state.page = page;
+            state.total = typeof response.data.total === "number" ? response.data.total :
+                (page - 1) * RELATION_PAGE_SIZE + cells.length + (cells.length === RELATION_PAGE_SIZE ? 1 : 0);
+            const databaseName = inputElement.parentElement.parentElement.querySelector(".popover__block");
+            databaseName.textContent = response.data.name;
+            databaseName.setAttribute("data-id", response.data.blockIDs?.[0] || "");
+            renderPage(cells, reset);
+            setLoading(false);
+            const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
+            setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+            succeeded = true;
+        }, undefined, undefined, controller.signal).finally(() => {
+            if (state.controller !== controller) {
+                return;
+            }
+            state.loading = false;
+            setLoading(false);
+            if (succeeded) {
+                ensureListFilled();
             }
         });
+    };
+    const search = () => {
+        state.keyword = inputElement.value;
+        state.controller?.abort();
+        state.controller = undefined;
+        state.loading = false;
+        setLoading(false);
+        if (searchTimer) {
+            clearTimeout(searchTimer);
+        }
+        searchTimer = window.setTimeout(() => {
+            loadPage(true);
+        }, Constants.TIMEOUT_INPUT);
+    };
+
+    inputElement.addEventListener("keydown", (event) => {
+        if (event.isComposing) {
+            return;
+        }
+        upDownHint(listElement, event, "b3-menu__item--current");
+        const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
+        if (event.key === "Enter" && currentElement && currentElement.getAttribute("data-type") === "setRelationCell") {
+            setRelationCell(options.protyle, options.blockElement as HTMLElement, currentElement, options.cellElements);
+            event.preventDefault();
+            event.stopPropagation();
+        }
     });
+    inputElement.addEventListener("input", (event: InputEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        search();
+        event.stopPropagation();
+    });
+    inputElement.addEventListener("compositionend", (event) => {
+        event.stopPropagation();
+        search();
+    });
+    listElement.addEventListener("scroll", () => {
+        if (!state.loading && hasMore() && listElement.scrollHeight - listElement.scrollTop - listElement.clientHeight <= 30) {
+            loadPage(false);
+        }
+    });
+    options.menuElement.querySelector('[data-type="copyRelatedItems"]').addEventListener("click", () => {
+        let copyText = "";
+        const selectedElements = options.menuElement.querySelectorAll('.b3-menu__item[draggable="true"]');
+        selectedElements.forEach((item: HTMLElement) => {
+            if (selectedElements.length > 1) {
+                copyText += "- ";
+            }
+            const textElement = item.querySelector(".b3-menu__label") as HTMLElement;
+            if (!textElement.dataset.id || textElement.dataset.id === "undefined") {
+                copyText += textElement.textContent + "\n";
+            } else {
+                copyText += `((${textElement.dataset.id} "${textElement.textContent}"))\n`;
+            }
+        });
+        if (copyText) {
+            writeText(copyText.trimEnd());
+            showMessage(window.siyuan.languages.copied);
+        }
+    });
+    loadPage(true);
+    return () => {
+        state.controller?.abort();
+        if (searchTimer) {
+            clearTimeout(searchTimer);
+        }
+    };
 };
 
 export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
@@ -455,7 +558,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
 </div>
 <div class="b3-menu__items">
-    <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+    ${genRelationLoaderHTML(true)}
 </div>`;
     } else {
         return "";
@@ -500,11 +603,10 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
         const rowId = target.getAttribute("data-row-id");
         const id = target.querySelector(".b3-menu__label").getAttribute("data-id");
         const separatorElement = menuElement.querySelector(".b3-menu__separator");
+        const listElement = separatorElement.parentElement;
         const searchValue = menuElement.querySelector("input").value;
         if (target.getAttribute("draggable")) {
-            if (!separatorElement.nextElementSibling.getAttribute("data-row-id") && !searchValue) {
-                separatorElement.nextElementSibling.remove();
-            }
+            listElement.querySelector('[data-relation-type="empty"]')?.remove();
             const removeIndex = newValue.blockIDs.indexOf(rowId);
             newValue.blockIDs.splice(removeIndex, 1);
             newValue.contents.splice(removeIndex, 1);
@@ -529,7 +631,7 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                 isDetached: !target.firstElementChild.getAttribute("style")
             });
             separatorElement.before(target);
-            target.outerHTML = `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell" class="${target.className}" 
+            target.outerHTML = `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell" data-relation-type="selected" class="${target.className}"
 draggable="true">${genSelectItemHTML({
                 type: "selected",
                 rowId,
@@ -537,8 +639,9 @@ draggable="true">${genSelectItemHTML({
                 isDetached: !target.querySelector(".popover__block"),
                 text: Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent)
             })}</button>`;
-            if (!separatorElement.nextElementSibling) {
-                separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML({type: "empty"}));
+            if (!searchValue && listElement.dataset.hasMore !== "true" &&
+                !listElement.querySelector('[data-relation-type="candidate"], [data-relation-type="empty"]')) {
+                listElement.querySelector('[data-relation-type="loader"]').insertAdjacentHTML("beforebegin", genSelectItemHTML({type: "empty"}));
             }
             updateCellsValue(protyle, nodeElement, newValue, cellElements);
         } else {
@@ -572,8 +675,8 @@ draggable="true">${genSelectItemHTML({
                 id: blockID,
                 data: dayjs().format("YYYYMMDDHHmmss"),
             }];
-            separatorElement.insertAdjacentHTML("beforebegin", `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell" 
-class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
+            separatorElement.insertAdjacentHTML("beforebegin", `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell"
+data-relation-type="selected" class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
                 type: "selected",
                 rowId,
                 isDetached: true,

@@ -438,7 +438,7 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 			}
 		}
 	}
-	attributeViewName, databaseBlockIDs, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, blockIDs, page, pageSize)
+	attributeViewName, databaseBlockIDs, rows, total, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, blockIDs, page, pageSize)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -449,6 +449,7 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 		"name":     attributeViewName,
 		"blockIDs": databaseBlockIDs,
 		"rows":     rows,
+		"total":    total,
 	}
 }
 

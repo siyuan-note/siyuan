@@ -33,6 +33,7 @@ import (
 	"time"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -449,5 +450,49 @@ func TestGetAssetLinkDestsByNode(t *testing.T) {
 	}
 	if got := assetLinkDestBlockID(linkDest); got != blockID {
 		t.Fatalf("get asset link destination block ID: got %q, want %q", got, blockID)
+	}
+}
+
+func TestGetAttributeViewAssetsLinkDestsFiltersItems(t *testing.T) {
+	attrView := &av.AttributeView{
+		KeyValues: []*av.KeyValues{
+			{
+				Key: &av.Key{Type: av.KeyTypeMAsset},
+				Values: []*av.Value{
+					{
+						BlockID: "public-item",
+						MAsset: []*av.ValueAsset{
+							{Type: av.AssetTypeImage, Content: "assets/public.png"},
+						},
+					},
+					{
+						BlockID: "private-item",
+						MAsset: []*av.ValueAsset{
+							{Type: av.AssetTypeImage, Content: "assets/private.png"},
+						},
+					},
+				},
+			},
+			{
+				Key: &av.Key{Type: av.KeyTypeURL},
+				Values: []*av.Value{
+					{BlockID: "public-item", URL: &av.ValueURL{Content: "assets/public-url.png"}},
+					{BlockID: "private-item", URL: &av.ValueURL{Content: "assets/private-url.png"}},
+				},
+			},
+		},
+	}
+
+	filter := func(_ *av.AttributeView, itemID string) bool {
+		return "public-item" == itemID
+	}
+	want := []string{"assets/public.png", "assets/public-url.png"}
+	if got := getAttributeViewAssetsLinkDests(attrView, false, filter); !reflect.DeepEqual(got, want) {
+		t.Fatalf("get filtered attribute view asset links: got %v, want %v", got, want)
+	}
+
+	want = []string{"assets/public.png", "assets/private.png", "assets/public-url.png", "assets/private-url.png"}
+	if got := getAttributeViewAssetsLinkDests(attrView, false, nil); !reflect.DeepEqual(got, want) {
+		t.Fatalf("get unfiltered attribute view asset links: got %v, want %v", got, want)
 	}
 }

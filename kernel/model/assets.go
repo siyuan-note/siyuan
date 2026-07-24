@@ -534,13 +534,19 @@ func multimodalValueOrDefault(value, fallback string) string {
 	return value
 }
 
+type attributeViewItemFilter func(attrView *av.AttributeView, itemID string) bool
+
 func DocAssets(rootID string, retainQueryStr bool) (ret []string, err error) {
+	return docAssets(rootID, retainQueryStr, nil)
+}
+
+func docAssets(rootID string, retainQueryStr bool, itemFilter attributeViewItemFilter) (ret []string, err error) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
 		return
 	}
 
-	ret = getAssetsLinkDests(tree.Root, false)
+	ret = getAssetsLinkDestsWithAttributeViewItemFilter(tree.Root, false, itemFilter)
 	if !retainQueryStr {
 		for i, asset := range ret {
 			if before, _, ok := strings.Cut(asset, "?"); ok {
@@ -2062,6 +2068,14 @@ func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 }
 
 func getAssetsLinkDests(node *ast.Node, includeServePath bool) (ret []string) {
+	return getAssetsLinkDestsWithAttributeViewItemFilter(node, includeServePath, nil)
+}
+
+func getAssetsLinkDestsWithAttributeViewItemFilter(
+	node *ast.Node,
+	includeServePath bool,
+	itemFilter attributeViewItemFilter,
+) (ret []string) {
 	ret = []string{}
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if n.IsBlock() {
@@ -2118,33 +2132,7 @@ func getAssetsLinkDests(node *ast.Node, includeServePath bool) (ret []string) {
 				return ast.WalkContinue
 			}
 
-			for _, keyValues := range attrView.KeyValues {
-				if av.KeyTypeMAsset == keyValues.Key.Type {
-					for _, value := range keyValues.Values {
-						if 1 > len(value.MAsset) {
-							continue
-						}
-
-						for _, asset := range value.MAsset {
-							dest := asset.Content
-							if !util.IsAssetLinkDest([]byte(dest), includeServePath) {
-								continue
-							}
-							ret = append(ret, strings.TrimSpace(dest))
-						}
-					}
-				} else if av.KeyTypeURL == keyValues.Key.Type {
-					for _, value := range keyValues.Values {
-						if nil != value.URL {
-							dest := value.URL.Content
-							if !util.IsAssetLinkDest([]byte(dest), includeServePath) {
-								continue
-							}
-							ret = append(ret, strings.TrimSpace(dest))
-						}
-					}
-				}
-			}
+			ret = append(ret, getAttributeViewAssetsLinkDests(attrView, includeServePath, itemFilter)...)
 		} else {
 			if ast.NodeWidget == n.Type {
 				dataAssets := n.IALAttr("custom-data-assets")
@@ -2171,6 +2159,39 @@ func getAssetsLinkDests(node *ast.Node, includeServePath bool) (ret []string) {
 		// 对于 macOS 的 rtfd 文件夹格式需要特殊处理，为其加上结尾 /
 		if strings.HasSuffix(dest, ".rtfd") {
 			ret[i] = dest + "/"
+		}
+	}
+	return
+}
+
+func getAttributeViewAssetsLinkDests(
+	attrView *av.AttributeView,
+	includeServePath bool,
+	itemFilter attributeViewItemFilter,
+) (ret []string) {
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeMAsset != keyValues.Key.Type && av.KeyTypeURL != keyValues.Key.Type {
+			continue
+		}
+
+		for _, value := range keyValues.Values {
+			if nil != itemFilter && !itemFilter(attrView, value.BlockID) {
+				continue
+			}
+
+			if av.KeyTypeMAsset == keyValues.Key.Type {
+				for _, asset := range value.MAsset {
+					dest := asset.Content
+					if util.IsAssetLinkDest([]byte(dest), includeServePath) {
+						ret = append(ret, strings.TrimSpace(dest))
+					}
+				}
+			} else if nil != value.URL {
+				dest := value.URL.Content
+				if util.IsAssetLinkDest([]byte(dest), includeServePath) {
+					ret = append(ret, strings.TrimSpace(dest))
+				}
+			}
 		}
 	}
 	return

@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -59,6 +60,28 @@ func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
 
 	if !checkBlockTreeAccessableByPublishAccess(c, PublishAccess{{ID: docID, Visible: false}}, bt) {
 		t.Fatal("hidden document should remain directly accessible")
+	}
+}
+
+func TestCheckAttributeViewItemIDAccessableByPublishAccess(t *testing.T) {
+	attrView := &av.AttributeView{
+		KeyValues: []*av.KeyValues{
+			{
+				Key: &av.Key{Type: av.KeyTypeBlock},
+				Values: []*av.Value{
+					{BlockID: "detached-item", Type: av.KeyTypeBlock, IsDetached: true},
+				},
+			},
+		},
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+
+	if !checkAttributeViewItemIDAccessableByPublishAccess(c, PublishAccess{}, attrView, "detached-item") {
+		t.Fatal("detached attribute view item should remain accessible")
+	}
+	if checkAttributeViewItemIDAccessableByPublishAccess(c, PublishAccess{}, attrView, "missing-item") {
+		t.Fatal("attribute view item without a primary value should not expose assets")
 	}
 }
 

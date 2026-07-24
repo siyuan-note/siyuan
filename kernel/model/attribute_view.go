@@ -34,6 +34,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -2920,7 +2921,7 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 	}
 }
 
-func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, err error) {
+func GetCurrentAttributeViewImages(c *gin.Context, avID, viewID, query string) (ret []string, err error) {
 	var attrView *av.AttributeView
 	attrView, err = av.ParseAttributeView(avID)
 	if err != nil {
@@ -2940,6 +2941,9 @@ func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, er
 	table := getAttrViewTable(attrView, view, query)
 	av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
 	av.Sort(table, attrView)
+	if IsReadOnlyRoleContext(c) {
+		table = FilterViewByPublishAccess(c, GetPublishAccess(), table).(*av.Table)
+	}
 
 	ids := map[string]bool{}
 	for _, column := range table.Columns {

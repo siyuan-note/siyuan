@@ -274,23 +274,52 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 
 		if ast.IsNodeIDPattern(pathParts[0]) {
 			box := pathParts[0]
+			if 2 < len(pathParts) && "assets" == pathParts[1] {
+				assetPath := strings.Join(pathParts[1:], "/")
+				return checkAssetPathAccessableByPublishAccess(c, publishAccess, assetPath, box)
+			}
 			blockPath := "/" + strings.Join(pathParts[1:], "/")
 			passwordID, password := GetPathPasswordByPublishAccess(box, blockPath, publishAccess)
 			publishIgnore := GetDisablePublishAccess(publishAccess)
 			return CheckPathAccessableByPublishIgnore(box, blockPath, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
 		} else if pathParts[0] == "assets" {
-			publishIgnore := GetDisablePublishAccess(publishAccess)
-			bts := treenode.GetBlockTreesByType("d")
-			for _, bt := range bts {
-				passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-				if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
-					assets, _ := DocAssets(bt.ID, false)
-					if slices.Contains(assets, relPath) {
-						return true
-					}
-				}
-			}
-			return false
+			return checkAssetPathAccessableByPublishAccess(c, publishAccess, relPath, "")
+		}
+	}
+	return false
+}
+
+func checkAssetPathAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetPath, boxID string) bool {
+	publishIgnore := GetDisablePublishAccess(publishAccess)
+	itemAccessCache := map[*av.AttributeView]map[string]bool{}
+	itemFilter := func(attrView *av.AttributeView, itemID string) bool {
+		itemAccess := itemAccessCache[attrView]
+		if nil == itemAccess {
+			itemAccess = map[string]bool{}
+			itemAccessCache[attrView] = itemAccess
+		}
+		if accessable, ok := itemAccess[itemID]; ok {
+			return accessable
+		}
+
+		accessable := checkAttributeViewItemIDAccessableByPublishAccess(c, publishAccess, attrView, itemID)
+		itemAccess[itemID] = accessable
+		return accessable
+	}
+	for _, bt := range treenode.GetBlockTreesByType("d") {
+		if "" != boxID && bt.BoxID != boxID {
+			continue
+		}
+
+		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+		if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) ||
+			("" != password && !CheckPublishAuthCookie(c, passwordID, password)) {
+			continue
+		}
+
+		assets, _ := docAssets(bt.ID, false, itemFilter)
+		if slices.Contains(assets, assetPath) {
+			return true
 		}
 	}
 	return false
@@ -354,6 +383,26 @@ func checkAttributeViewItemAccessableByPublishAccess(c *gin.Context, publishAcce
 
 	blockValue := item.GetBlockValue()
 	if nil == blockValue || blockValue.IsDetached || nil == blockValue.Block || "" == blockValue.Block.ID {
+		return true
+	}
+	return CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockValue.Block.ID)
+}
+
+func checkAttributeViewItemIDAccessableByPublishAccess(
+	c *gin.Context,
+	publishAccess PublishAccess,
+	attrView *av.AttributeView,
+	itemID string,
+) bool {
+	if nil == attrView || "" == itemID {
+		return false
+	}
+
+	blockValue := attrView.GetBlockValue(itemID)
+	if nil == blockValue {
+		return false
+	}
+	if blockValue.IsDetached || nil == blockValue.Block || "" == blockValue.Block.ID {
 		return true
 	}
 	return CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockValue.Block.ID)

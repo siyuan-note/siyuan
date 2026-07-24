@@ -1193,7 +1193,7 @@ func getCurrentAttrViewImages(c *gin.Context) {
 		query = queryArg.(string)
 	}
 
-	images, err := model.GetCurrentAttributeViewImages(id, viewID, query)
+	images, err := model.GetCurrentAttributeViewImages(c, id, viewID, query)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

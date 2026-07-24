@@ -677,6 +677,20 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         const detachedItemIDs = selectedItems.filter(item => item.isDetached).map(item => item.itemID);
         if (detachedItemIDs.length > 0) {
             menu.addItem({
+                id: "createSubDocAndBind",
+                label: window.siyuan.languages.createSubDocAndBind,
+                icon: "iconFile",
+                accelerator: window.siyuan.config.keymap.editor.general.newNameFile.custom,
+                click() {
+                    createAttributeViewItemDocs({
+                        protyle,
+                        blockElement,
+                        itemIDs: detachedItemIDs,
+                        saveMode: "subDoc",
+                    });
+                }
+            });
+            menu.addItem({
                 id: "createDocAndBind",
                 label: window.siyuan.languages.createDocAndBind,
                 icon: "iconFile",

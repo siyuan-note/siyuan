@@ -1,4 +1,5 @@
 {
+  "createSubDocAndBind": "Создать дочерний документ и привязать",
   "createDocAndBind": "Создать документ и привязать",
   "includeSublists": "Включить вложенные списки",
   "selectRelationItems": "Выбрать связанные элементы",

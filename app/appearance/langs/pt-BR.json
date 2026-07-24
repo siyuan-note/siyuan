@@ -1,4 +1,5 @@
 {
+  "createSubDocAndBind": "Criar documento filho e vinculá-lo",
   "createDocAndBind": "Criar documento e vinculá-lo",
   "includeSublists": "Incluir sublistas",
   "selectRelationItems": "Selecionar itens relacionados",

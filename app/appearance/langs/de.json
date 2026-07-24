@@ -1,4 +1,5 @@
 {
+  "createSubDocAndBind": "Untergeordnetes Dokument erstellen und verknüpfen",
   "createDocAndBind": "Dokument erstellen und verknüpfen",
   "includeSublists": "Unterlisten einbeziehen",
   "selectRelationItems": "Verknüpfte Einträge auswählen",

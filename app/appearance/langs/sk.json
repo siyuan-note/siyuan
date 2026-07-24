@@ -1,4 +1,5 @@
 {
+  "createSubDocAndBind": "Vytvoriť podradený dokument a prepojiť",
   "createDocAndBind": "Vytvoriť dokument a prepojiť",
   "includeSublists": "Zahrnúť vnorené zoznamy",
   "selectRelationItems": "Vybrať súvisiace položky",

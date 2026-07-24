@@ -1,4 +1,5 @@
 {
+  "createSubDocAndBind": "Buat dokumen anak dan tautkan",
   "createDocAndBind": "Buat dokumen dan tautkan",
   "includeSublists": "Sertakan subdaftar",
   "selectRelationItems": "Pilih item terkait",

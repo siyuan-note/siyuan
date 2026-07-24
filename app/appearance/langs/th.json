@@ -1,4 +1,5 @@
 {
+  "createSubDocAndBind": "สร้างเอกสารย่อยและเชื่อมโยง",
   "createDocAndBind": "สร้างเอกสารและเชื่อมโยง",
   "includeSublists": "รวมรายการย่อย",
   "selectRelationItems": "เลือกรายการที่เชื่อมโยง",

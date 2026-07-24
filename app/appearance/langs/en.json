@@ -1,4 +1,5 @@
 {
+  "createSubDocAndBind": "Create child document and bind",
   "createDocAndBind": "Create document and bind",
   "includeSublists": "Include sublists",
   "selectRelationItems": "Select entries",

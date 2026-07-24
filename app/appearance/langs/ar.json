@@ -1,4 +1,5 @@
 {
+  "createSubDocAndBind": "إنشاء مستند فرعي وربطه",
   "createDocAndBind": "إنشاء مستند وربطه",
   "includeSublists": "تضمين القوائم الفرعية",
   "selectRelationItems": "اختر العناصر المرتبطة",

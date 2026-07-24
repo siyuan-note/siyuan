@@ -66,6 +66,7 @@ export const openFileById = async (options: {
         showMessage(response.msg);
         return;
     }
+    const zoomIn = options.zoomIn === true && options.id !== response.data.rootID;
 
     return openFile({
         app: options.app,
@@ -77,7 +78,7 @@ export const openFileById = async (options: {
         position: options.position,
         mode: options.mode,
         action: options.action,
-        zoomIn: options.zoomIn,
+        zoomIn,
         keepCursor: options.keepCursor,
         removeCurrentTab: options.removeCurrentTab,
         afterOpen: options.afterOpen,

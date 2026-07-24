@@ -192,8 +192,8 @@ const getFieldVisibilityPanelHTML = (views: IAVFieldView[], colId: string, curre
     ${view.hidden ? "" : '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>'}
 </button>`;
     };
-    let html = `<button class="b3-menu__item" data-type="editCol" data-id="${colId}">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;">
+    let html = `<button class="b3-menu__item" data-type="nobg">
+    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="editCol" data-id="${colId}">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.fieldVisibility}</span>

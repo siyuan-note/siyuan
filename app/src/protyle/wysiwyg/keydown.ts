@@ -3,9 +3,7 @@ import {isMac, isNotCtrl, isOnlyMeta, writeText} from "../util/compatibility";
 import {
     focusBlock,
     focusByRange,
-    focusByOffset,
     focusByWbr,
-    getBlockRanges,
     getEditorRange,
     getSelectionOffset,
     getSelectionPosition,
@@ -22,7 +20,7 @@ import {
     hasTopClosestByAttribute,
     isInEmbedBlock
 } from "../util/hasClosest";
-import {removeBlock, removeImage} from "./remove";
+import {removeBlock, removeCrossBlockRange, removeImage} from "./remove";
 import {
     getContenteditableElement,
     getFirstBlock,
@@ -31,7 +29,6 @@ import {
     getParentBlock,
     getPreviousBlock,
     getTopAloneElement,
-    fixAdjacentTags,
     hasNextSibling,
     hasPreviousSibling,
     isEndOfBlock,
@@ -794,39 +791,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if ((!event.altKey && (event.key === "Backspace" || event.key === "Delete")) ||
             matchHotKey("⌃D", event)) {
             if (isCrossBlock && selectText !== "") {
-                const ranges = getBlockRanges(protyle.wysiwyg.element, range);
-                if (ranges.length > 0) {
-                    const firstRange = ranges[0];
-                    const rangesByBlock = new Map<HTMLElement, typeof ranges>();
-                    ranges.forEach(item => {
-                        const blockRanges = rangesByBlock.get(item.blockElement) || [];
-                        blockRanges.push(item);
-                        rangesByBlock.set(item.blockElement, blockRanges);
-                    });
-                    const blockElements = Array.from(rangesByBlock.keys());
-                    updateBatchTransaction(blockElements, protyle, blockElement => {
-                        rangesByBlock.get(blockElement).forEach(item => {
-                            const boundarySpans = new Set<HTMLElement>([
-                                hasClosestByTag(item.range.startContainer, "SPAN"),
-                                hasClosestByTag(item.range.endContainer, "SPAN"),
-                            ].filter(Boolean) as HTMLElement[]);
-                            item.range.deleteContents();
-                            boundarySpans.forEach(spanElement => {
-                                if (spanElement.isConnected && spanElement.textContent === "" &&
-                                    !spanElement.querySelector("img")) {
-                                    spanElement.remove();
-                                }
-                            });
-                            fixAdjacentTags(item.editableElement);
-                        });
-                        blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    });
-                    focusByOffset(firstRange.editableElement, firstRange.start, firstRange.start);
-                    blockElements.filter(item => item.getAttribute("data-type") === "NodeCodeBlock").forEach(item => {
-                        item.querySelector(".hljs")?.removeAttribute("data-render");
-                        highlightRender(item);
-                    });
-                }
+                await removeCrossBlockRange(protyle, range, nodeElement, endElement);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

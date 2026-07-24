@@ -2,6 +2,8 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {focusByRange, focusByWbr} from "../util/selection";
 import {writeText} from "../util/compatibility";
+import {isArrayEqual} from "../../util/functions";
+import {hasSameTextStyle} from "./Font";
 
 export const previewTemplate = (pathString: string, element: Element, parentId: string) => {
     if (!pathString) {
@@ -40,6 +42,44 @@ const mergeElement = (a: Element, b: Element, after = true) => {
         b.remove();
     }
     return isMatch;
+};
+
+export const mergeSameInlineElement = (currentElement: HTMLElement, previousElement: HTMLElement) => {
+    if (!currentElement || currentElement.nodeType !== 1 || !previousElement || previousElement.nodeType !== 1) {
+        return false;
+    }
+    const currentType = currentElement.getAttribute("data-type");
+    const previousType = previousElement.getAttribute("data-type");
+    if (!currentType || !previousType || currentElement.tagName === "BR" || currentElement.classList.contains("img")) {
+        return false;
+    }
+    const types = currentType.split(" ");
+    if (!isArrayEqual(types, previousType.split(" ")) || !hasSameTextStyle(currentElement, previousElement)) {
+        return false;
+    }
+    if ((types.includes("code") || types.includes("tag") || types.includes("kbd")) &&
+        currentElement.textContent.startsWith(Constants.ZWSP)) {
+        currentElement.textContent = currentElement.textContent.substring(1);
+    }
+    if (types.includes("inline-math")) {
+        currentElement.setAttribute("data-content",
+            previousElement.getAttribute("data-content") + currentElement.getAttribute("data-content"));
+    } else if (types.includes("block-ref") &&
+        previousElement.getAttribute("data-id") === currentElement.getAttribute("data-id")) {
+        if (previousElement.dataset.subtype !== "d") {
+            currentElement.setAttribute("data-subtype", "s");
+            currentElement.textContent = previousElement.textContent + currentElement.textContent;
+        }
+    } else {
+        // textContent：防止赋值后 \n 转换为 br；innerText：获取 br 的 \n。
+        currentElement.textContent = previousElement.innerText + currentElement.innerText;
+        if (types.includes("inline-memo")) {
+            currentElement.setAttribute("data-inline-memo-content",
+                (previousElement.getAttribute("data-inline-memo-content") || "") +
+                (currentElement.getAttribute("data-inline-memo-content") || ""));
+        }
+    }
+    return true;
 };
 
 export const removeSearchMark = (element: HTMLElement) => {

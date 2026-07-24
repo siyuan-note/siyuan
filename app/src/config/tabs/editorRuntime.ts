@@ -6,6 +6,7 @@ import {resize} from "../../protyle/util/resize";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 
 const applyEditorConfig = (data: Config.IEditor) => {
+    const refreshDatabaseRowLayout = window.siyuan.config.editor.fullWidth !== data.fullWidth;
     const refreshHeadingNumbers = window.siyuan.config.editor.headingNumber !== data.headingNumber ||
         window.siyuan.config.editor.headingNumberFormat !== data.headingNumberFormat;
     const remeasureHeadingNumbers = window.siyuan.config.editor.fontSize !== data.fontSize ||
@@ -14,6 +15,13 @@ const applyEditorConfig = (data: Config.IEditor) => {
     window.siyuan.config.editor = data;
     const models = getAllModels();
     models.editor.forEach(item => item.updateBacklinkPanel());
+    if (refreshDatabaseRowLayout) {
+        models.custom.forEach(item => {
+            if (item.type === "siyuan-database-row") {
+                item.resize?.();
+            }
+        });
+    }
     getAllEditor().forEach((editorItem) => {
         const protyle = editorItem.protyle;
         protyle.databaseAttributePanel?.updateDisplayConfig();

@@ -181,6 +181,7 @@
     &:empty::after {
       color: var(--b3-empty-color);
       content: attr(data-tip);
+      cursor: text;
     }
   }
 

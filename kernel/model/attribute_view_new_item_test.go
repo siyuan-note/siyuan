@@ -101,6 +101,25 @@ func TestAttributeViewItemDocumentTemplate(t *testing.T) {
 	}
 }
 
+func TestNewBoundAttributeViewItemValueUsesDynamicAnchorText(t *testing.T) {
+	original := &av.Value{
+		Type:       av.KeyTypeBlock,
+		IsDetached: true,
+		Block:      &av.ValueBlock{Content: "Detached item"},
+	}
+	docID := ast.NewNodeID()
+	bound, err := newBoundAttributeViewItemValue(original, docID, "1f4c4")
+	if nil != err {
+		t.Fatalf("create bound attribute view item value failed: %s", err)
+	}
+	if bound.IsDetached || docID != bound.Block.ID || "" != bound.Block.Content || "1f4c4" != bound.Block.Icon {
+		t.Fatalf("the bound item should use dynamic anchor text: %+v", bound)
+	}
+	if !original.IsDetached || "" != original.Block.ID || "Detached item" != original.Block.Content {
+		t.Fatalf("the original detached item should remain unchanged: %+v", original)
+	}
+}
+
 func TestLockAttributeViewItemDocs(t *testing.T) {
 	avID := ast.NewNodeID()
 	unlock := lockAttributeViewItemDocs(avID)

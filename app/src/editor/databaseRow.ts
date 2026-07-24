@@ -86,6 +86,9 @@ export const newDatabaseRowModel = (options: {
         update() {
             render(customModel);
         },
+        resize() {
+            updateLayout(customModel);
+        },
     });
     return model;
 };

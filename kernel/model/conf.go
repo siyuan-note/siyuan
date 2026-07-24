@@ -1255,12 +1255,25 @@ func HideConfSecret(c *AppConf) {
 	c.Sync = &conf.Sync{}
 	c.Secrets = &conf.Secrets{}
 	c.Variables = &conf.Variables{}
+	if nil != c.NotebookCrypto {
+		c.NotebookCrypto = &conf.NotebookCrypto{
+			Enabled:         c.NotebookCrypto.Enabled,
+			AutoLockMinutes: c.NotebookCrypto.AutoLockMinutes,
+		}
+	}
 	c.System.AppDir = ""
 	c.System.ConfDir = ""
 	c.System.DataDir = ""
 	c.System.HomeDir = ""
 	c.System.Name = ""
 	c.System.NetworkProxy = &conf.NetworkProxy{}
+}
+
+// HideBoxConfSecret 隐藏笔记本配置中的密钥材料。
+func HideBoxConfSecret(c *conf.BoxConf) {
+	if nil != c {
+		c.BoxCrypt = nil
+	}
 }
 
 func clearPortJSON() {

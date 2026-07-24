@@ -248,6 +248,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                         notebook: protyle.notebookId,
                         path: searchPath + ".sy"
                     });
+                if (!isBoxDoc && (pathResponse?.code !== 0 || typeof pathResponse?.data !== "string")) {
+                    return;
+                }
                 popSearch(protyle.app, {
                     hasReplace: false,
                     hPath: isBoxDoc ? getNotebookName(protyle.notebookId) : pathPosix().join(getNotebookName(protyle.notebookId), pathResponse.data),

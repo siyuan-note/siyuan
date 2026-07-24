@@ -233,13 +233,11 @@ func CreateAttributeViewItemDocs(avID, blockID, saveMode string, itemIDs []strin
 		if nil != err {
 			return nil, newItemCreationError(err, cleanupCreatedDocs())
 		}
-		item.bound = item.original.Clone()
-		if nil == item.bound {
-			return nil, newItemCreationError(fmt.Errorf("clone attribute view item [%s] failed", item.itemID), cleanupCreatedDocs())
+		icon, _ := getNodeAvBlockText(item.tree.Root, "")
+		item.bound, err = newBoundAttributeViewItemValue(item.original, item.docID, icon)
+		if nil != err {
+			return nil, newItemCreationError(fmt.Errorf("bind attribute view item [%s] failed: %w", item.itemID, err), cleanupCreatedDocs())
 		}
-		item.bound.IsDetached = false
-		item.bound.Block.ID = item.docID
-		item.bound.Block.Icon, _ = getNodeAvBlockText(item.tree.Root, "")
 		ret.ItemIDs = append(ret.ItemIDs, item.itemID)
 		ret.BlockIDs = append(ret.BlockIDs, item.docID)
 	}
@@ -287,6 +285,18 @@ func CreateAttributeViewItemDocs(avID, blockID, saveMode string, itemIDs []strin
 	}
 	ret.Transaction = tx
 	return ret, nil
+}
+
+func newBoundAttributeViewItemValue(original *av.Value, docID, icon string) (*av.Value, error) {
+	bound := original.Clone()
+	if nil == bound || nil == bound.Block {
+		return nil, errors.New("clone attribute view item failed")
+	}
+	bound.IsDetached = false
+	bound.Block.ID = docID
+	bound.Block.Content = ""
+	bound.Block.Icon = icon
+	return bound, nil
 }
 
 func lockAttributeViewItemDocs(avID string) func() {

@@ -33,6 +33,14 @@ const measureHeightDiff = (el: HTMLElement, mutate: () => void): number => {
     return Math.abs((el?.scrollHeight || 0) - before);
 };
 
+const getTopSpacerHeight = (bodyEl: HTMLElement): number => {
+    const spacerElement = bodyEl.querySelector(".av__spacer") as HTMLElement;
+    if (!spacerElement) {
+        return 0;
+    }
+    return parseFloat(spacerElement.style.height) || spacerElement.getBoundingClientRect().height;
+};
+
 const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     const viewportHeight = elementRect.bottom - elementRect.top;
     const buffer = viewportHeight * BUFFER_RATIO;
@@ -228,7 +236,7 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 } else if (type === "table" && topElement) {
                     const removeStartTop = toRemoveAbove[0].getBoundingClientRect().top;
                     const removeEndTop = topElement.getBoundingClientRect().top;
-                    removeHeight = Math.round(removeEndTop - removeStartTop);
+                    removeHeight = removeEndTop - removeStartTop;
                     toRemoveAbove.forEach((row) => {
                         row.remove();
                     });
@@ -304,28 +312,38 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                     });
                 } else {
                     topElement.insertAdjacentHTML("beforebegin", rowsHTML);
-                    let newRowElement = topElement.previousElementSibling as HTMLElement;
-                    while (newRowElement) {
-                        if (type === "table") {
-                            renderedHeight += newRowElement.offsetHeight;
-                        } else { // kanban
+                    if (type === "table") {
+                        const firstInsertedElement = bodyEl.querySelector(
+                            `.av__row[data-index="${firstVisibleIndex}"]`) as HTMLElement;
+                        if (firstInsertedElement) {
+                            renderedHeight = topElement.getBoundingClientRect().top -
+                                firstInsertedElement.getBoundingClientRect().top;
+                        }
+                    } else { // kanban
+                        let newRowElement = topElement.previousElementSibling as HTMLElement;
+                        while (newRowElement) {
                             // grid 布局中行与行之间均有 16px gap，每行都需计入
                             renderedHeight += newRowElement.offsetHeight + 16;
-                        }
-                        newRowElement = newRowElement.previousElementSibling as HTMLElement;
-                        if (!newRowElement || newRowElement.classList.contains("av__spacer") ||
-                            newRowElement.classList.contains("av__row--header")) {
-                            break;
+                            newRowElement = newRowElement.previousElementSibling as HTMLElement;
+                            if (!newRowElement || newRowElement.classList.contains("av__spacer") ||
+                                newRowElement.classList.contains("av__row--header")) {
+                                break;
+                            }
                         }
                     }
                 }
-                state.topSpacerHeight = Math.max(0, state.topSpacerHeight - renderedHeight);
-                if (state.topSpacerHeight === 0) {
-                    spacerElement?.remove();
-                } else if (spacerElement) {
-                    spacerElement.style.height = state.topSpacerHeight + "px";
-                }
                 state.renderedStart = firstVisibleIndex;
+                if (state.renderedStart === dataStart) {
+                    state.topSpacerHeight = 0;
+                    spacerElement?.remove();
+                } else {
+                    state.topSpacerHeight = Math.max(0, state.topSpacerHeight - renderedHeight);
+                    if (state.topSpacerHeight === 0) {
+                        spacerElement?.remove();
+                    } else if (spacerElement) {
+                        spacerElement.style.height = state.topSpacerHeight + "px";
+                    }
+                }
                 restoreSelect();
             }
         }
@@ -368,7 +386,7 @@ export const getBodyVirtualData = (bodyEl: HTMLElement, endSelector: string, fir
     return {
         renderedStart,
         renderedEnd,
-        topSpacerHeight: bodyEl.querySelector(".av__spacer")?.clientHeight || 0,
+        topSpacerHeight: getTopSpacerHeight(bodyEl),
     };
 };
 
@@ -536,7 +554,7 @@ export const initVirtualScroll = (options: {
                 renderedEnd: parseInt(lastRow.dataset.index),
                 dataOffset,
                 view,
-                topSpacerHeight: item.querySelector(".av__spacer")?.clientHeight || 0,
+                topSpacerHeight: getTopSpacerHeight(item),
                 selectedRowIds,
             });
         } else {
@@ -553,7 +571,7 @@ export const initVirtualScroll = (options: {
                 renderedEnd: parseInt(lastItem.dataset.index),
                 dataOffset,
                 view,
-                topSpacerHeight: item.querySelector(".av__spacer")?.clientHeight || 0,
+                topSpacerHeight: getTopSpacerHeight(item),
                 selectedRowIds,
             });
         }

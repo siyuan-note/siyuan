@@ -10,6 +10,7 @@
   &--empty:empty::before {
     color: var(--b3-empty-color);
     content: attr(placeholder);
+    cursor: text;
   }
 
   .protyle-breadcrumb__bar {

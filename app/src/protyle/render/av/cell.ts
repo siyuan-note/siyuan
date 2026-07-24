@@ -1030,9 +1030,9 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         } else {
             text = `<span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${cellValue.block.icon || ""}">${unicode2Emoji(cellValue.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(cellValue.block.content)}</span>`;
         }
-        const updateLabel = cellValue?.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.update;
+        const bindLabel = cellValue?.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.rebind;
         const updateIcon = cellValue?.isDetached ? "iconLink" : "iconRefresh";
-        text += `<span class="av__row-actions"><button class="av__row-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action ariaLabel" type="button" data-position="4north" aria-label="${updateLabel}" data-type="av-row-update"><svg><use xlink:href="#${updateIcon}"></use></svg></button></span>`;
+        text += `<span class="av__row-actions"><button class="av__row-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action ariaLabel" type="button" data-position="4north" aria-label="${bindLabel}" data-type="av-row-update"><svg><use xlink:href="#${updateIcon}"></use></svg></button></span>`;
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {

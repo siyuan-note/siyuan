@@ -26,6 +26,7 @@ import {
 import {
     transaction,
     turnListsRecursively,
+    turnsIntoGroupsTransaction,
     turnsIntoOneTransaction,
     turnsIntoTransaction,
     turnsOneInto,
@@ -40,6 +41,7 @@ import {blockRender} from "../render/blockRender";
 import {
     getContenteditableElement,
     getEmbedChildOperationContext,
+    getNextBlockSibling,
     getParentBlock,
     getTopAloneElement,
     isNotEditBlock
@@ -804,6 +806,11 @@ export class Gutter {
         };
     }
 
+    private hasSublist(nodeElements: Element[]) {
+        return nodeElements.some((item) => item.getAttribute("data-type") === "NodeList" &&
+            item.querySelector('[data-type="NodeList"]'));
+    }
+
     private turnsIntoOne(options: {
         menuId?: string,
         accelerator?: string,
@@ -821,6 +828,26 @@ export class Gutter {
             accelerator: options.accelerator,
             click() {
                 turnsIntoOneTransaction(options);
+            }
+        };
+    }
+
+    private turnsIntoGroups(options: {
+        menuId?: string,
+        accelerator?: string,
+        icon?: string,
+        label: string,
+        protyle: IProtyle,
+        selectsElementGroups: Element[][],
+        type: Exclude<TTurnIntoOne, "BlocksMergeSuperBlock">,
+    }) {
+        return {
+            id: options.menuId,
+            icon: options.icon,
+            label: options.label,
+            accelerator: options.accelerator,
+            click() {
+                turnsIntoGroupsTransaction(options);
             }
         };
     }
@@ -862,68 +889,70 @@ export class Gutter {
 
     public renderMultipleMenu(protyle: IProtyle, selectsElement: Element[]) {
         let isList = false;
-        let isContinue = false;
-        selectsElement.find((item, index) => {
+        const selectsElementGroups: Element[][] = [];
+        selectsElement.forEach((item) => {
             if (item.classList.contains("li")) {
                 isList = true;
-                return true;
             }
-            if (item.nextElementSibling && selectsElement[index + 1] &&
-                item.nextElementSibling === selectsElement[index + 1]) {
-                isContinue = true;
-            } else if (index !== selectsElement.length - 1) {
-                isContinue = false;
-                return true;
+            const currentGroup = selectsElementGroups[selectsElementGroups.length - 1];
+            const previousElement = currentGroup?.[currentGroup.length - 1];
+            if (previousElement && previousElement.parentElement === item.parentElement &&
+                getNextBlockSibling(previousElement) === item) {
+                currentGroup.push(item);
+            } else {
+                selectsElementGroups.push([item]);
             }
         });
+        const isContinue = selectsElementGroups.length === 1;
         if (!isList && !protyle.disabled) {
             const turnIntoSubmenu: IMenu[] = [];
-            if (isContinue) {
-                turnIntoSubmenu.push(this.turnsIntoOne({
-                    menuId: "list",
-                    icon: "iconList",
-                    label: window.siyuan.languages.list,
-                    protyle,
-                    accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
-                    selectsElement,
-                    type: "Blocks2ULs"
-                }));
-                turnIntoSubmenu.push(this.turnsIntoOne({
-                    menuId: "orderedList",
-                    icon: "iconOrderedList",
-                    label: window.siyuan.languages["ordered-list"],
-                    accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
-                    protyle,
-                    selectsElement,
-                    type: "Blocks2OLs"
-                }));
-                turnIntoSubmenu.push(this.turnsIntoOne({
-                    menuId: "check",
-                    icon: "iconCheck",
-                    label: window.siyuan.languages.check,
-                    accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
-                    protyle,
-                    selectsElement,
-                    type: "Blocks2TLs"
-                }));
-                turnIntoSubmenu.push(this.turnsIntoOne({
-                    menuId: "quote",
-                    icon: "iconQuote",
-                    label: window.siyuan.languages.quote,
-                    accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
-                    protyle,
-                    selectsElement,
-                    type: "Blocks2Blockquote"
-                }));
-                turnIntoSubmenu.push(this.turnsIntoOne({
-                    menuId: "callout",
-                    icon: "iconCallout",
-                    label: window.siyuan.languages.callout,
-                    protyle,
-                    selectsElement,
-                    type: "Blocks2Callout"
-                }));
+            turnIntoSubmenu.push(this.turnsIntoGroups({
+                menuId: "list",
+                icon: "iconList",
+                label: window.siyuan.languages.list,
+                protyle,
+                accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
+                selectsElementGroups,
+                type: "Blocks2ULs"
+            }));
+            turnIntoSubmenu.push(this.turnsIntoGroups({
+                menuId: "orderedList",
+                icon: "iconOrderedList",
+                label: window.siyuan.languages["ordered-list"],
+                accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
+                protyle,
+                selectsElementGroups,
+                type: "Blocks2OLs"
+            }));
+            turnIntoSubmenu.push(this.turnsIntoGroups({
+                menuId: "check",
+                icon: "iconCheck",
+                label: window.siyuan.languages.check,
+                accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
+                protyle,
+                selectsElementGroups,
+                type: "Blocks2TLs"
+            }));
+            if (this.hasSublist(selectsElement)) {
+                turnIntoSubmenu.push(this.recursiveListMenu(protyle, selectsElement));
             }
+            turnIntoSubmenu.push(this.turnsIntoGroups({
+                menuId: "quote",
+                icon: "iconQuote",
+                label: window.siyuan.languages.quote,
+                accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
+                protyle,
+                selectsElementGroups,
+                type: "Blocks2Blockquote"
+            }));
+            turnIntoSubmenu.push(this.turnsIntoGroups({
+                menuId: "callout",
+                icon: "iconCallout",
+                label: window.siyuan.languages.callout,
+                protyle,
+                selectsElementGroups,
+                type: "Blocks2Callout"
+            }));
             turnIntoSubmenu.push(this.turnsInto({
                 menuId: "paragraph",
                 icon: "iconParagraph",
@@ -934,9 +963,6 @@ export class Gutter {
                 type: "Blocks2Ps",
                 isContinue
             }));
-            if (selectsElement.some((item) => item.getAttribute("data-type") === "NodeList")) {
-                turnIntoSubmenu.push(this.recursiveListMenu(protyle, selectsElement));
-            }
             turnIntoSubmenu.push(this.turnsInto({
                 menuId: "heading1",
                 icon: "iconH1",
@@ -1604,7 +1630,9 @@ export class Gutter {
                     type: "OL2TL"
                 }));
             }
-            turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
+            if (this.hasSublist([nodeElement])) {
+                turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
+            }
         } else if (type === "NodeBlockquote" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",

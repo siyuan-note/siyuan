@@ -687,6 +687,9 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     notebook: notebookId,
                     path: searchPath + ".sy"
                 });
+                if (response.code !== 0 || typeof response.data !== "string") {
+                    return;
+                }
                 popSearch(app, {
                     hasReplace: false,
                     hPath: pathPosix().join(getNotebookName(notebookId), response.data),
@@ -715,6 +718,9 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     notebook: notebookId,
                     path: searchPath + ".sy"
                 });
+                if (response.code !== 0 || typeof response.data !== "string") {
+                    return;
+                }
                 popSearch(app, {
                     hasReplace: true,
                     hPath: pathPosix().join(getNotebookName(notebookId), response.data),

@@ -26,6 +26,7 @@ import {
     queueHeadingNumberRefresh,
     renderHeadingNumbers
 } from "./headingNumber";
+import {updateDocumentBottomEof} from "./documentRange";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -64,6 +65,7 @@ export const onGet = (options: {
         } else {
             options.protyle.wysiwyg.element.lastElementChild.setAttribute("data-eof", "2");
         }
+        updateDocumentBottomEof(options.protyle.wysiwyg.element);
         if (options.data.data.mode !== 4) {
             return;
         }
@@ -242,6 +244,7 @@ const setHTML = (options: {
             protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
         eofElement?.setAttribute("data-eof", options.action.includes(Constants.CB_GET_BEFORE) ? "1" : "2");
     }
+    updateDocumentBottomEof(protyle.wysiwyg.element);
 
     /// #if MOBILE
     protyle.wysiwyg.element.querySelectorAll("video, audio").forEach(item => {

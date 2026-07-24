@@ -1314,6 +1314,36 @@ export const turnsIntoOneTransaction = async (options: {
     hideElements(["gutter"], options.protyle);
 };
 
+export const turnsIntoGroupsTransaction = async (options: {
+    protyle: IProtyle,
+    selectsElementGroups: Element[][],
+    type: Exclude<TTurnIntoOne, "BlocksMergeSuperBlock">,
+}) => {
+    const firstElement = options.selectsElementGroups[0]?.[0];
+    if (!firstElement) {
+        return;
+    }
+    const firstID = firstElement.getAttribute("data-node-id");
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    for (const selectsElement of options.selectsElementGroups) {
+        if (selectsElement.length === 0) {
+            continue;
+        }
+        const groupOperations = await turnsIntoOneTransaction({
+            protyle: options.protyle,
+            selectsElement,
+            type: options.type,
+            getOperations: true,
+        });
+        doOperations.push(...groupOperations.doOperations);
+        undoOperations.splice(0, 0, ...groupOperations.undoOperations);
+    }
+    transaction(options.protyle, doOperations, undoOperations);
+    focusBlock(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${firstID}"]`));
+    hideElements(["gutter"], options.protyle);
+};
+
 const removeUnfoldRepeatBlock = (html: string, protyle: IProtyle) => {
     const temp = document.createElement("template");
     temp.innerHTML = html;

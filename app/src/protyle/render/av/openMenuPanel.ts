@@ -220,7 +220,7 @@ export const openMenuPanel = (options: {
                     setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
                 }, Constants.TIMEOUT_LOAD);  // 等待加载
             } else if (options.type === "relation") {
-                bindRelationEvent({
+                closeCB = bindRelationEvent({
                     menuElement,
                     cellElements: options.cellElements,
                     protyle: options.protyle,

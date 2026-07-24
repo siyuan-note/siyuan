@@ -50,6 +50,7 @@ func batchGetBlockAttrs(c *gin.Context) {
 		idList = append(idList, id.(string))
 	}
 
+	idList = filterBlockIDsByPublishAccess(c, idList, "")
 	ret.Data = sql.BatchGetBlockAttrs(idList)
 }
 
@@ -64,6 +65,9 @@ func getBlockAttrs(c *gin.Context) {
 
 	id := arg["id"].(string)
 	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+	if !checkBlockPublishAccess(c, id, ret) {
 		return
 	}
 

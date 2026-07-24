@@ -1,4 +1,4 @@
-import {bindPasswordIconaToggle} from "../render/fragments";
+import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
@@ -15,23 +15,23 @@ interface IProviderPreset {
     category: "official" | "aggregator" | "local" | "custom";
     region?: "china" | "international";
     icon?: string;
-    preserveIconColor?: boolean;
+    iconColor?: string;
 }
 
 const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "openai", name: "OpenAI", baseURL: "https://api.openai.com/v1", category: "official", icon: "/stage/images/ai-providers/openai.svg"},
-    {id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", icon: "/stage/images/ai-providers/deepseek.svg"},
+    {id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", icon: "/stage/images/ai-providers/deepseek.svg", iconColor: "#5786FE"},
     {id: "moonshot", name: "Moonshot AI", baseURL: "https://api.moonshot.cn/v1", category: "official", icon: "/stage/images/ai-providers/moonshot.svg"},
-    {id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/minimax.svg"},
-    {id: "minimax-cn", name: "MiniMax", baseURL: "https://api.minimaxi.com/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/minimax.svg"},
-    {id: "aliyun", name: "Alibaba Model Studio", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/aliyun.svg"},
-    {id: "aliyun-intl", name: "Alibaba Model Studio", baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/aliyun.svg"},
-    {id: "volcengine", name: "Volcengine Ark", baseURL: "https://ark.cn-beijing.volces.com/api/v3", category: "official", icon: "/stage/images/ai-providers/volcengine.svg", preserveIconColor: true},
-    {id: "zhipu", name: "Zhipu AI", baseURL: "https://open.bigmodel.cn/api/paas/v4", category: "official", icon: "/stage/images/ai-providers/zhipu.svg", preserveIconColor: true},
-    {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", icon: "/stage/images/ai-providers/gemini.svg"},
-    {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", icon: "/stage/images/ai-providers/mistral.svg"},
-    {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", icon: "/stage/images/ai-providers/siliconflow.svg", preserveIconColor: true},
-    {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", icon: "/stage/images/ai-providers/openrouter.svg"},
+    {id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/minimax.svg", iconColor: "#E73562"},
+    {id: "minimax-cn", name: "MiniMax", baseURL: "https://api.minimaxi.com/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/minimax.svg", iconColor: "#E73562"},
+    {id: "aliyun", name: "Alibaba Model Studio", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/aliyun.svg", iconColor: "#FF6A00"},
+    {id: "aliyun-intl", name: "Alibaba Model Studio", baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/aliyun.svg", iconColor: "#FF6A00"},
+    {id: "volcengine", name: "Volcengine Ark", baseURL: "https://ark.cn-beijing.volces.com/api/v3", category: "official", icon: "/stage/images/ai-providers/volcengine.svg"},
+    {id: "zhipu", name: "Zhipu AI", baseURL: "https://open.bigmodel.cn/api/paas/v4", category: "official", icon: "/stage/images/ai-providers/zhipu.svg"},
+    {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", icon: "/stage/images/ai-providers/gemini.svg", iconColor: "#8E75B2"},
+    {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", icon: "/stage/images/ai-providers/mistral.svg", iconColor: "#FA520F"},
+    {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", icon: "/stage/images/ai-providers/siliconflow.svg"},
+    {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", icon: "/stage/images/ai-providers/openrouter.svg", iconColor: "#94A3B8"},
     {id: "groq", name: "Groq", baseURL: "https://api.groq.com/openai/v1", category: "aggregator"},
     {id: "ollama", name: "Ollama", baseURL: "http://localhost:11434/v1", category: "local", icon: "/stage/images/ai-providers/ollama.svg"},
     {id: "lmstudio", name: "LM Studio", baseURL: "http://localhost:1234/v1", category: "local", icon: "/stage/images/ai-providers/lmstudio.svg"},
@@ -80,8 +80,10 @@ const getCategoryTitle = (category: IProviderPreset["category"]) => {
 const getProviderAvatarHTML = (provider: Config.IProvider, preset = findPreset(provider)) => {
     const title = providerTitle(provider);
     if (preset?.icon) {
-        const colorClass = preset.preserveIconColor ? " config-ai-provider__logo--color" : "";
-        return `<img class="config-ai-provider__logo config-ai-provider__logo--${preset.id}${colorClass}" src="${preset.icon}" alt="${escapeHTML(title)}" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+        if (preset.iconColor) {
+            return `<span class="config-ai-provider__logo config-ai-provider__logo--brand" style="--config-ai-provider-logo-color: ${preset.iconColor}; --config-ai-provider-logo-image: url('${preset.icon}')" role="img" aria-label="${escapeHTML(title)}"></span>`;
+        }
+        return `<img class="config-ai-provider__logo config-ai-provider__logo--${preset.id}" src="${preset.icon}" alt="${escapeHTML(title)}" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
 <span class="config-ai-provider__initial" hidden>${escapeHTML(title.slice(0, 1).toUpperCase())}</span>`;
     }
     return `<span class="config-ai-provider__initial">${escapeHTML(title.slice(0, 1).toUpperCase() || "AI")}</span>`;
@@ -90,16 +92,28 @@ const getProviderAvatarHTML = (provider: Config.IProvider, preset = findPreset(p
 const getProviderViewHost = (root: HTMLElement) =>
     root.closest<HTMLElement>(".config__tab-container") || root;
 
-const removeProviderView = (root: HTMLElement) => {
-    getProviderViewHost(root).querySelector(".config-ai-provider__view")?.remove();
+const getProviderViews = (root: HTMLElement) => {
+    return Array.from(getProviderViewHost(root).children).filter((element): element is HTMLElement =>
+        element instanceof HTMLElement && element.classList.contains("config-ai-provider__view"));
 };
 
-const createProviderView = (root: HTMLElement, title: string) => {
-    removeProviderView(root);
+const removeProviderView = (root: HTMLElement, view?: HTMLElement) => {
+    if (view) {
+        view.remove();
+    } else {
+        getProviderViews(root).forEach((item) => item.remove());
+    }
+};
+
+const createProviderView = (root: HTMLElement, title: string, stacked = false) => {
+    if (!stacked) {
+        removeProviderView(root);
+    }
     const host = getProviderViewHost(root);
-    host.scrollTop = 0;
+    const layer = getProviderViews(root).length;
     const view = document.createElement("div");
     view.className = "config-ai-provider__view";
+    view.style.zIndex = String(3 + layer);
     view.innerHTML = `<div class="config-ai-provider__view-head">
     <button class="block__icon block__icon--show" data-action="back" aria-label="${window.siyuan.languages.back}">
         <svg><use xlink:href="#iconLeft"></use></svg>
@@ -194,7 +208,7 @@ const openProviderCatalog = (root: HTMLElement) => {
     view.addEventListener("click", (event) => {
         const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
         if (action?.dataset.action === "back") {
-            removeProviderView(root);
+            removeProviderView(root, view);
             return;
         }
         const presetCard = (event.target as HTMLElement).closest<HTMLElement>("[data-preset-id]");
@@ -214,7 +228,7 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
         return;
     }
     const modelInputClass = availableModels.length > 0 ? "b3-select" : "b3-text-field";
-    const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" readonly' : "";
+    const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" data-menu="true" readonly' : "";
     container.innerHTML = models.map((model, index) => `<div class="config-ai-provider__model" data-model-index="${index}">
     <input class="b3-switch" data-model-field="enabled" type="checkbox"${model.enabled ? " checked" : ""} aria-label="${window.siyuan.languages.enable}">
     <input class="${modelInputClass}" data-model-field="name" type="text"${modelInputAction} spellcheck="false" placeholder="${window.siyuan.languages.selectModel}" value="${escapeHTML(model.name)}">
@@ -344,7 +358,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         models: [],
     };
     const initialJSON = JSON.stringify(draft);
-    const view = createProviderView(root, providerTitle(draft));
+    const view = createProviderView(root, providerTitle(draft), !existing && !!preset);
     const body = view.querySelector<HTMLElement>(".config-ai-provider__view-body");
     body.innerHTML = `<div class="config-ai-provider__detail">
     <div class="config-ai-provider__section">
@@ -358,6 +372,10 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 <span>${window.siyuan.languages.apiBaseURL}</span>
                 <input class="b3-text-field" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}">
             </label>
+            <label class="config-ai-provider__field">
+                <span>${window.siyuan.languages.apiTimeout}</span>
+                <input class="b3-text-field" data-provider-field="requestTimeout" type="number" min="1" max="600" value="${draft.requestTimeout}">
+            </label>
             <div class="config-ai-provider__field">
                 <span>${window.siyuan.languages.apiKey}</span>
                 <div class="b3-form__icona config-ai-provider__api-key-input">
@@ -365,10 +383,6 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
                 </div>
             </div>
-            <label class="config-ai-provider__field">
-                <span>${window.siyuan.languages.apiTimeout}</span>
-                <input class="b3-text-field" data-provider-field="requestTimeout" type="number" min="1" max="600" value="${draft.requestTimeout}">
-            </label>
         </div>
     </div>
     <div class="config-ai-provider__section">
@@ -396,9 +410,18 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
 </div>`;
     bindPasswordIconaToggle(view, "aiProviderDetailApiKey");
     const modelsContainer = view.querySelector<HTMLElement>(".config-ai-provider__models");
+    const addModelButton = view.querySelector<HTMLButtonElement>("[data-action='addModel']");
+    const fetchModelsButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
+    const confirmButton = view.querySelector<HTMLButtonElement>("[data-action='confirm']");
     let availableModels: string[] = [];
     let hasFetchedModels = false;
     let fetchingModels = false;
+    const updateModelActionButtons = () => {
+        const disabled = fetchingModels || !draft.apiKey.trim();
+        addModelButton.disabled = disabled;
+        fetchModelsButton.disabled = disabled;
+    };
+    updateModelActionButtons();
     renderDraftModels(modelsContainer, draft.models, availableModels);
 
     const addDraftModel = () => {
@@ -421,6 +444,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         if (fetchingModels) {
             return;
         }
+        if (!draft.apiKey.trim()) {
+            view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
+            showMessage(window.siyuan.languages.apiKeyTip, undefined, "error");
+            return;
+        }
         if (!draft.baseURL.trim()) {
             view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
             showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
@@ -428,12 +456,8 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         }
         hasFetchedModels = true;
         fetchingModels = true;
-        const fetchButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
-        const addButton = view.querySelector<HTMLButtonElement>("[data-action='addModel']");
-        const confirmButton = view.querySelector<HTMLButtonElement>("[data-action='confirm']");
-        const icon = fetchButton?.querySelector<SVGSVGElement>(".b3-button__icon");
-        fetchButton.disabled = true;
-        addButton.disabled = true;
+        const icon = fetchModelsButton.querySelector<SVGSVGElement>(".b3-button__icon");
+        updateModelActionButtons();
         confirmButton.disabled = true;
         icon?.classList.add("fn__rotate");
         fetchPost("/api/ai/listModels", {providerConfig: draft}, (response) => {
@@ -476,8 +500,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             if (!view.isConnected) {
                 return;
             }
-            fetchButton.disabled = false;
-            addButton.disabled = false;
+            updateModelActionButtons();
             confirmButton.disabled = false;
             icon?.classList.remove("fn__rotate");
             onFinished?.();
@@ -485,11 +508,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     };
 
     const leaveDetail = () => {
-        if (!existing && preset) {
-            openProviderCatalog(root);
-        } else {
-            removeProviderView(root);
-        }
+        removeProviderView(root, view);
     };
 
     const closeDetail = () => {
@@ -512,6 +531,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 draft.requestTimeout = Number.isFinite(target.valueAsNumber) ? target.valueAsNumber : 120;
             } else {
                 draft[providerField] = target.value;
+            }
+            if (providerField === "apiKey") {
+                updateModelActionButtons();
             }
             view.querySelector<HTMLElement>(".config-ai-provider__view-title").textContent = providerTitle(draft);
             return;
@@ -555,6 +577,10 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "addModel") {
+            if (!draft.apiKey.trim()) {
+                view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
+                return;
+            }
             if (!hasFetchedModels) {
                 const modelCount = draft.models.length;
                 fetchModels(() => {
@@ -690,28 +716,91 @@ const getSelectedModelId = (group: ModelPickerGroup) => {
     return getFirstEnabledModelId();
 };
 
-const buildGroupedModelOptions = (group: ModelPickerGroup, selectedModelId: string) => {
+const getModelPickerLabel = (modelId: string) => {
+    for (const {models} of getEnabledModelGroups()) {
+        const model = models.find((item) => item.id === modelId);
+        if (model) {
+            return model.displayName || model.name;
+        }
+    }
+    return window.siyuan.languages.noModelConfigured;
+};
+
+const updateGroupedModelPicker = (input: HTMLInputElement, group: ModelPickerGroup) => {
+    const selectedModelId = getSelectedModelId(group);
+    input.dataset.modelId = selectedModelId;
+    input.value = getModelPickerLabel(selectedModelId);
+    input.disabled = getEnabledModelGroups().length === 0;
+};
+
+const getGroupedModelMenuId = (group: ModelPickerGroup) => `ai-model-picker-${group}`;
+
+const isGroupedModelMenuOpen = (group: ModelPickerGroup) => {
+    const menuElement = window.siyuan.menus.menu.element;
+    return !menuElement.classList.contains("fn__none") &&
+        menuElement.getAttribute("data-name") === getGroupedModelMenuId(group);
+};
+
+const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group: ModelPickerGroup) => {
+    if (input.disabled) {
+        return;
+    }
+    const modelGroups = getEnabledModelGroups();
+    const selectedModelId = input.dataset.modelId || "";
+    const menu = new Menu(getGroupedModelMenuId(group));
+    if (menu.isOpen) {
+        return;
+    }
+    const selectModel = (modelId: string, label: string) => {
+        if (modelId === input.dataset.modelId) {
+            return;
+        }
+        input.dataset.modelId = modelId;
+        input.value = label;
+        aiConfigApi.patch(`${group}.modelId`, modelId, () => syncGroupedModelPickers(root));
+    };
     const optional = group === "vision" || group === "imageGeneration";
-    const emptyOption = optional || getEnabledModelGroups().length === 0
-        ? `<option value="">${window.siyuan.languages.noModelConfigured}</option>`
-        : "";
-    return emptyOption + getEnabledModelGroups().map(({provider, models}) =>
-        `<optgroup label="${escapeHTML(providerTitle(provider))}">${models.map((model) =>
-            `<option value="${escapeHTML(model.id)}"${model.id === selectedModelId ? " selected" : ""}>${escapeHTML(model.displayName || model.name)}</option>`
-        ).join("")}</optgroup>`
-    ).join("");
+    if (optional) {
+        menu.addItem({
+            iconHTML: "",
+            label: window.siyuan.languages.noModelConfigured,
+            current: selectedModelId === "",
+            click: () => selectModel("", window.siyuan.languages.noModelConfigured),
+        });
+        menu.addSeparator();
+    }
+    modelGroups.forEach(({provider, models}, index) => {
+        if (index > 0) {
+            menu.addSeparator();
+        }
+        menu.addItem({
+            iconHTML: "",
+            type: "readonly",
+            label: escapeHTML(providerTitle(provider)),
+            bind: (element) => element.classList.add("config-ai-provider__model-menu-group"),
+        });
+        models.forEach((model) => {
+            const label = model.displayName || model.name;
+            menu.addItem({
+                iconHTML: "",
+                label: escapeHTML(label),
+                current: model.id === selectedModelId,
+                click: () => selectModel(model.id, label),
+            });
+        });
+    });
+    const rect = input.getBoundingClientRect();
+    menu.element.style.minWidth = `${rect.width}px`;
+    menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
 };
 
 const syncGroupedModelPickers = (root: HTMLElement) => {
     (["editing", "agent", "vision", "imageGeneration"] as const).forEach((group) => {
-        const select = root.querySelector<HTMLSelectElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
-        if (!select) {
+        const input = root.querySelector<HTMLInputElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
+        if (!input) {
             return;
         }
-        const selectedModelId = getSelectedModelId(group);
-        select.innerHTML = buildGroupedModelOptions(group, selectedModelId);
-        select.value = selectedModelId;
-        select.disabled = getEnabledModelGroups().length === 0;
+        updateGroupedModelPicker(input, group);
     });
 };
 
@@ -728,24 +817,28 @@ export const genGroupedModelPickerHtml = (group: ModelPickerGroup): string => {
     }
     const selectedModelId = getSelectedModelId(group);
     const disabled = getEnabledModelGroups().length === 0 ? " disabled" : "";
-    return `<div class="b3-label config-item" id="aiModelPickerBlock-${group}" data-type="aiModelPicker" data-name="${group}">
-    <div class="fn__block">
-        <div class="config-name">${window.siyuan.languages.defaultModel}</div>
-        <div class="b3-label__text">${desc}</div>
-        <div class="fn__hr--small"></div>
-        <select class="b3-select fn__block" data-type="groupedModelPicker" data-group="${group}"${disabled}>
-            ${buildGroupedModelOptions(group, selectedModelId)}
-        </select>
-    </div>
+    const modelLabel = getModelPickerLabel(selectedModelId);
+    return `<div class="fn__flex b3-label config-item config-wrap" id="aiModelPickerBlock-${group}" data-type="aiModelPicker" data-name="${group}">
+    ${genConfigItemMainHtml(window.siyuan.languages.defaultModel, desc)}
+    <span class="fn__space"></span>
+    <input class="b3-select fn__flex-center fn__size200" data-type="groupedModelPicker" data-group="${group}" data-model-id="${escapeHTML(selectedModelId)}" data-menu="true" type="text" value="${escapeHTML(modelLabel)}" readonly${disabled}>
 </div>`;
 };
 
 export const mountGroupedModelPicker = (root: HTMLElement, group: ModelPickerGroup) => {
-    const select = root.querySelector<HTMLSelectElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
-    if (!select) {
+    const input = root.querySelector<HTMLInputElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
+    if (!input) {
         return;
     }
-    select.addEventListener("change", () => {
-        aiConfigApi.patch(`${group}.modelId`, select.value, () => syncGroupedModelPickers(root));
+    input.addEventListener("click", () => openGroupedModelMenu(root, input, group));
+    input.addEventListener("keydown", (event) => {
+        if (!["Enter", " ", "ArrowDown"].includes(event.key)) {
+            return;
+        }
+        if (isGroupedModelMenuOpen(group)) {
+            return;
+        }
+        event.preventDefault();
+        openGroupedModelMenu(root, input, group);
     });
 };

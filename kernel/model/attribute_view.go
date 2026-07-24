@@ -34,6 +34,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -1779,7 +1780,7 @@ func SetDatabaseBlockView(blockID, avID, viewID string) (err error) {
 	return
 }
 
-func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, page, pageSize int) (attributeViewName string, databaseBlockIDs []string, keyValues *av.KeyValues, err error) {
+func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, page, pageSize int) (attributeViewName string, databaseBlockIDs []string, keyValues *av.KeyValues, total int, err error) {
 	waitForSyncingStorages()
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -1816,14 +1817,22 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, p
 			}
 		}
 		keyValues.Values = values
+		total = len(values)
 		return
 	}
 	keyValues.Values = values
 
 	sort.Slice(keyValues.Values, func(i, j int) bool {
+		if keyValues.Values[i].Block.Updated == keyValues.Values[j].Block.Updated {
+			return keyValues.Values[i].BlockID > keyValues.Values[j].BlockID
+		}
 		return keyValues.Values[i].Block.Updated > keyValues.Values[j].Block.Updated
 	})
 
+	total = len(keyValues.Values)
+	if 1 > page {
+		page = 1
+	}
 	if 1 > pageSize {
 		pageSize = 16
 	}
@@ -2920,7 +2929,7 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 	}
 }
 
-func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, err error) {
+func GetCurrentAttributeViewImages(c *gin.Context, avID, viewID, query string) (ret []string, err error) {
 	var attrView *av.AttributeView
 	attrView, err = av.ParseAttributeView(avID)
 	if err != nil {
@@ -2940,6 +2949,9 @@ func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, er
 	table := getAttrViewTable(attrView, view, query)
 	av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
 	av.Sort(table, attrView)
+	if IsReadOnlyRoleContext(c) {
+		table = FilterViewByPublishAccess(c, GetPublishAccess(), table).(*av.Table)
+	}
 
 	ids := map[string]bool{}
 	for _, column := range table.Columns {

@@ -438,7 +438,7 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 			}
 		}
 	}
-	attributeViewName, databaseBlockIDs, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, blockIDs, page, pageSize)
+	attributeViewName, databaseBlockIDs, rows, total, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, blockIDs, page, pageSize)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -449,6 +449,7 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 		"name":     attributeViewName,
 		"blockIDs": databaseBlockIDs,
 		"rows":     rows,
+		"total":    total,
 	}
 }
 
@@ -1111,11 +1112,22 @@ func renderAttributeView(c *gin.Context) {
 		targetGroupID = targetGroupIDArg.(string)
 	}
 
+	readOnlyRole := model.IsReadOnlyRoleContext(c)
+	publishAccess := model.PublishAccess(nil)
+	if readOnlyRole {
+		publishAccess = model.GetPublishAccess()
+		if !model.CheckAttributeViewBlockAccessableByPublishAccess(c, publishAccess, id, blockID) {
+			ret.Code = -1
+			ret.Msg = av.ErrAttributeViewNotFound.Error()
+			c.JSON(http.StatusOK, ret)
+			return
+		}
+	}
+
 	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
-	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
+	if ret.Code == 0 && readOnlyRole {
 		retDataMap := ret.Data.(map[string]any)
-		retDataMap["view"] = model.FilterViewByPublishAccess(c, publishAccess, retDataMap["view"].(av.Viewable))
+		retDataMap["view"] = model.FilterAttributeViewByPublishAccess(c, publishAccess, id, blockID, retDataMap["view"].(av.Viewable))
 	}
 
 	// 大体量响应（如全量数据库视图）用 goccy 序列化后直接写字节，跳过 gin 内部基于标准库的二次序列化
@@ -1193,7 +1205,7 @@ func getCurrentAttrViewImages(c *gin.Context) {
 		query = queryArg.(string)
 	}
 
-	images, err := model.GetCurrentAttributeViewImages(id, viewID, query)
+	images, err := model.GetCurrentAttributeViewImages(c, id, viewID, query)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

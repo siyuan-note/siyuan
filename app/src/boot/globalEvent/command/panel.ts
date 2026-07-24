@@ -4,11 +4,11 @@ import {upDownHint} from "../../../util/upDownHint";
 import {updateHotkeyTip} from "../../../protyle/util/compatibility";
 import {isMobile} from "../../../util/functions";
 import {Constants} from "../../../constants";
-import {Editor} from "../../../editor";
 /// #if MOBILE
 import {getCurrentEditor} from "../../../mobile/editor";
 import {popSearch} from "../../../mobile/menu/search";
 /// #else
+import {Editor} from "../../../editor";
 import {getActiveTab, getDockByType} from "../../../layout/tabUtil";
 import {Custom} from "../../../layout/dock/Custom";
 import {getAllModels} from "../../../layout/getAll";
@@ -191,8 +191,8 @@ export const execByCommand = async (options: {
     let protyle = options.protyle;
     /// #if MOBILE
     if (!protyle) {
-        protyle = getCurrentEditor().protyle;
-        options.previousRange = protyle.toolbar.range;
+        protyle = getCurrentEditor()?.protyle;
+        options.previousRange = protyle?.toolbar.range;
     }
     /// #endif
     const range: Range = options.previousRange || (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange());
@@ -213,6 +213,7 @@ export const execByCommand = async (options: {
                 }
             });
         }
+        /// #if !MOBILE
         const activeTab = getActiveTab();
         if (!protyle && activeTab) {
             if (activeTab.model instanceof Editor) {
@@ -233,7 +234,9 @@ export const execByCommand = async (options: {
                     });
                 }
             }
-        } else if (!protyle) {
+        }
+        /// #endif
+        if (!protyle) {
             if (!protyle && range) {
                 window.siyuan.blockPanels.find(item => {
                     item.editors.find(editorItem => {
@@ -247,6 +250,7 @@ export const execByCommand = async (options: {
                     }
                 });
             }
+            /// #if !MOBILE
             const models = getAllModels();
             if (!protyle) {
                 models.backlink.find(item => {
@@ -274,6 +278,7 @@ export const execByCommand = async (options: {
                     }
                 });
             }
+            /// #endif
         }
     }
 

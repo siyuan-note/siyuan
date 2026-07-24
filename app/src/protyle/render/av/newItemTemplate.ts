@@ -374,7 +374,7 @@ const getContentTemplateRelativePath = (item: IContentTemplateSearchResult) => {
     if (item.relativePath) {
         return item.relativePath;
     }
-    const normalizedPath = (item.path || "").replaceAll("\\", "/");
+    const normalizedPath = (item.path || "").replace(/\\/g, "/");
     const templatesIndex = normalizedPath.lastIndexOf("/templates/");
     return templatesIndex > -1 ? normalizedPath.substring(templatesIndex + "/templates/".length) : "";
 };

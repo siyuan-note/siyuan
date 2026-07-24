@@ -5,9 +5,10 @@ import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getColId, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
-import {genAVValueHTML, isCustomAttr} from "./blockAttr";
+import {isCustomAttr} from "./blockAttr";
+import {genAVValueHTML} from "./attributeValue";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
-import {genCellValueByElement, getTypeByCellElement} from "./cell";
+import {genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements} from "./cell";
 import * as dayjs from "dayjs";
 import {getFieldsByData} from "./view";
 import {getFieldIdByCellElement} from "./row";
@@ -126,6 +127,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
         } else {
             updateAttrViewCellAnimation(item, cellValue);
         }
+        updateAttrViewCellInOtherElements(protyle, avID, rowID, colId, cellValue, item);
     });
     doOperations.push({
         action: "doUpdateUpdated",
@@ -237,6 +239,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 } else {
                     updateAttrViewCellAnimation(cellElement, cellValues[index]);
                 }
+                updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId, cellValues[index], cellElement);
             });
             menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
             bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
@@ -357,6 +360,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         } else {
                             updateAttrViewCellAnimation(cellElement, cellValues[index]);
                         }
+                        updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId,
+                            cellValues[index], cellElement);
                     });
                     menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
                     bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
@@ -433,7 +438,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     } else {
                         cellElements.forEach((cellElement: HTMLElement, cellIndex) => {
                             const rowID = getFieldIdByCellElement(cellElement, viewType);
-                            if (viewType === "table") {
+                            if (viewType === "table" || isCustomAttr) {
                                 cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
                                     blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
                             } else {
@@ -451,6 +456,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                             } else {
                                 updateAttrViewCellAnimation(cellElement, cellValues[cellIndex]);
                             }
+                            updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId,
+                                cellValues[cellIndex], cellElement);
                         });
                         menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
                         bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
@@ -615,6 +622,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         } else {
             updateAttrViewCellAnimation(item, cellValue);
         }
+        updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId, cellValue, item);
     });
 
     if (currentElement.querySelector(".b3-menu__accelerator")) {

@@ -962,10 +962,52 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
     }
 };
 
-export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {
-    blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
-        item.remove();
+export const updateAttrViewColAnimation = (protyle: IProtyle, avID: string, colID: string, headerValue: {
+    icon?: string,
+    name?: string,
+    pin?: boolean,
+    type?: TAVCol
+}) => {
+    protyle.wysiwyg.element.querySelectorAll<HTMLElement>(
+        `.av[data-av-id="${avID}"] .av__row--header .av__cell[data-col-id="${colID}"]`
+    ).forEach(item => {
+        updateAttrViewCellAnimation(item, undefined, headerValue);
     });
+    document.querySelectorAll<HTMLElement>(
+        `.custom-attr [data-av-id="${avID}"] > .av__row[data-col-id="${colID}"]`
+    ).forEach(item => {
+        if (typeof headerValue.name !== "undefined") {
+            const nameElement = item.querySelector(".block__logo span");
+            if (nameElement) {
+                nameElement.textContent = headerValue.name;
+            }
+        }
+        if (typeof headerValue.icon !== "undefined") {
+            const iconElement = item.querySelector(".block__logoicon");
+            const type = item.querySelector<HTMLElement>(":scope > [data-type][data-col-id]")?.dataset.type as TAVCol;
+            if (iconElement && type) {
+                iconElement.outerHTML = headerValue.icon ?
+                    unicode2Emoji(headerValue.icon, "block__logoicon", true) :
+                    `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
+            }
+        }
+    });
+};
+
+export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {
+    const avID = blockElement.getAttribute("data-av-id");
+    if (avID) {
+        document.querySelectorAll(`.av[data-av-id="${avID}"] .av__cell[data-col-id="${id}"]`).forEach(item => {
+            item.remove();
+        });
+        document.querySelectorAll(`.custom-attr [data-av-id="${avID}"] > .av__row[data-col-id="${id}"]`).forEach(item => {
+            item.remove();
+        });
+    } else {
+        blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
+            item.remove();
+        });
+    }
 };
 
 export const duplicateCompletely = (protyle: IProtyle, nodeElement: HTMLElement) => {

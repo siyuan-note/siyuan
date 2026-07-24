@@ -2,10 +2,10 @@ import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {getDefaultOperatorByType, getEditableFilters, hasFilterForColumn} from "./filter";
-import {genCellValue} from "./cell";
+import {genCellValue, renderCell} from "./cell";
 import {getPropertiesHTML, openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
-import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
+import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {toggleUpdateRelationBtn} from "./relation";
@@ -19,6 +19,7 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {getFieldsByData} from "./view";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {openFieldVisibility} from "./fieldVisibility";
+import {createEmptyAVValue, genAVAttributeRowHTML} from "./attributeValue";
 
 export const getColId = (element: Element, viewType: TAVView) => {
     if (viewType === "table" || hasClosestByClassName(element, "custom-attr")) {
@@ -279,7 +280,7 @@ export const bindEditEvent = (options: {
             type: colData.type,
         }]);
         colData.name = newValue;
-        updateAttrViewCellAnimation(options.protyle.wysiwyg.element.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: newValue});
+        updateAttrViewColAnimation(options.protyle, avID, colId, {name: newValue});
     });
     nameElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
@@ -630,8 +631,8 @@ const addAttrViewColAnimation = (options: {
         return;
     }
     const nodeId = options.blockElement.getAttribute("data-node-id");
-    if (options.blockElement.classList.contains("av")) {
-        options.blockElement.querySelectorAll(".av__row").forEach((item) => {
+    const insertTableColumn = (blockElement: Element) => {
+        blockElement.querySelectorAll(".av__row").forEach((item) => {
             let previousElement;
             if (options.previousID) {
                 previousElement = item.querySelector(`[data-col-id="${options.previousID}"]`);
@@ -651,21 +652,37 @@ const addAttrViewColAnimation = (options: {
     <div class="av__widthdrag"></div>
 </div>`;
             } else {
-                html = '<div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>';
+                const value = genCellValue(options.type, null);
+                html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${options.id}"
+data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px">${renderCell(value,
+                    parseInt(item.getAttribute("data-index")) || 0)}</div>`;
             }
             previousElement.insertAdjacentHTML("afterend", html);
         });
+    };
+    if (options.blockElement.classList.contains("av")) {
+        insertTableColumn(options.blockElement);
     } else {
-        options.blockElement.querySelector(".fn__hr").insertAdjacentHTML("beforebegin", `<div class="block__icons av__row" data-id="${nodeId}" data-col-id="${options.id}">
-    <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
-    <div class="block__logo block__logo--icon ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${getColNameByType(options.type)}">
-        <svg class="block__logoicon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>
-        <span>${getColNameByType(options.type)}</span>
-    </div>
-    <div data-col-id="${options.id}" data-block-id="${nodeId}" data-type="${options.type}" data-options="[]" class="fn__flex-1 fn__flex">
-        <div class="fn__flex-1"></div>
-    </div>
-</div>`);
+        const rowID = options.blockElement.querySelector<HTMLElement>("[data-row-id]")?.dataset.rowId || nodeId;
+        const colData = options.data ? getFieldsByData(options.data).find(item => item.id === options.id) : undefined;
+        options.blockElement.querySelector(".fn__hr").insertAdjacentHTML("beforebegin", genAVAttributeRowHTML({
+            nodeID: nodeId,
+            avID: options.blockElement.getAttribute("data-av-id"),
+            keyID: options.id,
+            type: options.type,
+            name: options.name,
+            desc: colData?.desc,
+            icon: options.icon,
+            typeIcon: getColIconByType(options.type),
+            selectOptions: colData?.options,
+            value: createEmptyAVValue(options.id, options.type, rowID),
+            empty: true,
+        }));
+        options.protyle.wysiwyg.element.querySelectorAll(
+            `.av[data-av-id="${options.blockElement.getAttribute("data-av-id")}"]`
+        ).forEach(item => {
+            insertTableColumn(item);
+        });
     }
     const menuElement = document.querySelector(".av__panel .b3-menu") as HTMLElement;
     if (menuElement && options.data && options.blockElement.classList.contains("av")) {
@@ -730,7 +747,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 name: oldValue,
                 type,
             }]);
-            updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: newValue});
+            updateAttrViewColAnimation(protyle, avID, colId, {name: newValue});
         }
         const newDesc = menu.element.querySelector("textarea").value;
         if (newDesc !== oldDesc) {

@@ -10,11 +10,11 @@ import {MenuItem} from "../../../menus/Menu";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
 import {previewAttrViewImages} from "../../preview/image";
-import {genAVValueHTML} from "./blockAttr";
+import {genAVValueHTML} from "./attributeValue";
 import {hideMessage, showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
 import {hasClosestBlock} from "../../util/hasClosest";
-import {genCellValueByElement, getTypeByCellElement} from "./cell";
+import {genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements} from "./cell";
 import {writeText} from "../../util/compatibility";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {renameAsset} from "../../../editor/rename";
@@ -166,6 +166,7 @@ export const updateAssetCell = (options: {
         } else {
             updateAttrViewCellAnimation(item, cellValue);
         }
+        updateAttrViewCellInOtherElements(options.protyle, avID, rowID, colId, cellValue, item);
     });
     cellDoOperations.push({
         action: "doUpdateUpdated",

@@ -266,7 +266,21 @@ export class MobileFiles extends Model {
                 ghostElement: null,
                 startTime: Date.now() - (isMousePointerTouchEvent(event) ? Constants.TIMEOUT_LONGPRESS : 0),
             };
+            if (!isMousePointerTouchEvent(event)) {
+                const state = this.touchDragState;
+                window.setTimeout(() => {
+                    if (this.touchDragState !== state) {
+                        return;
+                    }
+                    this.startTouchDrag(state, state.startX, state.startY, true);
+                }, Constants.TIMEOUT_LONGPRESS);
+            }
         }, {passive: false});
+        this.element.addEventListener("scroll", () => {
+            if (this.touchDragState && !this.touchDragState.isDragging) {
+                this.touchDragState = null;
+            }
+        }, {passive: true});
 
         filesElement.addEventListener("touchmove", (event: TouchEvent) => {
             const state = this.touchDragState;
@@ -280,17 +294,7 @@ export class MobileFiles extends Model {
                 }
                 if (Math.abs(touch.clientX - state.startX) < Constants.SIZE_DRAG_THRESHOLD &&
                     Math.abs(touch.clientY - state.startY) < Constants.SIZE_DRAG_THRESHOLD) return;
-                state.isDragging = true;
-
-                const ghostElement = document.createElement("ul");
-                ghostElement.id = "dragGhost";
-                ghostElement.append(state.selectedElement.cloneNode(true));
-                ghostElement.setAttribute("style", `background-color: var(--b3-theme-surface);width: 100%;touch-action: none;margin-left: -50%;margin-top:20px;z-index:${window.siyuan.zIndex};position: fixed;top:${touch.clientX}px;left:${touch.clientY}px`);
-                ghostElement.setAttribute("class", "b3-list b3-list--background");
-                document.body.append(ghostElement);
-
-                state.ghostElement = ghostElement;
-                state.selectedElement.style.opacity = "0.38";
+                this.startTouchDrag(state, touch.clientX, touch.clientY, !isMousePointerTouchEvent(event));
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -348,15 +352,16 @@ export class MobileFiles extends Model {
             stopScrollAnimation();
             state.selectedElement.style.opacity = "";
             if (state.isDragging) {
-                if (state.ghostElement) {
-                    state.ghostElement.remove();
-                }
+                state.ghostElement?.remove();
                 const newElement = this.element.querySelector(".dragover, .dragover__bottom, .dragover__top");
                 if (!newElement) {
+                    this.touchDragState = null;
                     return;
                 }
                 const newUlElement = hasTopClosestByTag(newElement, "UL");
                 if (!newUlElement) {
+                    this.clearDragIndicators();
+                    this.touchDragState = null;
                     return;
                 }
                 const oldScrollTop = this.element.scrollTop;
@@ -483,17 +488,18 @@ export class MobileFiles extends Model {
             this.touchDragState = null;
         });
 
-        filesElement.addEventListener("touchcancel", () => {
+        const cancelTouchDrag = () => {
             stopScrollAnimation();
-            if (this.touchDragState?.ghostElement) {
-                this.touchDragState.ghostElement.remove();
-            }
+            this.touchDragState?.ghostElement?.remove();
             if (this.touchDragState?.selectedElement) {
                 this.touchDragState.selectedElement.style.opacity = "";
             }
             this.clearDragIndicators();
             this.touchDragState = null;
-        });
+        };
+        filesElement.addEventListener("touchcancel", cancelTouchDrag);
+        filesElement.addEventListener("pointercancel", cancelTouchDrag);
+        window.addEventListener("blur", cancelTouchDrag);
         bindMousePointerTouchBridge(filesElement);
         this.init();
     }
@@ -584,6 +590,28 @@ export class MobileFiles extends Model {
                 case "rename":
                     this.onRename(data.data);
                     break;
+            }
+        }
+    }
+
+    private startTouchDrag(state: MobileFiles["touchDragState"], clientX: number, clientY: number, vibrate = false) {
+        if (state.isDragging) {
+            return;
+        }
+        state.isDragging = true;
+        const ghostElement = document.createElement("ul");
+        ghostElement.id = "dragGhost";
+        ghostElement.append(state.selectedElement.cloneNode(true));
+        ghostElement.setAttribute("style", `background-color: var(--b3-theme-surface);width: 100%;touch-action: none;margin-left: -50%;margin-top:20px;z-index:${window.siyuan.zIndex};position: fixed;top:${clientX}px;left:${clientY}px`);
+        ghostElement.setAttribute("class", "b3-list b3-list--background");
+        document.body.append(ghostElement);
+        state.ghostElement = ghostElement;
+        state.selectedElement.style.opacity = "0.38";
+        if (vibrate) {
+            if (window.webkit?.messageHandlers.vibrate) {
+                window.webkit.messageHandlers.vibrate.postMessage("");
+            } else if (navigator.vibrate) {
+                navigator.vibrate(Constants.TIMEOUT_VIBRATION_DURATION);
             }
         }
     }

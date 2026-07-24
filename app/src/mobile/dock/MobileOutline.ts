@@ -231,6 +231,15 @@ export class MobileOutline extends Model {
                 startTime: Date.now() - (isMousePointerTouchEvent(event) ? Constants.TIMEOUT_LONGPRESS : 0),
                 selectItem: null,
             };
+            if (!isMousePointerTouchEvent(event)) {
+                const state = this.touchDragState;
+                window.setTimeout(() => {
+                    if (this.touchDragState !== state) {
+                        return;
+                    }
+                    this.startTouchDrag(state, state.startX, state.startY, true);
+                }, Constants.TIMEOUT_LONGPRESS);
+            }
         }, {passive: false});
 
         this.element.addEventListener("touchmove", (event: TouchEvent) => {
@@ -248,16 +257,7 @@ export class MobileOutline extends Model {
                 }
                 if (Math.abs(touch.clientX - state.startX) < Constants.SIZE_DRAG_THRESHOLD &&
                     Math.abs(touch.clientY - state.startY) < Constants.SIZE_DRAG_THRESHOLD) return;
-                state.isDragging = true;
-
-                // 创建 ghost 元素，跟随手指移动
-                state.selectedElement.style.opacity = "0.38";
-                const ghostElement = state.selectedElement.cloneNode(true) as HTMLElement;
-                ghostElement.setAttribute("id", "dragGhost");
-                ghostElement.firstElementChild.setAttribute("style", "padding-left:4px");
-                ghostElement.setAttribute("style", `border-radius: var(--b3-border-radius);background-color: var(--b3-list-hover);pointer-events:none;position: fixed; top: ${touch.clientY}px; left: ${touch.clientX}px; z-index:999997;`);
-                document.body.append(ghostElement);
-                state.ghostElement = ghostElement;
+                this.startTouchDrag(state, touch.clientX, touch.clientY, !isMousePointerTouchEvent(event));
             }
 
             // 进入拖拽后阻止原生滚动，避免列表伴随手指滚动
@@ -380,6 +380,27 @@ export class MobileOutline extends Model {
             this.touchDragState = null;
         });
         bindMousePointerTouchBridge(this.element);
+    }
+
+    private startTouchDrag(state: MobileOutline["touchDragState"], clientX: number, clientY: number, vibrate = false) {
+        if (state.isDragging) {
+            return;
+        }
+        state.isDragging = true;
+        state.selectedElement.style.opacity = "0.38";
+        const ghostElement = state.selectedElement.cloneNode(true) as HTMLElement;
+        ghostElement.setAttribute("id", "dragGhost");
+        ghostElement.firstElementChild.setAttribute("style", "padding-left:4px");
+        ghostElement.setAttribute("style", `border-radius: var(--b3-border-radius);background-color: var(--b3-list-hover);pointer-events:none;position: fixed; top: ${clientY}px; left: ${clientX}px; z-index:999997;`);
+        document.body.append(ghostElement);
+        state.ghostElement = ghostElement;
+        if (vibrate) {
+            if (window.webkit?.messageHandlers.vibrate) {
+                window.webkit.messageHandlers.vibrate.postMessage("");
+            } else if (navigator.vibrate) {
+                navigator.vibrate(Constants.TIMEOUT_VIBRATION_DURATION);
+            }
+        }
     }
 
     // 清理拖拽指示线

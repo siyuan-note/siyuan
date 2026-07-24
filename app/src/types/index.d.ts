@@ -271,6 +271,7 @@ interface Window {
                 }) => number
             }
             cancelNotification: { postMessage: (id: number) => void }
+            vibrate?: { postMessage: (text: string) => void }
         }
     };
     htmlToImage: {

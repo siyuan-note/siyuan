@@ -13,12 +13,13 @@ import {previewImages} from "../../preview/image";
 /// #if !BROWSER
 import {webUtils} from "electron";
 /// #endif
-import {isBrowser} from "../../../util/functions";
+import {isBrowser, isTouchDevice} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {removeCompressURL} from "../../../util/image";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {createEmptyAVValue, genAVAttributeRowHTML} from "./attributeValue";
+import {isLastPointerMouse} from "../../../util/touchDragBridge";
 
 interface IAVAttributeTableData {
     avID: string;
@@ -263,6 +264,23 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 }
             });
             element.addEventListener("click", (event) => {
+                const databaseElement = hasClosestByClassName(event.target as HTMLElement, "popover__block");
+                if (databaseElement && isTouchDevice() && !isLastPointerMouse() &&
+                    hasClosestByClassName(databaseElement, "custom-attr__avheader")) {
+                    const blockElement = hasClosestBlock(databaseElement);
+                    const table = blockElement && attributeTableData.get(blockElement as HTMLElement);
+                    const databaseBlockID = table ? [...table.blockIDs].sort()[0] : "";
+                    if (databaseBlockID) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const dialogElement = hasClosestByClassName(databaseElement, "b3-dialog--open", true);
+                        if (dialogElement) {
+                            window.siyuan.dialogs.find(item => item.element === dialogElement)?.destroy();
+                        }
+                        openLink(protyle.app, `siyuan://blocks/${databaseBlockID}`, event);
+                        return;
+                    }
+                }
                 const backlinkToggleElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "av-backlinks-toggle");
                 if (backlinkToggleElement) {
                     const backlinksElement = hasClosestByClassName(backlinkToggleElement, "custom-attr__avbacklinks");

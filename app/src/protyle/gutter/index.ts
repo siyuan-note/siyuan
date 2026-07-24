@@ -806,6 +806,11 @@ export class Gutter {
         };
     }
 
+    private hasSublist(nodeElements: Element[]) {
+        return nodeElements.some((item) => item.getAttribute("data-type") === "NodeList" &&
+            item.querySelector('[data-type="NodeList"]'));
+    }
+
     private turnsIntoOne(options: {
         menuId?: string,
         accelerator?: string,
@@ -928,6 +933,9 @@ export class Gutter {
                 selectsElementGroups,
                 type: "Blocks2TLs"
             }));
+            if (this.hasSublist(selectsElement)) {
+                turnIntoSubmenu.push(this.recursiveListMenu(protyle, selectsElement));
+            }
             turnIntoSubmenu.push(this.turnsIntoGroups({
                 menuId: "quote",
                 icon: "iconQuote",
@@ -955,9 +963,6 @@ export class Gutter {
                 type: "Blocks2Ps",
                 isContinue
             }));
-            if (selectsElement.some((item) => item.getAttribute("data-type") === "NodeList")) {
-                turnIntoSubmenu.push(this.recursiveListMenu(protyle, selectsElement));
-            }
             turnIntoSubmenu.push(this.turnsInto({
                 menuId: "heading1",
                 icon: "iconH1",
@@ -1625,7 +1630,9 @@ export class Gutter {
                     type: "OL2TL"
                 }));
             }
-            turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
+            if (this.hasSublist([nodeElement])) {
+                turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
+            }
         } else if (type === "NodeBlockquote" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",

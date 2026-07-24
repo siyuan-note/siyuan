@@ -80,3 +80,9 @@
     cursor: move;
   }
 }
+
+iframe {
+  &[data-resizing] {
+    pointer-events: none;
+  }
+}

@@ -912,6 +912,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
         let range: Range;
         resizeElement.addEventListener("mousedown", (event: MouseEvent) => {
             event.preventDefault();
+            disableIframePointerEvents();
             getAllModels().editor.forEach((item) => {
                 if (item.editor && item.editor.protyle && item.element.parentElement) {
                     hideElements(["gutter"], item.editor.protyle);
@@ -981,6 +982,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             };
 
             documentSelf.onmouseup = () => {
+                restoreIframePointerEvents();
                 documentSelf.onmousemove = null;
                 documentSelf.onmouseup = null;
                 documentSelf.ondragstart = null;
@@ -1152,4 +1154,27 @@ export const fixWndFlex1 = (layout: Layout) => {
             flex1Element.classList.add("fn__flex-1");
         }
     }
+};
+
+const pointerEventsNoneDataSetKey = "resizing";
+const pointerEventsNoneDataSetValue = "layout";
+
+export const disableIframePointerEvents = (
+    rootElement: ParentNode = document,
+    dataSetKey: string = pointerEventsNoneDataSetKey,
+    dataSetValue: string = pointerEventsNoneDataSetValue,
+) => {
+    rootElement.querySelectorAll<HTMLIFrameElement>(`iframe:not([data-${dataSetKey}="${dataSetValue}"])`).forEach((iframe) => {
+        iframe.dataset[dataSetKey] = dataSetValue;
+    });
+};
+
+export const restoreIframePointerEvents = (
+    rootElement: ParentNode = document,
+    dataSetKey: string = pointerEventsNoneDataSetKey,
+    dataSetValue: string = pointerEventsNoneDataSetValue,
+) => {
+    rootElement.querySelectorAll<HTMLIFrameElement>(`iframe[data-${dataSetKey}="${dataSetValue}"]`).forEach((iframe) => {
+        delete iframe.dataset[dataSetKey];
+    });
 };

@@ -21,7 +21,6 @@ import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {getTableRangeCells, isIncludeCell} from "./table";
 import {getFieldIdByCellElement, getRowHTML} from "../render/av/row";
-import {processClonePHElement} from "../render/util";
 import {setFold} from "./blockFold";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
@@ -729,7 +728,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 }
                 renderItem.removeAttribute("data-render");
             });
-            processClonePHElement(item);
             if (insertBefore) {
                 blockElement.before(item);
             } else {

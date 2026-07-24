@@ -86,7 +86,7 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
     let text = "";
     const dataType = blockElement.dataset.type;
     if ("NodeHTMLBlock" === dataType) {
-        text += Lute.UnEscapeHTMLStr(blockElement.querySelector("protyle-html").getAttribute("data-content"));
+        text += blockElement.querySelector("protyle-html").getAttribute("data-content");
     } else if ("NodeAttributeView" === dataType) {
         blockElement.querySelectorAll(".av__row").forEach(rowElement => {
             rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
@@ -722,4 +722,3 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         scrollCenter(protyle, undefined, "nearest", "smooth");
     }
 };
-

@@ -29,7 +29,6 @@ import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {resize} from "../util/resize";
-import {processClonePHElement} from "../render/util";
 import {scrollCenter} from "../../util/highlightById";
 import {setFold} from "../util/blockFold";
 import {isEncryptedBox} from "../../util/pathName";
@@ -224,14 +223,14 @@ const promiseTransaction = (options: {
                     if (operation.previousID && updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                             if (!isInEmbedBlock(item) && !getNextBlockSibling(item)?.contains(range.startContainer)) {
-                                item.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                                item.after(updateElements[0].cloneNode(true));
                                 hasFind = true;
                             }
                         });
                     } else if (updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
                             if (!isInEmbedBlock(item) && !getFirstBlock(item).contains(range.startContainer)) {
-                                const cloneElement = processClonePHElement(updateElements[0].cloneNode(true) as Element);
+                                const cloneElement = updateElements[0].cloneNode(true) as Element;
                                 // 列表特殊处理
                                 if (item.firstElementChild?.classList.contains("protyle-action")) {
                                     item.firstElementChild.after(cloneElement);
@@ -909,13 +908,13 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     // 反链面板删除超级块中的最后一个段落块后撤销重做
                     const blockElement = hasTopClosestByAttribute(range.startContainer, "data-node-id", null);
                     if (blockElement) {
-                        blockElement.before(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                        blockElement.before(updateElements[0].cloneNode(true));
                         hasFind = true;
                     }
                 } else {
                     previousElement.forEach(item => {
                         if (!isInEmbedBlock(item)) {
-                            item.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                            item.after(updateElements[0].cloneNode(true));
                             hasFind = true;
                         }
                     });
@@ -923,19 +922,19 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             } else if (updateElements.length > 0) {
                 const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`);
                 if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID && !protyle.block.showAll) {
-                    protyle.wysiwyg.element.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                    protyle.wysiwyg.element.prepend(updateElements[0].cloneNode(true));
                     hasFind = true;
                 } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                     // 反链面板删除超级块中的段落块后撤销再重做 https://github.com/siyuan-note/siyuan/issues/14496#issuecomment-2771372486
                     const topBlockElement = hasTopClosestByAttribute(getSelection().getRangeAt(0).startContainer, "data-node-id", null);
                     if (topBlockElement) {
-                        topBlockElement.before(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                        topBlockElement.before(updateElements[0].cloneNode(true));
                         hasFind = true;
                     }
                 } else {
                     parentElement.forEach(item => {
                         if (!isInEmbedBlock(item)) {
-                            const cloneElement = processClonePHElement(updateElements[0].cloneNode(true) as Element);
+                            const cloneElement = updateElements[0].cloneNode(true) as Element;
                             // 列表特殊处理
                             if (item.firstElementChild?.classList.contains("protyle-action")) {
                                 item.firstElementChild.after(cloneElement);

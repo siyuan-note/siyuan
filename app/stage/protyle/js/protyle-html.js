@@ -6,10 +6,6 @@ class ProtyleHtml extends HTMLElement {
         super()
         const shadowRoot = this.attachShadow({mode: 'open'})
         this.display = this.shadowRoot
-        // https://github.com/siyuan-note/siyuan/issues/11321
-        const content = Lute.EscapeHTMLStr(this.getAttribute('data-content'))
-        this.setAttribute('data-content', content)
-        this.display.innerHTML = content
     }
 
     static get observedAttributes() {
@@ -18,7 +14,8 @@ class ProtyleHtml extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'data-content') {
-            let dataContent = Lute.UnEscapeHTMLStr(this.getAttribute('data-content'))
+            // data-content 保留原始 HTML 源码，确保 DOM 反复序列化和解析后内容不变。
+            let dataContent = newValue || ''
 
             if (!window.siyuan.config.editor.allowHTMLBLockScript) {
                 // Do not execute scripts in HTML blocks by default to prevent XSS https://github.com/siyuan-note/siyuan/issues/11172

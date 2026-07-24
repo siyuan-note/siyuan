@@ -4067,24 +4067,16 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths, defBlockIDs 
 
 		newAssets := getAssetsLinkDests(tree.Root, false)
 		for _, newAsset := range newAssets {
+			oldAsset, newAsset := resolveExportAssetPaths(newAsset, assetsOldNew, assetsNewOld)
+			if "" == oldAsset {
+				logging.LogWarnf("get asset old path for new asset [%s] failed", newAsset)
+				continue
+			}
+
 			newAsset = string(html.DecodeDestination([]byte(newAsset)))
 			cleanNewAsset := AssetPathWithoutQuery(newAsset)
 
 			if !strings.HasPrefix(cleanNewAsset, "assets/") {
-				continue
-			}
-
-			// 导出 Markdown 时链接路径中的空格被编码为 `%20`，需要替换回空格后才能正确获取原始资源路径
-			// Improve export of Markdown hyperlink spaces https://github.com/siyuan-note/siyuan/issues/9792
-			// No assets were exported when exporting Markdown https://github.com/siyuan-note/siyuan/issues/17046
-			spaceEncodedNewAsset := strings.ReplaceAll(newAsset, " ", "%20")
-			oldAsset := assetsNewOld[spaceEncodedNewAsset]
-			if "" == oldAsset {
-				spaceEncodedCleanNewAsset := strings.ReplaceAll(cleanNewAsset, " ", "%20")
-				oldAsset = assetsNewOld[spaceEncodedCleanNewAsset]
-			}
-			if "" == oldAsset {
-				logging.LogWarnf("get asset old path for new asset [%s] failed", spaceEncodedNewAsset)
 				continue
 			}
 
@@ -4175,6 +4167,17 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths, defBlockIDs 
 	} else {
 		zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
 	}
+	return
+}
+
+// 查表时使用重新解析后的原始路径，兼容 Markdown 链接中的 `%20` 和 HTML 资源路径中的字面空格。
+// 修复 Markdown.zip 遗漏文件名包含空格的音视频资源 https://github.com/siyuan-note/siyuan/issues/18351
+func resolveExportAssetPaths(asset string, assetsOldNew, assetsNewOld map[string]string) (oldAsset, newAsset string) {
+	newAsset = asset
+	if renamedAsset := assetsOldNew[asset]; "" != renamedAsset {
+		newAsset = renamedAsset
+	}
+	oldAsset = assetsNewOld[newAsset]
 	return
 }
 

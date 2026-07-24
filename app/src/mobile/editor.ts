@@ -68,13 +68,17 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             showMessage(data.msg);
             return;
         }
+        const isRootFocus = id === data.data.rootID &&
+            action.includes(Constants.CB_GET_ALL) &&
+            action.includes(Constants.CB_GET_FOCUS);
+        const actionList = isRootFocus ? action.filter((item) => item !== Constants.CB_GET_ALL) : action;
         const protyleOptions: IProtyleOptions = {
             databaseAttr: true,
             blockId: id,
             rootId: data.data.rootID,
             notebookId: data.data.box,
             scrollPosition,
-            action,
+            action: actionList,
             render: {
                 scroll: true,
                 title: true,
@@ -99,7 +103,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             } else {
                 fetchPost("/api/storage/updateRecentDocViewTime", {rootID: data.data.rootID});
             }
-            if (action.includes(Constants.CB_GET_SCROLL) && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID]) {
+            if (actionList.includes(Constants.CB_GET_SCROLL) && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID]) {
                 getDocByScroll({
                     protyle: window.siyuan.mobile.editor.protyle,
                     scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID],
@@ -114,8 +118,8 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             } else {
                 const getDocParam: IObject = {
                     id,
-                    size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-                    mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
+                    size: actionList.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
+                    mode: actionList.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
                 };
                 if (isEncryptedBox(window.siyuan.mobile.editor.protyle.notebookId)) {
                     getDocParam.notebook = window.siyuan.mobile.editor.protyle.notebookId;
@@ -124,7 +128,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                     onGet({
                         data: getResponse,
                         protyle: window.siyuan.mobile.editor.protyle,
-                        action,
+                        action: actionList,
                         scrollPosition,
                         afterCB() {
                             app.plugins.forEach(item => {

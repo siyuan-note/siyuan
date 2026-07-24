@@ -689,6 +689,7 @@ func getBlockDefIDsByRefText(c *gin.Context) {
 
 	anchor := arg["anchor"].(string)
 	ids := model.GetBlockDefIDsByRefText(anchor)
+	ids = filterBlockIDsByPublishAccess(c, ids, "")
 	var retRefDefs []model.RefDefs
 	for _, id := range ids {
 		retRefDefs = append(retRefDefs, model.RefDefs{RefID: id, DefIDs: []string{}})

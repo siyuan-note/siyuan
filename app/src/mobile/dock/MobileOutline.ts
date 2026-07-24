@@ -368,7 +368,7 @@ export class MobileOutline extends Model {
             this.touchDragState = null;
         });
 
-        this.element.addEventListener("touchcancel", () => {
+        const cancelTouchDrag = () => {
             stopScrollAnimation();
             if (this.touchDragState?.ghostElement) {
                 this.touchDragState.ghostElement.remove();
@@ -378,7 +378,10 @@ export class MobileOutline extends Model {
             }
             this.clearDragIndicators();
             this.touchDragState = null;
-        });
+        };
+        this.element.addEventListener("touchcancel", cancelTouchDrag);
+        this.element.addEventListener("pointercancel", cancelTouchDrag);
+        window.addEventListener("blur", cancelTouchDrag);
         bindMousePointerTouchBridge(this.element);
     }
 

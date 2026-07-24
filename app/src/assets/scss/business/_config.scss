@@ -661,20 +661,46 @@
     }
 
     &__model {
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+
+      [data-model-field="enabled"] {
+        grid-column: 2;
+        grid-row: 3;
+      }
+
+      [data-model-field="name"] {
+        grid-column: 1 / -1;
+        grid-row: 1;
+      }
 
       [data-model-field="displayName"] {
-        grid-column: 2 / -1;
+        grid-column: 1 / -1;
+        grid-row: 2;
       }
 
       [data-action="testModel"] {
-        grid-column: 2;
+        grid-column: 1;
+        grid-row: 3;
+      }
+
+      [data-action="deleteModel"] {
+        grid-column: 3;
+        grid-row: 3;
       }
     }
 
     &__section-head {
       align-items: flex-start;
       flex-direction: column;
+
+      & > .fn__flex {
+        flex-wrap: wrap;
+        gap: 8px;
+
+        & > .fn__space {
+          display: none;
+        }
+      }
     }
   }
 }

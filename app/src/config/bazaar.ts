@@ -136,7 +136,7 @@ export const bazaar = {
             <div class="fn__space"></div>
             <button data-type="myWidget" class="b3-button b3-button--outline">${window.siyuan.languages.widget}</button>
             <div class="fn__space"></div>
-            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+            <input class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch fn__flex-center" style="margin-right: 8px">

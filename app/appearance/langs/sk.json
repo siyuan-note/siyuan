@@ -202,7 +202,7 @@
 	"testConnectionFail": "Pripojenie zlyhalo",
 	"testConnectionFailModelRequired": "Zadajte názov modelu",
 	"testConnectionFailModelNotFound": "Tento model nie je v zozname dostupných modelov",
-	"fetchAvailableModels": "Získať dostupné modely",
+	"fetchAvailableModels": "Obnoviť dostupné modely",
 	"fetchAvailableModelsSuccess": "Získaných modelov: ${x}. Vyberte model z návrhov v poli názvu modelu",
 	"fetchAvailableModelsFail": "Nepodarilo sa získať dostupné modely",
 	"selectModel": "Vyberte model",

@@ -20,6 +20,7 @@ import (
 	"errors"
 	"html"
 	"net/http"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -39,6 +40,9 @@ func resolveAIProvider(arg map[string]any) (*conf.Provider, error) {
 		provider := &conf.Provider{}
 		if err = gulu.JSON.UnmarshalJSON(data, provider); err != nil {
 			return nil, err
+		}
+		if strings.TrimSpace(provider.BaseURL) == "" {
+			return nil, errors.New("provider base URL is required")
 		}
 		ai := &conf.AI{Providers: []*conf.Provider{provider}}
 		ai.Normalize()

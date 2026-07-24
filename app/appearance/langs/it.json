@@ -202,7 +202,7 @@
 	"testConnectionFail": "Connessione non riuscita",
 	"testConnectionFailModelRequired": "Inserisci il nome del modello",
 	"testConnectionFailModelNotFound": "Questo modello non è presente nell'elenco dei modelli disponibili",
-	"fetchAvailableModels": "Recupera modelli disponibili",
+	"fetchAvailableModels": "Aggiorna modelli disponibili",
 	"fetchAvailableModelsSuccess": "Recuperati ${x} modelli; selezionane uno dai suggerimenti del nome del modello",
 	"fetchAvailableModelsFail": "Recupero dei modelli disponibili non riuscito",
 	"selectModel": "Seleziona un modello",

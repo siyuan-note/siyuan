@@ -375,14 +375,14 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         <div class="config-ai-provider__section-head">
             <div class="config-ai-provider__section-title">${window.siyuan.languages.aiModelSettings}</div>
             <div class="fn__flex">
-                <button class="b3-button b3-button--outline" data-action="fetchModels">
-                    <svg class="b3-button__icon"><use xlink:href="#iconRefresh"></use></svg>
-                    <span>${window.siyuan.languages.fetchAvailableModels}</span>
-                </button>
-                <span class="fn__space"></span>
                 <button class="b3-button b3-button--outline" data-action="addModel">
                     <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
                     <span>${window.siyuan.languages.addAiModel}</span>
+                </button>
+                <span class="fn__space"></span>
+                <button class="b3-button b3-button--outline" data-action="fetchModels">
+                    <svg class="b3-button__icon"><use xlink:href="#iconRefresh"></use></svg>
+                    <span>${window.siyuan.languages.fetchAvailableModels}</span>
                 </button>
             </div>
         </div>
@@ -397,18 +397,111 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     bindPasswordIconaToggle(view, "aiProviderDetailApiKey");
     const modelsContainer = view.querySelector<HTMLElement>(".config-ai-provider__models");
     let availableModels: string[] = [];
+    let hasFetchedModels = false;
+    let fetchingModels = false;
     renderDraftModels(modelsContainer, draft.models, availableModels);
+
+    const addDraftModel = () => {
+        draft.models.push({id: "", enabled: true, name: "", displayName: ""});
+        renderDraftModels(modelsContainer, draft.models, availableModels);
+        const modelInput = modelsContainer.querySelector<HTMLInputElement>(
+            "[data-model-index]:last-child [data-model-field='name']",
+        );
+        if (!modelInput) {
+            return;
+        }
+        if (availableModels.length > 0) {
+            openAvailableModelMenu(modelInput, availableModels);
+        } else {
+            modelInput.focus();
+        }
+    };
+
+    const fetchModels = (onFinished?: () => void) => {
+        if (fetchingModels) {
+            return;
+        }
+        if (!draft.baseURL.trim()) {
+            view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
+            showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
+            return;
+        }
+        hasFetchedModels = true;
+        fetchingModels = true;
+        const fetchButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
+        const addButton = view.querySelector<HTMLButtonElement>("[data-action='addModel']");
+        const confirmButton = view.querySelector<HTMLButtonElement>("[data-action='confirm']");
+        const icon = fetchButton?.querySelector<SVGSVGElement>(".b3-button__icon");
+        fetchButton.disabled = true;
+        addButton.disabled = true;
+        confirmButton.disabled = true;
+        icon?.classList.add("fn__rotate");
+        fetchPost("/api/ai/listModels", {providerConfig: draft}, (response) => {
+            if (!view.isConnected) {
+                return;
+            }
+            const data = response.data || {};
+            const responseModels: unknown[] = Array.isArray(data.models) ? data.models : [];
+            const models = responseModels
+                .filter((name): name is string => typeof name === "string" && name.trim() !== "")
+                .map((name) => name.trim());
+            if (models.length === 0) {
+                showMessage(
+                    data.msg
+                        ? `${window.siyuan.languages.fetchAvailableModelsFail} ${escapeHTML(String(data.msg))}`
+                        : window.siyuan.languages.fetchAvailableModelsFail,
+                    undefined,
+                    "error",
+                );
+                return;
+            }
+            availableModels = [...new Set(models)].sort((first, second) => first.localeCompare(second));
+            if (draft.models.length === 0) {
+                draft.models.push({
+                    id: "",
+                    enabled: true,
+                    name: availableModels[0],
+                    displayName: "",
+                });
+            }
+            renderDraftModels(modelsContainer, draft.models, availableModels);
+            showMessage(
+                window.siyuan.languages.fetchAvailableModelsSuccess
+                    .replace("${x}", String(availableModels.length)),
+                undefined,
+                "info",
+            );
+        }).finally(() => {
+            fetchingModels = false;
+            if (!view.isConnected) {
+                return;
+            }
+            fetchButton.disabled = false;
+            addButton.disabled = false;
+            confirmButton.disabled = false;
+            icon?.classList.remove("fn__rotate");
+            onFinished?.();
+        });
+    };
+
+    const leaveDetail = () => {
+        if (!existing && preset) {
+            openProviderCatalog(root);
+        } else {
+            removeProviderView(root);
+        }
+    };
 
     const closeDetail = () => {
         if (JSON.stringify(draft) !== initialJSON) {
             confirmDialog(
                 window.siyuan.languages.confirm,
                 window.siyuan.languages.discardUnsavedChanges,
-                () => removeProviderView(root),
+                leaveDetail,
             );
             return;
         }
-        removeProviderView(root);
+        leaveDetail();
     };
 
     view.addEventListener("input", (event) => {
@@ -462,9 +555,16 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "addModel") {
-            draft.models.push({id: "", enabled: true, name: "", displayName: ""});
-            renderDraftModels(modelsContainer, draft.models, availableModels);
-            modelsContainer.querySelector<HTMLInputElement>("[data-model-index]:last-child [data-model-field='name']")?.focus();
+            if (!hasFetchedModels) {
+                const modelCount = draft.models.length;
+                fetchModels(() => {
+                    if (draft.models.length === modelCount) {
+                        addDraftModel();
+                    }
+                });
+                return;
+            }
+            addDraftModel();
             return;
         }
         const modelIndex = Number(actionElement.closest<HTMLElement>("[data-model-index]")?.dataset.modelIndex);
@@ -478,42 +578,16 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "fetchModels") {
-            const button = actionElement as HTMLButtonElement;
-            const icon = button.querySelector<SVGSVGElement>(".b3-button__icon");
-            button.disabled = true;
-            icon?.classList.add("fn__rotate");
-            fetchPost("/api/ai/listModels", {providerConfig: draft}, (response) => {
-                const data = response.data || {};
-                const responseModels: unknown[] = Array.isArray(data.models) ? data.models : [];
-                const models = responseModels
-                    .filter((name): name is string => typeof name === "string" && name.trim() !== "")
-                    .map((name) => name.trim());
-                if (models.length === 0) {
-                    showMessage(
-                        data.msg
-                            ? `${window.siyuan.languages.fetchAvailableModelsFail} ${escapeHTML(String(data.msg))}`
-                            : window.siyuan.languages.fetchAvailableModelsFail,
-                        undefined,
-                        "error",
-                    );
-                    return;
-                }
-                availableModels = [...new Set(models)].sort((first, second) => first.localeCompare(second));
-                renderDraftModels(modelsContainer, draft.models, availableModels);
-                showMessage(
-                    window.siyuan.languages.fetchAvailableModelsSuccess
-                        .replace("${x}", String(availableModels.length)),
-                    undefined,
-                    "info",
-                );
-            }).finally(() => {
-                button.disabled = false;
-                icon?.classList.remove("fn__rotate");
-            });
+            fetchModels();
             return;
         }
         if (action === "testModel" && draft.models[modelIndex]) {
             const model = draft.models[modelIndex];
+            if (!draft.baseURL.trim()) {
+                view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
+                showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
+                return;
+            }
             if (!model.name.trim()) {
                 showMessage(window.siyuan.languages.testConnectionFailModelRequired);
                 return;
@@ -523,10 +597,14 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             button.disabled = true;
             label.textContent = window.siyuan.languages.testConnectionTesting;
             fetchPost("/api/ai/testModel", {providerConfig: draft, model: model.name.trim()}, (response) => {
-                showTestResult(response.data || {});
+                if (view.isConnected) {
+                    showTestResult(response.data || {});
+                }
             }).finally(() => {
-                button.disabled = false;
-                label.textContent = window.siyuan.languages.testConnection;
+                if (view.isConnected) {
+                    button.disabled = false;
+                    label.textContent = window.siyuan.languages.testConnection;
+                }
             });
             return;
         }

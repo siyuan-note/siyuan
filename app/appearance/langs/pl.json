@@ -202,7 +202,7 @@
 	"testConnectionFail": "Połączenie nie powiodło się",
 	"testConnectionFailModelRequired": "Wprowadź nazwę modelu",
 	"testConnectionFailModelNotFound": "Ten model nie znajduje się na liście dostępnych modeli",
-	"fetchAvailableModels": "Pobierz dostępne modele",
+	"fetchAvailableModels": "Odśwież dostępne modele",
 	"fetchAvailableModelsSuccess": "Pobrano ${x} modeli; wybierz model z podpowiedzi w polu nazwy modelu",
 	"fetchAvailableModelsFail": "Nie udało się pobrać dostępnych modeli",
 	"selectModel": "Wybierz model",

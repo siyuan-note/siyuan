@@ -202,7 +202,7 @@
 	"testConnectionFail": "Bağlantı başarısız",
 	"testConnectionFailModelRequired": "Lütfen model adını girin",
 	"testConnectionFailModelNotFound": "Bu model kullanılabilir modeller listesinde değil",
-	"fetchAvailableModels": "Kullanılabilir modelleri getir",
+	"fetchAvailableModels": "Kullanılabilir modelleri yenile",
 	"fetchAvailableModelsSuccess": "${x} model getirildi; model adı önerilerinden birini seçin",
 	"fetchAvailableModelsFail": "Kullanılabilir modeller getirilemedi",
 	"selectModel": "Bir model seçin",

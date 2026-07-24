@@ -202,7 +202,7 @@
 	"testConnectionFail": "Conexión fallida",
 	"testConnectionFailModelRequired": "Introduzca el nombre del modelo",
 	"testConnectionFailModelNotFound": "Este modelo no está en la lista de modelos disponibles",
-	"fetchAvailableModels": "Obtener modelos disponibles",
+	"fetchAvailableModels": "Actualizar modelos disponibles",
 	"fetchAvailableModelsSuccess": "Se obtuvieron ${x} modelos; seleccione uno entre las sugerencias del nombre del modelo",
 	"fetchAvailableModelsFail": "Error al obtener los modelos disponibles",
 	"selectModel": "Seleccione un modelo",

@@ -202,7 +202,7 @@
 	"testConnectionFail": "連線失敗",
 	"testConnectionFailModelRequired": "請填寫模型名稱",
 	"testConnectionFailModelNotFound": "此模型不在可用模型清單中",
-	"fetchAvailableModels": "取得可用模型",
+	"fetchAvailableModels": "重新整理可用模型",
 	"fetchAvailableModelsSuccess": "取得 ${x} 個模型，可在模型名稱輸入框中選擇",
 	"fetchAvailableModelsFail": "取得可用模型失敗",
 	"selectModel": "請選擇模型",

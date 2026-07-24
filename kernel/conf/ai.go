@@ -361,8 +361,8 @@ func (ai *AI) GetImageGenerationModel() (*Provider, *Model) {
 	return ai.GetModel(ai.ImageGeneration.ModelID)
 }
 
-// ReconcileModelIDs 校正各使用场景引用的模型。编辑器和智能体始终回退到首个可用模型，
-// 可选的图片理解和图片生成场景仅清理失效引用。
+// ReconcileModelIDs 校正各使用场景引用的模型，并将旧版名称引用转换为模型 ID。
+// 编辑器和智能体始终回退到首个可用模型，可选的图片理解和图片生成场景仅清理失效引用。
 func (ai *AI) ReconcileModelIDs() {
 	firstModelID := ""
 	for _, p := range ai.Providers {
@@ -383,23 +383,35 @@ func (ai *AI) ReconcileModelIDs() {
 	if ai.Editing == nil {
 		ai.Editing = defaultEditing()
 	}
-	if p, m := ai.GetModel(ai.Editing.ModelID); p == nil || m == nil {
+	if _, m := ai.GetModel(ai.Editing.ModelID); m == nil {
 		ai.Editing.ModelID = firstModelID
+	} else {
+		ai.Editing.ModelID = m.ID
 	}
 	if ai.Agent == nil {
 		ai.Agent = defaultAgent()
 	}
-	if p, m := ai.GetModel(ai.Agent.ModelID); p == nil || m == nil {
+	if _, m := ai.GetModel(ai.Agent.ModelID); m == nil {
 		ai.Agent.ModelID = firstModelID
+	} else {
+		ai.Agent.ModelID = m.ID
 	}
 	if ai.Vision != nil {
-		if p, m := ai.GetModel(ai.Vision.ModelID); ai.Vision.ModelID != "" && (p == nil || m == nil) {
-			ai.Vision.ModelID = ""
+		if _, m := ai.GetModel(ai.Vision.ModelID); ai.Vision.ModelID != "" {
+			if m == nil {
+				ai.Vision.ModelID = ""
+			} else {
+				ai.Vision.ModelID = m.ID
+			}
 		}
 	}
 	if ai.ImageGeneration != nil {
-		if p, m := ai.GetModel(ai.ImageGeneration.ModelID); ai.ImageGeneration.ModelID != "" && (p == nil || m == nil) {
-			ai.ImageGeneration.ModelID = ""
+		if _, m := ai.GetModel(ai.ImageGeneration.ModelID); ai.ImageGeneration.ModelID != "" {
+			if m == nil {
+				ai.ImageGeneration.ModelID = ""
+			} else {
+				ai.ImageGeneration.ModelID = m.ID
+			}
 		}
 	}
 }

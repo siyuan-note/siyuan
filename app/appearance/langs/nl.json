@@ -202,7 +202,7 @@
 	"testConnectionFail": "Verbinding mislukt",
 	"testConnectionFailModelRequired": "Voer de modelnaam in",
 	"testConnectionFailModelNotFound": "Dit model staat niet in de lijst met beschikbare modellen",
-	"fetchAvailableModels": "Beschikbare modellen ophalen",
+	"fetchAvailableModels": "Beschikbare modellen vernieuwen",
 	"fetchAvailableModelsSuccess": "${x} modellen opgehaald; selecteer er een uit de suggesties voor de modelnaam",
 	"fetchAvailableModelsFail": "Ophalen van beschikbare modellen mislukt",
 	"selectModel": "Selecteer een model",

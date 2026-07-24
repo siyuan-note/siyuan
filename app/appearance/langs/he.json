@@ -202,7 +202,7 @@
 	"testConnectionFail": "החיבור נכשל",
 	"testConnectionFailModelRequired": "נא להזין את שם המודל",
 	"testConnectionFailModelNotFound": "מודל זה אינו ברשימת המודלים הזמינים",
-	"fetchAvailableModels": "אחזור מודלים זמינים",
+	"fetchAvailableModels": "רענון מודלים זמינים",
 	"fetchAvailableModelsSuccess": "אוחזרו ${x} מודלים; ניתן לבחור אחד מההצעות בשדה שם המודל",
 	"fetchAvailableModelsFail": "אחזור המודלים הזמינים נכשל",
 	"selectModel": "נא לבחור מודל",

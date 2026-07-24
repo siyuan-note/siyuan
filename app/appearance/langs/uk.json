@@ -202,7 +202,7 @@
 	"testConnectionFail": "Помилка з'єднання",
 	"testConnectionFailModelRequired": "Введіть назву моделі",
 	"testConnectionFailModelNotFound": "Цієї моделі немає в списку доступних моделей",
-	"fetchAvailableModels": "Отримати доступні моделі",
+	"fetchAvailableModels": "Оновити доступні моделі",
 	"fetchAvailableModelsSuccess": "Отримано моделей: ${x}. Виберіть модель із підказок у полі назви",
 	"fetchAvailableModelsFail": "Не вдалося отримати доступні моделі",
 	"selectModel": "Виберіть модель",

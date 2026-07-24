@@ -202,7 +202,7 @@
 	"testConnectionFail": "فشل الاتصال",
 	"testConnectionFailModelRequired": "يرجى إدخال اسم النموذج",
 	"testConnectionFailModelNotFound": "هذا النموذج غير موجود في قائمة النماذج المتاحة",
-	"fetchAvailableModels": "جلب النماذج المتاحة",
+	"fetchAvailableModels": "تحديث النماذج المتاحة",
 	"fetchAvailableModelsSuccess": "تم جلب ${x} نموذج، ويمكن اختيارها من حقل اسم النموذج",
 	"fetchAvailableModelsFail": "فشل جلب النماذج المتاحة",
 	"selectModel": "يرجى اختيار نموذج",

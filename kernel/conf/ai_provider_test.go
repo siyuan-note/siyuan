@@ -88,7 +88,7 @@ func TestAssignDefaultModelIDsUsesKeylessProvider(t *testing.T) {
 
 func TestReconcileModelIDs(t *testing.T) {
 	first := &Model{ID: "first-model", Name: "first", Enabled: true}
-	second := &Model{ID: "second-model", Name: "second", Enabled: true}
+	second := &Model{ID: "second-model", Name: "second", DisplayName: "Second", Enabled: true}
 	ai := &AI{
 		Providers: []*Provider{
 			{Enabled: false, Models: []*Model{{ID: "disabled-provider-model", Name: "disabled", Enabled: true}}},
@@ -96,9 +96,9 @@ func TestReconcileModelIDs(t *testing.T) {
 			{Enabled: true, Models: []*Model{first, second}},
 		},
 		Editing:         &Editing{ModelID: "missing"},
-		Agent:           &Agent{ModelID: second.ID},
+		Agent:           &Agent{ModelID: second.Name},
 		Vision:          &Vision{ModelID: "missing"},
-		ImageGeneration: &ImageGeneration{ModelID: second.ID},
+		ImageGeneration: &ImageGeneration{ModelID: second.DisplayName},
 	}
 
 	ai.ReconcileModelIDs()

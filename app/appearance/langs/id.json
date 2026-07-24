@@ -202,7 +202,7 @@
 	"testConnectionFail": "Koneksi gagal",
 	"testConnectionFailModelRequired": "Silakan masukkan nama model",
 	"testConnectionFailModelNotFound": "Model ini tidak ada dalam daftar model yang tersedia",
-	"fetchAvailableModels": "Ambil model yang tersedia",
+	"fetchAvailableModels": "Segarkan model yang tersedia",
 	"fetchAvailableModelsSuccess": "${x} model berhasil diambil; pilih salah satu dari saran nama model",
 	"fetchAvailableModelsFail": "Gagal mengambil model yang tersedia",
 	"selectModel": "Pilih model",

@@ -202,7 +202,7 @@
 	"testConnectionFail": "Ошибка подключения",
 	"testConnectionFailModelRequired": "Введите имя модели",
 	"testConnectionFailModelNotFound": "Этой модели нет в списке доступных моделей",
-	"fetchAvailableModels": "Получить доступные модели",
+	"fetchAvailableModels": "Обновить доступные модели",
 	"fetchAvailableModelsSuccess": "Получено моделей: ${x}. Выберите модель из подсказок в поле имени",
 	"fetchAvailableModelsFail": "Не удалось получить доступные модели",
 	"selectModel": "Выберите модель",

@@ -202,7 +202,7 @@
 	"testConnectionFail": "कनेक्शन विफल",
 	"testConnectionFailModelRequired": "कृपया मॉडल नाम दर्ज करें",
 	"testConnectionFailModelNotFound": "यह मॉडल उपलब्ध मॉडल सूची में नहीं है",
-	"fetchAvailableModels": "उपलब्ध मॉडल लाएं",
+	"fetchAvailableModels": "उपलब्ध मॉडल रीफ़्रेश करें",
 	"fetchAvailableModelsSuccess": "${x} मॉडल लाए गए; मॉडल नाम के सुझावों में से एक चुनें",
 	"fetchAvailableModelsFail": "उपलब्ध मॉडल लाना विफल",
 	"selectModel": "एक मॉडल चुनें",

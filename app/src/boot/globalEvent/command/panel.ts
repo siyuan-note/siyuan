@@ -337,6 +337,9 @@ export const execByCommand = async (options: {
                     notebook: protyle.notebookId,
                     path: protyle.path.endsWith(".sy") ? protyle.path : protyle.path + ".sy"
                 });
+                if (response.code !== 0 || typeof response.data !== "string") {
+                    return;
+                }
                 popSearch(options.app, {
                     page: 1,
                     hasReplace: true,
@@ -385,6 +388,9 @@ export const execByCommand = async (options: {
                     notebook: protyle.notebookId,
                     path: protyle.path.endsWith(".sy") ? protyle.path : protyle.path + ".sy"
                 });
+                if (response.code !== 0 || typeof response.data !== "string") {
+                    return;
+                }
                 popSearch(options.app, {
                     page: 1,
                     hasReplace: false,

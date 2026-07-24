@@ -619,6 +619,9 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         content = cellElement.querySelector(".av__celltext").textContent;
                     } else {
                         const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
+                        if (response.code !== 0 || typeof response.data !== "string") {
+                            continue;
+                        }
                         content = response.data;
                     }
 

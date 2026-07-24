@@ -63,6 +63,148 @@ func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
 	}
 }
 
+func TestCheckBlockTreeMetadataAccessableByPublishAccess(t *testing.T) {
+	const (
+		boxID          = "20260725000000-boxid01"
+		docID          = "20260725000001-docid01"
+		parentID       = "20260725000002-parent1"
+		privateID      = "20260725000003-private"
+		privatePass    = "password"
+		protectedID    = "20260725000004-protect"
+		protectedPass  = "protected-password"
+		inconsistentID = "20260725000005-invalid"
+		childID        = "20260725000006-child01"
+	)
+	newBlockTree := func(id, blockPath string) *treenode.BlockTree {
+		return &treenode.BlockTree{
+			ID:    id,
+			BoxID: boxID,
+			Path:  blockPath,
+		}
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+
+	tests := []struct {
+		name          string
+		publishAccess PublishAccess
+		blockTree     *treenode.BlockTree
+		metadata      bool
+		discoverable  bool
+	}{
+		{
+			name:         "missing",
+			blockTree:    nil,
+			metadata:     false,
+			discoverable: false,
+		},
+		{
+			name:         "public",
+			blockTree:    newBlockTree(docID, "/"+docID+".sy"),
+			metadata:     true,
+			discoverable: true,
+		},
+		{
+			name:          "protected",
+			publishAccess: PublishAccess{{ID: protectedID, Visible: true, Password: protectedPass}},
+			blockTree:     newBlockTree(protectedID, "/"+protectedID+".sy"),
+			metadata:      true,
+			discoverable:  true,
+		},
+		{
+			name:          "hidden",
+			publishAccess: PublishAccess{{ID: docID, Visible: false}},
+			blockTree:     newBlockTree(docID, "/"+docID+".sy"),
+			metadata:      true,
+			discoverable:  false,
+		},
+		{
+			name:          "private",
+			publishAccess: PublishAccess{{ID: privateID, Visible: false, Password: privatePass}},
+			blockTree:     newBlockTree(privateID, "/"+privateID+".sy"),
+			metadata:      false,
+			discoverable:  false,
+		},
+		{
+			name:          "forbidden",
+			publishAccess: PublishAccess{{ID: docID, Visible: false, Disable: true}},
+			blockTree:     newBlockTree(docID, "/"+docID+".sy"),
+			metadata:      false,
+			discoverable:  false,
+		},
+		{
+			name:          "hidden parent",
+			publishAccess: PublishAccess{{ID: parentID, Visible: false}},
+			blockTree:     newBlockTree(docID, "/"+parentID+"/"+docID+".sy"),
+			metadata:      true,
+			discoverable:  false,
+		},
+		{
+			name:          "private parent",
+			publishAccess: PublishAccess{{ID: privateID, Visible: false, Password: privatePass}},
+			blockTree:     newBlockTree(docID, "/"+privateID+"/"+docID+".sy"),
+			metadata:      false,
+			discoverable:  false,
+		},
+		{
+			name:          "hidden notebook",
+			publishAccess: PublishAccess{{ID: boxID, Visible: false}},
+			blockTree:     newBlockTree(docID, "/"+docID+".sy"),
+			metadata:      true,
+			discoverable:  false,
+		},
+		{
+			name:          "inconsistent visible forbidden",
+			publishAccess: PublishAccess{{ID: inconsistentID, Visible: true, Disable: true}},
+			blockTree:     newBlockTree(inconsistentID, "/"+inconsistentID+".sy"),
+			metadata:      false,
+			discoverable:  false,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := CheckBlockTreeMetadataAccessableByPublishAccess(c, test.publishAccess, test.blockTree); actual != test.metadata {
+				t.Fatalf("metadata access = %v, want %v", actual, test.metadata)
+			}
+			if actual := CheckBlockTreeDiscoverableByPublishAccess(test.publishAccess, test.blockTree); actual != test.discoverable {
+				t.Fatalf("discoverable = %v, want %v", actual, test.discoverable)
+			}
+		})
+	}
+
+	privateTree := newBlockTree(privateID, "/"+privateID+".sy")
+	privateAccess := PublishAccess{{ID: privateID, Visible: false, Password: privatePass}}
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + privateID,
+		Value: util.SHA256Hash([]byte(privateID + privatePass)),
+	})
+	if !CheckBlockTreeMetadataAccessableByPublishAccess(c, privateAccess, privateTree) {
+		t.Fatal("private document metadata should be accessible after authorization")
+	}
+	if CheckBlockTreeDiscoverableByPublishAccess(privateAccess, privateTree) {
+		t.Fatal("private document should remain undiscoverable after authorization")
+	}
+
+	protectedChildTree := newBlockTree(childID, "/"+parentID+"/"+protectedID+"/"+childID+".sy")
+	inheritedAccess := PublishAccess{
+		{ID: parentID, Visible: false},
+		{ID: protectedID, Visible: true, Password: protectedPass},
+	}
+	if CheckBlockTreeMetadataAccessableByPublishAccess(c, inheritedAccess, protectedChildTree) {
+		t.Fatal("protected child metadata under a hidden parent should require authorization")
+	}
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedID,
+		Value: util.SHA256Hash([]byte(protectedID + protectedPass)),
+	})
+	if !CheckBlockTreeMetadataAccessableByPublishAccess(c, inheritedAccess, protectedChildTree) {
+		t.Fatal("protected child metadata under a hidden parent should be accessible after authorization")
+	}
+	if CheckBlockTreeDiscoverableByPublishAccess(inheritedAccess, protectedChildTree) {
+		t.Fatal("protected child under a hidden parent should remain undiscoverable")
+	}
+}
+
 func TestCheckAttributeViewItemIDAccessableByPublishAccess(t *testing.T) {
 	attrView := &av.AttributeView{
 		KeyValues: []*av.KeyValues{

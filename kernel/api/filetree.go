@@ -376,6 +376,15 @@ func getHPathByPath(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if p != "/" && model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		id := util.GetTreeID(p)
+		if !model.CheckBlockIdMetadataAccessableByPublishAccessInBox(c, publishAccess, id, notebook) {
+			ret.Code = -1
+			ret.Msg = model.ErrBlockNotFound.Error()
+			return
+		}
+	}
 	ret.Data = hPath
 }
 
@@ -393,6 +402,7 @@ func getHPathsByPaths(c *gin.Context) {
 	for _, p := range pathsArg {
 		paths = append(paths, p.(string))
 	}
+	paths = filterFileTreePathsByPublishMetadataAccess(c, paths)
 	hPath, err := model.GetHPathsByPaths(paths)
 	if err != nil {
 		ret.Code = -1
@@ -422,6 +432,14 @@ func getHPathByID(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		if !model.CheckBlockIdMetadataAccessableByPublishAccess(c, publishAccess, id) {
+			ret.Code = -1
+			ret.Msg = model.ErrTreeNotFound.Error()
+			return
+		}
+	}
 	ret.Data = hPath
 }
 
@@ -448,6 +466,14 @@ func getPathByID(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		if !model.CheckBlockIdMetadataAccessableByPublishAccessInBox(c, publishAccess, id, notebook) {
+			ret.Code = -1
+			ret.Msg = model.ErrTreeNotFound.Error()
+			return
+		}
+	}
 	ret.Data = map[string]any{
 		"path":     p,
 		"notebook": notebook,
@@ -467,11 +493,22 @@ func getFullHPathByID(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
 	hPath, err := model.GetFullHPathByID(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
+	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		if !model.CheckBlockIdMetadataAccessableByPublishAccess(c, publishAccess, id) {
+			ret.Code = -1
+			ret.Msg = model.ErrTreeNotFound.Error()
+			return
+		}
 	}
 	ret.Data = hPath
 }
@@ -503,7 +540,44 @@ func getIDsByHPath(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	ids = filterFileTreeBlockIDsByPublishDiscoverability(c, ids, notebook)
 	ret.Data = ids
+}
+
+func filterFileTreePathsByPublishMetadataAccess(c *gin.Context, paths []string) (ret []string) {
+	if !model.IsReadOnlyRoleContext(c) {
+		return paths
+	}
+
+	ids := make([]string, 0, len(paths))
+	for _, p := range paths {
+		ids = append(ids, util.GetTreeID(p))
+	}
+	blockTrees := treenode.GetBlockTrees(ids)
+	publishAccess := model.GetPublishAccess()
+	ret = make([]string, 0, len(paths))
+	for i, p := range paths {
+		if model.CheckBlockTreeMetadataAccessableByPublishAccess(c, publishAccess, blockTrees[ids[i]]) {
+			ret = append(ret, p)
+		}
+	}
+	return
+}
+
+func filterFileTreeBlockIDsByPublishDiscoverability(c *gin.Context, ids []string, boxID string) (ret []string) {
+	if !model.IsReadOnlyRoleContext(c) {
+		return ids
+	}
+
+	blockTrees := treenode.GetBlockTreesInBox(ids, boxID)
+	publishAccess := model.GetPublishAccess()
+	ret = make([]string, 0, len(ids))
+	for _, id := range ids {
+		if model.CheckBlockTreeDiscoverableByPublishAccess(publishAccess, blockTrees[id]) {
+			ret = append(ret, id)
+		}
+	}
+	return
 }
 
 func moveDocs(c *gin.Context) {

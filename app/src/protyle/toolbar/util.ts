@@ -262,6 +262,9 @@ export const copyTextByType = async (ids: string[],
             text += `[${response.data.replace("[", "\\[").replace("]", "\\]")}](siyuan://blocks/${id})`;
         } else if (type === "hPath") {
             const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
+            if (response.code !== 0 || typeof response.data !== "string") {
+                continue;
+            }
             text += response.data;
         } else if (type === "webURL") {
             text += `${window.location.origin}?id=${id}`;

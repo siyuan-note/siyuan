@@ -34,7 +34,9 @@ const renderRecentDocsContent = async (data: {
         const pathResponse = await fetchSyncPost("/api/filetree/getFullHPathByID", {
             id: data[0].rootID // 过滤后的第一个文档 ID
         });
-        switchPath = escapeHtml(pathResponse.data);
+        if (pathResponse.code === 0 && typeof pathResponse.data === "string") {
+            switchPath = escapeHtml(pathResponse.data);
+        }
     }
     let dockHtml = "";
     if (!isWindow()) {

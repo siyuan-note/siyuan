@@ -479,6 +479,9 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
             } else if (type === "currentPath" && !target.hasAttribute("disabled")) {
                 const editProtyle = getCurrentEditor().protyle;
                 fetchPost("/api/filetree/getHPathsByPaths", {paths: [editProtyle.path]}, (response) => {
+                    if (!Array.isArray(response.data) || typeof response.data[0] !== "string") {
+                        return;
+                    }
                     config.idPath = [pathPosix().join(editProtyle.notebookId, editProtyle.path)];
                     config.hPath = response.data[0];
                     const searchPathElement = element.querySelector("#searchPath");

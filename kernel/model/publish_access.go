@@ -226,6 +226,50 @@ func CheckBlockIdAccessableByPublishAccessInBox(c *gin.Context, publishAccess Pu
 	return checkBlockTreeAccessableByPublishAccess(c, publishAccess, bt)
 }
 
+func CheckBlockIdMetadataAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockID string) bool {
+	return CheckBlockIdMetadataAccessableByPublishAccessInBox(c, publishAccess, blockID, "")
+}
+
+func CheckBlockIdMetadataAccessableByPublishAccessInBox(c *gin.Context, publishAccess PublishAccess, blockID, boxID string) bool {
+	bt := treenode.GetBlockTreeInBox(blockID, boxID)
+	return CheckBlockTreeMetadataAccessableByPublishAccess(c, publishAccess, bt)
+}
+
+func CheckBlockTreeMetadataAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) bool {
+	if bt == nil {
+		return false
+	}
+
+	publishDisable := GetDisablePublishAccess(publishAccess)
+	if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) {
+		return false
+	}
+
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) {
+		return true
+	}
+
+	passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+	return password == "" || CheckPublishAuthCookie(c, passwordID, password)
+}
+
+func CheckBlockIdDiscoverableByPublishAccessInBox(publishAccess PublishAccess, blockID, boxID string) bool {
+	bt := treenode.GetBlockTreeInBox(blockID, boxID)
+	return CheckBlockTreeDiscoverableByPublishAccess(publishAccess, bt)
+}
+
+func CheckBlockTreeDiscoverableByPublishAccess(publishAccess PublishAccess, bt *treenode.BlockTree) bool {
+	if bt == nil {
+		return false
+	}
+
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
+	return CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) &&
+		CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable)
+}
+
 func checkBlockTreeAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) bool {
 	if bt == nil {
 		return false

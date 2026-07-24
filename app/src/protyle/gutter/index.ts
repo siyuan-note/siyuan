@@ -1460,7 +1460,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
                 protyle,
                 nodeElement,
-                type: "CancelListRecursively"
+                type: "CancelList"
             }));
             turnIntoSubmenu.push(this.turnsIntoOne({
                 menuId: "quote",
@@ -1479,7 +1479,17 @@ export class Gutter {
                 selectsElement: [nodeElement],
                 type: "Blocks2Callout"
             }));
-            if (nodeElement.getAttribute("data-subtype") === "o") {
+            const listSubtype = nodeElement.getAttribute("data-subtype");
+            const recursiveTurnIntoSubmenu: IMenu[] = [this.turnsOneInto({
+                menuId: "recursiveParagraph",
+                id,
+                icon: "iconParagraph",
+                label: window.siyuan.languages.paragraph,
+                protyle,
+                nodeElement,
+                type: "CancelListRecursively"
+            })];
+            if (listSubtype === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "list",
                     id,
@@ -1488,8 +1498,7 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     protyle,
                     nodeElement,
-                    type: "ConvertListType",
-                    targetListType: "u",
+                    type: "OL2UL"
                 }));
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "check",
@@ -1499,10 +1508,29 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     nodeElement,
-                    type: "ConvertListType",
-                    targetListType: "t",
+                    type: "UL2TL"
                 }));
-            } else if (nodeElement.getAttribute("data-subtype") === "t") {
+                recursiveTurnIntoSubmenu.push(this.turnsOneInto({
+                    menuId: "recursiveList",
+                    id,
+                    icon: "iconList",
+                    label: window.siyuan.languages.list,
+                    protyle,
+                    nodeElement,
+                    type: "ConvertListType",
+                    targetListType: "u"
+                }));
+                recursiveTurnIntoSubmenu.push(this.turnsOneInto({
+                    menuId: "recursiveCheck",
+                    id,
+                    icon: "iconCheck",
+                    label: window.siyuan.languages.check,
+                    protyle,
+                    nodeElement,
+                    type: "ConvertListType",
+                    targetListType: "t"
+                }));
+            } else if (listSubtype === "t") {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "list",
                     id,
@@ -1511,8 +1539,7 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     protyle,
                     nodeElement,
-                    type: "ConvertListType",
-                    targetListType: "u",
+                    type: "TL2UL"
                 }));
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "orderedList",
@@ -1522,8 +1549,27 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     nodeElement,
+                    type: "TL2OL"
+                }));
+                recursiveTurnIntoSubmenu.push(this.turnsOneInto({
+                    menuId: "recursiveList",
+                    id,
+                    icon: "iconList",
+                    label: window.siyuan.languages.list,
+                    protyle,
+                    nodeElement,
                     type: "ConvertListType",
-                    targetListType: "o",
+                    targetListType: "u"
+                }));
+                recursiveTurnIntoSubmenu.push(this.turnsOneInto({
+                    menuId: "recursiveOrderedList",
+                    id,
+                    icon: "iconOrderedList",
+                    label: window.siyuan.languages["ordered-list"],
+                    protyle,
+                    nodeElement,
+                    type: "ConvertListType",
+                    targetListType: "o"
                 }));
             } else {
                 turnIntoSubmenu.push(this.turnsOneInto({
@@ -1534,8 +1580,7 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     nodeElement,
-                    type: "ConvertListType",
-                    targetListType: "o",
+                    type: "UL2OL"
                 }));
                 turnIntoSubmenu.push(this.turnsOneInto({
                     menuId: "check",
@@ -1545,10 +1590,36 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     nodeElement,
+                    type: "OL2TL"
+                }));
+                recursiveTurnIntoSubmenu.push(this.turnsOneInto({
+                    menuId: "recursiveOrderedList",
+                    id,
+                    icon: "iconOrderedList",
+                    label: window.siyuan.languages["ordered-list"],
+                    protyle,
+                    nodeElement,
                     type: "ConvertListType",
-                    targetListType: "t",
+                    targetListType: "o"
+                }));
+                recursiveTurnIntoSubmenu.push(this.turnsOneInto({
+                    menuId: "recursiveCheck",
+                    id,
+                    icon: "iconCheck",
+                    label: window.siyuan.languages.check,
+                    protyle,
+                    nodeElement,
+                    type: "ConvertListType",
+                    targetListType: "t"
                 }));
             }
+            turnIntoSubmenu.push({
+                id: "includeSublists",
+                icon: "iconListItem",
+                label: window.siyuan.languages.includeSublists,
+                type: "submenu",
+                submenu: recursiveTurnIntoSubmenu
+            });
         } else if (type === "NodeBlockquote" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",

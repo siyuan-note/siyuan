@@ -1,4 +1,5 @@
 {
+  "includeSublists": "包括子列表",
   "selectRelationItems": "选择条目",
   "filterOperatorContainsAnyItem": "包含任一",
   "filterOperatorDoesNotContainAnyItem": "不包含任一",

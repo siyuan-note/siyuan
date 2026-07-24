@@ -1,4 +1,5 @@
 {
+  "includeSublists": "Incluir sublistas",
   "selectRelationItems": "Seleccionar elementos relacionados",
   "filterOperatorContainsAnyItem": "Contiene cualquiera",
   "filterOperatorDoesNotContainAnyItem": "No contiene ninguno",

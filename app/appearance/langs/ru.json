@@ -1,4 +1,5 @@
 {
+  "includeSublists": "Включить вложенные списки",
   "selectRelationItems": "Выбрать связанные элементы",
   "filterOperatorContainsAnyItem": "Содержит любой элемент",
   "filterOperatorDoesNotContainAnyItem": "Не содержит ни одного элемента",

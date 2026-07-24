@@ -1,4 +1,5 @@
 {
+  "includeSublists": "Zahrnúť vnorené zoznamy",
   "selectRelationItems": "Vybrať súvisiace položky",
   "filterOperatorContainsAnyItem": "Obsahuje ľubovoľnú položku",
   "filterOperatorDoesNotContainAnyItem": "Neobsahuje žiadnu položku",

@@ -174,8 +174,8 @@ data-def-path="${item.defPath}">
     ${iconHTML}
     ${numberHTML}
     <span class="b3-list-item__text ariaLabel" data-position="parentE" ${type === "outline" ? ' aria-label="' + escapeAriaLabel(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
-    ${countHTML}
     ${this.blockExtHTML || ""}
+    ${countHTML}
 </li>`;
             if (item.children && item.children.length > 0) {
                 html += this.genBlockHTML(item.children, type === "outline" ? !item.folded : false, type) + "</ul>";

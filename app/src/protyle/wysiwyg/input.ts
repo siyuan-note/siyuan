@@ -22,6 +22,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 import {updateAVName} from "../render/av/action";
 import {setFold} from "../util/blockFold";
+import {nbsp2space} from "../util/normalizeText";
 
 export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true, event?: InputEvent) => {
     if (!blockElement.parentElement) {
@@ -213,11 +214,20 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
-    // 列表项内紧挨标记的第一个段落块不允许产生子列表 https://github.com/siyuan-note/siyuan/issues/17890
+    // 列表项内紧挨标记的首个段落块不生成子列表，仅移除触发标记并保留现有内容
+    // https://github.com/siyuan-note/siyuan/issues/17890 https://github.com/siyuan-note/siyuan/issues/18355
     if (blockElement.closest('[data-type="NodeListItem"]') &&
         blockElement.previousElementSibling?.classList.contains("protyle-action")) {
         if (tempElement.content.firstElementChild.classList.contains("list")) {
-            getContenteditableElement(blockElement).innerHTML = "<wbr>";
+            if (editElement.contains(wbrElement)) {
+                const markerRange = document.createRange();
+                markerRange.setStart(editElement, 0);
+                markerRange.setEndBefore(wbrElement);
+                const marker = nbsp2space(markerRange.toString()).split(Constants.ZWSP).join("");
+                if (/^ {0,3}(?:[-+*]|\d{1,9}[.)]) $/.test(marker)) {
+                    markerRange.deleteContents();
+                }
+            }
             html = blockElement.outerHTML;
             tempElement.innerHTML = html;
         }

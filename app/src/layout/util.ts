@@ -912,17 +912,18 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
         let range: Range;
         resizeElement.addEventListener("mousedown", (event: MouseEvent) => {
             event.preventDefault();
-            disableIframePointerEvents();
             getAllModels().editor.forEach((item) => {
                 if (item.editor && item.editor.protyle && item.element.parentElement) {
                     hideElements(["gutter"], item.editor.protyle);
                 }
             });
-
             if (getSelection().rangeCount > 0) {
                 range = getSelection().getRangeAt(0);
             }
             const documentSelf = document;
+            documentSelf.querySelectorAll("iframe:not(.fn__pointer-none)").forEach((iframe: HTMLElement) => {
+                iframe.classList.add("fn__pointer-none");
+            });
             const nextElement = resizeElement.nextElementSibling as HTMLElement;
             const previousElement = resizeElement.previousElementSibling as HTMLElement;
             nextElement.style.overflow = "auto"; // 拖动时 layout__resize 会出现 https://github.com/siyuan-note/siyuan/issues/6221
@@ -982,7 +983,9 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             };
 
             documentSelf.onmouseup = () => {
-                restoreIframePointerEvents();
+                documentSelf.querySelectorAll("iframe.fn__pointer-none").forEach((iframe: HTMLElement) => {
+                    iframe.classList.remove("fn__pointer-none");
+                });
                 documentSelf.onmousemove = null;
                 documentSelf.onmouseup = null;
                 documentSelf.ondragstart = null;
@@ -1154,27 +1157,4 @@ export const fixWndFlex1 = (layout: Layout) => {
             flex1Element.classList.add("fn__flex-1");
         }
     }
-};
-
-const pointerEventsNoneDataSetKey = "resizing";
-const pointerEventsNoneDataSetValue = "layout";
-
-export const disableIframePointerEvents = (
-    rootElement: ParentNode = document,
-    dataSetKey: string = pointerEventsNoneDataSetKey,
-    dataSetValue: string = pointerEventsNoneDataSetValue,
-) => {
-    rootElement.querySelectorAll<HTMLIFrameElement>(`iframe:not([data-${dataSetKey}="${dataSetValue}"])`).forEach((iframe) => {
-        iframe.dataset[dataSetKey] = dataSetValue;
-    });
-};
-
-export const restoreIframePointerEvents = (
-    rootElement: ParentNode = document,
-    dataSetKey: string = pointerEventsNoneDataSetKey,
-    dataSetValue: string = pointerEventsNoneDataSetValue,
-) => {
-    rootElement.querySelectorAll<HTMLIFrameElement>(`iframe[data-${dataSetKey}="${dataSetValue}"]`).forEach((iframe) => {
-        delete iframe.dataset[dataSetKey];
-    });
 };

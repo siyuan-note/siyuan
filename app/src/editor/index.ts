@@ -149,9 +149,7 @@ export class Editor extends Model {
         });
         this.backlinkMutationObserver.observe(this.editor.protyle.wysiwyg.element, {
             attributes: true,
-            attributeFilter: ["data-eof"],
-            childList: true,
-            subtree: true,
+            attributeFilter: ["data-bottom-eof"],
         });
         this.updateBacklinkVisibility();
     }
@@ -180,9 +178,8 @@ export class Editor extends Model {
         if (!this.backlinkElement) {
             return;
         }
-        const lastElement = this.editor.protyle.wysiwyg.element.lastElementChild;
         const hidden = this.backlinkEmpty || (!this.editor.protyle.block.showAll && this.editor.protyle.block.scroll &&
-            lastElement?.getAttribute("data-eof") !== "2");
+            !this.editor.protyle.wysiwyg.element.hasAttribute("data-bottom-eof"));
         if (this.backlinkElement.classList.contains("fn__none") !== hidden || forcePadding) {
             this.backlinkElement.classList.toggle("fn__none", hidden);
             setPadding(this.editor.protyle);

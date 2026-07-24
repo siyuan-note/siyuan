@@ -330,10 +330,14 @@ func getNotebookConf(c *gin.Context) {
 		return
 	}
 
+	boxConf := box.GetConf()
+	if !model.IsAdminRoleContext(c) {
+		model.HideBoxConfSecret(boxConf)
+	}
 	ret.Data = map[string]any{
 		"box":  box.ID,
 		"name": box.Name,
-		"conf": box.GetConf(),
+		"conf": boxConf,
 	}
 }
 

@@ -90,9 +90,7 @@ const getProviderAvatarHTML = (provider: Config.IProvider, preset = findPreset(p
 };
 
 const getProviderViewHost = (root: HTMLElement) =>
-    root.closest<HTMLElement>(".config__panel") ||
-    root.closest<HTMLElement>(".config__tab-container") ||
-    root;
+    root.closest<HTMLElement>(".config__tab-container") || root;
 
 const getProviderViews = (root: HTMLElement) => {
     return Array.from(getProviderViewHost(root).children).filter((element): element is HTMLElement =>
@@ -100,14 +98,10 @@ const getProviderViews = (root: HTMLElement) => {
 };
 
 const removeProviderView = (root: HTMLElement, view?: HTMLElement) => {
-    const host = getProviderViewHost(root);
     if (view) {
         view.remove();
     } else {
         getProviderViews(root).forEach((item) => item.remove());
-    }
-    if (getProviderViews(root).length === 0) {
-        host.classList.remove("config-ai-provider__view-host");
     }
 };
 
@@ -117,7 +111,6 @@ const createProviderView = (root: HTMLElement, title: string, stacked = false) =
     }
     const host = getProviderViewHost(root);
     const layer = getProviderViews(root).length;
-    host.classList.add("config-ai-provider__view-host");
     const view = document.createElement("div");
     view.className = "config-ai-provider__view";
     view.style.zIndex = String(3 + layer);

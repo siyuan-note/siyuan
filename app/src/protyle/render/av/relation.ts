@@ -369,6 +369,43 @@ export const bindRelationEvent = (options: {
         controller: undefined as AbortController | undefined,
     };
     let searchTimer: number;
+    let listNaturalMaxHeight = 0;
+    let positionInitialized = false;
+
+    const resetPosition = () => {
+        options.menuElement.removeAttribute("data-position-top");
+        options.menuElement.removeAttribute("data-position-bottom");
+        options.menuElement.removeAttribute("data-position-x");
+    };
+    const updateListMaxHeight = () => {
+        if (listNaturalMaxHeight < 1) {
+            return false;
+        }
+        const menuStyle = getComputedStyle(options.menuElement);
+        const maxMenuHeight = parseFloat(menuStyle.maxHeight) || window.innerHeight - 32;
+        const headerHeight = listElement.previousElementSibling?.getBoundingClientRect().height || 0;
+        const chromeHeight = headerHeight + parseFloat(menuStyle.paddingTop) + parseFloat(menuStyle.paddingBottom) +
+            parseFloat(menuStyle.borderTopWidth) + parseFloat(menuStyle.borderBottomWidth);
+        const maxHeight = Math.max(30, Math.min(listNaturalMaxHeight, maxMenuHeight - chromeHeight));
+        const maxHeightValue = maxHeight + "px";
+        if (listElement.style.maxHeight === maxHeightValue) {
+            return false;
+        }
+        listElement.style.maxHeight = maxHeightValue;
+        return true;
+    };
+    const positionMenu = (reset = false) => {
+        if (reset) {
+            resetPosition();
+        }
+        const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
+        setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+        positionInitialized = true;
+    };
+    const resize = () => {
+        updateListMaxHeight();
+        positionMenu(true);
+    };
 
     const setLoading = (loading: boolean) => {
         listElement.querySelector('[data-relation-type="loader"]')?.classList.toggle("fn__none", !loading);
@@ -455,8 +492,17 @@ ${genRelationLoaderHTML(state.loading)}`;
             databaseName.setAttribute("data-id", response.data.blockIDs?.[0] || "");
             renderPage(cells, reset);
             setLoading(false);
-            const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-            setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+            let listHeightChanged = false;
+            if (listNaturalMaxHeight < 1 && (keyword === "" || cells.length === RELATION_PAGE_SIZE)) {
+                listNaturalMaxHeight = listElement.scrollHeight;
+                if (listNaturalMaxHeight > 0) {
+                    listHeightChanged = updateListMaxHeight();
+                }
+            }
+            if (!positionInitialized || listHeightChanged) {
+                resetPosition();
+            }
+            positionMenu();
             succeeded = true;
         }, undefined, undefined, controller.signal).finally(() => {
             if (state.controller !== controller) {
@@ -530,9 +576,11 @@ ${genRelationLoaderHTML(state.loading)}`;
             showMessage(window.siyuan.languages.copied);
         }
     });
+    window.addEventListener("resize", resize);
     loadPage(true);
     return () => {
         state.controller?.abort();
+        window.removeEventListener("resize", resize);
         if (searchTimer) {
             clearTimeout(searchTimer);
         }

@@ -860,11 +860,31 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         });
         if (event.y <= protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
             const range = getRangeByPoint(event.clientX, event.clientY);
+            let caretLineShown = false;
             if (range && !hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
                 const rect = range.getBoundingClientRect();
                 if (rect.height > 0) {
                     showCaretLine(rect.left, rect.top, rect.height);
+                    caretLineShown = true;
+                } else {
+                    const blockElement = hasClosestBlock(range.startContainer) || hasClosestBlock(event.target as HTMLElement);
+                    const editableElement = hasClosestByAttribute(range.startContainer, "contenteditable", "true") ||
+                        getContenteditableElement(blockElement as HTMLElement);
+                    if (editableElement) {
+                        const editableRect = editableElement.getBoundingClientRect();
+                        const editableStyle = getComputedStyle(editableElement);
+                        const lineHeight = parseFloat(editableStyle.lineHeight) || editableRect.height;
+                        const height = Math.min(lineHeight, editableRect.height);
+                        if (height > 0) {
+                            const left = editableStyle.direction === "rtl" ? editableRect.right - 2 : editableRect.left;
+                            showCaretLine(left, editableRect.top + (editableRect.height - height) / 2, height);
+                            caretLineShown = true;
+                        }
+                    }
                 }
+            }
+            if (!caretLineShown) {
+                hideCaretLine();
             }
         } else {
             hideCaretLine();
@@ -1807,11 +1827,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
-        if (event.altKey && fileTreeIds.indexOf("-") === -1) {
-            // Alt=插入引用（行级）：走光标定位语义，清除全部拖拽指示。
+        const isFileTreeRef = fileTreeIds.indexOf("-") > -1 && !event.altKey && !isAvTarget;
+        if (isFileTreeRef || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
+            // 插入引用（行级）时走光标定位语义，清除全部块级拖拽指示。
             // 复用 cleanupDragIndicators 以覆盖列表专属指示类（--sibling/--child）与 --drag-* 变量，
-            // 否则按 Alt 时列表指示线会冻结在原处不动（仅清通用类不足以移除列表指示）。
-            // 注意：保留源块 .protyle-wysiwyg--select 不移除——该类仅在 dragstart 添加一次，
+            // 否则切换到引用语义时列表指示线会冻结在原处不动（仅清通用类不足以移除列表指示）。
+            // 块标拖拽时保留源块 .protyle-wysiwyg--select 不移除——该类仅在 dragstart 添加一次，
             // 移除后永不恢复；松开修饰键回到普通拖拽时，no-op 守卫需靠它识别源块，
             // 否则源项可被"移动"回自身原位。引用语义不依赖该类（用 gutterTypes[2] 的 id）。
             renderBlockRefDragover(event);

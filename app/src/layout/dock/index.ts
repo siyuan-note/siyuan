@@ -17,7 +17,7 @@ import {Backlink} from "./Backlink";
 import {AgentChat} from "./agent/AgentChat";
 import {adjustDockPadding, resetFloatDockSize} from "./util";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {Plugin} from "../../plugin";
 import {Custom} from "./Custom";
 import {clearBeforeResizeTop, recordBeforeResizeTop} from "../../protyle/util/resize";

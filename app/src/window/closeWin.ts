@@ -1,4 +1,4 @@
-import {App} from "../index";
+import type {App} from "../index";
 import {Constants} from "../constants";
 import { ipcRenderer } from "electron";
 

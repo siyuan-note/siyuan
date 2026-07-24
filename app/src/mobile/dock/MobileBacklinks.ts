@@ -2,7 +2,7 @@ import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {openMobileFileById} from "../editor";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {isEncryptedBox} from "../../util/pathName";
 
 export class MobileBacklinks {

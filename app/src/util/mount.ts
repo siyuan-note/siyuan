@@ -8,7 +8,7 @@ import {replaceFileName, validateName} from "../editor/rename";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
-import {App} from "../index";
+import type {App} from "../index";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import {importObsidianVault} from "../menus/importObsidian";

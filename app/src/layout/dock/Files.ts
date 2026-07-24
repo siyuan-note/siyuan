@@ -25,7 +25,7 @@ import {
     hasClosestByTag,
     hasTopClosestByTag
 } from "../../protyle/util/hasClosest";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";

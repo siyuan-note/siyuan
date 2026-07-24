@@ -13,7 +13,7 @@ import {onPageNumberChanged} from "./pdf/app";
 /// #endif
 import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
-import {App} from "../index";
+import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
 import {getDisplayName} from "../util/pathName";
 

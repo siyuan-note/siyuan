@@ -1,7 +1,7 @@
 import {getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {lockScreen} from "../dialog/processSystem";
-import {App} from "../index";
+import type {App} from "../index";
 
 const closeTab = (ipcData: IWebSocketData) => {
     const tab = getInstanceById(ipcData.data);

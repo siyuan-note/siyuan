@@ -19,7 +19,7 @@ import {MobileTags} from "../dock/MobileTags";
 import {activeBlur, initKeyboardToolbar} from "./keyboardToolbar";
 import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {MobileCustom} from "../dock/MobileCustom";
 import {Menu} from "../../plugin/Menu";

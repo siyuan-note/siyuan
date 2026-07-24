@@ -7,7 +7,7 @@ import {syncGuide} from "../../sync/syncGuide";
 import {openCard} from "../../card/openCard";
 import {activeBlur} from "../util/keyboardToolbar";
 import {getRecentDocs} from "./getRecentDocs";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {newFile} from "../../util/newFile";
 import {afterLayoutReady} from "../../plugin/loader";

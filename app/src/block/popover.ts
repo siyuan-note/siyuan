@@ -3,7 +3,7 @@ import {hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/has
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
 import {isLocalPath, parseSiYuanUriInfo} from "../util/pathName";
-import {App} from "../index";
+import type {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
 import {isTouchDevice} from "../util/functions";

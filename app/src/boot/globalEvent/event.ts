@@ -1,4 +1,4 @@
-import {App} from "../../index";
+import type {App} from "../../index";
 import {windowMouseMove} from "./mousemove";
 import {windowKeyUp} from "./keyup";
 import {windowKeyDown} from "./keydown";

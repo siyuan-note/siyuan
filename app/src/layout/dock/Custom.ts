@@ -1,6 +1,6 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {Protyle} from "../../protyle";
 
 export class Custom extends Model {

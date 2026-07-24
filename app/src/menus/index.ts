@@ -11,7 +11,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {Menu} from "./Menu";
 import {hasClosestByClassName, hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {App} from "../index";
+import type {App} from "../index";
 import {Constants} from "../constants";
 import {textMenu} from "./text";
 import {hideTooltip} from "../dialog/tooltip";

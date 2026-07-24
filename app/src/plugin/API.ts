@@ -11,7 +11,7 @@ import {Tab} from "../layout/Tab";
 /// #endif
 import {saveExportFile, updateHotkeyTip} from "../protyle/util/compatibility";
 import * as platformUtils from "./platformUtils";
-import {App} from "../index";
+import type {App} from "../index";
 import {Constants} from "../constants";
 import {Setting} from "./Setting";
 import {Menu} from "./Menu";

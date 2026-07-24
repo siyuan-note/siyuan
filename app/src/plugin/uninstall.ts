@@ -1,4 +1,4 @@
-import {App} from "../index";
+import type {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";

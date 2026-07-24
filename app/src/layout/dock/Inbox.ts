@@ -11,7 +11,7 @@ import {MenuItem} from "../../menus/Menu";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {replaceFileName} from "../../editor/rename";
 import {getDisplayName, movePathTo, pathPosix} from "../../util/pathName";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {getCloudURL} from "../../config/util/about";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {escapeHtml} from "../../util/escape";

@@ -4,7 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {sendGlobalShortcut} from "./keydown";
 import {ipcRenderer} from "electron";
 /// #endif
-import {App} from "../../index";
+import type {App} from "../../index";
 import {isMac, isNotCtrl, isOnlyMeta} from "../../protyle/util/compatibility";
 import {showPopover} from "../../block/popover";
 

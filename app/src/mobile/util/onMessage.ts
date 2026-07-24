@@ -6,7 +6,7 @@ import {
     setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";
 import {renderSnippet} from "../../config/util/snippets";

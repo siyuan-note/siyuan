@@ -37,7 +37,7 @@ import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";
 import {resize} from "./util/resize";
 import {getDocByScroll} from "./scroll/saveScroll";
-import {App} from "../index";
+import type {App} from "../index";
 import {insertHTML} from "./util/insertHTML";
 import {avRender} from "./render/av/render";
 import {focusBlock, getEditorRange} from "./util/selection";

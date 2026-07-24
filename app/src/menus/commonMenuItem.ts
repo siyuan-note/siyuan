@@ -28,7 +28,7 @@ import {rename, replaceFileName} from "../editor/rename";
 import * as dayjs from "dayjs";
 import {Constants} from "../constants";
 import {exportImage} from "../protyle/export/util";
-import {App} from "../index";
+import type {App} from "../index";
 import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 import {openAssetNewWindow} from "../window/openNewWindow";
 import {copyTextByType} from "../protyle/toolbar/util";

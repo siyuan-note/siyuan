@@ -4,7 +4,7 @@ import {getOpenNotebookCount} from "../../util/pathName";
 import {popSearch} from "../menu/search";
 import {getRecentDocs} from "../menu/getRecentDocs";
 import {openHistory} from "../../history/history";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {setTitle} from "../../util/processTitle";
 
 export const setEmpty = (app: App) => {

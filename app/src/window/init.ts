@@ -9,7 +9,7 @@ import {initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
 import {initWindow} from "../boot/onGetConfig";
-import {App} from "../index";
+import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
 import {initWindowOpenOverride} from "../protyle/util/compatibility";

@@ -1,4 +1,4 @@
-import {App} from "../index";
+import type {App} from "../index";
 import {Menu} from "./Menu";
 import {isHuawei, setStorageVal} from "../protyle/util/compatibility";
 /// #if !MOBILE

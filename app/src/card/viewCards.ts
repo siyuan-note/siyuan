@@ -10,7 +10,7 @@ import {unicode2Emoji} from "../emoji";
 import {addLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
 import {onGet} from "../protyle/util/onGet";
-import {App} from "../index";
+import type {App} from "../index";
 import {confirmDialog} from "../dialog/confirmDialog";
 
 export const viewCards = (app: App, deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {

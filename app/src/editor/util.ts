@@ -29,7 +29,7 @@ import {showMessage} from "../dialog/message";
 import {objEquals} from "../util/functions";
 import {resize} from "../protyle/util/resize";
 import {Search} from "../search";
-import {App} from "../index";
+import type {App} from "../index";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {clearOBG} from "../layout/dock/util";
 import {Model} from "../layout/Model";

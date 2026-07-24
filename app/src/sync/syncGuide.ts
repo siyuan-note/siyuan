@@ -8,7 +8,7 @@ import {processSync} from "../dialog/processSystem";
 /// #if !MOBILE
 import {openSetting} from "../config";
 /// #endif
-import {App} from "../index";
+import type {App} from "../index";
 import {Constants} from "../constants";
 import {getCloudURL} from "../config/util/about";
 

@@ -41,7 +41,7 @@ import {getFrontend, isWindow} from "../util/functions";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
-import {App} from "../index";
+import type {App} from "../index";
 import {unicode2Emoji} from "../emoji";
 import {closeWindow} from "../window/closeWin";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";

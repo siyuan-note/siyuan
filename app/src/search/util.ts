@@ -27,7 +27,7 @@ import {
     replaceFilterMenu,
     saveCriterion
 } from "./menu";
-import {App} from "../index";
+import type {App} from "../index";
 import {
     assetFilterMenu,
     assetInputEvent,

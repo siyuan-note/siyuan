@@ -4,7 +4,7 @@ import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openMobileFileById} from "../editor";
 import {openBookmarkMenu} from "../../menus/bookmark";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 
 export class MobileBookmarks {

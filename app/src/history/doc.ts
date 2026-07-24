@@ -6,7 +6,7 @@ import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import * as dayjs from "dayjs";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
-import {App} from "../index";
+import type {App} from "../index";
 import {resizeSide} from "./resizeSide";
 import {escapeHtml} from "../util/escape";
 

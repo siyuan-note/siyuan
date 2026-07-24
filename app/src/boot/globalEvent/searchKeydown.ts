@@ -5,7 +5,7 @@ import {matchHotKey} from "../../protyle/util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {newFile} from "../../util/newFile";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {Dialog} from "../../dialog";
 import {getAllModels} from "../../layout/getAll";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";

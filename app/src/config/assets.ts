@@ -13,7 +13,7 @@ import {writeText} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {Protyle} from "../protyle";
-import {App} from "../index";
+import type {App} from "../index";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {removeLoading} from "../protyle/ui/initUI";
 import {switchSettingPanelSubTab} from "./setting/mount";

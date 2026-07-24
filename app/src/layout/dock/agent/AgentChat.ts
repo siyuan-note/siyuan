@@ -1,6 +1,6 @@
 import {Tab} from "../../Tab";
 import {Model} from "../../Model";
-import {App} from "../../../index";
+import type {App} from "../../../index";
 import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult, IToolEffects} from "./agentSSE";
 import {genUUID} from "../../../util/genID";
 import {mountComposer} from "./AgentComposer";

@@ -5,7 +5,7 @@ import {Outline} from "./Outline";
 import {fixWndFlex1, getInstanceById, getWndByLayout} from "../util";
 import {getDockByType, resizeTabs, setTabPosition} from "../tabUtil";
 import {Backlink} from "./Backlink";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {Wnd} from "../Wnd";
 import {fetchSyncPost} from "../../util/fetch";
 import {Files} from "./Files";

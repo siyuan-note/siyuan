@@ -1,5 +1,5 @@
 import {fetchSyncPost} from "../util/fetch";
-import {App} from "../index";
+import type {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
 import {resizeTopBar, saveLayout} from "../layout/util";

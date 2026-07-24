@@ -14,7 +14,7 @@ import {newFile} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {activeBlur} from "../util/keyboardToolbar";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {
     assetFilterMenu,
     assetInputEvent,

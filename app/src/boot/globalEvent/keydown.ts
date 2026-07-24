@@ -52,7 +52,7 @@ import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {fullscreen} from "../../protyle/breadcrumb/action";
 import {openRecentDocs} from "../../business/openRecentDocs";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
 import {resize} from "../../protyle/util/resize";

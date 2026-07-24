@@ -1,6 +1,6 @@
 import {Custom} from "../layout/dock/Custom";
 import {Tab} from "../layout/Tab";
-import {App} from "../index";
+import type {App} from "../index";
 import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 import {Protyle} from "../protyle";
 import {getEditorHorizontalPadding} from "../protyle/ui/padding";

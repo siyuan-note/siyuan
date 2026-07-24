@@ -5,7 +5,7 @@ import {isInAndroid, isInHarmony, setStorageVal, writeText} from "../../protyle/
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {transaction, turnsIntoTransaction} from "../../protyle/wysiwyg/transaction";
 import {mathRender} from "../../protyle/render/mathRender";

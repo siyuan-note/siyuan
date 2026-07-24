@@ -16,7 +16,7 @@ import {unicode2Emoji} from "../../emoji";
 import {newNotebook, openEncryptedNotebook} from "../../util/mount";
 import {newFileInTree} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {showMessage} from "../../dialog/message";

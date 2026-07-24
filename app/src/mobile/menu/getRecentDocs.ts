@@ -5,7 +5,7 @@ import {escapeHtml} from "../../util/escape";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openModel} from "./model";
 import {openMobileFileById} from "../editor";
-import {App} from "../../index";
+import type {App} from "../../index";
 
 export const getRecentDocs = (app: App) => {
     fetchPost("/api/storage/getRecentDocs", {sortBy: "viewedAt"}, (response) => {

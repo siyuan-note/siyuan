@@ -11,7 +11,7 @@ import {getFrontend, isBrowser} from "../util/functions";
 import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Plugin} from "../plugin";
-import {App} from "../index";
+import type {App} from "../index";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {formatCount} from "../util/number";
 import {uninstall} from "../plugin/uninstall";

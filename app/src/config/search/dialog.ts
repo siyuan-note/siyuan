@@ -2,7 +2,7 @@ import {getSettingTab, type TSettingTab} from "../setting/tabs";
 import type {SettingTabMountContext} from "../setting/builder";
 import {clearSettingTabSearch} from "../setting/mount";
 import {getSearchKeywordsLower} from "./normalize";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {isPhablet} from "../../protyle/util/compatibility";
 
 /** @param visibleInSidebar 为 true 时，侧栏项被搜索过滤隐藏（`display: none`）则视为无 focus */

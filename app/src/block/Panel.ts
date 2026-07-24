@@ -13,7 +13,7 @@ import {openFileById} from "../editor/util";
 /// #endif
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
-import {App} from "../index";
+import type {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {checkFold} from "../util/noRelyPCFunction";
 import {updateHotkeyAfterTip} from "../protyle/util/compatibility";

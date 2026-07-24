@@ -8,11 +8,11 @@ import {openFileById} from "../editor/util";
 import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
 import {MenuItem} from "./Menu";
-import {App} from "../index";
+import type {App} from "../index";
 import {isInAndroid, saveExportFile, updateHotkeyTip} from "../protyle/util/compatibility";
 import {checkFold} from "../util/noRelyPCFunction";
 import {showMessage} from "../dialog/message";
-import {Editor} from "../editor";
+import type {Editor} from "../editor";
 import {setEditMode} from "../protyle/util/setEditMode";
 
 export const exportAsset = (src: string) => {

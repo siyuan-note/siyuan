@@ -1,6 +1,6 @@
 import {newDailyNote} from "../../../util/mount";
 import {openHistory} from "../../../history/history";
-import {Editor} from "../../../editor";
+import type {Editor} from "../../../editor";
 /// #if MOBILE
 import {openDock} from "../../../mobile/dock/util";
 import {popMenu} from "../../../mobile/menu";
@@ -31,7 +31,7 @@ import {Tab} from "../../../layout/Tab";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
-import {App} from "../../../index";
+import type {App} from "../../../index";
 import {Constants} from "../../../constants";
 import {editorConfigApi} from "../../../config/tabs/editorRuntime";
 import {lockScreen} from "../../../dialog/processSystem";

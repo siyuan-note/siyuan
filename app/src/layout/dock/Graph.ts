@@ -10,7 +10,7 @@ import {fetchPost} from "../../util/fetch";
 import {openFileById} from "../../editor/util";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {Editor} from "../../editor";
 import {getDocDisplayName} from "../../util/pathName";

@@ -7,7 +7,7 @@ import {fetchPost} from "../../util/fetch";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
 import {MenuItem} from "../../menus/Menu";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {openTagMenu} from "../../menus/tag";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {Constants} from "../../constants";

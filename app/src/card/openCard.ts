@@ -18,7 +18,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import * as dayjs from "dayjs";
 import {getDisplayName, movePathTo} from "../util/pathName";
-import {App} from "../index";
+import type {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {focusByRange} from "../protyle/util/selection";

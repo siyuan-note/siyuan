@@ -12,7 +12,7 @@ import {Constants} from "../constants";
 import {replaceFileName, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
-import {App} from "../index";
+import type {App} from "../index";
 import {NewDocTargetByHPath, NewDocTargetSubDoc, getNewDocTargetFromSavePath, getNewDocTargetFromTree} from "./parseNewDocTarget";
 
 export const getBlockRefAnchorText = (title: string) => {

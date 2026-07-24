@@ -9,7 +9,7 @@ import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {Protyle} from "../../protyle";
 import {MenuItem} from "../../menus/Menu";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {isSupportCSSHL, searchMarkRender} from "../../protyle/render/searchMarkRender";
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {getAllModels} from "../getAll";

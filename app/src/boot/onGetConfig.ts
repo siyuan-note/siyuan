@@ -24,7 +24,7 @@ import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {initBar} from "../layout/topBar";
 import {openChangelog} from "./openChangelog";
-import {App} from "../index";
+import type {App} from "../index";
 import {initWindowEvent} from "./globalEvent/event";
 import {sendGlobalShortcut} from "./globalEvent/keydown";
 import {closeWindow} from "../window/closeWin";

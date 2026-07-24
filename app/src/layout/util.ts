@@ -26,7 +26,7 @@ import {isEncryptedBox, parseUriInfo} from "../util/pathName";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
 import {newDatabaseRowModel} from "../editor/databaseRow";
-import {App} from "../index";
+import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";

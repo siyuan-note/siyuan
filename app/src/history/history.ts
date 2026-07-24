@@ -13,7 +13,7 @@ import {showDiff} from "./diff";
 import {saveExportFile, setStorageVal} from "../protyle/util/compatibility";
 import {openModel} from "../mobile/menu/model";
 import {closeModel} from "../mobile/util/closePanel";
-import {App} from "../index";
+import type {App} from "../index";
 import {resizeSide} from "./resizeSide";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 import {pathPosix} from "../util/pathName";

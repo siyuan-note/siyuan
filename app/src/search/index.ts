@@ -3,7 +3,7 @@ import {Tab} from "../layout/Tab";
 import {Protyle} from "../protyle";
 import {genSearch} from "./util";
 import {setPanelFocus} from "../layout/util";
-import {App} from "../index";
+import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
 
 export class Search extends Model {

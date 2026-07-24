@@ -1,6 +1,6 @@
 import {Protyle} from "../../../protyle";
 import {Constants} from "../../../constants";
-import {App} from "../../../index";
+import type {App} from "../../../index";
 import {escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
 import {hintRef} from "../../../protyle/hint/extend";

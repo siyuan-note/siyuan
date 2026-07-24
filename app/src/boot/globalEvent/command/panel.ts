@@ -1,5 +1,5 @@
 import {Dialog} from "../../../dialog";
-import {App} from "../../../index";
+import type {App} from "../../../index";
 import {upDownHint} from "../../../util/upDownHint";
 import {updateHotkeyTip} from "../../../protyle/util/compatibility";
 import {isMobile} from "../../../util/functions";

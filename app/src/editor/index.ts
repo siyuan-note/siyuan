@@ -6,7 +6,7 @@ import {setPadding} from "../protyle/ui/initUI";
 import {setModelsHash} from "../window/setHeader";
 /// #endif
 import {countBlockWord} from "../layout/status";
-import {App} from "../index";
+import type {App} from "../index";
 import {fullscreen} from "../protyle/breadcrumb/action";
 import {fetchPost} from "../util/fetch";
 import {Backlink} from "../layout/dock/Backlink";

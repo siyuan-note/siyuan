@@ -3,7 +3,7 @@ import {getInstanceById, newModelByInitData, saveLayout} from "./util";
 import {getAllModels, getAllTabs, getAllWnds} from "./getAll";
 import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {pdfResize} from "../asset/renderAssets";
-import {App} from "../index";
+import type {App} from "../index";
 import {Model} from "./Model";
 import {Editor} from "../editor";
 import {Asset} from "../asset";

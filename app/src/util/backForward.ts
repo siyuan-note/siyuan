@@ -13,7 +13,7 @@ import {zoomOut} from "../menus/protyle";
 import {showMessage} from "../dialog/message";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {getAllModels} from "../layout/getAll";
-import {App} from "../index";
+import type {App} from "../index";
 import {onGet} from "../protyle/util/onGet";
 import {isEncryptedBox} from "./pathName";
 

@@ -128,7 +128,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notebook/lockNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, lockNotebook)
 	ginServer.Handle("POST", "/api/notebook/unlockAndOpenNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, unlockAndOpenNotebook)
 	ginServer.Handle("POST", "/api/notebook/changeMasterPassword", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeMasterPassword)
-	ginServer.Handle("POST", "/api/notebook/getEncryptedNotebookStatus", model.CheckAuth, getEncryptedNotebookStatus)
+	ginServer.Handle("POST", "/api/notebook/getEncryptedNotebookStatus", model.CheckAuth, model.CheckAdminRole, getEncryptedNotebookStatus)
 	ginServer.Handle("POST", "/api/notebook/exportNotebookCryptoBackup", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, exportNotebookCryptoBackup)
 	ginServer.Handle("POST", "/api/notebook/importNotebookCryptoBackup", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importNotebookCryptoBackup)
 	ginServer.Handle("POST", "/api/notebook/setNotebookCryptoAutoLock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNotebookCryptoAutoLock)

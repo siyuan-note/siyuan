@@ -113,3 +113,64 @@ func TestGetNotebookConfHidesBoxCryptFromReader(t *testing.T) {
 		})
 	}
 }
+
+func TestGetEncryptedNotebookStatusAuthorization(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldConf, oldDataDir, oldHistoryDir := model.Conf, util.DataDir, util.HistoryDir
+	tempDir := t.TempDir()
+	util.DataDir = filepath.Join(tempDir, "data")
+	util.HistoryDir = filepath.Join(tempDir, "history")
+	if err := os.MkdirAll(util.DataDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(util.HistoryDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	t.Cleanup(func() {
+		model.Conf, util.DataDir, util.HistoryDir = oldConf, oldDataDir, oldHistoryDir
+	})
+
+	tests := []struct {
+		name       string
+		role       model.Role
+		statusCode int
+	}{
+		{name: "reader", role: model.RoleReader, statusCode: http.StatusForbidden},
+		{name: "editor", role: model.RoleEditor, statusCode: http.StatusForbidden},
+		{name: "administrator", role: model.RoleAdministrator, statusCode: http.StatusOK},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) {
+				c.Set(model.RoleContextKey, test.role)
+				c.Next()
+			})
+			ServeAPI(engine)
+
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, "/api/notebook/getEncryptedNotebookStatus", strings.NewReader(`{}`))
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			if recorder.Code != test.statusCode {
+				t.Fatalf("%s request returned status %d: %s", test.name, recorder.Code, recorder.Body.String())
+			}
+			if test.role == model.RoleAdministrator {
+				response := &struct {
+					Code int `json:"code"`
+				}{}
+				if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+					t.Fatalf("unmarshal response failed: %v", err)
+				}
+				if response.Code != 0 {
+					t.Fatalf("administrator request returned code %d: %s", response.Code, recorder.Body.String())
+				}
+			}
+		})
+	}
+}

@@ -68,6 +68,81 @@ const updateFieldViews = (views: IAVFieldView[], viewIDs: string[], hidden: bool
     });
 };
 
+const getFieldVisibilityItemsHTML = (views: IAVFieldView[], currentViewID: string, backColId?: string) => {
+    const visibleViews = views.filter((view) => !view.hidden);
+    const hiddenViews = views.filter((view) => view.hidden);
+    const getViewHTML = (view: IAVFieldView) => {
+        return `<button class="b3-menu__item${view.id === currentViewID ? " b3-menu__item--selected" : ""}" data-field-visibility-view-id="${view.id}">
+    ${getViewIconHTML(view)}
+    <span class="b3-menu__label">${escapeHtml(view.name) || "&nbsp;"}</span>
+    ${view.hidden ? "" : '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>'}
+</button>`;
+    };
+    const titleIconHTML = backColId
+        ? `<span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="editCol" data-id="${backColId}">
+        <svg><use xlink:href="#iconLeft"></use></svg>
+    </span>`
+        : '<svg class="b3-menu__icon"><use xlink:href="#iconEye"></use></svg>';
+    let html = `<button class="b3-menu__item" data-type="nobg">
+    ${titleIconHTML}
+    <span class="b3-menu__label ft__center">${window.siyuan.languages.fieldVisibility}</span>
+</button>`;
+    if (visibleViews.length > 0) {
+        html += `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="nobg">
+    <span class="b3-menu__label">${window.siyuan.languages.showCol}</span>
+    <span class="block__icon" data-field-visibility-action="hideAll">
+        ${window.siyuan.languages.hideInAllViews}
+        <span class="fn__space"></span>
+        <svg><use xlink:href="#iconEyeoff"></use></svg>
+    </span>
+</button>
+${visibleViews.map(getViewHTML).join("")}`;
+    }
+    if (hiddenViews.length > 0) {
+        html += `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="nobg">
+    <span class="b3-menu__label">${window.siyuan.languages.hideCol}</span>
+    <span class="block__icon" data-field-visibility-action="showAll">
+        ${window.siyuan.languages.showInAllViews}
+        <span class="fn__space"></span>
+        <svg><use xlink:href="#iconEye"></use></svg>
+    </span>
+</button>
+${hiddenViews.map(getViewHTML).join("")}`;
+    }
+    return html;
+};
+
+const bindFieldVisibilityEvents = (
+    element: Element,
+    views: IAVFieldView[],
+    updateVisibility: (viewIDs: string[], hidden: boolean) => void
+) => {
+    element.querySelectorAll("[data-field-visibility-view-id]").forEach((item: HTMLElement) => {
+        item.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const view = views.find((viewItem) => viewItem.id === item.dataset.fieldVisibilityViewId);
+            if (view) {
+                updateVisibility([view.id], !view.hidden);
+            }
+        });
+    });
+    const bindAll = (action: "hideAll" | "showAll", hidden: boolean) => {
+        element.querySelector(`[data-field-visibility-action="${action}"]`)?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const viewIDs = views.filter((view) => view.hidden !== hidden).map((view) => view.id);
+            if (viewIDs.length > 0) {
+                updateVisibility(viewIDs, hidden);
+            }
+        });
+    };
+    bindAll("hideAll", true);
+    bindAll("showAll", false);
+};
+
 export const openFieldVisibility = async (options: {
     protyle: IProtyle;
     blockElement: Element;
@@ -113,63 +188,10 @@ export const openFieldVisibility = async (options: {
         render();
     };
 
-    const addViewItem = (view: IAVFieldView) => {
-        menu.addItem({
-            iconHTML: getViewIconHTML(view),
-            label: escapeHtml(view.name) || "&nbsp;",
-            checked: !view.hidden,
-            current: view.id === currentViewID,
-            click() {
-                updateVisibility([view.id], !view.hidden);
-                return true;
-            }
-        });
-    };
-
     const render = () => {
-        menu.element.lastElementChild.innerHTML = "";
-        menu.addItem({
-            type: "readonly",
-            icon: "iconEye",
-            label: window.siyuan.languages.fieldVisibility,
-        });
-
-        const visibleViews = views.filter((view) => !view.hidden);
-        const hiddenViews = views.filter((view) => view.hidden);
-        if (visibleViews.length > 0) {
-            menu.addSeparator();
-            menu.addItem({
-                type: "readonly",
-                icon: "",
-                label: window.siyuan.languages.showCol,
-            });
-            menu.addItem({
-                icon: "iconEyeoff",
-                label: window.siyuan.languages.hideInAllViews,
-                click() {
-                    updateVisibility(visibleViews.map((view) => view.id), true);
-                    return true;
-                }
-            });
-            visibleViews.forEach(addViewItem);
-        }
-        if (hiddenViews.length > 0) {
-            menu.addSeparator();
-            menu.addItem({
-                type: "readonly",
-                icon: "",
-                label: window.siyuan.languages.hideCol,
-            });
-            menu.addItem({
-                icon: "iconEye",
-                label: window.siyuan.languages.showInAllViews,
-                click() {
-                    updateVisibility(hiddenViews.map((view) => view.id), false);
-                    return true;
-                }
-            });
-            hiddenViews.forEach(addViewItem);
-        }
+        const itemsElement = menu.element.lastElementChild;
+        itemsElement.innerHTML = getFieldVisibilityItemsHTML(views, currentViewID);
+        bindFieldVisibilityEvents(itemsElement, views, updateVisibility);
 
         if (opened) {
             window.siyuan.menus.menu.resetPosition();
@@ -180,49 +202,6 @@ export const openFieldVisibility = async (options: {
     };
 
     render();
-};
-
-const getFieldVisibilityPanelHTML = (views: IAVFieldView[], colId: string, currentViewID: string) => {
-    const visibleViews = views.filter((view) => !view.hidden);
-    const hiddenViews = views.filter((view) => view.hidden);
-    const getViewHTML = (view: IAVFieldView) => {
-        return `<button class="b3-menu__item${view.id === currentViewID ? " b3-menu__item--selected" : ""}" data-field-visibility-view-id="${view.id}">
-    ${getViewIconHTML(view)}
-    <span class="b3-menu__label">${escapeHtml(view.name) || "&nbsp;"}</span>
-    ${view.hidden ? "" : '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>'}
-</button>`;
-    };
-    let html = `<button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="editCol" data-id="${colId}">
-        <svg><use xlink:href="#iconLeft"></use></svg>
-    </span>
-    <span class="b3-menu__label ft__center">${window.siyuan.languages.fieldVisibility}</span>
-</button>`;
-    if (visibleViews.length > 0) {
-        html += `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__label">${window.siyuan.languages.showCol}</span>
-    <span class="block__icon" data-field-visibility-action="hideAll">
-        ${window.siyuan.languages.hideInAllViews}
-        <span class="fn__space"></span>
-        <svg><use xlink:href="#iconEyeoff"></use></svg>
-    </span>
-</button>
-${visibleViews.map(getViewHTML).join("")}`;
-    }
-    if (hiddenViews.length > 0) {
-        html += `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__label">${window.siyuan.languages.hideCol}</span>
-    <span class="block__icon" data-field-visibility-action="showAll">
-        ${window.siyuan.languages.showInAllViews}
-        <span class="fn__space"></span>
-        <svg><use xlink:href="#iconEye"></use></svg>
-    </span>
-</button>
-${hiddenViews.map(getViewHTML).join("")}`;
-    }
-    return `<div class="b3-menu__items">${html}</div>`;
 };
 
 export const openFieldVisibilityPanel = async (options: {
@@ -249,53 +228,25 @@ export const openFieldVisibilityPanel = async (options: {
         }
     };
 
+    const updateVisibility = (viewIDs: string[], hidden: boolean) => {
+        setFieldVisibility({
+            protyle: options.protyle,
+            avID,
+            blockID,
+            colId: options.colId,
+            viewIDs,
+            hidden,
+        });
+        updatePanelViews(viewIDs, hidden);
+        render();
+    };
+
     const render = () => {
         options.menuElement.style.width = `${panelRect.width}px`;
-        options.menuElement.innerHTML = getFieldVisibilityPanelHTML(views, options.colId, currentViewID);
+        options.menuElement.innerHTML =
+            `<div class="b3-menu__items">${getFieldVisibilityItemsHTML(views, currentViewID, options.colId)}</div>`;
         setPosition(options.menuElement, panelRect.left, panelRect.top, 0, 0, true);
-
-        options.menuElement.querySelectorAll("[data-field-visibility-view-id]").forEach((item: HTMLElement) => {
-            item.addEventListener("click", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                const view = views.find((viewItem) => viewItem.id === item.dataset.fieldVisibilityViewId);
-                if (!view) {
-                    return;
-                }
-                setFieldVisibility({
-                    protyle: options.protyle,
-                    avID,
-                    blockID,
-                    colId: options.colId,
-                    viewIDs: [view.id],
-                    hidden: !view.hidden,
-                });
-                updatePanelViews([view.id], !view.hidden);
-                render();
-            });
-        });
-        const bindAll = (action: "hideAll" | "showAll", hidden: boolean) => {
-            options.menuElement.querySelector(`[data-field-visibility-action="${action}"]`)?.addEventListener("click", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                const viewIDs = views.filter((view) => view.hidden !== hidden).map((view) => view.id);
-                if (viewIDs.length < 1) {
-                    return;
-                }
-                setFieldVisibility({
-                    protyle: options.protyle,
-                    avID,
-                    blockID,
-                    colId: options.colId,
-                    viewIDs,
-                    hidden,
-                });
-                updatePanelViews(viewIDs, hidden);
-                render();
-            });
-        };
-        bindAll("hideAll", true);
-        bindAll("showAll", false);
+        bindFieldVisibilityEvents(options.menuElement, views, updateVisibility);
     };
 
     render();

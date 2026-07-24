@@ -208,6 +208,7 @@ func setAI(c *gin.Context) {
 		preserveMCPServerIDs(oldServers, ai.MCP.Servers)
 	}
 	ai.Normalize()
+	ai.ReconcileModelIDs()
 	model.Conf.SetAI(ai)
 
 	// MCP 配置可能变更（开关切换、编辑、增删 server），异步重连让连接立即跟上。

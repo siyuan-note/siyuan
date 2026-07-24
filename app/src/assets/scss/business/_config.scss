@@ -415,6 +415,263 @@
   }
 }
 
+.config__tab-container[data-name="ai"] {
+  position: relative;
+}
+
+.config-ai-provider {
+  &__cards,
+  &__catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  &__catalog-section + &__catalog-section {
+    margin-top: 24px;
+  }
+
+  &__catalog-title {
+    margin-bottom: 12px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  &__card {
+    min-height: 108px;
+    align-items: center;
+  }
+
+  &__card--add {
+    justify-content: center;
+    gap: 8px;
+    color: var(--b3-theme-primary);
+    border: 1px dashed var(--b3-border-color);
+    box-shadow: none;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__avatar {
+    width: 56px;
+    height: 56px;
+    margin-left: 16px;
+    border-radius: var(--b3-border-radius);
+    background-color: var(--b3-theme-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+
+    img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+    }
+  }
+
+  &__initial {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--b3-theme-primary);
+  }
+
+  &__info {
+    min-width: 0;
+    flex: 1;
+    padding: 16px 8px;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  &__meta {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+  }
+
+  &__actions {
+    padding: 0 12px 0 0;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  &__view {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--b3-theme-background);
+    animation: config-ai-provider-slide-in 150ms ease-out;
+  }
+
+  &__view-head {
+    height: 48px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--b3-border-color);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  &__view-title {
+    margin-left: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__view-body {
+    padding: 16px;
+    overflow: auto;
+    flex: 1;
+    min-height: 0;
+  }
+
+  &__catalog-card {
+    min-height: 96px;
+    align-items: center;
+  }
+
+  &__detail {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  &__section {
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: var(--b3-border-radius-b);
+    background-color: var(--b3-theme-surface);
+  }
+
+  &__section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  &__section-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  &__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  &__field {
+    min-width: 0;
+
+    & > span:first-child {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--b3-theme-on-surface);
+      font-size: 13px;
+    }
+
+    & > .b3-text-field {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+
+  &__api-key-input {
+    width: 100%;
+    height: 28px;
+    line-height: 0;
+
+    & > .b3-form__icona-icon {
+      top: 1px;
+      bottom: auto;
+      transform: none;
+    }
+  }
+
+  &__model {
+    display: grid;
+    grid-template-columns: auto minmax(140px, 1fr) minmax(140px, 1fr) auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid var(--b3-border-color);
+
+    &:first-child {
+      border-top: 0;
+    }
+  }
+
+  &__empty {
+    padding: 16px 0;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 16px;
+  }
+}
+
+:root[data-theme-mode="dark"] .config-ai-provider__avatar img:not(.config-ai-provider__logo--color) {
+  filter: invert(1);
+}
+
+@keyframes config-ai-provider-slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 700px) {
+  .config-ai-provider {
+    &__cards,
+    &__catalog-grid,
+    &__fields {
+      grid-template-columns: 1fr;
+    }
+
+    &__model {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+
+      [data-model-field="displayName"] {
+        grid-column: 2 / -1;
+      }
+
+      [data-action="testModel"] {
+        grid-column: 2;
+      }
+    }
+
+    &__section-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+}
+
 .config-about__logo {
   display: flex;
   align-items: center;

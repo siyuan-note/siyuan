@@ -490,6 +490,7 @@ interface IBackStack {
         endId: string
         path: string
         notebookId: string
+        rootID: string
     },
     scrollTop?: number,
     callback?: TProtyleAction[],

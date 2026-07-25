@@ -111,6 +111,44 @@ func TestMarkReplaceSpanMatchesRawText(t *testing.T) {
 	})
 }
 
+func TestExtractedMarkContentsMatchRawText(t *testing.T) {
+	previousConf := Conf
+	Conf = NewAppConf()
+	Conf.Search = conf.NewSearch()
+	t.Cleanup(func() {
+		Conf = previousConf
+	})
+
+	start := search.GetMarkSpanStart(search.MarkDataType)
+	end := search.GetMarkSpanEnd()
+	tests := []string{"&", "a&b", "R&D", "<foo>", "\"quoted\"", "'quoted'", "&amp;"}
+	for _, content := range tests {
+		t.Run(content, func(t *testing.T) {
+			marked, matched := markReplaceSpanWithSplit(content, []string{content}, start, end)
+			if !matched {
+				t.Fatalf("%q 未生成高亮", content)
+			}
+
+			keywords := getMarkedTextContents(marked, start, end)
+			if 1 != len(keywords) || content != keywords[0] {
+				t.Fatalf("提取的关键字为 %q，期望 [%q]", keywords, content)
+			}
+
+			root := &ast.Node{Type: ast.NodeDocument}
+			text := &ast.Node{Type: ast.NodeText, Tokens: []byte(content)}
+			root.AppendChild(text)
+			var unlinks []*ast.Node
+			if !markReplaceSpan(text, &unlinks, keywords, search.MarkDataType, util.NewLute()) {
+				t.Fatalf("提取的关键字 %q 未匹配原始文本", keywords)
+			}
+			for _, unlink := range unlinks {
+				unlink.Unlink()
+			}
+			assertSearchMarkContents(t, root, []string{content})
+		})
+	}
+}
+
 func assertSearchMarkContents(t *testing.T, root *ast.Node, want []string) {
 	t.Helper()
 	var got []string

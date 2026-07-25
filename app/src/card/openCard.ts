@@ -164,7 +164,8 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
         fetchPost("/api/filetree/getDoc", {
             id,
             mode: 0,
-            size: Constants.SIZE_GET_MAX
+            size: Constants.SIZE_GET_MAX,
+            unfold: true
         }, (response) => {
             onGet({
                 updateReadonly: true,

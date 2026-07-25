@@ -85,9 +85,10 @@ export class Layout {
                     if (this.direction === "lr") {
                         // 向右分屏，左侧文档抖动，移除动画和边距
                         item.element.querySelectorAll(".protyle-content").forEach((element: HTMLElement) => {
-                            if (!element.parentElement.classList.contains("fn__none")) {
+                            const wysiwygElement = element.querySelector<HTMLElement>(".protyle-wysiwyg");
+                            if (wysiwygElement && !element.parentElement.classList.contains("fn__none")) {
                                 element.classList.remove("protyle-content--transition");
-                                (element.querySelector(".protyle-wysiwyg") as HTMLElement).style.padding = "";
+                                wysiwygElement.style.padding = "";
                                 element.classList.add("protyle-content--transition");
                             }
                         });

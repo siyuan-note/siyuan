@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "Wenn ein Block mit mehreren Datenbanken verknüpft ist, können Sie über Registerkarten zwischen deren Attributen wechseln",
   "rebind": "Neu verknüpfen",
   "aiProviderRegionInternational": "International",
   "aiProviderRegionChina": "China",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "Format der Überschriftennummerierung",
 	"backlinkShowBottom": "Backlinks am Dokumentende anzeigen",
 	"databaseAttrHideEmpty": "Leere Datenbankattribute ausblenden",
-	"databaseAttrUseTabs": "Registerkarten für Datenbankattribute verwenden",
+	"databaseAttrUseTabs": "Mehrere Datenbanken in Registerkarten anzeigen",
 	"rebuildHistoryIndex": "Verlaufsindex neu aufbauen",
 	"rebuildAssetContentIndex": "Index für Asset-Inhalte neu aufbauen",
 	"newItemWithTemplate": "Eintrag mit Vorlage erstellen",

@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "Wanneer een blok aan meerdere databases is gekoppeld, gebruikt u tabbladen om tussen hun kenmerken te schakelen",
   "rebind": "Opnieuw koppelen",
   "aiProviderRegionInternational": "Internationaal",
   "aiProviderRegionChina": "China",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "Indeling voor kopnummering",
 	"backlinkShowBottom": "Terugverwijzingen onderaan het document weergeven",
 	"databaseAttrHideEmpty": "Lege databasekenmerken verbergen",
-	"databaseAttrUseTabs": "Tabbladen gebruiken voor databasekenmerken",
+	"databaseAttrUseTabs": "Meerdere databases in tabbladen weergeven",
 	"rebuildHistoryIndex": "Geschiedenisindex herbouwen",
 	"rebuildAssetContentIndex": "Index voor assetinhoud herbouwen",
 	"newItemWithTemplate": "Item maken met sjabloon",

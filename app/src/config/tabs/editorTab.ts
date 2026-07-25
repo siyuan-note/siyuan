@@ -145,6 +145,7 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     });
     group.switch("editor.databaseAttrUseTabs", {
         title: window.siyuan.languages.databaseAttrUseTabs,
+        desc: window.siyuan.languages.databaseAttrUseTabsTip,
     });
     group.select("editor.headingEmbedMode", {
         title: window.siyuan.languages.headingEmbedMode,

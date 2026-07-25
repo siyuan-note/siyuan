@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "Lorsqu’un bloc est lié à plusieurs bases de données, utilisez des onglets pour passer d’un ensemble d’attributs à l’autre",
   "rebind": "Relier à nouveau",
   "aiProviderRegionInternational": "International",
   "aiProviderRegionChina": "Chine",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "Format de numérotation des titres",
 	"backlinkShowBottom": "Afficher les backlinks au bas du document",
 	"databaseAttrHideEmpty": "Masquer les attributs de base de données vides",
-	"databaseAttrUseTabs": "Utiliser des onglets pour les attributs de base de données",
+	"databaseAttrUseTabs": "Afficher plusieurs bases de données dans des onglets",
 	"rebuildHistoryIndex": "Reconstruire l'index de l'historique",
 	"rebuildAssetContentIndex": "Reconstruire l'index du contenu des ressources",
 	"newItemWithTemplate": "Créer un élément avec un modèle",

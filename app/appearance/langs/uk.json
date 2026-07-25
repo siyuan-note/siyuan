@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "Якщо блок прив’язано до кількох баз даних, використовуйте вкладки для перемикання між їхніми атрибутами",
   "rebind": "Переприв’язати",
   "aiProviderRegionInternational": "Міжнародний",
   "aiProviderRegionChina": "Китай",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "Формат нумерації заголовків",
 	"backlinkShowBottom": "Показувати зворотні посилання внизу документа",
 	"databaseAttrHideEmpty": "Приховувати порожні атрибути бази даних",
-	"databaseAttrUseTabs": "Використовувати вкладки для атрибутів бази даних",
+	"databaseAttrUseTabs": "Показувати кілька баз даних у вкладках",
 	"rebuildHistoryIndex": "Перебудувати індекс історії",
 	"rebuildAssetContentIndex": "Перебудувати індекс вмісту ресурсів",
 	"newItemWithTemplate": "Створити елемент за шаблоном",

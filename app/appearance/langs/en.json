@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "When a block is bound to multiple databases, use tabs to switch between their attributes",
   "rebind": "Rebind",
   "aiProviderRegionInternational": "International",
   "aiProviderRegionChina": "China",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "Heading numbering format",
 	"backlinkShowBottom": "Show backlinks at the bottom of the document",
 	"databaseAttrHideEmpty": "Hide empty database attributes",
-	"databaseAttrUseTabs": "Use tabs for database attributes",
+	"databaseAttrUseTabs": "Display multiple databases in tabs",
 	"rebuildHistoryIndex": "Rebuild history index",
 	"rebuildAssetContentIndex": "Rebuild asset content index",
 	"newItemWithTemplate": "Create item with template",

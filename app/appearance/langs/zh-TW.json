@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "區塊綁定多個資料庫時，使用頁籤切換顯示各資料庫的屬性",
   "rebind": "換綁",
   "aiProviderRegionInternational": "國際",
   "aiProviderRegionChina": "中國",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "標題編號格式",
 	"backlinkShowBottom": "在文件底部顯示反向連結",
 	"databaseAttrHideEmpty": "資料庫屬性隱藏空欄位",
-	"databaseAttrUseTabs": "資料庫屬性使用頁籤",
+	"databaseAttrUseTabs": "多個資料庫使用頁籤顯示",
 	"rebuildHistoryIndex": "重建歷史索引",
 	"rebuildAssetContentIndex": "重建資源檔案索引",
 	"newItemWithTemplate": "使用範本新增條目",

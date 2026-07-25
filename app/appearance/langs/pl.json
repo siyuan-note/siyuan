@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "Gdy blok jest powiązany z wieloma bazami danych, używaj kart do przełączania między ich atrybutami",
   "rebind": "Powiąż ponownie",
   "aiProviderRegionInternational": "Międzynarodowy",
   "aiProviderRegionChina": "Chiny",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "Format numeracji nagłówków",
 	"backlinkShowBottom": "Pokaż odniesienia zwrotne na dole dokumentu",
 	"databaseAttrHideEmpty": "Ukryj puste atrybuty bazy danych",
-	"databaseAttrUseTabs": "Używaj kart dla atrybutów bazy danych",
+	"databaseAttrUseTabs": "Wyświetlaj wiele baz danych na kartach",
 	"rebuildHistoryIndex": "Odbuduj indeks historii",
 	"rebuildAssetContentIndex": "Odbuduj indeks zawartości zasobów",
 	"newItemWithTemplate": "Utwórz element z szablonu",

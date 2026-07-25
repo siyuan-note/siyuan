@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "Keď je blok prepojený s viacerými databázami, pomocou kariet prepínajte medzi ich atribútmi",
   "rebind": "Znovu prepojiť",
   "aiProviderRegionInternational": "Medzinárodné",
   "aiProviderRegionChina": "Čína",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "Formát číslovania nadpisov",
 	"backlinkShowBottom": "Zobraziť spätné odkazy v spodnej časti dokumentu",
 	"databaseAttrHideEmpty": "Skryť prázdne atribúty databázy",
-	"databaseAttrUseTabs": "Používať karty pre atribúty databázy",
+	"databaseAttrUseTabs": "Zobraziť viacero databáz na kartách",
 	"rebuildHistoryIndex": "Znovu vytvoriť index histórie",
 	"rebuildAssetContentIndex": "Znovu vytvoriť index obsahu zdrojov",
 	"newItemWithTemplate": "Vytvoriť položku zo šablóny",

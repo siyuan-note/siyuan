@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "เมื่อบล็อกเชื่อมโยงกับหลายฐานข้อมูล ให้ใช้แท็บเพื่อสลับระหว่างแอตทริบิวต์ของแต่ละฐานข้อมูล",
   "rebind": "ผูกใหม่",
   "aiProviderRegionInternational": "นานาชาติ",
   "aiProviderRegionChina": "จีน",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "รูปแบบการกำหนดหมายเลขหัวข้อ",
 	"backlinkShowBottom": "แสดงลิงก์ย้อนกลับที่ด้านล่างของเอกสาร",
 	"databaseAttrHideEmpty": "ซ่อนแอตทริบิวต์ฐานข้อมูลที่ว่างเปล่า",
-	"databaseAttrUseTabs": "ใช้แท็บสำหรับแอตทริบิวต์ฐานข้อมูล",
+	"databaseAttrUseTabs": "แสดงหลายฐานข้อมูลในแท็บ",
 	"rebuildHistoryIndex": "สร้างดัชนีประวัติใหม่",
 	"rebuildAssetContentIndex": "สร้างดัชนีเนื้อหาสินทรัพย์ใหม่",
 	"newItemWithTemplate": "สร้างรายการด้วยเทมเพลต",

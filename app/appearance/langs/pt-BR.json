@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "Quando um bloco estiver vinculado a vários bancos de dados, use abas para alternar entre seus atributos",
   "rebind": "Vincular novamente",
   "aiProviderRegionInternational": "Internacional",
   "aiProviderRegionChina": "China",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "Formato de numeração de títulos",
 	"backlinkShowBottom": "Mostrar backlinks na parte inferior do documento",
 	"databaseAttrHideEmpty": "Ocultar atributos vazios do banco de dados",
-	"databaseAttrUseTabs": "Usar abas para atributos do banco de dados",
+	"databaseAttrUseTabs": "Exibir vários bancos de dados em abas",
 	"rebuildHistoryIndex": "Reconstruir índice do histórico",
 	"rebuildAssetContentIndex": "Reconstruir índice de conteúdo de recursos",
 	"newItemWithTemplate": "Criar item com modelo",

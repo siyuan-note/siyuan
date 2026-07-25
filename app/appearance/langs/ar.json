@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "عند ربط كتلة بقواعد بيانات متعددة، استخدم علامات التبويب للتبديل بين سمات قواعد البيانات",
   "rebind": "إعادة الربط",
   "aiProviderRegionInternational": "دولي",
   "aiProviderRegionChina": "الصين",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "تنسيق ترقيم العناوين",
 	"backlinkShowBottom": "إظهار الروابط المرجعية في أسفل المستند",
 	"databaseAttrHideEmpty": "إخفاء السمات الفارغة لقاعدة البيانات",
-	"databaseAttrUseTabs": "استخدام علامات تبويب لسمات قاعدة البيانات",
+	"databaseAttrUseTabs": "عرض قواعد بيانات متعددة في علامات تبويب",
 	"rebuildHistoryIndex": "إعادة بناء فهرس السجل",
 	"rebuildAssetContentIndex": "إعادة بناء فهرس محتوى الأصول",
 	"newItemWithTemplate": "إنشاء عنصر باستخدام قالب",

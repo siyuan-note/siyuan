@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "ブロックが複数のデータベースに関連付けられている場合、タブで各データベースの属性を切り替えます",
   "rebind": "再紐付け",
   "aiProviderRegionInternational": "国際",
   "aiProviderRegionChina": "中国",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "見出し番号の形式",
 	"backlinkShowBottom": "文書の下部にバックリンクを表示",
 	"databaseAttrHideEmpty": "空のデータベース属性を非表示",
-	"databaseAttrUseTabs": "データベース属性にタブを使用",
+	"databaseAttrUseTabs": "複数のデータベースをタブで表示",
 	"rebuildHistoryIndex": "履歴インデックスを再構築",
 	"rebuildAssetContentIndex": "アセットコンテンツインデックスを再構築",
 	"newItemWithTemplate": "テンプレートで項目を新規作成",

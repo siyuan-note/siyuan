@@ -1,4 +1,5 @@
 {
+  "databaseAttrUseTabsTip": "Bir blok birden fazla veritabanına bağlandığında, öznitelikler arasında geçiş yapmak için sekmeleri kullanın",
   "rebind": "Yeniden bağla",
   "aiProviderRegionInternational": "Uluslararası",
   "aiProviderRegionChina": "Çin",
@@ -26,7 +27,7 @@
   "headingNumberFormat": "Başlık numaralandırma biçimi",
 	"backlinkShowBottom": "Belgenin altında geri bağlantıları göster",
 	"databaseAttrHideEmpty": "Boş veritabanı özniteliklerini gizle",
-	"databaseAttrUseTabs": "Veritabanı öznitelikleri için sekmeleri kullan",
+	"databaseAttrUseTabs": "Birden fazla veritabanını sekmelerde göster",
 	"rebuildHistoryIndex": "Geçmiş indeksini yeniden oluştur",
 	"rebuildAssetContentIndex": "Varlık içeriği indeksini yeniden oluştur",
 	"newItemWithTemplate": "Şablonla öge oluştur",

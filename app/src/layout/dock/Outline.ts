@@ -878,6 +878,8 @@ export class Outline extends Model {
             });
         }
         this.saveExpendIds();
+        window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel = targetLevel;
+        setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
     }
 
     /**
@@ -891,6 +893,7 @@ export class Outline extends Model {
                 id: `heading${i}`,
                 icon: `iconH${i}`,
                 label: window.siyuan.languages[`heading${i}`],
+                current: window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel === i,
                 click: () => this.expandToLevel(i)
             }).element);
         }

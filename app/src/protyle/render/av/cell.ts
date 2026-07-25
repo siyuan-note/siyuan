@@ -967,6 +967,17 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
         }
         cellElement.dataset.cellValue = encodeURIComponent(JSON.stringify(value));
         cellElement.parentElement.dataset.empty = cellValueIsEmpty(value).toString();
+        if (value.type === "block") {
+            const databaseRowElement = cellElement.closest<HTMLElement>(".protyle-db-row");
+            if (databaseRowElement) {
+                const title = value.block?.content || window.siyuan.languages.untitled;
+                databaseRowElement.querySelector(".protyle-db-row__title span").textContent = title;
+                databaseRowElement.dispatchEvent(new CustomEvent("database-row-title-update", {
+                    bubbles: true,
+                    detail: title,
+                }));
+            }
+        }
     };
     if (sourceElement?.dataset.avId) {
         updateCustomAttr(sourceElement);

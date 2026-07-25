@@ -22,6 +22,17 @@ export const newDatabaseRowModel = (options: {
     let ghostProtyle: Protyle;
     let resizeObserver: ResizeObserver;
     let destroyed = false;
+    const updateTitle = (custom: Custom, bodyElement: HTMLElement) => {
+        const primaryElement = bodyElement.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
+        if (!primaryElement?.dataset.cellValue) {
+            return;
+        }
+        const value = JSON.parse(decodeURIComponent(primaryElement.dataset.cellValue)) as IAVCellValue;
+        const title = value.block?.content || window.siyuan.languages.untitled;
+        custom.data.title = title;
+        custom.element.querySelector(".protyle-db-row__title span").textContent = title;
+        custom.tab.updateTitle(title);
+    };
     const updateLayout = (custom: Custom) => {
         const width = custom.element.clientWidth;
         const padding = getEditorHorizontalPadding(width, window.siyuan.config.editor.fullWidth);
@@ -44,7 +55,9 @@ export const newDatabaseRowModel = (options: {
         bodyElement.className = "custom-attr protyle-db-row__body";
         previousBodyElement.replaceWith(bodyElement);
         updateLayout(custom);
-        renderAVAttribute(bodyElement, options.data.itemID, contextProtyle, undefined,
+        renderAVAttribute(bodyElement, options.data.itemID, contextProtyle, (element) => {
+            updateTitle(custom, element);
+        },
             {avID: options.data.avID, itemID: options.data.itemID, valueID: options.data.valueID});
     };
     const model = new Custom({
@@ -63,6 +76,11 @@ export const newDatabaseRowModel = (options: {
     </div>
 </div>`;
             custom.element.querySelector(".protyle-db-row__title span").textContent = options.data.title || window.siyuan.languages.untitled;
+            custom.element.addEventListener("database-row-title-update", (event) => {
+                const title = (event as CustomEvent<string>).detail;
+                custom.data.title = title;
+                custom.tab.updateTitle(title);
+            });
             updateLayout(custom);
             resizeObserver = new ResizeObserver(() => updateLayout(custom));
             resizeObserver.observe(custom.element);

@@ -1548,6 +1548,54 @@ func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
 	return
 }
 
+type moveDocsRefreshKey struct {
+	boxID  string
+	rootID string
+}
+
+type moveDocsRefresh struct {
+	parents   map[moveDocsRefreshKey]*parse.Tree
+	notebooks map[string]struct{}
+}
+
+func newMoveDocsRefresh() *moveDocsRefresh {
+	return &moveDocsRefresh{
+		parents:   map[moveDocsRefreshKey]*parse.Tree{},
+		notebooks: map[string]struct{}{},
+	}
+}
+
+func (refresh *moveDocsRefresh) addParent(tree *parse.Tree) {
+	if nil == refresh || nil == tree {
+		return
+	}
+	key := moveDocsRefreshKey{boxID: tree.Box, rootID: tree.ID}
+	refresh.parents[key] = tree
+}
+
+func (refresh *moveDocsRefresh) addNotebook(boxID string) {
+	if nil == refresh || "" == boxID {
+		return
+	}
+	refresh.notebooks[boxID] = struct{}{}
+}
+
+func (refresh *moveDocsRefresh) flush() {
+	refresh.flushWith(refreshDocInfo, refreshBoxDocInfoByBoxID)
+}
+
+func (refresh *moveDocsRefresh) flushWith(refreshParent func(*parse.Tree), refreshNotebook func(string)) {
+	if nil == refresh {
+		return
+	}
+	for _, tree := range refresh.parents {
+		refreshParent(tree)
+	}
+	for boxID := range refresh.notebooks {
+		refreshNotebook(boxID)
+	}
+}
+
 func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err error) {
 	toBox := Conf.Box(toBoxID)
 	if nil == toBox {
@@ -1611,6 +1659,8 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 
 	FlushTxQueue()
 	luteEngine := util.NewLute()
+	refresh := newMoveDocsRefresh()
+	defer refresh.flush()
 	count := 0
 	for fromPath, fromBox := range pathsBoxes {
 		count++
@@ -1618,7 +1668,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(70), fmt.Sprintf("%d/%d", count, len(fromPaths))))
 		}
 
-		_, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine, callback)
+		_, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine, callback, refresh)
 		if err != nil {
 			return
 		}
@@ -1645,7 +1695,7 @@ func countSubDocs(box, p string) (ret int) {
 	return
 }
 
-func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngine *lute.Lute, callback any) (newPath string, err error) {
+func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngine *lute.Lute, callback any, refresh *moveDocsRefresh) (newPath string, err error) {
 	isSameBox := fromBox.ID == toBox.ID
 
 	if isSameBox {
@@ -1667,12 +1717,18 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	}
 
 	fromParentTree := loadParentTree(tree)
+	refresh.addParent(fromParentTree)
+	if path.Dir(fromPath) == "/" {
+		refresh.addNotebook(fromBox.ID)
+	}
 
 	moveToRoot := "/" == toPath
 	toBlockID := tree.ID
 	fromFolder := path.Join(path.Dir(fromPath), tree.ID)
 	toFolder := "/"
-	if !moveToRoot {
+	if moveToRoot {
+		refresh.addNotebook(toBox.ID)
+	} else {
 		var toTree *parse.Tree
 		if isSameBox {
 			toTree, err = filesys.LoadTree(fromBox.ID, toPath, luteEngine)
@@ -1684,6 +1740,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 			return
 		}
 
+		refresh.addParent(toTree)
 		toBlockID = toTree.ID
 		toFolder = path.Join(path.Dir(toPath), toBlockID)
 	}
@@ -1787,14 +1844,6 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	evt.Callback = callback
 	util.PushEvent(evt)
 
-	refreshDocInfo(fromParentTree)
-	fromRoot := path.Dir(fromPath) == "/"
-	if fromRoot {
-		refreshBoxDocInfoByBoxID(fromBox.ID)
-	}
-	if moveToRoot && (!isSameBox || !fromRoot) {
-		refreshBoxDocInfoByBoxID(toBox.ID)
-	}
 	return
 }
 

@@ -153,6 +153,45 @@ func TestMoveDocsRejectsInvalidPathsBeforeMoving(t *testing.T) {
 	}
 }
 
+func TestMoveDocsRefreshDeduplicatesParentsAndNotebooks(t *testing.T) {
+	refresh := newMoveDocsRefresh()
+	parent1 := &parse.Tree{Box: "20260718000000-abcdefg", ID: "20260718000001-abcdefg"}
+	parent2 := &parse.Tree{Box: "20260718000002-abcdefg", ID: "20260718000001-abcdefg"}
+
+	refresh.addParent(parent1)
+	refresh.addParent(parent1)
+	refresh.addParent(parent2)
+	refresh.addNotebook(parent1.Box)
+	refresh.addNotebook(parent1.Box)
+	refresh.addNotebook(parent2.Box)
+
+	parentCalls := map[moveDocsRefreshKey]int{}
+	notebookCalls := map[string]int{}
+	refresh.flushWith(func(tree *parse.Tree) {
+		key := moveDocsRefreshKey{boxID: tree.Box, rootID: tree.ID}
+		parentCalls[key]++
+	}, func(boxID string) {
+		notebookCalls[boxID]++
+	})
+
+	if 2 != len(parentCalls) {
+		t.Fatalf("unexpected refreshed parent count: got %d, want 2", len(parentCalls))
+	}
+	for key, count := range parentCalls {
+		if 1 != count {
+			t.Fatalf("parent [%+v] refreshed %d times, want 1", key, count)
+		}
+	}
+	if 2 != len(notebookCalls) {
+		t.Fatalf("unexpected refreshed notebook count: got %d, want 2", len(notebookCalls))
+	}
+	for boxID, count := range notebookCalls {
+		if 1 != count {
+			t.Fatalf("notebook [%s] refreshed %d times, want 1", boxID, count)
+		}
+	}
+}
+
 func TestSetFileTreeSort(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 

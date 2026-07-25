@@ -548,7 +548,7 @@ func moveTree(tree *parse.Tree) {
 		util.PushStatusBar(msg)
 	}
 
-	refreshDocInfo(tree)
+	refreshDocInfoWithoutParent(tree)
 }
 
 func parseKTree(kramdown []byte) (ret *parse.Tree) {

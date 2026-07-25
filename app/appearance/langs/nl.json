@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Gedrag bij klikken op databasebadge",
+  "databaseAttrClickModeTip": "Bepaal wat er gebeurt wanneer op een databasebadge wordt geklikt",
+  "focusBlockAndExpandDatabasePanel": "Blok focussen en databasepaneel uitvouwen",
+  "openBlockAttributePanel": "Paneel met blokeigenschappen openen",
   "backlinkShowBottomTip": "Wanneer ingeschakeld, wordt onderaan het document een paneel met terugverwijzingen en vermeldingen weergegeven",
   "databaseAttrShowTip": "Wanneer uitgeschakeld, wordt het volledige databasepaneel verborgen; eerdere instellingen worden hersteld wanneer de optie opnieuw wordt ingeschakeld",
   "databaseAttrShow": "Databasepaneel bovenaan het document weergeven",

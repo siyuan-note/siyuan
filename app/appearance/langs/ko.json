@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "데이터베이스 배지 클릭 동작",
+  "databaseAttrClickModeTip": "데이터베이스 배지를 클릭할 때 수행할 동작을 설정합니다",
+  "focusBlockAndExpandDatabasePanel": "블록을 포커스하고 데이터베이스 패널 펼치기",
+  "openBlockAttributePanel": "블록 속성 패널 열기",
   "backlinkShowBottomTip": "활성화하면 문서 하단에 백링크와 멘션이 포함된 패널이 표시됩니다",
   "databaseAttrShowTip": "비활성화하면 데이터베이스 패널 전체가 숨겨지며 다시 활성화하면 이전 설정이 복원됩니다",
   "databaseAttrShow": "문서 상단에 데이터베이스 패널 표시",

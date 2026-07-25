@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Verhalten beim Klicken auf das Datenbank-Abzeichen",
+  "databaseAttrClickModeTip": "Legt fest, was beim Klicken auf das Datenbank-Abzeichen geschieht",
+  "focusBlockAndExpandDatabasePanel": "Block fokussieren und Datenbank-Panel erweitern",
+  "openBlockAttributePanel": "Block-Attributpanel öffnen",
   "backlinkShowBottomTip": "Wenn aktiviert, wird am Dokumentende ein Bereich mit Backlinks und Erwähnungen angezeigt",
   "databaseAttrShowTip": "Wenn deaktiviert, wird der gesamte Datenbankbereich ausgeblendet; nach dem erneuten Aktivieren werden die bisherigen Einstellungen wiederhergestellt",
   "databaseAttrShow": "Datenbankbereich am Dokumentanfang anzeigen",

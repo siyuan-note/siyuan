@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Comportamento al clic sul badge del database",
+  "databaseAttrClickModeTip": "Imposta cosa accade quando si fa clic sul badge del database",
+  "focusBlockAndExpandDatabasePanel": "Metti a fuoco il blocco ed espandi il pannello del database",
+  "openBlockAttributePanel": "Apri il pannello degli attributi del blocco",
   "backlinkShowBottomTip": "Quando è attiva, in fondo al documento viene mostrato un pannello contenente backlink e menzioni",
   "databaseAttrShowTip": "Quando è disattivato, l’intero pannello del database viene nascosto; le impostazioni precedenti vengono ripristinate quando viene riattivato",
   "databaseAttrShow": "Mostra il pannello del database all’inizio del documento",

@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Comportamiento al hacer clic en la insignia de base de datos",
+  "databaseAttrClickModeTip": "Establece qué ocurre al hacer clic en la insignia de base de datos",
+  "focusBlockAndExpandDatabasePanel": "Enfocar el bloque y expandir el panel de base de datos",
+  "openBlockAttributePanel": "Abrir el panel de atributos del bloque",
   "backlinkShowBottomTip": "Cuando está activado, se muestra un panel con enlaces entrantes y menciones al final del documento",
   "databaseAttrShowTip": "Cuando está desactivado, se oculta todo el panel de base de datos; al volver a activarlo, se restauran los ajustes anteriores",
   "databaseAttrShow": "Mostrar el panel de base de datos al principio del documento",

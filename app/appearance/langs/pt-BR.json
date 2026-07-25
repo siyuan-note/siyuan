@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Comportamento ao clicar no indicador do banco de dados",
+  "databaseAttrClickModeTip": "Defina o que acontece ao clicar no indicador do banco de dados",
+  "focusBlockAndExpandDatabasePanel": "Focar o bloco e expandir o painel do banco de dados",
+  "openBlockAttributePanel": "Abrir o painel de atributos do bloco",
   "backlinkShowBottomTip": "Quando ativada, um painel contendo backlinks e menções é exibido na parte inferior do documento",
   "databaseAttrShowTip": "Quando desativado, todo o painel do banco de dados fica oculto; as configurações anteriores são restauradas quando ele é reativado",
   "databaseAttrShow": "Mostrar o painel do banco de dados na parte superior do documento",

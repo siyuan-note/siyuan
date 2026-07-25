@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "פעולה בלחיצה על תג מסד הנתונים",
+  "databaseAttrClickModeTip": "הגדר מה יקרה בעת לחיצה על תג מסד הנתונים",
+  "focusBlockAndExpandDatabasePanel": "מיקוד בבלוק והרחבת חלונית מסד הנתונים",
+  "openBlockAttributePanel": "פתיחת חלונית מאפייני הבלוק",
   "backlinkShowBottomTip": "כאשר האפשרות מופעלת, לוח המכיל קישורים אחוריים ואזכורים מוצג בתחתית המסמך",
   "databaseAttrShowTip": "כאשר האפשרות מושבתת, כל לוח מסד הנתונים מוסתר; ההגדרות הקודמות משוחזרות כאשר היא מופעלת מחדש",
   "databaseAttrShow": "הצגת לוח מסד הנתונים בראש המסמך",

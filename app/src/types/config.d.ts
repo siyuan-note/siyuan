@@ -519,6 +519,12 @@ declare namespace Config {
          */
         databaseAttrShow: boolean;
         /**
+         * Behavior when clicking a database badge
+         * - `0`: Focus the block and expand the database panel
+         * - `1`: Open the block attribute panel
+         */
+        databaseAttrClickMode: number;
+        /**
          * Default state of database attributes
          * - `0`: Expanded
          * - `1`: Collapsed

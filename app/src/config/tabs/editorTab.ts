@@ -106,7 +106,12 @@ const bindDatabaseAttrSettingsVisibility = (root: HTMLElement) => {
         return;
     }
     const toggle = () => {
-        ["editor.databaseAttrViewMode", "editor.databaseAttrHideEmpty", "editor.databaseAttrUseTabs"].forEach(id => {
+        [
+            "editor.databaseAttrClickMode",
+            "editor.databaseAttrViewMode",
+            "editor.databaseAttrHideEmpty",
+            "editor.databaseAttrUseTabs",
+        ].forEach(id => {
             root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !showSwitch.checked);
         });
     };
@@ -166,6 +171,14 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.databaseAttrShow,
         desc: window.siyuan.languages.databaseAttrShowTip,
         afterMount: bindDatabaseAttrSettingsVisibility,
+    });
+    group.select("editor.databaseAttrClickMode", {
+        title: window.siyuan.languages.databaseAttrClickMode,
+        desc: window.siyuan.languages.databaseAttrClickModeTip,
+        options: [
+            {value: 0, label: window.siyuan.languages.focusBlockAndExpandDatabasePanel},
+            {value: 1, label: window.siyuan.languages.openBlockAttributePanel},
+        ],
     });
     group.select("editor.databaseAttrViewMode", {
         title: window.siyuan.languages.databaseAttrViewMode,

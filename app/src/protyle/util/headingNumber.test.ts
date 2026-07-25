@@ -5,7 +5,8 @@ import {
     invalidateHeadingNumberMeasurements,
     operationsMayChangeHeadingNumbers,
     operationsMayChangeOutline,
-    renderHeadingNumberElements
+    renderHeadingNumberElements,
+    resolveHeadingNumberEnabled
 } from "./headingNumberCore";
 
 class TestElement {
@@ -83,6 +84,15 @@ class TestElement {
         this.parentElement = null;
     }
 }
+
+describe("resolveHeadingNumberEnabled", () => {
+    it("优先使用文档设置并在默认状态下继承全局设置", () => {
+        assert.equal(resolveHeadingNumberEnabled("true", false), true);
+        assert.equal(resolveHeadingNumberEnabled("false", true), false);
+        assert.equal(resolveHeadingNumberEnabled("", true), true);
+        assert.equal(resolveHeadingNumberEnabled(null, false), false);
+    });
+});
 
 describe("renderHeadingNumbers", () => {
     it("生成不依赖标题 DOM 状态的编号样式", () => {
@@ -174,6 +184,30 @@ describe("renderHeadingNumbers", () => {
 });
 
 describe("operationsMayChangeHeadingNumbers", () => {
+    it("文档标题编号设置变化时使编号失效", () => {
+        const changed = operationsMayChangeHeadingNumbers([{
+            action: "updateAttrs",
+            data: {
+                old: {"custom-sy-heading-number": "false"},
+                new: {"custom-sy-heading-number": "true"},
+            },
+        }]);
+
+        assert.equal(changed, true);
+    });
+
+    it("其他文档属性变化时不使编号失效", () => {
+        const changed = operationsMayChangeHeadingNumbers([{
+            action: "updateAttrs",
+            data: {
+                old: {title: "Old"},
+                new: {title: "New"},
+            },
+        }]);
+
+        assert.equal(changed, false);
+    });
+
     it("更新并移除容器中的标题时使编号失效", () => {
         const changed = operationsMayChangeHeadingNumbers(
             [{action: "update", id: "container", data: "<div></div>"}],
@@ -205,6 +239,18 @@ describe("operationsMayChangeHeadingNumbers", () => {
 });
 
 describe("operationsMayChangeOutline", () => {
+    it("文档标题编号设置变化时刷新大纲", () => {
+        const changed = operationsMayChangeOutline([{
+            action: "updateAttrs",
+            data: {
+                old: {"custom-sy-heading-number": "true"},
+                new: {},
+            },
+        }]);
+
+        assert.equal(changed, true);
+    });
+
     it("API 更新容器并移除标题时刷新大纲", () => {
         const changed = operationsMayChangeOutline([{
             action: "update",

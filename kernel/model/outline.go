@@ -218,7 +218,7 @@ func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err e
 		return
 	}
 	headingNumbers := map[string]string{}
-	if Conf.Editor.HeadingNumber {
+	if headingNumberEnabled(tree, Conf.Editor.HeadingNumber) {
 		headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
 	}
 

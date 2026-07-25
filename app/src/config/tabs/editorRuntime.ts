@@ -49,7 +49,7 @@ const applyEditorConfig = (data: Config.IEditor) => {
     }
 
     void setInlineStyle().then(() => {
-        if (remeasureHeadingNumbers && data.headingNumber) {
+        if (remeasureHeadingNumbers) {
             refreshHeadingNumberMeasurements();
         }
     });

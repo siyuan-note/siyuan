@@ -43,6 +43,32 @@ func TestShouldReturnHeadingNumbers(t *testing.T) {
 	}
 }
 
+func TestHeadingNumberEnabled(t *testing.T) {
+	tests := []struct {
+		name           string
+		customValue    string
+		defaultEnabled bool
+		want           bool
+	}{
+		{name: "inherit enabled", defaultEnabled: true, want: true},
+		{name: "inherit disabled", defaultEnabled: false, want: false},
+		{name: "force enabled", customValue: "true", defaultEnabled: false, want: true},
+		{name: "force disabled", customValue: "false", defaultEnabled: true, want: false},
+		{name: "invalid value inherits", customValue: "invalid", defaultEnabled: true, want: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			tree := newHeadingNumberTestTree()
+			if "" != test.customValue {
+				tree.Root.SetIALAttr(headingNumberAttribute, test.customValue)
+			}
+			if got := headingNumberEnabled(tree, test.defaultEnabled); got != test.want {
+				t.Fatalf("unexpected enabled state: got %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
 func TestBuildHeadingNumberEntriesStartsFromLogicalRoot(t *testing.T) {
 	tree := newHeadingNumberTestTree(3, 4, 2, 6)
 	entries := buildHeadingNumberEntries(tree, "decimal-hierarchical")

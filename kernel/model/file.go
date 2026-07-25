@@ -730,8 +730,11 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	}
 
 	blockCount = tree.DocBlockCount()
-	if Conf.Editor.HeadingNumber && shouldReturnHeadingNumbers(mode, isBacklink) {
-		headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
+	if shouldReturnHeadingNumbers(mode, isBacklink) {
+		headingNumbers = map[string]string{}
+		if headingNumberEnabled(tree, Conf.Editor.HeadingNumber) {
+			headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
+		}
 	}
 	if ast.NodeDocument == node.Type {
 		parentID = node.ID

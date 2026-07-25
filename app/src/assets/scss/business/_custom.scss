@@ -375,7 +375,7 @@
   top: 50%;
   transform: translateY(-50%);
   transition: opacity 120ms ease-in-out;
-  background-color: transparent;
+  background-color: var(--b3-theme-background);
   border-radius: var(--b3-border-radius);
 
   .av__row-action {
@@ -411,6 +411,20 @@
 .av__gallery-item:hover .av__row-actions {
   opacity: 1;
   pointer-events: auto;
+}
+
+.av__row--select .av__row-actions,
+.av__row--hl .av__row-actions,
+.av__row--locate .av__row-actions,
+.av__cell--select > .av__row-actions,
+.av__cell--active > .av__row-actions,
+.av__gallery-item--select .av__row-actions,
+.av__gallery-item--locate .av__row-actions {
+  background-color: var(--b3-theme-primary-lightest);
+}
+
+.av__gallery-item:hover:not(.av__gallery-item--select):not(.av__gallery-item--locate) .av__row-actions {
+  background-color: var(--b3-theme-surface-light);
 }
 
 .protyle-db-row {

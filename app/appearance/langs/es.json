@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "Cuando está activado, se muestran los enlaces entrantes y las menciones al final del documento",
+  "databaseAttrShowTip": "Cuando está desactivado, se oculta toda el área de atributos de la base de datos; al volver a activarlo, se restauran los ajustes anteriores",
+  "databaseAttrShow": "Mostrar atributos de la base de datos al principio del documento",
   "databaseAttrHideEmptyTip": "Cuando está activado, los campos vacíos se ocultan en el área de atributos de la base de datos en la parte superior del editor; desactiva esta opción para editar campos vacíos",
   "databaseAttrUseTabsTip": "Cuando un bloque esté vinculado a varias bases de datos, usa pestañas para cambiar entre sus atributos",
   "rebind": "Volver a vincular",

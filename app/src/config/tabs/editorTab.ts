@@ -100,6 +100,20 @@ const bindSpellcheckLanguagesChips = async (root: HTMLElement) => {
 };
 /// #endif
 
+const bindDatabaseAttrSettingsVisibility = (root: HTMLElement) => {
+    const showSwitch = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.databaseAttrShow")}`);
+    if (!showSwitch) {
+        return;
+    }
+    const toggle = () => {
+        ["editor.databaseAttrViewMode", "editor.databaseAttrHideEmpty", "editor.databaseAttrUseTabs"].forEach(id => {
+            root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !showSwitch.checked);
+        });
+    };
+    showSwitch.addEventListener("change", toggle);
+    toggle();
+};
+
 const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("blockFeatures", window.siyuan.languages.configGroupBlockFeatures);
     group.switch("editor.displayNetImgMark", {
@@ -131,6 +145,11 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
             {value: "decimal-parenthesized", label: "1）"},
             {value: "chinese-document", label: "一、（一）1."},
         ],
+    });
+    group.switch("editor.databaseAttrShow", {
+        title: window.siyuan.languages.databaseAttrShow,
+        desc: window.siyuan.languages.databaseAttrShowTip,
+        afterMount: bindDatabaseAttrSettingsVisibility,
     });
     group.select("editor.databaseAttrViewMode", {
         title: window.siyuan.languages.databaseAttrViewMode,
@@ -204,6 +223,7 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
     if (!isMobile()) {
         group.switch("editor.backlinkShowBottom", {
             title: window.siyuan.languages.backlinkShowBottom,
+            desc: window.siyuan.languages.backlinkShowBottomTip,
         });
     }
     group.number("editor.backlinkExpandCount", {

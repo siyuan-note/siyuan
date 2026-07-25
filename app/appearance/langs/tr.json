@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "Etkinleştirildiğinde geri bağlantılar ve bahsetmeler belgenin altında gösterilir",
+  "databaseAttrShowTip": "Devre dışı bırakıldığında veritabanı öznitelikleri alanının tamamı gizlenir; yeniden etkinleştirildiğinde önceki ayarlar geri yüklenir",
+  "databaseAttrShow": "Belgenin üst kısmında veritabanı özniteliklerini göster",
   "databaseAttrHideEmptyTip": "Etkinleştirildiğinde, düzenleyicinin üst kısmındaki veritabanı öznitelikleri alanında boş alanlar gizlenir; boş alanları düzenlemek için bu seçeneği devre dışı bırakın",
   "databaseAttrUseTabsTip": "Bir blok birden fazla veritabanına bağlandığında, öznitelikler arasında geçiş yapmak için sekmeleri kullanın",
   "rebind": "Yeniden bağla",

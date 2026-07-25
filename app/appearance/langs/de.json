@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "Wenn aktiviert, werden Backlinks und Erwähnungen am Dokumentende angezeigt",
+  "databaseAttrShowTip": "Wenn deaktiviert, wird der gesamte Datenbankattributbereich ausgeblendet; nach dem erneuten Aktivieren werden die bisherigen Einstellungen wiederhergestellt",
+  "databaseAttrShow": "Datenbankattribute am Dokumentanfang anzeigen",
   "databaseAttrHideEmptyTip": "Wenn aktiviert, werden leere Felder im Datenbankattributbereich oben im Editor ausgeblendet; deaktivieren Sie diese Option, um leere Felder zu bearbeiten",
   "databaseAttrUseTabsTip": "Wenn ein Block mit mehreren Datenbanken verknüpft ist, können Sie über Registerkarten zwischen deren Attributen wechseln",
   "rebind": "Neu verknüpfen",

@@ -10,6 +10,7 @@ export class AVAttributePanel {
     private protyle: IProtyle;
     private targetID = "";
     private renderToken = 0;
+    private renderingTargetID = "";
     private collapsed: boolean;
     private activeAvID = "";
 
@@ -43,8 +44,13 @@ export class AVAttributePanel {
     }
 
     public render(force = false) {
+        if (!window.siyuan.config.editor.databaseAttrShow) {
+            this.hideByDisplayConfig();
+            return;
+        }
         const targetID = this.protyle.block.showAll ? this.protyle.block.id : this.protyle.block.rootID;
-        if (!targetID || (!force && targetID === this.targetID && this.element.dataset.rendered === "true")) {
+        if (!targetID || (!force && targetID === this.targetID &&
+            (this.element.dataset.rendered === "true" || this.renderingTargetID === targetID))) {
             return;
         }
         const currentBodyElement = this.bodyElement;
@@ -55,6 +61,7 @@ export class AVAttributePanel {
             this.element.removeAttribute("data-rendered");
         }
         const token = ++this.renderToken;
+        this.renderingTargetID = targetID;
         const bodyElement = document.createElement("div");
         bodyElement.className = "custom-attr protyle-db-attr__body";
         if (!keepCurrentBody) {
@@ -65,6 +72,7 @@ export class AVAttributePanel {
             if (token !== this.renderToken) {
                 return;
             }
+            this.renderingTargetID = "";
             if (keepCurrentBody) {
                 currentBodyElement.replaceWith(renderedElement);
                 this.bodyElement = renderedElement;
@@ -81,8 +89,17 @@ export class AVAttributePanel {
     }
 
     public updateDisplayConfig() {
+        if (!window.siyuan.config.editor.databaseAttrShow) {
+            this.hideByDisplayConfig();
+            return;
+        }
         this.updateTabs();
         this.updateEmptyState();
+        if (this.element.dataset.rendered === "true") {
+            this.element.classList.toggle("fn__none", !this.bodyElement.querySelector("[data-av-id], .custom-attr__avbacklinks"));
+        } else {
+            this.render();
+        }
     }
 
     public hasDatabase(avID: string) {
@@ -166,5 +183,14 @@ export class AVAttributePanel {
 
     private updateEmptyState() {
         updateEmptyState(this.element, window.siyuan.config.editor.databaseAttrHideEmpty);
+    }
+
+    private hideByDisplayConfig() {
+        if (this.renderingTargetID) {
+            this.renderToken++;
+            this.renderingTargetID = "";
+        }
+        this.element.removeAttribute("data-rendered");
+        this.element.classList.add("fn__none");
     }
 }

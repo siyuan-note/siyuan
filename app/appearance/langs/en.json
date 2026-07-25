@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "When enabled, backlinks and mentions are displayed at the bottom of the document",
+  "databaseAttrShowTip": "When disabled, the entire database attributes area is hidden; previous settings are restored when it is enabled again",
+  "databaseAttrShow": "Show database attributes at the top of the document",
   "databaseAttrHideEmptyTip": "When enabled, empty fields are hidden in the database attributes area at the top of the editor; disable this option to edit empty fields",
   "databaseAttrUseTabsTip": "When a block is bound to multiple databases, use tabs to switch between their attributes",
   "rebind": "Rebind",

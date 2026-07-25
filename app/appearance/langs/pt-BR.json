@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "Quando ativada, os backlinks e as menções são exibidos na parte inferior do documento",
+  "databaseAttrShowTip": "Quando desativada, toda a área de atributos do banco de dados fica oculta; as configurações anteriores são restauradas quando ela é reativada",
+  "databaseAttrShow": "Mostrar atributos do banco de dados na parte superior do documento",
   "databaseAttrHideEmptyTip": "Quando ativada, os campos vazios ficam ocultos na área de atributos do banco de dados na parte superior do editor; desative esta opção para editar campos vazios",
   "databaseAttrUseTabsTip": "Quando um bloco estiver vinculado a vários bancos de dados, use abas para alternar entre seus atributos",
   "rebind": "Vincular novamente",

@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "Po włączeniu odniesienia zwrotne i wzmianki są wyświetlane na dole dokumentu",
+  "databaseAttrShowTip": "Po wyłączeniu cały obszar atrybutów bazy danych jest ukrywany; po ponownym włączeniu przywracane są wcześniejsze ustawienia",
+  "databaseAttrShow": "Pokaż atrybuty bazy danych u góry dokumentu",
   "databaseAttrHideEmptyTip": "Po włączeniu puste pola są ukrywane w obszarze atrybutów bazy danych u góry edytora; wyłącz tę opcję, aby edytować puste pola",
   "databaseAttrUseTabsTip": "Gdy blok jest powiązany z wieloma bazami danych, używaj kart do przełączania między ich atrybutami",
   "rebind": "Powiąż ponownie",

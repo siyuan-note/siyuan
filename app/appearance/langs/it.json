@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "Quando è attiva, i backlink e le menzioni vengono mostrati in fondo al documento",
+  "databaseAttrShowTip": "Quando è disattivata, l’intera area degli attributi del database viene nascosta; le impostazioni precedenti vengono ripristinate quando viene riattivata",
+  "databaseAttrShow": "Mostra gli attributi del database all’inizio del documento",
   "databaseAttrHideEmptyTip": "Quando è attiva, i campi vuoti vengono nascosti nell’area degli attributi del database nella parte superiore dell’editor; disattiva questa opzione per modificare i campi vuoti",
   "databaseAttrUseTabsTip": "Quando un blocco è associato a più database, usa le schede per passare da un insieme di attributi all’altro",
   "rebind": "Ricollega",

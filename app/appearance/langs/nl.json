@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "Wanneer ingeschakeld, worden terugverwijzingen en vermeldingen onderaan het document weergegeven",
+  "databaseAttrShowTip": "Wanneer uitgeschakeld, wordt het volledige databasekenmerkengebied verborgen; eerdere instellingen worden hersteld wanneer de optie opnieuw wordt ingeschakeld",
+  "databaseAttrShow": "Databasekenmerken bovenaan het document weergeven",
   "databaseAttrHideEmptyTip": "Wanneer ingeschakeld, worden lege velden verborgen in het databasekenmerkengebied bovenaan de editor; schakel deze optie uit om lege velden te bewerken",
   "databaseAttrUseTabsTip": "Wanneer een blok aan meerdere databases is gekoppeld, gebruikt u tabbladen om tussen hun kenmerken te schakelen",
   "rebind": "Opnieuw koppelen",

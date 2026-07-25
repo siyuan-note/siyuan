@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "启用后在文档底部显示反链和提及",
+  "databaseAttrShowTip": "关闭后隐藏整个数据库属性区域，重新开启后恢复原有设置",
+  "databaseAttrShow": "在文档顶部显示数据库属性",
   "databaseAttrHideEmptyTip": "启用后编辑器顶部的数据库属性区域将隐藏空字段；如需编辑空字段，请关闭此选项",
   "databaseAttrUseTabsTip": "块绑定多个数据库时，使用页签切换显示各数据库的属性",
   "rebind": "换绑",

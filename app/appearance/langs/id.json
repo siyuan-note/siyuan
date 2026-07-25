@@ -1,4 +1,7 @@
 {
+  "backlinkShowBottomTip": "Saat diaktifkan, pranala balik dan penyebutan ditampilkan di bagian bawah dokumen",
+  "databaseAttrShowTip": "Saat dinonaktifkan, seluruh area atribut basis data disembunyikan; pengaturan sebelumnya dipulihkan saat diaktifkan kembali",
+  "databaseAttrShow": "Tampilkan atribut basis data di bagian atas dokumen",
   "databaseAttrHideEmptyTip": "Saat diaktifkan, bidang kosong disembunyikan di area atribut basis data di bagian atas editor; nonaktifkan opsi ini untuk mengedit bidang kosong",
   "databaseAttrUseTabsTip": "Saat blok ditautkan ke beberapa basis data, gunakan tab untuk beralih di antara atributnya",
   "rebind": "Tautkan ulang",

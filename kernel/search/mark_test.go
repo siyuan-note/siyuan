@@ -22,6 +22,68 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestMarkTextMatchesRawText(t *testing.T) {
+	old := util.SearchHanSensitive
+	util.SearchHanSensitive = true
+	t.Cleanup(func() {
+		util.SearchHanSensitive = old
+	})
+
+	tests := []struct {
+		name      string
+		text      string
+		keyword   string
+		beforeLen int
+		wantPos   int
+		want      string
+	}{
+		{
+			name:      "template name",
+			text:      "1&2amp",
+			keyword:   "amp",
+			beforeLen: 32,
+			wantPos:   len("1&amp;2"),
+			want:      "1&amp;2<mark>amp</mark>",
+		},
+		{
+			name:      "entity only",
+			text:      "A&B",
+			keyword:   "amp",
+			beforeLen: 32,
+			wantPos:   -1,
+			want:      "A&amp;B",
+		},
+		{
+			name:      "entity at context boundary",
+			text:      "a&xamp",
+			keyword:   "amp",
+			beforeLen: 1,
+			wantPos:   len("...&amp;x"),
+			want:      "...&amp;x<mark>amp</mark>",
+		},
+		{
+			name:      "multibyte context",
+			text:      "前🙂xamp",
+			keyword:   "amp",
+			beforeLen: 1,
+			wantPos:   len("...🙂x"),
+			want:      "...🙂x<mark>amp</mark>",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			pos, got := MarkText(test.text, test.keyword, test.beforeLen, true)
+			if test.want != got {
+				t.Fatalf("result = %q, want %q", got, test.want)
+			}
+			if test.wantPos != pos {
+				t.Fatalf("pos = %d, want %d", pos, test.wantPos)
+			}
+		})
+	}
+}
+
 func TestEncloseHighlightingRaw(t *testing.T) {
 	old := util.SearchHanSensitive
 	util.SearchHanSensitive = true

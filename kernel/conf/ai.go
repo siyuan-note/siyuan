@@ -28,6 +28,11 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+const (
+	atlasCloudDefaultBaseURL = "https://api.atlascloud.ai/v1"
+	atlasCloudDefaultModel   = "deepseek-ai/deepseek-v4-pro"
+)
+
 type AI struct {
 	MCP             *MCP             `json:"mcp"`
 	Embedding       *Embedding       `json:"embedding"`
@@ -190,15 +195,38 @@ func NewAI() *AI {
 	apiKey := os.Getenv("SIYUAN_OPENAI_API_KEY")
 	apiModel := os.Getenv("SIYUAN_OPENAI_API_MODEL")
 	apiBaseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL")
+	apiTimeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT")
+	apiMaxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS")
+	apiTemperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE")
+	apiMaxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS")
+	providerDisplayName := ""
 
-	if apiModel != "" && apiBaseURL != "" {
+	if !hasOpenAIProviderEnv(apiModel, apiBaseURL) && hasAtlasCloudProviderEnv() {
+		apiKey = firstEnvValue("SIYUAN_ATLASCLOUD_API_KEY", "SIYUAN_ATLAS_CLOUD_API_KEY")
+		apiModel = firstEnvValue("SIYUAN_ATLASCLOUD_API_MODEL", "SIYUAN_ATLAS_CLOUD_API_MODEL")
+		if "" == apiModel {
+			apiModel = atlasCloudDefaultModel
+		}
+		apiBaseURL = firstEnvValue("SIYUAN_ATLASCLOUD_API_BASE_URL", "SIYUAN_ATLAS_CLOUD_API_BASE_URL")
+		if "" == apiBaseURL {
+			apiBaseURL = atlasCloudDefaultBaseURL
+		}
+		apiTimeout = firstEnvValue("SIYUAN_ATLASCLOUD_API_TIMEOUT", "SIYUAN_ATLAS_CLOUD_API_TIMEOUT")
+		apiMaxTokens = firstEnvValue("SIYUAN_ATLASCLOUD_API_MAX_TOKENS", "SIYUAN_ATLAS_CLOUD_API_MAX_TOKENS")
+		apiTemperature = firstEnvValue("SIYUAN_ATLASCLOUD_API_TEMPERATURE", "SIYUAN_ATLAS_CLOUD_API_TEMPERATURE")
+		apiMaxContexts = firstEnvValue("SIYUAN_ATLASCLOUD_API_MAX_CONTEXTS", "SIYUAN_ATLAS_CLOUD_API_MAX_CONTEXTS")
+		providerDisplayName = "Atlas Cloud"
+	}
+
+	if strings.TrimSpace(apiModel) != "" && strings.TrimSpace(apiBaseURL) != "" {
 		provider := &Provider{
+			DisplayName:    providerDisplayName,
 			BaseURL:        apiBaseURL,
 			RequestTimeout: 120,
 			Enabled:        true,
 			APIKey:         apiKey,
 		}
-		if timeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT"); "" != timeout {
+		if timeout := apiTimeout; "" != timeout {
 			if v, err := strconv.Atoi(timeout); err == nil {
 				provider.RequestTimeout = v
 			}
@@ -208,17 +236,17 @@ func NewAI() *AI {
 			Name:    apiModel,
 			Enabled: true,
 		}
-		if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
+		if maxTokens := apiMaxTokens; "" != maxTokens {
 			if v, err := strconv.Atoi(maxTokens); err == nil {
 				ai.Editing.MaxCompletionTokens = v
 			}
 		}
-		if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
+		if temperature := apiTemperature; "" != temperature {
 			if v, err := strconv.ParseFloat(temperature, 64); err == nil {
 				ai.Editing.Temperature = v
 			}
 		}
-		if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
+		if maxContexts := apiMaxContexts; "" != maxContexts {
 			if v, err := strconv.Atoi(maxContexts); err == nil {
 				ai.Editing.MaxHistoryMessages = v
 			}
@@ -277,6 +305,31 @@ func NewAI() *AI {
 	}
 
 	return ai
+}
+
+func hasOpenAIProviderEnv(apiModel, apiBaseURL string) bool {
+	return strings.TrimSpace(apiModel) != "" && strings.TrimSpace(apiBaseURL) != ""
+}
+
+func hasAtlasCloudProviderEnv() bool {
+	return firstEnvValue(
+		"SIYUAN_ATLASCLOUD_API_KEY",
+		"SIYUAN_ATLAS_CLOUD_API_KEY",
+		"SIYUAN_ATLASCLOUD_API_MODEL",
+		"SIYUAN_ATLAS_CLOUD_API_MODEL",
+		"SIYUAN_ATLASCLOUD_API_BASE_URL",
+		"SIYUAN_ATLAS_CLOUD_API_BASE_URL",
+	) != ""
+}
+
+func firstEnvValue(names ...string) string {
+	for _, name := range names {
+		value := strings.TrimSpace(os.Getenv(name))
+		if "" != value {
+			return value
+		}
+	}
+	return ""
 }
 
 func (ai *AI) HasAnyProvider() bool {

@@ -28,6 +28,68 @@ func TestNewAIAddsKeylessProviderFromEnvironment(t *testing.T) {
 	}
 }
 
+func TestNewAIAddsAtlasCloudProviderFromEnvironment(t *testing.T) {
+	t.Setenv("SIYUAN_ATLASCLOUD_API_KEY", "atlas-key")
+
+	ai := NewAI()
+	if len(ai.Providers) != 1 {
+		t.Fatalf("provider count = %d, want 1", len(ai.Providers))
+	}
+	provider := ai.Providers[0]
+	if provider.DisplayName != "Atlas Cloud" || provider.APIKey != "atlas-key" || provider.BaseURL != atlasCloudDefaultBaseURL || !provider.Enabled {
+		t.Fatalf("unexpected Atlas Cloud provider: %#v", provider)
+	}
+	if len(provider.Models) != 1 || provider.Models[0].Name != atlasCloudDefaultModel || !provider.Models[0].Enabled {
+		t.Fatalf("unexpected Atlas Cloud provider models: %#v", provider.Models)
+	}
+}
+
+func TestNewAIReadsAtlasCloudAliasEnvironment(t *testing.T) {
+	t.Setenv("SIYUAN_ATLAS_CLOUD_API_KEY", "alias-key")
+	t.Setenv("SIYUAN_ATLAS_CLOUD_API_MODEL", "deepseek-ai/deepseek-v4-pro")
+	t.Setenv("SIYUAN_ATLAS_CLOUD_API_BASE_URL", "https://atlas.example/v1")
+	t.Setenv("SIYUAN_ATLAS_CLOUD_API_TIMEOUT", "240")
+	t.Setenv("SIYUAN_ATLAS_CLOUD_API_MAX_TOKENS", "4096")
+	t.Setenv("SIYUAN_ATLAS_CLOUD_API_TEMPERATURE", "0.6")
+	t.Setenv("SIYUAN_ATLAS_CLOUD_API_MAX_CONTEXTS", "12")
+
+	ai := NewAI()
+	if len(ai.Providers) != 1 {
+		t.Fatalf("provider count = %d, want 1", len(ai.Providers))
+	}
+	provider := ai.Providers[0]
+	if provider.APIKey != "alias-key" || provider.BaseURL != "https://atlas.example/v1" || provider.RequestTimeout != 240 {
+		t.Fatalf("unexpected Atlas Cloud alias provider: %#v", provider)
+	}
+	if provider.Models[0].Name != "deepseek-ai/deepseek-v4-pro" {
+		t.Fatalf("unexpected Atlas Cloud alias model: %#v", provider.Models[0])
+	}
+	if ai.Editing.MaxCompletionTokens != 4096 || ai.Editing.Temperature != 0.6 || ai.Editing.MaxHistoryMessages != 12 {
+		t.Fatalf("unexpected Atlas Cloud editing defaults: %#v", ai.Editing)
+	}
+}
+
+func TestNewAIPrefersOpenAIEnvironmentOverAtlasCloud(t *testing.T) {
+	t.Setenv("SIYUAN_OPENAI_API_KEY", "")
+	t.Setenv("SIYUAN_OPENAI_API_MODEL", "openai-model")
+	t.Setenv("SIYUAN_OPENAI_API_BASE_URL", "https://openai.example/v1")
+	t.Setenv("SIYUAN_ATLASCLOUD_API_KEY", "atlas-key")
+	t.Setenv("SIYUAN_ATLASCLOUD_API_MODEL", "atlas-model")
+	t.Setenv("SIYUAN_ATLASCLOUD_API_BASE_URL", "https://atlas.example/v1")
+
+	ai := NewAI()
+	if len(ai.Providers) != 1 {
+		t.Fatalf("provider count = %d, want 1", len(ai.Providers))
+	}
+	provider := ai.Providers[0]
+	if provider.DisplayName != "" || provider.APIKey != "" || provider.BaseURL != "https://openai.example/v1" {
+		t.Fatalf("unexpected OpenAI provider precedence: %#v", provider)
+	}
+	if len(provider.Models) != 1 || provider.Models[0].Name != "openai-model" {
+		t.Fatalf("unexpected OpenAI model precedence: %#v", provider.Models)
+	}
+}
+
 func TestAIKeylessProviderIsAvailable(t *testing.T) {
 	model := &Model{ID: "model-id", DisplayName: "Local Model", Name: "local-model", Enabled: true}
 	provider := &Provider{Enabled: true, BaseURL: "http://127.0.0.1:8080/v1", Models: []*Model{model}}

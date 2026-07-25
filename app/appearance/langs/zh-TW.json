@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "啟用後編輯器頂部的資料庫屬性區域將隱藏空欄位；如需編輯空欄位，請關閉此選項",
   "databaseAttrUseTabsTip": "區塊綁定多個資料庫時，使用頁籤切換顯示各資料庫的屬性",
   "rebind": "換綁",
   "aiProviderRegionInternational": "國際",

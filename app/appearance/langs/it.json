@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "Quando è attiva, i campi vuoti vengono nascosti nell’area degli attributi del database nella parte superiore dell’editor; disattiva questa opzione per modificare i campi vuoti",
   "databaseAttrUseTabsTip": "Quando un blocco è associato a più database, usa le schede per passare da un insieme di attributi all’altro",
   "rebind": "Ricollega",
   "aiProviderRegionInternational": "Internazionale",

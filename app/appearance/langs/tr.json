@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "Etkinleştirildiğinde, düzenleyicinin üst kısmındaki veritabanı öznitelikleri alanında boş alanlar gizlenir; boş alanları düzenlemek için bu seçeneği devre dışı bırakın",
   "databaseAttrUseTabsTip": "Bir blok birden fazla veritabanına bağlandığında, öznitelikler arasında geçiş yapmak için sekmeleri kullanın",
   "rebind": "Yeniden bağla",
   "aiProviderRegionInternational": "Uluslararası",

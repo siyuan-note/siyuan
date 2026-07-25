@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "Keď je táto možnosť zapnutá, prázdne polia sa skryjú v oblasti atribútov databázy v hornej časti editora; ak ich chcete upraviť, túto možnosť vypnite",
   "databaseAttrUseTabsTip": "Keď je blok prepojený s viacerými databázami, pomocou kariet prepínajte medzi ich atribútmi",
   "rebind": "Znovu prepojiť",
   "aiProviderRegionInternational": "Medzinárodné",

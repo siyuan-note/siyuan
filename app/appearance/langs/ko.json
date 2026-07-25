@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "활성화하면 편집기 상단의 데이터베이스 속성 영역에서 빈 필드가 숨겨집니다. 빈 필드를 편집하려면 이 옵션을 비활성화하세요",
   "databaseAttrUseTabsTip": "블록이 여러 데이터베이스에 연결된 경우 탭을 사용하여 각 데이터베이스의 속성을 전환합니다",
   "rebind": "다시 연결",
   "aiProviderRegionInternational": "국제",

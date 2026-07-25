@@ -142,6 +142,7 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     });
     group.switch("editor.databaseAttrHideEmpty", {
         title: window.siyuan.languages.databaseAttrHideEmpty,
+        desc: window.siyuan.languages.databaseAttrHideEmptyTip,
     });
     group.switch("editor.databaseAttrUseTabs", {
         title: window.siyuan.languages.databaseAttrUseTabs,

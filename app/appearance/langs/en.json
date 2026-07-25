@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "When enabled, empty fields are hidden in the database attributes area at the top of the editor; disable this option to edit empty fields",
   "databaseAttrUseTabsTip": "When a block is bound to multiple databases, use tabs to switch between their attributes",
   "rebind": "Rebind",
   "aiProviderRegionInternational": "International",

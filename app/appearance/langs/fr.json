@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "Lorsque cette option est activée, les champs vides sont masqués dans la zone des attributs de base de données en haut de l’éditeur ; désactivez-la pour modifier les champs vides",
   "databaseAttrUseTabsTip": "Lorsqu’un bloc est lié à plusieurs bases de données, utilisez des onglets pour passer d’un ensemble d’attributs à l’autre",
   "rebind": "Relier à nouveau",
   "aiProviderRegionInternational": "International",

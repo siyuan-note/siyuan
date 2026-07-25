@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "Cuando está activado, los campos vacíos se ocultan en el área de atributos de la base de datos en la parte superior del editor; desactiva esta opción para editar campos vacíos",
   "databaseAttrUseTabsTip": "Cuando un bloque esté vinculado a varias bases de datos, usa pestañas para cambiar entre sus atributos",
   "rebind": "Volver a vincular",
   "aiProviderRegionInternational": "Internacional",

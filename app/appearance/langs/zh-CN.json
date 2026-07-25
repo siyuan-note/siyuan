@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "启用后编辑器顶部的数据库属性区域将隐藏空字段；如需编辑空字段，请关闭此选项",
   "databaseAttrUseTabsTip": "块绑定多个数据库时，使用页签切换显示各数据库的属性",
   "rebind": "换绑",
   "aiProviderRegionInternational": "国际",

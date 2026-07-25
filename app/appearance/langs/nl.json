@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "Wanneer ingeschakeld, worden lege velden verborgen in het databasekenmerkengebied bovenaan de editor; schakel deze optie uit om lege velden te bewerken",
   "databaseAttrUseTabsTip": "Wanneer een blok aan meerdere databases is gekoppeld, gebruikt u tabbladen om tussen hun kenmerken te schakelen",
   "rebind": "Opnieuw koppelen",
   "aiProviderRegionInternational": "Internationaal",

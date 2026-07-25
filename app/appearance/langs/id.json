@@ -1,4 +1,5 @@
 {
+  "databaseAttrHideEmptyTip": "Saat diaktifkan, bidang kosong disembunyikan di area atribut basis data di bagian atas editor; nonaktifkan opsi ini untuk mengedit bidang kosong",
   "databaseAttrUseTabsTip": "Saat blok ditautkan ke beberapa basis data, gunakan tab untuk beralih di antara atributnya",
   "rebind": "Tautkan ulang",
   "aiProviderRegionInternational": "Internasional",

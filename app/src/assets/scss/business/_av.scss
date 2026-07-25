@@ -1485,6 +1485,20 @@
     }
   }
 
+  &__field-visibility {
+    & > .b3-menu__item:not(.b3-menu__item--readonly):hover {
+      background-color: var(--b3-list-hover);
+    }
+
+    .block__icon {
+      line-height: 20px;
+      padding: 0 4px;
+      font-size: 12px;
+      align-self: center;
+      opacity: 1;
+    }
+  }
+
   &__button {
     margin: 5px;
     color: var(--b3-theme-on-surface);

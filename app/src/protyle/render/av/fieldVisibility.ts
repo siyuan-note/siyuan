@@ -1,4 +1,3 @@
-import {Menu} from "../../../plugin/Menu";
 import {fetchSyncPost} from "../../../util/fetch";
 import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
@@ -68,7 +67,7 @@ const updateFieldViews = (views: IAVFieldView[], viewIDs: string[], hidden: bool
     });
 };
 
-const getFieldVisibilityItemsHTML = (views: IAVFieldView[], currentViewID: string, backColId?: string) => {
+const getFieldVisibilityItemsHTML = (views: IAVFieldView[], currentViewID: string, backColId: string) => {
     const visibleViews = views.filter((view) => !view.hidden);
     const hiddenViews = views.filter((view) => view.hidden);
     const getViewHTML = (view: IAVFieldView) => {
@@ -78,20 +77,18 @@ const getFieldVisibilityItemsHTML = (views: IAVFieldView[], currentViewID: strin
     ${view.hidden ? "" : '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>'}
 </button>`;
     };
-    const titleIconHTML = backColId
-        ? `<span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="editCol" data-id="${backColId}">
+    const titleIconHTML = `<span class="block__icon block__icon--show" style="padding: 8px;margin-left: -4px;" data-type="editCol" data-id="${backColId}">
         <svg><use xlink:href="#iconLeft"></use></svg>
-    </span>`
-        : '<svg class="b3-menu__icon"><use xlink:href="#iconEye"></use></svg>';
-    let html = `<button class="b3-menu__item" data-type="nobg">
+    </span>`;
+    let html = `<button class="b3-menu__item b3-menu__item--readonly" data-type="nobg">
     ${titleIconHTML}
     <span class="b3-menu__label ft__center">${window.siyuan.languages.fieldVisibility}</span>
 </button>`;
     if (visibleViews.length > 0) {
         html += `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
+<button class="b3-menu__item b3-menu__item--readonly" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages.showCol}</span>
-    <span class="block__icon" data-field-visibility-action="hideAll">
+    <span class="block__icon block__icon--show" data-field-visibility-action="hideAll">
         ${window.siyuan.languages.hideInAllViews}
         <span class="fn__space"></span>
         <svg><use xlink:href="#iconEyeoff"></use></svg>
@@ -101,9 +98,9 @@ ${visibleViews.map(getViewHTML).join("")}`;
     }
     if (hiddenViews.length > 0) {
         html += `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
+<button class="b3-menu__item b3-menu__item--readonly" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages.hideCol}</span>
-    <span class="block__icon" data-field-visibility-action="showAll">
+    <span class="block__icon block__icon--show" data-field-visibility-action="showAll">
         ${window.siyuan.languages.showInAllViews}
         <span class="fn__space"></span>
         <svg><use xlink:href="#iconEye"></use></svg>
@@ -117,8 +114,16 @@ ${hiddenViews.map(getViewHTML).join("")}`;
 const bindFieldVisibilityEvents = (
     element: Element,
     views: IAVFieldView[],
-    updateVisibility: (viewIDs: string[], hidden: boolean) => void
+    updateVisibility: (viewIDs: string[], hidden: boolean) => void,
+    back?: () => void
 ) => {
+    if (back) {
+        element.querySelector('[data-type="editCol"]')?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            back();
+        });
+    }
     element.querySelectorAll("[data-field-visibility-view-id]").forEach((item: HTMLElement) => {
         item.addEventListener("click", (event) => {
             event.preventDefault();
@@ -147,33 +152,75 @@ export const openFieldVisibility = async (options: {
     protyle: IProtyle;
     blockElement: Element;
     colId: string;
-    anchorElement?: Element;
 }) => {
-    const anchorElement = options.anchorElement || options.blockElement.querySelector(".av__views");
-    const rect = anchorElement?.getBoundingClientRect();
-    const position = rect ? {
-        x: rect.left,
-        y: rect.bottom,
-        h: rect.height,
-    } : undefined;
-    if (!position) {
-        return;
-    }
     document.querySelector(".av__panel")?.remove();
+    const menu = window.siyuan.menus.menu;
+    const menuElement = menu.element;
+    const previousItemsElement = menuElement.lastElementChild as HTMLElement;
+    const menuRect = menuElement.getBoundingClientRect();
+    const previousWidth = menuElement.style.width;
+    const previousRemoveCB = menu.removeCB;
     const avID = options.blockElement.getAttribute("data-av-id");
     const views = await fetchFieldViews(avID, options.colId);
-    if (!views) {
+    if (!views || menuElement.classList.contains("fn__none") || menuElement.lastElementChild !== previousItemsElement) {
         return;
     }
 
-    const menu = new Menu(Constants.MENU_AV_FIELD_VISIBILITY);
-    if (menu.isOpen) {
-        return;
-    }
     const blockID = options.blockElement.getAttribute("data-node-id");
     const currentViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
         options.blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id");
-    let opened = false;
+    const itemsElement = document.createElement("div");
+    itemsElement.classList.add("b3-menu__items", "av__field-visibility");
+    previousItemsElement.classList.add("fn__none");
+    menuElement.append(itemsElement);
+    menuElement.style.width = `${menuRect.width}px`;
+
+    const restoreMenu = () => {
+        itemsElement.remove();
+        previousItemsElement.classList.remove("fn__none");
+        menuElement.style.width = previousWidth;
+        menu.removeCB = previousRemoveCB;
+        menu.resetPosition();
+    };
+    menu.removeCB = () => {
+        itemsElement.remove();
+        previousItemsElement.classList.remove("fn__none");
+        menuElement.style.width = previousWidth;
+        previousRemoveCB?.();
+    };
+
+    const updatePreviousVisibilityItem = (hidden: boolean) => {
+        const previousVisibilityElement =
+            previousItemsElement.querySelector('[data-id="hide"]') as HTMLElement;
+        if (!previousVisibilityElement) {
+            return;
+        }
+        const visibilityElement = document.createElement("button");
+        visibilityElement.className = previousVisibilityElement.className;
+        visibilityElement.dataset.id = "hide";
+        visibilityElement.innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#${hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
+<span class="b3-menu__label">${hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hide}</span>
+<svg class="b3-menu__action ariaLabel" data-position="4west" aria-label="${window.siyuan.languages.fieldVisibility}"><use xlink:href="#iconEdit"></use></svg>`;
+        visibilityElement.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setFieldVisibility({
+                protyle: options.protyle,
+                avID,
+                blockID,
+                colId: options.colId,
+                viewIDs: [currentViewID],
+                hidden: !hidden,
+            });
+            menu.remove();
+        });
+        visibilityElement.querySelector(".b3-menu__action").addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            openFieldVisibility(options);
+        });
+        previousVisibilityElement.replaceWith(visibilityElement);
+    };
 
     const updateVisibility = (viewIDs: string[], hidden: boolean) => {
         setFieldVisibility({
@@ -185,20 +232,16 @@ export const openFieldVisibility = async (options: {
             hidden,
         });
         updateFieldViews(views, viewIDs, hidden);
+        if (viewIDs.includes(currentViewID)) {
+            updatePreviousVisibilityItem(hidden);
+        }
         render();
     };
 
     const render = () => {
-        const itemsElement = menu.element.lastElementChild;
-        itemsElement.innerHTML = getFieldVisibilityItemsHTML(views, currentViewID);
-        bindFieldVisibilityEvents(itemsElement, views, updateVisibility);
-
-        if (opened) {
-            window.siyuan.menus.menu.resetPosition();
-        } else {
-            menu.open(position);
-            opened = true;
-        }
+        itemsElement.innerHTML = getFieldVisibilityItemsHTML(views, currentViewID, options.colId);
+        bindFieldVisibilityEvents(itemsElement, views, updateVisibility, restoreMenu);
+        menu.resetPosition();
     };
 
     render();
@@ -216,8 +259,10 @@ export const openFieldVisibilityPanel = async (options: {
     const currentViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
         options.blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id");
     const panelRect = options.menuElement.getBoundingClientRect();
+    const previousItemsElement = options.menuElement.firstElementChild;
     const views = await fetchFieldViews(avID, options.colId);
-    if (!views || !options.menuElement.isConnected) {
+    if (!views || !options.menuElement.isConnected ||
+        options.menuElement.firstElementChild !== previousItemsElement) {
         return;
     }
 
@@ -244,7 +289,7 @@ export const openFieldVisibilityPanel = async (options: {
     const render = () => {
         options.menuElement.style.width = `${panelRect.width}px`;
         options.menuElement.innerHTML =
-            `<div class="b3-menu__items">${getFieldVisibilityItemsHTML(views, currentViewID, options.colId)}</div>`;
+            `<div class="b3-menu__items av__field-visibility">${getFieldVisibilityItemsHTML(views, currentViewID, options.colId)}</div>`;
         setPosition(options.menuElement, panelRect.left, panelRect.top, 0, 0, true);
         bindFieldVisibilityEvents(options.menuElement, views, updateVisibility);
     };

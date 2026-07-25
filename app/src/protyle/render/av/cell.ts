@@ -65,7 +65,11 @@ export const getCellText = (cellElement: HTMLElement | false) => {
 
 export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
     if (cellElement.dataset.avId && cellElement.dataset.cellValue) {
-        return JSON.parse(decodeURIComponent(cellElement.dataset.cellValue)) as IAVCellValue;
+        const cellValue = JSON.parse(decodeURIComponent(cellElement.dataset.cellValue)) as IAVCellValue;
+        if (colType === "mAsset" && !cellValue.mAsset) {
+            cellValue.mAsset = [];
+        }
+        return cellValue;
     }
     const cellValue: IAVCellValue = {
         type: colType,

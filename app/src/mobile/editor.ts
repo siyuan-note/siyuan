@@ -21,6 +21,21 @@ export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
 };
 
+// 串行更新时间，避免快速切换文档时较早的关闭请求覆盖较新的打开状态。
+let recentDocSwitchPromise = Promise.resolve();
+type TRecentDocUpdateType = "open" | "view" | "switch";
+export const updateRecentDocSwitchTime = (type: TRecentDocUpdateType, rootID: string, previousRootID?: string) => {
+    recentDocSwitchPromise = recentDocSwitchPromise.then(async () => {
+        if (type === "view") {
+            return fetchPost("/api/storage/updateRecentDocViewTime", {rootID});
+        }
+        if (type === "switch" && previousRootID) {
+            await fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: previousRootID});
+        }
+        return fetchPost("/api/storage/updateRecentDocOpenTime", {rootID});
+    });
+};
+
 export const openMobileFileById = (app: App, id: string, action: TProtyleAction[] = [Constants.CB_GET_HL],
                                    scrollPosition?: ScrollLogicalPosition, notebookId?: string,
                                    afterOpen?: (protyle: IProtyle) => void, forceReload = false) => {
@@ -52,7 +67,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             }
             closePanel();
             // 更新文档浏览时间
-            fetchPost("/api/storage/updateRecentDocViewTime", {rootID: window.siyuan.mobile.editor.protyle.block.rootID});
+            updateRecentDocSwitchTime("view", window.siyuan.mobile.editor.protyle.block.rootID);
             afterOpen?.(window.siyuan.mobile.editor.protyle);
             return;
         }
@@ -72,6 +87,9 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             action.includes(Constants.CB_GET_ALL) &&
             action.includes(Constants.CB_GET_FOCUS);
         const actionList = isRootFocus ? action.filter((item) => item !== Constants.CB_GET_ALL) : action;
+        const previousRootID = window.siyuan.mobile.editor?.protyle.block.rootID;
+        const recentDocUpdateType: TRecentDocUpdateType = !previousRootID ? "open" :
+            previousRootID === data.data.rootID ? "view" : "switch";
         const protyleOptions: IProtyleOptions = {
             databaseAttr: true,
             blockId: id,
@@ -90,18 +108,18 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             preview: {
                 actions: ["mp-wechat", "zhihu", "yuque"]
             },
-            after: (editor) => afterOpen?.(editor.protyle),
+            after: (editor) => {
+                updateRecentDocSwitchTime(recentDocUpdateType, data.data.rootID, previousRootID);
+                afterOpen?.(editor.protyle);
+            },
         };
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.notebookId = data.data.box;
             window.siyuan.mobile.editor.protyle.title.element.removeAttribute("data-render");
             pushBack();
             addLoading(window.siyuan.mobile.editor.protyle);
-            if (window.siyuan.mobile.editor.protyle.block.rootID !== data.data.rootID) {
+            if (previousRootID !== data.data.rootID) {
                 window.siyuan.mobile.editor.protyle.wysiwyg.element.innerHTML = "";
-                fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: data.data.rootID});
-            } else {
-                fetchPost("/api/storage/updateRecentDocViewTime", {rootID: data.data.rootID});
             }
             if (actionList.includes(Constants.CB_GET_SCROLL) && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID]) {
                 getDocByScroll({
@@ -109,6 +127,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                     scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID],
                     mergedOptions: protyleOptions,
                     cb() {
+                        updateRecentDocSwitchTime(recentDocUpdateType, data.data.rootID, previousRootID);
                         app.plugins.forEach(item => {
                             item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                         });
@@ -131,6 +150,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                         action: actionList,
                         scrollPosition,
                         afterCB() {
+                            updateRecentDocSwitchTime(recentDocUpdateType, data.data.rootID, previousRootID);
                             app.plugins.forEach(item => {
                                 item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                             });
@@ -145,7 +165,6 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                 initMirror(window.siyuan.mobile.editor.protyle.block.rootID);
             }
         } else {
-            fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: data.data.rootID});
             window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), protyleOptions);
         }
         setEditor();

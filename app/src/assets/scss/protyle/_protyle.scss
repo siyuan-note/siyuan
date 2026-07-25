@@ -407,6 +407,10 @@
     flex: none;
     min-height: auto;
     overflow: visible;
+
+    > .b3-list > .b3-list-item > .counter {
+      margin-right: 2px;
+    }
   }
 
   .backlinkList__loading {

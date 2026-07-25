@@ -322,7 +322,7 @@ func rewritePortJSON(pid, port string) {
 
 func serveExport(ginServer *gin.Engine) {
 	// Potential data export disclosure security vulnerability https://github.com/siyuan-note/siyuan/issues/12213
-	exportGroup := ginServer.Group("/export/", model.CheckAuth)
+	exportGroup := ginServer.Group("/export/", model.CheckAuth, model.CheckAdminRole)
 	exportBaseDir := filepath.Join(util.TempDir, "export")
 
 	exportGroup.GET("/*filepath", func(c *gin.Context) {
@@ -412,22 +412,39 @@ func serveExport(ginServer *gin.Engine) {
 
 func serveWidgets(ginServer *gin.Engine) {
 	widgets := ginServer.Group("/widgets/", model.CheckAuth)
-	widgets.Static("", filepath.Join(util.DataDir, "widgets"))
+	registerStaticFileHandlers(widgets, filepath.Join(util.DataDir, "widgets"), true, func(c *gin.Context, relativePath string) bool {
+		if !model.IsReadOnlyRoleContext(c) {
+			return true
+		}
+		name, _, _ := strings.Cut(filepath.ToSlash(relativePath), "/")
+		return model.CheckWidgetAccessableByPublishAccess(c, name, model.GetPublishAccess())
+	})
 }
 
 func servePlugins(ginServer *gin.Engine) {
 	plugins := ginServer.Group("/plugins/", model.CheckAuth)
-	plugins.Static("", filepath.Join(util.DataDir, "plugins"))
+	registerStaticFileHandlers(plugins, filepath.Join(util.DataDir, "plugins"), true, func(c *gin.Context, relativePath string) bool {
+		if !model.IsReadOnlyRoleContext(c) {
+			return true
+		}
+		name, _, _ := strings.Cut(filepath.ToSlash(relativePath), "/")
+		return model.CheckPluginAccessableInPublish(name)
+	})
 }
 
 func serveEmojis(ginServer *gin.Engine) {
 	emojis := ginServer.Group("/emojis/", model.CheckAuth)
-	emojis.Static("", filepath.Join(util.DataDir, "emojis"))
+	registerStaticFileHandlers(emojis, filepath.Join(util.DataDir, "emojis"), false, func(c *gin.Context, relativePath string) bool {
+		if !model.IsReadOnlyRoleContext(c) {
+			return true
+		}
+		return model.CheckEmojiAccessableByPublishAccess(c, filepath.ToSlash(relativePath), model.GetPublishAccess())
+	})
 }
 
 func serveTemplates(ginServer *gin.Engine) {
-	templates := ginServer.Group("/templates/", model.CheckAuth)
-	templates.Static("", filepath.Join(util.DataDir, "templates"))
+	templates := ginServer.Group("/templates/", model.CheckAuth, model.CheckAdminRole)
+	registerStaticFileHandlers(templates, filepath.Join(util.DataDir, "templates"), true, nil)
 }
 
 func servePublic(ginServer *gin.Engine) {
@@ -437,7 +454,12 @@ func servePublic(ginServer *gin.Engine) {
 
 func serveSnippets(ginServer *gin.Engine) {
 	ginServer.Handle("GET", "/snippets/*filepath", model.CheckAuth, func(c *gin.Context) {
-		filePath := strings.TrimPrefix(c.Request.URL.Path, "/snippets/")
+		filePath, ok := cleanStaticRelativePath(c.Param("filepath"))
+		if !ok {
+			c.Status(http.StatusForbidden)
+			return
+		}
+		filePath = filepath.ToSlash(filePath)
 		if !model.IsAdminRoleContext(c) {
 			if "conf.json" == filePath {
 				c.Status(http.StatusUnauthorized)
@@ -447,6 +469,18 @@ func serveSnippets(ginServer *gin.Engine) {
 
 		ext := filepath.Ext(filePath)
 		name := strings.TrimSuffix(filePath, ext)
+		if model.IsReadOnlyRoleContext(c) {
+			found, accessable := model.CheckSnippetAccessableInPublish(name, strings.TrimPrefix(ext, "."))
+			if !found {
+				c.Status(http.StatusNotFound)
+				return
+			}
+			if !accessable {
+				c.Status(http.StatusForbidden)
+				return
+			}
+		}
+
 		confSnippets, err := model.LoadSnippets()
 		if err != nil {
 			logging.LogErrorf("load snippets failed: %s", err)
@@ -463,21 +497,97 @@ func serveSnippets(ginServer *gin.Engine) {
 		}
 
 		// 没有在配置文件中命中时在文件系统上查找
-		filePath = filepath.Join(util.SnippetsPath, filePath)
+		serveStaticFile(c, util.SnippetsPath, filePath, false)
+	})
+}
 
-		// 限制只能访问 snippets 目录内的文件，并拦截敏感路径，避免通过路径穿越读取工作空间内的敏感文件
-		if !gulu.File.IsSubPath(util.SnippetsPath, filePath) {
-			c.Status(http.StatusUnauthorized)
-			return
-		}
-		if util.IsSensitivePath(filePath) {
-			logging.LogErrorf("refuse to serve sensitive snippet file [%s]", c.Request.URL.Path)
+type staticFileAccessCheck func(c *gin.Context, relativePath string) bool
+
+func registerStaticFileHandlers(group *gin.RouterGroup, root string, packageScoped bool, accessCheck staticFileAccessCheck) {
+	handler := func(c *gin.Context) {
+		relativePath, ok := cleanStaticRelativePath(c.Param("filepath"))
+		if !ok {
 			c.Status(http.StatusForbidden)
 			return
 		}
+		if accessCheck != nil && !accessCheck(c, relativePath) {
+			c.Status(http.StatusForbidden)
+			return
+		}
+		serveStaticFile(c, root, relativePath, packageScoped)
+	}
+	group.GET("/*filepath", handler)
+	group.HEAD("/*filepath", handler)
+}
 
-		c.File(filePath)
-	})
+func cleanStaticRelativePath(requestPath string) (string, bool) {
+	requestPath = strings.TrimPrefix(requestPath, "/")
+	relativePath := filepath.Clean(filepath.FromSlash(requestPath))
+	if filepath.IsAbs(relativePath) || filepath.VolumeName(relativePath) != "" ||
+		relativePath == ".." || strings.HasPrefix(relativePath, ".."+string(os.PathSeparator)) {
+		return "", false
+	}
+	return relativePath, true
+}
+
+func serveStaticFile(c *gin.Context, root, relativePath string, packageScoped bool) {
+	rootAbsPath, err := filepath.Abs(root)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	rootRealPath, err := filepath.EvalSymlinks(rootAbsPath)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	targetPath := filepath.Join(rootAbsPath, relativePath)
+	targetInfo, err := os.Stat(targetPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			c.Status(http.StatusNotFound)
+		} else {
+			c.Status(http.StatusForbidden)
+		}
+		return
+	}
+	if targetInfo.IsDir() {
+		targetPath = filepath.Join(targetPath, "index.html")
+	}
+
+	targetRealPath, err := filepath.EvalSymlinks(targetPath)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	allowedRoot := rootRealPath
+	if packageScoped && relativePath != "." {
+		// 插件、挂件等支持将一级包目录作为符号链接，包内符号链接仍不得越出该包的实际目录。
+		firstSegment, _, _ := strings.Cut(filepath.ToSlash(relativePath), "/")
+		if firstSegment != "" {
+			packageRoot := filepath.Join(rootAbsPath, filepath.FromSlash(firstSegment))
+			if resolvedPackageRoot, resolveErr := filepath.EvalSymlinks(packageRoot); resolveErr == nil {
+				allowedRoot = resolvedPackageRoot
+			}
+		}
+	}
+	if targetRealPath != allowedRoot && !gulu.File.IsSubPath(allowedRoot, targetRealPath) {
+		c.Status(http.StatusForbidden)
+		return
+	}
+	if util.IsSensitivePath(targetRealPath) {
+		logging.LogErrorf("refuse to serve sensitive static file [%s]", c.Request.URL.Path)
+		c.Status(http.StatusForbidden)
+		return
+	}
+
+	targetInfo, err = os.Stat(targetRealPath)
+	if err != nil || !targetInfo.Mode().IsRegular() {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	http.ServeFile(c.Writer, c.Request, targetRealPath)
 }
 
 func serveAppearance(ginServer *gin.Engine) {

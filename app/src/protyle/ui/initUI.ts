@@ -244,6 +244,10 @@ export const initUI = (protyle: IProtyle) => {
 
         const nodeElement = hasClosestBlock(event.target);
         if (protyle.options.render.gutter && nodeElement) {
+            if (!protyle.wysiwyg.element.contains(nodeElement)) {
+                hideElements(["gutter"], protyle);
+                return;
+            }
             if (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
                 // 光标在列表下部应显示右侧的元素，而不是列表本身。放在 windowEvent 中的 mousemove 下处理
                 return;

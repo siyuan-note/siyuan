@@ -1,12 +1,13 @@
+import {Constants} from "../../../constants";
 /// #if MOBILE
 import {openMobileFileById} from "../../../mobile/editor";
 import {Dialog} from "../../../dialog";
 import {renderAVAttribute} from "./blockAttr";
-import {Constants} from "../../../constants";
 /// #else
 import {openFile, openFileById} from "../../../editor/util";
 import {Editor} from "../../../editor";
 import {getAllTabs} from "../../../layout/getAll";
+import {zoomOut} from "../../../menus/protyle";
 /// #endif
 
 export interface IDatabaseRowOpenData {
@@ -58,6 +59,23 @@ const showDatabaseRowPreview = (model: Editor, blockID: string) => {
     model.editor.protyle.element.dataset.databaseRowId = blockID;
     model.editor.protyle.databaseAttributePanel?.expand();
     model.editor.protyle.contentElement.scrollTop = 0;
+};
+
+const focusDatabaseRowPreview = (model: Editor, blockID: string) => {
+    const editorProtyle = model?.editor?.protyle;
+    if (!editorProtyle) {
+        return;
+    }
+    if (editorProtyle.block.showAll && editorProtyle.block.id === blockID) {
+        showDatabaseRowPreview(model, blockID);
+        return;
+    }
+    zoomOut({
+        protyle: editorProtyle,
+        id: blockID,
+        reload: true,
+        callback: () => showDatabaseRowPreview(model, blockID),
+    });
 };
 
 const getDatabaseRowPreviewTab = (blockID: string) => {
@@ -129,10 +147,24 @@ export const openDatabaseRowByData = (protyle: IProtyle, data: IDatabaseRowOpenD
     }
     const openedTab = getDatabaseRowPreviewTab(data.boundBlockID);
     if (openedTab) {
+        const openedModel = openedTab.model;
+        if (!(openedModel instanceof Editor)) {
+            const initData = openedTab.headElement?.getAttribute("data-initdata");
+            if (initData) {
+                try {
+                    const initObj = JSON.parse(initData) as ILayoutJSON;
+                    initObj.blockId = data.boundBlockID;
+                    initObj.action = Constants.CB_GET_ALL;
+                    openedTab.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
+                } catch (e) {
+                    console.warn("Failed to update database row tab init data:", e);
+                }
+            }
+        }
         openedTab.parent.switchTab(openedTab.headElement);
         openedTab.parent.showHeading();
-        if (openedTab.model instanceof Editor) {
-            showDatabaseRowPreview(openedTab.model, data.boundBlockID);
+        if (openedModel instanceof Editor) {
+            focusDatabaseRowPreview(openedModel, data.boundBlockID);
         }
         return;
     }

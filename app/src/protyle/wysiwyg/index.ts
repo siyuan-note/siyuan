@@ -1399,9 +1399,7 @@ export class WYSIWYG {
             const mostTop = protyleRect.top + (protyle.options.render.breadcrumb ? protyle.breadcrumb.element.parentElement.clientHeight : 0);
             const selectStartScrollTop = protyle.contentElement.scrollTop;
             let moveCellElement: HTMLElement;
-            this.element.querySelectorAll("iframe").forEach(item => {
-                item.style.pointerEvents = "none";
-            });
+            this.element.classList.add("fn__pointer-none");
             // 容器类元素判断（划选时 elementFromPoint 命中它们的边缘/空白需继续探测子块）
             const isContainer = (el: Element) => el.classList.contains("protyle-wysiwyg") || el.classList.contains("list") ||
                 el.classList.contains("li") || el.classList.contains("sb") ||
@@ -1661,9 +1659,7 @@ export class WYSIWYG {
                     getSelection().removeAllRanges();
                 }
                 protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
-                this.element.querySelectorAll("iframe").forEach(item => {
-                    item.style.pointerEvents = "";
-                });
+                this.element.classList.remove("fn__pointer-none");
                 protyle.selectElement.classList.add("fn__none");
                 protyle.selectElement.removeAttribute("style");
                 if (tableBlockElement) {

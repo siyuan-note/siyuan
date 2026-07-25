@@ -921,9 +921,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 range = getSelection().getRangeAt(0);
             }
             const documentSelf = document;
-            documentSelf.querySelectorAll("iframe:not(.fn__pointer-none)").forEach((iframe: HTMLElement) => {
-                iframe.classList.add("fn__pointer-none");
-            });
+            documentSelf.body.classList.add("fn__pointer-none");
             const nextElement = resizeElement.nextElementSibling as HTMLElement;
             const previousElement = resizeElement.previousElementSibling as HTMLElement;
             nextElement.style.overflow = "auto"; // 拖动时 layout__resize 会出现 https://github.com/siyuan-note/siyuan/issues/6221
@@ -983,9 +981,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             };
 
             documentSelf.onmouseup = () => {
-                documentSelf.querySelectorAll("iframe.fn__pointer-none").forEach((iframe: HTMLElement) => {
-                    iframe.classList.remove("fn__pointer-none");
-                });
+                documentSelf.body.classList.remove("fn__pointer-none");
                 documentSelf.onmousemove = null;
                 documentSelf.onmouseup = null;
                 documentSelf.ondragstart = null;

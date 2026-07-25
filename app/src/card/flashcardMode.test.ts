@@ -1,6 +1,13 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {hideFlashcardAnswer, prepareCalloutFlashcard, showFlashcardAnswer} from "./flashcardMode";
+import {
+    beginFlashcardLoad,
+    createFlashcardRevealState,
+    hideFlashcardAnswer,
+    prepareCalloutFlashcard,
+    revealFlashcardAfterUnfold,
+    showFlashcardAnswer
+} from "./flashcardMode";
 
 const createClassElement = () => {
     const classes = new Set<string>();
@@ -15,14 +22,10 @@ const createClassElement = () => {
 
 describe("flashcardMode", () => {
     it("prepares a top-level callout with an answer", () => {
-        let removedAttribute = "";
         const calloutElement = {
             querySelector(selector: string) {
                 assert.equal(selector, ":scope > .callout-content > [data-node-id]");
                 return {};
-            },
-            removeAttribute(attribute: string) {
-                removedAttribute = attribute;
             },
         } as unknown as Element;
         const wysiwygElement = {
@@ -33,7 +36,6 @@ describe("flashcardMode", () => {
         } as unknown as Element;
 
         assert.equal(prepareCalloutFlashcard(wysiwygElement, true), true);
-        assert.equal(removedAttribute, "fold");
     });
 
     it("ignores callouts when the mode is disabled or no direct answer exists", () => {
@@ -77,5 +79,83 @@ describe("flashcardMode", () => {
 
         showFlashcardAnswer(element);
         assert.equal(classes.size, 0);
+    });
+
+    it("reveals an unfolded card immediately", () => {
+        const state = createFlashcardRevealState();
+        const generation = beginFlashcardLoad(state);
+        let revealed = 0;
+
+        assert.equal(revealFlashcardAfterUnfold({
+            state,
+            generation,
+            reveal: () => revealed++,
+        }), true);
+        assert.equal(revealed, 1);
+    });
+
+    it("waits for a folded card to finish unfolding", () => {
+        const state = createFlashcardRevealState();
+        const generation = beginFlashcardLoad(state);
+        let done: () => void;
+        let revealed = 0;
+
+        assert.equal(revealFlashcardAfterUnfold({
+            state,
+            generation,
+            unfold: (callback) => {
+                done = callback;
+            },
+            reveal: () => revealed++,
+        }), true);
+        assert.equal(revealed, 0);
+
+        done();
+        assert.equal(revealed, 1);
+    });
+
+    it("ignores repeated reveals while unfolding", () => {
+        const state = createFlashcardRevealState();
+        const generation = beginFlashcardLoad(state);
+        let done: () => void;
+        let revealed = 0;
+
+        revealFlashcardAfterUnfold({
+            state,
+            generation,
+            unfold: (callback) => {
+                done = callback;
+            },
+            reveal: () => revealed++,
+        });
+        assert.equal(revealFlashcardAfterUnfold({
+            state,
+            generation,
+            reveal: () => revealed++,
+        }), false);
+
+        done();
+        done();
+        assert.equal(revealed, 1);
+    });
+
+    it("ignores an unfold callback after loading another card", () => {
+        const state = createFlashcardRevealState();
+        const generation = beginFlashcardLoad(state);
+        let done: () => void;
+        let revealed = 0;
+
+        revealFlashcardAfterUnfold({
+            state,
+            generation,
+            unfold: (callback) => {
+                done = callback;
+            },
+            reveal: () => revealed++,
+        });
+        beginFlashcardLoad(state);
+        done();
+
+        assert.equal(revealed, 0);
     });
 });

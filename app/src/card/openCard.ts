@@ -26,7 +26,16 @@ import {updateCardHV} from "./util";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {transaction} from "../protyle/wysiwyg/transaction";
-import {hideFlashcardAnswer, prepareCalloutFlashcard, showFlashcardAnswer} from "./flashcardMode";
+import {
+    beginFlashcardLoad,
+    createFlashcardRevealState,
+    hideFlashcardAnswer,
+    isCurrentFlashcardLoad,
+    prepareCalloutFlashcard,
+    revealFlashcardAfterUnfold,
+    showFlashcardAnswer
+} from "./flashcardMode";
+import {setFold} from "../protyle/util/blockFold";
 
 const genCardCount = (cardsData: ICardData, allIndex = 0) => {
     let newIndex = 0;
@@ -156,24 +165,59 @@ export const genCardHTML = (options: {
 </div>`;
 };
 
+const flashcardRevealStates = new WeakMap<IProtyle, ReturnType<typeof createFlashcardRevealState>>();
+
+const getFlashcardRevealState = (protyle: IProtyle) => {
+    let state = flashcardRevealStates.get(protyle);
+    if (!state) {
+        state = createFlashcardRevealState();
+        flashcardRevealStates.set(protyle, state);
+    }
+    return state;
+};
+
+const showRatingActions = (actionElements: NodeListOf<Element>, currentCard: ICard) => {
+    actionElements[0].classList.add("fn__none");
+    actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
+        if (btnIndex < 2) {
+            return;
+        }
+        element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+    });
+    actionElements[1].classList.remove("fn__none");
+};
+
 const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard: ICard) => {
+    const revealState = getFlashcardRevealState(protyle);
+    const generation = beginFlashcardLoad(revealState);
+    const actionElements = element.querySelectorAll(".card__action");
+    actionElements.forEach(item => item.classList.add("fn__none"));
+    actionElements[0].querySelectorAll('button[data-type="-1"], button[data-type="-3"]').forEach(item => {
+        item.removeAttribute("disabled");
+    });
     fetchPost("/api/block/getDocInfo", {
         id,
     }, (docResponse) => {
+        if (!isCurrentFlashcardLoad(revealState, generation)) {
+            return;
+        }
         protyle.wysiwyg.renderCustom(docResponse.data.ial);
         fetchPost("/api/filetree/getDoc", {
             id,
             mode: 0,
-            size: Constants.SIZE_GET_MAX,
-            unfold: true
+            size: Constants.SIZE_GET_MAX
         }, (response) => {
+            if (!isCurrentFlashcardLoad(revealState, generation)) {
+                return;
+            }
             onGet({
                 updateReadonly: true,
                 data: response,
                 protyle,
                 action: response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
                 afterCB: () => {
-                    if (protyle.element.classList.contains("fn__none")) {
+                    if (!isCurrentFlashcardLoad(revealState, generation) ||
+                        protyle.element.classList.contains("fn__none")) {
                         return;
                     }
                     let hasHide = false;
@@ -193,7 +237,6 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                         if (window.siyuan.config.flashcard.blockquote) {
                             const blockquoteElement = protyle.wysiwyg.element.querySelector(":scope > .bq[custom-riff-decks]");
                             if (blockquoteElement?.querySelector(":scope > [data-node-id] ~ [data-node-id]")) {
-                                blockquoteElement.removeAttribute("fold");
                                 hasHide = true;
                             }
                         }
@@ -216,17 +259,10 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                             }
                         }
                     }
-                    const actionElements = element.querySelectorAll(".card__action");
                     if (!hasHide) {
-                        showFlashcardAnswer(protyle.element);
-                        actionElements[0].classList.add("fn__none");
-                        actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
-                            if (btnIndex < 2) {
-                                return;
-                            }
-                            element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+                        revealFlashcardAnswer(protyle, () => {
+                            showRatingActions(actionElements, currentCard);
                         });
-                        actionElements[1].classList.remove("fn__none");
                     } else {
                         hideFlashcardAnswer(protyle.element, window.siyuan.config.flashcard);
                         actionElements[0].classList.remove("fn__none");
@@ -237,6 +273,30 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
         });
     });
 
+};
+
+const revealFlashcardAnswer = (protyle: IProtyle, callback: () => void) => {
+    const revealState = getFlashcardRevealState(protyle);
+    const generation = revealState.generation;
+    const cardElement = protyle.wysiwyg.element.querySelector(
+        `[data-node-id="${protyle.block.id}"][fold="1"]`
+    );
+    revealFlashcardAfterUnfold({
+        state: revealState,
+        generation,
+        unfold: cardElement ? (done) => {
+            const foldData = setFold(protyle, cardElement, true, false, true, true);
+            if (!foldData.doOperations?.length) {
+                done();
+                return;
+            }
+            transaction(protyle, foldData.doOperations, foldData.undoOperations, {callback: done});
+        } : undefined,
+        reveal: () => {
+            showFlashcardAnswer(protyle.element);
+            callback();
+        }
+    });
 };
 
 export const bindCardEvent = async (options: {
@@ -682,6 +742,12 @@ export const bindCardEvent = async (options: {
         if (!type || !currentCard) {
             return;
         }
+        const revealState = getFlashcardRevealState(editor.protyle);
+        if (revealState.pendingGeneration === revealState.generation) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         event.preventDefault();
         event.stopPropagation();
         hideElements(["toolbar", "hint", "util", "gutter"], editor.protyle);
@@ -689,16 +755,16 @@ export const bindCardEvent = async (options: {
             if (actionElements[0].classList.contains("fn__none")) {
                 type = "3";
             } else {
-                showFlashcardAnswer(editor.protyle.element);
-                actionElements[0].classList.add("fn__none");
-                actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
-                    if (btnIndex < 2) {
-                        return;
-                    }
-                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+                revealFlashcardAnswer(editor.protyle, () => {
+                    showRatingActions(actionElements, currentCard);
+                    emitEvent(options.app, currentCard, type);
                 });
-                actionElements[1].classList.remove("fn__none");
-                emitEvent(options.app, currentCard, type);
+                const currentRevealState = getFlashcardRevealState(editor.protyle);
+                if (currentRevealState.pendingGeneration === currentRevealState.generation) {
+                    actionElements[0].querySelectorAll("button").forEach(item => {
+                        item.setAttribute("disabled", "disabled");
+                    });
+                }
                 return;
             }
         } else if (type === "-2") {    // 上一步

@@ -1,6 +1,57 @@
 type FlashcardCreationConfig = Pick<Config.IFlashCard,
     "blockquote" | "callout" | "heading" | "list" | "mark" | "superBlock">;
 
+export interface IFlashcardRevealState {
+    generation: number,
+    pendingGeneration?: number,
+}
+
+export const createFlashcardRevealState = (): IFlashcardRevealState => ({
+    generation: 0,
+});
+
+export const beginFlashcardLoad = (state: IFlashcardRevealState) => {
+    state.generation++;
+    state.pendingGeneration = undefined;
+    return state.generation;
+};
+
+export const isCurrentFlashcardLoad = (state: IFlashcardRevealState, generation: number) => {
+    return state.generation === generation;
+};
+
+export const revealFlashcardAfterUnfold = (options: {
+    state: IFlashcardRevealState,
+    generation: number,
+    unfold?: (done: () => void) => void,
+    reveal: () => void,
+}) => {
+    if (!isCurrentFlashcardLoad(options.state, options.generation) ||
+        options.state.pendingGeneration === options.generation) {
+        return false;
+    }
+    if (!options.unfold) {
+        options.reveal();
+        return true;
+    }
+
+    options.state.pendingGeneration = options.generation;
+    let finished = false;
+    options.unfold(() => {
+        if (finished) {
+            return;
+        }
+        finished = true;
+        if (options.state.pendingGeneration === options.generation) {
+            options.state.pendingGeneration = undefined;
+        }
+        if (isCurrentFlashcardLoad(options.state, options.generation)) {
+            options.reveal();
+        }
+    });
+    return true;
+};
+
 const FLASHCARD_HIDE_CLASS_ENTRIES: Array<[keyof FlashcardCreationConfig, string]> = [
     ["mark", "card__block--hidemark"],
     ["list", "card__block--hideli"],
@@ -33,6 +84,5 @@ export const prepareCalloutFlashcard = (wysiwygElement: Element, enabled: boolea
     if (!calloutElement?.querySelector(":scope > .callout-content > [data-node-id]")) {
         return false;
     }
-    calloutElement.removeAttribute("fold");
     return true;
 };

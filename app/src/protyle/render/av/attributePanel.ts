@@ -146,7 +146,7 @@ export class AVAttributePanel {
             this.refresh();
             return;
         }
-        if (operation.action === "updateAttrViewCell" && operation.data?.type === "block" && operation.rowID &&
+        if (operation.action === "updateAttrViewCell" && ["block", "number"].includes(operation.data?.type) && operation.rowID &&
             this.hasItem(operation.rowID)) {
             this.refresh();
             return;

@@ -544,6 +544,11 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             event.stopPropagation();
             event.preventDefault();
             break;
+        } else if (type === "number") {
+            popTextCell(protyle, [target], "number");
+            event.stopPropagation();
+            event.preventDefault();
+            break;
         } else if (type === "select" || type === "mSelect") {
             popTextCell(protyle, [target], target.getAttribute("data-type") as TAVCol);
             event.stopPropagation();

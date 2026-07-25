@@ -13,6 +13,7 @@ const refreshActions = new Set<TOperation>([
     "setAttrViewColIcon",
     "setAttrViewColDesc",
     "setAttrViewName",
+    "updateAttrViewColNumberFormat",
 ]);
 
 export class AVAttributePanel {

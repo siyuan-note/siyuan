@@ -39,6 +39,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - When explicitly asked to commit, follow the style of recent commits (gitmoji prefix + subject, in English)
    - Append the full issue/PR URL to the end of the commit title (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; never put the URL in the commit body, and do not fabricate one
 6. **GitHub:** Prefer the GitHub CLI (`gh`) for all GitHub operations, including reading issues, comments, pull requests, commits, statuses, and metadata. If `gh` is unavailable or does not support the operation, fall back to the GitHub API or web interface
+   - On Windows, when creating or updating GitHub text that contains non-ASCII characters, write the request payload to a UTF-8 JSON file and call the GitHub API with `gh api --input <file>`; do not pipe the text through PowerShell because its encoding may corrupt the content. Verify the published content and remove the temporary file afterward
 7. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request, and do not start it with `Fix`
    - If the issue is labeled `Bug`, objectively describe the problem or symptom instead of writing from a bug-fix perspective
    - If the issue is labeled `Enhancement`:

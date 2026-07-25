@@ -904,11 +904,19 @@ func GetBlockDOMWithEmbed(id string) (ret string) {
 
 // GetBlockDOMWithEmbedInBox 渲染指定笔记本内包含嵌入块的 DOM。
 func GetBlockDOMWithEmbedInBox(id, boxID string) (ret string) {
+	return GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID, nil)
+}
+
+// EmbedBlockAccessChecker 判断嵌入查询结果块是否允许返回。
+type EmbedBlockAccessChecker func(blockID string) bool
+
+// GetBlockDOMWithEmbedInBoxWithAccessChecker 按访问权限渲染指定笔记本内包含嵌入块的 DOM。
+func GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID string, accessChecker EmbedBlockAccessChecker) (ret string) {
 	if "" == id {
 		return
 	}
 
-	doms := GetBlockDOMsWithEmbedInBox([]string{id}, boxID)
+	doms := GetBlockDOMsWithEmbedInBoxWithAccessChecker([]string{id}, boxID, accessChecker)
 	ret = doms[id]
 	return
 }
@@ -919,6 +927,11 @@ func GetBlockDOMsWithEmbed(ids []string) (ret map[string]string) {
 
 // GetBlockDOMsWithEmbedInBox 渲染指定笔记本内包含嵌入块的 DOM。boxID 为空时仅查询普通全局库。
 func GetBlockDOMsWithEmbedInBox(ids []string, boxID string) (ret map[string]string) {
+	return GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids, boxID, nil)
+}
+
+// GetBlockDOMsWithEmbedInBoxWithAccessChecker 按访问权限渲染指定笔记本内包含嵌入块的 DOM。
+func GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids []string, boxID string, accessChecker EmbedBlockAccessChecker) (ret map[string]string) {
 	ret = map[string]string{}
 	if 0 == len(ids) {
 		return
@@ -935,7 +948,7 @@ func GetBlockDOMsWithEmbedInBox(ids []string, boxID string) (ret map[string]stri
 			continue
 		}
 
-		resolveEmbedContentInBox(node, luteEngine, boxID)
+		resolveEmbedContentInBox(node, luteEngine, boxID, accessChecker)
 
 		// 处理折叠标题
 		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -959,7 +972,7 @@ func GetBlockDOMsWithEmbedInBox(ids []string, boxID string) (ret map[string]stri
 }
 
 func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
-	resolveEmbedContentInBox(n, luteEngine, "")
+	resolveEmbedContentInBox(n, luteEngine, "", nil)
 }
 
 // loadTreeForBlockDOM 按指定 box 加载树，空 box 不回退搜索已打开的加密笔记本。
@@ -975,7 +988,7 @@ func loadTreeForBlockDOM(id, boxID string) *parse.Tree {
 	return tree
 }
 
-func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string) {
+func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string, accessChecker EmbedBlockAccessChecker) {
 	ast.Walk(n, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeBlockQueryEmbed != node.Type {
 			return ast.WalkContinue
@@ -992,6 +1005,7 @@ func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string) 
 
 		// 执行查询获取嵌入的块
 		sqlBlocks := sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Limit, boxID)
+		sqlBlocks = filterEmbedBlocksByAccess(sqlBlocks, accessChecker)
 
 		// 收集所有嵌入块的内容 HTML
 		var embedContents []string
@@ -1047,6 +1061,20 @@ func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string) 
 
 		return ast.WalkContinue
 	})
+}
+
+func filterEmbedBlocksByAccess(blocks []*sql.Block, accessChecker EmbedBlockAccessChecker) (ret []*sql.Block) {
+	if nil == accessChecker {
+		return blocks
+	}
+
+	ret = make([]*sql.Block, 0, len(blocks))
+	for _, block := range blocks {
+		if nil != block && accessChecker(block.ID) {
+			ret = append(ret, block)
+		}
+	}
+	return
 }
 
 func processEmbedHTML(htmlStr string) string {

@@ -21,20 +21,20 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {Plugin} from "../plugin";
 
-const BACKLINK_REFRESH_DELAY = 3600;
-let backlinkRefreshTimeout: number;
-
-export const scheduleBacklinkRefresh = () => {
-    window.clearTimeout(backlinkRefreshTimeout);
-    // 等待索引队列写入后再查询提及，并合并连续事务触发的刷新。
-    backlinkRefreshTimeout = window.setTimeout(() => {
-        getAllModels().backlink.forEach(item => {
-            if (item.type === "bottom") {
-                item.markDirty();
-                item.refreshIfVisible();
-            }
-        });
-    }, BACKLINK_REFRESH_DELAY);
+export const processBacklinkIndexCommit = (data: {
+    rootIDs?: string[],
+    backlinkChanged?: boolean,
+    backlinkFull?: boolean,
+}) => {
+    /// #if !MOBILE
+    if (!data?.backlinkChanged) {
+        return;
+    }
+    getAllModels().backlink.forEach(item => {
+        item.markIndexDirty(data);
+        item.refreshAfterIndex();
+    });
+    /// #endif
 };
 
 export const setRefDynamicText = (data: {
@@ -49,7 +49,6 @@ export const setRefDynamicText = (data: {
             item.innerHTML = data.refText;
         });
     });
-    scheduleBacklinkRefresh();
 };
 
 export const setDefRefCount = (data: {
@@ -59,17 +58,6 @@ export const setDefRefCount = (data: {
     "rootRefCount": number,
     "rootID": string
 }) => {
-    /// #if !MOBILE
-    getAllModels().backlink.forEach(item => {
-        const containsChangedBlock = window.siyuan.config.editor.backlinkContainChildren && item.rootId === data.rootID;
-        if (item.type !== "bottom" || (!containsChangedBlock &&
-            item.blockId !== data.rootID && item.blockId !== data.blockID && !data.defIDs?.includes(item.blockId))) {
-            return;
-        }
-        item.markDirty();
-        item.refreshIfVisible();
-    });
-    /// #endif
     getAllEditor().forEach(editor => {
         if (editor.protyle.block.rootID === data.rootID && editor.protyle.title) {
             const attrElement = editor.protyle.title.element.querySelector(".protyle-attr");

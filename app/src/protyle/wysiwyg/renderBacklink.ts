@@ -10,22 +10,124 @@ import {avRender} from "../render/av/render";
 import {hasClosestByAttribute} from "../util/hasClosest";
 import {isEncryptedBox} from "../../util/pathName";
 
-export const renderBacklink = (protyle: IProtyle, backlinkData: {
+interface IBacklinkData {
+    id?: string,
+    revision?: string,
     blockPaths: IBreadcrumb[],
     dom: string,
     expand: boolean
-}[]) => {
-    protyle.block.showAll = true;
-    let html = "";
-    backlinkData.forEach((item, index) => {
-        html += genBreadcrumb(item.blockPaths, false, index) + setBacklinkFold(item.dom, item.expand);
+}
+
+interface IBacklinkDOMRecord {
+    revision: string,
+    anchor: HTMLElement,
+}
+
+const backlinkDOMRecords = new WeakMap<IProtyle, Map<string, IBacklinkDOMRecord>>();
+
+const getBacklinkDOMNodes = (anchor: HTMLElement) => {
+    const nodes: Node[] = [anchor];
+    let next = anchor.nextSibling;
+    while (next) {
+        if (next instanceof HTMLElement && next.classList.contains("protyle-breadcrumb__bar") &&
+            next.hasAttribute("data-backlink-id")) {
+            break;
+        }
+        nodes.push(next);
+        next = next.nextSibling;
+    }
+    return nodes;
+};
+
+const removeBacklinkDOMRecord = (record: IBacklinkDOMRecord) => {
+    getBacklinkDOMNodes(record.anchor).forEach(item => item.parentNode?.removeChild(item));
+};
+
+const createBacklinkDOMRecord = (item: IBacklinkData, index: number, id: string) => {
+    const template = document.createElement("template");
+    template.innerHTML = genBreadcrumb(item.blockPaths, false, index, id) + setBacklinkFold(item.dom, item.expand);
+    const nodes = Array.from(template.content.childNodes);
+    return {
+        record: {
+            revision: item.revision || "",
+            anchor: nodes[0] as HTMLElement,
+        },
+        nodes,
+    };
+};
+
+const renderBacklinkDOMNodes = (protyle: IProtyle, nodes: Node[]) => {
+    nodes.forEach(item => {
+        if (!(item instanceof HTMLElement)) {
+            return;
+        }
+        improveBreadcrumbAppearance(item);
+        processRender(item);
+        highlightRender(item);
+        avRender(item, protyle);
+        blockRender(protyle, item);
     });
-    protyle.wysiwyg.element.innerHTML = html;
-    improveBreadcrumbAppearance(protyle.wysiwyg.element);
-    processRender(protyle.wysiwyg.element);
-    highlightRender(protyle.wysiwyg.element);
-    avRender(protyle.wysiwyg.element, protyle);
-    blockRender(protyle, protyle.wysiwyg.element);
+};
+
+export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[]) => {
+    protyle.block.showAll = true;
+    const element = protyle.wysiwyg.element;
+    let records = backlinkDOMRecords.get(protyle);
+    if (!records) {
+        records = new Map<string, IBacklinkDOMRecord>();
+        backlinkDOMRecords.set(protyle, records);
+        element.replaceChildren();
+    }
+
+    const ids = new Set(backlinkData.map((item, index) => item.id || `legacy-${index}`));
+    records.forEach((record, id) => {
+        if (!ids.has(id)) {
+            removeBacklinkDOMRecord(record);
+            records.delete(id);
+        }
+    });
+
+    const changedNodes: Node[][] = [];
+    const orderedRecords: IBacklinkDOMRecord[] = [];
+    backlinkData.forEach((item, index) => {
+        const id = item.id || `legacy-${index}`;
+        let record = records.get(id);
+        if (record && record.anchor.parentElement !== element) {
+            records.delete(id);
+            record = undefined;
+        }
+        if (!record || !item.revision || record.revision !== item.revision) {
+            const created = createBacklinkDOMRecord(item, index, id);
+            if (record) {
+                created.nodes.forEach(node => element.insertBefore(node, record.anchor));
+                removeBacklinkDOMRecord(record);
+            } else {
+                created.nodes.forEach(node => element.appendChild(node));
+            }
+            record = created.record;
+            records.set(id, record);
+            changedNodes.push(created.nodes);
+        }
+        orderedRecords.push(record);
+    });
+
+    let cursor = element.firstChild;
+    orderedRecords.forEach((record, index) => {
+        const nodes = getBacklinkDOMNodes(record.anchor);
+        if (nodes[0] !== cursor) {
+            const fragment = document.createDocumentFragment();
+            nodes.forEach(node => fragment.appendChild(node));
+            element.insertBefore(fragment, cursor);
+        }
+        cursor = nodes[nodes.length - 1].nextSibling;
+        if (record.anchor.style.width === "100%") {
+            const borderTop = index === 0 ? "0px" : "1px solid var(--b3-border-color)";
+            if (record.anchor.style.borderTop !== borderTop) {
+                record.anchor.style.borderTop = borderTop;
+            }
+        }
+    });
+    changedNodes.forEach(nodes => renderBacklinkDOMNodes(protyle, nodes));
     removeLoading(protyle);
     if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
         disabledProtyle(protyle);
@@ -101,9 +203,10 @@ export const getBacklinkHeadingMore = (moreElement: HTMLElement) => {
     moreElement.remove();
 };
 
-export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst: boolean, parentIndex?: number) => {
+export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst: boolean, parentIndex?: number, backlinkID?: string) => {
+    const backlinkAttr = backlinkID ? ` data-backlink-id="${backlinkID}"` : "";
     if (1 > blockPaths.length) {
-        return `<div contenteditable="false" style="border-top: ${parentIndex === 0 ? 0 : 1}px solid var(--b3-border-color);min-height: 0;width: 100%;" class="protyle-breadcrumb__bar"><span></span></div>`;
+        return `<div${backlinkAttr} contenteditable="false" style="border-top: ${parentIndex === 0 ? 0 : 1}px solid var(--b3-border-color);min-height: 0;width: 100%;" class="protyle-breadcrumb__bar"><span></span></div>`;
     }
 
     let html = "";
@@ -119,11 +222,16 @@ export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst: boolean, p
             html += '<svg class="protyle-breadcrumb__arrow"><use xlink:href="#iconRight"></use></svg>';
         }
     });
-    return `<div contenteditable="false" class="protyle-breadcrumb__bar protyle-breadcrumb__bar--nowrap">${html}</div>`;
+    return `<div${backlinkAttr} contenteditable="false" class="protyle-breadcrumb__bar protyle-breadcrumb__bar--nowrap">${html}</div>`;
 };
 
 export const improveBreadcrumbAppearance = (element: HTMLElement) => {
-    element.querySelectorAll(".protyle-breadcrumb__bar").forEach((item: HTMLElement) => {
+    const elements: HTMLElement[] = [];
+    if (element.classList.contains("protyle-breadcrumb__bar")) {
+        elements.push(element);
+    }
+    elements.push(...Array.from(element.querySelectorAll(".protyle-breadcrumb__bar")) as HTMLElement[]);
+    elements.forEach((item: HTMLElement) => {
         item.classList.remove("protyle-breadcrumb__bar--nowrap");
         const itemElements = Array.from(item.querySelectorAll(".protyle-breadcrumb__text"));
         if (itemElements.length === 0) {

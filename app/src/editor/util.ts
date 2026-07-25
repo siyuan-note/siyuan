@@ -727,26 +727,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
         if (blockId === item.blockId) {
             return;
         }
-        item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.add("fn__rotate");
-        const backlinkParam: IObject = {
-            sort: item.status[blockId] ? item.status[blockId].sort.toString() : window.siyuan.config.editor.backlinkSort.toString(),
-            mSort: item.status[blockId] ? item.status[blockId].mSort.toString() : window.siyuan.config.editor.backmentionSort.toString(),
-            id: blockId || "",
-            k: item.inputsElement[0].value,
-            mk: item.inputsElement[1].value,
-        };
-        if (protyle && isEncryptedBox(protyle.notebookId)) {
-            backlinkParam.notebook = protyle.notebookId;
-        }
-        fetchPost("/api/ref/getBacklink2", backlinkParam, response => {
-            if (!isCurrentEditor(blockId) || item.blockId === blockId) {
-                item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
-                return;
-            }
-            item.saveStatus();
-            item.blockId = blockId;
-            item.render(response.data);
-        });
+        item.switchBlock(blockId, protyle?.block?.rootID || "", protyle?.notebookId || "");
     });
 };
 

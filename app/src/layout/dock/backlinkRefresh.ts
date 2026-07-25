@@ -18,3 +18,14 @@ export const shouldHideBottomBacklinks = (
 ) => {
     return linkRefsCount === 0 && mentionsCount === 0 && !backlinkKeyword && !mentionKeyword;
 };
+
+export const shouldRefreshAllBacklinkContexts = (
+    rootIDs: Set<string>,
+    targetRootID: string,
+    blockID: string,
+    explicit: boolean,
+    queryChanged: boolean,
+    full: boolean,
+) => {
+    return explicit || queryChanged || full || rootIDs.has(targetRootID) || rootIDs.has(blockID);
+};

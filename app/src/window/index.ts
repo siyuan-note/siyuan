@@ -13,7 +13,7 @@ import {
     progressBackgroundTask,
     progressLoading,
     progressStatus,
-    scheduleBacklinkRefresh,
+    processBacklinkIndexCommit,
     setDefRefCount,
     setRefDynamicText,
     transactionError
@@ -62,8 +62,8 @@ class App {
                             case "setDefRefCount":
                                 setDefRefCount(data.data);
                                 break;
-                            case "transactions":
-                                scheduleBacklinkRefresh();
+                            case "databaseIndexCommit":
+                                processBacklinkIndexCommit(data.data);
                                 break;
                             case "setRefDynamicText":
                                 setRefDynamicText(data.data);
@@ -109,7 +109,6 @@ class App {
                                 });
                                 break;
                             case "rename":
-                                scheduleBacklinkRefresh();
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {
                                         const initTab = tab.headElement.getAttribute("data-initdata");

@@ -868,6 +868,7 @@ interface IFile {
 
 interface IBlockTree {
     box: string,
+    revision?: string,
     number?: string,
     nodeType: string,
     hPath: string,

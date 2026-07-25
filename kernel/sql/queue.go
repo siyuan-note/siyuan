@@ -23,6 +23,7 @@ import (
 	"math"
 	"path"
 	"runtime/debug"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -53,6 +54,81 @@ type dbQueueOperation struct {
 	block                         *Block      // update_block_content
 	id                            string      // index_node
 	removeAssetHashes             []string    // delete_assets
+}
+
+type backlinkIndexChange struct {
+	rootIDs map[string]struct{}
+	changed bool
+	full    bool
+}
+
+func newBacklinkIndexChange() *backlinkIndexChange {
+	return &backlinkIndexChange{rootIDs: map[string]struct{}{}}
+}
+
+func (change *backlinkIndexChange) addRootID(rootID string) {
+	if rootID == "" {
+		change.full = true
+		return
+	}
+	change.rootIDs[rootID] = struct{}{}
+}
+
+func (change *backlinkIndexChange) addOperation(op *dbQueueOperation) {
+	switch op.action {
+	case "index", "rename", "move":
+		change.changed = true
+		if op.indexTree == nil {
+			change.full = true
+		} else {
+			change.addRootID(op.indexTree.ID)
+		}
+	case "upsert", "update_refs", "delete_refs":
+		change.changed = true
+		if op.upsertTree == nil {
+			change.full = true
+		} else {
+			change.addRootID(op.upsertTree.ID)
+		}
+	case "update_block_content":
+		change.changed = true
+		if op.block == nil {
+			change.full = true
+		} else {
+			change.addRootID(op.block.RootID)
+		}
+	case "delete_id":
+		change.changed = true
+		change.addRootID(op.removeTreeID)
+	case "delete_ids":
+		change.changed = true
+		for _, rootID := range op.removeTreeIDs {
+			change.addRootID(rootID)
+		}
+	case "index_node":
+		change.changed = true
+		if bt := treenode.GetBlockTree(op.id); bt != nil {
+			change.addRootID(bt.RootID)
+		} else {
+			change.full = true
+		}
+	case "delete", "delete_box", "delete_box_refs":
+		change.changed = true
+		change.full = true
+	}
+}
+
+func (change *backlinkIndexChange) data() map[string]any {
+	rootIDs := make([]string, 0, len(change.rootIDs))
+	for rootID := range change.rootIDs {
+		rootIDs = append(rootIDs, rootID)
+	}
+	sort.Strings(rootIDs)
+	return map[string]any{
+		"rootIDs":         rootIDs,
+		"backlinkChanged": change.changed,
+		"backlinkFull":    change.full,
+	}
 }
 
 // boxID 从 op 提取目标 boxID，供 beginTxForBox 路由到加密 db 或全局 db。
@@ -181,6 +257,7 @@ func FlushQueue() {
 	}
 
 	groupOpsCurrent := map[string]int{}
+	backlinkChange := newBacklinkIndexChange()
 	for i, op := range ops {
 		if util.IsExiting.Load() {
 			return
@@ -205,6 +282,7 @@ func FlushQueue() {
 			logging.LogErrorf("commit tx failed: %s", err)
 			continue
 		}
+		backlinkChange.addOperation(op)
 
 		switch op.action {
 		case "index":
@@ -232,7 +310,7 @@ func FlushQueue() {
 	}
 
 	// Push database index commit event https://github.com/siyuan-note/siyuan/issues/8814
-	util.BroadcastByType("main", "databaseIndexCommit", 0, "", nil)
+	util.BroadcastByType("main", "databaseIndexCommit", 0, "", backlinkChange.data())
 
 	eventbus.Publish(eventbus.EvtSQLIndexFlushed)
 

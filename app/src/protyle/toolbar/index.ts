@@ -1218,7 +1218,7 @@ export class Toolbar {
         };
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
         if (types.includes("NodeHTMLBlock")) {
-            textElement.value = Lute.UnEscapeHTMLStr(renderElement.querySelector("protyle-html").getAttribute("data-content") || "");
+            textElement.value = renderElement.querySelector("protyle-html").getAttribute("data-content") || "";
         } else if (isInlineMemo) {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-inline-memo-content") || "");
         } else {
@@ -1234,7 +1234,7 @@ export class Toolbar {
                 return;
             }
             if (types.includes("NodeHTMLBlock")) {
-                renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                renderElement.querySelector("protyle-html").setAttribute("data-content", textElement.value);
             } else if (isInlineMemo) {
                 let inlineMemoElements;
                 if (updateElements) {
@@ -1292,7 +1292,7 @@ export class Toolbar {
                         htmlText = `<div>\n${htmlText}\n</div>`;
                     }
                 }
-                renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(htmlText));
+                renderElement.querySelector("protyle-html").setAttribute("data-content", htmlText);
                 // HTML 块中包含多个 <pre> 时只能保存第一个 https://github.com/siyuan-note/siyuan/issues/5732
                 const tempElement = document.createElement("template");
                 tempElement.innerHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);

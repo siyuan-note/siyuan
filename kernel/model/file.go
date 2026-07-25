@@ -880,8 +880,8 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 						if ast.NodeCodeBlockCode == n.Type && !treenode.IsChartCodeBlockCode(n) {
 							// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
 							code := string(n.Tokens)
-							markedCode := search.EncloseHighlighting(code, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive, false)
-							if code != markedCode {
+							markedCode, matched := search.EncloseHighlightingRaw(code, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive, false)
+							if matched {
 								n.Tokens = gulu.Str.ToBytes(markedCode)
 								return ast.WalkContinue
 							}

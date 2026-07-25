@@ -15,6 +15,7 @@ import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {getAllModels} from "../getAll";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {
+    shouldDeferBottomBacklinkRefresh,
     shouldHideBottomBacklinks,
     shouldRenderBacklinkResponse,
     shouldSaveBacklinkStatus
@@ -48,7 +49,6 @@ export class Backlink extends Model {
     private destroyed = false;
     private refreshQueued = false;
     private searchQueued = false;
-    private ignoreFocusOnNextRefresh = false;
     private requestID = 0;
     private showingLoading = false;
     private contextRequestVersions = [0, 0];
@@ -667,7 +667,6 @@ export class Backlink extends Model {
         this.refreshQueued = false;
         this.searchQueued = false;
         this.dirty = false;
-        this.ignoreFocusOnNextRefresh = false;
         this.notebookId = "";
         this.blockId = blockId;
         this.rootId = rootId;
@@ -745,7 +744,6 @@ export class Backlink extends Model {
         this.searchQueued = false;
         element.classList.add("fn__rotate");
         this.dirty = false;
-        this.ignoreFocusOnNextRefresh = false;
         // 解析当前反链面板所属 box：优先用已记录的 notebookId，首次为空时按 rootId 在已打开的编辑器里查找
         let notebookId = this.notebookId;
         if (!notebookId && this.rootId) {
@@ -978,19 +976,13 @@ export class Backlink extends Model {
         element.querySelector("use").setAttribute("xlink:href", folded ? "#iconRight" : "#iconDown");
     }
 
-    public markDirty(ignoreFocus = false) {
+    public markDirty() {
         this.dirty = true;
-        if (ignoreFocus) {
-            this.ignoreFocusOnNextRefresh = true;
-        }
     }
 
     public refreshIfVisible(ignoreFocus = false) {
         if (this.type !== "bottom" || !this.dirty) {
             return;
-        }
-        if (ignoreFocus) {
-            this.ignoreFocusOnNextRefresh = true;
         }
         if (!this.element.isConnected || this.ownerProtyle.element.getClientRects().length === 0) {
             return;
@@ -999,7 +991,10 @@ export class Backlink extends Model {
             this.searchBacklinks();
             return;
         }
-        if (!this.ignoreFocusOnNextRefresh && this.ownerProtyle.element.contains(document.activeElement)) {
+        if (shouldDeferBottomBacklinkRefresh(
+            this.ownerProtyle.element.contains(document.activeElement),
+            ignoreFocus
+        )) {
             return;
         }
         if (this.element.classList.contains("fn__none") ||

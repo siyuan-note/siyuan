@@ -11,7 +11,6 @@ import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
 import {net2LocalAssets} from "../breadcrumb/action";
-import {processClonePHElement} from "../render/util";
 import {copyTextByType} from "../toolbar/util";
 import {hasClosestByTag, hasTopClosestByClassName} from "../util/hasClosest";
 import {removeEmbed} from "./removeEmbed";
@@ -330,7 +329,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             tempElement.setAttribute("data-marker", (orderIndex) + ".");
             tempElement.querySelector(".protyle-action--order").textContent = (orderIndex) + ".";
         }
-        lastElement.after(processClonePHElement(tempElement));
+        lastElement.after(tempElement);
         doOperations.push({
             action: "insert",
             data: tempElement.outerHTML,

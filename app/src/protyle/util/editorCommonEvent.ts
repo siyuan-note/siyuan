@@ -48,7 +48,6 @@ import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
 /// #endif
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
-import {processClonePHElement} from "../render/util";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
@@ -718,7 +717,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 target.parentElement.classList.add("protyle-wysiwyg--select");
                 const ghostElement = document.createElement("div");
                 ghostElement.className = protyle.wysiwyg.element.className;
-                const cloneElement = processClonePHElement(target.parentElement.cloneNode(true) as Element);
+                const cloneElement = target.parentElement.cloneNode(true) as Element;
                 cloneElement.querySelectorAll(".iframe").forEach(item => {
                     item.remove();
                 });
@@ -794,7 +793,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 ghostElement.appendChild(cloneGalleryElement);
                             }
                         }
-                        const cloneItem = processClonePHElement(item.cloneNode(true) as Element);
+                        const cloneItem = item.cloneNode(true) as Element;
                         cloneItem.setAttribute("style", `height:${item.clientHeight}px;`);
                         cloneItem.classList.remove("av__gallery-item--select");
                         if (isKanban) {

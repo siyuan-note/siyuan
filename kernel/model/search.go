@@ -37,7 +37,6 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
-	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/88250/vitess-sqlparser/sqlparser"
@@ -2429,14 +2428,9 @@ func stringQuery(query string) string {
 func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markSpanDataType string, luteEngine *lute.Lute) bool {
 	if ast.NodeText == n.Type {
 		text := n.Content()
-		escapedText := util.EscapeHTML(text)
-		escapedKeywords := make([]string, len(keywords))
-		for i, keyword := range keywords {
-			escapedKeywords[i] = util.EscapeHTML(keyword)
-		}
-		hText := search.EncloseHighlighting(escapedText, escapedKeywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
-		if hText != escapedText {
-			text = hText
+		text, matched := search.EncloseHighlightingRaw(text, keywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
+		if !matched {
+			return false
 		}
 		n.Tokens = gulu.Str.ToBytes(text)
 		if bytes.Contains(n.Tokens, []byte(search.MarkDataType)) {
@@ -2458,20 +2452,10 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 			return false
 		}
 
-		var text string
-		if n.IsTextMarkType("code") {
-			// code 在前面的 n.
-			for i, k := range keywords {
-				keywords[i] = html.EscapeString(k)
-			}
-			text = n.TextMarkTextContent
-		} else {
-			text = n.Content()
-		}
-
+		text := n.Content()
 		startTag := search.GetMarkSpanStart(markSpanDataType)
-		text = search.EncloseHighlighting(text, keywords, startTag, search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
-		if strings.Contains(text, search.MarkDataType) {
+		text, matched := search.EncloseHighlightingRaw(text, keywords, startTag, search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
+		if matched {
 			dataType := search.GetMarkSpanStart(n.TextMarkType + " " + search.MarkDataType)
 			text = strings.ReplaceAll(text, startTag, dataType)
 			tokens := gulu.Str.ToBytes(text)
@@ -2519,11 +2503,16 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 }
 
 // markReplaceSpanWithSplit 用于处理虚拟引用和反链提及高亮。
-func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, replacementEnd string) (ret string) {
+func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, replacementEnd string) (ret string, matched bool) {
 	// 虚拟引用和反链提及关键字按最长匹配优先 https://github.com/siyuan-note/siyuan/issues/7465
 	sort.Slice(keywords, func(i, j int) bool { return len(keywords[i]) > len(keywords[j]) })
 
-	tmp := search.EncloseHighlighting(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive, true)
+	tmp, matched := search.EncloseHighlightingRaw(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive, true)
+	if !matched {
+		ret = tmp
+		return
+	}
+
 	parts := strings.Split(tmp, replacementEnd)
 	buf := bytes.Buffer{}
 	for i := range len(parts) {
@@ -2543,6 +2532,7 @@ func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, 
 		buf.WriteString(replacementEnd)
 	}
 	ret = buf.String()
+	matched = strings.Contains(ret, replacementStart)
 	return
 }
 

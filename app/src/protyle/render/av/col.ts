@@ -1077,7 +1077,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         protyle,
                         blockElement,
                         colId,
-                        anchorElement: cellElement,
                     });
                 });
             }

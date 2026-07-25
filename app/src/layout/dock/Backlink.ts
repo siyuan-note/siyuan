@@ -1366,7 +1366,7 @@ export class Backlink extends Model {
             return;
         }
         if (shouldDeferBottomBacklinkRefresh(
-            this.ownerProtyle.element.contains(document.activeElement),
+            this.element.contains(document.activeElement),
             ignoreFocus
         )) {
             return;

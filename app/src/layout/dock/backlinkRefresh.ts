@@ -6,8 +6,8 @@ export const shouldSaveBacklinkStatus = (init: boolean, showingLoading: boolean)
     return !init && !showingLoading;
 };
 
-export const shouldDeferBottomBacklinkRefresh = (ownerFocused: boolean, ignoreFocus: boolean) => {
-    return ownerFocused && !ignoreFocus;
+export const shouldDeferBottomBacklinkRefresh = (panelFocused: boolean, ignoreFocus: boolean) => {
+    return panelFocused && !ignoreFocus;
 };
 
 export const shouldHideBottomBacklinks = (

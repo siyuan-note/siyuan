@@ -25,7 +25,7 @@ describe("shouldSaveBacklinkStatus", () => {
 });
 
 describe("shouldDeferBottomBacklinkRefresh", () => {
-    it("defers automatic refreshes while the owner editor is focused", () => {
+    it("defers automatic refreshes while the backlink panel is focused", () => {
         assert.equal(shouldDeferBottomBacklinkRefresh(true, false), true);
         assert.equal(shouldDeferBottomBacklinkRefresh(false, false), false);
     });

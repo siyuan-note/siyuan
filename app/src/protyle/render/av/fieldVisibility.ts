@@ -80,7 +80,7 @@ const getFieldVisibilityItemsHTML = (views: IAVFieldView[], currentViewID: strin
     const titleIconHTML = `<span class="block__icon block__icon--show" style="padding: 8px;margin-left: -4px;" data-type="editCol" data-id="${backColId}">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>`;
-    let html = `<button class="b3-menu__item b3-menu__item--readonly" data-type="nobg">
+    let html = `<button class="b3-menu__item b3-menu__item--readonly av__field-visibility-title" data-type="nobg">
     ${titleIconHTML}
     <span class="b3-menu__label ft__center">${window.siyuan.languages.fieldVisibility}</span>
 </button>`;

@@ -1486,6 +1486,14 @@
   }
 
   &__field-visibility {
+    .b3-menu__label {
+      min-height: 0;
+    }
+
+    &-title {
+      align-items: center;
+    }
+
     & > .b3-menu__item:not(.b3-menu__item--readonly):hover {
       background-color: var(--b3-list-hover);
     }

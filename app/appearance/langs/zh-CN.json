@@ -1,5 +1,5 @@
 {
-  "databaseAttrClickMode": "点击数据库角标时",
+  "databaseAttrClickMode": "数据库角标点击操作",
   "databaseAttrClickModeTip": "设置点击数据库角标时执行的操作",
   "focusBlockAndExpandDatabasePanel": "聚焦块并展开数据库面板",
   "openBlockAttributePanel": "打开块属性面板",

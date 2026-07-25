@@ -154,6 +154,20 @@ export class Editor extends Model {
         this.updateBacklinkVisibility();
     }
 
+    public refreshBottomBacklinkPanel() {
+        if (!this.backlink) {
+            return;
+        }
+        const blockId = this.getBacklinkBlockId();
+        const rootId = this.editor.protyle.block.rootID;
+        if (this.backlink.blockId !== blockId || this.backlink.rootId !== rootId) {
+            this.backlink.switchBlock(blockId, rootId, this.editor.protyle.notebookId);
+            return;
+        }
+        this.backlink.markDirty();
+        this.backlink.refreshIfVisible(true);
+    }
+
     public destroy() {
         this.destroyBacklinkPanel();
         this.editor.destroy();

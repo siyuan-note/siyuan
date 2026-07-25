@@ -89,6 +89,8 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
                 if (protyle.query?.key) {
                     searchMarkRender(protyle, keys, protyle.highlight.rangeIndex);
                 }
+                protyle.databaseAttributePanel?.refresh();
+                protyle.model?.refreshBottomBacklinkPanel();
             }
         });
     }

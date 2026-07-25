@@ -26,9 +26,6 @@ let headingNumberMeasurementRefreshTimer: number;
 
 export const refreshHeadingNumberMeasurements = () => {
     invalidateHeadingNumberMeasurements();
-    if (!window.siyuan.config.editor.headingNumber) {
-        return;
-    }
     getAllEditor().forEach(item => renderHeadingNumbers(item.protyle));
 };
 

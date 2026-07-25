@@ -32,6 +32,7 @@ type Editor struct {
 	CodeLigatures                   bool           `json:"codeLigatures"`                   // 代码块是否连字
 	DisplayBookmarkIcon             bool           `json:"displayBookmarkIcon"`             // 是否显示内容块角标
 	DisplayNetImgMark               bool           `json:"displayNetImgMark"`               // 是否显示网络图片角标
+	DatabaseAttrShow                *bool          `json:"databaseAttrShow"`                // 是否在文档顶部显示数据库属性
 	DatabaseAttrViewMode            int            `json:"databaseAttrViewMode"`            // 数据库属性默认展开状态，0：展开，1：折叠
 	DatabaseAttrHideEmpty           bool           `json:"databaseAttrHideEmpty"`           // 是否隐藏数据库空属性
 	DatabaseAttrUseTabs             *bool          `json:"databaseAttrUseTabs"`             // 数据库属性是否使用页签
@@ -85,6 +86,7 @@ func NewEditor() *Editor {
 		CodeLigatures:                   false,
 		DisplayBookmarkIcon:             true,
 		DisplayNetImgMark:               true,
+		DatabaseAttrShow:                func() *bool { value := true; return &value }(),
 		DatabaseAttrViewMode:            0,
 		DatabaseAttrHideEmpty:           false,
 		DatabaseAttrUseTabs:             func() *bool { value := true; return &value }(),

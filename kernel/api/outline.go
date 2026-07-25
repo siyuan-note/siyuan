@@ -94,12 +94,10 @@ func getDocHeadingNumbers(c *gin.Context) {
 
 	numbers := map[string]string{}
 	var err error
-	if model.Conf.Editor.HeadingNumber {
-		if notebook, ok := arg["notebook"].(string); ok && "" != notebook && model.IsEncryptedBox(notebook) {
-			numbers, err = model.GetHeadingNumbers(rootID, notebook)
-		} else {
-			numbers, err = model.GetHeadingNumbers(rootID, "")
-		}
+	if notebook, ok := arg["notebook"].(string); ok && "" != notebook && model.IsEncryptedBox(notebook) {
+		numbers, err = model.GetHeadingNumbers(rootID, notebook)
+	} else {
+		numbers, err = model.GetHeadingNumbers(rootID, "")
 	}
 	if nil != err {
 		ret.Code = 1

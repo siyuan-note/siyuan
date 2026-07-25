@@ -100,6 +100,35 @@ const bindSpellcheckLanguagesChips = async (root: HTMLElement) => {
 };
 /// #endif
 
+const bindDatabaseAttrSettingsVisibility = (root: HTMLElement) => {
+    const showSwitch = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.databaseAttrShow")}`);
+    if (!showSwitch) {
+        return;
+    }
+    const toggle = () => {
+        ["editor.databaseAttrViewMode", "editor.databaseAttrHideEmpty", "editor.databaseAttrUseTabs"].forEach(id => {
+            root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !showSwitch.checked);
+        });
+    };
+    showSwitch.addEventListener("change", toggle);
+    toggle();
+};
+
+const bindHeadingNumberFormatVisibility = (root: HTMLElement) => {
+    const headingNumberSwitch = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.headingNumber")}`);
+    if (!headingNumberSwitch) {
+        return;
+    }
+    const toggle = () => {
+        root.querySelector(`#${CSS.escape("editor.headingNumberFormat")}`)?.closest(".config-item")?.classList.toggle(
+            "fn__none",
+            !headingNumberSwitch.checked,
+        );
+    };
+    headingNumberSwitch.addEventListener("change", toggle);
+    toggle();
+};
+
 const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("blockFeatures", window.siyuan.languages.configGroupBlockFeatures);
     group.switch("editor.displayNetImgMark", {
@@ -117,6 +146,7 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.headingNumber", {
         title: window.siyuan.languages.headingNumber,
         desc: window.siyuan.languages.headingNumberTip,
+        afterMount: bindHeadingNumberFormatVisibility,
     });
     group.select("editor.headingNumberFormat", {
         title: window.siyuan.languages.headingNumberFormat,
@@ -132,6 +162,11 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
             {value: "chinese-document", label: "一、（一）1."},
         ],
     });
+    group.switch("editor.databaseAttrShow", {
+        title: window.siyuan.languages.databaseAttrShow,
+        desc: window.siyuan.languages.databaseAttrShowTip,
+        afterMount: bindDatabaseAttrSettingsVisibility,
+    });
     group.select("editor.databaseAttrViewMode", {
         title: window.siyuan.languages.databaseAttrViewMode,
         desc: window.siyuan.languages.databaseAttrViewModeTip,
@@ -142,9 +177,11 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     });
     group.switch("editor.databaseAttrHideEmpty", {
         title: window.siyuan.languages.databaseAttrHideEmpty,
+        desc: window.siyuan.languages.databaseAttrHideEmptyTip,
     });
     group.switch("editor.databaseAttrUseTabs", {
         title: window.siyuan.languages.databaseAttrUseTabs,
+        desc: window.siyuan.languages.databaseAttrUseTabsTip,
     });
     group.select("editor.headingEmbedMode", {
         title: window.siyuan.languages.headingEmbedMode,
@@ -202,6 +239,7 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
     if (!isMobile()) {
         group.switch("editor.backlinkShowBottom", {
             title: window.siyuan.languages.backlinkShowBottom,
+            desc: window.siyuan.languages.backlinkShowBottomTip,
         });
     }
     group.number("editor.backlinkExpandCount", {

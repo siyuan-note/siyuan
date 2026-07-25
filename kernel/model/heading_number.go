@@ -27,6 +27,7 @@ import (
 type headingNumberStyle string
 
 const (
+	headingNumberAttribute                          = "custom-sy-heading-number"
 	headingNumberStyleDecimal    headingNumberStyle = "decimal"
 	headingNumberStyleUpperAlpha headingNumberStyle = "upper-alpha"
 	headingNumberStyleLowerAlpha headingNumberStyle = "lower-alpha"
@@ -61,12 +62,29 @@ func shouldReturnHeadingNumbers(mode int, isBacklink bool) bool {
 	return !isBacklink && (0 == mode || 3 == mode)
 }
 
+func headingNumberEnabled(tree *parse.Tree, defaultEnabled bool) bool {
+	if nil == tree || nil == tree.Root {
+		return defaultEnabled
+	}
+	switch tree.Root.IALAttr(headingNumberAttribute) {
+	case "true":
+		return true
+	case "false":
+		return false
+	default:
+		return defaultEnabled
+	}
+}
+
 // GetHeadingNumbers 返回文档标题块 ID 到显示编号的映射。
 func GetHeadingNumbers(rootID, boxID string) (ret map[string]string, err error) {
 	FlushTxQueue()
 	tree, err := loadTreeByBlockIDInBox(rootID, boxID)
 	if err != nil || nil == tree {
 		return map[string]string{}, err
+	}
+	if !headingNumberEnabled(tree, Conf.Editor.HeadingNumber) {
+		return map[string]string{}, nil
 	}
 	return headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat), nil
 }

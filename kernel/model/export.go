@@ -1455,7 +1455,7 @@ func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 }
 
 func applyHeadingNumbersForExport(tree *parse.Tree, bt *treenode.BlockTree, merged bool) (err error) {
-	if !Conf.Editor.HeadingNumber || nil == tree || nil == tree.Root {
+	if nil == tree || nil == tree.Root {
 		return
 	}
 
@@ -1467,6 +1467,9 @@ func applyHeadingNumbersForExport(tree *parse.Tree, bt *treenode.BlockTree, merg
 		}
 	}
 
+	if !headingNumberEnabled(numberingTree, Conf.Editor.HeadingNumber) {
+		return
+	}
 	materializeHeadingNumbers(tree, headingNumberLabels(numberingTree, Conf.Editor.HeadingNumberFormat))
 	return
 }
@@ -1513,6 +1516,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 		if nil == tree {
 			return nil
 		}
+		numberHeadings := headingNumberEnabled(tree, Conf.Editor.HeadingNumber)
 
 		if merge {
 			var mergeErr error
@@ -1526,7 +1530,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 		assetDests := getAssetsLinkDests(tree.Root, false)
 		headings := collectOutlineHeadings(tree)
 		var headingNumbers map[string]string
-		if Conf.Editor.HeadingNumber {
+		if numberHeadings {
 			headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
 		}
 

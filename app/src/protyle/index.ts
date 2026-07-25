@@ -341,21 +341,7 @@ export class Protyle {
         let hasDeleteOp = false;
         data.data[0].doOperations.find((item: IOperation) => {
             if (this.protyle.options.backlinkData && ["delete", "move"].includes(item.action)) {
-                // 只对特定情况刷新，否则展开、编辑等操作刷新会频繁
-                /// #if !MOBILE
-                if (2 == data.data[0].doOperations.length && "insert" === data.data[0].doOperations[0].action && "delete" === data.data[0].doOperations[1].action) {
-                    // 从反链面板复制块到正文粘贴时不再自动刷新反链面板
-                    // The list in the backlink panel no longer collapses automatically https://github.com/siyuan-note/siyuan/issues/17362
-                    return true;
-                }
-
-                getAllModels().backlink.find(backlinkItem => {
-                    if (backlinkItem.element.contains(this.protyle.element)) {
-                        backlinkItem.refresh();
-                        return true;
-                    }
-                });
-                /// #endif
+                // 反链上下文只展示源文档的一部分，结构操作等待索引提交后按内容版本增量同步。
                 return true;
             } else {
                 if (item.action === "delete") {

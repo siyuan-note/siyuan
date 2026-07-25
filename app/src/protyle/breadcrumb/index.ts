@@ -575,6 +575,49 @@ ${padHTML}
                         }
                     }]
                 }).element);
+                const isCustomHeadingNumber = protyle.wysiwyg.element.getAttribute(
+                    Constants.CUSTOM_SY_HEADING_NUMBER
+                );
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "headingNumber",
+                    label: window.siyuan.languages.headingNumber,
+                    icon: "iconHeadings",
+                    type: "submenu",
+                    submenu: [{
+                        id: "enable",
+                        iconHTML: "",
+                        current: isCustomHeadingNumber === "true",
+                        label: window.siyuan.languages.enable,
+                        click() {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {[Constants.CUSTOM_SY_HEADING_NUMBER]: "true"}
+                            });
+                        }
+                    }, {
+                        id: "disable",
+                        iconHTML: "",
+                        current: isCustomHeadingNumber === "false",
+                        label: window.siyuan.languages.disable,
+                        click() {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {[Constants.CUSTOM_SY_HEADING_NUMBER]: "false"}
+                            });
+                        }
+                    }, {
+                        id: "default",
+                        iconHTML: "",
+                        current: !isCustomHeadingNumber,
+                        label: window.siyuan.languages.default,
+                        click() {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {[Constants.CUSTOM_SY_HEADING_NUMBER]: ""}
+                            });
+                        }
+                    }]
+                }).element);
             }
             /// #endif
             if (protyle?.app?.plugins) {

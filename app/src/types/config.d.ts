@@ -515,6 +515,10 @@ declare namespace Config {
          */
         displayNetImgMark: boolean;
         /**
+         * Whether to show database attributes at the top of the document
+         */
+        databaseAttrShow: boolean;
+        /**
          * Default state of database attributes
          * - `0`: Expanded
          * - `1`: Collapsed

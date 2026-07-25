@@ -4,30 +4,51 @@ const updateEmptyState = (element: HTMLElement, hideEmpty: boolean) => {
     element.classList.toggle("protyle-db-attr--hide-empty", hideEmpty);
 };
 
+const refreshActions = new Set<TOperation>([
+    "addAttrViewCol",
+    "removeAttrViewCol",
+    "updateAttrViewCol",
+    "sortAttrViewKey",
+    "duplicateAttrViewKey",
+    "setAttrViewColIcon",
+    "setAttrViewColDesc",
+    "setAttrViewName",
+]);
+
 export class AVAttributePanel {
     public element: HTMLElement;
     private bodyElement: HTMLElement;
     private protyle: IProtyle;
     private targetID = "";
     private renderToken = 0;
+    private renderingTargetID = "";
     private collapsed: boolean;
     private activeAvID = "";
+    private showEmptyFields = false;
 
     constructor(protyle: IProtyle) {
         this.protyle = protyle;
         this.collapsed = window.siyuan.config.editor.databaseAttrViewMode === 1;
         this.element = document.createElement("div");
         this.element.className = "protyle-db-attr fn__none";
-        this.element.innerHTML = `<button type="button" class="protyle-db-attr__header fn__flex" data-type="toggle" aria-expanded="${!this.collapsed}" aria-label="${window.siyuan.languages.database}">
-    <span class="block__icon block__icon--show fn__flex-center"><svg><use xlink:href="#iconRight"></use></svg></span>
-    <span class="block__logo fn__flex-1">${window.siyuan.languages.database}</span>
-</button>`;
+        this.element.innerHTML = `<div class="protyle-db-attr__header fn__flex">
+    <button type="button" class="protyle-db-attr__toggle fn__flex fn__flex-1" data-type="toggle" aria-expanded="${!this.collapsed}" aria-label="${window.siyuan.languages.database}">
+        <span class="block__icon block__icon--show fn__flex-center"><svg><use xlink:href="#iconRight"></use></svg></span>
+        <span class="block__logo fn__flex-1">${window.siyuan.languages.database}</span>
+    </button>
+    <button type="button" class="protyle-db-attr__edit block__icon block__icon--show ariaLabel fn__none" data-position="4west" data-type="toggle-empty" aria-label="${window.siyuan.languages.displayEmptyFields}"><svg><use xlink:href="#iconEdit"></use></svg></button>
+</div>`;
         this.bodyElement = document.createElement("div");
         this.bodyElement.className = "custom-attr protyle-db-attr__body";
         this.element.appendChild(this.bodyElement);
         this.element.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
-            if (target.closest('[data-type="av-tab"]')) {
+            if (target.closest('[data-type="toggle-empty"]')) {
+                this.showEmptyFields = !this.showEmptyFields;
+                this.updateEmptyState();
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (target.closest('[data-type="av-tab"]')) {
                 this.activeAvID = (target.closest('[data-type="av-tab"]') as HTMLElement).dataset.id || "";
                 this.updateTabs();
                 event.preventDefault();
@@ -43,9 +64,17 @@ export class AVAttributePanel {
     }
 
     public render(force = false) {
-        const targetID = this.protyle.block.showAll ? this.protyle.block.id : this.protyle.block.rootID;
-        if (!targetID || (!force && targetID === this.targetID && this.element.dataset.rendered === "true")) {
+        if (!window.siyuan.config.editor.databaseAttrShow) {
+            this.hideByDisplayConfig();
             return;
+        }
+        const targetID = this.protyle.block.showAll ? this.protyle.block.id : this.protyle.block.rootID;
+        if (!targetID || (!force && targetID === this.targetID &&
+            (this.element.dataset.rendered === "true" || this.renderingTargetID === targetID))) {
+            return;
+        }
+        if (targetID !== this.targetID) {
+            this.showEmptyFields = false;
         }
         const currentBodyElement = this.bodyElement;
         const keepCurrentBody = force && targetID === this.targetID;
@@ -55,6 +84,7 @@ export class AVAttributePanel {
             this.element.removeAttribute("data-rendered");
         }
         const token = ++this.renderToken;
+        this.renderingTargetID = targetID;
         const bodyElement = document.createElement("div");
         bodyElement.className = "custom-attr protyle-db-attr__body";
         if (!keepCurrentBody) {
@@ -65,6 +95,7 @@ export class AVAttributePanel {
             if (token !== this.renderToken) {
                 return;
             }
+            this.renderingTargetID = "";
             if (keepCurrentBody) {
                 currentBodyElement.replaceWith(renderedElement);
                 this.bodyElement = renderedElement;
@@ -81,8 +112,17 @@ export class AVAttributePanel {
     }
 
     public updateDisplayConfig() {
+        if (!window.siyuan.config.editor.databaseAttrShow) {
+            this.hideByDisplayConfig();
+            return;
+        }
         this.updateTabs();
         this.updateEmptyState();
+        if (this.element.dataset.rendered === "true") {
+            this.element.classList.toggle("fn__none", !this.bodyElement.querySelector("[data-av-id], .custom-attr__avbacklinks"));
+        } else {
+            this.render();
+        }
     }
 
     public hasDatabase(avID: string) {
@@ -94,10 +134,15 @@ export class AVAttributePanel {
     }
 
     public refreshForOperation(operation: IOperation) {
-        if (!operation.avID) {
+        const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
+        if (!avID) {
             return;
         }
         if (operation.action === "insertAttrViewBlock" && operation.srcs?.some(item => item.id === this.targetID)) {
+            this.refresh();
+            return;
+        }
+        if (refreshActions.has(operation.action) && this.hasDatabase(avID)) {
             this.refresh();
             return;
         }
@@ -132,6 +177,7 @@ export class AVAttributePanel {
         toggleElement?.setAttribute("aria-expanded", (!this.collapsed).toString());
         const useElement = toggleElement?.querySelector("use");
         useElement?.setAttribute("xlink:href", this.collapsed ? "#iconRight" : "#iconDown");
+        this.updateEmptyState();
     }
 
     private updateTabs() {
@@ -165,6 +211,25 @@ export class AVAttributePanel {
     }
 
     private updateEmptyState() {
-        updateEmptyState(this.element, window.siyuan.config.editor.databaseAttrHideEmpty);
+        const hideEmpty = window.siyuan.config.editor.databaseAttrHideEmpty;
+        if (!hideEmpty) {
+            this.showEmptyFields = false;
+        }
+        updateEmptyState(this.element, hideEmpty && !this.showEmptyFields);
+        const editElement = this.element.querySelector<HTMLElement>('[data-type="toggle-empty"]');
+        editElement?.classList.toggle("fn__none", !hideEmpty || this.collapsed);
+        editElement?.setAttribute("aria-label", window.siyuan.languages[
+            this.showEmptyFields ? "hideEmptyFields" : "displayEmptyFields"
+        ]);
+    }
+
+    private hideByDisplayConfig() {
+        this.showEmptyFields = false;
+        if (this.renderingTargetID) {
+            this.renderToken++;
+            this.renderingTargetID = "";
+        }
+        this.element.removeAttribute("data-rendered");
+        this.element.classList.add("fn__none");
     }
 }

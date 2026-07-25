@@ -6,6 +6,7 @@ const HEADING_NUMBER_WIDTH_PROPERTY = "--b3-protyle-heading-number-width";
 const NUMBERED_HEADING_SELECTOR = `${HEADING_SELECTOR}[data-heading-number], ` +
     `${HEADING_SELECTOR} > [contenteditable][data-heading-number]`;
 const HEADING_CONTAINER_TYPES = new Set(["NodeDocument", "NodeList", "NodeListItem", "NodeSuperBlock"]);
+const CUSTOM_HEADING_NUMBER_ATTRIBUTE = "custom-sy-heading-number";
 let headingNumberMeasurements = new WeakMap<Element, {key: string, offset: string}>();
 
 export interface IHeadingNumberStyle {
@@ -17,6 +18,16 @@ export interface IHeadingNumberStyle {
 interface IHeadingNumberTarget extends IHeadingNumberStyle {
     element: Element;
 }
+
+export const resolveHeadingNumberEnabled = (customValue: string | null | undefined, defaultEnabled: boolean) => {
+    if (customValue === "true") {
+        return true;
+    }
+    if (customValue === "false") {
+        return false;
+    }
+    return defaultEnabled;
+};
 
 export const invalidateHeadingNumberMeasurements = () => {
     headingNumberMeasurements = new WeakMap<Element, {key: string, offset: string}>();
@@ -201,8 +212,20 @@ const operationDataIsHeadingContainer = (data: unknown) => {
     return match ? HEADING_CONTAINER_TYPES.has(match[2]) : false;
 };
 
+const operationChangesHeadingNumberSetting = (operation: IOperation) => {
+    if (operation.action !== "updateAttrs" || !operation.data || typeof operation.data !== "object") {
+        return false;
+    }
+    const oldValue = operation.data.old?.[CUSTOM_HEADING_NUMBER_ATTRIBUTE];
+    const newValue = operation.data.new?.[CUSTOM_HEADING_NUMBER_ATTRIBUTE];
+    return oldValue !== newValue;
+};
+
 export const operationsMayChangeOutline = (operations: IOperation[] = [], headingIDs: Set<string> = new Set()) => {
     return operations.some(operation => {
+        if (operationChangesHeadingNumberSetting(operation)) {
+            return true;
+        }
         if (["append", "delete", "move", "moveOutlineHeading"].includes(operation.action)) {
             return true;
         }
@@ -222,6 +245,9 @@ export const operationsMayChangeHeadingNumbers = (
     headingContainers: Set<string> = new Set(),
 ) => {
     return operations.some(operation => {
+        if (operationChangesHeadingNumberSetting(operation)) {
+            return true;
+        }
         if (["append", "delete", "move", "moveOutlineHeading"].includes(operation.action)) {
             return true;
         }

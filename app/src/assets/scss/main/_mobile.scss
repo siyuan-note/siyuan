@@ -461,8 +461,14 @@
   }
 }
 
-.protyle-db-attr__header {
+.protyle-db-attr__toggle {
   min-height: 40px;
+}
+
+.protyle-db-attr__edit {
+  justify-content: center;
+  min-height: 40px;
+  min-width: 40px;
 }
 
 .av__row-actions {

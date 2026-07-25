@@ -464,8 +464,8 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "a",
-													"TextMarkAHref": "https://twitter.com/b3logos",
-													"TextMarkTextContent": "Twitter"
+													"TextMarkAHref": "https://x.com/b3logos",
+													"TextMarkTextContent": "X"
 												}
 											]
 										}

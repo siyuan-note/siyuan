@@ -70,6 +70,7 @@ func refreshRefsByDefID(defID string) {
 }
 
 type Backlink struct {
+	ID         string       `json:"id"`
 	DOM        string       `json:"dom"`
 	BlockPaths []*BlockPath `json:"blockPaths"`
 	Expand     bool         `json:"expand"`
@@ -382,7 +383,7 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}
 	}
-	ret = &Backlink{DOM: dom, BlockPaths: blockPaths, Expand: expand, node: node}
+	ret = &Backlink{ID: refID, DOM: dom, BlockPaths: blockPaths, Expand: expand, node: node}
 	return
 }
 

@@ -5,7 +5,8 @@ import {
     buildHeadingNumberStyles,
     clearHeadingNumberElements,
     operationsMayChangeHeadingNumbers,
-    renderHeadingNumberElements
+    renderHeadingNumberElements,
+    resolveHeadingNumberEnabled
 } from "./headingNumberCore";
 import type {IHeadingNumberStyle} from "./headingNumberCore";
 
@@ -33,6 +34,13 @@ const clearHeadingNumberStyles = (protyle: IProtyle) => {
 const clearHeadingNumbers = (protyle: IProtyle) => {
     clearHeadingNumberElements(protyle.wysiwyg.element);
     clearHeadingNumberStyles(protyle);
+};
+
+export const isHeadingNumberEnabled = (protyle: IProtyle) => {
+    return resolveHeadingNumberEnabled(
+        protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_HEADING_NUMBER),
+        window.siyuan.config.editor.headingNumber
+    );
 };
 
 const applyHeadingNumberStyles = (protyle: IProtyle, styles: IHeadingNumberStyle[]) => {
@@ -67,7 +75,8 @@ export const renderHeadingNumbers = (
         protyle.block.headingNumbers = headingNumbers || {};
     }
     if (protyle.options.backlinkData ||
-        protyle.block.action?.includes(Constants.CB_GET_HISTORY)) {
+        protyle.block.action?.includes(Constants.CB_GET_HISTORY) ||
+        !isHeadingNumberEnabled(protyle)) {
         clearHeadingNumbers(protyle);
         headingNumberContainers.delete(protyle);
         return;
@@ -87,7 +96,7 @@ export const invalidateHeadingNumberRefresh = (protyle: IProtyle) => {
 };
 
 export const queueHeadingNumberRefresh = (protyle: IProtyle, operations?: IOperation[]) => {
-    if (!window.siyuan.config.editor.headingNumber) {
+    if (!isHeadingNumberEnabled(protyle)) {
         invalidateHeadingNumberRefresh(protyle);
         renderHeadingNumbers(protyle, {});
         return;
@@ -118,7 +127,7 @@ export const queueHeadingNumberRefresh = (protyle: IProtyle, operations?: IOpera
         }
         fetchPost("/api/outline/getDocHeadingNumbers", request, response => {
             if (response.code !== 0 ||
-                !window.siyuan.config.editor.headingNumber ||
+                !isHeadingNumberEnabled(protyle) ||
                 window.siyuan.config.editor.headingNumberFormat !== format ||
                 !protyle.element.isConnected ||
                 protyle.block.rootID !== rootID ||

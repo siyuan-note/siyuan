@@ -63,6 +63,14 @@ export class Tree {
         }
     }
 
+    public createTopLevelItem(data: IBlockTree) {
+        const template = document.createElement("template");
+        template.innerHTML = this.genHTML([data]);
+        const element = template.content.querySelector(".b3-list > .b3-list-item") as HTMLLIElement;
+        mathRender(element);
+        return element;
+    }
+
     private genHTML(data: (IBlockTree & { folded?: boolean })[]) {
         const isM = isMobile();
         let html = `<ul${data[0].depth === 0 ? " class='b3-list b3-list--background'" : ""}>`;

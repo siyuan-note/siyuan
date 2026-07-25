@@ -6,8 +6,8 @@ export const shouldSaveBacklinkStatus = (init: boolean, showingLoading: boolean)
     return !init && !showingLoading;
 };
 
-export const shouldDeferBottomBacklinkRefresh = (ownerFocused: boolean, ignoreFocus: boolean) => {
-    return ownerFocused && !ignoreFocus;
+export const shouldDeferBottomBacklinkRefresh = (panelFocused: boolean, ignoreFocus: boolean) => {
+    return panelFocused && !ignoreFocus;
 };
 
 export const shouldHideBottomBacklinks = (
@@ -17,4 +17,15 @@ export const shouldHideBottomBacklinks = (
     mentionKeyword: string
 ) => {
     return linkRefsCount === 0 && mentionsCount === 0 && !backlinkKeyword && !mentionKeyword;
+};
+
+export const shouldRefreshAllBacklinkContexts = (
+    rootIDs: Set<string>,
+    targetRootID: string,
+    blockID: string,
+    explicit: boolean,
+    queryChanged: boolean,
+    full: boolean,
+) => {
+    return explicit || queryChanged || full || rootIDs.has(targetRootID) || rootIDs.has(blockID);
 };

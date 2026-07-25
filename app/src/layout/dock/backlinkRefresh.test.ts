@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {
     shouldDeferBottomBacklinkRefresh,
     shouldHideBottomBacklinks,
+    shouldRefreshAllBacklinkContexts,
     shouldRenderBacklinkResponse,
     shouldSaveBacklinkStatus
 } from "./backlinkRefresh";
@@ -24,7 +25,7 @@ describe("shouldSaveBacklinkStatus", () => {
 });
 
 describe("shouldDeferBottomBacklinkRefresh", () => {
-    it("defers automatic refreshes while the owner editor is focused", () => {
+    it("defers automatic refreshes while the backlink panel is focused", () => {
         assert.equal(shouldDeferBottomBacklinkRefresh(true, false), true);
         assert.equal(shouldDeferBottomBacklinkRefresh(false, false), false);
     });
@@ -44,5 +45,29 @@ describe("shouldHideBottomBacklinks", () => {
     it("keeps the area visible when an active filter has no results", () => {
         assert.equal(shouldHideBottomBacklinks(0, 0, "backlink", ""), false);
         assert.equal(shouldHideBottomBacklinks(0, 0, "", "mention"), false);
+    });
+});
+
+describe("shouldRefreshAllBacklinkContexts", () => {
+    it("refreshes every expanded context when the target document changes", () => {
+        assert.equal(shouldRefreshAllBacklinkContexts(
+            new Set(["20260725000000-target"]),
+            "20260725000000-target",
+            "20260725000000-block",
+            false,
+            false,
+            false,
+        ), true);
+    });
+
+    it("keeps source-root changes scoped to their expanded context", () => {
+        assert.equal(shouldRefreshAllBacklinkContexts(
+            new Set(["20260725000000-source"]),
+            "20260725000000-target",
+            "20260725000000-block",
+            false,
+            false,
+            false,
+        ), false);
     });
 });

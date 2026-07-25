@@ -64,6 +64,7 @@ export abstract class Constants {
     public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";
+    public static readonly CUSTOM_SY_HEADING_NUMBER: string = "custom-sy-heading-number";
     public static readonly CUSTOM_SY_AV_VIEW: string = "custom-sy-av-view";
     public static readonly CUSTOM_SY_TITLE_EMPTY: string = "custom-sy-title-empty";
 

@@ -241,6 +241,11 @@
 
   &__header {
     align-items: center;
+    min-height: 34px;
+  }
+
+  &__toggle {
+    align-items: center;
     background-color: transparent;
     border: 0;
     border-radius: var(--b3-border-radius);
@@ -249,10 +254,10 @@
     cursor: pointer;
     font: inherit;
     min-height: 34px;
+    min-width: 0;
     padding: 0 8px;
     text-align: left;
     transition: var(--b3-background-transition);
-    width: 100%;
 
     & > .block__icon:first-child {
       margin-left: -8px;
@@ -261,6 +266,11 @@
     .block__logo {
       margin-left: 4px;
     }
+  }
+
+  &__edit {
+    flex-shrink: 0;
+    margin-right: 8px;
   }
 
   &--collapsed &__body {

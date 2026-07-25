@@ -808,7 +808,6 @@
       overflow: inherit; // 保证列宽和顺序调整的拖拽点样式
       border-right-color: transparent;
 
-      &[data-dtype="number"][data-align=""],
       &[data-align="right"] {
         justify-content: flex-end;
       }
@@ -821,7 +820,6 @@
         justify-content: flex-start;
       }
 
-      &[data-dtype="number"][data-align=""] .av__celltext,
       &[data-align="center"] .av__celltext,
       &[data-align="right"] .av__celltext {
         flex: 0 1 auto;

@@ -174,7 +174,7 @@ const pasteAVMatrix = async (options: {
                 const operations = await updateCellsValue(options.protyle, options.blockElement, options.values[i][j],
                     [cellElement], options.columns,
                     cellElement.dataset.dtype === "mAsset" ? (options.tempElement.content.children[i * (j + 1) + j]?.outerHTML || "") : options.html,
-                    true, newRowIDSet.has(rowElements[i].dataset.id));
+                    true, newRowIDSet.has(rowElements[i].dataset.id), true);
                 if (operations.doOperations.length > 0) {
                     doOperations.push(...operations.doOperations);
                     if (newRowIDSet.has(rowElements[i].dataset.id)) {

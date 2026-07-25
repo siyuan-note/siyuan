@@ -4,6 +4,17 @@ const updateEmptyState = (element: HTMLElement, hideEmpty: boolean) => {
     element.classList.toggle("protyle-db-attr--hide-empty", hideEmpty);
 };
 
+const refreshActions = new Set<TOperation>([
+    "addAttrViewCol",
+    "removeAttrViewCol",
+    "updateAttrViewCol",
+    "sortAttrViewKey",
+    "duplicateAttrViewKey",
+    "setAttrViewColIcon",
+    "setAttrViewColDesc",
+    "setAttrViewName",
+]);
+
 export class AVAttributePanel {
     public element: HTMLElement;
     private bodyElement: HTMLElement;
@@ -123,10 +134,15 @@ export class AVAttributePanel {
     }
 
     public refreshForOperation(operation: IOperation) {
-        if (!operation.avID) {
+        const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
+        if (!avID) {
             return;
         }
         if (operation.action === "insertAttrViewBlock" && operation.srcs?.some(item => item.id === this.targetID)) {
+            this.refresh();
+            return;
+        }
+        if (refreshActions.has(operation.action) && this.hasDatabase(avID)) {
             this.refresh();
             return;
         }

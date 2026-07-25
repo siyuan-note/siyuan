@@ -940,7 +940,13 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
         action: "doUpdateUpdated",
         id,
         data: blockElement.getAttribute("updated")
-    }]);
+    }], {
+        callback: () => {
+            if (protyle.databaseAttributePanel?.hasDatabase(avId)) {
+                protyle.databaseAttributePanel.refresh();
+            }
+        }
+    });
     blockElement.setAttribute("updated", newUpdated);
     nameElement.dataset.title = newData;
 

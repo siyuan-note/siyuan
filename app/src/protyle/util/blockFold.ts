@@ -172,18 +172,19 @@ const foldBlocksRecursively0 = async (protyle: IProtyle, nodeElements: Element[]
         return;
     }
 
-    // Determine target state: if any block is unfolded, we fold all. Otherwise we expand all.
+    // 任一候选块未折叠时执行全部折叠；全部已折叠时执行全部展开。
     let isFoldAll = elementsToFold.some(item => item.getAttribute("fold") !== "1");
+    // 单个入口已折叠时以展开入口为准，后代状态不影响操作方向。
     if (isFoldAll && nodeElements.length === 1 && nodeElements[0].getAttribute("fold") === "1") {
         isFoldAll = false;
     }
-    if (isFoldAll) {
-        elementsToFold.reverse();
-    }
+    // 内层状态需要先写入内核，外层标题最后展开时返回的 DOM 才能包含后代块的最终折叠状态。
+    const elementsToProcess = Array.from(elementsToFold).reverse();
+    const scrollElement = (isFoldAll ? elementsToProcess : elementsToFold).find(element => element.isConnected);
 
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    elementsToFold.forEach(element => {
+    elementsToProcess.forEach(element => {
         const hasFold = element.getAttribute("fold") === "1";
         if ((isFoldAll && hasFold) || (!isFoldAll && !hasFold)) {
             return;
@@ -218,7 +219,6 @@ const foldBlocksRecursively0 = async (protyle: IProtyle, nodeElements: Element[]
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, undoOperations);
         preventScroll(protyle);
-        const scrollElement = elementsToFold.find((element) => element.isConnected);
         if (scrollElement) {
             scrollCenter(protyle, scrollElement);
         }

@@ -33,6 +33,9 @@ const removePlaceholderRows = (blockElement: HTMLElement) => {
 };
 
 const markFoldHeadingChildren = (parent: ParentNode) => {
+    parent.querySelectorAll("[parent-heading]").forEach(item => {
+        item.removeAttribute("parent-heading");
+    });
     const foldedHeadings: {id: string, level: number}[] = [];
     Array.from(parent.children).forEach(item => {
         if (!item.hasAttribute("data-node-id")) {
@@ -702,6 +705,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).find((item) => {
         let addId = item.getAttribute("data-node-id");
         const hasParentHeading = item.getAttribute("parent-heading");
+        item.removeAttribute("parent-heading");
         if (addId === id) {
             item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             doOperation.push({
@@ -727,7 +731,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 liElement.append(item);
                 item = liElement;
             }
-            item.removeAttribute("parent-heading");
             doOperation.push({
                 action: "insert",
                 data: item.outerHTML,

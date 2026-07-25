@@ -175,6 +175,80 @@ func fillBlockRefCount(nodes []*ast.Node) {
 	}
 }
 
+func cloneRenderNode(node *ast.Node) *ast.Node {
+	if nil == node {
+		return nil
+	}
+
+	cloned := *node
+	cloned.Parent = nil
+	cloned.Previous = nil
+	cloned.Next = nil
+	cloned.FirstChild = nil
+	cloned.LastChild = nil
+	cloned.Children = nil
+	cloned.Tokens = bytes.Clone(node.Tokens)
+	if nil != node.KramdownIAL {
+		cloned.KramdownIAL = make([][]string, 0, len(node.KramdownIAL))
+		for _, attr := range node.KramdownIAL {
+			cloned.KramdownIAL = append(cloned.KramdownIAL, append([]string{}, attr...))
+		}
+	}
+	if nil != node.Properties {
+		cloned.Properties = make(map[string]string, len(node.Properties))
+		for name, value := range node.Properties {
+			cloned.Properties[name] = value
+		}
+	}
+
+	for child := node.FirstChild; nil != child; child = child.Next {
+		cloned.AppendChild(cloneRenderNode(child))
+	}
+	return &cloned
+}
+
+func cleanRenderNodes(nodes []*ast.Node, visibleOnly bool) (ret []*ast.Node) {
+	root := &ast.Node{Type: ast.NodeDocument}
+	for _, node := range nodes {
+		if cloned := cloneRenderNode(node); nil != cloned {
+			root.AppendChild(cloned)
+		}
+	}
+
+	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.IsBlock() {
+			treenode.ClearLegacyHeadingFold(node)
+		}
+		return ast.WalkContinue
+	})
+	if visibleOnly {
+		for _, node := range treenode.CollectFoldHiddenNodes(root) {
+			node.Unlink()
+		}
+	}
+
+	for node := root.FirstChild; nil != node; node = node.Next {
+		ret = append(ret, node)
+	}
+	return
+}
+
+func cleanRenderNode(node *ast.Node, visibleOnly bool) *ast.Node {
+	nodes := cleanRenderNodes([]*ast.Node{node}, visibleOnly)
+	if 0 == len(nodes) {
+		return nil
+	}
+	return nodes[0]
+}
+
+func renderCleanBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
+	return renderBlockDOMByNodes(cleanRenderNodes(nodes, false), luteEngine)
+}
+
+func renderVisibleBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
+	return renderBlockDOMByNodes(cleanRenderNodes(nodes, true), luteEngine)
+}
+
 func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
@@ -327,21 +401,15 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 						hChildren = append(hChildren, h)
 					} else if 2 == blockHeadingMode {
 						// 仅显示标题下方的块（默认行为）
-						if "1" != h.IALAttr("fold") {
-							children := treenode.HeadingChildren(h)
-							for _, c := range children {
-								if "1" == c.IALAttr("heading-fold") {
-									// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
-									continue
-								}
-								hChildren = append(hChildren, c)
-							}
+						if !treenode.IsSelfFolded(h) {
+							hChildren = append(hChildren, treenode.HeadingChildren(h)...)
 						}
 					} else {
 						// 0: 显示标题与下方的块
 						hChildren = append(hChildren, h)
 						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
 					}
+					hChildren = cleanRenderNodes(hChildren, true)
 					if 0 == blockEmbedMode {
 						embedTopLevel := 0
 						for _, hChild := range hChildren {

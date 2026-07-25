@@ -21,6 +21,38 @@ import (
 	"github.com/88250/lute/parse"
 )
 
+// IsSelfFolded 判断块是否处于自身折叠状态。heading-fold 是旧版标题折叠向后代注入的临时标记，
+// 同时存在时 fold 不代表块自身状态。
+func IsSelfFolded(node *ast.Node) bool {
+	return nil != node && "1" == node.IALAttr("fold") && "1" != node.IALAttr("heading-fold")
+}
+
+// SetSelfFolded 设置块自身的折叠状态。显式设置后需要移除旧版 heading-fold 标记，
+// 以便后续能够区分用户状态和旧版标题折叠的派生状态。
+func SetSelfFolded(node *ast.Node, folded bool) {
+	if nil == node {
+		return
+	}
+
+	node.RemoveIALAttr("heading-fold")
+	if folded {
+		node.SetIALAttr("fold", "1")
+	} else {
+		node.RemoveIALAttr("fold")
+	}
+}
+
+// ClearLegacyHeadingFold 清理旧版标题折叠向块注入的派生状态。
+func ClearLegacyHeadingFold(node *ast.Node) bool {
+	if nil == node || "1" != node.IALAttr("heading-fold") {
+		return false
+	}
+
+	node.RemoveIALAttr("heading-fold")
+	node.RemoveIALAttr("fold")
+	return true
+}
+
 func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 	foldHeadings := map[string][]*ast.Node{}
 	// 找到原有节点中所有折叠标题节点的下方节点
@@ -29,7 +61,7 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeHeading == n.Type && "1" == n.IALAttr("fold") {
+		if ast.NodeHeading == n.Type && IsSelfFolded(n) {
 			children := HeadingChildren(n)
 			foldHeadings[n.ID] = children
 		}
@@ -43,7 +75,7 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeHeading == n.Type && "1" == n.IALAttr("fold") {
+		if ast.NodeHeading == n.Type && IsSelfFolded(n) {
 			updateFoldHeadings = append(updateFoldHeadings, n)
 		}
 		return ast.WalkContinue
@@ -79,7 +111,7 @@ func (s *FoldHeadingStack) Enter(n *ast.Node) {
 	}
 
 	// 当前标题自身折叠时入栈，其后更深层级的兄弟块都被它盖住
-	if "1" == n.IALAttr("fold") {
+	if IsSelfFolded(n) {
 		s.levels = append(s.levels, n.HeadingLevel)
 	}
 }
@@ -92,7 +124,7 @@ func (s *FoldHeadingStack) Hidden() bool {
 		return false
 	}
 
-	if n := s.last; nil != n && ast.NodeHeading == n.Type && "1" == n.IALAttr("fold") && s.levels[depth-1] == n.HeadingLevel {
+	if n := s.last; nil != n && ast.NodeHeading == n.Type && IsSelfFolded(n) && s.levels[depth-1] == n.HeadingLevel {
 		// 折叠标题自身刚入栈：仅当它还被更浅的折叠标题盖住时才隐藏
 		return 1 < depth
 	}
@@ -119,7 +151,7 @@ func collectFoldHiddenNodes(parent *ast.Node, unlinks *[]*ast.Node) {
 			continue
 		}
 
-		if n.IsContainerBlock() {
+		if ast.NodeDocument == n.Type || n.IsContainerBlock() {
 			collectFoldHiddenNodes(n, unlinks)
 		}
 	}
@@ -136,7 +168,7 @@ func IsInFoldedHeading(node, currentHeading *ast.Node) bool {
 		return false
 	}
 	if ast.NodeHeading == heading.Type {
-		if "1" == heading.IALAttr("heading-fold") || "1" == heading.IALAttr("fold") {
+		if IsSelfFolded(heading) {
 			return true
 		}
 		if heading == currentHeading {
@@ -145,15 +177,6 @@ func IsInFoldedHeading(node, currentHeading *ast.Node) bool {
 		}
 	}
 	return IsInFoldedHeading(heading, currentHeading)
-}
-
-func GetHeadingFold(nodes []*ast.Node) (ret []*ast.Node) {
-	for _, n := range nodes {
-		if "1" == n.IALAttr("heading-fold") {
-			ret = append(ret, n)
-		}
-	}
-	return
 }
 
 func GetParentFoldedHeading(node *ast.Node) (parentFoldedHeading *ast.Node) {
@@ -175,7 +198,7 @@ func GetParentFoldedHeading(node *ast.Node) (parentFoldedHeading *ast.Node) {
 		}
 		currentLevel = n.HeadingLevel
 
-		if "1" == n.IALAttr("fold") {
+		if IsSelfFolded(n) {
 			if ast.NodeHeading != node.Type {
 				parentFoldedHeading = n
 			}

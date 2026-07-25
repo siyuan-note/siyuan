@@ -342,13 +342,17 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
         });
         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
             foldHeadingIds.push({oldId: item.getAttribute("data-node-id"), newId});
-            const responseHTML = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {id: item.getAttribute("data-node-id")});
+            const responseHTML = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
+                id: item.getAttribute("data-node-id"),
+                removeFoldAttr: false,
+            });
             const foldElement = document.createElement("template");
             foldElement.innerHTML = responseHTML.data;
             Array.from(foldElement.content.children).reverse().forEach((childItem: HTMLElement, childIndex) => {
                 if (childIndex === foldElement.content.children.length - 1) {
                     return;
                 }
+                childItem.removeAttribute("parent-heading");
                 childItem.querySelectorAll("[data-node-id]").forEach(subItem => {
                     subItem.setAttribute("data-node-id", Lute.NewNodeID());
                     clearBlockElement(subItem);

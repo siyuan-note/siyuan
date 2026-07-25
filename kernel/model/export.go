@@ -3256,6 +3256,18 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 	unlinks = nil
 	var emptyParagraphs []*ast.Node
+	foldHidden := map[*ast.Node]bool{}
+	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.IsBlock() {
+			treenode.ClearLegacyHeadingFold(n)
+		}
+		return ast.WalkContinue
+	})
+	if keepFold {
+		for _, n := range treenode.CollectFoldHiddenNodes(ret.Root) {
+			foldHidden[n] = true
+		}
+	}
 	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -3265,12 +3277,9 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		if !keepFold {
 			// 块折叠以后导出 HTML/PDF 固定展开 https://github.com/siyuan-note/siyuan/issues/4064
 			n.RemoveIALAttr("fold")
-			n.RemoveIALAttr("heading-fold")
-		} else {
-			if "1" == n.IALAttr("heading-fold") {
-				unlinks = append(unlinks, n)
-				return ast.WalkContinue
-			}
+		} else if foldHidden[n] {
+			unlinks = append(unlinks, n)
+			return ast.WalkSkipChildren
 		}
 
 		// 导出时去掉内容块闪卡样式 https://github.com/siyuan-note/siyuan/issues/7374

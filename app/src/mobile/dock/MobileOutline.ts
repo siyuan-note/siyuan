@@ -1057,7 +1057,7 @@ export class MobileOutline extends Model {
                 const data = this.getProtyleAndBlockElement(element);
                 fetchPost("/api/block/getHeadingChildrenDOM", {
                     id,
-                    removeFoldAttr: data.blockElement.getAttribute("fold") !== "1"
+                    removeFoldAttr: false
                 }, (response) => {
                     if (isInAndroid()) {
                         window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
@@ -1080,7 +1080,7 @@ export class MobileOutline extends Model {
                     const data = this.getProtyleAndBlockElement(element);
                     fetchPost("/api/block/getHeadingChildrenDOM", {
                         id,
-                        removeFoldAttr: data.blockElement.getAttribute("fold") !== "1"
+                        removeFoldAttr: false
                     }, (response) => {
                         if (isInAndroid()) {
                             window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);

@@ -342,6 +342,12 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string, boxID string) (
 	}
 	oldAttrs = parse.IAL2Map(node.KramdownIAL)
 	newAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
+	for name := range nameValues {
+		if "fold" == strings.ToLower(name) {
+			delete(newAttrsUnEsc, "heading-fold")
+			break
+		}
+	}
 
 	for name, value := range nameValues {
 		value = util.RemoveInvalidRetainCtrl(value)

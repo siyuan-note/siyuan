@@ -2134,7 +2134,7 @@ export class Gutter {
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {
                         id,
-                        removeFoldAttr: nodeElement.getAttribute("fold") !== "1"
+                        removeFoldAttr: false
                     }, (response) => {
                         if (isInAndroid()) {
                             window.JSAndroid.writeSiYuanHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), protyle.lute.BlockDOM2HTML(response.data).trimEnd(), response.data + Constants.ZWSP);
@@ -2154,7 +2154,7 @@ export class Gutter {
                     click() {
                         fetchPost("/api/block/getHeadingChildrenDOM", {
                             id,
-                            removeFoldAttr: nodeElement.getAttribute("fold") !== "1"
+                            removeFoldAttr: false
                         }, (response) => {
                             if (isInAndroid()) {
                                 window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
@@ -2850,8 +2850,8 @@ export class Gutter {
                 icon: "iconListTree",
                 label: window.siyuan.languages.foldRecursive,
                 accelerator: window.siyuan.config.keymap.editor.general.foldRecursive?.custom,
-                click() {
-                    foldBlocksRecursively(protyle, [nodeElement]);
+                async click() {
+                    await foldBlocksRecursively(protyle, [nodeElement]);
                     focusBlock(nodeElement);
                 }
             }).element);

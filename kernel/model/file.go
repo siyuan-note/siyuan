@@ -657,14 +657,9 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 				idx++
 				if index == idx {
 					node = n.DocChild()
-					if "1" == node.IALAttr("heading-fold") {
+					if parentFoldedHeading := treenode.GetParentFoldedHeading(node); nil != parentFoldedHeading {
 						// 加载到折叠标题下方块的话需要回溯到上方标题块
-						for h := node.Previous; nil != h; h = h.Previous {
-							if "1" == h.IALAttr("fold") {
-								node = h
-								break
-							}
-						}
+						node = parentFoldedHeading
 					}
 					located = true
 					return ast.WalkStop
@@ -840,11 +835,8 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 					return ast.WalkSkipChildren
 				}
 
-				if !nInFoldedHeading && "1" == n.IALAttr("heading-fold") {
-					// 标题已展开但子块仍残留 heading-fold 时清理，避免列表等嵌套块渲染为空
-					n.RemoveIALAttr("heading-fold")
-					n.RemoveIALAttr("fold")
-				}
+				// 旧版 heading-fold 仅用于兼容读取，不能输出为块自身的折叠状态。
+				treenode.ClearLegacyHeadingFold(n)
 
 				if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
 					// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
@@ -988,7 +980,7 @@ func loadNodesByStartEnd(tree *parse.Tree, startID, endID string) (nodes []*ast.
 func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeading bool) (nodes []*ast.Node, eof bool) {
 	if 2 == mode /* 向下 */ {
 		next := node.Next
-		if ast.NodeHeading == node.Type && "1" == node.IALAttr("fold") {
+		if ast.NodeHeading == node.Type && treenode.IsSelfFolded(node) {
 			// 标题展开时进行动态加载导致重复内容 https://github.com/siyuan-note/siyuan/issues/4671
 			// 这里要考虑折叠标题是最后一个块的情况
 			if children := treenode.HeadingChildren(node); 0 < len(children) {

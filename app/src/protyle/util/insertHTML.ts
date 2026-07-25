@@ -22,6 +22,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {getTableRangeCells, isIncludeCell} from "./table";
 import {getFieldIdByCellElement, getRowHTML} from "../render/av/row";
 import {setFold} from "./blockFold";
+import {removeFoldHeading} from "./heading";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -29,6 +30,32 @@ const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
 // 移除粘贴过程中插入的占位行，使 DOM 恢复到与虚拟滚动 bodyStates 一致的裁剪状态
 const removePlaceholderRows = (blockElement: HTMLElement) => {
     blockElement.querySelectorAll("." + PLACEHOLDER_ROW_CLASS).forEach(item => item.remove());
+};
+
+const markFoldHeadingChildren = (parent: ParentNode) => {
+    const foldedHeadings: {id: string, level: number}[] = [];
+    Array.from(parent.children).forEach(item => {
+        if (!item.hasAttribute("data-node-id")) {
+            return;
+        }
+
+        const isHeading = item.getAttribute("data-type") === "NodeHeading";
+        const level = isHeading ? parseInt(item.getAttribute("data-subtype").substring(1)) : 7;
+        if (isHeading) {
+            while (foldedHeadings.length > 0 && foldedHeadings[foldedHeadings.length - 1].level >= level) {
+                foldedHeadings.pop();
+            }
+        }
+        if (foldedHeadings.length > 0) {
+            item.setAttribute("parent-heading", foldedHeadings[0].id);
+        }
+        if (isHeading && item.getAttribute("fold") === "1") {
+            foldedHeadings.push({
+                id: item.getAttribute("data-node-id"),
+                level,
+            });
+        }
+    });
 };
 
 const genEmptyAVRow = (view: IAVTable, rowID: string): IAVRow => {
@@ -671,6 +698,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     if (tempElement.content.firstChild.nodeType === 3 || (tempElement.content.firstChild.nodeType === 1 && tempElement.content.firstElementChild.tagName !== "DIV")) {
         tempElement.innerHTML = protyle.lute.SpinBlockDOM(tempElement.innerHTML);
     }
+    markFoldHeadingChildren(tempElement.content);
     (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).find((item) => {
         let addId = item.getAttribute("data-node-id");
         const hasParentHeading = item.getAttribute("parent-heading");
@@ -714,6 +742,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             });
         }
         if (!hasParentHeading) {
+            Array.from(item.querySelectorAll('[data-type="NodeHeading"][fold="1"]')).reverse().forEach(heading => {
+                removeFoldHeading(heading);
+            });
             const rendersElement = [];
             if (item.classList.contains("render-node") && item.getAttribute("data-type") === "NodeCodeBlock") {
                 rendersElement.push(item);
@@ -734,7 +765,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 blockElement.after(item);
             }
         }
-        if (!lastElement) {
+        if (!lastElement && !hasParentHeading) {
             lastElement = item;
         }
     });

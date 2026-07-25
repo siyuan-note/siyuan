@@ -23,8 +23,32 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestGetMaskedConfHidesCookieKey(t *testing.T) {
+	const cookieKey = "session-cookie-signing-key"
+
+	originalConf := Conf
+	defer func() {
+		Conf = originalConf
+	}()
+
+	Conf = NewAppConf()
+	Conf.CookieKey = cookieKey
+
+	maskedConf, err := GetMaskedConf()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if "" != maskedConf.CookieKey {
+		t.Fatalf("cookie key was not hidden: %q", maskedConf.CookieKey)
+	}
+	if cookieKey != Conf.CookieKey {
+		t.Fatalf("cookie key in the runtime configuration was changed: %q", Conf.CookieKey)
+	}
+}
+
 func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 	appConf := NewAppConf()
+	appConf.CookieKey = "session-cookie-signing-key"
 	appConf.System = &conf.System{}
 	appConf.NotebookCrypto = &conf.NotebookCrypto{
 		Enabled:         true,
@@ -42,6 +66,9 @@ func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 
 	HideConfSecret(appConf)
 
+	if "" != appConf.CookieKey {
+		t.Fatalf("cookie key was not hidden: %q", appConf.CookieKey)
+	}
 	notebookCrypto := appConf.NotebookCrypto
 	if nil == notebookCrypto {
 		t.Fatal("notebook crypto settings should be preserved")
@@ -59,6 +86,41 @@ func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 		"" != notebookCrypto.Checksum ||
 		0 < len(notebookCrypto.KEKMAC) {
 		t.Fatalf("notebook crypto key material was not hidden: %#v", notebookCrypto)
+	}
+}
+
+func TestHideConfSecretHidesAbsolutePaths(t *testing.T) {
+	appConf := NewAppConf()
+	appConf.Export = &conf.Export{
+		AddTitle:  true,
+		PandocBin: `C:\Users\alice\SiYuan\temp\pandoc\bin\pandoc.exe`,
+	}
+	appConf.System = &conf.System{
+		KernelVersion: "3.3.0",
+		HomeDir:       `C:\Users\alice`,
+		WorkspaceDir:  `C:\Users\alice\SiYuan`,
+		AppDir:        `C:\Program Files\SiYuan`,
+		ConfDir:       `C:\Users\alice\SiYuan\conf`,
+		DataDir:       `C:\Users\alice\SiYuan\data`,
+	}
+
+	HideConfSecret(appConf)
+
+	if "" != appConf.Export.PandocBin {
+		t.Fatalf("pandoc path was not hidden: %q", appConf.Export.PandocBin)
+	}
+	if !appConf.Export.AddTitle {
+		t.Fatal("functional export settings should be preserved")
+	}
+	if "" != appConf.System.HomeDir ||
+		"" != appConf.System.WorkspaceDir ||
+		"" != appConf.System.AppDir ||
+		"" != appConf.System.ConfDir ||
+		"" != appConf.System.DataDir {
+		t.Fatalf("system paths were not hidden: %#v", appConf.System)
+	}
+	if "3.3.0" != appConf.System.KernelVersion {
+		t.Fatalf("functional system settings were changed: %#v", appConf.System)
 	}
 }
 

@@ -167,6 +167,17 @@ export class Protyle {
                             if (this.protyle.databaseAttributePanel?.hasDatabase(data.data.id)) {
                                 this.protyle.databaseAttributePanel.refresh();
                             }
+                            /// #if MOBILE
+                            document.querySelectorAll<HTMLElement>(
+                                `.protyle-db-row--mobile[data-protyle-id="${this.protyle.id}"] .protyle-db-row__body > [data-av-id="${data.data.id}"]`
+                            ).forEach((item) => {
+                                renderAVAttribute(item.parentElement as HTMLElement, item.dataset.nodeId, this.protyle, undefined, {
+                                    avID: data.data.id,
+                                    itemID: item.dataset.nodeId,
+                                    valueID: "",
+                                });
+                            });
+                            /// #endif
                             /// #if !MOBILE
                             getAllModels().custom.forEach((item) => {
                                 if (item.type === "siyuan-database-row" && (item.data.avID === data.data.id ||

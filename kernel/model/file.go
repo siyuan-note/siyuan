@@ -582,33 +582,14 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	return
 }
 
-func unfoldBlockForRender(node *ast.Node) {
-	removeFold := func(root *ast.Node) {
-		ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if entering {
-				n.RemoveIALAttr("fold")
-				n.RemoveIALAttr("heading-fold")
-			}
-			return ast.WalkContinue
-		})
-	}
-
-	removeFold(node)
-	if ast.NodeHeading == node.Type {
-		for _, child := range treenode.HeadingChildren(node) {
-			removeFold(child)
-		}
-	}
-}
-
-func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, unfold bool) (
+func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, err error) {
-	return GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, unfold, "")
+	return GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, "")
 }
 
 // GetDocInBox 与 GetDoc 一致，但按 boxID 路由到加密 db 或全局 db。
 // 加密笔记本打开文档时传入 boxID，blocktree/content 查询走加密 db；boxID 为空时 fall-through 全局 db。
-func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, unfold bool, boxID string) (
+func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool, boxID string) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxIDOut, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
@@ -641,9 +622,6 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 			err = ErrBlockNotFound
 			return
 		}
-	}
-	if unfold {
-		unfoldBlockForRender(node)
 	}
 
 	located := false
@@ -679,14 +657,9 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 				idx++
 				if index == idx {
 					node = n.DocChild()
-					if "1" == node.IALAttr("heading-fold") {
+					if parentFoldedHeading := treenode.GetParentFoldedHeading(node); nil != parentFoldedHeading {
 						// 加载到折叠标题下方块的话需要回溯到上方标题块
-						for h := node.Previous; nil != h; h = h.Previous {
-							if "1" == h.IALAttr("fold") {
-								node = h
-								break
-							}
-						}
+						node = parentFoldedHeading
 					}
 					located = true
 					return ast.WalkStop
@@ -862,11 +835,8 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 					return ast.WalkSkipChildren
 				}
 
-				if !nInFoldedHeading && "1" == n.IALAttr("heading-fold") {
-					// 标题已展开但子块仍残留 heading-fold 时清理，避免列表等嵌套块渲染为空
-					n.RemoveIALAttr("heading-fold")
-					n.RemoveIALAttr("fold")
-				}
+				// 旧版 heading-fold 仅用于兼容读取，不能输出为块自身的折叠状态。
+				treenode.ClearLegacyHeadingFold(n)
 
 				if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
 					// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
@@ -1010,7 +980,7 @@ func loadNodesByStartEnd(tree *parse.Tree, startID, endID string) (nodes []*ast.
 func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeading bool) (nodes []*ast.Node, eof bool) {
 	if 2 == mode /* 向下 */ {
 		next := node.Next
-		if ast.NodeHeading == node.Type && "1" == node.IALAttr("fold") {
+		if ast.NodeHeading == node.Type && treenode.IsSelfFolded(node) {
 			// 标题展开时进行动态加载导致重复内容 https://github.com/siyuan-note/siyuan/issues/4671
 			// 这里要考虑折叠标题是最后一个块的情况
 			if children := treenode.HeadingChildren(node); 0 < len(children) {
@@ -1570,6 +1540,54 @@ func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
 	return
 }
 
+type moveDocsRefreshKey struct {
+	boxID  string
+	rootID string
+}
+
+type moveDocsRefresh struct {
+	parents   map[moveDocsRefreshKey]*parse.Tree
+	notebooks map[string]struct{}
+}
+
+func newMoveDocsRefresh() *moveDocsRefresh {
+	return &moveDocsRefresh{
+		parents:   map[moveDocsRefreshKey]*parse.Tree{},
+		notebooks: map[string]struct{}{},
+	}
+}
+
+func (refresh *moveDocsRefresh) addParent(tree *parse.Tree) {
+	if nil == refresh || nil == tree {
+		return
+	}
+	key := moveDocsRefreshKey{boxID: tree.Box, rootID: tree.ID}
+	refresh.parents[key] = tree
+}
+
+func (refresh *moveDocsRefresh) addNotebook(boxID string) {
+	if nil == refresh || "" == boxID {
+		return
+	}
+	refresh.notebooks[boxID] = struct{}{}
+}
+
+func (refresh *moveDocsRefresh) flush() {
+	refresh.flushWith(refreshDocInfo, refreshBoxDocInfoByBoxID)
+}
+
+func (refresh *moveDocsRefresh) flushWith(refreshParent func(*parse.Tree), refreshNotebook func(string)) {
+	if nil == refresh {
+		return
+	}
+	for _, tree := range refresh.parents {
+		refreshParent(tree)
+	}
+	for boxID := range refresh.notebooks {
+		refreshNotebook(boxID)
+	}
+}
+
 func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err error) {
 	toBox := Conf.Box(toBoxID)
 	if nil == toBox {
@@ -1633,6 +1651,8 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 
 	FlushTxQueue()
 	luteEngine := util.NewLute()
+	refresh := newMoveDocsRefresh()
+	defer refresh.flush()
 	count := 0
 	for fromPath, fromBox := range pathsBoxes {
 		count++
@@ -1640,7 +1660,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(70), fmt.Sprintf("%d/%d", count, len(fromPaths))))
 		}
 
-		_, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine, callback)
+		_, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine, callback, refresh)
 		if err != nil {
 			return
 		}
@@ -1667,7 +1687,7 @@ func countSubDocs(box, p string) (ret int) {
 	return
 }
 
-func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngine *lute.Lute, callback any) (newPath string, err error) {
+func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngine *lute.Lute, callback any, refresh *moveDocsRefresh) (newPath string, err error) {
 	isSameBox := fromBox.ID == toBox.ID
 
 	if isSameBox {
@@ -1689,12 +1709,18 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	}
 
 	fromParentTree := loadParentTree(tree)
+	refresh.addParent(fromParentTree)
+	if path.Dir(fromPath) == "/" {
+		refresh.addNotebook(fromBox.ID)
+	}
 
 	moveToRoot := "/" == toPath
 	toBlockID := tree.ID
 	fromFolder := path.Join(path.Dir(fromPath), tree.ID)
 	toFolder := "/"
-	if !moveToRoot {
+	if moveToRoot {
+		refresh.addNotebook(toBox.ID)
+	} else {
 		var toTree *parse.Tree
 		if isSameBox {
 			toTree, err = filesys.LoadTree(fromBox.ID, toPath, luteEngine)
@@ -1706,6 +1732,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 			return
 		}
 
+		refresh.addParent(toTree)
 		toBlockID = toTree.ID
 		toFolder = path.Join(path.Dir(toPath), toBlockID)
 	}
@@ -1809,14 +1836,6 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	evt.Callback = callback
 	util.PushEvent(evt)
 
-	refreshDocInfo(fromParentTree)
-	fromRoot := path.Dir(fromPath) == "/"
-	if fromRoot {
-		refreshBoxDocInfoByBoxID(fromBox.ID)
-	}
-	if moveToRoot && (!isSameBox || !fromRoot) {
-		refreshBoxDocInfoByBoxID(toBox.ID)
-	}
 	return
 }
 

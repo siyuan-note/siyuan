@@ -552,17 +552,16 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 		n.Unlink()
 	}
 
-	// 折叠标题导出为模板后使用会出现内容重复 https://github.com/siyuan-note/siyuan/issues/4488
+	// 折叠标题下方块需要在模板插入后从当前 DOM 中移除，展开标题时再由内核加载，避免内容重复。
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if "1" == n.IALAttr("heading-fold") { // 为标题折叠下方块添加属性，前端渲染以后会统一做移除处理
-			n.SetIALAttr("status", "temp")
+		if entering && n.IsBlock() {
+			treenode.ClearLegacyHeadingFold(n)
 		}
 		return ast.WalkContinue
 	})
+	for _, n := range treenode.CollectFoldHiddenNodes(tree.Root) {
+		n.SetIALAttr("status", "temp")
+	}
 
 	icon := tree.Root.IALAttr("icon")
 	if "" != icon {

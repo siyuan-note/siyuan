@@ -50,6 +50,89 @@ func TestFoldHeadingStackHidesChildren(t *testing.T) {
 	}
 }
 
+func TestFoldHeadingStackPreservesNestedFold(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument}
+	h1 := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, ID: "h1"}
+	h2 := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 2, ID: "h2"}
+	child := &ast.Node{Type: ast.NodeParagraph, ID: "p1"}
+	nextH1 := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, ID: "h1-next"}
+	SetSelfFolded(h1, true)
+	SetSelfFolded(h2, true)
+	root.AppendChild(h1)
+	root.AppendChild(h2)
+	root.AppendChild(child)
+	root.AppendChild(nextH1)
+
+	var foldedParentStack FoldHeadingStack
+	foldedParentStack.Enter(h1)
+	foldedParentStack.Enter(h2)
+	if !foldedParentStack.Hidden() {
+		t.Fatal("nested folded heading should be hidden by folded parent")
+	}
+
+	SetSelfFolded(h1, false)
+	var unfoldedParentStack FoldHeadingStack
+	unfoldedParentStack.Enter(h1)
+	unfoldedParentStack.Enter(h2)
+	if unfoldedParentStack.Hidden() {
+		t.Fatal("nested folded heading should become visible after parent unfolds")
+	}
+	unfoldedParentStack.Enter(child)
+	if !unfoldedParentStack.Hidden() {
+		t.Fatal("nested folded heading should keep its own children hidden")
+	}
+	unfoldedParentStack.Enter(nextH1)
+	if unfoldedParentStack.Hidden() {
+		t.Fatal("same-level heading should end nested fold scope")
+	}
+}
+
+func TestLegacyHeadingFoldIsNotSelfFold(t *testing.T) {
+	legacy := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 2, ID: "legacy"}
+	legacy.SetIALAttr("fold", "1")
+	legacy.SetIALAttr("heading-fold", "1")
+	if IsSelfFolded(legacy) {
+		t.Fatal("legacy derived fold should not be treated as self fold")
+	}
+
+	SetSelfFolded(legacy, true)
+	if !IsSelfFolded(legacy) {
+		t.Fatal("explicit fold should become self fold")
+	}
+	if "" != legacy.IALAttr("heading-fold") {
+		t.Fatal("explicit fold should remove legacy heading-fold")
+	}
+
+	legacy.SetIALAttr("heading-fold", "1")
+	if !ClearLegacyHeadingFold(legacy) {
+		t.Fatal("legacy fold should be cleared")
+	}
+	if "" != legacy.IALAttr("fold") || "" != legacy.IALAttr("heading-fold") {
+		t.Fatal("legacy fold attributes should both be removed")
+	}
+}
+
+func TestCollectFoldHiddenNodesKeepsContainerScope(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument}
+	list := &ast.Node{Type: ast.NodeList, ID: "list", ListData: &ast.ListData{}}
+	item := &ast.Node{Type: ast.NodeListItem, ID: "item", ListData: &ast.ListData{}}
+	heading := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 2, ID: "heading"}
+	child := &ast.Node{Type: ast.NodeParagraph, ID: "child"}
+	outside := &ast.Node{Type: ast.NodeParagraph, ID: "outside"}
+	SetSelfFolded(item, true)
+	SetSelfFolded(heading, true)
+	item.AppendChild(heading)
+	item.AppendChild(child)
+	list.AppendChild(item)
+	root.AppendChild(list)
+	root.AppendChild(outside)
+
+	hidden := CollectFoldHiddenNodes(root)
+	if 1 != len(hidden) || hidden[0] != child {
+		t.Fatalf("heading fold should only hide siblings in the same container, got %d nodes", len(hidden))
+	}
+}
+
 func TestCollectFoldHiddenNodesKeepsCalloutChildren(t *testing.T) {
 	callout := &ast.Node{Type: ast.NodeCallout, ID: "c1"}
 	p := &ast.Node{Type: ast.NodeParagraph, ID: "p1"}

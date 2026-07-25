@@ -1239,6 +1239,7 @@ func GetMaskedConf() (ret *AppConf, err error) {
 
 	ret.UserData = MaskedUserData
 	ret.MCPOAuth = ""
+	ret.CookieKey = ""
 	if "" != ret.AccessAuthCode {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
@@ -1250,7 +1251,11 @@ func GetMaskedConf() (ret *AppConf, err error) {
 func HideConfSecret(c *AppConf) {
 	c.AI = &conf.AI{}
 	c.MCPOAuth = ""
+	c.CookieKey = ""
 	c.Api = &conf.API{}
+	if nil != c.Export {
+		c.Export.PandocBin = ""
+	}
 	c.Flashcard = &conf.Flashcard{}
 	c.ServerAddrs = []string{}
 	c.Publish = &conf.Publish{}
@@ -1268,6 +1273,7 @@ func HideConfSecret(c *AppConf) {
 	c.System.ConfDir = ""
 	c.System.DataDir = ""
 	c.System.HomeDir = ""
+	c.System.WorkspaceDir = ""
 	c.System.Name = ""
 	c.System.NetworkProxy = &conf.NetworkProxy{}
 }

@@ -44,6 +44,7 @@ const openMobileDetachedDatabaseRow = (protyle: IProtyle, data: IDatabaseRowOpen
         disableAnimation: true,
     });
     const rowElement = dialog.element.querySelector<HTMLElement>(".protyle-db-row");
+    rowElement.dataset.protyleId = protyle.id;
     rowElement.querySelector(".protyle-db-row__title span").textContent = title;
     renderAVAttribute(rowElement.querySelector<HTMLElement>(".protyle-db-row__body"), data.itemID, protyle, undefined, {
         avID: data.avID,

@@ -232,7 +232,7 @@ func CountBlockNodes(node *ast.Node) (ret int) {
 			return ast.WalkContinue
 		}
 
-		if "1" == n.IALAttr("fold") {
+		if IsSelfFolded(n) {
 			ret++
 			return ast.WalkSkipChildren
 		}

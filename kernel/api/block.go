@@ -979,10 +979,18 @@ func getBlockDOMWithEmbed(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
-	dom := model.GetBlockDOMWithEmbedInBox(id, boxID)
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	var publishAccess model.PublishAccess
+	var accessChecker model.EmbedBlockAccessChecker
+	if isReadOnlyRole {
+		publishAccess = model.GetPublishAccess()
+		accessChecker = func(blockID string) bool {
+			return model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, boxID)
+		}
+	}
+	dom := model.GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID, accessChecker)
 
-	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
+	if isReadOnlyRole {
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
 		bt := treenode.GetBlockTreeInBox(id, boxID)
 		if nil == bt {
@@ -1017,10 +1025,18 @@ func getBlockDOMsWithEmbed(c *gin.Context) {
 	}
 
 	boxID := encryptedNotebookFromArg(arg)
-	doms := model.GetBlockDOMsWithEmbedInBox(ids, boxID)
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	var publishAccess model.PublishAccess
+	var accessChecker model.EmbedBlockAccessChecker
+	if isReadOnlyRole {
+		publishAccess = model.GetPublishAccess()
+		accessChecker = func(blockID string) bool {
+			return model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, boxID)
+		}
+	}
+	doms := model.GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids, boxID, accessChecker)
 
-	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
+	if isReadOnlyRole {
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
 		filterBlockDOMsByPublishAccess(c, doms, ids, boxID, publishAccess, publishIgnore)
 	}

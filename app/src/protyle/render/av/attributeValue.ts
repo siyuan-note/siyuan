@@ -90,8 +90,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<textarea style="resize: vertical" rows="${(value.text?.content || "").split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">${escapeHtml(value.text?.content || "")}</textarea>`;
             break;
         case "number":
-            html = `<input value="${value.number.isNotEmpty ? value.number.content : ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
-<span class="fn__space"></span><span class="fn__flex-center ft__on-surface b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.format}">${value.number.formattedContent || ""}</span><span class="fn__space"></span>`;
+            html = `<span class="av__celltext" data-content="${value.number.isNotEmpty ? value.number.content : ""}" placeholder="${window.siyuan.languages.empty}">${value.number.formattedContent || (value.number.isNotEmpty ? value.number.content : "")}</span>`;
             break;
         case "mSelect":
         case "select":
@@ -196,7 +195,7 @@ export const genAVAttributeRowHTML = (options: {
     empty: boolean,
 }) => {
     const value = options.value;
-    const textInputType = ["url", "text", "number", "email", "phone", "block"].includes(value.type);
+    const textInputType = ["url", "text", "email", "phone", "block"].includes(value.type);
     const hasOwnPlaceholder = ["text", "number", "date", "url", "phone", "template", "email"].includes(value.type);
     return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}"${options.type === "block" ? ' data-primary="true"' : ""}>
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>

@@ -428,7 +428,8 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 } else {
                     scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || options.scrollPosition) ? nodeElement : null, options.scrollPosition);
                 }
-                editor.editor.protyle.observerLoad = new ResizeObserver(() => {
+                const userScrollAbort = new AbortController();
+                const observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
                         if (typeof scrollTop === "number") {
                             editor.editor.protyle.contentElement.scrollTop = scrollTop;
@@ -437,10 +438,36 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                         }
                     }
                 });
+                const stopObserve = () => {
+                    userScrollAbort.abort();
+                    observerLoad.disconnect();
+                };
+                const onUserScroll = () => stopObserve();
+                editor.editor.protyle.contentElement.addEventListener("wheel", onUserScroll, {
+                    capture: true,
+                    passive: true,
+                    signal: userScrollAbort.signal
+                });
+                editor.editor.protyle.contentElement.addEventListener("touchstart", onUserScroll, {
+                    capture: true,
+                    passive: true,
+                    signal: userScrollAbort.signal
+                });
+                editor.editor.protyle.contentElement.addEventListener("touchmove", onUserScroll, {
+                    capture: true,
+                    passive: true,
+                    signal: userScrollAbort.signal
+                });
+                editor.editor.protyle.contentElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                    if (["PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown", " "].includes(event.key)) {
+                        stopObserve();
+                    }
+                }, {capture: true, signal: userScrollAbort.signal});
+                editor.editor.protyle.observerLoad = observerLoad;
                 setTimeout(() => {
-                    editor.editor.protyle.observerLoad.disconnect();
+                    stopObserve();
                 }, 1000 * 3);
-                editor.editor.protyle.observerLoad.observe(editor.editor.protyle.wysiwyg.element);
+                observerLoad.observe(editor.editor.protyle.wysiwyg.element);
             } else if (editor.editor.protyle.block.rootID === options.id) {
                 // 由于 https://github.com/siyuan-note/siyuan/issues/5420，移除定位
             } else if (editor.editor.protyle.toolbar.range) {

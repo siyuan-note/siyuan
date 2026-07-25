@@ -89,6 +89,41 @@ func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 	}
 }
 
+func TestHideConfSecretHidesAbsolutePaths(t *testing.T) {
+	appConf := NewAppConf()
+	appConf.Export = &conf.Export{
+		AddTitle:  true,
+		PandocBin: `C:\Users\alice\SiYuan\temp\pandoc\bin\pandoc.exe`,
+	}
+	appConf.System = &conf.System{
+		KernelVersion: "3.3.0",
+		HomeDir:       `C:\Users\alice`,
+		WorkspaceDir:  `C:\Users\alice\SiYuan`,
+		AppDir:        `C:\Program Files\SiYuan`,
+		ConfDir:       `C:\Users\alice\SiYuan\conf`,
+		DataDir:       `C:\Users\alice\SiYuan\data`,
+	}
+
+	HideConfSecret(appConf)
+
+	if "" != appConf.Export.PandocBin {
+		t.Fatalf("pandoc path was not hidden: %q", appConf.Export.PandocBin)
+	}
+	if !appConf.Export.AddTitle {
+		t.Fatal("functional export settings should be preserved")
+	}
+	if "" != appConf.System.HomeDir ||
+		"" != appConf.System.WorkspaceDir ||
+		"" != appConf.System.AppDir ||
+		"" != appConf.System.ConfDir ||
+		"" != appConf.System.DataDir {
+		t.Fatalf("system paths were not hidden: %#v", appConf.System)
+	}
+	if "3.3.0" != appConf.System.KernelVersion {
+		t.Fatalf("functional system settings were changed: %#v", appConf.System)
+	}
+}
+
 func TestHideBoxConfSecretPreservesNotebookSettings(t *testing.T) {
 	boxConf := &conf.BoxConf{
 		Name:      "Encrypted notebook",

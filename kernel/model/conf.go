@@ -1253,6 +1253,9 @@ func HideConfSecret(c *AppConf) {
 	c.MCPOAuth = ""
 	c.CookieKey = ""
 	c.Api = &conf.API{}
+	if nil != c.Export {
+		c.Export.PandocBin = ""
+	}
 	c.Flashcard = &conf.Flashcard{}
 	c.ServerAddrs = []string{}
 	c.Publish = &conf.Publish{}
@@ -1270,6 +1273,7 @@ func HideConfSecret(c *AppConf) {
 	c.System.ConfDir = ""
 	c.System.DataDir = ""
 	c.System.HomeDir = ""
+	c.System.WorkspaceDir = ""
 	c.System.Name = ""
 	c.System.NetworkProxy = &conf.NetworkProxy{}
 }

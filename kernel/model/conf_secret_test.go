@@ -23,8 +23,32 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestGetMaskedConfHidesCookieKey(t *testing.T) {
+	const cookieKey = "session-cookie-signing-key"
+
+	originalConf := Conf
+	defer func() {
+		Conf = originalConf
+	}()
+
+	Conf = NewAppConf()
+	Conf.CookieKey = cookieKey
+
+	maskedConf, err := GetMaskedConf()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if "" != maskedConf.CookieKey {
+		t.Fatalf("cookie key was not hidden: %q", maskedConf.CookieKey)
+	}
+	if cookieKey != Conf.CookieKey {
+		t.Fatalf("cookie key in the runtime configuration was changed: %q", Conf.CookieKey)
+	}
+}
+
 func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 	appConf := NewAppConf()
+	appConf.CookieKey = "session-cookie-signing-key"
 	appConf.System = &conf.System{}
 	appConf.NotebookCrypto = &conf.NotebookCrypto{
 		Enabled:         true,
@@ -42,6 +66,9 @@ func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 
 	HideConfSecret(appConf)
 
+	if "" != appConf.CookieKey {
+		t.Fatalf("cookie key was not hidden: %q", appConf.CookieKey)
+	}
 	notebookCrypto := appConf.NotebookCrypto
 	if nil == notebookCrypto {
 		t.Fatal("notebook crypto settings should be preserved")

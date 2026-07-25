@@ -10,7 +10,7 @@ import {disabledForeverProtyle, setReadonlyByConfig} from "../../protyle/util/on
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {closePanel} from "./closePanel";
 import {showMessage} from "../../dialog/message";
-import {getCurrentEditor, updateRecentDocSwitchTime} from "../editor";
+import {createRecentDocUpdate, getCurrentEditor, updateRecentDocSwitchTime} from "../editor";
 import {avRender} from "../../protyle/render/av/render";
 import {setTitle} from "../../util/processTitle";
 import {isEncryptedBox} from "../../util/pathName";
@@ -34,8 +34,7 @@ export const clearMobileBackForward = (notebookId?: string) => {
 const focusStack = (backStack: IBackStack) => {
     const protyle = getCurrentEditor().protyle;
     const updateRecentDocTime = (previousRootID: string) => {
-        updateRecentDocSwitchTime(previousRootID === backStack.data.rootID ? "view" : "switch",
-            backStack.data.rootID, previousRootID);
+        updateRecentDocSwitchTime(createRecentDocUpdate(backStack.data.rootID, previousRootID));
     };
     // 前进后快速后退会导致滚动错位 https://ld246.com/article/1734018624070
     protyle.observerLoad?.disconnect();

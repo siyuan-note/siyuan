@@ -23,16 +23,35 @@ export const getCurrentEditor = () => {
 
 // 串行更新时间，避免快速切换文档时较早的关闭请求覆盖较新的打开状态。
 let recentDocSwitchPromise = Promise.resolve();
-type TRecentDocUpdateType = "open" | "view" | "switch";
-export const updateRecentDocSwitchTime = (type: TRecentDocUpdateType, rootID: string, previousRootID?: string) => {
+type TRecentDocUpdate = {
+    type: "open" | "view";
+    rootID: string;
+} | {
+    type: "switch";
+    rootID: string;
+    previousRootID: string;
+};
+let lastLoadedRecentDocRootID: string | undefined;
+export const createRecentDocUpdate = (rootID: string, fallbackRootID?: string): TRecentDocUpdate => {
+    const previousRootID = lastLoadedRecentDocRootID ?? fallbackRootID;
+    lastLoadedRecentDocRootID = rootID;
+    if (!previousRootID) {
+        return {type: "open", rootID};
+    }
+    if (previousRootID === rootID) {
+        return {type: "view", rootID};
+    }
+    return {type: "switch", rootID, previousRootID};
+};
+export const updateRecentDocSwitchTime = (update: TRecentDocUpdate) => {
     recentDocSwitchPromise = recentDocSwitchPromise.then(async () => {
-        if (type === "view") {
-            return fetchPost("/api/storage/updateRecentDocViewTime", {rootID});
+        if (update.type === "view") {
+            return fetchPost("/api/storage/updateRecentDocViewTime", {rootID: update.rootID});
         }
-        if (type === "switch" && previousRootID) {
-            await fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: previousRootID});
+        if (update.type === "switch") {
+            await fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: update.previousRootID});
         }
-        return fetchPost("/api/storage/updateRecentDocOpenTime", {rootID});
+        return fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: update.rootID});
     });
 };
 
@@ -67,7 +86,8 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             }
             closePanel();
             // 更新文档浏览时间
-            updateRecentDocSwitchTime("view", window.siyuan.mobile.editor.protyle.block.rootID);
+            const rootID = window.siyuan.mobile.editor.protyle.block.rootID;
+            updateRecentDocSwitchTime(createRecentDocUpdate(rootID, rootID));
             afterOpen?.(window.siyuan.mobile.editor.protyle);
             return;
         }
@@ -88,8 +108,6 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             action.includes(Constants.CB_GET_FOCUS);
         const actionList = isRootFocus ? action.filter((item) => item !== Constants.CB_GET_ALL) : action;
         const previousRootID = window.siyuan.mobile.editor?.protyle.block.rootID;
-        const recentDocUpdateType: TRecentDocUpdateType = !previousRootID ? "open" :
-            previousRootID === data.data.rootID ? "view" : "switch";
         const protyleOptions: IProtyleOptions = {
             databaseAttr: true,
             blockId: id,
@@ -109,7 +127,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                 actions: ["mp-wechat", "zhihu", "yuque"]
             },
             after: (editor) => {
-                updateRecentDocSwitchTime(recentDocUpdateType, data.data.rootID, previousRootID);
+                updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
                 afterOpen?.(editor.protyle);
             },
         };
@@ -127,7 +145,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                     scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID],
                     mergedOptions: protyleOptions,
                     cb() {
-                        updateRecentDocSwitchTime(recentDocUpdateType, data.data.rootID, previousRootID);
+                        updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
                         app.plugins.forEach(item => {
                             item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                         });
@@ -150,7 +168,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                         action: actionList,
                         scrollPosition,
                         afterCB() {
-                            updateRecentDocSwitchTime(recentDocUpdateType, data.data.rootID, previousRootID);
+                            updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
                             app.plugins.forEach(item => {
                                 item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                             });

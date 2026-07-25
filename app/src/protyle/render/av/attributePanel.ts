@@ -13,22 +13,31 @@ export class AVAttributePanel {
     private renderingTargetID = "";
     private collapsed: boolean;
     private activeAvID = "";
+    private showEmptyFields = false;
 
     constructor(protyle: IProtyle) {
         this.protyle = protyle;
         this.collapsed = window.siyuan.config.editor.databaseAttrViewMode === 1;
         this.element = document.createElement("div");
         this.element.className = "protyle-db-attr fn__none";
-        this.element.innerHTML = `<button type="button" class="protyle-db-attr__header fn__flex" data-type="toggle" aria-expanded="${!this.collapsed}" aria-label="${window.siyuan.languages.database}">
-    <span class="block__icon block__icon--show fn__flex-center"><svg><use xlink:href="#iconRight"></use></svg></span>
-    <span class="block__logo fn__flex-1">${window.siyuan.languages.database}</span>
-</button>`;
+        this.element.innerHTML = `<div class="protyle-db-attr__header fn__flex">
+    <button type="button" class="protyle-db-attr__toggle fn__flex fn__flex-1" data-type="toggle" aria-expanded="${!this.collapsed}" aria-label="${window.siyuan.languages.database}">
+        <span class="block__icon block__icon--show fn__flex-center"><svg><use xlink:href="#iconRight"></use></svg></span>
+        <span class="block__logo fn__flex-1">${window.siyuan.languages.database}</span>
+    </button>
+    <button type="button" class="protyle-db-attr__edit block__icon block__icon--show ariaLabel fn__none" data-position="4west" data-type="toggle-empty" aria-label="${window.siyuan.languages.displayEmptyFields}"><svg><use xlink:href="#iconEdit"></use></svg></button>
+</div>`;
         this.bodyElement = document.createElement("div");
         this.bodyElement.className = "custom-attr protyle-db-attr__body";
         this.element.appendChild(this.bodyElement);
         this.element.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
-            if (target.closest('[data-type="av-tab"]')) {
+            if (target.closest('[data-type="toggle-empty"]')) {
+                this.showEmptyFields = !this.showEmptyFields;
+                this.updateEmptyState();
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (target.closest('[data-type="av-tab"]')) {
                 this.activeAvID = (target.closest('[data-type="av-tab"]') as HTMLElement).dataset.id || "";
                 this.updateTabs();
                 event.preventDefault();
@@ -52,6 +61,9 @@ export class AVAttributePanel {
         if (!targetID || (!force && targetID === this.targetID &&
             (this.element.dataset.rendered === "true" || this.renderingTargetID === targetID))) {
             return;
+        }
+        if (targetID !== this.targetID) {
+            this.showEmptyFields = false;
         }
         const currentBodyElement = this.bodyElement;
         const keepCurrentBody = force && targetID === this.targetID;
@@ -149,6 +161,7 @@ export class AVAttributePanel {
         toggleElement?.setAttribute("aria-expanded", (!this.collapsed).toString());
         const useElement = toggleElement?.querySelector("use");
         useElement?.setAttribute("xlink:href", this.collapsed ? "#iconRight" : "#iconDown");
+        this.updateEmptyState();
     }
 
     private updateTabs() {
@@ -182,10 +195,20 @@ export class AVAttributePanel {
     }
 
     private updateEmptyState() {
-        updateEmptyState(this.element, window.siyuan.config.editor.databaseAttrHideEmpty);
+        const hideEmpty = window.siyuan.config.editor.databaseAttrHideEmpty;
+        if (!hideEmpty) {
+            this.showEmptyFields = false;
+        }
+        updateEmptyState(this.element, hideEmpty && !this.showEmptyFields);
+        const editElement = this.element.querySelector<HTMLElement>('[data-type="toggle-empty"]');
+        editElement?.classList.toggle("fn__none", !hideEmpty || this.collapsed);
+        editElement?.setAttribute("aria-label", window.siyuan.languages[
+            this.showEmptyFields ? "hideEmptyFields" : "displayEmptyFields"
+        ]);
     }
 
     private hideByDisplayConfig() {
+        this.showEmptyFields = false;
         if (this.renderingTargetID) {
             this.renderToken++;
             this.renderingTargetID = "";

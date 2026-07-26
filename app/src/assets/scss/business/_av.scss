@@ -962,7 +962,7 @@
     background-color: var(--b3-parent-background);
 
     &:has(> .av__cell, > .av__calc) {
-      box-shadow: 1px 0 0 var(--b3-theme-on-surface-light);
+      box-shadow: inset -1px 0 0 var(--b3-border-color);
     }
   }
 
@@ -977,22 +977,18 @@
     z-index: 3;
 
     &::after {
-      background-color: var(--b3-theme-on-surface-light);
+      background-color: transparent;
       border-radius: 1px;
       content: '';
-      height: 12px;
+      height: 20px;
       left: 4px;
-      opacity: .5;
       position: absolute;
-      top: calc(50% - 6px);
+      top: calc(50% - 10px);
       width: 2px;
     }
 
     &:hover::after {
       background-color: var(--b3-theme-primary);
-      height: 20px;
-      opacity: 1;
-      top: calc(50% - 10px);
     }
   }
 

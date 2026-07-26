@@ -69,3 +69,59 @@ func TestGetAttributeViewPasteRowsFromTable(t *testing.T) {
 		t.Fatal("invalid count should return an error")
 	}
 }
+
+func TestGetPasteInferableAttributeViewKeyIDs(t *testing.T) {
+	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
+		{
+			Key: &av.Key{ID: "20260726000000-keyaaaa"},
+			Values: []*av.Value{
+				{Type: av.KeyTypeText, Text: &av.ValueText{Content: ""}},
+				{Type: av.KeyTypeText},
+			},
+		},
+		{
+			Key: &av.Key{ID: "20260726000000-keybbbb"},
+			Values: []*av.Value{
+				{Type: av.KeyTypeText, Text: &av.ValueText{Content: "value"}},
+			},
+		},
+		{
+			Key: &av.Key{ID: "20260726000000-keycccc"},
+		},
+		{
+			Key: &av.Key{ID: "20260726000000-keydddd"},
+		},
+		{
+			Key: &av.Key{ID: "20260726000000-keyeeee"},
+		},
+	}, NewItemTemplates: []*av.NewItemTemplate{{
+		FieldValues: map[string]*av.NewItemFieldValue{
+			"20260726000000-keycccc": {},
+		},
+	}}, Views: []*av.View{{
+		Group: &av.ViewGroup{Field: "20260726000000-keydddd"},
+	}}}
+
+	inferableKeyIDs := getPasteInferableAttributeViewKeyIDs(attrView, map[string]struct{}{
+		"20260726000000-keyeeee": {},
+	})
+	if 1 != len(inferableKeyIDs) || "20260726000000-keyaaaa" != inferableKeyIDs[0] {
+		t.Fatalf("unexpected inferable key IDs: %+v", inferableKeyIDs)
+	}
+}
+
+func TestCollectDependentRollupKeyIDs(t *testing.T) {
+	keyIDs := collectDependentRollupKeyIDs([]*av.AttributeView{{
+		KeyValues: []*av.KeyValues{
+			{Key: &av.Key{Type: av.KeyTypeRollup, Rollup: &av.Rollup{KeyID: "20260726000000-keyaaaa"}}},
+			{Key: &av.Key{Type: av.KeyTypeRollup, Rollup: &av.Rollup{}}},
+			{Key: &av.Key{Type: av.KeyTypeText}},
+		},
+	}})
+	if 1 != len(keyIDs) {
+		t.Fatalf("unexpected dependent rollup key IDs: %+v", keyIDs)
+	}
+	if _, ok := keyIDs["20260726000000-keyaaaa"]; !ok {
+		t.Fatalf("dependent rollup key ID not found: %+v", keyIDs)
+	}
+}

@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "זיהוי כותרת טבלה",
+  "avPasteHeaderTip": "להשתמש בשורה הראשונה שהודבקה כשמות שדות במסד הנתונים?",
+  "avPasteHeaderAsData": "שימוש כנתונים",
+  "avPasteHeaderAsField": "שימוש כשמות שדות",
   "databaseAttrClickMode": "פעולה בלחיצה על תג מסד הנתונים",
   "databaseAttrClickModeTip": "הגדר מה יקרה בעת לחיצה על תג מסד הנתונים",
   "focusBlockAndExpandDatabasePanel": "מיקוד בבלוק והרחבת חלונית מסד הנתונים",

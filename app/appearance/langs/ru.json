@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Распознать заголовок таблицы",
+  "avPasteHeaderTip": "Использовать первую вставленную строку как имена полей базы данных?",
+  "avPasteHeaderAsData": "Использовать как данные",
+  "avPasteHeaderAsField": "Использовать как имена полей",
   "databaseAttrClickMode": "Действие при нажатии на значок базы данных",
   "databaseAttrClickModeTip": "Задайте действие при нажатии на значок базы данных",
   "focusBlockAndExpandDatabasePanel": "Сфокусировать блок и развернуть панель базы данных",

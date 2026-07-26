@@ -23,6 +23,14 @@ import {getTableRangeCells, isIncludeCell} from "./table";
 import {getFieldIdByCellElement, getRowHTML} from "../render/av/row";
 import {setFold} from "./blockFold";
 import {removeFoldHeading} from "./heading";
+import {
+    AV_PASTE_READONLY_TYPES,
+    getAVPasteMatrixWidth,
+    getUniqueAVPasteColumnName,
+    inferAVPasteColumnType,
+} from "../render/av/paste";
+import {Dialog} from "../../dialog";
+import {isMobile} from "../../util/functions";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -61,36 +69,186 @@ const markFoldHeadingChildren = (parent: ParentNode) => {
     });
 };
 
-const genEmptyAVRow = (view: IAVTable, rowID: string): IAVRow => {
+const genEmptyAVCell = (column: IAVColumn, rowID: string, cellID = Lute.NewNodeID()): IAVCell => {
+    const value = genCellValue(column.type, null);
+    value.id = cellID;
+    value.keyID = column.id;
+    value.blockID = rowID;
+    if (column.type === "block") {
+        value.isDetached = true;
+    }
     return {
-        id: rowID,
-        cells: view.columns.map(column => {
-            const id = Lute.NewNodeID();
-            const value = genCellValue(column.type, null);
-            value.id = id;
-            value.keyID = column.id;
-            value.blockID = rowID;
-            if (column.type === "block") {
-                value.isDetached = true;
-            }
-            return {
-                id,
-                color: "",
-                bgColor: "",
-                value,
-                valueType: column.type,
-            };
-        }),
+        id: cellID,
+        color: "",
+        bgColor: "",
+        value,
+        valueType: column.type,
     };
 };
 
+const genEmptyAVRow = (view: IAVTable, rowID: string): IAVRow => {
+    return {
+        id: rowID,
+        cells: view.columns.map(column => genEmptyAVCell(column, rowID)),
+    };
+};
+
+const genAVPasteColumn = (id: string, name: string, type: TAVCol): IAVColumn => {
+    const column: IAVColumn = {
+        hidden: false,
+        icon: "",
+        id,
+        name,
+        desc: "",
+        numberFormat: "",
+        pin: false,
+        template: "",
+        type,
+        width: "",
+        align: "",
+        wrap: undefined,
+        calc: null,
+    };
+    if (type === "date") {
+        column.date = {
+            autoFillNow: false,
+            fillSpecificTime: false,
+        };
+    }
+    return column;
+};
+
+const getAVPastePinIndex = (bodyElement: HTMLElement) => {
+    return parseInt(bodyElement.querySelector(".av__row--header > .block__icons")?.getAttribute("data-pinindex") || "-1");
+};
+
 const insertAVPastePlaceholder = (bodyElement: HTMLElement, view: IAVTable, row: IAVRow, rowIndex: number) => {
-    const pinIndex = parseInt(bodyElement.querySelector(".av__row--header > .block__icons")?.getAttribute("data-pinindex") || "-1");
     const bottomElement = bodyElement.querySelector(".av__row--util");
-    bottomElement.insertAdjacentHTML("beforebegin", getRowHTML({data: view, row, rowIndex, pinIndex, type: "table"}));
+    bottomElement.insertAdjacentHTML("beforebegin", getRowHTML({
+        data: view,
+        row,
+        rowIndex,
+        pinIndex: getAVPastePinIndex(bodyElement),
+        type: "table",
+    }));
     const rowElement = bottomElement.previousElementSibling as HTMLElement;
     rowElement.classList.add(PLACEHOLDER_ROW_CLASS);
     return rowElement;
+};
+
+interface IAVPasteCellPlaceholder {
+    element: HTMLElement;
+    originalHTML?: string;
+}
+
+interface IAVPasteTargetColumn {
+    column: IAVColumn;
+    isNew: boolean;
+    readonly: boolean;
+    typeChanged: boolean;
+}
+
+const restoreAVPasteCellPlaceholders = (placeholders: IAVPasteCellPlaceholder[]) => {
+    placeholders.reverse().forEach(item => {
+        if (item.originalHTML) {
+            item.element.insertAdjacentHTML("beforebegin", item.originalHTML);
+        }
+        item.element.remove();
+    });
+};
+
+const syncAVPasteRowCells = (options: {
+    bodyElement: HTMLElement;
+    rowElement: HTMLElement;
+    row: IAVRow;
+    rowIndex: number;
+    view: IAVTable;
+    columnIDs: Set<string>;
+    placeholders: IAVPasteCellPlaceholder[];
+}) => {
+    const template = document.createElement("template");
+    template.innerHTML = getRowHTML({
+        data: options.view,
+        row: options.row,
+        rowIndex: options.rowIndex,
+        pinIndex: getAVPastePinIndex(options.bodyElement),
+        type: "table",
+    });
+    options.columnIDs.forEach(columnID => {
+        const nextCell = template.content.querySelector(`.av__cell[data-col-id="${columnID}"]`) as HTMLElement;
+        if (!nextCell) {
+            return;
+        }
+        nextCell.classList.add("av__cell--paste-placeholder");
+        const currentCell = options.rowElement.querySelector(`.av__cell[data-col-id="${columnID}"]`) as HTMLElement;
+        if (currentCell) {
+            options.placeholders.push({element: nextCell, originalHTML: currentCell.outerHTML});
+            currentCell.replaceWith(nextCell);
+            return;
+        }
+
+        const columnIndex = options.view.columns.findIndex(column => column.id === columnID);
+        const previousColumn = options.view.columns.slice(0, columnIndex).reverse().find(column => !column.hidden);
+        const previousCell = previousColumn
+            ? options.rowElement.querySelector(`.av__cell[data-col-id="${previousColumn.id}"]`) as HTMLElement
+            : undefined;
+        const anchorElement = previousCell?.parentElement.classList.contains("av__colsticky")
+            ? previousCell.parentElement
+            : previousCell || options.rowElement.querySelector(".av__colsticky");
+        if (anchorElement) {
+            anchorElement.insertAdjacentElement("afterend", nextCell);
+            options.placeholders.push({element: nextCell});
+        }
+    });
+};
+
+const confirmAVPasteHeader = () => {
+    return new Promise<boolean>((resolve) => {
+        let settled = false;
+        const finish = (useHeader: boolean) => {
+            if (!settled) {
+                settled = true;
+                resolve(useHeader);
+            }
+        };
+        const dialog = new Dialog({
+            title: window.siyuan.languages.avPasteHeaderTitle,
+            content: `<div class="b3-dialog__content">
+    <div class="ft__breakword">${window.siyuan.languages.avPasteHeaderTip}</div>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel" data-action="data">${window.siyuan.languages.avPasteHeaderAsData}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text" data-action="header">${window.siyuan.languages.avPasteHeaderAsField}</button>
+</div>`,
+            width: isMobile() ? "92vw" : "520px",
+            destroyCallback: () => finish(false),
+        });
+        dialog.element.addEventListener("click", (event) => {
+            const isDispatch = typeof event.detail === "string";
+            if (isDispatch) {
+                if (event.detail === "Escape") {
+                    finish(false);
+                    dialog.destroy();
+                } else if (event.detail === "Enter") {
+                    finish(true);
+                    dialog.destroy();
+                }
+                return;
+            }
+            let target = event.target as HTMLElement;
+            while (target && target !== dialog.element) {
+                const action = target.dataset.action;
+                if (action === "data" || action === "header") {
+                    finish(action === "header");
+                    dialog.destroy();
+                    break;
+                }
+                target = target.parentElement;
+            }
+        });
+        dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
+        (dialog.element.querySelector('[data-action="header"]') as HTMLButtonElement).focus();
+    });
 };
 
 const pasteAVMatrix = async (options: {
@@ -100,10 +258,12 @@ const pasteAVMatrix = async (options: {
     startCell: HTMLElement,
     columns: IAVColumn[],
     html: string,
-    tempElement: HTMLTemplateElement,
+    cellHTML?: string[][],
+    header?: string[],
 }) => {
     const startRowElement = hasClosestByClassName(options.startCell, "av__row") as HTMLElement;
-    if (!startRowElement || options.values.length === 0) {
+    const sourceWidth = getAVPasteMatrixWidth(options.values, options.header);
+    if (!startRowElement || sourceWidth === 0) {
         return;
     }
     const bodyElement = hasClosestByClassName(startRowElement, "av__body") as HTMLElement;
@@ -119,7 +279,7 @@ const pasteAVMatrix = async (options: {
         groupID,
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent || "",
         startItemID: startRowElement.dataset.id,
-        count: options.values.length,
+        count: Math.max(options.values.length, 1),
     });
     const view = response.data?.view as IAVTable;
     const rows = view?.rows;
@@ -127,19 +287,147 @@ const pasteAVMatrix = async (options: {
         return;
     }
 
+    const originalColumns = view.columns.map(column => ({...column}));
+    const originalCellValues = new Map<string, IAVCellValue>();
+    rows.forEach(row => {
+        row.cells.forEach((cell, index) => {
+            const column = originalColumns[index];
+            if (column) {
+                originalCellValues.set(`${row.id}:${column.id}`, JSON.parse(JSON.stringify(cell.value)));
+            }
+        });
+    });
+
+    const schemaDoOperations: IOperation[] = [];
+    const schemaUndoOperations: IOperation[] = [];
+    const newColumnUndoOperations: IOperation[] = [];
+    const inferableKeyIDs = new Set<string>(response.data?.inferableKeyIDs || []);
+    const visibleColumns = view.columns.filter(column => !column.hidden);
+    const startColumnIndex = visibleColumns.findIndex(column => column.id === options.startCell.dataset.colId);
+    if (startColumnIndex < 0) {
+        return;
+    }
+    const availableColumns = visibleColumns.slice(startColumnIndex);
+    const usedNames = new Set(options.columns.map(column => column.name));
+    const changedCellColumnIDs = new Set<string>();
+    const targetColumns: IAVPasteTargetColumn[] = [];
+    let previousColumnID = visibleColumns[visibleColumns.length - 1].id;
+
+    for (let sourceIndex = 0; sourceIndex < sourceWidth; sourceIndex++) {
+        const headerName = options.header?.[sourceIndex]?.trim() || "";
+        const sourceValues = options.values.flatMap(row => sourceIndex < row.length ? [row[sourceIndex]] : []);
+        const inferredType = options.header ? inferAVPasteColumnType(sourceValues) : "text";
+        const currentColumn = availableColumns[sourceIndex];
+        if (currentColumn) {
+            const readonly = AV_PASTE_READONLY_TYPES.has(currentColumn.type);
+            const oldColumn = {...currentColumn};
+            const nextName = options.header && headerName && !readonly ? headerName : currentColumn.name;
+            const nextType = options.header && inferableKeyIDs.has(currentColumn.id) &&
+            currentColumn.type !== "block" && !readonly
+                ? inferredType
+                : currentColumn.type;
+            const typeChanged = oldColumn.type !== nextType;
+            currentColumn.name = nextName;
+            currentColumn.type = nextType;
+            if (typeChanged && nextType === "date") {
+                currentColumn.date = {
+                    autoFillNow: false,
+                    fillSpecificTime: false,
+                };
+            }
+            const valueColumn = options.columns.find(column => column.id === currentColumn.id);
+            if (valueColumn) {
+                valueColumn.name = nextName;
+                valueColumn.type = nextType;
+                if (typeChanged && nextType === "date") {
+                    valueColumn.date = currentColumn.date;
+                }
+            }
+            usedNames.add(nextName);
+            if (oldColumn.name !== nextName || typeChanged) {
+                schemaDoOperations.push({
+                    action: "updateAttrViewCol",
+                    id: currentColumn.id,
+                    avID: options.blockElement.dataset.avId,
+                    name: nextName,
+                    type: nextType,
+                });
+                schemaUndoOperations.push({
+                    action: "updateAttrViewCol",
+                    id: currentColumn.id,
+                    avID: options.blockElement.dataset.avId,
+                    name: oldColumn.name,
+                    type: oldColumn.type,
+                });
+            }
+            if (typeChanged) {
+                const columnIndex = view.columns.findIndex(column => column.id === currentColumn.id);
+                rows.forEach(row => {
+                    row.cells[columnIndex] = genEmptyAVCell(currentColumn, row.id, row.cells[columnIndex]?.id);
+                });
+                changedCellColumnIDs.add(currentColumn.id);
+            }
+            targetColumns.push({column: currentColumn, isNew: false, readonly, typeChanged});
+            continue;
+        }
+
+        const id = Lute.NewNodeID();
+        const baseName = headerName || window.siyuan.languages.text;
+        const name = headerName ? headerName : getUniqueAVPasteColumnName(baseName, usedNames);
+        const type = options.header ? inferredType : "text";
+        const column = genAVPasteColumn(id, name, type);
+        const previousIndex = view.columns.findIndex(item => item.id === previousColumnID);
+        view.columns.splice(previousIndex + 1, 0, column);
+        rows.forEach(row => {
+            row.cells.splice(previousIndex + 1, 0, genEmptyAVCell(column, row.id));
+        });
+        options.columns.push(column);
+        usedNames.add(name);
+        schemaDoOperations.push({
+            action: "addAttrViewCol",
+            name,
+            avID: options.blockElement.dataset.avId,
+            type,
+            id,
+            previousID: previousColumnID,
+        });
+        newColumnUndoOperations.unshift({
+            action: "removeAttrViewCol",
+            id,
+            avID: options.blockElement.dataset.avId,
+        });
+        previousColumnID = id;
+        changedCellColumnIDs.add(id);
+        targetColumns.push({column, isNew: true, readonly: false, typeChanged: false});
+    }
+
+    const existingRows = rows.slice(0, options.values.length);
     const rowElements: HTMLElement[] = [];
+    const pasteRows: IAVRow[] = [];
     const startIndex = parseInt(startRowElement.dataset.index || "0");
-    rows.forEach((row, index) => {
+    const cellPlaceholders: IAVPasteCellPlaceholder[] = [];
+    existingRows.forEach((row, index) => {
         let rowElement = bodyElement.querySelector(`.av__row[data-id="${row.id}"]`) as HTMLElement;
         if (!rowElement) {
             rowElement = insertAVPastePlaceholder(bodyElement, view, row, startIndex + index);
+        } else if (changedCellColumnIDs.size > 0) {
+            syncAVPasteRowCells({
+                bodyElement,
+                rowElement,
+                row,
+                rowIndex: startIndex + index,
+                view,
+                columnIDs: changedCellColumnIDs,
+                placeholders: cellPlaceholders,
+            });
         }
         rowElements.push(rowElement);
+        pasteRows.push(row);
     });
 
     const srcs: IOperationSrcs[] = [];
     const newRowIDs: string[] = [];
-    for (let i = rows.length; i < options.values.length; i++) {
+    for (let i = existingRows.length; i < options.values.length; i++) {
         const rowID = Lute.NewNodeID();
         newRowIDs.push(rowID);
         srcs.push({
@@ -148,65 +436,89 @@ const pasteAVMatrix = async (options: {
             isDetached: true,
             content: "",
         });
-        rowElements.push(insertAVPastePlaceholder(bodyElement, view, genEmptyAVRow(view, rowID), startIndex + i));
+        const row = genEmptyAVRow(view, rowID);
+        pasteRows.push(row);
+        rowElements.push(insertAVPastePlaceholder(bodyElement, view, row, startIndex + i));
     }
 
-    const doOperations: IOperation[] = [];
-    const undoOperations: IOperation[] = [];
+    const rowDoOperations: IOperation[] = [];
+    const rowUndoOperations: IOperation[] = [];
     if (srcs.length > 0) {
-        doOperations.push({
+        rowDoOperations.push({
             action: "insertAttrViewBlock",
             avID: options.blockElement.dataset.avId,
-            previousID: rows[rows.length - 1].id,
+            previousID: existingRows[existingRows.length - 1].id,
             srcs,
             blockID: options.blockElement.dataset.nodeId,
             viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
             groupID,
         });
-    }
-
-    const newRowIDSet = new Set(newRowIDs);
-    const firstColID = options.startCell.dataset.colId;
-    try {
-        for (let i = 0; i < options.values.length; i++) {
-            let cellElement = rowElements[i].querySelector(`.av__cell[data-col-id="${firstColID}"]`) as HTMLElement;
-            for (let j = 0; j < options.values[i].length && cellElement?.classList.contains("av__cell"); j++) {
-                const operations = await updateCellsValue(options.protyle, options.blockElement, options.values[i][j],
-                    [cellElement], options.columns,
-                    cellElement.dataset.dtype === "mAsset" ? (options.tempElement.content.children[i * (j + 1) + j]?.outerHTML || "") : options.html,
-                    true, newRowIDSet.has(rowElements[i].dataset.id), true);
-                if (operations.doOperations.length > 0) {
-                    doOperations.push(...operations.doOperations);
-                    if (newRowIDSet.has(rowElements[i].dataset.id)) {
-                        undoOperations.push(...operations.undoOperations.filter(operation =>
-                            operation.action !== "updateAttrViewCell" || operation.rowID !== rowElements[i].dataset.id));
-                    } else {
-                        undoOperations.push(...operations.undoOperations);
-                    }
-                }
-                if (cellElement.nextElementSibling) {
-                    cellElement = cellElement.nextElementSibling as HTMLElement;
-                } else if (cellElement.parentElement.classList.contains("av__colsticky")) {
-                    cellElement = cellElement.parentElement.nextElementSibling as HTMLElement;
-                } else {
-                    cellElement = undefined;
-                }
-            }
-        }
-    } finally {
-        removePlaceholderRows(options.blockElement);
-    }
-
-    if (doOperations.length === 0) {
-        return;
-    }
-    if (newRowIDs.length > 0) {
-        undoOperations.push({
+        rowUndoOperations.push({
             action: "removeAttrViewBlock",
             srcIDs: newRowIDs,
             avID: options.blockElement.dataset.avId,
         });
     }
+
+    const cellDoOperations: IOperation[] = [];
+    const cellUndoOperations: IOperation[] = [];
+    const newRowIDSet = new Set(newRowIDs);
+    try {
+        for (let i = 0; i < options.values.length; i++) {
+            for (let j = 0; j < options.values[i].length && j < targetColumns.length; j++) {
+                const targetColumn = targetColumns[j];
+                if (targetColumn.readonly) {
+                    continue;
+                }
+                const cellElement = rowElements[i].querySelector(
+                    `.av__cell[data-col-id="${targetColumn.column.id}"]`,
+                ) as HTMLElement;
+                if (!cellElement) {
+                    continue;
+                }
+                const isNewRow = newRowIDSet.has(pasteRows[i].id);
+                const operations = await updateCellsValue(options.protyle, options.blockElement, options.values[i][j],
+                    [cellElement], options.columns, options.cellHTML?.[i]?.[j] || options.html,
+                    true, isNewRow || targetColumn.isNew || targetColumn.typeChanged, true);
+                if (operations.doOperations.length > 0) {
+                    cellDoOperations.push(...operations.doOperations);
+                    const hasCellUpdate = operations.doOperations.some(operation => operation.action === "updateAttrViewCell");
+                    operations.undoOperations.forEach(operation => {
+                        if (operation.action !== "updateAttrViewCell") {
+                            cellUndoOperations.push(operation);
+                        }
+                    });
+                    if (hasCellUpdate && !isNewRow && !targetColumn.isNew) {
+                        const originalValue = originalCellValues.get(`${pasteRows[i].id}:${targetColumn.column.id}`);
+                        if (originalValue) {
+                            cellUndoOperations.push({
+                                action: "updateAttrViewCell",
+                                id: originalValue.id || cellElement.dataset.id,
+                                avID: options.blockElement.dataset.avId,
+                                keyID: targetColumn.column.id,
+                                rowID: pasteRows[i].id,
+                                data: originalValue,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    } finally {
+        restoreAVPasteCellPlaceholders(cellPlaceholders);
+        removePlaceholderRows(options.blockElement);
+    }
+
+    const doOperations = [...schemaDoOperations, ...rowDoOperations, ...cellDoOperations];
+    if (doOperations.length === 0) {
+        return;
+    }
+    const undoOperations = [
+        ...cellUndoOperations,
+        ...rowUndoOperations,
+        ...schemaUndoOperations.reverse(),
+        ...newColumnUndoOperations,
+    ];
     doOperations.push({
         action: "doUpdateUpdated",
         id: options.blockElement.dataset.nodeId,
@@ -224,18 +536,37 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
     let values: string[][] = [];
+    const cellHTML: string[][] = [];
+    let headerCandidate = false;
     if (html.endsWith("]") && html.startsWith("[")) {
         try {
             values = JSON.parse(html);
         } catch (e) {
             console.warn("insert cell: JSON.parse error");
         }
-    } else if (tempElement.content.querySelector("table")) {
-        tempElement.content.querySelectorAll("tr").forEach(item => {
-            values.push([]);
+    } else {
+        const tableElement = tempElement.content.querySelector("table");
+        const firstRowElement = tableElement?.querySelector("tr");
+        if (firstRowElement) {
+            headerCandidate = firstRowElement.parentElement?.tagName === "THEAD" ||
+                Boolean(firstRowElement.querySelector("th"));
+        }
+        tableElement?.querySelectorAll("tr").forEach(item => {
+            if (item.closest("table") !== tableElement) {
+                return;
+            }
+            const rowValues: string[] = [];
+            const rowHTML: string[] = [];
             Array.from(item.children).forEach(cell => {
-                values[values.length - 1].push(cell.textContent);
+                if (cell.tagName === "TD" || cell.tagName === "TH") {
+                    rowValues.push(cell.textContent);
+                    rowHTML.push(cell.outerHTML);
+                }
             });
+            if (rowValues.length > 0) {
+                values.push(rowValues);
+                cellHTML.push(rowHTML);
+            }
         });
     }
     const avID = blockElement.dataset.avId;
@@ -254,14 +585,16 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 cellElements.push(blockElement.querySelector(".av__row:not(.av__row--header) .av__cell"));
             }
             if (cellElements[0]) {
+                const useHeader = headerCandidate ? await confirmAVPasteHeader() : false;
                 await pasteAVMatrix({
-                    values,
+                    values: useHeader ? values.slice(1) : values,
                     protyle,
                     blockElement,
                     startCell: cellElements[0],
                     columns,
                     html,
-                    tempElement,
+                    cellHTML: useHeader ? cellHTML.slice(1) : cellHTML,
+                    header: useHeader ? values[0] : undefined,
                 });
             }
             return;
@@ -326,7 +659,6 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     startCell: cellElements[0],
                     columns,
                     html,
-                    tempElement,
                 });
             }
             document.querySelector(".av__panel")?.remove();

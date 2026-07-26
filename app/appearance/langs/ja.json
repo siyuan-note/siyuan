@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "表のヘッダーを認識",
+  "avPasteHeaderTip": "貼り付けた最初の行をデータベースのフィールド名として使用しますか？",
+  "avPasteHeaderAsData": "データとして使用",
+  "avPasteHeaderAsField": "フィールド名として使用",
   "databaseAttrClickMode": "データベースバッジをクリックしたときの動作",
   "databaseAttrClickModeTip": "データベースバッジをクリックしたときの動作を設定します",
   "focusBlockAndExpandDatabasePanel": "ブロックにフォーカスしてデータベースパネルを展開",

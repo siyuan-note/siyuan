@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Rozpoznaj nagłówek tabeli",
+  "avPasteHeaderTip": "Użyć pierwszego wklejonego wiersza jako nazw pól bazy danych?",
+  "avPasteHeaderAsData": "Użyj jako danych",
+  "avPasteHeaderAsField": "Użyj jako nazw pól",
   "databaseAttrClickMode": "Działanie po kliknięciu plakietki bazy danych",
   "databaseAttrClickModeTip": "Ustaw działanie wykonywane po kliknięciu plakietki bazy danych",
   "focusBlockAndExpandDatabasePanel": "Ustaw fokus na bloku i rozwiń panel bazy danych",

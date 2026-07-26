@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Tabellenkopf erkennen",
+  "avPasteHeaderTip": "Soll die erste eingefügte Zeile als Namen der Datenbankfelder verwendet werden?",
+  "avPasteHeaderAsData": "Als Daten verwenden",
+  "avPasteHeaderAsField": "Als Feldnamen verwenden",
   "databaseAttrClickMode": "Verhalten beim Klicken auf das Datenbank-Abzeichen",
   "databaseAttrClickModeTip": "Legt fest, was beim Klicken auf das Datenbank-Abzeichen geschieht",
   "focusBlockAndExpandDatabasePanel": "Block fokussieren und Datenbank-Panel erweitern",

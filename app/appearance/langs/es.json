@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Reconocer encabezado de tabla",
+  "avPasteHeaderTip": "¿Usar la primera fila pegada como nombres de campos de la base de datos?",
+  "avPasteHeaderAsData": "Usar como datos",
+  "avPasteHeaderAsField": "Usar como nombres de campos",
   "databaseAttrClickMode": "Comportamiento al hacer clic en la insignia de base de datos",
   "databaseAttrClickModeTip": "Establece qué ocurre al hacer clic en la insignia de base de datos",
   "focusBlockAndExpandDatabasePanel": "Enfocar el bloque y expandir el panel de base de datos",

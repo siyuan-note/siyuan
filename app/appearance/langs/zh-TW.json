@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "識別表頭",
+  "avPasteHeaderTip": "是否將貼上內容的第一列識別為資料庫欄位名稱？",
+  "avPasteHeaderAsData": "作為資料",
+  "avPasteHeaderAsField": "作為欄位名稱",
   "databaseAttrClickMode": "資料庫角標點選操作",
   "databaseAttrClickModeTip": "設定點選資料庫角標時執行的操作",
   "focusBlockAndExpandDatabasePanel": "聚焦區塊並展開資料庫面板",

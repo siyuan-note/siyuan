@@ -1685,6 +1685,14 @@
         right: -10px;
       }
 
+      &:first-child.dragover__left::after {
+        left: 0;
+      }
+
+      &:last-child.dragover__right::after {
+        right: 0;
+      }
+
       &--small {
         width: 180px;
       }

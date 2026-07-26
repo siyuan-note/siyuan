@@ -6,6 +6,7 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {goEnd, goHome} from "../wysiwyg/commonHotkey";
 import {showTooltip} from "../../dialog/tooltip";
 import {isEncryptedBox} from "../../util/pathName";
+import {updateScrollVisibility} from "./visibility";
 
 export class Scroll {
     public element: HTMLElement;
@@ -28,6 +29,7 @@ export class Scroll {
 </div>`;
 
         this.element = this.parentElement.querySelector(".protyle-scroll__bar");
+        this.element.classList.add("fn__none");
         this.keepLazyLoad = false;
         this.lastScrollTop = 0;
         this.inputElement = this.element.firstElementChild as HTMLInputElement;
@@ -111,6 +113,6 @@ export class Scroll {
         }
         const visible = protyle.options.render.scroll && !protyle.block.showAll && protyle.block.scroll &&
             !protyle.contentElement.classList.contains("fn__none");
-        this.parentElement.classList.toggle("fn__none", !visible);
+        updateScrollVisibility(this.parentElement, this.element, visible);
     }
 }

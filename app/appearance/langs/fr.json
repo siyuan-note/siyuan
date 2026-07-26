@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Comportement lors du clic sur le badge de base de données",
+  "databaseAttrClickModeTip": "Définir l’action effectuée lors du clic sur le badge de base de données",
+  "focusBlockAndExpandDatabasePanel": "Focaliser le bloc et développer le panneau de base de données",
+  "openBlockAttributePanel": "Ouvrir le panneau des attributs du bloc",
   "backlinkShowBottomTip": "Lorsque cette option est activée, un panneau contenant les backlinks et les mentions est affiché au bas du document",
   "databaseAttrShowTip": "Lorsque cette option est désactivée, tout le panneau de base de données est masqué ; les réglages précédents sont restaurés lorsqu’elle est réactivée",
   "databaseAttrShow": "Afficher le panneau de base de données en haut du document",

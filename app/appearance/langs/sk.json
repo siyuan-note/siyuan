@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Správanie po kliknutí na odznak databázy",
+  "databaseAttrClickModeTip": "Nastavte akciu vykonanú po kliknutí na odznak databázy",
+  "focusBlockAndExpandDatabasePanel": "Zamerať blok a rozbaliť panel databázy",
+  "openBlockAttributePanel": "Otvoriť panel atribútov bloku",
   "backlinkShowBottomTip": "Po zapnutí sa v spodnej časti dokumentu zobrazí panel obsahujúci spätné odkazy a zmienky",
   "databaseAttrShowTip": "Po vypnutí sa skryje celý panel databázy; po opätovnom zapnutí sa obnovia predchádzajúce nastavenia",
   "databaseAttrShow": "Zobraziť panel databázy v hornej časti dokumentu",

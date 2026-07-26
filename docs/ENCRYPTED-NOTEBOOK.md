@@ -18,6 +18,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | Global features | Encrypted notebooks never participate (global search / graph / block refs cannot see them) |
 | Block refs | Normal refs within the notebook; cross-boundary refs forbidden (bidirectional: normal↔encrypted, encrypted A↔encrypted B) |
 | AI / LLM | No functional-layer isolation — when unlocked, AI/LLM can read/search just like a normal notebook; when locked, no usable DEK handle exists and dedicated entry points deny access (see §13) |
+| Publish | Unsupported — publish readers and anonymous visitors cannot enumerate or read an encrypted notebook regardless of unlock state, publish password, or visibility configuration |
 | Cross-boundary move | Forbidden — would break data consistency and leak |
 | Database | Notebook-level storage — encrypted notebook database files follow the notebook directory, DEK-encrypted; cross-boundary mirroring forbidden |
 | Flashcards / spaced repetition | Not supported (feature limitation) |
@@ -57,6 +58,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | **Deleted notebook history** | Supported | Supported (entire directory backed up as ciphertext before deletion and restored verbatim; recovery also requires the matching global key backup and master password) |
 | **Embedding vectorization / semantic search** | Participates | Does not participate (encrypted data never enters the global block_embeddings table; the embedding pipeline reads only the global SQLite database — independent of lock state) |
 | **Agents / AI chat / MCP** | Can read content, can search | Available when unlocked (can read blocks, list docs, search within notebook); unreachable when locked (see §13). Global search / semantic search not included |
+| **Publish** | Supports visibility, password, and deny configuration through `publishAccess.json` | Unsupported; publish readers and anonymous visitors can never enumerate or read it, and `publishAccess.json` cannot override this rule |
 | **Kernel CLI** | Can operate on workspace data | Does not support encrypted notebooks or their files, whether locked or unlocked |
 | **Flashcards / spaced repetition** | Participates | Not supported (feature limitation) |
 | **Bookmarks** | Participates (global aggregation) | Not supported (feature limitation) |
@@ -68,7 +70,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | **Rebuild index** | Full | Skipped on startup (closed); opening performs a full rebuild into the encrypted SQLite database |
 | **/api/file/\*** | Can read, write, copy, rename, delete, or enumerate workspace files | Refuses access to any file in encrypted-notebook persistent directories (not just .sy) to prevent ciphertext disclosure or writes that bypass the encryption layer; `temp/` remains accessible to administrator file APIs and trusted plugins |
 
-**Core difference summary**: An encrypted notebook is an "island" — data is physically isolated, operations have dedicated entry points, it never participates in global features (global search/graph), and documents/database files do not cross the boundary. In-notebook features (editing, block refs, backlinks, search, database, outline, history, etc.) work normally; AI/LLM is also usable when unlocked (same as a normal notebook). Encrypted notebooks are also isolated from each other. Normal notebooks are completely unaffected.
+**Core difference summary**: An encrypted notebook is an "island" — data is physically isolated, operations have dedicated entry points, it never participates in global features (global search/graph), it cannot be published, and documents/database files do not cross the boundary. In-notebook features (editing, block refs, backlinks, search, database, outline, history, etc.) work normally; AI/LLM is also usable when unlocked (same as a normal notebook). Encrypted notebooks are also isolated from each other. Normal notebooks are completely unaffected.
 
 ## 4. Key Architecture
 
@@ -252,12 +254,13 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 | Import | Supported: imported .sy.zip or Markdown files are auto DEK-encrypted before writing to disk |
 | File history | Supported (must unlock the corresponding encrypted notebook before viewing; the history index stores no plaintext content) |
 | Deleted notebook | Supported (ciphertext backup; recovery requires the matching global key backup and master password; retaining this history prevents direct deletion of its key backup) |
+| Publish | Unsupported; publish-access editing offers no configuration entry for an encrypted notebook or any of its documents, and the publish service never exposes them regardless of authentication state |
 | Export | Supported (identical to normal notebooks; must unlock first, exports plaintext. Rejected when locked) |
 | Sync | Unchanged (ciphertext in, ciphertext out, self-consistent) |
 
 ## 12. Security Boundary
 
-**Security premise**: An encrypted notebook provides its strongest application-level protection while closed (locked). After locking completes, new operations are denied, managed DEK handles and database connections are removed, and kernel-managed plaintext caches, temporary files, and tokens are cleaned on a best-effort basis; this does not promise erasure of every transient copy in the Go runtime, OS swap, crash dumps, or storage media. **When open (unlocked), the application holds a usable DEK handle**, and authenticated application callers — APIs, third-party plugins, AI/LLM (including MCP, agents, semantic search) — can read plaintext content just like a normal notebook. The kernel CLI is an explicit exception: it rejects encrypted notebooks and their raw files regardless of lock state. Encryption protects data at rest and unreachability through supported entry points after locking; it **does not protect visibility to authenticated callers while unlocked**. Treat an unlocked encrypted notebook as a normal notebook in active use and lock it immediately afterwards.
+**Security premise**: An encrypted notebook provides its strongest application-level protection while closed (locked). After locking completes, new operations are denied, managed DEK handles and database connections are removed, and kernel-managed plaintext caches, temporary files, and tokens are cleaned on a best-effort basis; this does not promise erasure of every transient copy in the Go runtime, OS swap, crash dumps, or storage media. **When open (unlocked), the application holds a usable DEK handle**, and callers authorized by the main application — APIs, third-party plugins, AI/LLM (including MCP, agents, semantic search) — can read plaintext content just like a normal notebook. The publish service is an explicit exception: publish readers and anonymous visitors cannot enumerate or read encrypted notebooks regardless of unlock state, and publish passwords, visibility configuration, and `publishAccess.json` cannot override this rule. The kernel CLI likewise rejects encrypted notebooks and their raw files regardless of lock state. Encryption protects data at rest and unreachability through supported entry points after locking; it **does not protect visibility to callers authorized by the main application while unlocked**. Treat an unlocked encrypted notebook as a normal notebook in active use within the main application and lock it immediately afterwards.
 
 **Protected (ciphertext on disk)**:
 - `.sy` document body (encrypted)
@@ -278,6 +281,7 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 
 **API protection**:
 - `/api/file/*`: refuses access to any file in encrypted-notebook persistent directories (not just .sy), preventing ciphertext disclosure or writes that bypass the encryption layer; workspace `temp/` remains accessible.
+- Publish service: `RoleReader` and `RoleVisitor` can never access an encrypted notebook or its documents, blocks, attribute views, and resources; unlock state and publish-access configuration do not change the result.
 - Kernel CLI: rejects encrypted notebook/block targets and direct paths below `<workspace>/data/<encrypted-notebookID>/`; it cannot be used to unlock, read, write, export, or manipulate encrypted notebook data.
 
 ## 13. AI / LLM Reachability
@@ -295,6 +299,7 @@ Design stance: there is no "hide from AI" isolation at the functional layer, bec
 An encrypted notebook is an island; some features are unimplemented because of their cross-notebook nature or dependence on global aggregation. These are feature boundaries, not performance or security trade-offs.
 
 - **Flashcards / spaced repetition**: Decks and scheduling are cross-notebook and depend on the global SQLite database; not implemented.
+- **Publish**: The publish service targets read-only or anonymous visitors, so encrypted notebooks never participate whether locked or unlocked and cannot be enabled through publish passwords or visibility configuration.
 - **Bookmarks**: Global aggregation view (scans the global siyuan.db); encrypted notebooks not integrated.
 - **Tags**: Global aggregation view (scans the global spans table); encrypted notebooks not integrated.
 - **Asset file rename**: Encrypted-notebook asset filenames are already desensitized to `uuid-blockID.ext`; renaming breaks the original-name mapping.
@@ -327,7 +332,7 @@ This feature protects data-at-rest confidentiality and inaccessibility through s
 
 The following are outside this feature's security boundary and must be stated in product UI and user documentation:
 
-- While a notebook is unlocked, authenticated application callers such as APIs, plugins, MCP, and AI/LLM, as well as a local attacker able to read the application process memory, may obtain plaintext.
+- While a notebook is unlocked, APIs, plugins, MCP, and AI/LLM authorized by the main application, as well as a local attacker able to read the application process memory, may obtain plaintext; publish readers and anonymous visitors are outside this scope and are always denied.
 - Local processes that can read workspace files, administrator file APIs, and trusted plugins can read temporary plaintext exports that have not yet been cleaned up; the temporary directory is not an access-control boundary.
 - Files intentionally exported by the user, clipboard contents, screenshots, printouts, content shared with third parties, and plaintext files saved outside the workspace are protected by the user.
 - OS swap, hibernation images, crash dumps, filesystem snapshots, and malware are not absolutely protected by clearing application memory; locking performs best-effort cleanup only within the application's control.
@@ -382,7 +387,7 @@ Sync endpoints and offline backups are storage that may be lost, copied, or roll
 
 ## 20. Feature Boundaries, Plaintext Temporaries, and Interface Rules
 
-Unsupported flashcards, bookmarks, tags, asset rename, unused-asset cleanup, and unused-database cleanup must be handled uniformly by the frontend, HTTP API, plugin API, MCP, and import paths: return an explicit "unsupported" error for encrypted-notebook targets and create no global index, global attribute, or deferred task. Existing legacy data must not be loaded, aggregated, or written back. Error codes and localized messages remain stable for callers.
+Unsupported publishing, flashcards, bookmarks, tags, asset rename, unused-asset cleanup, and unused-database cleanup must be handled uniformly by the frontend, HTTP API, plugin API, MCP, and import paths: return an explicit "unsupported" error for encrypted-notebook targets and create no global index, global attribute, or deferred task. Existing legacy data must not be loaded, aggregated, or written back. Publish authorization is independent of lock state and takes precedence over `publishAccess.json`; existing publish configuration cannot make an encrypted notebook visible again. Error codes and localized messages remain stable for callers.
 
 Every raw entry point that might bypass dedicated read/write paths is registered, including file APIs, kernel CLI, MCP file tools, WebDAV, plugin file interfaces, export download URLs, preview URLs, and background tasks. Encrypted-notebook persistent directories always reject direct access through raw entry points to avoid ciphertext disclosure or writes that bypass the encryption layer. Workspace `temp/` is general temporary storage accessible to administrator file APIs, archive APIs, and trusted plugins, so it is not part of the encrypted access-control boundary. WebDAV continues to deny the entire `temp/` directory unconditionally to avoid exposing temporary data through a remote file service. Adding an entry point requires separate review of whether it touches encrypted-notebook persistent directories or temporary plaintext.
 
@@ -397,6 +402,7 @@ The in-memory `managedEncryptedExports` tokens manage download-link expiry and l
 | Scenario | Expected result |
 |---|---|
 | Access to encrypted-notebook persistent directories while locked through UI, HTTP, file APIs, CLI, MCP, WebDAV, plugins, and background tasks | Other than the explicitly exposed notebook name, cannot decrypt, write, copy, delete, or enumerate encrypted content; administrator file APIs and trusted plugins may still access an export copy in `temp/` that has not yet been cleaned up |
+| Access a locked or unlocked encrypted notebook through the publish service using anonymous access, a publish-reader account, and public/protected/private/forbidden configuration | Cannot enumerate notebooks, documents, blocks, attribute views, or resources and cannot obtain plaintext; lock state, publish authentication, and `publishAccess.json` do not change the result |
 | Unlock, lock, application restart, and authentication failure | Only `Unlocked` permits a managed DEK handle and database connections; after failure or restart, entry points deny access and application-controlled plaintext caches, temporary files, and handles undergo best-effort cleanup |
 | Lock concurrent with response generation, cache publication, export, preview, sync, indexing, or history restore | Lock succeeds only after all in-flight lifecycle leases end; no late plaintext response, cache refill, newly created temporary file, usable token, or database reconnection follows success, except for an existing temporary file whose deletion failed |
 | Move a document within one encrypted notebook, then clear caches and restart | When the basename is unchanged, ciphertext remains unchanged and authenticates with the stable object ID; the new parent takes effect under normal-notebook semantics, the old directory location is absent, and failure handling matches a normal notebook |
@@ -426,7 +432,7 @@ The in-memory `managedEncryptedExports` tokens manage download-link expiry and l
 - **Lock**: Closing the notebook equals locking. The kernel stops new access, waits for or cancels in-flight work, revokes managed DEK handles and database connections, and best-effort cleans kernel-managed plaintext caches, temporary files, and tokens. **Locking after use** is the most important security habit because it minimizes key and plaintext exposure
 - **After restart**: All encrypted notebooks are force-closed; you must re-enter the master password to unlock (managed DEK handles exist only in process memory and must be derived again after restart)
 
-> Important: An encrypted notebook provides its strongest application-level protection while locked, but locking only best-effort cleans application-controlled memory and temporary data; it does not promise erasure of every transient copy in the operating system or storage media. While unlocked, authenticated application callers (APIs, plugins, AI/LLM including MCP) can read plaintext just like a normal notebook; the kernel CLI always rejects encrypted-notebook operations (see §12 Security premise).
+> Important: An encrypted notebook provides its strongest application-level protection while locked, but locking only best-effort cleans application-controlled memory and temporary data; it does not promise erasure of every transient copy in the operating system or storage media. While unlocked, callers authorized by the main application (APIs, plugins, AI/LLM including MCP) can read plaintext just like a normal notebook; publish readers, anonymous visitors, and the kernel CLI are always denied (see §12 Security premise).
 
 ### Changing the master password
 Go to **Settings → Access authorization → Change master password**. Changing the password only re-wraps each notebook's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.
@@ -447,6 +453,7 @@ Sync recovery can validate backup integrity but cannot prove that a backup is th
 ### Import and export
 - **Import**: Supports importing `.sy.zip` and Markdown; content is automatically DEK-encrypted before writing to disk, identical to manually created documents
 - **Export**: Identical to normal notebooks (must unlock first; exports plaintext). `.sy.zip`, HTML, Word, PDF, Markdown, etc. are all supported; export is rejected while locked
+- **Publish**: Unsupported. Encrypted notebooks and their documents never appear through the publish service, and unlocking or setting a publish password cannot enable them
 
 ### What if I forget the password
 **It cannot be recovered** — by design (no backdoor). Even if the ciphertext has been synced to the cloud, it cannot be decrypted without the master password. **You must remember the master password; using a password manager is recommended.**
@@ -464,6 +471,7 @@ Restoring deleted encrypted-notebook history also requires the global key backup
 ### Unsuitable scenarios for encrypted notebooks
 - Daily notes, study notes (the extra encryption overhead is not worth it)
 - Content that needs global search (encrypted notebooks do not participate)
+- Content that must be made available through the publish service (encrypted notebooks cannot be published)
 - Knowledge networks needing cross-notebook block refs (cross-boundary forbidden)
 - Documents needing cross-notebook move/reorganize (cross-boundary forbidden)
 - Scenarios needing cross-notebook database mirroring (cross-boundary forbidden)

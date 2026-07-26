@@ -31,7 +31,162 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestGetNotebookConfHidesBoxCryptFromReader(t *testing.T) {
+func TestNotebookPublishVisibility(t *testing.T) {
+	const boxID = "20260726000000-abcdefg"
+	tests := []struct {
+		name          string
+		notebook      *model.Box
+		publishAccess model.PublishAccess
+		expected      bool
+	}{
+		{name: "missing notebook", expected: false},
+		{name: "closed notebook", notebook: &model.Box{ID: boxID, Closed: true}, expected: false},
+		{
+			name:          "encrypted notebook",
+			notebook:      &model.Box{ID: boxID, Encrypted: true},
+			publishAccess: model.PublishAccess{{ID: boxID, Visible: true}},
+			expected:      false,
+		},
+		{name: "default visible", notebook: &model.Box{ID: boxID}, expected: true},
+		{
+			name:          "explicitly visible",
+			notebook:      &model.Box{ID: boxID},
+			publishAccess: model.PublishAccess{{ID: boxID, Visible: true}},
+			expected:      true,
+		},
+		{
+			name:          "invisible",
+			notebook:      &model.Box{ID: boxID},
+			publishAccess: model.PublishAccess{{ID: boxID, Visible: false}},
+			expected:      false,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := isNotebookVisibleByPublishAccess(test.notebook, test.publishAccess); actual != test.expected {
+				t.Fatalf("unexpected notebook visibility: %v", actual)
+			}
+		})
+	}
+}
+
+func TestGetNotebookInfoHidesInvisibleNotebookFromReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldConf, oldDataDir := model.Conf, util.DataDir
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree = conf.NewFileTree()
+	const testLang = "notebook-security-test"
+	oldTimeLang, hadTimeLang := util.TimeLangs[testLang]
+	util.TimeLangs[testLang] = map[string]any{
+		"albl": "ago",
+		"blbl": "from now",
+		"now":  "now",
+		"1s":   "1 second %s",
+		"xs":   "%d seconds %s",
+		"1m":   "1 minute %s",
+		"xh":   "%d hours %s",
+		"1h":   "1 hour %s",
+		"1d":   "1 day %s",
+		"xd":   "%d days %s",
+		"1w":   "1 week %s",
+		"xw":   "%d weeks %s",
+		"1M":   "1 month %s",
+		"xM":   "%d months %s",
+		"1y":   "1 year %s",
+		"2y":   "2 years %s",
+		"xy":   "%d years %s",
+		"max":  "a long while %s",
+	}
+	model.Conf.Lang = testLang
+	t.Cleanup(func() {
+		if err := model.SetPublishAccess(model.PublishAccess{}); err != nil {
+			t.Errorf("reset publish access failed: %v", err)
+		}
+		if hadTimeLang {
+			util.TimeLangs[testLang] = oldTimeLang
+		} else {
+			delete(util.TimeLangs, testLang)
+		}
+		model.Conf, util.DataDir = oldConf, oldDataDir
+	})
+
+	const boxID = "20260726000000-abcdefg"
+	boxConf := conf.NewBoxConf()
+	boxConf.Name = "Invisible notebook"
+	boxConf.Closed = false
+	boxConfPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err := os.MkdirAll(filepath.Dir(boxConfPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	data, err := json.Marshal(boxConf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(boxConfPath, data, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err = model.SetPublishAccess(model.PublishAccess{{ID: boxID, Visible: false}}); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name         string
+		role         model.Role
+		expectedCode int
+		expectInfo   bool
+	}{
+		{name: "reader", role: model.RoleReader, expectedCode: -1},
+		{name: "visitor", role: model.RoleVisitor, expectedCode: -1},
+		{name: "administrator", role: model.RoleAdministrator, expectedCode: 0, expectInfo: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) {
+				c.Set(model.RoleContextKey, test.role)
+				c.Next()
+			})
+			engine.POST("/api/notebook/getNotebookInfo", getNotebookInfo)
+
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(
+				http.MethodPost,
+				"/api/notebook/getNotebookInfo",
+				strings.NewReader(`{"notebook":"`+boxID+`"}`),
+			)
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int    `json:"code"`
+				Msg  string `json:"msg"`
+				Data struct {
+					BoxInfo *model.BoxInfo `json:"boxInfo"`
+				} `json:"data"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if response.Code != test.expectedCode {
+				t.Fatalf("unexpected response: %s", recorder.Body.String())
+			}
+			if test.expectInfo {
+				if nil == response.Data.BoxInfo || boxConf.Name != response.Data.BoxInfo.Name {
+					t.Fatalf("administrator did not receive notebook info: %s", recorder.Body.String())
+				}
+			} else {
+				expectedMsg := "notebook [" + boxID + "] not found"
+				if response.Msg != expectedMsg || nil != response.Data.BoxInfo {
+					t.Fatalf("reader received invisible notebook info: %s", recorder.Body.String())
+				}
+			}
+		})
+	}
+}
+
+func TestGetNotebookConfHidesEncryptedNotebookFromReader(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	oldConf, oldDataDir := model.Conf, util.DataDir
@@ -65,12 +220,12 @@ func TestGetNotebookConfHidesBoxCryptFromReader(t *testing.T) {
 	}
 
 	tests := []struct {
-		name           string
-		role           model.Role
-		expectBoxCrypt bool
+		name       string
+		role       model.Role
+		expectCode int
 	}{
-		{name: "reader", role: model.RoleReader, expectBoxCrypt: false},
-		{name: "administrator", role: model.RoleAdministrator, expectBoxCrypt: true},
+		{name: "reader", role: model.RoleReader, expectCode: -1},
+		{name: "administrator", role: model.RoleAdministrator, expectCode: 0},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -99,16 +254,25 @@ func TestGetNotebookConfHidesBoxCryptFromReader(t *testing.T) {
 			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
 				t.Fatalf("unmarshal response failed: %v", err)
 			}
-			if 0 != response.Code || nil == response.Data.Conf {
-				t.Fatalf("unexpected response: %s", recorder.Body.String())
+			if test.expectCode != response.Code {
+				t.Fatalf("unexpected response code: %s", recorder.Body.String())
+			}
+			if model.RoleReader == test.role {
+				if nil != response.Data.Conf {
+					t.Fatalf("reader received encrypted notebook configuration: %s", recorder.Body.String())
+				}
+				return
+			}
+			if nil == response.Data.Conf {
+				t.Fatalf("administrator did not receive notebook configuration: %s", recorder.Body.String())
 			}
 			if response.Data.Conf.Encrypted != boxConf.Encrypted ||
 				response.Data.Conf.Name != boxConf.Name ||
 				response.Data.Conf.SortMode != boxConf.SortMode {
 				t.Fatalf("functional notebook settings were changed: %#v", response.Data.Conf)
 			}
-			if test.expectBoxCrypt != (nil != response.Data.Conf.BoxCrypt) {
-				t.Fatalf("unexpected box crypt visibility: %#v", response.Data.Conf.BoxCrypt)
+			if nil == response.Data.Conf.BoxCrypt {
+				t.Fatal("administrator did not receive encrypted notebook key metadata")
 			}
 		})
 	}

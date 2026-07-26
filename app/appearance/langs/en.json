@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Behavior when clicking a database badge",
+  "databaseAttrClickModeTip": "Set what happens when clicking a database badge",
+  "focusBlockAndExpandDatabasePanel": "Focus the block and expand the database panel",
+  "openBlockAttributePanel": "Open the block attribute panel",
   "backlinkShowBottomTip": "When enabled, a panel containing backlinks and mentions is displayed at the bottom of the document",
   "databaseAttrShowTip": "When disabled, the entire database panel is hidden; previous settings are restored when it is enabled again",
   "databaseAttrShow": "Show the database panel at the top of the document",

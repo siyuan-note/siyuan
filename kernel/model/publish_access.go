@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"math"
 	"net/http"
 	"os"
@@ -56,6 +57,17 @@ var (
 	publishAccess             PublishAccess
 	publishAccessLock         = sync.Mutex{}
 )
+
+const publishAccessDenyAllID = "\x00"
+const encryptedPublishAccessCacheTTL = 5 * time.Second
+
+var encryptedPublishAccessCache = struct {
+	sync.Mutex
+	dataDir   string
+	updatedAt time.Time
+	boxIDs    map[string]struct{}
+	denyAll   bool
+}{}
 
 func GetPublishAccess() (ret PublishAccess) {
 	ret = PublishAccess{}
@@ -126,6 +138,12 @@ func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
 }
 
 func GetInvisiblePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) {
+	outputPublishAccess = filterInvisiblePublishAccess(inputPublishAccess)
+	outputPublishAccess = appendEncryptedBoxesToPublishAccess(outputPublishAccess)
+	return
+}
+
+func filterInvisiblePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) {
 	outputPublishAccess = PublishAccess{}
 	for _, item := range inputPublishAccess {
 		if !item.Visible {
@@ -136,6 +154,12 @@ func GetInvisiblePublishAccess(inputPublishAccess PublishAccess) (outputPublishA
 }
 
 func GetDisablePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) {
+	outputPublishAccess = filterDisablePublishAccess(inputPublishAccess)
+	outputPublishAccess = appendEncryptedBoxesToPublishAccess(outputPublishAccess)
+	return
+}
+
+func filterDisablePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) {
 	outputPublishAccess = PublishAccess{}
 	for _, item := range inputPublishAccess {
 		if item.Disable {
@@ -143,6 +167,89 @@ func GetDisablePublishAccess(inputPublishAccess PublishAccess) (outputPublishAcc
 		}
 	}
 	return
+}
+
+// appendEncryptedBoxesToPublishAccess 将加密笔记本加入发布拒绝列表，使发布访问规则独立于持久化配置和锁定状态。
+func appendEncryptedBoxesToPublishAccess(inputPublishAccess PublishAccess) PublishAccess {
+	ret := append(PublishAccess{}, inputPublishAccess...)
+	existing := map[string]struct{}{}
+	for _, item := range ret {
+		existing[item.ID] = struct{}{}
+	}
+
+	boxIDs, denyAll := encryptedBoxIDsForPublishAccess()
+	if denyAll {
+		return append(ret, &PublishAccessItem{ID: publishAccessDenyAllID, Disable: true})
+	}
+	for boxID := range boxIDs {
+		if _, ok := existing[boxID]; ok {
+			continue
+		}
+		ret = append(ret, &PublishAccessItem{ID: boxID, Disable: true})
+	}
+	return ret
+}
+
+// encryptedBoxIDsForPublishAccess 返回发布门禁使用的加密笔记本快照，避免在块和属性视图过滤热路径中重复读取配置。
+func encryptedBoxIDsForPublishAccess() (map[string]struct{}, bool) {
+	encryptedPublishAccessCache.Lock()
+	defer encryptedPublishAccessCache.Unlock()
+
+	now := time.Now()
+	if encryptedPublishAccessCache.boxIDs != nil &&
+		encryptedPublishAccessCache.dataDir == util.DataDir &&
+		now.Sub(encryptedPublishAccessCache.updatedAt) < encryptedPublishAccessCacheTTL {
+		return encryptedPublishAccessCache.boxIDs, encryptedPublishAccessCache.denyAll
+	}
+
+	boxIDs, err := listEncryptedBoxIDsForPublishAccess()
+	snapshot := map[string]struct{}{}
+	for _, boxID := range boxIDs {
+		snapshot[boxID] = struct{}{}
+	}
+	encryptedPublishAccessCache.dataDir = util.DataDir
+	encryptedPublishAccessCache.updatedAt = now
+	encryptedPublishAccessCache.boxIDs = snapshot
+	encryptedPublishAccessCache.denyAll = err != nil
+	if err != nil {
+		logging.LogErrorf("list encrypted notebooks for publish access failed: %s", err)
+	}
+	return snapshot, err != nil
+}
+
+func invalidateEncryptedPublishAccessCache() {
+	encryptedPublishAccessCache.Lock()
+	encryptedPublishAccessCache.updatedAt = time.Time{}
+	encryptedPublishAccessCache.boxIDs = nil
+	encryptedPublishAccessCache.Unlock()
+}
+
+// IsEncryptedBoxDeniedByPublishAccess 判断笔记本是否应被发布门禁拒绝。
+func IsEncryptedBoxDeniedByPublishAccess(boxID string) bool {
+	boxIDs, denyAll := encryptedBoxIDsForPublishAccess()
+	if denyAll {
+		return true
+	}
+	_, encrypted := boxIDs[boxID]
+	return encrypted
+}
+
+func listEncryptedBoxIDsForPublishAccess() ([]string, error) {
+	if util.DataDir == "" {
+		return []string{}, nil
+	}
+	dirs, err := os.ReadDir(util.DataDir)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := []string{}
+	for _, dir := range dirs {
+		if dir.IsDir() && ast.IsNodeIDPattern(dir.Name()) && IsEncryptedBox(dir.Name()) {
+			ret = append(ret, dir.Name())
+		}
+	}
+	return ret, nil
 }
 
 func PurgePublishAccess() {
@@ -183,11 +290,64 @@ func PurgePublishAccess() {
 
 func CheckPathAccessableByPublishIgnore(box string, path string, publishIgnore PublishAccess) bool {
 	for _, item := range publishIgnore {
-		if item.ID == box || strings.Contains(path, item.ID) {
+		if item.ID == publishAccessDenyAllID || item.ID == box || strings.Contains(path, item.ID) {
 			return false
 		}
 	}
 	return true
+}
+
+// IsEncryptedPublishRuntimeTarget 判断发布读取目标是否属于当前可解析的加密笔记本。
+func IsEncryptedPublishRuntimeTarget(id string) bool {
+	boxIDs, denyAll := encryptedBoxIDsForPublishAccess()
+	if denyAll {
+		return true
+	}
+	if _, ok := boxIDs[id]; ok {
+		return true
+	}
+	for boxID := range boxIDs {
+		if nil != treenode.GetBlockTreeInBox(id, boxID) {
+			return true
+		}
+	}
+	return false
+}
+
+// IsEncryptedPublishAccessTarget 判断发布访问配置目标是否属于加密笔记本，包括锁定笔记本中的文档。
+func IsEncryptedPublishAccessTarget(id string) bool {
+	if IsEncryptedPublishRuntimeTarget(id) {
+		return true
+	}
+
+	boxIDs, denyAll := encryptedBoxIDsForPublishAccess()
+	if denyAll {
+		return true
+	}
+	targetName := id + ".sy"
+	for boxID := range boxIDs {
+		found := false
+		err := filepath.WalkDir(filepath.Join(util.DataDir, boxID), func(_ string, entry os.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return walkErr
+			}
+			if entry.IsDir() && (entry.Name() == ".siyuan" || entry.Name() == "assets") {
+				return fs.SkipDir
+			}
+			if !entry.IsDir() && entry.Name() == targetName {
+				found = true
+				return fs.SkipAll
+			}
+			return nil
+		})
+		if err != nil {
+			return true
+		}
+		if found {
+			return true
+		}
+	}
+	return false
 }
 
 func GetPathPasswordByPublishAccess(box string, blockPath string, publishAccess PublishAccess) (passwordID string, password string) {
@@ -236,16 +396,16 @@ func CheckBlockIdMetadataAccessableByPublishAccessInBox(c *gin.Context, publishA
 }
 
 func CheckBlockTreeMetadataAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) bool {
-	if bt == nil {
+	if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) {
 		return false
 	}
 
-	publishDisable := GetDisablePublishAccess(publishAccess)
+	publishDisable := filterDisablePublishAccess(publishAccess)
 	if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) {
 		return false
 	}
 
-	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishInvisible := filterInvisiblePublishAccess(publishAccess)
 	if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) {
 		return true
 	}
@@ -260,22 +420,22 @@ func CheckBlockIdDiscoverableByPublishAccessInBox(publishAccess PublishAccess, b
 }
 
 func CheckBlockTreeDiscoverableByPublishAccess(publishAccess PublishAccess, bt *treenode.BlockTree) bool {
-	if bt == nil {
+	if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) {
 		return false
 	}
 
-	publishInvisible := GetInvisiblePublishAccess(publishAccess)
-	publishDisable := GetDisablePublishAccess(publishAccess)
+	publishInvisible := filterInvisiblePublishAccess(publishAccess)
+	publishDisable := filterDisablePublishAccess(publishAccess)
 	return CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) &&
 		CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable)
 }
 
 func checkBlockTreeAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) bool {
-	if bt == nil {
+	if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) {
 		return false
 	}
 
-	publishIgnore := GetDisablePublishAccess(publishAccess)
+	publishIgnore := filterDisablePublishAccess(publishAccess)
 	passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 	return CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
 }
@@ -1064,13 +1224,13 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, b
 
 func FilterEmbedBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, embedBlocks []*EmbedBlock) (ret []*EmbedBlock) {
 	ret = []*EmbedBlock{}
+	publishIgnore := GetDisablePublishAccess(publishAccess)
 	for _, embedBlock := range embedBlocks {
 		if nil == embedBlock || nil == embedBlock.Block {
 			continue
 		}
 
 		block := embedBlock.Block
-		publishIgnore := GetDisablePublishAccess(publishAccess)
 		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
 		accessible := CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) &&
 			(password == "" || CheckPublishAuthCookie(c, passwordID, password))
@@ -1390,14 +1550,25 @@ func FilterGraphByPublishAccess(c *gin.Context, publishAccess PublishAccess, nod
 	return
 }
 
-func FilterTagsByPublishIgnore(publishIgnore PublishAccess, tags *Tags) (ret *Tags) {
-	spans := sql.QueryTagSpans("")
+func FilterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags) (ret *Tags) {
+	return filterTagsByPublishAccess(c, publishAccess, tags, sql.QueryTagSpans(""))
+}
+
+func filterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags, spans []*sql.Span) (ret *Tags) {
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
 	labelCounts := make(map[string]int)
 	for _, span := range spans {
-		if CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishIgnore) {
-			label := util.UnescapeHTML(span.Content)
-			labelCounts[label] += 1
+		if !CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishInvisible) ||
+			!CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishDisable) {
+			continue
 		}
+		passwordID, password := GetPathPasswordByPublishAccess(span.Box, span.Path, publishAccess)
+		if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
+			continue
+		}
+		label := util.UnescapeHTML(span.Content)
+		labelCounts[label] += 1
 	}
 
 	ret = &Tags{}

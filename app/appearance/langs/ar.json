@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "سلوك النقر على شارة قاعدة البيانات",
+  "databaseAttrClickModeTip": "تعيين ما يحدث عند النقر على شارة قاعدة البيانات",
+  "focusBlockAndExpandDatabasePanel": "التركيز على الكتلة وتوسيع لوحة قاعدة البيانات",
+  "openBlockAttributePanel": "فتح لوحة سمات الكتلة",
   "backlinkShowBottomTip": "عند التمكين، تُعرض لوحة تحتوي على الروابط المرجعية والإشارات في أسفل المستند",
   "databaseAttrShowTip": "عند إيقافه، تُخفى لوحة قاعدة البيانات بالكامل؛ وعند إعادة تشغيله، تُستعاد الإعدادات السابقة",
   "databaseAttrShow": "إظهار لوحة قاعدة البيانات أعلى المستند",

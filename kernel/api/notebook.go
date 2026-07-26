@@ -52,6 +52,11 @@ func getNotebookInfo(c *gin.Context) {
 		ret.Msg = "notebook [" + boxID + "] not found"
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) && !isNotebookVisibleByPublishAccess(box, model.GetPublishAccess()) {
+		ret.Code = -1
+		ret.Msg = "notebook [" + boxID + "] not found"
+		return
+	}
 
 	boxInfo := box.GetInfo()
 	ret.Data = map[string]any{
@@ -329,6 +334,11 @@ func getNotebookConf(c *gin.Context) {
 		ret.Msg = "notebook [" + notebook + "] not found"
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) && !isNotebookVisibleByPublishAccess(box, model.GetPublishAccess()) {
+		ret.Code = -1
+		ret.Msg = "notebook [" + notebook + "] not found"
+		return
+	}
 
 	boxConf := box.GetConf()
 	if !model.IsAdminRoleContext(c) {
@@ -445,21 +455,7 @@ func lsNotebooks(c *gin.Context) {
 			publishAccess = model.GetPublishAccess()
 			tempNotebooks := []*model.Box{}
 			for _, notebook := range notebooks {
-				// 筛除关闭的笔记本
-				if notebook.Closed {
-					continue
-				}
-				// 筛除发布不可见的笔记本
-				invisible := false
-				for _, item := range publishAccess {
-					if item.ID == notebook.ID {
-						if !item.Visible {
-							invisible = true
-						}
-						break
-					}
-				}
-				if invisible {
+				if !isNotebookVisibleByPublishAccess(notebook, publishAccess) {
 					continue
 				}
 				tempNotebooks = append(tempNotebooks, notebook)
@@ -485,6 +481,19 @@ func lsNotebooks(c *gin.Context) {
 		"notebooks":     notebooks,
 		"boxDocEnabled": boxDocEnabled,
 	}
+}
+
+func isNotebookVisibleByPublishAccess(notebook *model.Box, publishAccess model.PublishAccess) bool {
+	if nil == notebook || notebook.Closed || notebook.Encrypted {
+		return false
+	}
+
+	for _, item := range publishAccess {
+		if item.ID == notebook.ID {
+			return item.Visible
+		}
+	}
+	return true
 }
 
 // enableEncryptedNotebooks 启用加密笔记本功能并设置主密码。

@@ -37,6 +37,7 @@ func TestSyObjectBase(t *testing.T) {
 		{"with parent dir", "/20240101120000-aaa/20240101120000-1a2b3c4.sy", validBase, false},
 		{"deep parent dir", "20240101120000-aaa/20240101120000-bbb/20240101120000-1a2b3c4.sy", validBase, false},
 		{"windows backslash", "\\20240101120000-aaa\\20240101120000-1a2b3c4.sy", validBase, false},
+		{"mixed separators", "20240101120000-aaa\\20240101120000-bbb/20240101120000-1a2b3c4.sy", validBase, false},
 		{"non-sy extension", "/20240101120000-1a2b3c4.json", "", true},
 		{"no extension", "/20240101120000-1a2b3c4", "", true},
 		{"bad stem not node id", "/notanid.sy", "", true},
@@ -81,12 +82,22 @@ func TestSyAADIndependentOfParentDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	aadWithBackslash, err := SyAAD(boxID, "\\20240101120000-parent\\"+base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	aadWithMixedSeparators, err := SyAAD(boxID, "20240101120000-a\\20240101120000-b/"+base)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	if aadBare != aadWithDir || aadBare != aadDeepDir {
-		t.Fatalf("AAD must be independent of parent dir: bare=%q dir=%q deep=%q", aadBare, aadWithDir, aadDeepDir)
+	if aadBare != aadWithDir || aadBare != aadDeepDir || aadBare != aadWithBackslash ||
+		aadBare != aadWithMixedSeparators {
+		t.Fatalf("AAD must be independent of parent dir and path separator: bare=%q dir=%q deep=%q backslash=%q mixed=%q",
+			aadBare, aadWithDir, aadDeepDir, aadWithBackslash, aadWithMixedSeparators)
 	}
 	// AAD 不应包含目录分隔符，只含基名
-	if strings.Contains(strings.TrimPrefix(aadBare, "siyuan:v1:file:"+boxID+":"), "/") {
+	if strings.ContainsAny(strings.TrimPrefix(aadBare, "siyuan:v1:file:"+boxID+":"), "/\\") {
 		t.Fatalf("AAD must not contain path separator: %q", aadBare)
 	}
 }

@@ -45,7 +45,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.7.4-alpha.1"
+	Ver       = "3.7.4-alpha.2"
 	IsInsider = false
 )
 
@@ -367,6 +367,7 @@ func initWorkspaceDir(workspaceArg string) {
 	os.RemoveAll(filepath.Join(TempDir, "repo"))
 	// export 目录只保存临时文件，启动时统一清理；插件不得依赖其中的文件跨进程存续。
 	os.RemoveAll(filepath.Join(TempDir, "export"))
+	os.RemoveAll(filepath.Join(TempDir, "clipboard"))
 	os.Setenv("TMPDIR", osTmpDir)
 	os.Setenv("TEMP", osTmpDir)
 	os.Setenv("TMP", osTmpDir)

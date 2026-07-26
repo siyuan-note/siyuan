@@ -731,7 +731,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
 
 export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLElement, value?: any,
                                        cElements?: HTMLElement[], columns?: IAVColumn[], html?: string, getOperations = false,
-                                       forceOperation = false) => {
+                                       forceOperation = false, replaceSelectValues = false) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -846,15 +846,16 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         } else if (type === "mSelect" || type === "select") {
             // 不传入为删除
             if (typeof value === "string") {
+                const oldSelectValues = replaceSelectValues ? [] : oldValue.mSelect;
                 const newMSelectValue: IAVCellSelectValue[] = [];
-                let colorIndex = oldValue.mSelect.length;
+                let colorIndex = oldSelectValues.length;
                 // 以逗号分隔，去重，去空，去换行后做为选项
                 [...new Set(value.split(",").map(v => v.trim().replace(/\n|\r\n|\r|\u2028|\u2029/g, "")))].forEach((item) => {
                     if (!item) {
                         return;
                     }
                     let hasSameContent = false;
-                    oldValue.mSelect.find((mSelectItem) => {
+                    oldSelectValues.find((mSelectItem) => {
                         if (mSelectItem.content === item) {
                             hasSameContent = true;
                             return true;
@@ -869,7 +870,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                         color: colorIndex.toString()
                     });
                 });
-                newValue = oldValue.mSelect.concat(newMSelectValue);
+                newValue = oldSelectValues.concat(newMSelectValue);
             }
         } else if (type === "block" && typeof value === "string" && oldValue.block.id) {
             newValue = {

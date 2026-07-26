@@ -160,12 +160,7 @@ export class Editor extends Model {
         }
         const blockId = this.getBacklinkBlockId();
         const rootId = this.editor.protyle.block.rootID;
-        if (this.backlink.blockId !== blockId || this.backlink.rootId !== rootId) {
-            this.backlink.switchBlock(blockId, rootId, this.editor.protyle.notebookId);
-            return;
-        }
-        this.backlink.markDirty();
-        this.backlink.refreshIfVisible(true);
+        this.backlink.switchBlock(blockId, rootId, this.editor.protyle.notebookId);
     }
 
     public destroy() {

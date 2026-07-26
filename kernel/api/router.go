@@ -337,6 +337,8 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/clipboard/readFilePaths", model.CheckAuth, model.CheckAdminRole, readFilePaths)
 	ginServer.Handle("POST", "/api/clipboard/writeFilePath", model.CheckAuth, model.CheckAdminRole, writeFilePath)
+	ginServer.Handle("POST", "/api/clipboard/prepareRichText", model.CheckAuth, model.CheckAdminRole, prepareRichText)
+	ginServer.Handle("POST", "/api/clipboard/cleanupRichText", model.CheckAuth, model.CheckAdminRole, cleanupRichText)
 
 	ginServer.Handle("POST", "/api/asset/uploadCloud", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, uploadCloud)
 	ginServer.Handle("POST", "/api/asset/uploadCloudByAssetsPaths", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, uploadCloudByAssetsPaths)
@@ -527,7 +529,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/renderHistoryAttributeView", model.CheckAuth, model.CheckAdminRole, renderHistoryAttributeView)
 	ginServer.Handle("POST", "/api/av/renderSnapshotAttributeView", model.CheckAuth, model.CheckAdminRole, renderSnapshotAttributeView)
 	ginServer.Handle("POST", "/api/av/getAttributeViewKeys", model.CheckAuth, getAttributeViewKeys)
-	ginServer.Handle("POST", "/api/av/getAttributeViewFieldViews", model.CheckAuth, getAttributeViewFieldViews)
+	ginServer.Handle("POST", "/api/av/getAttributeViewFieldViews", model.CheckAuth, model.CheckReadonly, getAttributeViewFieldViews)
 	ginServer.Handle("POST", "/api/av/getAttributeViewBacklinks", model.CheckAuth, getAttributeViewBacklinks)
 	ginServer.Handle("POST", "/api/av/setAttributeViewBlockAttr", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAttributeViewBlockAttr)
 	ginServer.Handle("POST", "/api/av/batchSetAttributeViewBlockAttrs", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchSetAttributeViewBlockAttrs)

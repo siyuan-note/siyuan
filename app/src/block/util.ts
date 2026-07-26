@@ -125,8 +125,8 @@ export const refreshSbResize = (sbElement: Element) => {
 
 // 子块进出超级块后，重新分配所有子块的宽度（按比例均摊 gap），避免 gap 不均或换行
 // 仅当超级块中已有子块设置了宽度时才调整（否则保持 CSS 默认等分）
-// 返回被改动的块信息（id + 改前 HTML），供调用方持久化
-export const rebalanceSbWidth = (sbElement: Element): Array<{id: string, oldHTML: string}> => {
+// 返回被改动的块信息（id + 改前 style），供调用方持久化
+export const rebalanceSbWidth = (sbElement: Element): Array<{id: string, oldStyle: string}> => {
     if (!sbElement || sbElement.getAttribute("data-sb-layout") !== "col") {
         return [];
     }
@@ -155,20 +155,20 @@ export const rebalanceSbWidth = (sbElement: Element): Array<{id: string, oldHTML
     });
     // 归一化到总和 1，使子块填满整个超级块（删除/移入后不留空白）
     const totalRatio = ratios.reduce((s, r) => s + r, 0) || 1;
-    // 记录改前 HTML 用于持久化
-    const changes: Array<{id: string, oldHTML: string}> = [];
+    // 记录改前 style 用于持久化
+    const changes: Array<{id: string, oldStyle: string}> = [];
     children.forEach((child, i) => {
-        const oldHTML = child.outerHTML;
+        const oldStyle = child.getAttribute("style") || "";
         const pct = Math.round((ratios[i] / totalRatio) * 100 * 10) / 10;
         child.style.width = `calc(${pct}% - ${gapShare}px)`;
         child.style.flex = "none";
-        changes.push({id: child.getAttribute("data-node-id"), oldHTML});
+        changes.push({id: child.getAttribute("data-node-id"), oldStyle});
     });
     return changes;
 };
 
 // 刷新超级块的拖拽手柄并重新分配子块宽度，把变更持久化到 do/undo operations
-// 宽度撤销插入到 undoOperations 头部，确保 update undo 先于 move undo 执行（位置恢复后再还原宽度会错位）
+// 宽度撤销插入到 undoOperations 头部，确保 setAttrs undo 先于 move undo 执行（位置恢复后再还原宽度会错位）
 // 已脱离 DOM 的超级块会被跳过（cancelSB 可能已将其删除）
 export const refreshSbAndPersistWidth = (sbElement: Element,
                                           doOperations: IOperation[], undoOperations: IOperation[]) => {
@@ -180,8 +180,17 @@ export const refreshSbAndPersistWidth = (sbElement: Element,
     widthChanges.forEach(change => {
         const targetEl = sbElement.querySelector(`[data-node-id="${change.id}"]`);
         if (targetEl) {
-            doOperations.push({action: "update", id: change.id, data: targetEl.outerHTML});
-            undoOperations.splice(0, 0, {action: "update", id: change.id, data: change.oldHTML});
+            // 折叠标题的子块可能未渲染到 DOM，只持久化 style 可避免用不完整 HTML 覆盖块内容。
+            doOperations.push({
+                action: "setAttrs",
+                id: change.id,
+                data: JSON.stringify({style: targetEl.getAttribute("style") || ""})
+            });
+            undoOperations.splice(0, 0, {
+                action: "setAttrs",
+                id: change.id,
+                data: JSON.stringify({style: change.oldStyle})
+            });
         }
     });
 };

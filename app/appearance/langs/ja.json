@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "データベースバッジをクリックしたときの動作",
+  "databaseAttrClickModeTip": "データベースバッジをクリックしたときの動作を設定します",
+  "focusBlockAndExpandDatabasePanel": "ブロックにフォーカスしてデータベースパネルを展開",
+  "openBlockAttributePanel": "ブロック属性パネルを開く",
   "backlinkShowBottomTip": "有効にすると、文書の下部にバックリンクとメンションを含むパネルが表示されます",
   "databaseAttrShowTip": "無効にするとデータベースパネル全体が非表示になり、再度有効にすると以前の設定が復元されます",
   "databaseAttrShow": "文書の上部にデータベースパネルを表示",

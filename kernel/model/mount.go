@@ -183,6 +183,7 @@ func RemoveBox(boxID string) (err error) {
 	// 删目录前缓存加密状态：删目录后 conf.json 不复存在，IsEncryptedBox 会返回 false
 	isEncrypted := IsEncryptedBox(boxID)
 	unmount0(boxID)
+	ClearRichClipboardBox(boxID)
 	if !isEncrypted {
 		unindex(boxID)
 	}

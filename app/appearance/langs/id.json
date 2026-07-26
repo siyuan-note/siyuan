@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Perilaku saat mengeklik lencana basis data",
+  "databaseAttrClickModeTip": "Atur tindakan yang dilakukan saat mengeklik lencana basis data",
+  "focusBlockAndExpandDatabasePanel": "Fokuskan blok dan perluas panel basis data",
+  "openBlockAttributePanel": "Buka panel atribut blok",
   "backlinkShowBottomTip": "Saat diaktifkan, panel berisi pranala balik dan penyebutan ditampilkan di bagian bawah dokumen",
   "databaseAttrShowTip": "Saat dinonaktifkan, seluruh panel basis data disembunyikan; pengaturan sebelumnya dipulihkan saat diaktifkan kembali",
   "databaseAttrShow": "Tampilkan panel basis data di bagian atas dokumen",

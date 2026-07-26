@@ -1,6 +1,23 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
+import {getAllEditor, getAllModels} from "../../../layout/getAll";
+
+const refreshDatabaseAttributePanels = (protyle: IProtyle, avID: string) => {
+    protyle.databaseAttributePanel?.refresh();
+    getAllEditor().forEach((editor) => {
+        if (editor.protyle !== protyle && editor.protyle.databaseAttributePanel?.hasDatabase(avID)) {
+            editor.protyle.databaseAttributePanel.refresh();
+        }
+    });
+    /// #if !MOBILE
+    getAllModels().custom.forEach((model) => {
+        if (model.type === "siyuan-database-row" && model.data.avID === avID) {
+            model.update?.();
+        }
+    });
+    /// #endif
+};
 
 const addFormatItem = (options: {
     menu: Menu,
@@ -27,7 +44,9 @@ const addFormatItem = (options: {
                 avID: options.avID,
                 format: options.oldFormat,
                 type: "number",
-            }]);
+            }], {
+                callback: () => refreshDatabaseAttributePanels(options.protyle, options.avID),
+            });
             options.avPanelElement.remove();
         }
     });

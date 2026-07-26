@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -28,6 +29,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -66,6 +68,177 @@ func TestSetSortRejectsInvalidRequest(t *testing.T) {
 				t.Fatalf("invalid request returned code %d: %s", response.Code, recorder.Body.String())
 			}
 		})
+	}
+}
+
+func TestPublishAccessConfigurationRejectsEncryptedNotebook(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const (
+		boxID = "20260726000000-encrypt"
+		docID = "20260726000001-encrypt"
+	)
+	oldDataDir := util.DataDir
+	oldPublishAccess := model.PublishAccess{}
+	if oldDataDir != "" {
+		oldPublishAccess = model.GetPublishAccess()
+	}
+	oldConf := model.Conf
+	oldLangs := util.Langs
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Lang = "test"
+	util.Langs = map[string]map[int]string{
+		"test": {313: "Encrypted notebooks do not support this operation"},
+		"en":   {313: "Encrypted notebooks do not support this operation"},
+	}
+	if err := model.SetPublishAccess(model.PublishAccess{}); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+		model.Conf = oldConf
+		util.Langs = oldLangs
+		if oldDataDir != "" {
+			if err := model.SetPublishAccess(oldPublishAccess); err != nil {
+				t.Errorf("restore publish access failed: %v", err)
+			}
+		}
+	})
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Encrypted = true
+	if err := (&model.Box{ID: boxID}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(util.DataDir, boxID, docID+".sy"), []byte("{}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.POST("/api/filetree/setPublishAccess", setPublishAccess)
+	engine.POST("/api/filetree/getPublishAccess", getPublishAccess)
+	engine.POST("/api/filetree/authFilePublishAccess", authFilePublishAccess)
+	tests := []struct {
+		name string
+		path string
+		body string
+	}{
+		{
+			name: "set",
+			path: "/api/filetree/setPublishAccess",
+			body: `{"id":"` + boxID + `","visible":true,"password":"","disable":false}`,
+		},
+		{
+			name: "get",
+			path: "/api/filetree/getPublishAccess",
+			body: `{"ids":["` + boxID + `"]}`,
+		},
+		{
+			name: "authenticate",
+			path: "/api/filetree/authFilePublishAccess",
+			body: `{"id":"` + boxID + `","password":""}`,
+		},
+		{
+			name: "set locked document",
+			path: "/api/filetree/setPublishAccess",
+			body: `{"id":"` + docID + `","visible":true,"password":"","disable":false}`,
+		},
+		{
+			name: "get locked document",
+			path: "/api/filetree/getPublishAccess",
+			body: `{"ids":["` + docID + `"]}`,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, test.path, strings.NewReader(test.body))
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int `json:"code"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if response.Code != -1 {
+				t.Fatalf("encrypted notebook publish access returned code %d: %s", response.Code, recorder.Body.String())
+			}
+		})
+	}
+	if len(model.GetPublishAccess()) != 0 {
+		t.Fatal("encrypted notebook publish access should not be persisted")
+	}
+}
+
+func TestPublishReaderCannotBrowseEncryptedNotebook(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const (
+		boxID = "20260726000000-encrypt"
+		docID = "20260726000001-encrypt"
+	)
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+	})
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Encrypted = true
+	if err := (&model.Box{ID: boxID}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, model.RoleReader)
+		c.Next()
+	})
+	engine.POST("/api/filetree/listDocsByPath", listDocsByPath)
+	engine.POST("/api/filetree/getDoc", getDoc)
+
+	listRecorder := httptest.NewRecorder()
+	listRequest := httptest.NewRequest(
+		http.MethodPost,
+		"/api/filetree/listDocsByPath",
+		strings.NewReader(`{"notebook":"`+boxID+`","path":"/"}`),
+	)
+	listRequest.Header.Set("Content-Type", "application/json")
+	engine.ServeHTTP(listRecorder, listRequest)
+
+	listResponse := &struct {
+		Code int `json:"code"`
+		Data struct {
+			Files []any `json:"files"`
+		} `json:"data"`
+	}{}
+	if err := json.Unmarshal(listRecorder.Body.Bytes(), listResponse); err != nil {
+		t.Fatalf("unmarshal list response failed: %v", err)
+	}
+	if listResponse.Code != 0 || len(listResponse.Data.Files) != 0 {
+		t.Fatalf("publish reader enumerated encrypted notebook: %s", listRecorder.Body.String())
+	}
+
+	docRecorder := httptest.NewRecorder()
+	docRequest := httptest.NewRequest(
+		http.MethodPost,
+		"/api/filetree/getDoc",
+		strings.NewReader(`{"id":"`+docID+`","notebook":"`+boxID+`"}`),
+	)
+	docRequest.Header.Set("Content-Type", "application/json")
+	engine.ServeHTTP(docRecorder, docRequest)
+
+	docResponse := &struct {
+		Code int `json:"code"`
+	}{}
+	if err := json.Unmarshal(docRecorder.Body.Bytes(), docResponse); err != nil {
+		t.Fatalf("unmarshal document response failed: %v", err)
+	}
+	if docResponse.Code != 3 {
+		t.Fatalf("publish reader accessed encrypted document: %s", docRecorder.Body.String())
 	}
 }
 

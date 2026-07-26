@@ -17,12 +17,17 @@
 package model
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -60,6 +65,88 @@ func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
 
 	if !checkBlockTreeAccessableByPublishAccess(c, PublishAccess{{ID: docID, Visible: false}}, bt) {
 		t.Fatal("hidden document should remain directly accessible")
+	}
+}
+
+func TestEncryptedNotebookDeniedByPublishAccess(t *testing.T) {
+	const (
+		boxID = "20260726000000-encrypt"
+		docID = "20260726000001-encrypt"
+	)
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+		invalidateEncryptedPublishAccessCache()
+	})
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Encrypted = true
+	if err := (&Box{ID: boxID}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+
+	bt := &treenode.BlockTree{
+		ID:    docID,
+		BoxID: boxID,
+		Path:  "/" + docID + ".sy",
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	publishAccess := PublishAccess{{ID: boxID, Visible: true, Password: "password"}}
+
+	if CheckPathAccessableByPublishIgnore(boxID, bt.Path, GetInvisiblePublishAccess(publishAccess)) {
+		t.Fatal("encrypted notebook should be invisible to publish readers")
+	}
+	if CheckPathAccessableByPublishIgnore(boxID, bt.Path, GetDisablePublishAccess(publishAccess)) {
+		t.Fatal("encrypted notebook should be disabled for publish access")
+	}
+	if checkBlockTreeAccessableByPublishAccess(c, publishAccess, bt) {
+		t.Fatal("encrypted notebook content should not be accessible through publish")
+	}
+	if CheckBlockTreeMetadataAccessableByPublishAccess(c, publishAccess, bt) {
+		t.Fatal("encrypted notebook metadata should not be accessible through publish")
+	}
+	if CheckBlockTreeDiscoverableByPublishAccess(publishAccess, bt) {
+		t.Fatal("encrypted notebook should not be discoverable through publish")
+	}
+}
+
+func TestEncryptedPublishAccessCacheInvalidation(t *testing.T) {
+	const boxID = "20260726000002-encrypt"
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+		invalidateEncryptedPublishAccessCache()
+	})
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Encrypted = true
+	box := &Box{ID: boxID}
+	if err := box.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	if !IsEncryptedBoxDeniedByPublishAccess(boxID) {
+		t.Fatal("encrypted notebook should be present in publish access cache")
+	}
+
+	boxConf.Encrypted = false
+	data, err := json.MarshalIndent(boxConf, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json"), data, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if !IsEncryptedBoxDeniedByPublishAccess(boxID) {
+		t.Fatal("publish access should reuse its cached encrypted notebook snapshot")
+	}
+
+	invalidateEncryptedPublishAccessCache()
+	if IsEncryptedBoxDeniedByPublishAccess(boxID) {
+		t.Fatal("invalidated publish access cache should reload notebook encryption state")
 	}
 }
 
@@ -649,6 +736,55 @@ func TestFilterGraphByPublishAccess(t *testing.T) {
 	}
 	if filteredNodes[0].Refs != 1 || filteredNodes[1].Defs != 1 || filteredNodes[1].Size != 10 {
 		t.Fatalf("unexpected authenticated graph counts: %+v", filteredNodes)
+	}
+}
+
+func TestFilterTagsByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260726000000-boxid01"
+		publicDocID       = "20260726000001-public1"
+		protectedDocID    = "20260726000002-protect"
+		hiddenDocID       = "20260726000003-hidden1"
+		disabledDocID     = "20260726000004-disable"
+		protectedPassword = "password"
+	)
+	publishAccess := PublishAccess{
+		{ID: protectedDocID, Visible: true, Password: protectedPassword},
+		{ID: hiddenDocID, Visible: false},
+		{ID: disabledDocID, Visible: true, Disable: true},
+	}
+	spans := []*sql.Span{
+		{Box: boxID, Path: "/" + publicDocID + ".sy", Content: "shared"},
+		{Box: boxID, Path: "/" + protectedDocID + ".sy", Content: "shared"},
+		{Box: boxID, Path: "/" + protectedDocID + ".sy", Content: "protected"},
+		{Box: boxID, Path: "/" + hiddenDocID + ".sy", Content: "hidden"},
+		{Box: boxID, Path: "/" + disabledDocID + ".sy", Content: "disabled"},
+	}
+	newTags := func() *Tags {
+		return &Tags{
+			{Name: "shared", Label: "shared", Type: "tag", Count: 2},
+			{Name: "protected", Label: "protected", Type: "tag", Count: 1},
+			{Name: "hidden", Label: "hidden", Type: "tag", Count: 1},
+			{Name: "disabled", Label: "disabled", Type: "tag", Count: 1},
+		}
+	}
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	filtered := filterTagsByPublishAccess(c, publishAccess, newTags(), spans)
+	if len(*filtered) != 1 || (*filtered)[0].Label != "shared" || (*filtered)[0].Count != 1 {
+		t.Fatalf("unexpected unauthenticated tags: %+v", *filtered)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedDocID,
+		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+	})
+	filtered = filterTagsByPublishAccess(c, publishAccess, newTags(), spans)
+	if len(*filtered) != 2 ||
+		(*filtered)[0].Label != "shared" || (*filtered)[0].Count != 2 ||
+		(*filtered)[1].Label != "protected" || (*filtered)[1].Count != 1 {
+		t.Fatalf("unexpected authenticated tags: %+v", *filtered)
 	}
 }
 

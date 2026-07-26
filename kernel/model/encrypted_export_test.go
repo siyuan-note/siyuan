@@ -52,6 +52,13 @@ func TestLockBoxRevokesAndRemovesManagedExport(t *testing.T) {
 	if err = os.WriteFile(artifact, []byte("plaintext"), 0600); err != nil {
 		t.Fatal(err)
 	}
+	clipboardArtifact := filepath.Join(util.TempDir, "clipboard", boxID, "batch", "image.png")
+	if err = os.MkdirAll(filepath.Dir(clipboardArtifact), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(clipboardArtifact, []byte("plaintext"), 0600); err != nil {
+		t.Fatal(err)
+	}
 	relativePath := registerManagedEncryptedExport(boxID, filepath.Join("repo", exportID), artifact)
 
 	LockBox(boxID)
@@ -60,6 +67,9 @@ func TestLockBoxRevokesAndRemovesManagedExport(t *testing.T) {
 	}
 	if _, statErr := os.Stat(artifact); !os.IsNotExist(statErr) {
 		t.Fatalf("locking the notebook should remove the managed export artifact: %v", statErr)
+	}
+	if _, statErr := os.Stat(clipboardArtifact); !os.IsNotExist(statErr) {
+		t.Fatalf("locking the notebook should remove rich clipboard assets: %v", statErr)
 	}
 }
 

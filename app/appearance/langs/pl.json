@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Działanie po kliknięciu plakietki bazy danych",
+  "databaseAttrClickModeTip": "Ustaw działanie wykonywane po kliknięciu plakietki bazy danych",
+  "focusBlockAndExpandDatabasePanel": "Ustaw fokus na bloku i rozwiń panel bazy danych",
+  "openBlockAttributePanel": "Otwórz panel atrybutów bloku",
   "backlinkShowBottomTip": "Po włączeniu na dole dokumentu jest wyświetlany panel zawierający odniesienia zwrotne i wzmianki",
   "databaseAttrShowTip": "Po wyłączeniu cały panel bazy danych jest ukrywany; po ponownym włączeniu przywracane są wcześniejsze ustawienia",
   "databaseAttrShow": "Pokaż panel bazy danych u góry dokumentu",

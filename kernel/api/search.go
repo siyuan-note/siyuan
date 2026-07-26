@@ -468,6 +468,17 @@ func searchRefBlock(c *gin.Context) {
 		return
 	}
 
+	notebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, notebook) {
+		ret.Data = map[string]any{
+			"blocks": []*model.Block{},
+			"newDoc": false,
+			"k":      util.EscapeHTML(arg["k"].(string)),
+			"reqId":  reqId,
+		}
+		return
+	}
+
 	isSquareBrackets := false
 	if isSquareBracketsArg := arg["isSquareBrackets"]; nil != isSquareBracketsArg {
 		isSquareBrackets = isSquareBracketsArg.(bool)
@@ -485,7 +496,7 @@ func searchRefBlock(c *gin.Context) {
 	// 加密笔记本内的块引搜索走 InBox 版（只搜该 box 自己的加密 db，阻止跨加密边界引用）
 	var blocks []*model.Block
 	var newDoc bool
-	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+	if notebook != "" && model.IsEncryptedBox(notebook) {
 		blocks, newDoc = model.SearchRefBlockInBox(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase, notebook)
 	} else {
 		blocks, newDoc = model.SearchRefBlock(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase)
@@ -520,11 +531,23 @@ func fullTextSearchBlock(c *gin.Context) {
 		return
 	}
 
+	notebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, notebook) {
+		ret.Data = map[string]any{
+			"blocks":            []*model.Block{},
+			"matchedBlockCount": 0,
+			"matchedRootCount":  0,
+			"pageCount":         0,
+			"docMode":           false,
+		}
+		return
+	}
+
 	var blocks []*model.Block
 	var matchedBlockCount, matchedRootCount, pageCount int
 	var docMode bool
 	// 加密笔记本的全文搜索走 InBox 版（查加密 content db + blocks_fts）
-	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+	if notebook != "" && model.IsEncryptedBox(notebook) {
 		if !model.IsBoxUnlocked(notebook) {
 			ret.Code = -1
 			ret.Msg = "encrypted notebook locked"

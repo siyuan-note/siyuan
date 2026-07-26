@@ -55,8 +55,7 @@ func getTag(c *gin.Context) {
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
-		tags = model.FilterTagsByPublishIgnore(publishIgnore, tags)
+		tags = model.FilterTagsByPublishAccess(c, publishAccess, tags)
 	}
 	ret.Data = tags
 }

@@ -1041,7 +1041,7 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 		if matched {
 			tmp = append(tmp, b)
 
-			k := gulu.Str.SubstringsBetween(newText, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
+			k := getMarkedTextContents(newText, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
 			retMentionKeywords = append(retMentionKeywords, k...)
 		} else {
 			// columnFilter 中的命名、别名和备注命中的情况

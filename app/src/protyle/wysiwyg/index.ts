@@ -111,6 +111,7 @@ import {setFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
+import {enhanceRichClipboard} from "../util/richClipboard";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -593,6 +594,7 @@ export class WYSIWYG {
                         console.log("Copy write clipboard error:", e);
                     }
                 }
+                enhanceRichClipboard(textPlain, textHTML, protyle.notebookId);
             }
         });
 

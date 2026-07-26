@@ -117,6 +117,11 @@ export class MobileFiles extends Model {
                     event.preventDefault();
                     break;
                 } else if (target.classList.contains("b3-list-item__switch")) {
+                    if (target.closest("[data-encrypted=true]")) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
                     const rect = target.getBoundingClientRect();
                     const rootUL = hasTopClosestByTag(target, "UL");
                     openPublishAccessDialog(target.parentElement.getAttribute("data-type") === "navigation-root" ?
@@ -140,11 +145,7 @@ export class MobileFiles extends Model {
                 } else if (type === "publish-access") {
                     // 顶部栏中的按钮
                     target.classList.toggle("block__icon--active");
-                    const editingPublishAccess = target.classList.contains("block__icon--active");
-                    this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
-                        item.classList.toggle("fn__none", editingPublishAccess);
-                        item.nextElementSibling.classList.toggle("fn__none", !editingPublishAccess);
-                    });
+                    this.refreshPublishAccessSwitch();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -725,8 +726,8 @@ export class MobileFiles extends Model {
         const iconAriaLabel = isBoxDoc ?
             (hasChildren ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) :
             window.siyuan.languages.changeIcon;
-        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? " fn__none" : ""}" aria-label="${iconAriaLabel}">${iconContent}</span>`;
-        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
+        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess && !item.encrypted ? " fn__none" : ""}" aria-label="${iconAriaLabel}">${iconContent}</span>`;
+        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess && !item.encrypted ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item"${item.encrypted ? ' data-encrypted="true"' : ""}>
     <span class="b3-list-item__toggle fn__hidden">
@@ -740,7 +741,7 @@ export class MobileFiles extends Model {
     </span>
 </li>`;
         } else {
-            return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sortmode="${item.sortMode}">
+            return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sortmode="${item.sortMode}"${item.encrypted ? " data-encrypted=\"true\"" : ""}>
 <li class="b3-list-item" data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? item.id : ""}" style="--file-toggle-width:24px">
     <span class="b3-list-item__toggle${isBoxDoc && !hasChildren ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
@@ -1259,14 +1260,34 @@ class="b3-list-item" data-path="${item.path}" style="--file-toggle-width:${paddi
 </li>`;
     };
 
+    private updatePublishAccessControls(editingPublishAccess: boolean) {
+        this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
+            const encrypted = Boolean(item.closest("[data-encrypted=true]"));
+            item.classList.toggle("fn__none", editingPublishAccess && !encrypted);
+            const switchElement = item.nextElementSibling;
+            if (switchElement) {
+                switchElement.classList.toggle("fn__none", !editingPublishAccess || encrypted);
+            }
+        });
+    }
+
     private refreshPublishAccessSwitch() {
-        if (window.siyuan.config.readonly || window.siyuan.isPublish ||
-            !this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active")) {
+        const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
+        this.updatePublishAccessControls(editingPublishAccess);
+        if (window.siyuan.config.readonly || window.siyuan.isPublish || !editingPublishAccess) {
             return;
         }
         const ids: string[] = [];
-        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")));
-        this.element.querySelectorAll("[data-type=\"navigation-file\"][data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")));
+        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => {
+            if (!element.closest("[data-encrypted=true]")) {
+                ids.push(element.getAttribute("data-url"));
+            }
+        });
+        this.element.querySelectorAll("[data-type=\"navigation-file\"][data-node-id]").forEach((element: HTMLElement) => {
+            if (!element.closest("[data-encrypted=true]")) {
+                ids.push(element.getAttribute("data-node-id"));
+            }
+        });
         fetchPost("/api/filetree/getPublishAccess", {
             ids
         }, response => {

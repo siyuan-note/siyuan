@@ -225,7 +225,7 @@ func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeyword
 			blockKeys = append(blockKeys, alias)
 		}
 		if 0 < len(blockKeys) {
-			keys := gulu.Str.SubstringsBetween(newContent, search.GetMarkSpanStart(search.VirtualBlockRefDataType), search.GetMarkSpanEnd())
+			keys := getMarkedTextContents(newContent, search.GetMarkSpanStart(search.VirtualBlockRefDataType), search.GetMarkSpanEnd())
 			for _, k := range keys {
 				if gulu.Str.Contains(k, blockKeys) {
 					return true

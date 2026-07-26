@@ -348,10 +348,8 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             });
             const foldElement = document.createElement("template");
             foldElement.innerHTML = responseHTML.data;
-            Array.from(foldElement.content.children).reverse().forEach((childItem: HTMLElement, childIndex) => {
-                if (childIndex === foldElement.content.children.length - 1) {
-                    return;
-                }
+            let previousID = newId;
+            Array.from(foldElement.content.children).slice(1).forEach((childItem: HTMLElement) => {
                 childItem.removeAttribute("parent-heading");
                 childItem.querySelectorAll("[data-node-id]").forEach(subItem => {
                     subItem.setAttribute("data-node-id", Lute.NewNodeID());
@@ -367,12 +365,13 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
                     action: "insert",
                     data: childItem.outerHTML,
                     id: newChildId,
-                    previousID: newId,
+                    previousID,
                 });
                 undoOperations.push({
                     action: "delete",
                     id: newChildId,
                 });
+                previousID = newChildId;
             });
         }
     }

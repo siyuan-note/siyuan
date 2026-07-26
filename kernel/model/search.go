@@ -2536,6 +2536,14 @@ func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, 
 	return
 }
 
+func getMarkedTextContents(text, replacementStart, replacementEnd string) (ret []string) {
+	ret = gulu.Str.SubstringsBetween(text, replacementStart, replacementEnd)
+	for i, content := range ret {
+		ret[i] = stdhtml.UnescapeString(content)
+	}
+	return
+}
+
 var (
 	searchIgnoreLastModified int64
 	searchIgnore             []string

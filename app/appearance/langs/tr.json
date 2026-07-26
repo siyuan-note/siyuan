@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "Veritabanı rozetine tıklama davranışı",
+  "databaseAttrClickModeTip": "Veritabanı rozetine tıklandığında yapılacak işlemi ayarlayın",
+  "focusBlockAndExpandDatabasePanel": "Bloğa odaklan ve veritabanı panelini genişlet",
+  "openBlockAttributePanel": "Blok öznitelikleri panelini aç",
   "backlinkShowBottomTip": "Etkinleştirildiğinde geri bağlantılar ve bahsetmeler içeren bir panel belgenin altında gösterilir",
   "databaseAttrShowTip": "Devre dışı bırakıldığında veritabanı panelinin tamamı gizlenir; yeniden etkinleştirildiğinde önceki ayarlar geri yüklenir",
   "databaseAttrShow": "Belgenin üst kısmında veritabanı panelini göster",

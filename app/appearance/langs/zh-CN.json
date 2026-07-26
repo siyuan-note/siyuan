@@ -1,4 +1,8 @@
 {
+  "databaseAttrClickMode": "数据库角标点击操作",
+  "databaseAttrClickModeTip": "设置点击数据库角标时执行的操作",
+  "focusBlockAndExpandDatabasePanel": "聚焦块并展开数据库面板",
+  "openBlockAttributePanel": "打开块属性面板",
   "backlinkShowBottomTip": "启用后在文档底部显示包含反链和提及的面板",
   "databaseAttrShowTip": "关闭后隐藏整个数据库面板，重新开启后恢复原有设置",
   "databaseAttrShow": "在文档顶部显示数据库面板",

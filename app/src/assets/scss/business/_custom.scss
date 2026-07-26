@@ -417,16 +417,19 @@
 .av__row--hl .av__row-actions,
 .av__row--locate .av__row-actions,
 .av__cell--select > .av__row-actions,
-.av__cell--active > .av__row-actions,
-.av__gallery-item--select .av__row-actions,
-.av__gallery-item--locate .av__row-actions {
+.av__cell--active > .av__row-actions {
   background-color: var(--b3-theme-background);
   background-image: linear-gradient(var(--b3-theme-primary-lightest), var(--b3-theme-primary-lightest));
 }
 
-.av__gallery-item:hover:not(.av__gallery-item--select):not(.av__gallery-item--locate) .av__row-actions {
-  background-color: var(--b3-theme-background);
-  background-image: linear-gradient(var(--b3-theme-surface-light), var(--b3-theme-surface-light));
+.av__gallery-item .av__row-actions {
+  background-color: transparent;
+  background-image: none;
+  gap: 4px;
+
+  .av__row-action {
+    background-color: var(--b3-theme-background);
+  }
 }
 
 .protyle-db-row {

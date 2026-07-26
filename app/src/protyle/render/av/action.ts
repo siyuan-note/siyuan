@@ -973,7 +973,6 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
 export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAVCellValue, headerValue?: {
     icon?: string,
     name?: string,
-    pin?: boolean,
     type?: TAVCol
 }) => {
     // 属性面板更新列名
@@ -1012,7 +1011,6 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
 export const updateAttrViewColAnimation = (protyle: IProtyle, avID: string, colID: string, headerValue: {
     icon?: string,
     name?: string,
-    pin?: boolean,
     type?: TAVCol
 }) => {
     protyle.wysiwyg.element.querySelectorAll<HTMLElement>(

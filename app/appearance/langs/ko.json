@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "드래그하여 고정 열 범위 조정",
   "databaseTableView": "데이터베이스 표 보기",
   "databaseKanbanView": "데이터베이스 칸반 보기",
   "databaseGalleryView": "데이터베이스 카드 보기",
@@ -702,7 +703,7 @@
 	"unsplit": "분할 해제",
 	"unsplitAll": "모두 분할 해제",
 	"resetCardTip": "${x}개 플래시카드를 초기화하시겠습니까?",
-	"freezeCol": "열 고정",
+	"freezeCol": "이 열까지 고정",
 	"unfreezeCol": "열 고정 해제",
 	"snippetsTip": "코드 스니펫이 업데이트되었습니다. 저장하시겠습니까?",
 	"addBelowAbove": "클릭 <span class='ft__on-surface'>아래에 추가</span><br>⌥클릭 <span class='ft__on-surface'>위에 추가</span>",

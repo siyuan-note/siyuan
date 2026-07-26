@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "Trascina per regolare l'intervallo delle colonne bloccate",
   "databaseTableView": "Vista tabella del database",
   "databaseKanbanView": "Vista Kanban del database",
   "databaseGalleryView": "Vista schede del database",
@@ -702,8 +703,8 @@
 	"unsplit": "Dividi",
 	"unsplitAll": "Dividi tutto",
 	"resetCardTip": "Sei sicuro di voler reimpostare ${x} flashcard?",
-	"freezeCol": "Blocca campo",
-	"unfreezeCol": "Sblocca campo",
+	"freezeCol": "Blocca fino a questa colonna",
+	"unfreezeCol": "Sblocca colonne",
 	"snippetsTip": "Lo snippet di codice è stato aggiornato, vuoi salvarlo?",
 	"addBelowAbove": "Clicca <span class='ft__on-surface'>Aggiungi sotto</span><br>⌥Clicca <span class='ft__on-surface'>Aggiungi sopra</span>",
 	"imported": "Importazione completata",

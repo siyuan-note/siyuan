@@ -81,7 +81,7 @@ import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 import {selectRow, stickyRow, updateHeader} from "../render/av/row";
 import {updateAVRowSelect} from "../render/av/virtualScroll";
-import {showColMenu} from "../render/av/col";
+import {setFreezeColumn, showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {
@@ -104,6 +104,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
+import {avRender} from "../render/av/render";
 import {reloadProtyle} from "../util/reload";
 import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
@@ -1018,6 +1019,71 @@ export class WYSIWYG {
                         {action: "update", id: nextElement.getAttribute("data-node-id"), data: oldHTMLs.next},
                     ]);
                 };
+                this.preventClick = true;
+                event.preventDefault();
+                return;
+            }
+            // av 冻结范围
+            if (!protyle.disabled && target.classList.contains("av__freeze-drag")) {
+                if (!nodeElement) {
+                    return;
+                }
+                const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
+                const headerElement = hasClosestByClassName(target, "av__row--header") as HTMLElement;
+                if (!bodyElement || !headerElement) {
+                    return;
+                }
+                const headerCells = Array.from(headerElement.querySelectorAll<HTMLElement>(".av__cell"));
+                const oldFreezeColId = headerElement.querySelector<HTMLElement>('[data-freeze="true"]')?.dataset.colId || "";
+                let freezeColId = oldFreezeColId;
+                let moved = false;
+                const clearPreview = () => {
+                    bodyElement.querySelectorAll(".av__freeze-preview").forEach(item => {
+                        item.classList.remove("av__freeze-preview");
+                    });
+                };
+                const preview = () => {
+                    clearPreview();
+                    const selector = freezeColId ? `[data-col-id="${freezeColId}"]` : ".av__firstcol";
+                    bodyElement.querySelectorAll(selector).forEach(item => {
+                        item.classList.add("av__freeze-preview");
+                    });
+                };
+                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    const moveTarget = moveEvent.target as HTMLElement;
+                    const firstColElement = hasClosestByClassName(moveTarget, "av__firstcol");
+                    const cellElement = hasClosestByClassName(moveTarget, "av__cell") as HTMLElement;
+                    if (firstColElement && bodyElement.contains(firstColElement)) {
+                        freezeColId = "";
+                    } else if (cellElement && bodyElement.contains(cellElement)) {
+                        const cellIndex = headerCells.findIndex(item => item.dataset.colId === cellElement.dataset.colId);
+                        if (cellIndex > -1) {
+                            const cellRect = cellElement.getBoundingClientRect();
+                            freezeColId = moveEvent.clientX < cellRect.left + cellRect.width / 2
+                                ? (headerCells[cellIndex - 1]?.dataset.colId || "")
+                                : headerCells[cellIndex].dataset.colId;
+                        }
+                    } else if (headerCells.length > 0 &&
+                        moveEvent.clientX < headerCells[0].getBoundingClientRect().left) {
+                        freezeColId = "";
+                    }
+                    moved = true;
+                    preview();
+                };
+                documentSelf.onmouseup = () => {
+                    documentSelf.onmousemove = null;
+                    documentSelf.onmouseup = null;
+                    documentSelf.ondragstart = null;
+                    documentSelf.onselectstart = null;
+                    documentSelf.onselect = null;
+                    clearPreview();
+                    if (moved && freezeColId !== oldFreezeColId) {
+                        setFreezeColumn(protyle, nodeElement, freezeColId);
+                    }
+                };
+                documentSelf.ondragstart = () => false;
+                documentSelf.onselectstart = () => false;
+                documentSelf.onselect = () => false;
                 this.preventClick = true;
                 event.preventDefault();
                 return;
@@ -2095,6 +2161,14 @@ export class WYSIWYG {
         protyle.observer = new ResizeObserver(() => {
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
                 if (item.querySelector(".av__scroll")) {
+                    const width = Math.round(item.clientWidth);
+                    if (item.querySelector('[data-freeze="true"]') &&
+                        parseInt(item.dataset.freezeWidth) !== width) {
+                        item.dataset.freezeWidth = width.toString();
+                        item.removeAttribute("data-render");
+                        avRender(item, protyle);
+                        return;
+                    }
                     stickyRow(item, protyle.contentElement, "all");
                 }
             });

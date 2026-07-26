@@ -723,6 +723,31 @@ data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px
     window.siyuan.menus.menu.remove();
 };
 
+export const setFreezeColumn = (protyle: IProtyle, blockElement: Element, freezeColId: string) => {
+    const freezeElement = blockElement.querySelector<HTMLElement>(".av__row--header .av__cell[data-freeze=\"true\"]");
+    const oldFreezeColId = freezeElement?.dataset.colId || "";
+    if (freezeColId === oldFreezeColId) {
+        return;
+    }
+    const operation = {
+        action: "setAttrViewColPin" as TOperation,
+        id: freezeColId || oldFreezeColId,
+        avID: blockElement.getAttribute("data-av-id"),
+        data: !!freezeColId,
+        blockID: blockElement.getAttribute("data-node-id"),
+        viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+    };
+    const undoOperation = {
+        action: "setAttrViewColPin" as TOperation,
+        id: oldFreezeColId || freezeColId,
+        avID: operation.avID,
+        data: !!oldFreezeColId,
+        blockID: operation.blockID,
+        viewID: operation.viewID,
+    };
+    transaction(protyle, [operation], [undoOperation]);
+};
+
 export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
@@ -957,26 +982,13 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             }
         });
     }
-    const isPin = cellElement.dataset.pin === "true";
+    const isFreeze = cellElement.dataset.freeze === "true";
     menu.addItem({
-        id: isPin ? "unfreezeCol" : "freezeCol",
-        icon: isPin ? "iconUnpin" : "iconPin",
-        label: isPin ? window.siyuan.languages.unfreezeCol : window.siyuan.languages.freezeCol,
+        id: isFreeze ? "unfreezeCol" : "freezeCol",
+        icon: isFreeze ? "iconUnpin" : "iconPin",
+        label: isFreeze ? window.siyuan.languages.unfreezeCol : window.siyuan.languages.freezeCol,
         click() {
-            transaction(protyle, [{
-                action: "setAttrViewColPin",
-                id: colId,
-                avID,
-                data: !isPin,
-                blockID
-            }], [{
-                action: "setAttrViewColPin",
-                id: colId,
-                avID,
-                data: isPin,
-                blockID
-            }]);
-            updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {pin: !isPin});
+            setFreezeColumn(protyle, blockElement, isFreeze ? "" : colId);
         }
     });
     const align = (cellElement.dataset.align || "") as TAVAlign;

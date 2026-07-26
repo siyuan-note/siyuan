@@ -17,13 +17,54 @@
 package model
 
 import (
+	"bytes"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestGenerateDocHistorySkipsRemovedSource(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	sourceFile := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)
+	if err := os.Remove(sourceFile); err != nil {
+		t.Fatalf("remove source document failed: %v", err)
+	}
+
+	if err := generateDocHistoryFile(fixture.box.ID, sourceFile, t.TempDir(), util.NewLute()); err != nil {
+		t.Fatalf("generate history for removed source failed: %v", err)
+	}
+}
+
+func TestGenerateDocHistoryFromDataDoesNotReopenRemovedSource(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	sourceFile := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)
+	data, err := filelock.ReadFile(sourceFile)
+	if err != nil {
+		t.Fatalf("read source document failed: %v", err)
+	}
+	if err = os.Remove(sourceFile); err != nil {
+		t.Fatalf("remove source document failed: %v", err)
+	}
+
+	historyDir := t.TempDir()
+	if err = generateDocHistoryFromData(fixture.box.ID, sourceFile, historyDir, data, util.NewLute()); err != nil {
+		t.Fatalf("generate history from captured data failed: %v", err)
+	}
+	historyPath := filepath.Join(historyDir, fixture.box.ID, strings.TrimPrefix(sourceFile,
+		filepath.Join(util.DataDir, fixture.box.ID)))
+	historyData, err := filelock.ReadFile(historyPath)
+	if err != nil {
+		t.Fatalf("read generated history failed: %v", err)
+	}
+	if !bytes.Equal(historyData, data) {
+		t.Fatal("generated history differs from captured source data")
+	}
+}
 
 func TestGetRollbackDocPathTreatsBoxDocAsRoot(t *testing.T) {
 	fixture := setupFileOperationTest(t)

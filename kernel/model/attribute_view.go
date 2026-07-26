@@ -5184,11 +5184,9 @@ func setAttributeViewColPin(operation *Operation) (err error) {
 
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
+		pin := operation.Data.(bool)
 		for _, column := range view.Table.Columns {
-			if column.ID == operation.ID {
-				column.Pin = operation.Data.(bool)
-				break
-			}
+			column.Pin = pin && column.ID == operation.ID
 		}
 	case av.LayoutTypeGallery, av.LayoutTypeKanban:
 		return

@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "Drag to adjust the frozen column range",
   "databaseTableView": "Database table view",
   "databaseKanbanView": "Database Kanban view",
   "databaseGalleryView": "Database card view",
@@ -702,8 +703,8 @@
 	"unsplit": "Unsplit",
 	"unsplitAll": "Unsplit All",
 	"resetCardTip": "Are you sure reset ${x} flashcards?",
-	"freezeCol": "Freeze field",
-	"unfreezeCol": "Unfreeze field",
+	"freezeCol": "Freeze through this column",
+	"unfreezeCol": "Unfreeze columns",
 	"snippetsTip": "The code snippet has been updated, do you want to save it?",
 	"addBelowAbove": "Click <span class='ft__on-surface'>Add below</span><br>⌥Click <span class='ft__on-surface'>Add above</span>",
 	"imported": "Import completed",

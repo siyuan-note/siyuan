@@ -960,6 +960,40 @@
     z-index: 2; // 需大于 av__widthdrag，否则横行滚动后，拖拽会悬浮于 stick 列上
     display: flex;
     background-color: var(--b3-parent-background);
+
+    &:has(> .av__cell, > .av__calc) {
+      box-shadow: inset -1px 0 0 var(--b3-border-color);
+    }
+  }
+
+  &__freeze-drag {
+    bottom: 0;
+    cursor: col-resize;
+    position: absolute;
+    right: -5px;
+    top: 0;
+    touch-action: none;
+    width: 10px;
+    z-index: 3;
+
+    &::after {
+      background-color: transparent;
+      border-radius: 1px;
+      content: '';
+      height: 20px;
+      left: 4px;
+      position: absolute;
+      top: calc(50% - 10px);
+      width: 2px;
+    }
+
+    &:hover::after {
+      background-color: var(--b3-theme-primary);
+    }
+  }
+
+  &__freeze-preview {
+    box-shadow: inset -2px 0 0 var(--b3-theme-primary) !important;
   }
 
   &__widthdrag {

@@ -1550,6 +1550,14 @@ type moveDocsRefresh struct {
 	notebooks map[string]struct{}
 }
 
+type moveDocResult struct {
+	FromNotebook string `json:"fromNotebook"`
+	FromPath     string `json:"fromPath"`
+	ToNotebook   string `json:"toNotebook"`
+	ToPath       string `json:"toPath"`
+	NewPath      string `json:"newPath"`
+}
+
 func newMoveDocsRefresh() *moveDocsRefresh {
 	return &moveDocsRefresh{
 		parents:   map[moveDocsRefreshKey]*parse.Tree{},
@@ -1652,7 +1660,16 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 	FlushTxQueue()
 	luteEngine := util.NewLute()
 	refresh := newMoveDocsRefresh()
-	defer refresh.flush()
+	movedDocs := make([]moveDocResult, 0, len(pathsBoxes))
+	defer func() {
+		if 0 < len(movedDocs) {
+			evt := util.NewCmdResult("moveDocs", 0, util.PushModeBroadcast)
+			evt.Data = map[string]any{"moves": movedDocs}
+			evt.Callback = callback
+			util.PushEvent(evt)
+		}
+		refresh.flush()
+	}()
 	count := 0
 	for fromPath, fromBox := range pathsBoxes {
 		count++
@@ -1660,10 +1677,18 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(70), fmt.Sprintf("%d/%d", count, len(fromPaths))))
 		}
 
-		_, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine, callback, refresh)
+		var newPath string
+		newPath, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine, callback, refresh)
 		if err != nil {
 			return
 		}
+		movedDocs = append(movedDocs, moveDocResult{
+			FromNotebook: fromBox.ID,
+			FromPath:     fromPath,
+			ToNotebook:   toBox.ID,
+			ToPath:       toPath,
+			NewPath:      newPath,
+		})
 	}
 	cache.ClearDocsIAL()
 	IncSync()

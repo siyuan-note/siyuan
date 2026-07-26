@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "Sleep om het bereik van bevroren kolommen aan te passen",
   "databaseTableView": "Tabelweergave van database",
   "databaseKanbanView": "Kanbanweergave van database",
   "databaseGalleryView": "Kaartweergave van database",
@@ -702,8 +703,8 @@
 	"unsplit": "Splitsing opheffen",
 	"unsplitAll": "Alle splitsingen opheffen",
 	"resetCardTip": "Weet u zeker dat u ${x} flitskaarten wilt resetten?",
-	"freezeCol": "Veld bevriezen",
-	"unfreezeCol": "Bevriezing opheffen",
+	"freezeCol": "Bevriezen tot en met deze kolom",
+	"unfreezeCol": "Kolommen ontdooien",
 	"snippetsTip": "Het codefragment is bijgewerkt, wilt u het opslaan?",
 	"addBelowAbove": "Klik <span class='ft__on-surface'>Onder toevoegen</span><br>⌥Klik <span class='ft__on-surface'>Boven toevoegen</span>",
 	"imported": "Importeren voltooid",

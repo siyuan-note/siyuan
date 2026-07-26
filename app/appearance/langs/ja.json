@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "ドラッグして固定範囲を調整",
   "databaseTableView": "データベース テーブルビュー",
   "databaseKanbanView": "データベース カンバンビュー",
   "databaseGalleryView": "データベース カードビュー",
@@ -702,7 +703,7 @@
 	"unsplit": "分割解除",
 	"unsplitAll": "すべての分割解除",
 	"resetCardTip": "${x} 枚のフラッシュカードをリセットしてもよろしいですか？",
-	"freezeCol": "列を固定",
+	"freezeCol": "この列まで固定",
 	"unfreezeCol": "列の固定を解除",
 	"snippetsTip": "コードスニペットが更新されました。保存しますか？",
 	"addBelowAbove": "クリック <span class='ft__on-surface'>下に追加</span><br>⌥クリック <span class='ft__on-surface'>上に追加</span>",

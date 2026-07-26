@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "Arraste para ajustar o intervalo de colunas congeladas",
   "databaseTableView": "Visualização de tabela do banco de dados",
   "databaseKanbanView": "Visualização Kanban do banco de dados",
   "databaseGalleryView": "Visualização de cartões do banco de dados",
@@ -702,8 +703,8 @@
 	"unsplit": "Não dividir",
 	"unsplitAll": "Não dividir tudo",
 	"resetCardTip": "Tem certeza que deseja redefinir ${x} cartões de memorização?",
-	"freezeCol": "Congelar campo",
-	"unfreezeCol": "Descongelar campo",
+	"freezeCol": "Congelar até esta coluna",
+	"unfreezeCol": "Descongelar colunas",
 	"snippetsTip": "O snippet de código foi atualizado, deseja salvá-lo?",
 	"addBelowAbove": "Clique <span class='ft__on-surface'>Adicionar abaixo</span><br>⌥Clique <span class='ft__on-surface'>Adicionar acima</span>",
 	"imported": "Importação concluída",

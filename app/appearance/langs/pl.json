@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "Przeciągnij, aby dostosować zakres zablokowanych kolumn",
   "databaseTableView": "Widok tabeli bazy danych",
   "databaseKanbanView": "Widok Kanban bazy danych",
   "databaseGalleryView": "Widok kart bazy danych",
@@ -702,8 +703,8 @@
 	"unsplit": "Rozdziel",
 	"unsplitAll": "Rozdziel wszystko",
 	"resetCardTip": "Czy na pewno chcesz zresetować ${x} fiszek?",
-	"freezeCol": "Zablokuj kolumnę",
-	"unfreezeCol": "Odblokuj kolumnę",
+	"freezeCol": "Zablokuj do tej kolumny",
+	"unfreezeCol": "Odblokuj kolumny",
 	"snippetsTip": "Fragment kodu został zaktualizowany, czy chcesz go zapisać?",
 	"addBelowAbove": "Kliknij <span class='ft__on-surface'>Dodaj poniżej</span><br>⌥Kliknij <span class='ft__on-surface'>Dodaj powyżej</span>",
 	"imported": "Import zakończony",

@@ -134,16 +134,18 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
 };
 
 const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData) => {
+    e.dataset.freezeWidth = Math.round(e.clientWidth).toString();
+    const freezeDragHTML = `<div class="av__freeze-drag ariaLabel" data-position="east" aria-label="${escapeAttr(window.siyuan.languages.freezeDrag)}"></div>`;
     let calcHTML = "";
-    let contentHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
-    let pinIndex = -1;
+    let contentHTML = `<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>${freezeDragHTML}</div>`;
+    let freezeIndex = -1;
     let pinMaxIndex = -1;
     let indexWidth = 0;
     const eWidth = e.clientWidth;
     data.columns.forEach((item, index) => {
         if (!item.hidden) {
             if (item.pin) {
-                pinIndex = index;
+                freezeIndex = index;
             }
             if (indexWidth < eWidth - 200) {
                 indexWidth += parseInt(item.width) || 200;
@@ -152,9 +154,9 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
         }
     });
     if (eWidth === 0) {
-        pinMaxIndex = pinIndex;
+        pinMaxIndex = freezeIndex;
     }
-    pinIndex = Math.min(pinIndex, pinMaxIndex);
+    const pinIndex = Math.min(freezeIndex, pinMaxIndex);
     if (pinIndex > -1) {
         contentHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
         calcHTML = '<div class="av__colsticky">';
@@ -166,15 +168,15 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
         }
         contentHTML += `<div class="av__cell av__cell--header" data-col-id="${column.id}"  draggable="true" 
 data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
+data-freeze="${freezeIndex === index}"
 data-desc="${escapeAttr(column.desc)}" data-align="${column.align || ""}" data-position="north"
 style="width: ${column.width || "200px"};">
     ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${escapeHtml(column.name)}</span>
-    ${column.pin ? '<svg class="av__cellheadericon av__cellheadericon--pin"><use xlink:href="#iconPin"></use></svg>' : ""}
     <div class="av__widthdrag"></div>
 </div>`;
         if (pinIndex === index) {
-            contentHTML += "</div>";
+            contentHTML += `${freezeDragHTML}</div>`;
         }
         if (column.type === "lineNumber") {
             // lineNumber type 不参与计算操作

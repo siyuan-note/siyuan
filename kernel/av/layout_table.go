@@ -61,7 +61,7 @@ func NewLayoutTable() *LayoutTable {
 type ViewTableColumn struct {
 	*BaseField
 
-	Pin   bool             `json:"pin"`             // 是否固定
+	Pin   bool             `json:"pin"`             // 是否为冻结边界
 	Width string           `json:"width"`           // 列宽度
 	Align TableColumnAlign `json:"align,omitempty"` // 内容对齐方式
 	Calc  *FieldCalc       `json:"calc,omitempty"`  // 计算规则
@@ -80,7 +80,7 @@ type Table struct {
 type TableColumn struct {
 	*BaseInstanceField
 
-	Pin   bool             `json:"pin"`   // 是否固定
+	Pin   bool             `json:"pin"`   // 是否为冻结边界
 	Width string           `json:"width"` // 列宽度
 	Align TableColumnAlign `json:"align"` // 内容对齐方式
 }

@@ -104,7 +104,7 @@ const handleTouchStart = (e: TouchEvent) => {
     if (dragState || manualState) return;
 
     // 原生 Drag 路径：元素有 draggable="true" 祖先（如文件树、列表标记、AV 行拖拽），优先走 Drag API
-    if (!target.classList.contains("av__widthdrag")) {
+    if (!target.classList.contains("av__widthdrag") && !target.classList.contains("av__freeze-drag")) {
         const draggable = getDraggableAncestor(target);
         if (draggable) {
             dragState = createDragState(draggable, touch, "touch", isMouseInput(touch));
@@ -130,6 +130,7 @@ const handleTouchStart = (e: TouchEvent) => {
         !target.closest(".search__drag") &&
         // 编辑器内部调整大小的控件不使用原生 Drag API。
         !target.closest(".av__widthdrag") &&
+        !target.closest(".av__freeze-drag") &&
         !target.closest(".av__drag-fill") &&
         !target.closest(".protyle-action__drag") &&
         !target.closest(".table__resize") &&
@@ -254,7 +255,8 @@ let suppressMouseClick = false;
 
 const handlePointerDown = (event: PointerEvent) => {
     if (event.pointerType !== "mouse" || event.button !== 0 || dragState || manualState ||
-        !(event.target instanceof Element) || event.target.closest(".av__widthdrag")) {
+        !(event.target instanceof Element) ||
+        event.target.closest(".av__widthdrag") || event.target.closest(".av__freeze-drag")) {
         return;
     }
 

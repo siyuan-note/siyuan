@@ -55,6 +55,7 @@ export const openFileById = async (options: {
     zoomIn?: boolean
     removeCurrentTab?: boolean
     openNewTab?: boolean
+    keepAVPanel?: boolean
     afterOpen?: (model: Model) => void,
     scrollPosition?: ScrollLogicalPosition
 }) => {
@@ -83,6 +84,7 @@ export const openFileById = async (options: {
         removeCurrentTab: options.removeCurrentTab,
         afterOpen: options.afterOpen,
         openNewTab: options.openNewTab,
+        keepAVPanel: options.keepAVPanel,
         scrollPosition: options.scrollPosition,
     });
 };
@@ -106,9 +108,11 @@ export const openFile = async (options: IOpenFileOptions) => {
         options.removeCurrentTab = true;
     }
     // https://github.com/siyuan-note/siyuan/issues/10168
-    document.querySelectorAll(".av__panel, .av__mask").forEach(item => {
-        item.remove();
-    });
+    if (!options.keepAVPanel) {
+        document.querySelectorAll(".av__panel, .av__mask").forEach(item => {
+            item.remove();
+        });
+    }
     // 打开 PDF 时移除文档光标
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();

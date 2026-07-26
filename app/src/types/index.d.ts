@@ -791,6 +791,7 @@ interface IOpenFileOptions {
     zoomIn?: boolean // 是否缩放
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
     openNewTab?: boolean // 使用新页签打开
+    keepAVPanel?: boolean // 打开时保留数据库面板
     afterOpen?: (model?: import("../layout/Model").Model) => void // 打开后回调
 }
 

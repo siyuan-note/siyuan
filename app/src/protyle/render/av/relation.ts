@@ -648,6 +648,8 @@ ${genRelationLoaderHTML(state.loading)}`;
             title: blockElement.textContent,
             boundBlockID: blockElement.dataset.id,
             isDetached: !blockElement.classList.contains("popover__block"),
+        }, {
+            keepAVPanel: true,
         });
     });
     listElement.addEventListener("scroll", () => {

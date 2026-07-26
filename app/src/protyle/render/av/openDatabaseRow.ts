@@ -141,6 +141,7 @@ const getDatabaseRowPreviewTab = (blockID: string) => {
 
 export const openDatabaseRowByData = async (protyle: IProtyle, data: IDatabaseRowOpenData, options?: {
     position?: string,
+    keepAVPanel?: boolean,
 }) => {
     const title = data.title || window.siyuan.languages.untitled;
     const openStandalone = data.isDetached || !window.siyuan.config.editor.databaseAttrShow;
@@ -171,9 +172,10 @@ export const openDatabaseRowByData = async (protyle: IProtyle, data: IDatabaseRo
         }
         const opened = await openFile({
             app: protyle.app,
-            position: options ? options.position : "right",
-            removeCurrentTab: options ? undefined : false,
-            openNewTab: options ? undefined : true,
+            position: options?.position || "right",
+            removeCurrentTab: options && !options.keepAVPanel ? undefined : false,
+            openNewTab: options ? options.keepAVPanel ? false : undefined : true,
+            keepAVPanel: options?.keepAVPanel,
             custom: {
                 id: "siyuan-database-row",
                 icon: "iconDatabase",
@@ -203,7 +205,7 @@ export const openDatabaseRowByData = async (protyle: IProtyle, data: IDatabaseRo
     if (!data.boundBlockID) {
         return false;
     }
-    if (options) {
+    if (options && !options.keepAVPanel) {
         const opened = await openFileById({
             app: protyle.app,
             id: data.boundBlockID,
@@ -244,6 +246,7 @@ export const openDatabaseRowByData = async (protyle: IProtyle, data: IDatabaseRo
         position: "right",
         openNewTab: true,
         removeCurrentTab: false,
+        keepAVPanel: options?.keepAVPanel,
         zoomIn: true,
         afterOpen(model: Editor) {
             showDatabaseRowPreview(model, data);

@@ -156,13 +156,14 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
             return;
         }
     }
+    const listElement = liItemElements[0].parentElement;
     const previousElement = liItemElements[0].previousElementSibling as HTMLElement;
-    if (!previousElement) {
+    if (!listElement || !previousElement) {
         return;
     }
     range.collapse(false);
     range.insertNode(document.createElement("wbr"));
-    const html = previousElement.parentElement.outerHTML;
+    const html = listElement.outerHTML;
     const lastPreviousElement = getLastChildBlock(previousElement);
     if (lastPreviousElement && lastPreviousElement.getAttribute("data-type") === "NodeList") {
         // 上一个列表的最后一项为子列表
@@ -214,12 +215,12 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
 
         if (subtype === "o") {
             updateListOrder(lastPreviousElement);
-            updateListOrder(previousElement.parentElement);
+            updateListOrder(listElement);
         } else if (previousElement.getAttribute("data-subtype") === "o") {
-            updateListOrder(previousElement.parentElement);
+            updateListOrder(listElement);
         }
 
-        if (previousElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        if (listElement.classList.contains("protyle-wysiwyg")) {
             const newLastPreviousElement = getLastChildBlock(previousElement);
             doOperations.push({
                 action: "update",
@@ -325,14 +326,14 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
             doOperations.push(...foldOperations.doOperations);
             undoOperations.push(...foldOperations.undoOperations);
             transaction(protyle, doOperations, undoOperations);
-            focusByWbr(previousElement, range);
+            focusByWbr(protyle.wysiwyg.element, range);
             return;
         }
         if (subType === "o") {
             updateListOrder(newListElement, 1);
-            updateListOrder(previousElement.parentElement);
+            updateListOrder(listElement);
         }
-        if (previousElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        if (listElement.classList.contains("protyle-wysiwyg")) {
             doOperations.push({
                 action: "update",
                 data: previousElement.outerHTML,
@@ -346,10 +347,10 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
             transaction(protyle, doOperations, undoOperations);
         }
     }
-    if (!previousElement.parentElement.classList.contains("protyle-wysiwyg")) {
-        updateTransaction(protyle, previousElement.parentElement, html);
+    if (!listElement.classList.contains("protyle-wysiwyg")) {
+        updateTransaction(protyle, listElement, html);
     }
-    focusByWbr(previousElement, range);
+    focusByWbr(protyle.wysiwyg.element, range);
 };
 
 export const breakList = (protyle: IProtyle, blockElement: Element, range: Range) => {

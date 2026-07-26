@@ -55,6 +55,8 @@ import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 import {isSameDragEditor, uniqueDragIds} from "./dragDocument";
 
+const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
+
 const convertListItemSubtype = (listItem: Element, subtype: string) => {
     const actionElement = listItem.querySelector(".protyle-action");
     if (!actionElement || !["u", "o", "t"].includes(subtype)) {
@@ -851,6 +853,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
+        const kanbanTitleElement = hasClosestByClassName(target, "av__group-title") as HTMLElement;
 
         if (target.classList) {
             if (hasClosestByClassName(target, "protyle-wysiwyg__embed")) {
@@ -897,6 +900,26 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 window.siyuan.dragElement = target;
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.getAttribute("data-col-id")]}`,
                     target.outerHTML);
+                return;
+            } else if (kanbanTitleElement?.getAttribute("draggable") === "true") {
+                const groupElement = kanbanTitleElement.parentElement;
+                const ghostElement = document.createElement("div");
+                ghostElement.className = groupElement.className;
+                ghostElement.innerHTML = kanbanTitleElement.outerHTML;
+                ghostElement.setAttribute("style", `left:1px;top:100vh;position:fixed;opacity:.1;padding:8px;z-index:8;width:${groupElement.clientWidth}px;`);
+                document.body.append(ghostElement);
+                event.dataTransfer.setDragImage(ghostElement, -10, -10);
+                if (window.siyuan.touchDragActive) {
+                    window.siyuan.touchDragGhost = ghostElement;
+                } else {
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                }
+                groupElement.style.opacity = ".38";
+                window.siyuan.dragElement = groupElement;
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData(`${KANBAN_GROUP_DRAG_TYPE}${groupElement.dataset.groupId}`, groupElement.outerHTML);
                 return;
             } else if (target.classList.contains("av__gallery-item")) {
                 const blockElement = hasClosestBlock(target);
@@ -1106,6 +1129,58 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     previousID: gutterType.split(Constants.ZWSP).pop()
                 }]);
             }
+            return;
+        }
+        if (gutterType.startsWith(KANBAN_GROUP_DRAG_TYPE.toLowerCase())) {
+            event.preventDefault();
+            event.stopPropagation();
+            const sourceElement = window.siyuan.dragElement as HTMLElement;
+            const sourceKanbanElement = sourceElement?.parentElement;
+            const targetElement = sourceKanbanElement?.querySelector(".av__kanban-group.dragover__left, .av__kanban-group.dragover__right") as HTMLElement;
+            const targetKanbanElement = targetElement?.parentElement;
+            if (sourceElement && targetElement && sourceElement !== targetElement &&
+                sourceKanbanElement?.classList.contains("av__kanban") && sourceKanbanElement === targetKanbanElement) {
+                const blockElement = hasClosestBlock(sourceElement);
+                const sourceGroupID = sourceElement.dataset.groupId;
+                const oldPreviousID = sourceElement.dataset.previousGroupId || "";
+                let previousID = targetElement.classList.contains("dragover__left") ?
+                    targetElement.dataset.previousGroupId || "" : targetElement.dataset.groupId;
+                if (previousID === sourceGroupID) {
+                    previousID = oldPreviousID;
+                }
+                if (blockElement && sourceGroupID && previousID !== oldPreviousID) {
+                    let oldGroup: IAVGroup;
+                    try {
+                        oldGroup = JSON.parse(sourceElement.dataset.groupConfig);
+                    } catch (e) {
+                        console.warn("parse attribute view group config failed", e);
+                    }
+                    const undoOperations: IOperation[] = oldGroup && oldGroup.order !== 2 ? [{
+                        action: "setAttrViewGroup",
+                        avID: blockElement.getAttribute("data-av-id"),
+                        blockID: blockElement.getAttribute("data-node-id"),
+                        data: oldGroup,
+                    }] : [{
+                        action: "sortAttrViewGroup",
+                        avID: blockElement.getAttribute("data-av-id"),
+                        blockID: blockElement.getAttribute("data-node-id"),
+                        previousID: oldPreviousID,
+                        id: sourceGroupID,
+                    }];
+                    transaction(protyle, [{
+                        action: "sortAttrViewGroup",
+                        avID: blockElement.getAttribute("data-av-id"),
+                        blockID: blockElement.getAttribute("data-node-id"),
+                        previousID,
+                        id: sourceGroupID,
+                    }], undoOperations);
+                }
+            }
+            if (sourceElement) {
+                sourceElement.style.opacity = "";
+            }
+            window.siyuan.dragElement = undefined;
+            cleanupDragIndicators(editorElement);
             return;
         }
         let targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover__bottom--sibling, .dragover__top--sibling, .dragover__bottom--child, .dragover__top--child");
@@ -1910,9 +1985,68 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // 解析 gutter 类型数组，区分普通块、AV 块、AV 子类型
         const gutterTypes = gutterType ? gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP) : [];
+        const isKanbanGroupDrag = gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "group";
+        if (isKanbanGroupDrag) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            hideDragTip();
+            const sourceElement = window.siyuan.dragElement as HTMLElement;
+            const sourceKanbanElement = sourceElement?.parentElement;
+            sourceKanbanElement?.querySelectorAll(".av__kanban-group.dragover__left, .av__kanban-group.dragover__right").forEach(item => {
+                item.classList.remove("dragover__left", "dragover__right");
+            });
+            const kanbanElement = hasClosestByClassName(event.target, "av__kanban") as HTMLElement;
+            if (!sourceElement || !sourceKanbanElement?.classList.contains("av__kanban") ||
+                kanbanElement !== sourceKanbanElement) {
+                return;
+            }
+            let targetGroupElement = hasClosestByClassName(event.target, "av__kanban-group") as HTMLElement;
+            if (targetGroupElement === sourceElement) {
+                return;
+            }
+            let position: "left" | "right" = "left";
+            if (!targetGroupElement) {
+                const sourceRect = sourceElement.getBoundingClientRect();
+                if (event.clientX >= sourceRect.left && event.clientX <= sourceRect.right) {
+                    return;
+                }
+                const groupElements = Array.from(kanbanElement.querySelectorAll(":scope > .av__kanban-group"))
+                    .filter(item => item !== sourceElement) as HTMLElement[];
+                targetGroupElement = groupElements.find(item => {
+                    const rect = item.getBoundingClientRect();
+                    return event.clientX <= rect.right;
+                }) || groupElements[groupElements.length - 1];
+                if (targetGroupElement && event.clientX > targetGroupElement.getBoundingClientRect().right) {
+                    position = "right";
+                }
+            }
+            if (!targetGroupElement) {
+                return;
+            }
+            const oldVisiblePreviousID = (sourceElement.previousElementSibling as HTMLElement)?.dataset.groupId || "";
+            let visiblePreviousID = position === "left" ?
+                (targetGroupElement.previousElementSibling as HTMLElement)?.dataset.groupId || "" :
+                targetGroupElement.dataset.groupId;
+            if (visiblePreviousID === sourceElement.dataset.groupId) {
+                visiblePreviousID = oldVisiblePreviousID;
+            }
+            if (visiblePreviousID === oldVisiblePreviousID) {
+                return;
+            }
+            const oldPreviousID = sourceElement.dataset.previousGroupId || "";
+            let previousID = position === "left" ?
+                targetGroupElement.dataset.previousGroupId || "" : targetGroupElement.dataset.groupId;
+            if (previousID === sourceElement.dataset.groupId) {
+                previousID = oldPreviousID;
+            }
+            if (previousID !== oldPreviousID) {
+                targetGroupElement.classList.add(`dragover__${position}`);
+            }
+            return;
+        }
         const isAvSubType = gutterTypes[0] === "nodeattributeviewrowmenu" ||
             gutterTypes[0] === "nodeattributeviewrow" ||
-            (gutterTypes[0] === "nodeattributeview" && ["viewtab", "col", "galleryitem"].includes(gutterTypes[1] || ""));
+            (gutterTypes[0] === "nodeattributeview" && ["viewtab", "col", "galleryitem", "group"].includes(gutterTypes[1] || ""));
         // 操作提示：上半=操作对象名称，下半=操作文案
         const isAvTarget = hasClosestByClassName(event.target, "av__row") ||
             hasClosestByClassName(event.target, "av__row--util") ||

@@ -493,19 +493,29 @@ export const openMenuPanel = (options: {
                 const previousID = (isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
                 const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
                 if (previousID !== undoPreviousID && previousID !== sourceId) {
+                    const oldGroup: IAVGroup = {
+                        ...data.view.group,
+                        range: data.view.group.range ? {...data.view.group.range} : undefined,
+                    };
+                    const undoOperations: IOperation[] = oldGroup.order === 2 ? [{
+                        action: "sortAttrViewGroup",
+                        avID,
+                        blockID,
+                        previousID: undoPreviousID,
+                        id: sourceId,
+                    }] : [{
+                        action: "setAttrViewGroup",
+                        avID,
+                        blockID,
+                        data: oldGroup,
+                    }];
                     transaction(options.protyle, [{
                         action: "sortAttrViewGroup",
                         avID,
                         blockID,
                         previousID,
                         id: sourceId,
-                    }], [{
-                        action: "sortAttrViewGroup",
-                        avID,
-                        blockID,
-                        previousID: undoPreviousID,
-                        id: sourceId,
-                    }]);
+                    }], undoOperations);
                     menuElement.querySelector('[data-type="goGroupsSort"] .b3-menu__accelerator').textContent = getLanguageByIndex(2, "sort");
                     data.view.group.order = 2;
                     data.view.groups.find((group, index) => {

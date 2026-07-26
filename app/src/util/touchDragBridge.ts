@@ -242,6 +242,7 @@ const createDragState = (draggableElement: HTMLElement, point: DragPoint, inputT
         requireLongPress: draggableElement.closest(".sy__file") !== null ||
             draggableElement.closest(".sy__outline") !== null ||
             draggableElement.closest(".av__gallery-item") !== null ||
+            draggableElement.closest(".av__group-title") !== null ||
             draggableElement.closest(".layout-tab-bar") !== null ||
             draggableElement.closest(".protyle-action") !== null,
         longPressCancelled: false,

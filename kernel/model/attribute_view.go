@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -961,6 +962,15 @@ func (tx *Transaction) doSetAttrViewCardAspectRatio(operation *Operation) (ret *
 }
 
 func setAttrViewCardAspectRatio(operation *Operation) (err error) {
+	value, err := getAttrViewOperationNumber(operation)
+	if nil != err {
+		return
+	}
+	ratio := av.CardAspectRatio(value)
+	if value != math.Trunc(value) || ratio < av.CardAspectRatio16_9 || av.CardAspectRatio1_1 < ratio {
+		return fmt.Errorf("invalid card aspect ratio preset [%v]", value)
+	}
+
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if err != nil {
 		return
@@ -975,9 +985,50 @@ func setAttrViewCardAspectRatio(operation *Operation) (err error) {
 	case av.LayoutTypeTable:
 		return
 	case av.LayoutTypeGallery:
-		view.Gallery.CardAspectRatio = av.CardAspectRatio(operation.Data.(float64))
+		view.Gallery.CardAspectRatio = ratio
+		view.Gallery.CardAspectRatioValue = av.CardAspectRatioValueByPreset(ratio)
 	case av.LayoutTypeKanban:
-		view.Kanban.CardAspectRatio = av.CardAspectRatio(operation.Data.(float64))
+		view.Kanban.CardAspectRatio = ratio
+		view.Kanban.CardAspectRatioValue = av.CardAspectRatioValueByPreset(ratio)
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewCardAspectRatioValue(operation *Operation) (ret *TxErr) {
+	if err := setAttrViewCardAspectRatioValue(operation); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewCardAspectRatioValue(operation *Operation) (err error) {
+	ratio, err := getAttrViewOperationNumber(operation)
+	if nil != err {
+		return
+	}
+	if math.IsNaN(ratio) || math.IsInf(ratio, 0) ||
+		ratio < av.CardAspectRatioValueMin || av.CardAspectRatioValueMax < ratio {
+		return fmt.Errorf("invalid card aspect ratio [%v]", ratio)
+	}
+
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return
+	}
+
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		return
+	case av.LayoutTypeGallery:
+		view.Gallery.CardAspectRatioValue = ratio
+	case av.LayoutTypeKanban:
+		view.Kanban.CardAspectRatioValue = ratio
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1341,6 +1392,15 @@ func (tx *Transaction) doSetAttrViewCardSize(operation *Operation) (ret *TxErr) 
 }
 
 func setAttrViewCardSize(operation *Operation) (err error) {
+	value, err := getAttrViewOperationNumber(operation)
+	if nil != err {
+		return
+	}
+	size := av.CardSize(value)
+	if value != math.Trunc(value) || size < av.CardSizeSmall || av.CardSizeLarge < size {
+		return fmt.Errorf("invalid card size preset [%v]", value)
+	}
+
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if err != nil {
 		return
@@ -1355,12 +1415,62 @@ func setAttrViewCardSize(operation *Operation) (err error) {
 	case av.LayoutTypeTable:
 		return
 	case av.LayoutTypeGallery:
-		view.Gallery.CardSize = av.CardSize(operation.Data.(float64))
+		view.Gallery.CardSize = size
+		view.Gallery.CardWidth = av.CardWidthBySize(size)
 	case av.LayoutTypeKanban:
-		view.Kanban.CardSize = av.CardSize(operation.Data.(float64))
+		view.Kanban.CardSize = size
+		view.Kanban.CardWidth = av.CardWidthBySize(size)
 	}
 
 	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewCardWidth(operation *Operation) (ret *TxErr) {
+	if err := setAttrViewCardWidth(operation); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewCardWidth(operation *Operation) (err error) {
+	value, err := getAttrViewOperationNumber(operation)
+	if nil != err {
+		return
+	}
+	if math.IsNaN(value) || math.IsInf(value, 0) || value != math.Trunc(value) ||
+		value < av.CardWidthMin || av.CardWidthMax < value {
+		return fmt.Errorf("invalid card width [%v]", value)
+	}
+	width := int(value)
+
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return
+	}
+
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		return
+	case av.LayoutTypeGallery:
+		view.Gallery.CardWidth = width
+	case av.LayoutTypeKanban:
+		view.Kanban.CardWidth = width
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func getAttrViewOperationNumber(operation *Operation) (ret float64, err error) {
+	var ok bool
+	if ret, ok = operation.Data.(float64); !ok {
+		err = fmt.Errorf("invalid card configuration value [%v]", operation.Data)
+	}
 	return
 }
 
@@ -3641,7 +3751,10 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 		view.Gallery.CoverFrom = masterView.Gallery.CoverFrom
 		view.Gallery.CoverFromAssetKeyID = masterView.Gallery.CoverFromAssetKeyID
+		view.Gallery.CardAspectRatio = masterView.Gallery.CardAspectRatio
+		view.Gallery.CardAspectRatioValue = masterView.Gallery.CardAspectRatioValue
 		view.Gallery.CardSize = masterView.Gallery.CardSize
+		view.Gallery.CardWidth = masterView.Gallery.CardWidth
 		view.Gallery.FitImage = masterView.Gallery.FitImage
 		view.Gallery.DisplayFieldName = masterView.Gallery.DisplayFieldName
 		view.Gallery.DisplayEmptyFields = masterView.Gallery.DisplayEmptyFields
@@ -3661,7 +3774,10 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 		view.Kanban.CoverFrom = masterView.Kanban.CoverFrom
 		view.Kanban.CoverFromAssetKeyID = masterView.Kanban.CoverFromAssetKeyID
+		view.Kanban.CardAspectRatio = masterView.Kanban.CardAspectRatio
+		view.Kanban.CardAspectRatioValue = masterView.Kanban.CardAspectRatioValue
 		view.Kanban.CardSize = masterView.Kanban.CardSize
+		view.Kanban.CardWidth = masterView.Kanban.CardWidth
 		view.Kanban.FitImage = masterView.Kanban.FitImage
 		view.Kanban.DisplayFieldName = masterView.Kanban.DisplayFieldName
 		view.Kanban.DisplayEmptyFields = masterView.Kanban.DisplayEmptyFields

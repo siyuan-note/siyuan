@@ -297,7 +297,10 @@ const promiseTransaction = (options: {
                 const visibleData = getVisibleFoldHeadingHTML(operation.data);
                 // 块已被本地 DOM 操作插入时仍需同步其他普通副本，并跳过当前副本避免重复
                 // https://github.com/siyuan-note/siyuan/issues/17890
-                const insertedElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`);
+                const insertedElements = Array.from(
+                    protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)
+                );
+                const insertedElement = insertedElements[0];
                 const currentEmbedElement = insertedElement && isInEmbedBlock(insertedElement, false);
                 if (insertedElement) {
                     protyle.wysiwyg.element.querySelectorAll("[data-type=\"NodeBlockQueryEmbed\"]").forEach(item => {
@@ -322,7 +325,10 @@ const promiseTransaction = (options: {
                             }
                             return;
                         }
-                        if (getNextBlockSibling(item)?.getAttribute("data-node-id") !== operation.id &&
+                        const hasInsertedSibling = insertedElements.some(insertedItem =>
+                            !isInEmbedBlock(insertedItem, false) && insertedItem.parentElement === item.parentElement);
+                        if (!hasInsertedSibling &&
+                            getNextBlockSibling(item)?.getAttribute("data-node-id") !== operation.id &&
                             (!range || !item.contains(range.startContainer)) && // 当前操作块不再进行操作
                             // 段落转列表会在段落后插入新列表
                             !hasClosestByAttribute(item, "data-node-id", operation.id) &&
@@ -341,7 +347,10 @@ const promiseTransaction = (options: {
                             }
                             return;
                         }
-                        if (getPreviousBlockSibling(item)?.getAttribute("data-node-id") !== operation.id &&
+                        const hasInsertedSibling = insertedElements.some(insertedItem =>
+                            !isInEmbedBlock(insertedItem, false) && insertedItem.parentElement === item.parentElement);
+                        if (!hasInsertedSibling &&
+                            getPreviousBlockSibling(item)?.getAttribute("data-node-id") !== operation.id &&
                             (!range || !item.contains(range.startContainer)) &&
                             !hasClosestByAttribute(item, "data-node-id", operation.id) &&
                             !item.parentElement.classList.contains("protyle-wysiwyg__embed")) {

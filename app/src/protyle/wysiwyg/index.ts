@@ -2688,10 +2688,14 @@ export class WYSIWYG {
             // https://ld246.com/article/1648865235549
             // 不能使用上一版本的 timeStamp，否则一直滚动将导致间隔不够 https://ld246.com/article/1662852664926
             if (!preventGetTopHTML && !protyle.scroll.element.classList.contains("fn__none")) {
-                if (event.deltaY < 0 && protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1" &&
+                const firstElement = protyle.wysiwyg.element.firstElementChild;
+                const lastElement = protyle.wysiwyg.element.lastElementChild;
+                const firstId = firstElement?.getAttribute("data-node-id");
+                const lastId = lastElement?.getAttribute("data-node-id");
+                if (event.deltaY < 0 && firstElement && firstId && firstElement.getAttribute("data-eof") !== "1" &&
                     (protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight || protyle.contentElement.scrollTop === 0)) {
                     const getDocParam: IObject = {
-                        id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
+                        id: firstId,
                         mode: 1,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,
                     };
@@ -2707,11 +2711,11 @@ export class WYSIWYG {
                         });
                     });
                     preventGetTopHTML = true;
-                } else if (event.deltaY > 0 && protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
+                } else if (event.deltaY > 0 && lastElement && lastId && lastElement.getAttribute("data-eof") !== "2" &&
                     (protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight ||
                         protyle.contentElement.clientHeight + Math.ceil(protyle.contentElement.scrollTop) >= protyle.contentElement.scrollHeight)) {
                     const getDocParam: IObject = {
-                        id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+                        id: lastId,
                         mode: 2,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,
                     };

@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Vue tableau de base de données",
+  "databaseKanbanView": "Vue Kanban de base de données",
+  "databaseGalleryView": "Vue cartes de base de données",
   "deleteKanbanGroupConfirm": "⚠️ Confirmer la suppression du groupe",
   "deleteKanbanGroupTip": "Après la suppression du groupe, cette option sera retirée de tous les enregistrements. Les enregistrements sans autre option de regroupement seront déplacés vers « Non groupé »",
   "avPasteHeaderTitle": "Reconnaître l’en-tête du tableau",

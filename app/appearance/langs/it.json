@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Vista tabella del database",
+  "databaseKanbanView": "Vista Kanban del database",
+  "databaseGalleryView": "Vista schede del database",
   "deleteKanbanGroupConfirm": "⚠️ Conferma eliminazione gruppo",
   "deleteKanbanGroupTip": "Dopo l'eliminazione del gruppo, questa opzione verrà rimossa da tutti i record. I record senza altre opzioni di raggruppamento verranno spostati in “Non raggruppati”",
   "avPasteHeaderTitle": "Riconosci intestazione tabella",

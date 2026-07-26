@@ -1066,6 +1066,64 @@ func ChangeAttrViewLayout(blockID, avID string, newLayout av.LayoutType) (err er
 		return
 	}
 
+	if err = changeAttrViewLayout(attrView, view, newLayout); err != nil {
+		return
+	}
+
+	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
+	for _, bID := range blockIDs {
+		node, tree, _ := getNodeByBlockID(nil, bID)
+		if nil == node || nil == tree {
+			logging.LogErrorf("get node by block ID [%s] failed", bID)
+			continue
+		}
+
+		changed := false
+		attrs := parse.IAL2Map(node.KramdownIAL)
+		if blockID == bID { // 当前操作的镜像库
+			attrs[av.NodeAttrView] = view.ID
+			node.AttributeViewType = string(view.LayoutType)
+			attrView.ViewID = view.ID
+			changed = true
+		} else {
+			if view.ID == attrs[av.NodeAttrView] {
+				// 仅更新和当前操作的镜像库指定的视图相同的镜像库
+				node.AttributeViewType = string(view.LayoutType)
+				changed = true
+			}
+		}
+
+		if changed {
+			err = setNodeAttrs(node, tree, attrs)
+			if err != nil {
+				logging.LogWarnf("set node [%s] attrs failed: %s", bID, err)
+				return
+			}
+		}
+	}
+
+	regenAttrViewGroups(attrView)
+
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	ReloadAttrView(avID)
+	return
+}
+
+func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout av.LayoutType) (err error) {
+	if newLayout == view.LayoutType {
+		return
+	}
+
+	switch newLayout {
+	case av.LayoutTypeTable, av.LayoutTypeGallery, av.LayoutTypeKanban:
+	default:
+		return av.ErrWrongLayoutType
+	}
+
 	oldLayout := view.LayoutType
 	view.LayoutType = newLayout
 
@@ -1137,47 +1195,6 @@ func ChangeAttrViewLayout(blockID, avID string, newLayout av.LayoutType) (err er
 			setAttributeViewGroup(attrView, view, group)
 		}
 	}
-
-	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
-	for _, bID := range blockIDs {
-		node, tree, _ := getNodeByBlockID(nil, bID)
-		if nil == node || nil == tree {
-			logging.LogErrorf("get node by block ID [%s] failed", bID)
-			continue
-		}
-
-		changed := false
-		attrs := parse.IAL2Map(node.KramdownIAL)
-		if blockID == bID { // 当前操作的镜像库
-			attrs[av.NodeAttrView] = view.ID
-			node.AttributeViewType = string(view.LayoutType)
-			attrView.ViewID = view.ID
-			changed = true
-		} else {
-			if view.ID == attrs[av.NodeAttrView] {
-				// 仅更新和当前操作的镜像库指定的视图相同的镜像库
-				node.AttributeViewType = string(view.LayoutType)
-				changed = true
-			}
-		}
-
-		if changed {
-			err = setNodeAttrs(node, tree, attrs)
-			if err != nil {
-				logging.LogWarnf("set node [%s] attrs failed: %s", bID, err)
-				return
-			}
-		}
-	}
-
-	regenAttrViewGroups(attrView)
-
-	if err = av.SaveAttributeView(attrView); nil != err {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	ReloadAttrView(avID)
 	return
 }
 

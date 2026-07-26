@@ -533,6 +533,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 viewID: locateParams?.viewID || e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 query: resetData.query.trim(),
                 blockID: e.getAttribute("data-node-id"),
+                initialLayout: e.getAttribute("data-av-type"),
                 createIfNotExist: !protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE),
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",

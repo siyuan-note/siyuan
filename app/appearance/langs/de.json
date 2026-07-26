@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Datenbank-Tabellenansicht",
+  "databaseKanbanView": "Datenbank-Kanbanansicht",
+  "databaseGalleryView": "Datenbank-Kartenansicht",
   "deleteKanbanGroupConfirm": "⚠️ Löschen der Gruppe bestätigen",
   "deleteKanbanGroupTip": "Nach dem Löschen der Gruppe wird diese Option aus allen Datensätzen entfernt. Datensätze ohne weitere Gruppierungsoptionen werden nach „Nicht gruppiert“ verschoben",
   "avPasteHeaderTitle": "Tabellenkopf erkennen",

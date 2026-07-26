@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Tabuľkové zobrazenie databázy",
+  "databaseKanbanView": "Kanban zobrazenie databázy",
+  "databaseGalleryView": "Kartové zobrazenie databázy",
   "deleteKanbanGroupConfirm": "⚠️ Potvrdiť odstránenie skupiny",
   "deleteKanbanGroupTip": "Po odstránení skupiny sa táto možnosť odstráni zo všetkých záznamov. Záznamy bez ďalších možností zoskupenia sa presunú do skupiny „Nezoskupené“",
   "avPasteHeaderTitle": "Rozpoznať hlavičku tabuľky",

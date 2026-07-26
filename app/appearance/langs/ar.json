@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "عرض جدول قاعدة البيانات",
+  "databaseKanbanView": "عرض كانبان لقاعدة البيانات",
+  "databaseGalleryView": "عرض بطاقات قاعدة البيانات",
   "deleteKanbanGroupConfirm": "⚠️ تأكيد حذف المجموعة",
   "deleteKanbanGroupTip": "بعد حذف المجموعة، سيُزال هذا الخيار من جميع السجلات؛ وستُنقل السجلات التي لا تحتوي على خيارات تجميع أخرى إلى «غير مجمّع»",
   "avPasteHeaderTitle": "التعرّف على رأس الجدول",

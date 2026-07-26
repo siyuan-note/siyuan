@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Visualização de tabela do banco de dados",
+  "databaseKanbanView": "Visualização Kanban do banco de dados",
+  "databaseGalleryView": "Visualização de cartões do banco de dados",
   "deleteKanbanGroupConfirm": "⚠️ Confirmar exclusão do grupo",
   "deleteKanbanGroupTip": "Após excluir o grupo, esta opção será removida de todos os registros. Os registros sem outras opções de agrupamento serão movidos para “Sem grupo”",
   "avPasteHeaderTitle": "Reconhecer cabeçalho da tabela",

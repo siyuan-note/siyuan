@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "數據庫 表格視圖",
+  "databaseKanbanView": "數據庫 看板視圖",
+  "databaseGalleryView": "數據庫 卡片視圖",
   "deleteKanbanGroupConfirm": "⚠️ 確認刪除分組",
   "deleteKanbanGroupTip": "刪除分組後，該選項將從所有記錄中移除；沒有其他分組選項的記錄將移至「未分組」",
   "avPasteHeaderTitle": "識別表頭",

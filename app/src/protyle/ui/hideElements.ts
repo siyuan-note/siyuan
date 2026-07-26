@@ -1,5 +1,6 @@
 import {getAllEditor} from "../../layout/getAll";
 import {isIPhone} from "../util/compatibility";
+import {hideGutterElements} from "./gutterVisibility";
 
 // "gutter", "toolbar", "select", "hint", "util", "dialog", "gutterOnly"
 export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = false) => {
@@ -25,11 +26,16 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
         });
     }
     //  不能 remove("protyle-wysiwyg--hl") 否则打开页签的时候 "cb-get-hl" 高亮会被移除
-    if (protyle.gutter && panels.includes("gutterOnly")) {
-        if (!isIPhone()) {
-            protyle.gutter.element.classList.add("fn__none");
+    if (panels.includes("gutterOnly")) {
+        const gutterElements: HTMLElement[] = [];
+        if (protyle.gutter) {
+            gutterElements.push(protyle.gutter.element);
         }
-        protyle.gutter.element.innerHTML = "";
+        const nestedGutter = protyle.contentElement.querySelector<HTMLElement>(".protyle-gutters:not(.fn__none)");
+        if (nestedGutter) {
+            gutterElements.push(nestedGutter);
+        }
+        hideGutterElements(gutterElements, !isIPhone());
     }
     if (protyle.toolbar && panels.includes("toolbar")) {
         protyle.toolbar.element.classList.add("fn__none");

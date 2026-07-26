@@ -358,6 +358,10 @@ const promiseTransaction = (options: {
                             }
                             return;
                         }
+                        // 本地 DOM 可能已被同一事务的后续操作重排，不能仅根据首个子块判断是否已经插入。
+                        if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
+                            return;
+                        }
                         if (!range || !item.contains(range.startContainer)) {
                             // 列表特殊处理
                             if (item.firstElementChild && item.firstElementChild.classList.contains("protyle-action") &&

@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Tabelweergave van database",
+  "databaseKanbanView": "Kanbanweergave van database",
+  "databaseGalleryView": "Kaartweergave van database",
   "deleteKanbanGroupConfirm": "⚠️ Verwijderen van groep bevestigen",
   "deleteKanbanGroupTip": "Na het verwijderen van de groep wordt deze optie uit alle records verwijderd. Records zonder andere groeperingsopties worden verplaatst naar ‘Niet gegroepeerd’",
   "avPasteHeaderTitle": "Tabelkop herkennen",

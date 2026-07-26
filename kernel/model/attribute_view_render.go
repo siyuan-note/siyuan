@@ -52,16 +52,18 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 	return
 }
 
-// GetAttributeViewPasteRows 返回当前表格视图中从指定条目开始的连续行，供粘贴覆盖未加载条目。
-func GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID string, count int) (table *av.Table, err error) {
-	viewable, _, err := RenderAttributeView(blockID, avID, viewID, query, 1, math.MaxInt, nil, false, false)
+// GetAttributeViewPasteRows 返回当前表格视图中从指定条目开始的连续行和可安全推断类型的空字段，供粘贴扩充行列。
+func GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID string, count int) (
+	table *av.Table, inferableKeyIDs []string, err error,
+) {
+	viewable, attrView, err := RenderAttributeView(blockID, avID, viewID, query, 1, math.MaxInt, nil, false, false)
 	if nil != err {
-		return nil, err
+		return nil, nil, err
 	}
 
 	table, ok := viewable.(*av.Table)
 	if !ok {
-		return nil, fmt.Errorf("attribute view [%s] is not a table", avID)
+		return nil, nil, fmt.Errorf("attribute view [%s] is not a table", avID)
 	}
 	if "" != groupID {
 		var groupTable *av.Table
@@ -72,17 +74,85 @@ func GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemI
 			}
 		}
 		if nil == groupTable {
-			return nil, fmt.Errorf("attribute view group [%s] not found", groupID)
+			return nil, nil, fmt.Errorf("attribute view group [%s] not found", groupID)
 		}
 		table = groupTable
 	}
 
 	rows, err := getAttributeViewPasteRowsFromTable(table, startItemID, count)
 	if nil != err {
-		return nil, err
+		return nil, nil, err
 	}
 	table.Rows = rows
-	return table, nil
+	return table, getPasteInferableAttributeViewKeyIDs(attrView, getDependentRollupKeyIDs(attrView.ID)), nil
+}
+
+func getPasteInferableAttributeViewKeyIDs(attrView *av.AttributeView, dependentRollupKeyIDs map[string]struct{}) (ret []string) {
+	unsafeKeyIDs := dependentRollupKeyIDs
+	if nil == unsafeKeyIDs {
+		unsafeKeyIDs = map[string]struct{}{}
+	}
+	for _, itemTemplate := range attrView.NewItemTemplates {
+		if nil == itemTemplate {
+			continue
+		}
+		for keyID := range itemTemplate.FieldValues {
+			unsafeKeyIDs[keyID] = struct{}{}
+		}
+	}
+	for _, view := range attrView.Views {
+		if nil != view && nil != view.Group && "" != view.Group.Field {
+			unsafeKeyIDs[view.Group.Field] = struct{}{}
+		}
+	}
+	for _, keyValues := range attrView.KeyValues {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		if _, unsafe := unsafeKeyIDs[keyValues.Key.ID]; unsafe {
+			continue
+		}
+		empty := true
+		for _, value := range keyValues.Values {
+			if !value.IsEmpty() {
+				empty = false
+				break
+			}
+		}
+		if empty {
+			ret = append(ret, keyValues.Key.ID)
+		}
+	}
+	return
+}
+
+func getDependentRollupKeyIDs(avID string) map[string]struct{} {
+	var relatedAttrViews []*av.AttributeView
+	for _, relatedAvID := range av.GetSrcAvIDs(avID) {
+		relatedAv, _ := av.ParseAttributeView(relatedAvID)
+		if nil == relatedAv {
+			continue
+		}
+		relatedAttrViews = append(relatedAttrViews, relatedAv)
+	}
+	return collectDependentRollupKeyIDs(relatedAttrViews)
+}
+
+func collectDependentRollupKeyIDs(attrViews []*av.AttributeView) (ret map[string]struct{}) {
+	ret = map[string]struct{}{}
+	for _, attrView := range attrViews {
+		if nil == attrView {
+			continue
+		}
+		for _, keyValues := range attrView.KeyValues {
+			if nil == keyValues || nil == keyValues.Key || av.KeyTypeRollup != keyValues.Key.Type ||
+				nil == keyValues.Key.Rollup || "" == keyValues.Key.Rollup.KeyID {
+				continue
+			}
+			ret[keyValues.Key.Rollup.KeyID] = struct{}{}
+		}
+	}
+	return
 }
 
 func getAttributeViewPasteRowsFromTable(table *av.Table, startItemID string, count int) (rows []*av.TableRow, err error) {

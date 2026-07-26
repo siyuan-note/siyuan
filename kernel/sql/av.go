@@ -53,6 +53,7 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 		groupView.Gallery.CardSize = view.Gallery.CardSize
 		groupView.Gallery.FitImage = view.Gallery.FitImage
 		groupView.Gallery.DisplayFieldName = view.Gallery.DisplayFieldName
+		groupView.Gallery.DisplayEmptyFields = view.Gallery.DisplayEmptyFields
 	case av.LayoutTypeKanban:
 		err = copier.CopyWithOption(&groupView.Kanban.Fields, &view.Kanban.Fields, copier.Option{DeepCopy: true})
 		groupView.Kanban.ShowIcon = view.Kanban.ShowIcon
@@ -64,6 +65,7 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 		groupView.Kanban.CardSize = view.Kanban.CardSize
 		groupView.Kanban.FitImage = view.Kanban.FitImage
 		groupView.Kanban.DisplayFieldName = view.Kanban.DisplayFieldName
+		groupView.Kanban.DisplayEmptyFields = view.Kanban.DisplayEmptyFields
 		groupView.Kanban.FillColBackgroundColor = view.Kanban.FillColBackgroundColor
 	}
 	if nil != err {

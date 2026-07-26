@@ -97,6 +97,7 @@ const renderGroupGallery = (options: ITableOptions) => {
 
 export const afterRenderGallery = (options: ITableOptions) => {
     const view = options.data.view as IAVGallery;
+    options.blockElement.classList.toggle("av--display-empty-fields", view.displayEmptyFields);
     if (view.coverFrom === 1 || view.coverFrom === 3) {
         processRender(options.blockElement);
     }
@@ -128,16 +129,18 @@ export const afterRenderGallery = (options: ITableOptions) => {
     if (restoredItem) {
         updateHeader(restoredItem);
     }
-    options.resetData.editIds.find(selectId => {
-        let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
-        if (!itemElement) {
-            itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
-        }
-        if (itemElement) {
-            itemElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
-            itemElement.querySelector('.protyle-icon[data-type="av-gallery-edit"]').setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
-        }
-    });
+    if (!view.displayEmptyFields) {
+        options.resetData.editIds.find(selectId => {
+            let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+            if (!itemElement) {
+                itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+            }
+            if (itemElement) {
+                itemElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
+                itemElement.querySelector('.protyle-icon[data-type="av-gallery-edit"]')?.setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
+            }
+        });
+    }
     Object.keys(options.resetData.pageSizes).forEach((groupId) => {
         const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId === "unGroup" ? "" : groupId}"]`) as HTMLElement;
         if (bodyElement) {

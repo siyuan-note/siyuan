@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Recognize table header",
+  "avPasteHeaderTip": "Use the first pasted row as database field names?",
+  "avPasteHeaderAsData": "Use as data",
+  "avPasteHeaderAsField": "Use as field names",
   "databaseAttrClickMode": "Behavior when clicking a database badge",
   "databaseAttrClickModeTip": "Set what happens when clicking a database badge",
   "focusBlockAndExpandDatabasePanel": "Focus the block and expand the database panel",

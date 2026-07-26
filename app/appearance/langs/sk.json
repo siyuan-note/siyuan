@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Rozpoznať hlavičku tabuľky",
+  "avPasteHeaderTip": "Použiť prvý vložený riadok ako názvy polí databázy?",
+  "avPasteHeaderAsData": "Použiť ako údaje",
+  "avPasteHeaderAsField": "Použiť ako názvy polí",
   "databaseAttrClickMode": "Správanie po kliknutí na odznak databázy",
   "databaseAttrClickModeTip": "Nastavte akciu vykonanú po kliknutí na odznak databázy",
   "focusBlockAndExpandDatabasePanel": "Zamerať blok a rozbaliť panel databázy",

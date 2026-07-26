@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "तालिका शीर्षलेख पहचानें",
+  "avPasteHeaderTip": "क्या चिपकाई गई पहली पंक्ति को डेटाबेस फ़ील्ड नामों के रूप में उपयोग करना है?",
+  "avPasteHeaderAsData": "डेटा के रूप में उपयोग करें",
+  "avPasteHeaderAsField": "फ़ील्ड नामों के रूप में उपयोग करें",
   "databaseAttrClickMode": "डेटाबेस बैज पर क्लिक करने का व्यवहार",
   "databaseAttrClickModeTip": "डेटाबेस बैज पर क्लिक करने पर होने वाली कार्रवाई सेट करें",
   "focusBlockAndExpandDatabasePanel": "ब्लॉक पर फ़ोकस करें और डेटाबेस पैनल विस्तृत करें",

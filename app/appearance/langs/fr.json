@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Reconnaître l’en-tête du tableau",
+  "avPasteHeaderTip": "Utiliser la première ligne collée comme noms de champs de la base de données ?",
+  "avPasteHeaderAsData": "Utiliser comme données",
+  "avPasteHeaderAsField": "Utiliser comme noms de champs",
   "databaseAttrClickMode": "Comportement lors du clic sur le badge de base de données",
   "databaseAttrClickModeTip": "Définir l’action effectuée lors du clic sur le badge de base de données",
   "focusBlockAndExpandDatabasePanel": "Focaliser le bloc et développer le panneau de base de données",

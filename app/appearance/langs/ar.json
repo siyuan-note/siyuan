@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "التعرّف على رأس الجدول",
+  "avPasteHeaderTip": "هل تريد استخدام الصف الأول الملصق كأسماء حقول قاعدة البيانات؟",
+  "avPasteHeaderAsData": "استخدامه كبيانات",
+  "avPasteHeaderAsField": "استخدامه كأسماء حقول",
   "databaseAttrClickMode": "سلوك النقر على شارة قاعدة البيانات",
   "databaseAttrClickModeTip": "تعيين ما يحدث عند النقر على شارة قاعدة البيانات",
   "focusBlockAndExpandDatabasePanel": "التركيز على الكتلة وتوسيع لوحة قاعدة البيانات",

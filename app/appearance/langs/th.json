@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "รู้จักส่วนหัวตาราง",
+  "avPasteHeaderTip": "ใช้แถวแรกที่วางเป็นชื่อเขตข้อมูลของฐานข้อมูลหรือไม่?",
+  "avPasteHeaderAsData": "ใช้เป็นข้อมูล",
+  "avPasteHeaderAsField": "ใช้เป็นชื่อเขตข้อมูล",
   "databaseAttrClickMode": "ลักษณะการทำงานเมื่อคลิกป้ายฐานข้อมูล",
   "databaseAttrClickModeTip": "กำหนดสิ่งที่จะเกิดขึ้นเมื่อคลิกป้ายฐานข้อมูล",
   "focusBlockAndExpandDatabasePanel": "โฟกัสบล็อกและขยายแผงฐานข้อมูล",

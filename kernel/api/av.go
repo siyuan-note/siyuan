@@ -775,13 +775,13 @@ func getAttributeViewPasteRows(c *gin.Context) {
 		return
 	}
 
-	view, err := model.GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID, count)
+	view, inferableKeyIDs, err := model.GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID, count)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-	ret.Data = map[string]any{"view": view}
+	ret.Data = map[string]any{"view": view, "inferableKeyIDs": inferableKeyIDs}
 }
 
 func getAttributeViewFieldViews(c *gin.Context) {

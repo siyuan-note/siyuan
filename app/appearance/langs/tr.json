@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Tablo başlığını tanı",
+  "avPasteHeaderTip": "Yapıştırılan ilk satır veritabanı alan adları olarak kullanılsın mı?",
+  "avPasteHeaderAsData": "Veri olarak kullan",
+  "avPasteHeaderAsField": "Alan adları olarak kullan",
   "databaseAttrClickMode": "Veritabanı rozetine tıklama davranışı",
   "databaseAttrClickModeTip": "Veritabanı rozetine tıklandığında yapılacak işlemi ayarlayın",
   "focusBlockAndExpandDatabasePanel": "Bloğa odaklan ve veritabanı panelini genişlet",

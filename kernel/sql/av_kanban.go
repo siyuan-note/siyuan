@@ -27,6 +27,7 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 		CardSize:               view.Kanban.CardSize,
 		FitImage:               view.Kanban.FitImage,
 		DisplayFieldName:       view.Kanban.DisplayFieldName,
+		DisplayEmptyFields:     view.Kanban.DisplayEmptyFields,
 		FillColBackgroundColor: view.Kanban.FillColBackgroundColor,
 		Fields:                 []*av.KanbanField{},
 		Cards:                  []*av.KanbanCard{},

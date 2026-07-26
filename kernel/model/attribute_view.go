@@ -1244,6 +1244,14 @@ func (tx *Transaction) doSetAttrViewDisplayFieldName(operation *Operation) (ret 
 	return
 }
 
+func (tx *Transaction) doSetAttrViewDisplayEmptyFields(operation *Operation) (ret *TxErr) {
+	err := setAttrViewDisplayEmptyFields(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
 func (tx *Transaction) doSetAttrViewFillColBackgroundColor(operation *Operation) (ret *TxErr) {
 	err := setAttrViewFillColBackgroundColor(operation)
 	if err != nil {
@@ -1270,6 +1278,30 @@ func setAttrViewDisplayFieldName(operation *Operation) (err error) {
 		view.Gallery.DisplayFieldName = operation.Data.(bool)
 	case av.LayoutTypeKanban:
 		view.Kanban.DisplayFieldName = operation.Data.(bool)
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func setAttrViewDisplayEmptyFields(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return
+	}
+
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		return
+	case av.LayoutTypeGallery:
+		view.Gallery.DisplayEmptyFields = operation.Data.(bool)
+	case av.LayoutTypeKanban:
+		view.Kanban.DisplayEmptyFields = operation.Data.(bool)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -3612,6 +3644,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		view.Gallery.CardSize = masterView.Gallery.CardSize
 		view.Gallery.FitImage = masterView.Gallery.FitImage
 		view.Gallery.DisplayFieldName = masterView.Gallery.DisplayFieldName
+		view.Gallery.DisplayEmptyFields = masterView.Gallery.DisplayEmptyFields
 		view.Gallery.ShowIcon = masterView.Gallery.ShowIcon
 		view.Gallery.WrapField = masterView.Gallery.WrapField
 	case av.LayoutTypeKanban:
@@ -3631,6 +3664,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		view.Kanban.CardSize = masterView.Kanban.CardSize
 		view.Kanban.FitImage = masterView.Kanban.FitImage
 		view.Kanban.DisplayFieldName = masterView.Kanban.DisplayFieldName
+		view.Kanban.DisplayEmptyFields = masterView.Kanban.DisplayEmptyFields
 		view.Kanban.FillColBackgroundColor = masterView.Kanban.FillColBackgroundColor
 		view.Kanban.ShowIcon = masterView.Kanban.ShowIcon
 		view.Kanban.WrapField = masterView.Kanban.WrapField

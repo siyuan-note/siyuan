@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Riconosci intestazione tabella",
+  "avPasteHeaderTip": "Usare la prima riga incollata come nomi dei campi del database?",
+  "avPasteHeaderAsData": "Usa come dati",
+  "avPasteHeaderAsField": "Usa come nomi dei campi",
   "databaseAttrClickMode": "Comportamento al clic sul badge del database",
   "databaseAttrClickModeTip": "Imposta cosa accade quando si fa clic sul badge del database",
   "focusBlockAndExpandDatabasePanel": "Metti a fuoco il blocco ed espandi il pannello del database",

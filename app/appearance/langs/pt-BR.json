@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Reconhecer cabeçalho da tabela",
+  "avPasteHeaderTip": "Usar a primeira linha colada como nomes dos campos do banco de dados?",
+  "avPasteHeaderAsData": "Usar como dados",
+  "avPasteHeaderAsField": "Usar como nomes de campos",
   "databaseAttrClickMode": "Comportamento ao clicar no indicador do banco de dados",
   "databaseAttrClickModeTip": "Defina o que acontece ao clicar no indicador do banco de dados",
   "focusBlockAndExpandDatabasePanel": "Focar o bloco e expandir o painel do banco de dados",

@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Kenali tajuk tabel",
+  "avPasteHeaderTip": "Gunakan baris pertama yang ditempel sebagai nama bidang basis data?",
+  "avPasteHeaderAsData": "Gunakan sebagai data",
+  "avPasteHeaderAsField": "Gunakan sebagai nama bidang",
   "databaseAttrClickMode": "Perilaku saat mengeklik lencana basis data",
   "databaseAttrClickModeTip": "Atur tindakan yang dilakukan saat mengeklik lencana basis data",
   "focusBlockAndExpandDatabasePanel": "Fokuskan blok dan perluas panel basis data",

@@ -1,4 +1,8 @@
 {
+  "avPasteHeaderTitle": "Розпізнати заголовок таблиці",
+  "avPasteHeaderTip": "Використати перший вставлений рядок як назви полів бази даних?",
+  "avPasteHeaderAsData": "Використати як дані",
+  "avPasteHeaderAsField": "Використати як назви полів",
   "databaseAttrClickMode": "Дія після натискання значка бази даних",
   "databaseAttrClickModeTip": "Задайте дію після натискання значка бази даних",
   "focusBlockAndExpandDatabasePanel": "Сфокусувати блок і розгорнути панель бази даних",

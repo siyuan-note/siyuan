@@ -1,7 +1,11 @@
 import {Constants} from "../../constants";
 import {isInEmbedBlock} from "../util/hasClosest";
 
-export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: string | number, cb?: () => void) => {
+export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: string | number, cb?: () => void,
+                                 options?: {
+                                     rootElement?: HTMLElement,
+                                     currentElement?: Element,
+                                 }) => {
     if (!isSupportCSSHL() || ((!keys || keys.length === 0) && !hlId)) {
         return;
     }
@@ -11,8 +15,8 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
         protyle.highlight.rangeIndex = 0;
         protyle.highlight.ranges = [];
         let isSetHL = false;
-        let hlBlockElement: Element;
-        if (typeof hlId === "string") {
+        let hlBlockElement = options?.currentElement;
+        if (!hlBlockElement && typeof hlId === "string") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id='${hlId}']`)).find(item => {
                 if (!isInEmbedBlock(item)) {
                     hlBlockElement = item;
@@ -29,8 +33,9 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
         const textNodes: Node[] = [];
         const textNodesSize: number[] = [];
         let currentSize = 0;
+        const rootElement = options?.rootElement || protyle.contentElement;
 
-        const treeWalker = document.createTreeWalker(protyle.contentElement, NodeFilter.SHOW_TEXT);
+        const treeWalker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT);
         let currentNode = treeWalker.nextNode();
         while (currentNode) {
             textNodes.push(currentNode);
@@ -39,7 +44,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
             currentNode = treeWalker.nextNode();
         }
 
-        const text = protyle.contentElement.textContent;
+        const text = rootElement.textContent;
         const rangeIndexes: { range: Range, startIndex: number, isCurrent: boolean }[] = [];
         if (keys && keys.length > 0) {
             keys.forEach(key => {

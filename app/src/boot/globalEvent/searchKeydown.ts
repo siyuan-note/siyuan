@@ -17,6 +17,7 @@ import {writeText} from "../../protyle/util/compatibility";
 import {getUnRefList} from "../../search/unRef";
 import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "../../search/toggleHistory";
 import {Protyle} from "../../protyle";
+import {getKeysByLiElement} from "../../search/menu";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (getSelection().rangeCount === 0) {
@@ -107,6 +108,9 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                     }
                 },
                 openPosition: "right",
+                nodeType: currentList.dataset.nodeType,
+                method: config.method,
+                keywords: getKeysByLiElement(currentList),
             });
             return true;
         }
@@ -226,6 +230,9 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                             dialog.destroy({focus: "false"});
                         }
                     },
+                    nodeType: currentList.dataset.nodeType,
+                    method: config.method,
+                    keywords: getKeysByLiElement(currentList),
                 });
             }
         } else {

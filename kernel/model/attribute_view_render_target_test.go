@@ -47,6 +47,72 @@ func TestResolveAttributeViewTargetGroupID(t *testing.T) {
 	}
 }
 
+func TestGetAttributeViewSearchMatches(t *testing.T) {
+	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
+		{
+			Key: &av.Key{ID: "20260726000000-keyaaaa"},
+			Values: []*av.Value{
+				{
+					ID:      "20260726000000-valueaa",
+					BlockID: "20260726000000-itemaaa",
+					Type:    av.KeyTypeText,
+					Text:    &av.ValueText{Content: "First Match"},
+				},
+			},
+		},
+		{
+			Key: &av.Key{ID: "20260726000000-keybbbb"},
+			Values: []*av.Value{
+				{
+					ID:      "20260726000000-valuebb",
+					BlockID: "20260726000000-itemaaa",
+					Type:    av.KeyTypeText,
+					Text:    &av.ValueText{Content: "Second Match"},
+				},
+			},
+		},
+	}}
+
+	matches := getAttributeViewSearchMatches(attrView, []string{"Match"})
+	match := matches["20260726000000-itemaaa"]
+	if nil == match {
+		t.Fatal("search match not found")
+	}
+	if "20260726000000-valueaa" != match.valueID || "20260726000000-keyaaaa" != match.keyID {
+		t.Fatalf("unexpected search match: %+v", match)
+	}
+	if 0 != len(getAttributeViewSearchMatches(attrView, []string{"match"})) {
+		t.Fatal("search match should preserve the case of highlighted keywords")
+	}
+}
+
+func TestAppendAttributeViewSearchItemIDs(t *testing.T) {
+	hiddenGroup := &av.Table{
+		BaseInstance: &av.BaseInstance{GroupHidden: 2},
+		Rows:         []*av.TableRow{{ID: "20260726000000-hiddena"}},
+	}
+	visibleGroup := &av.Table{
+		BaseInstance: &av.BaseInstance{},
+		Rows: []*av.TableRow{
+			{ID: "20260726000000-visiblea"},
+			{ID: "20260726000000-visibleb"},
+		},
+	}
+	viewable := &av.Table{BaseInstance: &av.BaseInstance{Groups: []av.Viewable{hiddenGroup, visibleGroup}}}
+
+	itemIDs := appendAttributeViewSearchItemIDs(nil, viewable, false)
+	itemIDs = appendAttributeViewSearchItemIDs(itemIDs, viewable, true)
+	expected := []string{"20260726000000-visiblea", "20260726000000-visibleb", "20260726000000-hiddena"}
+	if len(expected) != len(itemIDs) {
+		t.Fatalf("unexpected item IDs: %+v", itemIDs)
+	}
+	for i, itemID := range itemIDs {
+		if expected[i] != itemID {
+			t.Fatalf("unexpected item IDs: %+v", itemIDs)
+		}
+	}
+}
+
 func TestGetAttributeViewPasteRowsFromTable(t *testing.T) {
 	table := &av.Table{Rows: []*av.TableRow{
 		{ID: "20260723000000-itemaaa"},

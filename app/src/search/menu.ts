@@ -777,7 +777,7 @@ export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTab
     });
 };
 
-export const getKeyByLiElement = (element: HTMLElement) => {
+export const getKeysByLiElement = (element: HTMLElement) => {
     const keys: string[] = [];
     element.querySelectorAll(".b3-list-item__text mark").forEach(item => {
         keys.push(item.textContent);
@@ -787,5 +787,9 @@ export const getKeyByLiElement = (element: HTMLElement) => {
             keys.push(item.textContent);
         });
     }
-    return [...new Set(keys)].join(" ");
+    return [...new Set(keys)];
+};
+
+export const getKeyByLiElement = (element: HTMLElement) => {
+    return getKeysByLiElement(element).join(" ");
 };

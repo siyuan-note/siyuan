@@ -1293,6 +1293,26 @@ func getAttributeViewKeys(c *gin.Context) {
 	ret.Data = blockAttributeViewKeys
 }
 
+func getAttributeViewSearchTarget(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id, _ := arg["id"].(string)
+	keywordsArg, _ := arg["keywords"].([]any)
+	var keywords []string
+	for _, keywordArg := range keywordsArg {
+		if keyword, ok := keywordArg.(string); ok {
+			keywords = append(keywords, keyword)
+		}
+	}
+	ret.Data = model.GetAttributeViewSearchTarget(id, keywords)
+}
+
 func getAttributeViewBacklinks(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

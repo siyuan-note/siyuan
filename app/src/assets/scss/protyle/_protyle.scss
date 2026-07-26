@@ -198,7 +198,8 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  z-index: 3; // 需大于 database header and footer
+  // 需高于数据库表头和表尾
+  z-index: 4;
   pointer-events: none; // 划选矩形不拦截鼠标事件，避免 elementFromPoint 命中自身
 }
 
@@ -214,7 +215,8 @@
   flex-shrink: 0;
   box-sizing: border-box;
   min-height: 42px;
-  z-index: 4; // 需大于 protyle-select
+  // 需高于选区容器，并低于 .protyle-toolbar
+  z-index: 5;
   font-size: 14px;
   border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
 

@@ -1,7 +1,8 @@
 .protyle {
   &-toolbar {
     background-color: var(--b3-theme-background);
-    z-index: 5; // higher than .layout__resize--lr
+    // 需高于 .layout__resize
+    z-index: 7;
     position: fixed;
     box-shadow: var(--b3-dialog-shadow);
     border-radius: var(--b3-border-radius);

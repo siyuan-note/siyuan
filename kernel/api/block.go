@@ -642,6 +642,14 @@ func getRefIDs(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	requestedNotebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
+		ret.Data = map[string]any{
+			"refDefs":             []model.RefDefs{},
+			"originalRefBlockIDs": map[string]string{},
+		}
+		return
+	}
 	refDefs, originalRefBlockIDs := model.GetBlockRefsInBox(id, encryptedNotebookFromArg(arg))
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -918,6 +926,11 @@ func getBlockDOM(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	requestedNotebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
+		ret.Data = map[string]string{"id": id, "dom": ""}
+		return
+	}
 	boxID := encryptedNotebookFromArg(arg)
 	dom := model.GetBlockDOMInBox(id, boxID)
 
@@ -956,6 +969,11 @@ func getBlockDOMs(c *gin.Context) {
 		ids = append(ids, id.(string))
 	}
 
+	requestedNotebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
+		ret.Data = map[string]string{}
+		return
+	}
 	boxID := encryptedNotebookFromArg(arg)
 	doms := model.GetBlockDOMsInBox(ids, boxID)
 
@@ -978,6 +996,11 @@ func getBlockDOMWithEmbed(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	requestedNotebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
+		ret.Data = map[string]string{"id": id, "dom": ""}
+		return
+	}
 	boxID := encryptedNotebookFromArg(arg)
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	var publishAccess model.PublishAccess
@@ -1024,6 +1047,11 @@ func getBlockDOMsWithEmbed(c *gin.Context) {
 		ids = append(ids, id.(string))
 	}
 
+	requestedNotebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
+		ret.Data = map[string]string{}
+		return
+	}
 	boxID := encryptedNotebookFromArg(arg)
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	var publishAccess model.PublishAccess
@@ -1050,6 +1078,10 @@ func encryptedNotebookFromArg(arg map[string]any) string {
 		return notebook
 	}
 	return ""
+}
+
+func isEncryptedNotebookDeniedForPublish(c *gin.Context, notebook string) bool {
+	return notebook != "" && model.IsReadOnlyRoleContext(c) && model.IsEncryptedBoxDeniedByPublishAccess(notebook)
 }
 
 func filterBlockDOMsByPublishAccess(c *gin.Context, doms map[string]string, ids []string, boxID string, publishAccess model.PublishAccess, publishIgnore model.PublishAccess) {
@@ -1096,6 +1128,11 @@ func getBlockKramdown(c *gin.Context) {
 		}
 	}
 
+	requestedNotebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
+		ret.Data = map[string]string{"id": id, "kramdown": ""}
+		return
+	}
 	boxID := encryptedNotebookFromArg(arg)
 	var kramdown string
 	if boxID != "" {
@@ -1156,6 +1193,11 @@ func getBlockKramdowns(c *gin.Context) {
 		}
 	}
 
+	requestedNotebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
+		ret.Data = map[string]string{}
+		return
+	}
 	boxID := encryptedNotebookFromArg(arg)
 	var kramdowns map[string]string
 	if boxID != "" {

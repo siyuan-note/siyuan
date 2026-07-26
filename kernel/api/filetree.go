@@ -1270,6 +1270,15 @@ func listDocsByPath(c *gin.Context) {
 		return
 	}
 
+	if isEncryptedNotebookDeniedForPublish(c, notebook) {
+		ret.Data = map[string]any{
+			"box":   notebook,
+			"path":  p,
+			"files": []*model.File{},
+		}
+		return
+	}
+
 	sortParam := arg["sort"]
 	sortMode := util.SortModeUnassigned
 	if nil != sortParam {
@@ -1345,6 +1354,13 @@ func getDoc(c *gin.Context) {
 		return
 	}
 	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+	requestedNotebook, _ := arg["notebook"].(string)
+	if model.IsReadOnlyRoleContext(c) &&
+		((requestedNotebook != "" && model.IsEncryptedBoxDeniedByPublishAccess(requestedNotebook)) ||
+			model.IsEncryptedPublishRuntimeTarget(id)) {
+		ret.Code = 3
 		return
 	}
 	idx := arg["index"]
@@ -1425,9 +1441,9 @@ func getDoc(c *gin.Context) {
 	var headingNumbers map[string]string
 	var err error
 	// 加密笔记本的打开文档走 InBox 版（查加密 blocktree + content db）
-	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+	if requestedNotebook != "" && model.IsEncryptedBox(requestedNotebook) {
 		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, err =
-			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, notebook)
+			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, requestedNotebook)
 	} else {
 		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, err =
 			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
@@ -1488,6 +1504,11 @@ func setPublishAccess(c *gin.Context) {
 
 	publishAccess := model.GetPublishAccess()
 	ID := arg["id"].(string)
+	if model.IsEncryptedPublishAccessTarget(ID) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		return
+	}
 	visible := arg["visible"].(bool)
 	password := arg["password"].(string)
 	disable := arg["disable"].(bool)
@@ -1544,7 +1565,13 @@ func getPublishAccess(c *gin.Context) {
 
 	var IDs []string
 	for _, ID := range arg["ids"].([]any) {
-		IDs = append(IDs, ID.(string))
+		id := ID.(string)
+		if model.IsEncryptedPublishAccessTarget(id) {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(313)
+			return
+		}
+		IDs = append(IDs, id)
 	}
 
 	publishAccess := model.GetPublishAccess()
@@ -1584,6 +1611,11 @@ func authFilePublishAccess(c *gin.Context) {
 
 	ID := arg["id"].(string)
 	if util.InvalidIDPattern(ID, ret) {
+		return
+	}
+	if model.IsEncryptedPublishRuntimeTarget(ID) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
 		return
 	}
 	password := arg["password"].(string)

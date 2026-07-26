@@ -49,9 +49,14 @@ func getDocOutline(c *gin.Context) {
 		return
 	}
 
+	notebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, notebook) {
+		ret.Data = []*model.Path{}
+		return
+	}
 	var headings []*model.Path
 	var err error
-	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+	if notebook != "" && model.IsEncryptedBox(notebook) {
 		headings, err = model.OutlineInBox(rootID, preview, notebook)
 	} else {
 		headings, err = model.Outline(rootID, preview)
@@ -92,9 +97,14 @@ func getDocHeadingNumbers(c *gin.Context) {
 		return
 	}
 
+	notebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, notebook) {
+		ret.Data = map[string]string{}
+		return
+	}
 	numbers := map[string]string{}
 	var err error
-	if notebook, ok := arg["notebook"].(string); ok && "" != notebook && model.IsEncryptedBox(notebook) {
+	if notebook != "" && model.IsEncryptedBox(notebook) {
 		numbers, err = model.GetHeadingNumbers(rootID, notebook)
 	} else {
 		numbers, err = model.GetHeadingNumbers(rootID, "")

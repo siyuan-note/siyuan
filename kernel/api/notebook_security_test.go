@@ -41,6 +41,12 @@ func TestNotebookPublishVisibility(t *testing.T) {
 	}{
 		{name: "missing notebook", expected: false},
 		{name: "closed notebook", notebook: &model.Box{ID: boxID, Closed: true}, expected: false},
+		{
+			name:          "encrypted notebook",
+			notebook:      &model.Box{ID: boxID, Encrypted: true},
+			publishAccess: model.PublishAccess{{ID: boxID, Visible: true}},
+			expected:      false,
+		},
 		{name: "default visible", notebook: &model.Box{ID: boxID}, expected: true},
 		{
 			name:          "explicitly visible",
@@ -180,7 +186,7 @@ func TestGetNotebookInfoHidesInvisibleNotebookFromReader(t *testing.T) {
 	}
 }
 
-func TestGetNotebookConfHidesBoxCryptFromReader(t *testing.T) {
+func TestGetNotebookConfHidesEncryptedNotebookFromReader(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	oldConf, oldDataDir := model.Conf, util.DataDir
@@ -214,12 +220,12 @@ func TestGetNotebookConfHidesBoxCryptFromReader(t *testing.T) {
 	}
 
 	tests := []struct {
-		name           string
-		role           model.Role
-		expectBoxCrypt bool
+		name       string
+		role       model.Role
+		expectCode int
 	}{
-		{name: "reader", role: model.RoleReader, expectBoxCrypt: false},
-		{name: "administrator", role: model.RoleAdministrator, expectBoxCrypt: true},
+		{name: "reader", role: model.RoleReader, expectCode: -1},
+		{name: "administrator", role: model.RoleAdministrator, expectCode: 0},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -248,16 +254,25 @@ func TestGetNotebookConfHidesBoxCryptFromReader(t *testing.T) {
 			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
 				t.Fatalf("unmarshal response failed: %v", err)
 			}
-			if 0 != response.Code || nil == response.Data.Conf {
-				t.Fatalf("unexpected response: %s", recorder.Body.String())
+			if test.expectCode != response.Code {
+				t.Fatalf("unexpected response code: %s", recorder.Body.String())
+			}
+			if model.RoleReader == test.role {
+				if nil != response.Data.Conf {
+					t.Fatalf("reader received encrypted notebook configuration: %s", recorder.Body.String())
+				}
+				return
+			}
+			if nil == response.Data.Conf {
+				t.Fatalf("administrator did not receive notebook configuration: %s", recorder.Body.String())
 			}
 			if response.Data.Conf.Encrypted != boxConf.Encrypted ||
 				response.Data.Conf.Name != boxConf.Name ||
 				response.Data.Conf.SortMode != boxConf.SortMode {
 				t.Fatalf("functional notebook settings were changed: %#v", response.Data.Conf)
 			}
-			if test.expectBoxCrypt != (nil != response.Data.Conf.BoxCrypt) {
-				t.Fatalf("unexpected box crypt visibility: %#v", response.Data.Conf.BoxCrypt)
+			if nil == response.Data.Conf.BoxCrypt {
+				t.Fatal("administrator did not receive encrypted notebook key metadata")
 			}
 		})
 	}

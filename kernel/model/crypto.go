@@ -966,6 +966,7 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 	if boxEnc == nil || len(boxEnc.WrappedDEK) == 0 {
 		return errors.New("no encrypted key material for box")
 	}
+	invalidateEncryptedPublishAccessCache()
 
 	// 全局配置锁先于笔记本生命周期锁获取（设计 §17 锁顺序约定），避免与持子系统锁后回取配置锁的路径死锁。
 	// notebookCryptoMu 持锁期间调用的 deriveKEK/conf 修复只申请 Conf.m/cachedDEKsLock，不回取 box 生命周期锁。
@@ -1754,6 +1755,7 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 		err = errors.New("encrypted notebook metadata verification failed after write")
 		return "", err
 	}
+	invalidateEncryptedPublishAccessCache()
 
 	// 复用刚派生的 DEK 直接开 db + 缓存，省去再次 Argon2id 解锁
 	cachedDEKsLock.Lock()

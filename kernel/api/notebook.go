@@ -334,6 +334,11 @@ func getNotebookConf(c *gin.Context) {
 		ret.Msg = "notebook [" + notebook + "] not found"
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) && !isNotebookVisibleByPublishAccess(box, model.GetPublishAccess()) {
+		ret.Code = -1
+		ret.Msg = "notebook [" + notebook + "] not found"
+		return
+	}
 
 	boxConf := box.GetConf()
 	if !model.IsAdminRoleContext(c) {
@@ -479,7 +484,7 @@ func lsNotebooks(c *gin.Context) {
 }
 
 func isNotebookVisibleByPublishAccess(notebook *model.Box, publishAccess model.PublishAccess) bool {
-	if nil == notebook || notebook.Closed {
+	if nil == notebook || notebook.Closed || notebook.Encrypted {
 		return false
 	}
 

@@ -269,6 +269,7 @@ func (box *Box) saveConf0(data []byte) error {
 		util.ReportFileSysFatalError(err)
 		return fmt.Errorf("write box conf [%s] failed: %w", confPath, err)
 	}
+	invalidateEncryptedPublishAccessCache()
 	return nil
 }
 

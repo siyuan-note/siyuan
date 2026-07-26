@@ -265,6 +265,9 @@ export class Files extends Model {
                     } else if (target.classList.contains("b3-list-item__switch")) {
                         event.preventDefault();
                         event.stopPropagation();
+                        if (target.closest("[data-encrypted=true]")) {
+                            break;
+                        }
                         const rect = target.getBoundingClientRect();
                         openPublishAccessDialog(target.parentElement.getAttribute("data-type") === "navigation-root" ?
                             notebookId : target.parentElement.getAttribute("data-node-id"), {
@@ -1073,8 +1076,8 @@ export class Files extends Model {
         const actionClasses = `${iconUsesDocAction && hasChildren && !editingPublishAccess ? " file-tree__item--icon-expand" : ""}${
             iconUsesDocAction && !hasChildren && !editingPublishAccess ? " file-tree__item--icon-open" : ""}${
             hasChildren && window.siyuan.config.fileTree.parentDocClickExpand ? " file-tree__item--title-expand" : ""}`;
-        const emojiHTML = `<span class="b3-list-item__icon ariaLabel${isBoxDoc ? " popover__block" : ""}${editingPublishAccess ? " fn__none" : ""}" data-position="8east"${isBoxDoc ? ` data-id="${item.id}"` : ""} aria-label="${iconAriaLabel}">${iconContent}</span>`;
-        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
+        const emojiHTML = `<span class="b3-list-item__icon ariaLabel${isBoxDoc ? " popover__block" : ""}${editingPublishAccess && !item.encrypted ? " fn__none" : ""}" data-position="8east"${isBoxDoc ? ` data-id="${item.id}"` : ""} aria-label="${iconAriaLabel}">${iconContent}</span>`;
+        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess && !item.encrypted ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action"${item.encrypted ? ' data-encrypted="true"' : ""}>
     <span class="b3-list-item__toggle fn__hidden">
@@ -1088,7 +1091,7 @@ export class Files extends Model {
     </span>
 </li>`;
         } else {
-            return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}">
+            return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}"${item.encrypted ? " data-encrypted=\"true\"" : ""}>
 <li class="b3-list-item b3-list-item--hide-action${actionClasses}" ${window.siyuan.config.fileTree.sort === 6 ? 'draggable="true"' : ""}
 style="--file-toggle-width:22px;--file-action-offset:22px"
 data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? item.id : ""}">
@@ -1692,11 +1695,6 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                 checked: this.element.classList.contains("file-tree__publish-access--active"),
                 click: () => {
                     this.element.classList.toggle("file-tree__publish-access--active");
-                    const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
-                    this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
-                        item.classList.toggle("fn__none", editingPublishAccess);
-                        item.nextElementSibling.classList.toggle("fn__none", !editingPublishAccess);
-                    });
                     this.updateDocActions();
                     this.refreshPublishAccessSwitch();
                 }
@@ -1705,14 +1703,34 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
         return window.siyuan.menus.menu;
     }
 
+    private updatePublishAccessControls(editingPublishAccess: boolean) {
+        this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
+            const encrypted = Boolean(item.closest("[data-encrypted=true]"));
+            item.classList.toggle("fn__none", editingPublishAccess && !encrypted);
+            const switchElement = item.nextElementSibling;
+            if (switchElement) {
+                switchElement.classList.toggle("fn__none", !editingPublishAccess || encrypted);
+            }
+        });
+    }
+
     private refreshPublishAccessSwitch() {
-        if (window.siyuan.config.readonly || window.siyuan.isPublish ||
-            !this.element.classList.contains("file-tree__publish-access--active")) {
+        const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
+        this.updatePublishAccessControls(editingPublishAccess);
+        if (window.siyuan.config.readonly || window.siyuan.isPublish || !editingPublishAccess) {
             return;
         }
         const ids: string[] = [];
-        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")));
-        this.element.querySelectorAll("[data-type=\"navigation-file\"][data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")));
+        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => {
+            if (!element.closest("[data-encrypted=true]")) {
+                ids.push(element.getAttribute("data-url"));
+            }
+        });
+        this.element.querySelectorAll("[data-type=\"navigation-file\"][data-node-id]").forEach((element: HTMLElement) => {
+            if (!element.closest("[data-encrypted=true]")) {
+                ids.push(element.getAttribute("data-node-id"));
+            }
+        });
         fetchPost("/api/filetree/getPublishAccess", {
             ids
         }, response => {

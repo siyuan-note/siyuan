@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "גרור כדי להתאים את טווח העמודות הקפואות",
   "databaseTableView": "תצוגת טבלה של מסד נתונים",
   "databaseKanbanView": "תצוגת קאנבן של מסד נתונים",
   "databaseGalleryView": "תצוגת כרטיסים של מסד נתונים",
@@ -702,8 +703,8 @@
 	"unsplit": "לא מפוצל",
 	"unsplitAll": "לא מפוצל הכל",
 	"resetCardTip": "האם אתה בטוח לאפס ${x} כרטיסונים?",
-	"freezeCol": "הקפא עמודה",
-	"unfreezeCol": "שחרר עמודה",
+	"freezeCol": "הקפא עד עמודה זו",
+	"unfreezeCol": "בטל הקפאת עמודות",
 	"snippetsTip": "נושא הקוד עודכן, האם תרצה לשמור אותו?",
 	"addBelowAbove": "לחץ <span class='ft__on-surface'>הוסף מתחת</span><br>⌥לחץ <span class='ft__on-surface'>הוסף מעל</span>",
 	"imported": "ייבוא הושלם",

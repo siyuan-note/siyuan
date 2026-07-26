@@ -1185,7 +1185,6 @@ const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
 export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
     icon?: string,
     name?: string,
-    pin?: boolean,
 }) => {
     if (typeof headerValue.icon !== "undefined") {
         cellElement.dataset.icon = headerValue.icon;
@@ -1193,16 +1192,6 @@ export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
     }
     if (typeof headerValue.name !== "undefined") {
         cellElement.querySelector(".av__celltext").textContent = headerValue.name;
-    }
-    if (typeof headerValue.pin !== "undefined") {
-        const textElement = cellElement.querySelector(".av__celltext");
-        if (headerValue.pin) {
-            if (!cellElement.querySelector(".av__cellheadericon--pin")) {
-                textElement.insertAdjacentHTML("afterend", '<svg class="av__cellheadericon av__cellheadericon--pin"><use xlink:href="#iconPin"></use></svg>');
-            }
-        } else {
-            cellElement.querySelector(".av__cellheadericon--pin")?.remove();
-        }
     }
 };
 

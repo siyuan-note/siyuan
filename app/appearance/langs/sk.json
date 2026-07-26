@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "Potiahnutím upravíte rozsah ukotvených stĺpcov",
   "databaseTableView": "Tabuľkové zobrazenie databázy",
   "databaseKanbanView": "Kanban zobrazenie databázy",
   "databaseGalleryView": "Kartové zobrazenie databázy",
@@ -702,8 +703,8 @@
 	"unsplit": "Zrušiť rozdelenie",
 	"unsplitAll": "Zrušiť všetky rozdelenia",
 	"resetCardTip": "Naozaj chcete resetovať ${x} kartičiek?",
-	"freezeCol": "Ukotviť pole",
-	"unfreezeCol": "Uvoľniť pole",
+	"freezeCol": "Ukotviť po tento stĺpec",
+	"unfreezeCol": "Uvoľniť stĺpce",
 	"snippetsTip": "Útržok kódu bol aktualizovaný, chcete ho uložiť?",
 	"addBelowAbove": "Kliknutím <span class='ft__on-surface'>Pridať pod</span><br>⌥Kliknutím <span class='ft__on-surface'>Pridať nad</span>",
 	"imported": "Import dokončený",

@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "ลากเพื่อปรับช่วงคอลัมน์ที่ตรึง",
   "databaseTableView": "มุมมองตารางฐานข้อมูล",
   "databaseKanbanView": "มุมมองคัมบังฐานข้อมูล",
   "databaseGalleryView": "มุมมองการ์ดฐานข้อมูล",
@@ -702,8 +703,8 @@
 	"unsplit": "ยกเลิกแยก",
 	"unsplitAll": "ยกเลิกแยกทั้งหมด",
 	"resetCardTip": "แน่ใจหรือไม่ว่าต้องการรีเซ็ตแฟลชการ์ด ${x} ใบ?",
-	"freezeCol": "ตรึงฟิลด์",
-	"unfreezeCol": "เลิกตรึง",
+	"freezeCol": "ตรึงถึงคอลัมน์นี้",
+	"unfreezeCol": "เลิกตรึงคอลัมน์",
 	"snippetsTip": "ส่วนย่อยโค้ดอัปเดตแล้ว ต้องการบันทึกหรือไม่?",
 	"addBelowAbove": "คลิก <span class='ft__on-surface'>เพิ่มด้านล่าง</span><br>⌥คลิก <span class='ft__on-surface'>เพิ่มด้านบน</span>",
 	"imported": "นำเข้าเสร็จ",

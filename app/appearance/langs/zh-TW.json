@@ -1,4 +1,5 @@
 {
+  "freezeDrag": "拖曳調整凍結範圍",
   "databaseTableView": "數據庫 表格視圖",
   "databaseKanbanView": "數據庫 看板視圖",
   "databaseGalleryView": "數據庫 卡片視圖",
@@ -702,8 +703,8 @@
 	"unsplit": "取消分割畫面",
 	"unsplitAll": "取消全部分螢幕",
 	"resetCardTip": "確定重設 ${x} 張閃卡？",
-	"freezeCol": "固定欄位",
-	"unfreezeCol": "取消固定欄位",
+	"freezeCol": "凍結至此欄",
+	"unfreezeCol": "取消凍結",
 	"snippetsTip": "程式碼片段已更新，是否儲存？",
 	"addBelowAbove": "點擊 <span class='ft__on-surface'>在下方新增</span><br>⌥點擊 <span class='ft__on-surface'>在上方新增</span>",
 	"imported": "導入完成",

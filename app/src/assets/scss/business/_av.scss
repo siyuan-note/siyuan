@@ -1850,6 +1850,7 @@ img.av__cellassetimg {
   .av__relation-table {
     overflow: auto;
     overscroll-behavior: contain;
+    padding: 0;
   }
 
   .av__relation-table-header,
@@ -1898,7 +1899,9 @@ img.av__cellassetimg {
       }
     }
 
-    &[data-relation-type="selected"] {
+    &[data-relation-type="selected"],
+    &[data-relation-type="selected"]:hover,
+    &[data-relation-type="selected"].b3-menu__item--current {
       background-color: var(--b3-theme-primary-lightest);
 
       .av__relation-table-check,
@@ -2000,5 +2003,34 @@ img.av__cellassetimg {
 
   .av__relation-table-row.dragover__bottom::after {
     bottom: -2px;
+  }
+}
+
+.av__relation-drag-ghost {
+  align-items: center;
+  background-color: var(--b3-menu-background);
+  border: 1px solid var(--b3-border-color);
+  border-radius: var(--b3-border-radius);
+  box-shadow: var(--b3-dialog-shadow);
+  box-sizing: border-box;
+  color: var(--b3-theme-on-background);
+  display: flex;
+  height: 34px;
+  overflow: hidden;
+  padding: 4px 8px;
+  position: fixed;
+  width: 240px;
+
+  .fn__grab {
+    flex: 0 0 auto;
+    height: 14px;
+    margin-right: 6px;
+    width: 14px;
+  }
+
+  .b3-menu__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

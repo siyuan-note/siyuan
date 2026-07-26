@@ -257,6 +257,19 @@ export const openMenuPanel = (options: {
         let counter = 0;
         avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
             window.siyuan.dragElement = event.target as HTMLElement;
+            if (window.siyuan.dragElement.dataset.relationType === "selected") {
+                const primaryElement = window.siyuan.dragElement.querySelector(".av__relation-table-primary");
+                if (primaryElement) {
+                    const ghostElement = primaryElement.cloneNode(true) as HTMLElement;
+                    ghostElement.className = "av__relation-drag-ghost";
+                    ghostElement.removeAttribute("style");
+                    document.body.append(ghostElement);
+                    event.dataTransfer.setDragImage(ghostElement, 16, 17);
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                }
+            }
             window.siyuan.dragElement.style.opacity = ".38";
             return;
         });

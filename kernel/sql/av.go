@@ -50,7 +50,9 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 		groupView.Gallery.CoverFrom = view.Gallery.CoverFrom
 		groupView.Gallery.CoverFromAssetKeyID = view.Gallery.CoverFromAssetKeyID
 		groupView.Gallery.CardAspectRatio = view.Gallery.CardAspectRatio
+		groupView.Gallery.CardAspectRatioValue = view.Gallery.CardAspectRatioValue
 		groupView.Gallery.CardSize = view.Gallery.CardSize
+		groupView.Gallery.CardWidth = view.Gallery.CardWidth
 		groupView.Gallery.FitImage = view.Gallery.FitImage
 		groupView.Gallery.DisplayFieldName = view.Gallery.DisplayFieldName
 		groupView.Gallery.DisplayEmptyFields = view.Gallery.DisplayEmptyFields
@@ -62,7 +64,9 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 		groupView.Kanban.CoverFrom = view.Kanban.CoverFrom
 		groupView.Kanban.CoverFromAssetKeyID = view.Kanban.CoverFromAssetKeyID
 		groupView.Kanban.CardAspectRatio = view.Kanban.CardAspectRatio
+		groupView.Kanban.CardAspectRatioValue = view.Kanban.CardAspectRatioValue
 		groupView.Kanban.CardSize = view.Kanban.CardSize
+		groupView.Kanban.CardWidth = view.Kanban.CardWidth
 		groupView.Kanban.FitImage = view.Kanban.FitImage
 		groupView.Kanban.DisplayFieldName = view.Kanban.DisplayFieldName
 		groupView.Kanban.DisplayEmptyFields = view.Kanban.DisplayEmptyFields

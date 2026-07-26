@@ -24,13 +24,15 @@ import (
 type LayoutGallery struct {
 	*BaseLayout
 
-	CoverFrom           CoverFrom       `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
-	CoverFromAssetKeyID string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
-	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
-	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
-	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
-	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
-	DisplayEmptyFields  bool            `json:"displayEmptyFields"`            // 是否显示空字段
+	CoverFrom            CoverFrom       `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
+	CoverFromAssetKeyID  string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
+	CardAspectRatio      CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
+	CardAspectRatioValue float64         `json:"cardAspectRatioValue"`          // 卡片宽高比实际值，宽除以高
+	CardSize             CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
+	CardWidth            int             `json:"cardWidth"`                     // 卡片宽度，单位为像素
+	FitImage             bool            `json:"fitImage"`                      // 是否适应封面图片大小
+	DisplayFieldName     bool            `json:"displayFieldName"`              // 是否显示字段名称
+	DisplayEmptyFields   bool            `json:"displayEmptyFields"`            // 是否显示空字段
 
 	CardFields []*ViewGalleryCardField `json:"fields"` // 卡片字段
 
@@ -46,9 +48,11 @@ func NewLayoutGallery() *LayoutGallery {
 			ID:       ast.NewNodeID(),
 			ShowIcon: true,
 		},
-		CoverFrom:       CoverFromContentImage,
-		CardAspectRatio: CardAspectRatio16_9,
-		CardSize:        CardSizeMedium,
+		CoverFrom:            CoverFromContentImage,
+		CardAspectRatio:      CardAspectRatio16_9,
+		CardAspectRatioValue: CardAspectRatioValueByPreset(CardAspectRatio16_9),
+		CardSize:             CardSizeMedium,
+		CardWidth:            CardWidthBySize(CardSizeMedium),
 	}
 }
 
@@ -72,6 +76,43 @@ const (
 	CardSizeLarge                  // 大卡片
 )
 
+const (
+	CardWidthMin            = 140
+	CardWidthMax            = 600
+	CardAspectRatioValueMin = 0.25
+	CardAspectRatioValueMax = 2.5
+)
+
+func CardWidthBySize(size CardSize) int {
+	switch size {
+	case CardSizeSmall:
+		return 180
+	case CardSizeLarge:
+		return 320
+	default:
+		return 260
+	}
+}
+
+func CardAspectRatioValueByPreset(ratio CardAspectRatio) float64 {
+	switch ratio {
+	case CardAspectRatio9_16:
+		return 9.0 / 16.0
+	case CardAspectRatio4_3:
+		return 4.0 / 3.0
+	case CardAspectRatio3_4:
+		return 3.0 / 4.0
+	case CardAspectRatio3_2:
+		return 3.0 / 2.0
+	case CardAspectRatio2_3:
+		return 2.0 / 3.0
+	case CardAspectRatio1_1:
+		return 1
+	default:
+		return 16.0 / 9.0
+	}
+}
+
 // CoverFrom 描述了卡片封面来源的枚举类型。
 type CoverFrom int
 
@@ -91,16 +132,18 @@ type ViewGalleryCardField struct {
 type Gallery struct {
 	*BaseInstance
 
-	CoverFrom           CoverFrom       `json:"coverFrom"`                     // 封面来源
-	CoverFromAssetKeyID string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 CoverFromAssetField 时有效
-	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
-	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小
-	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
-	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
-	DisplayEmptyFields  bool            `json:"displayEmptyFields"`            // 是否显示空字段
-	Fields              []*GalleryField `json:"fields"`                        // 卡片字段
-	Cards               []*GalleryCard  `json:"cards"`                         // 卡片
-	CardCount           int             `json:"cardCount"`                     // 总卡片数
+	CoverFrom            CoverFrom       `json:"coverFrom"`                     // 封面来源
+	CoverFromAssetKeyID  string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 CoverFromAssetField 时有效
+	CardAspectRatio      CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
+	CardAspectRatioValue float64         `json:"cardAspectRatioValue"`          // 卡片宽高比实际值，宽除以高
+	CardSize             CardSize        `json:"cardSize"`                      // 卡片大小
+	CardWidth            int             `json:"cardWidth"`                     // 卡片宽度，单位为像素
+	FitImage             bool            `json:"fitImage"`                      // 是否适应封面图片大小
+	DisplayFieldName     bool            `json:"displayFieldName"`              // 是否显示字段名称
+	DisplayEmptyFields   bool            `json:"displayEmptyFields"`            // 是否显示空字段
+	Fields               []*GalleryField `json:"fields"`                        // 卡片字段
+	Cards                []*GalleryCard  `json:"cards"`                         // 卡片
+	CardCount            int             `json:"cardCount"`                     // 总卡片数
 }
 
 // GalleryCard 描述了卡片实例的结构。

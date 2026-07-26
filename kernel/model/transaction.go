@@ -376,6 +376,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewCoverFromAssetKeyID(op)
 			case "setAttrViewCardSize":
 				ret = tx.doSetAttrViewCardSize(op)
+			case "setAttrViewCardWidth":
+				ret = tx.doSetAttrViewCardWidth(op)
 			case "setAttrViewFitImage":
 				ret = tx.doSetAttrViewFitImage(op)
 			case "setAttrViewDisplayFieldName":
@@ -394,6 +396,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewBlockView(op)
 			case "setAttrViewCardAspectRatio":
 				ret = tx.doSetAttrViewCardAspectRatio(op)
+			case "setAttrViewCardAspectRatioValue":
+				ret = tx.doSetAttrViewCardAspectRatioValue(op)
 			case "setAttrViewGroup":
 				ret = tx.doSetAttrViewGroup(op)
 			case "hideAttrViewGroup":

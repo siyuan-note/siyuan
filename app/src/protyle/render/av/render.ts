@@ -738,38 +738,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
         return;
     }
-    if (operation.action === "setAttrViewCardSize") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            if (item.getAttribute("data-av-type") === "kanban") {
-                item.querySelectorAll(".av__kanban-group").forEach(galleryItem => {
-                    galleryItem.classList.remove("av__kanban-group--small", "av__kanban-group--big");
-                    if (operation.data === 0) {
-                        galleryItem.classList.add("av__kanban-group--small");
-                    } else if (operation.data === 2) {
-                        galleryItem.classList.add("av__kanban-group--big");
-                    }
-                });
-            } else {
-                item.querySelectorAll(".av__gallery").forEach(galleryItem => {
-                    galleryItem.classList.remove("av__gallery--small", "av__gallery--big");
-                    if (operation.data === 0) {
-                        galleryItem.classList.add("av__gallery--small");
-                    } else if (operation.data === 2) {
-                        galleryItem.classList.add("av__gallery--big");
-                    }
-                });
-            }
-        });
-        return;
-    }
-    if (operation.action === "setAttrViewCardAspectRatio") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            item.querySelectorAll(".av__gallery-cover").forEach(coverItem => {
-                coverItem.className = "av__gallery-cover av__gallery-cover--" + operation.data;
-            });
-        });
-        return;
-    }
     if (operation.action === "hideAttrViewName") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             const titleElement = item.querySelector(".av__title");
@@ -895,6 +863,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         }
         getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
+            if (["setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
+                "setAttrViewCardAspectRatioValue"].includes(operation.action) &&
+                (!operation.viewID || getViewIDByAVElement(item) === operation.viewID)) {
+                // 卡片宽度和宽高比变化后原虚拟滚动占位高度已失效，重渲时从首项重新初始化。
+                item.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);
+            }
             if (operation.action === "replaceAttrViewBlock" && operation.retData?.duplicate &&
                 (!operation.blockID || operation.blockID === item.dataset.nodeId) &&
                 (!operation.context?.protyleID || operation.context.protyleID === protyle.id)) {

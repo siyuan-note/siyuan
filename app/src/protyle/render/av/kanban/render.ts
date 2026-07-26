@@ -8,6 +8,7 @@ import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getRowHTML} from "../row";
 import {getBodyVirtualData} from "../virtualScroll";
 import {beginAVRender, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
+import {getCardStyle} from "../gallery/style";
 
 interface IIds {
     groupId: string,
@@ -204,7 +205,7 @@ export const renderKanban = async (options: {
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
-    <div class="av__kanban${isSelectGroup ? " av__kanban--bg" : ""}">
+    <div class="av__kanban${isSelectGroup ? " av__kanban--bg" : ""}" style="${getCardStyle(view)}">
         ${bodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>

@@ -1,4 +1,5 @@
 import {Constants} from "../../../constants";
+import {getCardWidth} from "./gallery/style";
 import {showMessage} from "../../../dialog/message";
 import {transaction} from "../../wysiwyg/transaction";
 import {clearSelect} from "../../util/clear";
@@ -277,7 +278,7 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
         const itemHeight = (currentBody?.querySelector(".av__gallery-item") as HTMLElement)?.offsetHeight || 180;
         let columns = 1;
         if (data.viewType === "gallery") {
-            const minWidth = (view as IAVGallery)?.cardSize === 0 ? 180 : ((view as IAVGallery)?.cardSize === 2 ? 320 : 260);
+            const minWidth = getCardWidth(view as IAVGallery);
             columns = Math.max(1, Math.floor((blockElement.clientWidth + 16) / (minWidth + 16)));
             renderedStart -= renderedStart % columns;
         }

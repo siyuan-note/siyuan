@@ -10,6 +10,7 @@ import {renderKanban} from "../kanban/render";
 import {getBodyVirtualData, initVirtualScroll} from "../virtualScroll";
 import {getRowHTML, updateHeader} from "../row";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
+import {getCardStyle} from "./style";
 
 interface IIds {
     groupId: string,
@@ -57,7 +58,7 @@ const getGalleryHTML = (data: IAVGallery, e: HTMLElement, virtualData: IAVVirtua
         return false;
     });
     galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.newRow}</div>`;
-    return `<div class="av__gallery${data.cardSize === 0 ? " av__gallery--small" : (data.cardSize === 2 ? " av__gallery--big" : "")}">
+    return `<div class="av__gallery${data.cardSize === 0 ? " av__gallery--small" : (data.cardSize === 2 ? " av__gallery--big" : "")}" style="${getCardStyle(data)}">
     ${virtualData?.topSpacerHeight ? `<div class="av__spacer" style="height: ${virtualData.topSpacerHeight}px;"></div>` : ""}${galleryHTML}
 </div>
 <div class="av__gallery-load${data.cardCount > data.cards.length ? "" : " fn__none"}">

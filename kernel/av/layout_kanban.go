@@ -24,13 +24,15 @@ import (
 type LayoutKanban struct {
 	*BaseLayout
 
-	CoverFrom           CoverFrom       `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
-	CoverFromAssetKeyID string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
-	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
-	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
-	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
-	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
-	DisplayEmptyFields  bool            `json:"displayEmptyFields"`            // 是否显示空字段
+	CoverFrom            CoverFrom       `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
+	CoverFromAssetKeyID  string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
+	CardAspectRatio      CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
+	CardAspectRatioValue float64         `json:"cardAspectRatioValue"`          // 卡片宽高比实际值，宽除以高
+	CardSize             CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
+	CardWidth            int             `json:"cardWidth"`                     // 卡片宽度，单位为像素
+	FitImage             bool            `json:"fitImage"`                      // 是否适应封面图片大小
+	DisplayFieldName     bool            `json:"displayFieldName"`              // 是否显示字段名称
+	DisplayEmptyFields   bool            `json:"displayEmptyFields"`            // 是否显示空字段
 
 	FillColBackgroundColor bool `json:"fillColBackgroundColor"` // 是否填充列背景颜色
 
@@ -44,9 +46,11 @@ func NewLayoutKanban() *LayoutKanban {
 			ID:       ast.NewNodeID(),
 			ShowIcon: true,
 		},
-		CoverFrom:       CoverFromContentImage,
-		CardAspectRatio: CardAspectRatio16_9,
-		CardSize:        CardSizeMedium,
+		CoverFrom:            CoverFromContentImage,
+		CardAspectRatio:      CardAspectRatio16_9,
+		CardAspectRatioValue: CardAspectRatioValueByPreset(CardAspectRatio16_9),
+		CardSize:             CardSizeMedium,
+		CardWidth:            CardWidthBySize(CardSizeMedium),
 	}
 }
 
@@ -62,7 +66,9 @@ type Kanban struct {
 	CoverFrom              CoverFrom       `json:"coverFrom"`                     // 封面来源
 	CoverFromAssetKeyID    string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 CoverFromAssetField 时有效
 	CardAspectRatio        CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
+	CardAspectRatioValue   float64         `json:"cardAspectRatioValue"`          // 卡片宽高比实际值，宽除以高
 	CardSize               CardSize        `json:"cardSize"`                      // 卡片大小
+	CardWidth              int             `json:"cardWidth"`                     // 卡片宽度，单位为像素
 	FitImage               bool            `json:"fitImage"`                      // 是否适应封面图片大小
 	DisplayFieldName       bool            `json:"displayFieldName"`              // 是否显示字段名称
 	DisplayEmptyFields     bool            `json:"displayEmptyFields"`            // 是否显示空字段

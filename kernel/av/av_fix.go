@@ -24,7 +24,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const CurrentSpec = 5
+const CurrentSpec = 6
 
 const MaxFilterNestingDepth = 3
 
@@ -38,6 +38,7 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec3(av)
 	upgradeSpec4(av)
 	upgradeSpec5(av)
+	upgradeSpec6(av)
 }
 
 func CheckSpec(av *AttributeView) (err error) {
@@ -47,6 +48,26 @@ func CheckSpec(av *AttributeView) (err error) {
 		return
 	}
 	return
+}
+
+// upgradeSpec6 将卡片和看板的预设尺寸转换为可连续调节的实际宽度和宽高比。
+func upgradeSpec6(av *AttributeView) {
+	if 6 <= av.Spec {
+		return
+	}
+
+	for _, view := range av.Views {
+		if nil != view.Gallery {
+			view.Gallery.CardWidth = CardWidthBySize(view.Gallery.CardSize)
+			view.Gallery.CardAspectRatioValue = CardAspectRatioValueByPreset(view.Gallery.CardAspectRatio)
+		}
+		if nil != view.Kanban {
+			view.Kanban.CardWidth = CardWidthBySize(view.Kanban.CardSize)
+			view.Kanban.CardAspectRatioValue = CardAspectRatioValueByPreset(view.Kanban.CardAspectRatio)
+		}
+	}
+
+	av.Spec = 6
 }
 
 // upgradeSpec5 将旧的扁平过滤规则数组包装为单个隐式 AND 根组，支持递归嵌套分组。

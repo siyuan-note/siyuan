@@ -26,16 +26,18 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	}
 
 	ret = &av.Gallery{
-		BaseInstance:        av.NewViewBaseInstance(view),
-		CoverFrom:           view.Gallery.CoverFrom,
-		CoverFromAssetKeyID: view.Gallery.CoverFromAssetKeyID,
-		CardAspectRatio:     view.Gallery.CardAspectRatio,
-		CardSize:            view.Gallery.CardSize,
-		FitImage:            view.Gallery.FitImage,
-		DisplayFieldName:    view.Gallery.DisplayFieldName,
-		DisplayEmptyFields:  view.Gallery.DisplayEmptyFields,
-		Fields:              []*av.GalleryField{},
-		Cards:               []*av.GalleryCard{},
+		BaseInstance:         av.NewViewBaseInstance(view),
+		CoverFrom:            view.Gallery.CoverFrom,
+		CoverFromAssetKeyID:  view.Gallery.CoverFromAssetKeyID,
+		CardAspectRatio:      view.Gallery.CardAspectRatio,
+		CardAspectRatioValue: view.Gallery.CardAspectRatioValue,
+		CardSize:             view.Gallery.CardSize,
+		CardWidth:            view.Gallery.CardWidth,
+		FitImage:             view.Gallery.FitImage,
+		DisplayFieldName:     view.Gallery.DisplayFieldName,
+		DisplayEmptyFields:   view.Gallery.DisplayEmptyFields,
+		Fields:               []*av.GalleryField{},
+		Cards:                []*av.GalleryCard{},
 	}
 
 	// 组装字段

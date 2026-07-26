@@ -5,6 +5,25 @@ import {unicode2Emoji} from "../../../../emoji";
 import {getColIconByType} from "../col";
 import {avContextmenu} from "../action";
 import {Constants} from "../../../../constants";
+import {
+    CARD_ASPECT_RATIO_MAX,
+    CARD_ASPECT_RATIO_MIN,
+    CARD_ASPECT_RATIO_PRESETS,
+    CARD_WIDTH_MAX,
+    CARD_WIDTH_MIN,
+    CARD_WIDTH_PRESETS,
+    getCardAspectRatio,
+    getCardAspectRatioLabel,
+    getCardAspectRatioValue,
+    getCardWidth
+} from "./style";
+
+const updateCardPreview = (nodeElement: Element, property: string, value: string) => {
+    const selector = nodeElement.getAttribute("data-av-type") === "kanban" ? ".av__kanban" : ".av__gallery";
+    nodeElement.querySelectorAll<HTMLElement>(selector).forEach(item => {
+        item.style.setProperty(property, value);
+    });
+};
 
 export const setGalleryCover = (options: {
     view: IAVGallery
@@ -16,6 +35,9 @@ export const setGalleryCover = (options: {
     const blockID = options.nodeElement.getAttribute("data-node-id");
     const targetNameElement = options.target.querySelector(".b3-menu__accelerator");
     const menu = new Menu();
+    const updateRatioDisabled = (disabled: boolean) => {
+        (options.target.parentElement.querySelector('[data-type="set-gallery-ratio"]') as HTMLButtonElement).disabled = disabled;
+    };
     menu.addItem({
         iconHTML: "",
         checked: options.view.coverFrom === 0,
@@ -34,6 +56,7 @@ export const setGalleryCover = (options: {
             }]);
             options.view.coverFrom = 0;
             targetNameElement.textContent = window.siyuan.languages.calcOperatorNone;
+            updateRatioDisabled(true);
         }
     });
     menu.addItem({
@@ -54,6 +77,7 @@ export const setGalleryCover = (options: {
             }]);
             options.view.coverFrom = 3;
             targetNameElement.textContent = window.siyuan.languages.contentBlock;
+            updateRatioDisabled(false);
         }
     });
     menu.addItem({
@@ -74,6 +98,7 @@ export const setGalleryCover = (options: {
             }]);
             options.view.coverFrom = 1;
             targetNameElement.textContent = window.siyuan.languages.contentImage;
+            updateRatioDisabled(false);
         }
     });
     let addedSeparator = false;
@@ -112,6 +137,7 @@ export const setGalleryCover = (options: {
                     options.view.coverFrom = 2;
                     options.view.coverFromAssetKeyID = item.id;
                     targetNameElement.textContent = item.name;
+                    updateRatioDisabled(false);
                 }
             });
         }
@@ -121,7 +147,7 @@ export const setGalleryCover = (options: {
 };
 
 export const setGallerySize = (options: {
-    view: IAVGallery
+    view: IAVGallery | IAVKanban
     nodeElement: Element,
     protyle: IProtyle,
     target: HTMLElement
@@ -131,98 +157,74 @@ export const setGallerySize = (options: {
     const blockID = options.nodeElement.getAttribute("data-node-id");
     const viewID = options.nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     const targetNameElement = options.target.querySelector(".b3-menu__accelerator");
-    menu.addItem({
-        iconHTML: "",
-        checked: options.view.cardSize === 0,
-        label: window.siyuan.languages.small,
-        click() {
-            transaction(options.protyle, [{
-                action: "setAttrViewCardSize",
-                avID,
-                blockID,
-                data: 0,
-                viewID
-            }], [{
-                action: "setAttrViewCardSize",
-                avID,
-                blockID,
-                data: options.view.cardSize,
-                viewID
-            }]);
-            options.view.cardSize = 0;
-            targetNameElement.textContent = window.siyuan.languages.small;
-        }
+    const previousWidth = getCardWidth(options.view);
+    [window.siyuan.languages.small, window.siyuan.languages.medium, window.siyuan.languages.large].forEach((label, index) => {
+        const width = CARD_WIDTH_PRESETS[index];
+        menu.addItem({
+            iconHTML: "",
+            checked: previousWidth === width,
+            label,
+            click() {
+                transaction(options.protyle, [{
+                    action: "setAttrViewCardWidth",
+                    avID,
+                    blockID,
+                    data: width,
+                    viewID
+                }], [{
+                    action: "setAttrViewCardWidth",
+                    avID,
+                    blockID,
+                    data: previousWidth,
+                    viewID
+                }]);
+                options.view.cardWidth = width;
+                targetNameElement.textContent = `${width}px`;
+            }
+        });
     });
+    menu.addSeparator();
     menu.addItem({
         iconHTML: "",
-        checked: options.view.cardSize === 1,
-        label: window.siyuan.languages.medium,
-        click() {
-            transaction(options.protyle, [{
-                action: "setAttrViewCardSize",
-                avID,
-                blockID,
-                data: 1,
-                viewID
-            }], [{
-                action: "setAttrViewCardSize",
-                avID,
-                blockID,
-                data: options.view.cardSize,
-                viewID
-            }]);
-            options.view.cardSize = 1;
-            targetNameElement.textContent = window.siyuan.languages.medium;
-        }
-    });
-    menu.addItem({
-        iconHTML: "",
-        checked: options.view.cardSize === 2,
-        label: window.siyuan.languages.large,
-        click() {
-            transaction(options.protyle, [{
-                action: "setAttrViewCardSize",
-                avID,
-                blockID,
-                data: 2,
-                viewID
-            }], [{
-                action: "setAttrViewCardSize",
-                avID,
-                blockID,
-                data: options.view.cardSize,
-                viewID
-            }]);
-            options.view.cardSize = 2;
-            targetNameElement.textContent = window.siyuan.languages.large;
+        type: "readonly",
+        label: `<div class="b3-tooltips b3-tooltips__n" aria-label="${previousWidth}px" style="margin: 4px 0;">
+    <input class="b3-slider fn__block" max="${CARD_WIDTH_MAX}" min="${CARD_WIDTH_MIN}" step="10" type="range" value="${previousWidth}">
+</div>`,
+        bind(element) {
+            const rangeElement = element.querySelector("input") as HTMLInputElement;
+            rangeElement.addEventListener("input", () => {
+                updateCardPreview(options.nodeElement, "--b3-av-card-width", `${rangeElement.value}px`);
+                rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}px`);
+            });
+            rangeElement.addEventListener("change", () => {
+                const width = parseInt(rangeElement.value);
+                if (width !== previousWidth) {
+                    transaction(options.protyle, [{
+                        action: "setAttrViewCardWidth",
+                        avID,
+                        blockID,
+                        data: width,
+                        viewID
+                    }], [{
+                        action: "setAttrViewCardWidth",
+                        avID,
+                        blockID,
+                        data: previousWidth,
+                        viewID
+                    }]);
+                    options.view.cardWidth = width;
+                    targetNameElement.textContent = `${width}px`;
+                }
+                menu.close();
+            });
         }
     });
     const rect = options.target.getBoundingClientRect();
     menu.open({x: rect.left, y: rect.bottom});
 };
 
-export const getCardAspectRatio = (ratio: number) => {
-    switch (ratio) {
-        case 0:
-            return "16:9";
-        case 1:
-            return "9:16";
-        case 2:
-            return "4:3";
-        case 3:
-            return "3:4";
-        case 4:
-            return "3:2";
-        case 5:
-            return "2:3";
-        case 6:
-            return "1:1";
-    }
-    return "16:9";
-};
-
 export const setGalleryRatio = (options: {
-    view: IAVGallery
+    view: IAVGallery | IAVKanban
     nodeElement: Element,
     protyle: IProtyle,
     target: HTMLElement
@@ -232,29 +234,68 @@ export const setGalleryRatio = (options: {
     const blockID = options.nodeElement.getAttribute("data-node-id");
     const viewID = options.nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     const targetNameElement = options.target.querySelector(".b3-menu__accelerator");
+    const previousRatio = getCardAspectRatioValue(options.view);
     [0, 1, 2, 3, 4, 5, 6].forEach(ratio => {
+        const ratioValue = CARD_ASPECT_RATIO_PRESETS[ratio];
         menu.addItem({
             iconHTML: "",
-            checked: options.view.cardAspectRatio === ratio,
+            checked: Math.abs(previousRatio - ratioValue) < 0.0001,
             label: getCardAspectRatio(ratio),
             click() {
                 transaction(options.protyle, [{
-                    action: "setAttrViewCardAspectRatio",
+                    action: "setAttrViewCardAspectRatioValue",
                     avID,
                     blockID,
-                    data: ratio,
+                    data: ratioValue,
                     viewID
                 }], [{
-                    action: "setAttrViewCardAspectRatio",
+                    action: "setAttrViewCardAspectRatioValue",
                     avID,
                     blockID,
-                    data: options.view.cardAspectRatio,
+                    data: previousRatio,
                     viewID
                 }]);
-                options.view.cardAspectRatio = ratio;
-                targetNameElement.textContent = getCardAspectRatio(ratio);
+                options.view.cardAspectRatioValue = ratioValue;
+                targetNameElement.textContent = getCardAspectRatioLabel(ratioValue);
             }
         });
+    });
+    menu.addSeparator();
+    menu.addItem({
+        iconHTML: "",
+        type: "readonly",
+        label: `<div class="b3-tooltips b3-tooltips__n" aria-label="${getCardAspectRatioLabel(previousRatio)}" style="margin: 4px 0;">
+    <input class="b3-slider fn__block" max="${CARD_ASPECT_RATIO_MAX}" min="${CARD_ASPECT_RATIO_MIN}" step="0.05" type="range" value="${previousRatio}">
+</div>`,
+        bind(element) {
+            const rangeElement = element.querySelector("input") as HTMLInputElement;
+            rangeElement.addEventListener("input", () => {
+                const ratio = parseFloat(rangeElement.value);
+                updateCardPreview(options.nodeElement, "--b3-av-card-aspect-ratio", rangeElement.value);
+                rangeElement.parentElement.setAttribute("aria-label", getCardAspectRatioLabel(ratio));
+            });
+            rangeElement.addEventListener("change", () => {
+                const ratio = parseFloat(rangeElement.value);
+                if (ratio !== previousRatio) {
+                    transaction(options.protyle, [{
+                        action: "setAttrViewCardAspectRatioValue",
+                        avID,
+                        blockID,
+                        data: ratio,
+                        viewID
+                    }], [{
+                        action: "setAttrViewCardAspectRatioValue",
+                        avID,
+                        blockID,
+                        data: previousRatio,
+                        viewID
+                    }]);
+                    options.view.cardAspectRatioValue = ratio;
+                    targetNameElement.textContent = getCardAspectRatioLabel(ratio);
+                }
+                menu.close();
+            });
+        }
     });
     const rect = options.target.getBoundingClientRect();
     menu.open({x: rect.left, y: rect.bottom});

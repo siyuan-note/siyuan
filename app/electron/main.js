@@ -1773,17 +1773,8 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-export-pdf", (event, data) => {
-        dialog.showOpenDialog({
-            title: data.title, properties: ["createDirectory", "openDirectory"],
-        }).then((result) => {
-            if (result.canceled) {
-                event.sender.destroy();
-                return;
-            }
-            data.filePaths = result.filePaths;
-            data.webContentsId = event.sender.id;
-            getWindowByContentId(data.parentWindowId).send("siyuan-export-pdf", data);
-        });
+        data.webContentsId = event.sender.id;
+        getWindowByContentId(data.parentWindowId).send("siyuan-export-pdf", data);
     });
     ipcMain.on("siyuan-export-newwindow", (event, data) => {
         // The PDF/Word export preview window automatically adjusts according to the size of the main window https://github.com/siyuan-note/siyuan/issues/10554

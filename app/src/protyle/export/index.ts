@@ -672,9 +672,18 @@ ${getIconScript(servePath)}
                 parentWindowId: ${currentWindowId},
             };
         };
-        actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
+        actionElement.querySelector('.b3-button--text').addEventListener('click', async () => {
             const {ipcRenderer}  = require("electron");
+            const result = await ipcRenderer.invoke("${Constants.SIYUAN_GET}", {
+                cmd: "showOpenDialog",
+                title: "${window.siyuan.languages.export} PDF",
+                properties: ["createDirectory", "openDirectory"],
+            });
+            if (result.canceled || result.filePaths.length === 0) {
+                return;
+            }
             const isPaged = actionElement.querySelector("#paged").checked;
+            let exportConfig;
             if (!isPaged) {
                 const getPageSizeDimensions = () => {
                     // https://github.com/electron/electron/blob/3df3a6a736b93e0d69fa3b0c403b33f201287780/lib/browser/api/web-contents.ts#L89-L101
@@ -689,21 +698,23 @@ ${getIconScript(servePath)}
                     return pageSizes[actionElement.querySelector("#pageSize").value];
                 };
                 const previewHeight = Math.max(previewElement.scrollHeight / 96 - (parseFloat(document.querySelector("#marginsTop").value) || 0) - (parseFloat(document.querySelector("#marginsBottom").value) || 0), getPageSizeDimensions().height);
-                ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", buildExportConfig(actionElement.querySelector("#landscape").checked ? {
+                exportConfig = buildExportConfig(actionElement.querySelector("#landscape").checked ? {
                     height: getPageSizeDimensions().height,
                     width: previewHeight,
                 } : {
                     width: getPageSizeDimensions().width,
                     height: previewHeight,
-                }));
+                });
             } else {
-                ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", buildExportConfig());
+                exportConfig = buildExportConfig();
             }
+            exportConfig.filePaths = result.filePaths;
             document.body.classList.add("exporting");
             previewElement.style.zoom = "";
             previewElement.style.padding = "6px 0 0 0";
             fixBlockWidth();
             actionElement.remove();
+            ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", exportConfig);
         });
         setPadding();
         renderPreview(response.data);

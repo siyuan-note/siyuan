@@ -236,7 +236,7 @@ function getViewerConfiguration(element) {
 function webViewerLoad(file, element, pdfPage, annoId) {
   // SiYuan 通过 AppOptions.set 显式配置 viewer,禁用从 localStorage 读取的 Preferences,
   AppOptions.set("disablePreferences", true);
-  AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.min.mjs?v=4.7.85`);
+  AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.min.mjs?v=4.8.69`);
   AppOptions.set("defaultUrl", file);
   AppOptions.set("cMapUrl", 'cmaps/');
   AppOptions.set("standardFontDataUrl", 'standard_fonts/');

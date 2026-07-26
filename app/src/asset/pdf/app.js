@@ -301,7 +301,7 @@ class PDFViewerApplication {
 
                 if (typeof PDFJSDev === "undefined") {
                     // NOTE
-                    globalThis.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.mjs?v=4.7.85`);
+                    globalThis.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.min.mjs?v=4.8.69`);
                 } else {
                     await __non_webpack_import__(PDFWorker.workerSrc);
                 }

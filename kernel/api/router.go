@@ -549,6 +549,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/addAttributeViewBlocks", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addAttributeViewBlocks)
 	ginServer.Handle("POST", "/api/av/removeAttributeViewBlocks", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeAttributeViewBlocks)
 	ginServer.Handle("POST", "/api/av/getAttributeViewPrimaryKeyValues", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewPrimaryKeyValues)
+	ginServer.Handle("POST", "/api/av/getAttributeViewRelationCandidates", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewRelationCandidates)
 	ginServer.Handle("POST", "/api/av/setDatabaseBlockView", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setDatabaseBlockView)
 	ginServer.Handle("POST", "/api/av/getMirrorDatabaseBlocks", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getMirrorDatabaseBlocks)
 	ginServer.Handle("POST", "/api/av/getAttributeViewKeysByAvID", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewKeysByAvID)

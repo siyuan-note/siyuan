@@ -1932,6 +1932,48 @@
     * `data.blockIDs`: このデータベースを参照する全データベースブロック（ミラー）の ID
     * `data.total`: フィルタリング後、ページング前の主キー値の数
 
+### リレーション候補アイテムを取得
+
+* `/api/av/getAttributeViewRelationCandidates`
+* パラメータ
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "keyword": "",
+    "page": 1,
+    "pageSize": 16,
+    "selectedBlockIDs": ["20240118203831-fkfvvtx"]
+  }
+  ```
+
+    * `id`：データベース ID
+    * `keyword`：任意の検索テキスト。空白で区切られたキーワードは同じフィールド内にすべて含まれる必要があり、すべてのフィールドが検索対象になります
+    * `page`：候補アイテムのページ番号。`1` から始まり、既定値は `1` です
+    * `pageSize`：1 ページあたりの候補アイテム数。`-1` または省略時は `16` です
+    * `selectedBlockIDs`：任意の選択済みアイテムの行 ID。`selectedRows` では指定した順序が維持されます
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "name": "データベース",
+      "blockIDs": ["20240118120201-kldj15t"],
+      "columns": [],
+      "selectedRows": [],
+      "rows": [],
+      "total": 0
+    }
+  }
+  ```
+
+    * `columns`：行番号を除くデータベースの全フィールド。主キーが先頭です
+    * `selectedRows`：`selectedBlockIDs` に対応する完全なレンダリング済み行。`keyword` とページングの影響を受けません
+    * `rows`：`keyword` に一致する候補行。作成日時の降順で並びます
+    * `total`：ページング前に `keyword` と一致した候補行の総数
+
 ### 検索
 
 * `/api/av/searchAttributeView`

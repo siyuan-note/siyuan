@@ -1932,6 +1932,48 @@
     * `data.blockIDs`: 引用该数据库的所有数据库块（镜像）ID
     * `data.total`: 过滤后、分页前的主键值数量
 
+### 获取关系候选条目
+
+* `/api/av/getAttributeViewRelationCandidates`
+* 参数
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "keyword": "",
+    "page": 1,
+    "pageSize": 16,
+    "selectedBlockIDs": ["20240118203831-fkfvvtx"]
+  }
+  ```
+
+    * `id`：数据库 ID
+    * `keyword`：可选搜索文本。以空格分隔的关键词必须同时出现在同一个字段中，搜索范围为全部字段
+    * `page`：候选条目页码，从 `1` 开始，默认为 `1`
+    * `pageSize`：每页候选条目数，传入 `-1` 或省略时默认为 `16`
+    * `selectedBlockIDs`：可选的已选条目行 ID，`selectedRows` 会保留其顺序
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "name": "数据库",
+      "blockIDs": ["20240118120201-kldj15t"],
+      "columns": [],
+      "selectedRows": [],
+      "rows": [],
+      "total": 0
+    }
+  }
+  ```
+
+    * `columns`：数据库的全部字段，不包含行号，主键位于第一列
+    * `selectedRows`：与 `selectedBlockIDs` 对应的完整渲染行，不受 `keyword` 和分页影响
+    * `rows`：与 `keyword` 匹配的候选行，按创建时间降序排列
+    * `total`：分页前与 `keyword` 匹配的候选行总数
+
 ### 搜索
 
 * `/api/av/searchAttributeView`

@@ -2,15 +2,15 @@ import {Menu} from "../../../plugin/Menu";
 import {hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
-import {escapeHtml, escapeLessThans} from "../../../util/escape";
+import {escapeAttr, escapeHtml, escapeLessThans} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {updateCellsValue} from "./cell";
+import {renderCell, updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
 import * as dayjs from "dayjs";
 import {getFieldsByData, getViewName} from "./view";
-import {getColId} from "./col";
+import {getColIconByType, getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
 import {isMobile} from "../../../util/functions";
 import {showMessage} from "../../../dialog/message";
@@ -258,7 +258,7 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
 
 const updateCopyRelatedItems = (menuElement: Element) => {
     const inputElement = menuElement.querySelector(".b3-form__icona .b3-text-field") as HTMLInputElement;
-    if (menuElement.querySelector(".b3-menu__icon.fn__grab")) {
+    if (menuElement.querySelector('[data-relation-type="selected"]')) {
         inputElement.nextElementSibling.classList.remove("fn__none");
         inputElement.style.paddingRight = "26px";
     } else {
@@ -267,68 +267,69 @@ const updateCopyRelatedItems = (menuElement: Element) => {
     }
 };
 
-const genSelectItemHTML = (options: {
-    type: "selected" | "empty" | "unselect",
-    id?: string,
-    isDetached?: boolean,
-    text?: string,
-    className?: string,
-    rowId?: string,
-    newName?: string
-}) => {
-    if (options.type === "selected") {
-        return `<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-<span class="b3-menu__label fn__ellipsis ${options.isDetached ? "" : " popover__block"}" ${options.isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${options.id}">${options.text}</span>
-<svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>`;
-    }
-    if (options.type === "empty") {
-        if (options.newName) {
-            return `<button class="b3-menu__item" data-type="setRelationCell" data-relation-type="create">
-    <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", options.text).replace("${y}", options.newName)}</span>
-</button>`;
+const getRelationGridTemplate = (columns: IAVColumn[]) => {
+    return `32px ${columns.map((column, index) => {
+        if (index === 0) {
+            return "240px";
         }
-        return `<button class="b3-menu__item" data-relation-type="empty">
-    <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
-</button>`;
-    }
-    if (options.type == "unselect") {
-        return `<button data-row-id="${options.rowId}" class="${options.className || "b3-menu__item ariaLabel"}" data-position="west" data-type="setRelationCell" data-relation-type="candidate">
-    <span class="b3-menu__label fn__ellipsis${options.isDetached ? "" : " popover__block"}" ${options.isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${options.id}">${options.text}</span>
-    <svg class="b3-menu__action"><use xlink:href="#iconAdd"></use></svg>
-</button>`;
-    }
+        return ["relation", "rollup", "mAsset"].includes(column.type) ? "200px" : "160px";
+    }).join(" ")}`;
 };
 
-const genSelectedItemsHTML = (cellElement: HTMLElement, keyword: string) => {
-    let html = "";
-    const selectedIDs = new Set<string>();
-    const lowerKeyword = keyword.toLowerCase();
-    cellElement.querySelectorAll(".av__cell--relation").forEach((relationItem: HTMLElement) => {
-        const item = relationItem.querySelector(".av__celltext") as HTMLElement;
-        selectedIDs.add(relationItem.dataset.rowId);
-        html += `<button data-row-id="${relationItem.dataset.rowId}" data-position="west" data-type="setRelationCell" data-relation-type="selected"
-class="b3-menu__item ariaLabel${item.textContent.toLowerCase().includes(lowerKeyword) ? "" : " fn__none"}"
-draggable="true">${genSelectItemHTML({
-            type: "selected",
-            id: item.dataset.id,
-            isDetached: !item.classList.contains("av__celltext--ref"),
-            text: Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled)
-        })}</button>`;
+const getRelationPrimaryCell = (row: IAVRow) => {
+    return row.cells.find((cell) => cell.value?.type === "block");
+};
+
+const genRelationHeaderHTML = (columns: IAVColumn[], gridTemplate: string) => {
+    let html = `<div class="av__relation-table-header" data-relation-type="header" style="grid-template-columns:${gridTemplate}">
+<span class="av__relation-table-check"></span>`;
+    columns.forEach((column, index) => {
+        html += `<span class="av__relation-table-cell${index === 0 ? " av__relation-table-primary" : ""}">
+    <svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>
+    <span class="fn__ellipsis">${escapeHtml(column.name)}</span>
+</span>`;
     });
-    return {html, selectedIDs};
+    return html + "</div>";
 };
 
-const genCandidateItemsHTML = (cells: IAVCellValue[], excludedIDs: Set<string>) => {
+const genRelationRowHTML = (row: IAVRow, columns: IAVColumn[], type: "selected" | "candidate", gridTemplate: string) => {
+    const primaryCell = getRelationPrimaryCell(row);
+    if (!primaryCell?.value) {
+        return "";
+    }
+    const primaryValue = primaryCell.value;
+    const selected = type === "selected";
+    let html = `<div data-row-id="${escapeAttr(row.id)}" data-position="west" data-type="setRelationCell"
+data-relation-type="${type}" class="b3-menu__item av__relation-table-row" ${selected ? 'draggable="true"' : ""}
+style="grid-template-columns:${gridTemplate}">
+<span class="av__relation-table-check"><svg><use xlink:href="#icon${selected ? "Check" : "Uncheck"}"></use></svg></span>`;
+    columns.forEach((column, index) => {
+        const cell = row.cells.find((item) => item.value?.keyID === column.id) || row.cells[index];
+        if (index === 0) {
+            const isDetached = primaryValue.isDetached;
+            html += `<span class="av__relation-table-cell av__relation-table-primary" data-row-id="${escapeAttr(row.id)}"
+style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}${primaryCell.color ? `color:${primaryCell.color};` : ""}">
+    ${selected ? '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>' : ""}
+    <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}"
+        ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'}
+        data-id="${escapeAttr(primaryValue.block?.id || "")}">${Lute.EscapeHTMLStr(primaryValue.block?.content || window.siyuan.languages.untitled)}</span>
+</span>`;
+        } else {
+            html += `<span class="av__relation-table-cell"
+style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
+                renderCell(cell.value, 0, false, "table", column.options) : ""}</span>`;
+        }
+    });
+    return html + "</div>";
+};
+
+const genRelationRowsHTML = (rows: IAVRow[], columns: IAVColumn[], type: "selected" | "candidate",
+                             gridTemplate: string, excludedIDs = new Set<string>()) => {
     let html = "";
-    cells.forEach((item) => {
-        if (!excludedIDs.has(item.blockID)) {
-            html += genSelectItemHTML({
-                type: "unselect",
-                rowId: item.blockID,
-                id: item.block.id,
-                isDetached: item.isDetached,
-                text: Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)
-            });
+    rows.forEach((row) => {
+        if (!excludedIDs.has(row.id)) {
+            html += genRelationRowHTML(row, columns, type, gridTemplate);
+            excludedIDs.add(row.id);
         }
     });
     return html;
@@ -337,14 +338,17 @@ const genCandidateItemsHTML = (cells: IAVCellValue[], excludedIDs: Set<string>) 
 const genRelationFooterHTML = (menuElement: HTMLElement, keyword: string, hasCandidates: boolean, hasMore: boolean) => {
     if (keyword) {
         const refElement = menuElement.querySelector(".popover__block");
-        return genSelectItemHTML({
-            type: "empty",
-            newName: Lute.EscapeHTMLStr(keyword),
-            text: `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block" data-id="${refElement.getAttribute("data-id")}">${refElement.textContent}</span>`,
-        });
+        const databaseName = `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block"
+data-id="${escapeAttr(refElement?.getAttribute("data-id") || "")}">${escapeHtml(refElement?.textContent || "")}</span>`;
+        return `<button class="b3-menu__item av__relation-table-footer" data-type="setRelationCell" data-relation-type="create">
+    <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", databaseName).
+            replace("${y}", Lute.EscapeHTMLStr(keyword))}</span>
+</button>`;
     }
     if (!hasCandidates && !hasMore) {
-        return genSelectItemHTML({type: "empty"});
+        return `<button class="b3-menu__item av__relation-table-footer" data-relation-type="empty">
+    <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
+</button>`;
     }
     return "";
 };
@@ -366,6 +370,7 @@ export const bindRelationEvent = (options: {
         total: 0,
         keyword: "",
         loading: false,
+        columns: [] as IAVColumn[],
         controller: undefined as AbortController | undefined,
     };
     let searchTimer: number;
@@ -421,38 +426,69 @@ export const bindRelationEvent = (options: {
             }
         });
     };
-    const renderPage = (cells: IAVCellValue[], reset: boolean) => {
-        let excludedIDs: Set<string>;
-        let selectedHTML = "";
-        if (reset) {
-            const selected = genSelectedItemsHTML(options.cellElements[0], state.keyword);
-            excludedIDs = selected.selectedIDs;
-            selectedHTML = selected.html;
-        } else {
-            excludedIDs = new Set(Array.from(listElement.querySelectorAll(
-                '[data-relation-type="selected"], [data-relation-type="candidate"]'
-            )).map((item: HTMLElement) => item.dataset.rowId));
+    const getSelectedItems = () => {
+        const selectedRows = listElement.querySelectorAll('[data-relation-type="selected"]');
+        if (selectedRows.length > 0 || listElement.querySelector('[data-relation-type="header"]')) {
+            return Array.from(selectedRows).map((item: HTMLElement) => {
+                const blockElement = item.querySelector(".b3-menu__label") as HTMLElement;
+                return {
+                    id: item.dataset.rowId,
+                    blockID: blockElement.dataset.id,
+                    content: blockElement.textContent,
+                    isDetached: !blockElement.classList.contains("popover__block"),
+                };
+            });
         }
-        const candidateHTML = genCandidateItemsHTML(cells, excludedIDs);
+        return Array.from(options.cellElements[0].querySelectorAll(".av__cell--relation")).
+            map((item: HTMLElement) => {
+                const blockElement = item.querySelector(".av__celltext") as HTMLElement;
+                return {
+                    id: item.dataset.rowId,
+                    blockID: blockElement.dataset.id,
+                    content: blockElement.textContent,
+                    isDetached: !blockElement.classList.contains("av__celltext--ref"),
+                };
+            });
+    };
+    const renderFooter = (hasCandidates: boolean) => {
+        listElement.querySelector('[data-relation-type="create"], [data-relation-type="empty"]')?.remove();
         const more = hasMore();
         listElement.dataset.hasMore = more.toString();
+        const footerHTML = genRelationFooterHTML(options.menuElement, state.keyword, hasCandidates, more);
+        if (footerHTML) {
+            listElement.querySelector('[data-relation-type="loader"]').insertAdjacentHTML("beforebegin", footerHTML);
+        }
+    };
+    const renderPage = (data: {
+        columns: IAVColumn[],
+        selectedRows: IAVRow[],
+        rows: IAVRow[]
+    }, reset: boolean) => {
+        state.columns = data.columns || state.columns;
+        const gridTemplate = getRelationGridTemplate(state.columns);
+        const excludedIDs = new Set(Array.from(listElement.querySelectorAll(
+            '[data-relation-type="selected"], [data-relation-type="candidate"]'
+        )).map((item: HTMLElement) => item.dataset.rowId));
+        let candidateHTML = "";
         if (reset) {
-            listElement.innerHTML = `${selectedHTML}
-<button class="b3-menu__separator" data-relation-type="separator"></button>
-${candidateHTML}
-${genRelationFooterHTML(options.menuElement, state.keyword, !!candidateHTML, more)}
+            excludedIDs.clear();
+            const selectedHTML = genRelationRowsHTML(data.selectedRows || [], state.columns, "selected",
+                gridTemplate, excludedIDs);
+            candidateHTML = genRelationRowsHTML(data.rows || [], state.columns, "candidate", gridTemplate, excludedIDs);
+            listElement.innerHTML = `${genRelationHeaderHTML(state.columns, gridTemplate)}
+<div class="av__relation-table-selected" data-relation-type="selectedRows">${selectedHTML}</div>
+<div class="b3-menu__separator" data-relation-type="separator"></div>
+<div class="av__relation-table-candidates" data-relation-type="candidateRows">${candidateHTML}</div>
 ${genRelationLoaderHTML(state.loading)}`;
         } else {
+            candidateHTML = genRelationRowsHTML(data.rows || [], state.columns, "candidate", gridTemplate, excludedIDs);
             if (candidateHTML) {
-                listElement.querySelector('[data-relation-type="empty"]')?.remove();
-                const anchorElement = listElement.querySelector('[data-relation-type="create"], [data-relation-type="loader"]');
-                anchorElement.insertAdjacentHTML("beforebegin", candidateHTML);
-            } else if (!state.keyword && !more && !listElement.querySelector('[data-relation-type="candidate"], [data-relation-type="empty"]')) {
-                listElement.querySelector('[data-relation-type="loader"]').insertAdjacentHTML("beforebegin", genSelectItemHTML({type: "empty"}));
+                listElement.querySelector('[data-relation-type="candidateRows"]').insertAdjacentHTML("beforeend", candidateHTML);
             }
         }
+        renderFooter(!!listElement.querySelector('[data-relation-type="candidate"]'));
         if (!listElement.querySelector(".b3-menu__item--current")) {
-            listElement.querySelector(".b3-menu__item:not(.fn__none)")?.classList.add("b3-menu__item--current");
+            listElement.querySelector('[data-type="setRelationCell"]')?.classList.add("b3-menu__item--current");
         }
         updateCopyRelatedItems(options.menuElement);
     };
@@ -470,30 +506,60 @@ ${genRelationLoaderHTML(state.loading)}`;
         const page = reset ? 1 : state.page + 1;
         const keyword = state.keyword;
         const controller = new AbortController();
+        const selectedItems = getSelectedItems();
         state.controller = controller;
         state.loading = true;
         setLoading(true);
         let succeeded = false;
-        fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
+        fetchPost("/api/av/getAttributeViewRelationCandidates", {
             id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
             keyword,
             page,
             pageSize: RELATION_PAGE_SIZE,
+            selectedBlockIDs: selectedItems.map((item) => item.id),
         }, response => {
             if (controller.signal.aborted || keyword !== state.keyword) {
                 return;
             }
-            const cells = response.data.rows?.values as IAVCellValue[] || [];
+            const rows = response.data.rows as IAVRow[] || [];
             state.page = page;
             state.total = typeof response.data.total === "number" ? response.data.total :
-                (page - 1) * RELATION_PAGE_SIZE + cells.length + (cells.length === RELATION_PAGE_SIZE ? 1 : 0);
+                (page - 1) * RELATION_PAGE_SIZE + rows.length + (rows.length === RELATION_PAGE_SIZE ? 1 : 0);
             const databaseName = inputElement.parentElement.parentElement.querySelector(".popover__block");
             databaseName.textContent = response.data.name;
             databaseName.setAttribute("data-id", response.data.blockIDs?.[0] || "");
-            renderPage(cells, reset);
+            const columns = response.data.columns as IAVColumn[] || [];
+            const selectedRowsByID = new Map<string, IAVRow>((response.data.selectedRows as IAVRow[] || []).
+                map((row) => [row.id, row]));
+            const selectedRows: IAVRow[] = selectedItems.map((item) => {
+                return selectedRowsByID.get(item.id) || {
+                    id: item.id,
+                    cells: [{
+                        id: "",
+                        color: "",
+                        bgColor: "",
+                        valueType: "block",
+                        value: {
+                            keyID: columns[0]?.id,
+                            blockID: item.id,
+                            type: "block",
+                            isDetached: item.isDetached,
+                            block: {
+                                id: item.blockID,
+                                content: item.content,
+                            }
+                        }
+                    }]
+                } as IAVRow;
+            });
+            renderPage({
+                columns,
+                selectedRows,
+                rows,
+            }, reset);
             setLoading(false);
             let listHeightChanged = false;
-            if (listNaturalMaxHeight < 1 && (keyword === "" || cells.length === RELATION_PAGE_SIZE)) {
+            if (listNaturalMaxHeight < 1 && (keyword === "" || rows.length === RELATION_PAGE_SIZE)) {
                 listNaturalMaxHeight = listElement.scrollHeight;
                 if (listNaturalMaxHeight > 0) {
                     listHeightChanged = updateListMaxHeight();
@@ -557,6 +623,10 @@ ${genRelationLoaderHTML(state.loading)}`;
             loadPage(false);
         }
     });
+    const refresh = () => {
+        loadPage(true);
+    };
+    options.menuElement.addEventListener("relationrefresh", refresh);
     options.menuElement.querySelector('[data-type="copyRelatedItems"]').addEventListener("click", () => {
         let copyText = "";
         const selectedElements = options.menuElement.querySelectorAll('.b3-menu__item[draggable="true"]');
@@ -581,6 +651,7 @@ ${genRelationLoaderHTML(state.loading)}`;
     return () => {
         state.controller?.abort();
         window.removeEventListener("resize", resize);
+        options.menuElement.removeEventListener("relationrefresh", refresh);
         if (searchTimer) {
             clearTimeout(searchTimer);
         }
@@ -596,7 +667,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
         }
     });
     if (colRelationData && colRelationData.avID) {
-        return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column">
+        return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column av__relation">
 <div class="b3-menu__item" data-type="nobg">
     <div class="b3-form__icona fn__flex-1" style="overflow: visible">
         <input class="b3-text-field fn__block" style="min-width: 190px"/>
@@ -605,12 +676,45 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     <span class="fn__space"></span>
     <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
 </div>
-<div class="b3-menu__items">
+<div class="b3-menu__items av__relation-table">
     ${genRelationLoaderHTML(true)}
 </div>`;
     } else {
         return "";
     }
+};
+
+const getRelationValue = (menuElement: HTMLElement) => {
+    const value: IAVCellRelationValue = {blockIDs: [], contents: []};
+    menuElement.querySelectorAll('[data-relation-type="selected"]').forEach((item: HTMLElement) => {
+        const blockElement = item.querySelector(".b3-menu__label") as HTMLElement;
+        value.blockIDs.push(item.dataset.rowId);
+        value.contents.push({
+            type: "block",
+            block: {
+                id: blockElement.dataset.id,
+                content: blockElement.textContent
+            },
+            isDetached: !blockElement.classList.contains("popover__block")
+        });
+    });
+    return value;
+};
+
+const genCreatedRelationRowHTML = (menuElement: HTMLElement, rowID: string, content: string) => {
+    const headerElement = menuElement.querySelector('[data-relation-type="header"]') as HTMLElement;
+    const columnCount = headerElement?.querySelectorAll(".av__relation-table-cell").length || 1;
+    let cellsHTML = `<span class="av__relation-table-cell av__relation-table-primary" data-row-id="${rowID}">
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
+    <span class="b3-menu__label fn__ellipsis" data-id="">${Lute.EscapeHTMLStr(content)}</span>
+</span>`;
+    for (let i = 1; i < columnCount; i++) {
+        cellsHTML += '<span class="av__relation-table-cell"></span>';
+    }
+    return `<div data-row-id="${rowID}" data-position="west" data-type="setRelationCell"
+data-relation-type="selected" class="b3-menu__item av__relation-table-row" draggable="true"
+style="grid-template-columns:${headerElement?.style.gridTemplateColumns || "32px 240px"}">
+<span class="av__relation-table-check"><svg><use xlink:href="#iconCheck"></use></svg></span>${cellsHTML}</div>`;
 };
 
 export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElement, target: HTMLElement, cellElements: HTMLElement[]) => {
@@ -633,78 +737,30 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
         }
     }
 
-    const newValue: IAVCellRelationValue = {blockIDs: [], contents: []};
-    menuElement.querySelectorAll('[draggable="true"]').forEach(item => {
-        const rowId = item.getAttribute("data-row-id");
-        const blockPopElement = item.querySelector(".b3-menu__label");
-        newValue.blockIDs.push(rowId);
-        newValue.contents.push({
-            type: "block",
-            block: {
-                id: blockPopElement.getAttribute("data-id"),
-                content: blockPopElement.textContent
-            },
-            isDetached: !blockPopElement.classList.contains("popover__block")
-        });
-    });
     if (target.classList.contains("b3-menu__item")) {
         const rowId = target.getAttribute("data-row-id");
-        const id = target.querySelector(".b3-menu__label").getAttribute("data-id");
-        const separatorElement = menuElement.querySelector(".b3-menu__separator");
-        const listElement = separatorElement.parentElement;
-        const searchValue = menuElement.querySelector("input").value;
-        if (target.getAttribute("draggable")) {
-            listElement.querySelector('[data-relation-type="empty"]')?.remove();
-            const removeIndex = newValue.blockIDs.indexOf(rowId);
-            newValue.blockIDs.splice(removeIndex, 1);
-            newValue.contents.splice(removeIndex, 1);
-            separatorElement.after(target);
-            target.outerHTML = genSelectItemHTML({
-                type: "unselect",
-                rowId,
-                id,
-                isDetached: !target.querySelector(".popover__block"),
-                text: Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent),
-                className: target.className
-            });
-            updateCellsValue(protyle, nodeElement, newValue, cellElements);
+        if (target.dataset.relationType === "selected") {
+            target.remove();
+            updateCellsValue(protyle, nodeElement, getRelationValue(menuElement), cellElements);
+            menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
         } else if (rowId) {
-            newValue.blockIDs.push(rowId);
-            newValue.contents.push({
-                type: "block",
-                block: {
-                    id,
-                    content: target.firstElementChild.textContent
-                },
-                isDetached: !target.firstElementChild.getAttribute("style")
-            });
-            separatorElement.before(target);
-            target.outerHTML = `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell" data-relation-type="selected" class="${target.className}"
-draggable="true">${genSelectItemHTML({
-                type: "selected",
-                rowId,
-                id,
-                isDetached: !target.querySelector(".popover__block"),
-                text: Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent)
-            })}</button>`;
-            if (!searchValue && listElement.dataset.hasMore !== "true" &&
-                !listElement.querySelector('[data-relation-type="candidate"], [data-relation-type="empty"]')) {
-                listElement.querySelector('[data-relation-type="loader"]').insertAdjacentHTML("beforebegin", genSelectItemHTML({type: "empty"}));
-            }
-            updateCellsValue(protyle, nodeElement, newValue, cellElements);
+            target.dataset.relationType = "selected";
+            target.setAttribute("draggable", "true");
+            target.querySelector(".av__relation-table-check use").setAttribute("xlink:href", "#iconCheck");
+            const primaryElement = target.querySelector(".av__relation-table-primary");
+            primaryElement.insertAdjacentHTML("afterbegin",
+                '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>');
+            menuElement.querySelector('[data-relation-type="selectedRows"]').append(target);
+            updateCellsValue(protyle, nodeElement, getRelationValue(menuElement), cellElements);
+            menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
         } else {
             const blockID = target.querySelector(".popover__block").getAttribute("data-id");
             const content = target.querySelector("b").textContent;
             const rowId = Lute.NewNodeID();
             const bodyElement = hasClosestByClassName(cellElements[0], "av__body");
-            newValue.blockIDs.push(rowId);
-            newValue.contents.push({
-                type: "block",
-                block: {
-                    content
-                },
-                isDetached: true
-            });
+            menuElement.querySelector('[data-relation-type="selectedRows"]').insertAdjacentHTML(
+                "beforeend", genCreatedRelationRowHTML(menuElement, rowId, content));
+            const newValue = getRelationValue(menuElement);
             const updateOptions = await updateCellsValue(protyle, nodeElement, newValue, cellElements, null, null, true);
             const doOperations: IOperation[] = [{
                 action: "insertAttrViewBlock",
@@ -723,13 +779,6 @@ draggable="true">${genSelectItemHTML({
                 id: blockID,
                 data: dayjs().format("YYYYMMDDHHmmss"),
             }];
-            separatorElement.insertAdjacentHTML("beforebegin", `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell"
-data-relation-type="selected" class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
-                type: "selected",
-                rowId,
-                isDetached: true,
-                text: Lute.EscapeHTMLStr(content)
-            })}</button>`);
             transaction(protyle, doOperations.concat(updateOptions.doOperations));
         }
     }

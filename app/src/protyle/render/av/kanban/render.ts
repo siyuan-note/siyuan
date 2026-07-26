@@ -155,6 +155,7 @@ export const renderKanban = async (options: {
             viewID: locateParams?.viewID || options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
             query: resetData.query.trim(),
             blockID: options.blockElement.getAttribute("data-node-id"),
+            initialLayout: options.blockElement.getAttribute("data-av-type"),
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
         });

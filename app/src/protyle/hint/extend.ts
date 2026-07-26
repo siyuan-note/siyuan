@@ -181,6 +181,21 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: "<div>",
         html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconHTML5"></use></svg><span class="b3-list-item__text">HTML</span></div>',
     }, {
+        filter: [window.siyuan.languages.databaseTableView, "database table view", "数据库表格视图", "shujukubiaogeshitu", "sjkbgs"],
+        id: "databaseTableView",
+        value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconTable"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.databaseTableView}</span></div>`,
+    }, {
+        filter: [window.siyuan.languages.databaseKanbanView, "database kanban view", "数据库看板视图", "shujukukanbanshitu", "sjkkbs"],
+        id: "databaseKanbanView",
+        value: '<div data-type="NodeAttributeView" data-av-type="kanban"></div>',
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconBoard"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.databaseKanbanView}</span></div>`,
+    }, {
+        filter: [window.siyuan.languages.databaseGalleryView, "database card view", "database gallery view", "数据库卡片视图", "shujukukapianshitu", "sjkkps"],
+        id: "databaseGalleryView",
+        value: '<div data-type="NodeAttributeView" data-av-type="gallery"></div>',
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconGallery"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.databaseGalleryView}</span></div>`,
+    }, {
         value: "",
         id: "separator_2",
         html: "separator",

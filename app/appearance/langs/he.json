@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "תצוגת טבלה של מסד נתונים",
+  "databaseKanbanView": "תצוגת קאנבן של מסד נתונים",
+  "databaseGalleryView": "תצוגת כרטיסים של מסד נתונים",
   "deleteKanbanGroupConfirm": "⚠️ אישור מחיקת הקבוצה",
   "deleteKanbanGroupTip": "לאחר מחיקת הקבוצה, אפשרות זו תוסר מכל הרשומות. רשומות ללא אפשרויות קיבוץ נוספות יועברו אל „ללא קבוצה”",
   "avPasteHeaderTitle": "זיהוי כותרת טבלה",

@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "数据库 表格视图",
+  "databaseKanbanView": "数据库 看板视图",
+  "databaseGalleryView": "数据库 卡片视图",
   "deleteKanbanGroupConfirm": "⚠️ 确认删除分组",
   "deleteKanbanGroupTip": "删除分组后，该选项将从所有记录中移除；没有其他分组选项的记录将移至“未分组”",
   "avPasteHeaderTitle": "识别表头",

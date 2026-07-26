@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "มุมมองตารางฐานข้อมูล",
+  "databaseKanbanView": "มุมมองคัมบังฐานข้อมูล",
+  "databaseGalleryView": "มุมมองการ์ดฐานข้อมูล",
   "deleteKanbanGroupConfirm": "⚠️ ยืนยันการลบกลุ่ม",
   "deleteKanbanGroupTip": "หลังจากลบกลุ่ม ตัวเลือกนี้จะถูกนำออกจากระเบียนทั้งหมด ระเบียนที่ไม่มีตัวเลือกการจัดกลุ่มอื่นจะถูกย้ายไปที่ “ไม่ได้จัดกลุ่ม”",
   "avPasteHeaderTitle": "รู้จักส่วนหัวตาราง",

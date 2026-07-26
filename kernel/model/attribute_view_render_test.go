@@ -17,8 +17,12 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestRenderAttributeViewRejectsInvalidIDBeforeLookup(t *testing.T) {
@@ -28,6 +32,85 @@ func TestRenderAttributeViewRejectsInvalidIDBeforeLookup(t *testing.T) {
 			_, _, err := RenderAttributeView("", invalidID, "", "", 1, -1, nil, false, false)
 			if !errors.Is(err, ErrInvalidID) {
 				t.Fatalf("invalid attribute view ID [%s] returned error [%v]", invalidID, err)
+			}
+		})
+	}
+}
+
+func TestNewAttributeViewWithLayout(t *testing.T) {
+	oldLang, oldAttrViewLangs := util.Lang, util.AttrViewLangs
+	util.Lang = "en"
+	util.AttrViewLangs = map[string]map[string]any{
+		"en": {
+			"key":     "Key",
+			"select":  "Select",
+			"table":   "Table",
+			"gallery": "Gallery",
+			"kanban":  "Kanban",
+		},
+	}
+	defer func() {
+		util.Lang, util.AttrViewLangs = oldLang, oldAttrViewLangs
+	}()
+
+	tests := []struct {
+		name     string
+		layout   av.LayoutType
+		expected av.LayoutType
+	}{
+		{name: "default", expected: av.LayoutTypeTable},
+		{name: "table", layout: av.LayoutTypeTable, expected: av.LayoutTypeTable},
+		{name: "gallery", layout: av.LayoutTypeGallery, expected: av.LayoutTypeGallery},
+		{name: "kanban", layout: av.LayoutTypeKanban, expected: av.LayoutTypeKanban},
+		{name: "invalid", layout: av.LayoutType("invalid"), expected: av.LayoutTypeTable},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			attrView := newAttributeViewWithLayout("20260726120000-abcdefg", test.layout)
+			if len(attrView.Views) != 1 {
+				t.Fatalf("expected one view, got [%d]", len(attrView.Views))
+			}
+			view := attrView.Views[0]
+			if view.LayoutType != test.expected {
+				t.Fatalf("expected layout [%s], got [%s]", test.expected, view.LayoutType)
+			}
+			if attrView.ViewID != view.ID {
+				t.Fatalf("expected current view [%s], got [%s]", view.ID, attrView.ViewID)
+			}
+
+			blockKeyID := attrView.KeyValues[0].Key.ID
+			selectKeyID := attrView.KeyValues[1].Key.ID
+			switch test.expected {
+			case av.LayoutTypeTable:
+				if len(view.Table.Columns) != 2 || view.Table.Columns[0].ID != blockKeyID || view.Table.Columns[1].ID != selectKeyID {
+					t.Fatalf("unexpected table fields: %+v", view.Table.Columns)
+				}
+			case av.LayoutTypeGallery:
+				if len(view.Gallery.CardFields) != 2 || view.Gallery.CardFields[0].ID != blockKeyID || view.Gallery.CardFields[1].ID != selectKeyID {
+					t.Fatalf("unexpected gallery fields: %+v", view.Gallery.CardFields)
+				}
+			case av.LayoutTypeKanban:
+				if len(view.Kanban.Fields) != 2 || view.Kanban.Fields[0].ID != blockKeyID || view.Kanban.Fields[1].ID != selectKeyID {
+					t.Fatalf("unexpected kanban fields: %+v", view.Kanban.Fields)
+				}
+				if nil == view.Group || view.Group.Field != selectKeyID {
+					t.Fatalf("expected kanban group field [%s], got [%+v]", selectKeyID, view.Group)
+				}
+				if len(view.Groups) == 0 {
+					t.Fatal("expected kanban groups to be initialized")
+				}
+			}
+
+			data, err := json.Marshal(attrView)
+			if err != nil {
+				t.Fatalf("marshal attribute view failed: %s", err)
+			}
+			restored := &av.AttributeView{}
+			if err = json.Unmarshal(data, restored); err != nil {
+				t.Fatalf("unmarshal attribute view failed: %s", err)
+			}
+			if len(restored.Views) != 1 || restored.Views[0].LayoutType != test.expected {
+				t.Fatalf("unexpected persisted layout: %+v", restored.Views)
 			}
 		})
 	}

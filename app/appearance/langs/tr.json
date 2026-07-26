@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Veritabanı tablo görünümü",
+  "databaseKanbanView": "Veritabanı Kanban görünümü",
+  "databaseGalleryView": "Veritabanı kart görünümü",
   "deleteKanbanGroupConfirm": "⚠️ Grup silme işlemini onayla",
   "deleteKanbanGroupTip": "Grup silindikten sonra bu seçenek tüm kayıtlardan kaldırılır. Başka gruplandırma seçeneği olmayan kayıtlar “Gruplandırılmamış” bölümüne taşınır",
   "avPasteHeaderTitle": "Tablo başlığını tanı",

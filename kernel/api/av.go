@@ -218,7 +218,7 @@ func setAttrViewGroup(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, false, false, "", "")
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, "", "")
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)
@@ -295,7 +295,7 @@ func changeAttrViewLayout(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, false, false, "", "")
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, "", "")
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)
@@ -1092,6 +1092,11 @@ func renderAttributeView(c *gin.Context) {
 		groupPaging = groupPagingArg.(map[string]any)
 	}
 
+	initialLayout := av.LayoutType("")
+	if initialLayoutArg, ok := arg["initialLayout"].(string); ok {
+		initialLayout = av.LayoutType(initialLayoutArg)
+	}
+
 	createIfNotExist := true
 	createIfNotExistArg := arg["createIfNotExist"]
 	if nil != createIfNotExistArg {
@@ -1124,7 +1129,7 @@ func renderAttributeView(c *gin.Context) {
 		}
 	}
 
-	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
+	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
 	if ret.Code == 0 && readOnlyRole {
 		retDataMap := ret.Data.(map[string]any)
 		retDataMap["view"] = model.FilterAttributeViewByPublishAccess(c, publishAccess, id, blockID, retDataMap["view"].(av.Viewable))
@@ -1139,9 +1144,9 @@ func renderAttributeView(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json; charset=utf-8", marshalBytes)
 }
 
-func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (ret *gulu.Result) {
+func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (ret *gulu.Result) {
 	ret = gulu.Ret.NewResult()
-	view, attrView, target, err := model.RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
+	view, attrView, target, err := model.RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
 	if err != nil {
 		ret.Code = -1
 		if errors.Is(err, av.ErrSpecTooNew) {

@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "데이터베이스 표 보기",
+  "databaseKanbanView": "데이터베이스 칸반 보기",
+  "databaseGalleryView": "데이터베이스 카드 보기",
   "deleteKanbanGroupConfirm": "⚠️ 그룹 삭제 확인",
   "deleteKanbanGroupTip": "그룹을 삭제하면 이 옵션이 모든 레코드에서 제거됩니다. 다른 그룹화 옵션이 없는 레코드는 ‘그룹 없음’으로 이동합니다",
   "avPasteHeaderTitle": "표 머리글 인식",

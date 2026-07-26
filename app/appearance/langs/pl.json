@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Widok tabeli bazy danych",
+  "databaseKanbanView": "Widok Kanban bazy danych",
+  "databaseGalleryView": "Widok kart bazy danych",
   "deleteKanbanGroupConfirm": "⚠️ Potwierdź usunięcie grupy",
   "deleteKanbanGroupTip": "Po usunięciu grupy ta opcja zostanie usunięta ze wszystkich rekordów. Rekordy bez innych opcji grupowania zostaną przeniesione do „Bez grupy”",
   "avPasteHeaderTitle": "Rozpoznaj nagłówek tabeli",

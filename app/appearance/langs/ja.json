@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "データベース テーブルビュー",
+  "databaseKanbanView": "データベース カンバンビュー",
+  "databaseGalleryView": "データベース カードビュー",
   "deleteKanbanGroupConfirm": "⚠️ グループの削除を確認",
   "deleteKanbanGroupTip": "グループを削除すると、この選択肢はすべてのレコードから削除されます。ほかにグループ化の選択肢がないレコードは「未グループ」に移動します",
   "avPasteHeaderTitle": "表のヘッダーを認識",

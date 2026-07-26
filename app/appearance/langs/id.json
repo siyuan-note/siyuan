@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Tampilan tabel database",
+  "databaseKanbanView": "Tampilan Kanban database",
+  "databaseGalleryView": "Tampilan kartu database",
   "deleteKanbanGroupConfirm": "⚠️ Konfirmasi penghapusan grup",
   "deleteKanbanGroupTip": "Setelah grup dihapus, opsi ini akan dihapus dari semua catatan. Catatan tanpa opsi pengelompokan lain akan dipindahkan ke “Tidak dikelompokkan”",
   "avPasteHeaderTitle": "Kenali tajuk tabel",

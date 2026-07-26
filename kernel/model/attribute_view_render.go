@@ -48,7 +48,7 @@ type AttributeViewRenderTarget struct {
 }
 
 func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
-	viewable, attrView, _, err = RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, createIfNotExist, ignoreRows, "", "")
+	viewable, attrView, _, err = RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, "", createIfNotExist, ignoreRows, "", "")
 	return
 }
 
@@ -173,7 +173,7 @@ func getAttributeViewPasteRowsFromTable(table *av.Table, startItemID string, cou
 	return table.Rows[start:end], nil
 }
 
-func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
@@ -225,7 +225,7 @@ func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 			av.SetAVBoxID(avID, avBoxID)
 			defer av.SetAVBoxID(avID, "") // 创建完成立即清除，避免污染后续路由
 		}
-		attrView = av.NewAttributeView(avID)
+		attrView = newAttributeViewWithLayout(avID, initialLayout)
 		if err = av.SaveAttributeView(attrView); err != nil {
 			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 			return
@@ -265,6 +265,21 @@ func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 	}
 
 	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, ignoreRows, target, targetGroupID)
+	return
+}
+
+func newAttributeViewWithLayout(avID string, initialLayout av.LayoutType) (ret *av.AttributeView) {
+	ret = av.NewAttributeView(avID)
+	switch initialLayout {
+	case av.LayoutTypeGallery, av.LayoutTypeKanban:
+	default:
+		return
+	}
+
+	if err := changeAttrViewLayout(ret, ret.Views[0], initialLayout); err != nil {
+		return av.NewAttributeView(avID)
+	}
+	regenAttrViewGroups(ret)
 	return
 }
 

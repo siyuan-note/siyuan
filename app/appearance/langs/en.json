@@ -1,4 +1,7 @@
 {
+  "databaseTableView": "Database table view",
+  "databaseKanbanView": "Database Kanban view",
+  "databaseGalleryView": "Database card view",
   "deleteKanbanGroupConfirm": "⚠️ Confirm group deletion",
   "deleteKanbanGroupTip": "After deleting the group, this option will be removed from all records. Records without other grouping options will be moved to “Ungrouped”",
   "avPasteHeaderTitle": "Recognize table header",

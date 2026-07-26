@@ -309,7 +309,8 @@ const afterRenderTable = (options: ITableOptions) => {
         if (headerTransformElement) {
             headerTransformElement.style.transform = options.resetData.headerTransform.transform;
         }
-    } else if (editRect && !options.protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+    }
+    if (editRect && !options.protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
         setTimeout(() => {
             stickyRow(options.blockElement, options.protyle.contentElement, "top");

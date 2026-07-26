@@ -484,9 +484,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         item.setAttribute("draggable", "true");
     });
     protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-        if (item.querySelector(".av__scroll")) {
-            stickyRow(item, protyle.contentElement, "all");
-        }
+        stickyRow(item, protyle.contentElement, "all");
     });
     if (protyle.breadcrumb) {
         const readonlyButton = protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]');

@@ -8,7 +8,7 @@ import {processRender} from "../../../util/processCode";
 import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
 import {getBodyVirtualData, initVirtualScroll} from "../virtualScroll";
-import {getRowHTML, updateHeader} from "../row";
+import {getRowHTML, stickyRow, updateHeader} from "../row";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 import {getCardStyle} from "./style";
 import {setGroupFoldedStates} from "../groupFold";
@@ -168,6 +168,9 @@ export const afterRenderGallery = (options: ITableOptions) => {
         finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
     }
+    setTimeout(() => {
+        stickyRow(options.blockElement, options.protyle.contentElement, "top");
+    }, Constants.TIMEOUT_LOAD);
     bindAvSearch({
         blockElement: options.blockElement,
         query: options.resetData.query,

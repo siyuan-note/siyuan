@@ -85,6 +85,13 @@
     box-shadow: 0 -1px inset var(--b3-theme-background-light);
     font-size: 87.5%;
 
+    &--fixed {
+      background-color: var(--b3-parent-background);
+      box-sizing: border-box;
+      position: fixed;
+      z-index: 4;
+    }
+
     &--show .block__icon {
       opacity: 1;
     }

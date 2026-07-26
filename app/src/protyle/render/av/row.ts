@@ -459,6 +459,14 @@ const addFixedRow = (item: HTMLElement, fixedClass: string, placeholderClass: st
     item.insertAdjacentElement("afterend", placeholder);
 };
 
+const addFixedViews = (item: HTMLElement, height: number) => {
+    item.classList.add("av__views--fixed");
+    const placeholder = document.createElement("div");
+    placeholder.className = "av__views-placeholder";
+    placeholder.style.height = height + "px";
+    item.insertAdjacentElement("afterend", placeholder);
+};
+
 const removeFixedRow = (item: HTMLElement, fixedClass: string, placeholderClass: string) => {
     if (!item.classList.contains(fixedClass)) {
         return;
@@ -486,11 +494,12 @@ const syncFixedRowPos = (item: HTMLElement, bodyRect: DOMRect, scrollLeft: numbe
 };
 
 export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement, status: "top" | "bottom" | "all") => {
-    if (blockElement.dataset.avType !== "table") {
-        return;
-    }
     const skipFixed = hasTopClosestByAttribute(blockElement, "fold", "1");
     if (skipFixed) {
+        const viewsElement = blockElement.querySelector(".av__views") as HTMLElement;
+        if (viewsElement) {
+            removeFixedRow(viewsElement, "av__views--fixed", "av__views-placeholder");
+        }
         blockElement.querySelectorAll(".av__row--header--fixed").forEach((item: HTMLElement) => {
             removeFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder");
         });
@@ -499,8 +508,9 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
         });
         return;
     }
+    const isTable = blockElement.dataset.avType === "table";
     const scrollEl = blockElement.querySelector(".av__scroll") as HTMLElement;
-    if (scrollEl) {
+    if (isTable && scrollEl) {
         bindHeaderScrollSync(blockElement, scrollEl);
     }
 
@@ -510,6 +520,39 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
     const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
     const doTop = status === "top" || status === "all";
     const doBottom = status === "bottom" || status === "all";
+    const stickyTop = Math.round(elementRect.top);
+    const viewsElement = blockElement.querySelector(".av__views") as HTMLElement;
+    let viewsTask: {
+        element: HTMLElement;
+        height: number;
+        left: number;
+        top: number;
+        width: number;
+        shouldFix: boolean;
+    } | undefined;
+    let headerStickyTop = stickyTop;
+    if (doTop && viewsElement) {
+        const placeholderElement = viewsElement.classList.contains("av__views--fixed") &&
+            viewsElement.nextElementSibling?.classList.contains("av__views-placeholder")
+            ? viewsElement.nextElementSibling as HTMLElement
+            : viewsElement;
+        const viewsRect = placeholderElement.getBoundingClientRect();
+        const blockRect = blockElement.getBoundingClientRect();
+        const height = viewsElement.offsetHeight;
+        const shouldFix = height > 0 && viewsRect.top < stickyTop && blockRect.bottom > stickyTop;
+        const top = blockRect.bottom < stickyTop + height ? Math.round(blockRect.bottom - height) : stickyTop;
+        viewsTask = {
+            element: viewsElement,
+            height,
+            left: Math.round(viewsRect.left),
+            top,
+            width: Math.round(viewsRect.width),
+            shouldFix,
+        };
+        if (shouldFix) {
+            headerStickyTop = top + height;
+        }
+    }
 
     // 第一遍：纯读取，收集每个 header/footer 的几何与判定结果
     const headerTasks: Array<{
@@ -528,24 +571,22 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
         scrollLeft: number;
         scrollEl: HTMLElement;
     }> = [];
-    if (doTop) {
+    if (doTop && isTable) {
         blockElement.querySelectorAll(".av__row--header").forEach((item: HTMLElement) => {
             const body = item.parentElement as HTMLElement;
             const bodyRect = body.getBoundingClientRect();
-            const offset = Math.round(bodyRect.top - elementRect.top + scrollTop);
             const headerH = item.offsetHeight;
-            const bodyH = body.offsetHeight;
             headerTasks.push({
                 item,
                 bodyRect,
                 headerH,
-                shouldFix: scrollTop > offset && scrollTop < offset + bodyH,
+                shouldFix: bodyRect.top < headerStickyTop && bodyRect.bottom > headerStickyTop,
                 scrollLeft,
                 scrollEl,
             });
         });
     }
-    if (doBottom) {
+    if (doBottom && isTable) {
         blockElement.querySelectorAll(".av__row--footer").forEach((item: HTMLElement) => {
             if (!item.querySelector(".av__calc--ashow")) {
                 return;
@@ -569,8 +610,19 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
     }
 
     // 第二遍：纯写入，此时不再读取布局，仅触发一次重排
-    const stickyTop = Math.round(elementRect.top);
     const stickyBottom = Math.round(window.innerHeight - elementRect.bottom);
+    if (viewsTask) {
+        if (viewsTask.shouldFix) {
+            if (!viewsTask.element.classList.contains("av__views--fixed")) {
+                addFixedViews(viewsTask.element, viewsTask.height);
+            }
+            viewsTask.element.style.left = viewsTask.left + "px";
+            viewsTask.element.style.top = viewsTask.top + "px";
+            viewsTask.element.style.width = viewsTask.width + "px";
+        } else {
+            removeFixedRow(viewsTask.element, "av__views--fixed", "av__views-placeholder");
+        }
+    }
     headerTasks.forEach((task) => {
         const {item, bodyRect, headerH, shouldFix} = task;
         if (shouldFix) {
@@ -578,9 +630,9 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
                 addFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder", headerH, Math.round(bodyRect.width));
             }
             syncFixedRowPos(item, bodyRect, task.scrollLeft, task.scrollEl);
-            item.style.top = bodyRect.bottom < stickyTop + headerH
+            item.style.top = bodyRect.bottom < headerStickyTop + headerH
                 ? Math.round(bodyRect.bottom - headerH) + "px"
-                : stickyTop + "px";
+                : headerStickyTop + "px";
         } else {
             removeFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder");
         }

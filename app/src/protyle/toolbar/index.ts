@@ -234,6 +234,7 @@ export class Toolbar {
             item.classList.remove("protyle-toolbar__item--current");
         });
         this.element.querySelector('[data-type="a"]')?.toggleAttribute("disabled", isCrossBlock);
+        this.element.querySelector('[data-type="block-ref"]')?.toggleAttribute("disabled", isCrossBlock);
         const types = this.getCurrentType();
         types.forEach(item => {
             if (["search-mark", "a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math",

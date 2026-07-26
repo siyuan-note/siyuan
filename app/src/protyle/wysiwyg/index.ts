@@ -296,6 +296,17 @@ export class WYSIWYG {
         });
     }
 
+    private clearAttrContent(element: HTMLElement) {
+        const attrElements = element.querySelectorAll(".protyle-attr");
+        if (attrElements.length === 0) {
+            return;
+        }
+        attrElements.forEach(item => {
+            item.textContent = Constants.ZWSP;
+        });
+        return element.textContent;
+    }
+
     private bindCommonEvent(protyle: IProtyle) {
         this.element.addEventListener("copy", async (event: ClipboardEvent & { target: HTMLElement }) => {
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
@@ -482,6 +493,10 @@ export class WYSIWYG {
                     if (matchHeading) {
                         // 复制标题 https://github.com/siyuan-note/insider/issues/297
                         tempElement.append(headingElement.cloneNode(true));
+                        const textWithoutAttr = this.clearAttrContent(tempElement);
+                        if (textWithoutAttr !== undefined) {
+                            textPlain = textWithoutAttr;
+                        }
                         // https://github.com/siyuan-note/siyuan/issues/13232
                         headingElement.removeAttribute("fold");
                     } else if (!["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
@@ -491,10 +506,14 @@ export class WYSIWYG {
                     } else {
                         // 直接复制块 https://github.com/siyuan-note/insider/issues/318
                         tempElement.append(range.cloneContents());
+                        const textWithoutAttr = this.clearAttrContent(tempElement);
+                        if (textWithoutAttr !== undefined) {
+                            textPlain = textWithoutAttr;
+                        }
                         this.emojiToMd(tempElement);
                     }
                     html = tempElement.innerHTML;
-                    textPlain = range.toString();
+                    textPlain = textPlain || range.toString();
                 } else if (selectImgElement) {
                     html = selectImgElement.outerHTML;
                     // 和图片菜单中的复制保持一致
@@ -518,6 +537,7 @@ export class WYSIWYG {
                     textPlain = range.toString();
                 } else {
                     tempElement.append(range.cloneContents());
+                    const textWithoutAttr = this.clearAttrContent(tempElement);
                     this.emojiToMd(tempElement);
                     const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");
                     if (inlineMathElement) {
@@ -552,7 +572,7 @@ export class WYSIWYG {
                             }
                         });
                     } else if (!hasClosestByTag(range.startContainer, "CODE")) {
-                        textPlain = range.toString();
+                        textPlain = textWithoutAttr ?? range.toString();
                     }
                 }
             }

@@ -24,7 +24,7 @@ const getKanbanTitleHTML = (group: IAVView, counter: number, draggable: boolean)
         });
         if (draggable && group.groupValue.mSelect.length === 1) {
             const value = group.groupValue.mSelect[0];
-            optionMenuHTML = `<span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-kanban-group-more" data-position="north" aria-label="${window.siyuan.languages.more}" data-group-id="${group.id}" data-col-id="${group.groupKey.id}" data-name="${escapeAttr(value.content)}"><svg><use xlink:href="#iconMore"></use></svg></span>`;
+            optionMenuHTML = `<span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-kanban-group-more" data-position="north" aria-label="${window.siyuan.languages.more}" data-group-id="${group.id}" data-col-id="${group.groupKey.id}" data-name="${escapeAttr(value.content)}"><svg><use xlink:href="#iconMore"></use></svg></span><span class="fn__space"></span>`;
         }
     } else if (group.groupValue.type === "checkbox") {
         nameHTML = `<svg style="width:calc(1.625em - 12px);height:calc(1.625em - 12px);margin: 4px 0;float: left;"><use xlink:href="#icon${group.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;

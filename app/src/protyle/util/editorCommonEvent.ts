@@ -2004,19 +2004,25 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetGroupElement === sourceElement) {
                 return;
             }
+            let position: "left" | "right" = "left";
             if (!targetGroupElement) {
+                const sourceRect = sourceElement.getBoundingClientRect();
+                if (event.clientX >= sourceRect.left && event.clientX <= sourceRect.right) {
+                    return;
+                }
                 const groupElements = Array.from(kanbanElement.querySelectorAll(":scope > .av__kanban-group"))
                     .filter(item => item !== sourceElement) as HTMLElement[];
                 targetGroupElement = groupElements.find(item => {
                     const rect = item.getBoundingClientRect();
-                    return event.clientX < rect.left + rect.width / 2;
+                    return event.clientX <= rect.right;
                 }) || groupElements[groupElements.length - 1];
+                if (targetGroupElement && event.clientX > targetGroupElement.getBoundingClientRect().right) {
+                    position = "right";
+                }
             }
             if (!targetGroupElement) {
                 return;
             }
-            const targetRect = targetGroupElement.getBoundingClientRect();
-            const position = event.clientX < targetRect.left + targetRect.width / 2 ? "left" : "right";
             const oldVisiblePreviousID = (sourceElement.previousElementSibling as HTMLElement)?.dataset.groupId || "";
             let visiblePreviousID = position === "left" ?
                 (targetGroupElement.previousElementSibling as HTMLElement)?.dataset.groupId || "" :

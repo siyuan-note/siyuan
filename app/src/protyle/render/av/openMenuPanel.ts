@@ -423,6 +423,10 @@ export const openMenuPanel = (options: {
             }
             // 关联列拖拽排序
             if (targetElement.getAttribute("data-type") === "setRelationCell") {
+                if (targetElement.dataset.relationType !== "selected") {
+                    targetElement.classList.remove("dragover__bottom", "dragover__top");
+                    return;
+                }
                 if (isTop) {
                     targetElement.before(sourceElement);
                 } else {

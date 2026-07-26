@@ -1891,10 +1891,20 @@ img.av__cellassetimg {
     &:hover,
     &.b3-menu__item--current {
       background-color: var(--b3-list-hover);
+
+      .av__relation-table-check,
+      .av__relation-table-primary {
+        box-shadow: inset 0 0 0 9999px var(--b3-list-hover);
+      }
     }
 
     &[data-relation-type="selected"] {
       background-color: var(--b3-theme-primary-lightest);
+
+      .av__relation-table-check,
+      .av__relation-table-primary {
+        box-shadow: inset 0 0 0 9999px var(--b3-theme-primary-lightest);
+      }
     }
 
     .av__relation-table-cell > :not(.fn__grab),
@@ -1915,7 +1925,7 @@ img.av__cellassetimg {
   }
 
   .av__relation-table-check {
-    background-color: inherit;
+    background-color: var(--b3-menu-background);
     left: 0;
     padding: 8px;
     position: sticky;
@@ -1928,7 +1938,7 @@ img.av__cellassetimg {
   }
 
   .av__relation-table-primary {
-    background-color: inherit;
+    background-color: var(--b3-menu-background);
     left: 32px;
     position: sticky;
     z-index: 2;

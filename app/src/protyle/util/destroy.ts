@@ -6,6 +6,7 @@ export const destroy = (protyle: IProtyle) => {
         return;
     }
     hideElements(["util"], protyle);
+    protyle.preview?.destroy();
     if (isSupportCSSHL()) {
         protyle.highlight.markHL.clear();
         protyle.highlight.mark.clear();

@@ -11,6 +11,7 @@ import {Constants} from "../../constants";
 import {getSearch, isMobile} from "../../util/functions";
 /// #if !BROWSER
 import {shell} from "electron";
+import {enhanceRichClipboard, hasRichClipboardImages} from "../util/richClipboard";
 /// #endif
 /// #if !MOBILE
 import {openAsset, openBy} from "../../editor/util";
@@ -29,6 +30,8 @@ export class Preview {
     public element: HTMLElement;
     public previewElement: HTMLElement;
     private mdTimeoutId: number;
+    private copyingToX = false;
+    private copyEventHandler?: (event: ClipboardEvent) => void;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -73,6 +76,42 @@ export class Preview {
         actionElement.innerHTML = actionHtml.join("");
         this.element.appendChild(actionElement);
         this.element.appendChild(previewElement);
+
+        /// #if !BROWSER
+        this.copyEventHandler = (event: ClipboardEvent) => {
+            if (this.copyingToX || !event.clipboardData) {
+                return;
+            }
+
+            const selection = window.getSelection();
+            if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+                return;
+            }
+            const range = selection.getRangeAt(0);
+            if (!previewElement.contains(range.startContainer) || !previewElement.contains(range.endContainer)) {
+                return;
+            }
+
+            const copyElement = document.createElement("div");
+            copyElement.appendChild(range.cloneContents());
+            const copiedHTML = copyElement.innerHTML;
+            if (!hasRichClipboardImages(copiedHTML)) {
+                return;
+            }
+
+            const marker = `<!--siyuan-rich-clipboard='${Lute.NewNodeID()}'-->`;
+            const text = selection.toString();
+            const html = marker + copiedHTML;
+            event.preventDefault();
+            event.clipboardData.setData("text/plain", text);
+            event.clipboardData.setData("text/html", html);
+            enhanceRichClipboard(text, html, protyle.notebookId, {
+                marker,
+                removeMarker: true,
+            });
+        };
+        document.addEventListener("copy", this.copyEventHandler);
+        /// #endif
 
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
@@ -181,6 +220,16 @@ export class Preview {
         });
 
         this.previewElement = previewElement;
+    }
+
+    public destroy() {
+        window.clearTimeout(this.mdTimeoutId);
+        /// #if !BROWSER
+        if (this.copyEventHandler) {
+            document.removeEventListener("copy", this.copyEventHandler);
+            this.copyEventHandler = undefined;
+        }
+        /// #endif
     }
 
     public updatePadding(padding: { left: number, right: number, bottom: number, top: number }) {
@@ -345,7 +394,12 @@ export class Preview {
             range.setEndAfter(copyElement.lastElementChild);
         }
         focusByRange(range);
-        document.execCommand("copy");
+        this.copyingToX = true;
+        try {
+            document.execCommand("copy");
+        } finally {
+            this.copyingToX = false;
+        }
         this.element.lastElementChild.remove();
         focusByRange(cloneRange);
         if (type) {

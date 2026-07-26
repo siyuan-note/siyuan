@@ -19,6 +19,11 @@ interface IRichClipboardPrepared {
     }[];
 }
 
+interface IRichClipboardOptions {
+    marker?: string;
+    removeMarker?: boolean;
+}
+
 const richClipboardImageExts = new Set([
     "apng",
     "avif",
@@ -105,7 +110,13 @@ const getRichClipboardSources = (template: HTMLTemplateElement, notebookID: stri
     return sources;
 };
 
-export const enhanceRichClipboard = (text: string, html: string, notebookID: string) => {
+export const hasRichClipboardImages = (html: string) => {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    return getRichClipboardSources(template, "").length > 0;
+};
+
+export const enhanceRichClipboard = (text: string, html: string, notebookID: string, options: IRichClipboardOptions = {}) => {
     /// #if !BROWSER
     window.setTimeout(async () => {
         const template = document.createElement("template");
@@ -115,7 +126,7 @@ export const enhanceRichClipboard = (text: string, html: string, notebookID: str
             return;
         }
 
-        const marker = html.match(/<!--data-siyuan='[^']+'-->/)?.[0];
+        const marker = options.marker || html.match(/<!--data-siyuan='[^']+'-->/)?.[0];
         if (!marker) {
             return;
         }
@@ -191,11 +202,15 @@ export const enhanceRichClipboard = (text: string, html: string, notebookID: str
         }
 
         try {
+            let clipboardHTML = template.innerHTML;
+            if (options.removeMarker) {
+                clipboardHTML = clipboardHTML.replace(marker, "");
+            }
             const written = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                 cmd: "completeRichClipboard",
                 token,
                 text,
-                html: template.innerHTML,
+                html: clipboardHTML,
                 replacements,
             });
             if (!written) {

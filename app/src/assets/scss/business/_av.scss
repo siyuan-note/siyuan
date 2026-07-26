@@ -1666,6 +1666,25 @@
       position: relative;
       flex-shrink: 0;
 
+      &.dragover__left::after,
+      &.dragover__right::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background-color: var(--b3-theme-primary-lighter);
+        z-index: 3;
+      }
+
+      &.dragover__left::after {
+        left: -10px;
+      }
+
+      &.dragover__right::after {
+        right: -10px;
+      }
+
       &--small {
         width: 180px;
       }
@@ -1676,6 +1695,14 @@
 
       .av__group-title {
         padding-top: 0;
+
+        &[draggable="true"] {
+          cursor: grab;
+
+          &:active {
+            cursor: grabbing;
+          }
+        }
       }
     }
   }

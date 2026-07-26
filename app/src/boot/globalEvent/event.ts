@@ -15,6 +15,8 @@ import {isWindow} from "../../util/functions";
 import {getDockByType} from "../../layout/tabUtil";
 import {fetchPost} from "../../util/fetch";
 
+const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
+
 export const initWindowEvent = (app: App) => {
     let lastEncryptedNotebookTouch = 0;
     const touchEncryptedNotebooks = () => {
@@ -82,6 +84,15 @@ export const initWindowEvent = (app: App) => {
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
             if (!hasClosestByClassName(event.target, "layout-tab-bar")) {
+                stopScrollAnimation();
+            }
+            return;
+        }
+        if (event.dataTransfer.types.some(type => type.startsWith(KANBAN_GROUP_DRAG_TYPE))) {
+            const kanbanElement = hasClosestByClassName(event.target, "av__kanban");
+            if (kanbanElement) {
+                dragOverScroll(event, kanbanElement.getBoundingClientRect(), kanbanElement, "x");
+            } else {
                 stopScrollAnimation();
             }
             return;

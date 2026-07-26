@@ -4,7 +4,7 @@ import {fetchSyncPost} from "../../../../util/fetch";
 import {Constants} from "../../../../constants";
 import {avRender, genTabHeaderHTML} from "../render";
 import {afterRenderGallery, renderGallery} from "../gallery/render";
-import {escapeHtml} from "../../../../util/escape";
+import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getRowHTML} from "../row";
 import {getBodyVirtualData} from "../virtualScroll";
 import {beginAVRender, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
@@ -14,7 +14,7 @@ interface IIds {
     fieldId: string,
 }
 
-const getKanbanTitleHTML = (group: IAVView, counter: number) => {
+const getKanbanTitleHTML = (group: IAVView, counter: number, draggable: boolean) => {
     let nameHTML = "";
     if (["mSelect", "select"].includes(group.groupValue.type)) {
         group.groupValue.mSelect.forEach((item) => {
@@ -26,7 +26,7 @@ const getKanbanTitleHTML = (group: IAVView, counter: number) => {
         nameHTML = group.name;
     }
     // av__group-name 为第三方需求，本应用内没有使用，但不能移除 https://github.com/siyuan-note/siyuan/issues/15736
-    return `<div class="av__group-title">
+    return `<div class="av__group-title"${draggable ? ' draggable="true"' : ""}>
     <span class="av__group-name fn__ellipsis" style="white-space: nowrap;">${nameHTML}</span>
     ${(!counter || counter === 0) ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.entryNum}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
     <span class="fn__flex-1"></span>
@@ -174,9 +174,13 @@ export const renderKanban = async (options: {
         return;
     }
     const view = data.view as IAVKanban;
+    const groupDraggable = !options.protyle.disabled && !created && !snapshot &&
+        !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed") &&
+        !["created", "date", "updated"].includes(view.groupKey?.type);
+    const groupConfig = escapeAttr(JSON.stringify(view.group));
     let bodyHTML = "";
     let isSelectGroup = false;
-    view.groups.forEach((group: IAVKanban) => {
+    view.groups.forEach((group: IAVKanban, groupIndex: number) => {
         if (group.groupHidden === 0) {
             let selectBg = "";
             if (group.fillColBackgroundColor) {
@@ -191,8 +195,8 @@ export const renderKanban = async (options: {
                     }
                 }
             }
-            bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}"${selectBg}>
-    ${getKanbanTitleHTML(group, group.cardCount)}
+            bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}" data-group-id="${group.id}" data-previous-group-id="${view.groups[groupIndex - 1]?.id || ""}" data-group-config="${groupConfig}"${selectBg}>
+    ${getKanbanTitleHTML(group, group.cardCount, groupDraggable)}
     <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getKanbanHTML(group, options.blockElement, virtualData[group.id])}</div>
 </div>`;
         }

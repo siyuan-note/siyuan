@@ -773,7 +773,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             // 兼容新增行后台隐藏
             break;
         }
-        const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
+        const type = item.dataset.dtype as TAVCol || getTypeByCellElement(item) || item.dataset.type as TAVCol;
         if (["created", "updated", "template", "rollup"].includes(type)) {
             break;
         }

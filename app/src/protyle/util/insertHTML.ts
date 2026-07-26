@@ -673,35 +673,41 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
     });
 };
 
-interface ITablePasteRange {
+interface ITablePasteTarget {
     table: HTMLTableElement;
-    startCell: HTMLTableCellElement;
-    endCell: HTMLTableCellElement;
+    anchorCell: HTMLTableCellElement;
 }
 
-const getTablePasteRange = (range: Range): ITablePasteRange | undefined => {
-    if (range.collapsed) {
-        return undefined;
-    }
-    const startCell = (hasClosestByTag(range.startContainer, "TD") ||
+const getTablePasteTarget = (range: Range): ITablePasteTarget | undefined => {
+    const anchorCell = (hasClosestByTag(range.startContainer, "TD") ||
         hasClosestByTag(range.startContainer, "TH")) as HTMLTableCellElement;
-    const endCell = (hasClosestByTag(range.endContainer, "TD") ||
-        hasClosestByTag(range.endContainer, "TH")) as HTMLTableCellElement;
-    if (!startCell || !endCell || startCell === endCell) {
+    if (!anchorCell) {
         return undefined;
     }
-    const table = startCell.closest("table");
-    if (!table || table !== endCell.closest("table")) {
+    const table = anchorCell.closest("table");
+    if (!table) {
         return undefined;
     }
-    return {table, startCell, endCell};
+    return {table, anchorCell};
 };
 
 const processTable = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement,
-                      pasteRange?: ITablePasteRange) => {
+                       pasteTarget?: ITablePasteTarget) => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
-    const copyTableElement = tempElement.content.querySelector("table") as HTMLTableElement;
+    const pasteNodes = Array.from(tempElement.content.childNodes).filter(item =>
+        item.nodeType === Node.ELEMENT_NODE ||
+        (item.nodeType === Node.TEXT_NODE && item.textContent.trim() !== ""));
+    if (pasteNodes.length !== 1 || pasteNodes[0].nodeType !== Node.ELEMENT_NODE) {
+        return false;
+    }
+    const pasteElement = pasteNodes[0] as HTMLElement;
+    let copyTableElement: HTMLTableElement | undefined;
+    if (pasteElement.tagName === "TABLE") {
+        copyTableElement = pasteElement as HTMLTableElement;
+    } else if (pasteElement.getAttribute("data-type") === "NodeTable") {
+        copyTableElement = pasteElement.querySelector("table") || undefined;
+    }
     if (!copyTableElement) {
         return false;
     }
@@ -713,34 +719,36 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
     const scrollLeft = blockElement.firstElementChild.scrollLeft;
     const scrollTop = tableElement.scrollTop;
     const tableSelectElement = blockElement.querySelector(".table__select") as HTMLElement;
-    let startCell = pasteRange?.table === tableElement ? pasteRange.startCell : undefined;
-    let endCell = pasteRange?.table === tableElement ? pasteRange.endCell : undefined;
-    if (!startCell || !endCell) {
-        tableElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-            if (!item.classList.contains("fn__none") && isIncludeCell({
+    const targetCells = getTableRangeCells(tableElement);
+    let anchorCell: HTMLTableCellElement | undefined;
+    if (tableSelectElement.clientWidth > 0) {
+        const selectedCell = targetCells.find(item =>
+            !item.cell.classList.contains("fn__none") && isIncludeCell({
                 tableSelectElement,
                 scrollLeft,
                 scrollTop,
-                item,
-            })) {
-                if (!startCell) {
-                    startCell = item;
-                }
-                endCell = item;
-            }
-        });
+                item: item.cell,
+            }));
+        if (selectedCell) {
+            anchorCell = selectedCell.cell;
+        }
     }
-    if (!startCell || !endCell) {
+    if (!anchorCell && pasteTarget?.table === tableElement) {
+        anchorCell = pasteTarget.anchorCell;
+    }
+    if (!anchorCell) {
         return false;
     }
-    const targetCells = getTableRangeCells(tableElement, startCell, endCell);
-    // 按逻辑网格坐标匹配实际单元格，避免 colspan/rowspan 的 fn__none 占位导致内容错位。
-    const copyCellMap = new Map(copyCells.map(item => [`${item.row}:${item.col}`, item.cell]));
+    const anchor = targetCells.find(item => item.cell === anchorCell);
+    if (!anchor) {
+        return false;
+    }
+    const targetCellMap = new Map(targetCells.map(item => [`${item.row}:${item.col}`, item.cell]));
     const matchedCells: { source: HTMLTableCellElement; target: HTMLTableCellElement }[] = [];
-    targetCells.forEach(item => {
-        const source = copyCellMap.get(`${item.row}:${item.col}`);
-        if (source) {
-            matchedCells.push({source, target: item.cell});
+    copyCells.forEach(item => {
+        const target = targetCellMap.get(`${anchor.row + item.row}:${anchor.col + item.col}`);
+        if (target) {
+            matchedCells.push({source: item.cell, target});
         }
     });
     if (matchedCells.length === 0) {
@@ -769,7 +777,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         return;
     }
     const range = useProtyleRange ? protyle.toolbar.range : getEditorRange(protyle.wysiwyg.element);
-    const tablePasteRange = getTablePasteRange(range);
+    const tablePasteTarget = getTablePasteTarget(range);
     fixTableRange(range);
     let unSpinHTML;
     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
@@ -802,8 +810,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         }
     }
     if (blockElement.classList.contains("table") &&
-        (tablePasteRange || blockElement.querySelector(".table__select").clientWidth > 0) &&
-        processTable(range, html, protyle, blockElement, tablePasteRange)) {
+        processTable(range, html, protyle, blockElement, tablePasteTarget)) {
         return;
     }
 

@@ -1994,6 +1994,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const sourceKanbanElement = sourceElement?.parentElement;
             sourceKanbanElement?.querySelectorAll(".av__kanban-group.dragover__left, .av__kanban-group.dragover__right").forEach(item => {
                 item.classList.remove("dragover__left", "dragover__right");
+                (item as HTMLElement).style.removeProperty("--b3-av-kanban-drag-height");
             });
             const kanbanElement = hasClosestByClassName(event.target, "av__kanban") as HTMLElement;
             if (!sourceElement || !sourceKanbanElement?.classList.contains("av__kanban") ||
@@ -2040,6 +2041,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 previousID = oldPreviousID;
             }
             if (previousID !== oldPreviousID) {
+                targetGroupElement.style.setProperty("--b3-av-kanban-drag-height", `${sourceElement.offsetHeight}px`);
                 targetGroupElement.classList.add(`dragover__${position}`);
             }
             return;
@@ -2765,6 +2767,7 @@ const cleanupDragIndicators = (scope: ParentNode) => {
         item.style.removeProperty("--drag-line-left");
         item.style.removeProperty("--drag-base-bg");
         item.style.removeProperty("--drag-line-bg");
+        item.style.removeProperty("--b3-av-kanban-drag-height");
     });
 };
 

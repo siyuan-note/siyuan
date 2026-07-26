@@ -126,6 +126,12 @@ export class Preview {
                     break;
                 } else if (target.tagName === "BUTTON") {
                     const type = target.getAttribute("data-type");
+                    if (type !== "mp-wechat" && type !== "zhihu" && type !== "yuque") {
+                        actionElement.querySelectorAll("button").forEach((item) => {
+                            item.classList.remove("protyle-preview__action--current");
+                        });
+                        target.classList.add("protyle-preview__action--current");
+                    }
                     const actionCustom = actions.find((w: IPreviewActionCustom) => w?.key === type) as IPreviewActionCustom;
                     if (actionCustom) {
                         actionCustom.click(type);
@@ -142,12 +148,6 @@ export class Preview {
                     } else {
                         previewElement.style.width = "360px";
                         previewElement.style.padding = "8px";
-                    }
-                    if (type !== "mp-wechat" && type !== "zhihu" && type !== "yuque") {
-                        actionElement.querySelectorAll("button").forEach((item) => {
-                            item.classList.remove("protyle-preview__action--current");
-                        });
-                        target.classList.add("protyle-preview__action--current");
                     }
                 }
                 target = target.parentElement;
@@ -184,7 +184,7 @@ export class Preview {
     }
 
     public updatePadding(padding: { left: number, right: number, bottom: number, top: number }) {
-        if (this.element.style.display !== "none" &&
+        if (!this.element.classList.contains("fn__none") &&
             this.element.querySelector('.protyle-preview__action [data-type="desktop"]')?.classList.contains("protyle-preview__action--current")) {
             this.previewElement.style.padding = `${padding.top}px ${padding.left}px ${padding.bottom}px ${padding.right}px`;
         }

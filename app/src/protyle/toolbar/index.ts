@@ -9,7 +9,9 @@ import {
     focusByWbr,
     getBlockRanges,
     getEditorRange,
+    getSelectionOffset,
     getSelectionPosition,
+    getUndoFocusContext,
     selectAll
 } from "../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
@@ -25,7 +27,7 @@ import {
 } from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../render/highlightRender";
-import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
+import {getContenteditableElement, hasNextSibling, hasPreviousSibling, isEndOfBlock} from "../wysiwyg/getBlock";
 import {processRender} from "../util/processCode";
 import {BlockRef} from "./BlockRef";
 import {hintRenderTemplate, hintRenderWidget} from "../hint/extend";
@@ -330,8 +332,13 @@ export class Toolbar {
     private setBlockRangesInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",
                                      textObj?: ITextOption) {
         const selectedRange = this.range.cloneRange();
+        const startRange = selectedRange.cloneRange();
+        startRange.collapse(true);
+        const startsAtBlockEnd = isEndOfBlock(startRange);
         const ranges = getBlockRanges(protyle.wysiwyg.element, selectedRange,
-            ["NodeCodeBlock", "NodeAttributeView"]);
+            ["NodeCodeBlock", "NodeAttributeView"]).filter(item =>
+            !(startsAtBlockEnd && item.editableElement.contains(selectedRange.startContainer)) &&
+            item.range.toString().split(Constants.ZWSP).join(""));
         if (ranges.length === 0) {
             return;
         }
@@ -342,6 +349,8 @@ export class Toolbar {
         const remove = type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
             (!textObj && ranges.every(item => this.hasInlineMark(item.editableElement, item.range, type)));
         const rangesByBlock = new Map<HTMLElement, typeof ranges>();
+        const visibleOffsets = new Map(ranges.map(item =>
+            [item, getSelectionOffset(item.editableElement, undefined, item.range, true)]));
         ranges.forEach(item => {
             const blockRanges = rangesByBlock.get(item.blockElement) || [];
             blockRanges.push(item);
@@ -368,7 +377,8 @@ export class Toolbar {
                     offsetRange.setStartBefore(connectedNodes[0]);
                     offsetRange.setEndAfter(connectedNodes[connectedNodes.length - 1]);
                 } else {
-                    offsetRange = focusByOffset(item.editableElement, item.start, item.end, false) as Range;
+                    const position = visibleOffsets.get(item);
+                    offsetRange = focusByOffset(item.editableElement, position.start, position.end, false, true) as Range;
                 }
                 if (offsetRange) {
                     if (selectionRange) {
@@ -379,7 +389,7 @@ export class Toolbar {
                 }
                 newNodes.push(...connectedNodes);
             });
-        });
+        }, getUndoFocusContext(protyle.wysiwyg.element, selectedRange, true));
         if (selectionRange) {
             if (preserveStart) {
                 selectionRange.setStart(selectedRange.startContainer, selectedRange.startOffset);

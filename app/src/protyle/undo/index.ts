@@ -183,6 +183,7 @@ export class LocalUndo implements IUndo {
             }
             onTransaction(protyle, state.doOperations, true);
             transaction(protyle, state.doOperations, undefined, {skipSync: true});
+            restoreUndoFocus(protyle, state.doOperations);
         }
         syncToolbarRange(protyle);
         document.querySelector(".av__panel")?.remove();

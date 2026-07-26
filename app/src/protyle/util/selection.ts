@@ -4,6 +4,7 @@ import {
     getPreviousBlock,
     hasPreviousSibling,
     isContainerBlock,
+    isEndOfBlock,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByTag, isInEmbedBlock} from "./hasClosest";
@@ -339,7 +340,7 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
     };
 };
 
-export const getSelectionOffset = (selectElement: Node, editorElement?: Element, range?: Range) => {
+export const getSelectionOffset = (selectElement: Node, editorElement?: Element, range?: Range, ignoreZWSP = false) => {
     const position = {
         end: 0,
         start: 0,
@@ -362,9 +363,12 @@ export const getSelectionOffset = (selectElement: Node, editorElement?: Element,
         preSelectionRange.selectNodeContents(selectElement);
     }
     preSelectionRange.setEnd(range.startContainer, range.startOffset);
+    const getTextLength = (text: string) => (ignoreZWSP ? text.split(Constants.ZWSP).join("") : text).length;
     // 需加上表格内软换行 br 的长度
-    position.start = preSelectionRange.toString().length + preSelectionRange.cloneContents().querySelectorAll("br, .emoji").length;
-    position.end = position.start + range.toString().length + range.cloneContents().querySelectorAll("br, .emoji").length;
+    position.start = getTextLength(preSelectionRange.toString()) +
+        preSelectionRange.cloneContents().querySelectorAll("br, .emoji").length;
+    position.end = position.start + getTextLength(range.toString()) +
+        range.cloneContents().querySelectorAll("br, .emoji").length;
     return position;
 };
 
@@ -461,32 +465,47 @@ export const getBlockRanges = (editorElement: Element, selectedRange: Range, exc
     return ranges;
 };
 
-// 记录插入块前的焦点位置，供撤销回放完成后恢复。
-export const getUndoFocusContext = (editorElement: Element, range?: Range): Record<string, string> | undefined => {
+// 记录选区位置，供撤销或重做回放完成后恢复。
+export const getUndoFocusContext = (editorElement: Element, range?: Range, ignoreZWSP = false):
+Record<string, string> | undefined => {
     if (!range || !editorElement.contains(range.startContainer) || !editorElement.contains(range.endContainer)) {
         return undefined;
     }
-    const blockElement = hasClosestBlock(range.startContainer);
-    if (!blockElement || !blockElement.contains(range.endContainer)) {
+    const startBlockElement = hasClosestBlock(range.startContainer);
+    const endBlockElement = hasClosestBlock(range.endContainer);
+    if (!startBlockElement || !endBlockElement || (!ignoreZWSP && startBlockElement !== endBlockElement)) {
         return undefined;
     }
-    const editableElement = getContenteditableElement(blockElement) || blockElement;
-    if (!editableElement.contains(range.startContainer) || !editableElement.contains(range.endContainer)) {
+    const startEditableElement = getContenteditableElement(startBlockElement) || startBlockElement;
+    const endEditableElement = getContenteditableElement(endBlockElement) || endBlockElement;
+    if (!startEditableElement.contains(range.startContainer) || !endEditableElement.contains(range.endContainer)) {
         return undefined;
     }
-    const blockElements = Array.from(editorElement.querySelectorAll(
-        `[data-node-id="${blockElement.getAttribute("data-node-id")}"]`
+    const startBlockElements = Array.from(editorElement.querySelectorAll(
+        `[data-node-id="${startBlockElement.getAttribute("data-node-id")}"]`
     ));
-    const position = getSelectionOffset(editableElement, undefined, range);
+    const endBlockElements = startBlockElement === endBlockElement ? startBlockElements : Array.from(
+        editorElement.querySelectorAll(`[data-node-id="${endBlockElement.getAttribute("data-node-id")}"]`)
+    );
+    const startRange = range.cloneRange();
+    startRange.collapse(true);
+    const endRange = range.cloneRange();
+    endRange.collapse(false);
+    const start = getSelectionOffset(startEditableElement, undefined, startRange, ignoreZWSP).start;
+    const end = getSelectionOffset(endEditableElement, undefined, endRange, ignoreZWSP).end;
     return {
-        undoFocusId: blockElement.getAttribute("data-node-id"),
-        undoFocusIndex: blockElements.indexOf(blockElement).toString(),
-        undoFocusStart: position.start.toString(),
-        undoFocusEnd: position.end.toString(),
+        undoFocusId: startBlockElement.getAttribute("data-node-id"),
+        undoFocusIndex: startBlockElements.indexOf(startBlockElement).toString(),
+        undoFocusStart: start.toString(),
+        undoFocusStartAtEnd: isEndOfBlock(startRange).toString(),
+        undoFocusEndId: endBlockElement.getAttribute("data-node-id"),
+        undoFocusEndIndex: endBlockElements.indexOf(endBlockElement).toString(),
+        undoFocusEnd: end.toString(),
+        undoFocusIgnoreZWSP: ignoreZWSP.toString(),
     };
 };
 
-// 在撤销操作全部应用后，根据插入前保存的焦点位置重建选区。
+// 在撤销或重做操作全部应用后，根据保存的位置重建选区。
 export const restoreUndoFocus = (protyle: IProtyle, operations: IOperation[]) => {
     const operation = operations.find(item => item.context?.undoFocusId);
     if (!operation) {
@@ -497,16 +516,60 @@ export const restoreUndoFocus = (protyle: IProtyle, operations: IOperation[]) =>
     if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < 0) {
         return false;
     }
-    const blockElements = Array.from(protyle.wysiwyg.element.querySelectorAll(
+    const startBlockElements = Array.from(protyle.wysiwyg.element.querySelectorAll(
         `[data-node-id="${operation.context.undoFocusId}"]`
     ));
-    const index = Number(operation.context.undoFocusIndex);
-    const indexedElement = Number.isInteger(index) && index >= 0 ? blockElements[index] : undefined;
-    const blockElement = indexedElement || blockElements.find(item => !isInEmbedBlock(item, false)) || blockElements[0];
-    if (!blockElement) {
+    const startIndex = Number(operation.context.undoFocusIndex);
+    const indexedStartElement = Number.isInteger(startIndex) && startIndex >= 0 ?
+        startBlockElements[startIndex] : undefined;
+    const startBlockElement = indexedStartElement ||
+        startBlockElements.find(item => !isInEmbedBlock(item, false)) || startBlockElements[0];
+    const endBlockElements = operation.context.undoFocusEndId === operation.context.undoFocusId ?
+        startBlockElements : Array.from(protyle.wysiwyg.element.querySelectorAll(
+            `[data-node-id="${operation.context.undoFocusEndId || operation.context.undoFocusId}"]`
+        ));
+    const endIndex = Number(operation.context.undoFocusEndIndex);
+    const indexedEndElement = Number.isInteger(endIndex) && endIndex >= 0 ? endBlockElements[endIndex] : undefined;
+    const endBlockElement = indexedEndElement ||
+        endBlockElements.find(item => !isInEmbedBlock(item, false)) || endBlockElements[0];
+    if (!startBlockElement || !endBlockElement) {
         return false;
     }
-    return !!focusByOffset(blockElement, start, end);
+    const ignoreZWSP = operation.context.undoFocusIgnoreZWSP === "true";
+    if (startBlockElement === endBlockElement) {
+        return !!focusByOffset(startBlockElement, start, end, true, ignoreZWSP);
+    }
+    let startRange: Range;
+    if (operation.context.undoFocusStartAtEnd === "true") {
+        startRange = document.createRange();
+        setLastNodeRange(getContenteditableElement(startBlockElement) || startBlockElement, startRange);
+        startRange.collapse(true);
+    } else {
+        startRange = focusByOffset(startBlockElement, start, start, false, ignoreZWSP) as Range;
+    }
+    let endRange: Range;
+    if (ignoreZWSP && end === 0) {
+        endRange = document.createRange();
+        endRange.setStart(getContenteditableElement(endBlockElement) || endBlockElement, 0);
+        endRange.collapse(true);
+    } else {
+        endRange = focusByOffset(endBlockElement, 0, end, false, ignoreZWSP) as Range;
+    }
+    if (!startRange || !endRange) {
+        return false;
+    }
+    const range = document.createRange();
+    range.setStart(startRange.startContainer, startRange.startOffset);
+    range.setEnd(endRange.endContainer, endRange.endOffset);
+    if (range.endContainer.nodeType === Node.TEXT_NODE) {
+        let endOffset = range.endOffset;
+        while (endOffset > 0 && range.endContainer.textContent[endOffset - 1] === Constants.ZWSP) {
+            endOffset--;
+        }
+        range.setEnd(range.endContainer, endOffset);
+    }
+    focusByRange(range);
+    return true;
 };
 
 const searchNode = (
@@ -603,7 +666,24 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
     return range;
 };
 
-export const focusByOffset = (container: Element, start: number, end: number, isFocus = true) => {
+const getDOMOffset = (text: string, offset: number, skipZWSP: boolean) => {
+    let domOffset = 0;
+    let textOffset = 0;
+    while (domOffset < text.length && textOffset < offset) {
+        if (text[domOffset] !== Constants.ZWSP) {
+            textOffset++;
+        }
+        domOffset++;
+    }
+    if (skipZWSP) {
+        while (text[domOffset] === Constants.ZWSP) {
+            domOffset++;
+        }
+    }
+    return domOffset;
+};
+
+export const focusByOffset = (container: Element, start: number, end: number, isFocus = true, ignoreZWSP = false) => {
     if (!container) {
         return false;
     }
@@ -618,7 +698,8 @@ export const focusByOffset = (container: Element, start: number, end: number, is
     let startNode: Node;
     searchNode(container, container.firstChild, node => {
         if (node.nodeType === Node.TEXT_NODE) {
-            const dataLength = (node as Text).data.length;
+            const dataLength = ignoreZWSP ?
+                (node as Text).data.split(Constants.ZWSP).join("").length : (node as Text).data.length;
             if (start <= dataLength) {
                 startNode = node;
                 return true;
@@ -645,7 +726,8 @@ export const focusByOffset = (container: Element, start: number, end: number, is
         } else {
             searchNode(container, startNode, node => {
                 if (node.nodeType === Node.TEXT_NODE) {
-                    const dataLength = (node as Text).data.length;
+                    const dataLength = ignoreZWSP ?
+                        (node as Text).data.split(Constants.ZWSP).join("").length : (node as Text).data.length;
                     if (end <= dataLength) {
                         endNode = node;
                         return true;
@@ -667,8 +749,9 @@ export const focusByOffset = (container: Element, start: number, end: number, is
 
     const range = document.createRange();
     if (startNode) {
-        if (startNode.nodeType === Node.TEXT_NODE && start <= (startNode as Text).data.length) {
-            range.setStart(startNode, start);
+        if (startNode.nodeType === Node.TEXT_NODE) {
+            const data = (startNode as Text).data;
+            range.setStart(startNode, ignoreZWSP ? getDOMOffset(data, start, true) : start);
         } else {
             range.setStartAfter(startNode);
         }
@@ -683,8 +766,9 @@ export const focusByOffset = (container: Element, start: number, end: number, is
         range.collapse(true);
     } else {
         if (endNode) {
-            if (endNode.nodeType === Node.TEXT_NODE && end <= (endNode as Text).data.length) {
-                range.setEnd(endNode, end);
+            if (endNode.nodeType === Node.TEXT_NODE) {
+                const data = (endNode as Text).data;
+                range.setEnd(endNode, ignoreZWSP ? getDOMOffset(data, end, false) : end);
             } else {
                 range.setEndAfter(endNode);
             }

@@ -54,10 +54,8 @@ func TrimSpaceInPath(p string) string {
 }
 
 func GetTreeID(treePath string) string {
-	if strings.Contains(treePath, "\\") {
-		return strings.TrimSuffix(filepath.Base(treePath), ".sy")
-	}
-	return strings.TrimSuffix(path.Base(treePath), ".sy")
+	base := path.Base(strings.ReplaceAll(treePath, "\\", "/"))
+	return strings.TrimSuffix(base, ".sy")
 }
 
 func ShortPathForBootingDisplay(p string) string {

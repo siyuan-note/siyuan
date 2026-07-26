@@ -22,6 +22,28 @@ import (
 	"testing"
 )
 
+// TestGetTreeID 校验使用不同路径分隔符时均能提取相同的文档 ID。
+func TestGetTreeID(t *testing.T) {
+	id := "20240101120000-1a2b3c4"
+	cases := []struct {
+		name string
+		path string
+	}{
+		{"bare ID", id},
+		{"bare file", id + ".sy"},
+		{"slash", "/20240101120000-parent/" + id + ".sy"},
+		{"backslash", "\\20240101120000-parent\\" + id + ".sy"},
+		{"mixed separators", "20240101120000-a\\20240101120000-b/" + id + ".sy"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := GetTreeID(c.path); got != id {
+				t.Fatalf("GetTreeID(%q) = %q, want %q", c.path, got, id)
+			}
+		})
+	}
+}
+
 // TestIsSensitivePathCredentialDotfiles 覆盖 GHSA 报告中遗漏的家目录凭据 dotfile，
 // 确保它们在 globalCopyFiles 等接受工作空间外绝对路径的接口处被拒绝。
 func TestIsSensitivePathCredentialDotfiles(t *testing.T) {

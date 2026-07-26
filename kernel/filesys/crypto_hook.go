@@ -41,11 +41,9 @@ var DEKLockRelease func(boxID string)
 // 非法扩展名或非节点 ID 模式返回错误，避免把任意路径当 AAD 绑定物产生不可解密的数据。
 // 由 filesys、model 历史查看/回滚、import 等所有 .sy 加解密路径共同使用，保证 AAD 一致。
 func SyObjectBase(relativePath string) (string, error) {
-	p := filepath.ToSlash(relativePath)
-	p = strings.TrimPrefix(p, "/")
-	base := p
-	if idx := strings.LastIndex(p, "/"); idx >= 0 {
-		base = p[idx+1:]
+	base := relativePath
+	if idx := strings.LastIndexAny(relativePath, "/\\"); idx >= 0 {
+		base = relativePath[idx+1:]
 	}
 	if !strings.HasSuffix(base, ".sy") {
 		return "", fmt.Errorf("invalid .sy base name [%s]: must end with .sy", base)

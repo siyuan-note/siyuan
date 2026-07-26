@@ -1349,6 +1349,7 @@ func clearWorkspaceTemp(preserveInstallPkgs bool) {
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
 	os.RemoveAll(filepath.Join(util.TempDir, "convert"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
+	ClearRichClipboard()
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 	os.RemoveAll(filepath.Join(util.TempDir, "base64"))
 	os.RemoveAll(filepath.Join(util.TempDir, "ai"))

@@ -1,0 +1,210 @@
+import {Constants} from "../../constants";
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
+
+interface IRichClipboardSource {
+    element: HTMLImageElement;
+    index: number;
+    path: string;
+    box: string;
+}
+
+interface IRichClipboardPrepared {
+    batch: string;
+    groups: string[];
+    assets: {
+        index: number;
+        path: string;
+    }[];
+}
+
+const richClipboardImageExts = new Set([
+    "apng",
+    "avif",
+    "bmp",
+    "cur",
+    "gif",
+    "ico",
+    "jfif",
+    "jpe",
+    "jpeg",
+    "jpg",
+    "pjp",
+    "pjpeg",
+    "png",
+    "webp",
+]);
+
+const postRichClipboard = async (url: string, data: Record<string, unknown>) => {
+    const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
+    return response.json() as Promise<IWebSocketData>;
+};
+
+const cleanupRichClipboard = async (prepared: IRichClipboardPrepared) => {
+    try {
+        await postRichClipboard("/api/clipboard/cleanupRichText", {
+            batch: prepared.batch,
+            groups: prepared.groups,
+        });
+    } catch (e) {
+        console.warn("Cleanup rich clipboard error:", e);
+    }
+};
+
+const getRichClipboardSources = (template: HTMLTemplateElement, notebookID: string) => {
+    const sources: IRichClipboardSource[] = [];
+    template.content.querySelectorAll("img[src]").forEach((element: HTMLImageElement) => {
+        const src = element.getAttribute("src")?.trim();
+        if (!src) {
+            return;
+        }
+
+        let assetPath: string;
+        if (src.startsWith("assets/")) {
+            assetPath = src;
+        } else if (src.startsWith("./assets/")) {
+            assetPath = src.substring(2);
+        } else if (src.startsWith("/assets/")) {
+            assetPath = src.substring(1);
+        } else {
+            try {
+                const url = new URL(src, window.location.href);
+                if (url.origin !== window.location.origin || !url.pathname.startsWith("/assets/")) {
+                    return;
+                }
+                assetPath = url.pathname.substring(1) + url.search;
+            } catch {
+                return;
+            }
+        }
+        const hashStart = assetPath.indexOf("#");
+        if (hashStart > -1) {
+            assetPath = assetPath.substring(0, hashStart);
+        }
+
+        const pathWithoutQuery = assetPath.split("?", 1)[0];
+        const ext = pathWithoutQuery.substring(pathWithoutQuery.lastIndexOf(".") + 1).toLowerCase();
+        if (!richClipboardImageExts.has(ext)) {
+            return;
+        }
+
+        const queryStart = assetPath.indexOf("?");
+        const queryEnd = assetPath.indexOf("#", queryStart);
+        const query = queryStart > -1 ? assetPath.substring(queryStart + 1, queryEnd > -1 ? queryEnd : undefined) : "";
+        sources.push({
+            element,
+            index: sources.length,
+            path: assetPath,
+            box: new URLSearchParams(query).get("box") || notebookID,
+        });
+    });
+    return sources;
+};
+
+export const enhanceRichClipboard = (text: string, html: string, notebookID: string) => {
+    /// #if !BROWSER
+    window.setTimeout(async () => {
+        const template = document.createElement("template");
+        template.innerHTML = html;
+        const sources = getRichClipboardSources(template, notebookID);
+        if (sources.length === 0 || 1024 < sources.length) {
+            return;
+        }
+
+        const marker = html.match(/<!--data-siyuan='[^']+'-->/)?.[0];
+        if (!marker) {
+            return;
+        }
+
+        let token: string;
+        try {
+            token = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "beginRichClipboard",
+                text,
+                marker,
+            });
+        } catch (e) {
+            console.warn("Begin rich clipboard error:", e);
+            return;
+        }
+        if (!token) {
+            return;
+        }
+
+        let prepared: IRichClipboardPrepared | undefined;
+        try {
+            const response = await postRichClipboard("/api/clipboard/prepareRichText", {
+                assets: sources.map((source) => ({
+                    index: source.index,
+                    path: source.path,
+                    box: source.box,
+                })),
+            });
+            prepared = response.code === 0 ? response.data as IRichClipboardPrepared : undefined;
+            if (!prepared?.batch || !Array.isArray(prepared.groups) || !Array.isArray(prepared.assets)) {
+                await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                    cmd: "cancelRichClipboard",
+                    token,
+                });
+                return;
+            }
+        } catch (e) {
+            await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "cancelRichClipboard",
+                token,
+            });
+            console.warn("Prepare rich clipboard error:", e);
+            return;
+        }
+
+        const replacements: { placeholder: string; path: string }[] = [];
+        const preparedIndexes = new Set<number>();
+        for (const asset of prepared.assets) {
+            const source = sources[asset.index];
+            if (!source || preparedIndexes.has(asset.index) || typeof asset.path !== "string" || !asset.path) {
+                await cleanupRichClipboard(prepared);
+                await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                    cmd: "cancelRichClipboard",
+                    token,
+                });
+                return;
+            }
+            preparedIndexes.add(asset.index);
+            const placeholder = `siyuan-rich-clipboard-${prepared.batch}-${asset.index}`;
+            source.element.setAttribute("src", placeholder);
+            replacements.push({
+                placeholder,
+                path: asset.path,
+            });
+        }
+        if (preparedIndexes.size !== sources.length) {
+            await cleanupRichClipboard(prepared);
+            await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "cancelRichClipboard",
+                token,
+            });
+            return;
+        }
+
+        try {
+            const written = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "completeRichClipboard",
+                token,
+                text,
+                html: template.innerHTML,
+                replacements,
+            });
+            if (!written) {
+                await cleanupRichClipboard(prepared);
+            }
+        } catch (e) {
+            await cleanupRichClipboard(prepared);
+            console.warn("Complete rich clipboard error:", e);
+        }
+    }, 0);
+    /// #endif
+};

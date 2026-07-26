@@ -37,6 +37,7 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const {pathToFileURL} = require("url");
 const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
@@ -72,7 +73,10 @@ let gracefulSystemShutdownPromise;
 let keepAppOpenDuringSystemShutdown = false;
 let updateInstallPromise;
 let keepAppOpenDuringUpdate = false;
+let richClipboardOperation;
+let richClipboardSequence = 0;
 const openDialogSingletons = new Set();
+const normalizeClipboardText = (text) => text.replace(/\r\n?/g, "\n");
 const isOpenAsHidden = function () {
     return 1 === workspaces.length && openAsHidden;
 };
@@ -1427,6 +1431,70 @@ app.whenReady().then(() => {
     ipcMain.handle("siyuan-get", (event, data) => {
         if (data.cmd === "clipboardRead") {
             return clipboard.read(data.format);
+        }
+        if (data.cmd === "beginRichClipboard") {
+            richClipboardOperation = undefined;
+            const text = clipboard.readText();
+            const html = clipboard.readHTML();
+            if (typeof data.text !== "string" || typeof data.marker !== "string" ||
+                normalizeClipboardText(text) !== normalizeClipboardText(data.text) ||
+                !data.marker || !html.includes(data.marker)) {
+                return;
+            }
+
+            richClipboardSequence++;
+            const token = `${Date.now()}-${richClipboardSequence}`;
+            richClipboardOperation = {
+                token,
+                senderId: event.sender.id,
+                requestedText: data.text,
+                text,
+                html
+            };
+            return token;
+        }
+        if (data.cmd === "completeRichClipboard") {
+            const operation = richClipboardOperation;
+            if (!operation || operation.token !== data.token || operation.senderId !== event.sender.id) {
+                return false;
+            }
+            if (operation.requestedText !== data.text || clipboard.readText() !== operation.text ||
+                clipboard.readHTML() !== operation.html || typeof data.html !== "string" ||
+                !Array.isArray(data.replacements) || 1024 < data.replacements.length) {
+                richClipboardOperation = undefined;
+                return false;
+            }
+
+            let html = data.html;
+            for (const replacement of data.replacements) {
+                let isFile = false;
+                if (replacement && typeof replacement.path === "string" && path.isAbsolute(replacement.path)) {
+                    try {
+                        isFile = fs.statSync(replacement.path).isFile();
+                    } catch {
+                        isFile = false;
+                    }
+                }
+                if (!replacement || typeof replacement.placeholder !== "string" || !replacement.placeholder ||
+                    !isFile || !html.includes(replacement.placeholder)) {
+                    richClipboardOperation = undefined;
+                    return false;
+                }
+                const fileURL = pathToFileURL(replacement.path).href.replaceAll("&", "&amp;");
+                html = html.split(replacement.placeholder).join(fileURL);
+            }
+
+            richClipboardOperation = undefined;
+            clipboard.write({
+                text: data.text,
+                html
+            });
+            return true;
+        }
+        if (data.cmd === "cancelRichClipboard") {
+            if (richClipboardOperation?.token === data.token && richClipboardOperation.senderId === event.sender.id) {
+                richClipboardOperation = undefined;
+            }
         }
         if (data.cmd === "showOpenDialog") {
             if (data.singleton) {

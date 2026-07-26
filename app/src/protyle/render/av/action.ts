@@ -27,7 +27,7 @@ import {previewAttrViewImages} from "../../preview/image";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
-import {avRender} from "./render";
+import {avRender, getGroupFoldTip} from "./render";
 import {addView, openViewMenu} from "./view";
 import {isOnlyMeta, writeText} from "../../util/compatibility";
 import {openSearchAV} from "./relation";
@@ -84,6 +84,7 @@ const updateDatabaseRow = (protyle: IProtyle, target: HTMLElement) => {
 const setGroupFolded = (foldElement: HTMLElement, folded: boolean) => {
     foldElement.firstElementChild.classList.toggle("av__group-arrow--open", !folded);
     foldElement.parentElement.nextElementSibling.classList.toggle("fn__none", folded);
+    foldElement.setAttribute("aria-label", getGroupFoldTip(folded));
 };
 
 let foldTimeout: number;

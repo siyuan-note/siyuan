@@ -22,6 +22,7 @@ import {bindAvSearch} from "./search";
 import {getBodyVirtualData, initVirtualScroll} from "./virtualScroll";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate, setAVLocateRequest} from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
+import {updateHotkeyTip} from "../../util/compatibility";
 
 interface IIds {
     groupId: string,
@@ -251,7 +252,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     }
     // av__group-name 为第三方需求，本应用内没有使用，但不能移除 https://github.com/siyuan-note/siyuan/issues/15736
     return `<div class="av__group-title">
-    <div class="av__group-icon" data-type="av-group-fold" data-id="${group.id}">
+    <div class="av__group-icon ariaLabel" data-type="av-group-fold" data-id="${group.id}" data-position="north" aria-label="${getGroupFoldTip(!!group.groupFolded)}">
         <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
     </div>
     <span class="fn__space"></span>
@@ -259,6 +260,12 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     ${(!counter || counter === 0) ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.entryNum}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
     <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
+};
+
+export const getGroupFoldTip = (folded: boolean) => {
+    const action = folded ? window.siyuan.languages.expand : window.siyuan.languages.collapse;
+    const actionAll = folded ? window.siyuan.languages.expandAll : window.siyuan.languages.foldAll;
+    return `${action}<div class='ft__on-surface'>${updateHotkeyTip("⌥" + window.siyuan.languages.click)} ${actionAll}</div>`;
 };
 
 const renderGroupTable = (options: ITableOptions) => {
@@ -845,6 +852,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
                 foldElement.firstElementChild.classList.toggle("av__group-arrow--open", !groupFolded);
                 foldElement.parentElement.nextElementSibling.classList.toggle("fn__none", groupFolded);
+                foldElement.setAttribute("aria-label", getGroupFoldTip(groupFolded));
                 foldElement.removeAttribute("data-folding");
             });
         });

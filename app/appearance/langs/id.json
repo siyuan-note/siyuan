@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ Konfirmasi penghapusan grup",
+  "deleteKanbanGroupTip": "Setelah grup dihapus, opsi ini akan dihapus dari semua catatan. Catatan tanpa opsi pengelompokan lain akan dipindahkan ke “Tidak dikelompokkan”",
   "avPasteHeaderTitle": "Kenali tajuk tabel",
   "avPasteHeaderTip": "Gunakan baris pertama yang ditempel sebagai nama bidang basis data?",
   "avPasteHeaderAsData": "Gunakan sebagai data",

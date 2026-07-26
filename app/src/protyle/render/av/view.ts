@@ -88,6 +88,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
             id: "delete",
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
+            warning: true,
             click() {
                 document.querySelector(".av__panel")?.remove();
                 transaction(options.protyle, [{
@@ -242,7 +243,7 @@ export const getViewHTML = (data: IAV) => {
     </svg>
     <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
 </button>
-<button class="b3-menu__item${data.views.length > 1 ? "" : " fn__none"}" data-type="delete-view">
+<button class="b3-menu__item b3-menu__item--warning${data.views.length > 1 ? "" : " fn__none"}" data-type="delete-view">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
 </button>

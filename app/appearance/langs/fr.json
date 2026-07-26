@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ Confirmer la suppression du groupe",
+  "deleteKanbanGroupTip": "Après la suppression du groupe, cette option sera retirée de tous les enregistrements. Les enregistrements sans autre option de regroupement seront déplacés vers « Non groupé »",
   "avPasteHeaderTitle": "Reconnaître l’en-tête du tableau",
   "avPasteHeaderTip": "Utiliser la première ligne collée comme noms de champs de la base de données ?",
   "avPasteHeaderAsData": "Utiliser comme données",

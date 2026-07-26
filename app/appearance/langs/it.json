@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ Conferma eliminazione gruppo",
+  "deleteKanbanGroupTip": "Dopo l'eliminazione del gruppo, questa opzione verrà rimossa da tutti i record. I record senza altre opzioni di raggruppamento verranno spostati in “Non raggruppati”",
   "avPasteHeaderTitle": "Riconosci intestazione tabella",
   "avPasteHeaderTip": "Usare la prima riga incollata come nomi dei campi del database?",
   "avPasteHeaderAsData": "Usa come dati",

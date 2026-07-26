@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ Grup silme işlemini onayla",
+  "deleteKanbanGroupTip": "Grup silindikten sonra bu seçenek tüm kayıtlardan kaldırılır. Başka gruplandırma seçeneği olmayan kayıtlar “Gruplandırılmamış” bölümüne taşınır",
   "avPasteHeaderTitle": "Tablo başlığını tanı",
   "avPasteHeaderTip": "Yapıştırılan ilk satır veritabanı alan adları olarak kullanılsın mı?",
   "avPasteHeaderAsData": "Veri olarak kullan",

@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ אישור מחיקת הקבוצה",
+  "deleteKanbanGroupTip": "לאחר מחיקת הקבוצה, אפשרות זו תוסר מכל הרשומות. רשומות ללא אפשרויות קיבוץ נוספות יועברו אל „ללא קבוצה”",
   "avPasteHeaderTitle": "זיהוי כותרת טבלה",
   "avPasteHeaderTip": "להשתמש בשורה הראשונה שהודבקה כשמות שדות במסד הנתונים?",
   "avPasteHeaderAsData": "שימוש כנתונים",

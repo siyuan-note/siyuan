@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ 确认删除分组",
+  "deleteKanbanGroupTip": "删除分组后，该选项将从所有记录中移除；没有其他分组选项的记录将移至“未分组”",
   "avPasteHeaderTitle": "识别表头",
   "avPasteHeaderTip": "是否将粘贴内容的第一行识别为数据库字段名？",
   "avPasteHeaderAsData": "作为数据",

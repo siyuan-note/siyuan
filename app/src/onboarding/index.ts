@@ -5,12 +5,13 @@ import {mountHelp} from "../util/mount";
 import {syncGuide} from "../sync/syncGuide";
 import {openSetting} from "../config";
 import {isPaidUser} from "../util/needSubscribe";
-import {setNoteBook} from "../util/pathName";
+import {parseUriInfo, setNoteBook} from "../util/pathName";
 import type {App} from "../index";
 /// #if MOBILE
 import {openMobileFileById} from "../mobile/editor";
 /// #else
 import {openFileById} from "../editor/util";
+import {getAllTabs} from "../layout/getAll";
 /// #endif
 
 export const ensureOnboarding = async () => {
@@ -38,6 +39,7 @@ const shouldShowOnboarding = () => {
 let pendingLoginHandler: (() => void) | undefined;
 let pendingSyncHandler: (() => void) | undefined;
 let mobileKeyboardHandler: EventListener | undefined;
+let openingOnboardingDocument = false;
 
 const dismissOnboarding = () => {
     if (pendingLoginHandler) {
@@ -162,12 +164,23 @@ export const openDesktopOnboarding = (app: App) => {
         return;
     }
     window.setTimeout(() => {
-        openFileById({
+        if (!shouldShowOnboarding()) {
+            return;
+        }
+        renderOnboarding(app);
+        if (getAllTabs("Editor").length > 0 || parseUriInfo().id || openingOnboardingDocument) {
+            return;
+        }
+        openingOnboardingDocument = true;
+        void openFileById({
             app,
             id: window.siyuan.config.onboarding.documentID,
             action: [Constants.CB_GET_FOCUSFIRST],
+        }).finally(() => {
+            openingOnboardingDocument = false;
+        }).catch((error) => {
+            console.warn("open onboarding document failed", error);
         });
-        renderOnboarding(app);
     });
 };
 /// #endif

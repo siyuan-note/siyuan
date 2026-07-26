@@ -491,9 +491,16 @@ func getAttributeViewRelationCandidates(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	notebookID := ""
+	if 0 < len(blockIDs) {
+		if blockTree := treenode.GetBlockTree(blockIDs[0]); nil != blockTree {
+			notebookID = blockTree.BoxID
+		}
+	}
 	ret.Data = map[string]any{
 		"name":         name,
 		"blockIDs":     blockIDs,
+		"notebookID":   notebookID,
 		"columns":      columns,
 		"selectedRows": selectedRows,
 		"rows":         rows,

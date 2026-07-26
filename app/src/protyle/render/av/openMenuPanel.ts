@@ -263,6 +263,7 @@ export const openMenuPanel = (options: {
                     const ghostElement = primaryElement.cloneNode(true) as HTMLElement;
                     ghostElement.className = "av__relation-drag-ghost";
                     ghostElement.removeAttribute("style");
+                    ghostElement.querySelector(".av__relation-row-open")?.remove();
                     document.body.append(ghostElement);
                     event.dataTransfer.setDragImage(ghostElement, 16, 17);
                     setTimeout(() => {

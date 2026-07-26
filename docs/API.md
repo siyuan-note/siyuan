@@ -1943,48 +1943,6 @@ The field types (`keyType`) are:
     * `data.blockIDs`: IDs of all database blocks (mirrors) that reference this database
     * `data.total`: Number of primary-key values after filtering and before pagination
 
-### Get relation candidates
-
-* `/api/av/getAttributeViewRelationCandidates`
-* Parameters
-
-  ```json
-  {
-    "id": "20240118120204-kwyzf77",
-    "keyword": "",
-    "page": 1,
-    "pageSize": 16,
-    "selectedBlockIDs": ["20240118203831-fkfvvtx"]
-  }
-  ```
-
-    * `id`: Database ID
-    * `keyword`: Optional search text. Space-separated terms must all occur in the same field; all fields are searched
-    * `page`: Candidate page number, 1-based. Defaults to `1`
-    * `pageSize`: Candidates per page. `-1` or omitted means `16`
-    * `selectedBlockIDs`: Optional row IDs of selected items. Their order is preserved in `selectedRows`
-* Return value
-
-  ```json
-  {
-    "code": 0,
-    "msg": "",
-    "data": {
-      "name": "Database",
-      "blockIDs": ["20240118120201-kldj15t"],
-      "columns": [],
-      "selectedRows": [],
-      "rows": [],
-      "total": 0
-    }
-  }
-  ```
-
-    * `columns`: All database fields except line numbers, with the primary key first
-    * `selectedRows`: Complete rendered rows matching `selectedBlockIDs`; not affected by `keyword` or pagination
-    * `rows`: Candidate rows matching `keyword`, sorted by creation time descending
-    * `total`: Total number of candidate rows matching `keyword` before pagination
-
 ### Search
 
 * `/api/av/searchAttributeView`

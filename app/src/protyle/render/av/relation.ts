@@ -1,5 +1,5 @@
 import {Menu} from "../../../plugin/Menu";
-import {hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml, escapeLessThans} from "../../../util/escape";
@@ -16,6 +16,7 @@ import {isMobile} from "../../../util/functions";
 import {showMessage} from "../../../dialog/message";
 import {writeText} from "../../util/compatibility";
 import {Constants} from "../../../constants";
+import {openDatabaseRowByData} from "./openDatabaseRow";
 
 interface IAVItem {
     avID: string;
@@ -308,11 +309,14 @@ style="grid-template-columns:${gridTemplate}">
         if (index === 0) {
             const isDetached = primaryValue.isDetached;
             html += `<span class="av__relation-table-cell av__relation-table-primary" data-row-id="${escapeAttr(row.id)}"
+data-value-id="${escapeAttr(primaryCell.id || "")}"
 style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}${primaryCell.color ? `color:${primaryCell.color};` : ""}">
     ${selected ? '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>' : ""}
     <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}"
         ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'}
         data-id="${escapeAttr(primaryValue.block?.id || "")}">${Lute.EscapeHTMLStr(primaryValue.block?.content || window.siyuan.languages.untitled)}</span>
+    ${primaryCell.id ? `<button type="button" class="av__relation-row-open ariaLabel" data-type="openRelationRow" draggable="false"
+        data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
 </span>`;
         } else {
             html += `<span class="av__relation-table-cell"
@@ -528,6 +532,9 @@ ${genRelationLoaderHTML(state.loading)}`;
             const databaseName = inputElement.parentElement.parentElement.querySelector(".popover__block");
             databaseName.textContent = response.data.name;
             databaseName.setAttribute("data-id", response.data.blockIDs?.[0] || "");
+            const relationElement = options.menuElement.firstElementChild as HTMLElement;
+            relationElement.dataset.databaseBlockId = response.data.blockIDs?.[0] || "";
+            relationElement.dataset.notebookId = response.data.notebookID || "";
             const columns = response.data.columns as IAVColumn[] || [];
             const selectedRowsByID = new Map<string, IAVRow>((response.data.selectedRows as IAVRow[] || []).
                 map((row) => [row.id, row]));
@@ -617,6 +624,31 @@ ${genRelationLoaderHTML(state.loading)}`;
     inputElement.addEventListener("compositionend", (event) => {
         event.stopPropagation();
         search();
+    });
+    listElement.addEventListener("click", (event) => {
+        const openElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "openRelationRow");
+        if (!openElement || !listElement.contains(openElement)) {
+            return;
+        }
+        const rowElement = hasClosestByClassName(openElement, "av__relation-table-row") as HTMLElement;
+        const primaryElement = rowElement?.querySelector(".av__relation-table-primary") as HTMLElement;
+        const blockElement = primaryElement?.querySelector(".b3-menu__label") as HTMLElement;
+        const relationElement = options.menuElement.firstElementChild as HTMLElement;
+        if (!rowElement || !primaryElement || !blockElement || !relationElement.dataset.databaseBlockId) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        openDatabaseRowByData(options.protyle, {
+            avID: relationElement.dataset.avId,
+            databaseBlockID: relationElement.dataset.databaseBlockId,
+            notebookID: relationElement.dataset.notebookId,
+            itemID: rowElement.dataset.rowId,
+            valueID: primaryElement.dataset.valueId,
+            title: blockElement.textContent,
+            boundBlockID: blockElement.dataset.id,
+            isDetached: !blockElement.classList.contains("popover__block"),
+        });
     });
     listElement.addEventListener("scroll", () => {
         if (!state.loading && hasMore() && listElement.scrollHeight - listElement.scrollTop - listElement.clientHeight <= 30) {

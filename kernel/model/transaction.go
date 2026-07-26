@@ -380,6 +380,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewFitImage(op)
 			case "setAttrViewDisplayFieldName":
 				ret = tx.doSetAttrViewDisplayFieldName(op)
+			case "setAttrViewDisplayEmptyFields":
+				ret = tx.doSetAttrViewDisplayEmptyFields(op)
 			case "setAttrViewFillColBackgroundColor":
 				ret = tx.doSetAttrViewFillColBackgroundColor(op)
 			case "setAttrViewShowIcon":

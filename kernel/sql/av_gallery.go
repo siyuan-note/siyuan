@@ -33,6 +33,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		CardSize:            view.Gallery.CardSize,
 		FitImage:            view.Gallery.FitImage,
 		DisplayFieldName:    view.Gallery.DisplayFieldName,
+		DisplayEmptyFields:  view.Gallery.DisplayEmptyFields,
 		Fields:              []*av.GalleryField{},
 		Cards:               []*av.GalleryCard{},
 	}

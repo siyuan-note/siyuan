@@ -514,11 +514,12 @@
         }
       }
 
-      &--edit .av__gallery-field[data-empty="true"] .av__gallery-tip {
+      &--edit .av__gallery-field[data-empty="true"] .av__gallery-tip,
+      .av--display-empty-fields & .av__gallery-field[data-empty="true"] .av__gallery-tip {
         display: block;
       }
 
-      &:not(.av__gallery-fields--edit) [data-empty="true"] {
+      .av:not(.av--display-empty-fields) &:not(.av__gallery-fields--edit) [data-empty="true"] {
         display: none;
       }
     }

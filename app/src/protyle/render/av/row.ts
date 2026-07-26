@@ -93,8 +93,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         });
         html += `</div>
     <div class="av__gallery-actions">
-        <span class="protyle-icon protyle-icon--first ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-        <span class="protyle-icon protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
+        <span class="protyle-icon protyle-icon--first ariaLabel${kanbanData.displayEmptyFields ? " fn__none" : ""}" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        <span class="protyle-icon${kanbanData.displayEmptyFields ? " protyle-icon--first" : ""} protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
     </div>
 </div>`;
         return html;
@@ -159,8 +159,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         });
         html += `</div>
     <div class="av__gallery-actions">
-        <span class="protyle-icon protyle-icon--first ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-        <span class="protyle-icon protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
+        <span class="protyle-icon protyle-icon--first ariaLabel${kanbanData.displayEmptyFields ? " fn__none" : ""}" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        <span class="protyle-icon${kanbanData.displayEmptyFields ? " protyle-icon--first" : ""} protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
     </div>
 </div>`;
         return html;

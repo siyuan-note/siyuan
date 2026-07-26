@@ -77,6 +77,7 @@ type TOperation =
     | "sortAttrViewGroup"
     | "foldAttrViewGroup"
     | "setAttrViewDisplayFieldName"
+    | "setAttrViewDisplayEmptyFields"
     | "setAttrViewFillColBackgroundColor"
     | "setAttrViewUpdatedIncludeTime"
     | "setAttrViewCreatedIncludeTime"
@@ -1079,6 +1080,7 @@ interface IAVGallery extends IAVView {
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
     cardAspectRatio: number;
     displayFieldName: boolean;
+    displayEmptyFields: boolean;
     fitImage: boolean;
     cards: IAVGalleryItem[],
     desc: string
@@ -1092,6 +1094,7 @@ interface IAVKanban extends IAVView {
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
     cardAspectRatio: number;
     displayFieldName: boolean;
+    displayEmptyFields: boolean;
     fitImage: boolean;
     cards: IAVGalleryItem[],
     desc: string

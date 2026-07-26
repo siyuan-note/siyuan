@@ -30,6 +30,7 @@ type LayoutKanban struct {
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
 	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
+	DisplayEmptyFields  bool            `json:"displayEmptyFields"`            // 是否显示空字段
 
 	FillColBackgroundColor bool `json:"fillColBackgroundColor"` // 是否填充列背景颜色
 
@@ -64,6 +65,7 @@ type Kanban struct {
 	CardSize               CardSize        `json:"cardSize"`                      // 卡片大小
 	FitImage               bool            `json:"fitImage"`                      // 是否适应封面图片大小
 	DisplayFieldName       bool            `json:"displayFieldName"`              // 是否显示字段名称
+	DisplayEmptyFields     bool            `json:"displayEmptyFields"`            // 是否显示空字段
 	FillColBackgroundColor bool            `json:"fillColBackgroundColor"`        // 是否填充列背景颜色
 	Fields                 []*KanbanField  `json:"fields"`                        // 卡片字段
 	Cards                  []*KanbanCard   `json:"cards"`                         // 卡片

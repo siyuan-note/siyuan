@@ -30,6 +30,7 @@ type LayoutGallery struct {
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
 	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
+	DisplayEmptyFields  bool            `json:"displayEmptyFields"`            // 是否显示空字段
 
 	CardFields []*ViewGalleryCardField `json:"fields"` // 卡片字段
 
@@ -96,6 +97,7 @@ type Gallery struct {
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
 	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
+	DisplayEmptyFields  bool            `json:"displayEmptyFields"`            // 是否显示空字段
 	Fields              []*GalleryField `json:"fields"`                        // 卡片字段
 	Cards               []*GalleryCard  `json:"cards"`                         // 卡片
 	CardCount           int             `json:"cardCount"`                     // 总卡片数

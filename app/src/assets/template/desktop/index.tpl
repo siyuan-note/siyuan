@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
     <link rel="apple-touch-icon" href="../../icon.png">
-    <script src="../../protyle/js/pdf/pdf.min.mjs?v=4.7.85" type="module"></script>
+    <script src="../../protyle/js/pdf/pdf.min.mjs?v=4.8.69" type="module"></script>
 </head>
 <body class="fn__flex-column">
 <div id="loading" class="b3-dialog b3-dialog--open">

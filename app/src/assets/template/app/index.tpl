@@ -7,7 +7,7 @@
     <title>SiYuan</title>
     <link rel="preload" href="../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../../../appearance/fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <script src="../../protyle/js/pdf/pdf.min.mjs?v=4.7.85" type="module"></script>
+    <script src="../../protyle/js/pdf/pdf.min.mjs?v=4.8.69" type="module"></script>
 </head>
 <body class="fn__flex-column">
 <div id="loading" class="b3-dialog b3-dialog--open">

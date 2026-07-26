@@ -1929,7 +1929,6 @@ img.av__cellassetimg {
 
   .av__relation-table-primary {
     background-color: inherit;
-    border-right: 1px solid var(--b3-border-color);
     left: 32px;
     position: sticky;
     z-index: 2;
@@ -1944,6 +1943,12 @@ img.av__cellassetimg {
   }
 
   .av__relation-table-cell {
+    border-right: 1px solid var(--b3-border-color);
+
+    &:last-child {
+      border-right: 0;
+    }
+
     .av__celltext,
     .b3-menu__label {
       overflow: hidden;

@@ -451,8 +451,16 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     widthChanges.forEach(change => {
                         const targetEl = topParentElement.querySelector(`[data-node-id="${change.id}"]`);
                         if (targetEl) {
-                            deletes.push({action: "update", id: change.id, data: targetEl.outerHTML});
-                            inserts.push({action: "update", id: change.id, data: change.oldHTML});
+                            deletes.push({
+                                action: "setAttrs",
+                                id: change.id,
+                                data: JSON.stringify({style: targetEl.getAttribute("style") || ""})
+                            });
+                            inserts.push({
+                                action: "setAttrs",
+                                id: change.id,
+                                data: JSON.stringify({style: change.oldStyle})
+                            });
                         }
                     });
                 }
@@ -862,8 +870,16 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             widthChanges.forEach(change => {
                 const targetEl = parentElement.querySelector(`[data-node-id="${change.id}"]`);
                 if (targetEl) {
-                    doOperations.push({action: "update", id: change.id, data: targetEl.outerHTML});
-                    undoOperations.push({action: "update", id: change.id, data: change.oldHTML});
+                    doOperations.push({
+                        action: "setAttrs",
+                        id: change.id,
+                        data: JSON.stringify({style: targetEl.getAttribute("style") || ""})
+                    });
+                    undoOperations.push({
+                        action: "setAttrs",
+                        id: change.id,
+                        data: JSON.stringify({style: change.oldStyle})
+                    });
                 }
             });
         }

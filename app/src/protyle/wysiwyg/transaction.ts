@@ -77,16 +77,27 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     }
 };
 
-const syncFoldAttr = (element: Element, operation: IOperation) => {
+const syncFoldAndStyleAttrs = (element: Element, operation: IOperation) => {
     const attrs = JSON.parse(operation.data);
-    if (!Object.prototype.hasOwnProperty.call(attrs, "fold")) {
+    const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
+    const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
+    if (!hasFold && !hasStyle) {
         return;
     }
     element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-        if (attrs.fold === "1") {
-            item.setAttribute("fold", "1");
-        } else {
-            item.removeAttribute("fold");
+        if (hasFold) {
+            if (attrs.fold === "1") {
+                item.setAttribute("fold", "1");
+            } else {
+                item.removeAttribute("fold");
+            }
+        }
+        if (hasStyle) {
+            if (attrs.style) {
+                item.setAttribute("style", attrs.style);
+            } else {
+                item.removeAttribute("style");
+            }
         }
     });
 };
@@ -394,7 +405,7 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "setAttrs") {
-                syncFoldAttr(protyle.wysiwyg.element, operation);
+                syncFoldAndStyleAttrs(protyle.wysiwyg.element, operation);
                 const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
                 if (gutterFoldElement) {
                     gutterFoldElement.removeAttribute("disabled");
@@ -593,7 +604,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             updateElements.push(item);
         });
         if (operation.action === "setAttrs") {
-            syncFoldAttr(protyle.wysiwyg.element, operation);
+            syncFoldAndStyleAttrs(protyle.wysiwyg.element, operation);
             return;
         }
         if (operation.action === "unfoldHeading") {
@@ -1190,8 +1201,10 @@ export const turnsIntoOneTransaction = async (options: {
     level?: TTurnIntoOneSub,
     unfocus?: boolean,
     getOperations?: boolean,
+    parentID?: string,
 }) => {
     let parentElement: Element;
+    let firstChildOldStyle: string;
     const id = Lute.NewNodeID();
     if (options.type === "BlocksMergeSuperBlock") {
         parentElement = genSBElement(options.level, id);
@@ -1199,6 +1212,7 @@ export const turnsIntoOneTransaction = async (options: {
         // https://github.com/siyuan-note/siyuan/issues/9521
         const firstChild = options.selectsElement[0] as HTMLElement;
         if (firstChild.style.width) {
+            firstChildOldStyle = firstChild.getAttribute("style") || "";
             (parentElement as HTMLElement).style.width = firstChild.style.width;
             (parentElement as HTMLElement).style.flex = firstChild.style.flex;
             firstChild.style.width = "";
@@ -1243,7 +1257,7 @@ export const turnsIntoOneTransaction = async (options: {
         parentElement.innerHTML = html + '<div class="protyle-attr" contenteditable="false"></div>';
     }
     const previousId = options.selectsElement[0].getAttribute("data-node-id");
-    const parentId = getEmbedChildOperationParentID(options.selectsElement[0]) ||
+    const parentId = options.parentID || getEmbedChildOperationParentID(options.selectsElement[0]) ||
         getParentBlock(options.selectsElement[0]).getAttribute("data-node-id") || options.protyle.block.parentID;
     const doOperations: IOperation[] = [{
         action: "insert",
@@ -1308,6 +1322,19 @@ export const turnsIntoOneTransaction = async (options: {
             blockRender(options.protyle, item);
         }
     });
+    if (firstChildOldStyle !== undefined) {
+        const firstChild = options.selectsElement[0];
+        doOperations.push({
+            action: "setAttrs",
+            id: firstChild.getAttribute("data-node-id"),
+            data: JSON.stringify({style: firstChild.getAttribute("style") || ""})
+        });
+        undoOperations.splice(undoOperations.length - 1, 0, {
+            action: "setAttrs",
+            id: firstChild.getAttribute("data-node-id"),
+            data: JSON.stringify({style: firstChildOldStyle})
+        });
+    }
     // 子块移入完成后刷新超级块拖拽手柄
     if (parentElement.classList.contains("sb")) {
         refreshSbs(parentElement);

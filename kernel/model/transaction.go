@@ -696,9 +696,18 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 }
 
 func isMovingFoldHeadingIntoSelf(targetNode *ast.Node, headingChildren []*ast.Node) bool {
+	headingChildIDs := map[string]struct{}{}
 	for _, headingChild := range headingChildren {
-		if headingChild.ID == targetNode.ID {
-			// 不能将折叠标题移动到自己下方节点的前或后 https://github.com/siyuan-note/siyuan/issues/7163
+		headingChildIDs[headingChild.ID] = struct{}{}
+	}
+	visited := map[*ast.Node]struct{}{}
+	for target := targetNode; nil != target; target = target.Parent {
+		if _, ok := visited[target]; ok {
+			return true
+		}
+		visited[target] = struct{}{}
+		if _, ok := headingChildIDs[target.ID]; ok {
+			// 不能将折叠标题移动到自己下方节点的前后或内部 https://github.com/siyuan-note/siyuan/issues/7163
 			return true
 		}
 	}

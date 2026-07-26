@@ -89,9 +89,97 @@ const getTargetListItem = (targetElement: Element, isBottom: boolean) => {
     return targetElement.closest(".li") as HTMLElement;
 };
 
+const isFoldedHeading = (element: Element) => {
+    return element.getAttribute("data-type") === "NodeHeading" && element.getAttribute("fold") === "1";
+};
+
+type TDragSourcePosition = {
+    previousID: string,
+    parentID: string
+};
+
+const getDragSourceParentID = async (protyle: IProtyle, element: Element) => {
+    const parentBlock = getParentBlock(element);
+    const parentID = parentBlock?.getAttribute("data-node-id");
+    if (parentID) {
+        return parentID;
+    }
+    if (parentBlock === protyle.wysiwyg.element) {
+        return protyle.block.parentID || protyle.block.rootID;
+    }
+    let sourceRootID = "";
+    /// #if !MOBILE
+    const sourceEditor = getAllEditor().find(editor => editor.protyle.wysiwyg.element === parentBlock);
+    sourceRootID = sourceEditor?.protyle?.block?.rootID || "";
+    /// #endif
+    if (sourceRootID) {
+        return sourceRootID;
+    }
+    const response = await fetchSyncPost("/api/block/getBlockInfo", {
+        id: element.getAttribute("data-node-id")
+    });
+    return response?.data?.rootID || "";
+};
+
+const wrapInRowSB = async (protyle: IProtyle, elements: Element[]) => {
+    const firstElement = elements[0];
+    const sourcePosition: TDragSourcePosition = {
+        previousID: getPreviousBlockSibling(firstElement)?.getAttribute("data-node-id") || "",
+        parentID: await getDragSourceParentID(protyle, firstElement)
+    };
+    const operations = await turnsIntoOneTransaction({
+        protyle,
+        selectsElement: elements,
+        type: "BlocksMergeSuperBlock",
+        level: "row",
+        unfocus: true,
+        getOperations: true,
+        parentID: sourcePosition.parentID
+    });
+    return {
+        element: firstElement.parentElement,
+        doOperations: operations.doOperations,
+        undoOperations: operations.undoOperations,
+        sourcePosition
+    };
+};
+
+const genRowSBElement = (firstChild: Element) => {
+    const sbElement = genSBElement("row");
+    const childElement = firstChild as HTMLElement;
+    if (childElement.style.width) {
+        (sbElement as HTMLElement).style.width = childElement.style.width;
+        (sbElement as HTMLElement).style.flex = childElement.style.flex;
+    }
+    return sbElement;
+};
+
+const clearColumnWidth = (element: Element) => {
+    const htmlElement = element as HTMLElement;
+    if (!htmlElement.style.width) {
+        return false;
+    }
+    htmlElement.style.width = "";
+    htmlElement.style.flex = "";
+    return true;
+};
+
+const clearCopiedColumnWidth = (sbElement: Element, operations: IOperation[]) => {
+    const childElement = Array.from(sbElement.querySelectorAll<HTMLElement>("[data-node-id]")).find(item => item.style.width);
+    if (!childElement || !clearColumnWidth(childElement)) {
+        return;
+    }
+    const insertOperation = operations.find(item => item.action === "insert" &&
+        item.id === childElement.getAttribute("data-node-id"));
+    if (insertOperation) {
+        insertOperation.data = childElement.outerHTML;
+    }
+};
+
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
-                      isSameEditor: boolean, position: InsertPosition, isCopy: boolean) => {
+                      isSameEditor: boolean, position: InsertPosition, isCopy: boolean,
+                      sourcePositions = new Map<string, TDragSourcePosition>()) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
@@ -112,36 +200,15 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     // 不能依赖循环内 getParentBlock(item)（移动后 item 的父已变），否则撤销会移到错误位置。
     // 关键：对于文档顶层块，getParentBlock 返回 .protyle-wysiwyg 容器（无 data-node-id），
     // 不能用目标 protyle 的 rootID（跨文档拖拽时这是错误的文档），必须用源 DOM 所属文档 rootID。
-    const sourcePositions = new Map<string, { previousID: string, parentID: string }>();
-    for (const item of sourceElements) {
-        const id = item.getAttribute("data-node-id");
-        if (id) {
-            const parentBlock = getParentBlock(item);
-            let srcParentID = parentBlock?.getAttribute("data-node-id");
-            if (!srcParentID) {
-                // 顶层块：父是 .protyle-wysiwyg 容器（无 data-node-id）。
-                let srcRootID = "";
-                /// #if !MOBILE
-                // 通过 getAllEditor 反查 item 所属的源 protyle，取其 block.rootID。
-                const sourceEditor = getAllEditor().find(editor =>
-                    editor.protyle.wysiwyg.element === parentBlock);
-                if (sourceEditor?.protyle?.block?.rootID) {
-                    srcRootID = sourceEditor.protyle.block.rootID;
-                }
-                /// #endif
-                if (srcRootID) {
-                    srcParentID = srcRootID;
-                } else {
-                    // 跨窗口/移动端 getAllEditor 找不到源编辑器，用 kernel API 反查块的真实 rootID。
-                    // 不能 fallback 到目标 protyle 的 rootID（会导致撤销把块移到错误文档）。
-                    const response = await fetchSyncPost("/api/block/getBlockInfo", {id});
-                    srcParentID = response?.data?.rootID || "";
-                }
+    if (!isCopy) {
+        for (const item of sourceElements) {
+            const id = item.getAttribute("data-node-id");
+            if (id && !sourcePositions.has(id)) {
+                sourcePositions.set(id, {
+                    previousID: getPreviousBlockSibling(item)?.getAttribute("data-node-id") || "",
+                    parentID: await getDragSourceParentID(protyle, item)
+                });
             }
-            sourcePositions.set(id, {
-                previousID: getPreviousBlockSibling(item)?.getAttribute("data-node-id") || "",
-                parentID: srcParentID || "",
-            });
         }
     }
     for (let index = sourceElements.length - 1; index >= 0; index--) {
@@ -470,6 +537,31 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             return;
         }
     }
+    const focusSourceElement = sourceElements[0];
+    const sourceHasFoldHeading = sourceElements.some(isFoldedHeading);
+    const wrapDoOperations: IOperation[] = [];
+    const wrapUndoOperations: IOperation[] = [];
+    const sourcePositions = new Map<string, TDragSourcePosition>();
+    // 先在原标题位置完成纵向分组，避免新外层超级块落入 HeadingChildren 后形成循环父子关系。
+    if (direct === "col" && sourceHasFoldHeading && !isCopy) {
+        const sourceWrap = await wrapInRowSB(protyle, sourceElements);
+        wrapDoOperations.push(...sourceWrap.doOperations);
+        wrapUndoOperations.splice(0, 0, ...sourceWrap.undoOperations);
+        sourceElements = [sourceWrap.element];
+        sourcePositions.set(sourceWrap.element.getAttribute("data-node-id"), sourceWrap.sourcePosition);
+    }
+    if (direct === "col" && isFoldedHeading(targetElement)) {
+        const targetID = targetElement.getAttribute("data-node-id");
+        const targetWrap = await wrapInRowSB(protyle, [targetElement]);
+        wrapDoOperations.push(...targetWrap.doOperations);
+        wrapUndoOperations.splice(0, 0, ...targetWrap.undoOperations);
+        targetElement = targetWrap.element;
+        sourcePositions.forEach(position => {
+            if (position.previousID === targetID) {
+                position.previousID = targetElement.getAttribute("data-node-id");
+            }
+        });
+    }
     const undoOperations: IOperation[] = [];
     const targetMoveUndo: IOperation = {
         action: "move",
@@ -482,19 +574,35 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     };
     const sbElement = genSBElement(direct);
     targetElement.parentElement.replaceChild(sbElement, targetElement);
-    const doOperations: IOperation[] = [{
+    const doOperations: IOperation[] = [...wrapDoOperations, {
         action: "insert",
         data: sbElement.outerHTML,
         id: sbElement.getAttribute("data-node-id"),
-        nextID: getNextBlockSibling(sbElement)?.getAttribute("data-node-id"),
-        previousID: getPreviousBlockSibling(sbElement)?.getAttribute("data-node-id"),
-        parentID: getParentBlock(sbElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+        // 目标块稍后才会移入新超级块，先用它作为同级锚点可避免外层超级块误插入源折叠标题的纵向分组。
+        nextID: targetElement.getAttribute("data-node-id"),
+        parentID: targetMoveUndo.parentID
     }];
     // 临时插入，防止后面计算错误，最终再移动矫正
     sbElement.lastElementChild.before(targetElement);
-    const moveToResult = await moveTo(protyle, sourceElements, sbElement, isSameEditor, "afterbegin", isCopy);
+    // 复制折叠标题时原块不移动，可直接在目标外层超级块中创建纵向分组。
+    let sourceRowElement: Element;
+    if (direct === "col" && sourceHasFoldHeading && isCopy) {
+        sourceRowElement = genRowSBElement(sourceElements[0]);
+        sbElement.lastElementChild.before(sourceRowElement);
+        doOperations.push({
+            action: "insert",
+            data: sourceRowElement.outerHTML,
+            id: sourceRowElement.getAttribute("data-node-id"),
+            parentID: sbElement.getAttribute("data-node-id")
+        });
+    }
+    const moveToResult = await moveTo(protyle, sourceElements, sourceRowElement || sbElement,
+        isSameEditor, "afterbegin", isCopy, sourcePositions);
+    if (sourceRowElement && isCopy) {
+        clearCopiedColumnWidth(sourceRowElement, moveToResult.doOperations);
+    }
     doOperations.push(...moveToResult.doOperations);
-    undoOperations.push(...moveToResult.undoOperations);
+    const sourceUndoOperations = [...moveToResult.undoOperations];
     const newSourceParentElement = moveToResult.newSourceElements;
     // 横向超级块A内两个元素拖拽成纵向超级块B，取消超级块A会导致 targetElement 被删除，需先移动再删除 https://github.com/siyuan-note/siyuan/issues/16292
     let removeIndex = doOperations.length;
@@ -509,39 +617,46 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
     });
 
+    const sourcePreviousID = (sourceRowElement || newSourceParentElement[0]).getAttribute("data-node-id");
+    const targetOperations: IOperation[] = [];
     if (isBottom) {
-        // 拖拽到超级块 col 下方， 其他块右侧
+        // 拖拽到超级块 col 下方，其他块右侧
         sbElement.insertAdjacentElement("afterbegin", targetElement);
-        doOperations.splice(removeIndex, 0, {
+        targetOperations.push({
             action: "move",
             id: targetElement.getAttribute("data-node-id"),
             parentID: sbElement.getAttribute("data-node-id")
         });
     } else {
         sbElement.lastElementChild.insertAdjacentElement("beforebegin", targetElement);
-        doOperations.splice(removeIndex, 0, {
+        targetOperations.push({
             action: "move",
             id: targetElement.getAttribute("data-node-id"),
-            previousID: newSourceParentElement[0].getAttribute("data-node-id"),
+            previousID: sourcePreviousID
         });
     }
-    undoOperations.push(targetMoveUndo);
+    doOperations.splice(removeIndex, 0, ...targetOperations);
+    const targetUndoOperations = [targetMoveUndo];
+    // 目标原本紧跟源块时，需要先恢复作为 previousID 的源块，再恢复目标块。
+    let targetUndoIndex = 0;
+    if (!isCopy && targetMoveUndo.previousID) {
+        const previousSourceUndoIndex = sourceUndoOperations.findIndex(item =>
+            ["insert", "move"].includes(item.action) && item.id === targetMoveUndo.previousID);
+        if (previousSourceUndoIndex > -1) {
+            targetUndoIndex = previousSourceUndoIndex + 1;
+        }
+    }
+    undoOperations.push(
+        ...sourceUndoOperations.slice(0, targetUndoIndex),
+        ...targetUndoOperations,
+        ...sourceUndoOperations.slice(targetUndoIndex)
+    );
     undoOperations.push({
         action: "delete",
         id: sbElement.getAttribute("data-node-id"),
     });
-    const foldElements: Element[] = [];
-    newSourceParentElement.forEach(item => {
-        const nextBlockElement = getNextBlockSibling(item);
-        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
-            nextBlockElement && (
-                nextBlockElement.getAttribute("data-type") !== "NodeHeading" ||
-                (nextBlockElement.getAttribute("data-subtype") || "") > item.getAttribute("data-subtype")
-            )) {
-            foldElements.push(item);
-        }
-    });
-    if ((newSourceParentElement.length > 1 || foldElements.length > 0) && direct === "col") {
+    undoOperations.push(...wrapUndoOperations);
+    if (!sourceRowElement && newSourceParentElement.length > 1 && direct === "col") {
         const mergeOperations = await turnsIntoOneTransaction({
             protyle,
             selectsElement: newSourceParentElement.reverse(),
@@ -553,19 +668,14 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         doOperations.push(...mergeOperations.doOperations);
         undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
     }
-    foldElements.forEach(item => {
-        const foldOperations = setFold(protyle, item, true, false, false, true);
-        doOperations.push(...foldOperations.doOperations);
-        undoOperations.splice(0, 0, ...foldOperations.undoOperations);
-    });
     refreshSbResize(sbElement);
     originSbSet.forEach(sb => {
         refreshSbAndPersistWidth(sb, doOperations, undoOperations);
     });
     // 跨文档移动为可逆条目：全局撤销栈按 rootID 分栈联动，撤销时经 mutatedRootIDs 判定弹确认
     transaction(protyle, doOperations, undoOperations);
-    if (document.contains(sourceElements[0])) {
-        focusBlock(sourceElements[0]);
+    if (document.contains(focusSourceElement)) {
+        focusBlock(focusSourceElement);
     } else {
         focusBlock(targetElement);
     }
@@ -573,6 +683,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 
 const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, isCopy: boolean) => {
     const isSameEditor = isSameDragEditor(protyle.wysiwyg.element, sourceElements[0]);
+    const focusSourceElement = sourceElements[0];
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     // 移动前记录源块所在的超级块，移动后刷新其手柄（移出后需重建）
@@ -584,17 +695,69 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         }
     });
 
-    const moveToResult = await moveTo(protyle, sourceElements, targetElement, isSameEditor, isBottom ? "afterend" : "beforebegin", isCopy);
+    const sourceHasFoldHeading = sourceElements.some(isFoldedHeading);
+    const targetParentElement = targetElement.parentElement;
+    const isColumnDrop = targetParentElement.classList.contains("sb") &&
+        targetParentElement.getAttribute("data-sb-layout") === "col";
+    const wrapUndoOperations: IOperation[] = [];
+    const sourcePositions = new Map<string, TDragSourcePosition>();
+    let sourceRowElement: Element;
+    if (sourceHasFoldHeading && isColumnDrop && !isCopy) {
+        const sourceWrap = await wrapInRowSB(protyle, sourceElements);
+        doOperations.push(...sourceWrap.doOperations);
+        wrapUndoOperations.splice(0, 0, ...sourceWrap.undoOperations);
+        sourceElements = [sourceWrap.element];
+        sourcePositions.set(sourceWrap.element.getAttribute("data-node-id"), sourceWrap.sourcePosition);
+    }
+    if (isColumnDrop && isFoldedHeading(targetElement)) {
+        const targetID = targetElement.getAttribute("data-node-id");
+        const targetWrap = await wrapInRowSB(protyle, [targetElement]);
+        doOperations.push(...targetWrap.doOperations);
+        wrapUndoOperations.splice(0, 0, ...targetWrap.undoOperations);
+        targetElement = targetWrap.element;
+        sourcePositions.forEach(position => {
+            if (position.previousID === targetID) {
+                position.previousID = targetElement.getAttribute("data-node-id");
+            }
+        });
+    }
+    if (sourceHasFoldHeading && isColumnDrop && isCopy) {
+        // 复制折叠标题时原块不移动，可直接在目标横向超级块中创建纵向分组。
+        sourceRowElement = genRowSBElement(sourceElements[0]);
+        const sourceRowData = sourceRowElement.outerHTML;
+        targetElement.insertAdjacentElement(isBottom ? "afterend" : "beforebegin", sourceRowElement);
+        doOperations.push({
+            action: "insert",
+            data: sourceRowData,
+            id: sourceRowElement.getAttribute("data-node-id"),
+            nextID: isBottom ? undefined : targetElement.getAttribute("data-node-id"),
+            previousID: isBottom ? targetElement.getAttribute("data-node-id") : undefined,
+            parentID: targetParentElement.getAttribute("data-node-id")
+        });
+    }
+    const moveToResult = await moveTo(protyle, sourceElements, sourceRowElement || targetElement, isSameEditor,
+        sourceRowElement ? "afterbegin" : (isBottom ? "afterend" : "beforebegin"), isCopy, sourcePositions);
+    if (sourceRowElement && isCopy) {
+        clearCopiedColumnWidth(sourceRowElement, moveToResult.doOperations);
+    }
     doOperations.push(...moveToResult.doOperations);
-    undoOperations.push(...moveToResult.undoOperations);
+    const sourceUndoOperations = [...moveToResult.undoOperations];
+    undoOperations.push(...sourceUndoOperations);
+    if (sourceRowElement) {
+        undoOperations.push({
+            action: "delete",
+            id: sourceRowElement.getAttribute("data-node-id")
+        });
+    }
+    undoOperations.push(...wrapUndoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
     let foldData;
     const previousBlockElement = getPreviousBlockSibling(targetElement);
-    if (isBottom &&
+    if (!isColumnDrop && isBottom &&
         targetElement.getAttribute("data-type") === "NodeHeading" &&
         targetElement.getAttribute("fold") === "1") {
         foldData = setFold(protyle, targetElement, true, false, false, true);
-    } else if (!isBottom &&
+    } else if (!isColumnDrop && !isBottom &&
         previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
         previousBlockElement.getAttribute("fold") === "1") {
         foldData = setFold(protyle, previousBlockElement, true, false, false, true);
@@ -631,24 +794,11 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             });
         });
     }
-    let hasFoldHeading = false;
-    newSourceParentElement.forEach(item => {
-        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            hasFoldHeading = true;
-            const nextBlockElement = getNextBlockSibling(item);
-            if (nextBlockElement && (
-                nextBlockElement.getAttribute("data-type") !== "NodeHeading" ||
-                nextBlockElement.getAttribute("data-subtype") > item.getAttribute("data-subtype")
-            )) {
-                const foldOperations = setFold(protyle, item, true, false, false, true);
-                doOperations.push(...foldOperations.doOperations);
-                // 不折叠，否则无法撤销 undoOperations.push(...foldOperations.undoOperations);
-            }
-            return true;
-        }
-    });
     // 移入/移出超级块后刷新拖拽手柄并重新分配宽度（如 A 拖到超级块内 B 前面，需在 A、B 间补手柄）
     const dragSbSet = new Set<Element>(originSbSet);
+    if (isColumnDrop) {
+        dragSbSet.add(targetParentElement);
+    }
     [newSourceParentElement[0], targetElement].forEach(el => {
         const sb = el?.closest('[data-type="NodeSuperBlock"]');
         if (sb) {
@@ -658,7 +808,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     dragSbSet.forEach(sb => {
         refreshSbAndPersistWidth(sb, doOperations, undoOperations);
     });
-    if ((newSourceParentElement.length > 1 || hasFoldHeading) &&
+    if (!sourceRowElement && newSourceParentElement.length > 1 &&
         newSourceParentElement[0].parentElement.classList.contains("sb") &&
         newSourceParentElement[0].parentElement.getAttribute("data-sb-layout") === "col") {
         // 合并到同一个 transaction，避免新超级块 id 在第二个 transaction 中找不到
@@ -675,8 +825,8 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     }
     // 跨文档移动为可逆条目：全局撤销栈按 rootID 分栈联动，撤销时经 mutatedRootIDs 判定弹确认
     transaction(protyle, doOperations, undoOperations);
-    if (document.contains(sourceElements[0])) {
-        focusBlock(sourceElements[0]);
+    if (document.contains(focusSourceElement)) {
+        focusBlock(focusSourceElement);
     } else {
         focusBlock(targetElement);
     }

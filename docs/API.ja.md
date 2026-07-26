@@ -110,7 +110,7 @@
 
 ### 認証
 
-<kbd>設定 - このアプリケーションについて</kbd>でAPIトークンを確認し、リクエストヘッダーに `Authorization: Token xxx` を設定
+<kbd>設定 - 認証 - API トークン</kbd> で API トークンを確認し、リクエストヘッダーに `Authorization: Token xxx` を設定
 
 ## ノートブック
 

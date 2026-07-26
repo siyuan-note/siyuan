@@ -111,7 +111,7 @@
 
 ### Authentication
 
-View API token in <kbd>Settings - About</kbd>, request header: `Authorization: Token xxx`
+View the API token in <kbd>Settings - Authentication - API token</kbd>. Use it in the request header: `Authorization: Token xxx`
 
 ## Notebooks
 

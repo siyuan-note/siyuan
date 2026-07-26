@@ -110,7 +110,7 @@
 
 ### 鉴权
 
-在 <kbd>设置 - 关于</kbd> 里查看 API token，请求标头：`Authorization: Token xxx`
+在 <kbd>设置 - 鉴权 - API token</kbd> 中查看 API token，请求标头：`Authorization: Token xxx`
 
 ## 笔记本
 

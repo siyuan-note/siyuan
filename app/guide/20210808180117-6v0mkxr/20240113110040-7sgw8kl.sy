@@ -910,7 +910,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Configure the shorthand save location in [Settings - Documents - Default shorthand save path]:"
+					"Data": "Configure the shorthand save location in [Settings - Documents - New Document - Default shorthand save path]:"
 				}
 			]
 		},

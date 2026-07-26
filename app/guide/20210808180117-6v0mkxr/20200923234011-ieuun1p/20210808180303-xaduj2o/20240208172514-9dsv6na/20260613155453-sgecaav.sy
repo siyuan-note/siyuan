@@ -4890,7 +4890,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Unlike \"Template Snippets\", this template only applies to default value population of database entries. HTML content in template fields is sanitized by default. To execute scripts, enable Settings - Editor - Allow execution of scripts in HTML content, but only after confirming that the code is safe to avoid cross-site scripting (XSS) attacks."
+									"Data": ": Unlike \"Template Snippets\", this template only applies to default value population of database entries. HTML content in template fields is sanitized by default. To execute scripts, enable Settings - Editor - Advanced - Allow execution of scripts in HTML content, but only after confirming that the code is safe to avoid cross-site scripting (XSS) attacks."
 								}
 							]
 						}

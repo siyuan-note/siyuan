@@ -107,7 +107,7 @@ MasterSalt is the global root of KEK derivation — the master password + Master
 
 **Config recovery vs key recovery, separated**: Config recovery only needs to read the backup file and load back the salt/verifier (no password required, since salt is not secret and data remains undecryptable without the password); key recovery requires the password to derive the KEK and verify against the verifier. This allows the "enabled" state to be reached automatically after sync/import, so the user can unlock by entering the master password.
 
-**Manual key export/import**: Beyond auto-sync, users can manually export/import the key backup under **Settings → Access authorization → Encrypted notebooks**, as an independent recovery channel outside sync (e.g. when sync is unavailable, for cross-account migration, or offline physical transfer).
+**Manual key export/import**: Beyond auto-sync, users can manually export/import the key backup under **Settings → Authentication → Encrypted Notebook**, as an independent recovery channel outside sync (e.g. when sync is unavailable, for cross-account migration, or offline physical transfer).
 
 | Operation | Entry | Notes |
 |---|---|---|
@@ -238,14 +238,14 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 
 | Scenario | Interaction |
 |---|---|
-| Enable | Settings → Access authorization → Encrypted-notebook section → toggle → set master password (double input + risk confirmation) |
+| Enable | Settings → Authentication → Encrypted Notebook → toggle → set master password (double input + risk confirmation) |
 | Disable | Supported only when no live encrypted notebook and no kernel-enumerable history or recovery snapshot depends on the current key backup; otherwise reject, or require explicit permanent purge of those recovery artifacts before deleting global config and backup |
 | Create | File panel "more" menu → "New encrypted notebook" → enter name + master password → auto-unlock and open |
 | Icon | Shows lock icon when closed (locked); restores user emoji when opened (unlocked) |
 | Unlock | Click a closed encrypted notebook → master-password prompt (🔓 Unlock xxx) → wait ~1s → opens |
 | Lock | Equals close: first block new operations, wait for or cancel in-flight work, then remove managed DEK handles, delete encrypted SQLite databases, and best-effort clean kernel-managed plaintext caches, temporary files, and access tokens. Unsaved edits and file history are automatically saved before locking |
 | Auto-lock | Each unlocked notebook stores its own last-activity time. Real UI interaction by an authenticated user in the current workspace refreshes all currently unlocked encrypted notebooks together. A headless client can perform the same refresh through an explicit keepalive endpoint that requires authentication and the administrator role; background reads, sync, indexing, and other non-user activity do not keep notebooks alive automatically |
-| Change password | Settings → Access authorization → "Change master password" |
+| Change password | Settings → Authentication → Encrypted Notebook → "Change master password" |
 | Move document | A parent-only move within an encrypted notebook moves ciphertext verbatim and updates indexes; a basename change re-envelopes content. Moves between normal notebooks remain normal; cross-boundary (normal↔encrypted) moves are rejected with a prompt |
 | Doc to heading | Cross-boundary rejected with a prompt |
 | Block ref | Normal refs within an encrypted notebook (searching `((` only searches this notebook; backlinks panel displays normally); cross-boundary (normal↔encrypted, encrypted A↔encrypted B) blocked |
@@ -421,7 +421,7 @@ The in-memory `managedEncryptedExports` tokens manage download-link expiry and l
 ## 22. Usage Guide
 
 ### First-time enablement
-1. Go to **Settings → Access authorization → Encrypted notebooks** and toggle it on
+1. Go to **Settings → Authentication → Encrypted Notebook** and toggle it on
 2. Set a master password (double input + risk confirmation). The master password is the unified key for all encrypted notebooks — **you must remember it; there is no recovery backdoor**
 3. Once enabled, you can **create a new encrypted notebook** from the file-panel "more" menu (enter a name + master password → auto-unlocks and opens)
 
@@ -435,7 +435,7 @@ The in-memory `managedEncryptedExports` tokens manage download-link expiry and l
 > Important: An encrypted notebook provides its strongest application-level protection while locked, but locking only best-effort cleans application-controlled memory and temporary data; it does not promise erasure of every transient copy in the operating system or storage media. While unlocked, callers authorized by the main application (APIs, plugins, AI/LLM including MCP) can read plaintext just like a normal notebook; publish readers, anonymous visitors, and the kernel CLI are always denied (see §12 Security premise).
 
 ### Changing the master password
-Go to **Settings → Access authorization → Change master password**. Changing the password only re-wraps each notebook's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.
+Go to **Settings → Authentication → Encrypted Notebook → Change master password**. Changing the password only re-wraps each notebook's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.
 
 > Important semantics: password change uses the KEK envelope model — the DEK itself does not change; only a new KEK (derived from the new password) re-wraps the WrappedDEK. This means **changing the password does not revoke the old password's decryption ability**: if the old password and an old WrappedDEK (retained in sync endpoints, backups, or historical snapshots) leak together, the same DEK can still be unwrapped, decrypting current data. If you suspect the old password has leaked, migrate content to a freshly created encrypted notebook (new DEK) rather than just changing the password.
 

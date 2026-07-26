@@ -522,8 +522,6 @@ export class MobileFiles extends Model {
                 case "moveDocs":
                     this.onMove(data);
                     break;
-                case "moveDoc":
-                    break;
                 case "reloadFiletree":
                     setNoteBook(() => {
                         this.init(false);

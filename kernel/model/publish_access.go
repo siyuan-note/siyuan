@@ -1390,14 +1390,25 @@ func FilterGraphByPublishAccess(c *gin.Context, publishAccess PublishAccess, nod
 	return
 }
 
-func FilterTagsByPublishIgnore(publishIgnore PublishAccess, tags *Tags) (ret *Tags) {
-	spans := sql.QueryTagSpans("")
+func FilterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags) (ret *Tags) {
+	return filterTagsByPublishAccess(c, publishAccess, tags, sql.QueryTagSpans(""))
+}
+
+func filterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags, spans []*sql.Span) (ret *Tags) {
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
 	labelCounts := make(map[string]int)
 	for _, span := range spans {
-		if CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishIgnore) {
-			label := util.UnescapeHTML(span.Content)
-			labelCounts[label] += 1
+		if !CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishInvisible) ||
+			!CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishDisable) {
+			continue
 		}
+		passwordID, password := GetPathPasswordByPublishAccess(span.Box, span.Path, publishAccess)
+		if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
+			continue
+		}
+		label := util.UnescapeHTML(span.Content)
+		labelCounts[label] += 1
 	}
 
 	ret = &Tags{}

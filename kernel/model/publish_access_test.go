@@ -23,6 +23,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -649,6 +650,55 @@ func TestFilterGraphByPublishAccess(t *testing.T) {
 	}
 	if filteredNodes[0].Refs != 1 || filteredNodes[1].Defs != 1 || filteredNodes[1].Size != 10 {
 		t.Fatalf("unexpected authenticated graph counts: %+v", filteredNodes)
+	}
+}
+
+func TestFilterTagsByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260726000000-boxid01"
+		publicDocID       = "20260726000001-public1"
+		protectedDocID    = "20260726000002-protect"
+		hiddenDocID       = "20260726000003-hidden1"
+		disabledDocID     = "20260726000004-disable"
+		protectedPassword = "password"
+	)
+	publishAccess := PublishAccess{
+		{ID: protectedDocID, Visible: true, Password: protectedPassword},
+		{ID: hiddenDocID, Visible: false},
+		{ID: disabledDocID, Visible: true, Disable: true},
+	}
+	spans := []*sql.Span{
+		{Box: boxID, Path: "/" + publicDocID + ".sy", Content: "shared"},
+		{Box: boxID, Path: "/" + protectedDocID + ".sy", Content: "shared"},
+		{Box: boxID, Path: "/" + protectedDocID + ".sy", Content: "protected"},
+		{Box: boxID, Path: "/" + hiddenDocID + ".sy", Content: "hidden"},
+		{Box: boxID, Path: "/" + disabledDocID + ".sy", Content: "disabled"},
+	}
+	newTags := func() *Tags {
+		return &Tags{
+			{Name: "shared", Label: "shared", Type: "tag", Count: 2},
+			{Name: "protected", Label: "protected", Type: "tag", Count: 1},
+			{Name: "hidden", Label: "hidden", Type: "tag", Count: 1},
+			{Name: "disabled", Label: "disabled", Type: "tag", Count: 1},
+		}
+	}
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	filtered := filterTagsByPublishAccess(c, publishAccess, newTags(), spans)
+	if len(*filtered) != 1 || (*filtered)[0].Label != "shared" || (*filtered)[0].Count != 1 {
+		t.Fatalf("unexpected unauthenticated tags: %+v", *filtered)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedDocID,
+		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+	})
+	filtered = filterTagsByPublishAccess(c, publishAccess, newTags(), spans)
+	if len(*filtered) != 2 ||
+		(*filtered)[0].Label != "shared" || (*filtered)[0].Count != 2 ||
+		(*filtered)[1].Label != "protected" || (*filtered)[1].Count != 1 {
+		t.Fatalf("unexpected authenticated tags: %+v", *filtered)
 	}
 }
 

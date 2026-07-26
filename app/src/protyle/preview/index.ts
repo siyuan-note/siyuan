@@ -135,7 +135,7 @@ export class Preview {
                         this.copyToX(tempElement, protyle, type);
                     } else if (type === "desktop") {
                         previewElement.style.width = "";
-                        previewElement.style.padding = protyle.wysiwyg.element.style.padding;
+                        this.updatePadding(getPadding(protyle));
                     } else if (type === "tablet") {
                         previewElement.style.width = "1024px";
                         previewElement.style.padding = "8px 16px";
@@ -183,14 +183,18 @@ export class Preview {
         this.previewElement = previewElement;
     }
 
+    public updatePadding(padding: { left: number, right: number, bottom: number, top: number }) {
+        if (this.element.style.display !== "none" &&
+            this.element.querySelector('.protyle-preview__action [data-type="desktop"]')?.classList.contains("protyle-preview__action--current")) {
+            this.previewElement.style.padding = `${padding.top}px ${padding.left}px ${padding.bottom}px ${padding.right}px`;
+        }
+    }
+
     public render(protyle: IProtyle) {
         if (this.element.style.display === "none") {
             return;
         }
-        if (this.element.querySelector('.protyle-preview__action [data-type="desktop"]')?.classList.contains("protyle-preview__action--current")) {
-            const padding = getPadding(protyle);
-            this.previewElement.style.padding = `${padding.top}px ${padding.left}px ${padding.bottom}px ${padding.right}px`;
-        }
+        this.updatePadding(getPadding(protyle));
 
         let loadingElement = this.element.querySelector(".fn__loading");
         if (!loadingElement) {

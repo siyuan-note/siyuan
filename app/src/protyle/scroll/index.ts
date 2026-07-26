@@ -16,11 +16,11 @@ export class Scroll {
 
     constructor(protyle: IProtyle) {
         this.parentElement = document.createElement("div");
-        this.parentElement.classList.add("protyle-scroll");
+        this.parentElement.classList.add("protyle-scroll", "fn__none");
         this.parentElement.innerHTML = `<div class="protyle-scroll__up ariaLabel" data-position="north" aria-label="${updateHotkeyTip("⌘Home")}">
     <svg><use xlink:href="#iconUp"></use></svg>
 </div>
-<div class="fn__none protyle-scroll__bar ariaLabel" data-position="2west" aria-label="Blocks 1/1">
+<div class="protyle-scroll__bar ariaLabel" data-position="2west" aria-label="Blocks 1/1">
     <input class="b3-slider" type="range" max="1" min="1" step="1" value="1" />
 </div>
 <div class="protyle-scroll__down ariaLabel" aria-label="${updateHotkeyTip("⌘End")}">
@@ -29,9 +29,6 @@ export class Scroll {
 
         this.element = this.parentElement.querySelector(".protyle-scroll__bar");
         this.keepLazyLoad = false;
-        if (!protyle.options.render.scroll) {
-            this.parentElement.classList.add("fn__none");
-        }
         this.lastScrollTop = 0;
         this.inputElement = this.element.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
@@ -112,14 +109,8 @@ export class Scroll {
             this.inputElement.setAttribute("max", protyle.block.blockCount.toString());
             this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
         }
-        if (protyle.block.showAll) {
-            this.element.classList.add("fn__none");
-        } else {
-            if (protyle.block.scroll && !protyle.contentElement.classList.contains("fn__none")) {
-                this.element.classList.remove("fn__none");
-            } else {
-                this.element.classList.add("fn__none");
-            }
-        }
+        const visible = protyle.options.render.scroll && !protyle.block.showAll && protyle.block.scroll &&
+            !protyle.contentElement.classList.contains("fn__none");
+        this.parentElement.classList.toggle("fn__none", !visible);
     }
 }

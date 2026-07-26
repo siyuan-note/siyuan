@@ -337,6 +337,7 @@ export const setPadding = (protyle: IProtyle) => {
         };
     }
     const padding = getPadding(protyle);
+    protyle.preview.updatePadding(padding);
     const paddingLeft = protyle.options.backlinkData ? 24 : padding.left;
     const paddingRight = protyle.options.backlinkData ? 16 : padding.right;
     const backlinkBottomElement = protyle.contentElement.querySelector(".sy__backlink--bottom") as HTMLElement;
@@ -382,7 +383,7 @@ export const getPadding = (protyle: IProtyle) => {
     let right = 16;
     let left = 24;
     let bottom = 16;
-    if (protyle.options.typewriterMode) {
+    if (protyle.options.typewriterMode && protyle.preview.element.classList.contains("fn__none")) {
         bottom = protyle.element.clientHeight / 2;
     }
     if (!isMobile()) {

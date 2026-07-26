@@ -1982,25 +1982,24 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	treenode.RemoveBlockTreesByPathPrefix(box.ID, childrenDir)
 	cache.RemoveDocIAL(ret.Path)
 	cache.RemoveTreeData(ret.ID)
+	sql.RemoveTreePathQueue(ret.Box, childrenDir)
 
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
 		"ids": removeIDs,
 	}
 	util.PushEvent(evt)
-	task.AppendTask(task.DatabaseIndex, removeDoc0, ret, childrenDir)
+	task.AppendTask(task.DatabaseIndex, removeDoc0, ret)
 	return
 }
 
-func removeDoc0(tree *parse.Tree, childrenDir string) {
+func removeDoc0(tree *parse.Tree) {
 	// 收集引用的定义块 ID
 	refDefIDs := getRefDefIDs(tree.Root)
 	// 推送定义节点引用计数
 	for _, defID := range refDefIDs {
 		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
 	}
-
-	sql.RemoveTreePathQueue(tree.Box, childrenDir)
 }
 
 func RenameDoc(boxID, p, title string) (err error) {
@@ -2108,15 +2107,31 @@ func renameDoc0(boxID, p, title string) (err error) {
 	return
 }
 
-func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
+type createDocValidation struct {
+	box     *Box
+	path    string
+	title   string
+	hPath   string
+	id      string
+	folder  string
+	isEmpty bool
+}
+
+// ValidateCreateDoc 校验文档创建参数，不写入文件或索引。
+func ValidateCreateDoc(boxID, p, title string) error {
+	_, err := validateCreateDoc(boxID, p, title, false)
+	return err
+}
+
+func validateCreateDoc(boxID, p, title string, titleEmpty bool) (ret *createDocValidation, err error) {
 	p = normalizeBoxDocPath(boxID, p)
 	title = normalizeDocTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
-		err = errors.New(Conf.Language(106))
-		return
+		return nil, errors.New(Conf.Language(106))
 	}
-	var isEmpty bool
+
+	isEmpty := false
 	if "" == title {
 		title = Conf.Language(16)
 		isEmpty = true
@@ -2126,64 +2141,80 @@ func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, 
 
 	baseName := strings.TrimSpace(path.Base(p))
 	if "" == util.GetTreeID(baseName) {
-		err = errors.New(Conf.Language(16))
-		return
+		return nil, errors.New(Conf.Language(16))
 	}
-
 	if strings.HasPrefix(baseName, ".") {
-		err = errors.New(Conf.Language(13))
-		return
+		return nil, errors.New(Conf.Language(13))
 	}
 
 	box := Conf.Box(boxID)
 	if nil == box {
-		err = errors.New(Conf.Language(0))
-		return
+		return nil, errors.New(Conf.Language(0))
 	}
 
-	id := util.GetTreeID(p)
-	var hPath string
 	folder := path.Dir(p)
+	hPath := "/" + title
 	if "/" != folder {
 		parentID := path.Base(folder)
 		parentTree, loadErr := LoadTreeByBlockID(parentID)
 		if nil != loadErr {
 			logging.LogErrorf("get parent tree [%s] failed", parentID)
-			err = ErrBlockNotFound
-			return
+			return nil, ErrBlockNotFound
+		}
+		parentPath := strings.TrimSuffix(parentTree.Path, ".sy")
+		if parentTree.Box != boxID || cleanBoxDocDir(parentPath) != cleanBoxDocDir(folder) {
+			logging.LogErrorf("parent tree [%s] does not match box [%s] and folder [%s]", parentID, boxID, folder)
+			return nil, ErrBlockNotFound
 		}
 		hPath = path.Join(parentTree.HPath, title)
-	} else {
-		hPath = "/" + title
 	}
 
 	if depth := strings.Count(p, "/"); 7 < depth && !Conf.FileTree.AllowCreateDeeper {
-		err = errors.New(Conf.Language(118))
+		return nil, errors.New(Conf.Language(118))
+	}
+	if box.Exist(p) {
+		return nil, errors.New(Conf.Language(1))
+	}
+
+	ret = &createDocValidation{
+		box:     box,
+		path:    p,
+		title:   title,
+		hPath:   hPath,
+		id:      util.GetTreeID(p),
+		folder:  folder,
+		isEmpty: isEmpty,
+	}
+	return
+}
+
+func cleanBoxDocDir(p string) string {
+	return path.Clean("/" + strings.TrimPrefix(p, "/"))
+}
+
+func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
+	validation, err := validateCreateDoc(boxID, p, title, titleEmpty)
+	if nil != err {
 		return
 	}
 
-	if !box.Exist(folder) {
-		if err = box.MkdirAll(folder); err != nil {
+	if !validation.box.Exist(validation.folder) {
+		if err = validation.box.MkdirAll(validation.folder); err != nil {
 			return
 		}
-	}
-
-	if box.Exist(p) {
-		err = errors.New(Conf.Language(1))
-		return
 	}
 
 	luteEngine := util.NewLute()
 	tree = luteEngine.BlockDOM2Tree(dom)
 	tree.Box = boxID
-	tree.Path = p
-	tree.HPath = hPath
-	tree.ID = id
-	tree.Root.ID = id
+	tree.Path = validation.path
+	tree.HPath = validation.hPath
+	tree.ID = validation.id
+	tree.Root.ID = validation.id
 	tree.Root.Spec = treenode.CurrentSpec
-	updated := util.TimeFromID(id)
-	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
-	if isEmpty {
+	updated := util.TimeFromID(validation.id)
+	tree.Root.KramdownIAL = [][]string{{"id", validation.id}, {"title", html.EscapeAttrVal(validation.title)}, {"updated", updated}}
+	if validation.isEmpty {
 		tree.Root.SetIALAttr(NodeAttrTitleEmpty, "true")
 	}
 	if nil == tree.Root.FirstChild {

@@ -75,8 +75,11 @@ var documentCreateCmd = &cobra.Command{
 		if title == "" {
 			return fmt.Errorf("--title is required")
 		}
-		if dir == "" {
-			dir = "/"
+		dir = normalizeDocumentCreateParentPath(dir)
+		id := ast.NewNodeID()
+		docPath := path.Join(dir, id+".sy")
+		if err := model.ValidateCreateDoc(notebook, docPath, title); err != nil {
+			return err
 		}
 
 		if dryRun {
@@ -84,8 +87,6 @@ var documentCreateCmd = &cobra.Command{
 			return nil
 		}
 
-		id := ast.NewNodeID()
-		docPath := path.Join(dir, id+".sy")
 		_, err := model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
 		if err != nil {
 			return err
@@ -94,6 +95,13 @@ var documentCreateCmd = &cobra.Command{
 		fmt.Println(id)
 		return nil
 	},
+}
+
+func normalizeDocumentCreateParentPath(parentPath string) string {
+	if "" == parentPath {
+		return "/"
+	}
+	return strings.TrimSuffix(path.Clean(parentPath), ".sy")
 }
 
 var documentGetCmd = &cobra.Command{
@@ -209,16 +217,21 @@ var documentMoveCmd = &cobra.Command{
 			return fmt.Errorf("--id and --notebook are required")
 		}
 
+		tree, err := model.LoadTreeByBlockID(id)
+		if err != nil {
+			return err
+		}
+		targetPath, err := resolveDocumentMovePath(toNotebook, toPath, hpath, tree.HPath)
+		if err != nil {
+			return err
+		}
+
 		if dryRun {
 			fmt.Printf("[dry-run] Would move document %s to notebook %s\n", id, toNotebook)
 			return nil
 		}
 
-		tree, err := model.LoadTreeByBlockID(id)
-		if err != nil {
-			return err
-		}
-		if err := model.MoveDocs([]string{tree.Path}, toNotebook, resolvePath(toNotebook, toPath, hpath), nil); err != nil {
+		if err := model.MoveDocs([]string{tree.Path}, toNotebook, targetPath, nil); err != nil {
 			return err
 		}
 		model.AppendPushReloadFiletreeEntry()
@@ -289,6 +302,46 @@ func resolvePath(boxID, userPath, hpath string) string {
 		}
 	}
 	return "/"
+}
+
+func resolveDocumentMovePath(boxID, userPath, hpath, sourceHPath string) (string, error) {
+	return resolveDocumentMovePathWithLookup(userPath, hpath, sourceHPath, func(targetHPath string) (string, bool) {
+		bt := treenode.GetBlockTreeRootByHPath(boxID, targetHPath)
+		if nil == bt {
+			return "", false
+		}
+		return bt.Path, true
+	})
+}
+
+func resolveDocumentMovePathWithLookup(
+	userPath, hpath, sourceHPath string,
+	lookup func(string) (string, bool),
+) (string, error) {
+	if "" != userPath {
+		return userPath, nil
+	}
+	if "" == hpath {
+		return "/", nil
+	}
+
+	targetHPath := path.Clean("/" + strings.TrimPrefix(hpath, "/"))
+	if "/" == targetHPath {
+		return "/", nil
+	}
+
+	sourceTitle := path.Base(path.Clean(sourceHPath))
+	if sourceTitle == path.Base(targetHPath) {
+		targetHPath = path.Dir(targetHPath)
+		if "/" == targetHPath {
+			return "/", nil
+		}
+	}
+
+	if targetPath, found := lookup(targetHPath); found {
+		return targetPath, nil
+	}
+	return "", fmt.Errorf("target human-readable path not found: %s", targetHPath)
 }
 
 var documentSearchCmd = &cobra.Command{

@@ -399,6 +399,10 @@ var blockMoveCmd = &cobra.Command{
 			return fmt.Errorf("--id and --parent are required")
 		}
 
+		if err := validateBlockMove(id, parentID, previousID); err != nil {
+			return err
+		}
+
 		if dryRun {
 			fmt.Printf("[dry-run] Would move block %s to parent %s\n", id, parentID)
 			if previousID != "" {
@@ -407,32 +411,48 @@ var blockMoveCmd = &cobra.Command{
 			return nil
 		}
 
-		// 仅靠 parentID 定位目标时（无 previousID），目标必须是容器块，否则非法嵌套
-		if previousID == "" {
-			if err := treenode.CheckListItemNesting(parentID, id); err != nil {
-				return err
-			}
-			if err := treenode.CheckContainerParent(parentID); err != nil {
-				return err
-			}
-		}
-
-		transactions := []*model.Transaction{{
+		transaction := &model.Transaction{
 			DoOperations: []*model.Operation{{
 				Action:     "move",
 				ID:         id,
 				ParentID:   parentID,
 				PreviousID: previousID,
 			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		}
+		if err := model.PerformTxSync(transaction); err != nil {
+			return err
+		}
 		if bt := treenode.GetBlockTree(id); bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)
 		}
 		fmt.Println("ok")
 		return nil
 	},
+}
+
+func validateBlockMove(id, parentID, previousID string) error {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return fmt.Errorf("block not found: %s", id)
+	}
+	if "d" == bt.Type {
+		return fmt.Errorf("document block [%s] cannot be moved with block move; use document move instead", id)
+	}
+
+	if "" != previousID {
+		previousBt := treenode.GetBlockTree(previousID)
+		if nil == previousBt {
+			return fmt.Errorf("previous block not found: %s", previousID)
+		}
+		if "d" == previousBt.Type {
+			return fmt.Errorf("document block [%s] cannot be used as a previous sibling; use it as --parent instead", previousID)
+		}
+		return nil
+	}
+	if err := treenode.CheckListItemNesting(parentID, id); err != nil {
+		return err
+	}
+	return treenode.CheckContainerParent(parentID)
 }
 
 var blockBatchGetCmd = &cobra.Command{

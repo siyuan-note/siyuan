@@ -39,6 +39,14 @@ import {
     expandFileTree,
     isFileTreeCollapsing
 } from "./fileTreeAnimation";
+import {
+    collectExpandedDocIDs,
+    findMovedFileTreeItem,
+    getFileTreeChildList,
+    IFileTreeMove,
+    restoreMovedExpandedDocItems,
+    updateMovedSubtree
+} from "../../util/fileTreeMove";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -47,6 +55,7 @@ export class Files extends Model {
     public lastSelectedElement: Element = null;
     private actionsElement: HTMLElement;
     private reloadNotebookInfoTimeout: number;
+    private movedExpandedDocIDs = new Set<string>();
 
     constructor(options: { tab: Tab, app: App }) {
         super({app: options.app});
@@ -805,7 +814,9 @@ export class Files extends Model {
                             callback: Constants.CB_MOVE_NOLIST,
                         });
                         selectFileElements.forEach(item => {
-                            item.setAttribute("data-path", pathPosix().join(toDir, item.getAttribute("data-node-id") + ".sy"));
+                            const fromPath = item.getAttribute("data-path");
+                            const newPath = pathPosix().join(toDir, item.getAttribute("data-node-id") + ".sy");
+                            updateMovedSubtree(item, getFileTreeChildList(item), fromPath, newPath);
                         });
                         hasMove = true;
                     }
@@ -873,8 +884,10 @@ export class Files extends Model {
                 case "reloadDocInfo":
                     this.updateDocInfo(data);
                     break;
-                case "moveDoc":
+                case "moveDocs":
                     this.onMove(data);
+                    break;
+                case "moveDoc":
                     break;
                 case "reloadFiletree":
                     setNoteBook(() => {
@@ -1305,53 +1318,108 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     private onMove(response: IWebSocketData) {
-        const sourceElement = this.element.querySelector(`ul[data-url="${response.data.fromNotebook}"] li[data-path="${response.data.fromPath}"]`) as HTMLElement;
-        if (sourceElement) {
-            if (sourceElement.nextElementSibling && sourceElement.nextElementSibling.tagName === "UL") {
-                sourceElement.nextElementSibling.remove();
+        const refreshTargets = new Map<string, { element: HTMLElement, notebookId: string }>();
+        (response.data.moves as IFileTreeMove[]).forEach((move) => {
+            const expandedDocIDs = new Set<string>();
+            const movedItem = findMovedFileTreeItem(this.element, move);
+            const sourceElement = movedItem?.element;
+            const sourceAtTarget = movedItem?.isAtTarget;
+            let childListElement: HTMLElement;
+            if (sourceElement) {
+                childListElement = getFileTreeChildList(sourceElement);
+                collectExpandedDocIDs(sourceElement, childListElement, expandedDocIDs);
+                updateMovedSubtree(sourceElement, childListElement, move.fromPath, move.newPath);
             }
-            if (sourceElement.parentElement.childElementCount === 1) {
-                if (sourceElement.parentElement.previousElementSibling) {
-                    const parentLiElement = sourceElement.parentElement.previousElementSibling as HTMLElement;
-                    if (parentLiElement.getAttribute("data-type") !== "navigation-root" || parentLiElement.dataset.nodeId) {
-                        parentLiElement.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
+            if (sourceElement && !sourceAtTarget) {
+                const sourceListElement = sourceElement.parentElement;
+                childListElement?.remove();
+                if (sourceListElement.childElementCount === 1) {
+                    const parentLiElement = sourceListElement.previousElementSibling as HTMLElement;
+                    if (parentLiElement) {
+                        if (parentLiElement.getAttribute("data-type") !== "navigation-root" ||
+                            parentLiElement.dataset.nodeId) {
+                            parentLiElement.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
+                        }
+                        parentLiElement.querySelector(".b3-list-item__arrow").classList.remove(
+                            "b3-list-item__arrow--open"
+                        );
+                        parentLiElement.setAttribute("data-count", "0");
+                        this.updateDocActionElement(parentLiElement);
+                        const emojiElement = parentLiElement.querySelector(".b3-list-item__icon");
+                        if (emojiElement.innerHTML === unicode2Emoji(
+                            window.siyuan.storage[Constants.LOCAL_IMAGES].folder
+                        )) {
+                            emojiElement.innerHTML = unicode2Emoji(
+                                window.siyuan.storage[Constants.LOCAL_IMAGES].file
+                            );
+                        }
                     }
-                    parentLiElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
-                    parentLiElement.setAttribute("data-count", "0");
-                    this.updateDocActionElement(parentLiElement);
-                    const emojiElement = parentLiElement.querySelector(".b3-list-item__icon");
-                    if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder)) {
-                        emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file);
-                    }
+                    sourceListElement.remove();
+                } else {
+                    sourceElement.remove();
                 }
-                sourceElement.parentElement.remove();
-            } else {
-                sourceElement.remove();
+            } else if (!sourceElement || sourceAtTarget) {
+                const parentPath = pathPosix().dirname(move.fromPath);
+                const parentElement = this.element.querySelector(
+                    `ul[data-url="${move.fromNotebook}"] li[data-path="${parentPath === "/" ? "/" : parentPath + ".sy"}"]`
+                ) as HTMLElement;
+                if (parentElement && parentElement.getAttribute("data-count") === "1") {
+                    parentElement.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
+                    parentElement.querySelector(".b3-list-item__arrow").classList.remove(
+                        "b3-list-item__arrow--open"
+                    );
+                }
             }
-        } else {
-            const parentElement = this.element.querySelector(`ul[data-url="${response.data.fromNotebook}"] li[data-path="${pathPosix().dirname(response.data.fromPath)}.sy"]`) as HTMLElement;
-            if (parentElement && parentElement.getAttribute("data-count") === "1") {
-                parentElement.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
-                parentElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
+
+            const targetElement = this.element.querySelector(
+                `[data-url="${move.toNotebook}"] li[data-path="${move.toPath}"]`
+            ) as HTMLElement;
+            if (!targetElement) {
+                expandedDocIDs.forEach((id) => this.movedExpandedDocIDs.add(id));
+                return;
             }
-        }
-        const newElement = this.element.querySelector(`[data-url="${response.data.toNotebook}"] li[data-path="${response.data.toPath}"]`) as HTMLElement;
-        // 更新移动到的新文件夹
-        if (newElement) {
-            newElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
-            if (newElement.getAttribute("data-type") === "navigation-root") {
-                newElement.setAttribute("data-count", Math.max(1, Number(newElement.getAttribute("data-count"))).toString());
-                this.updateDocActionElement(newElement);
+            targetElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
+            if (targetElement.getAttribute("data-type") === "navigation-root") {
+                targetElement.setAttribute(
+                    "data-count",
+                    Math.max(1, Number(targetElement.getAttribute("data-count"))).toString()
+                );
+                this.updateDocActionElement(targetElement);
             }
-            const emojiElement = newElement.querySelector(".b3-list-item__icon");
+            const emojiElement = targetElement.querySelector(".b3-list-item__icon");
             if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file)) {
                 emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
             }
-            const arrowElement = newElement.querySelector(".b3-list-item__arrow");
-            if (arrowElement.classList.contains("b3-list-item__arrow--open") && response.callback !== Constants.CB_MOVE_NOLIST) {
-                this.getLeaf(newElement, response.data.toNotebook, true);
+
+            const targetListElement = getFileTreeChildList(targetElement);
+            const targetExpanded = Boolean(targetElement.querySelector(".b3-list-item__arrow--open"));
+            if (sourceElement && targetListElement && !sourceAtTarget) {
+                targetListElement.append(sourceElement);
+                if (childListElement) {
+                    sourceElement.after(childListElement);
+                }
             }
+            if (!targetExpanded || !sourceElement || (!sourceAtTarget && !targetListElement)) {
+                expandedDocIDs.forEach((id) => this.movedExpandedDocIDs.add(id));
+            }
+            if (targetExpanded) {
+                refreshTargets.set(`${move.toNotebook}:${move.toPath}`, {
+                    element: targetElement,
+                    notebookId: move.toNotebook,
+                });
+            }
+        });
+        if (response.callback !== Constants.CB_MOVE_NOLIST) {
+            refreshTargets.forEach((target) => {
+                this.getLeaf(target.element, target.notebookId, true);
+            });
         }
+    }
+
+    private restoreMovedExpandedItems(listElement: Element, notebookId: string) {
+        restoreMovedExpandedDocItems(listElement, this.movedExpandedDocIDs, (item) => {
+            this.getLeaf(item, notebookId, true);
+        });
     }
 
     private onLsHTML(data: { files: IFile[], box: string, path: string }, scrollTop?: number) {
@@ -1383,6 +1451,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                 }
             });
             nextElement.innerHTML = tempElement.innerHTML;
+            this.restoreMovedExpandedItems(nextElement, data.box);
             if (typeof scrollTop === "number") {
                 this.element.scroll({top: scrollTop, behavior: "smooth"});
             }
@@ -1392,6 +1461,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
         nextElement = liElement.nextElementSibling;
+        this.restoreMovedExpandedItems(nextElement, data.box);
         nextElement.setAttribute("style", "top: -1px;position: relative;");
         expandFileTree(nextElement as HTMLElement, () => {
             nextElement.removeAttribute("style");
@@ -1430,6 +1500,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
             emojiElement.textContent = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
         }
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
+        this.restoreMovedExpandedItems(liElement.nextElementSibling, data.box);
         let newLiElement;
         for (let i = 0; i < data.files.length; i++) {
             const item = data.files[i];

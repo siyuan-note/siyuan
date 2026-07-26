@@ -47,8 +47,12 @@ type AttributeView struct {
 	Views             []*View            `json:"views"`                       // 视图
 	NewItemTemplates  []*NewItemTemplate `json:"newItemTemplates,omitempty"`  // 新增条目模板
 	DefaultTemplateID string             `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
+	// 卡片封面位置，条目 ID -> 封面来源 -> 位置
+	CardCoverPositions map[string]map[string]*CardCoverPosition `json:"cardCoverPositions,omitempty"`
 
 	RenderedViewables map[string]Viewable `json:"-"` // 已经渲染好的视图
+
+	cardCoverPositionsChanged bool
 }
 
 // NewItemTargetType 描述新增条目模板创建的目标类型。
@@ -729,6 +733,11 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		logging.LogErrorf("save attribute view failed: %s", err)
 		return
 	}
+	defer func() {
+		if nil == err {
+			av.ResetCardCoverPositionChanges()
+		}
+	}()
 
 	// 做一些数据兼容和订正处理
 	UpgradeSpec(av)
@@ -1071,6 +1080,7 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		}
 		view.ItemIDs = []string{}
 	}
+	ret.CardCoverPositions = nil
 	ret.ViewID = ret.Views[0].ID
 
 	ret.KeyIDs = nil

@@ -63,6 +63,7 @@ type TOperation =
     | "setAttrViewCardAspectRatioValue"
     | "setAttrViewCoverFrom"
     | "setAttrViewCoverFromAssetKeyID"
+    | "setAttrViewCardCoverPosition"
     | "setAttrViewFitImage"
     | "setAttrViewShowIcon"
     | "setAttrViewWrapField"
@@ -1187,8 +1188,15 @@ interface IAVRow {
 interface IAVGalleryItem {
     coverURL?: string;
     coverContent?: string;
+    coverPosition?: IAVCardCoverPosition;
     id: string;
     values: IAVCell[];
+}
+
+interface IAVCardCoverPosition {
+    image: string;
+    x: number;
+    y: number;
 }
 
 interface IAVCell {

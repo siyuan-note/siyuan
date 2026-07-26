@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -1607,6 +1608,76 @@ func setAttrViewCoverFrom(operation *Operation) (err error) {
 	return
 }
 
+type setAttrViewCardCoverPositionData struct {
+	Source   string                `json:"source"`
+	Position *av.CardCoverPosition `json:"position"`
+}
+
+func (tx *Transaction) doSetAttrViewCardCoverPosition(operation *Operation) (ret *TxErr) {
+	if err := setAttrViewCardCoverPosition(operation); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewCardCoverPosition(operation *Operation) (err error) {
+	dataJSON, err := json.Marshal(operation.Data)
+	if nil != err {
+		return
+	}
+	var data setAttrViewCardCoverPositionData
+	if err = json.Unmarshal(dataJSON, &data); nil != err {
+		return
+	}
+	if !av.IsValidCardCoverSource(data.Source) {
+		return fmt.Errorf("invalid card cover source [%s]", data.Source)
+	}
+	if nil != data.Position {
+		if "" == data.Position.Image || 32*1024 < len(data.Position.Image) {
+			return errors.New("invalid card cover image")
+		}
+		if math.IsNaN(data.Position.X) || math.IsInf(data.Position.X, 0) ||
+			math.IsNaN(data.Position.Y) || math.IsInf(data.Position.Y, 0) ||
+			data.Position.X < 0 || 100 < data.Position.X || data.Position.Y < 0 || 100 < data.Position.Y {
+			return fmt.Errorf("invalid card cover position [%v, %v]", data.Position.X, data.Position.Y)
+		}
+	}
+
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+	if nil == attrView.GetBlockValue(operation.RowID) {
+		return fmt.Errorf("attribute view item [%s] not found", operation.RowID)
+	}
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if nil != err {
+		return
+	}
+	if av.LayoutTypeGallery != view.LayoutType && av.LayoutTypeKanban != view.LayoutType {
+		return av.ErrWrongLayoutType
+	}
+	var source string
+	if av.LayoutTypeGallery == view.LayoutType {
+		source = av.CardCoverSource(view.Gallery.CoverFrom, view.Gallery.CoverFromAssetKeyID)
+	} else {
+		source = av.CardCoverSource(view.Kanban.CoverFrom, view.Kanban.CoverFromAssetKeyID)
+	}
+	if data.Source != source {
+		return fmt.Errorf("card cover source [%s] does not match view [%s]", data.Source, view.ID)
+	}
+	if keyID := av.CardCoverSourceAssetKeyID(data.Source); "" != keyID {
+		key, getErr := attrView.GetKey(keyID)
+		if nil != getErr || nil == key || av.KeyTypeMAsset != key.Type {
+			return fmt.Errorf("card cover asset field [%s] not found", keyID)
+		}
+	}
+
+	attrView.SetCardCoverPosition(operation.RowID, data.Source, data.Position)
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*av.Value) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
@@ -1783,6 +1854,7 @@ func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, 
 	for _, v := range attrView.Views {
 		addRowToViewItems(v, newRowID, previousItemID)
 	}
+	attrView.CopyCardCoverPositions(srcRowID, newRowID)
 
 	// 统一处理双向关联：按目标属性视图聚合，每个目标只 parse/save 一次
 	twoWayByDestAv := map[string][]*pendingTwoWay{}
@@ -4951,6 +5023,9 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 			view.ItemIDs = gulu.Str.RemoveElem(view.ItemIDs, blockID)
 		}
 	}
+	for _, itemID := range srcIDs {
+		attrView.RemoveCardCoverPositions(itemID)
+	}
 	attrView.RemoveNewItemTemplateRelationItems(avID, srcIDs)
 	attrView.RemoveRelationFilterItems(avID, srcIDs)
 
@@ -6130,6 +6205,7 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 			}
 		}
 	}
+	attrView.RemoveCardCoverPositionsBySource(av.CardCoverSource(av.CoverFromAssetField, keyID))
 
 	for _, view := range attrView.Views {
 		if nil != view.Table {

@@ -442,6 +442,37 @@
       &--6 {
         aspect-ratio: var(--b3-av-card-aspect-ratio, 1);
       }
+
+      &--positioning {
+        cursor: move;
+        touch-action: none;
+      }
+
+      &-position-tip {
+        background-color: var(--b3-theme-on-surface);
+        border-radius: var(--b3-border-radius);
+        color: var(--b3-theme-surface);
+        font-size: 85%;
+        left: 50%;
+        line-height: 24px;
+        padding: 0 8px;
+        pointer-events: none;
+        position: absolute;
+        top: 8px;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        z-index: 2;
+      }
+
+      &-position-actions {
+        bottom: 8px;
+        display: flex;
+        left: 50%;
+        opacity: .86;
+        position: absolute;
+        transform: translateX(-50%);
+        z-index: 2;
+      }
     }
 
     &-img {
@@ -453,6 +484,7 @@
 
       &--fit {
         object-fit: contain;
+        object-position: center !important;
       }
     }
 

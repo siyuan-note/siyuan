@@ -808,12 +808,28 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewFitImage") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            const imgElement = item.querySelector(".av__gallery-img");
-            if (operation.data) {
-                imgElement.classList.add("av__gallery-img--fit");
-            } else {
-                imgElement.classList.remove("av__gallery-img--fit");
-            }
+            item.querySelectorAll(".av__gallery-img").forEach((imgElement) => {
+                if (operation.data) {
+                    imgElement.classList.add("av__gallery-img--fit");
+                } else {
+                    imgElement.classList.remove("av__gallery-img--fit");
+                }
+            });
+            item.querySelectorAll(".av__gallery-item").forEach((galleryItem) => {
+                const positionElement = galleryItem.querySelector<HTMLElement>('[data-type="av-cover-position"]');
+                if (!positionElement) {
+                    return;
+                }
+                const editElement = galleryItem.querySelector<HTMLElement>('[data-type="av-gallery-edit"]');
+                const moreElement = galleryItem.querySelector<HTMLElement>('[data-type="av-gallery-more"]');
+                if (!editElement || !moreElement) {
+                    return;
+                }
+                positionElement.classList.toggle("fn__none", Boolean(operation.data));
+                editElement.classList.toggle("protyle-icon--first", Boolean(operation.data));
+                moreElement.classList.toggle("protyle-icon--first",
+                    Boolean(operation.data) && editElement.classList.contains("fn__none"));
+            });
         });
         return;
     }

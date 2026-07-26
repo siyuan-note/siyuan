@@ -44,6 +44,12 @@ import {createAttributeViewItem, createAttributeViewItemDocs, openNewItemTemplat
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {openKanbanGroupMenu} from "./kanban/groupMenu";
 import {getGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
+import {
+    finishCardCoverPosition,
+    isCardCoverPositioning,
+    resetCardCoverPosition,
+    startCardCoverPosition
+} from "./coverPosition";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
@@ -170,6 +176,30 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (type === "av-row-update" && !protyle.disabled) {
             updateDatabaseRow(protyle, target);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-cover-position" && !protyle.disabled) {
+            startCardCoverPosition(protyle, target);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-cover-position-reset" && !protyle.disabled) {
+            resetCardCoverPosition(target);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-cover-position-cancel" && !protyle.disabled) {
+            finishCardCoverPosition(protyle, target, false);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-cover-position-confirm" && !protyle.disabled) {
+            finishCardCoverPosition(protyle, target, true);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (isCardCoverPositioning(target)) {
             event.preventDefault();
             event.stopPropagation();
             return true;

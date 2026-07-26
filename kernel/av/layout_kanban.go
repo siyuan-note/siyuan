@@ -83,8 +83,9 @@ type KanbanCard struct {
 	ID     string              `json:"id"`     // 卡片 ID
 	Values []*KanbanFieldValue `json:"values"` // 卡片字段值
 
-	CoverURL     string `json:"coverURL"`     // 卡片封面超链接
-	CoverContent string `json:"coverContent"` // 卡片封面文本内容
+	CoverURL      string             `json:"coverURL"`                // 卡片封面超链接
+	CoverContent  string             `json:"coverContent"`            // 卡片封面文本内容
+	CoverPosition *CardCoverPosition `json:"coverPosition,omitempty"` // 卡片封面位置
 }
 
 // KanbanField 描述了看板实例字段的结构。

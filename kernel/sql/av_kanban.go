@@ -129,6 +129,8 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 		}
 
 		fillAttributeViewKanbanCardCover(attrView, view, cardValues, &kanbanCard, cardID, luteEngine, boundTrees)
+		kanbanCard.CoverPosition = attrView.GetCardCoverPosition(cardID,
+			av.CardCoverSource(view.Kanban.CoverFrom, view.Kanban.CoverFromAssetKeyID), kanbanCard.CoverURL)
 		ret.Cards = append(ret.Cards, &kanbanCard)
 	}
 

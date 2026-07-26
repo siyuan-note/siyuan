@@ -8,9 +8,10 @@ import {processRender} from "../../../util/processCode";
 import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
 import {getBodyVirtualData, initVirtualScroll} from "../virtualScroll";
-import {getRowHTML, updateHeader} from "../row";
+import {getRowHTML, stickyRow, updateHeader} from "../row";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 import {getCardStyle} from "./style";
+import {setGroupFoldedStates} from "../groupFold";
 
 interface IIds {
     groupId: string,
@@ -71,6 +72,7 @@ const getGalleryHTML = (data: IAVGallery, e: HTMLElement, virtualData: IAVVirtua
 };
 
 const renderGroupGallery = (options: ITableOptions) => {
+    setGroupFoldedStates(options.blockElement, options.data.view.groups);
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
     const query = searchInputElement?.textContent || "";
@@ -166,6 +168,9 @@ export const afterRenderGallery = (options: ITableOptions) => {
         finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
     }
+    setTimeout(() => {
+        stickyRow(options.blockElement, options.protyle.contentElement, "top");
+    }, Constants.TIMEOUT_LOAD);
     bindAvSearch({
         blockElement: options.blockElement,
         query: options.resetData.query,

@@ -85,6 +85,13 @@
     box-shadow: 0 -1px inset var(--b3-theme-background-light);
     font-size: 87.5%;
 
+    &--fixed {
+      background-color: var(--b3-parent-background);
+      box-sizing: border-box;
+      position: fixed;
+      z-index: 4;
+    }
+
     &--show .block__icon {
       opacity: 1;
     }
@@ -1832,5 +1839,198 @@ img.av__cellassetimg {
 
   &.dragover__bottom::after {
     bottom: -2px;
+  }
+}
+
+.av__relation-panel {
+  .av__relation {
+    min-width: 0;
+  }
+
+  .av__relation-table {
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 0;
+  }
+
+  .av__relation-table-header,
+  .av__relation-table-row {
+    display: grid;
+    min-width: 100%;
+    width: max-content;
+  }
+
+  .av__relation-table-header {
+    background-color: var(--b3-menu-background);
+    border-bottom: 1px solid var(--b3-border-color);
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 4;
+
+    .av__relation-table-cell {
+      font-weight: 600;
+
+      > svg {
+        height: 14px;
+        margin-right: 6px;
+        width: 14px;
+      }
+    }
+  }
+
+  .av__relation-table-row {
+    border-bottom: 1px solid var(--b3-border-color);
+    border-radius: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    text-align: left;
+
+    &:hover,
+    &.b3-menu__item--current {
+      background-color: var(--b3-list-hover);
+
+      .av__relation-table-check,
+      .av__relation-table-primary {
+        box-shadow: inset 0 0 0 9999px var(--b3-list-hover);
+      }
+    }
+
+    &[data-relation-type="selected"],
+    &[data-relation-type="selected"]:hover,
+    &[data-relation-type="selected"].b3-menu__item--current {
+      background-color: var(--b3-theme-primary-lightest);
+
+      .av__relation-table-check,
+      .av__relation-table-primary {
+        box-shadow: inset 0 0 0 9999px var(--b3-theme-primary-lightest);
+      }
+    }
+
+    .av__relation-table-cell > :not(.fn__grab),
+    .av__relation-table-check > * {
+      pointer-events: none;
+    }
+  }
+
+  .av__relation-table-check,
+  .av__relation-table-cell {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    min-height: 34px;
+    min-width: 0;
+    overflow: hidden;
+    padding: 4px 8px;
+  }
+
+  .av__relation-table-check {
+    background-color: var(--b3-menu-background);
+    left: 0;
+    padding: 8px;
+    position: sticky;
+    z-index: 2;
+
+    svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+
+  .av__relation-table-primary {
+    background-color: var(--b3-menu-background);
+    left: 32px;
+    position: sticky;
+    z-index: 2;
+
+    .fn__grab {
+      cursor: grab;
+      flex: 0 0 auto;
+      height: 14px;
+      margin: 0 6px 0 0;
+      width: 14px;
+    }
+  }
+
+  .av__relation-table-cell {
+    border-right: 1px solid var(--b3-border-color);
+
+    &:last-child {
+      border-right: 0;
+    }
+
+    .av__celltext,
+    .b3-menu__label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .av__row-actions,
+    .block__icon {
+      display: none;
+    }
+  }
+
+  .av__relation-table-selected,
+  .av__relation-table-candidates {
+    display: contents;
+  }
+
+  .av__relation-table-footer {
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .av__relation-table-row.dragover__top::after,
+  .av__relation-table-row.dragover__bottom::after {
+    background-color: var(--b3-theme-primary-lighter);
+    content: '';
+    height: 4px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    z-index: 5;
+  }
+
+  .av__relation-table-row.dragover__top::after {
+    top: -2px;
+  }
+
+  .av__relation-table-row.dragover__bottom::after {
+    bottom: -2px;
+  }
+}
+
+.av__relation-drag-ghost {
+  align-items: center;
+  background-color: var(--b3-menu-background);
+  border: 1px solid var(--b3-border-color);
+  border-radius: var(--b3-border-radius);
+  box-shadow: var(--b3-dialog-shadow);
+  box-sizing: border-box;
+  color: var(--b3-theme-on-background);
+  display: flex;
+  height: 34px;
+  overflow: hidden;
+  padding: 4px 8px;
+  position: fixed;
+  width: 240px;
+
+  .fn__grab {
+    flex: 0 0 auto;
+    height: 14px;
+    margin-right: 6px;
+    width: 14px;
+  }
+
+  .b3-menu__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

@@ -47,6 +47,184 @@ type AttributeViewRenderTarget struct {
 	PageSize int    `json:"pageSize"`
 }
 
+type AttributeViewSearchTarget struct {
+	AvID            string   `json:"avID"`
+	DatabaseBlockID string   `json:"databaseBlockID"`
+	NotebookID      string   `json:"notebookID"`
+	ItemID          string   `json:"itemID"`
+	ValueID         string   `json:"valueID"`
+	MatchedValueID  string   `json:"matchedValueID"`
+	MatchedKeyID    string   `json:"matchedKeyID"`
+	Title           string   `json:"title"`
+	BoundBlockID    string   `json:"boundBlockID"`
+	IsDetached      bool     `json:"isDetached"`
+	Keywords        []string `json:"keywords"`
+}
+
+type attributeViewSearchMatch struct {
+	valueID string
+	keyID   string
+}
+
+func GetAttributeViewSearchTarget(blockID string, keywords []string) (ret *AttributeViewSearchTarget) {
+	waitForSyncingStorages()
+
+	node, tree, _ := getNodeByBlockID(nil, blockID)
+	if nil == node || nil == tree || ast.NodeAttributeView != node.Type || "" == node.AttributeViewID {
+		return
+	}
+
+	var attrView *av.AttributeView
+	var err error
+	if IsEncryptedBox(tree.Box) {
+		attrView, err = av.ParseAttributeViewInBox(node.AttributeViewID, tree.Box)
+	} else {
+		attrView, err = av.ParseAttributeView(node.AttributeViewID)
+	}
+	if nil == attrView {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", node.AttributeViewID, err)
+		return
+	}
+
+	keywords = normalizeAttributeViewSearchKeywords(keywords)
+	if 1 > len(keywords) {
+		return
+	}
+	matches := getAttributeViewSearchMatches(attrView, keywords)
+	if 1 > len(matches) {
+		return
+	}
+
+	var orderedItemIDs []string
+	blockValues := attrView.GetBlockKeyValues()
+	pageSize := len(matches) + 1
+	if nil != blockValues && len(blockValues.Values) >= pageSize {
+		pageSize = len(blockValues.Values) + 1
+	}
+	target := &AttributeViewRenderTarget{Status: "viewNotFound"}
+	viewable, renderErr := renderAttributeView(attrView, blockID, "", "", 1, pageSize, nil, false, target, "")
+	if nil == renderErr {
+		orderedItemIDs = appendAttributeViewSearchItemIDs(orderedItemIDs, viewable, false)
+		orderedItemIDs = appendAttributeViewSearchItemIDs(orderedItemIDs, viewable, true)
+	} else {
+		logging.LogWarnf("render attribute view [%s] for search target failed: %s", attrView.ID, renderErr)
+	}
+	if nil != blockValues {
+		for _, value := range blockValues.Values {
+			if nil != value {
+				orderedItemIDs = append(orderedItemIDs, value.BlockID)
+			}
+		}
+	}
+
+	visited := map[string]bool{}
+	for _, itemID := range orderedItemIDs {
+		if visited[itemID] {
+			continue
+		}
+		visited[itemID] = true
+		match := matches[itemID]
+		if nil == match {
+			continue
+		}
+		blockValue := attrView.GetBlockValue(itemID)
+		if nil == blockValue || nil == blockValue.Block {
+			continue
+		}
+		ret = &AttributeViewSearchTarget{
+			AvID:            attrView.ID,
+			DatabaseBlockID: blockID,
+			NotebookID:      tree.Box,
+			ItemID:          itemID,
+			ValueID:         blockValue.ID,
+			MatchedValueID:  match.valueID,
+			MatchedKeyID:    match.keyID,
+			Title:           blockValue.String(true),
+			BoundBlockID:    blockValue.Block.ID,
+			IsDetached:      blockValue.IsDetached || "" == blockValue.Block.ID,
+			Keywords:        keywords,
+		}
+		return
+	}
+	return
+}
+
+func normalizeAttributeViewSearchKeywords(keywords []string) (ret []string) {
+	added := map[string]bool{}
+	for _, keyword := range keywords {
+		keyword = strings.TrimSpace(keyword)
+		if "" == keyword || added[keyword] {
+			continue
+		}
+		added[keyword] = true
+		ret = append(ret, keyword)
+	}
+	return
+}
+
+func getAttributeViewSearchMatches(attrView *av.AttributeView, keywords []string) (ret map[string]*attributeViewSearchMatch) {
+	ret = map[string]*attributeViewSearchMatch{}
+	for _, keyValues := range attrView.KeyValues {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		for _, value := range keyValues.Values {
+			if nil == value || "" == value.BlockID || nil != ret[value.BlockID] {
+				continue
+			}
+			content := value.String(true)
+			for _, keyword := range keywords {
+				if strings.Contains(content, keyword) {
+					ret[value.BlockID] = &attributeViewSearchMatch{valueID: value.ID, keyID: keyValues.Key.ID}
+					break
+				}
+			}
+		}
+	}
+	return
+}
+
+func appendAttributeViewSearchItemIDs(itemIDs []string, viewable av.Viewable, hiddenGroups bool) []string {
+	if nil == viewable {
+		return itemIDs
+	}
+	baseInstance := getAttributeViewBaseInstance(viewable)
+	if nil != baseInstance && 0 < len(baseInstance.Groups) {
+		for _, group := range baseInstance.Groups {
+			if (0 != group.GetGroupHidden()) != hiddenGroups {
+				continue
+			}
+			if collection, ok := group.(av.Collection); ok {
+				for _, item := range collection.GetItems() {
+					itemIDs = append(itemIDs, item.GetID())
+				}
+			}
+		}
+		return itemIDs
+	}
+	if hiddenGroups {
+		return itemIDs
+	}
+	if collection, ok := viewable.(av.Collection); ok {
+		for _, item := range collection.GetItems() {
+			itemIDs = append(itemIDs, item.GetID())
+		}
+	}
+	return itemIDs
+}
+
+func getAttributeViewBaseInstance(viewable av.Viewable) (ret *av.BaseInstance) {
+	switch instance := viewable.(type) {
+	case *av.Table:
+		ret = instance.BaseInstance
+	case *av.Gallery:
+		ret = instance.BaseInstance
+	case *av.Kanban:
+		ret = instance.BaseInstance
+	}
+	return
+}
+
 func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	viewable, attrView, _, err = RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, "", createIfNotExist, ignoreRows, "", "")
 	return

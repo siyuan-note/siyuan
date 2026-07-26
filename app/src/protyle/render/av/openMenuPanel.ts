@@ -180,7 +180,7 @@ export const openMenuPanel = (options: {
 
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
-    <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
+    <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}${options.type === "relation" ? " av__relation-panel" : ""}" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${options.type === "relation" ? `width: 760px;max-width: ${isMobile() ? "90vw" : "calc(100vw - 32px)"};` : isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         let closeCB: () => void;
@@ -257,6 +257,19 @@ export const openMenuPanel = (options: {
         let counter = 0;
         avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
             window.siyuan.dragElement = event.target as HTMLElement;
+            if (window.siyuan.dragElement.dataset.relationType === "selected") {
+                const primaryElement = window.siyuan.dragElement.querySelector(".av__relation-table-primary");
+                if (primaryElement) {
+                    const ghostElement = primaryElement.cloneNode(true) as HTMLElement;
+                    ghostElement.className = "av__relation-drag-ghost";
+                    ghostElement.removeAttribute("style");
+                    document.body.append(ghostElement);
+                    event.dataTransfer.setDragImage(ghostElement, 16, 17);
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                }
+            }
             window.siyuan.dragElement.style.opacity = ".38";
             return;
         });
@@ -423,6 +436,10 @@ export const openMenuPanel = (options: {
             }
             // 关联列拖拽排序
             if (targetElement.getAttribute("data-type") === "setRelationCell") {
+                if (targetElement.dataset.relationType !== "selected") {
+                    targetElement.classList.remove("dragover__bottom", "dragover__top");
+                    return;
+                }
                 if (isTop) {
                     targetElement.before(sourceElement);
                 } else {

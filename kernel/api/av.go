@@ -453,6 +453,54 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 	}
 }
 
+func getAttributeViewRelationCandidates(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	keyword := ""
+	if keywordArg := arg["keyword"]; nil != keywordArg {
+		keyword = keywordArg.(string)
+	}
+	page := 1
+	if pageArg := arg["page"]; nil != pageArg {
+		page = int(pageArg.(float64))
+	}
+	pageSize := -1
+	if pageSizeArg := arg["pageSize"]; nil != pageSizeArg {
+		pageSize = int(pageSizeArg.(float64))
+	}
+	var selectedBlockIDs []string
+	if selectedBlockIDsArg, ok := arg["selectedBlockIDs"].([]any); ok {
+		for _, selectedBlockIDArg := range selectedBlockIDsArg {
+			if selectedBlockID, ok := selectedBlockIDArg.(string); ok && "" != selectedBlockID {
+				selectedBlockIDs = append(selectedBlockIDs, selectedBlockID)
+			}
+		}
+	}
+
+	name, blockIDs, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidates(
+		id, keyword, selectedBlockIDs, page, pageSize)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{
+		"name":         name,
+		"blockIDs":     blockIDs,
+		"columns":      columns,
+		"selectedRows": selectedRows,
+		"rows":         rows,
+		"total":        total,
+	}
+}
+
 func appendAttributeViewDetachedBlocksWithValues(c *gin.Context) {
 	// Add an internal kernel API `/api/av/appendAttributeViewDetachedBlocksWithValues` https://github.com/siyuan-note/siyuan/issues/11608
 
@@ -1243,6 +1291,26 @@ func getAttributeViewKeys(c *gin.Context) {
 		blockAttributeViewKeys = model.FilterBlockAttributeViewKeysByPublishAccess(c, publishAccess, blockAttributeViewKeys)
 	}
 	ret.Data = blockAttributeViewKeys
+}
+
+func getAttributeViewSearchTarget(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id, _ := arg["id"].(string)
+	keywordsArg, _ := arg["keywords"].([]any)
+	var keywords []string
+	for _, keywordArg := range keywordsArg {
+		if keyword, ok := keywordArg.(string); ok {
+			keywords = append(keywords, keyword)
+		}
+	}
+	ret.Data = model.GetAttributeViewSearchTarget(id, keywords)
 }
 
 func getAttributeViewBacklinks(c *gin.Context) {

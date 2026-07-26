@@ -4,7 +4,7 @@ import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
 import {escapeAriaLabel, escapeHtml} from "../util/escape";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
@@ -21,6 +21,7 @@ import {newFile} from "../util/newFile";
 import {
     filterMenu,
     getKeyByLiElement,
+    getKeysByLiElement,
     initCriteriaMenu,
     moreMenu,
     queryMenu,
@@ -48,6 +49,7 @@ import {highlightById} from "../util/highlightById";
 import {getSelectionOffset} from "../protyle/util/selection";
 import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
+import {IDatabaseRowOpenData, openDatabaseRowByData} from "../protyle/render/av/openDatabaseRow";
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();
@@ -833,6 +835,9 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                         id: target.getAttribute("data-node-id"),
                                         cb: closeCB,
                                         openPosition: "right",
+                                        nodeType: target.dataset.nodeType,
+                                        method: config.method,
+                                        keywords: getKeysByLiElement(target),
                                     });
                                 } else if (!target.classList.contains("b3-list-item--focus")) {
                                     (searchType === "doc" ? searchPanelElement : unRefPanelElement).querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
@@ -865,7 +870,10 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                 rootId: target.getAttribute("data-root-id"),
                                 protyle: edit.protyle,
                                 id: target.getAttribute("data-node-id"),
-                                cb: closeCB
+                                cb: closeCB,
+                                nodeType: target.dataset.nodeType,
+                                method: config.method,
+                                keywords: getKeysByLiElement(target),
                             });
                         }
                     }
@@ -928,12 +936,45 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     return {edit, unRefEdit};
 };
 
-export const openSearchEditor = (options: {
+export const openSearchEditor = async (options: {
     protyle: IProtyle,
     openPosition?: string,
     id: string,
     rootId: string,
-    cb: () => void
+    cb: () => void,
+    nodeType?: string,
+    method?: number,
+    keywords?: string[],
+}) => {
+    if (options.nodeType === "NodeAttributeView" && typeof options.method === "number" && [0, 1, 3].includes(options.method) &&
+        options.keywords?.length > 0) {
+        try {
+            const response = await fetchSyncPost("/api/av/getAttributeViewSearchTarget", {
+                id: options.id,
+                keywords: options.keywords,
+            });
+            if (response.code === 0 && response.data) {
+                const opened = await openDatabaseRowByData(options.protyle, response.data as IDatabaseRowOpenData, {
+                    position: options.openPosition,
+                });
+                if (opened) {
+                    options.cb?.();
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn("Resolve attribute view search target failed:", e);
+        }
+    }
+    openSearchBlockEditor(options);
+};
+
+const openSearchBlockEditor = (options: {
+    protyle: IProtyle,
+    openPosition?: string,
+    id: string,
+    rootId: string,
+    cb: () => void,
 }) => {
     let currentRange = (options.rootId === options.protyle.block.rootID && options.id === options.protyle.block.id) ?
         options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex] : null;
@@ -1456,7 +1497,7 @@ ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOC
                 if (childItem.refCount) {
                     countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.ref}">${childItem.refCount}</span>`;
                 }
-                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}">
+                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}" data-node-type="${childItem.type || ""}">
 <svg class="b3-list-item__graphic popover__block" data-id="${childItem.id}"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${childItem.content}</span>
@@ -1478,7 +1519,7 @@ ${countHTML}
             if (item.refCount) {
                 countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.ref}">${item.refCount}</span>`;
             }
-            resultHTML += `<div data-type="search-item" class="b3-list-item" data-node-id="${item.id}" data-root-id="${item.rootID}">
+            resultHTML += `<div data-type="search-item" class="b3-list-item" data-node-id="${item.id}" data-root-id="${item.rootID}" data-node-type="${item.type || ""}">
 <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>

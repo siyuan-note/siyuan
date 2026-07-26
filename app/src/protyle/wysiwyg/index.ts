@@ -2577,20 +2577,6 @@ export class WYSIWYG {
             if (!nodeElement) {
                 return false;
             }
-            const avGalleryItemElement = hasClosestByClassName(target, "av__gallery-item");
-            if (avGalleryItemElement) {
-                openGalleryItemMenu({
-                    target: avGalleryItemElement.querySelector(".protyle-icon--last"),
-                    protyle,
-                    position: {
-                        x: event.clientX,
-                        y: event.clientY
-                    }
-                });
-                event.stopPropagation();
-                event.preventDefault();
-                return false;
-            }
             const avCellElement = hasClosestByClassName(target, "av__cell");
             if (avCellElement) {
                 if (avCellElement.classList.contains("av__cell--header")) {
@@ -2615,17 +2601,31 @@ export class WYSIWYG {
                             protyle,
                             cellElements: [avCellElement],
                             blockElement: hasClosestBlock(assetImgElement) as HTMLElement,
-                            content: target.tagName === "IMG" ? target.getAttribute("src") : target.getAttribute("data-url"),
-                            type: target.tagName === "IMG" ? "image" : "file",
-                            name: target.tagName === "IMG" ? "" : target.getAttribute("data-name"),
+                            content: assetImgElement.tagName === "IMG" ? assetImgElement.getAttribute("src") : assetImgElement.getAttribute("data-url"),
+                            type: assetImgElement.tagName === "IMG" ? "image" : "file",
+                            name: assetImgElement.tagName === "IMG" ? "" : assetImgElement.getAttribute("data-name"),
                             index,
-                            rect: target.getBoundingClientRect()
+                            rect: assetImgElement.getBoundingClientRect()
                         });
                         event.stopPropagation();
                         event.preventDefault();
                         return;
                     }
                 }
+            }
+            const avGalleryItemElement = hasClosestByClassName(target, "av__gallery-item");
+            if (avGalleryItemElement) {
+                openGalleryItemMenu({
+                    target: avGalleryItemElement.querySelector(".protyle-icon--last"),
+                    protyle,
+                    position: {
+                        x: event.clientX,
+                        y: event.clientY
+                    }
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
             }
             // 在 span 前面，防止单元格哪 block-ref 被修改
             const avRowElement = hasClosestByClassName(target, "av__row");

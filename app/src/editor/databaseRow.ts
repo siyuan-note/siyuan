@@ -4,6 +4,7 @@ import type {App} from "../index";
 import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 import {Protyle} from "../protyle";
 import {getEditorHorizontalPadding} from "../protyle/ui/padding";
+import {searchMarkRender} from "../protyle/render/searchMarkRender";
 
 export const newDatabaseRowModel = (options: {
     app: App,
@@ -15,6 +16,9 @@ export const newDatabaseRowModel = (options: {
         itemID: string,
         valueID: string,
         title: string,
+        matchedValueID?: string,
+        matchedKeyID?: string,
+        keywords?: string[],
     },
 }) => {
     let customModel: Custom;
@@ -51,14 +55,32 @@ export const newDatabaseRowModel = (options: {
         if (!previousBodyElement || !contextProtyle) {
             return;
         }
+        const data = custom.data as typeof options.data;
         const bodyElement = document.createElement("div");
         bodyElement.className = "custom-attr protyle-db-row__body";
         previousBodyElement.replaceWith(bodyElement);
         updateLayout(custom);
-        renderAVAttribute(bodyElement, options.data.itemID, contextProtyle, (element) => {
+        renderAVAttribute(bodyElement, data.itemID, contextProtyle, (element) => {
             updateTitle(custom, element);
+            if (!data.keywords?.length) {
+                return;
+            }
+            const rootElement = custom.element.querySelector<HTMLElement>(".protyle-content");
+            if (!rootElement) {
+                return;
+            }
+            const matchedElement = data.matchedValueID ?
+                rootElement.querySelector(`[data-av-id="${data.avID}"] [data-id="${data.matchedValueID}"]`) :
+                rootElement.querySelector(
+                    `[data-av-id="${data.avID}"] [data-col-id="${data.matchedKeyID}"][data-row-id="${data.itemID}"]`);
+            searchMarkRender(contextProtyle, data.keywords, undefined, () => {
+                matchedElement?.scrollIntoView({block: "center"});
+            }, {
+                rootElement,
+                currentElement: matchedElement,
+            });
         },
-            {avID: options.data.avID, itemID: options.data.itemID, valueID: options.data.valueID});
+            {avID: data.avID, itemID: data.itemID, valueID: data.valueID});
     };
     const model = new Custom({
         app: options.app,
@@ -92,6 +114,7 @@ export const newDatabaseRowModel = (options: {
                         return;
                     }
                     contextProtyle = editor.protyle;
+                    custom.element.append(contextProtyle.highlight.styleElement);
                     render(custom);
                 },
             });

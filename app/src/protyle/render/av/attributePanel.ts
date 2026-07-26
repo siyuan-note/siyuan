@@ -26,6 +26,7 @@ export class AVAttributePanel {
     private collapsed: boolean;
     private activeAvID = "";
     private showEmptyFields = false;
+    private renderCallbacks: ((element: HTMLElement) => void)[] = [];
 
     constructor(protyle: IProtyle) {
         this.protyle = protyle;
@@ -105,7 +106,21 @@ export class AVAttributePanel {
             this.updateTabs();
             this.updateEmptyState();
             this.element.classList.toggle("fn__none", !renderedElement.querySelector("[data-av-id], .custom-attr__avbacklinks"));
+            const callbacks = this.renderCallbacks.splice(0);
+            callbacks.forEach(callback => callback(this.bodyElement));
         });
+    }
+
+    public afterRender(callback: (element: HTMLElement) => void) {
+        if (!window.siyuan.config.editor.databaseAttrShow) {
+            return;
+        }
+        if (this.element.dataset.rendered === "true" && !this.renderingTargetID) {
+            callback(this.bodyElement);
+            return;
+        }
+        this.renderCallbacks.push(callback);
+        this.render();
     }
 
     public refresh() {

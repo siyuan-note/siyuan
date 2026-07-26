@@ -78,6 +78,7 @@ type TOperation =
     | "hideAttrViewGroup"
     | "sortAttrViewGroup"
     | "foldAttrViewGroup"
+    | "foldAttrViewGroups"
     | "setAttrViewDisplayFieldName"
     | "setAttrViewDisplayEmptyFields"
     | "setAttrViewFillColBackgroundColor"

@@ -857,6 +857,58 @@ func foldAttrViewGroup(avID, blockID, groupID string, folded bool) (err error) {
 	return nil
 }
 
+func (tx *Transaction) doFoldAttrViewGroups(operation *Operation) (ret *TxErr) {
+	folded := map[string]bool{}
+	data, err := gulu.JSON.MarshalJSON(operation.Data)
+	if nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &folded); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	if err = foldAttrViewGroups(operation.AvID, operation.BlockID, operation.ViewID, folded); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func foldAttrViewGroups(avID, blockID, viewID string, folded map[string]bool) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return err
+	}
+
+	var view *av.View
+	if "" != viewID {
+		view = attrView.GetView(viewID)
+		if nil == view {
+			return av.ErrViewNotFound
+		}
+	} else {
+		view, err = getAttrViewViewByBlockID(attrView, blockID)
+		if err != nil {
+			return err
+		}
+	}
+
+	if !view.IsGroupView() {
+		return
+	}
+
+	for _, group := range view.Groups {
+		if groupFolded, ok := folded[group.ID]; ok {
+			group.GroupFolded = groupFolded
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	if err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return err
+	}
+	return nil
+}
+
 func (tx *Transaction) doSetAttrViewGroup(operation *Operation) (ret *TxErr) {
 	data, err := gulu.JSON.MarshalJSON(operation.Data)
 	if nil != err {
@@ -2002,6 +2054,176 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, p
 	end := min(len(keyValues.Values), start+pageSize)
 	keyValues.Values = keyValues.Values[start:end]
 	return
+}
+
+func GetAttributeViewRelationCandidates(avID, keyword string, selectedBlockIDs []string, page, pageSize int) (
+	attributeViewName string, databaseBlockIDs []string, columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
+	total int, err error,
+) {
+	waitForSyncingStorages()
+
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+	attributeViewName = getAttrViewName(attrView)
+	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(avID)
+
+	table := renderAttributeViewRelationCandidates(attrView)
+	if nil == table {
+		err = av.ErrViewNotFound
+		return
+	}
+	columns = table.Columns
+
+	rowsByID := map[string]*av.TableRow{}
+	for _, row := range table.Rows {
+		rowsByID[row.ID] = row
+	}
+	for _, blockID := range selectedBlockIDs {
+		if row := rowsByID[blockID]; nil != row {
+			selectedRows = append(selectedRows, row)
+		}
+	}
+	if nil == selectedRows {
+		selectedRows = []*av.TableRow{}
+	}
+
+	rows, total = filterSortPageRelationCandidates(table.Rows, keyword, page, pageSize)
+	return
+}
+
+func filterSortPageRelationCandidates(tableRows []*av.TableRow, keyword string, page, pageSize int) (
+	rows []*av.TableRow, total int,
+) {
+	for _, row := range tableRows {
+		if relationCandidateMatches(row, keyword) {
+			rows = append(rows, row)
+		}
+	}
+	sort.Slice(rows, func(i, j int) bool {
+		iCreated := relationCandidateCreatedAt(rows[i])
+		jCreated := relationCandidateCreatedAt(rows[j])
+		if iCreated == jCreated {
+			return rows[i].ID > rows[j].ID
+		}
+		return iCreated > jCreated
+	})
+
+	total = len(rows)
+	if 1 > page {
+		page = 1
+	}
+	if 1 > pageSize {
+		pageSize = 16
+	}
+	start := min(len(rows), (page-1)*pageSize)
+	end := min(len(rows), start+pageSize)
+	rows = rows[start:end]
+	if nil == rows {
+		rows = []*av.TableRow{}
+	}
+	return
+}
+
+func renderAttributeViewRelationCandidates(attrView *av.AttributeView) (ret *av.Table) {
+	if nil == attrView {
+		return
+	}
+
+	keysByID := map[string]*av.Key{}
+	for _, keyValues := range attrView.KeyValues {
+		if nil != keyValues && nil != keyValues.Key {
+			keysByID[keyValues.Key.ID] = keyValues.Key
+		}
+	}
+
+	var keys []*av.Key
+	added := map[string]bool{}
+	if blockKey := attrView.GetBlockKey(); nil != blockKey {
+		keys = append(keys, blockKey)
+		added[blockKey.ID] = true
+	}
+	appendKey := func(key *av.Key) {
+		if nil == key || added[key.ID] || av.KeyTypeLineNumber == key.Type {
+			return
+		}
+		keys = append(keys, key)
+		added[key.ID] = true
+	}
+	for _, keyID := range attrView.KeyIDs {
+		appendKey(keysByID[keyID])
+	}
+	for _, keyValues := range attrView.KeyValues {
+		if nil != keyValues {
+			appendKey(keyValues.Key)
+		}
+	}
+
+	view := &av.View{
+		ID:         ast.NewNodeID(),
+		Filters:    []*av.ViewFilter{},
+		Sorts:      []*av.ViewSort{},
+		PageSize:   av.ViewDefaultPageSize,
+		LayoutType: av.LayoutTypeTable,
+		Table:      av.NewLayoutTable(),
+	}
+	for _, key := range keys {
+		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{
+			BaseField: &av.BaseField{ID: key.ID},
+		})
+	}
+
+	viewable := sql.RenderView(attrView, view, "", false)
+	ret, _ = viewable.(*av.Table)
+	return
+}
+
+func relationCandidateMatches(row *av.TableRow, keyword string) bool {
+	keywords := strings.Fields(strings.TrimSpace(keyword))
+	if 1 > len(keywords) {
+		return true
+	}
+	for _, cell := range row.Cells {
+		if nil == cell || nil == cell.Value {
+			continue
+		}
+		content := cell.Value.String(true)
+		allKeywordsHit := true
+		for _, currentKeyword := range keywords {
+			if util.SearchCaseSensitive {
+				if !strings.Contains(content, currentKeyword) {
+					allKeywordsHit = false
+					break
+				}
+			} else if !strings.Contains(strings.ToLower(content), strings.ToLower(currentKeyword)) {
+				allKeywordsHit = false
+				break
+			}
+		}
+		if allKeywordsHit {
+			return true
+		}
+	}
+	return false
+}
+
+func relationCandidateCreatedAt(row *av.TableRow) int64 {
+	if nil == row {
+		return 0
+	}
+	blockValue := row.GetBlockValue()
+	if nil == blockValue {
+		return 0
+	}
+	if 0 < blockValue.CreatedAt {
+		return blockValue.CreatedAt
+	}
+	if nil != blockValue.Block {
+		return blockValue.Block.Created
+	}
+	return 0
 }
 
 func GetAttributeViewFilterSort(avID, blockID string) (filters []*av.ViewFilter, sorts []*av.ViewSort) {

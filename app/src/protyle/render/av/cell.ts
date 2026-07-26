@@ -1029,7 +1029,8 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
     }
 };
 
-export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = true, type: TAVView = "table") => {
+export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = true, type: TAVView = "table",
+                           selectOptions?: IAVColumn["options"]) => {
     let text = "";
     if ("template" === cellValue.type) {
         text = `<span class="av__celltext">${cellValue ? getAVTemplateHTML(cellValue.template.content || "") : ""}</span>`;
@@ -1056,7 +1057,11 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
             if (cellValue.type === "select" && index > 0) {
                 return;
             }
-            text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
+            const desc = selectOptions?.find(option => option.name === item.content)?.desc;
+            const tooltip = desc ?
+                ` data-position="north" aria-label="${escapeAriaLabel(item.content)}<div class='ft__on-surface'>${escapeAriaLabel(desc)}</div>"` :
+                "";
+            text += `<span class="b3-chip${desc ? " ariaLabel" : ""}"${tooltip} style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
         });
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;

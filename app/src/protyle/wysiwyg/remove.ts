@@ -45,6 +45,7 @@ import {isEncryptedBox} from "../../util/pathName";
 import {highlightRender} from "../render/highlightRender";
 import * as dayjs from "dayjs";
 import {mergeSameInlineElement} from "../toolbar/util";
+import {getCrossBlockMergeRemoveElement} from "./removeRange";
 
 export const removeCrossBlockRange = (protyle: IProtyle, selectedRange: Range,
                                       startElement: HTMLElement, endElement: HTMLElement) => {
@@ -86,12 +87,15 @@ export const removeCrossBlockRange = (protyle: IProtyle, selectedRange: Range,
         ["NodeParagraph", "NodeHeading"].includes(blockType) &&
         blockType === endElement.getAttribute("data-type") &&
         endElement.getAttribute("fold") !== "1") {
-        const topElement = getTopAloneElement(endElement);
-        const hasChildList = topElement === endElement && endElement.parentElement.classList.contains("li") &&
-            !!endElement.parentElement.querySelector(":scope > .list");
-        if (!hasChildList && !topElement.contains(startElement)) {
+        const topElement = getCrossBlockMergeRemoveElement(editorElement, startElement, endElement);
+        if (topElement) {
             removeEndElement = topElement;
-            removeElements.push(topElement as HTMLElement);
+            for (let i = removeElements.length - 1; i >= 0; i--) {
+                if (topElement.contains(removeElements[i])) {
+                    removeElements.splice(i, 1);
+                }
+            }
+            removeElements.push(topElement);
         }
     }
 

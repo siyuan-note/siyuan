@@ -24,7 +24,14 @@ import {updateAVName} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {nbsp2space} from "../util/normalizeText";
 
-export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true, event?: InputEvent) => {
+interface IInputOperations {
+    doOperations: IOperation[];
+    undoOperations: IOperation[];
+    undoContext?: Record<string, string>;
+}
+
+export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true,
+                            event?: InputEvent, inputOperations?: IInputOperations) => {
     if (!blockElement.parentElement) {
         // 不同 windows 版本下输入法会多次触发 input，导致 outerhtml 赋值的块丢失
         return;
@@ -99,17 +106,28 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         }
     }
     const id = blockElement.getAttribute("data-node-id");
+    const conversionOperations: IInputOperations | undefined = inputOperations ? {
+        doOperations: inputOperations.doOperations,
+        undoOperations: [{
+            id,
+            data: protyle.wysiwyg.lastHTMLs[id],
+            action: "update",
+            context: inputOperations.undoContext,
+        }, ...inputOperations.undoOperations]
+    } : undefined;
     if ((type !== "NodeCodeBlock" && type !== "NodeHeading") && // https://github.com/siyuan-note/siyuan/issues/11851
         (editElement.innerHTML.endsWith("\n<wbr>") || editElement.innerHTML.endsWith("\n<wbr>\n"))) {
         // 软换行
-        updateTransaction(protyle, blockElement, protyle.wysiwyg.lastHTMLs[id] || blockElement.outerHTML.replace("\n<wbr>", "<wbr>"));
+        updateTransaction(protyle, blockElement,
+            protyle.wysiwyg.lastHTMLs[id] || blockElement.outerHTML.replace("\n<wbr>", "<wbr>"),
+            inputOperations?.undoContext, inputOperations);
         wbrElement.remove();
         return;
     }
-    if (turnIntoTaskList(protyle, type, blockElement, editElement, range)) {
+    if (turnIntoTaskList(protyle, type, blockElement, editElement, range, conversionOperations)) {
         return;
     }
-    if (headingTurnIntoList(protyle, type, blockElement, editElement, range)) {
+    if (headingTurnIntoList(protyle, type, blockElement, editElement, range, conversionOperations)) {
         return;
     }
     // table、粗体 中也会有 br，仅用于类似#a#，删除后会产生的 br
@@ -136,7 +154,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     } else if ((trimStartHTML.startsWith("```") || trimStartHTML.startsWith("···") || trimStartHTML.startsWith("~~~")) &&
         trimStartHTML.indexOf("\n") === -1 && trimStartHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") === -1) {
         // ```test` 后续处理，```test 不处理
-        updateTransaction(protyle, blockElement, protyle.wysiwyg.lastHTMLs[id]);
+        updateTransaction(protyle, blockElement, protyle.wysiwyg.lastHTMLs[id],
+            inputOperations?.undoContext, inputOperations);
         wbrElement.remove();
         return;
     }
@@ -356,10 +375,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         protyle.hint.render(protyle);
     }
     hideElements(["gutter"], protyle);
-    updateInput(html, protyle, id);
+    updateInput(html, protyle, id, inputOperations);
 };
 
-const updateInput = (html: string, protyle: IProtyle, id: string) => {
+const updateInput = (html: string, protyle: IProtyle, id: string, inputOperations?: IInputOperations) => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
     const doOperations: IOperation[] = [];
@@ -378,7 +397,8 @@ const updateInput = (html: string, protyle: IProtyle, id: string) => {
             undoOperations.push({
                 id,
                 data: protyle.wysiwyg.lastHTMLs[id],
-                action: "update"
+                action: "update",
+                context: inputOperations?.undoContext,
             });
             protyle.wysiwyg.lastHTMLs[id] = item.outerHTML;
         } else {
@@ -399,5 +419,9 @@ const updateInput = (html: string, protyle: IProtyle, id: string) => {
             });
         }
     });
+    if (inputOperations) {
+        doOperations.push(...inputOperations.doOperations);
+        undoOperations.push(...inputOperations.undoOperations);
+    }
     transaction(protyle, doOperations, undoOperations);
 };

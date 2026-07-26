@@ -4,7 +4,22 @@ import * as dayjs from "dayjs";
 import {decodeHTML, escapeAttr} from "../../util/escape";
 import {Constants} from "../../constants";
 
-export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
+interface IAdditionalOperations {
+    doOperations: IOperation[];
+    undoOperations: IOperation[];
+}
+
+const transactionWithAdditionalOperations = (protyle: IProtyle, doOperations: IOperation[],
+                                             undoOperations: IOperation[],
+                                             additionalOperations?: IAdditionalOperations) => {
+    transaction(protyle, additionalOperations ?
+        additionalOperations.doOperations.concat(doOperations) : doOperations, additionalOperations ?
+        undoOperations.concat(additionalOperations.undoOperations) : undoOperations);
+};
+
+export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: HTMLElement,
+                                 editElement: HTMLElement, range: Range,
+                                 additionalOperations?: IAdditionalOperations) => {
     const html = decodeHTML(editElement.innerHTML);
     const dataTask = html.substring(0, 3).match(/^[\[【]([^\x80-\uffff\[\]【】])[\]】]$/);
     if (type !== "NodeCodeBlock" &&
@@ -41,7 +56,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 }
                 blockElement.previousElementSibling.outerHTML = `<div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>`;
                 editElement.innerHTML = html.substring(contextStartIndex);
-                updateTransaction(protyle, liElement, oldHTML);
+                updateTransaction(protyle, liElement, oldHTML, undefined, additionalOperations);
                 focusByWbr(protyle.wysiwyg.element, range);
                 return true;
             }
@@ -54,7 +69,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
             const oldHTML = blockElement.outerHTML;
             editElement.innerHTML = html.substring(contextStartIndex);
             blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
-            transaction(protyle, [{
+            transactionWithAdditionalOperations(protyle, [{
                 action: "update",
                 id,
                 data: blockElement.outerHTML,
@@ -81,7 +96,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 action: "update",
                 id,
                 data: oldHTML,
-            }]);
+            }], additionalOperations);
             blockElement.outerHTML = `<div data-subtype="t" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-task="${dataTask ? escapeAttr(dataTask[1]) : " "}" data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
             focusByWbr(protyle.wysiwyg.element, range);
             return true;
@@ -90,7 +105,9 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
     return false;
 };
 
-export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
+export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElement: HTMLElement,
+                                    editElement: HTMLElement, range: Range,
+                                    additionalOperations?: IAdditionalOperations) => {
     if (type === "NodeHeading" && ["* ", "- "].includes(editElement.innerHTML.substring(0, 2)) &&
         blockElement.parentElement.getAttribute("data-type") !== "NodeListItem") {
         const id = blockElement.getAttribute("data-node-id");
@@ -101,7 +118,7 @@ export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElemen
         const marker = editElement.innerHTML.substring(0, 1);
         editElement.innerHTML = editElement.innerHTML.substring(2);
         blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
-        transaction(protyle, [{
+        transactionWithAdditionalOperations(protyle, [{
             action: "update",
             id,
             data: blockElement.outerHTML,
@@ -128,7 +145,7 @@ export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElemen
         }, {
             action: "delete",
             id: newId
-        }]);
+        }], additionalOperations);
         blockElement.outerHTML = `<div data-subtype="u" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-marker="${marker}" data-subtype="u" data-node-id="${liItemId}" data-type="NodeListItem" class="li" updated="${liItemId.split("-")[0]}"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
         focusByWbr(protyle.wysiwyg.element, range);
         return true;

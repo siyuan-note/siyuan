@@ -1990,24 +1990,36 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
     }
 };
 
-export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: string, undoContext?: Record<string, string>) => {
+export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: string,
+                                  undoContext?: Record<string, string>, additionalOperations?: {
+        doOperations: IOperation[],
+        undoOperations: IOperation[],
+        context?: Record<string, string>,
+    }) => {
     const id = element.getAttribute("data-node-id");
     const newHTML = cleanHeadingNumberHTML(element.outerHTML);
     const cleanOldHTML = cleanHeadingNumberHTML(oldHTML);
-    if (newHTML === cleanOldHTML.replace("<wbr>", "")) {
+    if (newHTML === cleanOldHTML.replace("<wbr>", "") && !additionalOperations) {
         return;
     }
     element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
-    transaction(protyle, [{
+    const doOperations: IOperation[] = [{
         id,
         data: newHTML,
-        action: "update"
-    }], [{
+        action: "update",
+        context: additionalOperations?.context,
+    }];
+    const undoOperations: IOperation[] = [{
         id,
         data: cleanOldHTML,
         action: "update",
         context: undoContext,
-    }]);
+    }];
+    if (additionalOperations) {
+        doOperations.unshift(...additionalOperations.doOperations);
+        undoOperations.push(...additionalOperations.undoOperations);
+    }
+    transaction(protyle, doOperations, undoOperations);
 };
 
 export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyle, cb: (e: HTMLElement) => void,

@@ -1,14 +1,27 @@
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasClosestByTag,
+    isInEmbedBlock
+} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
-import {fixAdjacentTags, getContenteditableElement, getParentBlock, getPreviousBlockSibling} from "../wysiwyg/getBlock";
+import {
+    fixAdjacentTags,
+    getContenteditableElement,
+    getParentBlock,
+    getPreviousBlockSibling
+} from "../wysiwyg/getBlock";
 import {
     fixTableRange,
     focusBlock,
     focusByRange,
     focusByWbr,
+    getBlockRanges,
     getEditorRange,
     getSelectionOffset,
+    getUndoFocusContext,
     setLastNodeRange,
 } from "./selection";
 import {Constants} from "../../constants";
@@ -31,6 +44,7 @@ import {
 } from "../render/av/paste";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
+import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -777,6 +791,25 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         return;
     }
     const range = useProtyleRange ? protyle.toolbar.range : getEditorRange(protyle.wysiwyg.element);
+    const rangeStartBlockElement = hasClosestBlock(range.startContainer);
+    const rangeEndBlockElement = hasClosestBlock(range.endContainer);
+    if (!range.collapsed && rangeStartBlockElement && rangeEndBlockElement &&
+        rangeStartBlockElement !== rangeEndBlockElement) {
+        const hasUnsupportedBoundary = [
+            {blockElement: rangeStartBlockElement, container: range.startContainer},
+            {blockElement: rangeEndBlockElement, container: range.endContainer},
+        ].some(item => {
+            if (item.blockElement.classList.contains("av") || isInEmbedBlock(item.blockElement)) {
+                return true;
+            }
+            const editableElement = getContenteditableElement(item.blockElement);
+            return !editableElement ||
+                (item.container !== item.blockElement && !editableElement.contains(item.container));
+        });
+        if (hasUnsupportedBoundary) {
+            return;
+        }
+    }
     const tablePasteTarget = getTablePasteTarget(range);
     fixTableRange(range);
     let unSpinHTML;
@@ -814,15 +847,134 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         return;
     }
 
+    const blockRanges = !range.collapsed ? getBlockRanges(protyle.wysiwyg.element, range) : [];
+    const isCrossBlockRange = blockRanges.length > 1 && blockRanges[0].blockElement === blockElement;
+    const crossBlockUndoFocusContext = isCrossBlockRange ?
+        getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
+    const removeElements: HTMLElement[] = [];
+    if (isCrossBlockRange) {
+        const startElement = blockRanges[0].blockElement;
+        const endElement = blockRanges[blockRanges.length - 1].blockElement;
+        const selectedElements: HTMLElement[] = [];
+        range.cloneContents().querySelectorAll<HTMLElement>("[data-node-id]").forEach(item => {
+            const element = protyle.wysiwyg.element.querySelector<HTMLElement>(
+                `[data-node-id="${item.getAttribute("data-node-id")}"]`
+            );
+            if (!element || selectedElements.includes(element) || element === startElement || element === endElement ||
+                element.contains(startElement) || element.contains(endElement) || isInEmbedBlock(element)) {
+                return;
+            }
+            const elementRange = document.createRange();
+            elementRange.selectNode(element);
+            if (range.compareBoundaryPoints(Range.START_TO_START, elementRange) <= 0 &&
+                range.compareBoundaryPoints(Range.END_TO_END, elementRange) >= 0) {
+                selectedElements.push(element);
+            }
+        });
+        const selectedSet = new Set(selectedElements);
+        removeElements.push(...selectedElements.filter(item =>
+            !selectedSet.has(item.parentElement.closest<HTMLElement>("[data-node-id]"))
+        ));
+
+        const endBlockRange = blockRanges.slice().reverse().find(item => item.blockElement === endElement);
+        if (endBlockRange && endElement.getAttribute("data-type") !== "NodeTable") {
+            const contentRange = document.createRange();
+            contentRange.selectNodeContents(endBlockRange.editableElement);
+            const selectedPosition = getSelectionOffset(
+                endBlockRange.editableElement, undefined, endBlockRange.range, true
+            );
+            const contentPosition = getSelectionOffset(
+                endBlockRange.editableElement, undefined, contentRange, true
+            );
+            const mediaSelector = "img, video, audio, iframe, canvas";
+            const fullySelected = selectedPosition.start === 0 && selectedPosition.end === contentPosition.end &&
+                endBlockRange.range.cloneContents().querySelectorAll(mediaSelector).length ===
+                contentRange.cloneContents().querySelectorAll(mediaSelector).length;
+            if (fullySelected) {
+                const topElement = getCrossBlockMergeRemoveElement(
+                    protyle.wysiwyg.element, startElement, endElement);
+                if (topElement) {
+                    for (let i = removeElements.length - 1; i >= 0; i--) {
+                        if (topElement.contains(removeElements[i])) {
+                            removeElements.splice(i, 1);
+                        }
+                    }
+                    removeElements.push(topElement);
+                }
+            }
+        }
+    }
+    const crossBlockData = removeElements.map(element => ({
+        element,
+        oldHTML: element.outerHTML,
+        previousID: getPreviousBlockSibling(element)?.getAttribute("data-node-id"),
+        parentID: getParentBlock(element)?.getAttribute("data-node-id") || protyle.block.parentID,
+        remove: true
+    }));
+    if (isCrossBlockRange) {
+        Array.from(new Set(blockRanges.map(item => item.blockElement))).slice(1).forEach(element => {
+            if (removeElements.some(removeElement => removeElement.contains(element))) {
+                return;
+            }
+            crossBlockData.push({
+                element,
+                oldHTML: element.outerHTML,
+                previousID: getPreviousBlockSibling(element)?.getAttribute("data-node-id"),
+                parentID: getParentBlock(element)?.getAttribute("data-node-id") || protyle.block.parentID,
+                remove: false
+            });
+        });
+    }
     let id = blockElement.getAttribute("data-node-id");
-    range.insertNode(document.createElement("wbr"));
+    const rangeStartWbrElement = document.createElement("wbr");
+    range.insertNode(rangeStartWbrElement);
+    if (isCrossBlockRange) {
+        range.setStartAfter(rangeStartWbrElement);
+    }
     let oldHTML = blockElement.outerHTML;
     const type = blockElement.getAttribute("data-type");
     const isNodeCodeBlock = type === "NodeCodeBlock";
     const editableElement = getContenteditableElement(blockElement);
+    const crossBlockDoOperations: IOperation[] = [];
+    const crossBlockUndoOperations: IOperation[] = [];
+    const processCrossBlockData = () => {
+        crossBlockData.forEach(item => {
+            if (item.remove) {
+                item.element.remove();
+                crossBlockDoOperations.push({
+                    action: "delete",
+                    id: item.element.getAttribute("data-node-id")
+                });
+                crossBlockUndoOperations.push({
+                    action: "insert",
+                    id: item.element.getAttribute("data-node-id"),
+                    data: item.oldHTML,
+                    previousID: item.previousID,
+                    parentID: item.parentID
+                });
+            } else if (item.element.isConnected && item.oldHTML !== item.element.outerHTML) {
+                item.element.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                item.element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+                crossBlockDoOperations.push({
+                    action: "update",
+                    id: item.element.getAttribute("data-node-id"),
+                    data: item.element.outerHTML
+                });
+                crossBlockUndoOperations.push({
+                    action: "update",
+                    id: item.element.getAttribute("data-node-id"),
+                    data: item.oldHTML
+                });
+            }
+        });
+    };
     if (!isBlock &&
         (isNodeCodeBlock || protyle.toolbar.getCurrentType(range).includes("code"))) {
         range.deleteContents();
+        if (isCrossBlockRange && rangeStartWbrElement.isConnected) {
+            range.setStartAfter(rangeStartWbrElement);
+            range.collapse(true);
+        }
         // 代码块需保持至少一个 \n https://github.com/siyuan-note/siyuan/pull/13271#issuecomment-2502672155
         let codeBlockIsEmpty = false;
         if (isNodeCodeBlock && editableElement.textContent === "") {
@@ -843,7 +995,22 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             focusByWbr(blockElement, range);
         }
         blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        updateTransaction(protyle, blockElement, oldHTML);
+        if (isCrossBlockRange) {
+            processCrossBlockData();
+            blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+            transaction(protyle, [{
+                action: "update",
+                id,
+                data: blockElement.outerHTML
+            }, ...crossBlockDoOperations], [{
+                action: "update",
+                id,
+                data: oldHTML,
+                context: crossBlockUndoFocusContext
+            }, ...crossBlockUndoOperations]);
+        } else {
+            updateTransaction(protyle, blockElement, oldHTML);
+        }
         setTimeout(() => {
             scrollCenter(protyle, undefined, "nearest", "smooth");
         }, Constants.TIMEOUT_LOAD);
@@ -852,7 +1019,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
 
     const undoOperation: IOperation[] = [];
     const doOperation: IOperation[] = [];
-    if (range.toString() !== "") {
+    if (range.toString() !== "" || isCrossBlockRange) {
         const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");
         if (inlineMathElement) {
             // 表格内选中数学公式 https://ld246.com/article/1631708573504
@@ -874,13 +1041,15 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         undoOperation.push({
             action: "update",
             id,
-            data: oldHTML
+            data: oldHTML,
+            context: crossBlockUndoFocusContext
         });
         doOperation.push({
             action: "update",
             id,
             data: blockElement.outerHTML
         });
+        processCrossBlockData();
     }
     const tempElement = document.createElement("template");
 
@@ -904,9 +1073,11 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         tempElement.content.childElementCount === 1 &&
         tempElement.content.firstChild.nodeType !== 3 &&
         tempElement.content.firstElementChild.getAttribute("data-type") === "NodeHeading") {
-        // https://github.com/siyuan-note/siyuan/issues/14114
-        isBlock = false;
-        block2text = true;
+        if (!isCrossBlockRange) {
+            // https://github.com/siyuan-note/siyuan/issues/14114
+            isBlock = false;
+            block2text = true;
+        }
     }
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
     if (!isBlock) {
@@ -937,6 +1108,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 range.collapse(true);
                 splitElements.push(spanElement, afterElement);
             }
+            if (isCrossBlockRange) {
+                if (rangeStartWbrElement.isConnected) {
+                    range.setStartAfter(rangeStartWbrElement);
+                    range.collapse(true);
+                }
+            }
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);
             blockElement.querySelector("wbr")?.remove();
@@ -949,7 +1126,11 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             // 相邻标签之间插入空格区隔，避免后续 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
             fixAdjacentTags(getContenteditableElement(blockElement));
             protyle.wysiwyg.lastHTMLs[id] = oldHTML;
-            input(protyle, blockElement as HTMLElement, range);
+            input(protyle, blockElement as HTMLElement, range, true, undefined, isCrossBlockRange ? {
+                doOperations: crossBlockDoOperations,
+                undoOperations: crossBlockUndoOperations,
+                undoContext: crossBlockUndoFocusContext,
+            } : undefined);
             return;
         }
     }
@@ -1111,7 +1292,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             lastElement = item;
         }
     });
-    if (editableElement && editableElement.textContent === "" && blockElement.classList.contains("p") && !keepEmptyBlock) {
+    const emptyStartType = blockElement.getAttribute("data-type");
+    const canRemoveEmptyStart = emptyStartType === "NodeParagraph" ||
+        emptyStartType === "NodeCodeBlock" ||
+        (emptyStartType === "NodeHeading" && blockElement.getAttribute("fold") !== "1");
+    const startTextIsEmpty = editableElement &&
+        editableElement.textContent.split(Constants.ZWSP).join("").replace(/\n/g, "") === "";
+    if (startTextIsEmpty && canRemoveEmptyStart && !keepEmptyBlock &&
+        !editableElement?.querySelector("img, video, audio, iframe, canvas, .emoji")) {
         // 选中当前块所有内容粘贴再撤销会导致异常 https://ld246.com/article/1662542137636
         doOperation.find((item, index) => {
             if (item.id === id) {
@@ -1135,7 +1323,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             data: oldHTML,
             id,
             previousID: getPreviousBlockSibling(blockElement)?.getAttribute("data-node-id") || "",
-            parentID: getParentBlock(blockElement).getAttribute("data-node-id") || protyle.block.parentID
+            parentID: getParentBlock(blockElement).getAttribute("data-node-id") || protyle.block.parentID,
+            context: crossBlockUndoFocusContext
         });
         blockElement.remove();
     }
@@ -1150,6 +1339,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
         item.remove();
     });
+    doOperation.push(...crossBlockDoOperations);
+    undoOperation.push(...crossBlockUndoOperations);
     let foldData;
     if (blockElement.getAttribute("data-type") === "NodeHeading" &&
         blockElement.getAttribute("fold") === "1" && !insertBefore) {

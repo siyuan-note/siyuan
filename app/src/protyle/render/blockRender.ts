@@ -6,6 +6,7 @@ import {genBreadcrumb, improveBreadcrumbAppearance} from "../wysiwyg/renderBackl
 import {avRender} from "./av/render";
 import {genRenderFrame} from "./util";
 import {isEncryptedBox} from "../../util/pathName";
+import {disabledWYSIWYG} from "../util/disabledWYSIWYG";
 
 /**
  * 渲染嵌入块
@@ -136,6 +137,10 @@ ${popover}${breadcrumbHTML}${blocksItem.block.content}
     processRender(item);
     highlightRender(item);
     avRender(item, protyle);
+    if (protyle.disabled) {
+        // 嵌入块异步渲染可能晚于只读状态设置，需同步禁用新插入的可编辑节点
+        disabledWYSIWYG(item);
+    }
     if (top) {
         // 前进后退定位 https://ld246.com/article/1667652729995
         protyle.contentElement.scrollTop = top;

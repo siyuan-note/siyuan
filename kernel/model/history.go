@@ -843,39 +843,51 @@ func (box *Box) generateDocHistory0() {
 
 	luteEngine := util.NewLute()
 	for _, file := range files {
-		historyPath := filepath.Join(historyDir, box.ID, strings.TrimPrefix(file, filepath.Join(util.DataDir, box.ID)))
-		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
+		if err = generateDocHistoryFile(box.ID, file, historyDir, luteEngine); err != nil {
 			logging.LogErrorf("generate history failed: %s", err)
 			return
-		}
-
-		var data []byte
-		if data, err = filelock.ReadFile(file); err != nil {
-			logging.LogErrorf("generate history failed: %s", err)
-			return
-		}
-
-		if err = gulu.File.WriteFileSafer(historyPath, data, 0644); err != nil {
-			logging.LogErrorf("generate history failed: %s", err)
-			return
-		}
-
-		if strings.HasSuffix(file, ".sy") {
-			tree, loadErr := loadTree(file, luteEngine)
-			if nil != loadErr {
-				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
-			} else {
-				// loadTree 不设置 tree.Box，这里补上：generateAvHistoryInTree 依据 tree.Box 判定是否
-				// 加密笔记本并据此选择历史目标路径（<boxID>/storage/av vs 全局 storage/av），
-				// tree.Box 为空会把加密笔记本的密文 AV 错误拷到全局历史路径
-				tree.Box = box.ID
-				generateAvHistoryInTree(tree, historyDir)
-			}
 		}
 	}
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	return
+}
+
+func generateDocHistoryFile(boxID, file, historyDir string, luteEngine *lute.Lute) error {
+	data, err := filelock.ReadFile(file)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("read document [%s] failed: %w", file, err)
+	}
+
+	return generateDocHistoryFromData(boxID, file, historyDir, data, luteEngine)
+}
+
+func generateDocHistoryFromData(boxID, file, historyDir string, data []byte, luteEngine *lute.Lute) error {
+	historyPath := filepath.Join(historyDir, boxID, strings.TrimPrefix(file, filepath.Join(util.DataDir, boxID)))
+	if err := os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
+		return err
+	}
+	if err := gulu.File.WriteFileSafer(historyPath, data, 0644); err != nil {
+		return err
+	}
+	if !strings.HasSuffix(file, ".sy") {
+		return nil
+	}
+
+	tree, err := loadTreeByData(file, data, luteEngine)
+	if err != nil {
+		logging.LogErrorf("load tree [%s] failed: %s", file, err)
+		return nil
+	}
+	// loadTreeByData 不设置 tree.Box，这里补上：generateAvHistoryInTree 依据 tree.Box 判定是否
+	// 加密笔记本并据此选择历史目标路径（<boxID>/storage/av vs 全局 storage/av），
+	// tree.Box 为空会把加密笔记本的密文 AV 错误拷到全局历史路径
+	tree.Box = boxID
+	generateAvHistoryInTree(tree, historyDir)
+	return nil
 }
 
 func ClearOutdatedHistoryDirJob() {

@@ -11,6 +11,7 @@ import {getBodyVirtualData, initVirtualScroll} from "../virtualScroll";
 import {getRowHTML, updateHeader} from "../row";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 import {getCardStyle} from "./style";
+import {setGroupFoldedStates} from "../groupFold";
 
 interface IIds {
     groupId: string,
@@ -71,6 +72,7 @@ const getGalleryHTML = (data: IAVGallery, e: HTMLElement, virtualData: IAVVirtua
 };
 
 const renderGroupGallery = (options: ITableOptions) => {
+    setGroupFoldedStates(options.blockElement, options.data.view.groups);
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
     const query = searchInputElement?.textContent || "";

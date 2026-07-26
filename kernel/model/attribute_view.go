@@ -857,6 +857,58 @@ func foldAttrViewGroup(avID, blockID, groupID string, folded bool) (err error) {
 	return nil
 }
 
+func (tx *Transaction) doFoldAttrViewGroups(operation *Operation) (ret *TxErr) {
+	folded := map[string]bool{}
+	data, err := gulu.JSON.MarshalJSON(operation.Data)
+	if nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &folded); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	if err = foldAttrViewGroups(operation.AvID, operation.BlockID, operation.ViewID, folded); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func foldAttrViewGroups(avID, blockID, viewID string, folded map[string]bool) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return err
+	}
+
+	var view *av.View
+	if "" != viewID {
+		view = attrView.GetView(viewID)
+		if nil == view {
+			return av.ErrViewNotFound
+		}
+	} else {
+		view, err = getAttrViewViewByBlockID(attrView, blockID)
+		if err != nil {
+			return err
+		}
+	}
+
+	if !view.IsGroupView() {
+		return
+	}
+
+	for _, group := range view.Groups {
+		if groupFolded, ok := folded[group.ID]; ok {
+			group.GroupFolded = groupFolded
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	if err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return err
+	}
+	return nil
+}
+
 func (tx *Transaction) doSetAttrViewGroup(operation *Operation) (ret *TxErr) {
 	data, err := gulu.JSON.MarshalJSON(operation.Data)
 	if nil != err {

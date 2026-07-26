@@ -43,6 +43,7 @@ import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {createAttributeViewItem, createAttributeViewItemDocs, openNewItemTemplateMenu} from "./newItemTemplate";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {openKanbanGroupMenu} from "./kanban/groupMenu";
+import {getGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
@@ -78,6 +79,11 @@ const updateDatabaseRow = (protyle: IProtyle, target: HTMLElement) => {
     cellElement.classList.add("av__cell--select");
     addDragFill(cellElement);
     hintRef(textElement.textContent.trim(), protyle, "av");
+};
+
+const setGroupFolded = (foldElement: HTMLElement, folded: boolean) => {
+    foldElement.firstElementChild.classList.toggle("av__group-arrow--open", !folded);
+    foldElement.parentElement.nextElementSibling.classList.toggle("fn__none", folded);
 };
 
 let foldTimeout: number;
@@ -288,31 +294,65 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-group-fold") {
-            target.setAttribute("data-processed", "true");
             const isOpen = target.firstElementChild.classList.contains("av__group-arrow--open");
-            if (isOpen) {
-                target.firstElementChild.classList.remove("av__group-arrow--open");
-                target.parentElement.nextElementSibling.classList.add("fn__none");
-            } else {
-                target.firstElementChild.classList.add("av__group-arrow--open");
-                target.parentElement.nextElementSibling.classList.remove("fn__none");
-            }
-            clearTimeout(foldTimeout);
-            foldTimeout = window.setTimeout(() => {
+            const viewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
+                blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id");
+            if (event.altKey) {
+                const folded = isOpen;
+                const doData: Record<string, boolean> = {};
+                const undoData = getGroupFoldedStates(blockElement);
+                blockElement.querySelectorAll('[data-type="av-group-fold"]').forEach((item: HTMLElement) => {
+                    const groupID = item.dataset.id;
+                    if (!groupID) {
+                        return;
+                    }
+                    if (typeof undoData[groupID] !== "boolean") {
+                        undoData[groupID] = !item.firstElementChild.classList.contains("av__group-arrow--open");
+                    }
+                    item.setAttribute("data-processed", "true");
+                    setGroupFolded(item, folded);
+                });
+                Object.keys(undoData).forEach((groupID) => {
+                    doData[groupID] = folded;
+                });
+                updateGroupFoldedStates(blockElement, doData);
+                clearTimeout(foldTimeout);
                 transaction(protyle, [{
-                    action: "foldAttrViewGroup",
+                    action: "foldAttrViewGroups",
                     avID: blockElement.dataset.avId,
                     blockID: blockElement.dataset.nodeId,
-                    id: target.dataset.id,
-                    data: isOpen
+                    viewID,
+                    data: doData
                 }], [{
-                    action: "foldAttrViewGroup",
+                    action: "foldAttrViewGroups",
                     avID: blockElement.dataset.avId,
                     blockID: blockElement.dataset.nodeId,
-                    id: target.dataset.id,
-                    data: !isOpen
+                    viewID,
+                    data: undoData
                 }]);
-            }, Constants.TIMEOUT_COUNT);
+            } else {
+                target.setAttribute("data-processed", "true");
+                setGroupFolded(target, isOpen);
+                updateGroupFoldedStates(blockElement, {[target.dataset.id]: isOpen});
+                clearTimeout(foldTimeout);
+                foldTimeout = window.setTimeout(() => {
+                    transaction(protyle, [{
+                        action: "foldAttrViewGroup",
+                        avID: blockElement.dataset.avId,
+                        blockID: blockElement.dataset.nodeId,
+                        viewID,
+                        id: target.dataset.id,
+                        data: isOpen
+                    }], [{
+                        action: "foldAttrViewGroup",
+                        avID: blockElement.dataset.avId,
+                        blockID: blockElement.dataset.nodeId,
+                        viewID,
+                        id: target.dataset.id,
+                        data: !isOpen
+                    }]);
+                }, Constants.TIMEOUT_COUNT);
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;

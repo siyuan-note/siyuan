@@ -21,6 +21,7 @@ import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
 import {getBodyVirtualData, initVirtualScroll} from "./virtualScroll";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate, setAVLocateRequest} from "./locate";
+import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 
 interface IIds {
     groupId: string,
@@ -261,6 +262,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
 };
 
 const renderGroupTable = (options: ITableOptions) => {
+    setGroupFoldedStates(options.blockElement, options.data.view.groups);
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
     const query = searchInputElement?.textContent || "";
@@ -826,23 +828,25 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
         return;
     }
-    if (operation.action === "foldAttrViewGroup") {
-        getAVElements(protyle, operation.avID).forEach((item) => {
-            const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${operation.id}"]`);
-            if (foldElement) {
+    if (operation.action === "foldAttrViewGroup" || operation.action === "foldAttrViewGroups") {
+        const folded = operation.action === "foldAttrViewGroup"
+            ? {[operation.id]: operation.data}
+            : operation.data as Record<string, boolean>;
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            updateGroupFoldedStates(item, folded);
+            Object.entries(folded).forEach(([groupID, groupFolded]) => {
+                const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${groupID}"]`);
+                if (!foldElement) {
+                    return;
+                }
                 if (foldElement.getAttribute("data-processed") === "true") {
                     foldElement.removeAttribute("data-processed");
                     return;
                 }
-                if (operation.data) {
-                    foldElement.firstElementChild.classList.remove("av__group-arrow--open");
-                    foldElement.parentElement.nextElementSibling.classList.add("fn__none");
-                } else {
-                    foldElement.firstElementChild.classList.add("av__group-arrow--open");
-                    foldElement.parentElement.nextElementSibling.classList.remove("fn__none");
-                }
+                foldElement.firstElementChild.classList.toggle("av__group-arrow--open", !groupFolded);
+                foldElement.parentElement.nextElementSibling.classList.toggle("fn__none", groupFolded);
                 foldElement.removeAttribute("data-folding");
-            }
+            });
         });
         return;
     }

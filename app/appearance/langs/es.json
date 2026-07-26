@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ Confirmar la eliminación del grupo",
+  "deleteKanbanGroupTip": "Al eliminar el grupo, esta opción se quitará de todos los registros. Los registros sin otras opciones de agrupación se moverán a «Sin agrupar»",
   "avPasteHeaderTitle": "Reconocer encabezado de tabla",
   "avPasteHeaderTip": "¿Usar la primera fila pegada como nombres de campos de la base de datos?",
   "avPasteHeaderAsData": "Usar como datos",

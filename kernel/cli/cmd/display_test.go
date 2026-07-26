@@ -10,6 +10,112 @@ package cmd
 
 import "testing"
 
+func TestResolveDocumentMovePath(t *testing.T) {
+	paths := map[string]string{
+		"/parent":         "/20260726000000-parent1.sy",
+		"/grand/parent":   "/20260726000000-grand01/20260726000001-parent1.sy",
+		"/existing/child": "/20260726000002-existin/20260726000003-child01.sy",
+	}
+	lookup := func(hPath string) (string, bool) {
+		p, found := paths[hPath]
+		return p, found
+	}
+	tests := []struct {
+		name        string
+		userPath    string
+		hPath       string
+		sourceHPath string
+		want        string
+		wantErr     bool
+	}{
+		{
+			name:        "explicit internal path",
+			userPath:    "/20260726000000-parent1.sy",
+			hPath:       "/missing",
+			sourceHPath: "/child",
+			want:        "/20260726000000-parent1.sy",
+		},
+		{name: "default root", sourceHPath: "/child", want: "/"},
+		{name: "root hpath", hPath: "/", sourceHPath: "/child", want: "/"},
+		{
+			name:        "parent hpath",
+			hPath:       "/parent",
+			sourceHPath: "/child",
+			want:        "/20260726000000-parent1.sy",
+		},
+		{
+			name:        "parent hpath with trailing slash",
+			hPath:       "/parent/",
+			sourceHPath: "/child",
+			want:        "/20260726000000-parent1.sy",
+		},
+		{
+			name:        "full destination hpath",
+			hPath:       "/parent/child",
+			sourceHPath: "/child",
+			want:        "/20260726000000-parent1.sy",
+		},
+		{
+			name:        "nested full destination hpath",
+			hPath:       "/grand/parent/child",
+			sourceHPath: "/child",
+			want:        "/20260726000000-grand01/20260726000001-parent1.sy",
+		},
+		{
+			name:        "existing target with different source title",
+			hPath:       "/existing/child",
+			sourceHPath: "/source",
+			want:        "/20260726000002-existin/20260726000003-child01.sy",
+		},
+		{name: "missing target", hPath: "/missing", sourceHPath: "/child", wantErr: true},
+		{name: "missing destination parent", hPath: "/missing/child", sourceHPath: "/child", wantErr: true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := resolveDocumentMovePathWithLookup(test.userPath, test.hPath, test.sourceHPath, lookup)
+			if test.wantErr {
+				if nil == err {
+					t.Fatalf("expected an error, got path %q", got)
+				}
+				return
+			}
+			if nil != err {
+				t.Fatalf("resolve document move path failed: %v", err)
+			}
+			if got != test.want {
+				t.Fatalf("unexpected document move path: got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestNormalizeDocumentCreateParentPath(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		want string
+	}{
+		{name: "default root", path: "", want: "/"},
+		{name: "root", path: "/", want: "/"},
+		{name: "document directory", path: "/20260726000000-abcdefg", want: "/20260726000000-abcdefg"},
+		{name: "document file", path: "/20260726000000-abcdefg.sy", want: "/20260726000000-abcdefg"},
+		{
+			name: "nested document file",
+			path: "/20260726000000-abcdefg/20260726000001-abcdefg.sy",
+			want: "/20260726000000-abcdefg/20260726000001-abcdefg",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := normalizeDocumentCreateParentPath(test.path); got != test.want {
+				t.Fatalf("normalizeDocumentCreateParentPath(%q) = %q, want %q", test.path, got, test.want)
+			}
+		})
+	}
+}
+
 func TestDocumentSearchDisplayFields(t *testing.T) {
 	tests := []struct {
 		name     string

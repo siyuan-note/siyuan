@@ -835,6 +835,17 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
 };
 
 export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
+    let kanbanGroupDragoverElement: HTMLElement;
+    let kanbanGroupDragoverPosition: "left" | "right";
+    let kanbanGroupDragHeight = "";
+    const clearKanbanGroupDragover = () => {
+        if (kanbanGroupDragoverElement) {
+            kanbanGroupDragoverElement.classList.remove("dragover__left", "dragover__right");
+            kanbanGroupDragoverElement.style.removeProperty("--b3-av-kanban-drag-height");
+            kanbanGroupDragoverElement = undefined;
+            kanbanGroupDragoverPosition = undefined;
+        }
+    };
     editorElement.addEventListener("dragstart", (event) => {
         if (protyle.disabled) {
             event.preventDefault();
@@ -903,10 +914,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             } else if (kanbanTitleElement?.getAttribute("draggable") === "true") {
                 const groupElement = kanbanTitleElement.parentElement;
+                const groupRect = groupElement.getBoundingClientRect();
                 const ghostElement = document.createElement("div");
                 ghostElement.className = groupElement.className;
                 ghostElement.innerHTML = kanbanTitleElement.outerHTML;
-                ghostElement.setAttribute("style", `left:1px;top:100vh;position:fixed;opacity:.1;padding:8px;z-index:8;width:${groupElement.clientWidth}px;`);
+                ghostElement.setAttribute("style", `left:1px;top:100vh;position:fixed;opacity:.1;padding:8px;z-index:8;width:${groupRect.width}px;`);
                 document.body.append(ghostElement);
                 event.dataTransfer.setDragImage(ghostElement, -10, -10);
                 if (window.siyuan.touchDragActive) {
@@ -916,6 +928,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         ghostElement.remove();
                     });
                 }
+                let maxGroupHeight = groupRect.height;
+                groupElement.parentElement.querySelectorAll(":scope > .av__kanban-group").forEach((item: HTMLElement) => {
+                    maxGroupHeight = Math.max(maxGroupHeight, item.offsetHeight);
+                });
+                kanbanGroupDragHeight = `${maxGroupHeight}px`;
                 groupElement.style.opacity = ".38";
                 window.siyuan.dragElement = groupElement;
                 event.dataTransfer.effectAllowed = "move";
@@ -1136,7 +1153,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             const sourceElement = window.siyuan.dragElement as HTMLElement;
             const sourceKanbanElement = sourceElement?.parentElement;
-            const targetElement = sourceKanbanElement?.querySelector(".av__kanban-group.dragover__left, .av__kanban-group.dragover__right") as HTMLElement;
+            const targetElement = kanbanGroupDragoverElement;
             const targetKanbanElement = targetElement?.parentElement;
             if (sourceElement && targetElement && sourceElement !== targetElement &&
                 sourceKanbanElement?.classList.contains("av__kanban") && sourceKanbanElement === targetKanbanElement) {
@@ -1179,8 +1196,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (sourceElement) {
                 sourceElement.style.opacity = "";
             }
+            clearKanbanGroupDragover();
+            kanbanGroupDragHeight = "";
             window.siyuan.dragElement = undefined;
-            cleanupDragIndicators(editorElement);
             return;
         }
         let targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover__bottom--sibling, .dragover__top--sibling, .dragover__bottom--child, .dragover__top--child");
@@ -1853,6 +1871,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement = undefined;
         }
         // Clean up all drag indicators unconditionally after drop/cancel
+        clearKanbanGroupDragover();
+        kanbanGroupDragHeight = "";
         cleanupDragIndicators(document);
     });
     let dragoverElement: Element;
@@ -1992,22 +2012,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             hideDragTip();
             const sourceElement = window.siyuan.dragElement as HTMLElement;
             const sourceKanbanElement = sourceElement?.parentElement;
-            sourceKanbanElement?.querySelectorAll(".av__kanban-group.dragover__left, .av__kanban-group.dragover__right").forEach(item => {
-                item.classList.remove("dragover__left", "dragover__right");
-            });
             const kanbanElement = hasClosestByClassName(event.target, "av__kanban") as HTMLElement;
             if (!sourceElement || !sourceKanbanElement?.classList.contains("av__kanban") ||
                 kanbanElement !== sourceKanbanElement) {
+                clearKanbanGroupDragover();
                 return;
             }
             let targetGroupElement = hasClosestByClassName(event.target, "av__kanban-group") as HTMLElement;
             if (targetGroupElement === sourceElement) {
+                clearKanbanGroupDragover();
                 return;
             }
             let position: "left" | "right" = "left";
             if (!targetGroupElement) {
                 const sourceRect = sourceElement.getBoundingClientRect();
                 if (event.clientX >= sourceRect.left && event.clientX <= sourceRect.right) {
+                    clearKanbanGroupDragover();
                     return;
                 }
                 const groupElements = Array.from(kanbanElement.querySelectorAll(":scope > .av__kanban-group"))
@@ -2021,6 +2041,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
             if (!targetGroupElement) {
+                clearKanbanGroupDragover();
                 return;
             }
             const oldVisiblePreviousID = (sourceElement.previousElementSibling as HTMLElement)?.dataset.groupId || "";
@@ -2031,6 +2052,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 visiblePreviousID = oldVisiblePreviousID;
             }
             if (visiblePreviousID === oldVisiblePreviousID) {
+                clearKanbanGroupDragover();
                 return;
             }
             const oldPreviousID = sourceElement.dataset.previousGroupId || "";
@@ -2039,9 +2061,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (previousID === sourceElement.dataset.groupId) {
                 previousID = oldPreviousID;
             }
-            if (previousID !== oldPreviousID) {
-                targetGroupElement.classList.add(`dragover__${position}`);
+            if (previousID === oldPreviousID) {
+                clearKanbanGroupDragover();
+                return;
             }
+            if (kanbanGroupDragoverElement === targetGroupElement && kanbanGroupDragoverPosition === position) {
+                return;
+            }
+            clearKanbanGroupDragover();
+            targetGroupElement.style.setProperty("--b3-av-kanban-drag-height", kanbanGroupDragHeight);
+            targetGroupElement.classList.add(`dragover__${position}`);
+            kanbanGroupDragoverElement = targetGroupElement;
+            kanbanGroupDragoverPosition = position;
             return;
         }
         const isAvSubType = gutterTypes[0] === "nodeattributeviewrowmenu" ||
@@ -2729,6 +2760,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         counter--;
         if (counter === 0) {
+            clearKanbanGroupDragover();
             cleanupDragIndicators(editorElement);
             dragoverElement = undefined;
             hideDragTip();
@@ -2745,6 +2777,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             document.onmousemove = null;
         }
         // Clean up all drag indicators on cancel
+        clearKanbanGroupDragover();
+        kanbanGroupDragHeight = "";
         cleanupDragIndicators(editorElement);
         dragoverElement = undefined;
         hideDragTip();
@@ -2752,6 +2786,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     });
     // Fallback: document-level cleanup in case dragend doesn't bubble
     document.addEventListener("dragend", () => {
+        clearKanbanGroupDragover();
+        kanbanGroupDragHeight = "";
         cleanupDragIndicators(document);
     }, {once: true});
 };
@@ -2765,6 +2801,7 @@ const cleanupDragIndicators = (scope: ParentNode) => {
         item.style.removeProperty("--drag-line-left");
         item.style.removeProperty("--drag-base-bg");
         item.style.removeProperty("--drag-line-bg");
+        item.style.removeProperty("--b3-av-kanban-drag-height");
     });
 };
 

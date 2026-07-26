@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ Löschen der Gruppe bestätigen",
+  "deleteKanbanGroupTip": "Nach dem Löschen der Gruppe wird diese Option aus allen Datensätzen entfernt. Datensätze ohne weitere Gruppierungsoptionen werden nach „Nicht gruppiert“ verschoben",
   "avPasteHeaderTitle": "Tabellenkopf erkennen",
   "avPasteHeaderTip": "Soll die erste eingefügte Zeile als Namen der Datenbankfelder verwendet werden?",
   "avPasteHeaderAsData": "Als Daten verwenden",

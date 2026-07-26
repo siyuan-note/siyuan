@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ グループの削除を確認",
+  "deleteKanbanGroupTip": "グループを削除すると、この選択肢はすべてのレコードから削除されます。ほかにグループ化の選択肢がないレコードは「未グループ」に移動します",
   "avPasteHeaderTitle": "表のヘッダーを認識",
   "avPasteHeaderTip": "貼り付けた最初の行をデータベースのフィールド名として使用しますか？",
   "avPasteHeaderAsData": "データとして使用",

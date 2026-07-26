@@ -42,6 +42,7 @@ import {removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {createAttributeViewItem, createAttributeViewItemDocs, openNewItemTemplateMenu} from "./newItemTemplate";
 import {openDatabaseRowByData} from "./openDatabaseRow";
+import {openKanbanGroupMenu} from "./kanban/groupMenu";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
@@ -186,6 +187,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             } else {
                 insertRows({blockElement, protyle, count: 1, previousID, groupID});
             }
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-kanban-group-more" && !protyle.disabled) {
+            openKanbanGroupMenu({protyle, blockElement, target});
             event.preventDefault();
             event.stopPropagation();
             return true;

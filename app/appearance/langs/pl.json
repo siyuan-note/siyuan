@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ Potwierdź usunięcie grupy",
+  "deleteKanbanGroupTip": "Po usunięciu grupy ta opcja zostanie usunięta ze wszystkich rekordów. Rekordy bez innych opcji grupowania zostaną przeniesione do „Bez grupy”",
   "avPasteHeaderTitle": "Rozpoznaj nagłówek tabeli",
   "avPasteHeaderTip": "Użyć pierwszego wklejonego wiersza jako nazw pól bazy danych?",
   "avPasteHeaderAsData": "Użyj jako danych",

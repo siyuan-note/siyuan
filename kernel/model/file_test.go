@@ -102,6 +102,49 @@ func TestRemoveDocRejectsInvalidPath(t *testing.T) {
 	}
 }
 
+func TestValidateCreateDocDoesNotWrite(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	newID := "20260718000003-abcdefg"
+
+	rootPath := "/" + newID + ".sy"
+	if err := ValidateCreateDoc(fixture.box.ID, rootPath, "Root document"); err != nil {
+		t.Fatalf("validate root document failed: %v", err)
+	}
+	if fixture.box.Exist(rootPath) {
+		t.Fatalf("validation created root document [%s]", rootPath)
+	}
+
+	childPath := path.Join(strings.TrimSuffix(fixture.targetPath, ".sy"), newID+".sy")
+	if err := ValidateCreateDoc(fixture.box.ID, childPath, "Child document"); err != nil {
+		t.Fatalf("validate child document failed: %v", err)
+	}
+	if fixture.box.Exist(childPath) {
+		t.Fatalf("validation created child document [%s]", childPath)
+	}
+
+	invalidChildPath := path.Join(fixture.targetPath, newID+".sy")
+	if err := ValidateCreateDoc(fixture.box.ID, invalidChildPath, "Invalid child"); !errors.Is(err, ErrBlockNotFound) {
+		t.Fatalf("expected parent path with .sy suffix to return ErrBlockNotFound, got [%v]", err)
+	}
+
+	wrongParentPath := path.Join(strings.TrimSuffix(fixture.sourcePath, ".sy"), strings.TrimSuffix(fixture.targetPath, ".sy"), newID+".sy")
+	if err := ValidateCreateDoc(fixture.box.ID, wrongParentPath, "Wrong parent"); !errors.Is(err, ErrBlockNotFound) {
+		t.Fatalf("expected mismatched parent path to return ErrBlockNotFound, got [%v]", err)
+	}
+
+	otherBox := &Box{ID: "20260718000004-abcdefg"}
+	otherBoxConf := conf.NewBoxConf()
+	otherBoxConf.Name = "Other file operation test"
+	otherBoxConf.Closed = false
+	if err := otherBox.SaveConf(otherBoxConf); err != nil {
+		t.Fatalf("save other test notebook conf failed: %v", err)
+	}
+	crossBoxPath := path.Join(strings.TrimSuffix(fixture.targetPath, ".sy"), newID+".sy")
+	if err := ValidateCreateDoc(otherBox.ID, crossBoxPath, "Cross notebook"); !errors.Is(err, ErrBlockNotFound) {
+		t.Fatalf("expected cross-notebook parent to return ErrBlockNotFound, got [%v]", err)
+	}
+}
+
 func TestGetBoxesByPathsStrictRejectsInvalidPaths(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	tests := []struct {
@@ -125,6 +168,81 @@ func TestGetBoxesByPathsStrictRejectsInvalidPaths(t *testing.T) {
 
 	if _, err := getBoxesByPathsStrict([]string{strings.TrimPrefix(fixture.sourcePath, "/")}); err != nil {
 		t.Fatalf("expected document path without leading slash to remain supported, got [%v]", err)
+	}
+}
+
+func TestBlockTransactionRejectsDocumentMove(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	before := treenode.GetBlockTree(fixture.sourceID)
+	if nil == before {
+		t.Fatalf("source document block tree [%s] not found", fixture.sourceID)
+	}
+
+	tx := &Transaction{DoOperations: []*Operation{{
+		Action:   "move",
+		ID:       fixture.sourceID,
+		ParentID: strings.TrimSuffix(path.Base(fixture.targetPath), ".sy"),
+	}}}
+	err := PerformTxSync(tx)
+	if nil == err {
+		t.Fatal("expected document move transaction to be rejected")
+	}
+	var txErr *TxErr
+	if !errors.As(err, &txErr) {
+		t.Fatalf("expected transaction error, got [%T] %v", err, err)
+	}
+	if TxErrCodePushMsg != txErr.Code() {
+		t.Fatalf("unexpected transaction error code: got %d, want %d", txErr.Code(), TxErrCodePushMsg)
+	}
+
+	after := treenode.GetBlockTree(fixture.sourceID)
+	if nil == after {
+		t.Fatalf("source document block tree [%s] was removed", fixture.sourceID)
+	}
+	if before.RootID != after.RootID || before.ParentID != after.ParentID || before.BoxID != after.BoxID ||
+		before.Path != after.Path || before.HPath != after.HPath || before.Type != after.Type {
+		t.Fatalf("source document block tree changed: before [%+v], after [%+v]", before, after)
+	}
+	if !fixture.box.Exist(fixture.sourcePath) || !fixture.box.Exist(fixture.targetPath) {
+		t.Fatal("document move transaction changed files on disk")
+	}
+}
+
+func TestBlockTransactionRejectsDocumentPreviousSibling(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	before := treenode.GetBlockTree(fixture.childID)
+	if nil == before {
+		t.Fatalf("source block tree [%s] not found", fixture.childID)
+	}
+
+	tx := &Transaction{DoOperations: []*Operation{{
+		Action:     "move",
+		ID:         fixture.childID,
+		ParentID:   fixture.sourceID,
+		PreviousID: strings.TrimSuffix(path.Base(fixture.targetPath), ".sy"),
+	}}}
+	err := PerformTxSync(tx)
+	if nil == err {
+		t.Fatal("expected document previous sibling to be rejected")
+	}
+	var txErr *TxErr
+	if !errors.As(err, &txErr) {
+		t.Fatalf("expected transaction error, got [%T] %v", err, err)
+	}
+	if TxErrCodePushMsg != txErr.Code() {
+		t.Fatalf("unexpected transaction error code: got %d, want %d", txErr.Code(), TxErrCodePushMsg)
+	}
+
+	after := treenode.GetBlockTree(fixture.childID)
+	if nil == after {
+		t.Fatalf("source block tree [%s] was removed", fixture.childID)
+	}
+	if before.RootID != after.RootID || before.ParentID != after.ParentID || before.BoxID != after.BoxID ||
+		before.Path != after.Path || before.HPath != after.HPath || before.Type != after.Type {
+		t.Fatalf("source block tree changed: before [%+v], after [%+v]", before, after)
+	}
+	if !fixture.box.Exist(fixture.sourcePath) || !fixture.box.Exist(fixture.targetPath) {
+		t.Fatal("document previous sibling transaction changed files on disk")
 	}
 }
 

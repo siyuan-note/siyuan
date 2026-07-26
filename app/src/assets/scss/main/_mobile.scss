@@ -484,7 +484,7 @@
 }
 
 .av__cell[data-dtype="block"]:not(.av__cell--header) {
-  padding-right: 74px;
+  padding-right: 77px;
 
   & > .av__row-actions {
     opacity: 1;
@@ -492,11 +492,11 @@
   }
 
   &[data-align="center"] {
-    padding-left: 74px;
+    padding-left: 77px;
   }
 
   &[data-align="right"] {
-    padding-left: 74px;
+    padding-left: 77px;
     padding-right: 8px;
   }
 }

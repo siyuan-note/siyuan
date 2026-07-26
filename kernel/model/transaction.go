@@ -520,6 +520,19 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		logging.LogErrorf("get node [%s] in tree [%s] failed", id, srcTree.Root.ID)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
+	if ast.NodeDocument == srcNode.Type {
+		msg := "document blocks cannot be moved with block transactions"
+		logging.LogWarnf("%s [%s]", msg, id)
+		return &TxErr{code: TxErrCodePushMsg, msg: msg, id: id}
+	}
+	if targetPreviousID := operation.PreviousID; "" != targetPreviousID {
+		if targetBlockTree := treenode.GetBlockTree(targetPreviousID); nil != targetBlockTree &&
+			treenode.TypeAbbr(ast.NodeDocument.String()) == targetBlockTree.Type {
+			msg := "document blocks cannot be used as previous siblings"
+			logging.LogWarnf("%s [%s]", msg, targetPreviousID)
+			return &TxErr{code: TxErrCodePushMsg, msg: msg, id: targetPreviousID}
+		}
+	}
 
 	// 生成文档历史 https://github.com/siyuan-note/siyuan/issues/14359
 	generateOpTypeHistory(srcTree, HistoryOpUpdate)
@@ -566,6 +579,11 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		if nil == targetNode {
 			logging.LogErrorf("get node [%s] in tree [%s] failed", targetPreviousID, targetTree.Root.ID)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: targetPreviousID}
+		}
+		if ast.NodeDocument == targetNode.Type {
+			msg := "document blocks cannot be used as previous siblings"
+			logging.LogWarnf("%s [%s]", msg, targetPreviousID)
+			return &TxErr{code: TxErrCodePushMsg, msg: msg, id: targetPreviousID}
 		}
 
 		if ast.NodeHeading == targetNode.Type && treenode.IsSelfFolded(targetNode) {

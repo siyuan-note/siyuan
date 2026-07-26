@@ -1678,7 +1678,7 @@
         content: "";
         position: absolute;
         top: 0;
-        bottom: 0;
+        height: var(--b3-av-kanban-drag-height, 100%);
         width: 4px;
         background-color: var(--b3-theme-primary-lighter);
         z-index: 3;

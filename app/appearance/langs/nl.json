@@ -1,4 +1,6 @@
 {
+  "deleteKanbanGroupConfirm": "⚠️ Verwijderen van groep bevestigen",
+  "deleteKanbanGroupTip": "Na het verwijderen van de groep wordt deze optie uit alle records verwijderd. Records zonder andere groeperingsopties worden verplaatst naar ‘Niet gegroepeerd’",
   "avPasteHeaderTitle": "Tabelkop herkennen",
   "avPasteHeaderTip": "De eerste geplakte rij als veldnamen van de database gebruiken?",
   "avPasteHeaderAsData": "Als gegevens gebruiken",

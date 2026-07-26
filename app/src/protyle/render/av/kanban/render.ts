@@ -17,10 +17,15 @@ interface IIds {
 
 const getKanbanTitleHTML = (group: IAVView, counter: number, draggable: boolean) => {
     let nameHTML = "";
+    let optionMenuHTML = "";
     if (["mSelect", "select"].includes(group.groupValue.type)) {
         group.groupValue.mSelect.forEach((item) => {
             nameHTML += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
         });
+        if (draggable && group.groupValue.mSelect.length === 1) {
+            const value = group.groupValue.mSelect[0];
+            optionMenuHTML = `<span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-kanban-group-more" data-position="north" aria-label="${window.siyuan.languages.more}" data-group-id="${group.id}" data-col-id="${group.groupKey.id}" data-name="${escapeAttr(value.content)}"><svg><use xlink:href="#iconMore"></use></svg></span><span class="fn__space"></span>`;
+        }
     } else if (group.groupValue.type === "checkbox") {
         nameHTML = `<svg style="width:calc(1.625em - 12px);height:calc(1.625em - 12px);margin: 4px 0;float: left;"><use xlink:href="#icon${group.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else {
@@ -31,6 +36,7 @@ const getKanbanTitleHTML = (group: IAVView, counter: number, draggable: boolean)
     <span class="av__group-name fn__ellipsis" style="white-space: nowrap;">${nameHTML}</span>
     ${(!counter || counter === 0) ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.entryNum}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
     <span class="fn__flex-1"></span>
+    ${optionMenuHTML}
     <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
 };
@@ -175,9 +181,11 @@ export const renderKanban = async (options: {
         return;
     }
     const view = data.view as IAVKanban;
+    const groupKey = view.fields.find(item => item.id === view.group?.field);
+    const groupOptions = groupKey?.options || [];
     const groupDraggable = !options.protyle.disabled && !created && !snapshot &&
         !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed") &&
-        !["created", "date", "updated"].includes(view.groupKey?.type);
+        !["created", "date", "updated"].includes(groupKey?.type);
     const groupConfig = escapeAttr(JSON.stringify(view.group));
     let bodyHTML = "";
     let isSelectGroup = false;
@@ -205,7 +213,7 @@ export const renderKanban = async (options: {
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
-    <div class="av__kanban${isSelectGroup ? " av__kanban--bg" : ""}" style="${getCardStyle(view)}">
+    <div class="av__kanban${isSelectGroup ? " av__kanban--bg" : ""}" data-group-options="${escapeAttr(JSON.stringify(groupOptions))}" style="${getCardStyle(view)}">
         ${bodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
@@ -213,6 +221,7 @@ export const renderKanban = async (options: {
     } else {
         const kanbanElement = options.blockElement.querySelector(".av__kanban");
         kanbanElement.innerHTML = bodyHTML;
+        (kanbanElement as HTMLElement).dataset.groupOptions = JSON.stringify(groupOptions);
         if (isSelectGroup) {
             kanbanElement.classList.add("av__kanban--bg");
         } else {

@@ -26,28 +26,31 @@ export const getEditableAVFields = (blockElement: HTMLElement) => {
     return getFieldsByData(data).filter((field) => EDITABLE_FIELD_TYPES.includes(field.type));
 };
 
-const getItemCell = (view: IAVView, itemID: string, fieldID: string): IAVCell | undefined => {
+const findItemCell = (view: IAVView, viewType: TAVView, itemID: string, fieldIndex: number): IAVCell | undefined => {
     if (view.groups?.length > 0) {
         for (const group of view.groups) {
-            const cell = getItemCell(group, itemID, fieldID);
+            const cell = findItemCell(group, viewType, itemID, fieldIndex);
             if (cell) {
                 return cell;
             }
         }
         return;
     }
-    const isTable = view.type === "table";
-    const fields = isTable ? (view as IAVTable).columns : (view as IAVGallery).fields;
-    const fieldIndex = fields.findIndex((field) => field.id === fieldID);
+    const isTable = viewType === "table";
+    if (isTable) {
+        const item = (view as IAVTable).rows?.find((currentItem) => currentItem.id === itemID);
+        return item?.cells[fieldIndex];
+    }
+    const item = (view as IAVGallery).cards?.find((currentItem) => currentItem.id === itemID);
+    return item?.values[fieldIndex];
+};
+
+const getItemCell = (data: IAV, itemID: string, fieldID: string) => {
+    const fieldIndex = getFieldsByData(data).findIndex((field) => field.id === fieldID);
     if (fieldIndex < 0) {
         return;
     }
-    if (isTable) {
-        const item = (view as IAVTable).rows.find((currentItem) => currentItem.id === itemID);
-        return item?.cells[fieldIndex];
-    }
-    const item = (view as IAVGallery).cards.find((currentItem) => currentItem.id === itemID);
-    return item?.values[fieldIndex];
+    return findItemCell(data.view, data.viewType, itemID, fieldIndex);
 };
 
 const createEditProxy = (options: {
@@ -55,7 +58,7 @@ const createEditProxy = (options: {
     field: IAVColumn;
     itemID: string;
 }) => {
-    const cell = getItemCell(options.data.view, options.itemID, options.field.id);
+    const cell = getItemCell(options.data, options.itemID, options.field.id);
     const value = cell?.value ?
         JSON.parse(JSON.stringify(cell.value)) as IAVCellValue :
         createEmptyAVValue(options.field.id, options.field.type, options.itemID);
@@ -116,7 +119,7 @@ export const openAVFieldEditor = (options: {
         }
         destroyed = true;
         cellElements.forEach((cellElement, index) => {
-            const cell = getItemCell(data.view, itemIDs[index], options.field.id);
+            const cell = getItemCell(data, itemIDs[index], options.field.id);
             if (!cell || !cellElement.dataset.cellValue) {
                 return;
             }

@@ -44,31 +44,23 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
         }
 
         if (content.startsWith("//!js")) {
+            const renderError = (error: unknown) => {
+                console.error(error);
+                renderEmbed([], protyle, item, top, String(error), onEmbedRender);
+            };
             try {
-                const includeIDs = new Function(
+                const includeIDsPromise = new Function(
                     "fetchSyncPost",
                     "item",
                     "protyle",
                     "top",
-                    content)(fetchSyncPost, item, protyle, top);
-                if (includeIDs instanceof Promise) {
-                    includeIDs.then((promiseIds) => {
-                        if (Array.isArray(promiseIds)) {
-                            fetchPost("/api/search/getEmbedBlock", {
-                                embedBlockID: item.getAttribute("data-node-id"),
-                                includeIDs: promiseIds,
-                                headingMode: ["0", "1", "2"].includes(item.getAttribute("custom-heading-mode")) ? parseInt(item.getAttribute("custom-heading-mode")) : window.siyuan.config.editor.headingEmbedMode,
-                                breadcrumb
-                            }, (response) => {
-                                renderEmbed(response.data.blocks || [], protyle, item, top, undefined, onEmbedRender);
-                            });
-                        } else {
-                            return;
-                        }
-                    }).catch((e) => {
-                        renderEmbed([], protyle, item, top, e, onEmbedRender);
-                    });
-                } else if (Array.isArray(includeIDs)) {
+                    `return (async () => {
+${content}
+})();`)(fetchSyncPost, item, protyle, top);
+                includeIDsPromise.then((includeIDs: unknown) => {
+                    if (!Array.isArray(includeIDs)) {
+                        return;
+                    }
                     fetchPost("/api/search/getEmbedBlock", {
                         embedBlockID: item.getAttribute("data-node-id"),
                         includeIDs,
@@ -77,11 +69,9 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
                     }, (response) => {
                         renderEmbed(response.data.blocks || [], protyle, item, top, undefined, onEmbedRender);
                     });
-                } else {
-                    return;
-                }
+                }).catch(renderError);
             } catch (e) {
-                renderEmbed([], protyle, item, top, e, onEmbedRender);
+                renderError(e);
             }
         } else {
             fetchPost("/api/search/searchEmbedBlock", {

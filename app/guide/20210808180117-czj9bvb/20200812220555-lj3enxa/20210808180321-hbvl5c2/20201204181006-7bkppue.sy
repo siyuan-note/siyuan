@@ -153,17 +153,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "（"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://docs.siyuan-note.club/zh-Hans/reference/template/sprig/",
-					"TextMarkTextContent": "中文版"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "）。"
+					"Data": "。"
 				}
 			]
 		},

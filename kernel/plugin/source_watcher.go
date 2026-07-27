@@ -31,8 +31,9 @@ import (
 )
 
 const (
-	pluginSourceReloadDelay  = 300 * time.Millisecond
-	pluginSourcePollInterval = time.Second
+	pluginSourceReloadDelay      = 300 * time.Millisecond
+	pluginSourcePollInterval     = time.Second
+	pluginSourceFullScanInterval = 30 * time.Second
 )
 
 var errPluginFileWatchUnsupported = errors.New("plugin file watcher is not supported on mobile")
@@ -50,6 +51,8 @@ type pluginSourceWatchEntry struct {
 	signature  [sha256.Size]byte
 	fileState  pluginSourceFileState
 	lastError  string
+	verified   bool
+	nextScan   time.Time
 	generation uint64
 	timer      *time.Timer
 }
@@ -65,14 +68,18 @@ type pluginSourceWatchState struct {
 	entries    map[string]*pluginSourceWatchEntry
 	generation uint64
 	delay      time.Duration
+	fullScan   time.Duration
+	now        func() time.Time
 	reload     func(name string)
 }
 
 func newPluginSourceWatchState(reload func(name string)) pluginSourceWatchState {
 	return pluginSourceWatchState{
-		entries: map[string]*pluginSourceWatchEntry{},
-		delay:   pluginSourceReloadDelay,
-		reload:  reload,
+		entries:  map[string]*pluginSourceWatchEntry{},
+		delay:    pluginSourceReloadDelay,
+		fullScan: pluginSourceFullScanInterval,
+		now:      time.Now,
+		reload:   reload,
 	}
 }
 
@@ -104,12 +111,14 @@ func (s *pluginSourceWatchState) register(name, path, source string) {
 		old.timer.Stop()
 	}
 	s.generation++
-	s.entries[name] = &pluginSourceWatchEntry{
+	entry := &pluginSourceWatchEntry{
 		path:       path,
 		signature:  sha256.Sum256([]byte(source)),
 		fileState:  fileState,
 		generation: s.generation,
 	}
+	s.entries[name] = entry
+	s.scheduleLocked(name, entry, &fileState)
 }
 
 func (s *pluginSourceWatchState) unregister(name string) {
@@ -130,17 +139,20 @@ func (s *pluginSourceWatchState) scan() {
 			path:       entry.path,
 			generation: entry.generation,
 			fileState:  entry.fileState,
+			verified:   entry.verified,
+			nextScan:   entry.nextScan,
 		}
 	}
 	s.mu.Unlock()
 
+	now := s.now()
 	for name, snapshot := range entries {
 		fileState, err := readPluginSourceFileState(snapshot.path)
 		if err != nil {
 			s.logReadError(name, snapshot.generation, snapshot.path, err)
 			continue
 		}
-		if fileState == snapshot.fileState {
+		if snapshot.verified && fileState == snapshot.fileState && now.Before(snapshot.nextScan) {
 			s.clearReadError(name, snapshot.generation)
 			continue
 		}
@@ -242,6 +254,8 @@ func (s *pluginSourceWatchState) finishPluginSourceCheck(
 	entry.fileState = fileState
 	entry.lastError = ""
 	entry.signature = signature
+	entry.verified = true
+	entry.nextScan = s.now().Add(s.fullScan)
 	entry.timer = nil
 	reload := s.reload
 	s.mu.Unlock()
@@ -304,6 +318,8 @@ type pluginSourceWatchSnapshot struct {
 	path       string
 	generation uint64
 	fileState  pluginSourceFileState
+	verified   bool
+	nextScan   time.Time
 }
 
 func readPluginSourceFileState(path string) (pluginSourceFileState, error) {

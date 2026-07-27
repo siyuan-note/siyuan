@@ -136,6 +136,7 @@ func TestPluginSourceWatchStateScansChangedContent(t *testing.T) {
 		state.unregister(name)
 	})
 
+	waitForPluginSourceVerification(t, &state, name)
 	state.scan()
 	state.mu.Lock()
 	timer := state.entries[name].timer
@@ -173,6 +174,67 @@ func TestPluginSourceWatchStateScansChangedContent(t *testing.T) {
 	if err := os.WriteFile(sourcePath, []byte("recreated"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	state.scan()
+	waitForPluginReload(t, reloaded, name)
+}
+
+func TestPluginSourceWatchStateVerifiesRegistrationContent(t *testing.T) {
+	pluginsDir := t.TempDir()
+	name := "test-plugin"
+	sourcePath := filepath.Join(pluginsDir, "kernel.js")
+	if err := os.WriteFile(sourcePath, []byte("changed-after-load"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	reloaded := make(chan string, 1)
+	state := newPluginSourceWatchState(func(pluginName string) {
+		reloaded <- pluginName
+	})
+	state.delay = 20 * time.Millisecond
+	state.register(name, sourcePath, "loaded-source")
+	t.Cleanup(func() {
+		state.unregister(name)
+	})
+
+	waitForPluginReload(t, reloaded, name)
+}
+
+func TestPluginSourceWatchStatePeriodicallyChecksContent(t *testing.T) {
+	pluginsDir := t.TempDir()
+	name := "test-plugin"
+	sourcePath := filepath.Join(pluginsDir, "kernel.js")
+	if err := os.WriteFile(sourcePath, []byte("initial"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	now := time.Now()
+	reloaded := make(chan string, 1)
+	state := newPluginSourceWatchState(func(pluginName string) {
+		reloaded <- pluginName
+	})
+	state.delay = 20 * time.Millisecond
+	state.now = func() time.Time {
+		return now
+	}
+	state.register(name, sourcePath, "initial")
+	t.Cleanup(func() {
+		state.unregister(name)
+	})
+	waitForPluginSourceVerification(t, &state, name)
+
+	if err := os.WriteFile(sourcePath, []byte("changed"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	fileState, err := readPluginSourceFileState(sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	state.mu.Lock()
+	entry := state.entries[name]
+	entry.fileState = fileState
+	entry.nextScan = now
+	state.mu.Unlock()
+
 	state.scan()
 	waitForPluginReload(t, reloaded, name)
 }
@@ -342,4 +404,21 @@ func expectNoPluginReload(t *testing.T, reloaded <-chan string) {
 		t.Fatalf("unexpected plugin reload for %q", got)
 	case <-time.After(80 * time.Millisecond):
 	}
+}
+
+func waitForPluginSourceVerification(t *testing.T, state *pluginSourceWatchState, name string) {
+	t.Helper()
+
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		state.mu.Lock()
+		entry := state.entries[name]
+		verified := entry != nil && entry.verified && entry.timer == nil
+		state.mu.Unlock()
+		if verified {
+			return
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	t.Fatal("timed out waiting for plugin source verification")
 }

@@ -339,13 +339,14 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 		return
 	}
 
-	if 1 > len(view.Filters) && !view.IsGroupView() {
+	useGroupDefault := "" != groupID
+	if 1 > len(view.Filters) && !useGroupDefault {
 		// 没有过滤条件也没有分组条件时忽略
 		return
 	}
 
 	groupView := view
-	if "" != groupID {
+	if useGroupDefault {
 		groupView = view.GetGroupByID(groupID)
 	}
 	if nil == groupView {
@@ -353,7 +354,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 		return
 	}
 
-	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID, true)
+	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID, true, useGroupDefault)
 	for _, value := range ret {
 		// 主键都不返回内容，避免闪烁 https://github.com/siyuan-note/siyuan/issues/15561#issuecomment-3184746195
 		if av.KeyTypeBlock == value.Type {
@@ -363,10 +364,16 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 	return
 }
 
-func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string, isCreate bool) (ret map[string]*av.Value) {
+func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string, isCreate, useGroupDefault bool) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
+	defer func() {
+		for keyID, value := range ret {
+			key, _ := attrView.GetKey(keyID)
+			normalizeAttrViewAddingDefaultValue(key, value)
+		}
+	}()
 
-	if 1 > len(view.Filters) && !view.IsGroupView() {
+	if 1 > len(view.Filters) && !useGroupDefault {
 		// 没有过滤条件也没有分组条件时忽略
 		return
 	}
@@ -399,6 +406,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	filterKeyIDs := map[string]bool{}
 	if applyFilterDefaultValues(view.Filters, attrView, addingItemID, nearItem, templateRelevantKeys, rollupRelevantKeys, ret, filterKeyIDs) {
 		// 遇到 mAsset 过滤即结束全部默认值计算（保留原外层 return 语义）
+		return
+	}
+
+	if !useGroupDefault {
 		return
 	}
 
@@ -492,11 +503,6 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		// 临近项不为空并且分组字段和过滤字段相同时，优先使用临近项 https://github.com/siyuan-note/siyuan/issues/15591
 		newValue = getNewValueByNearItem(nearItem, groupKey, addingItemID)
 		ret[groupKey.ID] = newValue
-
-		if nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
-			newValue.Date.Content = time.Now().UnixMilli()
-			newValue.Date.IsNotEmpty = true
-		}
 		return
 	}
 
@@ -527,6 +533,9 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 			}
 		} else if av.KeyTypeCheckbox == groupView.GroupVal.Type {
 			newValue.Checkbox.Checked = groupView.GroupVal.Checkbox.Checked
+		} else if av.KeyTypeRelation == groupKey.Type && av.KeyTypeRelation == groupView.GroupVal.Type &&
+			nil != groupView.GroupVal.Relation && 0 < len(groupView.GroupVal.Relation.BlockIDs) {
+			newValue.Relation.BlockIDs = []string{groupView.GroupVal.Relation.BlockIDs[0]}
 		}
 
 		ret[groupKey.ID] = newValue
@@ -535,19 +544,48 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 	if nil != newValue && !filterKeyIDs[groupKey.ID] {
 		ret[groupKey.ID] = newValue
-
-		if nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
-			newValue.Date.Content = time.Now().UnixMilli()
-			newValue.Date.IsNotEmpty = true
-		}
 	}
 	return
 }
 
+func normalizeAttrViewAddingDefaultValue(key *av.Key, value *av.Value) {
+	if nil == key || nil == value {
+		return
+	}
+	if av.KeyTypeDate == value.Type && nil != value.Date {
+		value.Date.IsNotTime = true
+		if nil != key.Date {
+			value.Date.IsNotTime = !key.Date.FillSpecificTime
+			if key.Date.AutoFillNow {
+				value.Date.Content = util.CurrentTimeMillis()
+				value.Date.IsNotEmpty = true
+			}
+		}
+	}
+	if av.KeyTypeRelation == value.Type && nil != value.Relation {
+		value.Relation.Contents = nil
+	}
+}
+
 // applyFilterDefaultValues 递归遍历过滤节点树，对叶子节点计算新增行的默认值。
-// 分组节点只负责向下递归；叶子节点保留原扁平时代的默认值计算逻辑。
+// AND 分组合并后验证所有子节点，OR 分组采用首个可满足的分支；无法满足时不生成默认值。
 // 返回 true 表示遇到 mAsset 过滤，调用方应立即结束全部默认值计算（保留原外层 return 语义）。
 func applyFilterDefaultValues(filters []*av.ViewFilter, attrView *av.AttributeView, addingItemID string, nearItem av.Item,
+	templateRelevantKeys map[string][]*av.Key, rollupRelevantKeys map[string]*av.Key,
+	ret map[string]*av.Value, filterKeyIDs map[string]bool) (stop bool) {
+	originalRet := cloneDefaultValues(ret)
+	originalFilterKeyIDs := cloneBoolMap(filterKeyIDs)
+	if applyFilterDefaultValues0(filters, attrView, addingItemID, nearItem, templateRelevantKeys, rollupRelevantKeys, ret, filterKeyIDs) {
+		return true
+	}
+	if !filterBranchesMatchDefaultValues(filters, attrView, addingItemID, ret) {
+		replaceDefaultValues(ret, originalRet)
+		replaceBoolMap(filterKeyIDs, originalFilterKeyIDs)
+	}
+	return false
+}
+
+func applyFilterDefaultValues0(filters []*av.ViewFilter, attrView *av.AttributeView, addingItemID string, nearItem av.Item,
 	templateRelevantKeys map[string][]*av.Key, rollupRelevantKeys map[string]*av.Key,
 	ret map[string]*av.Value, filterKeyIDs map[string]bool) (stop bool) {
 	for _, filter := range filters {
@@ -555,17 +593,37 @@ func applyFilterDefaultValues(filters []*av.ViewFilter, attrView *av.AttributeVi
 			continue
 		}
 		if filter.IsGroup() {
+			if av.FilterCombinationOr == filter.Combination && 0 < len(filter.Filters) {
+				for _, child := range filter.Filters {
+					candidateRet := cloneDefaultValues(ret)
+					candidateFilterKeyIDs := cloneBoolMap(filterKeyIDs)
+					childStop := applyFilterDefaultValues([]*av.ViewFilter{child}, attrView, addingItemID, nearItem,
+						templateRelevantKeys, rollupRelevantKeys, candidateRet, candidateFilterKeyIDs)
+					if childStop || filterBranchMatchesDefaultValues(child, attrView, addingItemID, candidateRet) {
+						replaceDefaultValues(ret, candidateRet)
+						replaceBoolMap(filterKeyIDs, candidateFilterKeyIDs)
+						if childStop {
+							return true
+						}
+						break
+					}
+				}
+				continue
+			}
 			if applyFilterDefaultValues(filter.Filters, attrView, addingItemID, nearItem, templateRelevantKeys, rollupRelevantKeys, ret, filterKeyIDs) {
 				return true
 			}
 			continue
 		}
 
-		filterKeyIDs[filter.Column] = true
 		keyValues, _ := attrView.GetKeyValues(filter.Column)
 		if nil == keyValues {
 			continue
 		}
+		if !filter.IsValid() {
+			continue
+		}
+		filterKeyIDs[filter.Column] = true
 
 		if av.KeyTypeTemplate == keyValues.Key.Type && nil != nearItem {
 			if keys := templateRelevantKeys[keyValues.Key.ID]; 0 < len(keys) {
@@ -596,29 +654,95 @@ func applyFilterDefaultValues(filters []*av.ViewFilter, attrView *av.AttributeVi
 			return true // 保留原语义：遇到 mAsset 过滤即结束默认值计算
 		}
 
-		newValue := filter.GetAffectValue(keyValues.Key, addingItemID)
-		if nil == newValue {
-			if filter.IsValid() {
-				newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
-			}
+		newValue, allowNearItem := filter.GetAffectValue(keyValues.Key, addingItemID)
+		if nil == newValue && allowNearItem {
+			newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
 		}
 		if nil != newValue {
-			if av.KeyTypeDate == keyValues.Key.Type {
-				if nil != nearItem {
-					nearValue := getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
-					newValue.Date.IsNotTime = nearValue.Date.IsNotTime
-				}
-
-				if nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
-					newValue.Date.Content = time.Now().UnixMilli()
-					newValue.Date.IsNotEmpty = true
-				}
-			}
-
 			ret[keyValues.Key.ID] = newValue
 		}
 	}
 	return false
+}
+
+func cloneDefaultValues(values map[string]*av.Value) (ret map[string]*av.Value) {
+	ret = make(map[string]*av.Value, len(values))
+	for key, value := range values {
+		ret[key] = value
+	}
+	return
+}
+
+func cloneBoolMap(values map[string]bool) (ret map[string]bool) {
+	ret = make(map[string]bool, len(values))
+	for key, value := range values {
+		ret[key] = value
+	}
+	return
+}
+
+func filterBranchesMatchDefaultValues(filters []*av.ViewFilter, attrView *av.AttributeView, addingItemID string,
+	values map[string]*av.Value) bool {
+	for _, filter := range filters {
+		if !filterBranchMatchesDefaultValues(filter, attrView, addingItemID, values) {
+			return false
+		}
+	}
+	return true
+}
+
+func filterBranchMatchesDefaultValues(filter *av.ViewFilter, attrView *av.AttributeView, addingItemID string,
+	values map[string]*av.Value) bool {
+	if nil == filter {
+		return false
+	}
+	if filter.IsGroup() {
+		if 1 > len(filter.Filters) {
+			return av.FilterCombinationOr != filter.Combination
+		}
+		if av.FilterCombinationOr == filter.Combination {
+			for _, child := range filter.Filters {
+				if filterBranchMatchesDefaultValues(child, attrView, addingItemID, values) {
+					return true
+				}
+			}
+			return false
+		}
+		return filterBranchesMatchDefaultValues(filter.Filters, attrView, addingItemID, values)
+	}
+
+	keyValues, _ := attrView.GetKeyValues(filter.Column)
+	if nil == keyValues {
+		return false
+	}
+	if !filter.IsValid() {
+		return true
+	}
+	switch keyValues.Key.Type {
+	case av.KeyTypeTemplate, av.KeyTypeRollup, av.KeyTypeMAsset, av.KeyTypeCreated, av.KeyTypeUpdated:
+		// 这些字段的最终值需要在渲染阶段计算，此处无法根据存储值准确判断。
+		return true
+	}
+
+	value := values[filter.Column]
+	if nil == value {
+		value = av.GetAttributeViewDefaultValue(ast.NewNodeID(), filter.Column, addingItemID, keyValues.Key.Type, false)
+	}
+	return value.Filter(filter, attrView, addingItemID, nil, nil)
+}
+
+func replaceDefaultValues(target, source map[string]*av.Value) {
+	clear(target)
+	for key, value := range source {
+		target[key] = value
+	}
+}
+
+func replaceBoolMap(target, source map[string]bool) {
+	clear(target)
+	for key, value := range source {
+		target[key] = value
+	}
 }
 
 func (tx *Transaction) doSortAttrViewGroup(operation *Operation) (ret *TxErr) {
@@ -4796,30 +4920,14 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 		groupView = view.GetGroupByID(groupID)
 	}
 
+	useGroupDefault := "" != groupID
 	if !ignoreDefaultFill {
-		fillDefaultValue(attrView, view, groupView, previousItemID, addingItemID, true)
+		fillDefaultValue(attrView, view, groupView, previousItemID, addingItemID, true, useGroupDefault)
 	}
 
 	// 处理日期字段默认填充当前创建时间
 	// The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
-	for _, keyValues := range attrView.KeyValues {
-		if av.KeyTypeDate == keyValues.Key.Type && nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
-			val := keyValues.GetValue(addingItemID)
-			if nil == val { // 避免覆盖已有值（可能前面已经通过过滤或者分组条件填充了值）
-				dateVal := &av.Value{
-					ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingItemID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
-					Date: &av.ValueDate{Content: now, IsNotEmpty: true, IsNotTime: !keyValues.Key.Date.FillSpecificTime},
-				}
-				keyValues.Values = append(keyValues.Values, dateVal)
-			} else {
-				if val.IsRenderAutoFill {
-					val.CreatedAt, val.UpdatedAt = now, now+1000
-					val.Date.Content, val.Date.IsNotEmpty, val.Date.IsNotTime = now, true, !keyValues.Key.Date.FillSpecificTime
-					val.IsRenderAutoFill = false
-				}
-			}
-		}
-	}
+	fillAttrViewAutoFillNowValues(attrView, addingItemID, isDetached, now)
 
 	if !isDetached {
 		bindBlockAv0(tx, avID, node, tree)
@@ -4868,8 +4976,30 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 	return
 }
 
-func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string, isCreate bool) {
-	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousItemID, addingItemID, isCreate)
+func fillAttrViewAutoFillNowValues(attrView *av.AttributeView, addingItemID string, isDetached bool, now int64) {
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeDate == keyValues.Key.Type && nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
+			val := keyValues.GetValue(addingItemID)
+			if nil == val {
+				dateVal := &av.Value{
+					ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingItemID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
+					Date: &av.ValueDate{Content: now, IsNotEmpty: true, IsNotTime: !keyValues.Key.Date.FillSpecificTime},
+				}
+				keyValues.Values = append(keyValues.Values, dateVal)
+			} else {
+				if nil == val.Date {
+					val.Date = &av.ValueDate{}
+				}
+				val.CreatedAt, val.UpdatedAt = now, now+1000
+				val.Date.Content, val.Date.IsNotEmpty, val.Date.IsNotTime = now, true, !keyValues.Key.Date.FillSpecificTime
+				val.IsRenderAutoFill = false
+			}
+		}
+	}
+}
+
+func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string, isCreate, useGroupDefault bool) {
+	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousItemID, addingItemID, isCreate, useGroupDefault)
 	for keyID, newValue := range defaultValues {
 		newValue.BlockID = addingItemID
 		keyValues, getErr := attrView.GetKeyValues(keyID)
@@ -4915,7 +5045,13 @@ func getNewValueByNearItem(nearItem av.Item, key *av.Key, addingBlockID string) 
 	}
 
 	defaultVal := nearItem.GetValue(key.ID)
+	if nil == defaultVal {
+		return
+	}
 	ret = defaultVal.Clone()
+	if nil == ret {
+		return
+	}
 	ret.ID = ast.NewNodeID()
 	ret.KeyID = key.ID
 	ret.BlockID = addingBlockID
@@ -5604,7 +5740,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 			if isAcrossGroup {
 				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView && !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
-					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID, false)
+					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID, false, true)
 
 					if val := attrView.GetValue(groupKey.ID, itemID); nil != val {
 						if av.MSelectExistOption(val.MSelect, groupView.GetGroupValue()) {

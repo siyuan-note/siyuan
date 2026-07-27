@@ -869,7 +869,13 @@ export const insertRows = (options: {
         previousID: options.previousID,
         srcs,
         blockID: options.blockElement.dataset.nodeId,
-        groupID: options.groupID
+        groupID: options.groupID,
+        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
+            options.blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") || "",
+        context: {
+            protyleID: options.protyle.id,
+            openFilteredItem: "true",
+        },
     }, {
         action: "doUpdateUpdated",
         id: options.blockElement.dataset.nodeId,

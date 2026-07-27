@@ -143,7 +143,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     protyle,
                     count: 1,
                     previousID: "",
-                    groupID: blockElement.querySelector(".av__body")?.getAttribute("data-group-id") || "",
+                    groupID: "",
                 });
             }
             event.preventDefault();

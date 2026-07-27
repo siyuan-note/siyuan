@@ -460,6 +460,96 @@ func TestExactRelationFilterWithMissingCell(t *testing.T) {
 	}
 }
 
+func TestViewFilterGetAffectValueRelation(t *testing.T) {
+	key := &Key{ID: "relation", Type: KeyTypeRelation}
+	filter := &ViewFilter{
+		Operator: FilterOperatorContainsAnyItem,
+		Value: &Value{
+			Type:     KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"row-a", "row-b"}},
+		},
+	}
+
+	value, allowNearItem := filter.GetAffectValue(key, "new-row")
+	if allowNearItem || nil == value || nil == value.Relation ||
+		1 != len(value.Relation.BlockIDs) || "row-a" != value.Relation.BlockIDs[0] {
+		t.Fatalf("exact relation filter should fill the first selected item, got %#v", value)
+	}
+
+	filter.Operator = FilterOperatorDoesNotContainAnyItem
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("negative exact relation filter should not fill or use a near item")
+	}
+
+	filter.Operator = FilterOperatorContains
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || !allowNearItem {
+		t.Fatalf("keyword relation filter should use a near item")
+	}
+
+	filter.Operator = FilterOperatorDoesNotContain
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("negative keyword relation filter should not fill or use a near item")
+	}
+
+	filter.Operator = FilterOperatorIsEmpty
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("empty relation filter should leave the relation unset")
+	}
+
+	filter.Operator = FilterOperatorIsNotEmpty
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || !allowNearItem {
+		t.Fatalf("non-empty relation filter should use a near item")
+	}
+}
+
+func TestViewFilterGetAffectValueDate(t *testing.T) {
+	location, err := time.LoadLocation("America/New_York")
+	if nil != err {
+		t.Skipf("load time zone failed: %s", err)
+	}
+	originalLocal := time.Local
+	time.Local = location
+	defer func() {
+		time.Local = originalLocal
+	}()
+
+	start := time.Date(2026, time.March, 8, 0, 0, 0, 0, location)
+	key := &Key{ID: "date", Type: KeyTypeDate, Date: &Date{FillSpecificTime: false}}
+	filter := &ViewFilter{
+		Operator: FilterOperatorIsGreater,
+		Value: &Value{
+			Type: KeyTypeDate,
+			Date: &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true},
+		},
+	}
+
+	value, allowNearItem := filter.GetAffectValue(key, "new-row")
+	expected := start.AddDate(0, 0, 1)
+	if allowNearItem || nil == value || nil == value.Date || expected.UnixMilli() != value.Date.Content {
+		t.Fatalf("greater date filter should fill the next calendar day, got %#v", value)
+	}
+	if !value.Date.IsNotTime {
+		t.Fatalf("date default should follow the field-specific time setting")
+	}
+
+	key.Date.FillSpecificTime = true
+	value, _ = filter.GetAffectValue(key, "new-row")
+	if value.Date.IsNotTime {
+		t.Fatalf("date default should include time when configured")
+	}
+
+	filter.Operator = FilterOperatorIsNotEqual
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("not-equal date filter should not fill or use a near item")
+	}
+}
+
 func TestRemoveRelationItemsFromFilters(t *testing.T) {
 	exact := func(column string, operator FilterOperator, blockIDs ...string) *ViewFilter {
 		return &ViewFilter{

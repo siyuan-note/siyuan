@@ -2220,7 +2220,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     const thMatchElement = nodeElement.querySelectorAll("col")[colIndex];
-    if (thMatchElement.style.width || thMatchElement.style.minWidth !== "60px") {
+    if (thMatchElement && (thMatchElement.style.width || thMatchElement.style.minWidth !== "60px")) {
         otherMenus.push({
             id: "useDefaultWidth",
             label: window.siyuan.languages.useDefaultWidth,

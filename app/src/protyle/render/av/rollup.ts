@@ -59,6 +59,11 @@ const updateCol = (options: {
         goSearchRollupCalcElement.setAttribute("data-col-type", itemElement.dataset.colType);
         goSearchRollupCalcElement.querySelector(".b3-menu__accelerator").textContent = window.siyuan.languages.original;
     }
+    const relationColumn = fields.find((item) => item.id === colData.rollup?.relationKeyID);
+    const filterElement = options.target.closest(".b3-menu")?.querySelector(
+        '[data-type="goAttrViewColFilters"][data-filter-type="rollup"]');
+    const canFilter = options.isRelation ? !!itemElement.dataset.targetAvId : !!relationColumn?.relation?.avID;
+    filterElement?.classList.toggle("b3-menu__item--disabled", !canFilter);
     const doOperations: IOperation[] = [{
         action: "updateAttrViewColRollup",
         id: options.colId,

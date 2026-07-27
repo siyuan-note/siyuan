@@ -95,7 +95,7 @@ const isMatchingContextMenuRequest = (context, request) => {
 const popupNativeTextContextMenu = (contents, context, request) => {
     const params = context?.params;
     const template = [];
-    if (params?.spellcheckEnabled && params.misspelledWord) {
+    if (params?.misspelledWord) {
         params.dictionarySuggestions.forEach((suggestion) => {
             template.push(new MenuItem({
                 label: suggestion,
@@ -152,13 +152,12 @@ const dispatchContextMenuRequests = (contents) => {
     if (spellcheckRequest && isMatchingContextMenuRequest(context, spellcheckRequest)) {
         context.delivered = true;
         pendingSpellcheckRequests.delete(contents.id);
-        const enabled = context.params.isEditable && context.params.spellcheckEnabled;
         contents.send("siyuan-spellcheck-context", {
             contextId: context.contextId,
             x: spellcheckRequest.x,
             y: spellcheckRequest.y,
-            misspelledWord: enabled ? context.params.misspelledWord : "",
-            dictionarySuggestions: enabled ? context.params.dictionarySuggestions : [],
+            misspelledWord: context.params.misspelledWord,
+            dictionarySuggestions: context.params.dictionarySuggestions,
         });
         return;
     }

@@ -366,14 +366,13 @@ export class Dock {
         if (!reset) {
             this.layout.element.style.opacity = "1";
         }
-        this.layout.element.style.transform = "";
         this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
         if (this.position === "Left") {
-            this.layout.element.style.left = `${this.elements[0].clientWidth}px`;
+            this.layout.element.style.transform = `translateX(${this.elements[0].clientWidth}px)`;
         } else if (this.position === "Right") {
-            this.layout.element.style.right = `${this.elements[0].clientWidth}px`;
+            this.layout.element.style.transform = `translateX(-${this.elements[0].clientWidth}px)`;
         } else if (this.position === "Bottom") {
-            this.layout.element.style.bottom = `${document.getElementById("status").offsetHeight}px`;
+            this.layout.element.style.transform = `translateY(-${document.getElementById("status").offsetHeight}px)`;
             this.layout.element.style.left = this.elements[0].clientWidth + "px";
             this.layout.element.style.right = this.elements[1].clientWidth + "px";
         }
@@ -405,13 +404,10 @@ export class Dock {
         }
         if (this.position === "Left") {
             this.layout.element.style.transform = `translateX(-${this.layout.element.clientWidth + 8}px)`;
-            this.layout.element.style.left = "";
         } else if (this.position === "Right") {
             this.layout.element.style.transform = `translateX(${this.layout.element.clientWidth + 8}px)`;
-            this.layout.element.style.right = "";
         } else if (this.position === "Bottom") {
             this.layout.element.style.transform = `translateY(${this.layout.element.clientHeight + 8}px)`;
-            this.layout.element.style.bottom = "";
         }
         if (reset) {
             return;

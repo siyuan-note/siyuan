@@ -31,9 +31,8 @@ import (
 )
 
 const (
-	pluginSourceReloadDelay      = 300 * time.Millisecond
-	pluginSourcePollInterval     = time.Second
-	pluginSourceFullScanInterval = 30 * time.Second
+	pluginSourceReloadDelay  = 300 * time.Millisecond
+	pluginSourcePollInterval = time.Second
 )
 
 var errPluginFileWatchUnsupported = errors.New("plugin file watcher is not supported on mobile")
@@ -52,7 +51,6 @@ type pluginSourceWatchEntry struct {
 	fileState  pluginSourceFileState
 	lastError  string
 	verified   bool
-	nextScan   time.Time
 	generation uint64
 	timer      *time.Timer
 }
@@ -61,6 +59,9 @@ type pluginSourceFileState struct {
 	exists  bool
 	size    int64
 	modTime int64
+	device  uint64
+	inode   uint64
+	ctime   int64
 }
 
 type pluginSourceWatchState struct {
@@ -68,18 +69,14 @@ type pluginSourceWatchState struct {
 	entries    map[string]*pluginSourceWatchEntry
 	generation uint64
 	delay      time.Duration
-	fullScan   time.Duration
-	now        func() time.Time
 	reload     func(name string)
 }
 
 func newPluginSourceWatchState(reload func(name string)) pluginSourceWatchState {
 	return pluginSourceWatchState{
-		entries:  map[string]*pluginSourceWatchEntry{},
-		delay:    pluginSourceReloadDelay,
-		fullScan: pluginSourceFullScanInterval,
-		now:      time.Now,
-		reload:   reload,
+		entries: map[string]*pluginSourceWatchEntry{},
+		delay:   pluginSourceReloadDelay,
+		reload:  reload,
 	}
 }
 
@@ -140,19 +137,17 @@ func (s *pluginSourceWatchState) scan() {
 			generation: entry.generation,
 			fileState:  entry.fileState,
 			verified:   entry.verified,
-			nextScan:   entry.nextScan,
 		}
 	}
 	s.mu.Unlock()
 
-	now := s.now()
 	for name, snapshot := range entries {
 		fileState, err := readPluginSourceFileState(snapshot.path)
 		if err != nil {
 			s.logReadError(name, snapshot.generation, snapshot.path, err)
 			continue
 		}
-		if snapshot.verified && fileState == snapshot.fileState && now.Before(snapshot.nextScan) {
+		if snapshot.verified && fileState == snapshot.fileState {
 			s.clearReadError(name, snapshot.generation)
 			continue
 		}
@@ -255,7 +250,6 @@ func (s *pluginSourceWatchState) finishPluginSourceCheck(
 	entry.lastError = ""
 	entry.signature = signature
 	entry.verified = true
-	entry.nextScan = s.now().Add(s.fullScan)
 	entry.timer = nil
 	reload := s.reload
 	s.mu.Unlock()
@@ -319,7 +313,6 @@ type pluginSourceWatchSnapshot struct {
 	generation uint64
 	fileState  pluginSourceFileState
 	verified   bool
-	nextScan   time.Time
 }
 
 func readPluginSourceFileState(path string) (pluginSourceFileState, error) {
@@ -330,10 +323,14 @@ func readPluginSourceFileState(path string) (pluginSourceFileState, error) {
 	if err != nil {
 		return pluginSourceFileState{}, err
 	}
+	device, inode, ctime := readPluginSourceFileIdentity(info)
 	return pluginSourceFileState{
 		exists:  true,
 		size:    info.Size(),
 		modTime: info.ModTime().UnixNano(),
+		device:  device,
+		inode:   inode,
+		ctime:   ctime,
 	}, nil
 }
 

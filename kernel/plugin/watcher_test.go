@@ -199,7 +199,7 @@ func TestPluginSourceWatchStateVerifiesRegistrationContent(t *testing.T) {
 	waitForPluginReload(t, reloaded, name)
 }
 
-func TestPluginSourceWatchStatePeriodicallyChecksContent(t *testing.T) {
+func TestPluginSourceWatchStateChecksFileIdentity(t *testing.T) {
 	pluginsDir := t.TempDir()
 	name := "test-plugin"
 	sourcePath := filepath.Join(pluginsDir, "kernel.js")
@@ -207,15 +207,11 @@ func TestPluginSourceWatchStatePeriodicallyChecksContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	now := time.Now()
 	reloaded := make(chan string, 1)
 	state := newPluginSourceWatchState(func(pluginName string) {
 		reloaded <- pluginName
 	})
 	state.delay = 20 * time.Millisecond
-	state.now = func() time.Time {
-		return now
-	}
 	state.register(name, sourcePath, "initial")
 	t.Cleanup(func() {
 		state.unregister(name)
@@ -232,7 +228,7 @@ func TestPluginSourceWatchStatePeriodicallyChecksContent(t *testing.T) {
 	state.mu.Lock()
 	entry := state.entries[name]
 	entry.fileState = fileState
-	entry.nextScan = now
+	entry.fileState.inode++
 	state.mu.Unlock()
 
 	state.scan()

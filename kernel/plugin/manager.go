@@ -260,14 +260,14 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 	// Stop any running instance inside the same lock so that concurrent hot-reload goroutines queue here and each one sees the instance started by the previous.
 	m.stopLocked(petal.Name)
 
-	m.addPluginSourceWatch(petal.Name, petal.Kernel.JS)
-
 	p := NewKernelPlugin(m.context, petal)
 
 	m.plugins.Store(p.Name, p)
 
-	if err := p.start(); err != nil {
-		logging.LogErrorf("[plugin:%s] start failed: %s", p.Name, err)
+	startErr := p.start()
+	m.addPluginSourceWatch(petal.Name, petal.Kernel.JS)
+	if startErr != nil {
+		logging.LogErrorf("[plugin:%s] start failed: %s", p.Name, startErr)
 		ok = false
 		return
 	}

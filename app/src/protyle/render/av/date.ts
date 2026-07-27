@@ -1,5 +1,6 @@
 import * as dayjs from "dayjs";
 import {genCellValueByElement, updateCellsValue} from "./cell";
+import {getFieldsByData} from "./view";
 
 export const getDateHTML = (cellElements: HTMLElement[]) => {
     const cellValue = genCellValueByElement("date", cellElements[0]).date;
@@ -57,6 +58,7 @@ export const bindDateEvent = (options: {
     cellElements: HTMLElement[]
 }) => {
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
+    let dirty = false;
 
     // <input type="date"> 对非法日期会清空 input.value。原生 date input 不触发 beforeinput，用 keydown 区分删空与非法日输入。
     const lastNonEmptyValue: string[] = [inputElements[0].value, inputElements[1].value];
@@ -85,6 +87,7 @@ export const bindDateEvent = (options: {
             });
         });
         input.addEventListener("input", () => {
+            dirty = true;
             if (input.value) {
                 invalidEmpty[index] = false;
                 // 仅当 input.value 是合法完整日期时才更新
@@ -125,6 +128,9 @@ export const bindDateEvent = (options: {
     };
 
     const submit = () => {
+        if (!dirty) {
+            return;
+        }
         const dateStr1 = buildDateStr(0);
         const dateStr2 = buildDateStr(1);
         const content1 = getFullYearTime(dateStr1) || 0;
@@ -136,7 +142,7 @@ export const bindDateEvent = (options: {
             isNotEmpty2: content2 !== 0,
             hasEndDate: inputElements[2].checked,
             isNotTime: !inputElements[3].checked,
-        }, options.cellElements);
+        }, options.cellElements, getFieldsByData(options.data));
     };
 
     inputElements.forEach(item => {
@@ -151,12 +157,15 @@ export const bindDateEvent = (options: {
         });
     });
     inputElements[0].addEventListener("change", () => {
+        dirty = true;
         inputElements[0].dataset.value = inputElements[0].value.length > 10 ? inputElements[0].value : inputElements[0].value + " 00:00";
     });
     inputElements[1].addEventListener("change", () => {
+        dirty = true;
         inputElements[1].dataset.value = inputElements[1].value.length > 10 ? inputElements[1].value : inputElements[1].value + " 00:00";
     });
     inputElements[2].addEventListener("change", () => {
+        dirty = true;
         if (inputElements[2].checked) {
             if (!inputElements[1].dataset.value) {
                 const currentDate = Date.now();
@@ -169,6 +178,7 @@ export const bindDateEvent = (options: {
         }
     });
     inputElements[3].addEventListener("change", () => {
+        dirty = true;
         inputElements[0].value = "";
         inputElements[1].value = "";
         if (inputElements[3].checked) {

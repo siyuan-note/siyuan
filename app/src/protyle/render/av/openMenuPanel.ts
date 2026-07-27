@@ -89,11 +89,13 @@ export const openMenuPanel = (options: {
     cellElements?: HTMLElement[],   // for select & date & relation & asset
     // 复用调用方已构造好的视图数据，跳过内部 fetch，避免与刚提交的事务产生读写时序竞争
     data?: IAV,
-    cb?: (avPanelElement: Element) => void
+    cb?: (avPanelElement: Element) => void,
+    destroyCallback?: () => void,
 }) => {
     let avPanelElement = document.querySelector(".av__panel");
     if (avPanelElement) {
         avPanelElement.remove();
+        options.destroyCallback?.();
         return;
     }
     const avID = options.blockElement.getAttribute("data-av-id");
@@ -183,6 +185,17 @@ export const openMenuPanel = (options: {
     <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}${options.type === "relation" ? " av__relation-panel" : ""}" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${options.type === "relation" ? `width: 760px;max-width: ${isMobile() ? "90vw" : "calc(100vw - 32px)"};` : isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
+        if (options.destroyCallback) {
+            const renderedPanelElement = avPanelElement;
+            const parentElement = renderedPanelElement.parentElement;
+            const observer = new MutationObserver(() => {
+                if (!renderedPanelElement.isConnected) {
+                    observer.disconnect();
+                    options.destroyCallback();
+                }
+            });
+            observer.observe(parentElement, {childList: true});
+        }
         let closeCB: () => void;
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         let tabRect = options.blockElement.querySelector(`.av__views, .av__row[data-col-id="${options.colId}"] > .block__logo`)?.getBoundingClientRect();
@@ -1709,7 +1722,7 @@ export const openMenuPanel = (options: {
                         content2: null,
                         hasEndDate: false,
                         isNotTime: colData.date ? !colData.date.fillSpecificTime : true,
-                    }, options.cellElements);
+                    }, options.cellElements, fields);
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();

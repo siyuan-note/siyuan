@@ -22,6 +22,7 @@ const dataStore = new Map<string, {
     protyle: IProtyle;
     data: IAV;
 }>();
+const blockDataStore = new WeakMap<HTMLElement, IAV>();
 const bodyStates = new WeakMap<HTMLElement, IBodyState>();
 const trimPending = new WeakSet<HTMLElement>();
 let lastScrollTop: number;
@@ -491,6 +492,50 @@ export const getAVSelectedItems = (blockElement: HTMLElement): { itemID: string,
     return Array.from(selectedItems, ([itemID, isDetached]) => ({itemID, isDetached}));
 };
 
+export const getAVData = (blockElement: HTMLElement) => {
+    return blockDataStore.get(blockElement);
+};
+
+export const setAVData = (blockElement: HTMLElement, data: IAV) => {
+    blockDataStore.set(blockElement, data);
+};
+
+export const getAVSelectedItemIDs = (blockElement: HTMLElement) => {
+    const selectedIDs = new Set<string>();
+    blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
+        const state = bodyStates.get(bodyElement);
+        if (state?.selectedRowIds) {
+            state.selectedRowIds.forEach((itemID) => selectedIDs.add(itemID));
+        } else {
+            bodyElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select").forEach((item: HTMLElement) => {
+                if (item.dataset.id) {
+                    selectedIDs.add(item.dataset.id);
+                }
+            });
+        }
+    });
+    const data = blockDataStore.get(blockElement);
+    if (!data) {
+        return Array.from(selectedIDs);
+    }
+
+    const orderedIDs: string[] = [];
+    const collectIDs = (view: IAVView) => {
+        if (view.groups?.length > 0) {
+            view.groups.forEach(collectIDs);
+            return;
+        }
+        const items = (view as IAVTable).rows || (view as IAVGallery).cards || [];
+        items.forEach((item: IAVRow | IAVGalleryItem) => {
+            if (selectedIDs.delete(item.id)) {
+                orderedIDs.push(item.id);
+            }
+        });
+    };
+    collectIDs(data.view);
+    return orderedIDs;
+};
+
 export const trimAVRows = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     if (blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true" || trimPending.has(blockElement)) {
         return;
@@ -516,6 +561,7 @@ export const initVirtualScroll = (options: {
     blockElement: HTMLElement,
     data: IAV,
 }): void => {
+    setAVData(options.blockElement, options.data);
     if (options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
         return;
     }

@@ -15,7 +15,7 @@ import {
     updateCellsValue,
     updateHeaderCell
 } from "./cell";
-import {addCol, getColIconByType, showColMenu} from "./col";
+import {addCol, getColIconByType, getColNameByType, showColMenu} from "./col";
 import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHeader} from "./row";
 import {getAVSelectedItems, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
 import {emitOpenMenu} from "../../../plugin/EventBus";
@@ -50,6 +50,7 @@ import {
     resetCardCoverPosition,
     startCardCoverPosition
 } from "./coverPosition";
+import {getEditableAVFields, openAVFieldEditor} from "./batchEdit";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
@@ -933,44 +934,25 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
             }
         });
         const editAttrSubmenu: IMenu[] = [];
-        if (avType === "table") {
-            rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
-                const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__row--select:not(.av__row--header) .av__cell[data-col-id="${cellElement.dataset.colId}"]`));
-                const type = cellElement.getAttribute("data-dtype") as TAVCol;
-                if (!["updated", "created"].includes(type)) {
-                    const icon = cellElement.dataset.icon;
-                    editAttrSubmenu.push({
-                        iconHTML: icon ? unicode2Emoji(icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`,
-                        label: escapeHtml(cellElement.querySelector(".av__celltext").textContent.trim()),
-                        click() {
-                            popTextCell(protyle, selectElements);
-                        }
+        getEditableAVFields(blockElement).forEach((field) => {
+            editAttrSubmenu.push({
+                iconHTML: field.icon ? unicode2Emoji(field.icon, "b3-menu__icon", true) :
+                    `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(field.type)}"></use></svg>`,
+                label: escapeHtml(field.name || getColNameByType(field.type)),
+                click(element) {
+                    openAVFieldEditor({
+                        protyle,
+                        blockElement,
+                        field,
+                        anchorElement: element,
                     });
                 }
             });
-        } else {
-            rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
-                const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__gallery-item--select .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`));
-                const type = cellElement.getAttribute("data-dtype") as TAVCol;
-                if (!["updated", "created"].includes(type)) {
-                    const iconElement = cellElement.parentElement.querySelector(".av__gallery-tip, .av__gallery-name").firstElementChild.cloneNode(true) as HTMLElement;
-                    iconElement.classList.add("b3-menu__icon");
-                    editAttrSubmenu.push({
-                        iconHTML: iconElement.outerHTML,
-                        label: escapeHtml(cellElement.getAttribute("aria-label").split('<div class="ft__on-surface">')[0]),
-                        click() {
-                            rowElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
-                            rowElement.querySelector('[data-type="av-gallery-edit"]').setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
-                            popTextCell(protyle, selectElements);
-                        }
-                    });
-                }
-            });
-        }
+        });
         menu.addItem({
             id: "fields",
             icon: "iconAttr",
-            label: window.siyuan.languages.fields,
+            label: window.siyuan.languages.editFields,
             type: "submenu",
             submenu: editAttrSubmenu
         });

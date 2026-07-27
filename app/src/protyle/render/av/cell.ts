@@ -497,18 +497,23 @@ export const getTypeByCellElement = (cellElement: Element) => {
 
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol, options?: {
     scrollIntoView?: boolean;
+    data?: IAV;
+    destroyCallback?: () => void;
 }) => {
     if (cellElements.length === 0 || (cellElements.length === 1 && !cellElements[0])) {
+        options?.destroyCallback?.();
         return;
     }
     if (!type) {
         type = getTypeByCellElement(cellElements[0]);
     }
     if (type === "updated" || type === "created" || document.querySelector(".av__mask")) {
+        options?.destroyCallback?.();
         return;
     }
     const blockElement = hasClosestBlock(cellElements[0]);
     if (!blockElement) {
+        options?.destroyCallback?.();
         return;
     }
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
@@ -542,28 +547,62 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     } else {
         if (["select", "mSelect"].includes(type)) {
             if (blockElement.getAttribute("data-rendering") === "true") {
+                options?.destroyCallback?.();
                 return;
             }
-            openMenuPanel({protyle, blockElement, type: "select", cellElements});
+            openMenuPanel({
+                protyle,
+                blockElement,
+                type: "select",
+                cellElements,
+                data: options?.data,
+                destroyCallback: options?.destroyCallback,
+            });
         } else if (type === "mAsset") {
-            openMenuPanel({protyle, blockElement, type: "asset", cellElements});
+            openMenuPanel({
+                protyle,
+                blockElement,
+                type: "asset",
+                cellElements,
+                data: options?.data,
+                destroyCallback: options?.destroyCallback,
+            });
             if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
                 focusBlock(blockElement);
             }
         } else if (type === "date") {
-            openMenuPanel({protyle, blockElement, type: "date", cellElements});
+            openMenuPanel({
+                protyle,
+                blockElement,
+                type: "date",
+                cellElements,
+                data: options?.data,
+                destroyCallback: options?.destroyCallback,
+            });
         } else if (type === "checkbox") {
             updateCellValueByInput(protyle, type, blockElement, cellElements);
+            options?.destroyCallback?.();
         } else if (type === "relation") {
-            openMenuPanel({protyle, blockElement, type: "relation", cellElements});
+            openMenuPanel({
+                protyle,
+                blockElement,
+                type: "relation",
+                cellElements,
+                data: options?.data,
+                destroyCallback: options?.destroyCallback,
+            });
         } else if (type === "rollup") {
             openMenuPanel({
                 protyle,
                 blockElement,
                 type: "rollup",
                 cellElements,
-                colId: getColId(cellElements[0], viewType)
+                colId: getColId(cellElements[0], viewType),
+                data: options?.data,
+                destroyCallback: options?.destroyCallback,
             });
+        } else {
+            options?.destroyCallback?.();
         }
         if (viewType === "table" && !hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
@@ -574,12 +613,27 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     window.siyuan.menus.menu.remove();
     document.body.insertAdjacentHTML("beforeend", `<div class="av__mask" style="z-index: ${++window.siyuan.zIndex}">
     ${html}
-</div>`);
+    </div>`);
     const avMaskElement = document.querySelector(".av__mask");
+    if (options?.destroyCallback) {
+        const parentElement = avMaskElement.parentElement;
+        const observer = new MutationObserver(() => {
+            if (!avMaskElement.isConnected) {
+                observer.disconnect();
+                options.destroyCallback();
+            }
+        });
+        observer.observe(parentElement, {childList: true});
+    }
     const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
         if (["text", "email", "phone", "block", "template"].includes(type)) {
             inputElement.value = cellElements[0].querySelector(".av__celltext")?.textContent || "";
+        }
+        if (type !== "template") {
+            inputElement.addEventListener("input", () => {
+                inputElement.dataset.changed = "true";
+            });
         }
         inputElement.select();
         inputElement.focus();
@@ -598,7 +652,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 });
             });
         }
-        if (type === "block") {
+        if (type === "block" && !cellElements[0].dataset.avId) {
             inputElement.addEventListener("input", (event: InputEvent) => {
                 if (Constants.BLOCK_HINT_KEYS.includes(inputElement.value.substring(0, 2))) {
                     protyle.toolbar.range = document.createRange();
@@ -680,7 +734,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
 
 const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: HTMLElement, cellElements: HTMLElement[]) => {
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
-    if (viewType === "table") {
+    if (viewType === "table" && !cellElements[0].dataset.avId) {
         const rowElement = hasClosestByClassName(cellElements[0], "av__row");
         if (!rowElement) {
             return;
@@ -711,9 +765,18 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
             blockElement.setAttribute("data-loading", "true");
         }
     } else {
+        const inputElement = avMaskElement?.querySelector(".b3-text-field") as HTMLInputElement;
+        const unchanged = type !== "checkbox" && inputElement?.dataset.changed !== "true";
+        if (unchanged) {
+            document.querySelectorAll(".av__mask").forEach((item) => {
+                item.remove();
+            });
+            focusBlock(blockElement);
+            return;
+        }
         updateCellsValue(protyle, blockElement, type === "checkbox" ? {
             checked: cellElements[0].querySelector("use").getAttribute("xlink:href") === "#iconUncheck"
-        } : (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value, cellElements);
+        } : inputElement.value, cellElements);
     }
     if (viewType === "table" &&
         // 兼容新增行后台隐藏

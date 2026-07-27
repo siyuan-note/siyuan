@@ -19,7 +19,7 @@ import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
-import {getBodyVirtualData, initVirtualScroll} from "./virtualScroll";
+import {getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate, setAVLocateRequest} from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {updateHotkeyTip} from "../../util/compatibility";
@@ -296,6 +296,7 @@ const renderGroupTable = (options: ITableOptions) => {
 };
 
 const afterRenderTable = (options: ITableOptions) => {
+    setAVData(options.blockElement, options.data);
     if (options.blockElement.getAttribute("data-need-focus") === "true") {
         focusBlock(options.blockElement);
         options.blockElement.removeAttribute("data-need-focus");

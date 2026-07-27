@@ -1,4 +1,6 @@
 {
+  "addToDictionary": "Añadir al diccionario",
+  "addToDictionaryFailed": "No se pudo añadir la palabra al diccionario",
   "freezeDrag": "Arrastra para ajustar el intervalo de columnas inmovilizadas",
   "databaseTableView": "Vista de tabla de base de datos",
   "databaseKanbanView": "Vista Kanban de base de datos",

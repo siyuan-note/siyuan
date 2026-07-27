@@ -1,4 +1,6 @@
 {
+  "addToDictionary": "加入字典",
+  "addToDictionaryFailed": "無法將單字加入字典",
   "freezeDrag": "拖曳調整凍結範圍",
   "databaseTableView": "數據庫 表格視圖",
   "databaseKanbanView": "數據庫 看板視圖",

@@ -1,4 +1,6 @@
 {
+  "addToDictionary": "Sözlüğe ekle",
+  "addToDictionaryFailed": "Sözcük sözlüğe eklenemedi",
   "freezeDrag": "Dondurulmuş sütun aralığını ayarlamak için sürükleyin",
   "databaseTableView": "Veritabanı tablo görünümü",
   "databaseKanbanView": "Veritabanı Kanban görünümü",

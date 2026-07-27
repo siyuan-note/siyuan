@@ -1,4 +1,6 @@
 {
+  "addToDictionary": "إضافة إلى القاموس",
+  "addToDictionaryFailed": "تعذرت إضافة الكلمة إلى القاموس",
   "freezeDrag": "اسحب لضبط نطاق الأعمدة المجمدة",
   "databaseTableView": "عرض جدول قاعدة البيانات",
   "databaseKanbanView": "عرض كانبان لقاعدة البيانات",

@@ -1,4 +1,6 @@
 {
+  "addToDictionary": "Tambahkan ke kamus",
+  "addToDictionaryFailed": "Kata gagal ditambahkan ke kamus",
   "freezeDrag": "Seret untuk menyesuaikan rentang kolom beku",
   "databaseTableView": "Tampilan tabel database",
   "databaseKanbanView": "Tampilan Kanban database",

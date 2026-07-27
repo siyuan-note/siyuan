@@ -1,4 +1,6 @@
 {
+  "addToDictionary": "Zum Wörterbuch hinzufügen",
+  "addToDictionaryFailed": "Das Wort konnte nicht zum Wörterbuch hinzugefügt werden",
   "freezeDrag": "Ziehen, um den eingefrorenen Spaltenbereich anzupassen",
   "databaseTableView": "Datenbank-Tabellenansicht",
   "databaseKanbanView": "Datenbank-Kanbanansicht",

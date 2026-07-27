@@ -181,6 +181,9 @@ type Key struct {
 	// 数字
 	NumberFormat NumberFormat `json:"numberFormat"` // 列数字格式化
 
+	// 日期、创建时间、更新时间
+	DateFormat DateDisplayFormat `json:"dateFormat,omitempty"` // 日期显示格式
+
 	// 模板
 	Template string `json:"template"` // 模板内容
 

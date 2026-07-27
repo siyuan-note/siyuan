@@ -81,8 +81,10 @@ const createEditProxy = (options: {
     if (value.isDetached) {
         cellElement.dataset.detached = "true";
     }
+    cellElement.dataset.dateFormat = options.field.dateFormat || "";
     cellElement.style.cssText = "position:absolute;inset:0;";
-    cellElement.innerHTML = renderCell(value, 0, options.data.view.showIcon, "table", options.field.options);
+    cellElement.innerHTML = renderCell(value, 0, options.data.view.showIcon, "table", options.field.options,
+        options.field.dateFormat);
     return cellElement;
 };
 

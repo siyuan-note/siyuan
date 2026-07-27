@@ -6142,6 +6142,40 @@ func updateAttributeViewColNumberFormat(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doSetAttrViewColDateFormat(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColDateFormat(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColDateFormat(operation *Operation) (err error) {
+	format := av.DateDisplayFormat(operation.Format)
+	if !format.IsValid() {
+		return errors.New("invalid date display format")
+	}
+
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	colType := av.KeyType(operation.Typ)
+	if av.KeyTypeDate != colType && av.KeyTypeCreated != colType && av.KeyTypeUpdated != colType {
+		return errors.New("date display format is only available for date fields")
+	}
+	for _, keyValues := range attrView.KeyValues {
+		if keyValues.Key.ID == operation.ID && keyValues.Key.Type == colType {
+			keyValues.Key.DateFormat = format
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doUpdateAttrViewColumn(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewColumn(operation)
 	if err != nil {
@@ -6636,9 +6670,13 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 			}
 		}
 	} else if av.KeyTypeDate == val.Type {
-		if nil != val.Date && !val.Date.IsNotEmpty {
-			val.Date.Content = 0
-			val.Date.FormattedContent = ""
+		if nil != val.Date {
+			if !val.Date.IsNotEmpty {
+				val.Date.Content = 0
+				val.Date.FormattedContent = ""
+			} else if nil != key {
+				val.Date.FormatDate(key.DateFormat)
+			}
 		}
 	} else if av.KeyTypeSelect == val.Type || av.KeyTypeMSelect == val.Type {
 		if nil != key && 0 < len(val.MSelect) {

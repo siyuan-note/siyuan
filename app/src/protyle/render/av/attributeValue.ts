@@ -1,8 +1,8 @@
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
-import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {Constants} from "../../../constants";
 import {getCompressURL} from "../../../util/image";
+import {formatDateDisplay, formatDateValue} from "./dateFormat";
 
 export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string) => ({
     type,
@@ -95,10 +95,10 @@ const genAVRollupHTML = (value: IAVCellValue) => {
                 html = dataValue.formattedContent;
             } else {
                 if (dataValue && dataValue.isNotEmpty) {
-                    html = dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+                    html = formatDateDisplay(dataValue.content, "", dataValue.isNotTime);
                 }
                 if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
-                    html = `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+                    html = `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${formatDateDisplay(dataValue.content2, "", dataValue.isNotTime)}`;
                 }
             }
             if (html) {
@@ -118,7 +118,7 @@ const genAVRollupHTML = (value: IAVCellValue) => {
     return html;
 };
 
-export const genAVValueHTML = (value: IAVCellValue) => {
+export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = "") => {
     let html = "";
     switch (value.type) {
         case "block":
@@ -151,17 +151,18 @@ export const genAVValueHTML = (value: IAVCellValue) => {
         case "date":
             html = `<span class="av__celltext" data-value='${JSON.stringify(value[value.type])}' placeholder="${window.siyuan.languages.empty}">`;
             if (value[value.type] && value[value.type].isNotEmpty) {
-                html += dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+                html += escapeHtml(formatDateDisplay(value[value.type].content, dateFormat, value[value.type].isNotTime));
             }
             if (value[value.type] && value[value.type].hasEndDate && value[value.type].isNotEmpty && value[value.type].isNotEmpty2) {
-                html += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+                html += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${escapeHtml(formatDateDisplay(value[value.type].content2, dateFormat, value[value.type].isNotTime))}`;
             }
             html += "</span>";
             break;
         case "created":
         case "updated":
             if (value[value.type].isNotEmpty) {
-                html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format("YYYY-MM-DD HH:mm")}</span>`;
+                html = `<span data-content="${value[value.type].content}">${escapeHtml(value[value.type].formattedContent ||
+                    formatDateValue(value[value.type], dateFormat))}</span>`;
             }
             break;
         case "url":
@@ -229,6 +230,7 @@ export const genAVAttributeRowHTML = (options: {
         name: string,
         color: string
     }[],
+    dateFormat?: TAVDateFormat,
     value: IAVCellValue,
     empty: boolean,
 }) => {
@@ -243,7 +245,8 @@ export const genAVAttributeRowHTML = (options: {
     </div>
     <div data-av-id="${options.avID}" data-col-id="${value.keyID}" data-row-id="${value.blockID}"${value.id ? ` data-id="${value.id}"` : ""} data-cell-value="${encodeURIComponent(JSON.stringify(value))}" data-type="${value.type}"${value.isDetached ? ' data-detached="true"' : ""}
 data-options="${options.selectOptions ? escapeAttr(JSON.stringify(options.selectOptions)) : "[]"}"
+data-date-format="${options.dateFormat || ""}"
 ${hasOwnPlaceholder ? "" : `placeholder="${window.siyuan.languages.empty}"`}
-class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(value)}</div>
+class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(value, options.dateFormat)}</div>
 </div>`;
 };

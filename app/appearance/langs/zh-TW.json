@@ -1928,6 +1928,10 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
+		"dateFormat": "日期格式",
+		"fullDate": "完整日期",
+		"dateMonths": "一月|二月|三月|四月|五月|六月|七月|八月|九月|十月|十一月|十二月",
+		"dateFormatFullTemplate": "${year}年${month}${day}日",
 		"empty": "空白",
 		"table": "表格",
 		"gallery": "卡片",

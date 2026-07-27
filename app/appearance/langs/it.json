@@ -1928,6 +1928,10 @@
 		"quit": "Esci dall'applicazione"
 	},
 	"_attrView": {
+		"dateFormat": "Formato data",
+		"fullDate": "Data completa",
+		"dateMonths": "gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Vuoto",
 		"table": "Tabella",
 		"gallery": "Scheda",

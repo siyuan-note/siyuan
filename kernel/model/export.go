@@ -198,7 +198,10 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 				if nil != cell.Value {
 					if av.KeyTypeDate == cell.Value.Type {
 						if nil != cell.Value.Date {
-							cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone, cell.Value.Date.IsNotTime, cell.Value.Date.HasEndDate)
+							key, _ := attrView.GetKey(cell.Value.KeyID)
+							if nil != key {
+								cell.Value.Date.FormatDate(key.DateFormat)
+							}
 						}
 					} else if av.KeyTypeCreated == cell.Value.Type {
 						if nil != cell.Value.Created {
@@ -208,7 +211,9 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 								isNotTime = !key.Created.IncludeTime
 							}
 
-							cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone, isNotTime)
+							if nil != key {
+								cell.Value.Created.FormatDate(key.DateFormat, isNotTime)
+							}
 						}
 					} else if av.KeyTypeUpdated == cell.Value.Type {
 						if nil != cell.Value.Updated {
@@ -218,7 +223,9 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 								isNotTime = !key.Updated.IncludeTime
 							}
 
-							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone, isNotTime)
+							if nil != key {
+								cell.Value.Updated.FormatDate(key.DateFormat, isNotTime)
+							}
 						}
 					} else if av.KeyTypeMAsset == cell.Value.Type {
 						if nil != cell.Value.MAsset {
@@ -3482,7 +3489,10 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 						}
 					} else if av.KeyTypeDate == cell.Value.Type {
 						if nil != cell.Value.Date {
-							cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone, cell.Value.Date.IsNotTime, cell.Value.Date.HasEndDate)
+							key, _ := attrView.GetKey(cell.Value.KeyID)
+							if nil != key {
+								cell.Value.Date.FormatDate(key.DateFormat)
+							}
 						}
 					} else if av.KeyTypeCreated == cell.Value.Type {
 						if nil != cell.Value.Created {
@@ -3492,7 +3502,9 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 								isNotTime = !key.Created.IncludeTime
 							}
 
-							cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone, isNotTime)
+							if nil != key {
+								cell.Value.Created.FormatDate(key.DateFormat, isNotTime)
+							}
 						}
 					} else if av.KeyTypeUpdated == cell.Value.Type {
 						if nil != cell.Value.Updated {
@@ -3502,7 +3514,9 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 								isNotTime = !key.Updated.IncludeTime
 							}
 
-							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone, isNotTime)
+							if nil != key {
+								cell.Value.Updated.FormatDate(key.DateFormat, isNotTime)
+							}
 						}
 					} else if av.KeyTypeURL == cell.Value.Type {
 						if nil != cell.Value.URL {

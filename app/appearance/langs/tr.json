@@ -1928,6 +1928,10 @@
 		"quit": "Uygulamadan çık"
 	},
 	"_attrView": {
+		"dateFormat": "Tarih biçimi",
+		"fullDate": "Tam tarih",
+		"dateMonths": "Ocak|Şubat|Mart|Nisan|Mayıs|Haziran|Temmuz|Ağustos|Eylül|Ekim|Kasım|Aralık",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Boş",
 		"table": "Tablo",
 		"gallery": "Kart görünümü",

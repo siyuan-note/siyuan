@@ -1928,6 +1928,10 @@
 		"quit": "Quit application"
 	},
 	"_attrView": {
+		"dateFormat": "Date format",
+		"fullDate": "Full date",
+		"dateMonths": "January|February|March|April|May|June|July|August|September|October|November|December",
+		"dateFormatFullTemplate": "${month} ${day}, ${year}",
 		"empty": "Empty",
 		"table": "Table",
 		"gallery": "Card",

@@ -96,9 +96,10 @@ data-position="5west"
 data-id="${cell.id}" 
 data-field-id="${galleryData.fields[fieldsIndex].id}"
 data-dtype="${cell.valueType}" 
+data-date-format="${galleryData.fields[fieldsIndex].dateFormat || ""}"
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, galleryData.showIcon, "gallery", galleryData.fields[fieldsIndex].options)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, galleryData.showIcon, "gallery", galleryData.fields[fieldsIndex].options, galleryData.fields[fieldsIndex].dateFormat)}</div>`;
             if (galleryData.displayFieldName) {
                 html += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
     <div class="av__gallery-name">
@@ -160,9 +161,10 @@ data-position="5west"
 data-id="${cell.id}" 
 data-field-id="${kanbanData.fields[fieldsIndex].id}" 
 data-dtype="${cell.valueType}" 
+data-date-format="${kanbanData.fields[fieldsIndex].dateFormat || ""}"
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, kanbanData.showIcon, "kanban", kanbanData.fields[fieldsIndex].options)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, kanbanData.showIcon, "kanban", kanbanData.fields[fieldsIndex].options, kanbanData.fields[fieldsIndex].dateFormat)}</div>`;
             if (kanbanData.displayFieldName) {
                 html += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
     <div class="av__gallery-name">
@@ -208,11 +210,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         html += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-col-id="${column.id}" 
 data-wrap="${column.wrap}" 
 data-dtype="${column.type}" 
+data-date-format="${column.dateFormat || ""}"
 data-align="${column.align || ""}"
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${column.width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat)}</div>`;
 
         if (options.pinIndex === index) {
             html += "</div>";
@@ -395,9 +398,11 @@ export const insertAttrViewBlockAnimation = (options: {
         cellsHTML += `<div class="av__cell${colType === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${item.dataset.colId}" 
 data-wrap="${item.dataset.wrap}" 
 data-dtype="${item.dataset.dtype}" 
+data-date-format="${item.dataset.dateFormat || ""}"
 data-align="${item.dataset.align || ""}"
 style="width: ${item.style.width};"
-${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(colType, null), lineNumber)}</div>`;
+${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(colType, null), lineNumber,
+    true, "table", undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
         if (pinIndex === index) {
             cellsHTML += "</div>";
         }
@@ -426,7 +431,8 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
                     }
                     if (updateIds.includes(cellItem.dataset.colId)) {
                         const cellValue = response.data.values[cellItem.dataset.colId];
-                        cellItem.innerHTML = renderCell(cellValue);
+                        cellItem.innerHTML = renderCell(cellValue, 0, true, "table", undefined,
+                            cellItem.dataset.dateFormat as TAVDateFormat);
                         renderCellAttr(cellItem, cellValue);
                     }
                 });

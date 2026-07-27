@@ -321,7 +321,7 @@ style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}$
         } else {
             html += `<span class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
-                renderCell(cell.value, 0, false, "table", column.options) : ""}</span>`;
+                renderCell(cell.value, 0, false, "table", column.options, column.dateFormat) : ""}</span>`;
         }
     });
     return html + "</div>";

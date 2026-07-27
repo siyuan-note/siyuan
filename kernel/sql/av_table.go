@@ -58,6 +58,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				Calc:         col.Calc,
 				Options:      key.Options,
 				NumberFormat: key.NumberFormat,
+				DateFormat:   key.DateFormat,
 				Template:     key.Template,
 				Relation:     key.Relation,
 				Rollup:       key.Rollup,
@@ -115,7 +116,8 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			if nil != col.Date {
 				filedDateIsTime = col.Date.FillSpecificTime
 			}
-			fillAttributeViewBaseValue(tableCell.BaseValue, col.ID, rowID, col.NumberFormat, col.Template, filedDateIsTime)
+			fillAttributeViewBaseValue(tableCell.BaseValue, col.ID, rowID, col.NumberFormat, col.DateFormat, col.Template,
+				filedDateIsTime)
 			tableRow.Cells = append(tableRow.Cells, tableCell)
 		}
 		ret.Rows = append(ret.Rows, &tableRow)

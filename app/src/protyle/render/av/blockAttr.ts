@@ -85,6 +85,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     desc: string,
                     icon: string,
                     id: string,
+                    dateFormat?: TAVDateFormat,
                     options?: {
                         name: string,
                         color: string
@@ -123,6 +124,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     icon: item.key.icon,
                     typeIcon: getColIconByType(item.key.type),
                     selectOptions: item.key.options,
+                    dateFormat: item.key.dateFormat,
                     value,
                     empty: cellValueIsEmpty(value),
                 });

@@ -16,6 +16,7 @@ import {getAssetName, pathPosix} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
+import {formatDateDisplay, formatDateValue, parseDateValue} from "./dateFormat";
 import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
@@ -260,7 +261,7 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
     return newValue;
 };
 
-export const genCellValue = (colType: TAVCol, value: string | any) => {
+export const genCellValue = (colType: TAVCol, value: string | any, dateFormat: TAVDateFormat = "") => {
     let cellValue: IAVCellValue = {
         type: colType,
         [colType === "select" ? "mSelect" : colType]: value as IAVCellDateValue
@@ -297,42 +298,10 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 }
             };
         } else if (["date", "created", "updated"].includes(colType)) {
-            let values = value.split("→");
-            if (values.length !== 2) {
-                values = value.split("-");
-                if (values.length !== 2) {
-                    values = value.split("~");
-                }
-            }
-            const dateObj1 = dayjs(values[0]);
-            const dateObj2 = dayjs(values[1] || "");
-            if (isNaN(dateObj1.valueOf())) {
-                cellValue = {
-                    type: colType,
-                    [colType]: {
-                        content: null,
-                        isNotEmpty: false,
-                        content2: null,
-                        isNotEmpty2: false,
-                        formattedContent: "",
-                        hasEndDate: false,
-                        isNotTime: true,
-                    }
-                };
-            } else {
-                cellValue = {
-                    type: colType,
-                    [colType]: {
-                        content: dateObj1.valueOf(),
-                        isNotEmpty: true,
-                        content2: dateObj2.valueOf() || 0,
-                        isNotEmpty2: !isNaN(dateObj2.valueOf()),
-                        hasEndDate: !isNaN(dateObj2.valueOf()),
-                        isNotTime: dateObj1.hour() === 0 && values[0].split(":").length === 1,
-                        formattedContent: "",
-                    }
-                };
-            }
+            cellValue = {
+                type: colType,
+                [colType]: parseDateValue(value, dateFormat)
+            };
         } else if (colType === "relation") {
             cellValue = {
                 type: colType,
@@ -920,11 +889,16 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 newValue.icon = oldValue.block.icon;
             }
         }
+        let column = columns?.find(columnItem => columnItem.id === colId);
+        if (type === "date" && !column) {
+            const response = await fetchSyncPost("/api/av/getAttributeViewKeysByID", {avID, keyIDs: [colId]});
+            column = response.data?.[0];
+        }
         let cellValue: IAVCellValue;
         if (typeof newValue === "object" && newValue.type) {
             cellValue = transformCellValue(type, newValue);
         } else {
-            cellValue = genCellValue(type, newValue);
+            cellValue = genCellValue(type, newValue, column?.dateFormat);
         }
         cellValue.id = cellId;
         if ((cellValue.type === "date" && typeof cellValue.date === "string") ||
@@ -936,20 +910,13 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             doOperations.push(...operations.doOperations);
             undoOperations.push(...operations.undoOperations);
         }
-        // formattedContent 在单元格渲染时没有用到，需对比保持一致
         if (type === "date") {
             if (!(value && typeof value === "object" && typeof value.isNotTime === "boolean")) {
-                const column = columns?.find(item => item.id === colId);
                 if (column?.date) {
                     cellValue.date.isNotTime = !column.date.fillSpecificTime;
-                } else {
-                    const response = await fetchSyncPost("/api/av/getAttributeViewKeysByID", {avID: avID, keyIDs: [colId]});
-                    if (response.data[0].date) {
-                        cellValue.date.isNotTime = !response.data[0].date.fillSpecificTime;
-                    }
                 }
             }
-            cellValue.date.formattedContent = oldValue.date.formattedContent;
+            cellValue.date.formattedContent = formatDateValue(cellValue.date, column?.dateFormat);
         }
         if (forceOperation || !objEquals(cellValue, oldValue)) {
             doOperations.push({
@@ -970,7 +937,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 data: oldValue
             });
             if (isCustomAttr) {
-                item.innerHTML = genAVValueHTML(cellValue);
+                item.innerHTML = genAVValueHTML(cellValue, column?.dateFormat);
                 item.parentElement.dataset.empty = cellValueIsEmpty(cellValue).toString();
             } else {
                 updateAttrViewCellAnimation(item, cellValue);
@@ -1045,7 +1012,7 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
             return;
         }
         updateCustomAttr(cellElement);
-        cellElement.innerHTML = genAVValueHTML(value);
+        cellElement.innerHTML = genAVValueHTML(value, cellElement.dataset.dateFormat as TAVDateFormat);
     });
 };
 
@@ -1069,7 +1036,7 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
 };
 
 export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = true, type: TAVView = "table",
-                           selectOptions?: IAVColumn["options"]) => {
+                           selectOptions?: IAVColumn["options"], dateFormat: TAVDateFormat = "") => {
     let text = "";
     if ("template" === cellValue.type) {
         text = `<span class="av__celltext av__celltext--template">${cellValue ? getAVTemplateHTML(cellValue.template.content || "") : ""}</span>`;
@@ -1106,17 +1073,17 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         const dataValue = cellValue ? cellValue.date : null;
         text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
         if (dataValue && dataValue.isNotEmpty) {
-            text += dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+            text += escapeHtml(formatDateDisplay(dataValue.content, dateFormat, dataValue.isNotTime));
         }
         if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
-            text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+            text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${escapeHtml(formatDateDisplay(dataValue.content2, dateFormat, dataValue.isNotTime))}`;
         }
         text += "</span>";
     } else if (["created", "updated"].includes(cellValue.type)) {
         const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
         text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
         if (dataValue && dataValue.isNotEmpty) {
-            text += dataValue.formattedContent;
+            text += escapeHtml(dataValue.formattedContent || formatDateValue(dataValue, dateFormat));
         }
         text += "</span>";
     } else if (["lineNumber"].includes(cellValue.type)) {
@@ -1208,10 +1175,10 @@ const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
             text = dataValue.formattedContent;
         } else {
             if (dataValue && dataValue.isNotEmpty) {
-                text = dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+                text = formatDateDisplay(dataValue.content, "", dataValue.isNotTime);
             }
             if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
-                text = `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+                text = `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${formatDateDisplay(dataValue.content2, "", dataValue.isNotTime)}`;
             }
         }
         if (text) {
@@ -1314,7 +1281,8 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 rowID,
                 data
             });
-            item.element.innerHTML = renderCell(data, 0, showIcon);
+            item.element.innerHTML = renderCell(data, 0, showIcon, "table", undefined,
+                item.element.dataset.dateFormat as TAVDateFormat);
             renderCellAttr(item.element, data);
             delete item.colId;
             delete item.element;

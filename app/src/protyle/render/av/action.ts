@@ -1152,10 +1152,12 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
                     content: cellElement.getAttribute("aria-label").split('<div class="ft__on-surface">')[0],
                 };
             }
-            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false, viewType);
+            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
+                viewType, undefined, cellElement.dataset.dateFormat as TAVDateFormat);
             cellElement.parentElement.setAttribute("data-empty", cellValueIsEmpty(value).toString());
         } else {
-            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false);
+            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
+                undefined, undefined, cellElement.dataset.dateFormat as TAVDateFormat);
         }
         if (hasDragFill) {
             addDragFill(cellElement);

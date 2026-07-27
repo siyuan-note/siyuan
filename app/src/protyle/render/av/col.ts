@@ -5,6 +5,7 @@ import {getDefaultOperatorByType, getEditableFilters, hasFilterForColumn} from "
 import {genCellValue, renderCell} from "./cell";
 import {getPropertiesHTML, openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
+import {getLabelByDateFormat} from "./dateFormat";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
@@ -180,6 +181,11 @@ export const getEditHTML = (options: {
         html += '<button class="b3-menu__separator" data-id="separator_2"></button>' + getRollupHTML({colData});
     } else if (colData.type === "date") {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
+<button class="b3-menu__item" data-type="dateFormat" data-format="${colData.dateFormat || ""}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages._attrView.dateFormat}</span>
+    <span class="b3-menu__accelerator">${getLabelByDateFormat(colData.dateFormat)}</span>
+</button>
 <label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.fillCreated}</span>
     <span class="fn__space fn__flex-1"></span>
@@ -192,6 +198,11 @@ export const getEditHTML = (options: {
 </label>`;
     } else if (["updated", "created"].includes(colData.type)) {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
+<button class="b3-menu__item" data-type="dateFormat" data-format="${colData.dateFormat || ""}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages._attrView.dateFormat}</span>
+    <span class="b3-menu__accelerator">${getLabelByDateFormat(colData.dateFormat)}</span>
+</button>
 <label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.includeTime}</span>
     <span class="fn__space fn__flex-1"></span>
@@ -677,6 +688,7 @@ data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px
             icon: options.icon,
             typeIcon: getColIconByType(options.type),
             selectOptions: colData?.options,
+            dateFormat: colData?.dateFormat,
             value: createEmptyAVValue(options.id, options.type, rowID),
             empty: true,
         }));
@@ -2025,6 +2037,7 @@ const genColDataByType = (type: TAVCol, id: string, name: string) => {
         name,
         desc: "",
         numberFormat: "",
+        dateFormat: "",
         pin: false,
         template: "",
         type,

@@ -33,6 +33,7 @@ import {genCellValue, updateCellsValue} from "./cell";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML} from "./date";
 import {formatNumber} from "./number";
+import {formatDate} from "./dateFormatMenu";
 import {updateAttrViewCellAnimation} from "./action";
 import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCell} from "./asset";
 import {Constants} from "../../../constants";
@@ -1113,6 +1114,21 @@ export const openMenuPanel = (options: {
                         oldFormat: target.dataset.format,
                         colId: menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id"),
                         avID
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "dateFormat") {
+                    const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
+                    const colData = fields.find((item) => item.id === colId);
+                    formatDate({
+                        avPanelElement,
+                        element: target,
+                        protyle: options.protyle,
+                        oldFormat: target.dataset.format as TAVDateFormat,
+                        colId,
+                        avID,
+                        type: colData.type as "date" | "created" | "updated",
                     });
                     event.preventDefault();
                     event.stopPropagation();

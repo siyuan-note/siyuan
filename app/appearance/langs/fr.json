@@ -1928,6 +1928,10 @@
 		"quit": "Quitter le programme"
 	},
 	"_attrView": {
+		"dateFormat": "Format de date",
+		"fullDate": "Date complète",
+		"dateMonths": "janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Vide",
 		"table": "Tableau",
 		"gallery": "Carte",

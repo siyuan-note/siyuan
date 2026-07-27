@@ -1928,6 +1928,10 @@
 		"quit": "Zamknij aplikację"
 	},
 	"_attrView": {
+		"dateFormat": "Format daty",
+		"fullDate": "Pełna data",
+		"dateMonths": "stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Pusty",
 		"table": "Tabela",
 		"gallery": "Karta",

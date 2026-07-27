@@ -1928,6 +1928,10 @@
 		"quit": "Ukončiť aplikáciu"
 	},
 	"_attrView": {
+		"dateFormat": "Formát dátumu",
+		"fullDate": "Úplný dátum",
+		"dateMonths": "januára|februára|marca|apríla|mája|júna|júla|augusta|septembra|októbra|novembra|decembra",
+		"dateFormatFullTemplate": "${day}. ${month} ${year}",
 		"empty": "Prázdne",
 		"table": "Tabuľka",
 		"gallery": "Karta",

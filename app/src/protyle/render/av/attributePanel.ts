@@ -14,6 +14,7 @@ const refreshActions = new Set<TOperation>([
     "setAttrViewColDesc",
     "setAttrViewName",
     "updateAttrViewColNumberFormat",
+    "setAttrViewColDateFormat",
 ]);
 
 export class AVAttributePanel {

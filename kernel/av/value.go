@@ -98,6 +98,9 @@ func (value *Value) String(format bool) string {
 		if nil == value.Date {
 			return ""
 		}
+		if format && "" != value.Date.FormattedContent {
+			return value.Date.FormattedContent
+		}
 		formatted := NewFormattedValueDate(value.Date.Content, value.Date.Content2, DateFormatNone, value.Date.IsNotTime, value.Date.HasEndDate)
 		return formatted.FormattedContent
 	case KeyTypeSelect:
@@ -624,6 +627,67 @@ type ValueDate struct {
 	FormattedContent string `json:"formattedContent"`
 }
 
+type DateDisplayFormat string
+
+const (
+	DateDisplayFormatDefault      DateDisplayFormat = ""
+	DateDisplayFormatFull         DateDisplayFormat = "full"
+	DateDisplayFormatMonthDayYear DateDisplayFormat = "month-day-year"
+	DateDisplayFormatDayMonthYear DateDisplayFormat = "day-month-year"
+	DateDisplayFormatYearMonthDay DateDisplayFormat = "year-month-day"
+)
+
+func (format DateDisplayFormat) IsValid() bool {
+	switch format {
+	case DateDisplayFormatDefault, DateDisplayFormatFull, DateDisplayFormatMonthDayYear,
+		DateDisplayFormatDayMonthYear, DateDisplayFormatYearMonthDay:
+		return true
+	}
+	return false
+}
+
+func formatDateDisplay(content int64, format DateDisplayFormat, isNotTime bool) string {
+	contentTime := time.UnixMilli(content)
+	var formatted string
+	switch format {
+	case DateDisplayFormatFull:
+		months := strings.Split(GetAttributeViewI18n("dateMonths"), "|")
+		month := contentTime.Month().String()
+		if monthIndex := int(contentTime.Month()) - 1; 0 <= monthIndex && monthIndex < len(months) {
+			month = months[monthIndex]
+		}
+		formatted = GetAttributeViewI18n("dateFormatFullTemplate")
+		formatted = strings.ReplaceAll(formatted, "${year}", strconv.Itoa(contentTime.Year()))
+		formatted = strings.ReplaceAll(formatted, "${month}", month)
+		formatted = strings.ReplaceAll(formatted, "${day}", strconv.Itoa(contentTime.Day()))
+	case DateDisplayFormatMonthDayYear:
+		formatted = contentTime.Format("01/02/2006")
+	case DateDisplayFormatDayMonthYear:
+		formatted = contentTime.Format("02/01/2006")
+	case DateDisplayFormatYearMonthDay:
+		formatted = contentTime.Format("2006/01/02")
+	default:
+		formatted = contentTime.Format("2006-01-02")
+	}
+	if !isNotTime {
+		formatted += " " + contentTime.Format("15:04")
+	}
+	return formatted
+}
+
+func (date *ValueDate) FormatDate(format DateDisplayFormat) {
+	if nil == date || !date.IsNotEmpty || 0 == date.Content {
+		if nil != date {
+			date.FormattedContent = ""
+		}
+		return
+	}
+	date.FormattedContent = formatDateDisplay(date.Content, format, date.IsNotTime)
+	if date.HasEndDate && date.IsNotEmpty2 && 0 != date.Content2 {
+		date.FormattedContent += " → " + formatDateDisplay(date.Content2, format, date.IsNotTime)
+	}
+}
+
 // DateEndpoint 描述日期筛选或排序使用的时间端点。
 type DateEndpoint string
 
@@ -803,10 +867,25 @@ func NewFormattedValueCreated(content, content2 int64, format CreatedFormat, isN
 	}
 	ret = &ValueCreated{
 		Content:          content,
+		IsNotEmpty:       0 != content,
 		Content2:         content2,
+		IsNotEmpty2:      0 != content2,
 		FormattedContent: formatted,
 	}
 	return
+}
+
+func (created *ValueCreated) FormatDate(format DateDisplayFormat, isNotTime bool) {
+	if nil == created || !created.IsNotEmpty || 0 == created.Content {
+		if nil != created {
+			created.FormattedContent = ""
+		}
+		return
+	}
+	created.FormattedContent = formatDateDisplay(created.Content, format, isNotTime)
+	if created.IsNotEmpty2 && 0 != created.Content2 {
+		created.FormattedContent += " → " + formatDateDisplay(created.Content2, format, isNotTime)
+	}
 }
 
 type ValueUpdated struct {
@@ -844,10 +923,25 @@ func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat, isN
 	}
 	ret = &ValueUpdated{
 		Content:          content,
+		IsNotEmpty:       0 != content,
 		Content2:         content2,
+		IsNotEmpty2:      0 != content2,
 		FormattedContent: formatted,
 	}
 	return
+}
+
+func (updated *ValueUpdated) FormatDate(format DateDisplayFormat, isNotTime bool) {
+	if nil == updated || !updated.IsNotEmpty || 0 == updated.Content {
+		if nil != updated {
+			updated.FormattedContent = ""
+		}
+		return
+	}
+	updated.FormattedContent = formatDateDisplay(updated.Content, format, isNotTime)
+	if updated.IsNotEmpty2 && 0 != updated.Content2 {
+		updated.FormattedContent += " → " + formatDateDisplay(updated.Content2, format, isNotTime)
+	}
 }
 
 type ValueCheckbox struct {
@@ -888,6 +982,14 @@ func (r *ValueRollup) BuildContents(keyValues []*KeyValues, destKey *Key, relati
 		if KeyTypeNumber == destKey.Type {
 			destVal.Number.Format = destKey.NumberFormat
 			destVal.Number.FormatNumber()
+		} else if KeyTypeDate == destKey.Type {
+			destVal.Date.FormatDate(destKey.DateFormat)
+		} else if KeyTypeCreated == destKey.Type {
+			isNotTime := nil != destKey.Created && !destKey.Created.IncludeTime
+			destVal.Created.FormatDate(destKey.DateFormat, isNotTime)
+		} else if KeyTypeUpdated == destKey.Type {
+			isNotTime := nil != destKey.Updated && !destKey.Updated.IncludeTime
+			destVal.Updated.FormatDate(destKey.DateFormat, isNotTime)
 		}
 
 		r.Contents = append(r.Contents, destVal.Clone())
@@ -1238,7 +1340,9 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 		switch typ {
 		case KeyTypeDate:
 			if 0 != earliest {
-				r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+				date := NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)
+				date.FormatDate(destKey.DateFormat)
+				r.Contents = []*Value{{Type: KeyTypeDate, Date: date}}
 			}
 		case KeyTypeUpdated:
 			if 0 != earliest {
@@ -1247,7 +1351,9 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = !destKey.Updated.IncludeTime
 				}
 
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone, isNotTime)}}
+				updated := NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone, isNotTime)
+				updated.FormatDate(destKey.DateFormat, isNotTime)
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: updated}}
 			}
 		case KeyTypeCreated:
 			if 0 != earliest {
@@ -1256,7 +1362,9 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = !destKey.Created.IncludeTime
 				}
 
-				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone, isNotTime)}}
+				created := NewFormattedValueCreated(earliest, 0, CreatedFormatNone, isNotTime)
+				created.FormatDate(destKey.DateFormat, isNotTime)
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: created}}
 			}
 		}
 	case CalcOperatorLatest:
@@ -1292,7 +1400,9 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 		switch typ {
 		case KeyTypeDate:
 			if 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+				date := NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)
+				date.FormatDate(destKey.DateFormat)
+				r.Contents = []*Value{{Type: KeyTypeDate, Date: date}}
 			}
 		case KeyTypeUpdated:
 			if 0 != latest {
@@ -1300,7 +1410,9 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 				if nil != destKey.Updated {
 					isNotTime = !destKey.Updated.IncludeTime
 				}
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone, isNotTime)}}
+				updated := NewFormattedValueUpdated(latest, 0, UpdatedFormatNone, isNotTime)
+				updated.FormatDate(destKey.DateFormat, isNotTime)
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: updated}}
 			}
 		case KeyTypeCreated:
 			if 0 != latest {
@@ -1309,7 +1421,9 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = !destKey.Created.IncludeTime
 				}
 
-				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone, isNotTime)}}
+				created := NewFormattedValueCreated(latest, 0, CreatedFormatNone, isNotTime)
+				created.FormatDate(destKey.DateFormat, isNotTime)
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: created}}
 			}
 		}
 	case CalcOperatorChecked:

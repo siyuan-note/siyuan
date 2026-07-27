@@ -1928,6 +1928,10 @@
 		"quit": "アプリケーションを終了"
 	},
 	"_attrView": {
+		"dateFormat": "日付形式",
+		"fullDate": "完全な日付",
+		"dateMonths": "1月|2月|3月|4月|5月|6月|7月|8月|9月|10月|11月|12月",
+		"dateFormatFullTemplate": "${year}年${month}${day}日",
 		"empty": "空白",
 		"table": "テーブル",
 		"gallery": "カード",

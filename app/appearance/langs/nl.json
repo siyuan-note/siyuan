@@ -1928,6 +1928,10 @@
 		"quit": "Applicatie afsluiten"
 	},
 	"_attrView": {
+		"dateFormat": "Datumnotatie",
+		"fullDate": "Volledige datum",
+		"dateMonths": "januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Leeg",
 		"table": "Tabel",
 		"gallery": "Kaart",

@@ -28,7 +28,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
-	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -108,7 +107,7 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 
 	bt := treenode.GetBlockTreeInBox(blockID, boxID)
 	refDefs := queryBlockRefDefsInBox(bt, bt.BoxID)
-	buildBacklinkListItemRefsInBox(refDefs, bt.BoxID)
+	refDefs, _ = buildBacklinkListItemRefsInBox(refDefs, bt.BoxID)
 	var refIDs []string
 	for _, refDef := range refDefs {
 		refIDs = append(refIDs, refDef.RefID)
@@ -214,7 +213,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 		if queryRefCount {
 			var refIDs []string
 			refDefs := queryBlockRefDefs(bts[blockID])
-			buildBacklinkListItemRefs(refDefs)
+			refDefs, _ = buildBacklinkListItemRefs(refDefs)
 			for _, refDef := range refDefs {
 				refIDs = append(refIDs, refDef.RefID)
 			}
@@ -410,7 +409,7 @@ func GetBlockRefsInBox(defID, boxID string) (refDefs []*RefDefs, originalRefBloc
 
 	// 加密笔记本的 refs 在加密 db，用 bt.BoxID 路由
 	refDefs = queryBlockRefDefsInBox(bt, bt.BoxID)
-	originalRefBlockIDs = buildBacklinkListItemRefsInBox(refDefs, bt.BoxID)
+	refDefs, originalRefBlockIDs = buildBacklinkListItemRefsInBox(refDefs, bt.BoxID)
 	return
 }
 
@@ -694,11 +693,11 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 	return
 }
 
-func buildBacklinkListItemRefs(refDefs []*RefDefs) (originalRefBlockIDs map[string]string) {
+func buildBacklinkListItemRefs(refDefs []*RefDefs) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
 	return buildBacklinkListItemRefsInBox(refDefs, "")
 }
 
-func buildBacklinkListItemRefsInBox(refDefs []*RefDefs, boxID string) (originalRefBlockIDs map[string]string) {
+func buildBacklinkListItemRefsInBox(refDefs []*RefDefs, boxID string) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
 	originalRefBlockIDs = map[string]string{}
 
 	var refIDs []string
@@ -707,59 +706,14 @@ func buildBacklinkListItemRefsInBox(refDefs []*RefDefs, boxID string) (originalR
 	}
 	sqlRefBlocks := sql.GetBlocksInBox(refIDs, boxID)
 	refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 12)
-
-	parentRefParagraphs := map[string]*Block{}
-	var paragraphParentIDs []string
-	for _, ref := range refBlocks {
-		if nil != ref && "NodeParagraph" == ref.Type {
-			parentRefParagraphs[ref.ParentID] = ref
-			paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
+	for _, mapping := range buildBacklinkParentMappings(refBlocks, boxID) {
+		for _, refDef := range refDefs {
+			if mapping.coveredRefIDs[refDef.RefID] {
+				refDef.RefID = mapping.parent.ID
+			}
 		}
+		originalRefBlockIDs[mapping.parent.ID] = mapping.refBlock.ID
 	}
-	sqlParagraphParents := sql.GetBlocksInBox(paragraphParentIDs, boxID)
-	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
-
-	luteEngine := util.NewLute()
-	processedParagraphs := hashset.New()
-	for _, parent := range paragraphParents {
-		if nil == parent {
-			continue
-		}
-
-		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type || "NodeCallout" == parent.Type {
-			refBlock := parentRefParagraphs[parent.ID]
-			if nil == refBlock {
-				continue
-			}
-
-			paragraphUseParentLi := true
-			if "NodeListItem" == parent.Type && parent.FContent != refBlock.Content {
-				if inlineTree := parse.Inline("", []byte(refBlock.Markdown), luteEngine.ParseOptions); nil != inlineTree {
-					for c := inlineTree.Root.FirstChild.FirstChild; c != nil; c = c.Next {
-						if treenode.IsBlockRef(c) {
-							continue
-						}
-
-						if "" != strings.TrimSpace(c.Text()) {
-							paragraphUseParentLi = false
-							break
-						}
-					}
-				}
-			}
-
-			if paragraphUseParentLi {
-				for _, refDef := range refDefs {
-					if refDef.RefID == refBlock.ID {
-						refDef.RefID = parent.ID
-						break
-					}
-				}
-				processedParagraphs.Add(parent.ID)
-			}
-
-			originalRefBlockIDs[parent.ID] = refBlock.ID
-		}
-	}
+	retRefDefs = mergeBacklinkRefDefs(refDefs)
 	return
 }

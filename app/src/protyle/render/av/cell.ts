@@ -1035,7 +1035,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
                            selectOptions?: IAVColumn["options"]) => {
     let text = "";
     if ("template" === cellValue.type) {
-        text = `<span class="av__celltext">${cellValue ? getAVTemplateHTML(cellValue.template.content || "") : ""}</span>`;
+        text = `<span class="av__celltext av__celltext--template">${cellValue ? getAVTemplateHTML(cellValue.template.content || "") : ""}</span>`;
     } else if ("text" === cellValue.type) {
         text = `<span class="av__celltext">${cellValue ? Lute.EscapeHTMLStr(cellValue.text.content || "") : ""}</span>`;
     } else if (["email", "phone"].includes(cellValue.type)) {

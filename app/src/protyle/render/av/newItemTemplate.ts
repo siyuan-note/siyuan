@@ -636,7 +636,7 @@ export const openNewItemTemplateDialog = (options: {
             }, unicode => {
                 iconElement.dataset.value = unicode;
                 emojiElement.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
-            }, emojiElement.querySelector("img"));
+            }, emojiElement.querySelector("img"), {ownerElement: options.protyle.element});
             event.preventDefault();
             event.stopPropagation();
         });

@@ -78,6 +78,7 @@ import {AIChat} from "../../ai/chat";
 import {updateCalloutType} from "./callout";
 import {tabCodeBlock} from "./codeBlock";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
+import {getAVTemplateInteractiveElement} from "../render/av/attributeValue";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -96,6 +97,10 @@ export const getContentByInlineHTML = (range: Range, cb: (content: string) => vo
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
+            event.stopPropagation();
+            return;
+        }
+        if (getAVTemplateInteractiveElement(event.target)) {
             event.stopPropagation();
             return;
         }

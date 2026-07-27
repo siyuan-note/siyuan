@@ -273,6 +273,15 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
         return false;
     }
 
+    const dialogElement = hasClosestByAttribute(target, "data-popover-oid", null, true);
+    const dialogPopoverOID = dialogElement ? dialogElement.dataset.popoverOid : undefined;
+    const dialogPopoverLevel = Number(dialogElement ? dialogElement.dataset.popoverLevel : undefined);
+    const keepPopoverForDialog = (item: BlockPanel, itemLevel: number) => {
+        return Boolean(dialogPopoverOID) &&
+            dialogPopoverOID === item.element.dataset.oid &&
+            Number.isInteger(dialogPopoverLevel) &&
+            itemLevel <= dialogPopoverLevel;
+    };
     const avPanelElement = hasClosestByClassName(target, "av__panel") || hasClosestByClassName(target, "av__mask");
     if (avPanelElement) {
         // 浮窗上点击 av 操作，浮窗不能消失
@@ -341,6 +350,9 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                     itemLevel > (maxEditLevels[item.element.getAttribute("data-oid")] || 0) &&
                     item.element.getAttribute("data-pin") === "false" &&
                     itemLevel > parseInt(blockElement.getAttribute("data-level"))) {
+                    if (keepPopoverForDialog(item, itemLevel)) {
+                        continue;
+                    }
                     if (menuLevel && menuLevel >= itemLevel) {
                         // 有 gutter 菜单时不隐藏
                         break;
@@ -362,6 +374,9 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                 const item = window.siyuan.blockPanels[i];
                 const itemLevel = parseInt(item.element.getAttribute("data-level"));
                 if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "false") {
+                    if (keepPopoverForDialog(item, itemLevel)) {
+                        continue;
+                    }
                     if (menuLevel && menuLevel >= itemLevel) {
                         // 有 gutter 菜单时不隐藏
                         break;

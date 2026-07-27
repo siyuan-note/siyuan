@@ -640,6 +640,7 @@ export const openMenuPanel = (options: {
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
             event.stopPropagation();
         });
+        let suppressSelectClick = false;
         // 多选排序
         avPanelElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
             if (event.button === 1 && !hasClosestByClassName(event.target, "b3-menu")) {
@@ -647,19 +648,31 @@ export const openMenuPanel = (options: {
             }
             if (event.button !== 0 || options.type !== "select") return;
             const selectedElement = event.target.closest(".b3-chip--middle") as HTMLElement;
-            if (!selectedElement) {
+            if (!selectedElement || !selectedElement.parentElement.classList.contains("b3-chips") ||
+                event.target.closest('[data-type="removeCellOption"]')) {
+                return;
+            }
+            const colId = getColId(options.cellElements[0], data.viewType);
+            const colData = fields.find((item) => item.id === colId);
+            if (colData?.type !== "mSelect" ||
+                selectedElement.parentElement.querySelectorAll(".b3-chip--middle").length < 2) {
                 return;
             }
             event.preventDefault();
-            document.body.style.cursor = "grabbing";
             const documentSelf = document;
             documentSelf.ondragstart = () => false;
             let ghostElement: HTMLElement;
             const diffPosition = {x: 0, y: 0};
+            const startPosition = {x: event.clientX, y: event.clientY};
+            const oldValue = Array.from(selectedElement.parentElement.querySelectorAll(".b3-chip--middle"))
+                .map((item: HTMLElement) => item.dataset.content);
             documentSelf.onmousemove = (moveEvent: MouseEvent & { target: HTMLElement }) => {
                 moveEvent.preventDefault();
                 moveEvent.stopPropagation();
                 if (!ghostElement) {
+                    if (Math.hypot(moveEvent.clientX - startPosition.x, moveEvent.clientY - startPosition.y) < 5) {
+                        return;
+                    }
                     ghostElement = selectedElement.cloneNode(true) as HTMLElement;
                     document.body.append(ghostElement);
                     ghostElement.setAttribute("id", "dragGhost");
@@ -667,12 +680,13 @@ export const openMenuPanel = (options: {
                     ghostElement.style.position = "fixed";
                     ghostElement.style.zIndex = (window.siyuan.zIndex++).toString();
                     selectedElement.style.opacity = ".38";
+                    document.body.style.cursor = "grabbing";
                     const selectedRect = selectedElement.getBoundingClientRect();
                     diffPosition.x = moveEvent.clientX - selectedRect.left;
                     diffPosition.y = moveEvent.clientY - selectedRect.top;
                 }
-                ghostElement.style.top = (moveEvent.clientY - diffPosition.x) + "px";
-                ghostElement.style.left = (moveEvent.clientX - diffPosition.y) + "px";
+                ghostElement.style.top = (moveEvent.clientY - diffPosition.y) + "px";
+                ghostElement.style.left = (moveEvent.clientX - diffPosition.x) + "px";
                 const targetElement = moveEvent.target.closest(".b3-chip--middle") as HTMLElement;
                 if (targetElement && targetElement !== selectedElement) {
                     const nodeRect = targetElement.getBoundingClientRect();
@@ -695,11 +709,20 @@ export const openMenuPanel = (options: {
                 ghostElement?.remove();
                 selectedElement.style.opacity = "";
                 document.body.style.cursor = "";
+                if (!ghostElement) {
+                    return;
+                }
                 const newValue: IAVCellSelectValue[] = [];
                 selectedElement.parentElement.querySelectorAll(".b3-chip--middle").forEach((item: HTMLElement) => {
-                    newValue.push({content: item.dataset.content, color: item.style.color.match(/color(\d+)/)[1]});
+                    newValue.push({content: item.dataset.content, color: item.dataset.valueColor});
                 });
-                updateCellsValue(options.protyle, options.blockElement as HTMLElement, newValue, options.cellElements);
+                suppressSelectClick = true;
+                setTimeout(() => {
+                    suppressSelectClick = false;
+                });
+                if (newValue.some((item, index) => item.content !== oldValue[index])) {
+                    updateCellsValue(options.protyle, options.blockElement as HTMLElement, newValue, options.cellElements);
+                }
             };
         });
         avPanelElement.addEventListener("click", async (event: MouseEvent) => {
@@ -710,6 +733,17 @@ export const openMenuPanel = (options: {
             } else if (typeof event.detail === "object") {
                 type = (event.detail as { type: string }).type;
                 target = (event.detail as { target: HTMLElement }).target;
+            }
+            const selectedElement = target?.closest(".b3-chip--middle") as HTMLElement;
+            if (options.type === "select" && selectedElement?.parentElement.classList.contains("b3-chips") &&
+                !target.closest('[data-type="removeCellOption"]')) {
+                if (!suppressSelectClick) {
+                    setColOption(options.protyle, data, selectedElement, options.blockElement, isCustomAttr, options.cellElements);
+                }
+                suppressSelectClick = false;
+                event.preventDefault();
+                event.stopPropagation();
+                return;
             }
             while (target && target !== avPanelElement || type) {
                 type = target?.dataset.type || type;
@@ -1095,7 +1129,7 @@ export const openMenuPanel = (options: {
                         }]);
                         target.innerHTML = unicode ? unicode2Emoji(unicode) : '<svg style="width: 14px;height: 14px;"><use xlink:href="#iconTable"></use></svg>';
                         target.dataset.icon = unicode;
-                    }, target.querySelector("img"));
+                    }, target.querySelector("img"), {ownerElement: options.protyle.element});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1166,7 +1200,7 @@ export const openMenuPanel = (options: {
                             updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
                         }
                         target.dataset.icon = unicode;
-                    }, target.querySelector("img"));
+                    }, target.querySelector("img"), {ownerElement: options.protyle.element});
                     event.preventDefault();
                     event.stopPropagation();
                     break;

@@ -114,6 +114,7 @@ import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard} from "../util/richClipboard";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
+import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -312,6 +313,10 @@ export class WYSIWYG {
     private bindCommonEvent(protyle: IProtyle) {
         this.element.addEventListener("copy", async (event: ClipboardEvent & { target: HTMLElement }) => {
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
+            if (getAVTemplateInteractiveElement(event.target)) {
+                event.stopPropagation();
+                return;
+            }
             // https://github.com/siyuan-note/siyuan/issues/4600
             if (event.target.tagName === "PROTYLE-HTML" || event.target.localName === "input") {
                 event.stopPropagation();
@@ -629,6 +634,10 @@ export class WYSIWYG {
             protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
             if (event.button === 2) {
                 // 右键
+                return;
+            }
+            if (getAVTemplateInteractiveElement(event.target)) {
+                event.stopPropagation();
                 return;
             }
             const documentSelf = document;
@@ -2175,7 +2184,11 @@ export class WYSIWYG {
             });
         });
 
-        this.element.addEventListener("focusout", () => {
+        this.element.addEventListener("focusout", (event) => {
+            if (getAVTemplateInteractiveElement(event.target)) {
+                event.stopPropagation();
+                return;
+            }
             if (getSelection().rangeCount === 0) {
                 return;
             }
@@ -2187,6 +2200,10 @@ export class WYSIWYG {
 
         this.element.addEventListener("cut", async (event: ClipboardEvent & { target: HTMLElement }) => {
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
+            if (getAVTemplateInteractiveElement(event.target)) {
+                event.stopPropagation();
+                return;
+            }
             if (protyle.disabled) {
                 return;
             }
@@ -2854,6 +2871,10 @@ export class WYSIWYG {
         }, {passive: true});
 
         this.element.addEventListener("paste", (event: ClipboardEvent & { target: HTMLElement }) => {
+            if (getAVTemplateInteractiveElement(event.target)) {
+                event.stopPropagation();
+                return;
+            }
             // https://github.com/siyuan-note/siyuan/issues/11241
             if (hasClosestByAttribute(event.target, "data-type", "av-search")) {
                 return;
@@ -2892,6 +2913,10 @@ export class WYSIWYG {
         // 记录组合开始时的光标位置，用于取消组合后恢复光标（输入法删空候选词触发 compositionend 时浏览器会把光标移出可编辑单元格）
         let compositionRange: { cell: HTMLElement; offset: number };
         this.element.addEventListener("compositionstart", (event) => {
+            if (getAVTemplateInteractiveElement(event.target)) {
+                event.stopPropagation();
+                return;
+            }
             isComposition = true;
             // 微软双拼由于 focusByRange 导致无法输入文字，因此不再 keydown 中记录了，但 keyup 会记录拼音字符，因此使用 isComposition 阻止 keyup 记录。
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
@@ -2919,6 +2944,9 @@ export class WYSIWYG {
 
         this.element.addEventListener("compositionend", (event: InputEvent) => {
             event.stopPropagation();
+            if (getAVTemplateInteractiveElement(event.target)) {
+                return;
+            }
             isComposition = false;
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
@@ -2955,6 +2983,10 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("input", (event: InputEvent) => {
+            if (getAVTemplateInteractiveElement(event.target)) {
+                event.stopPropagation();
+                return;
+            }
             if (this.preventInput) {
                 event.stopPropagation();
                 return;
@@ -3008,6 +3040,10 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("keyup", (event) => {
+            if (getAVTemplateInteractiveElement(event.target)) {
+                event.stopPropagation();
+                return;
+            }
             const range = getEditorRange(this.element).cloneRange();
             const nodeElement = hasClosestBlock(range.startContainer);
 
@@ -3090,6 +3126,10 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            if (getAVTemplateInteractiveElement(event.target)) {
+                event.stopPropagation();
+                return;
+            }
             const target = event.target as HTMLElement;
             // 双击超级块拖拽手柄，均分所有列宽
             if (target.classList.contains("sb__resize")) {
@@ -3147,6 +3187,11 @@ export class WYSIWYG {
                     event
                 });
             });
+            const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
+            if (templateInteractiveElement && !isAVTemplateLink(templateInteractiveElement)) {
+                event.stopPropagation();
+                return;
+            }
             const ctrlIsPressed = isOnlyMeta(event);
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
@@ -3210,9 +3255,13 @@ export class WYSIWYG {
                 setFirstNodeRange(range.startContainer.parentElement.querySelector(".hljs").lastElementChild, range);
             }
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513
+            const templateLinkElement = templateInteractiveElement &&
+                isAVTemplateLink(templateInteractiveElement) ? templateInteractiveElement : undefined;
             const aElement = hasClosestByAttribute(event.target, "data-type", "a") ||
-                hasClosestByClassName(event.target, "av__celltext--url");   // 数据库中资源文件、链接、电话、邮箱单元格
-            let aLink = aElement ? (aElement.getAttribute("data-href") || "") : "";
+                hasClosestByClassName(event.target, "av__celltext--url") ||   // 数据库中资源文件、链接、电话、邮箱单元格
+                templateLinkElement;
+            let aLink = aElement ? (aElement.getAttribute("data-href") ||
+                (templateLinkElement ? aElement.getAttribute("href") : "") || "") : "";
             if (aElement && !aLink && aElement.classList.contains("av__celltext--url")) {
                 aLink = aElement.textContent.trim();
                 if (aElement.dataset.type === "phone") {
@@ -3688,7 +3737,7 @@ export class WYSIWYG {
                         calloutIconElement.innerHTML = emojiHTML;
                         updateTransaction(protyle, nodeElement, oldHTML);
                         focusBlock(nodeElement);
-                    }, calloutIconElement.querySelector("img"));
+                    }, calloutIconElement.querySelector("img"), {ownerElement: protyle.element});
                 }
                 event.preventDefault();
                 event.stopPropagation();
@@ -3721,7 +3770,7 @@ export class WYSIWYG {
                         hideElements(["dialog"]);
                         updateTransaction(protyle, nodeElement, oldHTML);
                         focusByWbr(nodeElement, range);
-                    }, emojiElement);
+                    }, emojiElement, {ownerElement: protyle.element});
                 }
                 return;
             }

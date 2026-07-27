@@ -241,9 +241,10 @@ export const openEmojiPanel = (
     position: IPosition,
     callback?: (emoji: string) => void,
     dynamicImgElement?: HTMLElement,
-    hide?: {
-        dynamic: boolean,
-        custom: boolean
+    options?: {
+        dynamic?: boolean,
+        custom?: boolean,
+        ownerElement?: HTMLElement
     }) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
@@ -251,6 +252,7 @@ export const openEmojiPanel = (
         window.siyuan.menus.menu.removeScrollEvent();
     }
 
+    const popoverElement = options?.ownerElement?.closest<HTMLElement>(".block__popover");
     const dynamicURL = "api/icon/getDynamicIcon?";
     const dynamicCurrentObj: Record<string, any> = {
         color: "#d23f31",
@@ -284,7 +286,7 @@ export const openEmojiPanel = (
     <div class="emojis__tabheader">
         <div data-type="tab-emoji" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.emoji}"><svg><use xlink:href="#iconEmoji"></use></svg></div>
         <div class="fn__space"></div>
-        <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show${hide?.dynamic ? " fn__none" : ""}" aria-label="${window.siyuan.languages.dynamicIcon}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
+        <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show${options?.dynamic ? " fn__none" : ""}" aria-label="${window.siyuan.languages.dynamicIcon}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
         <div class="fn__flex-1"></div>
         <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="remove" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
     </div>
@@ -301,7 +303,7 @@ export const openEmojiPanel = (
                 <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
-            <div class="emojis__panel">${filterEmoji("", null, hide?.custom)}</div>
+            <div class="emojis__panel">${filterEmoji("", null, options?.custom)}</div>
             <div class="fn__flex">
                 ${[
             ["2b50", window.siyuan.languages.recentEmoji],
@@ -315,7 +317,7 @@ export const openEmojiPanel = (
             ["267e-fe0f", getEmojiTitle(7)],
             ["1f6a9", getEmojiTitle(8)],
         ].map(([unicode, title], index) => {
-            if (hide?.custom && index === 1) {
+            if (options?.custom && index === 1) {
                 return "";
             }
             return `<div data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</div>`;
@@ -392,6 +394,12 @@ export const openEmojiPanel = (
 </div>`
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_EMOJIS);
+    const popoverOID = popoverElement?.dataset.oid;
+    const popoverLevel = popoverElement?.dataset.level;
+    if (popoverOID && popoverLevel) {
+        dialog.element.dataset.popoverOid = popoverOID;
+        dialog.element.dataset.popoverLevel = popoverLevel;
+    }
     dialog.element.querySelector(".b3-dialog__container").setAttribute("data-menu", "true");
     const dialogElement = dialog.element.querySelector(".b3-dialog") as HTMLElement;
     dialogElement.style.justifyContent = "inherit";
@@ -404,7 +412,7 @@ export const openEmojiPanel = (
     const emojiSearchInputElement = dialog.element.querySelector('[data-type="tab-emoji"] .b3-text-field') as HTMLInputElement;
     const emojisContentElement = dialog.element.querySelector(".emojis__panel");
     emojiSearchInputElement.addEventListener("compositionend", () => {
-        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, hide?.custom);
+        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, options?.custom);
         if (emojiSearchInputElement.value) {
             emojisContentElement.nextElementSibling.classList.add("fn__none");
         } else {
@@ -421,7 +429,7 @@ export const openEmojiPanel = (
         if (event.isComposing) {
             return;
         }
-        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, hide?.custom);
+        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, options?.custom);
         if (emojiSearchInputElement.value) {
             emojisContentElement.nextElementSibling.classList.add("fn__none");
         } else {

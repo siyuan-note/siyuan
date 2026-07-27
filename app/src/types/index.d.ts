@@ -325,6 +325,7 @@ interface Window {
         getScreenWidthPx(): number
         exit(): void
         setWebViewFocusable(enable: boolean): void
+        setNativeTextSelectionMenuDisabled(disabled: boolean): void
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
     };

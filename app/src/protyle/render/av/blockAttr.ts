@@ -18,7 +18,12 @@ import {Constants} from "../../../constants";
 import {removeCompressURL} from "../../../util/image";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {confirmDialog} from "../../../dialog/confirmDialog";
-import {createEmptyAVValue, genAVAttributeRowHTML} from "./attributeValue";
+import {
+    createEmptyAVValue,
+    genAVAttributeRowHTML,
+    getAVTemplateInteractiveElement,
+    isAVTemplateLink
+} from "./attributeValue";
 import {isLastPointerMouse} from "../../../util/touchDragBridge";
 
 interface IAVAttributeTableData {
@@ -44,6 +49,23 @@ interface IAVAttributeTableData {
 const attributeTableData = new WeakMap<HTMLElement, IAVAttributeTableData>();
 
 let attributeViewRenderID = 0;
+
+const handleTemplateInteraction = (protyle: IProtyle, event: MouseEvent) => {
+    const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
+    if (!templateInteractiveElement) {
+        return false;
+    }
+    if (isAVTemplateLink(templateInteractiveElement)) {
+        const link = templateInteractiveElement.getAttribute("data-href") ||
+            templateInteractiveElement.getAttribute("href");
+        if (link) {
+            openLink(protyle.app, link, event, event.ctrlKey || event.metaKey);
+            event.preventDefault();
+        }
+    }
+    event.stopPropagation();
+    return true;
+};
 
 export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle, cb?: (element: HTMLElement) => void,
                                   row?: { avID: string, itemID: string, valueID: string }) => {
@@ -264,6 +286,9 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 }
             });
             element.addEventListener("click", (event) => {
+                if (handleTemplateInteraction(protyle, event)) {
+                    return;
+                }
                 const databaseElement = hasClosestByClassName(event.target as HTMLElement, "popover__block");
                 if (databaseElement && isTouchDevice() && !isLastPointerMouse() &&
                     hasClosestByClassName(databaseElement, "custom-attr__avheader")) {
@@ -506,7 +531,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                 w: rect.width,
             }, (unicode) => {
                 target.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
-            }, target.querySelector("img"));
+            }, target.querySelector("img"), {ownerElement: protyle.element});
             event.preventDefault();
             event.stopPropagation();
             return true;

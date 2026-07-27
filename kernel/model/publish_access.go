@@ -1350,7 +1350,7 @@ func FilterRefDefsByPublishIgnore(publishIgnore PublishAccess, refDefs []*RefDef
 			retRefDefs = append(retRefDefs, refDef)
 		}
 	}
-	originalRefBlockIDs = buildBacklinkListItemRefs(retRefDefs)
+	retRefDefs, originalRefBlockIDs = buildBacklinkListItemRefs(retRefDefs)
 	return
 }
 

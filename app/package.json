@@ -64,7 +64,7 @@
     "cross-env": "^10.1.0",
     "css-loader": "^7.1.2",
     "dayjs": "^1.11.5",
-    "electron": "42.6.1",
+    "electron": "42.7.1",
     "electron-builder": "26.15.7",
     "encoding": "^0.1.13",
     "esbuild-loader": "^3.0.1",

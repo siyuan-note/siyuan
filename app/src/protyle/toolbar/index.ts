@@ -1971,7 +1971,7 @@ export class Toolbar {
         this.subElement.classList.remove("fn__none");
         this.element.classList.add("fn__none");
         const rangePosition = getSelectionPosition(nodeElement, range);
-        setPosition(this.subElement, rangePosition.left, rangePosition.top - 48, this.LINE_HEIGHT);
+        setPosition(this.subElement, rangePosition.left, rangePosition.top - this.subElement.clientHeight - 8, this.LINE_HEIGHT);
     }
 
     public isMultiSelectMode() {

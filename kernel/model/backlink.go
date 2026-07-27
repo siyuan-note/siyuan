@@ -424,13 +424,15 @@ func getBacklinkRenderNodes(n *ast.Node, originalRefBlockIDs map[string]string) 
 			return
 		}
 
-		for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
-			if treenode.IsBlockRef(headingFirstSpan) {
-				continue
-			}
-			if "" != strings.TrimSpace(headingFirstSpan.Text()) {
-				expand = false
-				break
+		if "" == originalRefBlockIDs[n.ID] {
+			for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
+				if treenode.IsBlockRef(headingFirstSpan) {
+					continue
+				}
+				if "" != strings.TrimSpace(headingFirstSpan.Text()) {
+					expand = false
+					break
+				}
 			}
 		}
 
@@ -625,32 +627,30 @@ func GetBacklinkInBox(id, keyword, mentionKeyword string, beforeLen int, contain
 	}
 
 	var linkRefs []*Block
-	processedParagraphs := hashset.New()
-	var paragraphParentIDs []string
+	var backlinkRefBlocks []*Block
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
-			}
+			backlinkRefBlocks = append(backlinkRefBlocks, ref)
 		}
 	}
-	paragraphParents := sql.GetBlocksInBox(paragraphParentIDs, boxID)
-	for _, p := range paragraphParents {
-		if nil == p {
+	coveredRefIDs := map[string]bool{}
+	originalRefBlockIDs := map[string]string{}
+	for _, mapping := range buildBacklinkParentMappings(backlinkRefBlocks, boxID) {
+		parent := sql.GetBlockInBox(mapping.parent.ID, boxID)
+		if nil == parent {
 			continue
 		}
-
-		if "i" == p.Type || "h" == p.Type {
-			linkRefs = append(linkRefs, fromSQLBlock(p, keyword, beforeLen))
-			processedParagraphs.Add(p.ID)
+		originalRefBlockIDs[mapping.parent.ID] = mapping.refBlock.ID
+		for refID := range mapping.coveredRefIDs {
+			coveredRefIDs[refID] = true
 		}
+		linkRefsCount -= len(mapping.coveredRefIDs) - 1
+		linkRefs = append(linkRefs, fromSQLBlock(parent, keyword, beforeLen))
 	}
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				if processedParagraphs.Contains(ref.ParentID) {
-					continue
-				}
+			if coveredRefIDs[ref.ID] {
+				continue
 			}
 
 			ref.DefID = link.ID
@@ -664,7 +664,7 @@ func GetBacklinkInBox(id, keyword, mentionKeyword string, beforeLen int, contain
 			linkRefs = append(linkRefs, ref)
 		}
 	}
-	linkPaths = toSubTreeInBox(linkRefs, keyword, boxID)
+	linkPaths = toSubTreeInBox(linkRefs, keyword, boxID, originalRefBlockIDs)
 
 	mentions, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen, boxID)
 	mentionsCount = len(mentions)
@@ -734,74 +734,36 @@ func buildLinkRefsInBox(defRootID string, refs []*sql.Ref, keywords []string, bo
 		refsCount += len(link.Refs)
 	}
 
-	parentRefParagraphs := map[string]*Block{}
-	var paragraphParentIDs []string
+	var backlinkRefBlocks []*Block
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				parentRefParagraphs[ref.ParentID] = ref
-				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
-			}
+			backlinkRefBlocks = append(backlinkRefBlocks, ref)
 		}
 	}
-	refsCountDelta := len(paragraphParentIDs)
-	paragraphParentIDs = gulu.Str.RemoveDuplicatedElem(paragraphParentIDs)
-	refsCountDelta -= len(paragraphParentIDs)
-	refsCount -= refsCountDelta
-	sqlParagraphParents := sql.GetBlocksInBox(paragraphParentIDs, boxID)
-	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
-
-	luteEngine := util.NewLute()
 	originalRefBlockIDs = map[string]string{}
-	processedParagraphs := hashset.New()
-	for _, parent := range paragraphParents {
-		if nil == parent {
+	refBlocksByID := map[string]*Block{}
+	for _, refBlock := range backlinkRefBlocks {
+		refBlocksByID[refBlock.ID] = refBlock
+	}
+	coveredRefIDs := map[string]bool{}
+	for _, mapping := range buildBacklinkParentMappings(backlinkRefBlocks, boxID) {
+		originalRefBlockIDs[mapping.parent.ID] = mapping.refBlock.ID
+		for refID := range mapping.coveredRefIDs {
+			coveredRefIDs[refID] = true
+		}
+
+		if !matchBacklinkParentMapping(mapping, refBlocksByID, keywords, boxID) {
+			refsCount -= len(mapping.coveredRefIDs)
 			continue
 		}
 
-		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type || "NodeCallout" == parent.Type {
-			refBlock := parentRefParagraphs[parent.ID]
-			if nil == refBlock {
-				continue
-			}
-
-			paragraphUseParentLi := true
-			if "NodeListItem" == parent.Type && parent.FContent != refBlock.Content {
-				if inlineTree := parse.Inline("", []byte(refBlock.Markdown), luteEngine.ParseOptions); nil != inlineTree {
-					for c := inlineTree.Root.FirstChild.FirstChild; c != nil; c = c.Next {
-						if treenode.IsBlockRef(c) {
-							continue
-						}
-
-						if "" != strings.TrimSpace(c.Text()) {
-							paragraphUseParentLi = false
-							break
-						}
-					}
-				}
-			}
-
-			if paragraphUseParentLi {
-				processedParagraphs.Add(parent.ID)
-			}
-
-			originalRefBlockIDs[parent.ID] = refBlock.ID
-			if !matchBacklinkKeyword(parent, keywords) {
-				refsCount--
-				continue
-			}
-
-			if paragraphUseParentLi {
-				ret = append(ret, parent)
-			}
-		}
+		refsCount -= len(mapping.coveredRefIDs) - 1
+		ret = append(ret, mapping.parent)
 	}
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				if processedParagraphs.Contains(ref.ParentID) {
-					continue
-				}
+			if coveredRefIDs[ref.ID] {
+				continue
 			}
 
 			if !matchBacklinkKeyword(ref, keywords) {
@@ -821,7 +783,7 @@ func buildLinkRefsInBox(defRootID string, refs []*sql.Ref, keywords []string, bo
 		var headingIDs []string
 		for _, link := range links {
 			for _, ref := range link.Refs {
-				if "NodeHeading" == ref.Type {
+				if "NodeHeading" == ref.Type && !coveredRefIDs[ref.ID] {
 					headingRefChildren[ref.ID] = ref
 					headingIDs = append(headingIDs, ref.ID)
 				}

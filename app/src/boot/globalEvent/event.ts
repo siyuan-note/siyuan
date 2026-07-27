@@ -14,10 +14,12 @@ import {cancelManualTouch, initTouchDragBridge, isLastPointerMouse} from "../../
 import {isWindow} from "../../util/functions";
 import {getDockByType} from "../../layout/tabUtil";
 import {fetchPost} from "../../util/fetch";
+import {initHarmonyTextSelectionMenu} from "../../util/harmonyTextSelectionMenu";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
 
 export const initWindowEvent = (app: App) => {
+    initHarmonyTextSelectionMenu();
     let lastEncryptedNotebookTouch = 0;
     const touchEncryptedNotebooks = () => {
         if (window.siyuan.isPublish) {

@@ -187,6 +187,14 @@ export class AVAttributePanel {
         this.updateCollapsedState();
     }
 
+    public displayEmptyFields() {
+        if (!window.siyuan.config.editor.databaseAttrHideEmpty || this.showEmptyFields) {
+            return;
+        }
+        this.showEmptyFields = true;
+        this.updateEmptyState();
+    }
+
     private updateCollapsedState() {
         this.element.classList.toggle("protyle-db-attr--collapsed", this.collapsed);
         const toggleElement = this.element.querySelector('[data-type="toggle"]');

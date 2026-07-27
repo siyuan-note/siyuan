@@ -586,6 +586,9 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             event.preventDefault();
             break;
         } else if (type === "addColumn") {
+            if (protyle.databaseAttributePanel?.element.contains(target)) {
+                protyle.databaseAttributePanel.displayEmptyFields();
+            }
             const rowElements = blockElement.querySelectorAll(".av__row");
             const addMenu = addCol(protyle, blockElement, rowElements[rowElements.length - 1].getAttribute("data-col-id"));
             const addRect = target.getBoundingClientRect();

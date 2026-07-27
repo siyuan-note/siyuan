@@ -334,8 +334,11 @@ const setHTML = (options: {
     }
 
     /// #if MOBILE
-    if (!protyle.disabled && !options.action.includes(Constants.CB_GET_ALL) && protyle.background) {
-        protyle.background.element.classList.add("protyle-background--mobileshow");
+    if (protyle.background) {
+        protyle.background.element.classList.toggle(
+            "protyle-background--mobileshow",
+            !options.action.includes(Constants.CB_GET_ALL)
+        );
     }
     /// #endif
 
@@ -428,7 +431,6 @@ export const disabledProtyle = (protyle: IProtyle) => {
     /// #endif
     if (protyle.background) {
         protyle.background.element.classList.remove("protyle-background--enable");
-        protyle.background.element.classList.remove("protyle-background--mobileshow");
     }
     disabledWYSIWYG(protyle.wysiwyg.element);
     if (protyle.breadcrumb) {

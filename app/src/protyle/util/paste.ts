@@ -647,7 +647,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
         }
-        if (range.toString()) {
+        if (range.toString() && startRangeBlockElement === endRangeBlockElement) {
             let types: string[] = [];
             let linkElement: HTMLElement;
             if (tempElement.childNodes.length === 1 && tempElement.childElementCount === 1) {

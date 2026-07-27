@@ -51,6 +51,7 @@ import {renderSnippet} from "./config/util/snippets";
 import {setBodyHighlight} from "./util/assets";
 import {reloadSync} from "./util/reloadSync";
 import {setTitle} from "./util/processTitle";
+import {ensureUILayout} from "./util/ensureUILayout";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -272,6 +273,7 @@ export class App {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
+            ensureUILayout();
             window.siyuan.isPublish = response.data.isPublish;
             setBodyHighlight();
             await loadPlugins(this);

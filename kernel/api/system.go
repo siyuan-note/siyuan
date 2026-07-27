@@ -619,9 +619,7 @@ func getConf(c *gin.Context) {
 	}
 
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
-		maskedConf = model.FilterConfByPublishIgnore(publishIgnore, maskedConf)
+		maskedConf.UILayout = &conf.UILayout{}
 	}
 
 	// 浏览器环境下不返回工作空间绝对路径，避免泄露用户名等敏感信息

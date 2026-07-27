@@ -79,6 +79,7 @@ import {updateCalloutType} from "./callout";
 import {tabCodeBlock} from "./codeBlock";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {getAVTemplateInteractiveElement} from "../render/av/attributeValue";
+import {focusAVByArrow} from "../render/av/focus";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -640,6 +641,39 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 代码块换最后一个 /n 肉眼是无法区分是否在其后的，因此统一在之前
                 position.end -= 1;
 
+            }
+            const selectionPosition = getSelectionPosition(nodeEditableElement, range);
+            const isFirstLine = (nodeEditableElement.innerText.substr(0, position.end).indexOf("\n") === -1 ||
+                position.start === 0) &&
+                selectionPosition.top - nodeEditableElement.getBoundingClientRect().top < 20;
+            const isLastLine = (nodeEditableElement.innerText.substr(position.end).indexOf("\n") === -1 ||
+                position.end >= nodeEditableElement.innerText.trimEnd().length) &&
+                nodeEditableElement.getBoundingClientRect().bottom - selectionPosition.top < 40;
+            const isStart = position.start === 0;
+            const isEnd = position.end >= nodeEditableElement.textContent.replace(/\n$/, "").length;
+            const toPrevious = (event.key === "ArrowUp" && isFirstLine) ||
+                (event.key === "ArrowLeft" && isStart);
+            const toNext = (event.key === "ArrowDown" && isLastLine) ||
+                (event.key === "ArrowRight" && isEnd);
+            if (selectText === "" && range.collapsed && nodeElement.classList.contains("av") &&
+                hasClosestByClassName(range.startContainer, "av__title") && (toPrevious || toNext) &&
+                focusAVByArrow(protyle, nodeElement, event.key, true)) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            if (selectText === "" && range.collapsed && !nodeElement.classList.contains("av")) {
+                let adjacentElement = toPrevious ? getPreviousBlock(nodeElement) :
+                    (toNext ? getNextBlock(nodeElement) : undefined);
+                if (adjacentElement) {
+                    adjacentElement = toPrevious ? getLastBlock(adjacentElement) : getFirstBlock(adjacentElement);
+                    if (adjacentElement.classList.contains("av") &&
+                        focusAVByArrow(protyle, adjacentElement as HTMLElement, event.key)) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    }
+                }
             }
             if (event.key === "ArrowUp") {
                 const firstEditElement = getContenteditableElement(protyle.wysiwyg.element.firstElementChild);

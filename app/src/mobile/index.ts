@@ -49,6 +49,7 @@ import {hideAllElements} from "../protyle/ui/hideElements";
 import {initTouchDragBridge} from "../util/touchDragBridge";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {openByMobile} from "../editor/openLink";
+import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -60,6 +61,7 @@ class App {
         }
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
+        initHarmonyTextSelectionMenu();
         this.appId = Constants.SIYUAN_APPID;
 
         const mainWs = new Model({app: this});

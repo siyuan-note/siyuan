@@ -302,7 +302,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 w: rect.width,
             }, (unicode) => {
                 target.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
-            }, target.querySelector("img"));
+            }, target.querySelector("img"), {ownerElement: protyle.element});
             event.preventDefault();
             event.stopPropagation();
             return true;

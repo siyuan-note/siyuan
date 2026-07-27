@@ -3688,7 +3688,7 @@ export class WYSIWYG {
                         calloutIconElement.innerHTML = emojiHTML;
                         updateTransaction(protyle, nodeElement, oldHTML);
                         focusBlock(nodeElement);
-                    }, calloutIconElement.querySelector("img"));
+                    }, calloutIconElement.querySelector("img"), {ownerElement: protyle.element});
                 }
                 event.preventDefault();
                 event.stopPropagation();
@@ -3721,7 +3721,7 @@ export class WYSIWYG {
                         hideElements(["dialog"]);
                         updateTransaction(protyle, nodeElement, oldHTML);
                         focusByWbr(nodeElement, range);
-                    }, emojiElement);
+                    }, emojiElement, {ownerElement: protyle.element});
                 }
                 return;
             }

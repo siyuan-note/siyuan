@@ -261,7 +261,7 @@ export class Background {
                         y: rect.bottom,
                         h: rect.height,
                         w: rect.width
-                    }, undefined, target.querySelector("img"));
+                    }, undefined, target.querySelector("img"), {ownerElement: protyle.element});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -448,7 +448,7 @@ export class Background {
                             y: rect.bottom,
                             h: rect.height,
                             w: rect.width
-                        });
+                        }, undefined, undefined, {ownerElement: protyle.element});
                     }
                     event.preventDefault();
                     event.stopPropagation();

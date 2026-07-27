@@ -139,7 +139,7 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
                 }
             }
             dialogCalloutIconElement.innerHTML = emojiHTML;
-        }, dialogCalloutIconElement.querySelector("img"));
+        }, dialogCalloutIconElement.querySelector("img"), {ownerElement: protyle.element});
     });
     dialog.element.querySelector(".b3-form__icona-icon").addEventListener("click", (event) => {
         const menu = new Menu(Constants.MENU_CALLOUT_SELECT, () => {

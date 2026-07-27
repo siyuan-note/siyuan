@@ -176,12 +176,51 @@ func TestRollupRelativeDateFilter(t *testing.T) {
 		RelativeDate: &RelativeDate{Count: 1, Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis},
 	}
 
-	if !value.Filter(filter, attrView, "source-item", map[string]Collection{}, map[string]*AttributeView{"target": targetView}) {
+	if !value.Filter(filter, attrView, "source-item", map[string]*RollupRenderContext{}, map[string]*AttributeView{"target": targetView}) {
 		t.Fatalf("rollup date before today should pass the relative date filter")
 	}
 	targetDate.Date.Content = today.AddDate(0, 0, 1).UnixMilli()
-	if value.Filter(filter, attrView, "source-item", map[string]Collection{}, map[string]*AttributeView{"target": targetView}) {
+	if value.Filter(filter, attrView, "source-item", map[string]*RollupRenderContext{}, map[string]*AttributeView{"target": targetView}) {
 		t.Fatalf("future rollup date should not pass the before-today filter")
+	}
+}
+
+func TestRollupFilterUsesEligibleRelationCount(t *testing.T) {
+	relationKey := NewKey("relation", "关联", "", KeyTypeRelation)
+	relationKey.Relation = &Relation{AvID: "target"}
+	rollupKey := NewKey("rollup", "汇总", "", KeyTypeRollup)
+	rollupKey.Rollup = &Rollup{RelationKeyID: relationKey.ID, KeyID: "text"}
+	attrView := &AttributeView{KeyValues: []*KeyValues{
+		{Key: relationKey, Values: []*Value{{
+			KeyID: relationKey.ID, BlockID: "source-item", Type: KeyTypeRelation,
+			Relation: &ValueRelation{
+				BlockIDs: []string{"target-a", "target-b"},
+				Contents: []*Value{
+					{BlockID: "target-a", Type: KeyTypeBlock, Block: &ValueBlock{Content: "A"}},
+					{BlockID: "target-b", Type: KeyTypeBlock, Block: &ValueBlock{Content: "B"}},
+				},
+			},
+		}}},
+		{Key: rollupKey},
+	}}
+	targetView := &AttributeView{KeyValues: []*KeyValues{{
+		Key: NewKey("text", "文本", "", KeyTypeText),
+		Values: []*Value{{
+			KeyID: "text", BlockID: "target-a", Type: KeyTypeText, Text: &ValueText{Content: "value"},
+		}},
+	}}}
+	value := &Value{KeyID: rollupKey.ID, BlockID: "source-item", Type: KeyTypeRollup, Rollup: &ValueRollup{}}
+	filter := &ViewFilter{
+		Qualifier: FilterQuantifierAll,
+		Operator:  FilterOperatorIsNotEmpty,
+		Value:     &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{}},
+	}
+	contexts := map[string]*RollupRenderContext{
+		rollupKey.ID: {EligibleItemIDs: map[string]bool{"target-a": true}},
+	}
+
+	if !value.Filter(filter, attrView, "source-item", contexts, map[string]*AttributeView{"target": targetView}) {
+		t.Fatal("excluded relation items should not be treated as empty rollup values")
 	}
 }
 
@@ -328,7 +367,7 @@ func TestRollupDateEndpointFilter(t *testing.T) {
 				Date: &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true},
 			}}}},
 		}
-		actual := value.Filter(filter, attrView, "source-item", map[string]Collection{}, map[string]*AttributeView{"target": targetView})
+		actual := value.Filter(filter, attrView, "source-item", map[string]*RollupRenderContext{}, map[string]*AttributeView{"target": targetView})
 		if actual != test.expected {
 			t.Fatalf("unexpected %s rollup endpoint result: expected %t, got %t", test.qualifier, test.expected, actual)
 		}
@@ -457,6 +496,96 @@ func TestExactRelationFilterWithMissingCell(t *testing.T) {
 	filter.Value.Relation.BlockIDs = nil
 	if !evalNode(filter, []*Value{nil}, columnIndexes, nil, "", nil, nil) {
 		t.Fatalf("an unconfigured exact filter should be ignored for a missing relation cell")
+	}
+}
+
+func TestViewFilterGetAffectValueRelation(t *testing.T) {
+	key := &Key{ID: "relation", Type: KeyTypeRelation}
+	filter := &ViewFilter{
+		Operator: FilterOperatorContainsAnyItem,
+		Value: &Value{
+			Type:     KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"row-a", "row-b"}},
+		},
+	}
+
+	value, allowNearItem := filter.GetAffectValue(key, "new-row")
+	if allowNearItem || nil == value || nil == value.Relation ||
+		1 != len(value.Relation.BlockIDs) || "row-a" != value.Relation.BlockIDs[0] {
+		t.Fatalf("exact relation filter should fill the first selected item, got %#v", value)
+	}
+
+	filter.Operator = FilterOperatorDoesNotContainAnyItem
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("negative exact relation filter should not fill or use a near item")
+	}
+
+	filter.Operator = FilterOperatorContains
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || !allowNearItem {
+		t.Fatalf("keyword relation filter should use a near item")
+	}
+
+	filter.Operator = FilterOperatorDoesNotContain
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("negative keyword relation filter should not fill or use a near item")
+	}
+
+	filter.Operator = FilterOperatorIsEmpty
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("empty relation filter should leave the relation unset")
+	}
+
+	filter.Operator = FilterOperatorIsNotEmpty
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || !allowNearItem {
+		t.Fatalf("non-empty relation filter should use a near item")
+	}
+}
+
+func TestViewFilterGetAffectValueDate(t *testing.T) {
+	location, err := time.LoadLocation("America/New_York")
+	if nil != err {
+		t.Skipf("load time zone failed: %s", err)
+	}
+	originalLocal := time.Local
+	time.Local = location
+	defer func() {
+		time.Local = originalLocal
+	}()
+
+	start := time.Date(2026, time.March, 8, 0, 0, 0, 0, location)
+	key := &Key{ID: "date", Type: KeyTypeDate, Date: &Date{FillSpecificTime: false}}
+	filter := &ViewFilter{
+		Operator: FilterOperatorIsGreater,
+		Value: &Value{
+			Type: KeyTypeDate,
+			Date: &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true},
+		},
+	}
+
+	value, allowNearItem := filter.GetAffectValue(key, "new-row")
+	expected := start.AddDate(0, 0, 1)
+	if allowNearItem || nil == value || nil == value.Date || expected.UnixMilli() != value.Date.Content {
+		t.Fatalf("greater date filter should fill the next calendar day, got %#v", value)
+	}
+	if !value.Date.IsNotTime {
+		t.Fatalf("date default should follow the field-specific time setting")
+	}
+
+	key.Date.FillSpecificTime = true
+	value, _ = filter.GetAffectValue(key, "new-row")
+	if value.Date.IsNotTime {
+		t.Fatalf("date default should include time when configured")
+	}
+
+	filter.Operator = FilterOperatorIsNotEqual
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("not-equal date filter should not fill or use a near item")
 	}
 }
 

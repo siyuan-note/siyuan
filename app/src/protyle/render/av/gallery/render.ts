@@ -7,7 +7,7 @@ import {bindAvSearch} from "../search";
 import {processRender} from "../../../util/processCode";
 import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
-import {getBodyVirtualData, initVirtualScroll} from "../virtualScroll";
+import {getBodyVirtualData, initVirtualScroll, setAVData} from "../virtualScroll";
 import {getRowHTML, stickyRow, updateHeader} from "../row";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 import {getCardStyle} from "./style";
@@ -99,6 +99,7 @@ const renderGroupGallery = (options: ITableOptions) => {
 };
 
 export const afterRenderGallery = (options: ITableOptions) => {
+    setAVData(options.blockElement, options.data);
     const view = options.data.view as IAVGallery;
     options.blockElement.classList.toggle("av--display-empty-fields", view.displayEmptyFields);
     if (view.coverFrom === 1 || view.coverFrom === 3) {

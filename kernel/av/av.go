@@ -181,6 +181,9 @@ type Key struct {
 	// 数字
 	NumberFormat NumberFormat `json:"numberFormat"` // 列数字格式化
 
+	// 日期、创建时间、更新时间
+	DateFormat DateDisplayFormat `json:"dateFormat,omitempty"` // 日期显示格式
+
 	// 模板
 	Template string `json:"template"` // 模板内容
 
@@ -233,9 +236,10 @@ type Date struct {
 }
 
 type Rollup struct {
-	RelationKeyID string      `json:"relationKeyID"` // 关联字段 ID
-	KeyID         string      `json:"keyID"`         // 目标字段 ID
-	Calc          *RollupCalc `json:"calc"`          // 计算方式
+	RelationKeyID string        `json:"relationKeyID"`     // 关联字段 ID
+	KeyID         string        `json:"keyID"`             // 目标字段 ID
+	Calc          *RollupCalc   `json:"calc"`              // 计算方式
+	Filters       []*ViewFilter `json:"filters,omitempty"` // 参与汇总计算的目标条目过滤规则
 }
 
 type RollupCalc struct {
@@ -244,9 +248,10 @@ type RollupCalc struct {
 }
 
 type Relation struct {
-	AvID      string `json:"avID"`      // 关联的属性视图 ID
-	IsTwoWay  bool   `json:"isTwoWay"`  // 是否双向关联
-	BackKeyID string `json:"backKeyID"` // 双向关联时回链关联列的 ID
+	AvID             string        `json:"avID"`                       // 关联的属性视图 ID
+	IsTwoWay         bool          `json:"isTwoWay"`                   // 是否双向关联
+	BackKeyID        string        `json:"backKeyID"`                  // 双向关联时回链关联列的 ID
+	CandidateFilters []*ViewFilter `json:"candidateFilters,omitempty"` // 可关联目标条目的过滤规则
 }
 
 type SelectOption struct {

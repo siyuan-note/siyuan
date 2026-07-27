@@ -85,6 +85,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     desc: string,
                     icon: string,
                     id: string,
+                    dateFormat?: TAVDateFormat,
                     options?: {
                         name: string,
                         color: string
@@ -112,7 +113,10 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
     <span data-type="remove" data-row-id="${primaryValue?.blockID || ""}" class="block__icon block__icon--warning block__icon--show b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
 </div>`;
             table.keyValues?.forEach(item => {
-                const value = item.values[0] || createEmptyAVValue(item.key.id, item.key.type, primaryValue?.blockID);
+                const value = Object.assign(
+                    createEmptyAVValue(item.key.id, item.key.type, primaryValue?.blockID),
+                    item.values[0] || {}
+                );
                 innerHTML += genAVAttributeRowHTML({
                     nodeID: id,
                     avID: table.avID,
@@ -123,6 +127,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     icon: item.key.icon,
                     typeIcon: getColIconByType(item.key.type),
                     selectOptions: item.key.options,
+                    dateFormat: item.key.dateFormat,
                     value,
                     empty: cellValueIsEmpty(value),
                 });

@@ -63,6 +63,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 				Calc:         field.Calc,
 				Options:      key.Options,
 				NumberFormat: key.NumberFormat,
+				DateFormat:   key.DateFormat,
 				Template:     key.Template,
 				Relation:     key.Relation,
 				Rollup:       key.Rollup,
@@ -129,7 +130,8 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			if nil != field.Date {
 				filedDateIsTime = field.Date.FillSpecificTime
 			}
-			fillAttributeViewBaseValue(fieldValue.BaseValue, field.ID, cardID, field.NumberFormat, field.Template, filedDateIsTime)
+			fillAttributeViewBaseValue(fieldValue.BaseValue, field.ID, cardID, field.NumberFormat, field.DateFormat,
+				field.Template, filedDateIsTime)
 			galleryCard.Values = append(galleryCard.Values, fieldValue)
 		}
 

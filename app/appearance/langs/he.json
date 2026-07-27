@@ -1,4 +1,5 @@
 {
+  "editFields": "עריכת שדות",
   "startDate": "תאריך התחלה",
   "addToDictionary": "הוספה למילון",
   "addToDictionaryFailed": "לא ניתן להוסיף את המילה למילון",
@@ -1927,6 +1928,10 @@
 		"quit": "צא מהאפליקציה"
 	},
 	"_attrView": {
+		"dateFormat": "תבנית תאריך",
+		"fullDate": "תאריך מקומי",
+		"dateMonths": "ינואר|פברואר|מרץ|אפריל|מאי|יוני|יולי|אוגוסט|ספטמבר|אוקטובר|נובמבר|דצמבר",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "ריק",
 		"table": "טבלה",
 		"gallery": "כרטיס",

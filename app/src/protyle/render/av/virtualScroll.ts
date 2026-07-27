@@ -22,6 +22,7 @@ const dataStore = new Map<string, {
     protyle: IProtyle;
     data: IAV;
 }>();
+const blockDataStore = new WeakMap<HTMLElement, IAV>();
 const bodyStates = new WeakMap<HTMLElement, IBodyState>();
 const trimPending = new WeakSet<HTMLElement>();
 let lastScrollTop: number;
@@ -483,12 +484,82 @@ export const getAVSelectedItems = (blockElement: HTMLElement): { itemID: string,
         bodyElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select").forEach((item: HTMLElement) => {
             const itemID = item.dataset.id;
             const blockCell = item.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
-            if (itemID && blockCell) {
-                selectedItems.set(itemID, blockCell.dataset.detached === "true");
+            const primaryCell = getAVPrimaryCell(blockElement, itemID);
+            if (itemID && (blockCell || primaryCell)) {
+                selectedItems.set(itemID, blockCell ?
+                    blockCell.dataset.detached === "true" : primaryCell.value?.isDetached === true);
             }
         });
     });
     return Array.from(selectedItems, ([itemID, isDetached]) => ({itemID, isDetached}));
+};
+
+export const getAVData = (blockElement: HTMLElement) => {
+    return blockDataStore.get(blockElement);
+};
+
+export const getAVPrimaryCell = (blockElement: HTMLElement, itemID: string) => {
+    const data = blockDataStore.get(blockElement);
+    if (!data || !itemID) {
+        return;
+    }
+    let primaryCell: IAVCell;
+    const findPrimaryCell = (view: IAVView) => {
+        if (view.groups?.length > 0) {
+            return view.groups.some(findPrimaryCell);
+        }
+        const items: Array<IAVRow | IAVGalleryItem> =
+            (view as IAVTable).rows || (view as IAVGallery).cards || [];
+        const item = items.find((row: IAVRow | IAVGalleryItem) => row.id === itemID);
+        if (!item) {
+            return false;
+        }
+        const cells = "cells" in item ? item.cells : item.values;
+        primaryCell = cells.find((cell: IAVCell) => cell.valueType === "block" || cell.value?.type === "block");
+        return true;
+    };
+    findPrimaryCell(data.view);
+    return primaryCell;
+};
+
+export const setAVData = (blockElement: HTMLElement, data: IAV) => {
+    blockDataStore.set(blockElement, data);
+};
+
+export const getAVSelectedItemIDs = (blockElement: HTMLElement) => {
+    const selectedIDs = new Set<string>();
+    blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
+        const state = bodyStates.get(bodyElement);
+        if (state?.selectedRowIds) {
+            state.selectedRowIds.forEach((itemID) => selectedIDs.add(itemID));
+        } else {
+            bodyElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select").forEach((item: HTMLElement) => {
+                if (item.dataset.id) {
+                    selectedIDs.add(item.dataset.id);
+                }
+            });
+        }
+    });
+    const data = blockDataStore.get(blockElement);
+    if (!data) {
+        return Array.from(selectedIDs);
+    }
+
+    const orderedIDs: string[] = [];
+    const collectIDs = (view: IAVView) => {
+        if (view.groups?.length > 0) {
+            view.groups.forEach(collectIDs);
+            return;
+        }
+        const items = (view as IAVTable).rows || (view as IAVGallery).cards || [];
+        items.forEach((item: IAVRow | IAVGalleryItem) => {
+            if (selectedIDs.delete(item.id)) {
+                orderedIDs.push(item.id);
+            }
+        });
+    };
+    collectIDs(data.view);
+    return orderedIDs;
 };
 
 export const trimAVRows = (blockElement: HTMLElement, elementRect: DOMRect): void => {
@@ -516,6 +587,7 @@ export const initVirtualScroll = (options: {
     blockElement: HTMLElement,
     data: IAV,
 }): void => {
+    setAVData(options.blockElement, options.data);
     if (options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
         return;
     }

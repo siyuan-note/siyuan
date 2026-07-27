@@ -1,4 +1,5 @@
 {
+  "editFields": "フィールドを編集",
   "startDate": "開始日",
   "addToDictionary": "辞書に追加",
   "addToDictionaryFailed": "単語を辞書に追加できませんでした",
@@ -1927,6 +1928,10 @@
 		"quit": "アプリケーションを終了"
 	},
 	"_attrView": {
+		"dateFormat": "日付形式",
+		"fullDate": "ローカル形式の日付",
+		"dateMonths": "1月|2月|3月|4月|5月|6月|7月|8月|9月|10月|11月|12月",
+		"dateFormatFullTemplate": "${year}年${month}${day}日",
 		"empty": "空白",
 		"table": "テーブル",
 		"gallery": "カード",

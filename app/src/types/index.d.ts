@@ -41,9 +41,12 @@ type TOperation =
     | "duplicateAttrViewKey"
     | "setAttrViewColIcon"
     | "setAttrViewFilters"
+    | "setAttrViewColRelationFilters"
+    | "setAttrViewColRollupFilters"
     | "setAttrViewSorts"
     | "setAttrViewColCalc"
     | "updateAttrViewColNumberFormat"
+    | "setAttrViewColDateFormat"
     | "replaceAttrViewBlock"
     | "addAttrViewView"
     | "setAttrViewViewName"
@@ -105,6 +108,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "kernel-plugin-state-change"
 type TAVView = "table" | "gallery" | "kanban"
 type TAVAlign = "" | "left" | "center" | "right"
+type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"
 type TAVCol =
     "text"
     | "date"
@@ -663,7 +667,7 @@ interface IOperation {
     isTwoWay?: boolean, // 是否双向关联
     backRelationKeyID?: string, // 双向关联的目标关联列 ID
     avID?: string,  // av
-    format?: string // updateAttrViewColNumberFormat 专享
+    format?: string // 属性视图字段格式化
     keyID?: string // updateAttrViewCell 专享
     rowID?: string // updateAttrViewCell 专享
     data?: any, // updateAttr 时为  { old: IObject, new: IObject }, updateAttrViewCell 时为 {TAVCol: {content: string}}
@@ -685,6 +689,11 @@ interface IOperation {
     layout?: string // addAttrViewView 专享
     groupID?: string // insertAttrViewBlock, sortAttrViewRow 专享
     targetGroupID?: string // sortAttrViewRow 专享
+}
+
+interface IAVFilterOperation {
+    action: "setAttrViewColRelationFilters" | "setAttrViewColRollupFilters";
+    keyID: string;
 }
 
 interface IOperationSrcs {
@@ -1161,6 +1170,7 @@ interface IAVColumn {
     hidden: boolean,
     type: TAVCol,
     numberFormat: string,
+    dateFormat?: TAVDateFormat,
     template: string,
     calc: IAVCalc,
     updated?: {
@@ -1287,12 +1297,14 @@ interface IAVColumnRelation {
     avID?: string;
     backKeyID?: string;
     isTwoWay?: boolean;
+    candidateFilters?: IAVFilter[];
 }
 
 interface IAVCellRollupValue {
     relationKeyID?: string;  // 关联列 ID
     keyID?: string;
     calc?: IAVCalc;
+    filters?: IAVFilter[];
 }
 
 interface IAVCalc {

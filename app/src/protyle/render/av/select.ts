@@ -150,7 +150,8 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     }
 };
 
-export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean, cellElements?: HTMLElement[]) => {
+export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean,
+                             cellElements?: HTMLElement[], keepMenuOpen = false) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
     const optionElement = target.closest("[data-name]") as HTMLElement;
     if (!menuElement || !optionElement) {
@@ -222,11 +223,13 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         } else {
             cellElements.forEach((cellElement: HTMLElement, index) => {
                 const rowID = getFieldIdByCellElement(cellElement, viewType);
-                if (viewType === "table" || isCustomAttr) {
-                    cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                        blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                } else {
-                    cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                if (!blockElement.contains(cellElement)) {
+                    if (viewType === "table" || isCustomAttr) {
+                        cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
+                            blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
+                    } else {
+                        cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                    }
                 }
 
                 cellValues[index].mSelect.find((item) => {
@@ -251,7 +254,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
         }
-    });
+    }, keepMenuOpen);
     if (menu.isOpen) {
         return;
     }
@@ -344,11 +347,13 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 } else {
                     cellElements.forEach((cellElement: HTMLElement, index) => {
                         const rowID = getFieldIdByCellElement(cellElement, viewType);
-                        if (viewType === "table" || isCustomAttr) {
-                            cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                                blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                        } else {
-                            cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                        if (!blockElement.contains(cellElement)) {
+                            if (viewType === "table" || isCustomAttr) {
+                                cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
+                                    blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
+                            } else {
+                                cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                            }
                         }
                         cellValues[index].mSelect.find((item, selectIndex) => {
                             if (item.content === newName) {
@@ -439,11 +444,13 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     } else {
                         cellElements.forEach((cellElement: HTMLElement, cellIndex) => {
                             const rowID = getFieldIdByCellElement(cellElement, viewType);
-                            if (viewType === "table" || isCustomAttr) {
-                                cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                                    blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                            } else {
-                                cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                            if (!blockElement.contains(cellElement)) {
+                                if (viewType === "table" || isCustomAttr) {
+                                    cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
+                                        blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
+                                } else {
+                                    cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                                }
                             }
                             cellValues[cellIndex].mSelect.find((item) => {
                                 if (item.content === name) {
@@ -481,9 +488,9 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         w: rect.width,
         h: rect.height,
     });
-    const inputElement = window.siyuan.menus.menu.element.querySelector("input");
+    const inputElement = menu.element.querySelector("input");
     inputElement.select();
-    const descElement = window.siyuan.menus.menu.element.querySelector("textarea");
+    const descElement = menu.element.querySelector("textarea");
 };
 
 export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, cellElements: HTMLElement[], blockElement: Element) => {

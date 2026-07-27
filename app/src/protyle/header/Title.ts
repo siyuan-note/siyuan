@@ -29,6 +29,7 @@ import {openTitleMenu} from "./openTitleMenu";
 import {electronUndo} from "../undo";
 import {enableLuteMarkdownSyntax, restoreLuteMarkdownSyntax} from "../util/paste";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
+import {focusAVByArrow} from "../render/av/focus";
 
 export class Title {
     public element: HTMLElement;
@@ -147,7 +148,10 @@ export class Title {
                         const noContainerElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild);
                         // https://github.com/siyuan-note/siyuan/issues/4923
                         if (noContainerElement) {
-                            focusBlock(noContainerElement, protyle.wysiwyg.element);
+                            if (!noContainerElement.classList.contains("av") ||
+                                !focusAVByArrow(protyle, noContainerElement as HTMLElement, event.key)) {
+                                focusBlock(noContainerElement, protyle.wysiwyg.element);
+                            }
                         }
                         event.preventDefault();
                         event.stopPropagation();

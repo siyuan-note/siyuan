@@ -278,6 +278,7 @@ export abstract class Constants {
     public static readonly MENU_AV_ADD_SORT = "av-add-sort"; // 数据库添加排序条件菜单
     public static readonly MENU_AV_COL_OPTION = "av-col-option"; // 数据库单选多选字段的选项编辑菜单
     public static readonly MENU_AV_COL_FORMAT_NUMBER = "av-col-format-number"; // 数据库数字字段格式化菜单
+    public static readonly MENU_AV_COL_FORMAT_DATE = "av-col-format-date"; // 数据库日期字段格式化菜单
     public static readonly MENU_AV_GROUP_DATE = "avGroupDate"; // 数据库日期字段分组菜单的日期菜单
     public static readonly MENU_AV_GROUP_SORT = "avGroupSort"; // 数据库日期字段分组菜单的排序菜单
     public static readonly MENU_AV_KANBAN_GROUP = "av-kanban-group"; // 数据库看板分组菜单

@@ -115,6 +115,7 @@ import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard} from "../util/richClipboard";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
+import {focusAVByArrow} from "../render/av/focus";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -2910,6 +2911,14 @@ export class WYSIWYG {
 
         // 输入法测试点 https://github.com/siyuan-note/siyuan/issues/3027
         let isComposition = false; // for iPhone
+        // 仅矫正从数据库外进入的占位光标，避免重置数据库内部的方向键导航。
+        let arrowStartElement: false | HTMLElement | undefined;
+        this.element.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (!event.repeat && !event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey &&
+                !event.isComposing && event.key.startsWith("Arrow")) {
+                arrowStartElement = hasClosestBlock(getEditorRange(this.element).startContainer);
+            }
+        });
         // 记录组合开始时的光标位置，用于取消组合后恢复光标（输入法删空候选词触发 compositionend 时浏览器会把光标移出可编辑单元格）
         let compositionRange: { cell: HTMLElement; offset: number };
         this.element.addEventListener("compositionstart", (event) => {
@@ -3046,6 +3055,20 @@ export class WYSIWYG {
             }
             const range = getEditorRange(this.element).cloneRange();
             const nodeElement = hasClosestBlock(range.startContainer);
+            const isArrowFromOutsideAV = arrowStartElement && !arrowStartElement.classList.contains("av");
+            if (event.key.startsWith("Arrow")) {
+                arrowStartElement = undefined;
+            }
+
+            if (!event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.isComposing &&
+                event.key.startsWith("Arrow") && isArrowFromOutsideAV &&
+                nodeElement && nodeElement.classList.contains("av") &&
+                !nodeElement.classList.contains("protyle-wysiwyg--select") &&
+                hasClosestByClassName(range.startContainer, "av__cursor") &&
+                focusAVByArrow(protyle, nodeElement, event.key)) {
+                event.stopPropagation();
+                return;
+            }
 
             if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" &&
                 event.key.indexOf("Arrow") === -1 && event.key !== "Escape" && event.key !== "Shift" &&

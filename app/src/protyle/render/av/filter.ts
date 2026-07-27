@@ -13,6 +13,17 @@ import {Constants} from "../../../constants";
 const isExactRelationOperator = (operator: string) =>
     operator === "Contains any item" || operator === "Does not contain any item";
 
+const getSetFiltersOperation = (avID: string, blockID: string, data: IAVFilter[],
+                                filterOperation?: IAVFilterOperation): IOperation => {
+    return {
+        action: filterOperation?.action || "setAttrViewFilters",
+        avID,
+        keyID: filterOperation?.keyID,
+        data,
+        blockID,
+    };
+};
+
 export const getDefaultOperatorByType = (type: TAVCol, isRollup = false) => {
     if (type === "relation" && !isRollup) {
         return "Contains any item";
@@ -153,7 +164,8 @@ export const addFilter = (options: {
     avId: string,
     protyle: IProtyle
     blockElement: Element,
-    parentPath?: string
+    parentPath?: string,
+    filterOperation?: IAVFilterOperation,
 }) => {
     const menu = new Menu(Constants.MENU_AV_ADD_FILTER);
     // 定位目标分组：支持向指定分组内追加，同分组允许同列多条件（如 状态=完成 OR 状态=进行中）
@@ -182,17 +194,12 @@ export const addFilter = (options: {
                     targetGroupFilters.push(filter);
                     const blockID = options.blockElement.getAttribute("data-node-id");
                     // 保存新增的占位条件，inline 控件立即可编辑（无需弹层）
-                    transaction(options.protyle, [{
-                        action: "setAttrViewFilters",
-                        avID: options.avId,
-                        data: JSON.parse(JSON.stringify(options.data.view.filters)),
-                        blockID
-                    }], [{
-                        action: "setAttrViewFilters",
-                        avID: options.avId,
-                        data: oldFilters,
-                        blockID
-                    }]);
+                    transaction(options.protyle, [
+                        getSetFiltersOperation(options.avId, blockID,
+                            JSON.parse(JSON.stringify(options.data.view.filters)), options.filterOperation)
+                    ], [
+                        getSetFiltersOperation(options.avId, blockID, oldFilters, options.filterOperation)
+                    ]);
                     options.menuElement.innerHTML = getFiltersHTML(options.data);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height, 0, true);
                 }
@@ -864,7 +871,9 @@ const readRelativeDate = (rowElement: HTMLElement, suffix: string): IAVRelativeD
 };
 
 // commitFilter 即时保存单个条件的修改。reRender=true 时重渲染整个面板（结构变化场景）。
-export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, protyle: IProtyle, blockID: string, avID: string, menuElement: HTMLElement, reRender: boolean) => {
+export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, protyle: IProtyle, blockID: string,
+                             avID: string, menuElement: HTMLElement, reRender: boolean,
+                             filterOperation?: IAVFilterOperation) => {
     const editable = getEditableFilters(data);
     const {parent, index} = getParentByPath(editable, path);
     if (!parent || index < 0 || index >= parent.length) {
@@ -873,17 +882,11 @@ export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, prot
     const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
     parent[index] = newFilter;
 
-    transaction(protyle, [{
-        action: "setAttrViewFilters",
-        avID,
-        data: JSON.parse(JSON.stringify(data.view.filters)),
-        blockID
-    }], [{
-        action: "setAttrViewFilters",
-        avID,
-        data: oldFilters,
-        blockID
-    }]);
+    transaction(protyle, [
+        getSetFiltersOperation(avID, blockID, JSON.parse(JSON.stringify(data.view.filters)), filterOperation)
+    ], [
+        getSetFiltersOperation(avID, blockID, oldFilters, filterOperation)
+    ]);
 
     if (reRender && menuElement) {
         menuElement.innerHTML = getFiltersHTML(data);
@@ -891,7 +894,8 @@ export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, prot
 };
 
 // bindInlineFilterEvents 绑定内联筛选编辑的事件（事件委托到面板）。即时保存。
-export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, protyle: IProtyle, blockID: string, avID: string) => {
+export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, protyle: IProtyle, blockID: string,
+                                       avID: string, filterOperation?: IAVFilterOperation) => {
     // 防重复绑定：事件委托绑在 panelElement 上，同一面板实例只需绑一次
     if (panelElement.dataset.filterEventsBound === "true") {
         return;
@@ -945,7 +949,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         if (quantifierSel) {
             newFilter.quantifier = quantifierSel.value;
         }
-        commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, reRender);
+        commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, reRender, filterOperation);
     };
 
     const getRelationFilterSelection = (dropdown: HTMLElement): string[] => {
@@ -997,7 +1001,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                 relation: {blockIDs: selectedBlockIDs, contents: []},
             },
         };
-        commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, false);
+        commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, false, filterOperation);
         renderRelationFilterSelection(path, dropdown, selectedBlockIDs);
     };
 
@@ -1064,7 +1068,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                     operator,
                     value,
                 };
-                commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, true);
+                commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, true, filterOperation);
             }
         } else if (type === "operation") {
             // 判断是否结构变化（需重渲染）：date 的 Is between 切换、空操作符切换

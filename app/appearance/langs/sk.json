@@ -1,4 +1,5 @@
 {
+  "editFields": "Upraviť polia",
   "startDate": "Dátum začiatku",
   "addToDictionary": "Pridať do slovníka",
   "addToDictionaryFailed": "Slovo sa nepodarilo pridať do slovníka",
@@ -1927,6 +1928,10 @@
 		"quit": "Ukončiť aplikáciu"
 	},
 	"_attrView": {
+		"dateFormat": "Formát dátumu",
+		"fullDate": "Lokalizovaný dátum",
+		"dateMonths": "januára|februára|marca|apríla|mája|júna|júla|augusta|septembra|októbra|novembra|decembra",
+		"dateFormatFullTemplate": "${day}. ${month} ${year}",
 		"empty": "Prázdne",
 		"table": "Tabuľka",
 		"gallery": "Karta",

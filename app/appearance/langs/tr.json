@@ -1,4 +1,5 @@
 {
+  "editFields": "Alanları düzenle",
   "startDate": "Başlangıç tarihi",
   "addToDictionary": "Sözlüğe ekle",
   "addToDictionaryFailed": "Sözcük sözlüğe eklenemedi",
@@ -1927,6 +1928,10 @@
 		"quit": "Uygulamadan çık"
 	},
 	"_attrView": {
+		"dateFormat": "Tarih biçimi",
+		"fullDate": "Yerelleştirilmiş tarih",
+		"dateMonths": "Ocak|Şubat|Mart|Nisan|Mayıs|Haziran|Temmuz|Ağustos|Eylül|Ekim|Kasım|Aralık",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Boş",
 		"table": "Tablo",
 		"gallery": "Kart görünümü",

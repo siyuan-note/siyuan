@@ -1,4 +1,5 @@
 {
+  "editFields": "Edytuj pola",
   "startDate": "Data rozpoczęcia",
   "addToDictionary": "Dodaj do słownika",
   "addToDictionaryFailed": "Nie udało się dodać słowa do słownika",
@@ -1927,6 +1928,10 @@
 		"quit": "Zamknij aplikację"
 	},
 	"_attrView": {
+		"dateFormat": "Format daty",
+		"fullDate": "Data w formacie lokalnym",
+		"dateMonths": "stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Pusty",
 		"table": "Tabela",
 		"gallery": "Karta",

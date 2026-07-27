@@ -1,4 +1,5 @@
 {
+  "editFields": "Editar campos",
   "startDate": "Fecha de inicio",
   "addToDictionary": "Añadir al diccionario",
   "addToDictionaryFailed": "No se pudo añadir la palabra al diccionario",
@@ -1927,6 +1928,10 @@
 		"quit": "Salir de la aplicación"
 	},
 	"_attrView": {
+		"dateFormat": "Formato de fecha",
+		"fullDate": "Fecha localizada",
+		"dateMonths": "enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre",
+		"dateFormatFullTemplate": "${day} de ${month} de ${year}",
 		"empty": "Vacío",
 		"table": "Tabla",
 		"gallery": "Tarjeta",

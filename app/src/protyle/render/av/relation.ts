@@ -175,6 +175,7 @@ export const updateRelation = (options: {
     avElement: Element,
     colsData: IAVColumn[],
     blockElement: Element,
+    callback?: () => void,
 }) => {
     const inputElement = options.avElement.querySelector('input[data-type="colName"]') as HTMLInputElement;
     const goSearchAVElement = options.avElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement;
@@ -191,20 +192,47 @@ export const updateRelation = (options: {
         }
     });
     const colNewName = (options.avElement.querySelector('[data-type="name"]') as HTMLInputElement).value;
-    transaction(options.protyle, [{
+    const blockID = options.blockElement.getAttribute("data-node-id");
+    const targetAVID = newAVId || colData.relation.avID;
+    const oldCandidateFilters = JSON.parse(JSON.stringify(colData.relation.candidateFilters || []));
+    const newCandidateFilters = targetAVID === colData.relation.avID ? oldCandidateFilters : [];
+    const targetChanged = targetAVID !== colData.relation.avID;
+    const dependentRollups = options.colsData.filter((item) => {
+        return item.type === "rollup" && item.rollup?.relationKeyID === colId;
+    });
+    const doOperations: IOperation[] = [{
         action: "updateAttrViewColRelation",
         avID: options.avID,
         keyID: colId,
-        id: newAVId || colData.relation.avID,
+        id: targetAVID,
         backRelationKeyID: colData.relation.avID === newAVId ? (colData.relation.backKeyID || Lute.NewNodeID()) : Lute.NewNodeID(),
         isTwoWay: (options.avElement.querySelector(".b3-switch") as HTMLInputElement).checked,
         name: inputElement.value,
         format: colNewName
     }, {
+        action: "setAttrViewColRelationFilters",
+        avID: options.avID,
+        keyID: colId,
+        blockID,
+        data: newCandidateFilters,
+    }];
+    if (targetChanged) {
+        dependentRollups.forEach((item) => {
+            doOperations.push({
+                action: "setAttrViewColRollupFilters",
+                avID: options.avID,
+                keyID: item.id,
+                blockID,
+                data: [],
+            });
+        });
+    }
+    doOperations.push({
         action: "doUpdateUpdated",
-        id: options.blockElement.getAttribute("data-node-id"),
+        id: blockID,
         data: dayjs().format("YYYYMMDDHHmmss"),
-    }], [{
+    });
+    const undoOperations: IOperation[] = [{
         action: "updateAttrViewColRelation",
         avID: options.avID,
         keyID: colId,
@@ -213,7 +241,28 @@ export const updateRelation = (options: {
         isTwoWay: colData.relation.isTwoWay,
         name: inputElement.dataset.oldValue,
         format: colData.name
-    }]);
+    }];
+    if (colData.relation.avID) {
+        undoOperations.push({
+            action: "setAttrViewColRelationFilters",
+            avID: options.avID,
+            keyID: colId,
+            blockID,
+            data: oldCandidateFilters,
+        });
+        if (targetChanged) {
+            dependentRollups.forEach((item) => {
+                undoOperations.push({
+                    action: "setAttrViewColRollupFilters",
+                    avID: options.avID,
+                    keyID: item.id,
+                    blockID,
+                    data: JSON.parse(JSON.stringify(item.rollup?.filters || [])),
+                });
+            });
+        }
+    }
+    transaction(options.protyle, doOperations, undoOperations, {callback: options.callback});
     options.avElement.remove();
     updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: colNewName});
     focusBlock(options.blockElement);
@@ -221,13 +270,19 @@ export const updateRelation = (options: {
 
 export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: string, resetData = false) => {
     const searchElement = menuItemsElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement;
-    const switchItemElement = searchElement.nextElementSibling;
-    const switchElement = switchItemElement.querySelector(".b3-switch") as HTMLInputElement;
-    const inputItemElement = switchItemElement.nextElementSibling;
-    const btnElement = inputItemElement.nextElementSibling;
+    const filterElement = menuItemsElement.querySelector(
+        '[data-type="goAttrViewColFilters"][data-filter-type="relation"]') as HTMLElement;
+    filterElement?.classList.toggle("b3-menu__item--disabled", !searchElement?.dataset.avId);
+    const switchElement = menuItemsElement.querySelector('input[data-type="backRelation"]') as HTMLInputElement;
+    const inputElement = menuItemsElement.querySelector('input[data-type="colName"]') as HTMLInputElement;
+    const inputItemElement = inputElement?.closest(".b3-menu__item") as HTMLElement;
+    const updateButtonElement = menuItemsElement.querySelector('[data-type="updateRelation"]') as HTMLElement;
+    const btnElement = updateButtonElement?.closest(".b3-menu__item") as HTMLElement;
+    if (!searchElement || !switchElement || !inputElement || !inputItemElement || !btnElement) {
+        return;
+    }
     const oldValue = JSON.parse(searchElement.dataset.oldValue) as IAVColumnRelation;
     if (oldValue.avID) {
-        const inputElement = inputItemElement.querySelector("input") as HTMLInputElement;
         if (resetData) {
             if (searchElement.dataset.avId !== oldValue.avID) {
                 inputElement.value = "";
@@ -321,7 +376,7 @@ style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}$
         } else {
             html += `<span class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
-                renderCell(cell.value, 0, false, "table", column.options) : ""}</span>`;
+                renderCell(cell.value, 0, false, "table", column.options, column.dateFormat) : ""}</span>`;
         }
     });
     return html + "</div>";
@@ -516,7 +571,8 @@ ${genRelationLoaderHTML(state.loading)}`;
         setLoading(true);
         let succeeded = false;
         fetchPost("/api/av/getAttributeViewRelationCandidates", {
-            id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
+            avID: options.menuElement.firstElementChild.getAttribute("data-source-av-id"),
+            keyID: options.menuElement.firstElementChild.getAttribute("data-key-id"),
             keyword,
             page,
             pageSize: RELATION_PAGE_SIZE,
@@ -694,14 +750,16 @@ ${genRelationLoaderHTML(state.loading)}`;
 
 export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     let colRelationData: IAVColumnRelation;
+    let colId = "";
     getFieldsByData(data).find(item => {
         if (item.id === getColId(cellElements[0], data.viewType)) {
             colRelationData = item.relation;
+            colId = item.id;
             return true;
         }
     });
     if (colRelationData && colRelationData.avID) {
-        return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column av__relation">
+        return `<div data-av-id="${colRelationData.avID}" data-source-av-id="${data.id}" data-key-id="${colId}" class="fn__flex-column av__relation">
 <div class="b3-menu__item" data-type="nobg">
     <div class="b3-form__icona fn__flex-1" style="overflow: visible">
         <input class="b3-text-field fn__block" style="min-width: 190px"/>

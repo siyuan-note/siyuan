@@ -5,6 +5,7 @@ import {getDefaultOperatorByType, getEditableFilters, hasFilterForColumn} from "
 import {genCellValue, renderCell} from "./cell";
 import {getPropertiesHTML, openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
+import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
@@ -164,6 +165,11 @@ export const getEditHTML = (options: {
     <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
+<button class="b3-menu__item${colData.relation?.avID ? "" : " b3-menu__item--disabled"}" data-type="goAttrViewColFilters" data-filter-type="relation">
+    <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
 <label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
     <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
@@ -175,11 +181,17 @@ export const getEditHTML = (options: {
 </div>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
     <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
-</div>`;
+    </div>`;
     } else if (colData.type === "rollup") {
-        html += '<button class="b3-menu__separator" data-id="separator_2"></button>' + getRollupHTML({colData});
+        html += '<button class="b3-menu__separator" data-id="separator_2"></button>' +
+            getRollupHTML({data: options.data, colData});
     } else if (colData.type === "date") {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
+<button class="b3-menu__item" data-type="dateFormat" data-format="${colData.dateFormat || ""}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages._attrView.dateFormat}</span>
+    <span class="b3-menu__accelerator">${getLabelByDateFormat(colData.dateFormat)}</span>
+</button>
 <label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.fillCreated}</span>
     <span class="fn__space fn__flex-1"></span>
@@ -192,6 +204,11 @@ export const getEditHTML = (options: {
 </label>`;
     } else if (["updated", "created"].includes(colData.type)) {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
+<button class="b3-menu__item" data-type="dateFormat" data-format="${colData.dateFormat || ""}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages._attrView.dateFormat}</span>
+    <span class="b3-menu__accelerator">${getLabelByDateFormat(colData.dateFormat)}</span>
+</button>
 <label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.includeTime}</span>
     <span class="fn__space fn__flex-1"></span>
@@ -205,13 +222,15 @@ export const getEditHTML = (options: {
     <span class="fn__space fn__flex-1"></span>
     <input type="checkbox" data-type="wrap" class="b3-switch b3-switch--menu"${colData.wrap ? " checked" : ""}>
 </label>`;
-    if (colData.type !== "block") {
-        html += `${options.isCustomAttr ? "" : `<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
+    if (colData.type !== "block" || options.data.viewType === "gallery") {
+        html += options.isCustomAttr ? "" : `<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
     <svg class="b3-menu__icon"><use xlink:href="#${colData.hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
     <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hide}</span>
     <svg class="b3-menu__action ariaLabel" data-position="4west" aria-label="${window.siyuan.languages.fieldVisibility}" data-type="fieldVisibility"><use xlink:href="#iconEdit"></use></svg>
-</button>`}
-<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
+</button>`;
+    }
+    if (colData.type !== "block") {
+        html += `<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
 </button>
@@ -529,6 +548,9 @@ export const bindEditEvent = (options: {
         });
         if (oldValue.avID) {
             fetchPost("/api/av/getAttributeView", {id: oldValue.avID}, (response) => {
+                if (!goSearchElement.isConnected || !response.data?.av) {
+                    return;
+                }
                 goSearchElement.querySelector(".b3-menu__accelerator").textContent = oldValue.avID === avID ? window.siyuan.languages.thisDatabase : (response.data.av.name || window.siyuan.languages._kernel[267]);
                 response.data.av.keyValues.find((item: { key: { id: string, name: string } }) => {
                     if (item.key.id === oldValue.backKeyID) {
@@ -624,6 +646,7 @@ const addAttrViewColAnimation = (options: {
     name: string,
     id: string,
     icon?: string,
+    dateFormat?: TAVDateFormat,
     previousID: string,
     data?: IAV
 }) => {
@@ -631,6 +654,8 @@ const addAttrViewColAnimation = (options: {
         return;
     }
     const nodeId = options.blockElement.getAttribute("data-node-id");
+    const colData = options.data ? getFieldsByData(options.data).find(item => item.id === options.id) : undefined;
+    const dateFormat = options.dateFormat ?? colData?.dateFormat ?? getDefaultDateFormat(options.type);
     const insertTableColumn = (blockElement: Element) => {
         blockElement.querySelectorAll(".av__row").forEach((item) => {
             let previousElement;
@@ -646,7 +671,7 @@ const addAttrViewColAnimation = (options: {
             }
             let html = "";
             if (item.classList.contains("av__row--header")) {
-                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" data-align="" style="width: 200px;">
+                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-date-format="${dateFormat}" data-wrap="false" data-align="" style="width: 200px;">
     ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${options.name}</span>
     <div class="av__widthdrag"></div>
@@ -654,7 +679,7 @@ const addAttrViewColAnimation = (options: {
             } else {
                 const value = genCellValue(options.type, null);
                 html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${options.id}"
-data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px">${renderCell(value,
+data-wrap="false" data-dtype="${options.type}" data-date-format="${dateFormat}" data-align="" style="width: 200px">${renderCell(value,
                     parseInt(item.getAttribute("data-index")) || 0)}</div>`;
             }
             previousElement.insertAdjacentHTML("afterend", html);
@@ -664,7 +689,6 @@ data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px
         insertTableColumn(options.blockElement);
     } else {
         const rowID = options.blockElement.querySelector<HTMLElement>("[data-row-id]")?.dataset.rowId || nodeId;
-        const colData = options.data ? getFieldsByData(options.data).find(item => item.id === options.id) : undefined;
         options.blockElement.querySelector(".fn__hr").insertAdjacentHTML("beforebegin", genAVAttributeRowHTML({
             nodeID: nodeId,
             avID: options.blockElement.getAttribute("data-av-id"),
@@ -675,6 +699,7 @@ data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px
             icon: options.icon,
             typeIcon: getColIconByType(options.type),
             selectOptions: colData?.options,
+            dateFormat,
             value: createEmptyAVValue(options.id, options.type, rowID),
             empty: true,
         }));
@@ -706,10 +731,6 @@ data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px
         return;
     }
     // https://github.com/siyuan-note/siyuan/issues/14724
-    let colData;
-    if (options.data) {
-        colData = getFieldsByData(options.data).find((item => item.id === options.id));
-    }
     openMenuPanel({
         protyle: options.protyle,
         blockElement: options.blockElement,
@@ -1089,6 +1110,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         protyle,
                         blockElement,
                         colId,
+                        fieldType: type,
                     });
                 });
             }
@@ -1317,6 +1339,7 @@ const removeColByMenu = (options: {
         name: options.oldValue,
         avID: options.avID,
         type: options.type,
+        format: options.cellElement.dataset.dateFormat || "",
         id: options.colId,
         previousID: options.cellElement.previousElementSibling?.getAttribute("data-col-id") || "",
     }, {
@@ -1364,6 +1387,7 @@ export const removeCol = (options: {
         name: colData.name,
         avID: options.avID,
         type: colData.type,
+        format: colData.dateFormat || "",
         id: colId,
         previousID: previousID
     }, {
@@ -1377,7 +1401,10 @@ export const removeCol = (options: {
     if (options.isCustomAttr) {
         options.avPanelElement.remove();
     } else {
-        options.menuElement.innerHTML = getPropertiesHTML(options.fields);
+        options.menuElement.innerHTML = getPropertiesHTML(
+            options.fields,
+            options.blockElement.getAttribute("data-av-type") as TAVView
+        );
         setPosition(options.menuElement,
             options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom,
             options.tabRect.height, 0, true);
@@ -1563,6 +1590,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
                 name: window.siyuan.languages.date,
                 avID,
                 type: "date",
+                format: "full",
                 id,
                 previousID
             }, {
@@ -1944,6 +1972,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
                 name: window.siyuan.languages.createdTime,
                 avID,
                 type: "created",
+                format: "full",
                 id,
                 previousID
             }, {
@@ -1982,6 +2011,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
                 name: window.siyuan.languages.updatedTime,
                 avID,
                 type: "updated",
+                format: "full",
                 id,
                 previousID
             }, {
@@ -2019,6 +2049,7 @@ const genColDataByType = (type: TAVCol, id: string, name: string) => {
         name,
         desc: "",
         numberFormat: "",
+        dateFormat: getDefaultDateFormat(type),
         pin: false,
         template: "",
         type,

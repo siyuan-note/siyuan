@@ -13,10 +13,11 @@ export class Menu {
     private wheelEvent: string;
     private position: IPosition;
 
-    constructor() {
+    constructor(element?: HTMLElement) {
         this.wheelEvent = "onwheel" in document.createElement("div") ? "wheel" : "mousewheel";
+        this.preventDefault = this.preventDefault.bind(this);
 
-        this.element = document.getElementById("commonMenu");
+        this.element = element || document.getElementById("commonMenu");
         this.element.querySelector(".b3-menu__title .b3-menu__label").innerHTML = window.siyuan.languages.back;
         this.element.addEventListener(isMobile() ? "click" : "mouseover", (event) => {
             const target = event.target as Element;
@@ -146,7 +147,7 @@ export class Menu {
     }
 
     public addItem(option: IMenu) {
-        const menuItem = new MenuItem(option);
+        const menuItem = new MenuItem(option, this);
         if (menuItem) {
             this.append(menuItem.element, option.index);
             return menuItem.element;
@@ -159,7 +160,7 @@ export class Menu {
 
     public remove(isKeyEvent = false) {
         if (isKeyEvent) {
-            const subElements = window.siyuan.menus.menu.element.querySelectorAll(".b3-menu__item--show");
+            const subElements = this.element.querySelectorAll(".b3-menu__item--show");
             if (subElements.length > 0) {
                 const subElement = subElements[subElements.length - 1];
                 subElement.classList.remove("b3-menu__item--show");
@@ -168,9 +169,10 @@ export class Menu {
                 return;
             }
         }
-        if (window.siyuan.menus.menu.removeCB) {
-            window.siyuan.menus.menu.removeCB();
-            window.siyuan.menus.menu.removeCB = undefined;
+        if (this.removeCB) {
+            const removeCB = this.removeCB;
+            this.removeCB = undefined;
+            removeCB();
         }
         this.removeScrollEvent();
         this.element.firstElementChild.classList.add("fn__none");
@@ -247,7 +249,7 @@ export class Menu {
 export class MenuItem {
     public element: HTMLElement;
 
-    constructor(options: IMenu) {
+    constructor(options: IMenu, menu = window.siyuan.menus.menu) {
         if (options.ignore) {
             return;
         }
@@ -289,7 +291,7 @@ export class MenuItem {
                 event.stopImmediatePropagation();
                 event.stopPropagation();
                 if (this.element.parentElement && !keepOpen) {
-                    window.siyuan.menus.menu.remove();
+                    menu.remove();
                 }
             });
         }
@@ -332,7 +334,7 @@ export class MenuItem {
             submenuElement.classList.add("b3-menu__submenu");
             submenuElement.innerHTML = '<div class="b3-menu__items"></div>';
             options.submenu.forEach((item) => {
-                submenuElement.firstElementChild.append(new MenuItem(item)?.element || "");
+                submenuElement.firstElementChild.append(new MenuItem(item, menu)?.element || "");
             });
             this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>');
             this.element.append(submenuElement);

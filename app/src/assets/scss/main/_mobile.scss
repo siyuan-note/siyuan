@@ -194,6 +194,10 @@
 #model {
   box-sizing: border-box;
 
+  .config--mobile {
+    height: 100%;
+  }
+
   .config-group {
     margin: 24px 0;
   }

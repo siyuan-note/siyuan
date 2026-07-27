@@ -1119,7 +1119,12 @@ export const getTableRangeHTML = (tableElement: HTMLElement, startCell: HTMLElem
         outputCell.innerHTML = cell.innerHTML;
         return outputCell.outerHTML;
     };
-    let html = "<table>";
+    const sourceColElements = Array.from(tableElement.children).find(item => item.tagName === "COLGROUP")?.children;
+    let html = "<table><colgroup>";
+    for (let c = selColStart; c <= selColEnd; c++) {
+        html += sourceColElements?.[c]?.outerHTML || "<col style='min-width: 60px;'>";
+    }
+    html += "</colgroup>";
     let curSection = "";
     for (let r = 0; r <= maxOutRow; r++) {
         const section = getOutputSection(r);

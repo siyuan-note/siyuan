@@ -108,7 +108,8 @@ const (
 	FilterQuantifierNone      FilterQuantifier = "None"
 )
 
-func Filter(viewable Viewable, attrView *AttributeView, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) {
+func Filter(viewable Viewable, attrView *AttributeView, rollupFurtherCollections map[string]*RollupRenderContext,
+	cachedAttrViews map[string]*AttributeView) {
 	collection := viewable.(Collection)
 	filters := collection.GetFilters()
 	if 1 > len(filters) {
@@ -203,7 +204,8 @@ func collectLeafColumnIndexes(nodes []*ViewFilter, fields []Field, colIndexByCol
 
 // evalNode 递归求值：分组按 Combination 聚合子节点，叶子调用原单元格求值逻辑。
 // 空分组：AND 恒真、OR 恒假。叶子节点的空值/未配置语义由 evalLeaf → value.Filter 保留原扁平行为。
-func evalNode(node *ViewFilter, values []*Value, colIndexByColumn map[string]int, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
+func evalNode(node *ViewFilter, values []*Value, colIndexByColumn map[string]int, attrView *AttributeView, itemID string,
+	rollupFurtherCollections map[string]*RollupRenderContext, cachedAttrViews map[string]*AttributeView) bool {
 	if nil == node {
 		return false
 	}
@@ -243,7 +245,8 @@ func evalNode(node *ViewFilter, values []*Value, colIndexByColumn map[string]int
 }
 
 // evalLeaf 对叶子过滤节点做单元格级判定，保留扁平时代 Filter() 的空值特判与 text 豁免语义。
-func evalLeaf(filter *ViewFilter, values []*Value, index int, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
+func evalLeaf(filter *ViewFilter, values []*Value, index int, attrView *AttributeView, itemID string,
+	rollupFurtherCollections map[string]*RollupRenderContext, cachedAttrViews map[string]*AttributeView) bool {
 	if 0 > index || index >= len(values) {
 		return evalMissingLeaf(filter)
 	}
@@ -559,7 +562,8 @@ func PruneInvalidColumnFilters(filters []*ViewFilter, validColumns map[string]bo
 	return
 }
 
-func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
+func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID string,
+	rollupFurtherCollections map[string]*RollupRenderContext, cachedAttrViews map[string]*AttributeView) bool {
 	if nil == filter || (nil == filter.Value && nil == filter.RelativeDate) {
 		return true
 	}
@@ -611,7 +615,17 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			return false
 		}
 
-		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, rollupFurtherCollections[key.ID])
+		rollupContext := rollupFurtherCollections[key.ID]
+		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, rollupContext)
+		relationContentCount := len(relVal.Relation.Contents)
+		if nil != rollupContext && nil != rollupContext.EligibleItemIDs {
+			relationContentCount = 0
+			for _, content := range relVal.Relation.Contents {
+				if rollupContext.EligibleItemIDs[content.BlockID] {
+					relationContentCount++
+				}
+			}
+		}
 
 		switch filter.Qualifier {
 		case FilterQuantifierUndefined, FilterQuantifierAny:
@@ -620,7 +634,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return true
 				}
 
-				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) { // 说明汇总的目标字段存在空值
+				if len(value.Rollup.Contents) < relationContentCount { // 说明汇总的目标字段存在空值
 					return true
 				}
 
@@ -662,7 +676,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return true
 				}
 
-				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+				if len(value.Rollup.Contents) < relationContentCount {
 					return false
 				}
 
@@ -677,7 +691,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return false
 				}
 
-				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+				if len(value.Rollup.Contents) < relationContentCount {
 					return false
 				}
 
@@ -709,7 +723,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return false
 				}
 
-				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+				if len(value.Rollup.Contents) < relationContentCount {
 					return true
 				}
 
@@ -1509,8 +1523,9 @@ func (filter *ViewFilter) IsValid() bool {
 	}
 
 	if FilterOperatorIsEmpty != filter.Operator && FilterOperatorIsNotEmpty != filter.Operator {
-		if isExactRelationFilter(filter) {
-			return nil != filter.Value.Relation && 0 < len(filter.Value.Relation.BlockIDs)
+		if KeyTypeRelation == filter.Value.Type {
+			return nil != filter.Value.Relation &&
+				(0 < len(filter.Value.Relation.BlockIDs) || 0 < len(filter.Value.Relation.Contents))
 		}
 		if filter.Value.IsEmpty() && nil == filter.RelativeDate {
 			return false
@@ -1519,22 +1534,25 @@ func (filter *ViewFilter) IsValid() bool {
 	return true
 }
 
-func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *Value) {
+func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *Value, allowNearItem bool) {
 	if nil != filter.Value {
-		if KeyTypeRelation == filter.Value.Type || KeyTypeTemplate == filter.Value.Type || KeyTypeRollup == filter.Value.Type || KeyTypeUpdated == filter.Value.Type || KeyTypeCreated == filter.Value.Type {
+		if KeyTypeTemplate == filter.Value.Type || KeyTypeRollup == filter.Value.Type || KeyTypeUpdated == filter.Value.Type || KeyTypeCreated == filter.Value.Type {
 			// 所有生成的数据都不设置默认值
-			return nil
+			return nil, false
 		}
 	}
 
 	if nil == filter.Value {
-		return nil
+		return nil, false
+	}
+	if !filter.IsValid() {
+		return nil, false
 	}
 
 	if FilterOperatorIsEmpty != filter.Operator && FilterOperatorIsNotEmpty != filter.Operator {
-		if filter.Value.IsEmpty() && nil == filter.RelativeDate {
+		if KeyTypeRelation != filter.Value.Type && filter.Value.IsEmpty() && nil == filter.RelativeDate {
 			// 在不是过滤空值和非空值的情况下，空值不设置默认值 https://github.com/siyuan-note/siyuan/issues/11297
-			return nil
+			return nil, false
 		}
 	}
 
@@ -1563,7 +1581,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEmpty:
 			ret.Block = &ValueBlock{Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorIsNotEmpty:
-			return nil
+			return nil, true
 		}
 	case KeyTypeText:
 		switch filter.Operator {
@@ -1582,7 +1600,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEmpty:
 			ret.Text = &ValueText{Content: ""}
 		case FilterOperatorIsNotEmpty:
-			return nil
+			return nil, true
 		}
 	case KeyTypeNumber:
 		switch filter.Operator {
@@ -1604,11 +1622,22 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 			ret.Number = &ValueNumber{Content: 0, IsNotEmpty: true}
 		}
 	case KeyTypeDate:
+		isNotTime := true
+		if nil != key.Date {
+			isNotTime = !key.Date.FillSpecificTime
+		}
+		newDate := func(content int64, isNotEmpty bool) *ValueDate {
+			return &ValueDate{Content: content, IsNotEmpty: isNotEmpty, IsNotTime: isNotTime}
+		}
+
 		start := time.Now()
 		end := start
 		if nil != filter.Value.Date {
 			start = time.UnixMilli(filter.Value.Date.Content)
-			end = time.UnixMilli(filter.Value.Date.Content2)
+			end = start
+			if filter.Value.Date.IsNotEmpty2 {
+				end = time.UnixMilli(filter.Value.Date.Content2)
+			}
 		}
 		if nil != filter.RelativeDate {
 			start, end = calcRelativeTimeRegion(filter.RelativeDate.Count, filter.RelativeDate.Unit, filter.RelativeDate.Direction)
@@ -1616,15 +1645,17 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 
 		switch filter.Operator {
 		case FilterOperatorIsEqual:
-			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
+			ret.Date = newDate(start.UnixMilli(), true)
+		case FilterOperatorIsNotEqual:
+			return nil, false
 		case FilterOperatorIsGreater:
-			ret.Date = &ValueDate{Content: end.Add(24 * time.Hour).UnixMilli(), IsNotEmpty: true}
+			ret.Date = newDate(end.AddDate(0, 0, 1).UnixMilli(), true)
 		case FilterOperatorIsGreaterOrEqual:
-			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
+			ret.Date = newDate(start.UnixMilli(), true)
 		case FilterOperatorIsLess:
-			ret.Date = &ValueDate{Content: start.Add(-24 * time.Hour).UnixMilli(), IsNotEmpty: true}
+			ret.Date = newDate(start.AddDate(0, 0, -1).UnixMilli(), true)
 		case FilterOperatorIsLessOrEqual:
-			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
+			ret.Date = newDate(start.UnixMilli(), true)
 		case FilterOperatorIsBetween:
 			start2, end2 := start, end
 			if nil != filter.RelativeDate2 {
@@ -1649,14 +1680,14 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 
 			now := time.Now()
 			if start.Before(now) && now.Before(end) {
-				ret.Date = &ValueDate{Content: now.UnixMilli(), IsNotEmpty: true}
+				ret.Date = newDate(now.UnixMilli(), true)
 				return
 			}
-			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
+			ret.Date = newDate(start.UnixMilli(), true)
 		case FilterOperatorIsEmpty:
-			ret.Date = &ValueDate{Content: 0, IsNotEmpty: false}
+			ret.Date = newDate(0, false)
 		case FilterOperatorIsNotEmpty:
-			ret.Date = &ValueDate{Content: util.CurrentTimeMillis(), IsNotEmpty: true}
+			ret.Date = newDate(util.CurrentTimeMillis(), true)
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
 		switch filter.Operator {
@@ -1671,20 +1702,20 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 			}
 			ret.MSelect = []*ValueSelect{valueSelect}
 		case FilterOperatorIsNotEqual:
-			return nil
+			return nil, false
 		case FilterOperatorContains:
 			if 0 < len(filter.Value.MSelect) {
 				ret.MSelect = []*ValueSelect{{Content: filter.Value.MSelect[0].Content, Color: filter.Value.MSelect[0].Color}}
 			}
 		case FilterOperatorDoesNotContain:
-			return nil
+			return nil, false
 		case FilterOperatorIsEmpty:
 			ret.MSelect = []*ValueSelect{}
 		case FilterOperatorIsNotEmpty:
 			if 0 < len(key.Options) {
 				ret.MSelect = []*ValueSelect{{Content: key.Options[0].Name, Color: key.Options[0].Color}}
 			} else {
-				return nil
+				return nil, false
 			}
 		}
 	case KeyTypeURL:
@@ -1704,7 +1735,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEmpty:
 			ret.URL = &ValueURL{Content: ""}
 		case FilterOperatorIsNotEmpty:
-			return nil
+			return nil, true
 		}
 	case KeyTypeEmail:
 		switch filter.Operator {
@@ -1723,7 +1754,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEmpty:
 			ret.Email = &ValueEmail{Content: ""}
 		case FilterOperatorIsNotEmpty:
-			return nil
+			return nil, true
 		}
 	case KeyTypePhone:
 		switch filter.Operator {
@@ -1742,7 +1773,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEmpty:
 			ret.Phone = &ValuePhone{Content: ""}
 		case FilterOperatorIsNotEmpty:
-			return nil
+			return nil, true
 		}
 	case KeyTypeMAsset:
 		switch filter.Operator {
@@ -1764,14 +1795,22 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		}
 	case KeyTypeRelation:
 		switch filter.Operator {
-		case FilterOperatorContains:
-			if 0 < len(filter.Value.Relation.Contents) {
-				ret.Relation = &ValueRelation{Contents: filter.Value.Relation.Contents}
+		case FilterOperatorContainsAnyItem:
+			if nil != filter.Value.Relation && 0 < len(filter.Value.Relation.BlockIDs) {
+				ret.Relation = &ValueRelation{BlockIDs: []string{filter.Value.Relation.BlockIDs[0]}}
+			} else {
+				return nil, false
 			}
+		case FilterOperatorDoesNotContainAnyItem:
+			return nil, false
+		case FilterOperatorContains:
+			return nil, true
 		case FilterOperatorDoesNotContain:
+			return nil, false
 		case FilterOperatorIsEmpty:
-			ret.Relation = &ValueRelation{Contents: []*Value{}}
+			return nil, false
 		case FilterOperatorIsNotEmpty:
+			return nil, true
 		}
 	}
 	return

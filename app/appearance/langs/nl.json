@@ -1,4 +1,5 @@
 {
+  "editFields": "Velden bewerken",
   "startDate": "Begindatum",
   "addToDictionary": "Toevoegen aan woordenboek",
   "addToDictionaryFailed": "Het woord kon niet aan het woordenboek worden toegevoegd",
@@ -1927,6 +1928,10 @@
 		"quit": "Applicatie afsluiten"
 	},
 	"_attrView": {
+		"dateFormat": "Datumnotatie",
+		"fullDate": "Gelokaliseerde datum",
+		"dateMonths": "januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Leeg",
 		"table": "Tabel",
 		"gallery": "Kaart",

@@ -1,4 +1,5 @@
 {
+  "editFields": "फ़ील्ड संपादित करें",
   "startDate": "प्रारंभ तिथि",
   "addToDictionary": "शब्दकोश में जोड़ें",
   "addToDictionaryFailed": "शब्द को शब्दकोश में नहीं जोड़ा जा सका",
@@ -1927,6 +1928,10 @@
 		"quit": "एप्लिकेशन से बाहर निकलें"
 	},
 	"_attrView": {
+		"dateFormat": "दिनांक प्रारूप",
+		"fullDate": "स्थानीयकृत दिनांक",
+		"dateMonths": "जनवरी|फ़रवरी|मार्च|अप्रैल|मई|जून|जुलाई|अगस्त|सितंबर|अक्टूबर|नवंबर|दिसंबर",
+		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "खाली",
 		"table": "तालिका",
 		"gallery": "कार्ड",

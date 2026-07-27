@@ -1,4 +1,5 @@
 {
+  "editFields": "编辑字段",
   "startDate": "开始时间",
   "addToDictionary": "添加到词典",
   "addToDictionaryFailed": "无法将单词添加到词典",
@@ -1927,6 +1928,10 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
+		"dateFormat": "日期格式",
+		"fullDate": "本地化日期",
+		"dateMonths": "1月|2月|3月|4月|5月|6月|7月|8月|9月|10月|11月|12月",
+		"dateFormatFullTemplate": "${year}年${month}${day}日",
 		"empty": "空白",
 		"table": "表格",
 		"gallery": "卡片",

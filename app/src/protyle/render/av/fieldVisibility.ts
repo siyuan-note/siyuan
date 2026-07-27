@@ -33,6 +33,13 @@ const fetchFieldViews = async (avID: string, colId: string) => {
     return response.data.views as IAVFieldView[];
 };
 
+const getSupportedFieldViews = (views: IAVFieldView[] | undefined, fieldType?: TAVCol) => {
+    if (!views) {
+        return;
+    }
+    return fieldType === "block" ? views.filter(view => view.type === "gallery") : views;
+};
+
 const setFieldVisibility = (options: {
     protyle: IProtyle;
     avID: string;
@@ -152,6 +159,7 @@ export const openFieldVisibility = async (options: {
     protyle: IProtyle;
     blockElement: Element;
     colId: string;
+    fieldType?: TAVCol;
 }) => {
     document.querySelector(".av__panel")?.remove();
     const menu = window.siyuan.menus.menu;
@@ -161,7 +169,7 @@ export const openFieldVisibility = async (options: {
     const previousWidth = menuElement.style.width;
     const previousRemoveCB = menu.removeCB;
     const avID = options.blockElement.getAttribute("data-av-id");
-    const views = await fetchFieldViews(avID, options.colId);
+    const views = getSupportedFieldViews(await fetchFieldViews(avID, options.colId), options.fieldType);
     if (!views || menuElement.classList.contains("fn__none") || menuElement.lastElementChild !== previousItemsElement) {
         return;
     }
@@ -260,7 +268,7 @@ export const openFieldVisibilityPanel = async (options: {
         options.blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id");
     const panelRect = options.menuElement.getBoundingClientRect();
     const previousItemsElement = options.menuElement.firstElementChild;
-    const views = await fetchFieldViews(avID, options.colId);
+    const views = getSupportedFieldViews(await fetchFieldViews(avID, options.colId), options.field.type);
     if (!views || !options.menuElement.isConnected ||
         options.menuElement.firstElementChild !== previousItemsElement) {
         return;

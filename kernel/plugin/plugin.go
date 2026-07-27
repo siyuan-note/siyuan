@@ -100,7 +100,10 @@ type KernelPlugin struct {
 
 	worker  Worker               // Worker for serializing plugin js-call-go (e.g. logger) and go-call-js (e.g. RPC calls) tasks on a single goroutine
 	runtime *eventloop.EventLoop // goja event loop runtime for this plugin
-	watcher *fsnotify.Watcher    // watcher for kernel plugin storage file changes
+
+	watcherMu   sync.Mutex
+	watcher     *fsnotify.Watcher // watcher for kernel plugin storage file changes
+	watcherDone chan struct{}
 
 	state atomic.Int64 //  PluginState
 
@@ -124,11 +127,6 @@ func NewKernelPlugin(ctx context.Context, petal *model.Petal) *KernelPlugin {
 
 	context, cancel := context.WithCancel(ctx)
 
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		logging.LogErrorf("[plugin:%s] failed to create storage watcher: %s", petal.Name, err)
-	}
-
 	plugin := &KernelPlugin{
 		Petal: petal,
 		token: token,
@@ -136,8 +134,6 @@ func NewKernelPlugin(ctx context.Context, petal *model.Petal) *KernelPlugin {
 
 		pluginDir:  filepath.Join(util.DataDir, "plugins", petal.Name),
 		storageDir: filepath.Join(util.DataDir, "storage", "petal", petal.Name),
-
-		watcher: watcher,
 
 		context: context,
 		cancel:  cancel,
@@ -232,8 +228,10 @@ func (p *KernelPlugin) close() (err error) {
 		}
 	}()
 
-	if p.runtime != nil {
-		p.runtime.Stop() // Stops the event loop and waits for it to finish.
+	runtime := p.runtime
+	p.runtime = nil
+	if runtime != nil {
+		runtime.Stop() // Stops the event loop and waits for it to finish.
 		// p.runtime.Terminate() // Interrupts the runtime and causes all executing code to throw an exception.
 	}
 	return
@@ -241,6 +239,10 @@ func (p *KernelPlugin) close() (err error) {
 
 // error sets the plugin state to errored and frees the goja runtime.
 func (p *KernelPlugin) error() {
+	if p.cancel != nil {
+		p.cancel()
+	}
+	p.closeStorageWatcher()
 	p.Clear()
 
 	if err := p.close(); err != nil {
@@ -254,8 +256,10 @@ func (p *KernelPlugin) error() {
 func (p *KernelPlugin) start() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			p.error()
 			err = fmt.Errorf("goja panic during start: %v", r)
+		}
+		if err != nil {
+			p.error()
 		}
 	}()
 
@@ -267,16 +271,12 @@ func (p *KernelPlugin) start() (err error) {
 	}
 
 	if runtimeErr := p.InitRuntime(); runtimeErr != nil {
-		p.error()
 		return fmt.Errorf("start runtime: %v", runtimeErr)
 	}
 
 	if subscribeErr := p.subscribeEventHandlers(); subscribeErr != nil {
-		p.error()
 		return fmt.Errorf("subscribe plugin events: %v", subscribeErr)
 	}
-
-	go p.startStorageWatch()
 
 	p.onLoad()
 	p.updateState(PluginStateRunning)
@@ -312,6 +312,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 	p.Clear()
 
 	p.cancel()
+	p.closeStorageWatcher()
 
 	p.socketsMu.Lock()
 	for c := range p.sockets {
@@ -724,35 +725,30 @@ func (p *KernelPlugin) UntrackRpcSocket(conn *gws.Conn) {
 }
 
 // startStorageWatch starts a goroutine to watch for file changes in the plugin's storage directory and dispatches events to the plugin.
-func (p *KernelPlugin) startStorageWatch() {
-	if p.watcher == nil {
-		return
-	}
-
-	defer p.watcher.Close()
+func (p *KernelPlugin) startStorageWatch(watcher *fsnotify.Watcher, done chan struct{}) {
+	defer p.finishStorageWatcher(watcher, done)
 
 	for {
 		select {
 		case <-p.context.Done():
 			return
-		case event, ok := <-p.watcher.Events:
+		case event, ok := <-watcher.Events:
 			if !ok {
 				return
 			}
 
-			switch event.Op {
-			case fsnotify.Create, fsnotify.Write, fsnotify.Rename, fsnotify.Remove:
+			for _, operation := range storageWatchOperations(event) {
 				path, relErr := filepath.Rel(p.storageDir, event.Name)
 				if relErr != nil {
 					logging.LogErrorf("[plugin:%s] failed to get relative storage path for [%s]: %v", p.Name, event.Name, relErr)
 					return
 				}
 				p.bus.Publish(EventBusTopicRuntime, createEventMessage("fs-notify", R{
-					"operation": event.Op.String(),
+					"operation": operation,
 					"path":      path,
 				}))
 			}
-		case err, ok := <-p.watcher.Errors:
+		case err, ok := <-watcher.Errors:
 			if !ok {
 				return
 			}
@@ -763,9 +759,23 @@ func (p *KernelPlugin) startStorageWatch() {
 
 // addStorageWatch adds a path to the fsnotify watcher to watch for storage file/directory changes.
 func (p *KernelPlugin) addStorageWatch(path string) (err error) {
+	if !isPluginFileWatchSupported() {
+		return errPluginFileWatchUnsupported
+	}
+
+	p.watcherMu.Lock()
+	defer p.watcherMu.Unlock()
+
+	if contextErr := p.context.Err(); contextErr != nil {
+		return fmt.Errorf("plugin stopped: %w", contextErr)
+	}
 	if p.watcher == nil {
-		err = fmt.Errorf("fsnotify watcher not initialized")
-		return
+		p.watcher, err = fsnotify.NewWatcher()
+		if err != nil {
+			return fmt.Errorf("initialize fsnotify watcher: %w", err)
+		}
+		p.watcherDone = make(chan struct{})
+		go p.startStorageWatch(p.watcher, p.watcherDone)
 	}
 
 	err = p.watcher.Add(path)
@@ -774,12 +784,56 @@ func (p *KernelPlugin) addStorageWatch(path string) (err error) {
 
 // removeStorageWatch removes a path from the fsnotify watcher to stop watching for storage file/directory changes.
 func (p *KernelPlugin) removeStorageWatch(path string) (err error) {
+	if !isPluginFileWatchSupported() {
+		return errPluginFileWatchUnsupported
+	}
+
+	p.watcherMu.Lock()
+	defer p.watcherMu.Unlock()
+
 	if p.watcher == nil {
 		err = fmt.Errorf("fsnotify watcher not initialized")
 		return
 	}
 
 	err = p.watcher.Remove(path)
+	return
+}
+
+func (p *KernelPlugin) closeStorageWatcher() {
+	p.watcherMu.Lock()
+	watcher := p.watcher
+	done := p.watcherDone
+	p.watcher = nil
+	p.watcherDone = nil
+	p.watcherMu.Unlock()
+
+	if watcher != nil {
+		watcher.Close()
+	}
+	if done != nil {
+		<-done
+	}
+}
+
+func (p *KernelPlugin) finishStorageWatcher(watcher *fsnotify.Watcher, done chan struct{}) {
+	watcher.Close()
+
+	p.watcherMu.Lock()
+	if p.watcher == watcher {
+		p.watcher = nil
+		p.watcherDone = nil
+	}
+	p.watcherMu.Unlock()
+	close(done)
+}
+
+func storageWatchOperations(event fsnotify.Event) (ret []string) {
+	for _, operation := range []fsnotify.Op{fsnotify.Create, fsnotify.Write, fsnotify.Rename, fsnotify.Remove} {
+		if event.Has(operation) {
+			ret = append(ret, operation.String())
+		}
+	}
 	return
 }
 

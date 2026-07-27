@@ -36,6 +36,7 @@ type ViewFilter struct {
 	Value         *Value            `json:"value"`                   // 过滤值，叶子节点有效
 	RelativeDate  *RelativeDate     `json:"relativeDate,omitempty"`  // 相对时间，叶子节点有效
 	RelativeDate2 *RelativeDate     `json:"relativeDate2,omitempty"` // 第二个相对时间，叶子节点有效
+	DateEndpoint  DateEndpoint      `json:"dateEndpoint,omitempty"`  // 日期端点，叶子节点有效
 	Combination   FilterCombination `json:"combination,omitempty"`   // 组合方式，分组节点有效
 	Filters       []*ViewFilter     `json:"filters,omitempty"`       // 子节点，分组节点有效（递归）
 }
@@ -303,6 +304,7 @@ func CloneFilters(filters []*ViewFilter) (ret []*ViewFilter) {
 			Value:         f.Value,
 			RelativeDate:  f.RelativeDate,
 			RelativeDate2: f.RelativeDate2,
+			DateEndpoint:  f.DateEndpoint,
 			Combination:   f.Combination,
 		}
 		if 0 < len(f.Filters) {
@@ -650,7 +652,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			}
 
 			for _, content := range value.Rollup.Contents {
-				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator, filter.DateEndpoint) {
 					return true
 				}
 			}
@@ -696,7 +698,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			}
 
 			for _, content := range value.Rollup.Contents {
-				if !content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+				if !content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator, filter.DateEndpoint) {
 					return false
 				}
 			}
@@ -739,7 +741,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			}
 
 			for _, content := range value.Rollup.Contents {
-				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator, filter.DateEndpoint) {
 					return false
 				}
 			}
@@ -776,16 +778,16 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 
 			switch filter.Operator {
 			case FilterOperatorContains:
-				if relationValue.filter(filterValue, filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+				if relationValue.filter(filterValue, filter.RelativeDate, filter.RelativeDate2, filter.Operator, filter.DateEndpoint) {
 					return true
 				}
 			case FilterOperatorDoesNotContain:
-				ret := relationValue.filter(filterValue, filter.RelativeDate, filter.RelativeDate2, filter.Operator)
+				ret := relationValue.filter(filterValue, filter.RelativeDate, filter.RelativeDate2, filter.Operator, filter.DateEndpoint)
 				if !ret {
 					return false
 				}
 			default:
-				if relationValue.filter(filterValue, filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+				if relationValue.filter(filterValue, filter.RelativeDate, filter.RelativeDate2, filter.Operator, filter.DateEndpoint) {
 					return true
 				}
 			}
@@ -946,7 +948,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			return true
 		}
 	}
-	return value.filter(filter.Value, filter.RelativeDate, filter.RelativeDate2, filter.Operator)
+	return value.filter(filter.Value, filter.RelativeDate, filter.RelativeDate2, filter.Operator, filter.DateEndpoint)
 }
 
 // isRollupFilterValueEmpty 判断汇总筛选是否缺少比较值，相对日期仅依赖相对时间配置。
@@ -959,7 +961,7 @@ func isRollupFilterValueEmpty(filter *ViewFilter) bool {
 	return nil == v || reflect.ValueOf(v).IsNil()
 }
 
-func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDate, operator FilterOperator) bool {
+func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDate, operator FilterOperator, dateEndpoint DateEndpoint) bool {
 	switch operator {
 	case FilterOperatorIsEmpty:
 		return value.IsEmpty()
@@ -1009,6 +1011,11 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				return false
 			}
 
+			valueContent, valueIsNotEmpty := value.Date.GetByEndpoint(dateEndpoint)
+			if !valueIsNotEmpty {
+				return false
+			}
+
 			if nil != relativeDate { // 使用相对时间比较
 				// 非 Is between 时前端不会下发 relativeDate2，为 nil 时复用第一段作为安全默认，避免空指针
 				secondRelativeDate := relativeDate2
@@ -1017,13 +1024,13 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				}
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
 				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(secondRelativeDate.Count, secondRelativeDate.Unit, secondRelativeDate.Direction)
-				return filterRelativeTime(value.Date.Content, value.Date.IsNotEmpty, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, secondRelativeDate.Direction)
+				return filterRelativeTime(valueContent, valueIsNotEmpty, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, secondRelativeDate.Direction)
 			}
 			// 使用具体时间比较
 			if nil == other.Date {
 				return true
 			}
-			return filterTime(value.Date.Content, value.Date.IsNotEmpty, other.Date.Content, other.Date.Content2, operator)
+			return filterTime(valueContent, valueIsNotEmpty, other.Date.Content, other.Date.Content2, operator)
 		}
 	case KeyTypeCreated:
 		if nil != value.Created {

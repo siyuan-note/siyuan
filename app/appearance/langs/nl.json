@@ -1,4 +1,7 @@
 {
+  "startDate": "Begindatum",
+  "addToDictionary": "Toevoegen aan woordenboek",
+  "addToDictionaryFailed": "Het woord kon niet aan het woordenboek worden toegevoegd",
   "freezeDrag": "Sleep om het bereik van bevroren kolommen aan te passen",
   "databaseTableView": "Tabelweergave van database",
   "databaseKanbanView": "Kanbanweergave van database",

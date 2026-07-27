@@ -499,6 +499,12 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query strin
 	if !ignoreRows || len(view.Groups) > 0 {
 		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, ignoreRows, target, targetGroupID)
 	}
+	if nil == err && attrView.HasCardCoverPositionChanges() {
+		if err = av.SaveAttributeView(attrView); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+			return
+		}
+	}
 	return
 }
 

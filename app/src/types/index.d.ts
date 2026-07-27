@@ -63,6 +63,7 @@ type TOperation =
     | "setAttrViewCardAspectRatioValue"
     | "setAttrViewCoverFrom"
     | "setAttrViewCoverFromAssetKeyID"
+    | "setAttrViewCardCoverPosition"
     | "setAttrViewFitImage"
     | "setAttrViewShowIcon"
     | "setAttrViewWrapField"
@@ -1118,6 +1119,7 @@ interface IAVFilter {
     value?: IAVCellValue,                             // 叶子节点：过滤值
     relativeDate?: IAVRelativeDate,                   // 叶子节点：相对时间
     relativeDate2?: IAVRelativeDate,                  // 叶子节点：第二个相对时间
+    dateEndpoint?: "start" | "end",                   // 叶子节点：日期端点，默认为开始时间
     combination?: "and" | "or",                       // 分组节点：子条件组合方式
     filters?: IAVFilter[],                            // 分组节点：子节点（递归）
 }
@@ -1142,7 +1144,8 @@ interface IAVGroup {
 
 interface IAVSort {
     column: string,
-    order: "ASC" | "DESC"
+    order: "ASC" | "DESC",
+    dateEndpoint?: "start" | "end"
 }
 
 interface IAVColumn {
@@ -1187,8 +1190,15 @@ interface IAVRow {
 interface IAVGalleryItem {
     coverURL?: string;
     coverContent?: string;
+    coverPosition?: IAVCardCoverPosition;
     id: string;
     values: IAVCell[];
+}
+
+interface IAVCardCoverPosition {
+    image: string;
+    x: number;
+    y: number;
 }
 
 interface IAVCell {

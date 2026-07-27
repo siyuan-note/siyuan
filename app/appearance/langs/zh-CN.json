@@ -1,4 +1,7 @@
 {
+  "startDate": "开始时间",
+  "addToDictionary": "添加到词典",
+  "addToDictionaryFailed": "无法将单词添加到词典",
   "freezeDrag": "拖拽调整冻结范围",
   "databaseTableView": "数据库 表格视图",
   "databaseKanbanView": "数据库 看板视图",
@@ -1200,7 +1203,7 @@
 	"installSize": "安装大小",
 	"installDate": "安装日期",
 	"optimizeTypography": "优化排版",
-	"dragPosition": "上下拖动图片以调整位置",
+	"dragPosition": "拖动图片以调整位置",
 	"exportPDF0": "页面大小",
 	"exportPDF1": "横向页面",
 	"exportPDF2": "页面边距",

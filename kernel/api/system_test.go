@@ -17,10 +17,112 @@
 package api
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/model"
 )
+
+func TestGetConfUILayoutByRole(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldConf := model.Conf
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Enabled = true
+	model.Conf.Sync.Provider = 1
+	model.Conf.System = &conf.System{}
+	uiLayout := conf.UILayout{
+		"layout": map[string]any{
+			"instance": "Layout",
+			"children": []any{
+				map[string]any{
+					"instance": "Tab",
+					"title":    "private-document-title",
+					"children": map[string]any{
+						"instance":   "Search",
+						"config":     map[string]any{"k": "private-search-term"},
+						"assetPath":  "assets/private-file.pdf",
+						"pluginData": "private-plugin-state",
+					},
+				},
+			},
+		},
+		"left": map[string]any{
+			"data": []any{map[string]any{"title": "private-dock-title"}},
+		},
+	}
+	model.Conf.UILayout = &uiLayout
+	t.Cleanup(func() {
+		model.Conf = oldConf
+	})
+
+	sentinels := []string{
+		"private-document-title",
+		"private-search-term",
+		"assets/private-file.pdf",
+		"private-plugin-state",
+		"private-dock-title",
+	}
+	tests := []struct {
+		name        string
+		role        model.Role
+		expectEmpty bool
+	}{
+		{name: "administrator", role: model.RoleAdministrator},
+		{name: "reader", role: model.RoleReader, expectEmpty: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) {
+				c.Set(model.RoleContextKey, test.role)
+				c.Next()
+			})
+			engine.POST("/api/system/getConf", getConf)
+
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, "/api/system/getConf", nil)
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int `json:"code"`
+				Data struct {
+					Conf struct {
+						UILayout map[string]any `json:"uiLayout"`
+					} `json:"conf"`
+				} `json:"data"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal getConf response failed: %v", err)
+			}
+			if response.Code != 0 {
+				t.Fatalf("getConf failed: %s", recorder.Body.String())
+			}
+
+			for _, sentinel := range sentinels {
+				contains := strings.Contains(recorder.Body.String(), sentinel)
+				if test.expectEmpty && contains {
+					t.Fatalf("reader received administrator layout data %q: %s", sentinel, recorder.Body.String())
+				}
+				if !test.expectEmpty && !contains {
+					t.Fatalf("administrator layout data %q was removed: %s", sentinel, recorder.Body.String())
+				}
+			}
+			if test.expectEmpty && len(response.Data.Conf.UILayout) != 0 {
+				t.Fatalf("reader received a non-empty UI layout: %#v", response.Data.Conf.UILayout)
+			}
+			if !test.expectEmpty && len(response.Data.Conf.UILayout) == 0 {
+				t.Fatal("administrator received an empty UI layout")
+			}
+		})
+	}
+}
 
 func TestPreserveImportedAISecrets(t *testing.T) {
 	currentMCP := &conf.MCP{Servers: []conf.MCPServer{{ID: "server", Headers: map[string]string{"Authorization": "secret"}}}}

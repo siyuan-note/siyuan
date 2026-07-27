@@ -1,4 +1,7 @@
 {
+  "startDate": "Data rozpoczęcia",
+  "addToDictionary": "Dodaj do słownika",
+  "addToDictionaryFailed": "Nie udało się dodać słowa do słownika",
   "freezeDrag": "Przeciągnij, aby dostosować zakres zablokowanych kolumn",
   "databaseTableView": "Widok tabeli bazy danych",
   "databaseKanbanView": "Widok Kanban bazy danych",

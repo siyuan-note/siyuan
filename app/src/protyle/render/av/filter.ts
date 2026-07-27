@@ -593,7 +593,15 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         const isChecked = filterValue?.checkbox?.checked;
         valueHTML = `<select class="b3-select" data-type="filterValue" data-path="${path}"><option value="true" ${isChecked ? "selected" : ""}>${window.siyuan.languages.checked}</option><option value="false" ${!isChecked ? "selected" : ""}>${window.siyuan.languages.unchecked}</option></select>`;
     } else if (["date", "created", "updated"].includes(valueType)) {
-        valueHTML = genInlineDateHTML(filter, valueType, path);
+        const dateHTML = genInlineDateHTML(filter, valueType, path);
+        valueHTML = dateHTML.valueHTML;
+        const endpointSelect = valueType === "date"
+            ? `<select class="b3-select" data-type="dateEndpoint" data-path="${path}">
+<option value="start"${filter.dateEndpoint !== "end" ? " selected" : ""}>${window.siyuan.languages.startDate}</option>
+<option value="end"${filter.dateEndpoint === "end" ? " selected" : ""}>${window.siyuan.languages.endDate}</option>
+</select>`
+            : "";
+        return `<span class="av__filter-date-controls">${quantifierSelect}<span class="av__filter-date-config${valueHidden}">${endpointSelect}${dateHTML.modeHTML}</span>${operatorSelect}<span class="av__filter-value${valueHidden}" data-type="valueContainer" data-path="${path}">${valueHTML}</span></span>`;
     } else if (valueType === "select" || valueType === "mSelect") {
         const {trigger, dropdown} = genInlineSelectHTML(filter, valueColumn, path, valueType);
         valueHTML = trigger;
@@ -611,11 +619,15 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
 };
 
 // genInlineDateHTML 生成日期类型的内联控件（绝对/相对切换 + Is between 结束日期）。
-const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): string => {
+const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): {
+    modeHTML: string,
+    valueHTML: string,
+} => {
     const dateValue = getFilterCellValue(filter)?.[valueType as "date"];
     const showToday1 = !filter.relativeDate?.direction;
     const showToday2 = !filter.relativeDate2?.direction;
     const isBetween = filter.operator === "Is between";
+    const isRelative = !!filter.relativeDate;
 
     // formatAbsDate 把时间戳格式化为 yyyy-MM-dd；空值/非法值返回 ""，避免 <input type="date"> 报 "Invalid Date"。
     // 0 也视作空值：created/updated 类型的 content 经后端 int64 往返后 null 会变成 0，
@@ -628,32 +640,39 @@ const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): 
         return dayObj.isValid() ? dayObj.format("YYYY-MM-DD") : "";
     };
 
-    const dateBlock = (suffix: "" | "2", relativeDate: IAVRelativeDate, dateVal: any, showToday: boolean): string => {
-        const dateTypeSel = `<select class="b3-select" data-type="dateType${suffix}" data-path="${path}">
-<option value="time"${!relativeDate ? " selected" : ""}>${window.siyuan.languages.includeTime}</option>
-<option value="custom"${relativeDate ? " selected" : ""}>${window.siyuan.languages.relativeToToday}</option>
+    const modeHTML = `<select class="b3-select" data-type="dateType" data-path="${path}">
+<option value="time"${!isRelative ? " selected" : ""}>${window.siyuan.languages.includeTime}</option>
+<option value="custom"${isRelative ? " selected" : ""}>${window.siyuan.languages.relativeToToday}</option>
 </select>`;
-        const absDate = `<input value="${(dateVal && (dateVal.isNotEmpty || (suffix === "2" ? dateVal.isNotEmpty2 : valueType !== "date"))) ? formatAbsDate(suffix === "2" ? dateVal.content2 : dateVal.content) : ""}" type="date" max="9999-12-31" class="b3-text-field b3-text-field--text" data-type="absDate${suffix}" data-path="${path}" style="${relativeDate ? "display:none;" : ""}">`;
-        const relDir = `<select class="b3-select" data-type="dataDirection${suffix}" data-path="${path}" style="${!relativeDate ? "display:none;" : ""}">
+
+    const dateBlock = (suffix: "" | "2", relativeDate: IAVRelativeDate, dateVal: any, showToday: boolean): string => {
+        const hasAbsoluteValue = suffix === "2"
+            ? dateVal?.isNotEmpty2
+            : dateVal && (dateVal.isNotEmpty || valueType !== "date");
+        const absDate = `<input value="${hasAbsoluteValue ? formatAbsDate(suffix === "2" ? dateVal.content2 : dateVal.content) : ""}" type="date" max="9999-12-31" class="b3-text-field b3-text-field--text" data-type="absDate${suffix}" data-path="${path}" style="${isRelative ? "display:none;" : ""}">`;
+        const relDir = `<select class="b3-select" data-type="dataDirection${suffix}" data-path="${path}" style="${!isRelative ? "display:none;" : ""}">
 <option value="-1"${relativeDate?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
 <option value="1"${relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
 <option value="0"${showToday ? " selected" : ""}>${window.siyuan.languages.current}</option>
 </select>`;
         // “当前”方向下数量 count 无意义（后端按单位取今天/本周/本月/今年），故仅隐藏 relCount；
         // 但单位 relUnit 必须保留，以便用户选择天/周/月/年
-        const relCount = `<input type="number" min="1" step="1" value="${relativeDate?.count || 1}" class="b3-text-field b3-text-field--text av__filter-num" data-type="relCount${suffix}" data-path="${path}" style="${(!relativeDate || showToday) ? "display:none;" : ""}">`;
-        const relUnit = `<select class="b3-select" data-type="relUnit${suffix}" data-path="${path}" style="${!relativeDate ? "display:none;" : ""}">
+        const relCount = `<input type="number" min="1" step="1" value="${relativeDate?.count || 1}" class="b3-text-field b3-text-field--text av__filter-num" data-type="relCount${suffix}" data-path="${path}" style="${(!isRelative || showToday) ? "display:none;" : ""}">`;
+        const relUnit = `<select class="b3-select" data-type="relUnit${suffix}" data-path="${path}" style="${!isRelative ? "display:none;" : ""}">
 <option value="0"${relativeDate?.unit === 0 ? " selected" : ""}>${window.siyuan.languages.day}</option>
 <option value="1"${(!relativeDate || relativeDate?.unit === 1) ? " selected" : ""}>${window.siyuan.languages.week}</option>
 <option value="2"${relativeDate?.unit === 2 ? " selected" : ""}>${window.siyuan.languages.month}</option>
 <option value="3"${relativeDate?.unit === 3 ? " selected" : ""}>${window.siyuan.languages.year}</option>
 </select>`;
-        return `<span class="av__filter-date-row">${dateTypeSel}${absDate}${relDir}${relCount}${relUnit}</span>`;
+        return `<span class="av__filter-date-row">${absDate}${relDir}${relCount}${relUnit}</span>`;
     };
 
     const filter1 = dateBlock("", filter.relativeDate, dateValue, showToday1);
     const filter2 = dateBlock("2", filter.relativeDate2, dateValue, showToday2);
-    return `<span class="av__filter-date-col">${filter1}<span data-type="filter2Wrap" data-path="${path}" style="${isBetween ? "" : "display:none;"}">${filter2}</span></span>`;
+    return {
+        modeHTML,
+        valueHTML: `<span class="av__filter-date-col">${filter1}<span data-type="filter2Wrap" data-path="${path}" style="${isBetween ? "" : "display:none;"}">${filter2}</span></span>`,
+    };
 };
 
 // genInlineSelectHTML 生成 select/mSelect 的内联多选 chip 列表 + 搜索。
@@ -919,6 +938,10 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             relativeDate,
             relativeDate2,
         };
+        const dateEndpointSel = rowElement.querySelector('[data-type="dateEndpoint"]') as HTMLSelectElement;
+        if (dateEndpointSel?.value === "end") {
+            newFilter.dateEndpoint = "end";
+        }
         if (quantifierSel) {
             newFilter.quantifier = quantifierSel.value;
         }
@@ -1056,10 +1079,10 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                 (valueType === "relation" && !isRollup &&
                     (isExactRelationOperator(newOp) !== isExactRelationOperator(oldOp)));
             saveRow(row, path, structureChange);
-        } else if (type === "quantifier" || type?.startsWith("dataDirection") || type?.startsWith("dateType")) {
+        } else if (type === "quantifier" || type === "dateEndpoint" || type?.startsWith("dataDirection") || type === "dateType") {
             // 量化器、日期方向、日期类型变化：保存。dateType 切换绝对/相对、dataDirection 切换“当前/前/后”
             // 都会改变 relCount/relUnit 的显示状态，需重渲染
-            if (type === "dateType" || type === "dateType2" || type?.startsWith("dataDirection")) {
+            if (type === "dateType" || type?.startsWith("dataDirection")) {
                 saveRow(row, path, true);
             } else {
                 saveRow(row, path, false);

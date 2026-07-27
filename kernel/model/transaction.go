@@ -374,6 +374,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewCoverFrom(op)
 			case "setAttrViewCoverFromAssetKeyID":
 				ret = tx.doSetAttrViewCoverFromAssetKeyID(op)
+			case "setAttrViewCardCoverPosition":
+				ret = tx.doSetAttrViewCardCoverPosition(op)
 			case "setAttrViewCardSize":
 				ret = tx.doSetAttrViewCardSize(op)
 			case "setAttrViewCardWidth":

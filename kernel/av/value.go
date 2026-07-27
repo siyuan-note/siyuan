@@ -624,6 +624,25 @@ type ValueDate struct {
 	FormattedContent string `json:"formattedContent"`
 }
 
+// DateEndpoint 描述日期筛选或排序使用的时间端点。
+type DateEndpoint string
+
+const (
+	DateEndpointStart DateEndpoint = "start"
+	DateEndpointEnd   DateEndpoint = "end"
+)
+
+// GetByEndpoint 获取指定端点的时间和值状态，未启用结束时间时回退到开始时间。
+func (date *ValueDate) GetByEndpoint(endpoint DateEndpoint) (content int64, isNotEmpty bool) {
+	if nil == date {
+		return
+	}
+	if DateEndpointEnd == endpoint && date.HasEndDate {
+		return date.Content2, date.IsNotEmpty2
+	}
+	return date.Content, date.IsNotEmpty
+}
+
 type DateFormat string
 
 const (

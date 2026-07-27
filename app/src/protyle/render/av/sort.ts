@@ -68,20 +68,32 @@ export const addSort = (options: {
 };
 
 export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV, blockID: string) => {
+    const fields = getFieldsByData(data);
     menuElement.querySelectorAll("select").forEach((item: HTMLSelectElement) => {
         item.addEventListener("change", () => {
             const colId = item.parentElement.getAttribute("data-id");
             const oldSort = JSON.parse(JSON.stringify(data.view.sorts));
-            if (item.previousElementSibling.classList.contains("b3-menu__icon")) {
-                data.view.sorts.find((sort: IAVSort) => {
-                    if (sort.column === colId) {
-                        sort.column = item.value;
-                        item.parentElement.setAttribute("data-id", item.value);
-                        return true;
-                    }
-                });
-            } else {
-                data.view.sorts.find((sort: IAVSort) => sort.column === colId).order = item.value as "ASC" | "DESC";
+            const sort = data.view.sorts.find((sort: IAVSort) => sort.column === colId);
+            if (!sort) {
+                return;
+            }
+            let reRender = false;
+            if (item.dataset.type === "sortColumn") {
+                const oldColumn = fields.find((column) => column.id === sort.column);
+                const newColumn = fields.find((column) => column.id === item.value);
+                sort.column = item.value;
+                if (oldColumn?.type !== "date" || newColumn?.type !== "date") {
+                    delete sort.dateEndpoint;
+                }
+                reRender = true;
+            } else if (item.dataset.type === "sortDateEndpoint") {
+                if (item.value === "end") {
+                    sort.dateEndpoint = "end";
+                } else {
+                    delete sort.dateEndpoint;
+                }
+            } else if (item.dataset.type === "sortOrder") {
+                sort.order = item.value as "ASC" | "DESC";
             }
             transaction(protyle, [{
                 action: "setAttrViewSorts",
@@ -94,6 +106,10 @@ export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data
                 data: oldSort,
                 blockID
             }]);
+            if (reRender) {
+                menuElement.innerHTML = getSortsHTML(fields, data.view.sorts);
+                bindSortsEvent(protyle, menuElement, data, blockID);
+            }
         });
     });
 };
@@ -108,13 +124,20 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
         return sortHTML;
     };
     sorts.forEach((item: IAVSort) => {
+        const column = columns.find((column) => column.id === item.column);
+        const dateEndpointHTML = column?.type === "date" ? `
+    <span class="fn__space"></span>
+    <select class="b3-select" data-type="sortDateEndpoint" style="margin: 4px 0">
+        <option value="start" ${item.dateEndpoint !== "end" ? "selected" : ""}>${window.siyuan.languages.startDate}</option>
+        <option value="end" ${item.dateEndpoint === "end" ? "selected" : ""}>${window.siyuan.languages.endDate}</option>
+    </select>` : "";
         html += `<button draggable="true" class="b3-menu__item" data-id="${item.column}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <select class="b3-select fn__flex-1" style="margin: 4px 0">
+    <select class="b3-select fn__flex-1" data-type="sortColumn" style="margin: 4px 0">
         ${genSortItem(item.column)}
-    </select>
+    </select>${dateEndpointHTML}
     <span class="fn__space"></span>
-    <select class="b3-select" style="margin: 4px 0">
+    <select class="b3-select" data-type="sortOrder" style="margin: 4px 0">
         <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.asc}</option>
         <option value="DESC" ${item.order === "DESC" ? "selected" : ""}>${window.siyuan.languages.desc}</option>
     </select>

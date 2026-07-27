@@ -21,7 +21,19 @@ import {unicode2Emoji} from "../../../emoji";
 import {escapeAttr} from "../../../util/escape";
 import {getCompressURL} from "../../../util/image";
 import {getAVSelectStat, getAvBodyData, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
-import {getCardCoverImageHTML} from "./cover";
+import {getCardCoverHTML, getCardCoverSource} from "./cover";
+
+const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem) => {
+    const canPosition = Boolean(row.coverURL && !row.coverURL.startsWith("background") && getCardCoverSource(data));
+    const positionHTML = canPosition ? `<span class="protyle-icon protyle-icon--first ariaLabel${data.fitImage ? " fn__none" : ""}" data-position="4north" aria-label="${window.siyuan.languages.dragPosition}" data-type="av-cover-position"><svg><use xlink:href="#iconMove"></use></svg></span>` : "";
+    const editFirst = !canPosition || data.fitImage;
+    const moreFirst = editFirst && data.displayEmptyFields;
+    return `<div class="av__gallery-actions">
+        ${positionHTML}
+        <span class="protyle-icon${editFirst ? " protyle-icon--first" : ""} ariaLabel${data.displayEmptyFields ? " fn__none" : ""}" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        <span class="protyle-icon${moreFirst ? " protyle-icon--first" : ""} protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
+    </div>`;
+};
 
 export const getRowHTML = (options: {
     data: IAVView
@@ -38,7 +50,8 @@ export const getRowHTML = (options: {
         if (kanbanData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
             if (galleryRow.coverURL) {
-                html += `<div class="${coverClass}">${getCardCoverImageHTML(galleryRow.coverURL, getCompressURL(galleryRow.coverURL), kanbanData.fitImage)}</div>`;
+                html += getCardCoverHTML(coverClass, galleryRow.coverURL, getCompressURL(galleryRow.coverURL),
+                    kanbanData.fitImage, getCardCoverSource(kanbanData), galleryRow.coverPosition);
             } else if (galleryRow.coverContent) {
                 html += `<div class="${coverClass}"><div class="av__gallery-content">${galleryRow.coverContent}</div><div></div></div>`;
             } else {
@@ -92,10 +105,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
             }
         });
         html += `</div>
-    <div class="av__gallery-actions">
-        <span class="protyle-icon protyle-icon--first ariaLabel${kanbanData.displayEmptyFields ? " fn__none" : ""}" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-        <span class="protyle-icon${kanbanData.displayEmptyFields ? " protyle-icon--first" : ""} protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
-    </div>
+    ${getGalleryActionsHTML(kanbanData, galleryRow)}
 </div>`;
         return html;
     }
@@ -106,7 +116,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         if (kanbanData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
             if (kanbanRow.coverURL) {
-                html += `<div class="${coverClass}">${getCardCoverImageHTML(kanbanRow.coverURL, getCompressURL(kanbanRow.coverURL), kanbanData.fitImage)}</div>`;
+                html += getCardCoverHTML(coverClass, kanbanRow.coverURL, getCompressURL(kanbanRow.coverURL),
+                    kanbanData.fitImage, getCardCoverSource(kanbanData), kanbanRow.coverPosition);
             } else if (kanbanRow.coverContent.trim()) {
                 html += `<div class="${coverClass}"><div class="av__gallery-content">${kanbanRow.coverContent}</div><div></div></div>`;
             }
@@ -158,10 +169,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
             }
         });
         html += `</div>
-    <div class="av__gallery-actions">
-        <span class="protyle-icon protyle-icon--first ariaLabel${kanbanData.displayEmptyFields ? " fn__none" : ""}" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-        <span class="protyle-icon${kanbanData.displayEmptyFields ? " protyle-icon--first" : ""} protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
-    </div>
+    ${getGalleryActionsHTML(kanbanData, kanbanRow)}
 </div>`;
         return html;
     }

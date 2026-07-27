@@ -1,4 +1,7 @@
 {
+  "startDate": "วันที่เริ่มต้น",
+  "addToDictionary": "เพิ่มลงในพจนานุกรม",
+  "addToDictionaryFailed": "ไม่สามารถเพิ่มคำลงในพจนานุกรมได้",
   "freezeDrag": "ลากเพื่อปรับช่วงคอลัมน์ที่ตรึง",
   "databaseTableView": "มุมมองตารางฐานข้อมูล",
   "databaseKanbanView": "มุมมองคัมบังฐานข้อมูล",

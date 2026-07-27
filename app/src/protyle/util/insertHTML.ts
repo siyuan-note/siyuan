@@ -1109,6 +1109,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 splitElements.push(spanElement, afterElement);
             }
             if (isCrossBlockRange) {
+                let rangeStartParentElement = rangeStartWbrElement.parentElement;
+                while (rangeStartParentElement && rangeStartParentElement !== editableElement &&
+                    rangeStartParentElement.textContent.replace(Constants.ZWSP, "") === "" &&
+                    Array.from(rangeStartParentElement.querySelectorAll("*")).every(item => item.tagName === "WBR")) {
+                    rangeStartParentElement.before(rangeStartWbrElement);
+                    rangeStartParentElement.remove();
+                    rangeStartParentElement = rangeStartWbrElement.parentElement;
+                }
                 if (rangeStartWbrElement.isConnected) {
                     range.setStartAfter(rangeStartWbrElement);
                     range.collapse(true);

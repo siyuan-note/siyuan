@@ -1,4 +1,7 @@
 {
+  "startDate": "Dátum začiatku",
+  "addToDictionary": "Pridať do slovníka",
+  "addToDictionaryFailed": "Slovo sa nepodarilo pridať do slovníka",
   "freezeDrag": "Potiahnutím upravíte rozsah ukotvených stĺpcov",
   "databaseTableView": "Tabuľkové zobrazenie databázy",
   "databaseKanbanView": "Kanban zobrazenie databázy",

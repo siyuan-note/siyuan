@@ -224,40 +224,103 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          TEST_WORKSPACE="${RUNNER_TEMP}/siyuan-e2e-workspace"
+          MAIN_WORKSPACE="${RUNNER_TEMP}/siyuan-e2e-main-workspace"
+          EDITOR_WORKSPACE="${RUNNER_TEMP}/siyuan-e2e-editor-workspace"
+          ATTRIBUTE_VIEW_WORKSPACE="${RUNNER_TEMP}/siyuan-e2e-attribute-view-workspace"
           APP_DIR="${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app"
           KERNEL_PATH="${APP_DIR}/kernel-darwin-arm64/SiYuan-Kernel"
-          mkdir -p "${TEST_WORKSPACE}"
-          "${KERNEL_PATH}" --workspace="${TEST_WORKSPACE}" serve --wd="${APP_DIR}" --port=6806 \
-            > "${RUNNER_TEMP}/siyuan-e2e-kernel-console.log" 2>&1 &
-          echo "SIYUAN_E2E_KERNEL_PID=$!" >> "${GITHUB_ENV}"
-          echo "SIYUAN_E2E_WORKSPACE=${TEST_WORKSPACE}" >> "${GITHUB_ENV}"
+          mkdir -p "${MAIN_WORKSPACE}" "${EDITOR_WORKSPACE}" "${ATTRIBUTE_VIEW_WORKSPACE}"
+          "${KERNEL_PATH}" --workspace="${MAIN_WORKSPACE}" serve --wd="${APP_DIR}" --port=6806 \
+            > "${RUNNER_TEMP}/siyuan-e2e-main-kernel-console.log" 2>&1 &
+          echo "SIYUAN_E2E_MAIN_KERNEL_PID=$!" >> "${GITHUB_ENV}"
+          "${KERNEL_PATH}" --workspace="${EDITOR_WORKSPACE}" serve --wd="${APP_DIR}" --port=6807 \
+            > "${RUNNER_TEMP}/siyuan-e2e-editor-kernel-console.log" 2>&1 &
+          echo "SIYUAN_E2E_EDITOR_KERNEL_PID=$!" >> "${GITHUB_ENV}"
+          "${KERNEL_PATH}" --workspace="${ATTRIBUTE_VIEW_WORKSPACE}" serve --wd="${APP_DIR}" --port=6808 \
+            > "${RUNNER_TEMP}/siyuan-e2e-attribute-view-kernel-console.log" 2>&1 &
+          echo "SIYUAN_E2E_ATTRIBUTE_VIEW_KERNEL_PID=$!" >> "${GITHUB_ENV}"
+          echo "SIYUAN_E2E_MAIN_WORKSPACE=${MAIN_WORKSPACE}" >> "${GITHUB_ENV}"
+          echo "SIYUAN_E2E_EDITOR_WORKSPACE=${EDITOR_WORKSPACE}" >> "${GITHUB_ENV}"
+          echo "SIYUAN_E2E_ATTRIBUTE_VIEW_WORKSPACE=${ATTRIBUTE_VIEW_WORKSPACE}" >> "${GITHUB_ENV}"
 
       - name: Wait for End-to-End Test Kernel
         if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
         continue-on-error: true
         shell: bash
         run: |
-          for attempt in {1..60}; do
-            if curl --fail --silent --request POST http://127.0.0.1:6806/api/system/getWorkspaceInfo > /dev/null; then
-              exit 0
-            fi
-            if ! kill -0 "${SIYUAN_E2E_KERNEL_PID}" 2>/dev/null; then
-              cat "${RUNNER_TEMP}/siyuan-e2e-kernel-console.log"
-              exit 1
-            fi
-            sleep 1
-          done
-          cat "${RUNNER_TEMP}/siyuan-e2e-kernel-console.log"
-          exit 1
+          wait_for_kernel() {
+            local pid="$1"
+            local port="$2"
+            local log_path="$3"
+            for attempt in {1..60}; do
+              if curl --fail --silent --request POST "http://127.0.0.1:${port}/api/system/getWorkspaceInfo" > /dev/null; then
+                return
+              fi
+              if ! kill -0 "${pid}" 2>/dev/null; then
+                cat "${log_path}"
+                return 1
+              fi
+              sleep 1
+            done
+            cat "${log_path}"
+            return 1
+          }
+          wait_for_kernel "${SIYUAN_E2E_MAIN_KERNEL_PID}" 6806 \
+            "${RUNNER_TEMP}/siyuan-e2e-main-kernel-console.log"
+          wait_for_kernel "${SIYUAN_E2E_EDITOR_KERNEL_PID}" 6807 \
+            "${RUNNER_TEMP}/siyuan-e2e-editor-kernel-console.log"
+          wait_for_kernel "${SIYUAN_E2E_ATTRIBUTE_VIEW_KERNEL_PID}" 6808 \
+            "${RUNNER_TEMP}/siyuan-e2e-attribute-view-kernel-console.log"
 
       - name: Run End-to-End Tests
         if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
         continue-on-error: true
         timeout-minutes: 30
+        shell: bash
         run: |
           pnpm run typecheck
-          SIYUAN_EXPECT_WORKSPACE="${SIYUAN_E2E_WORKSPACE}" pnpm exec playwright test --reporter=line,html
+          set +e
+          (
+            SIYUAN_BASE_URL="http://127.0.0.1:6806" \
+            SIYUAN_EXPECT_WORKSPACE="${SIYUAN_E2E_MAIN_WORKSPACE}" \
+            SIYUAN_E2E_SHARD="main" \
+            SIYUAN_TEST_RESULTS_DIR="test-results-main" \
+            PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-main" \
+            pnpm exec playwright test --config=playwright.focused.config.ts \
+              --reporter=line,html --output=test-results-main
+          ) &
+          MAIN_TEST_PID=$!
+          (
+            SIYUAN_BASE_URL="http://127.0.0.1:6807" \
+            SIYUAN_EXPECT_WORKSPACE="${SIYUAN_E2E_EDITOR_WORKSPACE}" \
+            SIYUAN_E2E_SHARD="editor" \
+            SIYUAN_TEST_RESULTS_DIR="test-results-editor" \
+            PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-editor" \
+            pnpm exec playwright test --config=playwright.focused.config.ts \
+              --reporter=line,html --output=test-results-editor
+          ) &
+          EDITOR_TEST_PID=$!
+          (
+            SIYUAN_BASE_URL="http://127.0.0.1:6808" \
+            SIYUAN_EXPECT_WORKSPACE="${SIYUAN_E2E_ATTRIBUTE_VIEW_WORKSPACE}" \
+            SIYUAN_E2E_SHARD="attribute-view" \
+            SIYUAN_TEST_RESULTS_DIR="test-results-attribute-view" \
+            PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-attribute-view" \
+            pnpm exec playwright test --config=playwright.focused.config.ts \
+              --reporter=line,html --output=test-results-attribute-view
+          ) &
+          ATTRIBUTE_VIEW_TEST_PID=$!
+          wait "${MAIN_TEST_PID}"
+          MAIN_TEST_STATUS=$?
+          wait "${EDITOR_TEST_PID}"
+          EDITOR_TEST_STATUS=$?
+          wait "${ATTRIBUTE_VIEW_TEST_PID}"
+          ATTRIBUTE_VIEW_TEST_STATUS=$?
+          set -e
+          if [ "${MAIN_TEST_STATUS}" -ne 0 ] || [ "${EDITOR_TEST_STATUS}" -ne 0 ] || \
+            [ "${ATTRIBUTE_VIEW_TEST_STATUS}" -ne 0 ]; then
+            exit 1
+          fi
         working-directory: ${{ github.workspace }}/siyuan-testing
 
       - name: Stop End-to-End Test Kernel
@@ -265,16 +328,23 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          if [ -n "${SIYUAN_E2E_KERNEL_PID:-}" ] && kill -0 "${SIYUAN_E2E_KERNEL_PID}" 2>/dev/null; then
-            kill -TERM "${SIYUAN_E2E_KERNEL_PID}"
+          stop_kernel() {
+            local pid="$1"
+            if [ -z "${pid}" ] || ! kill -0 "${pid}" 2>/dev/null; then
+              return
+            fi
+            kill -TERM "${pid}"
             for attempt in {1..30}; do
-              if ! kill -0 "${SIYUAN_E2E_KERNEL_PID}" 2>/dev/null; then
-                exit 0
+              if ! kill -0 "${pid}" 2>/dev/null; then
+                return
               fi
               sleep 1
             done
-            kill -KILL "${SIYUAN_E2E_KERNEL_PID}"
-          fi
+            kill -KILL "${pid}"
+          }
+          stop_kernel "${SIYUAN_E2E_MAIN_KERNEL_PID:-}"
+          stop_kernel "${SIYUAN_E2E_EDITOR_KERNEL_PID:-}"
+          stop_kernel "${SIYUAN_E2E_ATTRIBUTE_VIEW_KERNEL_PID:-}"
 
       - name: Upload End-to-End Test Results
         if: always() && matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
@@ -283,10 +353,18 @@ jobs:
         with:
           name: siyuan-e2e-macos-arm64
           path: |
-            ${{ github.workspace }}/siyuan-testing/playwright-report
-            ${{ github.workspace }}/siyuan-testing/test-results
-            ${{ runner.temp }}/siyuan-e2e-kernel-console.log
-            ${{ runner.temp }}/siyuan-e2e-workspace/temp/siyuan.log
+            ${{ github.workspace }}/siyuan-testing/playwright-report-main
+            ${{ github.workspace }}/siyuan-testing/playwright-report-editor
+            ${{ github.workspace }}/siyuan-testing/playwright-report-attribute-view
+            ${{ github.workspace }}/siyuan-testing/test-results-main
+            ${{ github.workspace }}/siyuan-testing/test-results-editor
+            ${{ github.workspace }}/siyuan-testing/test-results-attribute-view
+            ${{ runner.temp }}/siyuan-e2e-main-kernel-console.log
+            ${{ runner.temp }}/siyuan-e2e-editor-kernel-console.log
+            ${{ runner.temp }}/siyuan-e2e-attribute-view-kernel-console.log
+            ${{ runner.temp }}/siyuan-e2e-main-workspace/temp/siyuan.log
+            ${{ runner.temp }}/siyuan-e2e-editor-workspace/temp/siyuan.log
+            ${{ runner.temp }}/siyuan-e2e-attribute-view-workspace/temp/siyuan.log
           if-no-files-found: ignore
           retention-days: 14
 

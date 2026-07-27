@@ -36,6 +36,9 @@ export class Menus {
             if (target.classList.contains("b3-text-field") || (target.tagName === "INPUT" && (target as HTMLInputElement).type === "text")) {
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_CONTEXT_MENU, {
+                    x: event.clientX,
+                    y: event.clientY,
+                    requestedAt: Date.now(),
                     undo: window.siyuan.languages.undo,
                     redo: window.siyuan.languages.redo,
                     copy: window.siyuan.languages.copy,
@@ -44,6 +47,7 @@ export class Menus {
                     paste: window.siyuan.languages.paste,
                     pasteAsPlainText: window.siyuan.languages.pasteAsPlainText,
                     selectAll: window.siyuan.languages.selectAll,
+                    addToDictionary: window.siyuan.languages.addToDictionary,
                 });
                 /// #endif
                 event.stopPropagation();

@@ -1,4 +1,7 @@
 {
+  "startDate": "開始日",
+  "addToDictionary": "辞書に追加",
+  "addToDictionaryFailed": "単語を辞書に追加できませんでした",
   "freezeDrag": "ドラッグして固定範囲を調整",
   "databaseTableView": "データベース テーブルビュー",
   "databaseKanbanView": "データベース カンバンビュー",

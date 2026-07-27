@@ -185,6 +185,156 @@ func TestRollupRelativeDateFilter(t *testing.T) {
 	}
 }
 
+func TestDateEndpointFilter(t *testing.T) {
+	start := time.Date(2025, time.August, 10, 12, 0, 0, 0, time.Local)
+	end := time.Date(2025, time.August, 12, 12, 0, 0, 0, time.Local)
+	value := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     start.UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    end.UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	startFilterValue := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true},
+	}
+	endFilterValue := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true},
+	}
+
+	if !value.filter(startFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpointStart) {
+		t.Fatalf("start endpoint should match the start date")
+	}
+	if value.filter(startFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpointEnd) {
+		t.Fatalf("end endpoint should not match the start date")
+	}
+	if !value.filter(endFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpointEnd) {
+		t.Fatalf("end endpoint should match the end date")
+	}
+	if !value.filter(startFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpoint("")) {
+		t.Fatalf("missing endpoint should default to the start date")
+	}
+
+	value.Date.HasEndDate = false
+	if !value.filter(startFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpointEnd) {
+		t.Fatalf("end endpoint should fall back to the start date when the end date is disabled")
+	}
+
+	value.Date.HasEndDate = true
+	value.Date.IsNotEmpty2 = false
+	value.Date.Content2 = 0
+	if value.filter(startFilterValue, nil, nil, FilterOperatorIsNotEqual, DateEndpointEnd) {
+		t.Fatalf("an enabled but empty end date should not participate in ordinary comparisons")
+	}
+}
+
+func TestDateEndpointRelativeAndBetweenFilter(t *testing.T) {
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 12, 0, 0, 0, now.Location())
+	yesterday := today.AddDate(0, 0, -1)
+	value := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     yesterday.UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    today.UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	relativeDate := &RelativeDate{Count: 1, Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis}
+	if value.filter(&Value{Type: KeyTypeDate}, relativeDate, nil, FilterOperatorIsEqual, DateEndpointStart) {
+		t.Fatalf("yesterday's start date should not match today")
+	}
+	if !value.filter(&Value{Type: KeyTypeDate}, relativeDate, nil, FilterOperatorIsEqual, DateEndpointEnd) {
+		t.Fatalf("today's end date should match the relative today filter")
+	}
+
+	betweenValue := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     today.AddDate(0, 0, -2).UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    today.AddDate(0, 0, 2).UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	betweenFilterValue := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     today.AddDate(0, 0, 1).UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    today.AddDate(0, 0, 3).UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	if betweenValue.filter(betweenFilterValue, nil, nil, FilterOperatorIsBetween, DateEndpointStart) {
+		t.Fatalf("start endpoint should be outside the comparison boundaries")
+	}
+	if !betweenValue.filter(betweenFilterValue, nil, nil, FilterOperatorIsBetween, DateEndpointEnd) {
+		t.Fatalf("end endpoint should be inside the comparison boundaries")
+	}
+}
+
+func TestRollupDateEndpointFilter(t *testing.T) {
+	relationKey := NewKey("relation", "关联", "", KeyTypeRelation)
+	relationKey.Relation = &Relation{AvID: "target"}
+	rollupKey := NewKey("rollup", "汇总", "", KeyTypeRollup)
+	rollupKey.Rollup = &Rollup{RelationKeyID: relationKey.ID, KeyID: "date"}
+	attrView := &AttributeView{KeyValues: []*KeyValues{
+		{Key: relationKey, Values: []*Value{{
+			KeyID: relationKey.ID, BlockID: "source-item", Type: KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"target-item"}},
+		}}},
+		{Key: rollupKey},
+	}}
+
+	start := time.Date(2025, time.August, 10, 12, 0, 0, 0, time.Local)
+	end := time.Date(2025, time.August, 12, 12, 0, 0, 0, time.Local)
+	targetDate := &Value{
+		KeyID: "date", BlockID: "target-item", Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     start.UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    end.UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	targetView := &AttributeView{KeyValues: []*KeyValues{{Key: NewKey("date", "日期", "", KeyTypeDate), Values: []*Value{targetDate}}}}
+
+	for _, test := range []struct {
+		qualifier FilterQuantifier
+		expected  bool
+	}{
+		{qualifier: FilterQuantifierAny, expected: true},
+		{qualifier: FilterQuantifierAll, expected: true},
+		{qualifier: FilterQuantifierNone, expected: false},
+	} {
+		value := &Value{KeyID: rollupKey.ID, BlockID: "source-item", Type: KeyTypeRollup, Rollup: &ValueRollup{}}
+		filter := &ViewFilter{
+			Qualifier:    test.qualifier,
+			Operator:     FilterOperatorIsEqual,
+			DateEndpoint: DateEndpointEnd,
+			Value: &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{Contents: []*Value{{
+				Type: KeyTypeDate,
+				Date: &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true},
+			}}}},
+		}
+		actual := value.Filter(filter, attrView, "source-item", map[string]Collection{}, map[string]*AttributeView{"target": targetView})
+		if actual != test.expected {
+			t.Fatalf("unexpected %s rollup endpoint result: expected %t, got %t", test.qualifier, test.expected, actual)
+		}
+	}
+}
+
 func TestRemoveFiltersByColumn(t *testing.T) {
 	// 树结构：root(AND) → [leaf(c1), group(OR) → [leaf(c2), leaf(c1)]]
 	root := group(FilterCombinationAnd, leaf("c1"), group(FilterCombinationOr, leaf("c2"), leaf("c1")))
@@ -418,7 +568,9 @@ func TestRenameSelectOptionInFilters(t *testing.T) {
 }
 
 func TestCloneFilters(t *testing.T) {
-	original := []*ViewFilter{group(FilterCombinationAnd, leaf("c1"), group(FilterCombinationOr, leaf("c2")))}
+	endpointLeaf := leaf("c1")
+	endpointLeaf.DateEndpoint = DateEndpointEnd
+	original := []*ViewFilter{group(FilterCombinationAnd, endpointLeaf, group(FilterCombinationOr, leaf("c2")))}
 	cloned := CloneFilters(original)
 	if len(cloned) != len(original) {
 		t.Fatalf("clone length mismatch")
@@ -431,6 +583,9 @@ func TestCloneFilters(t *testing.T) {
 	// 嵌套分组也应深拷贝
 	if len(cloned[0].Filters[1].Filters) != 1 {
 		t.Fatalf("nested group children not cloned")
+	}
+	if DateEndpointEnd != cloned[0].Filters[0].DateEndpoint {
+		t.Fatalf("date endpoint not cloned")
 	}
 }
 

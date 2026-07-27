@@ -134,6 +134,8 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		}
 
 		fillAttributeViewGalleryCardCover(attrView, view, cardValues, &galleryCard, cardID, luteEngine, boundTrees)
+		galleryCard.CoverPosition = attrView.GetCardCoverPosition(cardID,
+			av.CardCoverSource(view.Gallery.CoverFrom, view.Gallery.CoverFromAssetKeyID), galleryCard.CoverURL)
 		ret.Cards = append(ret.Cards, &galleryCard)
 	}
 

@@ -26,7 +26,6 @@ import (
 	"path"
 	"path/filepath"
 	"slices"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -37,7 +36,6 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -1353,123 +1351,6 @@ func FilterRefDefsByPublishIgnore(publishIgnore PublishAccess, refDefs []*RefDef
 		}
 	}
 	originalRefBlockIDs = buildBacklinkListItemRefs(retRefDefs)
-	return
-}
-
-func FilterConfByPublishIgnore(publishIgnore PublishAccess, appConf *AppConf) (ret *AppConf) {
-	ret = appConf
-	if appConf == nil {
-		return
-	}
-
-	appConf.UILayout = FilterUILayoutByPublishIgnore(publishIgnore, appConf.UILayout)
-	return
-}
-
-func FilterUILayoutByPublishIgnore(publishIgnore PublishAccess, uiLayout *conf.UILayout) (ret *conf.UILayout) {
-	ret = uiLayout
-	if uiLayout == nil {
-		return
-	}
-
-	layout, ok := (*uiLayout)["layout"].(map[string]any)
-	if !ok {
-		return
-	}
-	layout = filterLayoutItemByPublishIgnore(publishIgnore, layout)
-	(*ret)["layout"] = layout
-	return
-}
-
-func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[string]any) (ret map[string]any) {
-	ret = item
-	if item == nil {
-		return
-	}
-
-	instanceItem, exists := item["instance"]
-	if !exists {
-		return
-	}
-	instance := instanceItem.(string)
-	if instance == "Tab" {
-		childrenItem, exists := item["children"]
-		if !exists {
-			return
-		}
-		children := childrenItem.(map[string]any)
-		if children == nil {
-			return
-		}
-		rootIdItem, exists := children["rootId"]
-		if rootIdItem == nil {
-			return
-		}
-		rootId := children["rootId"].(string)
-		bt := treenode.GetBlockTree(rootId)
-		if bt == nil {
-			return
-		}
-		if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-			ret = nil
-		}
-	} else {
-		childrenItem, exists := item["children"]
-		if !exists {
-			return
-		}
-		children := childrenItem.([]any)
-		if children == nil {
-			return
-		}
-		newChildren := []any{}
-		updateTabs := false
-		for _, childItem := range children {
-			child := childItem.(map[string]any)
-			if child == nil {
-				return
-			}
-			child = filterLayoutItemByPublishIgnore(publishIgnore, child)
-			if child != nil {
-				newChildren = append(newChildren, child)
-			} else {
-				updateTabs = true
-			}
-		}
-		if updateTabs {
-			hasActive := false
-			activeTimes := []int64{}
-			for _, childItem := range newChildren {
-				child := childItem.(map[string]any)
-				activeTimeStr := child["activeTime"].(string)
-				var activeTime int64
-				if len(activeTimeStr) > 0 {
-					activeTime, _ = strconv.ParseInt(activeTimeStr, 10, 64)
-				}
-				activeTimes = append(activeTimes, activeTime)
-				if active, exists := child["active"]; exists && active.(bool) {
-					hasActive = true
-				}
-			}
-			if !hasActive && len(activeTimes) > 0 {
-				// 如果原本激活的tab刚好被去掉了，就选择日期最新的一个tab激活
-				maxIndex := 0
-				for i, activeTime := range activeTimes {
-					if activeTime > activeTimes[maxIndex] {
-						maxIndex = i
-					}
-				}
-				newChildren[maxIndex].(map[string]any)["active"] = true
-			}
-			if len(newChildren) == 0 {
-				child := make(map[string]any)
-				child["instance"] = "Tab"
-				child["children"] = make(map[string]any)
-				newChildren = append(newChildren, child)
-			}
-		}
-		ret["children"] = newChildren
-	}
 	return
 }
 

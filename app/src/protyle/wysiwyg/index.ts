@@ -113,6 +113,7 @@ import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard} from "../util/richClipboard";
+import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -2542,12 +2543,14 @@ export class WYSIWYG {
         });
 
         let beforeContextmenuRange: Range;
-        this.element.addEventListener("contextmenu", (event: MouseEvent & { detail: any }) => {
+        this.element.addEventListener("contextmenu", async (event: MouseEvent & { detail: any }) => {
             if (event.shiftKey || protyle.toolbar.isMultiSelectMode()) {
                 return;
             }
             event.stopPropagation();
+            /// #if BROWSER
             event.preventDefault();
+            /// #endif
             const x = event.clientX || event.detail.x;
             const y = event.clientY || event.detail.y;
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
@@ -2725,7 +2728,16 @@ export class WYSIWYG {
                 (isMobile() || event.detail.target || (beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer)))
             ) {
                 if ((!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) && !nodeElement.classList.contains("av")) {
+                    const spellcheckContext = await requestSpellcheckContext(x, y);
+                    if (spellcheckContext === null) {
+                        return;
+                    }
+                    if (spellcheckContext?.misspelledWord) {
+                        protyle.wysiwyg.flushPendingInput();
+                        setInsertWbrHTML(nodeElement, protyle.toolbar.range, protyle);
+                    }
                     contentMenu(protyle, nodeElement);
+                    addSpellcheckMenuItems(spellcheckContext);
                     window.siyuan.menus.menu.popup({x, y: y + 13, h: 26});
                     protyle.toolbar?.element.classList.add("fn__none");
                     if (nodeElement.classList.contains("table")) {

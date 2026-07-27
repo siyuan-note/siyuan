@@ -68,6 +68,8 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         const cellValue = JSON.parse(decodeURIComponent(cellElement.dataset.cellValue)) as IAVCellValue;
         if (colType === "mAsset" && !cellValue.mAsset) {
             cellValue.mAsset = [];
+        } else if ((colType === "mSelect" || colType === "select") && !cellValue.mSelect) {
+            cellValue.mSelect = [];
         }
         return cellValue;
     }

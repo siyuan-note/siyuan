@@ -911,9 +911,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
             if (["setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
-                "setAttrViewCardAspectRatioValue"].includes(operation.action) &&
+                "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow",
+                "setAttrViewDisplayFieldName"].includes(operation.action) &&
                 (!operation.viewID || getViewIDByAVElement(item) === operation.viewID)) {
-                // 卡片宽度和宽高比变化后原虚拟滚动占位高度已失效，重渲时从首项重新初始化。
+                // 卡片尺寸或字段布局变化后原虚拟滚动占位高度已失效，重渲时从首项重新初始化。
                 item.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);
             }
             if (operation.action === "replaceAttrViewBlock" && operation.retData?.duplicate &&

@@ -1,4 +1,7 @@
 {
+  "cardLayout": "Diseño de tarjeta",
+  "compact": "Compacto",
+  "fullRow": "Fila completa",
   "editFields": "Editar campos",
   "startDate": "Fecha de inicio",
   "addToDictionary": "Añadir al diccionario",

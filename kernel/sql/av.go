@@ -54,6 +54,7 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 		groupView.Gallery.CardAspectRatioValue = view.Gallery.CardAspectRatioValue
 		groupView.Gallery.CardSize = view.Gallery.CardSize
 		groupView.Gallery.CardWidth = view.Gallery.CardWidth
+		groupView.Gallery.CardLayout = view.Gallery.CardLayout
 		groupView.Gallery.FitImage = view.Gallery.FitImage
 		groupView.Gallery.DisplayFieldName = view.Gallery.DisplayFieldName
 		groupView.Gallery.DisplayEmptyFields = view.Gallery.DisplayEmptyFields
@@ -68,6 +69,7 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 		groupView.Kanban.CardAspectRatioValue = view.Kanban.CardAspectRatioValue
 		groupView.Kanban.CardSize = view.Kanban.CardSize
 		groupView.Kanban.CardWidth = view.Kanban.CardWidth
+		groupView.Kanban.CardLayout = view.Kanban.CardLayout
 		groupView.Kanban.FitImage = view.Kanban.FitImage
 		groupView.Kanban.DisplayFieldName = view.Kanban.DisplayFieldName
 		groupView.Kanban.DisplayEmptyFields = view.Kanban.DisplayEmptyFields

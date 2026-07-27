@@ -1,4 +1,7 @@
 {
+  "cardLayout": "Kartenlayout",
+  "compact": "Kompakt",
+  "fullRow": "Ganze Zeile",
   "editFields": "Felder bearbeiten",
   "startDate": "Startdatum",
   "addToDictionary": "Zum Wörterbuch hinzufügen",

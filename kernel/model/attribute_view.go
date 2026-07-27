@@ -1511,7 +1511,7 @@ func setAttrViewDisplayFieldName(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	view, err := getAttrViewOperationView(attrView, operation)
 	if err != nil {
 		return
 	}
@@ -1658,6 +1658,107 @@ func setAttrViewCardWidth(operation *Operation) (err error) {
 
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+func (tx *Transaction) doSetAttrViewCardLayout(operation *Operation) (ret *TxErr) {
+	if err := setAttrViewCardLayout(operation); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewCardLayout(operation *Operation) (err error) {
+	value, err := getAttrViewOperationNumber(operation)
+	if nil != err {
+		return
+	}
+	layout := av.CardLayout(value)
+	if value != math.Trunc(value) || !layout.IsValid() {
+		return fmt.Errorf("invalid card layout [%v]", value)
+	}
+
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+	view, err := getAttrViewOperationView(attrView, operation)
+	if err != nil {
+		return
+	}
+
+	switch view.LayoutType {
+	case av.LayoutTypeGallery:
+		view.Gallery.CardLayout = layout
+	case av.LayoutTypeKanban:
+		view.Kanban.CardLayout = layout
+	default:
+		return av.ErrWrongLayoutType
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColFullRow(operation *Operation) (ret *TxErr) {
+	if err := setAttrViewColFullRow(operation); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewColFullRow(operation *Operation) (err error) {
+	fullRow, ok := operation.Data.(bool)
+	if !ok {
+		return fmt.Errorf("invalid card field full row value [%v]", operation.Data)
+	}
+
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+	view, err := getAttrViewOperationView(attrView, operation)
+	if err != nil {
+		return
+	}
+
+	found := false
+	switch view.LayoutType {
+	case av.LayoutTypeGallery:
+		for _, field := range view.Gallery.CardFields {
+			if field.ID == operation.ID {
+				field.FullRow = fullRow
+				found = true
+				break
+			}
+		}
+	case av.LayoutTypeKanban:
+		for _, field := range view.Kanban.Fields {
+			if field.ID == operation.ID {
+				field.FullRow = fullRow
+				found = true
+				break
+			}
+		}
+	default:
+		return av.ErrWrongLayoutType
+	}
+	if !found {
+		return fmt.Errorf("field [%s] not found in view [%s]", operation.ID, view.ID)
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func getAttrViewOperationView(attrView *av.AttributeView, operation *Operation) (ret *av.View, err error) {
+	if "" != operation.ViewID {
+		ret = attrView.GetView(operation.ViewID)
+		if nil == ret {
+			err = av.ErrViewNotFound
+		}
+		return
+	}
+	return getAttrViewViewByBlockID(attrView, operation.BlockID)
 }
 
 func getAttrViewOperationNumber(operation *Operation) (ret float64, err error) {
@@ -4239,6 +4340,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 					Hidden: field.Hidden,
 					Desc:   field.Desc,
 				},
+				FullRow: field.FullRow,
 			})
 		}
 
@@ -4248,6 +4350,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		view.Gallery.CardAspectRatioValue = masterView.Gallery.CardAspectRatioValue
 		view.Gallery.CardSize = masterView.Gallery.CardSize
 		view.Gallery.CardWidth = masterView.Gallery.CardWidth
+		view.Gallery.CardLayout = masterView.Gallery.CardLayout
 		view.Gallery.FitImage = masterView.Gallery.FitImage
 		view.Gallery.DisplayFieldName = masterView.Gallery.DisplayFieldName
 		view.Gallery.DisplayEmptyFields = masterView.Gallery.DisplayEmptyFields
@@ -4262,6 +4365,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 					Hidden: field.Hidden,
 					Desc:   field.Desc,
 				},
+				FullRow: field.FullRow,
 			})
 		}
 
@@ -4271,6 +4375,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		view.Kanban.CardAspectRatioValue = masterView.Kanban.CardAspectRatioValue
 		view.Kanban.CardSize = masterView.Kanban.CardSize
 		view.Kanban.CardWidth = masterView.Kanban.CardWidth
+		view.Kanban.CardLayout = masterView.Kanban.CardLayout
 		view.Kanban.FitImage = masterView.Kanban.FitImage
 		view.Kanban.DisplayFieldName = masterView.Kanban.DisplayFieldName
 		view.Kanban.DisplayEmptyFields = masterView.Kanban.DisplayEmptyFields
@@ -5639,6 +5744,7 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 								Hidden: field.Hidden,
 								Desc:   field.Desc,
 							},
+							FullRow: field.FullRow,
 						},
 					}, view.Gallery.CardFields[i+1:]...)...)
 					break
@@ -5655,6 +5761,7 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 								Hidden: field.Hidden,
 								Desc:   field.Desc,
 							},
+							FullRow: field.FullRow,
 						},
 					}, view.Kanban.Fields[i+1:]...)...)
 					break

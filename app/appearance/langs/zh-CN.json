@@ -1,4 +1,7 @@
 {
+  "cardLayout": "卡片布局",
+  "compact": "紧凑",
+  "fullRow": "独占整行",
   "editFields": "编辑字段",
   "startDate": "开始时间",
   "addToDictionary": "添加到词典",

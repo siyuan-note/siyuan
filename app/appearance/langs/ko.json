@@ -1,4 +1,7 @@
 {
+  "cardLayout": "카드 레이아웃",
+  "compact": "컴팩트",
+  "fullRow": "전체 행",
   "editFields": "필드 편집",
   "startDate": "시작일",
   "addToDictionary": "사전에 추가",

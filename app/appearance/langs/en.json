@@ -1,4 +1,7 @@
 {
+  "cardLayout": "Card layout",
+  "compact": "Compact",
+  "fullRow": "Full row",
   "editFields": "Edit fields",
   "startDate": "Start date",
   "addToDictionary": "Add to dictionary",

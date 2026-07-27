@@ -33,6 +33,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		CardAspectRatioValue: view.Gallery.CardAspectRatioValue,
 		CardSize:             view.Gallery.CardSize,
 		CardWidth:            view.Gallery.CardWidth,
+		CardLayout:           view.Gallery.CardLayout,
 		FitImage:             view.Gallery.FitImage,
 		DisplayFieldName:     view.Gallery.DisplayFieldName,
 		DisplayEmptyFields:   view.Gallery.DisplayEmptyFields,
@@ -71,6 +72,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 				Created:      key.Created,
 				Updated:      key.Updated,
 			},
+			FullRow: field.FullRow,
 		})
 	}
 

@@ -1,4 +1,7 @@
 {
+  "cardLayout": "Макет карточки",
+  "compact": "Компактный",
+  "fullRow": "Вся строка",
   "editFields": "Редактировать поля",
   "startDate": "Дата начала",
   "addToDictionary": "Добавить в словарь",

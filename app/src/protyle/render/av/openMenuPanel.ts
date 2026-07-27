@@ -94,6 +94,7 @@ export const openMenuPanel = (options: {
     destroyCallback?: () => void,
     keepMenuOpen?: boolean,
     filterOperation?: IAVFilterOperation,
+    requireExplicitChange?: boolean,
 }) => {
     let avPanelElement = document.querySelector(".av__panel");
     if (avPanelElement) {
@@ -235,7 +236,8 @@ export const openMenuPanel = (options: {
                     data,
                     menuElement,
                     cellElements: options.cellElements,
-                    blockElement: options.blockElement
+                    blockElement: options.blockElement,
+                    requireExplicitChange: options.requireExplicitChange,
                 });
             } else if (options.type === "asset") {
                 bindAssetEvent({

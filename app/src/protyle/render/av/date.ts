@@ -1,6 +1,7 @@
 import * as dayjs from "dayjs";
 import {genCellValueByElement, updateCellsValue} from "./cell";
 import {getFieldsByData} from "./view";
+import {shouldSubmitDateEdit} from "./dateSubmit";
 
 export const getDateHTML = (cellElements: HTMLElement[]) => {
     const cellValue = genCellValueByElement("date", cellElements[0]).date;
@@ -55,7 +56,8 @@ export const bindDateEvent = (options: {
     data: IAV,
     menuElement: HTMLElement,
     blockElement: Element,
-    cellElements: HTMLElement[]
+    cellElements: HTMLElement[],
+    requireExplicitChange?: boolean,
 }) => {
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
     let dirty = false;
@@ -132,7 +134,7 @@ export const bindDateEvent = (options: {
     };
 
     const submit = () => {
-        if (!dirty) {
+        if (!shouldSubmitDateEdit(dirty, options.requireExplicitChange === true)) {
             return;
         }
         const dateStr1 = buildDateStr(0);

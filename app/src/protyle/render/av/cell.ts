@@ -26,6 +26,7 @@ import {
     genRelationAVCellValue,
     getConvertedEmptyAVCellValue,
 } from "./cellValue";
+import {setPosition} from "../../../util/setPosition";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -455,6 +456,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     scrollIntoView?: boolean;
     data?: IAV;
     destroyCallback?: () => void;
+    keepMenuOpen?: boolean;
+    positionByMenu?: boolean;
 }) => {
     if (cellElements.length === 0 || (cellElements.length === 1 && !cellElements[0])) {
         options?.destroyCallback?.();
@@ -482,8 +485,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     let html = "";
     let height = cellRect.height;
     const cssStyle = getComputedStyle(cellElements[0]);
-    let style = `font-family:${cssStyle.fontFamily};font-size:${cssStyle.fontSize};line-height:${cssStyle.lineHeight};padding:${cssStyle.padding};position:absolute;top: ${cellRect.top}px;`;
-    if (contentElement) {
+    const inputTop = options?.positionByMenu ? cellRect.bottom : cellRect.top;
+    let style = `font-family:${cssStyle.fontFamily};font-size:${cssStyle.fontSize};line-height:${cssStyle.lineHeight};padding:${cssStyle.padding};position:absolute;top: ${inputTop}px;`;
+    if (contentElement && !options?.positionByMenu) {
         const contentRect = contentElement.getBoundingClientRect();
         if (cellRect.bottom > contentRect.bottom) {
             height = contentRect.bottom - cellRect.top;
@@ -491,7 +495,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         const width = Math.min(Math.max(cellRect.width, 25), contentRect.width);
         style = `style='height: ${height}px;width:${width}px;left: ${(cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ? contentRect.left : cellRect.left}px;${style}'`;
     } else {
-        style = `style='height: ${height}px;width:${Math.max(cellRect.width, 25)}px;left: ${cellRect.left}px;${style}'`;
+        const width = options?.positionByMenu ? Math.max(cellRect.width, 200) : Math.max(cellRect.width, 25);
+        style = `style='height: ${height}px;width:${width}px;left: ${cellRect.left}px;${style}'`;
     }
 
     if (["text", "email", "phone", "block", "template"].includes(type)) {
@@ -513,6 +518,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 cellElements,
                 data: options?.data,
                 destroyCallback: options?.destroyCallback,
+                keepMenuOpen: options?.keepMenuOpen,
             });
         } else if (type === "mAsset") {
             openMenuPanel({
@@ -522,6 +528,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 cellElements,
                 data: options?.data,
                 destroyCallback: options?.destroyCallback,
+                keepMenuOpen: options?.keepMenuOpen,
             });
             if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
                 focusBlock(blockElement);
@@ -534,6 +541,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 cellElements,
                 data: options?.data,
                 destroyCallback: options?.destroyCallback,
+                keepMenuOpen: options?.keepMenuOpen,
             });
         } else if (type === "checkbox") {
             updateCellValueByInput(protyle, type, blockElement, cellElements);
@@ -546,6 +554,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 cellElements,
                 data: options?.data,
                 destroyCallback: options?.destroyCallback,
+                keepMenuOpen: options?.keepMenuOpen,
             });
         } else if (type === "rollup") {
             openMenuPanel({
@@ -556,6 +565,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 colId: getColId(cellElements[0], viewType),
                 data: options?.data,
                 destroyCallback: options?.destroyCallback,
+                keepMenuOpen: options?.keepMenuOpen,
             });
         } else {
             options?.destroyCallback?.();
@@ -566,7 +576,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         }
         return;
     }
-    window.siyuan.menus.menu.remove();
+    if (!options?.keepMenuOpen) {
+        window.siyuan.menus.menu.remove();
+    }
     document.body.insertAdjacentHTML("beforeend", `<div class="av__mask" style="z-index: ${++window.siyuan.zIndex}">
     ${html}
     </div>`);
@@ -583,6 +595,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
+        if (options?.positionByMenu) {
+            setPosition(inputElement, cellRect.left, cellRect.bottom, cellRect.height);
+        }
         if (["text", "email", "phone", "block", "template"].includes(type)) {
             inputElement.value = cellElements[0].querySelector(".av__celltext")?.textContent || "";
         }
@@ -670,6 +685,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             && document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT") {
             updateCellValueByInput(protyle, type, blockElement, cellElements);
             avMaskElement?.remove();
+            if (options?.keepMenuOpen) {
+                window.siyuan.menus.menu.remove();
+            }
         }
     };
     avMaskElement.addEventListener("click", (event) => {

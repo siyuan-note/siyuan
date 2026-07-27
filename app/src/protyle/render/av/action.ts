@@ -946,6 +946,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                         field,
                         anchorElement: element,
                     });
+                    return true;
                 }
             });
         });

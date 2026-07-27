@@ -134,5 +134,7 @@ export const openAVFieldEditor = (options: {
         scrollIntoView: false,
         data,
         destroyCallback: destroy,
+        keepMenuOpen: true,
+        positionByMenu: true,
     });
 };

@@ -94,8 +94,9 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
     });
 };
 
-export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string, name: string) => void, exts?: string[]) => {
-    const menu = new Menu(Constants.MENU_BACKGROUND_ASSET);
+export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string, name: string) => void,
+                          exts?: string[], independent = false) => {
+    const menu = new Menu(Constants.MENU_BACKGROUND_ASSET, undefined, independent);
     if (menu.isOpen) {
         return;
     }
@@ -146,6 +147,9 @@ export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (ur
                         const currentElement = element.querySelector(".b3-list-item--focus");
                         if (callback) {
                             callback(currentElement.getAttribute("data-value"), currentElement.textContent);
+                            if (independent) {
+                                menu.close();
+                            }
                         } else {
                             hintRenderAssets(currentElement.getAttribute("data-value"), protyle);
                             window.siyuan.menus.menu.remove();
@@ -194,6 +198,9 @@ export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (ur
                     const currentURL = listItemElement.getAttribute("data-value");
                     if (callback) {
                         callback(currentURL, listItemElement.textContent);
+                        if (independent) {
+                            menu.close();
+                        }
                     } else {
                         hintRenderAssets(currentURL, protyle);
                         window.siyuan.menus.menu.remove();

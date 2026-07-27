@@ -91,6 +91,7 @@ export const openMenuPanel = (options: {
     data?: IAV,
     cb?: (avPanelElement: Element) => void,
     destroyCallback?: () => void,
+    keepMenuOpen?: boolean,
 }) => {
     let avPanelElement = document.querySelector(".av__panel");
     if (avPanelElement) {
@@ -118,7 +119,9 @@ export const openMenuPanel = (options: {
             avPanelElement.remove();
             return;
         }
-        window.siyuan.menus.menu.remove();
+        if (!options.keepMenuOpen) {
+            window.siyuan.menus.menu.remove();
+        }
         const blockID = options.blockElement.getAttribute("data-node-id");
 
         const isCustomAttr = !options.blockElement.classList.contains("av");
@@ -182,7 +185,7 @@ export const openMenuPanel = (options: {
 
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
-    <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}${options.type === "relation" ? " av__relation-panel" : ""}" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${options.type === "relation" ? `width: 760px;max-width: ${isMobile() ? "90vw" : "calc(100vw - 32px)"};` : isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
+    <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}${options.type === "relation" ? " av__relation-panel" : ""}" ${options.keepMenuOpen ? "data-menu=\"true\"" : ""} ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${options.type === "relation" ? `width: 760px;max-width: ${isMobile() ? "90vw" : "calc(100vw - 32px)"};` : isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         if (options.destroyCallback) {
@@ -741,6 +744,7 @@ export const openMenuPanel = (options: {
         avPanelElement.addEventListener("click", async (event: MouseEvent) => {
             let type: string;
             let target = event.target as HTMLElement;
+            const isProgrammaticClose = typeof event.detail === "string";
             if (typeof event.detail === "string") {
                 type = event.detail;
             } else if (typeof event.detail === "object") {
@@ -751,7 +755,8 @@ export const openMenuPanel = (options: {
             if (options.type === "select" && selectedElement?.parentElement.classList.contains("b3-chips") &&
                 !target.closest('[data-type="removeCellOption"]')) {
                 if (!suppressSelectClick) {
-                    setColOption(options.protyle, data, selectedElement, options.blockElement, isCustomAttr, options.cellElements);
+                    setColOption(options.protyle, data, selectedElement, options.blockElement, isCustomAttr,
+                        options.cellElements, options.keepMenuOpen);
                 }
                 suppressSelectClick = false;
                 event.preventDefault();
@@ -768,7 +773,8 @@ export const openMenuPanel = (options: {
                     if (!options.protyle.toolbar.subElement.classList.contains("fn__none")) {
                         // 优先关闭资源文件搜索
                         hideElements(["util"], options.protyle);
-                    } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
+                    } else if (!options.keepMenuOpen &&
+                        !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                         // 过滤面板先关闭过滤条件
                     } else {
                         closeCB?.();
@@ -777,7 +783,9 @@ export const openMenuPanel = (options: {
                             focusBlock(options.blockElement);
                         }, Constants.TIMEOUT_TRANSITION);  // 单选使用 enter 修改选项后会滚动
                     }
-                    window.siyuan.menus.menu.remove();
+                    if (!options.keepMenuOpen || !isProgrammaticClose) {
+                        window.siyuan.menus.menu.remove();
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1618,7 +1626,8 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "setColOption") {
-                    setColOption(options.protyle, data, target, options.blockElement, isCustomAttr, options.cellElements);
+                    setColOption(options.protyle, data, target, options.blockElement, isCustomAttr,
+                        options.cellElements, options.keepMenuOpen);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1637,7 +1646,9 @@ export const openMenuPanel = (options: {
                     } else {
                         addColOptionOrCell(options.protyle, data, options.cellElements, target, menuElement, options.blockElement);
                     }
-                    window.siyuan.menus.menu.remove();
+                    if (!options.keepMenuOpen) {
+                        window.siyuan.menus.menu.remove();
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1647,7 +1658,8 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "addAssetLink") {
-                    addAssetLink(options.protyle, options.cellElements, target, options.blockElement);
+                    addAssetLink(options.protyle, options.cellElements, target, options.blockElement,
+                        options.keepMenuOpen);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1679,8 +1691,10 @@ export const openMenuPanel = (options: {
                             addValue: [value],
                             blockElement: options.blockElement
                         });
-                        window.siyuan.menus.menu.remove();
-                    });
+                        if (!options.keepMenuOpen) {
+                            window.siyuan.menus.menu.remove();
+                        }
+                    }, undefined, options.keepMenuOpen);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1704,7 +1718,8 @@ export const openMenuPanel = (options: {
                         type: target.parentElement.dataset.type as "image" | "file",
                         name: target.parentElement.dataset.name,
                         index: parseInt(target.parentElement.dataset.index),
-                        rect: target.parentElement.getBoundingClientRect()
+                        rect: target.parentElement.getBoundingClientRect(),
+                        keepMenuOpen: options.keepMenuOpen,
                     });
                     event.preventDefault();
                     event.stopPropagation();

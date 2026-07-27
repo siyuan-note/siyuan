@@ -150,7 +150,8 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     }
 };
 
-export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean, cellElements?: HTMLElement[]) => {
+export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean,
+                             cellElements?: HTMLElement[], keepMenuOpen = false) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
     const optionElement = target.closest("[data-name]") as HTMLElement;
     if (!menuElement || !optionElement) {
@@ -253,7 +254,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
         }
-    });
+    }, keepMenuOpen);
     if (menu.isOpen) {
         return;
     }
@@ -487,9 +488,9 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         w: rect.width,
         h: rect.height,
     });
-    const inputElement = window.siyuan.menus.menu.element.querySelector("input");
+    const inputElement = menu.element.querySelector("input");
     inputElement.select();
-    const descElement = window.siyuan.menus.menu.element.querySelector("textarea");
+    const descElement = menu.element.querySelector("textarea");
 };
 
 export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, cellElements: HTMLElement[], blockElement: Element) => {

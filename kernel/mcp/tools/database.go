@@ -204,7 +204,7 @@ func databaseKeyAdd(args map[string]any) (CallToolResult, error) {
 	icon, _ := args["icon"].(string)
 	prev, _ := args["prev"].(string)
 	keyID := ast.NewNodeID()
-	if err := model.AddAttributeViewKey(id, keyID, name, keyType, icon, prev); err != nil {
+	if err := model.AddAttributeViewKey(id, keyID, name, keyType, icon, prev, av.DateDisplayFormatFull); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "add key failed: " + err.Error()}}, IsError: true}, nil
 	}
 	model.ReloadAttrView(id)

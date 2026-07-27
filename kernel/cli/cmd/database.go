@@ -164,7 +164,7 @@ var databaseKeyAddCmd = &cobra.Command{
 		}
 
 		keyID := ast.NewNodeID()
-		if err := model.AddAttributeViewKey(avID, keyID, name, keyType, icon, prev); err != nil {
+		if err := model.AddAttributeViewKey(avID, keyID, name, keyType, icon, prev, av.DateDisplayFormatFull); err != nil {
 			return err
 		}
 		model.AppendPushReloadAttrViewEntry(avID)

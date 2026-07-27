@@ -66,6 +66,10 @@ export const bindDateEvent = (options: {
     const invalidEmpty: boolean[] = [false, false];
     const bindTracking = (index: number) => {
         const input = inputElements[index];
+        input.addEventListener("pointerdown", () => {
+            // 日期输入框会预填当前日期，用户主动点击表示接受该候选值。
+            dirty = true;
+        });
         input.addEventListener("focus", () => {
             lastNonEmptyValue[index] = input.value;
             invalidEmpty[index] = false;
@@ -151,6 +155,7 @@ export const bindDateEvent = (options: {
                 return;
             }
             if (event.key === "Enter") {
+                dirty = true;
                 submit();
                 document.querySelector(".av__panel")?.dispatchEvent(new CustomEvent("click", {detail: "close"}));
             }

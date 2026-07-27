@@ -639,7 +639,7 @@ func addAttributeViewKey(c *gin.Context) {
 	keyIcon := arg["keyIcon"].(string)
 	previousKeyID := arg["previousKeyID"].(string)
 
-	err := model.AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID)
+	err := model.AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID, av.DateDisplayFormatFull)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

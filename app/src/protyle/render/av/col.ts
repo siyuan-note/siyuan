@@ -5,7 +5,7 @@ import {getDefaultOperatorByType, getEditableFilters, hasFilterForColumn} from "
 import {genCellValue, renderCell} from "./cell";
 import {getPropertiesHTML, openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
-import {getLabelByDateFormat} from "./dateFormat";
+import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
@@ -637,6 +637,7 @@ const addAttrViewColAnimation = (options: {
     name: string,
     id: string,
     icon?: string,
+    dateFormat?: TAVDateFormat,
     previousID: string,
     data?: IAV
 }) => {
@@ -644,6 +645,8 @@ const addAttrViewColAnimation = (options: {
         return;
     }
     const nodeId = options.blockElement.getAttribute("data-node-id");
+    const colData = options.data ? getFieldsByData(options.data).find(item => item.id === options.id) : undefined;
+    const dateFormat = options.dateFormat ?? colData?.dateFormat ?? getDefaultDateFormat(options.type);
     const insertTableColumn = (blockElement: Element) => {
         blockElement.querySelectorAll(".av__row").forEach((item) => {
             let previousElement;
@@ -659,7 +662,7 @@ const addAttrViewColAnimation = (options: {
             }
             let html = "";
             if (item.classList.contains("av__row--header")) {
-                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" data-align="" style="width: 200px;">
+                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-date-format="${dateFormat}" data-wrap="false" data-align="" style="width: 200px;">
     ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${options.name}</span>
     <div class="av__widthdrag"></div>
@@ -667,7 +670,7 @@ const addAttrViewColAnimation = (options: {
             } else {
                 const value = genCellValue(options.type, null);
                 html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${options.id}"
-data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px">${renderCell(value,
+data-wrap="false" data-dtype="${options.type}" data-date-format="${dateFormat}" data-align="" style="width: 200px">${renderCell(value,
                     parseInt(item.getAttribute("data-index")) || 0)}</div>`;
             }
             previousElement.insertAdjacentHTML("afterend", html);
@@ -677,7 +680,6 @@ data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px
         insertTableColumn(options.blockElement);
     } else {
         const rowID = options.blockElement.querySelector<HTMLElement>("[data-row-id]")?.dataset.rowId || nodeId;
-        const colData = options.data ? getFieldsByData(options.data).find(item => item.id === options.id) : undefined;
         options.blockElement.querySelector(".fn__hr").insertAdjacentHTML("beforebegin", genAVAttributeRowHTML({
             nodeID: nodeId,
             avID: options.blockElement.getAttribute("data-av-id"),
@@ -688,7 +690,7 @@ data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px
             icon: options.icon,
             typeIcon: getColIconByType(options.type),
             selectOptions: colData?.options,
-            dateFormat: colData?.dateFormat,
+            dateFormat,
             value: createEmptyAVValue(options.id, options.type, rowID),
             empty: true,
         }));
@@ -720,10 +722,6 @@ data-wrap="false" data-dtype="${options.type}" data-align="" style="width: 200px
         return;
     }
     // https://github.com/siyuan-note/siyuan/issues/14724
-    let colData;
-    if (options.data) {
-        colData = getFieldsByData(options.data).find((item => item.id === options.id));
-    }
     openMenuPanel({
         protyle: options.protyle,
         blockElement: options.blockElement,
@@ -1332,6 +1330,7 @@ const removeColByMenu = (options: {
         name: options.oldValue,
         avID: options.avID,
         type: options.type,
+        format: options.cellElement.dataset.dateFormat || "",
         id: options.colId,
         previousID: options.cellElement.previousElementSibling?.getAttribute("data-col-id") || "",
     }, {
@@ -1379,6 +1378,7 @@ export const removeCol = (options: {
         name: colData.name,
         avID: options.avID,
         type: colData.type,
+        format: colData.dateFormat || "",
         id: colId,
         previousID: previousID
     }, {
@@ -1581,6 +1581,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
                 name: window.siyuan.languages.date,
                 avID,
                 type: "date",
+                format: "full",
                 id,
                 previousID
             }, {
@@ -1962,6 +1963,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
                 name: window.siyuan.languages.createdTime,
                 avID,
                 type: "created",
+                format: "full",
                 id,
                 previousID
             }, {
@@ -2000,6 +2002,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
                 name: window.siyuan.languages.updatedTime,
                 avID,
                 type: "updated",
+                format: "full",
                 id,
                 previousID
             }, {
@@ -2037,7 +2040,7 @@ const genColDataByType = (type: TAVCol, id: string, name: string) => {
         name,
         desc: "",
         numberFormat: "",
-        dateFormat: "",
+        dateFormat: getDefaultDateFormat(type),
         pin: false,
         template: "",
         type,

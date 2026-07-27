@@ -2,6 +2,9 @@ const pad = (value: number) => value.toString().padStart(2, "0");
 
 const getMonths = (): string[] => window.siyuan.languages._attrView.dateMonths.split("|");
 
+export const getDefaultDateFormat = (type: TAVCol): TAVDateFormat =>
+    ["date", "created", "updated"].includes(type) ? "full" : "";
+
 export const formatDateDisplay = (content: number, format: TAVDateFormat = "", isNotTime = true) => {
     const date = new Date(content);
     const year = date.getFullYear();

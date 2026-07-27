@@ -14,6 +14,14 @@ import test from "node:test";
 
 const loadDateFormat = () => import("../src/protyle/render/av/dateFormat");
 
+test("uses localized dates for newly created date fields", async () => {
+    const {getDefaultDateFormat} = await loadDateFormat();
+    assert.equal(getDefaultDateFormat("date"), "full");
+    assert.equal(getDefaultDateFormat("created"), "full");
+    assert.equal(getDefaultDateFormat("updated"), "full");
+    assert.equal(getDefaultDateFormat("text"), "");
+});
+
 test("formats dates with the same fixed patterns as the kernel", async () => {
     const {formatDateDisplay} = await loadDateFormat();
     const content = new Date(2024, 2, 5, 14, 7).valueOf();

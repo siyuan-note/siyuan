@@ -28,6 +28,7 @@ import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAttrViewCellAnimation, updateAVName} from "../render/av/action";
+import {getDefaultDateFormat} from "../render/av/dateFormat";
 import {genCellValue, updateCellsValue} from "../render/av/cell";
 import {input} from "../wysiwyg/input";
 import {updateListOrder} from "../wysiwyg/list";
@@ -115,6 +116,7 @@ const genAVPasteColumn = (id: string, name: string, type: TAVCol): IAVColumn => 
         name,
         desc: "",
         numberFormat: "",
+        dateFormat: getDefaultDateFormat(type),
         pin: false,
         template: "",
         type,
@@ -405,6 +407,7 @@ const pasteAVMatrix = async (options: {
             name,
             avID: options.blockElement.dataset.avId,
             type,
+            format: getDefaultDateFormat(type),
             id,
             previousID: previousColumnID,
         });

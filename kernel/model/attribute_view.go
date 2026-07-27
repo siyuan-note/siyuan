@@ -5978,7 +5978,8 @@ func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
 	if nil != operation.Data {
 		icon = operation.Data.(string)
 	}
-	err := AddAttributeViewKey(operation.AvID, operation.ID, operation.Name, operation.Typ, icon, operation.PreviousID)
+	err := AddAttributeViewKey(operation.AvID, operation.ID, operation.Name, operation.Typ, icon, operation.PreviousID,
+		av.DateDisplayFormat(operation.Format))
 
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -5986,7 +5987,7 @@ func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
 	return
 }
 
-func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID string) (err error) {
+func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID string, dateFormat av.DateDisplayFormat) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
@@ -6004,6 +6005,12 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
 
 		key := av.NewKey(keyID, keyName, keyIcon, keyTyp)
+		if av.KeyTypeDate == keyTyp || av.KeyTypeCreated == keyTyp || av.KeyTypeUpdated == keyTyp {
+			if !dateFormat.IsValid() {
+				return errors.New("invalid date display format")
+			}
+			key.DateFormat = dateFormat
+		}
 		if av.KeyTypeRollup == keyTyp {
 			key.Rollup = &av.Rollup{Calc: &av.RollupCalc{Operator: av.CalcOperatorNone}}
 		}

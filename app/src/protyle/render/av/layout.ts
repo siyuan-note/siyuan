@@ -24,16 +24,14 @@ const getCardLayoutHTML = (view: IAVGallery | IAVKanban) => {
     <input data-type="toggle-card-full-row" data-id="${field.id}" type="checkbox" class="b3-switch b3-switch--menu" ${checked ? "checked" : ""}${disabled ? " disabled" : ""}>
 </label>`;
         });
-        fullRowHTML = `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item b3-menu__item--readonly" data-type="nobg">
-    <span class="b3-menu__label">${window.siyuan.languages.fullRow}</span>
-</button>
+        fullRowHTML = `<button class="b3-menu__separator av__card-layout-separator"></button>
+<div class="av__card-layout-label">${window.siyuan.languages.fullRow}</div>
 ${fullRowHTML}`;
     }
     return `<label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.cardLayout}</span>
     <span class="fn__space fn__flex-1"></span>
-    <select data-type="set-card-layout" class="b3-select">
+    <select data-type="set-card-layout" class="b3-select b3-select--noborder av__card-layout-select">
         <option value="${CARD_LAYOUT_LIST}"${view.cardLayout === CARD_LAYOUT_LIST ? " selected" : ""}>${window.siyuan.languages.list1}</option>
         <option value="${CARD_LAYOUT_COMPACT}"${view.cardLayout === CARD_LAYOUT_COMPACT ? " selected" : ""}>${window.siyuan.languages.compact}</option>
     </select>
@@ -92,8 +90,7 @@ export const getLayoutHTML = (data: IAV) => {
     <span class="fn__flex-center">${window.siyuan.languages.displayEmptyFields}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="toggle-gallery-empty" type="checkbox" class="b3-switch b3-switch--menu" ${view.displayEmptyFields ? "checked" : ""}>
-</label>
-${getCardLayoutHTML(view)}`;
+</label>`;
     }
     html = `<div class="b3-menu__items">
     <button class="b3-menu__item" data-type="nobg">
@@ -151,6 +148,7 @@ ${getCardLayoutHTML(view)}`;
         <span class="b3-menu__accelerator">${view.pageSize === Constants.SIZE_DATABASE_MAZ_SIZE ? window.siyuan.languages.all : view.pageSize}</span>
         <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
     </button>
+    ${["gallery", "kanban"].includes(data.viewType) ? getCardLayoutHTML(view) : ""}
 </div>`;
 };
 

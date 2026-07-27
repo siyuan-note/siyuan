@@ -762,6 +762,26 @@
     }
   }
 
+  &__card-layout-select {
+    background-color: transparent;
+
+    &:hover,
+    &:focus {
+      background-color: transparent;
+    }
+  }
+
+  &__card-layout-label {
+    color: var(--b3-theme-on-surface);
+    line-height: 14px;
+    margin: 0;
+    padding: 0 8px;
+  }
+
+  &__card-layout-separator {
+    margin-bottom: 8px;
+  }
+
   &__cell {
     box-sizing: border-box;
     position: relative;

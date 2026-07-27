@@ -152,15 +152,16 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
 
 export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean, cellElements?: HTMLElement[]) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
-    if (!menuElement) {
+    const optionElement = target.closest("[data-name]") as HTMLElement;
+    if (!menuElement || !optionElement) {
         return;
     }
     const blockID = blockElement.getAttribute("data-node-id");
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     const colId = (cellElements && cellElements[0]) ? getColId(cellElements[0], viewType) : menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
-    let name = target.parentElement.dataset.name;
-    let desc = target.parentElement.dataset.desc;
-    let color = target.parentElement.dataset.color;
+    let name = optionElement.dataset.name;
+    let desc = optionElement.dataset.desc;
+    let color = optionElement.dataset.color;
     const fields = getFieldsByData(data);
     const menu = new Menu(Constants.MENU_AV_COL_OPTION, () => {
         if ((name === inputElement.value && desc === descElement.value) || !inputElement.value) {
@@ -690,9 +691,11 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
     });
     let selectedHTML = "";
     const selected: string[] = [];
+    const canSort = colData.type === "mSelect" && cellValues[0].mSelect?.length > 1;
     cellValues[0].mSelect?.forEach((item) => {
+        const option = colData.options?.find((colOption) => colOption.name === item.content);
         selected.push(item.content);
-        selectedHTML += `<div class="b3-chip b3-chip--middle fn__grab" data-content="${escapeAttr(item.content)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconClose"></use></svg></div>`;
+        selectedHTML += `<div class="b3-chip b3-chip--middle${canSort ? " fn__grab" : " b3-chip--pointer"}" data-content="${escapeAttr(item.content)}" data-name="${escapeAttr(item.content)}" data-desc="${escapeAttr(option?.desc || "")}" data-color="${escapeAttr(option?.color || item.color)}" data-value-color="${escapeAttr(item.color)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconClose"></use></svg></div>`;
     });
 
     return `<div class="b3-menu__items" style="display: flex;flex-direction: column;flex: 1;">

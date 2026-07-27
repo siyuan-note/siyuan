@@ -58,10 +58,13 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
     clearSelect(["galleryItem"], options.blockElement);
     let html = "";
     const coverClass = sideItemElement?.querySelector(".av__gallery-cover")?.className || "fn__none";
+    const fieldsClass = sideItemElement?.querySelector(".av__gallery-fields")?.className || "av__gallery-fields";
+    const emptyClass = coverClass === "fn__none" && fieldsClass.includes("fn__none") ?
+        " av__gallery-item--empty" : "";
     options.srcIDs.forEach(() => {
-        html += `<div class="av__gallery-item" data-type="ghost">
+        html += `<div class="av__gallery-item${emptyClass}" data-type="ghost">
     <div class="${coverClass}"><span style="width: 100%;height: 100%;border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;" class="av__pulse"></span></div>
-    <div class="av__gallery-fields">${cellsHTML}</div>
+    <div class="${fieldsClass}">${cellsHTML}</div>
 </div>`;
     });
     if (sideItemElement) {

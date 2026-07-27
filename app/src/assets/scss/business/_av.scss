@@ -381,6 +381,10 @@
       flex-direction: column;
       position: relative;
 
+      &--empty {
+        min-height: 32px;
+      }
+
       &::before {
         transition: background 100ms ease-out;
         content: "";

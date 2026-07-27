@@ -17,7 +17,7 @@ import {
 } from "./cell";
 import {addCol, getColIconByType, getColNameByType, showColMenu} from "./col";
 import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHeader} from "./row";
-import {getAVSelectedItems, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
+import {getAVPrimaryCell, getAVSelectedItems, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
@@ -57,10 +57,85 @@ const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
 };
 
+const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement: HTMLElement) => {
+    const cellElement = rowElement.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
+    if (cellElement) {
+        const value = genCellValueByElement("block", cellElement);
+        return {
+            cellElement,
+            value,
+            valueID: cellElement.dataset.id,
+            fieldID: cellElement.dataset.fieldId || cellElement.dataset.colId,
+            content: value.block?.content || "",
+            blockID: value.block?.id || "",
+            isDetached: isDetachedDatabaseCell(cellElement),
+        };
+    }
+    const cell = getAVPrimaryCell(blockElement, rowElement.dataset.id);
+    if (!cell?.value) {
+        return;
+    }
+    return {
+        value: cell.value,
+        valueID: cell.id,
+        fieldID: cell.value.keyID,
+        content: cell.value.block?.content || "",
+        blockID: cell.value.block?.id || "",
+        isDetached: cell.value.isDetached === true || !cell.value.block?.id,
+    };
+};
+
+const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowElement: HTMLElement,
+                           primaryInfo: NonNullable<ReturnType<typeof getPrimaryRowInfo>>) => {
+    if (primaryInfo.cellElement) {
+        updateCellsValue(protyle, blockElement, {content: primaryInfo.content}, [primaryInfo.cellElement]);
+        return;
+    }
+    if (!primaryInfo.fieldID || !primaryInfo.valueID) {
+        return;
+    }
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+    const value: IAVCellValue = {
+        type: "block",
+        id: primaryInfo.valueID,
+        isDetached: true,
+        block: {
+            content: primaryInfo.content,
+        },
+    };
+    transaction(protyle, [{
+        action: "updateAttrViewCell",
+        id: primaryInfo.valueID,
+        avID: blockElement.dataset.avId,
+        keyID: primaryInfo.fieldID,
+        rowID: rowElement.dataset.id,
+        data: value,
+    }, {
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: newUpdated,
+    }], [{
+        action: "updateAttrViewCell",
+        id: primaryInfo.valueID,
+        avID: blockElement.dataset.avId,
+        keyID: primaryInfo.fieldID,
+        rowID: rowElement.dataset.id,
+        data: primaryInfo.value,
+    }, {
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: blockElement.getAttribute("updated"),
+    }]);
+    blockElement.setAttribute("updated", newUpdated);
+};
+
 const openDatabaseRow = (protyle: IProtyle, target: HTMLElement, blockElement: HTMLElement) => {
-    const cellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;
     const rowElement = hasClosestByClassName(target, "av__row") || hasClosestByClassName(target, "av__gallery-item");
-    if (!cellElement || !rowElement) {
+    if (!rowElement) {
+        return;
+    }
+    const primaryInfo = getPrimaryRowInfo(blockElement, rowElement as HTMLElement);
+    if (!primaryInfo) {
         return;
     }
     openDatabaseRowByData(protyle, {
@@ -68,10 +143,10 @@ const openDatabaseRow = (protyle: IProtyle, target: HTMLElement, blockElement: H
         databaseBlockID: blockElement.dataset.nodeId,
         notebookID: protyle.notebookId,
         itemID: rowElement.getAttribute("data-id"),
-        valueID: cellElement.dataset.id,
-        title: cellElement.querySelector(".av__celltext")?.textContent.trim(),
-        boundBlockID: cellElement.querySelector<HTMLElement>(".av__celltext--ref")?.dataset.id,
-        isDetached: isDetachedDatabaseCell(cellElement),
+        valueID: primaryInfo.valueID,
+        title: primaryInfo.content.trim(),
+        boundBlockID: primaryInfo.blockID,
+        isDetached: primaryInfo.isDetached,
     });
 };
 
@@ -184,6 +259,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-gallery-open") {
+            openDatabaseRow(protyle, target, blockElement);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         } else if (type === "av-row-update" && !protyle.disabled) {
             updateDatabaseRow(protyle, target);
             event.preventDefault();
@@ -210,6 +290,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (isCardCoverPositioning(target)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (viewType === "gallery" && target.classList.contains("av__gallery-cover") &&
+            (hasClosestByClassName(target, "av__gallery-item") as HTMLElement)?.classList.contains("av__gallery-item--primary-hidden")) {
+            openDatabaseRow(protyle, target, blockElement);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -527,9 +613,14 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
     const selectedItems = getAVSelectedItems(blockElement);
-    const keyCellElement = rowElements[0].querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
-    const ids = Array.from(rowElements).map(item => item.querySelector('[data-dtype="block"] .av__celltext').getAttribute("data-id"));
-    if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") !== "true") {
+    const primaryRows = Array.from(rowElements)
+        .map(item => getPrimaryRowInfo(blockElement, item as HTMLElement))
+        .filter((item): item is NonNullable<ReturnType<typeof getPrimaryRowInfo>> => Boolean(item));
+    if (primaryRows.length !== rowElements.length) {
+        return false;
+    }
+    const ids = primaryRows.map(item => item.blockID);
+    if (rowElements.length === 1 && !primaryRows[0].isDetached) {
         /// #if !MOBILE
         const blockId = ids[0];
         const openSubmenus = openEditorTab(protyle.app, [blockId], undefined, undefined, true);
@@ -553,8 +644,8 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         /// #endif
     }
     let hasBlock = false;
-    rowElements.forEach((item) => {
-        if (item.querySelector('.av__cell[data-dtype="block"]').getAttribute("data-detached") !== "true") {
+    primaryRows.forEach((item) => {
+        if (!item.isDetached) {
             hasBlock = true;
         }
     });
@@ -564,11 +655,11 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         label: window.siyuan.languages.copyKeyContent,
         click() {
             let text = "";
-            rowElements.forEach((item, i) => {
+            primaryRows.forEach((item, i) => {
                 if (rowElements.length > 1) {
                     text += "- ";
                 }
-                text += item.querySelector('.av__cell[data-dtype="block"] .av__celltext').textContent.trim();
+                text += item.content.trim();
                 if (ids.length > 1 && i !== ids.length - 1) {
                     text += "\n";
                 }
@@ -607,11 +698,11 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 for (let i = 0; i < ids.length; i++) {
                     const id = ids[i];
                     let content = "";
-                    const cellElement = rowElements[i].querySelector(".av__cell[data-dtype='block']");
-                    if (cellElement.getAttribute("data-detached") === "true") {
-                        content = cellElement.querySelector(".av__celltext").textContent;
+                    const primaryInfo = primaryRows[i];
+                    if (primaryInfo.isDetached) {
+                        content = primaryInfo.content;
                     } else {
-                        content = `((${id} '${cellElement.querySelector(".av__celltext").textContent.replace(/[\n]+/g, " ")}'))`;
+                        content = `((${id} '${primaryInfo.content.replace(/[\n]+/g, " ")}'))`;
                     }
                     if (ids.length > 1) {
                         text += "- ";
@@ -633,9 +724,9 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     if (ids.length > 1) {
                         text += "- ";
                     }
-                    const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
-                    if (cellElement.getAttribute("data-detached") === "true") {
-                        text += cellElement.querySelector(".av__celltext").textContent;
+                    const primaryInfo = primaryRows[index];
+                    if (primaryInfo.isDetached) {
+                        text += primaryInfo.content;
                     } else {
                         text += `{{select * from blocks where id='${id}'}}`;
                     }
@@ -655,9 +746,9 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     if (ids.length > 1) {
                         text += "- ";
                     }
-                    const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
-                    if (cellElement.getAttribute("data-detached") === "true") {
-                        text += cellElement.querySelector(".av__celltext").textContent;
+                    const primaryInfo = primaryRows[index];
+                    if (primaryInfo.isDetached) {
+                        text += primaryInfo.content;
                     } else {
                         text += `siyuan://blocks/${id}`;
                     }
@@ -676,11 +767,11 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 for (let i = 0; i < ids.length; i++) {
                     const id = ids[i];
                     let content = "";
-                    const cellElement = rowElements[i].querySelector(".av__cell[data-dtype='block']");
-                    if (cellElement.getAttribute("data-detached") === "true") {
-                        content = cellElement.querySelector(".av__celltext").textContent;
+                    const primaryInfo = primaryRows[i];
+                    if (primaryInfo.isDetached) {
+                        content = primaryInfo.content;
                     } else {
-                        content = `[${cellElement.querySelector(".av__celltext").textContent.replace(/[\n]+/g, " ")}](siyuan://blocks/${id})`;
+                        content = `[${primaryInfo.content.replace(/[\n]+/g, " ")}](siyuan://blocks/${id})`;
                     }
                     if (ids.length > 1) {
                         text += "- ";
@@ -701,9 +792,9 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 for (let i = 0; i < ids.length; i++) {
                     const id = ids[i];
                     let content = "";
-                    const cellElement = rowElements[i].querySelector(".av__cell[data-dtype='block']");
-                    if (cellElement.getAttribute("data-detached") === "true") {
-                        content = cellElement.querySelector(".av__celltext").textContent;
+                    const primaryInfo = primaryRows[i];
+                    if (primaryInfo.isDetached) {
+                        content = primaryInfo.content;
                     } else {
                         const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
                         if (response.code !== 0 || typeof response.data !== "string") {
@@ -732,9 +823,9 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     if (ids.length > 1) {
                         text += "- ";
                     }
-                    const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
-                    if (cellElement.getAttribute("data-detached") === "true") {
-                        text += cellElement.querySelector(".av__celltext").textContent;
+                    const primaryInfo = primaryRows[index];
+                    if (primaryInfo.isDetached) {
+                        text += primaryInfo.content;
                     } else {
                         text += id;
                     }
@@ -803,14 +894,14 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 openSearchAV(blockElement.getAttribute("data-av-id"), rowElements[0] as HTMLElement, (listItemElement) => {
                     const srcs: IOperationSrcs[] = [];
                     const sourceIds: string[] = [];
-                    rowElements.forEach(item => {
+                    rowElements.forEach((item, index) => {
                         const rowId = item.getAttribute("data-id");
-                        const blockValue = genCellValueByElement("block", item.querySelector('.av__cell[data-dtype="block"]'));
+                        const primaryInfo = primaryRows[index];
                         srcs.push({
                             itemID: Lute.NewNodeID(),
-                            content: blockValue.block.content,
-                            id: blockValue.block.id || "",
-                            isDetached: blockValue.isDetached,
+                            content: primaryInfo.content,
+                            id: primaryInfo.blockID,
+                            isDetached: primaryInfo.isDetached,
                         });
                         sourceIds.push(rowId);
                     });
@@ -838,7 +929,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             }
         });
         if (rowElements.length === 1) {
-            if (keyCellElement.getAttribute("data-detached") !== "true") {
+            if (!primaryRows[0].isDetached) {
                 menu.addSeparator({id: "separator_1"});
             }
             menu.addItem({
@@ -912,15 +1003,18 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                 }
             });
             menu.addSeparator({id: "separator_2"});
-            if (keyCellElement.getAttribute("data-detached") !== "true") {
+            if (!primaryRows[0].isDetached) {
                 menu.addItem({
                     id: "unbindBlock",
                     label: window.siyuan.languages.unbindBlock,
                     icon: "iconLinkOff",
                     click() {
-                        updateCellsValue(protyle, blockElement, {
-                            content: keyCellElement.querySelector(".av__celltext").textContent,
-                        }, [keyCellElement]);
+                        unbindDatabaseRow(
+                            protyle,
+                            blockElement,
+                            rowElements[0] as HTMLElement,
+                            primaryRows[0]
+                        );
                     }
                 });
             }

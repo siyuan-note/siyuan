@@ -836,15 +836,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 if (!positionElement) {
                     return;
                 }
-                const editElement = galleryItem.querySelector<HTMLElement>('[data-type="av-gallery-edit"]');
-                const moreElement = galleryItem.querySelector<HTMLElement>('[data-type="av-gallery-more"]');
-                if (!editElement || !moreElement) {
-                    return;
-                }
                 positionElement.classList.toggle("fn__none", Boolean(operation.data));
-                editElement.classList.toggle("protyle-icon--first", Boolean(operation.data));
-                moreElement.classList.toggle("protyle-icon--first",
-                    Boolean(operation.data) && editElement.classList.contains("fn__none"));
+                const actionElements =
+                    Array.from(galleryItem.querySelectorAll<HTMLElement>(".av__gallery-actions .protyle-icon"));
+                actionElements.forEach(actionElement => actionElement.classList.remove("protyle-icon--first"));
+                actionElements.find(actionElement => !actionElement.classList.contains("fn__none"))
+                    ?.classList.add("protyle-icon--first");
             });
         });
         return;

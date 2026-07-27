@@ -20,17 +20,26 @@ import {getColIconByType, getColNameByType} from "./col";
 import {unicode2Emoji} from "../../../emoji";
 import {escapeAttr} from "../../../util/escape";
 import {getCompressURL} from "../../../util/image";
-import {getAVSelectStat, getAvBodyData, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
+import {
+    getAVPrimaryCell,
+    getAVSelectStat,
+    getAvBodyData,
+    resetAVRowSelect,
+    updateAVRowSelect
+} from "./virtualScroll";
 import {getCardCoverHTML, getCardCoverSource} from "./cover";
 
-const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem) => {
+const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem, primaryHidden = false) => {
     const canPosition = Boolean(row.coverURL && !row.coverURL.startsWith("background") && getCardCoverSource(data));
     const positionHTML = canPosition ? `<span class="protyle-icon protyle-icon--first ariaLabel${data.fitImage ? " fn__none" : ""}" data-position="4north" aria-label="${window.siyuan.languages.dragPosition}" data-type="av-cover-position"><svg><use xlink:href="#iconMove"></use></svg></span>` : "";
     const editFirst = !canPosition || data.fitImage;
-    const moreFirst = editFirst && data.displayEmptyFields;
+    const openFirst = editFirst && data.displayEmptyFields;
+    const openHTML = primaryHidden ? `<span class="protyle-icon${openFirst ? " protyle-icon--first" : ""} ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-gallery-open"><svg><use xlink:href="#iconOpen"></use></svg></span>` : "";
+    const moreFirst = editFirst && data.displayEmptyFields && !primaryHidden;
     return `<div class="av__gallery-actions">
         ${positionHTML}
         <span class="protyle-icon${editFirst ? " protyle-icon--first" : ""} ariaLabel${data.displayEmptyFields ? " fn__none" : ""}" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        ${openHTML}
         <span class="protyle-icon${moreFirst ? " protyle-icon--first" : ""} protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
     </div>`;
 };
@@ -45,22 +54,25 @@ export const getRowHTML = (options: {
     let html = "";
     if (options.type === "gallery") {
         const galleryRow = options.row as IAVGalleryItem;
-        const kanbanData = options.data as IAVGallery;
-        html += `<div data-id="${galleryRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item">`;
-        if (kanbanData.coverFrom !== 0) {
-            const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
+        const galleryData = options.data as IAVGallery;
+        const primaryHidden = galleryData.fields.find(field => field.type === "block")?.hidden === true;
+        const hasVisibleFields = galleryData.fields.some(field => !field.hidden);
+        const emptyClass = !hasVisibleFields && galleryData.coverFrom === 0 ? " av__gallery-item--empty" : "";
+        html += `<div data-id="${galleryRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${primaryHidden ? " av__gallery-item--primary-hidden" : ""}${emptyClass}">`;
+        if (galleryData.coverFrom !== 0) {
+            const coverClass = "av__gallery-cover av__gallery-cover--" + galleryData.cardAspectRatio;
             if (galleryRow.coverURL) {
                 html += getCardCoverHTML(coverClass, galleryRow.coverURL, getCompressURL(galleryRow.coverURL),
-                    kanbanData.fitImage, getCardCoverSource(kanbanData), galleryRow.coverPosition);
+                    galleryData.fitImage, getCardCoverSource(galleryData), galleryRow.coverPosition);
             } else if (galleryRow.coverContent) {
                 html += `<div class="${coverClass}"><div class="av__gallery-content">${galleryRow.coverContent}</div><div></div></div>`;
             } else {
                 html += `<div class="${coverClass}"></div>`;
             }
         }
-        html += '<div class="av__gallery-fields">';
+        html += `<div class="av__gallery-fields${hasVisibleFields ? "" : " fn__none"}">`;
         galleryRow.values.forEach((cell, fieldsIndex) => {
-            if (kanbanData.fields[fieldsIndex].hidden) {
+            if (galleryData.fields[fieldsIndex].hidden) {
                 return;
             }
             let checkClass = "";
@@ -69,43 +81,43 @@ export const getRowHTML = (options: {
             }
             const isEmpty = cellValueIsEmpty(cell.value);
             // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
-            let ariaLabel = escapeAttr(kanbanData.fields[fieldsIndex].name) || getColNameByType(kanbanData.fields[fieldsIndex].type);
-            if (kanbanData.fields[fieldsIndex].desc) {
-                ariaLabel += escapeAttr(`<div class="ft__on-surface">${kanbanData.fields[fieldsIndex].desc}</div>`);
+            let ariaLabel = escapeAttr(galleryData.fields[fieldsIndex].name) || getColNameByType(galleryData.fields[fieldsIndex].type);
+            if (galleryData.fields[fieldsIndex].desc) {
+                ariaLabel += escapeAttr(`<div class="ft__on-surface">${galleryData.fields[fieldsIndex].desc}</div>`);
             }
 
-            if (cell.valueType === "checkbox" && !kanbanData.displayFieldName) {
-                cell.value.checkbox.content = kanbanData.fields[fieldsIndex].name || getColNameByType(kanbanData.fields[fieldsIndex].type);
+            if (cell.valueType === "checkbox" && !galleryData.displayFieldName) {
+                cell.value.checkbox.content = galleryData.fields[fieldsIndex].name || getColNameByType(galleryData.fields[fieldsIndex].type);
             }
-            const cellHTML = `<div class="av__cell${checkClass}${kanbanData.displayFieldName ? "" : " ariaLabel"}" 
-data-wrap="${kanbanData.fields[fieldsIndex].wrap}" 
+            const cellHTML = `<div class="av__cell${checkClass}${galleryData.displayFieldName ? "" : " ariaLabel"}"
+data-wrap="${galleryData.fields[fieldsIndex].wrap}"
 aria-label="${ariaLabel}" 
 data-position="5west"
 data-id="${cell.id}" 
-data-field-id="${kanbanData.fields[fieldsIndex].id}" 
+data-field-id="${galleryData.fields[fieldsIndex].id}"
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, kanbanData.showIcon, "gallery", kanbanData.fields[fieldsIndex].options)}</div>`;
-            if (kanbanData.displayFieldName) {
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, galleryData.showIcon, "gallery", galleryData.fields[fieldsIndex].options)}</div>`;
+            if (galleryData.displayFieldName) {
                 html += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
     <div class="av__gallery-name">
-        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
-        ${kanbanData.fields[fieldsIndex].desc ? `<svg aria-label="${kanbanData.fields[fieldsIndex].desc}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
+        ${galleryData.fields[fieldsIndex].icon ? unicode2Emoji(galleryData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(galleryData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(galleryData.fields[fieldsIndex].name)}
+        ${galleryData.fields[fieldsIndex].desc ? `<svg aria-label="${galleryData.fields[fieldsIndex].desc}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
     </div>
     ${cellHTML}
 </div>`;
             } else {
                 html += `<div class="av__gallery-field" data-empty="${isEmpty}">
     <div class="av__gallery-tip">
-        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
+        ${galleryData.fields[fieldsIndex].icon ? unicode2Emoji(galleryData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(galleryData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(galleryData.fields[fieldsIndex].name)}
     </div>
     ${cellHTML}
 </div>`;
             }
         });
         html += `</div>
-    ${getGalleryActionsHTML(kanbanData, galleryRow)}
+    ${getGalleryActionsHTML(galleryData, galleryRow, primaryHidden)}
 </div>`;
         return html;
     }
@@ -794,14 +806,22 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     if (rowElements.length === 0) {
         return;
     }
+    const primaryValues = Array.from(rowElements).map((item: HTMLElement) => {
+        const cellElement = item.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
+        return cellElement ? genCellValueByElement("block", cellElement) :
+            getAVPrimaryCell(blockElement, item.dataset.id)?.value;
+    });
+    if (primaryValues.some(value => !value)) {
+        return;
+    }
     const avID = blockElement.getAttribute("data-av-id");
     const undoOperations: IOperation[] = [];
     const blockIds: string[] = [];
     rowElements.forEach(item => {
         blockIds.push(item.getAttribute("data-id"));
     });
-    rowElements.forEach(item => {
-        const blockValue = genCellValueByElement("block", item.querySelector('.av__cell[data-dtype="block"]'));
+    rowElements.forEach((item, index) => {
+        const blockValue = primaryValues[index];
         const itemID = Lute.NewNodeID();
         // 撤销会使用新的条目 ID 恢复该行，重做时需要同时删除这个新条目。
         blockIds.push(itemID);

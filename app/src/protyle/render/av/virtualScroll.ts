@@ -484,8 +484,10 @@ export const getAVSelectedItems = (blockElement: HTMLElement): { itemID: string,
         bodyElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select").forEach((item: HTMLElement) => {
             const itemID = item.dataset.id;
             const blockCell = item.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
-            if (itemID && blockCell) {
-                selectedItems.set(itemID, blockCell.dataset.detached === "true");
+            const primaryCell = getAVPrimaryCell(blockElement, itemID);
+            if (itemID && (blockCell || primaryCell)) {
+                selectedItems.set(itemID, blockCell ?
+                    blockCell.dataset.detached === "true" : primaryCell.value?.isDetached === true);
             }
         });
     });
@@ -494,6 +496,30 @@ export const getAVSelectedItems = (blockElement: HTMLElement): { itemID: string,
 
 export const getAVData = (blockElement: HTMLElement) => {
     return blockDataStore.get(blockElement);
+};
+
+export const getAVPrimaryCell = (blockElement: HTMLElement, itemID: string) => {
+    const data = blockDataStore.get(blockElement);
+    if (!data || !itemID) {
+        return;
+    }
+    let primaryCell: IAVCell;
+    const findPrimaryCell = (view: IAVView) => {
+        if (view.groups?.length > 0) {
+            return view.groups.some(findPrimaryCell);
+        }
+        const items: Array<IAVRow | IAVGalleryItem> =
+            (view as IAVTable).rows || (view as IAVGallery).cards || [];
+        const item = items.find((row: IAVRow | IAVGalleryItem) => row.id === itemID);
+        if (!item) {
+            return false;
+        }
+        const cells = "cells" in item ? item.cells : item.values;
+        primaryCell = cells.find((cell: IAVCell) => cell.valueType === "block" || cell.value?.type === "block");
+        return true;
+    };
+    findPrimaryCell(data.view);
+    return primaryCell;
 };
 
 export const setAVData = (blockElement: HTMLElement, data: IAV) => {

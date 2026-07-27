@@ -33,6 +33,44 @@ export const getAVTemplateHTML = (content: string) => {
     return window.DOMPurify.sanitize(content);
 };
 
+const AV_TEMPLATE_INTERACTIVE_SELECTOR = [
+    "a[href]",
+    "button",
+    "input",
+    "select",
+    "textarea",
+    "label",
+    "summary",
+    "audio[controls]",
+    "video[controls]",
+    '[contenteditable=""]',
+    '[contenteditable="true"]',
+    '[contenteditable="plaintext-only"]',
+    "[onclick]",
+    '[role="button"]',
+    '[role="link"]',
+    "[data-av-interactive]",
+    '[data-type~="a"][data-href]',
+].join(",");
+
+export const getAVTemplateInteractiveElement = (target: EventTarget | null) => {
+    if (!(target instanceof Element)) {
+        return;
+    }
+    const templateElement = target.closest(".av__celltext--template");
+    if (!templateElement) {
+        return;
+    }
+    const interactiveElement = target.closest<HTMLElement>(AV_TEMPLATE_INTERACTIVE_SELECTOR);
+    if (interactiveElement && templateElement.contains(interactiveElement)) {
+        return interactiveElement;
+    }
+};
+
+export const isAVTemplateLink = (element: Element) => {
+    return element.matches('a[href], [data-type~="a"][data-href]');
+};
+
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
     const dataValue: IAVCellDateValue = value[value.type as "date"];
@@ -140,7 +178,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<svg class="av__checkbox"><use xlink:href="#icon${value.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
             break;
         case "template":
-            html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${getAVTemplateHTML(value.template.content)}</div>`;
+            html = `<div class="fn__flex-1 av__celltext--template" placeholder="${window.siyuan.languages.empty}">${getAVTemplateHTML(value.template.content)}</div>`;
             break;
         case "email":
             html = `<input value="${escapeAttr(value.email.content)}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">

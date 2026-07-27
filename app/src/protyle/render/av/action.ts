@@ -50,6 +50,7 @@ import {
     resetCardCoverPosition,
     startCardCoverPosition
 } from "./coverPosition";
+import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
@@ -95,6 +96,14 @@ const setGroupFolded = (foldElement: HTMLElement, folded: boolean) => {
 
 let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
+    const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
+    if (templateInteractiveElement) {
+        if (isAVTemplateLink(templateInteractiveElement)) {
+            event.preventDefault();
+        }
+        event.stopPropagation();
+        return true;
+    }
     if (isOnlyMeta(event)) {
         return false;
     }

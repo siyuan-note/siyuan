@@ -20,6 +20,14 @@ import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
+import {
+    cellValueIsEmpty,
+    genEmptyAVCellValue,
+    genRelationAVCellValue,
+    getConvertedEmptyAVCellValue,
+} from "./cellValue";
+
+export {cellValueIsEmpty} from "./cellValue";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -184,6 +192,10 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
     if (colType === value.type) {
         return value;
     }
+    const emptyValue = getConvertedEmptyAVCellValue(colType, value);
+    if (emptyValue) {
+        return emptyValue;
+    }
     const newValue: IAVCellValue = {
         type: colType,
     };
@@ -218,14 +230,7 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
             checked: true
         };
     } else if (colType === "relation") {
-        if (value.type === "block") {
-            newValue.relation = {
-                blockIDs: [value.blockID],
-                contents: [value]
-            };
-        } else {
-            newValue.relation = {blockIDs: [], contents: []};
-        }
+        return genRelationAVCellValue(value);
     } else if (colType === "mAsset") {
         const content = getCellValueContent(value).toString();
         newValue.mAsset = [{
@@ -344,56 +349,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             };
         }
     } else if (typeof value === "undefined" || !value) {
-        if (colType === "number") {
-            cellValue = {
-                type: colType,
-                number: {
-                    content: 0,
-                    isNotEmpty: false
-                }
-            };
-        } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
-            cellValue = {
-                type: colType,
-                [colType]: {
-                    content: ""
-                }
-            };
-        } else if (colType === "mSelect" || colType === "select" || colType === "mAsset") {
-            cellValue = {
-                type: colType,
-                [colType === "select" ? "mSelect" : colType]: []
-            };
-        } else if (["date", "created", "updated"].includes(colType)) {
-            cellValue = {
-                type: colType,
-                [colType]: {
-                    content: null,
-                    isNotEmpty: false,
-                    content2: null,
-                    isNotEmpty2: false,
-                    hasEndDate: false,
-                    isNotTime: true,
-                }
-            };
-        } else if (colType === "checkbox") {
-            cellValue = {
-                type: colType,
-                checkbox: {
-                    checked: false
-                }
-            };
-        } else if (colType === "relation") {
-            cellValue = {
-                type: colType,
-                relation: {blockIDs: [], contents: []}
-            };
-        } else if (colType === "rollup") {
-            cellValue = {
-                type: colType,
-                rollup: {contents: []}
-            };
-        }
+        cellValue = genEmptyAVCellValue(colType);
     }
     if (colType === "block") {
         if (typeof value === "object" && value && value.id) {
@@ -1371,39 +1327,5 @@ export const addDragFill = (cellElement: Element) => {
             return;
         }
         cellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
-    }
-};
-
-export const cellValueIsEmpty = (value: IAVCellValue) => {
-    if (value.type === "checkbox") {
-        return false;
-    }
-    if (["text", "block", "url", "phone", "email", "template"].includes(value.type)) {
-        return !value[value.type as "text"]?.content;
-    }
-    if (value.type === "number") {
-        return value.number ? !value.number.isNotEmpty : true;
-    }
-    if (["mSelect", "mAsset", "select"].includes(value.type)) {
-        if (value[(value.type === "select" ? "mSelect" : value.type) as "mSelect"]?.length > 0) {
-            return false;
-        }
-        return true;
-    }
-    if (["date", "created", "updated"].includes(value.type)) {
-        return !value[value.type as "date"]?.isNotEmpty &&
-            !value[value.type as "date"]?.isNotEmpty2;
-    }
-    if (value.type === "relation") {
-        if (value.relation?.blockIDs && value.relation.blockIDs.length > 0) {
-            return false;
-        }
-        return true;
-    }
-    if (value.type === "rollup") {
-        if (value.rollup?.contents && value.rollup.contents.length > 0) {
-            return false;
-        }
-        return true;
     }
 };

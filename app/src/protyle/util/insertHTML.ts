@@ -162,6 +162,8 @@ interface IAVPasteTargetColumn {
     typeChanged: boolean;
 }
 
+type TAVPasteValue = string | IAVCellValue;
+
 const restoreAVPasteCellPlaceholders = (placeholders: IAVPasteCellPlaceholder[]) => {
     placeholders.reverse().forEach(item => {
         if (item.originalHTML) {
@@ -266,7 +268,7 @@ const confirmAVPasteHeader = () => {
 };
 
 const pasteAVMatrix = async (options: {
-    values: string[][],
+    values: TAVPasteValue[][],
     protyle: IProtyle,
     blockElement: HTMLElement,
     startCell: HTMLElement,
@@ -329,7 +331,8 @@ const pasteAVMatrix = async (options: {
 
     for (let sourceIndex = 0; sourceIndex < sourceWidth; sourceIndex++) {
         const headerName = options.header?.[sourceIndex]?.trim() || "";
-        const sourceValues = options.values.flatMap(row => sourceIndex < row.length ? [row[sourceIndex]] : []);
+        const sourceValues = options.values.flatMap(row =>
+            sourceIndex < row.length && typeof row[sourceIndex] === "string" ? [row[sourceIndex] as string] : []);
         const inferredType = options.header ? inferAVPasteColumnType(sourceValues) : "text";
         const currentColumn = availableColumns[sourceIndex];
         if (currentColumn) {
@@ -549,7 +552,7 @@ const pasteAVMatrix = async (options: {
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
-    let values: string[][] = [];
+    let values: TAVPasteValue[][] = [];
     const cellHTML: string[][] = [];
     let headerCandidate = false;
     if (html.endsWith("]") && html.startsWith("[")) {
@@ -600,6 +603,8 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             }
             if (cellElements[0]) {
                 const useHeader = headerCandidate ? await confirmAVPasteHeader() : false;
+                const header = useHeader ?
+                    values[0].map(value => typeof value === "string" ? value : "") : undefined;
                 await pasteAVMatrix({
                     values: useHeader ? values.slice(1) : values,
                     protyle,
@@ -608,7 +613,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     columns,
                     html,
                     cellHTML: useHeader ? cellHTML.slice(1) : cellHTML,
-                    header: useHeader ? values[0] : undefined,
+                    header,
                 });
             }
             return;

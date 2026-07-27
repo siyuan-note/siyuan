@@ -49,7 +49,7 @@ export const inferAVPasteColumnType = (values: string[]): TAVCol => {
     return "text";
 };
 
-export const getAVPasteMatrixWidth = (rows: string[][], header?: string[]) => {
+export const getAVPasteMatrixWidth = (rows: unknown[][], header?: string[]) => {
     return Math.max(header?.length || 0, ...rows.map(row => row.length), 0);
 };
 

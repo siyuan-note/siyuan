@@ -39,59 +39,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-var extensionClipDiagnosticIDPattern = regexp.MustCompile(`^[a-zA-Z0-9-]{1,64}$`)
-
-func extensionClipAssetLabel(raw string) string {
-	decoded, err := url.PathUnescape(raw)
-	if nil == err {
-		raw = decoded
-	}
-	u, err := url.Parse(raw)
-	if nil != err {
-		return "invalid"
-	}
-	if "data" == u.Scheme || "blob" == u.Scheme {
-		return u.Scheme + ":inline"
-	}
-	name := path.Base(u.Path)
-	if "." == name || "/" == name {
-		name = ""
-	}
-	if "" == u.Hostname() {
-		raw = name
-	} else {
-		raw = u.Hostname() + "/" + name
-	}
-	raw = strings.Map(func(r rune) rune {
-		if r < 32 || 127 == r {
-			return -1
-		}
-		return r
-	}, raw)
-	if 128 < len(raw) {
-		raw = raw[:128] + "..."
-	}
-	return raw
-}
-
 func extensionCopy(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(200, ret)
 
 	form, _ := c.MultipartForm()
 	dom := form.Value["dom"][0]
-	diagnosticID := "unknown"
-	if values := form.Value["diagnosticID"]; 0 < len(values) &&
-		extensionClipDiagnosticIDPattern.MatchString(values[0]) {
-		diagnosticID = values[0]
-	}
-	assetsOn := len(form.Value["assets"]) > 0 && "true" == form.Value["assets"][0]
-	clipType := ""
-	if values := form.Value["clipType"]; 0 < len(values) {
-		clipType = values[0]
-	}
-	logging.LogInfof("[browser clipping][%s] received multipart [type=%s, assets=%t, domBytes=%d, files=%d]",
-		diagnosticID, clipType, assetsOn, len(dom), len(form.File))
 	assets := filepath.Join(util.DataDir, "assets")
 	boxID := ""
 	if notebookVal := form.Value["notebook"]; 0 < len(notebookVal) {
@@ -143,8 +96,6 @@ func extensionCopy(c *gin.Context) {
 	}
 
 	uploaded := map[string]string{}
-	storedFileCount := 0
-	rejectedFileCount := 0
 	for originalName, file := range form.File {
 		// 链滴/流云整页剪藏走服务端原始 Markdown，扩展上传的 DOM 资源地址与原始 Markdown 中的地址必然不一致，
 		// 上传的文件无法被匹配引用；该路径下由内核按“下载资源”开关统一下载本地化，因此跳过扩展上传的文件
@@ -160,16 +111,13 @@ func extensionCopy(c *gin.Context) {
 				originalName = strings.ReplaceAll(originalName, "%u", "\\u")
 				originalName, err = strconv.Unquote("\"" + originalName + "\"")
 				if err != nil {
-					rejectedFileCount++
 					continue
 				}
 				oName, err = url.PathUnescape(originalName)
 				if err != nil {
-					rejectedFileCount++
 					continue
 				}
 			} else {
-				rejectedFileCount++
 				continue
 			}
 		}
@@ -180,20 +128,17 @@ func extensionCopy(c *gin.Context) {
 			}
 		}
 
-		u, parseErr := url.Parse(oName)
-		if nil != parseErr || nil == u {
-			rejectedFileCount++
+		u, _ := url.Parse(oName)
+		if nil == u {
 			continue
 		}
 		if "" == u.Path {
-			rejectedFileCount++
 			continue
 		}
 		fName := path.Base(u.Path)
 
 		f, err := file[0].Open()
 		if err != nil {
-			rejectedFileCount++
 			ret.Code = -1
 			ret.Msg = err.Error()
 			break
@@ -201,7 +146,6 @@ func extensionCopy(c *gin.Context) {
 
 		data, err := io.ReadAll(f)
 		if err != nil {
-			rejectedFileCount++
 			ret.Code = -1
 			ret.Msg = err.Error()
 			break
@@ -224,7 +168,6 @@ func extensionCopy(c *gin.Context) {
 		// 统一通过 storeAssetForBox 写入，加密 box 自动脱敏 + 加密落盘 + 追加 ?box=
 		storedName, storeErr := model.StoreAssetForBox(boxID, assets, fName, data)
 		if storeErr != nil {
-			rejectedFileCount++
 			ret.Code = -1
 			ret.Msg = storeErr.Error()
 			break
@@ -235,10 +178,7 @@ func extensionCopy(c *gin.Context) {
 			assetURL += "?box=" + boxID
 		}
 		uploaded[unescaped] = assetURL
-		storedFileCount++
 	}
-	logging.LogInfof("[browser clipping][%s] processed multipart files [received=%d, stored=%d, rejected=%d, mappings=%d]",
-		diagnosticID, len(form.File), storedFileCount, rejectedFileCount, len(uploaded))
 
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
@@ -287,7 +227,7 @@ func extensionCopy(c *gin.Context) {
 
 			// 链滴/流云整页剪藏时扩展上传的 DOM 资源地址与服务端原始 Markdown 中的地址不一致，
 			// 扩展上传的文件无法匹配；当用户开启“下载资源”时由内核直接下载原始 Markdown 中的网络资源到本地
-			if assetsOn {
+			if assetsOn := len(form.Value["assets"]) > 0 && "true" == form.Value["assets"][0]; assetsOn {
 				model.DownloadNetAssets2LocalAssets(tree, false, symArticleHref, assets)
 			}
 
@@ -311,11 +251,6 @@ func extensionCopy(c *gin.Context) {
 	}
 
 	var unlinks []*ast.Node
-	imageCount := 0
-	emptyImageDestinationCount := 0
-	uploadedMatchCount := 0
-	unmatchedNetworkCount := 0
-	var unmatchedNetworkAssets []string
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -327,24 +262,13 @@ func extensionCopy(c *gin.Context) {
 				n.Tokens = bytes.TrimLeft(n.Tokens, " \t\n")
 			}
 		} else if ast.NodeImage == n.Type {
-			imageCount++
 			if dest := n.ChildByType(ast.NodeLinkDest); nil != dest {
-				originalDest := string(dest.Tokens)
-				if "" == originalDest {
-					emptyImageDestinationCount++
-				}
 				assetPath := uploaded[string(dest.Tokens)]
 				if "" == assetPath {
 					assetPath = uploaded[string(dest.Tokens)+"?imageView2/2/interlace/1/format/webp"]
 				}
 				if "" != assetPath {
 					dest.Tokens = []byte(assetPath)
-					uploadedMatchCount++
-				} else if strings.HasPrefix(originalDest, "http://") || strings.HasPrefix(originalDest, "https://") {
-					unmatchedNetworkCount++
-					if len(unmatchedNetworkAssets) < 20 {
-						unmatchedNetworkAssets = append(unmatchedNetworkAssets, extensionClipAssetLabel(originalDest))
-					}
 				}
 
 				// 检测 alt 和 title 格式，如果不是文本的话转换为文本 https://github.com/siyuan-note/siyuan/issues/14233
@@ -366,8 +290,6 @@ func extensionCopy(c *gin.Context) {
 						}
 					}
 				}
-			} else {
-				emptyImageDestinationCount++
 			}
 		}
 		return ast.WalkContinue
@@ -375,10 +297,6 @@ func extensionCopy(c *gin.Context) {
 	for _, unlink := range unlinks {
 		unlink.Unlink()
 	}
-	logging.LogInfof("[browser clipping][%s] matched image destinations [images=%d, emptyDestinations=%d, "+
-		"uploadedMatches=%d, unmatchedNetwork=%d, assets=%t, unmatched=%s]", diagnosticID, imageCount,
-		emptyImageDestinationCount, uploadedMatchCount, unmatchedNetworkCount, assetsOn,
-		strings.Join(unmatchedNetworkAssets, ","))
 
 	parse.TextMarks2Inlines(tree) // 先将 TextMark 转换为 Inlines https://github.com/siyuan-note/siyuan/issues/13056
 	parse.NestedInlines2FlattedSpansHybrid(tree, false)

@@ -41,6 +41,8 @@ type TOperation =
     | "duplicateAttrViewKey"
     | "setAttrViewColIcon"
     | "setAttrViewFilters"
+    | "setAttrViewColRelationFilters"
+    | "setAttrViewColRollupFilters"
     | "setAttrViewSorts"
     | "setAttrViewColCalc"
     | "updateAttrViewColNumberFormat"
@@ -689,6 +691,11 @@ interface IOperation {
     targetGroupID?: string // sortAttrViewRow 专享
 }
 
+interface IAVFilterOperation {
+    action: "setAttrViewColRelationFilters" | "setAttrViewColRollupFilters";
+    keyID: string;
+}
+
 interface IOperationSrcs {
     itemID: string,
     id: string,
@@ -1290,12 +1297,14 @@ interface IAVColumnRelation {
     avID?: string;
     backKeyID?: string;
     isTwoWay?: boolean;
+    candidateFilters?: IAVFilter[];
 }
 
 interface IAVCellRollupValue {
     relationKeyID?: string;  // 关联列 ID
     keyID?: string;
     calc?: IAVCalc;
+    filters?: IAVFilter[];
 }
 
 interface IAVCalc {

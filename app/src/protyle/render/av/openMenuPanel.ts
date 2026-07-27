@@ -93,6 +93,7 @@ export const openMenuPanel = (options: {
     cb?: (avPanelElement: Element) => void,
     destroyCallback?: () => void,
     keepMenuOpen?: boolean,
+    filterOperation?: IAVFilterOperation,
 }) => {
     let avPanelElement = document.querySelector(".av__panel");
     if (avPanelElement) {
@@ -124,6 +125,16 @@ export const openMenuPanel = (options: {
             window.siyuan.menus.menu.remove();
         }
         const blockID = options.blockElement.getAttribute("data-node-id");
+        const saveFilters = (newFilters: IAVFilter[], oldFilters: IAVFilter[]) => {
+            const operation = (filters: IAVFilter[]): IOperation => ({
+                action: options.filterOperation?.action || "setAttrViewFilters",
+                avID,
+                keyID: options.filterOperation?.keyID,
+                data: filters,
+                blockID,
+            });
+            transaction(options.protyle, [operation(newFilters)], [operation(oldFilters)]);
+        };
 
         const isCustomAttr = !options.blockElement.classList.contains("av");
         let data = response.data as IAV;
@@ -259,7 +270,8 @@ export const openMenuPanel = (options: {
             if (options.type === "sorts") {
                 bindSortsEvent(options.protyle, menuElement, data, blockID);
             } else if (options.type === "filters") {
-                bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
+                bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID,
+                    options.filterOperation);
             } else if (options.type === "edit") {
                 bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
             } else if (options.type === "config") {
@@ -640,20 +652,11 @@ export const openMenuPanel = (options: {
             if (node) {
                 node.combination = (select as HTMLSelectElement).value === "or" ? "or" : "and";
             }
-            transaction(options.protyle, [{
-                action: "setAttrViewFilters",
-                avID,
-                data: JSON.parse(JSON.stringify(data.view.filters)),
-                blockID
-            }], [{
-                action: "setAttrViewFilters",
-                avID,
-                data: oldFilters,
-                blockID
-            }]);
+            saveFilters(JSON.parse(JSON.stringify(data.view.filters)), oldFilters);
             // 重渲染以同步所有只读且/或标签（index >= 2 的节点显示的是只读 span）
             menuElement.innerHTML = getFiltersHTML(data);
-            bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
+            bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID,
+                options.filterOperation);
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
             event.stopPropagation();
         });
@@ -791,6 +794,12 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "go-config") {
+                    if (options.filterOperation) {
+                        avPanelElement.remove();
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
                     menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getViewHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
@@ -899,24 +908,15 @@ export const openMenuPanel = (options: {
                 } else if (type === "goFilters") {
                     menuElement.innerHTML = getFiltersHTML(data);
                     menuElement.classList.add("av__filter-panel");
-                    bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
+                    bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID,
+                        options.filterOperation);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "removeFilters") {
-                    transaction(options.protyle, [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: [],
-                        blockID
-                    }], [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: JSON.parse(JSON.stringify(data.view.filters)),
-                        blockID
-                    }]);
+                    saveFilters([], JSON.parse(JSON.stringify(data.view.filters)));
                     // 本地状态保持“顶层单个空根组”不变量（后端会同样归一化），避免后续 addFilterGroup 误把新分组当成根组
                     data.view.filters = [{combination: "and", filters: []}];
                     menuElement.innerHTML = getFiltersHTML(data);
@@ -935,7 +935,8 @@ export const openMenuPanel = (options: {
                         avId: avID,
                         protyle: options.protyle,
                         blockElement: options.blockElement,
-                        parentPath: path
+                        parentPath: path,
+                        filterOperation: options.filterOperation,
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -956,7 +957,8 @@ export const openMenuPanel = (options: {
                                 avId: avID,
                                 protyle: options.protyle,
                                 blockElement: options.blockElement,
-                                parentPath: path
+                                parentPath: path,
+                                filterOperation: options.filterOperation,
                             });
                         }
                     });
@@ -989,17 +991,7 @@ export const openMenuPanel = (options: {
                                         });
                                     }
                                 }
-                                transaction(options.protyle, [{
-                                    action: "setAttrViewFilters",
-                                    avID,
-                                    data: JSON.parse(JSON.stringify(data.view.filters)),
-                                    blockID
-                                }], [{
-                                    action: "setAttrViewFilters",
-                                    avID,
-                                    data: oldFilters,
-                                    blockID
-                                }]);
+                                saveFilters(JSON.parse(JSON.stringify(data.view.filters)), oldFilters);
                                 menuElement.innerHTML = getFiltersHTML(data);
                                 setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                             }
@@ -1020,17 +1012,7 @@ export const openMenuPanel = (options: {
                         click: () => {
                             const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
                             duplicateFilterByPath(getEditableFilters(data), path);
-                            transaction(options.protyle, [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: JSON.parse(JSON.stringify(data.view.filters)),
-                                blockID
-                            }], [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: oldFilters,
-                                blockID
-                            }]);
+                            saveFilters(JSON.parse(JSON.stringify(data.view.filters)), oldFilters);
                             menuElement.innerHTML = getFiltersHTML(data);
                             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                         }
@@ -1042,17 +1024,7 @@ export const openMenuPanel = (options: {
                             click: () => {
                                 const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
                                 convertFilterToGroup(getEditableFilters(data), path);
-                                transaction(options.protyle, [{
-                                    action: "setAttrViewFilters",
-                                    avID,
-                                    data: JSON.parse(JSON.stringify(data.view.filters)),
-                                    blockID
-                                }], [{
-                                    action: "setAttrViewFilters",
-                                    avID,
-                                    data: oldFilters,
-                                    blockID
-                                }]);
+                                saveFilters(JSON.parse(JSON.stringify(data.view.filters)), oldFilters);
                                 menuElement.innerHTML = getFiltersHTML(data);
                                 setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                             }
@@ -1064,17 +1036,7 @@ export const openMenuPanel = (options: {
                             click: () => {
                                 const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
                                 convertGroupToFilter(getEditableFilters(data), path);
-                                transaction(options.protyle, [{
-                                    action: "setAttrViewFilters",
-                                    avID,
-                                    data: JSON.parse(JSON.stringify(data.view.filters)),
-                                    blockID
-                                }], [{
-                                    action: "setAttrViewFilters",
-                                    avID,
-                                    data: oldFilters,
-                                    blockID
-                                }]);
+                                saveFilters(JSON.parse(JSON.stringify(data.view.filters)), oldFilters);
                                 menuElement.innerHTML = getFiltersHTML(data);
                                 setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                             }
@@ -1087,17 +1049,7 @@ export const openMenuPanel = (options: {
                             const cloneBefore = JSON.parse(JSON.stringify(data.view.filters));
                             removeFilterByPath(getEditableFilters(data), path);
                             const cloneAfter = JSON.parse(JSON.stringify(data.view.filters));
-                            transaction(options.protyle, [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: cloneAfter,
-                                blockID
-                            }], [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: cloneBefore,
-                                blockID
-                            }]);
+                            saveFilters(cloneAfter, cloneBefore);
                             menuElement.innerHTML = getFiltersHTML(data);
                             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                         }
@@ -1418,6 +1370,86 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goSearchAV") {
                     openSearchAV(avID, target, undefined, false, options.blockElement.getAttribute("data-node-id"));
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goAttrViewColFilters") {
+                    if (target.classList.contains("b3-menu__item--disabled")) {
+                        break;
+                    }
+                    const colId = options.colId ||
+                        menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
+                    const colData = fields.find((item) => item.id === colId);
+                    const isRelationFilter = target.dataset.filterType === "relation";
+                    const relationKey = isRelationFilter ? colData :
+                        fields.find((item) => item.id === colData?.rollup?.relationKeyID);
+                    const selectedTargetAvID = isRelationFilter ?
+                        (menuElement.querySelector('[data-type="goSearchAV"]') as HTMLElement)?.dataset.avId : "";
+                    const targetAvID = selectedTargetAvID || relationKey?.relation?.avID;
+                    if (!colData || !targetAvID) {
+                        break;
+                    }
+                    const targetChanged = isRelationFilter && targetAvID !== colData.relation?.avID;
+                    const filters = targetChanged ? [] :
+                        (isRelationFilter ? colData.relation?.candidateFilters : colData.rollup?.filters);
+                    const openFilters = (sourcePanelElement?: Element) => {
+                        fetchPost("/api/av/getAttributeView", {id: targetAvID}, (response) => {
+                            if (sourcePanelElement && !sourcePanelElement.isConnected) {
+                                return;
+                            }
+                            const targetAttrView = response.data?.av;
+                            if (!targetAttrView) {
+                                return;
+                            }
+                            const targetFields = (targetAttrView.keyValues || []).
+                                map((item: { key: IAVColumn }) => item.key);
+                            const filterData = {
+                                id: targetAttrView.id,
+                                name: targetAttrView.name,
+                                viewID: "",
+                                viewType: "table",
+                                views: [],
+                                view: {
+                                    id: "",
+                                    type: "table",
+                                    filters: JSON.parse(JSON.stringify(filters?.length ? filters :
+                                        [{combination: "and", filters: []}])),
+                                    sorts: [],
+                                    columns: targetFields,
+                                    rows: [],
+                                },
+                            } as IAV;
+                            sourcePanelElement?.remove();
+                            openMenuPanel({
+                                protyle: options.protyle,
+                                blockElement: options.blockElement,
+                                type: "filters",
+                                colId,
+                                data: filterData,
+                                filterOperation: {
+                                    action: isRelationFilter ? "setAttrViewColRelationFilters" :
+                                        "setAttrViewColRollupFilters",
+                                    keyID: colId,
+                                },
+                            });
+                        });
+                    };
+                    const updateRelationButton = menuElement.querySelector('[data-type="updateRelation"]');
+                    const updateRelationItem = updateRelationButton?.closest(".b3-menu__item");
+                    const hasPendingRelation = isRelationFilter && !!updateRelationItem &&
+                        !updateRelationItem.classList.contains("fn__none");
+                    if (hasPendingRelation) {
+                        updateRelation({
+                            protyle: options.protyle,
+                            avElement: avPanelElement,
+                            avID,
+                            colsData: fields,
+                            blockElement: options.blockElement,
+                            callback: openFilters,
+                        });
+                    } else {
+                        openFilters(avPanelElement);
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     break;

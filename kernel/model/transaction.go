@@ -286,6 +286,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewNewItemTemplates(op)
 			case "setAttrViewFilters":
 				ret = tx.doSetAttrViewFilters(op)
+			case "setAttrViewColRelationFilters":
+				ret = tx.doSetAttrViewColRelationFilters(op)
+			case "setAttrViewColRollupFilters":
+				ret = tx.doSetAttrViewColRollupFilters(op)
 			case "setAttrViewSorts":
 				ret = tx.doSetAttrViewSorts(op)
 			case "setAttrViewPageSize":

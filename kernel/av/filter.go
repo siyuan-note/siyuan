@@ -108,7 +108,8 @@ const (
 	FilterQuantifierNone      FilterQuantifier = "None"
 )
 
-func Filter(viewable Viewable, attrView *AttributeView, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) {
+func Filter(viewable Viewable, attrView *AttributeView, rollupFurtherCollections map[string]*RollupRenderContext,
+	cachedAttrViews map[string]*AttributeView) {
 	collection := viewable.(Collection)
 	filters := collection.GetFilters()
 	if 1 > len(filters) {
@@ -203,7 +204,8 @@ func collectLeafColumnIndexes(nodes []*ViewFilter, fields []Field, colIndexByCol
 
 // evalNode 递归求值：分组按 Combination 聚合子节点，叶子调用原单元格求值逻辑。
 // 空分组：AND 恒真、OR 恒假。叶子节点的空值/未配置语义由 evalLeaf → value.Filter 保留原扁平行为。
-func evalNode(node *ViewFilter, values []*Value, colIndexByColumn map[string]int, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
+func evalNode(node *ViewFilter, values []*Value, colIndexByColumn map[string]int, attrView *AttributeView, itemID string,
+	rollupFurtherCollections map[string]*RollupRenderContext, cachedAttrViews map[string]*AttributeView) bool {
 	if nil == node {
 		return false
 	}
@@ -243,7 +245,8 @@ func evalNode(node *ViewFilter, values []*Value, colIndexByColumn map[string]int
 }
 
 // evalLeaf 对叶子过滤节点做单元格级判定，保留扁平时代 Filter() 的空值特判与 text 豁免语义。
-func evalLeaf(filter *ViewFilter, values []*Value, index int, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
+func evalLeaf(filter *ViewFilter, values []*Value, index int, attrView *AttributeView, itemID string,
+	rollupFurtherCollections map[string]*RollupRenderContext, cachedAttrViews map[string]*AttributeView) bool {
 	if 0 > index || index >= len(values) {
 		return evalMissingLeaf(filter)
 	}
@@ -559,7 +562,8 @@ func PruneInvalidColumnFilters(filters []*ViewFilter, validColumns map[string]bo
 	return
 }
 
-func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
+func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID string,
+	rollupFurtherCollections map[string]*RollupRenderContext, cachedAttrViews map[string]*AttributeView) bool {
 	if nil == filter || (nil == filter.Value && nil == filter.RelativeDate) {
 		return true
 	}
@@ -611,7 +615,17 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			return false
 		}
 
-		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, rollupFurtherCollections[key.ID])
+		rollupContext := rollupFurtherCollections[key.ID]
+		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, rollupContext)
+		relationContentCount := len(relVal.Relation.Contents)
+		if nil != rollupContext && nil != rollupContext.EligibleItemIDs {
+			relationContentCount = 0
+			for _, content := range relVal.Relation.Contents {
+				if rollupContext.EligibleItemIDs[content.BlockID] {
+					relationContentCount++
+				}
+			}
+		}
 
 		switch filter.Qualifier {
 		case FilterQuantifierUndefined, FilterQuantifierAny:
@@ -620,7 +634,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return true
 				}
 
-				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) { // 说明汇总的目标字段存在空值
+				if len(value.Rollup.Contents) < relationContentCount { // 说明汇总的目标字段存在空值
 					return true
 				}
 
@@ -662,7 +676,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return true
 				}
 
-				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+				if len(value.Rollup.Contents) < relationContentCount {
 					return false
 				}
 
@@ -677,7 +691,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return false
 				}
 
-				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+				if len(value.Rollup.Contents) < relationContentCount {
 					return false
 				}
 
@@ -709,7 +723,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 					return false
 				}
 
-				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+				if len(value.Rollup.Contents) < relationContentCount {
 					return true
 				}
 

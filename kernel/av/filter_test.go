@@ -176,12 +176,51 @@ func TestRollupRelativeDateFilter(t *testing.T) {
 		RelativeDate: &RelativeDate{Count: 1, Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis},
 	}
 
-	if !value.Filter(filter, attrView, "source-item", map[string]Collection{}, map[string]*AttributeView{"target": targetView}) {
+	if !value.Filter(filter, attrView, "source-item", map[string]*RollupRenderContext{}, map[string]*AttributeView{"target": targetView}) {
 		t.Fatalf("rollup date before today should pass the relative date filter")
 	}
 	targetDate.Date.Content = today.AddDate(0, 0, 1).UnixMilli()
-	if value.Filter(filter, attrView, "source-item", map[string]Collection{}, map[string]*AttributeView{"target": targetView}) {
+	if value.Filter(filter, attrView, "source-item", map[string]*RollupRenderContext{}, map[string]*AttributeView{"target": targetView}) {
 		t.Fatalf("future rollup date should not pass the before-today filter")
+	}
+}
+
+func TestRollupFilterUsesEligibleRelationCount(t *testing.T) {
+	relationKey := NewKey("relation", "关联", "", KeyTypeRelation)
+	relationKey.Relation = &Relation{AvID: "target"}
+	rollupKey := NewKey("rollup", "汇总", "", KeyTypeRollup)
+	rollupKey.Rollup = &Rollup{RelationKeyID: relationKey.ID, KeyID: "text"}
+	attrView := &AttributeView{KeyValues: []*KeyValues{
+		{Key: relationKey, Values: []*Value{{
+			KeyID: relationKey.ID, BlockID: "source-item", Type: KeyTypeRelation,
+			Relation: &ValueRelation{
+				BlockIDs: []string{"target-a", "target-b"},
+				Contents: []*Value{
+					{BlockID: "target-a", Type: KeyTypeBlock, Block: &ValueBlock{Content: "A"}},
+					{BlockID: "target-b", Type: KeyTypeBlock, Block: &ValueBlock{Content: "B"}},
+				},
+			},
+		}}},
+		{Key: rollupKey},
+	}}
+	targetView := &AttributeView{KeyValues: []*KeyValues{{
+		Key: NewKey("text", "文本", "", KeyTypeText),
+		Values: []*Value{{
+			KeyID: "text", BlockID: "target-a", Type: KeyTypeText, Text: &ValueText{Content: "value"},
+		}},
+	}}}
+	value := &Value{KeyID: rollupKey.ID, BlockID: "source-item", Type: KeyTypeRollup, Rollup: &ValueRollup{}}
+	filter := &ViewFilter{
+		Qualifier: FilterQuantifierAll,
+		Operator:  FilterOperatorIsNotEmpty,
+		Value:     &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{}},
+	}
+	contexts := map[string]*RollupRenderContext{
+		rollupKey.ID: {EligibleItemIDs: map[string]bool{"target-a": true}},
+	}
+
+	if !value.Filter(filter, attrView, "source-item", contexts, map[string]*AttributeView{"target": targetView}) {
+		t.Fatal("excluded relation items should not be treated as empty rollup values")
 	}
 }
 
@@ -328,7 +367,7 @@ func TestRollupDateEndpointFilter(t *testing.T) {
 				Date: &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true},
 			}}}},
 		}
-		actual := value.Filter(filter, attrView, "source-item", map[string]Collection{}, map[string]*AttributeView{"target": targetView})
+		actual := value.Filter(filter, attrView, "source-item", map[string]*RollupRenderContext{}, map[string]*AttributeView{"target": targetView})
 		if actual != test.expected {
 			t.Fatalf("unexpected %s rollup endpoint result: expected %t, got %t", test.qualifier, test.expected, actual)
 		}

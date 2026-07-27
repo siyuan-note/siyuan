@@ -2252,19 +2252,35 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, p
 	return
 }
 
-func GetAttributeViewRelationCandidates(avID, keyword string, selectedBlockIDs []string, page, pageSize int) (
+func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, selectedBlockIDs []string, page, pageSize int) (
 	attributeViewName string, databaseBlockIDs []string, columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
 	total int, err error,
 ) {
 	waitForSyncingStorages()
 
-	attrView, err := av.ParseAttributeView(avID)
+	srcAttrView, err := av.ParseAttributeView(srcAvID)
 	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		logging.LogErrorf("parse attribute view [%s] failed: %s", srcAvID, err)
 		return
 	}
+	var relationKey *av.Key
+	attrView := srcAttrView
+	if "" != relationKeyID {
+		relationKey, _ = srcAttrView.GetKey(relationKeyID)
+		if nil == relationKey || av.KeyTypeRelation != relationKey.Type || nil == relationKey.Relation {
+			err = av.ErrKeyNotFound
+			return
+		}
+		if relationKey.Relation.AvID != srcAvID {
+			attrView, err = av.ParseAttributeView(relationKey.Relation.AvID)
+		}
+		if err != nil {
+			logging.LogErrorf("parse attribute view [%s] failed: %s", relationKey.Relation.AvID, err)
+			return
+		}
+	}
 	attributeViewName = getAttrViewName(attrView)
-	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(avID)
+	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(attrView.ID)
 
 	table := renderAttributeViewRelationCandidates(attrView)
 	if nil == table {
@@ -2284,6 +2300,19 @@ func GetAttributeViewRelationCandidates(avID, keyword string, selectedBlockIDs [
 	}
 	if nil == selectedRows {
 		selectedRows = []*av.TableRow{}
+	}
+
+	if nil != relationKey && hasAttrViewFilterConditions(relationKey.Relation.CandidateFilters) {
+		validColumns := map[string]bool{}
+		for _, keyValues := range attrView.KeyValues {
+			if nil != keyValues && nil != keyValues.Key {
+				validColumns[keyValues.Key.ID] = true
+			}
+		}
+		table.Filters, _ = av.PruneInvalidColumnFilters(
+			av.CloneFilters(relationKey.Relation.CandidateFilters), validColumns)
+		cachedAttrViews := map[string]*av.AttributeView{attrView.ID: attrView}
+		av.Filter(table, attrView, sql.GetFurtherCollections(attrView, cachedAttrViews), cachedAttrViews)
 	}
 
 	rows, total = filterSortPageRelationCandidates(table.Rows, keyword, page, pageSize)
@@ -3724,9 +3753,26 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 		return
 	}
 
+	var filters []*av.ViewFilter
+	oldDestAvID := ""
+	if nil != rollUpKey.Rollup {
+		filters = rollUpKey.Rollup.Filters
+		if oldRelationKey, _ := attrView.GetKey(rollUpKey.Rollup.RelationKeyID); nil != oldRelationKey &&
+			nil != oldRelationKey.Relation {
+			oldDestAvID = oldRelationKey.Relation.AvID
+		}
+	}
+	newDestAvID := ""
+	if newRelationKey, _ := attrView.GetKey(operation.ParentID); nil != newRelationKey && nil != newRelationKey.Relation {
+		newDestAvID = newRelationKey.Relation.AvID
+	}
+	if oldDestAvID != newDestAvID {
+		filters = nil
+	}
 	rollUpKey.Rollup = &av.Rollup{
 		RelationKeyID: operation.ParentID,
 		KeyID:         operation.KeyID,
+		Filters:       filters,
 	}
 
 	if nil == operation.Data {
@@ -3827,9 +3873,14 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 			av.RemoveAvRel(srcAv.ID, srcRel.AvID)
 		}
 
+		var candidateFilters []*av.ViewFilter
+		if nil != srcRel && srcRel.AvID == operation.ID {
+			candidateFilters = srcRel.CandidateFilters
+		}
 		srcRel = &av.Relation{
-			AvID:     operation.ID,
-			IsTwoWay: operation.IsTwoWay,
+			AvID:             operation.ID,
+			IsTwoWay:         operation.IsTwoWay,
+			CandidateFilters: candidateFilters,
 		}
 		if operation.IsTwoWay {
 			srcRel.BackKeyID = operation.BackRelationKeyID
@@ -3844,6 +3895,12 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	if oldDestAvID != operation.ID {
 		srcAv.RemoveNewItemTemplateFieldValue(operation.KeyID)
 		srcAv.RemoveExactRelationFilters(operation.KeyID)
+		for _, keyValues := range srcAv.KeyValues {
+			if nil != keyValues && nil != keyValues.Key && av.KeyTypeRollup == keyValues.Key.Type &&
+				nil != keyValues.Key.Rollup && keyValues.Key.Rollup.RelationKeyID == operation.KeyID {
+				keyValues.Key.Rollup.Filters = nil
+			}
+		}
 	}
 
 	destAdded := false
@@ -4602,6 +4659,22 @@ func (tx *Transaction) doSetAttrViewFilters(operation *Operation) (ret *TxErr) {
 	return
 }
 
+func (tx *Transaction) doSetAttrViewColRelationFilters(operation *Operation) (ret *TxErr) {
+	err := setAttrViewColFilters(operation.AvID, operation.BlockID, operation.KeyID, operation.Data.([]any), true)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColRollupFilters(operation *Operation) (ret *TxErr) {
+	err := setAttrViewColFilters(operation.AvID, operation.BlockID, operation.KeyID, operation.Data.([]any), false)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
 // avParseView 根据 blockID 推导 box 上下文，使用 box-aware 或全局 AV 解析。
 func avParseView(avID, blockID string) (*av.AttributeView, error) {
 	boxID := deriveAVBoxID(blockID)
@@ -4679,6 +4752,227 @@ func SetAttrViewFilters(avID, blockID string, data []any) (err error) {
 	}
 
 	err = avSaveView(attrView, blockID)
+	return
+}
+
+func setAttrViewColFilters(avID, blockID, keyID string, data []any, relation bool) (err error) {
+	attrView, err := avParseView(avID, blockID)
+	if err != nil {
+		return
+	}
+
+	key, _ := attrView.GetKey(keyID)
+	if nil == key {
+		return av.ErrKeyNotFound
+	}
+
+	destAvID := ""
+	if relation {
+		if av.KeyTypeRelation != key.Type || nil == key.Relation {
+			return av.ErrKeyNotFound
+		}
+		destAvID = key.Relation.AvID
+	} else {
+		if av.KeyTypeRollup != key.Type || nil == key.Rollup {
+			return av.ErrKeyNotFound
+		}
+		relationKey, _ := attrView.GetKey(key.Rollup.RelationKeyID)
+		if nil == relationKey || nil == relationKey.Relation {
+			return av.ErrKeyNotFound
+		}
+		destAvID = relationKey.Relation.AvID
+	}
+
+	destAttrView := attrView
+	if destAvID != avID {
+		destAttrView, err = av.ParseAttributeView(destAvID)
+		if err != nil {
+			return
+		}
+	}
+
+	jsonData, err := gulu.JSON.MarshalJSON(data)
+	if err != nil {
+		return
+	}
+	var filters []*av.ViewFilter
+	if err = gulu.JSON.UnmarshalJSON(jsonData, &filters); err != nil {
+		return
+	}
+	if 0 < len(filters) && (1 != len(filters) || nil == filters[0] || !filters[0].IsGroup()) {
+		filters = []*av.ViewFilter{{Combination: av.FilterCombinationAnd, Filters: filters}}
+	}
+	if err = av.ValidateFilterDepth(filters); nil != err {
+		return
+	}
+
+	validColumns := map[string]bool{}
+	for _, keyValues := range destAttrView.KeyValues {
+		if nil != keyValues && nil != keyValues.Key {
+			validColumns[keyValues.Key.ID] = true
+		}
+	}
+	filters, _ = av.PruneInvalidColumnFilters(filters, validColumns)
+	if !hasAttrViewFilterConditions(filters) {
+		filters = nil
+	}
+
+	if relation {
+		key.Relation.CandidateFilters = filters
+	} else {
+		key.Rollup.Filters = filters
+	}
+	err = avSaveView(attrView, blockID)
+	return
+}
+
+func hasAttrViewFilterConditions(filters []*av.ViewFilter) bool {
+	for _, filter := range filters {
+		if nil == filter {
+			continue
+		}
+		if filter.IsGroup() {
+			if hasAttrViewFilterConditions(filter.Filters) {
+				return true
+			}
+			continue
+		}
+		return true
+	}
+	return false
+}
+
+func attrViewFiltersContainColumn(filters []*av.ViewFilter, column string) bool {
+	for _, filter := range filters {
+		if nil == filter {
+			continue
+		}
+		if filter.IsGroup() {
+			if attrViewFiltersContainColumn(filter.Filters, column) {
+				return true
+			}
+			continue
+		}
+		if filter.Column == column {
+			return true
+		}
+	}
+	return false
+}
+
+func attrViewFiltersContainOption(filters []*av.ViewFilter, column, optionContent string) bool {
+	for _, filter := range filters {
+		if nil == filter {
+			continue
+		}
+		if filter.IsGroup() {
+			if attrViewFiltersContainOption(filter.Filters, column, optionContent) {
+				return true
+			}
+			continue
+		}
+		if filter.Column != column || nil == filter.Value {
+			continue
+		}
+		for _, option := range filter.Value.MSelect {
+			if nil != option && option.Content == optionContent {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func removeAttrViewColumnFromFieldFilters(attrView *av.AttributeView, targetAvID, column string) (changed bool) {
+	for _, keyValues := range attrView.KeyValues {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		key := keyValues.Key
+		if av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.AvID == targetAvID &&
+			attrViewFiltersContainColumn(key.Relation.CandidateFilters, column) {
+			key.Relation.CandidateFilters = av.RemoveFiltersByColumn(key.Relation.CandidateFilters, column)
+			if !hasAttrViewFilterConditions(key.Relation.CandidateFilters) {
+				key.Relation.CandidateFilters = nil
+			}
+			changed = true
+			continue
+		}
+		if av.KeyTypeRollup != key.Type || nil == key.Rollup ||
+			!attrViewFiltersContainColumn(key.Rollup.Filters, column) {
+			continue
+		}
+		relationKey, _ := attrView.GetKey(key.Rollup.RelationKeyID)
+		if nil == relationKey || nil == relationKey.Relation || relationKey.Relation.AvID != targetAvID {
+			continue
+		}
+		key.Rollup.Filters = av.RemoveFiltersByColumn(key.Rollup.Filters, column)
+		if !hasAttrViewFilterConditions(key.Rollup.Filters) {
+			key.Rollup.Filters = nil
+		}
+		changed = true
+	}
+	return
+}
+
+func removeAttrViewOptionFromFieldFilters(attrView *av.AttributeView, targetAvID, column,
+	optionContent string) (changed bool) {
+	for _, keyValues := range attrView.KeyValues {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		key := keyValues.Key
+		if av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.AvID == targetAvID &&
+			attrViewFiltersContainOption(key.Relation.CandidateFilters, column, optionContent) {
+			key.Relation.CandidateFilters = av.RemoveSelectOptionFromFilters(
+				key.Relation.CandidateFilters, column, optionContent)
+			if !hasAttrViewFilterConditions(key.Relation.CandidateFilters) {
+				key.Relation.CandidateFilters = nil
+			}
+			changed = true
+			continue
+		}
+		if av.KeyTypeRollup != key.Type || nil == key.Rollup ||
+			!attrViewFiltersContainOption(key.Rollup.Filters, column, optionContent) {
+			continue
+		}
+		relationKey, _ := attrView.GetKey(key.Rollup.RelationKeyID)
+		if nil == relationKey || nil == relationKey.Relation || relationKey.Relation.AvID != targetAvID {
+			continue
+		}
+		key.Rollup.Filters = av.RemoveSelectOptionFromFilters(key.Rollup.Filters, column, optionContent)
+		if !hasAttrViewFilterConditions(key.Rollup.Filters) {
+			key.Rollup.Filters = nil
+		}
+		changed = true
+	}
+	return
+}
+
+func renameAttrViewOptionInFieldFilters(attrView *av.AttributeView, targetAvID, column,
+	oldContent, newContent, newColor string) (changed bool) {
+	for _, keyValues := range attrView.KeyValues {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		key := keyValues.Key
+		if av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.AvID == targetAvID &&
+			attrViewFiltersContainOption(key.Relation.CandidateFilters, column, oldContent) {
+			av.RenameSelectOptionInFilters(key.Relation.CandidateFilters, column, oldContent, newContent, newColor)
+			changed = true
+			continue
+		}
+		if av.KeyTypeRollup != key.Type || nil == key.Rollup ||
+			!attrViewFiltersContainOption(key.Rollup.Filters, column, oldContent) {
+			continue
+		}
+		relationKey, _ := attrView.GetKey(key.Rollup.RelationKeyID)
+		if nil == relationKey || nil == relationKey.Relation || relationKey.Relation.AvID != targetAvID {
+			continue
+		}
+		av.RenameSelectOptionInFilters(key.Rollup.Filters, column, oldContent, newContent, newColor)
+		changed = true
+	}
 	return
 }
 
@@ -6238,6 +6532,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 				}
 			}
 		}
+		removeAttrViewColumnFromFieldFilters(attrView, attrView.ID, operation.ID)
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {
@@ -6247,13 +6542,17 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 	if changeType {
 		relatedAvIDs := av.GetSrcAvIDs(attrView.ID)
 		for _, relatedAvID := range relatedAvIDs {
+			if relatedAvID == attrView.ID {
+				continue
+			}
 			destAv, _ := av.ParseAttributeView(relatedAvID)
 			if nil == destAv {
 				continue
 			}
 
 			for _, keyValues := range destAv.KeyValues {
-				if av.KeyTypeRollup == keyValues.Key.Type && keyValues.Key.Rollup.KeyID == operation.ID {
+				if av.KeyTypeRollup == keyValues.Key.Type && nil != keyValues.Key.Rollup &&
+					keyValues.Key.Rollup.KeyID == operation.ID {
 					// 置空关联过来的汇总
 					for _, val := range keyValues.Values {
 						val.Rollup.Contents = nil
@@ -6261,6 +6560,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 					keyValues.Key.Rollup.Calc = &av.RollupCalc{Operator: av.CalcOperatorNone}
 				}
 			}
+			removeAttrViewColumnFromFieldFilters(destAv, attrView.ID, operation.ID)
 
 			regenAttrViewGroups(destAv)
 			av.SaveAttributeView(destAv)
@@ -6421,6 +6721,7 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 			}
 		}
 	}
+	removeAttrViewColumnFromFieldFilters(attrView, avID, keyID)
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		return
@@ -6432,19 +6733,24 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {
+		if relatedAvID == avID {
+			continue
+		}
 		destAv, _ := av.ParseAttributeView(relatedAvID)
 		if nil == destAv {
 			continue
 		}
 
 		for _, keyValues := range destAv.KeyValues {
-			if av.KeyTypeRollup == keyValues.Key.Type && keyValues.Key.Rollup.KeyID == keyID {
+			if av.KeyTypeRollup == keyValues.Key.Type && nil != keyValues.Key.Rollup &&
+				keyValues.Key.Rollup.KeyID == keyID {
 				// 置空关联过来的汇总
 				for _, val := range keyValues.Values {
 					val.Rollup.Contents = nil
 				}
 			}
 		}
+		removeAttrViewColumnFromFieldFilters(destAv, avID, keyID)
 
 		regenAttrViewGroups(destAv)
 		av.SaveAttributeView(destAv)
@@ -7158,9 +7464,27 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 			view.Filters = []*av.ViewFilter{{Combination: av.FilterCombinationAnd}}
 		}
 	}
+	removeAttrViewOptionFromFieldFilters(attrView, attrView.ID, operation.ID, optName)
 
 	regenAttrViewGroups(attrView)
-	err = av.SaveAttributeView(attrView)
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+
+	for _, relatedAvID := range av.GetSrcAvIDs(attrView.ID) {
+		if relatedAvID == attrView.ID {
+			continue
+		}
+		relatedAv, parseErr := av.ParseAttributeView(relatedAvID)
+		if nil != parseErr || nil == relatedAv ||
+			!removeAttrViewOptionFromFieldFilters(relatedAv, attrView.ID, operation.ID, optName) {
+			continue
+		}
+		if err = av.SaveAttributeView(relatedAv); nil != err {
+			return
+		}
+		ReloadAttrView(relatedAvID)
+	}
 	return
 }
 
@@ -7266,9 +7590,27 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	for _, view := range attrView.Views {
 		av.RenameSelectOptionInFilters(view.Filters, key.ID, oldName, newName, newColor)
 	}
+	renameAttrViewOptionInFieldFilters(attrView, attrView.ID, key.ID, oldName, newName, newColor)
 
 	regenAttrViewGroups(attrView)
-	err = av.SaveAttributeView(attrView)
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+
+	for _, relatedAvID := range av.GetSrcAvIDs(attrView.ID) {
+		if relatedAvID == attrView.ID {
+			continue
+		}
+		relatedAv, parseErr := av.ParseAttributeView(relatedAvID)
+		if nil != parseErr || nil == relatedAv ||
+			!renameAttrViewOptionInFieldFilters(relatedAv, attrView.ID, key.ID, oldName, newName, newColor) {
+			continue
+		}
+		if err = av.SaveAttributeView(relatedAv); nil != err {
+			return
+		}
+		ReloadAttrView(relatedAvID)
+	}
 	return
 }
 

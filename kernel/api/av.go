@@ -462,7 +462,11 @@ func getAttributeViewRelationCandidates(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	avID, _ := arg["avID"].(string)
+	keyID, _ := arg["keyID"].(string)
+	if "" == avID {
+		avID, _ = arg["id"].(string)
+	}
 	keyword := ""
 	if keywordArg := arg["keyword"]; nil != keywordArg {
 		keyword = keywordArg.(string)
@@ -485,7 +489,7 @@ func getAttributeViewRelationCandidates(c *gin.Context) {
 	}
 
 	name, blockIDs, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidates(
-		id, keyword, selectedBlockIDs, page, pageSize)
+		avID, keyID, keyword, selectedBlockIDs, page, pageSize)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

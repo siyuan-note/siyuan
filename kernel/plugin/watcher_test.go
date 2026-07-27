@@ -18,6 +18,7 @@ package plugin
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"os"
 	"path/filepath"
@@ -111,6 +112,122 @@ func TestHandlePluginSourceEventSupportsCombinedOperations(t *testing.T) {
 		Op:   fsnotify.Create | fsnotify.Write,
 	})
 	waitForPluginReload(t, reloaded, name)
+}
+
+func TestPluginSourceWatchStateScansChangedContent(t *testing.T) {
+	pluginsDir := t.TempDir()
+	name := "test-plugin"
+	pluginDir := filepath.Join(pluginsDir, name)
+	if err := os.MkdirAll(pluginDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	sourcePath := filepath.Join(pluginDir, "kernel.js")
+	if err := os.WriteFile(sourcePath, []byte("initial"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	reloaded := make(chan string, 2)
+	state := newPluginSourceWatchState(func(pluginName string) {
+		reloaded <- pluginName
+	})
+	state.delay = 20 * time.Millisecond
+	state.register(name, sourcePath, "initial")
+	t.Cleanup(func() {
+		state.unregister(name)
+	})
+
+	state.scan()
+	state.mu.Lock()
+	timer := state.entries[name].timer
+	state.mu.Unlock()
+	if timer != nil {
+		t.Fatal("unchanged source must not schedule a content read")
+	}
+	expectNoPluginReload(t, reloaded)
+
+	if err := os.WriteFile(sourcePath, []byte("changed-content"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	state.scan()
+	if err := os.WriteFile(sourcePath, []byte("final-content"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	waitForPluginReload(t, reloaded, name)
+
+	state.mu.Lock()
+	signature := state.entries[name].signature
+	state.mu.Unlock()
+	if want := sha256.Sum256([]byte("final-content")); signature != want {
+		t.Fatalf("polled source signature = %x, want %x", signature, want)
+	}
+
+	state.scan()
+	expectNoPluginReload(t, reloaded)
+
+	if err := os.Remove(sourcePath); err != nil {
+		t.Fatal(err)
+	}
+	state.scan()
+	expectNoPluginReload(t, reloaded)
+
+	if err := os.WriteFile(sourcePath, []byte("recreated"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	state.scan()
+	waitForPluginReload(t, reloaded, name)
+}
+
+func TestPluginSourceWatchStateIgnoresStaleRegistration(t *testing.T) {
+	pluginsDir := t.TempDir()
+	name := "test-plugin"
+	sourcePath := filepath.Join(pluginsDir, "kernel.js")
+	if err := os.WriteFile(sourcePath, []byte("initial"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	reloaded := make(chan string, 1)
+	state := newPluginSourceWatchState(func(pluginName string) {
+		reloaded <- pluginName
+	})
+	state.register(name, sourcePath, "initial")
+	state.mu.Lock()
+	staleGeneration := state.entries[name].generation
+	state.mu.Unlock()
+
+	state.unregister(name)
+	state.register(name, sourcePath, "initial")
+	t.Cleanup(func() {
+		state.unregister(name)
+	})
+
+	if err := os.WriteFile(sourcePath, []byte("changed"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	state.reloadIfChanged(name, staleGeneration, nil)
+	expectNoPluginReload(t, reloaded)
+}
+
+func TestSelectPluginSourceWatchMode(t *testing.T) {
+	tests := []struct {
+		name   string
+		goos   string
+		mobile bool
+		want   pluginSourceWatchMode
+	}{
+		{name: "windows", goos: "windows", want: pluginSourceWatchEvents},
+		{name: "linux", goos: "linux", want: pluginSourceWatchEvents},
+		{name: "darwin", goos: "darwin", want: pluginSourceWatchPolling},
+		{name: "darwin mobile", goos: "darwin", mobile: true, want: pluginSourceWatchDisabled},
+		{name: "android", goos: "android", mobile: true, want: pluginSourceWatchDisabled},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := selectPluginSourceWatchMode(test.goos, test.mobile); got != test.want {
+				t.Fatalf("selectPluginSourceWatchMode(%q, %t) = %d, want %d", test.goos, test.mobile, got, test.want)
+			}
+		})
+	}
 }
 
 func TestStorageWatcherIsCreatedLazilyAndClosedIdempotently(t *testing.T) {

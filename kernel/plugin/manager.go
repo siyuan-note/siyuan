@@ -45,6 +45,8 @@ type PluginManager struct {
 	context context.Context   // Context for managing plugin manager lifecycle
 	watcher *fsnotify.Watcher // watcher for kernel plugin source file changes, to trigger hot reload
 
+	sourceWatch pluginSourceWatchState
+
 	plugins   sync.Map // map[string]*KernelPlugin
 	pluginsMu sync.Map // map[string]*sync.Mutex, one per plugin name, to serialize start/stop of the same plugin while allowing concurrent start/stop of different plugins
 
@@ -80,10 +82,33 @@ func GetManager() *PluginManager {
 	managerOnce.Do(func() {
 		context := context.Background()
 
-		watcher, err := fsnotify.NewWatcher()
-		if err != nil {
-			logging.LogErrorf("failed to create kernel plugin source file watcher: %s", err)
-		} else if watcher != nil {
+		var watcher *fsnotify.Watcher
+		if isPluginFileWatchSupported() {
+			var err error
+			watcher, err = fsnotify.NewWatcher()
+			if err != nil {
+				logging.LogErrorf("failed to create kernel plugin source file watcher: %s", err)
+			}
+		}
+
+		manager = &PluginManager{
+			state: PluginManagerStateStopped,
+
+			pluginsDir: filepath.Join(util.DataDir, "plugins"),
+
+			context: context,
+			watcher: watcher,
+		}
+		manager.sourceWatch = newPluginSourceWatchState(func(name string) {
+			petal := model.GetPetalByName(name)
+			if petal == nil || !petal.Enabled {
+				return
+			}
+			logging.LogInfof("[plugin:%s] source file kernel.js changed, reloading plugin", petal.Name)
+			model.SetPetalEnabled(petal.Name, petal.Enabled)
+		})
+
+		if watcher != nil {
 			go func() {
 				defer watcher.Close()
 
@@ -95,19 +120,7 @@ func GetManager() *PluginManager {
 						if !ok {
 							return
 						}
-
-						pluginDir, fileName := filepath.Split(event.Name)
-						pluginName := filepath.Base(pluginDir)
-						if fileName == "kernel.js" {
-							switch event.Op {
-							case fsnotify.Create, fsnotify.Write:
-								petal := model.GetPetalByName(pluginName)
-								if petal != nil && petal.Enabled {
-									logging.LogInfof("[plugin:%s] source file kernel.js changed, reloading plugin", petal.Name)
-									go model.SetPetalEnabled(petal.Name, petal.Enabled)
-								}
-							}
-						}
+						manager.handlePluginSourceEvent(event)
 					case err, ok := <-watcher.Errors:
 						if !ok {
 							return
@@ -116,15 +129,6 @@ func GetManager() *PluginManager {
 					}
 				}
 			}()
-		}
-
-		manager = &PluginManager{
-			state: PluginManagerStateStopped,
-
-			pluginsDir: filepath.Join(util.DataDir, "plugins"),
-
-			context: context,
-			watcher: watcher,
 		}
 	})
 	return manager
@@ -246,7 +250,7 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 	// Stop any running instance inside the same lock so that concurrent hot-reload goroutines queue here and each one sees the instance started by the previous.
 	m.stopLocked(petal.Name)
 
-	m.addPluginSourceWatch(petal.Name)
+	m.addPluginSourceWatch(petal.Name, petal.Kernel.JS)
 
 	p := NewKernelPlugin(m.context, petal)
 
@@ -342,18 +346,21 @@ func (m *PluginManager) GetLoadedPluginsInfo() (plugins []*PluginInfo) {
 }
 
 // addPluginSourceWatch adds the plugin's base directory to the fsnotify watcher to watch for source file changes for hot reload.
-func (m *PluginManager) addPluginSourceWatch(name string) {
+func (m *PluginManager) addPluginSourceWatch(name, source string) {
 	if m.watcher == nil {
 		return
 	}
 	path := filepath.Join(m.pluginsDir, name)
 	if err := m.watcher.Add(path); err != nil {
 		logging.LogErrorf("failed to add kernel plugin source path [%s] to watcher: %s", path, err)
+		return
 	}
+	m.sourceWatch.register(name, filepath.Join(path, "kernel.js"), source)
 }
 
 // removePluginSourceWatch removes the plugin's base directory from the fsnotify watcher when the plugin is stopped.
 func (m *PluginManager) removePluginSourceWatch(name string) (err error) {
+	m.sourceWatch.unregister(name)
 	if m.watcher == nil {
 		return
 	}

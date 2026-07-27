@@ -32,7 +32,8 @@ export const formatDate = (options: {
     const menu = new Menu(Constants.MENU_AV_COL_FORMAT_DATE);
     (["", "full", "month-day-year", "day-month-year", "year-month-day"] as TAVDateFormat[]).forEach((format) => {
         menu.addItem({
-            iconHTML: format === options.oldFormat ? '<svg><use xlink:href="#iconSelect"></use></svg>' : "",
+            checked: format === options.oldFormat,
+            iconHTML: "",
             label: getLabelByDateFormat(format),
             click() {
                 transaction(options.protyle, [{

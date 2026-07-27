@@ -36,9 +36,9 @@ export const initWindowEvent = (app: App) => {
 
     document.body.addEventListener("mouseleave", () => {
         if (window.siyuan.layout.leftDock) {
-            window.siyuan.layout.leftDock.hideDock();
-            window.siyuan.layout.rightDock.hideDock();
-            window.siyuan.layout.bottomDock.hideDock();
+            window.siyuan.layout.leftDock.hideDockByHover();
+            window.siyuan.layout.rightDock.hideDockByHover();
+            window.siyuan.layout.bottomDock.hideDockByHover();
         }
         document.querySelectorAll(".protyle-gutters").forEach(item => {
             item.classList.add("fn__none");
@@ -46,19 +46,17 @@ export const initWindowEvent = (app: App) => {
         });
         hideTooltip();
     });
-    let mouseIsEnter = false;
-    document.body.addEventListener("mouseenter", () => {
-        if (window.siyuan.layout.leftDock) {
-            mouseIsEnter = true;
-            setTimeout(() => {
-                mouseIsEnter = false;
-            }, Constants.TIMEOUT_TRANSITION);
-        }
-    });
 
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
-        windowMouseMove(event, mouseIsEnter);
+        windowMouseMove(event);
     });
+    window.addEventListener("pointerdown", () => {
+        if (window.siyuan.layout.leftDock) {
+            window.siyuan.layout.leftDock.clearDockHoverTimeout();
+            window.siyuan.layout.rightDock.clearDockHoverTimeout();
+            window.siyuan.layout.bottomDock.clearDockHoverTimeout();
+        }
+    }, {passive: true});
 
     // 横向滚动表格时重新定位表格列宽调整手柄 https://github.com/siyuan-note/siyuan/issues/13828
     window.addEventListener("scroll", (event: Event) => {

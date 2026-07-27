@@ -38,7 +38,7 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     return nodeElement;
 };
 
-export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
+export const windowMouseMove = (event: MouseEvent) => {
     if (document.body.classList.contains("body--blur") || document.getElementById("progress")) {
         // 非激活状态下不执行 https://ld246.com/article/1693474547631
         return;
@@ -71,46 +71,54 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
     }
     const target = event.target as Element;
     // Dock
-    if (!mouseIsEnter &&
-        event.buttons === 0 &&  // 鼠标按键被按下时不触发
-        window.siyuan.layout.bottomDock &&
-        !isWindow()) {
-        if (event.clientX < Math.max(document.getElementById("dockLeft").clientWidth + 1, 16)) {
-            if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0 &&
+    if (window.siyuan.layout.bottomDock && !isWindow()) {
+        const docks = [
+            window.siyuan.layout.leftDock,
+            window.siyuan.layout.rightDock,
+            window.siyuan.layout.bottomDock
+        ];
+        const inDockOverlay = hasClosestByClassName(target, "b3-menu") ||
+            hasClosestByClassName(target, "tooltip") ||
+            hasClosestByClassName(target, "block__popover") ||
+            hasClosestByClassName(target, "b3-dialog", true);
+        if (event.buttons !== 0 || inDockOverlay) {
+            docks.forEach(dock => dock.clearDockHoverTimeout());
+        } else {
+            const toolbarHeight = document.getElementById("toolbar").clientHeight;
+            const statusHeight = document.getElementById("status").clientHeight;
+            const inYRange = event.clientY > toolbarHeight && event.clientY < window.innerHeight - statusHeight;
+            const canTrigger = !hasClosestByClassName(target, "layout--float") &&
+                !hasClosestByClassName(target, "protyle-toolbar") &&
+                !hasClosestByClassName(target, "protyle-util");
+            const leftDock = window.siyuan.layout.leftDock;
+            const leftTrigger = canTrigger && inYRange && !leftDock.pin && leftDock.layout.element.clientWidth > 0 &&
+                event.clientX < Math.max(document.getElementById("dockLeft").clientWidth + 1, 16) &&
                 // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围
-                (window.siyuan.layout.leftDock.elements[0].clientWidth > 0 || (window.siyuan.layout.leftDock.elements[0].clientWidth === 0 && event.clientX < 8))) {
-                if (event.clientY > document.getElementById("toolbar").clientHeight &&
-                    event.clientY < window.innerHeight - document.getElementById("status").clientHeight) {
-                    if (!hasClosestByClassName(target, "b3-menu") &&
-                        !hasClosestByClassName(target, "protyle-toolbar") &&
-                        !hasClosestByClassName(target, "protyle-util") &&
-                        !hasClosestByClassName(target, "b3-dialog", true) &&
-                        !hasClosestByClassName(target, "layout--float")) {
-                        window.siyuan.layout.leftDock.showDock();
-                    }
-                } else {
-                    window.siyuan.layout.leftDock.hideDock();
-                }
+                (leftDock.elements[0].clientWidth > 0 || event.clientX < 8);
+            if (leftTrigger || leftDock.layout.element.contains(target)) {
+                leftDock.showDockByHover();
+            } else {
+                leftDock.hideDockByHover();
             }
-        } else if (event.clientX > window.innerWidth - Math.max(document.getElementById("dockRight").clientWidth - 2, 16)) {
-            if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.clientWidth > 0 &&
-                (window.siyuan.layout.rightDock.elements[0].clientWidth > 0 || (window.siyuan.layout.rightDock.elements[0].clientWidth === 0 && event.clientX > window.innerWidth - 8))) {
-                if (event.clientY > document.getElementById("toolbar").clientHeight &&
-                    event.clientY < window.innerHeight - document.getElementById("status").clientHeight) {
-                    if (!hasClosestByClassName(target, "b3-menu") &&
-                        !hasClosestByClassName(target, "layout--float") &&
-                        !hasClosestByClassName(target, "protyle-toolbar") &&
-                        !hasClosestByClassName(target, "protyle-util") &&
-                        !hasClosestByClassName(target, "b3-dialog", true)) {
-                        window.siyuan.layout.rightDock.showDock();
-                    }
-                } else {
-                    window.siyuan.layout.rightDock.hideDock();
-                }
+
+            const rightDock = window.siyuan.layout.rightDock;
+            const rightTrigger = canTrigger && inYRange && !rightDock.pin && rightDock.layout.element.clientWidth > 0 &&
+                event.clientX > window.innerWidth - Math.max(document.getElementById("dockRight").clientWidth - 2, 16) &&
+                (rightDock.elements[0].clientWidth > 0 || event.clientX > window.innerWidth - 8);
+            if (rightTrigger || rightDock.layout.element.contains(target)) {
+                rightDock.showDockByHover();
+            } else {
+                rightDock.hideDockByHover();
             }
-        }
-        if (event.clientY > Math.min(window.innerHeight - 10, window.innerHeight - document.querySelector("#status").clientHeight)) {
-            window.siyuan.layout.bottomDock.showDock();
+
+            const bottomDock = window.siyuan.layout.bottomDock;
+            const bottomTrigger = canTrigger && !bottomDock.pin && bottomDock.layout.element.clientHeight > 0 &&
+                event.clientY > Math.min(window.innerHeight - 10, window.innerHeight - statusHeight);
+            if (bottomTrigger || bottomDock.layout.element.contains(target)) {
+                bottomDock.showDockByHover();
+            } else {
+                bottomDock.hideDockByHover();
+            }
         }
     }
 

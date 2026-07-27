@@ -34,6 +34,8 @@ export class Dock {
     public pin = true;
     public data: { [key in TDock | string]?: Model | boolean };
     private hideResizeTimeout: number;
+    private showDockTimeout = 0;
+    private hideDockTimeout = 0;
 
     constructor(options: {
         app: App,
@@ -225,6 +227,9 @@ export class Dock {
             });
         }
 
+        this.layout.element.addEventListener("mouseenter", () => {
+            this.showDockByHover();
+        });
         this.layout.element.addEventListener("mouseleave", (event: MouseEvent & { toElement: HTMLElement }) => {
             if (event.buttons !== 0 || this.pin || event.toElement?.classList.contains("b3-menu") ||
                 event.toElement?.classList.contains("tooltip")) {
@@ -239,7 +244,7 @@ export class Dock {
             if (this.position === "Bottom" && event.clientY > window.innerHeight - 73) {
                 return;
             }
-            this.hideDock();
+            this.hideDockByHover();
         });
 
         this.layout.element.querySelector(".layout__dockresize").addEventListener("mousedown", (event: MouseEvent) => {
@@ -307,6 +312,7 @@ export class Dock {
     }
 
     public togglePin() {
+        this.clearDockHoverTimeout();
         this.pin = !this.pin;
         const hasActive = this.elements[0].querySelector(".dock__item--active") ||
             this.elements[1].querySelector(".dock__item--active");
@@ -337,7 +343,39 @@ export class Dock {
         }
     }
 
+    public showDockByHover() {
+        window.clearTimeout(this.hideDockTimeout);
+        this.hideDockTimeout = 0;
+        if (this.showDockTimeout || this.pin || this.layout.element.style.opacity === "1") {
+            return;
+        }
+        this.showDockTimeout = window.setTimeout(() => {
+            this.showDockTimeout = 0;
+            this.showDock();
+        }, Constants.TIMEOUT_DOCK_TOGGLE);
+    }
+
+    public hideDockByHover() {
+        window.clearTimeout(this.showDockTimeout);
+        this.showDockTimeout = 0;
+        if (this.hideDockTimeout || this.pin || this.layout.element.style.opacity === "0") {
+            return;
+        }
+        this.hideDockTimeout = window.setTimeout(() => {
+            this.hideDockTimeout = 0;
+            this.hideDock();
+        }, Constants.TIMEOUT_DOCK_TOGGLE);
+    }
+
+    public clearDockHoverTimeout() {
+        window.clearTimeout(this.showDockTimeout);
+        window.clearTimeout(this.hideDockTimeout);
+        this.showDockTimeout = 0;
+        this.hideDockTimeout = 0;
+    }
+
     public showDock(reset = false) {
+        this.clearDockHoverTimeout();
         if (!reset && (this.pin || this.layout.element.style.opacity === "1") ||
             (!this.elements[0].querySelector(".dock__item--active") && !this.elements[1].querySelector(".dock__item--active"))
         ) {
@@ -379,6 +417,7 @@ export class Dock {
     }
 
     public hideDock(reset = false) {
+        this.clearDockHoverTimeout();
         if (!reset && (this.layout.element.style.opacity === "0" || this.pin)) {
             return;
         }

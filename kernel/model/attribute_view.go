@@ -4024,8 +4024,9 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 	for _, s := range masterView.Sorts {
 		view.Sorts = append(view.Sorts, &av.ViewSort{
-			Column: s.Column,
-			Order:  s.Order,
+			Column:       s.Column,
+			Order:        s.Order,
+			DateEndpoint: s.DateEndpoint,
 		})
 	}
 

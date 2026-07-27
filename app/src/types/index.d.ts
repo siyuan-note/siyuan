@@ -1144,7 +1144,8 @@ interface IAVGroup {
 
 interface IAVSort {
     column: string,
-    order: "ASC" | "DESC"
+    order: "ASC" | "DESC",
+    dateEndpoint?: "start" | "end"
 }
 
 interface IAVColumn {

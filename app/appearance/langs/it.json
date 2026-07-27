@@ -1,4 +1,5 @@
 {
+  "startDate": "Data di inizio",
   "addToDictionary": "Aggiungi al dizionario",
   "addToDictionaryFailed": "Impossibile aggiungere la parola al dizionario",
   "freezeDrag": "Trascina per regolare l'intervallo delle colonne bloccate",

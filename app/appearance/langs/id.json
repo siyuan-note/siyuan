@@ -1,4 +1,5 @@
 {
+  "startDate": "Tanggal mulai",
   "addToDictionary": "Tambahkan ke kamus",
   "addToDictionaryFailed": "Kata gagal ditambahkan ke kamus",
   "freezeDrag": "Seret untuk menyesuaikan rentang kolom beku",

@@ -1,4 +1,5 @@
 {
+  "startDate": "開始日期",
   "addToDictionary": "加入字典",
   "addToDictionaryFailed": "無法將單字加入字典",
   "freezeDrag": "拖曳調整凍結範圍",

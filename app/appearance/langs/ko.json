@@ -1,4 +1,5 @@
 {
+  "startDate": "시작일",
   "addToDictionary": "사전에 추가",
   "addToDictionaryFailed": "단어를 사전에 추가하지 못했습니다",
   "freezeDrag": "드래그하여 고정 열 범위 조정",

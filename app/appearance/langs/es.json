@@ -1,4 +1,5 @@
 {
+  "startDate": "Fecha de inicio",
   "addToDictionary": "Añadir al diccionario",
   "addToDictionaryFailed": "No se pudo añadir la palabra al diccionario",
   "freezeDrag": "Arrastra para ajustar el intervalo de columnas inmovilizadas",

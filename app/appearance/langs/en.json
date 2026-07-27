@@ -1,4 +1,5 @@
 {
+  "startDate": "Start date",
   "addToDictionary": "Add to dictionary",
   "addToDictionaryFailed": "Failed to add the word to the dictionary",
   "freezeDrag": "Drag to adjust the frozen column range",

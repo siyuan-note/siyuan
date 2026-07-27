@@ -1328,6 +1328,22 @@
         min-width: 60px;
       }
 
+      .av__filter-date-controls {
+        display: inline-flex;
+        align-items: center;
+        flex: 1;
+        flex-wrap: wrap;
+        gap: 6px;
+        min-width: 60px;
+      }
+
+      .av__filter-date-config {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
       &.av__filter-panel {
         min-width: 340px;
         max-width: 80vw;

@@ -1,4 +1,5 @@
 {
+  "startDate": "تاريخ البدء",
   "addToDictionary": "إضافة إلى القاموس",
   "addToDictionaryFailed": "تعذرت إضافة الكلمة إلى القاموس",
   "freezeDrag": "اسحب لضبط نطاق الأعمدة المجمدة",

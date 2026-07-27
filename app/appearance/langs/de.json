@@ -1929,7 +1929,7 @@
 	},
 	"_attrView": {
 		"dateFormat": "Datumsformat",
-		"fullDate": "Vollständiges Datum",
+		"fullDate": "Lokalisiertes Datum",
 		"dateMonths": "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember",
 		"dateFormatFullTemplate": "${day}. ${month} ${year}",
 		"empty": "Leer",

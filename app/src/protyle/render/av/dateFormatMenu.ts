@@ -2,7 +2,7 @@ import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
 import {getAllEditor, getAllModels} from "../../../layout/getAll";
-import {getLabelByDateFormat} from "./dateFormat";
+import {formatDateDisplay, getLabelByDateFormat} from "./dateFormat";
 
 const refreshDatabaseAttributePanels = (protyle: IProtyle, avID: string) => {
     protyle.databaseAttributePanel?.refresh();
@@ -35,6 +35,7 @@ export const formatDate = (options: {
             checked: format === options.oldFormat,
             iconHTML: "",
             label: getLabelByDateFormat(format),
+            accelerator: format === "full" ? formatDateDisplay(Date.now(), format) : undefined,
             click() {
                 transaction(options.protyle, [{
                     action: "setAttrViewColDateFormat",

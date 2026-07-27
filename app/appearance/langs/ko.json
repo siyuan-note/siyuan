@@ -1929,7 +1929,7 @@
 	},
 	"_attrView": {
 		"dateFormat": "날짜 형식",
-		"fullDate": "전체 날짜",
+		"fullDate": "현지화된 날짜",
 		"dateMonths": "1월|2월|3월|4월|5월|6월|7월|8월|9월|10월|11월|12월",
 		"dateFormatFullTemplate": "${year}년 ${month} ${day}일",
 		"empty": "비어 있음",

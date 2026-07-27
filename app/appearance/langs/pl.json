@@ -1929,7 +1929,7 @@
 	},
 	"_attrView": {
 		"dateFormat": "Format daty",
-		"fullDate": "Pełna data",
+		"fullDate": "Data w formacie lokalnym",
 		"dateMonths": "stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia",
 		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Pusty",

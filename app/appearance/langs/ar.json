@@ -1929,7 +1929,7 @@
 	},
 	"_attrView": {
 		"dateFormat": "تنسيق التاريخ",
-		"fullDate": "التاريخ الكامل",
+		"fullDate": "تاريخ محلي",
 		"dateMonths": "يناير|فبراير|مارس|أبريل|مايو|يونيو|يوليو|أغسطس|سبتمبر|أكتوبر|نوفمبر|ديسمبر",
 		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "فارغ",

@@ -1929,7 +1929,7 @@
 	},
 	"_attrView": {
 		"dateFormat": "תבנית תאריך",
-		"fullDate": "תאריך מלא",
+		"fullDate": "תאריך מקומי",
 		"dateMonths": "ינואר|פברואר|מרץ|אפריל|מאי|יוני|יולי|אוגוסט|ספטמבר|אוקטובר|נובמבר|דצמבר",
 		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "ריק",

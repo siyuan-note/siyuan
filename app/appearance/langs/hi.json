@@ -1929,7 +1929,7 @@
 	},
 	"_attrView": {
 		"dateFormat": "दिनांक प्रारूप",
-		"fullDate": "पूर्ण दिनांक",
+		"fullDate": "स्थानीयकृत दिनांक",
 		"dateMonths": "जनवरी|फ़रवरी|मार्च|अप्रैल|मई|जून|जुलाई|अगस्त|सितंबर|अक्टूबर|नवंबर|दिसंबर",
 		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "खाली",

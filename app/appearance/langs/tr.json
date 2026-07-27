@@ -1929,7 +1929,7 @@
 	},
 	"_attrView": {
 		"dateFormat": "Tarih biçimi",
-		"fullDate": "Tam tarih",
+		"fullDate": "Yerelleştirilmiş tarih",
 		"dateMonths": "Ocak|Şubat|Mart|Nisan|Mayıs|Haziran|Temmuz|Ağustos|Eylül|Ekim|Kasım|Aralık",
 		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Boş",

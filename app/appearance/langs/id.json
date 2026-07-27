@@ -1929,7 +1929,7 @@
 	},
 	"_attrView": {
 		"dateFormat": "Format tanggal",
-		"fullDate": "Tanggal lengkap",
+		"fullDate": "Tanggal lokal",
 		"dateMonths": "Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember",
 		"dateFormatFullTemplate": "${day} ${month} ${year}",
 		"empty": "Kosong",

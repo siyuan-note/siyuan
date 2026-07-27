@@ -293,8 +293,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (viewType === "gallery" && target.classList.contains("av__gallery-cover") &&
-            (hasClosestByClassName(target, "av__gallery-item") as HTMLElement)?.classList.contains("av__gallery-item--primary-hidden")) {
+        } else if (viewType === "gallery" && target.classList.contains("av__gallery-cover")) {
             openDatabaseRow(protyle, target, blockElement);
             event.preventDefault();
             event.stopPropagation();

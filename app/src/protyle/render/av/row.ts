@@ -58,7 +58,7 @@ export const getRowHTML = (options: {
         const primaryHidden = galleryData.fields.find(field => field.type === "block")?.hidden === true;
         const hasVisibleFields = galleryData.fields.some(field => !field.hidden);
         const emptyClass = !hasVisibleFields && galleryData.coverFrom === 0 ? " av__gallery-item--empty" : "";
-        html += `<div data-id="${galleryRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${primaryHidden ? " av__gallery-item--primary-hidden" : ""}${emptyClass}">`;
+        html += `<div data-id="${galleryRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${emptyClass}">`;
         if (galleryData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + galleryData.cardAspectRatio;
             if (galleryRow.coverURL) {

@@ -17,7 +17,13 @@ import {
 } from "./cell";
 import {addCol, getColIconByType, getColNameByType, showColMenu} from "./col";
 import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHeader} from "./row";
-import {getAVPrimaryCell, getAVSelectedItems, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
+import {
+    getAVPrimaryCell,
+    getAVSelectedItemInfos,
+    getAVSelectedItems,
+    resetAVRowSelect,
+    updateAVRowSelect
+} from "./virtualScroll";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
@@ -30,6 +36,7 @@ import {openCalcMenu} from "./calc";
 import {avRender, getGroupFoldTip} from "./render";
 import {addView, openViewMenu} from "./view";
 import {isOnlyMeta, writeText} from "../../util/compatibility";
+import {selectAVItemRange, setAVItemAnchor} from "./rangeSelect";
 import {openSearchAV} from "./relation";
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
@@ -57,8 +64,8 @@ const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
 };
 
-const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement: HTMLElement) => {
-    const cellElement = rowElement.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
+const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement?: HTMLElement, itemID = rowElement?.dataset.id) => {
+    const cellElement = rowElement?.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
     if (cellElement) {
         const value = genCellValueByElement("block", cellElement);
         return {
@@ -71,7 +78,7 @@ const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement: HTMLElement) =
             isDetached: isDetachedDatabaseCell(cellElement),
         };
     }
-    const cell = getAVPrimaryCell(blockElement, rowElement.dataset.id);
+    const cell = getAVPrimaryCell(blockElement, itemID);
     if (!cell?.value) {
         return;
     }
@@ -360,7 +367,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                         return;
                     }
                     if (cellType === "updated" || cellType === "created" || cellType === "lineNumber") {
-                        selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+                        clearSelect(["row"], blockElement);
                     } else {
                         scrollElement.querySelectorAll(".av__row--select").forEach(item => {
                             item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
@@ -495,7 +502,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (target.classList.contains("av__firstcol")) {
             window.siyuan.menus.menu.remove();
-            selectRow(target, "toggle");
+            const rowElement = hasClosestByClassName(target, "av__row") as HTMLElement;
+            if (event.shiftKey) {
+                selectAVItemRange(blockElement, rowElement);
+            } else {
+                selectRow(target, "toggle");
+                setAVItemAnchor(blockElement, rowElement);
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -538,7 +551,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (target.classList.contains("av__row") && event.shiftKey && !target.classList.contains("av__row--header")) {
-            selectRow(target.querySelector(".av__firstcol"), "toggle");
+            selectAVItemRange(blockElement, target);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -609,17 +622,21 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         }
         updateHeader(rowElement);
     }
+    setAVItemAnchor(blockElement as HTMLElement, rowElement);
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
+    const selectedItemInfos = getAVSelectedItemInfos(blockElement);
     const selectedItems = getAVSelectedItems(blockElement);
-    const primaryRows = Array.from(rowElements)
-        .map(item => getPrimaryRowInfo(blockElement, item as HTMLElement))
+    const primaryRows = selectedItemInfos
+        .map(item => getPrimaryRowInfo(blockElement,
+            blockElement.querySelector(`.av__row[data-id="${item.itemID}"], .av__gallery-item[data-id="${item.itemID}"]`) as HTMLElement,
+            item.itemID))
         .filter((item): item is NonNullable<ReturnType<typeof getPrimaryRowInfo>> => Boolean(item));
-    if (primaryRows.length !== rowElements.length) {
+    if (primaryRows.length !== selectedItemInfos.length) {
         return false;
     }
     const ids = primaryRows.map(item => item.blockID);
-    if (rowElements.length === 1 && !primaryRows[0].isDetached) {
+    if (selectedItemInfos.length === 1 && !primaryRows[0].isDetached) {
         /// #if !MOBILE
         const blockId = ids[0];
         const openSubmenus = openEditorTab(protyle.app, [blockId], undefined, undefined, true);
@@ -655,7 +672,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         click() {
             let text = "";
             primaryRows.forEach((item, i) => {
-                if (rowElements.length > 1) {
+                if (selectedItemInfos.length > 1) {
                     text += "- ";
                 }
                 text += item.content.trim();
@@ -673,14 +690,13 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             const databaseBlockID = blockElement.dataset.nodeId;
             const viewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
                 blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") || "";
-            const links = Array.from(rowElements).map((item: HTMLElement) => {
+            const links = selectedItemInfos.map(item => {
                 const params = new URLSearchParams({
                     avViewID: viewID,
-                    avItemID: item.dataset.id,
+                    avItemID: item.itemID,
                 });
-                const groupID = (hasClosestByClassName(item, "av__body") as HTMLElement)?.dataset.groupId;
-                if (groupID) {
-                    params.set("avGroupID", groupID);
+                if (item.groupID) {
+                    params.set("avGroupID", item.groupID);
                 }
                 return `siyuan://blocks/${databaseBlockID}?${params.toString()}`;
             });
@@ -842,7 +858,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         iconHTML: "",
         label: window.siyuan.languages.duplicate,
         click: () => {
-            duplicateRows(blockElement, protyle, rowElements);
+            duplicateRows(blockElement, protyle, selectedItemInfos.map(item => item.itemID));
         }
     });
 
@@ -890,11 +906,10 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             label: window.siyuan.languages.addToDatabase,
             icon: "iconDatabase",
             click() {
-                openSearchAV(blockElement.getAttribute("data-av-id"), rowElements[0] as HTMLElement, (listItemElement) => {
+                openSearchAV(blockElement.getAttribute("data-av-id"), rowElement, (listItemElement) => {
                     const srcs: IOperationSrcs[] = [];
                     const sourceIds: string[] = [];
-                    rowElements.forEach((item, index) => {
-                        const rowId = item.getAttribute("data-id");
+                    selectedItemInfos.forEach((item, index) => {
                         const primaryInfo = primaryRows[index];
                         srcs.push({
                             itemID: Lute.NewNodeID(),
@@ -902,7 +917,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                             id: primaryInfo.blockID,
                             isDetached: primaryInfo.isDetached,
                         });
-                        sourceIds.push(rowId);
+                        sourceIds.push(item.itemID);
                     });
                     const avID = listItemElement.dataset.avId;
                     const viewID = listItemElement.dataset.viewId;
@@ -927,7 +942,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 }, true, blockElement.getAttribute("data-node-id"));
             }
         });
-        if (rowElements.length === 1) {
+        if (selectedItemInfos.length === 1) {
             if (!primaryRows[0].isDetached) {
                 menu.addSeparator({id: "separator_1"});
             }
@@ -947,8 +962,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                             blockElement,
                             protyle,
                             count: parseInt(inputElement.value),
-                            previousID: rowElements[0].previousElementSibling?.getAttribute("data-id"),
-                            groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                            previousID: selectedItemInfos[0].previousID,
+                            groupID: selectedItemInfos[0].groupID
                         });
                         menu.close();
                     });
@@ -958,8 +973,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                                 blockElement,
                                 protyle,
                                 count: parseInt(inputElement.value),
-                                previousID: rowElements[0].previousElementSibling?.getAttribute("data-id"),
-                                groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                                previousID: selectedItemInfos[0].previousID,
+                                groupID: selectedItemInfos[0].groupID
                             });
                             menu.close();
                         }
@@ -982,8 +997,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                             blockElement,
                             protyle,
                             count: parseInt(inputElement.value),
-                            previousID: rowElements[0].getAttribute("data-id"),
-                            groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                            previousID: selectedItemInfos[0].itemID,
+                            groupID: selectedItemInfos[0].groupID
                         });
                         menu.close();
                     });
@@ -993,8 +1008,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                                 blockElement,
                                 protyle,
                                 count: parseInt(inputElement.value),
-                                previousID: rowElements[0].getAttribute("data-id"),
-                                groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                                previousID: selectedItemInfos[0].itemID,
+                                groupID: selectedItemInfos[0].groupID
                             });
                             menu.close();
                         }
@@ -1011,7 +1026,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                         unbindDatabaseRow(
                             protyle,
                             blockElement,
-                            rowElements[0] as HTMLElement,
+                            rowElement,
                             primaryRows[0]
                         );
                     }

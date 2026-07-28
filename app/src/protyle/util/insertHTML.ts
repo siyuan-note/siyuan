@@ -47,6 +47,7 @@ import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
 import {getAVFilteredTipContext} from "../render/av/filteredTip";
+import {getAVSelectedCells, IAVSelectedCell} from "../render/av/selectionState";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -274,18 +275,24 @@ const pasteAVMatrix = async (options: {
     values: TAVPasteValue[][],
     protyle: IProtyle,
     blockElement: HTMLElement,
-    startCell: HTMLElement,
+    startCell?: HTMLElement,
+    start?: IAVSelectedCell,
     columns: IAVColumn[],
     html: string,
     cellHTML?: string[][],
     header?: string[],
 }) => {
-    const startRowElement = hasClosestByClassName(options.startCell, "av__row") as HTMLElement;
+    const startRowElement = options.startCell ?
+        hasClosestByClassName(options.startCell, "av__row") as HTMLElement : undefined;
     const sourceWidth = getAVPasteMatrixWidth(options.values, options.header);
-    if (!startRowElement || sourceWidth === 0) {
+    const startItemID = options.start?.rowID || startRowElement?.dataset.id;
+    const startColID = options.start?.colID || options.startCell?.dataset.colId;
+    if (!startItemID || !startColID || sourceWidth === 0) {
         return;
     }
-    const bodyElement = hasClosestByClassName(startRowElement, "av__body") as HTMLElement;
+    const bodyElement = (startRowElement ? hasClosestByClassName(startRowElement, "av__body") :
+        Array.from(options.blockElement.querySelectorAll<HTMLElement>(".av__body")).find(item =>
+            (item.dataset.groupId || "") === (options.start?.groupID || ""))) as HTMLElement;
     if (!bodyElement) {
         return;
     }
@@ -297,7 +304,7 @@ const pasteAVMatrix = async (options: {
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
         groupID,
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent || "",
-        startItemID: startRowElement.dataset.id,
+        startItemID,
         count: Math.max(options.values.length, 1),
     });
     const view = response.data?.view as IAVTable;
@@ -322,7 +329,7 @@ const pasteAVMatrix = async (options: {
     const newColumnUndoOperations: IOperation[] = [];
     const inferableKeyIDs = new Set<string>(response.data?.inferableKeyIDs || []);
     const visibleColumns = view.columns.filter(column => !column.hidden);
-    const startColumnIndex = visibleColumns.findIndex(column => column.id === options.startCell.dataset.colId);
+    const startColumnIndex = visibleColumns.findIndex(column => column.id === startColID);
     if (startColumnIndex < 0) {
         return;
     }
@@ -425,7 +432,7 @@ const pasteAVMatrix = async (options: {
     const existingRows = rows.slice(0, options.values.length);
     const rowElements: HTMLElement[] = [];
     const pasteRows: IAVRow[] = [];
-    const startIndex = parseInt(startRowElement.dataset.index || "0");
+    const startIndex = options.start?.rowIndex ?? parseInt(startRowElement?.dataset.index || "0");
     const cellPlaceholders: IAVPasteCellPlaceholder[] = [];
     existingRows.forEach((row, index) => {
         let rowElement = bodyElement.querySelector(`.av__row[data-id="${row.id}"]`) as HTMLElement;
@@ -594,6 +601,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
     const avID = blockElement.dataset.avId;
     fetchPost("/api/av/getAttributeViewKeysByAvID", {avID}, async (response) => {
         const columns: IAVColumn[] = response.data;
+        const selectedCells = getAVSelectedCells(blockElement);
         const cellElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];
         if (values && Array.isArray(values) && values.length > 0) {
             if (cellElements.length === 0) {
@@ -603,10 +611,10 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     });
                 });
             }
-            if (cellElements.length === 0) {
+            if (cellElements.length === 0 && selectedCells.length === 0) {
                 cellElements.push(blockElement.querySelector(".av__row:not(.av__row--header) .av__cell"));
             }
-            if (cellElements[0]) {
+            if (cellElements[0] || selectedCells[0]) {
                 const useHeader = headerCandidate ? await confirmAVPasteHeader() : false;
                 const header = useHeader ?
                     values[0].map(value => typeof value === "string" ? value : "") : undefined;
@@ -615,6 +623,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     protyle,
                     blockElement,
                     startCell: cellElements[0],
+                    start: selectedCells[0],
                     columns,
                     html,
                     cellHTML: useHeader ? cellHTML.slice(1) : cellHTML,
@@ -674,13 +683,29 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         }
         if (cellElements.length > 0) {
             if (textJSON.length === 1 && textJSON[0].length === 1) {
-                updateCellsValue(protyle, blockElement as HTMLElement, normalizedText, cellElements, columns, html);
+                updateCellsValue(protyle, blockElement as HTMLElement, normalizedText,
+                    selectedCells.length > 0 ? undefined : cellElements, columns, html);
             } else {
                 await pasteAVMatrix({
                     values: textJSON,
                     protyle,
                     blockElement,
                     startCell: cellElements[0],
+                    start: selectedCells[0],
+                    columns,
+                    html,
+                });
+            }
+            document.querySelector(".av__panel")?.remove();
+        } else if (selectedCells.length > 0) {
+            if (textJSON.length === 1 && textJSON[0].length === 1) {
+                updateCellsValue(protyle, blockElement as HTMLElement, normalizedText, undefined, columns, html);
+            } else {
+                await pasteAVMatrix({
+                    values: textJSON,
+                    protyle,
+                    blockElement,
+                    start: selectedCells[0],
                     columns,
                     html,
                 });

@@ -90,12 +90,14 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {
     addDragFill,
     dragFillCellsValue,
+    getAVSelectedCellData,
     genCellValueByElement,
     getCellText,
     getPositionByCellElement,
     getTypeByCellElement,
     updateCellsValue
 } from "../render/av/cell";
+import {getAVSelectedCells} from "../render/av/selectionState";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {openLink} from "../../editor/openLink";
 import {mathRender} from "../render/mathRender";
@@ -120,6 +122,13 @@ import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spel
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
 import {applyAVDragSelection, clearAVDragSelection, isAVDragSelectSupported} from "../render/av/dragSelect";
+import {
+    selectAVCellRange,
+    selectAVItemRange,
+    setAVCellAnchor,
+    setAVDragItemAnchor,
+    setAVItemAnchor,
+} from "../render/av/rangeSelect";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -423,7 +432,8 @@ export class WYSIWYG {
                 return;
             }
             const selectImgElement = nodeElement.querySelector(".img--select");
-            const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select");
+            const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
+                (getAVSelectedCells(nodeElement).length > 0 ? nodeElement : null);
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table
             let selectTableRange = false;
@@ -515,7 +525,13 @@ export class WYSIWYG {
                     selectElements[0].removeAttribute("data-reftext");
                 }
             } else if (selectAVElement) {
-                const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];
+                const selectedCellData = getAVSelectedCellData(nodeElement);
+                const cellElements: Element[] = selectedCellData.json.length > 0 ? [] :
+                    Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select"));
+                if (selectedCellData.json.length > 0) {
+                    html = JSON.stringify(selectedCellData.json);
+                    textPlain = selectedCellData.text;
+                }
                 if (cellElements.length === 0) {
                     nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
                         rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
@@ -523,7 +539,7 @@ export class WYSIWYG {
                         });
                     });
                 }
-                if (cellElements.length > 0) {
+                if (cellElements.length > 0 && selectedCellData.json.length === 0) {
                     html = "[";
                     cellElements.forEach((item: HTMLElement, index) => {
                         const cellText = getCellText(item);
@@ -739,6 +755,7 @@ export class WYSIWYG {
             let nodeElement = hasClosestBlock(target) as HTMLElement;
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
             const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
+            const avCellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
             const mostLeft = wysiwygRect.left + (parseInt(wysiwygStyle.paddingLeft) || 24) + 1;
@@ -752,6 +769,22 @@ export class WYSIWYG {
             const baseDragSelectElements = new Set(isToggleBlockDrag ?
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")) : []);
             if (event.shiftKey) {
+                if (!protyle.disabled && nodeElement?.dataset.avType === "table" && avCellElement?.dataset.id &&
+                    selectAVCellRange(nodeElement, avCellElement)) {
+                    focusBlock(nodeElement);
+                    this.preventClick = true;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                if (!hasSelectClassElement && galleryItemElement &&
+                    selectAVItemRange(nodeElement, galleryItemElement as HTMLElement)) {
+                    focusBlock(nodeElement);
+                    this.preventClick = true;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 let startElement;
                 let endElement = nodeElement;
                 let shiftClickBlockPoint: IShiftClickBlockPoint | undefined;
@@ -767,49 +800,7 @@ export class WYSIWYG {
                     endElement = shiftClickBlockPoint?.blockElement;
                 }
                 // shift 多选
-                if (!hasSelectClassElement && galleryItemElement) {
-                    galleryItemElement.classList.add("av__gallery-item--select");
-                    let sideElement = galleryItemElement.previousElementSibling;
-                    let previousList: Element[] = [];
-                    while (sideElement) {
-                        if (sideElement.classList.contains("av__gallery-item--select")) {
-                            break;
-                        } else {
-                            previousList.push(sideElement);
-                        }
-                        sideElement = sideElement.previousElementSibling;
-                        if (!sideElement) {
-                            previousList = [];
-                            break;
-                        }
-                    }
-                    sideElement = galleryItemElement.nextElementSibling;
-                    let nextList: Element[] = [];
-                    while (sideElement) {
-                        if (sideElement.classList.contains("av__gallery-item--select")) {
-                            break;
-                        } else {
-                            nextList.push(sideElement);
-                        }
-                        sideElement = sideElement.nextElementSibling as HTMLElement;
-                        if (!sideElement || sideElement.classList.contains("av__gallery-add")) {
-                            nextList = [];
-                            break;
-                        }
-                    }
-                    // 锚点卡片及范围内卡片统一选中并同步虚拟滚动选中快照
-                    const shiftSelectItems = [galleryItemElement].concat(previousList as HTMLElement[]).concat(nextList as HTMLElement[]);
-                    shiftSelectItems.forEach(item => {
-                        item.classList.add("av__gallery-item--select");
-                        const galleryBodyElement = hasClosestByClassName(item, "av__body") as HTMLElement;
-                        const galleryRowId = item.getAttribute("data-id");
-                        if (galleryBodyElement && galleryRowId) {
-                            updateAVRowSelect(galleryBodyElement, galleryRowId, true);
-                        }
-                    });
-                    updateHeader(galleryItemElement);
-                    event.preventDefault();
-                } else if (startElement && endElement && startElement !== endElement) {
+                if (startElement && endElement && startElement !== endElement) {
                     let toDown = true;
                     const startRect = startElement.getBoundingClientRect();
                     const endRect = endElement.getBoundingClientRect();
@@ -923,8 +914,10 @@ export class WYSIWYG {
                                 galleryItemElement.classList.toggle("av__gallery-item--select"));
                         }
                         updateHeader(galleryItemElement);
+                        setAVItemAnchor(nodeElement, galleryItemElement as HTMLElement);
                     } else if (rowElement) {
                         selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+                        setAVItemAnchor(nodeElement, rowElement as HTMLElement);
                     }
                 } else if (ctrlElement) {
                     clearSelect(["row", "galleryItem"], this.element);
@@ -969,6 +962,7 @@ export class WYSIWYG {
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
                     clearSelect(["galleryItem"], protyle.wysiwyg.element);
+                    setAVItemAnchor(nodeElement, galleryItemElement as HTMLElement);
                     return false;
                 };
                 return;
@@ -1333,19 +1327,13 @@ export class WYSIWYG {
                 return false;
             }
             // av cell select
-            const avCellElement = hasClosestByClassName(target, "av__cell");
             if (!protyle.disabled && avCellElement && avCellElement.dataset.id && !isInEmbedBlock(avCellElement)) {
                 if (!nodeElement || nodeElement.dataset.avType !== "table") {
                     return;
                 }
-                nodeElement.querySelectorAll(".av__cell--select").forEach(item => {
-                    item.classList.remove("av__cell--select");
-                });
-                nodeElement.querySelectorAll(".av__drag-fill").forEach(item => {
-                    item.remove();
-                });
-                avCellElement.classList.add("av__cell--select");
-                const originIndex = getPositionByCellElement(avCellElement);
+                if (!setAVCellAnchor(nodeElement, avCellElement)) {
+                    return;
+                }
                 let moveSelectCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
                 const nodeRect = nodeElement.getBoundingClientRect();
@@ -1370,20 +1358,8 @@ export class WYSIWYG {
                         return;
                     }
                     if (tempCellElement && tempCellElement.dataset.id && (event.clientX !== moveEvent.clientX || event.clientY !== moveEvent.clientY)) {
-                        const newIndex = getPositionByCellElement(tempCellElement);
-                        nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                            item.classList.remove("av__cell--active");
-                        });
-                        bodyElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
-                            if (index >= Math.min(originIndex.rowIndex, newIndex.rowIndex) && index <= Math.max(originIndex.rowIndex, newIndex.rowIndex)) {
-                                rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, cellIndex: number) => {
-                                    if (cellIndex >= Math.min(originIndex.celIndex, newIndex.celIndex) && cellIndex <= Math.max(originIndex.celIndex, newIndex.celIndex)) {
-                                        cellElement.classList.add("av__cell--active");
-                                        lastCellElement = cellElement;
-                                    }
-                                });
-                            }
-                        });
+                        selectAVCellRange(nodeElement, tempCellElement);
+                        lastCellElement = tempCellElement;
                         moveSelectCellElement = tempCellElement;
                     }
                 };
@@ -2338,6 +2314,7 @@ export class WYSIWYG {
 
                 const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
                 if (avDragSelectMode === "items" && avDragSelectElement) {
+                    setAVDragItemAnchor(avDragSelectElement);
                     countBlockWord([]);
                     focusBlock(avDragSelectElement);
                 } else {
@@ -2475,7 +2452,8 @@ export class WYSIWYG {
             event.stopPropagation();
             event.preventDefault();
             const selectImgElement = nodeElement.querySelector(".img--select");
-            const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select");
+            const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
+                (getAVSelectedCells(nodeElement).length > 0 ? nodeElement : null);
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table
             let selectTableRange = false;

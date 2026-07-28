@@ -5,7 +5,6 @@ import {transaction} from "../../wysiwyg/transaction";
 import {
     cellValueIsEmpty,
     genCellValue,
-    genCellValueByElement,
     getTypeByCellElement,
     renderCell,
     renderCellAttr
@@ -21,8 +20,8 @@ import {unicode2Emoji} from "../../../emoji";
 import {escapeAttr} from "../../../util/escape";
 import {getCompressURL} from "../../../util/image";
 import {
-    getAVPrimaryCell,
     getAVSelectStat,
+    getAVSelectedItemInfos,
     getAvBodyData,
     resetAVRowSelect,
     updateAVRowSelect
@@ -838,25 +837,19 @@ export const setPageSize = (options: {
 };
 
 export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
-    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
-    if (rowElements.length === 0) {
+    const selectedItems = getAVSelectedItemInfos(blockElement);
+    if (selectedItems.length === 0) {
         return;
     }
-    const primaryValues = Array.from(rowElements).map((item: HTMLElement) => {
-        const cellElement = item.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
-        return cellElement ? genCellValueByElement("block", cellElement) :
-            getAVPrimaryCell(blockElement, item.dataset.id)?.value;
-    });
+    const primaryValues = selectedItems.map(item => item.primaryCell?.value);
     if (primaryValues.some(value => !value)) {
         return;
     }
     const avID = blockElement.getAttribute("data-av-id");
     const undoOperations: IOperation[] = [];
     const blockIds: string[] = [];
-    rowElements.forEach(item => {
-        blockIds.push(item.getAttribute("data-id"));
-    });
-    rowElements.forEach((item, index) => {
+    selectedItems.forEach(item => blockIds.push(item.itemID));
+    selectedItems.forEach((item, index) => {
         const blockValue = primaryValues[index];
         const itemID = Lute.NewNodeID();
         // 撤销会使用新的条目 ID 恢复该行，重做时需要同时删除这个新条目。
@@ -864,15 +857,15 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
         undoOperations.push({
             action: "insertAttrViewBlock",
             avID,
-            previousID: item.previousElementSibling?.getAttribute("data-id") || "",
+            previousID: item.previousID,
             srcs: [{
                 itemID,
-                id: item.getAttribute("data-id"),
+                id: item.itemID,
                 isDetached: blockValue.isDetached,
                 content: blockValue.block.content
             }],
             blockID: blockElement.dataset.nodeId,
-            groupID: item.parentElement.getAttribute("data-group-id")
+            groupID: item.groupID
         });
     });
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
@@ -890,9 +883,13 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
         id: blockElement.dataset.nodeId,
         data: newUpdated,
     }], undoOperations);
-    rowElements.forEach(item => {
-        item.remove();
+    const selectedIDs = new Set(selectedItems.map(item => item.itemID));
+    blockElement.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]").forEach(item => {
+        if (selectedIDs.has(item.dataset.id)) {
+            item.remove();
+        }
     });
+    clearSelect(["row", "galleryItem"], blockElement);
     stickyRow(blockElement, protyle.contentElement, "all");
     updateHeader(blockElement.querySelector(".av__row"));
     blockElement.setAttribute("updated", newUpdated);
@@ -962,18 +959,20 @@ export const insertRows = (options: {
     options.blockElement.setAttribute("updated", newUpdated);
 };
 
-export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowElements: NodeListOf<Element>) => {
+export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowIDs: string[]) => {
+    if (rowIDs.length === 0) {
+        return;
+    }
     const avID = blockElement.getAttribute("data-av-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     const newRowIDs: string[] = [];
     // 副本统一插入到最后选中的条目之后，按源序排列
-    const anchorID = rowElements[rowElements.length - 1].getAttribute("data-id");
+    const anchorID = rowIDs[rowIDs.length - 1];
     let previousID = anchorID;
-    rowElements.forEach(rowElement => {
+    rowIDs.forEach(srcRowID => {
         const newRowID = Lute.NewNodeID();
         newRowIDs.push(newRowID);
-        const srcRowID = rowElement.getAttribute("data-id");
         doOperations.push({
             action: "duplicateAttrViewRow",
             avID,

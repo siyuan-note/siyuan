@@ -24,6 +24,7 @@ import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, pre
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {updateHotkeyTip} from "../../util/compatibility";
 import {inspectAVInsertedItem} from "./filteredTip";
+import {refreshAVCellSelection, restoreAVCellSelection} from "./selectionState";
 
 interface IIds {
     groupId: string,
@@ -300,6 +301,7 @@ const renderGroupTable = (options: ITableOptions) => {
 
 const afterRenderTable = (options: ITableOptions) => {
     setAVData(options.blockElement, options.data);
+    refreshAVCellSelection(options.blockElement, options.data);
     if (options.blockElement.getAttribute("data-need-focus") === "true") {
         focusBlock(options.blockElement);
         options.blockElement.removeAttribute("data-need-focus");
@@ -387,6 +389,7 @@ const afterRenderTable = (options: ITableOptions) => {
         }
         activeCellElement?.classList.add("av__cell--active");
     });
+    restoreAVCellSelection(options.blockElement);
     if (getSelection().rangeCount > 0) {
         // 修改表头后光标重新定位
         const range = getSelection().getRangeAt(0);

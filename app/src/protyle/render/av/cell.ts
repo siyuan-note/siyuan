@@ -28,6 +28,7 @@ import {
     getConvertedEmptyAVCellValue,
 } from "./cellValue";
 import {setPosition} from "../../../util/setPosition";
+import {getAVSelectedCells, IAVSelectedCell, updateAVSelectedCellValue} from "./selectionState";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -749,12 +750,16 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
     const id = nodeElement.dataset.nodeId;
     let text = "";
     const json: IAVCellValue[][] = [];
-    let cellElements: Element[];
+    let cellElements: Element[] = [];
+    let selectedCells: IAVSelectedCell[] = [];
     if (cElements?.length > 0) {
         cellElements = cElements;
     } else {
-        cellElements = Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select"));
-        if (cellElements.length === 0) {
+        selectedCells = getAVSelectedCells(nodeElement);
+        if (selectedCells.length === 0) {
+            cellElements = Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select"));
+        }
+        if (cellElements.length === 0 && selectedCells.length === 0) {
             nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
                 rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
                     cellElements.push(cellElement);
@@ -762,40 +767,65 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             });
         }
     }
-    const isCustomAttr = hasClosestByClassName(cellElements[0], "custom-attr");
+    const sources: Array<{ element?: HTMLElement, selectedCell?: IAVSelectedCell }> = selectedCells.length > 0 ?
+        selectedCells.map(selectedCell => ({selectedCell})) :
+        cellElements.map((element: HTMLElement) => ({element}));
+    if (sources.length === 0) {
+        return {text: "", json};
+    }
+    const isCustomAttr = sources[0].element ?
+        Boolean(hasClosestByClassName(sources[0].element, "custom-attr")) : false;
     const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
-    for (let elementIndex = 0; elementIndex < cellElements.length; elementIndex++) {
-        let item = cellElements[elementIndex] as HTMLElement;
-        const rowID = getFieldIdByCellElement(item, viewType);
+    for (let elementIndex = 0; elementIndex < sources.length; elementIndex++) {
+        const source = sources[elementIndex];
+        let item = source.element;
+        const rowID = source.selectedCell?.rowID || (item ? getFieldIdByCellElement(item, viewType) : "");
         if (!rowID) {
-            break;
+            continue;
         }
-        if (!nodeElement.contains(item)) {
+        if (item && !nodeElement.contains(item)) {
             if (viewType === "table") {
-                item = cellElements[elementIndex] = (nodeElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
+                item = source.element = (nodeElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     nodeElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             } else {
-                item = cellElements[elementIndex] = (nodeElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
+                item = source.element = nodeElement.querySelector(
+                    `.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`) as HTMLElement;
             }
         }
-
-        if (!item) {
+        if (!item && !source.selectedCell) {
             // 兼容新增行后台隐藏
-            break;
+            continue;
         }
-        const type = item.dataset.dtype as TAVCol || getTypeByCellElement(item) || item.dataset.type as TAVCol;
-        if (["created", "updated", "template", "rollup"].includes(type)) {
-            break;
+        const type = source.selectedCell?.column.type ||
+            (item ? item.dataset.dtype as TAVCol || getTypeByCellElement(item) || item.dataset.type as TAVCol : undefined);
+        if (!type) {
+            continue;
         }
-        const cellId = item.dataset.id;   // 刚创建时无 id，更新需和 oldValue 保持一致
-        const colId = getColId(item, viewType);
-
-        text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling === cellElements[elementIndex + 1]) ? "\t" : "\n\n");
-        const oldValue = genCellValueByElement(type, item);
-        if (elementIndex === 0 || cellElements[elementIndex - 1] !== item.previousElementSibling) {
+        const readonly = ["created", "updated", "template", "rollup", "lineNumber"].includes(type);
+        const cellId = source.selectedCell?.cell.id || item?.dataset.id;
+        const colId = source.selectedCell?.colID || (item ? getColId(item, viewType) : "");
+        const oldValue = source.selectedCell?.cell.value || (item ? genCellValueByElement(type, item) : undefined);
+        if (!colId || !oldValue) {
+            continue;
+        }
+        const nextSource = sources[elementIndex + 1];
+        const sameNextRow = nextSource && (source.selectedCell ?
+            nextSource.selectedCell?.rowID === rowID :
+            Boolean(item?.nextElementSibling && item.nextElementSibling === nextSource.element));
+        const cellText = item ? getCellText(item) :
+            getCellValueText(oldValue, source.selectedCell?.column, source.selectedCell?.rowIndex);
+        text += cellText + (sameNextRow ? "\t" : "\n\n");
+        const previousSource = sources[elementIndex - 1];
+        const samePreviousRow = previousSource && (source.selectedCell ?
+            previousSource.selectedCell?.rowID === rowID :
+            previousSource.element === item?.previousElementSibling);
+        if (!samePreviousRow) {
             json.push([]);
         }
         json[json.length - 1].push(oldValue);
+        if (readonly || !cellId) {
+            continue;
+        }
         let newValue = value;
         // relation 为全部更新，以下类型为添加
         if (type === "mAsset") {
@@ -891,7 +921,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 newValue.icon = oldValue.block.icon;
             }
         }
-        let column = columns?.find(columnItem => columnItem.id === colId);
+        let column = source.selectedCell?.column || columns?.find(columnItem => columnItem.id === colId);
         if (type === "date" && !column) {
             const response = await fetchSyncPost("/api/av/getAttributeViewKeysByID", {avID, keyIDs: [colId]});
             column = response.data?.[0];
@@ -938,13 +968,14 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 rowID,
                 data: oldValue
             });
-            if (isCustomAttr) {
+            if (isCustomAttr && item) {
                 item.innerHTML = genAVValueHTML(cellValue, column?.dateFormat);
                 item.parentElement.dataset.empty = cellValueIsEmpty(cellValue).toString();
-            } else {
+            } else if (item) {
                 updateAttrViewCellAnimation(item, cellValue);
             }
             updateAttrViewCellInOtherElements(protyle, avID, rowID, colId, cellValue, item);
+            updateAVSelectedCellValue(nodeElement, rowID, colId, cellValue);
         }
     }
     if (getOperations) {
@@ -1145,6 +1176,30 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         text += '<span data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>';
     }
     return text;
+};
+
+const getCellValueText = (value: IAVCellValue, column?: IAVColumn, rowIndex = 0) => {
+    const cellElement = document.createElement("div");
+    cellElement.innerHTML = renderCell(value, rowIndex, true, "table", column?.options, column?.dateFormat);
+    return getCellText(cellElement);
+};
+
+export const getAVSelectedCellData = (blockElement: HTMLElement) => {
+    const selectedCells = getAVSelectedCells(blockElement);
+    const json: IAVCellValue[][] = [];
+    let text = "";
+    selectedCells.forEach((item, index) => {
+        if (index === 0 || selectedCells[index - 1].rowID !== item.rowID) {
+            json.push([]);
+        }
+        json[json.length - 1].push(item.cell.value);
+        text += getCellValueText(item.cell.value, item.column, item.rowIndex);
+        text += index === selectedCells.length - 1 || selectedCells[index + 1].rowID !== item.rowID ? "\n" : "\t";
+    });
+    return {
+        json,
+        text: text.substring(0, text.length - 1),
+    };
 };
 
 const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {

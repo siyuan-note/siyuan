@@ -1519,21 +1519,27 @@ export class WYSIWYG {
             let avDragSelectFrame: number | undefined;
             let pendingAVDragSelectRect: DOMRect | undefined;
             let hasInitializedAVDragSelect = false;
-            const dragSelectBlockElements = new Set<Element>();
-            const initializeAVDragSelect = () => {
-                if (!avDragSelectElement || hasInitializedAVDragSelect) {
-                    return;
-                }
+            // 仅同步发生变化的块，避免划选过程中重复触发选中样式
+            const syncDragSelectBlocks = (elements: Element[]) => {
+                const nextElements = new Set(elements.filter(item =>
+                    !hasClosestByClassName(item, "protyle-wysiwyg__embed")));
                 protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                    if (nextElements.delete(item)) {
+                        return;
+                    }
                     item.classList.remove("protyle-wysiwyg--select");
                     item.removeAttribute("select-start");
                     item.removeAttribute("select-end");
                 });
-                hasInitializedAVDragSelect = true;
+                nextElements.forEach(item => item.classList.add("protyle-wysiwyg--select"));
             };
-            const clearDragSelectBlocks = () => {
-                dragSelectBlockElements.forEach(item => item.classList.remove("protyle-wysiwyg--select"));
-                dragSelectBlockElements.clear();
+            const clearDragSelectBlocks = () => syncDragSelectBlocks([]);
+            const initializeAVDragSelect = () => {
+                if (!avDragSelectElement || hasInitializedAVDragSelect) {
+                    return;
+                }
+                clearDragSelectBlocks();
+                hasInitializedAVDragSelect = true;
             };
             const cancelAVDragSelect = () => {
                 if (avDragSelectFrame !== undefined) {
@@ -1583,7 +1589,7 @@ export class WYSIWYG {
                     !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
                     if (tableBlockElement.contains(moveTarget)) {
                         if (hasLeftTableBlock) {
-                            hideElements(["select"], protyle);
+                            clearDragSelectBlocks();
                             protyle.selectElement.classList.add("fn__none");
                             protyle.selectElement.removeAttribute("style");
                             hasLeftTableBlock = false;
@@ -1699,11 +1705,10 @@ export class WYSIWYG {
                 if (selectHeight < 4) {
                     cancelAVDragSelect();
                     if (avDragSelectElement) {
-                        clearDragSelectBlocks();
                         clearAVDragSelection(avDragSelectElement);
                     }
                     avDragSelectMode = undefined;
-                    hideElements(["select"], protyle);
+                    clearDragSelectBlocks();
                     protyle.selectElement.classList.add("fn__none");
                     protyle.selectElement.removeAttribute("style");
                     return;
@@ -1712,7 +1717,6 @@ export class WYSIWYG {
                 protyle.selectElement.classList.remove("fn__none");
                 protyle.selectElement.setAttribute("style", `top:${selectTop - protyleRect.top}px;height:${selectHeight}px;left:${selectLeft - protyleRect.left}px;width:${selectRight - selectLeft}px;`);
                 const selectRect = protyle.selectElement.getBoundingClientRect();
-                hideElements(["select"], protyle);
                 if (isAVItemMode && avDragSelectElement) {
                     clearDragSelectBlocks();
                     avDragSelectMode = "items";
@@ -1724,9 +1728,6 @@ export class WYSIWYG {
                     clearAVDragSelection(avDragSelectElement);
                 }
                 avDragSelectMode = "blocks";
-                if (avDragSelectElement) {
-                    clearDragSelectBlocks();
-                }
                 // 矩形左边缘落在 padding 内时 elementFromPoint 会命中 wysiwyg 容器，需钳制到内容区
                 const detectX = Math.max(mostLeft, Math.min(selectRect.left, mostRight));
                 let firstElement;
@@ -1737,6 +1738,7 @@ export class WYSIWYG {
                     firstElement = document.elementFromPoint(detectX, selectRect.top);
                 }
                 if (!firstElement) {
+                    clearDragSelectBlocks();
                     return;
                 }
                 // 向上划选且落点在 padding/缝隙时，elementFromPoint 易命中 wysiwyg 容器或容器类元素，
@@ -1754,6 +1756,7 @@ export class WYSIWYG {
                     }
                 }
                 if (!firstElement) {
+                    clearDragSelectBlocks();
                     return;
                 }
                 let firstBlockElement = hasClosestBlock(firstElement);
@@ -1837,14 +1840,7 @@ export class WYSIWYG {
                         currentElement = currentElement.nextElementSibling;
                     }
                 }
-                selectElements.forEach(item => {
-                    if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
-                        if (avDragSelectElement && !item.classList.contains("protyle-wysiwyg--select")) {
-                            dragSelectBlockElements.add(item);
-                        }
-                        item.classList.add("protyle-wysiwyg--select");
-                    }
-                });
+                syncDragSelectBlocks(selectElements);
             };
 
             documentSelf.onmouseup = (mouseUpEvent) => {

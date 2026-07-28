@@ -780,18 +780,13 @@ func getBlockBreadcrumbChildren(c *gin.Context) {
 	if limitArg := arg["limit"]; nil != limitArg {
 		limit = int(limitArg.(float64))
 	}
-	sessionID, _ := arg["sessionID"].(string)
-	if 128 < len(sessionID) {
-		sessionID = ""
-	}
-
 	boxID := encryptedNotebookFromArg(arg)
 	if !isBlockPublishAccessible(c, id, boxID) {
 		ret.Data = &model.BlockBreadcrumbChildren{Items: []*model.BlockPath{}}
 		return
 	}
 
-	children, err := model.GetBlockBreadcrumbChildrenInBox(id, excludeTypes, offset, limit, boxID, sessionID)
+	children, err := model.GetBlockBreadcrumbChildrenInBox(id, excludeTypes, offset, limit, boxID)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

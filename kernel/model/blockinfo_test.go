@@ -3,7 +3,6 @@ package model
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/88250/lute/ast"
 )
@@ -84,46 +83,6 @@ func TestCollectBlockBreadcrumbChildren(t *testing.T) {
 	}
 	if 1 != len(result.Items) || siblingHeading.ID != result.Items[0].ID {
 		t.Fatalf("unexpected last breadcrumb child: %+v", result.Items)
-	}
-}
-
-func TestBlockBreadcrumbTreeCache(t *testing.T) {
-	const sessionID = "breadcrumb-cache-test"
-	cacheKey := "\x00" + sessionID
-	node := &ast.Node{Type: ast.NodeParagraph, ID: "cached-node"}
-	entry := &blockBreadcrumbTreeCacheEntry{
-		nodes:     map[string]*ast.Node{node.ID: node},
-		expiresAt: time.Now().Add(time.Hour),
-		timer:     time.NewTimer(time.Hour),
-	}
-
-	blockBreadcrumbTreeCache.Lock()
-	blockBreadcrumbTreeCache.entries[cacheKey] = entry
-	blockBreadcrumbTreeCache.Unlock()
-	t.Cleanup(func() {
-		blockBreadcrumbTreeCache.Lock()
-		if current := blockBreadcrumbTreeCache.entries[cacheKey]; nil != current {
-			current.timer.Stop()
-			delete(blockBreadcrumbTreeCache.entries, cacheKey)
-		}
-		blockBreadcrumbTreeCache.Unlock()
-	})
-
-	cachedNode, err := loadBlockBreadcrumbNode(node.ID, "", sessionID)
-	if nil != err {
-		t.Fatal(err)
-	}
-	if cachedNode != node {
-		t.Fatalf("unexpected cached breadcrumb node: %+v", cachedNode)
-	}
-
-	blockBreadcrumbTreeCache.Lock()
-	entry.expiresAt = time.Now().Add(-time.Second)
-	cleanupBlockBreadcrumbTreeCache(time.Now())
-	_, cached := blockBreadcrumbTreeCache.entries[cacheKey]
-	blockBreadcrumbTreeCache.Unlock()
-	if cached {
-		t.Fatal("expected expired breadcrumb tree cache to be removed")
 	}
 }
 

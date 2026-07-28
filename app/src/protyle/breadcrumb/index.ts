@@ -295,10 +295,9 @@ ${padHTML}
             excludeTypes.push("NodeTextMark-mark");
         }
 
-        const sessionID = Lute.NewNodeID();
         let items: IMenu[];
         try {
-            items = await this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes, sessionID);
+            items = await this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes);
         } catch (e) {
             console.warn("get breadcrumb children failed", e);
             if (window.siyuan.menus.menu.element.getAttribute("data-name") === menuName) {
@@ -374,13 +373,12 @@ ${padHTML}
     }
 
     private async genChildrenMenuItems(protyle: IProtyle, id: string, currentPathIDs: Set<string>,
-                                       excludeTypes: string[], sessionID: string, offset = 0): Promise<IMenu[]> {
+                                       excludeTypes: string[], offset = 0): Promise<IMenu[]> {
         const request: Record<string, any> = {
             id,
             offset,
             limit: 64,
             excludeTypes,
-            sessionID,
         };
         if (isEncryptedBox(protyle.notebookId)) {
             request.notebook = protyle.notebookId;
@@ -406,7 +404,7 @@ ${padHTML}
             };
             if (item.hasChildren) {
                 menuItem.loadSubmenu = () => this.genChildrenMenuItems(protyle, item.id, currentPathIDs,
-                    excludeTypes, sessionID);
+                    excludeTypes);
             }
             return menuItem;
         });
@@ -417,7 +415,7 @@ ${padHTML}
                 label: window.siyuan.languages.loadMore,
                 click: (element) => {
                     element.setAttribute("disabled", "disabled");
-                    this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes, sessionID,
+                    this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes,
                         offset + data.items.length)
                         .then((nextItems) => {
                             if (!element.isConnected) {

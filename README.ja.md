@@ -66,13 +66,11 @@
 
 SiYuanは、プライバシーを最優先とする個人の知識管理システムであり、細かいブロックレベルの参照とMarkdown WYSIWYGをサポートしています。
 
-詳細については、[SiYuan英語ディスカッションフォーラム](https://liuyun.io)をご覧ください。
-
-オンラインユーザーガイド：[English](https://siyuan-en.b3log.org/)
-
 ![feature0.png](screenshots/feature0.png)
 
 ![feature5-1.png](screenshots/feature5-1.png)
+
+詳細については、[オンラインユーザーガイド](https://siyuan-en.b3log.org/)をご覧いただくか、[SiYuan英語ディスカッションフォーラム](https://liuyun.io)をご利用ください。
 
 ## 🔮 特徴
 

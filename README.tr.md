@@ -67,13 +67,11 @@
 SiYuan, gizliliği ön planda tutan kişisel bir bilgi yönetim sistemidir.  
 Blok düzeyinde referansları ve Markdown WYSIWYG düzenlemeyi destekler.
 
-Daha fazla bilgi için [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)’na katılabilirsin.
-
-Çevrimiçi kullanıcı rehberi: [English](https://siyuan-en.b3log.org/)
-
 ![feature0.png](screenshots/feature0.png)
 
 ![feature5-1.png](screenshots/feature5-1.png)
+
+Daha fazla bilgi için [çevrimiçi kullanıcı rehberini](https://siyuan-en.b3log.org/) inceleyebilir veya [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)’na katılabilirsin.
 
 ## 🔮 Özellikler
 

@@ -417,7 +417,8 @@ const getOperatorSelectByType = (type: TAVCol, currentOperator: string, isRollup
                 opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) +
                 opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
         case "select":
-            return opt("=", window.siyuan.languages.filterOperatorIs) + opt("!=", window.siyuan.languages.filterOperatorIsNot) +
+            return opt("=", isRollup ? window.siyuan.languages.filterOperatorIs : window.siyuan.languages.filterOperatorContains) +
+                opt("!=", isRollup ? window.siyuan.languages.filterOperatorIsNot : window.siyuan.languages.filterOperatorDoesNotContain) +
                 opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
         default:
             return "";
@@ -610,7 +611,8 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
             : "";
         return `<span class="av__filter-date-controls">${quantifierSelect}<span class="av__filter-date-config${valueHidden}">${endpointSelect}${dateHTML.modeHTML}</span>${operatorSelect}<span class="av__filter-value${valueHidden}" data-type="valueContainer" data-path="${path}">${valueHTML}</span></span>`;
     } else if (valueType === "select" || valueType === "mSelect") {
-        const {trigger, dropdown} = genInlineSelectHTML(filter, valueColumn, path, valueType);
+        const allowMultiple = valueType === "mSelect" || !isRollup;
+        const {trigger, dropdown} = genInlineSelectHTML(filter, valueColumn, path, valueType, allowMultiple);
         valueHTML = trigger;
         extraHTML = dropdown; // 下拉面板放 valueContainer 外，fixed 定位不影响行宽
     } else if (valueType === "relation" && !isRollup && isExactRelationOperator(operator)) {
@@ -682,12 +684,12 @@ const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): 
     };
 };
 
-// genInlineSelectHTML 生成 select/mSelect 的内联多选 chip 列表 + 搜索。
-const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string, valueType: TAVCol): { trigger: string, dropdown: string } => {
-    const isSingle = valueType === "select";
+// genInlineSelectHTML 生成 select/mSelect 的内联 chip 列表与搜索面板。
+const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string, valueType: TAVCol,
+                             allowMultiple: boolean): { trigger: string, dropdown: string } => {
     const options = colData.options || [];
     const selectedValues = (getFilterCellValue(filter)?.mSelect || []).filter((s: IAVCellSelectValue) => s.content);
-    const placeholder = isSingle ? window.siyuan.languages.select : window.siyuan.languages.multiSelect;
+    const placeholder = valueType === "select" ? window.siyuan.languages.select : window.siyuan.languages.multiSelect;
 
     // 触发器：显示已选值的 chip（与表格单元格样式一致），无选中时显示 placeholder + 下拉箭头
     const selectedChips = selectedValues.map((item: IAVCellSelectValue) => {
@@ -707,7 +709,7 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
 <span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${option.color});color:var(--b3-font-color${option.color})"><span class="fn__ellipsis">${escapeHtml(option.name)}</span></span>
 </button>`;
     }).join("");
-    const dropdown = `<div class="av__select-dropdown" data-type="selectDropdown" data-path="${path}" data-single="${isSingle ? "true" : "false"}" style="display:none;">
+    const dropdown = `<div class="av__select-dropdown" data-type="selectDropdown" data-path="${path}" data-single="${allowMultiple ? "false" : "true"}" data-value-type="${valueType}" style="display:none;">
 ${searchInput}<div class="av__select-options" data-type="selectOptions" data-path="${path}">${chips}</div>
 </div>`;
     return {trigger, dropdown};
@@ -1189,8 +1191,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         // 更新触发器显示（重建 chip 列表，与表格单元格样式一致）
         const triggerEl = menuElement.querySelector(`[data-type="selectTrigger"][data-path="${path}"]`) as HTMLElement;
         if (triggerEl && dropdown) {
-            const isSingleSel = dropdown.dataset.single === "true";
-            const placeholderStr = isSingleSel ? window.siyuan.languages.select : window.siyuan.languages.multiSelect;
+            const placeholderStr = dropdown.dataset.valueType === "select"
+                ? window.siyuan.languages.select
+                : window.siyuan.languages.multiSelect;
             const selectedChips: string[] = [];
             dropdown.querySelectorAll('[data-type="selectOption"]').forEach((item: HTMLElement) => {
                 const itemUseElement = item.querySelector(".av__select-option-check use");

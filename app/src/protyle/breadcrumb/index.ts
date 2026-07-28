@@ -12,7 +12,7 @@ import {hasClosestBlock, hasTopClosestByClassName} from "../util/hasClosest";
 import {needSubscribe} from "../../util/needSubscribe";
 import {isMobile} from "../../util/functions";
 import {zoomOut} from "../../menus/protyle";
-import {getEditorRange} from "../util/selection";
+import {focusByRange, getEditorRange} from "../util/selection";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 import {saveLayout} from "../../layout/util";
@@ -34,12 +34,15 @@ import {resize} from "../util/resize";
 import {listIndent, listOutdent} from "../wysiwyg/list";
 import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
 import {getCloudURL} from "../../config/util/about";
+import {escapeAriaLabel} from "../../util/escape";
 
 export class Breadcrumb {
     public element: HTMLElement;
     private mediaRecorder: RecordMedia;
     private id: string;
     private messageId: string;
+    private previousFocusElement: HTMLElement;
+    private previousRange: Range;
 
     constructor(protyle: IProtyle) {
         const element = document.createElement("div");
@@ -211,6 +214,39 @@ ${padHTML}
                 isLeft: false,
             });
         });
+        this.element.addEventListener("keydown", (event) => {
+            if (event.isComposing || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+                return;
+            }
+            const itemElement = (event.target as HTMLElement).closest(".protyle-breadcrumb__item") as HTMLElement;
+            if (!itemElement || !this.element.contains(itemElement)) {
+                return;
+            }
+            if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
+                return;
+            }
+            if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+                const nextItemElement = this.getSiblingItem(itemElement, event.key === "ArrowRight");
+                if (nextItemElement) {
+                    this.focusItem(nextItemElement);
+                }
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (event.key === "ArrowDown" || event.key === "Enter") {
+                const itemRect = itemElement.getBoundingClientRect();
+                this.openChildrenMenu(protyle, itemElement.getAttribute("data-node-id"), {
+                    x: itemRect.left,
+                    y: itemRect.bottom,
+                    isLeft: false,
+                }, true);
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (event.key === "Escape") {
+                this.restoreEditorFocus(protyle);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
         element.addEventListener("mouseleave", () => {
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
                 item.classList.remove("protyle-wysiwyg--hl");
@@ -222,11 +258,12 @@ ${padHTML}
         /// #endif
     }
 
-    private async openChildrenMenu(protyle: IProtyle, id: string, position: IPosition) {
+    private async openChildrenMenu(protyle: IProtyle, id: string, position: IPosition, keyboard = false) {
         if (!id) {
             return;
         }
 
+        const keyboardItemElement = keyboard ? document.activeElement : undefined;
         const menuName = `${Constants.MENU_BREADCRUMB_CHILDREN}-${id}`;
         const menu = new Menu(menuName);
         if (menu.isOpen) {
@@ -255,6 +292,12 @@ ${padHTML}
             }
             return;
         }
+        if (keyboard && document.activeElement !== keyboardItemElement) {
+            if (window.siyuan.menus.menu.element.getAttribute("data-name") === menuName) {
+                window.siyuan.menus.menu.remove();
+            }
+            return;
+        }
         if (window.siyuan.menus.menu.element.getAttribute("data-name") !== menuName) {
             return;
         }
@@ -267,6 +310,53 @@ ${padHTML}
             menu.addItem(item);
         });
         menu.open(position);
+        if (keyboard) {
+            menu.element.querySelector(".b3-menu__item:not([disabled])")?.classList.add("b3-menu__item--current");
+        }
+    }
+
+    private getSiblingItem(itemElement: HTMLElement, forward: boolean) {
+        let siblingElement = forward ? itemElement.nextElementSibling : itemElement.previousElementSibling;
+        while (siblingElement && !siblingElement.classList.contains("protyle-breadcrumb__item")) {
+            siblingElement = forward ? siblingElement.nextElementSibling : siblingElement.previousElementSibling;
+        }
+        return siblingElement as HTMLElement;
+    }
+
+    private focusItem(itemElement: HTMLElement) {
+        this.element.querySelectorAll(".protyle-breadcrumb__item").forEach((item) => {
+            item.setAttribute("tabindex", item === itemElement ? "0" : "-1");
+        });
+        itemElement.focus({preventScroll: true});
+        itemElement.scrollIntoView({block: "nearest", inline: "nearest"});
+    }
+
+    private restoreEditorFocus(protyle: IProtyle) {
+        const focusElement = this.previousFocusElement?.isConnected ? this.previousFocusElement : protyle.wysiwyg.element;
+        focusElement.focus({preventScroll: true});
+        if (this.previousRange) {
+            focusByRange(this.previousRange);
+        }
+        this.previousFocusElement = undefined;
+        this.previousRange = undefined;
+    }
+
+    public focus(range?: Range) {
+        if (!this.element.isConnected || this.element.getClientRects().length === 0) {
+            return false;
+        }
+        const itemElement = this.element.querySelector(".protyle-breadcrumb__item--active") as HTMLElement ||
+            this.element.querySelector(".protyle-breadcrumb__item:last-of-type") as HTMLElement;
+        if (!itemElement) {
+            return false;
+        }
+        window.siyuan.menus.menu.remove();
+        if (!this.element.contains(document.activeElement)) {
+            this.previousFocusElement = document.activeElement as HTMLElement;
+            this.previousRange = range?.cloneRange();
+        }
+        this.focusItem(itemElement);
+        return true;
     }
 
     private async genChildrenMenuItems(protyle: IProtyle, id: string, currentPathIDs: Set<string>,
@@ -848,11 +938,11 @@ ${padHTML}
                     isCurrent = true;
                 }
                 if (index === 0 && !protyle.options.render.breadcrumbDocName) {
-                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}"${response.data.length === 1 ? ' style="max-width:none"' : ""}>
+                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}" role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || window.siyuan.languages.untitled)}"${response.data.length === 1 ? ' style="max-width:none"' : ""}>
     <svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
 </span>`;
                 } else {
-                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}"${(response.data.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
+                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}" role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || window.siyuan.languages.untitled)}"${(response.data.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
     <svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
     ${item.name ? `<span class="protyle-breadcrumb__text" title="${item.name}">${item.name}</span>` : ""}
 </span>`;

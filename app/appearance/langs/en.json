@@ -1,4 +1,5 @@
 {
+  "focusBreadcrumb": "Focus breadcrumb",
   "tableRectangleSelectionRequired": "Requires a rectangular selection",
   "updateChannel": "Update channel",
   "updateChannelTip": "Beta receives stable, RC, and Beta releases; Alpha receives all releases. Test channels require access to GitHub",

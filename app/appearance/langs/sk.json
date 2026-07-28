@@ -1,4 +1,5 @@
 {
+  "focusBreadcrumb": "Zamerať navigačnú cestu",
   "tableRectangleSelectionRequired": "Vyžaduje obdĺžnikový výber",
   "updateChannel": "Aktualizačný kanál",
   "updateChannelTip": "Kanál Beta prijíma stabilné vydania, RC a Beta; kanál Alpha prijíma všetky vydania. Testovacie kanály vyžadujú prístup ku GitHubu",

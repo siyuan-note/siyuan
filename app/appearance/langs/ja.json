@@ -1,4 +1,5 @@
 {
+  "focusBreadcrumb": "パンくずリストにフォーカス",
   "tableRectangleSelectionRequired": "矩形範囲の選択が必要です",
   "updateChannel": "更新チャンネル",
   "updateChannelTip": "Beta チャンネルでは正式版、RC、Beta 版を受信し、Alpha チャンネルではすべての版を受信します。テストチャンネルの利用には GitHub へのアクセスが必要です",

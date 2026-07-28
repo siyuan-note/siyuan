@@ -1,4 +1,5 @@
 {
+  "focusBreadcrumb": "Focar breadcrumb",
   "tableRectangleSelectionRequired": "Requer uma seleção retangular",
   "updateChannel": "Canal de atualização",
   "updateChannelTip": "O canal Beta recebe versões estáveis, RC e Beta; o canal Alpha recebe todas as versões. Os canais de teste exigem acesso ao GitHub",

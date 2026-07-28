@@ -1,4 +1,5 @@
 {
+  "focusBreadcrumb": "التركيز على مسار التنقل",
   "tableRectangleSelectionRequired": "يتطلب تحديدًا مستطيلاً",
   "updateChannel": "قناة التحديث",
   "updateChannelTip": "تتلقى قناة Beta الإصدارات المستقرة وRC وBeta، بينما تتلقى قناة Alpha جميع الإصدارات. تتطلب قنوات الاختبار إمكانية الوصول إلى GitHub",

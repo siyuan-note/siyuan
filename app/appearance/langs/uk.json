@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Вирівняти за нижнім краєм",
+  "alignMiddle": "Вирівняти по вертикалі",
+  "alignTop": "Вирівняти за верхнім краєм",
   "focusBreadcrumb": "Перейти до навігаційного ланцюжка",
   "tableRectangleSelectionRequired": "Потрібне прямокутне виділення",
   "updateChannel": "Канал оновлень",

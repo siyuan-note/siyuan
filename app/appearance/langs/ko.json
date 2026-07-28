@@ -1,4 +1,7 @@
 {
+  "alignBottom": "아래쪽 맞춤",
+  "alignMiddle": "세로 가운데 맞춤",
+  "alignTop": "위쪽 맞춤",
   "focusBreadcrumb": "이동 경로에 포커스",
   "tableRectangleSelectionRequired": "직사각형 선택 영역이 필요합니다",
   "updateChannel": "업데이트 채널",

@@ -1,4 +1,7 @@
 {
+  "alignBottom": "จัดชิดด้านล่าง",
+  "alignMiddle": "จัดกึ่งกลางแนวตั้ง",
+  "alignTop": "จัดชิดด้านบน",
   "focusBreadcrumb": "โฟกัสเส้นทางนำทาง",
   "tableRectangleSelectionRequired": "ต้องเลือกเป็นรูปสี่เหลี่ยมผืนผ้า",
   "updateChannel": "ช่องทางการอัปเดต",

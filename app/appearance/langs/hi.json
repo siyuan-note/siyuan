@@ -1,4 +1,7 @@
 {
+  "alignBottom": "नीचे संरेखित करें",
+  "alignMiddle": "लंबवत केंद्रित करें",
+  "alignTop": "ऊपर संरेखित करें",
   "focusBreadcrumb": "ब्रेडक्रंब पर फ़ोकस करें",
   "tableRectangleSelectionRequired": "आयताकार चयन आवश्यक है",
   "updateChannel": "अपडेट चैनल",

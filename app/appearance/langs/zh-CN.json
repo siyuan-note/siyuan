@@ -1,4 +1,7 @@
 {
+  "alignBottom": "底部对齐",
+  "alignMiddle": "垂直居中",
+  "alignTop": "顶部对齐",
   "focusBreadcrumb": "聚焦面包屑",
   "tableRectangleSelectionRequired": "需要矩形选区",
   "updateChannel": "更新通道",

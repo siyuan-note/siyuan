@@ -1,4 +1,7 @@
 {
+  "alignBottom": "محاذاة للأسفل",
+  "alignMiddle": "توسيط عمودي",
+  "alignTop": "محاذاة للأعلى",
   "focusBreadcrumb": "التركيز على مسار التنقل",
   "tableRectangleSelectionRequired": "يتطلب تحديدًا مستطيلاً",
   "updateChannel": "قناة التحديث",

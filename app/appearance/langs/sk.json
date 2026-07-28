@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Zarovnať nadol",
+  "alignMiddle": "Vertikálne vycentrovať",
+  "alignTop": "Zarovnať nahor",
   "focusBreadcrumb": "Zamerať navigačnú cestu",
   "tableRectangleSelectionRequired": "Vyžaduje obdĺžnikový výber",
   "updateChannel": "Aktualizačný kanál",

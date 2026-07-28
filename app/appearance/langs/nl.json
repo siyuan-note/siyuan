@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Onder uitlijnen",
+  "alignMiddle": "Verticaal centreren",
+  "alignTop": "Boven uitlijnen",
   "focusBreadcrumb": "Breadcrumb focussen",
   "tableRectangleSelectionRequired": "Vereist een rechthoekige selectie",
   "updateChannel": "Updatekanaal",

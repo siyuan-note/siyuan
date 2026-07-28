@@ -1,4 +1,7 @@
 {
+  "alignBottom": "下揃え",
+  "alignMiddle": "垂直方向中央揃え",
+  "alignTop": "上揃え",
   "focusBreadcrumb": "パンくずリストにフォーカス",
   "tableRectangleSelectionRequired": "矩形範囲の選択が必要です",
   "updateChannel": "更新チャンネル",

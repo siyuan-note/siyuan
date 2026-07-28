@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Alinhar à parte inferior",
+  "alignMiddle": "Centralizar verticalmente",
+  "alignTop": "Alinhar ao topo",
   "focusBreadcrumb": "Focar breadcrumb",
   "tableRectangleSelectionRequired": "Requer uma seleção retangular",
   "updateChannel": "Canal de atualização",

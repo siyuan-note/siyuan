@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Alta hizala",
+  "alignMiddle": "Dikey ortala",
+  "alignTop": "Üste hizala",
   "focusBreadcrumb": "İçerik haritasına odaklan",
   "tableRectangleSelectionRequired": "Dikdörtgen bir seçim gerektirir",
   "updateChannel": "Güncelleme kanalı",

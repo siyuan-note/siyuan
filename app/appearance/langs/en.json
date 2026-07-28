@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Align bottom",
+  "alignMiddle": "Center vertically",
+  "alignTop": "Align top",
   "focusBreadcrumb": "Focus breadcrumb",
   "tableRectangleSelectionRequired": "Requires a rectangular selection",
   "updateChannel": "Update channel",

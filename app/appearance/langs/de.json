@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Unten ausrichten",
+  "alignMiddle": "Vertikal zentrieren",
+  "alignTop": "Oben ausrichten",
   "focusBreadcrumb": "Breadcrumb fokussieren",
   "tableRectangleSelectionRequired": "Erfordert eine rechteckige Auswahl",
   "updateChannel": "Aktualisierungskanal",

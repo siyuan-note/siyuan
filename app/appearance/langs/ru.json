@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Выровнять по нижнему краю",
+  "alignMiddle": "Выровнять по вертикали",
+  "alignTop": "Выровнять по верхнему краю",
   "focusBreadcrumb": "Перейти к навигационной цепочке",
   "tableRectangleSelectionRequired": "Требуется прямоугольное выделение",
   "updateChannel": "Канал обновлений",

@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Aligner en bas",
+  "alignMiddle": "Centrer verticalement",
+  "alignTop": "Aligner en haut",
   "focusBreadcrumb": "Activer le fil d’Ariane",
   "tableRectangleSelectionRequired": "Nécessite une sélection rectangulaire",
   "updateChannel": "Canal de mise à jour",

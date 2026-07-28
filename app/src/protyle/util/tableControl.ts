@@ -921,19 +921,19 @@ export class TableControl {
     private appendCellMenus(rectangle: boolean) {
         this.appendAlignmentMenus();
         window.siyuan.menus.menu.append(new MenuItem({
-            label: `${window.siyuan.languages.alignment} ↑`,
+            label: window.siyuan.languages.alignTop,
             click: () => this.setCellStyle("vertical-align", "top"),
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: `${window.siyuan.languages.alignment} ↕`,
+            label: window.siyuan.languages.alignMiddle,
             click: () => this.setCellStyle("vertical-align", "middle"),
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: `${window.siyuan.languages.alignment} ↓`,
+            label: window.siyuan.languages.alignBottom,
             click: () => this.setCellStyle("vertical-align", "bottom"),
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: `${window.siyuan.languages.useDefaultAlign} ↕`,
+            label: window.siyuan.languages.useDefaultAlign,
             click: () => this.setCellStyle("vertical-align", ""),
         }).element);
         const cells = this.getSelectedCells();

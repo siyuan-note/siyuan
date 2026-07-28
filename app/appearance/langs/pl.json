@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Wyrównaj do dołu",
+  "alignMiddle": "Wyśrodkuj w pionie",
+  "alignTop": "Wyrównaj do góry",
   "focusBreadcrumb": "Ustaw fokus na ścieżce nawigacji",
   "tableRectangleSelectionRequired": "Wymaga prostokątnego zaznaczenia",
   "updateChannel": "Kanał aktualizacji",

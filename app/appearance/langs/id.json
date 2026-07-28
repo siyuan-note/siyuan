@@ -1,4 +1,7 @@
 {
+  "alignBottom": "Ratakan ke bawah",
+  "alignMiddle": "Tengahkan secara vertikal",
+  "alignTop": "Ratakan ke atas",
   "focusBreadcrumb": "Fokuskan breadcrumb",
   "tableRectangleSelectionRequired": "Memerlukan pilihan persegi panjang",
   "updateChannel": "Saluran pembaruan",

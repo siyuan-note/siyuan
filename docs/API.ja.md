@@ -80,6 +80,10 @@
     * [エラーメッセージをプッシュ](#エラーメッセージをプッシュ)
 * [ネットワーク](#ネットワーク)
     * [フォワードプロキシ](#フォワードプロキシ)
+        * [JSONフォワードプロキシ](#JSONフォワードプロキシ)
+        * [HTTPフォワードプロキシ](#HTTPフォワードプロキシ)
+        * [WebSocketフォワードプロキシ](#WebSocketフォワードプロキシ)
+        * [EventSourceフォワードプロキシ](#EventSourceフォワードプロキシ)
 * [システム](#システム)
     * [起動進捗を取得](#起動進捗を取得)
     * [システムバージョンを取得](#システムバージョンを取得)
@@ -92,8 +96,8 @@
 ### パラメータと戻り値
 
 * エンドポイント: `http://127.0.0.1:6806`
-* すべてPOSTメソッドを使用
-* パラメータを持つインターフェースでは、パラメータはJSON文字列としてbodyに配置し、ヘッダーのContent-Typeは`application/json`とする
+* 個別に明記されていない限り、APIインターフェースはPOSTメソッドを使用します
+* JSONパラメータを受け取るインターフェースでは、パラメータはJSON文字列としてbodyに配置し、ヘッダーのContent-Typeは`application/json`とします
 * 戻り値
 
    ````json
@@ -1511,6 +1515,8 @@
 
 ### フォワードプロキシ
 
+#### JSONフォワードプロキシ
+
 * `/api/network/forwardProxy`
 * パラメータ
 
@@ -1525,8 +1531,9 @@
             "Cookie": ""
         }
     ],
+    "redirect": true,
     "payload": {},
-    "payloadEncoding": "text",
+    "payloadEncoding": "json",
     "responseEncoding": "text"
   }
   ```
@@ -1535,11 +1542,12 @@
     * `method`: HTTPメソッド、デフォルトは`POST`
     * `timeout`: タイムアウト（ミリ秒）、デフォルトは`7000`
     * `contentType`: Content-Type、デフォルトは`application/json`
-    * `headers`: HTTPヘッダー
+    * `headers`: HTTPリクエストヘッダー配列。各オブジェクトのキーと値がリクエストヘッダーとして設定されます
+    * `redirect`: リダイレクトを追跡するかどうか。デフォルトは`true`で、最大2回まで追跡します。`false`に設定するとリダイレクトを追跡しません
     * `payload`: HTTPペイロード、オブジェクトまたは文字列
-    * `payloadEncoding`: `payload`で使用されるエンコーディングスキーム、デフォルトは`text`、選択可能な値は以下の通り
+    * `payloadEncoding`: `payload`で使用されるエンコーディングスキーム。デフォルトは`json`です。`json`は`payload`をそのまま送信し、バイナリペイロードには次のエンコード済み文字列を使用できます
 
-        * `text`
+        * `json`
         * `base64` | `base64-std`
         * `base64-url`
         * `base32` | `base32-std`
@@ -1567,12 +1575,13 @@
       "headers": {
       },
       "status": 200,
-      "url": "https://b3log.org/siyuan"
+      "url": "https://b3log.org/siyuan/"
     }
   }
   ```
 
-    * `bodyEncoding`: `body`で使用されるエンコーディングスキーム、リクエストの`responseEncoding`フィールドと一致、デフォルトは`text`、選択可能な値は以下の通り
+    * `body`: レスポンス本文
+    * `bodyEncoding`: `body`で使用されるエンコーディングスキーム。リクエストの`responseEncoding`フィールドと一致します。デフォルトは`text`で、選択可能な値は以下の通り
 
         * `text`
         * `base64` | `base64-std`
@@ -1580,6 +1589,45 @@
         * `base32` | `base32-std`
         * `base32-hex`
         * `hex`
+    * `contentType`: レスポンスヘッダー`Content-Type`
+    * `elapsed`: リクエスト所要時間（ミリ秒）
+    * `headers`: ターゲットサービスが返したレスポンスヘッダー
+    * `status`: ターゲットサービスが返したHTTPステータスコード
+    * `url`: 転送したURL
+
+#### HTTPフォワードプロキシ
+
+* `/api/network/proxy`
+* リクエストメソッド: 任意のHTTPメソッド
+* クエリパラメータ
+
+    * `u`: 必須。ターゲットの`http`または`https` URLをGoの`base64.RawURLEncoding`でエンコードした文字列です。URLセーフで、`=`パディングを含まないBase64です
+    * `h`: 任意。同じ方式でエンコードしたリクエストヘッダーJSONです。JSONの型は`map[string][]string`で、例は`{"Authorization":["Bearer token"]}`です
+    * `t`: 任意。接続タイムアウトです。Goの`time.ParseDuration`形式を使用します。例は`30s`、`1500ms`です
+* リクエスト本文: 現在のリクエスト本文をそのまま転送し、現在のリクエストの完全な`Content-Type`ヘッダーをターゲットリクエストへ転送します
+* 戻り値: ターゲットサービスのHTTPステータスコードとレスポンス本文を直接返し、`code`、`msg`、`data`ではラップしません。ターゲットのレスポンスヘッダーは`Siyuan-Proxy-`プレフィックス付きで返されます。例えば`Content-Type`は`Siyuan-Proxy-Content-Type`として返されます
+
+#### WebSocketフォワードプロキシ
+
+* `/ws/network/proxy`
+* リクエストメソッド: `GET`
+* クエリパラメータ
+
+    * `u`: 必須。ターゲットの`ws`または`wss` URLをGoの`base64.RawURLEncoding`でエンコードした文字列です
+    * `h`: 任意。同じ方式でエンコードしたハンドシェイクリクエストヘッダーJSONです。JSONの型は`map[string][]string`です
+    * `t`: 任意。ハンドシェイクタイムアウトです。Goの`time.ParseDuration`形式を使用します。例は`30s`、`1500ms`です
+* 戻り値: WebSocketへアップグレードした後、メッセージを双方向に転送します。ターゲットのハンドシェイクレスポンスヘッダーは`Siyuan-Proxy-`プレフィックス付きで返されます
+
+#### EventSourceフォワードプロキシ
+
+* `/es/network/proxy`
+* リクエストメソッド: `GET`
+* クエリパラメータ
+
+    * `u`: 必須。ターゲットの`http`または`https` URLをGoの`base64.RawURLEncoding`でエンコードした文字列です
+    * `h`: 任意。同じ方式でエンコードしたリクエストヘッダーJSONです。JSONの型は`map[string][]string`です
+    * `t`: 任意。接続タイムアウトです。Goの`time.ParseDuration`形式を使用します。例は`30s`、`1500ms`です
+* 戻り値: ターゲットサービスのHTTPステータスコードとレスポンス本文を直接ストリーミングし、`code`、`msg`、`data`ではラップしません。リクエストヘッダーに`Accept`がない場合は、`text/event-stream`を自動的に使用します。ターゲットのレスポンスヘッダーは`Siyuan-Proxy-`プレフィックス付きで返されます
 
 ## システム
 

@@ -80,6 +80,10 @@
     * [Push error message](#Push-error-message)
 * [Network](#Network)
     * [Forward proxy](#Forward-proxy)
+        * [JSON forward proxy](#JSON-forward-proxy)
+        * [HTTP forward proxy](#HTTP-forward-proxy)
+        * [WebSocket forward proxy](#WebSocket-forward-proxy)
+        * [EventSource forward proxy](#EventSource-forward-proxy)
 * [System](#System)
     * [Get boot progress](#Get-boot-progress)
     * [Get system version](#Get-system-version)
@@ -92,9 +96,8 @@
 ### Parameters and return values
 
 * Endpoint: `http://127.0.0.1:6806`
-* Both are POST methods
-* An interface with parameters is required, the parameter is a JSON string, placed in the body, and the header
-  Content-Type is `application/json`
+* Unless otherwise stated, API interfaces use the POST method
+* For interfaces that take JSON parameters, the parameter is a JSON string placed in the body, and the header Content-Type is `application/json`
 * Return value
 
    ````json
@@ -1520,6 +1523,8 @@ Note: To ensure data security, access to this interface is prohibited in Publish
 
 ### Forward proxy
 
+#### JSON forward proxy
+
 * `/api/network/forwardProxy`
 * Parameters
 
@@ -1534,8 +1539,9 @@ Note: To ensure data security, access to this interface is prohibited in Publish
             "Cookie": ""
         }
     ],
+    "redirect": true,
     "payload": {},
-    "payloadEncoding": "text",
+    "payloadEncoding": "json",
     "responseEncoding": "text"
   }
   ```
@@ -1544,18 +1550,18 @@ Note: To ensure data security, access to this interface is prohibited in Publish
     * `method`: HTTP method, default is `POST`
     * `timeout`: timeout in milliseconds, default is `7000`
     * `contentType`: Content-Type, default is `application/json`
-    * `headers`: HTTP headers
+    * `headers`: HTTP request header array; each key-value pair in the objects is set as a request header
+    * `redirect`: Whether to follow redirects, default is `true`, following up to 2 redirects; set it to `false` to disable redirects
     * `payload`: HTTP payload, object or string
-    * `payloadEncoding`: The encoding scheme used by `pyaload`, default is `text`, optional values are as follows
+    * `payloadEncoding`: The encoding scheme used by `payload`, default is `json`; `json` sends `payload` directly, and binary payloads can use the following encoded strings
 
-        * `text`
+        * `json`
         * `base64` | `base64-std`
         * `base64-url`
         * `base32` | `base32-std`
         * `base32-hex`
         * `hex`
-    * `responseEncoding`: The encoding scheme used by `body` in response data, default is `text`, optional values are as
-      follows
+    * `responseEncoding`: The encoding scheme used by `body` in response data, default is `text`, optional values are as follows
 
         * `text`
         * `base64` | `base64-std`
@@ -1577,13 +1583,13 @@ Note: To ensure data security, access to this interface is prohibited in Publish
       "headers": {
       },
       "status": 200,
-      "url": "https://b3log.org/siyuan"
+      "url": "https://b3log.org/siyuan/"
     }
   }
   ```
 
-    * `bodyEncoding`: The encoding scheme used by `body`, is consistent with field `responseEncoding` in request,
-      default is `text`, optional values are as follows
+    * `body`: Response body
+    * `bodyEncoding`: The encoding scheme used by `body`; it is consistent with the `responseEncoding` field in the request, default is `text`, optional values are as follows
 
         * `text`
         * `base64` | `base64-std`
@@ -1591,6 +1597,45 @@ Note: To ensure data security, access to this interface is prohibited in Publish
         * `base32` | `base32-std`
         * `base32-hex`
         * `hex`
+    * `contentType`: Response header `Content-Type`
+    * `elapsed`: Request duration in milliseconds
+    * `headers`: Response headers returned by the target service
+    * `status`: HTTP status code returned by the target service
+    * `url`: Forwarded URL
+
+#### HTTP forward proxy
+
+* `/api/network/proxy`
+* Request method: any HTTP method
+* Query parameters
+
+    * `u`: Required, target `http` or `https` URL encoded with Go `base64.RawURLEncoding`, which is URL-safe Base64 without `=` padding
+    * `h`: Optional, request header JSON encoded in the same way; the JSON type is `map[string][]string`, for example `{"Authorization":["Bearer token"]}`
+    * `t`: Optional, connection timeout in Go `time.ParseDuration` format, for example `30s` or `1500ms`
+* Request body: Forwards the current request body as-is, and forwards the current request's full `Content-Type` header to the target request
+* Return value: Directly returns the target service HTTP status code and response body without wrapping them in `code`, `msg`, or `data`; target response headers are returned with the `Siyuan-Proxy-` prefix, for example `Content-Type` is returned as `Siyuan-Proxy-Content-Type`
+
+#### WebSocket forward proxy
+
+* `/ws/network/proxy`
+* Request method: `GET`
+* Query parameters
+
+    * `u`: Required, target `ws` or `wss` URL encoded with Go `base64.RawURLEncoding`
+    * `h`: Optional, handshake request header JSON encoded in the same way; the JSON type is `map[string][]string`
+    * `t`: Optional, handshake timeout in Go `time.ParseDuration` format, for example `30s` or `1500ms`
+* Return value: Upgrades to WebSocket and then forwards messages bidirectionally; target handshake response headers are returned with the `Siyuan-Proxy-` prefix
+
+#### EventSource forward proxy
+
+* `/es/network/proxy`
+* Request method: `GET`
+* Query parameters
+
+    * `u`: Required, target `http` or `https` URL encoded with Go `base64.RawURLEncoding`
+    * `h`: Optional, request header JSON encoded in the same way; the JSON type is `map[string][]string`
+    * `t`: Optional, connection timeout in Go `time.ParseDuration` format, for example `30s` or `1500ms`
+* Return value: Directly streams the target service HTTP status code and response body without wrapping them in `code`, `msg`, or `data`; if the request headers do not include `Accept`, `text/event-stream` is used automatically; target response headers are returned with the `Siyuan-Proxy-` prefix
 
 ## System
 

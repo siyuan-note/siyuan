@@ -3,8 +3,9 @@ import {getCardWidth} from "./gallery/style";
 import {showMessage} from "../../../dialog/message";
 import {transaction} from "../../wysiwyg/transaction";
 import {clearSelect} from "../../util/clear";
-import {addDragFill} from "./cell";
 import {scrollCenter} from "../../../util/highlightById";
+import {setAVCellAnchor, setAVItemAnchor} from "./rangeSelect";
+import {updateAVRowSelect} from "./virtualScroll";
 
 export interface IAVLocateRequest {
     itemID: string;
@@ -343,14 +344,15 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         targetElement = rowElement?.querySelector(".av__cell[data-dtype=\"block\"]") as HTMLElement;
         if (targetElement && request.select !== false) {
             clearSelect(["cell"], blockElement);
-            targetElement.classList.add("av__cell--select");
-            addDragFill(targetElement);
+            setAVCellAnchor(blockElement, targetElement);
         }
     } else {
         targetElement = bodyElement?.querySelector(`.av__gallery-item[data-id="${request.itemID}"]`) as HTMLElement;
         if (targetElement && request.select !== false && !request.highlight) {
-            blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => item.classList.remove("av__gallery-item--select"));
+            clearSelect(["galleryItem"], blockElement);
             targetElement.classList.add("av__gallery-item--select");
+            updateAVRowSelect(bodyElement, request.itemID, true);
+            setAVItemAnchor(blockElement, targetElement);
         }
     }
     if (!targetElement) {

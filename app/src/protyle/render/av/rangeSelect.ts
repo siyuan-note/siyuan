@@ -2,7 +2,7 @@ import {hasClosestByClassName} from "../../util/hasClosest";
 import {
     getAVData,
     getAVLoadedItemInfos,
-    getAVSelectedItemIDs,
+    getAVSelectedItemPoints,
     IAVItemInfo,
     resetAVRowSelect,
 } from "./virtualScroll";
@@ -73,12 +73,16 @@ const buildCellSelection = (blockElement: HTMLElement, anchor: IAVCellPoint,
     const rowEnd = Math.max(anchorRowIndex, focusRowIndex);
     const colStart = Math.min(anchorColIndex, focusColIndex);
     const colEnd = Math.max(anchorColIndex, focusColIndex);
+    const sourceColIndexes = new Map(view.columns.map((column, index) => [column.id, index]));
     const selectedCells: IAVSelectedCell[] = [];
     for (let rowIndex = rowStart; rowIndex <= rowEnd; rowIndex++) {
         const row = view.rows[rowIndex];
         for (let colIndex = colStart; colIndex <= colEnd; colIndex++) {
             const column = visibleColumns[colIndex];
-            const sourceColIndex = view.columns.findIndex(item => item.id === column.id);
+            const sourceColIndex = sourceColIndexes.get(column.id);
+            if (typeof sourceColIndex !== "number") {
+                continue;
+            }
             const cell = row.cells[sourceColIndex];
             if (cell) {
                 selectedCells.push({
@@ -191,13 +195,16 @@ const getItemElement = (blockElement: HTMLElement, item: Pick<IAVItemInfo, "item
         `.av__body${groupSelector} .av__gallery-item[data-id="${item.itemID}"]`);
 };
 
-const syncItemSelectionDOM = (blockElement: HTMLElement, selectedIDs: Set<string>) => {
+const getItemKey = (groupID: string, itemID: string) => `${groupID}:${itemID}`;
+
+const syncItemSelectionDOM = (blockElement: HTMLElement, selectedKeys: Set<string>) => {
     const isTable = blockElement.dataset.avType === "table";
     blockElement.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]").forEach(item => {
         if (item.closest(".av") !== blockElement) {
             return;
         }
-        const selected = selectedIDs.has(item.dataset.id);
+        const groupID = item.closest<HTMLElement>(".av__body")?.dataset.groupId || "";
+        const selected = selectedKeys.has(getItemKey(groupID, item.dataset.id));
         item.classList.toggle(isTable ? "av__row--select" : "av__gallery-item--select", selected);
         if (isTable) {
             item.querySelector(".av__firstcol use")?.setAttribute("xlink:href",
@@ -229,7 +236,6 @@ export const setAVItemAnchor = (blockElement: HTMLElement, itemElement: HTMLElem
         anchorGroupID: groupID,
         focusID: itemElement.dataset.id,
         focusGroupID: groupID,
-        selectedIDs: getAVSelectedItemIDs(blockElement),
     });
 };
 
@@ -253,7 +259,7 @@ const applyItemRange = (blockElement: HTMLElement, target: IAVItemInfo) => {
         anchorIndex = targetIndex;
     }
     const selectedItems = scopeItems.slice(Math.min(anchorIndex, targetIndex), Math.max(anchorIndex, targetIndex) + 1);
-    const selectedIDs = new Set(selectedItems.map(item => item.itemID));
+    const selectedKeys = new Set(selectedItems.map(item => getItemKey(item.groupID, item.itemID)));
     blockElement.querySelectorAll<HTMLElement>(".av__body").forEach(bodyElement => {
         if (bodyElement.closest(".av") !== blockElement) {
             return;
@@ -262,14 +268,13 @@ const applyItemRange = (blockElement: HTMLElement, target: IAVItemInfo) => {
         resetAVRowSelect(bodyElement, selectedItems.filter(item => item.groupID === groupID).map(item => item.itemID));
     });
     clearAVCellRange(blockElement);
-    syncItemSelectionDOM(blockElement, selectedIDs);
+    syncItemSelectionDOM(blockElement, selectedKeys);
     updateAVSelectionStatus(blockElement);
     setAVItemSelectionState(blockElement, {
         anchorID: itemSelection.anchorID,
         anchorGroupID: itemSelection.anchorGroupID,
         focusID: target.itemID,
         focusGroupID: target.groupID,
-        selectedIDs: Array.from(selectedIDs),
     });
     return true;
 };
@@ -304,8 +309,10 @@ export const moveAVItemRange = (blockElement: HTMLElement, direction: "up" | "do
 };
 
 export const setAVDragItemAnchor = (blockElement: HTMLElement) => {
-    const selectedIDs = new Set(getAVSelectedItemIDs(blockElement));
-    const selectedItems = getAVLoadedItemInfos(blockElement, true).filter(item => selectedIDs.has(item.itemID));
+    const selectedKeys = new Set(getAVSelectedItemPoints(blockElement).map(item =>
+        getItemKey(item.groupID, item.itemID)));
+    const selectedItems = getAVLoadedItemInfos(blockElement, true).filter(item =>
+        selectedKeys.has(getItemKey(item.groupID, item.itemID)));
     if (selectedItems.length > 0) {
         const firstSelected = selectedItems[0];
         const lastSelected = selectedItems[selectedItems.length - 1];
@@ -314,7 +321,8 @@ export const setAVDragItemAnchor = (blockElement: HTMLElement) => {
             anchorGroupID: firstSelected.groupID,
             focusID: lastSelected.itemID,
             focusGroupID: lastSelected.groupID,
-            selectedIDs: selectedItems.map(item => item.itemID),
         });
+    } else {
+        clearAVItemSelectionState(blockElement);
     }
 };

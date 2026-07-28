@@ -6,7 +6,7 @@ import {avRender, genTabHeaderHTML} from "../render";
 import {afterRenderGallery, renderGallery} from "../gallery/render";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getRowHTML} from "../row";
-import {getBodyVirtualData} from "../virtualScroll";
+import {getAVSelectedItemPoints, getBodyVirtualData} from "../virtualScroll";
 import {beginAVRender, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 import {getCardStyle} from "../gallery/style";
 
@@ -91,16 +91,10 @@ export const renderKanban = async (options: {
             fieldId: item.parentElement.getAttribute("data-id"),
         });
     });
-    const selectItemIds: IIds[] = [];
-    options.blockElement.querySelectorAll(".av__gallery-item--select").forEach(galleryItem => {
-        const fieldId = galleryItem.getAttribute("data-id");
-        if (fieldId) {
-            selectItemIds.push({
-                groupId: (hasClosestByClassName(galleryItem, "av__body") as HTMLElement).dataset.groupId || "",
-                fieldId
-            });
-        }
-    });
+    const selectItemIds: IIds[] = getAVSelectedItemPoints(options.blockElement).map(item => ({
+        groupId: item.groupID,
+        fieldId: item.itemID,
+    }));
     const pageSizes: { [key: string]: string } = {};
     const virtualData: { [key: string]: IAVVirtualData } = {};
     options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {

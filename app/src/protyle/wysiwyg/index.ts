@@ -83,13 +83,14 @@ import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 import {selectRow, stickyRow, updateHeader} from "../render/av/row";
-import {updateAVRowSelect} from "../render/av/virtualScroll";
+import {getAVSelectedItemIDs, getAVSelectedTableCells, updateAVRowSelect} from "../render/av/virtualScroll";
 import {setFreezeColumn, showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {
     addDragFill,
     dragFillCellsValue,
+    getAVCellData,
     getAVSelectedCellData,
     genCellValueByElement,
     getCellText,
@@ -433,7 +434,9 @@ export class WYSIWYG {
             }
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
-                (getAVSelectedCells(nodeElement).length > 0 ? nodeElement : null);
+                (getAVSelectedCells(nodeElement).length > 0 ||
+                (nodeElement.dataset.avType === "table" && getAVSelectedItemIDs(nodeElement).length > 0) ?
+                    nodeElement : null);
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table
             let selectTableRange = false;
@@ -525,7 +528,9 @@ export class WYSIWYG {
                     selectElements[0].removeAttribute("data-reftext");
                 }
             } else if (selectAVElement) {
-                const selectedCellData = getAVSelectedCellData(nodeElement);
+                const selectedCells = getAVSelectedCells(nodeElement);
+                const selectedCellData = selectedCells.length > 0 ?
+                    getAVSelectedCellData(nodeElement) : getAVCellData(getAVSelectedTableCells(nodeElement));
                 const cellElements: Element[] = selectedCellData.json.length > 0 ? [] :
                     Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select"));
                 if (selectedCellData.json.length > 0) {
@@ -769,7 +774,8 @@ export class WYSIWYG {
             const baseDragSelectElements = new Set(isToggleBlockDrag ?
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")) : []);
             if (event.shiftKey) {
-                if (!protyle.disabled && nodeElement?.dataset.avType === "table" && avCellElement?.dataset.id &&
+                if (!isMobile() && !protyle.disabled && nodeElement?.dataset.avType === "table" &&
+                    avCellElement?.dataset.id &&
                     selectAVCellRange(nodeElement, avCellElement)) {
                     focusBlock(nodeElement);
                     this.preventClick = true;
@@ -1264,17 +1270,30 @@ export class WYSIWYG {
                 const originData: { [key: string]: IAVCellValue[] } = {};
                 let lastOriginCellElement: HTMLElement;
                 const originCellIds: string[] = [];
-                bodyElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                    const rowElement = hasClosestByClassName(item, "av__row");
-                    if (rowElement) {
-                        if (!originData[rowElement.dataset.id]) {
-                            originData[rowElement.dataset.id] = [];
+                const stableOriginCells = getAVSelectedCells(nodeElement);
+                if (stableOriginCells.length > 0) {
+                    stableOriginCells.forEach(item => {
+                        if (!originData[item.rowID]) {
+                            originData[item.rowID] = [];
                         }
-                        originData[rowElement.dataset.id].push(genCellValueByElement(getTypeByCellElement(item), item));
-                        lastOriginCellElement = item;
-                        originCellIds.push(item.dataset.id);
-                    }
-                });
+                        originData[item.rowID].push(item.cell.value);
+                        originCellIds.push(item.cell.id);
+                    });
+                    lastOriginCellElement = avDragFillElement.parentElement;
+                } else {
+                    bodyElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                        const rowElement = hasClosestByClassName(item, "av__row");
+                        if (rowElement) {
+                            if (!originData[rowElement.dataset.id]) {
+                                originData[rowElement.dataset.id] = [];
+                            }
+                            originData[rowElement.dataset.id].push(
+                                genCellValueByElement(getTypeByCellElement(item), item));
+                            lastOriginCellElement = item;
+                            originCellIds.push(item.dataset.id);
+                        }
+                    });
+                }
                 const dragFillCellIndex = getPositionByCellElement(lastOriginCellElement);
                 const firstCellIndex = getPositionByCellElement(bodyElement.querySelector(".av__cell--active"));
                 let moveAVCellElement: HTMLElement;
@@ -1302,11 +1321,11 @@ export class WYSIWYG {
                                 rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, cellIndex: number) => {
                                     if (cellIndex >= firstCellIndex.celIndex && cellIndex <= newIndex.celIndex) {
                                         cellElement.classList.add("av__cell--active");
-                                        lastCellElement = cellElement;
                                     }
                                 });
                             }
                         });
+                        lastCellElement = moveAVCellElement;
                     }
                 };
 
@@ -1317,9 +1336,9 @@ export class WYSIWYG {
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
                     if (lastCellElement) {
+                        selectAVCellRange(nodeElement, lastCellElement);
                         dragFillCellsValue(protyle, nodeElement, originData, originCellIds, lastOriginCellElement);
-                        const allActiveCellsElement = bodyElement.querySelectorAll(".av__cell--active");
-                        addDragFill(allActiveCellsElement[allActiveCellsElement.length - 1]);
+                        addDragFill(lastCellElement);
                     }
                     return false;
                 };
@@ -2453,7 +2472,9 @@ export class WYSIWYG {
             event.preventDefault();
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
-                (getAVSelectedCells(nodeElement).length > 0 ? nodeElement : null);
+                (getAVSelectedCells(nodeElement).length > 0 ||
+                (nodeElement.dataset.avType === "table" && getAVSelectedItemIDs(nodeElement).length > 0) ?
+                    nodeElement : null);
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table
             let selectTableRange = false;
@@ -2542,7 +2563,10 @@ export class WYSIWYG {
                 }
             } else if (selectAVElement) {
                 needClipboardWrite = true;
-                const cellsValue = await updateCellsValue(protyle, nodeElement);
+                const selectedCells = getAVSelectedCells(nodeElement);
+                const itemCells = selectedCells.length === 0 ? getAVSelectedTableCells(nodeElement) : undefined;
+                const cellsValue = await updateCellsValue(protyle, nodeElement, undefined, undefined, undefined,
+                    undefined, false, false, false, itemCells);
                 html = JSON.stringify(cellsValue.json);
                 textPlain = cellsValue.text;
             } else if (selectTableElement) {

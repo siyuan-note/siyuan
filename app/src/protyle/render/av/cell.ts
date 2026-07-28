@@ -742,7 +742,8 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
 
 export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLElement, value?: any,
                                        cElements?: HTMLElement[], columns?: IAVColumn[], html?: string, getOperations = false,
-                                       forceOperation = false, replaceSelectValues = false) => {
+                                       forceOperation = false, replaceSelectValues = false,
+                                       stableCells?: IAVSelectedCell[]) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -755,7 +756,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
     if (cElements?.length > 0) {
         cellElements = cElements;
     } else {
-        selectedCells = getAVSelectedCells(nodeElement);
+        selectedCells = stableCells || getAVSelectedCells(nodeElement);
         if (selectedCells.length === 0) {
             cellElements = Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select"));
         }
@@ -1184,8 +1185,7 @@ const getCellValueText = (value: IAVCellValue, column?: IAVColumn, rowIndex = 0)
     return getCellText(cellElement);
 };
 
-export const getAVSelectedCellData = (blockElement: HTMLElement) => {
-    const selectedCells = getAVSelectedCells(blockElement);
+export const getAVCellData = (selectedCells: IAVSelectedCell[]) => {
     const json: IAVCellValue[][] = [];
     let text = "";
     selectedCells.forEach((item, index) => {
@@ -1200,6 +1200,10 @@ export const getAVSelectedCellData = (blockElement: HTMLElement) => {
         json,
         text: text.substring(0, text.length - 1),
     };
+};
+
+export const getAVSelectedCellData = (blockElement: HTMLElement) => {
+    return getAVCellData(getAVSelectedCells(blockElement));
 };
 
 const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
@@ -1318,7 +1322,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
     const showIcon = activeElement.querySelector(".b3-menu__avemoji") ? true : false;
     Object.keys(newData).forEach((rowID, index) => {
         newData[rowID].forEach((item, cellIndex) => {
-            if (["rollup", "template", "created", "updated"].includes(item.type) ||
+            if (["rollup", "template", "created", "updated", "lineNumber"].includes(item.type) ||
                 (item.type === "block" && item.element.getAttribute("data-detached") !== "true")) {
                 return;
             }
@@ -1341,6 +1345,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
             item.element.innerHTML = renderCell(data, 0, showIcon, "table", undefined,
                 item.element.dataset.dateFormat as TAVDateFormat);
             renderCellAttr(item.element, data);
+            updateAVSelectedCellValue(nodeElement, rowID, keyID, data);
             delete item.colId;
             delete item.element;
             undoOperations.push({

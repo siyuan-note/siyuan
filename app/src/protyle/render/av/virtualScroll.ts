@@ -1,6 +1,6 @@
 import {Constants} from "../../../constants";
 import {getRowHTML} from "./row";
-import {getAVItemSelection, restoreAVCellSelection} from "./selectionState";
+import {IAVSelectedCell, restoreAVCellSelection} from "./selectionState";
 
 const BUFFER_RATIO = 1;
 
@@ -509,6 +509,35 @@ export interface IAVItemInfo {
     primaryCell?: IAVCell;
 }
 
+export interface IAVItemPoint {
+    itemID: string;
+    groupID: string;
+}
+
+const getAVItemPointKey = (item: IAVItemPoint) => `${item.groupID}:${item.itemID}`;
+
+export const getAVSelectedItemPoints = (blockElement: HTMLElement): IAVItemPoint[] => {
+    const points: IAVItemPoint[] = [];
+    blockElement.querySelectorAll<HTMLElement>(".av__body").forEach(bodyElement => {
+        if (bodyElement.closest(".av") !== blockElement) {
+            return;
+        }
+        const groupID = bodyElement.dataset.groupId || "";
+        const state = bodyStates.get(bodyElement);
+        if (state?.selectedRowIds) {
+            state.selectedRowIds.forEach(itemID => points.push({itemID, groupID}));
+            return;
+        }
+        bodyElement.querySelectorAll<HTMLElement>(
+            ".av__row--select:not(.av__row--header), .av__gallery-item--select").forEach(item => {
+            if (item.dataset.id) {
+                points.push({itemID: item.dataset.id, groupID});
+            }
+        });
+    });
+    return points;
+};
+
 export const getAVLoadedItemInfos = (blockElement: HTMLElement, visibleOnly = false): IAVItemInfo[] => {
     const data = blockDataStore.get(blockElement);
     if (!data) {
@@ -550,8 +579,15 @@ export const getAVLoadedItemInfos = (blockElement: HTMLElement, visibleOnly = fa
 };
 
 export const getAVSelectedItemInfos = (blockElement: HTMLElement) => {
-    const selectedIDs = new Set(getAVSelectedItemIDs(blockElement));
-    return getAVLoadedItemInfos(blockElement).filter(item => selectedIDs.has(item.itemID));
+    const selectedKeys = new Set(getAVSelectedItemPoints(blockElement).map(getAVItemPointKey));
+    const selectedIDs = new Set<string>();
+    return getAVLoadedItemInfos(blockElement).filter(item => {
+        if (!selectedKeys.has(getAVItemPointKey(item)) || selectedIDs.has(item.itemID)) {
+            return false;
+        }
+        selectedIDs.add(item.itemID);
+        return true;
+    });
 };
 
 export const getAVPrimaryCell = (blockElement: HTMLElement, itemID: string) => {
@@ -563,19 +599,7 @@ export const setAVData = (blockElement: HTMLElement, data: IAV) => {
 };
 
 export const getAVSelectedItemIDs = (blockElement: HTMLElement) => {
-    const selectedIDs = new Set<string>();
-    blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
-        const state = bodyStates.get(bodyElement);
-        if (state?.selectedRowIds) {
-            state.selectedRowIds.forEach((itemID) => selectedIDs.add(itemID));
-        } else {
-            bodyElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select").forEach((item: HTMLElement) => {
-                if (item.dataset.id) {
-                    selectedIDs.add(item.dataset.id);
-                }
-            });
-        }
-    });
+    const selectedIDs = new Set(getAVSelectedItemPoints(blockElement).map(item => item.itemID));
     const data = blockDataStore.get(blockElement);
     if (!data) {
         return Array.from(selectedIDs);
@@ -596,6 +620,61 @@ export const getAVSelectedItemIDs = (blockElement: HTMLElement) => {
     };
     collectIDs(data.view);
     return orderedIDs;
+};
+
+export const getAVSelectedTableCells = (blockElement: HTMLElement): IAVSelectedCell[] => {
+    if (blockElement.dataset.avType !== "table") {
+        return [];
+    }
+    const selectedKeys = new Set(getAVSelectedItemPoints(blockElement).map(getAVItemPointKey));
+    const selectedIDs = new Set<string>();
+    const cells: IAVSelectedCell[] = [];
+    const data = blockDataStore.get(blockElement);
+    const findView = (view: IAVView, groupID: string): IAVView | undefined => {
+        if ((!groupID && !view.groups?.length) || view.id === groupID) {
+            return view;
+        }
+        for (const group of view.groups || []) {
+            const result = findView(group, groupID);
+            if (result) {
+                return result;
+            }
+        }
+    };
+    getAVLoadedItemInfos(blockElement).forEach(info => {
+        if (!selectedKeys.has(getAVItemPointKey(info)) || selectedIDs.has(info.itemID) ||
+            !("cells" in info.item)) {
+            return;
+        }
+        selectedIDs.add(info.itemID);
+        const table = data ? findView(data.view, info.groupID) as IAVTable : undefined;
+        const rowIndex = table?.rows?.findIndex(row => row.id === info.itemID);
+        if (typeof rowIndex !== "number" || rowIndex < 0) {
+            return;
+        }
+        const visibleColumns = table?.columns?.filter(column => !column.hidden) || [];
+        const sourceColIndexes = new Map(table.columns.map((column, index) => [column.id, index]));
+        const row = info.item as IAVRow;
+        visibleColumns.forEach((column, colIndex) => {
+            const sourceColIndex = sourceColIndexes.get(column.id);
+            if (typeof sourceColIndex !== "number") {
+                return;
+            }
+            const cell = row.cells[sourceColIndex];
+            if (cell) {
+                cells.push({
+                    groupID: info.groupID,
+                    rowID: info.itemID,
+                    colID: column.id,
+                    rowIndex,
+                    colIndex,
+                    cell,
+                    column,
+                });
+            }
+        });
+    });
+    return cells;
 };
 
 export const trimAVRows = (blockElement: HTMLElement, elementRect: DOMRect): void => {
@@ -622,9 +701,9 @@ export const initVirtualScroll = (options: {
     protyle: IProtyle,
     blockElement: HTMLElement,
     data: IAV,
+    selectedItemPoints?: IAVItemPoint[],
 }): void => {
     setAVData(options.blockElement, options.data);
-    const itemSelection = getAVItemSelection(options.blockElement);
     if (options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
         return;
     }
@@ -648,10 +727,9 @@ export const initVirtualScroll = (options: {
                 selectedRowIds.add(id);
             }
         });
-        const viewItems = (view as IAVTable).rows || (view as IAVGallery).cards || [];
-        itemSelection?.selectedIDs.forEach(itemID => {
-            if (viewItems.some(item => item.id === itemID)) {
-                selectedRowIds.add(itemID);
+        options.selectedItemPoints?.forEach(point => {
+            if (point.groupID === (item.dataset.groupId || "")) {
+                selectedRowIds.add(point.itemID);
             }
         });
         item.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]").forEach(row => {

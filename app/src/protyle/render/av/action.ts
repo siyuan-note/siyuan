@@ -59,6 +59,7 @@ import {
 } from "./coverPosition";
 import {getEditableAVFields, openAVFieldEditor} from "./batchEdit";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
+import {isMobile} from "../../../util/functions";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
@@ -367,7 +368,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                         return;
                     }
                     if (cellType === "updated" || cellType === "created" || cellType === "lineNumber") {
-                        clearSelect(["row"], blockElement);
+                        if (isMobile()) {
+                            selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+                        } else {
+                            clearSelect(["row"], blockElement);
+                        }
                     } else {
                         scrollElement.querySelectorAll(".av__row--select").forEach(item => {
                             item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
@@ -503,7 +508,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         } else if (target.classList.contains("av__firstcol")) {
             window.siyuan.menus.menu.remove();
             const rowElement = hasClosestByClassName(target, "av__row") as HTMLElement;
-            if (event.shiftKey) {
+            if (!isMobile() && event.shiftKey) {
                 selectAVItemRange(blockElement, rowElement);
             } else {
                 selectRow(target, "toggle");
@@ -551,7 +556,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (target.classList.contains("av__row") && event.shiftKey && !target.classList.contains("av__row--header")) {
-            selectAVItemRange(blockElement, target);
+            if (isMobile()) {
+                selectRow(target.querySelector(".av__firstcol"), "toggle");
+            } else {
+                selectAVItemRange(blockElement, target);
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;

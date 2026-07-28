@@ -25,7 +25,6 @@ interface IAVItemSelection {
     anchorGroupID: string;
     focusID: string;
     focusGroupID: string;
-    selectedIDs: string[];
 }
 
 interface IAVSelectionState {
@@ -85,7 +84,6 @@ export const setAVItemAnchorState = (blockElement: HTMLElement, itemID: string, 
         anchorGroupID: groupID,
         focusID: itemID,
         focusGroupID: groupID,
-        selectedIDs: state.item?.selectedIDs || [],
     };
 };
 
@@ -103,7 +101,7 @@ export const clearAVItemSelectionState = (blockElement: HTMLElement) => {
 export const refreshAVCellSelection = (blockElement: HTMLElement, data: IAV) => {
     const selection = getAVCellSelection(blockElement);
     if (!selection) {
-        return;
+        return true;
     }
     const findView = (view: IAVView): IAVView | undefined => {
         if ((!selection.anchor.groupID && !view.groups?.length) || view.id === selection.anchor.groupID) {
@@ -119,16 +117,20 @@ export const refreshAVCellSelection = (blockElement: HTMLElement, data: IAV) => 
     const view = findView(data.view) as IAVTable;
     if (!view?.rows || !view.columns) {
         clearAVCellSelectionState(blockElement);
-        return;
+        return false;
     }
     const columns = view.columns.filter(column => !column.hidden);
+    const rowIndexes = new Map(view.rows.map((row, index) => [row.id, index]));
+    const colIndexes = new Map(columns.map((column, index) => [column.id, index]));
+    const sourceColIndexes = new Map(view.columns.map((column, index) => [column.id, index]));
     const cells: IAVSelectedCell[] = [];
     selection.cells.forEach(selectedCell => {
-        const rowIndex = view.rows.findIndex(row => row.id === selectedCell.rowID);
-        const colIndex = columns.findIndex(column => column.id === selectedCell.colID);
-        const sourceColIndex = view.columns.findIndex(column => column.id === selectedCell.colID);
-        const cell = view.rows[rowIndex]?.cells[sourceColIndex];
-        if (cell && colIndex >= 0) {
+        const rowIndex = rowIndexes.get(selectedCell.rowID);
+        const colIndex = colIndexes.get(selectedCell.colID);
+        const sourceColIndex = sourceColIndexes.get(selectedCell.colID);
+        const cell = typeof rowIndex === "number" && typeof sourceColIndex === "number" ?
+            view.rows[rowIndex]?.cells[sourceColIndex] : undefined;
+        if (cell && typeof colIndex === "number" && typeof rowIndex === "number") {
             cells.push({
                 groupID: selection.anchor.groupID,
                 rowID: selectedCell.rowID,
@@ -142,9 +144,10 @@ export const refreshAVCellSelection = (blockElement: HTMLElement, data: IAV) => 
     });
     if (cells.length !== selection.cells.length) {
         clearAVCellSelectionState(blockElement);
-        return;
+        return false;
     }
     selection.cells = cells;
+    return true;
 };
 
 export const restoreAVCellSelection = (blockElement: HTMLElement) => {
@@ -152,22 +155,23 @@ export const restoreAVCellSelection = (blockElement: HTMLElement) => {
     if (!selection) {
         return;
     }
-    const selectedKeys = new Set(selection.cells.map(item => `${item.rowID}:${item.colID}`));
+    const selectedKeys = new Set(selection.cells.map(item => `${item.groupID}:${item.rowID}:${item.colID}`));
     blockElement.querySelectorAll<HTMLElement>(".av__cell--active, .av__cell--select").forEach(item => {
         item.classList.remove("av__cell--active", "av__cell--select");
         item.querySelector(".av__drag-fill")?.remove();
     });
     blockElement.querySelectorAll<HTMLElement>(".av__row[data-id] .av__cell[data-col-id]").forEach(cellElement => {
         const rowElement = cellElement.closest<HTMLElement>(".av__row[data-id]");
-        if (!rowElement || !selectedKeys.has(`${rowElement.dataset.id}:${cellElement.dataset.colId}`)) {
+        const groupID = cellElement.closest<HTMLElement>(".av__body")?.dataset.groupId || "";
+        if (!rowElement || !selectedKeys.has(`${groupID}:${rowElement.dataset.id}:${cellElement.dataset.colId}`)) {
             return;
         }
         cellElement.classList.add("av__cell--active");
-        if (rowElement.dataset.id === selection.anchor.rowID &&
+        if (groupID === selection.anchor.groupID && rowElement.dataset.id === selection.anchor.rowID &&
             cellElement.dataset.colId === selection.anchor.colID) {
             cellElement.classList.add("av__cell--select");
         }
-        if (rowElement.dataset.id === selection.focus.rowID &&
+        if (groupID === selection.focus.groupID && rowElement.dataset.id === selection.focus.rowID &&
             cellElement.dataset.colId === selection.focus.colID &&
             !["template", "rollup", "lineNumber", "created", "updated"].includes(cellElement.dataset.dtype)) {
             cellElement.insertAdjacentHTML("beforeend",

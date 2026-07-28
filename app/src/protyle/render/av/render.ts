@@ -19,7 +19,7 @@ import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
-import {getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
+import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate, setAVLocateRequest} from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {updateHotkeyTip} from "../../util/compatibility";
@@ -301,7 +301,11 @@ const renderGroupTable = (options: ITableOptions) => {
 
 const afterRenderTable = (options: ITableOptions) => {
     setAVData(options.blockElement, options.data);
-    refreshAVCellSelection(options.blockElement, options.data);
+    if (!refreshAVCellSelection(options.blockElement, options.data)) {
+        options.resetData.selectCellId = undefined;
+        options.resetData.dragFillId = undefined;
+        options.resetData.activeIds = [];
+    }
     if (options.blockElement.getAttribute("data-need-focus") === "true") {
         focusBlock(options.blockElement);
         options.blockElement.removeAttribute("data-need-focus");
@@ -404,6 +408,13 @@ const afterRenderTable = (options: ITableOptions) => {
     if (options.cb) {
         options.cb(options.data);
     }
+    initVirtualScroll({
+        ...options,
+        selectedItemPoints: options.resetData.selectRowIds.map(item => ({
+            groupID: item.groupId,
+            itemID: item.rowId,
+        })),
+    });
     if (!options.renderAll) {
         finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
@@ -414,7 +425,6 @@ const afterRenderTable = (options: ITableOptions) => {
         isSearching: options.resetData.isSearching,
         onChange: () => updateSearch(options.blockElement, options.protyle),
     });
-    initVirtualScroll(options);
     finishAVLocate(options.blockElement, options.protyle, options.data);
 };
 
@@ -457,16 +467,10 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 colId: selectCellElement.getAttribute("data-col-id"),
             };
         }
-        const selectRowIds: IIds[] = [];
-        e.querySelectorAll(".av__row--select").forEach(rowItem => {
-            const rowId = rowItem.getAttribute("data-id");
-            if (rowId) {
-                selectRowIds.push({
-                    groupId: (hasClosestByClassName(rowItem, "av__body") as HTMLElement).dataset.groupId || "",
-                    rowId
-                });
-            }
-        });
+        const selectRowIds: IIds[] = getAVSelectedItemPoints(e).map(item => ({
+            groupId: item.groupID,
+            rowId: item.itemID,
+        }));
         let dragFillId;
         const dragFillElement = e.querySelector(".av__drag-fill") as HTMLElement;
         if (dragFillElement) {

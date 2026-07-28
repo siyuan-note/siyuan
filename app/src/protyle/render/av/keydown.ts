@@ -16,6 +16,7 @@ import {
     setAVItemAnchor,
 } from "./rangeSelect";
 import {getAVCellSelection, getAVItemSelection} from "./selectionState";
+import {isMobile} from "../../../util/functions";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
     if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
@@ -75,7 +76,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         event.preventDefault();
         return true;
     }
-    if (!selectCellElement && cellSelection && event.shiftKey &&
+    if (!isMobile() && !selectCellElement && cellSelection && event.shiftKey &&
         ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
         const previousFocus = `${cellSelection.focus.rowID}:${cellSelection.focus.colID}`;
         const targetElement = moveAVCellRange(nodeElement,
@@ -121,7 +122,8 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             event.preventDefault();
             return true;
         }
-        if (event.shiftKey && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+        if (!isMobile() && event.shiftKey &&
+            ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
             if (!getAVCellSelection(nodeElement)) {
                 setAVCellAnchor(nodeElement, selectCellElement);
             }
@@ -236,7 +238,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     const selectRowElements = nodeElement.querySelectorAll(
         ".av__row--select:not(.av__row--header), .av__gallery-item--select");
     const itemSelection = getAVItemSelection(nodeElement);
-    if (selectRowElements.length === 0 && itemSelection && event.shiftKey &&
+    if (!isMobile() && selectRowElements.length === 0 && itemSelection && event.shiftKey &&
         (event.key === "ArrowUp" || event.key === "ArrowDown")) {
         const previousFocusID = itemSelection.focusID;
         const targetElement = moveAVItemRange(nodeElement, event.key === "ArrowUp" ? "up" : "down");
@@ -287,7 +289,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             event.preventDefault();
             return true;
         }
-        if (event.shiftKey && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
+        if (!isMobile() && event.shiftKey && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
             if (!getAVItemSelection(nodeElement)) {
                 setAVItemAnchor(nodeElement, selectRowElements[event.key === "ArrowUp" ? 0 :
                     selectRowElements.length - 1] as HTMLElement);

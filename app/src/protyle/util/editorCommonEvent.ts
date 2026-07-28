@@ -55,6 +55,8 @@ import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 import {isSameDragEditor, uniqueDragIds} from "./dragDocument";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
+import {getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
+import {setAVItemAnchor} from "../render/av/rangeSelect";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
 
@@ -955,10 +957,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                     if (!target.classList.contains("av__gallery-item--select")) {
-                        blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
-                            item.classList.remove("av__gallery-item--select");
-                        });
+                        clearSelect(["galleryItem"], blockElement);
                         target.classList.add("av__gallery-item--select");
+                        const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
+                        updateAVRowSelect(bodyElement, target.dataset.id, true);
+                        setAVItemAnchor(blockElement, target);
                     }
                     const ghostElement = document.createElement("div");
                     ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
@@ -1004,12 +1007,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         });
                     }
                     window.siyuan.dragElement = target;
-                    const selectIds: string[] = [];
-                    blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
-                        const bodyElement = hasClosestByClassName(item, "av__body") as HTMLElement;
-                        const groupId = bodyElement.getAttribute("data-group-id");
-                        selectIds.push(item.getAttribute("data-id") + (groupId ? `@${groupId}` : ""));
-                    });
+                    const selectIds = getAVSelectedItemPoints(blockElement).map(item =>
+                        item.itemID + (item.groupID ? `@${item.groupID}` : ""));
                     event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
                         ghostElement.outerHTML);
                 }

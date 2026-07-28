@@ -29,6 +29,7 @@ import {
 import {getCardCoverHTML, getCardCoverSource} from "./cover";
 import {getCardFieldsClass} from "./gallery/cardLayout";
 import {getAVFilteredTipContext} from "./filteredTip";
+import {clearAVItemSelectionState} from "./selectionState";
 
 const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem, primaryHidden = false) => {
     const canPosition = Boolean(row.coverURL && !row.coverURL.startsWith("background") && getCardCoverSource(data));
@@ -246,6 +247,10 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     const useElement = checkElement.querySelector("use");
     const bodyElement = hasClosestByClassName(rowElement, "av__body") as HTMLElement;
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
+        const blockElement = hasClosestByClassName(rowElement, "av") as HTMLElement;
+        if (blockElement) {
+            clearAVItemSelectionState(blockElement);
+        }
         if ("#iconCheck" === useElement.getAttribute("xlink:href") || type === "unselectAll") {
             rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");

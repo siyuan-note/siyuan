@@ -80,6 +80,10 @@
     * [推送报错消息](#推送报错消息)
 * [网络](#网络)
     * [正向代理](#正向代理)
+        * [JSON 正向代理](#JSON-正向代理)
+        * [HTTP 正向代理](#HTTP-正向代理)
+        * [WebSocket 正向代理](#WebSocket-正向代理)
+        * [EventSource 正向代理](#EventSource-正向代理)
 * [系统](#系统)
     * [获取启动进度](#获取启动进度)
     * [获取系统版本](#获取系统版本)
@@ -92,8 +96,8 @@
 ### 参数和返回值
 
 * 端点：`http://127.0.0.1:6806`
-* 均是 POST 方法
-* 需要带参的接口，参数为 JSON 字符串，放置到 body 里，标头 Content-Type 为 `application/json`
+* 除非接口中另有说明，否则 API 接口均使用 POST 方法
+* 使用 JSON 入参的接口，参数为 JSON 字符串，放置到 body 里，标头 Content-Type 为 `application/json`
 * 返回值
 
   ```json
@@ -1511,6 +1515,8 @@
 
 ### 正向代理
 
+#### JSON 正向代理
+
 * `/api/network/forwardProxy`
 * 参数
 
@@ -1525,21 +1531,23 @@
             "Cookie": ""
         }
     ],
+    "redirect": true,
     "payload": {},
-    "payloadEncoding": "text",
+    "payloadEncoding": "json",
     "responseEncoding": "text"
   }
   ```
 
     * `url`：转发的 URL
-    * `method`：HTTP 方法，默认为 `GET`
+    * `method`：HTTP 方法，默认为 `POST`
     * `timeout`：超时时间，单位为毫秒，默认为 `7000` 毫秒
     * `contentType`：HTTP Content-Type，默认为 `application/json`
-    * `headers`：HTTP 请求标头
-    * `payload`：HTTP 请求体，对象或者是字符串
-    * `payloadEncoding`：`pyaload` 所使用的编码方案，默认为 `text`，可选值如下所示
+    * `headers`：HTTP 请求标头数组，每个对象中的键值对都会设置为请求标头
+    * `redirect`：是否跟随重定向，默认为 `true`，最多跟随 3 次；设置为 `false` 时不跟随重定向
+    * `payload`：HTTP 请求体，可以是对象或者字符串
+    * `payloadEncoding`：`payload` 所使用的编码方案，默认为 `json`；`json` 会直接发送 `payload`，二进制请求体可使用以下编码字符串
 
-        * `text`
+        * `json`
         * `base64` | `base64-std`
         * `base64-url`
         * `base32` | `base32-std`
@@ -1567,11 +1575,12 @@
       "headers": {
       },
       "status": 200,
-      "url": "https://b3log.org/siyuan"
+      "url": "https://b3log.org/siyuan/"
     }
   }
   ```
 
+    * `body`：响应体
     * `bodyEncoding`：`body` 所使用的编码方案，与请求中 `responseEncoding` 字段一致，默认为 `text`，可能的值如下所示
 
         * `text`
@@ -1580,6 +1589,45 @@
         * `base32` | `base32-std`
         * `base32-hex`
         * `hex`
+    * `contentType`：响应标头 `Content-Type`
+    * `elapsed`：请求耗时，单位为毫秒
+    * `headers`：目标服务返回的响应标头
+    * `status`：目标服务返回的 HTTP 状态码
+    * `url`：转发的 URL
+
+#### HTTP 正向代理
+
+* `/api/network/proxy`
+* 请求方法：任意 HTTP 方法
+* 查询参数
+
+    * `u`：必填，目标 `http` 或 `https` URL 使用 Go `base64.RawURLEncoding` 编码后的字符串，也就是 URL 安全且不带 `=` 补位的 Base64
+    * `h`：可选，请求标头 JSON 使用同样方式编码后的字符串，JSON 类型为 `map[string][]string`，例如 `{"Authorization":["Bearer token"]}`
+    * `t`：可选，请求超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
+* 请求体：原样转发当前请求体，当前请求的 `Content-Type` 会转发到目标请求
+* 返回值：直接返回目标服务的 HTTP 状态码和响应体，不包裹 `code`、`msg`、`data`；目标服务响应标头会添加 `Siyuan-Proxy-` 前缀后返回，例如 `Content-Type` 会返回为 `Siyuan-Proxy-Content-Type`
+
+#### WebSocket 正向代理
+
+* `/ws/network/proxy`
+* 请求方法：`GET`
+* 查询参数
+
+    * `u`：必填，目标 `ws` 或 `wss` URL 使用 Go `base64.RawURLEncoding` 编码后的字符串
+    * `h`：可选，握手请求标头 JSON 使用同样方式编码后的字符串，JSON 类型为 `map[string][]string`
+    * `t`：可选，握手超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
+* 返回值：升级为 WebSocket 后双向转发消息；目标服务握手响应标头会添加 `Siyuan-Proxy-` 前缀后返回
+
+#### EventSource 正向代理
+
+* `/es/network/proxy`
+* 请求方法：`GET`
+* 查询参数
+
+    * `u`：必填，目标 `http` 或 `https` URL 使用 Go `base64.RawURLEncoding` 编码后的字符串
+    * `h`：可选，请求标头 JSON 使用同样方式编码后的字符串，JSON 类型为 `map[string][]string`
+    * `t`：可选，请求超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
+* 返回值：直接流式返回目标服务的 HTTP 状态码和响应体，不包裹 `code`、`msg`、`data`；如果请求标头中没有 `Accept`，会自动使用 `text/event-stream`；目标服务响应标头会添加 `Siyuan-Proxy-` 前缀后返回
 
 ## 系统
 

@@ -25,6 +25,7 @@ import {getFieldIdByCellElement} from "./row";
 import {base64ToURL, getCompressURL, removeCompressURL} from "../../../util/image";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {filesize} from "filesize";
+import {genNetworkImageAssetValue} from "./assetValue";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -110,7 +111,11 @@ ${batchMode === "replace" ? '<svg class="b3-menu__action" data-type="editAssetIt
         <span class="b3-menu__label">${window.siyuan.languages.insertAsset}</span> 
         <input multiple class="b3-form__upload" type="file">
     </button>
-    <button data-type="addAssetLink" class="b3-menu__item">
+    <button data-type="addAssetLink" data-asset-type="image" class="b3-menu__item">
+        <svg class="b3-menu__icon"><use xlink:href="#iconImage"></use></svg>
+        <span class="b3-menu__label">${window.siyuan.languages.insertImgURL}</span>
+    </button>
+    <button data-type="addAssetLink" data-asset-type="file" class="b3-menu__item">
         <svg class="b3-menu__icon"><use xlink:href="#iconLink"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.link}</span>
     </button>
@@ -425,9 +430,25 @@ export const editAssetItem = (options: {
 };
 
 export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element,
-                             keepMenuOpen = false) => {
+                             assetType: "image" | "file", keepMenuOpen = false) => {
     const menu = new Menu(Constants.MENU_AV_ASSET_EDIT, () => {
         const textElements = menu.element.querySelectorAll("textarea");
+        if (assetType === "image") {
+            const value = genNetworkImageAssetValue(textElements[0].value);
+            if (!value) {
+                if (textElements[0].value) {
+                    showMessage(window.siyuan.languages.invalid);
+                }
+                return;
+            }
+            updateAssetCell({
+                protyle,
+                cellElements,
+                blockElement,
+                addValue: [value]
+            });
+            return;
+        }
         if (!textElements[0].value && !textElements[1].value) {
             return;
         }
@@ -448,7 +469,8 @@ export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], tar
     menu.addItem({
         iconHTML: "",
         type: "readonly",
-        label: `${window.siyuan.languages.link}
+        label: assetType === "image" ? `${window.siyuan.languages.insertImgURL}
+<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>` : `${window.siyuan.languages.link}
 <textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
 ${window.siyuan.languages.title}

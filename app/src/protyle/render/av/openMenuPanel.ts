@@ -1715,6 +1715,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "addAssetLink") {
                     addAssetLink(options.protyle, options.cellElements, target, options.blockElement,
+                        target.dataset.assetType as "image" | "file",
                         options.keepMenuOpen);
                     event.preventDefault();
                     event.stopPropagation();

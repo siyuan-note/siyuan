@@ -193,6 +193,9 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
     // capture 阶段拦截 hint 选择、Enter 发送、历史翻页；undo/redo 交给 protyle 的 keydown（调 LocalUndo）。
     wysiwyg.element.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
         // hint 面板可见时，Enter/方向键主动调 hint.select 完成选择，避免 capture 与冒泡的时序问题。
         const hintEl = p.hint?.element;
         if (hintEl && !hintEl.classList.contains("fn__none")) {

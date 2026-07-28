@@ -1514,6 +1514,7 @@ export class WYSIWYG {
                 }
             }
             let moveCellElement: HTMLElement;
+            let hasLeftTableBlock = false;
             let avDragSelectMode: "items" | "blocks" | undefined;
             let avDragSelectFrame: number | undefined;
             let pendingAVDragSelectRect: DOMRect | undefined;
@@ -1581,6 +1582,12 @@ export class WYSIWYG {
                 if (tableBlockElement &&
                     !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
                     if (tableBlockElement.contains(moveTarget)) {
+                        if (hasLeftTableBlock) {
+                            hideElements(["select"], protyle);
+                            protyle.selectElement.classList.add("fn__none");
+                            protyle.selectElement.removeAttribute("style");
+                            hasLeftTableBlock = false;
+                        }
                         if (moveTarget.classList.contains("table__select")) {
                             moveTarget.classList.add("fn__none");
                             const pointElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
@@ -1653,6 +1660,7 @@ export class WYSIWYG {
                         }
                         return;
                     } else {
+                        hasLeftTableBlock = true;
                         tableBlockElement.querySelector(".table__select").removeAttribute("style");
                         moveCellElement = undefined;
                     }

@@ -93,55 +93,35 @@ func TestFilterBlockIDsByPublishAccess(t *testing.T) {
 	}
 }
 
-func TestGetBlocksOrdersArguments(t *testing.T) {
+func TestGetDocBlocksOrdersArguments(t *testing.T) {
 	tests := []struct {
-		name         string
-		body         string
-		expectedCode int
-		expectEmpty  bool
+		name string
+		body string
 	}{
-		{name: "missing mode", body: `{}`, expectedCode: -1},
-		{
-			name:         "mutually exclusive modes",
-			body:         `{"id":"20260728000200-doc0001","ids":[]}`,
-			expectedCode: -1,
-		},
-		{name: "empty IDs", body: `{"ids":[]}`, expectedCode: 0, expectEmpty: true},
-		{name: "invalid IDs are ignored", body: `{"ids":["invalid"]}`, expectedCode: 0, expectEmpty: true},
-		{name: "non-string ID", body: `{"ids":[1]}`, expectedCode: -1},
-		{name: "wrong document ID type", body: `{"id":1}`, expectedCode: -1},
-		{name: "invalid document ID", body: `{"id":"invalid"}`, expectedCode: -1},
-		{name: "null document ID", body: `{"id":null}`, expectedCode: -1},
-		{name: "null IDs", body: `{"ids":null}`, expectedCode: -1},
+		{name: "missing document ID", body: `{}`},
+		{name: "IDs only", body: `{"ids":[]}`},
+		{name: "wrong document ID type", body: `{"id":1}`},
+		{name: "invalid document ID", body: `{"id":"invalid"}`},
+		{name: "null document ID", body: `{"id":null}`},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			response := postBlocksOrders(t, test.body)
-			if test.expectedCode != response.Code {
-				t.Fatalf("unexpected response code: expected %d, got %d, message %q",
-					test.expectedCode, response.Code, response.Msg)
-			}
-			if test.expectEmpty {
-				var ids []string
-				if err := json.Unmarshal(response.Data, &ids); err != nil {
-					t.Fatalf("unmarshal block orders failed: %v", err)
-				}
-				if nil == ids || 0 != len(ids) {
-					t.Fatalf("expected an empty non-nil block order list, got %v", ids)
-				}
+			response := postDocBlocksOrders(t, test.body)
+			if -1 != response.Code {
+				t.Fatalf("unexpected response code: expected -1, got %d, message %q", response.Code, response.Msg)
 			}
 		})
 	}
 }
 
-type blocksOrdersResponse struct {
+type docBlocksOrdersResponse struct {
 	Code int             `json:"code"`
 	Msg  string          `json:"msg"`
 	Data json.RawMessage `json:"data"`
 }
 
-func postBlocksOrders(t *testing.T, body string) *blocksOrdersResponse {
+func postDocBlocksOrders(t *testing.T, body string) *docBlocksOrdersResponse {
 	t.Helper()
 
 	gin.SetMode(gin.TestMode)
@@ -150,14 +130,14 @@ func postBlocksOrders(t *testing.T, body string) *blocksOrdersResponse {
 		c.Set(model.RoleContextKey, model.RoleAdministrator)
 		c.Next()
 	})
-	engine.POST("/api/block/getBlocksOrders", getBlocksOrders)
+	engine.POST("/api/block/getDocBlocksOrders", getDocBlocksOrders)
 
 	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPost, "/api/block/getBlocksOrders", strings.NewReader(body))
+	request := httptest.NewRequest(http.MethodPost, "/api/block/getDocBlocksOrders", strings.NewReader(body))
 	request.Header.Set("Content-Type", "application/json")
 	engine.ServeHTTP(recorder, request)
 
-	response := &blocksOrdersResponse{}
+	response := &docBlocksOrdersResponse{}
 	if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
 		t.Fatalf("unmarshal response failed: %v", err)
 	}

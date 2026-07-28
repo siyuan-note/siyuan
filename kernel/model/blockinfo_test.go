@@ -104,7 +104,7 @@ func assertBlockBreadcrumbChildIDs(t *testing.T, node *ast.Node, expected []stri
 	}
 }
 
-func TestGetBlocksOrdersInTree(t *testing.T) {
+func TestGetDocBlocksOrdersInTree(t *testing.T) {
 	root := &ast.Node{Type: ast.NodeDocument, ID: "doc"}
 	list := &ast.Node{Type: ast.NodeList, ID: "list"}
 	item := &ast.Node{Type: ast.NodeListItem, ID: "item"}
@@ -127,30 +127,17 @@ func TestGetBlocksOrdersInTree(t *testing.T) {
 	tree := &parse.Tree{Root: root}
 
 	expected := []string{"list", "item", "paragraph", "blockquote", "quote-paragraph", "table"}
-	if actual := getBlocksOrdersInTree(tree, nil); !reflect.DeepEqual(expected, actual) {
+	if actual := getDocBlocksOrdersInTree(tree); !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("unexpected document block orders: expected %v, got %v", expected, actual)
-	}
-
-	included := map[string]struct{}{
-		"quote-paragraph": {},
-		"item":            {},
-		"table-row":       {},
-		"missing":         {},
-	}
-	expected = []string{"item", "quote-paragraph"}
-	if actual := getBlocksOrdersInTree(tree, included); !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("unexpected filtered block orders: expected %v, got %v", expected, actual)
 	}
 }
 
-func TestGetBlocksOrders(t *testing.T) {
+func TestGetDocBlocksOrders(t *testing.T) {
 	const (
 		boxID     = "20260728000100-box0001"
 		doc1ID    = "20260728000101-doc0001"
 		child1ID  = "20260728000102-para001"
 		child1BID = "20260728000103-para002"
-		doc2ID    = "20260728000104-doc0002"
-		child2ID  = "20260728000105-para003"
 	)
 
 	previousDataDir := util.DataDir
@@ -159,20 +146,15 @@ func TestGetBlocksOrders(t *testing.T) {
 	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
 	treenode.InitBlockTree(true)
 
-	tree1 := newBlocksOrdersTestTree(boxID, doc1ID, []string{child1ID, child1BID})
-	tree2 := newBlocksOrdersTestTree(boxID, doc2ID, []string{child2ID})
-	for _, tree := range []*parse.Tree{tree1, tree2} {
-		if _, err := filesys.WriteTree(tree); err != nil {
-			t.Fatalf("write test tree failed: %v", err)
-		}
-		treenode.UpsertBlockTree(tree)
+	tree1 := newDocBlocksOrdersTestTree(boxID, doc1ID, []string{child1ID, child1BID})
+	if _, err := filesys.WriteTree(tree1); err != nil {
+		t.Fatalf("write test tree failed: %v", err)
 	}
+	treenode.UpsertBlockTree(tree1)
 
 	t.Cleanup(func() {
-		for _, tree := range []*parse.Tree{tree1, tree2} {
-			cache.RemoveTreeDataInBox(tree.ID, tree.Box)
-			cache.RemoveDocIALInBox(tree.Path, tree.Box)
-		}
+		cache.RemoveTreeDataInBox(tree1.ID, tree1.Box)
+		cache.RemoveDocIALInBox(tree1.Path, tree1.Box)
 		treenode.CloseDatabase()
 		util.DataDir = previousDataDir
 		util.BlockTreeDBPath = previousBlockTreeDBPath
@@ -182,7 +164,7 @@ func TestGetBlocksOrders(t *testing.T) {
 	})
 
 	expected := []string{child1ID, child1BID}
-	actual, err := GetBlocksOrders(doc1ID, nil)
+	actual, err := GetDocBlocksOrders(doc1ID)
 	if err != nil {
 		t.Fatalf("get document block orders failed: %v", err)
 	}
@@ -190,28 +172,12 @@ func TestGetBlocksOrders(t *testing.T) {
 		t.Fatalf("unexpected document block orders: expected %v, got %v", expected, actual)
 	}
 
-	actual, err = GetBlocksOrders("", []string{"invalid", child1BID, child2ID, child1ID, child1ID, doc1ID})
-	if err != nil {
-		t.Fatalf("get filtered block orders failed: %v", err)
-	}
-	if !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("unexpected filtered block orders: expected %v, got %v", expected, actual)
-	}
-
-	if _, err = GetBlocksOrders(child1ID, nil); nil == err {
+	if _, err = GetDocBlocksOrders(child1ID); nil == err {
 		t.Fatal("expected a non-document ID to be rejected")
-	}
-
-	actual, err = GetBlocksOrders("", []string{})
-	if err != nil {
-		t.Fatalf("get empty block orders failed: %v", err)
-	}
-	if nil == actual || 0 != len(actual) {
-		t.Fatalf("expected an empty non-nil result, got %v", actual)
 	}
 }
 
-func newBlocksOrdersTestTree(boxID, docID string, childIDs []string) *parse.Tree {
+func newDocBlocksOrdersTestTree(boxID, docID string, childIDs []string) *parse.Tree {
 	tree := treenode.NewTree(boxID, "/"+docID+".sy", "/Test", "Test")
 	tree.Root.FirstChild.Unlink()
 	for _, childID := range childIDs {

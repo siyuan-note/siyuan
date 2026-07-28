@@ -1543,7 +1543,7 @@
     * `timeout`: タイムアウト（ミリ秒）、デフォルトは`7000`
     * `contentType`: Content-Type、デフォルトは`application/json`
     * `headers`: HTTPリクエストヘッダー配列。各オブジェクトのキーと値がリクエストヘッダーとして設定されます
-    * `redirect`: リダイレクトを追跡するかどうか。デフォルトは`true`で、最大3回まで追跡します。`false`に設定するとリダイレクトを追跡しません
+    * `redirect`: リダイレクトを追跡するかどうか。デフォルトは`true`で、最大2回まで追跡します。`false`に設定するとリダイレクトを追跡しません
     * `payload`: HTTPペイロード、オブジェクトまたは文字列
     * `payloadEncoding`: `payload`で使用されるエンコーディングスキーム。デフォルトは`json`です。`json`は`payload`をそのまま送信し、バイナリペイロードには次のエンコード済み文字列を使用できます
 
@@ -1603,8 +1603,8 @@
 
     * `u`: 必須。ターゲットの`http`または`https` URLをGoの`base64.RawURLEncoding`でエンコードした文字列です。URLセーフで、`=`パディングを含まないBase64です
     * `h`: 任意。同じ方式でエンコードしたリクエストヘッダーJSONです。JSONの型は`map[string][]string`で、例は`{"Authorization":["Bearer token"]}`です
-    * `t`: 任意。リクエストタイムアウトです。Goの`time.ParseDuration`形式を使用します。例は`30s`、`1500ms`です
-* リクエスト本文: 現在のリクエスト本文をそのまま転送し、現在のリクエストの`Content-Type`をターゲットリクエストへ転送します
+    * `t`: 任意。接続タイムアウトです。Goの`time.ParseDuration`形式を使用します。例は`30s`、`1500ms`です
+* リクエスト本文: 現在のリクエスト本文をそのまま転送し、現在のリクエストの完全な`Content-Type`ヘッダーをターゲットリクエストへ転送します
 * 戻り値: ターゲットサービスのHTTPステータスコードとレスポンス本文を直接返し、`code`、`msg`、`data`ではラップしません。ターゲットのレスポンスヘッダーは`Siyuan-Proxy-`プレフィックス付きで返されます。例えば`Content-Type`は`Siyuan-Proxy-Content-Type`として返されます
 
 #### WebSocketフォワードプロキシ
@@ -1626,7 +1626,7 @@
 
     * `u`: 必須。ターゲットの`http`または`https` URLをGoの`base64.RawURLEncoding`でエンコードした文字列です
     * `h`: 任意。同じ方式でエンコードしたリクエストヘッダーJSONです。JSONの型は`map[string][]string`です
-    * `t`: 任意。リクエストタイムアウトです。Goの`time.ParseDuration`形式を使用します。例は`30s`、`1500ms`です
+    * `t`: 任意。接続タイムアウトです。Goの`time.ParseDuration`形式を使用します。例は`30s`、`1500ms`です
 * 戻り値: ターゲットサービスのHTTPステータスコードとレスポンス本文を直接ストリーミングし、`code`、`msg`、`data`ではラップしません。リクエストヘッダーに`Accept`がない場合は、`text/event-stream`を自動的に使用します。ターゲットのレスポンスヘッダーは`Siyuan-Proxy-`プレフィックス付きで返されます
 
 ## システム

@@ -1551,7 +1551,7 @@ Note: To ensure data security, access to this interface is prohibited in Publish
     * `timeout`: timeout in milliseconds, default is `7000`
     * `contentType`: Content-Type, default is `application/json`
     * `headers`: HTTP request header array; each key-value pair in the objects is set as a request header
-    * `redirect`: Whether to follow redirects, default is `true`, following up to 3 redirects; set it to `false` to disable redirects
+    * `redirect`: Whether to follow redirects, default is `true`, following up to 2 redirects; set it to `false` to disable redirects
     * `payload`: HTTP payload, object or string
     * `payloadEncoding`: The encoding scheme used by `payload`, default is `json`; `json` sends `payload` directly, and binary payloads can use the following encoded strings
 
@@ -1611,8 +1611,8 @@ Note: To ensure data security, access to this interface is prohibited in Publish
 
     * `u`: Required, target `http` or `https` URL encoded with Go `base64.RawURLEncoding`, which is URL-safe Base64 without `=` padding
     * `h`: Optional, request header JSON encoded in the same way; the JSON type is `map[string][]string`, for example `{"Authorization":["Bearer token"]}`
-    * `t`: Optional, request timeout in Go `time.ParseDuration` format, for example `30s` or `1500ms`
-* Request body: Forwards the current request body as-is, and forwards the current request `Content-Type` to the target request
+    * `t`: Optional, connection timeout in Go `time.ParseDuration` format, for example `30s` or `1500ms`
+* Request body: Forwards the current request body as-is, and forwards the current request's full `Content-Type` header to the target request
 * Return value: Directly returns the target service HTTP status code and response body without wrapping them in `code`, `msg`, or `data`; target response headers are returned with the `Siyuan-Proxy-` prefix, for example `Content-Type` is returned as `Siyuan-Proxy-Content-Type`
 
 #### WebSocket forward proxy
@@ -1634,7 +1634,7 @@ Note: To ensure data security, access to this interface is prohibited in Publish
 
     * `u`: Required, target `http` or `https` URL encoded with Go `base64.RawURLEncoding`
     * `h`: Optional, request header JSON encoded in the same way; the JSON type is `map[string][]string`
-    * `t`: Optional, request timeout in Go `time.ParseDuration` format, for example `30s` or `1500ms`
+    * `t`: Optional, connection timeout in Go `time.ParseDuration` format, for example `30s` or `1500ms`
 * Return value: Directly streams the target service HTTP status code and response body without wrapping them in `code`, `msg`, or `data`; if the request headers do not include `Accept`, `text/event-stream` is used automatically; target response headers are returned with the `Siyuan-Proxy-` prefix
 
 ## System

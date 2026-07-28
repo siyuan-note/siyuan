@@ -1543,7 +1543,7 @@
     * `timeout`：超时时间，单位为毫秒，默认为 `7000` 毫秒
     * `contentType`：HTTP Content-Type，默认为 `application/json`
     * `headers`：HTTP 请求标头数组，每个对象中的键值对都会设置为请求标头
-    * `redirect`：是否跟随重定向，默认为 `true`，最多跟随 3 次；设置为 `false` 时不跟随重定向
+    * `redirect`：是否跟随重定向，默认为 `true`，最多跟随 2 次；设置为 `false` 时不跟随重定向
     * `payload`：HTTP 请求体，可以是对象或者字符串
     * `payloadEncoding`：`payload` 所使用的编码方案，默认为 `json`；`json` 会直接发送 `payload`，二进制请求体可使用以下编码字符串
 
@@ -1603,8 +1603,8 @@
 
     * `u`：必填，目标 `http` 或 `https` URL 使用 Go `base64.RawURLEncoding` 编码后的字符串，也就是 URL 安全且不带 `=` 补位的 Base64
     * `h`：可选，请求标头 JSON 使用同样方式编码后的字符串，JSON 类型为 `map[string][]string`，例如 `{"Authorization":["Bearer token"]}`
-    * `t`：可选，请求超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
-* 请求体：原样转发当前请求体，当前请求的 `Content-Type` 会转发到目标请求
+    * `t`：可选，连接超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
+* 请求体：原样转发当前请求体，当前请求的完整 `Content-Type` 标头会转发到目标请求
 * 返回值：直接返回目标服务的 HTTP 状态码和响应体，不包裹 `code`、`msg`、`data`；目标服务响应标头会添加 `Siyuan-Proxy-` 前缀后返回，例如 `Content-Type` 会返回为 `Siyuan-Proxy-Content-Type`
 
 #### WebSocket 正向代理
@@ -1626,7 +1626,7 @@
 
     * `u`：必填，目标 `http` 或 `https` URL 使用 Go `base64.RawURLEncoding` 编码后的字符串
     * `h`：可选，请求标头 JSON 使用同样方式编码后的字符串，JSON 类型为 `map[string][]string`
-    * `t`：可选，请求超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
+    * `t`：可选，连接超时时间，使用 Go `time.ParseDuration` 格式，例如 `30s`、`1500ms`
 * 返回值：直接流式返回目标服务的 HTTP 状态码和响应体，不包裹 `code`、`msg`、`data`；如果请求标头中没有 `Accept`，会自动使用 `text/event-stream`；目标服务响应标头会添加 `Siyuan-Proxy-` 前缀后返回
 
 ## 系统

@@ -452,7 +452,7 @@ services:
 
 ### 测试通道
 
-可在`设置 > 关于 > 更新通道`中选择 Beta 或 Alpha 以接收预发布版本。Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收全部版本。测试通道需要能够访问 GitHub。
+可在`设置 - 关于 - 更新通道`中选择 Beta 或 Alpha 以接收预发布版本。Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收全部版本。测试通道需要能够访问 GitHub。
 
 ## ⌨️ 命令行接口
 

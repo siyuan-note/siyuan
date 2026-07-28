@@ -356,7 +356,7 @@ services:
 
 ### Test Kanalları
 
-Ön sürümleri almak için `Ayarlar > Hakkında > Güncelleme kanalı` altında Beta veya Alpha seçeneğini belirleyin. Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test kanalları GitHub erişimi gerektirir.
+Ön sürümleri almak için `Ayarlar - Hakkında - Güncelleme kanalı` altında Beta veya Alpha seçeneğini belirleyin. Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test kanalları GitHub erişimi gerektirir.
 
 ## ⌨️ Komut Satırı Arayüzü
 

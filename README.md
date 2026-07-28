@@ -351,7 +351,7 @@ services:
 
 ### Test Channels
 
-Select Beta or Alpha in `Settings > About > Update channel` to receive prereleases. Beta includes stable, RC, and Beta releases; Alpha includes all releases. Test channels require access to GitHub.
+Select Beta or Alpha in `Settings - About - Update channel` to receive prereleases. Beta includes stable, RC, and Beta releases; Alpha includes all releases. Test channels require access to GitHub.
 
 ## ⌨️ Command-line Interface
 

@@ -52,7 +52,7 @@ func NewFileTree() *FileTree {
 		OpenFilesUseCurrentTab:   false,
 		DocIconClickExpand:       false,
 		ParentDocClickExpand:     false,
-		BoxDocEnabled:            func() *bool { b := false; return &b }(),
+		BoxDocEnabled:            new(bool),
 		Sort:                     util.SortModeCustom,
 		MaxListCount:             512,
 		MaxOpenTabCount:          8,
@@ -60,7 +60,7 @@ func NewFileTree() *FileTree {
 		CloseTabsOnStart:         false,
 		UseSingleLineSave:        util.UseSingleLineSave,
 		LargeFileWarningSize:     util.LargeFileWarningSize,
-		CreateDocAtTop:           func() *bool { b := false; return &b }(),
+		CreateDocAtTop:           new(bool),
 		NoSplitScreenWhenOpenTab: false,
 	}
 }

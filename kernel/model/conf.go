@@ -338,7 +338,7 @@ func InitConf() {
 	}
 	if nil == Conf.FileTree.BoxDocEnabled {
 		// 配置缺失时默认关闭顶层笔记本文档。
-		Conf.FileTree.BoxDocEnabled = func() *bool { b := false; return &b }()
+		Conf.FileTree.BoxDocEnabled = new(bool)
 	}
 
 	if conf.MinFileTreeRecentDocsListCount > Conf.FileTree.RecentDocsMaxListCount {

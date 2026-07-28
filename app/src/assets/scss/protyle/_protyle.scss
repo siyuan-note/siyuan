@@ -285,6 +285,37 @@
     color: var(--b3-theme-on-surface-light);
     margin: 0 2px;
     flex-shrink: 0;
+
+    &--interactive {
+      align-items: center;
+      background-color: transparent;
+      border: 0;
+      border-radius: var(--b3-border-radius);
+      box-sizing: border-box;
+      color: var(--b3-theme-on-surface);
+      cursor: pointer;
+      display: flex;
+      height: 24px;
+      justify-content: center;
+      margin: 0;
+      padding: 5px;
+      width: 24px;
+
+      &:hover,
+      &:focus-visible {
+        background-color: var(--b3-list-hover);
+        color: var(--b3-theme-on-background);
+      }
+
+      &:focus-visible {
+        outline: 1px solid var(--b3-theme-primary);
+      }
+
+      svg {
+        height: 14px;
+        width: 14px;
+      }
+    }
   }
 
   &__text--ellipsis {

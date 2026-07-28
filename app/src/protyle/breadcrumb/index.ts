@@ -973,7 +973,7 @@ ${padHTML}
 </span>`;
                 }
                 if (index !== response.data.length - 1) {
-                    html += '<svg class="protyle-breadcrumb__arrow"><use xlink:href="#iconRight"></use></svg>';
+                    html += `<button class="protyle-breadcrumb__arrow protyle-breadcrumb__arrow--interactive ariaLabel" aria-label="${window.siyuan.languages.expand}" type="button" tabindex="-1"><svg><use xlink:href="#iconRight"></use></svg></button>`;
                 }
             });
             this.element.innerHTML = html;

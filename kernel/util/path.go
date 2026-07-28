@@ -53,6 +53,20 @@ func TrimSpaceInPath(p string) string {
 	return strings.Join(parts, "/")
 }
 
+func NormalizeTemplatePath(p string) string {
+	p = TrimSpaceInPath(p)
+	if "" == p {
+		return ""
+	}
+	if !strings.HasSuffix(p, ".md") {
+		p += ".md"
+	}
+	if !strings.HasPrefix(p, "/") {
+		p = "/" + p
+	}
+	return p
+}
+
 func GetTreeID(treePath string) string {
 	base := path.Base(strings.ReplaceAll(treePath, "\\", "/"))
 	return strings.TrimSuffix(base, ".sy")

@@ -1255,6 +1255,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 	}
 
 	FlushTxQueue()
+	applyRequestedDocCreateTemplate(arg, md, tree.Root.ID)
 	PushCreate(box, p, arg)
 	return
 }
@@ -1310,8 +1311,23 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	box.setSortByConf(path.Dir(bt.Path), retID)
 
 	FlushTxQueue()
+	applyRequestedDocCreateTemplate(arg, md, retID)
 	PushCreate(box, bt.Path, arg)
 	return
+}
+
+func applyRequestedDocCreateTemplate(arg map[string]any, markdown, docID string) {
+	if nil == arg || "" != strings.TrimSpace(markdown) {
+		return
+	}
+	templatePath, _ := arg["docCreateTemplatePath"].(string)
+	if "" == strings.TrimSpace(templatePath) {
+		return
+	}
+	if err := applyDocContentTemplateAfterIndex(templatePath, docID); nil != err {
+		logging.LogWarnf("apply document creation template [%s] failed: %s", templatePath, err)
+		util.PushErrMsg(err.Error(), 7000)
+	}
 }
 
 const (
@@ -1370,48 +1386,10 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	var templateTree *parse.Tree
-	var templateDom string
 	if "" != boxConf.DailyNoteTemplatePath {
-		tplPath := filepath.Join(util.DataDir, "templates", boxConf.DailyNoteTemplatePath)
-		if !filelock.IsExist(tplPath) {
-			logging.LogWarnf("not found daily note template [%s]", tplPath)
-		} else {
-			var renderErr error
-			templateTree, templateDom, renderErr = RenderTemplate(tplPath, id, false)
-			if nil != renderErr {
-				logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, err)
-			}
-		}
-	}
-	if "" != templateDom {
-		var tree *parse.Tree
-		tree, err = LoadTreeByBlockID(id)
-		if err == nil {
-			tree.Root.FirstChild.Unlink()
-
-			luteEngine := util.NewLute()
-			newTree := luteEngine.BlockDOM2Tree(templateDom)
-			var children []*ast.Node
-			for c := newTree.Root.FirstChild; nil != c; c = c.Next {
-				children = append(children, c)
-			}
-			for _, c := range children {
-				tree.Root.AppendChild(c)
-			}
-
-			// Creating a dailynote template supports doc attributes https://github.com/siyuan-note/siyuan/issues/10698
-			templateIALs := parse.IAL2Map(templateTree.Root.KramdownIAL)
-			for k, v := range templateIALs {
-				if "name" == k || "alias" == k || "bookmark" == k || "memo" == k || "icon" == k || strings.HasPrefix(k, "custom-") {
-					tree.Root.SetIALAttr(k, v)
-				}
-			}
-
-			tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-			if err = indexWriteTreeUpsertQueue(tree); err != nil {
-				return
-			}
+		sql.FlushQueue()
+		if renderErr := applyDocContentTemplate(boxConf.DailyNoteTemplatePath, id); nil != renderErr {
+			logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, renderErr)
 		}
 	}
 	IncSync()
@@ -1428,6 +1406,9 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
+	}
+	if "" != boxConf.DailyNoteTemplatePath {
+		sql.FlushQueue()
 	}
 
 	return

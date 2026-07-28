@@ -807,6 +807,10 @@ declare namespace Config {
          */
         docCreateSavePath: string;
         /**
+         * The content template path of the new document
+         */
+        docCreateTemplatePath: string;
+        /**
          * The maximum number of documents listed
          */
         maxListCount: number;

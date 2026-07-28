@@ -15,7 +15,12 @@ import {
     getSelectionPosition,
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
-import {getBlockRefAnchorText, newFileByRefHint, newFileInProtyle} from "../../util/newFile";
+import {
+    getBlockRefAnchorText,
+    getDocCreateTemplatePath,
+    newFileByRefHint,
+    newFileInProtyle
+} from "../../util/newFile";
 import {isAbnormalItem, upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -714,22 +719,25 @@ ${genHintItemHTML(item)}
             } else if (value === Constants.ZWSP + 6) {
                 // 新建子文档
                 const newSubDocId = Lute.NewNodeID();
-                fetchPost("/api/filetree/createDoc", {
-                    notebook: protyle.notebookId,
-                    path: pathPosix().join(getDisplayName(protyle.path, false, true), newSubDocId + ".sy"),
-                    title: "",
-                    md: ""
-                }, () => {
-                    insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">${getBlockRefAnchorText("")}</span>`, protyle);
-                    /// #if MOBILE
-                    openMobileFileById(protyle.app, newSubDocId, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
-                    /// #else
-                    openFileById({
-                        app: protyle.app,
-                        id: newSubDocId,
-                        action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]
+                getDocCreateTemplatePath(protyle.notebookId, (docCreateTemplatePath) => {
+                    fetchPost("/api/filetree/createDoc", {
+                        notebook: protyle.notebookId,
+                        path: pathPosix().join(getDisplayName(protyle.path, false, true), newSubDocId + ".sy"),
+                        title: "",
+                        md: "",
+                        docCreateTemplatePath,
+                    }, () => {
+                        insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">${getBlockRefAnchorText("")}</span>`, protyle);
+                        /// #if MOBILE
+                        openMobileFileById(protyle.app, newSubDocId, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
+                        /// #else
+                        openFileById({
+                            app: protyle.app,
+                            id: newSubDocId,
+                            action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]
+                        });
+                        /// #endif
                     });
-                    /// #endif
                 });
                 return;
             } else if (value === Constants.ZWSP + 5) {

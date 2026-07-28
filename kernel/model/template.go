@@ -610,6 +610,88 @@ func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
 	}
 }
 
+func applyDocContentTemplateAfterIndex(templatePath, docID string) error {
+	sql.FlushQueue()
+	if err := applyDocContentTemplate(templatePath, docID); nil != err {
+		return err
+	}
+	sql.FlushQueue()
+	return nil
+}
+
+func applyDocContentTemplate(templatePath, docID string) error {
+	absPath, err := resolveDocContentTemplatePath(templatePath)
+	if nil != err {
+		return err
+	}
+	templateTree, templateDOM, err := RenderTemplate(absPath, docID, false)
+	if nil != err {
+		return err
+	}
+	if "" == templateDOM {
+		return nil
+	}
+	tree, err := LoadTreeByBlockID(docID)
+	if nil != err {
+		return err
+	}
+	if nil != tree.Root.FirstChild {
+		tree.Root.FirstChild.Unlink()
+	}
+	newTree := util.NewLute().BlockDOM2Tree(templateDOM)
+	var children []*ast.Node
+	for child := newTree.Root.FirstChild; nil != child; child = child.Next {
+		children = append(children, child)
+	}
+	for _, child := range children {
+		tree.Root.AppendChild(child)
+	}
+	templateIALs := parse.IAL2Map(templateTree.Root.KramdownIAL)
+	for key, value := range templateIALs {
+		if "name" == key || "alias" == key || "bookmark" == key || "memo" == key || "icon" == key ||
+			strings.HasPrefix(key, "custom-") {
+			tree.Root.SetIALAttr(key, value)
+		}
+	}
+	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	return indexWriteTreeUpsertQueue(tree)
+}
+
+func resolveDocContentTemplatePath(templatePath string) (string, error) {
+	templatePath = strings.TrimPrefix(filepath.ToSlash(strings.TrimSpace(templatePath)), "/")
+	cleanPath := filepath.Clean(filepath.FromSlash(templatePath))
+	if "" == cleanPath || "." == cleanPath || filepath.IsAbs(cleanPath) || ".." == cleanPath ||
+		strings.HasPrefix(cleanPath, ".."+string(os.PathSeparator)) {
+		return "", errors.New("invalid content template path")
+	}
+	templateRoot := filepath.Join(util.DataDir, "templates")
+	absPath := filepath.Join(templateRoot, cleanPath)
+	rel, err := filepath.Rel(templateRoot, absPath)
+	if nil != err || ".." == rel || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+		return "", errors.New("content template path is outside templates directory")
+	}
+	if !filelock.IsExist(absPath) {
+		return "", fmt.Errorf("content template [%s] not found", templatePath)
+	}
+	realRoot, err := filepath.EvalSymlinks(templateRoot)
+	if nil != err {
+		return "", err
+	}
+	realPath, err := filepath.EvalSymlinks(absPath)
+	if nil != err {
+		return "", err
+	}
+	info, err := os.Stat(realPath)
+	if nil != err || !info.Mode().IsRegular() {
+		return "", fmt.Errorf("content template [%s] is not a regular file", templatePath)
+	}
+	realRel, err := filepath.Rel(realRoot, realPath)
+	if nil != err || ".." == realRel || strings.HasPrefix(realRel, ".."+string(os.PathSeparator)) {
+		return "", errors.New("content template path is outside templates directory")
+	}
+	return realPath, nil
+}
+
 // CreateTemplate 在 <data>/templates/ 下创建模板文件。name 不含扩展名，content 为 markdown 文本。
 // overwrite=false 且文件已存在时返回 code=1（与 DocSaveAsTemplate 一致）。
 func CreateTemplate(name, content string, overwrite bool) (code int, err error) {

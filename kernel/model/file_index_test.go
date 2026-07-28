@@ -31,6 +31,7 @@ import (
 )
 
 const removeDocSQLTestEnv = "SIYUAN_TEST_REMOVE_DOC_SQL"
+const docTemplateSQLTestEnv = "SIYUAN_TEST_DOC_TEMPLATE_SQL"
 
 func TestRemoveDocFlushesDatabaseIndex(t *testing.T) {
 	if "1" != os.Getenv(removeDocSQLTestEnv) {
@@ -90,6 +91,111 @@ func TestRemoveDocFlushesDatabaseIndex(t *testing.T) {
 	}
 	sql.FlushQueue()
 	assertDatabaseBlockExists(t, tree.ID, false)
+}
+
+func TestDocumentTemplatesWaitForDatabaseIndex(t *testing.T) {
+	if "1" != os.Getenv(docTemplateSQLTestEnv) {
+		cmd := exec.Command(os.Args[0], "-test.run=^TestDocumentTemplatesWaitForDatabaseIndex$", "-test.v")
+		cmd.Env = append(os.Environ(), docTemplateSQLTestEnv+"=1")
+		output, err := cmd.CombinedOutput()
+		if nil != err {
+			t.Fatalf("document template SQL subprocess failed: %v\n%s", err, output)
+		}
+		return
+	}
+
+	workspaceDir := t.TempDir()
+	util.WorkspaceDir = workspaceDir
+	util.ConfDir = filepath.Join(workspaceDir, "conf")
+	util.DataDir = filepath.Join(workspaceDir, "data")
+	util.HistoryDir = filepath.Join(workspaceDir, "history")
+	util.TempDir = filepath.Join(workspaceDir, "temp")
+	util.QueueDir = filepath.Join(util.TempDir, "queue")
+	util.DBPath = filepath.Join(util.TempDir, util.DBName)
+	util.HistoryDBPath = filepath.Join(util.TempDir, "history.db")
+	util.AssetContentDBPath = filepath.Join(util.TempDir, "asset_content.db")
+	util.BlockTreeDBPath = filepath.Join(util.TempDir, "blocktree.db")
+	for _, dir := range []string{util.ConfDir, util.DataDir, util.HistoryDir, util.TempDir, util.QueueDir} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatalf("create test directory [%s] failed: %v", dir, err)
+		}
+	}
+
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	Conf.Editor = conf.NewEditor()
+	Conf.Export = conf.NewExport()
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	Conf.Sync = conf.NewSync()
+	Conf.Lang = "en"
+	util.WorkingDir = filepath.Clean(filepath.Join("..", "..", "app"))
+	initLang()
+
+	box := &Box{ID: "20260728000000-abcdefg"}
+	boxConf := conf.NewBoxConf()
+	boxConf.Name = "Document template SQL test"
+	boxConf.Closed = false
+	boxConf.DailyNoteSavePath = "/Daily note"
+	boxConf.DailyNoteTemplatePath = "/indexed.md"
+	if err := box.SaveConf(boxConf); err != nil {
+		t.Fatalf("save test notebook conf failed: %v", err)
+	}
+	templateDir := filepath.Join(util.DataDir, "templates")
+	if err := os.MkdirAll(templateDir, 0755); err != nil {
+		t.Fatalf("create templates directory failed: %v", err)
+	}
+	template := `.action{range queryBlocks "SELECT * FROM blocks WHERE id = '?' LIMIT 1" .id}.action{.ID}.action{end}`
+	if err := os.WriteFile(filepath.Join(templateDir, "indexed.md"), []byte(template), 0644); err != nil {
+		t.Fatalf("write test template failed: %v", err)
+	}
+
+	sql.InitDatabase(true)
+	sql.InitHistoryDatabase(true)
+	sql.InitAssetContentDatabase(true)
+	t.Cleanup(sql.CloseDatabase)
+
+	dailyPath, existed, err := CreateDailyNote(box.ID)
+	if nil != err {
+		t.Fatalf("create daily note failed: %v", err)
+	}
+	if existed {
+		t.Fatal("the first daily note creation should not reuse an existing document")
+	}
+	dailyID := util.GetTreeID(dailyPath)
+	assertTemplateOutputIndexed(t, dailyID)
+
+	docID := "20260728000001-abcdefg"
+	arg := map[string]any{"docCreateTemplatePath": "/indexed.md"}
+	createdID, err := CreateWithMarkdown("", box.ID, "/Default template", "", "", docID, false, "", arg)
+	if nil != err {
+		t.Fatalf("create document with default template failed: %v", err)
+	}
+	if docID != createdID {
+		t.Fatalf("unexpected created document ID: got %s, want %s", createdID, docID)
+	}
+	assertTemplateOutputIndexed(t, docID)
+
+	attributeViewDocID := "20260728000002-abcdefg"
+	createdID, err = CreateWithMarkdown("", box.ID, "/Attribute view template", "", "", attributeViewDocID, false, "", nil)
+	if nil != err {
+		t.Fatalf("create attribute view item document failed: %v", err)
+	}
+	if err = applyNewItemContentTemplate("/indexed.md", createdID); nil != err {
+		t.Fatalf("apply attribute view item content template failed: %v", err)
+	}
+	assertTemplateOutputIndexed(t, attributeViewDocID)
+}
+
+func assertTemplateOutputIndexed(t *testing.T, docID string) {
+	t.Helper()
+
+	blocks := sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE root_id = '"+docID+"' AND type = 'p'", 1, 32)
+	for _, block := range blocks {
+		if docID == block.Content {
+			return
+		}
+	}
+	t.Fatalf("template did not query and persist the indexed document [%s]", docID)
 }
 
 func assertDatabaseBlockExists(t *testing.T, id string, expected bool) {

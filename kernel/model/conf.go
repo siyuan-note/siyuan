@@ -325,6 +325,7 @@ func InitConf() {
 		Conf.FileTree.MaxOpenTabCount = 32
 	}
 	Conf.FileTree.DocCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.DocCreateSavePath)
+	Conf.FileTree.DocCreateTemplatePath = util.NormalizeTemplatePath(Conf.FileTree.DocCreateTemplatePath)
 	Conf.FileTree.RefCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.RefCreateSavePath)
 	Conf.FileTree.ShorthandSavePath = util.TrimSpaceInPath(Conf.FileTree.ShorthandSavePath)
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave

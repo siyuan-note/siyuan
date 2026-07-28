@@ -19,16 +19,13 @@ package model
 import (
 	"errors"
 	"fmt"
-	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -569,77 +566,7 @@ func buildNewItemFieldValueOperations(attrView *av.AttributeView, fieldValues ma
 }
 
 func applyNewItemContentTemplate(templatePath, docID string) error {
-	absPath, err := resolveNewItemContentTemplatePath(templatePath)
-	if nil != err {
-		return err
-	}
-	templateTree, templateDOM, err := RenderTemplate(absPath, docID, false)
-	if nil != err {
-		return err
-	}
-	if "" == templateDOM {
-		return nil
-	}
-	tree, err := LoadTreeByBlockID(docID)
-	if nil != err {
-		return err
-	}
-	if nil != tree.Root.FirstChild {
-		tree.Root.FirstChild.Unlink()
-	}
-	newTree := util.NewLute().BlockDOM2Tree(templateDOM)
-	var children []*ast.Node
-	for child := newTree.Root.FirstChild; nil != child; child = child.Next {
-		children = append(children, child)
-	}
-	for _, child := range children {
-		tree.Root.AppendChild(child)
-	}
-	templateIALs := parse.IAL2Map(templateTree.Root.KramdownIAL)
-	for key, value := range templateIALs {
-		if "name" == key || "alias" == key || "bookmark" == key || "memo" == key || "icon" == key || strings.HasPrefix(key, "custom-") {
-			tree.Root.SetIALAttr(key, value)
-		}
-	}
-	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	if err = indexWriteTreeUpsertQueue(tree); nil != err {
-		return err
-	}
-	FlushTxQueue()
-	return nil
-}
-
-func resolveNewItemContentTemplatePath(templatePath string) (string, error) {
-	cleanPath := filepath.Clean(filepath.FromSlash(strings.TrimSpace(templatePath)))
-	if "" == cleanPath || "." == cleanPath || filepath.IsAbs(cleanPath) || ".." == cleanPath || strings.HasPrefix(cleanPath, ".."+string(os.PathSeparator)) {
-		return "", errors.New("invalid content template path")
-	}
-	templateRoot := filepath.Join(util.DataDir, "templates")
-	absPath := filepath.Join(templateRoot, cleanPath)
-	rel, err := filepath.Rel(templateRoot, absPath)
-	if nil != err || ".." == rel || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
-		return "", errors.New("content template path is outside templates directory")
-	}
-	if !filelock.IsExist(absPath) {
-		return "", fmt.Errorf("content template [%s] not found", templatePath)
-	}
-	realRoot, err := filepath.EvalSymlinks(templateRoot)
-	if nil != err {
-		return "", err
-	}
-	realPath, err := filepath.EvalSymlinks(absPath)
-	if nil != err {
-		return "", err
-	}
-	info, err := os.Stat(realPath)
-	if nil != err || !info.Mode().IsRegular() {
-		return "", fmt.Errorf("content template [%s] is not a regular file", templatePath)
-	}
-	realRel, err := filepath.Rel(realRoot, realPath)
-	if nil != err || ".." == realRel || strings.HasPrefix(realRel, ".."+string(os.PathSeparator)) {
-		return "", errors.New("content template path is outside templates directory")
-	}
-	return realPath, nil
+	return applyDocContentTemplateAfterIndex(templatePath, docID)
 }
 
 func removeCreatedNewItemDoc(docID string) error {

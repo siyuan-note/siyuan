@@ -1004,10 +1004,14 @@ func getDocCreateSavePath(c *gin.Context) {
 	box := model.Conf.Box(notebook)
 	var docCreateSaveBox string
 	docCreateSavePathTpl := model.Conf.FileTree.DocCreateSavePath
+	docCreateTemplatePath := model.Conf.FileTree.DocCreateTemplatePath
 	if nil != box {
 		boxConf := box.GetConf()
 		docCreateSaveBox = boxConf.DocCreateSaveBox
 		docCreateSavePathTpl = boxConf.DocCreateSavePath
+		if "" != boxConf.DocCreateTemplatePath {
+			docCreateTemplatePath = boxConf.DocCreateTemplatePath
+		}
 	}
 	if "" == docCreateSaveBox && "" == docCreateSavePathTpl {
 		docCreateSaveBox = model.Conf.FileTree.DocCreateSaveBox
@@ -1041,8 +1045,9 @@ func getDocCreateSavePath(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"box":  docCreateSaveBox,
-		"path": docCreateSavePath,
+		"box":                   docCreateSaveBox,
+		"path":                  docCreateSavePath,
+		"docCreateTemplatePath": docCreateTemplatePath,
 	}
 }
 

@@ -30,6 +30,7 @@ type FileTree struct {
 	RefCreateSavePath        string `json:"refCreateSavePath"`        // 块引时新建文档存储路径
 	DocCreateSaveBox         string `json:"docCreateSaveBox"`         // 新建文档存储笔记本
 	DocCreateSavePath        string `json:"docCreateSavePath"`        // 新建文档存储路径
+	DocCreateTemplatePath    string `json:"docCreateTemplatePath"`    // 新建文档使用的模板路径
 	ShorthandSaveBox         string `json:"shorthandSaveBox"`         // 闪念速记存储笔记本
 	ShorthandSavePath        string `json:"shorthandSavePath"`        // 闪念速记存储路径
 	MaxListCount             int    `json:"maxListCount"`             // 最大列出数量

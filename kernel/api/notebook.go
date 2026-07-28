@@ -393,6 +393,7 @@ func setNotebookConf(c *gin.Context) {
 	boxConf.BoxCrypt = savedBoxCrypt
 
 	boxConf.DocCreateSavePath = util.TrimSpaceInPath(boxConf.DocCreateSavePath)
+	boxConf.DocCreateTemplatePath = util.NormalizeTemplatePath(boxConf.DocCreateTemplatePath)
 
 	boxConf.RefCreateSavePath = util.TrimSpaceInPath(boxConf.RefCreateSavePath)
 
@@ -408,15 +409,7 @@ func setNotebookConf(c *gin.Context) {
 		return
 	}
 
-	boxConf.DailyNoteTemplatePath = util.TrimSpaceInPath(boxConf.DailyNoteTemplatePath)
-	if "" != boxConf.DailyNoteTemplatePath {
-		if !strings.HasSuffix(boxConf.DailyNoteTemplatePath, ".md") {
-			boxConf.DailyNoteTemplatePath += ".md"
-		}
-		if !strings.HasPrefix(boxConf.DailyNoteTemplatePath, "/") {
-			boxConf.DailyNoteTemplatePath = "/" + boxConf.DailyNoteTemplatePath
-		}
-	}
+	boxConf.DailyNoteTemplatePath = util.NormalizeTemplatePath(boxConf.DailyNoteTemplatePath)
 
 	if err := box.SaveConf(boxConf); err != nil {
 		ret.Code = -1

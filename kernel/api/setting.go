@@ -538,6 +538,7 @@ func setFiletree(c *gin.Context) {
 	oldBoxDocEnabled := model.IsBoxDocEnabled()
 
 	fileTree.DocCreateSavePath = util.TrimSpaceInPath(fileTree.DocCreateSavePath)
+	fileTree.DocCreateTemplatePath = util.NormalizeTemplatePath(fileTree.DocCreateTemplatePath)
 
 	fileTree.RefCreateSavePath = util.TrimSpaceInPath(fileTree.RefCreateSavePath)
 

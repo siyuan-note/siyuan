@@ -194,9 +194,10 @@ function getNewFilePath(): Pick<NewDocRequest, "notebookId" | "currentPath" | "h
 function runNewDoc(request: NewDocRequest) {
     fetchPost("/api/filetree/getDocCreateSavePath", {notebook: request.notebookId}, (savePathResponse) => {
         const templatePath = savePathResponse.data.path as string;
+        const docCreateTemplatePath = savePathResponse.data.docCreateTemplatePath as string;
         const targetNotebookId = savePathResponse.data.box as string;
         getNewDocHPath(targetNotebookId, request.notebookId, request.currentPath, (hPath) => {
-            createNewDoc(request, templatePath, targetNotebookId, hPath);
+            createNewDoc(request, templatePath, docCreateTemplatePath, targetNotebookId, hPath);
         });
     });
 }
@@ -215,7 +216,8 @@ function getNewDocHPath(targetNotebookId: string, currentNotebookId: string, cur
     });
 }
 
-function createNewDoc(request: NewDocRequest, templatePath: string, targetNotebookId: string, hPath: string) {
+function createNewDoc(request: NewDocRequest, templatePath: string, docCreateTemplatePath: string,
+                      targetNotebookId: string, hPath: string) {
     const target = getNewDocTargetFromSavePath({
         templatePath,
         hPath: hPath || "/",
@@ -226,9 +228,9 @@ function createNewDoc(request: NewDocRequest, templatePath: string, targetNotebo
         currentPath: request.currentPath,
     });
     if (target.kind === "hPath") {
-        createNewDocByHPath(request, target);
+        createNewDocByHPath(request, target, docCreateTemplatePath);
     } else if (target.kind === "subDoc") {
-        createNewDocAsSubDoc(request, target);
+        createNewDocAsSubDoc(request, target, docCreateTemplatePath);
     }
 }
 
@@ -240,7 +242,7 @@ function runNewDocInTree(request: NewDocRequest) {
             currentPath: request.currentPath,
             name: request.name,
         });
-        createNewDocAsSubDoc(request, target);
+        createNewDocAsSubDoc(request, target, savePathResponse.data.docCreateTemplatePath as string);
     });
 }
 
@@ -251,7 +253,7 @@ function getCreateDocParentID(hasFocusTarget: boolean, notebookId: string, curre
         : undefined;
 }
 
-function createNewDocByHPath(request: NewDocRequest, target: NewDocTargetByHPath) {
+function createNewDocByHPath(request: NewDocRequest, target: NewDocTargetByHPath, docCreateTemplatePath: string) {
     if (target.title && !validateName(target.title)) {
         return;
     }
@@ -262,12 +264,13 @@ function createNewDocByHPath(request: NewDocRequest, target: NewDocTargetByHPath
         parentID,
         markdown: "",
         titleEmpty: !target.title,
+        docCreateTemplatePath,
     }, (response) => {
         openCreatedDoc(request.app, response.data, request.onCreated, target.title);
     });
 }
 
-function createNewDocAsSubDoc(request: NewDocRequest, target: NewDocTargetSubDoc) {
+function createNewDocAsSubDoc(request: NewDocRequest, target: NewDocTargetSubDoc, docCreateTemplatePath: string) {
     const id = Lute.NewNodeID();
     const newPath = pathPosix().join(getDisplayName(target.parentPath, false, true), id + ".sy");
     if (request.paths) {
@@ -278,12 +281,19 @@ function createNewDocAsSubDoc(request: NewDocRequest, target: NewDocTargetSubDoc
         path: newPath,
         title: target.title,
         md: "",
+        docCreateTemplatePath,
         sorts: request.paths,
         listDocTree: request.listDocTree,
     }, () => {
         openCreatedDoc(request.app, id, request.onCreated, target.title);
     });
 }
+
+export const getDocCreateTemplatePath = (notebookId: string, callback: (templatePath: string) => void) => {
+    fetchPost("/api/filetree/getDocCreateSavePath", {notebook: notebookId}, (response) => {
+        callback(response.data.docCreateTemplatePath as string);
+    });
+};
 
 function openCreatedDoc(app: App, id: string, onCreated?: (id: string, title: string) => void, title?: string) {
     if (onCreated) {

@@ -64,7 +64,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Document images: image.list finds local images referenced by a document; call image.analyze on a returned asset path to understand one. image.generate creates a reusable image asset for insertion or other document operations.
 
 ## Response Guidelines
-- Reply in the user's language. When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call (block.get/get_children/breadcrumb/batch_get/search); never fabricate IDs. For general mentions without a specific block, plain text is fine.
+- Reply in the language configured in SiYuan's appearance settings. When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call (block.get/get_children/breadcrumb/batch_get/search); never fabricate IDs. For general mentions without a specific block, plain text is fine.
 - Be concise: summarize rather than repeat large content.
 - For choices (which notebook/document/action), use the question tool — never a plain text list.
 - Use markdown; for code blocks always specify the language (e.g. python, go); use $...$ for inline and $...$ for block formulas.
@@ -1326,6 +1326,10 @@ func finishFrontendWait(callID string, ch chan frontendCallResult) (frontendCall
 }
 
 func buildSystemPrompt(language string, pluginActions []PluginAction) string {
+	if kernelModel.Conf != nil && kernelModel.Conf.Appearance != nil && kernelModel.Conf.Appearance.Lang != "" {
+		language = kernelModel.Conf.Appearance.Lang
+	}
+
 	var sb strings.Builder
 	sb.WriteString(systemPrompt)
 	sb.WriteString("\n\n<env>\nWorkspace: ")
@@ -1379,7 +1383,7 @@ func buildSystemPrompt(language string, pluginActions []PluginAction) string {
 	sb.WriteString("\n\nReply in ")
 	sb.WriteString(util.I18nTerm(language, "_label"))
 	sb.WriteString(".")
-	sb.WriteString("\n\nIn the user's language, a daily note is called: ")
+	sb.WriteString("\n\nIn the language configured in SiYuan's appearance settings, a daily note is called: ")
 	sb.WriteString(util.I18nTerm(language, "dailyNote"))
 	sb.WriteString(". When the user asks to write or create this, use dailynote.create, not document.create.")
 	return sb.String()

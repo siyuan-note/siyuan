@@ -12,8 +12,17 @@ import {setPosition} from "../util/setPosition";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getLuteInstance} from "../protyle/render/setLute";
 import * as dayjs from "dayjs";
-import {genEmojiImageHTML, normalizeNetworkIconURL} from "./iconValue";
+import {
+    bindDynamicIconTarget,
+    genEmojiImageHTML,
+    getIconSearchText,
+    getIconValueKind,
+    normalizeNetworkIconURL,
+    normalizeRecentIconValue,
+    updateRecentIconValues,
+} from "./iconValue";
 import {showMessage} from "../dialog/message";
+import {escapeAttr, escapeHtml} from "../util/escape";
 
 export const getRandomEmoji = () => {
     const emojis = window.siyuan.emojis[getRandom(0, window.siyuan.emojis.length - 1)];
@@ -51,6 +60,13 @@ export const unicode2Emoji = (unicode: string, className = "", needSpan = false,
     return emoji;
 };
 
+const genEmojiButton = (unicode: string, label: string, lazy = false) => {
+    const safeUnicode = escapeAttr(escapeHtml(unicode));
+    const safeLabel = escapeAttr(escapeHtml(label));
+    return `<button data-unicode="${safeUnicode}" class="emojis__item ariaLabel" aria-label="${safeLabel}">
+${unicode2Emoji(unicode, "", false, lazy)}</button>`;
+};
+
 export const lazyLoadEmoji = (element: HTMLElement) => {
     const emojiIntersectionObserver = new IntersectionObserver((entries) => {
         entries.forEach((entrie: IntersectionObserverEntry & { target: HTMLImageElement }) => {
@@ -58,8 +74,7 @@ export const lazyLoadEmoji = (element: HTMLElement) => {
             if ((typeof entrie.isIntersecting === "undefined" ? entrie.intersectionRatio !== 0 : entrie.isIntersecting) && index) {
                 let html = "";
                 window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
-${unicode2Emoji(emoji.unicode)}</button>`;
+                    html += genEmojiButton(emoji.unicode, getEmojiDesc(emoji));
                 });
                 entrie.target.innerHTML = html;
                 entrie.target.removeAttribute("data-index");
@@ -87,9 +102,21 @@ export const lazyLoadEmojiImg = (element: Element) => {
     });
 };
 
-export const filterEmoji = (key = "", max?: number, hideCustom = false) => {
+const isEmojiMatched = (emoji: IEmojiItem, key: string) => {
+    const lowerKey = key.toLowerCase();
+    return unicode2Emoji(emoji.unicode) === key ||
+        emoji.keywords.toLowerCase().includes(lowerKey) ||
+        emoji.description.toLowerCase().includes(lowerKey) ||
+        emoji.description_zh_cn.toLowerCase().includes(lowerKey) ||
+        emoji.description_ja_jp.toLowerCase().includes(lowerKey);
+};
+
+export const filterEmoji = (key = "", max?: number, hideCustom = false, options?: {
+    targetID?: string,
+    hideDynamic?: boolean,
+}) => {
     let html = "";
-    const recentEmojis: IEmojiItem[] = [];
+    const recentEmojiMap = new Map<string, IEmojiItem>();
     if (key) {
         html = `<div class="emojis__title">${window.siyuan.languages.emoji}</div><div class="emojis__content">`;
     }
@@ -108,40 +135,21 @@ export const filterEmoji = (key = "", max?: number, hideCustom = false) => {
         }
 
         category.items.forEach(emoji => {
+            recentEmojiMap.set(emoji.unicode, emoji);
             if (key) {
-                if (window.siyuan.config.editor.emoji.includes(emoji.unicode) &&
-                    (unicode2Emoji(emoji.unicode) === key ||
-                        emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
-                        emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
-                        emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
-                        emoji.description_ja_jp.toLowerCase().indexOf(key.toLowerCase()) > -1)
-                ) {
-                    recentEmojis.push(emoji);
-                }
                 if (max && maxCount > max) {
                     return;
                 }
-                if (unicode2Emoji(emoji.unicode) === key ||
-                    emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
-                    emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
-                    emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
-                    emoji.description_ja_jp.toLowerCase().indexOf(key.toLowerCase()) > -1) {
+                if (isEmojiMatched(emoji, key)) {
                     if (category.id === "custom") {
                         customStore.push(emoji);
                     } else {
-                        keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
-${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
+                        keyHTML += genEmojiButton(emoji.unicode, getEmojiDesc(emoji), true);
                     }
                     maxCount++;
                 }
-            } else {
-                if (window.siyuan.config.editor.emoji.includes(emoji.unicode)) {
-                    recentEmojis.push(emoji);
-                }
-                if (index < 2) {
-                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
-${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
-                }
+            } else if (index < 2) {
+                html += genEmojiButton(emoji.unicode, getEmojiDesc(emoji), true);
             }
         });
         if (!key) {
@@ -164,24 +172,40 @@ ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
             }
             return 0;
         }).forEach(item => {
-            html += `<button data-unicode="${item.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(item)}">
-${unicode2Emoji(item.unicode, undefined, false, true)}</button>`;
+            html += genEmojiButton(item.unicode, getEmojiDesc(item), true);
         });
         html = html + keyHTML + "</div>";
     }
-    let recentHTML = "";
-    if (recentEmojis.length > 0) {
-        recentHTML = `<div class="emojis__title" data-type="0">${window.siyuan.languages.recentEmoji}</div><div class="emojis__content">`;
-        window.siyuan.config.editor.emoji.forEach(emojiUnicode => {
-            const emoji = recentEmojis.filter((item) => item.unicode === emojiUnicode);
-            if (emoji[0]) {
-                recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji[0])}">
-${unicode2Emoji(emoji[0].unicode, undefined, false, true)}
-</button>`;
+
+    let recentItemsHTML = "";
+    const renderedRecentValues = new Set<string>();
+    window.siyuan.config.editor.emoji.forEach((value) => {
+        const recentValue = normalizeRecentIconValue(value);
+        if (!recentValue || renderedRecentValues.has(recentValue)) {
+            return;
+        }
+        renderedRecentValues.add(recentValue);
+        const emoji = recentEmojiMap.get(recentValue);
+        if (emoji) {
+            if (!key || isEmojiMatched(emoji, key)) {
+                recentItemsHTML += genEmojiButton(emoji.unicode, getEmojiDesc(emoji), true);
             }
-        });
-        recentHTML += "</div>";
-    }
+            return;
+        }
+
+        const kind = getIconValueKind(recentValue);
+        if ((kind !== "dynamic" && kind !== "network") || (kind === "dynamic" && options?.hideDynamic)) {
+            return;
+        }
+        if (key && !getIconSearchText(recentValue).toLowerCase().includes(key.toLowerCase())) {
+            return;
+        }
+        const displayValue = bindDynamicIconTarget(recentValue, options?.targetID);
+        const label = kind === "dynamic" ? window.siyuan.languages.dynamicIcon : recentValue;
+        recentItemsHTML += genEmojiButton(displayValue, label, true);
+    });
+    const recentHTML = recentItemsHTML ?
+        `<div class="emojis__title" data-type="0">${window.siyuan.languages.recentEmoji}</div><div class="emojis__content">${recentItemsHTML}</div>` : "";
 
     if (recentHTML + html === "") {
         return `<div class="emojis__title">${window.siyuan.languages.emptyContent}</div>`;
@@ -190,11 +214,11 @@ ${unicode2Emoji(emoji[0].unicode, undefined, false, true)}
 };
 
 export const addEmoji = (unicode: string) => {
-    window.siyuan.config.editor.emoji.unshift(unicode);
-    if (window.siyuan.config.editor.emoji.length > Constants.SIZE_UNDO) {
-        window.siyuan.config.editor.emoji.pop();
-    }
-    window.siyuan.config.editor.emoji = Array.from(new Set(window.siyuan.config.editor.emoji));
+    window.siyuan.config.editor.emoji = updateRecentIconValues(
+        window.siyuan.config.editor.emoji,
+        unicode,
+        Constants.SIZE_UNDO,
+    );
 
     fetchPost("/api/setting/setEmoji", {emoji: window.siyuan.config.editor.emoji});
 };
@@ -243,7 +267,8 @@ export const openEmojiPanel = (
     options?: {
         dynamic?: boolean,
         custom?: boolean,
-        ownerElement?: HTMLElement
+        ownerElement?: HTMLElement,
+        targetID?: string,
     }) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
@@ -252,6 +277,7 @@ export const openEmojiPanel = (
     }
 
     const popoverElement = options?.ownerElement?.closest<HTMLElement>(".block__popover");
+    const targetID = options?.targetID || id;
     const dynamicURL = "api/icon/getDynamicIcon?";
     const dynamicCurrentObj: Record<string, any> = {
         color: "#d23f31",
@@ -274,6 +300,10 @@ export const openEmojiPanel = (
         dynamicCurrentObj.type = dynamicCurrentUrl.get("type") || "1";
         dynamicCurrentObj.content = dynamicCurrentUrl.get("content") || "SiYuan";
     }
+    const dynamicTextURL = bindDynamicIconTarget(
+        `${dynamicURL}type=8&color=${encodeURIComponent(dynamicCurrentObj.color)}&content=${encodeURIComponent(dynamicCurrentObj.content)}`,
+        targetID,
+    );
 
     const dialog = new Dialog({
         disableAnimation: true,
@@ -304,7 +334,10 @@ export const openEmojiPanel = (
                 <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
-            <div class="emojis__panel">${filterEmoji("", null, options?.custom)}</div>
+            <div class="emojis__panel">${filterEmoji("", null, options?.custom, {
+        targetID,
+        hideDynamic: options?.dynamic,
+    })}</div>
             <div class="fn__flex">
                 ${[
             ["2b50", window.siyuan.languages.recentEmoji],
@@ -388,7 +421,7 @@ export const openEmojiPanel = (
                 <span class="fn__space"></span>
             </div>
             <div>
-                <img data-type="text" class="emoji__dynamic-item${dynamicCurrentObj.type === "8" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=8&color=${encodeURIComponent(dynamicCurrentObj.color)}&content=${encodeURIComponent(dynamicCurrentObj.content)}&id=${id}">
+                <img data-type="text" class="emoji__dynamic-item${dynamicCurrentObj.type === "8" ? " emoji__dynamic-item--current" : ""}" src="${escapeAttr(escapeHtml(dynamicTextURL))}">
             </div>
         </div>
         <div class="fn__none emojis__link" data-type="tab-link">
@@ -455,6 +488,7 @@ export const openEmojiPanel = (
         if (callback) {
             callback(unicode);
         }
+        addEmoji(unicode);
         dialog.destroy();
     };
     networkIconInputElement.addEventListener("input", renderNetworkIconPreview);
@@ -470,7 +504,10 @@ export const openEmojiPanel = (
     const emojiSearchInputElement = dialog.element.querySelector('[data-type="tab-emoji"] .b3-text-field') as HTMLInputElement;
     const emojisContentElement = dialog.element.querySelector(".emojis__panel");
     emojiSearchInputElement.addEventListener("compositionend", () => {
-        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, options?.custom);
+        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, options?.custom, {
+            targetID,
+            hideDynamic: options?.dynamic,
+        });
         if (emojiSearchInputElement.value) {
             emojisContentElement.nextElementSibling.classList.add("fn__none");
         } else {
@@ -487,7 +524,10 @@ export const openEmojiPanel = (
         if (event.isComposing) {
             return;
         }
-        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, options?.custom);
+        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, options?.custom, {
+            targetID,
+            hideDynamic: options?.dynamic,
+        });
         if (emojiSearchInputElement.value) {
             emojisContentElement.nextElementSibling.classList.add("fn__none");
         } else {

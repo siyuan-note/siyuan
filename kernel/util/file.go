@@ -21,6 +21,7 @@ import (
 	"io"
 	"io/fs"
 	"mime"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -214,6 +215,43 @@ func LastID(p string) (name, id string) {
 
 func IsValidUploadFileName(name string) bool {
 	return name == FilterUploadFileName(name)
+}
+
+func IsNetworkIconURL(icon string) bool {
+	u, err := url.Parse(icon)
+	return nil == err && "" != u.Host && ("http" == strings.ToLower(u.Scheme) || "https" == strings.ToLower(u.Scheme))
+}
+
+func FilterIconValue(icon string) (ret string, valid bool) {
+	ret = strings.TrimSpace(icon)
+	if strings.HasPrefix(ret, "api/icon/") || IsNetworkIconURL(ret) {
+		return ret, true
+	}
+
+	u, err := url.Parse(ret)
+	if strings.HasPrefix(ret, "//") || (nil == err && "" != u.Scheme) {
+		return "", false
+	}
+	if strings.Contains(ret, ".") {
+		ret = FilterUploadEmojiFileName(ret)
+	}
+	return ret, true
+}
+
+func FilterRecentIconValue(icon string) (ret string, valid bool) {
+	ret, valid = FilterIconValue(icon)
+	if !valid || !strings.HasPrefix(ret, "api/icon/getDynamicIcon") {
+		return
+	}
+
+	u, err := url.Parse(ret)
+	if nil != err {
+		return "", false
+	}
+	query := u.Query()
+	query.Del("id")
+	u.RawQuery = query.Encode()
+	return u.String(), true
 }
 
 func FilterUploadEmojiFileName(name string) string {

@@ -101,6 +101,8 @@ import {
 } from "../render/av/cell";
 import {getAVSelectedCells} from "../render/av/selectionState";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
+import {getIconValueKind} from "../../emoji/iconValue";
+import {escapeAttr, escapeHtml} from "../../util/escape";
 import {openLink} from "../../editor/openLink";
 import {mathRender} from "../render/mathRender";
 import {editAssetItem} from "../render/av/asset";
@@ -3992,14 +3994,7 @@ export class WYSIWYG {
                         w: emojiRect.width
                     }, (unicode) => {
                         const oldHTML = nodeElement.outerHTML;
-                        let emojiHTML;
-                        if (unicode.startsWith("api/icon/getDynamicIcon")) {
-                            emojiHTML = `<img class="callout-img" src="${unicode}"/>`;
-                        } else if (unicode.indexOf(".") > -1) {
-                            emojiHTML = `<img class="callout-img" src="/emojis/${unicode}">`;
-                        } else {
-                            emojiHTML = unicode2Emoji(unicode);
-                        }
+                        let emojiHTML = unicode2Emoji(unicode, "callout-img");
                         if (unicode === "") {
                             const subType = nodeElement.getAttribute("data-subtype");
                             if (subType === "NOTE") {
@@ -4017,7 +4012,10 @@ export class WYSIWYG {
                         calloutIconElement.innerHTML = emojiHTML;
                         updateTransaction(protyle, nodeElement, oldHTML);
                         focusBlock(nodeElement);
-                    }, calloutIconElement.querySelector("img"), {ownerElement: protyle.element});
+                    }, calloutIconElement.querySelector("img"), {
+                        ownerElement: protyle.element,
+                        targetID: nodeElement.dataset.nodeId,
+                    });
                 }
                 event.preventDefault();
                 event.stopPropagation();
@@ -4037,20 +4035,20 @@ export class WYSIWYG {
                     }, (unicode) => {
                         emojiElement.insertAdjacentHTML("afterend", "<wbr>");
                         const oldHTML = nodeElement.outerHTML;
-                        let emojiHTML;
-                        if (unicode.startsWith("api/icon/getDynamicIcon")) {
-                            emojiHTML = `<img class="emoji" src="${unicode}"/>`;
-                        } else if (unicode.indexOf(".") > -1) {
-                            const emojiList = unicode.split(".");
-                            emojiHTML = `<img alt="${emojiList[0]}" class="emoji" src="/emojis/${unicode}" title="${emojiList[0]}">`;
-                        } else {
-                            emojiHTML = unicode2Emoji(unicode);
+                        let emojiHTML = unicode2Emoji(unicode, "emoji");
+                        if (getIconValueKind(unicode) === "custom") {
+                            const emojiName = escapeAttr(escapeHtml(unicode.split(".")[0]));
+                            const emojiPath = escapeAttr(escapeHtml(unicode));
+                            emojiHTML = `<img alt="${emojiName}" class="emoji" src="/emojis/${emojiPath}" title="${emojiName}">`;
                         }
                         emojiElement.outerHTML = emojiHTML;
                         hideElements(["dialog"]);
                         updateTransaction(protyle, nodeElement, oldHTML);
                         focusByWbr(nodeElement, range);
-                    }, emojiElement, {ownerElement: protyle.element});
+                    }, emojiElement, {
+                        ownerElement: protyle.element,
+                        targetID: nodeElement.dataset.nodeId,
+                    });
                 }
                 return;
             }

@@ -326,6 +326,7 @@ const openEmoji = (options: {
     dynamicIconURL?: string
     hideDynamicIcon?: boolean
     hideCustomIcon?: boolean
+    targetID?: string
 }) => {
     let dynamicImgElement: HTMLImageElement;
     if (options.dynamicIconURL) {
@@ -334,7 +335,8 @@ const openEmoji = (options: {
     }
     openEmojiPanel("", "av", options.position, options.selectedCB, dynamicImgElement, {
         dynamic: options.hideDynamicIcon,
-        custom: options.hideCustomIcon
+        custom: options.hideCustomIcon,
+        targetID: options.targetID,
     });
 };
 

@@ -901,13 +901,13 @@ func setEmoji(c *gin.Context) {
 
 	argEmoji := arg["emoji"].([]any)
 	var emoji []string
+	seen := map[string]bool{}
 	for _, ae := range argEmoji {
 		e := ae.(string)
-		if strings.Contains(e, ".") {
-			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-			e = util.FilterUploadEmojiFileName(e)
+		if e, valid := util.FilterRecentIconValue(e); valid && !seen[e] {
+			emoji = append(emoji, e)
+			seen[e] = true
 		}
-		emoji = append(emoji, e)
 	}
 
 	model.Conf.Editor.Emoji = emoji

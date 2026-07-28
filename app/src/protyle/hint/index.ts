@@ -54,6 +54,15 @@ import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
+import {getIconValueKind} from "../../emoji/iconValue";
+
+const genEmojiInsertHTML = (value: string) => {
+    const kind = getIconValueKind(value);
+    if (kind === "custom") {
+        return `:${value.split(".")[0]}: `;
+    }
+    return unicode2Emoji(value, kind === "dynamic" || kind === "network" ? "emoji" : "") + " ";
+};
 
 export class Hint {
     public timeId: number;
@@ -118,13 +127,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                         range.endContainer.textContent = "";
                     }
                     addEmoji(unicode);
-                    let emoji;
-                    if (unicode.indexOf(".") > -1) {
-                        emoji = `:${unicode.split(".")[0]}: `;
-                    } else {
-                        emoji = unicode2Emoji(unicode) + " ";
-                    }
-                    insertHTML(protyle.lute.SpinBlockDOM(emoji), protyle, false, true);
+                    insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle, false, true);
                     this.element.classList.add("fn__none");
                 } else {
                     this.fill(unicode, protyle);
@@ -420,9 +423,11 @@ ${genHintItemHTML(item)}
             return;
         }
 
+        const targetElement = hasClosestBlock(protyle.toolbar.range?.startContainer);
+        const targetID = targetElement ? targetElement.getAttribute("data-node-id") : protyle.block.rootID;
         const panelElement = this.element.querySelector(".emojis__panel");
         if (panelElement) {
-            panelElement.innerHTML = filterEmoji(value, 256);
+            panelElement.innerHTML = filterEmoji(value, 256, false, {targetID});
             if (value) {
                 panelElement.nextElementSibling.classList.add("fn__none");
             } else {
@@ -432,7 +437,7 @@ ${genHintItemHTML(item)}
         } else {
             // max-height：min(402px,40vh) 和 .protyle-hint 保持一致，否则 emoji 不显示底部导航
             this.element.innerHTML = `<div style="padding:0;max-height:min(402px,40vh);width:366px" class="emojis">
-<div class="emojis__panel">${filterEmoji(value, 256)}</div>
+<div class="emojis__panel">${filterEmoji(value, 256, false, {targetID})}</div>
 <div class="fn__flex${value ? " fn__none" : ""}">
     ${[
                 ["2b50", window.siyuan.languages.recentEmoji],
@@ -642,13 +647,7 @@ ${genHintItemHTML(item)}
             return;
         } else if (this.splitChar === ":") {
             addEmoji(value);
-            let emoji;
-            if (value.indexOf(".") > -1) {
-                emoji = `:${value.split(".")[0]}: `;
-            } else {
-                emoji = unicode2Emoji(value) + " ";
-            }
-            insertHTML(protyle.lute.SpinBlockDOM(emoji), protyle);
+            insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(value)), protyle);
         } else if (["「「", "「『", "『「", "『『", "{{"].includes(this.splitChar) || this.splitChar === "#" || this.splitChar === ":") {
             if (value === "") {
                 const editElement = getContenteditableElement(nodeElement);
@@ -1003,13 +1002,7 @@ ${genHintItemHTML(item)}
                         range.endContainer.childNodes[range.endOffset - 1]?.remove();
                     }
                     addEmoji(unicode);
-                    let emoji;
-                    if (unicode.indexOf(".") > -1) {
-                        emoji = `:${unicode.split(".")[0]}: `;
-                    } else {
-                        emoji = unicode2Emoji(unicode) + " ";
-                    }
-                    insertHTML(protyle.lute.SpinBlockDOM(emoji), protyle);
+                    insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle);
                     this.element.classList.add("fn__none");
                 } else {
                     this.fill(unicode, protyle);

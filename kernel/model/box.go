@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -945,20 +944,14 @@ func SetBoxIcon(boxID, icon string) {
 }
 
 func filterBoxIcon(icon string) string {
-	networkURL := strings.TrimSpace(icon)
-	if isNetworkIconURL(networkURL) {
-		return networkURL
+	if filtered, valid := util.FilterIconValue(icon); valid {
+		return filtered
 	}
-	if strings.Contains(icon, ".") {
-		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadEmojiFileName(icon)
-	}
-	return icon
+	return ""
 }
 
 func isNetworkIconURL(icon string) bool {
-	u, err := url.Parse(icon)
-	return nil == err && "" != u.Host && ("http" == strings.ToLower(u.Scheme) || "https" == strings.ToLower(u.Scheme))
+	return util.IsNetworkIconURL(icon)
 }
 
 func (box *Box) UpdateHistoryGenerated() {

@@ -856,7 +856,10 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     }]);
                     iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg style="height: 14px;width: 14px"><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
                     updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
-                }, iconElement.querySelector("img"), {ownerElement: protyle.element});
+                }, iconElement.querySelector("img"), {
+                    ownerElement: protyle.element,
+                    targetID: protyle.block.rootID,
+                });
                 event.preventDefault();
                 event.stopPropagation();
             });

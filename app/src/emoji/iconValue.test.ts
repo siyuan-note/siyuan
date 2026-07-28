@@ -1,6 +1,14 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {genEmojiImageHTML, normalizeNetworkIconURL} from "./iconValue";
+import {
+    bindDynamicIconTarget,
+    genEmojiImageHTML,
+    getIconSearchText,
+    getIconValueKind,
+    normalizeNetworkIconURL,
+    normalizeRecentIconValue,
+    updateRecentIconValues,
+} from "./iconValue";
 
 describe("normalizeNetworkIconURL", () => {
     it("accepts absolute HTTP(S) links without relying on file extensions", () => {
@@ -20,6 +28,61 @@ describe("normalizeNetworkIconURL", () => {
             "javascript:alert(1)",
             "https://",
         ].forEach(item => assert.equal(normalizeNetworkIconURL(item), undefined));
+    });
+});
+
+describe("getIconValueKind", () => {
+    it("distinguishes supported icon value formats", () => {
+        assert.equal(getIconValueKind("1f600"), "unicode");
+        assert.equal(getIconValueKind("folder/icon.png"), "custom");
+        assert.equal(getIconValueKind("api/icon/getDynamicIcon?type=8&content=A.B"), "dynamic");
+        assert.equal(getIconValueKind("https://example.com/icon.png"), "network");
+        assert.equal(getIconValueKind("javascript:alert(1)"), "invalid");
+    });
+});
+
+describe("dynamic icon recent values", () => {
+    it("removes source IDs and canonicalizes query parameters", () => {
+        assert.equal(
+            normalizeRecentIconValue("api/icon/getDynamicIcon?type=8&content=%E6%97%A5&id=source&color=%23d23f31"),
+            "api/icon/getDynamicIcon?color=%23d23f31&content=%E6%97%A5&type=8",
+        );
+    });
+
+    it("binds text dynamic icons to the current target", () => {
+        const recent = "api/icon/getDynamicIcon?content=%E6%97%A5&type=8";
+        assert.equal(
+            bindDynamicIconTarget(recent, "current"),
+            "api/icon/getDynamicIcon?content=%E6%97%A5&id=current&type=8",
+        );
+        assert.equal(
+            bindDynamicIconTarget("api/icon/getDynamicIcon?date=&type=1", "current"),
+            "api/icon/getDynamicIcon?date=&type=1",
+        );
+    });
+
+    it("provides custom text for recent icon search", () => {
+        assert.match(getIconSearchText("api/icon/getDynamicIcon?content=%E6%97%A5&type=8"), /^日 /);
+    });
+});
+
+describe("updateRecentIconValues", () => {
+    it("moves normalized values to the front without shrinking the list", () => {
+        const values = Array.from({length: 64}, (_, index) => index === 20 ?
+            "api/icon/getDynamicIcon?type=8&content=%E6%97%A5&id=source" :
+            `1f${index.toString(16).padStart(3, "0")}`);
+        const updated = updateRecentIconValues(
+            values,
+            "api/icon/getDynamicIcon?content=%E6%97%A5&id=current&type=8",
+            64,
+        );
+        assert.equal(updated.length, 64);
+        assert.equal(updated[0], "api/icon/getDynamicIcon?content=%E6%97%A5&type=8");
+        assert.equal(updated.filter(item => item.includes("content=%E6%97%A5")).length, 1);
+    });
+
+    it("ignores unsupported icon values", () => {
+        assert.deepEqual(updateRecentIconValues(["1f600"], "javascript:alert(1)", 64), ["1f600"]);
     });
 });
 

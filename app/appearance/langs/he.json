@@ -1,6 +1,6 @@
 {
   "updateChannel": "ערוץ עדכונים",
-  "updateChannelTip": "ערוץ Beta מקבל גרסאות יציבות, RC ו-Beta; ערוץ Alpha מקבל את כל הגרסאות. ערוצי הבדיקה דורשים גישה ל-GitHub.",
+  "updateChannelTip": "ערוץ Beta מקבל גרסאות יציבות, RC ו-Beta; ערוץ Alpha מקבל את כל הגרסאות. ערוצי הבדיקה דורשים גישה ל-GitHub",
   "updateChannelStable": "יציב",
   "updateChannelBeta": "בטא",
   "updateChannelAlpha": "אלפא",

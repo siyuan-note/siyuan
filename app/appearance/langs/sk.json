@@ -1,6 +1,6 @@
 {
   "updateChannel": "Aktualizačný kanál",
-  "updateChannelTip": "Kanál Beta prijíma stabilné vydania, RC a Beta; kanál Alpha prijíma všetky vydania. Testovacie kanály vyžadujú prístup ku GitHubu.",
+  "updateChannelTip": "Kanál Beta prijíma stabilné vydania, RC a Beta; kanál Alpha prijíma všetky vydania. Testovacie kanály vyžadujú prístup ku GitHubu",
   "updateChannelStable": "Stabilný",
   "updateChannelBeta": "Beta",
   "updateChannelAlpha": "Alpha",

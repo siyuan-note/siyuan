@@ -1,6 +1,6 @@
 {
   "updateChannel": "更新通道",
-  "updateChannelTip": "Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收所有版本。測試通道需要能夠存取 GitHub。",
+  "updateChannelTip": "Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收所有版本。測試通道需要能夠存取 GitHub",
   "updateChannelStable": "正式版",
   "updateChannelBeta": "Beta",
   "updateChannelAlpha": "Alpha",

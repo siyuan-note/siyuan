@@ -1,6 +1,6 @@
 {
   "updateChannel": "Canale di aggiornamento",
-  "updateChannelTip": "Il canale Beta riceve le versioni stabili, RC e Beta; il canale Alpha riceve tutte le versioni. I canali di test richiedono l'accesso a GitHub.",
+  "updateChannelTip": "Il canale Beta riceve le versioni stabili, RC e Beta; il canale Alpha riceve tutte le versioni. I canali di test richiedono l'accesso a GitHub",
   "updateChannelStable": "Stabile",
   "updateChannelBeta": "Beta",
   "updateChannelAlpha": "Alpha",

@@ -1,6 +1,6 @@
 {
   "updateChannel": "Güncelleme kanalı",
-  "updateChannelTip": "Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test kanalları GitHub erişimi gerektirir.",
+  "updateChannelTip": "Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test kanalları GitHub erişimi gerektirir",
   "updateChannelStable": "Kararlı",
   "updateChannelBeta": "Beta",
   "updateChannelAlpha": "Alpha",

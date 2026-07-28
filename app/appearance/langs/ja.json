@@ -1,6 +1,6 @@
 {
   "updateChannel": "更新チャンネル",
-  "updateChannelTip": "Beta チャンネルでは正式版、RC、Beta 版を受信し、Alpha チャンネルではすべての版を受信します。テストチャンネルの利用には GitHub へのアクセスが必要です。",
+  "updateChannelTip": "Beta チャンネルでは正式版、RC、Beta 版を受信し、Alpha チャンネルではすべての版を受信します。テストチャンネルの利用には GitHub へのアクセスが必要です",
   "updateChannelStable": "正式版",
   "updateChannelBeta": "Beta",
   "updateChannelAlpha": "Alpha",

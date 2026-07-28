@@ -1,6 +1,6 @@
 {
   "updateChannel": "Update channel",
-  "updateChannelTip": "Beta receives stable, RC, and Beta releases; Alpha receives all releases. Test channels require access to GitHub.",
+  "updateChannelTip": "Beta receives stable, RC, and Beta releases; Alpha receives all releases. Test channels require access to GitHub",
   "updateChannelStable": "Stable",
   "updateChannelBeta": "Beta",
   "updateChannelAlpha": "Alpha",

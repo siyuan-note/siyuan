@@ -473,15 +473,18 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     let textPlain: string;
     let siyuanHTML: string;
     let files: FileList | DataTransferItemList | File[];
+    let vscodeEditorData = "";
     if ("clipboardData" in event) {
         textHTML = event.clipboardData.getData("text/html");
         textPlain = event.clipboardData.getData("text/plain");
         siyuanHTML = event.clipboardData.getData("text/siyuan");
+        vscodeEditorData = event.clipboardData.getData("vscode-editor-data");
         files = event.clipboardData.files;
     } else if ("dataTransfer" in event) {
         textHTML = event.dataTransfer.getData("text/html");
         textPlain = event.dataTransfer.getData("text/plain");
         siyuanHTML = event.dataTransfer.getData("text/siyuan");
+        vscodeEditorData = event.dataTransfer.getData("vscode-editor-data");
         if (event.dataTransfer.types[0] === "Files") {
             files = event.dataTransfer.items;
         }
@@ -509,6 +512,16 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
     /// #endif
     const originalTextHTML = textHTML;
+    if (vscodeEditorData) {
+        try {
+            const metadata = JSON.parse(vscodeEditorData);
+            if (metadata.version === 1 && metadata.mode === "markdown") {
+                textHTML = "";
+            }
+        } catch (e) {
+            // 忽略无效的 VS Code 剪贴板元数据
+        }
+    }
     // 浏览器地址栏拷贝处理
     if (textHTML.replace(/&amp;/g, "&").replace(/<(|\/)(html|body|meta)[^>]*?>/ig, "").trim() ===
         `<a href="${textPlain}">${textPlain}</a>` ||

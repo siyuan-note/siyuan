@@ -887,7 +887,7 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
     inputElement.select();
 };
 
-interface ITableCellInfo {
+export interface ITableCellInfo {
     cell: HTMLTableCellElement;
     row: number;
     col: number;
@@ -895,10 +895,12 @@ interface ITableCellInfo {
     colspan: number;
 }
 
-interface ITableGrid {
+export interface ITableGrid {
     cellInfos: ITableCellInfo[];
     sectionOfRow: string[];
     rowCount: number;
+    columnCount: number;
+    grid: (HTMLTableCellElement | null)[][];
 }
 
 export interface ITableRangeCell {
@@ -907,7 +909,7 @@ export interface ITableRangeCell {
     col: number;
 }
 
-const buildTableGrid = (tableElement: HTMLElement): ITableGrid => {
+export const buildTableGrid = (tableElement: HTMLElement): ITableGrid => {
     const cellInfos: ITableCellInfo[] = [];
     const sectionOfRow: string[] = [];
     const grid: (HTMLTableCellElement | null)[][] = [];
@@ -954,7 +956,13 @@ const buildTableGrid = (tableElement: HTMLElement): ITableGrid => {
         });
     });
 
-    return {cellInfos, sectionOfRow, rowCount: trElements.length};
+    return {
+        cellInfos,
+        sectionOfRow,
+        rowCount: trElements.length,
+        columnCount: grid.reduce((count, row) => Math.max(count, row.length), 0),
+        grid,
+    };
 };
 
 const getTableRangeBounds = (cellInfos: ITableCellInfo[], rowCount: number, startCell: HTMLElement, endCell: HTMLElement) => {

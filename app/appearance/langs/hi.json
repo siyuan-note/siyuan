@@ -1,4 +1,5 @@
 {
+  "tableRectangleSelectionRequired": "आयताकार चयन आवश्यक है",
   "updateChannel": "अपडेट चैनल",
   "updateChannelTip": "Beta चैनल को स्थिर, RC और Beta रिलीज़ मिलते हैं; Alpha चैनल को सभी रिलीज़ मिलते हैं। परीक्षण चैनलों के लिए GitHub तक पहुंच आवश्यक है",
   "updateChannelStable": "स्थिर",

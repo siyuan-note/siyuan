@@ -18,6 +18,7 @@ export const destroy = (protyle: IProtyle) => {
     protyle.element.classList.remove("protyle");
     protyle.element.removeAttribute("style");
     if (protyle.wysiwyg) {
+        protyle.wysiwyg.tableControl?.destroy();
         protyle.wysiwyg.lastHTMLs = {};
     }
     if (protyle.undo) {

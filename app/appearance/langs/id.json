@@ -1,4 +1,5 @@
 {
+  "tableRectangleSelectionRequired": "Memerlukan pilihan persegi panjang",
   "updateChannel": "Saluran pembaruan",
   "updateChannelTip": "Kanal Beta menerima rilis stabil, RC, dan Beta; kanal Alpha menerima semua rilis. Kanal pengujian memerlukan akses ke GitHub",
   "updateChannelStable": "Stabil",

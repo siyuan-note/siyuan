@@ -1,4 +1,5 @@
 {
+  "tableRectangleSelectionRequired": "Erfordert eine rechteckige Auswahl",
   "updateChannel": "Aktualisierungskanal",
   "updateChannelTip": "Der Beta-Kanal erhält stabile, RC- und Beta-Versionen; der Alpha-Kanal erhält alle Versionen. Testkanäle erfordern Zugriff auf GitHub",
   "updateChannelStable": "Stabil",

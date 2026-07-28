@@ -75,6 +75,7 @@ import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {clearTableCell, getTableRangeHTML, isIncludeCell, setTableAlign, updateTableTitle} from "../util/table";
+import {TableControl} from "../util/tableControl";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
@@ -228,6 +229,7 @@ export class WYSIWYG {
     private preventInput: boolean;
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, () => void>();
+    public tableControl: TableControl;
 
     private scheduleInput(callback: () => void, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -268,6 +270,9 @@ export class WYSIWYG {
         }
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
+        }
+        if (!isMobile()) {
+            this.tableControl = new TableControl(protyle, this.element);
         }
         this.bindCommonEvent(protyle);
         this.bindEvent(protyle);

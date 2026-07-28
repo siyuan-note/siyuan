@@ -1,4 +1,5 @@
 {
+  "tableRectangleSelectionRequired": "נדרשת בחירה מלבנית",
   "updateChannel": "ערוץ עדכונים",
   "updateChannelTip": "ערוץ Beta מקבל גרסאות יציבות, RC ו-Beta; ערוץ Alpha מקבל את כל הגרסאות. ערוצי הבדיקה דורשים גישה ל-GitHub",
   "updateChannelStable": "יציב",

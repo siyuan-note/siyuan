@@ -1,4 +1,5 @@
 {
+  "tableRectangleSelectionRequired": "직사각형 선택 영역이 필요합니다",
   "updateChannel": "업데이트 채널",
   "updateChannelTip": "Beta 채널은 정식, RC 및 Beta 릴리스를 받고 Alpha 채널은 모든 릴리스를 받습니다. 테스트 채널을 사용하려면 GitHub에 접근할 수 있어야 합니다",
   "updateChannelStable": "정식",

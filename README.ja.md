@@ -72,7 +72,7 @@ SiYuanは、プライバシーを最優先とする個人の知識管理シス�
 
 ![feature0.png](screenshots/feature0.png)
 
-![feature51.png](screenshots/feature5-1.png)
+![feature5-1.png](screenshots/feature5-1.png)
 
 ## 🔮 特徴
 

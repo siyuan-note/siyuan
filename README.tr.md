@@ -73,7 +73,7 @@ Daha fazla bilgi için [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)�
 
 ![feature0.png](screenshots/feature0.png)
 
-![feature51.png](screenshots/feature5-1.png)
+![feature5-1.png](screenshots/feature5-1.png)
 
 ## 🔮 Özellikler
 

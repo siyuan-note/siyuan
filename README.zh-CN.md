@@ -71,7 +71,7 @@
 
 ![feature0.png](screenshots/feature0.png)
 
-![feature51.png](screenshots/feature5-1.png)
+![feature5-1.png](screenshots/feature5-1.png)
 
 欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。同时也欢迎关注 B3log 开源社区微信公众号 `B3log开源`：
 

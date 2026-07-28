@@ -73,7 +73,7 @@ Online user guide: [English](https://siyuan-en.b3log.org/)
 
 ![feature0.png](screenshots/feature0.png)
 
-![feature51.png](screenshots/feature5-1.png)
+![feature5-1.png](screenshots/feature5-1.png)
 
 ## 🔮 Features
 

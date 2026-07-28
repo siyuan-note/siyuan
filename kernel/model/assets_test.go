@@ -222,6 +222,70 @@ func TestNormalizeMissingAssetLinkDest(t *testing.T) {
 	}
 }
 
+func TestMissingAssetItemsAreScopedToEncryptedNotebook(t *testing.T) {
+	originalDataDir, originalWorkspaceDir := util.DataDir, util.WorkspaceDir
+	originalConf, originalLangs := Conf, util.Langs
+	t.Cleanup(func() {
+		util.DataDir, util.WorkspaceDir = originalDataDir, originalWorkspaceDir
+		Conf, util.Langs = originalConf, originalLangs
+	})
+
+	workspaceDir := t.TempDir()
+	util.WorkspaceDir = workspaceDir
+	util.DataDir = filepath.Join(workspaceDir, "data")
+	Conf = NewAppConf()
+	Conf.Lang = "en"
+	util.Langs = map[string]map[int]string{"en": {12: "Asset [%s] not found"}}
+	boxA := "20260728160000-abcdefg"
+	boxB := "20260728160001-hijklmn"
+	normalBox := "20260728160002-opqrstu"
+	for _, boxID := range []string{boxA, boxB} {
+		confDir := filepath.Join(util.DataDir, boxID, ".siyuan")
+		if err := os.MkdirAll(confDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(confDir, "conf.json"), []byte(`{"encrypted":true}`), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	sharedDest := "assets/shared-20260728160003-vwxyzab.bin"
+	for _, assetPath := range []string{
+		filepath.Join(util.DataDir, boxA, filepath.FromSlash(sharedDest)),
+		filepath.Join(util.DataDir, boxA, "assets", "mismatch.bin"),
+		filepath.Join(util.DataDir, boxB, "assets", "mismatch.bin"),
+	} {
+		if err := os.MkdirAll(filepath.Dir(assetPath), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(assetPath, []byte("asset"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	referenceBlockIDs := map[missingAssetReference]map[string]bool{}
+	addAssetLinkDestBlockID(referenceBlockIDs, boxA, true, sharedDest+"?box="+boxA, "20260728160100-aaaaaaa")
+	addAssetLinkDestBlockID(referenceBlockIDs, boxB, true, sharedDest+"?box="+boxB, "20260728160101-bbbbbbb")
+	addAssetLinkDestBlockID(referenceBlockIDs, boxA, true, "assets/mismatch.bin?box="+boxB, "20260728160102-ccccccc")
+	addAssetLinkDestBlockID(referenceBlockIDs, normalBox, false, "assets/global.pdf?page=2", "20260728160103-ddddddd")
+	addAssetLinkDestBlockID(referenceBlockIDs, normalBox, false, "assets/normal-missing.txt", "20260728160104-eeeeeee")
+
+	items := missingAssetItems(referenceBlockIDs, map[string]string{"assets/global.pdf": "global.pdf"})
+	expected := []*UnusedItem{
+		{Item: "assets/mismatch.bin", Name: "mismatch.bin", BlockIDs: []string{"20260728160102-ccccccc"}},
+		{Item: "assets/normal-missing.txt", Name: "normal-missing.txt", BlockIDs: []string{"20260728160104-eeeeeee"}},
+		{Item: sharedDest, Name: path.Base(sharedDest), BlockIDs: []string{"20260728160101-bbbbbbb"}},
+	}
+	if !reflect.DeepEqual(items, expected) {
+		t.Fatalf("unexpected missing assets: got %#v, want %#v", items, expected)
+	}
+
+	items = missingAssetItems(map[missingAssetReference]map[string]bool{}, map[string]string{})
+	if nil == items || 0 != len(items) {
+		t.Fatalf("empty missing assets should be a non-nil empty slice: %#v", items)
+	}
+}
+
 func TestGetAssetAbsPathWithSymlinkedWorkspaceAncestor(t *testing.T) {
 	originalDataDir, originalWorkspaceDir := util.DataDir, util.WorkspaceDir
 	t.Cleanup(func() {

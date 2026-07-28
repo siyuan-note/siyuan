@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -524,6 +525,64 @@ func GetBlocksIndexes(ids []string) (ret map[string]int) {
 	for _, id := range ids {
 		ret[id] = nodesIndexes[id]
 	}
+	return
+}
+
+func GetBlocksOrders(id string, ids []string) (ret []string, err error) {
+	ret = []string{}
+	var tree *parse.Tree
+	var included map[string]struct{}
+	if "" != id {
+		tree, err = LoadTreeByBlockID(id)
+		if err != nil {
+			return
+		}
+		if nil == tree || nil == tree.Root {
+			err = ErrTreeNotFound
+			return
+		}
+		if tree.Root.ID != id {
+			err = fmt.Errorf("block [%s] is not a document", id)
+			return
+		}
+	} else {
+		for _, blockID := range ids {
+			if !ast.IsNodeIDPattern(blockID) {
+				continue
+			}
+			tree, _ = LoadTreeByBlockID(blockID)
+			if nil != tree {
+				break
+			}
+		}
+		if nil == tree {
+			return
+		}
+
+		included = map[string]struct{}{}
+		for _, blockID := range ids {
+			included[blockID] = struct{}{}
+		}
+	}
+
+	ret = getBlocksOrdersInTree(tree, included)
+	return
+}
+
+func getBlocksOrdersInTree(tree *parse.Tree, included map[string]struct{}) (ret []string) {
+	ret = []string{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || n == tree.Root || !n.IsBlock() || ast.NodeKramdownBlockIAL == n.Type || "" == n.ID {
+			return ast.WalkContinue
+		}
+
+		if nil == included {
+			ret = append(ret, n.ID)
+		} else if _, ok := included[n.ID]; ok {
+			ret = append(ret, n.ID)
+		}
+		return ast.WalkContinue
+	})
 	return
 }
 

@@ -827,6 +827,67 @@ func getBlocksIndexes(c *gin.Context) {
 	ret.Data = index
 }
 
+func getBlocksOrders(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	_, hasID := arg["id"]
+	_, hasIDs := arg["ids"]
+	if hasID == hasIDs {
+		ret.Code = -1
+		ret.Msg = "Exactly one of [id] and [ids] must be provided"
+		return
+	}
+
+	var id string
+	var ids []string
+	if hasID {
+		if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) || util.InvalidIDPattern(id, ret) {
+			return
+		}
+		if !checkBlockPublishAccess(c, id, ret) {
+			return
+		}
+	} else {
+		var idsArg []any
+		if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("ids", &idsArg, true, false)) {
+			return
+		}
+
+		seen := map[string]struct{}{}
+		for _, idArg := range idsArg {
+			idStr, isString := idArg.(string)
+			if !isString {
+				ret.Code = -1
+				ret.Msg = "Field [ids] should contain only strings"
+				return
+			}
+			if !ast.IsNodeIDPattern(idStr) {
+				continue
+			}
+			if _, added := seen[idStr]; added {
+				continue
+			}
+			seen[idStr] = struct{}{}
+			ids = append(ids, idStr)
+		}
+		ids = filterBlockIDsByPublishAccess(c, ids, "")
+	}
+
+	orders, err := model.GetBlocksOrders(id, ids)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = orders
+}
+
 func getBlockInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

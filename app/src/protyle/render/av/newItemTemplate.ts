@@ -6,14 +6,13 @@ import {Constants} from "../../../constants";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
 import {transaction} from "../../wysiwyg/transaction";
-import {avRender, getAVItemRenderStatus, isItemInData} from "./render";
+import {avRender} from "./render";
 import {getFieldsByData} from "./view";
 import {getColIconByType} from "./col";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {upDownHint} from "../../../util/upDownHint";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
-import {openDatabaseRowByData} from "./openDatabaseRow";
 
 interface ICreatePosition {
     previousID?: string;
@@ -878,26 +877,7 @@ export const createAttributeViewItem = (options: {
             showMessage(warnings.join("<br>"));
         }
         options.blockElement.removeAttribute("data-render");
-        avRender(options.blockElement, options.protyle, (data) => {
-            if (!response.data?.itemID || isItemInData(data, response.data.itemID)) {
-                return;
-            }
-            getAVItemRenderStatus(options.blockElement, response.data.itemID).then((status) => {
-                if ("filtered" !== status) {
-                    return;
-                }
-                openDatabaseRowByData(options.protyle, {
-                    avID: options.blockElement.dataset.avId,
-                    databaseBlockID: options.blockElement.dataset.nodeId,
-                    notebookID: options.protyle.notebookId,
-                    itemID: response.data.itemID,
-                    valueID: "",
-                    title: response.data.content || "",
-                    boundBlockID: response.data.isDetached ? undefined : response.data.blockID,
-                    isDetached: response.data.isDetached,
-                });
-            });
-        });
+        avRender(options.blockElement, options.protyle);
     });
 };
 

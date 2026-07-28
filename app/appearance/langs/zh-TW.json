@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "使用預設垂直對齊",
+  "useDefaultHorizontalAlign": "使用預設水平對齊",
+  "alignBottom": "底端對齊",
+  "alignMiddle": "垂直置中",
+  "alignTop": "頂端對齊",
+  "focusBreadcrumb": "聚焦麵包屑",
+  "tableRectangleSelectionRequired": "需要矩形選區",
   "updateChannel": "更新通道",
   "updateChannelTip": "Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收所有版本。測試通道需要能夠存取 GitHub",
   "updateChannelStable": "正式版",

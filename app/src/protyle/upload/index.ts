@@ -14,6 +14,8 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {filesize} from "filesize";
 import {transaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
+import {getAVSelectedCells} from "../render/av/selectionState";
+import {getAVSelectedTableCells} from "../render/av/virtualScroll";
 
 interface FileWithPath extends File {
     path: string;
@@ -187,6 +189,9 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
             return;
         }
     } else if (nodeElement && nodeElement.classList.contains("av")) {
+        const selectedCells = getAVSelectedCells(nodeElement);
+        const stableCellCandidates = (selectedCells.length > 0 ? selectedCells :
+            getAVSelectedTableCells(nodeElement)).filter(item => item.column.type === "mAsset");
         const cellElements: HTMLElement[] = [];
         nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
             item.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
@@ -196,22 +201,28 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
             });
         });
         if (cellElements.length === 0) {
-            protyle.wysiwyg.element.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+            nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                 if (getTypeByCellElement(item) === "mAsset") {
                     cellElements.push(item);
                 }
             });
         }
-        if (cellElements.length === 1) {
-            updateCellsValue(protyle, nodeElement, avAssets, cellElements);
-        } else if (cellElements.length > 1) {
+        const stableCells = stableCellCandidates.length > cellElements.length ? stableCellCandidates : [];
+        if (stableCells.length === 1 || cellElements.length === 1) {
+            updateCellsValue(protyle, nodeElement, avAssets, cellElements, undefined, undefined,
+                false, false, false, stableCells);
+        } else if (stableCells.length > 1 || cellElements.length > 1) {
             const doOperations: IOperation[] = [];
             const undoOperations: IOperation[] = [];
             let currentRowElement;
-            const colId = cellElements[0].getAttribute("data-col-id");
+            const colId = cellElements[0]?.getAttribute("data-col-id");
             for (let i = 0; i < avAssets.length; i++) {
+                const selectedCell = stableCells[i];
+                if (stableCells.length > 0 && !selectedCell) {
+                    break;
+                }
                 let cellElement = cellElements[i];
-                if (!cellElement) {
+                if (!cellElement && stableCells.length === 0) {
                     if (!currentRowElement) {
                         currentRowElement = hasClosestByClassName(cellElements[i - 1], "av__row") as HTMLElement;
                     }
@@ -222,11 +233,12 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
                         }
                     }
                 }
-                if (!cellElement) {
+                if (!cellElement && !selectedCell) {
                     break;
                 }
                 const operations = await updateCellsValue(protyle, nodeElement,
-                    [avAssets[i]], [cellElement], null, null, true);
+                    [avAssets[i]], cellElement ? [cellElement] : undefined, undefined, undefined,
+                    true, false, false, selectedCell ? [selectedCell] : undefined);
                 doOperations.push(...operations.doOperations);
                 undoOperations.push(...operations.undoOperations);
             }

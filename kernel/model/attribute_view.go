@@ -2669,31 +2669,68 @@ type AvSearchResult struct {
 	ViewLayout av.LayoutType     `json:"viewLayout"`
 	BlockID    string            `json:"blockID"`
 	HPath      string            `json:"hPath"`
+	Matched    bool              `json:"matched,omitempty"`
 	Children   []*AvSearchResult `json:"children,omitempty"`
 }
 
 type AvSearchTempResult struct {
-	AvID      string
-	AvName    string
-	AvUpdated int64
-	Score     float64
+	AvID           string
+	AvName         string
+	AvUpdated      int64
+	Score          float64
+	SearchInfo     *av.AttributeViewSearchInfo
+	MatchedViewIDs map[string]bool
 }
 
-func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, currentBlockID string) (ret []*AvSearchResult) {
+type SearchAttributeViewOptions struct {
+	Keyword            string
+	ExcludeAvIDs       []string
+	CurrentAvID        string
+	CurrentBlockID     string
+	IncludeViewMatches bool
+}
+
+func matchAttributeViewSearchName(name string, keywords []string) (score float64, hit bool) {
+	if name == "" || len(keywords) == 0 {
+		return
+	}
+
+	lowerName := strings.ToLower(name)
+	hit = true
+	for _, keyword := range keywords {
+		lowerKeyword := strings.ToLower(keyword)
+		if !strings.Contains(lowerName, lowerKeyword) {
+			return 0, false
+		}
+		score += smetrics.JaroWinkler(name, keyword, 0.7, 4)
+	}
+	return
+}
+
+func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, currentBlockID string) []*AvSearchResult {
+	return SearchAttributeViewWithOptions(SearchAttributeViewOptions{
+		Keyword:        keyword,
+		ExcludeAvIDs:   excludeAvIDs,
+		CurrentAvID:    currentAvID,
+		CurrentBlockID: currentBlockID,
+	})
+}
+
+func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*AvSearchResult) {
 	waitForSyncingStorages()
 
 	ret = []*AvSearchResult{}
-	keyword = strings.TrimSpace(keyword)
+	keyword := strings.TrimSpace(options.Keyword)
 	keywords := strings.Fields(keyword)
 
 	var avSearchTmpResults []*AvSearchTempResult
 	boxID := ""
-	if currentBlockID != "" {
-		if bt := treenode.GetBlockTree(currentBlockID); nil != bt && IsEncryptedBox(bt.BoxID) {
+	if options.CurrentBlockID != "" {
+		if bt := treenode.GetBlockTree(options.CurrentBlockID); nil != bt && IsEncryptedBox(bt.BoxID) {
 			boxID = bt.BoxID
 		}
-	} else if currentAvID != "" {
-		_, boxID = av.FindAttributeViewPath(currentAvID)
+	} else if options.CurrentAvID != "" {
+		_, boxID = av.FindAttributeViewPath(options.CurrentAvID)
 	}
 	avDir := filepath.Join(util.DataDir, "storage", "av")
 	if boxID != "" {
@@ -2720,7 +2757,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 			continue
 		}
 
-		if gulu.Str.Contains(id, excludeAvIDs) {
+		if gulu.Str.Contains(id, options.ExcludeAvIDs) {
 			continue
 		}
 
@@ -2728,23 +2765,42 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 			continue
 		}
 
-		name, _ := av.GetAttributeViewNameInBox(id, boxID)
+		var searchInfo *av.AttributeViewSearchInfo
+		var name string
+		if options.IncludeViewMatches && keyword != "" {
+			searchInfo, _ = av.GetAttributeViewSearchInfoInBox(id, boxID)
+			if searchInfo != nil {
+				name = searchInfo.Name
+			}
+		}
+		if searchInfo == nil {
+			name, _ = av.GetAttributeViewNameInBox(id, boxID)
+		}
+
 		info, _ := entry.Info()
 		if "" != keyword {
-			score := 0.0
-			hit := false
-			for _, k := range keywords {
-				if strings.Contains(strings.ToLower(name), strings.ToLower(k)) {
-					score += smetrics.JaroWinkler(name, k, 0.7, 4)
-					hit = true
-				} else {
-					hit = false
-					break
+			score, hit := matchAttributeViewSearchName(name, keywords)
+			matchedViewIDs := map[string]bool{}
+			if options.IncludeViewMatches && searchInfo != nil {
+				for _, view := range searchInfo.Views {
+					viewScore, viewHit := matchAttributeViewSearchName(view.Name, keywords)
+					if viewHit {
+						matchedViewIDs[view.ID] = true
+						if viewScore > score {
+							score = viewScore
+						}
+					}
 				}
 			}
 
-			if hit {
-				a := &AvSearchTempResult{AvID: id, AvName: name, Score: score}
+			if hit || len(matchedViewIDs) > 0 {
+				a := &AvSearchTempResult{
+					AvID:           id,
+					AvName:         name,
+					Score:          score,
+					SearchInfo:     searchInfo,
+					MatchedViewIDs: matchedViewIDs,
+				}
 				if nil != info && !info.ModTime().IsZero() {
 					a.AvUpdated = info.ModTime().UnixMilli()
 				}
@@ -2795,8 +2851,11 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 			continue
 		}
 
-		attrView, _ := av.ParseAttributeViewInBox(tmpResult.AvID, boxID)
-		if nil == attrView {
+		searchInfo := tmpResult.SearchInfo
+		if searchInfo == nil {
+			searchInfo, _ = av.GetAttributeViewSearchInfoInBox(tmpResult.AvID, boxID)
+		}
+		if searchInfo == nil {
 			continue
 		}
 
@@ -2810,11 +2869,6 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 			hPath = box.Name + hPath
 		}
 
-		name := tmpResult.AvName
-		if "" == name {
-			name = Conf.language(267)
-		}
-
 		parent := &AvSearchResult{
 			AvID:    tmpResult.AvID,
 			AvName:  tmpResult.AvName,
@@ -2823,7 +2877,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 		}
 		ret = append(ret, parent)
 
-		for _, view := range attrView.Views {
+		for _, view := range searchInfo.Views {
 			child := &AvSearchResult{
 				AvID:       tmpResult.AvID,
 				AvName:     tmpResult.AvName,
@@ -2832,6 +2886,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 				ViewLayout: view.LayoutType,
 				BlockID:    node.ID,
 				HPath:      hPath,
+				Matched:    tmpResult.MatchedViewIDs[view.ID],
 			}
 			parent.Children = append(parent.Children, child)
 		}
@@ -5189,14 +5244,26 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill)
+	result, err := addAttributeViewBlocks(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
+	operation.RetData = result
 	return
 }
 
 func AddAttributeViewBlock(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (err error) {
+	_, err = addAttributeViewBlocks(tx, srcs, avID, dbBlockID, viewID, groupID, previousItemID, ignoreDefaultFill)
+	return
+}
+
+type insertAttrViewBlockResult struct {
+	InsertedItemIDs []string `json:"insertedItemIDs"`
+	ExistingItemIDs []string `json:"existingItemIDs"`
+}
+
+func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (result *insertAttrViewBlockResult, err error) {
+	result = &insertAttrViewBlockResult{}
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
 
 	now := time.Now().UnixMilli()
@@ -5223,7 +5290,8 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]any, avID, dbBlock
 			}
 			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", boundBlockID, loadErr)
-				return loadErr
+				err = loadErr
+				return
 			}
 		}
 
@@ -5231,14 +5299,15 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]any, avID, dbBlock
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, tree, tx); nil != avErr {
-			return avErr
+		if avErr := addAttributeViewBlock(now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, tree, tx, result); nil != avErr {
+			err = avErr
+			return
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBoundBlockID)
@@ -5281,6 +5350,9 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 			msg := fmt.Sprintf(Conf.language(269), util.EscapeHTML(getAttrViewName(attrView)))
 			util.PushMsg(msg, 5000)
 			src["itemID"] = blockValue.BlockID
+			if nil == err {
+				result.ExistingItemIDs = append(result.ExistingItemIDs, blockValue.BlockID)
+			}
 			return
 		}
 	}
@@ -5372,6 +5444,9 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 
 	regenAttrViewGroups(attrView)
 	err = av.SaveAttributeView(attrView)
+	if nil == err {
+		result.InsertedItemIDs = append(result.InsertedItemIDs, addingItemID)
+	}
 	return
 }
 

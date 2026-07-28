@@ -1665,6 +1665,13 @@ type UnusedItem struct {
 	AbsPath  string    `json:"-"`
 }
 
+type missingAssetReference struct {
+	boxID     string
+	rawDest   string
+	dest      string
+	encrypted bool
+}
+
 func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	defer logging.Recover()
 	ret = []*UnusedItem{}
@@ -1880,11 +1887,12 @@ func MissingAssets() (ret []*UnusedItem) {
 		return
 	}
 	luteEngine := util.NewLute()
-	destBlockIDs := map[string]map[string]bool{}
+	referenceBlockIDs := map[missingAssetReference]map[string]bool{}
 	for _, notebook := range notebooks {
 		if notebook.Closed {
 			continue
 		}
+		encrypted := IsEncryptedBox(notebook.ID)
 
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 		for _, paths := range pages {
@@ -1904,7 +1912,7 @@ func MissingAssets() (ret []*UnusedItem) {
 
 					blockID := assetLinkDestBlockID(n)
 					for _, dest := range getAssetLinkDestsByNode(n, false) {
-						addAssetLinkDestBlockID(destBlockIDs, dest, blockID)
+						addAssetLinkDestBlockID(referenceBlockIDs, notebook.ID, encrypted, dest, blockID)
 					}
 					return ast.WalkContinue
 				})
@@ -1914,28 +1922,39 @@ func MissingAssets() (ret []*UnusedItem) {
 					if !util.IsAssetLinkDest([]byte(titleImgPath), false) {
 						continue
 					}
-					addAssetLinkDestBlockID(destBlockIDs, titleImgPath, tree.Root.ID)
+					addAssetLinkDestBlockID(referenceBlockIDs, notebook.ID, encrypted, titleImgPath, tree.Root.ID)
 				}
 			}
 		}
 	}
 
-	for dest, blockIDSet := range destBlockIDs {
-		if "" == assetsPathMap[dest] {
-			if strings.HasPrefix(dest, "assets/.") {
-				// Assets starting with `.` should not be considered missing assets https://github.com/siyuan-note/siyuan/issues/8821
-				if filelock.IsExist(filepath.Join(util.DataDir, dest)) {
-					continue
-				}
-			}
+	return missingAssetItems(referenceBlockIDs, assetsPathMap)
+}
 
-			blockIDs := make([]string, 0, len(blockIDSet))
-			for blockID := range blockIDSet {
-				blockIDs = append(blockIDs, blockID)
-			}
-			sort.Strings(blockIDs)
-			ret = append(ret, &UnusedItem{Item: dest, Name: path.Base(dest), BlockIDs: blockIDs})
+func missingAssetItems(referenceBlockIDs map[missingAssetReference]map[string]bool, assetsPathMap map[string]string) (ret []*UnusedItem) {
+	ret = []*UnusedItem{}
+	missingBlockIDs := map[string]map[string]bool{}
+	for reference, blockIDSet := range referenceBlockIDs {
+		if assetReferenceExists(reference, assetsPathMap) {
+			continue
 		}
+		destBlockIDs := missingBlockIDs[reference.dest]
+		if nil == destBlockIDs {
+			destBlockIDs = map[string]bool{}
+			missingBlockIDs[reference.dest] = destBlockIDs
+		}
+		for blockID := range blockIDSet {
+			destBlockIDs[blockID] = true
+		}
+	}
+
+	for dest, blockIDSet := range missingBlockIDs {
+		blockIDs := make([]string, 0, len(blockIDSet))
+		for blockID := range blockIDSet {
+			blockIDs = append(blockIDs, blockID)
+		}
+		sort.Strings(blockIDs)
+		ret = append(ret, &UnusedItem{Item: dest, Name: path.Base(dest), BlockIDs: blockIDs})
 	}
 	sort.Slice(ret, func(i, j int) bool {
 		return ret[i].Item < ret[j].Item
@@ -1943,16 +1962,37 @@ func MissingAssets() (ret []*UnusedItem) {
 	return
 }
 
-func addAssetLinkDestBlockID(destBlockIDs map[string]map[string]bool, dest, blockID string) {
-	dest = normalizeMissingAssetLinkDest(dest)
+func assetReferenceExists(reference missingAssetReference, assetsPathMap map[string]string) bool {
+	if reference.encrypted {
+		_, err := GetAssetAbsPathInBox(reference.rawDest, reference.boxID)
+		return nil == err
+	}
+
+	if _, _, err := assetPathAndBox(reference.rawDest, reference.boxID); nil != err {
+		return false
+	}
+	if "" != assetsPathMap[reference.dest] {
+		return true
+	}
+	if strings.HasPrefix(reference.dest, "assets/.") {
+		// Assets starting with `.` should not be considered missing assets https://github.com/siyuan-note/siyuan/issues/8821
+		return filelock.IsExist(filepath.Join(util.DataDir, reference.dest))
+	}
+	return false
+}
+
+func addAssetLinkDestBlockID(referenceBlockIDs map[missingAssetReference]map[string]bool, boxID string, encrypted bool, rawDest, blockID string) {
+	rawDest = strings.TrimSpace(rawDest)
+	dest := normalizeMissingAssetLinkDest(rawDest)
 	if "" == dest {
 		return
 	}
 
-	blockIDs := destBlockIDs[dest]
+	reference := missingAssetReference{boxID: boxID, rawDest: rawDest, dest: dest, encrypted: encrypted}
+	blockIDs := referenceBlockIDs[reference]
 	if nil == blockIDs {
 		blockIDs = map[string]bool{}
-		destBlockIDs[dest] = blockIDs
+		referenceBlockIDs[reference] = blockIDs
 	}
 	if "" != blockID {
 		blockIDs[blockID] = true

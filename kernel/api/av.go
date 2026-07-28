@@ -908,6 +908,18 @@ func createAttributeViewItem(c *gin.Context) {
 	}
 	ret.Data = result
 	if nil != result.Transaction {
+		for _, operation := range result.Transaction.DoOperations {
+			if "insertAttrViewBlock" == operation.Action {
+				operation.Context = map[string]any{
+					"filteredTipScope": "target",
+					"filteredTipToken": result.ItemID,
+					"filteredTipAppID": app,
+					"protyleID":        session,
+					"openFilteredItem": "true",
+				}
+				break
+			}
+		}
 		pushTransactions(app, session, []*model.Transaction{result.Transaction})
 	}
 }
@@ -980,7 +992,14 @@ func searchAttributeView(c *gin.Context) {
 			excludes = append(excludes, e.(string))
 		}
 	}
-	results := model.SearchAttributeView(keyword, excludes, currentAvID, currentBlockID)
+	includeViewMatches, _ := arg["includeViewMatches"].(bool)
+	results := model.SearchAttributeViewWithOptions(model.SearchAttributeViewOptions{
+		Keyword:            keyword,
+		ExcludeAvIDs:       excludes,
+		CurrentAvID:        currentAvID,
+		CurrentBlockID:     currentBlockID,
+		IncludeViewMatches: includeViewMatches,
+	})
 	ret.Data = map[string]any{
 		"results": results,
 	}

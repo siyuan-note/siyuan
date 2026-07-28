@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "Використовувати вертикальне вирівнювання за замовчуванням",
+  "useDefaultHorizontalAlign": "Використовувати горизонтальне вирівнювання за замовчуванням",
+  "alignBottom": "Вирівняти за нижнім краєм",
+  "alignMiddle": "Вирівняти по вертикалі",
+  "alignTop": "Вирівняти за верхнім краєм",
+  "focusBreadcrumb": "Перейти до навігаційного ланцюжка",
+  "tableRectangleSelectionRequired": "Потрібне прямокутне виділення",
   "updateChannel": "Канал оновлень",
   "updateChannelTip": "Канал Beta отримує стабільні, RC- та Beta-версії, а канал Alpha — усі версії. Для тестових каналів потрібен доступ до GitHub",
   "updateChannelStable": "Стабільний",

@@ -19,6 +19,13 @@
     .av__row--footer .av__calc {
       opacity: 1;
     }
+
+    .av__selection-toolbar {
+      [data-type="av-selection-edit"],
+      [data-type="av-selection-delete"] {
+        display: none;
+      }
+    }
   }
 
   &__cursor {
@@ -192,44 +199,33 @@
     }
   }
 
-  &__counter {
-    position: absolute;
-    bottom: 0;
-    height: 26px;
-    padding: 0 5px;
-    background-color: var(--b3-parent-background);
+  &__selection-toolbar {
+    align-items: center;
+    display: none;
+    flex: 1;
+    gap: 4px;
+    height: 32px;
+    min-width: 0;
     font-size: 87.5%;
 
-    &--sticky {
-      align-items: center;
-      bottom: auto;
+    .block__icon {
+      opacity: 1;
+    }
+  }
+
+  &__selection-count {
+    flex-shrink: 0;
+    padding: 0 5px;
+    white-space: nowrap;
+  }
+
+  &__views--selection {
+    > :not(.av__selection-toolbar) {
       display: none;
-      flex-shrink: 0;
-      position: static;
-      white-space: nowrap;
-    }
-  }
-
-  &__views--fixed > &__counter--sticky {
-    display: flex;
-  }
-
-  &__header:has(> .av__title.fn__none + .av__counter:not(.fn__none)) {
-    display: flex;
-    align-items: center;
-
-    .av__views {
-      min-width: 0;
-      flex: 1;
-      order: 2;
     }
 
-    > .av__counter {
-      position: static;
+    > .av__selection-toolbar {
       display: flex;
-      align-items: center;
-      flex-shrink: 0;
-      order: 1;
     }
   }
 

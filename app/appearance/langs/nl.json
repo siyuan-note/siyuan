@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "Standaard verticale uitlijning gebruiken",
+  "useDefaultHorizontalAlign": "Standaard horizontale uitlijning gebruiken",
+  "alignBottom": "Onder uitlijnen",
+  "alignMiddle": "Verticaal centreren",
+  "alignTop": "Boven uitlijnen",
+  "focusBreadcrumb": "Breadcrumb focussen",
+  "tableRectangleSelectionRequired": "Vereist een rechthoekige selectie",
   "updateChannel": "Updatekanaal",
   "updateChannelTip": "Het Beta-kanaal ontvangt stabiele, RC- en Beta-versies; het Alpha-kanaal ontvangt alle versies. Testkanalen vereisen toegang tot GitHub",
   "updateChannelStable": "Stabiel",

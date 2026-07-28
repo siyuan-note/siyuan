@@ -7,8 +7,8 @@ import {bindAvSearch} from "../search";
 import {processRender} from "../../../util/processCode";
 import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
-import {getBodyVirtualData, initVirtualScroll, setAVData} from "../virtualScroll";
-import {getRowHTML, stickyRow, updateHeader} from "../row";
+import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "../virtualScroll";
+import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "../row";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 import {getCardStyle} from "./style";
 import {setGroupFoldedStates} from "../groupFold";
@@ -165,6 +165,14 @@ export const afterRenderGallery = (options: ITableOptions) => {
     if (options.cb) {
         options.cb(options.data);
     }
+    initVirtualScroll({
+        ...options,
+        selectedItemPoints: options.resetData.selectItemIds.map(item => ({
+            groupID: item.groupId,
+            itemID: item.fieldId,
+        })),
+    });
+    updateAVSelectionStatus(options.blockElement);
     if (!options.renderAll) {
         finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
@@ -178,7 +186,6 @@ export const afterRenderGallery = (options: ITableOptions) => {
         isSearching: options.resetData.isSearching,
         onChange: () => updateSearch(options.blockElement, options.protyle),
     });
-    initVirtualScroll(options);
     finishAVLocate(options.blockElement, options.protyle, options.data);
 };
 
@@ -198,16 +205,10 @@ export const renderGallery = async (options: {
             fieldId: item.parentElement.getAttribute("data-id"),
         });
     });
-    const selectItemIds: IIds[] = [];
-    options.blockElement.querySelectorAll(".av__gallery-item--select").forEach(galleryItem => {
-        const fieldId = galleryItem.getAttribute("data-id");
-        if (fieldId) {
-            selectItemIds.push({
-                groupId: (hasClosestByClassName(galleryItem, "av__body") as HTMLElement).dataset.groupId || "",
-                fieldId
-            });
-        }
-    });
+    const selectItemIds: IIds[] = getAVSelectedItemPoints(options.blockElement).map(item => ({
+        groupId: item.groupID,
+        fieldId: item.itemID,
+    }));
     const pageSizes: { [key: string]: string } = {};
     const virtualData: { [key: string]: IAVVirtualData } = {};
     options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {

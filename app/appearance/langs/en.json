@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "Use default vertical alignment",
+  "useDefaultHorizontalAlign": "Use default horizontal alignment",
+  "alignBottom": "Align bottom",
+  "alignMiddle": "Center vertically",
+  "alignTop": "Align top",
+  "focusBreadcrumb": "Focus breadcrumb",
+  "tableRectangleSelectionRequired": "Requires a rectangular selection",
   "updateChannel": "Update channel",
   "updateChannelTip": "Beta receives stable, RC, and Beta releases; Alpha receives all releases. Test channels require access to GitHub",
   "updateChannelStable": "Stable",

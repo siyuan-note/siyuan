@@ -7,6 +7,7 @@ import {upDownHint} from "../../../util/upDownHint";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
+import {clearSelect} from "../../util/clear";
 
 // countFilterLeaves 递归统计过滤节点树中的叶子数量（分组不计入）。
 const countFilterLeaves = (filters: IAVFilter[]): number => {
@@ -262,6 +263,11 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
         if (event.key === "Enter") {
             const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
             if (currentElement) {
+                const currentViewID = options.blockElement.querySelector(".av__views .item--focus")?.
+                    getAttribute("data-id");
+                if (currentElement.dataset.id !== currentViewID) {
+                    clearSelect(["row", "galleryItem"], options.blockElement);
+                }
                 transaction(options.protyle, [{
                     action: "setAttrViewBlockView",
                     blockID: options.blockElement.getAttribute("data-node-id"),
@@ -270,7 +276,7 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
                 }], [{
                     action: "setAttrViewBlockView",
                     blockID: options.blockElement.getAttribute("data-node-id"),
-                    id: options.blockElement.querySelector(".av__views .item--focus").getAttribute("data-id"),
+                    id: currentViewID,
                     avID: options.blockElement.getAttribute("data-av-id"),
                 }]);
                 options.menuElement.remove();

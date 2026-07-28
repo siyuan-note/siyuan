@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "使用默认垂直对齐",
+  "useDefaultHorizontalAlign": "使用默认水平对齐",
+  "alignBottom": "底部对齐",
+  "alignMiddle": "垂直居中",
+  "alignTop": "顶部对齐",
+  "focusBreadcrumb": "聚焦面包屑",
+  "tableRectangleSelectionRequired": "需要矩形选区",
   "updateChannel": "更新通道",
   "updateChannelTip": "Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收全部版本。测试通道需要能够访问 GitHub",
   "updateChannelStable": "正式版",

@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "Usar alineación vertical predeterminada",
+  "useDefaultHorizontalAlign": "Usar alineación horizontal predeterminada",
+  "alignBottom": "Alinear abajo",
+  "alignMiddle": "Centrar verticalmente",
+  "alignTop": "Alinear arriba",
+  "focusBreadcrumb": "Enfocar ruta de navegación",
+  "tableRectangleSelectionRequired": "Requiere una selección rectangular",
   "updateChannel": "Canal de actualización",
   "updateChannelTip": "El canal Beta recibe versiones estables, RC y Beta; el canal Alpha recibe todas las versiones. Los canales de prueba requieren acceso a GitHub",
   "updateChannelStable": "Estable",

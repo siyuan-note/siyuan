@@ -17,7 +17,14 @@ import {
 } from "./cell";
 import {addCol, getColIconByType, getColNameByType, showColMenu} from "./col";
 import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHeader} from "./row";
-import {getAVPrimaryCell, getAVSelectedItems, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
+import {
+    getAVPrimaryCell,
+    getAVSelectedItemInfos,
+    getAVSelectedItemPoints,
+    getAVSelectedItems,
+    resetAVRowSelect,
+    updateAVRowSelect
+} from "./virtualScroll";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
@@ -30,6 +37,7 @@ import {openCalcMenu} from "./calc";
 import {avRender, getGroupFoldTip} from "./render";
 import {addView, openViewMenu} from "./view";
 import {isOnlyMeta, writeText} from "../../util/compatibility";
+import {selectAVItemRange, setAVItemAnchor} from "./rangeSelect";
 import {openSearchAV} from "./relation";
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
@@ -50,15 +58,16 @@ import {
     resetCardCoverPosition,
     startCardCoverPosition
 } from "./coverPosition";
-import {getEditableAVFields, openAVFieldEditor} from "./batchEdit";
+import {getEditableAVFields, openAVFieldEditor, updateAVFieldValue} from "./batchEdit";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
+import {isMobile} from "../../../util/functions";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
 };
 
-const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement: HTMLElement) => {
-    const cellElement = rowElement.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
+const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement?: HTMLElement, itemID = rowElement?.dataset.id) => {
+    const cellElement = rowElement?.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
     if (cellElement) {
         const value = genCellValueByElement("block", cellElement);
         return {
@@ -71,7 +80,7 @@ const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement: HTMLElement) =
             isDetached: isDetachedDatabaseCell(cellElement),
         };
     }
-    const cell = getAVPrimaryCell(blockElement, rowElement.dataset.id);
+    const cell = getAVPrimaryCell(blockElement, itemID);
     if (!cell?.value) {
         return;
     }
@@ -85,7 +94,7 @@ const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement: HTMLElement) =
     };
 };
 
-const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowElement: HTMLElement,
+const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowID: string,
                            primaryInfo: NonNullable<ReturnType<typeof getPrimaryRowInfo>>) => {
     if (primaryInfo.cellElement) {
         updateCellsValue(protyle, blockElement, {content: primaryInfo.content}, [primaryInfo.cellElement]);
@@ -108,7 +117,7 @@ const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowElem
         id: primaryInfo.valueID,
         avID: blockElement.dataset.avId,
         keyID: primaryInfo.fieldID,
-        rowID: rowElement.dataset.id,
+        rowID,
         data: value,
     }, {
         action: "doUpdateUpdated",
@@ -119,7 +128,7 @@ const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowElem
         id: primaryInfo.valueID,
         avID: blockElement.dataset.avId,
         keyID: primaryInfo.fieldID,
-        rowID: rowElement.dataset.id,
+        rowID,
         data: primaryInfo.value,
     }, {
         action: "doUpdateUpdated",
@@ -170,6 +179,85 @@ const setGroupFolded = (foldElement: HTMLElement, folded: boolean) => {
     foldElement.setAttribute("aria-label", getGroupFoldTip(folded));
 };
 
+const getAVEditFieldMenuItems = (protyle: IProtyle, blockElement: HTMLElement): IMenu[] => {
+    return getEditableAVFields(blockElement).map(field => {
+        const item: IMenu = {
+            iconHTML: field.icon ? unicode2Emoji(field.icon, "b3-menu__icon", true) :
+                `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(field.type)}"></use></svg>`,
+            label: escapeHtml(field.name || getColNameByType(field.type)),
+        };
+        if (field.type === "checkbox") {
+            item.type = "submenu";
+            item.submenu = [{
+                iconHTML: "",
+                label: window.siyuan.languages.checked,
+                click(element) {
+                    updateAVFieldValue({
+                        protyle,
+                        blockElement,
+                        field,
+                        anchorElement: element,
+                        value: {checked: true},
+                    });
+                }
+            }, {
+                iconHTML: "",
+                label: window.siyuan.languages.unchecked,
+                click(element) {
+                    updateAVFieldValue({
+                        protyle,
+                        blockElement,
+                        field,
+                        anchorElement: element,
+                        value: {checked: false},
+                    });
+                }
+            }];
+        } else if (["mSelect", "mAsset", "relation"].includes(field.type)) {
+            item.type = "submenu";
+            item.submenu = [{
+                iconHTML: "",
+                label: window.siyuan.languages.addAttr,
+                click(element) {
+                    openAVFieldEditor({protyle, blockElement, field, anchorElement: element, mode: "add"});
+                    return true;
+                }
+            }, {
+                iconHTML: "",
+                label: window.siyuan.languages.remove,
+                click(element) {
+                    openAVFieldEditor({protyle, blockElement, field, anchorElement: element, mode: "remove"});
+                    return true;
+                }
+            }, {
+                iconHTML: "",
+                label: window.siyuan.languages.replace,
+                click(element) {
+                    openAVFieldEditor({protyle, blockElement, field, anchorElement: element, mode: "replace"});
+                    return true;
+                }
+            }];
+        } else {
+            item.click = (element) => {
+                openAVFieldEditor({protyle, blockElement, field, anchorElement: element});
+                return true;
+            };
+        }
+        return item;
+    });
+};
+
+const openAVEditFieldMenu = (protyle: IProtyle, blockElement: HTMLElement, anchorElement: HTMLElement) => {
+    const menu = new Menu();
+    getAVEditFieldMenuItems(protyle, blockElement).forEach(item => menu.addItem(item));
+    if (isMobile()) {
+        menu.fullscreen();
+    } else {
+        const rect = anchorElement.getBoundingClientRect();
+        menu.open({x: rect.left, y: rect.bottom, w: rect.width, h: rect.height});
+    }
+};
+
 let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
@@ -192,7 +280,31 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     let target = event.target;
     while (target && !target.isEqualNode(blockElement)) {
         const type = target.getAttribute("data-type");
-        if (type === "av-header-add" && !protyle.disabled) {
+        if (type === "av-selection-edit" && !protyle.disabled) {
+            openAVEditFieldMenu(protyle, blockElement as HTMLElement, target);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-selection-delete" && !protyle.disabled) {
+            deleteRow(blockElement as HTMLElement, protyle);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-selection-more") {
+            const rect = target.getBoundingClientRect();
+            avContextmenu(protyle, undefined, {
+                x: rect.left,
+                y: rect.bottom,
+                w: rect.width,
+                h: rect.height,
+            }, {
+                blockElement: blockElement as HTMLElement,
+                anchorElement: target,
+            });
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-header-add" && !protyle.disabled) {
             const addMenu = addCol(protyle, blockElement);
             const addRect = target.getBoundingClientRect();
             addMenu.open({
@@ -360,7 +472,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                         return;
                     }
                     if (cellType === "updated" || cellType === "created" || cellType === "lineNumber") {
-                        selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+                        if (isMobile()) {
+                            selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+                        } else {
+                            clearSelect(["row"], blockElement);
+                        }
                     } else {
                         scrollElement.querySelectorAll(".av__row--select").forEach(item => {
                             item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
@@ -495,7 +611,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (target.classList.contains("av__firstcol")) {
             window.siyuan.menus.menu.remove();
-            selectRow(target, "toggle");
+            const rowElement = hasClosestByClassName(target, "av__row") as HTMLElement;
+            if (!isMobile() && event.shiftKey) {
+                selectAVItemRange(blockElement, rowElement);
+            } else {
+                selectRow(target, "toggle");
+                setAVItemAnchor(blockElement, rowElement);
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -503,6 +625,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});
             } else if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+                clearSelect(["row", "galleryItem"], blockElement);
                 blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
                 blockElement.removeAttribute("data-render");
                 if (target.dataset.page) {
@@ -512,6 +635,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 }
                 avRender(blockElement, protyle);
             } else {
+                clearSelect(["row", "galleryItem"], blockElement);
                 transaction(protyle, [{
                     action: "setAttrViewBlockView",
                     blockID: blockElement.getAttribute("data-node-id"),
@@ -538,7 +662,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (target.classList.contains("av__row") && event.shiftKey && !target.classList.contains("av__row--header")) {
-            selectRow(target.querySelector(".av__firstcol"), "toggle");
+            if (isMobile()) {
+                selectRow(target.querySelector(".av__firstcol"), "toggle");
+            } else {
+                selectAVItemRange(blockElement, target);
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -574,17 +702,20 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     return false;
 };
 
-export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, position: IPosition) => {
+export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undefined, position: IPosition, options?: {
+    blockElement?: HTMLElement;
+    anchorElement?: HTMLElement;
+}) => {
     hideElements(["hint"], protyle);
-    if (rowElement.classList.contains("av__row--header")) {
+    if (rowElement?.classList.contains("av__row--header")) {
         return false;
     }
-    const blockElement = hasClosestBlock(rowElement);
+    const blockElement = options?.blockElement || (rowElement ? hasClosestBlock(rowElement) : undefined);
     if (!blockElement) {
         return false;
     }
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
-    if (avType === "table") {
+    if (rowElement && avType === "table") {
         if (!rowElement.classList.contains("av__row--select")) {
             clearSelect(["row"], blockElement);
         }
@@ -597,7 +728,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             updateAVRowSelect(bodyElement, rowId, true);
         }
         updateHeader(rowElement);
-    } else {
+    } else if (rowElement) {
         if (!rowElement.classList.contains("av__gallery-item--select")) {
             clearSelect(["galleryItem"], blockElement);
         }
@@ -609,17 +740,27 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         }
         updateHeader(rowElement);
     }
+    if (rowElement) {
+        setAVItemAnchor(blockElement as HTMLElement, rowElement);
+    }
+    const anchorElement = options?.anchorElement || rowElement;
+    if (!anchorElement) {
+        return false;
+    }
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
+    const selectedItemInfos = getAVSelectedItemInfos(blockElement);
     const selectedItems = getAVSelectedItems(blockElement);
-    const primaryRows = Array.from(rowElements)
-        .map(item => getPrimaryRowInfo(blockElement, item as HTMLElement))
+    const primaryRows = selectedItemInfos
+        .map(item => getPrimaryRowInfo(blockElement,
+            blockElement.querySelector(`.av__row[data-id="${item.itemID}"], .av__gallery-item[data-id="${item.itemID}"]`) as HTMLElement,
+            item.itemID))
         .filter((item): item is NonNullable<ReturnType<typeof getPrimaryRowInfo>> => Boolean(item));
-    if (primaryRows.length !== rowElements.length) {
+    if (primaryRows.length !== selectedItemInfos.length) {
         return false;
     }
     const ids = primaryRows.map(item => item.blockID);
-    if (rowElements.length === 1 && !primaryRows[0].isDetached) {
+    if (selectedItemInfos.length === 1 && !primaryRows[0].isDetached) {
         /// #if !MOBILE
         const blockId = ids[0];
         const openSubmenus = openEditorTab(protyle.app, [blockId], undefined, undefined, true);
@@ -655,7 +796,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         click() {
             let text = "";
             primaryRows.forEach((item, i) => {
-                if (rowElements.length > 1) {
+                if (selectedItemInfos.length > 1) {
                     text += "- ";
                 }
                 text += item.content.trim();
@@ -673,14 +814,13 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             const databaseBlockID = blockElement.dataset.nodeId;
             const viewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
                 blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") || "";
-            const links = Array.from(rowElements).map((item: HTMLElement) => {
+            const links = selectedItemInfos.map(item => {
                 const params = new URLSearchParams({
                     avViewID: viewID,
-                    avItemID: item.dataset.id,
+                    avItemID: item.itemID,
                 });
-                const groupID = (hasClosestByClassName(item, "av__body") as HTMLElement)?.dataset.groupId;
-                if (groupID) {
-                    params.set("avGroupID", groupID);
+                if (item.groupID) {
+                    params.set("avGroupID", item.groupID);
                 }
                 return `siyuan://blocks/${databaseBlockID}?${params.toString()}`;
             });
@@ -842,7 +982,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         iconHTML: "",
         label: window.siyuan.languages.duplicate,
         click: () => {
-            duplicateRows(blockElement, protyle, rowElements);
+            duplicateRows(blockElement, protyle, selectedItemInfos.map(item => item.itemID));
         }
     });
 
@@ -890,44 +1030,49 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             label: window.siyuan.languages.addToDatabase,
             icon: "iconDatabase",
             click() {
-                openSearchAV(blockElement.getAttribute("data-av-id"), rowElements[0] as HTMLElement, (listItemElement) => {
-                    const srcs: IOperationSrcs[] = [];
-                    const sourceIds: string[] = [];
-                    rowElements.forEach((item, index) => {
-                        const rowId = item.getAttribute("data-id");
-                        const primaryInfo = primaryRows[index];
-                        srcs.push({
-                            itemID: Lute.NewNodeID(),
-                            content: primaryInfo.content,
-                            id: primaryInfo.blockID,
-                            isDetached: primaryInfo.isDetached,
+                openSearchAV({
+                    avID: blockElement.getAttribute("data-av-id"),
+                    target: anchorElement,
+                    purpose: "addToDatabase",
+                    blockID: blockElement.getAttribute("data-node-id"),
+                    callback: (listItemElement) => {
+                        const srcs: IOperationSrcs[] = [];
+                        const sourceIds: string[] = [];
+                        selectedItemInfos.forEach((item, index) => {
+                            const primaryInfo = primaryRows[index];
+                            srcs.push({
+                                itemID: Lute.NewNodeID(),
+                                content: primaryInfo.content,
+                                id: primaryInfo.blockID,
+                                isDetached: primaryInfo.isDetached,
+                            });
+                            sourceIds.push(item.itemID);
                         });
-                        sourceIds.push(rowId);
-                    });
-                    const avID = listItemElement.dataset.avId;
-                    const viewID = listItemElement.dataset.viewId;
-                    transaction(protyle, [{
-                        action: "insertAttrViewBlock",
-                        ignoreDefaultFill: viewID ? false : true,
-                        viewID,
-                        avID,
-                        srcs,
-                        context: {ignoreTip: "true"},
-                        blockID: listItemElement.dataset.blockId,
-                        groupID: rowElement.parentElement.getAttribute("data-group-id")
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: listItemElement.dataset.blockId,
-                        data: dayjs().format("YYYYMMDDHHmmss"),
-                    }], [{
-                        action: "removeAttrViewBlock",
-                        srcIDs: sourceIds,
-                        avID,
-                    }]);
-                }, true, blockElement.getAttribute("data-node-id"));
+                        const avID = listItemElement.dataset.avId;
+                        const viewID = listItemElement.dataset.viewId;
+                        transaction(protyle, [{
+                            action: "insertAttrViewBlock",
+                            ignoreDefaultFill: viewID ? false : true,
+                            viewID,
+                            avID,
+                            srcs,
+                            context: {ignoreTip: "true"},
+                            blockID: listItemElement.dataset.blockId,
+                            groupID: selectedItemInfos[0].groupID
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: listItemElement.dataset.blockId,
+                            data: dayjs().format("YYYYMMDDHHmmss"),
+                        }], [{
+                            action: "removeAttrViewBlock",
+                            srcIDs: sourceIds,
+                            avID,
+                        }]);
+                    }
+                });
             }
         });
-        if (rowElements.length === 1) {
+        if (selectedItemInfos.length === 1) {
             if (!primaryRows[0].isDetached) {
                 menu.addSeparator({id: "separator_1"});
             }
@@ -947,8 +1092,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                             blockElement,
                             protyle,
                             count: parseInt(inputElement.value),
-                            previousID: rowElements[0].previousElementSibling?.getAttribute("data-id"),
-                            groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                            previousID: selectedItemInfos[0].previousID,
+                            groupID: selectedItemInfos[0].groupID
                         });
                         menu.close();
                     });
@@ -958,8 +1103,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                                 blockElement,
                                 protyle,
                                 count: parseInt(inputElement.value),
-                                previousID: rowElements[0].previousElementSibling?.getAttribute("data-id"),
-                                groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                                previousID: selectedItemInfos[0].previousID,
+                                groupID: selectedItemInfos[0].groupID
                             });
                             menu.close();
                         }
@@ -982,8 +1127,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                             blockElement,
                             protyle,
                             count: parseInt(inputElement.value),
-                            previousID: rowElements[0].getAttribute("data-id"),
-                            groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                            previousID: selectedItemInfos[0].itemID,
+                            groupID: selectedItemInfos[0].groupID
                         });
                         menu.close();
                     });
@@ -993,8 +1138,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                                 blockElement,
                                 protyle,
                                 count: parseInt(inputElement.value),
-                                previousID: rowElements[0].getAttribute("data-id"),
-                                groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                                previousID: selectedItemInfos[0].itemID,
+                                groupID: selectedItemInfos[0].groupID
                             });
                             menu.close();
                         }
@@ -1011,7 +1156,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                         unbindDatabaseRow(
                             protyle,
                             blockElement,
-                            rowElements[0] as HTMLElement,
+                            selectedItemInfos[0].itemID,
                             primaryRows[0]
                         );
                     }
@@ -1026,29 +1171,12 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                 deleteRow(blockElement, protyle);
             }
         });
-        const editAttrSubmenu: IMenu[] = [];
-        getEditableAVFields(blockElement).forEach((field) => {
-            editAttrSubmenu.push({
-                iconHTML: field.icon ? unicode2Emoji(field.icon, "b3-menu__icon", true) :
-                    `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(field.type)}"></use></svg>`,
-                label: escapeHtml(field.name || getColNameByType(field.type)),
-                click(element) {
-                    openAVFieldEditor({
-                        protyle,
-                        blockElement,
-                        field,
-                        anchorElement: element,
-                    });
-                    return true;
-                }
-            });
-        });
         menu.addItem({
             id: "fields",
             icon: "iconAttr",
             label: window.siyuan.languages.editFields,
             type: "submenu",
-            submenu: editAttrSubmenu
+            submenu: getAVEditFieldMenuItems(protyle, blockElement)
         });
     }
     if (protyle?.app?.plugins) {
@@ -1059,6 +1187,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                 protyle,
                 element: blockElement,
                 selectRowElements: rowElements,
+                selectRowIds: selectedItemInfos.map(item => item.itemID),
+                selectRowPoints: getAVSelectedItemPoints(blockElement),
             },
             separatorPosition: "top",
         });

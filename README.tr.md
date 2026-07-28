@@ -67,13 +67,11 @@
 SiYuan, gizliliği ön planda tutan kişisel bir bilgi yönetim sistemidir.  
 Blok düzeyinde referansları ve Markdown WYSIWYG düzenlemeyi destekler.
 
-Daha fazla bilgi için [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)’na katılabilirsin.
+![feature0.png](screenshots/feature0.png)
 
-Çevrimiçi kullanıcı rehberi: [English](https://siyuan-en.b3log.org/)
+![feature5-1.png](screenshots/feature5-1.png)
 
-![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
-
-![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
+Daha fazla bilgi için [çevrimiçi kullanıcı rehberini](https://siyuan-en.b3log.org/) inceleyebilir veya [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)’na katılabilirsin.
 
 ## 🔮 Özellikler
 
@@ -115,7 +113,7 @@ Bazı özellikler yalnızca ücretli üyeler için geçerlidir. Detaylar için [
 
 ## 🏗️ Mimari ve Ekosistem
 
-![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
 
 | Proje                                                    | Açıklama              | Çatallama (Forks)                                                              | Yıldız (Stars)                                                                     |
 |----------------------------------------------------------|-----------------------|--------------------------------------------------------------------------------|------------------------------------------------------------------------------------|

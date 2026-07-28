@@ -18,12 +18,12 @@ package conf
 
 import "testing"
 
-func TestNewFileTreeEnablesBoxDoc(t *testing.T) {
+func TestNewFileTreeDisablesBoxDoc(t *testing.T) {
 	fileTree := NewFileTree()
 	if nil == fileTree.BoxDocEnabled {
 		t.Fatal("box document setting should be initialized")
 	}
-	if !*fileTree.BoxDocEnabled {
-		t.Fatal("box documents should be enabled for new users")
+	if *fileTree.BoxDocEnabled {
+		t.Fatal("box documents should be disabled for new users")
 	}
 }

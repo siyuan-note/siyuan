@@ -41,6 +41,12 @@ linux:
     - target: "rpm"
       arch: "arm64"
 
+rpm:
+  # 避免与包含相同 Electron 二进制文件的 RPM 包产生 build-id 链接冲突
+  fpm:
+    - "--rpm-rpmbuild-define"
+    - "_build_id_links none"
+
 extraResources:
   - from: "changelogs"
     to: "changelogs"

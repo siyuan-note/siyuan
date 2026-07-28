@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "डिफ़ॉल्ट लंबवत संरेखण का उपयोग करें",
+  "useDefaultHorizontalAlign": "डिफ़ॉल्ट क्षैतिज संरेखण का उपयोग करें",
+  "alignBottom": "नीचे संरेखित करें",
+  "alignMiddle": "लंबवत केंद्रित करें",
+  "alignTop": "ऊपर संरेखित करें",
+  "focusBreadcrumb": "ब्रेडक्रंब पर फ़ोकस करें",
+  "tableRectangleSelectionRequired": "आयताकार चयन आवश्यक है",
   "updateChannel": "अपडेट चैनल",
   "updateChannelTip": "Beta चैनल को स्थिर, RC और Beta रिलीज़ मिलते हैं; Alpha चैनल को सभी रिलीज़ मिलते हैं। परीक्षण चैनलों के लिए GitHub तक पहुंच आवश्यक है",
   "updateChannelStable": "स्थिर",

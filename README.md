@@ -67,13 +67,11 @@
 SiYuan is a privacy-first personal knowledge management system, supporting fine-grained block-level reference and Markdown
 WYSIWYG.
 
-Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
+![feature0.png](screenshots/feature0.png)
 
-Online user guide: [English](https://siyuan-en.b3log.org/)
+![feature5-1.png](screenshots/feature5-1.png)
 
-![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
-
-![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
+To learn more, read the [online user guide](https://siyuan-en.b3log.org/) or join the [SiYuan English Discussion Forum](https://liuyun.io).
 
 ## 🔮 Features
 
@@ -115,7 +113,7 @@ Some features are only available to paid members, for more details please refer 
 
 ## 🏗️ Architecture and Ecosystem
 
-![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
 
 | Project                                                  | Description           | Forks                                                                           | Stars                                                                                | 
 |----------------------------------------------------------|-----------------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|

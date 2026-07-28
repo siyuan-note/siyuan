@@ -1,5 +1,6 @@
 import {Constants} from "../../../constants";
 import {getRowHTML} from "./row";
+import {IAVSelectedCell, reconcileAVSelectedItemIDs, restoreAVCellSelection} from "./selectionState";
 
 const BUFFER_RATIO = 1;
 
@@ -117,18 +118,20 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         }
         // 给回填的行恢复选中态：遍历 body 内现存数据行，命中 selectedRowIds 的补回高亮类与选中图标。
         const restoreSelect = () => {
-            if (state.selectedRowIds.size === 0) {
-                return;
-            }
-            bodyEl.querySelectorAll(type === "table" ? ".av__row[data-id]" : ".av__gallery-item[data-id]").forEach((row: HTMLElement) => {
-                if (state.selectedRowIds.has(row.getAttribute("data-id"))) {
-                    row.classList.add(type === "table" ? "av__row--select" : "av__gallery-item--select");
-                    const use = row.querySelector(".av__firstcol use") as SVGUseElement;
-                    if (use) {
-                        use.setAttribute("xlink:href", "#iconCheck");
+            if (state.selectedRowIds.size > 0) {
+                bodyEl.querySelectorAll(type === "table" ? ".av__row[data-id]" : ".av__gallery-item[data-id]").forEach((row: HTMLElement) => {
+                    if (state.selectedRowIds.has(row.getAttribute("data-id"))) {
+                        row.classList.add(type === "table" ? "av__row--select" : "av__gallery-item--select");
+                        const use = row.querySelector(".av__firstcol use") as SVGUseElement;
+                        if (use) {
+                            use.setAttribute("xlink:href", "#iconCheck");
+                        }
                     }
-                }
-            });
+                });
+            }
+            if (type === "table") {
+                restoreAVCellSelection(blockElement);
+            }
         };
         let firstVisibleIndex: number;
         let lastVisibleIndex: number;
@@ -498,28 +501,97 @@ export const getAVData = (blockElement: HTMLElement) => {
     return blockDataStore.get(blockElement);
 };
 
-export const getAVPrimaryCell = (blockElement: HTMLElement, itemID: string) => {
+export interface IAVItemInfo {
+    itemID: string;
+    groupID: string;
+    previousID: string;
+    item: IAVRow | IAVGalleryItem;
+    primaryCell?: IAVCell;
+}
+
+export interface IAVItemPoint {
+    itemID: string;
+    groupID: string;
+}
+
+const getAVItemPointKey = (item: IAVItemPoint) => `${item.groupID}:${item.itemID}`;
+
+export const getAVSelectedItemPoints = (blockElement: HTMLElement): IAVItemPoint[] => {
+    const points: IAVItemPoint[] = [];
+    blockElement.querySelectorAll<HTMLElement>(".av__body").forEach(bodyElement => {
+        if (bodyElement.closest(".av") !== blockElement) {
+            return;
+        }
+        const groupID = bodyElement.dataset.groupId || "";
+        const state = bodyStates.get(bodyElement);
+        if (state?.selectedRowIds) {
+            state.selectedRowIds.forEach(itemID => points.push({itemID, groupID}));
+            return;
+        }
+        bodyElement.querySelectorAll<HTMLElement>(
+            ".av__row--select:not(.av__row--header), .av__gallery-item--select").forEach(item => {
+            if (item.dataset.id) {
+                points.push({itemID: item.dataset.id, groupID});
+            }
+        });
+    });
+    return points;
+};
+
+export const getAVLoadedItemInfos = (blockElement: HTMLElement, visibleOnly = false): IAVItemInfo[] => {
     const data = blockDataStore.get(blockElement);
-    if (!data || !itemID) {
-        return;
+    if (!data) {
+        return [];
     }
-    let primaryCell: IAVCell;
-    const findPrimaryCell = (view: IAVView) => {
+    const infos: IAVItemInfo[] = [];
+    const collect = (view: IAVView, groupID = "") => {
         if (view.groups?.length > 0) {
-            return view.groups.some(findPrimaryCell);
+            view.groups.forEach(group => {
+                if (visibleOnly) {
+                    const bodyElement = blockElement.querySelector<HTMLElement>(
+                        `.av__body[data-group-id="${group.id}"]`);
+                    if (!bodyElement || bodyElement.classList.contains("fn__none")) {
+                        return;
+                    }
+                } else if (group.groupHidden !== 0) {
+                    return;
+                }
+                collect(group, group.id);
+            });
+            return;
         }
         const items: Array<IAVRow | IAVGalleryItem> =
             (view as IAVTable).rows || (view as IAVGallery).cards || [];
-        const item = items.find((row: IAVRow | IAVGalleryItem) => row.id === itemID);
-        if (!item) {
+        items.forEach((item, index) => {
+            const cells = "cells" in item ? item.cells : item.values;
+            infos.push({
+                itemID: item.id,
+                groupID,
+                previousID: items[index - 1]?.id || "",
+                item,
+                primaryCell: cells.find(cell =>
+                    cell.valueType === "block" || cell.value?.type === "block"),
+            });
+        });
+    };
+    collect(data.view);
+    return infos;
+};
+
+export const getAVSelectedItemInfos = (blockElement: HTMLElement) => {
+    const selectedKeys = new Set(getAVSelectedItemPoints(blockElement).map(getAVItemPointKey));
+    const selectedIDs = new Set<string>();
+    return getAVLoadedItemInfos(blockElement).filter(item => {
+        if (!selectedKeys.has(getAVItemPointKey(item)) || selectedIDs.has(item.itemID)) {
             return false;
         }
-        const cells = "cells" in item ? item.cells : item.values;
-        primaryCell = cells.find((cell: IAVCell) => cell.valueType === "block" || cell.value?.type === "block");
+        selectedIDs.add(item.itemID);
         return true;
-    };
-    findPrimaryCell(data.view);
-    return primaryCell;
+    });
+};
+
+export const getAVPrimaryCell = (blockElement: HTMLElement, itemID: string) => {
+    return getAVLoadedItemInfos(blockElement).find(item => item.itemID === itemID)?.primaryCell;
 };
 
 export const setAVData = (blockElement: HTMLElement, data: IAV) => {
@@ -527,19 +599,7 @@ export const setAVData = (blockElement: HTMLElement, data: IAV) => {
 };
 
 export const getAVSelectedItemIDs = (blockElement: HTMLElement) => {
-    const selectedIDs = new Set<string>();
-    blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
-        const state = bodyStates.get(bodyElement);
-        if (state?.selectedRowIds) {
-            state.selectedRowIds.forEach((itemID) => selectedIDs.add(itemID));
-        } else {
-            bodyElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select").forEach((item: HTMLElement) => {
-                if (item.dataset.id) {
-                    selectedIDs.add(item.dataset.id);
-                }
-            });
-        }
-    });
+    const selectedIDs = new Set(getAVSelectedItemPoints(blockElement).map(item => item.itemID));
     const data = blockDataStore.get(blockElement);
     if (!data) {
         return Array.from(selectedIDs);
@@ -560,6 +620,61 @@ export const getAVSelectedItemIDs = (blockElement: HTMLElement) => {
     };
     collectIDs(data.view);
     return orderedIDs;
+};
+
+export const getAVSelectedTableCells = (blockElement: HTMLElement): IAVSelectedCell[] => {
+    if (blockElement.dataset.avType !== "table") {
+        return [];
+    }
+    const selectedKeys = new Set(getAVSelectedItemPoints(blockElement).map(getAVItemPointKey));
+    const selectedIDs = new Set<string>();
+    const cells: IAVSelectedCell[] = [];
+    const data = blockDataStore.get(blockElement);
+    const findView = (view: IAVView, groupID: string): IAVView | undefined => {
+        if ((!groupID && !view.groups?.length) || view.id === groupID) {
+            return view;
+        }
+        for (const group of view.groups || []) {
+            const result = findView(group, groupID);
+            if (result) {
+                return result;
+            }
+        }
+    };
+    getAVLoadedItemInfos(blockElement).forEach(info => {
+        if (!selectedKeys.has(getAVItemPointKey(info)) || selectedIDs.has(info.itemID) ||
+            !("cells" in info.item)) {
+            return;
+        }
+        selectedIDs.add(info.itemID);
+        const table = data ? findView(data.view, info.groupID) as IAVTable : undefined;
+        const rowIndex = table?.rows?.findIndex(row => row.id === info.itemID);
+        if (typeof rowIndex !== "number" || rowIndex < 0) {
+            return;
+        }
+        const visibleColumns = table?.columns?.filter(column => !column.hidden) || [];
+        const sourceColIndexes = new Map(table.columns.map((column, index) => [column.id, index]));
+        const row = info.item as IAVRow;
+        visibleColumns.forEach((column, colIndex) => {
+            const sourceColIndex = sourceColIndexes.get(column.id);
+            if (typeof sourceColIndex !== "number") {
+                return;
+            }
+            const cell = row.cells[sourceColIndex];
+            if (cell) {
+                cells.push({
+                    groupID: info.groupID,
+                    rowID: info.itemID,
+                    colID: column.id,
+                    rowIndex,
+                    colIndex,
+                    cell,
+                    column,
+                });
+            }
+        });
+    });
+    return cells;
 };
 
 export const trimAVRows = (blockElement: HTMLElement, elementRect: DOMRect): void => {
@@ -586,6 +701,7 @@ export const initVirtualScroll = (options: {
     protyle: IProtyle,
     blockElement: HTMLElement,
     data: IAV,
+    selectedItemPoints?: IAVItemPoint[],
 }): void => {
     setAVData(options.blockElement, options.data);
     if (options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
@@ -604,11 +720,31 @@ export const initVirtualScroll = (options: {
             return;
         }
         // 从现存 DOM 初始化选中行 ID 快照，重渲后保留选中态
-        const selectedRowIds = new Set<string>();
+        const selectedRowCandidates = new Set<string>();
         item.querySelectorAll(options.data.viewType === "table" ? ".av__row--select" : ".av__gallery-item--select").forEach((row: HTMLElement) => {
             const id = row.getAttribute("data-id");
             if (id) {
-                selectedRowIds.add(id);
+                selectedRowCandidates.add(id);
+            }
+        });
+        options.selectedItemPoints?.forEach(point => {
+            if (point.groupID === (item.dataset.groupId || "")) {
+                selectedRowCandidates.add(point.itemID);
+            }
+        });
+        const viewItems: Array<IAVRow | IAVGalleryItem> =
+            (view as IAVTable).rows || (view as IAVGallery).cards || [];
+        const selectedRowIds = reconcileAVSelectedItemIDs(
+            viewItems.map(viewItem => viewItem.id), selectedRowCandidates);
+        item.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]").forEach(row => {
+            if (!selectedRowIds.has(row.dataset.id)) {
+                return;
+            }
+            if (options.data.viewType === "table") {
+                row.classList.add("av__row--select");
+                row.querySelector(".av__firstcol use")?.setAttribute("xlink:href", "#iconCheck");
+            } else {
+                row.classList.add("av__gallery-item--select");
             }
         });
         if (options.data.viewType === "table") {

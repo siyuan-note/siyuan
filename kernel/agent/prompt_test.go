@@ -9,8 +9,14 @@
 package agent
 
 import (
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+
+	kernelConf "github.com/siyuan-note/siyuan/kernel/conf"
+	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestTurnContextStaysInUserMessage(t *testing.T) {
@@ -54,6 +60,31 @@ func TestSystemPromptSortsPluginActions(t *testing.T) {
 	}
 	if strings.Index(forward, actions[1].Name) > strings.Index(forward, actions[0].Name) {
 		t.Fatalf("plugin actions are not sorted in system prompt: %q", forward)
+	}
+}
+
+func TestSystemPromptUsesAppearanceLanguage(t *testing.T) {
+	originalConf := kernelModel.Conf
+	originalWorkingDir := util.WorkingDir
+	kernelModel.Conf = kernelModel.NewAppConf()
+	kernelModel.Conf.Appearance = kernelConf.NewAppearance()
+	kernelModel.Conf.Appearance.Lang = "zh-CN"
+	_, filename, _, _ := runtime.Caller(0)
+	util.WorkingDir = filepath.Join(filepath.Dir(filename), "..", "..", "app")
+	t.Cleanup(func() {
+		kernelModel.Conf = originalConf
+		util.WorkingDir = originalWorkingDir
+	})
+
+	prompt := buildSystemPrompt("en", nil)
+	if !strings.Contains(prompt, "Reply in the language configured in SiYuan's appearance settings.") {
+		t.Fatalf("appearance language instruction is missing from system prompt: %q", prompt)
+	}
+	if !strings.Contains(prompt, "Reply in 简体中文.") {
+		t.Fatalf("appearance language is missing from system prompt: %q", prompt)
+	}
+	if strings.Contains(prompt, "Reply in English.") {
+		t.Fatalf("request language leaked into system prompt: %q", prompt)
 	}
 }
 

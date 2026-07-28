@@ -705,6 +705,11 @@ interface IOperationSrcs {
     isDetached: boolean
 }
 
+interface IInsertAttrViewBlockRetData {
+    insertedItemIDs: string[];
+    existingItemIDs: string[];
+}
+
 interface IObject {
     [key: string]: string | number | boolean;
 }
@@ -958,6 +963,7 @@ interface IMenu {
     action?: string,
     id?: string,
     submenu?: IMenu[]
+    loadSubmenu?: () => Promise<IMenu[]>
     disabled?: boolean
     icon?: string
     iconHTML?: string

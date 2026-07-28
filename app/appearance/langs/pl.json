@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "Użyj domyślnego wyrównania w pionie",
+  "useDefaultHorizontalAlign": "Użyj domyślnego wyrównania w poziomie",
+  "alignBottom": "Wyrównaj do dołu",
+  "alignMiddle": "Wyśrodkuj w pionie",
+  "alignTop": "Wyrównaj do góry",
+  "focusBreadcrumb": "Ustaw fokus na ścieżce nawigacji",
+  "tableRectangleSelectionRequired": "Wymaga prostokątnego zaznaczenia",
   "updateChannel": "Kanał aktualizacji",
   "updateChannelTip": "Kanał Beta otrzymuje wydania stabilne, RC i Beta, a kanał Alpha wszystkie wydania. Kanały testowe wymagają dostępu do GitHub",
   "updateChannelStable": "Stabilny",

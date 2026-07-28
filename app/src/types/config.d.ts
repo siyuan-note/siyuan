@@ -1111,6 +1111,7 @@ declare namespace Config {
         copyText: IKey;
         duplicate: IKey;
         exitFocus: IKey;
+        focusBreadcrumb: IKey;
         expand: IKey;
         expandDown: IKey;
         expandUp: IKey;

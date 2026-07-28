@@ -285,6 +285,37 @@
     color: var(--b3-theme-on-surface-light);
     margin: 0 2px;
     flex-shrink: 0;
+
+    &--interactive {
+      align-items: center;
+      background-color: transparent;
+      border: 0;
+      border-radius: var(--b3-border-radius);
+      box-sizing: border-box;
+      color: var(--b3-theme-on-surface);
+      cursor: pointer;
+      display: flex;
+      height: 24px;
+      justify-content: center;
+      margin: 0;
+      padding: 5px;
+      width: 24px;
+
+      &:hover,
+      &:focus-visible {
+        background-color: var(--b3-list-hover);
+        color: var(--b3-theme-on-background);
+      }
+
+      &:focus-visible {
+        outline: 1px solid var(--b3-theme-primary);
+      }
+
+      svg {
+        height: 14px;
+        width: 14px;
+      }
+    }
   }
 
   &__text--ellipsis {
@@ -331,9 +362,14 @@
     }
 
     &:hover,
+    &:focus-visible,
     &--active {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-list-hover);
+    }
+
+    &:focus-visible {
+      outline: 1px solid var(--b3-theme-primary);
     }
   }
 }
@@ -683,5 +719,91 @@ table + .protyle-action__table {
     position: relative;
     transition: var(--b3-transition);
     z-index: 3;
+  }
+}
+
+.protyle-table-control {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+
+  &__handle,
+  &__add {
+    position: fixed;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 0;
+    color: var(--b3-theme-on-surface);
+    background-color: var(--b3-theme-background);
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+    box-shadow: var(--b3-point-shadow);
+    cursor: pointer;
+    pointer-events: auto;
+    transform: translate(-50%, -50%);
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    &:hover {
+      color: var(--b3-theme-primary);
+      background-color: var(--b3-list-hover);
+    }
+  }
+
+  &__handle {
+    width: 24px;
+    height: 24px;
+
+    &--row,
+    &--column {
+      cursor: grab;
+    }
+
+    &--drag-disabled {
+      cursor: pointer;
+    }
+
+    &--cell {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__add {
+    width: 24px;
+    height: 24px;
+  }
+
+  &__selection {
+    position: fixed;
+    z-index: 1;
+    box-sizing: border-box;
+    background-color: var(--b3-theme-primary-lightest);
+    border: 1px solid var(--b3-theme-primary);
+    pointer-events: none;
+  }
+
+  &__drop {
+    position: fixed;
+    z-index: 3;
+    background-color: var(--b3-theme-primary);
+    pointer-events: none;
+  }
+
+  &__color {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+    border: 1px solid var(--b3-border-color);
+    border-radius: 50%;
   }
 }

@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "Gunakan perataan vertikal bawaan",
+  "useDefaultHorizontalAlign": "Gunakan perataan horizontal bawaan",
+  "alignBottom": "Ratakan ke bawah",
+  "alignMiddle": "Tengahkan secara vertikal",
+  "alignTop": "Ratakan ke atas",
+  "focusBreadcrumb": "Fokuskan breadcrumb",
+  "tableRectangleSelectionRequired": "Memerlukan pilihan persegi panjang",
   "updateChannel": "Saluran pembaruan",
   "updateChannelTip": "Kanal Beta menerima rilis stabil, RC, dan Beta; kanal Alpha menerima semua rilis. Kanal pengujian memerlukan akses ke GitHub",
   "updateChannelStable": "Stabil",

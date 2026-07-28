@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "Použiť predvolené zvislé zarovnanie",
+  "useDefaultHorizontalAlign": "Použiť predvolené vodorovné zarovnanie",
+  "alignBottom": "Zarovnať nadol",
+  "alignMiddle": "Vertikálne vycentrovať",
+  "alignTop": "Zarovnať nahor",
+  "focusBreadcrumb": "Zamerať navigačnú cestu",
+  "tableRectangleSelectionRequired": "Vyžaduje obdĺžnikový výber",
   "updateChannel": "Aktualizačný kanál",
   "updateChannelTip": "Kanál Beta prijíma stabilné vydania, RC a Beta; kanál Alpha prijíma všetky vydania. Testovacie kanály vyžadujú prístup ku GitHubu",
   "updateChannelStable": "Stabilný",

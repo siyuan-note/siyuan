@@ -65,7 +65,10 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {emitOpenMenu} from "../../plugin/EventBus";
-import {insertAttrViewBlockAnimation, updateHeader} from "../render/av/row";
+import {insertAttrViewBlockAnimation, selectRow, updateHeader} from "../render/av/row";
+import {getAVSelectedItemPoints} from "../render/av/virtualScroll";
+import {setAVItemAnchor} from "../render/av/rangeSelect";
+import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
@@ -137,9 +140,9 @@ export class Gutter {
             }
             let selectIds: string[] = [];
             let selectElements: Element[] = [];
-            let avElement: Element;
+            let avElement: HTMLElement;
             if (buttonElement.dataset.rowId) {
-                avElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-node-id="${buttonElement.dataset.nodeId}"]`)).find((item: HTMLElement) => {
+                avElement = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(`.av[data-node-id="${buttonElement.dataset.nodeId}"]`)).find((item: HTMLElement) => {
                     if (!isInEmbedBlock(item) && !isInAVBlock(item)) {
                         return true;
                     }
@@ -158,18 +161,15 @@ export class Gutter {
                 }
                 const rowElement = avElement.querySelector(`.av__body${buttonElement.dataset.groupId ? `[data-group-id="${buttonElement.dataset.groupId}"]` : ""} .av__row[data-id="${buttonElement.dataset.rowId}"]`);
                 if (!rowElement.classList.contains("av__row--select")) {
-                    avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
-                        item.classList.remove("av__row--select");
-                        item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
-                    });
+                    clearSelect(["row"], avElement);
+                    selectRow(rowElement.querySelector(".av__firstcol"), "select");
+                    setAVItemAnchor(avElement, rowElement as HTMLElement);
                 }
-                rowElement.classList.add("av__row--select");
-                rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
                 updateHeader(rowElement as HTMLElement);
+                getAVSelectedItemPoints(avElement).forEach(item => {
+                    selectIds.push(item.itemID + (item.groupID ? "@" + item.groupID : ""));
+                });
                 avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
-                    const avBodyElement = hasClosestByClassName(item, "av__body") as HTMLElement;
-                    const groupId = (avBodyElement ? avBodyElement.dataset.groupId : "") || "";
-                    selectIds.push(item.getAttribute("data-id") + (groupId ? "@" + groupId : ""));
                     selectElements.push(item);
                 });
             } else {
@@ -397,6 +397,8 @@ export class Gutter {
                         }],
                         blockID: id,
                         groupID,
+                        viewID: getAVViewID(blockElement),
+                        context: getAVFilteredTipContext("target", protyle),
                     }, {
                         action: "doUpdateUpdated",
                         id,
@@ -2379,7 +2381,9 @@ export class Gutter {
             this.genWidths([nodeElement], protyle);
             // this.genHeights([nodeElement], protyle);
         }
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
+        if (type !== "NodeThematicBreak" || !protyle.disabled) {
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
+        }
         if (window.siyuan.config.cloudRegion === 0 &&
             !["NodeThematicBreak", "NodeBlockQueryEmbed", "NodeIFrame", "NodeHTMLBlock", "NodeWidget", "NodeVideo", "NodeAudio"].includes(type) &&
             getContenteditableElement(nodeElement)?.textContent.trim() !== "" &&

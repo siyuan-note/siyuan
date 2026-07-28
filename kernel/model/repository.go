@@ -1668,7 +1668,9 @@ func syncRepoDownload() (err error) {
 
 	logging.LogInfof("downloading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "d", true)
 	start := time.Now()
+	indexStart := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
+	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
@@ -1684,7 +1686,9 @@ func syncRepoDownload() (err error) {
 	beforeSyncPetals := getPetals()
 
 	syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	cloudStart := time.Now()
 	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
+	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
@@ -1714,7 +1718,10 @@ func syncRepoDownload() (err error) {
 	BootSyncSucc = 0
 
 	calcPetalDiff(beforeSyncPetals, mergeResult)
+	postProcessStart := time.Now()
 	processSyncMergeResult(false, true, mergeResult, trafficStat, "d", elapsed)
+	logging.LogInfof("download data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
+		indexElapsed.Seconds(), cloudElapsed.Seconds(), time.Since(postProcessStart).Seconds(), time.Since(start).Seconds())
 	return
 }
 
@@ -1742,7 +1749,9 @@ func syncRepoUpload() (err error) {
 
 	logging.LogInfof("uploading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "u", true)
 	start := time.Now()
+	indexStart := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
+	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
@@ -1756,7 +1765,9 @@ func syncRepoUpload() (err error) {
 	}
 
 	syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	cloudStart := time.Now()
 	trafficStat, err := repo.SyncUpload(syncContext)
+	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
@@ -1785,7 +1796,10 @@ func syncRepoUpload() (err error) {
 	autoSyncErrCount = 0
 	BootSyncSucc = 0
 
+	postProcessStart := time.Now()
 	processSyncMergeResult(false, true, &dejavu.MergeResult{}, trafficStat, "u", elapsed)
+	logging.LogInfof("upload data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
+		indexElapsed.Seconds(), cloudElapsed.Seconds(), time.Since(postProcessStart).Seconds(), time.Since(start).Seconds())
 	return
 }
 
@@ -1816,66 +1830,52 @@ func bootSyncRepo() (err error) {
 	}
 
 	isBootSyncing.Store(true)
+	bootStart := time.Now()
 
 	waitGroup := sync.WaitGroup{}
-	var errs []error
+	var beforeIndex, afterIndex *entity.Index
+	var indexElapsed time.Duration
+	var indexChangeGen uint64
+	var indexStable bool
+	var indexErr error
 	waitGroup.Go(func() {
 		defer logging.Recover()
 
+		indexStartChangeGen := syncDataChangeGen.Load()
 		start := time.Now()
-		_, _, indexErr := indexRepoBeforeCloudSync(repo)
-		if indexErr != nil {
-			errs = append(errs, indexErr)
-			autoSyncErrCount++
-			planSyncAfter(fixSyncInterval)
-
-			msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(indexErr))
-			Conf.Sync.Stat = msg
-			Conf.Save()
-			util.PushStatusBar(msg)
-			util.PushErrMsg(msg, 0)
-			BootSyncSucc = 1
-			isBootSyncing.Store(false)
-			return
-		}
-
-		logging.LogInfof("boot index repo elapsed [%.2fs]", time.Since(start).Seconds())
+		beforeIndex, afterIndex, indexErr = indexRepoBeforeCloudSync(repo)
+		indexElapsed = time.Since(start)
+		indexChangeGen = syncDataChangeGen.Load()
+		indexStable = indexStartChangeGen == indexChangeGen
+		logging.LogInfof("boot index repo elapsed [%.2fs]", indexElapsed.Seconds())
 	})
-	var fetchedFiles []*entity.File
+	var cloudLatest *entity.Index
+	var cloudLatestErr error
 	waitGroup.Go(func() {
 		defer logging.Recover()
 
 		start := time.Now()
 		syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-		cloudLatest, getErr := repo.GetCloudLatest(syncContext)
-		if nil != getErr {
-			errs = append(errs, getErr)
-			if !errors.Is(getErr, cloud.ErrCloudObjectNotFound) {
-				logging.LogErrorf("download cloud latest failed: %s", getErr)
-				return
-			}
-		}
-		fetchedFiles, getErr = repo.GetSyncCloudFiles(cloudLatest, syncContext)
-		if errors.Is(getErr, dejavu.ErrRepoFatal) {
-			errs = append(errs, getErr)
-			autoSyncErrCount++
-			planSyncAfter(fixSyncInterval)
-
-			msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(getErr))
-			Conf.Sync.Stat = msg
-			Conf.Save()
-			util.PushStatusBar(msg)
-			util.PushErrMsg(msg, 0)
-			BootSyncSucc = 1
-			isBootSyncing.Store(false)
-			return
+		cloudLatest, cloudLatestErr = repo.GetCloudLatest(syncContext)
+		if nil != cloudLatestErr && !errors.Is(cloudLatestErr, cloud.ErrCloudObjectNotFound) {
+			logging.LogErrorf("download cloud latest failed: %s", cloudLatestErr)
 		}
 
-		logging.LogInfof("boot get sync cloud files elapsed [%.2fs]", time.Since(start).Seconds())
+		logging.LogInfof("boot get cloud latest elapsed [%.2fs]", time.Since(start).Seconds())
 	})
 	waitGroup.Wait()
-	if 0 < len(errs) {
-		err = errs[0]
+	if nil != indexErr {
+		err = indexErr
+	} else if nil != cloudLatestErr && !errors.Is(cloudLatestErr, cloud.ErrCloudObjectNotFound) {
+		err = cloudLatestErr
+	}
+
+	var fetchedFiles []*entity.File
+	if nil == err {
+		start := time.Now()
+		syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+		fetchedFiles, err = repo.GetSyncCloudFiles(cloudLatest, syncContext)
+		logging.LogInfof("boot get sync cloud files elapsed [%.2fs]", time.Since(start).Seconds())
 	}
 
 	if err != nil {
@@ -1916,9 +1916,20 @@ func bootSyncRepo() (err error) {
 
 	if 0 < len(fetchedFiles) {
 		go func() {
-			_, syncErr := syncRepoWithDNSRetry(false, false)
-			isBootSyncing.Store(false)
-			if err != nil {
+			defer logging.Recover()
+			defer isBootSyncing.Store(false)
+
+			lockSync()
+			defer unlockSync()
+
+			logging.LogInfof("syncing prepared boot data repo [device=%s, kernel=%s, provider=%d]", Conf.System.ID, KernelID, Conf.Sync.Provider)
+			var syncErr error
+			if indexStable && indexChangeGen == syncDataChangeGen.Load() {
+				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, beforeIndex, afterIndex, bootStart, indexElapsed)
+			} else {
+				_, syncErr = syncRepoWithDNSRetry(false, false)
+			}
+			if syncErr != nil {
 				logging.LogErrorf("boot background sync repo failed: %s", syncErr)
 				return
 			}
@@ -1955,7 +1966,9 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 
 	logging.LogInfof("syncing data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "a", byHand)
 	start := time.Now()
+	indexStart := time.Now()
 	beforeIndex, afterIndex, err := indexRepoBeforeCloudSync(repo)
+	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -1974,10 +1987,21 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
+	dataChanged, err = syncIndexedRepo(repo, exit, byHand, beforeIndex, afterIndex, start, indexElapsed, false)
+	return
+}
+
+func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration, skipCloudPreflight bool) (dataChanged bool, err error) {
 	beforeSyncPetals := getPetals()
 
 	syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	if skipCloudPreflight {
+		// 启动同步已经读取过云端索引并预取了文件，锁内同步会再次校验最新版本。
+		syncContext["skipCloudPreflight"] = true
+	}
+	cloudStart := time.Now()
 	mergeResult, trafficStat, err := repo.Sync(syncContext)
+	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
 	if err != nil {
 		autoSyncErrCount++
@@ -2014,7 +2038,11 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	autoSyncErrCount = 0
 
 	calcPetalDiff(beforeSyncPetals, mergeResult)
+	postProcessStart := time.Now()
 	processSyncMergeResult(exit, byHand, mergeResult, trafficStat, "a", elapsed)
+	postProcessElapsed := time.Since(postProcessStart)
+	logging.LogInfof("sync data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
+		indexElapsed.Seconds(), cloudElapsed.Seconds(), postProcessElapsed.Seconds(), time.Since(start).Seconds())
 
 	if !exit {
 		go func() {
@@ -2023,6 +2051,14 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 			// 索引订正结束后执行数据仓库清理 Automatic purge for local data repo https://github.com/siyuan-note/siyuan/issues/13091
 			autoPurgeRepo(false)
 		}()
+	}
+	return
+}
+
+func syncIndexedRepoAfterBootWithDNSRetry(repo *dejavu.Repo, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration) (err error) {
+	_, err = syncIndexedRepo(repo, false, false, beforeIndex, afterIndex, start, indexElapsed, true)
+	if nil != err && flushAndRetryOnDNSError(err) {
+		_, err = syncRepo(false, false)
 	}
 	return
 }

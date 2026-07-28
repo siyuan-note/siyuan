@@ -23,26 +23,50 @@ interface IAVItem {
     avName: string;
     blockID: string;
     hPath: string;
+    matched?: boolean;
     viewName: string;
     viewID: string;
     viewLayout: string;
 }
 
+type TSearchAVPurpose = "addToDatabase" | "selectRelation";
+
+interface IOpenSearchAVOptions {
+    avID: string;
+    target: HTMLElement;
+    callback?: (element: HTMLElement) => void;
+    purpose: TSearchAVPurpose;
+    blockID?: string;
+}
+
 const RELATION_PAGE_SIZE = 16;
 
-const genSearchList = (element: Element, keyword: string, avId?: string, excludes = true, blockID?: string, cb?: () => void) => {
+const SEARCH_AV_LOADING_HTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">';
+
+const genSearchList = (element: Element, keyword: string, options: IOpenSearchAVOptions, signal: AbortSignal,
+                       cb?: () => void) => {
+    const showViews = options.purpose === "addToDatabase";
     fetchPost("/api/av/searchAttributeView", {
         keyword,
-        avID: avId,
-        blockID,
-        excludes: (excludes && avId) ? [avId] : undefined
+        avID: options.avID,
+        blockID: options.blockID,
+        excludes: (showViews && options.avID) ? [options.avID] : undefined,
+        includeViewMatches: showViews,
     }, (response) => {
         let html = "";
-        response.data.results.forEach((item: IAVItem & { children: IAVItem[] }, index: number) => {
-            const hasChildren = item.children && item.children.length > 0 && excludes;
-            html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-av-id="${item.avID}" data-block-id="${item.blockID}">
-    <span class="b3-list-item__toggle b3-list-item__toggle--hl${excludes ? "" : " fn__none"}" style="height:auto;align-self: stretch;margin: 4px 0;">
-        <svg class="b3-list-item__arrow">${hasChildren ? '<use xlink:href="#iconRight"></use>' : ""}</svg>
+        const results = response.data.results as Array<IAVItem & { children: IAVItem[] }>;
+        const hasMatchedView = showViews && results.some((item) => item.children?.some((subItem) => subItem.matched));
+        let focusAssigned = false;
+        results.forEach((item, index) => {
+            const hasChildren = item.children && item.children.length > 0 && showViews;
+            const expandChildren = hasChildren && item.children.some((subItem) => subItem.matched);
+            const focusParent = !hasMatchedView && index === 0;
+            if (focusParent) {
+                focusAssigned = true;
+            }
+            html += `<div class="b3-list-item b3-list-item--narrow${focusParent ? " b3-list-item--focus" : ""}" data-av-id="${item.avID}" data-block-id="${item.blockID}">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl${showViews ? "" : " fn__none"}" style="height:auto;align-self: stretch;margin: 4px 0;">
+        <svg class="b3-list-item__arrow${expandChildren ? " b3-list-item__arrow--open" : ""}">${hasChildren ? '<use xlink:href="#iconRight"></use>' : ""}</svg>
     </span>
     <span class="fn__space--small"></span>
     <div class="b3-list-item--two fn__flex-1">
@@ -51,13 +75,17 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
         </div>
         <div class="b3-list-item__meta b3-list-item__showall">${escapeLessThans(item.hPath)}</div>
     </div>
-    <svg aria-label="${window.siyuan.languages.thisDatabase}" style="margin: 0 0 0 4px" class="b3-list-item__hinticon ariaLabel${item.avID === avId ? "" : " fn__none"}"><use xlink:href="#iconInfo"></use></svg>
+    <svg aria-label="${window.siyuan.languages.thisDatabase}" style="margin: 0 0 0 4px" class="b3-list-item__hinticon ariaLabel${item.avID === options.avID ? "" : " fn__none"}"><use xlink:href="#iconInfo"></use></svg>
 </div>`;
             if (hasChildren) {
-                html += '<div class="fn__none">';
+                html += `<div class="${expandChildren ? "" : "fn__none"}">`;
                 item.children.forEach((subItem) => {
                     const viewDefaultName = getViewName(subItem.viewLayout);
-                    html += `<div style="padding-left: 48px;" class="b3-list-item b3-list-item--narrow" data-av-id="${subItem.avID}" data-view-id="${subItem.viewID}">
+                    const focusView = !focusAssigned && Boolean(subItem.matched);
+                    if (focusView) {
+                        focusAssigned = true;
+                    }
+                    html += `<div style="padding-left: 48px;" class="b3-list-item b3-list-item--narrow${focusView ? " b3-list-item--focus" : ""}" data-av-id="${subItem.avID}" data-view-id="${subItem.viewID}" data-block-id="${subItem.blockID}">
 <span class="b3-list-item__text">${escapeHtml(subItem.viewName)}</span> 
 <span class="b3-list-item__meta">${viewDefaultName}</span>
 </div>`;
@@ -69,7 +97,7 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
         if (cb) {
             cb();
         }
-    });
+    }, undefined, undefined, signal);
 };
 
 const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
@@ -82,7 +110,7 @@ const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
     }
 };
 
-export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: HTMLElement) => void, excludes = true, blockID?: string) => {
+export const openSearchAV = (options: IOpenSearchAVOptions) => {
     window.siyuan.menus.menu.remove();
     const menu = new Menu();
     menu.addItem({
@@ -92,12 +120,48 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
     <input class="b3-text-field fn__flex-shrink"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
-        <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+        ${SEARCH_AV_LOADING_HTML}
     </div>
 </div>`,
         bind(element) {
-            const listElement = element.querySelector(".b3-list");
-            const inputElement = element.querySelector("input");
+            const listElement = element.querySelector(".b3-list") as HTMLElement;
+            const inputElement = element.querySelector("input") as HTMLInputElement;
+            let searchTimer = 0;
+            let requestSequence = 0;
+            let controller: AbortController;
+            const loadList = (keyword: string, cb?: () => void) => {
+                controller?.abort();
+                controller = new AbortController();
+                const currentSequence = ++requestSequence;
+                genSearchList(listElement, keyword, options, controller.signal, () => {
+                    if (currentSequence !== requestSequence) {
+                        return;
+                    }
+                    cb?.();
+                });
+            };
+            const search = () => {
+                controller?.abort();
+                requestSequence++;
+                clearTimeout(searchTimer);
+                listElement.innerHTML = SEARCH_AV_LOADING_HTML;
+                searchTimer = window.setTimeout(() => {
+                    loadList(inputElement.value);
+                }, Constants.TIMEOUT_INPUT);
+            };
+            const selectItem = (listItemElement?: HTMLElement) => {
+                if (!listItemElement) {
+                    return;
+                }
+                clearTimeout(searchTimer);
+                controller?.abort();
+                if (options.callback) {
+                    options.callback(listItemElement);
+                } else {
+                    setDatabase(options.avID, options.target, listItemElement);
+                }
+                window.siyuan.menus.menu.remove();
+            };
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
@@ -107,12 +171,7 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                     event.preventDefault();
                     event.stopPropagation();
                     const listItemElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
-                    if (cb) {
-                        cb(listItemElement);
-                    } else {
-                        setDatabase(avId, target, listItemElement);
-                    }
-                    window.siyuan.menus.menu.remove();
+                    selectItem(listItemElement);
                 }
             });
             inputElement.addEventListener("input", (event: InputEvent) => {
@@ -120,10 +179,10 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                 if (event.isComposing) {
                     return;
                 }
-                genSearchList(listElement, inputElement.value, avId, excludes, blockID);
+                search();
             });
             inputElement.addEventListener("compositionend", () => {
-                genSearchList(listElement, inputElement.value, avId, excludes, blockID);
+                search();
             });
             element.lastElementChild.addEventListener("click", (event) => {
                 let clickTarget = event.target as HTMLElement;
@@ -142,19 +201,14 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                     } else if (clickTarget.classList.contains("b3-list-item")) {
                         event.preventDefault();
                         event.stopPropagation();
-                        if (cb) {
-                            cb(clickTarget);
-                        } else {
-                            setDatabase(avId, target, clickTarget);
-                        }
-                        window.siyuan.menus.menu.remove();
+                        selectItem(clickTarget);
                         break;
                     }
                     clickTarget = clickTarget.parentElement;
                 }
             });
-            genSearchList(listElement, "", avId, excludes, blockID, () => {
-                const rect = target.getBoundingClientRect();
+            loadList("", () => {
+                const rect = options.target.getBoundingClientRect();
                 menu.open({
                     x: rect.left,
                     y: rect.bottom,
@@ -165,7 +219,7 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
         }
     });
     menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
-    const popoverElement = hasTopClosestByClassName(target, "block__popover", true);
+    const popoverElement = hasTopClosestByClassName(options.target, "block__popover", true);
     menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
 };
 

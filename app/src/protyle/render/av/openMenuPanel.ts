@@ -76,6 +76,7 @@ import {
     setGroupMethod
 } from "./groups";
 import {openFieldVisibilityPanel} from "./fieldVisibility";
+import {clearSelect} from "../../util/clear";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -1371,7 +1372,12 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSearchAV") {
-                    openSearchAV(avID, target, undefined, false, options.blockElement.getAttribute("data-node-id"));
+                    openSearchAV({
+                        avID,
+                        target,
+                        purpose: "selectRelation",
+                        blockID: options.blockElement.getAttribute("data-node-id"),
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1709,6 +1715,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "addAssetLink") {
                     addAssetLink(options.protyle, options.cellElements, target, options.blockElement,
+                        target.dataset.assetType as "image" | "file",
                         options.keepMenuOpen);
                     event.preventDefault();
                     event.stopPropagation();
@@ -1801,6 +1808,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "av-view-switch") {
                     if (!target.parentElement.classList.contains("b3-menu__item--current")) {
+                        clearSelect(["row", "galleryItem"], options.blockElement);
                         avPanelElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
                         target.parentElement.classList.add("b3-menu__item--current");
                         transaction(options.protyle, [{
@@ -1826,6 +1834,7 @@ export const openMenuPanel = (options: {
                             element: target.parentElement
                         });
                     } else {
+                        clearSelect(["row", "galleryItem"], options.blockElement);
                         avPanelElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
                         target.parentElement.classList.add("b3-menu__item--current");
                         transaction(options.protyle, [{

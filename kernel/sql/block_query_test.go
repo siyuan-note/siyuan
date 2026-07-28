@@ -16,7 +16,10 @@
 
 package sql
 
-import "testing"
+import (
+	gosql "database/sql"
+	"testing"
+)
 
 func TestRootBlockExactMatchCondition(t *testing.T) {
 	condition, arg := rootBlockExactMatchCondition("Math%_\\", true)
@@ -27,5 +30,41 @@ func TestRootBlockExactMatchCondition(t *testing.T) {
 	condition, arg = rootBlockExactMatchCondition("Math%_\\", false)
 	if "content LIKE ? ESCAPE '\\'" != condition || "Math\\%\\_\\\\" != arg {
 		t.Fatalf("unexpected case-insensitive exact match: condition=%q arg=%q", condition, arg)
+	}
+}
+
+func TestQueryLikeEscape(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatalf("open test database failed: %s", err)
+	}
+	testDB.SetMaxOpenConns(1)
+	defer testDB.Close()
+
+	if _, err = testDB.Exec("CREATE TABLE blocks (id TEXT, content TEXT)"); err != nil {
+		t.Fatalf("create blocks table failed: %s", err)
+	}
+	if _, err = testDB.Exec("INSERT INTO blocks VALUES ('literal', 'a%b'), ('wildcard', 'axb')"); err != nil {
+		t.Fatalf("insert blocks failed: %s", err)
+	}
+
+	previousDB := db
+	db = testDB
+	defer func() {
+		db = previousDB
+	}()
+
+	stmts := []string{
+		`SELECT id FROM blocks WHERE content LIKE '%a\%b%' ESCAPE '\' ORDER BY id LIMIT 10`,
+		`SELECT id FROM blocks WHERE content LIKE '%a\%b%' ESCAPE '\' ORDER BY id`,
+	}
+	for _, stmt := range stmts {
+		rows, queryErr := Query(stmt, 10)
+		if queryErr != nil {
+			t.Fatalf("query failed [stmt=%s]: %s", stmt, queryErr)
+		}
+		if 1 != len(rows) || "literal" != rows[0]["id"] {
+			t.Fatalf("unexpected query result [stmt=%s]: %#v", stmt, rows)
+		}
 	}
 }

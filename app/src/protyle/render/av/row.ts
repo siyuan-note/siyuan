@@ -5,7 +5,6 @@ import {transaction} from "../../wysiwyg/transaction";
 import {
     cellValueIsEmpty,
     genCellValue,
-    genCellValueByElement,
     getTypeByCellElement,
     renderCell,
     renderCellAttr
@@ -21,14 +20,16 @@ import {unicode2Emoji} from "../../../emoji";
 import {escapeAttr} from "../../../util/escape";
 import {getCompressURL} from "../../../util/image";
 import {
-    getAVPrimaryCell,
     getAVSelectStat,
+    getAVSelectedItemInfos,
     getAvBodyData,
     resetAVRowSelect,
     updateAVRowSelect
 } from "./virtualScroll";
 import {getCardCoverHTML, getCardCoverSource} from "./cover";
 import {getCardFieldsClass} from "./gallery/cardLayout";
+import {getAVFilteredTipContext} from "./filteredTip";
+import {clearAVItemSelectionState} from "./selectionState";
 
 const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem, primaryHidden = false) => {
     const canPosition = Boolean(row.coverURL && !row.coverURL.startsWith("background") && getCardCoverSource(data));
@@ -246,6 +247,10 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     const useElement = checkElement.querySelector("use");
     const bodyElement = hasClosestByClassName(rowElement, "av__body") as HTMLElement;
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
+        const blockElement = hasClosestByClassName(rowElement, "av") as HTMLElement;
+        if (blockElement) {
+            clearAVItemSelectionState(blockElement);
+        }
         if ("#iconCheck" === useElement.getAttribute("xlink:href") || type === "unselectAll") {
             rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
@@ -350,20 +355,20 @@ export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
         });
     }
 
-    const counterElements = Array.from(blockElement.querySelectorAll<HTMLElement>(".av__counter")).filter(
+    const viewsElement = Array.from(blockElement.querySelectorAll<HTMLElement>(".av__views")).find(
         item => hasClosestByClassName(item, "av") === blockElement
     );
-    if (counterElements.length === 0) {
+    const countElement = viewsElement?.querySelector<HTMLElement>(".av__selection-count");
+    if (!viewsElement || !countElement) {
         return;
     }
     if (selectCount === 0) {
-        counterElements.forEach(item => item.classList.add("fn__none"));
+        viewsElement.classList.remove("av__views--selection");
+        countElement.textContent = "";
         return;
     }
-    counterElements.forEach(item => {
-        item.classList.remove("fn__none");
-        item.textContent = `${selectCount} ${window.siyuan.languages.selected}`;
-    });
+    viewsElement.classList.add("av__views--selection");
+    countElement.textContent = `${selectCount} ${window.siyuan.languages.selected}`;
 };
 
 export const setPage = (blockElement: Element) => {
@@ -837,25 +842,19 @@ export const setPageSize = (options: {
 };
 
 export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
-    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
-    if (rowElements.length === 0) {
+    const selectedItems = getAVSelectedItemInfos(blockElement);
+    if (selectedItems.length === 0) {
         return;
     }
-    const primaryValues = Array.from(rowElements).map((item: HTMLElement) => {
-        const cellElement = item.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
-        return cellElement ? genCellValueByElement("block", cellElement) :
-            getAVPrimaryCell(blockElement, item.dataset.id)?.value;
-    });
+    const primaryValues = selectedItems.map(item => item.primaryCell?.value);
     if (primaryValues.some(value => !value)) {
         return;
     }
     const avID = blockElement.getAttribute("data-av-id");
     const undoOperations: IOperation[] = [];
     const blockIds: string[] = [];
-    rowElements.forEach(item => {
-        blockIds.push(item.getAttribute("data-id"));
-    });
-    rowElements.forEach((item, index) => {
+    selectedItems.forEach(item => blockIds.push(item.itemID));
+    selectedItems.forEach((item, index) => {
         const blockValue = primaryValues[index];
         const itemID = Lute.NewNodeID();
         // 撤销会使用新的条目 ID 恢复该行，重做时需要同时删除这个新条目。
@@ -863,15 +862,15 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
         undoOperations.push({
             action: "insertAttrViewBlock",
             avID,
-            previousID: item.previousElementSibling?.getAttribute("data-id") || "",
+            previousID: item.previousID,
             srcs: [{
                 itemID,
-                id: item.getAttribute("data-id"),
+                id: item.itemID,
                 isDetached: blockValue.isDetached,
                 content: blockValue.block.content
             }],
             blockID: blockElement.dataset.nodeId,
-            groupID: item.parentElement.getAttribute("data-group-id")
+            groupID: item.groupID
         });
     });
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
@@ -889,9 +888,13 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
         id: blockElement.dataset.nodeId,
         data: newUpdated,
     }], undoOperations);
-    rowElements.forEach(item => {
-        item.remove();
+    const selectedIDs = new Set(selectedItems.map(item => item.itemID));
+    blockElement.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]").forEach(item => {
+        if (selectedIDs.has(item.dataset.id)) {
+            item.remove();
+        }
     });
+    clearSelect(["row", "galleryItem"], blockElement);
     stickyRow(blockElement, protyle.contentElement, "all");
     updateHeader(blockElement.querySelector(".av__row"));
     blockElement.setAttribute("updated", newUpdated);
@@ -927,10 +930,7 @@ export const insertRows = (options: {
         groupID: options.groupID,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
             options.blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") || "",
-        context: {
-            protyleID: options.protyle.id,
-            openFilteredItem: "true",
-        },
+        context: getAVFilteredTipContext("target", options.protyle, true),
     }, {
         action: "doUpdateUpdated",
         id: options.blockElement.dataset.nodeId,
@@ -964,18 +964,20 @@ export const insertRows = (options: {
     options.blockElement.setAttribute("updated", newUpdated);
 };
 
-export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowElements: NodeListOf<Element>) => {
+export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowIDs: string[]) => {
+    if (rowIDs.length === 0) {
+        return;
+    }
     const avID = blockElement.getAttribute("data-av-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     const newRowIDs: string[] = [];
     // 副本统一插入到最后选中的条目之后，按源序排列
-    const anchorID = rowElements[rowElements.length - 1].getAttribute("data-id");
+    const anchorID = rowIDs[rowIDs.length - 1];
     let previousID = anchorID;
-    rowElements.forEach(rowElement => {
+    rowIDs.forEach(srcRowID => {
         const newRowID = Lute.NewNodeID();
         newRowIDs.push(newRowID);
-        const srcRowID = rowElement.getAttribute("data-id");
         doOperations.push({
             action: "duplicateAttrViewRow",
             avID,

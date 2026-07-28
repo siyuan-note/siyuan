@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "Varsayılan dikey hizalamayı kullan",
+  "useDefaultHorizontalAlign": "Varsayılan yatay hizalamayı kullan",
+  "alignBottom": "Alta hizala",
+  "alignMiddle": "Dikey ortala",
+  "alignTop": "Üste hizala",
+  "focusBreadcrumb": "İçerik haritasına odaklan",
+  "tableRectangleSelectionRequired": "Dikdörtgen bir seçim gerektirir",
   "updateChannel": "Güncelleme kanalı",
   "updateChannelTip": "Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test kanalları GitHub erişimi gerektirir",
   "updateChannelStable": "Kararlı",

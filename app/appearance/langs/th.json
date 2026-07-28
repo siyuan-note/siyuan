@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "ใช้การจัดแนวตั้งเริ่มต้น",
+  "useDefaultHorizontalAlign": "ใช้การจัดแนวนอนเริ่มต้น",
+  "alignBottom": "จัดชิดด้านล่าง",
+  "alignMiddle": "จัดกึ่งกลางแนวตั้ง",
+  "alignTop": "จัดชิดด้านบน",
+  "focusBreadcrumb": "โฟกัสเส้นทางนำทาง",
+  "tableRectangleSelectionRequired": "ต้องเลือกเป็นรูปสี่เหลี่ยมผืนผ้า",
   "updateChannel": "ช่องทางการอัปเดต",
   "updateChannelTip": "ช่อง Beta จะได้รับรุ่นเสถียร รุ่น RC และรุ่น Beta ส่วนช่อง Alpha จะได้รับทุกรุ่น ช่องทดสอบจำเป็นต้องเข้าถึง GitHub",
   "updateChannelStable": "เสถียร",

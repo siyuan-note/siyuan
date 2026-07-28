@@ -532,7 +532,7 @@ func setFiletree(c *gin.Context) {
 		if nil != model.Conf.FileTree && nil != model.Conf.FileTree.BoxDocEnabled {
 			fileTree.BoxDocEnabled = model.Conf.FileTree.BoxDocEnabled
 		} else {
-			fileTree.BoxDocEnabled = func() *bool { b := false; return &b }()
+			fileTree.BoxDocEnabled = new(bool)
 		}
 	}
 	oldBoxDocEnabled := model.IsBoxDocEnabled()

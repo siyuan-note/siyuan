@@ -1,4 +1,11 @@
 {
+  "useDefaultVerticalAlign": "שימוש ביישור האנכי המוגדר כברירת מחדל",
+  "useDefaultHorizontalAlign": "שימוש ביישור האופקי המוגדר כברירת מחדל",
+  "alignBottom": "יישור למטה",
+  "alignMiddle": "מרכוז אנכי",
+  "alignTop": "יישור למעלה",
+  "focusBreadcrumb": "מיקוד בפירורי לחם",
+  "tableRectangleSelectionRequired": "נדרשת בחירה מלבנית",
   "updateChannel": "ערוץ עדכונים",
   "updateChannelTip": "ערוץ Beta מקבל גרסאות יציבות, RC ו-Beta; ערוץ Alpha מקבל את כל הגרסאות. ערוצי הבדיקה דורשים גישה ל-GitHub",
   "updateChannelStable": "יציב",

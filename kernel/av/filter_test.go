@@ -424,6 +424,42 @@ func TestRemoveSelectOptionFromFilters(t *testing.T) {
 	}
 }
 
+func TestSelectFilterWithMultipleOptions(t *testing.T) {
+	filter := &ViewFilter{
+		Value: &Value{
+			Type:    KeyTypeSelect,
+			MSelect: []*ValueSelect{{Content: "A"}, {Content: "B"}},
+		},
+	}
+	tests := []struct {
+		name     string
+		operator FilterOperator
+		content  string
+		expected bool
+	}{
+		{name: "contains first option", operator: FilterOperatorContains, content: "A", expected: true},
+		{name: "contains second option", operator: FilterOperatorContains, content: "B", expected: true},
+		{name: "contains no option", operator: FilterOperatorContains, content: "C", expected: false},
+		{name: "does not contain first option", operator: FilterOperatorDoesNotContain, content: "A", expected: false},
+		{name: "does not contain second option", operator: FilterOperatorDoesNotContain, content: "B", expected: false},
+		{name: "does not contain any option", operator: FilterOperatorDoesNotContain, content: "C", expected: true},
+		{name: "legacy equal operator", operator: FilterOperatorIsEqual, content: "B", expected: true},
+		{name: "legacy not equal operator", operator: FilterOperatorIsNotEqual, content: "C", expected: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			filter.Operator = test.operator
+			value := &Value{
+				Type:    KeyTypeSelect,
+				MSelect: []*ValueSelect{{Content: test.content}},
+			}
+			if actual := value.Filter(filter, nil, "", nil, nil); test.expected != actual {
+				t.Fatalf("unexpected filter result: got %t, want %t", actual, test.expected)
+			}
+		})
+	}
+}
+
 func TestExactRelationFilter(t *testing.T) {
 	value := &Value{
 		Type: KeyTypeRelation,

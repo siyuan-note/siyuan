@@ -3,6 +3,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {focusByRange} from "../../util/selection";
 import {hasClosestBlock} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
+import {getAVFilteredTipContext} from "./filteredTip";
 
 export const addFilesToDatabase = (fileLiElements: Element[]) => {
     const srcs: IOperationSrcs[] = [];
@@ -17,51 +18,63 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
         }
     });
     if (srcs.length > 0) {
-        openSearchAV("", fileLiElements[0] as HTMLElement, (listItemElement) => {
-            const avID = listItemElement.dataset.avId;
-            const viewID = listItemElement.dataset.viewId;
-            transaction(undefined, [{
-                action: "insertAttrViewBlock",
-                ignoreDefaultFill: viewID ? false : true,
-                viewID,
-                avID,
-                srcs,
-                blockID: listItemElement.dataset.blockId
-            }, {
-                action: "doUpdateUpdated",
-                id: listItemElement.dataset.blockId,
-                data: dayjs().format("YYYYMMDDHHmmss"),
-            }]);
+        openSearchAV({
+            avID: "",
+            target: fileLiElements[0] as HTMLElement,
+            purpose: "addToDatabase",
+            callback: (listItemElement) => {
+                const avID = listItemElement.dataset.avId;
+                const viewID = listItemElement.dataset.viewId;
+                transaction(undefined, [{
+                    action: "insertAttrViewBlock",
+                    ignoreDefaultFill: viewID ? false : true,
+                    viewID,
+                    avID,
+                    srcs,
+                    blockID: listItemElement.dataset.blockId,
+                    context: getAVFilteredTipContext(viewID ? "view" : "database"),
+                }, {
+                    action: "doUpdateUpdated",
+                    id: listItemElement.dataset.blockId,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
+                }]);
+            }
         });
     }
 };
 
 export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: string) => {
     if ((range && protyle.title?.editElement?.contains(range.startContainer)) || type === "title") {
-        openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {
-            const avID = listItemElement.dataset.avId;
-            const viewID = listItemElement.dataset.viewId;
-            transaction(protyle, [{
-                action: "insertAttrViewBlock",
-                ignoreDefaultFill: viewID ? false : true,
-                viewID,
-                avID,
-                srcs: [{
-                    itemID: Lute.NewNodeID(),
-                    id: protyle.block.rootID,
-                    isDetached: false
-                }],
-                blockID: listItemElement.dataset.blockId
-            }, {
-                action: "doUpdateUpdated",
-                id: listItemElement.dataset.blockId,
-                data: dayjs().format("YYYYMMDDHHmmss"),
-            }], [{
-                action: "removeAttrViewBlock",
-                srcIDs: [protyle.block.rootID],
-                avID,
-            }]);
-            focusByRange(range);
+        openSearchAV({
+            avID: "",
+            target: protyle.breadcrumb.element,
+            purpose: "addToDatabase",
+            callback: (listItemElement) => {
+                const avID = listItemElement.dataset.avId;
+                const viewID = listItemElement.dataset.viewId;
+                transaction(protyle, [{
+                    action: "insertAttrViewBlock",
+                    ignoreDefaultFill: viewID ? false : true,
+                    viewID,
+                    avID,
+                    srcs: [{
+                        itemID: Lute.NewNodeID(),
+                        id: protyle.block.rootID,
+                        isDetached: false
+                    }],
+                    blockID: listItemElement.dataset.blockId,
+                    context: getAVFilteredTipContext(viewID ? "view" : "database", protyle),
+                }, {
+                    action: "doUpdateUpdated",
+                    id: listItemElement.dataset.blockId,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
+                }], [{
+                    action: "removeAttrViewBlock",
+                    srcIDs: [protyle.block.rootID],
+                    avID,
+                }]);
+                focusByRange(range);
+            }
         });
     } else {
         let targetElement: HTMLElement;
@@ -83,36 +96,42 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             targetElement = protyle.wysiwyg.element;
             ids.push(protyle.block.rootID);
         }
-        openSearchAV("", targetElement, (listItemElement) => {
-            const srcIDs: string[] = [];
-            const srcs: IOperationSrcs[] = [];
-            ids.forEach(item => {
-                srcIDs.push(item);
-                srcs.push({
-                    itemID: Lute.NewNodeID(),
-                    id: item,
-                    isDetached: false
+        openSearchAV({
+            avID: "",
+            target: targetElement,
+            purpose: "addToDatabase",
+            callback: (listItemElement) => {
+                const srcIDs: string[] = [];
+                const srcs: IOperationSrcs[] = [];
+                ids.forEach(item => {
+                    srcIDs.push(item);
+                    srcs.push({
+                        itemID: Lute.NewNodeID(),
+                        id: item,
+                        isDetached: false
+                    });
                 });
-            });
-            const avID = listItemElement.dataset.avId;
-            const viewID = listItemElement.dataset.viewId;
-            transaction(protyle, [{
-                action: "insertAttrViewBlock",
-                ignoreDefaultFill: viewID ? false : true,
-                viewID,
-                avID,
-                srcs,
-                blockID: listItemElement.dataset.blockId
-            }, {
-                action: "doUpdateUpdated",
-                id: listItemElement.dataset.blockId,
-                data: dayjs().format("YYYYMMDDHHmmss"),
-            }], [{
-                action: "removeAttrViewBlock",
-                srcIDs,
-                avID,
-            }]);
-            focusByRange(range);
+                const avID = listItemElement.dataset.avId;
+                const viewID = listItemElement.dataset.viewId;
+                transaction(protyle, [{
+                    action: "insertAttrViewBlock",
+                    ignoreDefaultFill: viewID ? false : true,
+                    viewID,
+                    avID,
+                    srcs,
+                    blockID: listItemElement.dataset.blockId,
+                    context: getAVFilteredTipContext(viewID ? "view" : "database", protyle),
+                }, {
+                    action: "doUpdateUpdated",
+                    id: listItemElement.dataset.blockId,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
+                }], [{
+                    action: "removeAttrViewBlock",
+                    srcIDs,
+                    avID,
+                }]);
+                focusByRange(range);
+            }
         });
     }
 };

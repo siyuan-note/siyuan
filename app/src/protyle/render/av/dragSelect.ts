@@ -1,6 +1,7 @@
 import {resetAVRowSelect} from "./virtualScroll";
 import {updateAVSelectionStatus} from "./row";
 import {hasClosestByClassName} from "../../util/hasClosest";
+import {clearAVItemSelectionState} from "./selectionState";
 
 const isRectIntersecting = (rect: DOMRect, selectRect: DOMRect, clipRect?: DOMRect) => {
     const top = Math.max(rect.top, clipRect?.top ?? rect.top);
@@ -55,6 +56,7 @@ export const applyAVDragSelection = (blockElement: HTMLElement, selectRect: DOMR
 };
 
 export const clearAVDragSelection = (blockElement: HTMLElement) => {
+    clearAVItemSelectionState(blockElement);
     const isTable = blockElement.dataset.avType === "table";
     blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
         if (hasClosestByClassName(bodyElement, "av") !== blockElement) {

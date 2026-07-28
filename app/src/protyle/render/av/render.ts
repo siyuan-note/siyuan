@@ -5,7 +5,7 @@ import {addDragFill, cellScrollIntoView, popTextCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
-import {getRowHTML, stickyRow, updateHeader} from "./row";
+import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
@@ -19,11 +19,16 @@ import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
-import {getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
+import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate, setAVLocateRequest} from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {updateHotkeyTip} from "../../util/compatibility";
-import {openDatabaseRowByData} from "./openDatabaseRow";
+import {inspectAVInsertedItem} from "./filteredTip";
+import {
+    collapseAVCellSelectionToAnchor,
+    refreshAVCellSelection,
+    restoreAVCellSelection,
+} from "./selectionState";
 
 interface IIds {
     groupId: string,
@@ -89,7 +94,18 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
         defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
     return `<div class="av__header" data-default-template-id="${defaultTemplateID}">
         <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
-            <div class="av__counter av__counter--sticky fn__none"></div>
+            <div class="av__selection-toolbar">
+                <span class="av__selection-count"></span>
+                ${editable ? `<button data-type="av-selection-edit" class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.editFields}">
+                    <svg><use xlink:href="#iconAttr"></use></svg>
+                </button>
+                <button data-type="av-selection-delete" class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.delete}">
+                    <svg><use xlink:href="#iconTrashcan"></use></svg>
+                </button>` : ""}
+                <button data-type="av-selection-more" class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.more}">
+                    <svg><use xlink:href="#iconMore"></use></svg>
+                </button>
+            </div>
             <div class="layout-tab-bar fn__flex">
                 ${tabHTML}
             </div>
@@ -133,7 +149,6 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             </div>` : ""}
         </div>
         <div contenteditable="${editable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${Lute.EscapeHTMLStr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${Lute.EscapeHTMLStr(data.name || "")}</div>
-        <div class="av__counter fn__none"></div>
     </div>`;
 };
 
@@ -300,6 +315,11 @@ const renderGroupTable = (options: ITableOptions) => {
 
 const afterRenderTable = (options: ITableOptions) => {
     setAVData(options.blockElement, options.data);
+    if (!refreshAVCellSelection(options.blockElement, options.data)) {
+        options.resetData.selectCellId = undefined;
+        options.resetData.dragFillId = undefined;
+        options.resetData.activeIds = [];
+    }
     if (options.blockElement.getAttribute("data-need-focus") === "true") {
         focusBlock(options.blockElement);
         options.blockElement.removeAttribute("data-need-focus");
@@ -387,6 +407,7 @@ const afterRenderTable = (options: ITableOptions) => {
         }
         activeCellElement?.classList.add("av__cell--active");
     });
+    restoreAVCellSelection(options.blockElement);
     if (getSelection().rangeCount > 0) {
         // 修改表头后光标重新定位
         const range = getSelection().getRangeAt(0);
@@ -401,6 +422,14 @@ const afterRenderTable = (options: ITableOptions) => {
     if (options.cb) {
         options.cb(options.data);
     }
+    initVirtualScroll({
+        ...options,
+        selectedItemPoints: options.resetData.selectRowIds.map(item => ({
+            groupID: item.groupId,
+            itemID: item.rowId,
+        })),
+    });
+    updateAVSelectionStatus(options.blockElement);
     if (!options.renderAll) {
         finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
@@ -411,7 +440,6 @@ const afterRenderTable = (options: ITableOptions) => {
         isSearching: options.resetData.isSearching,
         onChange: () => updateSearch(options.blockElement, options.protyle),
     });
-    initVirtualScroll(options);
     finishAVLocate(options.blockElement, options.protyle, options.data);
 };
 
@@ -454,16 +482,10 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 colId: selectCellElement.getAttribute("data-col-id"),
             };
         }
-        const selectRowIds: IIds[] = [];
-        e.querySelectorAll(".av__row--select").forEach(rowItem => {
-            const rowId = rowItem.getAttribute("data-id");
-            if (rowId) {
-                selectRowIds.push({
-                    groupId: (hasClosestByClassName(rowItem, "av__body") as HTMLElement).dataset.groupId || "",
-                    rowId
-                });
-            }
-        });
+        const selectRowIds: IIds[] = getAVSelectedItemPoints(e).map(item => ({
+            groupId: item.groupID,
+            rowId: item.itemID,
+        }));
         let dragFillId;
         const dragFillElement = e.querySelector(".av__drag-fill") as HTMLElement;
         if (dragFillElement) {
@@ -632,33 +654,6 @@ const getViewIDByAVElement = (avElement: HTMLElement): string | null => {
         || null;
 };
 
-// 快速判断本次渲染数据是否包含条目；未找到时还需通过 target 状态区分过滤和分页。
-export const isItemInData = (data: IAV, itemID: string): boolean => {
-    const view = data.view as IAVTable & IAVGallery;
-    if (view.groups?.length > 0) {
-        return view.groups.some((group: IAVTable & IAVGallery) => {
-            const items = data.viewType === "table" ? group.rows : group.cards;
-            return items?.some((item: IAVRow | IAVGalleryItem) => item.id === itemID);
-        });
-    }
-    const items = data.viewType === "table" ? view.rows : view.cards;
-    return items?.some((item: IAVRow | IAVGalleryItem) => item.id === itemID);
-};
-
-export const getAVItemRenderStatus = async (blockElement: HTMLElement, itemID: string) => {
-    const searchInputElement = blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
-    const response = await fetchSyncPost("/api/av/renderAttributeView", {
-        id: blockElement.dataset.avId,
-        viewID: getViewIDByAVElement(blockElement) || "",
-        query: searchInputElement?.textContent?.trim() || "",
-        blockID: blockElement.dataset.nodeId,
-        initialLayout: blockElement.dataset.avType,
-        createIfNotExist: false,
-        targetItemID: itemID,
-    });
-    return (response.data as IAV)?.target?.status;
-};
-
 const addingFocusTokens = new Map<string, symbol>();
 
 const scrollAddingCellIntoView = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
@@ -738,6 +733,9 @@ const waitForAddingCellPosition = async (options: {
 };
 
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
+    if (operation.action === "insertAttrViewBlock") {
+        inspectAVInsertedItem(protyle, operation);
+    }
     if (operation.action === "setAttrViewName") {
         getAVElements(protyle, operation.id).forEach((item) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;
@@ -908,7 +906,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             attrElement.removeAttribute("data-rendering");
             renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
         }
-        let filteredItemOpened = false;
         getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
             if (["setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
@@ -929,6 +926,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             if (operation.action === "sortAttrViewRow") {
                 clearSelect(["cell"], item);
             } else if (operation.action === "sortAttrViewCol") {
+                collapseAVCellSelectionToAnchor(item);
                 item.querySelectorAll(".av__cell--active").forEach((item) => {
                     item.classList.remove("av__cell--active");
                     item.querySelector(".av__drag-fill")?.remove();
@@ -958,7 +956,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
             }
             const hasGhost = item.querySelector('[data-type="ghost"]');
-            avRender(item, protyle, (data: IAV) => {
+            avRender(item, protyle, () => {
                 if (operation.action === "insertAttrViewBlock" && operation.context?.ignoreTip !== "true") {
                     if (operation.context?.message) {
                         showMessage(operation.context.message);
@@ -1016,42 +1014,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         if (hasGhost && !isAddingFocusPending &&
                             addingFocusTokens.get(addingFocusKey) === addingFocusToken) {
                             addingFocusTokens.delete(addingFocusKey);
-                        }
-                        const inspectFilteredItem = operation.srcs.length === 1 &&
-                            operation.context?.openFilteredItem === "true" &&
-                            operation.context?.protyleID === protyle.id &&
-                            operation.blockID === item.dataset.nodeId &&
-                            (!operation.viewID || operation.viewID === getViewIDByAVElement(item));
-                        if (inspectFilteredItem) {
-                            const insertedItem = operation.srcs[0];
-                            if (!isItemInData(data, insertedItem.itemID)) {
-                                getAVItemRenderStatus(item, insertedItem.itemID).then((status) => {
-                                    if ("filtered" !== status || filteredItemOpened) {
-                                        return;
-                                    }
-                                    filteredItemOpened = true;
-                                    showMessage(window.siyuan.languages.databaseItemFiltered);
-                                    openDatabaseRowByData(protyle, {
-                                        avID,
-                                        databaseBlockID: item.dataset.nodeId,
-                                        notebookID: protyle.notebookId,
-                                        itemID: insertedItem.itemID,
-                                        valueID: "",
-                                        title: insertedItem.content || "",
-                                        boundBlockID: insertedItem.isDetached ? undefined : insertedItem.id,
-                                        isDetached: insertedItem.isDetached,
-                                    });
-                                });
-                            }
-                        } else {
-                            const missingItems = operation.srcs.filter((srcItem) => !isItemInData(data, srcItem.itemID));
-                            if (missingItems.length > 0) {
-                                Promise.all(missingItems.map((srcItem) => getAVItemRenderStatus(item, srcItem.itemID))).then((statuses) => {
-                                    if (statuses.includes("filtered")) {
-                                        showMessage(window.siyuan.languages.databaseItemFiltered);
-                                    }
-                                });
-                            }
                         }
                     }
                 } else if (operation.action === "addAttrViewView") {

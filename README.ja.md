@@ -66,13 +66,11 @@
 
 SiYuanは、プライバシーを最優先とする個人の知識管理システムであり、細かいブロックレベルの参照とMarkdown WYSIWYGをサポートしています。
 
-詳細については、[SiYuan英語ディスカッションフォーラム](https://liuyun.io)をご覧ください。
+![feature0.png](screenshots/feature0.png)
 
-オンラインユーザーガイド：[English](https://siyuan-en.b3log.org/)
+![feature5-1.png](screenshots/feature5-1.png)
 
-![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
-
-![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
+詳細については、[オンラインユーザーガイド](https://siyuan-en.b3log.org/)をご覧いただくか、[SiYuan英語ディスカッションフォーラム](https://liuyun.io)をご利用ください。
 
 ## 🔮 特徴
 
@@ -114,7 +112,7 @@ SiYuanは、プライバシーを最優先とする個人の知識管理シス�
 
 ## 🏗️ アーキテクチャとエコシステム
 
-![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
 
 | プロジェクト                                                   | 説明              | フォーク                                                                           | スター                                                                                | 
 |----------------------------------------------------------|-----------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|

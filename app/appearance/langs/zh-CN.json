@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "无更多条目",
   "docCreateTemplatePathTip": "新建文档模板路径（例如 <code class='fn__code'>document.md</code>，留空时不应用模板，需要将该文件放置于工作空间/data/templates/ 下）",
   "docCreateTemplatePathInheritTip": "新建文档模板路径（例如 <code class='fn__code'>document.md</code>，留空时使用全局设置，需要将该文件放置于工作空间/data/templates/ 下）",
   "cardLayout": "卡片布局",

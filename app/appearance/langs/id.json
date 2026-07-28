@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "Tidak ada item lagi",
   "docCreateTemplatePathTip": "Jalur templat dokumen baru (misalnya, <code class='fn__code'>document.md</code>; biarkan kosong agar tidak menerapkan templat; file harus ditempatkan di workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "Jalur templat dokumen baru (misalnya, <code class='fn__code'>document.md</code>; biarkan kosong untuk menggunakan pengaturan global; file harus ditempatkan di workspace/data/templates/)",
   "cardLayout": "Tata letak kartu",

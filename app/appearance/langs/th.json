@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "ไม่มีรายการเพิ่มเติม",
   "docCreateTemplatePathTip": "เส้นทางเทมเพลตเอกสารใหม่ (เช่น <code class='fn__code'>document.md</code> เว้นว่างไว้หากไม่ต้องการใช้เทมเพลต และต้องวางไฟล์ไว้ใน workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "เส้นทางเทมเพลตเอกสารใหม่ (เช่น <code class='fn__code'>document.md</code> เว้นว่างไว้เพื่อใช้การตั้งค่าส่วนกลาง และต้องวางไฟล์ไว้ใน workspace/data/templates/)",
   "cardLayout": "เค้าโครงการ์ด",

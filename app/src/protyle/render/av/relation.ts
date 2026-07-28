@@ -406,14 +406,14 @@ data-id="${escapeAttr(refElement?.getAttribute("data-id") || "")}">${escapeHtml(
     }
     if (!hasCandidates && !hasMore) {
         return `<button class="b3-menu__item av__relation-table-footer" data-relation-type="empty">
-    <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.noMoreItems}</span>
 </button>`;
     }
     return "";
 };
 
-const genRelationLoaderHTML = (loading: boolean) => {
-    return `<img data-relation-type="loader" class="${loading ? "" : "fn__none"}" style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">`;
+const genRelationLoaderHTML = (loading: boolean, visible = loading) => {
+    return `<img data-relation-type="loader" class="${loading ? "" : "fn__none"}" style="${visible ? "" : "visibility: hidden;"}margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">`;
 };
 
 export const bindRelationEvent = (options: {
@@ -429,10 +429,13 @@ export const bindRelationEvent = (options: {
         total: 0,
         keyword: "",
         loading: false,
+        loaderVisible: false,
         columns: [] as IAVColumn[],
         controller: undefined as AbortController | undefined,
     };
     let searchTimer: number;
+    let loaderTimer: number | undefined;
+    let initialLoad = true;
     let listNaturalMaxHeight = 0;
     let positionInitialized = false;
 
@@ -471,8 +474,30 @@ export const bindRelationEvent = (options: {
         positionMenu(true);
     };
 
-    const setLoading = (loading: boolean) => {
-        listElement.querySelector('[data-relation-type="loader"]')?.classList.toggle("fn__none", !loading);
+    const clearLoaderTimer = () => {
+        if (typeof loaderTimer !== "undefined") {
+            clearTimeout(loaderTimer);
+            loaderTimer = undefined;
+        }
+    };
+    const setLoading = (loading: boolean, delayed = false, controller?: AbortController) => {
+        clearLoaderTimer();
+        state.loaderVisible = loading && !delayed;
+        const loaderElement = listElement.querySelector('[data-relation-type="loader"]') as HTMLElement;
+        loaderElement?.classList.toggle("fn__none", !loading);
+        if (loaderElement) {
+            loaderElement.style.visibility = state.loaderVisible ? "" : "hidden";
+        }
+        if (loading && delayed) {
+            loaderTimer = window.setTimeout(() => {
+                if (!state.loading || state.controller !== controller) {
+                    return;
+                }
+                state.loaderVisible = true;
+                const currentLoaderElement = listElement.querySelector('[data-relation-type="loader"]') as HTMLElement;
+                currentLoaderElement?.style.removeProperty("visibility");
+            }, Constants.TIMEOUT_LOAD);
+        }
     };
     const hasMore = () => state.page * RELATION_PAGE_SIZE < state.total;
     const ensureListFilled = () => {
@@ -538,7 +563,7 @@ export const bindRelationEvent = (options: {
 <div class="av__relation-table-selected" data-relation-type="selectedRows">${selectedHTML}</div>
 <div class="b3-menu__separator" data-relation-type="separator"></div>
 <div class="av__relation-table-candidates" data-relation-type="candidateRows">${candidateHTML}</div>
-${genRelationLoaderHTML(state.loading)}`;
+${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
         } else {
             candidateHTML = genRelationRowsHTML(data.rows || [], state.columns, "candidate", gridTemplate, excludedIDs);
             if (candidateHTML) {
@@ -568,7 +593,7 @@ ${genRelationLoaderHTML(state.loading)}`;
         const selectedItems = getSelectedItems();
         state.controller = controller;
         state.loading = true;
-        setLoading(true);
+        setLoading(true, initialLoad && reset, controller);
         let succeeded = false;
         fetchPost("/api/av/getAttributeViewRelationCandidates", {
             avID: options.menuElement.firstElementChild.getAttribute("data-source-av-id"),
@@ -615,6 +640,7 @@ ${genRelationLoaderHTML(state.loading)}`;
                     }]
                 } as IAVRow;
             });
+            initialLoad = false;
             renderPage({
                 columns,
                 selectedRows,
@@ -742,6 +768,7 @@ ${genRelationLoaderHTML(state.loading)}`;
         state.controller?.abort();
         window.removeEventListener("resize", resize);
         options.menuElement.removeEventListener("relationrefresh", refresh);
+        clearLoaderTimer();
         if (searchTimer) {
             clearTimeout(searchTimer);
         }
@@ -769,7 +796,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
 </div>
 <div class="b3-menu__items av__relation-table">
-    ${genRelationLoaderHTML(true)}
+    ${genRelationLoaderHTML(true, false)}
 </div>`;
     } else {
         return "";

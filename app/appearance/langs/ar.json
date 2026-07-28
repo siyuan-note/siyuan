@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "لا مزيد من العناصر",
   "docCreateTemplatePathTip": "مسار قالب المستند الجديد (على سبيل المثال، <code class='fn__code'>document.md</code>؛ اتركه فارغًا لعدم تطبيق قالب؛ يجب وضع الملف ضمن workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "مسار قالب المستند الجديد (على سبيل المثال، <code class='fn__code'>document.md</code>؛ اتركه فارغًا لاستخدام الإعداد العام؛ يجب وضع الملف ضمن workspace/data/templates/)",
   "cardLayout": "تخطيط البطاقة",

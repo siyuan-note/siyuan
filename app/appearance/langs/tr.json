@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "Başka öğe yok",
   "docCreateTemplatePathTip": "Yeni belge şablonu yolu (örneğin <code class='fn__code'>document.md</code>; şablon uygulamamak için boş bırakın; dosya workspace/data/templates/ altında bulunmalıdır)",
   "docCreateTemplatePathInheritTip": "Yeni belge şablonu yolu (örneğin <code class='fn__code'>document.md</code>; genel ayarı kullanmak için boş bırakın; dosya workspace/data/templates/ altında bulunmalıdır)",
   "cardLayout": "Kart düzeni",

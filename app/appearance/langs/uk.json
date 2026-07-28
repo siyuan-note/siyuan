@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "Більше немає елементів",
   "docCreateTemplatePathTip": "Шлях до шаблону нового документа (наприклад, <code class='fn__code'>document.md</code>; залиште порожнім, щоб не застосовувати шаблон; файл має бути розміщений у workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "Шлях до шаблону нового документа (наприклад, <code class='fn__code'>document.md</code>; залиште порожнім, щоб використовувати глобальне налаштування; файл має бути розміщений у workspace/data/templates/)",
   "cardLayout": "Макет картки",

@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "No hay más elementos",
   "docCreateTemplatePathTip": "Ruta de la plantilla para documentos nuevos (por ejemplo, <code class='fn__code'>document.md</code>; déjela en blanco para no aplicar ninguna plantilla; el archivo debe colocarse en workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "Ruta de la plantilla para documentos nuevos (por ejemplo, <code class='fn__code'>document.md</code>; déjela en blanco para usar la configuración global; el archivo debe colocarse en workspace/data/templates/)",
   "cardLayout": "Diseño de tarjeta",

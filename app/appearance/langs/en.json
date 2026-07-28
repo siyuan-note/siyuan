@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "No more items",
   "docCreateTemplatePathTip": "New document template path (for example, <code class='fn__code'>document.md</code>; leave blank to apply no template; the file needs to be placed under workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "New document template path (for example, <code class='fn__code'>document.md</code>; leave blank to use the global setting; the file needs to be placed under workspace/data/templates/)",
   "cardLayout": "Card layout",

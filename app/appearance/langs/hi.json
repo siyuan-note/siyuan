@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "कोई और आइटम नहीं",
   "docCreateTemplatePathTip": "नए दस्तावेज़ का टेम्पलेट पथ (उदाहरण के लिए, <code class='fn__code'>document.md</code>; टेम्पलेट लागू न करने के लिए खाली छोड़ें; फ़ाइल को workspace/data/templates/ में रखना आवश्यक है)",
   "docCreateTemplatePathInheritTip": "नए दस्तावेज़ का टेम्पलेट पथ (उदाहरण के लिए, <code class='fn__code'>document.md</code>; वैश्विक सेटिंग का उपयोग करने के लिए खाली छोड़ें; फ़ाइल को workspace/data/templates/ में रखना आवश्यक है)",
   "cardLayout": "कार्ड लेआउट",

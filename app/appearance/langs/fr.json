@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "Aucun autre élément",
   "docCreateTemplatePathTip": "Chemin du modèle des nouveaux documents (par exemple, <code class='fn__code'>document.md</code> ; laisser vide pour ne pas appliquer de modèle ; le fichier doit être placé dans workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "Chemin du modèle des nouveaux documents (par exemple, <code class='fn__code'>document.md</code> ; laisser vide pour utiliser le réglage global ; le fichier doit être placé dans workspace/data/templates/)",
   "cardLayout": "Mise en page de la carte",

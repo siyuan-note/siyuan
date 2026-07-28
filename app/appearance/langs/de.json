@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "Keine weiteren Einträge",
   "docCreateTemplatePathTip": "Vorlagenpfad für neue Dokumente (zum Beispiel <code class='fn__code'>document.md</code>; leer lassen, um keine Vorlage anzuwenden; die Datei muss unter workspace/data/templates/ abgelegt werden)",
   "docCreateTemplatePathInheritTip": "Vorlagenpfad für neue Dokumente (zum Beispiel <code class='fn__code'>document.md</code>; leer lassen, um die globale Einstellung zu verwenden; die Datei muss unter workspace/data/templates/ abgelegt werden)",
   "cardLayout": "Kartenlayout",

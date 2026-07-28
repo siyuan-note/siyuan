@@ -1,4 +1,5 @@
 {
+  "noMoreItems": "אין פריטים נוספים",
   "docCreateTemplatePathTip": "נתיב תבנית למסמך חדש (לדוגמה, <code class='fn__code'>document.md</code>; יש להשאיר ריק כדי לא להחיל תבנית; הקובץ צריך להימצא תחת workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "נתיב תבנית למסמך חדש (לדוגמה, <code class='fn__code'>document.md</code>; יש להשאיר ריק כדי להשתמש בהגדרה הכללית; הקובץ צריך להימצא תחת workspace/data/templates/)",
   "cardLayout": "פריסת כרטיס",

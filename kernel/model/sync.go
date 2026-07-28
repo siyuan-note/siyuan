@@ -50,14 +50,12 @@ func SyncDataDownload() {
 		return
 	}
 
-	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !isProviderOnline(true) { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
-		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
+	unlock, ok := lockSyncRequest(&syncDownloadRequests)
+	if !ok {
 		return
 	}
-
-	lockSync()
-	defer unlockSync()
+	defer unlock()
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
@@ -80,14 +78,12 @@ func SyncDataUpload() {
 		return
 	}
 
-	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !isProviderOnline(true) { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
-		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
+	unlock, ok := lockSyncRequest(&syncUploadRequests)
+	if !ok {
 		return
 	}
-
-	lockSync()
-	defer unlockSync()
+	defer unlock()
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
@@ -102,9 +98,10 @@ func SyncDataUpload() {
 }
 
 var (
-	syncSameCount    = atomic.Int32{}
-	autoSyncErrCount = 0
-	fixSyncInterval  = 5 * time.Minute
+	syncSameCount     = atomic.Int32{}
+	syncDataChangeGen = atomic.Uint64{}
+	autoSyncErrCount  = 0
+	fixSyncInterval   = 5 * time.Minute
 
 	syncPlanTimeLock = sync.Mutex{}
 	syncPlanTime     = time.Now().Add(fixSyncInterval)
@@ -135,12 +132,6 @@ func BootSyncData() {
 		return
 	}
 
-	if !isProviderOnline(false) {
-		BootSyncSucc = 1
-		util.PushErrMsg(Conf.Language(76), 7000)
-		return
-	}
-
 	lockSync()
 	defer unlockSync()
 
@@ -151,7 +142,7 @@ func BootSyncData() {
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	err := bootSyncRepo()
+	err := bootSyncRepoWithDNSRetry()
 	code := 1
 	if err != nil {
 		code = 2
@@ -178,6 +169,27 @@ func unlockSync() {
 	syncLock.Unlock()
 }
 
+type syncRequestState struct {
+	requested atomic.Uint64
+	completed atomic.Uint64
+}
+
+func lockSyncRequest(state *syncRequestState) (unlock func(), ok bool) {
+	request := state.requested.Add(1)
+	lockSync()
+	if state.completed.Load() >= request {
+		unlockSync()
+		return nil, false
+	}
+
+	runRequests := state.requested.Load()
+	unlock = func() {
+		state.completed.Store(runRequests)
+		unlockSync()
+	}
+	return unlock, true
+}
+
 func syncData(exit, byHand bool) {
 	defer logging.Recover()
 
@@ -185,15 +197,19 @@ func syncData(exit, byHand bool) {
 		return
 	}
 
-	lockSync()
-	defer unlockSync()
-
-	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !exit && !isProviderOnline(byHand) { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
-		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
+	requests := &syncAutoRequests
+	if byHand {
+		requests = &syncManualRequests
+	} else if exit {
+		requests = &syncExitRequests
+	}
+	unlock, ok := lockSyncRequest(requests)
+	if !ok {
 		return
 	}
+	defer unlock()
 
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	if exit {
 		ExitSyncSucc = 0
 		logging.LogInfof("sync before exit")
@@ -520,8 +536,13 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 }
 
 var (
-	syncLock  = sync.Mutex{}
-	isSyncing = atomic.Bool{}
+	syncLock             = sync.Mutex{}
+	isSyncing            = atomic.Bool{}
+	syncAutoRequests     = syncRequestState{}
+	syncManualRequests   = syncRequestState{}
+	syncExitRequests     = syncRequestState{}
+	syncUploadRequests   = syncRequestState{}
+	syncDownloadRequests = syncRequestState{}
 )
 
 func CreateCloudSyncDir(name string) (err error) {
@@ -743,6 +764,14 @@ func syncRepoUploadWithDNSRetry() (err error) {
 	return
 }
 
+func bootSyncRepoWithDNSRetry() (err error) {
+	err = bootSyncRepo()
+	if nil != err && flushAndRetryOnDNSError(err) {
+		err = bootSyncRepo()
+	}
+	return
+}
+
 func getSyncIgnoreLines() (ret []string) {
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
 	err := os.MkdirAll(filepath.Dir(ignore), 0755)
@@ -779,6 +808,7 @@ func getSyncIgnoreLines() (ret []string) {
 }
 
 func IncSync() {
+	syncDataChangeGen.Add(1)
 	syncSameCount.Store(0)
 	planSyncAfter(time.Duration(Conf.Sync.Interval) * time.Second)
 }
@@ -787,37 +817,6 @@ func planSyncAfter(d time.Duration) {
 	syncPlanTimeLock.Lock()
 	syncPlanTime = time.Now().Add(d)
 	syncPlanTimeLock.Unlock()
-}
-
-func isProviderOnline(byHand bool) (ret bool) {
-	var checkURL string
-	skipTlsVerify := false
-	switch Conf.Sync.Provider {
-	case conf.ProviderSiYuan:
-		checkURL = util.GetCloudSyncServer()
-	case conf.ProviderS3:
-		checkURL = Conf.Sync.S3.Endpoint
-		skipTlsVerify = Conf.Sync.S3.SkipTlsVerify
-	case conf.ProviderWebDAV:
-		checkURL = Conf.Sync.WebDAV.Endpoint
-		skipTlsVerify = Conf.Sync.WebDAV.SkipTlsVerify
-	case conf.ProviderLocal:
-		checkURL = "file://" + Conf.Sync.Local.Endpoint
-	default:
-		logging.LogWarnf("unknown provider: %d", Conf.Sync.Provider)
-		return false
-	}
-
-	if ret = util.IsOnline(checkURL, skipTlsVerify, 7000); !ret {
-		if 1 > autoSyncErrCount || byHand {
-			util.PushErrMsg(Conf.Language(76)+" (Provider: "+conf.ProviderToStr(Conf.Sync.Provider)+")", 5000)
-		}
-		if !byHand {
-			planSyncAfter(fixSyncInterval)
-			autoSyncErrCount++
-		}
-	}
-	return
 }
 
 var (

@@ -2381,7 +2381,9 @@ export class Gutter {
             this.genWidths([nodeElement], protyle);
             // this.genHeights([nodeElement], protyle);
         }
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
+        if (type !== "NodeThematicBreak" || !protyle.disabled) {
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
+        }
         if (window.siyuan.config.cloudRegion === 0 &&
             !["NodeThematicBreak", "NodeBlockQueryEmbed", "NodeIFrame", "NodeHTMLBlock", "NodeWidget", "NodeVideo", "NodeAudio"].includes(type) &&
             getContenteditableElement(nodeElement)?.textContent.trim() !== "" &&

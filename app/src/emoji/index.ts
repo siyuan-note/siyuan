@@ -305,6 +305,15 @@ export const openEmojiPanel = (
         `${dynamicURL}type=8&color=${encodeURIComponent(dynamicCurrentObj.color)}&content=${encodeURIComponent(dynamicCurrentObj.content)}`,
         targetID,
     );
+    let pastedCustomIconFile: File | undefined;
+    let pastedCustomIconObjectURL = "";
+    const clearPastedCustomIcon = () => {
+        pastedCustomIconFile = undefined;
+        if (pastedCustomIconObjectURL) {
+            URL.revokeObjectURL(pastedCustomIconObjectURL);
+            pastedCustomIconObjectURL = "";
+        }
+    };
 
     const dialog = new Dialog({
         disableAnimation: true,
@@ -312,6 +321,7 @@ export const openEmojiPanel = (
         hideCloseIcon: true,
         width: isMobile() ? "80vw" : "368px",
         height: "50vh",
+        destroyCallback: clearPastedCustomIcon,
         content: `<div class="emojis">
     <div class="emojis__tabheader">
         <div data-type="tab-emoji" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.emoji}"><svg><use xlink:href="#iconEmoji"></use></svg></div>
@@ -426,7 +436,7 @@ export const openEmojiPanel = (
             </div>
         </div>
         <div class="fn__none emojis__link" data-type="tab-link">
-            <input class="b3-text-field fn__block" data-type="network-icon-url" placeholder="${window.siyuan.languages.insertImgURL} / Base64">
+            <input class="b3-text-field fn__block" data-type="network-icon-url" placeholder="${window.siyuan.languages.insertImgURL} / Base64 / Ctrl+V">
             <input class="b3-text-field fn__block fn__none emojis__link-name" data-type="custom-icon-name" placeholder="${window.siyuan.languages.fileName} (path/to/icon)">
             <div class="fn__flex emojis__link-action">
                 <div class="fn__flex-1"></div>
@@ -459,13 +469,22 @@ export const openEmojiPanel = (
     dialog.element.querySelector(".emojis__item").classList.add("emojis__item--current");
     const networkIconInputElement = dialog.element.querySelector('[data-type="network-icon-url"]') as HTMLInputElement;
     const customIconNameElement = dialog.element.querySelector('[data-type="custom-icon-name"]') as HTMLInputElement;
+    const linkIconElement = dialog.element.querySelector('[data-type="tab-link"].emojis__link') as HTMLElement;
     const networkIconPreviewElement = dialog.element.querySelector(".emojis__link-preview");
     networkIconInputElement.value = normalizeNetworkIconURL(dynamicImgElement?.getAttribute("src") || "") || "";
     const renderNetworkIconPreview = () => {
         const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
         const base64Image = parseBase64Image(networkIconInputElement.value);
-        customIconNameElement.classList.toggle("fn__none", !networkIconInputElement.value.trim().toLowerCase().startsWith("data:image/"));
+        const hasCustomIcon = !!pastedCustomIconFile ||
+            networkIconInputElement.value.trim().toLowerCase().startsWith("data:image/");
+        customIconNameElement.classList.toggle("fn__none", !hasCustomIcon);
         networkIconPreviewElement.innerHTML = "";
+        if (pastedCustomIconObjectURL) {
+            const imageElement = document.createElement("img");
+            imageElement.src = pastedCustomIconObjectURL;
+            networkIconPreviewElement.append(imageElement);
+            return;
+        }
         if (base64Image) {
             const imageElement = document.createElement("img");
             imageElement.src = networkIconInputElement.value.trim();
@@ -505,8 +524,18 @@ export const openEmojiPanel = (
             return;
         }
 
-        const base64Image = parseBase64Image(networkIconInputElement.value);
-        if (!base64Image) {
+        let customIconFile = pastedCustomIconFile;
+        if (!customIconFile) {
+            const base64Image = parseBase64Image(networkIconInputElement.value);
+            if (base64Image) {
+                customIconFile = new File(
+                    [base64Image.bytes],
+                    `icon.${base64Image.extension}`,
+                    {type: base64Image.mimeType},
+                );
+            }
+        }
+        if (!customIconFile) {
             showMessage(window.siyuan.languages.invalid);
             return;
         }
@@ -518,11 +547,7 @@ export const openEmojiPanel = (
 
         const formData = new FormData();
         formData.append("name", customIconNameElement.value);
-        formData.append("file", new File(
-            [base64Image.bytes],
-            `icon.${base64Image.extension}`,
-            {type: base64Image.mimeType},
-        ));
+        formData.append("file", customIconFile);
         const response = await fetchSyncPost("/api/system/addCustomEmoji", formData);
         if (response.code !== 0) {
             return;
@@ -530,7 +555,28 @@ export const openEmojiPanel = (
         reloadEmoji();
         applyLinkIcon(response.data.path);
     };
-    networkIconInputElement.addEventListener("input", renderNetworkIconPreview);
+    networkIconInputElement.addEventListener("input", () => {
+        clearPastedCustomIcon();
+        renderNetworkIconPreview();
+    });
+    linkIconElement.addEventListener("paste", (event: ClipboardEvent) => {
+        const clipboardItems = Array.from(event.clipboardData?.items || []);
+        const imageItem = clipboardItems.find(item => item.kind === "file" && item.type.startsWith("image/"));
+        const imageFile = imageItem?.getAsFile() ||
+            Array.from(event.clipboardData?.files || []).find(item => item.type.startsWith("image/"));
+        if (!imageFile) {
+            return;
+        }
+
+        event.preventDefault();
+        clearPastedCustomIcon();
+        pastedCustomIconFile = imageFile;
+        pastedCustomIconObjectURL = URL.createObjectURL(imageFile);
+        networkIconInputElement.value = "";
+        customIconNameElement.value = imageFile.name.replace(/\.[^.]+$/, "");
+        renderNetworkIconPreview();
+        customIconNameElement.focus();
+    });
     [networkIconInputElement, customIconNameElement].forEach(item => {
         item.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.isComposing || event.key !== "Enter") {

@@ -242,24 +242,31 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     }
     /// #endif
     if (!window.siyuan.config.readonly) {
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "changeIcon",
-            label: window.siyuan.languages.changeIcon,
-            icon: "iconEmoji",
-            click: () => {
-                const iconElement = liElement.querySelector<HTMLElement>(".b3-list-item__icon");
-                if (!iconElement) {
-                    return;
+        let showChangeIcon = true;
+        /// #if !MOBILE
+        showChangeIcon = window.siyuan.config.fileTree.docIconClickExpand &&
+            !window.siyuan.config.fileTree.boxDocEnabled;
+        /// #endif
+        if (showChangeIcon) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "changeIcon",
+                label: window.siyuan.languages.changeIcon,
+                icon: "iconEmoji",
+                click: () => {
+                    const iconElement = liElement.querySelector<HTMLElement>(".b3-list-item__icon");
+                    if (!iconElement) {
+                        return;
+                    }
+                    const rect = iconElement.getBoundingClientRect();
+                    openEmojiPanel(notebookId, "notebook", {
+                        x: rect.left,
+                        y: rect.bottom,
+                        h: rect.height,
+                        w: rect.width,
+                    }, undefined, iconElement.querySelector<HTMLElement>("img"));
                 }
-                const rect = iconElement.getBoundingClientRect();
-                openEmojiPanel(notebookId, "notebook", {
-                    x: rect.left,
-                    y: rect.bottom,
-                    h: rect.height,
-                    w: rect.width,
-                }, undefined, iconElement.querySelector<HTMLElement>("img"));
-            }
-        }).element);
+            }).element);
+        }
         window.siyuan.menus.menu.append(renameMenu({
             path: "/",
             notebookId,

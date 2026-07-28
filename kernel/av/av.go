@@ -534,6 +534,64 @@ func GetAttributeViewNameInBox(avID, boxID string) (ret string, err error) {
 	return getAttributeViewNameByPathInBox(avJSONPath, boxID)
 }
 
+type AttributeViewSearchView struct {
+	ID         string     `json:"id"`
+	Name       string     `json:"name"`
+	LayoutType LayoutType `json:"type"`
+}
+
+type AttributeViewSearchInfo struct {
+	Spec  int                        `json:"spec"`
+	Name  string                     `json:"name"`
+	Views []*AttributeViewSearchView `json:"views"`
+}
+
+func parseAttributeViewSearchInfo(data []byte) (ret *AttributeViewSearchInfo, err error) {
+	ret = &AttributeViewSearchInfo{}
+	if err = json.Unmarshal(data, ret); err != nil {
+		return
+	}
+	err = CheckSpec(&AttributeView{Spec: ret.Spec})
+	return
+}
+
+func GetAttributeViewSearchInfoInBox(avID, boxID string) (ret *AttributeViewSearchInfo, err error) {
+	avJSONPath, avBoxID := FindAttributeViewPathInBox(avID, boxID)
+	if avJSONPath == "" {
+		return
+	}
+
+	if cached, ok := cache.GetAVSearchDataInBox[*AttributeViewSearchInfo](avID, avBoxID); ok {
+		return cached, nil
+	}
+
+	var data []byte
+	if cached, ok := cache.GetAVDataInBox(avID, avBoxID); ok {
+		data = cached
+	} else {
+		if data, err = filelock.ReadFile(avJSONPath); err != nil {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avJSONPath, err)
+			return
+		}
+		if avBoxID != "" {
+			if data, err = decryptAVData(avBoxID, avID, data); err != nil {
+				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avJSONPath, err)
+				return
+			}
+		} else if util.IsCiphertext(data) {
+			return
+		}
+		cache.SetAVDataInBox(avID, avBoxID, data)
+	}
+
+	if ret, err = parseAttributeViewSearchInfo(data); err != nil {
+		logging.LogErrorf("unmarshal attribute view search info [%s] failed: %s", avID, err)
+		return nil, err
+	}
+	cache.SetAVSearchDataInBox(avID, avBoxID, ret)
+	return
+}
+
 func GetAttributeViewContent(avID string) (content string) {
 	if "" == avID {
 		return

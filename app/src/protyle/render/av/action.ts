@@ -906,40 +906,46 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             label: window.siyuan.languages.addToDatabase,
             icon: "iconDatabase",
             click() {
-                openSearchAV(blockElement.getAttribute("data-av-id"), rowElement, (listItemElement) => {
-                    const srcs: IOperationSrcs[] = [];
-                    const sourceIds: string[] = [];
-                    selectedItemInfos.forEach((item, index) => {
-                        const primaryInfo = primaryRows[index];
-                        srcs.push({
-                            itemID: Lute.NewNodeID(),
-                            content: primaryInfo.content,
-                            id: primaryInfo.blockID,
-                            isDetached: primaryInfo.isDetached,
+                openSearchAV({
+                    avID: blockElement.getAttribute("data-av-id"),
+                    target: rowElement,
+                    purpose: "addToDatabase",
+                    blockID: blockElement.getAttribute("data-node-id"),
+                    callback: (listItemElement) => {
+                        const srcs: IOperationSrcs[] = [];
+                        const sourceIds: string[] = [];
+                        selectedItemInfos.forEach((item, index) => {
+                            const primaryInfo = primaryRows[index];
+                            srcs.push({
+                                itemID: Lute.NewNodeID(),
+                                content: primaryInfo.content,
+                                id: primaryInfo.blockID,
+                                isDetached: primaryInfo.isDetached,
+                            });
+                            sourceIds.push(item.itemID);
                         });
-                        sourceIds.push(item.itemID);
-                    });
-                    const avID = listItemElement.dataset.avId;
-                    const viewID = listItemElement.dataset.viewId;
-                    transaction(protyle, [{
-                        action: "insertAttrViewBlock",
-                        ignoreDefaultFill: viewID ? false : true,
-                        viewID,
-                        avID,
-                        srcs,
-                        context: {ignoreTip: "true"},
-                        blockID: listItemElement.dataset.blockId,
-                        groupID: rowElement.parentElement.getAttribute("data-group-id")
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: listItemElement.dataset.blockId,
-                        data: dayjs().format("YYYYMMDDHHmmss"),
-                    }], [{
-                        action: "removeAttrViewBlock",
-                        srcIDs: sourceIds,
-                        avID,
-                    }]);
-                }, true, blockElement.getAttribute("data-node-id"));
+                        const avID = listItemElement.dataset.avId;
+                        const viewID = listItemElement.dataset.viewId;
+                        transaction(protyle, [{
+                            action: "insertAttrViewBlock",
+                            ignoreDefaultFill: viewID ? false : true,
+                            viewID,
+                            avID,
+                            srcs,
+                            context: {ignoreTip: "true"},
+                            blockID: listItemElement.dataset.blockId,
+                            groupID: rowElement.parentElement.getAttribute("data-group-id")
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: listItemElement.dataset.blockId,
+                            data: dayjs().format("YYYYMMDDHHmmss"),
+                        }], [{
+                            action: "removeAttrViewBlock",
+                            srcIDs: sourceIds,
+                            avID,
+                        }]);
+                    }
+                });
             }
         });
         if (selectedItemInfos.length === 1) {

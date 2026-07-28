@@ -992,7 +992,14 @@ func searchAttributeView(c *gin.Context) {
 			excludes = append(excludes, e.(string))
 		}
 	}
-	results := model.SearchAttributeView(keyword, excludes, currentAvID, currentBlockID)
+	includeViewMatches, _ := arg["includeViewMatches"].(bool)
+	results := model.SearchAttributeView(model.SearchAttributeViewOptions{
+		Keyword:            keyword,
+		ExcludeAvIDs:       excludes,
+		CurrentAvID:        currentAvID,
+		CurrentBlockID:     currentBlockID,
+		IncludeViewMatches: includeViewMatches,
+	})
 	ret.Data = map[string]any{
 		"results": results,
 	}

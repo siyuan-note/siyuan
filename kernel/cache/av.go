@@ -31,6 +31,9 @@ var avCache, _ = ristretto.NewCache(&ristretto.Config{
 var avCacheKeys = map[string]map[string]struct{}{}
 var avCacheKeysLock sync.Mutex
 
+var avSearchDataCache = map[string]any{}
+var avSearchDataCacheLock sync.RWMutex
+
 func avCacheKey(avID, boxID string) string {
 	return boxID + "\x00" + avID
 }
@@ -57,6 +60,7 @@ func SetAVDataInBox(avID, boxID string, raw []byte) {
 	}
 	key := avCacheKey(avID, boxID)
 	avCache.Set(key, raw, int64(len(raw)))
+	removeAVSearchDataByKey(key)
 
 	avCacheKeysLock.Lock()
 	defer avCacheKeysLock.Unlock()
@@ -71,6 +75,7 @@ func SetAVDataInBox(avID, boxID string, raw []byte) {
 func RemoveAVDataInBox(avID, boxID string) {
 	key := avCacheKey(avID, boxID)
 	avCache.Del(key)
+	removeAVSearchDataByKey(key)
 
 	avCacheKeysLock.Lock()
 	defer avCacheKeysLock.Unlock()
@@ -92,7 +97,9 @@ func RemoveAVData(avID string) {
 	avCache.Del(avCacheKey(avID, ""))
 	for key := range keys {
 		avCache.Del(key)
+		removeAVSearchDataByKey(key)
 	}
+	removeAVSearchDataByKey(avCacheKey(avID, ""))
 }
 
 func ClearAVCache() {
@@ -100,4 +107,34 @@ func ClearAVCache() {
 	avCacheKeys = map[string]map[string]struct{}{}
 	avCacheKeysLock.Unlock()
 	avCache.Clear()
+
+	avSearchDataCacheLock.Lock()
+	avSearchDataCache = map[string]any{}
+	avSearchDataCacheLock.Unlock()
+}
+
+func GetAVSearchDataInBox[T any](avID, boxID string) (ret T, ok bool) {
+	avSearchDataCacheLock.RLock()
+	data := avSearchDataCache[avCacheKey(avID, boxID)]
+	avSearchDataCacheLock.RUnlock()
+	if data == nil {
+		return
+	}
+	ret, ok = data.(T)
+	return
+}
+
+func SetAVSearchDataInBox(avID, boxID string, data any) {
+	if data == nil {
+		return
+	}
+	avSearchDataCacheLock.Lock()
+	avSearchDataCache[avCacheKey(avID, boxID)] = data
+	avSearchDataCacheLock.Unlock()
+}
+
+func removeAVSearchDataByKey(key string) {
+	avSearchDataCacheLock.Lock()
+	delete(avSearchDataCache, key)
+	avSearchDataCacheLock.Unlock()
 }

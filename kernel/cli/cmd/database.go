@@ -40,7 +40,7 @@ var databaseSearchCmd = &cobra.Command{
 	Short: "Search databases by name",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		results := model.SearchAttributeView(args[0], nil, "", "")
+		results := model.SearchAttributeView(model.SearchAttributeViewOptions{Keyword: args[0]})
 		switch outputFormat {
 		case "json":
 			data, _ := json.MarshalIndent(results, "", "  ")

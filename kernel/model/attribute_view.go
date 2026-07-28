@@ -2669,31 +2669,59 @@ type AvSearchResult struct {
 	ViewLayout av.LayoutType     `json:"viewLayout"`
 	BlockID    string            `json:"blockID"`
 	HPath      string            `json:"hPath"`
+	Matched    bool              `json:"matched,omitempty"`
 	Children   []*AvSearchResult `json:"children,omitempty"`
 }
 
 type AvSearchTempResult struct {
-	AvID      string
-	AvName    string
-	AvUpdated int64
-	Score     float64
+	AvID           string
+	AvName         string
+	AvUpdated      int64
+	Score          float64
+	SearchInfo     *av.AttributeViewSearchInfo
+	MatchedViewIDs map[string]bool
 }
 
-func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, currentBlockID string) (ret []*AvSearchResult) {
+type SearchAttributeViewOptions struct {
+	Keyword            string
+	ExcludeAvIDs       []string
+	CurrentAvID        string
+	CurrentBlockID     string
+	IncludeViewMatches bool
+}
+
+func matchAttributeViewSearchName(name string, keywords []string) (score float64, hit bool) {
+	if name == "" || len(keywords) == 0 {
+		return
+	}
+
+	lowerName := strings.ToLower(name)
+	hit = true
+	for _, keyword := range keywords {
+		lowerKeyword := strings.ToLower(keyword)
+		if !strings.Contains(lowerName, lowerKeyword) {
+			return 0, false
+		}
+		score += smetrics.JaroWinkler(name, keyword, 0.7, 4)
+	}
+	return
+}
+
+func SearchAttributeView(options SearchAttributeViewOptions) (ret []*AvSearchResult) {
 	waitForSyncingStorages()
 
 	ret = []*AvSearchResult{}
-	keyword = strings.TrimSpace(keyword)
+	keyword := strings.TrimSpace(options.Keyword)
 	keywords := strings.Fields(keyword)
 
 	var avSearchTmpResults []*AvSearchTempResult
 	boxID := ""
-	if currentBlockID != "" {
-		if bt := treenode.GetBlockTree(currentBlockID); nil != bt && IsEncryptedBox(bt.BoxID) {
+	if options.CurrentBlockID != "" {
+		if bt := treenode.GetBlockTree(options.CurrentBlockID); nil != bt && IsEncryptedBox(bt.BoxID) {
 			boxID = bt.BoxID
 		}
-	} else if currentAvID != "" {
-		_, boxID = av.FindAttributeViewPath(currentAvID)
+	} else if options.CurrentAvID != "" {
+		_, boxID = av.FindAttributeViewPath(options.CurrentAvID)
 	}
 	avDir := filepath.Join(util.DataDir, "storage", "av")
 	if boxID != "" {
@@ -2720,7 +2748,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 			continue
 		}
 
-		if gulu.Str.Contains(id, excludeAvIDs) {
+		if gulu.Str.Contains(id, options.ExcludeAvIDs) {
 			continue
 		}
 
@@ -2728,23 +2756,42 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 			continue
 		}
 
-		name, _ := av.GetAttributeViewNameInBox(id, boxID)
+		var searchInfo *av.AttributeViewSearchInfo
+		var name string
+		if options.IncludeViewMatches && keyword != "" {
+			searchInfo, _ = av.GetAttributeViewSearchInfoInBox(id, boxID)
+			if searchInfo != nil {
+				name = searchInfo.Name
+			}
+		}
+		if searchInfo == nil {
+			name, _ = av.GetAttributeViewNameInBox(id, boxID)
+		}
+
 		info, _ := entry.Info()
 		if "" != keyword {
-			score := 0.0
-			hit := false
-			for _, k := range keywords {
-				if strings.Contains(strings.ToLower(name), strings.ToLower(k)) {
-					score += smetrics.JaroWinkler(name, k, 0.7, 4)
-					hit = true
-				} else {
-					hit = false
-					break
+			score, hit := matchAttributeViewSearchName(name, keywords)
+			matchedViewIDs := map[string]bool{}
+			if options.IncludeViewMatches && searchInfo != nil {
+				for _, view := range searchInfo.Views {
+					viewScore, viewHit := matchAttributeViewSearchName(view.Name, keywords)
+					if viewHit {
+						matchedViewIDs[view.ID] = true
+						if viewScore > score {
+							score = viewScore
+						}
+					}
 				}
 			}
 
-			if hit {
-				a := &AvSearchTempResult{AvID: id, AvName: name, Score: score}
+			if hit || len(matchedViewIDs) > 0 {
+				a := &AvSearchTempResult{
+					AvID:           id,
+					AvName:         name,
+					Score:          score,
+					SearchInfo:     searchInfo,
+					MatchedViewIDs: matchedViewIDs,
+				}
 				if nil != info && !info.ModTime().IsZero() {
 					a.AvUpdated = info.ModTime().UnixMilli()
 				}
@@ -2795,8 +2842,11 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 			continue
 		}
 
-		attrView, _ := av.ParseAttributeViewInBox(tmpResult.AvID, boxID)
-		if nil == attrView {
+		searchInfo := tmpResult.SearchInfo
+		if searchInfo == nil {
+			searchInfo, _ = av.GetAttributeViewSearchInfoInBox(tmpResult.AvID, boxID)
+		}
+		if searchInfo == nil {
 			continue
 		}
 
@@ -2810,11 +2860,6 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 			hPath = box.Name + hPath
 		}
 
-		name := tmpResult.AvName
-		if "" == name {
-			name = Conf.language(267)
-		}
-
 		parent := &AvSearchResult{
 			AvID:    tmpResult.AvID,
 			AvName:  tmpResult.AvName,
@@ -2823,7 +2868,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 		}
 		ret = append(ret, parent)
 
-		for _, view := range attrView.Views {
+		for _, view := range searchInfo.Views {
 			child := &AvSearchResult{
 				AvID:       tmpResult.AvID,
 				AvName:     tmpResult.AvName,
@@ -2832,6 +2877,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 				ViewLayout: view.LayoutType,
 				BlockID:    node.ID,
 				HPath:      hPath,
+				Matched:    tmpResult.MatchedViewIDs[view.ID],
 			}
 			parent.Children = append(parent.Children, child)
 		}

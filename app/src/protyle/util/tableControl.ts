@@ -132,19 +132,19 @@ export class TableControl {
         this.element = document.createElement("div");
         this.element.className = "protyle-table-control";
         this.element.setAttribute("contenteditable", "false");
-        this.element.innerHTML = `<button class="protyle-table-control__handle protyle-table-control__handle--row fn__none" data-type="row" aria-label="${window.siyuan.languages.row}">
+        this.element.innerHTML = `<button type="button" class="protyle-table-control__handle protyle-table-control__handle--row b3-tooltips b3-tooltips__e fn__none" data-type="row" aria-label="${window.siyuan.languages.row}">
     <svg><use xlink:href="#iconDrag"></use></svg>
 </button>
-<button class="protyle-table-control__handle protyle-table-control__handle--column fn__none" data-type="column" aria-label="${window.siyuan.languages.column}">
+<button type="button" class="protyle-table-control__handle protyle-table-control__handle--column b3-tooltips b3-tooltips__s fn__none" data-type="column" aria-label="${window.siyuan.languages.column}">
     <svg><use xlink:href="#iconDrag"></use></svg>
 </button>
-<button class="protyle-table-control__handle protyle-table-control__handle--cell fn__none" data-type="cell" aria-label="${window.siyuan.languages.more}">
+<button type="button" class="protyle-table-control__handle protyle-table-control__handle--cell b3-tooltips b3-tooltips__w fn__none" data-type="cell" aria-label="${window.siyuan.languages.more}">
     <svg><use xlink:href="#iconMore"></use></svg>
 </button>
-<button class="protyle-table-control__add protyle-table-control__add--row fn__none" data-type="add-row" aria-label="${window.siyuan.languages.insertRowBelow}">
+<button type="button" class="protyle-table-control__add protyle-table-control__add--row b3-tooltips b3-tooltips__n fn__none" data-type="add-row" aria-label="${window.siyuan.languages.insertRowBelow}">
     <svg><use xlink:href="#iconAdd"></use></svg>
 </button>
-<button class="protyle-table-control__add protyle-table-control__add--column fn__none" data-type="add-column" aria-label="${window.siyuan.languages.insertColumnRight}">
+<button type="button" class="protyle-table-control__add protyle-table-control__add--column b3-tooltips b3-tooltips__w fn__none" data-type="add-column" aria-label="${window.siyuan.languages.insertColumnRight}">
     <svg><use xlink:href="#iconAdd"></use></svg>
 </button>
 <div class="protyle-table-control__drop fn__none"></div>`;
@@ -630,6 +630,14 @@ export class TableControl {
             const viewportRect = this.getTableViewportRect(table);
             const visibleCellRect = intersectRects(cellRect, viewportRect);
             const visibleRowRect = intersectRects(rowRect, viewportRect);
+            const merged = this.selection?.table === table && this.selectionGrid ?
+                this.selectionGrid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1) :
+                Array.from(table.querySelectorAll<HTMLTableCellElement>("th:not(.fn__none), td:not(.fn__none)"))
+                    .some(item => item.rowSpan > 1 || item.colSpan > 1);
+            this.rowHandle.classList.toggle("protyle-table-control__handle--drag-disabled", merged ||
+                (this.selection?.table === table && this.selection.mode === "row" &&
+                    this.selection.indexes.size > 1 && this.selection.indexes.has(0)));
+            this.columnHandle.classList.toggle("protyle-table-control__handle--drag-disabled", merged);
             if (visibleRowRect.width > 0 && visibleRowRect.height > 0) {
                 this.rowHandle.classList.remove("fn__none");
                 this.setPosition(this.rowHandle, viewportRect.left - 11,
@@ -746,8 +754,10 @@ export class TableControl {
                     icon: "iconCopy",
                     label: window.siyuan.languages.duplicate,
                     disabled: merged,
+                    accelerator: merged ? window.siyuan.languages.cancelMerged : undefined,
                     click: () => this.duplicateRowsOrColumns(),
                 }).element);
+                menu.append(new MenuItem({type: "separator"}).element);
             }
             menu.append(new MenuItem({
                 icon: "iconClear",
@@ -765,11 +775,13 @@ export class TableControl {
                 if (this.selection.mode === "column") {
                     this.appendAlignmentMenus();
                 }
+                menu.append(new MenuItem({type: "separator"}).element);
                 menu.append(new MenuItem({
-                    icon: this.selection.mode === "row" ? "iconTrashcan" : "iconTrashcan",
+                    icon: "iconTrashcan",
                     label: this.selection.mode === "row" ? window.siyuan.languages["delete-row"] :
                         window.siyuan.languages["delete-column"],
                     disabled: merged,
+                    accelerator: merged ? window.siyuan.languages.cancelMerged : undefined,
                     click: () => this.deleteSelection(false),
                 }).element);
             }
@@ -784,10 +796,13 @@ export class TableControl {
         if (this.selection.mode === "row") {
             const above = indexes[0];
             const below = indexes[indexes.length - 1] + 1;
+            const canInsertAbove = this.canInsertAtBoundary(grid, "row", above);
+            const canInsertBelow = this.canInsertAtBoundary(grid, "row", below);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertRowAbove,
-                disabled: !this.canInsertAtBoundary(grid, "row", above),
+                disabled: !canInsertAbove,
+                accelerator: canInsertAbove ? undefined : window.siyuan.languages.cancelMerged,
                 click: () => {
                     this.insertRowAt(selection.node, selection.table, above);
                 },
@@ -795,7 +810,8 @@ export class TableControl {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertRowBelow,
-                disabled: !this.canInsertAtBoundary(grid, "row", below),
+                disabled: !canInsertBelow,
+                accelerator: canInsertBelow ? undefined : window.siyuan.languages.cancelMerged,
                 click: () => {
                     this.insertRowAt(selection.node, selection.table, below);
                 },
@@ -803,10 +819,13 @@ export class TableControl {
         } else if (this.selection.mode === "column") {
             const left = indexes[0];
             const right = indexes[indexes.length - 1] + 1;
+            const canInsertLeft = this.canInsertAtBoundary(grid, "column", left);
+            const canInsertRight = this.canInsertAtBoundary(grid, "column", right);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertColumnLeft,
-                disabled: !this.canInsertAtBoundary(grid, "column", left),
+                disabled: !canInsertLeft,
+                accelerator: canInsertLeft ? undefined : window.siyuan.languages.cancelMerged,
                 click: () => {
                     this.insertColumnAt(selection.node, selection.table, left);
                 },
@@ -814,7 +833,8 @@ export class TableControl {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertColumnRight,
-                disabled: !this.canInsertAtBoundary(grid, "column", right),
+                disabled: !canInsertRight,
+                accelerator: canInsertRight ? undefined : window.siyuan.languages.cancelMerged,
                 click: () => {
                     this.insertColumnAt(selection.node, selection.table, right);
                 },
@@ -942,6 +962,7 @@ export class TableControl {
             checked: verticalAlign === "",
             click: () => this.setCellStyle("vertical-align", ""),
         }).element);
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         const cells = this.getSelectedCells();
         const mergedCell = cells.length === 1 && (cells[0].rowSpan > 1 || cells[0].colSpan > 1);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -953,6 +974,7 @@ export class TableControl {
     }
 
     private appendAlignmentMenus() {
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         const textAlign = this.getCommonCellStyle("text-align");
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconAlignLeft",
@@ -994,10 +1016,12 @@ export class TableControl {
     }
 
     private getBackgroundMenus(): IMenu[] {
+        const backgroundColor = this.getCommonCellStyle("background-color");
         const colors = ["", ...Array.from({length: 13}, (_, index) => `var(--b3-font-background${index + 1})`)];
         return colors.map((color, index) => ({
             label: index === 0 ? window.siyuan.languages.default : `${window.siyuan.languages.colorPrimary} ${index}`,
             iconHTML: `<span class="protyle-table-control__color" style="${color ? `background-color: ${color}` : ""}"></span>`,
+            checked: backgroundColor === color,
             click: () => this.setCellStyle("background-color", color),
         }));
     }

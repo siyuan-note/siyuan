@@ -766,12 +766,8 @@ table + .protyle-action__table {
       cursor: grab;
     }
 
-    &--column {
-      transform: translate(-50%, -50%) rotate(90deg);
-
-      svg {
-        transform: rotate(-90deg);
-      }
+    &--drag-disabled {
+      cursor: pointer;
     }
 
     &--cell {

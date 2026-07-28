@@ -337,7 +337,7 @@ func InitConf() {
 		Conf.FileTree.CreateDocAtTop = func() *bool { b := true; return &b }()
 	}
 	if nil == Conf.FileTree.BoxDocEnabled {
-		// 历史工作空间默认关闭顶层笔记本文档，新工作空间使用 NewFileTree 中的默认值。
+		// 配置缺失时默认关闭顶层笔记本文档。
 		Conf.FileTree.BoxDocEnabled = func() *bool { b := false; return &b }()
 	}
 

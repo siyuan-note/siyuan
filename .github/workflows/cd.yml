@@ -362,6 +362,20 @@ jobs:
         run: pnpm run ${{ matrix.config.electron_args }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
+      - name: Verify RPM Package Contents
+        if: matrix.config.goos == 'linux'
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+        run: |
+          for package in build/*.rpm; do
+            test -f "$package"
+            build_id_entries="$(rpm -qpl "$package" | awk '/^\/usr\/lib\/\.build-id(\/|$)/')"
+            if [ -n "$build_id_entries" ]; then
+              echo "Unexpected build-id entries in $package:"
+              echo "$build_id_entries"
+              exit 1
+            fi
+          done
+
       - name: Upload Build Artifacts (Non-Linux)
         if: matrix.config.goos != 'linux'
         uses: actions/upload-artifact@v7

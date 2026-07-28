@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "เส้นทางเทมเพลตเอกสารใหม่ (เช่น <code class='fn__code'>document.md</code> เว้นว่างไว้หากไม่ต้องการใช้เทมเพลต และต้องวางไฟล์ไว้ใน workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "เส้นทางเทมเพลตเอกสารใหม่ (เช่น <code class='fn__code'>document.md</code> เว้นว่างไว้เพื่อใช้การตั้งค่าส่วนกลาง และต้องวางไฟล์ไว้ใน workspace/data/templates/)",
   "cardLayout": "เค้าโครงการ์ด",
   "compact": "กะทัดรัด",
   "fullRow": "เต็มแถว",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "ที่ตั้งบันทึกเริ่มต้นของเอกสารใหม่",
 	"fileTree13": "เช่น <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code> ขึ้นต้นด้วย <code class='fn__code'>/</code> ใช้เส้นทางรากของสมุดบันทึกที่เลือก ไม่ขึ้นต้นด้วย <code class='fn__code'>/</code> ใช้เส้นทางสัมพัทธ์ของเอกสารปัจจุบัน",
 	"fileTree14": "เส้นทางบันทึก (สามารถใช้ตัวแปรเทมเพลตรูปแบบวันที่ได้ เช่น <code class='fn__code'>/บันทึกประจำวัน/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "เส้นทางเทมเพลต (เช่น <code class='fn__code'>dailynote.md</code> ต้องวางไฟล์ไว้ใน workspace/data/templates/)",
+	"fileTree15": "เส้นทางเทมเพลตบันทึกประจำวัน (เช่น <code class='fn__code'>dailynote.md</code> เว้นว่างไว้หากไม่ต้องการใช้เทมเพลต และต้องวางไฟล์ไว้ใน workspace/data/templates/)",
 	"fileTree16": "จำนวนสูงสุดที่แสดง",
 	"fileTree17": "หากมีเอกสารย่อย/แท็กจำนวนมาก สามารถใช้ข้อจำกัดนี้เพื่อปรับปรุงประสิทธิภาพ",
 	"fileTree18": "อนุญาตให้สร้างเอกสารย่อยที่ลึกกว่า 7 ระดับ",

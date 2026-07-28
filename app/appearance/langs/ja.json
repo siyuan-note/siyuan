@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "新規文書のテンプレートパス（例：<code class='fn__code'>document.md</code>。テンプレートを適用しない場合は空欄にします。ファイルは workspace/data/templates/ に配置してください）",
+  "docCreateTemplatePathInheritTip": "新規文書のテンプレートパス（例：<code class='fn__code'>document.md</code>。グローバル設定を使用する場合は空欄にします。ファイルは workspace/data/templates/ に配置してください）",
   "cardLayout": "カードレイアウト",
   "compact": "コンパクト",
   "fullRow": "行全体",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "新規ドキュメントのデフォルト保存場所",
 	"fileTree13": "例: <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>、<code class='fn__code'>/</code> で始まる場合は選択したノートブックのルートパスを使用し、<code class='fn__code'>/</code> で始まらない場合は現在のドキュメントの相対パスを使用します",
 	"fileTree14": "保存パス (日付形式のテンプレート変数をサポート。例: <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "テンプレートパス (例: <code class='fn__code'>dailynote.md</code>、ファイルは workspace/data/templates/ に配置します)",
+	"fileTree15": "デイリーノートのテンプレートパス（例：<code class='fn__code'>dailynote.md</code>。テンプレートを適用しない場合は空欄にします。ファイルは workspace/data/templates/ に配置してください）",
 	"fileTree16": "最大表示件数",
 	"fileTree17": "サブドキュメント/タグが数多くある場合はこの制限によりパフォーマンスが向上します",
 	"fileTree18": "7レベルより深いサブドキュメントの作成を許可",

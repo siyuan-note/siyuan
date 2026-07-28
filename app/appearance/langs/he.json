@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "נתיב תבנית למסמך חדש (לדוגמה, <code class='fn__code'>document.md</code>; יש להשאיר ריק כדי לא להחיל תבנית; הקובץ צריך להימצא תחת workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "נתיב תבנית למסמך חדש (לדוגמה, <code class='fn__code'>document.md</code>; יש להשאיר ריק כדי להשתמש בהגדרה הכללית; הקובץ צריך להימצא תחת workspace/data/templates/)",
   "cardLayout": "פריסת כרטיס",
   "compact": "קומפקטי",
   "fullRow": "שורה מלאה",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "נתיב שמירה ברירת מחדל למסמך חדש",
 	"fileTree13": "לדוגמה, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, מתחיל ב-<code class='fn__code'>/</code> משתמש בנתיב השורש של המחברת שנבחרה, לא מתחיל ב-<code class='fn__code'>/</code> משתמש בנתיב היחסי של המסמך הנוכחי",
 	"fileTree14": "מסלול השמירה (תומך במשתני תבנית בתאריך, כגון <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "מסלול תבנית (למשל, <code class='fn__code'>dailynote.md</code>, הקובץ צריך להיות ממוקם תחת הממשק/נתונים/templates/)",
+	"fileTree15": "נתיב תבנית ליומן (לדוגמה, <code class='fn__code'>dailynote.md</code>; יש להשאיר ריק כדי לא להחיל תבנית; הקובץ צריך להימצא תחת workspace/data/templates/)",
 	"fileTree16": "מספר מרבי לרשימה",
 	"fileTree17": "אם יש יותר מדי תתי מסמכים/תגים, ניתן להשתמש בהגבלת זו כדי לשפר את הביצועים",
 	"fileTree18": "מאפשר יצירת תתי מסמכים עמוקים מ-7 רמות",

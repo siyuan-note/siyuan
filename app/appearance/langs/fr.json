@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Chemin du modèle des nouveaux documents (par exemple, <code class='fn__code'>document.md</code> ; laisser vide pour ne pas appliquer de modèle ; le fichier doit être placé dans workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "Chemin du modèle des nouveaux documents (par exemple, <code class='fn__code'>document.md</code> ; laisser vide pour utiliser le réglage global ; le fichier doit être placé dans workspace/data/templates/)",
   "cardLayout": "Mise en page de la carte",
   "compact": "Compact",
   "fullRow": "Ligne entière",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Chemin d'enregistrement par défaut pour les nouveaux documents",
 	"fileTree13": "Par exemple, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, commençant par <code class='fn__code'>/</code> utilise le chemin racine du carnet sélectionné, ne commençant pas par <code class='fn__code'>/</code> utilise le chemin relatif du document actuel",
 	"fileTree14": "Chemin d'enregistrement (prise en charge des variables de modèle de format de date, telles que <code class='fn__code'>/Notes quotidiennes/{{mais | date \"2006/01\"}}/{{mais | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Chemin du modèle (par exemple, <code class='fn__code'>dailynote.md</code>, le fichier doit être placé sous \"l'espace de travail/data/templates/\")",
+	"fileTree15": "Chemin du modèle de journal (par exemple, <code class='fn__code'>dailynote.md</code> ; laisser vide pour ne pas appliquer de modèle ; le fichier doit être placé dans workspace/data/templates/)",
 	"fileTree16": "Nombre maximum à lister",
 	"fileTree17": "S'il y a trop de sous-documents/étiqueter, cette restriction peut être utilisée pour améliorer les performances.",
 	"fileTree18": "Permet la création de sous-documents de plus de 7 niveaux",

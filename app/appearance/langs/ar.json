@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "مسار قالب المستند الجديد (على سبيل المثال، <code class='fn__code'>document.md</code>؛ اتركه فارغًا لعدم تطبيق قالب؛ يجب وضع الملف ضمن workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "مسار قالب المستند الجديد (على سبيل المثال، <code class='fn__code'>document.md</code>؛ اتركه فارغًا لاستخدام الإعداد العام؛ يجب وضع الملف ضمن workspace/data/templates/)",
   "cardLayout": "تخطيط البطاقة",
   "compact": "مضغوط",
   "fullRow": "صف كامل",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "مسار الحفظ الافتراضي للمستندات الجديدة",
 	"fileTree13": "على سبيل المثال، <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>، إذا بدأ بـ <code class='fn__code'>/</code> يُستخدم المسار الجذري للدفتر المحدد، وإذا لم يبدأ بـ <code class='fn__code'>/</code> يُستخدم المسار النسبي للمستند الحالي",
 	"fileTree14": "‫حفظ المسار (تُدعم متغيرات قالب تاريخ، مثل  ‪<code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>‬)‬",
-	"fileTree15": "‫مسار القالب (على سبيل المثال، ‪<code class='fn__code'>dailynote.md</code>‬، يجب وضع الملف تحت workspace/data/templates/)‬",
+	"fileTree15": "مسار قالب اليومية (على سبيل المثال، <code class='fn__code'>dailynote.md</code>؛ اتركه فارغًا لعدم تطبيق قالب؛ يجب وضع الملف ضمن workspace/data/templates/)",
 	"fileTree16": "الحد الأقصى لعدد العناصر المعروضة",
 	"fileTree17": "إذا كان هناك الكثير من المستندات الفرعية/العلامات، يمكن استخدام هذا القيد لتحسين الأداء",
 	"fileTree18": "السماح بإنشاء وثائق فرعية أعمق من 7 مستويات",

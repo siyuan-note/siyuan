@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "New document template path (for example, <code class='fn__code'>document.md</code>; leave blank to apply no template; the file needs to be placed under workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "New document template path (for example, <code class='fn__code'>document.md</code>; leave blank to use the global setting; the file needs to be placed under workspace/data/templates/)",
   "cardLayout": "Card layout",
   "compact": "Compact",
   "fullRow": "Full row",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Default save path for new documents",
 	"fileTree13": "For example, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, starting with <code class='fn__code'>/</code> uses the selected notebook's root path, not starting with <code class='fn__code'>/</code> uses the current document's relative path",
 	"fileTree14": "Save path (support date format template variables, such as <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Template path (for example, <code class='fn__code'>dailynote.md</code>, the file needs to be placed under the workspace/data/templates/)",
+	"fileTree15": "Daily note template path (for example, <code class='fn__code'>dailynote.md</code>; leave blank to apply no template; the file needs to be placed under workspace/data/templates/)",
 	"fileTree16": "Maximum number to list",
 	"fileTree17": "If there are too many sub-docs/tags, this restriction can be used to improve performance",
 	"fileTree18": "Allows creation of sub-documents deeper than 7 levels",

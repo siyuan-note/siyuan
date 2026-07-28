@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Ruta de la plantilla para documentos nuevos (por ejemplo, <code class='fn__code'>document.md</code>; déjela en blanco para no aplicar ninguna plantilla; el archivo debe colocarse en workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "Ruta de la plantilla para documentos nuevos (por ejemplo, <code class='fn__code'>document.md</code>; déjela en blanco para usar la configuración global; el archivo debe colocarse en workspace/data/templates/)",
   "cardLayout": "Diseño de tarjeta",
   "compact": "Compacto",
   "fullRow": "Fila completa",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Ruta de guardado predeterminada para nuevos documentos",
 	"fileTree13": "Por ejemplo, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, si empieza por <code class='fn__code'>/</code> usa la ruta raíz del cuaderno seleccionado, si no empieza por <code class='fn__code'>/</code> usa la ruta relativa del documento actual",
 	"fileTree14": "Ruta de guardado (admite variables de plantilla de formato de fecha, como <code class='fn__code'>/Notas del día/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Ruta de la plantilla (por ejemplo, <code class='fn__code'>dailynote.md</code>, el archivo debe colocarse en el espacio de trabajo/data/templates/)",
+	"fileTree15": "Ruta de la plantilla del diario (por ejemplo, <code class='fn__code'>dailynote.md</code>; déjela en blanco para no aplicar ninguna plantilla; el archivo debe colocarse en workspace/data/templates/)",
 	"fileTree16": "Número máximo a listar",
 	"fileTree17": "Si hay demasiados subdocumentos/etiquetas, se puede utilizar esta restricción para mejorar el rendimiento",
 	"fileTree18": "Permite la creación de subdocumentos de más de 7 niveles",

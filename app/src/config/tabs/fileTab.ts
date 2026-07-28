@@ -99,7 +99,7 @@ const registerFileNewDocumentGroup = (tab: SettingTabBuilder) => {
             docCreateTitle,
             docCreateDesc,
             window.siyuan.languages.template,
-            window.siyuan.languages.fileTree15,
+            window.siyuan.languages.docCreateTemplatePathTip,
         ],
         html: () => genNotebookSavePathHtml(
             docCreateTitle,
@@ -109,7 +109,7 @@ const registerFileNewDocumentGroup = (tab: SettingTabBuilder) => {
             genNotebookOption(window.siyuan.config.fileTree.docCreateSaveBox),
             {
                 id: "fileTree.docCreateTemplatePath",
-                desc: window.siyuan.languages.fileTree15,
+                desc: window.siyuan.languages.docCreateTemplatePathTip,
             },
         ),
         afterMount: (root) => {

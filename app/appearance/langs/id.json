@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Jalur templat dokumen baru (misalnya, <code class='fn__code'>document.md</code>; biarkan kosong agar tidak menerapkan templat; file harus ditempatkan di workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "Jalur templat dokumen baru (misalnya, <code class='fn__code'>document.md</code>; biarkan kosong untuk menggunakan pengaturan global; file harus ditempatkan di workspace/data/templates/)",
   "cardLayout": "Tata letak kartu",
   "compact": "Ringkas",
   "fullRow": "Baris penuh",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Lokasi penyimpanan default untuk dokumen baru",
 	"fileTree13": "Misalnya, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, diawali dengan <code class='fn__code'>/</code> menggunakan jalur root buku catatan yang dipilih, tidak diawali dengan <code class='fn__code'>/</code> menggunakan jalur relatif dokumen saat ini",
 	"fileTree14": "Jalur penyimpanan (dukung variabel template format tanggal, seperti <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Jalur template (misalnya, <code class='fn__code'>dailynote.md</code>, file harus ditempatkan di bawah workspace/data/templates/)",
+	"fileTree15": "Jalur templat catatan harian (misalnya, <code class='fn__code'>dailynote.md</code>; biarkan kosong agar tidak menerapkan templat; file harus ditempatkan di workspace/data/templates/)",
 	"fileTree16": "Jumlah maksimum untuk didaftar",
 	"fileTree17": "Jika ada terlalu banyak sub-dokumen/tag, batasan ini dapat digunakan untuk meningkatkan kinerja",
 	"fileTree18": "Izinkan pembuatan sub-dokumen lebih dalam dari 7 level",

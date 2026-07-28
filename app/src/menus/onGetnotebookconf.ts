@@ -63,7 +63,7 @@ export const onGetnotebookconf = (data: INotebookConf) => {
         <input class="b3-text-field fn__flex-1" id="docCreateSavePath" value="">
     </div>
     <div class="fn__hr"></div>
-    <div class="b3-label__text">${window.siyuan.languages.fileTree15}</div>
+    <div class="b3-label__text">${window.siyuan.languages.docCreateTemplatePathInheritTip}</div>
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" id="docCreateTemplatePath" value="${data.conf.docCreateTemplatePath}">
 </div>

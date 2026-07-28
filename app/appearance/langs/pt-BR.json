@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Caminho do modelo de novos documentos (por exemplo, <code class='fn__code'>document.md</code>; deixe em branco para não aplicar um modelo; o arquivo deve ser colocado em workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "Caminho do modelo de novos documentos (por exemplo, <code class='fn__code'>document.md</code>; deixe em branco para usar a configuração global; o arquivo deve ser colocado em workspace/data/templates/)",
   "cardLayout": "Layout do cartão",
   "compact": "Compacto",
   "fullRow": "Linha inteira",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Caminho de salvamento padrão para novos documentos",
 	"fileTree13": "Por exemplo, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, começando com <code class='fn__code'>/</code> usa o caminho raiz do caderno selecionado, não começando com <code class='fn__code'>/</code> usa o caminho relativo do documento atual",
 	"fileTree14": "Caminho de salvamento (suporta variáveis de modelo de formato de data, como <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Caminho do modelo (por exemplo, <code class='fn__code'>dailynote.md</code>, o arquivo precisa ser colocado em workspace/data/templates/)",
+	"fileTree15": "Caminho do modelo de diário (por exemplo, <code class='fn__code'>dailynote.md</code>; deixe em branco para não aplicar um modelo; o arquivo deve ser colocado em workspace/data/templates/)",
 	"fileTree16": "Número máximo para listar",
 	"fileTree17": "Se houver muitos subdocumentos/tags, esta restrição pode ser usada para melhorar o desempenho",
 	"fileTree18": "Permitir criação de subdocumentos mais profundos que 7 níveis",

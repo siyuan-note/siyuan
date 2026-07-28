@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Ścieżka szablonu nowego dokumentu (na przykład <code class='fn__code'>document.md</code>; pozostaw puste, aby nie stosować szablonu; plik musi znajdować się w workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "Ścieżka szablonu nowego dokumentu (na przykład <code class='fn__code'>document.md</code>; pozostaw puste, aby użyć ustawienia globalnego; plik musi znajdować się w workspace/data/templates/)",
   "cardLayout": "Układ karty",
   "compact": "Kompaktowy",
   "fullRow": "Pełny wiersz",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Domyślna ścieżka zapisu nowego dokumentu",
 	"fileTree13": "Na przykład, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, rozpoczynając od <code class='fn__code'>/</code> używa ścieżki głównej wybranego notatnika, nie rozpoczynając od <code class='fn__code'>/</code> używa ścieżki względnej bieżącego dokumentu",
 	"fileTree14": "Ścieżka zapisu (obsługuje zmienne formatu daty, takie jak <code class='fn__code'>/Codzienne notatki/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Ścieżka szablonu (na przykład, <code class='fn__code'>dailynote.md</code>, plik musi być umieszczony w folderze workspace/data/templates/)",
+	"fileTree15": "Ścieżka szablonu dziennika (na przykład <code class='fn__code'>dailynote.md</code>; pozostaw puste, aby nie stosować szablonu; plik musi znajdować się w workspace/data/templates/)",
 	"fileTree16": "Maksymalna liczba do wyświetlenia",
 	"fileTree17": "Jeśli jest zbyt dużo poddokumentów/tagów, ten ograniczenie może być użyte do poprawienia wydajności",
 	"fileTree18": "Zezwól na tworzenie poddokumentów głębiej niż 7 poziomów",

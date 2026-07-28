@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Sjabloonpad voor nieuwe documenten (bijvoorbeeld <code class='fn__code'>document.md</code>; laat leeg om geen sjabloon toe te passen; het bestand moet in workspace/data/templates/ worden geplaatst)",
+  "docCreateTemplatePathInheritTip": "Sjabloonpad voor nieuwe documenten (bijvoorbeeld <code class='fn__code'>document.md</code>; laat leeg om de algemene instelling te gebruiken; het bestand moet in workspace/data/templates/ worden geplaatst)",
   "cardLayout": "Kaartindeling",
   "compact": "Compact",
   "fullRow": "Volledige rij",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Standaard opslagpad voor nieuwe documenten",
 	"fileTree13": "Bijvoorbeeld <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>; begint met <code class='fn__code'>/</code> gebruikt het rootpad van het geselecteerde notitieboek, begint niet met <code class='fn__code'>/</code> gebruikt het relatieve pad van het huidige document",
 	"fileTree14": "Opslagpad (datumformaat-sjabloonvariabelen ondersteund, bijv. <code class='fn__code'>/Dagboek/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Sjabloonpad (bijv. <code class='fn__code'>dailynote.md</code>, plaats het bestand onder workspace/data/templates/)",
+	"fileTree15": "Sjabloonpad voor dagelijkse notities (bijvoorbeeld <code class='fn__code'>dailynote.md</code>; laat leeg om geen sjabloon toe te passen; het bestand moet in workspace/data/templates/ worden geplaatst)",
 	"fileTree16": "Maximaal aantal weer te geven",
 	"fileTree17": "Als er te veel subdocumenten/tags zijn, kan deze beperking de prestaties verbeteren",
 	"fileTree18": "Subdocumenten dieper dan 7 niveaus toestaan",

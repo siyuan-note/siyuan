@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Yeni belge şablonu yolu (örneğin <code class='fn__code'>document.md</code>; şablon uygulamamak için boş bırakın; dosya workspace/data/templates/ altında bulunmalıdır)",
+  "docCreateTemplatePathInheritTip": "Yeni belge şablonu yolu (örneğin <code class='fn__code'>document.md</code>; genel ayarı kullanmak için boş bırakın; dosya workspace/data/templates/ altında bulunmalıdır)",
   "cardLayout": "Kart düzeni",
   "compact": "Kompakt",
   "fullRow": "Tam satır",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Yeni belge için varsayılan kayıt yolu",
 	"fileTree13": "Örneğin, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, <code class='fn__code'>/</code> ile başlarsa seçili defterin kök yolu kullanılır, <code class='fn__code'>/</code> ile başlamazsa mevcut belgenin göreli yolu kullanılır",
 	"fileTree14": "Kayıt yolu (tarih şablon değişkenlerini destekler, örnek: <code class='fn__code'>/Günlük Notlar/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Şablon yolu (örnek: <code class='fn__code'>dailynote.md</code>, dosya workspace/data/templates/ altında olmalıdır)",
+	"fileTree15": "Günlük not şablonu yolu (örneğin <code class='fn__code'>dailynote.md</code>; şablon uygulamamak için boş bırakın; dosya workspace/data/templates/ altında bulunmalıdır)",
 	"fileTree16": "Listeleme sınırı",
 	"fileTree17": "Çok fazla alt belge/etiket varsa performans için bu sınır kullanılabilir",
 	"fileTree18": "7 seviyeden daha derin alt belge oluşturulmasına izin ver",

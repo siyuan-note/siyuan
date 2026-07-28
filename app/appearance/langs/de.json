@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Vorlagenpfad für neue Dokumente (zum Beispiel <code class='fn__code'>document.md</code>; leer lassen, um keine Vorlage anzuwenden; die Datei muss unter workspace/data/templates/ abgelegt werden)",
+  "docCreateTemplatePathInheritTip": "Vorlagenpfad für neue Dokumente (zum Beispiel <code class='fn__code'>document.md</code>; leer lassen, um die globale Einstellung zu verwenden; die Datei muss unter workspace/data/templates/ abgelegt werden)",
   "cardLayout": "Kartenlayout",
   "compact": "Kompakt",
   "fullRow": "Ganze Zeile",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Standard-Speicherort für neue Dokumente",
 	"fileTree13": "Zum Beispiel <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, beginnend mit <code class='fn__code'>/</code> wird der Root-Pfad des ausgewählten Notizbuchs verwendet, nicht beginnend mit <code class='fn__code'>/</code> wird der relative Pfad des aktuellen Dokuments verwendet",
 	"fileTree14": "Speicherpfad (unterstützt Datumsformat-Template-Variablen, wie <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Vorlagenpfad (zum Beispiel <code class='fn__code'>dailynote.md</code>, die Datei muss im Arbeitsbereich/data/templates/ platziert werden)",
+	"fileTree15": "Vorlagenpfad für tägliche Notizen (zum Beispiel <code class='fn__code'>dailynote.md</code>; leer lassen, um keine Vorlage anzuwenden; die Datei muss unter workspace/data/templates/ abgelegt werden)",
 	"fileTree16": "Maximale Anzahl an aufzulistenden",
 	"fileTree17": "Wenn es zu viele Unterdokumente/Tags gibt, kann diese Einschränkung verwendet werden, um die Leistung zu verbessern",
 	"fileTree18": "Erlaubt die Erstellung von Unterdokumenten, die tiefer als 7 Ebenen sind",

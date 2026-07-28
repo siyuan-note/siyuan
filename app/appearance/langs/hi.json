@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "नए दस्तावेज़ का टेम्पलेट पथ (उदाहरण के लिए, <code class='fn__code'>document.md</code>; टेम्पलेट लागू न करने के लिए खाली छोड़ें; फ़ाइल को workspace/data/templates/ में रखना आवश्यक है)",
+  "docCreateTemplatePathInheritTip": "नए दस्तावेज़ का टेम्पलेट पथ (उदाहरण के लिए, <code class='fn__code'>document.md</code>; वैश्विक सेटिंग का उपयोग करने के लिए खाली छोड़ें; फ़ाइल को workspace/data/templates/ में रखना आवश्यक है)",
   "cardLayout": "कार्ड लेआउट",
   "compact": "संक्षिप्त",
   "fullRow": "पूरी पंक्ति",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "नए दस्तावेज़ों के लिए डिफ़ॉल्ट सहेजें पथ",
 	"fileTree13": "उदाहरण के लिए, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, <code class='fn__code'>/</code> से शुरू होने पर चयनित नोटबुक का रूट पथ उपयोग होता है, <code class='fn__code'>/</code> से शुरू न होने पर वर्तमान दस्तावेज़ का सापेक्ष पथ उपयोग होता है",
 	"fileTree14": "सहेजें पथ (दिनांक प्रारूप टेम्पलेट चर का समर्थन करता है, जैसे <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "टेम्पलेट पथ (उदाहरण के लिए, <code class='fn__code'>dailynote.md</code>, फ़ाइल को workspace/data/templates/ के तहत रखा जाना चाहिए)",
+	"fileTree15": "दैनिक नोट का टेम्पलेट पथ (उदाहरण के लिए, <code class='fn__code'>dailynote.md</code>; टेम्पलेट लागू न करने के लिए खाली छोड़ें; फ़ाइल को workspace/data/templates/ में रखना आवश्यक है)",
 	"fileTree16": "सूचीबद्ध करने की अधिकतम संख्या",
 	"fileTree17": "यदि बहुत अधिक उप-दस्तावेज़/टैग हैं, तो प्रदर्शन सुधारने के लिए इस प्रतिबंध का उपयोग किया जा सकता है",
 	"fileTree18": "7 स्तरों से अधिक गहरे उप-दस्तावेज़ बनाने की अनुमति देता है",

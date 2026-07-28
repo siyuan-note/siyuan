@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "新建文件範本路徑（例如 <code class='fn__code'>document.md</code>，留空時不套用範本，需要將該檔放置於工作空間/data/templates/ 下）",
+  "docCreateTemplatePathInheritTip": "新建文件範本路徑（例如 <code class='fn__code'>document.md</code>，留空時使用全域設定，需要將該檔放置於工作空間/data/templates/ 下）",
   "cardLayout": "卡片版面配置",
   "compact": "緊湊",
   "fullRow": "獨佔整行",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "新建文檔的默認存放路徑",
 	"fileTree13": "例如 <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>，以 <code class='fn__code'>/</code> 開頭則使用選中筆記本的根路徑，不以 <code class='fn__code'>/</code> 開頭則使用當前文檔相對路徑",
 	"fileTree14": "存放路徑（可使用日期格式範本變數，例如 <code class='fn__code'>/日記/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>）",
-	"fileTree15": "範本路徑（例如 <code class='fn__code'>dailynote.md</code>，需要將該檔放置於工作空間/data/templates/ 下）",
+	"fileTree15": "日記範本路徑（例如 <code class='fn__code'>dailynote.md</code>，留空時不套用範本，需要將該檔放置於工作空間/data/templates/ 下）",
 	"fileTree16": "最大列出數量",
 	"fileTree17": "如果子文檔/標籤非常多，可通過該項限制以提升性能",
 	"fileTree18": "允許建立深度大於 7 層的子文檔",

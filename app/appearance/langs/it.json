@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Percorso del modello per i nuovi documenti (ad esempio, <code class='fn__code'>document.md</code>; lascia vuoto per non applicare alcun modello; il file deve trovarsi in workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "Percorso del modello per i nuovi documenti (ad esempio, <code class='fn__code'>document.md</code>; lascia vuoto per usare l'impostazione globale; il file deve trovarsi in workspace/data/templates/)",
   "cardLayout": "Layout scheda",
   "compact": "Compatto",
   "fullRow": "Riga intera",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Percorso di salvataggio predefinito per i nuovi documenti",
 	"fileTree13": "Ad esempio, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, se inizia con <code class='fn__code'>/</code> usa il percorso root del taccuino selezionato, se non inizia con <code class='fn__code'>/</code> usa il percorso relativo del documento corrente",
 	"fileTree14": "Percorso di salvataggio (supporta variabili di modello di formato data, come <code class='fn__code'>/Note Giornaliere/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Percorso del modello (ad esempio, <code class='fn__code'>dailynote.md</code>, il file deve essere posizionato sotto workspace/data/templates/)",
+	"fileTree15": "Percorso del modello per il diario (ad esempio, <code class='fn__code'>dailynote.md</code>; lascia vuoto per non applicare alcun modello; il file deve trovarsi in workspace/data/templates/)",
 	"fileTree16": "Numero massimo da elencare",
 	"fileTree17": "Se ci sono troppi sotto-documenti/tag, questa limitazione può essere utilizzata per migliorare le prestazioni",
 	"fileTree18": "Permetti la creazione di sotto-documenti più profondi di 7 livelli",

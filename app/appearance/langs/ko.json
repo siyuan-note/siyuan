@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "새 문서 템플릿 경로(예: <code class='fn__code'>document.md</code>, 템플릿을 적용하지 않으려면 비워 두세요. 파일은 workspace/data/templates/ 아래에 있어야 합니다)",
+  "docCreateTemplatePathInheritTip": "새 문서 템플릿 경로(예: <code class='fn__code'>document.md</code>, 전역 설정을 사용하려면 비워 두세요. 파일은 workspace/data/templates/ 아래에 있어야 합니다)",
   "cardLayout": "카드 레이아웃",
   "compact": "컴팩트",
   "fullRow": "전체 행",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "새 문서의 기본 저장 경로",
 	"fileTree13": "예: <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, <code class='fn__code'>/</code>로 시작하면 선택한 노트북의 루트 경로를 사용하고, <code class='fn__code'>/</code>로 시작하지 않으면 현재 문서의 상대 경로를 사용합니다",
 	"fileTree14": "저장 경로 (날짜 형식 템플릿 변수 지원, 예: <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "템플릿 경로 (예: <code class='fn__code'>dailynote.md</code>, 파일은 workspace/data/templates/ 아래에 위치해야 함)",
+	"fileTree15": "데일리 노트 템플릿 경로(예: <code class='fn__code'>dailynote.md</code>, 템플릿을 적용하지 않으려면 비워 두세요. 파일은 workspace/data/templates/ 아래에 있어야 합니다)",
 	"fileTree16": "목록 최대 수",
 	"fileTree17": "하위 문서/태그가 너무 많은 경우 이 제한을 사용하여 성능을 향상시킬 수 있습니다",
 	"fileTree18": "7단계보다 깊은 하위 문서 생성 허용",

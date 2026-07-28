@@ -1,4 +1,6 @@
 {
+  "docCreateTemplatePathTip": "Cesta k šablóne nového dokumentu (napríklad <code class='fn__code'>document.md</code>; ak nechcete použiť šablónu, nechajte pole prázdne; súbor musí byť umiestnený v workspace/data/templates/)",
+  "docCreateTemplatePathInheritTip": "Cesta k šablóne nového dokumentu (napríklad <code class='fn__code'>document.md</code>; ak chcete použiť globálne nastavenie, nechajte pole prázdne; súbor musí byť umiestnený v workspace/data/templates/)",
   "cardLayout": "Rozloženie karty",
   "compact": "Kompaktné",
   "fullRow": "Celý riadok",
@@ -1654,7 +1656,7 @@
 	"fileTree12": "Predvolené umiestnenie nového dokumentu",
 	"fileTree13": "Napríklad <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, začínajúc <code class='fn__code'>/</code> použije koreňovú cestu vybraného zápisníka, nezačínajúc <code class='fn__code'>/</code> použije relatívnu cestu aktuálneho dokumentu",
 	"fileTree14": "Cesta na uloženie (podporuje premenné šablóny formátu dátumu, napríklad <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
-	"fileTree15": "Cesta k šablóne (napríklad <code class='fn__code'>dailynote.md</code>, súbor musí byť umiestnený v workspace/data/templates/)",
+	"fileTree15": "Cesta k šablóne dennej poznámky (napríklad <code class='fn__code'>dailynote.md</code>; ak nechcete použiť šablónu, nechajte pole prázdne; súbor musí byť umiestnený v workspace/data/templates/)",
 	"fileTree16": "Maximálny počet položiek v zozname",
 	"fileTree17": "Obmedzenie kvôli výkonu pri veľkom počte dokumentov",
 	"fileTree18": "Povoliť hlbšiu štruktúru ako 7 úrovní",

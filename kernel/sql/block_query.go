@@ -386,8 +386,12 @@ func Query(stmt string, limit int) (ret []map[string]any, err error) {
 			slct := parsedStmt2.(*sqlparser2.SelectStatement)
 			if nil == slct.LimitExpr {
 				slct.LimitExpr = &sqlparser2.NumberLit{Value: strconv.Itoa(limit)}
+				serialized, ok := stringifySelectStatement(slct)
+				if !ok {
+					return queryRawStmt(originalStmt, limit)
+				}
+				stmt = serialized
 			}
-			stmt = slct.String()
 		default:
 			return queryRawStmt(stmt, limit)
 		}
@@ -428,6 +432,17 @@ func Query(stmt string, limit int) (ret []map[string]any, err error) {
 		ret = append(ret, m)
 	}
 	return
+}
+
+func stringifySelectStatement(stmt *sqlparser2.SelectStatement) (ret string, ok bool) {
+	// rqlite/sql 可能出现解析成功但序列化 panic，失败时由调用方回退原始 SQL。
+	defer func() {
+		if nil != recover() {
+			ret = ""
+			ok = false
+		}
+	}()
+	return stmt.String(), true
 }
 
 func ToBlocks(result []map[string]any) (ret []*Block) {

@@ -201,10 +201,23 @@
     font-size: 87.5%;
   }
 
-  &__title.fn__none + .av__counter:not(.fn__none) {
-    position: static;
+  &__header:has(> .av__title.fn__none + .av__counter:not(.fn__none)) {
     display: flex;
     align-items: center;
+
+    .av__views {
+      min-width: 0;
+      flex: 1;
+      order: 2;
+    }
+
+    .av__counter {
+      position: static;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      order: 1;
+    }
   }
 
   &__mask {

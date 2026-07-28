@@ -2,21 +2,27 @@ import {resetAVRowSelect} from "./virtualScroll";
 import {updateAVSelectionStatus} from "./row";
 import {hasClosestByClassName} from "../../util/hasClosest";
 
-const isRectIntersecting = (rect: DOMRect, selectRect: DOMRect) => {
-    return rect.height > 0 && rect.width > 0 &&
-        rect.top < selectRect.bottom && rect.bottom > selectRect.top &&
-        rect.left < selectRect.right && rect.right > selectRect.left;
+const isRectIntersecting = (rect: DOMRect, selectRect: DOMRect, clipRect?: DOMRect) => {
+    const top = Math.max(rect.top, clipRect?.top ?? rect.top);
+    const right = Math.min(rect.right, clipRect?.right ?? rect.right);
+    const bottom = Math.min(rect.bottom, clipRect?.bottom ?? rect.bottom);
+    const left = Math.max(rect.left, clipRect?.left ?? rect.left);
+    return top < bottom && left < right &&
+        top < selectRect.bottom && bottom > selectRect.top &&
+        left < selectRect.right && right > selectRect.left;
 };
 
 export const isAVDragSelectSupported = (blockElement: HTMLElement) => {
     return blockElement.classList.contains("av") &&
-        ["table", "gallery"].includes(blockElement.dataset.avType);
+        ["table", "kanban", "gallery"].includes(blockElement.dataset.avType);
 };
 
 export const applyAVDragSelection = (blockElement: HTMLElement, selectRect: DOMRect) => {
     const isTable = blockElement.dataset.avType === "table";
     const itemSelector = isTable ? ".av__row[data-id]" :
         ".av__gallery-item[data-id]:not([data-type=\"ghost\"])";
+    const clipRect = blockElement.dataset.avType === "kanban" ?
+        blockElement.querySelector(":scope > .av__container > .av__kanban")?.getBoundingClientRect() : undefined;
     const selectedIdsByBody = new Map<HTMLElement, Set<string>>();
     blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
         if (hasClosestByClassName(bodyElement, "av") !== blockElement) {
@@ -30,7 +36,7 @@ export const applyAVDragSelection = (blockElement: HTMLElement, selectRect: DOMR
             return;
         }
         const bodyElement = hasClosestByClassName(item, "av__body") as HTMLElement;
-        const selected = isRectIntersecting(item.getBoundingClientRect(), selectRect);
+        const selected = isRectIntersecting(item.getBoundingClientRect(), selectRect, clipRect);
         if (isTable) {
             item.classList.toggle("av__row--select", selected);
             item.querySelector(".av__firstcol use")?.setAttribute("xlink:href", selected ? "#iconCheck" : "#iconUncheck");

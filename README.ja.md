@@ -70,9 +70,9 @@ SiYuanは、プライバシーを最優先とする個人の知識管理シス�
 
 オンラインユーザーガイド：[English](https://siyuan-en.b3log.org/)
 
-![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
+![feature0.png](screenshots/feature0.png)
 
-![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
+![feature51.png](screenshots/feature5-1.png)
 
 ## 🔮 特徴
 
@@ -114,7 +114,7 @@ SiYuanは、プライバシーを最優先とする個人の知識管理シス�
 
 ## 🏗️ アーキテクチャとエコシステム
 
-![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
 
 | プロジェクト                                                   | 説明              | フォーク                                                                           | スター                                                                                | 
 |----------------------------------------------------------|-----------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|

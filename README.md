@@ -71,9 +71,9 @@ Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
 
 Online user guide: [English](https://siyuan-en.b3log.org/)
 
-![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
+![feature0.png](screenshots/feature0.png)
 
-![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
+![feature51.png](screenshots/feature5-1.png)
 
 ## 🔮 Features
 
@@ -115,7 +115,7 @@ Some features are only available to paid members, for more details please refer 
 
 ## 🏗️ Architecture and Ecosystem
 
-![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
 
 | Project                                                  | Description           | Forks                                                                           | Stars                                                                                | 
 |----------------------------------------------------------|-----------------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|

@@ -71,9 +71,9 @@ Daha fazla bilgi için [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)�
 
 Çevrimiçi kullanıcı rehberi: [English](https://siyuan-en.b3log.org/)
 
-![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
+![feature0.png](screenshots/feature0.png)
 
-![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
+![feature51.png](screenshots/feature5-1.png)
 
 ## 🔮 Özellikler
 
@@ -115,7 +115,7 @@ Bazı özellikler yalnızca ücretli üyeler için geçerlidir. Detaylar için [
 
 ## 🏗️ Mimari ve Ekosistem
 
-![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
 
 | Proje                                                    | Açıklama              | Çatallama (Forks)                                                              | Yıldız (Stars)                                                                     |
 |----------------------------------------------------------|-----------------------|--------------------------------------------------------------------------------|------------------------------------------------------------------------------------|

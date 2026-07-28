@@ -35,7 +35,9 @@ import {emitOpenMenu} from "../plugin/EventBus";
 import {saveExportFile} from "../protyle/util/compatibility";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
 import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
+/// #if MOBILE
 import {openEmojiPanel} from "../emoji";
+/// #endif
 
 const confirmEncryptedExport = (notebookId: string, callback: () => void) => {
     if (!isEncryptedBox(notebookId)) {
@@ -242,31 +244,26 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     }
     /// #endif
     if (!window.siyuan.config.readonly) {
-        let showChangeIcon = true;
-        /// #if !MOBILE
-        showChangeIcon = window.siyuan.config.fileTree.docIconClickExpand &&
-            !window.siyuan.config.fileTree.boxDocEnabled;
-        /// #endif
-        if (showChangeIcon) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "changeIcon",
-                label: window.siyuan.languages.changeIcon,
-                icon: "iconEmoji",
-                click: () => {
-                    const iconElement = liElement.querySelector<HTMLElement>(".b3-list-item__icon");
-                    if (!iconElement) {
-                        return;
-                    }
-                    const rect = iconElement.getBoundingClientRect();
-                    openEmojiPanel(notebookId, "notebook", {
-                        x: rect.left,
-                        y: rect.bottom,
-                        h: rect.height,
-                        w: rect.width,
-                    }, undefined, iconElement.querySelector<HTMLElement>("img"));
+        /// #if MOBILE
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "changeIcon",
+            label: window.siyuan.languages.changeIcon,
+            icon: "iconEmoji",
+            click: () => {
+                const iconElement = liElement.querySelector<HTMLElement>(".b3-list-item__icon");
+                if (!iconElement) {
+                    return;
                 }
-            }).element);
-        }
+                const rect = iconElement.getBoundingClientRect();
+                openEmojiPanel(notebookId, "notebook", {
+                    x: rect.left,
+                    y: rect.bottom,
+                    h: rect.height,
+                    w: rect.width,
+                }, undefined, iconElement.querySelector<HTMLElement>("img"));
+            }
+        }).element);
+        /// #endif
         window.siyuan.menus.menu.append(renameMenu({
             path: "/",
             notebookId,

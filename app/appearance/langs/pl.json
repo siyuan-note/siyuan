@@ -1,4 +1,9 @@
 {
+  "updateChannel": "Kanał aktualizacji",
+  "updateChannelTip": "Kanał Beta otrzymuje wydania stabilne, RC i Beta, a kanał Alpha wszystkie wydania. Kanały testowe wymagają dostępu do GitHub.",
+  "updateChannelStable": "Stabilny",
+  "updateChannelBeta": "Beta",
+  "updateChannelAlpha": "Alpha",
   "noMoreItems": "Brak kolejnych elementów",
   "docCreateTemplatePathTip": "Ścieżka szablonu nowego dokumentu (na przykład <code class='fn__code'>document.md</code>; pozostaw puste, aby nie stosować szablonu; plik musi znajdować się w workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "Ścieżka szablonu nowego dokumentu (na przykład <code class='fn__code'>document.md</code>; pozostaw puste, aby użyć ustawienia globalnego; plik musi znajdować się w workspace/data/templates/)",

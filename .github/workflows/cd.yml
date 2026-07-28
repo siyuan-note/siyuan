@@ -546,28 +546,110 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v8
 
+      - name: Prepare Release Assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.prepare.outputs.version }}"
+          mkdir -p release-assets
+          cp "siyuan-linux/siyuan-${VERSION}-linux.AppImage" release-assets/
+          cp "siyuan-linux/siyuan-${VERSION}-linux.tar.gz" release-assets/
+          cp "siyuan-linux/siyuan-${VERSION}-linux.deb" release-assets/
+          cp "siyuan-linux/siyuan-${VERSION}-linux.rpm" release-assets/
+          cp "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg" release-assets/
+          cp "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg" release-assets/
+          cp "siyuan-win.exe/siyuan-${VERSION}-win.exe" release-assets/
+          cp "siyuan-android/siyuan-${VERSION}.apk" release-assets/
+
+          EXPECTED_ASSETS=(
+            "siyuan-${VERSION}-linux.AppImage"
+            "siyuan-${VERSION}-linux.tar.gz"
+            "siyuan-${VERSION}-linux.deb"
+            "siyuan-${VERSION}-linux.rpm"
+            "siyuan-${VERSION}-mac.dmg"
+            "siyuan-${VERSION}-mac-arm64.dmg"
+            "siyuan-${VERSION}-win.exe"
+            "siyuan-${VERSION}.apk"
+          )
+          for asset in "${EXPECTED_ASSETS[@]}"; do
+            test -s "release-assets/${asset}"
+          done
+          (
+            cd release-assets
+            sha256sum "${EXPECTED_ASSETS[@]}" > SHA256SUMS.txt
+            sha256sum --check SHA256SUMS.txt
+          )
+
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           name: ${{ needs.prepare.outputs.release_title }}
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }}
           body: ${{ needs.prepare.outputs.release_body }}
-          draft: false
+          draft: true
           prerelease: true
+          allowUpdates: true
+          omitDraftDuringUpdate: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Release Is Draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          test "$(gh release view "${{ github.ref_name }}" --json isDraft --jq '.isDraft')" = "true"
 
       - name: Upload Release Assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          VERSION=${{ needs.prepare.outputs.version }}
-          gh release upload ${{ github.ref_name }} \
-            "siyuan-linux/siyuan-${VERSION}-linux.AppImage#siyuan-${VERSION}-linux.AppImage" \
-            "siyuan-linux/siyuan-${VERSION}-linux.tar.gz#siyuan-${VERSION}-linux.tar.gz" \
-            "siyuan-linux/siyuan-${VERSION}-linux.deb#siyuan-${VERSION}-linux.deb" \
-            "siyuan-linux/siyuan-${VERSION}-linux.rpm#siyuan-${VERSION}-linux.rpm" \
-            "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg#siyuan-${VERSION}-mac.dmg" \
-            "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg#siyuan-${VERSION}-mac-arm64.dmg" \
-            "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${VERSION}-win.exe" \
-            "siyuan-android/siyuan-${VERSION}.apk#siyuan-${VERSION}.apk"
+          gh release upload "${{ github.ref_name }}" release-assets/* --clobber
+
+      - name: Validate and Publish Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.prepare.outputs.version }}"
+          TAG="${{ github.ref_name }}"
+          RELEASE_ID="$(gh api "repos/${GH_REPO}/releases/tags/${TAG}" --jq '.id')"
+          EXPECTED_ASSETS=(
+            "siyuan-${VERSION}-linux.AppImage"
+            "siyuan-${VERSION}-linux.tar.gz"
+            "siyuan-${VERSION}-linux.deb"
+            "siyuan-${VERSION}-linux.rpm"
+            "siyuan-${VERSION}-mac.dmg"
+            "siyuan-${VERSION}-mac-arm64.dmg"
+            "siyuan-${VERSION}-win.exe"
+            "siyuan-${VERSION}.apk"
+            "SHA256SUMS.txt"
+          )
+          declare -A EXPECTED_DIGESTS
+          for asset in "${EXPECTED_ASSETS[@]}"; do
+            EXPECTED_DIGESTS["${asset}"]="sha256:$(sha256sum "release-assets/${asset}" | awk '{print $1}')"
+          done
+
+          for attempt in {1..12}; do
+            ASSETS="$(gh api -H "X-GitHub-Api-Version: 2022-11-28" \
+              "repos/${GH_REPO}/releases/${RELEASE_ID}/assets?per_page=100")"
+            READY=true
+            for asset in "${EXPECTED_ASSETS[@]}"; do
+              REMOTE_DIGEST="$(jq -r --arg name "${asset}" \
+                '.[] | select(.name == $name and .state == "uploaded") | .digest // empty' <<< "${ASSETS}")"
+              if [ "${REMOTE_DIGEST}" != "${EXPECTED_DIGESTS[$asset]}" ]; then
+                READY=false
+                break
+              fi
+            done
+            if [ "${READY}" = true ]; then
+              gh release edit "${TAG}" --draft=false --prerelease
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "Release assets or SHA-256 digests are incomplete"
+          exit 1

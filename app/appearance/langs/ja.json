@@ -1,4 +1,9 @@
 {
+  "updateChannel": "更新チャンネル",
+  "updateChannelTip": "Beta チャンネルでは正式版、RC、Beta 版を受信し、Alpha チャンネルではすべての版を受信します。テストチャンネルの利用には GitHub へのアクセスが必要です。",
+  "updateChannelStable": "正式版",
+  "updateChannelBeta": "Beta",
+  "updateChannelAlpha": "Alpha",
   "noMoreItems": "これ以上項目はありません",
   "docCreateTemplatePathTip": "新規文書のテンプレートパス（例：<code class='fn__code'>document.md</code>。テンプレートを適用しない場合は空欄にします。ファイルは workspace/data/templates/ に配置してください）",
   "docCreateTemplatePathInheritTip": "新規文書のテンプレートパス（例：<code class='fn__code'>document.md</code>。グローバル設定を使用する場合は空欄にします。ファイルは workspace/data/templates/ に配置してください）",

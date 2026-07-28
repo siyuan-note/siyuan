@@ -28,7 +28,6 @@ type System struct {
 	OSPlatform       string `json:"osPlatform"`
 	Container        string `json:"container"` // docker, android, ios, harmony, std
 	IsMicrosoftStore bool   `json:"isMicrosoftStore"`
-	IsInsider        bool   `json:"isInsider"`
 
 	HomeDir      string `json:"homeDir"`
 	WorkspaceDir string `json:"workspaceDir"`
@@ -40,9 +39,10 @@ type System struct {
 	NetworkServeTLS bool          `json:"networkServeTLS"` // 是否开启 HTTPS 网络伺服
 	NetworkProxy    *NetworkProxy `json:"networkProxy"`
 
-	DownloadInstallPkg bool `json:"downloadInstallPkg"`
-	AutoLaunch2        int  `json:"autoLaunch2"`    // 0：不自动启动，1：自动启动，2：自动启动+隐藏主窗口
-	LockScreenMode     int  `json:"lockScreenMode"` // 0：手动，1：手动+跟随系统 https://github.com/siyuan-note/siyuan/issues/9087
+	DownloadInstallPkg bool   `json:"downloadInstallPkg"`
+	UpdateChannel      string `json:"updateChannel,omitempty"`
+	AutoLaunch2        int    `json:"autoLaunch2"`    // 0：不自动启动，1：自动启动，2：自动启动+隐藏主窗口
+	LockScreenMode     int    `json:"lockScreenMode"` // 0：手动，1：手动+跟随系统 https://github.com/siyuan-note/siyuan/issues/9087
 
 	DisabledFeatures []string `json:"disabledFeatures"`
 
@@ -55,6 +55,12 @@ const (
 	OnboardingPending         = "pending"
 	OnboardingNotebookCreated = "notebook-created"
 	OnboardingCompleted       = "completed"
+)
+
+const (
+	UpdateChannelStable = "stable"
+	UpdateChannelBeta   = "beta"
+	UpdateChannelAlpha  = "alpha"
 )
 
 type Onboarding struct {
@@ -72,6 +78,7 @@ func NewSystem() *System {
 		KernelVersion:      util.Ver,
 		NetworkProxy:       &NetworkProxy{},
 		DownloadInstallPkg: true,
+		UpdateChannel:      UpdateChannelStable,
 	}
 }
 

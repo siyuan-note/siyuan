@@ -1,4 +1,9 @@
 {
+  "updateChannel": "更新通道",
+  "updateChannelTip": "Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收所有版本。測試通道需要能夠存取 GitHub。",
+  "updateChannelStable": "正式版",
+  "updateChannelBeta": "Beta",
+  "updateChannelAlpha": "Alpha",
   "noMoreItems": "無更多條目",
   "docCreateTemplatePathTip": "新建文件範本路徑（例如 <code class='fn__code'>document.md</code>，留空時不套用範本，需要將該檔放置於工作空間/data/templates/ 下）",
   "docCreateTemplatePathInheritTip": "新建文件範本路徑（例如 <code class='fn__code'>document.md</code>，留空時使用全域設定，需要將該檔放置於工作空間/data/templates/ 下）",

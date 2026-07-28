@@ -15,10 +15,24 @@ const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.downloadLatestVer,
             window.siyuan.languages.isMsStoreVerTip,
             window.siyuan.languages.checkUpdate,
+            window.siyuan.languages.updateChannel,
+            window.siyuan.languages.updateChannelTip,
         ],
         html: genAboutVersionHtml,
         afterMount: mountAboutVersionSlot,
     });
+    if (!window.siyuan.config.system.isMicrosoftStore) {
+        group.select("system.updateChannel", {
+            title: window.siyuan.languages.updateChannel,
+            desc: window.siyuan.languages.updateChannelTip,
+            options: [
+                {value: "stable", label: window.siyuan.languages.updateChannelStable},
+                {value: "beta", label: window.siyuan.languages.updateChannelBeta},
+                {value: "alpha", label: window.siyuan.languages.updateChannelAlpha},
+            ],
+            save: (value) => sendAppSetting("system.updateChannel", value),
+        });
+    }
     /// #if !BROWSER
     if (!window.siyuan.config.system.isMicrosoftStore && window.siyuan.config.system.container === "std" && window.siyuan.config.system.os !== "linux") {
         group.switch("system.downloadInstallPkg", {
@@ -34,14 +48,14 @@ const genAboutVersionHtml = (): string => {
     if (window.siyuan.config.system.isMicrosoftStore) {
         return `<div class="fn__flex b3-label config-item config-wrap">
     <div class="fn__flex-1">
-        <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}<span id="isInsider"></span></div>
+        <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>
         <div class="b3-label__text">${window.siyuan.languages.isMsStoreVerTip}</div>
     </div>
 </div>`;
     }
     return `<div class="fn__flex b3-label config-item config-wrap">
     <div class="fn__flex-1">
-        <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}<span id="isInsider"></span></div>
+        <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>
         <div class="b3-label__text">${window.siyuan.languages.downloadLatestVer}</div>
     </div>
     <div class="fn__space"></div>
@@ -54,10 +68,6 @@ const genAboutVersionHtml = (): string => {
 };
 
 const mountAboutVersionSlot = (root: HTMLElement) => {
-    const isInsiderElement = root.querySelector("#isInsider");
-    if (window.siyuan.config.system.isInsider && isInsiderElement) {
-        isInsiderElement.innerHTML = " <span class='ft__secondary'>Insider Preview</span>";
-    }
     const updateElement = root.querySelector("#checkUpdateBtn") as HTMLButtonElement | null;
     updateElement?.addEventListener("click", () => {
         const svgElement = updateElement.querySelector("svg");

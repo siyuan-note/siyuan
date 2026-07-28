@@ -1,4 +1,9 @@
 {
+  "updateChannel": "ערוץ עדכונים",
+  "updateChannelTip": "ערוץ Beta מקבל גרסאות יציבות, RC ו-Beta; ערוץ Alpha מקבל את כל הגרסאות. ערוצי הבדיקה דורשים גישה ל-GitHub.",
+  "updateChannelStable": "יציב",
+  "updateChannelBeta": "בטא",
+  "updateChannelAlpha": "אלפא",
   "noMoreItems": "אין פריטים נוספים",
   "docCreateTemplatePathTip": "נתיב תבנית למסמך חדש (לדוגמה, <code class='fn__code'>document.md</code>; יש להשאיר ריק כדי לא להחיל תבנית; הקובץ צריך להימצא תחת workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "נתיב תבנית למסמך חדש (לדוגמה, <code class='fn__code'>document.md</code>; יש להשאיר ריק כדי להשתמש בהגדרה הכללית; הקובץ צריך להימצא תחת workspace/data/templates/)",

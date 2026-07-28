@@ -458,8 +458,8 @@ func InitConf() {
 		}
 
 		Conf.System.KernelVersion = util.Ver
-		Conf.System.IsInsider = util.IsInsider
 	}
+	Conf.System.UpdateChannel = loadGlobalUpdateChannel()
 	if nil == Conf.Onboarding {
 		Conf.Onboarding = &conf.Onboarding{State: conf.OnboardingCompleted}
 	}
@@ -1053,6 +1053,8 @@ func (conf *AppConf) Save() {
 	// safeMode 是纯运行时状态（由 --safe-mode 注入），不随 conf.json 持久化，避免跨启动残留。
 	if snapshot.System != nil {
 		snapshot.System.SafeMode = false
+		// 更新通道由用户目录下的全局配置持久化，不写入工作空间配置。
+		snapshot.System.UpdateChannel = ""
 	}
 
 	newData, err := gulu.JSON.MarshalIndentJSON(snapshot, "", "  ")

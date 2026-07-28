@@ -277,7 +277,7 @@ func refreshCheckDownloadInstallPkg() {
 	defer logging.Recover()
 
 	time.Sleep(3 * time.Minute)
-	checkDownloadInstallPkg()
+	checkDownloadInstallPkg(true)
 }
 
 func refreshAnnouncement() {

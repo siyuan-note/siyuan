@@ -1,4 +1,9 @@
 {
+  "updateChannel": "Güncelleme kanalı",
+  "updateChannelTip": "Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test kanalları GitHub erişimi gerektirir.",
+  "updateChannelStable": "Kararlı",
+  "updateChannelBeta": "Beta",
+  "updateChannelAlpha": "Alpha",
   "noMoreItems": "Başka öğe yok",
   "docCreateTemplatePathTip": "Yeni belge şablonu yolu (örneğin <code class='fn__code'>document.md</code>; şablon uygulamamak için boş bırakın; dosya workspace/data/templates/ altında bulunmalıdır)",
   "docCreateTemplatePathInheritTip": "Yeni belge şablonu yolu (örneğin <code class='fn__code'>document.md</code>; genel ayarı kullanmak için boş bırakın; dosya workspace/data/templates/ altında bulunmalıdır)",

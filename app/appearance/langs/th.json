@@ -1,4 +1,9 @@
 {
+  "updateChannel": "ช่องทางการอัปเดต",
+  "updateChannelTip": "ช่อง Beta จะได้รับรุ่นเสถียร รุ่น RC และรุ่น Beta ส่วนช่อง Alpha จะได้รับทุกรุ่น ช่องทดสอบจำเป็นต้องเข้าถึง GitHub",
+  "updateChannelStable": "เสถียร",
+  "updateChannelBeta": "เบต้า",
+  "updateChannelAlpha": "อัลฟ่า",
   "noMoreItems": "ไม่มีรายการเพิ่มเติม",
   "docCreateTemplatePathTip": "เส้นทางเทมเพลตเอกสารใหม่ (เช่น <code class='fn__code'>document.md</code> เว้นว่างไว้หากไม่ต้องการใช้เทมเพลต และต้องวางไฟล์ไว้ใน workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "เส้นทางเทมเพลตเอกสารใหม่ (เช่น <code class='fn__code'>document.md</code> เว้นว่างไว้เพื่อใช้การตั้งค่าส่วนกลาง และต้องวางไฟล์ไว้ใน workspace/data/templates/)",

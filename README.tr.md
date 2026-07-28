@@ -45,7 +45,7 @@
   - [Docker Barındırma](#docker-barındırma)
   - [Unraid Barındırma](#unraid-barındırma)
   - [TrueNAS Barındırma](#truenas-barındırma)
-  - [Erken Önizleme (Insider Preview)](#erken-önizleme-insider-preview)
+  - [Test Kanalları](#test-kanalları)
 - [⌨️ Komut Satırı Arayüzü](#-komut-satırı-arayüzü)
 - [🏘️ Topluluk](#️-topluluk)
 - [🛠️ Geliştirme Rehberi](#️-geliştirme-rehberi)
@@ -354,9 +354,9 @@ services:
 
 </details>
 
-### Erken Önizleme (Insider Preview)
+### Test Kanalları
 
-Büyük güncellemelerden önce erken erişim (Insider Preview) sürümlerini yayınlıyoruz. Lütfen [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider) adresini ziyaret edin.
+Ön sürümleri almak için `Ayarlar > Hakkında > Güncelleme kanalı` altında Beta veya Alpha seçeneğini belirleyin. Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test kanalları GitHub erişimi gerektirir.
 
 ## ⌨️ Komut Satırı Arayüzü
 

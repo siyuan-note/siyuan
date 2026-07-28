@@ -1,4 +1,9 @@
 {
+  "updateChannel": "Canal de atualização",
+  "updateChannelTip": "O canal Beta recebe versões estáveis, RC e Beta; o canal Alpha recebe todas as versões. Os canais de teste exigem acesso ao GitHub.",
+  "updateChannelStable": "Estável",
+  "updateChannelBeta": "Beta",
+  "updateChannelAlpha": "Alpha",
   "noMoreItems": "Não há mais itens",
   "docCreateTemplatePathTip": "Caminho do modelo de novos documentos (por exemplo, <code class='fn__code'>document.md</code>; deixe em branco para não aplicar um modelo; o arquivo deve ser colocado em workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "Caminho do modelo de novos documentos (por exemplo, <code class='fn__code'>document.md</code>; deixe em branco para usar a configuração global; o arquivo deve ser colocado em workspace/data/templates/)",

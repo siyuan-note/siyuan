@@ -1,4 +1,9 @@
 {
+  "updateChannel": "Aktualizačný kanál",
+  "updateChannelTip": "Kanál Beta prijíma stabilné vydania, RC a Beta; kanál Alpha prijíma všetky vydania. Testovacie kanály vyžadujú prístup ku GitHubu.",
+  "updateChannelStable": "Stabilný",
+  "updateChannelBeta": "Beta",
+  "updateChannelAlpha": "Alpha",
   "noMoreItems": "Žiadne ďalšie položky",
   "docCreateTemplatePathTip": "Cesta k šablóne nového dokumentu (napríklad <code class='fn__code'>document.md</code>; ak nechcete použiť šablónu, nechajte pole prázdne; súbor musí byť umiestnený v workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "Cesta k šablóne nového dokumentu (napríklad <code class='fn__code'>document.md</code>; ak chcete použiť globálne nastavenie, nechajte pole prázdne; súbor musí byť umiestnený v workspace/data/templates/)",

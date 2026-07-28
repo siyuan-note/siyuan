@@ -1,4 +1,9 @@
 {
+  "updateChannel": "Канал обновлений",
+  "updateChannelTip": "Канал Beta получает стабильные, RC- и Beta-версии, а канал Alpha — все версии. Для тестовых каналов требуется доступ к GitHub.",
+  "updateChannelStable": "Стабильный",
+  "updateChannelBeta": "Бета",
+  "updateChannelAlpha": "Альфа",
   "noMoreItems": "Больше нет элементов",
   "docCreateTemplatePathTip": "Путь к шаблону нового документа (например, <code class='fn__code'>document.md</code>; оставьте пустым, чтобы не применять шаблон; файл должен находиться в workspace/data/templates/)",
   "docCreateTemplatePathInheritTip": "Путь к шаблону нового документа (например, <code class='fn__code'>document.md</code>; оставьте пустым, чтобы использовать глобальную настройку; файл должен находиться в workspace/data/templates/)",

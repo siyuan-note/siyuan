@@ -346,7 +346,7 @@ func exportConf(c *gin.Context) {
 		clonedConf.System.OSPlatform = ""
 		clonedConf.System.Container = ""
 		clonedConf.System.IsMicrosoftStore = false
-		clonedConf.System.IsInsider = false
+		clonedConf.System.UpdateChannel = ""
 		clonedConf.System.MicrosoftDefenderExcluded = false
 	}
 	clonedConf.Sync = nil
@@ -538,6 +538,10 @@ func importConf(c *gin.Context) {
 		return
 	}
 	preserveImportedAISecrets(importedConf.AI, model.Conf.AI)
+	if nil != importedConf.System && nil != model.Conf.System {
+		// 更新通道是应用级全局设置，导入工作空间配置时保持不变。
+		importedConf.System.UpdateChannel = model.Conf.System.UpdateChannel
+	}
 
 	model.Conf.FileTree = importedConf.FileTree
 	model.Conf.Tag = importedConf.Tag
@@ -1094,6 +1098,27 @@ func setDownloadInstallPkg(c *gin.Context) {
 	downloadInstallPkg := arg["downloadInstallPkg"].(bool)
 	model.Conf.System.DownloadInstallPkg = downloadInstallPkg
 	model.Conf.Save()
+}
+
+func setUpdateChannel(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	updateChannel, ok := arg["updateChannel"].(string)
+	if !ok {
+		ret.Code = -1
+		ret.Msg = "update channel is invalid"
+		return
+	}
+	if err := model.SetUpdateChannel(updateChannel); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 func setNetworkProxy(c *gin.Context) {

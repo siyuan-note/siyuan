@@ -1831,6 +1831,10 @@ declare namespace Config {
          */
         downloadInstallPkg: boolean;
         /**
+         * 更新通道
+         */
+        updateChannel: TUpdateChannel;
+        /**
          * The absolute path of the user's home directory for the current operating system user
          */
         homeDir: string;
@@ -1838,10 +1842,6 @@ declare namespace Config {
          * The UUID of the current session
          */
         id: string;
-        /**
-         * Whether the current version is an internal test version
-         */
-        isInsider: boolean;
         /**
          * Whether the current version is a Microsoft Store version
          */
@@ -1906,6 +1906,8 @@ declare namespace Config {
      * - `std`: Desktop Electron environment
      */
     export type TSystemContainer = "docker" | "android" | "ios" | "harmony" | "std";
+
+    export type TUpdateChannel = "stable" | "beta" | "alpha";
 
     /**
      * SiYuan Network proxy configuration

@@ -45,7 +45,7 @@
   - [Docker Hosting](#docker-hosting)
   - [Unraid Hosting](#unraid-hosting)
   - [TrueNAS Hosting](#truenas-hosting)
-  - [Insider Preview](#insider-preview)
+  - [Test Channels](#test-channels)
 - [⌨️ Command-line Interface](#-command-line-interface)
 - [🏘️ Community](#️-community)
 - [🛠️ Development Guide](#️-development-guide)
@@ -349,9 +349,9 @@ services:
 
 </details>
 
-### Insider Preview
+### Test Channels
 
-We release insider preview before major updates, please visit [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider).
+Select Beta or Alpha in `Settings > About > Update channel` to receive prereleases. Beta includes stable, RC, and Beta releases; Alpha includes all releases. Test channels require access to GitHub.
 
 ## ⌨️ Command-line Interface
 

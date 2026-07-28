@@ -17,8 +17,10 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
 	"io"
 	"net/http"
 	"os"
@@ -192,63 +194,7 @@ func getEmojiConf(c *gin.Context) {
 	custom["items"] = items
 	if gulu.File.IsDir(customConfDir) {
 		model.ClearCustomEmojis()
-		customEmojis, err := os.ReadDir(customConfDir)
-		if err != nil {
-			logging.LogErrorf("read custom emojis failed: %s", err)
-		} else {
-			for _, customEmoji := range customEmojis {
-				name := customEmoji.Name()
-				if strings.HasPrefix(name, ".") {
-					continue
-				}
-
-				if !util.IsValidUploadFileName(html.UnescapeString(name)) {
-					emojiFullName := filepath.Join(customConfDir, name)
-					name = util.FilterUploadEmojiFileName(name)
-					fullPathFilteredName := filepath.Join(customConfDir, name)
-					// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-					logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", name, fullPathFilteredName)
-					if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
-						logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
-					}
-				}
-
-				if customEmoji.IsDir() {
-					// 子级
-					subCustomEmojis, err := os.ReadDir(filepath.Join(customConfDir, name))
-					if err != nil {
-						logging.LogErrorf("read custom emojis failed: %s", err)
-						continue
-					}
-
-					for _, subCustomEmoji := range subCustomEmojis {
-						if subCustomEmoji.IsDir() {
-							continue
-						}
-
-						subName := subCustomEmoji.Name()
-						if strings.HasPrefix(subName, ".") {
-							continue
-						}
-
-						if !util.IsValidUploadFileName(html.UnescapeString(subName)) {
-							emojiFullName := filepath.Join(customConfDir, name, subName)
-							fullPathFilteredName := filepath.Join(customConfDir, name, util.FilterUploadEmojiFileName(subName))
-							// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-							logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", subName, fullPathFilteredName)
-							if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
-								logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
-							}
-						}
-
-						addCustomEmoji(name+"/"+subName, &items)
-					}
-					continue
-				}
-
-				addCustomEmoji(name, &items)
-			}
-		}
+		readCustomEmojis(customConfDir, "", &items)
 	}
 	custom["items"] = items
 	conf = append([]map[string]any{custom}, conf...)
@@ -257,7 +203,42 @@ func getEmojiConf(c *gin.Context) {
 	return
 }
 
-func addCustomEmoji(name string, items *[]map[string]any) {
+func readCustomEmojis(rootDir, relativeDir string, items *[]map[string]any) {
+	dir := filepath.Join(rootDir, filepath.FromSlash(relativeDir))
+	customEmojis, err := os.ReadDir(dir)
+	if err != nil {
+		logging.LogErrorf("read custom emojis failed: %s", err)
+		return
+	}
+
+	for _, customEmoji := range customEmojis {
+		name := customEmoji.Name()
+		if strings.HasPrefix(name, ".") {
+			continue
+		}
+
+		if !util.IsValidUploadFileName(html.UnescapeString(name)) {
+			oldPath := filepath.Join(dir, name)
+			name = util.FilterUploadEmojiFileName(name)
+			newPath := filepath.Join(dir, name)
+			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", oldPath, newPath)
+			if renameErr := filelock.Rename(oldPath, newPath); nil != renameErr {
+				logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", newPath, renameErr)
+				continue
+			}
+		}
+
+		relativePath := filepath.ToSlash(filepath.Join(relativeDir, name))
+		if customEmoji.IsDir() {
+			readCustomEmojis(rootDir, relativePath, items)
+			continue
+		}
+		appendCustomEmoji(relativePath, items)
+	}
+}
+
+func appendCustomEmoji(name string, items *[]map[string]any) {
 	ext := filepath.Ext(name)
 	nameWithoutExt := strings.TrimSuffix(name, ext)
 	emoji := map[string]any{
@@ -271,6 +252,131 @@ func addCustomEmoji(name string, items *[]map[string]any) {
 
 	imgSrc := "/emojis/" + name
 	model.AddCustomEmoji(nameWithoutExt, imgSrc)
+}
+
+const maxCustomEmojiSize = 10 * 1024 * 1024
+
+func addCustomEmoji(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		ret.Code = http.StatusBadRequest
+		ret.Msg = "Field [file] must not be empty"
+		return
+	}
+	file, err := fileHeader.Open()
+	if err != nil {
+		ret.Code = http.StatusBadRequest
+		ret.Msg = err.Error()
+		return
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(io.LimitReader(file, maxCustomEmojiSize+1))
+	if err != nil {
+		ret.Code = http.StatusBadRequest
+		ret.Msg = err.Error()
+		return
+	}
+	if len(data) > maxCustomEmojiSize {
+		ret.Code = http.StatusRequestEntityTooLarge
+		ret.Msg = "custom emoji file is too large"
+		return
+	}
+
+	data, ext, err := normalizeCustomEmojiData(data)
+	if err != nil {
+		ret.Code = http.StatusBadRequest
+		ret.Msg = err.Error()
+		return
+	}
+	relativePath, err := normalizeCustomEmojiPath(c.PostForm("name"), ext)
+	if err != nil {
+		ret.Code = http.StatusBadRequest
+		ret.Msg = err.Error()
+		return
+	}
+
+	emojisDir := filepath.Join(util.DataDir, "emojis")
+	emojiPath := util.GetUniqueFilename(filepath.Join(emojisDir, filepath.FromSlash(relativePath)))
+	if err = os.MkdirAll(filepath.Dir(emojiPath), 0755); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err = filelock.WriteFile(emojiPath, data); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.IncSync()
+	relativePath, _ = filepath.Rel(emojisDir, emojiPath)
+	relativePath = filepath.ToSlash(relativePath)
+	ret.Data = map[string]any{"path": relativePath}
+}
+
+func normalizeCustomEmojiData(data []byte) (normalized []byte, ext string, err error) {
+	if len(data) == 0 {
+		return nil, "", fmt.Errorf("custom emoji file must not be empty")
+	}
+
+	raster := true
+	switch http.DetectContentType(data) {
+	case "image/png":
+		ext = ".png"
+	case "image/jpeg":
+		ext = ".jpg"
+	case "image/gif":
+		ext = ".gif"
+	case "image/webp":
+		ext = ".webp"
+	default:
+		raster = false
+	}
+	if raster {
+		config, _, decodeErr := image.DecodeConfig(bytes.NewReader(data))
+		if decodeErr != nil || config.Width < 1 || config.Height < 1 || config.Width > 16384 || config.Height > 16384 ||
+			int64(config.Width)*int64(config.Height) > 100*1000*1000 {
+			return nil, "", fmt.Errorf("invalid custom emoji image")
+		}
+		return data, ext, nil
+	}
+
+	sanitizedSVG, sanitizeErr := util.SanitizeSVG(string(data))
+	if sanitizeErr == nil {
+		return []byte(sanitizedSVG), ".svg", nil
+	}
+	return nil, "", fmt.Errorf("unsupported custom emoji image format")
+}
+
+func normalizeCustomEmojiPath(name, ext string) (string, error) {
+	name = strings.TrimSpace(strings.ReplaceAll(name, "\\", "/"))
+	parts := strings.Split(name, "/")
+	if len(parts) == 0 {
+		return "", fmt.Errorf("custom emoji name must not be empty")
+	}
+
+	lastIndex := len(parts) - 1
+	switch strings.ToLower(filepath.Ext(parts[lastIndex])) {
+	case ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg":
+		parts[lastIndex] = strings.TrimSuffix(parts[lastIndex], filepath.Ext(parts[lastIndex]))
+	}
+	for i, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" || part == "." || part == ".." {
+			return "", fmt.Errorf("invalid custom emoji name")
+		}
+		part = util.FilterUploadFileName(part)
+		if part == "" || part == "." || part == ".." {
+			return "", fmt.Errorf("invalid custom emoji name")
+		}
+		parts[i] = part
+	}
+	parts[lastIndex] += ext
+	return strings.Join(parts, "/"), nil
 }
 
 func checkUpdate(c *gin.Context) {

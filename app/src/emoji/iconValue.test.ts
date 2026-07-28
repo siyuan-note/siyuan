@@ -7,6 +7,7 @@ import {
     getIconValueKind,
     normalizeNetworkIconURL,
     normalizeRecentIconValue,
+    parseBase64Image,
     updateRecentIconValues,
 } from "./iconValue";
 
@@ -38,6 +39,31 @@ describe("getIconValueKind", () => {
         assert.equal(getIconValueKind("api/icon/getDynamicIcon?type=8&content=A.B"), "dynamic");
         assert.equal(getIconValueKind("https://example.com/icon.png"), "network");
         assert.equal(getIconValueKind("javascript:alert(1)"), "invalid");
+    });
+});
+
+describe("parseBase64Image", () => {
+    it("decodes supported image data URLs", () => {
+        const parsed = parseBase64Image(" data:image/png;base64,AQID ");
+        assert.ok(parsed);
+        assert.equal(parsed.mimeType, "image/png");
+        assert.equal(parsed.extension, "png");
+        assert.deepEqual([...parsed.bytes], [1, 2, 3]);
+
+        const svg = parseBase64Image("data:image/svg+xml;charset=utf-8;base64,PHN2Zz48L3N2Zz4=");
+        assert.ok(svg);
+        assert.equal(svg.extension, "svg");
+    });
+
+    it("rejects unsupported, empty, and malformed data URLs", () => {
+        [
+            "",
+            "data:text/plain;base64,AQID",
+            "data:image/bmp;base64,AQID",
+            "data:image/png,AQID",
+            "data:image/png;base64,",
+            "data:image/png;base64,***",
+        ].forEach(item => assert.equal(parseBase64Image(item), undefined));
     });
 });
 

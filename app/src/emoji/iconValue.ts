@@ -2,8 +2,20 @@ import {escapeAttr, escapeHtml} from "../util/escape";
 
 const DYNAMIC_ICON_PREFIX = "api/icon/getDynamicIcon";
 const URL_SCHEME_PATTERN = /^[a-zA-Z][a-zA-Z\d+.-]*:/;
+const BASE64_IMAGE_MIME_EXTENSIONS: Record<string, string> = {
+    "image/gif": "gif",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/svg+xml": "svg",
+    "image/webp": "webp",
+};
 
 export type TIconValueKind = "unicode" | "custom" | "dynamic" | "network" | "invalid";
+export interface IBase64Image {
+    bytes: Uint8Array,
+    extension: string,
+    mimeType: string,
+}
 
 export const normalizeNetworkIconURL = (value: string): string | undefined => {
     const icon = value.trim();
@@ -17,6 +29,38 @@ export const normalizeNetworkIconURL = (value: string): string | undefined => {
         return;
     }
     return url.href;
+};
+
+export const parseBase64Image = (value: string): IBase64Image | undefined => {
+    const icon = value.trim();
+    const commaIndex = icon.indexOf(",");
+    if (commaIndex < 0) {
+        return;
+    }
+
+    const header = icon.substring(0, commaIndex);
+    const headerMatch = header.match(/^data:(image\/(?:gif|jpeg|png|svg\+xml|webp))(?:;[^,;]+)*;base64$/i);
+    if (!headerMatch) {
+        return;
+    }
+    const mimeType = headerMatch[1].toLowerCase();
+    try {
+        const binary = atob(icon.substring(commaIndex + 1).replace(/\s/g, ""));
+        if (!binary) {
+            return;
+        }
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return {
+            bytes,
+            extension: BASE64_IMAGE_MIME_EXTENSIONS[mimeType],
+            mimeType,
+        };
+    } catch {
+        return;
+    }
 };
 
 export const getIconValueKind = (value: string): TIconValueKind => {

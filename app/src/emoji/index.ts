@@ -1,5 +1,5 @@
 import {getRandom, isMobile} from "../util/functions";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
 /// #if !MOBILE
 import {Files} from "../layout/dock/Files";
@@ -19,6 +19,7 @@ import {
     getIconValueKind,
     normalizeNetworkIconURL,
     normalizeRecentIconValue,
+    parseBase64Image,
     updateRecentIconValues,
 } from "./iconValue";
 import {showMessage} from "../dialog/message";
@@ -425,7 +426,8 @@ export const openEmojiPanel = (
             </div>
         </div>
         <div class="fn__none emojis__link" data-type="tab-link">
-            <input class="b3-text-field fn__block" data-type="network-icon-url" placeholder="${window.siyuan.languages.insertImgURL}">
+            <input class="b3-text-field fn__block" data-type="network-icon-url" placeholder="${window.siyuan.languages.insertImgURL} / Base64">
+            <input class="b3-text-field fn__block fn__none emojis__link-name" data-type="custom-icon-name" placeholder="${window.siyuan.languages.fileName} (path/to/icon)">
             <div class="fn__flex emojis__link-action">
                 <div class="fn__flex-1"></div>
                 <button class="b3-button b3-button--text" data-action="set-network-icon">${window.siyuan.languages.confirm}</button>
@@ -456,19 +458,24 @@ export const openEmojiPanel = (
     setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
     dialog.element.querySelector(".emojis__item").classList.add("emojis__item--current");
     const networkIconInputElement = dialog.element.querySelector('[data-type="network-icon-url"]') as HTMLInputElement;
+    const customIconNameElement = dialog.element.querySelector('[data-type="custom-icon-name"]') as HTMLInputElement;
     const networkIconPreviewElement = dialog.element.querySelector(".emojis__link-preview");
     networkIconInputElement.value = normalizeNetworkIconURL(dynamicImgElement?.getAttribute("src") || "") || "";
     const renderNetworkIconPreview = () => {
         const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
+        const base64Image = parseBase64Image(networkIconInputElement.value);
+        customIconNameElement.classList.toggle("fn__none", !networkIconInputElement.value.trim().toLowerCase().startsWith("data:image/"));
+        networkIconPreviewElement.innerHTML = "";
+        if (base64Image) {
+            const imageElement = document.createElement("img");
+            imageElement.src = networkIconInputElement.value.trim();
+            networkIconPreviewElement.append(imageElement);
+            return;
+        }
         const imageHTML = networkURL ? genEmojiImageHTML(networkURL) : "";
         networkIconPreviewElement.innerHTML = imageHTML ? Lute.Sanitize(imageHTML) : "";
     };
-    const setNetworkIcon = () => {
-        const unicode = normalizeNetworkIconURL(networkIconInputElement.value);
-        if (!unicode) {
-            showMessage(window.siyuan.languages.invalid);
-            return;
-        }
+    const applyLinkIcon = (unicode: string) => {
         if (type === "notebook") {
             fetchPost("/api/notebook/setNotebookIcon", {
                 notebook: id,
@@ -491,14 +498,48 @@ export const openEmojiPanel = (
         addEmoji(unicode);
         dialog.destroy();
     };
-    networkIconInputElement.addEventListener("input", renderNetworkIconPreview);
-    networkIconInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.isComposing || event.key !== "Enter") {
+    const setNetworkIcon = async () => {
+        const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
+        if (networkURL) {
+            applyLinkIcon(networkURL);
             return;
         }
-        setNetworkIcon();
-        event.preventDefault();
-        event.stopPropagation();
+
+        const base64Image = parseBase64Image(networkIconInputElement.value);
+        if (!base64Image) {
+            showMessage(window.siyuan.languages.invalid);
+            return;
+        }
+        if (!customIconNameElement.value.trim()) {
+            showMessage(window.siyuan.languages.nameEmpty);
+            customIconNameElement.focus();
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("name", customIconNameElement.value);
+        formData.append("file", new File(
+            [base64Image.bytes],
+            `icon.${base64Image.extension}`,
+            {type: base64Image.mimeType},
+        ));
+        const response = await fetchSyncPost("/api/system/addCustomEmoji", formData);
+        if (response.code !== 0) {
+            return;
+        }
+        reloadEmoji();
+        applyLinkIcon(response.data.path);
+    };
+    networkIconInputElement.addEventListener("input", renderNetworkIconPreview);
+    [networkIconInputElement, customIconNameElement].forEach(item => {
+        item.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.isComposing || event.key !== "Enter") {
+                return;
+            }
+            setNetworkIcon();
+            event.preventDefault();
+            event.stopPropagation();
+        });
     });
     renderNetworkIconPreview();
     const emojiSearchInputElement = dialog.element.querySelector('[data-type="tab-emoji"] .b3-text-field') as HTMLInputElement;

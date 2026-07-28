@@ -831,7 +831,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         // relation 为全部更新，以下类型为添加
         if (type === "mAsset") {
             if (Array.isArray(value)) {
-                newValue = oldValue.mAsset.concat(value);
+                newValue = (oldValue.mAsset || []).concat(value);
             } else if (typeof value !== "undefined" && typeof value !== "object") { // 不传入为删除，传入字符串不进行处理
                 const htmlValue: IAVCellAssetValue[] = [];
                 let link = protyle.lute.GetLinkDest(value);
@@ -882,12 +882,12 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                         name: value
                     });
                 }
-                newValue = oldValue.mAsset.concat(htmlValue);
+                newValue = (oldValue.mAsset || []).concat(htmlValue);
             }
         } else if (type === "mSelect" || type === "select") {
             // 不传入为删除
             if (typeof value === "string") {
-                const oldSelectValues = replaceSelectValues ? [] : oldValue.mSelect;
+                const oldSelectValues = replaceSelectValues ? [] : oldValue.mSelect || [];
                 const newMSelectValue: IAVCellSelectValue[] = [];
                 let colorIndex = oldSelectValues.length;
                 // 以逗号分隔，去重，去空，去换行后做为选项

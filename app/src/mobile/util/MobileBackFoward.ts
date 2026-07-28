@@ -172,6 +172,12 @@ export const goBack = () => {
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;
+    } else if (window.siyuan.viewer && !window.siyuan.viewer.destroyed) {
+        window.siyuan.viewer.destroy();
+        return;
+    } else if (window.siyuan.dialogs.length !== 0) {
+        window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
+        return;
     } else if (document.getElementById("model").style.transform === "translateY(0px)") {
         const searchAssetsPanelElement = document.getElementById("searchAssetsPanel");
         if (!searchAssetsPanelElement || searchAssetsPanelElement.classList.contains("fn__none")) {
@@ -180,19 +186,12 @@ export const goBack = () => {
             searchAssetsPanelElement.classList.add("fn__none");
         }
         return;
-    } else if (window.siyuan.viewer && !window.siyuan.viewer.destroyed) {
-        window.siyuan.viewer.destroy();
-        return;
     } else if (document.getElementById("menu").style.transform === "translateX(0px)" ||
         document.getElementById("sidebar").style.transform === "translateX(0px)") {
         closePanel();
         return;
     } else if (editor && !editor.protyle.toolbar.subElement.classList.contains("fn__none")) {
         hideElements(["util"], editor.protyle);
-        closePanel();
-        return;
-    } else if (window.siyuan.dialogs.length !== 0) {
-        hideElements(["dialog"]);
         closePanel();
         return;
     }

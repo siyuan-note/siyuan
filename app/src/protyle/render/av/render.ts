@@ -23,7 +23,7 @@ import {getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll"
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate, setAVLocateRequest} from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {updateHotkeyTip} from "../../util/compatibility";
-import {openDatabaseRowByData} from "./openDatabaseRow";
+import {inspectAVInsertedItem} from "./filteredTip";
 
 interface IIds {
     groupId: string,
@@ -632,33 +632,6 @@ const getViewIDByAVElement = (avElement: HTMLElement): string | null => {
         || null;
 };
 
-// 快速判断本次渲染数据是否包含条目；未找到时还需通过 target 状态区分过滤和分页。
-export const isItemInData = (data: IAV, itemID: string): boolean => {
-    const view = data.view as IAVTable & IAVGallery;
-    if (view.groups?.length > 0) {
-        return view.groups.some((group: IAVTable & IAVGallery) => {
-            const items = data.viewType === "table" ? group.rows : group.cards;
-            return items?.some((item: IAVRow | IAVGalleryItem) => item.id === itemID);
-        });
-    }
-    const items = data.viewType === "table" ? view.rows : view.cards;
-    return items?.some((item: IAVRow | IAVGalleryItem) => item.id === itemID);
-};
-
-export const getAVItemRenderStatus = async (blockElement: HTMLElement, itemID: string) => {
-    const searchInputElement = blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
-    const response = await fetchSyncPost("/api/av/renderAttributeView", {
-        id: blockElement.dataset.avId,
-        viewID: getViewIDByAVElement(blockElement) || "",
-        query: searchInputElement?.textContent?.trim() || "",
-        blockID: blockElement.dataset.nodeId,
-        initialLayout: blockElement.dataset.avType,
-        createIfNotExist: false,
-        targetItemID: itemID,
-    });
-    return (response.data as IAV)?.target?.status;
-};
-
 const addingFocusTokens = new Map<string, symbol>();
 
 const scrollAddingCellIntoView = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
@@ -738,6 +711,9 @@ const waitForAddingCellPosition = async (options: {
 };
 
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
+    if (operation.action === "insertAttrViewBlock") {
+        inspectAVInsertedItem(protyle, operation);
+    }
     if (operation.action === "setAttrViewName") {
         getAVElements(protyle, operation.id).forEach((item) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;
@@ -908,7 +884,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             attrElement.removeAttribute("data-rendering");
             renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
         }
-        let filteredItemOpened = false;
         getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
             if (["setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
@@ -958,7 +933,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
             }
             const hasGhost = item.querySelector('[data-type="ghost"]');
-            avRender(item, protyle, (data: IAV) => {
+            avRender(item, protyle, () => {
                 if (operation.action === "insertAttrViewBlock" && operation.context?.ignoreTip !== "true") {
                     if (operation.context?.message) {
                         showMessage(operation.context.message);
@@ -1016,42 +991,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         if (hasGhost && !isAddingFocusPending &&
                             addingFocusTokens.get(addingFocusKey) === addingFocusToken) {
                             addingFocusTokens.delete(addingFocusKey);
-                        }
-                        const inspectFilteredItem = operation.srcs.length === 1 &&
-                            operation.context?.openFilteredItem === "true" &&
-                            operation.context?.protyleID === protyle.id &&
-                            operation.blockID === item.dataset.nodeId &&
-                            (!operation.viewID || operation.viewID === getViewIDByAVElement(item));
-                        if (inspectFilteredItem) {
-                            const insertedItem = operation.srcs[0];
-                            if (!isItemInData(data, insertedItem.itemID)) {
-                                getAVItemRenderStatus(item, insertedItem.itemID).then((status) => {
-                                    if ("filtered" !== status || filteredItemOpened) {
-                                        return;
-                                    }
-                                    filteredItemOpened = true;
-                                    showMessage(window.siyuan.languages.databaseItemFiltered);
-                                    openDatabaseRowByData(protyle, {
-                                        avID,
-                                        databaseBlockID: item.dataset.nodeId,
-                                        notebookID: protyle.notebookId,
-                                        itemID: insertedItem.itemID,
-                                        valueID: "",
-                                        title: insertedItem.content || "",
-                                        boundBlockID: insertedItem.isDetached ? undefined : insertedItem.id,
-                                        isDetached: insertedItem.isDetached,
-                                    });
-                                });
-                            }
-                        } else {
-                            const missingItems = operation.srcs.filter((srcItem) => !isItemInData(data, srcItem.itemID));
-                            if (missingItems.length > 0) {
-                                Promise.all(missingItems.map((srcItem) => getAVItemRenderStatus(item, srcItem.itemID))).then((statuses) => {
-                                    if (statuses.includes("filtered")) {
-                                        showMessage(window.siyuan.languages.databaseItemFiltered);
-                                    }
-                                });
-                            }
                         }
                     }
                 } else if (operation.action === "addAttrViewView") {

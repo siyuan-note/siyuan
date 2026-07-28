@@ -3,6 +3,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {focusByRange} from "../../util/selection";
 import {hasClosestBlock} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
+import {getAVFilteredTipContext} from "./filteredTip";
 
 export const addFilesToDatabase = (fileLiElements: Element[]) => {
     const srcs: IOperationSrcs[] = [];
@@ -26,7 +27,8 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
                 viewID,
                 avID,
                 srcs,
-                blockID: listItemElement.dataset.blockId
+                blockID: listItemElement.dataset.blockId,
+                context: getAVFilteredTipContext(viewID ? "view" : "database"),
             }, {
                 action: "doUpdateUpdated",
                 id: listItemElement.dataset.blockId,
@@ -51,7 +53,8 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
                     id: protyle.block.rootID,
                     isDetached: false
                 }],
-                blockID: listItemElement.dataset.blockId
+                blockID: listItemElement.dataset.blockId,
+                context: getAVFilteredTipContext(viewID ? "view" : "database", protyle),
             }, {
                 action: "doUpdateUpdated",
                 id: listItemElement.dataset.blockId,
@@ -102,7 +105,8 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
                 viewID,
                 avID,
                 srcs,
-                blockID: listItemElement.dataset.blockId
+                blockID: listItemElement.dataset.blockId,
+                context: getAVFilteredTipContext(viewID ? "view" : "database", protyle),
             }, {
                 action: "doUpdateUpdated",
                 id: listItemElement.dataset.blockId,

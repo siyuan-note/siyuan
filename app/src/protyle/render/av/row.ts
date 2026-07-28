@@ -29,6 +29,7 @@ import {
 } from "./virtualScroll";
 import {getCardCoverHTML, getCardCoverSource} from "./cover";
 import {getCardFieldsClass} from "./gallery/cardLayout";
+import {getAVFilteredTipContext} from "./filteredTip";
 
 const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem, primaryHidden = false) => {
     const canPosition = Boolean(row.coverURL && !row.coverURL.startsWith("background") && getCardCoverSource(data));
@@ -927,10 +928,7 @@ export const insertRows = (options: {
         groupID: options.groupID,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
             options.blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") || "",
-        context: {
-            protyleID: options.protyle.id,
-            openFilteredItem: "true",
-        },
+        context: getAVFilteredTipContext("target", options.protyle, true),
     }, {
         action: "doUpdateUpdated",
         id: options.blockElement.dataset.nodeId,

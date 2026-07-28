@@ -5189,14 +5189,26 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill)
+	result, err := addAttributeViewBlocks(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
+	operation.RetData = result
 	return
 }
 
 func AddAttributeViewBlock(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (err error) {
+	_, err = addAttributeViewBlocks(tx, srcs, avID, dbBlockID, viewID, groupID, previousItemID, ignoreDefaultFill)
+	return
+}
+
+type insertAttrViewBlockResult struct {
+	InsertedItemIDs []string `json:"insertedItemIDs"`
+	ExistingItemIDs []string `json:"existingItemIDs"`
+}
+
+func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (result *insertAttrViewBlockResult, err error) {
+	result = &insertAttrViewBlockResult{}
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
 
 	now := time.Now().UnixMilli()
@@ -5223,7 +5235,8 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]any, avID, dbBlock
 			}
 			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", boundBlockID, loadErr)
-				return loadErr
+				err = loadErr
+				return
 			}
 		}
 
@@ -5231,14 +5244,15 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]any, avID, dbBlock
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, tree, tx); nil != avErr {
-			return avErr
+		if avErr := addAttributeViewBlock(now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, tree, tx, result); nil != avErr {
+			err = avErr
+			return
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBoundBlockID)
@@ -5281,6 +5295,9 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 			msg := fmt.Sprintf(Conf.language(269), util.EscapeHTML(getAttrViewName(attrView)))
 			util.PushMsg(msg, 5000)
 			src["itemID"] = blockValue.BlockID
+			if nil == err {
+				result.ExistingItemIDs = append(result.ExistingItemIDs, blockValue.BlockID)
+			}
 			return
 		}
 	}
@@ -5372,6 +5389,9 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 
 	regenAttrViewGroups(attrView)
 	err = av.SaveAttributeView(attrView)
+	if nil == err {
+		result.InsertedItemIDs = append(result.InsertedItemIDs, addingItemID)
+	}
 	return
 }
 

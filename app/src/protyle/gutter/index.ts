@@ -66,6 +66,7 @@ import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation, updateHeader} from "../render/av/row";
+import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
@@ -397,6 +398,8 @@ export class Gutter {
                         }],
                         blockID: id,
                         groupID,
+                        viewID: getAVViewID(blockElement),
+                        context: getAVFilteredTipContext("target", protyle),
                     }, {
                         action: "doUpdateUpdated",
                         id,

@@ -54,6 +54,7 @@ import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 import {isSameDragEditor, uniqueDragIds} from "./dragDocument";
+import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
 
@@ -1392,7 +1393,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 previousID,
                                 srcs,
                                 blockID: blockElement.dataset.nodeId,
-                                groupID
+                                groupID,
+                                viewID: getAVViewID(blockElement),
+                                context: getAVFilteredTipContext("target", protyle),
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1470,7 +1473,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 previousID,
                                 srcs,
                                 blockID: blockElement.dataset.nodeId,
-                                groupID: bodyElement && bodyElement.getAttribute("data-group-id")
+                                groupID: bodyElement && bodyElement.getAttribute("data-group-id"),
+                                viewID: getAVViewID(blockElement),
+                                context: getAVFilteredTipContext("target", protyle),
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1741,7 +1746,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             previousID,
                             srcs,
                             blockID: blockElement.dataset.nodeId,
-                            groupID
+                            groupID,
+                            viewID: getAVViewID(blockElement),
+                            context: getAVFilteredTipContext("target", protyle),
                         }, {
                             action: "doUpdateUpdated",
                             id: blockElement.dataset.nodeId,

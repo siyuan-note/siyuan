@@ -46,6 +46,7 @@ import {
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
+import {getAVFilteredTipContext} from "../render/av/filteredTip";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -472,6 +473,7 @@ const pasteAVMatrix = async (options: {
             blockID: options.blockElement.dataset.nodeId,
             viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
             groupID,
+            context: getAVFilteredTipContext("target", options.protyle),
         });
         rowUndoOperations.push({
             action: "removeAttrViewBlock",

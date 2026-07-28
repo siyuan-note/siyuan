@@ -908,6 +908,18 @@ func createAttributeViewItem(c *gin.Context) {
 	}
 	ret.Data = result
 	if nil != result.Transaction {
+		for _, operation := range result.Transaction.DoOperations {
+			if "insertAttrViewBlock" == operation.Action {
+				operation.Context = map[string]any{
+					"filteredTipScope": "target",
+					"filteredTipToken": result.ItemID,
+					"filteredTipAppID": app,
+					"protyleID":        session,
+					"openFilteredItem": "true",
+				}
+				break
+			}
+		}
 		pushTransactions(app, session, []*model.Transaction{result.Transaction})
 	}
 }

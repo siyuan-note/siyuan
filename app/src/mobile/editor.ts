@@ -70,25 +70,29 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
         if (window.siyuan.mobile.editor.protyle.contentElement.classList.contains("fn__none")) {
             setEditMode(window.siyuan.mobile.editor.protyle, "wysiwyg");
         }
-        let blockElement;
+        let blockElement: HTMLElement | undefined;
         Array.from(window.siyuan.mobile.editor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find((item: HTMLElement) => {
             if (!isInEmbedBlock(item)) {
                 blockElement = item;
                 return true;
             }
         });
-        if (blockElement && !forceReload) {
+        const protyle = window.siyuan.mobile.editor.protyle;
+        const shouldReload = forceReload ||
+            (action.includes(Constants.CB_GET_ALL) && (!protyle.block.showAll || protyle.block.id !== id)) ||
+            blockElement?.clientHeight === 0;
+        if (blockElement && !shouldReload) {
             pushBack();
             if (action.includes(Constants.CB_GET_HL)) {
-                highlightById(window.siyuan.mobile.editor.protyle, id, scrollPosition);
+                highlightById(protyle, id, scrollPosition);
             } else {
-                scrollCenter(window.siyuan.mobile.editor.protyle, blockElement, scrollPosition);
+                scrollCenter(protyle, blockElement, scrollPosition);
             }
             closePanel();
             // 更新文档浏览时间
-            const rootID = window.siyuan.mobile.editor.protyle.block.rootID;
+            const rootID = protyle.block.rootID;
             updateRecentDocSwitchTime(createRecentDocUpdate(rootID, rootID));
-            afterOpen?.(window.siyuan.mobile.editor.protyle);
+            afterOpen?.(protyle);
             return;
         }
     }

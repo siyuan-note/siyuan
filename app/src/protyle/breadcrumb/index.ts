@@ -363,6 +363,7 @@ ${padHTML}
         if (!itemElement) {
             return false;
         }
+        this.element.classList.remove("protyle-breadcrumb__bar--hide");
         window.siyuan.menus.menu.remove();
         if (!this.element.contains(document.activeElement)) {
             this.previousFocusElement = document.activeElement as HTMLElement;

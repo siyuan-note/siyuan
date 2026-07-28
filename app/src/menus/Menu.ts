@@ -6,6 +6,8 @@ import {Constants} from "../constants";
 import {getTopBarHeight} from "../layout/getTopBarHeight";
 import {electronUndo} from "../protyle/undo";
 
+const CUSTOM_EVENT_LOAD_SUBMENU = "load-submenu";
+
 export class Menu {
     public element: HTMLElement;
     public data: any;   // 用于记录当前菜单的数据
@@ -344,7 +346,11 @@ export class MenuItem {
             if (options.loadSubmenu) {
                 let loading = false;
                 let loaded = false;
-                const loadSubmenu = () => {
+                let focusAfterLoad = false;
+                const loadSubmenu = (event: Event) => {
+                    if ((event as CustomEvent).detail?.focus) {
+                        focusAfterLoad = true;
+                    }
                     if (loading || loaded) {
                         return;
                     }
@@ -367,6 +373,16 @@ export class MenuItem {
                         }
                         loaded = true;
                         menu.showSubMenu(submenuElement);
+                        if (focusAfterLoad && this.element.classList.contains("b3-menu__item--show")) {
+                            const actionMenuElement = getActionMenu(itemsElement.firstElementChild, true);
+                            if (actionMenuElement) {
+                                menu.element.querySelectorAll(".b3-menu__item--current").forEach((item) => {
+                                    item.classList.remove("b3-menu__item--current");
+                                });
+                                actionMenuElement.classList.add("b3-menu__item--current");
+                            }
+                        }
+                        focusAfterLoad = false;
                     }).catch(() => {
                         if (!this.element.isConnected) {
                             return;
@@ -376,11 +392,13 @@ export class MenuItem {
                             type: "readonly",
                             label: window.siyuan.languages.emptyContent,
                         }, menu).element);
+                        focusAfterLoad = false;
                     }).finally(() => {
                         loading = false;
                     });
                 };
                 this.element.addEventListener(isMobile() ? "click" : "mouseenter", loadSubmenu);
+                this.element.addEventListener(CUSTOM_EVENT_LOAD_SUBMENU, loadSubmenu);
             }
         }
     }
@@ -488,6 +506,9 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         if (!subMenuElement) {
             return true;
         }
+        currentElement.dispatchEvent(new CustomEvent(CUSTOM_EVENT_LOAD_SUBMENU, {
+            detail: {focus: true},
+        }));
         currentElement.classList.remove("b3-menu__item--current");
         currentElement.classList.add("b3-menu__item--show");
 
@@ -516,6 +537,9 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         } else {
             const subMenuElement = currentElement.querySelector(".b3-menu__submenu") as HTMLElement;
             if (subMenuElement) {
+                currentElement.dispatchEvent(new CustomEvent(CUSTOM_EVENT_LOAD_SUBMENU, {
+                    detail: {focus: true},
+                }));
                 currentElement.classList.remove("b3-menu__item--current");
                 currentElement.classList.add("b3-menu__item--show");
                 const actionMenuElement = getActionMenu(subMenuElement.firstElementChild.firstElementChild, true);

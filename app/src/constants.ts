@@ -569,7 +569,7 @@ export abstract class Constants {
                 refPopover: {default: "", custom: ""},
                 copyText: {default: "", custom: ""},
                 exitFocus: {default: "", custom: ""},
-                focusBreadcrumb: {default: "", custom: ""},
+                focusBreadcrumb: {default: "⌥⇧B", custom: "⌥⇧B"},
                 ai: {default: "", custom: ""},
                 switchReadonly: {default: "", custom: ""},
                 switchAdjust: {default: "", custom: ""},

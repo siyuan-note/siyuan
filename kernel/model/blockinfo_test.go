@@ -3,6 +3,7 @@ package model
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/88250/lute/ast"
 )
@@ -54,6 +55,76 @@ func TestWalkBlockBreadcrumbContainerChildren(t *testing.T) {
 
 	assertBlockBreadcrumbChildIDs(t, list, []string{"item1", "item2"})
 	assertBlockBreadcrumbChildIDs(t, item1, []string{"paragraph", "nested-list"})
+}
+
+func TestCollectBlockBreadcrumbChildren(t *testing.T) {
+	doc := &ast.Node{Type: ast.NodeDocument, ID: "doc"}
+	paragraph := &ast.Node{Type: ast.NodeParagraph, ID: "paragraph"}
+	heading := &ast.Node{Type: ast.NodeHeading, ID: "heading", HeadingLevel: 1}
+	headingParagraph := &ast.Node{Type: ast.NodeParagraph, ID: "heading-paragraph"}
+	siblingHeading := &ast.Node{Type: ast.NodeHeading, ID: "sibling-heading", HeadingLevel: 1}
+	for _, node := range []*ast.Node{paragraph, heading, headingParagraph, siblingHeading} {
+		doc.AppendChild(node)
+	}
+
+	result := collectBlockBreadcrumbChildren(doc, nil, 1, 1)
+	if !result.HasMore {
+		t.Fatal("expected more breadcrumb children")
+	}
+	if 1 != len(result.Items) || heading.ID != result.Items[0].ID {
+		t.Fatalf("unexpected paged breadcrumb children: %+v", result.Items)
+	}
+	if !result.Items[0].HasChildren {
+		t.Fatal("expected heading to have breadcrumb children")
+	}
+
+	result = collectBlockBreadcrumbChildren(doc, nil, 2, 1)
+	if result.HasMore {
+		t.Fatal("did not expect more breadcrumb children")
+	}
+	if 1 != len(result.Items) || siblingHeading.ID != result.Items[0].ID {
+		t.Fatalf("unexpected last breadcrumb child: %+v", result.Items)
+	}
+}
+
+func TestBlockBreadcrumbTreeCache(t *testing.T) {
+	const sessionID = "breadcrumb-cache-test"
+	cacheKey := "\x00" + sessionID
+	node := &ast.Node{Type: ast.NodeParagraph, ID: "cached-node"}
+	entry := &blockBreadcrumbTreeCacheEntry{
+		nodes:     map[string]*ast.Node{node.ID: node},
+		expiresAt: time.Now().Add(time.Hour),
+		timer:     time.NewTimer(time.Hour),
+	}
+
+	blockBreadcrumbTreeCache.Lock()
+	blockBreadcrumbTreeCache.entries[cacheKey] = entry
+	blockBreadcrumbTreeCache.Unlock()
+	t.Cleanup(func() {
+		blockBreadcrumbTreeCache.Lock()
+		if current := blockBreadcrumbTreeCache.entries[cacheKey]; nil != current {
+			current.timer.Stop()
+			delete(blockBreadcrumbTreeCache.entries, cacheKey)
+		}
+		blockBreadcrumbTreeCache.Unlock()
+	})
+
+	cachedNode, err := loadBlockBreadcrumbNode(node.ID, "", sessionID)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if cachedNode != node {
+		t.Fatalf("unexpected cached breadcrumb node: %+v", cachedNode)
+	}
+
+	blockBreadcrumbTreeCache.Lock()
+	entry.expiresAt = time.Now().Add(-time.Second)
+	cleanupBlockBreadcrumbTreeCache(time.Now())
+	_, cached := blockBreadcrumbTreeCache.entries[cacheKey]
+	blockBreadcrumbTreeCache.Unlock()
+	if cached {
+		t.Fatal("expected expired breadcrumb tree cache to be removed")
+	}
 }
 
 func assertBlockBreadcrumbChildIDs(t *testing.T, node *ast.Node, expected []string) {

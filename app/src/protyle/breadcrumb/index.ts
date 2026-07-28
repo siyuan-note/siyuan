@@ -277,14 +277,28 @@ ${padHTML}
                 currentPathIDs.add(itemID);
             }
         });
+        let currentBlockElement = this.id ?
+            protyle.wysiwyg.element.querySelector(`[data-node-id="${this.id}"]`) as HTMLElement : undefined;
+        while (currentBlockElement) {
+            const currentBlockID = currentBlockElement.getAttribute("data-node-id");
+            if (currentBlockID) {
+                currentPathIDs.add(currentBlockID);
+            }
+            const parentBlockElement = hasClosestBlock(currentBlockElement.parentElement) as HTMLElement;
+            if (!parentBlockElement || !protyle.wysiwyg.element.contains(parentBlockElement)) {
+                break;
+            }
+            currentBlockElement = parentBlockElement;
+        }
         const excludeTypes: string[] = [];
         if (this.element.parentElement?.parentElement?.classList.contains("card__block")) {
             excludeTypes.push("NodeTextMark-mark");
         }
 
+        const sessionID = Lute.NewNodeID();
         let items: IMenu[];
         try {
-            items = await this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes);
+            items = await this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes, sessionID);
         } catch (e) {
             console.warn("get breadcrumb children failed", e);
             if (window.siyuan.menus.menu.element.getAttribute("data-name") === menuName) {
@@ -360,12 +374,13 @@ ${padHTML}
     }
 
     private async genChildrenMenuItems(protyle: IProtyle, id: string, currentPathIDs: Set<string>,
-                                       excludeTypes: string[], offset = 0): Promise<IMenu[]> {
+                                       excludeTypes: string[], sessionID: string, offset = 0): Promise<IMenu[]> {
         const request: Record<string, any> = {
             id,
             offset,
             limit: 64,
             excludeTypes,
+            sessionID,
         };
         if (isEncryptedBox(protyle.notebookId)) {
             request.notebook = protyle.notebookId;
@@ -390,7 +405,8 @@ ${padHTML}
                 },
             };
             if (item.hasChildren) {
-                menuItem.loadSubmenu = () => this.genChildrenMenuItems(protyle, item.id, currentPathIDs, excludeTypes);
+                menuItem.loadSubmenu = () => this.genChildrenMenuItems(protyle, item.id, currentPathIDs,
+                    excludeTypes, sessionID);
             }
             return menuItem;
         });
@@ -401,15 +417,26 @@ ${padHTML}
                 label: window.siyuan.languages.loadMore,
                 click: (element) => {
                     element.setAttribute("disabled", "disabled");
-                    this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes, offset + data.items.length)
+                    this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes, sessionID,
+                        offset + data.items.length)
                         .then((nextItems) => {
                             if (!element.isConnected) {
                                 return;
                             }
+                            let firstNextElement: HTMLElement;
                             nextItems.forEach((item) => {
-                                element.before(new MenuItem(item).element);
+                                const nextElement = new MenuItem(item).element;
+                                if (!firstNextElement) {
+                                    firstNextElement = nextElement;
+                                }
+                                element.before(nextElement);
                             });
+                            const moveCurrent = element.classList.contains("b3-menu__item--current");
                             element.remove();
+                            if (moveCurrent && firstNextElement) {
+                                firstNextElement.classList.add("b3-menu__item--current");
+                                firstNextElement.scrollIntoView({block: "nearest"});
+                            }
                             window.siyuan.menus.menu.resetPosition();
                         }).catch(() => {
                             element.removeAttribute("disabled");

@@ -22,6 +22,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
+	"time"
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
@@ -541,6 +543,24 @@ type BlockBreadcrumbChildren struct {
 	HasMore bool         `json:"hasMore"`
 }
 
+type blockBreadcrumbTreeCacheEntry struct {
+	nodes     map[string]*ast.Node
+	expiresAt time.Time
+	timer     *time.Timer
+}
+
+const (
+	blockBreadcrumbTreeCacheTTL = 30 * time.Second
+	blockBreadcrumbTreeCacheMax = 1
+)
+
+var blockBreadcrumbTreeCache = struct {
+	sync.Mutex
+	entries map[string]*blockBreadcrumbTreeCacheEntry
+}{
+	entries: map[string]*blockBreadcrumbTreeCacheEntry{},
+}
+
 func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, err error) {
 	return BuildBlockBreadcrumbInBox(id, excludeTypes, "")
 }
@@ -563,10 +583,11 @@ func BuildBlockBreadcrumbInBox(id string, excludeTypes []string, boxID string) (
 }
 
 func GetBlockBreadcrumbChildren(id string, excludeTypes []string, offset, limit int) (ret *BlockBreadcrumbChildren, err error) {
-	return GetBlockBreadcrumbChildrenInBox(id, excludeTypes, offset, limit, "")
+	return GetBlockBreadcrumbChildrenInBox(id, excludeTypes, offset, limit, "", "")
 }
 
-func GetBlockBreadcrumbChildrenInBox(id string, excludeTypes []string, offset, limit int, boxID string) (ret *BlockBreadcrumbChildren, err error) {
+func GetBlockBreadcrumbChildrenInBox(id string, excludeTypes []string, offset, limit int, boxID, sessionID string) (
+	ret *BlockBreadcrumbChildren, err error) {
 	ret = &BlockBreadcrumbChildren{Items: []*BlockPath{}}
 	if offset < 0 {
 		offset = 0
@@ -577,16 +598,18 @@ func GetBlockBreadcrumbChildrenInBox(id string, excludeTypes []string, offset, l
 		limit = 256
 	}
 
-	tree, err := loadTreeByBlockIDInBox(id, boxID)
-	if nil == tree {
-		err = nil
-		return
-	}
-	node := treenode.GetNodeInTree(tree, id)
+	node, err := loadBlockBreadcrumbNode(id, boxID, sessionID)
 	if nil == node {
 		return
 	}
 
+	ret = collectBlockBreadcrumbChildren(node, excludeTypes, offset, limit)
+	return
+}
+
+func collectBlockBreadcrumbChildren(node *ast.Node, excludeTypes []string, offset, limit int) (
+	ret *BlockBreadcrumbChildren) {
+	ret = &BlockBreadcrumbChildren{Items: []*BlockPath{}}
 	index := 0
 	walkBlockBreadcrumbChildren(node, func(child *ast.Node) bool {
 		if index < offset {
@@ -605,6 +628,93 @@ func GetBlockBreadcrumbChildrenInBox(id string, excludeTypes []string, offset, l
 		return true
 	})
 	return
+}
+
+func loadBlockBreadcrumbNode(id, boxID, sessionID string) (ret *ast.Node, err error) {
+	if "" == sessionID {
+		tree, loadErr := loadTreeByBlockIDInBox(id, boxID)
+		if nil == tree {
+			return nil, nil
+		}
+		return treenode.GetNodeInTree(tree, id), loadErr
+	}
+
+	cacheKey := boxID + "\x00" + sessionID
+	now := time.Now()
+	blockBreadcrumbTreeCache.Lock()
+	cleanupBlockBreadcrumbTreeCache(now)
+	if entry := blockBreadcrumbTreeCache.entries[cacheKey]; nil != entry {
+		if node := entry.nodes[id]; nil != node {
+			entry.expiresAt = now.Add(blockBreadcrumbTreeCacheTTL)
+			entry.timer.Reset(blockBreadcrumbTreeCacheTTL)
+			blockBreadcrumbTreeCache.Unlock()
+			return node, nil
+		}
+	}
+	blockBreadcrumbTreeCache.Unlock()
+
+	tree, loadErr := loadTreeByBlockIDInBox(id, boxID)
+	if nil == tree {
+		return nil, nil
+	}
+	nodes := map[string]*ast.Node{}
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && "" != node.ID {
+			node.Box = tree.Box
+			node.Path = tree.Path
+			nodes[node.ID] = node
+		}
+		return ast.WalkContinue
+	})
+	ret = nodes[id]
+
+	blockBreadcrumbTreeCache.Lock()
+	cleanupBlockBreadcrumbTreeCache(now)
+	if blockBreadcrumbTreeCacheMax <= len(blockBreadcrumbTreeCache.entries) {
+		var oldestKey string
+		var oldestExpiration time.Time
+		for key, entry := range blockBreadcrumbTreeCache.entries {
+			if "" == oldestKey || entry.expiresAt.Before(oldestExpiration) {
+				oldestKey = key
+				oldestExpiration = entry.expiresAt
+			}
+		}
+		blockBreadcrumbTreeCache.entries[oldestKey].timer.Stop()
+		delete(blockBreadcrumbTreeCache.entries, oldestKey)
+	}
+	entry := &blockBreadcrumbTreeCacheEntry{
+		nodes:     nodes,
+		expiresAt: now.Add(blockBreadcrumbTreeCacheTTL),
+	}
+	entry.timer = time.AfterFunc(blockBreadcrumbTreeCacheTTL, func() {
+		expireBlockBreadcrumbTreeCacheEntry(cacheKey, entry)
+	})
+	blockBreadcrumbTreeCache.entries[cacheKey] = entry
+	blockBreadcrumbTreeCache.Unlock()
+	return ret, loadErr
+}
+
+func cleanupBlockBreadcrumbTreeCache(now time.Time) {
+	for key, entry := range blockBreadcrumbTreeCache.entries {
+		if !now.Before(entry.expiresAt) {
+			entry.timer.Stop()
+			delete(blockBreadcrumbTreeCache.entries, key)
+		}
+	}
+}
+
+func expireBlockBreadcrumbTreeCacheEntry(cacheKey string, expected *blockBreadcrumbTreeCacheEntry) {
+	blockBreadcrumbTreeCache.Lock()
+	defer blockBreadcrumbTreeCache.Unlock()
+	entry := blockBreadcrumbTreeCache.entries[cacheKey]
+	if entry != expected {
+		return
+	}
+	if remaining := time.Until(entry.expiresAt); 0 < remaining {
+		entry.timer.Reset(remaining)
+		return
+	}
+	delete(blockBreadcrumbTreeCache.entries, cacheKey)
 }
 
 func walkBlockBreadcrumbChildren(node *ast.Node, walker func(child *ast.Node) bool) {

@@ -170,7 +170,7 @@ The `BoxConf` struct:
 |---|---|---|
 | `name` | string | Notebook display name |
 | `sort` | int | Sort weight |
-| `icon` | string | Icon (emoji hex code, e.g. `"1f3af"`; or a custom-icon filename) |
+| `icon` | string | Icon (emoji hex code, e.g. `"1f3af"`; a custom-icon filename; or an HTTP(S) image URL) |
 | `closed` | bool | Whether the notebook is closed |
 | `refCreateSaveBox` | string | Target notebook for docs created via block-ref |
 | `refCreateSavePath` | string | Target path for docs created via block-ref |

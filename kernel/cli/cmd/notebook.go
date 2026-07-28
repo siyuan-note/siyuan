@@ -198,7 +198,7 @@ func printNotebookTable(boxes []*model.Box) {
 }
 
 // notebookSetIconCmd 设置笔记本图标。
-// icon 取值格式：emoji hex 码点（如 "1f4ca"）、emoji 字符、自定义图片路径或动态图标 URL。
+// icon 取值格式：emoji hex 码点（如 "1f4ca"）、emoji 字符、自定义图片路径、网络图片 URL 或动态图标 URL。
 var notebookSetIconCmd = &cobra.Command{
 	Use:   "set-icon --id <id> --icon <icon>",
 	Short: "Set a notebook icon",
@@ -381,7 +381,7 @@ func init() {
 	notebookOpenCmd.Flags().String("id", "", "notebook ID")
 	notebookCloseCmd.Flags().String("id", "", "notebook ID")
 	notebookSetIconCmd.Flags().String("id", "", "notebook ID")
-	notebookSetIconCmd.Flags().String("icon", "", "notebook icon: emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\"")
+	notebookSetIconCmd.Flags().String("icon", "", "notebook icon: emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", network image URL like \"https://example.com/icon.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\"")
 	notebookRandomIconCmd.Flags().String("id", "", "notebook ID (optional; omit to update all notebooks)")
 
 	rootCmd.AddCommand(notebookCmd)

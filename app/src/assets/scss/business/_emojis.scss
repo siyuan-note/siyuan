@@ -84,6 +84,24 @@
     padding: 0 8px;
   }
 
+  &__link {
+    padding: 16px;
+
+    &-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 112px;
+
+      img {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border-radius: var(--b3-border-radius);
+      }
+    }
+  }
+
   &__content {
     display: flex;
     flex-wrap: wrap;

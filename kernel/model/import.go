@@ -267,10 +267,7 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 		if importedBoxConf != nil {
 			box := &Box{ID: boxID}
 			boxConf := box.GetConf()
-			boxConf.Icon = importedBoxConf.Icon
-			if strings.Contains(boxConf.Icon, ".") {
-				boxConf.Icon = util.FilterUploadEmojiFileName(boxConf.Icon)
-			}
+			boxConf.Icon = filterBoxIcon(importedBoxConf.Icon)
 			boxConf.RefCreateSavePath = importedBoxConf.RefCreateSavePath
 			boxConf.DocCreateSavePath = importedBoxConf.DocCreateSavePath
 			boxConf.DocCreateTemplatePath = importedBoxConf.DocCreateTemplatePath
@@ -323,7 +320,7 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 
 			if icon := n.IALAttr("icon"); "" != icon {
 				// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-				icon = util.FilterUploadEmojiFileName(icon)
+				icon = filterBoxIcon(icon)
 				n.SetIALAttr("icon", icon)
 			}
 

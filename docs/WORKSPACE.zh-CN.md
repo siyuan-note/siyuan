@@ -170,7 +170,7 @@ data/<boxID>/
 |---|---|---|
 | `name` | string | 笔记本显示名称 |
 | `sort` | int | 排序权重 |
-| `icon` | string | 图标（emoji hex 码，如 `"1f3af"`；或自定义图标文件名） |
+| `icon` | string | 图标（emoji hex 码，如 `"1f3af"`；自定义图标文件名；或 HTTP(S) 图片 URL） |
 | `closed` | bool | 是否处于关闭状态 |
 | `refCreateSaveBox` | string | 块引用时新建文档的目标笔记本 |
 | `refCreateSavePath` | string | 块引用时新建文档的目标路径 |

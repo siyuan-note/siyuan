@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -158,16 +159,10 @@ func ListNotebooks() (ret []*Box, err error) {
 			}
 		}
 
-		icon := boxConf.Icon
-		if strings.Contains(icon, ".") { // 说明是自定义图标
-			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-			icon = util.FilterUploadEmojiFileName(icon)
-		}
-
 		box := &Box{
 			ID:        id,
 			Name:      boxConf.Name,
-			Icon:      icon,
+			Icon:      filterBoxIcon(boxConf.Icon),
 			Sort:      boxConf.Sort,
 			SortMode:  boxConf.SortMode,
 			Closed:    boxConf.Closed,
@@ -232,12 +227,7 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 		return
 	}
 
-	icon := ret.Icon
-	if strings.Contains(icon, ".") {
-		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadEmojiFileName(icon)
-		ret.Icon = icon
-	}
+	ret.Icon = filterBoxIcon(ret.Icon)
 	return
 }
 
@@ -955,11 +945,20 @@ func SetBoxIcon(boxID, icon string) {
 }
 
 func filterBoxIcon(icon string) string {
+	networkURL := strings.TrimSpace(icon)
+	if isNetworkIconURL(networkURL) {
+		return networkURL
+	}
 	if strings.Contains(icon, ".") {
 		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 		icon = util.FilterUploadEmojiFileName(icon)
 	}
 	return icon
+}
+
+func isNetworkIconURL(icon string) bool {
+	u, err := url.Parse(icon)
+	return nil == err && "" != u.Host && ("http" == strings.ToLower(u.Scheme) || "https" == strings.ToLower(u.Scheme))
 }
 
 func (box *Box) UpdateHistoryGenerated() {

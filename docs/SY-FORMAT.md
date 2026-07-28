@@ -459,7 +459,7 @@ A `NodeTextMark` carrying color/effects (with `Properties.style`) **must be imme
 
 A flat `map[string]string`.
 
-**Document-level (required):** `id`, `title`, `type` (always `"doc"`), `updated`. Optional: `icon` (emoji codepoint hex, e.g. `"1f4f0"`), `title-img` (CSS).
+**Document-level (required):** `id`, `title`, `type` (always `"doc"`), `updated`. Optional: `icon` (emoji codepoint hex, e.g. `"1f4f0"`; custom-icon filename; or HTTP(S) image URL), `title-img` (document title image style as a CSS declaration string, e.g. `background-image:url("assets/example.jpg")`).
 
 **Block-level (required):** `id` (= the node's `ID`), `updated`. Optional: `style` (inline CSS), `fold: "1"` (collapsed), `colgroup` (table column widths), arbitrary `custom-*` custom attributes.
 

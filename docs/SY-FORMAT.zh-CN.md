@@ -459,7 +459,7 @@ NodeList                        NodeList
 
 扁平 `map[string]string`。
 
-**文档级必有**:`id`、`title`、`type`（恒 `"doc"`）、`updated`。可选：`icon`（emoji 码点十六进制，如 `"1f4f0"`）、`title-img`(CSS)。
+**文档级必有**：`id`、`title`、`type`（恒 `"doc"`）、`updated`。可选：`icon`（emoji 码点十六进制，如 `"1f4f0"`；自定义图标文件名；或 HTTP(S) 图片 URL）、`title-img`（题头图样式，CSS 声明字符串，如 `background-image:url("assets/example.jpg")`）。
 
 **Block 级必有**:`id`（= 节点 `ID`）、`updated`。可选：`style`（行内 CSS）、`fold: "1"`（折叠态）、`colgroup`（表格列宽）、任意 `custom-*` 自定义属性。
 

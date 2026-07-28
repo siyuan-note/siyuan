@@ -199,6 +199,19 @@
     padding: 0 5px;
     background-color: var(--b3-parent-background);
     font-size: 87.5%;
+
+    &--sticky {
+      align-items: center;
+      bottom: auto;
+      display: none;
+      flex-shrink: 0;
+      position: static;
+      white-space: nowrap;
+    }
+  }
+
+  &__views--fixed > &__counter--sticky {
+    display: flex;
   }
 
   &__header:has(> .av__title.fn__none + .av__counter:not(.fn__none)) {
@@ -211,7 +224,7 @@
       order: 2;
     }
 
-    .av__counter {
+    > .av__counter {
       position: static;
       display: flex;
       align-items: center;

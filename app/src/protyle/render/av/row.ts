@@ -350,16 +350,20 @@ export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
         });
     }
 
-    const counterElement = blockElement.querySelector(".av__counter") as HTMLElement;
-    if (!counterElement) {
+    const counterElements = Array.from(blockElement.querySelectorAll<HTMLElement>(".av__counter")).filter(
+        item => hasClosestByClassName(item, "av") === blockElement
+    );
+    if (counterElements.length === 0) {
         return;
     }
     if (selectCount === 0) {
-        counterElement.classList.add("fn__none");
+        counterElements.forEach(item => item.classList.add("fn__none"));
         return;
     }
-    counterElement.classList.remove("fn__none");
-    counterElement.innerHTML = `${selectCount} ${window.siyuan.languages.selected}`;
+    counterElements.forEach(item => {
+        item.classList.remove("fn__none");
+        item.textContent = `${selectCount} ${window.siyuan.languages.selected}`;
+    });
 };
 
 export const setPage = (blockElement: Element) => {

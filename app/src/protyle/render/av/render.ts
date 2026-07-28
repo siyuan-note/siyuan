@@ -89,6 +89,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
         defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
     return `<div class="av__header" data-default-template-id="${defaultTemplateID}">
         <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
+            <div class="av__counter av__counter--sticky fn__none"></div>
             <div class="layout-tab-bar fn__flex">
                 ${tabHTML}
             </div>

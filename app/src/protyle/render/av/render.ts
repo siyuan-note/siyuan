@@ -5,7 +5,7 @@ import {addDragFill, cellScrollIntoView, popTextCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
-import {getRowHTML, stickyRow, updateHeader} from "./row";
+import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
@@ -24,7 +24,11 @@ import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, pre
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {updateHotkeyTip} from "../../util/compatibility";
 import {inspectAVInsertedItem} from "./filteredTip";
-import {refreshAVCellSelection, restoreAVCellSelection} from "./selectionState";
+import {
+    collapseAVCellSelectionToAnchor,
+    refreshAVCellSelection,
+    restoreAVCellSelection,
+} from "./selectionState";
 
 interface IIds {
     groupId: string,
@@ -415,6 +419,7 @@ const afterRenderTable = (options: ITableOptions) => {
             itemID: item.rowId,
         })),
     });
+    updateAVSelectionStatus(options.blockElement);
     if (!options.renderAll) {
         finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
@@ -911,6 +916,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             if (operation.action === "sortAttrViewRow") {
                 clearSelect(["cell"], item);
             } else if (operation.action === "sortAttrViewCol") {
+                collapseAVCellSelectionToAnchor(item);
                 item.querySelectorAll(".av__cell--active").forEach((item) => {
                     item.classList.remove("av__cell--active");
                     item.querySelector(".av__drag-fill")?.remove();

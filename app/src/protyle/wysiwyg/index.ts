@@ -1315,17 +1315,19 @@ export class WYSIWYG {
                             lastCellElement = undefined;
                             return;
                         }
+                        let hasFillTarget = false;
                         bodyElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
                             if ((newIndex.rowIndex < firstCellIndex.rowIndex && index >= newIndex.rowIndex && index < firstCellIndex.rowIndex) ||
                                 (newIndex.rowIndex > dragFillCellIndex.rowIndex && index <= newIndex.rowIndex && index > dragFillCellIndex.rowIndex)) {
                                 rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, cellIndex: number) => {
                                     if (cellIndex >= firstCellIndex.celIndex && cellIndex <= newIndex.celIndex) {
                                         cellElement.classList.add("av__cell--active");
+                                        hasFillTarget = true;
                                     }
                                 });
                             }
                         });
-                        lastCellElement = moveAVCellElement;
+                        lastCellElement = hasFillTarget ? moveAVCellElement : undefined;
                     }
                 };
 

@@ -64,7 +64,9 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     }
     const cellSelection = getAVCellSelection(nodeElement);
     const selectCellElement = (cellSelection ?
-        nodeElement.querySelector(`.av__row[data-id="${cellSelection.focus.rowID}"] .av__cell[data-col-id="${cellSelection.focus.colID}"]`) :
+        nodeElement.querySelector(
+            `.av__body[data-group-id="${cellSelection.focus.groupID}"] ` +
+            `.av__row[data-id="${cellSelection.focus.rowID}"] .av__cell[data-col-id="${cellSelection.focus.colID}"]`) :
         nodeElement.querySelector(".av__cell--select")) as HTMLElement;
     if (!selectCellElement && cellSelection && event.key === "Escape") {
         clearSelect(["cell"], nodeElement);
@@ -240,12 +242,15 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     const itemSelection = getAVItemSelection(nodeElement);
     if (!isMobile() && selectRowElements.length === 0 && itemSelection && event.shiftKey &&
         (event.key === "ArrowUp" || event.key === "ArrowDown")) {
-        const previousFocusID = itemSelection.focusID;
+        const previousFocus = `${itemSelection.focusGroupID}:${itemSelection.focusID}`;
         const targetElement = moveAVItemRange(nodeElement, event.key === "ArrowUp" ? "up" : "down");
         if (targetElement) {
             cellScrollIntoView(nodeElement, targetElement);
-        } else if (previousFocusID !== getAVItemSelection(nodeElement)?.focusID) {
-            protyle.contentElement.scrollBy({top: event.key === "ArrowUp" ? -48 : 48});
+        } else {
+            const nextSelection = getAVItemSelection(nodeElement);
+            if (previousFocus !== `${nextSelection?.focusGroupID}:${nextSelection?.focusID}`) {
+                protyle.contentElement.scrollBy({top: event.key === "ArrowUp" ? -48 : 48});
+            }
         }
         event.preventDefault();
         event.stopPropagation();
@@ -294,12 +299,16 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
                 setAVItemAnchor(nodeElement, selectRowElements[event.key === "ArrowUp" ? 0 :
                     selectRowElements.length - 1] as HTMLElement);
             }
-            const previousFocusID = getAVItemSelection(nodeElement)?.focusID;
+            const previousSelection = getAVItemSelection(nodeElement);
+            const previousFocus = `${previousSelection?.focusGroupID}:${previousSelection?.focusID}`;
             const targetElement = moveAVItemRange(nodeElement, event.key === "ArrowUp" ? "up" : "down");
             if (targetElement) {
                 cellScrollIntoView(nodeElement, targetElement);
-            } else if (previousFocusID !== getAVItemSelection(nodeElement)?.focusID) {
-                protyle.contentElement.scrollBy({top: event.key === "ArrowUp" ? -48 : 48});
+            } else {
+                const nextSelection = getAVItemSelection(nodeElement);
+                if (previousFocus !== `${nextSelection?.focusGroupID}:${nextSelection?.focusID}`) {
+                    protyle.contentElement.scrollBy({top: event.key === "ArrowUp" ? -48 : 48});
+                }
             }
             event.preventDefault();
             event.stopPropagation();

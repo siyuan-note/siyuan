@@ -10,6 +10,7 @@ import {updateAVSelectionStatus} from "./row";
 import {
     clearAVCellSelectionState,
     clearAVItemSelectionState,
+    findAVItemPointIndex,
     getAVCellSelection,
     getAVItemSelection,
     IAVCellPoint,
@@ -245,11 +246,9 @@ const applyItemRange = (blockElement: HTMLElement, target: IAVItemInfo) => {
     const scopeItems = viewType === "kanban" ?
         allItems.filter(item => item.groupID === target.groupID) : allItems;
     let itemSelection = getAVItemSelection(blockElement);
-    let anchorIndex = scopeItems.findIndex(item =>
-        item.itemID === itemSelection?.anchorID &&
-        (viewType !== "kanban" || item.groupID === itemSelection?.anchorGroupID));
-    const targetIndex = scopeItems.findIndex(item =>
-        item.itemID === target.itemID && item.groupID === target.groupID);
+    let anchorIndex = findAVItemPointIndex(
+        scopeItems, itemSelection?.anchorID, itemSelection?.anchorGroupID);
+    const targetIndex = findAVItemPointIndex(scopeItems, target.itemID, target.groupID);
     if (targetIndex < 0) {
         return false;
     }
@@ -298,9 +297,10 @@ export const moveAVItemRange = (blockElement: HTMLElement, direction: "up" | "do
     const allItems = getAVLoadedItemInfos(blockElement, true);
     const scopeItems = viewType === "kanban" ?
         allItems.filter(item => item.groupID === selection.focusGroupID) : allItems;
-    const focusIndex = scopeItems.findIndex(item =>
-        item.itemID === selection.focusID &&
-        (viewType !== "kanban" || item.groupID === selection.focusGroupID));
+    const focusIndex = findAVItemPointIndex(scopeItems, selection.focusID, selection.focusGroupID);
+    if (focusIndex < 0) {
+        return;
+    }
     const target = scopeItems[focusIndex + (direction === "up" ? -1 : 1)];
     if (!target || !applyItemRange(blockElement, target)) {
         return;

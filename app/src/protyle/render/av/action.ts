@@ -20,6 +20,7 @@ import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHead
 import {
     getAVPrimaryCell,
     getAVSelectedItemInfos,
+    getAVSelectedItemPoints,
     getAVSelectedItems,
     resetAVRowSelect,
     updateAVRowSelect
@@ -1089,6 +1090,8 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                 protyle,
                 element: blockElement,
                 selectRowElements: rowElements,
+                selectRowIds: selectedItemInfos.map(item => item.itemID),
+                selectRowPoints: getAVSelectedItemPoints(blockElement),
             },
             separatorPosition: "top",
         });

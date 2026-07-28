@@ -48,6 +48,7 @@ import {isMobile} from "../../util/functions";
 import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
 import {getAVFilteredTipContext} from "../render/av/filteredTip";
 import {getAVSelectedCells, IAVSelectedCell} from "../render/av/selectionState";
+import {getAVSelectedTableCells} from "../render/av/virtualScroll";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -602,19 +603,14 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
     fetchPost("/api/av/getAttributeViewKeysByAvID", {avID}, async (response) => {
         const columns: IAVColumn[] = response.data;
         const selectedCells = getAVSelectedCells(blockElement);
+        const selectedRowCells = selectedCells.length === 0 ? getAVSelectedTableCells(blockElement) : [];
+        const stableStartCell = selectedCells[0] || selectedRowCells[0];
         const cellElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];
         if (values && Array.isArray(values) && values.length > 0) {
-            if (cellElements.length === 0) {
-                blockElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
-                    rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
-                        cellElements.push(cellElement);
-                    });
-                });
-            }
-            if (cellElements.length === 0 && selectedCells.length === 0) {
+            if (cellElements.length === 0 && !stableStartCell) {
                 cellElements.push(blockElement.querySelector(".av__row:not(.av__row--header) .av__cell"));
             }
-            if (cellElements[0] || selectedCells[0]) {
+            if (cellElements[0] || stableStartCell) {
                 const useHeader = headerCandidate ? await confirmAVPasteHeader() : false;
                 const header = useHeader ?
                     values[0].map(value => typeof value === "string" ? value : "") : undefined;
@@ -623,7 +619,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     protyle,
                     blockElement,
                     startCell: cellElements[0],
-                    start: selectedCells[0],
+                    start: stableStartCell,
                     columns,
                     html,
                     cellHTML: useHeader ? cellHTML.slice(1) : cellHTML,
@@ -662,7 +658,6 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         }
 
         const text = protyle.lute.BlockDOM2Content(html);
-        const rowsElement = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
 
         const textRows = text.split("\n");
         while (textRows.length > 1 && textRows[textRows.length - 1] === "") {
@@ -670,16 +665,10 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         }
         const normalizedText = textRows.join("\n");
         const textJSON = textRows.map(row => row.split("\t"));
-        if (rowsElement.length > 0 && textJSON.length === 1 && textJSON[0].length === 1) {
-            updateCellsValue(protyle, blockElement as HTMLElement, normalizedText, undefined, columns, html);
+        if (selectedRowCells.length > 0 && textJSON.length === 1 && textJSON[0].length === 1) {
+            updateCellsValue(protyle, blockElement as HTMLElement, normalizedText, undefined, columns, html,
+                false, false, false, selectedRowCells);
             return;
-        }
-        if (cellElements.length === 0 && rowsElement.length > 0) {
-            rowsElement.forEach(rowElement => {
-                rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
-                    cellElements.push(cellElement);
-                });
-            });
         }
         if (cellElements.length > 0) {
             if (textJSON.length === 1 && textJSON[0].length === 1) {
@@ -691,13 +680,13 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     protyle,
                     blockElement,
                     startCell: cellElements[0],
-                    start: selectedCells[0],
+                    start: stableStartCell,
                     columns,
                     html,
                 });
             }
             document.querySelector(".av__panel")?.remove();
-        } else if (selectedCells.length > 0) {
+        } else if (stableStartCell) {
             if (textJSON.length === 1 && textJSON[0].length === 1) {
                 updateCellsValue(protyle, blockElement as HTMLElement, normalizedText, undefined, columns, html);
             } else {
@@ -705,7 +694,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     values: textJSON,
                     protyle,
                     blockElement,
-                    start: selectedCells[0],
+                    start: stableStartCell,
                     columns,
                     html,
                 });

@@ -1,6 +1,6 @@
 import {Constants} from "../../../constants";
 import {getRowHTML} from "./row";
-import {IAVSelectedCell, restoreAVCellSelection} from "./selectionState";
+import {IAVSelectedCell, reconcileAVSelectedItemIDs, restoreAVCellSelection} from "./selectionState";
 
 const BUFFER_RATIO = 1;
 
@@ -720,18 +720,22 @@ export const initVirtualScroll = (options: {
             return;
         }
         // 从现存 DOM 初始化选中行 ID 快照，重渲后保留选中态
-        const selectedRowIds = new Set<string>();
+        const selectedRowCandidates = new Set<string>();
         item.querySelectorAll(options.data.viewType === "table" ? ".av__row--select" : ".av__gallery-item--select").forEach((row: HTMLElement) => {
             const id = row.getAttribute("data-id");
             if (id) {
-                selectedRowIds.add(id);
+                selectedRowCandidates.add(id);
             }
         });
         options.selectedItemPoints?.forEach(point => {
             if (point.groupID === (item.dataset.groupId || "")) {
-                selectedRowIds.add(point.itemID);
+                selectedRowCandidates.add(point.itemID);
             }
         });
+        const viewItems: Array<IAVRow | IAVGalleryItem> =
+            (view as IAVTable).rows || (view as IAVGallery).cards || [];
+        const selectedRowIds = reconcileAVSelectedItemIDs(
+            viewItems.map(viewItem => viewItem.id), selectedRowCandidates);
         item.querySelectorAll<HTMLElement>(".av__row[data-id], .av__gallery-item[data-id]").forEach(row => {
             if (!selectedRowIds.has(row.dataset.id)) {
                 return;

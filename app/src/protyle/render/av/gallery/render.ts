@@ -8,7 +8,7 @@ import {processRender} from "../../../util/processCode";
 import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
 import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "../virtualScroll";
-import {getRowHTML, stickyRow, updateHeader} from "../row";
+import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "../row";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 import {getCardStyle} from "./style";
 import {setGroupFoldedStates} from "../groupFold";
@@ -172,6 +172,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
             itemID: item.fieldId,
         })),
     });
+    updateAVSelectionStatus(options.blockElement);
     if (!options.renderAll) {
         finishAVLocate(options.blockElement, options.protyle, options.data);
         return;

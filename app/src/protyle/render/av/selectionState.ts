@@ -34,6 +34,17 @@ interface IAVSelectionState {
 
 const selectionStates = new WeakMap<HTMLElement, IAVSelectionState>();
 
+export const findAVItemPointIndex = <T extends {itemID: string, groupID: string}>(
+    items: T[], itemID?: string, groupID?: string) => {
+    return items.findIndex(item => item.itemID === itemID && item.groupID === groupID);
+};
+
+export const reconcileAVSelectedItemIDs = (availableItemIDs: Iterable<string>,
+                                            selectedItemIDs: Iterable<string>) => {
+    const availableIDs = new Set(availableItemIDs);
+    return new Set(Array.from(selectedItemIDs).filter(itemID => availableIDs.has(itemID)));
+};
+
 const getState = (blockElement: HTMLElement) => {
     let state = selectionStates.get(blockElement);
     if (!state) {
@@ -56,6 +67,23 @@ export const clearAVCellSelectionState = (blockElement: HTMLElement) => {
     if (state) {
         delete state.cell;
     }
+};
+
+export const collapseAVCellSelectionToAnchor = (blockElement: HTMLElement) => {
+    const selection = getAVCellSelection(blockElement);
+    if (!selection) {
+        return;
+    }
+    const anchorCell = selection.cells.find(item =>
+        item.groupID === selection.anchor.groupID &&
+        item.rowID === selection.anchor.rowID &&
+        item.colID === selection.anchor.colID);
+    if (!anchorCell) {
+        clearAVCellSelectionState(blockElement);
+        return;
+    }
+    selection.focus = {...selection.anchor};
+    selection.cells = [anchorCell];
 };
 
 export const getAVSelectedCells = (blockElement: HTMLElement) => {

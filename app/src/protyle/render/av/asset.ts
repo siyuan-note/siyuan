@@ -9,6 +9,7 @@ import {openMenu} from "../../../menus/commonMenuItem";
 import {MenuItem} from "../../../menus/Menu";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
+import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
 import {previewAttrViewImages} from "../../preview/image";
 import {genAVValueHTML} from "./attributeValue";
 import {hideMessage, showMessage} from "../../../dialog/message";
@@ -57,9 +58,28 @@ export const bindAssetEvent = (options: {
     });
 };
 
+const getVisibleAssetValues = (cellElements: HTMLElement[]) => {
+    const batchMode = getAVBatchEditMode(cellElements[0]);
+    if (batchMode === "add") {
+        return [];
+    }
+    if (batchMode === "remove") {
+        const assets = new Map<string, IAVCellAssetValue>();
+        cellElements.forEach(item => {
+            const renderedValue = genCellValueByElement("mAsset", item);
+            getAVBatchSourceValue(item, renderedValue).mAsset?.forEach(asset => {
+                assets.set(`${asset.type}:${asset.content}:${asset.name}`, asset);
+            });
+        });
+        return Array.from(assets.values());
+    }
+    return genCellValueByElement("mAsset", cellElements[0]).mAsset || [];
+};
+
 export const getAssetHTML = (cellElements: HTMLElement[]) => {
     let html = "";
-    genCellValueByElement("mAsset", cellElements[0]).mAsset.forEach((item, index) => {
+    const batchMode = getAVBatchEditMode(cellElements[0]);
+    getVisibleAssetValues(cellElements).forEach((item, index) => {
         let contentHTML;
         if (item.type === "image") {
             contentHTML = `<span data-type="openAssetItem" class="fn__flex-1 ariaLabel" aria-label="${escapeAriaLabel(item.content)}">
@@ -72,7 +92,7 @@ export const getAssetHTML = (cellElements: HTMLElement[]) => {
         html += `<button class="b3-menu__item" draggable="true" data-index="${index}" data-name="${escapeAttr(item.name)}" data-type="${item.type}" data-content="${escapeAttr(item.content)}">
 <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
 ${contentHTML}
-<svg class="b3-menu__action" data-type="editAssetItem"><use xlink:href="#iconEdit"></use></svg>
+${batchMode === "replace" ? '<svg class="b3-menu__action" data-type="editAssetItem"><use xlink:href="#iconEdit"></use></svg>' : ""}
 </button>`;
     });
     const ids: string[] = [];
@@ -111,6 +131,9 @@ export const updateAssetCell = (options: {
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
     let mAssetValue: IAVCellAssetValue[];
+    const batchMode = getAVBatchEditMode(options.cellElements[0]);
+    const batchTarget = typeof options.removeIndex === "number" ?
+        getVisibleAssetValues(options.cellElements)[options.removeIndex] : undefined;
     options.cellElements.forEach((item, elementIndex) => {
         const rowID = getFieldIdByCellElement(item, viewType);
         if (!options.blockElement.contains(item)) {
@@ -121,9 +144,19 @@ export const updateAssetCell = (options: {
                 item = options.cellElements[elementIndex] = (options.blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
             }
         }
-        const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
+        const renderedValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
+        const cellValue = batchMode === "replace" ? renderedValue : getAVBatchSourceValue(item, renderedValue);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
-        if (elementIndex === 0) {
+        if (batchMode === "add" && options.addValue?.length > 0) {
+            const existing = new Set((cellValue.mAsset || []).map(asset =>
+                `${asset.type}:${asset.content}:${asset.name}`));
+            cellValue.mAsset = (cellValue.mAsset || []).concat(options.addValue.filter(asset =>
+                !existing.has(`${asset.type}:${asset.content}:${asset.name}`)));
+        } else if (batchMode === "remove" && batchTarget) {
+            cellValue.mAsset = (cellValue.mAsset || []).filter(asset =>
+                asset.type !== batchTarget.type || asset.content !== batchTarget.content ||
+                asset.name !== batchTarget.name);
+        } else if (elementIndex === 0) {
             if (typeof options.removeIndex === "number") {
                 cellValue.mAsset.splice(options.removeIndex, 1);
             } else if (options.addValue?.length > 0) {

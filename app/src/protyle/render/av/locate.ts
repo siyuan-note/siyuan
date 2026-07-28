@@ -258,6 +258,9 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
         }
         return;
     }
+    if (request.viewID && request.previousViewID !== undefined && request.viewID !== request.previousViewID) {
+        clearSelect(["row", "galleryItem"], blockElement);
+    }
     const key = data.target.groupID || "all";
     if (request.persistView === false && request.viewID) {
         blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, request.viewID);

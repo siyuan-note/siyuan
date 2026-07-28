@@ -2916,6 +2916,7 @@ export class WYSIWYG {
                 if (avTabHeaderElement.classList.contains("item--focus")) {
                     openViewMenu({protyle, blockElement: nodeElement, element: avTabHeaderElement});
                 } else {
+                    clearSelect(["row", "galleryItem"], nodeElement);
                     transaction(protyle, [{
                         action: "setAttrViewBlockView",
                         blockID: nodeElement.getAttribute("data-node-id"),

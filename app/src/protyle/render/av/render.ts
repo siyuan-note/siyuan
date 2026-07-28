@@ -94,7 +94,18 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
         defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
     return `<div class="av__header" data-default-template-id="${defaultTemplateID}">
         <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
-            <div class="av__counter av__counter--sticky fn__none"></div>
+            <div class="av__selection-toolbar">
+                <span class="av__selection-count"></span>
+                ${editable ? `<button data-type="av-selection-edit" class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.editFields}">
+                    <svg><use xlink:href="#iconAttr"></use></svg>
+                </button>
+                <button data-type="av-selection-delete" class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.delete}">
+                    <svg><use xlink:href="#iconTrashcan"></use></svg>
+                </button>` : ""}
+                <button data-type="av-selection-more" class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.more}">
+                    <svg><use xlink:href="#iconMore"></use></svg>
+                </button>
+            </div>
             <div class="layout-tab-bar fn__flex">
                 ${tabHTML}
             </div>
@@ -138,7 +149,6 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             </div>` : ""}
         </div>
         <div contenteditable="${editable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${Lute.EscapeHTMLStr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${Lute.EscapeHTMLStr(data.name || "")}</div>
-        <div class="av__counter fn__none"></div>
     </div>`;
 };
 

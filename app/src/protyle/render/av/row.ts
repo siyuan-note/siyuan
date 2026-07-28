@@ -355,20 +355,20 @@ export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
         });
     }
 
-    const counterElements = Array.from(blockElement.querySelectorAll<HTMLElement>(".av__counter")).filter(
+    const viewsElement = Array.from(blockElement.querySelectorAll<HTMLElement>(".av__views")).find(
         item => hasClosestByClassName(item, "av") === blockElement
     );
-    if (counterElements.length === 0) {
+    const countElement = viewsElement?.querySelector<HTMLElement>(".av__selection-count");
+    if (!viewsElement || !countElement) {
         return;
     }
     if (selectCount === 0) {
-        counterElements.forEach(item => item.classList.add("fn__none"));
+        viewsElement.classList.remove("av__views--selection");
+        countElement.textContent = "";
         return;
     }
-    counterElements.forEach(item => {
-        item.classList.remove("fn__none");
-        item.textContent = `${selectCount} ${window.siyuan.languages.selected}`;
-    });
+    viewsElement.classList.add("av__views--selection");
+    countElement.textContent = `${selectCount} ${window.siyuan.languages.selected}`;
 };
 
 export const setPage = (blockElement: Element) => {

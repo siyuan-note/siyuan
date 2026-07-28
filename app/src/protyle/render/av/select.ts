@@ -14,6 +14,7 @@ import {getFieldsByData} from "./view";
 import {getFieldIdByCellElement} from "./row";
 import {Constants} from "../../../constants";
 import {setPosition} from "../../../util/setPosition";
+import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
 
 let cellValues: IAVCellValue[];
 
@@ -80,6 +81,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     const undoOperations: IOperation[] = [];
     let mSelectValue: IAVCellSelectValue[];
     const avID = blockElement.getAttribute("data-av-id");
+    const batchMode = getAVBatchEditMode(cellElements[0]);
     cellElements.forEach((item, elementIndex) => {
         const rowID = getFieldIdByCellElement(item, viewType);
         if (!rowID) {
@@ -93,9 +95,13 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
                 item = cellElements[elementIndex] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
             }
         }
-        const cellValue: IAVCellValue = cellValues[elementIndex];
+        const cellValue: IAVCellValue = batchMode === "replace" ?
+            cellValues[elementIndex] :
+            getAVBatchSourceValue(item, cellValues[elementIndex]);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
-        if (elementIndex === 0) {
+        if (batchMode !== "replace") {
+            cellValue.mSelect = cellValue.mSelect?.filter(option => option.content !== target.dataset.content) || [];
+        } else if (elementIndex === 0) {
             cellValue.mSelect?.find((item, index) => {
                 if (item.content === target.dataset.content) {
                     cellValue.mSelect.splice(index, 1);
@@ -106,6 +112,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
         } else {
             cellValue.mSelect = mSelectValue;
         }
+        cellValues[elementIndex] = cellValue;
         doOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
@@ -577,14 +584,30 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
     let mSelectValue: IAVCellSelectValue[];
+    const batchMode = getAVBatchEditMode(cellElements[0]);
     cellElements.forEach((item, index) => {
         const rowID = getFieldIdByCellElement(item, data.viewType);
         if (!rowID) {
             return;
         }
-        const cellValue: IAVCellValue = cellValues[index];
+        const cellValue: IAVCellValue = batchMode === "replace" ?
+            cellValues[index] :
+            getAVBatchSourceValue(item, cellValues[index]);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
-        if (index === 0) {
+        if (batchMode === "remove") {
+            cellValue.mSelect = cellValue.mSelect?.filter(option =>
+                option.content !== currentElement.dataset.name) || [];
+        } else if (batchMode === "add") {
+            if (!cellValue.mSelect?.some(option => option.content === currentElement.dataset.name)) {
+                if (!cellValue.mSelect) {
+                    cellValue.mSelect = [];
+                }
+                cellValue.mSelect.push({
+                    color: currentElement.dataset.color,
+                    content: currentElement.dataset.name
+                });
+            }
+        } else if (index === 0) {
             if (colData.type === "mSelect") {
                 let hasOption = false;
                 cellValue.mSelect.find((item) => {
@@ -609,6 +632,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         } else {
             cellValue.mSelect = mSelectValue;
         }
+        cellValues[index] = cellValue;
         cellDoOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
@@ -698,8 +722,10 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
     });
     let selectedHTML = "";
     const selected: string[] = [];
-    const canSort = colData.type === "mSelect" && cellValues[0].mSelect?.length > 1;
-    cellValues[0].mSelect?.forEach((item) => {
+    const batchMode = getAVBatchEditMode(cellElements[0]);
+    const visibleValues = batchMode === "replace" ? cellValues[0].mSelect : [];
+    const canSort = colData.type === "mSelect" && visibleValues?.length > 1;
+    visibleValues?.forEach((item) => {
         const option = colData.options?.find((colOption) => colOption.name === item.content);
         selected.push(item.content);
         selectedHTML += `<div class="b3-chip b3-chip--middle${canSort ? " fn__grab" : " b3-chip--pointer"}" data-content="${escapeAttr(item.content)}" data-name="${escapeAttr(item.content)}" data-desc="${escapeAttr(option?.desc || "")}" data-color="${escapeAttr(option?.color || item.color)}" data-value-color="${escapeAttr(item.color)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconClose"></use></svg></div>`;

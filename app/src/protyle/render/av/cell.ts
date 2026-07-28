@@ -29,6 +29,13 @@ import {
 } from "./cellValue";
 import {setPosition} from "../../../util/setPosition";
 import {getAVSelectedCells, IAVSelectedCell, updateAVSelectedCellValue} from "./selectionState";
+import {
+    getAVBatchDisplayValue,
+    getAVBatchEditMode,
+    getAVBatchSourceValue,
+    mergeAVBatchRelationValue,
+    setAVBatchDisplayValue
+} from "./batchValue";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -777,6 +784,8 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
     const isCustomAttr = sources[0].element ?
         Boolean(hasClosestByClassName(sources[0].element, "custom-attr")) : false;
     const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
+    let batchDisplayValue: IAVCellValue;
+    let nextBatchDisplayValue: IAVCellValue;
     for (let elementIndex = 0; elementIndex < sources.length; elementIndex++) {
         const source = sources[elementIndex];
         let item = source.element;
@@ -805,9 +814,15 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         const readonly = ["created", "updated", "template", "rollup", "lineNumber"].includes(type);
         const cellId = source.selectedCell?.cell.id || item?.dataset.id;
         const colId = source.selectedCell?.colID || (item ? getColId(item, viewType) : "");
-        const oldValue = source.selectedCell?.cell.value || (item ? genCellValueByElement(type, item) : undefined);
+        const renderedOldValue = source.selectedCell?.cell.value ||
+            (item ? genCellValueByElement(type, item) : undefined);
+        const oldValue = item && renderedOldValue ? getAVBatchSourceValue(item, renderedOldValue) : renderedOldValue;
         if (!colId || !oldValue) {
             continue;
+        }
+        const batchMode = getAVBatchEditMode(item);
+        if (elementIndex === 0 && item && batchMode !== "replace") {
+            batchDisplayValue = getAVBatchDisplayValue(item, renderedOldValue);
         }
         const nextSource = sources[elementIndex + 1];
         const sameNextRow = nextSource && (source.selectedCell ?
@@ -913,6 +928,10 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 });
                 newValue = oldSelectValues.concat(newMSelectValue);
             }
+        } else if (type === "relation" && batchMode !== "replace" && batchDisplayValue?.relation &&
+            value?.blockIDs && value?.contents) {
+            newValue = mergeAVBatchRelationValue(oldValue.relation, batchDisplayValue.relation, value, batchMode);
+            nextBatchDisplayValue = genCellValue("relation", value);
         } else if (type === "block" && typeof value === "string" && oldValue.block.id) {
             newValue = {
                 content: value,
@@ -979,6 +998,9 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             updateAVSelectedCellValue(nodeElement, rowID, colId, cellValue);
         }
     }
+    if (nextBatchDisplayValue) {
+        setAVBatchDisplayValue(cellElements as HTMLElement[], nextBatchDisplayValue);
+    }
     if (getOperations) {
         return {doOperations, undoOperations};
     }
@@ -1001,6 +1023,9 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
 export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: string, rowID: string, colID: string,
                                                   value: IAVCellValue, sourceElement?: HTMLElement) => {
     const updateCustomAttr = (cellElement: HTMLElement) => {
+        if (cellElement.dataset.avBatchOriginalValue) {
+            cellElement.dataset.avBatchChanged = "true";
+        }
         if (value.id) {
             cellElement.dataset.id = value.id;
         } else {

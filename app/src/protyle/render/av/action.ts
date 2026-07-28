@@ -58,7 +58,7 @@ import {
     resetCardCoverPosition,
     startCardCoverPosition
 } from "./coverPosition";
-import {getEditableAVFields, openAVFieldEditor} from "./batchEdit";
+import {getEditableAVFields, openAVFieldEditor, updateAVFieldValue} from "./batchEdit";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
 import {isMobile} from "../../../util/functions";
 
@@ -94,7 +94,7 @@ const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement?: HTMLElement, 
     };
 };
 
-const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowElement: HTMLElement,
+const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowID: string,
                            primaryInfo: NonNullable<ReturnType<typeof getPrimaryRowInfo>>) => {
     if (primaryInfo.cellElement) {
         updateCellsValue(protyle, blockElement, {content: primaryInfo.content}, [primaryInfo.cellElement]);
@@ -117,7 +117,7 @@ const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowElem
         id: primaryInfo.valueID,
         avID: blockElement.dataset.avId,
         keyID: primaryInfo.fieldID,
-        rowID: rowElement.dataset.id,
+        rowID,
         data: value,
     }, {
         action: "doUpdateUpdated",
@@ -128,7 +128,7 @@ const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowElem
         id: primaryInfo.valueID,
         avID: blockElement.dataset.avId,
         keyID: primaryInfo.fieldID,
-        rowID: rowElement.dataset.id,
+        rowID,
         data: primaryInfo.value,
     }, {
         action: "doUpdateUpdated",
@@ -179,6 +179,85 @@ const setGroupFolded = (foldElement: HTMLElement, folded: boolean) => {
     foldElement.setAttribute("aria-label", getGroupFoldTip(folded));
 };
 
+const getAVEditFieldMenuItems = (protyle: IProtyle, blockElement: HTMLElement): IMenu[] => {
+    return getEditableAVFields(blockElement).map(field => {
+        const item: IMenu = {
+            iconHTML: field.icon ? unicode2Emoji(field.icon, "b3-menu__icon", true) :
+                `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(field.type)}"></use></svg>`,
+            label: escapeHtml(field.name || getColNameByType(field.type)),
+        };
+        if (field.type === "checkbox") {
+            item.type = "submenu";
+            item.submenu = [{
+                iconHTML: "",
+                label: window.siyuan.languages.checked,
+                click(element) {
+                    updateAVFieldValue({
+                        protyle,
+                        blockElement,
+                        field,
+                        anchorElement: element,
+                        value: {checked: true},
+                    });
+                }
+            }, {
+                iconHTML: "",
+                label: window.siyuan.languages.unchecked,
+                click(element) {
+                    updateAVFieldValue({
+                        protyle,
+                        blockElement,
+                        field,
+                        anchorElement: element,
+                        value: {checked: false},
+                    });
+                }
+            }];
+        } else if (["mSelect", "mAsset", "relation"].includes(field.type)) {
+            item.type = "submenu";
+            item.submenu = [{
+                iconHTML: "",
+                label: window.siyuan.languages.addAttr,
+                click(element) {
+                    openAVFieldEditor({protyle, blockElement, field, anchorElement: element, mode: "add"});
+                    return true;
+                }
+            }, {
+                iconHTML: "",
+                label: window.siyuan.languages.remove,
+                click(element) {
+                    openAVFieldEditor({protyle, blockElement, field, anchorElement: element, mode: "remove"});
+                    return true;
+                }
+            }, {
+                iconHTML: "",
+                label: window.siyuan.languages.replace,
+                click(element) {
+                    openAVFieldEditor({protyle, blockElement, field, anchorElement: element, mode: "replace"});
+                    return true;
+                }
+            }];
+        } else {
+            item.click = (element) => {
+                openAVFieldEditor({protyle, blockElement, field, anchorElement: element});
+                return true;
+            };
+        }
+        return item;
+    });
+};
+
+const openAVEditFieldMenu = (protyle: IProtyle, blockElement: HTMLElement, anchorElement: HTMLElement) => {
+    const menu = new Menu();
+    getAVEditFieldMenuItems(protyle, blockElement).forEach(item => menu.addItem(item));
+    if (isMobile()) {
+        menu.fullscreen();
+    } else {
+        const rect = anchorElement.getBoundingClientRect();
+        menu.open({x: rect.left, y: rect.bottom, w: rect.width, h: rect.height});
+    }
+};
+
 let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
@@ -201,7 +280,31 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     let target = event.target;
     while (target && !target.isEqualNode(blockElement)) {
         const type = target.getAttribute("data-type");
-        if (type === "av-header-add" && !protyle.disabled) {
+        if (type === "av-selection-edit" && !protyle.disabled) {
+            openAVEditFieldMenu(protyle, blockElement as HTMLElement, target);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-selection-delete" && !protyle.disabled) {
+            deleteRow(blockElement as HTMLElement, protyle);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-selection-more") {
+            const rect = target.getBoundingClientRect();
+            avContextmenu(protyle, undefined, {
+                x: rect.left,
+                y: rect.bottom,
+                w: rect.width,
+                h: rect.height,
+            }, {
+                blockElement: blockElement as HTMLElement,
+                anchorElement: target,
+            });
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-header-add" && !protyle.disabled) {
             const addMenu = addCol(protyle, blockElement);
             const addRect = target.getBoundingClientRect();
             addMenu.open({
@@ -522,6 +625,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});
             } else if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+                clearSelect(["row", "galleryItem"], blockElement);
                 blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
                 blockElement.removeAttribute("data-render");
                 if (target.dataset.page) {
@@ -531,6 +635,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 }
                 avRender(blockElement, protyle);
             } else {
+                clearSelect(["row", "galleryItem"], blockElement);
                 transaction(protyle, [{
                     action: "setAttrViewBlockView",
                     blockID: blockElement.getAttribute("data-node-id"),
@@ -597,17 +702,20 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     return false;
 };
 
-export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, position: IPosition) => {
+export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undefined, position: IPosition, options?: {
+    blockElement?: HTMLElement;
+    anchorElement?: HTMLElement;
+}) => {
     hideElements(["hint"], protyle);
-    if (rowElement.classList.contains("av__row--header")) {
+    if (rowElement?.classList.contains("av__row--header")) {
         return false;
     }
-    const blockElement = hasClosestBlock(rowElement);
+    const blockElement = options?.blockElement || (rowElement ? hasClosestBlock(rowElement) : undefined);
     if (!blockElement) {
         return false;
     }
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
-    if (avType === "table") {
+    if (rowElement && avType === "table") {
         if (!rowElement.classList.contains("av__row--select")) {
             clearSelect(["row"], blockElement);
         }
@@ -620,7 +728,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             updateAVRowSelect(bodyElement, rowId, true);
         }
         updateHeader(rowElement);
-    } else {
+    } else if (rowElement) {
         if (!rowElement.classList.contains("av__gallery-item--select")) {
             clearSelect(["galleryItem"], blockElement);
         }
@@ -632,7 +740,13 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         }
         updateHeader(rowElement);
     }
-    setAVItemAnchor(blockElement as HTMLElement, rowElement);
+    if (rowElement) {
+        setAVItemAnchor(blockElement as HTMLElement, rowElement);
+    }
+    const anchorElement = options?.anchorElement || rowElement;
+    if (!anchorElement) {
+        return false;
+    }
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
     const selectedItemInfos = getAVSelectedItemInfos(blockElement);
@@ -918,7 +1032,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             click() {
                 openSearchAV({
                     avID: blockElement.getAttribute("data-av-id"),
-                    target: rowElement,
+                    target: anchorElement,
                     purpose: "addToDatabase",
                     blockID: blockElement.getAttribute("data-node-id"),
                     callback: (listItemElement) => {
@@ -944,7 +1058,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                             srcs,
                             context: {ignoreTip: "true"},
                             blockID: listItemElement.dataset.blockId,
-                            groupID: rowElement.parentElement.getAttribute("data-group-id")
+                            groupID: selectedItemInfos[0].groupID
                         }, {
                             action: "doUpdateUpdated",
                             id: listItemElement.dataset.blockId,
@@ -1042,7 +1156,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                         unbindDatabaseRow(
                             protyle,
                             blockElement,
-                            rowElement,
+                            selectedItemInfos[0].itemID,
                             primaryRows[0]
                         );
                     }
@@ -1057,29 +1171,12 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                 deleteRow(blockElement, protyle);
             }
         });
-        const editAttrSubmenu: IMenu[] = [];
-        getEditableAVFields(blockElement).forEach((field) => {
-            editAttrSubmenu.push({
-                iconHTML: field.icon ? unicode2Emoji(field.icon, "b3-menu__icon", true) :
-                    `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(field.type)}"></use></svg>`,
-                label: escapeHtml(field.name || getColNameByType(field.type)),
-                click(element) {
-                    openAVFieldEditor({
-                        protyle,
-                        blockElement,
-                        field,
-                        anchorElement: element,
-                    });
-                    return true;
-                }
-            });
-        });
         menu.addItem({
             id: "fields",
             icon: "iconAttr",
             label: window.siyuan.languages.editFields,
             type: "submenu",
-            submenu: editAttrSubmenu
+            submenu: getAVEditFieldMenuItems(protyle, blockElement)
         });
     }
     if (protyle?.app?.plugins) {

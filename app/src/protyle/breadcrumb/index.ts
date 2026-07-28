@@ -1,5 +1,5 @@
 import {getIconByType} from "../../editor/getIcon";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {fullscreen, net2LocalAssets, updateReadonly} from "./action";
@@ -66,6 +66,21 @@ ${padHTML}
         this.element = element.firstElementChild as HTMLElement;
         element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
+            const arrowElement = target.closest(".protyle-breadcrumb__arrow");
+            if (arrowElement && this.element.contains(arrowElement)) {
+                const itemElement = arrowElement.previousElementSibling as HTMLElement;
+                if (itemElement?.classList.contains("protyle-breadcrumb__item")) {
+                    const targetRect = arrowElement.getBoundingClientRect();
+                    this.openChildrenMenu(protyle, itemElement.getAttribute("data-node-id"), {
+                        x: targetRect.left,
+                        y: targetRect.bottom,
+                        isLeft: false,
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+            }
             while (target && !target.isEqualNode(element)) {
                 const id = target.getAttribute("data-node-id");
                 const type = target.getAttribute("data-type");
@@ -183,6 +198,19 @@ ${padHTML}
             }
         });
         /// #if !MOBILE
+        this.element.addEventListener("contextmenu", (event) => {
+            const itemElement = (event.target as HTMLElement).closest(".protyle-breadcrumb__item");
+            if (!itemElement || !this.element.contains(itemElement)) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            this.openChildrenMenu(protyle, itemElement.getAttribute("data-node-id"), {
+                x: event.clientX,
+                y: event.clientY,
+                isLeft: false,
+            });
+        });
         element.addEventListener("mouseleave", () => {
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
                 item.classList.remove("protyle-wysiwyg--hl");
@@ -192,6 +220,115 @@ ${padHTML}
             this.element.scrollLeft = this.element.scrollLeft + event.deltaY;
         }, {passive: true});
         /// #endif
+    }
+
+    private async openChildrenMenu(protyle: IProtyle, id: string, position: IPosition) {
+        if (!id) {
+            return;
+        }
+
+        const menuName = `${Constants.MENU_BREADCRUMB_CHILDREN}-${id}`;
+        const menu = new Menu(menuName);
+        if (menu.isOpen) {
+            return;
+        }
+
+        const currentPathIDs = new Set<string>();
+        this.element.querySelectorAll(".protyle-breadcrumb__item").forEach((item) => {
+            const itemID = item.getAttribute("data-node-id");
+            if (itemID) {
+                currentPathIDs.add(itemID);
+            }
+        });
+        const excludeTypes: string[] = [];
+        if (this.element.parentElement?.parentElement?.classList.contains("card__block")) {
+            excludeTypes.push("NodeTextMark-mark");
+        }
+
+        let items: IMenu[];
+        try {
+            items = await this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes);
+        } catch (e) {
+            console.warn("get breadcrumb children failed", e);
+            if (window.siyuan.menus.menu.element.getAttribute("data-name") === menuName) {
+                window.siyuan.menus.menu.remove();
+            }
+            return;
+        }
+        if (window.siyuan.menus.menu.element.getAttribute("data-name") !== menuName) {
+            return;
+        }
+        if (items.length === 0) {
+            window.siyuan.menus.menu.remove();
+            return;
+        }
+
+        items.forEach((item) => {
+            menu.addItem(item);
+        });
+        menu.open(position);
+    }
+
+    private async genChildrenMenuItems(protyle: IProtyle, id: string, currentPathIDs: Set<string>,
+                                       excludeTypes: string[], offset = 0): Promise<IMenu[]> {
+        const request: Record<string, any> = {
+            id,
+            offset,
+            limit: 64,
+            excludeTypes,
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            request.notebook = protyle.notebookId;
+        }
+        const response = await fetchSyncPost("/api/block/getBlockBreadcrumbChildren", request);
+        const data = response.data as {
+            items: IBreadcrumb[],
+            hasMore: boolean,
+        };
+        if (!data?.items) {
+            return [];
+        }
+
+        const items = data.items.map((item) => {
+            const menuItem: IMenu = {
+                id: item.id,
+                icon: getIconByType(item.type, item.subType),
+                label: item.name || window.siyuan.languages.untitled,
+                current: currentPathIDs.has(item.id),
+                click: () => {
+                    zoomOut({protyle, id: item.id});
+                },
+            };
+            if (item.hasChildren) {
+                menuItem.loadSubmenu = () => this.genChildrenMenuItems(protyle, item.id, currentPathIDs, excludeTypes);
+            }
+            return menuItem;
+        });
+
+        if (data.hasMore) {
+            items.push({
+                icon: "iconMore",
+                label: window.siyuan.languages.loadMore,
+                click: (element) => {
+                    element.setAttribute("disabled", "disabled");
+                    this.genChildrenMenuItems(protyle, id, currentPathIDs, excludeTypes, offset + data.items.length)
+                        .then((nextItems) => {
+                            if (!element.isConnected) {
+                                return;
+                            }
+                            nextItems.forEach((item) => {
+                                element.before(new MenuItem(item).element);
+                            });
+                            element.remove();
+                            window.siyuan.menus.menu.resetPosition();
+                        }).catch(() => {
+                            element.removeAttribute("disabled");
+                        });
+                    return true;
+                },
+            });
+        }
+        return items;
     }
 
     private startRecord(protyle: IProtyle) {

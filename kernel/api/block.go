@@ -751,6 +751,51 @@ func getBlockBreadcrumb(c *gin.Context) {
 	ret.Data = blockPath
 }
 
+func getBlockBreadcrumbChildren(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
+	var excludeTypes []string
+	if excludeTypesArg := arg["excludeTypes"]; nil != excludeTypesArg {
+		for _, excludeType := range excludeTypesArg.([]any) {
+			excludeTypes = append(excludeTypes, excludeType.(string))
+		}
+	}
+
+	offset := 0
+	if offsetArg := arg["offset"]; nil != offsetArg {
+		offset = int(offsetArg.(float64))
+	}
+	limit := 64
+	if limitArg := arg["limit"]; nil != limitArg {
+		limit = int(limitArg.(float64))
+	}
+
+	boxID := encryptedNotebookFromArg(arg)
+	if !isBlockPublishAccessible(c, id, boxID) {
+		ret.Data = &model.BlockBreadcrumbChildren{Items: []*model.BlockPath{}}
+		return
+	}
+
+	children, err := model.GetBlockBreadcrumbChildrenInBox(id, excludeTypes, offset, limit, boxID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = children
+}
+
 func getBlockIndex(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

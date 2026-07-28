@@ -123,7 +123,8 @@ interface IBreadcrumb {
     name: string,
     type: string,
     subType: string,
-    children: []
+    children: IBreadcrumb[],
+    hasChildren?: boolean
 }
 
 interface ILuteOptions extends IMarkdownConfig {

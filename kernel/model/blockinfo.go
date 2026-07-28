@@ -528,11 +528,17 @@ func GetBlocksIndexes(ids []string) (ret map[string]int) {
 }
 
 type BlockPath struct {
-	ID       string       `json:"id"`
-	Name     string       `json:"name"`
-	Type     string       `json:"type"`
-	SubType  string       `json:"subType"`
-	Children []*BlockPath `json:"children"`
+	ID          string       `json:"id"`
+	Name        string       `json:"name"`
+	Type        string       `json:"type"`
+	SubType     string       `json:"subType"`
+	Children    []*BlockPath `json:"children"`
+	HasChildren bool         `json:"hasChildren,omitempty"`
+}
+
+type BlockBreadcrumbChildren struct {
+	Items   []*BlockPath `json:"items"`
+	HasMore bool         `json:"hasMore"`
 }
 
 func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, err error) {
@@ -554,6 +560,140 @@ func BuildBlockBreadcrumbInBox(id string, excludeTypes []string, boxID string) (
 
 	ret = buildBlockBreadcrumb(node, excludeTypes, false)
 	return
+}
+
+func GetBlockBreadcrumbChildren(id string, excludeTypes []string, offset, limit int) (ret *BlockBreadcrumbChildren, err error) {
+	return GetBlockBreadcrumbChildrenInBox(id, excludeTypes, offset, limit, "")
+}
+
+func GetBlockBreadcrumbChildrenInBox(id string, excludeTypes []string, offset, limit int, boxID string) (ret *BlockBreadcrumbChildren, err error) {
+	ret = &BlockBreadcrumbChildren{Items: []*BlockPath{}}
+	if offset < 0 {
+		offset = 0
+	}
+	if limit < 1 {
+		limit = 64
+	} else if 256 < limit {
+		limit = 256
+	}
+
+	tree, err := loadTreeByBlockIDInBox(id, boxID)
+	if nil == tree {
+		err = nil
+		return
+	}
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return
+	}
+
+	index := 0
+	walkBlockBreadcrumbChildren(node, func(child *ast.Node) bool {
+		if index < offset {
+			index++
+			return true
+		}
+		if limit <= len(ret.Items) {
+			ret.HasMore = true
+			return false
+		}
+
+		item := buildBlockBreadcrumbChild(child, excludeTypes)
+		item.HasChildren = hasBlockBreadcrumbChildren(child)
+		ret.Items = append(ret.Items, item)
+		index++
+		return true
+	})
+	return
+}
+
+func walkBlockBreadcrumbChildren(node *ast.Node, walker func(child *ast.Node) bool) {
+	if nil == node {
+		return
+	}
+
+	if ast.NodeHeading == node.Type {
+		headingLevels := []int{node.HeadingLevel}
+		for child := node.Next; nil != child; child = child.Next {
+			if !child.IsBlock() {
+				continue
+			}
+			if ast.NodeHeading == child.Type {
+				if child.HeadingLevel <= node.HeadingLevel {
+					return
+				}
+				for 1 < len(headingLevels) && headingLevels[len(headingLevels)-1] >= child.HeadingLevel {
+					headingLevels = headingLevels[:len(headingLevels)-1]
+				}
+				if 1 == len(headingLevels) && !walker(child) {
+					return
+				}
+				headingLevels = append(headingLevels, child.HeadingLevel)
+			} else if 1 == len(headingLevels) && !walker(child) {
+				return
+			}
+		}
+		return
+	}
+
+	if ast.NodeDocument != node.Type && !node.IsContainerBlock() {
+		return
+	}
+
+	var headingLevels []int
+	for child := node.FirstChild; nil != child; child = child.Next {
+		if !child.IsBlock() {
+			continue
+		}
+		if ast.NodeHeading == child.Type {
+			for 0 < len(headingLevels) && headingLevels[len(headingLevels)-1] >= child.HeadingLevel {
+				headingLevels = headingLevels[:len(headingLevels)-1]
+			}
+			if 0 == len(headingLevels) && !walker(child) {
+				return
+			}
+			headingLevels = append(headingLevels, child.HeadingLevel)
+		} else if 0 == len(headingLevels) && !walker(child) {
+			return
+		}
+	}
+}
+
+func hasBlockBreadcrumbChildren(node *ast.Node) (ret bool) {
+	walkBlockBreadcrumbChildren(node, func(child *ast.Node) bool {
+		ret = true
+		return false
+	})
+	return
+}
+
+func buildBlockBreadcrumbChild(node *ast.Node, excludeTypes []string) (ret *BlockPath) {
+	maxNameLen := 1024
+	fc := treenode.FirstLeafBlock(node)
+	name := node.IALAttr("name")
+	if ast.NodeAttributeView == node.Type {
+		name, _ = av.GetAttributeViewName(node.AttributeViewID)
+	} else if "" == name {
+		if ast.NodeListItem == node.Type || ast.NodeList == node.Type || ast.NodeSuperBlock == node.Type ||
+			ast.NodeBlockquote == node.Type || ast.NodeCallout == node.Type {
+			name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes, true), maxNameLen)
+		} else {
+			name = gulu.Str.SubStr(renderBlockText(node, excludeTypes, true), maxNameLen)
+		}
+	}
+	if ast.NodeListItem == node.Type && "" == name {
+		name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes, true), maxNameLen)
+	}
+
+	name = strings.ReplaceAll(name, editor.Caret, "")
+	name = util.UnescapeHTML(name)
+	name = util.EscapeHTML(name)
+	return &BlockPath{
+		ID:      node.ID,
+		Name:    name,
+		Type:    node.Type.String(),
+		SubType: treenode.SubTypeAbbr(node),
+	}
 }
 
 func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bool, headingMode ...int) (ret []*BlockPath) {

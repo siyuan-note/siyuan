@@ -234,6 +234,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getChildBlocks", model.CheckAuth, model.CheckAdminRole, getChildBlocks)
 	ginServer.Handle("POST", "/api/block/getTailChildBlocks", model.CheckAuth, model.CheckAdminRole, getTailChildBlocks)
 	ginServer.Handle("POST", "/api/block/getBlockBreadcrumb", model.CheckAuth, getBlockBreadcrumb)
+	ginServer.Handle("POST", "/api/block/getBlockBreadcrumbChildren", model.CheckAuth, getBlockBreadcrumbChildren)
 	ginServer.Handle("POST", "/api/block/getBlockIndex", model.CheckAuth, getBlockIndex)
 	ginServer.Handle("POST", "/api/block/getBlocksIndexes", model.CheckAuth, getBlocksIndexes)
 	ginServer.Handle("POST", "/api/block/getRefIDs", model.CheckAuth, getRefIDs)

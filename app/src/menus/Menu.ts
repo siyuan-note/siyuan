@@ -329,15 +329,59 @@ export class MenuItem {
             options.bind(this.element);
         }
 
-        if (options.submenu) {
+        if (options.submenu || options.loadSubmenu) {
             const submenuElement = document.createElement("div");
             submenuElement.classList.add("b3-menu__submenu");
             submenuElement.innerHTML = '<div class="b3-menu__items"></div>';
-            options.submenu.forEach((item) => {
+            (options.submenu || [{
+                type: "readonly",
+                label: window.siyuan.languages.loading,
+            }]).forEach((item: IMenu) => {
                 submenuElement.firstElementChild.append(new MenuItem(item, menu)?.element || "");
             });
             this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>');
             this.element.append(submenuElement);
+            if (options.loadSubmenu) {
+                let loading = false;
+                let loaded = false;
+                const loadSubmenu = () => {
+                    if (loading || loaded) {
+                        return;
+                    }
+                    loading = true;
+                    options.loadSubmenu().then((items) => {
+                        if (!this.element.isConnected) {
+                            return;
+                        }
+                        const itemsElement = submenuElement.firstElementChild;
+                        itemsElement.innerHTML = "";
+                        if (items.length === 0) {
+                            itemsElement.append(new MenuItem({
+                                type: "readonly",
+                                label: window.siyuan.languages.emptyContent,
+                            }, menu).element);
+                        } else {
+                            items.forEach((item) => {
+                                itemsElement.append(new MenuItem(item, menu)?.element || "");
+                            });
+                        }
+                        loaded = true;
+                        menu.showSubMenu(submenuElement);
+                    }).catch(() => {
+                        if (!this.element.isConnected) {
+                            return;
+                        }
+                        submenuElement.firstElementChild.innerHTML = "";
+                        submenuElement.firstElementChild.append(new MenuItem({
+                            type: "readonly",
+                            label: window.siyuan.languages.emptyContent,
+                        }, menu).element);
+                    }).finally(() => {
+                        loading = false;
+                    });
+                };
+                this.element.addEventListener(isMobile() ? "click" : "mouseenter", loadSubmenu);
+            }
         }
     }
 }

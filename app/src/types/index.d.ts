@@ -963,6 +963,7 @@ interface IMenu {
     action?: string,
     id?: string,
     submenu?: IMenu[]
+    loadSubmenu?: () => Promise<IMenu[]>
     disabled?: boolean
     icon?: string
     iconHTML?: string

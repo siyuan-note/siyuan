@@ -306,36 +306,54 @@ export const updateHeader = (rowElement: HTMLElement) => {
     if (!blockElement) {
         return;
     }
+    updateAVSelectionStatus(blockElement as HTMLElement);
+};
+
+export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
-    let selectCount: number;
+    let selectCount = 0;
     if (avType === "table") {
-        const bodyElement = rowElement.parentElement as HTMLElement;
-        // 虚拟滚动下 DOM 内只有渲染窗口的行，直接计数会低估；优先用选中快照与已加载行总数。
-        const stat = getAVSelectStat(bodyElement);
-        selectCount = stat ? stat.selectCount : bodyElement.querySelectorAll(".av__row--select:not(.av__row--header)").length;
-        const count = stat ? stat.loadedCount : bodyElement.querySelectorAll(".av__row:not(.av__row--header)").length;
-        const headElement = bodyElement.firstElementChild as HTMLElement;
-        const headUseElement = headElement.querySelector("use");
-        if (count === selectCount && count !== 0) {
-            headElement.classList.add("av__row--select");
-            headUseElement.setAttribute("xlink:href", "#iconCheck");
-        } else if (selectCount === 0) {
-            headElement.classList.remove("av__row--select");
-            headUseElement.setAttribute("xlink:href", "#iconUncheck");
-        } else if (selectCount > 0) {
-            headElement.classList.add("av__row--select");
-            headUseElement.setAttribute("xlink:href", "#iconIndeterminateCheck");
-        }
+        blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
+            if (hasClosestByClassName(bodyElement, "av") !== blockElement) {
+                return;
+            }
+            // 虚拟滚动下 DOM 内只有渲染窗口的行，直接计数会低估；优先用选中快照与已加载行总数。
+            const stat = getAVSelectStat(bodyElement);
+            const bodySelectCount = stat ? stat.selectCount :
+                bodyElement.querySelectorAll(".av__row--select[data-id]").length;
+            const count = stat ? stat.loadedCount : bodyElement.querySelectorAll(".av__row[data-id]").length;
+            selectCount += bodySelectCount;
+            const headElement = bodyElement.firstElementChild as HTMLElement;
+            const headUseElement = headElement?.querySelector("use");
+            if (!headElement || !headUseElement) {
+                return;
+            }
+            if (count === bodySelectCount && count !== 0) {
+                headElement.classList.add("av__row--select");
+                headUseElement.setAttribute("xlink:href", "#iconCheck");
+            } else if (bodySelectCount === 0) {
+                headElement.classList.remove("av__row--select");
+                headUseElement.setAttribute("xlink:href", "#iconUncheck");
+            } else {
+                headElement.classList.add("av__row--select");
+                headUseElement.setAttribute("xlink:href", "#iconIndeterminateCheck");
+            }
+        });
     } else {
         // 卡片/看板视图按分组（.av__body）聚合选中数，看板与分组卡片视图存在多个 body。
-        selectCount = 0;
         blockElement.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
+            if (hasClosestByClassName(bodyItem, "av") !== blockElement) {
+                return;
+            }
             const stat = getAVSelectStat(bodyItem);
             selectCount += stat ? stat.selectCount : bodyItem.querySelectorAll(".av__gallery-item--select").length;
         });
     }
 
-    const counterElement = blockElement.querySelector(".av__counter");
+    const counterElement = blockElement.querySelector(".av__counter") as HTMLElement;
+    if (!counterElement) {
+        return;
+    }
     if (selectCount === 0) {
         counterElement.classList.add("fn__none");
         return;

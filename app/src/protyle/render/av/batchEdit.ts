@@ -138,5 +138,6 @@ export const openAVFieldEditor = (options: {
         destroyCallback: destroy,
         keepMenuOpen: true,
         positionByMenu: true,
+        requireExplicitChange: true,
     });
 };

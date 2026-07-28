@@ -30,6 +30,7 @@ type LayoutGallery struct {
 	CardAspectRatioValue float64         `json:"cardAspectRatioValue"`          // 卡片宽高比实际值，宽除以高
 	CardSize             CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
 	CardWidth            int             `json:"cardWidth"`                     // 卡片宽度，单位为像素
+	CardLayout           CardLayout      `json:"cardLayout"`                    // 卡片字段布局
 	FitImage             bool            `json:"fitImage"`                      // 是否适应封面图片大小
 	DisplayFieldName     bool            `json:"displayFieldName"`              // 是否显示字段名称
 	DisplayEmptyFields   bool            `json:"displayEmptyFields"`            // 是否显示空字段
@@ -53,6 +54,7 @@ func NewLayoutGallery() *LayoutGallery {
 		CardAspectRatioValue: CardAspectRatioValueByPreset(CardAspectRatio16_9),
 		CardSize:             CardSizeMedium,
 		CardWidth:            CardWidthBySize(CardSizeMedium),
+		CardLayout:           CardLayoutList,
 	}
 }
 
@@ -126,6 +128,7 @@ const (
 // ViewGalleryCardField 描述了卡片字段的结构。
 type ViewGalleryCardField struct {
 	*BaseField
+	FullRow bool `json:"fullRow"` // 是否独占整行
 }
 
 // Gallery 描述了卡片视图实例的结构。
@@ -138,6 +141,7 @@ type Gallery struct {
 	CardAspectRatioValue float64         `json:"cardAspectRatioValue"`          // 卡片宽高比实际值，宽除以高
 	CardSize             CardSize        `json:"cardSize"`                      // 卡片大小
 	CardWidth            int             `json:"cardWidth"`                     // 卡片宽度，单位为像素
+	CardLayout           CardLayout      `json:"cardLayout"`                    // 卡片字段布局
 	FitImage             bool            `json:"fitImage"`                      // 是否适应封面图片大小
 	DisplayFieldName     bool            `json:"displayFieldName"`              // 是否显示字段名称
 	DisplayEmptyFields   bool            `json:"displayEmptyFields"`            // 是否显示空字段
@@ -159,6 +163,7 @@ type GalleryCard struct {
 // GalleryField 描述了卡片实例字段的结构。
 type GalleryField struct {
 	*BaseInstanceField
+	FullRow bool `json:"fullRow"` // 是否独占整行
 }
 
 // GalleryFieldValue 描述了卡片字段实例值的结构。

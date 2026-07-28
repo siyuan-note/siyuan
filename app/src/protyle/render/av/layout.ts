@@ -4,6 +4,40 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {setPosition} from "../../../util/setPosition";
 import {getCardAspectRatioLabel, getCardAspectRatioValue, getCardWidth} from "./gallery/style";
 import {getFieldsByData} from "./view";
+import {unicode2Emoji} from "../../../emoji";
+import {getColIconByType} from "./col";
+import {escapeHtml} from "../../../util/escape";
+import {CARD_LAYOUT_COMPACT, CARD_LAYOUT_LIST} from "./gallery/cardLayout";
+
+const getCardLayoutHTML = (view: IAVGallery | IAVKanban) => {
+    let fullRowHTML = "";
+    if (view.cardLayout === CARD_LAYOUT_COMPACT) {
+        view.fields.forEach((field) => {
+            if (field.hidden) {
+                return;
+            }
+            const disabled = field.type === "block" || view.displayFieldName;
+            const checked = disabled || field.fullRow;
+            fullRowHTML += `<label class="b3-menu__item">
+    ${field.icon ? unicode2Emoji(field.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(field.type)}"></use></svg>`}
+    <span class="b3-menu__label">${escapeHtml(field.name) || "&nbsp;"}</span>
+    <input data-type="toggle-card-full-row" data-id="${field.id}" type="checkbox" class="b3-switch b3-switch--menu" ${checked ? "checked" : ""}${disabled ? " disabled" : ""}>
+</label>`;
+        });
+        fullRowHTML = `<button class="b3-menu__separator av__card-layout-separator"></button>
+<div class="av__card-layout-label">${window.siyuan.languages.fullRow}</div>
+${fullRowHTML}`;
+    }
+    return `<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.cardLayout}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <select data-type="set-card-layout" class="b3-select b3-select--noborder av__card-layout-select">
+        <option value="${CARD_LAYOUT_LIST}"${view.cardLayout === CARD_LAYOUT_LIST ? " selected" : ""}>${window.siyuan.languages.list1}</option>
+        <option value="${CARD_LAYOUT_COMPACT}"${view.cardLayout === CARD_LAYOUT_COMPACT ? " selected" : ""}>${window.siyuan.languages.compact}</option>
+    </select>
+</label>
+${fullRowHTML}`;
+};
 
 export const getLayoutHTML = (data: IAV) => {
     let html = "";
@@ -114,6 +148,7 @@ export const getLayoutHTML = (data: IAV) => {
         <span class="b3-menu__accelerator">${view.pageSize === Constants.SIZE_DATABASE_MAZ_SIZE ? window.siyuan.languages.all : view.pageSize}</span>
         <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
     </button>
+    ${["gallery", "kanban"].includes(data.viewType) ? getCardLayoutHTML(view) : ""}
 </div>`;
 };
 
@@ -125,7 +160,14 @@ export const bindLayoutEvent = (options: {
 }) => {
     const avID = options.blockElement.getAttribute("data-av-id");
     const blockID = options.blockElement.getAttribute("data-node-id");
-    const viewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
+    const viewID = options.data.viewID || options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
+    const rerender = () => {
+        options.menuElement.innerHTML = getLayoutHTML(options.data);
+        const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+        setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth,
+            tabRect.bottom, tabRect.height, 0, true);
+        bindLayoutEvent(options);
+    };
     const toggleTitleElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-view-title"]') as HTMLInputElement;
     toggleTitleElement.addEventListener("change", () => {
         const checked = toggleTitleElement.checked;
@@ -186,6 +228,54 @@ export const bindLayoutEvent = (options: {
     if (options.data.viewType === "table") {
         return;
     }
+    const cardLayoutElement = options.menuElement.querySelector('select[data-type="set-card-layout"]') as HTMLSelectElement;
+    cardLayoutElement.addEventListener("change", () => {
+        const view = options.data.view as IAVGallery | IAVKanban;
+        const oldLayout = view.cardLayout;
+        const cardLayout = parseInt(cardLayoutElement.value);
+        transaction(options.protyle, [{
+            action: "setAttrViewCardLayout",
+            avID,
+            blockID,
+            data: cardLayout,
+            viewID
+        }], [{
+            action: "setAttrViewCardLayout",
+            avID,
+            blockID,
+            data: oldLayout,
+            viewID
+        }]);
+        view.cardLayout = cardLayout;
+        rerender();
+    });
+    options.menuElement.querySelectorAll('input[data-type="toggle-card-full-row"]').forEach((item: HTMLInputElement) => {
+        item.addEventListener("change", () => {
+            const field = (options.data.view as IAVGallery | IAVKanban).fields.find((fieldItem) => {
+                return fieldItem.id === item.dataset.id;
+            });
+            if (!field) {
+                return;
+            }
+            const oldFullRow = !!field.fullRow;
+            transaction(options.protyle, [{
+                action: "setAttrViewColFullRow",
+                id: field.id,
+                avID,
+                blockID,
+                data: item.checked,
+                viewID
+            }], [{
+                action: "setAttrViewColFullRow",
+                id: field.id,
+                avID,
+                blockID,
+                data: oldFullRow,
+                viewID
+            }]);
+            field.fullRow = item.checked;
+        });
+    });
     const toggleFitElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-fit"]') as HTMLInputElement;
     toggleFitElement.addEventListener("change", () => {
         const checked = toggleFitElement.checked;
@@ -211,14 +301,17 @@ export const bindLayoutEvent = (options: {
             action: "setAttrViewDisplayFieldName",
             avID,
             blockID,
-            data: checked
+            data: checked,
+            viewID
         }], [{
             action: "setAttrViewDisplayFieldName",
             avID,
             blockID,
-            data: !checked
+            data: !checked,
+            viewID
         }]);
-        (options.data.view as IAVGallery).displayFieldName = checked;
+        (options.data.view as IAVGallery | IAVKanban).displayFieldName = checked;
+        rerender();
     });
     const toggleEmptyElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-empty"]') as HTMLInputElement;
     toggleEmptyElement.addEventListener("change", () => {

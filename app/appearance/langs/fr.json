@@ -1,4 +1,7 @@
 {
+  "cardLayout": "Mise en page de la carte",
+  "compact": "Compact",
+  "fullRow": "Ligne entière",
   "editFields": "Modifier les champs",
   "startDate": "Date de début",
   "addToDictionary": "Ajouter au dictionnaire",

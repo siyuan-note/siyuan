@@ -28,6 +28,7 @@ import {
     updateAVRowSelect
 } from "./virtualScroll";
 import {getCardCoverHTML, getCardCoverSource} from "./cover";
+import {getCardFieldsClass} from "./gallery/cardLayout";
 
 const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem, primaryHidden = false) => {
     const canPosition = Boolean(row.coverURL && !row.coverURL.startsWith("background") && getCardCoverSource(data));
@@ -70,7 +71,7 @@ export const getRowHTML = (options: {
                 html += `<div class="${coverClass}"></div>`;
             }
         }
-        html += `<div class="av__gallery-fields${hasVisibleFields ? "" : " fn__none"}">`;
+        html += `<div class="${getCardFieldsClass(galleryData.cardLayout, hasVisibleFields)}">`;
         galleryRow.values.forEach((cell, fieldsIndex) => {
             if (galleryData.fields[fieldsIndex].hidden) {
                 return;
@@ -89,6 +90,9 @@ export const getRowHTML = (options: {
             if (cell.valueType === "checkbox" && !galleryData.displayFieldName) {
                 cell.value.checkbox.content = galleryData.fields[fieldsIndex].name || getColNameByType(galleryData.fields[fieldsIndex].type);
             }
+            const fullRowClass = galleryData.fields[fieldsIndex].type === "block" ||
+                galleryData.fields[fieldsIndex].fullRow || galleryData.displayFieldName ?
+                " av__gallery-field--full-row" : "";
             const cellHTML = `<div class="av__cell${checkClass}${galleryData.displayFieldName ? "" : " ariaLabel"}"
 data-wrap="${galleryData.fields[fieldsIndex].wrap}"
 aria-label="${ariaLabel}" 
@@ -101,7 +105,7 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
 ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, galleryData.showIcon, "gallery", galleryData.fields[fieldsIndex].options, galleryData.fields[fieldsIndex].dateFormat)}</div>`;
             if (galleryData.displayFieldName) {
-                html += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
+                html += `<div class="av__gallery-field av__gallery-field--name${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-name">
         ${galleryData.fields[fieldsIndex].icon ? unicode2Emoji(galleryData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(galleryData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(galleryData.fields[fieldsIndex].name)}
         ${galleryData.fields[fieldsIndex].desc ? `<svg aria-label="${galleryData.fields[fieldsIndex].desc}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
@@ -109,7 +113,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     ${cellHTML}
 </div>`;
             } else {
-                html += `<div class="av__gallery-field" data-empty="${isEmpty}">
+                html += `<div class="av__gallery-field${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-tip">
         ${galleryData.fields[fieldsIndex].icon ? unicode2Emoji(galleryData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(galleryData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(galleryData.fields[fieldsIndex].name)}
     </div>
@@ -135,7 +139,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
                 html += `<div class="${coverClass}"><div class="av__gallery-content">${kanbanRow.coverContent}</div><div></div></div>`;
             }
         }
-        html += '<div class="av__gallery-fields">';
+        html += `<div class="${getCardFieldsClass(kanbanData.cardLayout)}">`;
         kanbanRow.values.forEach((cell, fieldsIndex) => {
             if (kanbanData.fields[fieldsIndex].hidden) {
                 return;
@@ -154,6 +158,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
             if (cell.valueType === "checkbox" && !kanbanData.displayFieldName) {
                 cell.value.checkbox.content = kanbanData.fields[fieldsIndex].name || getColNameByType(kanbanData.fields[fieldsIndex].type);
             }
+            const fullRowClass = kanbanData.fields[fieldsIndex].type === "block" ||
+                kanbanData.fields[fieldsIndex].fullRow || kanbanData.displayFieldName ?
+                " av__gallery-field--full-row" : "";
             const cellHTML = `<div class="av__cell${checkClass}${kanbanData.displayFieldName ? "" : " ariaLabel"}" 
 data-wrap="${kanbanData.fields[fieldsIndex].wrap}" 
 aria-label="${ariaLabel}" 
@@ -166,7 +173,7 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
 ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, kanbanData.showIcon, "kanban", kanbanData.fields[fieldsIndex].options, kanbanData.fields[fieldsIndex].dateFormat)}</div>`;
             if (kanbanData.displayFieldName) {
-                html += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
+                html += `<div class="av__gallery-field av__gallery-field--name${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-name">
         ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
         ${kanbanData.fields[fieldsIndex].desc ? `<svg aria-label="${kanbanData.fields[fieldsIndex].desc}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
@@ -174,7 +181,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     ${cellHTML}
 </div>`;
             } else {
-                html += `<div class="av__gallery-field" data-empty="${isEmpty}">
+                html += `<div class="av__gallery-field${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-tip">
         ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
     </div>

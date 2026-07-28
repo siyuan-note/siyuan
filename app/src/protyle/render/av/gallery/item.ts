@@ -46,12 +46,12 @@ data-date-format="${item.dataset.dateFormat || ""}"
 ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber,
     false, type, undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
         if (item.previousElementSibling.classList.contains("av__gallery-name")) {
-            cellsHTML += `<div class="av__gallery-field av__gallery-field--name" data-empty="${item.parentElement.dataset.empty}">
+            cellsHTML += `<div class="${item.parentElement.className}" data-empty="${item.parentElement.dataset.empty}">
     ${item.previousElementSibling.outerHTML}
     ${cellHTML}
 </div>`;
         } else {
-            cellsHTML += `<div class="av__gallery-field" data-empty="${item.parentElement.dataset.empty}">
+            cellsHTML += `<div class="${item.parentElement.className}" data-empty="${item.parentElement.dataset.empty}">
     ${item.previousElementSibling.outerHTML}
     ${cellHTML}
 </div>`;

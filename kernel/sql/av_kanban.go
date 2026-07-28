@@ -27,6 +27,7 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 		CardAspectRatioValue:   view.Kanban.CardAspectRatioValue,
 		CardSize:               view.Kanban.CardSize,
 		CardWidth:              view.Kanban.CardWidth,
+		CardLayout:             view.Kanban.CardLayout,
 		FitImage:               view.Kanban.FitImage,
 		DisplayFieldName:       view.Kanban.DisplayFieldName,
 		DisplayEmptyFields:     view.Kanban.DisplayEmptyFields,
@@ -66,6 +67,7 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 				Created:      key.Created,
 				Updated:      key.Updated,
 			},
+			FullRow: field.FullRow,
 		})
 	}
 

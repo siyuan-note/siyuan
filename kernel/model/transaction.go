@@ -386,6 +386,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewCardSize(op)
 			case "setAttrViewCardWidth":
 				ret = tx.doSetAttrViewCardWidth(op)
+			case "setAttrViewCardLayout":
+				ret = tx.doSetAttrViewCardLayout(op)
+			case "setAttrViewColFullRow":
+				ret = tx.doSetAttrViewColFullRow(op)
 			case "setAttrViewFitImage":
 				ret = tx.doSetAttrViewFitImage(op)
 			case "setAttrViewDisplayFieldName":

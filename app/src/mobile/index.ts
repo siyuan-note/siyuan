@@ -109,14 +109,15 @@ class App {
                 showMessage(window.siyuan.languages.copied, 2000);
                 event.preventDefault();
             }
-            if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) {
+            const editableElement = canInput(event.target);
+            if (editableElement && ["INPUT", "TEXTAREA"].includes(editableElement.tagName)) {
                 setTimeout(() => {
-                    event.target.scrollIntoView({
+                    editableElement.scrollIntoView({
                         block: "center",
                     });
                 }, Constants.TIMEOUT_TRANSITION);
             }
-            if (canInput(event.target)) {
+            if (editableElement) {
                 // 原生 App 通过桥接主动唤起键盘；移动端浏览器没有桥接，但点击可编辑区域后也会立刻触发 resize，
                 // 进而调用 activeBlur 关闭键盘（比如三星键盘 https://github.com/siyuan-note/siyuan/issues/18078），所以此处也需要上锁
                 if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {

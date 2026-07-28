@@ -1,4 +1,7 @@
 {
+  "cardLayout": "カードレイアウト",
+  "compact": "コンパクト",
+  "fullRow": "行全体",
   "editFields": "フィールドを編集",
   "startDate": "開始日",
   "addToDictionary": "辞書に追加",

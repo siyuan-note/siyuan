@@ -1,4 +1,7 @@
 {
+  "cardLayout": "Layout scheda",
+  "compact": "Compatto",
+  "fullRow": "Riga intera",
   "editFields": "Modifica campi",
   "startDate": "Data di inizio",
   "addToDictionary": "Aggiungi al dizionario",

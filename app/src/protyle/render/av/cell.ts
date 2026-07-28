@@ -427,6 +427,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     destroyCallback?: () => void;
     keepMenuOpen?: boolean;
     positionByMenu?: boolean;
+    requireExplicitChange?: boolean;
 }) => {
     if (cellElements.length === 0 || (cellElements.length === 1 && !cellElements[0])) {
         options?.destroyCallback?.();
@@ -488,6 +489,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 data: options?.data,
                 destroyCallback: options?.destroyCallback,
                 keepMenuOpen: options?.keepMenuOpen,
+                requireExplicitChange: options?.requireExplicitChange,
             });
         } else if (type === "mAsset") {
             openMenuPanel({

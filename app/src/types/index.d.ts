@@ -64,6 +64,8 @@ type TOperation =
     | "setAttrViewCardWidth"
     | "setAttrViewCardAspectRatio"
     | "setAttrViewCardAspectRatioValue"
+    | "setAttrViewCardLayout"
+    | "setAttrViewColFullRow"
     | "setAttrViewCoverFrom"
     | "setAttrViewCoverFromAssetKeyID"
     | "setAttrViewCardCoverPosition"
@@ -1094,6 +1096,7 @@ interface IAVGallery extends IAVView {
     coverFromAssetKeyID?: string;
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
     cardWidth: number;
+    cardLayout: number;   // 0：列表，1：紧凑
     cardAspectRatio: number;
     cardAspectRatioValue: number;
     displayFieldName: boolean;
@@ -1110,6 +1113,7 @@ interface IAVKanban extends IAVView {
     coverFromAssetKeyID?: string;
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
     cardWidth: number;
+    cardLayout: number;   // 0：列表，1：紧凑
     cardAspectRatio: number;
     cardAspectRatioValue: number;
     displayFieldName: boolean;
@@ -1168,6 +1172,7 @@ interface IAVColumn {
     wrap: boolean,
     pin: boolean,
     hidden: boolean,
+    fullRow?: boolean,
     type: TAVCol,
     numberFormat: string,
     dateFormat?: TAVDateFormat,

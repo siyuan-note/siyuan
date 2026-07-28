@@ -763,6 +763,11 @@ export class WYSIWYG {
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
             let nodeElement = hasClosestBlock(target) as HTMLElement;
+            if (hasClosestByClassName(target, "av__selection-toolbar")) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
             const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
             const avCellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;

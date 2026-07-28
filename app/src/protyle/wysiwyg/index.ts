@@ -39,10 +39,13 @@ import {dropEvent} from "../util/editorCommonEvent";
 import {input} from "./input";
 import {
     getContenteditableElement,
+    getFirstBlock,
+    getLastBlock,
     getNextBlock,
     getTopAloneElement,
     hasNextSibling,
     hasPreviousSibling,
+    isContainerBlock,
     isEndOfBlock,
     isNotEditBlock
 } from "./getBlock";
@@ -117,6 +120,94 @@ import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spel
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
 import {applyAVDragSelection, clearAVDragSelection, isAVDragSelectSupported} from "../render/av/dragSelect";
+
+interface IShiftClickBlockPoint {
+    blockElement: HTMLElement;
+    toStart: boolean;
+}
+
+const getShiftClickBlockByPoint = (wysiwygElement: HTMLElement, startElement: HTMLElement, x: number, y: number) => {
+    const blockElements = Array.from(wysiwygElement.children).filter(item =>
+        item.getAttribute("data-type")?.startsWith("Node")) as HTMLElement[];
+    if (blockElements.length === 0) {
+        return;
+    }
+
+    const firstElement = blockElements[0];
+    const lastElement = blockElements[blockElements.length - 1];
+    const firstRect = firstElement.getBoundingClientRect();
+    const lastRect = lastElement.getBoundingClientRect();
+    if (y <= firstRect.top) {
+        return {
+            blockElement: getFirstBlock(firstElement) as HTMLElement,
+            toStart: true,
+        };
+    }
+    if (y >= lastRect.bottom) {
+        return {
+            blockElement: getLastBlock(lastElement) as HTMLElement,
+            toStart: false,
+        };
+    }
+
+    const startRect = startElement.getBoundingClientRect();
+    const horizontal = y >= startRect.top && y <= startRect.bottom;
+    const toStart = horizontal ?
+        x < startRect.left + startRect.width / 2 :
+        y < startRect.top + startRect.height / 2;
+    const stepX = horizontal ? (toStart ? 4 : -4) : 0;
+    const stepY = horizontal ? 0 : (toStart ? 4 : -4);
+    const wysiwygRect = wysiwygElement.getBoundingClientRect();
+    const wysiwygStyle = window.getComputedStyle(wysiwygElement);
+    const minX = wysiwygRect.left + (parseFloat(wysiwygStyle.paddingLeft) || 0) + 1;
+    const maxX = wysiwygRect.right - (parseFloat(wysiwygStyle.paddingRight) || 0) - 1;
+    let probeX = Math.max(minX, Math.min(x, maxX));
+    let probeY = y;
+    let containerBlockElement: HTMLElement | undefined;
+    while (horizontal ? (stepX > 0 ? probeX < maxX : probeX > minX) :
+        (stepY > 0 ? probeY < wysiwygRect.bottom : probeY > wysiwygRect.top)) {
+        probeX += stepX;
+        probeY += stepY;
+        const pointElement = document.elementFromPoint(probeX, probeY);
+        if (!pointElement || (pointElement !== wysiwygElement && !wysiwygElement.contains(pointElement))) {
+            continue;
+        }
+        const blockElement = hasClosestBlock(pointElement) as HTMLElement;
+        if (!blockElement || !wysiwygElement.contains(blockElement)) {
+            continue;
+        }
+        if (!isContainerBlock(blockElement)) {
+            return {
+                blockElement,
+                toStart,
+            };
+        }
+        containerBlockElement = containerBlockElement || blockElement;
+    }
+    if (containerBlockElement) {
+        return {
+            blockElement: (toStart ? getFirstBlock(containerBlockElement) :
+                getLastBlock(containerBlockElement)) as HTMLElement,
+            toStart,
+        };
+    }
+};
+
+const extendSelectionToBlockSide = (selection: Selection, blockElement: HTMLElement, toStart: boolean) => {
+    if (!selection.anchorNode || !blockElement.contains(selection.anchorNode)) {
+        return false;
+    }
+    const editableElement = getContenteditableElement(blockElement);
+    if (!editableElement) {
+        return false;
+    }
+    const boundaryRange = document.createRange();
+    boundaryRange.selectNodeContents(editableElement);
+    boundaryRange.collapse(toStart);
+    selection.setBaseAndExtent(selection.anchorNode, selection.anchorOffset,
+        boundaryRange.startContainer, boundaryRange.startOffset);
+    return true;
+};
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -651,9 +742,17 @@ export class WYSIWYG {
             if (event.shiftKey) {
                 let startElement;
                 let endElement = nodeElement;
+                let shiftClickBlockPoint: IShiftClickBlockPoint | undefined;
                 // Electron 更新后 shift 向上点击获取的 range 不为上一个位置的 https://github.com/siyuan-note/siyuan/issues/9334
                 if (getSelection().rangeCount > 0) {
                     startElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer) as HTMLElement;
+                }
+                // 块间空白和文档末尾没有直接对应的块，需沿锚点方向解析终点
+                // https://github.com/siyuan-note/siyuan/issues/11960
+                if (startElement && (!endElement || (target === endElement && isContainerBlock(endElement)))) {
+                    shiftClickBlockPoint = getShiftClickBlockByPoint(this.element, startElement,
+                        event.clientX, event.clientY);
+                    endElement = shiftClickBlockPoint?.blockElement;
                 }
                 // shift 多选
                 if (!hasSelectClassElement && galleryItemElement) {
@@ -793,6 +892,9 @@ export class WYSIWYG {
                             focusBlock(selectElements[0], protyle.wysiwyg.element, false);
                         }
                     }
+                    event.preventDefault();
+                } else if (!hasSelectClassElement && shiftClickBlockPoint && startElement === endElement &&
+                    extendSelectionToBlockSide(getSelection(), endElement, shiftClickBlockPoint.toStart)) {
                     event.preventDefault();
                 }
                 return;

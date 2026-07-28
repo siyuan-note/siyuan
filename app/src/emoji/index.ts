@@ -286,6 +286,7 @@ export const openEmojiPanel = (
         <div data-type="tab-emoji" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.emoji}"><svg><use xlink:href="#iconEmoji"></use></svg></div>
         <div class="fn__space"></div>
         <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show${options?.dynamic ? " fn__none" : ""}" aria-label="${window.siyuan.languages.dynamicIcon}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
+        <div class="fn__space${type === "av" ? " fn__none" : ""}"></div>
         <div data-type="tab-link" class="ariaLabel block__icon block__icon--show${type === "av" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.insertImgURL}"><svg><use xlink:href="#iconLink"></use></svg></div>
         <div class="fn__flex-1"></div>
         <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="remove" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
@@ -391,12 +392,12 @@ export const openEmojiPanel = (
             </div>
         </div>
         <div class="fn__none emojis__link" data-type="tab-link">
-            <input class="b3-text-field fn__block" data-type="network-icon-url" placeholder="${window.siyuan.languages.insertImgURL}">
-            <div class="emojis__link-preview"></div>
             <div class="fn__flex">
-                <div class="fn__flex-1"></div>
+                <input class="b3-text-field fn__flex-1" data-type="network-icon-url" placeholder="${window.siyuan.languages.insertImgURL}">
+                <div class="fn__space"></div>
                 <button class="b3-button b3-button--text" data-action="set-network-icon">${window.siyuan.languages.confirm}</button>
             </div>
+            <div class="emojis__link-preview"></div>
         </div>
     </div>
 </div>`

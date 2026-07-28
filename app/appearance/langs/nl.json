@@ -1,4 +1,6 @@
 {
+  "useDefaultVerticalAlign": "Standaard verticale uitlijning gebruiken",
+  "useDefaultHorizontalAlign": "Standaard horizontale uitlijning gebruiken",
   "alignBottom": "Onder uitlijnen",
   "alignMiddle": "Verticaal centreren",
   "alignTop": "Boven uitlijnen",

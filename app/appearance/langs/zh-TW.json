@@ -1,4 +1,6 @@
 {
+  "useDefaultVerticalAlign": "使用預設垂直對齊",
+  "useDefaultHorizontalAlign": "使用預設水平對齊",
   "alignBottom": "底端對齊",
   "alignMiddle": "垂直置中",
   "alignTop": "頂端對齊",

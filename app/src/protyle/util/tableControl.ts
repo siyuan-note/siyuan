@@ -920,20 +920,26 @@ export class TableControl {
 
     private appendCellMenus(rectangle: boolean) {
         this.appendAlignmentMenus();
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        const verticalAlign = this.getCommonCellStyle("vertical-align");
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.alignTop,
+            checked: verticalAlign === "top",
             click: () => this.setCellStyle("vertical-align", "top"),
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.alignMiddle,
+            checked: verticalAlign === "middle",
             click: () => this.setCellStyle("vertical-align", "middle"),
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.alignBottom,
+            checked: verticalAlign === "bottom",
             click: () => this.setCellStyle("vertical-align", "bottom"),
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.useDefaultAlign,
+            label: window.siyuan.languages.useDefaultVerticalAlign,
+            checked: verticalAlign === "",
             click: () => this.setCellStyle("vertical-align", ""),
         }).element);
         const cells = this.getSelectedCells();
@@ -947,25 +953,39 @@ export class TableControl {
     }
 
     private appendAlignmentMenus() {
+        const textAlign = this.getCommonCellStyle("text-align");
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconAlignLeft",
             label: window.siyuan.languages.alignLeft,
+            checked: textAlign === "left",
             click: () => this.setCellStyle("text-align", "left"),
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconAlignCenter",
             label: window.siyuan.languages.alignCenter,
+            checked: textAlign === "center",
             click: () => this.setCellStyle("text-align", "center"),
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconAlignRight",
             label: window.siyuan.languages.alignRight,
+            checked: textAlign === "right",
             click: () => this.setCellStyle("text-align", "right"),
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.useDefaultAlign,
+            label: window.siyuan.languages.useDefaultHorizontalAlign,
+            checked: textAlign === "",
             click: () => this.setCellStyle("text-align", ""),
         }).element);
+    }
+
+    private getCommonCellStyle(property: string) {
+        const cells = this.getSelectedCells();
+        if (cells.length === 0) {
+            return undefined;
+        }
+        const value = cells[0].style.getPropertyValue(property);
+        return cells.every(cell => cell.style.getPropertyValue(property) === value) ? value : undefined;
     }
 
     private isSelectionInOneSection() {

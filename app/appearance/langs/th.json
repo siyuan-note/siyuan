@@ -1,4 +1,6 @@
 {
+  "useDefaultVerticalAlign": "ใช้การจัดแนวตั้งเริ่มต้น",
+  "useDefaultHorizontalAlign": "ใช้การจัดแนวนอนเริ่มต้น",
   "alignBottom": "จัดชิดด้านล่าง",
   "alignMiddle": "จัดกึ่งกลางแนวตั้ง",
   "alignTop": "จัดชิดด้านบน",

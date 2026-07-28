@@ -1,4 +1,6 @@
 {
+  "useDefaultVerticalAlign": "Usa l’allineamento verticale predefinito",
+  "useDefaultHorizontalAlign": "Usa l’allineamento orizzontale predefinito",
   "alignBottom": "Allinea in basso",
   "alignMiddle": "Centra verticalmente",
   "alignTop": "Allinea in alto",

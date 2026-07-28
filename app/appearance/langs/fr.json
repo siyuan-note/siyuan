@@ -1,4 +1,6 @@
 {
+  "useDefaultVerticalAlign": "Utiliser l’alignement vertical par défaut",
+  "useDefaultHorizontalAlign": "Utiliser l’alignement horizontal par défaut",
   "alignBottom": "Aligner en bas",
   "alignMiddle": "Centrer verticalement",
   "alignTop": "Aligner en haut",

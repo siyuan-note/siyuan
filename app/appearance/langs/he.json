@@ -1,4 +1,6 @@
 {
+  "useDefaultVerticalAlign": "שימוש ביישור האנכי המוגדר כברירת מחדל",
+  "useDefaultHorizontalAlign": "שימוש ביישור האופקי המוגדר כברירת מחדל",
   "alignBottom": "יישור למטה",
   "alignMiddle": "מרכוז אנכי",
   "alignTop": "יישור למעלה",

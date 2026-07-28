@@ -1,4 +1,6 @@
 {
+  "useDefaultVerticalAlign": "기본 세로 맞춤 사용",
+  "useDefaultHorizontalAlign": "기본 가로 맞춤 사용",
   "alignBottom": "아래쪽 맞춤",
   "alignMiddle": "세로 가운데 맞춤",
   "alignTop": "위쪽 맞춤",

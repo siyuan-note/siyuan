@@ -1,4 +1,6 @@
 {
+  "useDefaultVerticalAlign": "Použiť predvolené zvislé zarovnanie",
+  "useDefaultHorizontalAlign": "Použiť predvolené vodorovné zarovnanie",
   "alignBottom": "Zarovnať nadol",
   "alignMiddle": "Vertikálne vycentrovať",
   "alignTop": "Zarovnať nahor",

@@ -22,17 +22,28 @@ func TestAVSearchDataInvalidation(t *testing.T) {
 	const avID = "20260728120000-search"
 	const boxID = "20260728120000-box"
 
-	SetAVSearchDataInBox(avID, boxID, "cached")
+	version := SetAVDataWithVersionInBox(avID, boxID, []byte(`{"name":"old"}`))
+	if !SetAVSearchDataInBox(avID, boxID, version, "cached") {
+		t.Fatal("failed to cache search data")
+	}
 	if cached, ok := GetAVSearchDataInBox[string](avID, boxID); !ok || cached != "cached" {
 		t.Fatalf("unexpected cached search data: %q, %v", cached, ok)
 	}
 
-	SetAVDataInBox(avID, boxID, []byte("{}"))
+	newVersion := SetAVDataWithVersionInBox(avID, boxID, []byte(`{"name":"new"}`))
 	if _, ok := GetAVSearchDataInBox[string](avID, boxID); ok {
 		t.Fatal("setting AV data should invalidate search data")
 	}
+	if SetAVSearchDataInBox(avID, boxID, version, "stale") {
+		t.Fatal("stale search data should not be cached")
+	}
+	if _, ok := GetAVSearchDataInBox[string](avID, boxID); ok {
+		t.Fatal("stale search data should remain invalid")
+	}
 
-	SetAVSearchDataInBox(avID, boxID, "cached")
+	if !SetAVSearchDataInBox(avID, boxID, newVersion, "cached") {
+		t.Fatal("failed to cache current search data")
+	}
 	RemoveAVDataInBox(avID, boxID)
 	if _, ok := GetAVSearchDataInBox[string](avID, boxID); ok {
 		t.Fatal("removing AV data should invalidate search data")

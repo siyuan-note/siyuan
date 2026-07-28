@@ -1940,12 +1940,14 @@
   ```json
   {
     "keyword": "API",
-    "excludes": []
+    "excludes": [],
+    "includeViewMatches": true
   }
   ```
 
     * `keyword`: 検索キーワード（データベース名に一致）
     * `excludes`: 任意。結果から除外するデータベース ID のリスト
+    * `includeViewMatches`: 任意。`true` の場合はビュー名も検索対象になり、一致した子ビューに `"matched": true` が含まれます
 * 戻り値（実際のレスポンス）：
 
   ```json
@@ -1969,6 +1971,7 @@
               "viewName": "テーブル",
               "viewID": "20240118120204-7rnmyc1",
               "viewLayout": "table",
+              "matched": true,
               "blockID": "20240118120201-kldj15t",
               "hPath": "正在跟进的问题/数据库/API"
             }
@@ -1979,7 +1982,7 @@
   }
   ```
 
-    * `data.results[]`: 各トップレベル結果は `avID` ごとにデータベースを集約します；その `children[]` が各ビュー（`viewName`/`viewID`/`viewLayout`）を列挙します
+    * `data.results[]`: 各トップレベル結果は `avID` ごとにデータベースを集約します。その `children[]` が各ビュー（`viewName`/`viewID`/`viewLayout`）を列挙し、`includeViewMatches` が有効な場合は `matched` で名前が一致したビューを示します
 
 ### セル値を設定
 

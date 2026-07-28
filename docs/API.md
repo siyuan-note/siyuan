@@ -1951,12 +1951,14 @@ The field types (`keyType`) are:
   ```json
   {
     "keyword": "API",
-    "excludes": []
+    "excludes": [],
+    "includeViewMatches": true
   }
   ```
 
     * `keyword`: Search keyword (matches database name)
     * `excludes`: Optional list of database IDs to exclude from the results
+    * `includeViewMatches`: Optional. When `true`, view names are also searched and matching child views contain `"matched": true`
 * Return value (real response):
 
   ```json
@@ -1980,6 +1982,7 @@ The field types (`keyType`) are:
               "viewName": "表格",
               "viewID": "20240118120204-7rnmyc1",
               "viewLayout": "table",
+              "matched": true,
               "blockID": "20240118120201-kldj15t",
               "hPath": "正在跟进的问题/数据库/API"
             }
@@ -1990,7 +1993,7 @@ The field types (`keyType`) are:
   }
   ```
 
-    * `data.results[]`: Each top-level result groups a database by `avID`; its `children[]` list the individual views (`viewName`/`viewID`/`viewLayout`)
+    * `data.results[]`: Each top-level result groups a database by `avID`; its `children[]` list the individual views (`viewName`/`viewID`/`viewLayout`), and `matched` identifies a view-name match when `includeViewMatches` is enabled
 
 ### Set a cell value
 

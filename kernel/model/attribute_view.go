@@ -2707,7 +2707,16 @@ func matchAttributeViewSearchName(name string, keywords []string) (score float64
 	return
 }
 
-func SearchAttributeView(options SearchAttributeViewOptions) (ret []*AvSearchResult) {
+func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, currentBlockID string) []*AvSearchResult {
+	return SearchAttributeViewWithOptions(SearchAttributeViewOptions{
+		Keyword:        keyword,
+		ExcludeAvIDs:   excludeAvIDs,
+		CurrentAvID:    currentAvID,
+		CurrentBlockID: currentBlockID,
+	})
+}
+
+func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*AvSearchResult) {
 	waitForSyncingStorages()
 
 	ret = []*AvSearchResult{}

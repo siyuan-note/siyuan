@@ -566,8 +566,10 @@ func GetAttributeViewSearchInfoInBox(avID, boxID string) (ret *AttributeViewSear
 	}
 
 	var data []byte
-	if cached, ok := cache.GetAVDataInBox(avID, avBoxID); ok {
+	var dataVersion uint64
+	if cached, version, ok := cache.GetAVDataWithVersionInBox(avID, avBoxID); ok {
 		data = cached
+		dataVersion = version
 	} else {
 		if data, err = filelock.ReadFile(avJSONPath); err != nil {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avJSONPath, err)
@@ -581,14 +583,14 @@ func GetAttributeViewSearchInfoInBox(avID, boxID string) (ret *AttributeViewSear
 		} else if util.IsCiphertext(data) {
 			return
 		}
-		cache.SetAVDataInBox(avID, avBoxID, data)
+		dataVersion = cache.SetAVDataWithVersionInBox(avID, avBoxID, data)
 	}
 
 	if ret, err = parseAttributeViewSearchInfo(data); err != nil {
 		logging.LogErrorf("unmarshal attribute view search info [%s] failed: %s", avID, err)
 		return nil, err
 	}
-	cache.SetAVSearchDataInBox(avID, avBoxID, ret)
+	cache.SetAVSearchDataInBox(avID, avBoxID, dataVersion, ret)
 	return
 }
 

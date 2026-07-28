@@ -1940,12 +1940,14 @@
   ```json
   {
     "keyword": "API",
-    "excludes": []
+    "excludes": [],
+    "includeViewMatches": true
   }
   ```
 
     * `keyword`: 搜索关键字（匹配数据库名称）
     * `excludes`: 可选，需从结果中排除的数据库 ID 列表
+    * `includeViewMatches`: 可选，设为 `true` 时同时搜索视图名称，命中的子视图包含 `"matched": true`
 * 返回值（真实响应）：
 
   ```json
@@ -1969,6 +1971,7 @@
               "viewName": "表格",
               "viewID": "20240118120204-7rnmyc1",
               "viewLayout": "table",
+              "matched": true,
               "blockID": "20240118120201-kldj15t",
               "hPath": "正在跟进的问题/数据库/API"
             }
@@ -1979,7 +1982,7 @@
   }
   ```
 
-    * `data.results[]`: 每个顶层结果按 `avID` 聚合一个数据库；其 `children[]` 列出该数据库的各个视图（`viewName`/`viewID`/`viewLayout`）
+    * `data.results[]`: 每个顶层结果按 `avID` 聚合一个数据库；其 `children[]` 列出该数据库的各个视图（`viewName`/`viewID`/`viewLayout`），启用 `includeViewMatches` 时由 `matched` 标识名称命中的视图
 
 ### 设置单元格值
 

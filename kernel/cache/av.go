@@ -28,10 +28,22 @@ var avCache, _ = ristretto.NewCache(&ristretto.Config{
 	BufferItems: 64,
 })
 
+type avCacheEntry struct {
+	raw     []byte
+	version uint64
+}
+
+type avSearchDataEntry struct {
+	data    any
+	version uint64
+}
+
 var avCacheKeys = map[string]map[string]struct{}{}
 var avCacheKeysLock sync.Mutex
 
-var avSearchDataCache = map[string]any{}
+var avDataVersion uint64
+var avDataVersions = map[string]uint64{}
+var avSearchDataCache = map[string]*avSearchDataEntry{}
 var avSearchDataCacheLock sync.RWMutex
 
 func avCacheKey(avID, boxID string) string {
@@ -43,11 +55,17 @@ func GetAVData(avID string) (raw []byte, ok bool) {
 }
 
 func GetAVDataInBox(avID, boxID string) (raw []byte, ok bool) {
+	raw, _, ok = GetAVDataWithVersionInBox(avID, boxID)
+	return
+}
+
+func GetAVDataWithVersionInBox(avID, boxID string) (raw []byte, version uint64, ok bool) {
 	v, _ := avCache.Get(avCacheKey(avID, boxID))
 	if nil == v {
-		return nil, false
+		return
 	}
-	return v.([]byte), true
+	entry := v.(*avCacheEntry)
+	return entry.raw, entry.version, true
 }
 
 func SetAVData(avID string, raw []byte) {
@@ -55,12 +73,20 @@ func SetAVData(avID string, raw []byte) {
 }
 
 func SetAVDataInBox(avID, boxID string, raw []byte) {
+	setAVDataInBox(avID, boxID, raw)
+}
+
+func SetAVDataWithVersionInBox(avID, boxID string, raw []byte) uint64 {
+	return setAVDataInBox(avID, boxID, raw)
+}
+
+func setAVDataInBox(avID, boxID string, raw []byte) (version uint64) {
 	if raw == nil {
 		return
 	}
 	key := avCacheKey(avID, boxID)
-	avCache.Set(key, raw, int64(len(raw)))
-	removeAVSearchDataByKey(key)
+	version = invalidateAVSearchDataByKey(key)
+	avCache.Set(key, &avCacheEntry{raw: raw, version: version}, int64(len(raw)))
 
 	avCacheKeysLock.Lock()
 	defer avCacheKeysLock.Unlock()
@@ -70,12 +96,13 @@ func SetAVDataInBox(avID, boxID string, raw []byte) {
 		avCacheKeys[avID] = keys
 	}
 	keys[key] = struct{}{}
+	return
 }
 
 func RemoveAVDataInBox(avID, boxID string) {
 	key := avCacheKey(avID, boxID)
 	avCache.Del(key)
-	removeAVSearchDataByKey(key)
+	invalidateAVSearchDataByKey(key)
 
 	avCacheKeysLock.Lock()
 	defer avCacheKeysLock.Unlock()
@@ -97,9 +124,9 @@ func RemoveAVData(avID string) {
 	avCache.Del(avCacheKey(avID, ""))
 	for key := range keys {
 		avCache.Del(key)
-		removeAVSearchDataByKey(key)
+		invalidateAVSearchDataByKey(key)
 	}
-	removeAVSearchDataByKey(avCacheKey(avID, ""))
+	invalidateAVSearchDataByKey(avCacheKey(avID, ""))
 }
 
 func ClearAVCache() {
@@ -109,32 +136,44 @@ func ClearAVCache() {
 	avCache.Clear()
 
 	avSearchDataCacheLock.Lock()
-	avSearchDataCache = map[string]any{}
+	avDataVersions = map[string]uint64{}
+	avSearchDataCache = map[string]*avSearchDataEntry{}
 	avSearchDataCacheLock.Unlock()
 }
 
 func GetAVSearchDataInBox[T any](avID, boxID string) (ret T, ok bool) {
 	avSearchDataCacheLock.RLock()
-	data := avSearchDataCache[avCacheKey(avID, boxID)]
+	key := avCacheKey(avID, boxID)
+	entry := avSearchDataCache[key]
+	version := avDataVersions[key]
 	avSearchDataCacheLock.RUnlock()
-	if data == nil {
+	if entry == nil || entry.version != version {
 		return
 	}
-	ret, ok = data.(T)
+	ret, ok = entry.data.(T)
 	return
 }
 
-func SetAVSearchDataInBox(avID, boxID string, data any) {
-	if data == nil {
+func SetAVSearchDataInBox(avID, boxID string, version uint64, data any) (ok bool) {
+	if data == nil || version == 0 {
 		return
 	}
 	avSearchDataCacheLock.Lock()
-	avSearchDataCache[avCacheKey(avID, boxID)] = data
-	avSearchDataCacheLock.Unlock()
+	defer avSearchDataCacheLock.Unlock()
+	key := avCacheKey(avID, boxID)
+	if avDataVersions[key] != version {
+		return
+	}
+	avSearchDataCache[key] = &avSearchDataEntry{data: data, version: version}
+	return true
 }
 
-func removeAVSearchDataByKey(key string) {
+func invalidateAVSearchDataByKey(key string) (version uint64) {
 	avSearchDataCacheLock.Lock()
+	avDataVersion++
+	version = avDataVersion
+	avDataVersions[key] = version
 	delete(avSearchDataCache, key)
 	avSearchDataCacheLock.Unlock()
+	return
 }

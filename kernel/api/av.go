@@ -993,7 +993,7 @@ func searchAttributeView(c *gin.Context) {
 		}
 	}
 	includeViewMatches, _ := arg["includeViewMatches"].(bool)
-	results := model.SearchAttributeView(model.SearchAttributeViewOptions{
+	results := model.SearchAttributeViewWithOptions(model.SearchAttributeViewOptions{
 		Keyword:            keyword,
 		ExcludeAvIDs:       excludes,
 		CurrentAvID:        currentAvID,

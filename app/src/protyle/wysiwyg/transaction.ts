@@ -468,6 +468,9 @@ const promiseTransaction = (options: {
                     processFold(operation, protyle);
                     return;
                 }
+                if (operation.action === "setAttrs") {
+                    syncFoldAndStyleAttrs(protyle.wysiwyg.element, operation);
+                }
             });
         }
         // 事务提交后再渲染嵌入块，避免其查询请求早于写入到达内核而拿到旧数据

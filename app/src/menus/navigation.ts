@@ -747,7 +747,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "fileHistory",
-            label: window.siyuan.languages.fileHistory,
+            label: window.siyuan.languages.dataHistory,
             icon: "iconHistory",
             click() {
                 openDocHistory({app, id, notebookId, pathString: name});

@@ -357,6 +357,38 @@ func searchRepoFile(c *gin.Context) {
 	}
 }
 
+func getRepoDocHistory(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id string
+	var page float64
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", &id, true, true),
+		util.BindJsonArg("page", &page, true, false),
+	) || util.InvalidIDPattern(id, ret) {
+		return
+	}
+
+	files, pageCount, totalCount, err := model.GetRepoDocHistory(id, int(page))
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]any{
+		"files":      files,
+		"pageCount":  pageCount,
+		"totalCount": totalCount,
+	}
+}
+
 func exportRepoFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

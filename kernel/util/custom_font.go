@@ -49,10 +49,38 @@ var (
 	customFonts       []*CustomFont
 	customFontsLoaded bool
 	customFontsLock   sync.Mutex
+	customFontTemps   = map[string]struct{}{}
 )
 
 func CustomFontDir() string {
 	return filepath.Join(AppearancePath, "fonts", "custom")
+}
+
+func CreateCustomFontTemp() (*os.File, error) {
+	customFontsLock.Lock()
+	defer customFontsLock.Unlock()
+
+	if err := os.MkdirAll(CustomFontDir(), 0755); err != nil {
+		return nil, err
+	}
+	tempFile, err := os.CreateTemp(CustomFontDir(), ".font-*")
+	if err != nil {
+		return nil, err
+	}
+	customFontTemps[filepath.Clean(tempFile.Name())] = struct{}{}
+	return tempFile, nil
+}
+
+func DiscardCustomFontTemp(tempPath string) {
+	customFontsLock.Lock()
+	defer customFontsLock.Unlock()
+
+	tempPath = filepath.Clean(tempPath)
+	if _, ok := customFontTemps[tempPath]; !ok {
+		return
+	}
+	delete(customFontTemps, tempPath)
+	_ = os.Remove(tempPath)
 }
 
 func LoadCustomFonts() []*CustomFont {
@@ -183,6 +211,7 @@ func loadCustomFontsLocked() {
 	if customFontsLoaded {
 		return
 	}
+	cleanupCustomFontTempsLocked()
 
 	customFonts = []*CustomFont{}
 	entries, err := os.ReadDir(CustomFontDir())
@@ -245,6 +274,22 @@ func loadCustomFontsLocked() {
 		return customFonts[i].DisplayName < customFonts[j].DisplayName
 	})
 	customFontsLoaded = true
+}
+
+func cleanupCustomFontTempsLocked() {
+	entries, err := os.ReadDir(CustomFontDir())
+	if err != nil {
+		return
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasPrefix(entry.Name(), ".font-") {
+			continue
+		}
+		tempPath := filepath.Clean(filepath.Join(CustomFontDir(), entry.Name()))
+		if _, active := customFontTemps[tempPath]; !active {
+			_ = os.Remove(tempPath)
+		}
+	}
 }
 
 func detectCustomFontExtension(reader io.Reader) (string, error) {

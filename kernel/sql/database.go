@@ -44,6 +44,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -73,7 +74,13 @@ func init() {
 
 	sql.Register("sqlite3_extended", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			return conn.RegisterFunc("regexp", regex, true)
+			if err := conn.RegisterFunc("regexp", regex, true); err != nil {
+				return err
+			}
+			normalizeSearchText := func(text string, caseSensitive, hanSensitive int) string {
+				return search.NormalizeSearchText(text, 0 != caseSensitive, 0 != hanSensitive)
+			}
+			return conn.RegisterFunc("search_normalize", normalizeSearchText, true)
 		},
 	})
 }
@@ -107,6 +114,9 @@ func initDatabase(forceRebuild bool) {
 		if util.DatabaseVer == getDatabaseVer() {
 			// 老库版本一致但缺少新加的列时，做幂等迁移（不升 DatabaseVer，避免全库重建丢失已嵌入向量）
 			migrateBlockEmbeddingsSchema()
+			if err := ensureBlocksDocHPathIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document hpath index failed: %s", err)
+			}
 			recoverIndexQueue()
 			return
 		}
@@ -165,6 +175,10 @@ func initDBTables() {
 	_, err = db.Exec("CREATE INDEX idx_blocks_root_id_id_hash ON blocks(root_id, id, hash)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocks_root_id_id_hash] failed: %s", err)
+	}
+
+	if err = ensureBlocksDocHPathIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document hpath index failed: %s", err)
 	}
 
 	if err = initFTSBlocks(); err != nil {
@@ -1379,6 +1393,11 @@ func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err
 	return
 }
 
+func ensureBlocksDocHPathIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_doc_hpath ON blocks(hpath) WHERE type = 'd'")
+	return
+}
+
 func CloseDatabase() {
 	closeIndexQueue()
 	// 退出时删除所有已打开的加密 db 文件：加密索引可由 box.Index() 全量重建，
@@ -1966,6 +1985,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		if _, err = boxDB.Exec(stmt); err != nil {
 			return
 		}
+	}
+	if err = ensureBlocksDocHPathIndex(boxDB); err != nil {
+		return
 	}
 	// FTS5 external-content 虚拟表，tokenize 与全局保持一致（siyuan 分词器）
 	ftsStmt := "CREATE VIRTUAL TABLE IF NOT EXISTS blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, content='blocks', content_rowid='rowid', tokenize=\"" + ftsTokenize() + "\")"

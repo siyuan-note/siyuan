@@ -120,6 +120,50 @@ func TestInstallCustomFontRejectsInvalidData(t *testing.T) {
 	}
 }
 
+func TestLoadCustomFontsCleansAbandonedTemporaryFiles(t *testing.T) {
+	oldAppearancePath := AppearancePath
+	AppearancePath = t.TempDir()
+	resetCustomFontCache()
+	t.Cleanup(func() {
+		AppearancePath = oldAppearancePath
+		resetCustomFontCache()
+	})
+
+	if err := os.MkdirAll(CustomFontDir(), 0755); err != nil {
+		t.Fatal(err)
+	}
+	abandonedFile, err := os.CreateTemp(CustomFontDir(), ".font-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	abandonedPath := abandonedFile.Name()
+	if err = abandonedFile.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	activeFile, err := CreateCustomFontTemp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	activePath := activeFile.Name()
+	if err = activeFile.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	LoadCustomFonts()
+	if _, err = os.Stat(abandonedPath); !os.IsNotExist(err) {
+		t.Fatalf("abandoned temporary font was not removed: %v", err)
+	}
+	if _, err = os.Stat(activePath); err != nil {
+		t.Fatalf("active temporary font was removed: %v", err)
+	}
+
+	DiscardCustomFontTemp(activePath)
+	if _, err = os.Stat(activePath); !os.IsNotExist(err) {
+		t.Fatalf("discarded temporary font was not removed: %v", err)
+	}
+}
+
 func copyCustomFontForTest(t *testing.T, sourcePath string) string {
 	t.Helper()
 
@@ -148,5 +192,6 @@ func resetCustomFontCache() {
 	customFontsLock.Lock()
 	customFonts = nil
 	customFontsLoaded = false
+	customFontTemps = map[string]struct{}{}
 	customFontsLock.Unlock()
 }

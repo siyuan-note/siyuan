@@ -51,6 +51,21 @@ func TestHanInsensitiveRegexp(t *testing.T) {
 	}
 }
 
+func TestNormalizeSearchText(t *testing.T) {
+	if result := NormalizeSearchText("詩經 ABC", true, true); "詩經 ABC" != result {
+		t.Fatalf("区分大小写和繁简时不应转换文本：%q", result)
+	}
+	if result := NormalizeSearchText("詩經 ABC", false, true); "詩經 abc" != result {
+		t.Fatalf("忽略大小写时转换错误：%q", result)
+	}
+	if result := NormalizeSearchText("詩經 ABC", true, false); "诗经 ABC" != result {
+		t.Fatalf("忽略繁简时转换错误：%q", result)
+	}
+	if result := NormalizeSearchText("詩經 ABC", false, false); "诗经 abc" != result {
+		t.Fatalf("同时忽略大小写和繁简时转换错误：%q", result)
+	}
+}
+
 func TestEncloseHighlightingHanInsensitive(t *testing.T) {
 	old := util.SearchHanSensitive
 	defer func() { util.SearchHanSensitive = old }()

@@ -535,6 +535,14 @@ type DiffFile struct {
 	Updated int64  `json:"updated"`
 }
 
+type RepoDocHistory struct {
+	FileID  string `json:"fileID"`
+	IndexID string `json:"indexID"`
+	Title   string `json:"title"`
+	HSize   string `json:"hSize"`
+	Updated int64  `json:"updated"`
+}
+
 type DiffIndex struct {
 	ID      string `json:"id"`
 	Created int64  `json:"created"`
@@ -775,6 +783,41 @@ func SearchRepoFile(keyword string, page int) (ret []*DiffFile, pageCount, total
 			Title:   title,
 			Path:    file.Path,
 			HPath:   hpath,
+			HSize:   humanize.BytesCustomCeil(uint64(file.Size), 2),
+			Updated: file.Updated,
+		})
+	}
+	return
+}
+
+func GetRepoDocHistory(id string, page int) (ret []*RepoDocHistory, pageCount, totalCount int, err error) {
+	ret = []*RepoDocHistory{}
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if err != nil {
+		return
+	}
+
+	files, fileIndexIDs, totalCount, pageCount, err := repo.SearchFileByName(id+".sy", page, 32)
+	if err != nil {
+		logging.LogErrorf("get repo doc history failed: %s", err)
+		return
+	}
+
+	luteEngine := NewLute()
+	for _, file := range files {
+		title, _, parseErr := parseTitleInSnapshot(file.ID, repo, luteEngine)
+		if "" == title || nil != parseErr {
+			title = path.Base(file.Path)
+		}
+		ret = append(ret, &RepoDocHistory{
+			FileID:  file.ID,
+			IndexID: fileIndexIDs[file.ID],
+			Title:   title,
 			HSize:   humanize.BytesCustomCeil(uint64(file.Size), 2),
 			Updated: file.Updated,
 		})

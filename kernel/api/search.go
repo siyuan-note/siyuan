@@ -546,6 +546,10 @@ func fullTextSearchBlock(c *gin.Context) {
 	var blocks []*model.Block
 	var matchedBlockCount, matchedRootCount, pageCount int
 	var docMode bool
+	searchHPath := true
+	if value, ok := arg["searchHPath"].(bool); ok {
+		searchHPath = value
+	}
 	// 加密笔记本的全文搜索走 InBox 版（查加密 content db + blocks_fts）
 	if notebook != "" && model.IsEncryptedBox(notebook) {
 		if !model.IsBoxUnlocked(notebook) {
@@ -553,9 +557,9 @@ func fullTextSearchBlock(c *gin.Context) {
 			ret.Msg = "encrypted notebook locked"
 			return
 		}
-		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBox(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, notebook)
+		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPath(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, notebook, searchHPath)
 	} else {
-		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize)
+		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockWithHPath(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, searchHPath)
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()

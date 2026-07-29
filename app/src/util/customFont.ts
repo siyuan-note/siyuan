@@ -12,6 +12,7 @@ export interface ICustomFont {
 
 let customFontsPromise: Promise<ICustomFont[]> | undefined;
 const registeredFonts = new Map<string, ICustomFont>();
+const fontLoadPromises = new Map<string, Promise<FontFace[]>>();
 
 export const isNativeMobileContainer = () => {
     return ["android", "ios", "harmony"].includes(window.siyuan.config.system.container);
@@ -34,21 +35,39 @@ export const invalidateCustomFonts = () => {
 };
 
 export const registerCustomFont = (font: ICustomFont) => {
-    if (window.siyuan.config.system.safeMode || !isValidCustomFont(font)) {
+    registerCustomFonts([font]);
+};
+
+export const registerCustomFonts = (fonts: ICustomFont[]) => {
+    if (window.siyuan.config.system.safeMode) {
         return;
     }
-    registeredFonts.set(font.id, {
-        ...font,
-        family: CUSTOM_FONT_FAMILY_PREFIX + font.id,
-        url: `/custom-fonts/${font.id}`,
-        weight: Math.max(1, Math.min(1000, font.weight || 400)),
+    fonts.forEach((font) => {
+        if (!isValidCustomFont(font)) {
+            return;
+        }
+        const normalizedFont = {
+            ...font,
+            family: CUSTOM_FONT_FAMILY_PREFIX + font.id,
+            url: `/custom-fonts/${font.id}`,
+            weight: Math.max(1, Math.min(1000, font.weight || 400)),
+        };
+        const registeredFont = registeredFonts.get(font.id);
+        if (registeredFont?.family === normalizedFont.family &&
+            registeredFont.url === normalizedFont.url &&
+            registeredFont.weight === normalizedFont.weight) {
+            return;
+        }
+        registeredFonts.set(font.id, normalizedFont);
+        fontLoadPromises.delete(font.id);
+        setCustomFontStyle(normalizedFont);
     });
-    renderCustomFontStyles();
 };
 
 export const unregisterCustomFont = (id: string) => {
+    fontLoadPromises.delete(id);
     if (registeredFonts.delete(id)) {
-        renderCustomFontStyles();
+        document.getElementById(`customFontStyle-${id}`)?.remove();
     }
 };
 
@@ -68,30 +87,34 @@ export const ensureSelectedCustomFont = async (family: string, weight: number) =
             return;
         }
         registerCustomFont(font);
-        await document.fonts.load(`${weight || font.weight || 400} 16px "${family}"`);
+        let loadPromise = fontLoadPromises.get(id);
+        if (!loadPromise) {
+            loadPromise = document.fonts.load(`${weight || font.weight || 400} 16px "${family}"`).catch((error) => {
+                fontLoadPromises.delete(id);
+                throw error;
+            });
+            fontLoadPromises.set(id, loadPromise);
+        }
+        await loadPromise;
     } catch (error) {
         console.warn("load custom font failed", error);
     }
 };
 
-const renderCustomFontStyles = () => {
-    let styleElement = document.getElementById("customFontStyle") as HTMLStyleElement;
-    if (registeredFonts.size === 0) {
-        styleElement?.remove();
-        return;
-    }
+const setCustomFontStyle = (font: ICustomFont) => {
+    let styleElement = document.getElementById(`customFontStyle-${font.id}`) as HTMLStyleElement;
     if (!styleElement) {
         styleElement = document.createElement("style");
-        styleElement.id = "customFontStyle";
+        styleElement.id = `customFontStyle-${font.id}`;
         document.head.append(styleElement);
     }
-    styleElement.textContent = Array.from(registeredFonts.values()).map((font) => `@font-face {
+    styleElement.textContent = `@font-face {
   font-family: "${font.family}";
   src: url("${font.url}");
   font-style: normal;
   font-weight: ${font.weight};
   font-display: swap;
-}`).join("\n");
+}`;
 };
 
 const isValidCustomFont = (font: ICustomFont) => {

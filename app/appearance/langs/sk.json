@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "Nahrávanie bolo prerušené. Nahrajte ho znova",
   "snapshotData": "Údaje",
   "extensions": "Rozšírenia",
   "deleteFontConfirm": "Odstrániť vlastné písmo <b>${x}</b>?",

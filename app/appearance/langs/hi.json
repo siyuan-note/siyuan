@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "रिकॉर्डिंग बाधित हो गई। कृपया फिर से रिकॉर्ड करें",
   "snapshotData": "डेटा",
   "extensions": "एक्सटेंशन",
   "deleteFontConfirm": "कस्टम फ़ॉन्ट <b>${x}</b> हटाएँ?",

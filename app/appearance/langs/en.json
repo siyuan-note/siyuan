@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "Recording was interrupted. Please record again",
   "snapshotData": "Data",
   "extensions": "Extensions",
   "deleteFontConfirm": "Delete custom font <b>${x}</b>?",

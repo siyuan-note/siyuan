@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "Kayıt kesintiye uğradı. Lütfen yeniden kaydedin",
   "snapshotData": "Veriler",
   "extensions": "Uzantılar",
   "deleteFontConfirm": "Özel yazı tipi <b>${x}</b> silinsin mi?",

@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "Perekaman terhenti. Silakan rekam lagi",
   "snapshotData": "Data",
   "extensions": "Ekstensi",
   "deleteFontConfirm": "Hapus font khusus <b>${x}</b>?",

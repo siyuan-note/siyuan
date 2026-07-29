@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "Nagrywanie zostało przerwane. Nagraj ponownie",
   "snapshotData": "Dane",
   "extensions": "Rozszerzenia",
   "deleteFontConfirm": "Usunąć niestandardową czcionkę <b>${x}</b>?",

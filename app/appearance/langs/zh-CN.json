@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "录音已中断，请重新录制",
   "snapshotData": "数据",
   "extensions": "扩展",
   "deleteFontConfirm": "确定删除自定义字体 <b>${x}</b> 吗？",

@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "Запис було перервано. Запишіть ще раз",
   "snapshotData": "Дані",
   "extensions": "Розширення",
   "deleteFontConfirm": "Видалити користувацький шрифт <b>${x}</b>?",

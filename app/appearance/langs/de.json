@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "Die Aufnahme wurde unterbrochen. Bitte nehmen Sie erneut auf",
   "snapshotData": "Daten",
   "extensions": "Erweiterungen",
   "deleteFontConfirm": "Benutzerdefinierte Schriftart <b>${x}</b> löschen?",

@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "توقف التسجيل. يُرجى التسجيل مرة أخرى",
   "snapshotData": "البيانات",
   "extensions": "الملحقات",
   "deleteFontConfirm": "هل تريد حذف الخط المخصص <b>${x}</b>؟",

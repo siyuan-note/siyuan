@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "La registrazione è stata interrotta. Registra di nuovo",
   "snapshotData": "Dati",
   "extensions": "Estensioni",
   "deleteFontConfirm": "Eliminare il carattere personalizzato <b>${x}</b>?",

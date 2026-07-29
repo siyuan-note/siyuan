@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "녹음이 중단되었습니다. 다시 녹음해 주세요",
   "snapshotData": "데이터",
   "extensions": "확장 기능",
   "deleteFontConfirm": "사용자 정의 글꼴 <b>${x}</b>을(를) 삭제하시겠습니까?",

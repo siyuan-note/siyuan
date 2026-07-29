@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "การบันทึกถูกขัดจังหวะ โปรดบันทึกใหม่",
   "snapshotData": "ข้อมูล",
   "extensions": "ส่วนขยาย",
   "deleteFontConfirm": "ลบแบบอักษรกำหนดเอง <b>${x}</b> หรือไม่?",

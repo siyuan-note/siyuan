@@ -5,7 +5,7 @@ import {MenuItem} from "../../menus/Menu";
 import {fullscreen, net2LocalAssets, updateReadonly} from "./action";
 import {openFileAttr} from "../../menus/commonMenuItem";
 import {setEditMode} from "../util/setEditMode";
-import {RecordMedia} from "../util/RecordMedia";
+import {RecordMedia, RecordMediaInputEndedError} from "../util/RecordMedia";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {uploadFiles} from "../upload";
 import {hasClosestBlock, hasTopClosestByClassName} from "../util/hasClosest";
@@ -466,14 +466,15 @@ ${padHTML}
             }
             throw error;
         }
-        recorder.onerror = () => {
+        recorder.onerror = (error) => {
             if (this.mediaRecorder !== recorder) {
                 return;
             }
             recorder.dispose();
             this.mediaRecorder = undefined;
             hideMessage(this.messageId);
-            showMessage(window.siyuan.languages["record-tip"]);
+            showMessage(error instanceof RecordMediaInputEndedError ?
+                window.siyuan.languages.recordInterrupted : window.siyuan.languages["record-tip"]);
         };
         this.messageId = showMessage(`<div class="fn__flex fn__flex-wrap">
 <span class="fn__flex-center">${window.siyuan.languages.recording}</span><span class="fn__space"></span>
@@ -497,7 +498,8 @@ ${padHTML}
             this.pendingRecordFiles.add(file);
             this.uploadRecord(protyle, file, protyle.block?.rootID);
         } catch (error) {
-            showMessage(window.siyuan.languages["record-tip"]);
+            showMessage(error instanceof RecordMediaInputEndedError ?
+                window.siyuan.languages.recordInterrupted : window.siyuan.languages["record-tip"]);
         } finally {
             recorder.dispose();
             if (this.mediaRecorder === recorder) {
@@ -670,7 +672,7 @@ ${padHTML}
                     window.siyuan.menus.menu.remove();
                 });
                 window.siyuan.menus.menu.append(uploadMenu);
-                if (!isInAndroid() && !isInHarmony()) {
+                if (!isInHarmony()) {
                     window.siyuan.menus.menu.append(new MenuItem({
                         id: this.mediaRecorder?.isRecording ? "endRecord" : "startRecord",
                         current: this.mediaRecorder && this.mediaRecorder.isRecording,
@@ -704,11 +706,22 @@ ${padHTML}
                                 }
                                 /// #endif
 
-                                mediaStream = await navigator.mediaDevices.getUserMedia({audio: true});
+                                mediaStream = await navigator.mediaDevices.getUserMedia({
+                                    audio: isInAndroid() ? {
+                                        autoGainControl: false,
+                                        echoCancellation: false,
+                                        noiseSuppression: false,
+                                    } : true,
+                                });
                                 await this.startRecord(protyle, mediaStream);
                             } catch (error) {
                                 mediaStream?.getTracks().forEach((track) => track.stop());
-                                showMessage(window.siyuan.languages["record-tip"]);
+                                if (error instanceof RecordMediaInputEndedError) {
+                                    showMessage(window.siyuan.languages.recordInterrupted);
+                                } else if (!isInAndroid() ||
+                                    !(error instanceof DOMException && error.name === "NotAllowedError")) {
+                                    showMessage(window.siyuan.languages["record-tip"]);
+                                }
                             } finally {
                                 this.startingRecord = false;
                             }

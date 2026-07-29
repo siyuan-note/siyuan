@@ -1,4 +1,5 @@
-const SAMPLE_RATE = 44100;
+import {isInAndroid} from "./compatibility";
+
 const MP3_BIT_RATE = 96;
 const BUFFER_SIZE = 2048;
 const PROCESSOR_NAME = "siyuan-record-media";
@@ -58,6 +59,13 @@ type ProcessorMessage =
     { type: "chunk", buffer: ArrayBuffer } |
     { type: "flushed" };
 
+export class RecordMediaInputEndedError extends Error {
+    constructor() {
+        super("Audio input ended");
+        this.name = "RecordMediaInputEndedError";
+    }
+}
+
 export class RecordMedia {
     public isRecording = false;
     public onerror?: (error: Error) => void;
@@ -75,6 +83,10 @@ export class RecordMedia {
     private resolveStop: (blob: Blob) => void;
     private rejectStop: (error: Error) => void;
     private disposed = false;
+    private failure: Error;
+    private readonly handleTrackEnded = () => {
+        this.handleWorkerError(new RecordMediaInputEndedError());
+    };
 
     constructor(mediaStream: MediaStream) {
         this.mediaStream = mediaStream;
@@ -83,11 +95,18 @@ export class RecordMedia {
             throw new Error("AudioContext is not supported");
         }
 
-        this.context = new AudioContextConstructor({sampleRate: SAMPLE_RATE});
+        const contextOptions = {} as AudioContextOptions & { sinkId?: { type: "none" } };
+        if (isInAndroid() && "setSinkId" in AudioContextConstructor.prototype) {
+            contextOptions.sinkId = {type: "none"};
+        }
+        this.context = new AudioContextConstructor(contextOptions);
         if (!this.context.audioWorklet || typeof AudioWorkletNode === "undefined") {
             throw new Error("AudioWorklet is not supported");
         }
         this.audioInput = this.context.createMediaStreamSource(mediaStream);
+        this.mediaStream.getAudioTracks().forEach((track) => {
+            track.addEventListener("ended", this.handleTrackEnded);
+        });
     }
 
     public async startRecording() {
@@ -118,7 +137,13 @@ export class RecordMedia {
             bitRate: MP3_BIT_RATE,
         });
         await Promise.all([this.readyPromise, this.initializeRecorder()]);
+        if (this.failure) {
+            throw this.failure;
+        }
         await this.context.resume();
+        if (this.failure) {
+            throw this.failure;
+        }
         this.isRecording = true;
         this.recorder.port.postMessage({type: "start"});
     }
@@ -152,6 +177,9 @@ export class RecordMedia {
         this.audioInput.disconnect();
         this.worker?.terminate();
         this.worker = undefined;
+        this.mediaStream.getAudioTracks().forEach((track) => {
+            track.removeEventListener("ended", this.handleTrackEnded);
+        });
         this.mediaStream.getTracks().forEach((track) => track.stop());
         if (this.context.state !== "closed") {
             this.context.close();
@@ -171,8 +199,7 @@ export class RecordMedia {
 
         this.recorder = new AudioWorkletNode(this.context, PROCESSOR_NAME, {
             numberOfInputs: 1,
-            numberOfOutputs: 1,
-            outputChannelCount: [1],
+            numberOfOutputs: 0,
         });
         this.recorder.port.onmessage = (event: MessageEvent<ProcessorMessage>) => {
             if (event.data.type === "chunk" && this.worker) {
@@ -185,7 +212,6 @@ export class RecordMedia {
             this.handleWorkerError(new Error("Audio processor failed"));
         };
         this.audioInput.connect(this.recorder);
-        this.recorder.connect(this.context.destination);
     }
 
     private handleWorkerMessage(message: EncoderMessage) {
@@ -201,6 +227,10 @@ export class RecordMedia {
     }
 
     private handleWorkerError(error: Error) {
+        if (this.disposed || this.failure) {
+            return;
+        }
+        this.failure = error;
         this.isRecording = false;
         this.rejectReady?.(error);
         this.rejectStop?.(error);

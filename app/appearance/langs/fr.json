@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "L’enregistrement a été interrompu. Veuillez recommencer",
   "snapshotData": "Données",
   "extensions": "Extensions",
   "deleteFontConfirm": "Supprimer la police personnalisée <b>${x}</b> ?",

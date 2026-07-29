@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "ההקלטה הופסקה. נא להקליט שוב",
   "snapshotData": "נתונים",
   "extensions": "הרחבות",
   "deleteFontConfirm": "למחוק את הגופן המותאם אישית <b>${x}</b>?",

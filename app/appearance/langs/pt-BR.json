@@ -1,4 +1,5 @@
 {
+  "recordInterrupted": "A gravação foi interrompida. Grave novamente",
   "snapshotData": "Dados",
   "extensions": "Extensões",
   "deleteFontConfirm": "Excluir a fonte personalizada <b>${x}</b>?",

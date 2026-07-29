@@ -12,6 +12,7 @@ import {pathPosix} from "../util/pathName";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {resizeSide} from "./resizeSide";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {showDocVersionDiff} from "./docDiff";
 
 type SnapshotDiffAggregate = "all" | "data" | "extension" | "other";
 type SnapshotFileKind = "document" | "database" | "asset" | "plugin" | "widget" | "template" | "snippet" | "bazaar" | "workspaceData" | "other";
@@ -216,7 +217,7 @@ const genItem = (items: SnapshotDiffItem[], hasUndo = true) => {
     let html = "";
     items.forEach((item) => {
         const compareID = item.compareFile ? ` data-id2="${item.compareFile.fileID}"` : "";
-        html += `<li class="b3-list-item b3-list-item--hide-action history__diff-item"${compareID} data-created="${item.file.updated}" data-id="${item.file.fileID}" data-title="${escapeAttr(item.file.title)}">
+        html += `<li class="b3-list-item b3-list-item--hide-action history__diff-item"${compareID} data-created="${item.file.updated}" data-id="${item.file.fileID}" data-kind="${item.kind}" data-title="${escapeAttr(item.file.title)}">
     <span class="history__diff-file">
         <span class="history__diff-title">${escapeHtml(item.file.title)}</span>
         <span class="history__diff-path" title="${escapeAttr(item.file.path)} ${item.file.hSize}">${escapeHtml(item.file.path)}</span>
@@ -281,6 +282,28 @@ const renderCompare = (app: App, element: HTMLElement) => {
     const dialogContainerElement = hasClosestByClassName(element, "b3-dialog__container");
     if (!dialogContainerElement) {
         return;
+    }
+    const id2 = element.getAttribute("data-id2");
+    if (element.dataset.kind === "document" && id2) {
+        const snapshots = Array.from(dialogContainerElement.querySelectorAll<HTMLElement>(".b3-dialog__header [data-snapshot]"));
+        if (snapshots.length === 2) {
+            const leftCreated = parseInt(snapshots[0].dataset.created);
+            const rightCreated = parseInt(snapshots[1].dataset.created);
+            showDocVersionDiff(app, {
+                type: "snapshot",
+                id: element.dataset.id,
+                snapshot: snapshots[0].dataset.snapshot,
+                label: `${window.siyuan.languages.dataSnapshot} ${snapshots[0].dataset.snapshot.substring(0, 7)} ${dayjs(leftCreated).format("YYYY-MM-DD HH:mm:ss")}`,
+                created: leftCreated,
+            }, {
+                type: "snapshot",
+                id: id2,
+                snapshot: snapshots[1].dataset.snapshot,
+                label: `${window.siyuan.languages.dataSnapshot} ${snapshots[1].dataset.snapshot.substring(0, 7)} ${dayjs(rightCreated).format("YYYY-MM-DD HH:mm:ss")}`,
+                created: rightCreated,
+            });
+            return;
+        }
     }
     const editorsElement = dialogContainerElement.querySelector('[data-type="editors"]');
     const leftElement = editorsElement.firstElementChild;
@@ -347,7 +370,6 @@ const renderCompare = (app: App, element: HTMLElement) => {
         titleElement.textContent = response.data.title;
         leftElement.querySelector(".history__date").textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
     });
-    const id2 = element.getAttribute("data-id2");
     if (id2) {
         rightElement.classList.remove("fn__none");
         fetchPost("/api/repo/openRepoSnapshotFile", {id: id2}, (response) => {
@@ -450,7 +472,8 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-list-item") && target.dataset.id) {
-                if (target.classList.contains("b3-list-item--focus")) {
+                if (target.classList.contains("b3-list-item--focus") &&
+                    !(target.dataset.kind === "document" && target.dataset.id2)) {
                     return;
                 }
                 dialog.element.querySelector(".history__side .b3-list-item--focus")?.classList.remove("b3-list-item--focus");
@@ -500,13 +523,13 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string, fi
         const headElement = dialog.element.querySelector(".b3-dialog__header");
         headElement.innerHTML = `<div style="padding: 0;min-height: auto;" class="block__icons">
     <span class="fn__flex-1"></span>
-    <code class="fn__code${isPhone ? " fn__none" : ""}" data-snapshot="${left}">${left.substring(0, 7)}</code>
+    <code class="fn__code${isPhone ? " fn__none" : ""}" data-snapshot="${left}" data-created="${response.data.left.created}">${left.substring(0, 7)}</code>
     ${isPhone ? "" : '<span class="fn__space"></span>'}
     ${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__space"></span>
     <span class="block__icon block__icon--show b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages.switchDirect}" data-direct="${direct}"><svg><use xlink:href="#iconScrollHoriz"></use></svg></span>
     <span class="fn__space"></span>
-    <code class="fn__code${isPhone ? " fn__none" : ""}" data-snapshot="${right}">${right.substring(0, 7)}</code>
+    <code class="fn__code${isPhone ? " fn__none" : ""}" data-snapshot="${right}" data-created="${response.data.right.created}">${right.substring(0, 7)}</code>
     ${isPhone ? "" : '<span class="fn__space"></span>'}
     ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__flex-1"></span>

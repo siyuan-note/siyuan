@@ -54,6 +54,8 @@ type DocVersionDiffResult struct {
 	Right         *DocVersionDiffContent  `json:"right"`
 	Differences   []*DocVersionDifference `json:"differences"`
 	Large         bool                    `json:"large"`
+	Fallback      bool                    `json:"fallback"`
+	Message       string                  `json:"message"`
 	TitleModified bool                    `json:"titleModified"`
 }
 
@@ -70,9 +72,12 @@ type DocVersionDifference struct {
 }
 
 type loadedDocVersion struct {
-	tree  *parse.Tree
-	title string
-	large bool
+	tree     *parse.Tree
+	title    string
+	rootID   string
+	raw      []byte
+	parseErr error
+	large    bool
 }
 
 type docDiffBlock struct {
@@ -86,6 +91,7 @@ type docTextSegment struct {
 	start      int
 	end        int
 	storedRuns []string
+	signature  string
 }
 
 // DiffDocVersions 比较同一文档的两个版本，并返回带临时差异标记的只读块 DOM。
@@ -101,7 +107,7 @@ func DiffDocVersions(leftRef, rightRef *DocVersionRef) (ret *DocVersionDiffResul
 	if err != nil {
 		return nil, err
 	}
-	if left.tree.Root.ID != right.tree.Root.ID {
+	if "" != left.rootID && "" != right.rootID && left.rootID != right.rootID {
 		return nil, errors.New("document versions do not belong to the same document")
 	}
 
@@ -109,6 +115,14 @@ func DiffDocVersions(leftRef, rightRef *DocVersionRef) (ret *DocVersionDiffResul
 		Differences:   []*DocVersionDifference{},
 		Large:         left.large || right.large,
 		TitleModified: left.title != right.title,
+	}
+	if nil == left.tree || nil == right.tree {
+		ret.Fallback = true
+		ret.Message = docVersionFallbackMessage(left, right)
+		ret.TitleModified = false
+		ret.Left = renderFallbackDocVersion(left)
+		ret.Right = renderFallbackDocVersion(right)
+		return
 	}
 	if ret.TitleModified {
 		ret.Differences = append(ret.Differences, &DocVersionDifference{
@@ -193,6 +207,7 @@ func loadDocVersion(ref *DocVersionRef) (ret *loadedDocVersion, err error) {
 		ret = &loadedDocVersion{}
 		ret.tree, err = LoadTreeByBlockID(ref.ID)
 		if nil == err && nil != ret.tree {
+			ret.rootID = ret.tree.Root.ID
 			if info, statErr := os.Stat(filepath.Join(util.DataDir, ret.tree.Box, filepath.FromSlash(ret.tree.Path))); nil == statErr {
 				ret.large = 1024*1024 <= info.Size()
 			}
@@ -207,11 +222,17 @@ func loadDocVersion(ref *DocVersionRef) (ret *loadedDocVersion, err error) {
 	if err != nil {
 		return nil, err
 	}
-	if nil == ret || nil == ret.tree || nil == ret.tree.Root {
+	if nil == ret || (nil == ret.tree && 0 == len(ret.raw)) || (nil != ret.tree && nil == ret.tree.Root) {
 		return nil, errors.New("document version is empty")
 	}
-	if "" == ret.title {
+	if nil != ret.tree && "" == ret.rootID {
+		ret.rootID = ret.tree.Root.ID
+	}
+	if nil != ret.tree && "" == ret.title {
 		ret.title = ret.tree.Root.IALAttr("title")
+	}
+	if "" == ret.title {
+		ret.title = ret.rootID
 	}
 	return
 }
@@ -253,10 +274,23 @@ func loadHistoryDocVersion(historyPath string) (ret *loadedDocVersion, err error
 
 	luteEngine := NewLute()
 	tree, err := dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	rootID := strings.TrimSuffix(filepath.Base(absPath), filepath.Ext(absPath))
 	if err != nil {
-		return nil, err
+		return &loadedDocVersion{
+			title:    rootID,
+			rootID:   rootID,
+			raw:      data,
+			parseErr: err,
+			large:    1024*1024 <= len(data),
+		}, nil
 	}
-	return &loadedDocVersion{tree: tree, title: tree.Root.IALAttr("title"), large: 1024*1024 <= len(data)}, nil
+	return &loadedDocVersion{
+		tree:   tree,
+		title:  tree.Root.IALAttr("title"),
+		rootID: tree.Root.ID,
+		raw:    data,
+		large:  1024*1024 <= len(data),
+	}, nil
 }
 
 func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
@@ -277,6 +311,16 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 	if !strings.HasSuffix(strings.ToLower(file.Path), ".sy") {
 		return nil, errors.New("snapshot version is not a document")
 	}
+	repoPath := strings.TrimPrefix(file.Path, "/")
+	pathParts := strings.SplitN(repoPath, "/", 2)
+	if 0 < len(pathParts) && IsEncryptedBox(pathParts[0]) {
+		HoldBoxReadLock(pathParts[0])
+		_, unlockErr := GetDEKIfUnlocked(pathParts[0])
+		ReleaseBoxReadLock(pathParts[0])
+		if unlockErr != nil {
+			return nil, errors.New(Conf.Language(314))
+		}
+	}
 	data, err := repo.OpenFile(file)
 	if err != nil {
 		return nil, err
@@ -284,10 +328,23 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 	data = decryptRepoDataIfNeeded(data, file.Path)
 	luteEngine := NewLute()
 	tree, err := dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	rootID := strings.TrimSuffix(filepath.Base(file.Path), filepath.Ext(file.Path))
 	if err != nil {
-		return nil, err
+		return &loadedDocVersion{
+			title:    rootID,
+			rootID:   rootID,
+			raw:      data,
+			parseErr: err,
+			large:    1024*1024 <= len(data),
+		}, nil
 	}
-	return &loadedDocVersion{tree: tree, title: tree.Root.IALAttr("title"), large: 1024*1024 <= len(data)}, nil
+	return &loadedDocVersion{
+		tree:   tree,
+		title:  tree.Root.IALAttr("title"),
+		rootID: tree.Root.ID,
+		raw:    data,
+		large:  1024*1024 <= len(data),
+	}, nil
 }
 
 func collectDocDiffBlocks(tree *parse.Tree) (blocks map[string]*docDiffBlock, children map[string][]string, order []string) {
@@ -448,7 +505,7 @@ func filterSharedDocBlockIDs(ids []string, other map[string]*docDiffBlock) (ret 
 func markDocInlineDiff(left, right *ast.Node) {
 	leftRunes, leftSegments, leftOK := collectDocTextSegments(left)
 	rightRunes, rightSegments, rightOK := collectDocTextSegments(right)
-	if !leftOK || !rightOK || string(leftRunes) == string(rightRunes) {
+	if !leftOK || !rightOK {
 		return
 	}
 	matches, ok := lcsMatches(leftRunes, rightRunes, docDiffMaxLCSCells)
@@ -467,8 +524,26 @@ func markDocInlineDiff(left, right *ast.Node) {
 		leftChanged[match[0]] = false
 		rightChanged[match[1]] = false
 	}
+	leftSignatures := docTextSegmentSignatures(leftSegments, len(leftRunes))
+	rightSignatures := docTextSegmentSignatures(rightSegments, len(rightRunes))
+	for _, match := range matches {
+		if leftSignatures[match[0]] != rightSignatures[match[1]] {
+			leftChanged[match[0]] = true
+			rightChanged[match[1]] = true
+		}
+	}
 	applyDocTextDiff(leftSegments, leftChanged)
 	applyDocTextDiff(rightSegments, rightChanged)
+}
+
+func docTextSegmentSignatures(segments []*docTextSegment, length int) (ret []string) {
+	ret = make([]string, length)
+	for _, segment := range segments {
+		for i := segment.start; i < segment.end; i++ {
+			ret[i] = segment.signature
+		}
+	}
+	return
 }
 
 func collectDocTextSegments(block *ast.Node) (runes []rune, segments []*docTextSegment, ok bool) {
@@ -506,10 +581,26 @@ func collectDocTextSegments(block *ast.Node) (runes []rune, segments []*docTextS
 			start:      start,
 			end:        len(runes),
 			storedRuns: storedRuns,
+			signature:  docTextNodeSignature(n),
 		})
 		return ast.WalkContinue
 	})
 	return
+}
+
+func docTextNodeSignature(node *ast.Node) string {
+	if ast.NodeText == node.Type {
+		return node.Type.String()
+	}
+	return strings.Join([]string{
+		node.Type.String(),
+		node.TextMarkType,
+		node.TextMarkAHref,
+		node.TextMarkATitle,
+		node.TextMarkBlockRefID,
+		node.TextMarkFileAnnotationRefID,
+		node.TextMarkInlineMemoContent,
+	}, "|")
 }
 
 func decodeDocTextMarkContent(node *ast.Node) (visible []rune, storedRuns []string) {
@@ -682,6 +773,27 @@ func prepareDocDiffTree(tree *parse.Tree) {
 		}
 		return ast.WalkContinue
 	})
+}
+
+func docVersionFallbackMessage(versions ...*loadedDocVersion) string {
+	for _, version := range versions {
+		if nil != version && nil != version.parseErr {
+			return version.parseErr.Error()
+		}
+	}
+	return ""
+}
+
+func renderFallbackDocVersion(version *loadedDocVersion) *DocVersionDiffContent {
+	if nil != version.tree {
+		return renderLargeDocVersion(version)
+	}
+	return &DocVersionDiffContent{
+		ID:      version.rootID,
+		RootID:  version.rootID,
+		Title:   version.title,
+		Content: string(version.raw),
+	}
 }
 
 func renderDocVersion(version *loadedDocVersion) *DocVersionDiffContent {

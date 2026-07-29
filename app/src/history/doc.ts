@@ -154,6 +154,7 @@ export const openDocHistory = (options: {
         type: "current" as const,
         id: options.id,
         label: window.siyuan.languages.currentVer,
+        created: Number.MAX_SAFE_INTEGER,
     };
     const selectedVersions: IDocVersionRef[] = [currentVersion];
     const contentHTML = `<div class="fn__flex-column" style="height: 100%;">
@@ -353,11 +354,13 @@ export const openDocHistory = (options: {
                 event.preventDefault();
                 break;
             } else if (type === "selectVersion" && repoFileElement) {
+                const created = parseInt(repoFileElement.getAttribute("data-created"));
                 toggleVersionSelection({
                     type: "snapshot",
                     id: repoFileElement.getAttribute("data-id"),
                     snapshot: repoFileElement.getAttribute("data-snapshot"),
-                    label: dayjs(parseInt(repoFileElement.getAttribute("data-created"))).format("YYYY-MM-DD HH:mm:ss"),
+                    label: `${window.siyuan.languages.dataSnapshot} ${dayjs(created).format("YYYY-MM-DD HH:mm:ss")}`,
+                    created,
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -369,13 +372,15 @@ export const openDocHistory = (options: {
                 break;
             } else if (type === "selectVersion" && !isLoading) {
                 const historyItemElement = target.parentElement;
+                const created = parseInt(historyItemElement.getAttribute("data-created")) * 1000;
                 getHistoryPath(historyItemElement, opElement.value, options.id, (item) => {
                     isLoading = false;
                     toggleVersionSelection({
                         type: "history",
                         id: historyItemElement.getAttribute("data-created"),
                         path: item.path,
-                        label: historyItemElement.querySelector(".b3-list-item__text").textContent.trim(),
+                        label: `${window.siyuan.languages.fileHistory} ${historyItemElement.querySelector(".b3-list-item__text").textContent.trim()}`,
+                        created,
                     });
                 });
                 event.stopPropagation();

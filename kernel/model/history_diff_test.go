@@ -80,6 +80,55 @@ func TestMarkDocInlineDiff(t *testing.T) {
 	}
 }
 
+func TestMarkDocInlineFormatDiff(t *testing.T) {
+	left := &ast.Node{Type: ast.NodeParagraph, ID: "20260729000000-left01"}
+	left.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("same")})
+	right := &ast.Node{Type: ast.NodeParagraph, ID: "20260729000000-right1"}
+	right.AppendChild(&ast.Node{
+		Type:                ast.NodeTextMark,
+		TextMarkType:        "strong",
+		TextMarkTextContent: "same",
+	})
+
+	markDocInlineDiff(left, right)
+
+	if "inline" != left.FirstChild.IALAttr("data-history-diff") {
+		t.Fatal("expected changed formatting on the left to be marked")
+	}
+	if "inline" != right.FirstChild.IALAttr("data-history-diff") {
+		t.Fatal("expected changed formatting on the right to be marked")
+	}
+}
+
+func TestDocDiffBlockSignatureIgnoresDescendantsAndDisplayAttrs(t *testing.T) {
+	left := &ast.Node{
+		Type: ast.NodeBlockquote,
+		ID:   "20260729000000-left01",
+		KramdownIAL: [][]string{
+			{"updated", "20260729000000"},
+			{"fold", "1"},
+		},
+	}
+	leftChild := &ast.Node{Type: ast.NodeParagraph, ID: "20260729000000-child1"}
+	leftChild.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("before")})
+	left.AppendChild(leftChild)
+
+	right := &ast.Node{
+		Type: ast.NodeBlockquote,
+		ID:   "20260729000000-right1",
+		KramdownIAL: [][]string{
+			{"updated", "20260729000001"},
+		},
+	}
+	rightChild := &ast.Node{Type: ast.NodeParagraph, ID: "20260729000000-child1"}
+	rightChild.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("after")})
+	right.AppendChild(rightChild)
+
+	if docDiffBlockSignature(left) != docDiffBlockSignature(right) {
+		t.Fatal("expected descendant content and display attributes to be ignored")
+	}
+}
+
 func TestDetectMovedDocBlocks(t *testing.T) {
 	left := map[string]*docDiffBlock{
 		"a": {parentID: "root"},

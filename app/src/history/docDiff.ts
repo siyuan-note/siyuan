@@ -4,16 +4,18 @@ import type {App} from "../index";
 import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {escapeHtml} from "../util/escape";
-import {fetchPost} from "../util/fetch";
+import {fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
+import {
+    countDocVersionDifferences,
+    type DocVersionDiffFilter,
+    type IDocVersionDifference,
+    type IDocVersionRef,
+    matchesDocVersionDiffFilter,
+    orderDocVersionRefs,
+} from "./docDiffCore";
 
-export interface IDocVersionRef {
-    type: "current" | "history" | "snapshot";
-    id?: string;
-    path?: string;
-    snapshot?: string;
-    label: string;
-}
+export type {IDocVersionRef} from "./docDiffCore";
 
 interface IDocVersionContent {
     id: string;
@@ -22,16 +24,13 @@ interface IDocVersionContent {
     content: string;
 }
 
-interface IDocVersionDifference {
-    id: string;
-    statuses: Array<"left-only" | "right-only" | "modified" | "moved">;
-}
-
 interface IDocVersionDiff {
     left: IDocVersionContent;
     right: IDocVersionContent;
     differences: IDocVersionDifference[];
     large: boolean;
+    fallback: boolean;
+    message: string;
     titleModified: boolean;
 }
 
@@ -55,10 +54,56 @@ const toProtyleResponse = (content: IDocVersionContent) => {
     } as IWebSocketData;
 };
 
-export const showDocVersionDiff = (app: App, leftRef: IDocVersionRef, rightRef: IDocVersionRef) => {
+const getScrollAnchor = (element: HTMLElement) => {
+    const elementRect = element.getBoundingClientRect();
+    const blocks = Array.from(element.querySelectorAll<HTMLElement>(".protyle-wysiwyg [data-node-id]"));
+    let anchor: HTMLElement;
+    for (const block of blocks) {
+        const rect = block.getBoundingClientRect();
+        if (rect.top <= elementRect.top + 16) {
+            anchor = block;
+        } else if (!anchor) {
+            anchor = block;
+            break;
+        }
+    }
+    if (!anchor) {
+        return;
+    }
+    return {
+        id: anchor.dataset.nodeId,
+        offset: anchor.getBoundingClientRect().top - elementRect.top,
+    };
+};
+
+const syncDocVersionScroll = (source: HTMLElement, target: HTMLElement) => {
+    const anchor = getScrollAnchor(source);
+    const targetBlock = anchor?.id ?
+        target.querySelector<HTMLElement>(`[data-node-id="${CSS.escape(anchor.id)}"]`) : undefined;
+    if (targetBlock) {
+        const targetRect = target.getBoundingClientRect();
+        target.scrollTop += targetBlock.getBoundingClientRect().top - targetRect.top - anchor.offset;
+        return;
+    }
+
+    const sourceMax = source.scrollHeight - source.clientHeight;
+    const targetMax = target.scrollHeight - target.clientHeight;
+    target.scrollTop = sourceMax > 0 ? source.scrollTop / sourceMax * targetMax : 0;
+};
+
+export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef: IDocVersionRef) => {
+    let [leftRef, rightRef] = orderDocVersionRefs(firstRef, secondRef);
     let editors: Protyle[] = [];
     let diff: IDocVersionDiff;
     let differenceIndex = -1;
+    let filter: DocVersionDiffFilter = "all";
+    let visibleDifferences: IDocVersionDifference[] = [];
+    let requestId = 0;
+    let isDestroyed = false;
+    let isSyncingScroll = false;
+    let removeScrollListeners = () => {
+        // 初次渲染前没有需要移除的监听器。
+    };
 
     const dialog = new Dialog({
         title: window.siyuan.languages.compare,
@@ -72,21 +117,23 @@ export const showDocVersionDiff = (app: App, leftRef: IDocVersionRef, rightRef: 
                 <svg><use xlink:href="#iconDown"></use></svg>
             </span>
             <span class="history__diff-count ft__on-surface">0/0</span>
+            <div class="history__compare-legend fn__none"></div>
             <span class="fn__flex-1"></span>
             <span class="block__icon block__icon--show b3-tooltips b3-tooltips__w" data-type="diffSwap" aria-label="${window.siyuan.languages.switchDirect}">
                 <svg><use xlink:href="#iconScrollHoriz"></use></svg>
             </span>
         </div>
     </div>
+    <div class="history__compare-message fn__none"></div>
     <div class="history__compare-scroll fn__flex-1">
         <div class="history__compare-editors fn__flex">
             <div class="history__compare-panel fn__flex-column">
-                <div class="history__compare-label ft__on-surface ft__ellipsis">${escapeHtml(leftRef.label)}</div>
+                <div class="history__compare-label ft__on-surface ft__ellipsis"></div>
                 <div class="protyle-title__input ft__center ft__breakword"></div>
                 <div class="history__compare-content fn__flex-1"></div>
             </div>
             <div class="history__compare-panel fn__flex-column">
-                <div class="history__compare-label ft__on-surface ft__ellipsis">${escapeHtml(rightRef.label)}</div>
+                <div class="history__compare-label ft__on-surface ft__ellipsis"></div>
                 <div class="protyle-title__input ft__center ft__breakword"></div>
                 <div class="history__compare-content fn__flex-1"></div>
             </div>
@@ -97,6 +144,9 @@ export const showDocVersionDiff = (app: App, leftRef: IDocVersionRef, rightRef: 
         height: isMobile() ? "100dvh" : "80vh",
         containerClassName: "b3-dialog__container--theme",
         destroyCallback() {
+            isDestroyed = true;
+            requestId++;
+            removeScrollListeners();
             editors.forEach((editor) => editor.destroy());
             editors = [];
         }
@@ -106,70 +156,170 @@ export const showDocVersionDiff = (app: App, leftRef: IDocVersionRef, rightRef: 
     const rootElement = dialog.element.querySelector(".history__doc-compare") as HTMLElement;
     const editorsElement = rootElement.querySelector(".history__compare-editors") as HTMLElement;
     const countElement = rootElement.querySelector(".history__diff-count") as HTMLElement;
-    const renderCount = () => {
-        countElement.textContent = `${differenceIndex < 0 ? 0 : differenceIndex + 1}/${diff?.differences.length || 0}`;
+    const legendElement = rootElement.querySelector(".history__compare-legend") as HTMLElement;
+    const messageElement = rootElement.querySelector(".history__compare-message") as HTMLElement;
+    const panels = Array.from(editorsElement.querySelectorAll<HTMLElement>(".history__compare-panel"));
+
+    const destroyEditors = () => {
+        removeScrollListeners();
+        removeScrollListeners = () => {
+            // 当前没有需要移除的监听器。
+        };
+        editors.forEach((editor) => editor.destroy());
+        editors = [];
     };
-    const focusDifference = (step: number) => {
-        if (!diff || diff.differences.length === 0) {
+
+    const renderCount = () => {
+        countElement.textContent = `${differenceIndex < 0 ? 0 : differenceIndex + 1}/${visibleDifferences.length}`;
+    };
+
+    const setMessage = (message = "", retry = false) => {
+        if (!message) {
+            messageElement.classList.add("fn__none");
+            messageElement.innerHTML = "";
             return;
         }
-        differenceIndex = (differenceIndex + step + diff.differences.length) % diff.differences.length;
-        rootElement.querySelectorAll(".history__diff--focus").forEach((item) => {
-            item.classList.remove("history__diff--focus");
+        messageElement.classList.remove("fn__none");
+        messageElement.innerHTML = `<span>${escapeHtml(message)}</span>${retry ?
+            `<button class="b3-button b3-button--outline" data-type="diffRetry">${window.siyuan.languages.retry}</button>` : ""}`;
+    };
+
+    const renderLoading = () => {
+        destroyEditors();
+        diff = undefined;
+        visibleDifferences = [];
+        differenceIndex = -1;
+        renderCount();
+        legendElement.classList.add("fn__none");
+        setMessage();
+        panels.forEach((panel, index) => {
+            panel.querySelector(".history__compare-label").textContent = index === 0 ? leftRef.label : rightRef.label;
+            panel.querySelector(".protyle-title__input").textContent = "";
+            panel.querySelector(".history__compare-content").innerHTML =
+                '<div class="fn__loading"><img style="height: 64px;width: 64px" src="/stage/loading-pure.svg"></div>';
         });
-        const id = diff.differences[differenceIndex].id;
-        editorsElement.querySelectorAll(".history__compare-panel").forEach((panel) => {
-            const block = panel.querySelector(`[data-node-id="${CSS.escape(id)}"]`);
-            const target = block || (id === diff.left.rootID ? panel.querySelector(".protyle-title__input") : undefined);
-            if (target) {
-                target.classList.add("history__diff--focus");
-                target.scrollIntoView({block: "center"});
+    };
+
+    const renderFilters = () => {
+        const counts = countDocVersionDifferences(diff.differences);
+        const items: {value: DocVersionDiffFilter, label: string, count: number}[] = [
+            {value: "all", label: window.siyuan.languages.all, count: counts.all},
+            {value: "added", label: window.siyuan.languages.addAttr, count: counts.added},
+            {value: "removed", label: window.siyuan.languages.remove, count: counts.removed},
+            {value: "modified", label: window.siyuan.languages.update, count: counts.modified},
+        ];
+        legendElement.innerHTML = items.map((item) => {
+            return `<button type="button" class="b3-chip b3-chip--middle b3-chip--pointer history__compare-filter history__compare-filter--${item.value}${filter === item.value ? " b3-chip--current" : ""}" data-type="diffFilter" data-value="${item.value}" aria-pressed="${filter === item.value}"><span></span>${item.label} ${item.count}</button>`;
+        }).join("");
+        legendElement.classList.remove("fn__none");
+    };
+
+    const applyFilter = () => {
+        if (!diff) {
+            return;
+        }
+        visibleDifferences = diff.differences.filter((item) => matchesDocVersionDiffFilter(item, filter));
+        differenceIndex = -1;
+        panels.forEach((panel) => {
+            panel.querySelectorAll(".history__diff--filtered").forEach((item) => {
+                item.classList.remove("history__diff--filtered");
+            });
+        });
+        diff.differences.forEach((item) => {
+            if (matchesDocVersionDiffFilter(item, filter)) {
+                return;
             }
+            panels.forEach((panel) => {
+                const target = item.id === diff.left.rootID ?
+                    panel.querySelector(".protyle-title__input") :
+                    panel.querySelector(`[data-node-id="${CSS.escape(item.id)}"]`);
+                target?.classList.add("history__diff--filtered");
+            });
+        });
+        legendElement.querySelectorAll<HTMLElement>('[data-type="diffFilter"]').forEach((item) => {
+            const current = item.dataset.value === filter;
+            item.classList.toggle("b3-chip--current", current);
+            item.setAttribute("aria-pressed", current.toString());
         });
         renderCount();
     };
 
-    rootElement.addEventListener("click", (event) => {
-        const target = (event.target as HTMLElement).closest("[data-type]") as HTMLElement;
-        if (!target) {
+    const focusDifference = (step: number) => {
+        if (!diff || visibleDifferences.length === 0) {
             return;
         }
-        if (target.dataset.type === "diffPrevious") {
-            focusDifference(-1);
-        } else if (target.dataset.type === "diffNext") {
-            focusDifference(1);
-        } else if (target.dataset.type === "diffSwap") {
-            editorsElement.append(editorsElement.firstElementChild);
-        }
-    });
+        differenceIndex = (differenceIndex + step + visibleDifferences.length) % visibleDifferences.length;
+        rootElement.querySelectorAll(".history__diff--focus").forEach((item) => {
+            item.classList.remove("history__diff--focus");
+        });
+        const id = visibleDifferences[differenceIndex].id;
+        isSyncingScroll = true;
+        panels.forEach((panel, index) => {
+            const block = panel.querySelector<HTMLElement>(`[data-node-id="${CSS.escape(id)}"]`);
+            const target = block || (id === diff.left.rootID ?
+                panel.querySelector<HTMLElement>(".protyle-title__input") : undefined);
+            if (!target) {
+                return;
+            }
+            target.classList.add("history__diff--focus");
+            const scrollElement = editors[index]?.protyle.contentElement;
+            if (block && scrollElement) {
+                const scrollRect = scrollElement.getBoundingClientRect();
+                const blockRect = block.getBoundingClientRect();
+                scrollElement.scrollTop += blockRect.top - scrollRect.top - (scrollRect.height - blockRect.height) / 2;
+            }
+        });
+        requestAnimationFrame(() => {
+            isSyncingScroll = false;
+        });
+        renderCount();
+    };
 
-    fetchPost("/api/history/diffDocVersions", {
-        left: {
-            type: leftRef.type,
-            id: leftRef.id || "",
-            path: leftRef.path || "",
-        },
-        right: {
-            type: rightRef.type,
-            id: rightRef.id || "",
-            path: rightRef.path || "",
+    const setupScrollSync = () => {
+        if (editors.length !== 2) {
+            return;
         }
-    }, (response) => {
-        diff = response.data as IDocVersionDiff;
+        const left = editors[0].protyle.contentElement;
+        const right = editors[1].protyle.contentElement;
+        const sync = (source: HTMLElement, target: HTMLElement) => {
+            if (isSyncingScroll) {
+                return;
+            }
+            isSyncingScroll = true;
+            syncDocVersionScroll(source, target);
+            requestAnimationFrame(() => {
+                isSyncingScroll = false;
+            });
+        };
+        const syncLeft = () => sync(left, right);
+        const syncRight = () => sync(right, left);
+        left.addEventListener("scroll", syncLeft, {passive: true});
+        right.addEventListener("scroll", syncRight, {passive: true});
+        removeScrollListeners = () => {
+            left.removeEventListener("scroll", syncLeft);
+            right.removeEventListener("scroll", syncRight);
+        };
+    };
+
+    const renderDiff = () => {
         const contents = [diff.left, diff.right];
         const refs = [leftRef, rightRef];
-        editorsElement.querySelectorAll(".history__compare-panel").forEach((panel, index) => {
-            const titleElement = panel.querySelector(".protyle-title__input");
+        panels.forEach((panel, index) => {
+            panel.querySelector(".history__compare-label").textContent = refs[index].label;
+            const titleElement = panel.querySelector(".protyle-title__input") as HTMLElement;
             titleElement.textContent = contents[index].title;
             if (diff.titleModified) {
                 titleElement.setAttribute("data-history-diff", "modified");
+            } else {
+                titleElement.removeAttribute("data-history-diff");
             }
             const contentElement = panel.querySelector(".history__compare-content") as HTMLElement;
-            if (diff.large) {
+            if (diff.large || diff.fallback) {
                 contentElement.innerHTML = '<textarea class="history__text fn__block" readonly></textarea>';
                 (contentElement.firstElementChild as HTMLTextAreaElement).value = contents[index].content;
                 return;
             }
+            contentElement.innerHTML = "";
             const editor = new Protyle(app, contentElement, {
                 blockId: "",
                 action: [Constants.CB_GET_HISTORY],
@@ -193,7 +343,81 @@ export const showDocVersionDiff = (app: App, leftRef: IDocVersionRef, rightRef: 
                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
             });
         });
-        renderCount();
+        if (diff.large || diff.fallback) {
+            setMessage(diff.fallback ? diff.message : window.siyuan.languages._kernel[36]);
+            visibleDifferences = [];
+            differenceIndex = -1;
+            legendElement.classList.add("fn__none");
+            renderCount();
+            return;
+        }
+        setupScrollSync();
+        renderFilters();
+        applyFilter();
+        focusDifference(1);
+    };
+
+    const loadDiff = async () => {
+        const currentRequestId = ++requestId;
+        renderLoading();
+        try {
+            const response = await fetchSyncPost("/api/history/diffDocVersions", {
+                left: {
+                    type: leftRef.type,
+                    id: leftRef.id || "",
+                    path: leftRef.path || "",
+                },
+                right: {
+                    type: rightRef.type,
+                    id: rightRef.id || "",
+                    path: rightRef.path || "",
+                }
+            });
+            if (isDestroyed || currentRequestId !== requestId) {
+                return;
+            }
+            if (response.code !== 0 || !response.data) {
+                panels.forEach((panel) => {
+                    panel.querySelector(".history__compare-content").innerHTML = "";
+                });
+                setMessage(response.msg || window.siyuan.languages.emptyContent, true);
+                return;
+            }
+            diff = response.data as IDocVersionDiff;
+            renderDiff();
+        } catch (error) {
+            if (isDestroyed || currentRequestId !== requestId) {
+                return;
+            }
+            panels.forEach((panel) => {
+                panel.querySelector(".history__compare-content").innerHTML = "";
+            });
+            setMessage(error instanceof Error ? error.message : String(error), true);
+        }
+    };
+
+    rootElement.addEventListener("click", (event) => {
+        const target = (event.target as HTMLElement).closest("[data-type]") as HTMLElement;
+        if (!target) {
+            return;
+        }
+        if (target.dataset.type === "diffPrevious") {
+            focusDifference(-1);
+        } else if (target.dataset.type === "diffNext") {
+            focusDifference(1);
+        } else if (target.dataset.type === "diffSwap") {
+            [leftRef, rightRef] = [rightRef, leftRef];
+            loadDiff();
+        } else if (target.dataset.type === "diffFilter") {
+            const nextFilter = target.dataset.value as DocVersionDiffFilter;
+            filter = filter === nextFilter ? "all" : nextFilter;
+            applyFilter();
+            focusDifference(1);
+        } else if (target.dataset.type === "diffRetry") {
+            loadDiff();
+        }
     });
+
+    loadDiff();
     (document.activeElement as HTMLElement)?.blur();
 };

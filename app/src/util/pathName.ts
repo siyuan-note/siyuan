@@ -763,12 +763,14 @@ export const getOpenNotebookCount = () => {
 };
 
 export const setNoteBook = (cb?: (notebook: INotebook[]) => void, flashcard = false) => {
-    fetchPost("/api/notebook/lsNotebooks", {
+    return fetchPost("/api/notebook/lsNotebooks", {
         flashcard
     }, (response) => {
         if (!flashcard) {
             window.siyuan.notebooks = response.data.notebooks;
-            window.siyuan.config.fileTree.boxDocEnabled = response.data.boxDocEnabled;
+            if (window.siyuan.config?.fileTree) {
+                window.siyuan.config.fileTree.boxDocEnabled = response.data.boxDocEnabled;
+            }
         }
         if (cb) {
             cb(response.data.notebooks);

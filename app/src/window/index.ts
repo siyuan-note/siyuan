@@ -178,6 +178,8 @@ class App {
 
         window.siyuan = {
             zIndex: 10,
+            isReady: false,
+            notebooks: [],
             reqIds: {},
             backStack: [],
             layout: {},
@@ -188,6 +190,7 @@ class App {
             altIsPressed: false,
             ws: mainWs,
         };
+        const notebookPromise = setNoteBook();
         fetchPost("/api/system/getConf", {}, async (response) => {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
@@ -195,21 +198,23 @@ class App {
             ensureUILayout();
             setBodyHighlight();
             window.siyuan.isPublish = response.data.isPublish;
+            await notebookPromise;
             await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
                     window.siyuan.menus = new Menus(this);
-                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;
-                        init(this);
+                        await init(this);
                         setTitle("", true);
                         initMessage();
+                        window.siyuan.isReady = true;
+                        mainWs.flushMainMessages();
                     });
                 });
             });
         });
-        setNoteBook();
         initBlockPopover(this);
     }
 }

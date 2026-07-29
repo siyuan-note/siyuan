@@ -549,6 +549,7 @@ interface INotebook {
 
 interface ISiyuan {
     zIndex: number
+    isReady?: boolean
     storage?: {
         [key: string]: any
     },

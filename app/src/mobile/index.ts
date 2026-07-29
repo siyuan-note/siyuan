@@ -78,6 +78,7 @@ class App {
 
         window.siyuan = {
             zIndex: 10,
+            isReady: false,
             notebooks: [],
             reqIds: {},
             backStack: [],
@@ -98,8 +99,9 @@ class App {
         };
         // 不能使用 touchstart，否则会被 event.stopImmediatePropagation() 阻塞
         window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
-            if (!window.siyuan.menus.menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
-                window.siyuan.menus.menu.remove();
+            const menu = window.siyuan.menus?.menu;
+            if (menu && !menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
+                menu.remove();
             }
             const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
             if (copyElement) {
@@ -151,10 +153,14 @@ class App {
             };
         }
         window.addEventListener("beforeunload", () => {
-            saveScroll(window.siyuan.mobile.editor.protyle);
+            if (window.siyuan.mobile.editor?.protyle) {
+                saveScroll(window.siyuan.mobile.editor.protyle);
+            }
         }, false);
         window.addEventListener("pagehide", () => {
-            saveScroll(window.siyuan.mobile.editor.protyle);
+            if (window.siyuan.mobile.editor?.protyle) {
+                saveScroll(window.siyuan.mobile.editor.protyle);
+            }
         }, false);
         // 判断手机横竖屏状态
         window.matchMedia("(orientation:portrait)").addEventListener("change", () => {
@@ -193,16 +199,18 @@ class App {
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;
                         await ensureOnboarding();
-                        fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
+                        fetchPost("/api/system/getEmojiConf", {}, async emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
-                            setNoteBook(() => {
-                                initFramework(this, confResponse.data.start).then(() => {
-                                    initRightMenu(this);
-                                    openChangelog();
-                                }).catch((error) => {
-                                    console.error("Failed to initialize mobile framework:", error);
-                                });
-                            });
+                            await setNoteBook();
+                            try {
+                                await initFramework(this, confResponse.data.start);
+                                initRightMenu(this);
+                                openChangelog();
+                                window.siyuan.isReady = true;
+                                mainWs.flushMainMessages();
+                            } catch (error) {
+                                console.error("Failed to initialize mobile framework:", error);
+                            }
                         });
                     });
                 });
@@ -268,7 +276,7 @@ window.reconnectWebSocket = () => {
     tryPing(window.siyuan.mobile.popEditor?.protyle.ws);
 };
 window.lockscreenByMode = () => {
-    if (window.siyuan.config.system.lockScreenMode === 1) {
+    if (window.siyuan.config?.system.lockScreenMode === 1) {
         lockScreen(siyuanApp);
     }
 };

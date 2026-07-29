@@ -136,6 +136,9 @@ export const resetLayout = () => {
 
 let saveCount = 0;
 export const saveLayout = () => {
+    if (!window.siyuan.layout?.layout) {
+        return;
+    }
     const breakObj = {};
     let layoutJSON: any = {};
     if (isWindow()) {

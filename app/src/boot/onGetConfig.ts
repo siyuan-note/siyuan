@@ -58,22 +58,25 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     ensureUILayout();
     initWindowEvent(app);
     const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
-    fetchPost("/api/system/getEmojiConf", {}, response => {
-        window.siyuan.emojis = response.data as IEmoji[];
-        snippetReady.then(() => {
-            try {
-                JSONToLayout(app, isStart);
-                setTimeout(() => {
-                    adjustLayout();
-                }); // 等待 dock 中 !this.pin 的 setTimeout
-                /// #if !BROWSER
-                sendGlobalShortcut(app);
-                /// #endif
-                openChangelog();
-            } catch (e) {
-                resetLayout();
-            }
-            openDesktopOnboarding(app);
+    const layoutReady = new Promise<void>((resolve) => {
+        fetchPost("/api/system/getEmojiConf", {}, response => {
+            window.siyuan.emojis = response.data as IEmoji[];
+            snippetReady.then(() => {
+                try {
+                    JSONToLayout(app, isStart);
+                    setTimeout(() => {
+                        adjustLayout();
+                    }); // 等待 dock 中 !this.pin 的 setTimeout
+                    /// #if !BROWSER
+                    sendGlobalShortcut(app);
+                    /// #endif
+                    openChangelog();
+                } catch (e) {
+                    resetLayout();
+                }
+                openDesktopOnboarding(app);
+                resolve();
+            });
         });
     });
     initBar(app);
@@ -118,6 +121,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             });
         }, Constants.TIMEOUT_RESIZE);
     });
+    return layoutReady;
 };
 
 export const initWindow = async (app: App) => {

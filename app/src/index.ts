@@ -258,6 +258,8 @@ export class App {
 
         window.siyuan = {
             zIndex: 10,
+            isReady: false,
+            notebooks: [],
             reqIds: {},
             backStack: [],
             layout: {},
@@ -269,6 +271,7 @@ export class App {
             ws: mainWs,
         };
 
+        const notebookPromise = setNoteBook();
         fetchPost("/api/system/getConf", {}, async (response) => {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
@@ -276,6 +279,7 @@ export class App {
             ensureUILayout();
             window.siyuan.isPublish = response.data.isPublish;
             setBodyHighlight();
+            await notebookPromise;
             await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
@@ -285,23 +289,23 @@ export class App {
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;
                         await ensureOnboarding();
-                        setNoteBook(() => {
-                            onGetConfig(response.data.start, this);
-                            onSetaccount();
-                            setTitle("", true);
-                            initMessage();
-                            /// #if BROWSER && !MOBILE
-                            if (!isInMobileApp() && !window.siyuan.config.readonly && !window.siyuan.isPublish && !isChromeBrowser()
-                                && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
-                                showMessage(window.siyuan.languages.useChrome, 0, "error");
-                            }
-                            /// #endif
-                        });
+                        await setNoteBook();
+                        await onGetConfig(response.data.start, this);
+                        onSetaccount();
+                        setTitle("", true);
+                        initMessage();
+                        /// #if BROWSER && !MOBILE
+                        if (!isInMobileApp() && !window.siyuan.config.readonly && !window.siyuan.isPublish && !isChromeBrowser()
+                            && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
+                            showMessage(window.siyuan.languages.useChrome, 0, "error");
+                        }
+                        /// #endif
+                        window.siyuan.isReady = true;
+                        mainWs.flushMainMessages();
                     });
                 });
             });
         });
-        setNoteBook();
         initBlockPopover(this);
     }
 }

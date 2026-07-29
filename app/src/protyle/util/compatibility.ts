@@ -532,6 +532,11 @@ export const getLocalStorage = (cb: () => void) => {
             template: "0",
             icon: "0",
             widget: "0",
+            downloadedPlugin: "0",
+            downloadedTheme: "0",
+            downloadedIcon: "0",
+            downloadedTemplate: "0",
+            downloadedWidget: "0",
         };
         defaultStorage[Constants.LOCAL_EXPORTWORD] = {removeAssets: false, mergeSubdocs: false};
         defaultStorage[Constants.LOCAL_EXPORTPDF] = {

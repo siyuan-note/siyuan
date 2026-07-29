@@ -1,4 +1,9 @@
 {
+  "sortDefault": "Predvolené poradie",
+  "sortByInstallTimeDesc": "Zostupne podľa času inštalácie",
+  "sortByInstallTimeAsc": "Vzostupne podľa času inštalácie",
+  "sortByEnabledFirst": "Najprv povolené",
+  "sortByDisabledFirst": "Najprv zakázané",
   "recordInterrupted": "Nahrávanie bolo prerušené. Nahrajte ho znova",
   "snapshotData": "Údaje",
   "extensions": "Rozšírenia",

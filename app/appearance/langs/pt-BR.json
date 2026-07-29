@@ -1,4 +1,9 @@
 {
+  "sortDefault": "Ordem padrão",
+  "sortByInstallTimeDesc": "Decrescente por data de instalação",
+  "sortByInstallTimeAsc": "Crescente por data de instalação",
+  "sortByEnabledFirst": "Ativados primeiro",
+  "sortByDisabledFirst": "Desativados primeiro",
   "recordInterrupted": "A gravação foi interrompida. Grave novamente",
   "snapshotData": "Dados",
   "extensions": "Extensões",

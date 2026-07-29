@@ -1,4 +1,9 @@
 {
+  "sortDefault": "Standardsortierung",
+  "sortByInstallTimeDesc": "Absteigend nach Installationszeit",
+  "sortByInstallTimeAsc": "Aufsteigend nach Installationszeit",
+  "sortByEnabledFirst": "Aktivierte zuerst",
+  "sortByDisabledFirst": "Deaktivierte zuerst",
   "recordInterrupted": "Die Aufnahme wurde unterbrochen. Bitte nehmen Sie erneut auf",
   "snapshotData": "Daten",
   "extensions": "Erweiterungen",

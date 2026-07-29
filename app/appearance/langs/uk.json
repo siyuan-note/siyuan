@@ -1,4 +1,9 @@
 {
+  "sortDefault": "Типовий порядок",
+  "sortByInstallTimeDesc": "За спаданням часу встановлення",
+  "sortByInstallTimeAsc": "За зростанням часу встановлення",
+  "sortByEnabledFirst": "Спочатку ввімкнені",
+  "sortByDisabledFirst": "Спочатку вимкнені",
   "recordInterrupted": "Запис було перервано. Запишіть ще раз",
   "snapshotData": "Дані",
   "extensions": "Розширення",

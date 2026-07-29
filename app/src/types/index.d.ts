@@ -1000,6 +1000,8 @@ interface IBazaarItem {
     version: string;
     hSize: string;
     hInstallSize: string;
+    installTime: number;
+    updateTime: number;
     hInstallDate: string;
     hUpdated: string;
     preferredFunding: string;

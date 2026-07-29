@@ -1,4 +1,9 @@
 {
+  "sortDefault": "الترتيب الافتراضي",
+  "sortByInstallTimeDesc": "تنازليًا حسب وقت التثبيت",
+  "sortByInstallTimeAsc": "تصاعديًا حسب وقت التثبيت",
+  "sortByEnabledFirst": "المفعّلة أولًا",
+  "sortByDisabledFirst": "المعطّلة أولًا",
   "recordInterrupted": "توقف التسجيل. يُرجى التسجيل مرة أخرى",
   "snapshotData": "البيانات",
   "extensions": "الملحقات",

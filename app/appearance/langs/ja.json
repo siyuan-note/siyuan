@@ -1,4 +1,9 @@
 {
+  "sortDefault": "既定の順序",
+  "sortByInstallTimeDesc": "インストール日時の降順",
+  "sortByInstallTimeAsc": "インストール日時の昇順",
+  "sortByEnabledFirst": "有効なものを優先",
+  "sortByDisabledFirst": "無効なものを優先",
   "recordInterrupted": "録音が中断されました。もう一度録音してください",
   "snapshotData": "データ",
   "extensions": "拡張機能",

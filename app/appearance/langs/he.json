@@ -1,4 +1,9 @@
 {
+  "sortDefault": "סדר ברירת מחדל",
+  "sortByInstallTimeDesc": "בסדר יורד לפי זמן ההתקנה",
+  "sortByInstallTimeAsc": "בסדר עולה לפי זמן ההתקנה",
+  "sortByEnabledFirst": "מופעלים תחילה",
+  "sortByDisabledFirst": "מושבתים תחילה",
   "recordInterrupted": "ההקלטה הופסקה. נא להקליט שוב",
   "snapshotData": "נתונים",
   "extensions": "הרחבות",

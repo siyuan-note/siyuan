@@ -1,4 +1,9 @@
 {
+  "sortDefault": "기본 순서",
+  "sortByInstallTimeDesc": "설치 시간 내림차순",
+  "sortByInstallTimeAsc": "설치 시간 오름차순",
+  "sortByEnabledFirst": "활성화 항목 우선",
+  "sortByDisabledFirst": "비활성화 항목 우선",
   "recordInterrupted": "녹음이 중단되었습니다. 다시 녹음해 주세요",
   "snapshotData": "데이터",
   "extensions": "확장 기능",

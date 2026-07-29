@@ -225,7 +225,8 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     return element;
 };
 
-export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: string, color?: string) => {
+export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: string, color?: string,
+                          focusRange = true) => {
     let localFontStyles = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (type) {
         localFontStyles.splice(0, 0, `${type}${Constants.ZWSP}${color}`);
@@ -277,12 +278,14 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 lineNumberRender(e.querySelector(".hljs"));
             }
         });
-        focusByRange(protyle.toolbar.range);
+        if (focusRange) {
+            focusByRange(protyle.toolbar.range);
+        }
     } else {
         if (type === "clear") {
-            protyle.toolbar.setInlineMark(protyle, "clear", "range", {type: "text"});
+            protyle.toolbar.setInlineMark(protyle, "clear", "range", {type: "text"}, focusRange);
         } else {
-            protyle.toolbar.setInlineMark(protyle, "text", "range", {type, color});
+            protyle.toolbar.setInlineMark(protyle, "text", "range", {type, color}, focusRange);
         }
     }
 };

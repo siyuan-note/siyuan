@@ -692,16 +692,18 @@ export const initKeyboardToolbar = () => {
             preventRender = true;
             const nodeElements = getFontNodeElements(protyle);
             const itemElement = buttonElement.firstElementChild as HTMLElement;
+            const focusRange = !buttonElement.classList.contains("keyboard__slash-item");
             if (type === "style1") {
-                fontEvent(protyle, nodeElements, type, itemElement.style.backgroundColor + Constants.ZWSP + itemElement.style.color);
+                fontEvent(protyle, nodeElements, type,
+                    itemElement.style.backgroundColor + Constants.ZWSP + itemElement.style.color, focusRange);
             } else if (type === "fontSize") {
-                fontEvent(protyle, nodeElements, type, itemElement.textContent.trim());
+                fontEvent(protyle, nodeElements, type, itemElement.textContent.trim(), focusRange);
             } else if (type === "backgroundColor") {
-                fontEvent(protyle, nodeElements, type, itemElement.style.backgroundColor);
+                fontEvent(protyle, nodeElements, type, itemElement.style.backgroundColor, focusRange);
             } else if (type === "color") {
-                fontEvent(protyle, nodeElements, type, itemElement.style.color);
+                fontEvent(protyle, nodeElements, type, itemElement.style.color, focusRange);
             } else {
-                fontEvent(protyle, nodeElements, type);
+                fontEvent(protyle, nodeElements, type, undefined, focusRange);
             }
             setTimeout(() => {
                 preventRender = false;

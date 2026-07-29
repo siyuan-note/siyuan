@@ -309,7 +309,8 @@ export class Toolbar {
         return true;
     }
 
-    public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
+    public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",
+                         textObj?: ITextOption, focusRange = true) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
             return;
@@ -322,16 +323,16 @@ export class Toolbar {
             if (type === "a") {
                 return;
             }
-            return this.setBlockRangesInlineMark(protyle, type, action, textObj);
+            return this.setBlockRangesInlineMark(protyle, type, action, textObj, focusRange);
         }
         if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;
         }
-        return this.setInlineMarkInBlock(protyle, type, action, textObj);
+        return this.setInlineMarkInBlock(protyle, type, action, textObj, undefined, focusRange);
     }
 
     private setBlockRangesInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",
-                                     textObj?: ITextOption) {
+                                     textObj?: ITextOption, focusRange = true) {
         const selectedRange = this.range.cloneRange();
         const startRange = selectedRange.cloneRange();
         startRange.collapse(true);
@@ -399,7 +400,9 @@ export class Toolbar {
                 selectionRange.setEnd(selectedRange.endContainer, selectedRange.endOffset);
             }
             this.range = selectionRange;
-            focusByRange(this.range);
+            if (focusRange) {
+                focusByRange(this.range);
+            }
         }
         if (memoOldHTMLs) {
             const memoElements = newNodes.filter(item => item.nodeType !== 3 &&
@@ -413,7 +416,7 @@ export class Toolbar {
     }
 
     private setInlineMarkInBlock(protyle: IProtyle, type: string, action: "range" | "toolbar",
-                                 textObj?: ITextOption, remove?: boolean) {
+                                 textObj?: ITextOption, remove?: boolean, focusRange = true) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;
@@ -972,7 +975,7 @@ export class Toolbar {
                 this.range.setEnd(endContainer.firstChild, endOffset);
             }
         }
-        if (!isBatch) {
+        if (!isBatch && focusRange) {
             focusByRange(this.range);
         }
 

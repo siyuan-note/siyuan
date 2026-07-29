@@ -216,15 +216,16 @@ func diffDocVersions(c *gin.Context) {
 }
 
 func parseDocVersionRef(arg map[string]interface{}, ret *gulu.Result) (ref *model.DocVersionRef, ok bool) {
-	var typ, id, path string
+	var typ, id, path, snapshot string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("type", &typ, true, true),
 		util.BindJsonArg("id", &id, false, false),
 		util.BindJsonArg("path", &path, false, false),
+		util.BindJsonArg("snapshot", &snapshot, false, false),
 	) {
 		return nil, false
 	}
-	return &model.DocVersionRef{Type: typ, ID: id, Path: path}, true
+	return &model.DocVersionRef{Type: typ, ID: id, Path: path, Snapshot: snapshot}, true
 }
 
 func rollbackDocHistory(c *gin.Context) {

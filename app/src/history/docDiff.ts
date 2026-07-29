@@ -56,17 +56,17 @@ const toProtyleResponse = (content: IDocVersionContent) => {
 
 const getScrollAnchor = (element: HTMLElement) => {
     const elementRect = element.getBoundingClientRect();
-    const blocks = Array.from(element.querySelectorAll<HTMLElement>(".protyle-wysiwyg [data-node-id]"));
-    let anchor: HTMLElement;
-    for (const block of blocks) {
-        const rect = block.getBoundingClientRect();
-        if (rect.top <= elementRect.top + 16) {
+    const x = elementRect.left + elementRect.width / 2;
+    const y = Math.min(elementRect.bottom - 1, elementRect.top + Math.min(16, elementRect.height / 2));
+    let anchor: HTMLElement | undefined;
+    document.elementsFromPoint(x, y).find((item) => {
+        const block = item.closest<HTMLElement>("[data-node-id]");
+        if (block && element.contains(block)) {
             anchor = block;
-        } else if (!anchor) {
-            anchor = block;
-            break;
+            return true;
         }
-    }
+        return false;
+    });
     if (!anchor) {
         return;
     }
@@ -415,6 +415,19 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
             focusDifference(1);
         } else if (target.dataset.type === "diffRetry") {
             loadDiff();
+        }
+    });
+    dialog.element.addEventListener("historyKeydown", (event: CustomEvent<string>) => {
+        if (event.detail === "Home") {
+            differenceIndex = -1;
+            focusDifference(1);
+        } else if (event.detail === "End") {
+            differenceIndex = 0;
+            focusDifference(-1);
+        } else if (event.detail === "ArrowUp") {
+            focusDifference(-1);
+        } else if (event.detail === "ArrowDown") {
+            focusDifference(1);
         }
     });
 

@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	stdhtml "html"
-	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -31,6 +30,8 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -204,14 +205,7 @@ func loadDocVersion(ref *DocVersionRef) (ret *loadedDocVersion, err error) {
 		if !ast.IsNodeIDPattern(ref.ID) {
 			return nil, errors.New("current document ID is invalid")
 		}
-		ret = &loadedDocVersion{}
-		ret.tree, err = LoadTreeByBlockID(ref.ID)
-		if nil == err && nil != ret.tree {
-			ret.rootID = ret.tree.Root.ID
-			if info, statErr := os.Stat(filepath.Join(util.DataDir, ret.tree.Box, filepath.FromSlash(ret.tree.Path))); nil == statErr {
-				ret.large = 1024*1024 <= info.Size()
-			}
-		}
+		ret, err = loadCurrentDocVersion(ref.ID)
 	case docVersionHistory:
 		ret, err = loadHistoryDocVersion(ref.Path)
 	case docVersionSnapshot:
@@ -237,6 +231,61 @@ func loadDocVersion(ref *DocVersionRef) (ret *loadedDocVersion, err error) {
 	return
 }
 
+func loadCurrentDocVersion(id string) (ret *loadedDocVersion, err error) {
+	blockTree := treenode.GetBlockTree(id)
+	if nil == blockTree {
+		return nil, ErrTreeNotFound
+	}
+	data, err := readCurrentDocVersionData(blockTree)
+	if err != nil {
+		return nil, err
+	}
+	ret = &loadedDocVersion{
+		title:  blockTree.RootID,
+		rootID: blockTree.RootID,
+		raw:    data,
+		large:  1024*1024 <= len(data),
+	}
+	ret.tree, err = LoadTreeByBlockID(id)
+	if nil != err || nil == ret.tree {
+		luteEngine := NewLute()
+		_, ret.parseErr = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		if nil != ret.parseErr {
+			return ret, nil
+		}
+		if nil == err {
+			err = ErrTreeNotFound
+		}
+		return nil, err
+	}
+	ret.title = ret.tree.Root.IALAttr("title")
+	ret.rootID = ret.tree.Root.ID
+	return
+}
+
+func readCurrentDocVersionData(blockTree *treenode.BlockTree) (ret []byte, err error) {
+	relPath, err := filesys.ValidateBoxRelativePath(blockTree.BoxID, blockTree.Path)
+	if err != nil {
+		return nil, err
+	}
+	encrypted := IsEncryptedBox(blockTree.BoxID)
+	if encrypted {
+		HoldBoxReadLock(blockTree.BoxID)
+		defer ReleaseBoxReadLock(blockTree.BoxID)
+	}
+	absPath := filepath.Join(util.DataDir, blockTree.BoxID, filepath.FromSlash(relPath))
+	ret, err = filelock.ReadFile(absPath)
+	if err != nil || !encrypted {
+		return
+	}
+	dek, err := GetDEKIfUnlocked(blockTree.BoxID)
+	if err != nil {
+		return nil, errors.New(Conf.Language(314))
+	}
+	ret, err = DecryptFile(blockTree.BoxID, relPath, dek, ret)
+	return
+}
+
 func loadHistoryDocVersion(historyPath string) (ret *loadedDocVersion, err error) {
 	absPath, err := validateHistoryPath(historyPath)
 	if err != nil {
@@ -245,11 +294,6 @@ func loadHistoryDocVersion(historyPath string) (ret *loadedDocVersion, err error
 	if !strings.HasSuffix(strings.ToLower(absPath), ".sy") {
 		return nil, errors.New("history version is not a document")
 	}
-	data, err := filelock.ReadFile(absPath)
-	if err != nil {
-		return nil, err
-	}
-
 	relPath, err := filepath.Rel(util.HistoryDir, absPath)
 	if err != nil {
 		return nil, err
@@ -258,6 +302,12 @@ func loadHistoryDocVersion(historyPath string) (ret *loadedDocVersion, err error
 	if len(parts) >= 2 && IsEncryptedBox(parts[1]) {
 		HoldBoxReadLock(parts[1])
 		defer ReleaseBoxReadLock(parts[1])
+	}
+	data, err := filelock.ReadFile(absPath)
+	if err != nil {
+		return nil, err
+	}
+	if len(parts) >= 2 && IsEncryptedBox(parts[1]) {
 		dek, dekErr := GetDEKIfUnlocked(parts[1])
 		if dekErr != nil {
 			return nil, errors.New(Conf.Language(314))
@@ -313,19 +363,25 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 	}
 	repoPath := strings.TrimPrefix(file.Path, "/")
 	pathParts := strings.SplitN(repoPath, "/", 2)
-	if 0 < len(pathParts) && IsEncryptedBox(pathParts[0]) {
-		HoldBoxReadLock(pathParts[0])
-		_, unlockErr := GetDEKIfUnlocked(pathParts[0])
-		ReleaseBoxReadLock(pathParts[0])
-		if unlockErr != nil {
-			return nil, errors.New(Conf.Language(314))
-		}
-	}
 	data, err := repo.OpenFile(file)
 	if err != nil {
 		return nil, err
 	}
-	data = decryptRepoDataIfNeeded(data, file.Path)
+	if 0 < len(pathParts) && IsEncryptedBox(pathParts[0]) {
+		HoldBoxReadLock(pathParts[0])
+		defer ReleaseBoxReadLock(pathParts[0])
+		dek, unlockErr := GetDEKIfUnlocked(pathParts[0])
+		if unlockErr != nil {
+			return nil, errors.New(Conf.Language(314))
+		}
+		if 2 > len(pathParts) {
+			return nil, errors.New("snapshot document path is invalid")
+		}
+		data, err = DecryptFile(pathParts[0], pathParts[1], dek, data)
+		if err != nil {
+			return nil, err
+		}
+	}
 	luteEngine := NewLute()
 	tree, err := dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	rootID := strings.TrimSuffix(filepath.Base(file.Path), filepath.Ext(file.Path))
@@ -505,35 +561,100 @@ func filterSharedDocBlockIDs(ids []string, other map[string]*docDiffBlock) (ret 
 func markDocInlineDiff(left, right *ast.Node) {
 	leftRunes, leftSegments, leftOK := collectDocTextSegments(left)
 	rightRunes, rightSegments, rightOK := collectDocTextSegments(right)
-	if !leftOK || !rightOK {
-		return
+	if leftOK && rightOK {
+		matches, ok := lcsMatches(leftRunes, rightRunes, docDiffMaxLCSCells)
+		if ok {
+			leftChanged := make([]bool, len(leftRunes))
+			rightChanged := make([]bool, len(rightRunes))
+			for i := range leftChanged {
+				leftChanged[i] = true
+			}
+			for i := range rightChanged {
+				rightChanged[i] = true
+			}
+			for _, match := range matches {
+				leftChanged[match[0]] = false
+				rightChanged[match[1]] = false
+			}
+			leftSignatures := docTextSegmentSignatures(leftSegments, len(leftRunes))
+			rightSignatures := docTextSegmentSignatures(rightSegments, len(rightRunes))
+			for _, match := range matches {
+				if leftSignatures[match[0]] != rightSignatures[match[1]] {
+					leftChanged[match[0]] = true
+					rightChanged[match[1]] = true
+				}
+			}
+			applyDocTextDiff(leftSegments, leftChanged)
+			applyDocTextDiff(rightSegments, rightChanged)
+		}
 	}
-	matches, ok := lcsMatches(leftRunes, rightRunes, docDiffMaxLCSCells)
+	markDocAtomicInlineDiff(left, right)
+}
+
+type docAtomicInline struct {
+	node      *ast.Node
+	signature string
+}
+
+func markDocAtomicInlineDiff(left, right *ast.Node) {
+	leftNodes := collectDocAtomicInlineNodes(left)
+	rightNodes := collectDocAtomicInlineNodes(right)
+	leftSignatures := make([]string, 0, len(leftNodes))
+	rightSignatures := make([]string, 0, len(rightNodes))
+	for _, item := range leftNodes {
+		leftSignatures = append(leftSignatures, item.signature)
+	}
+	for _, item := range rightNodes {
+		rightSignatures = append(rightSignatures, item.signature)
+	}
+	matches, ok := lcsMatches(leftSignatures, rightSignatures, docDiffMaxLCSCells)
 	if !ok {
 		return
 	}
-	leftChanged := make([]bool, len(leftRunes))
-	rightChanged := make([]bool, len(rightRunes))
-	for i := range leftChanged {
-		leftChanged[i] = true
-	}
-	for i := range rightChanged {
-		rightChanged[i] = true
-	}
+	leftMatched := make([]bool, len(leftNodes))
+	rightMatched := make([]bool, len(rightNodes))
 	for _, match := range matches {
-		leftChanged[match[0]] = false
-		rightChanged[match[1]] = false
+		leftMatched[match[0]] = true
+		rightMatched[match[1]] = true
 	}
-	leftSignatures := docTextSegmentSignatures(leftSegments, len(leftRunes))
-	rightSignatures := docTextSegmentSignatures(rightSegments, len(rightRunes))
-	for _, match := range matches {
-		if leftSignatures[match[0]] != rightSignatures[match[1]] {
-			leftChanged[match[0]] = true
-			rightChanged[match[1]] = true
+	for i, item := range leftNodes {
+		if !leftMatched[i] {
+			item.node.SetIALAttr("data-history-diff", "inline")
 		}
 	}
-	applyDocTextDiff(leftSegments, leftChanged)
-	applyDocTextDiff(rightSegments, rightChanged)
+	for i, item := range rightNodes {
+		if !rightMatched[i] {
+			item.node.SetIALAttr("data-history-diff", "inline")
+		}
+	}
+}
+
+func collectDocAtomicInlineNodes(block *ast.Node) (ret []*docAtomicInline) {
+	ast.Walk(block, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		if n != block && n.IsBlock() {
+			return ast.WalkSkipChildren
+		}
+		if ast.NodeTextMark != n.Type || "" != n.TextMarkTextContent {
+			return ast.WalkContinue
+		}
+		ret = append(ret, &docAtomicInline{
+			node: n,
+			signature: strings.Join([]string{
+				n.TextMarkType,
+				n.TextMarkInlineMathContent,
+				n.TextMarkAHref,
+				n.TextMarkATitle,
+				n.TextMarkBlockRefID,
+				n.TextMarkFileAnnotationRefID,
+				n.TextMarkInlineMemoContent,
+			}, "\x00"),
+		})
+		return ast.WalkContinue
+	})
+	return
 }
 
 func docTextSegmentSignatures(segments []*docTextSegment, length int) (ret []string) {
@@ -785,9 +906,6 @@ func docVersionFallbackMessage(versions ...*loadedDocVersion) string {
 }
 
 func renderFallbackDocVersion(version *loadedDocVersion) *DocVersionDiffContent {
-	if nil != version.tree {
-		return renderLargeDocVersion(version)
-	}
 	return &DocVersionDiffContent{
 		ID:      version.rootID,
 		RootID:  version.rootID,

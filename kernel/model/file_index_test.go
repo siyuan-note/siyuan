@@ -21,10 +21,15 @@ package model
 import (
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -83,14 +88,78 @@ func TestRemoveDocFlushesDatabaseIndex(t *testing.T) {
 	if err := indexWriteTreeIndexQueue(tree); err != nil {
 		t.Fatalf("write and index test document failed: %v", err)
 	}
+	childTree := treenode.NewTree(
+		box.ID,
+		path.Join("/20260726000001-abcdefg", "20260726000002-abcdefg.sy"),
+		"/Delete target/Child",
+		"Child",
+	)
+	if err := indexWriteTreeIndexQueue(childTree); err != nil {
+		t.Fatalf("write and index child test document failed: %v", err)
+	}
 	sql.FlushQueue()
 	assertDatabaseBlockExists(t, tree.ID, true)
+	assertDatabaseBlockExists(t, childTree.ID, true)
+
+	blockIDs := []string{tree.ID, tree.Root.FirstChild.ID, childTree.ID, childTree.Root.FirstChild.ID}
+	for _, blockID := range blockIDs {
+		warmBlockIALCache(t, blockID, box.ID)
+	}
+	if _, ok := cache.GetTreeDataInBox(childTree.ID, box.ID); !ok {
+		t.Fatalf("child tree data cache [%s] was not populated", childTree.ID)
+	}
+	if ial := cache.GetDocIALInBox(childTree.Path, box.ID); nil == ial {
+		t.Fatalf("child document IAL cache [%s] was not populated", childTree.Path)
+	}
 
 	if err := RemoveDoc(box.ID, tree.Path); err != nil {
 		t.Fatalf("remove test document failed: %v", err)
 	}
+
+	for _, blockID := range blockIDs {
+		if ial := cache.GetBlockIALInBox(blockID, box.ID); nil != ial {
+			t.Fatalf("deleted block IAL cache [%s] was retained: %+v", blockID, ial)
+		}
+		if ial := sql.GetBlockAttrs(blockID); 0 < len(ial) {
+			t.Fatalf("deleted block attributes [%s] were retained: %+v", blockID, ial)
+		}
+	}
+	if attrs := sql.BatchGetBlockAttrs(blockIDs); 0 < len(attrs) {
+		t.Fatalf("deleted block attributes were retained in batch result: %+v", attrs)
+	}
+	for _, removedTree := range []*parse.Tree{tree, childTree} {
+		if _, ok := cache.GetTreeDataInBox(removedTree.ID, box.ID); ok {
+			t.Fatalf("deleted tree data cache [%s] was retained", removedTree.ID)
+		}
+		if ial := cache.GetDocIALInBox(removedTree.Path, box.ID); nil != ial {
+			t.Fatalf("deleted document IAL cache [%s] was retained: %+v", removedTree.Path, ial)
+		}
+		if _, err := filesys.LoadTree(box.ID, removedTree.Path, util.NewLute()); nil == err {
+			t.Fatalf("deleted tree [%s] was loaded from cache", removedTree.ID)
+		}
+	}
+
 	sql.FlushQueue()
 	assertDatabaseBlockExists(t, tree.ID, false)
+	assertDatabaseBlockExists(t, childTree.ID, false)
+}
+
+func warmBlockIALCache(t *testing.T, blockID, boxID string) {
+	t.Helper()
+
+	deadline := time.Now().Add(time.Second)
+	for {
+		if attrs := sql.GetBlockAttrs(blockID); 0 == len(attrs) {
+			t.Fatalf("block attributes [%s] were not found", blockID)
+		}
+		if nil != cache.GetBlockIALInBox(blockID, boxID) {
+			return
+		}
+		if deadline.Before(time.Now()) {
+			t.Fatalf("block IAL cache [%s] was not populated", blockID)
+		}
+		time.Sleep(time.Millisecond)
+	}
 }
 
 func TestDocumentTemplatesWaitForDatabaseIndex(t *testing.T) {

@@ -8,7 +8,7 @@
 		"id": "20240530101000-4qitucx",
 		"title": "スタートガイド",
 		"type": "doc",
-		"updated": "20260729215152"
+		"updated": "20260729225925"
 	},
 	"Children": [
 		{
@@ -1415,12 +1415,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240530101000-9nw0o7t",
-				"updated": "20260729215152"
+				"updated": "20260729225925"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "🎨 外観と拡張機能"
+					"Data": "🎨 カスタマイズ"
 				}
 			]
 		},
@@ -1569,12 +1569,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729215152-390ratq",
-				"updated": "20260729215152"
+				"updated": "20260729225925"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "🌐 共有、公開、デプロイ"
+					"Data": "🌐 共有とデプロイ"
 				}
 			]
 		},
@@ -1847,12 +1847,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240530101000-m7rpuqf",
-				"updated": "20260729215152"
+				"updated": "20260729225925"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "☁️ アプリと会員サービス"
+					"Data": "☁️ アプリとサービス"
 				}
 			]
 		},
@@ -2496,12 +2496,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240530101000-ld390os",
-				"updated": "20260729215152"
+				"updated": "20260729225925"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "💌 開発、貢献、サポート"
+					"Data": "💌 貢献"
 				}
 			]
 		},

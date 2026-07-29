@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -97,6 +98,48 @@ func TestMarkDocInlineFormatDiff(t *testing.T) {
 	}
 	if "inline" != right.FirstChild.IALAttr("data-history-diff") {
 		t.Fatal("expected changed formatting on the right to be marked")
+	}
+}
+
+func TestMarkDocInlineMathDiff(t *testing.T) {
+	left := &ast.Node{Type: ast.NodeParagraph, ID: "20260729000000-left01"}
+	left.AppendChild(&ast.Node{
+		Type:                      ast.NodeTextMark,
+		TextMarkType:              "inline-math",
+		TextMarkInlineMathContent: "a+b",
+	})
+	right := &ast.Node{Type: ast.NodeParagraph, ID: "20260729000000-right1"}
+	right.AppendChild(&ast.Node{
+		Type:                      ast.NodeTextMark,
+		TextMarkType:              "inline-math",
+		TextMarkInlineMathContent: "a-b",
+	})
+
+	markDocInlineDiff(left, right)
+
+	if "inline" != left.FirstChild.IALAttr("data-history-diff") {
+		t.Fatal("expected changed inline math on the left to be marked")
+	}
+	if "inline" != right.FirstChild.IALAttr("data-history-diff") {
+		t.Fatal("expected changed inline math on the right to be marked")
+	}
+	if dom := util.NewLute().RenderNodeBlockDOM(left); !strings.Contains(dom, `data-history-diff="inline"`) {
+		t.Fatalf("expected rendered inline math to contain a diff marker, got [%s]", dom)
+	}
+}
+
+func TestRenderFallbackDocVersionUsesRawContent(t *testing.T) {
+	version := &loadedDocVersion{
+		tree:   &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument, ID: "20260729000000-root001"}},
+		title:  "Document",
+		rootID: "20260729000000-root001",
+		raw:    []byte(`{"ID":"20260729000000-root001"}`),
+	}
+
+	rendered := renderFallbackDocVersion(version)
+
+	if string(version.raw) != rendered.Content {
+		t.Fatalf("expected raw fallback content, got [%s]", rendered.Content)
 	}
 }
 

@@ -5,6 +5,7 @@ import {
     focusByWbr,
     getBlockRanges,
     getSelectionOffset,
+    getUndoFocusContext,
     setLastNodeRange
 } from "../util/selection";
 import {
@@ -106,6 +107,10 @@ export const removeCrossBlockRange = (protyle: IProtyle, selectedRange: Range,
         return;
     }
 
+    const undoFocusContext = getUndoFocusContext(editorElement, selectedRange, true);
+    if (undoFocusContext) {
+        undoFocusContext.undoFocusCollapseToEnd = "true";
+    }
     const undoOperations: IOperation[] = updateElements.map(item => ({
         action: "update",
         id: item.getAttribute("data-node-id"),
@@ -202,7 +207,11 @@ export const removeCrossBlockRange = (protyle: IProtyle, selectedRange: Range,
             data: item.outerHTML
         });
     });
-    transaction(protyle, doOperations, undoOperations.concat(insertOperations));
+    const crossBlockUndoOperations = undoOperations.concat(insertOperations);
+    if (crossBlockUndoOperations[0]) {
+        crossBlockUndoOperations[0].context = undoFocusContext;
+    }
+    transaction(protyle, doOperations, crossBlockUndoOperations);
 
     const firstRange = ranges.find(item => item.editableElement.isConnected);
     if (firstRange) {

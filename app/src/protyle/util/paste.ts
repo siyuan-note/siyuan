@@ -729,7 +729,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         tempElement.querySelectorAll('[contenteditable="false"][spellcheck]').forEach((e) => {
             e.setAttribute("contenteditable", "true");
         });
-        if (isBlock && pasteCrossBlockRange(protyle, tempElement, range)) {
+        const hasHeadingChildren = Array.from(tempElement.children).some(item =>
+            item.hasAttribute("parent-heading"));
+        // 标题及下方块需要保留块类型和折叠关系，交由 insertHTML 处理 https://github.com/siyuan-note/siyuan/issues/18419
+        if (isBlock && !hasHeadingChildren && pasteCrossBlockRange(protyle, tempElement, range)) {
             blockRender(protyle, protyle.wysiwyg.element);
             processRender(protyle.wysiwyg.element);
             highlightRender(protyle.wysiwyg.element);

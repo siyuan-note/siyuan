@@ -49,7 +49,7 @@ import {
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent,} from "../../block/util";
-import {transparentImgSrc} from "../util/dragTip";
+import {setDragTipGhost} from "../util/dragTip";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
 import {mathRender} from "../render/mathRender";
@@ -217,24 +217,15 @@ export class Gutter {
             });
             ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
             document.body.append(ghostElement);
-            // 普通块（段落/标题/列表块/引用块等）拖拽时隐藏原生 ghost 并改用自定义双区跟随框；AV 行保留原生 ghost
             const isBlockDrag = !buttonElement.dataset.rowId;
-            if (isBlockDrag && !window.siyuan.touchDragActive) {
-                const transparentImg = new Image();
-                transparentImg.src = transparentImgSrc;
-                event.dataTransfer.setDragImage(transparentImg, 0, 0);
+            setDragTipGhost(ghostElement, 0, 0);
+            event.dataTransfer.setDragImage(ghostElement, 0, 0);
+            if (window.siyuan.touchDragActive) {
+                window.siyuan.touchDragGhost = ghostElement;
+            } else {
                 setTimeout(() => {
                     ghostElement.remove();
                 });
-            } else {
-                event.dataTransfer.setDragImage(ghostElement, 0, 0);
-                if (window.siyuan.touchDragActive) {
-                    window.siyuan.touchDragGhost = ghostElement;
-                } else {
-                    setTimeout(() => {
-                        ghostElement.remove();
-                    });
-                }
             }
             if (isBlockDrag) {
                 const text = getContenteditableElement(selectElements[0] as HTMLElement)?.textContent?.trim() || "";

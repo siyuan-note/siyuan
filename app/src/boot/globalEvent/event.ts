@@ -15,6 +15,7 @@ import {isWindow} from "../../util/functions";
 import {getDockByType} from "../../layout/tabUtil";
 import {fetchPost} from "../../util/fetch";
 import {initHarmonyTextSelectionMenu} from "../../util/harmonyTextSelectionMenu";
+import {clearDragTipGhost, hideDragTip} from "../../protyle/util/dragTip";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
 
@@ -81,6 +82,7 @@ export const initWindowEvent = (app: App) => {
     }, true);
 
     let scrollTarget: HTMLElement | false;
+    window.addEventListener("dragstart", clearDragTipGhost, true);
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
             if (!hasClosestByClassName(event.target, "layout-tab-bar")) {
@@ -183,7 +185,8 @@ export const initWindowEvent = (app: App) => {
     });
     window.addEventListener("dragend", () => {
         stopScrollAnimation();
-        document.querySelector(".drag-tip")?.remove();
+        hideDragTip();
+        clearDragTipGhost();
         window.siyuan.dragTitle = "";
     });
     window.addEventListener("dragleave", () => {

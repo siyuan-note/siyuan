@@ -7,7 +7,7 @@ import {
     getSbChildBlockCount,
     getTopAloneElement
 } from "../wysiwyg/getBlock";
-import {hideCaretLine, hideDragTip, showCaretLine, showDragTip, transparentImgSrc} from "./dragTip";
+import {hideCaretLine, hideDragTip, setDragTipGhost, showCaretLine, showDragTip} from "./dragTip";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -891,15 +891,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 ghostElement.append(cloneElement);
                 ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${target.parentElement.clientWidth}px;padding:0;`);
                 document.body.append(ghostElement);
+                setDragTipGhost(ghostElement, 0, 0);
+                event.dataTransfer.setDragImage(ghostElement, 0, 0);
                 if (window.siyuan.touchDragActive) {
                     // 触屏保留 DOM ghost 供 touchDragBridge 跟随手指
-                    event.dataTransfer.setDragImage(ghostElement, 0, 0);
                     window.siyuan.touchDragGhost = ghostElement;
                 } else {
-                    // 桌面端隐藏原生 ghost，改用自定义双区跟随框
-                    const transparentImg = new Image();
-                    transparentImg.src = transparentImgSrc;
-                    event.dataTransfer.setDragImage(transparentImg, 0, 0);
                     setTimeout(() => {
                         ghostElement.remove();
                     });

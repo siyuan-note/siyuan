@@ -11,6 +11,7 @@ import {openBookmarkMenu} from "../../menus/bookmark";
 import type {App} from "../../index";
 import {Constants} from "../../constants";
 import {checkFold} from "../../util/noRelyPCFunction";
+import {setDragTipGhost} from "../../protyle/util/dragTip";
 
 export class Bookmark extends Model {
     private openNodes: string[];
@@ -145,6 +146,8 @@ export class Bookmark extends Model {
                 element.style.opacity = "0.38";
                 window.siyuan.dragElement = undefined;
                 window.siyuan.dragTitle = element.querySelector(".b3-list-item__text")?.textContent?.trim() || "";
+                const rect = element.getBoundingClientRect();
+                setDragTipGhost(element, event.clientX - rect.left, event.clientY - rect.top);
                 return true;
             },
             dragEnd: (element) => {

@@ -1,16 +1,34 @@
 // 拖拽时跟随鼠标的自定义双区提示框：上半=操作对象名称，下半=操作文案
 // 通过 .drag-tip 类做全局单例，在编辑器和文档树两处 dragover 共用
 
-export const transparentImgSrc = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-
 const dragTipState = {
     rafId: 0, title: "", action: "", x: 0, y: 0,
     element: null as HTMLElement, titleElement: null as HTMLElement, actionElement: null as HTMLElement,
-    lastTitle: "", lastAction: ""
+    lastTitle: "", lastAction: "", width: 0, height: 0,
+    ghost: null as {width: number, height: number, offsetX: number, offsetY: number}
+};
+
+const getDragTipPosition = () => {
+    const gap = 8;
+    const pointerOffset = 16;
+    if (!dragTipState.ghost) {
+        return {
+            left: dragTipState.x,
+            top: dragTipState.y - dragTipState.height - pointerOffset
+        };
+    }
+
+    const ghostLeft = dragTipState.x - dragTipState.ghost.offsetX;
+    const ghostTop = dragTipState.y - dragTipState.ghost.offsetY;
+    return {
+        left: ghostLeft,
+        top: ghostTop - dragTipState.height - gap
+    };
 };
 
 const renderDragTip = () => {
     dragTipState.rafId = 0;
+    let updateSize = false;
     if (!dragTipState.element || !dragTipState.element.isConnected) {
         // 优先复用已有的 .drag-tip（跨编辑器/文档树区域时避免重复创建）
         dragTipState.element = (document.querySelector(".drag-tip") as HTMLElement) || null;
@@ -40,6 +58,7 @@ const renderDragTip = () => {
         }
         dragTipState.lastTitle = "";
         dragTipState.lastAction = "";
+        updateSize = true;
     }
     // 名称/文案变化才写 textContent，减少 DOM 写入
     if (dragTipState.lastTitle !== dragTipState.title) {
@@ -47,13 +66,34 @@ const renderDragTip = () => {
         dragTipState.lastTitle = dragTipState.title;
         // 名称为空时隐藏上半行
         dragTipState.titleElement.style.display = dragTipState.title ? "" : "none";
+        updateSize = true;
     }
     if (dragTipState.lastAction !== dragTipState.action) {
         dragTipState.actionElement.textContent = dragTipState.action;
         dragTipState.lastAction = dragTipState.action;
+        updateSize = true;
     }
-    // 固定偏移到光标右下方，不读取 offsetHeight 以免触发同步布局造成卡顿
-    dragTipState.element.style.transform = `translate(${dragTipState.x + 16}px, ${dragTipState.y + 16}px)`;
+    if (updateSize) {
+        const rect = dragTipState.element.getBoundingClientRect();
+        dragTipState.width = rect.width;
+        dragTipState.height = rect.height;
+    }
+    const position = getDragTipPosition();
+    dragTipState.element.style.transform = `translate(${position.left}px, ${position.top}px)`;
+};
+
+export const setDragTipGhost = (element: HTMLElement, offsetX: number, offsetY: number) => {
+    const rect = element.getBoundingClientRect();
+    dragTipState.ghost = {
+        width: rect.width,
+        height: rect.height,
+        offsetX,
+        offsetY
+    };
+};
+
+export const clearDragTipGhost = () => {
+    dragTipState.ghost = null;
 };
 
 export const showDragTip = (title: string, action: string, x: number, y: number) => {
@@ -102,5 +142,7 @@ export const hideDragTip = () => {
     dragTipState.actionElement = null;
     dragTipState.lastTitle = "";
     dragTipState.lastAction = "";
+    dragTipState.width = 0;
+    dragTipState.height = 0;
     hideCaretLine();
 };

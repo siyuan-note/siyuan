@@ -374,6 +374,13 @@
   }
 }
 
+.b3-menu[data-name^="breadcrumb-children-"] .b3-menu__label {
+  max-width: 248px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .protyle-content {
   overflow: auto;
   flex: 1;

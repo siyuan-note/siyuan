@@ -312,22 +312,39 @@ func QueryBookmarkBlocks() (ret []*Block) {
 	return
 }
 
-func QueryBookmarkLabels() (ret []string) {
-	ret = []string{}
-	sqlStmt := "SELECT * FROM blocks WHERE ial LIKE ?"
+type BookmarkLabelBlock struct {
+	Label string
+	Box   string
+	Path  string
+}
+
+func QueryBookmarkLabelBlocks() (ret []*BookmarkLabelBlock) {
+	ret = []*BookmarkLabelBlock{}
+	sqlStmt := "SELECT ial, box, path FROM blocks WHERE ial LIKE ?"
 	rows, err := query(sqlStmt, "%bookmark=%")
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
 	}
 	defer rows.Close()
-	labels := map[string]bool{}
 	for rows.Next() {
-		if block := scanBlockRows(rows); nil != block {
-			if v := ialAttr(block.IAL, "bookmark"); "" != v {
-				labels[v] = true
-			}
+		var ial, box, blockPath string
+		if err = rows.Scan(&ial, &box, &blockPath); err != nil {
+			logging.LogErrorf("scan query rows failed: %s", err)
+			continue
 		}
+		if label := ialAttr(ial, "bookmark"); label != "" {
+			ret = append(ret, &BookmarkLabelBlock{Label: label, Box: box, Path: blockPath})
+		}
+	}
+	return
+}
+
+func QueryBookmarkLabels() (ret []string) {
+	ret = []string{}
+	labels := map[string]bool{}
+	for _, block := range QueryBookmarkLabelBlocks() {
+		labels[block.Label] = true
 	}
 
 	for label := range labels {

@@ -25,6 +25,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -183,6 +184,35 @@ func (s Bookmarks) Less(i, j int) bool { return s[i].Name < s[j].Name }
 
 func BookmarkLabels() (ret []string) {
 	ret = sql.QueryBookmarkLabels()
+	return
+}
+
+func BookmarkLabelsByPublishAccess(c *gin.Context, publishAccess PublishAccess) (ret []string) {
+	return filterBookmarkLabelsByPublishAccess(c, publishAccess, sql.QueryBookmarkLabelBlocks())
+}
+
+func filterBookmarkLabelsByPublishAccess(c *gin.Context, publishAccess PublishAccess, blocks []*sql.BookmarkLabelBlock) (ret []string) {
+	ret = []string{}
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
+	labels := map[string]bool{}
+	for _, block := range blocks {
+		if block == nil || block.Label == "" ||
+			!CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishInvisible) ||
+			!CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishDisable) {
+			continue
+		}
+		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+		if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
+			continue
+		}
+		labels[block.Label] = true
+	}
+
+	for label := range labels {
+		ret = append(ret, label)
+	}
+	sort.Strings(ret)
 	return
 }
 

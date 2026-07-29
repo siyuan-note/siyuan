@@ -32,7 +32,11 @@ func getBookmarkLabels(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	ret.Data = model.BookmarkLabels()
+	if model.IsReadOnlyRoleContext(c) {
+		ret.Data = model.BookmarkLabelsByPublishAccess(c, model.GetPublishAccess())
+	} else {
+		ret.Data = model.BookmarkLabels()
+	}
 }
 
 func batchGetBlockAttrs(c *gin.Context) {

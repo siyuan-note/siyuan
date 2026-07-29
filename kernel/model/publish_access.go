@@ -1311,17 +1311,24 @@ func FilterSearchDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess
 	return
 }
 
-func FilterBlockTreesByPublishIgnore(publishIgnore PublishAccess, bts map[string]*treenode.BlockTree) (ret map[string]*treenode.BlockTree) {
+func filterBlockTreesByPublishAccess(c *gin.Context, publishAccess PublishAccess, bts map[string]*treenode.BlockTree) (ret map[string]*treenode.BlockTree) {
 	ret = map[string]*treenode.BlockTree{}
 	for id, bt := range bts {
-		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-			ret[id] = bt
+		if !CheckBlockTreeDiscoverableByPublishAccess(publishAccess, bt) {
+			continue
 		}
+
+		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+		if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
+			continue
+		}
+
+		ret[id] = bt
 	}
 	return
 }
 
-func FilterRefDefsByPublishIgnore(publishIgnore PublishAccess, refDefs []*RefDefs) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
+func FilterRefDefsByPublishAccess(c *gin.Context, publishAccess PublishAccess, refDefs []*RefDefs) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
 	retRefDefs = []*RefDefs{}
 	IDs := []string{}
 	for _, refDef := range refDefs {
@@ -1330,7 +1337,7 @@ func FilterRefDefsByPublishIgnore(publishIgnore PublishAccess, refDefs []*RefDef
 	}
 	IDs = gulu.Str.RemoveDuplicatedElem(IDs)
 	bts := treenode.GetBlockTrees(IDs)
-	bts = FilterBlockTreesByPublishIgnore(publishIgnore, bts)
+	bts = filterBlockTreesByPublishAccess(c, publishAccess, bts)
 	visibles := make(map[string]bool)
 	for _, ID := range IDs {
 		visibles[ID] = false

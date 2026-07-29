@@ -98,6 +98,81 @@ func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
 	}
 }
 
+func TestFilterBlockTreesByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260729000000-boxid01"
+		publicID          = "20260729000001-public1"
+		protectedID       = "20260729000002-protect"
+		hiddenID          = "20260729000003-hidden1"
+		privateID         = "20260729000004-private"
+		forbiddenID       = "20260729000005-forbid"
+		inconsistentID    = "20260729000006-invalid"
+		protectedParentID = "20260729000007-parent1"
+		protectedChildID  = "20260729000008-child01"
+		protectedPassword = "protected-password"
+		privatePassword   = "private-password"
+	)
+
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+		invalidateEncryptedPublishAccessCache()
+	})
+
+	newBlockTree := func(id, blockPath string) *treenode.BlockTree {
+		return &treenode.BlockTree{
+			ID:    id,
+			BoxID: boxID,
+			Path:  blockPath,
+		}
+	}
+	blockTrees := map[string]*treenode.BlockTree{
+		publicID:           newBlockTree(publicID, "/"+publicID+".sy"),
+		protectedID:        newBlockTree(protectedID, "/"+protectedID+".sy"),
+		hiddenID:           newBlockTree(hiddenID, "/"+hiddenID+".sy"),
+		privateID:          newBlockTree(privateID, "/"+privateID+".sy"),
+		forbiddenID:        newBlockTree(forbiddenID, "/"+forbiddenID+".sy"),
+		inconsistentID:     newBlockTree(inconsistentID, "/"+inconsistentID+".sy"),
+		protectedChildID:   newBlockTree(protectedChildID, "/"+protectedParentID+"/"+protectedChildID+".sy"),
+		"missing-block-id": nil,
+	}
+	publishAccess := PublishAccess{
+		{ID: protectedID, Visible: true, Password: protectedPassword},
+		{ID: hiddenID, Visible: false},
+		{ID: privateID, Visible: false, Password: privatePassword},
+		{ID: forbiddenID, Visible: false, Disable: true},
+		{ID: inconsistentID, Visible: true, Disable: true},
+		{ID: protectedParentID, Visible: true, Password: protectedPassword},
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+
+	filtered := filterBlockTreesByPublishAccess(c, publishAccess, blockTrees)
+	if len(filtered) != 1 || filtered[publicID] == nil {
+		t.Fatalf("unauthorized publish reader received unexpected block trees: %+v", filtered)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedID,
+		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+	})
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedParentID,
+		Value: util.SHA256Hash([]byte(protectedParentID + protectedPassword)),
+	})
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + privateID,
+		Value: util.SHA256Hash([]byte(privateID + privatePassword)),
+	})
+
+	filtered = filterBlockTreesByPublishAccess(c, publishAccess, blockTrees)
+	if len(filtered) != 3 || filtered[publicID] == nil || filtered[protectedID] == nil || filtered[protectedChildID] == nil {
+		t.Fatalf("authorized publish reader received unexpected block trees: %+v", filtered)
+	}
+}
+
 func TestEncryptedNotebookDeniedByPublishAccess(t *testing.T) {
 	const (
 		boxID = "20260726000000-encrypt"

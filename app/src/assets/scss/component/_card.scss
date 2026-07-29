@@ -31,11 +31,20 @@
   &__img {
     margin: 16px 0 16px 16px;
 
-    img {
+    img, span {
       height: 74px;
       object-fit: cover;
       border-radius: var(--b3-border-radius);
       width: 74px;
+    }
+
+    span {
+      border-radius: var(--b3-border-radius);
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
     }
   }
 

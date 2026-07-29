@@ -15,23 +15,22 @@ interface IProviderPreset {
     category: "official" | "aggregator" | "local" | "custom";
     region?: "china" | "international";
     icon?: string;
-    iconColor?: string;
 }
 
 const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "openai", name: "OpenAI", baseURL: "https://api.openai.com/v1", category: "official", icon: "/stage/images/ai-providers/openai.svg"},
-    {id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", icon: "/stage/images/ai-providers/deepseek.svg", iconColor: "#5786FE"},
+    {id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", icon: "/stage/images/ai-providers/deepseek.svg"},
     {id: "moonshot", name: "Moonshot AI", baseURL: "https://api.moonshot.cn/v1", category: "official", icon: "/stage/images/ai-providers/moonshot.svg"},
-    {id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/minimax.svg", iconColor: "#E73562"},
-    {id: "minimax-cn", name: "MiniMax", baseURL: "https://api.minimaxi.com/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/minimax.svg", iconColor: "#E73562"},
-    {id: "aliyun", name: "Alibaba Model Studio", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/aliyun.svg", iconColor: "#FF6A00"},
-    {id: "aliyun-intl", name: "Alibaba Model Studio", baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/aliyun.svg", iconColor: "#FF6A00"},
+    {id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/minimax.svg"},
+    {id: "minimax-cn", name: "MiniMax", baseURL: "https://api.minimaxi.com/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/minimax.svg"},
+    {id: "aliyun", name: "Alibaba Model Studio", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/aliyun.svg"},
+    {id: "aliyun-intl", name: "Alibaba Model Studio", baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/aliyun.svg"},
     {id: "volcengine", name: "Volcengine Ark", baseURL: "https://ark.cn-beijing.volces.com/api/v3", category: "official", icon: "/stage/images/ai-providers/volcengine.svg"},
     {id: "zhipu", name: "Zhipu AI", baseURL: "https://open.bigmodel.cn/api/paas/v4", category: "official", icon: "/stage/images/ai-providers/zhipu.svg"},
-    {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", icon: "/stage/images/ai-providers/gemini.svg", iconColor: "#8E75B2"},
-    {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", icon: "/stage/images/ai-providers/mistral.svg", iconColor: "#FA520F"},
+    {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", icon: "/stage/images/ai-providers/gemini.svg"},
+    {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", icon: "/stage/images/ai-providers/mistral.svg"},
     {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", icon: "/stage/images/ai-providers/siliconflow.svg"},
-    {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", icon: "/stage/images/ai-providers/openrouter.svg", iconColor: "#94A3B8"},
+    {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", icon: "/stage/images/ai-providers/openrouter.svg"},
     {id: "groq", name: "Groq", baseURL: "https://api.groq.com/openai/v1", category: "aggregator"},
     {id: "ollama", name: "Ollama", baseURL: "http://localhost:11434/v1", category: "local", icon: "/stage/images/ai-providers/ollama.svg"},
     {id: "lmstudio", name: "LM Studio", baseURL: "http://localhost:1234/v1", category: "local", icon: "/stage/images/ai-providers/lmstudio.svg"},
@@ -80,13 +79,9 @@ const getCategoryTitle = (category: IProviderPreset["category"]) => {
 const getProviderAvatarHTML = (provider: Config.IProvider, preset = findPreset(provider)) => {
     const title = providerTitle(provider);
     if (preset?.icon) {
-        if (preset.iconColor) {
-            return `<span class="config-ai-provider__logo config-ai-provider__logo--brand" style="--config-ai-provider-logo-color: ${preset.iconColor}; --config-ai-provider-logo-image: url('${preset.icon}')" role="img" aria-label="${escapeHTML(title)}"></span>`;
-        }
-        return `<img class="config-ai-provider__logo config-ai-provider__logo--${preset.id}" src="${preset.icon}" alt="${escapeHTML(title)}" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
-<span class="config-ai-provider__initial" hidden>${escapeHTML(title.slice(0, 1).toUpperCase())}</span>`;
+        return `<img src="${preset.icon}" alt="${escapeHTML(title)}">`;
     }
-    return `<span class="config-ai-provider__initial">${escapeHTML(title.slice(0, 1).toUpperCase() || "AI")}</span>`;
+    return `<span class="config-name ft__primary">${escapeHTML(title.slice(0, 1).toUpperCase() || "AI")}</span>`;
 };
 
 const getProviderViewHost = (root: HTMLElement) =>
@@ -98,11 +93,16 @@ const getProviderViews = (root: HTMLElement) => {
 };
 
 const removeProviderView = (root: HTMLElement, view?: HTMLElement) => {
-    if (view) {
-        view.remove();
-    } else {
-        getProviderViews(root).forEach((item) => item.remove());
-    }
+    const views = view ? [view] : getProviderViews(root);
+    views.forEach((item) => {
+        item.classList.remove("config-ai-provider__view--show");
+        item.addEventListener("transitionend", (event) => {
+            if (event.propertyName === "opacity") {
+                item.remove();
+            }
+        });
+        window.setTimeout(() => item.remove(), 300);
+    });
 };
 
 const createProviderView = (root: HTMLElement, title: string, stacked = false) => {
@@ -114,19 +114,29 @@ const createProviderView = (root: HTMLElement, title: string, stacked = false) =
     const view = document.createElement("div");
     view.className = "config-ai-provider__view";
     view.style.zIndex = String(3 + layer);
-    view.innerHTML = `<div class="config-ai-provider__view-head">
+    view.innerHTML = `<div class="b3-dialog__header fn__flex">
     <button class="block__icon block__icon--show" data-action="back" aria-label="${window.siyuan.languages.back}">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </button>
-    <div class="config-ai-provider__view-title">${escapeHTML(title)}</div>
+    <span class="fn__space"></span>
+    <div class="fn__flex-1 fn__ellipsis" data-type="providerTitle">${escapeHTML(title)}</div>
 </div>
-<div class="config-ai-provider__view-body"></div>`;
+<div class="b3-dialog__body"></div>`;
     host.append(view);
+    view.getBoundingClientRect();
+    view.classList.add("config-ai-provider__view--show");
     return view;
 };
 
-export const genProviderCardsHtml = (): string => `<div class="b3-label config-item config-ai-provider" id="aiProviderCardsBlock">
-    <div class="b3-label__text">${window.siyuan.languages.apiProviderTip}</div>
+export const genProviderCardsHtml = (): string => `<div class="b3-label config-item" id="aiProviderCardsBlock">
+    <div class="fn__flex b3-label config-item config-wrap b3-label--noborder">
+        <div class="config-name">${window.siyuan.languages.apiProviderTip}</div>
+        <span class="fn__space"></span>
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-action="addProvider">
+            <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
+            <span>${window.siyuan.languages.addAiProvider}</span>
+        </button>
+    </div>
     <div class="fn__hr"></div>
     <div id="aiProviderCards"></div>
 </div>`;
@@ -136,25 +146,25 @@ const renderProviderCards = (root: HTMLElement) => {
     if (!cards) {
         return;
     }
-    const providerCards = window.siyuan.config.ai.providers.map((provider) => `<div class="b3-card config-ai-provider__card" data-provider-id="${escapeHTML(provider.id)}" data-action="openProvider">
-    <div class="config-ai-provider__avatar">${getProviderAvatarHTML(provider)}</div>
-    <div class="b3-card__info config-ai-provider__info">
-        <div class="fn__ellipsis config-ai-provider__name">${escapeHTML(providerTitle(provider))}</div>
-        <div class="b3-card__desc">${escapeHTML(provider.baseURL)}</div>
-        <div class="config-ai-provider__meta"><span>${provider.models.length}</span><span>${window.siyuan.languages.apiModel}</span></div>
+    const providerCards = window.siyuan.config.ai.providers.map((provider) => `<div class="b3-card" data-provider-id="${escapeHTML(provider.id)}" data-action="openProvider">
+    <div class="b3-card__img">${getProviderAvatarHTML(provider)}</div>
+    <div class="fn__flex-1 fn__flex-column">
+        <div class="b3-card__info b3-card__info--left fn__flex-1">
+            <div class="fn__ellipsis config-name">${escapeHTML(providerTitle(provider))}</div>
+            <div class="b3-card__desc">
+                ${escapeHTML(provider.baseURL)}<br>
+                ${provider.models.length} ${window.siyuan.languages.apiModel}
+            </div>
+        </div>
     </div>
-    <div class="b3-card__actions b3-card__actions--right config-ai-provider__actions">
+    <div class="b3-card__actions b3-card__actions--right">
         <input class="b3-switch" data-action="toggleProvider" type="checkbox"${provider.enabled ? " checked" : ""} aria-label="${window.siyuan.languages.enable}">
         <button class="block__icon block__icon--show block__icon--warning" data-action="deleteProvider" aria-label="${window.siyuan.languages.delete}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </button>
     </div>
 </div>`).join("");
-    const addCard = `<div class="b3-card config-ai-provider__card config-ai-provider__card--add" data-action="addProvider">
-    <svg><use xlink:href="#iconAdd"></use></svg>
-    <span>${window.siyuan.languages.addAiProvider}</span>
-</div>`;
-    cards.innerHTML = `<div class="b3-cards config-ai-provider__cards">${providerCards}${addCard}</div>`;
+    cards.innerHTML = `<div class="b3-cards b3-cards--nowrap">${providerCards}</div>`;
 };
 
 const saveProviders = (root: HTMLElement, providers: Config.IProvider[], onApplied?: () => void) => {
@@ -177,8 +187,8 @@ const showDeleteProviderConfirm = (root: HTMLElement, provider: Config.IProvider
 
 const openProviderCatalog = (root: HTMLElement) => {
     const view = createProviderView(root, window.siyuan.languages.addAiProvider);
-    const body = view.querySelector<HTMLElement>(".config-ai-provider__view-body");
-    body.innerHTML = `<div class="config-ai-provider__catalog">${PROVIDER_CATEGORIES.map((category) => {
+    const body = view.querySelector<HTMLElement>(".b3-dialog__body");
+    body.innerHTML = `<div class="b3-dialog__content" style="padding: 0">${PROVIDER_CATEGORIES.map((category) => {
         const cards = PROVIDER_PRESETS.filter((preset) => preset.category === category).map((preset) => {
             const provider: Config.IProvider = {
                 id: "",
@@ -192,18 +202,20 @@ const openProviderCatalog = (root: HTMLElement) => {
             const description = preset.baseURL
                 ? escapeHTML(preset.baseURL)
                 : window.siyuan.languages.apiBaseURLTip;
-            return `<div class="b3-card config-ai-provider__catalog-card" data-preset-id="${preset.id}">
-    <div class="config-ai-provider__avatar">${getProviderAvatarHTML(provider, preset)}</div>
-    <div class="b3-card__info config-ai-provider__info">
-        <div class="config-ai-provider__name">${escapeHTML(getPresetTitle(preset))}</div>
-        <div class="b3-card__desc">${description}</div>
+            return `<div class="b3-card" data-preset-id="${preset.id}">
+    <div class="b3-card__img">${getProviderAvatarHTML(provider, preset)}</div>
+    <div class="fn__flex-1 fn__flex-column">
+        <div class="b3-card__info b3-card__info--left fn__flex-1">
+            <div class="config-name">${escapeHTML(getPresetTitle(preset))}</div>
+            <div class="b3-card__desc">${description}</div>
+        </div>
     </div>
 </div>`;
         }).join("");
-        return `<section class="config-ai-provider__catalog-section">
-    <div class="config-ai-provider__catalog-title">${getCategoryTitle(category)}</div>
-    <div class="b3-cards config-ai-provider__catalog-grid">${cards}</div>
-</section>`;
+        return `<div class="config-group">
+    <div class="config-title">${getCategoryTitle(category)}</div>
+    <div class="b3-cards">${cards}</div>
+</div>`;
     }).join("")}</div>`;
     view.addEventListener("click", (event) => {
         const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
@@ -224,20 +236,24 @@ const openProviderCatalog = (root: HTMLElement) => {
 
 const renderDraftModels = (container: HTMLElement, models: Config.IModel[], availableModels: string[]) => {
     if (models.length === 0) {
-        container.innerHTML = `<div class="b3-label__text config-ai-provider__empty">${window.siyuan.languages.noModelConfigured}</div>`;
+        container.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.noModelConfigured}</div>`;
         return;
     }
     const modelInputClass = availableModels.length > 0 ? "b3-select" : "b3-text-field";
     const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" data-menu="true" readonly' : "";
-    container.innerHTML = models.map((model, index) => `<div class="config-ai-provider__model" data-model-index="${index}">
-    <input class="b3-switch" data-model-field="enabled" type="checkbox"${model.enabled ? " checked" : ""} aria-label="${window.siyuan.languages.enable}">
-    <input class="${modelInputClass}" data-model-field="name" type="text"${modelInputAction} spellcheck="false" placeholder="${window.siyuan.languages.selectModel}" value="${escapeHTML(model.name)}">
-    <input class="b3-text-field" data-model-field="displayName" type="text" spellcheck="false" placeholder="${window.siyuan.languages.customDisplayName}" value="${escapeHTML(model.displayName || "")}">
+    container.innerHTML = models.map((model, index) => `<div class="fn__flex b3-label config-item config-wrap" data-model-index="${index}">
+    <input class="b3-switch fn__flex-center" data-model-field="enabled" type="checkbox"${model.enabled ? " checked" : ""} aria-label="${window.siyuan.languages.enable}">
+    <span class="fn__space"></span>
+    <input class="${modelInputClass} fn__flex-1" data-model-field="name" type="text"${modelInputAction} spellcheck="false" placeholder="${window.siyuan.languages.selectModel}" value="${escapeHTML(model.name)}">
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-1" data-model-field="displayName" type="text" spellcheck="false" placeholder="${window.siyuan.languages.customDisplayName}" value="${escapeHTML(model.displayName || "")}">
+    <span class="fn__space"></span>
     <button class="b3-button b3-button--outline" data-action="testModel">
         <svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg>
         <span>${window.siyuan.languages.testConnection}</span>
     </button>
-    <button class="block__icon block__icon--show block__icon--warning" data-action="deleteModel" aria-label="${window.siyuan.languages.delete}">
+    <span class="fn__space"></span>
+    <button class="b3-button b3-button--remove b3-button--icon" data-action="deleteModel" aria-label="${window.siyuan.languages.delete}">
         <svg><use xlink:href="#iconTrashcan"></use></svg>
     </button>
 </div>`).join("");
@@ -359,36 +375,41 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     };
     const initialJSON = JSON.stringify(draft);
     const view = createProviderView(root, providerTitle(draft), !existing && !!preset);
-    const body = view.querySelector<HTMLElement>(".config-ai-provider__view-body");
-    body.innerHTML = `<div class="config-ai-provider__detail">
-    <div class="config-ai-provider__section">
-        <div class="config-ai-provider__section-title">${window.siyuan.languages.aiProviderSettings}</div>
-        <div class="config-ai-provider__fields">
-            <label class="config-ai-provider__field">
-                <span>${window.siyuan.languages.customDisplayName}</span>
-                <input class="b3-text-field" data-provider-field="displayName" type="text" spellcheck="false" value="${escapeHTML(draft.displayName || "")}">
+    const body = view.querySelector<HTMLElement>(".b3-dialog__body");
+    body.innerHTML = `<div class="b3-dialog__content" style="padding: 0">
+    <div class="config-group">
+        <div class="config-title">${window.siyuan.languages.aiProviderSettings}</div>
+        <div class="config-items">
+            <label class="fn__flex b3-label config-item config-wrap">
+                ${genConfigItemMainHtml(window.siyuan.languages.customDisplayName)}
+                <span class="fn__space"></span>
+                <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="displayName" type="text" spellcheck="false" value="${escapeHTML(draft.displayName || "")}">
             </label>
-            <label class="config-ai-provider__field">
-                <span>${window.siyuan.languages.apiBaseURL}</span>
-                <input class="b3-text-field" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}">
+            <label class="fn__flex b3-label config-item config-wrap">
+                ${genConfigItemMainHtml(window.siyuan.languages.apiBaseURL)}
+                <span class="fn__space"></span>
+                <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}">
             </label>
-            <label class="config-ai-provider__field">
-                <span>${window.siyuan.languages.apiTimeout}</span>
-                <input class="b3-text-field" data-provider-field="requestTimeout" type="number" min="1" max="600" value="${draft.requestTimeout}">
+            <label class="fn__flex b3-label config-item config-wrap">
+                ${genConfigItemMainHtml(window.siyuan.languages.apiTimeout)}
+                <span class="fn__space"></span>
+                <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="requestTimeout" type="number" min="1" max="600" value="${draft.requestTimeout}">
             </label>
-            <div class="config-ai-provider__field">
-                <span>${window.siyuan.languages.apiKey}</span>
-                <div class="b3-form__icona config-ai-provider__api-key-input">
-                    <input id="aiProviderDetailApiKey" class="b3-text-field b3-form__icona-input fn__block" data-provider-field="apiKey" type="password" value="${escapeHTML(draft.apiKey)}">
+            <label class="fn__flex b3-label config-item config-wrap">
+                ${genConfigItemMainHtml(window.siyuan.languages.apiKey)}
+                <span class="fn__space"></span>
+                <div class="b3-form__icona fn__size200">
+                    <input id="aiProviderDetailApiKey" class="b3-text-field b3-form__icona-input" data-provider-field="apiKey" type="password" value="${escapeHTML(draft.apiKey)}">
                     <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
                 </div>
-            </div>
+            </label>
         </div>
     </div>
-    <div class="config-ai-provider__section">
-        <div class="config-ai-provider__section-head">
-            <div class="config-ai-provider__section-title">${window.siyuan.languages.aiModelSettings}</div>
-            <div class="fn__flex">
+    <div class="config-group">
+        <div class="config-items">
+            <div class="fn__flex b3-label config-item config-wrap">
+                ${genConfigItemMainHtml(window.siyuan.languages.aiModelSettings)}
+                <span class="fn__space"></span>
                 <button class="b3-button b3-button--outline" data-action="addModel">
                     <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
                     <span>${window.siyuan.languages.addAiModel}</span>
@@ -399,17 +420,17 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <span>${window.siyuan.languages.fetchAvailableModels}</span>
                 </button>
             </div>
+            <div data-type="providerModels"></div>
         </div>
-        <div class="config-ai-provider__models"></div>
     </div>
-    <div class="config-ai-provider__footer">
-        <button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button>
-        <span class="fn__space"></span>
-        <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>
-    </div>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button>
+    <span class="fn__space"></span>
+    <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>
 </div>`;
     bindPasswordIconaToggle(view, "aiProviderDetailApiKey");
-    const modelsContainer = view.querySelector<HTMLElement>(".config-ai-provider__models");
+    const modelsContainer = view.querySelector<HTMLElement>("[data-type='providerModels']");
     const addModelButton = view.querySelector<HTMLButtonElement>("[data-action='addModel']");
     const fetchModelsButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
     const confirmButton = view.querySelector<HTMLButtonElement>("[data-action='confirm']");
@@ -535,7 +556,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             if (providerField === "apiKey") {
                 updateModelActionButtons();
             }
-            view.querySelector<HTMLElement>(".config-ai-provider__view-title").textContent = providerTitle(draft);
+            view.querySelector<HTMLElement>("[data-type='providerTitle']").textContent = providerTitle(draft);
             return;
         }
         const modelField = target.dataset.modelField as "name" | "displayName";
@@ -777,7 +798,6 @@ const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group:
             iconHTML: "",
             type: "readonly",
             label: escapeHTML(providerTitle(provider)),
-            bind: (element) => element.classList.add("config-ai-provider__model-menu-group"),
         });
         models.forEach((model) => {
             const label = model.displayName || model.name;

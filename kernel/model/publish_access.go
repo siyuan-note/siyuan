@@ -1478,39 +1478,14 @@ func reassignTagCounts(tag *Tag, counts map[string]int) (ret *Tag) {
 	return tag
 }
 
-func FilterLocalStorageByPublishAccess(publishAccess PublishAccess, localStorage map[string]any) (ret map[string]any) {
-	ret = localStorage
-	publishIgnore := GetInvisiblePublishAccess(publishAccess)
-	// 清空搜索历史记录
-	searchKeysItem := ret["local-searchkeys"]
-	if searchKeysItem != nil {
-		searchKeys := searchKeysItem.(map[string]any)
-		if searchKeys != nil {
-			searchKeys["keys"] = []string{}
-		}
-	}
-	searchAssetItem := ret["local-searchasset"]
-	if searchAssetItem != nil {
-		searchAsset := searchAssetItem.(map[string]any)
-		if searchAsset != nil {
-			searchAsset["k"] = ""
-			searchAsset["keys"] = []string{}
-		}
-	}
-	docInfoItem := ret["local-docinfo"]
-	if docInfoItem != nil {
-		docInfo := docInfoItem.(map[string]any)
-		if docInfo != nil {
-			idItem := docInfo["id"]
-			if idItem != nil {
-				id := idItem.(string)
-				bt := treenode.GetBlockTree(id)
-				if bt != nil {
-					if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-						docInfo["id"] = ""
-					}
-				}
-			}
+// 发布模式下默认不返回管理员的本地工作状态，新增键只有在确认不含敏感信息后才能加入白名单。
+var publishLocalStorageAllowedKeys = []string{}
+
+func FilterLocalStorageByPublishAccess(localStorage map[string]any) (ret map[string]any) {
+	ret = map[string]any{}
+	for _, key := range publishLocalStorageAllowedKeys {
+		if value, ok := localStorage[key]; ok {
+			ret[key] = value
 		}
 	}
 	return

@@ -32,6 +32,36 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestFilterLocalStorageByPublishAccess(t *testing.T) {
+	localStorage := map[string]any{
+		"local-closed-tabs": []any{
+			map[string]any{
+				"title": "private-document-title",
+				"children": map[string]any{
+					"rootId": "20260729000000-private",
+				},
+			},
+		},
+		"local-searchkeys": map[string]any{
+			"keys":        []any{"private-search-term"},
+			"replaceKeys": []any{"private-replace-term"},
+		},
+		"future-private-key": "future-private-value",
+	}
+
+	filtered := FilterLocalStorageByPublishAccess(localStorage)
+	if len(filtered) != 0 {
+		t.Fatalf("publish reader received local storage data: %#v", filtered)
+	}
+	if len(localStorage) != 3 {
+		t.Fatalf("filter modified the input local storage: %#v", localStorage)
+	}
+	searchKeys := localStorage["local-searchkeys"].(map[string]any)
+	if len(searchKeys["keys"].([]any)) != 1 || len(searchKeys["replaceKeys"].([]any)) != 1 {
+		t.Fatalf("filter modified nested input local storage: %#v", searchKeys)
+	}
+}
+
 func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
 	const (
 		boxID             = "20260721000000-boxid01"

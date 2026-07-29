@@ -31,8 +31,7 @@ func getLocalStorage(c *gin.Context) {
 
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
+		data = model.FilterLocalStorageByPublishAccess(data)
 	}
 	ret.Data = data
 }
@@ -53,8 +52,7 @@ func getLocalStorageVal(c *gin.Context) {
 
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
+		data = model.FilterLocalStorageByPublishAccess(data)
 	}
 	ret.Data = data[key]
 }
@@ -91,8 +89,7 @@ func getLocalStorageVals(c *gin.Context) {
 
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
+		data = model.FilterLocalStorageByPublishAccess(data)
 	}
 	out := map[string]any{}
 	for _, k := range keys {

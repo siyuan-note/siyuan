@@ -813,4 +813,20 @@ table + .protyle-action__table {
     border: 1px solid var(--b3-border-color);
     border-radius: 50%;
   }
+
+  &__color-menu {
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 16px));
+
+    & > .b3-menu__items {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .b3-menu__label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 }

@@ -764,11 +764,14 @@ export class TableControl {
                 label: window.siyuan.languages.clear,
                 click: () => this.clearCells(),
             }).element);
-            menu.append(new MenuItem({
+            const backgroundMenuItem = new MenuItem({
                 icon: "iconTheme",
                 label: window.siyuan.languages.colorPrimary,
                 submenu: this.getBackgroundMenus(),
-            }).element);
+            }).element;
+            backgroundMenuItem.querySelector(":scope > .b3-menu__submenu")
+                ?.classList.add("protyle-table-control__color-menu");
+            menu.append(backgroundMenuItem);
             if (this.selection.mode === "cell") {
                 this.appendCellMenus(rectangle);
             } else {

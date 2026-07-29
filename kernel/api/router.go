@@ -105,7 +105,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/storage/updateRecentDocViewTime", model.CheckAuth, updateRecentDocViewTime)
 	ginServer.Handle("POST", "/api/storage/updateRecentDocCloseTime", model.CheckAuth, updateRecentDocCloseTime)
 	ginServer.Handle("POST", "/api/storage/batchUpdateRecentDocCloseTime", model.CheckAuth, batchUpdateRecentDocCloseTime)
-	ginServer.Handle("POST", "/api/storage/getOutlineStorage", model.CheckAuth, getOutlineStorage)
+	ginServer.Handle("POST", "/api/storage/getOutlineStorage", model.CheckAuth, model.CheckAdminRole, getOutlineStorage)
 	ginServer.Handle("POST", "/api/storage/setOutlineStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setOutlineStorage)
 	ginServer.Handle("POST", "/api/storage/removeOutlineStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeOutlineStorage)
 

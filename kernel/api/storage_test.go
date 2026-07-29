@@ -145,3 +145,74 @@ func TestGetLocalStorageByRole(t *testing.T) {
 		}
 	}
 }
+
+func TestGetOutlineStorageByRole(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+	})
+
+	const (
+		docID     = "20260729000000-document"
+		headingID = "20260729000000-heading"
+	)
+	if err := model.SetOutlineStorage(docID, map[string]any{
+		"expandIds": []any{headingID},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	roles := []struct {
+		name       string
+		role       model.Role
+		statusCode int
+	}{
+		{name: "administrator", role: model.RoleAdministrator, statusCode: http.StatusOK},
+		{name: "reader", role: model.RoleReader, statusCode: http.StatusForbidden},
+	}
+	for _, role := range roles {
+		t.Run(role.name, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) {
+				c.Set(model.RoleContextKey, role.role)
+				c.Next()
+			})
+			ServeAPI(engine)
+
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(
+				http.MethodPost,
+				"/api/storage/getOutlineStorage",
+				strings.NewReader(`{"docID":"`+docID+`"}`),
+			)
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			if recorder.Code != role.statusCode {
+				t.Fatalf("unexpected status code: got %d, want %d", recorder.Code, role.statusCode)
+			}
+			if role.role == model.RoleReader {
+				if strings.Contains(recorder.Body.String(), headingID) {
+					t.Fatalf("reader received administrator outline storage data: %s", recorder.Body.String())
+				}
+				return
+			}
+
+			response := &struct {
+				Code int `json:"code"`
+				Data struct {
+					ExpandIDs []string `json:"expandIds"`
+				} `json:"data"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal outline storage response failed: %v", err)
+			}
+			if response.Code != 0 || len(response.Data.ExpandIDs) != 1 || response.Data.ExpandIDs[0] != headingID {
+				t.Fatalf("administrator did not receive outline storage data: %s", recorder.Body.String())
+			}
+		})
+	}
+}

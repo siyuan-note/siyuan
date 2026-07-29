@@ -68,12 +68,15 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
 };
 
 const renderRepo = async (element: HTMLElement, currentPage: number, id: string) => {
+    if (element.getAttribute("data-loading") === "true") {
+        return;
+    }
     const previousElement = element.querySelector('[data-type="snapshotprevious"]');
     const nextElement = element.querySelector('[data-type="snapshotnext"]');
     const pageNumElement = element.querySelector('[data-type="jumpSnapshotPage"]');
     const pageInfoElement = nextElement.nextElementSibling.nextElementSibling;
     const listElement = element.querySelector(".b3-list--background");
-    element.setAttribute("data-init", "true");
+    element.setAttribute("data-loading", "true");
     element.setAttribute("data-page", currentPage.toString());
     pageNumElement.textContent = currentPage.toString();
     previousElement.setAttribute("disabled", "disabled");
@@ -88,14 +91,18 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string)
         });
     } catch (e) {
         console.warn("get repo doc history failed", e);
+        element.removeAttribute("data-loading");
         listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
         return;
     }
     if (response.code !== 0) {
+        element.removeAttribute("data-loading");
         listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
         return;
     }
 
+    element.setAttribute("data-init", "true");
+    element.removeAttribute("data-loading");
     const pageCount = response.data.pageCount || 0;
     if (currentPage > 1) {
         previousElement.removeAttribute("disabled");
@@ -223,7 +230,8 @@ export const openDocHistory = (options: {
                         item.classList.remove("fn__none");
                         item.classList.add("fn__block");
                         target.classList.add("item--focus");
-                        if (type === "repo" && item.getAttribute("data-init") !== "true") {
+                        if (type === "repo" && item.getAttribute("data-init") !== "true" &&
+                            item.getAttribute("data-loading") !== "true") {
                             renderRepo(item, 1, options.id);
                         }
                     } else {

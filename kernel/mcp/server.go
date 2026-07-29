@@ -17,122 +17,176 @@
 package mcp
 
 import (
+	"context"
 	"encoding/json"
-	"io"
+	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/gin-gonic/gin"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+const protocolVersion20260728 = "2026-07-28"
+
+var (
+	httpHandlerOnce sync.Once
+	httpHandler     http.Handler
 )
 
 func Serve(ginServer *gin.Engine) {
+	handler := getHTTPHandler()
+
 	// MCP 工具暴露任意工作区文件读写删、SQL、插件分发等管理级原语，必须要求管理员角色，
 	// 否则 Publish 匿名模式注入的 RoleReader JWT 可经此链路越权调用全部工具。
-	ginServer.POST("/mcp", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, handlePost)
-	ginServer.GET("/mcp", model.CheckAuth, model.CheckAdminRole, func(c *gin.Context) {
-		c.Status(http.StatusMethodNotAllowed)
+	ginServer.POST("/mcp", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, serveHTTP(handler))
+	ginServer.GET("/mcp", model.CheckAuth, model.CheckAdminRole, serveHTTP(handler))
+	ginServer.DELETE("/mcp", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, serveHTTP(handler))
+}
+
+func getHTTPHandler() http.Handler {
+	httpHandlerOnce.Do(func() {
+		server := newServer()
+		tools.ObserveRegistry(func(name string, tool *tools.Tool) {
+			syncTool(server, name, tool)
+		})
+		httpHandler = newHTTPHandler(server)
 	})
-	ginServer.DELETE("/mcp", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, handleDelete)
+	return httpHandler
 }
 
-func handlePost(c *gin.Context) {
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		c.JSON(http.StatusOK, JsonRpcErrorResponse{
-			JsonRpc: "2.0",
-			Error:   RpcError{Code: -32700, Message: "Parse error"},
-			ID:      nil,
-		})
-		return
-	}
+func newServer() *mcpsdk.Server {
+	server := mcpsdk.NewServer(&mcpsdk.Implementation{
+		Name:    "SiYuan",
+		Version: util.Ver,
+	}, &mcpsdk.ServerOptions{
+		Capabilities: &mcpsdk.ServerCapabilities{},
+	})
+	server.AddReceivingMiddleware(privateCacheMiddleware())
+	return server
+}
 
-	var req JsonRpcRequest
-	if err := json.Unmarshal(body, &req); err != nil {
-		c.JSON(http.StatusOK, JsonRpcErrorResponse{
-			JsonRpc: "2.0",
-			Error:   RpcError{Code: -32700, Message: "Parse error"},
-			ID:      nil,
-		})
-		return
-	}
-
-	if req.JsonRpc != "2.0" {
-		c.JSON(http.StatusOK, JsonRpcErrorResponse{
-			JsonRpc: "2.0",
-			Error:   RpcError{Code: -32600, Message: "Invalid Request"},
-			ID:      req.ID,
-		})
-		return
-	}
-
-	if req.Method == "" {
-		c.JSON(http.StatusOK, JsonRpcErrorResponse{
-			JsonRpc: "2.0",
-			Error:   RpcError{Code: -32600, Message: "Invalid Request"},
-			ID:      req.ID,
-		})
-		return
-	}
-
-	protoVersion := c.GetHeader("MCP-Protocol-Version")
-	if protoVersion == ProtocolV20260728 {
-		handlePost2026(c, &req)
-		return
-	}
-
-	var session *Session
-	if req.Method == "initialize" {
-		session = newSession()
-	} else {
-		sessionID := c.GetHeader("Mcp-Session-Id")
-		if sessionID == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Mcp-Session-Id required"})
-			return
-		}
-		session = getSession(sessionID)
-		if session == nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "session not found"})
-			return
+func privateCacheMiddleware() mcpsdk.Middleware {
+	return func(next mcpsdk.MethodHandler) mcpsdk.MethodHandler {
+		return func(ctx context.Context, method string, request mcpsdk.Request) (mcpsdk.Result, error) {
+			result, err := next(ctx, method, request)
+			switch cacheable := result.(type) {
+			case *mcpsdk.DiscoverResult:
+				cacheable.CacheScope = "private"
+			case *mcpsdk.ListToolsResult:
+				cacheable.CacheScope = "private"
+			case *mcpsdk.ListPromptsResult:
+				cacheable.CacheScope = "private"
+			case *mcpsdk.ListResourcesResult:
+				cacheable.CacheScope = "private"
+			case *mcpsdk.ListResourceTemplatesResult:
+				cacheable.CacheScope = "private"
+			case *mcpsdk.ReadResourceResult:
+				cacheable.CacheScope = "private"
+			}
+			return result, err
 		}
 	}
-
-	response := processRequest(&req, session, protoVersion)
-
-	if req.Method == "initialize" {
-		c.Header("Mcp-Session-Id", session.ID)
-	}
-
-	writeResponse(c, response)
 }
 
-func handlePost2026(c *gin.Context, req *JsonRpcRequest) {
-	mcpMethod := c.GetHeader("Mcp-Method")
-	if mcpMethod != "" && mcpMethod != req.Method {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Mcp-Method header does not match body method"})
+func newHTTPHandler(server *mcpsdk.Server) http.Handler {
+	getServer := func(*http.Request) *mcpsdk.Server {
+		return server
+	}
+	modern := mcpsdk.NewStreamableHTTPHandler(getServer, &mcpsdk.StreamableHTTPOptions{
+		Stateless:                    true,
+		JSONResponse:                 true,
+		CrossOriginProtection:        http.NewCrossOriginProtection(),
+		PropagateRequestCancellation: true,
+	})
+	legacy := mcpsdk.NewStreamableHTTPHandler(getServer, &mcpsdk.StreamableHTTPOptions{
+		JSONResponse:          true,
+		CrossOriginProtection: http.NewCrossOriginProtection(),
+	})
+
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if isModernRequest(request) {
+			modern.ServeHTTP(writer, request)
+			return
+		}
+		legacy.ServeHTTP(writer, request)
+	})
+}
+
+func isModernRequest(request *http.Request) bool {
+	version := request.Header.Get("MCP-Protocol-Version")
+	return version >= protocolVersion20260728
+}
+
+func serveHTTP(handler http.Handler) gin.HandlerFunc {
+	return func(context *gin.Context) {
+		handler.ServeHTTP(context.Writer, context.Request)
+	}
+}
+
+func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
+	if tool == nil {
+		server.RemoveTools(name)
 		return
 	}
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			logging.LogWarnf("mcp: skip invalid server tool [%s]: %v", name, recovered)
+		}
+	}()
 
-	response := processRequest2026(req)
-	writeResponse(c, response)
-}
-
-func writeResponse(c *gin.Context, response any) {
-	switch v := response.(type) {
-	case nil:
-		c.Status(http.StatusAccepted)
-	case *JsonRpcResponse:
-		c.JSON(http.StatusOK, v)
-	case *JsonRpcErrorResponse:
-		c.JSON(http.StatusOK, v)
+	sdkTool := &mcpsdk.Tool{
+		Name:         name,
+		Title:        tool.Title,
+		Description:  tool.Description,
+		InputSchema:  tool.InputSchema,
+		OutputSchema: tool.OutputSchema,
 	}
-}
-
-func handleDelete(c *gin.Context) {
-	sessionID := c.GetHeader("Mcp-Session-Id")
-	if sessionID == "" {
-		c.Status(http.StatusBadRequest)
-		return
+	if tool.ReadOnlyHint {
+		sdkTool.Annotations = &mcpsdk.ToolAnnotations{ReadOnlyHint: true}
 	}
-	removeSession(sessionID)
-	c.Status(http.StatusOK)
+
+	server.AddTool(sdkTool, func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+		arguments := map[string]any{}
+		if len(request.Params.Arguments) > 0 {
+			if err := json.Unmarshal(request.Params.Arguments, &arguments); err != nil {
+				return nil, fmt.Errorf("invalid tool arguments: %w", err)
+			}
+		}
+		if arguments == nil {
+			arguments = map[string]any{}
+		}
+
+		var (
+			result tools.CallToolResult
+			err    error
+		)
+		if tool.ContextHandler != nil {
+			result, err = tool.ContextHandler(ctx, arguments)
+		} else if tool.Handler != nil {
+			result, err = tool.Handler(arguments)
+		} else {
+			err = fmt.Errorf("tool handler is not configured")
+		}
+		if err != nil {
+			return &mcpsdk.CallToolResult{
+				Content: []mcpsdk.Content{&mcpsdk.TextContent{Text: err.Error()}},
+				IsError: true,
+			}, nil
+		}
+
+		content := make([]mcpsdk.Content, 0, len(result.Content))
+		for _, item := range result.Content {
+			content = append(content, &mcpsdk.TextContent{Text: item.Text})
+		}
+		return &mcpsdk.CallToolResult{
+			Content:           content,
+			StructuredContent: result.StructuredContent,
+			IsError:           result.IsError,
+		}, nil
+	})
 }

@@ -19,6 +19,7 @@ package client
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -285,10 +286,17 @@ func connectOneServer(ctx context.Context, server conf.MCPServer, interactive bo
 
 		readOnlyHint := trustedReadOnlyHint(server, tool)
 		handler := mcpToolContextHandler(server.Name, tool.Name, serverTimeout(server))
+		var outputSchema *tools.ToolSchema
+		if tool.OutputSchema != nil {
+			converted := convertMCPSchema(tool.OutputSchema)
+			outputSchema = &converted
+		}
 		registeredTool := &tools.Tool{
 			Name:         name,
+			Title:        tool.Title,
 			Description:  desc,
 			InputSchema:  convertMCPSchema(tool.InputSchema),
+			OutputSchema: outputSchema,
 			Source:       "mcp",
 			ReadOnlyHint: readOnlyHint,
 			EffectScope:  tools.EffectScopeExternal,
@@ -550,12 +558,20 @@ func callMCPToolOnce(call func() (*mcp.CallToolResult, error), reconnect func(er
 	}
 	text := strings.Join(textParts, "\n")
 	if text == "" {
-		text = "(empty result)"
+		if result.StructuredContent != nil {
+			if data, err := json.Marshal(result.StructuredContent); err == nil {
+				text = string(data)
+			}
+		}
+		if text == "" {
+			text = "(empty result)"
+		}
 	}
 
 	syr := tools.CallToolResult{
-		IsError: result.IsError,
-		Content: []tools.ContentItem{{Type: "text", Text: text}},
+		IsError:           result.IsError,
+		Content:           []tools.ContentItem{{Type: "text", Text: text}},
+		StructuredContent: result.StructuredContent,
 	}
 	return syr
 }

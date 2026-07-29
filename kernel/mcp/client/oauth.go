@@ -54,6 +54,7 @@ type oauthCallbackResult struct {
 
 type oauthFlow struct {
 	State   string
+	Issuer  string
 	Result  chan oauthCallbackResult
 	Expires time.Time
 }
@@ -361,6 +362,7 @@ func (h *mcpOAuthHandler) Authorize(ctx context.Context, req *http.Request, resp
 
 	flow := &oauthFlow{
 		State:   state,
+		Issuer:  asm.Issuer,
 		Result:  make(chan oauthCallbackResult, 1),
 		Expires: time.Now().Add(oauthAuthorizationTimeout),
 	}
@@ -581,7 +583,7 @@ func removeOAuthFlow(flowID string, flow *oauthFlow) {
 	oauthFlows.Unlock()
 }
 
-func CompleteMCPOAuth(flowID, code, state, callbackError string) error {
+func CompleteMCPOAuth(flowID, code, state, callbackError, issuer string) error {
 	oauthFlows.Lock()
 	flow := oauthFlows.items[flowID]
 	if flow == nil || time.Now().After(flow.Expires) {
@@ -592,6 +594,10 @@ func CompleteMCPOAuth(flowID, code, state, callbackError string) error {
 	if state != flow.State {
 		oauthFlows.Unlock()
 		return fmt.Errorf("OAuth state mismatch")
+	}
+	if issuer != "" && issuer != flow.Issuer {
+		oauthFlows.Unlock()
+		return fmt.Errorf("OAuth issuer mismatch")
 	}
 	delete(oauthFlows.items, flowID)
 	oauthFlows.Unlock()

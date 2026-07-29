@@ -49,16 +49,24 @@ func TestProtectedResourceURLs(t *testing.T) {
 
 func TestCompleteMCPOAuth(t *testing.T) {
 	flowID := "test-flow"
-	flow := &oauthFlow{State: "test-state", Result: make(chan oauthCallbackResult, 1), Expires: time.Now().Add(time.Minute)}
+	flow := &oauthFlow{
+		State:   "test-state",
+		Issuer:  "https://issuer.example",
+		Result:  make(chan oauthCallbackResult, 1),
+		Expires: time.Now().Add(time.Minute),
+	}
 	oauthFlows.Lock()
 	oauthFlows.items[flowID] = flow
 	oauthFlows.Unlock()
 	t.Cleanup(func() { removeOAuthFlow(flowID, flow) })
 
-	if err := CompleteMCPOAuth(flowID, "code", "wrong-state", ""); err == nil {
+	if err := CompleteMCPOAuth(flowID, "code", "wrong-state", "", "https://issuer.example"); err == nil {
 		t.Fatal("expected state mismatch")
 	}
-	if err := CompleteMCPOAuth(flowID, "code", "test-state", ""); err != nil {
+	if err := CompleteMCPOAuth(flowID, "code", "test-state", "", "https://other.example"); err == nil {
+		t.Fatal("expected issuer mismatch")
+	}
+	if err := CompleteMCPOAuth(flowID, "code", "test-state", "", "https://issuer.example"); err != nil {
 		t.Fatal(err)
 	}
 	result := <-flow.Result
@@ -328,7 +336,7 @@ func TestMCPOAuthAuthorizationCodeFlow(t *testing.T) {
 		query.Get("resource") != server.URL+"/mcp" || query.Get("scope") != "todo.read offline_access" {
 		t.Fatalf("unexpected authorization URL: %s", authorizationURL)
 	}
-	if err = CompleteMCPOAuth(flowID, "authorization-code", query.Get("state"), ""); err != nil {
+	if err = CompleteMCPOAuth(flowID, "authorization-code", query.Get("state"), "", ""); err != nil {
 		t.Fatal(err)
 	}
 	select {

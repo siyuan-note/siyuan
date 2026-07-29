@@ -14,44 +14,37 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package mcp
+package client
 
 import (
-	"sync"
-
-	"github.com/88250/gulu"
+	"encoding/json"
+	"reflect"
+	"testing"
 )
 
-type Session struct {
-	ID          string
-	initialized bool
-	ready       bool
-}
-
-var (
-	sessionsMu sync.RWMutex
-	sessions   = map[string]*Session{}
-)
-
-func newSession() *Session {
-	s := &Session{
-		ID: gulu.Rand.String(16),
+func TestConvertMCPSchemaPreservesJSONSchema202012(t *testing.T) {
+	input := map[string]any{
+		"$schema":               "https://json-schema.org/draft/2020-12/schema",
+		"type":                  "object",
+		"unevaluatedProperties": false,
+		"properties": map[string]any{
+			"value": map[string]any{
+				"type":  []any{"string", "null"},
+				"const": "fixed",
+			},
+		},
 	}
-	sessionsMu.Lock()
-	sessions[s.ID] = s
-	sessionsMu.Unlock()
-	return s
-}
 
-func getSession(id string) *Session {
-	sessionsMu.RLock()
-	s := sessions[id]
-	sessionsMu.RUnlock()
-	return s
-}
-
-func removeSession(id string) {
-	sessionsMu.Lock()
-	delete(sessions, id)
-	sessionsMu.Unlock()
+	schema := convertMCPSchema(input)
+	data, err := json.Marshal(schema)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var output map[string]any
+	if err = json.Unmarshal(data, &output); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(output, input) {
+		t.Fatalf("schema changed during conversion:\ninput:  %#v\noutput: %#v", input, output)
+	}
 }

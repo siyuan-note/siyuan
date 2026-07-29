@@ -24,6 +24,8 @@ import (
 
 var registryMu sync.RWMutex
 var Registry = map[string]*Tool{}
+var registryObservers = map[uint64]func(string, *Tool){}
+var registryObserverID uint64
 
 func GetTool(name string) *Tool {
 	return LookupTool(name)
@@ -75,12 +77,14 @@ func SetTool(name string, t *Tool) {
 	registryMu.Lock()
 	defer registryMu.Unlock()
 	Registry[name] = t
+	notifyRegistryObservers(name, t)
 }
 
 func RemoveTool(name string) {
 	registryMu.Lock()
 	defer registryMu.Unlock()
 	delete(Registry, name)
+	notifyRegistryObservers(name, nil)
 }
 
 func RemoveToolIf(name string, tool *Tool) {
@@ -88,6 +92,36 @@ func RemoveToolIf(name string, tool *Tool) {
 	defer registryMu.Unlock()
 	if Registry[name] == tool {
 		delete(Registry, name)
+		notifyRegistryObservers(name, nil)
+	}
+}
+
+// ObserveRegistry 监听工具注册表变更，并在注册监听器时按名称顺序发送当前工具快照。
+func ObserveRegistry(observer func(string, *Tool)) (stop func()) {
+	registryMu.Lock()
+	registryObserverID++
+	id := registryObserverID
+	registryObservers[id] = observer
+	names := make([]string, 0, len(Registry))
+	for name := range Registry {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		observer(name, Registry[name])
+	}
+	registryMu.Unlock()
+
+	return func() {
+		registryMu.Lock()
+		delete(registryObservers, id)
+		registryMu.Unlock()
+	}
+}
+
+func notifyRegistryObservers(name string, tool *Tool) {
+	for _, observer := range registryObservers {
+		observer(name, tool)
 	}
 }
 

@@ -16,7 +16,10 @@
 
 package tools
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+)
 
 const (
 	EffectScopeLocal    = "local"
@@ -69,6 +72,35 @@ type ToolSchema struct {
 	AllOf      []ToolSchema          `json:"allOf,omitempty"`
 	Ref        string                `json:"$ref,omitempty"`
 	Defs       map[string]ToolSchema `json:"$defs,omitempty"`
+	Raw        map[string]any        `json:"-"`
+}
+
+func (s ToolSchema) MarshalJSON() ([]byte, error) {
+	if s.Raw != nil {
+		return json.Marshal(s.Raw)
+	}
+	type plain ToolSchema
+	return json.Marshal(plain(s))
+}
+
+func (s *ToolSchema) UnmarshalJSON(data []byte) error {
+	raw := map[string]any{}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	type plain ToolSchema
+	var decoded plain
+	if err := json.Unmarshal(data, &decoded); err == nil {
+		*s = ToolSchema(decoded)
+	} else {
+		*s = ToolSchema{}
+		if schemaType, ok := raw["type"].(string); ok {
+			s.Type = schemaType
+		}
+	}
+	s.Raw = raw
+	return nil
 }
 
 type Property struct {
@@ -85,9 +117,10 @@ type Property struct {
 }
 
 type CallToolResult struct {
-	Content          []ContentItem `json:"content"`
-	IsError          bool          `json:"isError,omitempty"`
-	ExecutionUnknown bool          `json:"-"`
+	Content           []ContentItem `json:"content"`
+	StructuredContent any           `json:"structuredContent,omitempty"`
+	IsError           bool          `json:"isError,omitempty"`
+	ExecutionUnknown  bool          `json:"-"`
 }
 
 type ContentItem struct {

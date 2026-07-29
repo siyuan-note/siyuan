@@ -92,6 +92,26 @@ func TestConvertSchemaRootAnyOf(t *testing.T) {
 	}
 }
 
+func TestConvertSchemaPreservesRawJSONSchema(t *testing.T) {
+	raw := map[string]any{
+		"type":                  "object",
+		"unevaluatedProperties": false,
+	}
+	out := convertSchema(tools.ToolSchema{Raw: raw}).(map[string]any)
+	if out["unevaluatedProperties"] != false {
+		t.Fatalf("raw schema was not preserved: %#v", out)
+	}
+}
+
+func TestResultToStringUsesStructuredContent(t *testing.T) {
+	result := resultToString(tools.CallToolResult{
+		StructuredContent: map[string]any{"status": "ok"},
+	})
+	if result != `{"status":"ok"}` {
+		t.Fatalf("unexpected structured result: %q", result)
+	}
+}
+
 func TestNeedsConfirmScopesReadOnlyActionsByToolSource(t *testing.T) {
 	const externalWrite = "test_external_write"
 	const externalRead = "test_external_read"

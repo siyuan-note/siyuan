@@ -26,3 +26,28 @@ func TestGetAllToolsSorted(t *testing.T) {
 		}
 	}
 }
+
+func TestObserveRegistry(t *testing.T) {
+	const name = "registry_observer_test"
+	RemoveTool(name)
+
+	var events []*Tool
+	stop := ObserveRegistry(func(changedName string, tool *Tool) {
+		if changedName == name {
+			events = append(events, tool)
+		}
+	})
+	t.Cleanup(func() {
+		stop()
+		RemoveTool(name)
+	})
+
+	tool := &Tool{Name: name}
+	SetTool(name, tool)
+	RemoveToolIf(name, &Tool{Name: name})
+	RemoveToolIf(name, tool)
+
+	if len(events) != 2 || events[0] != tool || events[1] != nil {
+		t.Fatalf("unexpected registry events: %#v", events)
+	}
+}

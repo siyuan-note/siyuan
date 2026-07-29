@@ -295,7 +295,7 @@ func mcpOAuthCallback(c *gin.Context) {
 	c.Header("Referrer-Policy", "no-referrer")
 	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'")
 	callbackError := c.Query("error")
-	if err := mcpclient.CompleteMCPOAuth(c.Param("flowID"), c.Query("code"), c.Query("state"), callbackError); err != nil {
+	if err := mcpclient.CompleteMCPOAuth(c.Param("flowID"), c.Query("code"), c.Query("state"), callbackError, c.Query("iss")); err != nil {
 		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", renderMCPOAuthCallbackPage(
 			util.LangToBCP47(model.Conf.Lang), model.Conf.Language(327), model.Conf.Language(328), false))
 		return

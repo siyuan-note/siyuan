@@ -17,6 +17,8 @@
 package client
 
 import (
+	"maps"
+
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 )
 
@@ -31,6 +33,7 @@ func convertMCPSchema(inputSchema any) tools.ToolSchema {
 	if !ok {
 		return schema
 	}
+	schema.Raw = maps.Clone(m)
 
 	if t, ok := m["type"].(string); ok && t != "" {
 		schema.Type = t

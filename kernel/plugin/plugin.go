@@ -437,7 +437,8 @@ func (p *KernelPlugin) invokeMcpTool(handler goja.Callable, args map[string]any)
 		}
 
 		return tools.CallToolResult{
-			Content: []tools.ContentItem{{Type: "text", Text: string(jsonBytes)}},
+			Content:           []tools.ContentItem{{Type: "text", Text: string(jsonBytes)}},
+			StructuredContent: taskResult.value,
 		}, nil
 
 	case <-p.context.Done():

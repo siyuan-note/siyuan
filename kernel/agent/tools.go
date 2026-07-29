@@ -19,6 +19,7 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"maps"
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
@@ -98,6 +99,10 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) (res
 }
 
 func convertSchema(schema tools.ToolSchema) any {
+	if schema.Raw != nil {
+		return maps.Clone(schema.Raw)
+	}
+
 	// 根级 anyOf 常见于 Zod 生成的 schema，取第一个 object 变体展开。
 	if schema.Type == "" && len(schema.AnyOf) > 0 {
 		for _, variant := range schema.AnyOf {
@@ -225,6 +230,11 @@ func resultToString(result tools.CallToolResult) string {
 	for _, item := range result.Content {
 		if item.Type == "text" {
 			parts = append(parts, item.Text)
+		}
+	}
+	if len(parts) == 0 && result.StructuredContent != nil {
+		if data, err := json.Marshal(result.StructuredContent); err == nil {
+			return string(data)
 		}
 	}
 	if len(parts) == 0 {

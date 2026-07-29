@@ -64,3 +64,19 @@ func hanInsensitiveRegexp(k string) string {
 	}
 	return b.String()
 }
+
+// NormalizeSearchText 按搜索设置归一化文本，用于全文索引之外的文本匹配。
+func NormalizeSearchText(text string, caseSensitive, hanSensitive bool) string {
+	if !hanSensitive {
+		text = strings.Map(func(r rune) rune {
+			if simplified, ok := hanTradToSimp[r]; ok {
+				return simplified
+			}
+			return r
+		}, text)
+	}
+	if !caseSensitive {
+		text = strings.ToLower(text)
+	}
+	return text
+}

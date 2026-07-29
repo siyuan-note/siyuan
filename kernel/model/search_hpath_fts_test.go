@@ -21,6 +21,7 @@ package model
 import (
 	gosql "database/sql"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -85,5 +86,20 @@ func TestFTSAndHPathMatchesIntegration(t *testing.T) {
 	}
 	if 3 != matched || 2 != docs {
 		t.Fatalf("FTS 与路径联合搜索统计错误：matches=%d, docs=%d", matched, docs)
+	}
+
+	snippetStmt, snippetArgs := buildFTSSnippetBlocksByRowIDQuery("\"Parent\"", []int64{1, 3})
+	if !strings.Contains(snippetStmt, "snippet(blocks_fts") || strings.Contains(snippetStmt, "SELECT *") {
+		t.Fatalf("FTS 结果应使用摘要投影：%s", snippetStmt)
+	}
+	snippetRows, err := testDB.Query(snippetStmt, snippetArgs...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !snippetRows.Next() {
+		t.Fatal("FTS 摘要查询应返回结果")
+	}
+	if err = snippetRows.Close(); err != nil {
+		t.Fatal(err)
 	}
 }

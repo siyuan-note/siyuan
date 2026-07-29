@@ -44,6 +44,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -73,7 +74,13 @@ func init() {
 
 	sql.Register("sqlite3_extended", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			return conn.RegisterFunc("regexp", regex, true)
+			if err := conn.RegisterFunc("regexp", regex, true); err != nil {
+				return err
+			}
+			normalizeSearchText := func(text string, caseSensitive, hanSensitive int) string {
+				return search.NormalizeSearchText(text, 0 != caseSensitive, 0 != hanSensitive)
+			}
+			return conn.RegisterFunc("search_normalize", normalizeSearchText, true)
 		},
 	})
 }

@@ -1350,7 +1350,7 @@ func FullTextSearchBlockInBoxWithHPath(query string, boxes, paths []string, type
 				}
 			} else {
 				docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584
-				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID, searchHPath)
+				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, boxID, searchHPath)
 			}
 		}
 	}
@@ -2034,7 +2034,7 @@ func fullTextSearchByFTSInBox(query, boxFilter, pathFilter string, boxArgs, path
 
 func fullTextSearchByFTSAndHPathInBox(rawQuery, query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string, orderBy, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	cte, args := buildFTSAndHPathMatchesCTE(rawQuery, query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter)
-	stmt := cte + " SELECT b.*, matches.match_source FROM matches JOIN blocks b ON b.rowid = matches.block_rowid"
+	stmt := cte + " SELECT b.rowid AS block_rowid, matches.match_source FROM matches JOIN blocks b ON b.rowid = matches.block_rowid"
 	stmt += " " + buildHPathSearchOrderBy(rawQuery, orderBy)
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	result, err := sql.QueryNoLimitArgsInBox(stmt, boxID, args...)
@@ -2044,8 +2044,19 @@ func fullTextSearchByFTSAndHPathInBox(rawQuery, query, boxFilter, pathFilter str
 		return
 	}
 
-	sqlBlocks := sql.ToBlocks(result)
-	ret = fromSQLBlocks(&sqlBlocks, rawQuery, beforeLen)
+	matches := make([]ftsAndHPathMatch, 0, len(result))
+	for _, row := range result {
+		matches = append(matches, ftsAndHPathMatch{
+			rowID:  row["block_rowid"].(int64),
+			source: int(row["match_source"].(int64)),
+		})
+	}
+	ret, err = loadFTSAndHPathMatchBlocks(matches, rawQuery, query, beforeLen, boxID)
+	if err != nil {
+		logging.LogErrorf("load blocks by FTS and hpath failed: %s", err)
+		ret = []*Block{}
+		return
+	}
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
@@ -2060,6 +2071,113 @@ func fullTextSearchByFTSAndHPathInBox(rawQuery, query, boxFilter, pathFilter str
 	if 0 < len(countResult) {
 		matchedBlockCount = int(countResult[0]["matches"].(int64))
 		matchedRootCount = int(countResult[0]["docs"].(int64))
+	}
+	return
+}
+
+type ftsAndHPathMatch struct {
+	rowID  int64
+	source int
+}
+
+func loadFTSAndHPathMatchBlocks(matches []ftsAndHPathMatch, rawQuery, query string, beforeLen int, boxID string) (ret []*Block, err error) {
+	var ftsRowIDs, hPathRowIDs []int64
+	for _, match := range matches {
+		if 0 == match.source {
+			ftsRowIDs = append(ftsRowIDs, match.rowID)
+		} else {
+			hPathRowIDs = append(hPathRowIDs, match.rowID)
+		}
+	}
+
+	ftsBlocks, err := queryFTSSnippetBlocksByRowID(query, ftsRowIDs, boxID)
+	if err != nil {
+		return nil, err
+	}
+	hPathBlocks, err := queryRawBlocksByRowID(hPathRowIDs, boxID)
+	if err != nil {
+		return nil, err
+	}
+	for _, match := range matches {
+		sqlBlock := ftsBlocks[match.rowID]
+		terms := ""
+		if 0 != match.source {
+			sqlBlock = hPathBlocks[match.rowID]
+			terms = rawQuery
+		}
+		if nil == sqlBlock {
+			continue
+		}
+		block := fromSQLBlock(sqlBlock, terms, beforeLen)
+		if 0 == match.source {
+			markBlockHPath(block, sqlBlock.HPath, rawQuery, -1)
+		}
+		ret = append(ret, block)
+	}
+	return
+}
+
+func queryFTSSnippetBlocksByRowID(query string, rowIDs []int64, boxID string) (ret map[int64]*sql.Block, err error) {
+	ret = map[int64]*sql.Block{}
+	if 1 > len(rowIDs) {
+		return
+	}
+
+	stmt, args := buildFTSSnippetBlocksByRowIDQuery(query, rowIDs)
+	result, err := sql.QueryNoLimitArgsInBox(stmt, boxID, args...)
+	if err != nil {
+		return nil, err
+	}
+	ret = mapSQLBlocksByRowID(result)
+	return
+}
+
+func buildFTSSnippetBlocksByRowIDQuery(query string, rowIDs []int64) (stmt string, args []any) {
+	table := "blocks_fts"
+	projections := "rowid AS block_rowid, id, parent_id, root_id, hash, box, path, hpath, " +
+		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS name, " +
+		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS alias, " +
+		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS memo, " +
+		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
+		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
+		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
+	stmt = "SELECT " + projections + " FROM " + table +
+		" WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")')" +
+		" AND rowid IN (" + strings.TrimSuffix(strings.Repeat("?,", len(rowIDs)), ",") + ")"
+	args = make([]any, len(rowIDs))
+	for i, rowID := range rowIDs {
+		args[i] = rowID
+	}
+	return
+}
+
+func queryRawBlocksByRowID(rowIDs []int64, boxID string) (ret map[int64]*sql.Block, err error) {
+	ret = map[int64]*sql.Block{}
+	if 1 > len(rowIDs) {
+		return
+	}
+	stmt := "SELECT rowid AS block_rowid, * FROM blocks WHERE rowid IN (" +
+		strings.TrimSuffix(strings.Repeat("?,", len(rowIDs)), ",") + ")"
+	args := make([]any, len(rowIDs))
+	for i, rowID := range rowIDs {
+		args[i] = rowID
+	}
+	result, err := sql.QueryNoLimitArgsInBox(stmt, boxID, args...)
+	if err != nil {
+		return nil, err
+	}
+	ret = mapSQLBlocksByRowID(result)
+	return
+}
+
+func mapSQLBlocksByRowID(result []map[string]any) (ret map[int64]*sql.Block) {
+	ret = map[int64]*sql.Block{}
+	for _, row := range result {
+		rowID := row["block_rowid"].(int64)
+		blocks := sql.ToBlocks([]map[string]any{row})
+		if 0 < len(blocks) {
+			ret[rowID] = blocks[0]
+		}
 	}
 	return
 }
@@ -2087,10 +2205,28 @@ func buildFTSAndHPathMatchesCTE(rawQuery, query, boxFilter, pathFilter string, b
 }
 
 func buildHPathContainsCondition(query string) (condition, arg string) {
-	if Conf.Search.CaseSensitive {
+	if Conf.Search.CaseSensitive && Conf.Search.HanSensitiveVal() {
 		return "instr(hpath, ?) > 0", query
 	}
-	return "hpath LIKE ? ESCAPE '\\'", "%" + escapeSearchDocLikePattern(query) + "%"
+	caseSensitive, hanSensitive := searchNormalizationFlags()
+	condition = "instr(search_normalize(hpath, " + strconv.Itoa(caseSensitive) + ", " + strconv.Itoa(hanSensitive) + "), ?) > 0"
+	arg = search.NormalizeSearchText(query, Conf.Search.CaseSensitive, Conf.Search.HanSensitiveVal())
+	return
+}
+
+func searchNormalizationFlags() (caseSensitive, hanSensitive int) {
+	if Conf.Search.CaseSensitive {
+		caseSensitive = 1
+	}
+	if Conf.Search.HanSensitiveVal() {
+		hanSensitive = 1
+	}
+	return
+}
+
+func normalizedHPathSearchField(field string) string {
+	caseSensitive, hanSensitive := searchNormalizationFlags()
+	return "search_normalize(" + field + ", " + strconv.Itoa(caseSensitive) + ", " + strconv.Itoa(hanSensitive) + ")"
 }
 
 func buildHPathSearchOrderBy(query string, orderBy int) string {
@@ -2160,19 +2296,21 @@ func fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter string, boxArgs,
 	return
 }
 
-func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string, orderBy, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	return fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "", true)
 }
 
-func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string, orderBy, beforeLen, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	rawQuery := query
 	query = strings.ReplaceAll(query, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	keywords := strings.Split(query, " ")
 	contentField := columnConcat()
-	documentSearchField := contentField
+	contentDocumentLikeFilter := buildSearchDocumentLikeFilter("GROUP_CONCAT("+contentField+")", keywords)
+	documentLikeFilter := contentDocumentLikeFilter
 	if searchHPath {
-		documentSearchField += "||(CASE WHEN type = 'd' THEN hpath ELSE '' END)"
+		hPathField := "MAX(CASE WHEN type = 'd' THEN " + normalizedHPathSearchField("hpath") + " ELSE '' END)"
+		documentLikeFilter = buildSearchDocumentLikeFilterWithHPath("GROUP_CONCAT("+contentField+")", hPathField, keywords)
 	}
-	documentLikeFilter := buildSearchDocumentLikeFilter("GROUP_CONCAT("+documentSearchField+")", keywords)
 	blockLikeFilter := buildSearchDocumentLikeFilter(contentField, keywords)
 	var orderByLike strings.Builder
 	orderByLike.WriteString("(")
@@ -2186,31 +2324,24 @@ func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxA
 	// box/path 过滤子句在下方 dMatchStmt 与 selectStmt 中各出现一次，绑定参数需按出现顺序收集两份。
 	// 第一份对应 CTE 内的 WHERE
 	args := append(append([]any{}, boxArgs...), pathArgs...)
-	dMatchStmt := "SELECT root_id, MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent" +
+	dMatchStmt := "SELECT root_id, MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent, " +
+		"CASE WHEN " + contentDocumentLikeFilter + " THEN 0 ELSE 1 END AS matchSource" +
 		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" GROUP BY root_id HAVING " + documentLikeFilter + "ORDER BY " + orderByLike.String() + " DESC, MAX(updated) DESC"
+		" GROUP BY root_id HAVING " + documentLikeFilter +
+		buildDocumentMatchOrderBy(orderByLike.String(), orderBy)
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
 	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	selectStmt := cteStmt + "\nSELECT *, " +
 		"(" + contentField + ") AS concatContent, " +
 		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
-		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + blockLikeFilter + ")) THEN 1 ELSE 0 END) AS blockSort" +
+		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + blockLikeFilter + ")) THEN 1 ELSE 0 END) AS blockSort, " +
+		"(SELECT matchSource FROM docBlocks WHERE docBlocks.root_id = blocks.root_id) AS matchSource" +
 		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" AND (id IN (SELECT root_id FROM docBlocks " + limit + ") OR" +
 		"  (root_id IN (SELECT root_id FROM docBlocks" + limit + ") AND (" + blockLikeFilter + ")))"
 	// 第二份对应外层 SELECT 的 WHERE
 	args = append(args, append(append([]any{}, boxArgs...), pathArgs...)...)
-	if strings.Contains(orderBy, "ORDER BY rank DESC") {
-		orderBy = buildOrderBy(query, 0, 0)
-		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort ASC, ", 1)
-	} else if strings.Contains(orderBy, "ORDER BY rank") {
-		orderBy = buildOrderBy(query, 0, 0)
-		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
-	} else if strings.Contains(orderBy, "sort ASC") {
-		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
-	} else {
-		selectStmt += " " + orderBy
-	}
+	selectStmt += " " + buildDocumentSearchOrderBy(rawQuery, orderBy)
 	result, _ := sql.QueryNoLimitArgsInBox(selectStmt, boxID, args...)
 	resultBlocks := sql.ToBlocks(result)
 	if 0 < len(resultBlocks) {
@@ -2228,6 +2359,40 @@ func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxA
 	return
 }
 
+func buildDocumentMatchOrderBy(matchScore string, orderBy int) string {
+	stableOrder := ", root_id ASC"
+	switch orderBy {
+	case 1:
+		return " ORDER BY MAX(created) ASC, matchSource ASC" + stableOrder
+	case 2:
+		return " ORDER BY MAX(created) DESC, matchSource ASC" + stableOrder
+	case 3:
+		return " ORDER BY MAX(updated) ASC, matchSource ASC" + stableOrder
+	case 4:
+		return " ORDER BY MAX(updated) DESC, matchSource ASC" + stableOrder
+	case 6:
+		return " ORDER BY matchSource ASC, " + matchScore + " ASC, MAX(updated) DESC" + stableOrder
+	default:
+		return " ORDER BY matchSource ASC, " + matchScore + " DESC, MAX(updated) DESC" + stableOrder
+	}
+}
+
+func buildDocumentSearchOrderBy(query string, orderBy int) string {
+	switch orderBy {
+	case 1, 2, 3, 4:
+		return buildOrderBy(query, 0, orderBy) + ", matchSource ASC, id ASC"
+	}
+
+	blockSort := "blockSort DESC"
+	if 6 == orderBy {
+		blockSort = "blockSort ASC"
+	}
+	ret := buildOrderBy(query, 0, 0)
+	ret = strings.Replace(ret, "ORDER BY ", "ORDER BY matchSource ASC, ", 1)
+	ret = strings.Replace(ret, "END ASC, ", "END ASC, "+blockSort+", ", 1)
+	return ret + ", id ASC"
+}
+
 func buildSearchDocumentLikeFilter(field string, keywords []string) string {
 	var ret strings.Builder
 	for i, keyword := range keywords {
@@ -2235,6 +2400,26 @@ func buildSearchDocumentLikeFilter(field string, keywords []string) string {
 		ret.WriteString(" LIKE '%")
 		ret.WriteString(keyword)
 		ret.WriteString("%'")
+		if i < len(keywords)-1 {
+			ret.WriteString(" AND ")
+		}
+	}
+	return ret.String()
+}
+
+func buildSearchDocumentLikeFilterWithHPath(contentField, hPathField string, keywords []string) string {
+	var ret strings.Builder
+	for i, keyword := range keywords {
+		normalizedKeyword := search.NormalizeSearchText(keyword, Conf.Search.CaseSensitive, Conf.Search.HanSensitiveVal())
+		ret.WriteString("(")
+		ret.WriteString(contentField)
+		ret.WriteString(" LIKE '%")
+		ret.WriteString(keyword)
+		ret.WriteString("%' OR instr(")
+		ret.WriteString(hPathField)
+		ret.WriteString(", '")
+		ret.WriteString(normalizedKeyword)
+		ret.WriteString("') > 0)")
 		if i < len(keywords)-1 {
 			ret.WriteString(" AND ")
 		}
@@ -2440,12 +2625,7 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 	if "" != terms {
 		hPathBeforeLen = -1
 	}
-	hPath, _ := markSearch(sqlBlock.HPath, terms, hPathBeforeLen)
-	if !strings.HasPrefix(hPath, "/") {
-		hPath = "/" + hPath
-	}
-	block.HPath = hPath
-
+	markBlockHPath(block, sqlBlock.HPath, terms, hPathBeforeLen)
 	if "" != block.Name {
 		block.Name, _ = markSearch(block.Name, terms, 256)
 	}
@@ -2456,6 +2636,14 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		block.Memo, _ = markSearch(block.Memo, terms, 256)
 	}
 	return
+}
+
+func markBlockHPath(block *Block, hPath, terms string, beforeLen int) {
+	hPath, _ = markSearch(hPath, terms, beforeLen)
+	if !strings.HasPrefix(hPath, "/") {
+		hPath = "/" + hPath
+	}
+	block.HPath = hPath
 }
 
 func maxContent(content string, maxLen int) string {

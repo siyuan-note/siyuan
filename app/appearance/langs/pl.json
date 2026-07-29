@@ -1,4 +1,6 @@
 {
+  "snapshotData": "Dane",
+  "extensions": "Rozszerzenia",
   "deleteFontConfirm": "Usunąć niestandardową czcionkę <b>${x}</b>?",
   "fontFileTip": "Obsługiwane są tylko pliki czcionek TTF i OTF o rozmiarze do 64 MB",
   "importFont": "Importuj czcionkę",

@@ -1,4 +1,6 @@
 {
+  "snapshotData": "Dados",
+  "extensions": "Extensões",
   "deleteFontConfirm": "Excluir a fonte personalizada <b>${x}</b>?",
   "fontFileTip": "Apenas arquivos de fonte TTF e OTF de até 64 MB são compatíveis",
   "importFont": "Importar fonte",

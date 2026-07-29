@@ -1,4 +1,6 @@
 {
+  "snapshotData": "Dati",
+  "extensions": "Estensioni",
   "deleteFontConfirm": "Eliminare il carattere personalizzato <b>${x}</b>?",
   "fontFileTip": "Sono supportati solo file di caratteri TTF e OTF fino a 64 MB",
   "importFont": "Importa carattere",

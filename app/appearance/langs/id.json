@@ -1,4 +1,6 @@
 {
+  "snapshotData": "Data",
+  "extensions": "Ekstensi",
   "deleteFontConfirm": "Hapus font khusus <b>${x}</b>?",
   "fontFileTip": "Hanya file font TTF dan OTF hingga 64 MB yang didukung",
   "importFont": "Impor font",

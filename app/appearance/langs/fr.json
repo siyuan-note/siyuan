@@ -1,4 +1,6 @@
 {
+  "snapshotData": "Données",
+  "extensions": "Extensions",
   "deleteFontConfirm": "Supprimer la police personnalisée <b>${x}</b> ?",
   "fontFileTip": "Seuls les fichiers de police TTF et OTF jusqu’à 64 Mo sont pris en charge",
   "importFont": "Importer une police",

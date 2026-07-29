@@ -1,4 +1,6 @@
 {
+  "snapshotData": "Daten",
+  "extensions": "Erweiterungen",
   "deleteFontConfirm": "Benutzerdefinierte Schriftart <b>${x}</b> löschen?",
   "fontFileTip": "Es werden nur TTF- und OTF-Schriftdateien bis 64 MB unterstützt",
   "importFont": "Schriftart importieren",

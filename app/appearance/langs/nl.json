@@ -1,4 +1,6 @@
 {
+  "snapshotData": "Gegevens",
+  "extensions": "Extensies",
   "deleteFontConfirm": "Aangepast lettertype <b>${x}</b> verwijderen?",
   "fontFileTip": "Alleen TTF- en OTF-lettertypebestanden tot 64 MB worden ondersteund",
   "importFont": "Lettertype importeren",

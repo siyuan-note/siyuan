@@ -1,4 +1,6 @@
 {
+  "snapshotData": "البيانات",
+  "extensions": "الملحقات",
   "deleteFontConfirm": "هل تريد حذف الخط المخصص <b>${x}</b>؟",
   "fontFileTip": "تُدعم فقط ملفات خطوط TTF وOTF التي يصل حجمها إلى 64 ميغابايت",
   "importFont": "استيراد خط",

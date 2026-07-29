@@ -1,4 +1,6 @@
 {
+  "snapshotData": "データ",
+  "extensions": "拡張機能",
   "deleteFontConfirm": "カスタムフォント <b>${x}</b> を削除しますか？",
   "fontFileTip": "64 MB 以下の TTF および OTF フォントファイルのみ対応しています",
   "importFont": "フォントをインポート",

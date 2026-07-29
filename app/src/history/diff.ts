@@ -13,18 +13,215 @@ import {renderAssetsPreview} from "../asset/renderAssets";
 import {resizeSide} from "./resizeSide";
 import {confirmDialog} from "../dialog/confirmDialog";
 
-const genItem = (data: [], data2?: { title: string, fileID: string }[], hasUndo = true) => {
-    if (!data || data.length === 0) {
+type SnapshotDiffAggregate = "all" | "data" | "extension" | "other";
+type SnapshotFileKind = "document" | "database" | "asset" | "plugin" | "widget" | "template" | "snippet" | "bazaar" | "workspaceData" | "other";
+type SnapshotOperation = "update" | "add" | "remove";
+
+interface SnapshotFile {
+    title: string;
+    fileID: string;
+    path: string;
+    hSize: string;
+    updated: number;
+}
+
+interface SnapshotDiffItem {
+    file: SnapshotFile;
+    compareFile?: SnapshotFile;
+    kind: SnapshotFileKind;
+}
+
+interface SnapshotDiffResult {
+    updates: SnapshotDiffItem[];
+    adds: SnapshotDiffItem[];
+    removes: SnapshotDiffItem[];
+}
+
+interface SnapshotDiffFilterState {
+    aggregate: SnapshotDiffAggregate;
+    kind: SnapshotFileKind | "all";
+    expanded: Set<SnapshotOperation>;
+    result?: SnapshotDiffResult;
+}
+
+const snapshotFileKinds: SnapshotFileKind[] = [
+    "document",
+    "database",
+    "asset",
+    "workspaceData",
+    "plugin",
+    "widget",
+    "template",
+    "snippet",
+    "bazaar",
+    "other",
+];
+
+const getSnapshotFileKind = (filePath: string): SnapshotFileKind => {
+    const normalizedPath = filePath.replaceAll("\\", "/").replace(/^\/+/, "");
+    if (normalizedPath.endsWith(".sy")) {
+        return "document";
+    }
+
+    const pathParts = normalizedPath.split("/").filter((item) => item);
+    const boxOffset = /^\d{14}-[a-z0-9]{7}$/.test(pathParts[0]) ? 1 : 0;
+    const scopedPath = pathParts.slice(boxOffset).join("/");
+    if (scopedPath.startsWith("storage/av/")) {
+        return "database";
+    }
+    if (scopedPath.startsWith("plugins/") || scopedPath.startsWith("storage/petal/")) {
+        return "plugin";
+    }
+    if (scopedPath.startsWith("widgets/")) {
+        return "widget";
+    }
+    if (scopedPath === "storage/bazaar.json") {
+        return "bazaar";
+    }
+    if (scopedPath.startsWith("templates/")) {
+        return "template";
+    }
+    if (scopedPath.startsWith("snippets/")) {
+        return "snippet";
+    }
+    if (scopedPath.startsWith("assets/") || scopedPath.includes("/assets/")) {
+        return "asset";
+    }
+    if (["emojis/", "public/", "storage/riff/", "storage/ai/"].some((prefix) => scopedPath.startsWith(prefix)) ||
+        boxOffset === 1) {
+        return "workspaceData";
+    }
+    return "other";
+};
+
+const getSnapshotAggregate = (kind: SnapshotFileKind): Exclude<SnapshotDiffAggregate, "all"> => {
+    if (["document", "database", "asset", "workspaceData"].includes(kind)) {
+        return "data";
+    }
+    if (["plugin", "widget", "template", "snippet", "bazaar"].includes(kind)) {
+        return "extension";
+    }
+    return "other";
+};
+
+const getSnapshotKindLabel = (kind: SnapshotFileKind) => {
+    switch (kind) {
+        case "document":
+            return window.siyuan.languages.doc;
+        case "database":
+            return window.siyuan.languages.database;
+        case "asset":
+            return window.siyuan.languages.assets;
+        case "plugin":
+            return window.siyuan.languages.plugin;
+        case "widget":
+            return window.siyuan.languages.widget;
+        case "template":
+            return window.siyuan.languages.template;
+        case "snippet":
+            return window.siyuan.languages.codeSnippet;
+        case "bazaar":
+            return window.siyuan.languages.bazaar;
+        case "workspaceData":
+            return window.siyuan.languages.workspaceData;
+        default:
+            return window.siyuan.languages.configGroupOthers;
+    }
+};
+
+const getSnapshotItems = (result: SnapshotDiffResult) => {
+    return [...result.updates, ...result.adds, ...result.removes];
+};
+
+const buildSnapshotDiffResult = (data: {
+    updatesLeft: SnapshotFile[];
+    updatesRight: SnapshotFile[];
+    addsLeft: SnapshotFile[];
+    removesRight: SnapshotFile[];
+}): SnapshotDiffResult => {
+    return {
+        updates: (data.updatesLeft || []).map((file, index) => ({
+            file,
+            compareFile: data.updatesRight?.[index],
+            kind: getSnapshotFileKind(file.path),
+        })),
+        adds: (data.addsLeft || []).map((file) => ({
+            file,
+            kind: getSnapshotFileKind(file.path),
+        })),
+        removes: (data.removesRight || []).map((file) => ({
+            file,
+            kind: getSnapshotFileKind(file.path),
+        })),
+    };
+};
+
+const filterSnapshotItems = (items: SnapshotDiffItem[], state: SnapshotDiffFilterState) => {
+    return items.filter((item) => {
+        if (state.aggregate !== "all" && getSnapshotAggregate(item.kind) !== state.aggregate) {
+            return false;
+        }
+        return state.kind === "all" || item.kind === state.kind;
+    });
+};
+
+const genSnapshotFilter = (type: "snapshotAggregate" | "snapshotKind", value: string, label: string,
+                           count: number, current: boolean) => {
+    return `<button type="button" class="b3-chip b3-chip--middle b3-chip--pointer history__diff-filter${current ? " b3-chip--current" : ""}" data-type="${type}" data-value="${value}" aria-pressed="${current}">${escapeHtml(label)} ${count}</button>`;
+};
+
+const genSnapshotFilters = (state: SnapshotDiffFilterState) => {
+    const items = getSnapshotItems(state.result);
+    const aggregateCounts: Record<Exclude<SnapshotDiffAggregate, "all">, number> = {
+        data: 0,
+        extension: 0,
+        other: 0,
+    };
+    const kindCounts = new Map<SnapshotFileKind, number>();
+    items.forEach((item) => {
+        const aggregate = getSnapshotAggregate(item.kind);
+        aggregateCounts[aggregate]++;
+        kindCounts.set(item.kind, (kindCounts.get(item.kind) || 0) + 1);
+    });
+
+    const aggregateFilters = [
+        genSnapshotFilter("snapshotAggregate", "all", window.siyuan.languages.all, items.length, state.aggregate === "all"),
+        genSnapshotFilter("snapshotAggregate", "data", window.siyuan.languages.snapshotData,
+            aggregateCounts.data, state.aggregate === "data"),
+        genSnapshotFilter("snapshotAggregate", "extension", window.siyuan.languages.extensions,
+            aggregateCounts.extension, state.aggregate === "extension"),
+    ];
+    if (aggregateCounts.other > 0) {
+        aggregateFilters.push(genSnapshotFilter("snapshotAggregate", "other", window.siyuan.languages.configGroupOthers,
+            aggregateCounts.other, state.aggregate === "other"));
+    }
+
+    const availableKinds = snapshotFileKinds.filter((kind) => {
+        return (kindCounts.get(kind) || 0) > 0 &&
+            (state.aggregate === "all" || getSnapshotAggregate(kind) === state.aggregate);
+    });
+    const kindFilters = availableKinds.map((kind) => {
+        return genSnapshotFilter("snapshotKind", kind, getSnapshotKindLabel(kind), kindCounts.get(kind),
+            state.kind === kind);
+    }).join("");
+    return `<div class="history__diff-filters">
+    <div class="history__diff-filter-row">${aggregateFilters.join("")}</div>
+    ${availableKinds.length > 1 ? `<div class="history__diff-filter-row"><span class="history__diff-filter-label">${window.siyuan.languages.type}</span>${kindFilters}</div>` : ""}
+</div>`;
+};
+
+const genItem = (items: SnapshotDiffItem[], hasUndo = true) => {
+    if (!items || items.length === 0) {
         return `<li style="padding-left: 40px;" class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
     }
     let html = "";
-    data.forEach((item: { title: string, fileID: string, path: string, hSize: string, updated: number }, index) => {
-        let id2 = "";
-        if (data2) {
-            id2 = `data-id2="${data2[index].fileID}"`;
-        }
-        html += `<li style="padding-left: 40px;" class="b3-list-item b3-list-item--hide-action" ${id2} data-created="${item.updated}" data-id="${item.fileID}">
-    <span class="b3-list-item__text" title="${escapeAttr(item.path)} ${item.hSize}">${escapeHtml(item.title)}</span>
+    items.forEach((item) => {
+        const compareID = item.compareFile ? ` data-id2="${item.compareFile.fileID}"` : "";
+        html += `<li class="b3-list-item b3-list-item--hide-action history__diff-item"${compareID} data-created="${item.file.updated}" data-id="${item.file.fileID}" data-title="${escapeAttr(item.file.title)}">
+    <span class="history__diff-file">
+        <span class="history__diff-title">${escapeHtml(item.file.title)}</span>
+        <span class="history__diff-path" title="${escapeAttr(item.file.path)} ${item.file.hSize}">${escapeHtml(item.file.path)}</span>
+    </span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action ariaLabel${hasUndo ? "" : " fn__none"}" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
@@ -32,6 +229,47 @@ const genItem = (data: [], data2?: { title: string, fileID: string }[], hasUndo 
 </li>`;
     });
     return html;
+};
+
+const genSnapshotOperation = (operation: SnapshotOperation, label: string, items: SnapshotDiffItem[],
+                              state: SnapshotDiffFilterState) => {
+    const expanded = state.expanded.has(operation);
+    const isAdd = operation === "add";
+    return `<ul class="b3-list b3-list--background">
+    <li class="b3-list-item" data-operation="${operation}">
+        <span class="b3-list-item__toggle b3-list-item__toggle--hl">
+            <svg class="b3-list-item__arrow${expanded ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
+        </span>
+        <span style="padding-left: 4px" class="b3-list-item__text">${label}</span>
+        <span class="counter${items.length === 0 ? " fn__none" : ""}">${items.length}</span>
+    </li>
+    <ul class="${expanded ? "" : "fn__none"}"${isAdd ? ' data-type="update"' : ""}>${genItem(items, !isAdd)}</ul>
+</ul>`;
+};
+
+const genSnapshotSide = (state: SnapshotDiffFilterState) => {
+    const updates = filterSnapshotItems(state.result.updates, state);
+    const adds = filterSnapshotItems(state.result.adds, state);
+    const removes = filterSnapshotItems(state.result.removes, state);
+    return `${genSnapshotFilters(state)}
+<div class="history__diff-list">
+    ${genSnapshotOperation("update", window.siyuan.languages.update, updates, state)}
+    ${genSnapshotOperation("add", window.siyuan.languages.addAttr, adds, state)}
+    ${genSnapshotOperation("remove", window.siyuan.languages.remove, removes, state)}
+</div>`;
+};
+
+const resetSnapshotPreview = (dialog: Dialog) => {
+    dialog.element.querySelectorAll('[data-type="editors"] > div').forEach((item) => item.classList.add("fn__none"));
+};
+
+const renderSnapshotSide = (dialog: Dialog, state: SnapshotDiffFilterState) => {
+    const sideElement = dialog.element.querySelector(".history__side");
+    if (!sideElement || !state.result) {
+        return;
+    }
+    sideElement.innerHTML = genSnapshotSide(state);
+    resetSnapshotPreview(dialog);
 };
 
 let leftEditor: Protyle;
@@ -159,6 +397,11 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
         left = data[0].id;
         right = data[1].id;
     }
+    const filterState: SnapshotDiffFilterState = {
+        aggregate: "all",
+        kind: "all",
+        expanded: new Set(),
+    };
 
     const dialog = new Dialog({
         title: window.siyuan.languages.compare,
@@ -181,9 +424,29 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
         }
         let target = event.target as HTMLElement;
         while (target && target !== dialog.element) {
-            if (target.classList.contains("b3-list-item") && !target.dataset.id) {
-                target.nextElementSibling.classList.toggle("fn__none");
+            if (target.dataset.type === "snapshotAggregate") {
+                filterState.aggregate = target.dataset.value as SnapshotDiffAggregate;
+                filterState.kind = "all";
+                renderSnapshotSide(dialog, filterState);
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.dataset.type === "snapshotKind") {
+                const kind = target.dataset.value as SnapshotFileKind;
+                filterState.kind = filterState.kind === kind ? "all" : kind;
+                renderSnapshotSide(dialog, filterState);
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.classList.contains("b3-list-item") && !target.dataset.id) {
+                const hidden = target.nextElementSibling.classList.toggle("fn__none");
                 target.querySelector("svg").classList.toggle("b3-list-item__arrow--open");
+                const operation = target.dataset.operation as SnapshotOperation;
+                if (hidden) {
+                    filterState.expanded.delete(operation);
+                } else {
+                    filterState.expanded.add(operation);
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -200,17 +463,17 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
             } else if (target.classList.contains("block__icon")) {
                 if (target.getAttribute("data-direct") === "left") {
                     target.setAttribute("data-direct", "right");
-                    genHTML(right, left, dialog, "right");
+                    genHTML(right, left, dialog, "right", filterState);
                 } else {
                     target.setAttribute("data-direct", "left");
-                    genHTML(left, right, dialog, "left");
+                    genHTML(left, right, dialog, "left", filterState);
                 }
                 event.preventDefault();
                 event.stopPropagation();
                 break;
             } else if (target.getAttribute("data-type") == "rollback") {
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback,
-                    window.siyuan.languages.rollbackConfirm.replace("${name}", target.parentElement.textContent).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
+                    window.siyuan.languages.rollbackConfirm.replace("${name}", target.parentElement.dataset.title).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
                     () => {
                         fetchPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
                     });
@@ -221,15 +484,20 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
             target = target.parentElement;
         }
     });
-    genHTML(left, right, dialog, "left");
+    genHTML(left, right, dialog, "left", filterState);
     (document.activeElement as HTMLElement)?.blur();
 };
 
-const genHTML = (left: string, right: string, dialog: Dialog, direct: string) => {
+const genHTML = (left: string, right: string, dialog: Dialog, direct: string, filterState: SnapshotDiffFilterState) => {
     leftEditor = undefined;
     rightEditor = undefined;
     const isPhone = isMobile();
     fetchPost("/api/repo/diffRepoSnapshots", {left, right}, (response) => {
+        filterState.result = buildSnapshotDiffResult(response.data);
+        if (filterState.kind !== "all" &&
+            !getSnapshotItems(filterState.result).some((item) => item.kind === filterState.kind)) {
+            filterState.kind = "all";
+        }
         const headElement = dialog.element.querySelector(".b3-dialog__header");
         headElement.innerHTML = `<div style="padding: 0;min-height: auto;" class="block__icons">
     <span class="fn__flex-1"></span>
@@ -245,38 +513,7 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string) =>
     <span class="fn__flex-1"></span>
 </div>`;
         headElement.nextElementSibling.innerHTML = `<div class="fn__flex history__panel" style="height: 100%">
-    <div class="history__side" ${isMobile() ? "" : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDiffWidth}"`}>
-        <ul class="b3-list b3-list--background">
-            <li class="b3-list-item">
-                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
-                    <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
-                </span>
-                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.update}</span>
-                <span class="counter${response.data.updatesLeft.length === 0 ? " fn__none" : ""}">${response.data.updatesLeft.length}</span>
-            </li>
-            <ul class="fn__none">${genItem(response.data.updatesLeft, response.data.updatesRight)}</ul>
-        </ul>
-        <ul class="b3-list b3-list--background">
-            <li class="b3-list-item">
-                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
-                    <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
-                </span>
-                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.addAttr}</span>
-                <span class="counter${response.data.addsLeft.length === 0 ? " fn__none" : ""}">${response.data.addsLeft.length}</span>
-            </li>
-            <ul class="fn__none" data-type="update">${genItem(response.data.addsLeft, undefined, false)}</ul>
-        </ul>
-        <ul class="b3-list b3-list--background">
-            <li class="b3-list-item">
-                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
-                    <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
-                </span>
-                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.remove}</span>
-                <span class="counter${response.data.removesRight.length === 0 ? " fn__none" : ""}">${response.data.removesRight.length}</span>
-            </li>
-            <ul class="fn__none">${genItem(response.data.removesRight)}</ul>
-        </ul>
-    </div>
+    <div class="history__side history__side--diff" ${isMobile() ? "" : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDiffWidth}"`}>${genSnapshotSide(filterState)}</div>
     <div class="history__resize"></div>
     <div class="fn__flex-1 fn__flex" data-type="editors">
         <div class="fn__none fn__flex-1 fn__flex-column">

@@ -3,8 +3,9 @@ import * as assert from "node:assert/strict";
 import {
     beginFlashcardLoad,
     createFlashcardRevealState,
+    type FlashcardCreationConfig,
+    hasFlashcardAnswer,
     hideFlashcardAnswer,
-    prepareCalloutFlashcard,
     revealFlashcardAfterUnfold,
     showFlashcardAnswer
 } from "./flashcardMode";
@@ -20,49 +21,91 @@ const createClassElement = () => {
     return {classes, element};
 };
 
+const createFlashcardConfig = (overrides: Partial<FlashcardCreationConfig> = {}): FlashcardCreationConfig => ({
+    blockquote: false,
+    callout: false,
+    heading: false,
+    list: false,
+    mark: false,
+    superBlock: false,
+    ...overrides,
+});
+
 describe("flashcardMode", () => {
-    it("prepares a top-level callout with an answer", () => {
-        const calloutElement = {
+    it("ignores ordinary lists in document flashcards", () => {
+        const element = {
             querySelector(selector: string) {
-                assert.equal(selector, ":scope > .callout-content > [data-node-id]");
-                return {};
-            },
-        } as unknown as Element;
-        const wysiwygElement = {
-            querySelector(selector: string) {
-                assert.equal(selector, ":scope > .callout[custom-riff-decks]");
-                return calloutElement;
+                return selector === ".list, .li" ? {} : null;
             },
         } as unknown as Element;
 
-        assert.equal(prepareCalloutFlashcard(wysiwygElement, true), true);
+        assert.equal(hasFlashcardAnswer(element, createFlashcardConfig({list: true})), false);
     });
 
-    it("ignores callouts when the mode is disabled or no direct answer exists", () => {
-        let queried = false;
-        const disabledElement = {
-            querySelector(): null {
-                queried = true;
-                return null;
+    it("detects list flashcard answers instead of leaf list cards", () => {
+        const answerSelector = ".list[custom-riff-decks] .li > .list, .li[custom-riff-decks] > .list";
+        const answerElement = {
+            querySelector(selector: string) {
+                return selector === answerSelector ? {} : null;
             },
         } as unknown as Element;
-        assert.equal(prepareCalloutFlashcard(disabledElement, false), false);
-        assert.equal(queried, false);
+        const leafElement = {
+            querySelector(selector: string) {
+                return selector === ".list[custom-riff-decks], .li[custom-riff-decks]" ? {} : null;
+            },
+        } as unknown as Element;
 
-        const calloutElement = {
-            querySelector(): null {
-                return null;
-            },
-            removeAttribute() {
-                assert.fail("A callout without an answer must keep its fold attribute");
+        assert.equal(hasFlashcardAnswer(answerElement, createFlashcardConfig({list: true})), true);
+        assert.equal(hasFlashcardAnswer(leafElement, createFlashcardConfig({list: true})), false);
+    });
+
+    it("detects structural flashcard answers", () => {
+        const selectors: Array<[keyof FlashcardCreationConfig, string]> = [
+            ["superBlock", ":scope > .sb[custom-riff-decks] > div:nth-of-type(n+2):not(.protyle-attr)"],
+            ["blockquote", ":scope > .bq[custom-riff-decks] > [data-node-id] ~ [data-node-id]"],
+            ["callout", ":scope > .callout[custom-riff-decks] > .callout-content > [data-node-id]"],
+            ["heading", ":scope > div[data-type=\"NodeHeading\"][custom-riff-decks] ~ div"],
+        ];
+
+        selectors.forEach(([key, answerSelector]) => {
+            const element = {
+                querySelector(selector: string) {
+                    return selector === answerSelector ? {} : null;
+                },
+            } as unknown as Element;
+            assert.equal(hasFlashcardAnswer(element, createFlashcardConfig({[key]: true})), true);
+        });
+    });
+
+    it("ignores ordinary structural blocks", () => {
+        const ordinarySelectors = new Set([
+            ":scope > .sb",
+            ":scope > [data-type=\"NodeHeading\"]",
+        ]);
+        const element = {
+            querySelector(selector: string) {
+                return ordinarySelectors.has(selector) ? {} : null;
             },
         } as unknown as Element;
-        const wysiwygElement = {
-            querySelector() {
-                return calloutElement;
+
+        assert.equal(hasFlashcardAnswer(element, createFlashcardConfig({
+            heading: true,
+            superBlock: true,
+        })), false);
+    });
+
+    it("detects marks and skips disabled modes", () => {
+        let queryCount = 0;
+        const element = {
+            querySelector(selector: string) {
+                queryCount++;
+                return selector === "span[data-type~=\"mark\"]" ? {} : null;
             },
         } as unknown as Element;
-        assert.equal(prepareCalloutFlashcard(wysiwygElement, true), false);
+
+        assert.equal(hasFlashcardAnswer(element, createFlashcardConfig()), false);
+        assert.equal(queryCount, 0);
+        assert.equal(hasFlashcardAnswer(element, createFlashcardConfig({mark: true})), true);
     });
 
     it("hides and reveals the callout answer", () => {

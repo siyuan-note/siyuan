@@ -29,9 +29,9 @@ import {transaction} from "../protyle/wysiwyg/transaction";
 import {
     beginFlashcardLoad,
     createFlashcardRevealState,
+    hasFlashcardAnswer,
     hideFlashcardAnswer,
     isCurrentFlashcardLoad,
-    prepareCalloutFlashcard,
     revealFlashcardAfterUnfold,
     showFlashcardAnswer
 } from "./flashcardMode";
@@ -220,45 +220,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                         protyle.element.classList.contains("fn__none")) {
                         return;
                     }
-                    let hasHide = false;
-                    if (!window.siyuan.config.flashcard.superBlock &&
-                        !window.siyuan.config.flashcard.blockquote &&
-                        !window.siyuan.config.flashcard.callout &&
-                        !window.siyuan.config.flashcard.heading &&
-                        !window.siyuan.config.flashcard.list &&
-                        !window.siyuan.config.flashcard.mark) {
-                        hasHide = false;
-                    } else {
-                        if (window.siyuan.config.flashcard.superBlock) {
-                            if (protyle.wysiwyg.element.querySelector(":scope > .sb")) {
-                                hasHide = true;
-                            }
-                        }
-                        if (window.siyuan.config.flashcard.blockquote) {
-                            const blockquoteElement = protyle.wysiwyg.element.querySelector(":scope > .bq[custom-riff-decks]");
-                            if (blockquoteElement?.querySelector(":scope > [data-node-id] ~ [data-node-id]")) {
-                                hasHide = true;
-                            }
-                        }
-                        if (prepareCalloutFlashcard(protyle.wysiwyg.element, window.siyuan.config.flashcard.callout)) {
-                            hasHide = true;
-                        }
-                        if (window.siyuan.config.flashcard.heading) {
-                            if (protyle.wysiwyg.element.querySelector(':scope > [data-type="NodeHeading"]')) {
-                                hasHide = true;
-                            }
-                        }
-                        if (window.siyuan.config.flashcard.list) {
-                            if (protyle.wysiwyg.element.querySelector(".list, .li")) {
-                                hasHide = true;
-                            }
-                        }
-                        if (window.siyuan.config.flashcard.mark) {
-                            if (protyle.wysiwyg.element.querySelector('span[data-type~="mark"]')) {
-                                hasHide = true;
-                            }
-                        }
-                    }
+                    const hasHide = hasFlashcardAnswer(protyle.wysiwyg.element, window.siyuan.config.flashcard);
                     if (!hasHide) {
                         revealFlashcardAnswer(protyle, () => {
                             showRatingActions(actionElements, currentCard);

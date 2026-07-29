@@ -1,4 +1,4 @@
-type FlashcardCreationConfig = Pick<Config.IFlashCard,
+export type FlashcardCreationConfig = Pick<Config.IFlashCard,
     "blockquote" | "callout" | "heading" | "list" | "mark" | "superBlock">;
 
 export interface IFlashcardRevealState {
@@ -63,6 +63,21 @@ const FLASHCARD_HIDE_CLASS_ENTRIES: Array<[keyof FlashcardCreationConfig, string
 
 const FLASHCARD_HIDE_CLASSES = FLASHCARD_HIDE_CLASS_ENTRIES.map((entry) => entry[1]);
 
+const FLASHCARD_ANSWER_SELECTOR_ENTRIES: Array<[keyof FlashcardCreationConfig, string]> = [
+    ["mark", "span[data-type~=\"mark\"]"],
+    ["list", ".list[custom-riff-decks] .li > .list, .li[custom-riff-decks] > .list"],
+    ["superBlock", ":scope > .sb[custom-riff-decks] > div:nth-of-type(n+2):not(.protyle-attr)"],
+    ["blockquote", ":scope > .bq[custom-riff-decks] > [data-node-id] ~ [data-node-id]"],
+    ["callout", ":scope > .callout[custom-riff-decks] > .callout-content > [data-node-id]"],
+    ["heading", ":scope > div[data-type=\"NodeHeading\"][custom-riff-decks] ~ div"],
+];
+
+export const hasFlashcardAnswer = (wysiwygElement: Element, config: FlashcardCreationConfig) => {
+    return FLASHCARD_ANSWER_SELECTOR_ENTRIES.some(([key, selector]) => {
+        return config[key] && Boolean(wysiwygElement.querySelector(selector));
+    });
+};
+
 export const showFlashcardAnswer = (element: Element) => {
     element.classList.remove(...FLASHCARD_HIDE_CLASSES);
 };
@@ -74,15 +89,4 @@ export const hideFlashcardAnswer = (element: Element, config: FlashcardCreationC
             element.classList.add(className);
         }
     });
-};
-
-export const prepareCalloutFlashcard = (wysiwygElement: Element, enabled: boolean) => {
-    if (!enabled) {
-        return false;
-    }
-    const calloutElement = wysiwygElement.querySelector(":scope > .callout[custom-riff-decks]");
-    if (!calloutElement?.querySelector(":scope > .callout-content > [data-node-id]")) {
-        return false;
-    }
-    return true;
 };

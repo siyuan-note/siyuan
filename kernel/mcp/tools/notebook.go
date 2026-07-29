@@ -207,7 +207,6 @@ func notebookSetIcon(args map[string]any) (CallToolResult, error) {
 
 	// icon 取值格式与 attr 工具一致；SetBoxIcon 内部对自定义图片名做 XSS 过滤。
 	model.SetBoxIcon(id, icon)
-	util.PushReloadFiletree()
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook icon set: " + id + " -> " + icon}}}, nil
 }
@@ -247,8 +246,6 @@ func notebookRandomIcon(args map[string]any) (CallToolResult, error) {
 		model.SetBoxIcon(nb.ID, newIcon)
 		sb.WriteString(fmt.Sprintf("- %s (id: %s): %s -> %s\n", nb.Name, nb.ID, oldIcon, newIcon))
 	}
-
-	util.PushReloadFiletree()
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

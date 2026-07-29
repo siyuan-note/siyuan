@@ -931,6 +931,7 @@ func SetBoxIcon(boxID, icon string) {
 
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
+	oldIcon := boxConf.Icon
 	boxConf.Icon = icon
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box icon [%s] failed: %s", boxID, err)
@@ -939,6 +940,9 @@ func SetBoxIcon(boxID, icon string) {
 	if err := setBoxDocIcon(boxID, icon); err != nil {
 		logging.LogErrorf("set box document icon [%s] failed: %s", boxID, err)
 		return
+	}
+	if oldIcon != icon {
+		pushNotebookIconChanged(boxID, icon)
 	}
 	IncSync()
 }

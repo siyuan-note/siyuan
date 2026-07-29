@@ -818,17 +818,22 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                         enableProtyle(protyle);
                     }
                 }
-                if (data.new.icon !== data.old.icon ||
+                const backgroundChanged = data.new.icon !== data.old.icon ||
                     data.new["title-img"] !== data.old["title-img"] ||
-                    data.new.tags !== data.old.tags && protyle.background) {
+                    data.new.tags !== data.old.tags;
+                if (backgroundChanged) {
                     /// #if MOBILE
                     protyle = window.siyuan.mobile.editor.protyle;
                     /// #endif
-                    protyle.background.ial.icon = data.new.icon;
-                    protyle.background.ial.tags = data.new.tags;
-                    protyle.background.ial["title-img"] = data.new["title-img"];
-                    protyle.background.render(protyle.background.ial, protyle.block.rootID);
-                    protyle.model?.parent.setDocIcon(data.new.icon);
+                    if (protyle.background) {
+                        protyle.background.ial.icon = data.new.icon;
+                        protyle.background.ial.tags = data.new.tags;
+                        protyle.background.ial["title-img"] = data.new["title-img"];
+                        protyle.background.render(protyle.background.ial, protyle.block.rootID);
+                    }
+                    if (data.new.icon !== data.old.icon) {
+                        protyle.model?.parent.setDocIcon(data.new.icon);
+                    }
                 }
                 return;
             }

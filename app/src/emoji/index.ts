@@ -998,8 +998,9 @@ export const updateOutlineEmoji = (unicode: string, id: string) => {
 };
 
 export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFile") => {
-    if (icon !== "iconFile") {
-        const notebook = window.siyuan.notebooks.find((item) => item.id === id);
+    const notebook = window.siyuan.notebooks.find((item) => item.id === id);
+    const isNotebookIcon = icon !== "iconFile" || !!notebook;
+    if (isNotebookIcon) {
         if (notebook?.icon === unicode) {
             return;
         }
@@ -1012,7 +1013,7 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
     }
     let emojiElement;
     /// #if MOBILE
-    if (icon === "iconFile") {
+    if (!isNotebookIcon) {
         emojiElement = document.querySelector(
             `#sidebar [data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`
         );
@@ -1027,7 +1028,7 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
     const dockFile = getDockByType("file");
     if (dockFile) {
         const files = dockFile.data.file as Files;
-        if (icon === "iconFile") {
+        if (!isNotebookIcon) {
             emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`);
         } else {
             emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`) || files.element.querySelector(`[data-url="${id}"] .b3-list-item__icon`) || files.closeElement.querySelector(`[data-url="${id}"] .b3-list-item__icon`);
@@ -1035,7 +1036,7 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
     }
     /// #endif
     if (emojiElement) {
-        emojiElement.innerHTML = unicode2Emoji(unicode || (icon === "iconFile" ? (emojiElement.previousElementSibling.classList.contains("fn__hidden") ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder) : window.siyuan.storage[Constants.LOCAL_IMAGES].note));
+        emojiElement.innerHTML = unicode2Emoji(unicode || (!isNotebookIcon ? (emojiElement.previousElementSibling.classList.contains("fn__hidden") ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder) : window.siyuan.storage[Constants.LOCAL_IMAGES].note));
     }
 };
 

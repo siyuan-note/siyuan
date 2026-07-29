@@ -2157,13 +2157,14 @@ func (tx *Transaction) commit() (err error) {
 	for boxID, icon := range tx.boxIcons {
 		box := &Box{ID: boxID}
 		boxConf := box.GetConf()
+		oldIcon := boxConf.Icon
 		boxConf.Icon = icon
 		if err = box.SaveConf(boxConf); err != nil {
 			return
 		}
-	}
-	if 0 < len(tx.boxIcons) {
-		ReloadFiletree()
+		if oldIcon != icon {
+			pushNotebookIconChanged(boxID, icon)
+		}
 	}
 	tx.changedRootIDs = refreshDynamicRefTexts(tx.nodes, tx.trees)
 

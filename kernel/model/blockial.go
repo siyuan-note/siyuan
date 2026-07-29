@@ -187,13 +187,14 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 	for boxID, icon := range boxIcons {
 		box := &Box{ID: boxID}
 		boxConf := box.GetConf()
+		oldIcon := boxConf.Icon
 		boxConf.Icon = icon
 		if err = box.SaveConf(boxConf); err != nil {
 			return
 		}
-	}
-	if 0 < len(boxIcons) {
-		ReloadFiletree()
+		if oldIcon != icon {
+			pushNotebookIconChanged(boxID, icon)
+		}
 	}
 
 	IncSync()
@@ -232,10 +233,11 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		if icon, ok := nameValues["icon"]; ok {
 			box := &Box{ID: tree.Box}
 			boxConf := box.GetConf()
+			oldIcon := boxConf.Icon
 			boxConf.Icon = icon
 			err = box.SaveConf(boxConf)
-			if nil == err {
-				ReloadFiletree()
+			if nil == err && oldIcon != icon {
+				pushNotebookIconChanged(tree.Box, icon)
 			}
 		}
 	}

@@ -892,6 +892,9 @@ export class Files extends Model {
                         this.init(false);
                     });
                     break;
+                case "notebookIconChanged":
+                    this.updateNotebookIcon(data.data);
+                    break;
                 case "reloadNotebookInfo":
                     window.clearTimeout(this.reloadNotebookInfoTimeout);
                     this.reloadNotebookInfoTimeout = window.setTimeout(() => {
@@ -1068,6 +1071,32 @@ export class Files extends Model {
                     this.getLeaf(liElement, notebookId, true);
                 }
                 break;
+            }
+        }
+    }
+
+    private updateNotebookIcon(data: { boxID: string, icon: string }) {
+        if (!data || typeof data.boxID !== "string" || typeof data.icon !== "string") {
+            return;
+        }
+        const notebook = window.siyuan.notebooks.find((item) => item.id === data.boxID);
+        if (!notebook) {
+            return;
+        }
+        notebook.icon = data.icon;
+        if (notebook.encrypted && notebook.closed) {
+            return;
+        }
+        const liElement = notebook.closed ?
+            this.closeElement.querySelector<HTMLElement>(`li[data-url="${data.boxID}"]`) :
+            this.element.querySelector<HTMLElement>(
+                `ul[data-url="${data.boxID}"] > li[data-type="navigation-root"]`
+            );
+        const iconElement = liElement?.querySelector<HTMLElement>(".b3-list-item__icon");
+        if (iconElement) {
+            const iconHTML = unicode2Emoji(data.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note);
+            if (iconElement.innerHTML !== iconHTML) {
+                iconElement.innerHTML = iconHTML;
             }
         }
     }

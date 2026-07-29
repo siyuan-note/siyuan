@@ -153,6 +153,13 @@ func refreshBoxDocInfoByBoxID(boxID string) {
 	util.BroadcastByType("filetree", "reloadNotebookInfo", 0, "", boxID)
 }
 
+func pushNotebookIconChanged(boxID, icon string) {
+	util.BroadcastByType("filetree", "notebookIconChanged", 0, "", map[string]any{
+		"boxID": boxID,
+		"icon":  icon,
+	})
+}
+
 func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	cTime, _ := time.ParseInLocation("20060102150405", tree.ID[:14], time.Local)
 	mTime := cTime

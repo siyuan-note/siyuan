@@ -235,7 +235,6 @@ var notebookSetIconCmd = &cobra.Command{
 
 		// SetBoxIcon 内部对自定义图片名做 XSS 过滤。
 		model.SetBoxIcon(id, icon)
-		util.PushReloadFiletree()
 
 		switch outputFormat {
 		case "json":
@@ -302,7 +301,6 @@ var notebookRandomIconCmd = &cobra.Command{
 		for _, c := range changes {
 			model.SetBoxIcon(c.ID, c.NewIcon)
 		}
-		util.PushReloadFiletree()
 
 		switch outputFormat {
 		case "json":

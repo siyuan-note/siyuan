@@ -19,6 +19,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"image"
 	"io"
@@ -439,6 +440,11 @@ func exportConf(c *gin.Context) {
 	}
 	if nil != clonedConf.Editor {
 		clonedConf.Editor.Emoji = []string{}
+		if strings.HasPrefix(clonedConf.Editor.FontFamily, util.CustomFontFamilyPrefix) {
+			clonedConf.Editor.FontFamily = ""
+			clonedConf.Editor.FontWeight = 400
+			clonedConf.Editor.FontFamilyDisplay = ""
+		}
 	}
 	if nil != clonedConf.Export {
 		clonedConf.Export.PandocBin = ""
@@ -889,6 +895,119 @@ func getSysFonts(c *gin.Context) {
 
 	fonts := util.LoadSysFonts()
 	ret.Data = fonts
+}
+
+func getCustomFonts(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = util.LoadCustomFonts()
+}
+
+func importCustomFont(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, util.MaxCustomFontSize+1024*1024)
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		var maxBytesError *http.MaxBytesError
+		if errors.As(err, &maxBytesError) {
+			ret.Code = http.StatusRequestEntityTooLarge
+			ret.Msg = "font file is too large"
+		} else {
+			ret.Code = http.StatusBadRequest
+			ret.Msg = "Field [file] must not be empty"
+		}
+		return
+	}
+	if util.MaxCustomFontSize < fileHeader.Size {
+		ret.Code = http.StatusRequestEntityTooLarge
+		ret.Msg = "font file is too large"
+		return
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		ret.Code = http.StatusBadRequest
+		ret.Msg = err.Error()
+		return
+	}
+	defer file.Close()
+
+	if err = os.MkdirAll(util.CustomFontDir(), 0755); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	tempFile, err := os.CreateTemp(util.CustomFontDir(), ".font-*")
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	tempPath := tempFile.Name()
+	defer os.Remove(tempPath)
+
+	written, copyErr := io.Copy(tempFile, io.LimitReader(file, util.MaxCustomFontSize+1))
+	closeErr := tempFile.Close()
+	if copyErr != nil {
+		ret.Code = http.StatusBadRequest
+		ret.Msg = copyErr.Error()
+		return
+	}
+	if closeErr != nil {
+		ret.Code = -1
+		ret.Msg = closeErr.Error()
+		return
+	}
+	if util.MaxCustomFontSize < written {
+		ret.Code = http.StatusRequestEntityTooLarge
+		ret.Msg = "font file is too large"
+		return
+	}
+
+	font, _, err := util.InstallCustomFont(tempPath)
+	if err != nil {
+		ret.Code = http.StatusBadRequest
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = font
+}
+
+func removeCustomFont(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	id, _ := arg["id"].(string)
+	font, err := util.RemoveCustomFont(id)
+	if err != nil {
+		if os.IsNotExist(err) {
+			ret.Code = http.StatusNotFound
+		} else {
+			ret.Code = http.StatusBadRequest
+		}
+		ret.Msg = err.Error()
+		return
+	}
+
+	var editor *conf.Editor
+	if model.Conf.Editor.FontFamily == font.Family {
+		model.Conf.Editor.FontFamily = ""
+		model.Conf.Editor.FontWeight = 400
+		model.Conf.Editor.FontFamilyDisplay = ""
+		model.Conf.Save()
+		editor = model.Conf.Editor
+	}
+	ret.Data = map[string]any{
+		"font":   font,
+		"editor": editor,
+	}
 }
 
 func version(c *gin.Context) {

@@ -17,6 +17,7 @@
 package util
 
 import (
+	"errors"
 	"os"
 	"sort"
 	"strconv"
@@ -27,8 +28,6 @@ import (
 	"github.com/ConradIrwin/font/sfnt"
 	"github.com/flopp/go-findfont"
 	"github.com/siyuan-note/logging"
-	textUnicode "golang.org/x/text/encoding/unicode"
-	"golang.org/x/text/transform"
 )
 
 var (
@@ -142,39 +141,19 @@ func parseTTFFontFamily(fontPath string) *Font {
 }
 
 func parseFont(font *sfnt.Font) *Font {
+	ret, _ := parseFontInfo(font)
+	return ret
+}
+
+func parseFontInfo(font *sfnt.Font) (*Font, error) {
 	t, err := font.NameTable()
 	if err != nil {
-		//logging.LogErrorf("parse font name table failed: %s", err)
-		return nil
+		return nil, err
 	}
 
-	var family, subfamily string
-	for _, e := range t.List() {
-		if sfnt.NameFontFamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
-			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-			if err == nil {
-				family = strings.TrimSpace(string(v))
-			}
-		}
-		if sfnt.NamePreferredFamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
-			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-			if err == nil {
-				family = strings.TrimSpace(string(v))
-			}
-		}
-		if sfnt.NameFontSubfamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
-			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-			if err == nil {
-				subfamily = strings.TrimSpace(string(v))
-			}
-		}
-		if sfnt.NamePreferredSubfamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
-			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-			if err == nil {
-				subfamily = strings.TrimSpace(string(v))
-			}
-		}
-	}
+	entries := t.List()
+	family := selectFontName(entries, sfnt.NamePreferredFamily, sfnt.NameFontFamily)
+	subfamily := selectFontName(entries, sfnt.NamePreferredSubfamily, sfnt.NameFontSubfamily)
 
 	weight := 400
 	os2, err := font.OS2Table()
@@ -223,17 +202,53 @@ func parseFont(font *sfnt.Font) *Font {
 		}
 	}
 
-	if family != "" && !strings.HasPrefix(family, ".") {
-		displayName := family
-		if subfamily != "" && !strings.EqualFold(subfamily, "Regular") {
-			displayName = family + " " + subfamily
-		}
+	if family == "" || strings.HasPrefix(family, ".") {
+		return nil, errors.New("font family is empty")
+	}
 
-		return &Font{
-			Family:      family,
-			Weight:      weight,
-			DisplayName: displayName,
+	displayName := family
+	if subfamily != "" && !strings.EqualFold(subfamily, "Regular") {
+		displayName = family + " " + subfamily
+	}
+
+	return &Font{
+		Family:      family,
+		Weight:      weight,
+		DisplayName: displayName,
+	}, nil
+}
+
+func selectFontName(entries []*sfnt.NameEntry, nameIDs ...sfnt.NameID) string {
+	for _, nameID := range nameIDs {
+		var selected string
+		selectedScore := 4
+		for _, entry := range entries {
+			if entry.NameID != nameID {
+				continue
+			}
+
+			value := strings.Trim(strings.TrimSpace(entry.String()), "\x00")
+			if value == "" {
+				continue
+			}
+
+			score := 3
+			switch {
+			case entry.LanguageID == sfnt.PlatformLanguageID(1033):
+				score = 0
+			case entry.LanguageID == sfnt.PlatformLanguageID(2052):
+				score = 1
+			case entry.PlatformID == sfnt.PlatformUnicode:
+				score = 2
+			}
+			if score < selectedScore {
+				selected = value
+				selectedScore = score
+			}
+		}
+		if selected != "" {
+			return selected
 		}
 	}
-	return nil
+	return ""
 }

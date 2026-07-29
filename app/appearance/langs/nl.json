@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "Aangepast lettertype <b>${x}</b> verwijderen?",
+  "fontFileTip": "Alleen TTF- en OTF-lettertypebestanden tot 64 MB worden ondersteund",
+  "importFont": "Lettertype importeren",
   "returnLabel": "Terug",
   "useDefaultVerticalAlign": "Standaard verticale uitlijning gebruiken",
   "useDefaultHorizontalAlign": "Standaard horizontale uitlijning gebruiken",

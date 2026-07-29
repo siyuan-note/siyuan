@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "¿Eliminar la fuente personalizada <b>${x}</b>?",
+  "fontFileTip": "Solo se admiten archivos de fuentes TTF y OTF de hasta 64 MB",
+  "importFont": "Importar fuente",
   "returnLabel": "Volver",
   "useDefaultVerticalAlign": "Usar alineación vertical predeterminada",
   "useDefaultHorizontalAlign": "Usar alineación horizontal predeterminada",

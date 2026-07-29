@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "למחוק את הגופן המותאם אישית <b>${x}</b>?",
+  "fontFileTip": "נתמכים רק קובצי גופן מסוג TTF ו-OTF בגודל של עד 64 MB",
+  "importFont": "ייבוא גופן",
   "returnLabel": "חזרה",
   "useDefaultVerticalAlign": "שימוש ביישור האנכי המוגדר כברירת מחדל",
   "useDefaultHorizontalAlign": "שימוש ביישור האופקי המוגדר כברירת מחדל",

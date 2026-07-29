@@ -27,7 +27,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
-func TestGetAttributeViewFieldViewsRejectsReader(t *testing.T) {
+func TestAttributeViewEditorEndpointsRejectReader(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	previousConf := model.Conf
@@ -43,11 +43,58 @@ func TestGetAttributeViewFieldViewsRejectsReader(t *testing.T) {
 	})
 	ServeAPI(engine)
 
+	tests := []struct {
+		path string
+		body string
+	}{
+		{
+			path: "/api/av/getAttributeViewFieldViews",
+			body: `{"avID":"20260726000000-abcdefg","keyID":"20260726000001-abcdefg"}`,
+		},
+		{
+			path: "/api/av/getAttributeViewSearchTarget",
+			body: `{"id":"20260726000000-abcdefg","keywords":["secret"]}`,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.path, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, test.path, strings.NewReader(test.body))
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int            `json:"code"`
+				Data map[string]any `json:"data"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if response.Code != -1 {
+				t.Fatalf("reader request returned code %d: %s", response.Code, recorder.Body.String())
+			}
+			if response.Data["closeTimeout"] != float64(5000) {
+				t.Fatalf("reader request reached the handler: %s", recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestGetAttributeViewSearchTargetAllowsEditor(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, model.RoleEditor)
+		c.Next()
+	})
+	ServeAPI(engine)
+
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(
 		http.MethodPost,
-		"/api/av/getAttributeViewFieldViews",
-		strings.NewReader(`{"avID":"20260726000000-abcdefg","keyID":"20260726000001-abcdefg"}`),
+		"/api/av/getAttributeViewSearchTarget",
+		strings.NewReader(`{"id":"","keywords":[]}`),
 	)
 	request.Header.Set("Content-Type", "application/json")
 	engine.ServeHTTP(recorder, request)
@@ -59,10 +106,10 @@ func TestGetAttributeViewFieldViewsRejectsReader(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
 		t.Fatalf("unmarshal response failed: %v", err)
 	}
-	if response.Code != -1 {
-		t.Fatalf("reader request returned code %d: %s", response.Code, recorder.Body.String())
+	if response.Code != 0 {
+		t.Fatalf("editor request returned code %d: %s", response.Code, recorder.Body.String())
 	}
-	if response.Data["closeTimeout"] != float64(5000) {
-		t.Fatalf("reader request reached the handler: %s", recorder.Body.String())
+	if response.Data["closeTimeout"] != nil {
+		t.Fatalf("editor request was rejected as read-only: %s", recorder.Body.String())
 	}
 }

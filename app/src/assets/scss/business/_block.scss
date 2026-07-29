@@ -120,6 +120,10 @@
     font-weight: 600;
     color: var(--b3-theme-on-background);
 
+    > .counter {
+      font-weight: normal;
+    }
+
     &--icon {
       margin-left: 0;
     }

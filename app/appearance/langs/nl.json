@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "Druk nogmaals op ${hotkey} om alle geladen inhoudsblokken te selecteren",
+  "doNotRemindAgain": "Niet meer herinneren",
+  "msgSelectAllTip": "Tip voor alles selecteren in de editor",
   "sortDefault": "Standaardvolgorde",
   "sortByInstallTimeDesc": "Aflopend op installatietijd",
   "sortByInstallTimeAsc": "Oplopend op installatietijd",

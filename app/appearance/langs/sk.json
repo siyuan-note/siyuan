@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "Opätovným stlačením ${hotkey} vyberiete všetky načítané bloky obsahu",
+  "doNotRemindAgain": "Viac nepripomínať",
+  "msgSelectAllTip": "Tip na výber všetkého v editore",
   "sortDefault": "Predvolené poradie",
   "sortByInstallTimeDesc": "Zostupne podľa času inštalácie",
   "sortByInstallTimeAsc": "Vzostupne podľa času inštalácie",

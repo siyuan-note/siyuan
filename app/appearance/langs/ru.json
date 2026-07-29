@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "Нажмите ${hotkey} ещё раз, чтобы выбрать все загруженные блоки содержимого",
+  "doNotRemindAgain": "Больше не напоминать",
+  "msgSelectAllTip": "Подсказка выбора всего в редакторе",
   "sortDefault": "Порядок по умолчанию",
   "sortByInstallTimeDesc": "По убыванию времени установки",
   "sortByInstallTimeAsc": "По возрастанию времени установки",

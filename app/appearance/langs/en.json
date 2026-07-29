@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "Press ${hotkey} again to select all loaded content blocks",
+  "doNotRemindAgain": "Don't remind me again",
+  "msgSelectAllTip": "Editor select-all tip",
   "sortDefault": "Default order",
   "sortByInstallTimeDesc": "Descending by install time",
   "sortByInstallTimeAsc": "Ascending by install time",

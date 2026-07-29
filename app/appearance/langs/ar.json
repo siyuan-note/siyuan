@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "اضغط على ${hotkey} مرة أخرى لتحديد جميع كتل المحتوى المحمّلة",
+  "doNotRemindAgain": "عدم التذكير مرة أخرى",
+  "msgSelectAllTip": "تلميح تحديد الكل في المحرر",
   "sortDefault": "الترتيب الافتراضي",
   "sortByInstallTimeDesc": "تنازليًا حسب وقت التثبيت",
   "sortByInstallTimeAsc": "تصاعديًا حسب وقت التثبيت",

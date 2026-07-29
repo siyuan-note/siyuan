@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "Pulsa ${hotkey} de nuevo para seleccionar todos los bloques de contenido cargados",
+  "doNotRemindAgain": "No volver a recordar",
+  "msgSelectAllTip": "Aviso de seleccionar todo en el editor",
   "sortDefault": "Orden predeterminado",
   "sortByInstallTimeDesc": "Descendente por fecha de instalación",
   "sortByInstallTimeAsc": "Ascendente por fecha de instalación",

@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "再次按下 ${hotkey} 以選取全部已載入的內容區塊",
+  "doNotRemindAgain": "不再提醒",
+  "msgSelectAllTip": "編輯器全選提示",
   "sortDefault": "預設排序",
   "sortByInstallTimeDesc": "安裝時間降序",
   "sortByInstallTimeAsc": "安裝時間升序",

@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "불러온 모든 콘텐츠 블록을 선택하려면 ${hotkey} 키를 다시 누르세요",
+  "doNotRemindAgain": "다시 알리지 않기",
+  "msgSelectAllTip": "편집기 전체 선택 안내",
   "sortDefault": "기본 순서",
   "sortByInstallTimeDesc": "설치 시간 내림차순",
   "sortByInstallTimeAsc": "설치 시간 오름차순",

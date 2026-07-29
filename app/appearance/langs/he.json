@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "לחץ שוב על ${hotkey} כדי לבחור את כל בלוקי התוכן שנטענו",
+  "doNotRemindAgain": "לא להזכיר שוב",
+  "msgSelectAllTip": "טיפ לבחירת הכול בעורך",
   "sortDefault": "סדר ברירת מחדל",
   "sortByInstallTimeDesc": "בסדר יורד לפי זמן ההתקנה",
   "sortByInstallTimeAsc": "בסדר עולה לפי זמן ההתקנה",

@@ -48,7 +48,7 @@ export const fixTableRange = (range: Range) => {
     }
 };
 
-export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range) => {
+export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range): boolean => {
     const editElement = getContenteditableElement(nodeElement);
     if (editElement) {
         let position;
@@ -113,8 +113,9 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     }
     range.collapse(true);
     const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-    if (protyle.wysiwyg.element.childElementCount === selectElements.length && (selectElements[0].parentElement === protyle.wysiwyg.element)) {
-        return true;
+    if (selectElements.length > 0 && protyle.wysiwyg.element.childElementCount === selectElements.length &&
+        selectElements[0].parentElement === protyle.wysiwyg.element) {
+        return false;
     }
     hideElements(["select"], protyle);
     const ids: string[] = [];
@@ -126,6 +127,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
         }
     });
     countBlockWord(ids, protyle.block.rootID);
+    return false;
 };
 
 export const selectBlocksByRange = (protyle: IProtyle, range: Range) => {

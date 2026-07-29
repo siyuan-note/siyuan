@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "Yüklenen tüm içerik bloklarını seçmek için ${hotkey} tuşuna tekrar basın",
+  "doNotRemindAgain": "Bir daha hatırlatma",
+  "msgSelectAllTip": "Düzenleyicide tümünü seçme ipucu",
   "sortDefault": "Varsayılan sıralama",
   "sortByInstallTimeDesc": "Kurulum zamanına göre azalan",
   "sortByInstallTimeAsc": "Kurulum zamanına göre artan",

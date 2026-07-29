@@ -358,6 +358,7 @@ declare namespace Config {
         tagMaxList: boolean;
         workspaceNotSSD: boolean;
         browserCompatibility: boolean;
+        selectAllTip?: boolean;
     }
 
     /**

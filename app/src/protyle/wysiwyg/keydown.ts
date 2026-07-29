@@ -1,5 +1,5 @@
 import {hideElements} from "../ui/hideElements";
-import {isMac, isNotCtrl, isOnlyMeta, writeText} from "../util/compatibility";
+import {isMac, isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     focusBlock,
     focusByRange,
@@ -81,6 +81,8 @@ import {tabCodeBlock} from "./codeBlock";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {getAVTemplateInteractiveElement} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
+import {hideMessage, showMessage} from "../../dialog/message";
+import {isMobile} from "../../util/functions";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -93,6 +95,33 @@ export const getContentByInlineHTML = (range: Range, cb: (content: string) => vo
     });
     fetchPost("/api/block/getDOMText", {dom: html}, (response) => {
         cb(response.data);
+    });
+};
+
+let selectAllTipShown = false;
+
+const showSelectAllTip = () => {
+    if (selectAllTipShown || window.siyuan.config.appearance.notifications?.selectAllTip === false) {
+        return;
+    }
+    const messageId = showMessage(`<div class="fn__flex fn__flex-wrap">
+<span class="fn__flex-center">${window.siyuan.languages.selectAllTip.replace("${hotkey}", updateHotkeyTip("⌘A"))}</span>
+<span class="fn__space"></span>
+<button type="button" class="b3-button b3-button--white">${window.siyuan.languages.doNotRemindAgain}</button>
+</div>`, 0, "info", "selectAllTip");
+    if (!messageId) {
+        return;
+    }
+    selectAllTipShown = true;
+    document.querySelector(`#message [data-id="${messageId}"] button`)?.addEventListener("click", () => {
+        hideMessage(messageId);
+        fetchPost("/api/setting/setAppearance", {
+            ...window.siyuan.config.appearance,
+            notifications: {
+                ...window.siyuan.config.appearance.notifications,
+                selectAllTip: false,
+            }
+        });
     });
 };
 
@@ -1175,7 +1204,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (matchHotKey("⌘A", event)) {
             event.preventDefault();
-            selectAll(protyle, nodeElement, range);
+            const selectedCurrentContent = selectAll(protyle, nodeElement, range);
+            if (selectedCurrentContent && !nodeElement.classList.contains("code-block") && !isMobile()) {
+                showSelectAllTip();
+            }
             return true;
         }
 

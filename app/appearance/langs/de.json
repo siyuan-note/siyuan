@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "Drücken Sie erneut ${hotkey}, um alle geladenen Inhaltsblöcke auszuwählen",
+  "doNotRemindAgain": "Nicht mehr erinnern",
+  "msgSelectAllTip": "Hinweis zur Auswahl aller Inhalte im Editor",
   "sortDefault": "Standardsortierung",
   "sortByInstallTimeDesc": "Absteigend nach Installationszeit",
   "sortByInstallTimeAsc": "Aufsteigend nach Installationszeit",

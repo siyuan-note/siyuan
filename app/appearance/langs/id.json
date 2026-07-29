@@ -1,4 +1,7 @@
 {
+  "selectAllTip": "Tekan ${hotkey} lagi untuk memilih semua blok konten yang telah dimuat",
+  "doNotRemindAgain": "Jangan ingatkan lagi",
+  "msgSelectAllTip": "Petunjuk pilih semua di editor",
   "sortDefault": "Urutan bawaan",
   "sortByInstallTimeDesc": "Menurun berdasarkan waktu pemasangan",
   "sortByInstallTimeAsc": "Menaik berdasarkan waktu pemasangan",

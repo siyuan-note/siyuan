@@ -100,6 +100,7 @@ jobs:
               # AppImage
               install -Dm755 "\${srcdir}/\${_pkgname}" "\${pkgdir}/opt/\${pkgname}/\${pkgname}.AppImage"
               install -Dm644 "\${srcdir}/squashfs-root/LICENSE" "\${pkgdir}/opt/\${pkgname}/LICENSE"
+              install -Dm644 "\${srcdir}/squashfs-root/THIRD_PARTY_NOTICES.md" "\${pkgdir}/opt/\${pkgname}/THIRD_PARTY_NOTICES.md"
 
               # Desktop file
               install -Dm644 "\${srcdir}/\${_desktop_file}" \\
@@ -116,6 +117,7 @@ jobs:
               # Symlink license
               install -dm755 "\${pkgdir}/usr/share/licenses/\${pkgname}/"
               ln -s "/opt/\${pkgname}/LICENSE" "\${pkgdir}/usr/share/licenses/\${pkgname}"
+              ln -s "/opt/\${pkgname}/THIRD_PARTY_NOTICES.md" "\${pkgdir}/usr/share/licenses/\${pkgname}/THIRD_PARTY_NOTICES.md"
           }
           EOF
 

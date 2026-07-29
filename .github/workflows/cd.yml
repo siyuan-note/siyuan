@@ -509,6 +509,7 @@ jobs:
           cd ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
           node scripts/trimChangelogs.js
           zip -r app.zip appearance guide stage $([ -d changelogs ] && echo changelogs)
+          zip -j app.zip ../LICENSE ../THIRD_PARTY_NOTICES.md
           mkdir -p ${{ github.workspace }}/siyuan-android/app/src/main/assets
           cp app.zip ${{ github.workspace }}/siyuan-android/app/src/main/assets/app.zip
 

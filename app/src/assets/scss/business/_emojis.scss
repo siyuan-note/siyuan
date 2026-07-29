@@ -89,30 +89,104 @@
     flex-direction: column;
     box-sizing: border-box;
     height: 100%;
+    outline: none;
     padding: 16px;
 
-    &-preview {
+    &-empty,
+    &-detail {
       display: flex;
       flex: 1;
-      align-items: center;
-      justify-content: center;
-      min-height: 112px;
+      flex-direction: column;
+      min-height: 0;
+    }
 
-      img {
-        width: 80px;
-        height: 80px;
-        object-fit: contain;
-        border-radius: var(--b3-border-radius);
+    &-empty {
+      &-content {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
       }
     }
 
-    &-action {
-      flex-shrink: 0;
-      margin-top: 8px;
+    &-upload {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 120px;
+      border: 0;
+      border-radius: var(--b3-border-radius-b);
+      background-color: var(--b3-theme-surface-lighter);
+      color: var(--b3-theme-on-surface);
+      cursor: pointer;
+      font-size: 16px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover,
+      &:focus-visible {
+        background-color: var(--b3-list-hover);
+      }
+    }
+
+    &-tip {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    &-preview {
+      display: flex;
+      align-items: center;
+      flex: 0 0 120px;
+      flex-direction: column;
+      justify-content: center;
+      border-radius: var(--b3-border-radius-b);
+      background-color: var(--b3-theme-surface-lighter);
+    }
+
+    &-samples {
+      display: flex;
+      gap: 8px;
+    }
+
+    &-sample {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border: 1px solid var(--b3-border-color);
+      border-radius: var(--b3-border-radius-b);
+
+      &--light {
+        background-color: #fff;
+      }
+
+      &--dark {
+        background-color: #1e1e1e;
+      }
+
+      img {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+      }
     }
 
     &-name {
-      margin-top: 8px;
+      margin-top: 16px;
+    }
+
+    &-footer {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 16px;
     }
   }
 

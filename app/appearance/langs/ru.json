@@ -1,4 +1,10 @@
 {
+  "sortDefault": "Порядок по умолчанию",
+  "sortByInstallTimeDesc": "По убыванию времени установки",
+  "sortByInstallTimeAsc": "По возрастанию времени установки",
+  "sortByEnabledFirst": "Сначала включённые",
+  "sortByDisabledFirst": "Сначала отключённые",
+  "recordInterrupted": "Запись была прервана. Запишите ещё раз",
   "snapshotData": "Данные",
   "extensions": "Расширения",
   "deleteFontConfirm": "Удалить пользовательский шрифт <b>${x}</b>?",

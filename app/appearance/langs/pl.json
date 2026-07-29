@@ -1,4 +1,10 @@
 {
+  "sortDefault": "Kolejność domyślna",
+  "sortByInstallTimeDesc": "Malejąco według czasu instalacji",
+  "sortByInstallTimeAsc": "Rosnąco według czasu instalacji",
+  "sortByEnabledFirst": "Najpierw włączone",
+  "sortByDisabledFirst": "Najpierw wyłączone",
+  "recordInterrupted": "Nagrywanie zostało przerwane. Nagraj ponownie",
   "snapshotData": "Dane",
   "extensions": "Rozszerzenia",
   "deleteFontConfirm": "Usunąć niestandardową czcionkę <b>${x}</b>?",

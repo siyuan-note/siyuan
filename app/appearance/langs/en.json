@@ -1,4 +1,10 @@
 {
+  "sortDefault": "Default order",
+  "sortByInstallTimeDesc": "Descending by install time",
+  "sortByInstallTimeAsc": "Ascending by install time",
+  "sortByEnabledFirst": "Enabled first",
+  "sortByDisabledFirst": "Disabled first",
+  "recordInterrupted": "Recording was interrupted. Please record again",
   "snapshotData": "Data",
   "extensions": "Extensions",
   "deleteFontConfirm": "Delete custom font <b>${x}</b>?",

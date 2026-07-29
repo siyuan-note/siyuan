@@ -1,4 +1,10 @@
 {
+  "sortDefault": "Ordre par défaut",
+  "sortByInstallTimeDesc": "Décroissant par date d’installation",
+  "sortByInstallTimeAsc": "Croissant par date d’installation",
+  "sortByEnabledFirst": "Activés en premier",
+  "sortByDisabledFirst": "Désactivés en premier",
+  "recordInterrupted": "L’enregistrement a été interrompu. Veuillez recommencer",
   "snapshotData": "Données",
   "extensions": "Extensions",
   "deleteFontConfirm": "Supprimer la police personnalisée <b>${x}</b> ?",

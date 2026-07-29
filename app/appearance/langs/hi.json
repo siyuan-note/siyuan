@@ -1,4 +1,10 @@
 {
+  "sortDefault": "डिफ़ॉल्ट क्रम",
+  "sortByInstallTimeDesc": "इंस्टॉल समय के अनुसार अवरोही",
+  "sortByInstallTimeAsc": "इंस्टॉल समय के अनुसार आरोही",
+  "sortByEnabledFirst": "सक्षम पहले",
+  "sortByDisabledFirst": "अक्षम पहले",
+  "recordInterrupted": "रिकॉर्डिंग बाधित हो गई। कृपया फिर से रिकॉर्ड करें",
   "snapshotData": "डेटा",
   "extensions": "एक्सटेंशन",
   "deleteFontConfirm": "कस्टम फ़ॉन्ट <b>${x}</b> हटाएँ?",

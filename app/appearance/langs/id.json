@@ -1,4 +1,10 @@
 {
+  "sortDefault": "Urutan bawaan",
+  "sortByInstallTimeDesc": "Menurun berdasarkan waktu pemasangan",
+  "sortByInstallTimeAsc": "Menaik berdasarkan waktu pemasangan",
+  "sortByEnabledFirst": "Diaktifkan terlebih dahulu",
+  "sortByDisabledFirst": "Dinonaktifkan terlebih dahulu",
+  "recordInterrupted": "Perekaman terhenti. Silakan rekam lagi",
   "snapshotData": "Data",
   "extensions": "Ekstensi",
   "deleteFontConfirm": "Hapus font khusus <b>${x}</b>?",

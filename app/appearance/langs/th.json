@@ -1,4 +1,10 @@
 {
+  "sortDefault": "ลำดับเริ่มต้น",
+  "sortByInstallTimeDesc": "เรียงเวลาติดตั้งจากใหม่ไปเก่า",
+  "sortByInstallTimeAsc": "เรียงเวลาติดตั้งจากเก่าไปใหม่",
+  "sortByEnabledFirst": "เปิดใช้งานก่อน",
+  "sortByDisabledFirst": "ปิดใช้งานก่อน",
+  "recordInterrupted": "การบันทึกถูกขัดจังหวะ โปรดบันทึกใหม่",
   "snapshotData": "ข้อมูล",
   "extensions": "ส่วนขยาย",
   "deleteFontConfirm": "ลบแบบอักษรกำหนดเอง <b>${x}</b> หรือไม่?",

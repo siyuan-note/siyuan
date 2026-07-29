@@ -139,6 +139,18 @@ export const bazaar = {
             <input class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
+            <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
+            <div class="fn__space"></div>
+            <select class="b3-select" data-type="downloaded-sort">
+                <option ${localSort.downloadedPlugin === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortDefault}</option>
+                <option ${localSort.downloadedPlugin === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByInstallTimeDesc}</option>
+                <option ${localSort.downloadedPlugin === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByInstallTimeAsc}</option>
+                <option ${localSort.downloadedPlugin === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
+                <option ${localSort.downloadedPlugin === "4" ? "selected" : ""} value="4">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
+                <option ${localSort.downloadedPlugin === "5" ? "selected" : ""} data-plugin-only="true" value="5">${window.siyuan.languages.sortByEnabledFirst}</option>
+                <option ${localSort.downloadedPlugin === "6" ? "selected" : ""} data-plugin-only="true" value="6">${window.siyuan.languages.sortByDisabledFirst}</option>
+            </select>
+            <div class="fn__space"></div>
             <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch fn__flex-center" style="margin-right: 8px">
             <div class="counter counter--bg fn__none fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
@@ -395,7 +407,7 @@ export const bazaar = {
 <div class="config-bazaar__content b3-cards b3-cards--nowrap">${items.map((item: IBazaarItem) => this._genUpdateItemHTML(item)).join("")}</div>`;
         });
     },
-    _genMyHTML(bazaarType: TBazaarType, app: App, updateUpdate = true) {
+    _genMyHTML(bazaarType: TBazaarType, app: App, updateUpdate = true, preserveOrder = false) {
         if (updateUpdate) {
             this._getUpdate();
         }
@@ -418,6 +430,8 @@ export const bazaar = {
             contentElement.removeAttribute("data-loading");
             return;
         }
+        bazaar._updateDownloadedSortSelect(bazaarType);
+        const initialSortValue = bazaar._getDownloadedSortValue(bazaarType);
         fetchPost(installedAPI[bazaarType], {
             frontend: getFrontend(),
             keyword: (contentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement)?.value || "",
@@ -427,14 +441,18 @@ export const bazaar = {
             if (activeBtn?.getAttribute("data-type") !== myType) {
                 return;
             }
+            const currentSortValue = bazaar._getDownloadedSortValue(bazaarType);
+            const packages = preserveOrder && initialSortValue === currentSortValue ?
+                bazaar._preserveDownloadedOrder(response.data.packages) :
+                bazaar._sortDownloadedPackages(response.data.packages, currentSortValue);
             let html = "";
             const counterElement = contentElement.previousElementSibling.querySelector(".counter");
-            if (response.data.packages.length === 0) {
+            if (packages.length === 0) {
                 counterElement.classList.add("fn__none");
             } else {
                 counterElement.classList.remove("fn__none");
-                counterElement.textContent = response.data.packages.length;
-                html = response.data.packages.map((bazaarItem: IBazaarItem) => {
+                counterElement.textContent = packages.length.toString();
+                html = packages.map((bazaarItem: IBazaarItem) => {
                     const showSwitch = ["icons", "themes"].includes(bazaarType) && !bazaarItem.current;
                     let hasSetting = false;
                     if (bazaarType === "plugins") {
@@ -479,7 +497,8 @@ type="checkbox">
 </div>`;
                 }).join("");
             }
-            bazaar._data.downloaded = response.data.packages;
+            bazaar._data.downloadedDefault = response.data.packages;
+            bazaar._data.downloaded = packages;
             const checkElement = contentElement.parentElement.querySelector(".b3-switch");
             if (bazaarType === "plugins") {
                 checkElement.classList.remove("fn__none");
@@ -506,6 +525,7 @@ type="checkbox">
         icons: [] as IBazaarItem[],
         widgets: [] as IBazaarItem[],
         plugins: [] as IBazaarItem[],
+        downloadedDefault: [] as IBazaarItem[],
         downloaded: [] as IBazaarItem[],
         update: {
             themes: [] as IBazaarItem[],
@@ -659,6 +679,101 @@ type="checkbox">
     _type2myType(type: TBazaarType) {
         const tab = bazaar._type2tabType(type);
         return "my" + tab.charAt(0).toUpperCase() + tab.slice(1);
+    },
+    _getDownloadedSortStorageKey(type: TBazaarType) {
+        const tab = bazaar._type2tabType(type);
+        return "downloaded" + tab.charAt(0).toUpperCase() + tab.slice(1);
+    },
+    _getDownloadedSortValue(type: TBazaarType) {
+        const value = window.siyuan.storage[Constants.LOCAL_BAZAAR][bazaar._getDownloadedSortStorageKey(type)] || "0";
+        if (type !== "plugins" && ["5", "6"].includes(value)) {
+            return "0";
+        }
+        return value;
+    },
+    _updateDownloadedSortSelect(type: TBazaarType) {
+        const selectElement = bazaar.element.querySelector('[data-type="downloaded-sort"]') as HTMLSelectElement;
+        if (!selectElement) {
+            return;
+        }
+        selectElement.value = bazaar._getDownloadedSortValue(type);
+        selectElement.querySelectorAll('[data-plugin-only="true"]').forEach((option: HTMLOptionElement) => {
+            option.hidden = type !== "plugins";
+        });
+    },
+    _preserveDownloadedOrder(packages: IBazaarItem[]) {
+        const positions = new Map(bazaar._data.downloaded.map((item, index) => [item.name, index]));
+        return packages.map((item, index) => ({item, index})).sort((a, b) => {
+            const aPosition = positions.get(a.item.name);
+            const bPosition = positions.get(b.item.name);
+            if (aPosition === undefined && bPosition === undefined) {
+                return a.index - b.index;
+            }
+            if (aPosition === undefined) {
+                return 1;
+            }
+            if (bPosition === undefined) {
+                return -1;
+            }
+            return aPosition - bPosition;
+        }).map((entry) => entry.item);
+    },
+    _sortDownloadedPackages(packages: IBazaarItem[], sortValue: string) {
+        const indexed = packages.map((item, index) => ({item, index}));
+        const sortByTime = (field: "installTime" | "updateTime", descending: boolean) => {
+            return indexed.sort((a, b) => {
+                const aTime = a.item[field] || 0;
+                const bTime = b.item[field] || 0;
+                if (aTime < 1 && bTime < 1) {
+                    return a.index - b.index;
+                }
+                if (aTime < 1) {
+                    return 1;
+                }
+                if (bTime < 1) {
+                    return -1;
+                }
+                const result = descending ? bTime - aTime : aTime - bTime;
+                return result || a.index - b.index;
+            }).map((entry) => entry.item);
+        };
+        if (sortValue === "1") {
+            return sortByTime("installTime", true);
+        }
+        if (sortValue === "2") {
+            return sortByTime("installTime", false);
+        }
+        if (sortValue === "3") {
+            return sortByTime("updateTime", true);
+        }
+        if (sortValue === "4") {
+            return sortByTime("updateTime", false);
+        }
+        if (["5", "6"].includes(sortValue)) {
+            return indexed.sort((a, b) => {
+                const aEnabled = a.item.enabled ? 1 : 0;
+                const bEnabled = b.item.enabled ? 1 : 0;
+                const result = sortValue === "5" ? bEnabled - aEnabled : aEnabled - bEnabled;
+                return result || a.index - b.index;
+            }).map((entry) => entry.item);
+        }
+        return [...packages];
+    },
+    _reorderDownloadedCards(packages: IBazaarItem[]) {
+        const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
+        const cards = new Map(Array.from(contentElement.children).filter((item) => item.classList.contains("b3-card")).map((card) => [
+            card.getAttribute("data-repourl"),
+            card,
+        ]));
+        const fragment = document.createDocumentFragment();
+        packages.forEach((item) => {
+            const card = cards.get(item.repoURL);
+            if (card) {
+                fragment.append(card);
+            }
+        });
+        contentElement.append(fragment);
+        bazaar._data.downloaded = packages;
     },
     _initBazaarPanel(app: App, bazaarType: TBazaarType, panel: HTMLElement) {
         if (panel.getAttribute("data-init")) {
@@ -1041,6 +1156,7 @@ type="checkbox">
                     if (!target.hasAttribute("disabled")) {
                         target.setAttribute("disabled", "disabled");
                         const enabled = (target as HTMLInputElement).checked;
+                        pkgItem.enabled = enabled;
                         fetchPost("/api/petal/setPetalEnabled", {
                             packageName: pkgItem.name,
                             enabled,
@@ -1053,7 +1169,7 @@ type="checkbox">
                                     return;
                                 }
                                 loadPlugin(app, response.data).then(() => {
-                                    this._genMyHTML("plugins", app, false);
+                                    this._genMyHTML("plugins", app, false, true);
                                 });
                             } else {
                                 uninstall(app, pkgItem.name, true);
@@ -1150,7 +1266,13 @@ type="checkbox">
 
         bazaar.element.querySelectorAll(".b3-select").forEach((selectElement: HTMLSelectElement) => {
             selectElement.addEventListener("change", () => {
-                if (selectElement.id === "bazaarSelect") {
+                if (selectElement.getAttribute("data-type") === "downloaded-sort") {
+                    const activeBtn = bazaar.element.querySelector("#configBazaarDownloaded")?.previousElementSibling?.querySelector(".b3-button:not(.b3-button--outline)") as HTMLElement;
+                    const bazaarType = bazaar._myType2Type(activeBtn.getAttribute("data-type"));
+                    window.siyuan.storage[Constants.LOCAL_BAZAAR][bazaar._getDownloadedSortStorageKey(bazaarType)] = selectElement.value;
+                    setStorageVal(Constants.LOCAL_BAZAAR, window.siyuan.storage[Constants.LOCAL_BAZAAR]);
+                    bazaar._reorderDownloadedCards(bazaar._sortDownloadedPackages(bazaar._data.downloadedDefault, selectElement.value));
+                } else if (selectElement.id === "bazaarSelect") {
                     bazaar._renderBazaarCards(
                         bazaar.element.querySelector("#configBazaarTheme"),
                         bazaar._data.themes,

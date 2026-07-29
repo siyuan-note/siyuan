@@ -82,7 +82,14 @@ func incPackageDownloads(repoURL, systemID string) {
 }
 
 // InstallPackage 安装集市包
-func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageName string) error {
+func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageName string, update bool) error {
+	var fallbackInstallTime time.Time
+	if update {
+		if info, statErr := os.Stat(installPath); statErr == nil {
+			fallbackInstallTime = info.ModTime()
+		}
+	}
+
 	repoURLHash := repoURL + "@" + repoHash
 	data, err := downloadBazaarFile(repoURLHash, true)
 	if err != nil {
@@ -92,11 +99,11 @@ func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageNa
 		return err
 	}
 
-	// 记录安装时间
+	// 记录首次安装时间或最近更新时间
 	now := time.Now()
-	setPackageInstallTime(pkgType, packageName, now)
+	recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update)
 
-	// 文件夹的修改时间设置为当前安装时间
+	// 文件夹的修改时间设置为当前操作时间
 	if err = os.Chtimes(installPath, now, now); err != nil {
 		logging.LogWarnf("set package [%s] folder mtime failed: %s", packageName, err)
 	}

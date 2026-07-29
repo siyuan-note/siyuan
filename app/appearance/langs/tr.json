@@ -1,4 +1,10 @@
 {
+  "sortDefault": "Varsayılan sıralama",
+  "sortByInstallTimeDesc": "Kurulum zamanına göre azalan",
+  "sortByInstallTimeAsc": "Kurulum zamanına göre artan",
+  "sortByEnabledFirst": "Etkin olanlar önce",
+  "sortByDisabledFirst": "Devre dışı olanlar önce",
+  "recordInterrupted": "Kayıt kesintiye uğradı. Lütfen yeniden kaydedin",
   "snapshotData": "Veriler",
   "extensions": "Uzantılar",
   "deleteFontConfirm": "Özel yazı tipi <b>${x}</b> silinsin mi?",

@@ -1,4 +1,10 @@
 {
+  "sortDefault": "默认排序",
+  "sortByInstallTimeDesc": "安装时间降序",
+  "sortByInstallTimeAsc": "安装时间升序",
+  "sortByEnabledFirst": "已启用优先",
+  "sortByDisabledFirst": "已禁用优先",
+  "recordInterrupted": "录音已中断，请重新录制",
   "snapshotData": "数据",
   "extensions": "扩展",
   "deleteFontConfirm": "确定删除自定义字体 <b>${x}</b> 吗？",

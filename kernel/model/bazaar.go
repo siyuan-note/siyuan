@@ -338,7 +338,7 @@ func installBazaarPackage(pkgType, repoURL, repoHash, packageName string) (meta 
 	installedPkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(installPath, jsonFileName))
 	meta.update = parseErr == nil && installedPkg != nil && installedPkg.Name == packageName
 
-	err = bazaar.InstallPackage(repoURL, repoHash, installPath, Conf.System.ID, pkgType, packageName)
+	err = bazaar.InstallPackage(repoURL, repoHash, installPath, Conf.System.ID, pkgType, packageName, meta.update)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)
 	}

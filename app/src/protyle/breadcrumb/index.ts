@@ -5,7 +5,7 @@ import {MenuItem} from "../../menus/Menu";
 import {fullscreen, net2LocalAssets, updateReadonly} from "./action";
 import {openFileAttr} from "../../menus/commonMenuItem";
 import {setEditMode} from "../util/setEditMode";
-import {RecordMedia} from "../util/RecordMedia";
+import {RecordMedia, RecordMediaInputEndedError} from "../util/RecordMedia";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {uploadFiles} from "../upload";
 import {hasClosestBlock, hasTopClosestByClassName} from "../util/hasClosest";
@@ -466,14 +466,15 @@ ${padHTML}
             }
             throw error;
         }
-        recorder.onerror = () => {
+        recorder.onerror = (error) => {
             if (this.mediaRecorder !== recorder) {
                 return;
             }
             recorder.dispose();
             this.mediaRecorder = undefined;
             hideMessage(this.messageId);
-            showMessage(window.siyuan.languages["record-tip"]);
+            showMessage(error instanceof RecordMediaInputEndedError ?
+                window.siyuan.languages.recordInterrupted : window.siyuan.languages["record-tip"]);
         };
         this.messageId = showMessage(`<div class="fn__flex fn__flex-wrap">
 <span class="fn__flex-center">${window.siyuan.languages.recording}</span><span class="fn__space"></span>
@@ -497,7 +498,8 @@ ${padHTML}
             this.pendingRecordFiles.add(file);
             this.uploadRecord(protyle, file, protyle.block?.rootID);
         } catch (error) {
-            showMessage(window.siyuan.languages["record-tip"]);
+            showMessage(error instanceof RecordMediaInputEndedError ?
+                window.siyuan.languages.recordInterrupted : window.siyuan.languages["record-tip"]);
         } finally {
             recorder.dispose();
             if (this.mediaRecorder === recorder) {
@@ -670,51 +672,60 @@ ${padHTML}
                     window.siyuan.menus.menu.remove();
                 });
                 window.siyuan.menus.menu.append(uploadMenu);
-                if (!isInAndroid() && !isInHarmony()) {
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        id: this.mediaRecorder?.isRecording ? "endRecord" : "startRecord",
-                        current: this.mediaRecorder && this.mediaRecorder.isRecording,
-                        icon: "iconRecord",
-                        label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
-                        click: async () => {
-                            if (this.startingRecord || this.stoppingRecord) {
-                                return;
-                            }
-                            if (this.mediaRecorder?.isRecording) {
-                                this.stopRecord(protyle);
-                                return;
-                            }
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: this.mediaRecorder?.isRecording ? "endRecord" : "startRecord",
+                    current: this.mediaRecorder && this.mediaRecorder.isRecording,
+                    icon: "iconRecord",
+                    label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
+                    click: async () => {
+                        if (this.startingRecord || this.stoppingRecord) {
+                            return;
+                        }
+                        if (this.mediaRecorder?.isRecording) {
+                            this.stopRecord(protyle);
+                            return;
+                        }
 
-                            this.startingRecord = true;
-                            let mediaStream: MediaStream;
-                            try {
-                                /// #if !BROWSER
-                                if (window.siyuan.config.system.os === "darwin") {
-                                    const status = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "getMicrophone"});
-                                    if (["denied", "restricted", "unknown"].includes(status)) {
-                                        showMessage(window.siyuan.languages.microphoneDenied);
+                        this.startingRecord = true;
+                        let mediaStream: MediaStream;
+                        try {
+                            /// #if !BROWSER
+                            if (window.siyuan.config.system.os === "darwin") {
+                                const status = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "getMicrophone"});
+                                if (["denied", "restricted", "unknown"].includes(status)) {
+                                    showMessage(window.siyuan.languages.microphoneDenied);
+                                    return;
+                                } else if (status === "not-determined") {
+                                    const isAccess = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "askMicrophone"});
+                                    if (!isAccess) {
+                                        showMessage(window.siyuan.languages.microphoneNotAccess);
                                         return;
-                                    } else if (status === "not-determined") {
-                                        const isAccess = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "askMicrophone"});
-                                        if (!isAccess) {
-                                            showMessage(window.siyuan.languages.microphoneNotAccess);
-                                            return;
-                                        }
                                     }
                                 }
-                                /// #endif
-
-                                mediaStream = await navigator.mediaDevices.getUserMedia({audio: true});
-                                await this.startRecord(protyle, mediaStream);
-                            } catch (error) {
-                                mediaStream?.getTracks().forEach((track) => track.stop());
-                                showMessage(window.siyuan.languages["record-tip"]);
-                            } finally {
-                                this.startingRecord = false;
                             }
+                            /// #endif
+
+                            mediaStream = await navigator.mediaDevices.getUserMedia({
+                                audio: isInAndroid() || isInHarmony() ? {
+                                    autoGainControl: false,
+                                    echoCancellation: false,
+                                    noiseSuppression: false,
+                                } : true,
+                            });
+                            await this.startRecord(protyle, mediaStream);
+                        } catch (error) {
+                            mediaStream?.getTracks().forEach((track) => track.stop());
+                            if (error instanceof RecordMediaInputEndedError) {
+                                showMessage(window.siyuan.languages.recordInterrupted);
+                            } else if ((!isInAndroid() && !isInHarmony()) ||
+                                !(error instanceof DOMException && error.name === "NotAllowedError")) {
+                                showMessage(window.siyuan.languages["record-tip"]);
+                            }
+                        } finally {
+                            this.startingRecord = false;
                         }
-                    }).element);
-                }
+                    }
+                }).element);
             }
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({

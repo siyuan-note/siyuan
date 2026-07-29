@@ -435,6 +435,11 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		}
 	}
 
+	if ret = tx.normalizeListItemFolds(); nil != ret {
+		tx.rollback()
+		return
+	}
+
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
 		if 1 == tx.state.Load() {
@@ -555,6 +560,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	if isMovingFoldHeading := ast.NodeHeading == srcNode.Type && treenode.IsSelfFolded(srcNode); isMovingFoldHeading {
 		headingChildren = treenode.HeadingChildren(srcNode)
 	}
+	srcParent := srcNode.Parent
 
 	var srcEmptyList *ast.Node
 	if ast.NodeListItem == srcNode.Type && srcNode.Parent.FirstChild == srcNode && srcNode.Parent.LastChild == srcNode {
@@ -626,6 +632,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			}
 		}
 
+		tx.markListItemFoldCandidate(srcParent, srcTree)
 		for i := len(headingChildren) - 1; -1 < i; i-- {
 			c := headingChildren[i]
 			targetNode.InsertAfter(c)
@@ -680,6 +687,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		return
 	}
 
+	tx.markListItemFoldCandidate(srcParent, srcTree)
 	processed := false
 	if ast.NodeSuperBlock == targetNode.Type {
 		// 在布局节点后插入
@@ -989,6 +997,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 		logging.LogWarnf("can't append a root to another root")
 		return
 	}
+	srcParent := srcNode.Parent
 
 	var headingChildren []*ast.Node
 	if isMovingFoldHeading := ast.NodeHeading == srcNode.Type && treenode.IsSelfFolded(srcNode); isMovingFoldHeading {
@@ -1027,6 +1036,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	}
 
 	targetRoot := targetTree.Root
+	tx.markListItemFoldCandidate(srcParent, srcTree)
 	if nil != targetNewList {
 		if nil != targetRoot.LastChild {
 			if ast.NodeList != targetRoot.LastChild.Type {
@@ -1115,6 +1125,7 @@ func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) (delete
 	task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, tree.Root.ID)
 
 	parent := node.Parent
+	tx.markListItemFoldCandidate(parent, tree)
 	if nil != node.Next && ast.NodeKramdownBlockIAL == node.Next.Type && bytes.Contains(node.Next.Tokens, []byte(node.ID)) {
 		// 列表块撤销状态异常 https://github.com/siyuan-note/siyuan/issues/3985
 		node.Next.Unlink()
@@ -1677,6 +1688,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	if ast.NodeList == updatedNode.Type && ast.NodeList == oldNode.Parent.Type {
 		updatedNode = updatedNode.FirstChild
 	}
+	if ast.NodeListItem == oldNode.Type {
+		tx.markListItemFoldCandidate(oldNode, tree)
+	}
 
 	if oldNode.IsContainerBlock() {
 		// 更新容器块的话需要考虑其子块中可能存在的折叠标题，需要把这些折叠标题的下方块移动到新节点下面
@@ -2026,6 +2040,69 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	return
 }
 
+func (tx *Transaction) markListItemFoldCandidate(node *ast.Node, tree *parse.Tree) {
+	if nil == node || ast.NodeListItem != node.Type || "" == node.ID || nil == tree {
+		return
+	}
+	if nil == tx.listItemFoldCandidateIDs {
+		tx.listItemFoldCandidateIDs = map[string]struct{}{}
+	}
+	if _, ok := tx.listItemFoldCandidateIDs[node.ID]; ok {
+		return
+	}
+	tx.listItemFoldCandidateIDs[node.ID] = struct{}{}
+	tx.listItemFoldCandidates = append(tx.listItemFoldCandidates, listItemFoldCandidate{id: node.ID, tree: tree})
+}
+
+func listItemDirectBlockCount(node *ast.Node) (ret int) {
+	for child := node.FirstChild; nil != child; child = child.Next {
+		if child.IsBlock() && ast.NodeKramdownBlockIAL != child.Type {
+			ret++
+		}
+	}
+	return
+}
+
+func (tx *Transaction) normalizeListItemFolds() (ret *TxErr) {
+	var undoOperations []*Operation
+	hasUndo := 0 < len(tx.UndoOperations)
+	for _, candidate := range tx.listItemFoldCandidates {
+		node := treenode.GetNodeInTree(candidate.tree, candidate.id)
+		if nil == node || ast.NodeListItem != node.Type || "1" != node.IALAttr("fold") ||
+			1 < listItemDirectBlockCount(node) {
+			continue
+		}
+
+		attrs := map[string]string{"fold": ""}
+		if _, err := setNodeAttrs0(node, attrs, candidate.tree.Box); nil != err {
+			logging.LogErrorf("normalize list item [%s] fold failed: %s", node.ID, err)
+			return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: node.ID}
+		}
+		cache.PutBlockIALInBox(node.ID, candidate.tree.Box, parse.IAL2Map(node.KramdownIAL))
+
+		// 规范化发生在原始操作执行完毕后，需补充操作供界面同步、撤销日志和重做使用。
+		tx.DoOperations = append(tx.DoOperations, &Operation{
+			Action:  "setAttrs",
+			ID:      node.ID,
+			Data:    `{"fold":""}`,
+			Context: map[string]any{"kernelGenerated": "normalizeListItemFold"},
+		})
+		if hasUndo {
+			undoOperations = append(undoOperations, &Operation{
+				Action:  "setAttrs",
+				ID:      node.ID,
+				Data:    `{"fold":"1"}`,
+				Context: map[string]any{"kernelGenerated": "normalizeListItemFold"},
+			})
+		}
+	}
+	if 0 < len(undoOperations) {
+		slices.Reverse(undoOperations)
+		tx.UndoOperations = append(undoOperations, tx.UndoOperations...)
+	}
+	return
+}
+
 type Operation struct {
 	Action     string   `json:"action"`
 	Data       any      `json:"data"`
@@ -2063,6 +2140,11 @@ type Operation struct {
 	Context map[string]any `json:"context"` // 上下文信息
 }
 
+type listItemFoldCandidate struct {
+	id   string
+	tree *parse.Tree
+}
+
 type Transaction struct {
 	Timestamp      int64        `json:"timestamp"`
 	DoOperations   []*Operation `json:"doOperations"`
@@ -2082,6 +2164,9 @@ type Transaction struct {
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
+
+	listItemFoldCandidates   []listItemFoldCandidate
+	listItemFoldCandidateIDs map[string]struct{}
 
 	luteEngine *lute.Lute
 	m          *sync.Mutex
@@ -2136,6 +2221,8 @@ func (tx *Transaction) begin() (err error) {
 	tx.boxIcons = map[string]string{}
 	tx.removedCreatedDocs = nil
 	tx.restoredCreatedDocs = nil
+	tx.listItemFoldCandidates = nil
+	tx.listItemFoldCandidateIDs = map[string]struct{}{}
 	tx.luteEngine = util.NewLute()
 	tx.m.Lock()
 	tx.state.Store(1)
@@ -2209,6 +2296,7 @@ func (tx *Transaction) commit() (err error) {
 
 func (tx *Transaction) rollback() {
 	tx.trees, tx.nodes, tx.boxIcons, tx.removedCreatedDocs, tx.restoredCreatedDocs = nil, nil, nil, nil, nil
+	tx.listItemFoldCandidates, tx.listItemFoldCandidateIDs = nil, nil
 	tx.state.Store(3)
 	tx.m.Unlock()
 	return

@@ -1,4 +1,10 @@
 {
+  "sortDefault": "Standaardvolgorde",
+  "sortByInstallTimeDesc": "Aflopend op installatietijd",
+  "sortByInstallTimeAsc": "Oplopend op installatietijd",
+  "sortByEnabledFirst": "Ingeschakelde eerst",
+  "sortByDisabledFirst": "Uitgeschakelde eerst",
+  "recordInterrupted": "De opname is onderbroken. Neem opnieuw op",
   "snapshotData": "Gegevens",
   "extensions": "Extensies",
   "deleteFontConfirm": "Aangepast lettertype <b>${x}</b> verwijderen?",

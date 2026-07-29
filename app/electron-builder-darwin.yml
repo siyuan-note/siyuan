@@ -12,6 +12,11 @@ directories:
 files:
   - "electron"
 afterPack: "./scripts/afterPack.js"
+extraFiles:
+  - from: "../LICENSE"
+    to: "LICENSE"
+  - from: "../THIRD_PARTY_NOTICES.md"
+    to: "THIRD_PARTY_NOTICES.md"
 
 mac:
   identity: "Yunnan Liandi Technology Co., Ltd."

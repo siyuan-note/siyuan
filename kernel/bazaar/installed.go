@@ -89,7 +89,8 @@ func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType
 	}
 
 	// 安装信息
-	pkg.HInstallDate = getPackageHInstallDate(pkgType, pkg.Name, installPath)
+	pkg.InstallTime, pkg.UpdateTime = getPackageTimes(pkgType, pkg.Name, installPath)
+	pkg.HInstallDate = time.UnixMilli(pkg.InstallTime).Format("2006-01-02")
 	// TODO 本地安装大小的缓存改成 1 分钟有效，打开集市包 README 的时候才遍历集市包文件夹进行统计，异步返回结果到前端显示 https://github.com/siyuan-note/siyuan/issues/16983
 	// 目前优先使用在线 stage 数据：不耗时，但可能不准确，比如本地旧版本与云端最新版本的安装大小可能不一致；其次使用本地目录大小：耗时，但准确
 	// 需要分离本地安装大小和在线 stage 数据的安装大小
@@ -132,6 +133,7 @@ type BazaarInfo struct {
 // PackageInfo 集市包的持久化信息
 type PackageInfo struct {
 	InstallTime int64 `json:"installTime"` // 安装时间戳（毫秒）
+	UpdateTime  int64 `json:"updateTime"`  // 更新时间戳（毫秒）
 }
 
 var (
@@ -222,8 +224,8 @@ func saveBazaarInfo() {
 	}
 }
 
-// setPackageInstallTime 设置集市包的安装时间
-func setPackageInstallTime(pkgType, pkgName string, installTime time.Time) {
+// recordPackageOperationTime 记录集市包的首次安装时间或最近更新时间
+func recordPackageOperationTime(pkgType, pkgName string, operationTime, fallbackInstallTime time.Time, update bool) {
 	getBazaarInfo()
 
 	bazaarInfoCacheLock.Lock()
@@ -231,6 +233,9 @@ func setPackageInstallTime(pkgType, pkgName string, installTime time.Time) {
 
 	if bazaarInfoCache == nil {
 		return
+	}
+	if bazaarInfoCache.Packages == nil {
+		bazaarInfoCache.Packages = make(map[string]map[string]*PackageInfo)
 	}
 	if bazaarInfoCache.Packages[pkgType] == nil {
 		bazaarInfoCache.Packages[pkgType] = make(map[string]*PackageInfo)
@@ -240,35 +245,72 @@ func setPackageInstallTime(pkgType, pkgName string, installTime time.Time) {
 		p = &PackageInfo{}
 		bazaarInfoCache.Packages[pkgType][pkgName] = p
 	}
-	p.InstallTime = installTime.UnixMilli()
+	if update {
+		if p.InstallTime < 1 {
+			if fallbackInstallTime.IsZero() {
+				fallbackInstallTime = operationTime
+			}
+			p.InstallTime = fallbackInstallTime.UnixMilli()
+		}
+		p.UpdateTime = operationTime.UnixMilli()
+	} else {
+		p.InstallTime = operationTime.UnixMilli()
+		p.UpdateTime = 0
+	}
 	saveBazaarInfo()
 }
 
-// getPackageHInstallDate 获取集市包的安装日期
-func getPackageHInstallDate(pkgType, pkgName, installPath string) string {
+// ensurePackageInstallTime 在没有首次安装时间时进行初始化
+func ensurePackageInstallTime(pkgType, pkgName string, fallbackInstallTime time.Time) (installTime, updateTime int64) {
+	getBazaarInfo()
+
+	bazaarInfoCacheLock.Lock()
+	defer bazaarInfoCacheLock.Unlock()
+
+	if bazaarInfoCache == nil {
+		return fallbackInstallTime.UnixMilli(), 0
+	}
+	if bazaarInfoCache.Packages == nil {
+		bazaarInfoCache.Packages = make(map[string]map[string]*PackageInfo)
+	}
+	if bazaarInfoCache.Packages[pkgType] == nil {
+		bazaarInfoCache.Packages[pkgType] = make(map[string]*PackageInfo)
+	}
+	p := bazaarInfoCache.Packages[pkgType][pkgName]
+	if p == nil {
+		p = &PackageInfo{}
+		bazaarInfoCache.Packages[pkgType][pkgName] = p
+	}
+	if p.InstallTime < 1 {
+		p.InstallTime = fallbackInstallTime.UnixMilli()
+		saveBazaarInfo()
+	}
+	return p.InstallTime, p.UpdateTime
+}
+
+// getPackageTimes 获取集市包的首次安装时间和最近更新时间
+func getPackageTimes(pkgType, pkgName, installPath string) (installTime, updateTime int64) {
 	getBazaarInfo()
 	bazaarInfoCacheLock.RLock()
-	var installTime int64
 	if bazaarInfoCache != nil && bazaarInfoCache.Packages[pkgType] != nil {
 		if p := bazaarInfoCache.Packages[pkgType][pkgName]; p != nil {
 			installTime = p.InstallTime
+			updateTime = p.UpdateTime
 		}
 	}
 	bazaarInfoCacheLock.RUnlock()
 
 	if installTime > 0 {
-		return time.UnixMilli(installTime).Format("2006-01-02")
+		return
 	}
 
 	// 如果 bazaar.json 中没有记录，使用文件夹修改时间并记录到 bazaar.json 中
 	fi, err := os.Stat(installPath)
 	if err != nil {
 		logging.LogWarnf("stat install package folder [%s] failed: %s", installPath, err)
-		return time.Now().Format("2006-01-02")
+		return ensurePackageInstallTime(pkgType, pkgName, time.Now())
 	}
-	setPackageInstallTime(pkgType, pkgName, fi.ModTime())
-
-	return fi.ModTime().Format("2006-01-02")
+	return ensurePackageInstallTime(pkgType, pkgName, fi.ModTime())
 }
 
 // RemovePackageInfo 删除集市包的持久化信息

@@ -1,4 +1,10 @@
 {
+  "sortDefault": "預設排序",
+  "sortByInstallTimeDesc": "安裝時間降序",
+  "sortByInstallTimeAsc": "安裝時間升序",
+  "sortByEnabledFirst": "已啟用優先",
+  "sortByDisabledFirst": "已停用優先",
+  "recordInterrupted": "錄音已中斷，請重新錄製",
   "snapshotData": "資料",
   "extensions": "擴充功能",
   "deleteFontConfirm": "確定刪除自訂字型 <b>${x}</b> 嗎？",

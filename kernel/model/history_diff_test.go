@@ -298,6 +298,23 @@ func TestDocDiffBlockSignatureIncludesAttributeViewContent(t *testing.T) {
 	}
 }
 
+func TestDocDiffAttributeViewSignatureNormalizesJSONObjects(t *testing.T) {
+	left := []byte(`{
+		"spec": 1,
+		"id": "20260729000000-view001",
+		"updatedAt": 1785342031853,
+		"keyValues": [{"key": {"id": "key", "type": "block"}, "values": []}]
+	}`)
+	right := []byte(`{"keyValues":[{"values":[],"key":{"type":"block","id":"key"}}],"updatedAt":1785342031853,"id":"20260729000000-view001","spec":1}`)
+	if docDiffAttributeViewSignature(left) != docDiffAttributeViewSignature(right) {
+		t.Fatal("expected equivalent attribute view JSON objects to have the same signature")
+	}
+	changed := []byte(`{"keyValues":[],"updatedAt":1785342031853,"id":"20260729000000-view001","spec":1}`)
+	if docDiffAttributeViewSignature(left) == docDiffAttributeViewSignature(changed) {
+		t.Fatal("expected changed attribute view content to have a different signature")
+	}
+}
+
 func TestMergeDocDiffBlockOrder(t *testing.T) {
 	order := mergeDocDiffBlockOrder(
 		[]string{"a", "deleted-before", "b", "deleted-after"},

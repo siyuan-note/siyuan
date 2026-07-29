@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	stdhtml "html"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -546,9 +547,16 @@ func loadDocVersionAttributeViewSignatures(ref *DocVersionRef, version *loadedDo
 }
 
 func docDiffAttributeViewSignature(data []byte) string {
-	var compact bytes.Buffer
-	if err := json.Compact(&compact, data); nil == err {
-		data = compact.Bytes()
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
+	var value any
+	if err := decoder.Decode(&value); nil == err {
+		var extra any
+		if err = decoder.Decode(&extra); errors.Is(err, io.EOF) {
+			if normalized, marshalErr := json.Marshal(value); nil == marshalErr {
+				data = normalized
+			}
+		}
 	}
 	hash := sha256.Sum256(data)
 	return fmt.Sprintf("%x", hash)

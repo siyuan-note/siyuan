@@ -873,8 +873,17 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
 
     const blockRanges = !range.collapsed ? getBlockRanges(protyle.wysiwyg.element, range) : [];
     const isCrossBlockRange = blockRanges.length > 1 && blockRanges[0].blockElement === blockElement;
-    const crossBlockUndoFocusContext = isCrossBlockRange ?
-        getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
+    let crossBlockUndoFocusContext: Record<string, string> | undefined;
+    if (isCrossBlockRange) {
+        const undoRange = document.createRange();
+        undoRange.setStart(blockRanges[0].range.startContainer, blockRanges[0].range.startOffset);
+        const endRange = blockRanges[blockRanges.length - 1].range;
+        undoRange.setEnd(endRange.endContainer, endRange.endOffset);
+        crossBlockUndoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, undoRange, true);
+        if (crossBlockUndoFocusContext) {
+            crossBlockUndoFocusContext.undoFocusCollapseToEnd = "true";
+        }
+    }
     const removeElements: HTMLElement[] = [];
     if (isCrossBlockRange) {
         const startElement = blockRanges[0].blockElement;
@@ -949,13 +958,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             });
         });
     }
+    const crossBlockOldHTML = isCrossBlockRange ? blockElement.outerHTML : undefined;
     let id = blockElement.getAttribute("data-node-id");
     const rangeStartWbrElement = document.createElement("wbr");
     range.insertNode(rangeStartWbrElement);
     if (isCrossBlockRange) {
         range.setStartAfter(rangeStartWbrElement);
     }
-    let oldHTML = blockElement.outerHTML;
+    let oldHTML = crossBlockOldHTML ?? blockElement.outerHTML;
     const type = blockElement.getAttribute("data-type");
     const isNodeCodeBlock = type === "NodeCodeBlock";
     const editableElement = getContenteditableElement(blockElement);

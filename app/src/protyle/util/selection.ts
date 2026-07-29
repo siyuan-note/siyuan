@@ -536,6 +536,9 @@ export const restoreUndoFocus = (protyle: IProtyle, operations: IOperation[]) =>
         return false;
     }
     const ignoreZWSP = operation.context.undoFocusIgnoreZWSP === "true";
+    if (operation.context.undoFocusCollapseToEnd === "true") {
+        return !!focusByOffset(endBlockElement, end, end, true, ignoreZWSP);
+    }
     if (startBlockElement === endBlockElement) {
         return !!focusByOffset(startBlockElement, start, end, true, ignoreZWSP);
     }

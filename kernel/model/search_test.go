@@ -298,6 +298,157 @@ func TestBuildExactSearchOrderConditionEscapesKeyword(t *testing.T) {
 	}
 }
 
+func TestFTSAndHPathMatchesDeduplicateAndSort(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	testDB := newSearchHPathTestDB(t)
+	insertSearchHPathTestBlock(t, testDB, "20260729120000-parent1", "20260729120000-parent1", "/Parent", "Parent", "d")
+	insertSearchHPathTestBlock(t, testDB, "20260729120001-child01", "20260729120001-child01", "/Parent/Child", "Child", "d")
+	insertSearchHPathTestBlock(t, testDB, "20260729120002-block01", "20260729120001-child01", "/Parent/Child", "Parent body", "p")
+
+	cte, args := buildFTSAndHPathMatchesCTE("Parent", "\"Parent\"", "", "", nil, nil, "(type IN ('d', 'p'))", "")
+	if countPlaceholder(cte) != len(args) {
+		t.Fatalf("候选查询占位符数量错误：%q，参数：%v", cte, args)
+	}
+	if len(args) != 1 || "Parent" != args[0] {
+		t.Fatalf("路径搜索参数错误：%v", args)
+	}
+	assertOrderBySequence(t, cte,
+		"fts_matches AS MATERIALIZED",
+		"instr(hpath, ?) > 0",
+		"NOT EXISTS (SELECT 1 FROM fts_matches",
+	)
+
+	stmt := "WITH matches(block_rowid, fts_rank, match_source, path_level) AS (" +
+		"VALUES (1, -10.0, 0, 0), (3, -1.0, 0, 0), (2, NULL, 1, 2)) " +
+		"SELECT b.id, matches.match_source FROM matches JOIN blocks b ON b.rowid = matches.block_rowid " +
+		buildHPathSearchOrderBy("Parent", 0)
+	rows, err := testDB.Query(stmt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+
+	var ids []string
+	var sources []int
+	for rows.Next() {
+		var id string
+		var source int
+		if err = rows.Scan(&id, &source); err != nil {
+			t.Fatal(err)
+		}
+		ids = append(ids, id)
+		sources = append(sources, source)
+	}
+	expectedIDs := []string{"20260729120000-parent1", "20260729120002-block01", "20260729120001-child01"}
+	if !slices.Equal(ids, expectedIDs) {
+		t.Fatalf("单关键词路径搜索排序错误：got %v, want %v", ids, expectedIDs)
+	}
+	if !slices.Equal(sources, []int{0, 0, 1}) {
+		t.Fatalf("单关键词路径搜索来源错误：%v", sources)
+	}
+}
+
+func TestBuildHPathContainsCondition(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	condition, arg := buildHPathContainsCondition("Parent%_\\")
+	if "instr(hpath, ?) > 0" != condition || "Parent%_\\" != arg {
+		t.Fatalf("区分大小写的路径条件错误：%q，%q", condition, arg)
+	}
+
+	Conf.Search.CaseSensitive = false
+	condition, arg = buildHPathContainsCondition("Parent%_\\")
+	if "hpath LIKE ? ESCAPE '\\'" != condition || "%Parent\\%\\_\\\\%" != arg {
+		t.Fatalf("忽略大小写的路径条件错误：%q，%q", condition, arg)
+	}
+}
+
+func TestBuildHPathSearchOrderBy(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	assertOrderBySequence(t, buildHPathSearchOrderBy("Parent", 0),
+		"matches.match_source ASC",
+		"CASE",
+		"matches.path_level",
+		"b.sort ASC",
+		"b.updated DESC",
+		"b.id ASC",
+	)
+	assertOrderBySequence(t, buildHPathSearchOrderBy("Parent", 2),
+		"b.created DESC",
+		"matches.match_source ASC",
+		"b.id ASC",
+	)
+	assertOrderBySequence(t, buildHPathSearchOrderBy("Parent", 7),
+		"matches.match_source ASC",
+		"CASE",
+		"matches.fts_rank",
+		"matches.path_level",
+		"b.id ASC",
+	)
+}
+
+func TestDocumentSearchFieldMatchesMultipleHPathLevels(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	testDB := newSearchHPathTestDB(t)
+	insertSearchHPathTestBlock(t, testDB, "20260729121000-child01", "20260729121000-child01", "/Project/Parent/Child", "Child", "d")
+	insertSearchHPathTestBlock(t, testDB, "20260729121001-block01", "20260729121000-child01", "/Project/Parent/Child", "Body keyword", "p")
+
+	contentField := columnConcat()
+	documentSearchField := contentField + "||(CASE WHEN type = 'd' THEN hpath ELSE '' END)"
+	filter := buildSearchDocumentLikeFilter("GROUP_CONCAT("+documentSearchField+")", []string{"Project", "Parent", "keyword"})
+	rows, err := testDB.Query("SELECT root_id FROM blocks WHERE type IN ('d', 'p') GROUP BY root_id HAVING " + filter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	if !rows.Next() {
+		t.Fatal("多关键词应能跨多层路径和正文命中文档")
+	}
+	var rootID string
+	if err = rows.Scan(&rootID); err != nil {
+		t.Fatal(err)
+	}
+	if "20260729121000-child01" != rootID {
+		t.Fatalf("命中的文档错误：%q", rootID)
+	}
+	if err = rows.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	contentOnlyFilter := buildSearchDocumentLikeFilter("GROUP_CONCAT("+contentField+")", []string{"Project", "Parent", "keyword"})
+	var count int
+	if err = testDB.QueryRow("SELECT COUNT(*) FROM (SELECT root_id FROM blocks WHERE type IN ('d', 'p') GROUP BY root_id HAVING " + contentOnlyFilter + ")").Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if 0 != count {
+		t.Fatalf("关闭路径搜索后不应命中父文档关键词：%d", count)
+	}
+}
+
+func newSearchHPathTestDB(t *testing.T) *gosql.DB {
+	t.Helper()
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	testDB.SetMaxOpenConns(1)
+	t.Cleanup(func() {
+		testDB.Close()
+	})
+	if _, err = testDB.Exec("CREATE TABLE blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated)"); err != nil {
+		t.Fatal(err)
+	}
+	return testDB
+}
+
+func insertSearchHPathTestBlock(t *testing.T, testDB *gosql.DB, id, rootID, hPath, content, blockType string) {
+	t.Helper()
+	_, err := testDB.Exec("INSERT INTO blocks VALUES (?, '', ?, '', '20260729120000-box000', '/"+rootID+".sy', ?, '', '', '', '', ?, '', '', 0, ?, '', '', 0, '20260729120000', '20260729120000')",
+		id, rootID, hPath, content, blockType)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func setSearchCaseSensitive(t *testing.T, caseSensitive bool) {
 	t.Helper()
 	previousConf := Conf

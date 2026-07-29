@@ -1408,6 +1408,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 orderBy: config.sort,
                 page: config.page || 1,
                 pageSize: 32,
+                searchHPath: !config.hasReplace,
             };
             // 限定在单个加密 box 内搜索时带 notebook，让内核走加密 db；跨 box 或全局搜索走原函数
             const idPaths = config.idPath || [];

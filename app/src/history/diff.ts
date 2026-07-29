@@ -196,9 +196,8 @@ const genSnapshotFilters = (state: SnapshotDiffFilterState) => {
             aggregateCounts.other, state.aggregate === "other"));
     }
 
-    const availableKinds = snapshotFileKinds.filter((kind) => {
-        return (kindCounts.get(kind) || 0) > 0 &&
-            (state.aggregate === "all" || getSnapshotAggregate(kind) === state.aggregate);
+    const availableKinds = state.aggregate === "all" ? [] : snapshotFileKinds.filter((kind) => {
+        return (kindCounts.get(kind) || 0) > 0 && getSnapshotAggregate(kind) === state.aggregate;
     });
     const kindFilters = availableKinds.map((kind) => {
         return genSnapshotFilter("snapshotKind", kind, getSnapshotKindLabel(kind), kindCounts.get(kind),
@@ -206,7 +205,7 @@ const genSnapshotFilters = (state: SnapshotDiffFilterState) => {
     }).join("");
     return `<div class="history__diff-filters">
     <div class="history__diff-filter-row">${aggregateFilters.join("")}</div>
-    ${availableKinds.length > 1 ? `<div class="history__diff-filter-row"><span class="history__diff-filter-label">${window.siyuan.languages.type}</span>${kindFilters}</div>` : ""}
+    ${availableKinds.length > 1 ? `<div class="history__diff-filter-row history__diff-filter-row--kind">${kindFilters}</div>` : ""}
 </div>`;
 };
 

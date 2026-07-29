@@ -61,12 +61,10 @@
         border: 0;
         font-family: inherit;
       }
-    }
 
-    &-filter-label {
-      margin: 4px 4px 4px 8px;
-      color: var(--b3-theme-on-surface);
-      font-size: 12px;
+      &--kind {
+        padding-left: 8px;
+      }
     }
 
     &-list {

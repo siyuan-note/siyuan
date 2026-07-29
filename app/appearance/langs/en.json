@@ -1,4 +1,5 @@
 {
+  "pluginGlobalDisabledTip": "All plugins are currently disabled; this plugin still cannot be used after it is enabled",
   "selectAllTip": "Press ${hotkey} again to select all loaded content blocks",
   "doNotRemindAgain": "Don't remind me again",
   "msgSelectAllTip": "Editor select-all tip",

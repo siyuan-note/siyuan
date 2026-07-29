@@ -1,4 +1,5 @@
 {
+  "pluginGlobalDisabledTip": "כל התוספים מושבתים כעת, ולא ניתן יהיה להשתמש בתוסף הזה גם לאחר הפעלתו",
   "selectAllTip": "לחץ שוב על ${hotkey} כדי לבחור את כל בלוקי התוכן שנטענו",
   "doNotRemindAgain": "לא להזכיר שוב",
   "msgSelectAllTip": "טיפ לבחירת הכול בעורך",

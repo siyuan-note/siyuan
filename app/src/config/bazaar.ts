@@ -1166,6 +1166,7 @@ type="checkbox">
                             if (enabled) {
                                 if (window.siyuan.config.bazaar.petalDisabled) {
                                     target.parentElement.querySelector('[data-type="setting"]')?.classList.add("fn__none");
+                                    showMessage(window.siyuan.languages.pluginGlobalDisabledTip);
                                     return;
                                 }
                                 loadPlugin(app, response.data).then(() => {

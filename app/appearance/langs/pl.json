@@ -1,4 +1,5 @@
 {
+  "pluginGlobalDisabledTip": "Wszystkie wtyczki są obecnie wyłączone; tej wtyczki nadal nie można używać po jej włączeniu",
   "selectAllTip": "Naciśnij ponownie ${hotkey}, aby zaznaczyć wszystkie załadowane bloki treści",
   "doNotRemindAgain": "Nie przypominaj ponownie",
   "msgSelectAllTip": "Wskazówka zaznaczania wszystkiego w edytorze",

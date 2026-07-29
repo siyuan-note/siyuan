@@ -1,4 +1,5 @@
 {
+  "pluginGlobalDisabledTip": "Todos os plugins estão desativados no momento; este plugin continuará indisponível mesmo depois de ser ativado",
   "selectAllTip": "Pressione ${hotkey} novamente para selecionar todos os blocos de conteúdo carregados",
   "doNotRemindAgain": "Não lembrar novamente",
   "msgSelectAllTip": "Dica de selecionar tudo no editor",

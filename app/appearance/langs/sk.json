@@ -1,4 +1,5 @@
 {
+  "pluginGlobalDisabledTip": "Všetky pluginy sú momentálne vypnuté, takže tento plugin nemožno používať ani po jeho zapnutí",
   "selectAllTip": "Opätovným stlačením ${hotkey} vyberiete všetky načítané bloky obsahu",
   "doNotRemindAgain": "Viac nepripomínať",
   "msgSelectAllTip": "Tip na výber všetkého v editore",

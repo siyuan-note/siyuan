@@ -1,4 +1,5 @@
 {
+  "pluginGlobalDisabledTip": "目前已停用所有插件，該插件啟用後仍無法使用",
   "selectAllTip": "再次按下 ${hotkey} 以選取全部已載入的內容區塊",
   "doNotRemindAgain": "不再提醒",
   "msgSelectAllTip": "編輯器全選提示",

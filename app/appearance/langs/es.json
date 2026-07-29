@@ -1,4 +1,5 @@
 {
+  "pluginGlobalDisabledTip": "Actualmente todos los complementos están deshabilitados; este complemento seguirá sin poder utilizarse después de habilitarlo",
   "selectAllTip": "Pulsa ${hotkey} de nuevo para seleccionar todos los bloques de contenido cargados",
   "doNotRemindAgain": "No volver a recordar",
   "msgSelectAllTip": "Aviso de seleccionar todo en el editor",

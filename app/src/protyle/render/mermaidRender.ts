@@ -2,13 +2,31 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
+import {applyMermaidLayout, getMermaidLayout, MERMAID_LAYOUT_ATTR} from "./mermaidLayout";
+
+let mermaidTidyTreePromise: Promise<void>;
+
+const registerMermaidLayouts = (mermaidElements: Element[], cdn: string) => {
+    if (!mermaidElements.some((item) => getMermaidLayout(item.getAttribute(MERMAID_LAYOUT_ATTR)) === "tidy-tree")) {
+        return Promise.resolve();
+    }
+    if (!mermaidTidyTreePromise) {
+        mermaidTidyTreePromise = addScript(
+            `${cdn}/js/mermaid/mermaid-layout-tidy-tree.min.js?v=0.2.1`,
+            "protyleMermaidTidyTreeScript"
+        ).then(() => {
+            window.mermaid.registerLayoutLoaders(window.mermaidTidyTree);
+        });
+    }
+    return mermaidTidyTreePromise;
+};
 
 export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
-    let mermaidElements: Element[] | NodeListOf<Element> = [];
+    let mermaidElements: Element[] = [];
     if (element.getAttribute("data-subtype") === "mermaid" && element.getAttribute("data-render") !== "true") {
         mermaidElements = [element];
     } else {
-        mermaidElements = element.querySelectorAll('[data-subtype="mermaid"]:not([data-render="true"])');
+        mermaidElements = Array.from(element.querySelectorAll('[data-subtype="mermaid"]:not([data-render="true"])'));
     }
     if (mermaidElements.length === 0) {
         return;
@@ -16,6 +34,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     addScript(`${cdn}/js/mermaid/mermaid.min.js?v=11.13.0`, "protyleMermaidScript").then(() => {
         addScript(`${cdn}/js/mermaid/mermaid-zenuml.min.js?v=0.2.2`, "protyleMermaidZenumlScript").then(async () => {
             await window.mermaid.registerExternalDiagrams([window.zenuml]);
+            await registerMermaidLayouts(mermaidElements, cdn);
             window.mermaid.registerIconPacks([
                 {
                     name: "logos",
@@ -97,7 +116,11 @@ const initMermaid = (mermaidElements: Element[]) => {
         const id = "mermaid" + Lute.NewNodeID();
         try {
             renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"><span id="${id}"></span></div>`;
-            const mermaidData = await window.mermaid.render(id, Lute.UnEscapeHTMLStr(item.getAttribute("data-content")));
+            const content = applyMermaidLayout(
+                Lute.UnEscapeHTMLStr(item.getAttribute("data-content")),
+                getMermaidLayout(item.getAttribute(MERMAID_LAYOUT_ATTR))
+            );
+            const mermaidData = await window.mermaid.render(id, content);
             let svg = mermaidData.svg.replace(/(href|src|xlink:href)\s*=\s*["']\\\\/gi, (match, p1) => `${p1}="about:blank"`);
             svg = window.DOMPurify.sanitize(svg, {
                 USE_PROFILES: {svg: true, svgFilters: true, mathMl: true},

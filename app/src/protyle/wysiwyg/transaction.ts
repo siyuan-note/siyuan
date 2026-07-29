@@ -38,6 +38,7 @@ import {
     cleanHeadingNumberOperations,
     queueHeadingNumberRefresh
 } from "../util/headingNumber";
+import {MERMAID_LAYOUT_ATTR} from "../render/mermaidLayout";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -760,6 +761,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         }
         if (operation.action === "updateAttrs") { // 调用接口才推送
             const data = operation.data as any;
+            const mermaidLayoutChanged = data.new[MERMAID_LAYOUT_ATTR] !== data.old[MERMAID_LAYOUT_ATTR];
             const attrsResult: Record<string, string> = {};
             let bookmarkHTML = "";
             let nameHTML = "";
@@ -884,6 +886,10 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     nodeAttrHTML += refElement.outerHTML;
                 }
                 attrElement.innerHTML = nodeAttrHTML + Constants.ZWSP;
+                if (mermaidLayoutChanged && item.getAttribute("data-subtype") === "mermaid") {
+                    item.removeAttribute("data-render");
+                    processRender(item);
+                }
             });
             return;
         }

@@ -115,11 +115,10 @@ const createProviderView = (root: HTMLElement, title: string, stacked = false) =
     view.className = "config-ai-provider__view config__view";
     view.style.zIndex = String(3 + layer);
     view.innerHTML = `<div class="b3-dialog__header fn__flex">
-    <button class="block__icon block__icon--show" data-action="back" aria-label="${window.siyuan.languages.back}">
-        <svg><use xlink:href="#iconLeft"></use></svg>
-    </button>
-    <span class="fn__space"></span>
-    <div class="fn__flex-1 fn__ellipsis" data-type="providerTitle">${escapeHTML(title)}</div>
+    <div class="block__logo fn__pointer fn__flex-1" data-action="back">
+        <svg class="block__logoicon"><use xlink:href="#iconLeft"></use></svg>
+        <span class="ft__breakword" data-type="providerTitle">${escapeHTML(title)}</span>
+    </div>
 </div>
 <div class="b3-dialog__body"></div>`;
     host.append(view);

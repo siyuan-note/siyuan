@@ -549,11 +549,10 @@ type="checkbox">
         bazaar._upsertReadmeData(bazaarType, from, data);
         const isDownload = from === "downloaded";
         readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(data.repoURL)}">
-    <div class="fn__flex fn__flex-shrink">
-        <div style="padding-right: 8px" data-type="goBack" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.back}">
-            <svg><use xlink:href="#iconLeft"></use></svg>
-            <span class="fn__space"></span>
-            ${navTitles[bazaarType]}
+    <div class="block__icons">
+        <div class="block__logo fn__pointer fn__flex-1" data-type="goBack">
+            <svg class="block__logoicon"><use xlink:href="#iconLeft"></use></svg>
+            <span class="ft__breakword">${navTitles[bazaarType]}</span>
         </div>
     </div>
     <div class="fn__flex-1">

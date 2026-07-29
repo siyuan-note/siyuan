@@ -394,7 +394,8 @@
   }
 }
 
-#historyContainer {
+#historyContainer,
+#docHistoryContainer {
   & > div {
     flex-direction: column;
 

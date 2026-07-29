@@ -10,13 +10,13 @@ import {fetchPost} from "../util/fetch";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {showDiff} from "./diff";
-import {saveExportFile, setStorageVal} from "../protyle/util/compatibility";
+import {setStorageVal} from "../protyle/util/compatibility";
 import {openModel} from "../mobile/menu/model";
 import {closeModel} from "../mobile/util/closePanel";
 import type {App} from "../index";
 import {resizeSide} from "./resizeSide";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
-import {pathPosix} from "../util/pathName";
+import {openRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
 
 let historyEditor: Protyle;
 
@@ -269,73 +269,7 @@ ${actionHTML}
 };
 
 const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
-    if (response.data.files.length === 0) {
-        element.lastElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-        return;
-    }
-    let html = "";
-    response.data.files.forEach((item: {
-        fileID: string,
-        indexID: string,
-        title: string,
-        hPath: string,
-        path: string,
-        hSize: string,
-        updated: number
-    }) => {
-        /// #if MOBILE
-        html += `<li class="b3-list-item" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}">
-    <div class="fn__flex-1">
-        <div style="padding-top:8px" class="b3-list-item__text">${escapeHtml(item.title)}</div>
-        <div class="b3-list-item__meta">
-            ${item.hSize}
-            <span class="fn__space"></span>
-            ${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}
-        </div>
-        <div class="fn__flex" style="height: 26px">
-            <span class="fn__flex-1"></span>
-            <span class="b3-list-item__action" data-type="view">
-                <svg><use xlink:href="#iconEye"></use></svg>
-                <span class="fn__space"></span>${window.siyuan.languages.cardPreview}
-            </span>
-            <span class="fn__space"></span>
-            <span class="b3-list-item__action" data-type="saveAs">
-                <svg><use xlink:href="#iconDownload"></use></svg>
-                <span class="fn__space"></span>${window.siyuan.languages.saveAs}
-            </span>
-            <span class="fn__space"></span>
-            <span class="b3-list-item__action" data-type="rollback">
-                <svg><use xlink:href="#iconUndo"></use></svg>
-                <span class="fn__space"></span> ${window.siyuan.languages.rollback}
-            </span>
-        </div>
-    </div>
-</li>`;
-        /// #else
-        html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}">
-    <div class="fn__flex-1">
-        <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
-        <div class="b3-list-item__meta">
-            ${escapeHtml(item.hPath)}
-            <span class="fn__space"></span>
-            ${item.hSize}
-            <span class="fn__space"></span>
-            ${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}
-        </div>
-    </div>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="view" aria-label="${window.siyuan.languages.cardPreview}">
-        <svg><use xlink:href="#iconEye"></use></svg>
-    </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
-        <svg><use xlink:href="#iconDownload"></use></svg>
-    </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
-        <svg><use xlink:href="#iconUndo"></use></svg>
-    </span>
-</li>`;
-        /// #endif
-    });
-    element.lastElementChild.innerHTML = html;
+    renderRepoFileList(response.data.files, element.lastElementChild, true);
 };
 
 const renderRepo = (element: Element, currentPage: number) => {
@@ -694,6 +628,12 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
             } else if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
                 const liElement = target.closest(".b3-list-item");
                 const dataType = target.parentElement.getAttribute("data-type") || liElement.getAttribute("data-type");
+                if (dataType === "searchFileItem") {
+                    rollbackRepoFile(liElement);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                }
                 let name;
                 let time;
                 if (dataType === "notebook") {
@@ -702,9 +642,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 } else if (dataType === "repoitem") {
                     name = window.siyuan.languages.workspaceData;
                     time = (isMobile() ? target.parentElement.parentElement : target.parentElement).querySelector("span[data-type='hCreated']").textContent.trim();
-                } else if (dataType === "searchFileItem") {
-                    name = liElement.querySelector(".b3-list-item__text").textContent.trim();
-                    time = dayjs(parseInt(liElement.getAttribute("data-created"))).format("YYYY-MM-DD HH:mm:ss");
                 } else {
                     name = target.previousElementSibling.previousElementSibling.textContent.trim();
                     time = dayjs(parseInt(target.parentElement.getAttribute("data-created")) * 1000).format("YYYY-MM-DD HH:mm:ss");
@@ -728,10 +665,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             fetchPost("/api/history/rollbackNotebookHistory", {
                                 historyPath: target.parentElement.getAttribute("data-path")
                             });
-                        } else if (dataType === "searchFileItem") {
-                            fetchPost("/api/repo/rollbackRepoSnapshotFile", {
-                                id: liElement.getAttribute("data-id")
-                            });
                         } else {
                             fetchPost("/api/repo/checkoutRepo", {
                                 id: target.parentElement.getAttribute("data-id")
@@ -742,55 +675,12 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "saveAs") {
-                const liElement = target.closest(".b3-list-item") as HTMLElement;
-                const fileId = liElement.getAttribute("data-id");
-                fetchPost("/api/repo/exportRepoFile", {id: fileId}, (response) => {
-                    saveExportFile(response.data.path);
-                });
+                saveRepoFile(target.closest(".b3-list-item"));
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "view") {
-                const liElement = target.closest(".b3-list-item");
-                const snapshotId = liElement.getAttribute("data-snapshot") || "";
-                const dialog = new Dialog({
-                    title: liElement.querySelector(".b3-list-item__text").textContent.trim(),
-                    content: '<div class="b3-dialog__content"><div style="border-radius: var(--b3-border-radius-b);"></div></div>',
-                    width: isMobile() ? "100vw" : "80vw",
-                    height: isMobile() ? "100dvh" : "70vh",
-                    disableAnimation: true,
-                });
-                const contentElement = dialog.element.querySelector(".b3-dialog__content");
-                fetchPost("/api/repo/openRepoSnapshotFile", {id: liElement.getAttribute("data-id")}, (response) => {
-                    const type = pathPosix().extname(response.data.content).toLowerCase();
-                    if (Constants.SIYUAN_ASSETS_IMAGE.concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(type)) {
-                        contentElement.firstElementChild.innerHTML = renderAssetsPreview(response.data.content);
-                    } else if (response.data.displayInText) {
-                        contentElement.innerHTML = '<textarea readonly class="b3-text-field fn__block" style="height: 100%"></textarea>';
-                        (contentElement.firstElementChild as HTMLTextAreaElement).value = response.data.content || response.data.title;
-                    } else {
-                        const viewEditor = new Protyle(app, contentElement.firstElementChild as HTMLElement, {
-                            blockId: "",
-                            action: [Constants.CB_GET_HISTORY],
-                            history: {
-                                snapshot: snapshotId
-                            },
-                            render: {
-                                background: false,
-                                gutter: false,
-                                breadcrumb: false,
-                                breadcrumbDocName: false,
-                            },
-                            typewriterMode: false
-                        });
-                        disabledProtyle(viewEditor.protyle);
-                        onGet({
-                            data: response,
-                            protyle: viewEditor.protyle,
-                            action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
-                        });
-                    }
-                });
+                openRepoFile(app, target.closest(".b3-list-item"));
                 event.stopPropagation();
                 event.preventDefault();
                 break;

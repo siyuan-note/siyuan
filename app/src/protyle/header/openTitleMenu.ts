@@ -310,7 +310,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "fileHistory",
-                label: window.siyuan.languages.fileHistory,
+                label: window.siyuan.languages.dataHistory,
                 icon: "iconHistory",
                 click() {
                     openDocHistory({

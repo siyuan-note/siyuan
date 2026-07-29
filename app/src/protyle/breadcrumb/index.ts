@@ -42,6 +42,10 @@ export class Breadcrumb {
     private mediaRecorder: RecordMedia;
     private id: string;
     private messageId: string;
+    private recordUploadMessageIds = new Map<File, string>();
+    private pendingRecordFiles = new Set<File>();
+    private startingRecord = false;
+    private stoppingRecord = false;
     private previousFocusElement: HTMLElement;
     private previousRange: Range;
 
@@ -448,18 +452,81 @@ ${padHTML}
         return items;
     }
 
-    private startRecord(protyle: IProtyle) {
+    private async startRecord(protyle: IProtyle, mediaStream: MediaStream) {
+        const recorder = new RecordMedia(mediaStream);
+        this.mediaRecorder = recorder;
+        try {
+            await recorder.startRecording();
+        } catch (error) {
+            recorder.dispose();
+            if (this.mediaRecorder === recorder) {
+                this.mediaRecorder = undefined;
+            }
+            throw error;
+        }
+        recorder.onerror = () => {
+            if (this.mediaRecorder !== recorder) {
+                return;
+            }
+            recorder.dispose();
+            this.mediaRecorder = undefined;
+            hideMessage(this.messageId);
+            showMessage(window.siyuan.languages["record-tip"]);
+        };
         this.messageId = showMessage(`<div class="fn__flex fn__flex-wrap">
 <span class="fn__flex-center">${window.siyuan.languages.recording}</span><span class="fn__space"></span>
 <button class="b3-button b3-button--white">${window.siyuan.languages.endRecord}</button></div>`, -1);
         document.querySelector(`#message [data-id="${this.messageId}"] button`).addEventListener("click", () => {
-            this.mediaRecorder.stopRecording();
-            hideMessage(this.messageId);
-            const file: File = new File([this.mediaRecorder.buildWavFileBlob()],
-                `record${(new Date()).getTime()}.wav`, {type: "video/webm"});
-            uploadFiles(protyle, [file]);
+            this.stopRecord(protyle);
         });
-        this.mediaRecorder.startRecordingNewWavFile();
+    }
+
+    private async stopRecord(protyle: IProtyle) {
+        if (this.stoppingRecord || !this.mediaRecorder?.isRecording) {
+            return;
+        }
+        this.stoppingRecord = true;
+        const recorder = this.mediaRecorder;
+        recorder.onerror = undefined;
+        hideMessage(this.messageId);
+        try {
+            const blob = await recorder.stopRecording();
+            const file = new File([blob], `record${Date.now()}.mp3`, {type: "audio/mpeg"});
+            this.pendingRecordFiles.add(file);
+            this.uploadRecord(protyle, file);
+        } catch (error) {
+            showMessage(window.siyuan.languages["record-tip"]);
+        } finally {
+            recorder.dispose();
+            if (this.mediaRecorder === recorder) {
+                this.mediaRecorder = undefined;
+            }
+            this.stoppingRecord = false;
+        }
+    }
+
+    private uploadRecord(protyle: IProtyle, file: File) {
+        if (!this.pendingRecordFiles.has(file)) {
+            return;
+        }
+        hideMessage(this.recordUploadMessageIds.get(file));
+        this.recordUploadMessageIds.delete(file);
+        uploadFiles(protyle, [file], undefined, undefined, (succeeded) => {
+            if (!this.pendingRecordFiles.has(file)) {
+                return;
+            }
+            if (succeeded) {
+                this.pendingRecordFiles.delete(file);
+                return;
+            }
+            const messageId = showMessage(`<div class="fn__flex fn__flex-wrap">
+<span class="fn__flex-center">${window.siyuan.languages.uploadError}</span><span class="fn__space"></span>
+<button class="b3-button b3-button--white">${window.siyuan.languages.retry}</button></div>`, -1);
+            this.recordUploadMessageIds.set(file, messageId);
+            document.querySelector(`#message [data-id="${messageId}"] button`)?.addEventListener("click", () => {
+                this.uploadRecord(protyle, file);
+            });
+        });
     }
 
     private genMobileMenu(protyle: IProtyle) {
@@ -578,51 +645,40 @@ ${padHTML}
                         icon: "iconRecord",
                         label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
                         click: async () => {
-                            /// #if !BROWSER
-                            if (window.siyuan.config.system.os === "darwin") {
-                                const status = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "getMicrophone"});
-                                if (["denied", "restricted", "unknown"].includes(status)) {
-                                    showMessage(window.siyuan.languages.microphoneDenied);
-                                    return;
-                                } else if (status === "not-determined") {
-                                    const isAccess = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "askMicrophone"});
-                                    if (!isAccess) {
-                                        showMessage(window.siyuan.languages.microphoneNotAccess);
-                                        return;
-                                    }
-                                }
+                            if (this.startingRecord || this.stoppingRecord) {
+                                return;
                             }
-                            /// #endif
-
-                            if (!this.mediaRecorder) {
-                                navigator.mediaDevices.getUserMedia({audio: true}).then((mediaStream: MediaStream) => {
-                                    this.mediaRecorder = new RecordMedia(mediaStream);
-                                    this.mediaRecorder.recorder.onaudioprocess = (e: AudioProcessingEvent) => {
-                                        // Do nothing if not recording:
-                                        if (!this.mediaRecorder.isRecording) {
-                                            return;
-                                        }
-                                        // Copy the data from the input buffers;
-                                        const left = e.inputBuffer.getChannelData(0);
-                                        const right = e.inputBuffer.getChannelData(1);
-                                        this.mediaRecorder.cloneChannelData(left, right);
-                                    };
-                                    this.startRecord(protyle);
-                                }).catch(() => {
-                                    showMessage(window.siyuan.languages["record-tip"]);
-                                });
+                            if (this.mediaRecorder?.isRecording) {
+                                this.stopRecord(protyle);
                                 return;
                             }
 
-                            if (this.mediaRecorder.isRecording) {
-                                this.mediaRecorder.stopRecording();
-                                hideMessage(this.messageId);
-                                const file: File = new File([this.mediaRecorder.buildWavFileBlob()],
-                                    `record${(new Date()).getTime()}.wav`, {type: "video/webm"});
-                                uploadFiles(protyle, [file]);
-                            } else {
-                                hideMessage(this.messageId);
-                                this.startRecord(protyle);
+                            this.startingRecord = true;
+                            let mediaStream: MediaStream;
+                            try {
+                                /// #if !BROWSER
+                                if (window.siyuan.config.system.os === "darwin") {
+                                    const status = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "getMicrophone"});
+                                    if (["denied", "restricted", "unknown"].includes(status)) {
+                                        showMessage(window.siyuan.languages.microphoneDenied);
+                                        return;
+                                    } else if (status === "not-determined") {
+                                        const isAccess = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "askMicrophone"});
+                                        if (!isAccess) {
+                                            showMessage(window.siyuan.languages.microphoneNotAccess);
+                                            return;
+                                        }
+                                    }
+                                }
+                                /// #endif
+
+                                mediaStream = await navigator.mediaDevices.getUserMedia({audio: true});
+                                await this.startRecord(protyle, mediaStream);
+                            } catch (error) {
+                                mediaStream?.getTracks().forEach((track) => track.stop());
+                                showMessage(window.siyuan.languages["record-tip"]);
+                            } finally {
+                                this.startingRecord = false;
                             }
                         }
                     }).element);

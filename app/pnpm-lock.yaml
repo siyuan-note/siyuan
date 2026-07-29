@@ -18,6 +18,9 @@ importers:
         specifier: 4.4.2
         version: 4.4.2
     devDependencies:
+      '@breezystack/lamejs':
+        specifier: 1.2.7
+        version: 1.2.7
       '@eslint/eslintrc':
         specifier: ^3.3.1
         version: 3.3.5
@@ -122,6 +125,9 @@ importers:
         version: 4.10.0(webpack-bundle-analyzer@4.5.0)(webpack@5.106.2)
 
 packages:
+
+  '@breezystack/lamejs@1.2.7':
+    resolution: {integrity: sha512-6wc7ck65ctA75Hq7FYHTtTvGnYs6msgdxiSUICQ+A01nVOWg6rqouZB8IdyteRlfpYYiFovkf67dIeOgWIUzTA==}
 
   '@discoveryjs/json-ext@0.5.0':
     resolution: {integrity: sha512-gX9Hx+2BMP5+yXfr4Agb+iBd9YiI729x38wbhfvRSkxQqfXnJUNy1nnyJWetYCvxnL1caWd1HqJnbQwVrgvgeA==}
@@ -2999,6 +3005,8 @@ packages:
     resolution: {integrity: sha512-Bq0B+ixT/DMyG8kgX2xWcI5jUvCwqrMxSFam7m0lAf78nf04hv6lNCsyLYdyYTrCVMqNDY/206K7eExYCeSyUQ==}
 
 snapshots:
+
+  '@breezystack/lamejs@1.2.7': {}
 
   '@discoveryjs/json-ext@0.5.0': {}
 

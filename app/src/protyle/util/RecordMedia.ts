@@ -1,170 +1,139 @@
-export class RecordMedia {
-    public SAMPLE_RATE = 44100;
-    public DEFAULT_SAMPLE_RATE: number;
-    public isRecording = false;
-    public readyFlag = false;
-    public leftChannel: Float32List[] = [];
-    public rightChannel: Float32List[] = [];
-    public recordingLength = 0;
-    // This needs to be public so the 'onaudioprocess' event handler can be defined externally.
-    public recorder: ScriptProcessorNode;
+const SAMPLE_RATE = 44100;
+const MP3_BIT_RATE = 96;
+const BUFFER_SIZE = 2048;
 
-    constructor(e: MediaStream) {
-        let context;
-        // creates the audio context
-        if (typeof AudioContext !== "undefined") {
-            context = new AudioContext();
-        } else if (webkitAudioContext) {
-            context = new webkitAudioContext();
-        } else {
+type EncoderMessage =
+    { type: "ready" } |
+    { type: "chunk", buffer: ArrayBuffer } |
+    { type: "finished" } |
+    { type: "error", message: string };
+
+export class RecordMedia {
+    public isRecording = false;
+    public onerror?: (error: Error) => void;
+
+    private readonly context: AudioContext;
+    private readonly mediaStream: MediaStream;
+    private readonly audioInput: MediaStreamAudioSourceNode;
+    private readonly recorder: ScriptProcessorNode;
+    private worker: Worker;
+    private chunks: ArrayBuffer[] = [];
+    private readyPromise: Promise<void>;
+    private resolveReady: () => void;
+    private rejectReady: (error: Error) => void;
+    private stopPromise: Promise<Blob>;
+    private resolveStop: (blob: Blob) => void;
+    private rejectStop: (error: Error) => void;
+    private disposed = false;
+
+    constructor(mediaStream: MediaStream) {
+        this.mediaStream = mediaStream;
+        const AudioContextConstructor = typeof AudioContext !== "undefined" ? AudioContext : webkitAudioContext;
+        if (!AudioContextConstructor) {
+            throw new Error("AudioContext is not supported");
+        }
+
+        this.context = new AudioContextConstructor({sampleRate: SAMPLE_RATE});
+        this.audioInput = this.context.createMediaStreamSource(mediaStream);
+        this.recorder = this.context.createScriptProcessor(BUFFER_SIZE, 1, 1);
+        this.recorder.onaudioprocess = (event: AudioProcessingEvent) => {
+            if (!this.isRecording || !this.worker) {
+                return;
+            }
+            const input = event.inputBuffer.getChannelData(0);
+            const pcm = new Int16Array(input.length);
+            for (let i = 0; i < input.length; i++) {
+                const sample = Math.max(-1, Math.min(1, input[i]));
+                pcm[i] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+            }
+            this.worker.postMessage({type: "encode", buffer: pcm.buffer}, [pcm.buffer]);
+        };
+        this.audioInput.connect(this.recorder);
+        this.recorder.connect(this.context.destination);
+    }
+
+    public async startRecording() {
+        if (this.disposed) {
+            throw new Error("Recorder has been disposed");
+        }
+        if (this.isRecording) {
             return;
         }
 
-        this.DEFAULT_SAMPLE_RATE = context.sampleRate;
-
-        // creates a gain node
-        const volume = context.createGain();
-
-        // creates an audio node from the microphone incoming stream
-        const audioInput = context.createMediaStreamSource(e);
-
-        // connect the stream to the gain node
-        audioInput.connect(volume);
-
-        /* From the spec: The size of the buffer controls how frequently the audioprocess event is
-         dispatched and how many sample-frames need to be processed each call.
-         Lower values for buffer size will result in a lower (better) latency.
-         Higher values will be necessary to avoid audio breakup and glitches */
-        this.recorder = context.createScriptProcessor(2048, 2, 1);
-
-        // The onaudioprocess event needs to be defined externally, so make sure it is not set:
-        this.recorder.onaudioprocess = null;
-
-        // we connect the recorder
-        volume.connect(this.recorder);
-        this.recorder.connect(context.destination);
-        this.readyFlag = true;
-    }
-
-    // Publicly accessible methods:
-    public cloneChannelData(leftChannelData: Float32List, rightChannelData: Float32List) {
-        this.leftChannel.push(new Float32Array(leftChannelData));
-        this.rightChannel.push(new Float32Array(rightChannelData));
-        this.recordingLength += 2048;
-    }
-
-    public startRecordingNewWavFile() {
-        if (this.readyFlag) {
-            this.isRecording = true;
-            this.leftChannel.length = this.rightChannel.length = 0;
-            this.recordingLength = 0;
-        }
+        this.chunks = [];
+        this.readyPromise = new Promise<void>((resolve, reject) => {
+            this.resolveReady = resolve;
+            this.rejectReady = reject;
+        });
+        // Webpack 通过 import.meta.url 将录音编码器打包为按需加载的独立 Worker。
+        // @ts-ignore TypeScript 的 CommonJS 类型检查不识别由 Webpack 转换的 import.meta.url。
+        this.worker = new Worker(new URL("./RecordMediaWorker.ts", import.meta.url));
+        this.worker.onmessage = (event: MessageEvent<EncoderMessage>) => {
+            this.handleWorkerMessage(event.data);
+        };
+        this.worker.onerror = (event: ErrorEvent) => {
+            this.handleWorkerError(new Error(event.message || "MP3 encoder failed"));
+        };
+        this.worker.postMessage({
+            type: "init",
+            sampleRate: this.context.sampleRate,
+            bitRate: MP3_BIT_RATE,
+        });
+        await this.readyPromise;
+        await this.context.resume();
+        this.isRecording = true;
     }
 
     public stopRecording() {
+        if (this.stopPromise) {
+            return this.stopPromise;
+        }
+        if (!this.isRecording || !this.worker) {
+            return Promise.reject(new Error("Recorder is not recording"));
+        }
+
         this.isRecording = false;
+        this.stopPromise = new Promise<Blob>((resolve, reject) => {
+            this.resolveStop = resolve;
+            this.rejectStop = reject;
+        });
+        this.worker.postMessage({type: "finish"});
+        return this.stopPromise;
     }
 
-    public buildWavFileBlob() {
-        // we flat the left and right channels down
-        const leftBuffer = this.mergeBuffers(this.leftChannel);
-        const rightBuffer = this.mergeBuffers(this.rightChannel);
-
-        // Interleave the left and right channels together:
-        let interleaved: Float32Array = new Float32Array(leftBuffer.length);
-
-        for (let i = 0; i < leftBuffer.length; ++i) {
-            interleaved[i] = 0.5 * (leftBuffer[i] + rightBuffer[i]);
+    public dispose() {
+        if (this.disposed) {
+            return;
         }
-
-        // Downsample the audio data if necessary:
-        if (this.DEFAULT_SAMPLE_RATE > this.SAMPLE_RATE) {
-            interleaved = this.downSampleBuffer(interleaved, this.SAMPLE_RATE);
+        this.disposed = true;
+        this.isRecording = false;
+        this.recorder.onaudioprocess = null;
+        this.audioInput.disconnect();
+        this.recorder.disconnect();
+        this.worker?.terminate();
+        this.worker = undefined;
+        this.mediaStream.getTracks().forEach((track) => track.stop());
+        if (this.context.state !== "closed") {
+            this.context.close();
         }
-
-        const totalByteCount = (44 + interleaved.length * 2);
-        const buffer = new ArrayBuffer(totalByteCount);
-        const view = new DataView(buffer);
-
-        // Build the RIFF chunk descriptor:
-        this.writeUTFBytes(view, 0, "RIFF");
-        view.setUint32(4, totalByteCount, true);
-        this.writeUTFBytes(view, 8, "WAVE");
-
-        // Build the FMT sub-chunk:
-        this.writeUTFBytes(view, 12, "fmt "); // subchunk1 ID is format
-        view.setUint32(16, 16, true); // The sub-chunk size is 16.
-        view.setUint16(20, 1, true); // The audio format is 1.
-        view.setUint16(22, 1, true); // Number of interleaved channels.
-        view.setUint32(24, this.SAMPLE_RATE, true); // Sample rate.
-        view.setUint32(28, this.SAMPLE_RATE * 2, true); // Byte rate.
-        view.setUint16(32, 2, true); // Block align
-        view.setUint16(34, 16, true); // Bits per sample.
-
-        // Build the data sub-chunk:
-        const subChunk2ByteCount = interleaved.length * 2;
-        this.writeUTFBytes(view, 36, "data");
-        view.setUint32(40, subChunk2ByteCount, true);
-
-        // Write the PCM samples to the view:
-        const lng = interleaved.length;
-        let index = 44;
-        const volume = 1;
-        for (let j = 0; j < lng; j++) {
-            view.setInt16(index, interleaved[j] * (0x7FFF * volume), true);
-            index += 2;
-        }
-
-        return new Blob([view], {type: "audio/wav"});
     }
 
-    private downSampleBuffer(buffer: Float32Array, rate: number) {
-        if (rate === this.DEFAULT_SAMPLE_RATE) {
-            return buffer;
+    private handleWorkerMessage(message: EncoderMessage) {
+        if (message.type === "ready") {
+            this.resolveReady?.();
+        } else if (message.type === "chunk") {
+            this.chunks.push(message.buffer);
+        } else if (message.type === "finished") {
+            this.resolveStop?.(new Blob(this.chunks, {type: "audio/mpeg"}));
+        } else if (message.type === "error") {
+            this.handleWorkerError(new Error(message.message));
         }
-
-        if (rate > this.DEFAULT_SAMPLE_RATE) {
-            // throw "downsampling rate show be smaller than original sample rate";
-            return buffer;
-        }
-
-        const sampleRateRatio = this.DEFAULT_SAMPLE_RATE / rate;
-        const newLength = Math.round(buffer.length / sampleRateRatio);
-        const result = new Float32Array(newLength);
-        let offsetResult = 0;
-        let offsetBuffer = 0;
-
-        while (offsetResult < result.length) {
-            const nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
-            let accum = 0;
-            let count = 0;
-            for (let i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
-                accum += buffer[i];
-                count++;
-            }
-            result[offsetResult] = accum / count;
-            offsetResult++;
-            offsetBuffer = nextOffsetBuffer;
-        }
-        return result;
     }
 
-    private mergeBuffers(desiredChannelBuffer: Float32List[]) {
-        const result = new Float32Array(this.recordingLength);
-        let offset = 0;
-        const lng = desiredChannelBuffer.length;
-        for (let i = 0; i < lng; ++i) {
-            const buffer = desiredChannelBuffer[i];
-            result.set(buffer, offset);
-            offset += buffer.length;
-        }
-        return result;
-    }
-
-    private writeUTFBytes(view: DataView, offset: number, value: string) {
-        const lng = value.length;
-        for (let i = 0; i < lng; i++) {
-            view.setUint8(offset + i, value.charCodeAt(i));
-        }
+    private handleWorkerError(error: Error) {
+        this.isRecording = false;
+        this.rejectReady?.(error);
+        this.rejectStop?.(error);
+        this.onerror?.(error);
     }
 }

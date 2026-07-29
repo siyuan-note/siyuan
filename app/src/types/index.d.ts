@@ -249,10 +249,12 @@ interface Window {
         }): string;
     };
     zenuml: object,
+    mermaidTidyTree: object[],
     mermaid: {
         initialize(options: any): void,
-        render(id: string, text: string): { svg: string },
-        registerExternalDiagrams(ex: object[]): void,
+        render(id: string, text: string): Promise<{ svg: string }>,
+        registerExternalDiagrams(ex: object[]): Promise<void>,
+        registerLayoutLoaders(layouts: object[]): void,
         registerIconPacks(options: {
             name: string,
             loader(): Promise<Response>

@@ -150,6 +150,14 @@ func DiffDocVersions(leftRef, rightRef *DocVersionRef) (ret *DocVersionDiffResul
 		ret.Right = renderLargeDocVersion(right)
 		return
 	}
+	left.av, err = loadDocVersionAttributeViewSignatures(leftRef, left)
+	if err != nil {
+		return nil, err
+	}
+	right.av, err = loadDocVersionAttributeViewSignatures(rightRef, right)
+	if err != nil {
+		return nil, err
+	}
 
 	leftBlocks, leftChildren, leftOrder := collectDocDiffBlocks(left.tree, left.av)
 	rightBlocks, rightChildren, rightOrder := collectDocDiffBlocks(right.tree, right.av)
@@ -229,12 +237,6 @@ func loadDocVersion(ref *DocVersionRef) (ret *loadedDocVersion, err error) {
 	}
 	if nil != ret.tree && "" == ret.title {
 		ret.title = ret.tree.Root.IALAttr("title")
-	}
-	if nil != ret.tree {
-		ret.av, err = loadDocVersionAttributeViewSignatures(ref, ret)
-		if err != nil {
-			return nil, err
-		}
 	}
 	if "" == ret.title {
 		ret.title = ret.rootID
@@ -426,10 +428,9 @@ func parseDocVersionTree(data []byte, rootID string) (ret *parse.Tree, err error
 	if err != nil {
 		return
 	}
-	if err = treenode.CheckSpec(ret); err != nil {
+	if err = filesys.NormalizeTreeForRead(ret); err != nil {
 		return nil, err
 	}
-	treenode.UpgradeSpec(ret)
 	if ast.IsNodeIDPattern(rootID) && rootID != ret.Root.ID {
 		ret.ID = rootID
 		ret.Root.ID = rootID
@@ -645,7 +646,7 @@ func docDiffBlockSignatureWithAttributeViews(block *ast.Node, attributeViews map
 		if !entering {
 			return ast.WalkContinue
 		}
-		if n != block && n.IsBlock() {
+		if n != block && n.IsBlock() && "" != n.ID {
 			return ast.WalkSkipChildren
 		}
 		builder.WriteByte('|')
@@ -752,124 +753,71 @@ func filterSharedDocBlockIDs(ids []string, other map[string]*docDiffBlock) (ret 
 	return
 }
 
-func markDocInlineDiff(left, right *ast.Node) {
-	leftRunes, leftSegments, leftOK := collectDocTextSegments(left)
-	rightRunes, rightSegments, rightOK := collectDocTextSegments(right)
-	if leftOK && rightOK {
-		matches, ok := lcsMatches(leftRunes, rightRunes, docDiffMaxLCSCells)
-		if ok {
-			leftChanged := make([]bool, len(leftRunes))
-			rightChanged := make([]bool, len(rightRunes))
-			for i := range leftChanged {
-				leftChanged[i] = true
-			}
-			for i := range rightChanged {
-				rightChanged[i] = true
-			}
-			for _, match := range matches {
-				leftChanged[match[0]] = false
-				rightChanged[match[1]] = false
-			}
-			leftSignatures := docTextSegmentSignatures(leftSegments, len(leftRunes))
-			rightSignatures := docTextSegmentSignatures(rightSegments, len(rightRunes))
-			for _, match := range matches {
-				if leftSignatures[match[0]] != rightSignatures[match[1]] {
-					leftChanged[match[0]] = true
-					rightChanged[match[1]] = true
-				}
-			}
-			applyDocTextDiff(leftSegments, leftChanged)
-			applyDocTextDiff(rightSegments, rightChanged)
-		}
-	}
-	markDocAtomicInlineDiff(left, right)
+type docInlineTokenKey struct {
+	kind    uint8
+	content string
+	context string
 }
 
 type docAtomicInline struct {
-	node      *ast.Node
-	signature string
+	node  *ast.Node
+	index int
 }
 
-func markDocAtomicInlineDiff(left, right *ast.Node) {
-	leftNodes := collectDocAtomicInlineNodes(left)
-	rightNodes := collectDocAtomicInlineNodes(right)
-	leftSignatures := make([]string, 0, len(leftNodes))
-	rightSignatures := make([]string, 0, len(rightNodes))
-	for _, item := range leftNodes {
-		leftSignatures = append(leftSignatures, item.signature)
-	}
-	for _, item := range rightNodes {
-		rightSignatures = append(rightSignatures, item.signature)
-	}
-	matches, ok := lcsMatches(leftSignatures, rightSignatures, docDiffMaxLCSCells)
+func markDocInlineDiff(left, right *ast.Node) {
+	markDocInlineDiffWithBudget(left, right, &docDiffLCSBudget{remaining: docDiffMaxTotalLCSCells})
+}
+
+func markDocInlineDiffWithBudget(left, right *ast.Node, budget *docDiffLCSBudget) {
+	leftTokens, leftSegments, leftAtomic := collectDocInlineTokens(left)
+	rightTokens, rightSegments, rightAtomic := collectDocInlineTokens(right)
+	matches, ok := lcsMatchesWithBudget(leftTokens, rightTokens, docDiffMaxLCSCells, budget)
 	if !ok {
 		return
 	}
-	leftMatched := make([]bool, len(leftNodes))
-	rightMatched := make([]bool, len(rightNodes))
+	leftChanged := make([]bool, len(leftTokens))
+	rightChanged := make([]bool, len(rightTokens))
+	for i := range leftChanged {
+		leftChanged[i] = true
+	}
+	for i := range rightChanged {
+		rightChanged[i] = true
+	}
 	for _, match := range matches {
-		leftMatched[match[0]] = true
-		rightMatched[match[1]] = true
+		leftChanged[match[0]] = false
+		rightChanged[match[1]] = false
 	}
-	for i, item := range leftNodes {
-		if !leftMatched[i] {
+	leftSignatures := docTextSegmentSignatures(leftSegments, len(leftTokens))
+	rightSignatures := docTextSegmentSignatures(rightSegments, len(rightTokens))
+	for _, match := range matches {
+		if 0 == leftTokens[match[0]].kind && leftSignatures[match[0]] != rightSignatures[match[1]] {
+			leftChanged[match[0]] = true
+			rightChanged[match[1]] = true
+		}
+	}
+	applyDocTextDiff(leftSegments, leftChanged)
+	applyDocTextDiff(rightSegments, rightChanged)
+	for _, item := range leftAtomic {
+		if leftChanged[item.index] {
 			item.node.SetIALAttr("data-history-diff", "inline")
 		}
 	}
-	for i, item := range rightNodes {
-		if !rightMatched[i] {
+	for _, item := range rightAtomic {
+		if rightChanged[item.index] {
 			item.node.SetIALAttr("data-history-diff", "inline")
 		}
 	}
 }
 
-func collectDocAtomicInlineNodes(block *ast.Node) (ret []*docAtomicInline) {
+func collectDocInlineTokens(block *ast.Node) (tokens []docInlineTokenKey, segments []*docTextSegment, atomic []*docAtomicInline) {
 	ast.Walk(block, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
-		if n != block && n.IsBlock() {
+		if n != block && n.IsBlock() && "" != n.ID {
 			return ast.WalkSkipChildren
 		}
-		if ast.NodeTextMark != n.Type || "" != n.TextMarkTextContent {
-			return ast.WalkContinue
-		}
-		ret = append(ret, &docAtomicInline{
-			node: n,
-			signature: strings.Join([]string{
-				n.TextMarkType,
-				n.TextMarkInlineMathContent,
-				n.TextMarkAHref,
-				n.TextMarkATitle,
-				n.TextMarkBlockRefID,
-				n.TextMarkFileAnnotationRefID,
-				n.TextMarkInlineMemoContent,
-			}, "\x00"),
-		})
-		return ast.WalkContinue
-	})
-	return
-}
-
-func docTextSegmentSignatures(segments []*docTextSegment, length int) (ret []string) {
-	ret = make([]string, length)
-	for _, segment := range segments {
-		for i := segment.start; i < segment.end; i++ {
-			ret[i] = segment.signature
-		}
-	}
-	return
-}
-
-func collectDocTextSegments(block *ast.Node) (runes []rune, segments []*docTextSegment, ok bool) {
-	ok = true
-	ast.Walk(block, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-		if n != block && n.IsBlock() {
-			return ast.WalkSkipChildren
-		}
+		context := docInlineStructuralContext(n, block)
 		var visible []rune
 		var storedRuns []string
 		switch n.Type {
@@ -880,6 +828,9 @@ func collectDocTextSegments(block *ast.Node) (runes []rune, segments []*docTextS
 			}
 		case ast.NodeTextMark:
 			if "" == n.TextMarkTextContent || n.IsTextMarkType("inline-math") {
+				signature := docAtomicInlineSignature(n)
+				atomic = append(atomic, &docAtomicInline{node: n, index: len(tokens)})
+				tokens = append(tokens, docInlineTokenKey{kind: 1, content: signature, context: context})
 				return ast.WalkContinue
 			}
 			visible, storedRuns = decodeDocTextMarkContent(n)
@@ -889,17 +840,61 @@ func collectDocTextSegments(block *ast.Node) (runes []rune, segments []*docTextS
 		if 0 == len(visible) {
 			return ast.WalkContinue
 		}
-		start := len(runes)
-		runes = append(runes, visible...)
+		start := len(tokens)
+		for _, r := range visible {
+			tokens = append(tokens, docInlineTokenKey{content: string(r), context: context})
+		}
 		segments = append(segments, &docTextSegment{
 			node:       n,
 			start:      start,
-			end:        len(runes),
+			end:        len(tokens),
 			storedRuns: storedRuns,
 			signature:  docTextNodeSignature(n),
 		})
 		return ast.WalkContinue
 	})
+	return
+}
+
+func docAtomicInlineSignature(node *ast.Node) string {
+	return strings.Join([]string{
+		node.TextMarkType,
+		node.TextMarkInlineMathContent,
+		node.TextMarkAHref,
+		node.TextMarkATitle,
+		node.TextMarkBlockRefID,
+		node.TextMarkFileAnnotationRefID,
+		node.TextMarkInlineMemoContent,
+	}, "\x00")
+}
+
+func docInlineStructuralContext(node, block *ast.Node) string {
+	var parts []string
+	for parent := node.Parent; nil != parent && parent != block; parent = parent.Parent {
+		if ast.NodeTableRow != parent.Type && ast.NodeTableCell != parent.Type {
+			continue
+		}
+		index := 0
+		for previous := parent.Previous; nil != previous; previous = previous.Previous {
+			if previous.Type == parent.Type {
+				index++
+			}
+		}
+		parts = append(parts, parent.Type.String()+":"+strconv.Itoa(index))
+	}
+	for i, j := 0, len(parts)-1; i < j; i, j = i+1, j-1 {
+		parts[i], parts[j] = parts[j], parts[i]
+	}
+	return strings.Join(parts, "/")
+}
+
+func docTextSegmentSignatures(segments []*docTextSegment, length int) (ret []string) {
+	ret = make([]string, length)
+	for _, segment := range segments {
+		for i := segment.start; i < segment.end; i++ {
+			ret[i] = segment.signature
+		}
+	}
 	return
 }
 
@@ -1042,11 +1037,48 @@ func cloneDocTextNode(node *ast.Node) *ast.Node {
 }
 
 func lcsMatches[T comparable](left, right []T, maxCells int) (matches [][2]int, ok bool) {
+	return lcsMatchesWithBudget(left, right, maxCells, &docDiffLCSBudget{remaining: maxCells})
+}
+
+func lcsMatchesWithBudget[T comparable](left, right []T, maxCells int,
+	budget *docDiffLCSBudget) (matches [][2]int, ok bool) {
 	if 0 == len(left) || 0 == len(right) {
 		return [][2]int{}, true
 	}
-	if len(left) > maxCells/len(right) {
-		return nil, false
+	prefix := 0
+	for prefix < len(left) && prefix < len(right) && left[prefix] == right[prefix] {
+		matches = append(matches, [2]int{prefix, prefix})
+		prefix++
+	}
+	suffix := 0
+	for prefix+suffix < len(left) && prefix+suffix < len(right) &&
+		left[len(left)-suffix-1] == right[len(right)-suffix-1] {
+		suffix++
+	}
+	leftMiddle := left[prefix : len(left)-suffix]
+	rightMiddle := right[prefix : len(right)-suffix]
+	if 0 < len(leftMiddle) && 0 < len(rightMiddle) {
+		height := len(leftMiddle) + 1
+		width := len(rightMiddle) + 1
+		if height > maxCells/width || nil == budget || height > budget.remaining/width {
+			return nil, false
+		}
+		cells := height * width
+		budget.remaining -= cells
+		middleMatches := lcsMatchesTable(leftMiddle, rightMiddle)
+		for _, match := range middleMatches {
+			matches = append(matches, [2]int{match[0] + prefix, match[1] + prefix})
+		}
+	}
+	for i := suffix; 0 < i; i-- {
+		matches = append(matches, [2]int{len(left) - i, len(right) - i})
+	}
+	return matches, true
+}
+
+func lcsMatchesTable[T comparable](left, right []T) (matches [][2]int) {
+	if 0 == len(left) || 0 == len(right) {
+		return
 	}
 	width := len(right) + 1
 	table := make([]int, (len(left)+1)*width)
@@ -1073,7 +1105,7 @@ func lcsMatches[T comparable](left, right []T, maxCells int) (matches [][2]int, 
 			j++
 		}
 	}
-	return matches, true
+	return matches
 }
 
 func setDocDiffBlockAttrs(node *ast.Node, statuses []string) {

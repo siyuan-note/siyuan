@@ -1348,13 +1348,17 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             matchDialog = undefined;
         }
         if (matchDialog) {
+            let handled = false;
             if (matchDialog.element.getAttribute("data-key") === Constants.DIALOG_VIEWCARDS) {
                 matchDialog.element.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
+                handled = true;
             } else if (matchDialog.element.getAttribute("data-key") === Constants.DIALOG_HISTORYCOMPARE) {
-                historyKeydown(event, matchDialog);
+                handled = historyKeydown(event, matchDialog);
             }
-            event.preventDefault();
-            return;
+            if (handled) {
+                event.preventDefault();
+                return;
+            }
         }
     }
 

@@ -286,6 +286,12 @@
   }
 }
 
+@media (hover: none) {
+  .history__side .b3-list-item--hide-action > [data-type="selectVersion"] {
+    display: flex;
+  }
+}
+
 @keyframes history-diff-focus {
   0%,
   40% {

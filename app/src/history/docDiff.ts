@@ -246,7 +246,7 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
 
     const focusDifference = (step: number) => {
         if (!diff || visibleDifferences.length === 0) {
-            return;
+            return false;
         }
         differenceIndex = (differenceIndex + step + visibleDifferences.length) % visibleDifferences.length;
         rootElement.querySelectorAll(".history__diff--focus").forEach((item) => {
@@ -273,6 +273,7 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
             isSyncingScroll = false;
         });
         renderCount();
+        return true;
     };
 
     const setupScrollSync = () => {
@@ -366,11 +367,13 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
                     type: leftRef.type,
                     id: leftRef.id || "",
                     path: leftRef.path || "",
+                    snapshot: leftRef.snapshot || "",
                 },
                 right: {
                     type: rightRef.type,
                     id: rightRef.id || "",
                     path: rightRef.path || "",
+                    snapshot: rightRef.snapshot || "",
                 }
             });
             if (isDestroyed || currentRequestId !== requestId) {
@@ -418,10 +421,14 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
         }
     });
     dialog.element.addEventListener("historyKeydown", (event: CustomEvent<string>) => {
+        let handled = false;
         if (event.detail === "ArrowUp") {
-            focusDifference(-1);
+            handled = focusDifference(-1);
         } else if (event.detail === "ArrowDown") {
-            focusDifference(1);
+            handled = focusDifference(1);
+        }
+        if (handled) {
+            event.preventDefault();
         }
     });
 

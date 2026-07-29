@@ -54,7 +54,7 @@ export const reloadSync = (
         }
     }
     setNoteBook(() => {
-        window.siyuan.mobile.docks.file.init(false);
+        window.siyuan.mobile.docks.file?.init(false);
     });
     /// #else
     const allModels = getAllModels();

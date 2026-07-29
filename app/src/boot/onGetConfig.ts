@@ -57,7 +57,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     /// #endif
     ensureUILayout();
     initWindowEvent(app);
-    const snippetReady = renderSnippet();
+    const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
         snippetReady.then(() => {

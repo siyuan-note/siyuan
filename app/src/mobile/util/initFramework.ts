@@ -62,7 +62,7 @@ const openDockMenu = (app: App) => {
 
 export const initFramework = async (app: App, isStart: boolean) => {
     setInlineStyle();
-    const snippetReady = renderSnippet();
+    const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
     initKeyboardToolbar();
     const sidebarElement = document.getElementById("sidebar");
     // 不能使用 getEventName，否则点击返回会展开右侧栏

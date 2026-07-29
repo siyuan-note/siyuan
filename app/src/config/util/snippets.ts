@@ -5,7 +5,11 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
 import {refreshHeadingNumberMeasurements} from "../../util/assets";
 
-export const renderSnippet = () => {
+export const renderSnippet = (timeout = 0) => {
+    const abortController = timeout > 0 ? new AbortController() : undefined;
+    const timeoutId = abortController ? window.setTimeout(() => {
+        abortController.abort();
+    }, timeout) : 0;
     return fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
         let cssChanged = false;
         response.data.snippets.forEach((item: ISnippet) => {
@@ -50,6 +54,8 @@ export const renderSnippet = () => {
         if (cssChanged) {
             refreshHeadingNumberMeasurements();
         }
+    }, undefined, undefined, abortController?.signal).finally(() => {
+        window.clearTimeout(timeoutId);
     });
 };
 

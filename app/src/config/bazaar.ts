@@ -253,7 +253,7 @@ export const bazaar = {
         </div>
     </div>
 </div>
-<div id="configBazaarReadme" class="config-bazaar__readme"></div>
+<div id="configBazaarReadme" class="config-bazaar__readme config__view"></div>
 </div>`;
     },
     _genFundingHTML(funding: string): string {
@@ -487,7 +487,7 @@ type="checkbox">
                 checkElement.classList.add("fn__none");
             }
             contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
-            const sideElement = bazaar.element.querySelector("#configBazaarReadme.config-bazaar__readme--show .item__side");
+            const sideElement = bazaar.element.querySelector("#configBazaarReadme.config__view--show .item__side");
             // 仅刷新「已下载」详情，避免通过 URI 打开的在线详情被本地数据覆盖
             if (sideElement?.getAttribute("data-from") === "downloaded") {
                 const repoURL = sideElement.getAttribute("data-repourl");
@@ -549,75 +549,77 @@ type="checkbox">
         bazaar._upsertReadmeData(bazaarType, from, data);
         const isDownload = from === "downloaded";
         readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(data.repoURL)}">
-    <div class="fn__flex">
-        <div style="padding-right: 8px" class="block__icon block__icon--show ariaLabel" data-position="north" data-type="goBack" aria-label="${window.siyuan.languages.back}">
+    <div class="fn__flex fn__flex-shrink">
+        <div style="padding-right: 8px" data-type="goBack" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.back}">
             <svg><use xlink:href="#iconLeft"></use></svg>
             <span class="fn__space"></span>
             ${navTitles[bazaarType]}
         </div>
     </div>
-    <img class="item__img" src="${data.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
-    <div>
-        <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${escapeHtml(data.preferredName)}</a>
+    <div class="fn__flex-1">
+        <img class="item__img" src="${data.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
+        <div>
+            <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${escapeHtml(data.preferredName)}</a>
+        </div>
+        <div class="fn__hr"></div>
+        <div>
+            <a href="${data.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${escapeHtml(data.name)}</a>
+        </div>
+        <div class="block__icons">
+            <span class="fn__flex-1"></span>
+            ${data.preferredFunding ?
+                bazaar._genFundingHTML(data.preferredFunding) :
+                '<span class="block__icon block__icon--show block__icon--text" style="cursor: default"><svg><use xlink:href="#iconAccount"></use></svg></span>'
+            }
+            <span class="fn__space"></span>
+            <a href="${urls.join("/")}" target="_blank" title="Creator">${escapeHtml(data.author)}</a>
+            <span class="fn__flex-1"></span>
+        </div>
+        <div class="fn__hr--b"></div>
+        <div class="fn__hr--b"></div>
+        <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.currentVer}<br>v${escapeHtml(data.version)}</div>
+        <div class="fn__hr"></div>
+        <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${isDownload ? window.siyuan.languages.installDate : window.siyuan.languages.releaseDate}<br>${isDownload ? data.hInstallDate : data.hUpdated}</div>
+        <div class="fn__hr${isDownload ? " fn__none" : ""}"></div>
+        <div class="ft__on-surface ft__smaller${isDownload ? " fn__none" : ""}" style="line-height: 20px;">${window.siyuan.languages.pkgSize}<br>${data.hSize}</div>
+        <div class="fn__hr"></div>
+        <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.installSize}<br>${data.hInstallSize}</div>
+        <div class="fn__hr--b"></div>
+        <div class="fn__hr--b"></div>
+        <div${data.installed ? ' class="fn__none"' : ""}>
+            <button ${data.disallowInstall ? `disabled aria-label="${bazaar._genInstallButtonAriaLabel(data)}" data-position="north"` : ""} class="b3-button ariaLabel" style="width: 168px"  data-type="install">${window.siyuan.languages.download}</button>
+        </div>
+        ${bazaar._genReadmeUpdateButtonHTML(data)}
+        <div class="fn__hr--b"></div>
+        <div>
+            <a href="${data.repoURL}/issues" target="_blank" title="Feedback via GitHub Issues" class="b3-button b3-button--success" style="width: 168px" data-type="feedback">${window.siyuan.languages.feedback}</a>
+        </div>
+        <div class="fn__hr--b${isDownload ? " fn__none" : ""}"></div>
+        <div class="fn__hr--b${isDownload ? " fn__none" : ""}"></div>
+        <div class="fn__flex${isDownload ? " fn__none" : ""}" style="justify-content: center;">
+            <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconGithub"></use></svg>
+            <span class="fn__space"></span>
+            <a href="${data.repoURL}" target="_blank" title="GitHub Repo">Repo</a>
+            <span class="fn__space"></span>
+            <span class="fn__space"></span>
+            <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconStar"></use></svg>
+            <span class="fn__space"></span>
+            <a href="${data.repoURL}/stargazers" target="_blank" title="Stars">${formatCount(data.stars)}</a>
+            <span class="fn__space"></span>
+            <span class="fn__space"></span>
+            <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconGitHubI"></use></svg>
+            <span class="fn__space"></span>
+            <a href="${data.repoURL}/issues" target="_blank" title="Open issues">${formatCount(data.openIssues)}</a>
+            <span class="fn__space"></span>
+            <span class="fn__space"></span>
+            <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconDownload"></use></svg>
+            <span class="fn__space"></span>
+            ${formatCount(data.downloads)}
+        </div>
+        <div class="fn__hr--b"></div>
+        <div class="fn__hr--b"></div>
+        <div class="fn__flex-1"></div>
     </div>
-    <div class="fn__hr"></div>
-    <div>
-        <a href="${data.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${escapeHtml(data.name)}</a>
-    </div>
-    <div class="block__icons">
-        <span class="fn__flex-1"></span>
-        ${data.preferredFunding ?
-            bazaar._genFundingHTML(data.preferredFunding) :
-            '<span class="block__icon block__icon--show block__icon--text" style="cursor: default"><svg><use xlink:href="#iconAccount"></use></svg></span>'
-        }
-        <span class="fn__space"></span>
-        <a href="${urls.join("/")}" target="_blank" title="Creator">${escapeHtml(data.author)}</a>
-        <span class="fn__flex-1"></span>
-    </div>
-    <div class="fn__hr--b"></div>
-    <div class="fn__hr--b"></div>
-    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.currentVer}<br>v${escapeHtml(data.version)}</div>
-    <div class="fn__hr"></div>
-    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${isDownload ? window.siyuan.languages.installDate : window.siyuan.languages.releaseDate}<br>${isDownload ? data.hInstallDate : data.hUpdated}</div>
-    <div class="fn__hr${isDownload ? " fn__none" : ""}"></div>
-    <div class="ft__on-surface ft__smaller${isDownload ? " fn__none" : ""}" style="line-height: 20px;">${window.siyuan.languages.pkgSize}<br>${data.hSize}</div>
-    <div class="fn__hr"></div>
-    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.installSize}<br>${data.hInstallSize}</div>
-    <div class="fn__hr--b"></div>
-    <div class="fn__hr--b"></div>
-    <div${data.installed ? ' class="fn__none"' : ""}>
-        <button ${data.disallowInstall ? `disabled aria-label="${bazaar._genInstallButtonAriaLabel(data)}" data-position="north"` : ""} class="b3-button ariaLabel" style="width: 168px"  data-type="install">${window.siyuan.languages.download}</button>
-    </div>
-    ${bazaar._genReadmeUpdateButtonHTML(data)}
-    <div class="fn__hr--b"></div>
-    <div>
-        <a href="${data.repoURL}/issues" target="_blank" title="Feedback via GitHub Issues" class="b3-button b3-button--success" style="width: 168px" data-type="feedback">${window.siyuan.languages.feedback}</a>
-    </div>
-    <div class="fn__hr--b${isDownload ? " fn__none" : ""}"></div>
-    <div class="fn__hr--b${isDownload ? " fn__none" : ""}"></div>
-    <div class="fn__flex${isDownload ? " fn__none" : ""}" style="justify-content: center;">
-        <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconGithub"></use></svg>
-        <span class="fn__space"></span>
-        <a href="${data.repoURL}" target="_blank" title="GitHub Repo">Repo</a>
-        <span class="fn__space"></span>
-        <span class="fn__space"></span>
-        <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconStar"></use></svg>
-        <span class="fn__space"></span>
-        <a href="${data.repoURL}/stargazers" target="_blank" title="Stars">${formatCount(data.stars)}</a>
-        <span class="fn__space"></span>
-        <span class="fn__space"></span>
-        <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconGitHubI"></use></svg>
-        <span class="fn__space"></span>
-        <a href="${data.repoURL}/issues" target="_blank" title="Open issues">${formatCount(data.openIssues)}</a>
-        <span class="fn__space"></span>
-        <span class="fn__space"></span>
-        <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconDownload"></use></svg>
-        <span class="fn__space"></span>
-        ${formatCount(data.downloads)}
-    </div>
-    <div class="fn__hr--b"></div>
-    <div class="fn__hr--b"></div>
-    <div class="fn__flex-1"></div>
 </div>
 <div class="item__main">
     <div class="item__preview" style="background-image: url(${data.previewURL})"></div>
@@ -647,7 +649,7 @@ type="checkbox">
                 highlightRender(mdElement);
             });
         }
-        readmeElement.classList.add("config-bazaar__readme--show");
+        readmeElement.classList.add("config__view--show");
     },
     _myType2Type(myType: string) {
         return myType.replace("my", "").toLowerCase() + "s" as TBazaarType;
@@ -834,7 +836,7 @@ type="checkbox">
                     event.stopPropagation();
                     break;
                 } else if (type === "goBack") {
-                    bazaar.element.querySelector("#configBazaarReadme").classList.remove("config-bazaar__readme--show");
+                    bazaar.element.querySelector("#configBazaarReadme").classList.remove("config__view--show");
                     event.preventDefault();
                     event.stopPropagation();
                     break;

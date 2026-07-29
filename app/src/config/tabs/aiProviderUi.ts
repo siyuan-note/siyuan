@@ -95,7 +95,7 @@ const getProviderViews = (root: HTMLElement) => {
 const removeProviderView = (root: HTMLElement, view?: HTMLElement) => {
     const views = view ? [view] : getProviderViews(root);
     views.forEach((item) => {
-        item.classList.remove("config-ai-provider__view--show");
+        item.classList.remove("config__view--show");
         item.addEventListener("transitionend", (event) => {
             if (event.propertyName === "opacity") {
                 item.remove();
@@ -112,7 +112,7 @@ const createProviderView = (root: HTMLElement, title: string, stacked = false) =
     const host = getProviderViewHost(root);
     const layer = getProviderViews(root).length;
     const view = document.createElement("div");
-    view.className = "config-ai-provider__view";
+    view.className = "config-ai-provider__view config__view";
     view.style.zIndex = String(3 + layer);
     view.innerHTML = `<div class="b3-dialog__header fn__flex">
     <button class="block__icon block__icon--show" data-action="back" aria-label="${window.siyuan.languages.back}">
@@ -124,7 +124,7 @@ const createProviderView = (root: HTMLElement, title: string, stacked = false) =
 <div class="b3-dialog__body"></div>`;
     host.append(view);
     view.getBoundingClientRect();
-    view.classList.add("config-ai-provider__view--show");
+    view.classList.add("config__view--show");
     return view;
 };
 

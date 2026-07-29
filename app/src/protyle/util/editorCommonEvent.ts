@@ -1019,12 +1019,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         document.onmouseup = null;
     });
     const insertBlockRefs = async (ids: string[]) => {
-        let html = "";
-        for (const id of ids) {
-            const response = await fetchSyncPost("/api/block/getRefText", {id});
-            html += protyle.lute.Md2BlockDOM(`((${id} '${response.data}'))`);
+        let markdown = "";
+        for (let i = 0; i < ids.length; i++) {
+            if (ids.length > 1) {
+                markdown += "- ";
+            }
+            const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
+            markdown += `((${ids[i]} '${response.data}'))`;
+            if (ids.length > 1 && i !== ids.length - 1) {
+                markdown += "\n";
+            }
         }
-        insertHTML(html, protyle);
+        insertHTML(protyle.lute.Md2BlockDOM(markdown), protyle);
     };
     const focusBlockRefDrop = (event: DragEvent) => {
         if (event.y > protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
@@ -1698,18 +1704,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         focusByRange(range);
                     }
                 }
-                let html = "";
-                for (let i = 0; i < ids.length; i++) {
-                    if (ids.length > 1) {
-                        html += "- ";
-                    }
-                    const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
-                    html += `((${ids[i]} '${response.data}'))`;
-                    if (ids.length > 1 && i !== ids.length - 1) {
-                        html += "\n";
-                    }
-                }
-                insertHTML(protyle.lute.Md2BlockDOM(html), protyle);
+                await insertBlockRefs(ids);
             } else if (targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
                 const scrollTop = protyle.contentElement.scrollTop;
                 if (targetElement.classList.contains("av__row") ||

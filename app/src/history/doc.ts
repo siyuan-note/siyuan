@@ -9,9 +9,10 @@ import {isMobile} from "../util/functions";
 import type {App} from "../index";
 import {resizeSide} from "./resizeSide";
 import {escapeHtml} from "../util/escape";
-import {openRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
+import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
 
 let historyEditor: Protyle;
+const repoHistoryEditors = new WeakMap<HTMLElement, Protyle>();
 let isLoading = false;
 
 const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
@@ -76,6 +77,13 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string)
     const pageNumElement = element.querySelector('[data-type="jumpSnapshotPage"]');
     const pageInfoElement = nextElement.nextElementSibling.nextElementSibling;
     const listElement = element.querySelector(".b3-list--background");
+    const previewElement = element.querySelector('[data-type="repoPanel"]');
+    repoHistoryEditors.get(element)?.destroy();
+    repoHistoryEditors.delete(element);
+    element.querySelector(".protyle-title__input").classList.add("fn__none");
+    previewElement.classList.add("fn__none");
+    previewElement.removeAttribute("data-request-id");
+    previewElement.innerHTML = "";
     element.setAttribute("data-loading", "true");
     element.setAttribute("data-page", currentPage.toString());
     pageNumElement.textContent = currentPage.toString();
@@ -174,9 +182,16 @@ export const openDocHistory = (options: {
                     <div class="fn__flex-1"></div>
                 </div>
             </div>
-            <ul class="b3-list b3-list--background fn__flex-1" style="padding: 8px 0">
-                <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
-            </ul>
+            <div class="fn__flex fn__flex-1 history__panel">
+                <ul class="b3-list b3-list--background history__side" ${isMobile() ? "" : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDocWidth}"`}>
+                    <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
+                </ul>
+                <div class="history__resize"></div>
+                <div class="fn__flex-1 fn__flex-column">
+                    <div class="protyle-title__input fn__none ft__center ft__breakword"></div>
+                    <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="repoPanel"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>`;
@@ -188,6 +203,8 @@ export const openDocHistory = (options: {
         containerClassName: "b3-dialog__container--theme",
         destroyCallback() {
             historyEditor = undefined;
+            repoHistoryEditors.get(repoElement)?.destroy();
+            repoHistoryEditors.delete(repoElement);
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYDOC);
@@ -200,6 +217,8 @@ export const openDocHistory = (options: {
     });
     const docElement = fileElement.querySelector('.history__text[data-type="docPanel"]') as HTMLElement;
     const mdElement = fileElement.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
+    const repoPreviewElement = repoElement.querySelector('[data-type="repoPanel"]') as HTMLElement;
+    const repoTitleElement = repoElement.querySelector(".protyle-title__input") as HTMLElement;
     renderDoc(fileElement, 1, options.id);
     historyEditor = new Protyle(options.app, docElement, {
         blockId: "",
@@ -218,6 +237,18 @@ export const openDocHistory = (options: {
     disabledProtyle(historyEditor.protyle);
     const pageNumElement = fileElement.querySelector('[data-type="jumpRepoPage"]');
     const titleElement = fileElement.querySelector(".protyle-title__input");
+    const previewRepoFile = (element: Element) => {
+        repoHistoryEditors.get(repoElement)?.destroy();
+        repoHistoryEditors.delete(repoElement);
+        repoTitleElement.textContent = element.querySelector(".b3-list-item__text").textContent.trim();
+        repoTitleElement.classList.remove("fn__none");
+        repoPreviewElement.classList.remove("fn__none");
+        renderRepoFile(options.app, element, repoPreviewElement, (editor) => {
+            repoHistoryEditors.set(repoElement, editor);
+        });
+        element.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+        element.classList.add("b3-list-item--focus");
+    };
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(dialog.element)) {
@@ -253,7 +284,7 @@ export const openDocHistory = (options: {
                 event.preventDefault();
                 break;
             } else if (type === "view" && repoFileElement) {
-                openRepoFile(options.app, repoFileElement);
+                previewRepoFile(repoFileElement);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -269,6 +300,12 @@ export const openDocHistory = (options: {
                         });
                     });
                 });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.classList.contains("b3-list-item") &&
+                target.getAttribute("data-type") === "searchFileItem") {
+                previewRepoFile(target);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -345,7 +382,8 @@ export const openDocHistory = (options: {
             target = target.parentElement;
         }
     });
-    resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideDocWidth");
+    resizeSide(fileElement.querySelector(".history__resize"), fileElement.querySelector(".history__side"), "sideDocWidth");
+    resizeSide(repoElement.querySelector(".history__resize"), repoElement.querySelector(".history__side"), "sideDocWidth");
 };
 
 const getHistoryPath = (target: Element, op: string, id: string, cb: (item: any) => void) => {

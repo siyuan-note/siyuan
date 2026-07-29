@@ -935,19 +935,14 @@ func importCustomFont(c *gin.Context) {
 	}
 	defer file.Close()
 
-	if err = os.MkdirAll(util.CustomFontDir(), 0755); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	tempFile, err := os.CreateTemp(util.CustomFontDir(), ".font-*")
+	tempFile, err := util.CreateCustomFontTemp()
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 	tempPath := tempFile.Name()
-	defer os.Remove(tempPath)
+	defer util.DiscardCustomFontTemp(tempPath)
 
 	written, copyErr := io.Copy(tempFile, io.LimitReader(file, util.MaxCustomFontSize+1))
 	closeErr := tempFile.Close()

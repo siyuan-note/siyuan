@@ -30,6 +30,7 @@ import {
     isNativeMobileContainer,
     loadCustomFonts,
     registerCustomFont,
+    registerCustomFonts,
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
@@ -123,7 +124,6 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
             return;
         }
         const systemFonts = Array.isArray(systemResponse.data) ? systemResponse.data as IFontItem[] : [];
-        customFonts.forEach(registerCustomFont);
 
         const curFamily = fontFamilyEl.dataset.family;
         const curWeight = parseInt(fontFamilyEl.dataset.weight || "400", 10);
@@ -136,7 +136,9 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
             genFontListItemHtml(item, item.family === curFamily && item.weight === curWeight)
         ).join("");
         const canManageCustomFonts = nativeMobile && !window.siyuan.config.readonly;
-        const fontMenu = new Menu();
+        const customFontsByID = new Map(customFonts.map((font) => [font.id, font]));
+        let fontPreviewObserver: IntersectionObserver;
+        const fontMenu = new Menu(undefined, () => fontPreviewObserver?.disconnect());
         fontMenu.addItem({
             iconHTML: "",
             type: "empty",
@@ -158,6 +160,30 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
                     item.style.fontFamily = item.dataset.family;
                     item.style.fontWeight = item.dataset.weight;
                 });
+                if (!window.siyuan.config.system.safeMode && "IntersectionObserver" in window) {
+                    fontPreviewObserver = new IntersectionObserver((entries) => {
+                        const visibleFonts: ICustomFont[] = [];
+                        entries.forEach((entry) => {
+                            if (!entry.isIntersecting) {
+                                return;
+                            }
+                            const id = (entry.target as HTMLElement).dataset.id;
+                            const font = customFontsByID.get(id);
+                            if (font) {
+                                visibleFonts.push(font);
+                            }
+                            fontPreviewObserver.unobserve(entry.target);
+                        });
+                        registerCustomFonts(visibleFonts);
+                    }, {
+                        rootMargin: "96px 0px",
+                    });
+                    listElement.querySelectorAll<HTMLElement>(".b3-list-item[data-id]").forEach((item) => {
+                        if (item.dataset.id) {
+                            fontPreviewObserver.observe(item);
+                        }
+                    });
+                }
                 const filterFontList = () => {
                     const value = inputElement.value.toLowerCase().trim();
                     listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");

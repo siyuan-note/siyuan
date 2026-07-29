@@ -689,6 +689,7 @@ export const initKeyboardToolbar = () => {
         const type = buttonElement.getAttribute("data-type");
         // appearance
         if (["clear", "style2", "style4", "color", "backgroundColor", "fontSize", "style1"].includes(type)) {
+            preventRender = true;
             const nodeElements = getFontNodeElements(protyle);
             const itemElement = buttonElement.firstElementChild as HTMLElement;
             if (type === "style1") {
@@ -702,6 +703,9 @@ export const initKeyboardToolbar = () => {
             } else {
                 fontEvent(protyle, nodeElements, type);
             }
+            setTimeout(() => {
+                preventRender = false;
+            }, 1000);
         }
 
         event.preventDefault();

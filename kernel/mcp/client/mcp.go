@@ -572,12 +572,21 @@ func callMCPToolOnce(call func() (*mcp.CallToolResult, error), reconnect func(er
 			text = "(empty result)"
 		}
 	}
+	structuredContentSet := result.StructuredContent != nil
+	if !structuredContentSet && structuredContentExpected && !result.IsError {
+		for _, content := range result.Content {
+			if textContent, ok := content.(*mcp.TextContent); ok && strings.TrimSpace(textContent.Text) == "null" {
+				structuredContentSet = true
+				break
+			}
+		}
+	}
 
 	syr := tools.CallToolResult{
 		IsError:              result.IsError,
 		Content:              []tools.ContentItem{{Type: "text", Text: text}},
 		StructuredContent:    result.StructuredContent,
-		StructuredContentSet: result.StructuredContent != nil || (structuredContentExpected && !result.IsError),
+		StructuredContentSet: structuredContentSet,
 	}
 	return syr
 }

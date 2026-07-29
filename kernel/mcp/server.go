@@ -167,7 +167,7 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 		if arguments == nil {
 			arguments = map[string]any{}
 		}
-		if err := validator.ValidateInput(arguments); err != nil {
+		if err := validator.ValidateInputContext(ctx, arguments); err != nil {
 			return toolErrorResult(fmt.Sprintf("invalid tool arguments: %v", err)), nil
 		}
 
@@ -185,7 +185,7 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 		if err != nil {
 			return toolErrorResult(err.Error()), nil
 		}
-		if err = validator.ValidateOutput(result); err != nil {
+		if err = validator.ValidateOutputContext(ctx, result); err != nil {
 			return toolErrorResult(fmt.Sprintf("invalid tool output: %v", err)), nil
 		}
 

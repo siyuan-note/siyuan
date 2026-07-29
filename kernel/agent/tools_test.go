@@ -19,6 +19,7 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/sashabaranov/go-openai"
@@ -331,6 +332,32 @@ func TestExecuteToolPropagatesUnknownExecution(t *testing.T) {
 		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
 	}, "")
 	if result != "result unknown" || !isErr || !executionUnknown {
+		t.Fatalf("unexpected tool result: result=%q, isErr=%v, executionUnknown=%v", result, isErr, executionUnknown)
+	}
+}
+
+func TestExecuteToolRejectsInvalidStructuredOutput(t *testing.T) {
+	const toolName = "test_invalid_structured_output"
+	if err := tools.SetTool(toolName, &tools.Tool{
+		Name:         toolName,
+		Source:       "mcp",
+		InputSchema:  tools.ToolSchema{Type: "object"},
+		OutputSchema: &tools.ToolSchema{Raw: map[string]any{"type": "array"}},
+		Handler: func(args map[string]any) (tools.CallToolResult, error) {
+			return tools.CallToolResult{
+				StructuredContent:    map[string]any{"wrong": true},
+				StructuredContentSet: true,
+			}, nil
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { tools.RemoveTool(toolName) })
+
+	result, isErr, executionUnknown := executeTool(context.Background(), openai.ToolCall{
+		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
+	}, "")
+	if !isErr || executionUnknown || !strings.Contains(result, "invalid tool output") {
 		t.Fatalf("unexpected tool result: result=%q, isErr=%v, executionUnknown=%v", result, isErr, executionUnknown)
 	}
 }

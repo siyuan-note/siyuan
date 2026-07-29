@@ -45,7 +45,7 @@ func convertMCPToolsToOpenAI() []openai.Tool {
 // executeTool 执行单次工具调用。
 // 返回值：结果文本（已展平为字符串），isErr 表示工具是否返回错误结果，executionUnknown 表示副作用结果无法确定。
 func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) (resultText string, isErr, executionUnknown bool) {
-	t := tools.GetTool(tc.Function.Name)
+	t, validator := tools.LookupToolWithValidator(tc.Function.Name)
 	if t == nil {
 		return "unknown tool: " + tc.Function.Name, true, false
 	}
@@ -57,6 +57,9 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) (res
 	}
 
 	args := parseToolArgs(tc.Function.Arguments)
+	if err := validator.ValidateInputContext(ctx, args); err != nil {
+		return "invalid tool arguments: " + err.Error(), true, false
+	}
 	// _sessionID 和 _toolCallID 是原生工具专用的内部字段，用于关联会话状态和实现幂等操作。
 	// 仅注入给原生工具；MCP/插件工具的参数会原样转发给外部服务端，
 	// 严格校验（additionalProperties:false）的服务端（如 Flomo MCP）会因这个多余字段报错。
@@ -93,6 +96,9 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) (res
 			return "tool execution was interrupted; execution result is unknown and must not be retried automatically", true, true
 		}
 		return "tool execution error: " + err.Error(), true, false
+	}
+	if err = validator.ValidateOutputContext(ctx, result); err != nil {
+		return "invalid tool output: " + err.Error(), true, false
 	}
 
 	return resultToString(result), result.IsError, result.ExecutionUnknown

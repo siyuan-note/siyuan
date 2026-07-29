@@ -74,3 +74,59 @@ func TestToolValidatorAcceptsExplicitNullOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestCompileToolValidatorRejectsInvalidParamHeader(t *testing.T) {
+	_, err := CompileToolValidator(&Tool{
+		Name: "invalid_header",
+		InputSchema: ToolSchema{Raw: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"items": map[string]any{
+					"type":         "array",
+					"x-mcp-header": "Items",
+				},
+			},
+		}},
+	})
+	if err == nil {
+		t.Fatal("expected invalid x-mcp-header annotation to fail")
+	}
+}
+
+func TestCompileToolValidatorRejectsExcessiveSchemaDepth(t *testing.T) {
+	var nested any = true
+	for range maxToolSchemaDepth + 1 {
+		nested = []any{nested}
+	}
+	_, err := CompileToolValidator(&Tool{
+		Name: "deep_schema",
+		InputSchema: ToolSchema{Raw: map[string]any{
+			"type": "object",
+			"x":    nested,
+		}},
+	})
+	if err == nil {
+		t.Fatal("expected excessive schema depth to fail")
+	}
+}
+
+func TestToolValidatorRejectsExcessiveValueDepth(t *testing.T) {
+	validator, err := CompileToolValidator(&Tool{
+		Name:         "deep_value",
+		InputSchema:  ToolSchema{Type: "object"},
+		OutputSchema: &ToolSchema{},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var nested any = true
+	for range maxToolValueDepth + 1 {
+		nested = []any{nested}
+	}
+	if err = validator.ValidateOutput(CallToolResult{
+		StructuredContent:    nested,
+		StructuredContentSet: true,
+	}); err == nil {
+		t.Fatal("expected excessive value depth to fail")
+	}
+}

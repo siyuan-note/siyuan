@@ -25,27 +25,39 @@ import (
 
 var registryMu sync.RWMutex
 var Registry = map[string]*Tool{}
+var registryValidators = map[string]*ToolValidator{}
 var registryObservers = map[uint64]func(string, *Tool){}
 var registryObserverID uint64
 
 func GetTool(name string) *Tool {
-	return LookupTool(name)
+	tool, _ := LookupToolWithValidator(name)
+	return tool
 }
 
 func LookupTool(name string) *Tool {
+	tool, _ := LookupToolWithValidator(name)
+	return tool
+}
+
+func LookupToolWithValidator(name string) (*Tool, *ToolValidator) {
 	registryMu.RLock()
 	defer registryMu.RUnlock()
 
+	key, tool := lookupToolLocked(name)
+	return tool, registryValidators[key]
+}
+
+func lookupToolLocked(name string) (string, *Tool) {
 	name = strings.TrimSpace(name)
 
 	if t := Registry[name]; t != nil {
-		return t
+		return name, t
 	}
 
 	lower := strings.ToLower(name)
 	for k, v := range Registry {
 		if strings.ToLower(k) == lower {
-			return v
+			return k, v
 		}
 	}
 
@@ -53,12 +65,12 @@ func LookupTool(name string) *Tool {
 		base := strings.TrimPrefix(lower, prefix)
 		for k, v := range Registry {
 			if strings.ToLower(k) == base {
-				return v
+				return k, v
 			}
 		}
 	}
 
-	return nil
+	return "", nil
 }
 
 func GetAllTools() []*Tool {
@@ -75,12 +87,14 @@ func GetAllTools() []*Tool {
 }
 
 func SetTool(name string, t *Tool) error {
-	if _, err := CompileToolValidator(t); err != nil {
+	validator, err := CompileToolValidator(t)
+	if err != nil {
 		return err
 	}
 	registryMu.Lock()
 	defer registryMu.Unlock()
 	Registry[name] = t
+	registryValidators[name] = validator
 	notifyRegistryObservers(name, t)
 	return nil
 }
@@ -89,6 +103,7 @@ func RemoveTool(name string) {
 	registryMu.Lock()
 	defer registryMu.Unlock()
 	delete(Registry, name)
+	delete(registryValidators, name)
 	notifyRegistryObservers(name, nil)
 }
 
@@ -97,6 +112,7 @@ func RemoveToolIf(name string, tool *Tool) {
 	defer registryMu.Unlock()
 	if Registry[name] == tool {
 		delete(Registry, name)
+		delete(registryValidators, name)
 		notifyRegistryObservers(name, nil)
 	}
 }

@@ -83,6 +83,17 @@ func TestCallMCPToolOncePreservesExpectedNullStructuredContent(t *testing.T) {
 	}
 }
 
+func TestCallMCPToolOnceDoesNotInventMissingStructuredContent(t *testing.T) {
+	result := callMCPToolOnce(func() (*mcp.CallToolResult, error) {
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{&mcp.TextContent{Text: "completed without structured output"}},
+		}, nil
+	}, func(error) {}, true)
+	if result.HasStructuredContent() {
+		t.Fatalf("missing structured content was treated as explicit null: %#v", result)
+	}
+}
+
 func TestTrustedReadOnlyHint(t *testing.T) {
 	tool := &mcp.Tool{Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true}}
 	if trustedReadOnlyHint(conf.MCPServer{}, tool) {

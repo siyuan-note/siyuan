@@ -239,6 +239,11 @@ describe("operationsMayChangeHeadingNumbers", () => {
 });
 
 describe("operationsMayChangeOutline", () => {
+    it("缺少操作列表时不刷新大纲", () => {
+        assert.equal(operationsMayChangeOutline(null), false);
+        assert.equal(operationsMayChangeOutline(undefined), false);
+    });
+
     it("文档标题编号设置变化时刷新大纲", () => {
         const changed = operationsMayChangeOutline([{
             action: "updateAttrs",

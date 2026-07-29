@@ -221,8 +221,8 @@ const operationChangesHeadingNumberSetting = (operation: IOperation) => {
     return oldValue !== newValue;
 };
 
-export const operationsMayChangeOutline = (operations: IOperation[] = [], headingIDs: Set<string> = new Set()) => {
-    return operations.some(operation => {
+export const operationsMayChangeOutline = (operations: IOperation[] | null = [], headingIDs: Set<string> = new Set()) => {
+    return (operations ?? []).some(operation => {
         if (operationChangesHeadingNumberSetting(operation)) {
             return true;
         }

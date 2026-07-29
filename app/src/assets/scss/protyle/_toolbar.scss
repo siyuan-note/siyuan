@@ -37,6 +37,7 @@
 
       &:disabled {
         opacity: .38;
+        cursor: not-allowed;
       }
 
       &:hover:not(:disabled) {

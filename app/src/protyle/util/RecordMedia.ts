@@ -1,12 +1,62 @@
 const SAMPLE_RATE = 44100;
 const MP3_BIT_RATE = 96;
 const BUFFER_SIZE = 2048;
+const PROCESSOR_NAME = "siyuan-record-media";
+const PROCESSOR_SOURCE = `
+class RecordMediaProcessor extends AudioWorkletProcessor {
+    constructor() {
+        super();
+        this.buffer = new Int16Array(${BUFFER_SIZE});
+        this.offset = 0;
+        this.recording = false;
+        this.port.onmessage = (event) => {
+            if (event.data.type === "start") {
+                this.recording = true;
+            } else if (event.data.type === "stop") {
+                this.recording = false;
+                this.flush();
+                this.port.postMessage({type: "flushed"});
+            }
+        };
+    }
+
+    flush() {
+        if (this.offset === 0) {
+            return;
+        }
+        const chunk = this.buffer.slice(0, this.offset);
+        this.buffer = new Int16Array(${BUFFER_SIZE});
+        this.offset = 0;
+        this.port.postMessage({type: "chunk", buffer: chunk.buffer}, [chunk.buffer]);
+    }
+
+    process(inputs) {
+        if (!this.recording || !inputs[0] || !inputs[0][0]) {
+            return true;
+        }
+        const input = inputs[0][0];
+        for (let i = 0; i < input.length; i++) {
+            const sample = Math.max(-1, Math.min(1, input[i]));
+            this.buffer[this.offset++] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+            if (this.offset === this.buffer.length) {
+                this.flush();
+            }
+        }
+        return true;
+    }
+}
+registerProcessor("${PROCESSOR_NAME}", RecordMediaProcessor);
+`;
 
 type EncoderMessage =
     { type: "ready" } |
     { type: "chunk", buffer: ArrayBuffer } |
     { type: "finished" } |
     { type: "error", message: string };
+
+type ProcessorMessage =
+    { type: "chunk", buffer: ArrayBuffer } |
+    { type: "flushed" };
 
 export class RecordMedia {
     public isRecording = false;
@@ -15,7 +65,7 @@ export class RecordMedia {
     private readonly context: AudioContext;
     private readonly mediaStream: MediaStream;
     private readonly audioInput: MediaStreamAudioSourceNode;
-    private readonly recorder: ScriptProcessorNode;
+    private recorder: AudioWorkletNode;
     private worker: Worker;
     private chunks: ArrayBuffer[] = [];
     private readyPromise: Promise<void>;
@@ -34,22 +84,10 @@ export class RecordMedia {
         }
 
         this.context = new AudioContextConstructor({sampleRate: SAMPLE_RATE});
+        if (!this.context.audioWorklet || typeof AudioWorkletNode === "undefined") {
+            throw new Error("AudioWorklet is not supported");
+        }
         this.audioInput = this.context.createMediaStreamSource(mediaStream);
-        this.recorder = this.context.createScriptProcessor(BUFFER_SIZE, 1, 1);
-        this.recorder.onaudioprocess = (event: AudioProcessingEvent) => {
-            if (!this.isRecording || !this.worker) {
-                return;
-            }
-            const input = event.inputBuffer.getChannelData(0);
-            const pcm = new Int16Array(input.length);
-            for (let i = 0; i < input.length; i++) {
-                const sample = Math.max(-1, Math.min(1, input[i]));
-                pcm[i] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-            }
-            this.worker.postMessage({type: "encode", buffer: pcm.buffer}, [pcm.buffer]);
-        };
-        this.audioInput.connect(this.recorder);
-        this.recorder.connect(this.context.destination);
     }
 
     public async startRecording() {
@@ -79,16 +117,17 @@ export class RecordMedia {
             sampleRate: this.context.sampleRate,
             bitRate: MP3_BIT_RATE,
         });
-        await this.readyPromise;
+        await Promise.all([this.readyPromise, this.initializeRecorder()]);
         await this.context.resume();
         this.isRecording = true;
+        this.recorder.port.postMessage({type: "start"});
     }
 
     public stopRecording() {
         if (this.stopPromise) {
             return this.stopPromise;
         }
-        if (!this.isRecording || !this.worker) {
+        if (!this.isRecording || !this.worker || !this.recorder) {
             return Promise.reject(new Error("Recorder is not recording"));
         }
 
@@ -97,7 +136,7 @@ export class RecordMedia {
             this.resolveStop = resolve;
             this.rejectStop = reject;
         });
-        this.worker.postMessage({type: "finish"});
+        this.recorder.port.postMessage({type: "stop"});
         return this.stopPromise;
     }
 
@@ -107,15 +146,46 @@ export class RecordMedia {
         }
         this.disposed = true;
         this.isRecording = false;
-        this.recorder.onaudioprocess = null;
+        this.recorder?.port.close();
+        this.recorder?.disconnect();
+        this.recorder = undefined;
         this.audioInput.disconnect();
-        this.recorder.disconnect();
         this.worker?.terminate();
         this.worker = undefined;
         this.mediaStream.getTracks().forEach((track) => track.stop());
         if (this.context.state !== "closed") {
             this.context.close();
         }
+    }
+
+    private async initializeRecorder() {
+        const processorURL = URL.createObjectURL(new Blob([PROCESSOR_SOURCE], {type: "text/javascript"}));
+        try {
+            await this.context.audioWorklet.addModule(processorURL);
+        } finally {
+            URL.revokeObjectURL(processorURL);
+        }
+        if (this.disposed) {
+            throw new Error("Recorder has been disposed");
+        }
+
+        this.recorder = new AudioWorkletNode(this.context, PROCESSOR_NAME, {
+            numberOfInputs: 1,
+            numberOfOutputs: 1,
+            outputChannelCount: [1],
+        });
+        this.recorder.port.onmessage = (event: MessageEvent<ProcessorMessage>) => {
+            if (event.data.type === "chunk" && this.worker) {
+                this.worker.postMessage({type: "encode", buffer: event.data.buffer}, [event.data.buffer]);
+            } else if (event.data.type === "flushed" && this.worker) {
+                this.worker.postMessage({type: "finish"});
+            }
+        };
+        this.recorder.onprocessorerror = () => {
+            this.handleWorkerError(new Error("Audio processor failed"));
+        };
+        this.audioInput.connect(this.recorder);
+        this.recorder.connect(this.context.destination);
     }
 
     private handleWorkerMessage(message: EncoderMessage) {

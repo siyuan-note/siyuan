@@ -7,7 +7,7 @@
 		"id": "20200812220555-lj3enxa",
 		"title": "请从这里开始",
 		"type": "doc",
-		"updated": "20260729213849"
+		"updated": "20260729225925"
 	},
 	"Children": [
 		{
@@ -1376,12 +1376,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240508000037-veyx5w5",
-				"updated": "20260729213849"
+				"updated": "20260729225925"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "🎨 外观与扩展"
+					"Data": "🎨 个性化"
 				}
 			]
 		},
@@ -1526,12 +1526,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729213849-17vjx77",
-				"updated": "20260729213849"
+				"updated": "20260729225925"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "🌐 分享、发布与部署"
+					"Data": "🌐 分享与部署"
 				}
 			]
 		},
@@ -1800,12 +1800,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240508000059-guv1xe5",
-				"updated": "20260729213849"
+				"updated": "20260729225925"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "☁️ 多端与会员服务"
+					"Data": "☁️ 应用与服务"
 				}
 			]
 		},
@@ -2554,12 +2554,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210501165231-lp7skso",
-				"updated": "20260729213849"
+				"updated": "20260729225925"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "💌 开发、贡献与支持"
+					"Data": "💌 参与贡献"
 				}
 			]
 		},

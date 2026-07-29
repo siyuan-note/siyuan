@@ -1,4 +1,5 @@
 {
+  "returnLabel": "戻る",
   "useDefaultVerticalAlign": "デフォルトの垂直方向配置を使用",
   "useDefaultHorizontalAlign": "デフォルトの水平方向配置を使用",
   "alignBottom": "下揃え",

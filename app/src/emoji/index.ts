@@ -8,7 +8,7 @@ import {getDockByType} from "../layout/tabUtil";
 import {getAllEditor, getAllModels} from "../layout/getAll";
 import {Dialog} from "../dialog";
 import {setPosition} from "../util/setPosition";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {getLuteInstance} from "../protyle/render/setLute";
 import * as dayjs from "dayjs";
 import {
@@ -445,7 +445,7 @@ export const openEmojiPanel = (
                     <button class="b3-button b3-button--cancel emojis__link-source" data-action="input-custom-icon">
                         ${window.siyuan.languages.use} URL / Base64
                     </button>
-                    ${isMobile() ? "" : `<div class="emojis__link-tip ft__on-surface">Ctrl+V · ${window.siyuan.languages.image} / URL / Base64</div>`}
+                    ${isMobile() ? "" : `<div class="emojis__link-tip ft__on-surface">${updateHotkeyTip("⌘V")} · ${window.siyuan.languages.image} / URL / Base64</div>`}
                 </div>
                 <div class="emojis__link-footer">
                     <button class="b3-button b3-button--cancel" data-action="cancel-custom-icon">${window.siyuan.languages.cancel}</button>
@@ -459,7 +459,7 @@ export const openEmojiPanel = (
                               placeholder="https://... / data:image/..."></textarea>
                 </label>
                 <div class="emojis__link-footer">
-                    <button class="b3-button b3-button--cancel" data-action="back-custom-icon">${window.siyuan.languages.back}</button>
+                    <button class="b3-button b3-button--cancel" data-action="back-custom-icon">${window.siyuan.languages.returnLabel}</button>
                     <button class="b3-button b3-button--text" data-action="confirm-custom-icon" disabled>${window.siyuan.languages.confirm}</button>
                 </div>
             </div>
@@ -475,7 +475,7 @@ export const openEmojiPanel = (
                     <input class="b3-text-field fn__block" data-type="custom-icon-name" placeholder="path/to/icon">
                 </label>
                 <div class="emojis__link-footer">
-                    <button class="b3-button b3-button--cancel" data-action="back-custom-icon">${window.siyuan.languages.back}</button>
+                    <button class="b3-button b3-button--cancel" data-action="back-custom-icon">${window.siyuan.languages.returnLabel}</button>
                     <button class="b3-button b3-button--text" data-action="set-network-icon" disabled>${window.siyuan.languages.save}</button>
                 </div>
             </div>

@@ -43,6 +43,10 @@
     overflow: auto;
     user-select: none;
 
+    .b3-list-item--hide-action > [data-type="selectVersion"][aria-pressed="true"] {
+      display: flex;
+    }
+
     &--diff {
       display: flex;
       flex-direction: column;
@@ -167,6 +171,7 @@
       }
 
       [data-history-diff~="modified"] {
+        border-radius: 0 !important;
         box-shadow: 3px 0 0 var(--b3-theme-primary) inset;
       }
 

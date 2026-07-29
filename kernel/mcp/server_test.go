@@ -156,6 +156,121 @@ func TestInvalidDynamicToolDoesNotCrashServer(t *testing.T) {
 	}
 }
 
+func TestInvalidDynamicToolRemovesExistingServerTool(t *testing.T) {
+	server, httpServer := newTestHTTPServer(t)
+	syncTool(server, "echo", &tools.Tool{
+		Name:        "echo",
+		Description: "Invalid replacement",
+		InputSchema: tools.ToolSchema{Raw: map[string]any{}},
+	})
+
+	client := mcpsdk.NewClient(&mcpsdk.Implementation{Name: "test-client", Version: "1.0.0"}, nil)
+	session, err := client.Connect(t.Context(), &mcpsdk.StreamableClientTransport{Endpoint: httpServer.URL}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		session.Close()
+	})
+	result, err := session.ListTools(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tool := range result.Tools {
+		if tool.Name == "echo" {
+			t.Fatal("invalid replacement left the previous server tool exposed")
+		}
+	}
+}
+
+func TestToolInputAndOutputValidation(t *testing.T) {
+	server, httpServer := newTestHTTPServer(t)
+	inputHandlerCalled := false
+	syncTool(server, "validated_input", &tools.Tool{
+		Name: "validated_input",
+		InputSchema: tools.ToolSchema{Raw: map[string]any{
+			"type":     "object",
+			"required": []any{"text"},
+			"properties": map[string]any{
+				"text": map[string]any{"type": "string"},
+			},
+		}},
+		Handler: func(map[string]any) (tools.CallToolResult, error) {
+			inputHandlerCalled = true
+			return tools.CallToolResult{}, nil
+		},
+	})
+	syncTool(server, "validated_output", &tools.Tool{
+		Name:         "validated_output",
+		InputSchema:  tools.ToolSchema{Type: "object"},
+		OutputSchema: &tools.ToolSchema{Raw: map[string]any{"type": "array"}},
+		Handler: func(map[string]any) (tools.CallToolResult, error) {
+			return tools.CallToolResult{
+				StructuredContent:    map[string]any{"wrong": true},
+				StructuredContentSet: true,
+			}, nil
+		},
+	})
+
+	client := mcpsdk.NewClient(&mcpsdk.Implementation{Name: "test-client", Version: "1.0.0"}, nil)
+	session, err := client.Connect(t.Context(), &mcpsdk.StreamableClientTransport{Endpoint: httpServer.URL}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		session.Close()
+	})
+
+	inputResult, err := session.CallTool(t.Context(), &mcpsdk.CallToolParams{Name: "validated_input"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !inputResult.IsError || inputHandlerCalled {
+		t.Fatalf("invalid input reached handler: result=%#v called=%v", inputResult, inputHandlerCalled)
+	}
+
+	outputResult, err := session.CallTool(t.Context(), &mcpsdk.CallToolParams{Name: "validated_output"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !outputResult.IsError || outputResult.StructuredContent != nil {
+		t.Fatalf("invalid output was returned: %#v", outputResult)
+	}
+}
+
+func TestExplicitNullStructuredContent(t *testing.T) {
+	server, httpServer := newTestHTTPServer(t)
+	syncTool(server, "null_output", &tools.Tool{
+		Name:         "null_output",
+		InputSchema:  tools.ToolSchema{Type: "object"},
+		OutputSchema: &tools.ToolSchema{Type: "null"},
+		Handler: func(map[string]any) (tools.CallToolResult, error) {
+			return tools.CallToolResult{
+				Content:              []tools.ContentItem{{Type: "text", Text: "null"}},
+				StructuredContentSet: true,
+			}, nil
+		},
+	})
+
+	body := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"null_output","arguments":{},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}`
+	response := postMCP(t, httpServer.URL, body, map[string]string{
+		"MCP-Protocol-Version": protocolVersion20260728,
+		"Mcp-Method":           "tools/call",
+		"Mcp-Name":             "null_output",
+	})
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("unexpected status: %d", response.StatusCode)
+	}
+	var callResponse struct {
+		Result map[string]json.RawMessage `json:"result"`
+	}
+	decodeResponse(t, response, &callResponse)
+	structured, ok := callResponse.Result["structuredContent"]
+	if !ok || string(structured) != "null" {
+		t.Fatalf("explicit null was not returned: %#v", callResponse.Result)
+	}
+}
+
 func TestModernProtocolHeadersAndResult(t *testing.T) {
 	_, httpServer := newTestHTTPServer(t)
 	body := `{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}`

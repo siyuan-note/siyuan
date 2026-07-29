@@ -285,7 +285,7 @@ func connectOneServer(ctx context.Context, server conf.MCPServer, interactive bo
 		}
 
 		readOnlyHint := trustedReadOnlyHint(server, tool)
-		handler := mcpToolContextHandler(server.Name, tool.Name, serverTimeout(server))
+		handler := mcpToolContextHandler(server.Name, tool.Name, serverTimeout(server), tool.OutputSchema != nil)
 		var outputSchema *tools.ToolSchema
 		if tool.OutputSchema != nil {
 			converted := convertMCPSchema(tool.OutputSchema)
@@ -360,7 +360,10 @@ func registerMCPToolsForContext(ctx context.Context, registeredTools map[string]
 		return false
 	}
 	for name, tool := range registeredTools {
-		tools.SetTool(name, tool)
+		if err := tools.SetTool(name, tool); err != nil {
+			logging.LogWarnf("mcp: skip invalid client tool [%s]: %v", name, err)
+			delete(registeredTools, name)
+		}
 	}
 	return true
 }
@@ -476,7 +479,8 @@ func hasAuthorizationHeader(headers map[string]string) bool {
 	return false
 }
 
-func mcpToolContextHandler(serverName, toolName string, timeout time.Duration) func(context.Context, map[string]any) (tools.CallToolResult, error) {
+func mcpToolContextHandler(serverName, toolName string, timeout time.Duration,
+	structuredContentExpected bool) func(context.Context, map[string]any) (tools.CallToolResult, error) {
 	return func(ctx context.Context, args map[string]any) (tools.CallToolResult, error) {
 		result := callMCPToolOnce(func() (*mcp.CallToolResult, error) {
 			result, err := callMCPTool(ctx, serverName, toolName, timeout, args)
@@ -485,7 +489,7 @@ func mcpToolContextHandler(serverName, toolName string, timeout time.Duration) f
 		}, func(err error) {
 			logging.LogWarnf("mcp: server [%s] tool [%s] disconnected (%s), reconnecting", serverName, toolName, err)
 			go reconnectMCP(serverName)
-		})
+		}, structuredContentExpected)
 		return result, nil
 	}
 }
@@ -528,7 +532,8 @@ func updateMCPRuntimeAfterToolCall(serverName string, callErr error) {
 }
 
 // callMCPToolOnce 保证一次工具请求最多发送一次。断线时只恢复后续调用所需的连接，不重放当前请求。
-func callMCPToolOnce(call func() (*mcp.CallToolResult, error), reconnect func(error)) tools.CallToolResult {
+func callMCPToolOnce(call func() (*mcp.CallToolResult, error), reconnect func(error),
+	structuredContentExpected bool) tools.CallToolResult {
 	result, err := call()
 	if err != nil && isExecutionUnknownError(err) {
 		if isReconnectableError(err) {
@@ -569,9 +574,10 @@ func callMCPToolOnce(call func() (*mcp.CallToolResult, error), reconnect func(er
 	}
 
 	syr := tools.CallToolResult{
-		IsError:           result.IsError,
-		Content:           []tools.ContentItem{{Type: "text", Text: text}},
-		StructuredContent: result.StructuredContent,
+		IsError:              result.IsError,
+		Content:              []tools.ContentItem{{Type: "text", Text: text}},
+		StructuredContent:    result.StructuredContent,
+		StructuredContentSet: result.StructuredContent != nil || (structuredContentExpected && !result.IsError),
 	}
 	return syr
 }

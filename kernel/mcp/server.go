@@ -133,8 +133,15 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 		server.RemoveTools(name)
 		return
 	}
+	validator, err := tools.CompileToolValidator(tool)
+	if err != nil {
+		server.RemoveTools(name)
+		logging.LogWarnf("mcp: skip invalid server tool [%s]: %v", name, err)
+		return
+	}
 	defer func() {
 		if recovered := recover(); recovered != nil {
+			server.RemoveTools(name)
 			logging.LogWarnf("mcp: skip invalid server tool [%s]: %v", name, recovered)
 		}
 	}()
@@ -160,6 +167,9 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 		if arguments == nil {
 			arguments = map[string]any{}
 		}
+		if err := validator.ValidateInput(arguments); err != nil {
+			return toolErrorResult(fmt.Sprintf("invalid tool arguments: %v", err)), nil
+		}
 
 		var (
 			result tools.CallToolResult
@@ -173,20 +183,31 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 			err = fmt.Errorf("tool handler is not configured")
 		}
 		if err != nil {
-			return &mcpsdk.CallToolResult{
-				Content: []mcpsdk.Content{&mcpsdk.TextContent{Text: err.Error()}},
-				IsError: true,
-			}, nil
+			return toolErrorResult(err.Error()), nil
+		}
+		if err = validator.ValidateOutput(result); err != nil {
+			return toolErrorResult(fmt.Sprintf("invalid tool output: %v", err)), nil
 		}
 
 		content := make([]mcpsdk.Content, 0, len(result.Content))
 		for _, item := range result.Content {
 			content = append(content, &mcpsdk.TextContent{Text: item.Text})
 		}
+		structuredContent := result.StructuredContent
+		if result.HasStructuredContent() && structuredContent == nil {
+			structuredContent = json.RawMessage("null")
+		}
 		return &mcpsdk.CallToolResult{
 			Content:           content,
-			StructuredContent: result.StructuredContent,
+			StructuredContent: structuredContent,
 			IsError:           result.IsError,
 		}, nil
 	})
+}
+
+func toolErrorResult(message string) *mcpsdk.CallToolResult {
+	return &mcpsdk.CallToolResult{
+		Content: []mcpsdk.Content{&mcpsdk.TextContent{Text: message}},
+		IsError: true,
+	}
 }

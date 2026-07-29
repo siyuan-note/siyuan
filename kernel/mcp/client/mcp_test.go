@@ -46,7 +46,7 @@ func TestCallMCPToolOnceMarksTimeoutUnknownWithoutReconnect(t *testing.T) {
 		return nil, context.DeadlineExceeded
 	}, func(error) {
 		reconnects++
-	})
+	}, false)
 	if calls != 1 || reconnects != 0 {
 		t.Fatalf("unexpected call counts: calls=%d, reconnects=%d", calls, reconnects)
 	}
@@ -63,12 +63,23 @@ func TestCallMCPToolOnceDoesNotReplayDisconnectedCall(t *testing.T) {
 		return nil, errors.New("connection closed after request")
 	}, func(error) {
 		reconnects++
-	})
+	}, false)
 	if calls != 1 || reconnects != 1 {
 		t.Fatalf("unexpected call counts: calls=%d, reconnects=%d", calls, reconnects)
 	}
 	if !result.IsError || !result.ExecutionUnknown {
 		t.Fatalf("disconnected call was not marked unknown: %#v", result)
+	}
+}
+
+func TestCallMCPToolOncePreservesExpectedNullStructuredContent(t *testing.T) {
+	result := callMCPToolOnce(func() (*mcp.CallToolResult, error) {
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{&mcp.TextContent{Text: "null"}},
+		}, nil
+	}, func(error) {}, true)
+	if !result.HasStructuredContent() || result.StructuredContent != nil {
+		t.Fatalf("expected explicit null structured content: %#v", result)
 	}
 }
 

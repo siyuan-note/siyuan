@@ -136,7 +136,9 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 				},
 			}
 
-			p.registerMcpTool(name, tool)
+			if err = p.registerMcpTool(name, tool); err != nil {
+				return
+			}
 
 			result = map[string]any{
 				"name":         fullToolName,

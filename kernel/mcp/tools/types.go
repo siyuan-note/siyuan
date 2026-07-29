@@ -117,10 +117,45 @@ type Property struct {
 }
 
 type CallToolResult struct {
-	Content           []ContentItem `json:"content"`
-	StructuredContent any           `json:"structuredContent,omitempty"`
-	IsError           bool          `json:"isError,omitempty"`
-	ExecutionUnknown  bool          `json:"-"`
+	Content              []ContentItem `json:"content"`
+	StructuredContent    any           `json:"structuredContent,omitempty"`
+	StructuredContentSet bool          `json:"-"`
+	IsError              bool          `json:"isError,omitempty"`
+	ExecutionUnknown     bool          `json:"-"`
+}
+
+func (r CallToolResult) HasStructuredContent() bool {
+	return r.StructuredContentSet || r.StructuredContent != nil
+}
+
+func (r CallToolResult) MarshalJSON() ([]byte, error) {
+	type plain CallToolResult
+	if r.StructuredContentSet && r.StructuredContent == nil {
+		return json.Marshal(struct {
+			plain
+			StructuredContent json.RawMessage `json:"structuredContent"`
+		}{
+			plain:             plain(r),
+			StructuredContent: json.RawMessage("null"),
+		})
+	}
+	return json.Marshal(plain(r))
+}
+
+func (r *CallToolResult) UnmarshalJSON(data []byte) error {
+	type plain CallToolResult
+	var decoded plain
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*r = CallToolResult(decoded)
+
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	_, r.StructuredContentSet = fields["structuredContent"]
+	return nil
 }
 
 type ContentItem struct {

@@ -232,7 +232,7 @@ func resultToString(result tools.CallToolResult) string {
 			parts = append(parts, item.Text)
 		}
 	}
-	if len(parts) == 0 && result.StructuredContent != nil {
+	if len(parts) == 0 && result.HasStructuredContent() {
 		if data, err := json.Marshal(result.StructuredContent); err == nil {
 			return string(data)
 		}

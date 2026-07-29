@@ -17,6 +17,7 @@
 package tools
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -73,11 +74,15 @@ func GetAllTools() []*Tool {
 	return result
 }
 
-func SetTool(name string, t *Tool) {
+func SetTool(name string, t *Tool) error {
+	if _, err := CompileToolValidator(t); err != nil {
+		return err
+	}
 	registryMu.Lock()
 	defer registryMu.Unlock()
 	Registry[name] = t
 	notifyRegistryObservers(name, t)
+	return nil
 }
 
 func RemoveTool(name string) {
@@ -129,5 +134,7 @@ func register(t *Tool) {
 	if t.Source == "" {
 		t.Source = "native"
 	}
-	SetTool(t.Name, t)
+	if err := SetTool(t.Name, t); err != nil {
+		panic(fmt.Sprintf("register MCP tool [%s]: %v", t.Name, err))
+	}
 }

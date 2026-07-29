@@ -42,12 +42,33 @@ func TestObserveRegistry(t *testing.T) {
 		RemoveTool(name)
 	})
 
-	tool := &Tool{Name: name}
-	SetTool(name, tool)
+	tool := &Tool{Name: name, InputSchema: ToolSchema{Type: "object"}}
+	if err := SetTool(name, tool); err != nil {
+		t.Fatal(err)
+	}
 	RemoveToolIf(name, &Tool{Name: name})
 	RemoveToolIf(name, tool)
 
 	if len(events) != 2 || events[0] != tool || events[1] != nil {
 		t.Fatalf("unexpected registry events: %#v", events)
+	}
+}
+
+func TestSetToolKeepsExistingToolWhenSchemaIsInvalid(t *testing.T) {
+	const name = "registry_validation_test"
+	original := &Tool{Name: name, InputSchema: ToolSchema{Type: "object"}}
+	if err := SetTool(name, original); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		RemoveTool(name)
+	})
+
+	invalid := &Tool{Name: name, InputSchema: ToolSchema{Raw: map[string]any{}}}
+	if err := SetTool(name, invalid); err == nil {
+		t.Fatal("expected invalid schema")
+	}
+	if actual := LookupTool(name); actual != original {
+		t.Fatalf("invalid replacement changed registry entry: %#v", actual)
 	}
 }

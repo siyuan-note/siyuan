@@ -435,7 +435,6 @@ export const openEmojiPanel = (
             </div>
         </div>
         <div class="fn__none emojis__link" data-type="tab-link" tabindex="0">
-            <input class="fn__none" data-type="network-icon-url">
             <input class="fn__none" data-type="custom-icon-file" type="file" accept="image/*">
             <div class="emojis__link-empty">
                 <div class="emojis__link-empty-content">
@@ -443,11 +442,25 @@ export const openEmojiPanel = (
                         <svg><use xlink:href="#iconImage"></use></svg>
                         <span>${window.siyuan.languages.upload} ${window.siyuan.languages.image}</span>
                     </button>
-                    <div class="emojis__link-tip ft__on-surface">Ctrl+V · ${window.siyuan.languages.image} / URL / Base64</div>
+                    <button class="b3-button b3-button--cancel emojis__link-source" data-action="input-custom-icon">
+                        ${window.siyuan.languages.use} URL / Base64
+                    </button>
+                    ${isMobile() ? "" : `<div class="emojis__link-tip ft__on-surface">Ctrl+V · ${window.siyuan.languages.image} / URL / Base64</div>`}
                 </div>
                 <div class="emojis__link-footer">
                     <button class="b3-button b3-button--cancel" data-action="cancel-custom-icon">${window.siyuan.languages.cancel}</button>
                     <button class="b3-button b3-button--text" disabled>${window.siyuan.languages.save}</button>
+                </div>
+            </div>
+            <div class="fn__none emojis__link-input">
+                <label class="emojis__link-value">
+                    <span class="b3-label__text">URL / Base64</span>
+                    <textarea class="b3-text-field fn__block" data-type="network-icon-url"
+                              placeholder="https://... / data:image/..."></textarea>
+                </label>
+                <div class="emojis__link-footer">
+                    <button class="b3-button b3-button--cancel" data-action="back-custom-icon">${window.siyuan.languages.back}</button>
+                    <button class="b3-button b3-button--text" data-action="confirm-custom-icon" disabled>${window.siyuan.languages.confirm}</button>
                 </div>
             </div>
             <div class="fn__none emojis__link-detail">
@@ -490,16 +503,27 @@ export const openEmojiPanel = (
     dialog.element.querySelector(`.emojis__tabbody [data-type="tab-${currentTab}"]`).classList.remove("fn__none");
     setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
     dialog.element.querySelector(".emojis__item").classList.add("emojis__item--current");
-    const networkIconInputElement = dialog.element.querySelector('[data-type="network-icon-url"]') as HTMLInputElement;
+    const networkIconInputElement = dialog.element.querySelector('[data-type="network-icon-url"]') as HTMLTextAreaElement;
     const customIconFileElement = dialog.element.querySelector('[data-type="custom-icon-file"]') as HTMLInputElement;
     const customIconNameElement = dialog.element.querySelector('[data-type="custom-icon-name"]') as HTMLInputElement;
     const customIconNameLabelElement = customIconNameElement.parentElement;
     const linkIconElement = dialog.element.querySelector('[data-type="tab-link"].emojis__link') as HTMLElement;
     const linkIconEmptyElement = dialog.element.querySelector(".emojis__link-empty");
+    const linkIconInputElement = dialog.element.querySelector(".emojis__link-input");
     const linkIconDetailElement = dialog.element.querySelector(".emojis__link-detail");
     const linkIconSampleElements = dialog.element.querySelectorAll(".emojis__link-sample");
+    const linkIconConfirmElement = dialog.element.querySelector('[data-action="confirm-custom-icon"]') as HTMLButtonElement;
     const linkIconSaveElement = dialog.element.querySelector('[data-action="set-network-icon"]') as HTMLButtonElement;
     networkIconInputElement.value = normalizeNetworkIconURL(dynamicImgElement?.getAttribute("src") || "") || "";
+    const showLinkIconView = (view: "empty" | "input" | "detail") => {
+        linkIconEmptyElement.classList.toggle("fn__none", view !== "empty");
+        linkIconInputElement.classList.toggle("fn__none", view !== "input");
+        linkIconDetailElement.classList.toggle("fn__none", view !== "detail");
+    };
+    const updateLinkIconInput = () => {
+        linkIconConfirmElement.disabled = !normalizeNetworkIconURL(networkIconInputElement.value) &&
+            !parseBase64Image(networkIconInputElement.value);
+    };
     const renderNetworkIconPreview = () => {
         const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
         const base64Image = parseBase64Image(networkIconInputElement.value);
@@ -507,8 +531,7 @@ export const openEmojiPanel = (
         const previewSource = pastedCustomIconObjectURL ||
             (base64Image ? networkIconInputElement.value.trim() : networkURL);
         const hasIcon = !!previewSource;
-        linkIconEmptyElement.classList.toggle("fn__none", hasIcon);
-        linkIconDetailElement.classList.toggle("fn__none", !hasIcon);
+        showLinkIconView(hasIcon ? "detail" : "empty");
         customIconNameLabelElement.classList.toggle("fn__none", !customIcon);
         linkIconSaveElement.disabled = !hasIcon || (customIcon && !customIconNameElement.value.trim());
         linkIconSampleElements.forEach(item => {
@@ -529,8 +552,30 @@ export const openEmojiPanel = (
         networkIconInputElement.value = "";
         customIconFileElement.value = "";
         customIconNameElement.value = "";
+        updateLinkIconInput();
         renderNetworkIconPreview();
         linkIconElement.focus();
+    };
+    const inputLinkIcon = () => {
+        clearPastedCustomIcon();
+        networkIconInputElement.value = "";
+        customIconFileElement.value = "";
+        customIconNameElement.value = "";
+        updateLinkIconInput();
+        showLinkIconView("input");
+        networkIconInputElement.focus();
+    };
+    const confirmLinkIcon = () => {
+        if (linkIconConfirmElement.disabled) {
+            showMessage(window.siyuan.languages.invalid);
+            return;
+        }
+        clearPastedCustomIcon();
+        customIconNameElement.value = "";
+        renderNetworkIconPreview();
+        if (parseBase64Image(networkIconInputElement.value)) {
+            customIconNameElement.focus();
+        }
     };
     const setCustomIconFile = (file: File) => {
         clearPastedCustomIcon();
@@ -621,7 +666,7 @@ export const openEmojiPanel = (
             return;
         }
 
-        if (event.target === customIconNameElement) {
+        if (event.target === customIconNameElement || event.target === networkIconInputElement) {
             return;
         }
         const text = event.clipboardData?.getData("text/plain").trim() || "";
@@ -639,6 +684,7 @@ export const openEmojiPanel = (
             customIconNameElement.focus();
         }
     });
+    networkIconInputElement.addEventListener("input", updateLinkIconInput);
     customIconNameElement.addEventListener("input", renderNetworkIconPreview);
     customIconNameElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (!event.isComposing && event.key === "Enter" && !linkIconSaveElement.disabled) {
@@ -826,6 +872,16 @@ export const openEmojiPanel = (
             } else if (target.getAttribute("data-action") === "select-custom-icon") {
                 customIconFileElement.value = "";
                 customIconFileElement.click();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.getAttribute("data-action") === "input-custom-icon") {
+                inputLinkIcon();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.getAttribute("data-action") === "confirm-custom-icon") {
+                confirmLinkIcon();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

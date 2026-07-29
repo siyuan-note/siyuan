@@ -93,6 +93,7 @@
     padding: 16px;
 
     &-empty,
+    &-input,
     &-detail {
       display: flex;
       flex: 1;
@@ -106,6 +107,11 @@
         flex: 1;
         flex-direction: column;
       }
+    }
+
+    &-source {
+      align-self: center;
+      margin-top: 12px;
     }
 
     &-upload {
@@ -133,8 +139,17 @@
     }
 
     &-tip {
-      margin-top: 16px;
+      margin-top: 12px;
       text-align: center;
+    }
+
+    &-value {
+      textarea {
+        height: 120px;
+        margin-top: 4px;
+        resize: none;
+        word-break: break-all;
+      }
     }
 
     &-preview {

@@ -27,20 +27,20 @@ import (
 )
 
 const (
-	maxToolSchemaBytes = 1 << 20
-	maxToolSchemaDepth = 64
-	maxToolSchemaNodes = 16 << 10
-	maxToolValueBytes  = 8 << 20
-	maxToolValueDepth  = 128
-	maxToolValueNodes  = 256 << 10
-	toolValidationTime = 2 * time.Second
+	maxToolSchemaBytes        = 1 << 20
+	maxToolSchemaDepth        = 64
+	maxToolSchemaNodes        = 16 << 10
+	maxToolValueBytes         = 8 << 20
+	maxToolValueDepth         = 128
+	maxToolValueNodes         = 256 << 10
+	toolValidationTime        = 2 * time.Second
+	toolValidationConcurrency = 4
 )
 
-var toolValidationSlots = make(chan struct{}, 4)
-
 type ToolValidator struct {
-	input  *jsonschema.Resolved
-	output *jsonschema.Resolved
+	input           *jsonschema.Resolved
+	output          *jsonschema.Resolved
+	validationSlots chan struct{}
 }
 
 func CompileToolValidator(tool *Tool) (*ToolValidator, error) {
@@ -59,7 +59,11 @@ func CompileToolValidator(tool *Tool) (*ToolValidator, error) {
 			return nil, fmt.Errorf("invalid output schema: %w", err)
 		}
 	}
-	return &ToolValidator{input: input, output: output}, nil
+	return &ToolValidator{
+		input:           input,
+		output:          output,
+		validationSlots: make(chan struct{}, toolValidationConcurrency),
+	}, nil
 }
 
 func resolveToolSchema(schema ToolSchema, requireObject bool) (*jsonschema.Resolved, error) {
@@ -109,7 +113,7 @@ func (validator *ToolValidator) ValidateInputContext(ctx context.Context, argume
 	if err != nil {
 		return err
 	}
-	return validateResolved(ctx, validator.input, value)
+	return validateResolved(ctx, validator.validationSlots, validator.input, value)
 }
 
 func (validator *ToolValidator) ValidateOutput(result CallToolResult) error {
@@ -127,7 +131,7 @@ func (validator *ToolValidator) ValidateOutputContext(ctx context.Context, resul
 	if err != nil {
 		return fmt.Errorf("prepare structured content: %w", err)
 	}
-	return validateResolved(ctx, validator.output, value)
+	return validateResolved(ctx, validator.validationSlots, validator.output, value)
 }
 
 func prepareValidationValue(value any) (any, error) {
@@ -151,7 +155,7 @@ func prepareValidationValue(value any) (any, error) {
 	return canonical, nil
 }
 
-func validateResolved(ctx context.Context, schema *jsonschema.Resolved, value any) error {
+func validateResolved(ctx context.Context, validationSlots chan struct{}, schema *jsonschema.Resolved, value any) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -159,7 +163,7 @@ func validateResolved(ctx context.Context, schema *jsonschema.Resolved, value an
 	defer timer.Stop()
 
 	select {
-	case toolValidationSlots <- struct{}{}:
+	case validationSlots <- struct{}{}:
 	case <-ctx.Done():
 		return ctx.Err()
 	case <-timer.C:
@@ -169,7 +173,7 @@ func validateResolved(ctx context.Context, schema *jsonschema.Resolved, value an
 	result := make(chan error, 1)
 	go func() {
 		err := schema.Validate(value)
-		<-toolValidationSlots
+		<-validationSlots
 		result <- err
 	}()
 

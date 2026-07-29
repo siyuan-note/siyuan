@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "कस्टम फ़ॉन्ट <b>${x}</b> हटाएँ?",
+  "fontFileTip": "केवल 64 MB तक की TTF और OTF फ़ॉन्ट फ़ाइलें समर्थित हैं",
+  "importFont": "फ़ॉन्ट आयात करें",
   "returnLabel": "वापस",
   "useDefaultVerticalAlign": "डिफ़ॉल्ट लंबवत संरेखण का उपयोग करें",
   "useDefaultHorizontalAlign": "डिफ़ॉल्ट क्षैतिज संरेखण का उपयोग करें",

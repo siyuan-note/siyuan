@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "Excluir a fonte personalizada <b>${x}</b>?",
+  "fontFileTip": "Apenas arquivos de fonte TTF e OTF de até 64 MB são compatíveis",
+  "importFont": "Importar fonte",
   "returnLabel": "Voltar",
   "useDefaultVerticalAlign": "Usar alinhamento vertical padrão",
   "useDefaultHorizontalAlign": "Usar alinhamento horizontal padrão",

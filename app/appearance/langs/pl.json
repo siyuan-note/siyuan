@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "Usunąć niestandardową czcionkę <b>${x}</b>?",
+  "fontFileTip": "Obsługiwane są tylko pliki czcionek TTF i OTF o rozmiarze do 64 MB",
+  "importFont": "Importuj czcionkę",
   "returnLabel": "Wróć",
   "useDefaultVerticalAlign": "Użyj domyślnego wyrównania w pionie",
   "useDefaultHorizontalAlign": "Użyj domyślnego wyrównania w poziomie",

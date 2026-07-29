@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "ลบแบบอักษรกำหนดเอง <b>${x}</b> หรือไม่?",
+  "fontFileTip": "รองรับเฉพาะไฟล์แบบอักษร TTF และ OTF ที่มีขนาดไม่เกิน 64 MB",
+  "importFont": "นำเข้าแบบอักษร",
   "returnLabel": "กลับ",
   "useDefaultVerticalAlign": "ใช้การจัดแนวตั้งเริ่มต้น",
   "useDefaultHorizontalAlign": "ใช้การจัดแนวนอนเริ่มต้น",

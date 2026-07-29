@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "Özel yazı tipi <b>${x}</b> silinsin mi?",
+  "fontFileTip": "Yalnızca 64 MB boyutuna kadar TTF ve OTF yazı tipi dosyaları desteklenir",
+  "importFont": "Yazı tipi içe aktar",
   "returnLabel": "Geri dön",
   "useDefaultVerticalAlign": "Varsayılan dikey hizalamayı kullan",
   "useDefaultHorizontalAlign": "Varsayılan yatay hizalamayı kullan",

@@ -21,6 +21,7 @@ import {
 import {setCodeTheme} from "../protyle/render/util";
 import {getBackend, getFrontend} from "./functions";
 import {getWorkspaceName} from "./processTitle";
+import {ensureSelectedCustomFont} from "./customFont";
 
 let headingNumberMeasurementRefreshTimer: number;
 
@@ -230,6 +231,9 @@ export const initAssets = () => {
 };
 
 export const setInlineStyle = async (set = true, servePath = "../../../") => {
+    if (set) {
+        await ensureSelectedCustomFont(window.siyuan.config.editor.fontFamily, window.siyuan.config.editor.fontWeight);
+    }
     let style;
     // Emojis Reset: 字体中包含了 emoji，需重置
     // Emojis Additional： 苹果/win11 字体中没有的 emoji
@@ -310,7 +314,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     style += `\n:root { --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px }
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }${window.siyuan.config.editor.justify ? "\n.protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
     if (window.siyuan.config.editor.fontFamily) {
-        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${window.siyuan.config.editor.fontWeight ? `font-weight: ${window.siyuan.config.editor.fontWeight};` : ""}font-family: "Emojis Additional", "Emojis Reset", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${window.siyuan.config.editor.fontWeight ? `font-weight: ${window.siyuan.config.editor.fontWeight};` : ""}font-family: "Emojis Additional", "Emojis Reset", ${CSS.escape(window.siyuan.config.editor.fontFamily)}, var(--b3-font-family)}`;
     }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {

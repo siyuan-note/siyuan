@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "Supprimer la police personnalisée <b>${x}</b> ?",
+  "fontFileTip": "Seuls les fichiers de police TTF et OTF jusqu’à 64 Mo sont pris en charge",
+  "importFont": "Importer une police",
   "returnLabel": "Retour",
   "useDefaultVerticalAlign": "Utiliser l’alignement vertical par défaut",
   "useDefaultHorizontalAlign": "Utiliser l’alignement horizontal par défaut",

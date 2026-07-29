@@ -186,12 +186,20 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 			return toolErrorResult(err.Error()), nil
 		}
 		if err = validator.ValidateOutputContext(ctx, result); err != nil {
-			return toolErrorResult(fmt.Sprintf("invalid tool output: %v", err)), nil
+			return toolErrorResult(fmt.Sprintf(
+				"invalid tool output after execution; execution result may have side effects and must not be retried automatically: %v",
+				err)), nil
 		}
 
 		content := make([]mcpsdk.Content, 0, len(result.Content))
 		for _, item := range result.Content {
-			content = append(content, &mcpsdk.TextContent{Text: item.Text})
+			converted, convertErr := convertContentItem(item)
+			if convertErr != nil {
+				return toolErrorResult(fmt.Sprintf(
+					"invalid tool content after execution; execution result may have side effects and must not be retried automatically: %v",
+					convertErr)), nil
+			}
+			content = append(content, converted)
 		}
 		structuredContent := result.StructuredContent
 		if result.HasStructuredContent() && structuredContent == nil {
@@ -203,6 +211,23 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 			IsError:           result.IsError,
 		}, nil
 	})
+}
+
+func convertContentItem(item tools.ContentItem) (mcpsdk.Content, error) {
+	data, err := json.Marshal(item)
+	if err != nil {
+		return nil, err
+	}
+	wrapped := append([]byte(`{"content":[`), data...)
+	wrapped = append(wrapped, []byte(`]}`)...)
+	var result mcpsdk.CallToolResult
+	if err = json.Unmarshal(wrapped, &result); err != nil {
+		return nil, err
+	}
+	if len(result.Content) != 1 {
+		return nil, fmt.Errorf("expected one content item, got %d", len(result.Content))
+	}
+	return result.Content[0], nil
 }
 
 func toolErrorResult(message string) *mcpsdk.CallToolResult {

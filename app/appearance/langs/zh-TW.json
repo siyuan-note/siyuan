@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "確定刪除自訂字型 <b>${x}</b> 嗎？",
+  "fontFileTip": "僅支援不超過 64 MB 的 TTF 和 OTF 字型檔案",
+  "importFont": "匯入字型",
   "returnLabel": "返回",
   "useDefaultVerticalAlign": "使用預設垂直對齊",
   "useDefaultHorizontalAlign": "使用預設水平對齊",

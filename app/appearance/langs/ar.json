@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "هل تريد حذف الخط المخصص <b>${x}</b>؟",
+  "fontFileTip": "تُدعم فقط ملفات خطوط TTF وOTF التي يصل حجمها إلى 64 ميغابايت",
+  "importFont": "استيراد خط",
   "returnLabel": "عودة",
   "useDefaultVerticalAlign": "استخدام المحاذاة العمودية الافتراضية",
   "useDefaultHorizontalAlign": "استخدام المحاذاة الأفقية الافتراضية",

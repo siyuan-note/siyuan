@@ -120,6 +120,27 @@ func TestResultToStringUsesExplicitNullStructuredContent(t *testing.T) {
 	}
 }
 
+func TestResultToStringUsesStructuredContentForEmptyText(t *testing.T) {
+	result := resultToString(tools.CallToolResult{
+		Content:           []tools.ContentItem{{Type: "text"}},
+		StructuredContent: map[string]any{"status": "ok"},
+	})
+	if result != `{"status":"ok"}` {
+		t.Fatalf("unexpected structured result: %q", result)
+	}
+}
+
+func TestResultToStringTranslatesNonTextContent(t *testing.T) {
+	var image tools.ContentItem
+	if err := json.Unmarshal([]byte(`{"type":"image","data":"aW1hZ2U=","mimeType":"image/png"}`), &image); err != nil {
+		t.Fatal(err)
+	}
+	result := resultToString(tools.CallToolResult{Content: []tools.ContentItem{image}})
+	if !strings.Contains(result, `"type":"image"`) || !strings.Contains(result, `"mimeType":"image/png"`) {
+		t.Fatalf("unexpected image result: %q", result)
+	}
+}
+
 func TestNeedsConfirmScopesReadOnlyActionsByToolSource(t *testing.T) {
 	const externalWrite = "test_external_write"
 	const externalRead = "test_external_read"
@@ -357,7 +378,7 @@ func TestExecuteToolRejectsInvalidStructuredOutput(t *testing.T) {
 	result, isErr, executionUnknown := executeTool(context.Background(), openai.ToolCall{
 		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
 	}, "")
-	if !isErr || executionUnknown || !strings.Contains(result, "invalid tool output") {
+	if !isErr || !executionUnknown || !strings.Contains(result, "must not be retried automatically") {
 		t.Fatalf("unexpected tool result: result=%q, isErr=%v, executionUnknown=%v", result, isErr, executionUnknown)
 	}
 }

@@ -165,6 +165,7 @@ func Serve(fastMode bool, cookieKey string) {
 
 	serveDebug(ginServer)
 	serveAssets(ginServer)
+	serveCustomFonts(ginServer)
 	serveAppearance(ginServer)
 	serveWebSocket(ginServer)
 	serveMCP(ginServer)
@@ -588,6 +589,29 @@ func serveStaticFile(c *gin.Context, root, relativePath string, packageScoped bo
 		return
 	}
 	http.ServeFile(c.Writer, c.Request, targetRealPath)
+}
+
+func serveCustomFonts(ginServer *gin.Engine) {
+	ginServer.GET("/custom-fonts/:id", model.CheckAuth, func(c *gin.Context) {
+		fontPath, _, ok := util.GetCustomFontFile(c.Param("id"))
+		if !ok {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		switch strings.ToLower(filepath.Ext(fontPath)) {
+		case ".ttf":
+			c.Header("Content-Type", "font/ttf")
+		case ".otf":
+			c.Header("Content-Type", "font/otf")
+		default:
+			c.Status(http.StatusNotFound)
+			return
+		}
+		c.Header("Cache-Control", "private, max-age=31536000, immutable")
+		c.Header("X-Content-Type-Options", "nosniff")
+		c.File(fontPath)
+	})
 }
 
 func serveAppearance(ginServer *gin.Engine) {

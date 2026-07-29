@@ -1,4 +1,7 @@
 {
+  "deleteFontConfirm": "Odstrániť vlastné písmo <b>${x}</b>?",
+  "fontFileTip": "Podporované sú iba súbory písiem TTF a OTF s veľkosťou do 64 MB",
+  "importFont": "Importovať písmo",
   "returnLabel": "Späť",
   "useDefaultVerticalAlign": "Použiť predvolené zvislé zarovnanie",
   "useDefaultHorizontalAlign": "Použiť predvolené vodorovné zarovnanie",

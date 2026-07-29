@@ -13,6 +13,7 @@ module.exports = (env, argv) => {
         devtool: argv.mode !== "production" ? "eval-source-map" : false,
         target: "electron-renderer",
         output: {
+            globalObject: "globalThis",
             publicPath: "auto",
             filename: "[name].[chunkhash].js",
             path: path.resolve(__dirname, "stage/build/app"),

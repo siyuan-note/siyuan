@@ -24,12 +24,14 @@ export const destroy = (protyle: IProtyle) => {
     if (protyle.undo) {
         protyle.undo.clear();
     }
-    try {
-        protyle.ws.send("closews", {});
-    } catch (e) {
-        setTimeout(() => {
+    if (protyle.ws) {
+        try {
             protyle.ws.send("closews", {});
-        }, 10240);
+        } catch (e) {
+            setTimeout(() => {
+                protyle.ws?.send("closews", {});
+            }, 10240);
+        }
     }
     protyle.app.plugins.forEach(item => {
         item.eventBus.emit("destroy-protyle", {

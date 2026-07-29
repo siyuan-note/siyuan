@@ -16,9 +16,10 @@ import {closeModel} from "../mobile/util/closePanel";
 import type {App} from "../index";
 import {resizeSide} from "./resizeSide";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
-import {openRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
+import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
 
 let historyEditor: Protyle;
+const repoHistoryEditors = new WeakMap<Element, Protyle>();
 
 const renderDoc = (element: HTMLElement, currentPage: number) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
@@ -265,19 +266,54 @@ ${actionHTML}
 </li>`;
         /// #endif
     });
-    element.lastElementChild.innerHTML = `${repoHTML}`;
+    element.querySelector('[data-type="repoList"]').innerHTML = `${repoHTML}`;
+};
+
+const clearRepoPreview = (element: Element) => {
+    const previewElement = element.querySelector('[data-type="repoPreviewPanel"]');
+    repoHistoryEditors.get(element)?.destroy();
+    repoHistoryEditors.delete(element);
+    element.querySelector('[data-type="repoPreview"] .protyle-title__input').classList.add("fn__none");
+    previewElement.classList.add("fn__none");
+    previewElement.removeAttribute("data-request-id");
+    previewElement.innerHTML = "";
+};
+
+const setRepoSearchLayout = (element: Element, enabled: boolean) => {
+    const listElement = element.querySelector('[data-type="repoList"]') as HTMLElement;
+    const resizeElement = element.querySelector(".history__resize");
+    const previewElement = element.querySelector('[data-type="repoPreview"]');
+    clearRepoPreview(element);
+    if (enabled) {
+        listElement.classList.remove("fn__flex-1");
+        listElement.classList.add("history__side");
+        if (!isMobile()) {
+            listElement.style.width = window.siyuan.storage[Constants.LOCAL_HISTORY].sideWidth;
+        }
+        resizeElement.classList.remove("fn__none");
+        previewElement.classList.remove("fn__none");
+    } else {
+        listElement.classList.add("fn__flex-1");
+        listElement.classList.remove("history__side");
+        listElement.style.width = "";
+        resizeElement.classList.add("fn__none");
+        previewElement.classList.add("fn__none");
+    }
 };
 
 const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
-    renderRepoFileList(response.data.files, element.lastElementChild, true);
+    renderRepoFileList(response.data.files, element.querySelector('[data-type="repoList"]'), true);
 };
 
 const renderRepo = (element: Element, currentPage: number) => {
     const selectElement = element.querySelector(".b3-select") as HTMLSelectElement;
     const selectValue = selectElement.value;
+    const searchInputElement = element.querySelector("input") as HTMLInputElement;
+    const keyword = searchInputElement.value.trim();
 
     selectElement.disabled = true;
-    element.lastElementChild.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
+    setRepoSearchLayout(element, Boolean(keyword && selectValue === "getRepoSnapshots"));
+    element.querySelector('[data-type="repoList"]').innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
     const pageBtn = element.querySelector('button[data-type="jumpRepoPage"]');
     pageBtn.textContent = `${currentPage}`;
 
@@ -286,13 +322,11 @@ const renderRepo = (element: Element, currentPage: number) => {
     const pageElement = nextElement.nextElementSibling.nextElementSibling;
     element.setAttribute("data-init", "true");
 
-    const searchInputElement = element.querySelector("input") as HTMLInputElement;
     if (selectValue === "getRepoSnapshots") {
         searchInputElement.parentElement.classList.remove("fn__none");
     } else {
         searchInputElement.parentElement.classList.add("fn__none");
     }
-    const keyword = searchInputElement.value.trim();
     if (keyword && selectValue === "getRepoSnapshots") {
         const searchBtnElement = searchInputElement.nextElementSibling as HTMLButtonElement;
         searchBtnElement.disabled = true;
@@ -503,9 +537,16 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                     </button>
                 </div>    
             </div>
-            <ul class="b3-list b3-list--background fn__flex-1" style="padding: 8px 0">
-                <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
-            </ul>
+            <div class="fn__flex fn__flex-1 history__panel">
+                <ul data-type="repoList" class="b3-list b3-list--background fn__flex-1" style="padding: 8px 0">
+                    <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
+                </ul>
+                <div class="history__resize fn__none"></div>
+                <div data-type="repoPreview" class="fn__flex-1 fn__flex-column fn__none">
+                    <div class="protyle-title__input fn__none ft__center ft__breakword"></div>
+                    <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="repoPreviewPanel"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>`;
@@ -531,6 +572,9 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
             containerClassName: "b3-dialog__container--theme",
             destroyCallback() {
                 historyEditor = undefined;
+                const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
+                repoHistoryEditors.get(repoElement)?.destroy();
+                repoHistoryEditors.delete(repoElement);
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORY);
@@ -540,7 +584,10 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
         } else {
             dialog.element.querySelector("input").focus();
         }
-        resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideWidth");
+        const docPanelElement = dialog.element.querySelector('#historyContainer [data-type="doc"]');
+        const repoPanelElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
+        resizeSide(docPanelElement.querySelector(".history__resize"), docPanelElement.querySelector(".history__side"), "sideWidth");
+        resizeSide(repoPanelElement.querySelector(".history__resize"), repoPanelElement.querySelector('[data-type="repoList"]'), "sideWidth");
     }
 };
 
@@ -581,6 +628,20 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     disabledProtyle(historyEditor.protyle);
     const repoElement = element.querySelector('#historyContainer [data-type="repo"]');
     const historyElement = element.querySelector('#historyContainer [data-type="doc"]');
+    const previewRepoFile = (itemElement: Element) => {
+        const previewElement = repoElement.querySelector('[data-type="repoPreviewPanel"]');
+        const previewTitleElement = repoElement.querySelector('[data-type="repoPreview"] .protyle-title__input');
+        repoHistoryEditors.get(repoElement)?.destroy();
+        repoHistoryEditors.delete(repoElement);
+        previewTitleElement.textContent = itemElement.querySelector(".b3-list-item__text").textContent.trim();
+        previewTitleElement.classList.remove("fn__none");
+        previewElement.classList.remove("fn__none");
+        renderRepoFile(app, itemElement, previewElement, (editor) => {
+            repoHistoryEditors.set(repoElement, editor);
+        });
+        itemElement.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+        itemElement.classList.add("b3-list-item--focus");
+    };
     const repoSelectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
     const searchFileElement = repoElement.querySelector(".b3-text-field") as HTMLInputElement;
     repoSelectElement.addEventListener("change", () => {
@@ -679,8 +740,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "view") {
-                openRepoFile(app, target.closest(".b3-list-item"));
+            } else if (target.classList.contains("b3-list-item") &&
+                target.getAttribute("data-type") === "searchFileItem") {
+                previewRepoFile(target);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

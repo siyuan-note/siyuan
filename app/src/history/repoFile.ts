@@ -1,6 +1,5 @@
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {Constants} from "../constants";
-import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import type {App} from "../index";
 import {Protyle} from "../protyle";
@@ -8,7 +7,6 @@ import {saveExportFile} from "../protyle/util/compatibility";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
-import {isMobile} from "../util/functions";
 import {pathPosix} from "../util/pathName";
 import * as dayjs from "dayjs";
 
@@ -20,6 +18,8 @@ interface IRepoFile {
     hSize: string;
     updated: number;
 }
+
+let repoFileRequestId = 0;
 
 export const renderRepoFileList = (files: IRepoFile[], element: Element, showPath: boolean) => {
     if (files.length === 0) {
@@ -41,11 +41,6 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
         </div>
         <div class="fn__flex" style="height: 26px">
             <span class="fn__flex-1"></span>
-            <span class="b3-list-item__action" data-type="view">
-                <svg><use xlink:href="#iconEye"></use></svg>
-                <span class="fn__space"></span>${window.siyuan.languages.cardPreview}
-            </span>
-            <span class="fn__space"></span>
             <span class="b3-list-item__action" data-type="saveAs">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space"></span>${window.siyuan.languages.saveAs}
@@ -68,9 +63,6 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
             ${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}
         </div>
     </div>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="view" aria-label="${window.siyuan.languages.cardPreview}">
-        <svg><use xlink:href="#iconEye"></use></svg>
-    </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>
@@ -107,19 +99,20 @@ export const saveRepoFile = (element: Element) => {
     });
 };
 
-export const openRepoFile = (app: App, element: Element) => {
+export const renderRepoFile = (app: App, element: Element, contentElement: Element,
+                               onEditor?: (editor: Protyle) => void) => {
+    const fileId = element.getAttribute("data-id");
     const snapshotId = element.getAttribute("data-snapshot") || "";
-    const dialog = new Dialog({
-        title: element.querySelector(".b3-list-item__text").textContent.trim(),
-        content: '<div class="b3-dialog__content"><div style="border-radius: var(--b3-border-radius-b);"></div></div>',
-        width: isMobile() ? "100vw" : "80vw",
-        height: isMobile() ? "100dvh" : "70vh",
-        disableAnimation: true,
-    });
-    const contentElement = dialog.element.querySelector(".b3-dialog__content");
+    const requestId = (++repoFileRequestId).toString();
+    contentElement.setAttribute("data-id", fileId);
+    contentElement.setAttribute("data-request-id", requestId);
+    contentElement.innerHTML = '<div style="border-radius: var(--b3-border-radius-b);"></div>';
     fetchPost("/api/repo/openRepoSnapshotFile", {
-        id: element.getAttribute("data-id")
+        id: fileId
     }, (response) => {
+        if (!contentElement.isConnected || contentElement.getAttribute("data-request-id") !== requestId) {
+            return;
+        }
         const type = pathPosix().extname(response.data.content).toLowerCase();
         if (Constants.SIYUAN_ASSETS_IMAGE.concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(type)) {
             contentElement.firstElementChild.innerHTML = renderAssetsPreview(response.data.content);
@@ -142,6 +135,7 @@ export const openRepoFile = (app: App, element: Element) => {
                 typewriterMode: false
             });
             disabledProtyle(viewEditor.protyle);
+            onEditor?.(viewEditor);
             onGet({
                 data: response,
                 protyle: viewEditor.protyle,

@@ -36,6 +36,7 @@ import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
 import {getCloudURL} from "../../config/util/about";
 import {escapeAriaLabel} from "../../util/escape";
 import {refreshUndoButtons} from "../undo/globalUndo";
+import {getAllEditor} from "../../layout/getAll";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -44,6 +45,7 @@ export class Breadcrumb {
     private messageId: string;
     private recordUploadMessageIds = new Map<File, string>();
     private pendingRecordFiles = new Set<File>();
+    private uploadingRecordFiles = new Set<File>();
     private startingRecord = false;
     private stoppingRecord = false;
     private previousFocusElement: HTMLElement;
@@ -493,7 +495,7 @@ ${padHTML}
             const blob = await recorder.stopRecording();
             const file = new File([blob], `record${Date.now()}.mp3`, {type: "audio/mpeg"});
             this.pendingRecordFiles.add(file);
-            this.uploadRecord(protyle, file);
+            this.uploadRecord(protyle, file, protyle.block?.rootID);
         } catch (error) {
             showMessage(window.siyuan.languages["record-tip"]);
         } finally {
@@ -505,27 +507,57 @@ ${padHTML}
         }
     }
 
-    private uploadRecord(protyle: IProtyle, file: File) {
-        if (!this.pendingRecordFiles.has(file)) {
+    private uploadRecord(protyle: IProtyle, file: File, rootID: string) {
+        if (!this.pendingRecordFiles.has(file) || this.uploadingRecordFiles.has(file)) {
             return;
         }
         hideMessage(this.recordUploadMessageIds.get(file));
         this.recordUploadMessageIds.delete(file);
-        uploadFiles(protyle, [file], undefined, undefined, (succeeded) => {
-            if (!this.pendingRecordFiles.has(file)) {
-                return;
-            }
-            if (succeeded) {
-                this.pendingRecordFiles.delete(file);
-                return;
-            }
-            const messageId = showMessage(`<div class="fn__flex fn__flex-wrap">
+        const uploadProtyle = this.findRecordUploadProtyle(protyle, rootID);
+        if (!uploadProtyle) {
+            this.showRecordUploadRetry(protyle, file, rootID);
+            return;
+        }
+
+        this.uploadingRecordFiles.add(file);
+        try {
+            uploadFiles(uploadProtyle, [file], undefined, undefined, (succeeded) => {
+                this.uploadingRecordFiles.delete(file);
+                if (!this.pendingRecordFiles.has(file)) {
+                    return;
+                }
+                if (succeeded) {
+                    this.pendingRecordFiles.delete(file);
+                    return;
+                }
+                this.showRecordUploadRetry(uploadProtyle, file, rootID);
+            });
+        } catch (error) {
+            this.uploadingRecordFiles.delete(file);
+            this.showRecordUploadRetry(uploadProtyle, file, rootID);
+        }
+    }
+
+    private findRecordUploadProtyle(protyle: IProtyle, rootID: string) {
+        if (document.body.contains(protyle.element) && (!rootID || protyle.block?.rootID === rootID)) {
+            return protyle;
+        }
+        return getAllEditor().find((editor) => {
+            return document.body.contains(editor.protyle.element) &&
+                (!rootID || editor.protyle.block?.rootID === rootID);
+        })?.protyle;
+    }
+
+    private showRecordUploadRetry(protyle: IProtyle, file: File, rootID: string) {
+        if (!this.pendingRecordFiles.has(file)) {
+            return;
+        }
+        const messageId = showMessage(`<div class="fn__flex fn__flex-wrap">
 <span class="fn__flex-center">${window.siyuan.languages.uploadError}</span><span class="fn__space"></span>
 <button class="b3-button b3-button--white">${window.siyuan.languages.retry}</button></div>`, -1);
-            this.recordUploadMessageIds.set(file, messageId);
-            document.querySelector(`#message [data-id="${messageId}"] button`)?.addEventListener("click", () => {
-                this.uploadRecord(protyle, file);
-            });
+        this.recordUploadMessageIds.set(file, messageId);
+        document.querySelector(`#message [data-id="${messageId}"] button`)?.addEventListener("click", () => {
+            this.uploadRecord(protyle, file, rootID);
         });
     }
 

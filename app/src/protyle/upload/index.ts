@@ -344,6 +344,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         const isValidate = protyle.options.upload.validate(fileList);
         if (typeof isValidate === "string") {
             showMessage(isValidate);
+            completeCB?.(false);
             return;
         }
     }

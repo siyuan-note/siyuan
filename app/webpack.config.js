@@ -38,6 +38,14 @@ module.exports = (env, argv) => {
                 chunks: "all",
                 minSize: 20000,
                 cacheGroups: {
+                    // MP3 编码器仅由录音 Worker 使用，单独分包可避免主界面提前加载。
+                    recordMediaEncoder: {
+                        test: /[\\/]node_modules[\\/]@breezystack[\\/]lamejs[\\/]/,
+                        name: "record-media-encoder",
+                        chunks: "all",
+                        priority: 20,
+                        enforce: true,
+                    },
                     // 第三方依赖统一进 vendors chunk（dayjs、iconv-lite、@tiptap/* 等）
                     vendors: {
                         test: /[\\/]node_modules[\\/]/,

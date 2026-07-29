@@ -176,6 +176,57 @@ func getDocHistoryContent(c *gin.Context) {
 	}
 }
 
+func diffDocVersions(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	leftArg, ok := arg["left"].(map[string]interface{})
+	if !ok {
+		ret.Code = -1
+		ret.Msg = "left document version is required"
+		return
+	}
+	rightArg, ok := arg["right"].(map[string]interface{})
+	if !ok {
+		ret.Code = -1
+		ret.Msg = "right document version is required"
+		return
+	}
+	left, ok := parseDocVersionRef(leftArg, ret)
+	if !ok {
+		return
+	}
+	right, ok := parseDocVersionRef(rightArg, ret)
+	if !ok {
+		return
+	}
+
+	diff, err := model.DiffDocVersions(left, right)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = diff
+}
+
+func parseDocVersionRef(arg map[string]interface{}, ret *gulu.Result) (ref *model.DocVersionRef, ok bool) {
+	var typ, id, path string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("type", &typ, true, true),
+		util.BindJsonArg("id", &id, false, false),
+		util.BindJsonArg("path", &path, false, false),
+	) {
+		return nil, false
+	}
+	return &model.DocVersionRef{Type: typ, ID: id, Path: path}, true
+}
+
 func rollbackDocHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

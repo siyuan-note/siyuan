@@ -10,6 +10,7 @@ import type {App} from "../index";
 import {resizeSide} from "./resizeSide";
 import {escapeHtml} from "../util/escape";
 import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
+import {showDocVersionDiff, type IDocVersionRef} from "./docDiff";
 
 let historyEditor: Protyle;
 const repoHistoryEditors = new WeakMap<HTMLElement, Protyle>();
@@ -52,6 +53,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         pageInfoElement.textContent = window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount);
         if (response.data.histories.length === 0) {
             listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            element.dispatchEvent(new CustomEvent("versionListRendered"));
             return;
         }
         let logsHTML = "";
@@ -59,12 +61,16 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
             logsHTML += `<li class="b3-list-item b3-list-item--hide-action" data-created="${item}">
     <span class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
     <span class="fn__space"></span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
+        <svg><use xlink:href="#iconUncheck"></use></svg>
+    </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
 </li>`;
         });
         listElement.innerHTML = logsHTML;
+        element.dispatchEvent(new CustomEvent("versionListRendered"));
     });
 };
 
@@ -123,7 +129,8 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string)
         .replace("${x}", pageCount)
         .replace("${y}", response.data.totalCount);
     pageInfoElement.classList.remove("fn__none");
-    renderRepoFileList(response.data.files, listElement, false);
+    renderRepoFileList(response.data.files, listElement, false, true);
+    element.dispatchEvent(new CustomEvent("versionListRendered"));
 };
 
 export const openDocHistory = (options: {
@@ -132,6 +139,12 @@ export const openDocHistory = (options: {
     notebookId: string,
     pathString: string
 }) => {
+    const currentVersion = {
+        type: "current" as const,
+        id: options.id,
+        label: window.siyuan.languages.currentVer,
+    };
+    const selectedVersions: IDocVersionRef[] = [currentVersion];
     const contentHTML = `<div class="fn__flex-column" style="height: 100%;">
     <div class="layout-tab-bar fn__flex" ${isMobile() ? "" : 'style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0"'}>
         <div data-type="doc" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.fileHistory}</span><span class="fn__flex-1"></span></div>
@@ -156,6 +169,10 @@ export const openDocHistory = (options: {
                         <option value="replace">${window.siyuan.languages.historyReplace}</option>
                         <option value="outline">${window.siyuan.languages.historyOutline}</option>
                     </select>
+                    <span class="fn__space"></span>
+                    <button class="b3-button b3-button--outline" data-type="selectCurrentVersion" aria-pressed="true"><svg><use xlink:href="#iconCheck"></use></svg>${window.siyuan.languages.currentVer}</button>
+                    <span class="fn__space"></span>
+                    <button class="b3-button b3-button--outline" data-type="compareVersions" disabled>${window.siyuan.languages.compare}</button>
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
@@ -180,6 +197,9 @@ export const openDocHistory = (options: {
                     <span class="ft__on-surface fn__flex-shrink ft__selectnone fn__none">${window.siyuan.languages.pageCountAndSnapshotCount}</span>
                     <span class="fn__space"></span>
                     <div class="fn__flex-1"></div>
+                    <button class="b3-button b3-button--outline" data-type="selectCurrentVersion" aria-pressed="true"><svg><use xlink:href="#iconCheck"></use></svg>${window.siyuan.languages.currentVer}</button>
+                    <span class="fn__space"></span>
+                    <button class="b3-button b3-button--outline" data-type="compareVersions" disabled>${window.siyuan.languages.compare}</button>
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
@@ -209,8 +229,48 @@ export const openDocHistory = (options: {
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYDOC);
 
+    const versionKey = (version: IDocVersionRef) => `${version.type}:${version.id || version.path || ""}`;
+    const syncVersionSelection = () => {
+        const selectedKeys = new Set(selectedVersions.map(versionKey));
+        dialog.element.querySelectorAll('[data-type="selectCurrentVersion"]').forEach((item) => {
+            const selected = selectedKeys.has(versionKey(currentVersion));
+            item.setAttribute("aria-pressed", selected.toString());
+            item.querySelector("use").setAttribute("xlink:href", selected ? "#iconCheck" : "#iconUncheck");
+        });
+        dialog.element.querySelectorAll('[data-type="selectVersion"]').forEach((item) => {
+            const row = item.closest(".b3-list-item");
+            const type = row.getAttribute("data-type") === "searchFileItem" ? "snapshot" : "history";
+            const id = type === "snapshot" ? row.getAttribute("data-id") : row.getAttribute("data-created");
+            const selected = selectedKeys.has(`${type}:${id}`);
+            item.setAttribute("aria-pressed", selected.toString());
+            item.querySelector("use").setAttribute("xlink:href", selected ? "#iconCheck" : "#iconUncheck");
+        });
+        dialog.element.querySelectorAll('[data-type="compareVersions"]').forEach((item) => {
+            if (selectedVersions.length === 2) {
+                item.removeAttribute("disabled");
+            } else {
+                item.setAttribute("disabled", "disabled");
+            }
+        });
+    };
+    const toggleVersionSelection = (version: IDocVersionRef) => {
+        const key = versionKey(version);
+        const index = selectedVersions.findIndex((item) => versionKey(item) === key);
+        if (index > -1) {
+            selectedVersions.splice(index, 1);
+        } else {
+            if (selectedVersions.length === 2) {
+                selectedVersions.shift();
+            }
+            selectedVersions.push(version);
+        }
+        syncVersionSelection();
+    };
+
     const fileElement = dialog.element.querySelector('#docHistoryContainer [data-type="doc"]') as HTMLElement;
     const repoElement = dialog.element.querySelector('#docHistoryContainer [data-type="repo"]') as HTMLElement;
+    fileElement.addEventListener("versionListRendered", syncVersionSelection);
+    repoElement.addEventListener("versionListRendered", syncVersionSelection);
     const opElement = fileElement.querySelector(".b3-select") as HTMLSelectElement;
     opElement.addEventListener("change", () => {
         renderDoc(fileElement, 1, options.id);
@@ -283,17 +343,53 @@ export const openDocHistory = (options: {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (type === "selectVersion" && repoFileElement) {
+                toggleVersionSelection({
+                    type: "snapshot",
+                    id: repoFileElement.getAttribute("data-id"),
+                    snapshot: repoFileElement.getAttribute("data-snapshot"),
+                    label: dayjs(parseInt(repoFileElement.getAttribute("data-created"))).format("YYYY-MM-DD HH:mm:ss"),
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (type === "view" && repoFileElement) {
                 previewRepoFile(repoFileElement);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (type === "selectVersion" && !isLoading) {
+                const historyItemElement = target.parentElement;
+                getHistoryPath(historyItemElement, opElement.value, options.id, (item) => {
+                    isLoading = false;
+                    toggleVersionSelection({
+                        type: "history",
+                        id: historyItemElement.getAttribute("data-created"),
+                        path: item.path,
+                        label: historyItemElement.querySelector(".b3-list-item__text").textContent.trim(),
+                    });
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "selectCurrentVersion") {
+                toggleVersionSelection(currentVersion);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "compareVersions" && target.getAttribute("disabled") !== "disabled" &&
+                selectedVersions.length === 2) {
+                showDocVersionDiff(options.app, selectedVersions[0], selectedVersions[1]);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (type === "rollback" && !isLoading) {
-                getHistoryPath(target.parentElement, opElement.value, options.id, (item) => {
+                const historyItemElement = target.parentElement;
+                getHistoryPath(historyItemElement, opElement.value, options.id, (item) => {
                     const dataPath = item.path;
                     isLoading = false;
                     const confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", escapeHtml(item.title))
-                        .replace("${time}", target.previousElementSibling.previousElementSibling.textContent.trim());
+                        .replace("${time}", historyItemElement.querySelector(".b3-list-item__text").textContent.trim());
                     confirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, () => {
                         fetchPost("/api/history/rollbackDocHistory", {
                             historyPath: dataPath

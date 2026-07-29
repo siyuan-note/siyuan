@@ -17,6 +17,7 @@ import type {App} from "../index";
 import {resizeSide} from "./resizeSide";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
+import {openDocHistory} from "./doc";
 
 let historyEditor: Protyle;
 const repoHistoryEditors = new WeakMap<Element, Protyle>();
@@ -686,6 +687,17 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (target.classList.contains("b3-list-item__action") && type === "compare") {
+                const itemElement = target.closest(".b3-list-item");
+                openDocHistory({
+                    app,
+                    id: itemElement.getAttribute("data-id"),
+                    notebookId: itemElement.getAttribute("data-notebook-id"),
+                    pathString: itemElement.querySelector(".b3-list-item__text").textContent.trim(),
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
                 const liElement = target.closest(".b3-list-item");
                 const dataType = target.parentElement.getAttribute("data-type") || liElement.getAttribute("data-type");
@@ -704,8 +716,8 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     name = window.siyuan.languages.workspaceData;
                     time = (isMobile() ? target.parentElement.parentElement : target.parentElement).querySelector("span[data-type='hCreated']").textContent.trim();
                 } else {
-                    name = target.previousElementSibling.previousElementSibling.textContent.trim();
-                    time = dayjs(parseInt(target.parentElement.getAttribute("data-created")) * 1000).format("YYYY-MM-DD HH:mm:ss");
+                    name = liElement.querySelector(".b3-list-item__text").textContent.trim();
+                    time = dayjs(parseInt(liElement.getAttribute("data-created")) * 1000).format("YYYY-MM-DD HH:mm:ss");
                 }
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback,
                     window.siyuan.languages.rollbackConfirm.replace("${name}", name).replace("${time}", time),
@@ -779,6 +791,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             let html = "";
                             let ariaLabel = "";
                             response.data.items.forEach((docItem: {
+                                id: string,
                                 title: string,
                                 path: string,
                                 op: string,
@@ -807,10 +820,15 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                     chipClass += "b3-chip--warning ";
                                     ariaLabel = window.siyuan.languages.historyOutline;
                                 }
-                                html += `<li data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${typeElement.value === "4" ? "av" : (typeElement.value === "2" ? "assets" : "doc")}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
+                                const itemType = typeElement.value === "4" ? "av" : (typeElement.value === "2" ? "assets" : "doc");
+                                const compareHTML = itemType === "doc" && docItem.op !== "delete" ? `<span class="b3-list-item__action ariaLabel" data-type="compare" data-position="6south" aria-label="${window.siyuan.languages.compare}">
+        <svg><use xlink:href="#iconSplitLR"></use></svg>
+    </span>` : "";
+                                html += `<li data-id="${docItem.id}" data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${itemType}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
     <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6south" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
     <span class="b3-list-item__text" title="${escapeAttr(docItem.title)}">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
+    ${compareHTML}
     <span class="b3-list-item__action ariaLabel" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>

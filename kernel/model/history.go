@@ -610,6 +610,7 @@ type History struct {
 }
 
 type HistoryItem struct {
+	ID       string `json:"id"`
 	Title    string `json:"title"`
 	Path     string `json:"path"`
 	Op       string `json:"op"`
@@ -1281,6 +1282,7 @@ func fromSQLHistories(sqlHistories []*sql.History) (ret []*HistoryItem) {
 
 	for _, sqlHistory := range sqlHistories {
 		item := &HistoryItem{
+			ID:    sqlHistory.ID,
 			Title: sqlHistory.Title,
 			Path:  filepath.ToSlash(strings.TrimPrefix(filepath.Join(util.HistoryDir, sqlHistory.Path), util.WorkspaceDir)),
 			Op:    sqlHistory.Op,

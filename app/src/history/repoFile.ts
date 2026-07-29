@@ -21,7 +21,7 @@ interface IRepoFile {
 
 let repoFileRequestId = 0;
 
-export const renderRepoFileList = (files: IRepoFile[], element: Element, showPath: boolean) => {
+export const renderRepoFileList = (files: IRepoFile[], element: Element, showPath: boolean, showCompare = false) => {
     if (files.length === 0) {
         element.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
         return;
@@ -30,6 +30,14 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
     let html = "";
     files.forEach((item) => {
         const pathHTML = showPath && item.hPath ? `${escapeHtml(item.hPath)}<span class="fn__space"></span>` : "";
+        const compareHTML = showCompare ? `<span class="b3-list-item__action" data-type="selectVersion" aria-pressed="false">
+                <svg><use xlink:href="#iconUncheck"></use></svg>
+                <span class="fn__space"></span>${window.siyuan.languages.compare}
+            </span>
+            <span class="fn__space"></span>` : "";
+        const compareIconHTML = showCompare ? `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
+        <svg><use xlink:href="#iconUncheck"></use></svg>
+    </span>` : "";
         /// #if MOBILE
         html += `<li class="b3-list-item" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}">
     <div class="fn__flex-1">
@@ -41,6 +49,7 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
         </div>
         <div class="fn__flex" style="height: 26px">
             <span class="fn__flex-1"></span>
+            ${compareHTML}
             <span class="b3-list-item__action" data-type="saveAs">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space"></span>${window.siyuan.languages.saveAs}
@@ -63,6 +72,7 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
             ${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}
         </div>
     </div>
+    ${compareIconHTML}
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>

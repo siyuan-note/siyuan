@@ -184,6 +184,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/history/rollbackNotebookHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackNotebookHistory)
 	ginServer.Handle("POST", "/api/history/rollbackAssetsHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackAssetsHistory)
 	ginServer.Handle("POST", "/api/history/getDocHistoryContent", model.CheckAuth, model.CheckAdminRole, getDocHistoryContent)
+	ginServer.Handle("POST", "/api/history/diffDocVersions", model.CheckAuth, model.CheckAdminRole, diffDocVersions)
 	ginServer.Handle("POST", "/api/history/rollbackDocHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackDocHistory)
 	ginServer.Handle("POST", "/api/history/clearWorkspaceHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, clearWorkspaceHistory)
 	ginServer.Handle("POST", "/api/history/reindexHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reindexHistory)
@@ -296,7 +297,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/file/removeFile", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeFile)
 	ginServer.Handle("POST", "/api/file/renameFile", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameFile)
 	ginServer.Handle("POST", "/api/file/readDir", model.CheckAuth, model.CheckAdminRole, readDir)
-	ginServer.Handle("POST", "/api/file/getUniqueFilename", model.CheckAuth, getUniqueFilename)
+	ginServer.Handle("POST", "/api/file/getUniqueFilename", model.CheckAuth, model.CheckAdminRole, getUniqueFilename)
 
 	ginServer.Handle("POST", "/api/ref/refreshBacklink", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, refreshBacklink)
 	ginServer.Handle("POST", "/api/ref/getBacklink", model.CheckAuth, getBacklink)

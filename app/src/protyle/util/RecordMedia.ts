@@ -1,4 +1,4 @@
-import {isInAndroid} from "./compatibility";
+import {isInAndroid, isInHarmony} from "./compatibility";
 
 const MP3_BIT_RATE = 96;
 const BUFFER_SIZE = 2048;
@@ -96,7 +96,7 @@ export class RecordMedia {
         }
 
         const contextOptions = {} as AudioContextOptions & { sinkId?: { type: "none" } };
-        if (isInAndroid() && "setSinkId" in AudioContextConstructor.prototype) {
+        if ((isInAndroid() || isInHarmony()) && "setSinkId" in AudioContextConstructor.prototype) {
             contextOptions.sinkId = {type: "none"};
         }
         this.context = new AudioContextConstructor(contextOptions);

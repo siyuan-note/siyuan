@@ -161,4 +161,24 @@ func (r *CallToolResult) UnmarshalJSON(data []byte) error {
 type ContentItem struct {
 	Type string `json:"type"`
 	Text string `json:"text"`
+	raw  json.RawMessage
+}
+
+func (item ContentItem) MarshalJSON() ([]byte, error) {
+	if len(item.raw) > 0 {
+		return item.raw, nil
+	}
+	type plain ContentItem
+	return json.Marshal(plain(item))
+}
+
+func (item *ContentItem) UnmarshalJSON(data []byte) error {
+	type plain ContentItem
+	var decoded plain
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*item = ContentItem(decoded)
+	item.raw = append(item.raw[:0], data...)
+	return nil
 }

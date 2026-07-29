@@ -236,6 +236,49 @@ func TestToolInputAndOutputValidation(t *testing.T) {
 	if !outputResult.IsError || outputResult.StructuredContent != nil {
 		t.Fatalf("invalid output was returned: %#v", outputResult)
 	}
+	outputText, ok := outputResult.Content[0].(*mcpsdk.TextContent)
+	if !ok || !strings.Contains(outputText.Text, "must not be retried automatically") {
+		t.Fatalf("invalid output did not warn against retrying: %#v", outputResult.Content)
+	}
+}
+
+func TestNonTextToolContentIsPreserved(t *testing.T) {
+	server, httpServer := newTestHTTPServer(t)
+	var imageContent tools.ContentItem
+	if err := json.Unmarshal(
+		[]byte(`{"type":"image","data":"aW1hZ2UtZGF0YQ==","mimeType":"image/png"}`), &imageContent); err != nil {
+		t.Fatal(err)
+	}
+	syncTool(server, "image_output", &tools.Tool{
+		Name:        "image_output",
+		InputSchema: tools.ToolSchema{Type: "object"},
+		Handler: func(map[string]any) (tools.CallToolResult, error) {
+			return tools.CallToolResult{
+				Content: []tools.ContentItem{imageContent},
+			}, nil
+		},
+	})
+
+	client := mcpsdk.NewClient(&mcpsdk.Implementation{Name: "test-client", Version: "1.0.0"}, nil)
+	session, err := client.Connect(t.Context(), &mcpsdk.StreamableClientTransport{Endpoint: httpServer.URL}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		session.Close()
+	})
+
+	result, err := session.CallTool(t.Context(), &mcpsdk.CallToolParams{Name: "image_output"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Content) != 1 {
+		t.Fatalf("unexpected content: %#v", result.Content)
+	}
+	image, ok := result.Content[0].(*mcpsdk.ImageContent)
+	if !ok || string(image.Data) != "image-data" || image.MIMEType != "image/png" {
+		t.Fatalf("unexpected image content: %#v", result.Content[0])
+	}
 }
 
 func TestExplicitNullStructuredContent(t *testing.T) {

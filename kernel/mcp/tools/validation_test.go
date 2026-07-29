@@ -16,7 +16,12 @@
 
 package tools
 
-import "testing"
+import (
+	"context"
+	"errors"
+	"testing"
+	"time"
+)
 
 func TestToolValidatorValidatesInputAndOutput(t *testing.T) {
 	validator, err := CompileToolValidator(&Tool{
@@ -128,5 +133,39 @@ func TestToolValidatorRejectsExcessiveValueDepth(t *testing.T) {
 		StructuredContentSet: true,
 	}); err == nil {
 		t.Fatal("expected excessive value depth to fail")
+	}
+}
+
+func TestToolValidatorTimeoutIsIsolatedPerTool(t *testing.T) {
+	blocked, err := CompileToolValidator(&Tool{
+		Name:        "blocked",
+		InputSchema: ToolSchema{Type: "object"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	healthy, err := CompileToolValidator(&Tool{
+		Name:        "healthy",
+		InputSchema: ToolSchema{Type: "object"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range cap(blocked.validationSlots) {
+		blocked.validationSlots <- struct{}{}
+	}
+	t.Cleanup(func() {
+		for range cap(blocked.validationSlots) {
+			<-blocked.validationSlots
+		}
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+	if err = blocked.ValidateInputContext(ctx, map[string]any{}); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("unexpected blocked validation result: %v", err)
+	}
+	if err = healthy.ValidateInput(map[string]any{}); err != nil {
+		t.Fatalf("blocked validator affected another tool: %v", err)
 	}
 }

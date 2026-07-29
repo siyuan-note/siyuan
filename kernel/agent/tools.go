@@ -98,7 +98,8 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) (res
 		return "tool execution error: " + err.Error(), true, false
 	}
 	if err = validator.ValidateOutputContext(ctx, result); err != nil {
-		return "invalid tool output: " + err.Error(), true, false
+		return "invalid tool output after execution; execution result may have side effects and must not be retried automatically: " +
+			err.Error(), true, true
 	}
 
 	return resultToString(result), result.IsError, result.ExecutionUnknown
@@ -236,17 +237,21 @@ func resultToString(result tools.CallToolResult) string {
 	for _, item := range result.Content {
 		if item.Type == "text" {
 			parts = append(parts, item.Text)
+			continue
+		}
+		if data, err := json.Marshal(item); err == nil {
+			parts = append(parts, string(data))
 		}
 	}
-	if len(parts) == 0 && result.HasStructuredContent() {
+	if joined := strings.Join(parts, "\n"); joined != "" {
+		return joined
+	}
+	if result.HasStructuredContent() {
 		if data, err := json.Marshal(result.StructuredContent); err == nil {
 			return string(data)
 		}
 	}
-	if len(parts) == 0 {
-		return "(empty result)"
-	}
-	return strings.Join(parts, "\n")
+	return "(empty result)"
 }
 
 func parseToolArgs(argsJSON string) map[string]any {

@@ -1,4 +1,6 @@
 {
+  "previousDifference": "Vorig verschil",
+  "nextDifference": "Volgend verschil",
   "pluginGlobalDisabledTip": "Alle plugins zijn momenteel uitgeschakeld; deze plugin kan ook na het inschakelen niet worden gebruikt",
   "selectAllTip": "Druk nogmaals op ${hotkey} om alle geladen inhoudsblokken te selecteren",
   "doNotRemindAgain": "Niet meer herinneren",

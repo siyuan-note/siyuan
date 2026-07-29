@@ -1,5 +1,7 @@
 {
   "pluginGlobalDisabledTip": "جميع الإضافات معطلة حاليًا، ولن يكون من الممكن استخدام هذه الإضافة حتى بعد تمكينها",
+  "previousDifference": "الاختلاف السابق",
+  "nextDifference": "الاختلاف التالي",
   "selectAllTip": "اضغط على ${hotkey} مرة أخرى لتحديد جميع كتل المحتوى المحمّلة",
   "doNotRemindAgain": "عدم التذكير مرة أخرى",
   "msgSelectAllTip": "تلميح تحديد الكل في المحرر",

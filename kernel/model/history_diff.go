@@ -17,9 +17,13 @@
 package model
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
 	stdhtml "html"
+	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -30,6 +34,7 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -40,14 +45,16 @@ const (
 	docVersionHistory  = "history"
 	docVersionSnapshot = "snapshot"
 
-	docDiffMaxLCSCells = 2_000_000
-	docDiffMaxBlocks   = 10_000
+	docDiffMaxLCSCells      = 2_000_000
+	docDiffMaxTotalLCSCells = 8_000_000
+	docDiffMaxBlocks        = 10_000
 )
 
 type DocVersionRef struct {
-	Type string `json:"type"`
-	ID   string `json:"id"`
-	Path string `json:"path"`
+	Type     string `json:"type"`
+	ID       string `json:"id"`
+	Path     string `json:"path"`
+	Snapshot string `json:"snapshot"`
 }
 
 type DocVersionDiffResult struct {
@@ -79,6 +86,9 @@ type loadedDocVersion struct {
 	raw      []byte
 	parseErr error
 	large    bool
+	boxID    string
+	history  string
+	av       map[string]string
 }
 
 type docDiffBlock struct {
@@ -93,6 +103,10 @@ type docTextSegment struct {
 	end        int
 	storedRuns []string
 	signature  string
+}
+
+type docDiffLCSBudget struct {
+	remaining int
 }
 
 // DiffDocVersions 比较同一文档的两个版本，并返回带临时差异标记的只读块 DOM。
@@ -137,8 +151,8 @@ func DiffDocVersions(leftRef, rightRef *DocVersionRef) (ret *DocVersionDiffResul
 		return
 	}
 
-	leftBlocks, leftChildren, leftOrder := collectDocDiffBlocks(left.tree)
-	rightBlocks, rightChildren, rightOrder := collectDocDiffBlocks(right.tree)
+	leftBlocks, leftChildren, leftOrder := collectDocDiffBlocks(left.tree, left.av)
+	rightBlocks, rightChildren, rightOrder := collectDocDiffBlocks(right.tree, right.av)
 	if len(leftBlocks) > docDiffMaxBlocks || len(rightBlocks) > docDiffMaxBlocks {
 		ret.Large = true
 		ret.Left = renderLargeDocVersion(left)
@@ -146,18 +160,9 @@ func DiffDocVersions(leftRef, rightRef *DocVersionRef) (ret *DocVersionDiffResul
 		return
 	}
 
-	moved := detectMovedDocBlocks(leftBlocks, rightBlocks, leftChildren, rightChildren)
-	ids := make([]string, 0, len(leftBlocks)+len(rightBlocks))
-	seen := map[string]bool{}
-	for _, id := range rightOrder {
-		ids = append(ids, id)
-		seen[id] = true
-	}
-	for _, id := range leftOrder {
-		if !seen[id] {
-			ids = append(ids, id)
-		}
-	}
+	lcsBudget := &docDiffLCSBudget{remaining: docDiffMaxTotalLCSCells}
+	moved := detectMovedDocBlocksWithBudget(leftBlocks, rightBlocks, leftChildren, rightChildren, lcsBudget)
+	ids := mergeDocDiffBlockOrder(leftOrder, rightOrder)
 
 	for _, id := range ids {
 		leftBlock, leftOK := leftBlocks[id]
@@ -183,7 +188,7 @@ func DiffDocVersions(leftRef, rightRef *DocVersionRef) (ret *DocVersionDiffResul
 				setDocDiffBlockAttrs(rightBlock.node, statuses)
 			}
 			if modified {
-				markDocInlineDiff(leftBlock.node, rightBlock.node)
+				markDocInlineDiffWithBudget(leftBlock.node, rightBlock.node, lcsBudget)
 			}
 		}
 		if 0 < len(statuses) {
@@ -225,6 +230,12 @@ func loadDocVersion(ref *DocVersionRef) (ret *loadedDocVersion, err error) {
 	if nil != ret.tree && "" == ret.title {
 		ret.title = ret.tree.Root.IALAttr("title")
 	}
+	if nil != ret.tree {
+		ret.av, err = loadDocVersionAttributeViewSignatures(ref, ret)
+		if err != nil {
+			return nil, err
+		}
+	}
 	if "" == ret.title {
 		ret.title = ret.rootID
 	}
@@ -245,18 +256,11 @@ func loadCurrentDocVersion(id string) (ret *loadedDocVersion, err error) {
 		rootID: blockTree.RootID,
 		raw:    data,
 		large:  1024*1024 <= len(data),
+		boxID:  blockTree.BoxID,
 	}
-	ret.tree, err = LoadTreeByBlockID(id)
-	if nil != err || nil == ret.tree {
-		luteEngine := NewLute()
-		_, ret.parseErr = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
-		if nil != ret.parseErr {
-			return ret, nil
-		}
-		if nil == err {
-			err = ErrTreeNotFound
-		}
-		return nil, err
+	ret.tree, ret.parseErr = parseDocVersionTree(data, blockTree.RootID)
+	if nil != ret.parseErr {
+		return ret, nil
 	}
 	ret.title = ret.tree.Root.IALAttr("title")
 	ret.rootID = ret.tree.Root.ID
@@ -322,9 +326,13 @@ func loadHistoryDocVersion(historyPath string) (ret *loadedDocVersion, err error
 		}
 	}
 
-	luteEngine := NewLute()
-	tree, err := dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	rootID := strings.TrimSuffix(filepath.Base(absPath), filepath.Ext(absPath))
+	tree, err := parseDocVersionTree(data, rootID)
+	historyRoot := filepath.Join(util.HistoryDir, parts[0])
+	boxID := ""
+	if len(parts) >= 2 && ast.IsNodeIDPattern(parts[1]) {
+		boxID = parts[1]
+	}
 	if err != nil {
 		return &loadedDocVersion{
 			title:    rootID,
@@ -332,14 +340,18 @@ func loadHistoryDocVersion(historyPath string) (ret *loadedDocVersion, err error
 			raw:      data,
 			parseErr: err,
 			large:    1024*1024 <= len(data),
+			boxID:    boxID,
+			history:  historyRoot,
 		}, nil
 	}
 	return &loadedDocVersion{
-		tree:   tree,
-		title:  tree.Root.IALAttr("title"),
-		rootID: tree.Root.ID,
-		raw:    data,
-		large:  1024*1024 <= len(data),
+		tree:    tree,
+		title:   tree.Root.IALAttr("title"),
+		rootID:  tree.Root.ID,
+		raw:     data,
+		large:   1024*1024 <= len(data),
+		boxID:   boxID,
+		history: historyRoot,
 	}, nil
 }
 
@@ -382,9 +394,12 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 			return nil, err
 		}
 	}
-	luteEngine := NewLute()
-	tree, err := dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	rootID := strings.TrimSuffix(filepath.Base(file.Path), filepath.Ext(file.Path))
+	tree, err := parseDocVersionTree(data, rootID)
+	boxID := ""
+	if 0 < len(pathParts) && ast.IsNodeIDPattern(pathParts[0]) {
+		boxID = pathParts[0]
+	}
 	if err != nil {
 		return &loadedDocVersion{
 			title:    rootID,
@@ -392,6 +407,7 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 			raw:      data,
 			parseErr: err,
 			large:    1024*1024 <= len(data),
+			boxID:    boxID,
 		}, nil
 	}
 	return &loadedDocVersion{
@@ -400,10 +416,144 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 		rootID: tree.Root.ID,
 		raw:    data,
 		large:  1024*1024 <= len(data),
+		boxID:  boxID,
 	}, nil
 }
 
-func collectDocDiffBlocks(tree *parse.Tree) (blocks map[string]*docDiffBlock, children map[string][]string, order []string) {
+func parseDocVersionTree(data []byte, rootID string) (ret *parse.Tree, err error) {
+	luteEngine := NewLute()
+	ret, _, err = dataparser.ParseJSON(data, luteEngine.ParseOptions)
+	if err != nil {
+		return
+	}
+	if err = treenode.CheckSpec(ret); err != nil {
+		return nil, err
+	}
+	treenode.UpgradeSpec(ret)
+	if ast.IsNodeIDPattern(rootID) && rootID != ret.Root.ID {
+		ret.ID = rootID
+		ret.Root.ID = rootID
+		ret.Root.SetIALAttr("id", rootID)
+	}
+	return
+}
+
+func loadDocVersionAttributeViewSignatures(ref *DocVersionRef, version *loadedDocVersion) (ret map[string]string, err error) {
+	ret = map[string]string{}
+	ids := map[string]bool{}
+	ast.Walk(version.tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && ast.NodeAttributeView == n.Type && "" != n.AttributeViewID {
+			ids[n.AttributeViewID] = true
+		}
+		return ast.WalkContinue
+	})
+	if 0 == len(ids) {
+		return
+	}
+
+	var readData func(string) ([]byte, error)
+	switch ref.Type {
+	case docVersionCurrent:
+		readData = func(id string) ([]byte, error) {
+			boxID := ""
+			if IsEncryptedBox(version.boxID) {
+				boxID = version.boxID
+			}
+			return av.ReadAttributeViewDataInBox(id, boxID)
+		}
+	case docVersionHistory:
+		readData = func(id string) ([]byte, error) {
+			candidates := []string{}
+			if "" != version.boxID {
+				candidates = append(candidates, filepath.Join(version.history, version.boxID, "storage", "av", id+".json"))
+			}
+			candidates = append(candidates, filepath.Join(version.history, "storage", "av", id+".json"))
+			for _, candidate := range candidates {
+				data, readErr := filelock.ReadFile(candidate)
+				if nil != readErr {
+					if os.IsNotExist(readErr) {
+						continue
+					}
+					return nil, readErr
+				}
+				if "" != version.boxID && IsEncryptedBox(version.boxID) {
+					data, readErr = av.DecryptAVData(version.boxID, id, data)
+					if nil != readErr {
+						return nil, readErr
+					}
+				}
+				return data, nil
+			}
+			boxID := ""
+			if IsEncryptedBox(version.boxID) {
+				boxID = version.boxID
+			}
+			return av.ReadAttributeViewDataInBox(id, boxID)
+		}
+	case docVersionSnapshot:
+		if "" == ref.Snapshot {
+			return
+		}
+		repo, repoErr := newRepository()
+		if nil != repoErr {
+			return nil, repoErr
+		}
+		index, indexErr := repo.GetIndex(ref.Snapshot)
+		if nil != indexErr {
+			return nil, indexErr
+		}
+		files, filesErr := repo.GetFiles(index)
+		if nil != filesErr {
+			return nil, filesErr
+		}
+		readData = func(id string) ([]byte, error) {
+			for _, file := range files {
+				if !strings.HasSuffix(filepath.ToSlash(file.Path), "/storage/av/"+id+".json") {
+					continue
+				}
+				data, readErr := repo.OpenFile(file)
+				if nil != readErr {
+					return nil, readErr
+				}
+				if boxID := avBoxIDFromRepoPath(file.Path); "" != boxID && IsEncryptedBox(boxID) {
+					data, readErr = av.DecryptAVData(boxID, id, data)
+					if nil != readErr {
+						return nil, readErr
+					}
+				}
+				return data, nil
+			}
+			return nil, nil
+		}
+	}
+	if nil == readData {
+		return
+	}
+
+	for id := range ids {
+		data, readErr := readData(id)
+		if nil != readErr {
+			return nil, readErr
+		}
+		if nil == data {
+			ret[id] = "missing"
+			continue
+		}
+		ret[id] = docDiffAttributeViewSignature(data)
+	}
+	return
+}
+
+func docDiffAttributeViewSignature(data []byte) string {
+	var compact bytes.Buffer
+	if err := json.Compact(&compact, data); nil == err {
+		data = compact.Bytes()
+	}
+	hash := sha256.Sum256(data)
+	return fmt.Sprintf("%x", hash)
+}
+
+func collectDocDiffBlocks(tree *parse.Tree, attributeViews map[string]string) (blocks map[string]*docDiffBlock, children map[string][]string, order []string) {
 	blocks = map[string]*docDiffBlock{}
 	children = map[string][]string{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -414,7 +564,7 @@ func collectDocDiffBlocks(tree *parse.Tree) (blocks map[string]*docDiffBlock, ch
 		blocks[n.ID] = &docDiffBlock{
 			node:      n,
 			parentID:  parentID,
-			signature: docDiffBlockSignature(n),
+			signature: docDiffBlockSignatureWithAttributeViews(n, attributeViews),
 		}
 		children[parentID] = append(children[parentID], n.ID)
 		order = append(order, n.ID)
@@ -433,6 +583,10 @@ func parentDocDiffBlockID(node *ast.Node) string {
 }
 
 func docDiffBlockSignature(block *ast.Node) string {
+	return docDiffBlockSignatureWithAttributeViews(block, nil)
+}
+
+func docDiffBlockSignatureWithAttributeViews(block *ast.Node, attributeViews map[string]string) string {
 	var builder strings.Builder
 	builder.WriteString(block.Type.String())
 	builder.WriteByte('|')
@@ -447,6 +601,10 @@ func docDiffBlockSignature(block *ast.Node) string {
 	builder.WriteString(block.AttributeViewID)
 	builder.WriteByte(':')
 	builder.WriteString(block.AttributeViewType)
+	if signature, ok := attributeViews[block.AttributeViewID]; ok {
+		builder.WriteByte(':')
+		builder.WriteString(signature)
+	}
 	builder.WriteByte('|')
 	builder.WriteString(block.CalloutType)
 	builder.WriteByte(':')
@@ -519,6 +677,12 @@ func docDiffBlockSignature(block *ast.Node) string {
 }
 
 func detectMovedDocBlocks(left, right map[string]*docDiffBlock, leftChildren, rightChildren map[string][]string) map[string]bool {
+	return detectMovedDocBlocksWithBudget(left, right, leftChildren, rightChildren,
+		&docDiffLCSBudget{remaining: docDiffMaxTotalLCSCells})
+}
+
+func detectMovedDocBlocksWithBudget(left, right map[string]*docDiffBlock, leftChildren, rightChildren map[string][]string,
+	budget *docDiffLCSBudget) map[string]bool {
 	ret := map[string]bool{}
 	for id, leftBlock := range left {
 		if rightBlock, ok := right[id]; ok && leftBlock.parentID != rightBlock.parentID {
@@ -532,7 +696,7 @@ func detectMovedDocBlocks(left, right map[string]*docDiffBlock, leftChildren, ri
 		}
 		leftShared := filterSharedDocBlockIDs(leftIDs, right)
 		rightShared := filterSharedDocBlockIDs(rightIDs, left)
-		matches, ok := lcsMatches(leftShared, rightShared, docDiffMaxLCSCells)
+		matches, ok := lcsMatchesWithBudget(leftShared, rightShared, docDiffMaxLCSCells, budget)
 		if !ok {
 			continue
 		}
@@ -547,6 +711,36 @@ func detectMovedDocBlocks(left, right map[string]*docDiffBlock, leftChildren, ri
 		}
 	}
 	return ret
+}
+
+func mergeDocDiffBlockOrder(left, right []string) (ret []string) {
+	ret = append(ret, right...)
+	rightSet := map[string]bool{}
+	for _, id := range right {
+		rightSet[id] = true
+	}
+	for i, id := range left {
+		if rightSet[id] {
+			continue
+		}
+		insertAt := len(ret)
+		for _, nextID := range left[i+1:] {
+			if !rightSet[nextID] {
+				continue
+			}
+			for index, currentID := range ret {
+				if currentID == nextID {
+					insertAt = index
+					break
+				}
+			}
+			break
+		}
+		ret = append(ret, "")
+		copy(ret[insertAt+1:], ret[insertAt:])
+		ret[insertAt] = id
+	}
+	return
 }
 
 func filterSharedDocBlockIDs(ids []string, other map[string]*docDiffBlock) (ret []string) {

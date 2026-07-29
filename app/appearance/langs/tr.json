@@ -1,4 +1,6 @@
 {
+  "previousDifference": "Önceki fark",
+  "nextDifference": "Sonraki fark",
   "pluginGlobalDisabledTip": "Şu anda tüm eklentiler devre dışı; bu eklenti etkinleştirildikten sonra da kullanılamaz",
   "selectAllTip": "Yüklenen tüm içerik bloklarını seçmek için ${hotkey} tuşuna tekrar basın",
   "doNotRemindAgain": "Bir daha hatırlatma",

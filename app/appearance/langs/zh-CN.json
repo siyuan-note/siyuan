@@ -1,5 +1,7 @@
 {
   "pluginGlobalDisabledTip": "当前已禁用所有插件，该插件启用后仍无法使用",
+  "previousDifference": "上一个差异",
+  "nextDifference": "下一个差异",
   "selectAllTip": "再次按下 ${hotkey} 以选中全部已加载的内容块",
   "doNotRemindAgain": "不再提醒",
   "msgSelectAllTip": "编辑器全选提示",

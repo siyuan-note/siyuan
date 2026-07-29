@@ -2,7 +2,9 @@ import {Dialog} from "../dialog";
 
 export const historyKeydown = (event: KeyboardEvent, dialog: Dialog) => {
     if (dialog.element.querySelector(".history__doc-compare")) {
-        dialog.element.dispatchEvent(new CustomEvent("historyKeydown", {detail: event.key}));
+        if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+            dialog.element.dispatchEvent(new CustomEvent("historyKeydown", {detail: event.key}));
+        }
         return;
     }
     let currentItem = dialog.element.querySelector(".history__side .b3-list-item--focus");

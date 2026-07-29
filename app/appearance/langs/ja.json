@@ -1,4 +1,6 @@
 {
+  "previousDifference": "前の差分",
+  "nextDifference": "次の差分",
   "pluginGlobalDisabledTip": "現在すべてのプラグインが無効になっているため、このプラグインを有効にしても使用できません",
   "selectAllTip": "読み込み済みのすべてのコンテンツブロックを選択するには、もう一度 ${hotkey} を押してください",
   "doNotRemindAgain": "今後表示しない",

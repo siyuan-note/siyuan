@@ -1,4 +1,6 @@
 {
+  "previousDifference": "Différence précédente",
+  "nextDifference": "Différence suivante",
   "pluginGlobalDisabledTip": "Tous les plugins sont actuellement désactivés ; ce plugin restera inutilisable même après son activation",
   "selectAllTip": "Appuyez à nouveau sur ${hotkey} pour sélectionner tous les blocs de contenu chargés",
   "doNotRemindAgain": "Ne plus me le rappeler",

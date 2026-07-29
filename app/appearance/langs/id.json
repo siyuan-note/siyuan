@@ -1,4 +1,6 @@
 {
+  "previousDifference": "Perbedaan sebelumnya",
+  "nextDifference": "Perbedaan berikutnya",
   "pluginGlobalDisabledTip": "Saat ini semua plugin dinonaktifkan; plugin ini tetap tidak dapat digunakan setelah diaktifkan",
   "selectAllTip": "Tekan ${hotkey} lagi untuk memilih semua blok konten yang telah dimuat",
   "doNotRemindAgain": "Jangan ingatkan lagi",

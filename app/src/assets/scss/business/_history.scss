@@ -209,12 +209,24 @@
         [data-history-diff="inline"] {
           background-color: color-mix(in srgb, var(--b3-theme-error) 18%, transparent);
         }
+
+        [data-type="NodeAttributeView"][data-history-diff~="only"] {
+          border-radius: 0 !important;
+          background-color: transparent;
+          box-shadow: 3px 0 0 var(--b3-theme-error) inset;
+        }
       }
 
       &:last-child {
         [data-history-diff~="only"],
         [data-history-diff="inline"] {
           background-color: color-mix(in srgb, var(--b3-theme-success) 18%, transparent);
+        }
+
+        [data-type="NodeAttributeView"][data-history-diff~="only"] {
+          border-radius: 0 !important;
+          background-color: transparent;
+          box-shadow: 3px 0 0 var(--b3-theme-success) inset;
         }
       }
 

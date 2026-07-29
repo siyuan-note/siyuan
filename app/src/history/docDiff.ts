@@ -110,10 +110,10 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
         content: `<div class="history__doc-compare fn__flex-column">
     <div class="history__action">
         <div class="block__icons">
-            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="diffPrevious" aria-label="${window.siyuan.languages.previousLabel}">
+            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="diffPrevious" aria-label="${window.siyuan.languages.previousDifference}">
                 <svg><use xlink:href="#iconUp"></use></svg>
             </span>
-            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="diffNext" aria-label="${window.siyuan.languages.nextLabel}">
+            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="diffNext" aria-label="${window.siyuan.languages.nextDifference}">
                 <svg><use xlink:href="#iconDown"></use></svg>
             </span>
             <span class="history__diff-count ft__on-surface">0/0</span>
@@ -418,13 +418,7 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
         }
     });
     dialog.element.addEventListener("historyKeydown", (event: CustomEvent<string>) => {
-        if (event.detail === "Home") {
-            differenceIndex = -1;
-            focusDifference(1);
-        } else if (event.detail === "End") {
-            differenceIndex = 0;
-            focusDifference(-1);
-        } else if (event.detail === "ArrowUp") {
+        if (event.detail === "ArrowUp") {
             focusDifference(-1);
         } else if (event.detail === "ArrowDown") {
             focusDifference(1);

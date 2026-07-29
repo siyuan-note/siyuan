@@ -1,4 +1,6 @@
 {
+  "previousDifference": "पिछला अंतर",
+  "nextDifference": "अगला अंतर",
   "pluginGlobalDisabledTip": "वर्तमान में सभी प्लगइन अक्षम हैं, इसलिए इस प्लगइन को सक्षम करने के बाद भी इसका उपयोग नहीं किया जा सकता",
   "selectAllTip": "सभी लोड किए गए सामग्री ब्लॉक चुनने के लिए ${hotkey} फिर से दबाएँ",
   "doNotRemindAgain": "फिर याद न दिलाएँ",

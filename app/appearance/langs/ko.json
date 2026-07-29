@@ -1,4 +1,6 @@
 {
+  "previousDifference": "이전 차이",
+  "nextDifference": "다음 차이",
   "pluginGlobalDisabledTip": "현재 모든 플러그인이 비활성화되어 있어 이 플러그인을 활성화해도 사용할 수 없습니다",
   "selectAllTip": "불러온 모든 콘텐츠 블록을 선택하려면 ${hotkey} 키를 다시 누르세요",
   "doNotRemindAgain": "다시 알리지 않기",

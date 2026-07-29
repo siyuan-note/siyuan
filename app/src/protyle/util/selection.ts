@@ -2,6 +2,7 @@ import {
     getContenteditableElement,
     getNextBlock,
     getPreviousBlock,
+    getTopAloneElement,
     hasPreviousSibling,
     isContainerBlock,
     isEndOfBlock,
@@ -125,6 +126,22 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
         }
     });
     countBlockWord(ids, protyle.block.rootID);
+};
+
+export const selectBlocksByRange = (protyle: IProtyle, range: Range) => {
+    const selectElements: HTMLElement[] = [];
+    protyle.wysiwyg.element.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
+        if (!item.querySelector("[data-node-id]") && range.intersectsNode(item)) {
+            const embedElement = isInEmbedBlock(item);
+            const selectElement = getTopAloneElement(embedElement || item) as HTMLElement;
+            if (!selectElements.includes(selectElement)) {
+                selectElements.push(selectElement);
+                selectElement.classList.add("protyle-wysiwyg--select");
+            }
+        }
+    });
+    range.collapse(false);
+    countBlockWord(selectElements.map(item => item.getAttribute("data-node-id")), protyle.block.rootID);
 };
 
 // https://github.com/siyuan-note/siyuan/issues/8196

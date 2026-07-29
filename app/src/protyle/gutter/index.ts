@@ -34,7 +34,7 @@ import {
     updateTransaction
 } from "../wysiwyg/transaction";
 import {removeBlock} from "../wysiwyg/remove";
-import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
+import {focusBlock, focusByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
@@ -1293,12 +1293,26 @@ export class Gutter {
         if (!nodeElement) {
             return;
         }
+        const editableElement = getContenteditableElement(nodeElement);
+        const range = protyle.toolbar.range;
+        if (range && protyle.wysiwyg.element.contains(range.startContainer) &&
+            protyle.wysiwyg.element.contains(range.endContainer) &&
+            hasClosestBlock(range.startContainer) !== hasClosestBlock(range.endContainer)) {
+            hideElements(["select"], protyle);
+            if (range.intersectsNode(hasClosestBlock(editableElement) || nodeElement)) {
+                selectBlocksByRange(protyle, range);
+            } else {
+                range.collapse(false);
+            }
+            focusByRange(range);
+        }
         const embedContext = getEmbedChildOperationContext(nodeElement);
         const selectsElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
         if (!embedContext && selectsElement.length > 1) {
             window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BLOCK_MULTI);
             const match = Array.from(selectsElement).find(item => {
-                if (id === item.getAttribute("data-node-id")) {
+                if (id === item.getAttribute("data-node-id") ||
+                    editableElement && item.contains(editableElement)) {
                     return true;
                 }
             });

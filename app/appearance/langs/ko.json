@@ -1,4 +1,6 @@
 {
+  "snapshotData": "데이터",
+  "extensions": "확장 기능",
   "deleteFontConfirm": "사용자 정의 글꼴 <b>${x}</b>을(를) 삭제하시겠습니까?",
   "fontFileTip": "64 MB 이하의 TTF 및 OTF 글꼴 파일만 지원됩니다",
   "importFont": "글꼴 가져오기",

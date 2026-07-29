@@ -20,6 +20,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -75,5 +76,27 @@ func TestFilterEmbedBlocksByAccess(t *testing.T) {
 	filtered = filterEmbedBlocksByAccess(blocks, accessChecker)
 	if 3 != len(filtered) || protectedDocID != filtered[2].ID {
 		t.Fatalf("authorized protected embed result should be returned: %+v", filtered)
+	}
+}
+
+func TestNewEmbeddedBlockIncludesSourceRootID(t *testing.T) {
+	const (
+		blockID = "20260729150000-block01"
+		rootID  = "20260729150001-root001"
+	)
+	def := &ast.Node{
+		ID:   blockID,
+		Type: ast.NodeParagraph,
+		Box:  "20260729150002-box0001",
+		Path: "/" + rootID + ".sy",
+	}
+	blockTree := &treenode.BlockTree{
+		RootID: rootID,
+		HPath:  "/Source document",
+	}
+
+	block := newEmbeddedBlock(def, blockTree, "<div>content</div>", "content")
+	if rootID != block.RootID {
+		t.Fatalf("embedded block root ID = %q, want %q", block.RootID, rootID)
 	}
 }

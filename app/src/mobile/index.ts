@@ -196,9 +196,12 @@ class App {
                         fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
                             setNoteBook(() => {
-                                initFramework(this, confResponse.data.start);
-                                initRightMenu(this);
-                                openChangelog();
+                                initFramework(this, confResponse.data.start).then(() => {
+                                    initRightMenu(this);
+                                    openChangelog();
+                                }).catch((error) => {
+                                    console.error("Failed to initialize mobile framework:", error);
+                                });
                             });
                         });
                     });

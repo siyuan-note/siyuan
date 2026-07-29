@@ -1,4 +1,6 @@
 {
+  "snapshotData": "ข้อมูล",
+  "extensions": "ส่วนขยาย",
   "deleteFontConfirm": "ลบแบบอักษรกำหนดเอง <b>${x}</b> หรือไม่?",
   "fontFileTip": "รองรับเฉพาะไฟล์แบบอักษร TTF และ OTF ที่มีขนาดไม่เกิน 64 MB",
   "importFont": "นำเข้าแบบอักษร",

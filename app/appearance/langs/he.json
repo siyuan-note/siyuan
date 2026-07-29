@@ -1,4 +1,6 @@
 {
+  "snapshotData": "נתונים",
+  "extensions": "הרחבות",
   "deleteFontConfirm": "למחוק את הגופן המותאם אישית <b>${x}</b>?",
   "fontFileTip": "נתמכים רק קובצי גופן מסוג TTF ו-OTF בגודל של עד 64 MB",
   "importFont": "ייבוא גופן",

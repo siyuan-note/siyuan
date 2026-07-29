@@ -53,6 +53,7 @@
     }
   ],
   "devDependencies": {
+    "@breezystack/lamejs": "1.2.7",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.24.0",
     "@types/node": "^18.13.0",

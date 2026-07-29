@@ -113,7 +113,8 @@ const renderEmbed = (blocks: {
             }
         }
         const childOperationAttr = blocksItem.allowChildOperation ? " data-allow-child-operation=\"true\"" : "";
-        html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}"${childOperationAttr}>
+        const rootIDAttr = blocksItem.block.rootID ? ` data-root-id="${blocksItem.block.rootID}"` : "";
+        html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}"${rootIDAttr}${childOperationAttr}>
 ${popover}${breadcrumbHTML}${blocksItem.block.content}
 </div>`;
     });

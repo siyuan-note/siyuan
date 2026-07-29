@@ -299,7 +299,8 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
     });
 };
 
-export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement, successCB?: (res: string) => void) => {
+export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement,
+                            successCB?: (res: string) => void, completeCB?: (succeeded: boolean) => void) => {
     // FileList | DataTransferItemList | File[] => File[]
     let fileList = [];
     for (let i = 0; i < files.length; i++) {
@@ -319,8 +320,10 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         const isValidate = protyle.options.upload.handler(fileList);
         if (typeof isValidate === "string") {
             showMessage(isValidate);
+            completeCB?.(false);
             return;
         }
+        completeCB?.(true);
         return;
     }
 
@@ -329,6 +332,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
             element.value = "";
         }
         showMessage("please config: options.upload.url");
+        completeCB?.(false);
         return;
     }
 
@@ -340,6 +344,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         const isValidate = protyle.options.upload.validate(fileList);
         if (typeof isValidate === "string") {
             showMessage(isValidate);
+            completeCB?.(false);
             return;
         }
     }
@@ -350,6 +355,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         if (element) {
             element.value = "";
         }
+        completeCB?.(false);
         return;
     }
 
@@ -388,6 +394,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
                 if (!document.body.contains(protyle.element)) {
                     // 网络较慢时，页签已经关闭
                     destroy(protyle);
+                    completeCB?.(false);
                     return;
                 }
                 if (xhr.status === 200) {
@@ -403,14 +410,28 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
                         }
                         genUploadedLabel(responseText, protyle);
                     }
+                    let succeeded = true;
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.data?.succMap) {
+                            succeeded = validateResult.files.every((file) => response.data.succMap[file.name]);
+                        } else if (typeof response.code === "number") {
+                            succeeded = response.code === 0;
+                        }
+                    } catch (error) {
+                        // 自定义上传接口不一定返回 JSON，HTTP 200 仍视为成功。
+                    }
+                    completeCB?.(succeeded);
                 } else if (xhr.status === 0) {
                     showMessage(window.siyuan.languages["_kernel"][28]);
+                    completeCB?.(false);
                 } else {
                     if (protyle.options.upload.error) {
                         protyle.options.upload.error(xhr.responseText);
                     } else {
                         showMessage(xhr.responseText);
                     }
+                    completeCB?.(false);
                 }
                 if (element) {
                     element.value = "";
@@ -430,5 +451,6 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         xhr.send(formData);
     }, () => {
         hideMessage(validateResult.msgId);
+        completeCB?.(false);
     });
 };

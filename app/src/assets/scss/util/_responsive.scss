@@ -128,6 +128,11 @@
         padding-bottom: 8px;
         width: auto !important;
         border-bottom: 1px solid var(--b3-border-color);
+
+        &.history__side--diff {
+          overflow: hidden;
+          padding-bottom: 0;
+        }
       }
     }
   }

@@ -1367,7 +1367,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	visibleNodes := cleanRenderNodes(nodes, true)
 	dom := renderBlockDOMByNodes(visibleNodes, luteEngine)
 	content := renderBlockContentByNodes(visibleNodes)
-	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom, Markdown: content /* 这里使用 Markdown 字段来临时存储 content */}
+	block = newEmbeddedBlock(def, b, dom, content)
 
 	if "" != sqlBlock.IAL {
 		block.IAL = map[string]string{}
@@ -1386,4 +1386,17 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 		blockPaths = []*BlockPath{}
 	}
 	return
+}
+
+func newEmbeddedBlock(def *ast.Node, blockTree *treenode.BlockTree, dom, content string) *Block {
+	return &Block{
+		Box:      def.Box,
+		Path:     def.Path,
+		HPath:    blockTree.HPath,
+		ID:       def.ID,
+		RootID:   blockTree.RootID,
+		Type:     def.Type.String(),
+		Content:  dom,
+		Markdown: content, // 这里使用 Markdown 字段来临时存储 content
+	}
 }

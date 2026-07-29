@@ -60,9 +60,9 @@ const openDockMenu = (app: App) => {
     }
 };
 
-export const initFramework = (app: App, isStart: boolean) => {
+export const initFramework = async (app: App, isStart: boolean) => {
     setInlineStyle();
-    renderSnippet();
+    const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
     initKeyboardToolbar();
     const sidebarElement = document.getElementById("sidebar");
     // 不能使用 getEventName，否则点击返回会展开右侧栏
@@ -142,6 +142,7 @@ export const initFramework = (app: App, isStart: boolean) => {
             }
         });
     });
+    await snippetReady;
     window.siyuan.mobile.docks.file = new MobileFiles(app);
     document.getElementById("toolbarFile").addEventListener("click", () => {
         if (getCurrentEditor()?.protyle.toolbar.isMultiSelectMode()) {

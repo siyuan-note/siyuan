@@ -4061,7 +4061,7 @@ export class WYSIWYG {
                 // 选中后，在选中的文字上点击需等待 range 更新
                 let newRange = getEditorRange(this.element);
                 // 表格中点击两侧或间隙导致光标跳转到开头 https://github.com/siyuan-note/siyuan/issues/16179
-                if (event.target.classList.contains("protyle-wysiwyg") || event.target.parentElement.classList.contains("table")) {
+                if (event.target.classList.contains("protyle-wysiwyg") || event.target.parentElement?.classList.contains("table")) {
                     const rect = this.element.getBoundingClientRect();
                     let rangeElement = document.elementFromPoint(rect.left + rect.width / 2, event.clientY);
                     if (rangeElement === this.element) {

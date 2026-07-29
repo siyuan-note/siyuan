@@ -1,4 +1,6 @@
 {
+  "snapshotData": "資料",
+  "extensions": "擴充功能",
   "deleteFontConfirm": "確定刪除自訂字型 <b>${x}</b> 嗎？",
   "fontFileTip": "僅支援不超過 64 MB 的 TTF 和 OTF 字型檔案",
   "importFont": "匯入字型",

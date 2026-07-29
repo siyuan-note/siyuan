@@ -1,4 +1,6 @@
 {
+  "snapshotData": "Data",
+  "extensions": "Extensions",
   "deleteFontConfirm": "Delete custom font <b>${x}</b>?",
   "fontFileTip": "Only TTF and OTF font files up to 64 MB are supported",
   "importFont": "Import font",

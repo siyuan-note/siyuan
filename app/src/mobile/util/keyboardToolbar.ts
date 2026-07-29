@@ -16,7 +16,7 @@ import {isInAndroid, isInEdge, isInHarmony} from "../../protyle/util/compatibili
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
 import {callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAppUtil";
 import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
-import {getMirror} from "../../protyle/undo/globalUndo";
+import {getMirror, getUndoRootID, hasUndoStateMirror, initMirror} from "../../protyle/undo/globalUndo";
 
 let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
@@ -364,8 +364,16 @@ const renderKeyboardToolbar = () => {
         const protyle = getCurrentEditor().protyle;
         protyle.toolbar.range = range;
         if (!dynamicElements[0].classList.contains("fn__none")) {
-            // 撤销权威栈在 kernel，本地按 rootID 读镜像设按钮态（零 fetch）
-            const undoState = protyle.block?.rootID ? getMirror(protyle.block.rootID) : {
+            // 撤销权威栈在 kernel，本地按 rootID 读镜像设按钮态，首次进入嵌入源文档时按需初始化。
+            const undoRootID = getUndoRootID(protyle, range);
+            if (undoRootID && !hasUndoStateMirror(undoRootID)) {
+                initMirror(undoRootID).then((initialized) => {
+                    if (initialized && getUndoRootID(protyle, protyle.toolbar.range) === undoRootID) {
+                        renderKeyboardToolbar();
+                    }
+                });
+            }
+            const undoState = undoRootID ? getMirror(undoRootID) : {
                 canUndo: false,
                 canRedo: false
             };

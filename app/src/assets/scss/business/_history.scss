@@ -29,6 +29,14 @@
     background: var(--b3-theme-background);
   }
 
+  &__current-version {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    background: var(--b3-theme-background);
+    border-bottom: 1px solid var(--b3-border-color);
+  }
+
   &__side {
     width: 256px;
     padding: 8px 0;
@@ -154,7 +162,7 @@
       &:last-child {
         [data-history-diff~="only"],
         [data-history-diff="inline"] {
-          background-color: color-mix(in srgb, var(--b3-theme-primary) 18%, transparent);
+          background-color: color-mix(in srgb, var(--b3-theme-success) 18%, transparent);
         }
       }
 

@@ -5,7 +5,7 @@ import type {App} from "../index";
 import {Protyle} from "../protyle";
 import {saveExportFile} from "../protyle/util/compatibility";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
-import {escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
 import {pathPosix} from "../util/pathName";
 import * as dayjs from "dayjs";
@@ -29,15 +29,23 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
 
     let html = "";
     files.forEach((item) => {
-        const pathHTML = showPath && item.hPath ? `${escapeHtml(item.hPath)}<span class="fn__space"></span>` : "";
-        const compareHTML = showCompare ? `<span class="b3-list-item__action" data-type="selectVersion" aria-pressed="false">
-                <svg><use xlink:href="#iconUncheck"></use></svg>
-                <span class="fn__space"></span>${window.siyuan.languages.compare}
-            </span>
-            <span class="fn__space"></span>` : "";
-        const compareIconHTML = showCompare ? `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
+        if (showCompare) {
+            html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}" data-title="${escapeAttr(item.title)}">
+    <span class="b3-list-item__text">${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}</span>
+    <span class="fn__space"></span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
         <svg><use xlink:href="#iconUncheck"></use></svg>
-    </span>` : "";
+    </span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
+        <svg><use xlink:href="#iconDownload"></use></svg>
+    </span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+        <svg><use xlink:href="#iconUndo"></use></svg>
+    </span>
+</li>`;
+            return;
+        }
+        const pathHTML = showPath && item.hPath ? `${escapeHtml(item.hPath)}<span class="fn__space"></span>` : "";
         /// #if MOBILE
         html += `<li class="b3-list-item" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}">
     <div class="fn__flex-1">
@@ -49,7 +57,6 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
         </div>
         <div class="fn__flex" style="height: 26px">
             <span class="fn__flex-1"></span>
-            ${compareHTML}
             <span class="b3-list-item__action" data-type="saveAs">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space"></span>${window.siyuan.languages.saveAs}
@@ -72,7 +79,6 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
             ${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}
         </div>
     </div>
-    ${compareIconHTML}
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>
@@ -90,7 +96,7 @@ export const rollbackRepoFile = (element: Element) => {
         return;
     }
 
-    const name = element.querySelector(".b3-list-item__text").textContent.trim();
+    const name = element.getAttribute("data-title") || element.querySelector(".b3-list-item__text").textContent.trim();
     const time = dayjs(parseInt(element.getAttribute("data-created"))).format("YYYY-MM-DD HH:mm:ss");
     confirmDialog("⚠️ " + window.siyuan.languages.rollback,
         window.siyuan.languages.rollbackConfirm.replace("${name}", name).replace("${time}", time),

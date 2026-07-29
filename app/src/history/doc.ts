@@ -16,6 +16,14 @@ let historyEditor: Protyle;
 const repoHistoryEditors = new WeakMap<HTMLElement, Protyle>();
 let isLoading = false;
 
+const genCurrentVersionItem = () => `<li class="b3-list-item history__current-version" data-type="currentVersionItem">
+    <span class="b3-list-item__text">${window.siyuan.languages.currentVer}</span>
+    <span class="fn__space"></span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectCurrentVersion" aria-pressed="true" aria-label="${window.siyuan.languages.currentVer}">
+        <svg><use xlink:href="#iconCheck"></use></svg>
+    </span>
+</li>`;
+
 const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
     const nextElement = element.querySelector('[data-type="docnext"]');
@@ -52,11 +60,11 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         pageInfoElement.classList.remove("fn__none");
         pageInfoElement.textContent = window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount);
         if (response.data.histories.length === 0) {
-            listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            listElement.innerHTML = `${genCurrentVersionItem()}<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             element.dispatchEvent(new CustomEvent("versionListRendered"));
             return;
         }
-        let logsHTML = "";
+        let logsHTML = genCurrentVersionItem();
         response.data.histories.forEach((item: string) => {
             logsHTML += `<li class="b3-list-item b3-list-item--hide-action" data-created="${item}">
     <span class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
@@ -106,12 +114,14 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string)
     } catch (e) {
         console.warn("get repo doc history failed", e);
         element.removeAttribute("data-loading");
-        listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+        listElement.innerHTML = `${genCurrentVersionItem()}<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+        element.dispatchEvent(new CustomEvent("versionListRendered"));
         return;
     }
     if (response.code !== 0) {
         element.removeAttribute("data-loading");
-        listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+        listElement.innerHTML = `${genCurrentVersionItem()}<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+        element.dispatchEvent(new CustomEvent("versionListRendered"));
         return;
     }
 
@@ -130,6 +140,7 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string)
         .replace("${y}", response.data.totalCount);
     pageInfoElement.classList.remove("fn__none");
     renderRepoFileList(response.data.files, listElement, false, true);
+    listElement.insertAdjacentHTML("afterbegin", genCurrentVersionItem());
     element.dispatchEvent(new CustomEvent("versionListRendered"));
 };
 
@@ -160,6 +171,8 @@ export const openDocHistory = (options: {
                     <span class="fn__space"></span>
                     <span class="ft__on-surface fn__flex-shrink ft__selectnone fn__none">${window.siyuan.languages.pageCountAndHistoryCount}</span>
                     <span class="fn__space"></span>
+                    <button class="b3-button b3-button--outline" data-type="compareVersions" disabled>${window.siyuan.languages.compare}</button>
+                    <span class="fn__space"></span>
                     <div class="fn__flex-1"></div>
                     <select data-type="opselect" class="b3-select">
                         <option value="all" selected>${window.siyuan.languages.allOp}</option>
@@ -169,10 +182,6 @@ export const openDocHistory = (options: {
                         <option value="replace">${window.siyuan.languages.historyReplace}</option>
                         <option value="outline">${window.siyuan.languages.historyOutline}</option>
                     </select>
-                    <span class="fn__space"></span>
-                    <button class="b3-button b3-button--outline" data-type="selectCurrentVersion" aria-pressed="true"><svg><use xlink:href="#iconCheck"></use></svg>${window.siyuan.languages.currentVer}</button>
-                    <span class="fn__space"></span>
-                    <button class="b3-button b3-button--outline" data-type="compareVersions" disabled>${window.siyuan.languages.compare}</button>
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
@@ -196,10 +205,9 @@ export const openDocHistory = (options: {
                     <span class="fn__space"></span>
                     <span class="ft__on-surface fn__flex-shrink ft__selectnone fn__none">${window.siyuan.languages.pageCountAndSnapshotCount}</span>
                     <span class="fn__space"></span>
-                    <div class="fn__flex-1"></div>
-                    <button class="b3-button b3-button--outline" data-type="selectCurrentVersion" aria-pressed="true"><svg><use xlink:href="#iconCheck"></use></svg>${window.siyuan.languages.currentVer}</button>
-                    <span class="fn__space"></span>
                     <button class="b3-button b3-button--outline" data-type="compareVersions" disabled>${window.siyuan.languages.compare}</button>
+                    <span class="fn__space"></span>
+                    <div class="fn__flex-1"></div>
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
@@ -300,7 +308,8 @@ export const openDocHistory = (options: {
     const previewRepoFile = (element: Element) => {
         repoHistoryEditors.get(repoElement)?.destroy();
         repoHistoryEditors.delete(repoElement);
-        repoTitleElement.textContent = element.querySelector(".b3-list-item__text").textContent.trim();
+        repoTitleElement.textContent = element.getAttribute("data-title") ||
+            element.querySelector(".b3-list-item__text").textContent.trim();
         repoTitleElement.classList.remove("fn__none");
         repoPreviewElement.classList.remove("fn__none");
         renderRepoFile(options.app, element, repoPreviewElement, (editor) => {
@@ -380,6 +389,11 @@ export const openDocHistory = (options: {
             } else if (type === "compareVersions" && target.getAttribute("disabled") !== "disabled" &&
                 selectedVersions.length === 2) {
                 showDocVersionDiff(options.app, selectedVersions[0], selectedVersions[1]);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.classList.contains("b3-list-item") && type === "currentVersionItem") {
+                toggleVersionSelection(currentVersion);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

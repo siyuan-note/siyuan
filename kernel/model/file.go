@@ -1941,6 +1941,13 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	removeIDs := treenode.RootChildIDs(ret.ID)
 	dir := path.Dir(p)
 	childrenDir := path.Join(dir, ret.ID)
+	removedBlockTrees := treenode.GetBlockTreesByPathPrefix(box.ID, childrenDir)
+	removedRootPaths := map[string]string{ret.ID: ret.Path}
+	for _, blockTree := range removedBlockTrees {
+		if blockTree.ID == blockTree.RootID {
+			removedRootPaths[blockTree.RootID] = blockTree.Path
+		}
+	}
 	existChildren := box.Exist(childrenDir)
 	if existChildren {
 		absChildrenDir := filepath.Join(util.DataDir, ret.Box, childrenDir)
@@ -1961,6 +1968,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 			continue
 		}
 
+		removedRootPaths[removeTree.ID] = removeTree.Path
 		syncDelete2AvBlock(removeTree.Root, removeTree, true, nil)
 	}
 
@@ -1985,9 +1993,14 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		}
 	}
 
+	for rootID, treePath := range removedRootPaths {
+		cache.RemoveTreeData(rootID)
+		cache.RemoveDocIAL(treePath)
+	}
+	for _, blockTree := range removedBlockTrees {
+		cache.RemoveBlockIAL(blockTree.ID)
+	}
 	treenode.RemoveBlockTreesByPathPrefix(box.ID, childrenDir)
-	cache.RemoveDocIAL(ret.Path)
-	cache.RemoveTreeData(ret.ID)
 	sql.RemoveTreePathQueue(ret.Box, childrenDir)
 
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)

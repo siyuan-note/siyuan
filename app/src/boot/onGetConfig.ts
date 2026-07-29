@@ -57,21 +57,24 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     /// #endif
     ensureUILayout();
     initWindowEvent(app);
+    const snippetReady = renderSnippet();
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
-        try {
-            JSONToLayout(app, isStart);
-            setTimeout(() => {
-                adjustLayout();
-            }); // 等待 dock 中 !this.pin 的 setTimeout
-            /// #if !BROWSER
-            sendGlobalShortcut(app);
-            /// #endif
-            openChangelog();
-        } catch (e) {
-            resetLayout();
-        }
-        openDesktopOnboarding(app);
+        snippetReady.then(() => {
+            try {
+                JSONToLayout(app, isStart);
+                setTimeout(() => {
+                    adjustLayout();
+                }); // 等待 dock 中 !this.pin 的 setTimeout
+                /// #if !BROWSER
+                sendGlobalShortcut(app);
+                /// #endif
+                openChangelog();
+            } catch (e) {
+                resetLayout();
+            }
+            openDesktopOnboarding(app);
+        });
     });
     initBar(app);
     initStatus();
@@ -83,7 +86,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     appearanceConfigApi.apply(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();
-    renderSnippet();
     if (window.siyuan.config.system.safeMode) {
         // 安全模式已禁用代码片段、插件、自定义主题和图标
         showMessage(window.siyuan.languages.safeModeTip);

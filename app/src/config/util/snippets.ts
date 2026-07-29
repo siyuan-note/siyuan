@@ -6,7 +6,7 @@ import {Constants} from "../../constants";
 import {refreshHeadingNumberMeasurements} from "../../util/assets";
 
 export const renderSnippet = () => {
-    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
+    return fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
         let cssChanged = false;
         response.data.snippets.forEach((item: ISnippet) => {
             const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;

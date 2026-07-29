@@ -35,6 +35,7 @@ import {listIndent, listOutdent} from "../wysiwyg/list";
 import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
 import {getCloudURL} from "../../config/util/about";
 import {escapeAriaLabel} from "../../util/escape";
+import {refreshUndoButtons} from "../undo/globalUndo";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -906,6 +907,7 @@ ${padHTML}
         if (protyle.element.getAttribute("disabled-forever") === "true") {
             return;
         }
+        refreshUndoButtons(protyle);
         /// #if !MOBILE
         let range: Range;
         let blockElement: Element;

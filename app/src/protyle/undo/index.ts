@@ -5,7 +5,7 @@ import {hideElements} from "../ui/hideElements";
 import {matchHotKey} from "../util/hotKey";
 import {restoreUndoFocus} from "../util/selection";
 import {ipcRenderer} from "electron";
-import {markMirror, refreshUndoButtons, requestRedo, requestUndo} from "./globalUndo";
+import {getUndoRootID, markMirror, refreshUndoButtons, requestRedo, requestUndo} from "./globalUndo";
 import {scrollCenter} from "../../util/highlightById";
 
 // 撤销/重做统一契约：kernel 模式由 Undo 实现（转发 kernel），lite 模式由 LocalUndo 实现（前端操作日志）。
@@ -37,21 +37,28 @@ const syncToolbarRange = (protyle: IProtyle) => {
 // 本类仅保留发起窗口本地乐观应用的渲染逻辑（renderLocal，走 isUndo=true 分支，
 // 保住光标恢复/折叠/zoom 兜底），以及按钮态刷新。
 export class Undo implements IUndo {
+    private lastHistoryRootID?: string;
+
     public undo(protyle: IProtyle) {
         if (protyle.disabled) {
             return;
         }
+        // 输入提交或嵌入块重渲染可能使选区失效，需提前保存实际编辑文档。
+        const rootID = getUndoRootID(protyle);
+        this.lastHistoryRootID = rootID;
         protyle.wysiwyg.flushPendingInput();
         // 转发到全局 Manager，由 kernel 弹栈 + 广播，发起窗口本地乐观应用
-        requestUndo(protyle);
+        requestUndo(protyle, rootID);
     }
 
     public redo(protyle: IProtyle) {
         if (protyle.disabled) {
             return;
         }
+        const rootID = getUndoRootID(protyle, undefined, this.lastHistoryRootID);
+        this.lastHistoryRootID = rootID;
         protyle.wysiwyg.flushPendingInput();
-        requestRedo(protyle);
+        requestRedo(protyle, rootID);
     }
 
     // renderLocal 仅在发起窗口本地应用操作（isUndo=true），不 POST 到 kernel
@@ -84,10 +91,12 @@ export class Undo implements IUndo {
     // add 降级为：不压栈（kernel 已在 commit 后 Record），仅置位本地镜像 + 刷新按钮态。
     // 保留签名以兼容 transaction.ts 的调用点。
     public add(doOperations: IOperation[], undoOperations: IOperation[], protyle: IProtyle) {
-        if (protyle.block?.rootID) {
-            markMirror(protyle.block.rootID, {canUndo: true, canRedo: false});
+        const rootID = getUndoRootID(protyle);
+        this.lastHistoryRootID = rootID;
+        if (rootID) {
+            markMirror(rootID, {canUndo: true, canRedo: false});
         }
-        refreshUndoButtons(protyle);
+        refreshUndoButtons(protyle, rootID);
     }
 
     public clear() {

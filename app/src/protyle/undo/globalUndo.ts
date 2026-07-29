@@ -3,6 +3,7 @@ import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {waitForPendingTransactions} from "../util/transactionQueue";
+import {hasClosestByClassName} from "../util/hasClosest";
 /// #if !MOBILE
 import {getActiveTab} from "../../layout/tabUtil";
 /// #endif
@@ -29,6 +30,40 @@ export const getMirror = (rootID: string): IUndoStateMirror => {
     return undoStateMirror.get(rootID) || {canUndo: false, canRedo: false};
 };
 
+const getRangeRootID = (protyle: IProtyle, range?: Range) => {
+    if (!range?.startContainer?.isConnected || !protyle.wysiwyg.element.contains(range.startContainer)) {
+        return;
+    }
+    const embedElement = hasClosestByClassName(range.startContainer, "protyle-wysiwyg__embed");
+    if (embedElement) {
+        const rootID = embedElement.getAttribute("data-root-id");
+        if (rootID) {
+            return rootID;
+        }
+    }
+    return protyle.block?.rootID;
+};
+
+// 嵌入块是源文档在当前编辑器中的投影，撤销目标应由具体查询结果决定，外层查询块不绑定单一文档。
+export const getUndoRootID = (protyle: IProtyle, range?: Range, fallbackRootID?: string) => {
+    if (!protyle) {
+        return fallbackRootID;
+    }
+    const rangeRootID = getRangeRootID(protyle, range);
+    if (rangeRootID) {
+        return rangeRootID;
+    }
+    const selection = getSelection();
+    if (selection.rangeCount > 0) {
+        const selectionRootID = getRangeRootID(protyle, selection.getRangeAt(0));
+        if (selectionRootID) {
+            return selectionRootID;
+        }
+    }
+    const toolbarRootID = getRangeRootID(protyle, protyle.toolbar?.range);
+    return toolbarRootID || fallbackRootID || protyle.block?.rootID;
+};
+
 // 从 WS 广播 context.undoState 批量更新镜像（多窗口/多端同步）
 export const syncMirrorFromBroadcast = (undoState: { [rootID: string]: { canUndo: boolean; canRedo: boolean } }) => {
     if (!undoState) {
@@ -53,11 +88,11 @@ export const initMirror = (rootID: string) => {
 };
 
 // 刷新指定 protyle 的撤销/重做按钮态（读镜像，零 fetch）
-export const refreshUndoButtons = (protyle: IProtyle) => {
-    if (!protyle.block?.rootID) {
+export const refreshUndoButtons = (protyle: IProtyle, rootID = getUndoRootID(protyle)) => {
+    if (!rootID) {
         return;
     }
-    const state = getMirror(protyle.block.rootID);
+    const state = getMirror(rootID);
     if (protyle.breadcrumb) {
         const parent = protyle.breadcrumb.element.parentElement;
         const undoElement = parent.querySelector('[data-type="undo"]') as HTMLElement;
@@ -139,38 +174,44 @@ const focusRootIDs = (rootIDs: string[], focusBlockId?: string) => {
     }
 };
 
-// 请求撤销：读镜像判可撤销 → 跨文档提示 → 调 kernel undo → 本地乐观应用 + 更新镜像
-export const requestUndo = async (protyle: IProtyle) => {
+const fetchUndoState = (rootID: string) => new Promise<{
+    canUndo: boolean;
+    canRedo: boolean;
+    peekMutatedRootIDs: string[];
+}>((resolve) => {
+    fetchPost("/api/transactions/undoState", {rootID}, (response) => {
+        resolve({
+            canUndo: !!response.data?.canUndo,
+            canRedo: !!response.data?.canRedo,
+            peekMutatedRootIDs: response.data?.peekMutatedRootIDs || [],
+        });
+    });
+});
+
+// 请求撤销：读取 kernel 权威状态 → 跨文档提示 → 调 kernel undo → 本地乐观应用 + 更新镜像
+export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
     if (!protyle || isUndoing) {
         return;
     }
-    const rootID = protyle.block?.rootID;
     if (!rootID) {
         return;
-    }
-
-    const state = getMirror(rootID);
-    if (!state.canUndo) {
-        return; // 语义 B：栈空不做事
     }
 
     // 尽早置锁，阻止确认对话框期间触发新的撤销/重做（含 peek 与确认阶段）
     isUndoing = true;
     await waitForPendingTransactions(protyle);
 
-    // 跨文档提示（标准①）：先 peek 栈顶的 mutatedRootIDs
-    let peekMutatedRootIDs: string[] = [];
-    await new Promise<void>((resolve) => {
-        fetchPost("/api/transactions/undoState", {rootID}, (response) => {
-            if (response.data?.peekMutatedRootIDs) {
-                peekMutatedRootIDs = response.data.peekMutatedRootIDs;
-            }
-            resolve();
-        });
-    });
+    // 等待输入事务提交后读取权威状态，避免本地镜像尚未更新时吞掉立即撤销。
+    const state = await fetchUndoState(rootID);
+    markMirror(rootID, {canUndo: state.canUndo, canRedo: state.canRedo});
+    if (!state.canUndo) {
+        isUndoing = false;
+        refreshUndoButtons(protyle, rootID);
+        return;
+    }
 
-    if (peekMutatedRootIDs.length > 1) {
-        const names = await resolveRootNames(peekMutatedRootIDs);
+    if (state.peekMutatedRootIDs.length > 1) {
+        const names = await resolveRootNames(state.peekMutatedRootIDs);
         // 确认期间拦截当前编辑器的键盘输入（遮罩只挡鼠标点击，不挡键盘冒泡）
         const blockInput = (e: Event) => {
             e.stopImmediatePropagation();
@@ -234,22 +275,23 @@ export const requestUndo = async (protyle: IProtyle) => {
 };
 
 // 请求重做：对称，redo 不提示（其逆已在 undo 中确认）
-export const requestRedo = async (protyle: IProtyle) => {
+export const requestRedo = async (protyle: IProtyle, rootID?: string) => {
     if (!protyle || isUndoing) {
         return;
     }
-    const rootID = protyle.block?.rootID;
     if (!rootID) {
-        return;
-    }
-
-    const state = getMirror(rootID);
-    if (!state.canRedo) {
         return;
     }
 
     isUndoing = true;
     await waitForPendingTransactions(protyle);
+    const state = await fetchUndoState(rootID);
+    markMirror(rootID, {canUndo: state.canUndo, canRedo: state.canRedo});
+    if (!state.canRedo) {
+        isUndoing = false;
+        refreshUndoButtons(protyle, rootID);
+        return;
+    }
     fetchPost("/api/transactions/redo", {
         rootID,
         app: Constants.SIYUAN_APPID,

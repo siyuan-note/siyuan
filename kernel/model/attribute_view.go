@@ -4266,10 +4266,13 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	view, err := getAttrViewViewToRemove(attrView, operation)
 	if nil == view {
-		logging.LogWarnf("get view failed: %s", operation.BlockID)
-		return
+		logging.LogWarnf("get view [%s] to remove failed: %s", operation.ID, err)
+		if nil == err {
+			err = av.ErrViewNotFound
+		}
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 
 	viewID := view.ID
@@ -4340,6 +4343,17 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 
 	operation.RetData = view.LayoutType
 	return
+}
+
+func getAttrViewViewToRemove(attrView *av.AttributeView, operation *Operation) (ret *av.View, err error) {
+	if "" != operation.ID {
+		ret = attrView.GetView(operation.ID)
+		if nil == ret {
+			err = av.ErrViewNotFound
+		}
+		return
+	}
+	return getAttrViewViewByBlockID(attrView, operation.BlockID)
 }
 
 func getMirrorBlocksNodes(avID string) (trees []*parse.Tree, nodes []*ast.Node) {

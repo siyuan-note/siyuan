@@ -18,3 +18,16 @@ export const getAVVisibleViewIDs = (blockElement: Element, views: IAVView[] | st
 export const setAVVisibleViewIDs = (blockElement: Element, viewIDs: string[]) => {
     blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, viewIDs.join(","));
 };
+
+export const serializeAVViewPageSizes = (views: IAVView[]) => JSON.stringify(
+    Object.fromEntries(views.map((view) => [view.id, view.pageSize]))
+);
+
+export const getAVViewPageSize = (value: string | null | undefined, viewID: string) => {
+    try {
+        const pageSize = JSON.parse(value || "{}")[viewID];
+        return typeof pageSize === "number" ? pageSize.toString() : undefined;
+    } catch {
+        return undefined;
+    }
+};

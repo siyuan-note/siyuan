@@ -4,6 +4,8 @@ import * as assert from "node:assert/strict";
 let visibleViewsAttribute: string;
 let getAVVisibleViewIDs: typeof import("./viewVisibility").getAVVisibleViewIDs;
 let setAVVisibleViewIDs: typeof import("./viewVisibility").setAVVisibleViewIDs;
+let getAVViewPageSize: typeof import("./viewVisibility").getAVViewPageSize;
+let serializeAVViewPageSizes: typeof import("./viewVisibility").serializeAVViewPageSizes;
 
 before(async () => {
     Object.assign(globalThis, {NODE_ENV: "test", SIYUAN_VERSION: ""});
@@ -14,6 +16,8 @@ before(async () => {
     visibleViewsAttribute = Constants.CUSTOM_SY_AV_VISIBLE_VIEWS;
     getAVVisibleViewIDs = visibility.getAVVisibleViewIDs;
     setAVVisibleViewIDs = visibility.setAVVisibleViewIDs;
+    getAVViewPageSize = visibility.getAVViewPageSize;
+    serializeAVViewPageSizes = visibility.serializeAVViewPageSizes;
 });
 
 const createBlockElement = (value?: string) => {
@@ -57,5 +61,16 @@ describe("database block visible views", () => {
             blockElement.getAttribute(visibleViewsAttribute),
             "view-a,view-c"
         );
+    });
+
+    it("keeps page sizes available for hidden views", () => {
+        const value = serializeAVViewPageSizes([
+            {id: "view-a", pageSize: 25},
+            {id: "view-b", pageSize: 100},
+        ] as IAVView[]);
+
+        assert.equal(getAVViewPageSize(value, "view-b"), "100");
+        assert.equal(getAVViewPageSize(value, "missing"), undefined);
+        assert.equal(getAVViewPageSize("invalid", "view-a"), undefined);
     });
 });

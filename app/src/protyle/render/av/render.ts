@@ -29,7 +29,12 @@ import {
     refreshAVCellSelection,
     restoreAVCellSelection,
 } from "./selectionState";
-import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
+import {
+    getAVViewPageSize,
+    getAVVisibleViewIDs,
+    serializeAVViewPageSizes,
+    setAVVisibleViewIDs
+} from "./viewVisibility";
 
 interface IIds {
     groupId: string,
@@ -100,7 +105,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     const defaultTemplate = data.newItemTemplates?.find(item => item.id === data.defaultTemplateID);
     const defaultTemplateID = defaultTemplate && (defaultTemplate.targetType !== "detached" ||
         defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
-    return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}">
+    return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
         <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
             <div class="av__selection-toolbar">
                 <span class="av__selection-count"></span>
@@ -973,19 +978,24 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 });
                 addDragFill(item.querySelector(".av__cell--select"));
             } else if (operation.action === "setAttrViewBlockView") {
-                const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
-                if (viewTabElement) {
-                    item.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
-                        bodyItem.dataset.pageSize = viewTabElement.dataset.page;
-                    });
-                }
+                const pageSize = getAVViewPageSize(
+                    item.querySelector(".av__header")?.getAttribute("data-view-pages"),
+                    operation.id
+                );
+                item.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
+                    if (pageSize) {
+                        bodyItem.dataset.pageSize = pageSize;
+                    } else {
+                        bodyItem.removeAttribute("data-page-size");
+                    }
+                });
             } else if (operation.action === "addAttrViewView") {
                 item.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
                     bodyItem.dataset.pageSize = "50";
                 });
             } else if (operation.action === "removeAttrViewView") {
                 item.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
-                    bodyItem.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${getViewIDByAVElement(item)}"]`)?.getAttribute("data-page");
+                    bodyItem.removeAttribute("data-page-size");
                 });
             } else if (operation.action === "sortAttrViewView" && operation.data === "unRefresh") {
                 const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;

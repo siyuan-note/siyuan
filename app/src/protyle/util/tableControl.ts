@@ -1,11 +1,14 @@
 import {MenuItem} from "../../menus/Menu";
-import {removeBlock} from "../wysiwyg/remove";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {encodeBase64, isMac} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
 import {focusByRange, getEditorRange} from "./selection";
 import {
     buildTableGrid,
+    deleteTableColumns,
+    deleteTableRows,
+    getTableFullColumnSelection,
+    getTableFullRowSelection,
     getTableRangeHTML,
     ITableCellInfo,
     ITableGrid,
@@ -760,11 +763,6 @@ export class TableControl {
                 menu.append(new MenuItem({type: "separator"}).element);
             }
             menu.append(new MenuItem({
-                icon: "iconClear",
-                label: window.siyuan.languages.clear,
-                click: () => this.clearCells(),
-            }).element);
-            menu.append(new MenuItem({
                 icon: "iconTheme",
                 label: window.siyuan.languages.colorPrimary,
                 submenu: this.getBackgroundMenus(),
@@ -776,6 +774,11 @@ export class TableControl {
                     this.appendAlignmentMenus();
                 }
                 menu.append(new MenuItem({type: "separator"}).element);
+                menu.append(new MenuItem({
+                    icon: "iconClear",
+                    label: window.siyuan.languages.clear,
+                    click: () => this.clearCells(),
+                }).element);
                 menu.append(new MenuItem({
                     icon: "iconTrashcan",
                     label: this.selection.mode === "row" ? window.siyuan.languages["delete-row"] :
@@ -971,6 +974,40 @@ export class TableControl {
             accelerator: !mergedCell && !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
             click: () => mergedCell ? this.splitCell(cells[0]) : this.mergeCells(),
         }).element);
+        const rowSelection = getTableFullRowSelection(this.selection.table, cells);
+        const columnSelection = getTableFullColumnSelection(this.selection.table, cells);
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconClear",
+            label: window.siyuan.languages.clear,
+            click: () => this.clearCells(),
+        }).element);
+        if (rowSelection.indexes.length > 0) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconTrashcan",
+                label: window.siyuan.languages["delete-row"],
+                disabled: rowSelection.merged,
+                accelerator: rowSelection.merged ? window.siyuan.languages.cancelMerged : undefined,
+                click: () => {
+                    if (deleteTableRows(this.protyle, this.selection.node, rowSelection.indexes)) {
+                        this.clear();
+                    }
+                },
+            }).element);
+        }
+        if (columnSelection.indexes.length > 0) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconTrashcan",
+                label: window.siyuan.languages["delete-column"],
+                disabled: columnSelection.merged,
+                accelerator: columnSelection.merged ? window.siyuan.languages.cancelMerged : undefined,
+                click: () => {
+                    if (deleteTableColumns(this.protyle, this.selection.node, columnSelection.indexes)) {
+                        this.clear();
+                    }
+                },
+            }).element);
+        }
     }
 
     private appendAlignmentMenus() {
@@ -1086,29 +1123,11 @@ export class TableControl {
 
     private deleteRowsOrColumns() {
         const selection = this.selection;
-        const grid = buildTableGrid(selection.table);
-        const total = selection.mode === "row" ? grid.rowCount : grid.columnCount;
-        if (selection.indexes.size >= total) {
-            const range = getEditorRange(selection.node);
-            selection.node.classList.add("protyle-wysiwyg--select");
-            removeBlock(this.protyle, selection.node, range, "remove");
-            this.clear();
-            return;
-        }
-        const oldHTML = selection.node.outerHTML;
-        const indexes = Array.from(selection.indexes).sort((a, b) => b - a);
         if (selection.mode === "row") {
-            const rows = Array.from(selection.table.rows);
-            indexes.forEach(index => rows[index]?.remove());
-            this.normalizeTableSections(selection.table);
+            deleteTableRows(this.protyle, selection.node, Array.from(selection.indexes));
         } else {
-            Array.from(selection.table.rows).forEach(row => {
-                indexes.forEach(index => row.cells[index]?.remove());
-            });
-            const columns = Array.from(selection.table.querySelectorAll("col"));
-            indexes.forEach(index => columns[index]?.remove());
+            deleteTableColumns(this.protyle, selection.node, Array.from(selection.indexes));
         }
-        updateTransaction(this.protyle, selection.node, oldHTML);
         this.clear();
     }
 

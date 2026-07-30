@@ -80,7 +80,17 @@ import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} 
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
-import {clearTableCell, getTableRangeHTML, isIncludeCell, setTableAlign, updateTableTitle} from "../util/table";
+import {
+    clearTableCell,
+    deleteTableColumns,
+    deleteTableRows,
+    getTableFullColumnSelection,
+    getTableFullRowSelection,
+    getTableRangeHTML,
+    isIncludeCell,
+    setTableAlign,
+    updateTableTitle,
+} from "../util/table";
 import {TableControl} from "../util/tableControl";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
@@ -2408,15 +2418,6 @@ export class WYSIWYG {
                                 }
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({
-                                id: "clear",
-                                label: window.siyuan.languages.clear,
-                                icon: "iconTrashcan",
-                                accelerator: "⌦",
-                                click() {
-                                    clearTableCell(protyle, tableBlockElement as HTMLElement);
-                                }
-                            }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({
                                 id: "paste",
                                 label: window.siyuan.languages.paste,
                                 icon: "iconPaste",
@@ -2434,6 +2435,64 @@ export class WYSIWYG {
                                     }
                                 }
                             }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                id: "deleteRowsSeparator",
+                                type: "separator",
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                id: "clear",
+                                label: window.siyuan.languages.clear,
+                                icon: "iconTrashcan",
+                                accelerator: "⌦",
+                                click() {
+                                    clearTableCell(protyle, tableBlockElement as HTMLElement);
+                                }
+                            }).element);
+                            const tableElement = tableBlockElement.querySelector("table");
+                            const selectedCellElements: HTMLTableCellElement[] = [];
+                            const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                            const scrollTop = tableElement.scrollTop;
+                            tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                if (!item.classList.contains("fn__none") && isIncludeCell({
+                                    tableSelectElement,
+                                    scrollLeft,
+                                    scrollTop,
+                                    item,
+                                })) {
+                                    selectedCellElements.push(item);
+                                }
+                            });
+                            const rowSelection = getTableFullRowSelection(tableElement, selectedCellElements);
+                            const columnSelection = getTableFullColumnSelection(tableElement, selectedCellElements);
+                            if (rowSelection.indexes.length > 0) {
+                                window.siyuan.menus.menu.append(new MenuItem({
+                                    id: "deleteRows",
+                                    icon: "iconTrashcan",
+                                    label: window.siyuan.languages["delete-row"],
+                                    disabled: rowSelection.merged,
+                                    accelerator: rowSelection.merged ? window.siyuan.languages.cancelMerged : undefined,
+                                    click() {
+                                        tableSelectElement.removeAttribute("style");
+                                        deleteTableRows(protyle, tableBlockElement as HTMLElement,
+                                            rowSelection.indexes);
+                                    },
+                                }).element);
+                            }
+                            if (columnSelection.indexes.length > 0) {
+                                window.siyuan.menus.menu.append(new MenuItem({
+                                    id: "deleteColumns",
+                                    icon: "iconTrashcan",
+                                    label: window.siyuan.languages["delete-column"],
+                                    disabled: columnSelection.merged,
+                                    accelerator: columnSelection.merged ?
+                                        window.siyuan.languages.cancelMerged : undefined,
+                                    click() {
+                                        tableSelectElement.removeAttribute("style");
+                                        deleteTableColumns(protyle, tableBlockElement as HTMLElement,
+                                            columnSelection.indexes);
+                                    },
+                                }).element);
+                            }
                         }
                         window.siyuan.menus.menu.popup({x: mouseUpEvent.clientX - 8, y: mouseUpEvent.clientY - 16});
                     }

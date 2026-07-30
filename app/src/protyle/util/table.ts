@@ -1,5 +1,12 @@
 import {updateTransaction} from "../wysiwyg/transaction";
-import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, getSelectionPosition,} from "./selection";
+import {
+    focusBlock,
+    focusByRange,
+    focusByWbr,
+    getEditorRange,
+    getSelectionOffset,
+    getSelectionPosition,
+} from "./selection";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
 import {isNotCtrl} from "./compatibility";
@@ -963,6 +970,162 @@ export const buildTableGrid = (tableElement: HTMLElement): ITableGrid => {
         columnCount: grid.reduce((count, row) => Math.max(count, row.length), 0),
         grid,
     };
+};
+
+export const getTableFullRowSelection = (
+    tableElement: HTMLTableElement,
+    cellElements: HTMLTableCellElement[],
+) => {
+    const grid = buildTableGrid(tableElement);
+    const selectedCells = new Set(cellElements);
+    const indexes: number[] = [];
+    let hasPartialRow = false;
+    for (let row = 0; row < grid.rowCount; row++) {
+        const cells = grid.grid[row] || [];
+        const selectedSlots = cells.filter(cell => cell && selectedCells.has(cell)).length;
+        if (selectedSlots === 0) {
+            continue;
+        }
+        if (cells.length !== grid.columnCount || selectedSlots !== grid.columnCount) {
+            hasPartialRow = true;
+            break;
+        }
+        indexes.push(row);
+    }
+    return {
+        indexes: hasPartialRow ? [] : indexes,
+        merged: grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1),
+    };
+};
+
+export const getTableFullColumnSelection = (
+    tableElement: HTMLTableElement,
+    cellElements: HTMLTableCellElement[],
+) => {
+    const grid = buildTableGrid(tableElement);
+    const selectedCells = new Set(cellElements);
+    const indexes: number[] = [];
+    let hasPartialColumn = false;
+    for (let column = 0; column < grid.columnCount; column++) {
+        let slotCount = 0;
+        let selectedSlotCount = 0;
+        for (let row = 0; row < grid.rowCount; row++) {
+            const cell = grid.grid[row]?.[column];
+            if (cell) {
+                slotCount++;
+                if (selectedCells.has(cell)) {
+                    selectedSlotCount++;
+                }
+            }
+        }
+        if (selectedSlotCount === 0) {
+            continue;
+        }
+        if (slotCount !== grid.rowCount || selectedSlotCount !== grid.rowCount) {
+            hasPartialColumn = true;
+            break;
+        }
+        indexes.push(column);
+    }
+    return {
+        indexes: hasPartialColumn ? [] : indexes,
+        merged: grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1),
+    };
+};
+
+const replaceTableCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
+    if (cell.tagName.toLowerCase() === tag) {
+        return;
+    }
+    const newCell = document.createElement(tag);
+    Array.from(cell.attributes).forEach(attribute => {
+        newCell.setAttribute(attribute.name, attribute.value);
+    });
+    while (cell.firstChild) {
+        newCell.append(cell.firstChild);
+    }
+    cell.replaceWith(newCell);
+};
+
+const normalizeTableSections = (tableElement: HTMLTableElement) => {
+    const rows = Array.from(tableElement.rows);
+    const head = tableElement.tHead || tableElement.createTHead();
+    const body = tableElement.tBodies[0] || tableElement.createTBody();
+    head.innerHTML = "";
+    body.innerHTML = "";
+    rows.forEach((row, index) => {
+        Array.from(row.cells).forEach(cell => replaceTableCellTag(cell, index === 0 ? "th" : "td"));
+        (index === 0 ? head : body).append(row);
+    });
+    Array.from(tableElement.tBodies).slice(1).forEach(item => item.remove());
+};
+
+export const deleteTableRows = (
+    protyle: IProtyle,
+    nodeElement: HTMLElement,
+    rowIndexes: number[],
+) => {
+    const tableElement = nodeElement.querySelector("table");
+    if (!tableElement) {
+        return false;
+    }
+    const grid = buildTableGrid(tableElement);
+    if (grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1)) {
+        return false;
+    }
+    const indexes = Array.from(new Set(rowIndexes))
+        .filter(index => index >= 0 && index < grid.rowCount)
+        .sort((a, b) => b - a);
+    if (indexes.length === 0) {
+        return false;
+    }
+    if (indexes.length >= grid.rowCount) {
+        const range = getEditorRange(nodeElement);
+        nodeElement.classList.add("protyle-wysiwyg--select");
+        removeBlock(protyle, nodeElement, range, "remove");
+        return true;
+    }
+    const oldHTML = nodeElement.outerHTML;
+    const rows = Array.from(tableElement.rows);
+    indexes.forEach(index => rows[index]?.remove());
+    normalizeTableSections(tableElement);
+    updateTransaction(protyle, nodeElement, oldHTML);
+    return true;
+};
+
+export const deleteTableColumns = (
+    protyle: IProtyle,
+    nodeElement: HTMLElement,
+    columnIndexes: number[],
+) => {
+    const tableElement = nodeElement.querySelector("table");
+    if (!tableElement) {
+        return false;
+    }
+    const grid = buildTableGrid(tableElement);
+    if (grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1)) {
+        return false;
+    }
+    const indexes = Array.from(new Set(columnIndexes))
+        .filter(index => index >= 0 && index < grid.columnCount)
+        .sort((a, b) => b - a);
+    if (indexes.length === 0) {
+        return false;
+    }
+    if (indexes.length >= grid.columnCount) {
+        const range = getEditorRange(nodeElement);
+        nodeElement.classList.add("protyle-wysiwyg--select");
+        removeBlock(protyle, nodeElement, range, "remove");
+        return true;
+    }
+    const oldHTML = nodeElement.outerHTML;
+    Array.from(tableElement.rows).forEach(row => {
+        indexes.forEach(index => row.cells[index]?.remove());
+    });
+    const columns = Array.from(tableElement.querySelectorAll("col"));
+    indexes.forEach(index => columns[index]?.remove());
+    updateTransaction(protyle, nodeElement, oldHTML);
+    return true;
 };
 
 const getTableRangeBounds = (cellInfos: ITableCellInfo[], rowCount: number, startCell: HTMLElement, endCell: HTMLElement) => {

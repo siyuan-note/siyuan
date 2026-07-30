@@ -39,9 +39,15 @@ import {setFold} from "./blockFold";
 import {removeFoldHeading} from "./heading";
 import {
     AV_PASTE_READONLY_TYPES,
+    getAVPasteColumnWidth,
     getAVPasteMatrixWidth,
+    getAVPasteTextMeasurer,
     getUniqueAVPasteColumnName,
     inferAVPasteColumnType,
+    isAVPasteHeaderCandidate,
+    removeAVPasteSkeleton,
+    shouldShowAVPasteSkeleton,
+    showAVPasteSkeleton,
 } from "../render/av/paste";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
@@ -327,6 +333,8 @@ const pasteAVMatrix = async (options: {
 
     const schemaDoOperations: IOperation[] = [];
     const schemaUndoOperations: IOperation[] = [];
+    const widthDoOperations: IOperation[] = [];
+    const widthUndoOperations: IOperation[] = [];
     const newColumnUndoOperations: IOperation[] = [];
     const inferableKeyIDs = new Set<string>(response.data?.inferableKeyIDs || []);
     const visibleColumns = view.columns.filter(column => !column.hidden);
@@ -338,6 +346,7 @@ const pasteAVMatrix = async (options: {
     const usedNames = new Set(options.columns.map(column => column.name));
     const changedCellColumnIDs = new Set<string>();
     const targetColumns: IAVPasteTargetColumn[] = [];
+    const measureText = getAVPasteTextMeasurer(options.blockElement);
     let previousColumnID = visibleColumns[visibleColumns.length - 1].id;
 
     for (let sourceIndex = 0; sourceIndex < sourceWidth; sourceIndex++) {
@@ -354,9 +363,13 @@ const pasteAVMatrix = async (options: {
             currentColumn.type !== "block" && !readonly
                 ? inferredType
                 : currentColumn.type;
+            const compactWidth = options.header && (!oldColumn.width || oldColumn.width === "200px")
+                ? getAVPasteColumnWidth(nextName, nextType, sourceValues, measureText)
+                : oldColumn.width;
             const typeChanged = oldColumn.type !== nextType;
             currentColumn.name = nextName;
             currentColumn.type = nextType;
+            currentColumn.width = compactWidth;
             if (typeChanged && nextType === "date") {
                 currentColumn.date = {
                     autoFillNow: false,
@@ -367,6 +380,7 @@ const pasteAVMatrix = async (options: {
             if (valueColumn) {
                 valueColumn.name = nextName;
                 valueColumn.type = nextType;
+                valueColumn.width = compactWidth;
                 if (typeChanged && nextType === "date") {
                     valueColumn.date = currentColumn.date;
                 }
@@ -388,6 +402,23 @@ const pasteAVMatrix = async (options: {
                     type: oldColumn.type,
                 });
             }
+            if (compactWidth && oldColumn.width !== compactWidth) {
+                const widthOperation = {
+                    action: "setAttrViewColWidth" as const,
+                    id: currentColumn.id,
+                    avID: options.blockElement.dataset.avId,
+                    blockID: options.blockElement.dataset.nodeId,
+                    viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+                };
+                widthDoOperations.push({
+                    ...widthOperation,
+                    data: compactWidth,
+                });
+                widthUndoOperations.push({
+                    ...widthOperation,
+                    data: oldColumn.width || "200px",
+                });
+            }
             if (typeChanged) {
                 const columnIndex = view.columns.findIndex(column => column.id === currentColumn.id);
                 rows.forEach(row => {
@@ -404,6 +435,7 @@ const pasteAVMatrix = async (options: {
         const name = headerName ? headerName : getUniqueAVPasteColumnName(baseName, usedNames);
         const type = options.header ? inferredType : "text";
         const column = genAVPasteColumn(id, name, type);
+        column.width = getAVPasteColumnWidth(name, type, sourceValues, measureText);
         const previousIndex = view.columns.findIndex(item => item.id === previousColumnID);
         view.columns.splice(previousIndex + 1, 0, column);
         rows.forEach(row => {
@@ -419,6 +451,14 @@ const pasteAVMatrix = async (options: {
             format: getDefaultDateFormat(type),
             id,
             previousID: previousColumnID,
+        });
+        widthDoOperations.push({
+            action: "setAttrViewColWidth",
+            id,
+            avID: options.blockElement.dataset.avId,
+            data: column.width,
+            blockID: options.blockElement.dataset.nodeId,
+            viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
         });
         newColumnUndoOperations.unshift({
             action: "removeAttrViewCol",
@@ -509,7 +549,7 @@ const pasteAVMatrix = async (options: {
                 const isNewRow = newRowIDSet.has(pasteRows[i].id);
                 const operations = await updateCellsValue(options.protyle, options.blockElement, options.values[i][j],
                     [cellElement], options.columns, options.cellHTML?.[i]?.[j] || options.html,
-                    true, isNewRow || targetColumn.isNew || targetColumn.typeChanged, true);
+                    true, isNewRow || targetColumn.isNew || targetColumn.typeChanged, true, undefined, false);
                 if (operations.doOperations.length > 0) {
                     cellDoOperations.push(...operations.doOperations);
                     const hasCellUpdate = operations.doOperations.some(operation => operation.action === "updateAttrViewCell");
@@ -539,13 +579,14 @@ const pasteAVMatrix = async (options: {
         removePlaceholderRows(options.blockElement);
     }
 
-    const doOperations = [...schemaDoOperations, ...rowDoOperations, ...cellDoOperations];
+    const doOperations = [...schemaDoOperations, ...widthDoOperations, ...rowDoOperations, ...cellDoOperations];
     if (doOperations.length === 0) {
         return;
     }
     const undoOperations = [
         ...cellUndoOperations,
         ...rowUndoOperations,
+        ...widthUndoOperations.reverse(),
         ...schemaUndoOperations.reverse(),
         ...newColumnUndoOperations,
     ];
@@ -560,6 +601,30 @@ const pasteAVMatrix = async (options: {
         data: options.blockElement.getAttribute("updated"),
     });
     transaction(options.protyle, doOperations, undoOperations);
+    return true;
+};
+
+const pasteAVMatrixWithSkeleton = async (options: Parameters<typeof pasteAVMatrix>[0]) => {
+    const showSkeleton = shouldShowAVPasteSkeleton(options.values) &&
+        showAVPasteSkeleton(options.blockElement, getAVPasteMatrixWidth(options.values, options.header));
+    if (showSkeleton) {
+        await new Promise<void>((resolve) => {
+            requestAnimationFrame(() => resolve());
+        });
+    }
+    try {
+        const submitted = await pasteAVMatrix(options);
+        if (showSkeleton && !submitted) {
+            removeAVPasteSkeleton(options.blockElement);
+        } else if (showSkeleton) {
+            window.setTimeout(() => removeAVPasteSkeleton(options.blockElement), 30000);
+        }
+    } catch (error) {
+        if (showSkeleton) {
+            removeAVPasteSkeleton(options.blockElement);
+        }
+        throw error;
+    }
 };
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
@@ -598,6 +663,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 cellHTML.push(rowHTML);
             }
         });
+        headerCandidate = isAVPasteHeaderCandidate(values, headerCandidate);
     }
     const avID = blockElement.dataset.avId;
     fetchPost("/api/av/getAttributeViewKeysByAvID", {avID}, async (response) => {
@@ -614,7 +680,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 const useHeader = headerCandidate ? await confirmAVPasteHeader() : false;
                 const header = useHeader ?
                     values[0].map(value => typeof value === "string" ? value : "") : undefined;
-                await pasteAVMatrix({
+                await pasteAVMatrixWithSkeleton({
                     values: useHeader ? values.slice(1) : values,
                     protyle,
                     blockElement,
@@ -675,7 +741,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 updateCellsValue(protyle, blockElement as HTMLElement, normalizedText,
                     selectedCells.length > 0 ? undefined : cellElements, columns, html);
             } else {
-                await pasteAVMatrix({
+                await pasteAVMatrixWithSkeleton({
                     values: textJSON,
                     protyle,
                     blockElement,
@@ -690,7 +756,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             if (textJSON.length === 1 && textJSON[0].length === 1) {
                 updateCellsValue(protyle, blockElement as HTMLElement, normalizedText, undefined, columns, html);
             } else {
-                await pasteAVMatrix({
+                await pasteAVMatrixWithSkeleton({
                     values: textJSON,
                     protyle,
                     blockElement,

@@ -82,6 +82,33 @@
     }
   }
 
+  &--paste-loading {
+    min-height: 194px;
+    position: relative;
+  }
+
+  &__paste-skeleton {
+    background-color: var(--b3-theme-background);
+    border-radius: var(--b3-border-radius);
+    cursor: wait;
+    inset: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: 5;
+
+    .av__row {
+      background-color: var(--b3-theme-background);
+      min-height: 38px;
+    }
+
+    .av__cell {
+      align-items: center;
+      display: flex;
+      flex-shrink: 0;
+      padding: 8px;
+    }
+  }
+
   &__header {
     position: relative;
 

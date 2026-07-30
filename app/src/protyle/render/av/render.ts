@@ -35,6 +35,7 @@ import {
     serializeAVViewPageSizes,
     setAVVisibleViewIDs
 } from "./viewVisibility";
+import {removeAVPasteSkeleton} from "./paste";
 
 interface IIds {
     groupId: string,
@@ -1070,6 +1071,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         openMenuPanel({protyle, blockElement: item, type: "config"});
                     }
                 }
+                removeAVPasteSkeleton(item);
                 item.removeAttribute("data-loading");
             });
         });

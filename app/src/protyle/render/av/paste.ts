@@ -35,6 +35,23 @@ const isFullDate = (value: string) => {
     return hour < 24 && minute < 60 && second < 60;
 };
 
+const isURL = (value: string) => {
+    try {
+        const url = new URL(value.trim());
+        return url.protocol === "http:" || url.protocol === "https:";
+    } catch (e) {
+        return false;
+    }
+};
+
+const isSingleSelect = (values: string[]) => {
+    if (values.length < 4 || values.some(value => value.length > 64 || /[\r\n]/.test(value))) {
+        return false;
+    }
+    const optionCount = new Set(values).size;
+    return optionCount > 1 && optionCount <= 20 && optionCount / values.length <= 0.5;
+};
+
 export const inferAVPasteColumnType = (values: string[]): TAVCol => {
     const nonEmptyValues = values.map(value => value.trim()).filter(Boolean);
     if (nonEmptyValues.length === 0) {
@@ -46,11 +63,91 @@ export const inferAVPasteColumnType = (values: string[]): TAVCol => {
     if (nonEmptyValues.every(isFullDate)) {
         return "date";
     }
+    if (nonEmptyValues.every(isURL)) {
+        return "url";
+    }
+    if (isSingleSelect(nonEmptyValues)) {
+        return "select";
+    }
     return "text";
 };
 
 export const getAVPasteMatrixWidth = (rows: unknown[][], header?: string[]) => {
     return Math.max(header?.length || 0, ...rows.map(row => row.length), 0);
+};
+
+export const shouldShowAVPasteSkeleton = (rows: unknown[][]) => {
+    return rows.reduce((count, row) => count + row.length, 0) >= 100;
+};
+
+const getEstimatedTextWidth = (value: string) => {
+    return Array.from(value.trim().replace(/[\r\n]+/g, " ")).reduce((width, character) => {
+        if (/[\u2E80-\u9FFF\uAC00-\uD7AF]/u.test(character)) {
+            return width + 14;
+        }
+        if (/\s/u.test(character)) {
+            return width + 4;
+        }
+        if (/[A-ZMW@#%&]/u.test(character)) {
+            return width + 9;
+        }
+        return width + 7;
+    }, 0);
+};
+
+export const getAVPasteTextMeasurer = (blockElement: HTMLElement) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    const cellElement = blockElement.querySelector<HTMLElement>(".av__cell");
+    if (!context || !cellElement) {
+        return getEstimatedTextWidth;
+    }
+    const style = getComputedStyle(cellElement);
+    context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    return (value: string) => context.measureText(value.trim().replace(/[\r\n]+/g, " ")).width;
+};
+
+export const getAVPasteColumnWidth = (name: string, type: TAVCol, values: string[],
+                                      measureText = getEstimatedTextWidth) => {
+    const headerWidth = measureText(name) + 42;
+    const contentPadding = type === "select" ? 32 : 20;
+    const contentWidth = values.reduce((width, value) => Math.max(width, measureText(value) + contentPadding), 0);
+    return `${Math.ceil(Math.min(480, Math.max(64, headerWidth, contentWidth)))}px`;
+};
+
+export const showAVPasteSkeleton = (blockElement: HTMLElement, columnCount: number) => {
+    if (blockElement.querySelector(".av__paste-skeleton")) {
+        return false;
+    }
+    const skeletonElement = document.createElement("div");
+    skeletonElement.className = "av__paste-skeleton";
+    skeletonElement.setAttribute("role", "status");
+    skeletonElement.setAttribute("aria-label", window.siyuan.languages.loading);
+    const visibleColumnCount = Math.min(Math.max(columnCount, 2), 6);
+    let html = "";
+    for (let rowIndex = 0; rowIndex < 5; rowIndex++) {
+        html += '<div class="av__row"><div style="width: 24px;flex-shrink: 0"></div>';
+        for (let columnIndex = 0; columnIndex < visibleColumnCount; columnIndex++) {
+            const pulseWidth = 45 + (rowIndex * 17 + columnIndex * 13) % 45;
+            html += `<div class="av__cell" style="width: 200px"><span class="av__pulse" style="width: ${pulseWidth}%"></span></div>`;
+        }
+        html += "</div>";
+    }
+    skeletonElement.innerHTML = html;
+    blockElement.classList.add("av--paste-loading");
+    blockElement.setAttribute("aria-busy", "true");
+    blockElement.append(skeletonElement);
+    return true;
+};
+
+export const removeAVPasteSkeleton = (blockElement: HTMLElement) => {
+    blockElement.querySelector(".av__paste-skeleton")?.remove();
+    blockElement.classList.remove("av--paste-loading");
+    blockElement.removeAttribute("aria-busy");
+};
+
+export const isAVPasteHeaderCandidate = (rows: unknown[][], hasSemanticHeader: boolean) => {
+    return hasSemanticHeader || (rows.length > 1 && getAVPasteMatrixWidth(rows) > 1);
 };
 
 export const getUniqueAVPasteColumnName = (baseName: string, usedNames: Set<string>) => {

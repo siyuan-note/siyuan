@@ -241,7 +241,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	isLargeInsert := tx.processLargeInsert()
 	isLargeDelete := tx.processLargeDelete()
 	if !isLargeInsert {
-		for _, op := range tx.DoOperations {
+		for operationIndex := 0; operationIndex < len(tx.DoOperations); operationIndex++ {
+			op := tx.DoOperations[operationIndex]
 			if isLargeDelete && "delete" == op.Action {
 				continue
 			}
@@ -325,7 +326,20 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			case "sortAttrViewKey":
 				ret = tx.doSortAttrViewKey(op)
 			case "updateAttrViewCell":
-				ret = tx.doUpdateAttrViewCell(op)
+				operations := []*Operation{op}
+				for nextIndex := operationIndex + 1; nextIndex < len(tx.DoOperations); nextIndex++ {
+					nextOperation := tx.DoOperations[nextIndex]
+					if "updateAttrViewCell" != nextOperation.Action || op.AvID != nextOperation.AvID {
+						break
+					}
+					operations = append(operations, nextOperation)
+				}
+				if 1 == len(operations) {
+					ret = tx.doUpdateAttrViewCell(op)
+				} else {
+					ret = tx.doBatchUpdateAttrViewCells(operations)
+					operationIndex += len(operations) - 1
+				}
 			case "updateAttrViewColOptions":
 				ret = tx.doUpdateAttrViewColOptions(op)
 			case "removeAttrViewColOption":

@@ -7206,6 +7206,25 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 	return
 }
 
+func (tx *Transaction) doBatchUpdateAttrViewCells(operations []*Operation) (ret *TxErr) {
+	attrView, err := av.ParseAttributeView(operations[0].AvID)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: err.Error()}
+	}
+
+	for _, operation := range operations {
+		if _, err = updateAttributeViewValue(tx, attrView, operation.KeyID, operation.RowID, operation.Data, false); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+	}
+	regenAttrViewGroups(attrView)
+	if err = av.SaveAttributeView(attrView); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: attrView.ID, msg: err.Error()}
+	}
+	refreshRelatedSrcAvs(attrView.ID, tx)
+	return
+}
+
 func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
@@ -7228,11 +7247,16 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (
 			return
 		}
 		valueData := v["value"]
-		_, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData)
+		_, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData, false)
 		if err != nil {
 			return
 		}
 	}
+	regenAttrViewGroups(attrView)
+	if err = av.SaveAttributeView(attrView); err != nil {
+		return
+	}
+	refreshRelatedSrcAvs(avID, tx)
 	return
 }
 
@@ -7242,14 +7266,14 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueD
 		return
 	}
 
-	val, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData)
+	val, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData, true)
 	if nil != err {
 		return
 	}
 	return
 }
 
-func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID, itemID string, valueData any) (val *av.Value, err error) {
+func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID, itemID string, valueData any, save bool) (val *av.Value, err error) {
 	avID := attrView.ID
 	var blockVal *av.Value
 	for _, kv := range attrView.KeyValues {
@@ -7433,15 +7457,19 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		updateTwoWayRelationDestAttrView(attrView, key, val, relationChangeMode, oldRelationBlockIDs)
 	}
 
-	regenAttrViewGroups(attrView)
-	if err = av.SaveAttributeView(attrView); nil != err {
-		return
+	if save {
+		regenAttrViewGroups(attrView)
+		if err = av.SaveAttributeView(attrView); nil != err {
+			return
+		}
 	}
 	if 0 != relationChangeMode && nil != key && nil != key.Relation && "" != key.Relation.AvID && key.Relation.AvID != avID {
 		ReloadAttrView(key.Relation.AvID)
 	}
 
-	refreshRelatedSrcAvs(avID, tx)
+	if save {
+		refreshRelatedSrcAvs(avID, tx)
+	}
 	return
 }
 

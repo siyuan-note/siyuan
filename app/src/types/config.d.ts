@@ -135,7 +135,6 @@ declare namespace Config {
         providers: IProvider[];
         editing: IEditing;
         agent: IAgent;
-        vision: IVision;
         imageGeneration: IImageGeneration;
         mcp: IMCP;
         embedding: IEmbedding;
@@ -164,14 +163,6 @@ declare namespace Config {
         maxHistoryMessages: number;
         temperature: number;
         maxCompletionTokens: number;
-    }
-
-    export interface IVision {
-        modelId: string;
-        requestTimeout: number;
-        maxImageBytes: number;
-        maxPixels: number;
-        maxEdge: number;
     }
 
     export interface IImageGeneration {

@@ -118,7 +118,6 @@ func TestReconcileModelIDs(t *testing.T) {
 		},
 		Editing:         &Editing{ModelID: "missing"},
 		Agent:           &Agent{ModelID: second.Name},
-		Vision:          &Vision{ModelID: "missing"},
 		ImageGeneration: &ImageGeneration{ModelID: second.DisplayName},
 	}
 
@@ -129,9 +128,6 @@ func TestReconcileModelIDs(t *testing.T) {
 	}
 	if ai.Agent.ModelID != second.ID {
 		t.Fatalf("agent model ID = %q, want %q", ai.Agent.ModelID, second.ID)
-	}
-	if ai.Vision.ModelID != "" {
-		t.Fatalf("vision model ID = %q, want empty", ai.Vision.ModelID)
 	}
 	if ai.ImageGeneration.ModelID != second.ID {
 		t.Fatalf("image generation model ID = %q, want %q", ai.ImageGeneration.ModelID, second.ID)

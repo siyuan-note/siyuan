@@ -288,31 +288,17 @@ type DocumentImageList struct {
 	Images     []ImageArtifactRef `json:"images"`
 }
 
-type AnalyzeDocumentImageRequest struct {
-	DocumentID string `json:"documentId"`
-	AssetPath  string `json:"assetPath"`
-	Question   string `json:"question"`
-	Detail     string `json:"detail"`
-}
-
-type AnalyzeDocumentImageResult struct {
-	Artifact ImageArtifactRef `json:"artifact"`
-	Analysis string           `json:"analysis"`
-	Width    int              `json:"width"`
-	Height   int              `json:"height"`
-}
+const (
+	documentImageMaxBytes  = 20 * 1024 * 1024
+	documentImageMaxPixels = 40 * 1000 * 1000
+	documentImageMaxEdge   = 2048
+)
 
 type PreparedDocumentImage struct {
 	Artifact ImageArtifactRef   `json:"artifact"`
 	Data     []byte             `json:"-"`
 	MIMEType string             `json:"mimeType"`
 	Prepared util.PreparedImage `json:"-"`
-}
-
-type AnalyzeImageResult struct {
-	Analysis string `json:"analysis"`
-	Width    int    `json:"width"`
-	Height   int    `json:"height"`
 }
 
 type GenerateImageRequest struct {
@@ -389,39 +375,6 @@ func ListDocumentImages(documentID string) (DocumentImageList, error) {
 	return DocumentImageList{DocumentID: bt.RootID, Images: refs}, nil
 }
 
-// AnalyzeDocumentImage 使用全局图片理解配置分析文档引用的资源图片。
-func AnalyzeDocumentImage(ctx context.Context, request AnalyzeDocumentImageRequest) (AnalyzeDocumentImageResult, error) {
-	prepared, err := PrepareDocumentImage(request.DocumentID, request.AssetPath)
-	if err != nil {
-		return AnalyzeDocumentImageResult{}, err
-	}
-	if Conf == nil || Conf.AI == nil {
-		return AnalyzeDocumentImageResult{}, errors.New("AI configuration is unavailable")
-	}
-	provider, visionModel := Conf.AI.GetVisionModel()
-	if err = validateImageModel(provider, visionModel); err != nil {
-		return AnalyzeDocumentImageResult{}, err
-	}
-	visionPrepared, err := util.PrepareForVision(
-		prepared.Data, Conf.AI.Vision.MaxImageBytes, Conf.AI.Vision.MaxPixels, Conf.AI.Vision.MaxEdge,
-	)
-	if err != nil {
-		return AnalyzeDocumentImageResult{}, err
-	}
-	analysis, err := util.NewOpenAIImageAdapter(
-		provider.APIKey, provider.BaseURL, visionModel.Name, Conf.AI.Vision.RequestTimeout,
-	).Analyze(ctx, visionPrepared, request.Question, request.Detail)
-	if err != nil {
-		return AnalyzeDocumentImageResult{}, markImageExecutionUnknown(fmt.Errorf("analyze image failed: %w", err))
-	}
-	return AnalyzeDocumentImageResult{
-		Artifact: prepared.Artifact,
-		Analysis: analysis,
-		Width:    visionPrepared.Width,
-		Height:   visionPrepared.Height,
-	}, nil
-}
-
 // PrepareDocumentImage 校验并读取文档实际引用的本地资源图片，供当前模型直接接收图片输入。
 func PrepareDocumentImage(documentID, assetPath string) (PreparedDocumentImage, error) {
 	assetPath = strings.TrimSpace(assetPath)
@@ -430,9 +383,6 @@ func PrepareDocumentImage(documentID, assetPath string) (PreparedDocumentImage, 
 	}
 	if !strings.HasPrefix(AssetPathWithoutQuery(assetPath), "assets/") {
 		return PreparedDocumentImage{}, errors.New("only local assets/... images are supported")
-	}
-	if Conf == nil || Conf.AI == nil || Conf.AI.Vision == nil {
-		return PreparedDocumentImage{}, errors.New("AI vision configuration is unavailable")
 	}
 	bt, err := resolveMultimodalDocument(documentID)
 	if err != nil {
@@ -445,8 +395,8 @@ func PrepareDocumentImage(documentID, assetPath string) (PreparedDocumentImage, 
 	if err != nil {
 		return PreparedDocumentImage{}, fmt.Errorf("read image failed: %w", err)
 	}
-	prepared, err := util.PrepareForVision(
-		data, Conf.AI.Vision.MaxImageBytes, Conf.AI.Vision.MaxPixels, Conf.AI.Vision.MaxEdge,
+	prepared, err := util.PrepareModelImage(
+		data, documentImageMaxBytes, documentImageMaxPixels, documentImageMaxEdge,
 	)
 	if err != nil {
 		return PreparedDocumentImage{}, err
@@ -457,28 +407,6 @@ func PrepareDocumentImage(documentID, assetPath string) (PreparedDocumentImage, 
 		MIMEType: prepared.MIMEType,
 		Prepared: prepared,
 	}, nil
-}
-
-// AnalyzeImage 使用全局图片理解配置分析图片字节，可供文档资源、聊天附件和其他图片入口复用。
-func AnalyzeImage(ctx context.Context, data []byte, question, detail string) (AnalyzeImageResult, error) {
-	if Conf == nil || Conf.AI == nil {
-		return AnalyzeImageResult{}, errors.New("AI configuration is unavailable")
-	}
-	provider, visionModel := Conf.AI.GetVisionModel()
-	if err := validateImageModel(provider, visionModel); err != nil {
-		return AnalyzeImageResult{}, err
-	}
-	prepared, err := util.PrepareForVision(data, Conf.AI.Vision.MaxImageBytes, Conf.AI.Vision.MaxPixels, Conf.AI.Vision.MaxEdge)
-	if err != nil {
-		return AnalyzeImageResult{}, err
-	}
-	analysis, err := util.NewOpenAIImageAdapter(
-		provider.APIKey, provider.BaseURL, visionModel.Name, Conf.AI.Vision.RequestTimeout,
-	).Analyze(ctx, prepared, question, detail)
-	if err != nil {
-		return AnalyzeImageResult{}, markImageExecutionUnknown(fmt.Errorf("analyze image failed: %w", err))
-	}
-	return AnalyzeImageResult{Analysis: analysis, Width: prepared.Width, Height: prepared.Height}, nil
 }
 
 // GenerateImage 使用全局图片生成配置创建图片字节，可供文档资源、编辑器和其他图片入口复用。

@@ -38,38 +38,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestAnalyzeImageDoesNotRequireDocument(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"an image"}}]}`))
-	}))
-	defer server.Close()
-
-	originalConf := Conf
-	t.Cleanup(func() { Conf = originalConf })
-	ai := conf.NewAI()
-	modelID := "20260715130000-abcdefg"
-	ai.Providers = []*conf.Provider{{
-		ID: "provider", Enabled: true, APIKey: "test", BaseURL: server.URL + "/v1", Protocol: "openai", RequestTimeout: 5,
-		Models: []*conf.Model{{ID: modelID, Enabled: true, Name: "vision-model"}},
-	}}
-	ai.Vision.ModelID = modelID
-	Conf = NewAppConf()
-	Conf.AI = ai
-
-	var source bytes.Buffer
-	if err := png.Encode(&source, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
-		t.Fatal(err)
-	}
-	result, err := AnalyzeImage(context.Background(), source.Bytes(), "describe", "low")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if result.Analysis != "an image" || result.Width != 2 || result.Height != 2 {
-		t.Fatalf("unexpected image analysis result: %#v", result)
-	}
-}
-
 func TestGenerateImageDoesNotRequireDocument(t *testing.T) {
 	var source bytes.Buffer
 	if err := png.Encode(&source, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
@@ -102,7 +70,7 @@ func TestGenerateImageDoesNotRequireDocument(t *testing.T) {
 	}
 }
 
-func TestMultimodalProviderErrorsPreventAutomaticRetry(t *testing.T) {
+func TestImageGenerationProviderErrorsPreventAutomaticRetry(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		http.Error(w, "provider failed", http.StatusBadGateway)
 	}))
@@ -111,27 +79,15 @@ func TestMultimodalProviderErrorsPreventAutomaticRetry(t *testing.T) {
 	originalConf := Conf
 	t.Cleanup(func() { Conf = originalConf })
 	ai := conf.NewAI()
-	visionModelID := "20260715130000-provider"
 	generationModelID := "20260715130001-provider"
 	ai.Providers = []*conf.Provider{{
 		ID: "provider", Enabled: true, APIKey: "test", BaseURL: server.URL + "/v1", Protocol: "openai", RequestTimeout: 5,
-		Models: []*conf.Model{
-			{ID: visionModelID, Enabled: true, Name: "vision-model"},
-			{ID: generationModelID, Enabled: true, Name: "image-model"},
-		},
+		Models: []*conf.Model{{ID: generationModelID, Enabled: true, Name: "image-model"}},
 	}}
-	ai.Vision.ModelID = visionModelID
 	ai.ImageGeneration.ModelID = generationModelID
 	Conf = NewAppConf()
 	Conf.AI = ai
 
-	var source bytes.Buffer
-	if err := png.Encode(&source, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := AnalyzeImage(context.Background(), source.Bytes(), "describe", "low"); !IsImageExecutionUnknown(err) {
-		t.Fatalf("vision provider error should prevent automatic retry: %v", err)
-	}
 	if _, err := GenerateImage(context.Background(), GenerateImageRequest{Prompt: "draw", OutputFormat: "png"}); !IsImageExecutionUnknown(err) {
 		t.Fatalf("image provider error should prevent automatic retry: %v", err)
 	}
@@ -191,10 +147,8 @@ func TestClearWorkspaceTempPreservesInstallPackages(t *testing.T) {
 	}
 }
 
-func TestAnalyzeDocumentImageRejectsNetworkImage(t *testing.T) {
-	_, err := AnalyzeDocumentImage(context.Background(), AnalyzeDocumentImageRequest{
-		DocumentID: "20260715130000-abcdefg", AssetPath: "https://example.com/image.png",
-	})
+func TestPrepareDocumentImageRejectsNetworkImage(t *testing.T) {
+	_, err := PrepareDocumentImage("20260715130000-abcdefg", "https://example.com/image.png")
 	if err == nil || err.Error() != "only local assets/... images are supported" {
 		t.Fatalf("unexpected network image error: %v", err)
 	}

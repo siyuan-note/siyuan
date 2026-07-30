@@ -34,7 +34,6 @@ type AI struct {
 	Rerank          *Rerank          `json:"rerank"`
 	Agent           *Agent           `json:"agent"`
 	Editing         *Editing         `json:"editing"`
-	Vision          *Vision          `json:"vision"`
 	ImageGeneration *ImageGeneration `json:"imageGeneration"`
 	Providers       []*Provider      `json:"providers"`
 }
@@ -58,15 +57,6 @@ type Editing struct {
 	MaxHistoryMessages  int     `json:"maxHistoryMessages"`  // Max number of prior turns kept as context
 	Temperature         float64 `json:"temperature"`         // Alignment with Agent.Temperature
 	MaxCompletionTokens int     `json:"maxCompletionTokens"` // Alignment with Agent.MaxCompletionTokens
-}
-
-// Vision 配置图片理解场景及发送到模型前的资源限制。
-type Vision struct {
-	ModelID        string `json:"modelId"`
-	RequestTimeout int    `json:"requestTimeout"`
-	MaxImageBytes  int    `json:"maxImageBytes"`
-	MaxPixels      int    `json:"maxPixels"`
-	MaxEdge        int    `json:"maxEdge"`
 }
 
 // ImageGeneration 配置图片生成场景的模型和默认输出参数。
@@ -168,10 +158,6 @@ func defaultEditing() *Editing {
 	}
 }
 
-func defaultVision() *Vision {
-	return &Vision{RequestTimeout: 300, MaxImageBytes: 20 * 1024 * 1024, MaxPixels: 40 * 1000 * 1000, MaxEdge: 2048}
-}
-
 func defaultImageGeneration() *ImageGeneration {
 	return &ImageGeneration{RequestTimeout: 300, Size: "1024x1024", Quality: "auto", OutputFormat: "png"}
 }
@@ -184,7 +170,6 @@ func NewAI() *AI {
 		Rerank:          defaultRerank(),
 		Agent:           defaultAgent(),
 		Editing:         defaultEditing(),
-		Vision:          defaultVision(),
 		ImageGeneration: defaultImageGeneration(),
 	}
 
@@ -348,13 +333,6 @@ func (ai *AI) GetAgentModel() (*Provider, *Model) {
 	return ai.GetModel(ai.Agent.ModelID)
 }
 
-func (ai *AI) GetVisionModel() (*Provider, *Model) {
-	if ai.Vision == nil || ai.Vision.ModelID == "" {
-		return nil, nil
-	}
-	return ai.GetModel(ai.Vision.ModelID)
-}
-
 func (ai *AI) GetImageGenerationModel() (*Provider, *Model) {
 	if ai.ImageGeneration == nil || ai.ImageGeneration.ModelID == "" {
 		return nil, nil
@@ -363,7 +341,7 @@ func (ai *AI) GetImageGenerationModel() (*Provider, *Model) {
 }
 
 // ReconcileModelIDs 校正各使用场景引用的模型，并将旧版名称引用转换为模型 ID。
-// 编辑器和智能体始终回退到首个可用模型，可选的图片理解和图片生成场景仅清理失效引用。
+// 编辑器和智能体始终回退到首个可用模型，可选的图片生成场景仅清理失效引用。
 func (ai *AI) ReconcileModelIDs() {
 	firstModelID := ""
 	for _, p := range ai.Providers {
@@ -396,15 +374,6 @@ func (ai *AI) ReconcileModelIDs() {
 		ai.Agent.ModelID = firstModelID
 	} else {
 		ai.Agent.ModelID = m.ID
-	}
-	if ai.Vision != nil {
-		if _, m := ai.GetModel(ai.Vision.ModelID); ai.Vision.ModelID != "" {
-			if m == nil {
-				ai.Vision.ModelID = ""
-			} else {
-				ai.Vision.ModelID = m.ID
-			}
-		}
 	}
 	if ai.ImageGeneration != nil {
 		if _, m := ai.GetModel(ai.ImageGeneration.ModelID); ai.ImageGeneration.ModelID != "" {
@@ -468,29 +437,6 @@ func (ai *AI) Normalize() {
 		} else if 64 < ai.Editing.MaxHistoryMessages {
 			ai.Editing.MaxHistoryMessages = 64
 		}
-	}
-	if ai.Vision == nil {
-		ai.Vision = defaultVision()
-	}
-	if ai.Vision.RequestTimeout < 1 {
-		ai.Vision.RequestTimeout = 300
-	} else if ai.Vision.RequestTimeout > 600 {
-		ai.Vision.RequestTimeout = 600
-	}
-	if ai.Vision.MaxImageBytes < 1024*1024 {
-		ai.Vision.MaxImageBytes = 20 * 1024 * 1024
-	} else if ai.Vision.MaxImageBytes > 100*1024*1024 {
-		ai.Vision.MaxImageBytes = 100 * 1024 * 1024
-	}
-	if ai.Vision.MaxPixels < 1000*1000 {
-		ai.Vision.MaxPixels = 40 * 1000 * 1000
-	} else if ai.Vision.MaxPixels > 100*1000*1000 {
-		ai.Vision.MaxPixels = 100 * 1000 * 1000
-	}
-	if ai.Vision.MaxEdge < 512 {
-		ai.Vision.MaxEdge = 2048
-	} else if ai.Vision.MaxEdge > 4096 {
-		ai.Vision.MaxEdge = 4096
 	}
 	if ai.ImageGeneration == nil {
 		ai.ImageGeneration = defaultImageGeneration()

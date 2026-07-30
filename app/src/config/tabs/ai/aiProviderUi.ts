@@ -6,7 +6,7 @@ import {aiConfigApi} from "./aiRuntime";
 import {Menu} from "../../../plugin/Menu";
 import {upDownHint} from "../../../util/upDownHint";
 
-type ModelPickerGroup = "editing" | "agent" | "vision" | "imageGeneration";
+type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
 
 interface IProviderPreset {
     id: string;
@@ -778,7 +778,7 @@ const getFirstEnabledModelId = () => getEnabledModelGroups()[0]?.models[0]?.id |
 const getSelectedModelId = (group: ModelPickerGroup) => {
     const savedModelId = window.siyuan.config.ai[group].modelId;
     const valid = getEnabledModelGroups().some((item) => item.models.some((model) => model.id === savedModelId));
-    if (valid || group === "vision" || group === "imageGeneration") {
+    if (valid || group === "imageGeneration") {
         return valid ? savedModelId : "";
     }
     return getFirstEnabledModelId();
@@ -827,7 +827,7 @@ const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group:
         input.value = label;
         aiConfigApi.patch(`${group}.modelId`, modelId, () => syncGroupedModelPickers(root));
     };
-    const optional = group === "vision" || group === "imageGeneration";
+    const optional = group === "imageGeneration";
     if (optional) {
         menu.addItem({
             iconHTML: "",
@@ -862,7 +862,7 @@ const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group:
 };
 
 const syncGroupedModelPickers = (root: HTMLElement) => {
-    (["editing", "agent", "vision", "imageGeneration"] as const).forEach((group) => {
+    (["editing", "agent", "imageGeneration"] as const).forEach((group) => {
         const input = root.querySelector<HTMLInputElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
         if (!input) {
             return;
@@ -877,8 +877,6 @@ export const genGroupedModelPickerHtml = (group: ModelPickerGroup): string => {
         desc = window.siyuan.languages.aiEditingModelPickerTip;
     } else if (group === "agent") {
         desc = window.siyuan.languages.aiAgentModelPickerTip;
-    } else if (group === "vision") {
-        desc = window.siyuan.languages.aiImageUnderstandingTip;
     } else {
         desc = window.siyuan.languages.aiImageGenerationTip;
     }

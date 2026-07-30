@@ -36,6 +36,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 2. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
 3. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
 4. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
+   - When a feature adds or changes shortcuts, update the shortcut documentation in the user guide in the same change; if the appropriate section is unclear, ask the user where it should be placed
 5. **Git:**
    - When explicitly asked to commit, follow the style of recent commits (gitmoji prefix + subject, in English)
    - Append the full issue/PR URL to the end of the commit title (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; never put the URL in the commit body, and do not fabricate one

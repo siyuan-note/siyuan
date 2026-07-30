@@ -2887,6 +2887,7 @@ export class Gutter {
                 id: "foldChildHeadings",
                 icon: "iconHeadings",
                 label: window.siyuan.languages.foldChildHeadings,
+                accelerator: window.siyuan.config.keymap.editor.general.foldChildHeadings.custom,
                 async click() {
                     await foldHeadingGroup(protyle, nodeElement, "children");
                     focusBlock(nodeElement);
@@ -2896,7 +2897,9 @@ export class Gutter {
                 id: "foldSiblingHeadings",
                 icon: "iconHeadings",
                 label: window.siyuan.languages.foldSiblingHeadings,
-                accelerator: updateHotkeyTip("⌥" + window.siyuan.languages.click),
+                accelerator: window.siyuan.config.keymap.editor.general.foldSiblingHeadings.custom +
+                    (window.siyuan.config.keymap.editor.general.foldSiblingHeadings.custom ? "/" : "") +
+                    updateHotkeyTip("⌥" + window.siyuan.languages.click),
                 async click() {
                     hideElements(["gutter"], protyle);
                     await foldHeadingGroup(protyle, nodeElement, "siblings");

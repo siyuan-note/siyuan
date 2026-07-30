@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260616224229"
+		"updated": "20260730103436"
 	},
 	"Children": [
 		{
@@ -1033,6 +1033,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "标题块"
+				}
+			]
+		},
+		{
+			"ID": "20260730103436-h7n2k4m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260730103436-h7n2k4m",
+				"updated": "20260730103436"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击标题左侧三角可折叠或展开当前标题；按住 Alt（macOS 上为 ⌥）点击三角可折叠或展开直接子标题；按住 Alt（macOS 上为 ⌥）点击块标可折叠或展开同级标题。也可以使用块标菜单中的「折叠/展开直接子标题」和「折叠/展开同级标题」。"
+				}
+			]
+		},
+		{
+			"ID": "20260730103436-p3w8c6x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260730103436-p3w8c6x",
+				"updated": "20260730103436"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "这两个操作的快捷键默认为空，可在设置 - 快捷键 - 编辑器中配置。"
 				}
 			]
 		},

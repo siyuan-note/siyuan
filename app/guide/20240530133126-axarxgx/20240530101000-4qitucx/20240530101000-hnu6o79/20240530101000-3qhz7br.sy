@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260616224517"
+		"updated": "20260730103436"
 	},
 	"Children": [
 		{
@@ -1112,6 +1112,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "見出しブロック"
+				}
+			]
+		},
+		{
+			"ID": "20260730103436-j8s4u2a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260730103436-j8s4u2a",
+				"updated": "20260730103436"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "見出し左側の三角形をクリックすると現在の見出しを折りたたみ/展開できます。Alt キー（macOS では ⌥ キー）を押しながら三角形をクリックすると直接の子見出しを折りたたみ/展開でき、同じキーを押しながらブロックアイコンをクリックすると同階層の見出しを折りたたみ/展開できます。ブロックアイコンメニューの「直接の子見出しを折りたたむ/展開」と「同階層の見出しを折りたたむ/展開」も使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260730103436-k5e7x3r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260730103436-k5e7x3r",
+				"updated": "20260730103436"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "これら 2 つの操作のショートカットはデフォルトでは未設定です。設定 - ショートカット - エディタで設定できます。"
 				}
 			]
 		},

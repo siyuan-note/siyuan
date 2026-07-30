@@ -1101,6 +1101,8 @@ declare namespace Config {
         attr: IKey;
         backlinks: IKey;
         collapse: IKey;
+        foldChildHeadings: IKey;
+        foldSiblingHeadings: IKey;
         foldRecursive: IKey;
         copyBlockEmbed: IKey;
         copyBlockRef: IKey;

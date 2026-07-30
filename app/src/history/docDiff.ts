@@ -110,10 +110,10 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
         content: `<div class="history__doc-compare fn__flex-column">
     <div class="history__action">
         <div class="block__icons">
-            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="diffPrevious" aria-label="${window.siyuan.languages.previousLabel}">
+            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="diffPrevious" aria-label="${window.siyuan.languages.previousDifference}">
                 <svg><use xlink:href="#iconUp"></use></svg>
             </span>
-            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="diffNext" aria-label="${window.siyuan.languages.nextLabel}">
+            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="diffNext" aria-label="${window.siyuan.languages.nextDifference}">
                 <svg><use xlink:href="#iconDown"></use></svg>
             </span>
             <span class="history__diff-count ft__on-surface">0/0</span>
@@ -246,7 +246,7 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
 
     const focusDifference = (step: number) => {
         if (!diff || visibleDifferences.length === 0) {
-            return;
+            return false;
         }
         differenceIndex = (differenceIndex + step + visibleDifferences.length) % visibleDifferences.length;
         rootElement.querySelectorAll(".history__diff--focus").forEach((item) => {
@@ -273,6 +273,7 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
             isSyncingScroll = false;
         });
         renderCount();
+        return true;
     };
 
     const setupScrollSync = () => {
@@ -366,11 +367,13 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
                     type: leftRef.type,
                     id: leftRef.id || "",
                     path: leftRef.path || "",
+                    snapshot: leftRef.snapshot || "",
                 },
                 right: {
                     type: rightRef.type,
                     id: rightRef.id || "",
                     path: rightRef.path || "",
+                    snapshot: rightRef.snapshot || "",
                 }
             });
             if (isDestroyed || currentRequestId !== requestId) {
@@ -418,16 +421,14 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
         }
     });
     dialog.element.addEventListener("historyKeydown", (event: CustomEvent<string>) => {
-        if (event.detail === "Home") {
-            differenceIndex = -1;
-            focusDifference(1);
-        } else if (event.detail === "End") {
-            differenceIndex = 0;
-            focusDifference(-1);
-        } else if (event.detail === "ArrowUp") {
-            focusDifference(-1);
+        let handled = false;
+        if (event.detail === "ArrowUp") {
+            handled = focusDifference(-1);
         } else if (event.detail === "ArrowDown") {
-            focusDifference(1);
+            handled = focusDifference(1);
+        }
+        if (handled) {
+            event.preventDefault();
         }
     });
 

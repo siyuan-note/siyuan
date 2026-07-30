@@ -117,7 +117,9 @@ export class Model {
     }
 
     public send(cmd: string, param: Record<string, unknown>, process = false) {
-        if (!this.ws) { // Inbox 无 ws
+        if (!this.ws ||
+            this.ws.readyState === WebSocket.CLOSING ||
+            this.ws.readyState === WebSocket.CLOSED) { // Inbox 无 WebSocket，关闭中的连接不能继续发送
             return;
         }
         this.reqId = process ? 0 : Date.now();

@@ -284,7 +284,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getBlockSiblingID", model.CheckAuth, getBlockSiblingID)
 	ginServer.Handle("POST", "/api/block/getBlockRelevantIDs", model.CheckAuth, getBlockRelevantIDs)
 	ginServer.Handle("POST", "/api/block/getBlockTreeInfos", model.CheckAuth, getBlockTreeInfos)
-	ginServer.Handle("POST", "/api/block/checkBlockRef", model.CheckAuth, checkBlockRef)
+	ginServer.Handle("POST", "/api/block/checkBlockRef", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, checkBlockRef)
 	ginServer.Handle("POST", "/api/block/appendHeadingChildren", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, appendHeadingChildren)
 	ginServer.Handle("POST", "/api/block/updateTaskListItemMarker", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updateTaskListItemMarker)
 	ginServer.Handle("POST", "/api/block/batchUpdateTaskListItemMarker", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchUpdateTaskListItemMarker)

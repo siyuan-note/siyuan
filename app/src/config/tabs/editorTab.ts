@@ -258,7 +258,7 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
     group.number("editor.backlinkExpandCount", {
         title: window.siyuan.languages.backlinkExpand,
         desc: window.siyuan.languages.backlinkExpandTip,
-        min: 0,
+        min: -1,
         max: 512,
     });
     group.number("editor.backmentionExpandCount", {

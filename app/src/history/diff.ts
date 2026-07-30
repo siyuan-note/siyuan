@@ -13,6 +13,7 @@ import {renderAssetsPreview} from "../asset/renderAssets";
 import {resizeSide} from "./resizeSide";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showDocVersionDiff} from "./docDiff";
+import {pairSnapshotFilesByPath} from "./snapshotDiffCore";
 
 type SnapshotDiffAggregate = "all" | "data" | "extension" | "other";
 type SnapshotFileKind = "document" | "database" | "asset" | "plugin" | "widget" | "template" | "snippet" | "bazaar" | "workspaceData" | "other";
@@ -141,10 +142,9 @@ const buildSnapshotDiffResult = (data: {
     removesRight: SnapshotFile[];
 }): SnapshotDiffResult => {
     return {
-        updates: (data.updatesLeft || []).map((file, index) => ({
-            file,
-            compareFile: data.updatesRight?.[index],
-            kind: getSnapshotFileKind(file.path),
+        updates: pairSnapshotFilesByPath(data.updatesLeft || [], data.updatesRight || []).map((item) => ({
+            ...item,
+            kind: getSnapshotFileKind(item.file.path),
         })),
         adds: (data.addsLeft || []).map((file) => ({
             file,

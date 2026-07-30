@@ -211,6 +211,19 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	return
 }
 
+// NormalizeTreeForRead 对只读树应用与文件加载一致的规范化处理，但不写回磁盘。
+func NormalizeTreeForRead(tree *parse.Tree) (err error) {
+	if nil == tree || nil == tree.Root {
+		return errors.New("tree is empty")
+	}
+	if err = treenode.CheckSpec(tree); nil != err {
+		return
+	}
+	treenode.UpgradeSpec(tree)
+	escapeAttributeValues(tree)
+	return
+}
+
 func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	ret, err = parseJSON2Tree(boxID, p, data, luteEngine)
 	if nil != err {

@@ -54,6 +54,7 @@ type TOperation =
     | "setAttrViewViewIcon"
     | "duplicateAttrViewView"
     | "duplicateAttrViewRow"
+    | "setAttrViewBlockVisibleViews"
     | "sortAttrViewView"
     | "setAttrViewPageSize"
     | "updateAttrViewColRelation"

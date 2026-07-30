@@ -16,6 +16,10 @@ const getListItemElement = (element: HTMLElement, editorElement: HTMLElement) =>
     }
 };
 
+export const isEntireBlockContentSelected = (start: number, end: number, contentEnd: number) => {
+    return start === 0 && end >= contentEnd;
+};
+
 export const getCrossBlockMergeRemoveElement = (editorElement: HTMLElement, startElement: HTMLElement,
                                                 endElement: HTMLElement) => {
     let topElement = endElement;

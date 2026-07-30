@@ -406,6 +406,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doChangeAttrViewLayout(op)
 			case "setAttrViewBlockView":
 				ret = tx.doSetAttrViewBlockView(op)
+			case "setAttrViewBlockVisibleViews":
+				ret = tx.doSetAttrViewBlockVisibleViews(op)
 			case "setAttrViewCardAspectRatio":
 				ret = tx.doSetAttrViewCardAspectRatio(op)
 			case "setAttrViewCardAspectRatioValue":

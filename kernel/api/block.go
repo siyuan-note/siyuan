@@ -43,14 +43,111 @@ func checkBlockRef(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]any)
-	var ids []string
-	for _, id := range idsArg {
-		ids = append(ids, id.(string))
+	scope := ""
+	if scopeArg, exists := arg["scope"]; exists {
+		var valid bool
+		scope, valid = scopeArg.(string)
+		if !valid {
+			ret.Code = -1
+			ret.Msg = "Field [scope] should be of type [String]"
+			return
+		}
 	}
-	ids = gulu.Str.RemoveDuplicatedElem(ids)
+	if "" == strings.TrimSpace(scope) {
+		scope = "blocks"
+	}
+	switch scope {
+	case "blocks":
+		ids, parsed := parseBlockRefStringArray(arg, "ids", ret, true)
+		if !parsed {
+			return
+		}
+		var exactIDs []string
+		if _, exists := arg["exactIDs"]; exists {
+			exactIDs, parsed = parseBlockRefStringArray(arg, "exactIDs", ret, false)
+			if !parsed {
+				return
+			}
+		}
+		for _, id := range ids {
+			if util.InvalidIDPattern(id, ret) {
+				return
+			}
+		}
+		idSet := map[string]struct{}{}
+		for _, id := range ids {
+			idSet[id] = struct{}{}
+		}
+		for _, id := range exactIDs {
+			if util.InvalidIDPattern(id, ret) {
+				return
+			}
+			if _, exists := idSet[id]; !exists {
+				ret.Code = -1
+				ret.Msg = "Field [exactIDs] should be a subset of field [ids]"
+				return
+			}
+		}
+		notebook, valid := util.ParseJsonArg[string]("notebook", arg, ret, false, false)
+		if !valid {
+			return
+		}
+		if "" != notebook && util.InvalidIDPattern(notebook, ret) {
+			return
+		}
+		var err error
+		ret.Data, err = model.CheckBlockRefInBox(ids, exactIDs, notebook)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+	case "documents":
+		paths, parsed := parseBlockRefStringArray(arg, "paths", ret, true)
+		if !parsed {
+			return
+		}
+		var err error
+		ret.Data, err = model.CheckDocsRef(paths)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+	case "notebook":
+		var notebook string
+		if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
+			return
+		}
+		if util.InvalidIDPattern(notebook, ret) {
+			return
+		}
+		var err error
+		ret.Data, err = model.CheckNotebookRef(notebook)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+	default:
+		ret.Code = -1
+		ret.Msg = "invalid block ref check scope"
+	}
+}
 
-	ret.Data = model.CheckBlockRef(ids)
+func parseBlockRefStringArray(arg map[string]any, key string, ret *gulu.Result, rejectEmpty bool) (values []string, ok bool) {
+	var raw []any
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg(key, &raw, true, rejectEmpty)) {
+		return
+	}
+	for _, value := range raw {
+		str, isString := value.(string)
+		if !isString || "" == strings.TrimSpace(str) {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [%s] should contain non-empty strings", key)
+			return nil, false
+		}
+		values = append(values, str)
+	}
+	values = gulu.Str.RemoveDuplicatedElem(values)
+	return values, true
 }
 
 func getBlockTreeInfos(c *gin.Context) {

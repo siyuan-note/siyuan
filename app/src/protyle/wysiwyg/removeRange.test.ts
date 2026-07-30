@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getCrossBlockMergeRemoveElement} from "./removeRange";
+import {getCrossBlockMergeRemoveElement, isEntireBlockContentSelected} from "./removeRange";
 
 class TestElement {
     parentElement: TestElement | null = null;
@@ -54,6 +54,15 @@ const block = (name: string, type: string, ...children: TestElement[]) =>
     new TestElement(name, type).append(...children);
 const attr = (name: string) => new TestElement(name);
 const asHTMLElement = (element: TestElement) => element as unknown as HTMLElement;
+
+describe("isEntireBlockContentSelected", () => {
+    it("requires the selection to cover the complete editable content", () => {
+        assert.equal(isEntireBlockContentSelected(0, 3, 3), true);
+        assert.equal(isEntireBlockContentSelected(0, 4, 3), true);
+        assert.equal(isEntireBlockContentSelected(1, 3, 3), false);
+        assert.equal(isEntireBlockContentSelected(0, 2, 3), false);
+    });
+});
 
 describe("getCrossBlockMergeRemoveElement", () => {
     it("删除多层列表中起点下方的完整分支", () => {

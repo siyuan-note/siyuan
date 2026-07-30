@@ -146,7 +146,9 @@ const registerExportPandocGroup = (tab: SettingTabBuilder) => {
         ],
         afterMount: mountExportPandocStack,
     }, (stack) => {
-        stack.title(`${window.siyuan.languages.export19}<span class="fn__space"></span><a href="javascript:void(0)" id="pandocBinPathDisplay" style="word-break: break-all">${Lute.EscapeHTMLStr(window.siyuan.config.export.pandocBin)}</a>`);
+        const pandocBinLabel = window.siyuan.config.export.pandocBin ?
+            Lute.EscapeHTMLStr(window.siyuan.config.export.pandocBin) : `${window.siyuan.languages.builtIn} Pandoc`;
+        stack.title(`${window.siyuan.languages.export19}<span class="fn__space"></span><a href="javascript:void(0)" id="pandocBinPathDisplay" style="word-break: break-all">${pandocBinLabel}</a>`);
         stack.button({
             id: "pandocBinReset",
             label: window.siyuan.languages.reset,

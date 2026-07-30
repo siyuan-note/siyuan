@@ -409,6 +409,12 @@
       transition: none;
     }
   }
+
+  &--backlink-bottom {
+    > .protyle-wysiwyg {
+      min-height: var(--b3-protyle-bottom-backlink-min-height);
+    }
+  }
 }
 
 .sy__backlink {
@@ -430,6 +436,20 @@
   box-sizing: border-box;
   min-height: 32px;
   outline: none;
+
+  &.sy__backlink--backlinks-empty {
+    > .backlinkList__header,
+    > .backlinkList {
+      display: none;
+    }
+  }
+
+  &.sy__backlink--mentions-empty {
+    > .backlinkMList__header,
+    > .backlinkMList {
+      display: none;
+    }
+  }
 
   &.sy__backlink--pending {
     height: 1px;

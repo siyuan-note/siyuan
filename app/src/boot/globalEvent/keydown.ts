@@ -1344,14 +1344,21 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
                 matchDialog = item;
             }
         });
+        if (matchDialog?.element.querySelector(".history__doc-compare") && ["Home", "End"].includes(event.key)) {
+            matchDialog = undefined;
+        }
         if (matchDialog) {
+            let handled = false;
             if (matchDialog.element.getAttribute("data-key") === Constants.DIALOG_VIEWCARDS) {
                 matchDialog.element.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
+                handled = true;
             } else if (matchDialog.element.getAttribute("data-key") === Constants.DIALOG_HISTORYCOMPARE) {
-                historyKeydown(event, matchDialog);
+                handled = historyKeydown(event, matchDialog);
             }
-            event.preventDefault();
-            return;
+            if (handled) {
+                event.preventDefault();
+                return;
+            }
         }
     }
 

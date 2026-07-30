@@ -207,7 +207,7 @@ export const renderKanban = async (options: {
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"), options.blockElement)}
     <div class="av__kanban${isSelectGroup ? " av__kanban--bg" : ""}" data-group-options="${escapeAttr(JSON.stringify(groupOptions))}" style="${getCardStyle(view)}">
         ${bodyHTML}
     </div>

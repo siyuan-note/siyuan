@@ -61,6 +61,7 @@ import {
 import {getEditableAVFields, openAVFieldEditor, updateAVFieldValue} from "./batchEdit";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
 import {isMobile} from "../../../util/functions";
+import {getAVCurrentViewID} from "./viewVisibility";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
@@ -644,7 +645,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 }], [{
                     action: "setAttrViewBlockView",
                     blockID: blockElement.getAttribute("data-node-id"),
-                    id: target.parentElement.querySelector(".item--focus").getAttribute("data-id"),
+                    id: getAVCurrentViewID(blockElement),
                     avID: blockElement.getAttribute("data-av-id"),
                 }]);
             }
@@ -1349,6 +1350,14 @@ export const duplicateCompletely = (protyle: IProtyle, nodeElement: HTMLElement)
         const tempElement = document.createElement("template");
         tempElement.innerHTML = protyle.lute.SpinBlockDOM(`<div class="av" data-node-id="${response.data.blockID}" data-av-id="${response.data.avID}" data-type="NodeAttributeView" data-av-type="table"></div>`);
         const cloneElement = tempElement.content.firstElementChild;
+        const viewID = nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
+        const visibleViewIDs = nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS);
+        if (viewID) {
+            cloneElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, viewID);
+        }
+        if (visibleViewIDs) {
+            cloneElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, visibleViewIDs);
+        }
         nodeElement.after(cloneElement);
         avRender(cloneElement, protyle, () => {
             focusBlock(cloneElement);

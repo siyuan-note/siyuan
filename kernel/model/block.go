@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"html"
+	"path"
 	"regexp"
 	"slices"
 	"strings"
@@ -114,44 +115,133 @@ type Path struct {
 	Created string `json:"created"` // 创建时间
 }
 
-func CheckBlockRef(ids []string) bool {
-	bts := treenode.GetBlockTrees(ids)
+type blockRefCheckGroup struct {
+	blockIDs map[string]struct{}
+	rootIDs  map[string]struct{}
+}
 
-	var rootIDs, blockIDs []string
-	for _, bt := range bts {
-		if "d" == bt.Type {
-			rootIDs = append(rootIDs, bt.ID)
-		} else {
-			blockIDs = append(blockIDs, bt.ID)
-		}
+func newBlockRefCheckGroup() *blockRefCheckGroup {
+	return &blockRefCheckGroup{
+		blockIDs: map[string]struct{}{},
+		rootIDs:  map[string]struct{}{},
 	}
-	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
-	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
+}
 
-	existRef := func(refCounts map[string]int) bool {
-		for _, refCount := range refCounts {
-			if 0 < refCount {
-				return true
+// CheckBlockRef 保留原有调用语义。
+func CheckBlockRef(ids []string) bool {
+	ret, _ := CheckBlockRefInBox(ids, nil, "")
+	return ret
+}
+
+// CheckBlockRefInBox 检查块及其容器后代是否被引用。
+func CheckBlockRefInBox(ids, exactIDs []string, boxID string) (ret bool, err error) {
+	sql.FlushQueue()
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
+	if 1 > len(ids) {
+		return
+	}
+
+	var bts map[string]*treenode.BlockTree
+	if "" == boxID {
+		bts = treenode.GetBlockTrees(ids)
+	} else {
+		bts = treenode.GetBlockTreesInBox(ids, boxID)
+	}
+
+	group := newBlockRefCheckGroup()
+	exactIDSet := map[string]struct{}{}
+	for _, id := range exactIDs {
+		exactIDSet[id] = struct{}{}
+	}
+	selectedByRoot := map[string]map[string]map[string]struct{}{}
+	for _, bt := range bts {
+		if "d" == bt.Type && bt.ID == bt.RootID {
+			group.rootIDs[bt.ID] = struct{}{}
+			continue
+		}
+		group.blockIDs[bt.ID] = struct{}{}
+		if _, exact := exactIDSet[bt.ID]; exact {
+			continue
+		}
+		if nil == selectedByRoot[bt.BoxID] {
+			selectedByRoot[bt.BoxID] = map[string]map[string]struct{}{}
+		}
+		if nil == selectedByRoot[bt.BoxID][bt.RootID] {
+			selectedByRoot[bt.BoxID][bt.RootID] = map[string]struct{}{}
+		}
+		selectedByRoot[bt.BoxID][bt.RootID][bt.ID] = struct{}{}
+	}
+
+	// blocktrees 的父子关系用于展开列表、引述、超级块等容器后代。
+	for treeBoxID, selectedRoots := range selectedByRoot {
+		for rootID, selected := range selectedRoots {
+			rootTrees := treenode.GetBlockTreesByRootIDInBox(rootID, treeBoxID)
+			byID := map[string]*treenode.BlockTree{}
+			for _, bt := range rootTrees {
+				byID[bt.ID] = bt
+			}
+			for _, bt := range rootTrees {
+				current := bt
+				for nil != current && "" != current.ParentID {
+					if _, ok := selected[current.ParentID]; ok {
+						group.blockIDs[bt.ID] = struct{}{}
+						break
+					}
+					current = byID[current.ParentID]
+				}
 			}
 		}
-		return false
 	}
+	return existBlockRefGroup(group)
+}
 
-	for _, rootID := range rootIDs {
-		refCounts := sql.QueryRootChildrenRefCount(rootID)
-		if existRef(refCounts) {
-			return true
+// CheckDocsRef 检查文档删除时会递归移除的全部文档。
+func CheckDocsRef(paths []string) (ret bool, err error) {
+	FlushTxQueue()
+	sql.FlushQueue()
+	if _, err = getBoxesByPathsStrict(paths); err != nil {
+		return
+	}
+	paths = util.FilterSelfChildDocs(paths)
+	pathsBoxes := getBoxesByPaths(paths)
+	group := newBlockRefCheckGroup()
+	for docPath, box := range pathsBoxes {
+		rootID := util.GetTreeID(docPath)
+		group.rootIDs[rootID] = struct{}{}
+		childrenDir := path.Join(path.Dir(docPath), rootID)
+		for _, bt := range treenode.GetBlockTreesByPathPrefix(box.ID, childrenDir) {
+			if bt.ID == bt.RootID {
+				group.rootIDs[bt.RootID] = struct{}{}
+			}
 		}
 	}
+	return existBlockRefGroup(group)
+}
 
-	refCounts := sql.QueryRefCount(blockIDs)
-	if existRef(refCounts) {
-		return true
+// CheckNotebookRef 检查笔记本当前索引中的全部文档。
+func CheckNotebookRef(boxID string) (ret bool, err error) {
+	FlushTxQueue()
+	sql.FlushQueue()
+	if nil == Conf.Box(boxID) {
+		return false, ErrBoxNotFound
 	}
+	group := newBlockRefCheckGroup()
+	for _, rootID := range treenode.GetRootBlockIDsByBoxID(boxID) {
+		group.rootIDs[rootID] = struct{}{}
+	}
+	return existBlockRefGroup(group)
+}
 
-	// TODO 还需要考虑容器块的子块引用计数 https://github.com/siyuan-note/siyuan/issues/13396
-
-	return false
+func existBlockRefGroup(group *blockRefCheckGroup) (ret bool, err error) {
+	blockIDs := make([]string, 0, len(group.blockIDs))
+	for id := range group.blockIDs {
+		blockIDs = append(blockIDs, id)
+	}
+	rootIDs := make([]string, 0, len(group.rootIDs))
+	for id := range group.rootIDs {
+		rootIDs = append(rootIDs, id)
+	}
+	return sql.ExistRefByDefIDs(blockIDs, rootIDs)
 }
 
 type BlockTreeInfo struct {

@@ -118,6 +118,61 @@ func QueryRefCount(defIDs []string) (ret map[string]int) {
 	return
 }
 
+// ExistRefByDefIDsInBox 检查指定笔记本索引中是否存在指向定义块或文档内块的引用。
+func ExistRefByDefIDsInBox(defIDs, defRootIDs []string, boxID string) (ret bool, err error) {
+	const batchSize = 900
+
+	exist := func(column string, ids []string) (bool, error) {
+		for start := 0; start < len(ids); start += batchSize {
+			end := start + batchSize
+			if len(ids) < end {
+				end = len(ids)
+			}
+			batch := ids[start:end]
+			placeholders := strings.TrimSuffix(strings.Repeat("?,", len(batch)), ",")
+			args := make([]any, 0, len(batch))
+			for _, id := range batch {
+				args = append(args, id)
+			}
+			rows, queryErr := queryForBox(boxID, "SELECT 1 FROM refs WHERE "+column+" IN ("+placeholders+") LIMIT 1", args...)
+			if queryErr != nil {
+				return false, queryErr
+			}
+			found := rows.Next()
+			rowsErr := rows.Err()
+			if closeErr := rows.Close(); closeErr != nil {
+				return false, closeErr
+			}
+			if rowsErr != nil {
+				return false, rowsErr
+			}
+			if found {
+				return true, nil
+			}
+		}
+		return false, nil
+	}
+
+	if ret, err = exist("def_block_id", defIDs); err != nil || ret {
+		return
+	}
+	ret, err = exist("def_block_root_id", defRootIDs)
+	return
+}
+
+// ExistRefByDefIDs 检查全局库及所有已打开加密库中的引用。
+func ExistRefByDefIDs(defIDs, defRootIDs []string) (ret bool, err error) {
+	if ret, err = ExistRefByDefIDsInBox(defIDs, defRootIDs, ""); err != nil || ret {
+		return
+	}
+	for _, boxID := range GetEncryptedBoxIDs() {
+		if ret, err = ExistRefByDefIDsInBox(defIDs, defRootIDs, boxID); err != nil || ret {
+			return
+		}
+	}
+	return
+}
+
 func QueryRootChildrenRefCount(defRootID string) (ret map[string]int) {
 	ret = map[string]int{}
 	rows, err := query("SELECT def_block_id, COUNT(*) AS ref_cnt FROM refs WHERE def_block_root_id = ? GROUP BY def_block_id", defRootID)

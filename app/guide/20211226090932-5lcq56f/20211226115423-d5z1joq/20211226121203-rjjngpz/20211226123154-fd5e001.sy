@@ -500,7 +500,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613181022-wnnyyw0",
-								"updated": "20260613181056"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -517,11 +517,11 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120508-yzh70eh",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "嵌入塊"
+									"TextMarkTextContent": "嵌入區塊"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，可以彙總待辦事項或需要每日查看的內容塊"
+									"Data": "，可以彙總待辦事項或需要每日查看的內容區塊"
 								}
 							]
 						}

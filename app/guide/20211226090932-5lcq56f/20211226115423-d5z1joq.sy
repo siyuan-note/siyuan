@@ -192,7 +192,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115745-w92vc97",
-								"updated": "20260729215152"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -204,11 +204,11 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120349-rbkmozu",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "在內容塊中遨遊"
+									"TextMarkTextContent": "在內容區塊中遨遊"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，瞭解如何選擇、移動和編輯內容塊"
+									"Data": "，瞭解如何選擇、移動和編輯內容區塊"
 								}
 							]
 						}
@@ -307,7 +307,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226115745-bygtonj",
-				"updated": "20260729215152"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -319,7 +319,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "以內容塊為基本組織單元。段落、標題、列表等內容都可以獨立編輯、引用和組織，便於在塊級粒度上整理知識，也適合長文閱讀和輸出。"
+					"Data": "以內容區塊為基本組織單元。段落、標題、列表等內容都可以獨立編輯、引用和組織，便於在區塊級粒度上整理知識，也適合長文閱讀和輸出。"
 				}
 			]
 		},
@@ -349,7 +349,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240508002509-vl4mv94",
-								"updated": "20240508002640"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -357,7 +357,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120055-9mityht",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "什麼是內容塊"
+									"TextMarkTextContent": "什麼是內容區塊"
 								}
 							]
 						}
@@ -380,7 +380,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240508002551-lj94190",
-								"updated": "20240508002640"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -388,7 +388,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120147-ib6yy3i",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "內容塊類型"
+									"TextMarkTextContent": "內容區塊類型"
 								}
 							]
 						}
@@ -411,7 +411,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240508002554-90qcjw0",
-								"updated": "20240508002640"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -419,7 +419,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120247-63nd8y5",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "引用内容塊"
+									"TextMarkTextContent": "引用内容區塊"
 								}
 							]
 						}
@@ -442,7 +442,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240508002600-jh4z647",
-								"updated": "20240508002640"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -450,7 +450,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120422-bkzsd2e",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "文檔塊和標題塊的轉換"
+									"TextMarkTextContent": "文檔區塊和標題區塊的轉換"
 								}
 							]
 						}
@@ -473,7 +473,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240508002602-0ezbd5t",
-								"updated": "20240508002640"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -481,7 +481,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120508-yzh70eh",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "嵌入內容塊"
+									"TextMarkTextContent": "嵌入內容區塊"
 								}
 							]
 						}
@@ -504,7 +504,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240508002606-8054fr5",
-								"updated": "20240508002640"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -512,7 +512,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120802-77aj0is",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "内容塊屬性"
+									"TextMarkTextContent": "内容區塊屬性"
 								}
 							]
 						}

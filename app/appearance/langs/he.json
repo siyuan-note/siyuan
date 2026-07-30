@@ -1,4 +1,5 @@
 {
+  "copyRichText": "העתקת טקסט עשיר/HTML",
   "modelContextLengthTip": "השאר ריק או הגדר ל-0 כדי להשתמש בקטלוג המודלים המובנה",
   "modelContextLength": "אורך הקשר המודל (Tokens)",
   "newTab": "כרטיסייה חדשה",

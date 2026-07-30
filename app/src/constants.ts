@@ -563,6 +563,7 @@ export abstract class Constants {
                 moveToUp: {default: "⇧⌘↑", custom: "⇧⌘↑"},
                 moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
                 duplicateCompletely: {default: "", custom: ""},
+                copyRichText: {default: "", custom: ""},
                 copyPlainText: {default: "", custom: ""},
                 copyID: {default: "", custom: ""},
                 copyProtocolInMd: {default: "", custom: ""},

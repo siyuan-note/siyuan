@@ -1,4 +1,5 @@
 {
+  "copyRichText": "Salin teks kaya/HTML",
   "modelContextLengthTip": "Kosongkan atau atur ke 0 untuk menggunakan katalog model bawaan",
   "modelContextLength": "Panjang Konteks Model (Tokens)",
   "newTab": "Tab baru",

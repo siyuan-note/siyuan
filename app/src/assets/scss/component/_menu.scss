@@ -66,6 +66,7 @@
         padding: 0;
         border-radius: 0;
         width: 100%;
+        overflow-x: hidden;
         transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
         display: block;
 
@@ -78,6 +79,7 @@
         flex: 1;
         padding: 16px 0;
         max-height: none;
+        overflow-x: hidden;
         background-color: var(--b3-theme-surface);
       }
 

@@ -1,4 +1,5 @@
 {
+  "copyRichText": "Copier le texte enrichi/HTML",
   "modelContextLengthTip": "Laisser vide ou définir sur 0 pour utiliser le catalogue de modèles intégré",
   "modelContextLength": "Longueur du contexte du modèle (Tokens)",
   "newTab": "Nouvel onglet",

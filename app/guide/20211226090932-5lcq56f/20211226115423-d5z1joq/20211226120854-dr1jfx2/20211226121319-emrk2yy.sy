@@ -52,7 +52,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226122008-mc8bdbc",
-								"updated": "20240416113759"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -60,7 +60,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226115423-d5z1joq",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "塊引用"
+									"TextMarkTextContent": "區塊引用"
 								}
 							]
 						}
@@ -847,12 +847,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-nufcprx",
-				"updated": "20211226122008"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "超级塊"
+					"Data": "超级區塊"
 				}
 			]
 		},
@@ -982,12 +982,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-ju18gnz",
-				"updated": "20211226122008"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "嵌入塊"
+					"Data": "嵌入區塊"
 				}
 			]
 		},
@@ -1024,12 +1024,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-hsi1yp3",
-				"updated": "20220312005014"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "標題塊"
+					"Data": "標題區塊"
 				}
 			]
 		},
@@ -1038,12 +1038,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260730103436-t6y3n8d",
-				"updated": "20260730103436"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "點選標題左側三角可摺疊或展開目前標題；按住 Alt（macOS 上為 ⌥）點選三角可摺疊或展開直接子標題；按住 Alt（macOS 上為 ⌥）點選塊標可摺疊或展開同級標題。也可以使用塊標選單中的「摺疊/展開直接子標題」和「摺疊/展開同級標題」。"
+					"Data": "點選標題左側三角可摺疊或展開目前標題；按住 Alt（macOS 上為 ⌥）點選三角可摺疊或展開直接子標題；按住 Alt（macOS 上為 ⌥）點選區塊標可摺疊或展開同級標題。也可以使用區塊標選單中的「摺疊/展開直接子標題」和「摺疊/展開同級標題」。"
 				}
 			]
 		},
@@ -1849,12 +1849,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-81ngeqd",
-				"updated": "20251209211701"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "引述塊"
+					"Data": "引述區塊"
 				}
 			]
 		},
@@ -1875,12 +1875,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20211226122008-f15cb8m",
-						"updated": "20211226002617"
+						"updated": "20260730184353"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "注意不是内容塊引用，而是引述塊（Blockquote）。"
+							"Data": "注意不是内容區塊引用，而是引述區塊（Blockquote）。"
 						}
 					]
 				}
@@ -1892,12 +1892,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251209211701-hu8m4pm",
-				"updated": "20251211094201"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "提示塊"
+					"Data": "提示區塊"
 				}
 			]
 		},
@@ -2042,12 +2042,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-yn6yro1",
-				"updated": "20211226122008"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "代碼塊"
+					"Data": "代碼區塊"
 				}
 			]
 		},
@@ -2472,12 +2472,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220312004712-5dfiars",
-				"updated": "20241018105327"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "HTML 塊"
+					"Data": "HTML 區塊"
 				}
 			]
 		},
@@ -2495,7 +2495,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220312122707-8258e11",
-				"updated": "20241018105327"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -2507,7 +2507,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20240427230732-snprakd",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "HTML 塊注意"
+					"TextMarkTextContent": "HTML 區塊注意"
 				},
 				{
 					"Type": "NodeText",
@@ -2684,7 +2684,7 @@
 				{
 					"ID": "20220307092237-4jcq3tq",
 					"Type": "NodeCodeBlockCode",
-					"Data": "- 教程\n- 語法指導\n  - 普通內容\n  - 提及用戶\n  - 表情符號 Emoji\n    - 一些表情例子\n  - 大標題 - Heading 3\n    - Heading 4\n      - Heading 5\n        - Heading 6\n  - 圖片\n  - 代碼塊\n    - 普通\n    - 語法突顯支援\n      - 展示 Go 代碼突顯\n      - 展示 Java 突顯\n  - 有序、無序、任務列表\n    - 無序列表\n    - 有序列表\n    - 任務列表\n  - 表格\n  - 隱藏細節\n  - 段落\n  - 連結引用\n  - 數學公式\n  - 心智圖\n  - 流程圖\n  - 時序圖\n  - 甘特圖\n  - 圖表\n  - 五線譜\n  - Graphviz\n  - 多媒體\n  - 註腳\n- 快捷鍵",
+					"Data": "- 教程\n- 語法指導\n  - 普通內容\n  - 提及用戶\n  - 表情符號 Emoji\n    - 一些表情例子\n  - 大標題 - Heading 3\n    - Heading 4\n      - Heading 5\n        - Heading 6\n  - 圖片\n  - 代碼區塊\n    - 普通\n    - 語法突顯支援\n      - 展示 Go 代碼突顯\n      - 展示 Java 突顯\n  - 有序、無序、任務列表\n    - 無序列表\n    - 有序列表\n    - 任務列表\n  - 表格\n  - 隱藏細節\n  - 段落\n  - 連結引用\n  - 數學公式\n  - 心智圖\n  - 流程圖\n  - 時序圖\n  - 甘特圖\n  - 圖表\n  - 五線譜\n  - Graphviz\n  - 多媒體\n  - 註腳\n- 快捷鍵",
 					"Properties": {
 						"id": "20220307092237-4jcq3tq"
 					}

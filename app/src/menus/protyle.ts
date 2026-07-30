@@ -724,6 +724,15 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "copyRichText",
+            label: window.siyuan.languages.copyRichText,
+            accelerator: window.siyuan.config.keymap.editor.general.copyRichText.custom,
+            click() {
+                focusByRange(getEditorRange(nodeElement));
+                protyle.wysiwyg.copyRichText();
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
             id: "copyPlainText",
             label: window.siyuan.languages.copyPlainText,
             accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,

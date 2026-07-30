@@ -1,4 +1,5 @@
 {
+  "copyRichText": "复制富文本/HTML",
   "modelContextLengthTip": "留空或设为 0 时使用内置模型表识别",
   "modelContextLength": "模型上下文长度（Token）",
   "newTab": "新建页签",

@@ -32,6 +32,12 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - Use three ASCII periods (`...`) for ellipses in all localized strings; do not use Unicode ellipsis characters (`…` or `……`)
    - Setting description tip strings must not end with a period or equivalent sentence-ending mark (for example `.`, `。`, or `।`)
    - Domains: `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
+   - In `zh-TW` localization and the Traditional Chinese user guide, translate SiYuan's content-model term Block as `區塊`; never abbreviate it as `塊`
+   - Use `區塊` consistently in compound terms, for example `內容區塊`, `子區塊`, `父區塊`, `嵌入區塊`, `程式碼區塊`, `區塊 ID`, `區塊標`, and `區塊級`
+   - Translate Block Reference as `區塊引用` and Blockquote as `引述區塊`; do not confuse them or reverse the word order
+   - When counting content blocks, use `個區塊` rather than using `塊` as a classifier or abbreviation
+   - Do not mechanically replace `塊` in ordinary words with `區塊`; preserve non-content-block terms such as `分塊` for data chunks and `覈取方塊` for Checkbox
+   - Keep block terminology consistent between the Traditional Chinese interface and user guide
    - After modifying i18n files, run `python scripts/check-lang-keys.py` to verify key completeness across all language files
 2. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
 3. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible

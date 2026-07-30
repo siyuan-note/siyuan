@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-ffn21hi",
-				"updated": "20260614194439"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "將內容塊設定為閃卡後，系統會通過間隔重複演算法 FSRS（github repo: open-spaced-repetition/free-spaced-repetition-scheduler）自動安排複習，在遺忘臨界點提醒複習，幫助將短期記憶轉化為長期記憶。"
+					"Data": "將內容區塊設定為閃卡後，系統會通過間隔重複演算法 FSRS（github repo: open-spaced-repetition/free-spaced-repetition-scheduler）自動安排複習，在遺忘臨界點提醒複習，幫助將短期記憶轉化為長期記憶。"
 				}
 			]
 		},
@@ -109,12 +109,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-xja26ei",
-								"updated": "20260614194452"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊中的 "
+									"Data": "內容區塊中的 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -146,12 +146,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-g95rwrc",
-								"updated": "20260614194439"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果將超級塊設定為閃卡，則該超級塊的第一個子區塊會被視作問題，其餘子區塊會被視作答案"
+									"Data": "如果將超級區塊設定為閃卡，則該超級區塊的第一個子區塊會被視作問題，其餘子區塊會被視作答案"
 								}
 							]
 						}
@@ -202,12 +202,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-01nxgir",
-								"updated": "20260614194439"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果將標題塊設定為閃卡，則該標題塊會被視作問題，其下方塊會被視作答案"
+									"Data": "如果將標題區塊設定為閃卡，則該標題區塊會被視作問題，其下方的區塊會被視作答案"
 								}
 							]
 						}
@@ -234,12 +234,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-zih3624",
-				"updated": "20260614194439"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "完成製卡：在塊標選單中選擇「快速製卡」。"
+					"Data": "完成製卡：在區塊標選單中選擇「快速製卡」。"
 				}
 			]
 		},
@@ -326,12 +326,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-brh7nwo",
-								"updated": "20260614194439"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在編輯器中點擊文件塊標上的「閃卡 - 間隔重複」，複習範圍為當前文件及其子文件中的卡片"
+									"Data": "在編輯器中點擊文件區塊標上的「閃卡 - 間隔重複」，複習範圍為當前文件及其子文件中的卡片"
 								}
 							]
 						}
@@ -925,12 +925,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-j1e4fk4",
-								"updated": "20260614194439"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊被刪除（或者 ID 改變）後對應的閃卡會失效"
+									"Data": "內容區塊被刪除（或者 ID 改變）後對應的閃卡會失效"
 								}
 							]
 						}

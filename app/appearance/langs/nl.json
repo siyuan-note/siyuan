@@ -2344,6 +2344,7 @@
 		"348": "Kan bronbestand [%s] niet importeren",
 		"349": "De inhoud van de Vault is na de analyse gewijzigd; voer de analyse opnieuw uit",
 		"350": "Het schrijven of indexeren van het nieuwe notitieboek kon niet worden voltooid; het is als onvolledig gemarkeerd",
-		"351": "Er is een onverwachte fout opgetreden; controleer het systeemlogboek voor taak [%s]"
+		"351": "Er is een onverwachte fout opgetreden; controleer het systeemlogboek voor taak [%s]",
+		"352": "De context van de AI-agent past na compressie niet in het geselecteerde model. Verkort het bericht of kies een model met een groter contextvenster"
 	}
 	}

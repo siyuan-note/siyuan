@@ -2344,6 +2344,7 @@
 		"348": "Nie można zaimportować pliku zasobu [%s]",
 		"349": "Zawartość Vault zmieniła się po analizie; wykonaj analizę ponownie",
 		"350": "Nie można ukończyć zapisywania lub indeksowania nowego notatnika; został oznaczony jako niekompletny",
-		"351": "Wystąpił nieoczekiwany błąd; sprawdź dziennik systemowy zadania [%s]"
+		"351": "Wystąpił nieoczekiwany błąd; sprawdź dziennik systemowy zadania [%s]",
+		"352": "Kontekst agenta AI nie mieści się w wybranym modelu po kompresji. Skróć wiadomość lub wybierz model z większym oknem kontekstowym"
 	}
 	}

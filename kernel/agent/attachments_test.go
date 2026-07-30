@@ -162,19 +162,26 @@ func TestCheckpointKeepsOnlyLatestAttachmentBatch(t *testing.T) {
 	}
 }
 
-func TestCompactionDoesNotCountAttachmentAsUserTurn(t *testing.T) {
-	attachmentMessage, _ := buildAttachmentMessage([]AgentAttachment{testAgentAttachment()})
-	messages := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: "system"},
-		{Role: openai.ChatMessageRoleUser, Content: "first"},
-		{Role: openai.ChatMessageRoleAssistant, Content: "tool call"},
-		attachmentMessage,
-		{Role: openai.ChatMessageRoleAssistant, Content: "first answer"},
-		{Role: openai.ChatMessageRoleUser, Content: "second"},
+func TestCompactionCandidatesKeepAttachmentToolCallInItsTurn(t *testing.T) {
+	entries := []SessionEntry{
+		{ID: "user-1", Type: "user", Content: "first"},
+		{
+			ID:   "assistant-1",
+			Type: "assistant",
+			ToolCalls: []AgentToolCall{{
+				ID:          "call-image",
+				Name:        "image",
+				Result:      "attached",
+				Attachments: []AgentAttachment{testAgentAttachment()},
+			}},
+		},
+		{ID: "thinking-1", Type: "thinking"},
+		{ID: "user-2", Type: "user", Content: "second"},
+		{ID: "user-3", Type: "user", Content: "current"},
 	}
-	compacted := compactMessages(messages, 2)
-	if len(compacted) != len(messages) {
-		t.Fatalf("attachment was counted as a logical user turn: %#v", compacted)
+	candidates := compactionCandidateEntryCounts(entries, 0, "user-3")
+	if len(candidates) != 2 || candidates[0] != 3 || candidates[1] != 4 {
+		t.Fatalf("unexpected complete-turn compaction boundaries: %#v", candidates)
 	}
 }
 

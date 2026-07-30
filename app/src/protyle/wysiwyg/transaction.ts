@@ -2143,7 +2143,11 @@ export const turnEmptyParagraphsIntoTransaction = (options: {
     processRender(options.protyle.wysiwyg.element);
     highlightRender(options.protyle.wysiwyg.element);
     blockRender(options.protyle, options.protyle.wysiwyg.element);
-    focusBlock(newElements[0]);
+    if (options.type === "math") {
+        options.protyle.toolbar.showRender(options.protyle, newElements[0]);
+    } else {
+        focusBlock(newElements[0]);
+    }
     hideElements(["gutter"], options.protyle);
 };
 

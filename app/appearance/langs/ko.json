@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Markdown 블록 구문",
+  "codeBlockMiddleDot": "가운뎃점 코드 블록 단축 입력",
+  "codeBlockMiddleDotTip": "활성화하면 <code class='fn__code'>···</code> 입력 후 Enter 키 또는 가운뎃점을 하나 더 입력할 때 코드 블록으로 변환됩니다",
   "foldChildHeadings": "직접 하위 제목 접기/펼치기",
   "foldSiblingHeadings": "같은 수준 제목 접기/펼치기",
   "copyViewMirror": "보기 미러 복사",

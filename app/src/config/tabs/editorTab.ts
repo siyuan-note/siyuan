@@ -269,6 +269,14 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
     });
 };
 
+const registerEditorMarkdownBlockGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("markdownBlock", window.siyuan.languages.configGroupMarkdownBlockSyntax);
+    group.switch("editor.markdown.codeBlockMiddleDot", {
+        title: window.siyuan.languages.codeBlockMiddleDot,
+        desc: window.siyuan.languages.codeBlockMiddleDotTip,
+    });
+};
+
 const registerEditorMarkdownInlineGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("markdownInline", window.siyuan.languages.configGroupMarkdownInlineSyntax);
     group.switch("editor.markdown.inlineAsterisk", {
@@ -330,6 +338,7 @@ export const registerEditorTab = (tab: SettingTabBuilder) => {
     registerEditorBehaviorGroup(tab);
     registerEditorBlockFeaturesGroup(tab);
     registerEditorBidirectionalGroup(tab);
+    registerEditorMarkdownBlockGroup(tab);
     registerEditorMarkdownInlineGroup(tab);
     registerEditorAdvancedGroup(tab);
 };

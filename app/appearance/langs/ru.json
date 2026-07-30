@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Блочный синтаксис Markdown",
+  "codeBlockMiddleDot": "Быстрый ввод блока кода через среднюю точку",
+  "codeBlockMiddleDotTip": "Если включено, ввод <code class='fn__code'>···</code> с последующим нажатием Enter или вводом ещё одной средней точки преобразует текст в блок кода",
   "foldChildHeadings": "Свернуть/развернуть непосредственные подзаголовки",
   "foldSiblingHeadings": "Свернуть/развернуть заголовки одного уровня",
   "copyViewMirror": "Копировать зеркало представления",

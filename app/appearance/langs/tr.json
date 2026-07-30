@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Markdown Blok Sözdizimi",
+  "codeBlockMiddleDot": "Orta nokta kod bloğu kısayolu",
+  "codeBlockMiddleDotTip": "Etkinleştirildiğinde, <code class='fn__code'>···</code> yazıp Enter tuşuna basmak veya bir orta nokta daha girmek metni kod bloğuna dönüştürür",
   "foldChildHeadings": "Doğrudan alt başlıkları daralt/genişlet",
   "foldSiblingHeadings": "Aynı düzeydeki başlıkları daralt/genişlet",
   "copyViewMirror": "Görünüm aynasını kopyala",

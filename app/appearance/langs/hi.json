@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Markdown ब्लॉक सिंटैक्स",
+  "codeBlockMiddleDot": "मध्य बिंदु कोड ब्लॉक शॉर्टकट",
+  "codeBlockMiddleDotTip": "सक्षम होने पर, <code class='fn__code'>···</code> दर्ज करके Enter या एक और मध्य बिंदु दबाने से यह कोड ब्लॉक में बदल जाता है",
   "foldChildHeadings": "प्रत्यक्ष उपशीर्षकों को संक्षिप्त/विस्तृत करें",
   "foldSiblingHeadings": "समान-स्तरीय शीर्षकों को संक्षिप्त/विस्तृत करें",
   "copyViewMirror": "दृश्य मिरर कॉपी करें",

@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Markdown ブロック構文",
+  "codeBlockMiddleDot": "中点によるコードブロック入力",
+  "codeBlockMiddleDotTip": "有効にすると、<code class='fn__code'>···</code> を入力して Enter キーまたは別の中点を入力したときにコードブロックへ変換されます",
   "foldChildHeadings": "直接の子見出しを折りたたむ/展開",
   "foldSiblingHeadings": "同階層の見出しを折りたたむ/展開",
   "copyViewMirror": "ビューミラーをコピー",

@@ -148,11 +148,18 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     const trimStartHTML = editElement.innerHTML.trimStart();
     const trimStartText = editElement.textContent.trimStart();
-    if ((trimStartHTML.startsWith("````") || trimStartHTML.startsWith("····") || trimStartHTML.startsWith("~~~~")) &&
-        trimStartHTML.indexOf("\n") === -1) {
+    const enableCodeBlockMiddleDot = window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false;
+    const codeBlockMarkerRegExp = enableCodeBlockMiddleDot ? /·|~/g : /~/g;
+    const codeBlockFenceStartRegExp = enableCodeBlockMiddleDot ? /^(~|·|`){3,}/g : /^(~|`){3,}/g;
+    const codeBlockFenceLineRegExp = enableCodeBlockMiddleDot ? /\n(~|·|`){3,}/g : /\n(~|`){3,}/g;
+    const startsWithFourCodeBlockMarkers = trimStartHTML.startsWith("````") || trimStartHTML.startsWith("~~~~") ||
+        (enableCodeBlockMiddleDot && trimStartHTML.startsWith("····"));
+    const startsWithCodeBlockFence = trimStartHTML.startsWith("```") || trimStartHTML.startsWith("~~~") ||
+        (enableCodeBlockMiddleDot && trimStartHTML.startsWith("···"));
+    if (startsWithFourCodeBlockMarkers && trimStartHTML.indexOf("\n") === -1) {
         // 超过三个标记符就可以形成为代码块，下方会处理
-    } else if ((trimStartHTML.startsWith("```") || trimStartHTML.startsWith("···") || trimStartHTML.startsWith("~~~")) &&
-        trimStartHTML.indexOf("\n") === -1 && trimStartHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") === -1) {
+    } else if (startsWithCodeBlockFence && trimStartHTML.indexOf("\n") === -1 &&
+        trimStartHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") === -1) {
         // ```test` 后续处理，```test 不处理
         updateTransaction(protyle, blockElement, protyle.wysiwyg.lastHTMLs[id],
             inputOperations?.undoContext, inputOperations);
@@ -194,15 +201,19 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         }
     } else {
         if (type !== "NodeCodeBlock" && (
-            trimStartHTML.startsWith("```") || trimStartHTML.startsWith("~~~") || trimStartHTML.startsWith("···") ||
+            startsWithCodeBlockFence ||
             (trimStartHTML.indexOf("\n```") > -1 && trimStartText.indexOf("\n```") > -1) ||
             (trimStartHTML.indexOf("\n~~~") > -1 && trimStartText.indexOf("\n~~~") > -1) ||
-            (trimStartHTML.indexOf("\n···") > -1 && trimStartText.indexOf("\n···") > -1)
+            (enableCodeBlockMiddleDot &&
+                trimStartHTML.indexOf("\n···") > -1 && trimStartText.indexOf("\n···") > -1)
         )) {
-            if (trimStartHTML.indexOf("\n") === -1 && trimStartHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+            if (trimStartHTML.indexOf("\n") === -1 &&
+                trimStartHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
                 // ```test` 不处理，正常渲染为段落块
             } else {
-                let replaceInnerHTML = editElement.innerHTML.trim().replace(/^(~|·|`){3,}/g, "```").replace(/\n(~|·|`){3,}/g, "\n```").trim();
+                let replaceInnerHTML = editElement.innerHTML.trim()
+                    .replace(codeBlockFenceStartRegExp, "```")
+                    .replace(codeBlockFenceLineRegExp, "\n```").trim();
                 if (replaceInnerHTML.endsWith("\n```<wbr>") &&
                     (replaceInnerHTML.split("\n```").length - 1 + (replaceInnerHTML.startsWith("```") ? 1 : 0)) % 2 === 0) {
                     // 匹配已闭合的不需添加 https://github.com/siyuan-note/siyuan/issues/16053

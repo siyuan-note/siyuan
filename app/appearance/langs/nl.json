@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Markdown-bloksyntaxis",
+  "codeBlockMiddleDot": "Snelkoppeling voor codeblok met middelpunt",
+  "codeBlockMiddleDotTip": "Indien ingeschakeld, wordt het invoeren van <code class='fn__code'>···</code> gevolgd door Enter of nog een middelpunt omgezet in een codeblok",
   "foldChildHeadings": "Directe subkoppen in-/uitklappen",
   "foldSiblingHeadings": "Koppen op hetzelfde niveau in-/uitklappen",
   "copyViewMirror": "Weergavespiegel kopiëren",

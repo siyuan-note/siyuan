@@ -35,17 +35,19 @@ var MarkdownSettings = &Markdown{
 	InlineMath:          true,
 	InlineStrikethrough: true,
 	InlineMark:          true,
+	CodeBlockMiddleDot:  func() *bool { value := true; return &value }(),
 }
 
 type Markdown struct {
-	InlineAsterisk      bool `json:"inlineAsterisk"`      // 是否启用行级 * 语法
-	InlineUnderscore    bool `json:"inlineUnderscore"`    // 是否启用行级 _ 语法
-	InlineSup           bool `json:"inlineSup"`           // 是否启用行级上标
-	InlineSub           bool `json:"inlineSub"`           // 是否启用行级下标
-	InlineTag           bool `json:"inlineTag"`           // 是否启用行级标签
-	InlineMath          bool `json:"inlineMath"`          // 是否启用行级公式
-	InlineStrikethrough bool `json:"inlineStrikethrough"` // 是否启用行级删除线
-	InlineMark          bool `json:"inlineMark"`          // 是否启用行级标记
+	InlineAsterisk      bool  `json:"inlineAsterisk"`      // 是否启用行级 * 语法
+	InlineUnderscore    bool  `json:"inlineUnderscore"`    // 是否启用行级 _ 语法
+	InlineSup           bool  `json:"inlineSup"`           // 是否启用行级上标
+	InlineSub           bool  `json:"inlineSub"`           // 是否启用行级下标
+	InlineTag           bool  `json:"inlineTag"`           // 是否启用行级标签
+	InlineMath          bool  `json:"inlineMath"`          // 是否启用行级公式
+	InlineStrikethrough bool  `json:"inlineStrikethrough"` // 是否启用行级删除线
+	InlineMark          bool  `json:"inlineMark"`          // 是否启用行级标记
+	CodeBlockMiddleDot  *bool `json:"codeBlockMiddleDot"`  // 是否启用中点代码块快捷输入
 }
 
 func NewLute() (ret *lute.Lute) {

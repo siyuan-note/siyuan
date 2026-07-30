@@ -1082,15 +1082,23 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         range.insertNode(leftNodes);
         const previousHTML = previousLastEditElement.innerHTML.trimStart();
         const previousText = previousLastEditElement.textContent.trimStart();
+        const enableCodeBlockMiddleDot = window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false;
+        const codeBlockMarkerRegExp = enableCodeBlockMiddleDot ? /·|~/g : /~/g;
+        const codeBlockFenceStartRegExp = enableCodeBlockMiddleDot ? /^(~|·|`){3,}/g : /^(~|`){3,}/g;
+        const codeBlockFenceLineRegExp = enableCodeBlockMiddleDot ? /\n(~|·|`){3,}/g : /\n(~|`){3,}/g;
         // https://github.com/siyuan-note/siyuan/issues/15554
-        if (previousHTML.startsWith("```") || previousHTML.startsWith("···") || previousHTML.startsWith("~~~") ||
+        if (previousHTML.startsWith("```") || previousHTML.startsWith("~~~") ||
             (previousHTML.indexOf("\n```") > -1 && previousText.indexOf("\n```") > -1) ||
             (previousHTML.indexOf("\n~~~") > -1 && previousText.indexOf("\n~~~") > -1) ||
-            (previousHTML.indexOf("\n···") > -1 && previousText.indexOf("\n···") > -1)) {
-            if (previousHTML.indexOf("\n") === -1 && previousHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+            (enableCodeBlockMiddleDot && (previousHTML.startsWith("···") ||
+                (previousHTML.indexOf("\n···") > -1 && previousText.indexOf("\n···") > -1)))) {
+            if (previousHTML.indexOf("\n") === -1 &&
+                previousHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
                 // ```test` 不处理，正常渲染为段落块
             } else {
-                let replaceNewHTML = previousLastEditElement.innerHTML.replace(/\n(~|·|`){3,}/g, "\n```").trim().replace(/^(~|·|`){3,}/g, "```");
+                let replaceNewHTML = previousLastEditElement.innerHTML
+                    .replace(codeBlockFenceLineRegExp, "\n```").trim()
+                    .replace(codeBlockFenceStartRegExp, "```");
                 if (!replaceNewHTML.endsWith("\n```")) {
                     replaceNewHTML += "\n```";
                 }

@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Блоковий синтаксис Markdown",
+  "codeBlockMiddleDot": "Швидке введення блоку коду через середню крапку",
+  "codeBlockMiddleDotTip": "Якщо ввімкнено, введення <code class='fn__code'>···</code> з подальшим натисканням Enter або введенням ще однієї середньої крапки перетворює текст на блок коду",
   "foldChildHeadings": "Згорнути/розгорнути безпосередні підзаголовки",
   "foldSiblingHeadings": "Згорнути/розгорнути заголовки одного рівня",
   "copyViewMirror": "Копіювати дзеркало подання",

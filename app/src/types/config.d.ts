@@ -440,6 +440,10 @@ declare namespace Config {
          * Whether to enable the inline mark
          */
         inlineMark: boolean;
+        /**
+         * Whether to enable the middle dot code block shortcut
+         */
+        codeBlockMiddleDot: boolean;
     }
 
     /**

@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "ไวยากรณ์บล็อก Markdown",
+  "codeBlockMiddleDot": "ทางลัดบล็อกโค้ดด้วยจุดกึ่งกลาง",
+  "codeBlockMiddleDotTip": "เมื่อเปิดใช้งาน การป้อน <code class='fn__code'>···</code> แล้วกด Enter หรือป้อนจุดกึ่งกลางอีกหนึ่งตัวจะแปลงเป็นบล็อกโค้ด",
   "foldChildHeadings": "ยุบ/ขยายหัวข้อย่อยโดยตรง",
   "foldSiblingHeadings": "ยุบ/ขยายหัวข้อระดับเดียวกัน",
   "copyViewMirror": "คัดลอกมิเรอร์มุมมอง",

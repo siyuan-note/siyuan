@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Markdown 區塊級語法",
+  "codeBlockMiddleDot": "中點程式碼區塊快捷輸入",
+  "codeBlockMiddleDotTip": "啟用後，輸入 <code class='fn__code'>···</code> 並按下回車或繼續輸入中點時將轉換為程式碼區塊",
   "foldChildHeadings": "摺疊/展開直接子標題",
   "foldSiblingHeadings": "摺疊/展開同級標題",
   "copyViewMirror": "複製檢視鏡像",

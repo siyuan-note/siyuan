@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Składnia blokowa Markdown",
+  "codeBlockMiddleDot": "Skrót bloku kodu ze środkową kropką",
+  "codeBlockMiddleDotTip": "Po włączeniu wpisanie <code class='fn__code'>···</code> i naciśnięcie Enter lub wpisanie kolejnej środkowej kropki przekształca tekst w blok kodu",
   "foldChildHeadings": "Zwiń/rozwiń bezpośrednie nagłówki podrzędne",
   "foldSiblingHeadings": "Zwiń/rozwiń nagłówki tego samego poziomu",
   "copyViewMirror": "Kopiuj lustrzany widok",

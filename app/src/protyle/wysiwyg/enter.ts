@@ -61,11 +61,18 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
 
     const trimStartHTML = editableElement.innerHTML.trimStart();
     const trimStartText = editableElement.textContent.trimStart();
-    if (trimStartHTML.startsWith("```") || trimStartHTML.startsWith("···") || trimStartHTML.startsWith("~~~") ||
-        (trimStartHTML.indexOf("\n```") > -1 && trimStartText.indexOf("\n```") > -1) ||
-        (trimStartHTML.indexOf("\n~~~") > -1 && trimStartText.indexOf("\n~~~") > -1) ||
-        (trimStartHTML.indexOf("\n···") > -1 && trimStartText.indexOf("\n···") > -1)) {
-        if (trimStartHTML.indexOf("\n") === -1 && trimStartHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+    const enableCodeBlockMiddleDot = window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false;
+    const codeBlockMarkerRegExp = enableCodeBlockMiddleDot ? /·|~/g : /~/g;
+    const codeBlockFenceStartRegExp = enableCodeBlockMiddleDot ? /^(~|·|`){3,}/g : /^(~|`){3,}/g;
+    const codeBlockFenceLineRegExp = enableCodeBlockMiddleDot ? /\n(~|·|`){3,}/g : /\n(~|`){3,}/g;
+    const hasCodeBlockFence = (html: string, text: string) => html.startsWith("```") || html.startsWith("~~~") ||
+        (html.indexOf("\n```") > -1 && text.indexOf("\n```") > -1) ||
+        (html.indexOf("\n~~~") > -1 && text.indexOf("\n~~~") > -1) ||
+        (enableCodeBlockMiddleDot && (html.startsWith("···") ||
+            (html.indexOf("\n···") > -1 && text.indexOf("\n···") > -1)));
+    if (hasCodeBlockFence(trimStartHTML, trimStartText)) {
+        if (trimStartHTML.indexOf("\n") === -1 &&
+            trimStartHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else if (blockElement.classList.contains("p")) { // https://github.com/siyuan-note/siyuan/issues/6953
             range.insertNode(document.createElement("wbr"));
@@ -75,7 +82,9 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             const wbrElement = document.createElement("wbr");
             range.insertNode(wbrElement);
             wbrElement.after(document.createTextNode("\n"));
-            let replaceInnerHTML = editableElement.innerHTML.replace(/\n(~|·|`){3,}/g, "\n```").trim().replace(/^(~|·|`){3,}/g, "```");
+            let replaceInnerHTML = editableElement.innerHTML
+                .replace(codeBlockFenceLineRegExp, "\n```").trim()
+                .replace(codeBlockFenceStartRegExp, "```");
             if (!replaceInnerHTML.endsWith("\n```")) {
                 replaceInnerHTML += "\n```";
             }
@@ -273,14 +282,14 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
     const newHTML = newEditableElement.innerHTML.trimStart();
     const newText = newEditableElement.textContent.trimStart();
     // https://github.com/siyuan-note/siyuan/issues/10759
-    if (newHTML.startsWith("```") || newHTML.startsWith("···") || newHTML.startsWith("~~~") ||
-        (newHTML.indexOf("\n```") > -1 && newText.indexOf("\n```") > -1) ||
-        (newHTML.indexOf("\n~~~") > -1 && newText.indexOf("\n~~~") > -1) ||
-        (newHTML.indexOf("\n···") > -1 && newText.indexOf("\n···") > -1)) {
-        if (newHTML.indexOf("\n") === -1 && newHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+    if (hasCodeBlockFence(newHTML, newText)) {
+        if (newHTML.indexOf("\n") === -1 &&
+            newHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else {
-            let replaceNewHTML = newEditableElement.innerHTML.replace(/\n(~|·|`){3,}/g, "\n```").trim().replace(/^(~|·|`){3,}/g, "```");
+            let replaceNewHTML = newEditableElement.innerHTML
+                .replace(codeBlockFenceLineRegExp, "\n```").trim()
+                .replace(codeBlockFenceStartRegExp, "```");
             if (!replaceNewHTML.endsWith("\n```")) {
                 replaceNewHTML += "\n```";
             }

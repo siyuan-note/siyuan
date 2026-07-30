@@ -1,4 +1,7 @@
 {
+  "configGroupMarkdownBlockSyntax": "Sintassi Markdown a blocchi",
+  "codeBlockMiddleDot": "Scorciatoia per blocco di codice con punto centrale",
+  "codeBlockMiddleDotTip": "Quando è attiva, digitando <code class='fn__code'>···</code> seguito da Invio o da un altro punto centrale il testo viene convertito in un blocco di codice",
   "foldChildHeadings": "Comprimi/espandi i sottotitoli diretti",
   "foldSiblingHeadings": "Comprimi/espandi i titoli dello stesso livello",
   "copyViewMirror": "Copia mirror della vista",

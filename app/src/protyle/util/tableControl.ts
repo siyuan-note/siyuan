@@ -763,11 +763,6 @@ export class TableControl {
                 menu.append(new MenuItem({type: "separator"}).element);
             }
             menu.append(new MenuItem({
-                icon: "iconClear",
-                label: window.siyuan.languages.clear,
-                click: () => this.clearCells(),
-            }).element);
-            menu.append(new MenuItem({
                 icon: "iconTheme",
                 label: window.siyuan.languages.colorPrimary,
                 submenu: this.getBackgroundMenus(),
@@ -779,6 +774,11 @@ export class TableControl {
                     this.appendAlignmentMenus();
                 }
                 menu.append(new MenuItem({type: "separator"}).element);
+                menu.append(new MenuItem({
+                    icon: "iconClear",
+                    label: window.siyuan.languages.clear,
+                    click: () => this.clearCells(),
+                }).element);
                 menu.append(new MenuItem({
                     icon: "iconTrashcan",
                     label: this.selection.mode === "row" ? window.siyuan.languages["delete-row"] :
@@ -976,9 +976,12 @@ export class TableControl {
         }).element);
         const rowSelection = getTableFullRowSelection(this.selection.table, cells);
         const columnSelection = getTableFullColumnSelection(this.selection.table, cells);
-        if (rowSelection.indexes.length > 0 || columnSelection.indexes.length > 0) {
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        }
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconClear",
+            label: window.siyuan.languages.clear,
+            click: () => this.clearCells(),
+        }).element);
         if (rowSelection.indexes.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",

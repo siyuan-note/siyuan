@@ -8,6 +8,7 @@
 
 .b3-typography,
 .protyle-wysiwyg {
+  font-variant-emoji: unicode;
   font-variant-ligatures: no-common-ligatures;
   display: flex;
   flex-direction: column;

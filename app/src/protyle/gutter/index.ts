@@ -30,6 +30,8 @@ import {
     turnsIntoOneTransaction,
     turnsIntoTransaction,
     turnsOneInto,
+    isEmptyParagraph,
+    turnEmptyParagraphsIntoTransaction,
     updateBatchTransaction,
     updateTransaction
 } from "../wysiwyg/transaction";
@@ -874,6 +876,54 @@ export class Gutter {
         };
     }
 
+    private emptyParagraphTurnIntoMenu(protyle: IProtyle, nodeElements: Element[]): IMenu[] {
+        if (!nodeElements.every(isEmptyParagraph)) {
+            return [];
+        }
+        const items: {
+            id: string,
+            icon: string,
+            label: string,
+            accelerator?: string,
+            type: "code" | "table" | "line" | "math",
+        }[] = [{
+            id: "code",
+            icon: "iconCode",
+            label: window.siyuan.languages.code,
+            accelerator: window.siyuan.config.keymap.editor.insert.code.custom,
+            type: "code",
+        }, {
+            id: "table",
+            icon: "iconTable",
+            label: window.siyuan.languages.table,
+            accelerator: window.siyuan.config.keymap.editor.insert.table.custom,
+            type: "table",
+        }, {
+            id: "line",
+            icon: "iconLine",
+            label: window.siyuan.languages.line,
+            type: "line",
+        }, {
+            id: "math",
+            icon: "iconMath",
+            label: window.siyuan.languages.math,
+            type: "math",
+        }];
+        return items.map(item => ({
+            id: item.id,
+            icon: item.icon,
+            label: item.label,
+            accelerator: item.accelerator,
+            click() {
+                turnEmptyParagraphsIntoTransaction({
+                    protyle,
+                    nodeElements,
+                    type: item.type,
+                });
+            }
+        }));
+    }
+
     private showMobileAppearance(protyle: IProtyle) {
         const toolbarElement = document.getElementById("keyboardToolbar");
         const dynamicElements = toolbarElement.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
@@ -1029,6 +1079,7 @@ export class Gutter {
                 type: "Blocks2Hs",
                 isContinue
             }));
+            turnIntoSubmenu.push(...this.emptyParagraphTurnIntoMenu(protyle, selectsElement));
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "turnInto",
                 icon: "iconTurnInto",
@@ -1704,6 +1755,7 @@ export class Gutter {
                 type: "Callout2Blockquote"
             }));
         }
+        turnIntoSubmenu.push(...this.emptyParagraphTurnIntoMenu(protyle, [nodeElement]));
         if (turnIntoSubmenu.length > 0 && allowStructuralMutation) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "turnInto",

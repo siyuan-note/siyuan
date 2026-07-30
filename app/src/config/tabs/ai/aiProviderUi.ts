@@ -1,10 +1,10 @@
-import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {showMessage} from "../../dialog/message";
-import {fetchPost} from "../../util/fetch";
+import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../../render/fragments";
+import {confirmDialog} from "../../../dialog/confirmDialog";
+import {showMessage} from "../../../dialog/message";
+import {fetchPost} from "../../../util/fetch";
 import {aiConfigApi} from "./aiRuntime";
-import {Menu} from "../../plugin/Menu";
-import {upDownHint} from "../../util/upDownHint";
+import {Menu} from "../../../plugin/Menu";
+import {upDownHint} from "../../../util/upDownHint";
 
 type ModelPickerGroup = "editing" | "agent" | "vision" | "imageGeneration";
 

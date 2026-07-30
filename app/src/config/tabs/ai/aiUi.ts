@@ -1,11 +1,11 @@
-import {Dialog} from "../../dialog";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {showMessage} from "../../dialog/message";
-import {Constants} from "../../constants";
-import {isMobile} from "../../util/functions";
-import {fetchPost} from "../../util/fetch";
+import {Dialog} from "../../../dialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
+import {showMessage} from "../../../dialog/message";
+import {Constants} from "../../../constants";
+import {isMobile} from "../../../util/functions";
+import {fetchPost} from "../../../util/fetch";
 import {aiConfigApi} from "./aiRuntime";
-import {openByMobile} from "../../editor/openLink";
+import {openByMobile} from "../../../editor/openLink";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
@@ -366,23 +366,17 @@ const mountAddMcpServerButton = (root: HTMLElement, block: HTMLElement) => {
         return;
     }
 
-    const spacerElement = document.createElement("span");
-    spacerElement.className = "fn__flex-1";
-    const buttonElement = document.createElement("button");
-    buttonElement.className = "b3-button b3-button--outline fn__flex-center fn__size200";
-    buttonElement.dataset.type = "addAiMcpServer";
-    buttonElement.innerHTML = "<svg class=\"b3-button__icon\"><use xlink:href=\"#iconAdd\"></use></svg>";
-    const labelElement = document.createElement("span");
-    labelElement.textContent = window.siyuan.languages.addAiMcpServer;
-    buttonElement.append(labelElement);
-    buttonElement.addEventListener("click", (event) => {
+    groupTitle.classList.add("config-title--action");
+    groupTitle.insertAdjacentHTML("beforeend", `<span class="fn__flex-1"></span>
+<button class="b3-button b3-button--outline fn__flex-center fn__size200" data-type="addAiMcpServer">
+    <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
+    <span>${Lute.EscapeHTMLStr(window.siyuan.languages.addAiMcpServer)}</span>
+</button>`);
+    (groupTitle.lastElementChild as HTMLButtonElement).addEventListener("click", (event) => {
         openMcpServerDialog(root, null);
         event.preventDefault();
         event.stopPropagation();
     });
-
-    groupTitle.classList.add("config-title--action");
-    groupTitle.append(spacerElement, buttonElement);
 };
 
 export const mountMcpServersBlock = (root: HTMLElement) => {

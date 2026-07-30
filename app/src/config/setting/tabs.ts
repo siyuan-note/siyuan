@@ -1,7 +1,7 @@
 import {editorConfigApi} from "../tabs/editorRuntime";
 import {fileConfigApi} from "../tabs/fileRuntime";
 import {flashcardConfigApi} from "../tabs/flashcardRuntime";
-import {aiConfigApi} from "../tabs/aiRuntime";
+import {aiConfigApi} from "../tabs/ai/aiRuntime";
 import {secretsConfigApi} from "../tabs/secretsVariablesRuntime";
 import {exportConfigApi} from "../tabs/exportRuntime";
 import {searchConfigApi} from "../tabs/searchRuntime";
@@ -21,7 +21,7 @@ import {SettingBuilder, type SettingTab} from "./builder";
 import {registerEditorTab} from "../tabs/editorTab";
 import {registerFileTab} from "../tabs/fileTab";
 import {registerFlashcardTab} from "../tabs/flashcardTab";
-import {registerAiTab} from "../tabs/aiTab";
+import {registerAiTab} from "../tabs/ai/aiTab";
 import {registerSecretsVariablesTab} from "../tabs/secretsVariablesTab";
 import {registerExportTab} from "../tabs/exportTab";
 import {registerSearchTab} from "../tabs/searchTab";

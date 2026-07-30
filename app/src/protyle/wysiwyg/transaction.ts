@@ -2089,6 +2089,7 @@ export const turnEmptyParagraphsIntoTransaction = (options: {
         oldElement.classList.remove("protyle-wysiwyg--select");
         oldElement.removeAttribute("select-start");
         oldElement.removeAttribute("select-end");
+        const oldHTML = oldElement.outerHTML;
         const editableElement = getContenteditableElement(oldElement);
         editableElement.textContent = getEmptyParagraphTargetMarkdown(options.type);
 
@@ -2109,7 +2110,7 @@ export const turnEmptyParagraphsIntoTransaction = (options: {
         }
         return {
             nodeElement,
-            oldHTML: oldElement.outerHTML,
+            oldHTML,
             newElement,
         };
     });

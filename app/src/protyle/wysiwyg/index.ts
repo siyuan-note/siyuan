@@ -933,6 +933,8 @@ export class WYSIWYG {
             const isToggleBlockDrag = isOnlyMeta(event) && !event.shiftKey && !event.altKey && startsFromPadding;
             const baseDragSelectElements = new Set(isToggleBlockDrag ?
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")) : []);
+            const rangeBeforePaddingMouseDown = startsFromPadding && getSelection().rangeCount > 0 ?
+                getSelection().getRangeAt(0).cloneRange() : undefined;
             if (event.shiftKey) {
                 if (!isMobile() && !protyle.disabled && nodeElement?.dataset.avType === "table" &&
                     avCellElement?.dataset.id &&
@@ -2152,11 +2154,28 @@ export class WYSIWYG {
                 documentSelf.onselect = null;
                 // 多选表格单元格后，选择菜单中的居左，然后 shift+左 选中的文字无法显示选中背景，因此需移除
                 // 多选块后 shift+左 选中的文字无法显示选中背景，因此需移除
-                if (startsFromPadding) {
-                    getSelection().removeAllRanges();
-                }
                 protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                 this.element.classList.remove("fn__pointer-none");
+                if (startsFromPadding) {
+                    if (avDragSelectMode !== undefined) {
+                        getSelection().removeAllRanges();
+                    } else if (isToggleBlockDrag && rangeBeforePaddingMouseDown &&
+                        this.element.contains(rangeBeforePaddingMouseDown.startContainer) &&
+                        this.element.contains(rangeBeforePaddingMouseDown.endContainer)) {
+                        focusByRange(rangeBeforePaddingMouseDown);
+                    } else if (mouseUpEvent.clientY > lastBlockRect.bottom) {
+                        // 文档末尾空白由 contentElement 的 click 事件插入或聚焦末尾块
+                        getSelection().removeAllRanges();
+                    } else if (nodeElement) {
+                        const blockPoint = getShiftClickBlockByPoint(this.element, nodeElement,
+                            mouseUpEvent.clientX, mouseUpEvent.clientY);
+                        if (blockPoint) {
+                            focusBlock(blockPoint.blockElement, undefined, blockPoint.toStart);
+                        } else {
+                            focusBlock(nodeElement, undefined, mouseUpEvent.clientX < mostLeft);
+                        }
+                    }
+                }
                 protyle.selectElement.classList.add("fn__none");
                 protyle.selectElement.removeAttribute("style");
                 if (tableBlockElement) {

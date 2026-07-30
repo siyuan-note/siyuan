@@ -198,6 +198,7 @@ export class MobileTabs {
                 data.notebook = notebookId;
             }
             let handled = false;
+            // 仅取消导航状态，不中止底层请求，避免部分 WebView 的 fetch 包装层将 AbortError 暴露为未处理异常。
             void fetchPost("/api/block/getBlockInfo", data, (response) => {
                 handled = true;
                 if (response.code === 0 && response.data?.rootID) {
@@ -205,7 +206,7 @@ export class MobileTabs {
                 } else {
                     reject(new InvalidMobileTabTargetError(response.msg));
                 }
-            }, undefined, undefined, signal).then(() => {
+            }).then(() => {
                 if (!handled && !signal?.aborted) {
                     reject(new Error("Failed to resolve mobile tab target"));
                 }
@@ -271,6 +272,7 @@ export class MobileTabs {
                 resolve(result);
             };
             abortController.signal.addEventListener("abort", () => finish("cancelled"), {once: true});
+            // 过期响应由 epoch 和 isValid 丢弃，不向 fetch 传递 signal。
             loadMobileFileById(this.app, loadID, loadAction, options.scrollPosition, info.box, (protyle) => {
                 if (epoch !== this.navigationEpoch) {
                     finish("cancelled");
@@ -309,7 +311,7 @@ export class MobileTabs {
                 }
                 finish("success");
                 options.afterOpen?.(protyle);
-            }, options.forceReload, () => epoch === this.navigationEpoch, abortController.signal, loadScroll, false, (invalid) => {
+            }, options.forceReload, () => epoch === this.navigationEpoch, undefined, loadScroll, false, (invalid) => {
                 finish(abortController.signal.aborted ? "cancelled" : (invalid ? "invalid" : "failed"));
             });
         });

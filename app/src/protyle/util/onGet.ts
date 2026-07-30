@@ -37,8 +37,12 @@ export const onGet = (options: {
     updateReadonly?: boolean,
     scrollPosition?: ScrollLogicalPosition,
     afterCB?: () => void,
-    dataDocType?: string
+    dataDocType?: string,
+    isValid?: () => boolean,
 }) => {
+    if (options.isValid && !options.isValid()) {
+        return;
+    }
     if (!options.action) {
         options.action = [];
     }
@@ -131,6 +135,9 @@ export const onGet = (options: {
         docInfoParam.notebook = options.protyle.notebookId;
     }
     fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
+        if (options.isValid && !options.isValid()) {
+            return;
+        }
         if (options.protyle.options.render.title) {
             // 页签没有打开
             options.protyle.title.render(options.protyle, response);

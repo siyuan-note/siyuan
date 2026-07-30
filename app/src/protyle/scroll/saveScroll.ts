@@ -69,6 +69,7 @@ export const getDocByScroll = (options: {
     updateReadonly?: boolean,
     signal?: AbortSignal,
     fail?: (invalid?: boolean) => void,
+    isValid?: () => boolean,
 }) => {
     const fetchDoc = (params: Record<string, any>, callback: (response: IWebSocketData) => void) => {
         let handled = false;
@@ -92,7 +93,6 @@ export const getDocByScroll = (options: {
         }
     }
     const renderDoc = (response: IWebSocketData) => {
-        let callbackCalled = false;
         try {
             onGet({
                 scrollPosition: options.mergedOptions?.scrollPosition,
@@ -101,18 +101,15 @@ export const getDocByScroll = (options: {
                 action: actions,
                 scrollAttr: options.scrollAttr,
                 afterCB: options.cb ? () => {
-                    callbackCalled = true;
                     options.cb(response.data.keywords);
                 } : undefined,
-                updateReadonly: options.updateReadonly
+                updateReadonly: options.updateReadonly,
+                isValid: options.isValid,
             });
         } catch (error) {
             console.error(error);
             options.fail?.();
             return;
-        }
-        if (options.cb && !callbackCalled) {
-            options.fail?.();
         }
     };
     if (options.scrollAttr?.zoomInId && options.scrollAttr?.rootId && options.scrollAttr.zoomInId !== options.scrollAttr.rootId) {

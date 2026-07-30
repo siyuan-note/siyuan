@@ -123,12 +123,6 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 ${tabHTML}
             </div>
             <div class="fn__space"></div>
-            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${visibleViewIDs.length < data.views.length ? " block__icon--show" : ""}${data.views.length > 0 ? "" : " fn__none"}">
-                <svg><use xlink:href="#iconEye"></use></svg>
-                <span class="fn__space"></span>
-                <small>${visibleViewIDs.length}/${data.views.length}</small>
-            </span>
-            <div class="fn__space"></div>
             <span data-type="av-add" class="block__icon ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.newView}">
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
@@ -155,6 +149,12 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             ${data.isMirror ? `<span data-av-id="${data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.mirrorTip}">
                 <svg><use xlink:href="#iconSplitLR"></use></svg>
             </span><div class="fn__space"></div>` : ""}
+            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${visibleViewIDs.length < data.views.length ? " block__icon--show" : " av__views-switcher--all"}${data.views.length > 0 ? "" : " fn__none"}">
+                <svg><use xlink:href="#iconEye"></use></svg>
+                <span class="fn__space"></span>
+                <small>${visibleViewIDs.length}/${data.views.length}</small>
+            </span>
+            <div class="fn__space"></div>
             ${editable ? `<div class="av__new fn__flex">
                 <button data-type="av-add-more" class="b3-button">${window.siyuan.languages.new}</button>
                 <button data-type="av-add-template" class="b3-button ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.template}"><svg><use xlink:href="#iconDown"></use></svg></button>

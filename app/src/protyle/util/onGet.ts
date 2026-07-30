@@ -46,6 +46,10 @@ export const onGet = (options: {
     if (!options.action) {
         options.action = [];
     }
+    if (!options.action.includes(Constants.CB_GET_APPEND) &&
+        !options.action.includes(Constants.CB_GET_BEFORE)) {
+        options.protyle.scroll?.invalidateDynamicLoad(options.protyle);
+    }
     options.protyle.wysiwyg.element.removeAttribute("data-top");
     if (options.data.code === 1) {
         // 其他报错
@@ -365,36 +369,12 @@ const setHTML = (options: {
         protyle.contentElement.scrollHeight > 0 && // 没有激活的页签 https://github.com/siyuan-note/siyuan/issues/5255
         !options.action.includes(Constants.CB_GET_FOCUSFIRST) && // 防止 eof 为true https://github.com/siyuan-note/siyuan/issues/5291
         protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
-        const getDocParam: IObject = {
-            id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
-            mode: 2,
-            size: window.siyuan.config.editor.dynamicLoadBlocks,
-        };
-        if (isEncryptedBox(protyle.notebookId)) {
-            getDocParam.notebook = protyle.notebookId;
-        }
-        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
-            onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]});
-        });
+        protyle.scroll.loadDynamic(protyle, 2);
     }
     // 动态滚动条拖拽到最后几个块时需多加载一点块 https://github.com/siyuan-note/siyuan/issues/16906
     if (options.action.includes(Constants.CB_GET_FOCUSFIRST) &&
         protyle.wysiwyg.element.getBoundingClientRect().top > protyle.breadcrumb.element.getBoundingClientRect().bottom) {
-        const getDocParam: IObject = {
-            id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
-            mode: 1,
-            size: window.siyuan.config.editor.dynamicLoadBlocks,
-        };
-        if (isEncryptedBox(protyle.notebookId)) {
-            getDocParam.notebook = protyle.notebookId;
-        }
-        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
-            onGet({
-                data: getResponse,
-                protyle,
-                action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
-            });
-        });
+        protyle.scroll.loadDynamic(protyle, 1);
     }
     if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none") && !protyle.element.classList.contains("fn__none")) {
         // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index

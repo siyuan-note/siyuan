@@ -17,7 +17,7 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
 import {zoomOut} from "../../menus/protyle";
-import {disabledProtyle, enableProtyle, onGet} from "../util/onGet";
+import {disabledProtyle, enableProtyle} from "../util/onGet";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
@@ -31,7 +31,6 @@ import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {resize} from "../util/resize";
 import {scrollCenter} from "../../util/highlightById";
 import {setFold} from "../util/blockFold";
-import {isEncryptedBox} from "../../util/pathName";
 import {queueTransaction} from "../util/transactionQueue";
 import {
     cleanHeadingNumberHTML,
@@ -1985,21 +1984,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             !protyle.scroll.element.classList.contains("fn__none") &&
             protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2    // https://github.com/siyuan-note/siyuan/issues/7785
         ) {
-            const getDocParam: IObject = {
-                id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
-                mode: 2,
-                size: window.siyuan.config.editor.dynamicLoadBlocks,
-            };
-            if (isEncryptedBox(protyle.notebookId)) {
-                getDocParam.notebook = protyle.notebookId;
-            }
-            fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
-                onGet({
-                    data: getResponse,
-                    protyle,
-                    action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID],
-                });
-            });
+            protyle.scroll.loadDynamic(protyle, 2);
         }
         return;
     }

@@ -39,10 +39,8 @@ import {hasClosestBlock, hasClosestByClassName, hasClosestByTag, isInEmbedBlock}
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {onGet} from "../util/onGet";
+import {fetchSyncPost} from "../../util/fetch";
 import {setFold} from "../util/blockFold";
-import {isEncryptedBox} from "../../util/pathName";
 import {highlightRender} from "../render/highlightRender";
 import * as dayjs from "dayjs";
 import {mergeSameInlineElement} from "../toolbar/util";
@@ -726,21 +724,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 !protyle.scroll.element.classList.contains("fn__none") &&
                 protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2
             ) {
-                const getDocParam: IObject = {
-                    id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
-                    mode: 2,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                };
-                if (isEncryptedBox(protyle.notebookId)) {
-                    getDocParam.notebook = protyle.notebookId;
-                }
-                fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
-                    onGet({
-                        data: getResponse,
-                        protyle,
-                        action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID],
-                    });
-                });
+                protyle.scroll.loadDynamic(protyle, 2);
             }
         }, Constants.TIMEOUT_COUNT);// 需等待滚动阻塞、后台处理完成。否则会加载已删除的内容
         return true;

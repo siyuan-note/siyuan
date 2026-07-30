@@ -7,11 +7,19 @@ import {goEnd, goHome} from "../wysiwyg/commonHotkey";
 import {showTooltip} from "../../dialog/tooltip";
 import {isEncryptedBox} from "../../util/pathName";
 import {updateScrollVisibility} from "./visibility";
+import {
+    DynamicLoadState,
+    type IDynamicLoadRequest,
+    type TDynamicLoadMode
+} from "./dynamicLoadState";
 
 export class Scroll {
     public element: HTMLElement;
     private parentElement: HTMLElement;
     private inputElement: HTMLInputElement;
+    private dynamicLoadState = new DynamicLoadState();
+    private dynamicLoadAbortController?: AbortController;
+    private dynamicLoadFinish?: () => void;
     public lastScrollTop: number;
     public keepLazyLoad: boolean;   // 保持加载内容
 
@@ -60,6 +68,83 @@ export class Scroll {
                 protyle.contentElement.scrollTop += event.deltaY;
             }
         }, {passive: true});
+    }
+
+    public loadDynamic(protyle: IProtyle, mode: TDynamicLoadMode, options?: {
+        beforeApply?: () => void,
+        onFinish?: () => void,
+    }) {
+        const anchorElement = mode === 1 ?
+            protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
+        const anchorID = anchorElement?.getAttribute("data-node-id");
+        const rootID = protyle.block.rootID;
+        const eof = anchorElement?.getAttribute("data-eof");
+        if (!anchorID || !rootID || eof === (mode === 1 ? "1" : "2")) {
+            return false;
+        }
+        // 同一编辑器的动态加载需要串行，避免相同边界响应被重复追加 https://github.com/siyuan-note/siyuan/issues/18459
+        const request = this.dynamicLoadState.begin(rootID, anchorID, mode);
+        if (!request) {
+            return false;
+        }
+
+        const abortController = new AbortController();
+        this.dynamicLoadAbortController = abortController;
+        this.dynamicLoadFinish = options?.onFinish;
+        protyle.wysiwyg.element.setAttribute("data-top", protyle.contentElement.scrollTop.toString());
+        const getDocParam: IObject = {
+            id: anchorID,
+            mode,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            getDocParam.notebook = protyle.notebookId;
+        }
+        void fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
+            const currentAnchor = mode === 1 ?
+                protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
+            const currentAnchorID = currentAnchor?.getAttribute("data-node-id");
+            if (!protyle.element.isConnected ||
+                !this.dynamicLoadState.isCurrent(request, protyle.block.rootID, currentAnchorID)) {
+                return;
+            }
+            options?.beforeApply?.();
+            onGet({
+                data: getResponse,
+                protyle,
+                action: [
+                    mode === 1 ? Constants.CB_GET_BEFORE : Constants.CB_GET_APPEND,
+                    Constants.CB_GET_UNCHANGEID
+                ],
+            });
+        }, undefined, undefined, abortController.signal).finally(() => {
+            this.finishDynamicLoad(request, protyle);
+        });
+        return true;
+    }
+
+    public invalidateDynamicLoad(protyle: IProtyle) {
+        if (!this.dynamicLoadState.invalidate()) {
+            return;
+        }
+        const abortController = this.dynamicLoadAbortController;
+        const onFinish = this.dynamicLoadFinish;
+        this.dynamicLoadAbortController = undefined;
+        this.dynamicLoadFinish = undefined;
+        protyle.wysiwyg.element.removeAttribute("data-top");
+        onFinish?.();
+        abortController?.abort();
+    }
+
+    private finishDynamicLoad(request: IDynamicLoadRequest, protyle: IProtyle) {
+        if (!this.dynamicLoadState.finish(request)) {
+            return;
+        }
+        const onFinish = this.dynamicLoadFinish;
+        this.dynamicLoadAbortController = undefined;
+        this.dynamicLoadFinish = undefined;
+        protyle.wysiwyg.element.removeAttribute("data-top");
+        onFinish?.();
     }
 
     private setIndex(protyle: IProtyle) {

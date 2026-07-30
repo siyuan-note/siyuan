@@ -953,6 +953,10 @@ export const zoomOut = (options: {
     if (options.protyle.options.backlinkData) {
         return;
     }
+    if (options.id !== options.protyle.block.rootID) {
+        options.protyle.breadcrumb?.element.parentElement.querySelector('[data-type="context"]')
+            ?.classList.remove("block__icon--active");
+    }
     if (typeof options.isPushBack === "undefined") {
         options.isPushBack = true;
     }

@@ -455,6 +455,7 @@ export class Gutter {
                 }
                 if (buttonElement.getAttribute("data-type") === "NodeHeading") {
                     foldHeadingGroup(protyle, foldElement, "siblings");
+                    hideElements(["gutter"], protyle);
                 } else if (buttonElement.getAttribute("data-type") === "NodeListItem" && foldElement.parentElement.getAttribute("data-node-id")) {
                     // 折叠同级
                     let hasFold = true;
@@ -2897,6 +2898,7 @@ export class Gutter {
                 label: window.siyuan.languages.foldSiblingHeadings,
                 accelerator: updateHotkeyTip("⌥" + window.siyuan.languages.click),
                 async click() {
+                    hideElements(["gutter"], protyle);
                     await foldHeadingGroup(protyle, nodeElement, "siblings");
                     focusBlock(nodeElement);
                 }

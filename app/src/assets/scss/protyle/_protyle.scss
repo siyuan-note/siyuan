@@ -808,6 +808,7 @@ table + .protyle-action__table {
 
     &--row,
     &--column {
+      border-radius: 0;
       cursor: grab;
     }
 
@@ -824,6 +825,7 @@ table + .protyle-action__table {
   &__add {
     width: 24px;
     height: 24px;
+    border-radius: 0;
   }
 
   &__selection {

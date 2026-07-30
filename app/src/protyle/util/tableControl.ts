@@ -15,6 +15,7 @@ import {
 } from "./table";
 
 type TableSelectionMode = "row" | "column" | "cell";
+type TableControlType = TableSelectionMode | "add-row" | "add-column";
 
 interface ITableSelection {
     node: HTMLElement;
@@ -107,6 +108,7 @@ const replaceCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
 };
 
 const getCellText = (cell: HTMLTableCellElement) => cell.innerText.replace(/\n+$/g, "");
+const TABLE_EDGE_CONTROL_SIZE = 28;
 
 export class TableControl {
     private protyle: IProtyle;
@@ -120,6 +122,7 @@ export class TableControl {
     private dropIndicator: HTMLElement;
     private selection: ITableSelection;
     private hoverCell: HTMLTableCellElement;
+    private hoverType: TableControlType;
     private selectionElements: HTMLElement[] = [];
     private selectionElementIndex = 0;
     private selectedCells: HTMLTableCellElement[] = [];
@@ -191,15 +194,20 @@ export class TableControl {
     private bindEvents() {
         const signal = this.abortController.signal;
         this.wysiwygElement.addEventListener("pointermove", event => {
-            const cell = getCell(event.target);
+            const targetCell = getCell(event.target);
+            const edgeHover = targetCell ? undefined : this.getEdgeHover(event.clientX, event.clientY);
+            const cell = targetCell || edgeHover?.cell;
             if (cell && getTableNode(cell) && !this.protyle.disabled) {
-                if (cell === this.hoverCell) {
+                const hoverType = edgeHover?.type || "cell";
+                if (cell === this.hoverCell && hoverType === this.hoverType) {
                     return;
                 }
                 this.hoverCell = cell;
+                this.hoverType = hoverType;
                 this.scheduleRender();
             } else if (this.hoverCell) {
                 this.hoverCell = undefined;
+                this.hoverType = undefined;
                 this.scheduleRender();
             }
         }, {signal});
@@ -208,6 +216,7 @@ export class TableControl {
                 return;
             }
             this.hoverCell = undefined;
+            this.hoverType = undefined;
             this.scheduleRender();
         }, {signal});
         this.wysiwygElement.addEventListener("pointerdown", event => {
@@ -290,6 +299,7 @@ export class TableControl {
                 return;
             }
             this.hoverCell = undefined;
+            this.hoverType = undefined;
             this.scheduleRender();
         }, {signal});
     }
@@ -598,6 +608,76 @@ export class TableControl {
         return intersectRects(tableRect, wrapperRect, contentRect);
     }
 
+    private getEdgeHover(clientX: number, clientY: number) {
+        const candidates: {
+            cell: HTMLTableCellElement;
+            type: Exclude<TableControlType, "cell">;
+            distance: number;
+        }[] = [];
+        this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
+            const tableRect = table.getBoundingClientRect();
+            const viewportRect = this.getTableViewportRect(table);
+            const grid = buildTableGrid(table);
+            if (clientX >= viewportRect.left - TABLE_EDGE_CONTROL_SIZE && clientX <= viewportRect.left &&
+                clientY >= viewportRect.top && clientY <= viewportRect.bottom) {
+                const rows = Array.from(table.rows);
+                const rowIndex = rows.findIndex(row => {
+                    const rect = intersectRects(row.getBoundingClientRect(), viewportRect);
+                    return rect.height > 0 && clientY >= rect.top && clientY <= rect.bottom;
+                });
+                const cell = grid.grid[rowIndex]?.find(item => item);
+                if (cell) {
+                    candidates.push({
+                        cell,
+                        type: "row",
+                        distance: viewportRect.left - clientX,
+                    });
+                }
+            }
+            if (clientY >= viewportRect.top - TABLE_EDGE_CONTROL_SIZE && clientY <= viewportRect.top &&
+                clientX >= viewportRect.left && clientX <= viewportRect.right) {
+                const cells = Array.from(new Set(grid.grid[0]?.filter(item => item) || []));
+                const cell = cells.find(item => {
+                    const rect = intersectRects(item.getBoundingClientRect(), viewportRect);
+                    return rect.width > 0 && clientX >= rect.left && clientX <= rect.right;
+                });
+                if (cell) {
+                    candidates.push({
+                        cell,
+                        type: "column",
+                        distance: viewportRect.top - clientY,
+                    });
+                }
+            }
+            if (tableRect.right <= viewportRect.right + 1 &&
+                clientX >= tableRect.right && clientX <= tableRect.right + TABLE_EDGE_CONTROL_SIZE &&
+                clientY >= viewportRect.top && clientY <= viewportRect.bottom) {
+                const cell = grid.cellInfos[0]?.cell;
+                if (cell) {
+                    candidates.push({
+                        cell,
+                        type: "add-column",
+                        distance: clientX - tableRect.right,
+                    });
+                }
+            }
+            if (tableRect.bottom <= viewportRect.bottom + 1 &&
+                clientY >= tableRect.bottom && clientY <= tableRect.bottom + TABLE_EDGE_CONTROL_SIZE &&
+                clientX >= viewportRect.left && clientX <= viewportRect.right) {
+                const cell = grid.cellInfos[0]?.cell;
+                if (cell) {
+                    candidates.push({
+                        cell,
+                        type: "add-row",
+                        distance: clientY - tableRect.bottom,
+                    });
+                }
+            }
+        });
+        candidates.sort((a, b) => a.distance - b.distance);
+        return candidates[0];
+    }
+
     private appendSelectionRect(rect: ITableControlRect, viewportRect: ITableControlRect) {
         const visibleRect = intersectRects(rect, viewportRect);
         if (visibleRect.width === 0 || visibleRect.height === 0) {
@@ -641,29 +721,40 @@ export class TableControl {
                 (this.selection?.table === table && this.selection.mode === "row" &&
                     this.selection.indexes.size > 1 && this.selection.indexes.has(0)));
             this.columnHandle.classList.toggle("protyle-table-control__handle--drag-disabled", merged);
-            if (visibleRowRect.width > 0 && visibleRowRect.height > 0) {
+            if (this.hoverType === "row" && visibleRowRect.width > 0 && visibleRowRect.height > 0) {
                 this.rowHandle.classList.remove("fn__none");
-                this.setPosition(this.rowHandle, viewportRect.left - 11,
+                this.rowHandle.style.width = `${TABLE_EDGE_CONTROL_SIZE}px`;
+                this.rowHandle.style.height = `${visibleRowRect.height}px`;
+                this.setPosition(this.rowHandle, viewportRect.left - TABLE_EDGE_CONTROL_SIZE / 2,
                     visibleRowRect.top + visibleRowRect.height / 2);
             }
-            if (visibleCellRect.width > 0 && viewportRect.height > 0) {
+            if (this.hoverType === "column" && visibleCellRect.width > 0 && viewportRect.height > 0) {
                 this.columnHandle.classList.remove("fn__none");
+                this.columnHandle.style.width = `${visibleCellRect.width}px`;
+                this.columnHandle.style.height = `${TABLE_EDGE_CONTROL_SIZE}px`;
                 this.setPosition(this.columnHandle, visibleCellRect.left + visibleCellRect.width / 2,
-                    viewportRect.top - 11);
+                    viewportRect.top - TABLE_EDGE_CONTROL_SIZE / 2);
             }
-            if (visibleCellRect.width > 0 && visibleCellRect.height > 0) {
+            if (this.hoverType === "cell" && visibleCellRect.width > 0 && visibleCellRect.height > 0) {
                 this.cellHandle.classList.remove("fn__none");
                 this.setPosition(this.cellHandle, visibleCellRect.right - 5, visibleCellRect.top + 5);
             }
-            if (viewportRect.width > 0 && tableRect.bottom <= viewportRect.bottom + 1 &&
+            if (this.hoverType === "add-row" && viewportRect.width > 0 &&
+                tableRect.bottom <= viewportRect.bottom + 1 &&
                 tableRect.bottom >= viewportRect.top) {
                 this.addRowButton.classList.remove("fn__none");
-                this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2, tableRect.bottom + 7);
+                this.addRowButton.style.width = `${viewportRect.width}px`;
+                this.addRowButton.style.height = `${TABLE_EDGE_CONTROL_SIZE}px`;
+                this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2,
+                    tableRect.bottom + TABLE_EDGE_CONTROL_SIZE / 2);
             }
-            if (viewportRect.height > 0 && tableRect.right <= viewportRect.right + 1 &&
+            if (this.hoverType === "add-column" && viewportRect.height > 0 &&
+                tableRect.right <= viewportRect.right + 1 &&
                 tableRect.right >= viewportRect.left) {
                 this.addColumnButton.classList.remove("fn__none");
-                this.setPosition(this.addColumnButton, tableRect.right + 7,
+                this.addColumnButton.style.width = `${TABLE_EDGE_CONTROL_SIZE}px`;
+                this.addColumnButton.style.height = `${viewportRect.height}px`;
+                this.setPosition(this.addColumnButton, tableRect.right + TABLE_EDGE_CONTROL_SIZE / 2,
                     viewportRect.top + viewportRect.height / 2);
             }
         }
@@ -1310,8 +1401,25 @@ export class TableControl {
             return;
         }
         this.dragState.dragging = true;
-        const cell = getCell(document.elementFromPoint(event.clientX, event.clientY));
-        if (!cell || getTableNode(cell) !== this.selection.node) {
+        const grid = this.selectionGrid || buildTableGrid(this.selection.table);
+        const viewportRect = this.getTableViewportRect(this.selection.table);
+        let cell: HTMLTableCellElement;
+        if (this.dragState.mode === "row") {
+            const rowIndex = Array.from(this.selection.table.rows).findIndex(row => {
+                const rect = intersectRects(row.getBoundingClientRect(), viewportRect);
+                return rect.height > 0 && event.clientY >= rect.top && event.clientY <= rect.bottom;
+            });
+            cell = grid.grid[rowIndex]?.find(item => item);
+        } else {
+            cell = grid.grid[0]?.find(item => {
+                if (!item) {
+                    return false;
+                }
+                const rect = intersectRects(item.getBoundingClientRect(), viewportRect);
+                return rect.width > 0 && event.clientX >= rect.left && event.clientX <= rect.right;
+            });
+        }
+        if (!cell) {
             this.dragState.target = -1;
             this.dropIndicator.classList.add("fn__none");
             return;
@@ -1321,7 +1429,6 @@ export class TableControl {
             return;
         }
         const rect = this.dragState.mode === "row" ? cell.parentElement.getBoundingClientRect() : cell.getBoundingClientRect();
-        const viewportRect = this.getTableViewportRect(this.selection.table);
         const visibleRect = intersectRects(rect, viewportRect);
         if (visibleRect.width === 0 || visibleRect.height === 0) {
             this.dragState.target = -1;

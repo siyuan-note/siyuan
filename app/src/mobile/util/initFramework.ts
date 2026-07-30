@@ -26,6 +26,7 @@ import {Menu} from "../../plugin/Menu";
 import {showMessage} from "../../dialog/message";
 import {setTitle} from "../../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../../protyle/render/av/locate";
+import {MobileTabs} from "../tabs/MobileTabs";
 
 let custom: MobileCustom;
 const openDockMenu = (app: App) => {
@@ -171,7 +172,17 @@ export const initFramework = async (app: App, isStart: boolean) => {
     document.getElementById("modelClose").addEventListener("click", () => {
         closeModel();
     });
+    window.siyuan.mobile.tabs = new MobileTabs(app);
+    const toolbarTabsElement = document.getElementById("toolbarTabs");
+    toolbarTabsElement.setAttribute("aria-label", window.siyuan.languages.mobileTabs);
+    toolbarTabsElement.addEventListener("click", () => {
+        activeBlur();
+        window.siyuan.mobile.tabs.openOverview();
+    });
     initEditorName();
+    if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
+        window.siyuan.mobile.tabs.closeAll();
+    }
     if (getOpenNotebookCount() > 0) {
         if (window.JSAndroid && window.openFileByURL(window.JSAndroid.getBlockURL())) {
             return;
@@ -193,12 +204,18 @@ export const initFramework = async (app: App, isStart: boolean) => {
         if (openMobileOnboarding(app)) {
             return;
         }
-        if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
-            setEmpty(app);
+        if (isStart && window.siyuan.config.fileTree.tabStartupMode === 1) {
+            window.siyuan.mobile.tabs.createBlank();
+            return;
+        }
+        if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
+            return;
+        }
+        if (await window.siyuan.mobile.tabs.restore()) {
             return;
         }
         const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
-        fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
+        fetchPost("/api/block/checkBlockExist", {id: localDoc?.id}, existResponse => {
             if (existResponse.data) {
                 openMobileFileById(app, localDoc.id, [Constants.CB_GET_SCROLL]);
             } else {
@@ -215,7 +232,11 @@ export const initFramework = async (app: App, isStart: boolean) => {
         });
         return;
     }
-    setEmpty(app);
+    if (isStart && window.siyuan.config.fileTree.tabStartupMode === 1) {
+        window.siyuan.mobile.tabs.createBlank();
+    } else {
+        setEmpty(app);
+    }
 };
 
 const initEditorName = () => {

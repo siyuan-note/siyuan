@@ -66,7 +66,8 @@ export const getDocByScroll = (options: {
     mergedOptions?: IProtyleOptions,
     cb?: (keys: string[]) => void
     focus?: boolean,
-    updateReadonly?: boolean
+    updateReadonly?: boolean,
+    signal?: AbortSignal
 }) => {
     let actions: TProtyleAction[] = [];
     if (options.mergedOptions) {
@@ -116,7 +117,7 @@ export const getDocByScroll = (options: {
                         } : undefined,
                         updateReadonly: options.updateReadonly
                     });
-                });
+                }, undefined, undefined, options.signal);
             } else {
                 actions.push(Constants.CB_GET_ALL);
                 onGet({
@@ -131,7 +132,7 @@ export const getDocByScroll = (options: {
                     updateReadonly: options.updateReadonly
                 });
             }
-        });
+        }, undefined, undefined, options.signal);
         return;
     }
     const getDocParam: Record<string, any> = {
@@ -159,5 +160,5 @@ export const getDocByScroll = (options: {
             } : undefined,
             updateReadonly: options.updateReadonly
         });
-    });
+    }, undefined, undefined, options.signal);
 };

@@ -1,4 +1,12 @@
 {
+  "newTab": "แท็บใหม่",
+  "mobileTabs": "แท็บ",
+  "tabStartupClose": "ปิดแท็บที่เปิดอยู่",
+  "tabStartupNew": "เปิดแท็บว่างใหม่",
+  "tabStartupRestore": "คืนค่าแท็บก่อนหน้า",
+  "tabStartupModeTip": "เลือกวิธีจัดการแท็บเมื่อเริ่มอินเทอร์เฟซ",
+  "tabStartupMode": "เมื่อเริ่มต้น",
+  "tabStartup": "การเริ่มต้นแท็บ",
   "configGroupMarkdownBlockSyntax": "ไวยากรณ์บล็อก Markdown",
   "codeBlockMiddleDot": "ทางลัดบล็อกโค้ดด้วยจุดกึ่งกลาง",
   "codeBlockMiddleDotTip": "เมื่อเปิดใช้งาน การป้อน <code class='fn__code'>···</code> แล้วกด Enter หรือป้อนจุดกึ่งกลางอีกหนึ่งตัวจะแปลงเป็นบล็อกโค้ด",

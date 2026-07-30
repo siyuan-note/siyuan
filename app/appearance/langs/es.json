@@ -1,4 +1,12 @@
 {
+  "newTab": "Nueva pestaña",
+  "mobileTabs": "Pestañas",
+  "tabStartupClose": "Cerrar pestañas abiertas",
+  "tabStartupNew": "Abrir una pestaña nueva en blanco",
+  "tabStartupRestore": "Restaurar pestañas anteriores",
+  "tabStartupModeTip": "Elige cómo se gestionan las pestañas al iniciar la interfaz",
+  "tabStartupMode": "Al iniciar",
+  "tabStartup": "Inicio de pestañas",
   "configGroupMarkdownBlockSyntax": "Sintaxis de bloques Markdown",
   "codeBlockMiddleDot": "Atajo de bloque de código con punto medio",
   "codeBlockMiddleDotTip": "Cuando está activado, al introducir <code class='fn__code'>···</code> y pulsar Intro o escribir otro punto medio, se convierte en un bloque de código",

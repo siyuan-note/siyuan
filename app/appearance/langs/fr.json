@@ -1,4 +1,12 @@
 {
+  "newTab": "Nouvel onglet",
+  "mobileTabs": "Onglets",
+  "tabStartupClose": "Fermer les onglets ouverts",
+  "tabStartupNew": "Ouvrir un nouvel onglet vide",
+  "tabStartupRestore": "Restaurer les onglets précédents",
+  "tabStartupModeTip": "Choisissez comment les onglets sont gérés au démarrage de l’interface",
+  "tabStartupMode": "Au démarrage",
+  "tabStartup": "Démarrage des onglets",
   "configGroupMarkdownBlockSyntax": "Syntaxe de bloc Markdown",
   "codeBlockMiddleDot": "Raccourci de bloc de code avec point médian",
   "codeBlockMiddleDotTip": "Lorsque cette option est activée, la saisie de <code class='fn__code'>···</code> suivie d’Entrée ou d’un autre point médian est convertie en bloc de code",

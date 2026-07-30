@@ -1,4 +1,12 @@
 {
+  "newTab": "Yeni sekme",
+  "mobileTabs": "Sekmeler",
+  "tabStartupClose": "Açık sekmeleri kapat",
+  "tabStartupNew": "Yeni boş sekme aç",
+  "tabStartupRestore": "Önceki sekmeleri geri yükle",
+  "tabStartupModeTip": "Arayüz başlatıldığında sekmelerin nasıl işleneceğini seçin",
+  "tabStartupMode": "Başlangıçta",
+  "tabStartup": "Sekme başlangıcı",
   "configGroupMarkdownBlockSyntax": "Markdown Blok Sözdizimi",
   "codeBlockMiddleDot": "Orta nokta kod bloğu kısayolu",
   "codeBlockMiddleDotTip": "Etkinleştirildiğinde, <code class='fn__code'>···</code> yazıp Enter tuşuna basmak veya bir orta nokta daha girmek metni kod bloğuna dönüştürür",

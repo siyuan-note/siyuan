@@ -566,6 +566,16 @@ func setFiletree(c *gin.Context) {
 	if 32 < fileTree.MaxOpenTabCount {
 		fileTree.MaxOpenTabCount = 32
 	}
+	if nil == fileTree.TabStartupMode {
+		fileTree.TabStartupMode = new(int)
+		if fileTree.CloseTabsOnStart {
+			*fileTree.TabStartupMode = 2
+		}
+	}
+	if 0 > *fileTree.TabStartupMode || 2 < *fileTree.TabStartupMode {
+		*fileTree.TabStartupMode = 0
+	}
+	fileTree.CloseTabsOnStart = 2 == *fileTree.TabStartupMode
 
 	if conf.MinFileTreeRecentDocsListCount > fileTree.RecentDocsMaxListCount {
 		fileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount

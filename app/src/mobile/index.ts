@@ -36,7 +36,6 @@ import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 import {registerServiceWorker} from "../util/serviceWorker";
 import {loadPlugins} from "../plugin/loader";
-import {saveScroll} from "../protyle/scroll/saveScroll";
 import {removeBlock} from "../protyle/wysiwyg/remove";
 import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
 import {updateCardHV} from "../card/util";
@@ -153,14 +152,10 @@ class App {
             };
         }
         window.addEventListener("beforeunload", () => {
-            if (window.siyuan.mobile.editor?.protyle) {
-                saveScroll(window.siyuan.mobile.editor.protyle);
-            }
+            window.siyuan.mobile.tabs?.save();
         }, false);
         window.addEventListener("pagehide", () => {
-            if (window.siyuan.mobile.editor?.protyle) {
-                saveScroll(window.siyuan.mobile.editor.protyle);
-            }
+            window.siyuan.mobile.tabs?.save();
         }, false);
         // 判断手机横竖屏状态
         window.matchMedia("(orientation:portrait)").addEventListener("change", () => {

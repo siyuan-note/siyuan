@@ -1,4 +1,12 @@
 {
+  "newTab": "New Tab",
+  "mobileTabs": "Tabs",
+  "tabStartupClose": "Close Open Tabs",
+  "tabStartupNew": "Open a New Blank Tab",
+  "tabStartupRestore": "Restore Previous Tabs",
+  "tabStartupModeTip": "Choose how tabs are handled when the interface starts",
+  "tabStartupMode": "At Startup",
+  "tabStartup": "Tab Startup",
   "configGroupMarkdownBlockSyntax": "Markdown Block Syntax",
   "codeBlockMiddleDot": "Middle dot code block shortcut",
   "codeBlockMiddleDotTip": "When enabled, entering <code class='fn__code'>···</code> followed by Enter or another middle dot converts it to a code block",

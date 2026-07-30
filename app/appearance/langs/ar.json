@@ -1,4 +1,12 @@
 {
+  "newTab": "علامة تبويب جديدة",
+  "mobileTabs": "علامات التبويب",
+  "tabStartupClose": "إغلاق علامات التبويب المفتوحة",
+  "tabStartupNew": "فتح علامة تبويب فارغة جديدة",
+  "tabStartupRestore": "استعادة علامات التبويب السابقة",
+  "tabStartupModeTip": "اختر كيفية التعامل مع علامات التبويب عند بدء الواجهة",
+  "tabStartupMode": "عند بدء التشغيل",
+  "tabStartup": "بدء علامات التبويب",
   "configGroupMarkdownBlockSyntax": "صيغة كتل Markdown",
   "codeBlockMiddleDot": "اختصار كتلة التعليمات البرمجية بالنقطة الوسطى",
   "codeBlockMiddleDotTip": "عند التمكين، يؤدي إدخال <code class='fn__code'>···</code> ثم الضغط على Enter أو إدخال نقطة وسطى أخرى إلى التحويل إلى كتلة تعليمات برمجية",

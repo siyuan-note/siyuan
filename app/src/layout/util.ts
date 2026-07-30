@@ -473,26 +473,20 @@ export const JSONToCenter = (
 export const JSONToLayout = (app: App, isStart: boolean) => {
     JSONToCenter(app, window.siyuan.config.uiLayout.layout, undefined);
     JSONToDock(window.siyuan.config.uiLayout, app);
-    // 启动时不打开页签，需要移除没有钉住的页签
-    if (window.siyuan.config.fileTree.closeTabsOnStart) {
-        /// #if BROWSER
-        if (!sessionStorage.getItem(Constants.LOCAL_SESSION_FIRSTLOAD)) {
-            getAllTabs().forEach(item => {
-                if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                    item.parent.removeTab(item.id, false, false, false);
-                }
-            });
-            sessionStorage.setItem(Constants.LOCAL_SESSION_FIRSTLOAD, "true");
-        }
-        /// #else
-        if (isStart) {
-            getAllTabs().forEach(item => {
-                if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                    item.parent.removeTab(item.id, false, false, false);
-                }
-            });
-        }
-        /// #endif
+    let applyTabStartupMode = isStart;
+    /// #if BROWSER
+    applyTabStartupMode = !sessionStorage.getItem(Constants.LOCAL_SESSION_FIRSTLOAD);
+    if (applyTabStartupMode) {
+        sessionStorage.setItem(Constants.LOCAL_SESSION_FIRSTLOAD, "true");
+    }
+    /// #endif
+    // 关闭已打开页签时保留钉住的页签
+    if (applyTabStartupMode && window.siyuan.config.fileTree.tabStartupMode === 2) {
+        getAllTabs().forEach(item => {
+            if (item.headElement && !item.headElement.classList.contains("item--pin")) {
+                item.parent.removeTab(item.id, false, false, false);
+            }
+        });
     }
     // 移除没有插件的 tab
     document.querySelectorAll('li[data-type="tab-header"]').forEach((item: HTMLElement) => {
@@ -541,6 +535,15 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             },
         });
     } else {
+        if (applyTabStartupMode && window.siyuan.config.fileTree.tabStartupMode === 1) {
+            document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item) => {
+                item.removeAttribute("data-init-active");
+            });
+            const wnd = getWndByLayout(window.siyuan.layout.centerLayout);
+            if (wnd && !wnd.children.some((item) => !item.headElement)) {
+                wnd.addTab(newCenterEmptyTab(app), false, false);
+            }
+        }
         let latestTabHeaderElement: HTMLElement;
         document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
             if (!latestTabHeaderElement) {

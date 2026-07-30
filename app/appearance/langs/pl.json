@@ -1,4 +1,12 @@
 {
+  "newTab": "Nowa karta",
+  "mobileTabs": "Karty",
+  "tabStartupClose": "Zamknij otwarte karty",
+  "tabStartupNew": "Otwórz nową pustą kartę",
+  "tabStartupRestore": "Przywróć poprzednie karty",
+  "tabStartupModeTip": "Wybierz sposób obsługi kart podczas uruchamiania interfejsu",
+  "tabStartupMode": "Przy uruchamianiu",
+  "tabStartup": "Uruchamianie kart",
   "configGroupMarkdownBlockSyntax": "Składnia blokowa Markdown",
   "codeBlockMiddleDot": "Skrót bloku kodu ze środkową kropką",
   "codeBlockMiddleDotTip": "Po włączeniu wpisanie <code class='fn__code'>···</code> i naciśnięcie Enter lub wpisanie kolejnej środkowej kropki przekształca tekst w blok kodu",

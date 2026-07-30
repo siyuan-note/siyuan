@@ -70,18 +70,28 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.noSplitScreenWhenOpenTab,
         desc: window.siyuan.languages.noSplitScreenWhenOpenTabTip,
     });
+};
+/// #endif
+
+const registerTabStartupGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("tabStartup", window.siyuan.languages.tabStartup);
     group.number("fileTree.maxOpenTabCount", {
         title: window.siyuan.languages.tabLimit,
         desc: window.siyuan.languages.tabLimit1,
         min: 1,
         max: 32,
     });
-    group.switch("fileTree.closeTabsOnStart", {
-        title: window.siyuan.languages.fileTree9,
-        desc: window.siyuan.languages.fileTree10,
+    group.select("fileTree.tabStartupMode", {
+        title: window.siyuan.languages.tabStartupMode,
+        desc: window.siyuan.languages.tabStartupModeTip,
+        options: [
+            {value: 0, label: window.siyuan.languages.tabStartupRestore},
+            {value: 1, label: window.siyuan.languages.tabStartupNew},
+            {value: 2, label: window.siyuan.languages.tabStartupClose},
+        ],
+        save: (value) => fileConfigApi.patch("tabStartupMode", value),
     });
 };
-/// #endif
 
 const registerFileNewDocumentGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("newDocument", window.siyuan.languages.configGroupNewDocument);
@@ -321,6 +331,7 @@ export const registerFileTab = (tab: SettingTabBuilder) => {
     /// #if !MOBILE
     registerFileTreeBehaviorGroup(tab);
     /// #endif
+    registerTabStartupGroup(tab);
     registerFileNewDocumentGroup(tab);
     registerFileManagementGroup(tab);
     registerFileOthersGroup(tab);

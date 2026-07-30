@@ -37,6 +37,7 @@ import {exportMarkdownZip} from "../protyle/export/exportMd";
 import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 /// #if MOBILE
 import {openEmojiPanel} from "../emoji";
+import {openMobileFileByIdInNewTab} from "../mobile/editor";
 /// #endif
 
 const confirmEncryptedExport = (notebookId: string, callback: () => void) => {
@@ -492,6 +493,17 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     const id = liElement.getAttribute("data-node-id");
     let name = liElement.getAttribute("data-name");
     name = getDisplayName(name, false, true);
+    /// #if MOBILE
+    window.siyuan.menus.menu.append(new MenuItem({
+        id: "openInNewTab",
+        label: window.siyuan.languages.openInNewTab,
+        icon: "iconAdd",
+        click: () => {
+            openMobileFileByIdInNewTab(app, id, [Constants.CB_GET_SCROLL], undefined, notebookId);
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({id: "separator_open", type: "separator"}).element);
+    /// #endif
     /// #if !MOBILE
     if (window.siyuan.config.fileTree.parentDocClickExpand && Number(liElement.getAttribute("data-count")) > 0) {
         window.siyuan.menus.menu.append(new MenuItem({

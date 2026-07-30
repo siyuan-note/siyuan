@@ -557,6 +557,10 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_DOCINFO] = {
             id: "",
         };
+        defaultStorage[Constants.LOCAL_MOBILE_TABS] = {
+            version: 1,
+            tabs: [],
+        };
         defaultStorage[Constants.LOCAL_IMAGES] = {
             file: "1f4c4",
             note: "1f5c3",
@@ -588,7 +592,8 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_RECENT_DOCS] = {type: "viewedAt"};   // TRecentDocsSort
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
-            Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
+            Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_MOBILE_TABS,
+            Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,

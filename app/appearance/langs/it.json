@@ -1,4 +1,12 @@
 {
+  "newTab": "Nuova scheda",
+  "mobileTabs": "Schede",
+  "tabStartupClose": "Chiudi le schede aperte",
+  "tabStartupNew": "Apri una nuova scheda vuota",
+  "tabStartupRestore": "Ripristina le schede precedenti",
+  "tabStartupModeTip": "Scegli come gestire le schede all’avvio dell’interfaccia",
+  "tabStartupMode": "All’avvio",
+  "tabStartup": "Avvio delle schede",
   "configGroupMarkdownBlockSyntax": "Sintassi Markdown a blocchi",
   "codeBlockMiddleDot": "Scorciatoia per blocco di codice con punto centrale",
   "codeBlockMiddleDotTip": "Quando è attiva, digitando <code class='fn__code'>···</code> seguito da Invio o da un altro punto centrale il testo viene convertito in un blocco di codice",

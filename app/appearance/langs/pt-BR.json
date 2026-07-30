@@ -1,4 +1,12 @@
 {
+  "newTab": "Nova aba",
+  "mobileTabs": "Abas",
+  "tabStartupClose": "Fechar abas abertas",
+  "tabStartupNew": "Abrir uma nova aba em branco",
+  "tabStartupRestore": "Restaurar abas anteriores",
+  "tabStartupModeTip": "Escolha como as abas são tratadas ao iniciar a interface",
+  "tabStartupMode": "Ao iniciar",
+  "tabStartup": "Inicialização das abas",
   "configGroupMarkdownBlockSyntax": "Sintaxe de bloco Markdown",
   "codeBlockMiddleDot": "Atalho de bloco de código com ponto médio",
   "codeBlockMiddleDotTip": "Quando ativado, inserir <code class='fn__code'>···</code> seguido de Enter ou de outro ponto médio converte o texto em um bloco de código",

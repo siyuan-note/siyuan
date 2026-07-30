@@ -147,6 +147,112 @@
     min-height: 30px;
     line-height: 30px;
   }
+
+  &__tabs {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    color: var(--b3-theme-on-surface);
+    background: transparent;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover,
+    &:focus {
+      background-color: var(--b3-list-hover);
+    }
+  }
+
+  &__tabs-count {
+    min-width: 14px;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+  }
+}
+
+.mobile-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &__list {
+    flex: 1;
+    min-height: 0;
+    padding: 12px;
+    overflow: auto;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    margin-bottom: 8px;
+    padding: 4px 6px 4px 12px;
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius-b);
+    background-color: var(--b3-theme-background);
+
+    &--active {
+      border-color: var(--b3-theme-primary);
+      box-shadow: 0 0 0 1px var(--b3-theme-primary-lightest);
+    }
+  }
+
+  &__item-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    color: var(--b3-theme-on-surface-light);
+  }
+
+  &__item-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__close {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 12px max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    border-top: 1px solid var(--b3-border-color);
+
+    .b3-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
 }
 
 .side-panel {

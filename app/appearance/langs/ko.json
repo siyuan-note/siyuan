@@ -1,4 +1,12 @@
 {
+  "newTab": "새 탭",
+  "mobileTabs": "탭",
+  "tabStartupClose": "열린 탭 닫기",
+  "tabStartupNew": "새 빈 탭 열기",
+  "tabStartupRestore": "이전 탭 복원",
+  "tabStartupModeTip": "인터페이스 시작 시 탭 처리 방식을 선택합니다",
+  "tabStartupMode": "시작할 때",
+  "tabStartup": "탭 시작",
   "configGroupMarkdownBlockSyntax": "Markdown 블록 구문",
   "codeBlockMiddleDot": "가운뎃점 코드 블록 단축 입력",
   "codeBlockMiddleDotTip": "활성화하면 <code class='fn__code'>···</code> 입력 후 Enter 키 또는 가운뎃점을 하나 더 입력할 때 코드 블록으로 변환됩니다",

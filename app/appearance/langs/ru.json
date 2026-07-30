@@ -1,4 +1,12 @@
 {
+  "newTab": "Новая вкладка",
+  "mobileTabs": "Вкладки",
+  "tabStartupClose": "Закрыть открытые вкладки",
+  "tabStartupNew": "Открыть новую пустую вкладку",
+  "tabStartupRestore": "Восстановить предыдущие вкладки",
+  "tabStartupModeTip": "Выберите способ обработки вкладок при запуске интерфейса",
+  "tabStartupMode": "При запуске",
+  "tabStartup": "Запуск вкладок",
   "configGroupMarkdownBlockSyntax": "Блочный синтаксис Markdown",
   "codeBlockMiddleDot": "Быстрый ввод блока кода через среднюю точку",
   "codeBlockMiddleDotTip": "Если включено, ввод <code class='fn__code'>···</code> с последующим нажатием Enter или вводом ещё одной средней точки преобразует текст в блок кода",

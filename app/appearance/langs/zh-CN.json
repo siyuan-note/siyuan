@@ -1,4 +1,12 @@
 {
+  "newTab": "新建页签",
+  "mobileTabs": "页签",
+  "tabStartupClose": "关闭已打开的页签",
+  "tabStartupNew": "打开新的空白页签",
+  "tabStartupRestore": "恢复上次的页签",
+  "tabStartupModeTip": "选择界面启动时页签的处理方式",
+  "tabStartupMode": "启动时",
+  "tabStartup": "页签启动",
   "configGroupMarkdownBlockSyntax": "Markdown 块级语法",
   "codeBlockMiddleDot": "中点代码块快捷输入",
   "codeBlockMiddleDotTip": "启用后，输入 <code class='fn__code'>···</code> 并按回车或继续输入中点时将转换为代码块",

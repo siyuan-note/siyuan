@@ -12,6 +12,7 @@ export class Font extends ToolbarItem {
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
         this.element.addEventListener("click", () => {
+            const triggerRect = this.element.getBoundingClientRect();
             protyle.toolbar.element.classList.add("fn__none");
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
@@ -22,7 +23,7 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElementCloseCB = undefined;
             focusByRange(protyle.toolbar.range);
             /// #if !MOBILE
-            protyle.toolbar.setSelectionElementPosition(protyle, protyle.toolbar.subElement);
+            protyle.toolbar.setSelectionElementPosition(protyle, protyle.toolbar.subElement, triggerRect);
             /// #endif
         });
     }

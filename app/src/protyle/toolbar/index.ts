@@ -192,7 +192,7 @@ export class Toolbar {
         });
     }
 
-    public setSelectionElementPosition(protyle: IProtyle, element: HTMLElement) {
+    public setSelectionElementPosition(protyle: IProtyle, element: HTMLElement, triggerRect?: DOMRect) {
         if (!this.rangePosition || !this.range) {
             return;
         }
@@ -211,7 +211,11 @@ export class Toolbar {
             (above >= protyleRect.top + 30 ?
                 above : Math.min(below, protyleRect.bottom - element.clientHeight));
         const horizontalDivisor = this.isMultipleClick ? 3 : 4;
-        setPosition(element, this.rangePosition.left - element.clientWidth / horizontalDivisor, y);
+        // 子面板与触发按钮水平居中，垂直方向继续避让选区
+        const left = triggerRect ?
+            triggerRect.left + (triggerRect.width - element.clientWidth) / 2 :
+            this.rangePosition.left - element.clientWidth / horizontalDivisor;
+        setPosition(element, left, y);
         return y;
     }
 

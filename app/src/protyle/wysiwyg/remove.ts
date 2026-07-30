@@ -256,6 +256,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         const foldTransactions = new Map<string, IWebSocketData>();
         if (!skipRefCheck) {
             const checkIDs: string[] = [];
+            const exactIDs: string[] = [];
             const selectedSuperBlocks = new Map<Element, number>();
             for (const item of selectElements) {
                 const topElement = getTopAloneElement(item);
@@ -282,12 +283,15 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             }
             selectedSuperBlocks.forEach((selectedCount, superBlock) => {
                 if (getSbChildBlockCount(superBlock) - selectedCount <= 1) {
-                    checkIDs.push(superBlock.getAttribute("data-node-id"));
+                    const superBlockID = superBlock.getAttribute("data-node-id");
+                    checkIDs.push(superBlockID);
+                    exactIDs.push(superBlockID);
                 }
             });
             if (!await confirmBlockRef({
                 scope: "blocks",
                 ids: Array.from(new Set(checkIDs)),
+                exactIDs: Array.from(new Set(exactIDs)),
                 notebook: protyle.notebookId,
             }, protyle)) {
                 return false;
@@ -627,7 +631,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         const removeBlockParent = isCallout ? blockParentElement.querySelector(".callout-content").childElementCount === 1 :
             blockParentElement.childElementCount === 2;
         if (removeBlockParent && !await confirmRefRemoval(protyle,
-            [blockParentElement.getAttribute("data-node-id")], [blockParentElement])) {
+            [blockParentElement.getAttribute("data-node-id")], [blockParentElement],
+            [blockParentElement.getAttribute("data-node-id")])) {
             return;
         }
         if (type !== "Delete") {
@@ -810,10 +815,13 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             if (editableElement.textContent.trim() === "") {
                 const id = blockElement.getAttribute("data-node-id");
                 const checkIDs = [id];
+                const exactIDs: string[] = [];
                 if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildBlockCount(parentElement) === 2) {
-                    checkIDs.push(parentElement.getAttribute("data-node-id"));
+                    const parentID = parentElement.getAttribute("data-node-id");
+                    checkIDs.push(parentID);
+                    exactIDs.push(parentID);
                 }
-                if (!await confirmRefRemoval(protyle, checkIDs, [blockElement])) {
+                if (!await confirmRefRemoval(protyle, checkIDs, [blockElement], exactIDs)) {
                     return;
                 }
                 const doOperations: IOperation[] = [{
@@ -857,10 +865,13 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
     const removeId = removeElement.getAttribute("data-node-id");
     const checkIDs = [removeId];
+    const exactIDs: string[] = [];
     if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildBlockCount(parentElement) === 2) {
-        checkIDs.push(parentElement.getAttribute("data-node-id"));
+        const parentID = parentElement.getAttribute("data-node-id");
+        checkIDs.push(parentID);
+        exactIDs.push(parentID);
     }
-    if (!await confirmRefRemoval(protyle, checkIDs, [removeElement])) {
+    if (!await confirmRefRemoval(protyle, checkIDs, [removeElement], exactIDs)) {
         return;
     }
     range.insertNode(document.createElement("wbr"));
@@ -1064,10 +1075,11 @@ export const removeImage = (imgSelectElement: Element, nodeElement: HTMLElement,
     }
 };
 
-const confirmRefRemoval = async (protyle: IProtyle, ids: string[], elements: Element[]) => {
+const confirmRefRemoval = async (protyle: IProtyle, ids: string[], elements: Element[], exactIDs: string[] = []) => {
     const confirmed = await confirmBlockRef({
         scope: "blocks",
         ids,
+        exactIDs,
         notebook: protyle.notebookId,
     }, protyle);
     if (confirmed && elements.every(item => item.isConnected)) {
@@ -1085,7 +1097,8 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
     // 第一个子列表合并到上一个块的末尾
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.parentElement.parentElement.classList.contains("list")) {
         if (!await confirmRefRemoval(protyle,
-            [blockElement.parentElement.getAttribute("data-node-id")], [blockElement.parentElement])) {
+            [blockElement.parentElement.getAttribute("data-node-id")], [blockElement.parentElement],
+            [blockElement.parentElement.getAttribute("data-node-id")])) {
             return;
         }
         range.insertNode(document.createElement("wbr"));
@@ -1128,7 +1141,8 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
             return;
         }
         if (!await confirmRefRemoval(protyle,
-            [blockElement.parentElement.getAttribute("data-node-id")], [blockElement.parentElement])) {
+            [blockElement.parentElement.getAttribute("data-node-id")], [blockElement.parentElement],
+            [blockElement.parentElement.getAttribute("data-node-id")])) {
             return;
         }
         moveToPrevious(blockElement, range, isDelete);
@@ -1209,7 +1223,7 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
     const deleteFoldedListItem = previousListItem.getAttribute("fold") !== "1" ||
         (getContenteditableElement(blockElement).textContent.trim() === "" &&
             blockElement.nextElementSibling.classList.contains("protyle-attr"));
-    if (deleteFoldedListItem && !await confirmRefRemoval(protyle, [listItemId], [listItemElement])) {
+    if (deleteFoldedListItem && !await confirmRefRemoval(protyle, [listItemId], [listItemElement], [listItemId])) {
         return;
     }
     moveToPrevious(blockElement, range, isDelete);

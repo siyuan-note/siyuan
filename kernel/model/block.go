@@ -129,12 +129,12 @@ func newBlockRefCheckGroup() *blockRefCheckGroup {
 
 // CheckBlockRef 保留原有调用语义。
 func CheckBlockRef(ids []string) bool {
-	ret, _ := CheckBlockRefInBox(ids, "")
+	ret, _ := CheckBlockRefInBox(ids, nil, "")
 	return ret
 }
 
 // CheckBlockRefInBox 检查块及其容器后代是否被引用。
-func CheckBlockRefInBox(ids []string, boxID string) (ret bool, err error) {
+func CheckBlockRefInBox(ids, exactIDs []string, boxID string) (ret bool, err error) {
 	sql.FlushQueue()
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	if 1 > len(ids) {
@@ -149,6 +149,10 @@ func CheckBlockRefInBox(ids []string, boxID string) (ret bool, err error) {
 	}
 
 	group := newBlockRefCheckGroup()
+	exactIDSet := map[string]struct{}{}
+	for _, id := range exactIDs {
+		exactIDSet[id] = struct{}{}
+	}
 	selectedByRoot := map[string]map[string]map[string]struct{}{}
 	for _, bt := range bts {
 		if "d" == bt.Type && bt.ID == bt.RootID {
@@ -156,6 +160,9 @@ func CheckBlockRefInBox(ids []string, boxID string) (ret bool, err error) {
 			continue
 		}
 		group.blockIDs[bt.ID] = struct{}{}
+		if _, exact := exactIDSet[bt.ID]; exact {
+			continue
+		}
 		if nil == selectedByRoot[bt.BoxID] {
 			selectedByRoot[bt.BoxID] = map[string]map[string]struct{}{}
 		}
@@ -219,10 +226,8 @@ func CheckNotebookRef(boxID string) (ret bool, err error) {
 		return false, ErrBoxNotFound
 	}
 	group := newBlockRefCheckGroup()
-	for _, bt := range treenode.GetBlockTreesByBoxID(boxID) {
-		if bt.ID == bt.RootID {
-			group.rootIDs[bt.RootID] = struct{}{}
-		}
+	for _, rootID := range treenode.GetRootBlockIDsByBoxID(boxID) {
+		group.rootIDs[rootID] = struct{}{}
 	}
 	return existBlockRefGroup(group)
 }

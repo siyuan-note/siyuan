@@ -58,12 +58,33 @@ func checkBlockRef(c *gin.Context) {
 	}
 	switch scope {
 	case "blocks":
-		ids, parsed := parseBlockRefStringArray(arg, "ids", ret)
+		ids, parsed := parseBlockRefStringArray(arg, "ids", ret, true)
 		if !parsed {
 			return
 		}
+		var exactIDs []string
+		if _, exists := arg["exactIDs"]; exists {
+			exactIDs, parsed = parseBlockRefStringArray(arg, "exactIDs", ret, false)
+			if !parsed {
+				return
+			}
+		}
 		for _, id := range ids {
 			if util.InvalidIDPattern(id, ret) {
+				return
+			}
+		}
+		idSet := map[string]struct{}{}
+		for _, id := range ids {
+			idSet[id] = struct{}{}
+		}
+		for _, id := range exactIDs {
+			if util.InvalidIDPattern(id, ret) {
+				return
+			}
+			if _, exists := idSet[id]; !exists {
+				ret.Code = -1
+				ret.Msg = "Field [exactIDs] should be a subset of field [ids]"
 				return
 			}
 		}
@@ -75,13 +96,13 @@ func checkBlockRef(c *gin.Context) {
 			return
 		}
 		var err error
-		ret.Data, err = model.CheckBlockRefInBox(ids, notebook)
+		ret.Data, err = model.CheckBlockRefInBox(ids, exactIDs, notebook)
 		if err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
 		}
 	case "documents":
-		paths, parsed := parseBlockRefStringArray(arg, "paths", ret)
+		paths, parsed := parseBlockRefStringArray(arg, "paths", ret, true)
 		if !parsed {
 			return
 		}
@@ -111,9 +132,9 @@ func checkBlockRef(c *gin.Context) {
 	}
 }
 
-func parseBlockRefStringArray(arg map[string]any, key string, ret *gulu.Result) (values []string, ok bool) {
+func parseBlockRefStringArray(arg map[string]any, key string, ret *gulu.Result, rejectEmpty bool) (values []string, ok bool) {
 	var raw []any
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg(key, &raw, true, true)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg(key, &raw, true, rejectEmpty)) {
 		return
 	}
 	for _, value := range raw {

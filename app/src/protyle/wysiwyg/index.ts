@@ -2518,6 +2518,7 @@ export class WYSIWYG {
                 selectElements = [nodeElement];
                 autoSelectedBlock = true;
             }
+            const selectedStateElements = [...selectElements];
             let html = "";
             let textPlain = "";
             let isInCodeBlock = false;
@@ -2597,7 +2598,7 @@ export class WYSIWYG {
                     }
                     return;
                 }
-                if (selectElements.some(item => !item.isConnected || !item.classList.contains("protyle-wysiwyg--select"))) {
+                if (selectedStateElements.some(item => !item.isConnected || !item.classList.contains("protyle-wysiwyg--select"))) {
                     return;
                 }
                 needClipboardWrite = true;

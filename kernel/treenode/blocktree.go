@@ -73,6 +73,9 @@ func initDatabase(forceRebuild bool) {
 		}
 	}
 	if !forceRebuild {
+		if _, err := db.Exec("CREATE INDEX IF NOT EXISTS idx_blocktrees_box_id ON blocktrees(box_id)"); err != nil {
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree box index failed: %s", err)
+		}
 		return
 	}
 
@@ -100,6 +103,11 @@ func initDBTables() {
 	_, err = db.Exec("CREATE INDEX idx_blocktrees_root_id ON blocktrees(root_id)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocktrees_root_id] failed: %s", err)
+	}
+
+	_, err = db.Exec("CREATE INDEX idx_blocktrees_box_id ON blocktrees(box_id)")
+	if err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocktrees_box_id] failed: %s", err)
 	}
 }
 
@@ -615,6 +623,25 @@ func GetBlockTreesByBoxID(boxID string) (ret []*BlockTree) {
 	return
 }
 
+func GetRootBlockIDsByBoxID(boxID string) (ret []string) {
+	sqlStmt := "SELECT id FROM blocktrees WHERE box_id = ? AND id = root_id AND type = 'd'"
+	rows, err := queryForBox(boxID, sqlStmt, boxID)
+	if err != nil {
+		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret = append(ret, id)
+	}
+	return
+}
+
 func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 	sqlStmt := "SELECT id FROM blocktrees WHERE box_id = ?"
 	rows, err := queryForBox(boxID, sqlStmt, boxID)
@@ -974,6 +1001,7 @@ func initEncryptedBlockTreeTables(boxDB *sql.DB) (err error) {
 		"CREATE TABLE IF NOT EXISTS blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type)",
 		"CREATE INDEX IF NOT EXISTS idx_blocktrees_id ON blocktrees(id)",
 		"CREATE INDEX IF NOT EXISTS idx_blocktrees_root_id ON blocktrees(root_id)",
+		"CREATE INDEX IF NOT EXISTS idx_blocktrees_box_id ON blocktrees(box_id)",
 	}
 	for _, s := range stmts {
 		if _, err = boxDB.Exec(s); err != nil {

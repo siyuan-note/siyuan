@@ -459,6 +459,16 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         });
         return true;
     }
+    /// #if !MOBILE
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyRichText.custom, event)) {
+        if (!hasClosestBlock(range.startContainer)) {
+            return false;
+        }
+        protyle.wysiwyg.copyRichText();
+        event.preventDefault();
+        return true;
+    }
+    /// #endif
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyPlainText.custom, event)) {
         const nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement) {

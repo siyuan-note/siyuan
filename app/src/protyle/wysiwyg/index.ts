@@ -146,7 +146,7 @@ import {setFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
-import {enhanceRichClipboard} from "../util/richClipboard";
+import {enhanceRichClipboard, prepareRichClipboardHTML} from "../util/richClipboard";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
@@ -254,6 +254,7 @@ export class WYSIWYG {
 
     private preventClick: boolean;
     private preventInput: boolean;
+    private copyAsRichText = false;
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, () => void>();
     public tableControl: TableControl;
@@ -282,6 +283,15 @@ export class WYSIWYG {
         this.pendingInputTimeouts.clear();
         this.inputTimeout = undefined;
         callbacks.forEach(callback => callback());
+    }
+
+    public copyRichText() {
+        this.copyAsRichText = true;
+        try {
+            document.execCommand("copy");
+        } finally {
+            this.copyAsRichText = false;
+        }
     }
 
     constructor(protyle: IProtyle) {
@@ -540,6 +550,8 @@ export class WYSIWYG {
 
     private bindCommonEvent(protyle: IProtyle) {
         this.element.addEventListener("copy", async (event: ClipboardEvent & { target: HTMLElement }) => {
+            const copyAsRichText = this.copyAsRichText;
+            this.copyAsRichText = false;
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
@@ -832,7 +844,7 @@ export class WYSIWYG {
             textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
-            event.clipboardData.setData("text/plain", textPlain);
+            let clipboardText = textPlain;
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
@@ -851,19 +863,30 @@ export class WYSIWYG {
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 restoreLuteMarkdownSyntax(protyle);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ((selectTableElement || selectTableRange) ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                let exportedHTML = removeZWJ((selectTableElement || selectTableRange) ? html :
+                    (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : html) :
+                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
+                if (copyAsRichText) {
+                    const prepared = prepareRichClipboardHTML(exportedHTML);
+                    exportedHTML = prepared.html;
+                    clipboardText = prepared.source;
+                }
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + exportedHTML;
+                event.clipboardData.setData("text/plain", clipboardText);
                 event.clipboardData.setData("text/html", textHTML);
                 if (needClipboardWrite) {
                     try {
                         await navigator.clipboard.write([new ClipboardItem({
-                            ["text/plain"]: textPlain,
+                            ["text/plain"]: clipboardText,
                             ["text/html"]: textHTML,
                         })]);
                     } catch (e) {
                         console.log("Copy write clipboard error:", e);
                     }
                 }
-                enhanceRichClipboard(textPlain, textHTML, protyle.notebookId);
+                enhanceRichClipboard(clipboardText, textHTML, protyle.notebookId);
+            } else {
+                event.clipboardData.setData("text/plain", clipboardText);
             }
         });
 
@@ -2377,6 +2400,19 @@ export class WYSIWYG {
                                 type: "separator"
                             }).element);
                         }
+                        /// #if !MOBILE
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "copyRichText",
+                            label: window.siyuan.languages.copyRichText,
+                            accelerator: window.siyuan.config.keymap.editor.general.copyRichText.custom,
+                            click() {
+                                if (tableBlockElement) {
+                                    focusByRange(getEditorRange(tableBlockElement));
+                                    protyle.wysiwyg.copyRichText();
+                                }
+                            }
+                        }).element);
+                        /// #endif
                         window.siyuan.menus.menu.append(new MenuItem({
                             id: "copyPlainText",
                             label: window.siyuan.languages.copyPlainText,

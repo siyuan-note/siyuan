@@ -1,4 +1,5 @@
 {
+  "copyRichText": "Copy rich text/HTML",
   "modelContextLengthTip": "Leave blank or set to 0 to use the built-in model catalog",
   "modelContextLength": "Model Context Length (Tokens)",
   "newTab": "New Tab",

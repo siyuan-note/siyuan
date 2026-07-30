@@ -1,4 +1,5 @@
 {
+  "copyRichText": "คัดลอกข้อความแบบ Rich Text/HTML",
   "modelContextLengthTip": "เว้นว่างหรือตั้งค่าเป็น 0 เพื่อใช้แค็ตตาล็อกโมเดลในตัว",
   "modelContextLength": "ความยาวบริบทของโมเดล (Tokens)",
   "newTab": "แท็บใหม่",

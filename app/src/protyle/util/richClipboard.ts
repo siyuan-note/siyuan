@@ -41,6 +41,123 @@ const richClipboardImageExts = new Set([
     "webp",
 ]);
 
+const richClipboardAttributes = new Set([
+    "align",
+    "alt",
+    "checked",
+    "colspan",
+    "controls",
+    "height",
+    "href",
+    "poster",
+    "rowspan",
+    "src",
+    "start",
+    "style",
+    "target",
+    "title",
+    "type",
+    "width",
+]);
+
+const richClipboardLineTags = new Set([
+    "H1",
+    "H2",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+    "P",
+    "PRE",
+]);
+
+const getTableSourceLines = (tableElement: HTMLTableElement) => {
+    const lines: string[] = [];
+    tableElement.querySelectorAll("tr").forEach(rowElement => {
+        const cells = Array.from(rowElement.children).filter(item =>
+            item.tagName === "TH" || item.tagName === "TD") as HTMLElement[];
+        if (cells.length > 0) {
+            lines.push(cells.map(item => item.innerHTML.trim()).join("\t"));
+        }
+    });
+    return lines;
+};
+
+const getListItemSourceLines = (listItemElement: HTMLLIElement) => {
+    const lines: string[] = [];
+    const inlineElement = document.createElement("div");
+    listItemElement.childNodes.forEach(item => {
+        if (item.nodeType === Node.ELEMENT_NODE &&
+            ["OL", "UL"].includes((item as HTMLElement).tagName)) {
+            return;
+        }
+        if (item.nodeType === Node.ELEMENT_NODE &&
+            richClipboardLineTags.has((item as HTMLElement).tagName)) {
+            if (inlineElement.innerHTML.trim()) {
+                lines.push(inlineElement.innerHTML.trim());
+                inlineElement.replaceChildren();
+            }
+            lines.push((item as HTMLElement).innerHTML.trim());
+        } else {
+            inlineElement.append(item.cloneNode(true));
+        }
+    });
+    if (inlineElement.innerHTML.trim()) {
+        lines.push(inlineElement.innerHTML.trim());
+    }
+    listItemElement.querySelectorAll(":scope > ul, :scope > ol").forEach(item => {
+        lines.push(...getRichClipboardSourceLines(item));
+    });
+    return lines;
+};
+
+const getRichClipboardSourceLines = (parent: ParentNode) => {
+    const lines: string[] = [];
+    parent.childNodes.forEach(item => {
+        if (item.nodeType === Node.TEXT_NODE) {
+            if (item.textContent.trim()) {
+                const textElement = document.createElement("div");
+                textElement.textContent = item.textContent;
+                lines.push(textElement.innerHTML);
+            }
+            return;
+        }
+        if (item.nodeType !== Node.ELEMENT_NODE) {
+            return;
+        }
+        const element = item as HTMLElement;
+        if (richClipboardLineTags.has(element.tagName)) {
+            lines.push(element.innerHTML.trim());
+        } else if (element.tagName === "TABLE") {
+            lines.push(...getTableSourceLines(element as HTMLTableElement));
+        } else if (element.tagName === "LI") {
+            lines.push(...getListItemSourceLines(element as HTMLLIElement));
+        } else if (element.children.length > 0) {
+            lines.push(...getRichClipboardSourceLines(element));
+        } else if (element.outerHTML.trim()) {
+            lines.push(element.outerHTML.trim());
+        }
+    });
+    return lines.filter(line => line);
+};
+
+export const prepareRichClipboardHTML = (html: string) => {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    template.content.querySelectorAll("*").forEach(element => {
+        Array.from(element.attributes).forEach(attribute => {
+            if (!richClipboardAttributes.has(attribute.name) &&
+                !(attribute.name === "class" && attribute.value.split(/\s+/).every(item => item.startsWith("language-")))) {
+                element.removeAttribute(attribute.name);
+            }
+        });
+    });
+    return {
+        html: template.innerHTML.trim(),
+        source: getRichClipboardSourceLines(template.content).join("\n"),
+    };
+};
+
 const postRichClipboard = async (url: string, data: Record<string, unknown>) => {
     const response = await fetch(url, {
         method: "POST",

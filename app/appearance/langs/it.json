@@ -1,4 +1,5 @@
 {
+  "copyRichText": "Copia testo formattato/HTML",
   "modelContextLengthTip": "Lascia vuoto o imposta 0 per usare il catalogo dei modelli integrato",
   "modelContextLength": "Lunghezza del contesto del modello (Tokens)",
   "newTab": "Nuova scheda",

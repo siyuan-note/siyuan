@@ -1,4 +1,5 @@
 {
+  "copyRichText": "Kopírovať formátovaný text/HTML",
   "modelContextLengthTip": "Ponechajte prázdne alebo nastavte 0, aby sa použil vstavaný katalóg modelov",
   "modelContextLength": "Dĺžka kontextu modelu (Tokens)",
   "newTab": "Nová karta",

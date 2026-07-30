@@ -1,4 +1,5 @@
 {
+  "copyRichText": "서식 있는 텍스트/HTML 복사",
   "modelContextLengthTip": "비워 두거나 0으로 설정하면 내장 모델 카탈로그를 사용합니다",
   "modelContextLength": "모델 컨텍스트 길이 (Tokens)",
   "newTab": "새 탭",

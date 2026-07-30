@@ -293,6 +293,8 @@ declare class Lute {
 
     public BlockDOM2HTML(html: string): string;
 
+    public BlockDOM2RichHTML(html: string): string;
+
     public CancelListRecursively(html: string): string;
 
     public ConvertListType(html: string, targetType: "u" | "o" | "t"): string;

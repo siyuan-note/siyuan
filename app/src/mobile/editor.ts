@@ -187,6 +187,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                     mergedOptions: protyleOptions,
                     signal,
                     fail,
+                    isValid,
                     cb() {
                         if (!isValid()) {
                             fail();
@@ -227,6 +228,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                             protyle: window.siyuan.mobile.editor.protyle,
                             action: actionList,
                             scrollPosition,
+                            isValid,
                             afterCB() {
                                 if (!isValid()) {
                                     fail();
@@ -243,9 +245,6 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                         });
                     } catch (error) {
                         console.error(error);
-                        fail();
-                    }
-                    if (!completed) {
                         fail();
                     }
                 }, undefined, undefined, signal).then(() => {

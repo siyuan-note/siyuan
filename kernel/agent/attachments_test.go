@@ -65,6 +65,42 @@ func TestBuildAttachmentMessageUsesImageContent(t *testing.T) {
 	}
 }
 
+func TestEstimateChatImageTokensUsesDetailBudget(t *testing.T) {
+	message := openai.ChatCompletionMessage{
+		Role: openai.ChatMessageRoleUser,
+		MultiContent: []openai.ChatMessagePart{
+			{
+				Type: openai.ChatMessagePartTypeImageURL,
+				ImageURL: &openai.ChatMessageImageURL{
+					URL:    "data:image/png;base64,AA==",
+					Detail: openai.ImageURLDetailLow,
+				},
+			},
+			{
+				Type: openai.ChatMessagePartTypeImageURL,
+				ImageURL: &openai.ChatMessageImageURL{
+					URL:    "data:image/png;base64,AA==",
+					Detail: openai.ImageURLDetailHigh,
+				},
+			},
+			{
+				Type: openai.ChatMessagePartTypeImageURL,
+				ImageURL: &openai.ChatMessageImageURL{
+					URL:    "data:image/png;base64,AA==",
+					Detail: openai.ImageURLDetailAuto,
+				},
+			},
+		},
+	}
+	want := estimatedLowDetailImageTokens + 2*estimatedHighDetailImageTokens
+	if got := estimateChatImageTokens(message); got != want {
+		t.Fatalf("image token estimate = %d, want %d", got, want)
+	}
+	if got := estimateChatRequestTokens("test-model", []openai.ChatCompletionMessage{message}, nil); got < want {
+		t.Fatalf("request token estimate omitted image budget: %d < %d", got, want)
+	}
+}
+
 func TestCheckpointRestoresAttachmentAfterToolResults(t *testing.T) {
 	checkpoint := []AgentMessage{{
 		Role: "assistant",
@@ -162,19 +198,26 @@ func TestCheckpointKeepsOnlyLatestAttachmentBatch(t *testing.T) {
 	}
 }
 
-func TestCompactionDoesNotCountAttachmentAsUserTurn(t *testing.T) {
-	attachmentMessage, _ := buildAttachmentMessage([]AgentAttachment{testAgentAttachment()})
-	messages := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: "system"},
-		{Role: openai.ChatMessageRoleUser, Content: "first"},
-		{Role: openai.ChatMessageRoleAssistant, Content: "tool call"},
-		attachmentMessage,
-		{Role: openai.ChatMessageRoleAssistant, Content: "first answer"},
-		{Role: openai.ChatMessageRoleUser, Content: "second"},
+func TestCompactionCandidatesKeepAttachmentToolCallInItsTurn(t *testing.T) {
+	entries := []SessionEntry{
+		{ID: "user-1", Type: "user", Content: "first"},
+		{
+			ID:   "assistant-1",
+			Type: "assistant",
+			ToolCalls: []AgentToolCall{{
+				ID:          "call-image",
+				Name:        "image",
+				Result:      "attached",
+				Attachments: []AgentAttachment{testAgentAttachment()},
+			}},
+		},
+		{ID: "thinking-1", Type: "thinking"},
+		{ID: "user-2", Type: "user", Content: "second"},
+		{ID: "user-3", Type: "user", Content: "current"},
 	}
-	compacted := compactMessages(messages, 2)
-	if len(compacted) != len(messages) {
-		t.Fatalf("attachment was counted as a logical user turn: %#v", compacted)
+	candidates := compactionCandidateEntryCounts(entries, 0, "user-3")
+	if len(candidates) != 2 || candidates[0] != 3 || candidates[1] != 4 {
+		t.Fatalf("unexpected complete-turn compaction boundaries: %#v", candidates)
 	}
 }
 

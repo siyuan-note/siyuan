@@ -20,7 +20,10 @@ import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragov
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
-import {operationsMayChangeOutline} from "../../protyle/util/headingNumberCore";
+import {
+    operationsMayChangeOutline,
+    transactionsMayChangeRootHeadingNumberSetting
+} from "../../protyle/util/headingNumberCore";
 
 export class MobileOutline extends Model {
     public tree: Tree;
@@ -419,6 +422,11 @@ export class MobileOutline extends Model {
             switch (data.cmd) {
                 case "savedoc":
                     this.onTransaction(data);
+                    break;
+                case "transactions":
+                    if (transactionsMayChangeRootHeadingNumberSetting(data.data, this.blockId)) {
+                        this.reload();
+                    }
                     break;
                 case "rename":
                     if (this.blockId === data.data.id) {

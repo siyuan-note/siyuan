@@ -2344,6 +2344,7 @@
 		"348": "Unable to import asset file [%s]",
 		"349": "The Vault contents changed after analysis; analyze the Vault again",
 		"350": "Unable to finish writing or indexing the new notebook; it has been marked as incomplete",
-		"351": "An unexpected error occurred; check the system log for task [%s]"
+		"351": "An unexpected error occurred; check the system log for task [%s]",
+		"352": "The agent context cannot fit the selected model after compaction. Switch to a model with a larger context window"
 	}
 	}

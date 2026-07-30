@@ -4330,6 +4330,13 @@ export class WYSIWYG {
             setTimeout(() => {
                 // 选中后，在选中的文字上点击需等待 range 更新
                 let newRange = getEditorRange(this.element);
+                const calloutElement = ["callout", "callout-info", "callout-content"].some(className =>
+                    event.target.classList.contains(className)) ? hasClosestBlock(event.target) : false;
+                if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutElement) {
+                    // 提示块结构区域不可编辑，点击后将光标定位到首个可编辑子块
+                    // https://github.com/siyuan-note/siyuan/issues/16310
+                    newRange = focusBlock(calloutElement) || newRange;
+                }
                 // 表格中点击两侧或间隙导致光标跳转到开头 https://github.com/siyuan-note/siyuan/issues/16179
                 if (event.target.classList.contains("protyle-wysiwyg") || event.target.parentElement?.classList.contains("table")) {
                     const rect = this.element.getBoundingClientRect();

@@ -151,9 +151,9 @@ export const genEmojiImageHTML = (value: string, className = "", lazy = false): 
     let network = false;
     const kind = getIconValueKind(value);
     if (kind === "dynamic") {
-        src = value;
+        src = value.replaceAll("&amp;", "&");
     } else if (kind === "network") {
-        src = normalizeNetworkIconURL(value)!;
+        src = normalizeNetworkIconURL(value.replaceAll("&amp;", "&"))!;
         network = true;
     } else if (kind === "custom") {
         src = `/emojis/${value}`;

@@ -6,7 +6,8 @@ import {
     operationsMayChangeHeadingNumbers,
     operationsMayChangeOutline,
     renderHeadingNumberElements,
-    resolveHeadingNumberEnabled
+    resolveHeadingNumberEnabled,
+    transactionsMayChangeRootHeadingNumberSetting
 } from "./headingNumberCore";
 
 class TestElement {
@@ -284,5 +285,48 @@ describe("operationsMayChangeOutline", () => {
         }]);
 
         assert.equal(changed, false);
+    });
+});
+
+describe("transactionsMayChangeRootHeadingNumberSetting", () => {
+    it("当前根文档标题编号设置变化时刷新大纲", () => {
+        const changed = transactionsMayChangeRootHeadingNumberSetting([{
+            doOperations: [{
+                action: "updateAttrs",
+                id: "root",
+                data: {
+                    old: {"custom-sy-heading-number": "true"},
+                    new: {"custom-sy-heading-number": "false"},
+                },
+            }],
+        }], "root");
+
+        assert.equal(changed, true);
+    });
+
+    it("忽略其他文档及无关属性事务", () => {
+        const otherDocument = transactionsMayChangeRootHeadingNumberSetting([{
+            doOperations: [{
+                action: "updateAttrs",
+                id: "other-root",
+                data: {
+                    old: {"custom-sy-heading-number": "true"},
+                    new: {"custom-sy-heading-number": "false"},
+                },
+            }],
+        }], "root");
+        const unrelatedAttribute = transactionsMayChangeRootHeadingNumberSetting([{
+            undoOperations: [{
+                action: "updateAttrs",
+                id: "root",
+                data: {
+                    old: {"custom-test": "old"},
+                    new: {"custom-test": "new"},
+                },
+            }],
+        }], "root");
+
+        assert.equal(otherDocument, false);
+        assert.equal(unrelatedAttribute, false);
     });
 });

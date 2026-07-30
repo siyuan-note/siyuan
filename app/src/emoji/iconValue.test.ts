@@ -128,6 +128,17 @@ describe("genEmojiImageHTML", () => {
         );
     });
 
+    it("does not double-escape persisted image icon URLs", () => {
+        assert.equal(
+            genEmojiImageHTML("api/icon/getDynamicIcon?type=1&amp;color=%23d23f31", "icon"),
+            '<img class="icon" src="api/icon/getDynamicIcon?type=1&amp;color=%23d23f31"/>',
+        );
+        assert.equal(
+            genEmojiImageHTML("https://example.com/icon?id=1&amp;size=2", "icon"),
+            '<img class="icon" src="https://example.com/icon?id=1&amp;size=2" referrerpolicy="no-referrer"/>',
+        );
+    });
+
     it("does not treat unsupported URL schemes or Emoji codepoints as image sources", () => {
         assert.equal(genEmojiImageHTML("data:image/png;base64,AAAA"), undefined);
         assert.equal(genEmojiImageHTML("file:///tmp/icon.png"), undefined);

@@ -2344,6 +2344,7 @@
 		"348": "Não foi possível importar o arquivo de recurso [%s]",
 		"349": "O conteúdo do Vault mudou após a análise; faça a análise novamente",
 		"350": "Não foi possível concluir a gravação ou indexação do novo caderno; ele foi marcado como incompleto",
-		"351": "Ocorreu um erro inesperado; verifique o registro do sistema para a tarefa [%s]"
+		"351": "Ocorreu um erro inesperado; verifique o registro do sistema para a tarefa [%s]",
+		"352": "O contexto do agente não cabe no modelo selecionado após a compactação. Mude para um modelo com uma janela de contexto maior"
 	}
 	}

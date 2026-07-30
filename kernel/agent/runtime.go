@@ -63,9 +63,12 @@ type agentRuntimeTurn struct {
 }
 
 type runtimeCompaction struct {
+	Version           int    `json:"version"`
 	Summary           string `json:"summary"`
 	CoveredEntryCount int    `json:"coveredEntryCount"`
+	NextEntryID       string `json:"nextEntryID"`
 	CoveredDigest     string `json:"coveredDigest"`
+	UpdatedAt         int64  `json:"updatedAt"`
 }
 
 func runtimePath(sessionID string) string {
@@ -215,6 +218,24 @@ func saveRuntimeTurn(sessionID string, turn *agentRuntimeTurn, alwaysAllow bool)
 	runtime.AlwaysAllow = runtime.AlwaysAllow || alwaysAllow
 	turn.UpdatedAt = time.Now().UnixMilli()
 	runtime.ActiveTurn = turn
+	return writeRuntimeLocked(sessionID, runtime)
+}
+
+func saveRuntimeCompaction(sessionID string, compaction *runtimeCompaction) error {
+	if sessionID == "" || compaction == nil {
+		return errContextCannotBeCompacted
+	}
+	if !isValidSessionID(sessionID) {
+		return fmt.Errorf("invalid session id")
+	}
+	lock := sessionLock(sessionID)
+	lock.Lock()
+	defer lock.Unlock()
+	runtime, err := loadRuntimeLocked(sessionID)
+	if err != nil {
+		return err
+	}
+	runtime.Compaction = cloneRuntimeCompaction(compaction)
 	return writeRuntimeLocked(sessionID, runtime)
 }
 

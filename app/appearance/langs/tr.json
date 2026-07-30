@@ -2344,6 +2344,7 @@
 		"348": "Kaynak dosyası [%s] içe aktarılamıyor",
 		"349": "Vault içeriği analizden sonra değişti; yeniden analiz edin",
 		"350": "Yeni not defterinin yazılması veya dizine eklenmesi tamamlanamadı; eksik olarak işaretlendi",
-		"351": "Beklenmeyen bir hata oluştu; görev [%s] için sistem günlüğünü kontrol edin"
+		"351": "Beklenmeyen bir hata oluştu; görev [%s] için sistem günlüğünü kontrol edin",
+		"352": "Ajan bağlamı sıkıştırmadan sonra seçilen modele sığmıyor. Daha büyük bağlam penceresine sahip bir modele geçin"
 	}
 	}

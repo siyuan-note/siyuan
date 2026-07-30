@@ -31,7 +31,10 @@ import {genEmptyElement} from "../../block/util";
 import {focusBlock, focusByWbr} from "../../protyle/util/selection";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {getDocDisplayName} from "../../util/pathName";
-import {operationsMayChangeOutline} from "../../protyle/util/headingNumberCore";
+import {
+    operationsMayChangeOutline,
+    transactionsMayChangeRootHeadingNumberSetting
+} from "../../protyle/util/headingNumberCore";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -342,6 +345,11 @@ export class Outline extends Model {
             switch (data.cmd) {
                 case "savedoc":
                     this.onTransaction(data);
+                    break;
+                case "transactions":
+                    if (transactionsMayChangeRootHeadingNumberSetting(data.data, this.blockId)) {
+                        this.refresh();
+                    }
                     break;
                 case "rename":
                     if (this.type === "local" && this.blockId === data.data.id) {

@@ -25,6 +25,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -368,6 +369,39 @@ func TestBuildHPathContainsCondition(t *testing.T) {
 	condition, arg = buildHPathContainsCondition("詩經")
 	if "instr(search_normalize(hpath, 0, 0), ?) > 0" != condition || "诗经" != arg {
 		t.Fatalf("忽略繁简的路径条件错误：%q，%q", condition, arg)
+	}
+}
+
+func TestFromHPathSearchSQLBlockOnlyMarksHPath(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	sqlBlock := &sql.Block{
+		ID:      "20260730160000-hpath01",
+		RootID:  "20260730160000-hpath01",
+		HPath:   "/思源笔记/子文档",
+		Name:    "引用思源笔记",
+		Alias:   "思源笔记",
+		Memo:    "思源笔记",
+		Tag:     "思源笔记",
+		Content: "((20260730160001-ref0001 '思源笔记'))",
+		Type:    "d",
+	}
+
+	block := fromHPathSearchSQLBlock(sqlBlock, "思源笔记", 36)
+	if strings.Contains(block.Content, "<mark>") ||
+		strings.Contains(block.Name, "<mark>") ||
+		strings.Contains(block.Alias, "<mark>") ||
+		strings.Contains(block.Memo, "<mark>") ||
+		strings.Contains(block.Tag, "<mark>") {
+		t.Fatalf("路径辅助命中不应高亮正文或文档引用：%+v", block)
+	}
+	if !strings.Contains(block.HPath, "<mark>思源笔记</mark>") {
+		t.Fatalf("路径辅助命中应高亮层级路径：%q", block.HPath)
+	}
+
+	sqlBlock.Content = search.SearchMarkLeft + "思源笔记" + search.SearchMarkRight
+	block = fromHPathSearchSQLBlock(sqlBlock, "思源笔记", 36)
+	if !strings.Contains(block.Content, "<mark>思源笔记</mark>") {
+		t.Fatalf("FTS 摘要高亮应保留：%q", block.Content)
 	}
 }
 

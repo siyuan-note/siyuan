@@ -1251,7 +1251,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey("⌘A", event)) {
             event.preventDefault();
             const selectedCurrentContent = selectAll(protyle, nodeElement, range);
-            if (selectedCurrentContent && !nodeElement.classList.contains("code-block") && !isMobile()) {
+            if (selectedCurrentContent && !protyle.lite &&
+                !nodeElement.classList.contains("code-block") && !isMobile()) {
                 showSelectAllTip();
             }
             return true;

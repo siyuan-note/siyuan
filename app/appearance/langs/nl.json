@@ -1,4 +1,5 @@
 {
+  "exportFileSaveFailed": "Kan het bestand niet opslaan; controleer of het niet door een ander programma wordt gebruikt en of de doellocatie beschrijfbaar is",
   "copyRichText": "Rijke tekst/HTML kopiëren",
   "modelContextLengthTip": "Laat leeg of stel in op 0 om de ingebouwde modelcatalogus te gebruiken",
   "modelContextLength": "Modelcontextlengte (Tokens)",

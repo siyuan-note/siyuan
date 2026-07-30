@@ -1,4 +1,5 @@
 {
+  "exportFileSaveFailed": "לא ניתן לשמור את הקובץ; יש לוודא שהוא אינו בשימוש על ידי תוכנית אחרת ושניתן לכתוב במיקום היעד",
   "copyRichText": "העתקת טקסט עשיר/HTML",
   "modelContextLengthTip": "השאר ריק או הגדר ל-0 כדי להשתמש בקטלוג המודלים המובנה",
   "modelContextLength": "אורך הקשר המודל (Tokens)",

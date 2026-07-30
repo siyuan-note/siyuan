@@ -1,4 +1,5 @@
 {
+  "exportFileSaveFailed": "Dosya kaydedilemedi; başka bir program tarafından kullanılmadığından ve hedef konumun yazılabilir olduğundan emin olun",
   "copyRichText": "Zengin metni/HTML'yi kopyala",
   "modelContextLengthTip": "Yerleşik model kataloğunu kullanmak için boş bırakın veya 0 olarak ayarlayın",
   "modelContextLength": "Model Bağlam Uzunluğu (Tokens)",

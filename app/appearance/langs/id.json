@@ -1,4 +1,5 @@
 {
+  "exportFileSaveFailed": "File tidak dapat disimpan; pastikan file tidak sedang digunakan oleh program lain dan lokasi tujuan dapat ditulisi",
   "copyRichText": "Salin teks kaya/HTML",
   "modelContextLengthTip": "Kosongkan atau atur ke 0 untuk menggunakan katalog model bawaan",
   "modelContextLength": "Panjang Konteks Model (Tokens)",

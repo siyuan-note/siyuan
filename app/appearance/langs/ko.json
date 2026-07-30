@@ -1,4 +1,5 @@
 {
+  "exportFileSaveFailed": "파일을 저장할 수 없습니다. 다른 프로그램에서 사용 중이지 않고 대상 위치에 쓰기 권한이 있는지 확인하세요",
   "copyRichText": "서식 있는 텍스트/HTML 복사",
   "modelContextLengthTip": "비워 두거나 0으로 설정하면 내장 모델 카탈로그를 사용합니다",
   "modelContextLength": "모델 컨텍스트 길이 (Tokens)",

@@ -17,6 +17,7 @@
 package api
 
 import (
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
@@ -1072,10 +1073,64 @@ func copyExportFile(c *gin.Context) {
 		return
 	}
 
-	if err := filelock.Copy(srcFullPath, dest); err != nil {
+	if err := copyExportFileToDestination(srcFullPath, dest); err != nil {
 		logging.LogErrorf("copy export file [%s] to [%s] failed: %s", srcFullPath, dest, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+}
+
+func copyExportFileToDestination(src, dest string) (err error) {
+	filelock.Lock(src)
+	defer filelock.Unlock(src)
+
+	srcInfo, err := os.Lstat(src)
+	if err != nil {
+		return err
+	}
+	if !srcInfo.Mode().IsRegular() {
+		return fmt.Errorf("export source [%s] is not a regular file", src)
+	}
+
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	destDir := filepath.Dir(dest)
+	if err = os.MkdirAll(destDir, 0755); err != nil {
+		return err
+	}
+	tmpFile, err := os.CreateTemp(destDir, ".siyuan-export-*.tmp")
+	if err != nil {
+		return err
+	}
+	tmpPath := tmpFile.Name()
+	tmpClosed := false
+	defer func() {
+		if !tmpClosed {
+			_ = tmpFile.Close()
+		}
+		if removeErr := os.Remove(tmpPath); removeErr != nil && !os.IsNotExist(removeErr) {
+			logging.LogWarnf("remove temporary export file [%s] failed: %s", tmpPath, removeErr)
+		}
+	}()
+
+	if _, err = io.Copy(tmpFile, srcFile); err != nil {
+		return err
+	}
+	if err = tmpFile.Chmod(srcInfo.Mode().Perm()); err != nil {
+		return err
+	}
+	if err = tmpFile.Sync(); err != nil {
+		return err
+	}
+	if err = tmpFile.Close(); err != nil {
+		return err
+	}
+	tmpClosed = true
+
+	return os.Rename(tmpPath, dest)
 }

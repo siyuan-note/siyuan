@@ -1,4 +1,5 @@
 {
+  "exportFileSaveFailed": "Impossibile salvare il file; assicurati che non sia utilizzato da un altro programma e che il percorso di destinazione sia scrivibile",
   "copyRichText": "Copia testo formattato/HTML",
   "modelContextLengthTip": "Lascia vuoto o imposta 0 per usare il catalogo dei modelli integrato",
   "modelContextLength": "Lunghezza del contesto del modello (Tokens)",

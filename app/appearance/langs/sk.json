@@ -1,4 +1,5 @@
 {
+  "exportFileSaveFailed": "Súbor sa nepodarilo uložiť; uistite sa, že ho nepoužíva iný program a že cieľové umiestnenie je zapisovateľné",
   "copyRichText": "Kopírovať formátovaný text/HTML",
   "modelContextLengthTip": "Ponechajte prázdne alebo nastavte 0, aby sa použil vstavaný katalóg modelov",
   "modelContextLength": "Dĺžka kontextu modelu (Tokens)",

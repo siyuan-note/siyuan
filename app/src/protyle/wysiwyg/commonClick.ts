@@ -61,7 +61,7 @@ export const commonClick = (event: MouseEvent & {
             }
         } else if (data) {
             if (avID) {
-                databaseAttributePanel.expand(avID);
+                databaseAttributePanel.expand(avID, true);
             } else {
                 databaseAttributePanel.toggle();
             }
@@ -70,7 +70,7 @@ export const commonClick = (event: MouseEvent & {
             const blockID = blockElement ? blockElement.getAttribute("data-node-id") : "";
             if (blockID && protyle.block.showAll && blockID === protyle.block.id) {
                 if (avID) {
-                    databaseAttributePanel.expand(avID);
+                    databaseAttributePanel.expand(avID, true);
                 } else {
                     databaseAttributePanel.toggle();
                 }
@@ -78,7 +78,7 @@ export const commonClick = (event: MouseEvent & {
                 zoomOut({
                     protyle,
                     id: blockID,
-                    callback: avID ? () => databaseAttributePanel.expand(avID) : undefined,
+                    callback: avID ? () => databaseAttributePanel.expand(avID, true) : undefined,
                 });
             }
         }

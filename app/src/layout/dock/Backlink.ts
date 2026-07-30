@@ -23,6 +23,12 @@ import {
     shouldRenderBacklinkResponse,
     shouldSaveBacklinkStatus
 } from "./backlinkRefresh";
+import {
+    cancelHeightAnimation,
+    collapseHeight,
+    expandHeight,
+    isHeightAnimating
+} from "../../util/heightAnimation";
 
 interface IBacklinkItemRecord {
     revision: string,
@@ -500,12 +506,23 @@ export class Backlink extends Model {
     }
 
     private setBottomLayout(element: HTMLElement, listElement: HTMLElement) {
+        if (isHeightAnimating(listElement)) {
+            return;
+        }
         const folded = !listElement.classList.contains("fn__none");
         if (folded) {
             this.cancelContextRequests(listElement, listElement === this.mTree.element);
             this.hideEditorGutters(listElement);
+            listElement.dataset.heightFolding = "true";
+            collapseHeight(listElement, () => {
+                delete listElement.dataset.heightFolding;
+                listElement.classList.add("fn__none");
+            });
+        } else {
+            delete listElement.dataset.heightFolding;
+            listElement.classList.remove("fn__none");
+            expandHeight(listElement);
         }
-        listElement.classList.toggle("fn__none", folded);
         if (folded) {
             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
         }
@@ -654,6 +671,9 @@ export class Backlink extends Model {
 
     private expandDocumentItems(tree: Tree, isMention: boolean) {
         const listElement = tree.element;
+        if (this.type === "bottom" && isHeightAnimating(listElement)) {
+            return;
+        }
         const folded = this.type === "bottom" ?
             listElement.classList.contains("fn__none") :
             (isMention ? listElement.style.height === "0px" : listElement.classList.contains("fn__none"));
@@ -971,6 +991,10 @@ export class Backlink extends Model {
     }
 
     private resetRenderedData(resetLists: boolean) {
+        cancelHeightAnimation(this.tree.element);
+        cancelHeightAnimation(this.mTree.element);
+        delete this.tree.element.dataset.heightFolding;
+        delete this.mTree.element.dataset.heightFolding;
         this.cancelContextRequests(this.tree.element, false);
         this.cancelContextRequests(this.mTree.element, true);
         this.editors.forEach(item => item.destroy());
@@ -1200,9 +1224,12 @@ export class Backlink extends Model {
             backlinkOpenIds: [],
             backlinkMOpenIds: [],
             backlinkMStatus: 3, // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
-            backlinkFolded: this.tree.element.classList.contains("fn__none"),
+            backlinkFolded: this.tree.element.classList.contains("fn__none") ||
+                this.tree.element.dataset.heightFolding === "true",
             backmentionFolded: this.type === "bottom" ?
-                this.mTree.element.classList.contains("fn__none") : this.mTree.element.style.height === "0px"
+                (this.mTree.element.classList.contains("fn__none") ||
+                    this.mTree.element.dataset.heightFolding === "true") :
+                this.mTree.element.style.height === "0px"
         };
         this.tree.element.querySelectorAll(".b3-list-item__arrow--open").forEach(item => {
             this.status[this.blockId].backlinkOpenIds.push(item.parentElement.parentElement.getAttribute("data-node-id"));
@@ -1370,6 +1397,8 @@ export class Backlink extends Model {
     }
 
     private restoreBottomLayout(element: HTMLElement, listElement: HTMLElement, folded: boolean) {
+        cancelHeightAnimation(listElement);
+        delete listElement.dataset.heightFolding;
         listElement.classList.toggle("fn__none", folded);
         element.setAttribute("aria-label", folded ? window.siyuan.languages.expand : window.siyuan.languages.collapse);
         element.querySelector("use").setAttribute("xlink:href", folded ? "#iconRight" : "#iconDown");
@@ -1447,6 +1476,10 @@ export class Backlink extends Model {
 
     public destroy() {
         this.destroyed = true;
+        cancelHeightAnimation(this.tree.element);
+        cancelHeightAnimation(this.mTree.element);
+        delete this.tree.element.dataset.heightFolding;
+        delete this.mTree.element.dataset.heightFolding;
         if (this.ownerFocusoutListener) {
             this.ownerProtyle.element.removeEventListener("focusout", this.ownerFocusoutListener);
         }

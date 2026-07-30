@@ -1,4 +1,10 @@
 import {renderAVAttribute} from "./blockAttr";
+import {
+    cancelHeightAnimation,
+    collapseHeight,
+    expandHeight,
+    isHeightAnimating
+} from "../../../util/heightAnimation";
 
 const updateEmptyState = (element: HTMLElement, hideEmpty: boolean) => {
     element.classList.toggle("protyle-db-attr--hide-empty", hideEmpty);
@@ -91,6 +97,7 @@ export class AVAttributePanel {
         const bodyElement = document.createElement("div");
         bodyElement.className = "custom-attr protyle-db-attr__body";
         if (!keepCurrentBody) {
+            this.updateCollapsedState();
             currentBodyElement.replaceWith(bodyElement);
             this.bodyElement = bodyElement;
         }
@@ -100,6 +107,7 @@ export class AVAttributePanel {
             }
             this.renderingTargetID = "";
             if (keepCurrentBody) {
+                this.updateCollapsedState();
                 currentBodyElement.replaceWith(renderedElement);
                 this.bodyElement = renderedElement;
             }
@@ -174,18 +182,16 @@ export class AVAttributePanel {
         }
     }
 
-    public expand(avID?: string) {
+    public expand(avID?: string, animate = false) {
         if (avID) {
             this.activeAvID = avID;
         }
-        this.collapsed = false;
-        this.updateCollapsedState();
+        this.setCollapsed(false, animate);
         this.updateTabs();
     }
 
     public toggle() {
-        this.collapsed = !this.collapsed;
-        this.updateCollapsedState();
+        this.setCollapsed(!this.collapsed, true);
     }
 
     public displayEmptyFields() {
@@ -197,12 +203,43 @@ export class AVAttributePanel {
     }
 
     private updateCollapsedState() {
+        cancelHeightAnimation(this.bodyElement);
         this.element.classList.toggle("protyle-db-attr--collapsed", this.collapsed);
+        this.updateCollapsedControls();
+        this.updateEmptyState();
+    }
+
+    private updateCollapsedControls() {
         const toggleElement = this.element.querySelector('[data-type="toggle"]');
         toggleElement?.setAttribute("aria-expanded", (!this.collapsed).toString());
         const useElement = toggleElement?.querySelector("use");
         useElement?.setAttribute("xlink:href", this.collapsed ? "#iconRight" : "#iconDown");
+    }
+
+    private setCollapsed(collapsed: boolean, animate: boolean) {
+        if (animate && isHeightAnimating(this.bodyElement)) {
+            return;
+        }
+        if (animate && collapsed === this.collapsed) {
+            return;
+        }
+        this.collapsed = collapsed;
+        if (!animate) {
+            this.updateCollapsedState();
+            return;
+        }
+        this.updateCollapsedControls();
         this.updateEmptyState();
+        if (collapsed) {
+            collapseHeight(this.bodyElement, () => {
+                if (this.collapsed) {
+                    this.element.classList.add("protyle-db-attr--collapsed");
+                }
+            });
+        } else {
+            this.element.classList.remove("protyle-db-attr--collapsed");
+            expandHeight(this.bodyElement);
+        }
     }
 
     private updateTabs() {
@@ -250,6 +287,7 @@ export class AVAttributePanel {
 
     private hideByDisplayConfig() {
         this.showEmptyFields = false;
+        cancelHeightAnimation(this.bodyElement);
         if (this.renderingTargetID) {
             this.renderToken++;
             this.renderingTargetID = "";

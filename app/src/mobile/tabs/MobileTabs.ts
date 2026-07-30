@@ -324,6 +324,23 @@ export class MobileTabs {
         this.updateCounter();
     }
 
+    activateStartupBlank() {
+        this.cancelNavigation();
+        this.snapshot();
+        const tab = [...this.state.tabs]
+            .filter((item) => !item.current)
+            .sort((a, b) => b.activeAt - a.activeAt)[0];
+        if (!tab) {
+            this.createBlank();
+            return;
+        }
+        tab.activeAt = Date.now();
+        this.state.activeTabID = tab.id;
+        setEmpty(this.app);
+        this.persist();
+        this.updateCounter();
+    }
+
     async switchTo(tabID: string) {
         const tab = this.state.tabs.find((item) => item.id === tabID);
         if (!tab || tab.id === this.state.activeTabID) {

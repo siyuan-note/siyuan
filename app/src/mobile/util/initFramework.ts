@@ -205,7 +205,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
             return;
         }
         if (isStart && window.siyuan.config.fileTree.tabStartupMode === 1) {
-            window.siyuan.mobile.tabs.createBlank();
+            window.siyuan.mobile.tabs.activateStartupBlank();
             return;
         }
         if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
@@ -233,7 +233,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
         return;
     }
     if (isStart && window.siyuan.config.fileTree.tabStartupMode === 1) {
-        window.siyuan.mobile.tabs.createBlank();
+        window.siyuan.mobile.tabs.activateStartupBlank();
     } else {
         setEmpty(app);
     }

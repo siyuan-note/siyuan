@@ -71,6 +71,7 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
         return;
     }
     /// #if !BROWSER
+    let saveErrorMsgId: string | undefined;
     try {
         const resolved = new URL(uri, `${location.origin}/`);
         const pathSeg = resolved.pathname.substring(resolved.pathname.lastIndexOf("/") + 1);
@@ -83,30 +84,46 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
         if (!fileName) {
             fileName = "download";
         }
-        const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-            cmd: "showSaveDialog",
-            defaultPath: fileName,
-            properties: ["showOverwriteConfirmation"],
-        });
-        if (result.canceled || !result.filePath) {
-            if (msgId) {
-                hideMessage(msgId);
+        let defaultPath = fileName;
+        while (true) {
+            const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "showSaveDialog",
+                defaultPath,
+                properties: ["showOverwriteConfirmation"],
+            });
+            if (result.canceled || !result.filePath) {
+                if (msgId) {
+                    hideMessage(msgId);
+                }
+                if (saveErrorMsgId) {
+                    hideMessage(saveErrorMsgId);
+                }
+                return;
             }
-            return;
-        }
-        const copyResponse = await (await fetch("/api/export/copyExportFile", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                srcPath: resolved.pathname,
-                dest: result.filePath,
-            }),
-        })).json();
-        if (copyResponse.code !== 0) {
-            throw new Error(copyResponse.msg);
+            const copyResponse = await (await fetch("/api/export/copyExportFile", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    srcPath: resolved.pathname,
+                    dest: result.filePath,
+                }),
+            })).json();
+            if (copyResponse.code === 0) {
+                break;
+            }
+            console.error("saveExportFile failed:", new Error(copyResponse.msg));
+            if (saveErrorMsgId) {
+                showMessage(window.siyuan.languages.exportFileSaveFailed, 0, "error", saveErrorMsgId);
+            } else {
+                saveErrorMsgId = showMessage(window.siyuan.languages.exportFileSaveFailed, 0, "error");
+            }
+            defaultPath = result.filePath;
         }
         if (msgId) {
             hideMessage(msgId);
+        }
+        if (saveErrorMsgId) {
+            hideMessage(saveErrorMsgId);
         }
         showMessage(window.siyuan.languages.exported);
         return;
@@ -115,7 +132,11 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
             hideMessage(msgId);
         }
         console.error("saveExportFile failed:", e);
-        showMessage(window.siyuan.languages.exportFileSaveFailed, 0, "error");
+        if (saveErrorMsgId) {
+            showMessage(window.siyuan.languages.exportFileSaveFailed, 0, "error", saveErrorMsgId);
+        } else {
+            showMessage(window.siyuan.languages.exportFileSaveFailed, 0, "error");
+        }
     }
     /// #else
     try {

@@ -630,7 +630,7 @@ jobs:
           set -euo pipefail
           VERSION="${{ needs.prepare.outputs.version }}"
           TAG="${{ github.ref_name }}"
-          RELEASE_ID="$(gh api "repos/${GH_REPO}/releases/tags/${TAG}" --jq '.id')"
+          RELEASE_ID="$(gh release view "${TAG}" --json databaseId --jq '.databaseId')"
           EXPECTED_ASSETS=(
             "siyuan-${VERSION}-linux.AppImage"
             "siyuan-${VERSION}-linux.tar.gz"

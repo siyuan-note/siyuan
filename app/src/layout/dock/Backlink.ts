@@ -26,6 +26,7 @@ import {
 
 interface IBacklinkItemRecord {
     revision: string,
+    containerElement: HTMLDivElement,
     headerElement: HTMLLIElement,
     editor?: Protyle,
     contextRevision?: string,
@@ -341,11 +342,7 @@ export class Backlink extends Model {
             this.updateBottomBacklinkSpacing();
         });
         this.element.querySelector('[data-type="expand"]').addEventListener("click", () => {
-            Array.from(this.tree.element.firstElementChild.children).forEach((item: HTMLElement) => {
-                if (item.tagName === "LI" && !item.querySelector(".b3-list-item__arrow--open")) {
-                    this.toggleItem(item, false);
-                }
-            });
+            this.expandDocumentItems(this.tree, false);
         });
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
@@ -363,11 +360,7 @@ export class Backlink extends Model {
                             event.stopPropagation();
                             break;
                         case "mExpand":
-                            Array.from(this.mTree.element.firstElementChild.children).forEach((item: HTMLElement) => {
-                                if (item.tagName === "LI" && !item.querySelector(".b3-list-item__arrow--open")) {
-                                    this.toggleItem(item, true);
-                                }
-                            });
+                            this.expandDocumentItems(this.mTree, true);
                             event.stopPropagation();
                             break;
                         case "mCollapse":
@@ -631,7 +624,7 @@ export class Backlink extends Model {
         }
         const docId = liElement.getAttribute("data-node-id");
         const record = this.itemRecords[isMention ? 1 : 0].get(docId);
-        const editor = record?.editor || this.editors.find(item => item.protyle.element === liElement.nextElementSibling);
+        const editor = record?.editor;
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
             if (record) {
@@ -657,6 +650,29 @@ export class Backlink extends Model {
         } else {
             this.loadContext(liElement, isMention, true);
         }
+    }
+
+    private expandDocumentItems(tree: Tree, isMention: boolean) {
+        const listElement = tree.element;
+        const folded = this.type === "bottom" ?
+            listElement.classList.contains("fn__none") :
+            (isMention ? listElement.style.height === "0px" : listElement.classList.contains("fn__none"));
+        if (folded) {
+            if (this.type === "bottom") {
+                const toggleType = isMention ? "layout" : "bLayout";
+                this.setBottomLayout(
+                    listElement.previousElementSibling.querySelector(`[data-type="${toggleType}"]`),
+                    listElement
+                );
+            } else {
+                this.setDockSectionLayout(listElement);
+            }
+        }
+        this.getDocumentItemElements(tree).forEach(item => {
+            if (!item.querySelector(".b3-list-item__arrow--open")) {
+                this.toggleItem(item, isMention);
+            }
+        });
     }
 
     private loadContext(liElement: HTMLElement, isMention: boolean, expand: boolean) {
@@ -712,7 +728,7 @@ export class Backlink extends Model {
                     editorElement.setAttribute("data-defid", blockId);
                     editorElement.setAttribute("data-ismention", isMention ? "true" : "false");
                     editorElement.setAttribute("data-backlink-revision", response.data.revision);
-                    liElement.after(editorElement);
+                    record.containerElement.appendChild(editorElement);
                     const editor = new Protyle(this.app, editorElement, {
                         blockId: docId,
                         click: {
@@ -769,9 +785,18 @@ export class Backlink extends Model {
             if (editorIndex > -1) {
                 this.editors.splice(editorIndex, 1);
             }
-            record.editor.protyle.element.remove();
         }
-        record.headerElement.remove();
+        record.containerElement.remove();
+    }
+
+    public getDocumentItemElements(tree: Tree) {
+        return Array.from(tree.element.querySelectorAll(
+            ":scope > .b3-list > .backlinkList__item > .b3-list-item[data-node-id]"
+        )) as HTMLLIElement[];
+    }
+
+    public getScrollElement(tree: Tree) {
+        return this.type === "bottom" ? this.ownerProtyle.contentElement : tree.element;
     }
 
     private ensureListElement(tree: Tree) {
@@ -823,13 +848,18 @@ export class Backlink extends Model {
             let record = records.get(id);
             if (!record) {
                 const headerElement = tree.createTopLevelItem(item);
+                const containerElement = document.createElement("div");
+                containerElement.className = "backlinkList__item";
+                containerElement.dataset.nodeId = id;
+                containerElement.appendChild(headerElement);
                 record = {
                     revision: item.revision || "",
+                    containerElement,
                     headerElement,
                     requestGeneration: 0,
                 };
                 records.set(id, record);
-                listElement.appendChild(headerElement);
+                listElement.appendChild(containerElement);
                 changed = true;
             } else if (!item.revision || record.revision !== item.revision) {
                 const headerElement = tree.createTopLevelItem(item);
@@ -851,18 +881,11 @@ export class Backlink extends Model {
 
         let cursor = listElement.firstElementChild;
         orderedRecords.forEach(record => {
-            if (record.headerElement !== cursor) {
-                listElement.insertBefore(record.headerElement, cursor);
+            if (record.containerElement !== cursor) {
+                listElement.insertBefore(record.containerElement, cursor);
                 changed = true;
             }
-            cursor = record.headerElement.nextElementSibling;
-            if (record.editor) {
-                if (record.editor.protyle.element !== cursor) {
-                    listElement.insertBefore(record.editor.protyle.element, cursor);
-                    changed = true;
-                }
-                cursor = record.editor.protyle.element.nextElementSibling;
-            }
+            cursor = record.containerElement.nextElementSibling;
         });
         return changed;
     }
@@ -871,7 +894,9 @@ export class Backlink extends Model {
         const scrollElement = this.type === "bottom" ? this.ownerProtyle.contentElement : tree.element;
         const scopeElement = tree?.element || this.element;
         const scrollRect = scrollElement.getBoundingClientRect();
-        const itemElements = Array.from(scopeElement.querySelectorAll(".b3-list > .b3-list-item[data-node-id]")) as HTMLElement[];
+        const itemElements = Array.from(
+            scopeElement.querySelectorAll(".b3-list > .backlinkList__item[data-node-id]")
+        ) as HTMLElement[];
         const anchorElement = itemElements.find(item => item.getBoundingClientRect().bottom >= scrollRect.top);
         if (!anchorElement) {
             return;
@@ -889,7 +914,7 @@ export class Backlink extends Model {
             return;
         }
         const tree = anchor.isMention ? this.mTree : this.tree;
-        const anchorElement = tree.element.querySelector(`.b3-list-item[data-node-id="${anchor.rootID}"]`);
+        const anchorElement = tree.element.querySelector(`.backlinkList__item[data-node-id="${anchor.rootID}"]`);
         if (!anchorElement) {
             return;
         }
@@ -923,7 +948,9 @@ export class Backlink extends Model {
             this.tree.element.classList.remove("backlinkList--divider-spacing");
             return;
         }
-        const lastItem = this.tree.element.querySelector(":scope > .b3-list > .b3-list-item:last-of-type");
+        const lastItem = this.tree.element.querySelector(
+            ":scope > .b3-list > .backlinkList__item:last-child > .b3-list-item"
+        );
         this.tree.element.classList.toggle("backlinkList--divider-spacing",
             !lastItem || !lastItem.querySelector(".b3-list-item__arrow--open"));
     }

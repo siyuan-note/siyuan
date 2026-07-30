@@ -420,13 +420,30 @@
 .sy__backlink {
   > .backlinkList,
   > .backlinkMList {
-    > .b3-list > .b3-list-item > .counter {
-      background-color: transparent;
-      color: var(--b3-theme-on-surface-light);
+    > .b3-list > .backlinkList__item {
+      display: flow-root;
+      position: relative;
 
-      &:hover {
-        background-color: transparent;
-        color: var(--b3-theme-on-surface-light);
+      > .b3-list-item {
+        background-color: var(--b3-theme-background);
+        position: sticky;
+        top: 0;
+        z-index: 6; // 需高于编辑器内固定表头及高亮层，低于工具栏
+
+        &:hover:not(.b3-list-item--focus):not(.dragover):not(.dragover__current):not(.dragover__top):not(.dragover__bottom),
+        &.b3-list-item--focus {
+          background-image: linear-gradient(var(--b3-list-hover), var(--b3-list-hover));
+        }
+
+        > .counter {
+          background-color: transparent;
+          color: var(--b3-theme-on-surface-light);
+
+          &:hover {
+            background-color: transparent;
+            color: var(--b3-theme-on-surface-light);
+          }
+        }
       }
     }
   }
@@ -496,7 +513,7 @@
     min-height: auto;
     overflow: visible;
 
-    > .b3-list > .b3-list-item {
+    > .b3-list > .backlinkList__item > .b3-list-item {
       margin-left: 0;
 
       > .b3-list-item__toggle {

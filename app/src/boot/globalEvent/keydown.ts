@@ -1109,6 +1109,32 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
+    if (activeItemElement.closest(".backlinkList__item")) {
+        if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            return true;
+        }
+        if (event.key === "ArrowDown" || event.key === "ArrowRight" || event.key === "ArrowUp") {
+            const itemElements = backlinkModel.getDocumentItemElements(tree);
+            const currentIndex = itemElements.indexOf(activeItemElement as HTMLLIElement);
+            const nextIndex = currentIndex + (event.key === "ArrowUp" ? -1 : 1);
+            const nextElement = itemElements[nextIndex];
+            if (nextElement) {
+                activeItemElement.classList.remove("b3-list-item--focus");
+                nextElement.classList.add("b3-list-item--focus");
+                const nextRect = nextElement.getBoundingClientRect();
+                const scrollElement = backlinkModel.getScrollElement(tree);
+                const scrollRect = scrollElement.getBoundingClientRect();
+                if (nextRect.top < scrollRect.top) {
+                    scrollElement.scrollTop += nextRect.top - scrollRect.top;
+                } else if (nextRect.bottom > scrollRect.bottom) {
+                    scrollElement.scrollTop += nextRect.bottom - scrollRect.bottom;
+                }
+            }
+            event.preventDefault();
+            return true;
+        }
+    }
     const ulElement = hasClosestByClassName(activeItemElement, "b3-list");
     if (!ulElement) {
         return false;

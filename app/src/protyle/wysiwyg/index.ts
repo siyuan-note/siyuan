@@ -62,7 +62,8 @@ import {
     getImageBlockRefCheckTargets,
     getRangeBlockRefCheckTargets,
     IBlockRefCheckTargets,
-    removeBlock
+    removeBlock,
+    removeCrossBlockRange
 } from "./remove";
 import {highlightRender} from "../render/highlightRender";
 import {openAttr} from "../../menus/commonMenuItem";
@@ -2562,16 +2563,18 @@ export class WYSIWYG {
                 autoSelectedBlock = true;
             }
             const selectedStateElements = [...selectElements];
+            const endElement = hasClosestBlock(range.endContainer);
+            const cutCrossBlockRange = selectedStateElements.length === 0 && !range.collapsed &&
+                !!endElement && nodeElement !== endElement && !selectImgElement && !selectAVElement && !selectTableElement;
             let cutClipboardWritten = false;
             if (selectedStateElements.length === 0 && (!range.collapsed || selectImgElement) &&
                 !selectAVElement && !selectTableElement) {
-                const endElement = hasClosestBlock(range.endContainer);
                 let checkTargets: IBlockRefCheckTargets = {elements: [], exactIDs: []};
                 if (selectImgElement) {
                     checkTargets = getImageBlockRefCheckTargets(nodeElement, selectImgElement);
                 } else if (endElement) {
                     checkTargets = getRangeBlockRefCheckTargets(
-                        protyle.wysiwyg.element, range, nodeElement, endElement);
+                        protyle.wysiwyg.element, range, nodeElement, endElement, cutCrossBlockRange);
                 }
                 const checkIDs = checkTargets.elements
                     .map(item => item.getAttribute("data-node-id")).filter(Boolean);
@@ -2595,6 +2598,26 @@ export class WYSIWYG {
                     }
                     cutClipboardWritten = true;
                 }
+            }
+            if (cutCrossBlockRange) {
+                if (!cutClipboardWritten) {
+                    const clipboardData = new DataTransfer();
+                    this.element.dispatchEvent(new ClipboardEvent("copy", {
+                        bubbles: true,
+                        cancelable: true,
+                        clipboardData,
+                    }));
+                    if (clipboardData.types.length === 0) {
+                        showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+                        return;
+                    }
+                    Array.from(clipboardData.types).forEach(type => {
+                        event.clipboardData.setData(type, clipboardData.getData(type));
+                    });
+                }
+                await removeCrossBlockRange(protyle, range, nodeElement, endElement, true);
+                protyle.hint.render(protyle);
+                return;
             }
             let html = "";
             let textPlain = "";

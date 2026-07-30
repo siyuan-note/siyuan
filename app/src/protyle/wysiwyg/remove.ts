@@ -241,7 +241,8 @@ IBlockRefCheckTargets => {
 };
 
 export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Range,
-                                            startElement: HTMLElement, endElement: HTMLElement) => {
+                                            startElement: HTMLElement, endElement: HTMLElement,
+                                            skipRefCheck = false) => {
     const editorElement = protyle.wysiwyg.element;
     const context = getCrossBlockRemovalContext(editorElement, selectedRange, startElement, endElement);
     const {
@@ -256,18 +257,20 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
     if (removeElements.length === 0 && updateElements.length === 0) {
         return;
     }
-    const checkTargets = getBlockRefCheckTargetsFromContext(context, context.removeElements);
-    const checkIDs = checkTargets.elements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
-    if (checkIDs.length > 0 && !await confirmBlockRef({
-        scope: "blocks",
-        ids: checkIDs,
-        exactIDs: checkTargets.exactIDs,
-        notebook: protyle.notebookId,
-    }, protyle)) {
-        return;
-    }
-    if (checkTargets.elements.some(item => !item.isConnected || item.getAttribute("data-node-id") === null)) {
-        return;
+    if (!skipRefCheck) {
+        const checkTargets = getBlockRefCheckTargetsFromContext(context, context.removeElements);
+        const checkIDs = checkTargets.elements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
+        if (checkIDs.length > 0 && !await confirmBlockRef({
+            scope: "blocks",
+            ids: checkIDs,
+            exactIDs: checkTargets.exactIDs,
+            notebook: protyle.notebookId,
+        }, protyle)) {
+            return;
+        }
+        if (checkTargets.elements.some(item => !item.isConnected || item.getAttribute("data-node-id") === null)) {
+            return;
+        }
     }
 
     const undoFocusContext = getUndoFocusContext(editorElement, selectedRange, true);

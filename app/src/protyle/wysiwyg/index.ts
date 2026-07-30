@@ -2,6 +2,7 @@ import {
     beforePaste,
     convertPastedListItemSubtype,
     enableLuteMarkdownSyntax,
+    getPlainText,
     getTextStar,
     paste,
     restoreLuteMarkdownSyntax
@@ -783,9 +784,13 @@ export class WYSIWYG {
                     textPlain = range.toString();
                 } else {
                     tempElement.append(range.cloneContents());
-                    if (nodeElement !== hasClosestBlock(range.endContainer)) {
+                    const isCrossBlock = nodeElement !== hasClosestBlock(range.endContainer);
+                    if (isCrossBlock) {
                         this.normalizeCrossBlockCopy(tempElement, range);
                     }
+                    const crossBlockTextPlain = isCrossBlock ? Array.from(tempElement.children)
+                        .map(item => getPlainText(item as HTMLElement).trimEnd())
+                        .filter(Boolean).join("\n") : undefined;
                     const textWithoutAttr = this.clearAttrContent(tempElement);
                     this.emojiToMd(tempElement);
                     const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");
@@ -796,7 +801,7 @@ export class WYSIWYG {
                         html = tempElement.innerHTML;
                     }
                     // 不能使用 commonAncestorContainer https://ld246.com/article/1643282894693
-                    textPlain = tempElement.textContent;
+                    textPlain = crossBlockTextPlain ?? tempElement.textContent;
                     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
@@ -821,7 +826,7 @@ export class WYSIWYG {
                             }
                         });
                     } else if (!hasClosestByTag(range.startContainer, "CODE")) {
-                        textPlain = textWithoutAttr ?? range.toString();
+                        textPlain = crossBlockTextPlain ?? textWithoutAttr ?? range.toString();
                     }
                 }
             }

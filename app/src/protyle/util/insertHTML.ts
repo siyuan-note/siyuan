@@ -1467,6 +1467,18 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         }
     });
     orderLists.forEach(orderList => {
+        for (const operation of doOperation) {
+            if (operation.action !== "insert") {
+                continue;
+            }
+            const insertedRoot = orderList.closest(`[data-node-id="${operation.id}"]`);
+            if (!insertedRoot) {
+                continue;
+            }
+            updateListOrder(orderList);
+            operation.data = insertedRoot.outerHTML;
+            return;
+        }
         // 保存原有列表项的原始状态用于撤销
         const originalItems: {id: string, html: string}[] = [];
         orderList.querySelectorAll(":scope > .li").forEach(li => {

@@ -2,6 +2,7 @@
   "copyViewMirror": "Kopiuj lustrzany widok",
   "hideViewTab": "Ukryj kartę widoku",
   "showViewTab": "Pokaż kartę widoku",
+  "deleteRefConfirm": "Treść przeznaczona do usunięcia lub wycięcia zawiera bloki, do których prowadzą odwołania. Czy chcesz kontynuować?",
   "previousDifference": "Poprzednia różnica",
   "nextDifference": "Następna różnica",
   "pluginGlobalDisabledTip": "Wszystkie wtyczki są obecnie wyłączone; tej wtyczki nadal nie można używać po jej włączeniu",

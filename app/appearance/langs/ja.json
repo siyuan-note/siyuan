@@ -2,6 +2,7 @@
   "copyViewMirror": "ビューミラーをコピー",
   "hideViewTab": "ビュータブを非表示",
   "showViewTab": "ビュータブを表示",
+  "deleteRefConfirm": "削除または切り取る内容には参照されているブロックが含まれています。続行しますか？",
   "previousDifference": "前の差分",
   "nextDifference": "次の差分",
   "pluginGlobalDisabledTip": "現在すべてのプラグインが無効になっているため、このプラグインを有効にしても使用できません",

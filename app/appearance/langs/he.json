@@ -2,6 +2,7 @@
   "copyViewMirror": "העתקת שיקוף התצוגה",
   "hideViewTab": "הסתרת לשונית התצוגה",
   "showViewTab": "הצגת לשונית התצוגה",
+  "deleteRefConfirm": "התוכן שיימחק או ייגזר מכיל בלוקים שיש אליהם הפניות. האם להמשיך?",
   "previousDifference": "ההבדל הקודם",
   "nextDifference": "ההבדל הבא",
   "pluginGlobalDisabledTip": "כל התוספים מושבתים כעת, ולא ניתן יהיה להשתמש בתוסף הזה גם לאחר הפעלתו",

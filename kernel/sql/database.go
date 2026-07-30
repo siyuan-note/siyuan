@@ -117,6 +117,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureBlocksDocHPathIndex(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document hpath index failed: %s", err)
 			}
+			if err := ensureRefsDefIndexes(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create refs definition indexes failed: %s", err)
+			}
 			recoverIndexQueue()
 			return
 		}
@@ -245,6 +248,9 @@ func initDBTables() {
 	_, err = db.Exec("CREATE TABLE refs (id, def_block_id, def_block_parent_id, def_block_root_id, def_block_path, block_id, root_id, box, path, content, markdown, type)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [refs] failed: %s", err)
+	}
+	if err = ensureRefsDefIndexes(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create refs definition indexes failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS file_annotation_refs")
@@ -1398,6 +1404,14 @@ func ensureBlocksDocHPathIndex(database *sql.DB) (err error) {
 	return
 }
 
+func ensureRefsDefIndexes(database *sql.DB) (err error) {
+	if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_refs_def_block_id ON refs(def_block_id)"); err != nil {
+		return
+	}
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_refs_def_block_root_id ON refs(def_block_root_id)")
+	return
+}
+
 func CloseDatabase() {
 	closeIndexQueue()
 	// 退出时删除所有已打开的加密 db 文件：加密索引可由 box.Index() 全量重建，
@@ -1987,6 +2001,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		}
 	}
 	if err = ensureBlocksDocHPathIndex(boxDB); err != nil {
+		return
+	}
+	if err = ensureRefsDefIndexes(boxDB); err != nil {
 		return
 	}
 	// FTS5 external-content 虚拟表，tokenize 与全局保持一致（siyuan 分词器）

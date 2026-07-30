@@ -2,6 +2,7 @@
   "copyViewMirror": "Copia mirror della vista",
   "hideViewTab": "Nascondi scheda della vista",
   "showViewTab": "Mostra scheda della vista",
+  "deleteRefConfirm": "Il contenuto da eliminare o tagliare contiene blocchi referenziati. Vuoi continuare?",
   "previousDifference": "Differenza precedente",
   "nextDifference": "Differenza successiva",
   "pluginGlobalDisabledTip": "Attualmente tutti i plugin sono disabilitati; questo plugin non potrà essere utilizzato anche dopo essere stato abilitato",

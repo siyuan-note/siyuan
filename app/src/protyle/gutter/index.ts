@@ -48,6 +48,7 @@ import {
 } from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {confirmBlockRef} from "../../util/checkBlockRef";
 import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent,} from "../../block/util";
 import {setDragTipGhost} from "../util/dragTip";
 import {countBlockWord} from "../../layout/status";
@@ -2163,16 +2164,26 @@ export class Gutter {
                             id,
                             removeFoldAttr: false
                         }, (response) => {
-                            if (isInAndroid()) {
-                                window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                            } else if (isInHarmony()) {
-                                window.JSHarmony.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                            } else {
-                                writeText(response.data + Constants.ZWSP);
-                            }
                             fetchPost("/api/block/getHeadingDeleteTransaction", {
                                 id,
-                            }, (deleteResponse) => {
+                            }, async (deleteResponse) => {
+                                if (!await confirmBlockRef({
+                                    scope: "blocks",
+                                    ids: deleteResponse.data.doOperations.map((operation: IOperation) => operation.id),
+                                    notebook: protyle.notebookId,
+                                }, protyle)) {
+                                    return;
+                                }
+                                if (!protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
+                                    return;
+                                }
+                                if (isInAndroid()) {
+                                    window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                                } else if (isInHarmony()) {
+                                    window.JSHarmony.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                                } else {
+                                    writeText(response.data + Constants.ZWSP);
+                                }
                                 deleteResponse.data.doOperations.forEach((operation: IOperation) => {
                                     protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                         itemElement.remove();
@@ -2206,7 +2217,17 @@ export class Gutter {
                     click() {
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
-                        }, (response) => {
+                        }, async (response) => {
+                            if (!await confirmBlockRef({
+                                scope: "blocks",
+                                ids: response.data.doOperations.map((operation: IOperation) => operation.id),
+                                notebook: protyle.notebookId,
+                            }, protyle)) {
+                                return;
+                            }
+                            if (!protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
+                                return;
+                            }
                             response.data.doOperations.forEach((operation: IOperation) => {
                                 protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                     itemElement.remove();

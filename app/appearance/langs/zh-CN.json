@@ -2,6 +2,7 @@
   "copyViewMirror": "复制视图镜像",
   "hideViewTab": "隐藏视图页签",
   "showViewTab": "显示视图页签",
+  "deleteRefConfirm": "待删除或剪切的内容中存在被引用的内容块，是否继续？",
   "pluginGlobalDisabledTip": "当前已禁用所有插件，该插件启用后仍无法使用",
   "previousDifference": "上一个差异",
   "nextDifference": "下一个差异",

@@ -1,5 +1,6 @@
 import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
+import {confirmBlockRef} from "../../util/checkBlockRef";
 import {hasClosestBlock, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {isInAndroid, isInHarmony, setStorageVal, writeText} from "../../protyle/util/compatibility";
 import {Constants} from "../../constants";
@@ -1082,16 +1083,26 @@ export class MobileOutline extends Model {
                         id,
                         removeFoldAttr: false
                     }, (response) => {
-                        if (isInAndroid()) {
-                            window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                        } else if (isInHarmony()) {
-                            window.JSHarmony.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                        } else {
-                            writeText(response.data + Constants.ZWSP);
-                        }
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
-                        }, (deleteResponse) => {
+                        }, async (deleteResponse) => {
+                            if (!await confirmBlockRef({
+                                scope: "blocks",
+                                ids: deleteResponse.data.doOperations.map((operation: IOperation) => operation.id),
+                                notebook: data.protyle.notebookId,
+                            }, data.protyle)) {
+                                return;
+                            }
+                            if (!data.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
+                                return;
+                            }
+                            if (isInAndroid()) {
+                                window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                            } else if (isInHarmony()) {
+                                window.JSHarmony.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                            } else {
+                                writeText(response.data + Constants.ZWSP);
+                            }
                             deleteResponse.data.doOperations.forEach((operation: IOperation) => {
                                 data.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                     itemElement.remove();
@@ -1128,7 +1139,17 @@ export class MobileOutline extends Model {
                     const data = this.getProtyleAndBlockElement(element);
                     fetchPost("/api/block/getHeadingDeleteTransaction", {
                         id,
-                    }, (response) => {
+                    }, async (response) => {
+                        if (!await confirmBlockRef({
+                            scope: "blocks",
+                            ids: response.data.doOperations.map((operation: IOperation) => operation.id),
+                            notebook: data.protyle.notebookId,
+                        }, data.protyle)) {
+                            return;
+                        }
+                        if (!data.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
+                            return;
+                        }
                         response.data.doOperations.forEach((operation: IOperation) => {
                             data.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                 itemElement.remove();

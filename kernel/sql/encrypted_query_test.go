@@ -59,6 +59,42 @@ func TestQueryRefsByDefIDInBoxContainsChildren(t *testing.T) {
 	}
 }
 
+func TestExistRefByDefIDsSearchesGlobalAndEncryptedIndexes(t *testing.T) {
+	globalDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if nil != err {
+		t.Fatalf("open global test database failed: %s", err)
+	}
+	globalDB.SetMaxOpenConns(1)
+	if _, err = globalDB.Exec("CREATE TABLE refs (def_block_id TEXT, def_block_root_id TEXT)"); nil != err {
+		t.Fatalf("create global refs table failed: %s", err)
+	}
+	if _, err = globalDB.Exec("INSERT INTO refs VALUES ('global-definition', 'global-root')"); nil != err {
+		t.Fatalf("insert global ref failed: %s", err)
+	}
+	previousDB := db
+	db = globalDB
+	t.Cleanup(func() {
+		db = previousDB
+		globalDB.Close()
+	})
+
+	encryptedDB, _ := useEncryptedQueryTestDB(t)
+	insertEncryptedQueryTestRef(t, encryptedDB, "encrypted-ref", "encrypted-definition", "encrypted-root")
+
+	if exists, queryErr := ExistRefByDefIDs([]string{"global-definition"}, nil); nil != queryErr || !exists {
+		t.Fatalf("global ref was not found: %v", queryErr)
+	}
+	if exists, queryErr := ExistRefByDefIDs([]string{"encrypted-definition"}, nil); nil != queryErr || !exists {
+		t.Fatalf("encrypted ref was not found: %v", queryErr)
+	}
+	if exists, queryErr := ExistRefByDefIDs(nil, []string{"encrypted-root"}); nil != queryErr || !exists {
+		t.Fatalf("encrypted root ref was not found: %v", queryErr)
+	}
+	if exists, queryErr := ExistRefByDefIDs([]string{"missing"}, []string{"missing"}); nil != queryErr || exists {
+		t.Fatalf("unexpected missing ref result: exists=%v, err=%v", exists, queryErr)
+	}
+}
+
 func TestSelectBlocksRawStmtInBoxPaginatesExistingLimit(t *testing.T) {
 	testDB, boxID := useEncryptedQueryTestDB(t)
 	for i := 1; i <= 6; i++ {

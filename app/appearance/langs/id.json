@@ -2,6 +2,7 @@
   "copyViewMirror": "Salin cermin tampilan",
   "hideViewTab": "Sembunyikan tab tampilan",
   "showViewTab": "Tampilkan tab tampilan",
+  "deleteRefConfirm": "Konten yang akan dihapus atau dipotong berisi blok yang dirujuk. Apakah Anda ingin melanjutkan?",
   "previousDifference": "Perbedaan sebelumnya",
   "nextDifference": "Perbedaan berikutnya",
   "pluginGlobalDisabledTip": "Saat ini semua plugin dinonaktifkan; plugin ini tetap tidak dapat digunakan setelah diaktifkan",

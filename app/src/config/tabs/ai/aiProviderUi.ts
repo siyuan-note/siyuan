@@ -55,11 +55,6 @@ const getProviderName = (provider: Config.IProvider) =>
 const getProviderTitle = (provider: Config.IProvider) =>
     getProviderName(provider) || window.siyuan.languages.addAiProvider;
 
-const getProviderSettingsTitle = (provider: Config.IProvider) => {
-    const name = getProviderName(provider);
-    return name ? `${name} ${window.siyuan.languages.aiProviderSettings}` : window.siyuan.languages.aiProviderSettings;
-};
-
 const getPresetTitle = (preset: IProviderPreset) => {
     const name = preset.name || window.siyuan.languages.custom;
     if (!preset.region) {
@@ -395,7 +390,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     const body = view.querySelector<HTMLElement>(".b3-dialog__body");
     body.innerHTML = `<div class="b3-dialog__content" style="padding: 0">
     <div class="config-group">
-        <div class="config-title" data-type="providerSettingsTitle">${escapeHTML(getProviderSettingsTitle(draft))}</div>
+        <div class="config-title">${window.siyuan.languages.aiProviderSettings}</div>
         <div class="config-items">
             <label class="fn__flex b3-label config-item config-wrap">
                 ${genConfigItemMainHtml(window.siyuan.languages.customDisplayName)}
@@ -447,7 +442,6 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>
 </div>`;
     bindPasswordIconaToggle(view, "aiProviderDetailApiKey");
-    const providerSettingsTitleElement = view.querySelector<HTMLElement>("[data-type='providerSettingsTitle']");
     const modelsContainer = view.querySelector<HTMLElement>("[data-type='providerModels']");
     const addModelButton = view.querySelector<HTMLButtonElement>("[data-action='addModel']");
     const fetchModelsButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
@@ -592,9 +586,6 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             }
             if (providerField === "baseURL") {
                 updateModelActionButtons();
-            }
-            if (providerField === "displayName" || providerField === "baseURL") {
-                providerSettingsTitleElement.textContent = getProviderSettingsTitle(draft);
             }
             return;
         }

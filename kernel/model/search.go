@@ -1421,7 +1421,7 @@ func parseReplaceText(replacement string, luteEngine *lute.Lute) (ret []*ast.Nod
 	if nil == tree.Root.FirstChild {
 		return nil, "" == replacement
 	}
-	parse.NestedInlines2FlattedSpans(tree, false)
+	parse.NestedInlines2FlattedSpansHybrid(tree, false)
 	for child := tree.Root.FirstChild.FirstChild; nil != child; {
 		next := child.Next
 		child.Unlink()

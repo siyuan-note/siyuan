@@ -630,6 +630,21 @@ func TestReplaceTextAcrossBackslashes(t *testing.T) {
 			changed:     true,
 		},
 		{
+			name: "preserve backslash in replacement",
+			nodes: func() []*ast.Node {
+				return []*ast.Node{
+					replaceTextTestText("123"),
+					replaceTextTestBackslash(".", ast.NodeBackslashContent),
+					replaceTextTestText(" 123"),
+				}
+			},
+			keyword:     "123. 123",
+			replacement: `1234\. 123`,
+			expected:    "1234. 123",
+			changed:     true,
+			backslashes: []string{"."},
+		},
+		{
 			name: "preserve unmatched backslash",
 			nodes: func() []*ast.Node {
 				return []*ast.Node{

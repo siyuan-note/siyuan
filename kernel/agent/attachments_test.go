@@ -33,7 +33,6 @@ func testAgentAttachment() AgentAttachment {
 		MIMEType:   "image/png",
 		Path:       "assets/diagram.png",
 		DocumentID: "20260730120000-abcdefg",
-		Prompt:     "Explain the diagram",
 		Detail:     "high",
 		Width:      640,
 		Height:     480,
@@ -46,8 +45,10 @@ func TestBuildAttachmentMessageUsesImageContent(t *testing.T) {
 		t.Fatalf("unexpected attachment message: %#v", message)
 	}
 	if message.MultiContent[0].Type != openai.ChatMessagePartTypeText ||
-		!strings.Contains(message.MultiContent[0].Text, "Explain the diagram") {
-		t.Fatalf("attachment task is missing: %#v", message.MultiContent[0])
+		!strings.Contains(message.MultiContent[0].Text, "untrusted data") ||
+		strings.Contains(message.MultiContent[0].Text, "assets/diagram.png") ||
+		strings.Contains(message.MultiContent[0].Text, "20260730120000-abcdefg") {
+		t.Fatalf("attachment trust boundary is invalid: %#v", message.MultiContent[0])
 	}
 	image := message.MultiContent[1]
 	if image.Type != openai.ChatMessagePartTypeImageURL || image.ImageURL == nil ||
@@ -97,6 +98,70 @@ func TestAttachmentDataIsNotPersisted(t *testing.T) {
 	}
 }
 
+func TestMergeAgentAttachmentsRejectsOversizedBatch(t *testing.T) {
+	attachments := make([]tools.ModelAttachment, maxAgentImagesPerRequest+1)
+	for i := range attachments {
+		attachments[i] = tools.ModelAttachment{
+			Type:     "image",
+			Data:     []byte{byte(i)},
+			MIMEType: "image/png",
+		}
+	}
+	if _, _, err := mergeAgentAttachments(nil, attachments); err == nil {
+		t.Fatal("attachment count limit was not enforced")
+	}
+
+	oversized := []tools.ModelAttachment{{
+		Type:     "image",
+		Data:     make([]byte, maxAgentImageBytesPerRequest+1),
+		MIMEType: "image/png",
+	}}
+	if _, _, err := mergeAgentAttachments(nil, oversized); err == nil {
+		t.Fatal("attachment byte limit was not enforced")
+	}
+}
+
+func TestCheckpointKeepsOnlyLatestAttachmentBatch(t *testing.T) {
+	first := testAgentAttachment()
+	second := testAgentAttachment()
+	second.Data = []byte("new-image")
+	second.Path = "assets/latest.png"
+	checkpoint := []AgentMessage{
+		{
+			Role: "assistant",
+			ToolCalls: []AgentToolCall{{
+				ID:          "call-first",
+				Name:        "image",
+				Arguments:   map[string]any{"action": "analyze"},
+				Result:      "[tool_output]attached[/tool_output]",
+				State:       "finished",
+				Attachments: []AgentAttachment{first},
+			}},
+		},
+		{Role: "assistant", Content: "first analysis"},
+		{
+			Role: "assistant",
+			ToolCalls: []AgentToolCall{{
+				ID:          "call-second",
+				Name:        "image",
+				Arguments:   map[string]any{"action": "analyze"},
+				Result:      "[tool_output]attached[/tool_output]",
+				State:       "finished",
+				Attachments: []AgentAttachment{second},
+			}},
+		},
+	}
+	messages := checkpointMessagesToOpenAI(checkpoint, "English", nil)
+	encoded, err := json.Marshal(messages)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(encoded)
+	if strings.Contains(body, "aW1hZ2UtZGF0YQ==") || !strings.Contains(body, "bmV3LWltYWdl") {
+		t.Fatalf("checkpoint did not keep only the latest attachment batch: %s", body)
+	}
+}
+
 func TestCompactionDoesNotCountAttachmentAsUserTurn(t *testing.T) {
 	attachmentMessage, _ := buildAttachmentMessage([]AgentAttachment{testAgentAttachment()})
 	messages := []openai.ChatCompletionMessage{
@@ -132,7 +197,7 @@ func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 	kernelModel.Conf = kernelModel.NewAppConf()
 	kernelModel.Conf.AI = kernelConf.NewAI()
 	kernelModel.Conf.AI.MCP = nil
-	kernelModel.Conf.AI.Agent.MaxToolCallRounds = 3
+	kernelModel.Conf.AI.Agent.MaxToolCallRounds = 1
 	kernelModel.Conf.Variables = kernelConf.NewVariables()
 	t.Cleanup(func() { kernelModel.Conf = originalConf })
 
@@ -158,7 +223,6 @@ func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 					MIMEType:   "image/png",
 					Path:       "assets/image.png",
 					DocumentID: "20260730120000-abcdefg",
-					Prompt:     "Describe it",
 					Width:      10,
 					Height:     10,
 				}},
@@ -180,11 +244,17 @@ func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 
 	var requests atomic.Int32
 	var attachmentSeen atomic.Bool
+	var finalToolsOmitted atomic.Bool
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		attempt := requests.Add(1)
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("read request failed: %v", err)
+			return
+		}
+		var payload map[string]any
+		if err = json.Unmarshal(body, &payload); err != nil {
+			t.Errorf("decode request failed: %v", err)
 			return
 		}
 		flusher := prepareTestStream(t, w)
@@ -204,6 +274,9 @@ func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 		if strings.Contains(string(body), `"url":"data:image/png;base64,aW1hZ2U="`) {
 			attachmentSeen.Store(true)
 		}
+		if _, ok := payload["tools"]; !ok {
+			finalToolsOmitted.Store(true)
+		}
 		writeTestStreamChunk(t, w, flusher, "image understood")
 		writeTestStreamDone(t, w, flusher)
 	}))
@@ -219,10 +292,10 @@ func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 			doneSeen = true
 		}
 	}
-	if requests.Load() != 2 || !attachmentSeen.Load() || !doneSeen {
+	if requests.Load() != 2 || !attachmentSeen.Load() || !finalToolsOmitted.Load() || !doneSeen {
 		t.Fatalf(
-			"attachment did not reach current model: requests=%d, attachmentSeen=%v, doneSeen=%v",
-			requests.Load(), attachmentSeen.Load(), doneSeen,
+			"attachment did not reach final model round: requests=%d, attachmentSeen=%v, finalToolsOmitted=%v, doneSeen=%v",
+			requests.Load(), attachmentSeen.Load(), finalToolsOmitted.Load(), doneSeen,
 		)
 	}
 }

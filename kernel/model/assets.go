@@ -445,14 +445,16 @@ func PrepareDocumentImage(documentID, assetPath string) (PreparedDocumentImage, 
 	if err != nil {
 		return PreparedDocumentImage{}, fmt.Errorf("read image failed: %w", err)
 	}
-	prepared, err := util.PrepareForVision(data, Conf.AI.Vision.MaxImageBytes, Conf.AI.Vision.MaxPixels, 0)
+	prepared, err := util.PrepareForVision(
+		data, Conf.AI.Vision.MaxImageBytes, Conf.AI.Vision.MaxPixels, Conf.AI.Vision.MaxEdge,
+	)
 	if err != nil {
 		return PreparedDocumentImage{}, err
 	}
 	return PreparedDocumentImage{
 		Artifact: ImageArtifactRef{Kind: "image", Path: assetPath, DocumentID: bt.RootID},
-		Data:     data,
-		MIMEType: mimetype.Detect(data).String(),
+		Data:     prepared.Data,
+		MIMEType: prepared.MIMEType,
 		Prepared: prepared,
 	}, nil
 }

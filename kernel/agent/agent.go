@@ -336,7 +336,6 @@ type AgentAttachment struct {
 	MIMEType   string `json:"mimeType,omitempty"`
 	Path       string `json:"path"`
 	DocumentID string `json:"documentId"`
-	Prompt     string `json:"prompt,omitempty"`
 	Detail     string `json:"detail,omitempty"`
 	Width      int    `json:"width,omitempty"`
 	Height     int    `json:"height,omitempty"`
@@ -614,24 +613,33 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 		}
 		maxCompletionTokens := max(kernelModel.Conf.AI.Agent.MaxCompletionTokens, 0)
 		maxRounds := kernelModel.Conf.AI.Agent.MaxToolCallRounds
+		modelRound := 0
+		toolCallRounds := 0
 
-		for round := 0; maxRounds <= 0 || round < maxRounds; round++ {
+		for {
 			select {
 			case <-ctx.Done():
 				return
 			default:
 			}
 
-			if round == 0 {
+			if modelRound == 0 {
 				sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "analyzing"})
 			} else {
 				sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "processing"})
+			}
+			modelRound++
+
+			requestTools := tools
+			if maxRounds > 0 && toolCallRounds >= maxRounds {
+				// 工具调用达到上限后仍允许模型完成一次最终回答，但不再提供工具定义。
+				requestTools = nil
 			}
 
 			req := openai.ChatCompletionRequest{
 				Model:               model,
 				Messages:            messages,
-				Tools:               tools,
+				Tools:               requestTools,
 				Stream:              true,
 				StreamOptions:       &openai.StreamOptions{IncludeUsage: true},
 				Temperature:         float32(temperature),
@@ -761,6 +769,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 					}
 				}
 				aggregatedToolCalls = filtered
+				toolCallRounds++
 
 				messages = append(messages, openai.ChatCompletionMessage{
 					Role:             openai.ChatMessageRoleAssistant,
@@ -973,9 +982,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 						executionUnknown = executed.ExecutionUnknown
 					}
 					if !isErr && !executionUnknown && len(modelAttachments) > 0 {
-						attachments := agentAttachmentsFromTool(modelAttachments)
-						checkpointMsgs[assistantIdx].ToolCalls[i].Attachments = attachments
-						roundAttachments = append(roundAttachments, attachments...)
+						merged, added, attachmentErr := mergeAgentAttachments(roundAttachments, modelAttachments)
+						if attachmentErr != nil {
+							resultStr = attachmentErr.Error()
+							isErr = true
+						} else {
+							checkpointMsgs[assistantIdx].ToolCalls[i].Attachments = added
+							roundAttachments = merged
+						}
 					}
 					// rawResult 保留 wrap/truncate 之前的原始文本，用于判断是否为空。
 					rawResult := resultStr
@@ -1030,6 +1044,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 							doomLoop.count = 0
 						}
 					}
+				}
+				if len(roundAttachments) > 0 {
+					// 历史图片的文字分析仍保留在上下文中，只携带最近一轮图片，避免请求体随会话无限增长。
+					messages = withoutAttachmentMessages(messages)
 				}
 				if attachmentMessage, ok := buildAttachmentMessage(roundAttachments); ok {
 					messages = append(messages, attachmentMessage)
@@ -1601,6 +1619,18 @@ func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, 
 	msgs := []openai.ChatCompletionMessage{
 		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, pluginActions)},
 	}
+	latestAttachmentMsg := -1
+	for i := len(checkpointMsgs) - 1; i >= 0; i-- {
+		for _, tc := range checkpointMsgs[i].ToolCalls {
+			if len(tc.Attachments) > 0 {
+				latestAttachmentMsg = i
+				break
+			}
+		}
+		if latestAttachmentMsg >= 0 {
+			break
+		}
+	}
 
 	for cmi := range checkpointMsgs {
 		cm := &checkpointMsgs[cmi]
@@ -1659,12 +1689,14 @@ func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, 
 						ToolCallID: tc.ID,
 					})
 				}
-				var attachments []AgentAttachment
-				for _, tc := range cm.ToolCalls {
-					attachments = append(attachments, tc.Attachments...)
-				}
-				if attachmentMessage, ok := buildAttachmentMessage(attachments); ok {
-					msgs = append(msgs, attachmentMessage)
+				if cmi == latestAttachmentMsg {
+					var attachments []AgentAttachment
+					for _, tc := range cm.ToolCalls {
+						attachments = append(attachments, tc.Attachments...)
+					}
+					if attachmentMessage, ok := buildAttachmentMessage(attachments); ok {
+						msgs = append(msgs, attachmentMessage)
+					}
 				}
 			}
 		}

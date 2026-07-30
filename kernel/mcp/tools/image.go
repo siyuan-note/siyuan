@@ -47,7 +47,7 @@ var ImageTool = &Tool{
 			"action":       {Type: "string", Enum: []string{"list", "analyze", "generate"}},
 			"documentID":   {Type: "string", Description: "Document or descendant block ID used to resolve the target document and notebook"},
 			"assetPath":    {Type: "string", Description: "Local assets/... path returned by list; required for analyze"},
-			"question":     {Type: "string", Description: "Question for the vision model"},
+			"question":     {Type: "string", Description: "Question for the current Agent model about the attached image"},
 			"detail":       {Type: "string", Enum: []string{"auto", "low", "high"}},
 			"prompt":       {Type: "string", Description: "Prompt describing the image to generate"},
 			"size":         {Type: "string", Description: "Provider-supported image size, such as 1024x1024"},
@@ -130,7 +130,6 @@ func imageList(documentID string) CallToolResult {
 
 func imageAnalyze(documentID string, args map[string]any) CallToolResult {
 	assetPath, _ := args["assetPath"].(string)
-	question, _ := args["question"].(string)
 	detail, _ := args["detail"].(string)
 	prepared, err := model.PrepareDocumentImage(documentID, assetPath)
 	if err != nil {
@@ -151,7 +150,6 @@ func imageAnalyze(documentID string, args map[string]any) CallToolResult {
 		MIMEType:   prepared.MIMEType,
 		Path:       prepared.Artifact.Path,
 		DocumentID: prepared.Artifact.DocumentID,
-		Prompt:     question,
 		Detail:     detail,
 		Width:      prepared.Prepared.Width,
 		Height:     prepared.Prepared.Height,

@@ -133,7 +133,6 @@ type ModelAttachment struct {
 	MIMEType   string `json:"mimeType,omitempty"`
 	Path       string `json:"path,omitempty"`
 	DocumentID string `json:"documentId,omitempty"`
-	Prompt     string `json:"prompt,omitempty"`
 	Detail     string `json:"detail,omitempty"`
 	Width      int    `json:"width,omitempty"`
 	Height     int    `json:"height,omitempty"`

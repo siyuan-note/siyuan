@@ -9,6 +9,7 @@ const createWysiwygElement = (lastElementEof?: string, initialBottomEof = false)
             lastElementChild: lastElementEof ? {
                 getAttribute: (name: string) => name === "data-eof" ? lastElementEof : null,
             } : null,
+            hasAttribute: (name: string) => name === "data-bottom-eof" && bottomEof,
             toggleAttribute: (name: string, force: boolean) => {
                 if (name === "data-bottom-eof") {
                     bottomEof = force;
@@ -34,5 +35,13 @@ describe("updateDocumentBottomEof", () => {
         updateDocumentBottomEof(wysiwyg.element);
 
         assert.equal(wysiwyg.hasBottomEof(), false);
+    });
+
+    it("preserves the document end when probing the beginning of a single-block range", () => {
+        const wysiwyg = createWysiwygElement("1", true);
+
+        updateDocumentBottomEof(wysiwyg.element, true);
+
+        assert.equal(wysiwyg.hasBottomEof(), true);
     });
 });

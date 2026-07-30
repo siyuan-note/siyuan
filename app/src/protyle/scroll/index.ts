@@ -78,8 +78,9 @@ export class Scroll {
             protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
         const anchorID = anchorElement?.getAttribute("data-node-id");
         const rootID = protyle.block.rootID;
-        const eof = anchorElement?.getAttribute("data-eof");
-        if (!anchorID || !rootID || eof === (mode === 1 ? "1" : "2")) {
+        const eof = mode === 1 ? anchorElement?.getAttribute("data-eof") === "1" :
+            protyle.wysiwyg.element.hasAttribute("data-bottom-eof");
+        if (!anchorID || !rootID || eof) {
             return false;
         }
         // 同一编辑器的动态加载需要串行，避免相同边界响应被重复追加 https://github.com/siyuan-note/siyuan/issues/18459

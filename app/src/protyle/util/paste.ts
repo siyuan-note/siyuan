@@ -275,7 +275,7 @@ const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[]) => {
     uploadLocalFiles(localFiles, protyle, true);
 };
 
-const convertPastedListItemSubtype = (listItemElement: HTMLElement, subtype: string) => {
+export const convertPastedListItemSubtype = (listItemElement: HTMLElement, subtype: string) => {
     const actionElement = listItemElement.querySelector<HTMLElement>(".protyle-action");
     if (!actionElement || !["u", "o", "t"].includes(subtype)) {
         return;

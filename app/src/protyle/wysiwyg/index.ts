@@ -1,4 +1,11 @@
-import {beforePaste, enableLuteMarkdownSyntax, getTextStar, paste, restoreLuteMarkdownSyntax} from "../util/paste";
+import {
+    beforePaste,
+    convertPastedListItemSubtype,
+    enableLuteMarkdownSyntax,
+    getTextStar,
+    paste,
+    restoreLuteMarkdownSyntax
+} from "../util/paste";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -482,6 +489,16 @@ export class WYSIWYG {
                 item.append(attrElement.cloneNode(true));
             }
         });
+        const listItemElements = Array.from(element.children).filter(item =>
+            item.getAttribute("data-type") === "NodeListItem") as HTMLElement[];
+        const subtype = listItemElements[0]?.getAttribute("data-subtype");
+        if (subtype && listItemElements.length > 1 && listItemElements.length === element.childElementCount) {
+            listItemElements.forEach(item => {
+                if (item.getAttribute("data-subtype") !== subtype) {
+                    convertPastedListItemSubtype(item, subtype);
+                }
+            });
+        }
     }
 
     private async writeSelectionClipboardForCut() {

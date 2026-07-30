@@ -2037,6 +2037,116 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
     transaction(protyle, doOperations, undoOperations);
 };
 
+type TEmptyParagraphTarget = "code" | "table" | "line" | "math";
+
+const EMPTY_PARAGRAPH_TARGET_NODE_TYPES: Record<TEmptyParagraphTarget, string> = {
+    code: "NodeCodeBlock",
+    table: "NodeTable",
+    line: "NodeThematicBreak",
+    math: "NodeMathBlock",
+};
+
+const getEmptyParagraphTargetMarkdown = (type: TEmptyParagraphTarget) => {
+    if (type === "code") {
+        const language = window.siyuan.storage[Constants.LOCAL_CODELANG] || "";
+        return "```" + (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(language) ? "" : language) +
+            Lute.Caret + "\n```";
+    }
+    if (type === "table") {
+        return `| ${Lute.Caret} |  |  |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |`;
+    }
+    return type === "line" ? "---" : "$$";
+};
+
+export const isEmptyParagraph = (element: Element) => {
+    if (element.getAttribute("data-type") !== "NodeParagraph") {
+        return false;
+    }
+    const editableElement = getContenteditableElement(element);
+    if (!editableElement) {
+        return false;
+    }
+    const contentElement = editableElement.cloneNode(true) as Element;
+    contentElement.querySelectorAll("br, wbr").forEach(item => item.remove());
+    const text = contentElement.textContent.replace(new RegExp(Constants.ZWSP, "g"), "").trim();
+    return text === "" && contentElement.childElementCount === 0;
+};
+
+export const turnEmptyParagraphsIntoTransaction = (options: {
+    protyle: IProtyle,
+    nodeElements: Element[],
+    type: TEmptyParagraphTarget,
+}) => {
+    if (options.nodeElements.length === 0 || !options.nodeElements.every(isEmptyParagraph)) {
+        return;
+    }
+
+    const replacements = options.nodeElements.map((nodeElement) => {
+        const oldElement = nodeElement.cloneNode(true) as HTMLElement;
+        oldElement.classList.remove("protyle-wysiwyg--select");
+        oldElement.removeAttribute("select-start");
+        oldElement.removeAttribute("select-end");
+        const oldHTML = oldElement.outerHTML;
+        const editableElement = getContenteditableElement(oldElement);
+        editableElement.textContent = getEmptyParagraphTargetMarkdown(options.type);
+
+        const template = document.createElement("template");
+        template.innerHTML = options.protyle.lute.SpinBlockDOM(oldElement.outerHTML);
+        if (template.content.childElementCount !== 1) {
+            return;
+        }
+        const newElement = template.content.firstElementChild as HTMLElement;
+        if (newElement.getAttribute("data-node-id") !== oldElement.getAttribute("data-node-id") ||
+            newElement.getAttribute("data-type") !== EMPTY_PARAGRAPH_TARGET_NODE_TYPES[options.type]) {
+            return;
+        }
+        if (newElement.getAttribute("data-type") === "NodeTable") {
+            newElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
+                item.style.minWidth = "60px";
+            });
+        }
+        return {
+            nodeElement,
+            oldHTML,
+            newElement,
+        };
+    });
+    if (replacements.some(item => !item)) {
+        return;
+    }
+
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const newElements: HTMLElement[] = [];
+    replacements.forEach((replacement) => {
+        const id = replacement.newElement.getAttribute("data-node-id");
+        doOperations.push({
+            action: "update",
+            id,
+            data: replacement.newElement.outerHTML,
+        });
+        undoOperations.push({
+            action: "update",
+            id,
+            data: replacement.oldHTML,
+        });
+        replacement.nodeElement.insertAdjacentElement("afterend", replacement.newElement);
+        replacement.nodeElement.remove();
+        replacement.newElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+        newElements.push(replacement.newElement);
+    });
+
+    transaction(options.protyle, doOperations, undoOperations);
+    processRender(options.protyle.wysiwyg.element);
+    highlightRender(options.protyle.wysiwyg.element);
+    blockRender(options.protyle, options.protyle.wysiwyg.element);
+    focusBlock(newElements[0]);
+    hideElements(["gutter"], options.protyle);
+};
+
 export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyle, cb: (e: HTMLElement) => void,
                                        focusContext?: Record<string, string>) => {
     const operations: IOperation[] = [];

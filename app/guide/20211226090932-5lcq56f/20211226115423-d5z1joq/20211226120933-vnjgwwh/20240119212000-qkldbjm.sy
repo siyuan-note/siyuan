@@ -218,7 +218,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241001010716-h04et95",
-								"updated": "20241001011821"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -232,7 +232,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：忽略所在文件路徑以 ​/20210808180117-6v0mkxr 開頭的內容塊搜尋"
+									"Data": "​：忽略所在文件路徑以 ​/20210808180117-6v0mkxr 開頭的內容區塊搜尋"
 								}
 							]
 						}
@@ -255,7 +255,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241001010716-5dui527",
-								"updated": "20241001011758"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -269,7 +269,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：忽略 data/20210808180117-czj9bvb 筆記本下的內容塊搜索"
+									"Data": "​：忽略 data/20210808180117-czj9bvb 筆記本下的內容區塊搜索"
 								}
 							]
 						}
@@ -292,7 +292,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241001010716-7y5034n",
-								"updated": "20241001011824"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -306,7 +306,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：忽略 id 為 20200923234011-ieuun1p 的內容塊搜索"
+									"Data": "​：忽略 id 為 20200923234011-ieuun1p 的內容區塊搜索"
 								}
 							]
 						}

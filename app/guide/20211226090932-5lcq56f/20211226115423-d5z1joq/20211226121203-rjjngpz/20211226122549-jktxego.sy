@@ -2933,7 +2933,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-eu9085n",
-				"updated": "20250115155400"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -3111,7 +3111,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "向上選中或取消塊"
+									"Data": "向上選中或取消區塊"
 								}
 							]
 						},
@@ -3201,7 +3201,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "向下選中或取消塊"
+									"Data": "向下選中或取消區塊"
 								}
 							]
 						},
@@ -3781,7 +3781,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20260728202615"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -3892,7 +3892,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "連續按下兩次以選中文檔中所有已加載的內容塊；代碼塊中使用時僅選中代碼塊中的內容"
+									"Data": "連續按下兩次以選中文檔中所有已加載的內容區塊；代碼區塊中使用時僅選中代碼區塊中的內容"
 								}
 							]
 						}
@@ -3978,7 +3978,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "剪下/剪下塊內容"
+									"Data": "剪下/剪下區塊內容"
 								}
 							]
 						},
@@ -4025,7 +4025,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "沒有選擇內容時為剪下塊內容"
+									"Data": "沒有選擇內容時為剪下區塊內容"
 								}
 							]
 						}
@@ -4088,7 +4088,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "沒有選擇內容時為複製塊內容"
+									"Data": "沒有選擇內容時為複製區塊內容"
 								}
 							]
 						}
@@ -4104,7 +4104,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "複製塊超連結"
+									"Data": "複製區塊超連結"
 								}
 							]
 						},
@@ -4170,7 +4170,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "複製該塊為嵌入塊"
+									"Data": "複製該區塊為嵌入區塊"
 								}
 							]
 						},
@@ -4236,7 +4236,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "複製該塊為塊引用"
+									"Data": "複製該區塊為區塊引用"
 								}
 							]
 						},
@@ -4309,7 +4309,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "跳到父塊的下一個塊"
+									"Data": "跳到父區塊的下一個區塊"
 								}
 							]
 						},
@@ -4394,7 +4394,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "跳到父塊的上一個塊"
+									"Data": "跳到父區塊的上一個區塊"
 								}
 							]
 						},
@@ -4472,7 +4472,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "跳到父塊"
+									"Data": "跳到父區塊"
 								}
 							]
 						},
@@ -4538,7 +4538,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "重複當前或選中的塊"
+									"Data": "重複當前或選中的區塊"
 								}
 							]
 						},
@@ -4642,7 +4642,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "可將選中內容作為連結標題或塊引用錨點"
+									"Data": "可將選中內容作為連結標題或區塊引用錨點"
 								}
 							]
 						}
@@ -4658,7 +4658,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "塊屬性"
+									"Data": "區塊屬性"
 								}
 							]
 						},
@@ -4714,7 +4714,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選擇內容時為設定塊命名"
+									"Data": "選擇內容時為設定區塊命名"
 								}
 							]
 						}
@@ -5040,7 +5040,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "塊引新建文檔存放位置"
+									"TextMarkTextContent": "區塊引用新建文檔存放位置"
 								},
 								{
 									"Type": "NodeText",
@@ -5060,7 +5060,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "使用選中內容/塊作為新建文檔的內容"
+									"Data": "使用選中內容/區塊作為新建文檔的內容"
 								}
 							]
 						},
@@ -5840,7 +5840,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "塊前插入空塊"
+									"Data": "區塊前插入空區塊"
 								}
 							]
 						},
@@ -5906,7 +5906,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "塊後插入空塊"
+									"Data": "區塊後插入空區塊"
 								}
 							]
 						},
@@ -5972,7 +5972,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "塊向上移動"
+									"Data": "區塊向上移動"
 								}
 							]
 						},
@@ -6038,7 +6038,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "塊向下移動"
+									"Data": "區塊向下移動"
 								}
 							]
 						},
@@ -6226,7 +6226,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選中塊首至游標內容"
+									"Data": "選中區塊首至游標內容"
 								}
 							]
 						},
@@ -6382,7 +6382,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選中塊首至游標內容"
+									"Data": "選中區塊首至游標內容"
 								}
 							]
 						},
@@ -6560,7 +6560,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "游標移動到塊首"
+									"Data": "游標移動到區塊首"
 								}
 							]
 						},
@@ -6605,7 +6605,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "游標移動到塊末"
+									"Data": "游標移動到區塊末"
 								}
 							]
 						},
@@ -6980,7 +6980,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "向上選中或取消塊"
+									"Data": "向上選中或取消區塊"
 								}
 							]
 						},
@@ -7043,7 +7043,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "向下選中或取消塊"
+									"Data": "向下選中或取消區塊"
 								},
 								{
 									"Type": "NodeBr",
@@ -7104,7 +7104,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "依次向上選中塊"
+									"Data": "依次向上選中區塊"
 								}
 							]
 						},
@@ -7170,7 +7170,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "依次向下選中塊"
+									"Data": "依次向下選中區塊"
 								}
 							]
 						},
@@ -7236,7 +7236,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "摺疊/展開當前塊"
+									"Data": "摺疊/展開當前區塊"
 								}
 							]
 						},
@@ -7293,7 +7293,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "展開當前塊"
+									"Data": "展開當前區塊"
 								}
 							]
 						},
@@ -7397,7 +7397,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在反鏈面板中的作用是打開遊標所在塊"
+									"Data": "在反鏈面板中的作用是打開遊標所在區塊"
 								}
 							]
 						}
@@ -7470,7 +7470,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選擇多個塊"
+									"Data": "選擇多個區塊"
 								}
 							]
 						},
@@ -7566,7 +7566,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用塊"
+									"Data": "區塊引用"
 								}
 							]
 						},
@@ -7692,7 +7692,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "嵌入塊"
+									"Data": "嵌入區塊"
 								}
 							]
 						},
@@ -7835,7 +7835,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "游標在行級元素中喚起對應的功能菜單，否則喚起塊菜單"
+									"Data": "游標在行級元素中喚起對應的功能菜單，否則喚起區塊菜單"
 								},
 								{
 									"Type": "NodeBr",
@@ -8069,7 +8069,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在下側打開塊引用"
+									"Data": "在下側打開區塊引用"
 								}
 							]
 						},
@@ -8479,7 +8479,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "複製塊超連結（Markdown）"
+									"Data": "複製區塊超連結（Markdown）"
 								}
 							]
 						},
@@ -8553,7 +8553,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "對於資料庫塊是 "
+									"Data": "對於資料庫區塊是 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -8616,7 +8616,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "僅對資料庫塊可用，可前往 "
+									"Data": "僅對資料庫區塊可用，可前往 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9208,7 +9208,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-v6as45b",
-				"updated": "20260730111518"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -9317,7 +9317,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "塊引用"
+									"Data": "區塊引用"
 								}
 							]
 						},
@@ -10247,7 +10247,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引述塊"
+									"Data": "引述區塊"
 								}
 							]
 						},
@@ -10343,7 +10343,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "代碼塊"
+									"Data": "代碼區塊"
 								}
 							]
 						},
@@ -12353,12 +12353,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250423105322-jc65ji5",
-				"updated": "20260730111518"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "代碼塊 "
+					"Data": "代碼區塊 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -12522,12 +12522,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260128160937-uvbwubc",
-				"updated": "20260128160952"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "提示塊"
+					"Data": "提示區塊"
 				}
 			]
 		},
@@ -14038,12 +14038,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-jhdz9s3",
-				"updated": "20250115155935"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "塊標"
+					"Data": "區塊標"
 				}
 			]
 		},
@@ -14057,7 +14057,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226122652-ykdt6pc",
-				"updated": "20250115155935"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -14388,7 +14388,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "生成塊引用"
+									"Data": "生成區塊引用"
 								}
 							]
 						},
@@ -14441,7 +14441,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "生成嵌入塊"
+									"Data": "生成嵌入區塊"
 								}
 							]
 						},
@@ -14960,12 +14960,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-dz6tv7l",
-				"updated": "20250115155953"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "塊引用 / 關係圖節點"
+					"Data": "區塊引用 / 關係圖節點"
 				}
 			]
 		},
@@ -14980,7 +14980,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619002223-k6apxvm",
-				"updated": "20250115155953"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -15261,7 +15261,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "查看定義塊的所有引用"
+									"Data": "查看定義區塊的所有引用"
 								}
 							]
 						},
@@ -15342,7 +15342,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619002223-xwob5s8",
-				"updated": "20250929213959"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -15789,7 +15789,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "生成塊引用"
+									"Data": "生成區塊引用"
 								}
 							]
 						},
@@ -16443,12 +16443,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-7cvwac5",
-				"updated": "20250115160014"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "塊嵌入"
+					"Data": "區塊嵌入"
 				}
 			]
 		},

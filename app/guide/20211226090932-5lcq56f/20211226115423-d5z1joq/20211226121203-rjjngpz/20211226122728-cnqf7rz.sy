@@ -67,7 +67,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226122740-4qaa4jj",
-				"updated": "20211226122740"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -77,7 +77,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：直接打開內容塊，需要該塊所在筆記本已經處於打開狀態。"
+					"Data": "：直接打開內容區塊，需要該區塊所在筆記本已經處於打開狀態。"
 				}
 			]
 		},
@@ -424,7 +424,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226122740-0ub46as",
-								"updated": "20250115153431"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -434,7 +434,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "塊標菜單"
+									"TextMarkTextContent": "區塊標菜單"
 								},
 								{
 									"Type": "NodeText",
@@ -452,7 +452,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "複製塊超連結"
+									"TextMarkTextContent": "複製區塊超連結"
 								},
 								{
 									"Type": "NodeText",

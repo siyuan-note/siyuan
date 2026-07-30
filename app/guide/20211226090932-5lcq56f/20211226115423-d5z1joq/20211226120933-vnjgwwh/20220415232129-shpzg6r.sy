@@ -885,7 +885,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20220415232130-8ymwyjm",
-				"updated": "20220502163553"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -898,7 +898,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "-- 匹配包含 \"one\" 或者 \"two\" 的塊，不匹配包含 \"three\" 的塊\n'one OR two NOT three'\n\n-- 匹配包含 \"one\" 或者包含 \"two\" 且不包含 \"three\" 的塊\n'one OR (two NOT three)'\n"
+					"Data": "-- 匹配包含 \"one\" 或者 \"two\" 的區塊，不匹配包含 \"three\" 的區塊\n'one OR two NOT three'\n\n-- 匹配包含 \"one\" 或者包含 \"two\" 且不包含 \"three\" 的區塊\n'one OR (two NOT three)'\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1078,12 +1078,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-ecl8s30",
-				"updated": "20220415232130"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "了解到這些以後，我們就可以通過查詢語法來實現查詢嵌入塊，這樣查詢性能會更好："
+					"Data": "了解到這些以後，我們就可以通過查詢語法來實現查詢嵌入區塊，這樣查詢性能會更好："
 				}
 			]
 		},

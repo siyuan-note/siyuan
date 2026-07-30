@@ -886,12 +886,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501231338-vlg2lgm",
-				"updated": "20220501231338"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "有的塊（比如在列表項中的段落塊）找不到塊標怎麼辦？"
+					"Data": "有的區塊（比如在列表項中的段落區塊）找不到區塊標怎麼辦？"
 				}
 			]
 		},
@@ -900,12 +900,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501231338-vs50rai",
-				"updated": "20220501231338"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在列表項下的第一個子塊是省略塊標的。可以將游標移到這個塊中，然後通過 "
+					"Data": "在列表項下的第一個子區塊是省略區塊標的。可以將游標移到這個區塊中，然後通過 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -914,7 +914,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 觸發它的塊標菜單。"
+					"Data": " 觸發它的區塊標菜單。"
 				}
 			]
 		},

@@ -482,16 +482,19 @@ func setExport(c *gin.Context) {
 		return
 	}
 
+	previousPandocBin := model.Conf.Export.PandocBin
 	if "" != export.PandocBin {
 		if !util.IsValidPandocBin(export.PandocBin) {
 			util.PushErrMsg(fmt.Sprintf(model.Conf.Language(117), export.PandocBin), 5000)
-			export.PandocBin = model.Conf.Export.PandocBin
+			export.PandocBin = previousPandocBin
 		}
 	}
 
 	model.Conf.Export = export
 	model.Conf.Save()
-	util.InitPandoc(export.PandocBin)
+	if previousPandocBin != export.PandocBin {
+		util.InitPandoc(export.PandocBin)
+	}
 
 	ret.Data = model.Conf.Export
 }

@@ -87,6 +87,7 @@ import {selectRow, stickyRow, updateHeader} from "../render/av/row";
 import {getAVSelectedItemIDs, getAVSelectedTableCells, updateAVRowSelect} from "../render/av/virtualScroll";
 import {setFreezeColumn, showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
+import {getAVCurrentViewID} from "../render/av/viewVisibility";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
@@ -2989,7 +2990,7 @@ export class WYSIWYG {
                     }], [{
                         action: "setAttrViewBlockView",
                         blockID: nodeElement.getAttribute("data-node-id"),
-                        id: avTabHeaderElement.parentElement.querySelector(".item--focus").getAttribute("data-id"),
+                        id: getAVCurrentViewID(nodeElement),
                         avID: nodeElement.getAttribute("data-av-id"),
                     }]);
                     window.siyuan.menus.menu.remove();

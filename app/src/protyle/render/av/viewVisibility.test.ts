@@ -2,6 +2,8 @@ import {before, describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 
 let visibleViewsAttribute: string;
+let currentViewAttribute: string;
+let getAVCurrentViewID: typeof import("./viewVisibility").getAVCurrentViewID;
 let getAVVisibleViewIDs: typeof import("./viewVisibility").getAVVisibleViewIDs;
 let setAVVisibleViewIDs: typeof import("./viewVisibility").setAVVisibleViewIDs;
 let getAVViewPageSize: typeof import("./viewVisibility").getAVViewPageSize;
@@ -14,20 +16,38 @@ before(async () => {
         import("./viewVisibility"),
     ]);
     visibleViewsAttribute = Constants.CUSTOM_SY_AV_VISIBLE_VIEWS;
+    currentViewAttribute = Constants.CUSTOM_SY_AV_VIEW;
+    getAVCurrentViewID = visibility.getAVCurrentViewID;
     getAVVisibleViewIDs = visibility.getAVVisibleViewIDs;
     setAVVisibleViewIDs = visibility.setAVVisibleViewIDs;
     getAVViewPageSize = visibility.getAVViewPageSize;
     serializeAVViewPageSizes = visibility.serializeAVViewPageSizes;
 });
 
-const createBlockElement = (value?: string) => {
+const createBlockElement = (value?: string, currentViewID?: string, renderedViewID?: string, focusedViewID?: string) => {
     const attrs = new Map<string, string>();
     if (value !== undefined) {
         attrs.set(visibleViewsAttribute, value);
     }
+    if (currentViewID !== undefined) {
+        attrs.set(currentViewAttribute, currentViewID);
+    }
     return {
         getAttribute: (name: string) => attrs.get(name) ?? null,
         setAttribute: (name: string, attrValue: string) => attrs.set(name, attrValue),
+        querySelector: (selector: string) => {
+            if (selector === ".av__header" && renderedViewID !== undefined) {
+                return {
+                    getAttribute: (name: string) => name === "data-current-view-id" ? renderedViewID : null,
+                };
+            }
+            if (selector === ".layout-tab-bar .item--focus" && focusedViewID !== undefined) {
+                return {
+                    getAttribute: (name: string) => name === "data-id" ? focusedViewID : null,
+                };
+            }
+            return null;
+        },
     } as unknown as Element;
 };
 
@@ -38,6 +58,15 @@ const views = [
 ] as IAVView[];
 
 describe("database block visible views", () => {
+    it("keeps the rendered current view available when its tab is hidden", () => {
+        assert.equal(getAVCurrentViewID(createBlockElement(undefined, undefined, "view-b")), "view-b");
+    });
+
+    it("prefers the persisted current view and supports legacy focused tabs", () => {
+        assert.equal(getAVCurrentViewID(createBlockElement(undefined, "view-c", "view-b", "view-a")), "view-c");
+        assert.equal(getAVCurrentViewID(createBlockElement(undefined, undefined, undefined, "view-a")), "view-a");
+    });
+
     it("shows all views for legacy blocks without a visibility attribute", () => {
         assert.deepEqual(getAVVisibleViewIDs(createBlockElement(), views), ["view-a", "view-b", "view-c"]);
     });

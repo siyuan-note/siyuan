@@ -1,5 +1,12 @@
 import {Constants} from "../../../constants";
 
+export const getAVCurrentViewID = (blockElement: Element) => {
+    return blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
+        blockElement.querySelector(".av__header")?.getAttribute("data-current-view-id") ||
+        blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") ||
+        "";
+};
+
 export const getAVVisibleViewIDs = (blockElement: Element, views: IAVView[] | string[]) => {
     const viewIDs = views.map((view) => typeof view === "string" ? view : view.id);
     const value = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS)?.trim();

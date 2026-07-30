@@ -105,7 +105,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     const defaultTemplate = data.newItemTemplates?.find(item => item.id === data.defaultTemplateID);
     const defaultTemplateID = defaultTemplate && (defaultTemplate.targetType !== "detached" ||
         defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
-    return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
+    return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-current-view-id="${escapeAttr(data.viewID)}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
         <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
             <div class="av__selection-toolbar">
                 <span class="av__selection-count"></span>
@@ -128,8 +128,8 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             </span>
             <div class="fn__flex-1"></div>
             <div class="fn__space"></div>
-            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${data.views.length > 0 ? "" : " fn__none"}">
-                <svg><use xlink:href="#iconDown"></use></svg>
+            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon block__icon--show${data.views.length > 0 ? "" : " fn__none"}">
+                <svg><use xlink:href="#iconEye"></use></svg>
                 <span class="fn__space"></span>
                 <small>${visibleViewIDs.length}/${data.views.length}</small>
             </span>

@@ -61,6 +61,7 @@ import {
 import {getEditableAVFields, openAVFieldEditor, updateAVFieldValue} from "./batchEdit";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
 import {isMobile} from "../../../util/functions";
+import {getAVCurrentViewID} from "./viewVisibility";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
@@ -644,8 +645,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 }], [{
                     action: "setAttrViewBlockView",
                     blockID: blockElement.getAttribute("data-node-id"),
-                    id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
-                        target.parentElement.querySelector(".item--focus")?.getAttribute("data-id"),
+                    id: getAVCurrentViewID(blockElement),
                     avID: blockElement.getAttribute("data-av-id"),
                 }]);
             }

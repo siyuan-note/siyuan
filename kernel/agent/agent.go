@@ -431,7 +431,7 @@ type agentCheckpoint struct {
 	LastCommittedTurnID   string         `json:"lastCommittedTurnID,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userEntryID string, contentRevision int64, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, contextLimit int, sessionID string, userEntryID string, contentRevision int64, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -460,7 +460,6 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		var messages []openai.ChatCompletionMessage
 		var checkpointMsgs []AgentMessage
 		var totalPrompt, totalCompletion, lastPromptTokens, lastCachedTokens int
-		contextLimit := GetModelContextLimit(model)
 		alwaysAllow := map[string]bool{}
 		var doomLoop doomLoopTracker
 		var compactCount int

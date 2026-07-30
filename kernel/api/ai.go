@@ -220,9 +220,20 @@ func listModels(c *gin.Context) {
 		return
 	}
 
-	models, err := util.ListAvailableModels(provider.APIKey, provider.BaseURL, provider.RequestTimeout)
+	metadata, err := util.ListAvailableModelsWithContext(provider.APIKey, provider.BaseURL, provider.RequestTimeout)
+	models := make([]string, 0, len(metadata))
+	contextLengths := map[string]int{}
+	for _, item := range metadata {
+		models = append(models, item.ID)
+		if 0 < item.ContextLength {
+			if current := contextLengths[item.ID]; current < item.ContextLength {
+				contextLengths[item.ID] = item.ContextLength
+			}
+		}
+	}
 	result := map[string]any{
-		"models": models,
+		"models":         models,
+		"contextLengths": contextLengths,
 	}
 	if nil != err {
 		result["msg"] = err.Error()

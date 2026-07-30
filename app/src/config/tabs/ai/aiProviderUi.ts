@@ -448,10 +448,13 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     const fetchModelsButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
     const confirmButton = view.querySelector<HTMLButtonElement>("[data-action='confirm']");
     let availableModels: string[] = [];
+    let availableModelContextLengths: Record<string, number> = {};
     let hasFetchedModels = false;
     let fetchingModels = false;
+    const getAvailableModelContextLength = (name: string) =>
+        availableModelContextLengths[name] || availableModelContextLengths[name.toLowerCase()] || 0;
     const updateModelActionButtons = () => {
-        const disabled = fetchingModels || !draft.apiKey.trim();
+        const disabled = fetchingModels || !draft.baseURL.trim();
         addModelButton.disabled = disabled;
         fetchModelsButton.disabled = disabled;
     };
@@ -478,11 +481,6 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         if (fetchingModels) {
             return;
         }
-        if (!draft.apiKey.trim()) {
-            view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
-            showMessage(window.siyuan.languages.apiKeyTip, undefined, "error");
-            return;
-        }
         if (!draft.baseURL.trim()) {
             view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
             showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
@@ -503,6 +501,16 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             const models = responseModels
                 .filter((name): name is string => typeof name === "string" && name.trim() !== "")
                 .map((name) => name.trim());
+            availableModelContextLengths = {};
+            const responseContextLengths = data.contextLengths;
+            if (responseContextLengths && typeof responseContextLengths === "object") {
+                Object.entries(responseContextLengths as Record<string, unknown>).forEach(([name, value]) => {
+                    if (typeof value === "number" && Number.isSafeInteger(value) && value > 0) {
+                        availableModelContextLengths[name] = value;
+                        availableModelContextLengths[name.toLowerCase()] = value;
+                    }
+                });
+            }
             if (models.length === 0) {
                 showMessage(
                     data.msg
@@ -514,13 +522,24 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 return;
             }
             availableModels = [...new Set(models)].sort((first, second) => first.localeCompare(second));
+            draft.models.forEach((model) => {
+                const contextLength = getAvailableModelContextLength(model.name);
+                if (contextLength > 0) {
+                    model.contextLength = contextLength;
+                }
+            });
             if (draft.models.length === 0) {
-                draft.models.push({
+                const model: Config.IModel = {
                     id: "",
                     enabled: true,
                     name: availableModels[0],
                     displayName: "",
-                });
+                };
+                const contextLength = getAvailableModelContextLength(model.name);
+                if (contextLength > 0) {
+                    model.contextLength = contextLength;
+                }
+                draft.models.push(model);
             }
             renderDraftModels(modelsContainer, draft.models, availableModels);
             showMessage(
@@ -566,7 +585,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             } else {
                 draft[providerField] = target.value;
             }
-            if (providerField === "apiKey") {
+            if (providerField === "baseURL") {
                 updateModelActionButtons();
             }
             if (providerField === "displayName" || providerField === "baseURL") {
@@ -578,6 +597,14 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         const modelIndex = Number(target.closest<HTMLElement>("[data-model-index]")?.dataset.modelIndex);
         if (modelField && draft.models[modelIndex]) {
             draft.models[modelIndex][modelField] = target.value;
+            if (modelField === "name") {
+                const contextLength = getAvailableModelContextLength(target.value);
+                if (contextLength > 0) {
+                    draft.models[modelIndex].contextLength = contextLength;
+                } else {
+                    delete draft.models[modelIndex].contextLength;
+                }
+            }
         }
     });
 
@@ -613,10 +640,6 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "addModel") {
-            if (!draft.apiKey.trim()) {
-                view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
-                return;
-            }
             if (!hasFetchedModels) {
                 const modelCount = draft.models.length;
                 fetchModels(() => {

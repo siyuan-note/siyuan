@@ -224,13 +224,14 @@ declare namespace Config {
 
     /**
      * AI model configuration. Behavior params (maxTokens/temperature/maxContexts)
-     * live on IEditing; Model holds only identity fields.
+     * live on IEditing; Model holds identity and provider metadata.
      */
     export interface IModel {
         id: string;
         enabled: boolean;
         name: string;
         displayName?: string;
+        contextLength?: number;
     }
 
     /**

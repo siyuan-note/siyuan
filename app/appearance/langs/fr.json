@@ -2345,6 +2345,6 @@
 		"349": "Le contenu du Vault a changé après l’analyse ; relancez l’analyse",
 		"350": "Impossible de terminer l’écriture ou l’indexation du nouveau carnet ; il a été marqué comme incomplet",
 		"351": "Une erreur inattendue s’est produite ; consultez le journal système pour la tâche [%s]",
-		"352": "Le contexte de l’agent IA ne tient pas dans le modèle sélectionné après compression. Raccourcissez le message ou choisissez un modèle avec une fenêtre de contexte plus grande"
+		"352": "Le contexte de l’agent ne tient pas dans le modèle sélectionné après compression. Choisissez un modèle avec une fenêtre de contexte plus grande"
 	}
 	}

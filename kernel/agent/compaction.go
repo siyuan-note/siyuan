@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -37,6 +38,7 @@ const (
 )
 
 var errContextCannotBeCompacted = errors.New("agent context cannot be compacted enough")
+var errCompactionSummaryEmpty = errors.New("agent compaction summary is empty")
 
 func isContextOverflow(err error) bool {
 	msg := err.Error()
@@ -163,31 +165,57 @@ func compactionSummaryMessages(source string) []openai.ChatCompletionMessage {
 	}
 }
 
-func createCompactionSummary(ctx context.Context, client *openai.Client, model, source string, maxTokens int, timeout time.Duration) (summary string, promptTokens, completionTokens int, err error) {
+func createCompactionSummary(ctx context.Context, client *openai.Client, model, source string, maxTokens, maxRetries int,
+	requestTimeout, streamIdleTimeout time.Duration, ch chan<- AgentEvent) (summary string, promptTokens, completionTokens int, err error) {
 	if maxTokens < compactionSummaryMinTokens {
 		return "", 0, 0, errContextCannotBeCompacted
 	}
-	requestCtx := ctx
-	cancel := func() {}
-	if timeout > 0 {
-		requestCtx, cancel = context.WithTimeout(ctx, timeout)
-	}
-	defer cancel()
 
-	response, err := client.CreateChatCompletion(requestCtx, openai.ChatCompletionRequest{
+	request := openai.ChatCompletionRequest{
 		Model:               model,
 		Messages:            compactionSummaryMessages(source),
 		MaxCompletionTokens: maxTokens,
-	})
+		Stream:              true,
+		StreamOptions:       &openai.StreamOptions{IncludeUsage: true},
+	}
+	stream, firstResponse, cancel, err := createStreamWithRetry(
+		ctx, client, request, maxRetries, requestTimeout, streamIdleTimeout, delayForCategory, ch)
 	if err != nil {
-		return "", 0, 0, fmt.Errorf("%w: summary request failed: %v", errContextCannotBeCompacted, err)
+		return "", 0, 0, fmt.Errorf("compaction summary request failed: %w", err)
 	}
-	if len(response.Choices) == 0 || strings.TrimSpace(response.Choices[0].Message.Content) == "" {
-		return "", response.Usage.PromptTokens, response.Usage.CompletionTokens,
-			fmt.Errorf("%w: summary response is empty", errContextCannotBeCompacted)
+	defer stream.Close()
+	defer cancel()
+
+	var summaryBuilder strings.Builder
+	firstResponsePending := true
+	for {
+		response := firstResponse
+		var receiveErr error
+		if firstResponsePending {
+			firstResponsePending = false
+		} else {
+			response, receiveErr = recvStreamWithIdleTimeout(stream, streamIdleTimeout, cancel)
+		}
+		if receiveErr != nil {
+			if errors.Is(receiveErr, io.EOF) {
+				break
+			}
+			return "", promptTokens, completionTokens,
+				fmt.Errorf("compaction summary stream failed: %w", receiveErr)
+		}
+		for _, choice := range response.Choices {
+			summaryBuilder.WriteString(choice.Delta.Content)
+		}
+		if response.Usage != nil {
+			promptTokens = response.Usage.PromptTokens
+			completionTokens = response.Usage.CompletionTokens
+		}
 	}
-	return strings.TrimSpace(response.Choices[0].Message.Content), response.Usage.PromptTokens,
-		response.Usage.CompletionTokens, nil
+	summary = strings.TrimSpace(summaryBuilder.String())
+	if summary == "" {
+		return "", promptTokens, completionTokens, errCompactionSummaryEmpty
+	}
+	return summary, promptTokens, completionTokens, nil
 }
 
 func newRuntimeCompaction(entries []SessionEntry, coveredEntryCount int, summary string) (*runtimeCompaction, error) {

@@ -37,6 +37,11 @@ var (
 	tokenCounters   sync.Map
 )
 
+const (
+	estimatedLowDetailImageTokens  = 256
+	estimatedHighDetailImageTokens = 2048
+)
+
 // getTokenCounter 按模型缓存 counter，避免切换模型后继续沿用上一个模型的编码器。
 // 未识别的模型回退到 cl100k_base。离线 BPE loader 只注册一次。
 func getTokenCounter(modelName string) (*tokenCounter, error) {
@@ -136,7 +141,7 @@ func computeTokenBreakdown(counter *tokenCounter, messages []openai.ChatCompleti
 		case openai.ChatMessageRoleSystem:
 			systemTotal += counter.count(msg.Content) + perMessageOverhead
 		case openai.ChatMessageRoleUser:
-			breakdown["messages"] += counter.count(chatMessageText(msg)) + perMessageOverhead
+			breakdown["messages"] += counter.count(chatMessageText(msg)) + estimateChatImageTokens(msg) + perMessageOverhead
 		case openai.ChatMessageRoleAssistant:
 			breakdown["messages"] += counter.count(msg.Content) + perMessageOverhead
 			// 助手消息的推理内容（deepseek-reasoner 等）也计入对话消息。
@@ -231,6 +236,23 @@ func computeTokenBreakdown(counter *tokenCounter, messages []openai.ChatCompleti
 		breakdown["other"] = max(realPromptTokens-allocated, 0)
 	}
 	return breakdown
+}
+
+// estimateChatImageTokens 为不同 OpenAI 兼容提供商预留保守的图片输入预算。
+// low 使用较小固定值，auto/high 按高分辨率处理，避免完全忽略多模态上下文开销。
+func estimateChatImageTokens(message openai.ChatCompletionMessage) int {
+	total := 0
+	for _, part := range message.MultiContent {
+		if part.Type != openai.ChatMessagePartTypeImageURL || part.ImageURL == nil {
+			continue
+		}
+		if part.ImageURL.Detail == openai.ImageURLDetailLow {
+			total += estimatedLowDetailImageTokens
+		} else {
+			total += estimatedHighDetailImageTokens
+		}
+	}
+	return total
 }
 
 func estimateChatRequestTokens(model string, messages []openai.ChatCompletionMessage, tools []openai.Tool) int {

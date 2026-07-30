@@ -11,16 +11,62 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	kernelConf "github.com/siyuan-note/siyuan/kernel/conf"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 )
+
+func setupCompactionAgentTest(t *testing.T) {
+	t.Helper()
+	useTestDataDir(t)
+	originalConf := kernelModel.Conf
+	kernelModel.Conf = kernelModel.NewAppConf()
+	kernelModel.Conf.AI = kernelConf.NewAI()
+	kernelModel.Conf.AI.MCP = nil
+	kernelModel.Conf.AI.Agent.MaxCompletionTokens = 512
+	kernelModel.Conf.Variables = kernelConf.NewVariables()
+	t.Cleanup(func() { kernelModel.Conf = originalConf })
+}
+
+func compactionTestContextLimit(t *testing.T, fullTokens, compactedBaseTokens int) int {
+	t.Helper()
+	targetBudget := fullTokens - 512
+	minimumCompactedBudget := compactedBaseTokens + compactionSummaryOverhead + compactionSummaryMinTokens
+	if targetBudget < minimumCompactedBudget {
+		targetBudget = minimumCompactedBudget
+	}
+	if fullTokens <= targetBudget {
+		t.Fatalf("test context does not require compaction: full=%d, budget=%d", fullTokens, targetBudget)
+	}
+	contextLimit := targetBudget + 1024
+	for contextInputBudget(contextLimit, 512) < targetBudget {
+		contextLimit++
+	}
+	return contextLimit
+}
+
+func writeCompactionSummaryStream(t *testing.T, w http.ResponseWriter, content string, promptTokens, completionTokens int) {
+	t.Helper()
+	flusher := prepareTestStream(t, w)
+	writeTestStreamChunk(t, w, flusher, content)
+	if _, err := fmt.Fprintf(w,
+		"data: {\"id\":\"chatcmpl-summary\",\"object\":\"chat.completion.chunk\",\"created\":1,"+
+			"\"model\":\"test-model\",\"choices\":[],\"usage\":{\"prompt_tokens\":%d,\"completion_tokens\":%d,"+
+			"\"total_tokens\":%d}}\n\n",
+		promptTokens, completionTokens, promptTokens+completionTokens); err != nil {
+		t.Fatalf("write summary usage failed: %v", err)
+	}
+	flusher.Flush()
+	writeTestStreamDone(t, w, flusher)
+}
 
 func compactionTestEntries() []SessionEntry {
 	return []SessionEntry{
@@ -96,18 +142,13 @@ func TestCreateCompactionSummaryDoesNotSendTools(t *testing.T) {
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 			t.Fatal(err)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = fmt.Fprint(w, `{
-			"id":"summary-1",
-			"object":"chat.completion",
-			"choices":[{"index":0,"message":{"role":"assistant","content":"Persisted summary"},"finish_reason":"stop"}],
-			"usage":{"prompt_tokens":12,"completion_tokens":3,"total_tokens":15}
-		}`)
+		writeCompactionSummaryStream(t, w, "Persisted summary", 12, 3)
 	}))
 	defer server.Close()
 
 	summary, promptTokens, completionTokens, err := createCompactionSummary(
-		context.Background(), newTestOpenAIClient(server.URL), "test-model", "history", 512, time.Second)
+		context.Background(), newTestOpenAIClient(server.URL), "test-model", "history", 512, 0,
+		time.Second, time.Second, make(chan AgentEvent, 1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,8 +158,33 @@ func TestCreateCompactionSummaryDoesNotSendTools(t *testing.T) {
 	if _, ok := request["tools"]; ok {
 		t.Fatalf("compaction request exposed tools: %#v", request)
 	}
+	if stream, _ := request["stream"].(bool); !stream {
+		t.Fatalf("compaction request was not streamed: %#v", request)
+	}
 	if numberToInt64(request["max_completion_tokens"]) != 512 {
 		t.Fatalf("compaction output was not bounded: %#v", request)
+	}
+}
+
+func TestCreateCompactionSummaryPreservesProviderError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = fmt.Fprint(w, `{"error":{"message":"summary access denied","type":"authentication_error"}}`)
+	}))
+	defer server.Close()
+
+	_, _, _, err := createCompactionSummary(
+		context.Background(), newTestOpenAIClient(server.URL), "test-model", "history", 512, 0,
+		time.Second, time.Second, make(chan AgentEvent, 1))
+	if err == nil {
+		t.Fatal("summary request unexpectedly succeeded")
+	}
+	if errors.Is(err, errContextCannotBeCompacted) {
+		t.Fatalf("provider error was misclassified as a context capacity error: %v", err)
+	}
+	if classifyRetry(err) != "fatal" || !strings.Contains(err.Error(), "summary access denied") {
+		t.Fatalf("provider error was not preserved: %v", err)
 	}
 }
 
@@ -164,14 +230,7 @@ func TestRuntimeCompactionPersistsBesideActiveTurn(t *testing.T) {
 }
 
 func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
-	useTestDataDir(t)
-	originalConf := kernelModel.Conf
-	kernelModel.Conf = kernelModel.NewAppConf()
-	kernelModel.Conf.AI = kernelConf.NewAI()
-	kernelModel.Conf.AI.MCP = nil
-	kernelModel.Conf.AI.Agent.MaxCompletionTokens = 512
-	kernelModel.Conf.Variables = kernelConf.NewVariables()
-	t.Cleanup(func() { kernelModel.Conf = originalConf })
+	setupCompactionAgentTest(t)
 
 	entries := []SessionEntry{
 		{ID: "user-1", Type: "user", Content: "complete the old task"},
@@ -195,35 +254,21 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 		"test-model", checkpointMessagesToOpenAI(checkpoint, "English", nil), requestTools)
 	recentTokens := estimateChatRequestTokens(
 		"test-model", checkpointMessagesToOpenAI(entriesToAgentMessages(entries[2:]), "English", nil), requestTools)
-	targetBudget := fullTokens - 512
-	minimumCompactedBudget := recentTokens + compactionSummaryOverhead + compactionSummaryMinTokens
-	if targetBudget < minimumCompactedBudget {
-		targetBudget = minimumCompactedBudget
-	}
-	contextLimit := targetBudget + 1024
-	for contextInputBudget(contextLimit, 512) < targetBudget {
-		contextLimit++
-	}
+	contextLimit := compactionTestContextLimit(t, fullTokens, recentTokens)
 	if fullTokens <= contextInputBudget(contextLimit, 512) {
 		t.Fatalf("test context does not require compaction: full=%d, budget=%d", fullTokens,
 			contextInputBudget(contextLimit, 512))
 	}
 
-	requestCount := 0
+	var requestCount atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestCount++
+		count := requestCount.Add(1)
 		var payload map[string]any
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			t.Fatal(err)
 		}
-		if stream, _ := payload["stream"].(bool); !stream {
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = fmt.Fprint(w, `{
-				"id":"summary-1",
-				"object":"chat.completion",
-				"choices":[{"index":0,"message":{"role":"assistant","content":"The old task is complete and its result is retained"},"finish_reason":"stop"}],
-				"usage":{"prompt_tokens":100,"completion_tokens":12,"total_tokens":112}
-			}`)
+		if count == 1 {
+			writeCompactionSummaryStream(t, w, "The old task is complete and its result is retained", 100, 12)
 			return
 		}
 		flusher := prepareTestStream(t, w)
@@ -246,8 +291,8 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 			doneSeen = true
 		}
 	}
-	if requestCount != 2 || !doneSeen {
-		t.Fatalf("unexpected compaction request flow: requests=%d, done=%v", requestCount, doneSeen)
+	if requestCount.Load() != 2 || !doneSeen {
+		t.Fatalf("unexpected compaction request flow: requests=%d, done=%v", requestCount.Load(), doneSeen)
 	}
 	runtime, err := loadRuntimeState(testSessionID)
 	if err != nil {
@@ -263,5 +308,186 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 	}
 	if persistedEntries := canonical["entries"].([]any); len(persistedEntries) != len(entries) {
 		t.Fatalf("compaction changed visible history: %#v", persistedEntries)
+	}
+}
+
+func TestAgentChatRegenerateCompactionUsesTruncatedEditedHistory(t *testing.T) {
+	setupCompactionAgentTest(t)
+	const (
+		originalTarget = "ORIGINAL_TARGET_PROMPT_DO_NOT_SEND"
+		editedTarget   = "EDITED_TARGET_PROMPT_MUST_SEND"
+		staleAnswer    = "STALE_REGENERATED_ANSWER_DO_NOT_SEND"
+		futureTurn     = "FUTURE_TURN_DO_NOT_SEND"
+	)
+	entries := []SessionEntry{
+		{ID: "user-1", Type: "user", Content: "complete the old task"},
+		{ID: "assistant-1", Type: "assistant", Content: strings.Repeat("important old result ", 8000)},
+		{ID: "user-2", Type: "user", Content: originalTarget},
+		{ID: "assistant-2", Type: "assistant", Content: staleAnswer},
+		{ID: "user-3", Type: "user", Content: futureTurn},
+		{ID: "assistant-3", Type: "assistant", Content: "future answer"},
+	}
+	session := map[string]any{
+		"id":        testSessionID,
+		"title":     "regenerate compaction",
+		"createdAt": int64(1),
+		"updatedAt": int64(1),
+		"entries":   entries,
+	}
+	if _, err := SaveSession(marshalSession(t, session)); err != nil {
+		t.Fatal(err)
+	}
+
+	regenerateCheckpoint := entriesToAgentMessages(entries[:2])
+	regenerateCheckpoint = append(regenerateCheckpoint,
+		newAgentUserMessage(editedTarget, "user-2", nil, EditorContext{}))
+	requestTools := convertMCPToolsToOpenAI()
+	fullTokens := estimateChatRequestTokens(
+		"test-model", checkpointMessagesToOpenAI(regenerateCheckpoint, "English", nil), requestTools)
+	recentTokens := estimateChatRequestTokens(
+		"test-model", checkpointMessagesToOpenAI(regenerateCheckpoint[2:], "English", nil), requestTools)
+	contextLimit := compactionTestContextLimit(t, fullTokens, recentTokens)
+
+	var requestCount atomic.Int32
+	modelPayload := make(chan string, 1)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		count := requestCount.Add(1)
+		var payload map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Fatal(err)
+		}
+		if count == 1 {
+			writeCompactionSummaryStream(t, w, "The old task is complete", 100, 8)
+			return
+		}
+		data, err := json.Marshal(payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		modelPayload <- string(data)
+		flusher := prepareTestStream(t, w)
+		writeTestStreamChunk(t, w, flusher, "new answer")
+		writeTestStreamDone(t, w, flusher)
+	}))
+	defer server.Close()
+
+	events := AgentChat(
+		context.Background(), newTestOpenAIClient(server.URL), "test-model", contextLimit, testSessionID,
+		"user-2", 1, editedTarget, "English", nil, EditorContext{}, nil, true,
+		time.Second, 0, "", time.Second, time.Second,
+	)
+	for event := range events {
+		if event.Type == "error" {
+			t.Fatalf("regenerate returned an error after compaction: %s", event.Error)
+		}
+	}
+	if requestCount.Load() != 2 {
+		t.Fatalf("unexpected regenerate request count: %d", requestCount.Load())
+	}
+	payload := <-modelPayload
+	if !strings.Contains(payload, editedTarget) {
+		t.Fatalf("edited target was omitted from regenerated context: %s", payload)
+	}
+	for _, excluded := range []string{originalTarget, staleAnswer, futureTurn} {
+		if strings.Contains(payload, excluded) {
+			t.Fatalf("truncated regenerate history %q was reintroduced: %s", excluded, payload)
+		}
+	}
+	runtime, err := loadRuntimeState(testSessionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if runtime.ActiveTurn == nil {
+		t.Fatal("regenerate runtime turn was not persisted")
+	}
+	deltaJSON, err := json.Marshal(runtime.ActiveTurn.Delta)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, excluded := range []string{staleAnswer, futureTurn} {
+		if strings.Contains(string(deltaJSON), excluded) {
+			t.Fatalf("truncated regenerate history %q was persisted in the turn delta: %s", excluded, deltaJSON)
+		}
+	}
+}
+
+func TestAgentChatRetriesOverflowAfterProactiveCompaction(t *testing.T) {
+	setupCompactionAgentTest(t)
+	entries := []SessionEntry{
+		{ID: "user-1", Type: "user", Content: "first completed task"},
+		{ID: "assistant-1", Type: "assistant", Content: strings.Repeat("first result ", 6000)},
+		{ID: "user-2", Type: "user", Content: "second completed task"},
+		{ID: "assistant-2", Type: "assistant", Content: strings.Repeat("second result ", 6000)},
+		{ID: "user-3", Type: "user", Content: "current task"},
+	}
+	session := map[string]any{
+		"id":        testSessionID,
+		"title":     "overflow fallback",
+		"createdAt": int64(1),
+		"updatedAt": int64(1),
+		"entries":   entries,
+	}
+	if _, err := SaveSession(marshalSession(t, session)); err != nil {
+		t.Fatal(err)
+	}
+
+	requestTools := convertMCPToolsToOpenAI()
+	fullTokens := estimateChatRequestTokens(
+		"test-model", checkpointMessagesToOpenAI(entriesToAgentMessages(entries), "English", nil), requestTools)
+	afterFirstTokens := estimateChatRequestTokens(
+		"test-model", checkpointMessagesToOpenAI(entriesToAgentMessages(entries[2:]), "English", nil), requestTools)
+	contextLimit := compactionTestContextLimit(t, fullTokens, afterFirstTokens)
+
+	var requestCount atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		count := requestCount.Add(1)
+		var payload map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Fatal(err)
+		}
+		switch count {
+		case 1:
+			writeCompactionSummaryStream(t, w, "The first task is complete", 90, 8)
+		case 2:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = fmt.Fprint(w,
+				`{"error":{"message":"maximum context length exceeded","type":"invalid_request_error",`+
+					`"code":"context_length_exceeded"}}`)
+		case 3:
+			writeCompactionSummaryStream(t, w, "Both earlier tasks are complete", 100, 9)
+		case 4:
+			flusher := prepareTestStream(t, w)
+			writeTestStreamChunk(t, w, flusher, "current task continued")
+			writeTestStreamDone(t, w, flusher)
+		default:
+			t.Fatalf("unexpected request %d: %#v", count, payload)
+		}
+	}))
+	defer server.Close()
+
+	events := AgentChat(
+		context.Background(), newTestOpenAIClient(server.URL), "test-model", contextLimit, testSessionID,
+		"user-3", 1, "current task", "English", nil, EditorContext{}, nil, false,
+		time.Second, 0, "", time.Second, time.Second,
+	)
+	doneSeen := false
+	for event := range events {
+		if event.Type == "error" {
+			t.Fatalf("overflow fallback returned an error: %s", event.Error)
+		}
+		if event.Type == "done" {
+			doneSeen = true
+		}
+	}
+	if requestCount.Load() != 4 || !doneSeen {
+		t.Fatalf("unexpected overflow fallback flow: requests=%d, done=%v", requestCount.Load(), doneSeen)
+	}
+	runtime, err := loadRuntimeState(testSessionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if runtime.Compaction == nil || runtime.Compaction.CoveredEntryCount != 4 {
+		t.Fatalf("overflow fallback did not extend the compaction boundary: %#v", runtime.Compaction)
 	}
 }

@@ -495,8 +495,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 				if len(cp.Entries) > 0 {
 					sessionEntries = append([]SessionEntry(nil), cp.Entries...)
 					contextEntries := cp.Entries
+					currentUserIndex := sessionUserEntryIndex(cp.Entries, userEntryID)
 					if runtime != nil && validRuntimeCompaction(cp.Entries, runtime.Compaction) {
-						currentUserIndex := sessionUserEntryIndex(cp.Entries, userEntryID)
 						if currentUserIndex >= runtime.Compaction.CoveredEntryCount {
 							compaction = cloneRuntimeCompaction(runtime.Compaction)
 							contextEntries = cp.Entries[compaction.CoveredEntryCount:]
@@ -544,6 +544,17 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 								break
 							}
 						}
+					}
+					if currentUserIndex >= 0 {
+						if regenerate {
+							// 重新生成只保留目标用户消息之前的历史，避免压缩时从持久化会话重新引入
+							// 已被前端截断的旧回答和后续轮次。
+							sessionEntries = sessionEntries[:currentUserIndex+1]
+						}
+						currentUserEntry := &sessionEntries[currentUserIndex]
+						currentUserEntry.Content = userMessage
+						currentUserEntry.References = append([]Reference(nil), references...)
+						currentUserEntry.EditorContext = cloneEditorContext(editorCtx)
 					}
 					messages = checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, pluginActions, compaction)
 				}
@@ -630,6 +641,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 		modelRound := 0
 		toolCallRounds := 0
 		overflowRetryPending := false
+		compactionErrorMessage := func(err error) string {
+			if errors.Is(err, errContextCannotBeCompacted) || isContextOverflow(err) {
+				return kernelModel.Conf.Language(352)
+			}
+			return getAgentRequestErrorMessage(err, messages)
+		}
 
 		compactContext := func(requestTools []openai.Tool, force bool) (bool, error) {
 			if contextLimit <= 0 {
@@ -693,7 +710,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 
 			sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "compacting context"})
 			summary, promptTokens, completionTokens, err := createCompactionSummary(
-				ctx, client, model, source, summaryMaxTokens, requestTimeout)
+				ctx, client, model, source, summaryMaxTokens, maxRetries, requestTimeout, streamIdleTimeout, ch)
 			totalPrompt += promptTokens
 			totalCompletion += completionTokens
 			if err != nil {
@@ -737,13 +754,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 				requestTools = nil
 			}
 
-			compactedThisAttempt, compactErr := compactContext(requestTools, false)
+			_, compactErr := compactContext(requestTools, false)
 			if compactErr != nil {
 				logging.LogErrorf("agent context compaction failed: %s", compactErr)
 				if !saveTurn("interrupted") {
 					return
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(352)})
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(compactErr)})
 				return
 			}
 
@@ -761,7 +778,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 
 			stream, firstResp, roundCancel, streamErr := createStreamWithRetry(ctx, client, req, maxRetries, requestTimeout, streamIdleTimeout, delayForCategory, ch)
 			if streamErr != nil {
-				if isContextOverflow(streamErr) && !compactedThisAttempt && !overflowRetryPending {
+				if isContextOverflow(streamErr) && !overflowRetryPending {
 					compacted, err := compactContext(requestTools, true)
 					if err == nil && compacted {
 						overflowRetryPending = true
@@ -769,6 +786,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 					}
 					if err != nil {
 						logging.LogErrorf("agent overflow compaction failed: %s", err)
+						if !saveTurn("interrupted") {
+							return
+						}
+						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(err)})
+						return
 					}
 				}
 				logging.LogErrorf("agent API request failed: %s", streamErr.Error())

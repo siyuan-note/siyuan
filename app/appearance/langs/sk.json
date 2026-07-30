@@ -2345,6 +2345,6 @@
 		"349": "Obsah Vault sa po analýze zmenil; spustite analýzu znova",
 		"350": "Zápis alebo indexovanie nového zápisníka sa nepodarilo dokončiť; bol označený ako neúplný",
 		"351": "Vyskytla sa neočakávaná chyba; skontrolujte systémový denník úlohy [%s]",
-		"352": "Kontext agenta AI sa ani po kompresii nezmestí do vybraného modelu. Skráťte správu alebo vyberte model s väčším kontextovým oknom"
+		"352": "Kontext agenta sa ani po kompresii nezmestí do vybraného modelu. Vyberte model s väčším kontextovým oknom"
 	}
 	}

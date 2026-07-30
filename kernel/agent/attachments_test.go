@@ -65,6 +65,42 @@ func TestBuildAttachmentMessageUsesImageContent(t *testing.T) {
 	}
 }
 
+func TestEstimateChatImageTokensUsesDetailBudget(t *testing.T) {
+	message := openai.ChatCompletionMessage{
+		Role: openai.ChatMessageRoleUser,
+		MultiContent: []openai.ChatMessagePart{
+			{
+				Type: openai.ChatMessagePartTypeImageURL,
+				ImageURL: &openai.ChatMessageImageURL{
+					URL:    "data:image/png;base64,AA==",
+					Detail: openai.ImageURLDetailLow,
+				},
+			},
+			{
+				Type: openai.ChatMessagePartTypeImageURL,
+				ImageURL: &openai.ChatMessageImageURL{
+					URL:    "data:image/png;base64,AA==",
+					Detail: openai.ImageURLDetailHigh,
+				},
+			},
+			{
+				Type: openai.ChatMessagePartTypeImageURL,
+				ImageURL: &openai.ChatMessageImageURL{
+					URL:    "data:image/png;base64,AA==",
+					Detail: openai.ImageURLDetailAuto,
+				},
+			},
+		},
+	}
+	want := estimatedLowDetailImageTokens + 2*estimatedHighDetailImageTokens
+	if got := estimateChatImageTokens(message); got != want {
+		t.Fatalf("image token estimate = %d, want %d", got, want)
+	}
+	if got := estimateChatRequestTokens("test-model", []openai.ChatCompletionMessage{message}, nil); got < want {
+		t.Fatalf("request token estimate omitted image budget: %d < %d", got, want)
+	}
+}
+
 func TestCheckpointRestoresAttachmentAfterToolResults(t *testing.T) {
 	checkpoint := []AgentMessage{{
 		Role: "assistant",

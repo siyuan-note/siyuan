@@ -938,7 +938,8 @@ export const zoomOut = (options: {
     focusId?: string,
     isPushBack?: boolean,
     callback?: () => void,
-    reload?: boolean
+    reload?: boolean,
+    dataDocType?: string
 }) => {
     if (options.protyle.options.backlinkData) {
         return;
@@ -1007,6 +1008,7 @@ export const zoomOut = (options: {
             } : undefined,
             scrollPosition: options.focusId ? "start" : undefined,
             afterCB: options.callback,
+            dataDocType: options.dataDocType,
         });
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (options.focusId) {
@@ -1042,6 +1044,7 @@ export const zoomOut = (options: {
                         data: getFocusResponse,
                         protyle: options.protyle,
                         action: options.isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO],
+                        dataDocType: options.dataDocType,
                     });
                 });
                 return;
@@ -1062,7 +1065,8 @@ export const zoomOut = (options: {
                         scrollAttr: {
                             rootId: options.id,
                             focusId: options.focusId
-                        }
+                        },
+                        dataDocType: options.dataDocType,
                     });
                 });
                 return;

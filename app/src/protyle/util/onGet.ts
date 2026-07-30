@@ -36,7 +36,8 @@ export const onGet = (options: {
     scrollAttr?: IScrollAttr
     updateReadonly?: boolean,
     scrollPosition?: ScrollLogicalPosition,
-    afterCB?: () => void
+    afterCB?: () => void,
+    dataDocType?: string
 }) => {
     if (!options.action) {
         options.action = [];
@@ -93,7 +94,7 @@ export const onGet = (options: {
         options.protyle.block.id = options.data.data.id;    // 非缩放情况时不一定是 rootID（搜索打开页签）；缩放时必为缩放 id，否则需查看代码
         options.protyle.scroll.lastScrollTop = 0;
         options.protyle.contentElement.scrollTop = 0;
-        options.protyle.wysiwyg.element.setAttribute("data-doc-type", options.data.data.type);
+        options.protyle.wysiwyg.element.setAttribute("data-doc-type", options.dataDocType || options.data.data.type);
     }
 
     if (options.protyle.options.render.title && options.protyle.title.element.getAttribute("data-render") !== "true") {

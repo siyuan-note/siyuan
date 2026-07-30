@@ -148,7 +148,15 @@ ${padHTML}
                     event.preventDefault();
                     break;
                 } else if (type === "exit-focus") {
-                    zoomOut({protyle, id: protyle.block.rootID, focusId: protyle.block.id});
+                    zoomOut({
+                        protyle,
+                        id: protyle.block.rootID,
+                        focusId: protyle.block.id,
+                        dataDocType: "NodeDocument",
+                        callback: () => {
+                            element.querySelector('[data-type="context"]').classList.add("block__icon--active");
+                        }
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -168,9 +176,16 @@ ${padHTML}
                             getDocParam.notebook = protyle.notebookId;
                         }
                         fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
-                            onGet({data: getResponse, protyle, action: [Constants.CB_GET_HL]});
+                            onGet({
+                                data: getResponse,
+                                protyle,
+                                action: [Constants.CB_GET_HL],
+                                dataDocType: "NodeDocument",
+                                afterCB: () => {
+                                    target.classList.add("block__icon--active");
+                                }
+                            });
                         });
-                        target.classList.add("block__icon--active");
                     }
                     break;
                 } else if (type === "undo") {

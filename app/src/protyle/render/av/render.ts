@@ -123,17 +123,16 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 ${tabHTML}
             </div>
             <div class="fn__space"></div>
-            <span data-type="av-add" class="block__icon ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.newView}">
-                <svg><use xlink:href="#iconAdd"></use></svg>
-            </span>
-            <div class="fn__flex-1"></div>
-            <div class="fn__space"></div>
-            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon block__icon--show${data.views.length > 0 ? "" : " fn__none"}">
+            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${visibleViewIDs.length < data.views.length ? " block__icon--show" : ""}${data.views.length > 0 ? "" : " fn__none"}">
                 <svg><use xlink:href="#iconEye"></use></svg>
                 <span class="fn__space"></span>
                 <small>${visibleViewIDs.length}/${data.views.length}</small>
             </span>
             <div class="fn__space"></div>
+            <span data-type="av-add" class="block__icon ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.newView}">
+                <svg><use xlink:href="#iconAdd"></use></svg>
+            </span>
+            <div class="fn__flex-1"></div>
             <span data-type="av-filter" aria-label="${window.siyuan.languages.filter}" data-position="8south" class="ariaLabel block__icon${hasFilter ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>

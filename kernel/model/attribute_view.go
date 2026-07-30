@@ -1220,6 +1220,57 @@ func (tx *Transaction) doSetAttrViewBlockView(operation *Operation) (ret *TxErr)
 	return
 }
 
+func (tx *Transaction) doSetAttrViewBlockVisibleViews(operation *Operation) (ret *TxErr) {
+	err := SetDatabaseBlockVisibleViews(operation.BlockID, operation.AvID, operation.ViewIDs)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func SetDatabaseBlockVisibleViews(blockID, avID string, viewIDs []string) (err error) {
+	if 1 > len(viewIDs) {
+		return errors.New("at least one visible view is required")
+	}
+
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	visible := map[string]bool{}
+	for _, viewID := range viewIDs {
+		if nil == attrView.GetView(viewID) {
+			return fmt.Errorf("view [%s] not found in attribute view [%s]", viewID, avID)
+		}
+		visible[viewID] = true
+	}
+
+	var normalized []string
+	for _, view := range attrView.Views {
+		if visible[view.ID] {
+			normalized = append(normalized, view.ID)
+		}
+	}
+	if 1 > len(normalized) {
+		return errors.New("at least one visible view is required")
+	}
+
+	node, tree, err := getNodeByBlockID(nil, blockID)
+	if nil != err {
+		return
+	}
+	if ast.NodeAttributeView != node.Type || node.AttributeViewID != avID {
+		return fmt.Errorf("block [%s] is not an instance of attribute view [%s]", blockID, avID)
+	}
+
+	err = setNodeAttrs(node, tree, map[string]string{
+		av.NodeAttrVisibleViewIDs: strings.Join(normalized, ","),
+	})
+	return
+}
+
 func (tx *Transaction) doChangeAttrViewLayout(operation *Operation) (ret *TxErr) {
 	err := ChangeAttrViewLayout(operation.BlockID, operation.AvID, operation.Layout)
 	if err != nil {
@@ -4244,24 +4295,41 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	trees, nodes := getMirrorBlocksNodes(avID)
 	for _, node := range nodes {
 		attrs := parse.IAL2Map(node.KramdownIAL)
+		changed := false
+		visibleViewIDsValue := attrs[av.NodeAttrVisibleViewIDs]
+		visibleViewIDs := attrView.GetVisibleViewIDs(visibleViewIDsValue)
+		if "" != visibleViewIDsValue {
+			normalized := strings.Join(visibleViewIDs, ",")
+			if normalized != visibleViewIDsValue {
+				attrs[av.NodeAttrVisibleViewIDs] = normalized
+				changed = true
+			}
+		}
+
 		blockViewID := attrs[av.NodeAttrView]
 		if blockViewID == viewID {
-			attrs[av.NodeAttrView] = attrView.ViewID
-			node.AttributeViewType = string(view.LayoutType)
-			// 镜像块节点未关联 tree，通过 blocktree 解析 boxID 以走加密笔记本守卫与 box-aware 缓存键
-			boxID := ""
-			if bt := treenode.GetBlockTree(node.ID); nil != bt {
-				boxID = bt.BoxID
-			}
-			oldAttrs, e := setNodeAttrs0(node, attrs, boxID)
-			if nil != e {
-				logging.LogErrorf("set node attrs failed: %s", e)
-				continue
-			}
-
-			cache.PutBlockIALInBox(node.ID, boxID, parse.IAL2Map(node.KramdownIAL))
-			pushBlockAttrs(oldAttrs, node)
+			attrs[av.NodeAttrView] = visibleViewIDs[0]
+			fallbackView := attrView.GetView(visibleViewIDs[0])
+			node.AttributeViewType = string(fallbackView.LayoutType)
+			changed = true
 		}
+		if !changed {
+			continue
+		}
+
+		// 镜像块节点未关联 tree，通过 blocktree 解析 boxID 以走加密笔记本守卫与 box-aware 缓存键
+		boxID := ""
+		if bt := treenode.GetBlockTree(node.ID); nil != bt {
+			boxID = bt.BoxID
+		}
+		oldAttrs, e := setNodeAttrs0(node, attrs, boxID)
+		if nil != e {
+			logging.LogErrorf("set node attrs failed: %s", e)
+			continue
+		}
+
+		cache.PutBlockIALInBox(node.ID, boxID, parse.IAL2Map(node.KramdownIAL))
+		pushBlockAttrs(oldAttrs, node)
 	}
 
 	for _, tree := range trees {
@@ -4288,6 +4356,57 @@ func getMirrorBlocksNodes(avID string) (trees []*parse.Tree, nodes []*ast.Node) 
 
 	for _, tree := range mirrorBlockTrees {
 		trees = append(trees, tree)
+	}
+	return
+}
+
+func freezeOtherAttrViewBlockVisibleViews(attrView *av.AttributeView, currentBlockID string, currentTree *parse.Tree) (err error) {
+	var oldViewIDs []string
+	for _, view := range attrView.Views {
+		oldViewIDs = append(oldViewIDs, view.ID)
+	}
+	if 1 > len(oldViewIDs) {
+		return
+	}
+	value := strings.Join(oldViewIDs, ",")
+
+	var otherBlockIDs []string
+	for _, blockID := range treenode.GetMirrorAttrViewBlockIDs(attrView.ID) {
+		if blockID != currentBlockID {
+			otherBlockIDs = append(otherBlockIDs, blockID)
+		}
+	}
+	mirrorBlockTrees := filesys.LoadTrees(otherBlockIDs)
+	changedTrees := map[string]*parse.Tree{}
+	for blockID, tree := range mirrorBlockTrees {
+		if tree.Root.ID == currentTree.Root.ID {
+			tree = currentTree
+		}
+		node := treenode.GetNodeInTree(tree, blockID)
+		if nil == node {
+			logging.LogErrorf("get node in tree by block ID [%s] failed", blockID)
+			continue
+		}
+		if "" != node.IALAttr(av.NodeAttrVisibleViewIDs) {
+			continue
+		}
+
+		boxID := tree.Box
+		oldAttrs, setErr := setNodeAttrs0(node, map[string]string{av.NodeAttrVisibleViewIDs: value}, boxID)
+		if nil != setErr {
+			return setErr
+		}
+		cache.PutBlockIALInBox(node.ID, boxID, parse.IAL2Map(node.KramdownIAL))
+		pushBlockAttrs(oldAttrs, node)
+		if tree.Root.ID != currentTree.Root.ID {
+			changedTrees[tree.Root.ID] = tree
+		}
+	}
+
+	for _, tree := range changedTrees {
+		if err = indexWriteTreeUpsertQueue(tree); nil != err {
+			return
+		}
 	}
 	return
 }
@@ -4327,8 +4446,15 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID}
 	}
 
+	visibleViewIDs := attrView.GetVisibleViewIDs(node.IALAttr(av.NodeAttrVisibleViewIDs))
+	visibleViewIDs = append(visibleViewIDs, operation.ID)
+	if err = freezeOtherAttrViewBlockVisibleViews(attrView, operation.BlockID, tree); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[av.NodeAttrView] = operation.ID
+	attrs[av.NodeAttrVisibleViewIDs] = strings.Join(visibleViewIDs, ",")
 	node.AttributeViewType = string(masterView.LayoutType)
 	err = setNodeAttrs(node, tree, attrs)
 	if err != nil {
@@ -4547,6 +4673,17 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 		return
 	}
 
+	node, tree, _ := getNodeByBlockID(nil, blockID)
+	if nil == node {
+		logging.LogErrorf("get node by block ID [%s] failed", blockID)
+		return
+	}
+	visibleViewIDs := attrView.GetVisibleViewIDs(node.IALAttr(av.NodeAttrVisibleViewIDs))
+	visibleViewIDs = append(visibleViewIDs, viewID)
+	if err = freezeOtherAttrViewBlockVisibleViews(attrView, blockID, tree); nil != err {
+		return
+	}
+
 	view.ItemIDs = firstView.ItemIDs
 	attrView.ViewID = viewID
 	view.ID = viewID
@@ -4558,15 +4695,10 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 		setAttributeViewGroup(attrView, view, group)
 	}
 
-	node, tree, _ := getNodeByBlockID(nil, blockID)
-	if nil == node {
-		logging.LogErrorf("get node by block ID [%s] failed", blockID)
-		return
-	}
-
 	node.AttributeViewType = string(view.LayoutType)
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[av.NodeAttrView] = viewID
+	attrs[av.NodeAttrVisibleViewIDs] = strings.Join(visibleViewIDs, ",")
 	err = setNodeAttrs(node, tree, attrs)
 	if err != nil {
 		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)

@@ -29,6 +29,7 @@ import {
     refreshAVCellSelection,
     restoreAVCellSelection,
 } from "./selectionState";
+import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
 
 interface IIds {
     groupId: string,
@@ -58,10 +59,11 @@ interface ITableOptions {
     }
 }
 
-export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boolean) => {
+export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boolean, blockElement: Element) => {
     let tabHTML = "";
-    let viewData: IAVView;
+    let viewData = data.views.find((item) => item.id === data.viewID) || data.views[0];
     let hasFilter = false;
+    const visibleViewIDs = getAVVisibleViewIDs(blockElement, data.views);
     // 递归在过滤树中查找是否存在引用了现有字段的叶子
     const findLeafFilter = (nodes: IAVFilter[], columnId: string, columnType: string): boolean => {
         for (const n of nodes) {
@@ -81,6 +83,12 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
         }
     });
     data.views.forEach((item: IAVView) => {
+        if (!visibleViewIDs.includes(item.id)) {
+            if (item.id === data.viewID) {
+                viewData = item;
+            }
+            return;
+        }
         tabHTML += `<div draggable="true" data-position="north" data-av-type="${item.type}" data-id="${item.id}" data-page="${item.pageSize}" data-desc="${escapeAriaLabel(item.desc || "")}" class="ariaLabel item${item.id === data.viewID ? " item--focus" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : `<svg class="item__graphic"><use xlink:href="#${getViewIcon(item.type)}"></use></svg>`}
     <span class="item__text">${escapeHtml(item.name)}</span>
@@ -92,7 +100,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     const defaultTemplate = data.newItemTemplates?.find(item => item.id === data.defaultTemplateID);
     const defaultTemplateID = defaultTemplate && (defaultTemplate.targetType !== "detached" ||
         defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
-    return `<div class="av__header" data-default-template-id="${defaultTemplateID}">
+    return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}">
         <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
             <div class="av__selection-toolbar">
                 <span class="av__selection-count"></span>
@@ -118,7 +126,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${data.views.length > 0 ? "" : " fn__none"}">
                 <svg><use xlink:href="#iconDown"></use></svg>
                 <span class="fn__space"></span>
-                <small>${data.views.length}</small>
+                <small>${visibleViewIDs.length}/${data.views.length}</small>
             </span>
             <div class="fn__space"></div>
             <span data-type="av-filter" aria-label="${window.siyuan.languages.filter}" data-position="8south" class="ariaLabel block__icon${hasFilter ? " block__icon--active" : ""}">
@@ -301,7 +309,7 @@ const renderGroupTable = (options: ITableOptions) => {
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled)}
+    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled, options.blockElement)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
@@ -418,7 +426,10 @@ const afterRenderTable = (options: ITableOptions) => {
             }
         }
     }
-    options.blockElement.querySelector(".layout-tab-bar").scrollLeft = (options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft - 30;
+    const focusViewElement = options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement;
+    if (focusViewElement) {
+        options.blockElement.querySelector(".layout-tab-bar").scrollLeft = focusViewElement.offsetLeft - 30;
+    }
     if (options.cb) {
         options.cb(options.data);
     }
@@ -583,6 +594,13 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         if (!isCurrentAVRender(e, renderToken)) {
             continue;
         }
+        const currentViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
+        if (currentViewID && !data.views.some((view) => view.id === currentViewID)) {
+            e.setAttribute(Constants.CUSTOM_SY_AV_VIEW, data.viewID);
+        }
+        if (e.hasAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS)) {
+            setAVVisibleViewIDs(e, getAVVisibleViewIDs(e, data.views));
+        }
         prepareAVLocate(e, data, resetData);
         if (data.viewType === "gallery") {
             e.setAttribute("data-av-type", data.viewType);
@@ -604,7 +622,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
 </div>`;
         if (renderAll) {
             e.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !protyle.disabled)}
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !protyle.disabled, e)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
@@ -735,6 +753,28 @@ const waitForAddingCellPosition = async (options: {
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "insertAttrViewBlock") {
         inspectAVInsertedItem(protyle, operation);
+    }
+    if (operation.action === "addAttrViewView" || operation.action === "duplicateAttrViewView") {
+        getAVElements(protyle, operation.avID).forEach((item) => {
+            const oldViewIDs = (item.querySelector(".av__header")?.getAttribute("data-view-ids") || "")
+                .split(",").filter(Boolean);
+            if (item.dataset.nodeId === operation.blockID) {
+                setAVVisibleViewIDs(item, getAVVisibleViewIDs(item, oldViewIDs).concat(operation.id));
+            } else if (!item.hasAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS)) {
+                setAVVisibleViewIDs(item, oldViewIDs);
+            }
+        });
+    }
+    if (operation.action === "setAttrViewBlockVisibleViews") {
+        getAVElements(protyle, operation.avID).forEach((item) => {
+            if (item.dataset.nodeId !== operation.blockID) {
+                return;
+            }
+            setAVVisibleViewIDs(item, operation.viewIDs);
+            item.removeAttribute("data-render");
+            avRender(item, protyle);
+        });
+        return;
     }
     if (operation.action === "setAttrViewName") {
         getAVElements(protyle, operation.id).forEach((item) => {

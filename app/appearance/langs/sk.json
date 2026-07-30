@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "Kopírovať zrkadlo zobrazenia",
+  "hideViewTab": "Skryť kartu zobrazenia",
+  "showViewTab": "Zobraziť kartu zobrazenia",
   "previousDifference": "Predchádzajúci rozdiel",
   "nextDifference": "Nasledujúci rozdiel",
   "pluginGlobalDisabledTip": "Všetky pluginy sú momentálne vypnuté, takže tento plugin nemožno používať ani po jeho zapnutí",

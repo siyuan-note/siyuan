@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "Copy view mirror",
+  "hideViewTab": "Hide view tab",
+  "showViewTab": "Show view tab",
   "previousDifference": "Previous difference",
   "nextDifference": "Next difference",
   "pluginGlobalDisabledTip": "All plugins are currently disabled; this plugin still cannot be used after it is enabled",

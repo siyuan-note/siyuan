@@ -924,6 +924,34 @@ func (av *AttributeView) GetView(viewID string) (ret *View) {
 	return
 }
 
+// GetVisibleViewIDs 根据数据库块属性返回可见视图 ID，并按数据库中的视图顺序排列。
+func (av *AttributeView) GetVisibleViewIDs(value string) (ret []string) {
+	value = strings.TrimSpace(value)
+	if "" == value {
+		for _, view := range av.Views {
+			ret = append(ret, view.ID)
+		}
+		return
+	}
+
+	visible := map[string]bool{}
+	for viewID := range strings.SplitSeq(value, ",") {
+		viewID = strings.TrimSpace(viewID)
+		if "" != viewID {
+			visible[viewID] = true
+		}
+	}
+	for _, view := range av.Views {
+		if visible[view.ID] {
+			ret = append(ret, view.ID)
+		}
+	}
+	if 1 > len(ret) && 0 < len(av.Views) {
+		ret = append(ret, av.Views[0].ID)
+	}
+	return
+}
+
 func (av *AttributeView) GetCurrentView(viewID string) (ret *View, err error) {
 	if "" != viewID {
 		ret = av.GetView(viewID)
@@ -1189,9 +1217,10 @@ var (
 )
 
 const (
-	NodeAttrNameAvs        = "custom-avs"          // 用于标记块所属的属性视图，逗号分隔 av id
-	NodeAttrView           = "custom-sy-av-view"   // 用于标记块所属的属性视图视图 view id Database block support specified view https://github.com/siyuan-note/siyuan/issues/10443
-	NodeAttrViewStaticText = "custom-sy-av-s-text" // 用于标记块所属的属性视图静态文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+	NodeAttrNameAvs        = "custom-avs"                 // 用于标记块所属的属性视图，逗号分隔 av id
+	NodeAttrView           = "custom-sy-av-view"          // 用于标记块所属的属性视图视图 view id Database block support specified view https://github.com/siyuan-note/siyuan/issues/10443
+	NodeAttrVisibleViewIDs = "custom-sy-av-visible-views" // 用于标记数据库块显示的视图 ID，逗号分隔
+	NodeAttrViewStaticText = "custom-sy-av-s-text"        // 用于标记块所属的属性视图静态文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
 
 	NodeAttrViewNames = "av-names" // 用于临时标记块所属的属性视图名称，空格分隔
 )

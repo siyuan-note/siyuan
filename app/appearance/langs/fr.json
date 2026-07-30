@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "Copier le miroir de la vue",
+  "hideViewTab": "Masquer l’onglet de vue",
+  "showViewTab": "Afficher l’onglet de vue",
   "previousDifference": "Différence précédente",
   "nextDifference": "Différence suivante",
   "pluginGlobalDisabledTip": "Tous les plugins sont actuellement désactivés ; ce plugin restera inutilisable même après son activation",

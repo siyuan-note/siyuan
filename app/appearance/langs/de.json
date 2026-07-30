@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "Ansicht als Spiegel kopieren",
+  "hideViewTab": "Ansichtsregisterkarte ausblenden",
+  "showViewTab": "Ansichtsregisterkarte anzeigen",
   "previousDifference": "Vorheriger Unterschied",
   "nextDifference": "Nächster Unterschied",
   "pluginGlobalDisabledTip": "Derzeit sind alle Plugins deaktiviert; dieses Plugin kann auch nach dem Aktivieren nicht verwendet werden",

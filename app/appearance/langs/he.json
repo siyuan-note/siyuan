@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "העתקת שיקוף התצוגה",
+  "hideViewTab": "הסתרת לשונית התצוגה",
+  "showViewTab": "הצגת לשונית התצוגה",
   "previousDifference": "ההבדל הקודם",
   "nextDifference": "ההבדל הבא",
   "pluginGlobalDisabledTip": "כל התוספים מושבתים כעת, ולא ניתן יהיה להשתמש בתוסף הזה גם לאחר הפעלתו",

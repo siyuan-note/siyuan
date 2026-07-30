@@ -51,10 +51,12 @@ import {
     getFieldsByData,
     getSwitcherHTML,
     getViewHTML,
-    openViewMenu
+    openViewMenu,
+    setAVBlockVisibleViewIDs
 } from "./view";
 import {focusBlock} from "../../util/selection";
 import {getFieldIdByCellElement, setPageSize} from "./row";
+import {getAVVisibleViewIDs} from "./viewVisibility";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
 import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";
 import {openCalcMenu} from "./calc";
@@ -152,7 +154,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "sorts") {
             html = getSortsHTML(fields, data.view.sorts);
         } else if (options.type === "switcher") {
-            html = getSwitcherHTML(data.views, data.viewID);
+            html = getSwitcherHTML(data.views, data.viewID, options.blockElement);
         } else if (options.type === "filters") {
             html = getFiltersHTML(data);
         } else if (options.type === "select") {
@@ -1812,6 +1814,35 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "av-view-show-all") {
+                    if (setAVBlockVisibleViewIDs(options.protyle, options.blockElement, data.views.map((view) => view.id))) {
+                        menuElement.innerHTML = getSwitcherHTML(data.views, data.viewID, options.blockElement);
+                        bindSwitcherEvent({
+                            protyle: options.protyle,
+                            menuElement,
+                            blockElement: options.blockElement
+                        });
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "av-view-visibility") {
+                    const viewID = target.closest<HTMLElement>(".b3-menu__item")?.dataset.id;
+                    const visibleViewIDs = getAVVisibleViewIDs(options.blockElement, data.views);
+                    const viewIDs = visibleViewIDs.includes(viewID) ?
+                        visibleViewIDs.filter((item) => item !== viewID) :
+                        visibleViewIDs.concat(viewID);
+                    if (setAVBlockVisibleViewIDs(options.protyle, options.blockElement, viewIDs)) {
+                        menuElement.innerHTML = getSwitcherHTML(data.views, data.viewID, options.blockElement);
+                        bindSwitcherEvent({
+                            protyle: options.protyle,
+                            menuElement,
+                            blockElement: options.blockElement
+                        });
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "av-view-switch") {
                     if (!target.parentElement.classList.contains("b3-menu__item--current")) {
                         clearSelect(["row", "galleryItem"], options.blockElement);
@@ -1825,7 +1856,8 @@ export const openMenuPanel = (options: {
                         }], [{
                             action: "setAttrViewBlockView",
                             blockID,
-                            id: options.blockElement.querySelector(".av__views .item--focus").getAttribute("data-id"),
+                            id: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
+                                options.blockElement.querySelector(".av__views .item--focus")?.getAttribute("data-id"),
                             avID
                         }]);
                     }
@@ -1851,7 +1883,8 @@ export const openMenuPanel = (options: {
                         }], [{
                             action: "setAttrViewBlockView",
                             blockID,
-                            id: options.blockElement.querySelector(".av__views .item--focus").getAttribute("data-id"),
+                            id: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
+                                options.blockElement.querySelector(".av__views .item--focus")?.getAttribute("data-id"),
                             avID,
                         }]);
                         window.siyuan.menus.menu.remove();

@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "Salin cermin tampilan",
+  "hideViewTab": "Sembunyikan tab tampilan",
+  "showViewTab": "Tampilkan tab tampilan",
   "previousDifference": "Perbedaan sebelumnya",
   "nextDifference": "Perbedaan berikutnya",
   "pluginGlobalDisabledTip": "Saat ini semua plugin dinonaktifkan; plugin ini tetap tidak dapat digunakan setelah diaktifkan",

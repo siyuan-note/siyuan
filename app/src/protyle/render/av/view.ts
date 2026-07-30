@@ -2,12 +2,14 @@ import {Menu} from "../../../plugin/Menu";
 import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
-import {focusBlock} from "../../util/selection";
+import {focusBlock, focusByRange, getEditorRange} from "../../util/selection";
 import {upDownHint} from "../../../util/upDownHint";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
 import {clearSelect} from "../../util/clear";
+import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
+import {isNotEditBlock} from "../../wysiwyg/getBlock";
 
 // countFilterLeaves 递归统计过滤节点树中的叶子数量（分组不计入）。
 const countFilterLeaves = (filters: IAVFilter[]): number => {
@@ -23,6 +25,58 @@ const countFilterLeaves = (filters: IAVFilter[]): number => {
     };
     walk(filters);
     return count;
+};
+
+export const setAVBlockVisibleViewIDs = (
+    protyle: IProtyle,
+    blockElement: Element,
+    requestedViewIDs: string[]
+) => {
+    const allViewIDs = (blockElement.querySelector(".av__header")?.getAttribute("data-view-ids") || "")
+        .split(",").filter(Boolean);
+    const oldViewIDs = getAVVisibleViewIDs(blockElement, allViewIDs);
+    const requested = new Set(requestedViewIDs);
+    const viewIDs = allViewIDs.filter((viewID) => requested.has(viewID));
+    if (viewIDs.length === 0 || viewIDs.join(",") === oldViewIDs.join(",")) {
+        return false;
+    }
+
+    setAVVisibleViewIDs(blockElement, viewIDs);
+    transaction(protyle, [{
+        action: "setAttrViewBlockVisibleViews",
+        avID: blockElement.getAttribute("data-av-id"),
+        blockID: blockElement.getAttribute("data-node-id"),
+        viewIDs,
+    }], [{
+        action: "setAttrViewBlockVisibleViews",
+        avID: blockElement.getAttribute("data-av-id"),
+        blockID: blockElement.getAttribute("data-node-id"),
+        viewIDs: oldViewIDs,
+    }]);
+    return true;
+};
+
+const copyViewMirror = (blockElement: Element, viewID: string) => {
+    const oldVisibleViewIDs = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS);
+    const oldViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
+    blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, viewID);
+    blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, viewID);
+    if (isNotEditBlock(blockElement)) {
+        focusBlock(blockElement);
+    } else {
+        focusByRange(getEditorRange(blockElement));
+    }
+    document.execCommand("copy");
+    if (null === oldVisibleViewIDs) {
+        blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS);
+    } else {
+        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, oldVisibleViewIDs);
+    }
+    if (null === oldViewID) {
+        blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VIEW);
+    } else {
+        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, oldViewID);
+    }
 };
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
@@ -70,6 +124,12 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         click() {
             document.querySelector(".av__panel")?.remove();
             const id = Lute.NewNodeID();
+            const allViewIDs = (options.blockElement.querySelector(".av__header")?.getAttribute("data-view-ids") || "")
+                .split(",").filter(Boolean);
+            setAVVisibleViewIDs(
+                options.blockElement,
+                getAVVisibleViewIDs(options.blockElement, allViewIDs).concat(id)
+            );
             transaction(options.protyle, [{
                 action: "duplicateAttrViewView",
                 avID: options.blockElement.dataset.avId,
@@ -84,7 +144,34 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
             }]);
         }
     });
-    if (options.blockElement.querySelectorAll(".layout-tab-bar .item").length > 1) {
+    menu.addItem({
+        id: "copyViewMirror",
+        icon: "iconCopy",
+        label: window.siyuan.languages.copyViewMirror,
+        click() {
+            document.querySelector(".av__panel")?.remove();
+            copyViewMirror(options.blockElement, options.element.dataset.id);
+        }
+    });
+    const allViewIDs = (options.blockElement.querySelector(".av__header")?.getAttribute("data-view-ids") || "")
+        .split(",").filter(Boolean);
+    const visibleViewIDs = getAVVisibleViewIDs(options.blockElement, allViewIDs);
+    const isVisible = visibleViewIDs.includes(options.element.dataset.id);
+    if (!isVisible || visibleViewIDs.length > 1) {
+        menu.addItem({
+            id: "setViewVisibility",
+            icon: isVisible ? "iconEyeoff" : "iconEye",
+            label: isVisible ? window.siyuan.languages.hideViewTab : window.siyuan.languages.showViewTab,
+            click() {
+                document.querySelector(".av__panel")?.remove();
+                const viewIDs = isVisible ?
+                    visibleViewIDs.filter((viewID) => viewID !== options.element.dataset.id) :
+                    visibleViewIDs.concat(options.element.dataset.id);
+                setAVBlockVisibleViewIDs(options.protyle, options.blockElement, viewIDs);
+            }
+        });
+    }
+    if (allViewIDs.length > 1) {
         menu.addItem({
             id: "delete",
             icon: "iconTrashcan",
@@ -263,8 +350,8 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
         if (event.key === "Enter") {
             const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
             if (currentElement) {
-                const currentViewID = options.blockElement.querySelector(".av__views .item--focus")?.
-                    getAttribute("data-id");
+                const currentViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
+                    options.blockElement.querySelector(".av__views .item--focus")?.getAttribute("data-id");
                 if (currentElement.dataset.id !== currentViewID) {
                     clearSelect(["row", "galleryItem"], options.blockElement);
                 }
@@ -316,7 +403,8 @@ const filterSwitcher = (menuElement: Element) => {
     }
 };
 
-export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
+export const getSwitcherHTML = (views: IAVView[], viewId: string, blockElement: Element) => {
+    const visibleViewIDs = getAVVisibleViewIDs(blockElement, views);
     let html = "";
     views.forEach((item) => {
         html += `<button draggable="true" class="b3-menu__item${item.id === viewId ? " b3-menu__item--current" : ""}" data-id="${item.id}">
@@ -325,6 +413,7 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getViewIcon(item.type)}"></use></svg>`}
         <span class="fn__ellipsis">${item.name}</span>
     </div>
+    <svg class="b3-menu__action ariaLabel${visibleViewIDs.length === 1 && visibleViewIDs.includes(item.id) ? " fn__none" : ""}" data-type="av-view-visibility" data-position="4west" aria-label="${visibleViewIDs.includes(item.id) ? window.siyuan.languages.hideViewTab : window.siyuan.languages.showViewTab}"><use xlink:href="#${visibleViewIDs.includes(item.id) ? "iconEye" : "iconEyeoff"}"></use></svg>
     <svg class="b3-menu__action" data-type="av-view-edit"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
     });
@@ -333,6 +422,10 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.newView}</span>
 </button>
+${visibleViewIDs.length === views.length ? "" : `<button class="b3-menu__item" data-type="av-view-show-all">
+    <svg class="b3-menu__icon"><use xlink:href="#iconEye"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.showAll}</span>
+</button>`}
 <button class="b3-menu__separator"></button>
 <div class="b3-menu__item fn__flex-shrink" data-type="nobg">
     <input class="b3-text-field fn__block" type="text" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">
@@ -347,6 +440,11 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
     const id = Lute.NewNodeID();
     const avID = blockElement.getAttribute("data-av-id");
     const viewElement = blockElement.querySelector(".av__views");
+    const addVisibleView = () => {
+        const allViewIDs = (blockElement.querySelector(".av__header")?.getAttribute("data-view-ids") || "")
+            .split(",").filter(Boolean);
+        setAVVisibleViewIDs(blockElement, getAVVisibleViewIDs(blockElement, allViewIDs).concat(id));
+    };
     const addMenu = new Menu(undefined, () => {
         viewElement.classList.remove("av__views--show");
     });
@@ -354,6 +452,7 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         icon: "iconTable",
         label: window.siyuan.languages.table,
         click() {
+            addVisibleView();
             transaction(protyle, [{
                 action: "addAttrViewView",
                 avID,
@@ -371,6 +470,7 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         icon: "iconBoard",
         label: window.siyuan.languages.kanban,
         click() {
+            addVisibleView();
             transaction(protyle, [{
                 action: "addAttrViewView",
                 avID,
@@ -390,6 +490,7 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         icon: "iconGallery",
         label: window.siyuan.languages.gallery,
         click() {
+            addVisibleView();
             transaction(protyle, [{
                 action: "addAttrViewView",
                 avID,

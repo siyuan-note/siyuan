@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "نسخ مرآة العرض",
+  "hideViewTab": "إخفاء علامة تبويب العرض",
+  "showViewTab": "إظهار علامة تبويب العرض",
   "pluginGlobalDisabledTip": "جميع الإضافات معطلة حاليًا، ولن يكون من الممكن استخدام هذه الإضافة حتى بعد تمكينها",
   "previousDifference": "الاختلاف السابق",
   "nextDifference": "الاختلاف التالي",

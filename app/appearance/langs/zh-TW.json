@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "複製檢視鏡像",
+  "hideViewTab": "隱藏檢視頁籤",
+  "showViewTab": "顯示檢視頁籤",
   "previousDifference": "上一個差異",
   "nextDifference": "下一個差異",
   "pluginGlobalDisabledTip": "目前已停用所有插件，該插件啟用後仍無法使用",

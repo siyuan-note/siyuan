@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "दृश्य मिरर कॉपी करें",
+  "hideViewTab": "दृश्य टैब छिपाएँ",
+  "showViewTab": "दृश्य टैब दिखाएँ",
   "previousDifference": "पिछला अंतर",
   "nextDifference": "अगला अंतर",
   "pluginGlobalDisabledTip": "वर्तमान में सभी प्लगइन अक्षम हैं, इसलिए इस प्लगइन को सक्षम करने के बाद भी इसका उपयोग नहीं किया जा सकता",

@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "Görünüm aynasını kopyala",
+  "hideViewTab": "Görünüm sekmesini gizle",
+  "showViewTab": "Görünüm sekmesini göster",
   "previousDifference": "Önceki fark",
   "nextDifference": "Sonraki fark",
   "pluginGlobalDisabledTip": "Şu anda tüm eklentiler devre dışı; bu eklenti etkinleştirildikten sonra da kullanılamaz",

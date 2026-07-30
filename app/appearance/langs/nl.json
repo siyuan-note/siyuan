@@ -1,4 +1,7 @@
 {
+  "copyViewMirror": "Weergavespiegel kopiëren",
+  "hideViewTab": "Weergavetabblad verbergen",
+  "showViewTab": "Weergavetabblad tonen",
   "previousDifference": "Vorig verschil",
   "nextDifference": "Volgend verschil",
   "pluginGlobalDisabledTip": "Alle plugins zijn momenteel uitgeschakeld; deze plugin kan ook na het inschakelen niet worden gebruikt",

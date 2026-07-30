@@ -616,6 +616,17 @@
   }
 }
 
+.protyle-wysiwyg .table > div:first-child,
+.b3-typography .table > div:first-child {
+  overflow: auto;
+}
+
+.protyle-wysiwyg [data-node-id].table table,
+.b3-typography .table table {
+  display: inline-block;
+  vertical-align: top;
+}
+
 .b3-typography {
   font-family: var(--b3-font-family);
   word-wrap: break-word;
@@ -806,10 +817,6 @@
       margin: 0;
       width: 1em;
     }
-  }
-
-  &-wysiwyg .table > div:first-child {
-    overflow: auto;
   }
 }
 

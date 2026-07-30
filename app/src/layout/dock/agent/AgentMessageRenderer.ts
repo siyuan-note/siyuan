@@ -27,11 +27,11 @@ export const renderTodoList = (result: string): string => {
     const L = window.siyuan.languages;
     const lines = result.split("\n");
     let html = '<div class="agent-chat__tool-card agent-chat__tool-card--todo">' +
-    '<div class="agent-chat__todo-header">' +
+        '<div class="agent-chat__todo-header">' +
         '<svg class="agent-chat__tool-icon"><use xlink:href="#iconList"></use></svg>' +
         '<span class="agent-chat__tool-title">' + (L.agentTodoList || "Todo List") + "</span>" +
-    "</div>" +
-    '<div class="agent-chat__todo-items">';
+        "</div>" +
+        '<div class="agent-chat__todo-items">';
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         if (line.startsWith("- [x]")) {
@@ -55,20 +55,20 @@ export const renderWelcomeHTML = (hasModel = true): string => {
         return '<div class="agent-welcome">' +
             '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
             '<div class="agent-welcome__no-model">' +
-                '<div class="agent-welcome__no-model-title">' + (L.agentNoModel || "No model configured") + "</div>" +
-                '<div class="agent-welcome__no-model-tip">' + L.agentNoModelTip + "</div>" +
-                '<button class="b3-button agent-welcome__go-setting" data-type="go-ai-setting">' + (L.agentGoToSetting || "Go to Settings") + "</button>" +
+            '<div class="agent-welcome__no-model-title">' + (L.agentNoModel || "No model configured") + "</div>" +
+            '<div class="agent-welcome__no-model-tip">' + L.agentNoModelTip + "</div>" +
+            '<button class="b3-button agent-welcome__go-setting" data-type="go-ai-setting">' + (L.agentGoToSetting || "Go to Settings") + "</button>" +
             "</div>" +
-        "</div>";
+            "</div>";
     }
     return '<div class="agent-welcome">' +
         '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
         '<div class="agent-welcome__examples">' +
-            '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
-            '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +
-            '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample3 || "") + '">' + (L.agentExample3 || "") + "</div>" +
+        '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
+        '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +
+        '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample3 || "") + '">' + (L.agentExample3 || "") + "</div>" +
         "</div>" +
-    "</div>";
+        "</div>";
 };
 
 export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknown>>, questionID: string): string => {
@@ -115,7 +115,7 @@ export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknow
     html += '<div class="agent-chat__question-submit">' +
         '<button class="b3-button b3-button--text agent-chat__question-submit-btn">' +
         (L.agentQuestionSubmit || "Submit") + "</button>" +
-    "</div></div>";
+        "</div></div>";
     return html;
 };
 
@@ -124,13 +124,13 @@ export const renderRetryCardHTML = (attempt: number, maxRetries: number): string
         .replace("${attempt}", attempt.toString())
         .replace("${maxRetries}", maxRetries.toString());
     return '<div class="agent-chat__thinking-card">' +
-    '<div class="agent-chat__thinking-header">' +
+        '<div class="agent-chat__thinking-header">' +
         '<span class="agent-chat__thinking-text">' + escapeHtml(text) + "</span>" +
-    "</div>" +
-"</div>";
+        "</div>" +
+        "</div>";
 };
 
-export const renderToolsLineHTML = (newTools: Array<{name: string; running?: boolean}>): string => {
+export const renderToolsLineHTML = (newTools: Array<{ name: string; running?: boolean }>): string => {
     let detailLines = "<div class=\"agent-chat__thinking-tools-line\"><span class=\"agent-chat__thinking-summary\">Tool calls:</span>";
     for (let i = 0; i < newTools.length; i++) {
         const runningClass = newTools[i].running ? " agent-chat__thinking-tool--running" : "";
@@ -143,7 +143,12 @@ export const renderToolsLineHTML = (newTools: Array<{name: string; running?: boo
 // createThinkingCardElement 用于流式过程中的单个思考卡片。
 // 工具调用只接收名字列表（arguments/result 在 assistant entry 存一份）；
 // 标题文本由调用方传入（已通过 i18n 从 duration 生成）。
-export const createThinkingCardElement = (step: {reasoning: string; text: string; toolNames?: string[]; reasoningContent: string}): HTMLElement => {
+export const createThinkingCardElement = (step: {
+    reasoning: string;
+    text: string;
+    toolNames?: string[];
+    reasoningContent: string
+}): HTMLElement => {
     let detail = "";
     if (step.toolNames && step.toolNames.length > 0) {
         detail += '<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">Tool calls:</span>';
@@ -159,17 +164,17 @@ export const createThinkingCardElement = (step: {reasoning: string; text: string
     const el = document.createElement("div");
     el.className = "agent-chat__msg agent-chat__msg--thinking agent-chat__msg--thinking-done";
     el.innerHTML = '<div class="agent-chat__thinking-card">' +
-    '<div class="agent-chat__thinking-header">' +
+        '<div class="agent-chat__thinking-header">' +
         '<span class="agent-chat__thinking-arrow">' +
-            '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
-            '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
+        '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
+        '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
         "</span>" +
         '<span class="agent-chat__thinking-text">' + escapeHtml(step.text) + "</span>" +
-    "</div>" +
-    '<div class="agent-chat__thinking-body">' +
+        "</div>" +
+        '<div class="agent-chat__thinking-body">' +
         detail +
-    "</div>" +
-"</div>";
+        "</div>" +
+        "</div>";
     return el;
 };
 
@@ -178,7 +183,9 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
     const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
     const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
     const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
-    if (!header || !body || !expandIcon || !contractIcon) { return; }
+    if (!header || !body || !expandIcon || !contractIcon) {
+        return;
+    }
     header.addEventListener("click", () => {
         el.setAttribute("data-user-interacted", "true");
         const isExpanded = body.classList.contains("agent-chat__thinking-body--expanded");
@@ -255,7 +262,9 @@ const createCopyButton = (getText: () => string): HTMLElement => {
 
 export const postRender = (container: HTMLElement, app?: App): void => {
     container.querySelectorAll(".language-math").forEach((el) => {
-        if (el.hasAttribute("data-subtype")) { return; }
+        if (el.hasAttribute("data-subtype")) {
+            return;
+        }
         const content = el.textContent || "";
         const preParent = el.closest("pre");
         if (preParent) {
@@ -284,7 +293,22 @@ export const postRender = (container: HTMLElement, app?: App): void => {
     const contentElements = container.matches(contentSelector)
         ? [container as HTMLElement]
         : Array.from(container.querySelectorAll<HTMLElement>(contentSelector));
-    contentElements.forEach((item) => highlightRender(item));
+    contentElements.forEach((item) => {
+        if (item.classList.contains("b3-typography")) {
+            item.querySelectorAll<HTMLTableElement>("table").forEach((table) => {
+                if (table.parentElement?.parentElement?.classList.contains("table")) {
+                    return;
+                }
+                const tableElement = document.createElement("div");
+                tableElement.className = "table";
+                const scrollElement = document.createElement("div");
+                table.before(tableElement);
+                tableElement.appendChild(scrollElement);
+                scrollElement.appendChild(table);
+            });
+        }
+        highlightRender(item);
+    });
     mathRender(container);
     mermaidRender(container);
     flowchartRender(container);

@@ -255,6 +255,8 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-1" data-model-field="displayName" type="text" spellcheck="false" placeholder="${window.siyuan.languages.customDisplayName}" value="${escapeHTML(model.displayName || "")}">
     <span class="fn__space"></span>
+    <input class="b3-text-field fn__size200 ariaLabel" data-model-field="contextLength" data-position="north" type="number" min="0" max="100000000" step="1" placeholder="${window.siyuan.languages.modelContextLength}" aria-label="${window.siyuan.languages.modelContextLengthTip}" value="${model.contextLength || ""}">
+    <span class="fn__space"></span>
     <button class="b3-button b3-button--outline" data-action="testModel">
         <svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg>
         <span>${window.siyuan.languages.testConnection}</span>
@@ -593,9 +595,16 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             }
             return;
         }
-        const modelField = target.dataset.modelField as "name" | "displayName";
+        const modelField = target.dataset.modelField as "name" | "displayName" | "contextLength";
         const modelIndex = Number(target.closest<HTMLElement>("[data-model-index]")?.dataset.modelIndex);
         if (modelField && draft.models[modelIndex]) {
+            if (modelField === "contextLength") {
+                draft.models[modelIndex].contextLength =
+                    Number.isSafeInteger(target.valueAsNumber) && target.valueAsNumber > 0
+                        ? target.valueAsNumber
+                        : 0;
+                return;
+            }
             draft.models[modelIndex][modelField] = target.value;
             if (modelField === "name") {
                 const contextLength = getAvailableModelContextLength(target.value);

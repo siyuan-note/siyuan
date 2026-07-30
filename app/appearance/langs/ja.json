@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "空欄または 0 にすると内蔵モデルカタログを使用します",
+  "modelContextLength": "モデルのコンテキスト長（Tokens）",
   "newTab": "新しいタブ",
   "mobileTabs": "タブ",
   "tabStartupClose": "前回開いていたタブを閉じる",

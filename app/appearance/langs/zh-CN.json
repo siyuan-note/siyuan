@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "留空或设为 0 时使用内置模型表识别",
+  "modelContextLength": "模型上下文长度（Token）",
   "newTab": "新建页签",
   "mobileTabs": "页签",
   "tabStartupClose": "关闭上次打开的页签",

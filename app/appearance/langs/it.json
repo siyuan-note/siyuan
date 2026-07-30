@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "Lascia vuoto o imposta 0 per usare il catalogo dei modelli integrato",
+  "modelContextLength": "Lunghezza del contesto del modello (Tokens)",
   "newTab": "Nuova scheda",
   "mobileTabs": "Schede",
   "tabStartupClose": "Chiudi le schede aperte in precedenza",

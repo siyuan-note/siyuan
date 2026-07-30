@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "Yerleşik model kataloğunu kullanmak için boş bırakın veya 0 olarak ayarlayın",
+  "modelContextLength": "Model Bağlam Uzunluğu (Tokens)",
   "newTab": "Yeni sekme",
   "mobileTabs": "Sekmeler",
   "tabStartupClose": "Daha önce açılmış sekmeleri kapat",

@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "اتركه فارغًا أو اضبطه على 0 لاستخدام دليل النماذج المدمج",
+  "modelContextLength": "طول سياق النموذج (Tokens)",
   "newTab": "علامة تبويب جديدة",
   "mobileTabs": "علامات التبويب",
   "tabStartupClose": "إغلاق علامات التبويب المفتوحة سابقًا",

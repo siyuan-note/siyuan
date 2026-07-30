@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "Deixe em branco ou defina como 0 para usar o catálogo de modelos integrado",
+  "modelContextLength": "Tamanho do contexto do modelo (Tokens)",
   "newTab": "Nova aba",
   "mobileTabs": "Abas",
   "tabStartupClose": "Fechar abas abertas anteriormente",

@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "Pozostaw puste lub ustaw 0, aby użyć wbudowanego katalogu modeli",
+  "modelContextLength": "Długość kontekstu modelu (Tokens)",
   "newTab": "Nowa karta",
   "mobileTabs": "Karty",
   "tabStartupClose": "Zamknij wcześniej otwarte karty",

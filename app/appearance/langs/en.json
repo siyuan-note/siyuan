@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "Leave blank or set to 0 to use the built-in model catalog",
+  "modelContextLength": "Model Context Length (Tokens)",
   "newTab": "New Tab",
   "mobileTabs": "Tabs",
   "tabStartupClose": "Close Previously Opened Tabs",

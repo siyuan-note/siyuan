@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "Leer lassen oder auf 0 setzen, um den integrierten Modellkatalog zu verwenden",
+  "modelContextLength": "Modellkontextlänge (Tokens)",
   "newTab": "Neuer Tab",
   "mobileTabs": "Tabs",
   "tabStartupClose": "Zuvor geöffnete Tabs schließen",

@@ -1,4 +1,6 @@
 {
+  "modelContextLengthTip": "Laat leeg of stel in op 0 om de ingebouwde modelcatalogus te gebruiken",
+  "modelContextLength": "Modelcontextlengte (Tokens)",
   "newTab": "Nieuw tabblad",
   "mobileTabs": "Tabbladen",
   "tabStartupClose": "Eerder geopende tabbladen sluiten",

@@ -106,7 +106,7 @@ export const genCardHTML = (options: {
     ${iconsHTML}
     <div class="card__block fn__flex-1 ${options.cardsData.cards.length === 0 ? "fn__none" : ""}" data-type="render"></div>
     <div class="card__empty card__empty--space${options.cardsData.cards.length === 0 ? "" : " fn__none"}" data-type="empty">
-        <div>🔮</div>
+        <div class="card__empty-icon">🔮</div>
         ${window.siyuan.languages.noDueCard}
     </div>
     <div class="fn__flex card__action fn__none">
@@ -917,7 +917,7 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
-    emptyElement.innerHTML = `<div>🔮</div>${window.siyuan.languages.noDueCard}`;
+    emptyElement.innerHTML = `<div class="card__empty-icon">🔮</div>${window.siyuan.languages.noDueCard}`;
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");
     actionElements[1].classList.add("fn__none");
@@ -930,7 +930,7 @@ const newRound = (countElement: Element, editor: Protyle, actionElements: NodeLi
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
-    emptyElement.innerHTML = `<div>♻️ </div>
+    emptyElement.innerHTML = `<div class="card__empty-icon">♻️ </div>
 <span>${window.siyuan.languages.continueReview2.replace("${count}", unreviewedCount)}</span>
 <div class="fn__hr"></div>
 <button data-type="newround" class="b3-button fn__size200">${window.siyuan.languages.continueReview1}</button>`;

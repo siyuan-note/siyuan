@@ -177,8 +177,12 @@
       color: var(--b3-callout-note);
     }
 
-    .callout-icon:empty {
-      display: none;
+    .callout-icon {
+      font-variant-emoji: emoji;
+
+      &:empty {
+        display: none;
+      }
     }
 
     &[data-subtype="WARNING"] {

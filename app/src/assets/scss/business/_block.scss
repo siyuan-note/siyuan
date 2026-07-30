@@ -106,6 +106,10 @@
       background-color: var(--b3-list-icon-hover);
     }
 
+    &--emoji {
+      font-variant-emoji: emoji;
+    }
+
     svg {
       height: 16px;
       width: 16px;
@@ -139,5 +143,6 @@
     width: 16px;
     padding: 4px;
     flex-shrink: 0;
+    font-variant-emoji: emoji;
   }
 }

@@ -19,6 +19,10 @@
     <svg id="toolbarSync" class="toolbar__icon toolbar__icon-deactivate fn__none">
         <use xlink:href="#iconCloudSucc"></use>
     </svg>
+    <button id="toolbarTabs" class="toolbar__tabs" type="button">
+        <svg><use xlink:href="#iconLayoutGrid"></use></svg>
+        <span class="toolbar__tabs-count">0</span>
+    </button>
     <svg id="toolbarMore" class="toolbar__icon">
         <use xlink:href="#iconSettings"></use>
     </svg>

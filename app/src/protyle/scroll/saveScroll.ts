@@ -64,10 +64,23 @@ export const getDocByScroll = (options: {
     protyle: IProtyle,
     scrollAttr?: IScrollAttr,
     mergedOptions?: IProtyleOptions,
-    cb?: (keys: string[]) => void
+    cb?: (keys: string[]) => void,
     focus?: boolean,
-    updateReadonly?: boolean
+    updateReadonly?: boolean,
+    signal?: AbortSignal,
+    fail?: (invalid?: boolean) => void,
 }) => {
+    const fetchDoc = (params: Record<string, any>, callback: (response: IWebSocketData) => void) => {
+        let handled = false;
+        void fetchPost("/api/filetree/getDoc", params, (response) => {
+            handled = true;
+            callback(response);
+        }, undefined, undefined, options.signal).then(() => {
+            if (!handled) {
+                options.fail?.();
+            }
+        });
+    };
     let actions: TProtyleAction[] = [];
     if (options.mergedOptions) {
         actions = options.mergedOptions.action;
@@ -78,6 +91,30 @@ export const getDocByScroll = (options: {
             actions = [Constants.CB_GET_UNUNDO];
         }
     }
+    const renderDoc = (response: IWebSocketData) => {
+        let callbackCalled = false;
+        try {
+            onGet({
+                scrollPosition: options.mergedOptions?.scrollPosition,
+                data: response,
+                protyle: options.protyle,
+                action: actions,
+                scrollAttr: options.scrollAttr,
+                afterCB: options.cb ? () => {
+                    callbackCalled = true;
+                    options.cb(response.data.keywords);
+                } : undefined,
+                updateReadonly: options.updateReadonly
+            });
+        } catch (error) {
+            console.error(error);
+            options.fail?.();
+            return;
+        }
+        if (options.cb && !callbackCalled) {
+            options.fail?.();
+        }
+    };
     if (options.scrollAttr?.zoomInId && options.scrollAttr?.rootId && options.scrollAttr.zoomInId !== options.scrollAttr.rootId) {
         const getDocParam: Record<string, any> = {
             id: options.scrollAttr.zoomInId,
@@ -91,7 +128,7 @@ export const getDocByScroll = (options: {
         if (isEncryptedBox(options.protyle.notebookId)) {
             getDocParam.notebook = options.protyle.notebookId;
         }
-        fetchPost("/api/filetree/getDoc", getDocParam, response => {
+        fetchDoc(getDocParam, response => {
             if (response.code === 1) {
                 const getDocParam: Record<string, any> = {
                     id: options.scrollAttr.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr.startId,
@@ -104,32 +141,20 @@ export const getDocByScroll = (options: {
                 if (isEncryptedBox(options.protyle.notebookId)) {
                     getDocParam.notebook = options.protyle.notebookId;
                 }
-                fetchPost("/api/filetree/getDoc", getDocParam, response => {
-                    onGet({
-                        scrollPosition: options.mergedOptions?.scrollPosition,
-                        data: response,
-                        protyle: options.protyle,
-                        action: actions,
-                        scrollAttr: options.scrollAttr,
-                        afterCB: options.cb ? () => {
-                            options.cb(response.data.keywords);
-                        } : undefined,
-                        updateReadonly: options.updateReadonly
-                    });
+                fetchDoc(getDocParam, response => {
+                    if (response.code !== 0 && options.fail) {
+                        options.fail(true);
+                        return;
+                    }
+                    renderDoc(response);
                 });
             } else {
+                if (response.code !== 0 && options.fail) {
+                    options.fail(true);
+                    return;
+                }
                 actions.push(Constants.CB_GET_ALL);
-                onGet({
-                    scrollPosition: options.mergedOptions?.scrollPosition,
-                    data: response,
-                    protyle: options.protyle,
-                    action: actions,
-                    scrollAttr: options.scrollAttr,
-                    afterCB: options.cb ? () => {
-                        options.cb(response.data.keywords);
-                    } : undefined,
-                    updateReadonly: options.updateReadonly
-                });
+                renderDoc(response);
             }
         });
         return;
@@ -147,17 +172,11 @@ export const getDocByScroll = (options: {
     if (isEncryptedBox(options.protyle.notebookId)) {
         getDocParam.notebook = options.protyle.notebookId;
     }
-    fetchPost("/api/filetree/getDoc", getDocParam, response => {
-        onGet({
-            scrollPosition: options.mergedOptions?.scrollPosition,
-            data: response,
-            protyle: options.protyle,
-            action: actions,
-            scrollAttr: options.scrollAttr,
-            afterCB: options.cb ? () => {
-                options.cb(response.data.keywords);
-            } : undefined,
-            updateReadonly: options.updateReadonly
-        });
+    fetchDoc(getDocParam, response => {
+        if (response.code !== 0 && options.fail) {
+            options.fail(true);
+            return;
+        }
+        renderDoc(response);
     });
 };

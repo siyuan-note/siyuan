@@ -26,7 +26,6 @@ import (
 	"image/png"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"sync/atomic"
 	"testing"
 )
@@ -63,90 +62,54 @@ func TestKeylessModelFallsBackToChatCompletion(t *testing.T) {
 	}
 }
 
-func TestPrepareForVisionPreservesAndLimitsImage(t *testing.T) {
+func TestPrepareModelImagePreservesAndLimitsImage(t *testing.T) {
 	var source bytes.Buffer
 	img := image.NewRGBA(image.Rect(0, 0, 4, 2))
 	img.Set(0, 0, color.RGBA{R: 255, A: 255})
 	if err := png.Encode(&source, img); err != nil {
 		t.Fatal(err)
 	}
-	original, err := PrepareForVision(source.Bytes(), 1024*1024, 8, 4)
+	original, err := PrepareModelImage(source.Bytes(), 1024*1024, 8, 4)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if original.MIMEType != "image/png" || !bytes.Equal(original.Data, source.Bytes()) {
 		t.Fatalf("supported image should be preserved: %#v", original)
 	}
-	prepared, err := PrepareForVision(source.Bytes(), 1024*1024, 8, 2)
+	prepared, err := PrepareModelImage(source.Bytes(), 1024*1024, 8, 2)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if prepared.MIMEType != "image/png" || prepared.Width != 2 || prepared.Height != 1 {
 		t.Fatalf("unexpected prepared image: %#v", prepared)
 	}
-	if _, err = PrepareForVision(source.Bytes(), 1024*1024, 7, 2); err == nil {
+	if _, err = PrepareModelImage(source.Bytes(), 1024*1024, 7, 2); err == nil {
 		t.Fatal("pixel limit was not enforced before decoding")
 	}
-	if _, err = PrepareForVision([]byte(`<svg xmlns="http://www.w3.org/2000/svg"></svg>`), 1024, 100, 100); err == nil {
+	if _, err = PrepareModelImage([]byte(`<svg xmlns="http://www.w3.org/2000/svg"></svg>`), 1024, 100, 100); err == nil {
 		t.Fatal("SVG input must be rejected")
 	}
 }
 
-func TestOpenAIImageAdapterAnalyzeAndGenerate(t *testing.T) {
+func TestOpenAIImageAdapterGenerate(t *testing.T) {
 	generatedBytes := testGeneratedPNG(t)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
-		case "/v1/chat/completions":
-			var body map[string]any
-			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-				t.Error(err)
-			}
-			if body["max_completion_tokens"] != float64(imageAnalysisMaxTokens) {
-				t.Errorf("unexpected vision max completion tokens: %v", body["max_completion_tokens"])
-			}
-			encoded, _ := json.Marshal(body)
-			if !strings.Contains(string(encoded), "data:image/jpeg;base64,") {
-				t.Errorf("vision request does not contain an image data URL: %s", encoded)
-			}
-			if strings.Contains(string(encoded), "document task") || !strings.Contains(string(encoded), "user's task") {
-				t.Errorf("vision request is not task-generic: %s", encoded)
-			}
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"a diagram"}}]}`))
-		case "/v1/images/generations":
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = w.Write([]byte(`{"data":[{"b64_json":"` + base64.StdEncoding.EncodeToString(generatedBytes) + `","revised_prompt":"refined"}]}`))
-		default:
+		if r.URL.Path != "/v1/images/generations" {
 			http.NotFound(w, r)
+			return
 		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"data":[{"b64_json":"` + base64.StdEncoding.EncodeToString(generatedBytes) + `","revised_prompt":"refined"}]}`))
 	}))
 	defer server.Close()
 
 	adapter := NewOpenAIImageAdapter("test", server.URL+"/v1", "test-model", 5)
-	analysis, err := adapter.Analyze(context.Background(), PreparedImage{Data: []byte("jpeg"), MIMEType: "image/jpeg"}, "What is shown?", "high")
-	if err != nil || analysis != "a diagram" {
-		t.Fatalf("unexpected analysis %q: %v", analysis, err)
-	}
 	generated, err := adapter.Generate(context.Background(), GenerateImageRequest{Prompt: "A header", Size: "1024x1024", OutputFormat: "png"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if generated.MIMEType != "image/png" || generated.Extension != ".png" || generated.RevisedPrompt != "refined" {
 		t.Fatalf("unexpected generated image metadata: %#v", generated)
-	}
-}
-
-func TestOpenAIImageAdapterRejectsTruncatedAnalysis(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"partial"},"finish_reason":"length"}]}`))
-	}))
-	defer server.Close()
-
-	adapter := NewOpenAIImageAdapter("test", server.URL+"/v1", "test-model", 5)
-	_, err := adapter.Analyze(context.Background(), PreparedImage{Data: []byte("jpeg"), MIMEType: "image/jpeg"}, "Describe", "low")
-	if err == nil || !strings.Contains(err.Error(), "truncated") {
-		t.Fatalf("unexpected truncated analysis error: %v", err)
 	}
 }
 

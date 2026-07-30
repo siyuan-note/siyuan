@@ -141,6 +141,31 @@ func TestResultToStringTranslatesNonTextContent(t *testing.T) {
 	}
 }
 
+func TestExecuteToolPreservesModelAttachments(t *testing.T) {
+	const toolName = "test_model_attachment"
+	tools.SetTool(toolName, &tools.Tool{
+		Name:        toolName,
+		InputSchema: tools.ToolSchema{Type: "object"},
+		Handler: func(args map[string]any) (tools.CallToolResult, error) {
+			return tools.CallToolResult{
+				Content: []tools.ContentItem{{Type: "text", Text: "attached"}},
+				ModelAttachments: []tools.ModelAttachment{{
+					Type: "image", Data: []byte("image"), MIMEType: "image/png", Path: "assets/image.png",
+				}},
+			}, nil
+		},
+	})
+	t.Cleanup(func() { tools.RemoveTool(toolName) })
+
+	result := executeTool(context.Background(), openai.ToolCall{
+		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
+	}, "")
+	if result.Text != "attached" || result.IsError || len(result.ModelAttachments) != 1 ||
+		string(result.ModelAttachments[0].Data) != "image" {
+		t.Fatalf("model attachment was not preserved: %#v", result)
+	}
+}
+
 func TestNeedsConfirmScopesReadOnlyActionsByToolSource(t *testing.T) {
 	const externalWrite = "test_external_write"
 	const externalRead = "test_external_read"
@@ -349,11 +374,11 @@ func TestExecuteToolPropagatesUnknownExecution(t *testing.T) {
 	})
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
 
-	result, isErr, executionUnknown := executeTool(context.Background(), openai.ToolCall{
+	result := executeTool(context.Background(), openai.ToolCall{
 		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
 	}, "")
-	if result != "result unknown" || !isErr || !executionUnknown {
-		t.Fatalf("unexpected tool result: result=%q, isErr=%v, executionUnknown=%v", result, isErr, executionUnknown)
+	if result.Text != "result unknown" || !result.IsError || !result.ExecutionUnknown {
+		t.Fatalf("unexpected tool result: %#v", result)
 	}
 }
 
@@ -375,11 +400,11 @@ func TestExecuteToolRejectsInvalidStructuredOutput(t *testing.T) {
 	}
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
 
-	result, isErr, executionUnknown := executeTool(context.Background(), openai.ToolCall{
+	result := executeTool(context.Background(), openai.ToolCall{
 		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
 	}, "")
-	if !isErr || !executionUnknown || !strings.Contains(result, "must not be retried automatically") {
-		t.Fatalf("unexpected tool result: result=%q, isErr=%v, executionUnknown=%v", result, isErr, executionUnknown)
+	if !result.IsError || !result.ExecutionUnknown || !strings.Contains(result.Text, "must not be retried automatically") {
+		t.Fatalf("unexpected tool result: %#v", result)
 	}
 }
 
@@ -402,25 +427,16 @@ func TestExecuteToolCancellationMarksExecutionUnknown(t *testing.T) {
 	})
 
 	ctx, cancel := context.WithCancel(context.Background())
-	resultCh := make(chan struct {
-		text    string
-		isErr   bool
-		unknown bool
-	}, 1)
+	resultCh := make(chan executedToolResult, 1)
 	go func() {
-		text, isErr, unknown := executeTool(ctx, openai.ToolCall{
+		resultCh <- executeTool(ctx, openai.ToolCall{
 			Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
 		}, "")
-		resultCh <- struct {
-			text    string
-			isErr   bool
-			unknown bool
-		}{text: text, isErr: isErr, unknown: unknown}
 	}()
 	<-started
 	cancel()
 	result := <-resultCh
-	if !result.isErr || !result.unknown || result.text == "" {
+	if !result.IsError || !result.ExecutionUnknown || result.Text == "" {
 		t.Fatalf("cancelled tool result was not marked unknown: %#v", result)
 	}
 }
@@ -440,11 +456,10 @@ func TestExecuteToolDoesNotStartAfterCancellation(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	result, isErr, executionUnknown := executeTool(ctx, openai.ToolCall{
+	result := executeTool(ctx, openai.ToolCall{
 		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
 	}, "")
-	if invoked || result == "" || !isErr || executionUnknown {
-		t.Fatalf("pre-cancelled tool was handled incorrectly: invoked=%v, result=%q, isErr=%v, executionUnknown=%v",
-			invoked, result, isErr, executionUnknown)
+	if invoked || result.Text == "" || !result.IsError || result.ExecutionUnknown {
+		t.Fatalf("pre-cancelled tool was handled incorrectly: invoked=%v, result=%#v", invoked, result)
 	}
 }

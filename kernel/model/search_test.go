@@ -18,12 +18,15 @@ package model
 
 import (
 	gosql "database/sql"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestFromSQLBlockMapsTimestamps(t *testing.T) {
@@ -530,6 +533,194 @@ func setSearchCaseSensitive(t *testing.T, caseSensitive bool) {
 	t.Cleanup(func() {
 		Conf = previousConf
 	})
+}
+
+func TestReplaceTextAcrossBackslashes(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	luteEngine := util.NewLute()
+	tests := []struct {
+		name        string
+		nodes       func() []*ast.Node
+		method      int
+		keyword     string
+		replacement string
+		expected    string
+		changed     bool
+		backslashes []string
+	}{
+		{
+			name: "consecutive backslashes",
+			nodes: func() []*ast.Node {
+				return []*ast.Node{
+					replaceTextTestText("前 "),
+					replaceTextTestBackslash("=", ast.NodeText),
+					replaceTextTestBackslash(">", ast.NodeBackslashContent),
+					replaceTextTestText(" 后"),
+				}
+			},
+			keyword:     "=>",
+			replacement: "to",
+			expected:    "前 to 后",
+			changed:     true,
+		},
+		{
+			name: "cite marker",
+			nodes: func() []*ast.Node {
+				return []*ast.Node{
+					replaceTextTestText("[cite"),
+					replaceTextTestBackslash("_", ast.NodeText),
+					replaceTextTestText("start]A[cite"),
+					replaceTextTestBackslash("_", ast.NodeBackslashContent),
+					replaceTextTestText("start]B"),
+				}
+			},
+			method:      3,
+			keyword:     `\[cite.*?\]`,
+			replacement: "",
+			expected:    "AB",
+			changed:     true,
+		},
+		{
+			name: "task marker",
+			nodes: func() []*ast.Node {
+				return []*ast.Node{
+					replaceTextTestBackslash("[", ast.NodeText),
+					replaceTextTestText("v"),
+					replaceTextTestBackslash("]", ast.NodeBackslashContent),
+					replaceTextTestText(" item"),
+				}
+			},
+			keyword:     "[v]",
+			replacement: "",
+			expected:    " item",
+			changed:     true,
+		},
+		{
+			name: "preserve unmatched backslash",
+			nodes: func() []*ast.Node {
+				return []*ast.Node{
+					replaceTextTestBackslash("*", ast.NodeBackslashContent),
+					replaceTextTestText(" keep "),
+					replaceTextTestBackslash("=", ast.NodeText),
+					replaceTextTestBackslash(">", ast.NodeBackslashContent),
+					replaceTextTestText(" end"),
+				}
+			},
+			keyword:     "=>",
+			replacement: "to",
+			expected:    "* keep to end",
+			changed:     true,
+			backslashes: []string{"*"},
+		},
+		{
+			name: "regular expression uses full run context",
+			nodes: func() []*ast.Node {
+				return []*ast.Node{
+					replaceTextTestText("prefix "),
+					replaceTextTestBackslash("=", ast.NodeText),
+					replaceTextTestBackslash(">", ast.NodeBackslashContent),
+				}
+			},
+			method:      3,
+			keyword:     `^=>`,
+			replacement: "to",
+			expected:    "prefix =>",
+			backslashes: []string{"=", ">"},
+		},
+		{
+			name: "regular expression capture",
+			nodes: func() []*ast.Node {
+				return []*ast.Node{
+					replaceTextTestBackslash("=", ast.NodeText),
+					replaceTextTestBackslash(">", ast.NodeBackslashContent),
+					replaceTextTestText(" rest"),
+				}
+			},
+			method:      3,
+			keyword:     `(=>)`,
+			replacement: `${1}x`,
+			expected:    "=>x rest",
+			changed:     true,
+		},
+		{
+			name: "zero width regular expression",
+			nodes: func() []*ast.Node {
+				return []*ast.Node{
+					replaceTextTestBackslash("=", ast.NodeText),
+					replaceTextTestBackslash(">", ast.NodeBackslashContent),
+				}
+			},
+			method:      3,
+			keyword:     `$`,
+			replacement: "x",
+			expected:    "=>x",
+			changed:     true,
+			backslashes: []string{"=", ">"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			root := &ast.Node{Type: ast.NodeParagraph}
+			for _, node := range test.nodes() {
+				root.AppendChild(node)
+			}
+			var matcher *regexp.Regexp
+			if 3 == test.method {
+				matcher = regexp.MustCompile(test.keyword)
+			}
+
+			skipNodes, changed := replaceTextAcrossBackslashes(root, test.method, test.keyword, test.replacement, matcher, luteEngine)
+			if test.changed != changed {
+				t.Fatalf("替换状态错误：期望 %t，实际 %t", test.changed, changed)
+			}
+			if actual := root.Content(); test.expected != actual {
+				t.Fatalf("替换结果错误：期望 %q，实际 %q", test.expected, actual)
+			}
+			if test.changed && 1 > len(skipNodes) {
+				t.Fatal("替换后的节点未加入跳过集合")
+			}
+			if actual := replaceTextTestBackslashes(root); !slices.Equal(test.backslashes, actual) {
+				t.Fatalf("转义节点错误：期望 %q，实际 %q", test.backslashes, actual)
+			}
+		})
+	}
+}
+
+func TestReplaceTextAcrossBackslashesCaseInsensitive(t *testing.T) {
+	setSearchCaseSensitive(t, false)
+	root := &ast.Node{Type: ast.NodeParagraph}
+	root.AppendChild(replaceTextTestText("A"))
+	root.AppendChild(replaceTextTestBackslash("_", ast.NodeBackslashContent))
+	root.AppendChild(replaceTextTestText("B"))
+
+	_, changed := replaceTextAcrossBackslashes(root, 0, "a_b", "x", nil, util.NewLute())
+	if !changed {
+		t.Fatal("大小写不敏感的跨节点替换未执行")
+	}
+	if actual := root.Content(); "x" != actual {
+		t.Fatalf("大小写不敏感的跨节点替换结果错误：期望 %q，实际 %q", "x", actual)
+	}
+}
+
+func replaceTextTestText(content string) *ast.Node {
+	return &ast.Node{Type: ast.NodeText, Tokens: []byte(content)}
+}
+
+func replaceTextTestBackslash(content string, contentType ast.NodeType) *ast.Node {
+	ret := &ast.Node{Type: ast.NodeBackslash}
+	ret.AppendChild(&ast.Node{Type: contentType, Tokens: []byte(content)})
+	return ret
+}
+
+func replaceTextTestBackslashes(root *ast.Node) (ret []string) {
+	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && ast.NodeBackslash == node.Type {
+			ret = append(ret, node.Content())
+		}
+		return ast.WalkContinue
+	})
+	return
 }
 
 func assertOrderBySequence(t *testing.T, orderBy string, fragments ...string) {

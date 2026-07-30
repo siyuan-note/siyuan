@@ -38,6 +38,7 @@ type FileTree struct {
 	AllowCreateDeeper        bool   `json:"allowCreateDeeper"`        // 允许创建超过 7 层深度的子文档
 	RemoveDocWithoutConfirm  bool   `json:"removeDocWithoutConfirm"`  // 删除文档时是否不需要确认
 	CloseTabsOnStart         bool   `json:"closeTabsOnStart"`         // 启动时关闭所有页签
+	TabStartupMode           *int   `json:"tabStartupMode"`           // 页签启动策略：0 恢复，1 新建空白页签，2 关闭已打开页签
 	UseSingleLineSave        bool   `json:"useSingleLineSave"`        // 使用单行保存文档 .sy 和属性视图 .json
 	LargeFileWarningSize     int    `json:"largeFileWarningSize"`     // 大文件警告大小（单位：MB）
 	CreateDocAtTop           *bool  `json:"createDocAtTop"`           // 在顶部创建新文档 https://github.com/siyuan-note/siyuan/issues/16327
@@ -58,6 +59,7 @@ func NewFileTree() *FileTree {
 		MaxOpenTabCount:          8,
 		AllowCreateDeeper:        false,
 		CloseTabsOnStart:         false,
+		TabStartupMode:           new(int),
 		UseSingleLineSave:        util.UseSingleLineSave,
 		LargeFileWarningSize:     util.LargeFileWarningSize,
 		CreateDocAtTop:           new(bool),

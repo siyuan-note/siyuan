@@ -72,6 +72,27 @@ func TestAIDisabledKeylessProviderOrModelIsUnavailable(t *testing.T) {
 	}
 }
 
+func TestAINormalizeModelContextLength(t *testing.T) {
+	ai := &AI{Providers: []*Provider{{
+		Models: []*Model{
+			{Name: "negative", ContextLength: -1},
+			{Name: "valid", ContextLength: 1048576},
+			{Name: "too-large", ContextLength: 100000001},
+		},
+	}}}
+
+	ai.Normalize()
+	if got := ai.Providers[0].Models[0].ContextLength; got != 0 {
+		t.Fatalf("negative context length = %d, want 0", got)
+	}
+	if got := ai.Providers[0].Models[1].ContextLength; got != 1048576 {
+		t.Fatalf("valid context length = %d, want 1048576", got)
+	}
+	if got := ai.Providers[0].Models[2].ContextLength; got != 0 {
+		t.Fatalf("too-large context length = %d, want 0", got)
+	}
+}
+
 func TestAssignDefaultModelIDsUsesKeylessProvider(t *testing.T) {
 	model := &Model{ID: "model-id", Name: "local-model", Enabled: true}
 	ai := &AI{
@@ -97,7 +118,6 @@ func TestReconcileModelIDs(t *testing.T) {
 		},
 		Editing:         &Editing{ModelID: "missing"},
 		Agent:           &Agent{ModelID: second.Name},
-		Vision:          &Vision{ModelID: "missing"},
 		ImageGeneration: &ImageGeneration{ModelID: second.DisplayName},
 	}
 
@@ -108,9 +128,6 @@ func TestReconcileModelIDs(t *testing.T) {
 	}
 	if ai.Agent.ModelID != second.ID {
 		t.Fatalf("agent model ID = %q, want %q", ai.Agent.ModelID, second.ID)
-	}
-	if ai.Vision.ModelID != "" {
-		t.Fatalf("vision model ID = %q, want empty", ai.Vision.ModelID)
 	}
 	if ai.ImageGeneration.ModelID != second.ID {
 		t.Fatalf("image generation model ID = %q, want %q", ai.ImageGeneration.ModelID, second.ID)

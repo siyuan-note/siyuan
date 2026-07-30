@@ -18,12 +18,9 @@ package conf
 
 import "testing"
 
-func TestNormalizeMultimodalDefaults(t *testing.T) {
-	ai := &AI{Providers: []*Provider{{Enabled: true, Models: []*Model{{Enabled: true, Name: " vision "}}}}}
+func TestNormalizeImageGenerationDefaults(t *testing.T) {
+	ai := &AI{Providers: []*Provider{{Enabled: true, Models: []*Model{{Enabled: true, Name: " image "}}}}}
 	ai.Normalize()
-	if ai.Vision == nil || ai.Vision.RequestTimeout != 300 || ai.Vision.MaxImageBytes != 20*1024*1024 || ai.Vision.MaxEdge != 2048 {
-		t.Fatalf("unexpected vision defaults: %#v", ai.Vision)
-	}
 	if ai.ImageGeneration == nil || ai.ImageGeneration.RequestTimeout != 300 || ai.ImageGeneration.Size != "1024x1024" || ai.ImageGeneration.OutputFormat != "png" {
 		t.Fatalf("unexpected image generation defaults: %#v", ai.ImageGeneration)
 	}
@@ -31,18 +28,17 @@ func TestNormalizeMultimodalDefaults(t *testing.T) {
 	if provider.Protocol != "openai" {
 		t.Fatalf("unexpected provider protocol: %q", provider.Protocol)
 	}
-	if provider.Models[0].Name != "vision" {
+	if provider.Models[0].Name != "image" {
 		t.Fatalf("unexpected normalized model name: %q", provider.Models[0].Name)
 	}
 }
 
-func TestNormalizeMultimodalTimeouts(t *testing.T) {
+func TestNormalizeImageGenerationTimeout(t *testing.T) {
 	ai := &AI{
-		Vision:          &Vision{RequestTimeout: 601},
 		ImageGeneration: &ImageGeneration{RequestTimeout: 30},
 	}
 	ai.Normalize()
-	if ai.Vision.RequestTimeout != 600 || ai.ImageGeneration.RequestTimeout != 30 {
-		t.Fatalf("unexpected multimodal timeouts: vision=%d generation=%d", ai.Vision.RequestTimeout, ai.ImageGeneration.RequestTimeout)
+	if ai.ImageGeneration.RequestTimeout != 30 {
+		t.Fatalf("unexpected image generation timeout: %d", ai.ImageGeneration.RequestTimeout)
 	}
 }

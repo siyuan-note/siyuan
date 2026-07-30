@@ -135,7 +135,6 @@ declare namespace Config {
         providers: IProvider[];
         editing: IEditing;
         agent: IAgent;
-        vision: IVision;
         imageGeneration: IImageGeneration;
         mcp: IMCP;
         embedding: IEmbedding;
@@ -164,14 +163,6 @@ declare namespace Config {
         maxHistoryMessages: number;
         temperature: number;
         maxCompletionTokens: number;
-    }
-
-    export interface IVision {
-        modelId: string;
-        requestTimeout: number;
-        maxImageBytes: number;
-        maxPixels: number;
-        maxEdge: number;
     }
 
     export interface IImageGeneration {
@@ -224,13 +215,14 @@ declare namespace Config {
 
     /**
      * AI model configuration. Behavior params (maxTokens/temperature/maxContexts)
-     * live on IEditing; Model holds only identity fields.
+     * live on IEditing; Model holds identity and provider metadata.
      */
     export interface IModel {
         id: string;
         enabled: boolean;
         name: string;
         displayName?: string;
+        contextLength?: number;
     }
 
     /**
@@ -807,6 +799,7 @@ declare namespace Config {
          * Whether to close all tabs when starting
          */
         closeTabsOnStart: boolean;
+        tabStartupMode: 0 | 1 | 2;
         /**
          * The storage path of the new document
          */

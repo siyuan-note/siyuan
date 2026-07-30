@@ -323,6 +323,16 @@ func InitConf() {
 	if 32 < Conf.FileTree.MaxOpenTabCount {
 		Conf.FileTree.MaxOpenTabCount = 32
 	}
+	if nil == Conf.FileTree.TabStartupMode {
+		Conf.FileTree.TabStartupMode = new(int)
+		if Conf.FileTree.CloseTabsOnStart {
+			*Conf.FileTree.TabStartupMode = 2
+		}
+	}
+	if 0 > *Conf.FileTree.TabStartupMode || 2 < *Conf.FileTree.TabStartupMode {
+		*Conf.FileTree.TabStartupMode = 0
+	}
+	Conf.FileTree.CloseTabsOnStart = 2 == *Conf.FileTree.TabStartupMode
 	Conf.FileTree.DocCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.DocCreateSavePath)
 	Conf.FileTree.DocCreateTemplatePath = util.NormalizeTemplatePath(Conf.FileTree.DocCreateTemplatePath)
 	Conf.FileTree.RefCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.RefCreateSavePath)

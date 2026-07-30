@@ -117,25 +117,6 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
     });
 };
 
-const registerAiVisionGroup = (tab: SettingTabBuilder) => {
-    const groupId = "vision";
-    const group = tab.group(groupId, window.siyuan.languages.aiImageUnderstanding);
-
-    group.slot({
-        key: "visionModelPicker",
-        keywords: getModelPickerKeywords(groupId),
-        html: () => genGroupedModelPickerHtml(groupId),
-        afterMount: (root) => mountGroupedModelPicker(root, groupId),
-    });
-    group.number("ai.vision.requestTimeout", {
-        title: window.siyuan.languages.apiTimeout,
-        desc: window.siyuan.languages.apiTimeoutTip,
-        min: 1,
-        max: 600,
-        unit: "s",
-    });
-};
-
 const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
     const groupId = "imageGeneration";
     const group = tab.group(groupId, window.siyuan.languages.aiImageGeneration);
@@ -270,7 +251,6 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);
-    registerAiVisionGroup(tab);
     registerAiImageGenerationGroup(tab);
     registerAiMcpGroup(tab);
     // TODO: add skills group?

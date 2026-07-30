@@ -10,7 +10,7 @@ import {openByMobile} from "../../../editor/openLink";
 import {shell} from "electron";
 /// #endif
 
-type ModelPickerGroup = "editing" | "agent" | "vision" | "imageGeneration";
+type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
 
 export const getProvidersBlockKeywords = (): string[] => [
     window.siyuan.languages.apiProvider,
@@ -301,8 +301,6 @@ export const getModelPickerKeywords = (group: ModelPickerGroup): string[] => {
             window.siyuan.languages.aiAgentModelPickerTip,
             window.siyuan.languages.agentChat,
         );
-    } else if (group === "vision") {
-        keywords.push(window.siyuan.languages.aiImageUnderstanding, window.siyuan.languages.aiImageUnderstandingTip);
     } else {
         keywords.push(window.siyuan.languages.aiImageGeneration, window.siyuan.languages.aiImageGenerationTip);
     }

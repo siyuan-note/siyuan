@@ -117,11 +117,25 @@ type Property struct {
 }
 
 type CallToolResult struct {
-	Content              []ContentItem `json:"content"`
-	StructuredContent    any           `json:"structuredContent,omitempty"`
-	StructuredContentSet bool          `json:"-"`
-	IsError              bool          `json:"isError,omitempty"`
-	ExecutionUnknown     bool          `json:"-"`
+	Content              []ContentItem     `json:"content"`
+	StructuredContent    any               `json:"structuredContent,omitempty"`
+	StructuredContentSet bool              `json:"-"`
+	ModelAttachments     []ModelAttachment `json:"-"`
+	IsError              bool              `json:"isError,omitempty"`
+	ExecutionUnknown     bool              `json:"-"`
+}
+
+// ModelAttachment 描述工具希望在下一轮模型请求中附加的多模态输入。
+// Data 只在当前运行期内存中传递，持久化时仅保存可重新解析资源的元数据。
+type ModelAttachment struct {
+	Type       string `json:"type"`
+	Data       []byte `json:"-"`
+	MIMEType   string `json:"mimeType,omitempty"`
+	Path       string `json:"path,omitempty"`
+	DocumentID string `json:"documentId,omitempty"`
+	Detail     string `json:"detail,omitempty"`
+	Width      int    `json:"width,omitempty"`
+	Height     int    `json:"height,omitempty"`
 }
 
 func (r CallToolResult) HasStructuredContent() bool {

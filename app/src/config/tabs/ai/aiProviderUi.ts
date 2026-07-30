@@ -6,7 +6,7 @@ import {aiConfigApi} from "./aiRuntime";
 import {Menu} from "../../../plugin/Menu";
 import {upDownHint} from "../../../util/upDownHint";
 
-type ModelPickerGroup = "editing" | "agent" | "vision" | "imageGeneration";
+type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
 
 interface IProviderPreset {
     id: string;
@@ -255,6 +255,8 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-1" data-model-field="displayName" type="text" spellcheck="false" placeholder="${window.siyuan.languages.customDisplayName}" value="${escapeHTML(model.displayName || "")}">
     <span class="fn__space"></span>
+    <input class="b3-text-field fn__size200 ariaLabel" data-model-field="contextLength" data-position="north" type="number" min="0" max="100000000" step="1" placeholder="${window.siyuan.languages.modelContextLength}" aria-label="${window.siyuan.languages.modelContextLengthTip}" value="${model.contextLength || ""}">
+    <span class="fn__space"></span>
     <button class="b3-button b3-button--outline" data-action="testModel">
         <svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg>
         <span>${window.siyuan.languages.testConnection}</span>
@@ -448,10 +450,13 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     const fetchModelsButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
     const confirmButton = view.querySelector<HTMLButtonElement>("[data-action='confirm']");
     let availableModels: string[] = [];
+    let availableModelContextLengths: Record<string, number> = {};
     let hasFetchedModels = false;
     let fetchingModels = false;
+    const getAvailableModelContextLength = (name: string) =>
+        availableModelContextLengths[name] || availableModelContextLengths[name.toLowerCase()] || 0;
     const updateModelActionButtons = () => {
-        const disabled = fetchingModels || !draft.apiKey.trim();
+        const disabled = fetchingModels || !draft.baseURL.trim();
         addModelButton.disabled = disabled;
         fetchModelsButton.disabled = disabled;
     };
@@ -478,11 +483,6 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         if (fetchingModels) {
             return;
         }
-        if (!draft.apiKey.trim()) {
-            view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
-            showMessage(window.siyuan.languages.apiKeyTip, undefined, "error");
-            return;
-        }
         if (!draft.baseURL.trim()) {
             view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
             showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
@@ -503,6 +503,16 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             const models = responseModels
                 .filter((name): name is string => typeof name === "string" && name.trim() !== "")
                 .map((name) => name.trim());
+            availableModelContextLengths = {};
+            const responseContextLengths = data.contextLengths;
+            if (responseContextLengths && typeof responseContextLengths === "object") {
+                Object.entries(responseContextLengths as Record<string, unknown>).forEach(([name, value]) => {
+                    if (typeof value === "number" && Number.isSafeInteger(value) && value > 0) {
+                        availableModelContextLengths[name] = value;
+                        availableModelContextLengths[name.toLowerCase()] = value;
+                    }
+                });
+            }
             if (models.length === 0) {
                 showMessage(
                     data.msg
@@ -514,13 +524,24 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 return;
             }
             availableModels = [...new Set(models)].sort((first, second) => first.localeCompare(second));
+            draft.models.forEach((model) => {
+                const contextLength = getAvailableModelContextLength(model.name);
+                if (contextLength > 0) {
+                    model.contextLength = contextLength;
+                }
+            });
             if (draft.models.length === 0) {
-                draft.models.push({
+                const model: Config.IModel = {
                     id: "",
                     enabled: true,
                     name: availableModels[0],
                     displayName: "",
-                });
+                };
+                const contextLength = getAvailableModelContextLength(model.name);
+                if (contextLength > 0) {
+                    model.contextLength = contextLength;
+                }
+                draft.models.push(model);
             }
             renderDraftModels(modelsContainer, draft.models, availableModels);
             showMessage(
@@ -566,7 +587,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             } else {
                 draft[providerField] = target.value;
             }
-            if (providerField === "apiKey") {
+            if (providerField === "baseURL") {
                 updateModelActionButtons();
             }
             if (providerField === "displayName" || providerField === "baseURL") {
@@ -574,10 +595,25 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             }
             return;
         }
-        const modelField = target.dataset.modelField as "name" | "displayName";
+        const modelField = target.dataset.modelField as "name" | "displayName" | "contextLength";
         const modelIndex = Number(target.closest<HTMLElement>("[data-model-index]")?.dataset.modelIndex);
         if (modelField && draft.models[modelIndex]) {
+            if (modelField === "contextLength") {
+                draft.models[modelIndex].contextLength =
+                    Number.isSafeInteger(target.valueAsNumber) && target.valueAsNumber > 0
+                        ? target.valueAsNumber
+                        : 0;
+                return;
+            }
             draft.models[modelIndex][modelField] = target.value;
+            if (modelField === "name") {
+                const contextLength = getAvailableModelContextLength(target.value);
+                if (contextLength > 0) {
+                    draft.models[modelIndex].contextLength = contextLength;
+                } else {
+                    delete draft.models[modelIndex].contextLength;
+                }
+            }
         }
     });
 
@@ -613,10 +649,6 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "addModel") {
-            if (!draft.apiKey.trim()) {
-                view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
-                return;
-            }
             if (!hasFetchedModels) {
                 const modelCount = draft.models.length;
                 fetchModels(() => {
@@ -746,7 +778,7 @@ const getFirstEnabledModelId = () => getEnabledModelGroups()[0]?.models[0]?.id |
 const getSelectedModelId = (group: ModelPickerGroup) => {
     const savedModelId = window.siyuan.config.ai[group].modelId;
     const valid = getEnabledModelGroups().some((item) => item.models.some((model) => model.id === savedModelId));
-    if (valid || group === "vision" || group === "imageGeneration") {
+    if (valid || group === "imageGeneration") {
         return valid ? savedModelId : "";
     }
     return getFirstEnabledModelId();
@@ -795,7 +827,7 @@ const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group:
         input.value = label;
         aiConfigApi.patch(`${group}.modelId`, modelId, () => syncGroupedModelPickers(root));
     };
-    const optional = group === "vision" || group === "imageGeneration";
+    const optional = group === "imageGeneration";
     if (optional) {
         menu.addItem({
             iconHTML: "",
@@ -830,7 +862,7 @@ const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group:
 };
 
 const syncGroupedModelPickers = (root: HTMLElement) => {
-    (["editing", "agent", "vision", "imageGeneration"] as const).forEach((group) => {
+    (["editing", "agent", "imageGeneration"] as const).forEach((group) => {
         const input = root.querySelector<HTMLInputElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
         if (!input) {
             return;
@@ -845,8 +877,6 @@ export const genGroupedModelPickerHtml = (group: ModelPickerGroup): string => {
         desc = window.siyuan.languages.aiEditingModelPickerTip;
     } else if (group === "agent") {
         desc = window.siyuan.languages.aiAgentModelPickerTip;
-    } else if (group === "vision") {
-        desc = window.siyuan.languages.aiImageUnderstandingTip;
     } else {
         desc = window.siyuan.languages.aiImageGenerationTip;
     }

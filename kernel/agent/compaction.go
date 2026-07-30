@@ -44,7 +44,7 @@ func compactMessages(msgs []openai.ChatCompletionMessage, keepLastUserMessages i
 	userCount := 0
 	cutIdx := 1 // default: keep only system prompt
 	for i := len(msgs) - 1; i >= 1; i-- {
-		if msgs[i].Role == openai.ChatMessageRoleUser {
+		if msgs[i].Role == openai.ChatMessageRoleUser && !isAttachmentMessage(msgs[i]) {
 			userCount++
 			if userCount == keepLastUserMessages {
 				cutIdx = i
@@ -80,7 +80,7 @@ func extractSummary(msgs []openai.ChatCompletionMessage) string {
 	for _, m := range msgs {
 		switch m.Role {
 		case openai.ChatMessageRoleUser:
-			text := strings.TrimSpace(m.Content)
+			text := strings.TrimSpace(chatMessageText(m))
 			if text != "" {
 				runes := []rune(text)
 				if len(runes) > 300 {

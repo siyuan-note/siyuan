@@ -817,15 +817,23 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     /// #endif
                     if (isClick) {
                         clickTimeout = window.setTimeout(() => {
+                            const activeElement = document.activeElement;
+                            const shouldRestoreFocus = (inputElement: HTMLInputElement) =>
+                                !activeElement || activeElement === document.body ||
+                                activeElement === inputElement || target.contains(activeElement);
                             if (searchType === "asset") {
                                 if (!target.classList.contains("b3-list-item--focus")) {
                                     assetsElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                                     target.classList.add("b3-list-item--focus");
                                     renderPreview(element.querySelector("#searchAssetPreview"), target.dataset.id, searchAssetInputElement.value, window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method);
-                                    searchAssetInputElement.focus();
+                                    if (shouldRestoreFocus(searchAssetInputElement)) {
+                                        searchAssetInputElement.focus();
+                                    }
                                 } else if (target.classList.contains("b3-list-item--focus")) {
                                     renderNextAssetMark(element.querySelector("#searchAssetPreview"));
-                                    searchAssetInputElement.focus();
+                                    if (shouldRestoreFocus(searchAssetInputElement)) {
+                                        searchAssetInputElement.focus();
+                                    }
                                 }
                             } else {
                                 if (event.altKey) {
@@ -848,14 +856,18 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                         config: searchType === "doc" ? config : null,
                                         value: searchType === "doc" ? searchInputElement.value : null,
                                     });
-                                    searchInputElement.focus();
+                                    if (shouldRestoreFocus(searchInputElement)) {
+                                        searchInputElement.focus();
+                                    }
                                 } else if (searchType === "doc" && target.classList.contains("b3-list-item--focus")) {
                                     renderNextSearchMark({
                                         edit,
                                         id: target.getAttribute("data-node-id"),
                                         target,
                                     });
-                                    searchInputElement.focus();
+                                    if (shouldRestoreFocus(searchInputElement)) {
+                                        searchInputElement.focus();
+                                    }
                                 }
                             }
                         }, Constants.TIMEOUT_DBLCLICK);

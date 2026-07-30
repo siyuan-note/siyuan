@@ -366,12 +366,16 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 						result = toolUnknownResult
 					}
 				}
-				calls = append(calls, map[string]any{
+				persistedCall := map[string]any{
 					"name":      call.Name,
 					"arguments": call.Arguments,
 					"result":    result,
 					"state":     call.State,
-				})
+				}
+				if len(call.Attachments) > 0 {
+					persistedCall["attachments"] = call.Attachments
+				}
+				calls = append(calls, persistedCall)
 			}
 			entry["toolCalls"] = calls
 		}

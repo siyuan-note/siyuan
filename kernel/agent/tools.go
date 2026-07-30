@@ -42,23 +42,29 @@ func convertMCPToolsToOpenAI() []openai.Tool {
 	return result
 }
 
+type executedToolResult struct {
+	Text             string
+	ModelAttachments []tools.ModelAttachment
+	IsError          bool
+	ExecutionUnknown bool
+}
+
 // executeTool 执行单次工具调用。
-// 返回值：结果文本（已展平为字符串），isErr 表示工具是否返回错误结果，executionUnknown 表示副作用结果无法确定。
-func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) (resultText string, isErr, executionUnknown bool) {
+func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) executedToolResult {
 	t, validator := tools.LookupToolWithValidator(tc.Function.Name)
 	if t == nil {
-		return "unknown tool: " + tc.Function.Name, true, false
+		return executedToolResult{Text: "unknown tool: " + tc.Function.Name, IsError: true}
 	}
 	if t.ContextHandler == nil && t.Handler == nil {
-		return "tool handler unavailable: " + tc.Function.Name, true, false
+		return executedToolResult{Text: "tool handler unavailable: " + tc.Function.Name, IsError: true}
 	}
 	if ctx.Err() != nil {
-		return "tool execution was cancelled before it started", true, false
+		return executedToolResult{Text: "tool execution was cancelled before it started", IsError: true}
 	}
 
 	args := parseToolArgs(tc.Function.Arguments)
 	if err := validator.ValidateInputContext(ctx, args); err != nil {
-		return "invalid tool arguments: " + err.Error(), true, false
+		return executedToolResult{Text: "invalid tool arguments: " + err.Error(), IsError: true}
 	}
 	// _sessionID 和 _toolCallID 是原生工具专用的内部字段，用于关联会话状态和实现幂等操作。
 	// 仅注入给原生工具；MCP/插件工具的参数会原样转发给外部服务端，
@@ -88,21 +94,38 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) (res
 	select {
 	case execution = <-executionCh:
 	case <-ctx.Done():
-		return "tool execution was interrupted; execution result is unknown and must not be retried automatically", true, true
+		return executedToolResult{
+			Text:             "tool execution was interrupted; execution result is unknown and must not be retried automatically",
+			IsError:          true,
+			ExecutionUnknown: true,
+		}
 	}
 	result, err := execution.result, execution.err
 	if err != nil {
 		if ctx.Err() != nil {
-			return "tool execution was interrupted; execution result is unknown and must not be retried automatically", true, true
+			return executedToolResult{
+				Text:             "tool execution was interrupted; execution result is unknown and must not be retried automatically",
+				IsError:          true,
+				ExecutionUnknown: true,
+			}
 		}
-		return "tool execution error: " + err.Error(), true, false
+		return executedToolResult{Text: "tool execution error: " + err.Error(), IsError: true}
 	}
 	if err = validator.ValidateOutputContext(ctx, result); err != nil {
-		return "invalid tool output after execution; execution result may have side effects and must not be retried automatically: " +
-			err.Error(), true, true
+		return executedToolResult{
+			Text: "invalid tool output after execution; execution result may have side effects and must not be retried automatically: " +
+				err.Error(),
+			IsError:          true,
+			ExecutionUnknown: true,
+		}
 	}
 
-	return resultToString(result), result.IsError, result.ExecutionUnknown
+	return executedToolResult{
+		Text:             resultToString(result),
+		ModelAttachments: result.ModelAttachments,
+		IsError:          result.IsError,
+		ExecutionUnknown: result.ExecutionUnknown,
+	}
 }
 
 func convertSchema(schema tools.ToolSchema) any {

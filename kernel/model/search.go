@@ -717,9 +717,16 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			}
 		} else {
 			var unlinks []*ast.Node
+			skipReplaceNodes := map[*ast.Node]struct{}{}
+			if replaceTypes["text"] {
+				skipReplaceNodes, _ = replaceTextAcrossBackslashes(node, method, keyword, replacement, r, luteEngine)
+			}
 			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering {
 					return ast.WalkContinue
+				}
+				if _, ok := skipReplaceNodes[n]; ok {
+					return ast.WalkSkipChildren
 				}
 
 				switch n.Type {
@@ -727,23 +734,12 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 					if !replaceTypes["text"] {
 						return ast.WalkContinue
 					}
+					if nil != n.Parent && ast.NodeBackslash == n.Parent.Type {
+						return ast.WalkContinue
+					}
 
 					if replaceTextNode(n, method, keyword, replacement, r, luteEngine) {
-						if nil != n.Parent && ast.NodeBackslash == n.Parent.Type {
-							unlinks = append(unlinks, n.Parent)
-
-							prev, next := n.Parent.Previous, n.Parent.Next
-							for ; prev != nil && ((ast.NodeText == prev.Type && prev.Tokens == nil) || ast.NodeBackslash == prev.Type); prev = prev.Previous {
-								// Tokens 为空的节点或者转义节点之前已经处理，需要跳过
-							}
-							if nil != prev && ast.NodeText == prev.Type && nil != next && ast.NodeText == next.Type {
-								prev.Tokens = append(prev.Tokens, next.Tokens...)
-								next.Tokens = nil // 将 Tokens 设置为空，表示该节点已经被处理过
-								unlinks = append(unlinks, next)
-							}
-						} else {
-							unlinks = append(unlinks, n)
-						}
+						unlinks = append(unlinks, n)
 					}
 				case ast.NodeLinkDest:
 					if !replaceTypes["imgSrc"] {
@@ -1149,6 +1145,339 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 		}
 		n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, editor.Zwsp, "")
 	}
+}
+
+type replaceTextFragment struct {
+	start       int
+	end         int
+	node        *ast.Node
+	contentNode *ast.Node
+	escaped     bool
+}
+
+type replaceTextRun struct {
+	start     int
+	end       int
+	fragments []*replaceTextFragment
+}
+
+type replaceTextRunPlan struct {
+	run     *replaceTextRun
+	matches [][]int
+}
+
+// replaceTextAcrossBackslashes 在可见文本投影上处理跨转义节点的匹配。
+func replaceTextAcrossBackslashes(root *ast.Node, method int, keyword, replacement string, r *regexp.Regexp,
+	luteEngine *lute.Lute) (skipNodes map[*ast.Node]struct{}, changed bool) {
+	skipNodes = map[*ast.Node]struct{}{}
+	if nil == root || "" == keyword || (0 != method && 3 != method) {
+		return
+	}
+
+	var parents []*ast.Node
+	parentSet := map[*ast.Node]struct{}{}
+	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeBackslash != n.Type || nil == n.Parent {
+			return ast.WalkContinue
+		}
+		if _, ok := parentSet[n.Parent]; !ok {
+			parentSet[n.Parent] = struct{}{}
+			parents = append(parents, n.Parent)
+		}
+		return ast.WalkSkipChildren
+	})
+
+	for _, parent := range parents {
+		content, runs := buildReplaceTextRuns(parent)
+		if "" == content || 1 > len(runs) {
+			continue
+		}
+
+		indexes := findReplaceTextMatchIndexes(content, method, keyword, r)
+		if 1 > len(indexes) {
+			continue
+		}
+
+		var plans []*replaceTextRunPlan
+		for _, run := range runs {
+			var matches [][]int
+			hasEscapedMatch := false
+			for _, index := range indexes {
+				if !replaceTextMatchInRun(index, run, len(content)) {
+					continue
+				}
+				matches = append(matches, index)
+				if replaceTextMatchTouchesBackslash(index, run) {
+					hasEscapedMatch = true
+				}
+			}
+			if hasEscapedMatch {
+				plans = append(plans, &replaceTextRunPlan{run: run, matches: matches})
+			}
+		}
+
+		for i := len(plans) - 1; 0 <= i; i-- {
+			plan := plans[i]
+			output, ok := buildReplaceTextRunOutput(content, plan, method, replacement, r, luteEngine)
+			if !ok {
+				continue
+			}
+			if applyReplaceTextRunOutput(plan.run, output, skipNodes) {
+				changed = true
+			}
+		}
+	}
+	return
+}
+
+func buildReplaceTextRuns(parent *ast.Node) (content string, runs []*replaceTextRun) {
+	var buf strings.Builder
+	var current *replaceTextRun
+	for child := parent.FirstChild; nil != child; child = child.Next {
+		contentNode, escaped := replaceTextContentNode(child)
+		if nil == contentNode {
+			if nil != current {
+				current.end = buf.Len()
+				runs = append(runs, current)
+				current = nil
+			}
+			buf.WriteString(child.Content())
+			continue
+		}
+
+		if nil == current {
+			current = &replaceTextRun{start: buf.Len()}
+		}
+		start := buf.Len()
+		buf.Write(contentNode.Tokens)
+		current.fragments = append(current.fragments, &replaceTextFragment{
+			start:       start,
+			end:         buf.Len(),
+			node:        child,
+			contentNode: contentNode,
+			escaped:     escaped,
+		})
+	}
+	if nil != current {
+		current.end = buf.Len()
+		runs = append(runs, current)
+	}
+	return buf.String(), runs
+}
+
+func replaceTextContentNode(node *ast.Node) (contentNode *ast.Node, escaped bool) {
+	if ast.NodeText == node.Type {
+		return node, false
+	}
+	if ast.NodeBackslash != node.Type {
+		return nil, false
+	}
+	for child := node.FirstChild; nil != child; child = child.Next {
+		if ast.NodeText == child.Type || ast.NodeBackslashContent == child.Type {
+			return child, true
+		}
+	}
+	return nil, false
+}
+
+func findReplaceTextMatchIndexes(content string, method int, keyword string, r *regexp.Regexp) (ret [][]int) {
+	if 3 == method {
+		if nil != r {
+			ret = r.FindAllStringSubmatchIndex(content, -1)
+		}
+		return
+	}
+
+	exp := regexp.QuoteMeta(keyword)
+	if !Conf.Search.CaseSensitive {
+		exp = "(?i:" + exp + ")"
+	}
+	matcher, err := regexp.Compile(exp)
+	if nil != err {
+		return
+	}
+	return matcher.FindAllStringSubmatchIndex(content, -1)
+}
+
+func replaceTextMatchInRun(index []int, run *replaceTextRun, contentLength int) bool {
+	if 2 > len(index) || 0 > index[0] || 0 > index[1] {
+		return false
+	}
+	if index[0] == index[1] {
+		return run.start <= index[0] && (index[0] < run.end || index[0] == run.end && run.end == contentLength)
+	}
+	return run.start <= index[0] && index[1] <= run.end
+}
+
+func replaceTextMatchTouchesBackslash(index []int, run *replaceTextRun) bool {
+	if 2 > len(index) {
+		return false
+	}
+	if index[0] == index[1] {
+		for _, fragment := range run.fragments {
+			if fragment.escaped && fragment.start <= index[0] && index[0] <= fragment.end {
+				return true
+			}
+		}
+		return false
+	}
+	for _, fragment := range run.fragments {
+		if fragment.escaped && index[0] < fragment.end && fragment.start < index[1] {
+			return true
+		}
+	}
+	return false
+}
+
+func buildReplaceTextRunOutput(content string, plan *replaceTextRunPlan, method int, replacement string, r *regexp.Regexp,
+	luteEngine *lute.Lute) (ret []*ast.Node, ok bool) {
+	cursor := plan.run.start
+	for _, index := range plan.matches {
+		ret = appendReplaceOriginalText(ret, plan.run, cursor, index[0])
+
+		replacementText := replacement
+		if 3 == method {
+			replacementText = string(r.ExpandString(nil, replacement, content, index))
+		}
+		replacementNodes, parsed := parseReplaceText(replacementText, luteEngine)
+		if !parsed {
+			return nil, false
+		}
+		for _, replacementNode := range replacementNodes {
+			ret = appendReplaceOutputNode(ret, replacementNode)
+		}
+		cursor = index[1]
+	}
+	ret = appendReplaceOriginalText(ret, plan.run, cursor, plan.run.end)
+	return ret, true
+}
+
+func appendReplaceOriginalText(output []*ast.Node, run *replaceTextRun, start, end int) []*ast.Node {
+	if end <= start {
+		return output
+	}
+	for _, fragment := range run.fragments {
+		fragmentStart := max(start, fragment.start)
+		fragmentEnd := min(end, fragment.end)
+		if fragmentEnd <= fragmentStart {
+			continue
+		}
+
+		node := cloneReplaceTextFragment(fragment, fragmentStart-fragment.start, fragmentEnd-fragment.start)
+		if nil != node {
+			output = appendReplaceOutputNode(output, node)
+		}
+	}
+	return output
+}
+
+func cloneReplaceTextFragment(fragment *replaceTextFragment, start, end int) *ast.Node {
+	ret := cloneReplaceTextNode(fragment.node)
+	if nil == ret {
+		return nil
+	}
+	tokens := bytes.Clone(fragment.contentNode.Tokens[start:end])
+	if fragment.escaped {
+		contentNode, _ := replaceTextContentNode(ret)
+		if nil == contentNode {
+			return nil
+		}
+		contentNode.Tokens = tokens
+	} else {
+		ret.Tokens = tokens
+	}
+	return ret
+}
+
+func cloneReplaceTextNode(node *ast.Node) *ast.Node {
+	if nil == node {
+		return nil
+	}
+	ret := *node
+	ret.Parent, ret.Previous, ret.Next = nil, nil, nil
+	ret.FirstChild, ret.LastChild = nil, nil
+	ret.Children = nil
+	ret.Tokens = bytes.Clone(node.Tokens)
+	if nil != node.Properties {
+		ret.Properties = map[string]string{}
+		for key, value := range node.Properties {
+			ret.Properties[key] = value
+		}
+	}
+	if nil != node.KramdownIAL {
+		ret.KramdownIAL = make([][]string, len(node.KramdownIAL))
+		for i, item := range node.KramdownIAL {
+			ret.KramdownIAL[i] = append([]string(nil), item...)
+		}
+	}
+	for child := node.FirstChild; nil != child; child = child.Next {
+		ret.AppendChild(cloneReplaceTextNode(child))
+	}
+	return &ret
+}
+
+func parseReplaceText(replacement string, luteEngine *lute.Lute) (ret []*ast.Node, ok bool) {
+	tree := parse.Inline("", []byte(replacement), luteEngine.ParseOptions)
+	if nil == tree.Root.FirstChild {
+		return nil, "" == replacement
+	}
+	parse.NestedInlines2FlattedSpans(tree, false)
+	for child := tree.Root.FirstChild.FirstChild; nil != child; {
+		next := child.Next
+		child.Unlink()
+		ret = append(ret, child)
+		child = next
+	}
+	return ret, true
+}
+
+func appendReplaceOutputNode(output []*ast.Node, node *ast.Node) []*ast.Node {
+	if nil == node || (ast.NodeText == node.Type && 1 > len(node.Tokens)) {
+		return output
+	}
+	if 0 < len(output) && ast.NodeText == output[len(output)-1].Type && ast.NodeText == node.Type &&
+		0 == len(output[len(output)-1].KramdownIAL) && 0 == len(node.KramdownIAL) {
+		output[len(output)-1].Tokens = append(output[len(output)-1].Tokens, node.Tokens...)
+		return output
+	}
+	return append(output, node)
+}
+
+func applyReplaceTextRunOutput(run *replaceTextRun, output []*ast.Node, skipNodes map[*ast.Node]struct{}) bool {
+	if 1 > len(run.fragments) {
+		return false
+	}
+	first := run.fragments[0].node
+	last := run.fragments[len(run.fragments)-1].node
+	parent := first.Parent
+	if nil == parent || parent != last.Parent {
+		return false
+	}
+	after := last.Next
+	block := treenode.ParentBlock(first)
+
+	for current := first; current != after; {
+		next := current.Next
+		current.Unlink()
+		current = next
+	}
+	for _, node := range output {
+		if nil != after {
+			after.InsertBefore(node)
+		} else {
+			parent.AppendChild(node)
+		}
+		ast.Walk(node, func(current *ast.Node, entering bool) ast.WalkStatus {
+			if entering {
+				skipNodes[current] = struct{}{}
+			}
+			return ast.WalkContinue
+		})
+	}
+	if nil != block {
+		treenode.RefreshUpdated(block)
+	}
+	return true
 }
 
 // replaceTextNode 替换文本节点为其他节点。

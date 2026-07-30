@@ -686,7 +686,12 @@ func TestApplyRuntimeDistinguishesPendingAndExecutingTools(t *testing.T) {
 		Delta: []AgentMessage{{
 			Role: "assistant",
 			ToolCalls: []AgentToolCall{
-				{Name: "not_started", State: "pending"},
+				{
+					Name: "not_started", State: "pending",
+					Attachments: []AgentAttachment{{
+						Type: "image", Path: "assets/image.png", DocumentID: "20260730120000-abcdefg",
+					}},
+				},
 				{Name: "possibly_started", State: "executing"},
 			},
 		}},
@@ -701,5 +706,9 @@ func TestApplyRuntimeDistinguishesPendingAndExecutingTools(t *testing.T) {
 	}
 	if calls[1]["result"] != toolUnknownResult {
 		t.Fatalf("executing tool result was not protected against automatic retry: %#v", calls[1])
+	}
+	attachments, ok := calls[0]["attachments"].([]AgentAttachment)
+	if !ok || len(attachments) != 1 || attachments[0].Path != "assets/image.png" {
+		t.Fatalf("runtime attachment descriptor was not preserved: %#v", calls[0])
 	}
 }

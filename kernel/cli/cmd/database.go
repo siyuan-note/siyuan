@@ -280,7 +280,7 @@ var databaseItemAddCmd = &cobra.Command{
 		}
 		srcs := []map[string]any{src}
 
-		if err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, viewID, groupID, previousID, ignoreFill); err != nil {
+		if err := model.AddAttributeViewBlock(nil, srcs, avID, "", viewID, groupID, previousID, ignoreFill); err != nil {
 			return err
 		}
 		model.AppendPushReloadAttrViewEntry(avID)
@@ -501,7 +501,7 @@ func init() {
 
 	databaseKeyAddCmd.Flags().String("av", "", "attribute view ID (required)")
 	databaseKeyAddCmd.Flags().String("name", "", "key name (required)")
-	databaseKeyAddCmd.Flags().String("type", "", "key type (required): block/text/number/date/select/mSelect/url/email/phone/mAsset/template/created/updated/checkbox/relation/rollup/lineNumber")
+	databaseKeyAddCmd.Flags().String("type", "", "key type (required): text/number/date/select/mSelect/url/email/phone/mAsset/template/created/updated/checkbox/relation/rollup/lineNumber")
 	databaseKeyAddCmd.Flags().String("icon", "", "key icon (optional)")
 	databaseKeyAddCmd.Flags().String("prev", "", "previous key ID for ordering (optional)")
 

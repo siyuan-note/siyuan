@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "Fold/expand direct subheadings",
+  "foldSiblingHeadings": "Fold/expand sibling headings",
   "copyViewMirror": "Copy view mirror",
   "hideViewTab": "Hide view tab",
   "showViewTab": "Show view tab",

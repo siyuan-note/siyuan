@@ -275,6 +275,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/unfoldBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, unfoldBlock)
 	ginServer.Handle("POST", "/api/block/setBlockReminder", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setBlockReminder)
 	ginServer.Handle("POST", "/api/block/getHeadingLevelTransaction", model.CheckAuth, model.CheckAdminRole, getHeadingLevelTransaction)
+	ginServer.Handle("POST", "/api/block/getHeadingFoldTransaction", model.CheckAuth, model.CheckAdminRole, getHeadingFoldTransaction)
 	ginServer.Handle("POST", "/api/block/getHeadingDeleteTransaction", model.CheckAuth, model.CheckAdminRole, getHeadingDeleteTransaction)
 	ginServer.Handle("POST", "/api/block/getHeadingInsertTransaction", model.CheckAuth, model.CheckAdminRole, getHeadingInsertTransaction)
 	ginServer.Handle("POST", "/api/block/getHeadingChildrenIDs", model.CheckAuth, getHeadingChildrenIDs)

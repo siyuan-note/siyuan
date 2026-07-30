@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "摺疊/展開直接子標題",
+  "foldSiblingHeadings": "摺疊/展開同級標題",
   "copyViewMirror": "複製檢視鏡像",
   "hideViewTab": "隱藏檢視頁籤",
   "showViewTab": "顯示檢視頁籤",

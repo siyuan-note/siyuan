@@ -112,6 +112,54 @@ func TestLegacyHeadingFoldIsNotSelfFold(t *testing.T) {
 	}
 }
 
+func TestHeadingDirectChildrenAndSiblings(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument}
+	h1 := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, ID: "h1"}
+	h3a := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 3, ID: "h3-a"}
+	h3b := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 3, ID: "h3-b"}
+	h2 := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 2, ID: "h2"}
+	h3Nested := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 3, ID: "h3-nested"}
+	h1Next := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, ID: "h1-next"}
+	root.AppendChild(h1)
+	root.AppendChild(h3a)
+	root.AppendChild(h3b)
+	root.AppendChild(h2)
+	root.AppendChild(h3Nested)
+	root.AppendChild(h1Next)
+
+	assertHeadingIDs(t, HeadingDirectChildren(h1), "h3-a", "h3-b", "h2")
+	assertHeadingIDs(t, HeadingSiblings(h3a), "h3-a", "h3-b")
+	assertHeadingIDs(t, HeadingSiblings(h3Nested), "h3-nested")
+	assertHeadingIDs(t, HeadingSiblings(h1), "h1", "h1-next")
+}
+
+func TestHeadingSiblingsKeepContainerBoundary(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument}
+	rootHeading := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, ID: "root-heading"}
+	superBlock := &ast.Node{Type: ast.NodeSuperBlock, ID: "super-block"}
+	containerHeading := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, ID: "container-heading"}
+	containerHeadingNext := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, ID: "container-heading-next"}
+	root.AppendChild(rootHeading)
+	superBlock.AppendChild(containerHeading)
+	superBlock.AppendChild(containerHeadingNext)
+	root.AppendChild(superBlock)
+
+	assertHeadingIDs(t, HeadingSiblings(rootHeading), "root-heading")
+	assertHeadingIDs(t, HeadingSiblings(containerHeading), "container-heading", "container-heading-next")
+}
+
+func assertHeadingIDs(t *testing.T, headings []*ast.Node, expected ...string) {
+	t.Helper()
+	if len(headings) != len(expected) {
+		t.Fatalf("expected %d headings, got %d", len(expected), len(headings))
+	}
+	for i, heading := range headings {
+		if heading.ID != expected[i] {
+			t.Fatalf("expected heading [%s] at index %d, got [%s]", expected[i], i, heading.ID)
+		}
+	}
+}
+
 func TestCollectFoldHiddenNodesKeepsContainerScope(t *testing.T) {
 	root := &ast.Node{Type: ast.NodeDocument}
 	list := &ast.Node{Type: ast.NodeList, ID: "list", ListData: &ast.ListData{}}

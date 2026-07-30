@@ -257,6 +257,70 @@ func HeadingParent(node *ast.Node) *ast.Node {
 	return node.Parent
 }
 
+// HeadingDirectChildren 返回语义父标题为 heading 的直接子标题。
+func HeadingDirectChildren(heading *ast.Node) (ret []*ast.Node) {
+	if nil == heading || ast.NodeHeading != heading.Type || nil == heading.Parent {
+		return
+	}
+
+	parents := headingParents(heading.Parent)
+	for n := heading.Parent.FirstChild; nil != n; n = n.Next {
+		if ast.NodeHeading == n.Type && parents[n] == heading {
+			ret = append(ret, n)
+		}
+	}
+	return
+}
+
+// HeadingSiblings 返回与 heading 位于同一容器、语义父级和标题级别的标题。
+func HeadingSiblings(heading *ast.Node) (ret []*ast.Node) {
+	if nil == heading || ast.NodeHeading != heading.Type || nil == heading.Parent {
+		return
+	}
+
+	parents := headingParents(heading.Parent)
+	parent := parents[heading]
+	for n := heading.Parent.FirstChild; nil != n; n = n.Next {
+		if ast.NodeHeading == n.Type && n.HeadingLevel == heading.HeadingLevel && parents[n] == parent {
+			ret = append(ret, n)
+		}
+	}
+	return
+}
+
+// headingParents 一次扫描同一容器中的标题，计算每个标题的语义父级。
+func headingParents(parent *ast.Node) (ret map[*ast.Node]*ast.Node) {
+	ret = map[*ast.Node]*ast.Node{}
+	if nil == parent {
+		return
+	}
+
+	var levels [7]*ast.Node
+	for n := parent.FirstChild; nil != n; n = n.Next {
+		if ast.NodeHeading != n.Type {
+			continue
+		}
+		if n.HeadingLevel < 1 || 6 < n.HeadingLevel {
+			ret[n] = parent
+			continue
+		}
+
+		semanticParent := parent
+		for level := n.HeadingLevel - 1; 1 <= level; level-- {
+			if nil != levels[level] {
+				semanticParent = levels[level]
+				break
+			}
+		}
+		ret[n] = semanticParent
+		for level := n.HeadingLevel; level <= 6; level++ {
+			levels[level] = nil
+		}
+		levels[n.HeadingLevel] = n
+	}
+	return
+}
+
 func HeadingLevel(node *ast.Node) int {
 	if nil == node {
 		return 0

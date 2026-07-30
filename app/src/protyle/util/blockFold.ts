@@ -106,6 +106,50 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     return {fold: !hasFold ? 1 : 0, undoOperations, doOperations};
 };
 
+const headingFoldingProtyles = new WeakSet<IProtyle>();
+
+export const foldHeadingGroup = async (protyle: IProtyle, nodeElement: Element,
+                                       scope: "children" | "siblings") => {
+    if (headingFoldingProtyles.has(protyle) || nodeElement.getAttribute("data-type") !== "NodeHeading") {
+        return;
+    }
+
+    headingFoldingProtyles.add(protyle);
+    try {
+        const id = nodeElement.getAttribute("data-node-id");
+        const response = await fetchSyncPost("/api/block/getHeadingFoldTransaction", {id, scope});
+        const doOperations = response.data?.doOperations as IOperation[];
+        const undoOperations = response.data?.undoOperations as IOperation[];
+        if (!doOperations || !undoOperations || doOperations.length === 0) {
+            return;
+        }
+        await new Promise<void>((resolve) => {
+            const timeout = window.setTimeout(resolve, 10000);
+            transaction(protyle, doOperations, undoOperations, {
+                callback() {
+                    window.clearTimeout(timeout);
+                    const currentElement = nodeElement.isConnected ? nodeElement :
+                        protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+                    const blockButtonElement = protyle.gutter.element.querySelector(`[data-node-id="${id}"]`);
+                    const arrowElement = blockButtonElement?.parentElement?.querySelector("[data-type='fold'] > svg") as HTMLElement;
+                    if (currentElement && arrowElement) {
+                        arrowElement.style.transform = currentElement.getAttribute("fold") === "1" ? "" : "rotate(90deg)";
+                    }
+                    resolve();
+                }
+            });
+            if (protyle.lite) {
+                window.clearTimeout(timeout);
+                resolve();
+            }
+        });
+    } catch (error) {
+        console.error(error);
+    } finally {
+        headingFoldingProtyles.delete(protyle);
+    }
+};
+
 const isFoldable = (el: Element) => {
     const type = el.getAttribute("data-type");
     return type === "NodeHeading" ||

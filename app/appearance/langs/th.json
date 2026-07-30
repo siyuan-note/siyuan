@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "ยุบ/ขยายหัวข้อย่อยโดยตรง",
+  "foldSiblingHeadings": "ยุบ/ขยายหัวข้อระดับเดียวกัน",
   "copyViewMirror": "คัดลอกมิเรอร์มุมมอง",
   "hideViewTab": "ซ่อนแท็บมุมมอง",
   "showViewTab": "แสดงแท็บมุมมอง",

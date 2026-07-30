@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "Recolher/expandir subtítulos diretos",
+  "foldSiblingHeadings": "Recolher/expandir títulos do mesmo nível",
   "copyViewMirror": "Copiar espelho da visualização",
   "hideViewTab": "Ocultar aba da visualização",
   "showViewTab": "Mostrar aba da visualização",

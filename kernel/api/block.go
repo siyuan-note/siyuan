@@ -418,6 +418,28 @@ func getHeadingLevelTransaction(c *gin.Context) {
 	ret.Data = transaction
 }
 
+func getHeadingFoldTransaction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	scope := arg["scope"].(string)
+	transaction, err := model.GetHeadingFoldTransaction(id, scope)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 7000}
+		return
+	}
+
+	ret.Data = transaction
+}
+
 func setBlockReminder(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

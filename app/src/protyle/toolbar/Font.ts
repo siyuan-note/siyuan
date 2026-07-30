@@ -1,7 +1,6 @@
 import {setStorageVal, updateHotkeyTip} from "../util/compatibility";
 import {ToolbarItem} from "./ToolbarItem";
-import {setPosition} from "../../util/setPosition";
-import {focusByRange, getSelectionPosition} from "../util/selection";
+import {focusByRange} from "../util/selection";
 import {Constants} from "../../constants";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {updateBatchTransaction} from "../wysiwyg/transaction";
@@ -23,8 +22,7 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElementCloseCB = undefined;
             focusByRange(protyle.toolbar.range);
             /// #if !MOBILE
-            const position = getSelectionPosition(protyle.wysiwyg.element, protyle.toolbar.range);
-            setPosition(protyle.toolbar.subElement, position.left, position.top + 18, 26);
+            protyle.toolbar.setSelectionElementPosition(protyle, protyle.toolbar.subElement);
             /// #endif
         });
     }

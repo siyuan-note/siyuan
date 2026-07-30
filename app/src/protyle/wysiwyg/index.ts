@@ -1723,7 +1723,11 @@ export class WYSIWYG {
                         if (getSelection().rangeCount > 0) {
                             const range = getSelection().getRangeAt(0);
                             if (range.toString().replace(Constants.ZWSP, "") !== "") {
-                                protyle.toolbar.render(protyle, range);
+                                protyle.toolbar.render(protyle, range, {
+                                    x: mouseUpEvent.clientX,
+                                    y: mouseUpEvent.clientY,
+                                    detail: mouseUpEvent.detail,
+                                });
                                 countSelectWord(range, protyle.block.rootID);
                             }
                         }
@@ -4411,7 +4415,11 @@ export class WYSIWYG {
                 }
                 /// #if !MOBILE
                 if (newRange.toString().replace(Constants.ZWSP, "") !== "") {
-                    protyle.toolbar.render(protyle, newRange);
+                    protyle.toolbar.render(protyle, newRange, event.detail > 0 ? {
+                        x: event.clientX,
+                        y: event.clientY,
+                        detail: event.detail,
+                    } : undefined);
                 } else {
                     // https://github.com/siyuan-note/siyuan/issues/9785
                     protyle.toolbar.range = newRange;

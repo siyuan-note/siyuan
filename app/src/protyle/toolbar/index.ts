@@ -72,13 +72,22 @@ const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) 
     });
 };
 
+interface IToolbarRangePosition {
+    left: number;
+    top: number;
+    isBottom?: boolean;
+    rectIndex?: number;
+}
+
 export class Toolbar {
     public element: HTMLElement;
     public subElement: HTMLElement;
     public subElementCloseCB: () => void;
     public subElementResizeCB: () => void;
     public range: Range;
+    public rangePosition?: IToolbarRangePosition;
     public toolbarHeight: number;
+    private isMultipleClick = false;
     private readonly LINE_HEIGHT = 32;
 
     constructor(protyle: IProtyle) {
@@ -183,8 +192,33 @@ export class Toolbar {
         });
     }
 
-    public render(protyle: IProtyle, range: Range) {
+    public setSelectionElementPosition(protyle: IProtyle, element: HTMLElement) {
+        if (!this.rangePosition || !this.range) {
+            return;
+        }
+        const protyleRect = protyle.element.getBoundingClientRect();
+        const rangeRects = this.range.getClientRects();
+        const rangeRect = (typeof this.rangePosition.rectIndex === "number" ?
+            rangeRects[this.rangePosition.rectIndex] : undefined) ||
+            (this.rangePosition.isBottom ? rangeRects[rangeRects.length - 1] : rangeRects[0]) ||
+            this.range.getBoundingClientRect();
+        const gap = this.isMultipleClick ? 2 : 4;
+        const above = rangeRect.top - element.clientHeight - gap;
+        const below = rangeRect.bottom + gap;
+        const y = this.rangePosition.isBottom ?
+            (below + element.clientHeight <= protyleRect.bottom ?
+                below : Math.max(above, protyleRect.top + 30)) :
+            (above >= protyleRect.top + 30 ?
+                above : Math.min(below, protyleRect.bottom - element.clientHeight));
+        const horizontalDivisor = this.isMultipleClick ? 3 : 4;
+        setPosition(element, this.rangePosition.left - element.clientWidth / horizontalDivisor, y);
+        return y;
+    }
+
+    public render(protyle: IProtyle, range: Range, position?: IPosition & {detail?: number}) {
         this.range = range;
+        this.rangePosition = undefined;
+        this.isMultipleClick = (position?.detail || 0) > 1;
         const nodeElement = hasClosestBlock(range.startContainer);
         const endElement = hasClosestBlock(range.endContainer);
         const isCrossBlock = !!nodeElement && !!endElement && nodeElement !== endElement;
@@ -215,20 +249,15 @@ export class Toolbar {
             this.element.classList.add("fn__none");
             return;
         }
-        const rangePosition = getSelectionPosition(nodeElement, range, true);
+        this.rangePosition = getSelectionPosition(nodeElement, range, true, position);
         this.element.classList.remove("fn__none");
         this.toolbarHeight = this.element.clientHeight;
-        const protyleRect = protyle.element.getBoundingClientRect();
-        const rangeRects = range.getClientRects();
-        const rangeRect = (rangePosition.isBottom ? rangeRects[rangeRects.length - 1] : rangeRects[0]) ||
-            range.getBoundingClientRect();
-        const above = rangeRect.top - this.toolbarHeight - 4;
-        const below = rangeRect.bottom + 4;
-        const y = rangePosition.isBottom ?
-            (below + this.toolbarHeight <= protyleRect.bottom ? below : Math.max(above, protyleRect.top + 30)) :
-            (above >= protyleRect.top + 30 ? above : Math.min(below, protyleRect.bottom - this.toolbarHeight));
+        const y = this.setSelectionElementPosition(protyle, this.element);
+        if (typeof y !== "number") {
+            this.element.classList.add("fn__none");
+            return;
+        }
         this.element.setAttribute("data-inity", y + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
-        setPosition(this.element, rangePosition.left - this.element.clientWidth / 4, y);
 
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
             item.classList.remove("protyle-toolbar__item--current");

@@ -228,7 +228,53 @@ export const getEditorRange = (element: Element): Range => {
     return range;
 };
 
-export const getSelectionPosition = (nodeElement: Element, range?: Range, useDirect = false) => {
+interface IClosestSelectionRect {
+    rect: DOMRect;
+    rectIndex: number;
+    left: number;
+    verticalDistance: number;
+    horizontalDistance: number;
+}
+
+const getDistanceToInterval = (value: number, start: number, end: number) => {
+    if (value < start) {
+        return start - value;
+    }
+    if (value > end) {
+        return value - end;
+    }
+    return 0;
+};
+
+const getClosestSelectionRect = (rects: DOMRectList, position: IPosition) => {
+    const rectArray = Array.from(rects);
+    const hasTextRect = rectArray.some(rect => rect.width > 0.5 && rect.height > 0.5);
+    let closest: IClosestSelectionRect | undefined;
+    rectArray.forEach((rect, rectIndex) => {
+        if (hasTextRect && (rect.width <= 0.5 || rect.height <= 0.5)) {
+            return;
+        }
+        const verticalDistance = getDistanceToInterval(position.y, rect.top, rect.bottom);
+        const horizontalDistance = getDistanceToInterval(position.x, rect.left, rect.right);
+        // 文本按行排列，优先比较垂直距离，避免较长的其他行因水平距离较近而被选中
+        if (!closest ||
+            verticalDistance < closest.verticalDistance - 0.5 ||
+            (Math.abs(verticalDistance - closest.verticalDistance) <= 0.5 &&
+                horizontalDistance < closest.horizontalDistance)) {
+            closest = {
+                rect,
+                rectIndex,
+                left: Math.max(rect.left, Math.min(position.x, rect.right)),
+                verticalDistance,
+                horizontalDistance,
+            };
+        }
+    });
+    return closest;
+};
+
+export const getSelectionPosition = (nodeElement: Element, range?: Range, useDirect = false,
+                                     position?: IPosition) => {
     if (!range) {
         range = getEditorRange(nodeElement);
     }
@@ -324,6 +370,29 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
         const rects = range.getClientRects(); // 由于长度过长折行，光标在行首时有多个 rects https://github.com/siyuan-note/siyuan/issues/6156
         if (range.toString()) {
             if (useDirect) {
+                if (position) {
+                    const closest = getClosestSelectionRect(rects, position);
+                    if (closest) {
+                        const textRects = Array.from(rects).filter(rect => rect.width > 0.5 && rect.height > 0.5);
+                        const compareRects = textRects.length > 0 ? textRects : Array.from(rects);
+                        const maxTop = Math.max(...compareRects.map(rect => rect.top));
+                        const minBottom = Math.min(...compareRects.map(rect => rect.bottom));
+                        const isSingleLine = maxTop <= minBottom + 0.5;
+                        let isBottom = false;
+                        if (!isSingleLine) {
+                            const centers = compareRects.map(rect => (rect.top + rect.bottom) / 2);
+                            const closestCenter = (closest.rect.top + closest.rect.bottom) / 2;
+                            isBottom = Math.abs(Math.max(...centers) - closestCenter) <
+                                Math.abs(closestCenter - Math.min(...centers));
+                        }
+                        return {
+                            left: closest.left,
+                            top: isBottom ? closest.rect.bottom : closest.rect.top,
+                            isBottom,
+                            rectIndex: closest.rectIndex,
+                        };
+                    }
+                }
                 const selection = window.getSelection() as Selection & {
                     direction: "forward" | "backward" | "none"
                 };
@@ -337,7 +406,8 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
                     left: isBackward ? rects[0].left : rects[rects.length - 1].right,
                     // 如果向右选择时有多个垂直位置不同的矩形：使用最后一个矩形的下边界；否则使用第一个矩形的上边界
                     top: isBottom ? rects[rects.length - 1].bottom : rects[0].top,
-                    isBottom
+                    isBottom,
+                    rectIndex: isBottom ? rects.length - 1 : 0,
                 };
             } else {
                 return {    // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541

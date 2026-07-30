@@ -58,8 +58,25 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                    scrollPosition?: ScrollLogicalPosition, notebookId?: string,
                                    afterOpen?: (protyle: IProtyle) => void, forceReload = false,
                                    isValid: () => boolean = () => true, signal?: AbortSignal,
-                                   scrollAttr?: IScrollAttr, updateRecent = true) => {
+                                   scrollAttr?: IScrollAttr, updateRecent = true,
+                                   onFailure?: (invalid?: boolean) => void) => {
+    let completed = false;
+    const complete = (protyle: IProtyle) => {
+        if (completed) {
+            return;
+        }
+        completed = true;
+        afterOpen?.(protyle);
+    };
+    const fail = (invalid = false) => {
+        if (completed) {
+            return;
+        }
+        completed = true;
+        onFailure?.(invalid);
+    };
     if (!isValid()) {
+        fail();
         return;
     }
     const avPanelElement = document.querySelector(".av__panel");
@@ -95,7 +112,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             if (updateRecent) {
                 updateRecentDocSwitchTime(createRecentDocUpdate(rootID, rootID));
             }
-            afterOpen?.(protyle);
+            complete(protyle);
             return;
         }
     }
@@ -105,12 +122,20 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
     if (isEncryptedBox(targetNotebookId)) {
         blockInfoParam.notebook = targetNotebookId;
     }
-    fetchPost("/api/block/getBlockInfo", blockInfoParam, (data) => {
+    let blockInfoHandled = false;
+    void fetchPost("/api/block/getBlockInfo", blockInfoParam, (data) => {
+        blockInfoHandled = true;
         if (!isValid()) {
+            fail();
             return;
         }
         if (data.code === 3) {
             showMessage(data.msg);
+            fail(true);
+            return;
+        }
+        if (data.code !== 0 || !data.data?.rootID) {
+            fail();
             return;
         }
         const isRootFocus = id === data.data.rootID &&
@@ -138,12 +163,13 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             },
             after: (editor) => {
                 if (!isValid()) {
+                    fail();
                     return;
                 }
                 if (updateRecent) {
                     updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
                 }
-                afterOpen?.(editor.protyle);
+                complete(editor.protyle);
             },
         };
         if (window.siyuan.mobile.editor) {
@@ -160,8 +186,10 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                     scrollAttr: targetScrollAttr,
                     mergedOptions: protyleOptions,
                     signal,
+                    fail,
                     cb() {
                         if (!isValid()) {
+                            fail();
                             return;
                         }
                         if (updateRecent) {
@@ -170,7 +198,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                         app.plugins.forEach(item => {
                             item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                         });
-                        afterOpen?.(window.siyuan.mobile.editor.protyle);
+                        complete(window.siyuan.mobile.editor.protyle);
                     }
                 });
             } else {
@@ -182,29 +210,49 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 if (isEncryptedBox(window.siyuan.mobile.editor.protyle.notebookId)) {
                     getDocParam.notebook = window.siyuan.mobile.editor.protyle.notebookId;
                 }
-                fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
+                let getDocHandled = false;
+                void fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
+                    getDocHandled = true;
                     if (!isValid()) {
+                        fail();
                         return;
                     }
-                    onGet({
-                        data: getResponse,
-                        protyle: window.siyuan.mobile.editor.protyle,
-                        action: actionList,
-                        scrollPosition,
-                        afterCB() {
-                            if (!isValid()) {
-                                return;
+                    if (getResponse.code !== 0 && onFailure) {
+                        fail(true);
+                        return;
+                    }
+                    try {
+                        onGet({
+                            data: getResponse,
+                            protyle: window.siyuan.mobile.editor.protyle,
+                            action: actionList,
+                            scrollPosition,
+                            afterCB() {
+                                if (!isValid()) {
+                                    fail();
+                                    return;
+                                }
+                                if (updateRecent) {
+                                    updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
+                                }
+                                app.plugins.forEach(item => {
+                                    item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                                });
+                                complete(window.siyuan.mobile.editor.protyle);
                             }
-                            if (updateRecent) {
-                                updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
-                            }
-                            app.plugins.forEach(item => {
-                                item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
-                            });
-                            afterOpen?.(window.siyuan.mobile.editor.protyle);
-                        }
-                    });
-                }, undefined, undefined, signal);
+                        });
+                    } catch (error) {
+                        console.error(error);
+                        fail();
+                    }
+                    if (!completed) {
+                        fail();
+                    }
+                }, undefined, undefined, signal).then(() => {
+                    if (!getDocHandled) {
+                        fail();
+                    }
+                });
             }
             window.siyuan.mobile.editor.protyle.undo.clear();
             // 切换文档后校准新文档的撤销镜像（语义 B：各文档栈隔离）
@@ -212,11 +260,21 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 initMirror(window.siyuan.mobile.editor.protyle.block.rootID);
             }
         } else {
-            window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), protyleOptions);
+            try {
+                window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), protyleOptions);
+            } catch (error) {
+                console.error(error);
+                fail();
+                return;
+            }
         }
         setEditor();
         closePanel();
-    }, undefined, undefined, signal);
+    }, undefined, undefined, signal).then(() => {
+        if (!blockInfoHandled) {
+            fail();
+        }
+    });
 };
 
 export const openMobileFileById = (app: App, id: string, action: TProtyleAction[] = [Constants.CB_GET_HL],
@@ -225,9 +283,17 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
     if (window.siyuan.mobile.tabs) {
         const options = {action, scrollPosition, notebookId, afterOpen, forceReload};
         if (action.includes(Constants.CB_GET_OPENNEW)) {
-            void window.siyuan.mobile.tabs.openInNewTab(id, options);
+            void window.siyuan.mobile.tabs.openInNewTab(id, options).then((result) => {
+                if (result === "invalid" || result === "failed") {
+                    void window.siyuan.mobile.tabs.restore();
+                }
+            });
         } else {
-            void window.siyuan.mobile.tabs.open(id, options);
+            void window.siyuan.mobile.tabs.open(id, options).then((result) => {
+                if (result === "invalid" || result === "failed") {
+                    void window.siyuan.mobile.tabs.restore();
+                }
+            });
         }
         return;
     }
@@ -241,7 +307,16 @@ export const openMobileFileByIdInNewTab = (app: App, id: string,
                                            scrollPosition?: ScrollLogicalPosition, notebookId?: string,
                                            afterOpen?: (protyle: IProtyle) => void) => {
     if (window.siyuan.mobile.tabs) {
-        void window.siyuan.mobile.tabs.openInNewTab(id, {action, scrollPosition, notebookId, afterOpen});
+        void window.siyuan.mobile.tabs.openInNewTab(id, {
+            action,
+            scrollPosition,
+            notebookId,
+            afterOpen
+        }).then((result) => {
+            if (result === "invalid" || result === "failed") {
+                void window.siyuan.mobile.tabs.restore();
+            }
+        });
     } else {
         openMobileFileById(app, id, action, scrollPosition, notebookId, afterOpen);
     }

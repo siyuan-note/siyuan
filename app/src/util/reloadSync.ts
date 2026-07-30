@@ -30,9 +30,9 @@ export const reloadSync = (
             window.siyuan.mobile.popEditor.reload(false, updateReadonly);
         }
     }
+    window.siyuan.mobile.tabs?.removeRoots(data.removeRootIDs);
     if (document.getElementById("empty").classList.contains("fn__none") &&
         window.siyuan.mobile.editor && window.siyuan.mobile.editor.protyle) {
-        window.siyuan.mobile.tabs?.removeRoots(data.removeRootIDs);
         if (data.removeRootIDs.includes(window.siyuan.mobile.editor.protyle.block.rootID)) {
             if (!window.siyuan.mobile.tabs) {
                 setEmpty(app);

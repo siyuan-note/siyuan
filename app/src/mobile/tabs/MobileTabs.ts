@@ -50,6 +50,11 @@ type OpenOptions = {
     recentPreviousRootID?: string;
 };
 
+type MobileTabOpenResult = "success" | "cancelled" | "invalid" | "failed";
+
+class InvalidMobileTabTargetError extends Error {
+}
+
 const isEntry = (value: unknown): value is MobileTabEntry => {
     const entry = value as MobileTabEntry;
     return !!entry && typeof entry.id === "string" && typeof entry.rootID === "string" &&
@@ -192,17 +197,23 @@ export class MobileTabs {
             if (notebookId) {
                 data.notebook = notebookId;
             }
-            fetchPost("/api/block/getBlockInfo", data, (response) => {
+            let handled = false;
+            void fetchPost("/api/block/getBlockInfo", data, (response) => {
+                handled = true;
                 if (response.code === 0 && response.data?.rootID) {
                     resolve(response.data);
                 } else {
-                    reject(new Error(response.msg));
+                    reject(new InvalidMobileTabTargetError(response.msg));
                 }
-            }, undefined, undefined, signal);
+            }, undefined, undefined, signal).then(() => {
+                if (!handled && !signal?.aborted) {
+                    reject(new Error("Failed to resolve mobile tab target"));
+                }
+            });
         });
     }
 
-    async open(id: string, options: OpenOptions = {}) {
+    async open(id: string, options: OpenOptions = {}): Promise<MobileTabOpenResult> {
         const action = options.action || [Constants.CB_GET_HL];
         this.abortController?.abort();
         const abortController = new AbortController();
@@ -211,11 +222,14 @@ export class MobileTabs {
         let info: {rootID: string; box: string};
         try {
             info = await this.resolveRoot(id, options.notebookId, abortController.signal);
-        } catch {
-            return abortController.signal.aborted;
+        } catch (error) {
+            if (abortController.signal.aborted) {
+                return "cancelled";
+            }
+            return error instanceof InvalidMobileTabTargetError ? "invalid" : "failed";
         }
         if (epoch !== this.navigationEpoch) {
-            return true;
+            return "cancelled";
         }
 
         this.snapshot();
@@ -240,45 +254,65 @@ export class MobileTabs {
             };
         }
         const previous = tab.current;
-        const loadID = switchedExisting && previous ? previous.id : id;
-        const loadAction = switchedExisting ? [Constants.CB_GET_SCROLL] as TProtyleAction[] : action;
-        const loadScroll = switchedExisting ? previous?.scroll : options.scroll;
-        const shouldReplace = options.replace || switchedExisting || previous?.id === id;
+        const restoreExistingPosition = switchedExisting && id === info.rootID &&
+            action.includes(Constants.CB_GET_SCROLL);
+        const loadID = restoreExistingPosition && previous ? previous.id : id;
+        const loadAction = restoreExistingPosition ? [Constants.CB_GET_SCROLL] as TProtyleAction[] : action;
+        const loadScroll = restoreExistingPosition ? previous?.scroll : options.scroll;
+        const shouldReplace = options.replace || restoreExistingPosition || previous?.id === id;
         const targetTabID = tab.id;
-        loadMobileFileById(this.app, loadID, loadAction, options.scrollPosition, info.box, (protyle) => {
-            if (epoch !== this.navigationEpoch || targetTabID !== tab.id) {
-                return;
-            }
-            if (!shouldReplace) {
-                this.pushHistory(tab.backStack, previous);
-                tab.forwardStack = [];
-            }
-            if (createOnSuccess) {
-                this.state.tabs.push(tab);
-            }
-            tab.current = this.entryFromProtyle(loadID, loadAction, protyle);
-            tab.activeAt = Date.now();
-            this.state.activeTabID = tab.id;
-            this.trimTabs();
-            window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id: loadID};
-            setStorageVal(Constants.LOCAL_DOCINFO, {id: loadID});
-            this.persist();
-            this.updateCounter();
-            const previousRootID = options.recentPreviousRootID || previous?.rootID;
-            if (switchedExisting || previousRootID === protyle.block.rootID) {
-                updateRecentDocSwitchTime({type: "view", rootID: protyle.block.rootID});
-            } else if (previousRootID) {
-                updateRecentDocSwitchTime({
-                    type: "switch",
-                    rootID: protyle.block.rootID,
-                    previousRootID,
-                });
-            } else {
-                updateRecentDocSwitchTime({type: "open", rootID: protyle.block.rootID});
-            }
-            options.afterOpen?.(protyle);
-        }, options.forceReload, () => epoch === this.navigationEpoch, abortController.signal, loadScroll, false);
-        return true;
+        return new Promise<MobileTabOpenResult>((resolve) => {
+            let settled = false;
+            const finish = (result: MobileTabOpenResult) => {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                resolve(result);
+            };
+            abortController.signal.addEventListener("abort", () => finish("cancelled"), {once: true});
+            loadMobileFileById(this.app, loadID, loadAction, options.scrollPosition, info.box, (protyle) => {
+                if (epoch !== this.navigationEpoch) {
+                    finish("cancelled");
+                    return;
+                }
+                if (!createOnSuccess && !this.state.tabs.some((item) => item.id === targetTabID)) {
+                    finish("cancelled");
+                    return;
+                }
+                if (!shouldReplace) {
+                    this.pushHistory(tab.backStack, previous);
+                    tab.forwardStack = [];
+                }
+                if (createOnSuccess) {
+                    this.state.tabs.push(tab);
+                }
+                tab.current = this.entryFromProtyle(loadID, loadAction, protyle);
+                tab.activeAt = Date.now();
+                this.state.activeTabID = tab.id;
+                this.trimTabs();
+                window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id: loadID};
+                setStorageVal(Constants.LOCAL_DOCINFO, {id: loadID});
+                this.persist();
+                this.updateCounter();
+                const previousRootID = options.recentPreviousRootID || previous?.rootID;
+                if (switchedExisting || previousRootID === protyle.block.rootID) {
+                    updateRecentDocSwitchTime({type: "view", rootID: protyle.block.rootID});
+                } else if (previousRootID) {
+                    updateRecentDocSwitchTime({
+                        type: "switch",
+                        rootID: protyle.block.rootID,
+                        previousRootID,
+                    });
+                } else {
+                    updateRecentDocSwitchTime({type: "open", rootID: protyle.block.rootID});
+                }
+                finish("success");
+                options.afterOpen?.(protyle);
+            }, options.forceReload, () => epoch === this.navigationEpoch, abortController.signal, loadScroll, false, (invalid) => {
+                finish(abortController.signal.aborted ? "cancelled" : (invalid ? "invalid" : "failed"));
+            });
+        });
     }
 
     openInNewTab(id: string, options: Omit<OpenOptions, "newTab"> = {}) {
@@ -298,7 +332,7 @@ export class MobileTabs {
             this.updateCounter();
             return true;
         }
-        const launched = await this.open(tab.current.id, {
+        const result = await this.open(tab.current.id, {
             action: [Constants.CB_GET_SCROLL],
             notebookId: tab.current.notebookID,
             forceReload: true,
@@ -306,12 +340,15 @@ export class MobileTabs {
             scroll: tab.current.scroll,
             tabID: tab.id,
         });
-        if (!launched) {
+        if (result === "invalid") {
             this.state.tabs = this.state.tabs.filter((item) => item.id !== tab.id);
             this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
             this.persist();
             this.updateCounter();
             return this.restore();
+        }
+        if (result === "failed") {
+            setEmpty(this.app);
         }
         return true;
     }
@@ -346,13 +383,11 @@ export class MobileTabs {
         const tab = this.state.tabs.find((item) => item.id === tabID);
         if (!tab || tab.id === this.state.activeTabID) {
             closeModel();
-            return;
+            return !!tab;
         }
         this.snapshot();
-        this.state.activeTabID = tab.id;
-        tab.activeAt = Date.now();
         if (tab.current) {
-            await this.open(tab.current.id, {
+            const result = await this.open(tab.current.id, {
                 action: [Constants.CB_GET_SCROLL],
                 notebookId: tab.current.notebookID,
                 forceReload: true,
@@ -360,13 +395,20 @@ export class MobileTabs {
                 scroll: tab.current.scroll,
                 tabID: tab.id,
             });
+            if (result === "invalid" || result === "failed") {
+                await this.restore();
+                return false;
+            }
         } else {
             this.cancelNavigation();
+            this.state.activeTabID = tab.id;
+            tab.activeAt = Date.now();
             setEmpty(this.app);
             this.persist();
             this.updateCounter();
         }
         closeModel();
+        return true;
     }
 
     async goBack(): Promise<boolean> {
@@ -381,7 +423,7 @@ export class MobileTabs {
         this.pushHistory(tab.forwardStack, tab.current);
         tab.current = target;
         this.persist();
-        const launched = await this.open(target.id, {
+        const result = await this.open(target.id, {
             action: [Constants.CB_GET_SCROLL],
             notebookId: target.notebookID,
             forceReload: true,
@@ -390,11 +432,14 @@ export class MobileTabs {
             tabID: tab.id,
             recentPreviousRootID: previousRootID,
         });
-        if (!launched) {
+        if (result === "invalid" || result === "failed") {
             tab.current = previous;
             tab.forwardStack.pop();
             this.persist();
-            return this.goBack();
+            if (result === "invalid") {
+                return this.goBack();
+            }
+            await this.restore();
         }
         return true;
     }
@@ -411,7 +456,7 @@ export class MobileTabs {
         this.pushHistory(tab.backStack, tab.current);
         tab.current = target;
         this.persist();
-        const launched = await this.open(target.id, {
+        const result = await this.open(target.id, {
             action: [Constants.CB_GET_SCROLL],
             notebookId: target.notebookID,
             forceReload: true,
@@ -420,11 +465,14 @@ export class MobileTabs {
             tabID: tab.id,
             recentPreviousRootID: previousRootID,
         });
-        if (!launched) {
+        if (result === "invalid" || result === "failed") {
             tab.current = previous;
             tab.backStack.pop();
             this.persist();
-            return this.goForward();
+            if (result === "invalid") {
+                return this.goForward();
+            }
+            await this.restore();
         }
         return true;
     }
@@ -435,18 +483,27 @@ export class MobileTabs {
             return;
         }
         const wasActive = this.state.activeTabID === tabID;
+        if (wasActive) {
+            this.cancelNavigation();
+        }
         const closedRootID = this.state.tabs[index].current?.rootID;
         this.state.tabs.splice(index, 1);
         if (closedRootID) {
             fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: closedRootID});
         }
         if (wasActive) {
+            this.state.activeTabID = undefined;
             const next = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0];
             if (next?.current) {
-                this.state.activeTabID = undefined;
-                await this.switchTo(next.id);
+                const opened = await this.switchTo(next.id);
+                if (!opened) {
+                    setEmpty(this.app);
+                }
             } else {
                 this.state.activeTabID = next?.id;
+                if (next) {
+                    next.activeAt = Date.now();
+                }
                 setEmpty(this.app);
             }
         }
@@ -483,6 +540,9 @@ export class MobileTabs {
     }
 
     removeRoots(rootIDs: string[]) {
+        if (rootIDs.length === 0) {
+            return;
+        }
         const roots = new Set(rootIDs);
         this.state.tabs.forEach((tab) => {
             if (tab.current && roots.has(tab.current.rootID)) {
@@ -493,12 +553,14 @@ export class MobileTabs {
     }
 
     private filterEntries(predicate: (entry: MobileTabEntry) => boolean) {
+        const activeTabID = this.state.activeTabID;
         this.state.tabs.forEach((tab) => {
             tab.backStack = tab.backStack.filter(predicate);
             tab.forwardStack = tab.forwardStack.filter(predicate);
         });
         this.state.tabs = this.state.tabs.filter((tab) => !tab.current || predicate(tab.current));
-        if (!this.state.tabs.some((tab) => tab.id === this.state.activeTabID)) {
+        if (!this.state.tabs.some((tab) => tab.id === activeTabID)) {
+            this.cancelNavigation();
             this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
             if (this.state.activeTabID) {
                 void this.restore();

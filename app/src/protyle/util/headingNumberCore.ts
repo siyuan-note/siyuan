@@ -221,6 +221,19 @@ const operationChangesHeadingNumberSetting = (operation: IOperation) => {
     return oldValue !== newValue;
 };
 
+export const transactionsMayChangeRootHeadingNumberSetting = (transactions: {
+    doOperations?: IOperation[] | null,
+    undoOperations?: IOperation[] | null,
+}[] | null, rootID: string) => {
+    return (transactions ?? []).some(transaction => {
+        return [transaction.doOperations, transaction.undoOperations].some(operations => {
+            return (operations ?? []).some(operation => {
+                return operation.id === rootID && operationChangesHeadingNumberSetting(operation);
+            });
+        });
+    });
+};
+
 export const operationsMayChangeOutline = (operations: IOperation[] | null = [], headingIDs: Set<string> = new Set()) => {
     return (operations ?? []).some(operation => {
         if (operationChangesHeadingNumberSetting(operation)) {

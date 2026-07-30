@@ -1055,7 +1055,7 @@ func getBlockInfo(c *gin.Context) {
 	}
 	rootTitle := root.IAL["title"]
 	rootTitle = html.UnescapeString(rootTitle)
-	icon := root.IAL["icon"]
+	icon := html.UnescapeString(root.IAL["icon"])
 	ret.Data = map[string]any{
 		"box":            block.Box,
 		"path":           block.Path,

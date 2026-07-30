@@ -338,7 +338,7 @@ var blockUpdateCmd = &cobra.Command{
 		}
 		lockType, _ := cmd.Flags().GetBool("lock-type")
 
-		operations, rootIDs, err := model.BuildBlockUpdateOperations([]model.BlockUpdateInput{{
+		_, rootIDs, err := model.PerformBlockUpdates([]model.BlockUpdateInput{{
 			ID:       id,
 			Data:     data,
 			DataType: "markdown",
@@ -348,9 +348,6 @@ var blockUpdateCmd = &cobra.Command{
 			return err
 		}
 
-		transactions := []*model.Transaction{{DoOperations: operations}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
 		for _, rootID := range rootIDs {
 			model.AppendPushReloadProtyleEntry(rootID)
 		}

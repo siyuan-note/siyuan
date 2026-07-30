@@ -68,16 +68,20 @@ func FlushTxQueue() {
 // 失败时返回原始错误（不转成推送消息），调用方据此回滚撤销栈状态。
 func PerformTxSync(tx *Transaction) (err error) {
 	defer logging.Recover()
-	// 初始化事务互斥锁（异步路径 PerformTransactions 在入队前初始化，同步路径这里补上）
-	if nil == tx.m {
-		tx.m = &sync.Mutex{}
-	}
 	flushLock.Lock()
 	isFlushing.Store(true)
 	defer func() {
 		isFlushing.Store(false)
 		flushLock.Unlock()
 	}()
+	return performTxSyncLocked(tx)
+}
+
+func performTxSyncLocked(tx *Transaction) (err error) {
+	// 初始化事务互斥锁（异步路径 PerformTransactions 在入队前初始化，同步路径这里补上）
+	if nil == tx.m {
+		tx.m = &sync.Mutex{}
+	}
 	if txErr := performTx(tx); nil != txErr {
 		return txErr
 	}
@@ -1631,18 +1635,10 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
 	}
 
-	updatedNode := firstContentBlock(subTree.Root)
-	if nil == updatedNode {
-		logging.LogErrorf("get first node in sub tree [%s] failed", subTree.Root.ID)
-		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
-	}
-	if nil != oldNode.Parent && ast.NodeList == updatedNode.Type && ast.NodeList == oldNode.Parent.Type {
-		updatedNode = firstContentBlock(updatedNode)
-	}
-	if nil == updatedNode {
-		msg := "updated block node is invalid"
-		logging.LogErrorf("%s [%s]", msg, id)
-		return &TxErr{code: TxErrCodePushMsg, msg: msg, id: id}
+	updatedNode, resolveErr := resolveBlockUpdateNode(oldNode, subTree.Root)
+	if resolveErr != nil {
+		logging.LogErrorf("resolve updated block [%s] failed: %s", id, resolveErr)
+		return &TxErr{code: TxErrCodePushMsg, msg: resolveErr.Error(), id: id}
 	}
 	if err = treenode.ValidateBlockReplacement(oldNode, updatedNode); err != nil {
 		logging.LogErrorf("validate updated block [%s] structure failed: %s", id, err)

@@ -858,16 +858,12 @@ func updateBlock(c *gin.Context) {
 		return
 	}
 
-	operations, _, err := model.BuildBlockUpdateOperations([]model.BlockUpdateInput{input})
+	transactions, _, err := model.PerformBlockUpdates([]model.BlockUpdateInput{input})
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-
-	transactions := []*model.Transaction{{DoOperations: operations}}
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -978,16 +974,12 @@ func batchUpdateBlock(c *gin.Context) {
 		inputs = append(inputs, input)
 	}
 
-	operations, _, err := model.BuildBlockUpdateOperations(inputs)
+	transactions, _, err := model.PerformBlockUpdates(inputs)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-
-	transactions := []*model.Transaction{{DoOperations: operations}}
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)

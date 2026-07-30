@@ -298,7 +298,7 @@ func blockUpdate(args map[string]any) (CallToolResult, error) {
 	}
 	lockType, _ := args["lockType"].(bool)
 
-	operations, rootIDs, err := model.BuildBlockUpdateOperations([]model.BlockUpdateInput{{
+	_, rootIDs, err := model.PerformBlockUpdates([]model.BlockUpdateInput{{
 		ID:       id,
 		Data:     data,
 		DataType: dataType,
@@ -307,10 +307,6 @@ func blockUpdate(args map[string]any) (CallToolResult, error) {
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
 	}
-
-	transactions := []*model.Transaction{{DoOperations: operations}}
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
 
 	for _, rootID := range rootIDs {
 		util.PushReloadProtyle(rootID)

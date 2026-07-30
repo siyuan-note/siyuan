@@ -21,6 +21,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -44,6 +45,89 @@ func TestNormalizeListItemBlockUpdateTree(t *testing.T) {
 	}
 	if normalizedTree.Root.FirstChild != updatedNode || normalizedTree.Root.LastChild != updatedNode || nil != updatedNode.Next {
 		t.Fatal("normalized update tree should contain only the first list item")
+	}
+}
+
+func TestResolveSuperBlockListItemAfterBlockDOMRoundTrip(t *testing.T) {
+	const oldID = "20260731010000-olditem"
+
+	superBlock := &ast.Node{Type: ast.NodeSuperBlock, ID: "20260731010001-superbk"}
+	oldItem := &ast.Node{Type: ast.NodeListItem, ID: oldID}
+	superBlock.AppendChild(oldItem)
+
+	luteEngine := util.NewLute()
+	blockDOM, _ := luteEngine.Md2BlockDOMTree("* updated", true)
+	dataTree := luteEngine.BlockDOM2Tree(blockDOM)
+	normalizedTree, updatedNode, err := normalizeBlockUpdateTree(oldItem, dataTree, luteEngine)
+	if err != nil {
+		t.Fatalf("normalize super block list item failed: %s", err)
+	}
+	updatedNode.SetIALAttr("id", oldID)
+
+	normalizedDOM := luteEngine.Tree2BlockDOM(normalizedTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	transactionTree := luteEngine.BlockDOM2Tree(normalizedDOM)
+	if ast.NodeList != firstContentBlock(transactionTree.Root).Type {
+		t.Fatal("standalone list item DOM should be wrapped in a list when parsed")
+	}
+
+	resolvedNode, err := resolveBlockUpdateNode(oldItem, transactionTree.Root)
+	if err != nil {
+		t.Fatalf("resolve super block list item failed: %s", err)
+	}
+	if ast.NodeListItem != resolvedNode.Type || oldID != resolvedNode.ID {
+		t.Fatalf("unexpected resolved node [%s] [%s]", resolvedNode.Type.String(), resolvedNode.ID)
+	}
+	if err = treenode.ValidateBlockReplacement(oldItem, resolvedNode); err != nil {
+		t.Fatalf("super block list item replacement should be valid: %s", err)
+	}
+}
+
+func TestBuildBlockUpdateOperationsCachesTrees(t *testing.T) {
+	const (
+		boxID    = "20260731010100-box0001"
+		rootID   = "20260731010101-root001"
+		firstID  = "20260731010102-first01"
+		secondID = "20260731010103-second1"
+	)
+
+	root := &ast.Node{Type: ast.NodeDocument, ID: rootID}
+	root.AppendChild(&ast.Node{Type: ast.NodeParagraph, ID: firstID})
+	root.AppendChild(&ast.Node{Type: ast.NodeParagraph, ID: secondID})
+	tree := &parse.Tree{ID: rootID, Box: boxID, Root: root}
+
+	loadCount := 0
+	operations, rootIDs, err := buildBlockUpdateOperations([]BlockUpdateInput{
+		{ID: firstID, Data: "first", DataType: "markdown"},
+		{ID: secondID, Data: "second", DataType: "markdown"},
+	}, func(id string) *treenode.BlockTree {
+		return &treenode.BlockTree{ID: id, RootID: rootID, BoxID: boxID}
+	}, func(id string) (*parse.Tree, error) {
+		loadCount++
+		return tree, nil
+	})
+	if err != nil {
+		t.Fatalf("build cached block updates failed: %s", err)
+	}
+	if 1 != loadCount {
+		t.Fatalf("expected the shared tree to be loaded once, got [%d]", loadCount)
+	}
+	if 2 != len(operations) || 1 != len(rootIDs) || rootID != rootIDs[0] {
+		t.Fatalf("unexpected build result: operations [%d], root IDs [%v]", len(operations), rootIDs)
+	}
+}
+
+func TestPerformBlockUpdatesReturnsExecutionError(t *testing.T) {
+	transactions, rootIDs, err := performBlockUpdates(nil, func(inputs []BlockUpdateInput) ([]*Operation, []string, error) {
+		return []*Operation{{
+			Action: "update",
+			ID:     "20260731010200-invalid",
+		}}, nil, nil
+	})
+	if nil == err {
+		t.Fatal("expected synchronous block update execution error")
+	}
+	if nil != transactions || nil != rootIDs {
+		t.Fatalf("failed block updates should not return transactions or root IDs: [%v] [%v]", transactions, rootIDs)
 	}
 }
 

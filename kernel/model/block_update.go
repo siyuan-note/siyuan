@@ -36,14 +36,58 @@ type BlockUpdateInput struct {
 	LockType bool
 }
 
+type blockUpdateTreeKey struct {
+	boxID  string
+	rootID string
+}
+
+type blockUpdateTreeResolver func(id string) *treenode.BlockTree
+type blockUpdateTreeLoader func(id string) (*parse.Tree, error)
+type blockUpdateOperationsBuilder func(inputs []BlockUpdateInput) ([]*Operation, []string, error)
+
 // BuildBlockUpdateOperations 解析并校验所有块更新，全部通过后返回可执行的事务操作。
 func BuildBlockUpdateOperations(inputs []BlockUpdateInput) (operations []*Operation, rootIDs []string, err error) {
+	return buildBlockUpdateOperations(inputs, treenode.GetBlockTree, LoadTreeByBlockID)
+}
+
+// PerformBlockUpdates 在事务串行区内准备并同步执行外部块更新。
+func PerformBlockUpdates(inputs []BlockUpdateInput) (transactions []*Transaction, rootIDs []string, err error) {
+	return performBlockUpdates(inputs, BuildBlockUpdateOperations)
+}
+
+func performBlockUpdates(inputs []BlockUpdateInput, build blockUpdateOperationsBuilder) (transactions []*Transaction, rootIDs []string, err error) {
+	flushLock.Lock()
+	isFlushing.Store(true)
+	defer func() {
+		isFlushing.Store(false)
+		flushLock.Unlock()
+	}()
+
+	// 先执行已入队事务，保证本次校验基于调用前已经提交的修改。
+	for _, queued := range takeQueuedTransactions() {
+		flushTx(queued)
+	}
+
+	operations, rootIDs, err := build(inputs)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	transaction := &Transaction{DoOperations: operations}
+	if err = performTxSyncLocked(transaction); err != nil {
+		return nil, nil, err
+	}
+	return []*Transaction{transaction}, rootIDs, nil
+}
+
+func buildBlockUpdateOperations(inputs []BlockUpdateInput, resolveTree blockUpdateTreeResolver, loadTree blockUpdateTreeLoader) (operations []*Operation, rootIDs []string, err error) {
 	if 1 > len(inputs) {
 		return nil, nil, errors.New("block updates are empty")
 	}
 
 	luteEngine := util.NewLute()
 	rootIDSet := map[string]struct{}{}
+	treeCache := map[blockUpdateTreeKey]*parse.Tree{}
 	for _, input := range inputs {
 		if !ast.IsNodeIDPattern(input.ID) {
 			return nil, nil, fmt.Errorf("invalid block ID [%s]", input.ID)
@@ -54,9 +98,27 @@ func BuildBlockUpdateOperations(inputs []BlockUpdateInput) (operations []*Operat
 			return nil, nil, parseErr
 		}
 
-		oldTree, loadErr := LoadTreeByBlockID(input.ID)
-		if loadErr != nil {
-			return nil, nil, fmt.Errorf("load block tree [%s] failed: %w", input.ID, loadErr)
+		var oldTree *parse.Tree
+		var cacheKey blockUpdateTreeKey
+		hasCacheKey := false
+		if blockTree := resolveTree(input.ID); nil != blockTree {
+			cacheKey = blockUpdateTreeKey{boxID: blockTree.BoxID, rootID: blockTree.RootID}
+			hasCacheKey = true
+			oldTree = treeCache[cacheKey]
+		}
+		if nil == oldTree {
+			var loadErr error
+			oldTree, loadErr = loadTree(input.ID)
+			if loadErr != nil {
+				return nil, nil, fmt.Errorf("load block tree [%s] failed: %w", input.ID, loadErr)
+			}
+			if nil == oldTree || nil == oldTree.Root {
+				return nil, nil, fmt.Errorf("load block tree [%s] failed: tree is empty", input.ID)
+			}
+			treeCache[blockUpdateTreeKey{boxID: oldTree.Box, rootID: oldTree.ID}] = oldTree
+			if hasCacheKey {
+				treeCache[cacheKey] = oldTree
+			}
 		}
 		oldNode := treenode.GetNodeInTree(oldTree, input.ID)
 		if nil == oldNode {
@@ -160,16 +222,9 @@ func parseBlockUpdateData(data, dataType string, luteEngine *lute.Lute) (ret str
 }
 
 func normalizeBlockUpdateTree(oldNode *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) (ret *parse.Tree, updatedNode *ast.Node, err error) {
-	updatedNode = firstContentBlock(tree.Root)
-	if nil == updatedNode {
-		return nil, nil, errors.New("parse tree failed")
-	}
-	if ast.NodeListItem == oldNode.Type && ast.NodeList == updatedNode.Type {
-		listItem := firstContentBlock(updatedNode)
-		if nil == listItem || ast.NodeListItem != listItem.Type {
-			return nil, nil, errors.New("list block has no list item")
-		}
-		updatedNode = listItem
+	updatedNode, err = resolveBlockUpdateNode(oldNode, tree.Root)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	updatedNode.Unlink()
@@ -178,6 +233,21 @@ func normalizeBlockUpdateTree(oldNode *ast.Node, tree *parse.Tree, luteEngine *l
 	ret = &parse.Tree{
 		Root:    root,
 		Context: &parse.Context{ParseOption: luteEngine.ParseOptions},
+	}
+	return
+}
+
+func resolveBlockUpdateNode(oldNode, root *ast.Node) (updatedNode *ast.Node, err error) {
+	updatedNode = firstContentBlock(root)
+	if nil == updatedNode {
+		return nil, errors.New("parse tree failed")
+	}
+	if ast.NodeListItem == oldNode.Type && ast.NodeList == updatedNode.Type {
+		listItem := firstContentBlock(updatedNode)
+		if nil == listItem || ast.NodeListItem != listItem.Type {
+			return nil, errors.New("list block has no list item")
+		}
+		updatedNode = listItem
 	}
 	return
 }

@@ -39,12 +39,11 @@
     }
 
     span {
-      border-radius: var(--b3-border-radius);
-      background-color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 36px;
+      color: var(--b3-theme-primary);
     }
   }
 

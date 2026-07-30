@@ -81,7 +81,7 @@ const getProviderAvatarHTML = (provider: Config.IProvider, preset = findPreset(p
     if (preset?.icon) {
         return `<img src="${preset.icon}" alt="${escapeHTML(title)}">`;
     }
-    return `<span class="config-name ft__primary">${escapeHTML(title.slice(0, 1).toUpperCase() || "AI")}</span>`;
+    return `<span>${escapeHTML(title.slice(0, 1).toUpperCase() || "AI")}</span>`;
 };
 
 const getProviderViewHost = (root: HTMLElement) =>
@@ -130,7 +130,7 @@ const createProviderView = (root: HTMLElement, title: string, stacked = false) =
 export const genProviderCardsHtml = (): string => `<div class="b3-label config-item" id="aiProviderCardsBlock">
     <div class="fn__flex b3-label config-item config-wrap b3-label--noborder">
         <div class="config-name">${window.siyuan.languages.apiProviderTip}</div>
-        <span class="fn__space"></span>
+        <span class="fn__space fn__flex-1"></span>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-action="addProvider">
             <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
             <span>${window.siyuan.languages.addAiProvider}</span>
@@ -158,7 +158,7 @@ const renderProviderCards = (root: HTMLElement) => {
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         <input class="b3-switch" data-action="toggleProvider" type="checkbox"${provider.enabled ? " checked" : ""} aria-label="${window.siyuan.languages.enable}">
-        <button class="block__icon block__icon--show block__icon--warning" data-action="deleteProvider" aria-label="${window.siyuan.languages.delete}">
+        <button class="block__icon block__icon--show block__icon--warning ariaLabel" data-action="deleteProvider" data-position="north" aria-label="${window.siyuan.languages.delete}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </button>
     </div>
@@ -235,7 +235,7 @@ const openProviderCatalog = (root: HTMLElement) => {
 
 const renderDraftModels = (container: HTMLElement, models: Config.IModel[], availableModels: string[]) => {
     if (models.length === 0) {
-        container.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.noModelConfigured}</div>`;
+        container.innerHTML = `<div class="b3-label config-item b3-card__desc">${window.siyuan.languages.noModelConfigured}</div>`;
         return;
     }
     const modelInputClass = availableModels.length > 0 ? "b3-select" : "b3-text-field";

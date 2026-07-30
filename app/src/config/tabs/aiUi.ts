@@ -162,28 +162,47 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
     window.requestAnimationFrame(cleanup);
 };
 
-// mountEmbeddingTestBtn 在嵌入「模型」输入框下方注入测试连接按钮，点击后用极简文本请求嵌入端点验证连通性。
+const mountModelTestButton = (root: HTMLElement, inputId: string, buttonId: string) => {
+    const inputElement = root.querySelector<HTMLInputElement>(`[id="${inputId}"]`);
+    const itemElement = inputElement?.closest<HTMLElement>(".config-item");
+    const wrapperElement = itemElement?.querySelector<HTMLElement>(":scope > .fn__block");
+    const nameElement = wrapperElement?.querySelector<HTMLElement>(":scope > .config-name");
+    const descriptionElement = wrapperElement?.querySelector<HTMLElement>(":scope > .b3-label__text");
+    const separatorElement = wrapperElement?.querySelector<HTMLElement>(":scope > .fn__hr--small");
+    if (!inputElement || !itemElement || !nameElement || !descriptionElement || !separatorElement) {
+        return;
+    }
+
+    const headerElement = document.createElement("div");
+    headerElement.className = "fn__flex";
+    const textElement = document.createElement("div");
+    textElement.className = "fn__flex-1";
+    textElement.append(nameElement, descriptionElement);
+    const spaceElement = document.createElement("div");
+    spaceElement.className = "fn__space";
+    const buttonElement = document.createElement("div");
+    buttonElement.style.textAlign = "right";
+    buttonElement.style.marginTop = "8px";
+    buttonElement.innerHTML = `<button class="b3-button b3-button--outline" id="${buttonId}"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button>`;
+    headerElement.append(textElement, spaceElement, buttonElement);
+    separatorElement.className = "fn__hr";
+    itemElement.replaceChildren(headerElement, separatorElement, inputElement);
+    return buttonElement.querySelector<HTMLButtonElement>(`#${buttonId}`);
+};
+
+// mountEmbeddingTestBtn 将测试按钮放在嵌入模型说明右侧，并绑定连接测试事件。
 // 嵌入配置即时保存，点测试时内核已持最新配置，故无需前端传参。
 export const mountEmbeddingTestBtn = (root: HTMLElement) => {
-    const inputEl = root.querySelector<HTMLInputElement>('[id="ai.embedding.name"]');
-    if (!inputEl) {
+    const testBtn = mountModelTestButton(root, "ai.embedding.name", "aiEmbeddingTestBtn");
+    if (!testBtn) {
         return;
     }
-    // input 自身带 fn__block class，closest 会命中自身，故从 .config-item 往下精确定位外层容器
-    const wrapper = inputEl.closest(".config-item")?.querySelector(".fn__block");
-    if (!wrapper) {
-        return;
-    }
-    const btnContainer = document.createElement("div");
-    btnContainer.style.textAlign = "right";
-    btnContainer.style.marginTop = "8px";
-    btnContainer.innerHTML = `<button class="b3-button b3-button--outline" id="aiEmbeddingTestBtn"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button>`;
-    wrapper.appendChild(btnContainer);
-
-    const testBtn = btnContainer.querySelector<HTMLButtonElement>("#aiEmbeddingTestBtn");
     const iconUse = testBtn.querySelector("use");
     const svgEl = testBtn.querySelector("svg");
     const labelSpan = testBtn.querySelector("span");
+    if (!iconUse || !svgEl || !labelSpan) {
+        return;
+    }
     testBtn.addEventListener("click", () => {
         testBtn.disabled = true;
         iconUse.setAttribute("xlink:href", "#iconRefresh");
@@ -218,27 +237,19 @@ export const mountEmbeddingTestBtn = (root: HTMLElement) => {
     });
 };
 
-// mountRerankTestBtn 在重排「模型」输入框下方注入测试连接按钮，点击后用极简 query+documents 请求重排端点验证连通性。
+// mountRerankTestBtn 将测试按钮放在重排模型说明右侧，并绑定连接测试事件。
 // 重排配置即时保存，点测试时内核已持最新配置，故无需前端传参。
 export const mountRerankTestBtn = (root: HTMLElement) => {
-    const inputEl = root.querySelector<HTMLInputElement>('[id="ai.rerank.name"]');
-    if (!inputEl) {
+    const testBtn = mountModelTestButton(root, "ai.rerank.name", "aiRerankTestBtn");
+    if (!testBtn) {
         return;
     }
-    const wrapper = inputEl.closest(".config-item")?.querySelector(".fn__block");
-    if (!wrapper) {
-        return;
-    }
-    const btnContainer = document.createElement("div");
-    btnContainer.style.textAlign = "right";
-    btnContainer.style.marginTop = "8px";
-    btnContainer.innerHTML = `<button class="b3-button b3-button--outline" id="aiRerankTestBtn"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button>`;
-    wrapper.appendChild(btnContainer);
-
-    const testBtn = btnContainer.querySelector<HTMLButtonElement>("#aiRerankTestBtn");
     const iconUse = testBtn.querySelector("use");
     const svgEl = testBtn.querySelector("svg");
     const labelSpan = testBtn.querySelector("span");
+    if (!iconUse || !svgEl || !labelSpan) {
+        return;
+    }
     testBtn.addEventListener("click", () => {
         testBtn.disabled = true;
         iconUse.setAttribute("xlink:href", "#iconRefresh");

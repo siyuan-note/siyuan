@@ -59,5 +59,5 @@ export const confirmDialog = (title: string, text: string,
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
-    (dialog.element.querySelector("#cancelDialogConfirmBtn") as HTMLButtonElement).focus({preventScroll: true});
+    (dialog.element.querySelector("#confirmDialogConfirmBtn") as HTMLButtonElement).focus({preventScroll: true});
 };

@@ -1,4 +1,5 @@
 {
+  "exportFileSaveFailed": "ファイルを保存できません。別のプログラムで使用されていないこと、および保存先に書き込み可能であることを確認してください",
   "copyRichText": "リッチテキスト/HTMLとしてコピー",
   "modelContextLengthTip": "空欄または 0 にすると内蔵モデルカタログを使用します",
   "modelContextLength": "モデルのコンテキスト長（Tokens）",
@@ -155,8 +156,8 @@
 	"obsidianUnreferencedTip": "参照されていない ${count} 個のファイルは未参照アセットとしてインポートされます",
 	"obsidianImportFailed": "Obsidian Vault のインポートに失敗しました",
 	"openDocument": "文書を開く",
-	"docIconClickExpand": "文書アイコンをクリックして子文書を展開または折りたたむ",
-	"docIconClickExpandTip": "有効にすると、文書アイコンをクリックして子文書を展開または折りたためます。子文書がない場合は文書が開きます。無効にすると、文書アイコンをクリックしてアイコンを変更できます",
+	"docIconClickExpand": "文書またはノートブックのアイコンをクリックして子文書を展開または折りたたむ",
+	"docIconClickExpandTip": "有効にすると、文書またはノートブックのアイコンをクリックして子文書を展開または折りたためます。子文書がない場合、開くことのできる文書があれば開き、それ以外の場合はアイコンを変更できます。無効にすると、どちらのアイコンもクリックして変更できます",
 	"parentDocClickExpand": "親文書のタイトルをクリックして子文書を展開または折りたたむ",
 	"parentDocClickExpandTip": "有効にすると、親文書のタイトルをクリックして子文書を展開または折りたためます。親文書はコンテキストメニューの「文書を開く」から開けます。子文書がない場合は、クリックすると文書が直接開きます",
 	"mcpStatusAuthorizing": "認可中",

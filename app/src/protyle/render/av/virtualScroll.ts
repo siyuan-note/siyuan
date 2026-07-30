@@ -784,4 +784,5 @@ export const initVirtualScroll = (options: {
             });
         }
     });
+    trimAVRows(options.blockElement, options.protyle.contentElement.getBoundingClientRect());
 };

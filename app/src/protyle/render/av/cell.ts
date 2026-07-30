@@ -40,22 +40,7 @@ import {
 export {cellValueIsEmpty} from "./cellValue";
 
 const renderCellURL = (urlContent: string) => {
-    let host = urlContent;
-    let suffix = "";
-    try {
-        const urlObj = new URL(urlContent);
-        if (urlObj.protocol.startsWith("http")) {
-            host = urlObj.host;
-            suffix = urlObj.href.replace(urlObj.origin, "");
-            if (suffix.length > 12) {
-                suffix = suffix.substring(0, 4) + "..." + suffix.substring(suffix.length - 6);
-            }
-        }
-    } catch (e) {
-        // 不是 url 地址
-    }
-    // host 统一在输出处转义，避免非 http 协议（如 asd:<img...>）绕过 https://github.com/siyuan-note/siyuan/issues/9291
-    return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${escapeAttr(urlContent)}"><span>${Lute.EscapeHTMLStr(host)}</span><span class="ft__on-surface">${Lute.EscapeHTMLStr(suffix)}</span></span>`;
+    return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${escapeAttr(urlContent)}">${Lute.EscapeHTMLStr(urlContent)}</span>`;
 };
 
 export const getCellText = (cellElement: HTMLElement | false) => {
@@ -750,7 +735,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
 export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLElement, value?: any,
                                        cElements?: HTMLElement[], columns?: IAVColumn[], html?: string, getOperations = false,
                                        forceOperation = false, replaceSelectValues = false,
-                                       stableCells?: IAVSelectedCell[]) => {
+                                       stableCells?: IAVSelectedCell[], updateElements = true) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -824,21 +809,23 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         if (elementIndex === 0 && item && batchMode !== "replace") {
             batchDisplayValue = getAVBatchDisplayValue(item, renderedOldValue);
         }
-        const nextSource = sources[elementIndex + 1];
-        const sameNextRow = nextSource && (source.selectedCell ?
-            nextSource.selectedCell?.rowID === rowID :
-            Boolean(item?.nextElementSibling && item.nextElementSibling === nextSource.element));
-        const cellText = item ? getCellText(item) :
-            getCellValueText(oldValue, source.selectedCell?.column, source.selectedCell?.rowIndex);
-        text += cellText + (sameNextRow ? "\t" : "\n\n");
-        const previousSource = sources[elementIndex - 1];
-        const samePreviousRow = previousSource && (source.selectedCell ?
-            previousSource.selectedCell?.rowID === rowID :
-            previousSource.element === item?.previousElementSibling);
-        if (!samePreviousRow) {
-            json.push([]);
+        if (!getOperations) {
+            const nextSource = sources[elementIndex + 1];
+            const sameNextRow = nextSource && (source.selectedCell ?
+                nextSource.selectedCell?.rowID === rowID :
+                Boolean(item?.nextElementSibling && item.nextElementSibling === nextSource.element));
+            const cellText = item ? getCellText(item) :
+                getCellValueText(oldValue, source.selectedCell?.column, source.selectedCell?.rowIndex);
+            text += cellText + (sameNextRow ? "\t" : "\n\n");
+            const previousSource = sources[elementIndex - 1];
+            const samePreviousRow = previousSource && (source.selectedCell ?
+                previousSource.selectedCell?.rowID === rowID :
+                previousSource.element === item?.previousElementSibling);
+            if (!samePreviousRow) {
+                json.push([]);
+            }
+            json[json.length - 1].push(oldValue);
         }
-        json[json.length - 1].push(oldValue);
         if (readonly || !cellId) {
             continue;
         }
@@ -988,14 +975,16 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 rowID,
                 data: oldValue
             });
-            if (isCustomAttr && item) {
-                item.innerHTML = genAVValueHTML(cellValue, column?.dateFormat);
-                item.parentElement.dataset.empty = cellValueIsEmpty(cellValue).toString();
-            } else if (item) {
-                updateAttrViewCellAnimation(item, cellValue);
+            if (updateElements) {
+                if (isCustomAttr && item) {
+                    item.innerHTML = genAVValueHTML(cellValue, column?.dateFormat);
+                    item.parentElement.dataset.empty = cellValueIsEmpty(cellValue).toString();
+                } else if (item) {
+                    updateAttrViewCellAnimation(item, cellValue);
+                }
+                updateAttrViewCellInOtherElements(protyle, avID, rowID, colId, cellValue, item);
+                updateAVSelectedCellValue(nodeElement, rowID, colId, cellValue);
             }
-            updateAttrViewCellInOtherElements(protyle, avID, rowID, colId, cellValue, item);
-            updateAVSelectedCellValue(nodeElement, rowID, colId, cellValue);
         }
     }
     if (nextBatchDisplayValue) {

@@ -173,6 +173,94 @@ func TestFilterBlockTreesByPublishAccess(t *testing.T) {
 	}
 }
 
+func TestFilterAttributeViewBacklinksByPublishAccess(t *testing.T) {
+	const (
+		boxID         = "20260730140000-box0001"
+		targetDocID   = "20260730140001-target1"
+		sourceDocID   = "20260730140002-source1"
+		targetAvID    = "20260730140003-targeta"
+		sourceAvID    = "20260730140004-sourcea"
+		sourceItemID  = "20260730140005-sourcei"
+		targetItemID  = "20260730140006-targeti"
+		relationKeyID = "20260730140007-relkey1"
+	)
+
+	oldDataDir := util.DataDir
+	oldBlockTreeDBPath := util.BlockTreeDBPath
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.DataDir = oldDataDir
+		util.BlockTreeDBPath = oldBlockTreeDBPath
+		invalidateEncryptedPublishAccessCache()
+		if "" != oldBlockTreeDBPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+
+	targetTree := treenode.NewTree(boxID, "/"+targetDocID+".sy", "/Target", "Target")
+	sourceTree := treenode.NewTree(boxID, "/"+sourceDocID+".sy", "/Source", "Source")
+	treenode.UpsertBlockTree(targetTree)
+	treenode.UpsertBlockTree(sourceTree)
+	av.UpsertBlockRel(targetAvID, targetDocID)
+
+	newBacklinks := func() *AttributeViewBacklinks {
+		return &AttributeViewBacklinks{
+			Total: 1,
+			Items: []*AttributeViewBacklink{{
+				AvID:       sourceAvID,
+				BlockIDs:   []string{sourceDocID},
+				ItemID:     sourceItemID,
+				IsDetached: true,
+				Relations: []*AttributeViewBacklinkRelation{{
+					KeyID:        relationKeyID,
+					TargetAvID:   targetAvID,
+					TargetItemID: targetItemID,
+				}},
+			}},
+		}
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+
+	tests := []struct {
+		name          string
+		publishAccess PublishAccess
+		expectedTotal int
+	}{
+		{
+			name:          "public source",
+			expectedTotal: 1,
+		},
+		{
+			name:          "hidden source",
+			publishAccess: PublishAccess{{ID: sourceDocID, Visible: false}},
+			expectedTotal: 0,
+		},
+		{
+			name:          "disabled source with inconsistent visibility",
+			publishAccess: PublishAccess{{ID: sourceDocID, Visible: true, Disable: true}},
+			expectedTotal: 0,
+		},
+		{
+			name:          "hidden target remains directly accessible",
+			publishAccess: PublishAccess{{ID: targetDocID, Visible: false}},
+			expectedTotal: 1,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			filtered := FilterAttributeViewBacklinksByPublishAccess(c, test.publishAccess, newBacklinks())
+			if filtered.Total != test.expectedTotal || len(filtered.Items) != test.expectedTotal {
+				t.Fatalf("unexpected attribute view backlinks: %+v", filtered)
+			}
+		})
+	}
+}
+
 func TestEncryptedNotebookDeniedByPublishAccess(t *testing.T) {
 	const (
 		boxID = "20260726000000-encrypt"

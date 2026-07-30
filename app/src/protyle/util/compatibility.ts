@@ -114,7 +114,8 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
         if (msgId) {
             hideMessage(msgId);
         }
-        showMessage("saveExportFile failed: " + e);
+        console.error("saveExportFile failed:", e);
+        showMessage(window.siyuan.languages.exportFileSaveFailed, 0, "error");
     }
     /// #else
     try {

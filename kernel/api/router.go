@@ -430,6 +430,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/setAccount", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAccount)
 	ginServer.Handle("POST", "/api/setting/setEditor", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setEditor)
 	ginServer.Handle("POST", "/api/setting/setExport", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setExport)
+	ginServer.Handle("POST", "/api/setting/getPandocBin", model.CheckAuth, model.CheckAdminRole, getPandocBin)
 	ginServer.Handle("POST", "/api/setting/setFiletree", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFiletree)
 	ginServer.Handle("POST", "/api/setting/setSearch", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setSearch)
 	ginServer.Handle("POST", "/api/setting/setKeymap", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setKeymap)

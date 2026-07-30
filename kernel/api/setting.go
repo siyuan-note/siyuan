@@ -499,6 +499,23 @@ func setExport(c *gin.Context) {
 	ret.Data = model.Conf.Export
 }
 
+func getPandocBin(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	pandocRuntime := util.GetPandocRuntime()
+	if !util.IsValidPandocBin(pandocRuntime.BinPath) {
+		util.InitPandoc(model.Conf.Export.PandocBin)
+		pandocRuntime = util.GetPandocRuntime()
+	}
+	if !util.IsValidPandocBin(pandocRuntime.BinPath) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(115)
+		return
+	}
+	ret.Data = pandocRuntime.BinPath
+}
+
 func setFiletree(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

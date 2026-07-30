@@ -5,6 +5,7 @@ import {useShell} from "../../util/pathName";
 import type {SettingTabBuilder} from "../setting/builder";
 import {Constants} from "../../constants";
 import {exportConfigApi} from "./exportRuntime";
+import {fetchPost} from "../../util/fetch";
 
 const registerExportReferencesGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("references", window.siyuan.languages.configGroupReferences);
@@ -175,7 +176,13 @@ const mountExportPandocStack = (root: HTMLElement) => {
     root.querySelector("#pandocBinPathDisplay")?.addEventListener("click", () => {
         if (window.siyuan.config.export.pandocBin) {
             useShell("showItemInFolder", window.siyuan.config.export.pandocBin);
+            return;
         }
+        fetchPost("/api/setting/getPandocBin", {}, (response) => {
+            if (response.data) {
+                useShell("showItemInFolder", response.data);
+            }
+        });
     });
     root.querySelector("#pandocBinChooser")?.addEventListener("click", async () => {
         const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {

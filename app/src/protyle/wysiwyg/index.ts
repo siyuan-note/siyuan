@@ -428,6 +428,52 @@ export class WYSIWYG {
         return element.textContent;
     }
 
+    private normalizeCrossBlockCopy(element: HTMLElement, range: Range) {
+        element.querySelectorAll<HTMLElement>('[data-type~="virtual-block-ref"]').forEach(item => {
+            const types = (item.getAttribute("data-type") || "").split(" ")
+                .filter(type => type && type !== "virtual-block-ref");
+            if (types.length > 0) {
+                item.setAttribute("data-type", types.join(" "));
+            } else {
+                item.replaceWith(...Array.from(item.childNodes));
+            }
+        });
+        let firstElement = element.firstElementChild as HTMLElement;
+        while (firstElement?.getAttribute("data-type") === "NodeListItem") {
+            const childBlocks = Array.from(firstElement.children).filter(item =>
+                item.hasAttribute("data-node-id")) as HTMLElement[];
+            if (childBlocks.length !== 1 || childBlocks[0].getAttribute("data-type") !== "NodeList") {
+                break;
+            }
+            const listItems = Array.from(childBlocks[0].children).filter(item =>
+                item.getAttribute("data-type") === "NodeListItem");
+            if (listItems.length === 0) {
+                break;
+            }
+            firstElement.replaceWith(...listItems);
+            firstElement = element.firstElementChild as HTMLElement;
+        }
+        element.querySelectorAll<HTMLElement>("[data-node-id]").forEach(item => {
+            const sourceElements = this.element.querySelectorAll<HTMLElement>(
+                `[data-node-id="${item.getAttribute("data-node-id")}"]`,
+            );
+            const sourceElement = Array.from(sourceElements).find(source => range.intersectsNode(source)) ||
+                sourceElements[0];
+            if (!sourceElement) {
+                return;
+            }
+            const prependElements = Array.from(sourceElement.children).filter(sourceChild =>
+                (sourceChild.classList.contains("protyle-action") ||
+                    sourceChild.classList.contains("callout-info")) &&
+                !Array.from(item.children).some(child => child.className === sourceChild.className));
+            item.prepend(...prependElements.map(child => child.cloneNode(true)));
+            const attrElement = sourceElement.querySelector(":scope > .protyle-attr");
+            if (attrElement && !item.querySelector(":scope > .protyle-attr")) {
+                item.append(attrElement.cloneNode(true));
+            }
+        });
+    }
+
     private async writeSelectionClipboardForCut() {
         const clipboardData = new DataTransfer();
         this.element.dispatchEvent(new ClipboardEvent("copy", {
@@ -710,6 +756,9 @@ export class WYSIWYG {
                     textPlain = range.toString();
                 } else {
                     tempElement.append(range.cloneContents());
+                    if (nodeElement !== hasClosestBlock(range.endContainer)) {
+                        this.normalizeCrossBlockCopy(tempElement, range);
+                    }
                     const textWithoutAttr = this.clearAttrContent(tempElement);
                     this.emojiToMd(tempElement);
                     const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");

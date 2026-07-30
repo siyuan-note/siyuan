@@ -2092,6 +2092,7 @@ export const turnEmptyParagraphsIntoTransaction = (options: {
             newElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
                 item.style.minWidth = "60px";
             });
+            newElement.querySelectorAll("wbr").forEach(item => item.remove());
         }
         return {
             nodeElement,

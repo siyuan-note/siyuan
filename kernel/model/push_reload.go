@@ -326,7 +326,8 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 	var changedNodes []*ast.Node
 	var refs []*sql.Ref
 	for _, updateNode := range updatedDefNodes {
-		refs, changedNodes = getRefsCacheByDefNode(updateNode)
+		boxID := updatedNodeBoxID(updateNode, updatedTrees)
+		refs, changedNodes = getRefsCacheByDefNode(updateNode, boxID)
 		for _, ref := range refs {
 			if refIDs, ok := treeRefNodeIDs[ref.RootID]; !ok {
 				refIDs = hashset.New()
@@ -393,6 +394,14 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 		indexWriteTreeUpsertQueue(tree)
 	}
 	return
+}
+
+func updatedNodeBoxID(updateNode *ast.Node, updatedTrees map[string]*parse.Tree) string {
+	rootID := treenode.TreeRoot(updateNode).ID
+	if updatedTree := updatedTrees[rootID]; nil != updatedTree {
+		return updatedTree.Box
+	}
+	return updateNode.Box
 }
 
 var (

@@ -71,6 +71,52 @@ const richClipboardLineTags = new Set([
     "PRE",
 ]);
 
+const richClipboardTextMarkTags = new Map([
+    ["a", "a"],
+    ["code", "code"],
+    ["em", "em"],
+    ["kbd", "kbd"],
+    ["mark", "mark"],
+    ["s", "s"],
+    ["strong", "strong"],
+    ["sub", "sub"],
+    ["sup", "sup"],
+    ["u", "u"],
+]);
+
+const convertRichClipboardTextMarks = (template: HTMLTemplateElement) => {
+    template.content.querySelectorAll<HTMLElement>("span[data-type]").forEach(element => {
+        const tags = element.dataset.type.split(/\s+/)
+            .map(type => richClipboardTextMarkTags.get(type))
+            .filter((tag): tag is string => Boolean(tag));
+        if (tags.length === 0) {
+            return;
+        }
+
+        const replacement = document.createElement(tags[0]);
+        let current = replacement;
+        tags.slice(1).forEach(tag => {
+            const tagElement = document.createElement(tag);
+            current.append(tagElement);
+            current = tagElement;
+        });
+        const linkElement = replacement.matches("a") ? replacement : replacement.querySelector("a");
+        if (linkElement) {
+            linkElement.setAttribute("href", element.dataset.href || element.getAttribute("href") || "");
+            const title = element.dataset.title || element.getAttribute("title");
+            if (title) {
+                linkElement.setAttribute("title", title);
+            }
+        }
+        current.append(...Array.from(element.childNodes));
+        const style = element.getAttribute("style");
+        if (style) {
+            replacement.setAttribute("style", style);
+        }
+        element.replaceWith(replacement);
+    });
+};
+
 const getTableSourceLines = (tableElement: HTMLTableElement) => {
     const lines: string[] = [];
     tableElement.querySelectorAll("tr").forEach(rowElement => {
@@ -144,6 +190,7 @@ const getRichClipboardSourceLines = (parent: ParentNode) => {
 export const prepareRichClipboardHTML = (html: string) => {
     const template = document.createElement("template");
     template.innerHTML = html;
+    convertRichClipboardTextMarks(template);
     template.content.querySelectorAll("*").forEach(element => {
         Array.from(element.attributes).forEach(attribute => {
             if (!richClipboardAttributes.has(attribute.name) &&

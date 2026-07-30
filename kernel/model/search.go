@@ -2429,19 +2429,13 @@ func loadFTSAndHPathMatchBlocks(matches []ftsAndHPathMatch, rawQuery, query stri
 	}
 	for _, match := range matches {
 		sqlBlock := ftsBlocks[match.rowID]
-		terms := ""
 		if 0 != match.source {
 			sqlBlock = hPathBlocks[match.rowID]
-			terms = rawQuery
 		}
 		if nil == sqlBlock {
 			continue
 		}
-		block := fromSQLBlock(sqlBlock, terms, beforeLen)
-		if 0 == match.source {
-			markBlockHPath(block, sqlBlock.HPath, rawQuery, -1)
-		}
-		ret = append(ret, block)
+		ret = append(ret, fromHPathSearchSQLBlock(sqlBlock, rawQuery, beforeLen))
 	}
 	return
 }
@@ -2681,7 +2675,13 @@ func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxA
 	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 	terms := strings.Join(keywords, search.TermSep)
 	terms = strings.ReplaceAll(terms, "''", "'")
-	ret = fromSQLBlocks(&resultBlocks, terms, beforeLen)
+	for i, resultBlock := range resultBlocks {
+		if 1 == result[i]["matchSource"].(int64) {
+			ret = append(ret, fromHPathSearchSQLBlock(resultBlock, terms, beforeLen))
+		} else {
+			ret = append(ret, fromSQLBlock(resultBlock, terms, beforeLen))
+		}
+	}
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
@@ -2973,6 +2973,12 @@ func markBlockHPath(block *Block, hPath, terms string, beforeLen int) {
 		hPath = "/" + hPath
 	}
 	block.HPath = hPath
+}
+
+func fromHPathSearchSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Block) {
+	block = fromSQLBlock(sqlBlock, "", beforeLen)
+	markBlockHPath(block, sqlBlock.HPath, terms, -1)
+	return
 }
 
 func maxContent(content string, maxLen int) string {

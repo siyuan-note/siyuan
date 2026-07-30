@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "طي/توسيع العناوين الفرعية المباشرة",
+  "foldSiblingHeadings": "طي/توسيع العناوين الشقيقة",
   "copyViewMirror": "نسخ مرآة العرض",
   "hideViewTab": "إخفاء علامة تبويب العرض",
   "showViewTab": "إظهار علامة تبويب العرض",

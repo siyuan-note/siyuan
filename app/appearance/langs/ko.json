@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "직접 하위 제목 접기/펼치기",
+  "foldSiblingHeadings": "같은 수준 제목 접기/펼치기",
   "copyViewMirror": "보기 미러 복사",
   "hideViewTab": "보기 탭 숨기기",
   "showViewTab": "보기 탭 표시",

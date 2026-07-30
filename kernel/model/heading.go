@@ -34,6 +34,63 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// GetHeadingFoldTransaction 生成直接子标题或同级标题的批量折叠事务。
+func GetHeadingFoldTransaction(id, scope string) (transaction *Transaction, err error) {
+	tree, err := LoadTreeByBlockID(id)
+	if err != nil {
+		return
+	}
+
+	heading := treenode.GetNodeInTree(tree, id)
+	transaction = &Transaction{}
+	if nil == heading || ast.NodeHeading != heading.Type {
+		return
+	}
+
+	var headings []*ast.Node
+	switch scope {
+	case "children":
+		if treenode.IsSelfFolded(heading) {
+			headings = []*ast.Node{heading}
+		} else {
+			headings = treenode.HeadingDirectChildren(heading)
+		}
+	case "siblings":
+		headings = treenode.HeadingSiblings(heading)
+	default:
+		err = errors.New("invalid heading fold scope")
+		return
+	}
+	transaction = buildHeadingFoldTransaction(headings)
+	return
+}
+
+func buildHeadingFoldTransaction(headings []*ast.Node) (transaction *Transaction) {
+	transaction = &Transaction{}
+	foldAll := false
+	for _, heading := range headings {
+		if !treenode.IsSelfFolded(heading) {
+			foldAll = true
+			break
+		}
+	}
+
+	for i := len(headings) - 1; 0 <= i; i-- {
+		heading := headings[i]
+		if treenode.IsSelfFolded(heading) == foldAll {
+			continue
+		}
+
+		action, undoAction := "unfoldHeading", "foldHeading"
+		if foldAll {
+			action, undoAction = undoAction, action
+		}
+		transaction.DoOperations = append(transaction.DoOperations, &Operation{Action: action, ID: heading.ID})
+		transaction.UndoOperations = append(transaction.UndoOperations, &Operation{Action: undoAction, ID: heading.ID})
+	}
+	return
+}
+
 func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 	headingID := operation.ID
 	tree, err := tx.loadTree(headingID)

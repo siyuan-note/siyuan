@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "Doğrudan alt başlıkları daralt/genişlet",
+  "foldSiblingHeadings": "Aynı düzeydeki başlıkları daralt/genişlet",
   "copyViewMirror": "Görünüm aynasını kopyala",
   "hideViewTab": "Görünüm sekmesini gizle",
   "showViewTab": "Görünüm sekmesini göster",

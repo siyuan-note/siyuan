@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "折叠/展开直接子标题",
+  "foldSiblingHeadings": "折叠/展开同级标题",
   "copyViewMirror": "复制视图镜像",
   "hideViewTab": "隐藏视图页签",
   "showViewTab": "显示视图页签",

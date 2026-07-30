@@ -118,10 +118,18 @@ func QueryRefCount(defIDs []string) (ret map[string]int) {
 	return
 }
 
-// ExistRefByDefIDsInBox 检查指定笔记本索引中是否存在指向定义块或文档内块的引用。
-func ExistRefByDefIDsInBox(defIDs, defRootIDs []string, boxID string) (ret bool, err error) {
+// ExistRefByDefIDsInBox 检查指定笔记本索引中是否存在来自删除集合外部的引用。
+func ExistRefByDefIDsInBox(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs []string, boxID string) (ret bool, err error) {
 	const batchSize = 900
 
+	excludeBlockIDSet := map[string]struct{}{}
+	for _, id := range excludeBlockIDs {
+		excludeBlockIDSet[id] = struct{}{}
+	}
+	excludeRootIDSet := map[string]struct{}{}
+	for _, id := range excludeRootIDs {
+		excludeRootIDSet[id] = struct{}{}
+	}
 	exist := func(column string, ids []string) (bool, error) {
 		for start := 0; start < len(ids); start += batchSize {
 			end := start + batchSize
@@ -134,20 +142,33 @@ func ExistRefByDefIDsInBox(defIDs, defRootIDs []string, boxID string) (ret bool,
 			for _, id := range batch {
 				args = append(args, id)
 			}
-			rows, queryErr := queryForBox(boxID, "SELECT 1 FROM refs WHERE "+column+" IN ("+placeholders+") LIMIT 1", args...)
+			rows, queryErr := queryForBox(boxID, "SELECT block_id, root_id FROM refs WHERE "+column+" IN ("+placeholders+")", args...)
 			if queryErr != nil {
 				return false, queryErr
 			}
-			found := rows.Next()
-			rowsErr := rows.Err()
-			if closeErr := rows.Close(); closeErr != nil {
-				return false, closeErr
+			for rows.Next() {
+				var blockID, rootID string
+				if scanErr := rows.Scan(&blockID, &rootID); scanErr != nil {
+					rows.Close()
+					return false, scanErr
+				}
+				if _, excluded := excludeBlockIDSet[blockID]; excluded {
+					continue
+				}
+				if _, excluded := excludeRootIDSet[rootID]; excluded {
+					continue
+				}
+				if closeErr := rows.Close(); closeErr != nil {
+					return false, closeErr
+				}
+				return true, nil
 			}
-			if rowsErr != nil {
+			if rowsErr := rows.Err(); rowsErr != nil {
+				rows.Close()
 				return false, rowsErr
 			}
-			if found {
-				return true, nil
+			if closeErr := rows.Close(); closeErr != nil {
+				return false, closeErr
 			}
 		}
 		return false, nil
@@ -160,13 +181,13 @@ func ExistRefByDefIDsInBox(defIDs, defRootIDs []string, boxID string) (ret bool,
 	return
 }
 
-// ExistRefByDefIDs 检查全局库及所有已打开加密库中的引用。
-func ExistRefByDefIDs(defIDs, defRootIDs []string) (ret bool, err error) {
-	if ret, err = ExistRefByDefIDsInBox(defIDs, defRootIDs, ""); err != nil || ret {
+// ExistRefByDefIDs 检查全局库及所有已打开加密库中来自删除集合外部的引用。
+func ExistRefByDefIDs(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs []string) (ret bool, err error) {
+	if ret, err = ExistRefByDefIDsInBox(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs, ""); err != nil || ret {
 		return
 	}
 	for _, boxID := range GetEncryptedBoxIDs() {
-		if ret, err = ExistRefByDefIDsInBox(defIDs, defRootIDs, boxID); err != nil || ret {
+		if ret, err = ExistRefByDefIDsInBox(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs, boxID); err != nil || ret {
 			return
 		}
 	}

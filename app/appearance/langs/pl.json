@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "Zwiń/rozwiń bezpośrednie nagłówki podrzędne",
+  "foldSiblingHeadings": "Zwiń/rozwiń nagłówki tego samego poziomu",
   "copyViewMirror": "Kopiuj lustrzany widok",
   "hideViewTab": "Ukryj kartę widoku",
   "showViewTab": "Pokaż kartę widoku",

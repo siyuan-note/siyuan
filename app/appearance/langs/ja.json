@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "直接の子見出しを折りたたむ/展開",
+  "foldSiblingHeadings": "同階層の見出しを折りたたむ/展開",
   "copyViewMirror": "ビューミラーをコピー",
   "hideViewTab": "ビュータブを非表示",
   "showViewTab": "ビュータブを表示",

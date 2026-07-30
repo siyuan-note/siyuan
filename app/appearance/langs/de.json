@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "Direkte Unterüberschriften ein-/ausklappen",
+  "foldSiblingHeadings": "Geschwisterüberschriften ein-/ausklappen",
   "copyViewMirror": "Ansicht als Spiegel kopieren",
   "hideViewTab": "Ansichtsregisterkarte ausblenden",
   "showViewTab": "Ansichtsregisterkarte anzeigen",

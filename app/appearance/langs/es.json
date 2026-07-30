@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "Contraer/expandir subtítulos directos",
+  "foldSiblingHeadings": "Contraer/expandir encabezados del mismo nivel",
   "copyViewMirror": "Copiar espejo de vista",
   "hideViewTab": "Ocultar pestaña de vista",
   "showViewTab": "Mostrar pestaña de vista",

@@ -58,7 +58,12 @@ import {ipcRenderer} from "electron";
 import {getEnableHTML, removeEmbed} from "./removeEmbed";
 import {keydown} from "./keydown";
 import {openMobileFileById} from "../../mobile/editor";
-import {getCrossBlockRefCheckElements, removeBlock} from "./remove";
+import {
+    getImageBlockRefCheckTargets,
+    getRangeBlockRefCheckTargets,
+    IBlockRefCheckTargets,
+    removeBlock
+} from "./remove";
 import {highlightRender} from "../render/highlightRender";
 import {openAttr} from "../../menus/commonMenuItem";
 import {blockRender} from "../render/blockRender";
@@ -420,6 +425,43 @@ export class WYSIWYG {
             item.textContent = Constants.ZWSP;
         });
         return element.textContent;
+    }
+
+    private async writeSelectionClipboardForCut() {
+        const clipboardData = new DataTransfer();
+        this.element.dispatchEvent(new ClipboardEvent("copy", {
+            bubbles: true,
+            cancelable: true,
+            clipboardData,
+        }));
+        const textPlain = clipboardData.getData("text/plain");
+        const textHTML = clipboardData.getData("text/html");
+        if (!textPlain && !textHTML) {
+            showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+            return false;
+        }
+        const clipboardItem: Record<string, string> = {};
+        if (textPlain) {
+            clipboardItem["text/plain"] = textPlain;
+        }
+        if (textHTML) {
+            clipboardItem["text/html"] = textHTML;
+        }
+        try {
+            if (navigator.clipboard?.write) {
+                await navigator.clipboard.write([new ClipboardItem(clipboardItem)]);
+            } else if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(textPlain || textHTML);
+            } else {
+                showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.log("Cut write clipboard error:", error);
+            showMessage(error instanceof Error ? error.message : String(error), 7000, "error");
+            return false;
+        }
     }
 
     private bindCommonEvent(protyle: IProtyle) {
@@ -2520,22 +2562,38 @@ export class WYSIWYG {
                 autoSelectedBlock = true;
             }
             const selectedStateElements = [...selectElements];
-            if (selectedStateElements.length === 0 && range.toString() !== "") {
+            let cutClipboardWritten = false;
+            if (selectedStateElements.length === 0 && (!range.collapsed || selectImgElement) &&
+                !selectAVElement && !selectTableElement) {
                 const endElement = hasClosestBlock(range.endContainer);
-                if (endElement && nodeElement !== endElement) {
-                    const checkElements = getCrossBlockRefCheckElements(
+                let checkTargets: IBlockRefCheckTargets = {elements: [], exactIDs: []};
+                if (selectImgElement) {
+                    checkTargets = getImageBlockRefCheckTargets(nodeElement, selectImgElement);
+                } else if (endElement) {
+                    checkTargets = getRangeBlockRefCheckTargets(
                         protyle.wysiwyg.element, range, nodeElement, endElement);
-                    const checkIDs = checkElements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
-                    if (checkIDs.length > 0 && !await confirmBlockRef({
+                }
+                const checkIDs = checkTargets.elements
+                    .map(item => item.getAttribute("data-node-id")).filter(Boolean);
+                if (checkIDs.length > 0) {
+                    if (!await confirmBlockRef({
                         scope: "blocks",
                         ids: checkIDs,
+                        exactIDs: checkTargets.exactIDs,
                         notebook: protyle.notebookId,
                     }, protyle)) {
                         return;
                     }
-                    if (checkElements.some(item => !item.isConnected)) {
+                    if (checkTargets.elements.some(item => !item.isConnected) ||
+                        !protyle.wysiwyg.element.contains(range.startContainer) ||
+                        !protyle.wysiwyg.element.contains(range.endContainer)) {
                         return;
                     }
+                    focusByRange(range);
+                    if (!await this.writeSelectionClipboardForCut()) {
+                        return;
+                    }
+                    cutClipboardWritten = true;
                 }
             }
             let html = "";
@@ -2834,7 +2892,9 @@ export class WYSIWYG {
                 }
             }
             textPlain = removeZWJ(nbsp2space(textPlain)); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
-            event.clipboardData.setData("text/plain", textPlain);
+            if (!cutClipboardWritten) {
+                event.clipboardData.setData("text/plain", textPlain);
+            }
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
@@ -2849,12 +2909,16 @@ export class WYSIWYG {
                     textSiyuan = html;
                 }
                 restoreLuteMarkdownSyntax(protyle);
-                event.clipboardData.setData("text/siyuan", textSiyuan);
+                if (!cutClipboardWritten) {
+                    event.clipboardData.setData("text/siyuan", textSiyuan);
+                }
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
                 const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ((selectTableElement || selectTableRange) ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
-                event.clipboardData.setData("text/html", textHTML);
+                if (!cutClipboardWritten) {
+                    event.clipboardData.setData("text/html", textHTML);
+                }
                 let clipboardWriteSucceeded = true;
-                if (needClipboardWrite) {
+                if (needClipboardWrite && !cutClipboardWritten) {
                     try {
                         await navigator.clipboard.write([new ClipboardItem({
                             ["text/plain"]: textPlain,

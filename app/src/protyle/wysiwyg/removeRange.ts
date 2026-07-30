@@ -16,8 +16,26 @@ const getListItemElement = (element: HTMLElement, editorElement: HTMLElement) =>
     }
 };
 
-export const isEntireBlockContentSelected = (start: number, end: number, contentEnd: number) => {
-    return start === 0 && end >= contentEnd;
+export const isEntireBlockContentSelected = (selectedRange: Range, contentRange: Range) => {
+    const startToStart = 0;
+    const endToEnd = 2;
+    return selectedRange.compareBoundaryPoints(startToStart, contentRange) <= 0 &&
+        selectedRange.compareBoundaryPoints(endToEnd, contentRange) >= 0;
+};
+
+export const getBlockRefCheckElementChain = (element: HTMLElement, topElement: HTMLElement) => {
+    const elements: HTMLElement[] = [];
+    let currentElement: HTMLElement | null = element;
+    while (currentElement && topElement.contains(currentElement)) {
+        if (currentElement.hasAttribute("data-node-id")) {
+            elements.push(currentElement);
+        }
+        if (currentElement === topElement) {
+            break;
+        }
+        currentElement = currentElement.parentElement;
+    }
+    return elements;
 };
 
 export const getCrossBlockMergeRemoveElement = (editorElement: HTMLElement, startElement: HTMLElement,

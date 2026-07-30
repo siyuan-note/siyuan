@@ -1,4 +1,6 @@
 {
+  "foldChildHeadings": "Replier/déplier les sous-titres directs",
+  "foldSiblingHeadings": "Replier/déplier les titres de même niveau",
   "copyViewMirror": "Copier le miroir de la vue",
   "hideViewTab": "Masquer l’onglet de vue",
   "showViewTab": "Afficher l’onglet de vue",

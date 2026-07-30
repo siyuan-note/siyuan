@@ -1,24 +1,28 @@
 const fs = require("fs");
 const fsPromises = fs.promises;
 const path = require("path");
+const {Arch} = require("electron-builder");
 const unzipper = require("unzipper");
 const { trimChangelogs } = require("./trimChangelogs");
 
 module.exports = async function afterPack(context) {
-  const {appOutDir, electronPlatformName, packager} = context;
-  await extractPackagedPandoc(appOutDir, packager, electronPlatformName);
+  const {appOutDir, arch, electronPlatformName, packager} = context;
+  await extractPackagedPandoc(appOutDir, packager, electronPlatformName, arch);
   await removeLanguagePacks(appOutDir, packager, electronPlatformName);
   await trimPackagedChangelogs(appOutDir, packager, electronPlatformName);
 };
 
-async function extractPackagedPandoc(appOutDir, packager, platform) {
+async function extractPackagedPandoc(appOutDir, packager, platform, arch) {
   const resourcePath = getPackagedResourcePath(appOutDir, packager, platform);
   const archivePath = path.join(resourcePath, "pandoc.zip");
   try {
     await fsPromises.access(archivePath);
   } catch (error) {
-    if (error.code === "ENOENT") {
+    if (error.code === "ENOENT" && platform === "win32" && arch === Arch.arm64) {
       return;
+    }
+    if (error.code === "ENOENT") {
+      throw new Error(`Packaged Pandoc archive not found: ${archivePath}`);
     }
     throw error;
   }

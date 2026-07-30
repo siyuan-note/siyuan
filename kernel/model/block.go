@@ -147,6 +147,9 @@ func CheckBlockRefInBox(ids, exactIDs []string, boxID string) (ret bool, err err
 	} else {
 		bts = treenode.GetBlockTreesInBox(ids, boxID)
 	}
+	if len(bts) != len(ids) {
+		return false, ErrBlockNotFound
+	}
 
 	group := newBlockRefCheckGroup()
 	exactIDSet := map[string]struct{}{}
@@ -241,7 +244,7 @@ func existBlockRefGroup(group *blockRefCheckGroup) (ret bool, err error) {
 	for id := range group.rootIDs {
 		rootIDs = append(rootIDs, id)
 	}
-	return sql.ExistRefByDefIDs(blockIDs, rootIDs)
+	return sql.ExistRefByDefIDs(blockIDs, rootIDs, blockIDs, rootIDs)
 }
 
 type BlockTreeInfo struct {

@@ -990,11 +990,11 @@ func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
 
 func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string, err error) {
 	err = withExportReadLockByBlockID(id, func() error {
-		pandocBinPath := util.GetPandocBinPath()
-		if !util.IsValidPandocBin(pandocBinPath) {
+		pandocRuntime := util.GetPandocRuntime()
+		if !util.IsValidPandocBin(pandocRuntime.BinPath) {
 			util.InitPandoc(Conf.Export.PandocBin)
-			pandocBinPath = util.GetPandocBinPath()
-			if !util.IsValidPandocBin(pandocBinPath) {
+			pandocRuntime = util.GetPandocRuntime()
+			if !util.IsValidPandocBin(pandocRuntime.BinPath) {
 				return errors.New(Conf.Language(115))
 			}
 		}
@@ -1031,15 +1031,15 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 			}
 		}
 
-		if !hasPandocOption(args, "--lua-filter") && "" != util.PandocColorFilterPath {
-			args = append(args, "--lua-filter", util.PandocColorFilterPath)
+		if !hasPandocOption(args, "--lua-filter") && "" != pandocRuntime.ColorFilterPath {
+			args = append(args, "--lua-filter", pandocRuntime.ColorFilterPath)
 		}
 
-		if !hasPandocOption(args, "--reference-doc") && "" != util.PandocTemplatePath {
-			args = append(args, "--reference-doc", util.PandocTemplatePath)
+		if !hasPandocOption(args, "--reference-doc") && "" != pandocRuntime.TemplatePath {
+			args = append(args, "--reference-doc", pandocRuntime.TemplatePath)
 		}
 
-		pandoc := exec.Command(pandocBinPath, args...)
+		pandoc := exec.Command(pandocRuntime.BinPath, args...)
 		gulu.CmdAttr(pandoc)
 		pandoc.Stdin = bytes.NewBufferString(content)
 		output, pandocErr := pandoc.CombinedOutput()

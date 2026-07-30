@@ -9,7 +9,7 @@ import {
 } from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
-import {foldBlocksRecursively, setFold} from "../util/blockFold";
+import {foldBlocksRecursively, foldHeadingGroup, setFold} from "../util/blockFold";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openFileAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {
@@ -289,7 +289,11 @@ export class Gutter {
                 if (!foldElement) {
                     return;
                 }
-                if (event.altKey) {
+                if (event.altKey && foldElement.getAttribute("data-type") === "NodeHeading") {
+                    foldHeadingGroup(protyle, foldElement, "children").finally(() => {
+                        buttonElement.removeAttribute("disabled");
+                    });
+                } else if (event.altKey) {
                     // 折叠所有子集
                     let hasFold = true;
                     Array.from(foldElement.children).find((ulElement) => {
@@ -449,7 +453,9 @@ export class Gutter {
                 if (!foldElement) {
                     return;
                 }
-                if (buttonElement.getAttribute("data-type") === "NodeListItem" && foldElement.parentElement.getAttribute("data-node-id")) {
+                if (buttonElement.getAttribute("data-type") === "NodeHeading") {
+                    foldHeadingGroup(protyle, foldElement, "siblings");
+                } else if (buttonElement.getAttribute("data-type") === "NodeListItem" && foldElement.parentElement.getAttribute("data-node-id")) {
                     // 折叠同级
                     let hasFold = true;
                     Array.from(foldElement.parentElement.children).find((listItemElement) => {
@@ -2863,18 +2869,41 @@ export class Gutter {
     }
 
     private appendFoldMenu(protyle: IProtyle, nodeElement: Element) {
+        const type = nodeElement.getAttribute("data-type");
         window.siyuan.menus.menu.append(new MenuItem({
             id: "fold",
             icon: "iconFoldUnFold",
             label: window.siyuan.languages.fold,
-            accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}/${updateHotkeyTip("⌥" + window.siyuan.languages.click)}`,
+            accelerator: type === "NodeHeading" ? updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom) :
+                `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}/${updateHotkeyTip("⌥" + window.siyuan.languages.click)}`,
             click() {
                 setFold(protyle, nodeElement);
                 focusBlock(nodeElement);
             }
         }).element);
+        if (type === "NodeHeading") {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "foldChildHeadings",
+                icon: "iconHeadings",
+                label: window.siyuan.languages.foldChildHeadings,
+                async click() {
+                    await foldHeadingGroup(protyle, nodeElement, "children");
+                    focusBlock(nodeElement);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "foldSiblingHeadings",
+                icon: "iconHeadings",
+                label: window.siyuan.languages.foldSiblingHeadings,
+                accelerator: updateHotkeyTip("⌥" + window.siyuan.languages.click),
+                async click() {
+                    await foldHeadingGroup(protyle, nodeElement, "siblings");
+                    focusBlock(nodeElement);
+                }
+            }).element);
+        }
         if (["NodeHeading", "NodeListItem", "NodeBlockquote", "NodeCallout", "NodeSuperBlock"].includes(
-            nodeElement.getAttribute("data-type"))) {
+            type)) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "foldRecursive",
                 icon: "iconListTree",

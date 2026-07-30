@@ -1097,7 +1097,7 @@ func FilterAttributeViewBacklinksByPublishAccess(c *gin.Context, publishAccess P
 			}
 			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 			if ("" == password || CheckPublishAuthCookie(c, passwordID, password)) &&
-				CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+				CheckBlockTreeDiscoverableByPublishAccess(publishAccess, bt) {
 				databaseAccessible = true
 				backlink.DatabaseBlockID = bt.ID
 				backlink.BoxID = bt.BoxID

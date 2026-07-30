@@ -109,6 +109,7 @@ const replaceCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
 
 const getCellText = (cell: HTMLTableCellElement) => cell.innerText.replace(/\n+$/g, "");
 const TABLE_EDGE_CONTROL_SIZE = 28;
+const TABLE_EDGE_CONTROL_TRIGGER_SIZE = 8;
 
 export class TableControl {
     private protyle: IProtyle;
@@ -195,8 +196,13 @@ export class TableControl {
         const signal = this.abortController.signal;
         this.wysiwygElement.addEventListener("pointermove", event => {
             const targetCell = getCell(event.target);
-            const edgeHover = targetCell ? undefined : this.getEdgeHover(event.clientX, event.clientY);
-            const cell = targetCell || edgeHover?.cell;
+            const targetTable = targetCell?.closest("table") as HTMLTableElement;
+            const targetViewportRect = targetTable ? this.getTableViewportRect(targetTable) : undefined;
+            const edgeHover = !targetCell || (targetViewportRect &&
+                event.clientX >= targetViewportRect.left &&
+                event.clientX <= targetViewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE) ?
+                this.getEdgeHover(event.clientX, event.clientY) : undefined;
+            const cell = edgeHover?.cell || targetCell;
             if (cell && getTableNode(cell) && !this.protyle.disabled) {
                 const hoverType = edgeHover?.type || "cell";
                 if (cell === this.hoverCell && hoverType === this.hoverType) {
@@ -618,19 +624,23 @@ export class TableControl {
             const tableRect = table.getBoundingClientRect();
             const viewportRect = this.getTableViewportRect(table);
             const grid = buildTableGrid(table);
-            if (clientX >= viewportRect.left - TABLE_EDGE_CONTROL_SIZE && clientX <= viewportRect.left &&
-                clientY >= viewportRect.top && clientY <= viewportRect.bottom) {
+            if (clientY >= viewportRect.top && clientY <= viewportRect.bottom) {
                 const rows = Array.from(table.rows);
                 const rowIndex = rows.findIndex(row => {
                     const rect = intersectRects(row.getBoundingClientRect(), viewportRect);
                     return rect.height > 0 && clientY >= rect.top && clientY <= rect.bottom;
                 });
-                const cell = grid.grid[rowIndex]?.find(item => item);
-                if (cell) {
+                const firstRow = rowIndex === 0;
+                const rowControlHovered = firstRow ?
+                    clientX >= viewportRect.left &&
+                    clientX <= Math.min(viewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE, viewportRect.right) :
+                    clientX >= viewportRect.left - TABLE_EDGE_CONTROL_SIZE && clientX <= viewportRect.left;
+                const cell = rowControlHovered ? grid.grid[rowIndex]?.find(item => item) : undefined;
+                if (cell && rowIndex > -1) {
                     candidates.push({
                         cell,
                         type: "row",
-                        distance: viewportRect.left - clientX,
+                        distance: firstRow ? clientX - viewportRect.left : viewportRect.left - clientX,
                     });
                 }
             }
@@ -725,7 +735,9 @@ export class TableControl {
                 this.rowHandle.classList.remove("fn__none");
                 this.rowHandle.style.width = `${TABLE_EDGE_CONTROL_SIZE}px`;
                 this.rowHandle.style.height = `${visibleRowRect.height}px`;
-                this.setPosition(this.rowHandle, viewportRect.left - TABLE_EDGE_CONTROL_SIZE / 2,
+                const firstRow = table.rows[0] === cell.parentElement;
+                this.setPosition(this.rowHandle, viewportRect.left +
+                    (firstRow ? TABLE_EDGE_CONTROL_SIZE / 2 : -TABLE_EDGE_CONTROL_SIZE / 2),
                     visibleRowRect.top + visibleRowRect.height / 2);
             }
             if (this.hoverType === "column" && visibleCellRect.width > 0 && viewportRect.height > 0) {

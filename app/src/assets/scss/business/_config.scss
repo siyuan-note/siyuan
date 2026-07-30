@@ -63,6 +63,11 @@
     margin: 24px 16px 16px 16px;
     font-size: 15px;
     font-weight: bold;
+
+    &--action {
+      display: flex;
+      align-items: center;
+    }
   }
 
   &-items {

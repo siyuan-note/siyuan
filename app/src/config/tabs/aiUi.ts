@@ -75,7 +75,13 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
     const render = () => {
         fetchPost("/api/ai/embeddingStat", {}, (response) => {
             const stat = response.data as {
-                total: number, indexed: number, pending: number, failed: number, ignoredByLen: number, ignoredByConfig: number, enabled: boolean,
+                total: number,
+                indexed: number,
+                pending: number,
+                failed: number,
+                ignoredByLen: number,
+                ignoredByConfig: number,
+                enabled: boolean,
             };
             if (!stat) {
                 return;
@@ -344,27 +350,47 @@ export const getMcpServersBlockKeywords = (): string[] => [
 const openedMcpOAuthURLs = new Map<string, string>();
 
 export const genMcpServersBlockHtml = (): string => `<div class="b3-label config-item" id="aiMcpServersBlock">
-    <div class="fn__flex" style="align-items:center;">
+    <div class="fn__flex config-wrap">
         <span class="b3-label__text">${window.siyuan.languages.aiMcpServersTip}</span>
         <span class="fn__flex-1"></span>
         <span id="aiMcpStatusSummary" class="b3-label__text ft__on-surface fn__none"></span>
     </div>
     <div class="fn__hr--small"></div>
     <div id="aiMcpServerList"></div>
-    <div class="fn__hr"></div>
-    <div class="config-wrap">
-        <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-type="addAiMcpServer">
-            <svg><use xlink:href="#iconAdd"></use></svg>
-            ${window.siyuan.languages.addAiMcpServer}
-        </button>
-    </div>
 </div>`;
 
+const mountAddMcpServerButton = (root: HTMLElement, block: HTMLElement) => {
+    const groupTitle = block.closest<HTMLElement>(".config-group")
+        ?.querySelector<HTMLElement>(":scope > .config-title");
+    if (!groupTitle || groupTitle.querySelector("[data-type='addAiMcpServer']")) {
+        return;
+    }
+
+    const spacerElement = document.createElement("span");
+    spacerElement.className = "fn__flex-1";
+    const buttonElement = document.createElement("button");
+    buttonElement.className = "b3-button b3-button--outline fn__flex-center fn__size200";
+    buttonElement.dataset.type = "addAiMcpServer";
+    buttonElement.innerHTML = "<svg class=\"b3-button__icon\"><use xlink:href=\"#iconAdd\"></use></svg>";
+    const labelElement = document.createElement("span");
+    labelElement.textContent = window.siyuan.languages.addAiMcpServer;
+    buttonElement.append(labelElement);
+    buttonElement.addEventListener("click", (event) => {
+        openMcpServerDialog(root, null);
+        event.preventDefault();
+        event.stopPropagation();
+    });
+
+    groupTitle.classList.add("config-title--action");
+    groupTitle.append(spacerElement, buttonElement);
+};
+
 export const mountMcpServersBlock = (root: HTMLElement) => {
-    const block = root.querySelector("#aiMcpServersBlock");
+    const block = root.querySelector<HTMLElement>("#aiMcpServersBlock");
     if (!block) {
         return;
     }
+    mountAddMcpServerButton(root, block);
     renderMcpServerList(root);
 
     // 轮询 MCP 连接状态，刷新每个 server 名称旁的状态圆点颜色、tooltip，以及标题右侧的汇总。
@@ -487,12 +513,6 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
         const target = event.target as HTMLElement;
         const actionEl = target.closest<HTMLElement>("[data-type]");
         const type = actionEl?.dataset.type;
-        if (type === "addAiMcpServer") {
-            openMcpServerDialog(root, null);
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
         if (type === "editAiMcpServer") {
             const serverName = getMcpServerName(actionEl);
             if (serverName) {

@@ -49,8 +49,16 @@ const normalizeBaseURL = (value: string) => value.trim().replace(/\/+$/, "").toL
 const findPreset = (provider: Config.IProvider) =>
     PROVIDER_PRESETS.find((preset) => preset.baseURL && normalizeBaseURL(preset.baseURL) === normalizeBaseURL(provider.baseURL));
 
-const providerTitle = (provider: Config.IProvider) =>
-    provider.displayName || findPreset(provider)?.name || provider.baseURL || window.siyuan.languages.addAiProvider;
+const getProviderName = (provider: Config.IProvider) =>
+    provider.displayName || findPreset(provider)?.name || provider.baseURL;
+
+const getProviderTitle = (provider: Config.IProvider) =>
+    getProviderName(provider) || window.siyuan.languages.addAiProvider;
+
+const getProviderSettingsTitle = (provider: Config.IProvider) => {
+    const name = getProviderName(provider);
+    return name ? `${name} ${window.siyuan.languages.aiProviderSettings}` : window.siyuan.languages.aiProviderSettings;
+};
 
 const getPresetTitle = (preset: IProviderPreset) => {
     const name = preset.name || window.siyuan.languages.custom;
@@ -77,7 +85,7 @@ const getCategoryTitle = (category: IProviderPreset["category"]) => {
 };
 
 const getProviderAvatarHTML = (provider: Config.IProvider, preset = findPreset(provider)) => {
-    const title = providerTitle(provider);
+    const title = getProviderTitle(provider);
     if (preset?.icon) {
         return `<img src="${preset.icon}" alt="${escapeHTML(title)}">`;
     }
@@ -105,7 +113,7 @@ const removeProviderView = (root: HTMLElement, view?: HTMLElement) => {
     });
 };
 
-const createProviderView = (root: HTMLElement, title: string, stacked = false) => {
+const createProviderView = (root: HTMLElement, backLabel: string, stacked = false) => {
     if (!stacked) {
         removeProviderView(root);
     }
@@ -117,7 +125,7 @@ const createProviderView = (root: HTMLElement, title: string, stacked = false) =
     view.innerHTML = `<div class="b3-dialog__header fn__flex">
     <div class="block__logo fn__pointer fn__flex-1" data-action="back">
         <svg class="block__logoicon"><use xlink:href="#iconLeft"></use></svg>
-        <span class="ft__breakword" data-type="providerTitle">${escapeHTML(title)}</span>
+        <span class="ft__breakword">${escapeHTML(backLabel)}</span>
     </div>
 </div>
 <div class="b3-dialog__body"></div>`;
@@ -149,7 +157,7 @@ const renderProviderCards = (root: HTMLElement) => {
     <div class="b3-card__img">${getProviderAvatarHTML(provider)}</div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
-            <div class="fn__ellipsis config-name">${escapeHTML(providerTitle(provider))}</div>
+            <div class="fn__ellipsis config-name">${escapeHTML(getProviderTitle(provider))}</div>
             <div class="b3-card__desc">
                 ${escapeHTML(provider.baseURL)}<br>
                 ${provider.models.length} ${window.siyuan.languages.apiModel}
@@ -177,7 +185,7 @@ const saveProviders = (root: HTMLElement, providers: Config.IProvider[], onAppli
 const showDeleteProviderConfirm = (root: HTMLElement, provider: Config.IProvider) => {
     confirmDialog(
         window.siyuan.languages.deleteOpConfirm,
-        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHTML(providerTitle(provider))),
+        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHTML(getProviderTitle(provider))),
         () => saveProviders(root, window.siyuan.config.ai.providers.filter((item) => item.id !== provider.id)),
         undefined,
         true,
@@ -185,7 +193,7 @@ const showDeleteProviderConfirm = (root: HTMLElement, provider: Config.IProvider
 };
 
 const openProviderCatalog = (root: HTMLElement) => {
-    const view = createProviderView(root, window.siyuan.languages.addAiProvider);
+    const view = createProviderView(root, window.siyuan.languages.apiProvider);
     const body = view.querySelector<HTMLElement>(".b3-dialog__body");
     body.innerHTML = `<div class="b3-dialog__content" style="padding: 0">${PROVIDER_CATEGORIES.map((category) => {
         const cards = PROVIDER_PRESETS.filter((preset) => preset.category === category).map((preset) => {
@@ -373,11 +381,16 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         models: [],
     };
     const initialJSON = JSON.stringify(draft);
-    const view = createProviderView(root, providerTitle(draft), !existing && !!preset);
+    const openedFromCatalog = !existing && !!preset;
+    const view = createProviderView(
+        root,
+        openedFromCatalog ? window.siyuan.languages.addAiProvider : window.siyuan.languages.apiProvider,
+        openedFromCatalog,
+    );
     const body = view.querySelector<HTMLElement>(".b3-dialog__body");
     body.innerHTML = `<div class="b3-dialog__content" style="padding: 0">
     <div class="config-group">
-        <div class="config-title">${window.siyuan.languages.aiProviderSettings}</div>
+        <div class="config-title" data-type="providerSettingsTitle">${escapeHTML(getProviderSettingsTitle(draft))}</div>
         <div class="config-items">
             <label class="fn__flex b3-label config-item config-wrap">
                 ${genConfigItemMainHtml(window.siyuan.languages.customDisplayName)}
@@ -405,20 +418,20 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         </div>
     </div>
     <div class="config-group">
+        <div class="config-title config-title--action">
+            <span>${window.siyuan.languages.aiModelSettings}</span>
+            <div class="fn__flex-1"></div>
+            <button class="b3-button b3-button--outline" data-action="addModel">
+                <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
+                <span>${window.siyuan.languages.addAiModel}</span>
+            </button>
+            <span class="fn__space"></span>
+            <button class="b3-button b3-button--outline" data-action="fetchModels">
+                <svg class="b3-button__icon"><use xlink:href="#iconRefresh"></use></svg>
+                <span>${window.siyuan.languages.fetchAvailableModels}</span>
+            </button>
+        </div>
         <div class="config-items">
-            <div class="fn__flex b3-label config-item config-wrap">
-                ${genConfigItemMainHtml(window.siyuan.languages.aiModelSettings)}
-                <span class="fn__space"></span>
-                <button class="b3-button b3-button--outline" data-action="addModel">
-                    <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
-                    <span>${window.siyuan.languages.addAiModel}</span>
-                </button>
-                <span class="fn__space"></span>
-                <button class="b3-button b3-button--outline" data-action="fetchModels">
-                    <svg class="b3-button__icon"><use xlink:href="#iconRefresh"></use></svg>
-                    <span>${window.siyuan.languages.fetchAvailableModels}</span>
-                </button>
-            </div>
             <div data-type="providerModels"></div>
         </div>
     </div>
@@ -429,6 +442,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>
 </div>`;
     bindPasswordIconaToggle(view, "aiProviderDetailApiKey");
+    const providerSettingsTitleElement = view.querySelector<HTMLElement>("[data-type='providerSettingsTitle']");
     const modelsContainer = view.querySelector<HTMLElement>("[data-type='providerModels']");
     const addModelButton = view.querySelector<HTMLButtonElement>("[data-action='addModel']");
     const fetchModelsButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
@@ -555,7 +569,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             if (providerField === "apiKey") {
                 updateModelActionButtons();
             }
-            view.querySelector<HTMLElement>("[data-type='providerTitle']").textContent = providerTitle(draft);
+            if (providerField === "displayName" || providerField === "baseURL") {
+                providerSettingsTitleElement.textContent = getProviderSettingsTitle(draft);
+            }
             return;
         }
         const modelField = target.dataset.modelField as "name" | "displayName";
@@ -796,7 +812,7 @@ const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group:
         menu.addItem({
             iconHTML: "",
             type: "readonly",
-            label: escapeHTML(providerTitle(provider)),
+            label: escapeHTML(getProviderTitle(provider)),
         });
         models.forEach((model) => {
             const label = model.displayName || model.name;

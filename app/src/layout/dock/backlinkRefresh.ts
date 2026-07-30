@@ -10,13 +10,26 @@ export const shouldDeferBottomBacklinkRefresh = (panelFocused: boolean, ignoreFo
     return panelFocused && !ignoreFocus;
 };
 
-export const shouldHideBottomBacklinks = (
+export const getBottomBacklinkVisibility = (
     linkRefsCount: number,
     mentionsCount: number,
     backlinkKeyword: string,
     mentionKeyword: string
 ) => {
-    return linkRefsCount === 0 && mentionsCount === 0 && !backlinkKeyword && !mentionKeyword;
+    const hideBacklinks = linkRefsCount === 0 && !backlinkKeyword;
+    const hideMentions = mentionsCount === 0 && !mentionKeyword;
+    return {
+        hideBacklinks,
+        hideMentions,
+        hidePanel: hideBacklinks && hideMentions,
+    };
+};
+
+export const getInitialBacklinkSectionState = (expandCount: number, ids: string[]) => {
+    return {
+        folded: expandCount === -1,
+        openIds: expandCount > 0 ? ids.slice(0, expandCount) : [],
+    };
 };
 
 export const shouldRefreshAllBacklinkContexts = (

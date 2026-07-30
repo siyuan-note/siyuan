@@ -1,8 +1,9 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getBottomBacklinkVisibility,
+    getInitialBacklinkSectionState,
     shouldDeferBottomBacklinkRefresh,
-    shouldHideBottomBacklinks,
     shouldRefreshAllBacklinkContexts,
     shouldRenderBacklinkResponse,
     shouldSaveBacklinkStatus
@@ -35,16 +36,61 @@ describe("shouldDeferBottomBacklinkRefresh", () => {
     });
 });
 
-describe("shouldHideBottomBacklinks", () => {
-    it("hides the bottom area only when backlinks and mentions are both empty", () => {
-        assert.equal(shouldHideBottomBacklinks(0, 0, "", ""), true);
-        assert.equal(shouldHideBottomBacklinks(1, 0, "", ""), false);
-        assert.equal(shouldHideBottomBacklinks(0, 1, "", ""), false);
+describe("getBottomBacklinkVisibility", () => {
+    it("hides empty sections independently", () => {
+        assert.deepEqual(getBottomBacklinkVisibility(0, 0, "", ""), {
+            hideBacklinks: true,
+            hideMentions: true,
+            hidePanel: true,
+        });
+        assert.deepEqual(getBottomBacklinkVisibility(1, 0, "", ""), {
+            hideBacklinks: false,
+            hideMentions: true,
+            hidePanel: false,
+        });
+        assert.deepEqual(getBottomBacklinkVisibility(0, 1, "", ""), {
+            hideBacklinks: true,
+            hideMentions: false,
+            hidePanel: false,
+        });
     });
 
-    it("keeps the area visible when an active filter has no results", () => {
-        assert.equal(shouldHideBottomBacklinks(0, 0, "backlink", ""), false);
-        assert.equal(shouldHideBottomBacklinks(0, 0, "", "mention"), false);
+    it("keeps the filtered section visible when it has no results", () => {
+        assert.deepEqual(getBottomBacklinkVisibility(0, 0, "backlink", ""), {
+            hideBacklinks: false,
+            hideMentions: true,
+            hidePanel: false,
+        });
+        assert.deepEqual(getBottomBacklinkVisibility(0, 0, "", "mention"), {
+            hideBacklinks: true,
+            hideMentions: false,
+            hidePanel: false,
+        });
+    });
+});
+
+describe("getInitialBacklinkSectionState", () => {
+    const ids = ["one", "two", "three"];
+
+    it("folds the section when configured to minus one", () => {
+        assert.deepEqual(getInitialBacklinkSectionState(-1, ids), {
+            folded: true,
+            openIds: [],
+        });
+    });
+
+    it("keeps contexts folded when configured to zero", () => {
+        assert.deepEqual(getInitialBacklinkSectionState(0, ids), {
+            folded: false,
+            openIds: [],
+        });
+    });
+
+    it("opens only the configured number of contexts", () => {
+        assert.deepEqual(getInitialBacklinkSectionState(2, ids), {
+            folded: false,
+            openIds: ["one", "two"],
+        });
     });
 });
 

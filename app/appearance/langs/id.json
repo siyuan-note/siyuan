@@ -1080,7 +1080,7 @@
 	"dynamicLoadBlocks": "Jumlah blok yang dimuat secara dinamis",
 	"dynamicLoadBlocksTip": "Nilai ini berisi jumlah sub-blok. Jika ada banyak blok kode, blok rumus atau blok bagan yang perlu dirender, disarankan untuk tidak mengatur terlalu besar",
 	"backlinkExpand": "Ekspansi default backlink",
-	"backlinkExpandTip": "Jika dikonfigurasi sebagai <code class='fn__code'>0</code>",
+	"backlinkExpandTip": "Jika dikonfigurasi sebagai <code class='fn__code'>0</code>, tidak akan diperluas, jika dikonfigurasi sebagai <code class='fn__code'>-1</code>, panel akan ditutup",
 	"backmentionExpand": "Ekspansi default backmention",
 	"backmentionExpandTip": "Jika dikonfigurasi sebagai <code class='fn__code'>0</code>, tidak akan diperluas, jika dikonfigurasi sebagai <code class='fn__code'>-1</code>, panel akan ditutup",
 	"floatWindowMode": "Metode pemicu jendela mengambang",

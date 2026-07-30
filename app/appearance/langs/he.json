@@ -1080,7 +1080,7 @@
 	"dynamicLoadBlocks": "מספר הבלוקים המועמסים דינמית",
 	"dynamicLoadBlocksTip": "ערך זה מכיל את מספר תתי הבלוקים. אם יש הרבה בלוקי קוד, בלוקי נוסחאות או בלוקי תרשימים שצריך לה-render, מומלץ לא לקבוע ערך גבוה מדי",
 	"backlinkExpand": "ברירת מחדל להרחבת ייחסים",
-	"backlinkExpandTip": "אם מוגדר כ<code class='fn__code'>0</code>",
+	"backlinkExpandTip": "אם מוגדר כ<code class='fn__code'>0</code>, הוא לא יתרחב, אם מוגדר כ<code class='fn__code'>-1</code>, הפנל ייסגר",
 	"backmentionExpand": "ברירת מחדל להרחבת אזכור",
 	"backmentionExpandTip": "אם מוגדר כ<code class='fn__code'>0</code>, הוא לא יתרחב, אם מוגדר כ<code class='fn__code'>-1</code>, הפנל ייסגר",
 	"floatWindowMode": "שיטת הפעלת חלון צף",

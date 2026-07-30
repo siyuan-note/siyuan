@@ -1080,7 +1080,7 @@
 	"dynamicLoadBlocks": "عدد الكتل المحملة ديناميكيا",
 	"dynamicLoadBlocksTip": "تحتوي هذه القيمة على عدد الكتل الفرعية. إذا كان هناك العديد من كتل الكود، أو كتل الصيغة أو كتل الرسم البياني التي تحتاج إلى تقديمها، يوصى بعدم تعيين قيمة كبيرة جداً",
 	"backlinkExpand": "عدد الروابط المرجعية الموسَّعة افتراضياً",
-	"backlinkExpandTip": "‫عدم توسيع إذا تم إعداده كـ‪<code class='fn__code'>0</code>‬‬",
+	"backlinkExpandTip": "‫إذا تم إعداده كـ‪<code class='fn__code'>0</code>‬، فلن يتم توسيعه، وإذا تم إعداده كـ‪<code class='fn__code'>-1</code>‬، سيتم إغلاق اللوحة‬",
 	"backmentionExpand": "عدد الإشارات المرجعية الموسَّعة افتراضياً",
 	"backmentionExpandTip": "‫إذا تم إعداده كـ‪<code class='fn__code'>0</code>‬، فلن يتم توسيعه، وإذا تم إعداده كـ‪<code class='fn__code'>-1</code>‬، سيتم إغلاق اللوحة‬",
 	"floatWindowMode": "طريقة تشغيل النافذة العائمة",

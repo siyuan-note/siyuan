@@ -1080,7 +1080,7 @@
 	"dynamicLoadBlocks": "Anzahl der dynamisch geladenen Blöcke",
 	"dynamicLoadBlocksTip": "Dieser Wert enthält die Anzahl der Unterblöcke. Wenn viele Codeblöcke, Formelblöcke oder Diagrammblöcke gerendert werden müssen, wird empfohlen, diesen Wert nicht zu groß zu setzen.",
 	"backlinkExpand": "Standarderweiterung des Backlinks",
-	"backlinkExpandTip": "Wenn auf <code class='fn__code'>0</code> konfiguriert, wird es nicht erweitert.",
+	"backlinkExpandTip": "Wenn auf <code class='fn__code'>0</code> konfiguriert, wird es nicht erweitert, wenn auf <code class='fn__code'>-1</code> konfiguriert, wird das Panel geschlossen",
 	"backmentionExpand": "Standarderweiterung der Rückverweismarken",
 	"backmentionExpandTip": "Wenn auf <code class='fn__code'>0</code> konfiguriert, wird es nicht erweitert, wenn auf <code class='fn__code'>-1</code> konfiguriert, wird das Panel geschlossen.",
 	"floatWindowMode": "Auslösermethode für schwebendes Fenster",

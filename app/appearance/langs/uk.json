@@ -1080,7 +1080,7 @@
 	"dynamicLoadBlocks": "Кількість динамічно завантажуваних блоків",
 	"dynamicLoadBlocksTip": "Це значення включає кількість підблоків. Якщо потрібно рендерити багато блоків коду, формул або діаграм, не рекомендується встановлювати надто велике значення",
 	"backlinkExpand": "Типове розгортання зворотних посилань",
-	"backlinkExpandTip": "Якщо налаштовано як <code class='fn__code'>0</code>",
+	"backlinkExpandTip": "Якщо налаштовано як <code class='fn__code'>0</code>, не буде розгорнуто; якщо як <code class='fn__code'>-1</code>, панель буде закрито",
 	"backmentionExpand": "Типове розгортання згадок",
 	"backmentionExpandTip": "Якщо налаштовано як <code class='fn__code'>0</code>, не буде розгорнуто; якщо як <code class='fn__code'>-1</code>, панель буде закрито",
 	"floatWindowMode": "Спосіб виклику плаваючого вікна",

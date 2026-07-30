@@ -1080,7 +1080,7 @@
 	"dynamicLoadBlocks": "Número de blocos carregados dinamicamente",
 	"dynamicLoadBlocksTip": "Este valor contém o número de subblocos. Se houver muitos blocos de código, blocos de fórmula ou blocos de gráfico que precisam ser renderizados, recomenda-se não definir muito grande",
 	"backlinkExpand": "Backlink expandir padrão",
-	"backlinkExpandTip": "Se configurado como <code class='fn__code'>0</code>",
+	"backlinkExpandTip": "Se configurado como <code class='fn__code'>0</code>, não será expandido, se configurado como <code class='fn__code'>-1</code>, o painel será fechado",
 	"backmentionExpand": "Backmention expandir padrão",
 	"backmentionExpandTip": "Se configurado como <code class='fn__code'>0</code>, não será expandido, se configurado como <code class='fn__code'>-1</code>, o painel será fechado",
 	"floatWindowMode": "Método de acionamento da janela flutuante",

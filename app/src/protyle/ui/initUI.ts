@@ -344,6 +344,14 @@ export const setPadding = (protyle: IProtyle) => {
     const backlinkBottomVisible = backlinkBottomElement &&
         !backlinkBottomElement.classList.contains("fn__none") &&
         !backlinkBottomElement.classList.contains("sy__backlink--pending");
+    protyle.contentElement.classList.toggle("protyle-content--backlink-bottom", Boolean(backlinkBottomVisible));
+    if (backlinkBottomVisible) {
+        const topHeight = (protyle.contentElement.querySelector(".protyle-top") as HTMLElement)?.offsetHeight || 0;
+        const minHeight = Math.max((protyle.contentElement.clientHeight - topHeight) * .5, 0);
+        protyle.contentElement.style.setProperty("--b3-protyle-bottom-backlink-min-height", `${minHeight}px`);
+    } else {
+        protyle.contentElement.style.removeProperty("--b3-protyle-bottom-backlink-min-height");
+    }
 
     if (protyle.options.backlinkData) {
         protyle.wysiwyg.element.style.padding = `4px ${paddingRight}px 4px ${paddingLeft}px`;

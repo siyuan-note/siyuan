@@ -16,8 +16,9 @@ import {getAllModels} from "../getAll";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {renderBacklink} from "../../protyle/wysiwyg/renderBacklink";
 import {
+    getBottomBacklinkVisibility,
+    getInitialBacklinkSectionState,
     shouldDeferBottomBacklinkRefresh,
-    shouldHideBottomBacklinks,
     shouldRefreshAllBacklinkContexts,
     shouldRenderBacklinkResponse,
     shouldSaveBacklinkStatus
@@ -77,8 +78,8 @@ export class Backlink extends Model {
             backlinkOpenIds: string[],
             backlinkMOpenIds: string[],
             backlinkMStatus: number, // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
-            backlinkFolded?: boolean,
-            backmentionFolded?: boolean
+            backlinkFolded: boolean,
+            backmentionFolded: boolean
         }
     } = {};
     private dirty = false;
@@ -86,6 +87,7 @@ export class Backlink extends Model {
     private refreshQueued = false;
     private searchQueued = false;
     private requestID = 0;
+    private requesting = false;
     private showingLoading = false;
     private contextRequestVersions = [0, 0];
     private itemRecords = [new Map<string, IBacklinkItemRecord>(), new Map<string, IBacklinkItemRecord>()];
@@ -156,12 +158,12 @@ export class Backlink extends Model {
         }
         const backlinkSort = window.siyuan.config.editor.backlinkSort;
         const backmentionSort = window.siyuan.config.editor.backmentionSort;
-        this.element.innerHTML = `<div class="block__icons">
+        this.element.innerHTML = `<div class="block__icons backlinkList__header">
     ${this.type === "bottom" ? `<span data-type="bLayout" class="block__icon block__icon--show fn__flex-center backlinkList__toggle ariaLabel" data-position="north" aria-label="${window.siyuan.languages.collapse}"><svg><use xlink:href="#iconDown"></use></svg></span>` : ""}
-    <div class="block__logo block__logo--counter fn__flex-1${this.type === "bottom" ? " fn__pointer" : ""}"${this.type === "bottom" ? ' data-type="backlink"' : ""}>${window.siyuan.languages.backlinks}<span class="counter listCount"></span></div>
+    <div class="block__logo block__logo--counter fn__flex-1 fn__pointer" data-type="backlink">${window.siyuan.languages.backlinks}<span class="counter listCount"></span></div>
     <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
-    <span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
-    <span class="fn__space"></span>
+    ${this.type === "bottom" ? "" : `<span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
+    <span class="fn__space"></span>`}
     <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="sort" data-sort="${backlinkSort}" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
@@ -177,7 +179,7 @@ export class Backlink extends Model {
     <span data-type="min" class="${this.type !== "pin" ? "fn__none " : ""}block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="backlinkList fn__flex-1"></div>
-<div class="block__icons">
+<div class="block__icons backlinkMList__header">
     ${this.type === "bottom" ? `<span data-type="layout" class="block__icon block__icon--show fn__flex-center backlinkList__toggle ariaLabel" data-position="north" aria-label="${window.siyuan.languages.collapse}"><svg><use xlink:href="#iconDown"></use></svg></span>` : ""}
     <div class="block__logo block__logo--counter fn__flex-1 fn__pointer" data-type="mention">${window.siyuan.languages.mentions}<span class="counter listMCount"></span></div>
     <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
@@ -404,14 +406,16 @@ export class Backlink extends Model {
                         case "backlink":
                             if (this.type === "bottom") {
                                 this.setBottomLayout(target.parentElement.querySelector('[data-type="bLayout"]'), this.tree.element);
-                                event.stopPropagation();
+                            } else {
+                                this.setDockSectionLayout(this.tree.element);
                             }
+                            event.stopPropagation();
                             break;
                         case "mention":
                             if (this.type === "bottom") {
                                 this.setBottomLayout(target.parentElement.querySelector('[data-type="layout"]'), this.mTree.element);
                             } else {
-                                this.setLayout(target.parentElement.querySelector('[data-type="layout"]'));
+                                this.setDockSectionLayout(this.mTree.element);
                             }
                             event.stopPropagation();
                             break;
@@ -484,6 +488,20 @@ export class Backlink extends Model {
                 element.querySelector("use").setAttribute("xlink:href", "#iconDown");
             }
         }
+        this.tree.element.dispatchEvent(new CustomEvent("scroll"));
+        this.mTree.element.dispatchEvent(new CustomEvent("scroll"));
+    }
+
+    private setDockSectionLayout(listElement: HTMLElement) {
+        const isMention = listElement === this.mTree.element;
+        const backlinkFolded = this.tree.element.classList.contains("fn__none");
+        const backmentionFolded = this.mTree.element.style.height === "0px";
+        this.applyDockLayout(
+            isMention ? backlinkFolded : !backlinkFolded,
+            isMention ? !backmentionFolded : backmentionFolded,
+            this.status[this.blockId]?.backlinkMStatus ?? 1,
+        );
+        this.saveStatus();
         this.tree.element.dispatchEvent(new CustomEvent("scroll"));
         this.mTree.element.dispatchEvent(new CustomEvent("scroll"));
     }
@@ -900,6 +918,11 @@ export class Backlink extends Model {
         if (this.type !== "bottom") {
             return;
         }
+        if (this.element.classList.contains("sy__backlink--backlinks-empty") ||
+            this.element.classList.contains("sy__backlink--mentions-empty")) {
+            this.tree.element.classList.remove("backlinkList--divider-spacing");
+            return;
+        }
         const lastItem = this.tree.element.querySelector(":scope > .b3-list > .b3-list-item:last-of-type");
         this.tree.element.classList.toggle("backlinkList--divider-spacing",
             !lastItem || !lastItem.querySelector(".b3-list-item__arrow--open"));
@@ -911,6 +934,7 @@ export class Backlink extends Model {
         }
         this.showingLoading = true;
         this.resetRenderedData(false);
+        this.element.classList.remove("sy__backlink--backlinks-empty", "sy__backlink--mentions-empty");
         const loadingHTML = '<div class="backlinkList__loading"><img width="32px" height="32px" src="/stage/loading-pure.svg"></div>';
         this.tree.element.innerHTML = loadingHTML;
         this.mTree.element.innerHTML = loadingHTML;
@@ -947,7 +971,7 @@ export class Backlink extends Model {
         this.notebookId = "";
         this.blockId = blockId;
         this.rootId = rootId;
-        this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
+        this.setRequesting(false);
         this.showBottomLoading();
     }
 
@@ -975,7 +999,7 @@ export class Backlink extends Model {
             "data-sort",
             (status?.mSort ?? window.siyuan.config.editor.backmentionSort).toString(),
         );
-        this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
+        this.setRequesting(false);
         if (!blockId) {
             this.render({
                 box: "",
@@ -991,11 +1015,16 @@ export class Backlink extends Model {
         this.searchBacklinks(true);
     }
 
+    private setRequesting(requesting: boolean) {
+        this.requesting = requesting;
+        this.element.querySelector('.block__icon[data-type="refresh"] svg')?.classList.toggle("fn__rotate", requesting);
+    }
+
     private finishRequest(requestID: number) {
         if (this.destroyed || requestID !== this.requestID) {
             return false;
         }
-        this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
+        this.setRequesting(false);
         return true;
     }
 
@@ -1012,16 +1041,15 @@ export class Backlink extends Model {
     }
 
     public refresh() {
-        const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
         if (!this.blockId) {
             return;
         }
-        if (element.classList.contains("fn__rotate")) {
+        if (this.requesting) {
             this.refreshQueued = true;
             return;
         }
         this.refreshQueued = false;
-        element.classList.add("fn__rotate");
+        this.setRequesting(true);
         this.dirty = false;
         const requestID = ++this.requestID;
         let responseHandled = false;
@@ -1050,13 +1078,12 @@ export class Backlink extends Model {
         if (!this.blockId) {
             return;
         }
-        const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
-        if (element.classList.contains("fn__rotate")) {
+        if (this.requesting) {
             this.searchQueued = true;
             return;
         }
         this.searchQueued = false;
-        element.classList.add("fn__rotate");
+        this.setRequesting(true);
         // 解析当前反链面板所属 box：优先用已记录的 notebookId，首次为空时按 rootId 在已打开的编辑器里查找
         let notebookId = this.notebookId;
         if (!notebookId && this.rootId) {
@@ -1147,7 +1174,8 @@ export class Backlink extends Model {
             backlinkMOpenIds: [],
             backlinkMStatus: 3, // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
             backlinkFolded: this.tree.element.classList.contains("fn__none"),
-            backmentionFolded: this.mTree.element.classList.contains("fn__none")
+            backmentionFolded: this.type === "bottom" ?
+                this.mTree.element.classList.contains("fn__none") : this.mTree.element.style.height === "0px"
         };
         this.tree.element.querySelectorAll(".b3-list-item__arrow--open").forEach(item => {
             this.status[this.blockId].backlinkOpenIds.push(item.parentElement.parentElement.getAttribute("data-node-id"));
@@ -1187,7 +1215,7 @@ export class Backlink extends Model {
         const wasLoading = this.showingLoading;
         this.showingLoading = false;
 
-        this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
+        this.setRequesting(false);
         this.notebookId = data.box;
         this.inputsElement[0].value = data.k;
         this.inputsElement[1].value = data.mk;
@@ -1198,6 +1226,12 @@ export class Backlink extends Model {
         if (backlinkChanged || backmentionChanged) {
             this.restoreScrollAnchor(backlinkAnchor);
             this.restoreScrollAnchor(mentionAnchor);
+        }
+        const bottomVisibility = this.type === "bottom" ?
+            getBottomBacklinkVisibility(data.linkRefsCount, data.mentionsCount, data.k, data.mk) : undefined;
+        if (bottomVisibility) {
+            this.element.classList.toggle("sy__backlink--backlinks-empty", bottomVisibility.hideBacklinks);
+            this.element.classList.toggle("sy__backlink--mentions-empty", bottomVisibility.hideMentions);
         }
         this.updateBottomBacklinkSpacing();
 
@@ -1216,42 +1250,29 @@ export class Backlink extends Model {
             mCountElement.textContent = data.mentionsCount.toString();
         }
         if (!this.status[this.blockId]) {
+            const backlinkState = getInitialBacklinkSectionState(
+                window.siyuan.config.editor.backlinkExpandCount,
+                data.backlinks.map(item => item.id),
+            );
+            const backmentionState = getInitialBacklinkSectionState(
+                window.siyuan.config.editor.backmentionExpandCount,
+                data.backmentions.map(item => item.id),
+            );
+            const backlinkFolded = backlinkState.folded ||
+                (this.type !== "bottom" && data.linkRefsCount === 0 && data.mentionsCount > 0);
+            const backmentionFolded = backmentionState.folded ||
+                (this.type !== "bottom" && data.mentionsCount === 0);
             this.status[this.blockId] = {
                 sort: window.siyuan.config.editor.backlinkSort,
                 mSort: window.siyuan.config.editor.backmentionSort,
                 scrollTop: 0,
                 mScrollTop: 0,
-                backlinkOpenIds: [],
-                backlinkMOpenIds: [],
-                backlinkMStatus: 3,
-                backlinkFolded: false,
-                backmentionFolded: false
+                backlinkOpenIds: backlinkState.openIds,
+                backlinkMOpenIds: backmentionState.openIds,
+                backlinkMStatus: backlinkFolded ? 0 : (backmentionFolded ? 3 : 1),
+                backlinkFolded,
+                backmentionFolded
             };
-            if (data.mentionsCount === 0 || window.siyuan.config.editor.backmentionExpandCount === -1) {
-                this.status[this.blockId].backlinkMStatus = 3;
-            } else {
-                Array.from({length: window.siyuan.config.editor.backmentionExpandCount}).forEach((item, index) => {
-                    if (data.backmentions[index]) {
-                        this.status[this.blockId].backlinkMOpenIds.push(data.backmentions[index].id);
-                    }
-                });
-                if (data.mentionsCount === 0) {
-                    this.status[this.blockId].backlinkMStatus = 3;
-                } else {
-                    if (data.linkRefsCount === 0) {
-                        this.status[this.blockId].backlinkMStatus = 0;
-                    } else {
-                        this.status[this.blockId].backlinkMStatus = 1;
-                    }
-                }
-            }
-            if (data.linkRefsCount > 0) {
-                Array.from({length: window.siyuan.config.editor.backlinkExpandCount}).forEach((item, index) => {
-                    if (data.backlinks[index]) {
-                        this.status[this.blockId].backlinkOpenIds.push(data.backlinks[index].id);
-                    }
-                });
-            }
         }
 
         // restore status
@@ -1273,34 +1294,16 @@ export class Backlink extends Model {
             this.restoreBottomLayout(this.mTree.element.previousElementSibling.querySelector('[data-type="layout"]'), this.mTree.element,
                 this.status[this.blockId].backmentionFolded);
         } else {
-            // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
-            const layoutElement = this.mTree.element.previousElementSibling.querySelector('[data-type="layout"]');
-            if (this.status[this.blockId].backlinkMStatus === 2 || this.status[this.blockId].backlinkMStatus === 1) {
-                this.tree.element.classList.remove("fn__none");
-                this.mTree.element.removeAttribute("style");
-                if (this.status[this.blockId].backlinkMStatus === 1) {
-                    layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
-                    layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
-                } else {
-                    layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
-                    layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
-                }
-            } else if (this.status[this.blockId].backlinkMStatus === 3) {
-                this.tree.element.classList.remove("fn__none");
-                this.mTree.element.setAttribute("style", "flex:none;height:0px");
-                layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
-                layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
-            } else {
-                this.tree.element.classList.add("fn__none");
-                this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
-                layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
-                layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
-            }
+            this.applyDockLayout(
+                this.status[this.blockId].backlinkFolded,
+                this.status[this.blockId].backmentionFolded,
+                this.status[this.blockId].backlinkMStatus,
+            );
         }
         this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').setAttribute("data-sort", this.status[this.blockId].sort.toString());
         this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').setAttribute("data-sort", this.status[this.blockId].mSort.toString());
-        if (this.type === "bottom") {
-            const empty = shouldHideBottomBacklinks(data.linkRefsCount, data.mentionsCount, data.k, data.mk);
+        if (bottomVisibility) {
+            const empty = bottomVisibility.hidePanel;
             if (this.empty !== empty || wasLoading) {
                 this.empty = empty;
                 this.emptyChange?.(empty);
@@ -1312,6 +1315,30 @@ export class Backlink extends Model {
                 this.tree.element.scrollTop = this.status[this.blockId].scrollTop;
                 this.mTree.element.scrollTop = this.status[this.blockId].mScrollTop;
             }, Constants.TIMEOUT_LOAD);
+        }
+    }
+
+    private applyDockLayout(backlinkFolded: boolean, backmentionFolded: boolean, backlinkMStatus: number) {
+        const layoutElement = this.mTree.element.previousElementSibling.querySelector('[data-type="layout"]');
+        this.mTree.element.classList.remove("fn__none");
+        if (!backlinkFolded && !backmentionFolded) {
+            this.tree.element.classList.remove("fn__none");
+            this.mTree.element.removeAttribute("style");
+            const splitUp = backlinkMStatus === 2;
+            layoutElement.setAttribute("aria-label", splitUp ? window.siyuan.languages.up : window.siyuan.languages.down);
+            layoutElement.querySelector("use").setAttribute("xlink:href", splitUp ? "#iconUp" : "#iconDown");
+        } else if (backlinkFolded) {
+            this.tree.element.classList.add("fn__none");
+            const height = backmentionFolded ? 0 :
+                Math.max(this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2, 0);
+            this.mTree.element.setAttribute("style", `flex:none;height:${height}px`);
+            layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
+            layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
+        } else {
+            this.tree.element.classList.remove("fn__none");
+            this.mTree.element.setAttribute("style", "flex:none;height:0px");
+            layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
+            layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
         }
     }
 

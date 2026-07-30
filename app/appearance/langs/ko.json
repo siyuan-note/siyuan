@@ -1080,7 +1080,7 @@
 	"dynamicLoadBlocks": "동적 로드 블록 수",
 	"dynamicLoadBlocksTip": "이 값에는 하위 블록 수가 포함됩니다. 렌더링해야 할 코드 블록, 수식 블록 또는 차트 블록이 많은 경우 너무 크게 설정하지 않는 것이 좋습니다",
 	"backlinkExpand": "백링크 기본 펼치기",
-	"backlinkExpandTip": "<code class='fn__code'>0</code>으로 설정하면",
+	"backlinkExpandTip": "<code class='fn__code'>0</code>으로 설정하면 펼쳐지지 않으며, <code class='fn__code'>-1</code>로 설정하면 패널이 닫힙니다",
 	"backmentionExpand": "백멘션 기본 펼치기",
 	"backmentionExpandTip": "<code class='fn__code'>0</code>으로 설정하면 펼쳐지지 않으며, <code class='fn__code'>-1</code>로 설정하면 패널이 닫힙니다",
 	"floatWindowMode": "플로팅 창 트리거 방식",

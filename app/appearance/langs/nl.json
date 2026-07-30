@@ -1080,7 +1080,7 @@
 	"dynamicLoadBlocks": "Dynamisch geladen blokken",
 	"dynamicLoadBlocksTip": "Deze waarde omvat het aantal subblokken. Als er veel codeblokken, formuleblokken of grafiekblokken moeten worden weergegeven, wordt aanbevolen deze niet te hoog in te stellen",
 	"backlinkExpand": "Terugverwijzing uitklappen",
-	"backlinkExpandTip": "Indien ingesteld op <code class='fn__code'>0</code> niet uitklappen",
+	"backlinkExpandTip": "<code class='fn__code'>0</code> = niet uitklappen, <code class='fn__code'>-1</code> = paneel sluiten",
 	"backmentionExpand": "Terugvermelding uitklappen",
 	"backmentionExpandTip": "<code class='fn__code'>0</code> = niet uitklappen, <code class='fn__code'>-1</code> = paneel sluiten",
 	"floatWindowMode": "Zwevend venster activeren",

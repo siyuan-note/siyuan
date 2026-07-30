@@ -1080,7 +1080,7 @@
 	"dynamicLoadBlocks": "โหลดบล็อกไดนามิก",
 	"dynamicLoadBlocksTip": "ค่านี้รวมจำนวนบล็อกย่อย หากมีบล็อกโค้ด บล็อกสูตร หรือบล็อกแผนภูมิจำนวนมากที่ต้องแสดงผล แนะนำให้ไม่ตั้งค่าสูงเกินไป",
 	"backlinkExpand": "ขยายลิงก์ย้อนกลับ",
-	"backlinkExpandTip": "หากตั้งค่าเป็น <code class='fn__code'>0</code> จะไม่ขยาย",
+	"backlinkExpandTip": "หากตั้งค่าเป็น <code class='fn__code'>0</code> จะไม่ขยาย หากตั้งค่าเป็น <code class='fn__code'>-1</code> จะปิดแผง",
 	"backmentionExpand": "ขยายกล่าวถึงย้อนกลับ",
 	"backmentionExpandTip": "หากตั้งค่าเป็น <code class='fn__code'>0</code> จะไม่ขยาย หากตั้งค่าเป็น <code class='fn__code'>-1</code> จะปิดแผง",
 	"floatWindowMode": "เรียกหน้าต่างลอย",

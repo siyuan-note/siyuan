@@ -86,6 +86,9 @@ const getCategoryTitle = (category: IProviderPreset["category"]) => {
 
 const getProviderAvatarHTML = (provider: Config.IProvider, preset = findPreset(provider)) => {
     const title = getProviderTitle(provider);
+    if (preset?.id === "custom") {
+        return '<span><svg class="b3-card__icon"><use xlink:href="#iconBrain"></use></svg></span>';
+    }
     if (preset?.icon) {
         return `<img src="${preset.icon}" alt="${escapeHTML(title)}">`;
     }

@@ -424,6 +424,11 @@
       display: flow-root;
       position: relative;
 
+      > .protyle > .protyle-content {
+        // 将反链正文限制在独立层叠上下文中，避免其内部浮层覆盖吸顶标题
+        isolation: isolate;
+      }
+
       > .b3-list-item {
         background-color: var(--b3-theme-background);
         position: sticky;

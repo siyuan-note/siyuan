@@ -72,6 +72,10 @@
     }
   }
 
+  &__avbacklinkicon {
+    font-variant-emoji: emoji;
+  }
+
   &__avbacklinkopen {
     color: var(--b3-theme-on-surface-light);
     opacity: 0;

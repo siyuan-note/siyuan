@@ -683,6 +683,10 @@
       position: relative;
     }
 
+    &-fieldicon {
+      font-variant-emoji: emoji;
+    }
+
     &-name {
       opacity: 0.38;
       padding: 2px 4px;
@@ -1020,6 +1024,7 @@
         flex-shrink: 0;
         font-size: inherit;
         font-family: var(--b3-font-family-emoji);
+        font-variant-emoji: emoji;
 
         &--pin {
           margin: 0 0 0 5px;

@@ -1,12 +1,9 @@
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
-import {fetchPost} from "../../util/fetch";
-import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {stickyRow} from "../render/av/row";
 import {trimAVRowsSync} from "../render/av/virtualScroll";
-import {isEncryptedBox} from "../../util/pathName";
 
 let getIndexTimeout: number;
 const avScrollPending = new WeakSet<HTMLElement>();
@@ -93,26 +90,17 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             if (element.scrollTop < element.clientHeight &&
                 firstId && firstElement.getAttribute("data-eof") !== "1") {
                 // 禁用滚动时会产生抖动 https://ld246.com/article/1666717094418
-                protyle.contentElement.style.width = (protyle.contentElement.offsetWidth) + "px";
-                protyle.contentElement.style.overflow = "hidden";
-                protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
-                const getDocParam: IObject = {
-                    id: firstId,
-                    mode: 1,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                };
-                if (isEncryptedBox(protyle.notebookId)) {
-                    getDocParam.notebook = protyle.notebookId;
-                }
-                fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
+                const clearLoadingStyle = () => {
                     protyle.contentElement.style.overflow = "";
                     protyle.contentElement.style.width = "";
-                    onGet({
-                        data: getResponse,
-                        protyle,
-                        action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
-                    });
-                });
+                };
+                if (protyle.scroll.loadDynamic(protyle, 1, {
+                    beforeApply: clearLoadingStyle,
+                    onFinish: clearLoadingStyle,
+                })) {
+                    protyle.contentElement.style.width = (protyle.contentElement.offsetWidth) + "px";
+                    protyle.contentElement.style.overflow = "hidden";
+                }
             }
         } else if ((element.scrollTop > element.scrollHeight - element.clientHeight * 1.8) &&
             lastElement && lastId && lastElement.getAttribute("data-eof") !== "2") {
@@ -121,22 +109,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 element.scrollTop = protyle.scroll.lastScrollTop;
                 return;
             }
-            protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
-            const getDocParam: IObject = {
-                id: lastId,
-                mode: 2,
-                size: window.siyuan.config.editor.dynamicLoadBlocks,
-            };
-            if (isEncryptedBox(protyle.notebookId)) {
-                getDocParam.notebook = protyle.notebookId;
-            }
-            fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
-                onGet({
-                    data: getResponse,
-                    protyle,
-                    action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID],
-                });
-            });
+            protyle.scroll.loadDynamic(protyle, 2);
         }
         protyle.scroll.lastScrollTop = Math.max(element.scrollTop, 0);
     }, {

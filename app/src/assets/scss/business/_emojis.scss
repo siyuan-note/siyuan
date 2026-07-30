@@ -48,6 +48,7 @@
   &__item {
     font-size: 19px;
     font-family: var(--b3-font-family-emoji);
+    font-variant-emoji: emoji;
     text-align: center;
     height: 32px;
     padding: 4px;
@@ -228,6 +229,7 @@
     border: 0;
     padding: 0;
     font-family: var(--b3-font-family-emoji);
+    font-variant-emoji: emoji;
 
     &:hover {
       background-color: var(--b3-theme-surface-lighter);

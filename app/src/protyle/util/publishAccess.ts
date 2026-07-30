@@ -74,15 +74,15 @@ export const openPublishAccessDialog = (id: string, position: IPosition, callbac
         width: isMobile() ? "80vw" : "230px",
         height: "auto",
         content: `<div class="block__icons">
-    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="public" aria-label="${window.siyuan.languages.publishAccessPublic}">${getPublishAccessOptionByLevel("public").iconHTML}</button>
+    <button class="block__icon block__icon--emoji block__icon--show ariaLabel" data-position="north" data-level="public" aria-label="${window.siyuan.languages.publishAccessPublic}">${getPublishAccessOptionByLevel("public").iconHTML}</button>
     <span class="fn__space"></span>
-    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="protected" aria-label="${window.siyuan.languages.publishAccessProtected}">${getPublishAccessOptionByLevel("protected").iconHTML}</button>
+    <button class="block__icon block__icon--emoji block__icon--show ariaLabel" data-position="north" data-level="protected" aria-label="${window.siyuan.languages.publishAccessProtected}">${getPublishAccessOptionByLevel("protected").iconHTML}</button>
     <span class="fn__space"></span>
-    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="hidden" aria-label="${window.siyuan.languages.publishAccessHidden}">${getPublishAccessOptionByLevel("hidden").iconHTML}</button>
+    <button class="block__icon block__icon--emoji block__icon--show ariaLabel" data-position="north" data-level="hidden" aria-label="${window.siyuan.languages.publishAccessHidden}">${getPublishAccessOptionByLevel("hidden").iconHTML}</button>
     <span class="fn__space"></span>
-    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="private" aria-label="${window.siyuan.languages.publishAccessPrivate}">${getPublishAccessOptionByLevel("private").iconHTML}</button>
+    <button class="block__icon block__icon--emoji block__icon--show ariaLabel" data-position="north" data-level="private" aria-label="${window.siyuan.languages.publishAccessPrivate}">${getPublishAccessOptionByLevel("private").iconHTML}</button>
     <span class="fn__space"></span>
-    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="forbidden" aria-label="${window.siyuan.languages.publishAccessForbidden}">${getPublishAccessOptionByLevel("forbidden").iconHTML}</button>
+    <button class="block__icon block__icon--emoji block__icon--show ariaLabel" data-position="north" data-level="forbidden" aria-label="${window.siyuan.languages.publishAccessForbidden}">${getPublishAccessOptionByLevel("forbidden").iconHTML}</button>
     <span class="fn__flex-1"></span>
     <button class="b3-button b3-button--text ariaLabel" data-position="north" aria-label="${window.siyuan.languages.confirm}"><svg><use xlink:href="#iconSelect"></use></svg></button>
 </div>

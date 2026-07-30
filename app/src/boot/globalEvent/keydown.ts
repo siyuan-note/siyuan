@@ -1504,7 +1504,12 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     const confirmDialogElement = document.querySelector('.b3-dialog--open[data-key="dialog-confirm"]');
     if (confirmDialogElement) {
         if (event.key === "Enter") {
-            confirmDialogElement.dispatchEvent(new CustomEvent("click", {detail: event.key}));
+            const activeElement = document.activeElement;
+            if (activeElement instanceof HTMLButtonElement && confirmDialogElement.contains(activeElement)) {
+                activeElement.click();
+            } else {
+                confirmDialogElement.dispatchEvent(new CustomEvent("click", {detail: event.key}));
+            }
             event.preventDefault();
             return;
         } else if (event.key === "Escape") {

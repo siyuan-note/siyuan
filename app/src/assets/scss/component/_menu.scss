@@ -310,6 +310,7 @@
     margin-right: 8px;
     flex-shrink: 0;
     color: var(--b3-menu-icon-color);
+    font-variant-emoji: emoji;
 
     &--small {
       margin: 0 0 0 8px;
@@ -381,6 +382,7 @@
     float: left;
     margin-right: 8px;
     font-family: var(--b3-font-family-emoji);
+    font-variant-emoji: emoji;
 
     img, svg {
       width: 20px;

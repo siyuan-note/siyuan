@@ -91,3 +91,11 @@ export const collapseFileTree = (liElement: Element, onFinish: () => void) => {
         onFinish();
     });
 };
+
+export const toggleFileTree = (liElement: Element, onCollapse: () => void, onExpand: () => void) => {
+    if (liElement.querySelector(".b3-list-item__arrow--open")) {
+        collapseFileTree(liElement, onCollapse);
+    } else if (!isFileTreeCollapsing(liElement)) {
+        onExpand();
+    }
+};

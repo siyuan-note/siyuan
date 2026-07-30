@@ -5,6 +5,7 @@ import {setStorageVal} from "../../protyle/util/compatibility";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
+import {newFile} from "../../util/newFile";
 import {loadMobileFileById, updateRecentDocSwitchTime} from "../editor";
 import {openModel} from "../menu/model";
 import {closeModel} from "../util/closePanel";
@@ -542,32 +543,37 @@ export class MobileTabs {
     <div class="mobile-tabs__actions">
         <button class="b3-button b3-button--outline" data-action="back"${tab?.backStack.length ? "" : " disabled"}><svg><use xlink:href="#iconLeft"></use></svg>${window.siyuan.languages.goBack}</button>
         <button class="b3-button b3-button--outline" data-action="forward"${tab?.forwardStack.length ? "" : " disabled"}><svg><use xlink:href="#iconRight"></use></svg>${window.siyuan.languages.goForward}</button>
-        <button class="b3-button b3-button--outline" data-action="new"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.newTab}</button>
+        <button class="b3-button b3-button--outline" data-action="new-doc"><svg><use xlink:href="#iconAddDoc"></use></svg>${window.siyuan.languages.newFile}</button>
         <button class="b3-button b3-button--outline" data-action="close-all"${this.state.tabs.length ? "" : " disabled"}><svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.closeAll}</button>
     </div>
 </div>`,
             bindEvent: (element) => {
-                element.addEventListener("click", (event) => {
-                    const target = (event.target as HTMLElement).closest<HTMLElement>("[data-action], [data-tab-id]");
-                    if (!target) {
-                        return;
-                    }
-                    const action = target.dataset.action;
-                    const tabID = target.closest<HTMLElement>("[data-tab-id]")?.dataset.tabId;
-                    if (action === "close" && tabID) {
-                        void this.close(tabID);
-                    } else if (action === "back") {
-                        void this.goBack().then(() => closeModel());
-                    } else if (action === "forward") {
-                        void this.goForward().then(() => closeModel());
-                    } else if (action === "new") {
-                        this.createBlank();
-                        closeModel();
-                    } else if (action === "close-all") {
-                        this.closeAll();
-                    } else if (tabID) {
-                        void this.switchTo(tabID);
-                    }
+                element.querySelectorAll<HTMLElement>("[data-action]").forEach((target) => {
+                    target.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        const action = target.dataset.action;
+                        const tabID = target.closest<HTMLElement>("[data-tab-id]")?.dataset.tabId;
+                        if (action === "close" && tabID) {
+                            void this.close(tabID);
+                        } else if (action === "back") {
+                            void this.goBack().then(() => closeModel());
+                        } else if (action === "forward") {
+                            void this.goForward().then(() => closeModel());
+                        } else if (action === "new-doc") {
+                            closeModel();
+                            newFile(this.app);
+                        } else if (action === "close-all") {
+                            this.closeAll();
+                        }
+                    });
+                });
+                element.querySelectorAll<HTMLElement>("[data-tab-id]").forEach((target) => {
+                    target.addEventListener("click", () => {
+                        const tabID = target.dataset.tabId;
+                        if (tabID) {
+                            void this.switchTo(tabID);
+                        }
+                    });
                 });
             },
         });

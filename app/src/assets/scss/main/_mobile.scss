@@ -255,6 +255,10 @@
   }
 }
 
+#model > .toolbar > .toolbar__icon.fn__none + .toolbar__text {
+  padding-left: 12px;
+}
+
 .side-panel {
   position: fixed;
   background-color: var(--b3-theme-surface);

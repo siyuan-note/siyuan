@@ -5482,7 +5482,13 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 
 	// 检查是否重复添加相同的块
 	blockValues := attrView.GetBlockKeyValues()
+	if nil == blockValues || nil == blockValues.Key {
+		return fmt.Errorf("attribute view [%s] has no block key", avID)
+	}
 	for _, blockValue := range blockValues.Values {
+		if nil == blockValue || nil == blockValue.Block {
+			continue
+		}
 		if "" != addingBoundBlockID && blockValue.Block.ID == addingBoundBlockID {
 			if !isDetached {
 				// 重复绑定一下，比如剪切数据库块、取消绑定块后再次添加的场景需要
@@ -6623,6 +6629,8 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 
 	keyTyp := av.KeyType(keyType)
 	switch keyTyp {
+	case av.KeyTypeBlock:
+		return errors.New("cannot add an attribute view block key")
 	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
 		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
 		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
@@ -6707,6 +6715,8 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 				}
 			}
 		}
+	default:
+		return fmt.Errorf("unsupported attribute view key type [%s]", keyType)
 	}
 
 	err = av.SaveAttributeView(attrView)

@@ -40,7 +40,7 @@ var DatabaseTool = &Tool{
 			"page":               {Type: "number", Description: "Page number (default 1)"},
 			"pageSize":           {Type: "number", Description: "Results per page (default 50)"},
 			"name":               {Type: "string", Description: "Key name (for key_add)"},
-			"type":               {Type: "string", Description: "Key type: block/text/number/date/select/mSelect/url/email/phone/mAsset/template/created/updated/checkbox/relation/rollup/lineNumber (for key_add)"},
+			"type":               {Type: "string", Description: "Key type: text/number/date/select/mSelect/url/email/phone/mAsset/template/created/updated/checkbox/relation/rollup/lineNumber (for key_add)"},
 			"icon":               {Type: "string", Description: "Key icon (for key_add, optional)"},
 			"prev":               {Type: "string", Description: "Previous key ID for ordering (for key_add, optional)"},
 			"keyID":              {Type: "string", Description: "Key ID (for key_remove, item_update)"},
@@ -257,7 +257,7 @@ func databaseItemAdd(args map[string]any) (CallToolResult, error) {
 		src["content"] = content
 	}
 	srcs := []map[string]any{src}
-	if err := model.AddAttributeViewBlock(nil, srcs, id, blockID, viewID, groupID, previousID, ignoreFill); err != nil {
+	if err := model.AddAttributeViewBlock(nil, srcs, id, "", viewID, groupID, previousID, ignoreFill); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "add item failed: " + err.Error()}}, IsError: true}, nil
 	}
 	model.ReloadAttrView(id)

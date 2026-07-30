@@ -4,7 +4,7 @@ const applyExportConfig = (data: Config.IExport) => {
     window.siyuan.config.export = data;
     const pathDisplay = document.getElementById("pandocBinPathDisplay");
     if (pathDisplay) {
-        pathDisplay.textContent = data.pandocBin;
+        pathDisplay.textContent = data.pandocBin || `${window.siyuan.languages.builtIn} Pandoc`;
     }
 };
 

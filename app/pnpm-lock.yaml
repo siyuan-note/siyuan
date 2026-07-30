@@ -114,6 +114,9 @@ importers:
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
+      unzipper:
+        specifier: 0.12.5
+        version: 0.12.5
       webpack:
         specifier: ^5.104.1
         version: 5.106.2(postcss@8.5.14)(webpack-cli@4.10.0)

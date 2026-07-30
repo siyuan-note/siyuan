@@ -33,7 +33,6 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/Xuanwo/go-locale"
-	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -439,10 +438,6 @@ func InitConf() {
 		// 锚点哈希模式和脚注模式合并 https://github.com/siyuan-note/siyuan/issues/13331
 		Conf.Export.BlockRefMode = 4 // 改为脚注+锚点哈希
 	}
-	if "" == Conf.Export.PandocBin {
-		Conf.Export.PandocBin = util.PandocBinPath
-	}
-
 	if nil == Conf.Graph || nil == Conf.Graph.Local || nil == Conf.Graph.Global {
 		Conf.Graph = conf.NewGraph()
 	}
@@ -510,6 +505,9 @@ func InitConf() {
 			Conf.Export.PandocParams = strings.TrimSpace(params)
 		}
 		Conf.Export.DocxTemplate = ""
+		Conf.Save()
+	}
+	if migratePandocConfig(Conf.Export) {
 		Conf.Save()
 	}
 
@@ -770,7 +768,7 @@ func InitConf() {
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
 
-	go util.InitPandoc()
+	go util.InitPandoc(Conf.Export.PandocBin)
 	go util.InitTesseract()
 }
 
@@ -1494,28 +1492,6 @@ func closeUserGuide() {
 		util.PushClearMsg(msgId)
 		logging.LogInfof("closed user guide box [%s]", boxID)
 	}
-}
-
-func init() {
-	subscribeConfEvents()
-}
-
-func subscribeConfEvents() {
-	eventbus.Subscribe(util.EvtConfPandocInitialized, func() {
-		logging.LogInfof("pandoc initialized, set pandoc bin to [%s]", util.PandocBinPath)
-		Conf.Export.PandocBin = util.PandocBinPath
-
-		params := util.RemoveInvalid(Conf.Export.PandocParams)
-		if !strings.Contains(params, "--reference-doc") && "" != util.PandocTemplatePath && !Conf.System.IsMicrosoftStore {
-			params += " --reference-doc"
-			params += " \"" + util.PandocTemplatePath + "\""
-			Conf.Export.PandocParams = strings.TrimSpace(params)
-		}
-
-		logging.LogInfof("pandoc params set to [%s]", Conf.Export.PandocParams)
-		logging.LogInfof("pandoc resources [%s, %s]", util.PandocTemplatePath, util.PandocColorFilterPath)
-		Conf.Save()
-	})
 }
 
 // NotebookCryptoEnabled 返回加密笔记本功能是否已启用（线程安全）。

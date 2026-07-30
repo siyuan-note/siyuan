@@ -826,13 +826,15 @@
   {
     "dataType": "markdown",
     "data": "foobarbaz",
-    "id": "20211230161520-querkps"
+    "id": "20211230161520-querkps",
+    "lockType": false
   }
   ```
 
     * `dataType`: 更新するデータ型、`markdown`または`dom`
     * `data`: 更新するデータ
     * `id`: 更新するブロックのID
+    * `lockType`: 解析後のブロック型が既存のブロック型と異なる場合に更新を拒否するかどうか。不正な親子構造は常に拒否されますが、空の段落ブロックは任意の有効なブロック型に変換できます。デフォルトは`false`
 * 戻り値
 
   ```json

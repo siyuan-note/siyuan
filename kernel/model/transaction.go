@@ -1631,6 +1631,28 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
 	}
 
+	updatedNode := firstContentBlock(subTree.Root)
+	if nil == updatedNode {
+		logging.LogErrorf("get first node in sub tree [%s] failed", subTree.Root.ID)
+		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
+	}
+	if nil != oldNode.Parent && ast.NodeList == updatedNode.Type && ast.NodeList == oldNode.Parent.Type {
+		updatedNode = firstContentBlock(updatedNode)
+	}
+	if nil == updatedNode {
+		msg := "updated block node is invalid"
+		logging.LogErrorf("%s [%s]", msg, id)
+		return &TxErr{code: TxErrCodePushMsg, msg: msg, id: id}
+	}
+	if err = treenode.ValidateBlockReplacement(oldNode, updatedNode); err != nil {
+		logging.LogErrorf("validate updated block [%s] structure failed: %s", id, err)
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: id}
+	}
+	if err = validateBlockUpdateType(oldNode, updatedNode, operation.LockType); err != nil {
+		logging.LogError(err.Error())
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: id}
+	}
+
 	// 收集引用的定义块 ID
 	oldDefIDs := getRefDefIDs(oldNode)
 	var newDefIDs []string
@@ -1696,14 +1718,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		TouchRefUsed(newRefDefIDs)
 	}
 
-	updatedNode := subTree.Root.FirstChild
-	if nil == updatedNode {
-		logging.LogErrorf("get fist node in sub tree [%s] failed", subTree.Root.ID)
-		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
-	}
-	if ast.NodeList == updatedNode.Type && ast.NodeList == oldNode.Parent.Type {
-		updatedNode = updatedNode.FirstChild
-	}
 	if ast.NodeListItem == oldNode.Type {
 		tx.markListItemFoldCandidate(oldNode, tree)
 	}
@@ -2133,6 +2147,8 @@ type Operation struct {
 
 	DeckID string      `json:"deckID"` // 用于添加/删除闪卡
 	Tree   *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
+
+	LockType bool `json:"-"` // 外部块更新是否禁止改变主类型
 
 	AvID              string           `json:"avID"`              // 属性视图 ID
 	SrcIDs            []string         `json:"srcIDs"`            // 用于从属性视图中删除行

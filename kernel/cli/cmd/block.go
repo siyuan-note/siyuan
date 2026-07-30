@@ -336,19 +336,23 @@ var blockUpdateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		lockType, _ := cmd.Flags().GetBool("lock-type")
 
-		dom := markdownToBlockDOM(data)
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action: "update",
-				Data:   dom,
-				ID:     id,
-			}},
-		}}
+		operations, rootIDs, err := model.BuildBlockUpdateOperations([]model.BlockUpdateInput{{
+			ID:       id,
+			Data:     data,
+			DataType: "markdown",
+			LockType: lockType,
+		}})
+		if err != nil {
+			return err
+		}
+
+		transactions := []*model.Transaction{{DoOperations: operations}}
 		model.PerformTransactions(&transactions)
 		model.FlushTxQueue()
-		if bt := treenode.GetBlockTree(id); bt != nil {
-			model.AppendPushReloadProtyleEntry(bt.RootID)
+		for _, rootID := range rootIDs {
+			model.AppendPushReloadProtyleEntry(rootID)
 		}
 		fmt.Println("ok")
 		return nil
@@ -604,6 +608,7 @@ func init() {
 	blockUpdateCmd.Flags().String("id", "", "block ID")
 	blockUpdateCmd.Flags().String("data", "", "markdown content")
 	blockUpdateCmd.Flags().String("file", "", "read content from file path (- for stdin)")
+	blockUpdateCmd.Flags().Bool("lock-type", false, "reject update when the parsed block type differs from the existing block type")
 
 	blockDeleteCmd.Flags().String("id", "", "block ID")
 

@@ -21,7 +21,13 @@ import {
     hasTopClosestByAttribute,
     isInEmbedBlock
 } from "../util/hasClosest";
-import {removeBlock, removeCrossBlockRange, removeImage} from "./remove";
+import {
+    getImageBlockRefCheckTargets,
+    getRangeBlockRefCheckTargets,
+    removeBlock,
+    removeCrossBlockRange,
+    removeImage
+} from "./remove";
 import {
     getContenteditableElement,
     getFirstBlock,
@@ -83,6 +89,7 @@ import {getAVTemplateInteractiveElement} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {isMobile} from "../../util/functions";
+import {confirmBlockRef} from "../../util/checkBlockRef";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -859,10 +866,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 不可使用 !event.shiftKey，否则 https://ld246.com/article/1666434796806
         if ((!event.altKey && (event.key === "Backspace" || event.key === "Delete")) ||
             matchHotKey("⌃D", event)) {
-            if (isCrossBlock && selectText !== "") {
-                await removeCrossBlockRange(protyle, range, nodeElement, endElement);
+            const rangeCheckTargets = !range.collapsed && endElement ?
+                getRangeBlockRefCheckTargets(protyle.wysiwyg.element, range, nodeElement, endElement, true) :
+                {elements: [], exactIDs: []};
+            if (endElement && ((isCrossBlock && selectText !== "") || rangeCheckTargets.elements.length > 0)) {
                 event.stopPropagation();
                 event.preventDefault();
+                await removeCrossBlockRange(protyle, range, nodeElement, endElement);
                 return;
             }
             if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
@@ -905,13 +915,29 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const editElement = getContenteditableElement(nodeElement) as HTMLElement;
             const imgSelectElement = protyle.wysiwyg.element.querySelector(".img--select");
             if (imgSelectElement) {
-                imgSelectElement.classList.remove("img--select");
                 if (nodeElement.contains(imgSelectElement)) {
+                    const checkTargets = getImageBlockRefCheckTargets(nodeElement, imgSelectElement);
+                    const checkIDs = checkTargets.elements
+                        .map(item => item.getAttribute("data-node-id")).filter(Boolean);
+                    if (checkIDs.length > 0) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        if (!await confirmBlockRef({
+                            scope: "blocks",
+                            ids: checkIDs,
+                            exactIDs: checkTargets.exactIDs,
+                            notebook: protyle.notebookId,
+                        }, protyle) || checkTargets.elements.some(item => !item.isConnected)) {
+                            return;
+                        }
+                    }
+                    imgSelectElement.classList.remove("img--select");
                     removeImage(imgSelectElement, nodeElement, range, protyle);
                     event.stopPropagation();
                     event.preventDefault();
                     return;
                 }
+                imgSelectElement.classList.remove("img--select");
             } else if (selectText === "") {
                 if (nodeElement.classList.contains("table") && nodeElement.querySelector(".table__select").clientHeight > 0) {
                     clearTableCell(protyle, nodeElement);

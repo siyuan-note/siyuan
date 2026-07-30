@@ -46,11 +46,21 @@ import {isEncryptedBox} from "../../util/pathName";
 import {highlightRender} from "../render/highlightRender";
 import * as dayjs from "dayjs";
 import {mergeSameInlineElement} from "../toolbar/util";
-import {getCrossBlockMergeRemoveElement, isEntireBlockContentSelected} from "./removeRange";
+import {
+    getBlockRefCheckElementChain,
+    getCrossBlockMergeRemoveElement,
+    isEntireBlockContentSelected
+} from "./removeRange";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 
+export interface IBlockRefCheckTargets {
+    elements: HTMLElement[];
+    exactIDs: string[];
+}
+
 const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: Range,
-                                     startElement: HTMLElement, endElement: HTMLElement) => {
+                                     startElement: HTMLElement, endElement: HTMLElement,
+                                     mergeEndElement = true) => {
     const ranges = getBlockRanges(editorElement, selectedRange);
     const selectedElements: HTMLElement[] = [];
     selectedRange.cloneContents().querySelectorAll<HTMLElement>("[data-node-id]").forEach(item => {
@@ -67,9 +77,10 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
         }
     });
     const selectedSet = new Set(selectedElements);
-    const removeElements = selectedElements.filter(item => {
+    const rangeRemoveElements = selectedElements.filter(item => {
         return !selectedSet.has(item.parentElement.closest<HTMLElement>("[data-node-id]"));
     });
+    const removeElements = [...rangeRemoveElements];
     const rangesByBlock = new Map<HTMLElement, typeof ranges>();
     ranges.forEach(item => {
         if (removeElements.some(removeElement => removeElement.contains(item.blockElement))) {
@@ -84,7 +95,7 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
     const endEditableElement = rangesByBlock.get(endElement)?.[0]?.editableElement;
     const blockType = startElement.getAttribute("data-type");
     let removeEndElement: Element;
-    if (startEditableElement && endEditableElement &&
+    if (mergeEndElement && startElement !== endElement && startEditableElement && endEditableElement &&
         ["NodeParagraph", "NodeHeading"].includes(blockType) &&
         blockType === endElement.getAttribute("data-type") &&
         endElement.getAttribute("fold") !== "1") {
@@ -105,6 +116,9 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
     });
     return {
         ranges,
+        startElement,
+        endElement,
+        rangeRemoveElements,
         removeElements,
         rangesByBlock,
         startEditableElement,
@@ -114,34 +128,116 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
     };
 };
 
-const getCrossBlockRefCheckElementsFromContext = (context: ReturnType<typeof getCrossBlockRemovalContext>) => {
+const addExactRefCheckElement = (elementsByID: Map<string, HTMLElement>, exactIDs: Set<string>,
+                                 element: HTMLElement) => {
+    const id = element?.getAttribute("data-node-id");
+    if (id) {
+        elementsByID.set(id, element);
+        exactIDs.add(id);
+    }
+};
+
+const addExactRefCheckElementChain = (elementsByID: Map<string, HTMLElement>, exactIDs: Set<string>,
+                                      element: HTMLElement) => {
+    const topElement = getTopAloneElement(element) as HTMLElement;
+    getBlockRefCheckElementChain(element, topElement).forEach(item => {
+        addExactRefCheckElement(elementsByID, exactIDs, item);
+    });
+};
+
+const hasMeaningfulContent = (element: Element) => {
+    const text = (element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim();
+    return text !== "" || !!element.querySelector(".img, .emoji, [data-type~='inline-math']");
+};
+
+const isEntireMeaningfulContentSelected = (selectedRange: Range, editableElement: Element) => {
+    const contentRange = document.createRange();
+    contentRange.selectNodeContents(editableElement);
+    if (isEntireBlockContentSelected(selectedRange, contentRange)) {
+        return true;
+    }
+    const beforeRange = contentRange.cloneRange();
+    beforeRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
+    const afterRange = contentRange.cloneRange();
+    afterRange.setStart(selectedRange.endContainer, selectedRange.endOffset);
+    const beforeElement = document.createElement("div");
+    beforeElement.append(beforeRange.cloneContents());
+    const afterElement = document.createElement("div");
+    afterElement.append(afterRange.cloneContents());
+    return !hasMeaningfulContent(beforeElement) && !hasMeaningfulContent(afterElement);
+};
+
+const getBlockRefCheckTargetsFromContext = (context: ReturnType<typeof getCrossBlockRemovalContext>,
+                                            removedElements: HTMLElement[]) => {
     const elementsByID = new Map<string, HTMLElement>();
-    context.removeElements.forEach(item => {
+    const exactIDs = new Set<string>();
+    removedElements.forEach(item => {
         const id = item.getAttribute("data-node-id");
         if (id) {
             elementsByID.set(id, item);
         }
     });
+    let mergedEndHasRemainingContent = false;
+    if (context.removeEndElement) {
+        const endRange = context.ranges.find(item => item.blockElement === context.endElement);
+        if (endRange) {
+            mergedEndHasRemainingContent = !isEntireMeaningfulContentSelected(
+                endRange.range, endRange.editableElement);
+        }
+    }
     context.ranges.forEach(item => {
-        const contentRange = document.createRange();
-        contentRange.selectNodeContents(item.editableElement);
-        const contentPosition = getSelectionOffset(item.editableElement, undefined, contentRange);
-        if (!isEntireBlockContentSelected(item.start, item.end, contentPosition.end)) {
+        if (removedElements.some(removeElement => removeElement.contains(item.blockElement)) ||
+            getContenteditableElement(item.blockElement) !== item.editableElement ||
+            (mergedEndHasRemainingContent && item.blockElement === context.startElement)) {
             return;
         }
-        const topElement = getTopAloneElement(item.blockElement) as HTMLElement;
-        const id = topElement.getAttribute("data-node-id");
-        if (id) {
-            elementsByID.set(id, topElement);
+        if (!isEntireMeaningfulContentSelected(item.range, item.editableElement)) {
+            return;
         }
+        addExactRefCheckElementChain(elementsByID, exactIDs, item.blockElement);
     });
-    return Array.from(elementsByID.values());
+    removedElements.forEach(item => {
+        exactIDs.delete(item.getAttribute("data-node-id"));
+    });
+    return {
+        elements: Array.from(elementsByID.values()),
+        exactIDs: Array.from(exactIDs),
+    };
 };
 
-export const getCrossBlockRefCheckElements = (editorElement: HTMLElement, selectedRange: Range,
-                                               startElement: HTMLElement, endElement: HTMLElement) => {
-    return getCrossBlockRefCheckElementsFromContext(
-        getCrossBlockRemovalContext(editorElement, selectedRange, startElement, endElement));
+export const getRangeBlockRefCheckTargets = (editorElement: HTMLElement, selectedRange: Range,
+                                              startElement: HTMLElement, endElement: HTMLElement,
+                                              mergeEndElement = false) => {
+    const context = getCrossBlockRemovalContext(
+        editorElement, selectedRange, startElement, endElement, mergeEndElement);
+    return getBlockRefCheckTargetsFromContext(
+        context, mergeEndElement ? context.removeElements : context.rangeRemoveElements);
+};
+
+export const getImageBlockRefCheckTargets = (blockElement: HTMLElement, removeElement: Element):
+IBlockRefCheckTargets => {
+    const editableElement = getContenteditableElement(blockElement);
+    if (!editableElement?.contains(removeElement)) {
+        return {elements: [], exactIDs: []};
+    }
+    const cloneElement = editableElement.cloneNode(true) as HTMLElement;
+    const removeElements = Array.from(editableElement.querySelectorAll(".img"));
+    const imageElement = removeElement.classList.contains("img") ? removeElement : removeElement.closest(".img");
+    const removeIndex = removeElements.indexOf(imageElement);
+    if (removeIndex < 0) {
+        return {elements: [], exactIDs: []};
+    }
+    cloneElement.querySelectorAll(".img")[removeIndex]?.remove();
+    if (hasMeaningfulContent(cloneElement)) {
+        return {elements: [], exactIDs: []};
+    }
+    const elementsByID = new Map<string, HTMLElement>();
+    const exactIDs = new Set<string>();
+    addExactRefCheckElementChain(elementsByID, exactIDs, blockElement);
+    return {
+        elements: Array.from(elementsByID.values()),
+        exactIDs: Array.from(exactIDs),
+    };
 };
 
 export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Range,
@@ -160,16 +256,17 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
     if (removeElements.length === 0 && updateElements.length === 0) {
         return;
     }
-    const checkElements = getCrossBlockRefCheckElementsFromContext(context);
-    const checkIDs = checkElements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
+    const checkTargets = getBlockRefCheckTargetsFromContext(context, context.removeElements);
+    const checkIDs = checkTargets.elements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
     if (checkIDs.length > 0 && !await confirmBlockRef({
         scope: "blocks",
         ids: checkIDs,
+        exactIDs: checkTargets.exactIDs,
         notebook: protyle.notebookId,
     }, protyle)) {
         return;
     }
-    if (checkElements.some(item => !item.isConnected || item.getAttribute("data-node-id") === null)) {
+    if (checkTargets.elements.some(item => !item.isConnected || item.getAttribute("data-node-id") === null)) {
         return;
     }
 

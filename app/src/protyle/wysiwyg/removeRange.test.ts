@@ -1,6 +1,10 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getCrossBlockMergeRemoveElement, isEntireBlockContentSelected} from "./removeRange";
+import {
+    getBlockRefCheckElementChain,
+    getCrossBlockMergeRemoveElement,
+    isEntireBlockContentSelected
+} from "./removeRange";
 
 class TestElement {
     parentElement: TestElement | null = null;
@@ -56,11 +60,37 @@ const attr = (name: string) => new TestElement(name);
 const asHTMLElement = (element: TestElement) => element as unknown as HTMLElement;
 
 describe("isEntireBlockContentSelected", () => {
-    it("requires the selection to cover the complete editable content", () => {
-        assert.equal(isEntireBlockContentSelected(0, 3, 3), true);
-        assert.equal(isEntireBlockContentSelected(0, 4, 3), true);
-        assert.equal(isEntireBlockContentSelected(1, 3, 3), false);
-        assert.equal(isEntireBlockContentSelected(0, 2, 3), false);
+    const range = (startComparison: number, endComparison: number) => ({
+        compareBoundaryPoints(type: number) {
+            return type === 0 ? startComparison : endComparison;
+        },
+    }) as unknown as Range;
+
+    it("requires the selection boundaries to cover the complete editable content", () => {
+        const contentRange = {} as Range;
+        assert.equal(isEntireBlockContentSelected(range(0, 0), contentRange), true);
+        assert.equal(isEntireBlockContentSelected(range(-1, 1), contentRange), true);
+        assert.equal(isEntireBlockContentSelected(range(1, 0), contentRange), false);
+        assert.equal(isEntireBlockContentSelected(range(0, -1), contentRange), false);
+    });
+});
+
+describe("getBlockRefCheckElementChain", () => {
+    it("includes the intermediate list item when a nested list paragraph is cleared", () => {
+        const paragraph = block("paragraph", "NodeParagraph");
+        const nestedItem = block("nestedItem", "NodeListItem", paragraph, attr("nestedItemAttr"));
+        const nestedList = block("nestedList", "NodeList", nestedItem, attr("nestedListAttr"));
+        const parentItem = block("parentItem", "NodeListItem",
+            block("parentParagraph", "NodeParagraph"), nestedList, attr("parentItemAttr"));
+
+        const result = getBlockRefCheckElementChain(asHTMLElement(paragraph), asHTMLElement(nestedList));
+
+        assert.deepEqual(result, [
+            asHTMLElement(paragraph),
+            asHTMLElement(nestedItem),
+            asHTMLElement(nestedList),
+        ]);
+        assert.equal(result.includes(asHTMLElement(parentItem)), false);
     });
 });
 

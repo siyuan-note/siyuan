@@ -133,7 +133,7 @@ func computeTokenBreakdown(counter *tokenCounter, messages []openai.ChatCompleti
 		case openai.ChatMessageRoleSystem:
 			systemTotal += counter.count(msg.Content) + perMessageOverhead
 		case openai.ChatMessageRoleUser:
-			breakdown["messages"] += counter.count(msg.Content) + perMessageOverhead
+			breakdown["messages"] += counter.count(chatMessageText(msg)) + perMessageOverhead
 		case openai.ChatMessageRoleAssistant:
 			breakdown["messages"] += counter.count(msg.Content) + perMessageOverhead
 			// 助手消息的推理内容（deepseek-reasoner 等）也计入对话消息。

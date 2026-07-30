@@ -302,6 +302,13 @@ type AnalyzeDocumentImageResult struct {
 	Height   int              `json:"height"`
 }
 
+type PreparedDocumentImage struct {
+	Artifact ImageArtifactRef   `json:"artifact"`
+	Data     []byte             `json:"-"`
+	MIMEType string             `json:"mimeType"`
+	Prepared util.PreparedImage `json:"-"`
+}
+
 type AnalyzeImageResult struct {
 	Analysis string `json:"analysis"`
 	Width    int    `json:"width"`
@@ -384,32 +391,69 @@ func ListDocumentImages(documentID string) (DocumentImageList, error) {
 
 // AnalyzeDocumentImage 使用全局图片理解配置分析文档引用的资源图片。
 func AnalyzeDocumentImage(ctx context.Context, request AnalyzeDocumentImageRequest) (AnalyzeDocumentImageResult, error) {
-	if strings.TrimSpace(request.AssetPath) == "" {
-		return AnalyzeDocumentImageResult{}, errors.New("assetPath is required for analyze")
-	}
-	if !strings.HasPrefix(AssetPathWithoutQuery(request.AssetPath), "assets/") {
-		return AnalyzeDocumentImageResult{}, errors.New("only local assets/... images are supported")
-	}
-	bt, err := resolveMultimodalDocument(request.DocumentID)
+	prepared, err := PrepareDocumentImage(request.DocumentID, request.AssetPath)
 	if err != nil {
 		return AnalyzeDocumentImageResult{}, err
 	}
-	if !documentReferencesImage(bt.RootID, request.AssetPath) {
-		return AnalyzeDocumentImageResult{}, errors.New("assetPath is not an image referenced by the document")
+	if Conf == nil || Conf.AI == nil {
+		return AnalyzeDocumentImageResult{}, errors.New("AI configuration is unavailable")
 	}
-	data, err := ReadAssetBytesInBox(bt.BoxID, request.AssetPath)
-	if err != nil {
-		return AnalyzeDocumentImageResult{}, fmt.Errorf("read image failed: %w", err)
+	provider, visionModel := Conf.AI.GetVisionModel()
+	if err = validateImageModel(provider, visionModel); err != nil {
+		return AnalyzeDocumentImageResult{}, err
 	}
-	result, err := AnalyzeImage(ctx, data, request.Question, request.Detail)
+	visionPrepared, err := util.PrepareForVision(
+		prepared.Data, Conf.AI.Vision.MaxImageBytes, Conf.AI.Vision.MaxPixels, Conf.AI.Vision.MaxEdge,
+	)
 	if err != nil {
 		return AnalyzeDocumentImageResult{}, err
+	}
+	analysis, err := util.NewOpenAIImageAdapter(
+		provider.APIKey, provider.BaseURL, visionModel.Name, Conf.AI.Vision.RequestTimeout,
+	).Analyze(ctx, visionPrepared, request.Question, request.Detail)
+	if err != nil {
+		return AnalyzeDocumentImageResult{}, markImageExecutionUnknown(fmt.Errorf("analyze image failed: %w", err))
 	}
 	return AnalyzeDocumentImageResult{
-		Artifact: ImageArtifactRef{Kind: "image", Path: request.AssetPath, DocumentID: bt.RootID},
-		Analysis: result.Analysis,
-		Width:    result.Width,
-		Height:   result.Height,
+		Artifact: prepared.Artifact,
+		Analysis: analysis,
+		Width:    visionPrepared.Width,
+		Height:   visionPrepared.Height,
+	}, nil
+}
+
+// PrepareDocumentImage 校验并读取文档实际引用的本地资源图片，供当前模型直接接收图片输入。
+func PrepareDocumentImage(documentID, assetPath string) (PreparedDocumentImage, error) {
+	assetPath = strings.TrimSpace(assetPath)
+	if assetPath == "" {
+		return PreparedDocumentImage{}, errors.New("assetPath is required for analyze")
+	}
+	if !strings.HasPrefix(AssetPathWithoutQuery(assetPath), "assets/") {
+		return PreparedDocumentImage{}, errors.New("only local assets/... images are supported")
+	}
+	if Conf == nil || Conf.AI == nil || Conf.AI.Vision == nil {
+		return PreparedDocumentImage{}, errors.New("AI vision configuration is unavailable")
+	}
+	bt, err := resolveMultimodalDocument(documentID)
+	if err != nil {
+		return PreparedDocumentImage{}, err
+	}
+	if !documentReferencesImage(bt.RootID, assetPath) {
+		return PreparedDocumentImage{}, errors.New("assetPath is not an image referenced by the document")
+	}
+	data, err := ReadAssetBytesInBox(bt.BoxID, assetPath)
+	if err != nil {
+		return PreparedDocumentImage{}, fmt.Errorf("read image failed: %w", err)
+	}
+	prepared, err := util.PrepareForVision(data, Conf.AI.Vision.MaxImageBytes, Conf.AI.Vision.MaxPixels, 0)
+	if err != nil {
+		return PreparedDocumentImage{}, err
+	}
+	return PreparedDocumentImage{
+		Artifact: ImageArtifactRef{Kind: "image", Path: assetPath, DocumentID: bt.RootID},
+		Data:     data,
+		MIMEType: mimetype.Detect(data).String(),
+		Prepared: prepared,
 	}, nil
 }
 

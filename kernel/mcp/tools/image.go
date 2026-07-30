@@ -39,7 +39,7 @@ var ImageTool = &Tool{
 	Name:  "image",
 	Title: "Document images",
 	Description: "List and understand local images referenced by a SiYuan document, or generate an image asset. " +
-		"Use list before analyze. analyze sends the selected image to the configured vision provider. " +
+		"Use list before analyze. analyze attaches the selected image to the current Agent model. " +
 		"generate creates a reusable image asset in the target document's notebook.",
 	InputSchema: ToolSchema{
 		Type: "object",
@@ -109,11 +109,7 @@ func imageHandler(ctx context.Context, args map[string]any) (CallToolResult, err
 	case "list":
 		return imageList(documentID), nil
 	case "analyze":
-		assetPath, _ := args["assetPath"].(string)
-		meta := imageOperationMeta{Action: action, DocumentID: documentID, AssetPath: assetPath}
-		return runImageOperation(ctx, imageOperationKey(args, action), meta, func() CallToolResult {
-			return imageAnalyze(ctx, documentID, args)
-		}), nil
+		return imageAnalyze(documentID, args), nil
 	case "generate":
 		meta := imageOperationMeta{Action: action, DocumentID: documentID}
 		return runImageOperation(ctx, imageOperationKey(args, action), meta, func() CallToolResult {
@@ -132,20 +128,35 @@ func imageList(documentID string) CallToolResult {
 	return imageJSON(result)
 }
 
-func imageAnalyze(ctx context.Context, documentID string, args map[string]any) CallToolResult {
+func imageAnalyze(documentID string, args map[string]any) CallToolResult {
 	assetPath, _ := args["assetPath"].(string)
 	question, _ := args["question"].(string)
 	detail, _ := args["detail"].(string)
-	result, err := model.AnalyzeDocumentImage(ctx, model.AnalyzeDocumentImageRequest{
-		DocumentID: documentID,
-		AssetPath:  assetPath,
-		Question:   question,
-		Detail:     detail,
-	})
+	prepared, err := model.PrepareDocumentImage(documentID, assetPath)
 	if err != nil {
 		return imageResultForError(err)
 	}
-	return imageJSON(result)
+	result := imageJSON(map[string]any{
+		"artifact": prepared.Artifact,
+		"attached": true,
+		"width":    prepared.Prepared.Width,
+		"height":   prepared.Prepared.Height,
+	})
+	if result.IsError {
+		return result
+	}
+	result.ModelAttachments = []ModelAttachment{{
+		Type:       "image",
+		Data:       prepared.Data,
+		MIMEType:   prepared.MIMEType,
+		Path:       prepared.Artifact.Path,
+		DocumentID: prepared.Artifact.DocumentID,
+		Prompt:     question,
+		Detail:     detail,
+		Width:      prepared.Prepared.Width,
+		Height:     prepared.Prepared.Height,
+	}}
+	return result
 }
 
 func imageGenerate(ctx context.Context, documentID string, args map[string]any) CallToolResult {

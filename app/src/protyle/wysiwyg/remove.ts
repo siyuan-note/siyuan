@@ -46,12 +46,11 @@ import {isEncryptedBox} from "../../util/pathName";
 import {highlightRender} from "../render/highlightRender";
 import * as dayjs from "dayjs";
 import {mergeSameInlineElement} from "../toolbar/util";
-import {getCrossBlockMergeRemoveElement} from "./removeRange";
+import {getCrossBlockMergeRemoveElement, isEntireBlockContentSelected} from "./removeRange";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 
-export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Range,
-                                            startElement: HTMLElement, endElement: HTMLElement) => {
-    const editorElement = protyle.wysiwyg.element;
+const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: Range,
+                                     startElement: HTMLElement, endElement: HTMLElement) => {
     const ranges = getBlockRanges(editorElement, selectedRange);
     const selectedElements: HTMLElement[] = [];
     selectedRange.cloneContents().querySelectorAll<HTMLElement>("[data-node-id]").forEach(item => {
@@ -104,18 +103,73 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
     const updateElements = Array.from(rangesByBlock.keys()).filter(item => {
         return !removeElements.some(removeElement => removeElement.contains(item));
     });
+    return {
+        ranges,
+        removeElements,
+        rangesByBlock,
+        startEditableElement,
+        endEditableElement,
+        removeEndElement,
+        updateElements,
+    };
+};
+
+const getCrossBlockRefCheckElementsFromContext = (context: ReturnType<typeof getCrossBlockRemovalContext>) => {
+    const elementsByID = new Map<string, HTMLElement>();
+    context.removeElements.forEach(item => {
+        const id = item.getAttribute("data-node-id");
+        if (id) {
+            elementsByID.set(id, item);
+        }
+    });
+    context.ranges.forEach(item => {
+        const contentRange = document.createRange();
+        contentRange.selectNodeContents(item.editableElement);
+        const contentPosition = getSelectionOffset(item.editableElement, undefined, contentRange);
+        if (!isEntireBlockContentSelected(item.start, item.end, contentPosition.end)) {
+            return;
+        }
+        const topElement = getTopAloneElement(item.blockElement) as HTMLElement;
+        const id = topElement.getAttribute("data-node-id");
+        if (id) {
+            elementsByID.set(id, topElement);
+        }
+    });
+    return Array.from(elementsByID.values());
+};
+
+export const getCrossBlockRefCheckElements = (editorElement: HTMLElement, selectedRange: Range,
+                                               startElement: HTMLElement, endElement: HTMLElement) => {
+    return getCrossBlockRefCheckElementsFromContext(
+        getCrossBlockRemovalContext(editorElement, selectedRange, startElement, endElement));
+};
+
+export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Range,
+                                            startElement: HTMLElement, endElement: HTMLElement) => {
+    const editorElement = protyle.wysiwyg.element;
+    const context = getCrossBlockRemovalContext(editorElement, selectedRange, startElement, endElement);
+    const {
+        ranges,
+        removeElements,
+        rangesByBlock,
+        startEditableElement,
+        endEditableElement,
+        removeEndElement,
+        updateElements,
+    } = context;
     if (removeElements.length === 0 && updateElements.length === 0) {
         return;
     }
-    const removeIDs = removeElements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
-    if (removeIDs.length > 0 && !await confirmBlockRef({
+    const checkElements = getCrossBlockRefCheckElementsFromContext(context);
+    const checkIDs = checkElements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
+    if (checkIDs.length > 0 && !await confirmBlockRef({
         scope: "blocks",
-        ids: removeIDs,
+        ids: checkIDs,
         notebook: protyle.notebookId,
     }, protyle)) {
         return;
     }
-    if (removeElements.some(item => !item.isConnected || item.getAttribute("data-node-id") === null)) {
+    if (checkElements.some(item => !item.isConnected || item.getAttribute("data-node-id") === null)) {
         return;
     }
 

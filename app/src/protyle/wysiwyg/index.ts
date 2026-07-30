@@ -58,7 +58,7 @@ import {ipcRenderer} from "electron";
 import {getEnableHTML, removeEmbed} from "./removeEmbed";
 import {keydown} from "./keydown";
 import {openMobileFileById} from "../../mobile/editor";
-import {removeBlock} from "./remove";
+import {getCrossBlockRefCheckElements, removeBlock} from "./remove";
 import {highlightRender} from "../render/highlightRender";
 import {openAttr} from "../../menus/commonMenuItem";
 import {blockRender} from "../render/blockRender";
@@ -2519,6 +2519,24 @@ export class WYSIWYG {
                 autoSelectedBlock = true;
             }
             const selectedStateElements = [...selectElements];
+            if (selectedStateElements.length === 0 && range.toString() !== "") {
+                const endElement = hasClosestBlock(range.endContainer);
+                if (endElement && nodeElement !== endElement) {
+                    const checkElements = getCrossBlockRefCheckElements(
+                        protyle.wysiwyg.element, range, nodeElement, endElement);
+                    const checkIDs = checkElements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
+                    if (checkIDs.length > 0 && !await confirmBlockRef({
+                        scope: "blocks",
+                        ids: checkIDs,
+                        notebook: protyle.notebookId,
+                    }, protyle)) {
+                        return;
+                    }
+                    if (checkElements.some(item => !item.isConnected)) {
+                        return;
+                    }
+                }
+            }
             let html = "";
             let textPlain = "";
             let isInCodeBlock = false;

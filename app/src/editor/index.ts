@@ -19,7 +19,6 @@ export class Editor extends Model {
     private backlinkElement?: HTMLElement;
     private backlinkIntersectionObserver?: IntersectionObserver;
     private backlinkMutationObserver?: MutationObserver;
-    private backlinkTopResizeObserver?: ResizeObserver;
     private backlinkEmpty = false;
 
     constructor(options: {
@@ -152,15 +151,6 @@ export class Editor extends Model {
             attributes: true,
             attributeFilter: ["data-bottom-eof"],
         });
-        const topElement = this.editor.protyle.contentElement.querySelector(".protyle-top");
-        if (topElement) {
-            this.backlinkTopResizeObserver = new ResizeObserver(() => {
-                if (this.backlinkElement === backlinkElement) {
-                    setPadding(this.editor.protyle);
-                }
-            });
-            this.backlinkTopResizeObserver.observe(topElement);
-        }
         this.updateBacklinkVisibility();
     }
 
@@ -209,12 +199,10 @@ export class Editor extends Model {
         const hasBacklinkElement = !!this.backlinkElement;
         this.backlinkIntersectionObserver?.disconnect();
         this.backlinkMutationObserver?.disconnect();
-        this.backlinkTopResizeObserver?.disconnect();
         this.backlink?.destroy();
         this.backlinkElement?.remove();
         this.backlinkIntersectionObserver = undefined;
         this.backlinkMutationObserver = undefined;
-        this.backlinkTopResizeObserver = undefined;
         this.backlink = undefined;
         this.backlinkElement = undefined;
         this.backlinkEmpty = false;

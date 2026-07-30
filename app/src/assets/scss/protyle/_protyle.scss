@@ -409,12 +409,6 @@
       transition: none;
     }
   }
-
-  &--backlink-bottom {
-    > .protyle-wysiwyg {
-      min-height: var(--b3-protyle-bottom-backlink-min-height);
-    }
-  }
 }
 
 .sy__backlink {

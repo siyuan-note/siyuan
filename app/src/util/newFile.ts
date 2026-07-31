@@ -14,6 +14,13 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
 import {NewDocTargetByHPath, NewDocTargetSubDoc, getNewDocTargetFromSavePath, getNewDocTargetFromTree} from "./parseNewDocTarget";
+import {focusByRange} from "../protyle/util/selection";
+import {
+    isNewFileSelectionValid,
+    isRangeInEditor,
+    isSameRange,
+    NewFileSelectionContext
+} from "./newFileSelection";
 
 export const getBlockRefAnchorText = (title: string) => {
     const trimmed = (title || "").trim();
@@ -82,8 +89,38 @@ export const newFileInTree = (app: App, notebookId: string, currentPath: string,
     });
 };
 
-export const newFileBySelect = (protyle: IProtyle, selectText: string, nodeElement: HTMLElement, pathDir: string, targetNotebookId: string) => {
-    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim());
+const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, id: string, refText: string) => {
+    if (!isNewFileSelectionValid(protyle, context)) {
+        return;
+    }
+    const selection = document.getSelection();
+    const currentRange = selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : undefined;
+    const selectionMoved = currentRange && !isSameRange(currentRange, context.range);
+    protyle.toolbar.range = context.range;
+    const refElements = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+        type: "id",
+        color: `${id}${Constants.ZWSP}d${Constants.ZWSP}${refText}`
+    }, false);
+    if (!refElements?.[0]) {
+        return;
+    }
+    const refRange = protyle.toolbar.range;
+    refRange.selectNodeContents(refElements[0]);
+    if (selectionMoved) {
+        if (isRangeInEditor(protyle.wysiwyg.element, currentRange)) {
+            protyle.toolbar.range = currentRange;
+            focusByRange(currentRange);
+        }
+    } else {
+        focusByRange(refRange);
+    }
+};
+
+export const newFileBySelect = (protyle: IProtyle, newFileName: string, context: NewFileSelectionContext,
+                                pathDir: string, targetNotebookId: string) => {
+    if (!isNewFileSelectionValid(protyle, context)) {
+        return;
+    }
     const hPath = pathPosix().join(pathDir, newFileName || window.siyuan.languages._kernel[16]);
     fetchPost("/api/filetree/getIDsByHPath", {
         path: hPath,
@@ -91,31 +128,21 @@ export const newFileBySelect = (protyle: IProtyle, selectText: string, nodeEleme
     }, (idResponse) => {
         const refText = getBlockRefAnchorText(newFileName);
         if (idResponse.data && idResponse.data.length > 0) {
-            const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
-                type: "id",
-                color: `${idResponse.data[0]}${Constants.ZWSP}d${Constants.ZWSP}${refText}`
-            });
-            if (refElement[0]) {
-                protyle.toolbar.range.selectNodeContents(refElement[0]);
-            }
+            insertNewFileRef(protyle, context, idResponse.data[0], refText);
         } else {
+            if (!isNewFileSelectionValid(protyle, context)) {
+                return;
+            }
             fetchPost("/api/filetree/createDocWithMd", {
                 notebook: targetNotebookId,
                 path: hPath,
-                parentID: protyle.notebookId === targetNotebookId ? protyle.block.rootID : "",
+                parentID: context.notebookId === targetNotebookId ? context.rootID : "",
                 markdown: "",
                 titleEmpty: newFileName === "",
             }, response => {
-                const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
-                    type: "id",
-                    color: `${response.data}${Constants.ZWSP}d${Constants.ZWSP}${refText}`
-                });
-                if (refElement[0]) {
-                    protyle.toolbar.range.selectNodeContents(refElement[0]);
-                }
+                insertNewFileRef(protyle, context, response.data, refText);
             });
         }
-        hideElements(["toolbar"], protyle);
     });
 };
 

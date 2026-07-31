@@ -1367,21 +1367,39 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 ) {
                     selectAll(protyle, nodeElement, range);
                 }
-                // 同步 toolbar.range，避免 DOM 已被其他操作（undo/enter 等）替换后变为 detached，
-                // 导致后续异步回调中 setInlineMark 读到无效 range https://github.com/siyuan-note/siyuan/issues/17896
-                protyle.toolbar.range = range;
-                if (isNewNameFile) {
-                    fetchPost("/api/filetree/getHPathByPath", {
-                        notebook: protyle.notebookId,
-                        path: protyle.path,
-                    }, (response) => {
-                        newFileBySelect(protyle, selectText, nodeElement, response.data, protyle.notebookId);
-                    });
-                } else {
-                    getRefCreateSavePath(protyle.notebookId, protyle.path, (targetNotebookId, hPath) => {
-                        newFileBySelect(protyle, selectText, nodeElement, hPath, targetNotebookId);
-                    });
+                // 固定触发时的文档和选区，异步创建完成后仅修改原位置 https://github.com/siyuan-note/siyuan/issues/16972
+                const selectionRange = range.cloneRange();
+                const startBlockElement = hasClosestBlock(selectionRange.startContainer);
+                const endBlockElement = hasClosestBlock(selectionRange.endContainer);
+                if (startBlockElement && endBlockElement) {
+                    const sourceNotebookId = protyle.notebookId;
+                    const sourceRootID = protyle.block.rootID;
+                    const sourcePath = protyle.path;
+                    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() :
+                        protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim());
+                    const selectionContext = {
+                        range: selectionRange,
+                        notebookId: sourceNotebookId,
+                        rootID: sourceRootID,
+                        path: sourcePath,
+                        startBlockID: startBlockElement.getAttribute("data-node-id"),
+                        endBlockID: endBlockElement.getAttribute("data-node-id"),
+                        text: selectionRange.toString(),
+                    };
+                    if (isNewNameFile) {
+                        fetchPost("/api/filetree/getHPathByPath", {
+                            notebook: sourceNotebookId,
+                            path: sourcePath,
+                        }, (response) => {
+                            newFileBySelect(protyle, newFileName, selectionContext, response.data, sourceNotebookId);
+                        });
+                    } else {
+                        getRefCreateSavePath(sourceNotebookId, sourcePath, (targetNotebookId, hPath) => {
+                            newFileBySelect(protyle, newFileName, selectionContext, hPath, targetNotebookId);
+                        });
+                    }
                 }
+                hideElements(["toolbar"], protyle);
             }
             event.preventDefault();
             event.stopPropagation();

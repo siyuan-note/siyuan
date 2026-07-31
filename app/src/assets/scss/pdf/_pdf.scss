@@ -24,6 +24,8 @@
   }
 
   &__outer {
+    --b3-pdf-selection: var(--b3-pdf-selection-light, #d0e9c8);
+
     user-select: text;
     overflow: hidden;
     width: 100%;
@@ -108,6 +110,15 @@
 }
 
 .pdf__outer--dark {
+  --b3-pdf-selection: var(--b3-pdf-selection-dark, #779170);
+  --b3-pdf-background1: var(--b3-pdf-background1-dark, var(--b3-pdf-background1-light));
+  --b3-pdf-background2: var(--b3-pdf-background2-dark, var(--b3-pdf-background2-light));
+  --b3-pdf-background3: var(--b3-pdf-background3-dark, var(--b3-pdf-background3-light));
+  --b3-pdf-background4: var(--b3-pdf-background4-dark, var(--b3-pdf-background4-light));
+  --b3-pdf-background5: var(--b3-pdf-background5-dark, var(--b3-pdf-background5-light));
+  --b3-pdf-background6: var(--b3-pdf-background6-dark, var(--b3-pdf-background6-light));
+  --b3-pdf-background7: var(--b3-pdf-background7-dark, var(--b3-pdf-background7-light));
+
   .pdfViewer .page canvas,
   .thumbnailImage {
     filter: grayscale(0%) invert(100%) contrast(100%) brightness(100%) hue-rotate(180deg);

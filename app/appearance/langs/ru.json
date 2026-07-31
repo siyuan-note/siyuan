@@ -1,4 +1,6 @@
 {
+  "visibleViews": "Отображаемые виды",
+  "hiddenViews": "Скрытые виды",
   "bazaarInstallInfo": "Локальная установка",
   "bazaarCompatibility": "Совместимость",
   "bazaarMarketInfo": "Онлайн-магазин",

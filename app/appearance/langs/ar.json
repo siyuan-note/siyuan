@@ -1,4 +1,6 @@
 {
+  "visibleViews": "طرق العرض الظاهرة",
+  "hiddenViews": "طرق العرض المخفية",
   "bazaarInstallInfo": "التثبيت المحلي",
   "bazaarCompatibility": "التوافق",
   "bazaarMarketInfo": "السوق عبر الإنترنت",

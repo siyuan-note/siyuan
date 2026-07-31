@@ -1,4 +1,6 @@
 {
+  "visibleViews": "表示中のビュー",
+  "hiddenViews": "非表示のビュー",
   "bazaarInstallInfo": "ローカルインストール",
   "bazaarCompatibility": "互換性",
   "bazaarMarketInfo": "オンラインマーケット",

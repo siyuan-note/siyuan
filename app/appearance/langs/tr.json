@@ -1,4 +1,6 @@
 {
+  "visibleViews": "Görünür görünümler",
+  "hiddenViews": "Gizli görünümler",
   "bazaarInstallInfo": "Yerel kurulum",
   "bazaarCompatibility": "Uyumluluk",
   "bazaarMarketInfo": "Çevrimiçi pazar",

@@ -1,4 +1,6 @@
 {
+  "visibleViews": "Tampilan terlihat",
+  "hiddenViews": "Tampilan tersembunyi",
   "bazaarInstallInfo": "Instalasi lokal",
   "bazaarCompatibility": "Kompatibilitas",
   "bazaarMarketInfo": "Pasar daring",

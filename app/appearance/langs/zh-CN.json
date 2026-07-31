@@ -1,4 +1,6 @@
 {
+  "visibleViews": "显示视图",
+  "hiddenViews": "隐藏视图",
   "bazaarInstallInfo": "本地安装",
   "bazaarCompatibility": "兼容性",
   "bazaarMarketInfo": "在线集市",

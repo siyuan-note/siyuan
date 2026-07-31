@@ -1,4 +1,6 @@
 {
+  "visibleViews": "표시된 뷰",
+  "hiddenViews": "숨겨진 뷰",
   "bazaarInstallInfo": "로컬 설치",
   "bazaarCompatibility": "호환성",
   "bazaarMarketInfo": "온라인 마켓",

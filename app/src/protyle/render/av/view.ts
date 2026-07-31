@@ -398,41 +398,72 @@ const filterSwitcher = (menuElement: Element) => {
             item.classList.remove("b3-menu__item--current");
         }
     });
+    menuElement.querySelectorAll("[data-av-view-section]").forEach((sectionElement: HTMLElement) => {
+        const hasMatchedView = Array.from(menuElement.querySelectorAll(`[data-av-view-visibility="${sectionElement.dataset.avViewSection}"]`))
+            .some((item) => !item.classList.contains("fn__none"));
+        sectionElement.classList.toggle("fn__none", !!key && !hasMatchedView);
+    });
     if (!menuElement.querySelector(".b3-menu__item--current")) {
-        menuElement.querySelector(".fn__flex-1 .b3-menu__item:not(.fn__none)")?.classList.add("b3-menu__item--current");
+        menuElement.querySelector('.fn__flex-1 .b3-menu__item[draggable="true"]:not(.fn__none)')?.classList.add("b3-menu__item--current");
     }
 };
 
 export const getSwitcherHTML = (views: IAVView[], viewId: string, blockElement: Element) => {
     const visibleViewIDs = getAVVisibleViewIDs(blockElement, views);
-    let html = "";
+    let visibleHTML = "";
+    let hiddenHTML = "";
     views.forEach((item) => {
-        html += `<button draggable="true" class="b3-menu__item${item.id === viewId ? " b3-menu__item--current" : ""}" data-id="${item.id}">
+        const visible = visibleViewIDs.includes(item.id);
+        const html = `<button draggable="true" class="b3-menu__item${item.id === viewId ? " b3-menu__item--current" : ""}" data-id="${item.id}" data-av-view-visibility="${visible ? "visible" : "hidden"}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="b3-menu__label fn__flex" data-type="av-view-switch" data-av-type="${item.type}">
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getViewIcon(item.type)}"></use></svg>`}
-        <span class="fn__ellipsis">${item.name}</span>
+        <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
     </div>
-    <svg class="b3-menu__action ariaLabel${visibleViewIDs.length === 1 && visibleViewIDs.includes(item.id) ? " fn__none" : ""}" data-type="av-view-visibility" data-position="4west" aria-label="${visibleViewIDs.includes(item.id) ? window.siyuan.languages.hideViewTab : window.siyuan.languages.showViewTab}"><use xlink:href="#${visibleViewIDs.includes(item.id) ? "iconEye" : "iconEyeoff"}"></use></svg>
+    <svg class="b3-menu__action ariaLabel${visibleViewIDs.length === 1 && visible ? " fn__none" : ""}" data-type="av-view-visibility" data-position="4west" aria-label="${visible ? window.siyuan.languages.hideViewTab : window.siyuan.languages.showViewTab}"><use xlink:href="#${visible ? "iconEyeoff" : "iconEye"}"></use></svg>
     <svg class="b3-menu__action" data-type="av-view-edit"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
+        if (visible) {
+            visibleHTML += html;
+        } else {
+            hiddenHTML += html;
+        }
     });
-    return `<div class="b3-menu__items fn__flex-column">
-<button class="b3-menu__item" data-type="av-add">
-    <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.newView}</span>
-</button>
-${visibleViewIDs.length === views.length ? "" : `<button class="b3-menu__item" data-type="av-view-show-all">
-    <svg class="b3-menu__icon"><use xlink:href="#iconEye"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.showAll}</span>
-</button>`}
+    const visibleSectionHTML = `<div data-av-view-section="visible">
 <button class="b3-menu__separator"></button>
+<button class="b3-menu__item b3-menu__item--readonly" data-type="nobg">
+    <span class="b3-menu__label">${window.siyuan.languages.visibleViews}</span>
+    <span class="block__icon block__icon--show" data-type="av-view-hide-all">
+        ${window.siyuan.languages.hideAll}
+        <span class="fn__space"></span>
+        <svg><use xlink:href="#iconEyeoff"></use></svg>
+    </span>
+</button>
+</div>${visibleHTML}`;
+    const hiddenSectionHTML = hiddenHTML ? `<div data-av-view-section="hidden">
+<button class="b3-menu__separator"></button>
+<button class="b3-menu__item b3-menu__item--readonly" data-type="nobg">
+    <span class="b3-menu__label">${window.siyuan.languages.hiddenViews}</span>
+    <span class="block__icon block__icon--show" data-type="av-view-show-all">
+        ${window.siyuan.languages.showAll}
+        <span class="fn__space"></span>
+        <svg><use xlink:href="#iconEye"></use></svg>
+    </span>
+</button>
+</div>${hiddenHTML}` : "";
+    return `<div class="b3-menu__items fn__flex-column">
 <div class="b3-menu__item fn__flex-shrink" data-type="nobg">
     <input class="b3-text-field fn__block" type="text" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">
 </div>
 <div class="fn__flex-1" style="overflow: auto">
-    ${html}
+    ${visibleSectionHTML}
+    ${hiddenSectionHTML}
 </div>
+<button class="b3-menu__separator fn__flex-shrink"></button>
+<button class="b3-menu__item fn__flex-shrink" data-type="av-add">
+    <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.newView}</span>
+</button>
 </div>`;
 };
 

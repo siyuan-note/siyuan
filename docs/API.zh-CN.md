@@ -1818,9 +1818,10 @@
   }
   ```
 
-    * `data.view`: 渲染后的视图实例。结构随 `viewType` 而变——`table` 返回 `columns`/`rows`/`rowCount`，`gallery` 返回 `columns`/`rows`，`kanban` 返回 `columns`/`groups`（每个分组本身也是视图实例，含 `groupKey`/`groupValue`）。`view` 还包含 `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden`。注意：启用的过滤/分组可能使 `rows` 为空，即使 `rowCount` > 0
+    * `data.view`: 渲染后的视图实例。结构随 `viewType` 而变：`table` 返回 `columns`/`rows`/`rowCount`，`gallery` 和 `kanban` 返回 `fields`/`cards`/`cardCount`。启用分组时，`groups` 包含各分组的视图实例，每个实例含 `groupKey`/`groupValue`。`view` 还包含 `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden`。注意：启用的过滤或分组可能使条目列表为空，即使条目总数大于 0
     * `data.view.columns[]`: 每列含 `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`pin`/`width`；`select`/`mSelect` 列还额外包含 `options`
-    * `data.view.rows[].id`: **行 ID**（一个条目 ID）。对于绑定行，它等于绑定的块 ID；对于独立行，它是生成的条目 ID，与任何块都不同
+    * `data.view.rows[].id`: 表格行的**条目 ID**（`itemID`），也等于该行主键单元格的 `value.blockID`。对于绑定行，绑定块 ID 位于主键单元格的 `value.block.id`；二者是不同概念，不能假设相等
+    * `data.view.cards[].id`: 卡片或看板卡片的**条目 ID**（`itemID`）。启用分组时，表格行或卡片位于 `groups[]` 的对应视图实例中
     * `data.view.rows[].cells[].value`: 一个 `Value` 对象——所有 value 形态见 [设置单元格值](#设置单元格值)。`createdAt`/`updatedAt` 为 int64 毫秒时间戳
     * `data.views`: 所有视图的元数据（不含行数据）
     * `data.isMirror`: 当数据库块为数据库的镜像（只读副本）时为 `true`
@@ -2051,7 +2052,7 @@
 | `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
 
-> ⚠️ `itemID` 是**行 ID**（[渲染](#渲染) 返回的 `rows[].id`）。对于绑定行，行 ID 等于绑定的块 ID；对于独立行，它是生成的条目 ID。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
+> ⚠️ `itemID` 是**条目 ID**，即[渲染](#渲染)返回的条目 `id`：表格为 `rows[].id`，卡片和看板为 `cards[].id`，启用分组时位于 `groups[]` 的对应视图实例中。它也等于主键值的 `value.blockID`。对于绑定条目，绑定块 ID 位于主键值的 `value.block.id`；二者是不同概念，不能假设相等。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
 
 * `/api/av/setAttributeViewBlockAttr`
 * 参数

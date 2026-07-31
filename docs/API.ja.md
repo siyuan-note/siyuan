@@ -1818,9 +1818,10 @@
   }
   ```
 
-    * `data.view`: レンダリングされたビューインスタンス。形状は `viewType` により異なります——`table` は `columns`/`rows`/`rowCount`、`gallery` は `columns`/`rows`、`kanban` は `columns`/`groups`（各グループ自体が `groupKey`/`groupValue` を持つビューインスタンス）を返します。`view` は `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden` も含みます。注意：有効なフィルター/グループ化により、`rowCount` > 0 でも `rows` が空になることがあります
+    * `data.view`: レンダリングされたビューインスタンス。構造は `viewType` により異なります。`table` は `columns`/`rows`/`rowCount` を、`gallery` と `kanban` は `fields`/`cards`/`cardCount` を返します。グループ化が有効な場合、`groups` には `groupKey`/`groupValue` を持つグループごとのビューインスタンスが含まれます。`view` は `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden` も含みます。注意：有効なフィルターまたはグループ化により、アイテムの総数が 0 より大きくてもアイテムリストが空になることがあります
     * `data.view.columns[]`: 各列は `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`pin`/`width` を持ちます；`select`/`mSelect` 列はさらに `options` を含みます
-    * `data.view.rows[].id`: **行 ID**（アイテム ID）。紐づく行の場合は紐づくブロック ID と同じです；独立行の場合は生成されたアイテム ID で、いかなるブロックとも異なります
+    * `data.view.rows[].id`: 表形式の行の**アイテム ID**（`itemID`）です。その行の主キーセルにある `value.blockID` とも同じです。紐づく行の場合、紐づくブロック ID は主キーセルの `value.block.id` にあります。両者は異なる概念であり、同一であると仮定してはいけません
+    * `data.view.cards[].id`: ギャラリーまたはカンバンのカードの**アイテム ID**（`itemID`）です。グループ化が有効な場合、表形式の行またはカードは `groups[]` 内の対応するビューインスタンスにあります
     * `data.view.rows[].cells[].value`: `Value` オブジェクト——すべての value 形状は [セル値を設定](#セル値を設定) を参照。`createdAt`/`updatedAt` は int64 ミリ秒タイムスタンプ
     * `data.views`: 全ビューのメタデータ（行データなし）
     * `data.isMirror`: データベースブロックがデータベースのミラー（読み取り専用コピー）の場合 `true`
@@ -2051,7 +2052,7 @@
 | `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
 
-> ⚠️ `itemID` は**行 ID**（[レンダリング](#レンダリング) が返す `rows[].id`）です。紐づく行の場合は行 ID は紐づくブロック ID と等しく、独立行の場合は生成されたアイテム ID です。誤った ID を渡すと、値はレンダリングされたセルに現れない孤立データとして保存されます。
+> ⚠️ `itemID` は**アイテム ID**、つまり[レンダリング](#レンダリング)が返すアイテムの `id` です。表形式では `rows[].id`、ギャラリーとカンバンでは `cards[].id` であり、グループ化が有効な場合は `groups[]` 内の対応するビューインスタンスにあります。また、主キー値の `value.blockID` とも同じです。紐づくアイテムの場合、紐づくブロック ID は主キー値の `value.block.id` にあります。両者は異なる概念であり、同一であると仮定してはいけません。誤った ID を渡すと、値はレンダリングされたセルに現れない孤立データとして保存されます。
 
 * `/api/av/setAttributeViewBlockAttr`
 * パラメータ

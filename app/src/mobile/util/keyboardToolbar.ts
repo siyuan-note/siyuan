@@ -20,6 +20,7 @@ import {getMirror, getUndoRootID, hasUndoStateMirror, initMirror} from "../../pr
 
 let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
+let clearRenderGutterAfterScroll: () => void;
 let showUtil = false;
 
 const getSlashItem = (value: string, icon: string, text: string, focus = "false") => {
@@ -456,12 +457,23 @@ export const showKeyboardToolbar = () => {
         });
     }
     clearTimeout(scrollSelectionIntoViewTimeout);
+    clearRenderGutterAfterScroll?.();
     scrollSelectionIntoViewTimeout = window.setTimeout(() => {
         if (editor?.protyle.toolbar.isMultiSelectMode()) {
             return;
         }
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
         if (contentElement) {
+            const renderGutter = () => {
+                const blockElement = hasClosestBlock(range.startContainer);
+                if (!editor?.protyle.gutter || !editor.protyle.options.render.gutter ||
+                    !blockElement || !editor.protyle.wysiwyg.element.contains(blockElement)) {
+                    return;
+                }
+                const targetElement = range.startContainer.nodeType === Node.ELEMENT_NODE ?
+                    range.startContainer as Element : range.startContainer.parentElement;
+                editor.protyle.gutter.render(editor.protyle, blockElement, targetElement);
+            };
             let cursorTop = getSelectionPosition(contentElement).top;
             if (cursorTop < 0 && window.siyuan.mobile.touchRange) {
                 const rangeBlockElement = hasClosestBlock(window.siyuan.mobile.touchRange.startContainer);
@@ -475,8 +487,23 @@ export const showKeyboardToolbar = () => {
                 }
             }
             if (cursorTop < window.innerHeight - 42 && cursorTop > contentElement.getBoundingClientRect().top) {
+                renderGutter();
                 return;
             }
+            const clearRenderGutter = () => {
+                contentElement.removeEventListener("scrollend", renderGutterAfterScroll);
+                contentElement.removeEventListener("touchstart", clearRenderGutter);
+                clearTimeout(renderGutterTimeout);
+                clearRenderGutterAfterScroll = undefined;
+            };
+            const renderGutterAfterScroll = () => {
+                clearRenderGutter();
+                renderGutter();
+            };
+            const renderGutterTimeout = window.setTimeout(renderGutterAfterScroll, Constants.TIMEOUT_COUNT);
+            clearRenderGutterAfterScroll = clearRenderGutter;
+            contentElement.addEventListener("scrollend", renderGutterAfterScroll, {once: true});
+            contentElement.addEventListener("touchstart", clearRenderGutter, {once: true, passive: true});
             contentElement.scroll({
                 top: cursorTop < 0 ? contentElement.scrollTop + window.innerHeight - 42 :
                     contentElement.scrollTop + cursorTop - window.innerHeight + 42 + 26,
@@ -490,6 +517,7 @@ export const showKeyboardToolbar = () => {
 export const hideKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     clearTimeout(scrollSelectionIntoViewTimeout);
+    clearRenderGutterAfterScroll?.();
     window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: false}));
     if (showUtil) {
         return;

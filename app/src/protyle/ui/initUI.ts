@@ -25,6 +25,14 @@ import {
 import {hideElements} from "./hideElements";
 import {AVAttributePanel} from "../render/av/attributePanel";
 import {getEditorHorizontalPadding} from "./padding";
+import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
+
+const focusMobileAppEditor = (element: HTMLElement) => {
+    if (window.JSAndroid?.showKeyboard || window.JSHarmony?.showKeyboard) {
+        element.focus();
+        callMobileAppShowKeyboard();
+    }
+};
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -192,10 +200,11 @@ export const initUI = (protyle: IProtyle) => {
                     action: "delete",
                     id: emptyElement.getAttribute("data-node-id")
                 }]);
-                const emptyEditElement = getContenteditableElement(emptyElement) as HTMLInputElement;
+                const emptyEditElement = getContenteditableElement(emptyElement) as HTMLElement;
                 range.selectNodeContents(emptyEditElement);
                 range.collapse(true);
                 focusByRange(range);
+                focusMobileAppEditor(emptyEditElement);
                 // 需等待 range 更新再次进行渲染
                 if (protyle.options.render.breadcrumb) {
                     setTimeout(() => {
@@ -206,6 +215,7 @@ export const initUI = (protyle: IProtyle) => {
                 range.selectNodeContents(lastEditElement);
                 range.collapse(false);
                 focusByRange(range);
+                focusMobileAppEditor(lastEditElement as HTMLElement);
             }
             protyle.toolbar.range = range;
         }

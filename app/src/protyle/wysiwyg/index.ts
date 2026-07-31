@@ -3946,9 +3946,13 @@ export class WYSIWYG {
             if (virtualRefElement && range.toString() === "") {
                 event.stopPropagation();
                 event.preventDefault();
-                fetchPost("/api/block/getBlockDefIDsByRefText", {
+                const virtualRefParam: { anchor: string, notebook?: string } = {
                     anchor: virtualRefElement.textContent,
-                }, (response) => {
+                };
+                if (isEncryptedBox(protyle.notebookId)) {
+                    virtualRefParam.notebook = protyle.notebookId;
+                }
+                fetchPost("/api/block/getBlockDefIDsByRefText", virtualRefParam, (response) => {
                     checkFold(response.data.refDefs[0].refID, (zoomIn) => {
                         mobileBlur = true;
                         activeBlur();

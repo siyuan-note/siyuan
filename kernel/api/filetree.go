@@ -1033,7 +1033,7 @@ func getDocCreateSavePath(c *gin.Context) {
 		}
 	}
 
-	docCreateSavePath, err := model.RenderGoTemplate(docCreateSavePathTpl)
+	docCreateSavePath, err := model.RenderGoTemplateInBox(docCreateSavePathTpl, docCreateSaveBox)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -1088,7 +1088,7 @@ func getRefCreateSavePath(c *gin.Context) {
 		}
 	}
 
-	refCreateSavePath, err := model.RenderGoTemplate(refCreateSavePathTpl)
+	refCreateSavePath, err := model.RenderGoTemplateInBox(refCreateSavePathTpl, refCreateSaveBox)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -1124,7 +1124,7 @@ func getShorthandSavePath(c *gin.Context) {
 		}
 	}
 
-	shorthandSavePath, err := model.RenderGoTemplate(shorthandSavePathTpl)
+	shorthandSavePath, err := model.RenderGoTemplateInBox(shorthandSavePathTpl, shorthandSaveBox)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

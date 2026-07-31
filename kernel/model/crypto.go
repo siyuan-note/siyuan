@@ -61,6 +61,9 @@ var errEncryptedNotebookPayloadFound = errors.New("encrypted notebook payload fo
 // value 为确认身份时的 DataDir，防止测试或切换工作空间时复用其他工作空间的运行时状态。
 var runtimeEncryptedBoxes sync.Map // map[string]string
 
+// runtimeNormalBoxes 缓存已确认的普通笔记本，减少普通笔记本高频访问时的文件系统探测。
+var runtimeNormalBoxes sync.Map // map[string]string
+
 // IsEncryptedNotebookData 判断数据是否以当前文档或资源密文标识开头。
 func IsEncryptedNotebookData(data []byte) bool {
 	return util.IsCiphertext(data) || bytes.HasPrefix(data, encryptedAssetMagic)
@@ -68,6 +71,7 @@ func IsEncryptedNotebookData(data []byte) bool {
 
 func markRuntimeEncryptedBox(boxID string) {
 	if ast.IsNodeIDPattern(boxID) {
+		forgetRuntimeNormalBox(boxID)
 		runtimeEncryptedBoxes.Store(boxID, filepath.Clean(util.DataDir))
 	}
 }
@@ -77,10 +81,29 @@ func forgetRuntimeEncryptedBox(boxID string) {
 	if ok && dataDir == filepath.Clean(util.DataDir) {
 		runtimeEncryptedBoxes.Delete(boxID)
 	}
+	forgetRuntimeNormalBox(boxID)
 }
 
 func isRuntimeEncryptedBox(boxID string) bool {
 	dataDir, ok := runtimeEncryptedBoxes.Load(boxID)
+	return ok && dataDir == filepath.Clean(util.DataDir)
+}
+
+func markRuntimeNormalBox(boxID string) {
+	if ast.IsNodeIDPattern(boxID) {
+		runtimeNormalBoxes.Store(boxID, filepath.Clean(util.DataDir))
+	}
+}
+
+func forgetRuntimeNormalBox(boxID string) {
+	dataDir, ok := runtimeNormalBoxes.Load(boxID)
+	if ok && dataDir == filepath.Clean(util.DataDir) {
+		runtimeNormalBoxes.Delete(boxID)
+	}
+}
+
+func isRuntimeNormalBox(boxID string) bool {
+	dataDir, ok := runtimeNormalBoxes.Load(boxID)
 	return ok && dataDir == filepath.Clean(util.DataDir)
 }
 
@@ -89,7 +112,10 @@ func hasEncryptedNotebookPayload(boxID string) (bool, error) {
 	if !ast.IsNodeIDPattern(boxID) {
 		return false, errors.New("invalid notebook ID")
 	}
-	boxDir := filepath.Join(util.DataDir, boxID)
+	return hasEncryptedNotebookPayloadAtPath(filepath.Join(util.DataDir, boxID))
+}
+
+func hasEncryptedNotebookPayloadAtPath(boxDir string) (bool, error) {
 	if !filelock.IsExist(boxDir) {
 		return false, nil
 	}
@@ -141,6 +167,8 @@ var errMasterPasswordMigrationPending = errors.New("master password migration is
 // notebookCryptoMu 串行化加密笔记本的控制面操作（Enable/Disable/Create/ChangeMasterPassword/Import/restore 等），
 // 避免 ChangeMasterPassword 枚举与 CreateEncryptedBox 并发导致新笔记本用旧 KEK 但 verifier 已切换的不可恢复状态。
 var notebookCryptoMu sync.Mutex
+
+var masterPasswordMigrationMu sync.Mutex
 
 // boxLifecycleLocks 为每个 box 提供一个 RWMutex，协调锁定操作与在途解密请求。
 // 在途解密请求持读锁，LockBox 持写锁，确保锁定后不会有新的解密输出。
@@ -483,6 +511,12 @@ func masterPasswordMigrationPath() string {
 }
 
 func writeMasterPasswordMigration(m *masterPasswordMigration) error {
+	masterPasswordMigrationMu.Lock()
+	defer masterPasswordMigrationMu.Unlock()
+	return writeMasterPasswordMigrationUnlocked(m)
+}
+
+func writeMasterPasswordMigrationUnlocked(m *masterPasswordMigration) error {
 	p := masterPasswordMigrationPath()
 	if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
 		return fmt.Errorf("mkdir master password migration dir failed: %w", err)
@@ -495,6 +529,12 @@ func writeMasterPasswordMigration(m *masterPasswordMigration) error {
 }
 
 func readMasterPasswordMigration() (*masterPasswordMigration, error) {
+	masterPasswordMigrationMu.Lock()
+	defer masterPasswordMigrationMu.Unlock()
+	return readMasterPasswordMigrationUnlocked()
+}
+
+func readMasterPasswordMigrationUnlocked() (*masterPasswordMigration, error) {
 	p := masterPasswordMigrationPath()
 	if !filelock.IsExist(p) {
 		return nil, nil
@@ -511,9 +551,48 @@ func readMasterPasswordMigration() (*masterPasswordMigration, error) {
 }
 
 func removeMasterPasswordMigration() {
+	masterPasswordMigrationMu.Lock()
+	defer masterPasswordMigrationMu.Unlock()
+	removeMasterPasswordMigrationUnlocked()
+}
+
+func removeMasterPasswordMigrationUnlocked() {
 	p := masterPasswordMigrationPath()
 	if err := filelock.Remove(p); err != nil && !os.IsNotExist(err) {
 		logging.LogErrorf("remove master password migration failed: %s", err)
+	}
+}
+
+func removeMasterPasswordMigrationBox(boxID string) {
+	if boxID == "" {
+		return
+	}
+	masterPasswordMigrationMu.Lock()
+	defer masterPasswordMigrationMu.Unlock()
+
+	mig, err := readMasterPasswordMigrationUnlocked()
+	if err != nil || mig == nil {
+		return
+	}
+	remaining := make([]migrationBoxEntry, 0, len(mig.Boxes))
+	found := false
+	for _, entry := range mig.Boxes {
+		if entry.BoxID == boxID {
+			found = true
+			continue
+		}
+		remaining = append(remaining, entry)
+	}
+	if !found {
+		return
+	}
+	if len(remaining) == 0 {
+		removeMasterPasswordMigrationUnlocked()
+		return
+	}
+	mig.Boxes = remaining
+	if err = writeMasterPasswordMigrationUnlocked(mig); err != nil {
+		logging.LogErrorf("remove notebook [%s] from master password migration failed: %s", boxID, err)
 	}
 }
 
@@ -539,6 +618,29 @@ func recoverMasterPasswordMigration() {
 	}
 	if mig == nil {
 		return // 无待恢复的迁移
+	}
+	remaining := make([]migrationBoxEntry, 0, len(mig.Boxes))
+	for _, entry := range mig.Boxes {
+		if !ast.IsNodeIDPattern(entry.BoxID) {
+			logging.LogWarnf("drop invalid notebook [%s] from master password migration", entry.BoxID)
+			continue
+		}
+		if !filelock.IsExist(filepath.Join(util.DataDir, entry.BoxID)) {
+			logging.LogInfof("drop deleted notebook [%s] from master password migration", entry.BoxID)
+			continue
+		}
+		remaining = append(remaining, entry)
+	}
+	if len(remaining) != len(mig.Boxes) {
+		mig.Boxes = remaining
+		if len(mig.Boxes) == 0 {
+			removeMasterPasswordMigration()
+			return
+		}
+		if writeErr := writeMasterPasswordMigration(mig); writeErr != nil {
+			logging.LogErrorf("update master password migration after notebook removal failed: %s", writeErr)
+			return
+		}
 	}
 
 	Conf.m.RLock()
@@ -817,7 +919,11 @@ func EnableEncryptedNotebook(password string) error {
 	hasBackup := filelock.IsExist(dataCryptoBackupPath())
 	if hasEncrypted || hasHistory || hasBackup {
 		// 现存笔记本、已删除笔记本历史或全局备份均表示已有密钥域，必须恢复并认证，不能生成新 MasterSalt。
-		if _, restoreErr := tryRestoreNotebookCryptoFromBackupLocked(password); restoreErr != nil {
+		kek, restoreErr := tryRestoreNotebookCryptoFromBackupLocked(password)
+		if kek != nil {
+			zeroAndClear(kek)
+		}
+		if restoreErr != nil {
 			if strings.Contains(restoreErr.Error(), Conf.Language(311)) {
 				return errors.New(Conf.Language(311))
 			}
@@ -1645,6 +1751,9 @@ func IsEncryptedBox(boxID string) bool {
 	if isRuntimeEncryptedBox(boxID) {
 		return true
 	}
+	if isRuntimeNormalBox(boxID) {
+		return false
+	}
 
 	normalConf := false
 	boxConfPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
@@ -1667,25 +1776,30 @@ func IsEncryptedBox(boxID string) bool {
 		backup, err := readNotebookCryptBackup(boxID)
 		if err != nil {
 			logging.LogWarnf("failed to read notebook crypt backup for [%s]: %s", boxID, err)
+			forgetRuntimeNormalBox(boxID)
 			markRuntimeEncryptedBox(boxID)
 			return true
 		}
 		if backup != nil && len(backup.WrappedDEK) > 0 {
+			forgetRuntimeNormalBox(boxID)
 			markRuntimeEncryptedBox(boxID)
 			return true
 		}
 	}
 	if normalConf {
+		markRuntimeNormalBox(boxID)
 		return false
 	}
 
 	found, err := hasEncryptedNotebookPayload(boxID)
 	if err != nil {
 		logging.LogWarnf("failed to inspect notebook encryption identity for [%s]: %s", boxID, err)
+		forgetRuntimeNormalBox(boxID)
 		markRuntimeEncryptedBox(boxID)
 		return true
 	}
 	if found {
+		forgetRuntimeNormalBox(boxID)
 		markRuntimeEncryptedBox(boxID)
 	}
 	return found
@@ -1893,6 +2007,7 @@ func GetDEKIfUnlocked(boxID string) ([]byte, error) {
 	if !IsEncryptedBox(boxID) {
 		return nil, nil
 	}
+	repairEncryptedBoxStateFromDEK(boxID)
 	if !isBoxUnlockedForAccess(boxID) {
 		return nil, errors.New("encrypted notebook is locked, please unlock it first")
 	}
@@ -1910,7 +2025,17 @@ func GetDEKIfUnlocked(boxID string) ([]byte, error) {
 // HoldBoxReadLock 获取 box 读锁，防止 LockBox 在持锁期间清除缓存/临时文件。
 // 调用方完成解密输出后必须调 ReleaseBoxReadLock。
 func HoldBoxReadLock(boxID string) {
+	if !IsEncryptedBox(boxID) {
+		acquireBoxReadLock(boxID)
+		return
+	}
+	lifecycle := getEncryptedBoxLifecycle(boxID)
+	lifecycle.lock.Lock()
+	for lifecycle.state == EncryptedBoxStateUnlocking || lifecycle.state == EncryptedBoxStateLocking {
+		lifecycle.condition.Wait()
+	}
 	acquireBoxReadLock(boxID)
+	lifecycle.lock.Unlock()
 }
 
 // ReleaseBoxReadLock 释放 HoldBoxReadLock 获取的 box 读锁。
@@ -2434,6 +2559,7 @@ func cleanupFailedEncryptedBox(boxID string) {
 	treenode.RemoveEncryptedBlockTreeDBFile(boxID)
 	removeEncryptedBoxLifecycle(boxID)
 	forgetRuntimeEncryptedBox(boxID)
+	removeMasterPasswordMigrationBox(boxID)
 	if err := filelock.Remove(boxDir); err != nil {
 		logging.LogErrorf("cleanup failed encrypted box [%s]: %s", boxID, err)
 	}
@@ -2445,6 +2571,7 @@ func finalizeSyncedEncryptedBoxRemoval(boxID string) {
 		return
 	}
 	LockBox(boxID)
+	removeMasterPasswordMigrationBox(boxID)
 	removeEncryptedBoxLifecycle(boxID)
 	forgetRuntimeEncryptedBox(boxID)
 	invalidateEncryptedPublishAccessCache()

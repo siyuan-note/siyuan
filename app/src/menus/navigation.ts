@@ -89,9 +89,9 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         }).element);
     }
 
-    window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(
-        Array.from(selectItemElements)
-    )));
+    const selectedItems = Array.from(selectItemElements);
+    window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(selectedItems), selectedItems.map((item) =>
+        item.closest("ul[data-url]")?.getAttribute("data-url") || "")));
 
     if (blockIDs.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
@@ -576,9 +576,9 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 }
             }])
         }).element);
-        window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(
-            Array.from(fileElement.querySelectorAll(".b3-list-item--focus"))
-        )));
+        const selectedItems = Array.from(fileElement.querySelectorAll(".b3-list-item--focus"));
+        window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(selectedItems), selectedItems.map((item) =>
+            item.closest("ul[data-url]")?.getAttribute("data-url") || "")));
         window.siyuan.menus.menu.append(new MenuItem({
             id: "addToDatabase",
             label: window.siyuan.languages.addToDatabase,

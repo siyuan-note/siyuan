@@ -51,6 +51,22 @@ func QueryEmptyContentEmbedBlocks() (ret []*Block) {
 	return
 }
 
+func QueryEmptyContentEmbedBlocksInBox(boxID string) (ret []*Block) {
+	stmt := "SELECT * FROM blocks WHERE type = 'query_embed' AND content = ''"
+	rows, err := queryForBox(boxID, stmt)
+	if err != nil {
+		logging.LogErrorf("sql query [%s] failed: %s", stmt, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		if block := scanBlockRows(rows); block != nil {
+			ret = append(ret, block)
+		}
+	}
+	return
+}
+
 func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string) {
 	stmt := "SELECT id, hash FROM blocks WHERE root_id = ?"
 	rows, err := queryTx(tx, stmt, rootID)
@@ -77,6 +93,29 @@ func QueryRootBlockByCondition(condition, exactKeyword string, limit int, args .
 		" ORDER BY CASE WHEN " + exactCondition + " THEN 0 ELSE 1 END ASC, box DESC, lv ASC LIMIT ?"
 	args = append(args, exactArg, limit)
 	rows, err := query(sqlStmt, args...)
+	if err != nil {
+		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var block Block
+		var sepCount int
+		if err = rows.Scan(&block.ID, &block.ParentID, &block.RootID, &block.Hash, &block.Box, &block.Path, &block.HPath, &block.Name, &block.Alias, &block.Memo, &block.Tag, &block.Content, &block.FContent, &block.Markdown, &block.Length, &block.Type, &block.SubType, &block.IAL, &block.Sort, &block.Created, &block.Updated, &sepCount); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret = append(ret, &block)
+	}
+	return
+}
+
+func QueryRootBlockByConditionInBox(condition, exactKeyword string, limit int, boxID string, args ...any) (ret []*Block) {
+	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive)
+	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition +
+		" ORDER BY CASE WHEN " + exactCondition + " THEN 0 ELSE 1 END ASC, box DESC, lv ASC LIMIT ?"
+	args = append(args, exactArg, limit)
+	rows, err := queryForBox(boxID, sqlStmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
@@ -162,7 +201,7 @@ func QueryBlockAliases(rootID string) (ret []string) {
 	return
 }
 
-func queryNames(searchIgnoreLines []string) (ret []string) {
+func queryNames(searchIgnoreLines []string, boxIDs ...string) (ret []string) {
 	ret = []string{}
 	sqlStmt := "SELECT name FROM blocks WHERE name != ''"
 	buf := bytes.Buffer{}
@@ -172,7 +211,11 @@ func queryNames(searchIgnoreLines []string) (ret []string) {
 	}
 	sqlStmt += buf.String()
 	sqlStmt += " LIMIT ?"
-	rows, err := query(sqlStmt, 10240)
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
+	rows, err := queryForBox(boxID, sqlStmt, 10240)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
@@ -202,7 +245,7 @@ func queryNames(searchIgnoreLines []string) (ret []string) {
 	return
 }
 
-func queryAliases(searchIgnoreLines []string) (ret []string) {
+func queryAliases(searchIgnoreLines []string, boxIDs ...string) (ret []string) {
 	ret = []string{}
 	sqlStmt := "SELECT alias FROM blocks WHERE alias != ''"
 	buf := bytes.Buffer{}
@@ -212,7 +255,11 @@ func queryAliases(searchIgnoreLines []string) (ret []string) {
 	}
 	sqlStmt += buf.String()
 	sqlStmt += " LIMIT ?"
-	rows, err := query(sqlStmt, 10240)
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
+	rows, err := queryForBox(boxID, sqlStmt, 10240)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
@@ -242,7 +289,7 @@ func queryAliases(searchIgnoreLines []string) (ret []string) {
 	return
 }
 
-func queryDocTitles(searchIgnoreLines []string) (ret []string) {
+func queryDocTitles(searchIgnoreLines []string, boxIDs ...string) (ret []string) {
 	ret = []string{}
 	sqlStmt := "SELECT content FROM blocks WHERE type = 'd'"
 	buf := bytes.Buffer{}
@@ -251,7 +298,11 @@ func queryDocTitles(searchIgnoreLines []string) (ret []string) {
 		buf.WriteString(line)
 	}
 	sqlStmt += buf.String()
-	rows, err := query(sqlStmt)
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
+	rows, err := queryForBox(boxID, sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return

@@ -4,7 +4,7 @@ import {Model} from "../Model";
 import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {Constants} from "../../constants";
-import {getDocDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
+import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {newFileInTree} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {MenuItem} from "../../menus/Menu";
@@ -100,6 +100,11 @@ export class Files extends Model {
                 if (target.classList.contains("b3-list-item__icon")) {
                     event.preventDefault();
                     event.stopPropagation();
+                    const notebookElement = target.closest("li[data-encrypted=true]");
+                    if (notebookElement) {
+                        openEncryptedNotebook(this.app, notebookElement.getAttribute("data-url"), notebookElement.querySelector(".b3-list-item__text").textContent);
+                        break;
+                    }
                     const rect = target.getBoundingClientRect();
                     openEmojiPanel(target.parentElement.getAttribute("data-url"), "notebook", {
                         x: rect.left,
@@ -768,6 +773,13 @@ export class Files extends Model {
                 }
             });
             if (newElement.classList.contains("dragover")) {
+                const sourceNotebookIds = selectFileElements.map((item) =>
+                    item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");
+                if (!isMoveTargetAllowed(sourceNotebookIds, toURL)) {
+                    showMessage(window.siyuan.languages._kernel[313]);
+                    newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                    return;
+                }
                 fetchPost("/api/filetree/moveDocs", {
                     toNotebook: toURL,
                     fromPaths,
@@ -801,6 +813,13 @@ export class Files extends Model {
                     const toDir = pathPosix().dirname(toPath);
                     const newElementClassList = newElement.getAttribute("class");
                     if (fromPaths.length > 0) {
+                        const sourceNotebookIds = selectFileElements.map((item) =>
+                            item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");
+                        if (!isMoveTargetAllowed(sourceNotebookIds, toURL)) {
+                            showMessage(window.siyuan.languages._kernel[313]);
+                            newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                            return;
+                        }
                         await fetchSyncPost("/api/filetree/moveDocs", {
                             toNotebook: toURL,
                             fromPaths,

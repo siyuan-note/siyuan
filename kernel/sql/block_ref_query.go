@@ -44,18 +44,22 @@ func GetRefDuplicatedDefRootIDs() (ret []string) {
 	return
 }
 
-func QueryVirtualRefKeywords(name, alias, anchor, doc bool, searchIgnoreLines, refSearchIgnoreLines []string) (ret []string) {
+func QueryVirtualRefKeywords(name, alias, anchor, doc bool, searchIgnoreLines, refSearchIgnoreLines []string, boxIDs ...string) (ret []string) {
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
 	if name {
-		ret = append(ret, queryNames(searchIgnoreLines)...)
+		ret = append(ret, queryNames(searchIgnoreLines, boxID)...)
 	}
 	if alias {
-		ret = append(ret, queryAliases(searchIgnoreLines)...)
+		ret = append(ret, queryAliases(searchIgnoreLines, boxID)...)
 	}
 	if anchor {
-		ret = append(ret, queryRefTexts(refSearchIgnoreLines)...)
+		ret = append(ret, queryRefTexts(refSearchIgnoreLines, boxID)...)
 	}
 	if doc {
-		ret = append(ret, queryDocTitles(searchIgnoreLines)...)
+		ret = append(ret, queryDocTitles(searchIgnoreLines, boxID)...)
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	sort.SliceStable(ret, func(i, j int) bool {
@@ -64,7 +68,7 @@ func QueryVirtualRefKeywords(name, alias, anchor, doc bool, searchIgnoreLines, r
 	return
 }
 
-func queryRefTexts(refSearchIgnoreLines []string) (ret []string) {
+func queryRefTexts(refSearchIgnoreLines []string, boxIDs ...string) (ret []string) {
 	ret = []string{}
 	sqlStmt := "SELECT DISTINCT content FROM refs WHERE 1 = 1"
 	buf := bytes.Buffer{}
@@ -74,7 +78,11 @@ func queryRefTexts(refSearchIgnoreLines []string) (ret []string) {
 	}
 	sqlStmt += buf.String()
 	sqlStmt += " LIMIT 10240"
-	rows, err := query(sqlStmt)
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
+	rows, err := queryForBox(boxID, sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
@@ -345,6 +353,62 @@ func getRefText(defBlockID string) string {
 func QueryBlockDefIDsByRefText(refText string) (ret []string) {
 	ret = queryDefIDsByDefText(refText)
 	ret = append(ret, queryDefIDsByNameAliasAndDocTitle(refText)...)
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
+func QueryBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
+	var q, arg string
+	if caseSensitive {
+		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ?"
+		arg = refText
+	} else {
+		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content LIKE ? ESCAPE '\\'"
+		arg = escapeLikePattern(refText)
+	}
+	rows, err := queryForBox(boxID, q, arg)
+	if err != nil {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret = append(ret, id)
+	}
+
+	escaped := escapeLikePattern(refText)
+	aliasArg := "%," + escaped + ",%"
+	var nameCond, docCond, exactArg string
+	if caseSensitive {
+		nameCond = "name = ?"
+		docCond = "content = ?"
+		exactArg = refText
+	} else {
+		nameCond = "name LIKE ? ESCAPE '\\'"
+		docCond = "content LIKE ? ESCAPE '\\'"
+		exactArg = escaped
+	}
+	q = "SELECT id FROM blocks WHERE " + nameCond + " OR (',' || alias || ',') LIKE ? ESCAPE '\\'" +
+		" UNION ALL SELECT id FROM (SELECT id FROM blocks WHERE type = 'd' AND " + docCond + " LIMIT ?)"
+	rows, err = queryForBox(boxID, q, exactArg, aliasArg, exactArg, 32)
+	if err != nil {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret = append(ret, id)
+	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }

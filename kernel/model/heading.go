@@ -160,7 +160,7 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	sql.UpsertTreeQueue(tree)
 
 	// 展开折叠的标题后显示块引用计数 Display reference counts after unfolding headings https://github.com/siyuan-note/siyuan/issues/13618
-	fillBlockRefCount(children)
+	fillBlockRefCount(children, tree.Box)
 
 	operation.RetData = renderVisibleBlockDOMByNodes(children, NewLute())
 	if 0 < len(legacyNodes) {

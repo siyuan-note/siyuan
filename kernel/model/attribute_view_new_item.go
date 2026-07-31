@@ -322,7 +322,18 @@ func attributeViewItemDocumentTemplate(attrView *av.AttributeView, saveMode stri
 }
 
 func resolveAttributeViewNewItemTemplate(blockID string, itemTemplate *av.NewItemTemplate, createdAt time.Time) (*NewItemTemplatePreview, error) {
-	primary, err := RenderGoTemplateAt(itemTemplate.PrimaryKeyTemplate, createdAt)
+	boxID := ""
+	if blockTree := treenode.GetBlockTree(blockID); blockTree != nil {
+		boxID = blockTree.BoxID
+	} else {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if blockTree := treenode.GetBlockTreeInBox(blockID, encBoxID); blockTree != nil {
+				boxID = encBoxID
+				break
+			}
+		}
+	}
+	primary, err := RenderGoTemplateAtInBox(itemTemplate.PrimaryKeyTemplate, createdAt, boxID)
 	if nil != err {
 		return nil, err
 	}
@@ -336,6 +347,14 @@ func resolveAttributeViewNewItemTemplate(blockID string, itemTemplate *av.NewIte
 
 func resolveAttributeViewItemDocument(blockID, primary string, itemTemplate *av.NewItemTemplate, createdAt time.Time) (*NewItemTemplatePreview, error) {
 	blockTree := treenode.GetBlockTree(blockID)
+	if blockTree == nil {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if candidate := treenode.GetBlockTreeInBox(blockID, encBoxID); candidate != nil {
+				blockTree = candidate
+				break
+			}
+		}
+	}
 	if nil == blockTree {
 		return nil, ErrBlockNotFound
 	}
@@ -347,7 +366,7 @@ func resolveAttributeViewItemDocument(blockID, primary string, itemTemplate *av.
 	if nil != err {
 		return nil, err
 	}
-	renderedPath, err := RenderGoTemplateAt(pathTemplate, createdAt)
+	renderedPath, err := RenderGoTemplateAtInBox(pathTemplate, createdAt, boxID)
 	if nil != err {
 		return nil, err
 	}

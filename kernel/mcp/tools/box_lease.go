@@ -42,6 +42,7 @@ var encryptedBoxScopedToolNames = map[string]struct{}{
 	"ref":       {},
 	"repo":      {},
 	"search":    {},
+	"sql":       {},
 	"template":  {},
 }
 

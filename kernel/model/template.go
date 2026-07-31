@@ -52,15 +52,23 @@ type TemplateSearchResult struct {
 }
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
-	return RenderGoTemplateAt(templateContent, time.Now())
+	return RenderGoTemplateAtInBox(templateContent, time.Now(), "")
 }
 
 // RenderGoTemplateAt 使用固定时间渲染 Go 模板，保证同一次业务操作中的多个模板结果一致。
 func RenderGoTemplateAt(templateContent string, now time.Time) (ret string, err error) {
+	return RenderGoTemplateAtInBox(templateContent, now, "")
+}
+
+func RenderGoTemplateInBox(templateContent, boxID string) (ret string, err error) {
+	return RenderGoTemplateAtInBox(templateContent, time.Now(), boxID)
+}
+
+func RenderGoTemplateAtInBox(templateContent string, now time.Time, boxID string) (ret string, err error) {
 	tmpl := template.New("")
 	tplFuncMap := filesys.BuiltInTemplateFuncs()
 	tplFuncMap["now"] = func() time.Time { return now }
-	sql.SQLTemplateFuncs(&tplFuncMap)
+	sql.SQLTemplateFuncs(&tplFuncMap, boxID)
 	tmpl = tmpl.Funcs(tplFuncMap)
 	tpl, err := tmpl.Parse(templateContent)
 	if err != nil {
@@ -378,7 +386,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 
 	goTpl := template.New("").Delims(".action{", "}")
 	tplFuncMap := filesys.BuiltInTemplateFuncs()
-	sql.SQLTemplateFuncs(&tplFuncMap)
+	sql.SQLTemplateFuncs(&tplFuncMap, tree.Box)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(gulu.Str.FromBytes(md))
 	if err != nil {
@@ -500,7 +508,11 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 			} else {
 				// 外部引用：保持 ID 不变，补全空锚文本
 				if refText := n.Text(); "" == refText {
-					refText = strings.TrimSpace(sql.GetRefText(defID))
+					if IsEncryptedBox(tree.Box) {
+						refText = strings.TrimSpace(GetBlockRefTextInBox(defID, tree.Box))
+					} else {
+						refText = strings.TrimSpace(sql.GetRefText(defID))
+					}
 					if "" != refText {
 						treenode.SetDynamicBlockRefText(n, refText)
 					} else {
@@ -518,7 +530,11 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 				} else {
 					// 外部引用：保持 ID 不变，补全空锚文本
 					if refText := n.Text(); "" == refText {
-						refText = strings.TrimSpace(sql.GetRefText(defID))
+						if IsEncryptedBox(tree.Box) {
+							refText = strings.TrimSpace(GetBlockRefTextInBox(defID, tree.Box))
+						} else {
+							refText = strings.TrimSpace(sql.GetRefText(defID))
+						}
 						if "" != refText {
 							treenode.SetDynamicBlockRefText(n, refText)
 						} else {

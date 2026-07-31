@@ -2,7 +2,7 @@ import {BlockPanel} from "./Panel";
 import {hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
-import {isLocalPath, parseSiYuanUriInfo} from "../util/pathName";
+import {isEncryptedBox, isLocalPath, parseSiYuanUriInfo} from "../util/pathName";
 import type {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
@@ -15,6 +15,11 @@ import {Tab} from "../layout/Tab";
 /// #endif
 
 let popoverTargetElement: HTMLElement;
+
+const getPopoverNotebookId = () => {
+    const notebookId = popoverTargetElement?.closest("[data-notebook-id]")?.getAttribute("data-notebook-id") || "";
+    return isEncryptedBox(notebookId) ? notebookId : "";
+};
 // 异步获取信息后再显示 tooltip，鼠标已移走时需中断请求 https://github.com/siyuan-note/siyuan/issues/14823
 let tooltipAbortController: AbortController | null = null;
 export const initBlockPopover = (app: App) => {
@@ -503,11 +508,15 @@ export const showPopover = async (app: App, showRef = false) => {
     }
     let refDefs: IRefDefs[] = [];
     let originalRefBlockIDs: IObject;
+    const notebookId = getPopoverNotebookId();
     const dataId = popoverTargetElement.getAttribute("data-id");
     if (dataId) {
         // backlink/util/hint 上的弹层
         if (showRef) {
-            const postResponse = await fetchSyncPost("/api/block/getRefIDs", {id: dataId});
+            const postResponse = await fetchSyncPost("/api/block/getRefIDs", {
+                id: dataId,
+                notebook: notebookId
+            });
             refDefs = postResponse.data.refDefs;
             originalRefBlockIDs = postResponse.data.originalRefBlockIDs;
         } else {
@@ -522,6 +531,7 @@ export const showPopover = async (app: App, showRef = false) => {
     } else if (popoverTargetElement.getAttribute("data-type")?.indexOf("virtual-block-ref") > -1) {
         const postResponse = await fetchSyncPost("/api/block/getBlockDefIDsByRefText", {
             anchor: popoverTargetElement.textContent,
+            notebook: notebookId
         });
         refDefs = postResponse.data.refDefs;
     } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
@@ -569,7 +579,10 @@ export const showPopover = async (app: App, showRef = false) => {
             targetId = popoverTargetElement.parentElement.getAttribute("data-node-id");
         }
         if (url) {
-            const postResponse = await fetchSyncPost(url, {id: targetId});
+            const postResponse = await fetchSyncPost(url, {
+                id: targetId,
+                notebook: notebookId
+            });
             refDefs = postResponse.data.refDefs;
             originalRefBlockIDs = postResponse.data.originalRefBlockIDs;
         }

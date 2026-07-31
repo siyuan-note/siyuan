@@ -29,8 +29,9 @@ var SQLTool = &Tool{
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action": {Type: "string", Description: "Operation", Enum: []string{"query"}},
-			"stmt":   {Type: "string", Description: "SQL SELECT statement"},
+			"action":   {Type: "string", Description: "Operation", Enum: []string{"query"}},
+			"stmt":     {Type: "string", Description: "SQL SELECT statement"},
+			"notebook": {Type: "string", Description: "Optional notebook ID used to query an encrypted notebook"},
 		},
 		Required: []string{"action", "stmt"},
 	},
@@ -72,11 +73,25 @@ func sqlQuery(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "invalid SQL: " + err.Error()}}, IsError: true}, nil
 	}
 
-	if err := sql.CheckReadonlyStatement(stmt); err != nil {
+	boxID, _ := args["notebook"].(string)
+	if boxID == "" {
+		if err := sql.CheckReadonlyStatement(stmt); err != nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "readonly SQL required: " + err.Error()}}, IsError: true}, nil
+		}
+	} else if err := sql.CheckReadonlyStatementInBox(stmt, boxID); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "readonly SQL required: " + err.Error()}}, IsError: true}, nil
 	}
 
-	rows, err := sql.Query(stmt, 100)
+	var rows []map[string]any
+	var err error
+	if boxID == "" {
+		rows, err = sql.Query(stmt, 100)
+	} else {
+		rows, err = sql.QueryNoLimitInBox(stmt, boxID)
+		if len(rows) > 100 {
+			rows = rows[:100]
+		}
+	}
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "query failed: " + err.Error()}}, IsError: true}, nil
 	}

@@ -111,6 +111,11 @@ export class Protyle {
 
         this.protyle.element.innerHTML = "";
         this.protyle.element.classList.add("protyle");
+        if (this.protyle.notebookId) {
+            this.protyle.element.setAttribute("data-notebook-id", this.protyle.notebookId);
+        } else {
+            this.protyle.element.removeAttribute("data-notebook-id");
+        }
         // 启用 RTL 时给 .protyle 元素添加 .rtl 类名，方便主题开发者判断 RTL 方向
         if (window.siyuan.config.editor.rtl) {
             this.protyle.element.classList.add("rtl");
@@ -271,6 +276,11 @@ export class Protyle {
                             if (this.protyle.path === data.data.fromPath) {
                                 this.protyle.path = data.data.newPath;
                                 this.protyle.notebookId = data.data.toNotebook;
+                                if (this.protyle.notebookId) {
+                                    this.protyle.element.setAttribute("data-notebook-id", this.protyle.notebookId);
+                                } else {
+                                    this.protyle.element.removeAttribute("data-notebook-id");
+                                }
                             }
                             break;
                         case "closeBox":

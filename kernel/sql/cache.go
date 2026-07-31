@@ -173,7 +173,7 @@ func GetRefsCacheByDefIDInBox(defID, boxID string) (ret []*Ref) {
 		}
 	}
 	if 1 > len(ret) {
-		allRefs := QueryRefsByDefID(defID, false)
+		allRefs := QueryRefsByDefIDInBox(defID, false, boxID)
 		for _, ref := range allRefs {
 			// 按 box 过滤：boxID 非空时只选同 box 的 Ref，boxID 为空时全部保留
 			if boxID == "" || ref.Box == boxID {

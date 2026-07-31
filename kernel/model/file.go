@@ -184,12 +184,45 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 		}
 		boxes[box.ID] = box
 	}
+	queryRootBlocks := func(condition, exactKeyword string, limit int, args ...any) (ret []*sql.Block) {
+		seen := map[string]struct{}{}
+		appendBlocks := func(blocks []*sql.Block) {
+			for _, block := range blocks {
+				if block == nil {
+					continue
+				}
+				key := block.Box + "\x00" + block.ID
+				if _, exists := seen[key]; exists {
+					continue
+				}
+				seen[key] = struct{}{}
+				ret = append(ret, block)
+				if len(ret) >= limit {
+					return
+				}
+			}
+		}
+		appendBlocks(sql.QueryRootBlockByCondition(condition, exactKeyword, limit, args...))
+		if len(ret) >= limit {
+			return ret[:limit]
+		}
+		for boxID := range boxes {
+			if !IsEncryptedBox(boxID) {
+				continue
+			}
+			appendBlocks(sql.QueryRootBlockByConditionInBox(condition, exactKeyword, limit-len(ret), boxID, args...))
+			if len(ret) >= limit {
+				break
+			}
+		}
+		return
+	}
 
 	keyword = strings.TrimSpace(keyword)
 
 	var rootBlocks []*sql.Block
 	if ast.IsNodeIDPattern(keyword) {
-		rootBlocks = sql.QueryRootBlockByCondition("id = ?", keyword, 1, keyword)
+		rootBlocks = queryRootBlocks("id = ?", keyword, 1, keyword)
 	} else {
 		keywords := strings.Fields(keyword)
 		if 0 < len(keywords) {
@@ -210,7 +243,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 			}
 
 			condition, args := buildSearchDocsCondition(keywords, excludeIDs, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo)
-			rootBlocks = sql.QueryRootBlockByCondition(condition, keyword, Conf.Search.Limit, args...)
+			rootBlocks = queryRootBlocks(condition, keyword, Conf.Search.Limit, args...)
 		} else {
 			for _, box := range boxes {
 				data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
@@ -1366,7 +1399,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	hPath, err := RenderGoTemplate(boxConf.DailyNoteSavePath)
+	hPath, err := RenderGoTemplateInBox(boxConf.DailyNoteSavePath, box.ID)
 	if err != nil {
 		return
 	}

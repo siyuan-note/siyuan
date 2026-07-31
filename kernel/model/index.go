@@ -364,6 +364,9 @@ func autoIndexEmbedBlock() {
 	defer indexEmbedBlockLock.Unlock()
 
 	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
+	for _, boxID := range treenode.GetOpenedEncryptedBoxIDs() {
+		embedBlocks = append(embedBlocks, sql.QueryEmptyContentEmbedBlocksInBox(boxID)...)
+	}
 	for i, embedBlock := range embedBlocks {
 		markdown := strings.TrimSpace(embedBlock.Markdown)
 		markdown = strings.TrimPrefix(markdown, "{{")
@@ -385,7 +388,12 @@ func autoIndexEmbedBlock() {
 			continue
 		}
 
-		queryResultBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 102400)
+		var queryResultBlocks []*sql.Block
+		if IsEncryptedBox(embedBlock.Box) {
+			queryResultBlocks = sql.SelectBlocksRawStmtNoParseInBox(stmt, 102400, embedBlock.Box)
+		} else {
+			queryResultBlocks = sql.SelectBlocksRawStmtNoParse(stmt, 102400)
+		}
 		for _, block := range queryResultBlocks {
 			embedBlock.Content += block.Content
 		}
@@ -400,8 +408,12 @@ func autoIndexEmbedBlock() {
 	}
 }
 
-func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBlock) {
-	embedBlock := sql.GetBlock(embedBlockID)
+func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBlock, boxIDs ...string) {
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
+	embedBlock := sql.GetBlockInBox(embedBlockID, boxID)
 	if nil == embedBlock {
 		return
 	}

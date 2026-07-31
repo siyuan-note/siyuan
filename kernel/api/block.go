@@ -809,7 +809,8 @@ func getRefIDsByFileAnnotationID(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	refIDs := model.GetBlockRefIDsByFileAnnotationID(id)
+	boxID, _ := arg["notebook"].(string)
+	refIDs := model.GetBlockRefIDsByFileAnnotationIDInBox(id, boxID)
 	if model.IsReadOnlyRoleContext(c) {
 		refIDs = model.FilterRefIDsByPublishAccess(c, model.GetPublishAccess(), refIDs)
 	}
@@ -836,7 +837,8 @@ func getBlockDefIDsByRefText(c *gin.Context) {
 	}
 
 	anchor := arg["anchor"].(string)
-	ids := model.GetBlockDefIDsByRefText(anchor)
+	boxID, _ := arg["notebook"].(string)
+	ids := model.GetBlockDefIDsByRefTextInBox(anchor, boxID)
 	ids = filterBlockIDsByPublishAccess(c, ids, "")
 	var retRefDefs []model.RefDefs
 	for _, id := range ids {

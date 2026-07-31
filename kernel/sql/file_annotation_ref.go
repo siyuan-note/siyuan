@@ -33,8 +33,12 @@ type FileAnnotationRef struct {
 }
 
 func QueryRefIDsByAnnotationID(annotationID string) (refIDs []string) {
+	return QueryRefIDsByAnnotationIDInBox(annotationID, "")
+}
+
+func QueryRefIDsByAnnotationIDInBox(annotationID, boxID string) (refIDs []string) {
 	refIDs = []string{}
-	rows, err := query("SELECT block_id FROM file_annotation_refs WHERE annotation_id = ?", annotationID)
+	rows, err := queryForBox(boxID, "SELECT block_id FROM file_annotation_refs WHERE annotation_id = ?", annotationID)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return

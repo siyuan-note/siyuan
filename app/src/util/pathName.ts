@@ -209,6 +209,18 @@ export const getTopPaths = (liElements: Element[]) => {
     return fromPaths;
 };
 
+export const isMoveTargetAllowed = (sourceNotebookIds: string[] = [], targetNotebookId: string) => {
+    const sourceIds = Array.from(new Set(sourceNotebookIds.filter(Boolean)));
+    if (sourceIds.length === 0) {
+        return true;
+    }
+    const encryptedSourceIds = sourceIds.filter(isEncryptedBox);
+    if (encryptedSourceIds.length > 0) {
+        return encryptedSourceIds.length === sourceIds.length && sourceIds.length === 1 && sourceIds[0] === targetNotebookId;
+    }
+    return !isEncryptedBox(targetNotebookId);
+};
+
 export const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string) => {
     fetchPost("/api/filetree/moveDocs", {
         toNotebook,
@@ -224,6 +236,7 @@ export const movePathTo = (options: {
     title?: string,
     flashcard: boolean
     rootIDs?: string[],
+    sourceNotebookIds?: string[],
 }) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
@@ -273,7 +286,7 @@ export const movePathTo = (options: {
     setNoteBook((notebooks) => {
         let html = "";
         notebooks.forEach((item) => {
-            if (!item.closed) {
+            if (!item.closed && isMoveTargetAllowed(options.sourceNotebookIds, item.id)) {
                 let countHTML = "";
                 if (options.flashcard) {
                     countHTML = `<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>

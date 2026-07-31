@@ -903,7 +903,7 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 		ccH := c.ChildrenByType(ast.NodeHeading)
 		childrenHeadings = append(childrenHeadings, ccH...)
 	}
-	fillBlockRefCount(childrenHeadings)
+	fillBlockRefCount(childrenHeadings, tree.Box)
 
 	transaction = &Transaction{}
 	if treenode.IsSelfFolded(node) {
@@ -1439,7 +1439,11 @@ func getBlock(id string, tree *parse.Tree) (ret *Block, err error) {
 func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, headingMode int, breadcrumb bool) (block *Block, blockPaths []*BlockPath) {
 	tree, _ := trees[sqlBlock.RootID]
 	if nil == tree {
-		tree, _ = LoadTreeByBlockID(sqlBlock.RootID)
+		if IsEncryptedBox(sqlBlock.Box) {
+			tree, _ = LoadTreeByBlockIDInExactBox(sqlBlock.RootID, sqlBlock.Box)
+		} else {
+			tree, _ = LoadTreeByBlockID(sqlBlock.RootID)
+		}
 	}
 	if nil == tree {
 		return
@@ -1470,7 +1474,12 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 		nodes = append(nodes, def)
 	}
 
-	b := treenode.GetBlockTree(def.ID)
+	var b *treenode.BlockTree
+	if IsEncryptedBox(sqlBlock.Box) {
+		b = treenode.GetBlockTreeInBox(def.ID, sqlBlock.Box)
+	} else {
+		b = treenode.GetBlockTree(def.ID)
+	}
 	if nil == b {
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			if encBT := treenode.GetBlockTreeInBox(def.ID, encBoxID); nil != encBT {
@@ -1484,7 +1493,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 
 	// 嵌入块查询结果中显示块引用计数 https://github.com/siyuan-note/siyuan/issues/7191
-	fillBlockRefCount(nodes)
+	fillBlockRefCount(nodes, b.BoxID)
 
 	luteEngine := NewLute()
 	luteEngine.RenderOptions.ProtyleContenteditable = true

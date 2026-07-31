@@ -450,7 +450,8 @@ export const execByCommand = async (options: {
                         paths: [protyle.path],
                         range,
                         flashcard: false,
-                        rootIDs: [protyle.block.rootID]
+                        rootIDs: [protyle.block.rootID],
+                        sourceNotebookIds: [protyle.notebookId]
                     });
                 } else if (nodeElement && range && protyle.element.contains(range.startContainer)) {
                     let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
@@ -462,11 +463,14 @@ export const execByCommand = async (options: {
                             hintMoveBlock(toPath[0], selectElements, protyle);
                         },
                         flashcard: false,
-                        rootIDs: [protyle.block.rootID]
+                        rootIDs: [protyle.block.rootID],
+                        sourceNotebookIds: [protyle.notebookId]
                     });
                 }
             } else {
                 const paths = getTopPaths(fileLiElements);
+                const sourceNotebookIds = fileLiElements.map((item) =>
+                    item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");
                 const rootIDs: string[] = [];
                 fileLiElements.forEach(item => {
                     rootIDs.push(item.getAttribute("data-node-id"));
@@ -477,7 +481,8 @@ export const execByCommand = async (options: {
                     },
                     paths,
                     rootIDs,
-                    flashcard: false
+                    flashcard: false,
+                    sourceNotebookIds
                 });
             }
             break;

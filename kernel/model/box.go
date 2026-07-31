@@ -183,6 +183,7 @@ func ListNotebooks() (ret []*Box, err error) {
 			markRuntimeEncryptedBox(id)
 		}
 		if boxConf.Encrypted && !missingEncryptedIdentity {
+			repairEncryptedBoxStateFromDEK(id)
 			if metadataErr := revealBoxMetadataIfUnlocked(id, boxConf); metadataErr != nil {
 				logging.LogErrorf("decrypt encrypted notebook metadata [%s] failed: %s", id, metadataErr)
 			}

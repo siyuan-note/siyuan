@@ -179,6 +179,8 @@ func RemoveBox(boxID string) (err error) {
 	isUserGuide := IsUserGuide(boxID)
 	localPath := filepath.Join(util.DataDir, boxID)
 	if !filelock.IsExist(localPath) {
+		forgetRuntimeNormalBox(boxID)
+		removeMasterPasswordMigrationBox(boxID)
 		return
 	}
 	if !gulu.File.IsDir(localPath) {
@@ -244,7 +246,10 @@ func RemoveBox(boxID string) (err error) {
 		treenode.RemoveEncryptedBlockTreeDBFile(boxID)
 		removeEncryptedBoxLifecycle(boxID)
 		forgetRuntimeEncryptedBox(boxID)
+	} else {
+		forgetRuntimeNormalBox(boxID)
 	}
+	removeMasterPasswordMigrationBox(boxID)
 
 	if isUserGuide {
 		if avFiles, readAvErr := getUserGuideAVJSONFiles(boxID); nil == readAvErr {

@@ -183,6 +183,10 @@ func html2BlockDOM(c *gin.Context) {
 				logging.LogWarnf("skip copying asset [%s] due to sensitive path", localPath)
 				return ast.WalkContinue
 			}
+			if encryptedBoxID := model.EncryptedRawPathBoxID(localPath); encryptedBoxID != "" {
+				logging.LogWarnf("skip copying asset [%s] from encrypted notebook [%s]", localPath, encryptedBoxID)
+				return ast.WalkContinue
+			}
 
 			name := filepath.Base(localPath)
 			ext := filepath.Ext(name)

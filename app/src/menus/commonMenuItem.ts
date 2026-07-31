@@ -1009,7 +1009,7 @@ export const renameMenu = (options: {
     }).element;
 };
 
-export const movePathToMenu = (paths: string[]) => {
+export const movePathToMenu = (paths: string[], sourceNotebookIds: string[] = []) => {
     return new MenuItem({
         id: "move",
         label: window.siyuan.languages.move,
@@ -1027,6 +1027,7 @@ export const movePathToMenu = (paths: string[]) => {
                 paths,
                 flashcard: false,
                 rootIDs,
+                sourceNotebookIds,
             });
         }
     }).element;

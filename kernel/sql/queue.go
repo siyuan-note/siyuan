@@ -265,7 +265,9 @@ func FlushQueue() {
 
 		tx, err := beginTxForBox(op.boxID())
 		if err != nil {
-			return
+			logging.LogWarnf("skip queue operation [%s] for box [%s]: %s", op.action, op.boxID(), err)
+			requeueOperation(op)
+			continue
 		}
 
 		groupOpsCurrent[op.action]++
@@ -601,6 +603,14 @@ func getOperations() (ops []*dbQueueOperation, indexSnapshot int64) {
 
 func appendOperation(op *dbQueueOperation) {
 	operationQueue = append(operationQueue, op)
+	appendToIndexQueue(op)
+	eventbus.Publish(eventbus.EvtSQLIndexChanged)
+}
+
+func requeueOperation(op *dbQueueOperation) {
+	dbQueueLock.Lock()
+	operationQueue = append(operationQueue, op)
+	dbQueueLock.Unlock()
 	appendToIndexQueue(op)
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)
 }

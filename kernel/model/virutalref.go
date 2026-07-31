@@ -69,7 +69,7 @@ func getBlockVirtualRefKeywords(root *ast.Node, boxID string) (ret []string) {
 }
 
 func putBlockVirtualRefKeywords(blockContent string, root *ast.Node, boxID string) (ret []string) {
-	keywords := getVirtualRefKeywords(root)
+	keywords := getVirtualRefKeywords(root, boxID)
 	if 1 > len(keywords) {
 		return
 	}
@@ -124,6 +124,10 @@ func ResetVirtualBlockRefCache() {
 	refSearchIgnoreLines := getRefSearchIgnoreLines()
 	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines)
 	virtualBlockRefCache.Set("virtual_ref", keywords, 1)
+	for _, boxID := range treenode.GetOpenedEncryptedBoxIDs() {
+		boxKeywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxID)
+		virtualBlockRefCache.Set(boxID+"\x00virtual_ref", boxKeywords, 1)
+	}
 }
 
 // addNewKeywords 将新关键字添加到虚拟引用关键字列表中，如果不存在则追加，保留空白字符
@@ -272,13 +276,23 @@ func parseKeywords(keywordsStr string) (keywords []string) {
 	return
 }
 
-func getVirtualRefKeywords(root *ast.Node) (ret []string) {
+func getVirtualRefKeywords(root *ast.Node, boxIDs ...string) (ret []string) {
 	if !Conf.Editor.VirtualBlockRef {
 		return
 	}
 
-	if val, ok := virtualBlockRefCache.Get("virtual_ref"); ok {
+	key := "virtual_ref"
+	if len(boxIDs) > 0 && boxIDs[0] != "" {
+		key = boxIDs[0] + "\x00virtual_ref"
+	}
+	if val, ok := virtualBlockRefCache.Get(key); ok {
 		ret = val.([]string)
+	} else {
+		searchIgnoreLines := getSearchIgnoreLines()
+		refSearchIgnoreLines := getRefSearchIgnoreLines()
+		ret = sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias,
+			Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxIDs...)
+		virtualBlockRefCache.Set(key, ret, 1)
 	}
 
 	includes := parseKeywords(Conf.Editor.VirtualBlockRefInclude)

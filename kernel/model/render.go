@@ -145,7 +145,7 @@ func renderBlockText(node *ast.Node, excludeTypes []string, removeLineBreak bool
 	return
 }
 
-func fillBlockRefCount(nodes []*ast.Node) {
+func fillBlockRefCount(nodes []*ast.Node, boxID string) {
 	var defIDs []string
 	for _, n := range nodes {
 		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -160,7 +160,7 @@ func fillBlockRefCount(nodes []*ast.Node) {
 		})
 	}
 	defIDs = gulu.Str.RemoveDuplicatedElem(defIDs)
-	refCount := sql.QueryRefCount(defIDs)
+	refCount := sql.QueryRefCountInBox(defIDs, boxID)
 	for _, n := range nodes {
 		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || !n.IsBlock() {
@@ -500,20 +500,33 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 	return
 }
 
-func renderBlockMarkdownR(id string, rendered *[]string) (ret []*ast.Node) {
-	if gulu.Str.Contains(id, *rendered) {
+func renderBlockMarkdownR(id string, rendered *[]string, boxIDs ...string) (ret []*ast.Node) {
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
+	renderedID := id
+	if boxID != "" {
+		renderedID = boxID + "\x00" + id
+	}
+	if gulu.Str.Contains(renderedID, *rendered) {
 		return
 	}
-	*rendered = append(*rendered, id)
+	*rendered = append(*rendered, renderedID)
 
-	b := treenode.GetBlockTree(id)
+	b := treenode.GetBlockTreeInBox(id, boxID)
 	if nil == b {
 		return
 	}
 
 	var err error
 	var t *parse.Tree
-	if t, err = LoadTreeByBlockID(b.ID); err != nil {
+	if boxID == "" {
+		t, err = LoadTreeByBlockID(b.ID)
+	} else {
+		t, err = LoadTreeByBlockIDInExactBox(b.ID, boxID)
+	}
+	if err != nil {
 		return
 	}
 	node := treenode.GetNodeInTree(t, b.ID)
@@ -544,9 +557,14 @@ func renderBlockMarkdownR(id string, rendered *[]string) (ret []*ast.Node) {
 				stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 				stmt = html.UnescapeString(stmt)
 				stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-				sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+				var sqlBlocks []*sql.Block
+				if boxID != "" && IsEncryptedBox(boxID) {
+					sqlBlocks = sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Limit, boxID)
+				} else {
+					sqlBlocks = sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+				}
 				for _, sqlBlock := range sqlBlocks {
-					subNodes := renderBlockMarkdownR(sqlBlock.ID, rendered)
+					subNodes := renderBlockMarkdownR(sqlBlock.ID, rendered, boxID)
 					for _, subNode := range subNodes {
 						inserts = append(inserts, subNode)
 					}

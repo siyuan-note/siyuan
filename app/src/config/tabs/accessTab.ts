@@ -626,9 +626,9 @@ const openChangeMasterPasswordDialog = (onChanged?: () => void) => {
             if (response.code === 0) {
                 showMessage(window.siyuan.languages.changeMasterPasswordSuccessTip);
                 dialog.destroy();
+                onChanged?.();
             } else {
                 showMessage(response.msg, 6000, "error");
-                onChanged?.();
             }
         });
     });

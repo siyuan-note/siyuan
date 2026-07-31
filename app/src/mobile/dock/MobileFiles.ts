@@ -89,6 +89,13 @@ export class MobileFiles extends Model {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.actionsElement)) {
                 if (target.classList.contains("b3-list-item__icon")) {
+                    const notebookElement = target.closest("li[data-encrypted=true]");
+                    if (notebookElement) {
+                        openEncryptedNotebook(this.app, notebookElement.getAttribute("data-url"), notebookElement.querySelector(".b3-list-item__text").textContent);
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
                     target = target.previousElementSibling as HTMLElement;
                 }
                 const type = target.getAttribute("data-type");

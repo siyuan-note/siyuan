@@ -3449,12 +3449,16 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 		blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
 		if 1 > len(blockIDs) {
 			// 老数据兼容处理
-			avBts := treenode.GetBlockTreesByType("av")
+			boxID := ""
+			if tree, _ := LoadTreeByBlockID(nodeID); tree != nil {
+				boxID = tree.Box
+			}
+			avBts := treenode.GetBlockTreesByTypeInBox("av", boxID)
 			for _, avBt := range avBts {
 				if nil == avBt {
 					continue
 				}
-				tree, _ := LoadTreeByBlockID(avBt.ID)
+				tree, _ := LoadTreeByBlockIDInExactBox(avBt.ID, avBt.BoxID)
 				if nil == tree {
 					continue
 				}

@@ -172,6 +172,30 @@ func GetBlockTreesByType(typ string) (ret []*BlockTree) {
 	return
 }
 
+// GetBlockTreesByTypeInBox 按类型在指定笔记本的块树数据库中查询块。
+func GetBlockTreesByTypeInBox(typ, boxID string) (ret []*BlockTree) {
+	if boxID == "" {
+		return GetBlockTreesByType(typ)
+	}
+
+	sqlStmt := "SELECT * FROM blocktrees WHERE type = ? AND box_id = ?"
+	rows, err := queryForBox(boxID, sqlStmt, typ, boxID)
+	if err != nil {
+		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var block BlockTree
+		if err = rows.Scan(&block.ID, &block.RootID, &block.ParentID, &block.BoxID, &block.Path, &block.HPath, &block.Updated, &block.Type); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret = append(ret, &block)
+	}
+	return
+}
+
 func GetBlockTreeByBoxPath(boxID, path string) (ret *BlockTree) {
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ?"

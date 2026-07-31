@@ -91,6 +91,9 @@ func prepareBoxConfForSave(boxID string, boxConf *conf.BoxConf) (*conf.BoxConf, 
 	}
 	persisted := *boxConf
 	persisted.BoxCrypt = DeepCopyBoxEncryption(boxConf.BoxCrypt)
+	if persisted.Encrypted {
+		forgetRuntimeNormalBox(boxID)
+	}
 	if !persisted.Encrypted {
 		if IsEncryptedBox(boxID) {
 			return nil, errors.New("encrypted notebook cannot be saved as a normal notebook")
@@ -107,7 +110,7 @@ func prepareBoxConfForSave(boxID string, boxConf *conf.BoxConf) (*conf.BoxConf, 
 
 	if dek, ok := cachedDEKCopy(boxID); ok {
 		defer zeroAndClear(dek)
-		if err := encryptBoxMetadata(boxID, &persisted, dek); err != nil {
+		if err := reuseBoxMetadataIfUnchanged(boxID, &persisted, dek); err != nil {
 			return nil, err
 		}
 	} else if len(persisted.BoxCrypt.Metadata) == 0 {
@@ -125,6 +128,23 @@ func prepareBoxConfForSave(boxID string, boxConf *conf.BoxConf) (*conf.BoxConf, 
 	}
 	clearBoxMetadata(&persisted)
 	return &persisted, nil
+}
+
+func reuseBoxMetadataIfUnchanged(boxID string, boxConf *conf.BoxConf, dek []byte) error {
+	existing, err := readRawBoxConf(boxID)
+	if err != nil {
+		return err
+	}
+	if existing != nil && existing.Encrypted && existing.BoxCrypt != nil && len(existing.BoxCrypt.Metadata) > 0 {
+		decrypted := &conf.BoxConf{BoxCrypt: DeepCopyBoxEncryption(existing.BoxCrypt)}
+		if err = decryptBoxMetadata(boxID, decrypted, dek); err == nil &&
+			filterBoxIcon(decrypted.Icon) == filterBoxIcon(boxConf.Icon) &&
+			decrypted.Sort == boxConf.Sort && decrypted.SortMode == boxConf.SortMode {
+			boxConf.BoxCrypt.Metadata = append([]byte(nil), existing.BoxCrypt.Metadata...)
+			return nil
+		}
+	}
+	return encryptBoxMetadata(boxID, boxConf, dek)
 }
 
 func clearBoxMetadata(boxConf *conf.BoxConf) {

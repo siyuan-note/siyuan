@@ -337,6 +337,10 @@ func getEmbedBlock(c *gin.Context) {
 	if nil != breadcrumbArg {
 		breadcrumb = breadcrumbArg.(bool)
 	}
+	notebook := ""
+	if notebookArg, ok := arg["notebook"].(string); ok && model.IsEncryptedBox(notebookArg) {
+		notebook = notebookArg
+	}
 
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	var blocks []*model.EmbedBlock
@@ -350,7 +354,11 @@ func getEmbedBlock(c *gin.Context) {
 		blocks = model.GetEmbedBlockForPublish(embedBlockID, includeIDs, headingMode, breadcrumb)
 		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
 	} else {
-		blocks = model.GetEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb)
+		if notebook == "" {
+			blocks = model.GetEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb)
+		} else {
+			blocks = model.GetEmbedBlockInBox(embedBlockID, includeIDs, headingMode, breadcrumb, notebook)
+		}
 	}
 	ret.Data = map[string]any{
 		"blocks": blocks,

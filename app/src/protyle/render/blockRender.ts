@@ -65,7 +65,8 @@ ${content}
                         embedBlockID: item.getAttribute("data-node-id"),
                         includeIDs,
                         headingMode: ["0", "1", "2"].includes(item.getAttribute("custom-heading-mode")) ? parseInt(item.getAttribute("custom-heading-mode")) : window.siyuan.config.editor.headingEmbedMode,
-                        breadcrumb
+                        breadcrumb,
+                        notebook: isEncryptedBox(protyle.notebookId) ? protyle.notebookId : ""
                     }, (response) => {
                         renderEmbed(response.data.blocks || [], protyle, item, top, undefined, onEmbedRender);
                     });

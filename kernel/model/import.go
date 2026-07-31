@@ -1013,6 +1013,81 @@ func replaceAssetName(path string, assetNameMap map[string]string, boxSuffix str
 	return path
 }
 
+func validateImportedNotebookIdentities(tmpDataPath string) ([]string, error) {
+	dirs, err := os.ReadDir(tmpDataPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var encryptedBoxIDs []string
+	for _, entry := range dirs {
+		if !entry.IsDir() || !ast.IsNodeIDPattern(entry.Name()) {
+			continue
+		}
+
+		boxID := entry.Name()
+		boxDir := filepath.Join(tmpDataPath, boxID)
+		confPath := filepath.Join(boxDir, ".siyuan", "conf.json")
+		backupPath := filepath.Join(boxDir, ".siyuan", notebookCryptoBackupFilename)
+
+		var boxConf *conf.BoxConf
+		if filelock.IsExist(confPath) {
+			data, readErr := filelock.ReadFile(confPath)
+			if readErr != nil {
+				return nil, fmt.Errorf("read imported notebook conf [%s] failed: %w", boxID, readErr)
+			}
+			boxConf = conf.NewBoxConf()
+			if unmarshalErr := gulu.JSON.UnmarshalJSON(data, boxConf); unmarshalErr != nil {
+				return nil, fmt.Errorf("parse imported notebook conf [%s] failed: %w", boxID, unmarshalErr)
+			}
+		}
+
+		var backup *conf.BoxEncryption
+		if filelock.IsExist(backupPath) {
+			backup, err = readBoxEncryptionFile(backupPath)
+			if err != nil {
+				return nil, fmt.Errorf("invalid imported notebook identity [%s]: %w", boxID, err)
+			}
+		}
+
+		var boxCrypt *conf.BoxEncryption
+		if boxConf != nil && boxConf.Encrypted {
+			if boxConf.BoxCrypt != nil && validateBoxEncryption(boxConf.BoxCrypt) == nil {
+				boxCrypt = boxConf.BoxCrypt
+			} else {
+				boxCrypt = backup
+			}
+			if boxCrypt == nil {
+				return nil, fmt.Errorf("encrypted notebook [%s] has no valid identity", boxID)
+			}
+		} else if boxConf != nil && backup != nil {
+			return nil, fmt.Errorf("notebook [%s] has conflicting normal and encrypted identities", boxID)
+		} else if backup != nil {
+			boxCrypt = backup
+		}
+
+		payloadFound, payloadErr := hasEncryptedNotebookPayloadAtPath(boxDir)
+		if payloadErr != nil {
+			return nil, fmt.Errorf("inspect imported notebook [%s] failed: %w", boxID, payloadErr)
+		}
+		if boxCrypt == nil && payloadFound {
+			return nil, fmt.Errorf("imported notebook [%s] contains encrypted payload without identity", boxID)
+		}
+		if boxCrypt == nil {
+			continue
+		}
+
+		if err = validateBoxEncryption(boxCrypt); err != nil {
+			return nil, fmt.Errorf("invalid imported notebook identity [%s]: %w", boxID, err)
+		}
+		if filelock.IsExist(filepath.Join(util.DataDir, boxID)) && IsEncryptedBox(boxID) {
+			return nil, fmt.Errorf("refuse to overwrite existing encrypted notebook [%s]", boxID)
+		}
+		encryptedBoxIDs = append(encryptedBoxIDs, boxID)
+	}
+	return encryptedBoxIDs, nil
+}
+
 func ImportData(zipPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
@@ -1068,10 +1143,17 @@ func ImportData(zipPath string) (err error) {
 		}
 		return nil
 	})
+	importedEncryptedBoxIDs, err := validateImportedNotebookIdentities(tmpDataPath)
+	if err != nil {
+		return err
+	}
 	if err = filelock.Copy(tmpDataPath, util.DataDir); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
+	}
+	for _, boxID := range importedEncryptedBoxIDs {
+		forgetRuntimeNormalBox(boxID)
 	}
 
 	// 导入的 Data.zip 可能含加密笔记本备份文件：若本机未启用，自动把配置装回 conf.json，

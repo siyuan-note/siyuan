@@ -286,11 +286,20 @@ func toSubTreeInBox(blocks []*Block, keyword, boxID string, originalRefBlockIDs 
 						if ast.NodeList == next.Type {
 							for subLi := next.FirstChild; nil != subLi; subLi = subLi.Next {
 								subLiBlock, _ := getBlock(subLi.ID, tree)
+								if nil == subLiBlock || nil == subLi.FirstChild {
+									continue
+								}
 								var subFirst *sql.Block
 								if 3 != subLi.ListData.Typ {
-									subFirst = sql.GetBlock(subLi.FirstChild.ID)
+									subFirst = sql.GetBlockInBox(subLi.FirstChild.ID, boxID)
 								} else {
-									subFirst = sql.GetBlock(subLi.FirstChild.Next.ID)
+									if nil == subLi.FirstChild.Next {
+										continue
+									}
+									subFirst = sql.GetBlockInBox(subLi.FirstChild.Next.ID, boxID)
+								}
+								if nil == subFirst {
+									continue
 								}
 								subPos := 0
 								content := subFirst.Content
@@ -389,11 +398,20 @@ func toSubTreeInBox(blocks []*Block, keyword, boxID string, originalRefBlockIDs 
 						if ast.NodeList == headingChild.Type {
 							for subLi := headingChild.FirstChild; nil != subLi; subLi = subLi.Next {
 								subLiBlock, _ := getBlock(subLi.ID, tree)
+								if nil == subLiBlock || nil == subLi.FirstChild {
+									continue
+								}
 								var subFirst *sql.Block
 								if 3 != subLi.ListData.Typ {
-									subFirst = sql.GetBlock(subLi.FirstChild.ID)
+									subFirst = sql.GetBlockInBox(subLi.FirstChild.ID, boxID)
 								} else {
-									subFirst = sql.GetBlock(subLi.FirstChild.Next.ID)
+									if nil == subLi.FirstChild.Next {
+										continue
+									}
+									subFirst = sql.GetBlockInBox(subLi.FirstChild.Next.ID, boxID)
+								}
+								if nil == subFirst {
+									continue
 								}
 								subPos := 0
 								content := subFirst.Content

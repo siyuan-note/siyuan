@@ -86,10 +86,17 @@ func GetEncryptedBoxState(boxID string) EncryptedBoxState {
 	lifecycle := getEncryptedBoxLifecycle(boxID)
 	lifecycle.lock.Lock()
 	defer lifecycle.lock.Unlock()
+	return lifecycle.state
+}
+
+func repairEncryptedBoxStateFromDEK(boxID string) {
+	lifecycle := getEncryptedBoxLifecycle(boxID)
+	lifecycle.lock.Lock()
+	defer lifecycle.lock.Unlock()
 	if lifecycle.state == EncryptedBoxStateLocked && IsBoxUnlocked(boxID) {
 		lifecycle.state = EncryptedBoxStateUnlocked
+		lifecycle.condition.Broadcast()
 	}
-	return lifecycle.state
 }
 
 // NotebookCryptoLifecycleState 返回全局加密功能状态。
@@ -139,6 +146,7 @@ func AcquireEncryptedBoxOperation(boxID string) error {
 	defer lifecycle.lock.Unlock()
 	if lifecycle.state == EncryptedBoxStateLocked && IsBoxUnlocked(boxID) {
 		lifecycle.state = EncryptedBoxStateUnlocked
+		lifecycle.condition.Broadcast()
 	}
 	if lifecycle.state != EncryptedBoxStateUnlocked {
 		return errors.New("encrypted notebook is not unlocked")

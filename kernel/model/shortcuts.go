@@ -74,7 +74,7 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 	hPath := Conf.FileTree.ShorthandSavePath
 	if "" != hPath {
 		var renderErr error
-		hPath, renderErr = RenderGoTemplate(hPath)
+		hPath, renderErr = RenderGoTemplateInBox(hPath, boxID)
 		if nil != renderErr {
 			logging.LogErrorf("render shorthand save path failed: %s", renderErr)
 			hPath = ""

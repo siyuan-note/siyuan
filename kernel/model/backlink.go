@@ -373,7 +373,7 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	}
 
 	// 反链面板中显示块引用计数 Display reference counts in the backlink panel https://github.com/siyuan-note/siyuan/issues/13618
-	fillBlockRefCount(renderNodes)
+	fillBlockRefCount(renderNodes, refTree.Box)
 
 	dom := renderVisibleBlockDOMByNodes(renderNodes, luteEngine)
 	var blockPaths []*BlockPath

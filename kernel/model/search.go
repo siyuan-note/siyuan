@@ -213,21 +213,30 @@ func UpdateEmbedBlock(id, content string) (err error) {
 		},
 	}
 
-	updateEmbedBlockContent(id, []*EmbedBlock{embedBlock})
+	updateEmbedBlockContent(id, []*EmbedBlock{embedBlock}, bt.BoxID)
 	return
 }
 
 func GetEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
-	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb, true)
+	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb, true, "")
+}
+
+func GetEmbedBlockInBox(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool, boxID string) (ret []*EmbedBlock) {
+	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb, true, boxID)
 }
 
 func GetEmbedBlockForPublish(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
-	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb, false)
+	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb, false, "")
 }
 
-func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb, updateIndex bool) (ret []*EmbedBlock) {
+func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb, updateIndex bool, boxID string) (ret []*EmbedBlock) {
 	validIDs := validEmbedBlockIDs(includeIDs, 1024)
-	sqlBlocks := sql.GetBlocks(validIDs)
+	var sqlBlocks []*sql.Block
+	if boxID != "" {
+		sqlBlocks = sql.GetBlocksInBox(validIDs, boxID)
+	} else {
+		sqlBlocks = sql.GetBlocks(validIDs)
+	}
 	var existingBlocks []*sql.Block
 	for _, block := range sqlBlocks {
 		if nil != block {
@@ -245,7 +254,7 @@ func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, br
 		return m[sqlBlocks[i].ID] < m[sqlBlocks[j].ID]
 	})
 
-	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, "", sqlBlocks, updateIndex)
+	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, "", sqlBlocks, updateIndex, boxID)
 	return
 }
 
@@ -326,12 +335,12 @@ func searchEmbedBlockInBox(embedBlockID, stmt string, excludeIDs []string, headi
 	} else {
 		sqlBlocks = sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	}
-	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, treenode.GetEmbedBlockRefID(stmt), sqlBlocks, updateIndex)
+	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, treenode.GetEmbedBlockRefID(stmt), sqlBlocks, updateIndex, boxID)
 	return
 }
 
 func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, breadcrumb bool, embedBlockRefID string,
-	sqlBlocks []*sql.Block, updateIndex bool) (ret []*EmbedBlock) {
+	sqlBlocks []*sql.Block, updateIndex bool, boxID string) (ret []*EmbedBlock) {
 	var tmp []*sql.Block
 	for _, b := range sqlBlocks {
 		if "query_embed" == b.Type { // 嵌入块不再嵌入
@@ -376,7 +385,7 @@ func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, 
 
 	if updateIndex {
 		// 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
-		task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, updateEmbedBlockContent, embedBlockID, ret)
+		task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, updateEmbedBlockContent, embedBlockID, ret, boxID)
 	}
 
 	// 添加笔记本名称

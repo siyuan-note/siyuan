@@ -1831,13 +1831,24 @@ func closeDatabase() {
 	return
 }
 
-func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
+func SQLTemplateFuncs(templateFuncMap *template.FuncMap, boxIDs ...string) {
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
 	readonlyStmts := &sync.Map{}
 	isReadonlyStmt := func(stmt string) bool {
 		if _, ok := readonlyStmts.Load(stmt); ok {
 			return true
 		}
-		if CheckSingleStatement(stmt) != nil || CheckReadonlyStatement(stmt) != nil {
+		if CheckSingleStatement(stmt) != nil {
+			return false
+		}
+		if boxID == "" {
+			if CheckReadonlyStatement(stmt) != nil {
+				return false
+			}
+		} else if CheckReadonlyStatementInBox(stmt, boxID) != nil {
 			return false
 		}
 		readonlyStmts.Store(stmt, struct{}{})
@@ -1851,16 +1862,20 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		if !isReadonlyStmt(stmt) {
 			return
 		}
-		retBlocks = SelectBlocksRawStmt(stmt, 1, 512)
+		if boxID == "" {
+			retBlocks = SelectBlocksRawStmt(stmt, 1, 512)
+		} else {
+			retBlocks = SelectBlocksRawStmtInBox(stmt, 1, 512, boxID)
+		}
 		return
 	}
 	(*templateFuncMap)["getBlock"] = func(arg any) (retBlock *Block) {
 		switch v := arg.(type) {
 		case string:
-			retBlock = GetBlock(v)
+			retBlock = GetBlockInBox(v, boxID)
 		case map[string]any:
 			if id, ok := v["id"]; ok {
-				retBlock = GetBlock(id.(string))
+				retBlock = GetBlockInBox(id.(string), boxID)
 			}
 		}
 		return
@@ -1872,14 +1887,25 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		if !isReadonlyStmt(stmt) {
 			return
 		}
-		retSpans = SelectSpansRawStmt(stmt, 512)
+		if boxID == "" {
+			retSpans = SelectSpansRawStmt(stmt, 512)
+		} else {
+			retSpans = SelectSpansRawStmtInBox(stmt, 512, boxID)
+		}
 		return
 	}
 	(*templateFuncMap)["querySQL"] = func(stmt string) (ret []map[string]any) {
 		if !isReadonlyStmt(stmt) {
 			return
 		}
-		ret, _ = Query(stmt, 1024)
+		if boxID == "" {
+			ret, _ = Query(stmt, 1024)
+		} else {
+			ret, _ = QueryNoLimitInBox(stmt, boxID)
+			if len(ret) > 1024 {
+				ret = ret[:1024]
+			}
+		}
 		return
 	}
 }

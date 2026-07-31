@@ -489,6 +489,9 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             refParam.notebook = protyle.notebookId;
         }
     }
+    if (protyle.lite && isEncryptedBox(protyle.notebookId)) {
+        refParam.notebook = protyle.notebookId;
+    }
     fetchPost("/api/search/searchRefBlock", refParam, (response) => {
         const dataList: IHintData[] = [];
         if (response.data.newDoc) {

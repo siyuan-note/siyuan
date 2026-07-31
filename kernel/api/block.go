@@ -810,6 +810,9 @@ func getRefIDsByFileAnnotationID(c *gin.Context) {
 
 	id := arg["id"].(string)
 	refIDs := model.GetBlockRefIDsByFileAnnotationID(id)
+	if model.IsReadOnlyRoleContext(c) {
+		refIDs = model.FilterRefIDsByPublishAccess(c, model.GetPublishAccess(), refIDs)
+	}
 	var retRefDefs []model.RefDefs
 	for _, blockID := range refIDs {
 		retRefDefs = append(retRefDefs, model.RefDefs{RefID: blockID, DefIDs: []string{}})

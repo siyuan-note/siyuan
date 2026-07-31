@@ -49,13 +49,14 @@ func TestParseBlockRefStringArrayEmptyHandling(t *testing.T) {
 	}
 }
 
-func TestFilterBlockIDsByPublishAccess(t *testing.T) {
+func TestFilterBlockAndRefIDsByPublishAccess(t *testing.T) {
 	const (
 		boxID             = "20260724000000-boxid01"
 		publicID          = "20260724000001-public1"
 		hiddenID          = "20260724000002-hidden1"
 		protectedID       = "20260724000003-protect"
-		missingID         = "20260724000004-missing"
+		disabledID        = "20260724000004-disable"
+		missingID         = "20260724000005-missing"
 		protectedPassword = "password"
 	)
 
@@ -66,8 +67,9 @@ func TestFilterBlockIDsByPublishAccess(t *testing.T) {
 	treenode.InitBlockTree(true)
 	previousPublishAccess := model.GetPublishAccess()
 	if err := model.SetPublishAccess(model.PublishAccess{
-		{ID: hiddenID, Disable: true},
+		{ID: hiddenID, Visible: false},
 		{ID: protectedID, Visible: true, Password: protectedPassword},
+		{ID: disabledID, Visible: true, Disable: true},
 	}); err != nil {
 		t.Fatalf("set publish access failed: %v", err)
 	}
@@ -78,7 +80,7 @@ func TestFilterBlockIDsByPublishAccess(t *testing.T) {
 		util.DataDir = previousDataDir
 	})
 
-	for _, id := range []string{publicID, hiddenID, protectedID} {
+	for _, id := range []string{publicID, hiddenID, protectedID, disabledID} {
 		treenode.IndexBlockTree(&parse.Tree{
 			ID:   id,
 			Box:  boxID,
@@ -87,20 +89,27 @@ func TestFilterBlockIDsByPublishAccess(t *testing.T) {
 		})
 	}
 
-	ids := []string{publicID, hiddenID, protectedID, missingID}
+	ids := []string{publicID, hiddenID, protectedID, disabledID, missingID}
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request = httptest.NewRequest(http.MethodPost, "/", nil)
 	c.Set(model.RoleContextKey, model.RoleReader)
-	if filtered := filterBlockIDsByPublishAccess(c, ids, ""); !slices.Equal(filtered, []string{publicID}) {
+	if filtered := filterBlockIDsByPublishAccess(c, ids, ""); !slices.Equal(filtered, []string{publicID, hiddenID}) {
 		t.Fatalf("unexpected unauthenticated reader block IDs: %v", filtered)
+	}
+	publishAccess := model.GetPublishAccess()
+	if filtered := model.FilterRefIDsByPublishAccess(c, publishAccess, ids); !slices.Equal(filtered, []string{publicID}) {
+		t.Fatalf("unexpected unauthenticated reader reference IDs: %v", filtered)
 	}
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedID,
 		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
 	})
-	if filtered := filterBlockIDsByPublishAccess(c, ids, ""); !slices.Equal(filtered, []string{publicID, protectedID}) {
+	if filtered := filterBlockIDsByPublishAccess(c, ids, ""); !slices.Equal(filtered, []string{publicID, hiddenID, protectedID}) {
 		t.Fatalf("unexpected authenticated reader block IDs: %v", filtered)
+	}
+	if filtered := model.FilterRefIDsByPublishAccess(c, publishAccess, ids); !slices.Equal(filtered, []string{publicID, protectedID}) {
+		t.Fatalf("unexpected authenticated reader reference IDs: %v", filtered)
 	}
 
 	c.Set(model.RoleContextKey, model.RoleAdministrator)

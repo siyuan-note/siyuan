@@ -1364,6 +1364,18 @@ func FilterRefDefsByPublishAccess(c *gin.Context, publishAccess PublishAccess, r
 	return
 }
 
+func FilterRefIDsByPublishAccess(c *gin.Context, publishAccess PublishAccess, refIDs []string) (ret []string) {
+	ret = []string{}
+	bts := treenode.GetBlockTrees(refIDs)
+	bts = filterBlockTreesByPublishAccess(c, publishAccess, bts)
+	for _, refID := range refIDs {
+		if nil != bts[refID] {
+			ret = append(ret, refID)
+		}
+	}
+	return
+}
+
 func FilterGraphByPublishAccess(c *gin.Context, publishAccess PublishAccess, nodes []*GraphNode, links []*GraphLink) (retNodes []*GraphNode, retLinks []*GraphLink) {
 	retNodes = []*GraphNode{}
 	retLinks = []*GraphLink{}

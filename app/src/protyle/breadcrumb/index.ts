@@ -418,7 +418,7 @@ ${padHTML}
             const menuItem: IMenu = {
                 id: item.id,
                 icon: getIconByType(item.type, item.subType),
-                label: item.name || window.siyuan.languages.untitled,
+                label: item.name,
                 current: currentPathIDs.has(item.id),
                 click: () => {
                     zoomOut({protyle, id: item.id});

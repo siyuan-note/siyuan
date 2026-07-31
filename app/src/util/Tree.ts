@@ -11,6 +11,7 @@ export class Tree {
     private data: IBlockTree[];
     private blockExtHTML: string;
     private topExtHTML: string;
+    private titleTooltipPosition: string;
     private blockDraggable: boolean;
     private dragStart: (element: HTMLElement, event: DragEvent) => boolean;
     private dragEnd: (element: HTMLElement, event: DragEvent) => boolean;
@@ -27,6 +28,7 @@ export class Tree {
         data: IBlockTree[],
         blockExtHTML?: string,
         topExtHTML?: string,
+        titleTooltipPosition?: string,
         blockDraggable?: boolean,
         click?(element: HTMLElement, event: MouseEvent): void
         ctrlClick?(element: HTMLElement, event: MouseEvent): void
@@ -46,6 +48,7 @@ export class Tree {
         this.element = options.element;
         this.blockExtHTML = options.blockExtHTML;
         this.topExtHTML = options.topExtHTML;
+        this.titleTooltipPosition = options.titleTooltipPosition || "parentE";
         this.blockDraggable = options.blockDraggable;
         this.dragStart = options.dragStart;
         this.dragEnd = options.dragEnd;
@@ -118,7 +121,7 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
     </span>
     ${iconHTML}
     ${numberHTML}
-    <span class="b3-list-item__text ariaLabel" data-position="parentE"${titleTip}>${item.name}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}"${titleTip}>${item.name}</span>
     ${this.topExtHTML || ""}
     ${countHTML}
 </li>`;
@@ -181,7 +184,7 @@ data-def-path="${item.defPath}">
     </span>
     ${iconHTML}
     ${numberHTML}
-    <span class="b3-list-item__text ariaLabel" data-position="parentE" ${type === "outline" ? ' aria-label="' + escapeAriaLabel(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}" ${type === "outline" ? ' aria-label="' + escapeAriaLabel(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
     ${this.blockExtHTML || ""}
     ${countHTML}
 </li>`;

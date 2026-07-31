@@ -129,12 +129,12 @@ export const bazaar = {
     <div class="config-bazaar__panel" data-type="downloaded" data-init="true">
         <div class="fn__flex config-bazaar__title config-bazaar__title--downloaded">
             <div class="fn__flex config-bazaar__tabs">
+                <button data-type="myUpdate" class="b3-button b3-button--outline fn__none">${window.siyuan.languages.update}</button>
                 <button data-type="myPlugin" class="b3-button">${window.siyuan.languages.plugin}</button>
                 <button data-type="myTheme" class="b3-button b3-button--outline">${window.siyuan.languages.theme}</button>
                 <button data-type="myIcon" class="b3-button b3-button--outline">${window.siyuan.languages.icon}</button>
                 <button data-type="myTemplate" class="b3-button b3-button--outline">${window.siyuan.languages.template}</button>
                 <button data-type="myWidget" class="b3-button b3-button--outline">${window.siyuan.languages.widget}</button>
-                <button data-type="myUpdate" class="b3-button b3-button--outline fn__none">${window.siyuan.languages.update}</button>
             </div>
             <div class="fn__flex config-bazaar__tools">
                 <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">

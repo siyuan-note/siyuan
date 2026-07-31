@@ -301,8 +301,17 @@ export const initBlockPopover = (app: App) => {
                 clearTimeout(penTimeoutHide);
             }
         };
+        const handlePenPointerDown = (event: PointerEvent & { path: HTMLElement[] }) => {
+            if (event.pointerType !== "pen") {
+                return;
+            }
+            cancelPenHover(event);
+            if (window.siyuan.menus) {
+                hidePopover(event);
+            }
+        };
         document.addEventListener("pointerout", cancelPenHover, {capture: true, passive: true});
-        document.addEventListener("pointerdown", cancelPenHover, {capture: true, passive: true});
+        document.addEventListener("pointerdown", handlePenPointerDown, {capture: true, passive: true});
         document.addEventListener("pointercancel", cancelPenHover, {capture: true, passive: true});
     }
 };

@@ -331,6 +331,14 @@ export const bazaar = {
         }
         return values.map((value) => `<span class="b3-chip b3-chip--small">${escapeHtml(value)}</span>`).join("");
     },
+    _genReadmeKeywords(values: string[]) {
+        const visibleCount = 5;
+        const chips = values.map((value, index) => `<span${index >= visibleCount ? " data-keyword-hidden" : ""} class="b3-chip b3-chip--small${index >= visibleCount ? " fn__none" : ""}">${escapeHtml(value)}</span>`).join("");
+        if (values.length <= visibleCount) {
+            return chips;
+        }
+        return `${chips}<button type="button" data-type="keywords-expand" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.showMore)}" class="item__keywords-more b3-chip b3-chip--small b3-chip--hover ariaLabel">...</button>`;
+    },
     _getFrontendLabels(frontends: string[]) {
         if (!frontends?.length || frontends.includes("all")) {
             return [window.siyuan.languages.all];
@@ -777,7 +785,7 @@ type="checkbox">
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.version, `v${available.version}`)}
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.releaseDate, available.hUpdated)}
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.pkgSize, available.hSize)}
-    ${available.keywords?.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.keywords, bazaar._genReadmeChips(available.keywords), true) : ""}
+    ${available.keywords?.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.keywords, bazaar._genReadmeKeywords(available.keywords), true) : ""}
 </section>` : "";
         const resourceStats = available ? `<div class="fn__hr"></div>
 <div class="fn__flex">
@@ -1278,6 +1286,14 @@ type="checkbox">
                         writeText(funding);
                         showMessage(window.siyuan.languages.copied);
                     }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "keywords-expand") {
+                    target.parentElement?.querySelectorAll("[data-keyword-hidden]").forEach((item) => {
+                        item.classList.remove("fn__none");
+                    });
+                    target.remove();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

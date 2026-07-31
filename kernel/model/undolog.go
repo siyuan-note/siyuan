@@ -25,6 +25,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
@@ -371,6 +372,46 @@ var dataNodeIDPattern = regexp.MustCompile(`data-node-id="([^"]+)"`)
 var refcountAttrPattern = regexp.MustCompile(`\s*refcount="[^"]*"`)
 var refcountDivPattern = regexp.MustCompile(`<div class="protyle-attr--refcount[^"]*"[^>]*>.*?</div>`)
 
+func replaceReplayOperationID(operation *Operation, replacements map[string]string) (replaced bool) {
+	newID, replaced := replacements[operation.ID]
+	if !replaced {
+		return false
+	}
+	// insert 恢复的容器 ID 换新后，紧随其后的 update 也必须指向新容器；delete 仍保留旧 ID 以清理冲突块。
+	if "insert" == operation.Action || "update" == operation.Action {
+		operation.ID = newID
+	}
+	return true
+}
+
+func existingReplayBlockIDs(ids []string) map[string]bool {
+	ret := map[string]bool{}
+	blockTrees := treenode.GetBlockTrees(ids)
+	loadedTrees := map[string]*parse.Tree{}
+	loadFailed := map[string]bool{}
+	for _, id := range ids {
+		ret[id] = false
+		blockTree := blockTrees[id]
+		if nil == blockTree {
+			continue
+		}
+		key := blockTree.BoxID + "\x00" + blockTree.Path
+		tree, loaded := loadedTrees[key]
+		if !loaded && !loadFailed[key] {
+			var err error
+			tree, err = loadTreeByBlockTree(blockTree)
+			if nil != err || nil == tree {
+				// 无法读取时按存在处理，避免在不确定状态下引入重复 ID。
+				loadFailed[key] = true
+			} else {
+				loadedTrees[key] = tree
+			}
+		}
+		ret[id] = loadFailed[key] || nil != tree && nil != treenode.GetNodeInTree(tree, id)
+	}
+	return ret
+}
+
 // ResolveReplayDuplicateIds 在 undo/redo 重放事务前解决块 ID 冲突。
 // 场景：剪切块 X 后粘贴到别处（保留原 ID），再撤销剪切会 insert X，而 X 已存在于粘贴处，产生重复 ID。
 // 这里对即将重放的 insert 操作做检查——若其引入的 ID 在块树中已存在，则在正反向操作及关联字段
@@ -416,7 +457,8 @@ func ResolveReplayDuplicateIds(tx *Transaction) {
 	for id := range ids {
 		idList = append(idList, id)
 	}
-	exist := treenode.ExistBlockTrees(idList)
+	// blocktree 索引异步更新，立即撤销时可能仍残留已删除容器的记录，必须以当前 .sy 树为准。
+	exist := existingReplayBlockIDs(idList)
 
 	// 已存在的 ID 生成替换
 	replacements := map[string]string{}
@@ -429,21 +471,16 @@ func ResolveReplayDuplicateIds(tx *Transaction) {
 		return
 	}
 
-	// 对 do/undo 两套操作统一替换 ID 及关联字段
+	// 对实际重放的操作统一替换 ID 及关联字段
 	apply := func(ops []*Operation) {
 		for _, op := range ops {
-			// 记录本操作的 ID 是否被换新（在改 op.ID 之前判断，否则 replacements 的 key 是 oldID 查不到）
-			_, idReplaced := replacements[op.ID]
-			// 仅 insert 操作替换 op.ID。delete 操作声明的 ID 是待删除的旧块本身，若换为新 ID，
+			// 记录本操作的 ID 是否被换新，以便清除引用角标。
+			idReplaced := replaceReplayOperationID(op, replacements)
+			// delete 操作声明的 ID 是待删除的旧块本身，若换为新 ID，
 			// doDelete 会找不到节点而静默跳过，导致旧块残留并在重放后产生重复块。
 			// 典型场景：列表转段落后撤销——undo 先 delete 扁平化出的子块，再 insert 原列表
 			// （HTML 内联同一批子块 ID），这些子块会被前置 delete 清理，本不该参与冲突替换。
 			// https://github.com/siyuan-note/siyuan/issues/18012
-			if "insert" == op.Action {
-				if newID, ok := replacements[op.ID]; ok {
-					op.ID = newID
-				}
-			}
 			if newID, ok := replacements[op.ParentID]; ok {
 				op.ParentID = newID
 			}

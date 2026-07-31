@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {isSameDragEditor, uniqueDragIds} from "./dragDocument";
+import {
+    isSameDragEditor,
+    isSameSiblingMove,
+    replaceDragUndoOperation,
+    uniqueDragIds
+} from "./dragDocument";
 
 describe("isSameDragEditor", () => {
     it("does not treat a nested Protyle as the target editor", () => {
@@ -23,5 +28,38 @@ describe("isSameDragEditor", () => {
 describe("uniqueDragIds", () => {
     it("removes empty and duplicate block IDs while preserving their order", () => {
         assert.deepEqual(uniqueDragIds(["a", "", "b", "a", "b", "c"]), ["a", "b", "c"]);
+    });
+});
+
+describe("isSameSiblingMove", () => {
+    it("treats dropping a selection onto one of its items as a no-op", () => {
+        assert.equal(isSameSiblingMove(["a", "b", "c"], ["a", "b", "c"], "c", true), true);
+    });
+
+    it("recognizes an unchanged sibling order", () => {
+        assert.equal(isSameSiblingMove(["a", "b", "c", "d"], ["b", "c"], "a", true), true);
+    });
+
+    it("allows a sibling move that changes the order", () => {
+        assert.equal(isSameSiblingMove(["a", "b", "c", "d"], ["b", "c"], "d", true), false);
+    });
+});
+
+describe("replaceDragUndoOperation", () => {
+    it("restores a valid container before moving the remaining items back", () => {
+        const operations = ["move-c", "move-b", "move-a"];
+        replaceDragUndoOperation(operations, "move-a", [
+            "delete-placeholder",
+            "move-a",
+            "insert-list-with-placeholder"
+        ]);
+
+        assert.deepEqual(operations.reverse(), [
+            "insert-list-with-placeholder",
+            "move-a",
+            "delete-placeholder",
+            "move-b",
+            "move-c"
+        ]);
     });
 });

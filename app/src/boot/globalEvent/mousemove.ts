@@ -250,8 +250,8 @@ export const windowMouseMove = (event: MouseEvent) => {
     if (blockElement && blockElement.style.cursor !== "col-resize" && !hasClosestByClassName(blockElement, "protyle-wysiwyg__embed")) {
         const cellElement = (hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD")) as HTMLTableCellElement;
         const tableElement = blockElement.querySelector("table");
-        if (cellElement && tableElement) {
-            const resizeElement = blockElement.querySelector(".table__resize");
+        const resizeElement = blockElement.querySelector(".table__resize");
+        if (cellElement && tableElement && resizeElement) {
             if (blockElement.style.textAlign === "center" || blockElement.style.textAlign === "right") {
                 resizeElement.parentElement.style.left = tableElement.offsetLeft + "px";
             } else {

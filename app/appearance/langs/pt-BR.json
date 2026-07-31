@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "Falha ao verificar atualizações dos pacotes do marketplace",
   "reasoningEffortNone": "Nenhum",
   "reasoningEffortXHigh": "Muito alto",
   "reasoningEffortMax": "Máximo",

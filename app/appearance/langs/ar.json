@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "تعذر التحقق من تحديثات حزم السوق",
   "reasoningEffortNone": "بدون",
   "reasoningEffortXHigh": "عالٍ جدًا",
   "reasoningEffortMax": "الحد الأقصى",

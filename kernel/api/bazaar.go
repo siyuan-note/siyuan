@@ -47,7 +47,10 @@ func batchUpdatePackage(c *gin.Context) {
 		return
 	}
 
-	model.BatchUpdatePackages(frontend)
+	if err := model.BatchUpdatePackages(frontend); err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+	}
 }
 
 func getUpdatedPackage(c *gin.Context) {
@@ -64,13 +67,84 @@ func getUpdatedPackage(c *gin.Context) {
 		return
 	}
 
-	plugins, widgets, icons, themes, templates := model.GetUpdatedPackages(frontend)
+	plugins, widgets, icons, themes, templates, err := model.GetUpdatedPackages(frontend)
+	if err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
 	ret.Data = map[string]any{
 		"plugins":   plugins,
 		"widgets":   widgets,
 		"icons":     icons,
 		"themes":    themes,
 		"templates": templates,
+	}
+}
+
+func updateBazaarPackage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var pkgType, packageName, frontend string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("packageType", &pkgType, true, true),
+		util.BindJsonArg("packageName", &packageName, true, true),
+		util.BindJsonArg("frontend", &frontend, true, true),
+	) {
+		return
+	}
+	if !validPackageTypes[pkgType] {
+		ret.Code = 1
+		ret.Msg = "Invalid package type"
+		return
+	}
+	if err := model.UpdateBazaarPackage(pkgType, packageName, frontend); err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	util.PushMsg(model.Conf.Language(69), 3000)
+	ret.Data = map[string]any{
+		"packages": model.GetBazaarPackages(pkgType, frontend, ""),
+	}
+}
+
+func getInstalledPackageSize(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var pkgType, packageName string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("packageType", &pkgType, true, true),
+		util.BindJsonArg("packageName", &packageName, true, true),
+	) {
+		return
+	}
+	if !validPackageTypes[pkgType] {
+		ret.Code = 1
+		ret.Msg = "Invalid package type"
+		return
+	}
+	size, hSize, err := model.GetInstalledPackageSize(pkgType, packageName)
+	if err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{
+		"installSize":  size,
+		"hInstallSize": hSize,
 	}
 }
 

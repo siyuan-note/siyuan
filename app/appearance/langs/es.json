@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "No se pudieron comprobar las actualizaciones de paquetes del bazar",
   "reasoningEffortNone": "Ninguno",
   "reasoningEffortXHigh": "Muy alto",
   "reasoningEffortMax": "Máximo",

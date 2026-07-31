@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "Не вдалося перевірити оновлення пакетів маркетплейсу",
   "reasoningEffortNone": "Немає",
   "reasoningEffortXHigh": "Дуже висока",
   "reasoningEffortMax": "Максимальна",

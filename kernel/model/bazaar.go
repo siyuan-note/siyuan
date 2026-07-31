@@ -39,6 +39,12 @@ type installedPackageInfo struct {
 	DirName string
 }
 
+// UpdatedPackage 描述本地已安装包及其在线可用更新
+type UpdatedPackage struct {
+	Installed *bazaar.Package `json:"installed"`
+	Available *bazaar.Package `json:"available"`
+}
+
 func getPackageInstallPath(pkgType, packageName string) (string, string, error) {
 	switch pkgType {
 	case "plugins":
@@ -69,9 +75,10 @@ type batchInstallItem struct {
 }
 
 // updatePackages 更新一组集市包；同类型批量更新时，安装后处理只执行一次
-func updatePackages(packages []*bazaar.Package, pkgType string, successCount *int, planned int) {
+func updatePackages(packages []*UpdatedPackage, pkgType string, successCount *int, planned int) {
 	items := make([]batchInstallItem, 0, len(packages))
-	for _, pkg := range packages {
+	for _, updated := range packages {
+		pkg := updated.Available
 		meta, err := installBazaarPackage(pkgType, pkg.RepoURL, pkg.RepoHash, pkg.Name)
 		if err != nil {
 			logging.LogErrorf("update %s [%s] failed: %s", pkgType, pkg.Name, err)
@@ -86,19 +93,22 @@ func updatePackages(packages []*bazaar.Package, pkgType string, successCount *in
 }
 
 // filterUpdatableBazaarPackages 过滤出允许更新的集市包
-func filterUpdatableBazaarPackages(packages []*bazaar.Package) []*bazaar.Package {
-	updatable := make([]*bazaar.Package, 0, len(packages))
-	for _, pkg := range packages {
-		if !pkg.DisallowUpdate {
-			updatable = append(updatable, pkg)
+func filterUpdatableBazaarPackages(packages []*UpdatedPackage) []*UpdatedPackage {
+	updatable := make([]*UpdatedPackage, 0, len(packages))
+	for _, updated := range packages {
+		if updated.Available != nil && !updated.Available.DisallowUpdate {
+			updatable = append(updatable, updated)
 		}
 	}
 	return updatable
 }
 
 // BatchUpdatePackages 更新所有集市包
-func BatchUpdatePackages(frontend string) {
-	plugins, widgets, icons, themes, templates := GetUpdatedPackages(frontend)
+func BatchUpdatePackages(frontend string) error {
+	plugins, widgets, icons, themes, templates, err := GetUpdatedPackages(frontend)
+	if err != nil {
+		return err
+	}
 	plugins = filterUpdatableBazaarPackages(plugins)
 	widgets = filterUpdatableBazaarPackages(widgets)
 	icons = filterUpdatableBazaarPackages(icons)
@@ -107,7 +117,7 @@ func BatchUpdatePackages(frontend string) {
 
 	planned := len(plugins) + len(widgets) + len(icons) + len(themes) + len(templates)
 	if 1 > planned {
-		return
+		return nil
 	}
 
 	defer util.PushClearProgress()
@@ -121,43 +131,68 @@ func BatchUpdatePackages(frontend string) {
 	if 0 < successCount {
 		util.PushMsg(fmt.Sprintf(Conf.language(237), successCount), 5000)
 	}
+	return nil
 }
 
 // GetUpdatedPackages 获取所有类型集市包的更新列表
 //
 //   - frontend 仅用于插件环境兼容性判断
-func GetUpdatedPackages(frontend string) (plugins, widgets, icons, themes, templates []*bazaar.Package) {
+func GetUpdatedPackages(frontend string) (plugins, widgets, icons, themes, templates []*UpdatedPackage, err error) {
 	wg := &sync.WaitGroup{}
+	errs := make([]error, 5)
 
 	wg.Go(func() {
-		plugins = getUpdatedPackages("plugins", frontend)
+		plugins, errs[0] = getUpdatedPackages("plugins", frontend)
 	})
 	wg.Go(func() {
-		themes = getUpdatedPackages("themes", "")
+		themes, errs[1] = getUpdatedPackages("themes", "")
 	})
 	wg.Go(func() {
-		icons = getUpdatedPackages("icons", "")
+		icons, errs[2] = getUpdatedPackages("icons", "")
 	})
 	wg.Go(func() {
-		templates = getUpdatedPackages("templates", "")
+		templates, errs[3] = getUpdatedPackages("templates", "")
 	})
 	wg.Go(func() {
-		widgets = getUpdatedPackages("widgets", "")
+		widgets, errs[4] = getUpdatedPackages("widgets", "")
 	})
 
 	wg.Wait()
+	err = errors.Join(errs...)
 	return
 }
 
 // getUpdatedPackages 获取单个类型集市包的更新列表
-func getUpdatedPackages(pkgType, frontend string) (updatedPackages []*bazaar.Package) {
+func getUpdatedPackages(pkgType, frontend string) (updatedPackages []*UpdatedPackage, err error) {
 	installedPackages := GetInstalledPackages(pkgType, frontend, "")
-	updatedPackages = []*bazaar.Package{} // 确保返回空切片而非 nil
-	for _, pkg := range installedPackages {
-		if !pkg.Outdated {
+	updatedPackages = []*UpdatedPackage{}
+	if len(installedPackages) == 0 {
+		return
+	}
+
+	bazaarPackagesMap, err := bazaar.GetBazaarPackagesMap(pkgType, frontend)
+	if err != nil {
+		return
+	}
+	updatedPackages = buildUpdatedPackages(installedPackages, bazaarPackagesMap)
+	return
+}
+
+func buildUpdatedPackages(installedPackages []*bazaar.Package, bazaarPackagesMap map[string]*bazaar.Package) (updatedPackages []*UpdatedPackage) {
+	updatedPackages = []*UpdatedPackage{}
+	for _, installed := range installedPackages {
+		online := bazaarPackagesMap[installed.Name]
+		if online == nil || 0 <= semver.Compare("v"+installed.Version, "v"+online.Version) {
 			continue
 		}
-		updatedPackages = append(updatedPackages, pkg)
+		available := *online
+		available.Installed = true
+		available.Outdated = true
+		available.Current = installed.Current
+		updatedPackages = append(updatedPackages, &UpdatedPackage{
+			Installed: installed,
+			Available: &available,
+		})
 	}
 	return
 }
@@ -250,14 +285,12 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 		return
 	}
 
-	bazaarPackagesMap := bazaar.GetBazaarPackagesMap(pkgType, frontend)
-
 	for _, info := range installedInfos {
 		pkg := info.Pkg
 		installPath := filepath.Join(basePath, info.DirName)
 		baseURLPath := baseURLPathPrefix + info.DirName + "/"
 		// 设置本地集市包的通用元数据
-		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, baseURLPath, pkgType, frontend, bazaarPackagesMap) {
+		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, baseURLPath, pkgType) {
 			continue
 		}
 		installedPackages = append(installedPackages, pkg)
@@ -275,11 +308,6 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 		case "plugins":
 			installedIncompatible := bazaar.IsIncompatiblePlugin(pkg, frontend)
 			pkg.InstalledIncompatible = &installedIncompatible
-			var bazaarIncompatible bool
-			if onlinePkg := bazaarPackagesMap[pkg.Name]; nil != onlinePkg {
-				bazaarIncompatible = bazaar.IsIncompatiblePlugin(onlinePkg, frontend)
-			}
-			pkg.BazaarIncompatible = &bazaarIncompatible
 			petal := getPetalByName(pkg.Name, petals)
 			if nil != petal {
 				enabled := petal.Enabled
@@ -291,6 +319,23 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 			pkg.Current = pkg.Name == Conf.Appearance.Icon
 		}
 	}
+	return
+}
+
+// GetInstalledPackageSize 获取本地集市包的安装大小
+func GetInstalledPackageSize(pkgType, packageName string) (size int64, hSize string, err error) {
+	installedInfos, basePath, _, err := GetInstalledPackageInfos(pkgType)
+	if err != nil {
+		return
+	}
+	for _, info := range installedInfos {
+		if info.Pkg.Name != packageName {
+			continue
+		}
+		installPath := filepath.Join(basePath, info.DirName)
+		return bazaar.GetInstalledPackageSize(pkgType, packageName, installPath)
+	}
+	err = errors.New("installed package not found")
 	return
 }
 
@@ -414,6 +459,27 @@ func InstallBazaarPackage(pkgType, repoURL, repoHash, packageName string, themeM
 	return nil
 }
 
+// UpdateBazaarPackage 使用在线集市数据更新本地集市包
+func UpdateBazaarPackage(pkgType, packageName, frontend string) error {
+	if _, _, err := getPackageInstallPath(pkgType, packageName); err != nil {
+		return err
+	}
+	updatedPackages, err := getUpdatedPackages(pkgType, frontend)
+	if err != nil {
+		return err
+	}
+	for _, updated := range updatedPackages {
+		if updated.Installed == nil || updated.Available == nil || updated.Installed.Name != packageName {
+			continue
+		}
+		if updated.Available.DisallowUpdate {
+			return errors.New("marketplace package update is not allowed")
+		}
+		return InstallBazaarPackage(pkgType, updated.Available.RepoURL, updated.Available.RepoHash, packageName, 0)
+	}
+	return errors.New("marketplace package update not found")
+}
+
 func UninstallPackage(pkgType, packageName string) error {
 	installPath, _, err := getPackageInstallPath(pkgType, packageName)
 	if err != nil {
@@ -427,6 +493,7 @@ func UninstallPackage(pkgType, packageName string) error {
 
 	// 删除集市包的持久化信息
 	bazaar.RemovePackageInfo(pkgType, packageName)
+	bazaar.RemoveInstalledPackageSizeCache(pkgType, packageName)
 
 	switch pkgType {
 	case "plugins":

@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "ตรวจสอบการอัปเดตแพ็กเกจในตลาดไม่สำเร็จ",
   "reasoningEffortNone": "ไม่มี",
   "reasoningEffortXHigh": "สูงมาก",
   "reasoningEffortMax": "สูงสุด",

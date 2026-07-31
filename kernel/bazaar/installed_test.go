@@ -17,6 +17,8 @@
 package bazaar
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -66,5 +68,47 @@ func TestRecordPackageOperationTime(t *testing.T) {
 	}
 	if info.UpdateTime != 0 {
 		t.Fatalf("update time was not cleared after reinstall: %d", info.UpdateTime)
+	}
+}
+
+func TestInstalledPackageSizeCacheAndInvalidation(t *testing.T) {
+	installPath := t.TempDir()
+	if err := os.WriteFile(filepath.Join(installPath, "first"), []byte("first"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	const pkgType = "plugins"
+	const packageName = "size-cache-test"
+	RemoveInstalledPackageSizeCache(pkgType, packageName)
+	t.Cleanup(func() {
+		RemoveInstalledPackageSizeCache(pkgType, packageName)
+	})
+
+	firstSize, firstHSize, err := GetInstalledPackageSize(pkgType, packageName, installPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if firstSize < 1 || firstHSize == "" {
+		t.Fatalf("expected a formatted non-zero size, got %d and %q", firstSize, firstHSize)
+	}
+
+	if err = os.WriteFile(filepath.Join(installPath, "second"), []byte("second file"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	cachedSize, _, err := GetInstalledPackageSize(pkgType, packageName, installPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cachedSize != firstSize {
+		t.Fatalf("expected cached size %d, got %d", firstSize, cachedSize)
+	}
+
+	RemoveInstalledPackageSizeCache(pkgType, packageName)
+	refreshedSize, _, err := GetInstalledPackageSize(pkgType, packageName, installPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if refreshedSize <= firstSize {
+		t.Fatalf("expected refreshed size greater than %d, got %d", firstSize, refreshedSize)
 	}
 }

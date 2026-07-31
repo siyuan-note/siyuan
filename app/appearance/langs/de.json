@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "Prüfen auf Marktplatz-Paketaktualisierungen fehlgeschlagen",
   "reasoningEffortNone": "Keine",
   "reasoningEffortXHigh": "Sehr hoch",
   "reasoningEffortMax": "Maximum",

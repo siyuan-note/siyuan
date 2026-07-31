@@ -98,6 +98,7 @@ func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageNa
 	if err = installPackage(data, installPath); err != nil {
 		return err
 	}
+	RemoveInstalledPackageSizeCache(pkgType, packageName)
 
 	// 记录首次安装时间或最近更新时间
 	now := time.Now()

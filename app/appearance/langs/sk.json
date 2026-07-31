@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "Nepodarilo sa skontrolovať aktualizácie balíkov z trhoviska",
   "reasoningEffortNone": "Žiadne",
   "reasoningEffortXHigh": "Veľmi vysoká",
   "reasoningEffortMax": "Maximálna",

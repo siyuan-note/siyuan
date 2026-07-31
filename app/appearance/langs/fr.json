@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "Échec de la vérification des mises à jour des paquets de la place de marché",
   "reasoningEffortNone": "Aucun",
   "reasoningEffortXHigh": "Très élevé",
   "reasoningEffortMax": "Maximum",

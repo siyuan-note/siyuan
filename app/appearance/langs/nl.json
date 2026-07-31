@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "Controleren op updates voor marktplaatspakketten is mislukt",
   "reasoningEffortNone": "Geen",
   "reasoningEffortXHigh": "Zeer hoog",
   "reasoningEffortMax": "Maximum",

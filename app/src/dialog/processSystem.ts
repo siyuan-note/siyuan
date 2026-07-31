@@ -429,7 +429,7 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     if (!bazaarSideElement) {
         return;
     }
-    if (data.id !== bazaarSideElement.getAttribute("data-repourl")) {
+    if (data.id !== (bazaarSideElement.getAttribute("data-progress-id") || bazaarSideElement.getAttribute("data-repourl"))) {
         return;
     }
     const installBtnElement = bazaarSideElement.querySelector('[data-type="install"]') as HTMLElement;

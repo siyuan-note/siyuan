@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "Pazar paketi güncellemeleri denetlenemedi",
   "reasoningEffortNone": "Yok",
   "reasoningEffortXHigh": "Çok yüksek",
   "reasoningEffortMax": "Maksimum",

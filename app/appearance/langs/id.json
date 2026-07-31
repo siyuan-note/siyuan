@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "Gagal memeriksa pembaruan paket bazar",
   "reasoningEffortNone": "Tidak ada",
   "reasoningEffortXHigh": "Sangat tinggi",
   "reasoningEffortMax": "Maksimum",

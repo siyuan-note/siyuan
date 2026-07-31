@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "マーケットプレイスパッケージの更新確認に失敗しました",
   "reasoningEffortNone": "なし",
   "reasoningEffortXHigh": "非常に高い",
   "reasoningEffortMax": "最大",

@@ -1,4 +1,5 @@
 {
+  "bazaarCheckUpdateFailed": "마켓 패키지 업데이트를 확인하지 못했습니다",
   "reasoningEffortNone": "없음",
   "reasoningEffortXHigh": "매우 높음",
   "reasoningEffortMax": "최대",

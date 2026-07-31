@@ -366,6 +366,10 @@
           height: 100%;
           overflow: hidden;
           padding: 0 16px;
+
+          & > .fn__flex-1 {
+            padding-right: 8px;
+          }
         }
 
         &__readme {

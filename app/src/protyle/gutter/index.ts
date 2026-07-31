@@ -133,6 +133,16 @@ export class Gutter {
         }
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";
+        let isGutterDragging = false;
+        let dragCleanupController: AbortController | undefined;
+        const restoreGutter = () => {
+            isGutterDragging = false;
+            this.element.classList.remove("protyle-gutters--dragging");
+            window.siyuan.dragElement = undefined;
+            window.siyuan.dragTitle = "";
+            dragCleanupController?.abort();
+            dragCleanupController = undefined;
+        };
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
             hideTooltip();
             window.siyuan.menus.menu.remove();
@@ -240,18 +250,33 @@ export class Gutter {
                 }
                 window.siyuan.dragTitle = title;
             }
-            buttonElement.style.opacity = "0.38";
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;
             event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}${Constants.ZWSP}${window.siyuan.config.system.workspaceDir}`,
                 protyle.wysiwyg.element.innerHTML);
-        });
-        this.element.addEventListener("dragend", () => {
-            this.element.querySelectorAll("button").forEach((item) => {
-                item.style.opacity = "";
+            isGutterDragging = true;
+            dragCleanupController?.abort();
+            const cleanupController = new AbortController();
+            dragCleanupController = cleanupController;
+            window.addEventListener("drop", () => {
+                setTimeout(() => {
+                    if (dragCleanupController === cleanupController) {
+                        restoreGutter();
+                    }
+                });
+            }, {capture: true, once: true, signal: cleanupController.signal});
+            window.addEventListener("dragend", restoreGutter, {
+                capture: true,
+                once: true,
+                signal: cleanupController.signal,
             });
-            window.siyuan.dragElement = undefined;
-            window.siyuan.dragTitle = "";
+            window.addEventListener("blur", restoreGutter, {once: true, signal: cleanupController.signal});
+            setTimeout(() => {
+                if (isGutterDragging && dragCleanupController === cleanupController) {
+                    this.element.classList.add("protyle-gutters--dragging");
+                }
+            });
         });
+        this.element.addEventListener("dragend", restoreGutter);
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");
             if (!buttonElement) {

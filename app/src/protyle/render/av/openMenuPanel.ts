@@ -38,7 +38,7 @@ import {updateAttrViewCellAnimation} from "./action";
 import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCell} from "./asset";
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
-import {pathPosix} from "../../../util/pathName";
+import {getAssetExtension} from "../../../util/pathName";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {isMobile} from "../../../util/functions";
 import {openLink} from "../../../editor/openLink";
@@ -1751,7 +1751,7 @@ export const openMenuPanel = (options: {
                         h: rect.height
                     }, (url, name) => {
                         let value: IAVCellAssetValue;
-                        if (Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(url).toLowerCase())) {
+                        if (Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(url).toLowerCase())) {
                             value = {
                                 type: "image",
                                 content: url,

@@ -1,4 +1,4 @@
-import {isLocalPath, pathPosix} from "../util/pathName";
+import {getAssetExtension, isLocalPath} from "../util/pathName";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
@@ -32,11 +32,12 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
     openByMobile(linkAddress);
     /// #else
     if (isLocalPath(linkAddress)) {
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(linkAddress)) &&
+        const extension = getAssetExtension(linkAddress);
+        if (Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
             (
-                !linkAddress.endsWith(".pdf") ||
+                extension !== ".pdf" ||
                 // 本地 pdf 仅 assets/ 开头的才使用 siyuan 打开
-                (linkAddress.endsWith(".pdf") && linkAddress.startsWith("assets/"))
+                (extension === ".pdf" && linkAddress.startsWith("assets/"))
             )
         ) {
             if (event && event.altKey) {

@@ -4,7 +4,7 @@ import {updateAttrViewCellAnimation} from "./action";
 import {isMobile} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {uploadFiles} from "../../upload";
-import {pathPosix} from "../../../util/pathName";
+import {getAssetExtension, pathPosix} from "../../../util/pathName";
 import {openMenu} from "../../../menus/commonMenuItem";
 import {MenuItem} from "../../../menus/Menu";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "../../../menus/util";
@@ -46,7 +46,7 @@ export const bindAssetEvent = (options: {
                 value.push({
                     name: key,
                     content: resData.data.succMap[key],
-                    type: Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(resData.data.succMap[key]).toLowerCase()) ? "image" : "file"
+                    type: Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(resData.data.succMap[key]).toLowerCase()) ? "image" : "file"
                 });
             });
             updateAssetCell({

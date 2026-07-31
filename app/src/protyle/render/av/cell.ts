@@ -12,7 +12,7 @@ import {getColIconByType, getColId} from "./col";
 import {genAVValueHTML, getAVTemplateHTML} from "./attributeValue";
 import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
-import {getAssetName, pathPosix} from "../../../util/pathName";
+import {getAssetExtension, getAssetName} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
@@ -230,7 +230,7 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
     } else if (colType === "mAsset") {
         const content = getCellValueContent(value).toString();
         newValue.mAsset = [{
-            type: Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(content).toLowerCase()) ? "image" : "file",
+            type: Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(content).toLowerCase()) ? "image" : "file",
             content,
             name: "",
         }];
@@ -302,7 +302,7 @@ export const genCellValue = (colType: TAVCol, value: string | any, dateFormat: T
                 relation: {blockIDs: [value], contents: []}
             };
         } else if (colType === "mAsset") {
-            const type = pathPosix().extname(value).toLowerCase();
+            const type = getAssetExtension(value).toLowerCase();
             cellValue = {
                 type: colType,
                 mAsset: [{
@@ -842,7 +842,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 // https://github.com/siyuan-note/siyuan/issues/13892
                 if (!link && value.startsWith("assets/")) {
                     link = value;
-                    name = getAssetName(value) + pathPosix().extname(value);
+                    name = getAssetName(value) + getAssetExtension(value);
                 }
                 // https://github.com/siyuan-note/siyuan/issues/12308
                 if (html) {

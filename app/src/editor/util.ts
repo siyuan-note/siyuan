@@ -5,7 +5,7 @@ import {getInstanceById, getWndByLayout, newModelByInitData, pdfIsLoading, setPa
 import {getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getDisplayName, getDocDisplayName, isEncryptedBox, pathPosix, useShell} from "../util/pathName";
+import {getAssetExtension, getDisplayName, getDocDisplayName, isEncryptedBox, useShell} from "../util/pathName";
 import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -90,7 +90,7 @@ export const openFileById = async (options: {
 };
 
 export const openAsset = (app: App, assetPath: string, page: number | string, position?: string) => {
-    const suffix = pathPosix().extname(assetPath).split("?")[0];
+    const suffix = getAssetExtension(assetPath);
     if (!Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
         return;
     }
@@ -491,7 +491,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
 const newTab = (options: IOpenFileOptions) => {
     let tab: Tab;
     if (options.assetPath) {
-        const suffix = pathPosix().extname(options.assetPath).split("?")[0];
+        const suffix = getAssetExtension(options.assetPath);
         if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
             let icon = "iconPDF";
             if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {

@@ -1006,7 +1006,11 @@ func replaceAssetName(path string, assetNameMap map[string]string, boxSuffix str
 			path = path[:idx] + diskName + path[idx+len(original):]
 			// 替换后如果没有 box query，补上
 			if boxSuffix != "" && !strings.Contains(path, "?box=") {
-				path += boxSuffix
+				if strings.Contains(path, "?") {
+					path += "&" + strings.TrimPrefix(boxSuffix, "?")
+				} else {
+					path += boxSuffix
+				}
 			}
 		}
 	}

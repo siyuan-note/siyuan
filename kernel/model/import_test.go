@@ -38,3 +38,31 @@ func TestIsSYNotebookExport(t *testing.T) {
 		})
 	}
 }
+
+func TestReplaceAssetNamePreservesExistingQuery(t *testing.T) {
+	assetNameMap := map[string]string{"document.pdf": "encrypted.pdf"}
+	boxSuffix := "?box=20260731190414-j45dgmm"
+	tests := []struct {
+		path string
+		want string
+	}{
+		{
+			path: "assets/document.pdf",
+			want: "assets/encrypted.pdf?box=20260731190414-j45dgmm",
+		},
+		{
+			path: "assets/document.pdf?page=2",
+			want: "assets/encrypted.pdf?page=2&box=20260731190414-j45dgmm",
+		},
+		{
+			path: "assets/document.pdf?box=20260731190414-j45dgmm",
+			want: "assets/encrypted.pdf?box=20260731190414-j45dgmm",
+		},
+	}
+
+	for _, test := range tests {
+		if got := replaceAssetName(test.path, assetNameMap, boxSuffix); got != test.want {
+			t.Fatalf("replaceAssetName(%q) = %q, want %q", test.path, got, test.want)
+		}
+	}
+}

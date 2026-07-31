@@ -6,7 +6,7 @@ import {Constants} from "../constants";
 import {Tab} from "../layout/Tab";
 import {fetchSyncPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
-import {getDisplayName, pathPosix} from "../util/pathName";
+import {getAssetExtension, getDisplayName} from "../util/pathName";
 import {getSearch} from "../util/functions";
 
 interface windowOptions {
@@ -77,7 +77,7 @@ export const openNewWindowById = async (id: string | string[], options: windowOp
 
 export const openAssetNewWindow = (assetPath: string, options: windowOptions = {}) => {
     /// #if !BROWSER
-    const suffix = pathPosix().extname(assetPath).split("?")[0];
+    const suffix = getAssetExtension(assetPath);
     if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
         let docIcon = "iconPDF";
         if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {

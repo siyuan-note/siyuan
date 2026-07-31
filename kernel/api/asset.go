@@ -478,16 +478,10 @@ func resolveAssetPath(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
-	p, err := model.GetAssetAbsPathInBox(path, "")
+	p, err := model.PrepareAssetForOpen(path)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 3000}
-		return
-	}
-	if model.IsEncryptedAssetPath(p) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
 		ret.Data = map[string]any{"closeTimeout": 3000}
 		return
 	}

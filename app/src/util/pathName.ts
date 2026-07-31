@@ -154,8 +154,17 @@ export const getDocDisplayName = (name: string, titleEmpty?: boolean, escape?: b
     return displayName;
 };
 
+export const getAssetPathWithoutQuery = (assetPath: string) => {
+    return assetPath.split("?", 1)[0];
+};
+
+export const getAssetExtension = (assetPath: string) => {
+    return pathPosix().extname(getAssetPathWithoutQuery(assetPath));
+};
+
 export const getAssetName = (assetPath: string) => {
-    return pathPosix().basename(assetPath, pathPosix().extname(assetPath)).replace(/-\d{14}-\w{7}/, "");
+    const pathWithoutQuery = getAssetPathWithoutQuery(assetPath);
+    return pathPosix().basename(pathWithoutQuery, getAssetExtension(pathWithoutQuery)).replace(/-\d{14}-\w{7}/, "");
 };
 
 export const isLocalPath = (link: string) => {

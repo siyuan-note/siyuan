@@ -11,7 +11,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {getContenteditableElement, getTopAloneElement} from "../wysiwyg/getBlock";
 import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
-import {getAssetName, getDisplayName, isEncryptedBox, pathPosix} from "../../util/pathName";
+import {getAssetExtension, getAssetName, getDisplayName, isEncryptedBox} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {updateListOrder} from "../wysiwyg/list";
 import {escapeHtml} from "../../util/escape";
@@ -604,7 +604,7 @@ export const hintRenderWidget = (value: string, protyle: IProtyle) => {
 
 export const hintRenderAssets = (value: string, protyle: IProtyle) => {
     focusByRange(protyle.toolbar.range);
-    const type = pathPosix().extname(value).toLowerCase();
+    const type = getAssetExtension(value).toLowerCase();
     const filename = value.startsWith("assets/") ? getAssetName(value) : value;
     insertHTML(genAssetHTML(type, value, filename, value.startsWith("assets/") ? filename + type : value), protyle);
     hideElements(["util"], protyle);

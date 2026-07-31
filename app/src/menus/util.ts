@@ -3,7 +3,7 @@ import {ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import {fetchPost} from "../util/fetch";
-import {getAssetName, pathPosix, useShell} from "../util/pathName";
+import {getAssetExtension, getAssetName, useShell} from "../util/pathName";
 import {openFileById} from "../editor/util";
 import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
@@ -26,7 +26,7 @@ export const exportAsset = (src: string) => {
             /// #else
             const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                 cmd: "showSaveDialog",
-                defaultPath: getAssetName(src) + pathPosix().extname(src),
+                defaultPath: getAssetName(src) + getAssetExtension(src),
                 properties: ["showOverwriteConfirmation"],
             });
             if (!result.canceled) {

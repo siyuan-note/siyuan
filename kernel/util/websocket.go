@@ -17,6 +17,7 @@
 package util
 
 import (
+	"net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -168,13 +169,36 @@ func AddPushChan(session *melody.Session) {
 	}
 }
 
-func IsAuthSession(session *melody.Session) bool {
-	id, _ := session.Get("id")
-	if "auth" == id {
-		return true
+// IsAuthPageKeepaliveRequest 判断是否为授权页保持连接请求，避免非常驻内存内核自动退出。
+// 该请求无需认证，但连接必须被隔离在广播池之外。
+// https://github.com/siyuan-note/insider/issues/1099
+func IsAuthPageKeepaliveRequest(r *http.Request) bool {
+	if "/ws" != r.URL.Path {
+		return false
 	}
 
-	id = session.Request.URL.Query().Get("id")
+	query := r.URL.Query()
+	return strings.HasPrefix(query.Get("app"), "siyuan") && "auth" == query.Get("id") && "auth" == query.Get("type")
+}
+
+// HasDuplicateQueryValues 判断请求查询参数中是否存在重复键。
+func HasDuplicateQueryValues(r *http.Request) bool {
+	query := r.URL.Query()
+	for _, values := range query {
+		if 1 < len(values) {
+			return true
+		}
+	}
+	return false
+}
+
+func IsAuthSession(session *melody.Session) bool {
+	// 授权页保持连接会话在接入时打上标记，禁止重解析请求查询参数判定会话身份
+	if isAuth, ok := session.Get("authSession"); ok {
+		return isAuth.(bool)
+	}
+
+	id, _ := session.Get("id")
 	return "auth" == id
 }
 

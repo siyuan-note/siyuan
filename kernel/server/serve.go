@@ -1234,6 +1234,15 @@ func serveWebSocket(ginServer *gin.Engine) {
 
 	util.WebSocketServer.HandleConnect(func(s *melody.Session) {
 		//logging.LogInfof("ws check auth for [%s]", s.Request.RequestURI)
+
+		// 拒绝携带重复查询键的请求，避免同一 URI 表达多个会话身份
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-c8w8-3pqp-wr83
+		if util.HasDuplicateQueryValues(s.Request) {
+			s.CloseWithMsg([]byte("  invalid query"))
+			logging.LogWarnf("closed a session with duplicated query values [%s]", util.GetRemoteAddr(s.Request))
+			return
+		}
+
 		authOk := true
 
 		if "" != model.Conf.AccessAuthCode {
@@ -1272,7 +1281,10 @@ func serveWebSocket(ginServer *gin.Engine) {
 
 		if !authOk {
 			// 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-			authOk = strings.Contains(s.Request.RequestURI, "/ws?app=siyuan") && strings.Contains(s.Request.RequestURI, "&id=auth&type=auth")
+			if util.IsAuthPageKeepaliveRequest(s.Request) {
+				authOk = true
+				s.Set("authSession", true)
+			}
 		}
 
 		if !authOk {

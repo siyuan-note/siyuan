@@ -1619,22 +1619,24 @@ func authFilePublishAccess(c *gin.Context) {
 	if util.InvalidIDPattern(ID, ret) {
 		return
 	}
+	password := arg["password"].(string)
+
+	ret.Code = -1
+	ret.Msg = model.Conf.Language(285)
 	if model.IsEncryptedPublishRuntimeTarget(ID) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
 		return
 	}
-	password := arg["password"].(string)
 
 	publishAccess := model.GetPublishAccess()
 	for _, item := range publishAccess {
 		if item.ID == ID {
-			if item.Password == password {
-				model.SetPublishAuthCookie(c, ID, password)
-			} else {
-				ret.Msg = model.Conf.Language(285)
+			if item.Disable || item.Password == "" || item.Password != password {
+				return
 			}
-			break
+			model.SetPublishAuthCookie(c, ID, password)
+			ret.Code = 0
+			ret.Msg = ""
+			return
 		}
 	}
 }

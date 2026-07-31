@@ -71,6 +71,144 @@ func TestSetSortRejectsInvalidRequest(t *testing.T) {
 	}
 }
 
+func TestAuthFilePublishAccessReturnsUniformFailure(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const (
+		encryptedBoxID      = "20260731000000-encrypt"
+		publicID            = "20260731000001-public0"
+		missingID           = "20260731000002-missing"
+		protectedID         = "20260731000003-protect"
+		privateID           = "20260731000004-private"
+		hiddenID            = "20260731000005-hidden0"
+		forbiddenID         = "20260731000006-forbid0"
+		forbiddenPasswordID = "20260731000007-forbid1"
+		password            = "secret"
+		passwordIncorrect   = "Password is incorrect"
+	)
+
+	oldDataDir := util.DataDir
+	oldPublishAccess := model.PublishAccess{}
+	if oldDataDir != "" {
+		oldPublishAccess = model.GetPublishAccess()
+	}
+	oldConf := model.Conf
+	oldLangs := util.Langs
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Lang = "test"
+	util.Langs = map[string]map[int]string{
+		"test": {285: passwordIncorrect},
+		"en":   {285: passwordIncorrect},
+	}
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+		model.Conf = oldConf
+		util.Langs = oldLangs
+		if oldDataDir != "" {
+			if err := model.SetPublishAccess(oldPublishAccess); err != nil {
+				t.Errorf("restore publish access failed: %v", err)
+			}
+		}
+	})
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Encrypted = true
+	if err := (&model.Box{ID: encryptedBoxID}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: protectedID, Visible: true, Password: password},
+		{ID: privateID, Visible: false, Password: password},
+		{ID: hiddenID, Visible: false},
+		{ID: forbiddenID, Visible: false, Disable: true},
+		{ID: forbiddenPasswordID, Visible: false, Password: password, Disable: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.POST("/api/filetree/authFilePublishAccess", authFilePublishAccess)
+	post := func(ID, inputPassword string) *httptest.ResponseRecorder {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(
+			http.MethodPost,
+			"/api/filetree/authFilePublishAccess",
+			strings.NewReader(`{"id":"`+ID+`","password":"`+inputPassword+`"}`),
+		)
+		request.Header.Set("Content-Type", "application/json")
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	failures := []struct {
+		name     string
+		ID       string
+		password string
+	}{
+		{name: "public", ID: publicID},
+		{name: "missing", ID: missingID},
+		{name: "protected", ID: protectedID},
+		{name: "private", ID: privateID},
+		{name: "hidden", ID: hiddenID},
+		{name: "forbidden", ID: forbiddenID},
+		{name: "forbidden with password", ID: forbiddenPasswordID, password: password},
+		{name: "encrypted notebook", ID: encryptedBoxID},
+	}
+	var failureBody string
+	for _, test := range failures {
+		t.Run(test.name, func(t *testing.T) {
+			recorder := post(test.ID, test.password)
+			if cookies := recorder.Header().Values("Set-Cookie"); len(cookies) != 0 {
+				t.Fatalf("failed publish authentication set cookies: %v", cookies)
+			}
+
+			response := &struct {
+				Code int    `json:"code"`
+				Msg  string `json:"msg"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if response.Code != -1 || response.Msg != passwordIncorrect {
+				t.Fatalf("unexpected failed publish authentication response: %s", recorder.Body.String())
+			}
+			if failureBody == "" {
+				failureBody = recorder.Body.String()
+			} else if recorder.Body.String() != failureBody {
+				t.Fatalf("publish authentication failures differ:\ngot  %s\nwant %s", recorder.Body.String(), failureBody)
+			}
+		})
+	}
+
+	successes := []struct {
+		name string
+		ID   string
+	}{
+		{name: "protected", ID: protectedID},
+		{name: "private", ID: privateID},
+	}
+	for _, test := range successes {
+		t.Run(test.name+" success", func(t *testing.T) {
+			recorder := post(test.ID, password)
+			response := &struct {
+				Code int    `json:"code"`
+				Msg  string `json:"msg"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if response.Code != 0 || response.Msg != "" {
+				t.Fatalf("unexpected successful publish authentication response: %s", recorder.Body.String())
+			}
+			cookies := recorder.Result().Cookies()
+			if len(cookies) != 1 || cookies[0].Name != "publish-auth-"+test.ID {
+				t.Fatalf("unexpected successful publish authentication cookies: %v", cookies)
+			}
+		})
+	}
+}
+
 func TestPublishAccessConfigurationRejectsEncryptedNotebook(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

@@ -102,7 +102,7 @@ func GetAttributeViewSearchTarget(blockID string, keywords []string) (ret *Attri
 		pageSize = len(blockValues.Values) + 1
 	}
 	target := &AttributeViewRenderTarget{Status: "viewNotFound"}
-	viewable, renderErr := renderAttributeView(attrView, blockID, "", "", 1, pageSize, nil, false, target, "")
+	viewable, renderErr := renderAttributeView(attrView, blockID, "", "", 1, pageSize, nil, false, false, target, "")
 	if nil == renderErr {
 		orderedItemIDs = appendAttributeViewSearchItemIDs(orderedItemIDs, viewable, false)
 		orderedItemIDs = appendAttributeViewSearchItemIDs(orderedItemIDs, viewable, true)
@@ -225,8 +225,8 @@ func getAttributeViewBaseInstance(viewable av.Viewable) (ret *av.BaseInstance) {
 	return
 }
 
-func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
-	viewable, attrView, _, err = RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, "", createIfNotExist, ignoreRows, "", "")
+func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows, persistView bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	viewable, attrView, _, err = RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, "", createIfNotExist, ignoreRows, persistView, "", "")
 	return
 }
 
@@ -234,7 +234,7 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 func GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID string, count int) (
 	table *av.Table, inferableKeyIDs []string, err error,
 ) {
-	viewable, attrView, err := RenderAttributeView(blockID, avID, viewID, query, 1, math.MaxInt, nil, false, false)
+	viewable, attrView, err := RenderAttributeView(blockID, avID, viewID, query, 1, math.MaxInt, nil, false, false, false)
 	if nil != err {
 		return nil, nil, err
 	}
@@ -351,7 +351,7 @@ func getAttributeViewPasteRowsFromTable(table *av.Table, startItemID string, cou
 	return table.Rows[start:end], nil
 }
 
-func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows, persistView bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
@@ -442,7 +442,7 @@ func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 	} else {
 	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, ignoreRows, target, targetGroupID)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, ignoreRows, persistView, target, targetGroupID)
 	return
 }
 
@@ -469,9 +469,9 @@ const (
 	groupValueNext7Days, groupValueNext30Days                = "_@next7Days@_", "_@next30Days@_"
 )
 
-func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows bool, target *AttributeViewRenderTarget, targetGroupID string) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, persistView bool, target *AttributeViewRenderTarget, targetGroupID string) (viewable av.Viewable, err error) {
 	// 获取待渲染的视图
-	view, err := getRenderAttributeViewView(attrView, viewID, nodeID, nil == target)
+	view, err := getRenderAttributeViewView(attrView, viewID, nodeID, persistView)
 	if nil != err {
 		return
 	}
@@ -1066,7 +1066,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil, false, nil, "")
+	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil, false, false, nil, "")
 	return
 }
 
@@ -1170,6 +1170,6 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, false, nil, "")
+	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, false, false, nil, "")
 	return
 }

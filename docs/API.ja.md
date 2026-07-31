@@ -1720,7 +1720,10 @@
     "pageSize": 50,
     "query": "",
     "groupPaging": {},
-    "createIfNotExist": true
+    "targetItemID": "",
+    "targetGroupID": "",
+    "createIfNotExist": true,
+    "persistView": true
   }
   ```
 
@@ -1731,7 +1734,10 @@
     * `pageSize`: 1 ページあたりのアイテム数。`-1` または省略時はビューのデフォルト（`50`）を使用
     * `query`: 主キー値に対する任意の全文フィルターキーワード
     * `groupPaging`: グループ化（カンバン）ビューの任意のページング設定
-    * `createIfNotExist`: `true`（デフォルト）の場合、データベースにビューが無ければデフォルトビューを作成
+    * `targetItemID`: 位置を特定するデータベースアイテムの任意の ID。指定すると、レスポンスに対象の位置情報が含まれます
+    * `targetGroupID`: `targetItemID` とともに使用する任意のグループヒント
+    * `createIfNotExist`: `true`（デフォルト）の場合、データベースが存在しなければデフォルトビューを含むデータベースを作成
+    * `persistView`: 選択したビューをデータベースのトップレベルの現在のビューとして保存するかどうか。デフォルトは `true` ですが、`targetItemID` を指定した場合は `false` です。読み取り専用の公開アクセスでは選択したビューを保存しません。`false` に設定しても現在のビューの変更を防ぐだけで、レンダリング時にほかの書き込みが行われないことを保証するものではありません
 * 戻り値（実際のレスポンス、テーブルレイアウト、1 行を表示）：
 
   ```json

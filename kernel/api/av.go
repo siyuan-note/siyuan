@@ -218,7 +218,7 @@ func setAttrViewGroup(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, "", "")
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, false, "", "")
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)
@@ -295,7 +295,7 @@ func changeAttrViewLayout(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, "", "")
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, false, "", "")
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)
@@ -1194,8 +1194,15 @@ func renderAttributeView(c *gin.Context) {
 	if targetGroupIDArg := arg["targetGroupID"]; nil != targetGroupIDArg {
 		targetGroupID = targetGroupIDArg.(string)
 	}
+	persistView := targetItemID == ""
+	if persistViewArg := arg["persistView"]; nil != persistViewArg {
+		persistView = persistViewArg.(bool)
+	}
 
 	readOnlyRole := model.IsReadOnlyRoleContext(c)
+	if readOnlyRole {
+		persistView = false
+	}
 	publishAccess := model.PublishAccess(nil)
 	if readOnlyRole {
 		publishAccess = model.GetPublishAccess()
@@ -1207,7 +1214,7 @@ func renderAttributeView(c *gin.Context) {
 		}
 	}
 
-	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
+	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, persistView, targetItemID, targetGroupID)
 	if ret.Code == 0 && readOnlyRole {
 		retDataMap := ret.Data.(map[string]any)
 		retDataMap["view"] = model.FilterAttributeViewByPublishAccess(c, publishAccess, id, blockID, retDataMap["view"].(av.Viewable))
@@ -1222,9 +1229,9 @@ func renderAttributeView(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json; charset=utf-8", marshalBytes)
 }
 
-func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (ret *gulu.Result) {
+func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows, persistView bool, targetItemID, targetGroupID string) (ret *gulu.Result) {
 	ret = gulu.Ret.NewResult()
-	view, attrView, target, err := model.RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
+	view, attrView, target, err := model.RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, persistView, targetItemID, targetGroupID)
 	if err != nil {
 		ret.Code = -1
 		if errors.Is(err, av.ErrSpecTooNew) {

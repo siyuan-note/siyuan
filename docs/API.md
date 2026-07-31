@@ -1728,7 +1728,10 @@ The field types (`keyType`) are:
     "pageSize": 50,
     "query": "",
     "groupPaging": {},
-    "createIfNotExist": true
+    "targetItemID": "",
+    "targetGroupID": "",
+    "createIfNotExist": true,
+    "persistView": true
   }
   ```
 
@@ -1739,7 +1742,10 @@ The field types (`keyType`) are:
     * `pageSize`: Items per page. `-1` or omitted means use the view's default (`50`)
     * `query`: Optional full-text filter for the primary-key values
     * `groupPaging`: Optional paging configuration for grouped (kanban) views
-    * `createIfNotExist`: When `true` (default), create a default view if the database has none
+    * `targetItemID`: Optional database item ID to locate. When specified, the response includes target-location metadata
+    * `targetGroupID`: Optional group hint used with `targetItemID`
+    * `createIfNotExist`: When `true` (default), create a database with a default view if the database does not exist
+    * `persistView`: Whether to save the selected view as the database's top-level current view. Defaults to `true`, or `false` when `targetItemID` is specified. Read-only publish access never persists the selected view. Setting this to `false` only prevents the current view from changing; it does not guarantee that rendering performs no other writes
 * Return value (real response, table layout, one row shown):
 
   ```json

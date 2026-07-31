@@ -168,6 +168,14 @@
         height: 21px;
         margin-bottom: 16px;
         padding: 0 4px;
+
+        .b3-list-item__graphic {
+          padding: 0 4px;
+        }
+
+        .b3-list-item__text {
+          line-height: 16px;
+        }
       }
 
       .b3-list-item {
@@ -413,8 +421,12 @@
           .b3-list-item__graphic {
             flex-shrink: 0;
             height: 16px;
-            padding: 0 10px 0 4px;
+            padding: 0 4px;
             width: 16px;
+          }
+
+          .b3-list-item__text {
+            line-height: 16px;
           }
         }
 

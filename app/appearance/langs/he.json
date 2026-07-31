@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "פרטי התקנה",
+  "bazaarCompatibility": "תאימות",
+  "bazaarMarketInfo": "פרטי השוק",
+  "bazaarResources": "משאבים",
+  "bazaarMinAppVersion": "גרסת SiYuan מזערית",
+  "bazaarPlatforms": "פלטפורמות",
+  "bazaarSystems": "מערכות",
+  "bazaarWeb": "אינטרנט",
   "bazaarCheckUpdateFailed": "בדיקת עדכונים לחבילות השוק נכשלה",
   "reasoningEffortNone": "ללא",
   "reasoningEffortXHigh": "גבוה מאוד",

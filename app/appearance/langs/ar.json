@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "معلومات التثبيت",
+  "bazaarCompatibility": "التوافق",
+  "bazaarMarketInfo": "معلومات السوق",
+  "bazaarResources": "الموارد",
+  "bazaarMinAppVersion": "الحد الأدنى لإصدار SiYuan",
+  "bazaarPlatforms": "المنصات",
+  "bazaarSystems": "الأنظمة",
+  "bazaarWeb": "الويب",
   "bazaarCheckUpdateFailed": "تعذر التحقق من تحديثات حزم السوق",
   "reasoningEffortNone": "بدون",
   "reasoningEffortXHigh": "عالٍ جدًا",

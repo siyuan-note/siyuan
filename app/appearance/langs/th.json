@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "ข้อมูลการติดตั้ง",
+  "bazaarCompatibility": "ความเข้ากันได้",
+  "bazaarMarketInfo": "ข้อมูลมาร์เก็ต",
+  "bazaarResources": "ทรัพยากร",
+  "bazaarMinAppVersion": "เวอร์ชัน SiYuan ขั้นต่ำ",
+  "bazaarPlatforms": "แพลตฟอร์ม",
+  "bazaarSystems": "ระบบ",
+  "bazaarWeb": "เว็บ",
   "bazaarCheckUpdateFailed": "ตรวจสอบการอัปเดตแพ็กเกจในตลาดไม่สำเร็จ",
   "reasoningEffortNone": "ไม่มี",
   "reasoningEffortXHigh": "สูงมาก",

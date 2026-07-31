@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "Informácie o inštalácii",
+  "bazaarCompatibility": "Kompatibilita",
+  "bazaarMarketInfo": "Informácie o trhu",
+  "bazaarResources": "Zdroje",
+  "bazaarMinAppVersion": "Minimálna verzia SiYuan",
+  "bazaarPlatforms": "Platformy",
+  "bazaarSystems": "Systémy",
+  "bazaarWeb": "Web",
   "bazaarCheckUpdateFailed": "Nepodarilo sa skontrolovať aktualizácie balíkov z trhoviska",
   "reasoningEffortNone": "Žiadne",
   "reasoningEffortXHigh": "Veľmi vysoká",

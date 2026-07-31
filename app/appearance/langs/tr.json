@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "Kurulum bilgileri",
+  "bazaarCompatibility": "Uyumluluk",
+  "bazaarMarketInfo": "Pazar bilgileri",
+  "bazaarResources": "Kaynaklar",
+  "bazaarMinAppVersion": "En düşük SiYuan sürümü",
+  "bazaarPlatforms": "Platformlar",
+  "bazaarSystems": "Sistemler",
+  "bazaarWeb": "Web",
   "bazaarCheckUpdateFailed": "Pazar paketi güncellemeleri denetlenemedi",
   "reasoningEffortNone": "Yok",
   "reasoningEffortXHigh": "Çok yüksek",

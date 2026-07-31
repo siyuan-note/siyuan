@@ -148,6 +148,35 @@ func getInstalledPackageSize(c *gin.Context) {
 	}
 }
 
+func getBazaarPackage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var pkgType, packageName, frontend string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("packageType", &pkgType, true, true),
+		util.BindJsonArg("packageName", &packageName, true, true),
+		util.BindJsonArg("frontend", &frontend, false, true),
+	) {
+		return
+	}
+	if !validPackageTypes[pkgType] {
+		ret.Code = 1
+		ret.Msg = "Invalid package type"
+		return
+	}
+	installed, available := model.GetBazaarPackageDetail(pkgType, packageName, frontend)
+	ret.Data = map[string]any{
+		"installed": installed,
+		"available": available,
+	}
+}
+
 func getBazaarPackageREADME(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "Informações da instalação",
+  "bazaarCompatibility": "Compatibilidade",
+  "bazaarMarketInfo": "Informações do mercado",
+  "bazaarResources": "Recursos",
+  "bazaarMinAppVersion": "Versão mínima do SiYuan",
+  "bazaarPlatforms": "Plataformas",
+  "bazaarSystems": "Sistemas",
+  "bazaarWeb": "Web",
   "bazaarCheckUpdateFailed": "Falha ao verificar atualizações dos pacotes do marketplace",
   "reasoningEffortNone": "Nenhum",
   "reasoningEffortXHigh": "Muito alto",

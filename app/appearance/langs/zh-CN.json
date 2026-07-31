@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "安装信息",
+  "bazaarCompatibility": "兼容性",
+  "bazaarMarketInfo": "市场信息",
+  "bazaarResources": "资源",
+  "bazaarMinAppVersion": "最低思源版本",
+  "bazaarPlatforms": "平台",
+  "bazaarSystems": "系统",
+  "bazaarWeb": "网页端",
   "bazaarCheckUpdateFailed": "检查集市包更新失败",
   "reasoningEffortNone": "无",
   "reasoningEffortXHigh": "超高",

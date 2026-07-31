@@ -339,6 +339,32 @@ func GetInstalledPackageSize(pkgType, packageName string) (size int64, hSize str
 	return
 }
 
+// GetBazaarPackageDetail 获取单个集市包的本地安装信息和在线信息。
+//
+// 在线集市不可用时仍返回本地信息，避免网络问题阻断已下载包详情。
+func GetBazaarPackageDetail(pkgType, packageName, frontend string) (installed, available *bazaar.Package) {
+	for _, pkg := range GetInstalledPackages(pkgType, frontend, "") {
+		if pkg.Name == packageName {
+			installed = pkg
+			break
+		}
+	}
+
+	availablePackages, err := bazaar.GetBazaarPackagesMap(pkgType, frontend)
+	if err != nil {
+		return
+	}
+	available = availablePackages[packageName]
+	if available == nil || installed == nil {
+		return
+	}
+
+	available.Installed = true
+	available.Outdated = 0 > semver.Compare("v"+installed.Version, "v"+available.Version)
+	available.Current = installed.Current
+	return
+}
+
 // GetBazaarPackages 获取在线集市包列表
 func GetBazaarPackages(pkgType, frontend, keyword string) (bazaarPackages []*bazaar.Package) {
 	bazaarPackages = bazaar.GetBazaarPackages(pkgType, frontend)

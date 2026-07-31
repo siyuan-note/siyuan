@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "Відомості про встановлення",
+  "bazaarCompatibility": "Сумісність",
+  "bazaarMarketInfo": "Відомості про маркетплейс",
+  "bazaarResources": "Ресурси",
+  "bazaarMinAppVersion": "Мінімальна версія SiYuan",
+  "bazaarPlatforms": "Платформи",
+  "bazaarSystems": "Системи",
+  "bazaarWeb": "Веб",
   "bazaarCheckUpdateFailed": "Не вдалося перевірити оновлення пакетів маркетплейсу",
   "reasoningEffortNone": "Немає",
   "reasoningEffortXHigh": "Дуже висока",

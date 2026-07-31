@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "स्थापना जानकारी",
+  "bazaarCompatibility": "संगतता",
+  "bazaarMarketInfo": "बाज़ार जानकारी",
+  "bazaarResources": "संसाधन",
+  "bazaarMinAppVersion": "न्यूनतम SiYuan संस्करण",
+  "bazaarPlatforms": "प्लेटफ़ॉर्म",
+  "bazaarSystems": "सिस्टम",
+  "bazaarWeb": "वेब",
   "bazaarCheckUpdateFailed": "बाज़ार पैकेज अपडेट की जाँच विफल रही",
   "reasoningEffortNone": "कोई नहीं",
   "reasoningEffortXHigh": "बहुत अधिक",

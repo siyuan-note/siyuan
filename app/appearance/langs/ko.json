@@ -1,4 +1,12 @@
 {
+  "bazaarInstallInfo": "설치 정보",
+  "bazaarCompatibility": "호환성",
+  "bazaarMarketInfo": "마켓 정보",
+  "bazaarResources": "리소스",
+  "bazaarMinAppVersion": "최소 SiYuan 버전",
+  "bazaarPlatforms": "플랫폼",
+  "bazaarSystems": "시스템",
+  "bazaarWeb": "웹",
   "bazaarCheckUpdateFailed": "마켓 패키지 업데이트를 확인하지 못했습니다",
   "reasoningEffortNone": "없음",
   "reasoningEffortXHigh": "매우 높음",

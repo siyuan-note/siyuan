@@ -181,7 +181,7 @@
     --b3-protyle-inline-fileref-color: var(--b3-theme-secondary);
 
     /* PDF */
-    --b3-pdf-selection-light: #d0e9c8;
+    --b3-pdf-selection: #d0e9c8;
     --b3-pdf-selection-dark: #779170;
     --sidebar-width: 200px;
     --b3-pdf-offset: 0;

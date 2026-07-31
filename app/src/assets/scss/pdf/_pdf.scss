@@ -24,8 +24,6 @@
   }
 
   &__outer {
-    --b3-pdf-selection: var(--b3-pdf-selection-light, #d0e9c8);
-
     user-select: text;
     overflow: hidden;
     width: 100%;

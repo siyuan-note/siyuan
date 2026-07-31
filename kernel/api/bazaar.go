@@ -267,7 +267,7 @@ func installBazaarPlugin(c *gin.Context) {
 	) {
 		return
 	}
-	err := model.InstallBazaarPackage("plugins", repoURL, repoHash, packageName, 0)
+	err := model.InstallBazaarPackage("plugins", repoURL, repoHash, packageName, nil)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -373,7 +373,7 @@ func installBazaarWidget(c *gin.Context) {
 	) {
 		return
 	}
-	err := model.InstallBazaarPackage("widgets", repoURL, repoHash, packageName, 0)
+	err := model.InstallBazaarPackage("widgets", repoURL, repoHash, packageName, nil)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -470,7 +470,7 @@ func installBazaarIcon(c *gin.Context) {
 	) {
 		return
 	}
-	err := model.InstallBazaarPackage("icons", repoURL, repoHash, packageName, 0)
+	err := model.InstallBazaarPackage("icons", repoURL, repoHash, packageName, nil)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -569,7 +569,7 @@ func installBazaarTemplate(c *gin.Context) {
 	) {
 		return
 	}
-	err := model.InstallBazaarPackage("templates", repoURL, repoHash, packageName, 0)
+	err := model.InstallBazaarPackage("templates", repoURL, repoHash, packageName, nil)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -659,27 +659,47 @@ func installBazaarTheme(c *gin.Context) {
 	}
 
 	var keyword, repoURL, repoHash, packageName string
-	var mode float64
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("keyword", &keyword, false, false),
 		util.BindJsonArg("repoURL", &repoURL, true, true),
 		util.BindJsonArg("repoHash", &repoHash, true, true),
 		util.BindJsonArg("packageName", &packageName, true, true),
-		util.BindJsonArg("mode", &mode, true, false),
 	) {
 		return
 	}
-	err := model.InstallBazaarPackage("themes", repoURL, repoHash, packageName, int(mode))
+
+	_, hasMode := arg["mode"]
+	_, hasModeOS := arg["modeOS"]
+	if hasMode != hasModeOS {
+		ret.Code = -1
+		ret.Msg = "Fields [mode] and [modeOS] must be provided together"
+		return
+	}
+
+	var themeOptions *model.ThemeInstallOptions
+	if hasMode {
+		var mode float64
+		var modeOS bool
+		if !util.ParseJsonArgs(arg, ret,
+			util.BindJsonArg("mode", &mode, true, false),
+			util.BindJsonArg("modeOS", &modeOS, true, false),
+		) {
+			return
+		}
+		if 0 != mode && 1 != mode {
+			ret.Code = -1
+			ret.Msg = "Field [mode] must be 0 or 1"
+			return
+		}
+		themeOptions = &model.ThemeInstallOptions{Mode: int(mode), ModeOS: modeOS}
+	}
+
+	err := model.InstallBazaarPackage("themes", repoURL, repoHash, packageName, themeOptions)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		return
 	}
-
-	// TODO 安装新主题之后，不应该始终取消外观模式“跟随系统” https://github.com/siyuan-note/siyuan/issues/16990
-	// 安装集市主题后不跟随系统切换外观模式
-	model.Conf.Appearance.ModeOS = false
-	model.Conf.Save()
 
 	util.PushMsg(model.Conf.Language(69), 3000)
 	ret.Data = map[string]any{

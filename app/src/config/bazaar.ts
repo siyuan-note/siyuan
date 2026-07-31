@@ -1099,6 +1099,23 @@ type="checkbox">
             loadPlugin(app, response.data).then(callback);
         });
     },
+    _resolveThemeAppearanceMode(item: IBazaarItem) {
+        const appearance = window.siyuan.config.appearance;
+        const modes = item.modes || [];
+        const currentMode = appearance.mode;
+        const supportsCurrentMode = modes.length === 0 ||
+            modes.includes(currentMode === 0 ? "light" : "dark");
+        if (supportsCurrentMode) {
+            return {
+                mode: currentMode,
+                modeOS: appearance.modeOS,
+            };
+        }
+        return {
+            mode: modes.includes("dark") ? 1 : 0,
+            modeOS: false,
+        };
+    },
     _setAppearancePackage(bazaarType: "themes" | "icons", item: IBazaarItem, enabled: boolean, callback: () => void) {
         const appearance = {...window.siyuan.config.appearance};
         if (bazaarType === "icons") {
@@ -1113,11 +1130,9 @@ type="checkbox">
             if (supportsDark) {
                 appearance.themeDark = item.name;
             }
-            const supportsCurrentMode = appearance.mode === 0 ? supportsLight : supportsDark;
-            if (!supportsCurrentMode) {
-                appearance.mode = supportsDark ? 1 : 0;
-                appearance.modeOS = false;
-            }
+            const themeAppearanceMode = bazaar._resolveThemeAppearanceMode(item);
+            appearance.mode = themeAppearanceMode.mode;
+            appearance.modeOS = themeAppearanceMode.modeOS;
         } else {
             if (appearance.themeLight === item.name) {
                 appearance.themeLight = "daylight";
@@ -1327,12 +1342,14 @@ type="checkbox">
                             templates: "/api/bazaar/installBazaarTemplate",
                             widgets: "/api/bazaar/installBazaarWidget",
                         };
+                        const themeAppearanceMode = pkgType === "themes" ?
+                            bazaar._resolveThemeAppearanceMode(installItem) : {};
                         fetchPost(installAPI[pkgType], {
                             keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-text-field`) as HTMLInputElement).value,
                             repoURL: installItem.repoURL,
                             packageName: installItem.name,
                             repoHash: installItem.repoHash,
-                            mode: installItem.modes?.toString() === "dark" ? 1 : 0,
+                            ...themeAppearanceMode,
                             frontend: getFrontend()
                         }, response => {
                             if (response.code !== 0) {

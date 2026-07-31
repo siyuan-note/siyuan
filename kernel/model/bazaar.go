@@ -74,6 +74,12 @@ type batchInstallItem struct {
 	meta installMeta
 }
 
+// ThemeInstallOptions 描述新安装主题后需要应用的外观模式
+type ThemeInstallOptions struct {
+	Mode   int
+	ModeOS bool
+}
+
 // updatePackages 更新一组集市包；同类型批量更新时，安装后处理只执行一次
 func updatePackages(packages []*UpdatedPackage, pkgType string, successCount *int, planned int) {
 	items := make([]batchInstallItem, 0, len(packages))
@@ -89,7 +95,7 @@ func updatePackages(packages []*UpdatedPackage, pkgType string, successCount *in
 		*successCount++
 		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), *successCount, planned, pkg.Name))
 	}
-	finishInstall(pkgType, items, 0)
+	finishInstall(pkgType, items, nil)
 }
 
 // filterUpdatableBazaarPackages 过滤出允许更新的集市包
@@ -418,8 +424,8 @@ func installBazaarPackage(pkgType, repoURL, repoHash, packageName string) (meta 
 
 // finishInstall 集市包安装后的处理（刷新外观、推送插件重载等）；批量更新时同类型只执行一次
 //
-//   - themeMode：0 浅色 / 1 深色，仅在新安装主题（meta.update 为 false）时写入外观；批量覆盖更新不会用到
-func finishInstall(pkgType string, items []batchInstallItem, themeMode int) {
+//   - themeOptions：仅在新安装主题（meta.update 为 false）时写入外观；批量覆盖更新不会用到
+func finishInstall(pkgType string, items []batchInstallItem, themeOptions *ThemeInstallOptions) {
 	if 1 > len(items) {
 		return
 	}
@@ -447,14 +453,31 @@ func finishInstall(pkgType string, items []batchInstallItem, themeMode int) {
 		}
 	case "themes":
 		for _, item := range items {
-			if !item.meta.update {
+			if !item.meta.update && nil != themeOptions {
 				// 新安装主题时才自动切换 https://github.com/siyuan-note/siyuan/issues/4966
-				if 0 == themeMode {
-					Conf.Appearance.ThemeLight = item.name
-				} else {
-					Conf.Appearance.ThemeDark = item.name
+				applied := false
+				theme, err := bazaar.ParsePackageJSON(filepath.Join(util.ThemesPath, item.name, "theme.json"))
+				if nil == err && nil != theme && nil != theme.Modes {
+					for _, mode := range *theme.Modes {
+						switch mode {
+						case "light":
+							Conf.Appearance.ThemeLight = item.name
+							applied = true
+						case "dark":
+							Conf.Appearance.ThemeDark = item.name
+							applied = true
+						}
+					}
 				}
-				Conf.Appearance.Mode = themeMode
+				if !applied {
+					if 0 == themeOptions.Mode {
+						Conf.Appearance.ThemeLight = item.name
+					} else {
+						Conf.Appearance.ThemeDark = item.name
+					}
+				}
+				Conf.Appearance.Mode = themeOptions.Mode
+				Conf.Appearance.ModeOS = themeOptions.ModeOS
 				Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, item.name, "theme.js"))
 				Conf.Save()
 			}
@@ -475,13 +498,13 @@ func finishInstall(pkgType string, items []batchInstallItem, themeMode int) {
 	}
 }
 
-// InstallBazaarPackage 安装集市包，themeMode 仅在 pkgType 为 "themes" 时生效
-func InstallBazaarPackage(pkgType, repoURL, repoHash, packageName string, themeMode int) error {
+// InstallBazaarPackage 安装集市包，themeOptions 仅在 pkgType 为 "themes" 时生效
+func InstallBazaarPackage(pkgType, repoURL, repoHash, packageName string, themeOptions *ThemeInstallOptions) error {
 	meta, err := installBazaarPackage(pkgType, repoURL, repoHash, packageName)
 	if err != nil {
 		return err
 	}
-	finishInstall(pkgType, []batchInstallItem{{name: packageName, meta: meta}}, themeMode)
+	finishInstall(pkgType, []batchInstallItem{{name: packageName, meta: meta}}, themeOptions)
 	return nil
 }
 
@@ -501,7 +524,7 @@ func UpdateBazaarPackage(pkgType, packageName, frontend string) error {
 		if updated.Available.DisallowUpdate {
 			return errors.New("marketplace package update is not allowed")
 		}
-		return InstallBazaarPackage(pkgType, updated.Available.RepoURL, updated.Available.RepoHash, packageName, 0)
+		return InstallBazaarPackage(pkgType, updated.Available.RepoURL, updated.Available.RepoHash, packageName, nil)
 	}
 	return errors.New("marketplace package update not found")
 }

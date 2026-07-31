@@ -182,6 +182,8 @@ export const initFramework = async (app: App, isStart: boolean) => {
     initEditorName();
     if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
         window.siyuan.mobile.tabs.closeAll();
+    } else {
+        await window.siyuan.mobile.tabs.removeMissingTabs();
     }
     if (getOpenNotebookCount() > 0) {
         if (window.JSAndroid && window.openFileByURL(window.JSAndroid.getBlockURL())) {

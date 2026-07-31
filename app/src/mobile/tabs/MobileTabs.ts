@@ -3,7 +3,7 @@ import type {App} from "../../index";
 import {saveScroll} from "../../protyle/scroll/saveScroll";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {escapeAttr, escapeHtml} from "../../util/escape";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
 import {newFile} from "../../util/newFile";
 import {isEncryptedBox} from "../../util/pathName";
@@ -205,6 +205,38 @@ export class MobileTabs {
                 fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: inactive.current.rootID});
             }
         }
+    }
+
+    async removeMissingTabs() {
+        const rootIDs = [...new Set(this.state.tabs.map((tab) => tab.current?.rootID).filter((rootID): rootID is string => !!rootID))];
+        if (rootIDs.length === 0) {
+            return;
+        }
+        let response: IWebSocketData;
+        try {
+            response = await fetchSyncPost("/api/block/checkBlocksExist", {ids: rootIDs});
+        } catch (error) {
+            console.warn("check mobile tabs failed", error);
+            return;
+        }
+        if (response.code !== 0 || !response.data || typeof response.data !== "object" || Array.isArray(response.data)) {
+            return;
+        }
+        const missingRootIDs = new Set(rootIDs.filter((rootID) => response.data[rootID] === false));
+        if (missingRootIDs.size === 0) {
+            return;
+        }
+        const activeTabID = this.state.activeTabID;
+        this.state.tabs.forEach((tab) => {
+            tab.backStack = tab.backStack.filter((entry) => !missingRootIDs.has(entry.rootID));
+            tab.forwardStack = tab.forwardStack.filter((entry) => !missingRootIDs.has(entry.rootID));
+        });
+        this.state.tabs = this.state.tabs.filter((tab) => !tab.current || !missingRootIDs.has(tab.current.rootID));
+        if (!this.state.tabs.some((tab) => tab.id === activeTabID)) {
+            this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
+        }
+        this.persist();
+        this.updateCounter();
     }
 
     private resolveRoot(id: string, notebookId?: string, signal?: AbortSignal) {

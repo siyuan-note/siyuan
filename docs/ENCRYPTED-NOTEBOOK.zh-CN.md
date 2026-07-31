@@ -94,7 +94,9 @@
 
 MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2id 派生 KEK，KEK 再解开各笔记本的 WrappedDEK。**MasterSalt 丢失等于数据永久锁死**：即使输入相同主密码，因 salt 变化派生出的 KEK 不同，旧 WrappedDEK 无法解开。为此引入备份与恢复机制。
 
-**备份**：`<DataDir>/.siyuan/notebook-crypto-backup.json`，保存整套 NotebookCrypto（MasterSalt/KEKVerifier/KDFParams）。位于 DataDir 内，**进入 dejavu 同步范围**。启用加密笔记本、修改主密码时刷新；只有禁用前确认不存在现存加密笔记本，也不存在依赖该备份的内核可枚举历史或恢复快照，或用户明确选择永久清除这些恢复数据后，才能删除。备份文件按明文 JSON 存储（salt 不保密、verifier 是密文，与 `conf/conf.json` 的存储方式一致）。
+**备份**：`<DataDir>/.siyuan/data-crypto-backup.json`，保存整套 NotebookCrypto（MasterSalt/KEKVerifier/KDFParams）。位于 DataDir 内，**进入 dejavu 同步范围**。启用加密笔记本、修改主密码时刷新；只有禁用前确认不存在现存加密笔记本，也不存在依赖该备份的内核可枚举历史或恢复快照，或用户明确选择永久清除这些恢复数据后，才能删除。备份文件按明文 JSON 存储（salt 不保密、verifier 是密文，与 `conf/conf.json` 的存储方式一致）。
+
+每个加密笔记本另行保存 `<DataDir>/<boxID>/.siyuan/notebook-crypto-backup.json`，其中包含该笔记本的 BoxEncryption 密钥包络（WrappedDEK/WrapNonce 和认证元数据）。全局 `data-crypto-backup.json` 提供 KEK 派生身份，单笔记本 `notebook-crypto-backup.json` 提供已封装 DEK，两者不能相互替代。
 
 **恢复触发点**（覆盖 conf.json 丢失 / 同步到新设备 / 导入 Data.zip 等场景）：
 
@@ -111,7 +113,7 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 
 | 操作 | 入口 | 说明 |
 |---|---|---|
-| 导出密钥 | 已启用状态下显示 | 把 `notebook-crypto-backup.json` 复制到 export 目录供下载，用户自行保管（API：`/api/notebook/exportNotebookCryptoBackup`） |
+| 导出密钥 | 已启用状态下显示 | 把 `data-crypto-backup.json` 复制到 export 目录供下载，用户自行保管（API：`/api/notebook/exportNotebookCryptoBackup`） |
 | 导入密钥 | `Disabled` 或 `RecoveryRequired` 状态下显示 | 选本地备份文件上传，校验合法后写回 `<DataDir>/.siyuan/` 并装回本机配置（`Enabled=true`）。后续用该密钥对应的主密码解锁（API：`/api/notebook/importNotebookCryptoBackup`） |
 
 导入防呆：完整的 `Enabled` 配置拒绝导入，避免覆盖现有 salt 并孤立 WrappedDEK；`RecoveryRequired` 仅在候选密钥通过认证且能解开全部现存加密笔记本及内核可枚举的已删除笔记本历史依赖时允许导入。备份文件本身不含主密码（salt 不保密、verifier 是密文），导出和导入不涉及明文数据泄漏，解锁仍需主密码。
@@ -128,9 +130,11 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 ├── storage/av/                             ← 普通笔记本的 数据库文件（明文）
 ├── data/
 │   ├── .siyuan/
-│   │   └── notebook-crypto-backup.json     ← NotebookCrypto 备份（MasterSalt/KEKVerifier，进同步范围，详见 §4.1）
+│   │   └── data-crypto-backup.json         ← NotebookCrypto 备份（MasterSalt/KEKVerifier，进同步范围，详见 §4.1）
 │   ├── <boxID>/                            ← 加密笔记本目录
-│   │   ├── .siyuan/conf.json               ← BoxConf（Encrypted=true + WrappedDEK)
+│   │   ├── .siyuan/
+│   │   │   ├── conf.json                   ← BoxConf（Encrypted=true + WrappedDEK）
+│   │   │   └── notebook-crypto-backup.json ← 单笔记本 BoxEncryption 备份
 │   │   ├── *.sy                            ← AES-256-GCM 密文
 │   │   ├── assets/
 │   │   │   └── <uuid>-<blockID>.ext        ← 单文件加密容器，文件名已脱敏
@@ -371,9 +375,9 @@ SQLCipher 的主数据库、WAL、SHM、回滚日志、临时文件和备份副�
 
 ## 19. 备份、恢复与元数据策略
 
-`notebook-crypto-backup.json` 是恢复材料而非秘密。文件带格式版本、备份 ID、创建时间、内容摘要和基于 KEK 的 HMAC；主密码派生 KEK 后，HMAC 缺失或不匹配必须拒绝恢复，不得作为兼容路径放行。恢复不得静默覆盖已启用配置。格式无效或与已有加密笔记本不匹配的备份进入错误状态，而不是生成新的 MasterSalt。
+`data-crypto-backup.json` 是恢复材料而非秘密。文件带格式版本、备份 ID、创建时间、内容摘要和基于 KEK 的 HMAC；主密码派生 KEK 后，HMAC 缺失或不匹配必须拒绝恢复，不得作为兼容路径放行。恢复不得静默覆盖已启用配置。格式无效或与已有加密笔记本不匹配的备份进入错误状态，而不是生成新的 MasterSalt。
 
-备份持久化遵循项目现有文件写入语义：全局 `notebook-crypto-backup.json` 通过同目录随机临时文件写入后原子替换，每个笔记本的 `notebook-crypt-backup.json` 使用文件锁保护的常规配置写入。两者都不额外承诺断电场景下的文件或目录 `fsync` 持久性；启动时校验无需密钥即可验证的结构和摘要，输入主密码后的恢复再校验 HMAC 以及密钥包络匹配关系。损坏或不匹配时安全拒绝，而不是生成替代密钥材料。
+备份持久化遵循项目现有文件写入语义：全局 `data-crypto-backup.json` 通过同目录随机临时文件写入后原子替换，每个笔记本的 `notebook-crypto-backup.json` 使用文件锁保护的常规配置写入。两者都不额外承诺断电场景下的文件或目录 `fsync` 持久性；启动时校验无需密钥即可验证的结构和摘要，输入主密码后的恢复再校验 HMAC 以及密钥包络匹配关系。损坏或不匹配时安全拒绝，而不是生成替代密钥材料。
 
 HMAC 只能证明备份内容未被不知道 KEK 的一方篡改，不能证明它是最新版本。当前范围不引入可信外部单调计数器，因此一个认证有效的历史备份或历史密文可能通过校验；`BackupID` 和 `CreatedAt` 只是供诊断和人工比较的信息，不是防回滚锚点。同步、历史或恢复流程不得把“认证成功”表述为“最新”或“来源可信”；真正防回滚需要独立可信状态，超出本设计范围。
 
@@ -462,7 +466,7 @@ HMAC 只能证明备份内容未被不知道 KEK 的一方篡改，不能证明�
 **无法恢复**——这是设计使然（没有后门）。即使密文已同步到云端，没有主密码也解不开。**务必牢记主密码，建议使用密码管理器保存**。
 
 ### 密钥备份丢失的恢复
-若 `conf/conf.json` 与同步目录里的密钥备份同时丢失（极端情况），重新启用加密笔记本会被拒绝并提示恢复备份文件。只要能从其他已同步的设备或之前导出的密钥文件找回 `notebook-crypto-backup.json`，可通过 `Disabled` 或 `RecoveryRequired` 状态下显示的「导入密钥」按钮导入，或手动放回 `<工作区>/data/.siyuan/` 后重新启用，即可用该密钥对应的主密码解锁。
+若 `conf/conf.json` 与同步目录里的密钥备份同时丢失（极端情况），重新启用加密笔记本会被拒绝并提示恢复备份文件。只要能从其他已同步的设备或之前导出的密钥文件找回 `data-crypto-backup.json`，可通过 `Disabled` 或 `RecoveryRequired` 状态下显示的「导入密钥」按钮导入，或手动放回 `<工作区>/data/.siyuan/` 后重新启用，即可用该密钥对应的主密码解锁。
 
 恢复已删除加密笔记本的历史同样需要与其 WrappedDEK 匹配的全局密钥备份和主密码。只要仍要保留这类本地恢复能力，就不要永久清除其历史或匹配的密钥备份；禁用流程应在发现这类依赖时拒绝继续。
 

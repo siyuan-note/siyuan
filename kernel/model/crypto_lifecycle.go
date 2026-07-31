@@ -103,7 +103,7 @@ func NotebookCryptoLifecycleState(hasRecoveryDependency bool) NotebookCryptoStat
 		}
 		return NotebookCryptoStateRecoveryRequired
 	}
-	if hasRecoveryDependency || filelock.IsExist(notebookCryptoBackupPath()) {
+	if hasRecoveryDependency || filelock.IsExist(dataCryptoBackupPath()) {
 		return NotebookCryptoStateRecoveryRequired
 	}
 	return NotebookCryptoStateDisabled

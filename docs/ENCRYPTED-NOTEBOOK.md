@@ -94,7 +94,9 @@ User master password
 
 MasterSalt is the global root of KEK derivation — the master password + MasterSalt derive the KEK via Argon2id, and the KEK then unwraps each notebook's WrappedDEK. **Losing MasterSalt permanently locks the data**: even with the same master password, a changed salt derives a different KEK, so old WrappedDEKs cannot be unwrapped. A backup-and-recovery mechanism is therefore introduced.
 
-**Backup**: `<DataDir>/.siyuan/notebook-crypto-backup.json`, holding the full NotebookCrypto (MasterSalt/KEKVerifier/KDFParams). Located inside DataDir, it **enters the dejavu sync scope**. It is refreshed when enabling encrypted notebooks and when changing the master password. It may be deleted on disable only after confirming that no live encrypted notebook and no kernel-enumerable history or recovery snapshot depends on it, or after the user explicitly chooses to purge those recovery artifacts permanently. Stored as plaintext JSON (salt is not secret, verifier is ciphertext — identical to how they are stored in `conf/conf.json`).
+**Backup**: `<DataDir>/.siyuan/data-crypto-backup.json`, holding the full NotebookCrypto (MasterSalt/KEKVerifier/KDFParams). Located inside DataDir, it **enters the dejavu sync scope**. It is refreshed when enabling encrypted notebooks and when changing the master password. It may be deleted on disable only after confirming that no live encrypted notebook and no kernel-enumerable history or recovery snapshot depends on it, or after the user explicitly chooses to purge those recovery artifacts permanently. Stored as plaintext JSON (salt is not secret, verifier is ciphertext — identical to how they are stored in `conf/conf.json`).
+
+Each encrypted notebook separately stores `<DataDir>/<boxID>/.siyuan/notebook-crypto-backup.json`, containing that notebook's BoxEncryption key envelope (WrappedDEK/WrapNonce and authenticated metadata). The global `data-crypto-backup.json` supplies the KEK derivation identity, while the per-notebook `notebook-crypto-backup.json` supplies the wrapped DEK; neither file can replace the other.
 
 **Recovery triggers** (covering scenarios such as conf.json loss, sync to a new device, importing Data.zip):
 
@@ -111,7 +113,7 @@ MasterSalt is the global root of KEK derivation — the master password + Master
 
 | Operation | Entry | Notes |
 |---|---|---|
-| Export key | Shown when enabled | Copies `notebook-crypto-backup.json` to the export directory for download; the user keeps it (API: `/api/notebook/exportNotebookCryptoBackup`) |
+| Export key | Shown when enabled | Copies `data-crypto-backup.json` to the export directory for download; the user keeps it (API: `/api/notebook/exportNotebookCryptoBackup`) |
 | Import key | Shown in `Disabled` or `RecoveryRequired` | Uploads a local backup file; after validation it is written back to `<DataDir>/.siyuan/` and the local config is restored (`Enabled=true`). Use the master password matching that key to unlock afterwards (API: `/api/notebook/importNotebookCryptoBackup`) |
 
 Import guard: a complete `Enabled` configuration rejects import to avoid overwriting the existing salt and orphaning WrappedDEKs. `RecoveryRequired` permits import only when the authenticated candidate key can unwrap every live encrypted notebook and every kernel-enumerable deleted-notebook history dependency. The backup file itself does not contain the master password (salt is not secret, verifier is ciphertext), so export/import does not leak plaintext data; unlocking still requires the master password.
@@ -128,9 +130,11 @@ Import guard: a complete `Enabled` configuration rejects import to avoid overwri
 ├── storage/av/                             ← normal-notebook database files (plaintext)
 ├── data/
 │   ├── .siyuan/
-│   │   └── notebook-crypto-backup.json     ← NotebookCrypto backup (MasterSalt/KEKVerifier, synced; see §4.1)
+│   │   └── data-crypto-backup.json         ← NotebookCrypto backup (MasterSalt/KEKVerifier, synced; see §4.1)
 │   ├── <boxID>/                            ← encrypted notebook directory
-│   │   ├── .siyuan/conf.json               ← BoxConf (Encrypted=true + WrappedDEK)
+│   │   ├── .siyuan/
+│   │   │   ├── conf.json                   ← BoxConf (Encrypted=true + WrappedDEK)
+│   │   │   └── notebook-crypto-backup.json ← per-notebook BoxEncryption backup
 │   │   ├── *.sy                            ← AES-256-GCM ciphertext
 │   │   ├── assets/
 │   │   │   └── <uuid>-<blockID>.ext        ← single-file encrypted container, filename desensitized
@@ -371,9 +375,9 @@ The SQLCipher main database, WAL, SHM, rollback journal, temporary files, and ba
 
 ## 19. Backup, Recovery, and Metadata Policy
 
-`notebook-crypto-backup.json` is recovery material, not a secret. It contains a format version, backup ID, creation time, content digest, and KEK-based HMAC. After the master password derives the KEK, a missing or mismatched HMAC rejects recovery rather than acting as a compatibility fallback. Recovery must not silently overwrite enabled configuration. A malformed backup or a backup incompatible with existing encrypted notebooks enters an error state instead of generating a new MasterSalt.
+`data-crypto-backup.json` is recovery material, not a secret. It contains a format version, backup ID, creation time, content digest, and KEK-based HMAC. After the master password derives the KEK, a missing or mismatched HMAC rejects recovery rather than acting as a compatibility fallback. Recovery must not silently overwrite enabled configuration. A malformed backup or a backup incompatible with existing encrypted notebooks enters an error state instead of generating a new MasterSalt.
 
-Backup persistence follows the project's existing file-write semantics. The global `notebook-crypto-backup.json` is written to a random temporary file in the same directory and then atomically replaced; each notebook's `notebook-crypt-backup.json` uses the ordinary file-lock-protected configuration write. Neither path makes an additional power-loss durability guarantee through file or directory `fsync`. Startup validates the structure and digest that can be checked without a key; recovery validates the HMAC and key-envelope compatibility after the master password is entered. Corruption or mismatch is safely rejected instead of generating replacement key material.
+Backup persistence follows the project's existing file-write semantics. The global `data-crypto-backup.json` is written to a random temporary file in the same directory and then atomically replaced; each notebook's `notebook-crypto-backup.json` uses the ordinary file-lock-protected configuration write. Neither path makes an additional power-loss durability guarantee through file or directory `fsync`. Startup validates the structure and digest that can be checked without a key; recovery validates the HMAC and key-envelope compatibility after the master password is entered. Corruption or mismatch is safely rejected instead of generating replacement key material.
 
 An HMAC proves only that a party without the KEK did not alter the backup; it does not prove that the backup is the latest version. The current scope introduces no trusted external monotonic counter, so an authenticated historical backup or ciphertext may pass validation. `BackupID` and `CreatedAt` are information for diagnostics and manual comparison, not rollback anchors. Sync, history, and recovery flows must not describe successful authentication as proof of freshness or source trust. Strong rollback prevention requires independent trusted state and is outside this design's scope.
 
@@ -462,7 +466,7 @@ Sync recovery can validate backup integrity but cannot prove that a backup is th
 **It cannot be recovered** — by design (no backdoor). Even if the ciphertext has been synced to the cloud, it cannot be decrypted without the master password. **You must remember the master password; using a password manager is recommended.**
 
 ### Recovering from a lost key backup
-If both `conf/conf.json` and the key backup in the sync directory are lost (an extreme case), re-enabling the encrypted-notebook feature will be rejected with a prompt to restore the backup file. As long as you can recover `notebook-crypto-backup.json` from another synced device or a previously exported key file, you can import it via the "Import key" button shown in `Disabled` or `RecoveryRequired`, or manually put it back at `<workspace>/data/.siyuan/` and re-enable, then unlock with the master password matching that key.
+If both `conf/conf.json` and the key backup in the sync directory are lost (an extreme case), re-enabling the encrypted-notebook feature will be rejected with a prompt to restore the backup file. As long as you can recover `data-crypto-backup.json` from another synced device or a previously exported key file, you can import it via the "Import key" button shown in `Disabled` or `RecoveryRequired`, or manually put it back at `<workspace>/data/.siyuan/` and re-enable, then unlock with the master password matching that key.
 
 Restoring deleted encrypted-notebook history also requires the global key backup matching its WrappedDEK and the master password. While you still need that local recovery path, do not permanently purge either the history or its matching key backup; disabling must refuse to proceed when it discovers such a dependency.
 

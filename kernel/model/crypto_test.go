@@ -312,7 +312,7 @@ func TestBackupRejectsUnsupportedSpec(t *testing.T) {
 			defer func() { util.DataDir = origDataDir }()
 
 			backup := &conf.NotebookCrypto{Spec: spec}
-			backupPath := filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+			backupPath := filepath.Join(util.DataDir, ".siyuan", "data-crypto-backup.json")
 			if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 				t.Fatal(err)
 			}
@@ -328,6 +328,20 @@ func TestBackupRejectsUnsupportedSpec(t *testing.T) {
 	}
 }
 
+func TestCryptoBackupPathNames(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() { util.DataDir = originalDataDir }()
+
+	if got, want := dataCryptoBackupPath(), filepath.Join(util.DataDir, ".siyuan", "data-crypto-backup.json"); got != want {
+		t.Fatalf("unexpected data crypto backup path: got %q, want %q", got, want)
+	}
+	boxID := "20260731120000-abcdefg"
+	if got, want := notebookCryptoBackupPath(boxID), filepath.Join(util.DataDir, boxID, ".siyuan", "notebook-crypto-backup.json"); got != want {
+		t.Fatalf("unexpected notebook crypto backup path: got %q, want %q", got, want)
+	}
+}
+
 func TestBackupRejectsIncompleteCurrentSpec(t *testing.T) {
 	originalDataDir := util.DataDir
 	util.DataDir = t.TempDir()
@@ -336,7 +350,7 @@ func TestBackupRejectsIncompleteCurrentSpec(t *testing.T) {
 	backup := conf.NewNotebookCrypto()
 	backup.Enabled = true
 	prepareBackupForWrite(backup)
-	backupPath := filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+	backupPath := filepath.Join(util.DataDir, ".siyuan", "data-crypto-backup.json")
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -375,7 +389,7 @@ func TestBackupChecksumCorruption(t *testing.T) {
 	}
 	prepareBackupForWrite(nc)
 	nc.KEKMAC = computeKEKMAC(nc, kek)
-	backupPath := filepath.Join(tempDir, ".siyuan", "notebook-crypto-backup.json")
+	backupPath := filepath.Join(tempDir, ".siyuan", "data-crypto-backup.json")
 	os.MkdirAll(filepath.Dir(backupPath), 0755)
 	data, _ := json.Marshal(nc)
 	os.WriteFile(backupPath, data, 0644)
@@ -448,7 +462,7 @@ func TestDeriveKEKRejectsTamperedBackupMAC(t *testing.T) {
 	}
 	prepareBackupForWrite(&nc)
 	nc.KEKMAC = bytes.Repeat([]byte{0x7f}, 32)
-	backupPath := filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+	backupPath := filepath.Join(util.DataDir, ".siyuan", "data-crypto-backup.json")
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -953,7 +967,7 @@ func TestEnabledWithoutBackupReturnsRecoveryError(t *testing.T) {
 	}
 
 	// 关键：不在磁盘制造无效备份——备份文件应仍不存在
-	if _, statErr := os.Stat(notebookCryptoBackupPath()); !os.IsNotExist(statErr) {
+	if _, statErr := os.Stat(dataCryptoBackupPath()); !os.IsNotExist(statErr) {
 		t.Fatalf("backup file should not be generated during deriveKEK; stat err=%v", statErr)
 	}
 }

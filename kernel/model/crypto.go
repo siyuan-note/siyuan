@@ -107,13 +107,13 @@ func NotebookCryptoMuLock() { notebookCryptoMu.Lock() }
 // NotebookCryptoMuUnlock 解锁 notebookCryptoMu。
 func NotebookCryptoMuUnlock() { notebookCryptoMu.Unlock() }
 
-// notebookCryptoBackupPath 是 NotebookCrypto 的备份路径，位于 DataDir/.siyuan/ 下（进入 dejavu 同步范围）。
+// dataCryptoBackupPath 是全局 NotebookCrypto 的备份路径，位于 DataDir/.siyuan/ 下（进入 dejavu 同步范围）。
 // MasterSalt 是加密体系的全局根基：conf/conf.json 丢失后若重新启用会生成新 salt，
 // 导致旧 WrappedDEK 无法用相同主密码解开（KEK 随 salt 改变）。把整套 NotebookCrypto 备份到
 // 同步目录，conf.json 丢失时通过同步恢复或本地备份即可重新解锁已有加密笔记本。
 // MasterSalt/KEKVerifier 设计为可明文（salt 不保密，verifier 是密文），备份文件按明文 JSON 存储。
-func notebookCryptoBackupPath() string {
-	return filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+func dataCryptoBackupPath() string {
+	return filepath.Join(util.DataDir, ".siyuan", "data-crypto-backup.json")
 }
 
 // notebookCryptoAuthPayload 生成密钥身份认证载荷。
@@ -180,7 +180,7 @@ func ExportNotebookCryptoBackup() (downloadPath string, err error) {
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
 
-	backupPath := notebookCryptoBackupPath()
+	backupPath := dataCryptoBackupPath()
 	data, readErr := filelock.ReadFile(backupPath)
 	if readErr != nil {
 		if os.IsNotExist(readErr) {
@@ -206,7 +206,7 @@ func ExportNotebookCryptoBackup() (downloadPath string, err error) {
 }
 
 // ImportNotebookCryptoBackup 接收用户导入的密钥备份文件内容（JSON 字节），
-// 校验为合法 NotebookCrypto 后写回 <DataDir>/.siyuan/notebook-crypto-backup.json 并装回本机 Conf。
+// 校验为合法 NotebookCrypto 后写回 <DataDir>/.siyuan/data-crypto-backup.json 并装回本机 Conf。
 // 用于新设备/重装后不依赖同步、手动恢复加密配置（详见设计文档 §4.1）。
 // 安全：备份文件不含主密码（salt 不保密、verifier 是密文），导入只恢复配置，解锁仍需主密码。
 // 防呆：本机已有完整且已启用的加密配置时拒绝导入，避免覆盖现有 salt/verifier 孤立现有 WrappedDEK。
@@ -292,7 +292,7 @@ func saveNotebookCryptoBackup(kek []byte) error {
 	Conf.NotebookCrypto.Checksum = nc.Checksum
 	Conf.NotebookCrypto.KEKMAC = nc.KEKMAC // 保持 Conf 与备份文件的 KEKMAC 一致
 	Conf.m.Unlock()
-	backupPath := notebookCryptoBackupPath()
+	backupPath := dataCryptoBackupPath()
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		return fmt.Errorf("mkdir notebook crypto backup dir failed: %w", err)
 	}
@@ -317,7 +317,7 @@ func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto, kek []byte) error {
 	if !notebookCryptoConfigurationComplete(nc) {
 		return errors.New("cannot write incomplete notebook crypto backup")
 	}
-	backupPath := notebookCryptoBackupPath()
+	backupPath := dataCryptoBackupPath()
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		return fmt.Errorf("mkdir notebook crypto backup dir failed: %w", err)
 	}
@@ -367,7 +367,7 @@ func verifyKEKAgainstExistingBoxes(kek []byte) bool {
 
 // loadNotebookCryptoBackup 从 DataDir 读取 NotebookCrypto 备份。文件不存在返回 (nil, nil)。
 func loadNotebookCryptoBackup() (*conf.NotebookCrypto, error) {
-	data, err := filelock.ReadFile(notebookCryptoBackupPath())
+	data, err := filelock.ReadFile(dataCryptoBackupPath())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -389,7 +389,7 @@ func loadNotebookCryptoBackup() (*conf.NotebookCrypto, error) {
 
 // removeNotebookCryptoBackup 删除备份文件（禁用加密功能时调用）。文件不存在视为成功。
 func removeNotebookCryptoBackup() {
-	if err := os.Remove(notebookCryptoBackupPath()); err != nil && !os.IsNotExist(err) {
+	if err := os.Remove(dataCryptoBackupPath()); err != nil && !os.IsNotExist(err) {
 		logging.LogErrorf("remove notebook crypto backup failed: %s", err)
 	}
 }
@@ -555,14 +555,14 @@ func hasEncryptedNotebook() (bool, error) {
 }
 
 // HasEncryptedNotebookHistory 检查历史目录中是否存在加密笔记本的历史快照。
-// 笔记本删除后其 box 目录（含 .siyuan/conf.json 和 notebook-crypt-backup.json）会被
+// 笔记本删除后其 box 目录（含 .siyuan/conf.json 和 notebook-crypto-backup.json）会被
 // 原样密文备份到历史目录（RemoveBox 的 filelock.Copy），但此时 IsEncryptedBox 已返回 false
 // （box 目录已删）。因此 DisableEncryptedNotebook 不能只靠 ListAllEncryptedBoxIDs 判定——
 // 已删除加密笔记本的历史仍依赖当前 MasterSalt/KEKVerifier 才能恢复，禁用并删除备份会让这些
 // 历史永久锁死，违反设计 §19。本函数扫描历史目录识别这类依赖。
 //
 // 判定信号：历史条目 <HistoryDir>/<ts>-<op>/<boxID>/.siyuan/ 下存在
-// notebook-crypt-backup.json（专为 box 删除后的恢复设计），或 conf.json 标记 Encrypted=true。
+// notebook-crypto-backup.json（专为 box 删除后的恢复设计），或 conf.json 标记 Encrypted=true。
 // boxID 用 ast.IsNodeIDPattern 校验，避免误判 assets/storage 等非 box 目录。
 func scanEncryptedNotebookHistory() (bool, error) {
 	boxDirs, err := encryptedNotebookHistoryBoxDirs()
@@ -634,7 +634,7 @@ func verifyKEKAgainstEncryptedHistory(kek []byte) bool {
 
 func readEncryptedHistoryBoxEncryptionCandidates(boxDir string) (ret []*conf.BoxEncryption, err error) {
 	var candidateErrors []error
-	backupPath := filepath.Join(boxDir, ".siyuan", "notebook-crypt-backup.json")
+	backupPath := filepath.Join(boxDir, ".siyuan", "notebook-crypto-backup.json")
 	if filelock.IsExist(backupPath) {
 		if candidate, readErr := readBoxEncryptionFile(backupPath); readErr == nil {
 			ret = append(ret, candidate)
@@ -681,11 +681,11 @@ func HasEncryptedNotebookHistory() bool {
 }
 
 // isEncryptedHistoryBoxDir 判断历史目录中的 boxID 子目录是否属于加密笔记本。
-// 优先看 notebook-crypt-backup.json（删除前随 box 目录整体备份，是加密身份的权威标识），
+// 优先看 notebook-crypto-backup.json（删除前随 box 目录整体备份，是加密身份的权威标识），
 // 再 fallback 到 conf.json 的 Encrypted 标志。
 func isEncryptedHistoryBoxDir(boxDir string) (bool, error) {
 	siyuanDir := filepath.Join(boxDir, ".siyuan")
-	backupPath := filepath.Join(siyuanDir, "notebook-crypt-backup.json")
+	backupPath := filepath.Join(siyuanDir, "notebook-crypto-backup.json")
 	if _, err := os.Stat(backupPath); err == nil {
 		return true, nil
 	} else if !os.IsNotExist(err) {
@@ -747,7 +747,7 @@ func EnableEncryptedNotebook(password string) error {
 	if historyErr != nil {
 		return fmt.Errorf("check encrypted notebook history failed: %w", historyErr)
 	}
-	hasBackup := filelock.IsExist(notebookCryptoBackupPath())
+	hasBackup := filelock.IsExist(dataCryptoBackupPath())
 	if hasEncrypted || hasHistory || hasBackup {
 		// 现存笔记本、已删除笔记本历史或全局备份均表示已有密钥域，必须恢复并认证，不能生成新 MasterSalt。
 		if _, restoreErr := tryRestoreNotebookCryptoFromBackupLocked(password); restoreErr != nil {
@@ -1233,7 +1233,7 @@ func lockBoxHeld(boxID string) {
 	// 仅在 backup 缺失时从 conf 补写。正常流程中 CreateEncryptedBox/UnlockBox/ChangeMasterPassword
 	// 已刷新 backup，此处不再用未经解密验证的 BoxCrypt 覆盖已有 backup，
 	// 避免 conf 中的坏 WrappedDEK 覆盖有效恢复源。
-	if !filelock.IsExist(notebookCryptBackupPath(boxID)) {
+	if !filelock.IsExist(notebookCryptoBackupPath(boxID)) {
 		box := &Box{ID: boxID}
 		boxConf := box.GetConf()
 		if boxConf != nil && boxConf.Encrypted && boxConf.BoxCrypt != nil && len(boxConf.BoxCrypt.WrappedDEK) > 0 {
@@ -1520,7 +1520,7 @@ func IsEncryptedBox(boxID string) bool {
 		return true
 	}
 	// 主 conf 缺失/损坏时检查独立备份，确认是否为加密笔记本
-	backupPath := notebookCryptBackupPath(boxID)
+	backupPath := notebookCryptoBackupPath(boxID)
 	if !filelock.IsExist(backupPath) {
 		return false // 无备份文件 → 非加密
 	}
@@ -1592,7 +1592,7 @@ func DeepCopyBoxEncryption(src *conf.BoxEncryption) *conf.BoxEncryption {
 }
 
 // listAllEncryptedBoxIDs 直接扫描笔记本配置及密钥备份，不触发配置修复等副作用。
-// conf 损坏或缺失时以 notebook-crypt-backup.json 为准，供候选密钥验证、改密和禁用等关键路径使用。
+// conf 损坏或缺失时以 notebook-crypto-backup.json 为准，供候选密钥验证、改密和禁用等关键路径使用。
 func listAllEncryptedBoxIDs() ([]string, error) {
 	var ids []string
 	dirs, err := os.ReadDir(util.DataDir)
@@ -2031,12 +2031,12 @@ func DecryptAsset(boxID, diskName string, dek, ciphertext []byte) ([]byte, error
 	return plaintext, err
 }
 
-// notebookCryptBackupPath 返回加密笔记本的独立 BoxCrypt 备份路径。
+// notebookCryptoBackupPath 返回加密笔记本的独立 BoxCrypt 备份路径。
 // 该文件在主 conf.json 丢失时用作"此笔记本是加密笔记本"的标识和降级恢复源。
-// 与全局 NotebookCrypto 备份（<DataDir>/.siyuan/notebook-crypto-backup.json）配合使用，
+// 与全局 NotebookCrypto 备份（<DataDir>/.siyuan/data-crypto-backup.json）配合使用，
 // 全局备份存 MasterSalt/KEKVerifier，per-notebook 备份存 WrappedDEK/WrapNonce。
-func notebookCryptBackupPath(boxID string) string {
-	return filepath.Join(util.DataDir, boxID, ".siyuan", "notebook-crypt-backup.json")
+func notebookCryptoBackupPath(boxID string) string {
+	return filepath.Join(util.DataDir, boxID, ".siyuan", "notebook-crypto-backup.json")
 }
 
 // writeNotebookCryptBackup 写入加密笔记本的 BoxCrypt 备份。
@@ -2045,7 +2045,7 @@ func writeNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) error {
 	if err := validateBoxEncryption(crypt); err != nil {
 		return err
 	}
-	backupPath := notebookCryptBackupPath(boxID)
+	backupPath := notebookCryptoBackupPath(boxID)
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		return fmt.Errorf("mkdir notebook crypt backup dir failed: %w", err)
 	}
@@ -2062,7 +2062,7 @@ func writeNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) error {
 // readNotebookCryptBackup 读取加密笔记本的 BoxCrypt 备份。
 // 备份文件不存在时返回 (nil, nil)，调用方据此区分"非加密笔记本"和"备份不存在"。
 func readNotebookCryptBackup(boxID string) (*conf.BoxEncryption, error) {
-	backupPath := notebookCryptBackupPath(boxID)
+	backupPath := notebookCryptoBackupPath(boxID)
 	if !filelock.IsExist(backupPath) {
 		return nil, nil
 	}

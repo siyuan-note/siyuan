@@ -374,7 +374,7 @@ func TestRecoveryRequiredHistoryRestoresAuthenticatedBackup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = os.WriteFile(filepath.Join(historyBoxDir, "notebook-crypt-backup.json"), boxCryptData, 0644); err != nil {
+	if err = os.WriteFile(filepath.Join(historyBoxDir, "notebook-crypto-backup.json"), boxCryptData, 0644); err != nil {
 		t.Fatal(err)
 	}
 

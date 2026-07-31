@@ -1,8 +1,8 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    applyAgentUserEdit,
     findAgentUserEntryIndex,
-    filterAgentReferencesForContent,
     hasAgentExecutedToolsAfter,
     isAgentRegenerateStateCurrent
 } from "./AgentHistory";
@@ -45,11 +45,30 @@ describe("AgentHistory", () => {
         assert.equal(isAgentRegenerateStateCurrent("session-1", "session-1", 2, 2, false, true), false);
     });
 
-    it("drops block references removed from edited content", () => {
-        const references = [
-            {id: "block-1", title: "First block"},
-            {id: "block-2", title: "Second block"},
-        ];
-        assert.deepEqual(filterAgentReferencesForContent(references, "Review First block"), [references[0]]);
+    it("updates rich user message data together", () => {
+        const entry = {
+            content: "Old content",
+            blockHTML: "<div>Old content</div>",
+            references: [{id: "block-1", title: "Old reference"}],
+        };
+        const references = [{id: "block-2", title: "New reference"}];
+        applyAgentUserEdit(entry, {
+            text: "| A | B |",
+            blockHTML: '<div data-type="NodeTable">table</div>',
+            references,
+        });
+        assert.deepEqual(entry, {
+            content: "| A | B |",
+            blockHTML: '<div data-type="NodeTable">table</div>',
+            references,
+        });
+        assert.notEqual(entry.references, references);
+
+        applyAgentUserEdit(entry, {
+            text: "No references",
+            blockHTML: "<div>No references</div>",
+            references: [],
+        });
+        assert.equal(entry.references, undefined);
     });
 });

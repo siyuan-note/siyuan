@@ -102,6 +102,7 @@ export async function fetchAgentSSE(
     pluginActions?: Array<{name: string; description: string}>,
     userEntryID?: string,
     contentRevision?: number,
+    blockHTML?: string,
 ): Promise<void> {
     let errorReported = false;
     const reportError = async (err: Error) => {
@@ -125,6 +126,7 @@ export async function fetchAgentSSE(
         if (pluginActions && pluginActions.length > 0) { body.pluginActions = pluginActions; }
         if (userEntryID) { body.userEntryID = userEntryID; }
         if (typeof contentRevision === "number") { body.contentRevision = contentRevision; }
+        if (blockHTML !== undefined) { body.blockHTML = blockHTML; }
 
         const response = await fetch("/api/ai/agent/chat", {
             method: "POST",

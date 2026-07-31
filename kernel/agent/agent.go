@@ -443,7 +443,7 @@ type agentCheckpoint struct {
 	LastCommittedTurnID   string         `json:"lastCommittedTurnID,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, contextLimit int, sessionID string, userEntryID string, contentRevision int64, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, contextLimit int, sessionID string, userEntryID string, contentRevision int64, userMessage string, userBlockHTML *string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -555,6 +555,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 						currentUserEntry.Content = userMessage
 						currentUserEntry.References = append([]Reference(nil), references...)
 						currentUserEntry.EditorContext = cloneEditorContext(editorCtx)
+						if userBlockHTML != nil {
+							currentUserEntry.BlockHTML = *userBlockHTML
+						}
 					}
 					messages = checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, pluginActions, compaction)
 				}
@@ -582,6 +585,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 			userReferences := append([]Reference(nil), references...)
 			turn.UserReferences = &userReferences
 			turn.UserEditorContext = cloneEditorContext(editorCtx)
+			if userBlockHTML != nil {
+				blockHTML := *userBlockHTML
+				turn.UserBlockHTML = &blockHTML
+			}
 		}
 		select {
 		case <-ctx.Done():

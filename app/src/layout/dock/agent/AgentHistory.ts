@@ -7,6 +7,24 @@ export type AgentHistoryEntry = {
 
 export type AgentHistoryReference = { id: string; title: string };
 
+export type AgentHistoryUserEntry = {
+    content: string;
+    blockHTML?: string;
+    references?: AgentHistoryReference[];
+};
+
+export type AgentHistoryEditData = {
+    text: string;
+    blockHTML: string;
+    references: AgentHistoryReference[];
+};
+
+export const applyAgentUserEdit = (entry: AgentHistoryUserEntry, data: AgentHistoryEditData) => {
+    entry.content = data.text;
+    entry.blockHTML = data.blockHTML;
+    entry.references = data.references.length > 0 ? data.references.slice() : undefined;
+};
+
 export const findAgentUserEntryIndex = (entries: AgentHistoryEntry[], userEntryID?: string): number => {
     for (let i = entries.length - 1; i >= 0; i--) {
         if (entries[i].type === "user" && (!userEntryID || entries[i].id === userEntryID)) {
@@ -34,8 +52,4 @@ export const isAgentRegenerateStateCurrent = (requestSessionID: string, currentS
                                                isStreaming: boolean, mirrorLocked: boolean): boolean => {
     return requestSessionID === currentSessionID && requestRevision === currentRevision &&
         !isStreaming && !mirrorLocked;
-};
-
-export const filterAgentReferencesForContent = (references: AgentHistoryReference[], content: string) => {
-    return references.filter(reference => content.includes(reference.title));
 };

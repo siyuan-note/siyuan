@@ -210,16 +210,19 @@
   width: min(100%, 560px);
 }
 
-.agent-chat__edit-textarea {
-  display: block;
+.agent-chat__edit-editor {
+  background-color: transparent;
+  max-height: 40vh;
   min-height: 96px;
   width: 100%;
-  resize: vertical;
-  line-height: 1.5;
+}
+
+.agent-chat__edit-editor .protyle-wysiwyg {
+  min-height: 96px;
 }
 
 .agent-chat__msg--editing .agent-chat__msg-actions {
-  margin-top: 8px;
+  margin-top: 4px;
   opacity: 1;
 }
 
@@ -245,7 +248,7 @@
   width: 100%;
   justify-content: flex-end;
   opacity: 0;
-  transition: var(--b3-transition);
+  transition: opacity .2s cubic-bezier(0, 0, .2, 1) 0ms;
 }
 
 .agent-chat__msg--ai:hover .agent-chat__msg-actions,
@@ -1045,14 +1048,18 @@
   }
 }
 
-// 迷你 protyle 输入框：复用 .protyle-wysiwyg，此处只约束尺寸（min/max-height、滚动）。
-.agent-chat__composer-host .protyle-wysiwyg {
+// 发送框和历史消息编辑器复用相同排版，尺寸和滚动按使用场景分别约束。
+.agent-chat__composer-host .protyle-wysiwyg,
+.agent-chat__edit-editor .protyle-wysiwyg {
   outline: none;
-  font-size: 14px;
+  font-size: var(--b3-font-size);
   line-height: 1.6;
   color: var(--b3-theme-on-background);
+  padding: 0;
+}
+
+.agent-chat__composer-host .protyle-wysiwyg {
   min-height: 24px;
   max-height: 120px;
   overflow-y: auto;
-  padding: 0;
 }

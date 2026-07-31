@@ -39,6 +39,7 @@ type agentChatReq struct {
 	UserEntryID     string               `json:"userEntryID"`
 	ContentRevision *int64               `json:"contentRevision"`
 	Message         string               `json:"message"`
+	BlockHTML       *string              `json:"blockHTML"`
 	Language        string               `json:"language"`
 	References      []agent.Reference    `json:"references"`
 	EditorContext   agent.EditorContext  `json:"editorContext"`
@@ -135,7 +136,7 @@ func agentChat(c *gin.Context) {
 		contentRevision = *req.ContentRevision
 	}
 	contextLimit := agent.ResolveModelContextLimit(selectedModel.Name, selectedModel.ContextLength)
-	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, contextLimit, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout, streamIdleTimeout)
+	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, contextLimit, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.BlockHTML, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout, streamIdleTimeout)
 	defer cancel()
 	streamClosed := false
 	defer func() {

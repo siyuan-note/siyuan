@@ -279,7 +279,7 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 
 	events := AgentChat(
 		context.Background(), newTestOpenAIClient(server.URL), "test-model", contextLimit, testSessionID,
-		"user-2", 1, "start the current task", "English", nil, EditorContext{}, nil, false,
+		"user-2", 1, "start the current task", nil, "English", nil, EditorContext{}, nil, false,
 		time.Second, 0, "", time.Second, time.Second,
 	)
 	doneSeen := false
@@ -314,10 +314,11 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 func TestAgentChatRegenerateCompactionUsesTruncatedEditedHistory(t *testing.T) {
 	setupCompactionAgentTest(t)
 	const (
-		originalTarget = "ORIGINAL_TARGET_PROMPT_DO_NOT_SEND"
-		editedTarget   = "EDITED_TARGET_PROMPT_MUST_SEND"
-		staleAnswer    = "STALE_REGENERATED_ANSWER_DO_NOT_SEND"
-		futureTurn     = "FUTURE_TURN_DO_NOT_SEND"
+		originalTarget  = "ORIGINAL_TARGET_PROMPT_DO_NOT_SEND"
+		editedTarget    = "EDITED_TARGET_PROMPT_MUST_SEND"
+		editedBlockHTML = `<div data-node-id="edited">EDITED_TARGET_PROMPT_MUST_SEND</div>`
+		staleAnswer     = "STALE_REGENERATED_ANSWER_DO_NOT_SEND"
+		futureTurn      = "FUTURE_TURN_DO_NOT_SEND"
 	)
 	entries := []SessionEntry{
 		{ID: "user-1", Type: "user", Content: "complete the old task"},
@@ -373,7 +374,7 @@ func TestAgentChatRegenerateCompactionUsesTruncatedEditedHistory(t *testing.T) {
 
 	events := AgentChat(
 		context.Background(), newTestOpenAIClient(server.URL), "test-model", contextLimit, testSessionID,
-		"user-2", 1, editedTarget, "English", nil, EditorContext{}, nil, true,
+		"user-2", 1, editedTarget, stringPointer(editedBlockHTML), "English", nil, EditorContext{}, nil, true,
 		time.Second, 0, "", time.Second, time.Second,
 	)
 	for event := range events {
@@ -399,6 +400,9 @@ func TestAgentChatRegenerateCompactionUsesTruncatedEditedHistory(t *testing.T) {
 	}
 	if runtime.ActiveTurn == nil {
 		t.Fatal("regenerate runtime turn was not persisted")
+	}
+	if runtime.ActiveTurn.UserBlockHTML == nil || *runtime.ActiveTurn.UserBlockHTML != editedBlockHTML {
+		t.Fatalf("regenerate runtime lost edited block HTML: %#v", runtime.ActiveTurn)
 	}
 	deltaJSON, err := json.Marshal(runtime.ActiveTurn.Delta)
 	if err != nil {
@@ -468,7 +472,7 @@ func TestAgentChatRetriesOverflowAfterProactiveCompaction(t *testing.T) {
 
 	events := AgentChat(
 		context.Background(), newTestOpenAIClient(server.URL), "test-model", contextLimit, testSessionID,
-		"user-3", 1, "current task", "English", nil, EditorContext{}, nil, false,
+		"user-3", 1, "current task", nil, "English", nil, EditorContext{}, nil, false,
 		time.Second, 0, "", time.Second, time.Second,
 	)
 	doneSeen := false

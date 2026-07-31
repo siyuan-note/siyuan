@@ -46,6 +46,7 @@ type agentRuntimeTurn struct {
 	UserEntryID       string         `json:"userEntryID"`
 	TargetUserEntryID string         `json:"targetUserEntryID,omitempty"`
 	UserContent       string         `json:"userContent,omitempty"`
+	UserBlockHTML     *string        `json:"userBlockHTML,omitempty"`
 	UserReferences    *[]Reference   `json:"userReferences,omitempty"`
 	UserEditorContext *EditorContext `json:"userEditorContext,omitempty"`
 	BaseRevision      int64          `json:"baseRevision"`
@@ -347,6 +348,13 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 	if turn.Mode == "regenerate" && turn.UserContent != "" {
 		entry, _ := entries[anchor].(map[string]any)
 		entry["content"] = turn.UserContent
+		if turn.UserBlockHTML != nil {
+			if *turn.UserBlockHTML != "" {
+				entry["blockHTML"] = *turn.UserBlockHTML
+			} else {
+				delete(entry, "blockHTML")
+			}
+		}
 		if turn.UserReferences != nil {
 			if len(*turn.UserReferences) > 0 {
 				entry["references"] = *turn.UserReferences

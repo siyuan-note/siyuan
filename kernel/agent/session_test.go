@@ -39,6 +39,10 @@ func marshalSession(t *testing.T, value any) []byte {
 	return data
 }
 
+func stringPointer(value string) *string {
+	return &value
+}
+
 func TestSaveSessionRevisionConflictAndUnknownFields(t *testing.T) {
 	useTestDataDir(t)
 	base := map[string]any{
@@ -291,6 +295,7 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 
 func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 	useTestDataDir(t)
+	const editedBlockHTML = `<div data-node-id="edited">edited prompt</div>`
 	base := map[string]any{
 		"id":        testSessionID,
 		"title":     "base",
@@ -301,6 +306,7 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 				"id": "user-1", "type": "user", "content": "original prompt",
 				"references":    []any{map[string]any{"id": "block-1", "title": "First block"}},
 				"editorContext": map[string]any{"activeDocID": "old-doc"},
+				"blockHTML":     `<div data-node-id="original">original prompt</div>`,
 			},
 			map[string]any{"id": "assistant-1", "type": "assistant", "content": "old answer"},
 			map[string]any{"id": "user-2", "type": "user", "content": "later prompt"},
@@ -325,6 +331,7 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 		}},
 	}
 	emptyReferences := []Reference{}
+	turn.UserBlockHTML = stringPointer(editedBlockHTML)
 	turn.UserReferences = &emptyReferences
 	turn.UserEditorContext = &EditorContext{ActiveDocID: "new-doc"}
 	if err := beginRuntimeTurn(testSessionID, turn, false); err != nil {
@@ -347,6 +354,9 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 	if _, ok := entries[0].(map[string]any)["references"]; ok {
 		t.Fatalf("references removed by the edit were restored: %#v", entries[0])
 	}
+	if blockHTML := entries[0].(map[string]any)["blockHTML"]; blockHTML != editedBlockHTML {
+		t.Fatalf("regenerated runtime lost edited block HTML: %#v", entries[0])
+	}
 	editorContext := entries[0].(map[string]any)["editorContext"].(*EditorContext)
 	if editorContext.ActiveDocID != "new-doc" {
 		t.Fatalf("regenerated editor context was not restored: %#v", entries[0])
@@ -360,6 +370,9 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 	if len(committedEntries) != 2 || committedEntries[0].(map[string]any)["content"] != "edited prompt" {
 		t.Fatalf("committed regenerate turn lost edited content: %#v", committedEntries)
 	}
+	if blockHTML := committedEntries[0].(map[string]any)["blockHTML"]; blockHTML != editedBlockHTML {
+		t.Fatalf("committed regenerate turn lost edited block HTML: %#v", committedEntries[0])
+	}
 	committedEditorContext := committedEntries[0].(map[string]any)["editorContext"].(*EditorContext)
 	if committedEditorContext.ActiveDocID != "new-doc" {
 		t.Fatalf("committed regenerate turn lost editor context: %#v", committedEntries[0])
@@ -369,6 +382,9 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 		t.Fatal(err)
 	}
 	persistedEntries := persisted["entries"].([]any)
+	if blockHTML := persistedEntries[0].(map[string]any)["blockHTML"]; blockHTML != editedBlockHTML {
+		t.Fatalf("persisted regenerate turn lost edited block HTML: %#v", persistedEntries[0])
+	}
 	persistedEditorContext := persistedEntries[0].(map[string]any)["editorContext"].(map[string]any)
 	if persistedEditorContext["activeDocID"] != "new-doc" {
 		t.Fatalf("persisted regenerate turn lost editor context: %#v", persistedEntries[0])
@@ -642,20 +658,25 @@ func TestApplyRuntimePreservesUIOrderAndReplacesAssistant(t *testing.T) {
 }
 
 func TestApplyRegenerateRuntimeReplacesUserContent(t *testing.T) {
+	const editedBlockHTML = `<div data-node-id="edited">edited prompt</div>`
 	session := map[string]any{
 		"entries": []any{
-			map[string]any{"id": "user-1", "type": "user", "content": "original prompt"},
+			map[string]any{
+				"id": "user-1", "type": "user", "content": "original prompt",
+				"blockHTML": `<div data-node-id="original">original prompt</div>`,
+			},
 			map[string]any{"id": "assistant-1", "type": "assistant", "content": "old answer"},
 			map[string]any{"id": "user-2", "type": "user", "content": "later prompt"},
 			map[string]any{"id": "assistant-2", "type": "assistant", "content": "later answer"},
 		},
 	}
 	turn := &agentRuntimeTurn{
-		TurnID:      "20260715120007-abcdefg",
-		Mode:        "regenerate",
-		UserEntryID: "user-1",
-		UserContent: "edited prompt",
-		UpdatedAt:   1,
+		TurnID:        "20260715120007-abcdefg",
+		Mode:          "regenerate",
+		UserEntryID:   "user-1",
+		UserContent:   "edited prompt",
+		UserBlockHTML: stringPointer(editedBlockHTML),
+		UpdatedAt:     1,
 		Delta: []AgentMessage{{
 			Role:    "assistant",
 			Content: "new answer",
@@ -671,8 +692,63 @@ func TestApplyRegenerateRuntimeReplacesUserContent(t *testing.T) {
 	if content := entries[0].(map[string]any)["content"]; content != "edited prompt" {
 		t.Fatalf("edited user content was not restored: %v", content)
 	}
+	if blockHTML := entries[0].(map[string]any)["blockHTML"]; blockHTML != editedBlockHTML {
+		t.Fatalf("edited user block HTML was not restored: %v", blockHTML)
+	}
 	if content := entries[1].(map[string]any)["content"]; content != "new answer" {
 		t.Fatalf("regenerated assistant content was not restored: %v", content)
+	}
+}
+
+func TestApplyRegenerateRuntimePreservesUneditedUserBlockHTML(t *testing.T) {
+	const originalBlockHTML = `<div data-node-id="original">original prompt</div>`
+	session := map[string]any{
+		"entries": []any{
+			map[string]any{
+				"id": "user-1", "type": "user", "content": "original prompt",
+				"blockHTML": originalBlockHTML,
+			},
+		},
+	}
+	turn := &agentRuntimeTurn{
+		TurnID:      "20260715120010-abcdefg",
+		Mode:        "regenerate",
+		UserEntryID: "user-1",
+		UserContent: "original prompt",
+		UpdatedAt:   1,
+	}
+	if err := applyRuntimeTurnToSessionLocked(session, turn); err != nil {
+		t.Fatal(err)
+	}
+	entry := session["entries"].([]any)[0].(map[string]any)
+	if blockHTML := entry["blockHTML"]; blockHTML != originalBlockHTML {
+		t.Fatalf("regenerate without an edit changed user block HTML: %#v", entry)
+	}
+}
+
+func TestApplyRegenerateRuntimeClearsEditedUserBlockHTML(t *testing.T) {
+	session := map[string]any{
+		"entries": []any{
+			map[string]any{
+				"id": "user-1", "type": "user", "content": "original prompt",
+				"blockHTML": `<div data-node-id="original">original prompt</div>`,
+			},
+		},
+	}
+	turn := &agentRuntimeTurn{
+		TurnID:        "20260715120011-abcdefg",
+		Mode:          "regenerate",
+		UserEntryID:   "user-1",
+		UserContent:   "edited prompt",
+		UserBlockHTML: stringPointer(""),
+		UpdatedAt:     1,
+	}
+	if err := applyRuntimeTurnToSessionLocked(session, turn); err != nil {
+		t.Fatal(err)
+	}
+	entry := session["entries"].([]any)[0].(map[string]any)
+	if _, ok := entry["blockHTML"]; ok {
+		t.Fatalf("empty edited block HTML was not cleared: %#v", entry)
 	}
 }
 

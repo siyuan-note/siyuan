@@ -3,7 +3,7 @@ import {Model} from "../../Model";
 import type {App} from "../../../index";
 import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult, IToolEffects} from "./agentSSE";
 import {genUUID} from "../../../util/genID";
-import {mountComposer} from "./AgentComposer";
+import {mountComposer, type AgentComposerData} from "./AgentComposer";
 import {disabledWYSIWYG} from "../../../protyle/util/disabledWYSIWYG";
 import {getAllEditor} from "../../getAll";
 import "./frontendActions";
@@ -22,8 +22,8 @@ import {showMessage} from "../../../dialog/message";
 import * as dayjs from "dayjs";
 import {sendNotification} from "../../../plugin/platformUtils";
 import {
+    applyAgentUserEdit,
     findAgentUserEntryIndex,
-    filterAgentReferencesForContent,
     hasAgentExecutedToolsAfter,
     isAgentRegenerateStateCurrent
 } from "./AgentHistory";
@@ -122,7 +122,8 @@ export class AgentChat extends Model {
     private currentThinkingReasoning = "";
     private currentThinkingReasoningContent = "";
     private editingUserEntryID = "";
-    private pendingEditDraft: { entryID: string; content: string } | null = null;
+    private editingComposer: ReturnType<typeof mountComposer> | null = null;
+    private pendingEditDraft: { entryID: string; data: AgentComposerData } | null = null;
     // thinking step 只保留工具名列表（去重：arguments/result 仅在 assistant entry 存一份），
     // 不再保存 text（"已思考：Xs" 由 i18n 在渲染时从 duration 生成）。
     private currentThinkingSteps: Array<{
@@ -486,7 +487,7 @@ export class AgentChat extends Model {
     }
 
     private showWelcome() {
-        this.editingUserEntryID = "";
+        this.destroyEditingComposer();
         const hasModel = this.modelOptions.length > 0;
         this.messagesContainer.innerHTML = renderWelcomeHTML(hasModel);
         if (!hasModel) {
@@ -1038,6 +1039,7 @@ export class AgentChat extends Model {
 
     // 当前会话被其他实例删除时，清空到欢迎页。不调 saveSession（会话已不存在于磁盘）。
     private handleCurrentSessionDeleted() {
+        this.destroyEditingComposer();
         this.pendingEditDraft = null;
         const deletedSessionID = this.sessionId;
         this.removeMirrorPlaceholder();
@@ -1063,6 +1065,7 @@ export class AgentChat extends Model {
     }
 
     private async switchSession(id: string) {
+        this.destroyEditingComposer();
         this.pendingEditDraft = null;
         const previousSessionID = this.sessionId;
         const hadActiveTurn = this.isStreaming || !!this.currentTurnID;
@@ -1276,7 +1279,7 @@ export class AgentChat extends Model {
     }
 
     private renderLoadedSession(session: AgentSession) {
-        this.editingUserEntryID = "";
+        this.destroyEditingComposer();
         for (let i = 0; i < session.entries.length; i++) {
             const entry = session.entries[i];
             const entryId = (entry as { id?: string }).id;
@@ -1395,6 +1398,7 @@ export class AgentChat extends Model {
     }
 
     private async createSession() {
+        this.destroyEditingComposer();
         this.pendingEditDraft = null;
         const previousSessionID = this.sessionId;
         const hadActiveTurn = this.isStreaming || !!this.currentTurnID;
@@ -1584,6 +1588,12 @@ export class AgentChat extends Model {
         showMessage(L.agentChatBusy || "This session is busy in another instance", 3000);
     }
 
+    private destroyEditingComposer() {
+        this.editingComposer?.destroy();
+        this.editingComposer = null;
+        this.editingUserEntryID = "";
+    }
+
     private restorePendingEditDraft() {
         const draft = this.pendingEditDraft;
         if (!draft) {
@@ -1592,7 +1602,7 @@ export class AgentChat extends Model {
         const userEl = this.messagesContainer.querySelector(
             '.agent-chat__msg--user[data-message-id="' + draft.entryID + '"]') as HTMLElement | null;
         if (userEl) {
-            this.beginEditUserMessage(draft.entryID, userEl, draft.content);
+            this.beginEditUserMessage(draft.entryID, userEl, draft.data);
         }
     }
 
@@ -2029,7 +2039,7 @@ export class AgentChat extends Model {
         this.scrollToBottom(true);
     }
 
-    private beginEditUserMessage(entryID: string, el: HTMLElement, initialContent?: string) {
+    private beginEditUserMessage(entryID: string, el: HTMLElement, initialData?: AgentComposerData) {
         if (this.editingUserEntryID || this.isStreaming || this.mirrorLocked) {
             return;
         }
@@ -2041,23 +2051,25 @@ export class AgentChat extends Model {
         el.classList.add("agent-chat__msg--editing");
         const body = el.querySelector(".agent-chat__body") as HTMLElement;
         const actions = el.querySelector(".agent-chat__msg-actions") as HTMLElement;
-        const textarea = document.createElement("textarea");
-        textarea.className = "b3-text-field agent-chat__edit-textarea";
-        textarea.value = initialContent ?? entry.content;
+        const editorHost = document.createElement("div");
+        editorHost.className = "agent-chat__edit-editor";
+        body.classList.remove("protyle-wysiwyg");
+        body.removeAttribute("contenteditable");
+        body.removeAttribute("data-readonly");
         body.innerHTML = "";
-        body.appendChild(textarea);
+        body.appendChild(editorHost);
         actions.innerHTML = "";
 
         const cancel = document.createElement("button");
-        cancel.className = "b3-button b3-button--cancel";
+        cancel.className = "b3-button b3-button--small b3-button--cancel";
         cancel.textContent = window.siyuan.languages.cancel;
         const submit = document.createElement("button");
-        submit.className = "b3-button b3-button--text";
+        submit.className = "b3-button b3-button--small b3-button--text";
         submit.textContent = window.siyuan.languages.confirm;
         actions.append(cancel, submit);
 
         const restore = () => {
-            this.editingUserEntryID = "";
+            this.destroyEditingComposer();
             if (this.pendingEditDraft?.entryID === entryID) {
                 this.pendingEditDraft = null;
             }
@@ -2066,28 +2078,29 @@ export class AgentChat extends Model {
             this.renderUserMessage(replacement);
         };
         cancel.addEventListener("click", restore);
-        submit.addEventListener("click", async () => {
-            const content = textarea.value.trim();
-            if (!content) {
-                textarea.focus();
+        let editComposer: ReturnType<typeof mountComposer> | null = null;
+        const submitEdit = async () => {
+            const data = editComposer?.getSendData();
+            if (!data?.text) {
+                editComposer?.focus();
                 return;
             }
-            await this.regenerateResponse(entryID, content);
+            await this.regenerateResponse(entryID, data);
+        };
+        submit.addEventListener("click", () => {
+            void submitEdit();
         });
-        textarea.addEventListener("keydown", (event) => {
-            if (event.isComposing) {
-                return;
-            }
-            if (event.key === "Escape") {
-                event.preventDefault();
-                restore();
-            } else if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-                event.preventDefault();
-                submit.click();
-            }
+        editComposer = mountComposer(editorHost, () => {
+            void submitEdit();
+        }, undefined, {
+            initialContent: initialData?.text ?? entry.content,
+            initialBlockHTML: initialData?.blockHTML ?? entry.blockHTML,
+            submitMode: "mod-enter",
+            onCancel: restore,
+            enableHistory: false,
         });
-        textarea.focus();
-        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        this.editingComposer = editComposer;
+        editComposer.focus(true);
     }
 
     private createAIMessagePlaceholder(): HTMLElement {
@@ -2518,11 +2531,15 @@ export class AgentChat extends Model {
         });
     }
 
-    private async regenerateResponse(userEntryID?: string, editedContent?: string) {
+    private async regenerateResponse(userEntryID?: string, editedData?: AgentComposerData) {
         if (this.isStreaming || this.mirrorLocked || this.modelOptions.length === 0) {
             return;
         }
+        if (editedData !== undefined && userEntryID) {
+            this.pendingEditDraft = {entryID: userEntryID, data: editedData};
+        }
         if (!await this.prepareForNewTurn()) {
+            this.restorePendingEditDraft();
             return;
         }
         const requestSessionID = this.sessionId;
@@ -2530,9 +2547,6 @@ export class AgentChat extends Model {
         let targetIndex = findAgentUserEntryIndex(this.entries, userEntryID);
         if (targetIndex < 0) {
             return;
-        }
-        if (editedContent !== undefined && userEntryID) {
-            this.pendingEditDraft = {entryID: userEntryID, content: editedContent};
         }
         if (!await this.confirmHistoryTruncation(targetIndex)) {
             this.restorePendingEditDraft();
@@ -2556,19 +2570,13 @@ export class AgentChat extends Model {
         if (targetEntry.type !== "user") {
             return;
         }
-        this.editingUserEntryID = "";
-        this.pendingEditDraft = editedContent === undefined ? null : {
+        this.destroyEditingComposer();
+        this.pendingEditDraft = editedData === undefined ? null : {
             entryID: targetEntry.id || "",
-            content: editedContent,
+            data: editedData,
         };
-        if (editedContent !== undefined) {
-            const contentChanged = editedContent !== targetEntry.content;
-            targetEntry.content = editedContent;
-            if (contentChanged) {
-                targetEntry.blockHTML = undefined;
-            }
-            const references = filterAgentReferencesForContent(targetEntry.references || [], editedContent);
-            targetEntry.references = references.length > 0 ? references : undefined;
+        if (editedData !== undefined) {
+            applyAgentUserEdit(targetEntry, editedData);
         }
         this.entries.splice(targetIndex + 1);
 
@@ -2581,7 +2589,7 @@ export class AgentChat extends Model {
                 sibling.remove();
                 sibling = next;
             }
-            if (editedContent !== undefined) {
+            if (editedData !== undefined) {
                 const replacement = this.createUserMessage(targetEntry.content, targetEntry.timestamp, targetEntry.id,
                     targetEntry.blockHTML);
                 targetEl.replaceWith(replacement);
@@ -2645,6 +2653,7 @@ export class AgentChat extends Model {
             pluginActions,
             lastUserEntry.id,
             SessionStore.getRevision(this.sessionId),
+            editedData?.blockHTML,
         );
     }
 

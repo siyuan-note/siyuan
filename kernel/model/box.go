@@ -164,15 +164,21 @@ func ListNotebooks() (ret []*Box, err error) {
 			}
 		}
 
+		unlocked := boxConf.Encrypted && IsBoxUnlocked(id)
+		closed := boxConf.Closed
+		if boxConf.Encrypted {
+			// 加密笔记本的打开状态不能从其他设备继承，仅本机已挂载且持有 DEK 时才视为打开。
+			closed = !unlocked || !isEncryptedBoxMounted(id)
+		}
 		box := &Box{
 			ID:        id,
 			Name:      boxConf.Name,
 			Icon:      filterBoxIcon(boxConf.Icon),
 			Sort:      boxConf.Sort,
 			SortMode:  boxConf.SortMode,
-			Closed:    boxConf.Closed,
+			Closed:    closed,
 			Encrypted: boxConf.Encrypted,
-			Unlocked:  IsBoxUnlocked(id),
+			Unlocked:  unlocked,
 		}
 		if box.Encrypted {
 			box.State = GetEncryptedBoxState(id)

@@ -2440,6 +2440,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 	for boxID := range needIndexBoxes {
 		if box := Conf.GetBox(boxID); nil != box {
+			if box.Encrypted && box.Closed {
+				continue
+			}
 			if _, err := EnsureBoxDoc(boxID); nil != err {
 				logging.LogErrorf("ensure box document [%s] after sync failed: %s", boxID, err)
 			}

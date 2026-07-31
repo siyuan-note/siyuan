@@ -86,6 +86,7 @@ func TestEncryptedBoxLockPreparationWaitsForActiveOperations(t *testing.T) {
 	defer cleanup()
 
 	setEncryptedBoxState(boxID, EncryptedBoxStateUnlocked)
+	mountedEncryptedBoxes.Store(boxID, true)
 	if err := AcquireEncryptedBoxOperation(boxID); err != nil {
 		t.Fatalf("acquire encrypted notebook operation failed: %v", err)
 	}
@@ -128,6 +129,9 @@ func TestEncryptedBoxLockPreparationWaitsForActiveOperations(t *testing.T) {
 	}
 	if IsBoxUnlocked(boxID) {
 		t.Fatal("locked notebook retained its DEK")
+	}
+	if isEncryptedBoxMounted(boxID) {
+		t.Fatal("locked notebook retained its local mount state")
 	}
 }
 
@@ -199,6 +203,64 @@ func TestEncryptedBoxMetadataIsNotStoredInPlaintext(t *testing.T) {
 	locked := box.GetConf()
 	if locked.Icon != "" || locked.Sort != 0 || locked.SortMode != util.SortModeFileTree {
 		t.Fatalf("locked metadata was exposed: icon=%q sort=%d sortMode=%d", locked.Icon, locked.Sort, locked.SortMode)
+	}
+}
+
+func TestListNotebooksDoesNotInheritEncryptedOpenState(t *testing.T) {
+	oldConf := Conf
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	defer func() {
+		Conf = oldConf
+	}()
+
+	boxID := "20260731160007-abcdefg"
+	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)
+	defer cleanup()
+
+	box := &Box{ID: boxID}
+	boxConf := box.GetConf()
+	boxConf.Closed = true
+	if err := box.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	mountedEncryptedBoxes.Store(boxID, true)
+
+	boxes, err := ListNotebooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(boxes) != 1 || boxes[0].Closed || !boxes[0].Unlocked {
+		t.Fatalf("expected locally unlocked notebook to be open, got %+v", boxes)
+	}
+	boxConf.Closed = false
+	if err = box.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+
+	cachedDEKsLock.Lock()
+	if cached, ok := cachedDEKs[boxID]; ok {
+		zeroAndClear(cached)
+		delete(cachedDEKs, boxID)
+	}
+	cachedDEKsLock.Unlock()
+	mountedEncryptedBoxes.Delete(boxID)
+	setEncryptedBoxState(boxID, EncryptedBoxStateLocked)
+
+	boxes, err = ListNotebooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(boxes) != 1 || !boxes[0].Closed || boxes[0].Unlocked {
+		t.Fatalf("expected encrypted notebook without a local DEK to be closed, got %+v", boxes)
+	}
+
+	raw, err := readRawBoxConf(boxID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if raw.Closed {
+		t.Fatal("test precondition failed: synchronized configuration should still contain closed=false")
 	}
 }
 
@@ -439,6 +501,7 @@ func prepareEncryptedBoxLifecycleTest(t *testing.T, boxID string) func() {
 	}
 
 	return func() {
+		mountedEncryptedBoxes.Delete(boxID)
 		cachedDEKsLock.Lock()
 		if cached, ok := cachedDEKs[boxID]; ok {
 			zeroAndClear(cached)

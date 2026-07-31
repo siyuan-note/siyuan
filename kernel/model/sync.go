@@ -367,6 +367,9 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			// .sy 直接出现在 data 文件夹下，没有出现在笔记本文件夹下的情况
 			continue
 		}
+		if IsEncryptedBox(box) && (!IsBoxUnlocked(box) || !isEncryptedBoxMounted(box)) {
+			continue
+		}
 
 		p := strings.TrimPrefix(upsertFile, box)
 		msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))

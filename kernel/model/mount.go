@@ -137,7 +137,16 @@ func normalizeBoxName(name string) string {
 	return name
 }
 
-var boxLock = sync.Map{}
+var (
+	boxLock = sync.Map{}
+	// mountedEncryptedBoxes 只记录当前进程完成挂载的加密笔记本，不能从同步配置恢复。
+	mountedEncryptedBoxes = sync.Map{}
+)
+
+func isEncryptedBoxMounted(boxID string) bool {
+	_, mounted := mountedEncryptedBoxes.Load(boxID)
+	return mounted
+}
 
 // removeBoxDir 重试删除刚完成读写的笔记本目录，避免 Windows 延迟释放句柄导致瞬时失败。
 func removeBoxDir(p string) (err error) {
@@ -403,6 +412,9 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	boxConf.Closed = false
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
+	}
+	if boxConf.Encrypted {
+		mountedEncryptedBoxes.Store(boxID, true)
 	}
 	if _, ensureErr := EnsureBoxDoc(boxID); nil != ensureErr {
 		logging.LogErrorf("ensure box document [%s] failed: %s", boxID, ensureErr)

@@ -1226,6 +1226,7 @@ func lockBoxHeld(boxID string) {
 		delete(cachedDEKs, boxID)
 	}
 	cachedDEKsLock.Unlock()
+	mountedEncryptedBoxes.Delete(boxID)
 
 	// 清理自动锁定访问时间戳
 	boxLastAccess.Delete(boxID)
@@ -1514,6 +1515,9 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 // IsEncryptedBox 判断给定 boxID 是否为加密笔记本。
 // 优先读 conf.json，若缺失/损坏则 fallback 到独立备份，避免 fail-open。
 func IsEncryptedBox(boxID string) bool {
+	if boxID == "" {
+		return false
+	}
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	if boxConf != nil && boxConf.Encrypted {
@@ -2062,6 +2066,9 @@ func writeNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) error {
 // readNotebookCryptBackup 读取加密笔记本的 BoxCrypt 备份。
 // 备份文件不存在时返回 (nil, nil)，调用方据此区分"非加密笔记本"和"备份不存在"。
 func readNotebookCryptBackup(boxID string) (*conf.BoxEncryption, error) {
+	if boxID == "" {
+		return nil, nil
+	}
 	backupPath := notebookCryptoBackupPath(boxID)
 	if !filelock.IsExist(backupPath) {
 		return nil, nil

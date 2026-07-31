@@ -449,6 +449,8 @@ Go to **Settings → Authentication → Encrypted Notebook → Change master pas
 ### Multi-device sync
 Encrypted-notebook ciphertext `.sy`/assets/database files sync along with the data (ciphertext in, ciphertext out, self-consistent); the global key material (MasterSalt etc.) is also automatically backed up to the sync directory. **No manual "enable" is needed on a new device after sync**:
 
+An encrypted notebook's open state is never inherited across devices. Even if the synchronized `conf.json` records that another device had the notebook open, the UI and kernel must treat it as closed and skip indexing whenever the local process has no DEK for that notebook; entering the master password unlocks and mounts it locally.
+
 1. Configure the same sync account on the new device and complete a sync
 2. Sync pulls the key backup to the local machine; the kernel auto-restores the "enabled" state
 3. Just click the encrypted notebook and enter the master password to unlock and use it

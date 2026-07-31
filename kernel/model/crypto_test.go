@@ -38,6 +38,25 @@ func setDEKForTest(boxID string, dek []byte) {
 	cachedDEKs[boxID] = dek
 }
 
+func TestIsEncryptedBoxRejectsEmptyID(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() {
+		util.DataDir = oldDataDir
+	}()
+
+	backupDir := filepath.Join(util.DataDir, ".siyuan")
+	if err := os.MkdirAll(backupDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(backupDir, "notebook-crypto-backup.json"), []byte("{}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if IsEncryptedBox("") {
+		t.Fatal("empty notebook ID must not resolve to the data-level backup path")
+	}
+}
+
 func TestEncryptedAssetRoundTrip(t *testing.T) {
 	boxID := "20260731103900-asset01"
 	diskName := "asset-20260731103900-abcdefg.bin"

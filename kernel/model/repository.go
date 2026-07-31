@@ -2278,6 +2278,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadFiletree = true
 			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/conf.json")
 			if ast.IsNodeIDPattern(boxID) {
+				forgetRuntimeNormalBox(boxID)
 				needUnindexBoxes[boxID] = true
 				needIndexBoxes[boxID] = true
 			}

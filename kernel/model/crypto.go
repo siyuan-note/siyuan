@@ -620,16 +620,39 @@ func recoverMasterPasswordMigration() {
 		return // 无待恢复的迁移
 	}
 	remaining := make([]migrationBoxEntry, 0, len(mig.Boxes))
+	pendingRecovery := false
 	for _, entry := range mig.Boxes {
 		if !ast.IsNodeIDPattern(entry.BoxID) {
 			logging.LogWarnf("drop invalid notebook [%s] from master password migration", entry.BoxID)
 			continue
 		}
 		if !filelock.IsExist(filepath.Join(util.DataDir, entry.BoxID)) {
-			logging.LogInfof("drop deleted notebook [%s] from master password migration", entry.BoxID)
+			deleted, historyErr := hasEncryptedNotebookDeleteHistory(entry.BoxID)
+			if historyErr != nil {
+				logging.LogWarnf("keep missing notebook [%s] in master password migration because delete history check failed: %s", entry.BoxID, historyErr)
+				remaining = append(remaining, entry)
+				pendingRecovery = true
+				continue
+			}
+			if deleted {
+				logging.LogInfof("drop deleted notebook [%s] from master password migration", entry.BoxID)
+				continue
+			}
+			logging.LogWarnf("keep missing notebook [%s] in master password migration until synchronization or recovery restores it", entry.BoxID)
+			remaining = append(remaining, entry)
+			pendingRecovery = true
 			continue
 		}
 		remaining = append(remaining, entry)
+	}
+	if pendingRecovery {
+		mig.Boxes = remaining
+		if writeErr := writeMasterPasswordMigration(mig); writeErr != nil {
+			logging.LogErrorf("update master password migration with pending notebook failed: %s", writeErr)
+			return
+		}
+		logging.LogInfof("postpone master password migration recovery until missing notebooks are restored")
+		return
 	}
 	if len(remaining) != len(mig.Boxes) {
 		mig.Boxes = remaining
@@ -770,6 +793,38 @@ func encryptedNotebookHistoryBoxDirs() (ret []string, err error) {
 		}
 	}
 	return ret, nil
+}
+
+func hasEncryptedNotebookDeleteHistory(boxID string) (bool, error) {
+	if !ast.IsNodeIDPattern(boxID) {
+		return false, errors.New("invalid notebook ID")
+	}
+	entries, err := os.ReadDir(util.HistoryDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, fmt.Errorf("read history dir failed: %w", err)
+	}
+
+	deleteSuffix := "-" + HistoryOpDelete
+	for _, entry := range entries {
+		if !entry.IsDir() || !strings.HasSuffix(entry.Name(), deleteSuffix) {
+			continue
+		}
+		boxDir := filepath.Join(util.HistoryDir, entry.Name(), boxID)
+		if !filelock.IsExist(boxDir) {
+			continue
+		}
+		encrypted, checkErr := isEncryptedHistoryBoxDir(boxDir)
+		if checkErr != nil {
+			return false, checkErr
+		}
+		if encrypted {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func verifyKEKAgainstEncryptedHistory(kek []byte) bool {
@@ -2031,7 +2086,7 @@ func HoldBoxReadLock(boxID string) {
 	}
 	lifecycle := getEncryptedBoxLifecycle(boxID)
 	lifecycle.lock.Lock()
-	for lifecycle.state == EncryptedBoxStateUnlocking || lifecycle.state == EncryptedBoxStateLocking {
+	for lifecycle.state == EncryptedBoxStateUnlocking {
 		lifecycle.condition.Wait()
 	}
 	acquireBoxReadLock(boxID)

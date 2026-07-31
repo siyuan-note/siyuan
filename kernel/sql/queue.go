@@ -42,6 +42,8 @@ var (
 	dbQueueCond    = sync.NewCond(&dbQueueLock)
 )
 
+const maxBeginTxRetries = 3
+
 type dbQueueOperation struct {
 	inQueueTime                   time.Time
 	action                        string      // upsert/delete/delete_id/rename/move/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets/index_node
@@ -54,6 +56,7 @@ type dbQueueOperation struct {
 	block                         *Block      // update_block_content
 	id                            string      // index_node
 	removeAssetHashes             []string    // delete_assets
+	beginTxRetries                uint8
 }
 
 type backlinkIndexChange struct {
@@ -266,7 +269,12 @@ func FlushQueue() {
 		tx, err := beginTxForBox(op.boxID())
 		if err != nil {
 			logging.LogWarnf("skip queue operation [%s] for box [%s]: %s", op.action, op.boxID(), err)
-			requeueOperation(op)
+			if op.beginTxRetries < maxBeginTxRetries {
+				op.beginTxRetries++
+				requeueOperation(op)
+			} else {
+				logging.LogErrorf("drop queue operation [%s] for box [%s] after %d retries: %s", op.action, op.boxID(), maxBeginTxRetries, err)
+			}
 			continue
 		}
 

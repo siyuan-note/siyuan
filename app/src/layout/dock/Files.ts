@@ -706,6 +706,13 @@ export class Files extends Model {
             if (gutterType) {
                 const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
                 if (["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
+                    const sourceNotebookId = window.siyuan.dragElement?.closest("[data-notebook-id]")?.getAttribute("data-notebook-id") || "";
+                    if (!isMoveTargetAllowed([sourceNotebookId], toURL)) {
+                        showMessage(window.siyuan.languages._kernel[313]);
+                        newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                        window.siyuan.dragElement = undefined;
+                        return;
+                    }
                     const toDocOptions: {
                         targetNoteBook: string;
                         pushMode: number;

@@ -2,7 +2,7 @@ import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../../
 import {escapeHtml} from "../../util/escape";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
-import {getDocDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
+import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {
     getPublishAccessLevel,
@@ -403,6 +403,15 @@ export class MobileFiles extends Model {
                 }
 
                 if (newElement.classList.contains("dragover")) {
+                    const sourceNotebookId = state.selectedElement.getAttribute("data-notebook-id") ||
+                        state.selectedElement.closest("ul[data-url]")?.getAttribute("data-url") ||
+                        state.selectedElement.getAttribute("data-url") || "";
+                    if (!isMoveTargetAllowed([sourceNotebookId], toURL)) {
+                        showMessage(window.siyuan.languages._kernel[313]);
+                        this.clearDragIndicators();
+                        this.touchDragState = null;
+                        return;
+                    }
                     fetchPost("/api/filetree/moveDocs", {
                         toNotebook: toURL,
                         fromPaths,
@@ -436,6 +445,15 @@ export class MobileFiles extends Model {
                         let hasMove = false;
                         const toDir = pathPosix().dirname(toPath);
                         if (fromPaths.length > 0) {
+                            const sourceNotebookId = state.selectedElement.getAttribute("data-notebook-id") ||
+                                state.selectedElement.closest("ul[data-url]")?.getAttribute("data-url") ||
+                                state.selectedElement.getAttribute("data-url") || "";
+                            if (!isMoveTargetAllowed([sourceNotebookId], toURL)) {
+                                showMessage(window.siyuan.languages._kernel[313]);
+                                this.clearDragIndicators();
+                                this.touchDragState = null;
+                                return;
+                            }
                             await fetchSyncPost("/api/filetree/moveDocs", {
                                 toNotebook: toURL,
                                 fromPaths,

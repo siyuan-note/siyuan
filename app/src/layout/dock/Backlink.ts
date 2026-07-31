@@ -770,6 +770,11 @@ export class Backlink extends Model {
                         editor.protyle.wysiwyg.element.addEventListener("focusin", () => this.setOwnerFocus());
                     }
                     editor.protyle.notebookId = notebookId;
+                    if (notebookId) {
+                        editor.protyle.element.setAttribute("data-notebook-id", notebookId);
+                    } else {
+                        editor.protyle.element.removeAttribute("data-notebook-id");
+                    }
                     searchMarkRender(editor.protyle, response.data.keywords);
                     this.editors.push(editor);
                     record.editor = editor;

@@ -80,6 +80,66 @@ func TestEncryptedBoxLifecycleWaitsForActiveOperations(t *testing.T) {
 	}
 }
 
+func TestEncryptedBoxReadLockDoesNotWaitDuringLocking(t *testing.T) {
+	boxID := "20260731160008-abcdefg"
+	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)
+	defer cleanup()
+
+	setEncryptedBoxState(boxID, EncryptedBoxStateLocking)
+	done := make(chan struct{})
+	go func() {
+		HoldBoxReadLock(boxID)
+		ReleaseBoxReadLock(boxID)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		setEncryptedBoxState(boxID, EncryptedBoxStateUnlocked)
+		<-done
+		t.Fatal("read lock waited during lock preparation")
+	}
+}
+
+func TestEncryptedNotebookDeleteHistoryDistinguishesMissingNotebook(t *testing.T) {
+	oldHistoryDir := util.HistoryDir
+	util.HistoryDir = t.TempDir()
+	defer func() {
+		util.HistoryDir = oldHistoryDir
+	}()
+
+	boxID := "20260731160009-abcdefg"
+	deleted, err := hasEncryptedNotebookDeleteHistory(boxID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deleted {
+		t.Fatal("missing delete history must not confirm notebook deletion")
+	}
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Encrypted = true
+	data, err := gulu.JSON.MarshalIndentJSON(boxConf, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	confPath := filepath.Join(util.HistoryDir, "2026-07-31-160009-delete", boxID, ".siyuan", "conf.json")
+	if err = os.MkdirAll(filepath.Dir(confPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(confPath, data, 0644); err != nil {
+		t.Fatal(err)
+	}
+	deleted, err = hasEncryptedNotebookDeleteHistory(boxID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !deleted {
+		t.Fatal("encrypted delete history must confirm notebook deletion")
+	}
+}
+
 func TestEncryptedBoxLockPreparationWaitsForActiveOperations(t *testing.T) {
 	boxID := "20260731160005-abcdefg"
 	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)

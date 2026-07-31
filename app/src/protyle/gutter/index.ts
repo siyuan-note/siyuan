@@ -381,12 +381,16 @@ export class Gutter {
             const gutterRect = buttonElement.getBoundingClientRect();
             if (buttonElement.dataset.type === "gutterPlusBefore" || buttonElement.dataset.type === "gutterPlusAfter") {
                 // 块标边缘+号：在对应块上方/下方插入新块，复用 insertEmptyBlock（列表项自动生成新列表项）
-                if (protyle.disabled || !id) {
+                if (protyle.disabled || !id || !activeBlockButton) {
+                    return;
+                }
+                const nodeElement = this.getNodeElement(protyle, activeBlockButton);
+                if (!nodeElement) {
                     return;
                 }
                 hideElements(["gutter"], protyle);
                 countBlockWord([], protyle.block.rootID);
-                insertEmptyBlock(protyle, buttonElement.dataset.type === "gutterPlusBefore" ? "beforebegin" : "afterend", id);
+                insertEmptyBlock(protyle, buttonElement.dataset.type === "gutterPlusBefore" ? "beforebegin" : "afterend", nodeElement);
                 return;
             }
             if (buttonElement.dataset.type === "NodeAttributeViewRowMenu" || buttonElement.dataset.type === "NodeAttributeViewRow") {

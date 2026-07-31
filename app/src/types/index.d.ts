@@ -736,6 +736,7 @@ interface ILayoutJSON extends ILayoutOptions {
     page?: string
     path?: string
     blockId?: string
+    notebookId?: string
     mode?: TEditorMode
     action?: TProtyleAction
     icon?: string
@@ -1014,6 +1015,11 @@ interface IBazaarItem {
     bazaarIncompatible?: boolean; // 仅 plugin
     enabled?: boolean; // 仅 plugin
     modes?: string[]; // 仅 theme
+}
+
+interface IUpdatedBazaarItem {
+    installed: IBazaarItem;
+    available: IBazaarItem;
 }
 
 interface IAV {

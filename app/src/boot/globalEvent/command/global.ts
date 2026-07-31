@@ -42,8 +42,7 @@ import {Wnd} from "../../../layout/Wnd";
 import {unsplitWnd} from "../../../menus/tab";
 import {openFile} from "../../../editor/util";
 import {fetchPost} from "../../../util/fetch";
-import {isSensitiveSearchConfig, setStorageVal} from "../../../protyle/util/compatibility";
-import {isEncryptedBox} from "../../../util/pathName";
+import {sanitizeClosedTabs, setStorageVal} from "../../../protyle/util/compatibility";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -155,14 +154,7 @@ export const globalCommand = (command: string, app: App) => {
         case "recentClosed": {
             const closedTabsLength = window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length;
             window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] =
-                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].filter((tab: {
-                    children?: ILayoutJSON & {
-                        notebookId?: string,
-                        config?: Config.IUILayoutTabSearchConfig,
-                    }
-                }) =>
-                    !(tab.children?.instance === "Editor" && isEncryptedBox(tab.children.notebookId)) &&
-                    !(tab.children?.instance === "Search" && isSensitiveSearchConfig(tab.children.config)));
+                sanitizeClosedTabs(window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             if (closedTabsLength !== window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length) {
                 setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             }
@@ -229,6 +221,7 @@ export const globalCommand = (command: string, app: App) => {
                                 app,
                                 blockId: childData.blockId,
                                 rootId: childData.rootId,
+                                notebookId: childData.notebookId,
                                 title: closeData.title,
                             });
                         } else if (childData.instance === "Graph") {
@@ -236,12 +229,14 @@ export const globalCommand = (command: string, app: App) => {
                                 app,
                                 blockId: childData.blockId,
                                 rootId: childData.rootId,
+                                notebookId: childData.notebookId,
                                 title: closeData.title
                             });
                         } else if (childData.instance === "Outline") {
                             openOutline({
                                 app,
                                 rootId: childData.blockId,
+                                notebookId: childData.notebookId,
                                 title: closeData.title,
                                 isPreview: childData.isPreview
                             });

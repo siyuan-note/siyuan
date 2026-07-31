@@ -126,7 +126,13 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 			continue
 		}
 
-		avName, getErr := av.GetAttributeViewName(avID)
+		var avName string
+		var getErr error
+		if boxID != "" && IsEncryptedBox(boxID) {
+			avName, getErr = av.GetAttributeViewNameInBox(avID, boxID)
+		} else {
+			avName, getErr = av.GetAttributeViewName(avID)
+		}
 		if nil != getErr {
 			continue
 		}

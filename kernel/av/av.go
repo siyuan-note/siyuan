@@ -560,6 +560,11 @@ func GetAttributeViewSearchInfoInBox(avID, boxID string) (ret *AttributeViewSear
 	if avJSONPath == "" {
 		return
 	}
+	release, lockErr := holdAVBoxReadLock(avBoxID)
+	if lockErr != nil {
+		return nil, lockErr
+	}
+	defer release()
 
 	if cached, ok := cache.GetAVSearchDataInBox[*AttributeViewSearchInfo](avID, avBoxID); ok {
 		return cached, nil
@@ -576,7 +581,7 @@ func GetAttributeViewSearchInfoInBox(avID, boxID string) (ret *AttributeViewSear
 			return
 		}
 		if avBoxID != "" {
-			if data, err = decryptAVData(avBoxID, avID, data); err != nil {
+			if data, err = decryptAVDataLocked(avBoxID, avID, data); err != nil {
 				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avJSONPath, err)
 				return
 			}
@@ -700,6 +705,11 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 		err = ErrViewNotFound
 		return
 	}
+	release, lockErr := holdAVBoxReadLock(boxID)
+	if lockErr != nil {
+		return nil, lockErr
+	}
+	defer release()
 
 	avID := filepath.Base(avJSONPath)
 	avID = strings.TrimSuffix(avID, filepath.Ext(avID))
@@ -716,7 +726,7 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 		}
 		// 加密笔记本的 AV 定义是密文，按路径反查 boxID 后解密
 		if boxID != "" {
-			data, readErr = decryptAVData(boxID, avID, data)
+			data, readErr = decryptAVDataLocked(boxID, avID, data)
 			if readErr != nil {
 				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, readErr)
 				return

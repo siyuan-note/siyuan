@@ -47,7 +47,7 @@ import (
 )
 
 // kekVerifierMagic 是写入 KEKVerifier 的固定魔数。启用时用 KEK 加密它，校验主密码时解密比对。
-var kekVerifierMagic = []byte("siyuan-enc-v1")
+var kekVerifierMagic = []byte("siyuan-encrypted-notebook")
 
 const boxEncryptionSpec = 1
 
@@ -256,7 +256,7 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 	if !verifyKEKMAC(nc, kek) {
 		return errors.New(Conf.Language(317))
 	}
-	decrypted, dErr := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
+	decrypted, dErr := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:kek-verifier"))
 	if dErr != nil || string(decrypted) != string(kekVerifierMagic) {
 		return errors.New(Conf.Language(311)) // 主密码错误
 	}
@@ -719,7 +719,7 @@ func EnableEncryptedNotebook(password string) error {
 	defer zeroAndClear(kek)
 
 	// 用 KEK 加密固定魔数作为校验值，落盘后供后续 UnlockBox 离线校验
-	verifierCT, err := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	verifierCT, err := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	if err != nil {
 		return err
 	}
@@ -866,7 +866,7 @@ func deriveNotebookCryptoBackupCandidate(password string) (backup *conf.Notebook
 		return nil, nil, errors.New(Conf.Language(317))
 	}
 	kek = util.DeriveKey(password, backup.MasterSalt, params)
-	decrypted, decryptErr := util.DecryptWithAAD(kek, backup.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
+	decrypted, decryptErr := util.DecryptWithAAD(kek, backup.KEKVerifier, []byte("siyuan:kek-verifier"))
 	if decryptErr != nil || string(decrypted) != string(kekVerifierMagic) {
 		zeroAndClear(kek)
 		return nil, nil, errors.New(Conf.Language(311))
@@ -905,7 +905,7 @@ func deriveKEK(password string) ([]byte, error) {
 	}
 	kek := util.DeriveKey(password, nc.MasterSalt, params)
 
-	decrypted, err := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
+	decrypted, err := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:kek-verifier"))
 	localPasswordValid := err == nil && string(decrypted) == string(kekVerifierMagic)
 	mig, migErr := readMasterPasswordMigration()
 	if !localPasswordValid {
@@ -1090,9 +1090,9 @@ func IsBoxUnlocked(boxID string) bool {
 func LockBox(boxID string) {
 	FlushTxQueue()
 	acquireBoxWriteLock(boxID)
+	defer releaseBoxWriteLock(boxID)
 	lockBoxHeld(boxID)
-	releaseBoxWriteLock(boxID)
-	// 单 box 锁定后需要刷新全局缓存（树/Block/IAL/AV）
+	// 单 box 锁定时需要在写锁保护下刷新全局缓存，避免锁定与缓存读取之间出现明文窗口。
 	cache.ClearTreeCache()
 	sql.ClearCache()
 	cache.ClearDocsIAL()
@@ -1178,13 +1178,10 @@ func WrapNewDEK(boxID string, kek []byte) (*conf.BoxEncryption, []byte, error) {
 }
 
 func wrappedDEKAAD(boxID string) []byte {
-	return []byte("siyuan:v1:wrapped-dek:" + boxID)
+	return []byte("siyuan:wrapped-dek:" + boxID)
 }
 
 func decryptWrappedDEK(boxID string, enc *conf.BoxEncryption, kek []byte) ([]byte, error) {
-	if enc.Spec >= boxEncryptionSpec {
-		return util.DecryptWithAAD(kek, enc.WrappedDEK, wrappedDEKAAD(boxID))
-	}
 	return util.DecryptWithAAD(kek, enc.WrappedDEK, wrappedDEKAAD(boxID))
 }
 
@@ -1260,7 +1257,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	}
 	newKEK := util.DeriveKey(newPassword, nc.MasterSalt, params)
 	defer zeroAndClear(newKEK)
-	newVerifier, err := util.EncryptWithAAD(newKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	newVerifier, err := util.EncryptWithAAD(newKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	if err != nil {
 		return err
 	}

@@ -49,15 +49,7 @@ func NewNotebookCrypto() *NotebookCrypto {
 // CurrentNotebookCryptoSpec 是当前备份规范版本号。
 const CurrentNotebookCryptoSpec = 1
 
-// UpgradeSpec 集中处理 NotebookCrypto 备份规范的逐版本升级。
-// 当前没有受支持的旧版本迁移；后续新增规范时，应在此按版本顺序完成字段转换，
-// 每一步仅在前一版本数据校验成功后推进 Spec，并由调用方持久化升级结果。
-func UpgradeSpec(nc *NotebookCrypto) (upgraded bool) {
-	// 后续升级模式：
-	// if nc.Spec == 1 {
-	// 	// 校验并迁移 v1 → v2。
-	// 	nc.Spec = 2
-	// 	upgraded = true
-	// }
-	return
+// UpgradeSpec 当前不执行迁移。
+func UpgradeSpec(*NotebookCrypto) bool {
+	return false
 }

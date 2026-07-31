@@ -8,6 +8,7 @@
 package av
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,9 +37,30 @@ var AVEncryptedBoxIDs func() []string
 // AVIsEncryptedBox 由 model 层注入，判断 boxID 是否为加密笔记本。
 var AVIsEncryptedBox func(boxID string) bool
 
+// AVIsBoxUnlocked 由 model 层注入，判断加密笔记本是否仍持有 DEK。
+var AVIsBoxUnlocked func(boxID string) bool
+
 // AVGetBlockBoxID 由 model 层注入，返回 blockID 所在的 boxID（查 blocktree）。
 // 用于镜像写入时校验源块与 AV 定义是否处于同一加密边界。
 var AVGetBlockBoxID func(blockID string) string
+
+func holdAVBoxReadLock(boxID string) (release func(), err error) {
+	release = func() {}
+	if boxID == "" || AVIsEncryptedBox == nil || !AVIsEncryptedBox(boxID) {
+		return
+	}
+	if AVLockAcquire == nil || AVLockRelease == nil || AVIsBoxUnlocked == nil {
+		return nil, errors.New("encrypted notebook lock callbacks are not initialized")
+	}
+	AVLockAcquire(boxID)
+	if !AVIsBoxUnlocked(boxID) {
+		AVLockRelease(boxID)
+		return nil, errors.New("encrypted notebook is locked, please unlock it first")
+	}
+	return func() {
+		AVLockRelease(boxID)
+	}, nil
+}
 
 // pendingAVBox 记录首次创建的 AV 归属哪个加密 box。
 // handler 层创建 AV 前调 SetAVBoxID(avID, boxID)，SaveAttributeView 时
@@ -343,11 +365,11 @@ func decryptAVDataLocked(boxID, avID string, data []byte) ([]byte, error) {
 func avAAD(boxID, avID string) string {
 	switch avID {
 	case "mirror":
-		return "siyuan:v1:av-mirror:" + boxID
+		return "siyuan:av-mirror:" + boxID
 	case "relation":
-		return "siyuan:v1:av-relation:" + boxID
+		return "siyuan:av-relation:" + boxID
 	default:
-		return "siyuan:v1:av:" + boxID + ":" + avID
+		return "siyuan:av:" + boxID + ":" + avID
 	}
 }
 

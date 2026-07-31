@@ -59,6 +59,11 @@ func extensionCopy(c *gin.Context) {
 			}
 		}
 	}
+	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 
 	if err := os.MkdirAll(assets, 0755); err != nil {
 		logging.LogErrorf("create assets folder [%s] failed: %s", assets, err)

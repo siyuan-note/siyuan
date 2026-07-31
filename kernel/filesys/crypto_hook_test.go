@@ -97,7 +97,7 @@ func TestSyAADIndependentOfParentDir(t *testing.T) {
 			aadBare, aadWithDir, aadDeepDir, aadWithBackslash, aadWithMixedSeparators)
 	}
 	// AAD 不应包含目录分隔符，只含基名
-	if strings.ContainsAny(strings.TrimPrefix(aadBare, "siyuan:v1:file:"+boxID+":"), "/\\") {
+	if strings.ContainsAny(strings.TrimPrefix(aadBare, "siyuan:file:"+boxID+":"), "/\\") {
 		t.Fatalf("AAD must not contain path separator: %q", aadBare)
 	}
 }

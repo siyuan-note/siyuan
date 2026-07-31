@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -69,6 +70,50 @@ func TestMobileExportLeaseLifecycle(t *testing.T) {
 func TestMobileExportLeaseRejectsTraversal(t *testing.T) {
 	if _, err := AcquireMobileExportLease("/export/../secret.txt"); err == nil {
 		t.Fatalf("mobile export lease should reject path traversal")
+	}
+}
+
+func TestMobileExportLeaseExpiresAndReleasesBoxLock(t *testing.T) {
+	originalTTL := mobileExportLeaseTTL
+	mobileExportLeaseTTL = 20 * time.Millisecond
+	defer func() {
+		mobileExportLeaseTTL = originalTTL
+	}()
+
+	cleanupDir := t.TempDir()
+	artifact := filepath.Join(cleanupDir, "export.zip")
+	if err := os.WriteFile(artifact, []byte("plaintext"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	boxID := "20260731170000-lease01"
+	HoldBoxReadLock(boxID)
+	lease, err := registerMobileExportLeaseWithID("expiring-lease", boxID, artifact, "export.zip", cleanupDir)
+	if err != nil {
+		ReleaseBoxReadLock(boxID)
+		t.Fatal(err)
+	}
+
+	writerAcquired := make(chan struct{})
+	go func() {
+		acquireBoxWriteLock(boxID)
+		close(writerAcquired)
+		releaseBoxWriteLock(boxID)
+	}()
+	select {
+	case <-writerAcquired:
+	case <-time.After(2 * time.Second):
+		ReleaseMobileExportLease(lease.ID)
+		t.Fatal("expired mobile export lease did not release the box read lock")
+	}
+
+	mobileExportLeases.Lock()
+	_, exists := mobileExportLeases.leases[lease.ID]
+	mobileExportLeases.Unlock()
+	if exists {
+		t.Fatal("expired mobile export lease remained registered")
+	}
+	if _, statErr := os.Stat(cleanupDir); !os.IsNotExist(statErr) {
+		t.Fatalf("expired mobile export lease did not remove plaintext directory: %v", statErr)
 	}
 }
 

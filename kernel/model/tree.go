@@ -254,6 +254,18 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 	return loadTreeByBlockIDInBox(id, "")
 }
 
+// LoadTreeByBlockIDInExactBox 只在指定笔记本边界内加载块所在文档，boxID 为空时不遍历加密笔记本。
+func LoadTreeByBlockIDInExactBox(id, boxID string) (ret *parse.Tree, err error) {
+	if !ast.IsNodeIDPattern(id) {
+		return nil, ErrTreeNotFound
+	}
+	bt := treenode.GetBlockTreeInExactBox(id, boxID)
+	if bt == nil {
+		return nil, ErrTreeNotFound
+	}
+	return loadTreeByBlockTree(bt)
+}
+
 func loadTreeByBlockIDWithoutNotFoundLog(id string) (ret *parse.Tree, err error) {
 	return loadTreeByBlockIDInBox0(id, "", false)
 }

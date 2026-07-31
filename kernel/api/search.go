@@ -200,9 +200,9 @@ func findReplace(c *gin.Context) {
 	boxID := ""
 	if 1 == len(boxes) && model.IsEncryptedBox(boxes[0]) {
 		boxID = boxes[0]
-		if !model.IsBoxUnlocked(boxID) {
+		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
 			ret.Code = 1
-			ret.Msg = model.Conf.Language(309)
+			ret.Msg = err.Error()
 			return
 		}
 	}
@@ -478,6 +478,11 @@ func searchRefBlock(c *gin.Context) {
 		}
 		return
 	}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 
 	isSquareBrackets := false
 	if isSquareBracketsArg := arg["isSquareBrackets"]; nil != isSquareBracketsArg {
@@ -552,9 +557,9 @@ func fullTextSearchBlock(c *gin.Context) {
 	}
 	// 加密笔记本的全文搜索走 InBox 版（查加密 content db + blocks_fts）
 	if notebook != "" && model.IsEncryptedBox(notebook) {
-		if !model.IsBoxUnlocked(notebook) {
+		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 			ret.Code = -1
-			ret.Msg = "encrypted notebook locked"
+			ret.Msg = err.Error()
 			return
 		}
 		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPathContext(c.Request.Context(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, notebook, searchHPath)

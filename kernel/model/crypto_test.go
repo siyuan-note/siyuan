@@ -373,7 +373,7 @@ func TestDeriveKEKRejectsTamperedBackupMAC(t *testing.T) {
 	salt, _ := util.GenerateSalt()
 	params := util.DefaultArgon2Params()
 	kek := util.DeriveKey(password, salt, params)
-	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	nc := conf.NotebookCrypto{
 		Enabled:     true,
 		MasterSalt:  salt,
@@ -415,7 +415,7 @@ func TestDeriveKEKAllowsLocalAutoLockChange(t *testing.T) {
 	params := util.DefaultArgon2Params()
 	kek := util.DeriveKey(password, salt, params)
 	defer zeroAndClear(kek)
-	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	backup := &conf.NotebookCrypto{
 		Enabled:         true,
 		MasterSalt:      salt,
@@ -451,7 +451,7 @@ func TestDeriveKEKKeepsAuthenticatedLocalCandidateWithDifferentBackup(t *testing
 	params := util.DefaultArgon2Params()
 	localKEK := util.DeriveKey(localPassword, localSalt, params)
 	defer zeroAndClear(localKEK)
-	localVerifier, _ := util.EncryptWithAAD(localKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	localVerifier, _ := util.EncryptWithAAD(localKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	local := &conf.NotebookCrypto{
 		Enabled:         true,
 		MasterSalt:      localSalt,
@@ -467,7 +467,7 @@ func TestDeriveKEKKeepsAuthenticatedLocalCandidateWithDifferentBackup(t *testing
 	backupSalt, _ := util.GenerateSalt()
 	backupKEK := util.DeriveKey(backupPassword, backupSalt, params)
 	defer zeroAndClear(backupKEK)
-	backupVerifier, _ := util.EncryptWithAAD(backupKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	backupVerifier, _ := util.EncryptWithAAD(backupKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	backup := &conf.NotebookCrypto{
 		Enabled:         true,
 		MasterSalt:      backupSalt,
@@ -511,7 +511,7 @@ func TestDeriveKEKAdoptsCompleteSynchronizedCandidate(t *testing.T) {
 	params := util.DefaultArgon2Params()
 	newKEK := util.DeriveKey(newPassword, newSalt, params)
 	defer zeroAndClear(newKEK)
-	newVerifier, _ := util.EncryptWithAAD(newKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	newVerifier, _ := util.EncryptWithAAD(newKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	newConfig := &conf.NotebookCrypto{
 		Enabled:     true,
 		MasterSalt:  newSalt,
@@ -539,7 +539,7 @@ func TestDeriveKEKAdoptsCompleteSynchronizedCandidate(t *testing.T) {
 	oldSalt, _ := util.GenerateSalt()
 	oldKEK := util.DeriveKey("old-device-password", oldSalt, params)
 	defer zeroAndClear(oldKEK)
-	oldVerifier, _ := util.EncryptWithAAD(oldKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	oldVerifier, _ := util.EncryptWithAAD(oldKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	localConfig := &conf.NotebookCrypto{
 		Enabled:         true,
 		MasterSalt:      oldSalt,
@@ -598,7 +598,7 @@ func TestBackupMACRoundTrip(t *testing.T) {
 	kek := util.DeriveKey(password, salt, params)
 	defer zeroAndClear(kek)
 
-	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	nc := &conf.NotebookCrypto{
 		Enabled:     true,
 		MasterSalt:  salt,
@@ -776,7 +776,7 @@ func TestEnabledWithoutBackupReturnsRecoveryError(t *testing.T) {
 	defer zeroAndClear(kek)
 
 	// 构造本机已启用、本机 verifier 有效的配置（主密码能派生出可用 KEK），但不写备份文件
-	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	nc := &conf.NotebookCrypto{
 		Enabled:     true,
 		MasterSalt:  salt,

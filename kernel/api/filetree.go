@@ -78,14 +78,10 @@ func listDocTree(c *gin.Context) {
 	}
 
 	// 加密笔记本锁定时拒绝直接列举磁盘目录，防止泄漏文档 ID、层级和数量
-	if model.IsEncryptedBox(notebook) {
-		model.HoldBoxReadLock(notebook)
-		defer model.ReleaseBoxReadLock(notebook)
-		if _, dekErr := model.GetDEKIfUnlocked(notebook); dekErr != nil {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(314)
-			return
-		}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
 	}
 
 	p := arg["path"].(string)
@@ -1366,6 +1362,11 @@ func getDoc(c *gin.Context) {
 		((requestedNotebook != "" && model.IsEncryptedBoxDeniedByPublishAccess(requestedNotebook)) ||
 			model.IsEncryptedPublishRuntimeTarget(id)) {
 		ret.Code = 3
+		return
+	}
+	if err := holdEncryptedBoxRequest(c, requestedNotebook); err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
 		return
 	}
 	idx := arg["index"]

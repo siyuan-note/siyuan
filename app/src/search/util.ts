@@ -54,8 +54,10 @@ import {scheduleSearchRequest} from "./request";
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();
-    const sensitive = searchData?.sensitive || (!!text && getAllModels().editor.some((item) =>
-        isEncryptedBox(item.editor.protyle.notebookId)));
+    const sensitive = searchData?.sensitive || getAllModels().editor.some((item) =>
+        isEncryptedBox(item.editor.protyle.notebookId) &&
+        item.parent.headElement?.classList.contains("item--focus") &&
+        item.parent.parent.element.classList.contains("layout__wnd--active"));
     const searchModel = getAllModels().search.find((item) => {
         if (sensitive) {
             item.config.sensitive = true;

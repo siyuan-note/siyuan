@@ -686,7 +686,7 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
                     return;
                 }
                 item.isPreview = !protyle.preview.element.classList.contains("fn__none");
-                item.update(response, blockId);
+                item.update(response, blockId, protyle?.notebookId || "");
                 if (protyle) {
                     item.updateDocTitle(protyle.background.ial, response.data?.length || 0);
                     if (getSelection().rangeCount > 0) {
@@ -724,9 +724,11 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             if (protyle && protyle.block) {
                 blockId = protyle.block.showAll ? protyle.block.id : protyle.block.parentID;
             }
-            if (blockId === item.blockId) {
+            const notebookId = protyle?.notebookId || "";
+            if (blockId === item.blockId && notebookId === item.notebookId) {
                 return;
             }
+            item.notebookId = notebookId;
             item.searchGraph(true, blockId);
         }
     });

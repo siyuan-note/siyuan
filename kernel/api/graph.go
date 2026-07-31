@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -126,6 +127,17 @@ func getLocalGraph(c *gin.Context) {
 		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("conf", &confArg, true, false),
 	) {
+		return
+	}
+	notebook, _ := arg["notebook"].(string)
+	if model.IsEncryptedBox(notebook) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		return
+	}
+	if bt := treenode.GetBlockTree(id); bt != nil && model.IsEncryptedBox(bt.BoxID) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
 		return
 	}
 

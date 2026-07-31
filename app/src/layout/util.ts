@@ -29,13 +29,30 @@ import {newDatabaseRowModel} from "../editor/databaseRow";
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
-import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
+import {isSensitiveLayoutData, isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
 import {adjustDockPadding} from "./dock/util";
 import {setTitle} from "../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
 
 const isBuiltInCustomModel = (type: string) => {
     return type === "siyuan-card" || type === "siyuan-database-row";
+};
+
+export const isSensitiveTab = (tab: Tab) => {
+    if (tab.model instanceof Editor) {
+        return isEncryptedBox(tab.model.editor.protyle.notebookId);
+    }
+    if (tab.model instanceof Search) {
+        return isSensitiveSearchConfig(tab.model.config);
+    }
+    if ((tab.model instanceof Backlink || tab.model instanceof Graph || tab.model instanceof Outline) &&
+        tab.model.type === "local") {
+        return !tab.model.notebookId || isEncryptedBox(tab.model.notebookId);
+    }
+    if (!tab.model && tab.headElement) {
+        return isSensitiveLayoutData(JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}"));
+    }
+    return false;
 };
 
 export const setPanelFocus = (element: Element, isSaveLayout = true) => {
@@ -386,8 +403,7 @@ export const JSONToCenter = (
         }
         (layout as Wnd).addTab(child, false, false, json.activeTime);
     } else if (json.instance === "Editor" && json.blockId) {
-        const notebook = window.siyuan.notebooks.find((item) => item.id === json.notebookId);
-        if (notebook?.closed && isEncryptedBox(json.notebookId)) {
+        if (isSensitiveLayoutData(json)) {
             (layout as Tab).headElement.removeAttribute("data-init-active");
             removedTabs.push(layout as Tab);
             return;
@@ -404,11 +420,17 @@ export const JSONToCenter = (
             page: json.page,
         }));
     } else if (json.instance === "Backlink") {
+        if (isSensitiveLayoutData(json)) {
+            (layout as Tab).headElement.removeAttribute("data-init-active");
+            removedTabs.push(layout as Tab);
+            return;
+        }
         (layout as Tab).addModel(new Backlink({
             app,
             tab: (layout as Tab),
             blockId: json.blockId,
             rootId: json.rootId,
+            notebookId: json.notebookId,
             type: json.type as "pin" | "local",
         }));
     } else if (json.instance === "Bookmark") {
@@ -419,24 +441,41 @@ export const JSONToCenter = (
             tab: (layout as Tab),
         }));
     } else if (json.instance === "Graph") {
+        if (isSensitiveLayoutData(json)) {
+            (layout as Tab).headElement.removeAttribute("data-init-active");
+            removedTabs.push(layout as Tab);
+            return;
+        }
         (layout as Tab).addModel(new Graph({
             app,
             tab: (layout as Tab),
             blockId: json.blockId,
             rootId: json.rootId,
+            notebookId: json.notebookId,
             type: json.type as "pin" | "local" | "global",
         }));
     } else if (json.instance === "Outline") {
+        if (isSensitiveLayoutData(json)) {
+            (layout as Tab).headElement.removeAttribute("data-init-active");
+            removedTabs.push(layout as Tab);
+            return;
+        }
         (layout as Tab).addModel(new Outline({
             app,
             tab: (layout as Tab),
             blockId: json.blockId,
+            notebookId: json.notebookId,
             type: json.type as "pin" | "local",
             isPreview: json.isPreview,
         }));
     } else if (json.instance === "Tag") {
         (layout as Tab).addModel(new Tag(app, (layout as Tab)));
     } else if (json.instance === "Search") {
+        if (isSensitiveLayoutData(json)) {
+            (layout as Tab).headElement.removeAttribute("data-init-active");
+            removedTabs.push(layout as Tab);
+            return;
+        }
         (layout as Tab).addModel(new Search({
             app,
             tab: (layout as Tab),
@@ -654,6 +693,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
     } else if (layout instanceof Backlink) {
         json.blockId = layout.blockId;
         json.rootId = layout.rootId;
+        json.notebookId = layout.notebookId;
         json.type = layout.type;
         json.instance = "Backlink";
     } else if (layout instanceof Bookmark) {
@@ -663,10 +703,12 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
     } else if (layout instanceof Graph) {
         json.blockId = layout.blockId;
         json.rootId = layout.rootId;
+        json.notebookId = layout.notebookId;
         json.type = layout.type;
         json.instance = "Graph";
     } else if (layout instanceof Outline) {
         json.blockId = layout.blockId;
+        json.notebookId = layout.notebookId;
         json.type = layout.type;
         json.isPreview = layout.isPreview;
         json.instance = "Outline";
@@ -708,18 +750,8 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
             json.children = [];
             layout.children.forEach((item: Layout | Wnd | Tab) => {
                 if (item instanceof Tab) {
-                    if (item.model instanceof Editor && isEncryptedBox(item.model.editor.protyle.notebookId)) {
+                    if (isSensitiveTab(item)) {
                         return;
-                    }
-                    if (item.model instanceof Search && isSensitiveSearchConfig(item.model.config)) {
-                        return;
-                    }
-                    if (!item.model && item.headElement) {
-                        const initData = JSON.parse(item.headElement.getAttribute("data-initdata") || "{}");
-                        if ((initData.instance === "Editor" && isEncryptedBox(initData.notebookId)) ||
-                            (initData.instance === "Search" && isSensitiveSearchConfig(initData.config))) {
-                            return;
-                        }
                     }
                 }
                 const itemJSON = {};

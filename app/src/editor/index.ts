@@ -113,6 +113,7 @@ export class Editor extends Model {
                     app: this.app,
                     blockId: this.getBacklinkBlockId(),
                     rootId: this.editor.protyle.block.rootID,
+                    notebookId: this.editor.protyle.notebookId,
                     type: "bottom",
                     element: backlinkElement,
                     ownerProtyle: this.editor.protyle,

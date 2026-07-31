@@ -57,12 +57,16 @@ type MobileExportLease struct {
 type mobileExportLeaseState struct {
 	boxID      string
 	cleanupDir string
+	expiresAt  time.Time
+	timer      *time.Timer
 }
+
+var mobileExportLeaseTTL = 30 * time.Minute
 
 var mobileExportLeases = struct {
 	sync.Mutex
-	leases map[string]mobileExportLeaseState
-}{leases: map[string]mobileExportLeaseState{}}
+	leases map[string]*mobileExportLeaseState
+}{leases: map[string]*mobileExportLeaseState{}}
 
 func newManagedEncryptedExportID() (string, error) {
 	random := make([]byte, 16)
@@ -359,14 +363,30 @@ func registerMobileExportLeaseWithID(leaseID, boxID, artifact, name, cleanupDir 
 	if info.IsDir() {
 		return nil, fmt.Errorf("export artifact [%s] is a directory", artifact)
 	}
+	state := &mobileExportLeaseState{
+		boxID:      boxID,
+		cleanupDir: cleanupDir,
+		expiresAt:  time.Now().Add(mobileExportLeaseTTL),
+	}
 	mobileExportLeases.Lock()
-	mobileExportLeases.leases[leaseID] = mobileExportLeaseState{boxID: boxID, cleanupDir: cleanupDir}
+	if _, exists := mobileExportLeases.leases[leaseID]; exists {
+		mobileExportLeases.Unlock()
+		return nil, fmt.Errorf("mobile export lease [%s] already exists", leaseID)
+	}
+	mobileExportLeases.leases[leaseID] = state
+	state.timer = time.AfterFunc(mobileExportLeaseTTL, func() {
+		releaseMobileExportLease(leaseID, true)
+	})
 	mobileExportLeases.Unlock()
 	return &MobileExportLease{ID: leaseID, Path: artifact, Name: name, Size: info.Size()}, nil
 }
 
 // ReleaseMobileExportLease 释放移动端导出租约；重复调用不会产生副作用。
 func ReleaseMobileExportLease(leaseID string) {
+	releaseMobileExportLease(leaseID, false)
+}
+
+func releaseMobileExportLease(leaseID string, expired bool) {
 	mobileExportLeases.Lock()
 	state, ok := mobileExportLeases.leases[leaseID]
 	if ok {
@@ -376,6 +396,9 @@ func ReleaseMobileExportLease(leaseID string) {
 	if !ok {
 		return
 	}
+	if state.timer != nil {
+		state.timer.Stop()
+	}
 	if state.cleanupDir != "" {
 		if err := os.RemoveAll(state.cleanupDir); err != nil {
 			logging.LogWarnf("remove mobile export lease [%s] failed: %s", leaseID, err)
@@ -383,5 +406,8 @@ func ReleaseMobileExportLease(leaseID string) {
 	}
 	if state.boxID != "" {
 		ReleaseBoxReadLock(state.boxID)
+	}
+	if expired {
+		logging.LogWarnf("mobile export lease [%s] expired at [%s]", leaseID, state.expiresAt.Format(time.RFC3339))
 	}
 }

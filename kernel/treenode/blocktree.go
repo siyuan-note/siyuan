@@ -1078,6 +1078,31 @@ func GetBlockTreeInBox(id, boxID string) (ret *BlockTree) {
 	return
 }
 
+// GetBlockTreeInExactBox 只在指定笔记本边界内查询块树；boxID 为空时只查全局数据库，不遍历加密笔记本。
+func GetBlockTreeInExactBox(id, boxID string) (ret *BlockTree) {
+	if id == "" {
+		return
+	}
+	if boxID != "" {
+		ret = GetBlockTreeInBox(id, boxID)
+		if ret != nil && ret.BoxID != boxID {
+			return nil
+		}
+		return
+	}
+
+	ret = &BlockTree{}
+	sqlStmt := "SELECT * FROM blocktrees WHERE id = ?"
+	err := queryRow(sqlStmt, id).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			logging.LogErrorf("sql query [%s] failed: %v\n\t%s", sqlStmt, err, logging.ShortStack())
+		}
+		return nil
+	}
+	return
+}
+
 // GetBlockTreesInBox 按 ids 在指定 box 的 db 里批量查块树。
 func GetBlockTreesInBox(ids []string, boxID string) (ret map[string]*BlockTree) {
 	ret = map[string]*BlockTree{}

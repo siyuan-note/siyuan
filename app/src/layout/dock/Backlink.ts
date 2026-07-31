@@ -73,7 +73,7 @@ export class Backlink extends Model {
     public rootId: string; // "local" 和 "bottom" 必传
     public ownerProtyle?: IProtyle;
     public tree: Tree;
-    private notebookId: string;
+    public notebookId: string;
     public mTree: Tree;
     public editors: Protyle[] = [];
     public status: {
@@ -115,6 +115,7 @@ export class Backlink extends Model {
         element?: HTMLElement,
         blockId: string,
         rootId?: string,
+        notebookId?: string,
         type: "pin" | "local" | "bottom",
         ownerProtyle?: IProtyle,
         emptyChange?: (empty: boolean) => void,
@@ -132,6 +133,7 @@ export class Backlink extends Model {
 
         this.blockId = options.blockId;
         this.rootId = options.rootId;
+        this.notebookId = options.notebookId || "";
         this.type = options.type;
         this.ownerProtyle = options.ownerProtyle;
         this.emptyChange = options.emptyChange;
@@ -1042,7 +1044,7 @@ export class Backlink extends Model {
         this.resetRenderedData(true);
         this.blockId = blockId;
         this.rootId = rootId;
-        this.notebookId = isEncryptedBox(notebookId) ? notebookId : "";
+        this.notebookId = notebookId || "";
         const status = this.status[blockId];
         this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').setAttribute(
             "data-sort",

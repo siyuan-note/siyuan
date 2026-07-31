@@ -931,9 +931,26 @@ func serveAssets(ginServer *gin.Engine) {
 
 func serveSVG(context *gin.Context, assetAbsPath string) bool {
 	if strings.HasSuffix(assetAbsPath, ".svg") {
-		data, err := readAssetBytes(assetAbsPath)
+		boxID := model.ExtractBoxIDFromAssetsPath(assetAbsPath)
+		var dek []byte
+		if boxID != "" && model.IsEncryptedBox(boxID) {
+			model.HoldBoxReadLock(boxID)
+			var err error
+			dek, err = model.GetDEKIfUnlocked(boxID)
+			if err != nil {
+				model.ReleaseBoxReadLock(boxID)
+				context.Status(http.StatusForbidden)
+				return true
+			}
+			defer model.ReleaseBoxReadLock(boxID)
+		}
+		data, err := readAssetBytesLocked(assetAbsPath, boxID, dek)
 		if err != nil {
 			logging.LogErrorf("read svg file failed: %s", err)
+			if boxID != "" && model.IsEncryptedBox(boxID) {
+				context.Status(http.StatusInternalServerError)
+				return true
+			}
 			return false
 		}
 
@@ -956,20 +973,13 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 	return false
 }
 
-// readAssetBytes 读取 asset 文件字节。加密笔记本的 asset 是密文，自动解密后返回明文。
-func readAssetBytes(absPath string) ([]byte, error) {
+// readAssetBytesLocked 读取 asset 文件字节；读取加密笔记本资源时调用方必须持有对应的 box 读锁。
+func readAssetBytesLocked(absPath, boxID string, dek []byte) ([]byte, error) {
 	data, err := os.ReadFile(absPath)
 	if err != nil {
 		return nil, err
 	}
-	if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" && model.IsEncryptedBox(boxID) {
-		model.HoldBoxReadLock(boxID)
-		dek, dekErr := model.GetDEKIfUnlocked(boxID)
-		if dekErr != nil {
-			model.ReleaseBoxReadLock(boxID)
-			return nil, dekErr
-		}
-		defer model.ReleaseBoxReadLock(boxID)
+	if boxID != "" && model.IsEncryptedBox(boxID) {
 		diskName := filepath.Base(absPath)
 		plain, decErr := model.DecryptAsset(boxID, diskName, dek, data)
 		if decErr != nil {

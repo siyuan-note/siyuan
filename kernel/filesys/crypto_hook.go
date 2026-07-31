@@ -118,14 +118,14 @@ func SyObjectBase(relativePath string) (string, error) {
 	return base, nil
 }
 
-// SyAAD 构造 .sy 密文的 AAD：siyuan:v1:file:<boxID>:<稳定文件基名>。
+// SyAAD 构造 .sy 密文的 AAD：siyuan:file:<boxID>:<稳定文件基名>。
 // 父目录不进 AAD——同 box 内文件名不变的移动允许原样 Rename 密文，内容/box/类型/对象 ID 仍受认证。
 func SyAAD(boxID, relativePath string) (string, error) {
 	base, err := SyObjectBase(relativePath)
 	if err != nil {
 		return "", err
 	}
-	return "siyuan:v1:file:" + boxID + ":" + base, nil
+	return "siyuan:file:" + boxID + ":" + base, nil
 }
 
 // encryptedBox 判断 boxID 是否为已解锁的加密 box，供 filesys 内部分流（如静默修正禁用）。

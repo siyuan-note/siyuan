@@ -5,6 +5,7 @@ import {
     getInstanceById,
     getWndByLayout,
     JSONToCenter, layoutToJSON,
+    isSensitiveTab,
     newModelByInitData,
     pdfIsLoading,
     saveLayout,
@@ -43,7 +44,6 @@ import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
 import type {App} from "../index";
 import {unicode2Emoji} from "../emoji";
-import {isEncryptedBox} from "../util/pathName";
 import {closeWindow} from "../window/closeWin";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {fullscreen} from "../protyle/breadcrumb/action";
@@ -51,7 +51,7 @@ import {setPadding} from "../protyle/ui/initUI";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {sanitizeClosedTabs, setStorageVal} from "../protyle/util/compatibility";
 import {setTitle} from "../util/processTitle";
 import {dragOverScroll} from "../boot/globalEvent/dragover";
 
@@ -773,14 +773,11 @@ export class Wnd {
                 return;
             }
             window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] =
-                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].filter((tab: {children?: {notebookId?: string}}) =>
-                    !isEncryptedBox(tab.children?.notebookId));
+                sanitizeClosedTabs(window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
                 window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
             }
-            const isEncryptedEditor = item.model instanceof Editor &&
-                isEncryptedBox(item.model.editor.protyle.notebookId);
-            if (item.headElement && !isEncryptedEditor) {
+            if (item.headElement && !isSensitiveTab(item)) {
                 const tabJSON = {};
                 layoutToJSON(item, tabJSON);
                 window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);

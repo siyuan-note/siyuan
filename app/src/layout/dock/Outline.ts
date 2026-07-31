@@ -42,6 +42,7 @@ export class Outline extends Model {
     public headerElement: HTMLElement;
     public type: "pin" | "local";
     public blockId: string;
+    public notebookId: string;
     public isPreview: boolean;
     public protyle: IProtyle;
     private preFilterExpandIds: string[] | null = null;
@@ -51,6 +52,7 @@ export class Outline extends Model {
         app: App,
         tab: Tab,
         blockId: string,
+        notebookId?: string,
         type: "pin" | "local",
         isPreview: boolean
     }) {
@@ -63,6 +65,7 @@ export class Outline extends Model {
         });
         this.isPreview = options.isPreview;
         this.blockId = options.blockId;
+        this.notebookId = options.notebookId || "";
         this.type = options.type;
         options.tab.panelElement.classList.add("fn__flex-column", "file-tree", "sy__outline", "dockPanel");
         options.tab.panelElement.innerHTML = `<div class="block__icons fn__hidescrollbar">
@@ -306,14 +309,7 @@ export class Outline extends Model {
             id: this.blockId,
             preview: this.isPreview
         };
-        // 解析当前大纲面板所属 box：按 blockId 在已打开的编辑器里查找
-        let notebookId: string;
-        getAllModels().editor.some(item => {
-            if (item.editor.protyle.block.rootID === this.blockId) {
-                notebookId = item.editor.protyle.notebookId;
-                return true;
-            }
-        });
+        const notebookId = this.getNotebookId();
         if (isEncryptedBox(notebookId)) {
             outlineParam.notebook = notebookId;
         }
@@ -572,14 +568,7 @@ export class Outline extends Model {
                 id: this.blockId,
                 preview: this.isPreview
             };
-            // 解析当前大纲面板所属 box：按 blockId 在已打开的编辑器里查找
-            let notebookId: string;
-            getAllModels().editor.some(item => {
-                if (item.editor.protyle.block.rootID === this.blockId) {
-                    notebookId = item.editor.protyle.notebookId;
-                    return true;
-                }
-            });
+            const notebookId = this.getNotebookId();
             if (isEncryptedBox(notebookId)) {
                 outlineParam.notebook = notebookId;
             }
@@ -628,14 +617,7 @@ export class Outline extends Model {
                     id: nodeElement.getAttribute("data-node-id"),
                     excludeTypes: []
                 };
-                // 解析当前大纲面板所属 box：按 blockId 在已打开的编辑器里查找
-                let notebookId: string;
-                getAllModels().editor.some(editorItem => {
-                    if (editorItem.editor.protyle.block.rootID === this.blockId) {
-                        notebookId = editorItem.editor.protyle.notebookId;
-                        return true;
-                    }
-                });
+                const notebookId = this.getNotebookId();
                 if (isEncryptedBox(notebookId)) {
                     breadcrumbParam.notebook = notebookId;
                 }
@@ -698,7 +680,7 @@ export class Outline extends Model {
         }
     }
 
-    public update(data: IWebSocketData, callbackId?: string) {
+    public update(data: IWebSocketData, callbackId?: string, notebookId?: string) {
         let currentElement = this.element.querySelector(".b3-list-item--focus");
         let currentId;
         if (currentElement) {
@@ -707,6 +689,7 @@ export class Outline extends Model {
         const scrollTop = this.element.scrollTop;
         if (typeof callbackId !== "undefined") {
             this.blockId = callbackId;
+            this.notebookId = typeof notebookId === "undefined" ? "" : notebookId;
         }
         this.tree.updateData(data.data);
 
@@ -730,6 +713,19 @@ export class Outline extends Model {
         this.element.removeAttribute("data-loading");
     }
 
+    private getNotebookId() {
+        if (this.notebookId) {
+            return this.notebookId;
+        }
+        getAllModels().editor.some(item => {
+            if (item.editor.protyle.block.rootID === this.blockId) {
+                this.notebookId = item.editor.protyle.notebookId;
+                return true;
+            }
+        });
+        return this.notebookId;
+    }
+
     public refresh() {
         if (!this.blockId) {
             return;
@@ -747,8 +743,9 @@ export class Outline extends Model {
                 return true;
             }
         });
-        if (isEncryptedBox(protyle?.notebookId)) {
-            outlineParam.notebook = protyle.notebookId;
+        const notebookId = this.getNotebookId();
+        if (isEncryptedBox(notebookId)) {
+            outlineParam.notebook = notebookId;
         }
         fetchPost("/api/outline/getDocOutline", outlineParam, response => {
             if (refreshId !== this.refreshId || blockId !== this.blockId) {

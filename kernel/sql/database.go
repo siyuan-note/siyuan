@@ -65,6 +65,9 @@ var (
 	// sql 包不直接 import model（循环依赖），路由函数据此 fail-closed：
 	// 加密笔记本未解锁时绝不回退全局库，避免加密笔记本索引污染全局明文库。
 	IsEncryptedBoxFn func(boxID string) bool
+
+	// IsBoxUnlockedFn 由 model 层注入，用于在读取明文缓存前确认加密笔记本仍处于解锁状态。
+	IsBoxUnlockedFn func(boxID string) bool
 )
 
 func init() {

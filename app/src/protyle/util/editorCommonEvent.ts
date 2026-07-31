@@ -991,7 +991,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.getAttribute("data-col-id")]}`,
                     target.outerHTML);
                 return;
-            } else if (kanbanTitleElement?.getAttribute("draggable") === "true") {
+            } else if (kanbanTitleElement && kanbanTitleElement.getAttribute("draggable") === "true") {
                 const groupElement = kanbanTitleElement.parentElement;
                 const groupRect = groupElement.getBoundingClientRect();
                 const ghostElement = document.createElement("div");

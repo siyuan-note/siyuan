@@ -328,7 +328,10 @@ export const bazaar = {
     <span>${valueHTML ? value : escapeHtml(value)}</span>
 </div>`;
     },
-    _genReadmeChips(values: string[]) {
+    _genReadmeChips(values: string[], plainAll = false) {
+        if (plainAll && values.length === 1 && values[0] === window.siyuan.languages.all) {
+            return escapeHtml(values[0]);
+        }
         return values.map((value) => `<span class="b3-chip b3-chip--small">${escapeHtml(value)}</span>`).join("");
     },
     _getFrontendLabels(frontends: string[]) {
@@ -773,8 +776,8 @@ type="checkbox">
         const compatibilitySection = `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarCompatibility}</div>
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarMinAppVersion, compatibilityData.minAppVersion ? `v${compatibilityData.minAppVersion}` : "-")}
-    ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPlatforms, bazaar._genReadmeChips(frontendLabels), true)}
-    ${bazaarType === "plugins" ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarSystems, bazaar._genReadmeChips(systemLabels), true) : ""}
+    ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPlatforms, bazaar._genReadmeChips(frontendLabels, true), true)}
+    ${bazaarType === "plugins" ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarSystems, bazaar._genReadmeChips(systemLabels, true), true) : ""}
     ${bazaarType === "plugins" ? bazaar._genReadmeMetaRow(window.siyuan.languages.publishService, compatibilityData.disabledInPublish ? window.siyuan.languages.disable : window.siyuan.languages.enable) : ""}
 </section>`;
         const marketSection = available ? `<section class="item__meta-section">
@@ -826,25 +829,24 @@ type="checkbox">
         </div>
         <div class="item__meta">
             ${installSection}
-            ${compatibilitySection}
             ${marketSection}
+            ${compatibilitySection}
+            <section class="item__meta-section item__resources">
+                <div class="item__meta-title">${window.siyuan.languages.bazaarResources}</div>
+                <div class="fn__flex">
+                    <a href="${resourceData.repoURL}" target="_blank" title="GitHub Repo">GitHub</a>
+                    <span class="fn__space"></span>
+                    <a href="${resourceData.repoURL}/issues" target="_blank" title="Feedback via GitHub Issues" data-type="feedback">${window.siyuan.languages.feedback}</a>
+                </div>
+                ${resourceStats}
+            </section>
         </div>
-        <div class="item__actions">
-            ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
-            ${installed ? '<div class="fn__hr"></div>' : ""}
-            ${bazaar._genReadmeUpdateButtonHTML(available, Boolean(installed))}
-        </div>
-        <section class="item__meta-section item__resources">
-            <div class="item__meta-title">${window.siyuan.languages.bazaarResources}</div>
-            <div class="fn__flex">
-                <a href="${resourceData.repoURL}" target="_blank" title="GitHub Repo">GitHub</a>
-                <span class="fn__space"></span>
-                <a href="${resourceData.repoURL}/issues" target="_blank" title="Feedback via GitHub Issues" data-type="feedback">${window.siyuan.languages.feedback}</a>
-            </div>
-            ${resourceStats}
-        </section>
         <div class="fn__hr--b"></div>
-        <div class="fn__flex-1"></div>
+    </div>
+    <div class="item__actions">
+        ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
+        ${installed ? '<div class="fn__hr"></div>' : ""}
+        ${bazaar._genReadmeUpdateButtonHTML(available, Boolean(installed))}
     </div>
 </div>
 <div class="item__main">

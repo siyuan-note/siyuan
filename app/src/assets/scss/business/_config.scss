@@ -408,7 +408,6 @@
           text-align: left;
 
           &-section {
-            border-top: 1px solid var(--b3-border-color);
             padding: 16px 0;
           }
 
@@ -443,7 +442,8 @@
         }
 
         &__actions {
-          padding: 8px 0 16px;
+          flex-shrink: 0;
+          padding: 8px 8px 0 0;
 
           [data-type="readme-update-slot"] .b3-button {
             width: 100% !important;

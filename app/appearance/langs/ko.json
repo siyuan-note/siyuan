@@ -1,7 +1,7 @@
 {
-  "bazaarInstallInfo": "설치",
+  "bazaarInstallInfo": "로컬 설치",
   "bazaarCompatibility": "호환성",
-  "bazaarMarketInfo": "마켓",
+  "bazaarMarketInfo": "온라인 마켓",
   "bazaarResources": "리소스",
   "bazaarMinAppVersion": "최소 SiYuan 버전",
   "bazaarPlatforms": "플랫폼",

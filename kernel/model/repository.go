@@ -2262,6 +2262,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	reloadPluginSet := hashset.New()     // 插件代码变更 data/plugins/
 	dataChangePluginSet := hashset.New() // 插件存储数据变更 data/storage/petal/
 	needUnindexBoxes, needIndexBoxes := map[string]bool{}, map[string]bool{}
+	removedBoxConfs, removedBoxCryptoBackups := map[string]bool{}, map[string]bool{}
 	needRestoreNotebookCrypto := false // 加密笔记本备份文件随同步到达，需恢复本机启用状态
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
@@ -2276,14 +2277,18 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasSuffix(file.Path, "/.siyuan/conf.json") {
 			needReloadFiletree = true
 			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/conf.json")
-			needUnindexBoxes[boxID] = true
-			needIndexBoxes[boxID] = true
+			if ast.IsNodeIDPattern(boxID) {
+				needUnindexBoxes[boxID] = true
+				needIndexBoxes[boxID] = true
+			}
 		}
 		if strings.HasSuffix(file.Path, "/.siyuan/boxDoc.json") {
 			needReloadFiletree = true
 			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/boxDoc.json")
-			needUnindexBoxes[boxID] = true
-			needIndexBoxes[boxID] = true
+			if ast.IsNodeIDPattern(boxID) {
+				needUnindexBoxes[boxID] = true
+				needIndexBoxes[boxID] = true
+			}
 		}
 
 		if file.Path == "/.siyuan/data-crypto-backup.json" {
@@ -2344,13 +2349,24 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasSuffix(file.Path, "/.siyuan/conf.json") {
 			needReloadFiletree = true
 			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/conf.json")
-			needUnindexBoxes[boxID] = true
+			if ast.IsNodeIDPattern(boxID) {
+				needUnindexBoxes[boxID] = true
+				removedBoxConfs[boxID] = true
+			}
+		}
+		if strings.HasSuffix(file.Path, "/.siyuan/"+notebookCryptoBackupFilename) {
+			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/"+notebookCryptoBackupFilename)
+			if ast.IsNodeIDPattern(boxID) {
+				removedBoxCryptoBackups[boxID] = true
+			}
 		}
 		if strings.HasSuffix(file.Path, "/.siyuan/boxDoc.json") {
 			needReloadFiletree = true
 			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/boxDoc.json")
-			needUnindexBoxes[boxID] = true
-			needIndexBoxes[boxID] = true
+			if ast.IsNodeIDPattern(boxID) {
+				needUnindexBoxes[boxID] = true
+				needIndexBoxes[boxID] = true
+			}
 		}
 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
@@ -2423,6 +2439,19 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	syncingFiles = sync.Map{}
 	syncingStorages.Store(false)
+	removedEncryptedBox := false
+	for boxID := range removedBoxConfs {
+		if IsEncryptedBox(boxID) || removedBoxCryptoBackups[boxID] {
+			finalizeSyncedEncryptedBoxRemoval(boxID)
+			unindex(boxID)
+			removedEncryptedBox = true
+			needUnindexBoxes[boxID] = true
+			delete(needIndexBoxes, boxID)
+		}
+	}
+	if removedEncryptedBox {
+		sql.FlushQueue()
+	}
 
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
 		FullReindex(false)
@@ -2434,9 +2463,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	for boxID := range needUnindexBoxes {
-		if box := Conf.GetBox(boxID); nil != box {
-			box.Unindex()
-		}
+		(&Box{ID: boxID}).Unindex()
 	}
 	for boxID := range needIndexBoxes {
 		if box := Conf.GetBox(boxID); nil != box {

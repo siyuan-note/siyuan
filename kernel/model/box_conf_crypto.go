@@ -92,6 +92,9 @@ func prepareBoxConfForSave(boxID string, boxConf *conf.BoxConf) (*conf.BoxConf, 
 	persisted := *boxConf
 	persisted.BoxCrypt = DeepCopyBoxEncryption(boxConf.BoxCrypt)
 	if !persisted.Encrypted {
+		if IsEncryptedBox(boxID) {
+			return nil, errors.New("encrypted notebook cannot be saved as a normal notebook")
+		}
 		return &persisted, nil
 	}
 	if persisted.BoxCrypt == nil {

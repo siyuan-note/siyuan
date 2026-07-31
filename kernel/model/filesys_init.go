@@ -36,7 +36,7 @@ func init() {
 	av.AVLockRelease = ReleaseBoxReadLock
 	av.AVEncryptedBoxIDs = treenode.GetOpenedEncryptedBoxIDs
 	av.AVIsEncryptedBox = IsEncryptedBox
-	av.AVIsBoxUnlocked = IsBoxUnlocked
+	av.AVIsBoxUnlocked = isBoxUnlockedForAccess
 	av.AVGetBlockBoxID = func(blockID string) string {
 		bt := treenode.GetBlockTree(blockID)
 		if nil == bt {
@@ -45,13 +45,13 @@ func init() {
 		return bt.BoxID
 	}
 	sql.IsEncryptedBoxFn = IsEncryptedBox
-	sql.IsBoxUnlockedFn = IsBoxUnlocked
+	sql.IsBoxUnlockedFn = isBoxUnlockedForAccess
 	treenode.IsEncryptedBoxFn = IsEncryptedBox
 	util.ReloadDocInfoGuard = func(boxID string) bool {
 		// 加密笔记本锁定后丢弃延迟 reloadDocInfo 广播，防止明文元数据泄漏
 		if !IsEncryptedBox(boxID) {
 			return true
 		}
-		return IsBoxUnlocked(boxID)
+		return isBoxUnlockedForAccess(boxID)
 	}
 }

@@ -158,6 +158,142 @@ func TestEncryptedBoxOperationReleaseSurvivesNotebookRemoval(t *testing.T) {
 	}
 }
 
+func TestMissingEncryptedIdentityNeverFallsBackToNormalNotebook(t *testing.T) {
+	oldDataDir := util.DataDir
+	oldConf := Conf
+	util.DataDir = t.TempDir()
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	boxID := "20260731160100-abcdefg"
+	defer func() {
+		forgetRuntimeEncryptedBox(boxID)
+		removeEncryptedBoxLifecycle(boxID)
+		Conf = oldConf
+		util.DataDir = oldDataDir
+	}()
+
+	boxDir := filepath.Join(util.DataDir, boxID)
+	if err := os.MkdirAll(boxDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	key, err := util.GenerateDEK()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer zeroAndClear(key)
+	ciphertext, err := util.EncryptWithAAD(key, []byte(`{"ID":"20260731160101-abcdefg"}`), []byte("identity-test"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rootPath := filepath.Join(boxDir, "20260731160101-abcdefg.sy")
+	if err = os.WriteFile(rootPath, ciphertext, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	boxes, err := ListNotebooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(boxes) != 1 || !boxes[0].Encrypted || boxes[0].Unlocked || boxes[0].State != EncryptedBoxStateError {
+		t.Fatalf("expected a quarantined encrypted notebook, got %+v", boxes)
+	}
+	confPath := filepath.Join(boxDir, ".siyuan", "conf.json")
+	if _, statErr := os.Stat(confPath); !os.IsNotExist(statErr) {
+		t.Fatalf("missing encrypted identity must not create a normal configuration: %v", statErr)
+	}
+	if _, keyErr := GetBoxEncryption(boxID); keyErr == nil {
+		t.Fatal("ciphertext without key identity should report missing encrypted key material")
+	}
+	if saveErr := (&Box{ID: boxID}).SaveConf(conf.NewBoxConf()); saveErr == nil {
+		t.Fatal("quarantined encrypted notebook must not be saved as a normal notebook")
+	}
+}
+
+func TestNotebookBackupPreventsNormalIdentityDowngrade(t *testing.T) {
+	oldConf := Conf
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	defer func() {
+		Conf = oldConf
+	}()
+
+	boxID := "20260731160104-abcdefg"
+	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)
+	defer cleanup()
+	normalConf := conf.NewBoxConf()
+	data, err := gulu.JSON.MarshalIndentJSON(normalConf, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	confPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err = os.WriteFile(confPath, data, 0644); err != nil {
+		t.Fatal(err)
+	}
+	forgetRuntimeEncryptedBox(boxID)
+
+	if !IsEncryptedBox(boxID) {
+		t.Fatal("a notebook key backup must prevent an encrypted notebook from being downgraded by a normal configuration")
+	}
+	boxes, err := ListNotebooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(boxes) != 1 || !boxes[0].Encrypted {
+		t.Fatalf("expected backup identity to quarantine the notebook, got %+v", boxes)
+	}
+}
+
+func TestSyncedEncryptedNotebookRemovalClearsRuntimeState(t *testing.T) {
+	boxID := "20260731160102-abcdefg"
+	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)
+	defer cleanup()
+
+	if !IsEncryptedBox(boxID) {
+		t.Fatal("encrypted notebook identity was not detected")
+	}
+	mountedEncryptedBoxes.Store(boxID, true)
+	if err := os.RemoveAll(filepath.Join(util.DataDir, boxID)); err != nil {
+		t.Fatal(err)
+	}
+	if !IsEncryptedBox(boxID) {
+		t.Fatal("runtime identity should survive synchronized identity-file removal until cleanup")
+	}
+
+	finalizeSyncedEncryptedBoxRemoval(boxID)
+	if IsBoxUnlocked(boxID) {
+		t.Fatal("synchronized notebook removal retained its DEK")
+	}
+	if isEncryptedBoxMounted(boxID) {
+		t.Fatal("synchronized notebook removal retained its mount marker")
+	}
+	if isRuntimeEncryptedBox(boxID) || IsEncryptedBox(boxID) {
+		t.Fatal("completed synchronized notebook removal retained its encryption identity")
+	}
+	if _, exists := encryptedBoxLifecycles.Load(boxID); exists {
+		t.Fatal("completed synchronized notebook removal retained its lifecycle")
+	}
+}
+
+func TestUnlockAndMountFailureKeepsPreexistingUnlock(t *testing.T) {
+	boxID := "20260731160103-abcdefg"
+	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)
+	defer cleanup()
+
+	boxCrypt, err := GetBoxEncryption(boxID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.RemoveAll(filepath.Join(util.DataDir, boxID)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = UnlockAndMountBox(boxID, "unused", boxCrypt); err == nil {
+		t.Fatal("mounting a removed notebook should fail")
+	}
+	if !IsBoxUnlocked(boxID) {
+		t.Fatal("a mount failure must not roll back a preexisting unlock")
+	}
+}
+
 func TestEncryptedBoxMetadataIsNotStoredInPlaintext(t *testing.T) {
 	boxID := "20260731160001-abcdefg"
 	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)
@@ -510,6 +646,7 @@ func prepareEncryptedBoxLifecycleTest(t *testing.T, boxID string) func() {
 		cachedDEKsLock.Unlock()
 		zeroAndClear(dek)
 		removeEncryptedBoxLifecycle(boxID)
+		forgetRuntimeEncryptedBox(boxID)
 		util.DataDir = oldDataDir
 	}
 }

@@ -116,16 +116,20 @@ func ListNotebooks() (ret []*Box, err error) {
 		boxDirPath := filepath.Join(util.DataDir, id)
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
 		isExistConf := filelock.IsExist(boxConfPath)
+		missingEncryptedIdentity := false
 		if !isExistConf {
 			if !IsUserGuide(id) {
 				// conf.json 缺失时检查加密备份，确认是否为加密笔记本
 				backup, backupErr := readNotebookCryptBackup(id)
 				if backupErr != nil {
 					logging.LogErrorf("read notebook crypt backup [%s] failed: %s", boxDirPath, backupErr)
-					continue
-				}
-				if backup != nil {
+					markRuntimeEncryptedBox(id)
+					boxConf.Encrypted = true
+					missingEncryptedIdentity = true
+					setEncryptedBoxState(id, EncryptedBoxStateError)
+				} else if backup != nil {
 					// 从备份恢复 conf.json，避免加密笔记本被当作普通笔记本处理
+					markRuntimeEncryptedBox(id)
 					boxConf.Encrypted = true
 					boxConf.BoxCrypt = backup
 					tmpBox := &Box{ID: id}
@@ -134,6 +138,11 @@ func ListNotebooks() (ret []*Box, err error) {
 						continue
 					}
 					logging.LogWarnf("restored encrypted notebook conf from backup [%s]", boxDirPath)
+				} else if IsEncryptedBox(id) {
+					boxConf.Encrypted = true
+					missingEncryptedIdentity = true
+					setEncryptedBoxState(id, EncryptedBoxStateError)
+					logging.LogErrorf("encrypted notebook key identity is missing [%s]", boxDirPath)
 				} else {
 					// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
 					logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
@@ -151,20 +160,35 @@ func ListNotebooks() (ret []*Box, err error) {
 				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
 				// 检查加密备份，有备份则保留损坏 conf 不删（避免标记为缺失后自动恢复旧数据）
 				backup, backupErr := readNotebookCryptBackup(id)
-				if backupErr == nil && backup != nil {
+				if backupErr != nil || backup != nil {
+					markRuntimeEncryptedBox(id)
 					continue
 				}
 				filelock.Remove(boxConfPath)
 				continue
 			}
 		}
+		if !boxConf.Encrypted && IsEncryptedBox(id) {
+			backup, backupErr := readNotebookCryptBackup(id)
+			boxConf.Encrypted = true
+			if backupErr == nil && backup != nil {
+				boxConf.BoxCrypt = backup
+			} else {
+				missingEncryptedIdentity = true
+				setEncryptedBoxState(id, EncryptedBoxStateError)
+			}
+			logging.LogWarnf("normal notebook configuration conflicts with encrypted identity [%s]", boxDirPath)
+		}
 		if boxConf.Encrypted {
+			markRuntimeEncryptedBox(id)
+		}
+		if boxConf.Encrypted && !missingEncryptedIdentity {
 			if metadataErr := revealBoxMetadataIfUnlocked(id, boxConf); metadataErr != nil {
 				logging.LogErrorf("decrypt encrypted notebook metadata [%s] failed: %s", id, metadataErr)
 			}
 		}
 
-		unlocked := boxConf.Encrypted && IsBoxUnlocked(id)
+		unlocked := boxConf.Encrypted && !missingEncryptedIdentity && isBoxUnlockedForAccess(id)
 		closed := boxConf.Closed
 		if boxConf.Encrypted {
 			// 加密笔记本的打开状态不能从其他设备继承，仅本机已挂载且持有 DEK 时才视为打开。
@@ -181,10 +205,14 @@ func ListNotebooks() (ret []*Box, err error) {
 			Unlocked:  unlocked,
 		}
 		if box.Encrypted {
-			box.State = GetEncryptedBoxState(id)
+			if missingEncryptedIdentity {
+				box.State = EncryptedBoxStateError
+			} else {
+				box.State = GetEncryptedBoxState(id)
+			}
 		}
 
-		if !isExistConf {
+		if !isExistConf && !missingEncryptedIdentity {
 			// Automatically create notebook conf.json if not found it https://github.com/siyuan-note/siyuan/issues/9647
 			if err := box.SaveConf(boxConf); err != nil {
 				logging.LogErrorf("save box conf [%s] failed: %s", boxDirPath, err)

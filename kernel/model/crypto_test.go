@@ -38,7 +38,7 @@ func setDEKForTest(boxID string, dek []byte) {
 	cachedDEKs[boxID] = dek
 }
 
-func TestIsEncryptedBoxRejectsEmptyID(t *testing.T) {
+func TestEncryptedBoxIdentityRejectsInvalidIDs(t *testing.T) {
 	oldDataDir := util.DataDir
 	util.DataDir = t.TempDir()
 	defer func() {
@@ -52,8 +52,16 @@ func TestIsEncryptedBoxRejectsEmptyID(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(backupDir, "notebook-crypto-backup.json"), []byte("{}"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	if IsEncryptedBox("") {
-		t.Fatal("empty notebook ID must not resolve to the data-level backup path")
+	for _, boxID := range []string{"", ".", "..", "not-a-node-id"} {
+		if IsEncryptedBox(boxID) {
+			t.Fatalf("invalid notebook ID %q must not resolve to a backup path", boxID)
+		}
+		if _, err := readNotebookCryptBackup(boxID); err == nil {
+			t.Fatalf("invalid notebook ID %q should be rejected by backup reads", boxID)
+		}
+		if _, err := GetBoxEncryption(boxID); err == nil {
+			t.Fatalf("invalid notebook ID %q should be rejected by key lookup", boxID)
+		}
 	}
 }
 
@@ -137,8 +145,8 @@ func TestEncryptedAssetRejectsUnknownFormat(t *testing.T) {
 
 // TestIsBoxUnlockedLifecycle 验证 DEK 缓存的存在/缺失状态。
 func TestIsBoxUnlockedLifecycle(t *testing.T) {
-	LockBox("lifecycle-test-box") // 确保初始干净
-	boxID := "lifecycle-test-box"
+	boxID := "20260731121000-lifecyc"
+	LockBox(boxID) // 确保初始干净
 	if IsBoxUnlocked(boxID) {
 		t.Fatalf("box should not be unlocked after LockBox")
 	}
@@ -156,7 +164,7 @@ func TestIsBoxUnlockedLifecycle(t *testing.T) {
 // TestGetDEKReturnsErrorAfterLock 验证 LockBox 后 GetDEK 报错。
 func TestGetDEKReturnsErrorAfterLock(t *testing.T) {
 	dek, _ := util.GenerateDEK()
-	boxID := "get-dek-test-box"
+	boxID := "20260731121001-getdekk"
 	setDEKForTest(boxID, dek)
 
 	got, err := GetDEK(boxID)
@@ -176,9 +184,10 @@ func TestGetDEKReturnsErrorAfterLock(t *testing.T) {
 // TestWrapNewDEKRoundTrip 验证用 KEK 生成 DEK → 包络 → 解包 → 还原。
 func TestWrapNewDEKRoundTrip(t *testing.T) {
 	kek, _ := util.GenerateDEK()
-	defer LockBox("wrap-roundtrip-box")
+	boxID := "20260731121002-wrapbox"
+	defer LockBox(boxID)
 
-	boxEnc, _, err := WrapNewDEK("wrap-roundtrip-box", kek)
+	boxEnc, _, err := WrapNewDEK(boxID, kek)
 	if err != nil {
 		t.Fatalf("WrapNewDEK failed: %v", err)
 	}
@@ -186,7 +195,7 @@ func TestWrapNewDEKRoundTrip(t *testing.T) {
 		t.Fatalf("BoxEncryption fields malformed: wrappedDEK=%d wrapNonce=%d", len(boxEnc.WrappedDEK), len(boxEnc.WrapNonce))
 	}
 
-	dek, err := decryptWrappedDEK("wrap-roundtrip-box", boxEnc, kek)
+	dek, err := decryptWrappedDEK(boxID, boxEnc, kek)
 	if err != nil {
 		t.Fatalf("decryptWrappedDEK failed: %v", err)
 	}
@@ -197,13 +206,14 @@ func TestWrapNewDEKRoundTrip(t *testing.T) {
 
 // TestDecryptWrappedDEKWithWrongKEK 验证用错误的 KEK 解密 WrappedDEK 失败（GCM MAC 校验）。
 func TestDecryptWrappedDEKWithWrongKEK(t *testing.T) {
+	boxID := "20260731121003-wrongkk"
 	kek1, _ := util.GenerateDEK()
-	boxEnc, _, _ := WrapNewDEK("wrong-kek-box", kek1)
+	boxEnc, _, _ := WrapNewDEK(boxID, kek1)
 
 	kek2, _ := util.GenerateDEK()
-	defer LockBox("wrong-kek-box")
+	defer LockBox(boxID)
 
-	if _, err := decryptWrappedDEK("wrong-kek-box", boxEnc, kek2); err == nil {
+	if _, err := decryptWrappedDEK(boxID, boxEnc, kek2); err == nil {
 		t.Fatalf("decryptWrappedDEK with wrong KEK should fail")
 	}
 }
@@ -211,11 +221,13 @@ func TestDecryptWrappedDEKWithWrongKEK(t *testing.T) {
 // TestWrapNewDEKProducesUniqueDEKs 验证两次调用 WrapNewDEK 生成不同的 DEK（随机性）。
 func TestWrapNewDEKProducesUniqueDEKs(t *testing.T) {
 	kek, _ := util.GenerateDEK()
-	defer LockBox("uniq-box-1")
-	defer LockBox("uniq-box-2")
+	boxID1 := "20260731121004-uniquea"
+	boxID2 := "20260731121005-uniqueb"
+	defer LockBox(boxID1)
+	defer LockBox(boxID2)
 
-	_, dek1, _ := WrapNewDEK("uniq-box-1", kek)
-	_, dek2, _ := WrapNewDEK("uniq-box-2", kek)
+	_, dek1, _ := WrapNewDEK(boxID1, kek)
+	_, dek2, _ := WrapNewDEK(boxID2, kek)
 
 	// WrapNewDEK 同时返回原始 DEK，可直接比对随机性
 	if bytes.Equal(dek1, dek2) {
@@ -277,15 +289,16 @@ func TestBoxEncryptionNonceMismatchRejected(t *testing.T) {
 // 直接测试 clearDEKIfUnlockedEncryptedBox（unmount0 在 box==nil 分支调用的清理逻辑），
 // 避免依赖未初始化的全局 Conf。
 func TestUnmount0ClearsDEKForUnmountedEncryptedBox(t *testing.T) {
-	boxID := "unmount-unlocked-test-box"
+	boxID := "20260731120000-unmount"
 
 	// 临时替换 DataDir，创建加密 box 的 conf.json，让 IsEncryptedBox 返回 true
 	origDataDir := util.DataDir
 	tempDir := t.TempDir()
 	util.DataDir = tempDir
 	defer func() {
+		LockBox(boxID) // 测试后清理 DEK 缓存
+		forgetRuntimeEncryptedBox(boxID)
 		util.DataDir = origDataDir
-		LockBox("unmount-unlocked-test-box") // 测试后清理 DEK 缓存
 	}()
 
 	// 写入加密 box 的 conf.json
@@ -810,8 +823,8 @@ func TestBackupMACRoundTrip(t *testing.T) {
 
 // TestLockBoxConcurrentReads 验证 LockBox（单 box）能与在途读锁正确串行化。
 func TestLockBoxConcurrentReads(t *testing.T) {
-	LockBox("concurrent-single-box") // 清理初始状态
-	boxID := "concurrent-single-box"
+	boxID := "20260731121006-concurr"
+	LockBox(boxID) // 清理初始状态
 	dek, _ := util.GenerateDEK()
 	setDEKForTest(boxID, dek)
 
@@ -844,7 +857,7 @@ func TestLockBoxConcurrentReads(t *testing.T) {
 
 // TestLockBoxClearsTempDirs 验证 LockBox 删除 per-box 临时目录。
 func TestLockBoxClearsTempDirs(t *testing.T) {
-	boxID := "temp-cleanup-box"
+	boxID := "20260731121007-tempcln"
 	dek, _ := util.GenerateDEK()
 	setDEKForTest(boxID, dek)
 
@@ -852,8 +865,8 @@ func TestLockBoxClearsTempDirs(t *testing.T) {
 	tempDir := t.TempDir()
 	util.TempDir = tempDir
 	defer func() {
+		LockBox(boxID)
 		util.TempDir = origTempDir
-		LockBox("temp-cleanup-box")
 	}()
 
 	// 创建模拟临时目录和文件

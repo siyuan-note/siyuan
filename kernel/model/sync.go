@@ -355,43 +355,53 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 	luteEngine := util.NewLute()
 	bootProgressPart := int32(10 / float64(len(upsertFilePaths)))
 	for _, upsertFile := range upsertFilePaths {
-		if !strings.HasSuffix(upsertFile, ".sy") {
-			continue
+		rootID, indexed := func() (string, bool) {
+			if !strings.HasSuffix(upsertFile, ".sy") {
+				return "", false
+			}
+
+			upsertFile = filepath.ToSlash(upsertFile)
+			upsertFile = strings.TrimPrefix(upsertFile, "/")
+
+			box, _, found := strings.Cut(upsertFile, "/")
+			if !found {
+				// .sy 直接出现在 data 文件夹下，没有出现在笔记本文件夹下的情况
+				return "", false
+			}
+			if IsEncryptedBox(box) {
+				if !isBoxUnlockedForAccess(box) || !isEncryptedBoxMounted(box) {
+					return "", false
+				}
+				if acquireErr := AcquireEncryptedBoxOperation(box); acquireErr != nil {
+					return "", false
+				}
+				defer ReleaseEncryptedBoxOperation(box)
+			}
+
+			p := strings.TrimPrefix(upsertFile, box)
+			msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))
+			util.IncBootProgress(bootProgressPart, msg)
+			util.PushStatusBar(msg)
+
+			rootID := util.GetTreeID(p)
+			cache.RemoveTreeData(rootID)
+			tree, err0 := filesys.LoadTree(box, p, luteEngine)
+			if nil != err0 {
+				return "", false
+			}
+			treenode.UpsertBlockTree(tree)
+			sql.UpsertTreeQueue(tree)
+
+			bts := treenode.GetBlockTreesByRootIDInBox(rootID, tree.Box)
+			for _, b := range bts {
+				cache.RemoveBlockIAL(b.ID)
+			}
+			cache.RemoveDocIAL(tree.Path)
+			return rootID, true
+		}()
+		if indexed {
+			upsertRootIDs = append(upsertRootIDs, rootID)
 		}
-
-		upsertFile = filepath.ToSlash(upsertFile)
-		upsertFile = strings.TrimPrefix(upsertFile, "/")
-
-		box, _, found := strings.Cut(upsertFile, "/")
-		if !found {
-			// .sy 直接出现在 data 文件夹下，没有出现在笔记本文件夹下的情况
-			continue
-		}
-		if IsEncryptedBox(box) && (!IsBoxUnlocked(box) || !isEncryptedBoxMounted(box)) {
-			continue
-		}
-
-		p := strings.TrimPrefix(upsertFile, box)
-		msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))
-		util.IncBootProgress(bootProgressPart, msg)
-		util.PushStatusBar(msg)
-
-		rootID := util.GetTreeID(p)
-		cache.RemoveTreeData(rootID)
-		tree, err0 := filesys.LoadTree(box, p, luteEngine)
-		if nil != err0 {
-			continue
-		}
-		treenode.UpsertBlockTree(tree)
-		sql.UpsertTreeQueue(tree)
-
-		bts := treenode.GetBlockTreesByRootIDInBox(rootID, tree.Box)
-		for _, b := range bts {
-			cache.RemoveBlockIAL(b.ID)
-		}
-		cache.RemoveDocIAL(tree.Path)
-
-		upsertRootIDs = append(upsertRootIDs, rootID)
 	}
 
 	if 1 > len(upsertRootIDs) {

@@ -676,8 +676,7 @@ func unlockNotebook(c *gin.Context) {
 	}
 }
 
-// unlockAndOpenNotebook 原子化解锁并挂载加密笔记本：UnlockBox 成功后立即 Mount，
-// Mount 失败则 LockBox 回滚（清除 DEK），避免 DEK 残留在内存但笔记本未挂载的不一致状态。
+// unlockAndOpenNotebook 原子化解锁并挂载加密笔记本，挂载失败时由模型层在同一转换锁内回滚本次解锁。
 func unlockAndOpenNotebook(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -711,7 +710,10 @@ func unlockAndOpenNotebook(c *gin.Context) {
 		return
 	}
 
-	if err := model.UnlockBox(notebook, password, boxCrypt); err != nil {
+	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
+	defer util.PushClearMsg(msgId)
+	existed, err := model.UnlockAndMountBox(notebook, password, boxCrypt)
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -719,18 +721,6 @@ func unlockAndOpenNotebook(c *gin.Context) {
 	if err = holdEncryptedBoxRequest(c, notebook); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
-	}
-
-	// 解锁成功后立即挂载；失败则回滚锁定，清除 DEK 避免残留
-	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
-	defer util.PushClearMsg(msgId)
-	existed, err := model.Mount(notebook)
-	if err != nil {
-		releaseEncryptedBoxRequest(c, notebook)
-		model.LockBox(notebook)
-		ret.Code = -1
-		ret.Msg = err.Error()
 		return
 	}
 

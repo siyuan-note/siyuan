@@ -311,6 +311,7 @@ func TestEncryptedPublishAccessCacheInvalidation(t *testing.T) {
 	util.DataDir = t.TempDir()
 	invalidateEncryptedPublishAccessCache()
 	t.Cleanup(func() {
+		forgetRuntimeEncryptedBox(boxID)
 		util.DataDir = oldDataDir
 		invalidateEncryptedPublishAccessCache()
 	})
@@ -333,6 +334,7 @@ func TestEncryptedPublishAccessCacheInvalidation(t *testing.T) {
 	if err = os.WriteFile(filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json"), data, 0644); err != nil {
 		t.Fatal(err)
 	}
+	forgetRuntimeEncryptedBox(boxID)
 	if !IsEncryptedBoxDeniedByPublishAccess(boxID) {
 		t.Fatal("publish access should reuse its cached encrypted notebook snapshot")
 	}

@@ -162,12 +162,13 @@ func removeBoxDir(p string) (err error) {
 }
 
 func RemoveBox(boxID string) (err error) {
-	if _, ok := boxLock.Load(boxID); ok {
+	if !ast.IsNodeIDPattern(boxID) {
+		return errors.New("invalid notebook ID")
+	}
+	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
 		err = errors.New(Conf.language(239))
 		return
 	}
-
-	boxLock.Store(boxID, true)
 	defer boxLock.Delete(boxID)
 
 	if util.IsReservedFilename(boxID) {
@@ -176,11 +177,6 @@ func RemoveBox(boxID string) (err error) {
 
 	FlushTxQueue()
 	isUserGuide := IsUserGuide(boxID)
-	databaseIndexDataLock.Lock()
-	defer databaseIndexDataLock.Unlock()
-	createDocLock.Lock()
-	defer createDocLock.Unlock()
-
 	localPath := filepath.Join(util.DataDir, boxID)
 	if !filelock.IsExist(localPath) {
 		return
@@ -189,9 +185,20 @@ func RemoveBox(boxID string) (err error) {
 		return fmt.Errorf("can not remove [%s] caused by it is not a dir", boxID)
 	}
 
-	// 删目录前缓存加密状态：删目录后 conf.json 不复存在，IsEncryptedBox 会返回 false
+	// 删目录前固定加密状态，确保后续历史、资源和索引清理始终使用同一个安全边界。
 	isEncrypted := IsEncryptedBox(boxID)
-	unmount0(boxID)
+	if isEncrypted {
+		// 加密索引先持有生命周期租约再获取索引锁，因此删除也必须先结束生命周期，保持锁顺序一致。
+		unmount0(boxID)
+	}
+
+	databaseIndexDataLock.Lock()
+	defer databaseIndexDataLock.Unlock()
+	createDocLock.Lock()
+	defer createDocLock.Unlock()
+	if !isEncrypted {
+		unmount0(boxID)
+	}
 	ClearRichClipboardBox(boxID)
 	if !isEncrypted {
 		unindex(boxID)
@@ -236,6 +243,7 @@ func RemoveBox(boxID string) (err error) {
 		sql.RemoveEncryptedDBFile(boxID)
 		treenode.RemoveEncryptedBlockTreeDBFile(boxID)
 		removeEncryptedBoxLifecycle(boxID)
+		forgetRuntimeEncryptedBox(boxID)
 	}
 
 	if isUserGuide {
@@ -258,6 +266,10 @@ func RemoveBox(boxID string) (err error) {
 }
 
 func Unmount(boxID string) {
+	if !ast.IsNodeIDPattern(boxID) {
+		logging.LogWarnf("refuse to unmount notebook with invalid ID [%s]", boxID)
+		return
+	}
 	FlushTxQueue()
 
 	unmount0(boxID)
@@ -306,7 +318,6 @@ func unmount0(boxID string) {
 			if err := box.SaveConf(boxConf); err != nil {
 				logging.LogErrorf("save box conf [%s] failed: %s", box.ID, err)
 			}
-			sql.FlushQueue()
 			GenerateFileHistoryForBox(box)
 		})
 		return
@@ -321,12 +332,21 @@ func unmount0(boxID string) {
 }
 
 func Mount(boxID string) (alreadyMount bool, err error) {
-	if _, ok := boxLock.Load(boxID); ok {
+	if !ast.IsNodeIDPattern(boxID) {
+		return false, errors.New("invalid notebook ID")
+	}
+	if IsEncryptedBox(boxID) {
+		releaseTransition := holdEncryptedBoxTransition(boxID)
+		defer releaseTransition()
+	}
+	return mountBox(boxID)
+}
+
+func mountBox(boxID string) (alreadyMount bool, err error) {
+	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
 		err = errors.New(Conf.language(239))
 		return
 	}
-
-	boxLock.Store(boxID, true)
 	defer boxLock.Delete(boxID)
 
 	FlushTxQueue()
@@ -414,6 +434,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
 	}
 	if boxConf.Encrypted {
+		markRuntimeEncryptedBox(boxID)
 		mountedEncryptedBoxes.Store(boxID, true)
 	}
 	if _, ensureErr := EnsureBoxDoc(boxID); nil != ensureErr {

@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/fs"
 	"path/filepath"
@@ -131,10 +132,28 @@ func (box *Box) Index() {
 }
 
 func removeBoxRefs(boxID string) {
+	if IsEncryptedBox(boxID) {
+		if err := AcquireEncryptedBoxOperation(boxID); err != nil {
+			return
+		}
+		defer ReleaseEncryptedBoxOperation(boxID)
+	}
 	sql.DeleteBoxRefsQueue(boxID)
 }
 
 func indexBox(boxID string) {
+	encrypted := IsEncryptedBox(boxID)
+	if encrypted {
+		if err := AcquireEncryptedBoxOperation(boxID); err != nil {
+			logging.LogWarnf("skip indexing encrypted notebook [%s]: %s", boxID, err)
+			return
+		}
+		defer ReleaseEncryptedBoxOperation(boxID)
+		if !isEncryptedBoxMounted(boxID) {
+			return
+		}
+	}
+
 	databaseIndexDataLock.Lock()
 	defer databaseIndexDataLock.Unlock()
 
@@ -228,6 +247,18 @@ func indexBox(boxID string) {
 }
 
 func IndexRefs() {
+	boxes := Conf.GetOpenedBoxes()
+	boxIDs := make([]string, 0, len(boxes))
+	for _, box := range boxes {
+		boxIDs = append(boxIDs, box.ID)
+	}
+	release, err := AcquireEncryptedBoxOperations(context.Background(), boxIDs)
+	if err != nil {
+		logging.LogWarnf("skip resolving references while an encrypted notebook is unavailable: %s", err)
+		return
+	}
+	defer release()
+
 	databaseIndexDataLock.Lock()
 	defer databaseIndexDataLock.Unlock()
 
@@ -239,7 +270,6 @@ func IndexRefs() {
 	var defBlockIDs []string
 	defBlockBoxes := map[string]string{} // defBlockID -> boxID，加密笔记本下需按 box 路由后续加载
 	luteEngine := util.NewLute()
-	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
 		encryptedBox := IsEncryptedBox(box.ID)
 		pages := pagedPaths(filepath.Join(util.DataDir, box.ID), 32)

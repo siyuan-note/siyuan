@@ -242,14 +242,14 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 
 | Scenario | Interaction |
 |---|---|
-| Enable | Settings → Authentication → Encrypted Notebook → toggle → set master password (double input + risk confirmation) |
+| Enable | Settings - Authentication - Encrypted Notebook, then enable the toggle and set a master password (double input + risk confirmation) |
 | Disable | Supported only when no live encrypted notebook and no kernel-enumerable history or recovery snapshot depends on the current key backup; otherwise reject, or require explicit permanent purge of those recovery artifacts before deleting global config and backup |
-| Create | File panel "more" menu → "New encrypted notebook" → enter name + master password → auto-unlock and open |
+| Create | File panel - "more" menu - "New encrypted notebook"; enter a name and master password to unlock and open automatically |
 | Icon | Shows lock icon when closed (locked); restores user emoji when opened (unlocked) |
-| Unlock | Click a closed encrypted notebook → master-password prompt (🔓 Unlock xxx) → wait ~1s → opens |
+| Unlock | Click a closed encrypted notebook, enter the password in the master-password prompt (🔓 Unlock xxx), and wait about one second for it to open |
 | Lock | Equals close: first block new operations, wait for or cancel in-flight work, then remove managed DEK handles, delete encrypted SQLite databases, and best-effort clean kernel-managed plaintext caches, temporary files, and access tokens. Unsaved edits and file history are automatically saved before locking |
 | Auto-lock | Each unlocked notebook stores its own last-activity time. Real UI interaction by an authenticated user in the current workspace refreshes all currently unlocked encrypted notebooks together. A headless client can perform the same refresh through an explicit keepalive endpoint that requires authentication and the administrator role; background reads, sync, indexing, and other non-user activity do not keep notebooks alive automatically |
-| Change password | Settings → Authentication → Encrypted Notebook → "Change master password" |
+| Change password | Settings - Authentication - Encrypted Notebook - "Change master password" |
 | Move document | A parent-only move within an encrypted notebook moves ciphertext verbatim and updates indexes; a basename change re-envelopes content. Moves between normal notebooks remain normal; cross-boundary (normal↔encrypted) moves are rejected with a prompt |
 | Doc to heading | Cross-boundary rejected with a prompt |
 | Block ref | Normal refs within an encrypted notebook (searching `((` only searches this notebook; backlinks panel displays normally); cross-boundary (normal↔encrypted, encrypted A↔encrypted B) blocked |
@@ -350,6 +350,8 @@ The following are outside this feature's security boundary and must be stated in
 
 The global state is `Disabled`, `Enabled`, or `RecoveryRequired`. In normal steady state, `Disabled` has no live encrypted notebook or kernel-enumerable key dependency. If startup discovers encrypted notebooks or recovery artifacts while global configuration is missing or disabled, it enters `RecoveryRequired`, never treats them as normal notebooks, and waits for a matching key backup to be restored. Under `Enabled`, each encrypted notebook independently has one of these states: `Locked`, `Unlocking`, `Unlocked`, `Locking`, or `Error`, and starts as `Locked` after application startup.
 
+Encrypted identity detection is fail-closed. If a valid boxID has a missing or damaged `conf.json` or notebook key backup, the presence of a current ciphertext marker or an encryption identity already confirmed by the current process puts the notebook in `Error` and denies normal-notebook reads and writes; the kernel never auto-creates an `Encrypted=false` configuration. Only the notebook-deletion flow may remove the runtime identity, after draining lifecycle leases and clearing the local DEK, mount marker, dedicated databases, and caches.
+
 | Transition | Preconditions | Invariants after success | Failure handling |
 |---|---|---|---|
 | `Locked → Unlocking → Unlocked` | Master-password verification succeeds and ciphertext configuration matches | A usable DEK handle exists only in managed memory; dedicated databases are open; notebook-specific entry points are allowed | Revoke derived KEK/DEK handles, close opened resources, and return to `Locked` |
@@ -357,7 +359,7 @@ The global state is `Disabled`, `Enabled`, or `RecoveryRequired`. In normal stea
 | `Unlocked → Error` | Ciphertext authentication fails, database opening fails, or an invariant is violated | Immediately deny reads and writes; never fall back to a normal-notebook path | Close resources and retain diagnostics without plaintext; the user can only lock or unlock again |
 | Change master password | All encrypted notebooks are `Locked` | All WrappedDEKs, global configuration, and backup update as one recoverable transaction | Keep old configuration and backup usable; no subset of notebooks becomes unlockable only with the new password |
 
-One lifecycle controller per notebook manages state, operation admission, and the active-operation count. Reads, edits, exports, previews, sync, indexing, history view or restore, and AI/MCP access obtain a shared lifecycle lease only while `Unlocked`, and hold it through parsing, cache publication, HTTP response or download completion, and asynchronous-result registration. Lock and delete atomically change the state to `Locking` and close admission, acquire the exclusive lifecycle lease after cancelling or draining active work, then close databases, revoke managed DEK handles, and best-effort clean caches and temporary artifacts while exclusive. They publish `Locked` after key handles and database connections are removed; a temporary-file deletion failure does not block locking, but it is logged and retried on exit or next startup. No new plaintext response, cache refill, or database reconnection may occur after locking completes, but a temporary plaintext copy whose deletion failed may remain on disk.
+One lifecycle controller per notebook manages state, operation admission, and the active-operation count. Reads, edits, exports, previews, sync, indexing, history view or restore, and AI/MCP access obtain a shared lifecycle lease only while `Unlocked`, and hold it through parsing, cache publication, HTTP response or download completion, and asynchronous-result registration. Unlock-and-open completes under one per-notebook transition lock; a mount failure rolls back only an unlock created by that operation and never locks a DEK or mount already used by a concurrent request. Lock and delete atomically change the state to `Locking` and close admission, acquire the exclusive lifecycle lease after cancelling or draining active work, then close databases, revoke managed DEK handles, and best-effort clean caches and temporary artifacts while exclusive. They publish `Locked` after key handles and database connections are removed; a temporary-file deletion failure does not block locking, but it is logged and retried on exit or next startup. No new plaintext response, cache refill, or database reconnection may occur after locking completes, but a temporary plaintext copy whose deletion failed may remain on disk.
 
 The global configuration lock is acquired before any notebook lifecycle lock. An operation involving multiple notebooks acquires lifecycle locks in lexicographic boxID order. DEK-cache, database, file, and other subsystem locks are acquired only after lifecycle locks and released before them. Reverse acquisition, reacquiring the global configuration lock while holding a subsystem lock, and acquiring a lower-level lock while holding a higher-level one are forbidden. Auto-lock stores activity time per notebook, but one authenticated user interaction in the current workspace or an explicit keepalive refreshes every unlocked notebook together. A periodic job checks elapsed time using the system clock, so a system-clock adjustment can advance or delay the trigger accordingly; auto-lock is a convenience protection, not a precise security timing boundary.
 
@@ -420,6 +422,7 @@ Native mobile save flows must call `AcquireExportFile` to obtain a lease contain
 | Disk inspection of files, assets, databases, WAL/SHM, history, snapshots, and logs | No readable body, asset contents, original asset names, or plaintext SQLite pages exist in encrypted-notebook persistent locations; `temp/` may contain plaintext during export or after cleanup failure |
 | Restart after an abnormal exit | Startup removes at least entries under `temp/export/` whose first-level name is a valid boxID; generic temporary-directory initialization may also remove other exports and plugin temporary files |
 | Ciphertext tampering, path substitution, and backup corruption | Authentication or format validation fails safely; never fall back to a normal path, generate replacement key material, or silently overwrite configuration |
+| Both an encrypted notebook's `conf.json` and notebook key backup are missing, or sync removes an encrypted notebook that is currently open locally | Ciphertext or runtime identity puts the former in `Error` without creating a normal configuration; the latter drains in-flight leases and clears the DEK, mount, dedicated databases, caches, and indexes even though `Conf.GetBox` is empty after deletion |
 | Nonce randomness failure, reaching a purpose-key invocation bound, or discovering nonce reuse afterwards | Reject before encryption on randomness failure or bound exhaustion; AES-GCM authentication cannot detect nonce reuse that already occurred, so discovery is handled as a key-compromise incident by rotating the DEK and re-encrypting data |
 | Replay an authenticated historical ciphertext object or key backup | It may validate as an authentic old version but is never claimed to be freshest or from a trusted source; rollback risk is explicit, and the current design does not claim rollback prevention |
 | Master-password change and KEK rewrapping | WrappedDEKs and backup update atomically; an interrupted update leaves the old configuration recoverably usable; the old-password exposure warning is accurate; data and history are verifiably readable before and after migration |
@@ -428,21 +431,21 @@ Native mobile save flows must call `AcquireExportFile` to obtain a lease contain
 ## 22. Usage Guide
 
 ### First-time enablement
-1. Go to **Settings → Authentication → Encrypted Notebook** and toggle it on
+1. Go to **Settings - Authentication - Encrypted Notebook** and toggle it on
 2. Set a master password (double input + risk confirmation). The master password is the unified key for all encrypted notebooks — **you must remember it; there is no recovery backdoor**
-3. Once enabled, you can **create a new encrypted notebook** from the file-panel "more" menu (enter a name + master password → auto-unlocks and opens)
+3. Once enabled, you can **create a new encrypted notebook** from the file-panel "more" menu; enter a name and master password to unlock and open it automatically
 
 > Strength recommendation: 12+ characters, mixed case + digits + symbols. The stronger the master password, the higher the brute-force resistance (password strength is the only line of defense; there is no backdoor).
 
 ### Daily use: unlock and lock
-- **Unlock**: Click a closed encrypted notebook → enter the master password → wait ~1 second (Argon2id derivation) → opens. Unlocking only affects that notebook; other encrypted notebooks stay locked
+- **Unlock**: Click a closed encrypted notebook, enter the master password, and wait about one second for Argon2id derivation before it opens. Unlocking only affects that notebook; other encrypted notebooks stay locked
 - **Lock**: Closing the notebook equals locking. The kernel stops new access, waits for or cancels in-flight work, revokes managed DEK handles and database connections, and best-effort cleans kernel-managed plaintext caches, temporary files, and tokens. **Locking after use** is the most important security habit because it minimizes key and plaintext exposure
 - **After restart**: All encrypted notebooks are force-closed; you must re-enter the master password to unlock (managed DEK handles exist only in process memory and must be derived again after restart)
 
 > Important: An encrypted notebook provides its strongest application-level protection while locked, but locking only best-effort cleans application-controlled memory and temporary data; it does not promise erasure of every transient copy in the operating system or storage media. While unlocked, callers authorized by the main application (APIs, plugins, AI/LLM including MCP) can read plaintext just like a normal notebook; publish readers, anonymous visitors, and the kernel CLI are always denied (see §12 Security premise).
 
 ### Changing the master password
-Go to **Settings → Authentication → Encrypted Notebook → Change master password**. Changing the password only re-wraps each notebook's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.
+Go to **Settings - Authentication - Encrypted Notebook - Change master password**. Changing the password only re-wraps each notebook's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.
 
 > Important semantics: password change uses the KEK envelope model — the DEK itself does not change; only a new KEK (derived from the new password) re-wraps the WrappedDEK. This means **changing the password does not revoke the old password's decryption ability**: if the old password and an old WrappedDEK (retained in sync endpoints, backups, or historical snapshots) leak together, the same DEK can still be unwrapped, decrypting current data. If you suspect the old password has leaked, migrate content to a freshly created encrypted notebook (new DEK) rather than just changing the password.
 
@@ -450,6 +453,8 @@ Go to **Settings → Authentication → Encrypted Notebook → Change master pas
 Encrypted-notebook ciphertext `.sy`/assets/database files sync along with the data (ciphertext in, ciphertext out, self-consistent); the global key material (MasterSalt etc.) is also automatically backed up to the sync directory. **No manual "enable" is needed on a new device after sync**:
 
 An encrypted notebook's open state is never inherited across devices. Even if the synchronized `conf.json` records that another device had the notebook open, the UI and kernel must treat it as closed and skip indexing whenever the local process has no DEK for that notebook; entering the master password unlocks and mounts it locally.
+
+When sync removes an encrypted notebook currently mounted on this device, the kernel completes the local deletion transition before any full-reindex branch, exit early-return, or UI reload: it closes admission, drains active leases, clears the DEK and mount state, deletes dedicated index databases, and completes global-index cleanup. The now-missing disk configuration is never used to decide whether cleanup is required.
 
 1. Configure the same sync account on the new device and complete a sync
 2. Sync pulls the key backup to the local machine; the kernel auto-restores the "enabled" state

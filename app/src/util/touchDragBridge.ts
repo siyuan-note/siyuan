@@ -276,6 +276,7 @@ const handlePointerMove = (event: PointerEvent) => {
         return;
     }
     if ((event.buttons & 1) === 0) {
+        dispatchBridgeDragEnd(event);
         cleanupDrag();
         return;
     }
@@ -311,6 +312,7 @@ const handlePointerUp = (event: PointerEvent) => {
 
 const handlePointerCancel = (event: PointerEvent) => {
     if (dragState?.inputType === "pointer" && dragState.pointerId === event.pointerId) {
+        dispatchBridgeDragEnd(event);
         cleanupDrag();
     }
 };
@@ -457,11 +459,17 @@ const endBridgeDrag = (touch: DragPoint) => {
         elementUnderTouch.dispatchEvent(dropEvent);
     }
 
+    dispatchBridgeDragEnd(touch);
+};
+
+const dispatchBridgeDragEnd = (point?: DragPoint) => {
+    if (!dragState?.isDragging) return;
+
     const dragEndEvent = new DragEvent("dragend", {
         bubbles: true,
         cancelable: true,
-        clientX: touch.clientX,
-        clientY: touch.clientY,
+        clientX: point?.clientX ?? dragState.startX,
+        clientY: point?.clientY ?? dragState.startY,
         dataTransfer: dragState.dataTransfer,
         view: window,
     });
@@ -486,6 +494,7 @@ const cleanupDrag = () => {
 };
 
 const handleCancel = () => {
+    dispatchBridgeDragEnd();
     // touchcancel 时两条路径都需无条件清理（cleanupDrag/cancelManualTouch 内部均做空状态处理）
     cleanupDrag();
     cancelManualTouch();
@@ -516,6 +525,7 @@ export const initTouchDragBridge = () => {
         document.addEventListener("click", handleMouseClick, {capture: true, passive: false});
         window.addEventListener("blur", () => {
             if (dragState?.inputType === "pointer") {
+                dispatchBridgeDragEnd();
                 cleanupDrag();
             }
         });

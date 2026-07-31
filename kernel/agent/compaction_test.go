@@ -278,7 +278,7 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 	defer server.Close()
 
 	events := AgentChat(
-		context.Background(), newTestOpenAIClient(server.URL), "test-model", contextLimit, testSessionID,
+		context.Background(), newTestOpenAIClient(server.URL), "test-model", "", contextLimit, testSessionID,
 		"user-2", 1, "start the current task", nil, "English", nil, EditorContext{}, nil, false,
 		time.Second, 0, "", time.Second, time.Second,
 	)
@@ -373,7 +373,7 @@ func TestAgentChatRegenerateCompactionUsesTruncatedEditedHistory(t *testing.T) {
 	defer server.Close()
 
 	events := AgentChat(
-		context.Background(), newTestOpenAIClient(server.URL), "test-model", contextLimit, testSessionID,
+		context.Background(), newTestOpenAIClient(server.URL), "test-model", "", contextLimit, testSessionID,
 		"user-2", 1, editedTarget, stringPointer(editedBlockHTML), "English", nil, EditorContext{}, nil, true,
 		time.Second, 0, "", time.Second, time.Second,
 	)
@@ -471,7 +471,7 @@ func TestAgentChatRetriesOverflowAfterProactiveCompaction(t *testing.T) {
 	defer server.Close()
 
 	events := AgentChat(
-		context.Background(), newTestOpenAIClient(server.URL), "test-model", contextLimit, testSessionID,
+		context.Background(), newTestOpenAIClient(server.URL), "test-model", "", contextLimit, testSessionID,
 		"user-3", 1, "current task", nil, "English", nil, EditorContext{}, nil, false,
 		time.Second, 0, "", time.Second, time.Second,
 	)

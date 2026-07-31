@@ -1,4 +1,8 @@
 {
+  "reasoningEffortNone": "Keine",
+  "reasoningEffortXHigh": "Sehr hoch",
+  "reasoningEffortMax": "Maximum",
+  "agentModelSwitchWarning": "Die aktuelle Sitzung enthält Kontext zu Schlussfolgerungen oder Werkzeugaufrufen. Nach einem Modellwechsel können die Antwortqualität, die Kontinuität der Werkzeugaufrufe und die Cache-Trefferrate sinken. Mit dem Wechsel fortfahren?",
   "exportFileSaveFailed": "Die Datei kann nicht gespeichert werden: Stellen Sie sicher, dass sie nicht von einem anderen Programm verwendet wird und der Zielort beschreibbar ist",
   "copyRichText": "Rich-Text/HTML kopieren",
   "modelContextLengthTip": "Leer lassen oder auf 0 setzen, um den integrierten Modellkatalog zu verwenden",

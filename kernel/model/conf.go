@@ -381,18 +381,7 @@ func InitConf() {
 	if nil == Conf.Editor.DatabaseAttrUseTabs {
 		Conf.Editor.DatabaseAttrUseTabs = defaultEditor.DatabaseAttrUseTabs
 	}
-	if 1 > len(Conf.Editor.Emoji) {
-		Conf.Editor.Emoji = []string{}
-	}
-	var filteredEmojis []string
-	seenEmojis := map[string]bool{}
-	for _, emoji := range Conf.Editor.Emoji {
-		if emoji, valid := util.FilterRecentIconValue(emoji); valid && !seenEmojis[emoji] {
-			filteredEmojis = append(filteredEmojis, emoji)
-			seenEmojis[emoji] = true
-		}
-	}
-	Conf.Editor.Emoji = filteredEmojis
+	Conf.Editor.Emoji = util.FilterRecentIconValues(Conf.Editor.Emoji)
 	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
 		Conf.Editor.FontSize = 16
 	}

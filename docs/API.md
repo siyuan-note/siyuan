@@ -1826,9 +1826,10 @@ The field types (`keyType`) are:
   }
   ```
 
-    * `data.view`: The rendered viewable instance. Shape depends on `viewType` — `table` returns `columns`/`rows`/`rowCount`, `gallery` returns `columns`/`rows`, `kanban` returns `columns`/`groups` (each group is itself a view instance with `groupKey`/`groupValue`). `view` also carries `filters`, `sorts`, `group`, `showIcon`, `wrapField`, `groupFolded`, `groupHidden`. Note: active filters/grouping can make `rows` empty even when `rowCount` > 0
+    * `data.view`: The rendered view instance. Its shape depends on `viewType`: `table` returns `columns`/`rows`/`rowCount`, while `gallery` and `kanban` return `fields`/`cards`/`cardCount`. When grouping is enabled, `groups` contains a view instance for each group, including `groupKey`/`groupValue`. `view` also carries `filters`, `sorts`, `group`, `showIcon`, `wrapField`, `groupFolded`, and `groupHidden`. Note: active filters or grouping can make the item list empty even when the total item count is greater than 0
     * `data.view.columns[]`: Each has `id`, `name`, `type`, `icon`, `wrap`, `hidden`, `desc`, `calc`, `numberFormat`, `template`, `pin`, `width`; `select`/`mSelect` columns additionally carry `options`
-    * `data.view.rows[].id`: The **row ID** (an item ID). For a bound row this is the same as the bound block ID; for a detached row it is a generated item ID distinct from any block
+    * `data.view.rows[].id`: The table row's **item ID** (`itemID`). It also equals `value.blockID` in that row's primary-key cell. For a bound row, the bound block ID is stored in `value.block.id` in the primary-key cell; these are distinct concepts and must not be assumed equal
+    * `data.view.cards[].id`: The **item ID** (`itemID`) of a gallery or kanban card. When grouping is enabled, table rows or cards are in the corresponding view instances under `groups[]`
     * `data.view.rows[].cells[].value`: A `Value` object — see [Set a cell value](#Set-a-cell-value) for all value shapes. `createdAt`/`updatedAt` are int64 millisecond timestamps
     * `data.views`: Metadata of every view (no rows)
     * `data.isMirror`: `true` when the database block is a mirror (read-only copy) of the database
@@ -2060,7 +2061,7 @@ Updates a single cell (one field of one row). This is the primary write endpoint
 | `mAsset`   | `{"mAsset": [{"type": "image", "name": "", "content": "https://example.com/image"}]}`                               |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
 
-> ⚠️ `itemID` is the **row ID** (`rows[].id` from [Render](#Render)). For a bound row the row ID equals the bound block ID; for a detached row it is a generated item ID. Passing the wrong ID stores the value as an orphan that does not appear in the rendered cell.
+> ⚠️ `itemID` is the **item ID**, which is the rendered item's `id` from [Render](#Render): `rows[].id` for a table and `cards[].id` for a gallery or kanban, inside the corresponding view instance under `groups[]` when grouping is enabled. It also equals the primary-key value's `value.blockID`. For a bound item, the bound block ID is stored in the primary-key value's `value.block.id`; these are distinct concepts and must not be assumed equal. Passing the wrong ID stores the value as an orphan that does not appear in the rendered cell.
 
 For `mAsset`, each item uses `type: "image"` to render an image or `type: "file"` to render a file link. Updating the value replaces the entire `mAsset` array, so append operations must include the existing items.
 

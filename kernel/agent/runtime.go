@@ -384,6 +384,9 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 		if message.Content != "" {
 			entry["content"] = message.Content
 		}
+		if message.ReasoningContent != "" {
+			entry["reasoningContent"] = message.ReasoningContent
+		}
 		if len(message.ToolCalls) > 0 {
 			calls := make([]map[string]any, 0, len(message.ToolCalls))
 			for _, call := range message.ToolCalls {
@@ -400,6 +403,12 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 					"arguments": call.Arguments,
 					"result":    result,
 					"state":     call.State,
+				}
+				if call.ID != "" {
+					persistedCall["id"] = call.ID
+				}
+				if call.ArgumentsJSON != "" {
+					persistedCall["argumentsJSON"] = call.ArgumentsJSON
 				}
 				if len(call.Attachments) > 0 {
 					persistedCall["attachments"] = call.Attachments

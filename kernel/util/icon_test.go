@@ -16,7 +16,10 @@
 
 package util
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestFilterIconValuePreservesSupportedValues(t *testing.T) {
 	for _, icon := range []string{
@@ -70,5 +73,32 @@ func TestFilterRecentIconValueRemovesDynamicIconID(t *testing.T) {
 	expected := "api/icon/getDynamicIcon?color=%23d23f31&content=%E6%97%A5&type=8"
 	if filtered != expected {
 		t.Fatalf("dynamic icon was not canonicalized [expected=%q, actual=%q]", expected, filtered)
+	}
+}
+
+func TestFilterRecentIconValuesReturnsNonNilEmptySlice(t *testing.T) {
+	filtered := FilterRecentIconValues(nil)
+	if nil == filtered {
+		t.Fatal("empty recent icons were returned as nil")
+	}
+	if 0 != len(filtered) {
+		t.Fatalf("empty recent icons were not preserved [actual=%v]", filtered)
+	}
+}
+
+func TestFilterRecentIconValuesCanonicalizesAndDeduplicates(t *testing.T) {
+	filtered := FilterRecentIconValues([]string{
+		"1f600",
+		"1f600",
+		"api/icon/getDynamicIcon?type=8&content=%E6%97%A5&id=source&color=%23d23f31",
+		"api/icon/getDynamicIcon?color=%23d23f31&content=%E6%97%A5&type=8",
+		"file:///tmp/icon.png",
+	})
+	expected := []string{
+		"1f600",
+		"api/icon/getDynamicIcon?color=%23d23f31&content=%E6%97%A5&type=8",
+	}
+	if !reflect.DeepEqual(expected, filtered) {
+		t.Fatalf("recent icons were not filtered [expected=%v, actual=%v]", expected, filtered)
 	}
 }

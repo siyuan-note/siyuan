@@ -1,4 +1,8 @@
 {
+  "reasoningEffortNone": "Tidak ada",
+  "reasoningEffortXHigh": "Sangat tinggi",
+  "reasoningEffortMax": "Maksimum",
+  "agentModelSwitchWarning": "Sesi saat ini berisi konteks penalaran atau pemanggilan alat. Setelah mengganti model, kualitas jawaban, kesinambungan pemanggilan alat, dan rasio hit cache dapat menurun. Lanjutkan mengganti model?",
   "exportFileSaveFailed": "File tidak dapat disimpan; pastikan file tidak sedang digunakan oleh program lain dan lokasi tujuan dapat ditulisi",
   "copyRichText": "Salin teks kaya/HTML",
   "modelContextLengthTip": "Kosongkan atau atur ke 0 untuk menggunakan katalog model bawaan",

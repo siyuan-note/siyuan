@@ -313,21 +313,23 @@ type AgentEvent struct {
 }
 
 type AgentMessage struct {
-	Role          string          `json:"role"`
-	Content       string          `json:"content"`
-	References    []Reference     `json:"references,omitempty"`
-	EditorContext *EditorContext  `json:"editorContext,omitempty"`
-	ToolCalls     []AgentToolCall `json:"toolCalls,omitempty"`
-	EntryID       string          `json:"entryID,omitempty"`
+	Role             string          `json:"role"`
+	Content          string          `json:"content"`
+	ReasoningContent string          `json:"reasoningContent,omitempty"`
+	References       []Reference     `json:"references,omitempty"`
+	EditorContext    *EditorContext  `json:"editorContext,omitempty"`
+	ToolCalls        []AgentToolCall `json:"toolCalls,omitempty"`
+	EntryID          string          `json:"entryID,omitempty"`
 }
 
 type AgentToolCall struct {
-	ID          string            `json:"id,omitempty"`
-	Name        string            `json:"name"`
-	Arguments   map[string]any    `json:"arguments"`
-	Result      string            `json:"result,omitempty"`
-	State       string            `json:"state,omitempty"`
-	Attachments []AgentAttachment `json:"attachments,omitempty"`
+	ID            string            `json:"id,omitempty"`
+	Name          string            `json:"name"`
+	Arguments     map[string]any    `json:"arguments"`
+	ArgumentsJSON string            `json:"argumentsJSON,omitempty"`
+	Result        string            `json:"result,omitempty"`
+	State         string            `json:"state,omitempty"`
+	Attachments   []AgentAttachment `json:"attachments,omitempty"`
 }
 
 type AgentAttachment struct {
@@ -443,7 +445,7 @@ type agentCheckpoint struct {
 	LastCommittedTurnID   string         `json:"lastCommittedTurnID,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, contextLimit int, sessionID string, userEntryID string, contentRevision int64, userMessage string, userBlockHTML *string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilityKey string, contextLimit int, sessionID string, userEntryID string, contentRevision int64, userMessage string, userBlockHTML *string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -648,11 +650,19 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 		modelRound := 0
 		toolCallRounds := 0
 		overflowRetryPending := false
+		imageInputDisabled := imageInputUnsupportedCached(imageCapabilityKey)
+		projectImageMessages := func(source []openai.ChatCompletionMessage) ([]openai.ChatCompletionMessage, bool) {
+			if imageInputDisabled {
+				return downgradeImageInput(source)
+			}
+			return source, false
+		}
 		compactionErrorMessage := func(err error) string {
 			if errors.Is(err, errContextCannotBeCompacted) || isContextOverflow(err) {
 				return kernelModel.Conf.Language(352)
 			}
-			return getAgentRequestErrorMessage(err, messages)
+			requestMessages, _ := projectImageMessages(messages)
+			return getAgentRequestErrorMessage(err, requestMessages)
 		}
 
 		compactContext := func(requestTools []openai.Tool, force bool) (bool, error) {
@@ -666,7 +676,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 			if inputBudget <= 0 {
 				return false, fmt.Errorf("%w: no input budget remains", errContextCannotBeCompacted)
 			}
-			if !force && estimateChatRequestTokens(model, messages, requestTools) <= inputBudget {
+			estimatedMessages, _ := projectImageMessages(messages)
+			if !force && estimateChatRequestTokens(model, estimatedMessages, requestTools) <= inputBudget {
 				return false, nil
 			}
 
@@ -689,6 +700,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 				candidate := candidates[i]
 				candidateCheckpointMsgs := checkpointMessagesAfterCompaction(sessionEntries, candidate, tail)
 				candidateMessages := checkpointMessagesToOpenAIWithSummary(candidateCheckpointMsgs, language, pluginActions, nil)
+				candidateMessages, _ = projectImageMessages(candidateMessages)
 				baseTokens := estimateChatRequestTokens(model, candidateMessages, requestTools)
 				return compactionSummaryMinTokens <= inputBudget-baseTokens-compactionSummaryOverhead
 			})
@@ -699,7 +711,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 			selectedCheckpointMsgs := checkpointMessagesAfterCompaction(sessionEntries, selectedEntryCount, tail)
 			selectedMessages := checkpointMessagesToOpenAIWithSummary(
 				selectedCheckpointMsgs, language, pluginActions, nil)
-			baseTokens := estimateChatRequestTokens(model, selectedMessages, requestTools)
+			estimatedSelectedMessages, _ := projectImageMessages(selectedMessages)
+			baseTokens := estimateChatRequestTokens(model, estimatedSelectedMessages, requestTools)
 			summaryMaxTokens := min(
 				compactionSummaryMaxTokens, inputBudget-baseTokens-compactionSummaryOverhead)
 
@@ -729,7 +742,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 			}
 			nextMessages := checkpointMessagesToOpenAIWithSummary(
 				selectedCheckpointMsgs, language, pluginActions, nextCompaction)
-			if estimateChatRequestTokens(model, nextMessages, requestTools) > inputBudget {
+			estimatedNextMessages, _ := projectImageMessages(nextMessages)
+			if estimateChatRequestTokens(model, estimatedNextMessages, requestTools) > inputBudget {
 				return false, fmt.Errorf("%w: compacted context still exceeds the input budget", errContextCannotBeCompacted)
 			}
 			if err := saveRuntimeCompaction(sessionID, nextCompaction); err != nil {
@@ -779,11 +793,19 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 				StreamOptions:       &openai.StreamOptions{IncludeUsage: true},
 				Temperature:         float32(temperature),
 				MaxCompletionTokens: maxCompletionTokens,
-				// 推理模型努力度（low/medium/high），空串因 omitempty 不发送，非推理模型忽略该参数。
+				// 推理强度按界面选中的供应商档位原样发送，空串因 omitempty 不发送。
 				ReasoningEffort: reasoningEffort,
 			}
 
-			stream, firstResp, roundCancel, streamErr := createStreamWithRetry(ctx, client, req, maxRetries, requestTimeout, streamIdleTimeout, delayForCategory, ch)
+			stream, firstResp, roundCancel, requestMessages, imageDowngraded, imageUnsupportedDetected, streamErr :=
+				createImageCompatibleStream(ctx, client, req, imageCapabilityKey, imageInputDisabled, maxRetries,
+					requestTimeout, streamIdleTimeout, delayForCategory, ch)
+			if imageUnsupportedDetected {
+				imageInputDisabled = true
+			}
+			if imageDowngraded {
+				logging.LogDebugf("agent image input downgraded for model [%s]", model)
+			}
 			if streamErr != nil {
 				if isContextOverflow(streamErr) && !overflowRetryPending {
 					compacted, err := compactContext(requestTools, true)
@@ -808,7 +830,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(352)})
 					return
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(streamErr, messages)})
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(streamErr, requestMessages)})
 				return
 			}
 			overflowRetryPending = false
@@ -926,8 +948,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 				})
 
 				checkpointMsg := AgentMessage{
-					Role:    "assistant",
-					Content: contentBuilder.String(),
+					Role:             "assistant",
+					Content:          contentBuilder.String(),
+					ReasoningContent: reasoningBuilder.String(),
 				}
 				parsedArgs := make([]map[string]any, len(aggregatedToolCalls))
 				var roundAttachments []AgentAttachment
@@ -935,10 +958,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 					args := parseToolArgs(tc.Function.Arguments)
 					parsedArgs[i] = args
 					checkpointMsg.ToolCalls = append(checkpointMsg.ToolCalls, AgentToolCall{
-						ID:        tc.ID,
-						Name:      tc.Function.Name,
-						Arguments: args,
-						State:     "pending",
+						ID:            tc.ID,
+						Name:          tc.Function.Name,
+						Arguments:     args,
+						ArgumentsJSON: tc.Function.Arguments,
+						State:         "pending",
 					})
 				}
 				checkpointMsgs = append(checkpointMsgs, checkpointMsg)
@@ -1225,8 +1249,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 			}
 
 			content := contentBuilder.String()
-			if content != "" {
-				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
+			if content != "" || reasoningBuilder.Len() > 0 {
+				checkpointMsgs = append(checkpointMsgs, AgentMessage{
+					Role:             "assistant",
+					Content:          content,
+					ReasoningContent: reasoningBuilder.String(),
+				})
 			}
 			if content == "" {
 				content = " "
@@ -1236,7 +1264,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, context
 				Content:          content,
 				ReasoningContent: reasoningBuilder.String(),
 			})
-			turn.TokenBreakdown = computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens)
+			turn.TokenBreakdown = computeBreakdownIfNeeded(model, requestMessages, requestTools, lastPromptTokens)
 			if !saveTurn("finished") {
 				return
 			}
@@ -1727,7 +1755,7 @@ func loadCheckpoint(sessionID string) *agentCheckpoint {
 }
 
 // entriesToAgentMessages 把持久化的 entries 还原为 AgentMessage 视图。
-// 仅 user/assistant（含 toolCalls）参与；thinking/confirm/snapshot 等仅供 UI 展示，
+// 仅 user/assistant（含 reasoningContent/toolCalls）参与；thinking/confirm/snapshot 等仅供 UI 展示，
 // 因此不进入 LLM 上下文。配合 checkpointMessagesToOpenAI 即可重建 OpenAI 消息。
 func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 	var msgs []AgentMessage
@@ -1746,7 +1774,12 @@ func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 			}
 			msgs = append(msgs, m)
 		case "assistant":
-			m := AgentMessage{Role: "assistant", Content: e.Content, EntryID: e.ID}
+			m := AgentMessage{
+				Role:             "assistant",
+				Content:          e.Content,
+				ReasoningContent: e.ReasoningCont,
+				EntryID:          e.ID,
+			}
 			if len(e.ToolCalls) > 0 {
 				m.ToolCalls = make([]AgentToolCall, len(e.ToolCalls))
 				for j := range e.ToolCalls {
@@ -1810,8 +1843,9 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 					content = " "
 				}
 				msgs = append(msgs, openai.ChatCompletionMessage{
-					Role:    openai.ChatMessageRoleAssistant,
-					Content: content,
+					Role:             openai.ChatMessageRoleAssistant,
+					Content:          content,
+					ReasoningContent: cm.ReasoningContent,
 				})
 			} else {
 				for j := range cm.ToolCalls {
@@ -1822,20 +1856,25 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 
 				toolCalls := make([]openai.ToolCall, 0, len(cm.ToolCalls))
 				for _, tc := range cm.ToolCalls {
-					argsJSON, _ := gulu.JSON.MarshalJSON(tc.Arguments)
+					argsJSON := tc.ArgumentsJSON
+					if argsJSON == "" {
+						data, _ := gulu.JSON.MarshalJSON(tc.Arguments)
+						argsJSON = string(data)
+					}
 					toolCalls = append(toolCalls, openai.ToolCall{
 						ID:   tc.ID,
 						Type: openai.ToolTypeFunction,
 						Function: openai.FunctionCall{
 							Name:      tc.Name,
-							Arguments: string(argsJSON),
+							Arguments: argsJSON,
 						},
 					})
 				}
 				msgs = append(msgs, openai.ChatCompletionMessage{
-					Role:      openai.ChatMessageRoleAssistant,
-					Content:   cm.Content,
-					ToolCalls: toolCalls,
+					Role:             openai.ChatMessageRoleAssistant,
+					Content:          cm.Content,
+					ReasoningContent: cm.ReasoningContent,
+					ToolCalls:        toolCalls,
 				})
 				for _, tc := range cm.ToolCalls {
 					result := tc.Result
@@ -1864,7 +1903,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 }
 
 // agentMessagesToEntries 把后端运行期累积的 AgentMessage 派生为最小 entries，
-// 用于中途崩溃恢复的 checkpoint 兜底（仅 user/assistant + toolCalls，
+// 用于中途崩溃恢复的 checkpoint 兜底（仅 user/assistant + reasoningContent/toolCalls，
 // 不含 thinking/confirm/snapshot —— 前端完成后会用完整 entries 覆盖）。
 func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 	if len(msgs) == 0 {
@@ -1896,10 +1935,11 @@ func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 				id = fmt.Sprintf("cp_%d", i)
 			}
 			e := SessionEntry{
-				ID:        id,
-				Type:      "assistant",
-				Content:   m.Content,
-				ToolCalls: m.ToolCalls,
+				ID:            id,
+				Type:          "assistant",
+				Content:       m.Content,
+				ReasoningCont: m.ReasoningContent,
+				ToolCalls:     m.ToolCalls,
 			}
 			entries = append(entries, e)
 		}

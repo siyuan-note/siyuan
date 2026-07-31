@@ -145,13 +145,15 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 		ContextLimit:     128,
 		TokenBreakdown:   map[string]int{"user": 3, "system": 10},
 		Delta: []AgentMessage{{
-			Role:    "assistant",
-			Content: "server authoritative content",
+			Role:             "assistant",
+			Content:          "server authoritative content",
+			ReasoningContent: "server authoritative reasoning",
 			ToolCalls: []AgentToolCall{{
-				ID:        "call-1",
-				Name:      "external_write",
-				Arguments: map[string]any{"action": "write"},
-				State:     "executing",
+				ID:            "call-1",
+				Name:          "external_write",
+				Arguments:     map[string]any{"action": "write"},
+				ArgumentsJSON: "{\n  \"action\": \"write\"\n}",
+				State:         "executing",
 			}},
 		}},
 	}
@@ -198,6 +200,10 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 	toolCall := toolCalls[0]
 	if toolCall["result"] != toolUnknownResult {
 		t.Fatalf("executing external write must be restored with an explicit unknown result: %#v", toolCall)
+	}
+	if assistant["reasoningContent"] != "server authoritative reasoning" || toolCall["id"] != "call-1" ||
+		toolCall["argumentsJSON"] != "{\n  \"action\": \"write\"\n}" {
+		t.Fatalf("runtime did not preserve the complete assistant context: %#v", assistant)
 	}
 	if numberToInt64(recovered["promptTokens"]) != 21 || numberToInt64(recovered["completionTokens"]) != 8 ||
 		numberToInt64(recovered["contextTokens"]) != 13 || numberToInt64(recovered["contextCachedTokens"]) != 5 ||
@@ -247,6 +253,14 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 		t.Fatalf("recovered history was duplicated: %#v", entries)
 	} else if entries[1].(map[string]any)["content"] != "server authoritative content" {
 		t.Fatalf("client snapshot overwrote authoritative runtime content: %#v", entries[1])
+	} else {
+		assistant := entries[1].(map[string]any)
+		toolCalls := assistant["toolCalls"].([]any)
+		toolCall := toolCalls[0].(map[string]any)
+		if assistant["reasoningContent"] != "server authoritative reasoning" || toolCall["id"] != "call-1" ||
+			toolCall["argumentsJSON"] != "{\n  \"action\": \"write\"\n}" {
+			t.Fatalf("committed session lost the complete assistant context: %#v", assistant)
+		}
 	}
 	repeatedCommit := map[string]any{}
 	for key, value := range committed {

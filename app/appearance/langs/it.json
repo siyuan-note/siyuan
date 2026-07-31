@@ -1,4 +1,8 @@
 {
+  "reasoningEffortNone": "Nessuno",
+  "reasoningEffortXHigh": "Molto alto",
+  "reasoningEffortMax": "Massimo",
+  "agentModelSwitchWarning": "La sessione corrente contiene contesto di ragionamento o chiamate agli strumenti. Dopo il cambio di modello, la qualità delle risposte, la continuità delle chiamate agli strumenti e il tasso di hit della cache potrebbero diminuire. Continuare con il cambio?",
   "exportFileSaveFailed": "Impossibile salvare il file; assicurati che non sia utilizzato da un altro programma e che il percorso di destinazione sia scrivibile",
   "copyRichText": "Copia testo formattato/HTML",
   "modelContextLengthTip": "Lascia vuoto o imposta 0 per usare il catalogo dei modelli integrato",

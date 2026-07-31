@@ -136,7 +136,9 @@ func agentChat(c *gin.Context) {
 		contentRevision = *req.ContentRevision
 	}
 	contextLimit := agent.ResolveModelContextLimit(selectedModel.Name, selectedModel.ContextLength)
-	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, contextLimit, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.BlockHTML, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout, streamIdleTimeout)
+	imageCapabilityKey := fmt.Sprintf("%s\x00%s\x00%s\x00%s\x00%s",
+		selectedProvider.ID, selectedModel.ID, selectedProvider.BaseURL, selectedProvider.Protocol, selectedModel.Name)
+	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, imageCapabilityKey, contextLimit, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.BlockHTML, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout, streamIdleTimeout)
 	defer cancel()
 	streamClosed := false
 	defer func() {

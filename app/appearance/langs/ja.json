@@ -1,4 +1,8 @@
 {
+  "reasoningEffortNone": "なし",
+  "reasoningEffortXHigh": "非常に高い",
+  "reasoningEffortMax": "最大",
+  "agentModelSwitchWarning": "現在のセッションには推論またはツール呼び出しのコンテキストが含まれています。モデルを切り替えると、回答品質、ツール呼び出しの継続性、キャッシュヒット率が低下する可能性があります。切り替えを続行しますか？",
   "exportFileSaveFailed": "ファイルを保存できません。別のプログラムで使用されていないこと、および保存先に書き込み可能であることを確認してください",
   "copyRichText": "リッチテキスト/HTMLとしてコピー",
   "modelContextLengthTip": "空欄または 0 にすると内蔵モデルカタログを使用します",

@@ -4,6 +4,7 @@ import {
     applyAgentUserEdit,
     findAgentUserEntryIndex,
     hasAgentExecutedToolsAfter,
+    hasAgentModelSpecificContext,
     isAgentRegenerateStateCurrent
 } from "./AgentHistory";
 
@@ -35,6 +36,22 @@ describe("AgentHistory", () => {
             {id: "user-1", type: "user"},
             {id: "snapshot-1", type: "snapshot"},
         ], 0), true);
+    });
+
+    it("detects model-specific context in the current session", () => {
+        assert.equal(hasAgentModelSpecificContext([
+            {type: "assistant", reasoningContent: "reasoning"},
+        ]), true);
+        assert.equal(hasAgentModelSpecificContext([
+            {type: "thinking", steps: [{reasoningContent: "reasoning"}]},
+        ]), true);
+        assert.equal(hasAgentModelSpecificContext([
+            {type: "assistant", toolCalls: [{}]},
+        ]), true);
+        assert.equal(hasAgentModelSpecificContext([
+            {type: "assistant", reasoningContent: "  ", toolCalls: []},
+            {type: "thinking", steps: [{reasoningContent: ""}]},
+        ]), false);
     });
 
     it("rejects regenerate state changed while confirmation is open", () => {

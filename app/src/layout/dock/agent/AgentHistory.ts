@@ -2,6 +2,8 @@ export type AgentHistoryEntry = {
     id?: string;
     type: string;
     status?: string;
+    reasoningContent?: string;
+    steps?: Array<{ reasoningContent?: string }>;
     toolCalls?: Array<{ result?: string; state?: string }>;
 };
 
@@ -26,6 +28,15 @@ export const hasAgentExecutedToolsAfter = (entries: AgentHistoryEntry[], entryIn
         }
         return entry.type === "assistant" && !!entry.toolCalls?.some((call) =>
             call.state === "executing" || call.state === "completed" || call.result !== undefined);
+    });
+};
+
+export const hasAgentModelSpecificContext = (entries: AgentHistoryEntry[]): boolean => {
+    return entries.some((entry) => {
+        if (entry.type === "assistant") {
+            return !!entry.reasoningContent?.trim() || !!entry.toolCalls?.length;
+        }
+        return entry.type === "thinking" && !!entry.steps?.some(step => step.reasoningContent?.trim());
     });
 };
 

@@ -1,4 +1,5 @@
 {
+  "agentModelSwitchWarning": "Geçerli oturum, akıl yürütme veya araç çağrısı bağlamı içeriyor. Model değiştirildikten sonra yanıt kalitesi, araç çağrısı sürekliliği ve önbellek isabet oranı düşebilir. Değişikliğe devam edilsin mi?",
   "exportFileSaveFailed": "Dosya kaydedilemedi; başka bir program tarafından kullanılmadığından ve hedef konumun yazılabilir olduğundan emin olun",
   "copyRichText": "Zengin metni/HTML'yi kopyala",
   "modelContextLengthTip": "Yerleşik model kataloğunu kullanmak için boş bırakın veya 0 olarak ayarlayın",

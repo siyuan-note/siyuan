@@ -313,21 +313,23 @@ type AgentEvent struct {
 }
 
 type AgentMessage struct {
-	Role          string          `json:"role"`
-	Content       string          `json:"content"`
-	References    []Reference     `json:"references,omitempty"`
-	EditorContext *EditorContext  `json:"editorContext,omitempty"`
-	ToolCalls     []AgentToolCall `json:"toolCalls,omitempty"`
-	EntryID       string          `json:"entryID,omitempty"`
+	Role             string          `json:"role"`
+	Content          string          `json:"content"`
+	ReasoningContent string          `json:"reasoningContent,omitempty"`
+	References       []Reference     `json:"references,omitempty"`
+	EditorContext    *EditorContext  `json:"editorContext,omitempty"`
+	ToolCalls        []AgentToolCall `json:"toolCalls,omitempty"`
+	EntryID          string          `json:"entryID,omitempty"`
 }
 
 type AgentToolCall struct {
-	ID          string            `json:"id,omitempty"`
-	Name        string            `json:"name"`
-	Arguments   map[string]any    `json:"arguments"`
-	Result      string            `json:"result,omitempty"`
-	State       string            `json:"state,omitempty"`
-	Attachments []AgentAttachment `json:"attachments,omitempty"`
+	ID            string            `json:"id,omitempty"`
+	Name          string            `json:"name"`
+	Arguments     map[string]any    `json:"arguments"`
+	ArgumentsJSON string            `json:"argumentsJSON,omitempty"`
+	Result        string            `json:"result,omitempty"`
+	State         string            `json:"state,omitempty"`
+	Attachments   []AgentAttachment `json:"attachments,omitempty"`
 }
 
 type AgentAttachment struct {
@@ -939,8 +941,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 				})
 
 				checkpointMsg := AgentMessage{
-					Role:    "assistant",
-					Content: contentBuilder.String(),
+					Role:             "assistant",
+					Content:          contentBuilder.String(),
+					ReasoningContent: reasoningBuilder.String(),
 				}
 				parsedArgs := make([]map[string]any, len(aggregatedToolCalls))
 				var roundAttachments []AgentAttachment
@@ -948,10 +951,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					args := parseToolArgs(tc.Function.Arguments)
 					parsedArgs[i] = args
 					checkpointMsg.ToolCalls = append(checkpointMsg.ToolCalls, AgentToolCall{
-						ID:        tc.ID,
-						Name:      tc.Function.Name,
-						Arguments: args,
-						State:     "pending",
+						ID:            tc.ID,
+						Name:          tc.Function.Name,
+						Arguments:     args,
+						ArgumentsJSON: tc.Function.Arguments,
+						State:         "pending",
 					})
 				}
 				checkpointMsgs = append(checkpointMsgs, checkpointMsg)
@@ -1238,8 +1242,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			}
 
 			content := contentBuilder.String()
-			if content != "" {
-				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
+			if content != "" || reasoningBuilder.Len() > 0 {
+				checkpointMsgs = append(checkpointMsgs, AgentMessage{
+					Role:             "assistant",
+					Content:          content,
+					ReasoningContent: reasoningBuilder.String(),
+				})
 			}
 			if content == "" {
 				content = " "
@@ -1740,7 +1748,7 @@ func loadCheckpoint(sessionID string) *agentCheckpoint {
 }
 
 // entriesToAgentMessages 把持久化的 entries 还原为 AgentMessage 视图。
-// 仅 user/assistant（含 toolCalls）参与；thinking/confirm/snapshot 等仅供 UI 展示，
+// 仅 user/assistant（含 reasoningContent/toolCalls）参与；thinking/confirm/snapshot 等仅供 UI 展示，
 // 因此不进入 LLM 上下文。配合 checkpointMessagesToOpenAI 即可重建 OpenAI 消息。
 func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 	var msgs []AgentMessage
@@ -1759,7 +1767,12 @@ func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 			}
 			msgs = append(msgs, m)
 		case "assistant":
-			m := AgentMessage{Role: "assistant", Content: e.Content, EntryID: e.ID}
+			m := AgentMessage{
+				Role:             "assistant",
+				Content:          e.Content,
+				ReasoningContent: e.ReasoningCont,
+				EntryID:          e.ID,
+			}
 			if len(e.ToolCalls) > 0 {
 				m.ToolCalls = make([]AgentToolCall, len(e.ToolCalls))
 				for j := range e.ToolCalls {
@@ -1823,8 +1836,9 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 					content = " "
 				}
 				msgs = append(msgs, openai.ChatCompletionMessage{
-					Role:    openai.ChatMessageRoleAssistant,
-					Content: content,
+					Role:             openai.ChatMessageRoleAssistant,
+					Content:          content,
+					ReasoningContent: cm.ReasoningContent,
 				})
 			} else {
 				for j := range cm.ToolCalls {
@@ -1835,20 +1849,25 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 
 				toolCalls := make([]openai.ToolCall, 0, len(cm.ToolCalls))
 				for _, tc := range cm.ToolCalls {
-					argsJSON, _ := gulu.JSON.MarshalJSON(tc.Arguments)
+					argsJSON := tc.ArgumentsJSON
+					if argsJSON == "" {
+						data, _ := gulu.JSON.MarshalJSON(tc.Arguments)
+						argsJSON = string(data)
+					}
 					toolCalls = append(toolCalls, openai.ToolCall{
 						ID:   tc.ID,
 						Type: openai.ToolTypeFunction,
 						Function: openai.FunctionCall{
 							Name:      tc.Name,
-							Arguments: string(argsJSON),
+							Arguments: argsJSON,
 						},
 					})
 				}
 				msgs = append(msgs, openai.ChatCompletionMessage{
-					Role:      openai.ChatMessageRoleAssistant,
-					Content:   cm.Content,
-					ToolCalls: toolCalls,
+					Role:             openai.ChatMessageRoleAssistant,
+					Content:          cm.Content,
+					ReasoningContent: cm.ReasoningContent,
+					ToolCalls:        toolCalls,
 				})
 				for _, tc := range cm.ToolCalls {
 					result := tc.Result
@@ -1877,7 +1896,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 }
 
 // agentMessagesToEntries 把后端运行期累积的 AgentMessage 派生为最小 entries，
-// 用于中途崩溃恢复的 checkpoint 兜底（仅 user/assistant + toolCalls，
+// 用于中途崩溃恢复的 checkpoint 兜底（仅 user/assistant + reasoningContent/toolCalls，
 // 不含 thinking/confirm/snapshot —— 前端完成后会用完整 entries 覆盖）。
 func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 	if len(msgs) == 0 {
@@ -1909,10 +1928,11 @@ func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 				id = fmt.Sprintf("cp_%d", i)
 			}
 			e := SessionEntry{
-				ID:        id,
-				Type:      "assistant",
-				Content:   m.Content,
-				ToolCalls: m.ToolCalls,
+				ID:            id,
+				Type:          "assistant",
+				Content:       m.Content,
+				ReasoningCont: m.ReasoningContent,
+				ToolCalls:     m.ToolCalls,
 			}
 			entries = append(entries, e)
 		}

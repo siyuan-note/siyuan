@@ -1,4 +1,5 @@
 {
+  "agentModelSwitchWarning": "當前會話包含推理或工具呼叫上下文。切換模型後，回答品質、工具呼叫連續性和快取命中率可能下降。是否繼續切換？",
   "exportFileSaveFailed": "無法儲存檔案，請確認該檔案未被其他程式佔用且目標位置可寫入",
   "copyRichText": "複製富文字/HTML",
   "modelContextLengthTip": "留空或設為 0 時使用內建模型表識別",

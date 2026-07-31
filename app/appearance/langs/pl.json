@@ -1,4 +1,5 @@
 {
+  "agentModelSwitchWarning": "Bieżąca sesja zawiera kontekst rozumowania lub wywołań narzędzi. Po zmianie modelu jakość odpowiedzi, ciągłość wywołań narzędzi i współczynnik trafień pamięci podręcznej mogą się obniżyć. Kontynuować zmianę?",
   "exportFileSaveFailed": "Nie można zapisać pliku; upewnij się, że nie jest używany przez inny program i że lokalizacja docelowa jest zapisywalna",
   "copyRichText": "Kopiuj tekst sformatowany/HTML",
   "modelContextLengthTip": "Pozostaw puste lub ustaw 0, aby użyć wbudowanego katalogu modeli",

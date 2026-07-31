@@ -25,6 +25,7 @@ import {
     findAgentUserEntryIndex,
     filterAgentReferencesForContent,
     hasAgentExecutedToolsAfter,
+    hasAgentModelSpecificContext,
     isAgentRegenerateStateCurrent
 } from "./AgentHistory";
 import {
@@ -68,7 +69,15 @@ type SessionEntry =
     | (EntryBase & {
     type: "assistant";
     content?: string;
-    toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string; state?: string }>;
+    reasoningContent?: string;
+    toolCalls?: Array<{
+        id?: string;
+        name: string;
+        arguments: Record<string, unknown>;
+        argumentsJSON?: string;
+        result?: string;
+        state?: string
+    }>;
     timestamp?: number
 })
     | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; effects?: IToolEffects; status?: string })
@@ -375,7 +384,30 @@ export class AgentChat extends Model {
         this.refreshModelOptions();
         // 选中模型变更：原生 select 的 change 事件，无需自定义菜单逻辑。
         this.modelSelect.addEventListener("change", () => {
-            this.selectedModel = this.modelSelect.value;
+            const nextModel = this.modelSelect.value;
+            const previousModel = this.selectedModel;
+            if (!nextModel || nextModel === previousModel) {
+                return;
+            }
+            if (!hasAgentModelSpecificContext(this.entries)) {
+                this.selectedModel = nextModel;
+                return;
+            }
+            const sessionID = this.sessionId;
+            this.modelSelect.value = previousModel;
+            confirmDialog(window.siyuan.languages.confirm,
+                window.siyuan.languages.agentModelSwitchWarning,
+                () => {
+                    if (this.sessionId !== sessionID || this.selectedModel !== previousModel ||
+                        !this.modelOptions.some(option => option.id === nextModel)) {
+                        this.updateModelLabel();
+                        return;
+                    }
+                    this.selectedModel = nextModel;
+                    this.modelSelect.value = nextModel;
+                }, () => {
+                    this.modelSelect.value = this.selectedModel;
+                });
         });
         // 无模型时拦截下拉展开，改为打开设置-人工智能面板（动态 import 避免循环依赖）。
         this.modelSelect.addEventListener("mousedown", (e: MouseEvent) => {

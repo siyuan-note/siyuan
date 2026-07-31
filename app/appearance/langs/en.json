@@ -1,4 +1,5 @@
 {
+  "agentModelSwitchWarning": "The current session contains reasoning or tool call context. After switching models, response quality, tool call continuity, and cache hit rate may decrease. Continue switching?",
   "exportFileSaveFailed": "Unable to save the file; make sure it is not in use by another program and the destination is writable",
   "copyRichText": "Copy rich text/HTML",
   "modelContextLengthTip": "Leave blank or set to 0 to use the built-in model catalog",

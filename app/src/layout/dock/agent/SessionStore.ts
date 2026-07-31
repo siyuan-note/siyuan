@@ -74,7 +74,14 @@ export interface AgentSession {
             toolCalls?: Array<{name: string; result?: string}>
         }>;
         reasoningContent?: string;
-        toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string; state?: string}>;
+        toolCalls?: Array<{
+            id?: string;
+            name: string;
+            arguments?: Record<string, unknown>;
+            argumentsJSON?: string;
+            result?: string;
+            state?: string
+        }>;
         duration?: number;
         timestamp?: number;
         name?: string;

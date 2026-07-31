@@ -786,7 +786,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 				StreamOptions:       &openai.StreamOptions{IncludeUsage: true},
 				Temperature:         float32(temperature),
 				MaxCompletionTokens: maxCompletionTokens,
-				// 推理模型努力度（low/medium/high），空串因 omitempty 不发送，非推理模型忽略该参数。
+				// 推理强度按界面选中的供应商档位原样发送，空串因 omitempty 不发送。
 				ReasoningEffort: reasoningEffort,
 			}
 

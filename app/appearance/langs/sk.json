@@ -1,4 +1,7 @@
 {
+  "reasoningEffortNone": "Žiadne",
+  "reasoningEffortXHigh": "Veľmi vysoká",
+  "reasoningEffortMax": "Maximálna",
   "agentModelSwitchWarning": "Aktuálna relácia obsahuje kontext uvažovania alebo volaní nástrojov. Po zmene modelu sa môže znížiť kvalita odpovedí, kontinuita volaní nástrojov a miera zásahov vyrovnávacej pamäte. Pokračovať v zmene?",
   "exportFileSaveFailed": "Súbor sa nepodarilo uložiť; uistite sa, že ho nepoužíva iný program a že cieľové umiestnenie je zapisovateľné",
   "copyRichText": "Kopírovať formátovaný text/HTML",

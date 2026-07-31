@@ -1,4 +1,7 @@
 {
+  "reasoningEffortNone": "Aucun",
+  "reasoningEffortXHigh": "Très élevé",
+  "reasoningEffortMax": "Maximum",
   "agentModelSwitchWarning": "La session actuelle contient un contexte de raisonnement ou d’appels d’outils. Après un changement de modèle, la qualité des réponses, la continuité des appels d’outils et le taux de succès du cache peuvent diminuer. Continuer le changement ?",
   "exportFileSaveFailed": "Impossible d’enregistrer le fichier ; vérifiez qu’il n’est pas utilisé par un autre programme et que l’emplacement de destination est accessible en écriture",
   "copyRichText": "Copier le texte enrichi/HTML",

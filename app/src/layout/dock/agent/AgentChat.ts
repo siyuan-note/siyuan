@@ -38,6 +38,7 @@ import {
     renderToolsLineHTML,
     renderWelcomeHTML
 } from "./AgentMessageRenderer";
+import {getAgentReasoningEffortOptions} from "./AgentReasoning";
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -489,16 +490,9 @@ export class AgentChat extends Model {
         return this.selectedModel;
     }
 
-    // 根据当前选中值刷新按钮上的文字（默认/低/中/高）。
-    // 初始化思考强度原生 select：填充 4 个选项并绑定 change，模式与 initModelSelect 一致。
+    // 初始化思考强度原生 select：提供各供应商使用的标准档位并绑定 change，模式与 initModelSelect 一致。
     private initReasoningEffortSelect() {
-        const L = window.siyuan.languages;
-        const options: Array<{ value: string; label: string }> = [
-            {value: "", label: L.reasoningEffortDefault || "Default"},
-            {value: "low", label: L.reasoningEffortLow || "Low"},
-            {value: "medium", label: L.reasoningEffortMedium || "Medium"},
-            {value: "high", label: L.reasoningEffortHigh || "High"},
-        ];
+        const options = getAgentReasoningEffortOptions(window.siyuan.languages);
         this.reasoningEffortSelect.innerHTML = options
             .map(o => '<option value="' + escapeHtml(o.value) + '">' + escapeHtml(o.label) + "</option>")
             .join("");

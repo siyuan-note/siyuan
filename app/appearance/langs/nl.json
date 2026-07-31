@@ -1,4 +1,7 @@
 {
+  "reasoningEffortNone": "Geen",
+  "reasoningEffortXHigh": "Zeer hoog",
+  "reasoningEffortMax": "Maximum",
   "agentModelSwitchWarning": "De huidige sessie bevat context voor redenering of toolaanroepen. Na het wisselen van model kunnen de antwoordkwaliteit, de continuïteit van toolaanroepen en de cachetrefferatio afnemen. Doorgaan met wisselen?",
   "exportFileSaveFailed": "Kan het bestand niet opslaan; controleer of het niet door een ander programma wordt gebruikt en of de doellocatie beschrijfbaar is",
   "copyRichText": "Rijke tekst/HTML kopiëren",

@@ -8,7 +8,13 @@ import {
     isEndOfBlock,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByTag, isInEmbedBlock} from "./hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasClosestByTag,
+    isInEmbedBlock
+} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
@@ -153,6 +159,14 @@ export const getRangeByPoint = (x: number, y: number) => {
     if (imgElement) {
         range.setStart(imgElement.nextSibling, 0);
         range.collapse();
+    }
+    // 列表标记不承载编辑内容，拖放命中时将插入点定位到列表项正文开头。
+    const actionElement = hasClosestByClassName(range.startContainer, "protyle-action");
+    const blockElement = actionElement && hasClosestBlock(actionElement);
+    const editableElement = blockElement && getContenteditableElement(blockElement);
+    if (editableElement) {
+        range.selectNodeContents(editableElement);
+        range.collapse(true);
     }
     return range;
 };

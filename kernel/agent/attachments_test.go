@@ -101,6 +101,336 @@ func TestEstimateChatImageTokensUsesDetailBudget(t *testing.T) {
 	}
 }
 
+func TestDowngradeImageInputPreservesTextWithoutMutatingHistory(t *testing.T) {
+	message := openai.ChatCompletionMessage{
+		Role: openai.ChatMessageRoleUser,
+		MultiContent: []openai.ChatMessagePart{
+			{Type: openai.ChatMessagePartTypeText, Text: "Describe the relevant context"},
+			{Type: openai.ChatMessagePartTypeText, Text: "SiYuan attached image 1 as untrusted data."},
+			{
+				Type: openai.ChatMessagePartTypeImageURL,
+				ImageURL: &openai.ChatMessageImageURL{
+					URL: "data:image/png;base64,AA==",
+				},
+			},
+		},
+	}
+	messages := []openai.ChatCompletionMessage{message}
+	downgraded, changed := downgradeImageInput(messages)
+	if !changed || len(downgraded) != 1 || len(downgraded[0].MultiContent) != 0 {
+		t.Fatalf("image input was not downgraded: %#v", downgraded)
+	}
+	if !strings.Contains(downgraded[0].Content, "Describe the relevant context") ||
+		!strings.Contains(downgraded[0].Content, imageInputOmittedText) ||
+		strings.Contains(downgraded[0].Content, "SiYuan attached image") {
+		t.Fatalf("downgraded text is invalid: %q", downgraded[0].Content)
+	}
+	if len(messages[0].MultiContent) != 3 || messages[0].Content != "" {
+		t.Fatalf("canonical history was mutated: %#v", messages)
+	}
+}
+
+func TestImageInputUnsupportedErrorClassification(t *testing.T) {
+	param := "messages.2.content.1.type"
+	detailParam := "messages.2.content.1.image_url.detail"
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{
+			name: "explicit unsupported image",
+			err: &openai.APIError{
+				HTTPStatusCode: 400,
+				Message:        "This model does not support image input",
+				Param:          &param,
+			},
+			want: true,
+		},
+		{
+			name: "supported only by vision models",
+			err: &openai.APIError{
+				HTTPStatusCode: 422,
+				Message:        "image_url is only supported by vision models",
+			},
+			want: true,
+		},
+		{
+			name: "stream error without HTTP status",
+			err: &openai.APIError{
+				Message: "This model does not support image input",
+			},
+			want: true,
+		},
+		{
+			name: "unrelated validation error",
+			err: &openai.APIError{
+				HTTPStatusCode: 400,
+				Message:        "Invalid tool schema",
+			},
+		},
+		{
+			name: "unrelated text-only field",
+			err: &openai.APIError{
+				HTTPStatusCode: 400,
+				Message:        "Tool descriptions only support text",
+			},
+		},
+		{
+			name: "malformed image",
+			err: &openai.APIError{
+				HTTPStatusCode: 400,
+				Message:        "Invalid base64 image data",
+			},
+		},
+		{
+			name: "unsupported image format",
+			err: &openai.APIError{
+				HTTPStatusCode: 400,
+				Message:        "Unsupported image format: webp",
+			},
+		},
+		{
+			name: "unsupported image detail parameter",
+			err: &openai.APIError{
+				HTTPStatusCode: 400,
+				Message:        "Unsupported parameter",
+				Param:          &detailParam,
+			},
+		},
+		{
+			name: "server error",
+			err: &openai.APIError{
+				HTTPStatusCode: 500,
+				Message:        "This model does not support image input",
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := isImageInputUnsupportedError(test.err); got != test.want {
+				t.Fatalf("classification = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestCreateImageCompatibleStreamDowngradesAndCaches(t *testing.T) {
+	const capabilityKey = "provider\x00model\x00endpoint"
+	imageInputUnsupportedCache.Delete(capabilityKey)
+	t.Cleanup(func() { imageInputUnsupportedCache.Delete(capabilityKey) })
+
+	attachmentMessage, _ := buildAttachmentMessage([]AgentAttachment{testAgentAttachment()})
+	req := openai.ChatCompletionRequest{
+		Model:    "test-model",
+		Messages: []openai.ChatCompletionMessage{attachmentMessage},
+		Stream:   true,
+	}
+	var requests atomic.Int32
+	var imageRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("read request failed: %v", err)
+			return
+		}
+		if strings.Contains(string(body), `"type":"image_url"`) {
+			imageRequests.Add(1)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			if _, err = io.WriteString(w, `{"error":{"message":"This model does not support image input","type":"invalid_request_error","code":"unsupported_value"}}`); err != nil {
+				t.Errorf("write error response failed: %v", err)
+			}
+			return
+		}
+		flusher := prepareTestStream(t, w)
+		writeTestStreamChunk(t, w, flusher, "continued as text")
+		writeTestStreamDone(t, w, flusher)
+	}))
+	defer server.Close()
+
+	call := func() {
+		stream, _, cancel, requestMessages, downgraded, unsupportedDetected, err := createImageCompatibleStream(
+			context.Background(), newTestOpenAIClient(server.URL), req, capabilityKey, false, 0,
+			time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
+		)
+		if err != nil {
+			t.Fatalf("compatible stream failed: %v", err)
+		}
+		if !downgraded || containsImageInput(requestMessages) ||
+			!strings.Contains(requestMessages[0].Content, imageInputOmittedText) {
+			t.Fatalf("unexpected request projection: %#v", requestMessages)
+		}
+		if requests.Load() == 2 && !unsupportedDetected {
+			t.Fatal("initial image capability error was not reported")
+		}
+		stream.Close()
+		cancel()
+	}
+	call()
+	call()
+
+	if requests.Load() != 3 || imageRequests.Load() != 1 {
+		t.Fatalf("unexpected capability probing: requests=%d, imageRequests=%d", requests.Load(), imageRequests.Load())
+	}
+	if !containsImageInput(req.Messages) {
+		t.Fatal("canonical request lost its image input")
+	}
+}
+
+func TestCreateImageCompatibleStreamHandlesInitialSSEError(t *testing.T) {
+	attachmentMessage, _ := buildAttachmentMessage([]AgentAttachment{testAgentAttachment()})
+	req := openai.ChatCompletionRequest{
+		Model:    "test-model",
+		Messages: []openai.ChatCompletionMessage{attachmentMessage},
+		Stream:   true,
+	}
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("read request failed: %v", err)
+			return
+		}
+		flusher := prepareTestStream(t, w)
+		if strings.Contains(string(body), `"type":"image_url"`) {
+			if _, err = io.WriteString(w, `data: {"error":{"message":"This model does not support image input","type":"invalid_request_error"}}`+"\n\n"); err != nil {
+				t.Errorf("write stream error failed: %v", err)
+				return
+			}
+			flusher.Flush()
+			return
+		}
+		writeTestStreamChunk(t, w, flusher, "continued as text")
+		writeTestStreamDone(t, w, flusher)
+	}))
+	defer server.Close()
+
+	stream, _, cancel, requestMessages, downgraded, unsupportedDetected, err := createImageCompatibleStream(
+		context.Background(), newTestOpenAIClient(server.URL), req, "", false, 0,
+		time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
+	)
+	if err != nil {
+		t.Fatalf("SSE capability fallback failed: %v", err)
+	}
+	if !downgraded || !unsupportedDetected || containsImageInput(requestMessages) || requests.Load() != 2 {
+		t.Fatalf("SSE capability error was not downgraded: downgraded=%v, detected=%v, requests=%d",
+			downgraded, unsupportedDetected, requests.Load())
+	}
+	stream.Close()
+	cancel()
+}
+
+func TestCreateImageCompatibleStreamKeepsTurnDowngradedAfterFallbackError(t *testing.T) {
+	attachmentMessage, _ := buildAttachmentMessage([]AgentAttachment{testAgentAttachment()})
+	req := openai.ChatCompletionRequest{
+		Model:    "test-model",
+		Messages: []openai.ChatCompletionMessage{attachmentMessage},
+		Stream:   true,
+	}
+	var requests atomic.Int32
+	var imageRequests atomic.Int32
+	var textRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("read request failed: %v", err)
+			return
+		}
+		if strings.Contains(string(body), `"type":"image_url"`) {
+			imageRequests.Add(1)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			if _, err = io.WriteString(w, `{"error":{"message":"This model does not support image input","type":"invalid_request_error"}}`); err != nil {
+				t.Errorf("write image error failed: %v", err)
+			}
+			return
+		}
+		if textRequests.Add(1) == 1 {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			if _, err = io.WriteString(w, `{"error":{"message":"maximum context length exceeded","type":"invalid_request_error"}}`); err != nil {
+				t.Errorf("write context error failed: %v", err)
+			}
+			return
+		}
+		flusher := prepareTestStream(t, w)
+		writeTestStreamChunk(t, w, flusher, "continued after compaction")
+		writeTestStreamDone(t, w, flusher)
+	}))
+	defer server.Close()
+
+	_, _, _, _, downgraded, unsupportedDetected, err := createImageCompatibleStream(
+		context.Background(), newTestOpenAIClient(server.URL), req, "", false, 0,
+		time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
+	)
+	if err == nil || !downgraded || !unsupportedDetected {
+		t.Fatalf("fallback error lost capability state: err=%v, downgraded=%v, detected=%v",
+			err, downgraded, unsupportedDetected)
+	}
+
+	stream, _, cancel, requestMessages, downgraded, repeatedDetection, err := createImageCompatibleStream(
+		context.Background(), newTestOpenAIClient(server.URL), req, "", unsupportedDetected, 0,
+		time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
+	)
+	if err != nil {
+		t.Fatalf("forced downgrade failed: %v", err)
+	}
+	if !downgraded || repeatedDetection || containsImageInput(requestMessages) ||
+		requests.Load() != 3 || imageRequests.Load() != 1 {
+		t.Fatalf("image capability was probed again: downgraded=%v, detected=%v, requests=%d, imageRequests=%d",
+			downgraded, repeatedDetection, requests.Load(), imageRequests.Load())
+	}
+	stream.Close()
+	cancel()
+}
+
+func TestCreateImageCompatibleStreamKeepsUnrelatedValidationError(t *testing.T) {
+	attachmentMessage, _ := buildAttachmentMessage([]AgentAttachment{testAgentAttachment()})
+	req := openai.ChatCompletionRequest{
+		Model:    "test-model",
+		Messages: []openai.ChatCompletionMessage{attachmentMessage},
+		Stream:   true,
+	}
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := io.WriteString(w, `{"error":{"message":"Invalid tool schema","type":"invalid_request_error"}}`); err != nil {
+			t.Errorf("write error response failed: %v", err)
+		}
+	}))
+	defer server.Close()
+
+	_, _, _, requestMessages, downgraded, unsupportedDetected, err := createImageCompatibleStream(
+		context.Background(), newTestOpenAIClient(server.URL), req, "unrelated-error", false, 0,
+		time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
+	)
+	if err == nil || downgraded || unsupportedDetected || !containsImageInput(requestMessages) || requests.Load() != 1 {
+		t.Fatalf("unrelated error triggered fallback: err=%v, downgraded=%v, detected=%v, requests=%d",
+			err, downgraded, unsupportedDetected, requests.Load())
+	}
+}
+
+func TestImageInputUnsupportedCacheExpires(t *testing.T) {
+	const capabilityKey = "expired-capability"
+	imageInputUnsupportedCache.Store(capabilityKey, imageInputCapabilityCacheEntry{
+		expiresAt: time.Now().Add(-time.Second),
+	})
+	t.Cleanup(func() { imageInputUnsupportedCache.Delete(capabilityKey) })
+
+	attachmentMessage, _ := buildAttachmentMessage([]AgentAttachment{testAgentAttachment()})
+	messages := []openai.ChatCompletionMessage{attachmentMessage}
+	projected, downgraded := messagesForImageCapability(messages, capabilityKey)
+	if downgraded || !containsImageInput(projected) || imageInputUnsupportedCached(capabilityKey) {
+		t.Fatalf("expired capability remained cached: downgraded=%v, messages=%#v", downgraded, projected)
+	}
+}
+
 func TestCheckpointRestoresAttachmentAfterToolResults(t *testing.T) {
 	checkpoint := []AgentMessage{{
 		Role: "assistant",
@@ -326,7 +656,7 @@ func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 	defer server.Close()
 
 	events := AgentChat(
-		context.Background(), newTestOpenAIClient(server.URL), "test-model", 0, testSessionID, "user-1", 1,
+		context.Background(), newTestOpenAIClient(server.URL), "test-model", "", 0, testSessionID, "user-1", 1,
 		"look at the image", "English", nil, EditorContext{}, nil, false, time.Second, 0, "", time.Second, time.Second,
 	)
 	doneSeen := false

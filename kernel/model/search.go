@@ -566,9 +566,30 @@ func filterSelfHPath(blocks []*Block) {
 
 	for _, b := range blocks {
 		if b.IsDoc() {
-			b.HPath = strings.TrimSuffix(b.HPath, path.Base(b.HPath))
+			b.HPath = trimSelfHPath(b.HPath)
 		}
 	}
+}
+
+func trimSelfHPath(hPath string) string {
+	inTag := false
+	lastSlash := -1
+	for i, r := range hPath {
+		switch r {
+		case '<':
+			inTag = true
+		case '>':
+			inTag = false
+		case '/':
+			if !inTag {
+				lastSlash = i
+			}
+		}
+	}
+	if 0 > lastSlash {
+		return hPath
+	}
+	return hPath[:lastSlash+1]
 }
 
 func prependNotebookNameInHPath(blocks []*Block) {

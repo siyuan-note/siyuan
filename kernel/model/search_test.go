@@ -405,6 +405,44 @@ func TestFromHPathSearchSQLBlockOnlyMarksHPath(t *testing.T) {
 	}
 }
 
+func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	multipleKeywords := fromHPathSearchSQLBlock(&sql.Block{
+		ID:      "20260731120000-hpath01",
+		RootID:  "20260731120000-hpath01",
+		HPath:   "/思源笔记用户指南/请/从这里开始/会员特权",
+		Content: "会员特权",
+		Type:    "d",
+	}, "从这里"+search.TermSep+"会员", 36)
+	singleKeyword := fromHPathSearchSQLBlock(&sql.Block{
+		ID:      "20260731120001-hpath02",
+		RootID:  "20260731120001-hpath02",
+		HPath:   "/会员特权",
+		Content: "会员特权",
+		Type:    "d",
+	}, "会员", 36)
+	blocks := []*Block{
+		multipleKeywords,
+		singleKeyword,
+		{
+			Type:  "NodeParagraph",
+			HPath: "/思源笔记用户指南/<mark>会员</mark>特权",
+		},
+	}
+
+	filterSelfHPath(blocks)
+
+	if expected := "/思源笔记用户指南/请/<mark>从这里</mark>开始/"; expected != blocks[0].HPath {
+		t.Fatalf("多关键字高亮路径移除文档自身后错误：got %q, want %q", blocks[0].HPath, expected)
+	}
+	if expected := "/"; expected != blocks[1].HPath {
+		t.Fatalf("单关键字高亮路径移除文档自身后错误：got %q, want %q", blocks[1].HPath, expected)
+	}
+	if expected := "/思源笔记用户指南/<mark>会员</mark>特权"; expected != blocks[2].HPath {
+		t.Fatalf("非文档块路径不应变化：got %q, want %q", blocks[2].HPath, expected)
+	}
+}
+
 func TestBuildHPathSearchOrderBy(t *testing.T) {
 	setSearchCaseSensitive(t, true)
 	assertOrderBySequence(t, buildHPathSearchOrderBy("Parent", 0),

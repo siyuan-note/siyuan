@@ -45,6 +45,13 @@ interface ITableControlRect {
     height: number;
 }
 
+interface ITableEdgeHover {
+    cell: HTMLTableCellElement;
+    type: Exclude<TableControlType, "cell">;
+    distance: number;
+    index?: number;
+}
+
 const getCell = (target: EventTarget) => {
     return (target as Element)?.closest?.("th, td") as HTMLTableCellElement;
 };
@@ -108,7 +115,8 @@ const replaceCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
 };
 
 const getCellText = (cell: HTMLTableCellElement) => cell.innerText.replace(/\n+$/g, "");
-const TABLE_EDGE_CONTROL_SIZE = 28;
+const TABLE_HANDLE_THICKNESS = 16;
+const TABLE_ADD_CONTROL_THICKNESS = 16;
 const TABLE_EDGE_CONTROL_TRIGGER_SIZE = 8;
 
 export class TableControl {
@@ -124,6 +132,7 @@ export class TableControl {
     private selection: ITableSelection;
     private hoverCell: HTMLTableCellElement;
     private hoverType: TableControlType;
+    private hoverIndex: number;
     private selectionElements: HTMLElement[] = [];
     private selectionElementIndex = 0;
     private selectedCells: HTMLTableCellElement[] = [];
@@ -168,6 +177,8 @@ export class TableControl {
                 this.clear();
             } else if (this.hoverCell && !this.hoverCell.isConnected) {
                 this.hoverCell = undefined;
+                this.hoverType = undefined;
+                this.hoverIndex = undefined;
                 this.scheduleRender();
             }
         });
@@ -199,22 +210,26 @@ export class TableControl {
             const targetTable = targetCell?.closest("table") as HTMLTableElement;
             const targetViewportRect = targetTable ? this.getTableViewportRect(targetTable) : undefined;
             const edgeHover = !targetCell || (targetViewportRect &&
-                event.clientX >= targetViewportRect.left &&
                 event.clientX <= targetViewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE) ?
                 this.getEdgeHover(event.clientX, event.clientY) : undefined;
             const cell = edgeHover?.cell || targetCell;
             if (cell && getTableNode(cell) && !this.protyle.disabled) {
                 const hoverType = edgeHover?.type || "cell";
-                if (cell === this.hoverCell && hoverType === this.hoverType) {
+                const hoverIndex = edgeHover?.index;
+                if (cell === this.hoverCell && hoverType === this.hoverType && hoverIndex === this.hoverIndex) {
                     return;
                 }
                 this.hoverCell = cell;
                 this.hoverType = hoverType;
+                this.hoverIndex = hoverIndex;
                 this.scheduleRender();
-            } else if (this.hoverCell) {
-                this.hoverCell = undefined;
-                this.hoverType = undefined;
-                this.scheduleRender();
+            } else {
+                if (this.hoverCell) {
+                    this.hoverCell = undefined;
+                    this.hoverType = undefined;
+                    this.hoverIndex = undefined;
+                    this.scheduleRender();
+                }
             }
         }, {signal});
         this.wysiwygElement.addEventListener("pointerleave", event => {
@@ -223,6 +238,7 @@ export class TableControl {
             }
             this.hoverCell = undefined;
             this.hoverType = undefined;
+            this.hoverIndex = undefined;
             this.scheduleRender();
         }, {signal});
         this.wysiwygElement.addEventListener("pointerdown", event => {
@@ -286,6 +302,16 @@ export class TableControl {
         }, {capture: true, signal});
         this.protyle.element.addEventListener("scroll", () => this.scheduleRender(), {capture: true, signal});
         window.addEventListener("resize", () => this.scheduleRender(), {signal});
+        this.element.addEventListener("wheel", event => {
+            if (event.ctrlKey) {
+                return;
+            }
+            event.preventDefault();
+            this.protyle.contentElement.scrollBy({
+                left: event.deltaX,
+                top: event.deltaY,
+            });
+        }, {passive: false, signal});
         this.element.addEventListener("pointerdown", event => this.handlePointerDown(event), {signal});
         this.element.addEventListener("click", event => this.handleClick(event), {signal});
         this.element.addEventListener("contextmenu", event => {
@@ -294,7 +320,7 @@ export class TableControl {
                 return;
             }
             if (!this.selection || this.selection.mode !== type || !this.isCellInSelection(this.hoverCell)) {
-                this.selectFromCell(type, this.hoverCell, false, false);
+                this.selectFromCell(type, this.hoverCell, false, false, this.hoverIndex);
             }
             event.preventDefault();
             event.stopPropagation();
@@ -306,6 +332,7 @@ export class TableControl {
             }
             this.hoverCell = undefined;
             this.hoverType = undefined;
+            this.hoverIndex = undefined;
             this.scheduleRender();
         }, {signal});
     }
@@ -323,7 +350,7 @@ export class TableControl {
         if (type !== "row" && type !== "column") {
             return;
         }
-        this.selectFromCell(type, this.hoverCell, isPrimaryModifier(event), event.shiftKey);
+        this.selectFromCell(type, this.hoverCell, isPrimaryModifier(event), event.shiftKey, this.hoverIndex);
         if (!this.selection) {
             return;
         }
@@ -383,7 +410,8 @@ export class TableControl {
         }
     }
 
-    private selectFromCell(mode: TableSelectionMode, cell: HTMLTableCellElement, toggle: boolean, extend: boolean) {
+    private selectFromCell(mode: TableSelectionMode, cell: HTMLTableCellElement, toggle: boolean, extend: boolean,
+                           logicalIndex?: number) {
         const node = getTableNode(cell);
         const table = cell.closest("table") as HTMLTableElement;
         if (!node || !table) {
@@ -398,6 +426,7 @@ export class TableControl {
         if (!info) {
             return;
         }
+        const index = logicalIndex ?? (mode === "row" ? info.row : info.col);
         const sameSelection = this.selection?.node === node && this.selection.mode === mode;
         if (!sameSelection) {
             this.selection = {
@@ -406,7 +435,7 @@ export class TableControl {
                 mode,
                 indexes: new Set(),
                 cells: new Set(),
-                anchor: mode === "cell" ? cell : mode === "row" ? info.row : info.col,
+                anchor: mode === "cell" ? cell : index,
                 activeCell: cell,
             };
         }
@@ -431,7 +460,6 @@ export class TableControl {
                 this.selection.anchor = cell;
             }
         } else {
-            const index = mode === "row" ? info.row : info.col;
             if (extend && typeof this.selection.anchor === "number") {
                 if (!toggle) {
                     this.selection.indexes.clear();
@@ -614,12 +642,36 @@ export class TableControl {
         return intersectRects(tableRect, wrapperRect, contentRect);
     }
 
+    private getColumnRect(table: HTMLTableElement, grid: ITableGrid, index: number) {
+        const column = table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col")[index];
+        const columnRect = column?.getBoundingClientRect();
+        const tableRect = table.getBoundingClientRect();
+        if (columnRect?.width > 0 && columnRect.right > tableRect.left && columnRect.left < tableRect.right) {
+            return columnRect;
+        }
+        const info = grid.cellInfos.find(item => item.col === index && item.colspan === 1) ||
+            grid.cellInfos.find(item => item.col <= index && item.col + item.colspan > index);
+        if (!info) {
+            return;
+        }
+        const cellRect = info.cell.getBoundingClientRect();
+        if (info.colspan === 1) {
+            return cellRect;
+        }
+        const width = cellRect.width / info.colspan;
+        const left = cellRect.left + width * (index - info.col);
+        return {
+            left,
+            top: cellRect.top,
+            right: left + width,
+            bottom: cellRect.bottom,
+            width,
+            height: cellRect.height,
+        };
+    }
+
     private getEdgeHover(clientX: number, clientY: number) {
-        const candidates: {
-            cell: HTMLTableCellElement;
-            type: Exclude<TableControlType, "cell">;
-            distance: number;
-        }[] = [];
+        const candidates: ITableEdgeHover[] = [];
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
             const tableRect = table.getBoundingClientRect();
             const viewportRect = this.getTableViewportRect(table);
@@ -634,33 +686,43 @@ export class TableControl {
                 const rowControlHovered = firstRow ?
                     clientX >= viewportRect.left &&
                     clientX <= Math.min(viewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE, viewportRect.right) :
-                    clientX >= viewportRect.left - TABLE_EDGE_CONTROL_SIZE && clientX <= viewportRect.left;
+                    clientX >= viewportRect.left - TABLE_HANDLE_THICKNESS && clientX <= viewportRect.left;
                 const cell = rowControlHovered ? grid.grid[rowIndex]?.find(item => item) : undefined;
                 if (cell && rowIndex > -1) {
                     candidates.push({
                         cell,
                         type: "row",
                         distance: firstRow ? clientX - viewportRect.left : viewportRect.left - clientX,
+                        index: rowIndex,
                     });
                 }
             }
-            if (clientY >= viewportRect.top - TABLE_EDGE_CONTROL_SIZE && clientY <= viewportRect.top &&
+            if (clientY >= viewportRect.top - TABLE_HANDLE_THICKNESS && clientY <= viewportRect.top &&
                 clientX >= viewportRect.left && clientX <= viewportRect.right) {
-                const cells = Array.from(new Set(grid.grid[0]?.filter(item => item) || []));
-                const cell = cells.find(item => {
-                    const rect = intersectRects(item.getBoundingClientRect(), viewportRect);
-                    return rect.width > 0 && clientX >= rect.left && clientX <= rect.right;
-                });
-                if (cell) {
+                let columnIndex = -1;
+                for (let index = 0; index < grid.columnCount; index++) {
+                    const rect = this.getColumnRect(table, grid, index);
+                    if (!rect) {
+                        continue;
+                    }
+                    const visibleRect = intersectRects(rect, viewportRect);
+                    if (visibleRect.width > 0 && clientX >= visibleRect.left && clientX <= visibleRect.right) {
+                        columnIndex = index;
+                        break;
+                    }
+                }
+                const cell = grid.grid[0]?.[columnIndex];
+                if (cell && columnIndex > -1) {
                     candidates.push({
                         cell,
                         type: "column",
                         distance: viewportRect.top - clientY,
+                        index: columnIndex,
                     });
                 }
             }
             if (tableRect.right <= viewportRect.right + 1 &&
-                clientX >= tableRect.right && clientX <= tableRect.right + TABLE_EDGE_CONTROL_SIZE &&
+                clientX >= tableRect.right && clientX <= tableRect.right + TABLE_ADD_CONTROL_THICKNESS &&
                 clientY >= viewportRect.top && clientY <= viewportRect.bottom) {
                 const cell = grid.cellInfos[0]?.cell;
                 if (cell) {
@@ -672,7 +734,7 @@ export class TableControl {
                 }
             }
             if (tableRect.bottom <= viewportRect.bottom + 1 &&
-                clientY >= tableRect.bottom && clientY <= tableRect.bottom + TABLE_EDGE_CONTROL_SIZE &&
+                clientY >= tableRect.bottom && clientY <= tableRect.bottom + TABLE_ADD_CONTROL_THICKNESS &&
                 clientX >= viewportRect.left && clientX <= viewportRect.right) {
                 const cell = grid.cellInfos[0]?.cell;
                 if (cell) {
@@ -718,34 +780,41 @@ export class TableControl {
         });
         if (visible) {
             const cellRect = cell.getBoundingClientRect();
-            const rowRect = cell.parentElement.getBoundingClientRect();
             const tableRect = table.getBoundingClientRect();
             const viewportRect = this.getTableViewportRect(table);
             const visibleCellRect = intersectRects(cellRect, viewportRect);
-            const visibleRowRect = intersectRects(rowRect, viewportRect);
-            const merged = this.selection?.table === table && this.selectionGrid ?
-                this.selectionGrid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1) :
-                Array.from(table.querySelectorAll<HTMLTableCellElement>("th:not(.fn__none), td:not(.fn__none)"))
-                    .some(item => item.rowSpan > 1 || item.colSpan > 1);
+            const grid = this.selection?.table === table && this.selectionGrid ?
+                this.selectionGrid : buildTableGrid(table);
+            const cellInfo = grid.cellInfos.find(item => item.cell === cell);
+            const rowIndex = this.hoverType === "row" && typeof this.hoverIndex === "number" ?
+                this.hoverIndex : cellInfo?.row;
+            const rowRect = typeof rowIndex === "number" ? table.rows[rowIndex]?.getBoundingClientRect() : undefined;
+            const visibleRowRect = rowRect ? intersectRects(rowRect, viewportRect) : undefined;
+            const columnIndex = this.hoverType === "column" && typeof this.hoverIndex === "number" ?
+                this.hoverIndex : cellInfo?.col;
+            const columnRect = typeof columnIndex === "number" ?
+                this.getColumnRect(table, grid, columnIndex) : undefined;
+            const visibleColumnRect = columnRect ? intersectRects(columnRect, viewportRect) : undefined;
+            const merged = grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1);
             this.rowHandle.classList.toggle("protyle-table-control__handle--drag-disabled", merged ||
                 (this.selection?.table === table && this.selection.mode === "row" &&
                     this.selection.indexes.size > 1 && this.selection.indexes.has(0)));
             this.columnHandle.classList.toggle("protyle-table-control__handle--drag-disabled", merged);
-            if (this.hoverType === "row" && visibleRowRect.width > 0 && visibleRowRect.height > 0) {
+            if (this.hoverType === "row" && visibleRowRect?.width > 0 && visibleRowRect.height > 0) {
                 this.rowHandle.classList.remove("fn__none");
-                this.rowHandle.style.width = `${TABLE_EDGE_CONTROL_SIZE}px`;
+                this.rowHandle.style.width = `${TABLE_HANDLE_THICKNESS}px`;
                 this.rowHandle.style.height = `${visibleRowRect.height}px`;
-                const firstRow = table.rows[0] === cell.parentElement;
+                const firstRow = rowIndex === 0;
                 this.setPosition(this.rowHandle, viewportRect.left +
-                    (firstRow ? TABLE_EDGE_CONTROL_SIZE / 2 : -TABLE_EDGE_CONTROL_SIZE / 2),
+                    (firstRow ? TABLE_HANDLE_THICKNESS / 2 : -TABLE_HANDLE_THICKNESS / 2),
                     visibleRowRect.top + visibleRowRect.height / 2);
             }
-            if (this.hoverType === "column" && visibleCellRect.width > 0 && viewportRect.height > 0) {
+            if (this.hoverType === "column" && visibleColumnRect?.width > 0 && viewportRect.height > 0) {
                 this.columnHandle.classList.remove("fn__none");
-                this.columnHandle.style.width = `${visibleCellRect.width}px`;
-                this.columnHandle.style.height = `${TABLE_EDGE_CONTROL_SIZE}px`;
-                this.setPosition(this.columnHandle, visibleCellRect.left + visibleCellRect.width / 2,
-                    viewportRect.top - TABLE_EDGE_CONTROL_SIZE / 2);
+                this.columnHandle.style.width = `${visibleColumnRect.width}px`;
+                this.columnHandle.style.height = `${TABLE_HANDLE_THICKNESS}px`;
+                this.setPosition(this.columnHandle, visibleColumnRect.left + visibleColumnRect.width / 2,
+                    viewportRect.top - TABLE_HANDLE_THICKNESS / 2);
             }
             if (this.hoverType === "cell" && visibleCellRect.width > 0 && visibleCellRect.height > 0) {
                 this.cellHandle.classList.remove("fn__none");
@@ -756,17 +825,17 @@ export class TableControl {
                 tableRect.bottom >= viewportRect.top) {
                 this.addRowButton.classList.remove("fn__none");
                 this.addRowButton.style.width = `${viewportRect.width}px`;
-                this.addRowButton.style.height = `${TABLE_EDGE_CONTROL_SIZE}px`;
+                this.addRowButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
                 this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2,
-                    tableRect.bottom + TABLE_EDGE_CONTROL_SIZE / 2);
+                    tableRect.bottom + TABLE_ADD_CONTROL_THICKNESS / 2);
             }
             if (this.hoverType === "add-column" && viewportRect.height > 0 &&
                 tableRect.right <= viewportRect.right + 1 &&
                 tableRect.right >= viewportRect.left) {
                 this.addColumnButton.classList.remove("fn__none");
-                this.addColumnButton.style.width = `${TABLE_EDGE_CONTROL_SIZE}px`;
+                this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
                 this.addColumnButton.style.height = `${viewportRect.height}px`;
-                this.setPosition(this.addColumnButton, tableRect.right + TABLE_EDGE_CONTROL_SIZE / 2,
+                this.setPosition(this.addColumnButton, tableRect.right + TABLE_ADD_CONTROL_THICKNESS / 2,
                     viewportRect.top + viewportRect.height / 2);
             }
         }
@@ -798,8 +867,8 @@ export class TableControl {
         } else if (this.selection.mode === "column") {
             const grid = this.selectionGrid || buildTableGrid(this.selection.table);
             getIndexGroups(this.selection.indexes).forEach(group => {
-                const startRect = grid.grid[0]?.[group.start]?.getBoundingClientRect();
-                const endRect = grid.grid[0]?.[group.end]?.getBoundingClientRect();
+                const startRect = this.getColumnRect(this.selection.table, grid, group.start);
+                const endRect = this.getColumnRect(this.selection.table, grid, group.end);
                 if (startRect && endRect) {
                     this.appendSelectionRect({
                         left: startRect.left,

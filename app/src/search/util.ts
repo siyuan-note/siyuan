@@ -50,6 +50,7 @@ import {getSelectionOffset} from "../protyle/util/selection";
 import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {IDatabaseRowOpenData, openDatabaseRowByData} from "../protyle/render/av/openDatabaseRow";
+import {scheduleSearchRequest} from "./request";
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();
@@ -942,7 +943,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         height: searchInputElement.clientHeight,
         clearCB() {
             config.page = 1;
-            inputEvent(element, config, edit);
+            inputEvent(element, config, edit, true);
         }
     });
     addClearButton({
@@ -1376,101 +1377,119 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                                currentId?: string,
                                newId?: string
                            }) => {
-    let inputTimeout = parseInt(element.getAttribute("data-timeout") || "0");
-    clearTimeout(inputTimeout);
-    inputTimeout = window.setTimeout(() => {
-        if (rmCurrentCriteria) {
-            element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
-        }
-        const listElement = element.querySelector("#searchList") as HTMLElement;
-        const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
-        loadingElement.classList.remove("fn__none");
-        loadingElement.style.top = listElement.offsetTop + "px";
-        const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
-        config.query = searchInputElement.value;
-        listElement.scrollTo(0, 0);
-        const previousElement = element.querySelector('[data-type="previous"]');
-        const nextElement = element.querySelector('[data-type="next"]');
-        edit.protyle?.app.plugins.forEach(item => {
-            item.eventBus.emit("input-search", {
-                protyle: edit,
-                config,
-                searchElement: searchInputElement,
-            });
-        });
-        const searchResultElement = element.querySelector("#searchResult");
-        if (config.query === "" && (!config.idPath || config.idPath.length === 0)) {
-            fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                if (window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] && window.siyuan.reqIds["/api/search/fullTextSearchBlock"] &&
-                    window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] < window.siyuan.reqIds["/api/search/fullTextSearchBlock"]) {
-                    return;
-                }
-                onSearch(response.data, edit, element, config);
+    if (rmCurrentCriteria) {
+        element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
+        element.querySelector("#searchList").innerHTML = "";
+        element.querySelector("#searchResult").innerHTML = "";
+        element.querySelector('[data-type="previous"]').setAttribute("disabled", "disabled");
+        element.querySelector('[data-type="next"]').setAttribute("disabled", "disabled");
+        edit.protyle.element.classList.add("fn__none");
+        element.querySelector(".search__drag").classList.add("fn__none");
+    }
+    const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
+    loadingElement.classList.remove("fn__none");
+    scheduleSearchRequest({
+        element,
+        delay: Constants.TIMEOUT_INPUT,
+        onIdle: () => {
+            if (element.isConnected) {
                 loadingElement.classList.add("fn__none");
-                searchResultElement.innerHTML = "";
-                previousElement.setAttribute("disabled", "true");
-                nextElement.setAttribute("disabled", "true");
+            }
+        },
+        createTask(version) {
+            const listElement = element.querySelector("#searchList") as HTMLElement;
+            loadingElement.style.top = listElement.offsetTop + "px";
+            const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+            config.query = searchInputElement.value;
+            if (!config.page) {
+                config.page = 1;
+            }
+            listElement.scrollTo(0, 0);
+            const previousElement = element.querySelector('[data-type="previous"]');
+            const nextElement = element.querySelector('[data-type="next"]');
+            edit.protyle?.app.plugins.forEach(item => {
+                item.eventBus.emit("input-search", {
+                    protyle: edit,
+                    config,
+                    searchElement: searchInputElement,
+                });
             });
-        } else {
-            if (config.page > 1) {
+            const requestConfig = JSON.parse(JSON.stringify(config)) as Config.IUILayoutTabSearchConfig;
+            const requestFocusId = focusId ? Object.assign({}, focusId) : undefined;
+            const searchResultElement = element.querySelector("#searchResult");
+            if (requestConfig.query === "" && (!requestConfig.idPath || requestConfig.idPath.length === 0)) {
+                return {
+                    method: requestConfig.method,
+                    version,
+                    run(signal: AbortSignal, isCurrent: () => boolean) {
+                        return fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
+                            if (!isCurrent()) {
+                                return;
+                            }
+                            onSearch(response.data, edit, element, requestConfig);
+                            searchResultElement.innerHTML = "";
+                            previousElement.setAttribute("disabled", "true");
+                            nextElement.setAttribute("disabled", "true");
+                        }, undefined, undefined, signal);
+                    }
+                };
+            }
+            if (requestConfig.page > 1) {
                 previousElement.removeAttribute("disabled");
             } else {
                 previousElement.setAttribute("disabled", "disabled");
             }
-            const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
+            const endpoint = requestConfig.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
             const searchParam: Record<string, any> = {
-                query: config.query,
-                method: config.method,
-                types: config.types,
-                subTypes: config.subTypes,
-                paths: config.idPath || [],
-                groupBy: config.group,
-                orderBy: config.sort,
-                page: config.page || 1,
+                query: requestConfig.query,
+                method: requestConfig.method,
+                types: requestConfig.types,
+                subTypes: requestConfig.subTypes,
+                paths: requestConfig.idPath || [],
+                groupBy: requestConfig.group,
+                orderBy: requestConfig.sort,
+                page: requestConfig.page || 1,
                 pageSize: 32,
-                searchHPath: !config.hasReplace,
+                searchHPath: !requestConfig.hasReplace,
             };
             // 限定在单个加密 box 内搜索时带 notebook，让内核走加密 db；跨 box 或全局搜索走原函数
-            const idPaths = config.idPath || [];
+            const idPaths = requestConfig.idPath || [];
             if (idPaths.length > 0) {
                 const box = idPaths[0].split("/")[0];
                 if (isEncryptedBox(box) && idPaths.every(p => p.split("/")[0] === box)) {
                     searchParam.notebook = box;
                 }
             }
-            fetchPost(endpoint, searchParam, (response) => {
-                const searchReqId = config.method === 4
-                    ? window.siyuan.reqIds["/api/search/semanticSearchBlock"]
-                    : window.siyuan.reqIds["/api/search/fullTextSearchBlock"];
-                if (window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] && searchReqId &&
-                    window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] > searchReqId) {
-                    return;
-                }
-                if (!config.page) {
-                    config.page = 1;
-                }
-                if (config.page < response.data.pageCount) {
-                    nextElement.removeAttribute("disabled");
-                } else {
-                    nextElement.setAttribute("disabled", "disabled");
-                }
-                onSearch(response.data.blocks, edit, element, config, focusId);
-                if (response.data.matchedBlockCount > 0) {
-                    let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
-                    if (response.data.docMode) {
-                        text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
-                    }
-                    searchResultElement.innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
+            return {
+                method: requestConfig.method,
+                version,
+                run(signal: AbortSignal, isCurrent: () => boolean) {
+                    return fetchPost(endpoint, searchParam, (response) => {
+                        if (!isCurrent()) {
+                            return;
+                        }
+                        if (requestConfig.page < response.data.pageCount) {
+                            nextElement.removeAttribute("disabled");
+                        } else {
+                            nextElement.setAttribute("disabled", "disabled");
+                        }
+                        onSearch(response.data.blocks, edit, element, requestConfig, requestFocusId);
+                        if (response.data.matchedBlockCount > 0) {
+                            let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
+                            if (response.data.docMode) {
+                                text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
+                            }
+                            searchResultElement.innerHTML = `${requestConfig.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
 <span class="ft__on-surface">${text}</span>`;
-                } else {
-                    searchResultElement.innerHTML = "";
+                        } else {
+                            searchResultElement.innerHTML = "";
+                        }
+                        searchResultElement.setAttribute("data-pagecount", response.data.pageCount || 1);
+                    }, undefined, undefined, signal);
                 }
-                loadingElement.classList.add("fn__none");
-                searchResultElement.setAttribute("data-pagecount", response.data.pageCount || 1);
-            });
+            };
         }
-    }, Constants.TIMEOUT_INPUT);
-    element.setAttribute("data-timeout", inputTimeout.toString());
+    });
 };
 
 export const getAttr = (block: IBlock) => {

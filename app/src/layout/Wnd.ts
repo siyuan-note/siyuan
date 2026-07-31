@@ -751,8 +751,7 @@ export class Wnd {
             return;
         }
         if (model instanceof Search) {
-            model.editors.edit.destroy();
-            model.editors.unRefEdit.destroy();
+            model.destroy();
             return;
         }
         if (model instanceof Asset) {

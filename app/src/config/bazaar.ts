@@ -127,38 +127,35 @@ export const bazaar = {
 </div>
 <div class="fn__flex-1">
     <div class="config-bazaar__panel" data-type="downloaded" data-init="true">
-        <div class="fn__flex config-bazaar__title">
-            <button data-type="myUpdate" class="b3-button b3-button--outline fn__none">${window.siyuan.languages.update}</button>
-            <div data-type="myUpdate-space" class="fn__space fn__none"></div>
-            <button data-type="myPlugin" class="b3-button">${window.siyuan.languages.plugin}</button>
-            <div class="fn__space"></div>
-            <button data-type="myTheme" class="b3-button b3-button--outline">${window.siyuan.languages.theme}</button>
-            <div class="fn__space"></div>
-            <button data-type="myIcon" class="b3-button b3-button--outline">${window.siyuan.languages.icon}</button>
-            <div class="fn__space"></div>
-            <button data-type="myTemplate" class="b3-button b3-button--outline">${window.siyuan.languages.template}</button>
-            <div class="fn__space"></div>
-            <button data-type="myWidget" class="b3-button b3-button--outline">${window.siyuan.languages.widget}</button>
-            <div class="fn__space"></div>
-            <input data-type="downloaded-filter" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            <div data-type="downloaded-filter" class="fn__space"></div>
-            <div class="fn__flex-1"></div>
-            <svg data-type="downloaded-sort" class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
-            <div data-type="downloaded-sort" class="fn__space"></div>
-            <select class="b3-select" data-type="downloaded-sort">
-                <option ${localSort.downloadedPlugin === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortDefault}</option>
-                <option ${localSort.downloadedPlugin === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByInstallTimeDesc}</option>
-                <option ${localSort.downloadedPlugin === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByInstallTimeAsc}</option>
-                <option ${localSort.downloadedPlugin === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
-                <option ${localSort.downloadedPlugin === "4" ? "selected" : ""} value="4">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
-                <option ${localSort.downloadedPlugin === "5" ? "selected" : ""} data-plugin-only="true" value="5">${window.siyuan.languages.sortByEnabledFirst}</option>
-                <option ${localSort.downloadedPlugin === "6" ? "selected" : ""} data-plugin-only="true" value="6">${window.siyuan.languages.sortByDisabledFirst}</option>
-            </select>
-            <div data-type="downloaded-sort" class="fn__space"></div>
-            <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>
-            <div data-type="install-all" class="fn__space fn__none"></div>
-            <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch fn__flex-center" style="margin-right: 8px">
-            <div class="counter counter--bg fn__none fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+        <div class="fn__flex config-bazaar__title config-bazaar__title--downloaded">
+            <div class="fn__flex config-bazaar__tabs">
+                <button data-type="myPlugin" class="b3-button">${window.siyuan.languages.plugin}</button>
+                <button data-type="myTheme" class="b3-button b3-button--outline">${window.siyuan.languages.theme}</button>
+                <button data-type="myIcon" class="b3-button b3-button--outline">${window.siyuan.languages.icon}</button>
+                <button data-type="myTemplate" class="b3-button b3-button--outline">${window.siyuan.languages.template}</button>
+                <button data-type="myWidget" class="b3-button b3-button--outline">${window.siyuan.languages.widget}</button>
+                <button data-type="myUpdate" class="b3-button b3-button--outline fn__none">${window.siyuan.languages.update}</button>
+            </div>
+            <div class="fn__flex config-bazaar__tools">
+                <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+                <div class="fn__flex config-bazaar__sort">
+                    <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
+                    <select class="b3-select" data-type="downloaded-sort">
+                        <option ${localSort.downloadedPlugin === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortDefault}</option>
+                        <option ${localSort.downloadedPlugin === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByInstallTimeDesc}</option>
+                        <option ${localSort.downloadedPlugin === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByInstallTimeAsc}</option>
+                        <option ${localSort.downloadedPlugin === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
+                        <option ${localSort.downloadedPlugin === "4" ? "selected" : ""} value="4">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
+                        <option ${localSort.downloadedPlugin === "5" ? "selected" : ""} data-plugin-only="true" value="5">${window.siyuan.languages.sortByEnabledFirst}</option>
+                        <option ${localSort.downloadedPlugin === "6" ? "selected" : ""} data-plugin-only="true" value="6">${window.siyuan.languages.sortByDisabledFirst}</option>
+                    </select>
+                </div>
+                <div class="fn__flex config-bazaar__actions">
+                    <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>
+                    <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch fn__flex-center">
+                    <div class="counter counter--bg fn__none fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+                </div>
+            </div>
         </div>
         <div id="configBazaarDownloaded" class="config-bazaar__content b3-cards b3-cards--nowrap">
             ${loadingHTML}
@@ -502,9 +499,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     },
     _setUpdateTabVisible(visible: boolean) {
         const updateButton = bazaar.element.querySelector('[data-type="myUpdate"]');
-        const updateSpace = bazaar.element.querySelector('[data-type="myUpdate-space"]');
         updateButton?.classList.toggle("fn__none", !visible);
-        updateSpace?.classList.toggle("fn__none", !visible);
         if (!visible && this._isUpdatePanelActive()) {
             (bazaar.element.querySelector('[data-type="myPlugin"]') as HTMLElement)?.click();
         }
@@ -543,9 +538,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
         const counterElement = contentElement.previousElementSibling.querySelector(".counter");
         const installAllElement = contentElement.previousElementSibling.querySelector('[data-type="install-all"].b3-button');
-        const installAllSpaceElement = contentElement.previousElementSibling.querySelector('[data-type="install-all"].fn__space');
         installAllElement?.classList.add("fn__none");
-        installAllSpaceElement?.classList.add("fn__none");
         if (this._updateState === "loading" || this._updateState === "idle") {
             counterElement.classList.add("fn__none");
             contentElement.innerHTML = "<div class=\"fn__flex-center\" style=\"height: 96px\"><img src=\"/stage/loading-pure.svg\"></div>";
@@ -569,7 +562,6 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         counterElement.classList.remove("fn__none");
         counterElement.textContent = items.length.toString();
         installAllElement?.classList.remove("fn__none");
-        installAllSpaceElement?.classList.remove("fn__none");
         contentElement.innerHTML = items.map(({type, item}) => this._genUpdateItemHTML(item, type)).join("");
     },
     _syncDownloadedUpdateButtons() {
@@ -946,13 +938,12 @@ type="checkbox">
     _updateDownloadedToolbar(type: TBazaarType | "update") {
         const titleElement = bazaar.element.querySelector('.config-bazaar__panel[data-type="downloaded"] .config-bazaar__title');
         const isUpdate = type === "update";
-        titleElement?.querySelectorAll('[data-type="downloaded-filter"], [data-type="downloaded-sort"]').forEach((element) => {
+        titleElement?.querySelectorAll(".config-bazaar__filter, .config-bazaar__sort").forEach((element) => {
             element.classList.toggle("fn__none", isUpdate);
         });
         titleElement?.querySelector('[data-type="plugins-enable"]')?.classList.toggle("fn__none", type !== "plugins");
         if (!isUpdate) {
             titleElement?.querySelector('[data-type="install-all"].b3-button')?.classList.add("fn__none");
-            titleElement?.querySelector('[data-type="install-all"].fn__space')?.classList.add("fn__none");
         }
     },
     _preserveDownloadedOrder(packages: IBazaarItem[]) {
@@ -1611,7 +1602,7 @@ type="checkbox">
                             bazaar._data.plugins = response.data.packages;
                         });
                     } else if (type === "downloaded") {
-                        const activeType = inputElement.parentElement.querySelector('.b3-button[data-type^="my"]:not(.b3-button--outline)')?.getAttribute("data-type");
+                        const activeType = inputElement.closest(".config-bazaar__title")?.querySelector('.b3-button[data-type^="my"]:not(.b3-button--outline)')?.getAttribute("data-type");
                         if (activeType && activeType !== "myUpdate") {
                             this._genMyHTML(bazaar._myType2Type(activeType), app);
                         }

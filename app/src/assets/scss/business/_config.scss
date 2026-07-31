@@ -348,6 +348,39 @@
       z-index: 2;
       flex-wrap: wrap;
       row-gap: 8px;
+
+      &--downloaded {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
+    &__tabs,
+    &__tools {
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    &__tabs [data-type="myUpdate"] {
+      margin-left: auto;
+    }
+
+    &__filter {
+      flex: 1 1 200px;
+      min-width: 160px;
+      width: auto;
+    }
+
+    &__sort,
+    &__actions {
+      align-items: center;
+      flex-shrink: 0;
+      gap: 8px;
+    }
+
+    &__actions {
+      margin-left: auto;
     }
 
     &__content {

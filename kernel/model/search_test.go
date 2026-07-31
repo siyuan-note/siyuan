@@ -405,6 +405,35 @@ func TestFromHPathSearchSQLBlockOnlyMarksHPath(t *testing.T) {
 	}
 }
 
+func TestFromMixedHPathSearchSQLBlockMarksDirectContent(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	terms := "从这里" + search.TermSep + "会员"
+	contentTerms := matchedSearchTerms("会员特权", terms)
+	if "会员" != contentTerms {
+		t.Fatalf("文档自身直接命中的关键词错误：%q", contentTerms)
+	}
+
+	sqlBlock := &sql.Block{
+		ID:      "20260731160000-hpath03",
+		RootID:  "20260731160000-hpath03",
+		HPath:   "/思源笔记用户指南/请/从这里开始/会员特权",
+		Name:    "从这里",
+		Content: "会员特权",
+		Type:    "d",
+	}
+	block := fromHPathSearchSQLBlockWithContentTerms(sqlBlock, terms, contentTerms, 36)
+	if "<mark>会员</mark>特权" != block.Content {
+		t.Fatalf("混合命中应高亮文档自身直接命中的关键词：%q", block.Content)
+	}
+	if strings.Contains(block.Name, "<mark>") {
+		t.Fatalf("路径关键词不应扩展高亮到其他文档字段：%q", block.Name)
+	}
+	if !strings.Contains(block.HPath, "<mark>从这里</mark>") ||
+		!strings.Contains(block.HPath, "<mark>会员</mark>") {
+		t.Fatalf("混合命中应高亮全部路径关键词：%q", block.HPath)
+	}
+}
+
 func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 	setSearchCaseSensitive(t, true)
 	multipleKeywords := fromHPathSearchSQLBlock(&sql.Block{
@@ -471,6 +500,7 @@ func TestBuildDocumentSearchOrderBy(t *testing.T) {
 	setSearchCaseSensitive(t, true)
 	assertOrderBySequence(t, buildDocumentSearchOrderBy("Parent Child", 0),
 		"matchSource ASC",
+		"docMatchScore DESC",
 		"CASE",
 		"blockSort DESC",
 		"sort ASC",
@@ -479,6 +509,7 @@ func TestBuildDocumentSearchOrderBy(t *testing.T) {
 	)
 	assertOrderBySequence(t, buildDocumentSearchOrderBy("Parent Child", 6),
 		"matchSource ASC",
+		"docMatchScore ASC",
 		"CASE",
 		"blockSort ASC",
 		"sort ASC",
@@ -488,8 +519,89 @@ func TestBuildDocumentSearchOrderBy(t *testing.T) {
 	assertOrderBySequence(t, buildDocumentSearchOrderBy("Parent Child", 2),
 		"created DESC",
 		"matchSource ASC",
+		"docMatchScore DESC",
 		"id ASC",
 	)
+}
+
+func TestBuildDocumentMatchOrderBy(t *testing.T) {
+	assertOrderBySequence(t, buildDocumentMatchOrderBy("docMatchScore", 0),
+		"matchSource ASC",
+		"docMatchScore DESC",
+		"docUpdated DESC",
+		"docRootID ASC",
+	)
+	assertOrderBySequence(t, buildDocumentMatchOrderBy("docMatchScore", 6),
+		"matchSource ASC",
+		"docMatchScore ASC",
+		"docUpdated DESC",
+		"docRootID ASC",
+	)
+	assertOrderBySequence(t, buildDocumentMatchOrderBy("docMatchScore", 2),
+		"docCreated DESC",
+		"matchSource ASC",
+		"docMatchScore DESC",
+		"docRootID ASC",
+	)
+}
+
+func TestDocumentSearchFinalOrderPrioritizesDirectMatches(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	testDB := newSearchHPathTestDB(t)
+	insertSearchHPathTestBlock(t, testDB, "path-only", "path-only", "/从这里开始/会员特权/资源文件图床", "资源文件图床", "d")
+	insertSearchHPathTestBlock(t, testDB, "direct", "direct", "/从这里开始/会员特权", "会员特权", "d")
+	if _, err := testDB.Exec("UPDATE blocks SET created = '20260731120002' WHERE id = 'path-only'"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := testDB.Exec("UPDATE blocks SET created = '20260731120001' WHERE id = 'direct'"); err != nil {
+		t.Fatal(err)
+	}
+
+	queryResult := func(query string, keywords []string, orderBy, pageSize int) (ids []string, sources, scores []int) {
+		stmt := buildDocumentSearchStatement(query, keywords, "type IN ('d')", "", "", "", orderBy, 1, pageSize, true)
+		rows, err := testDB.Query("SELECT id, docContent, matchSource, docMatchScore FROM (" + stmt + ")")
+		if err != nil {
+			t.Fatal(err)
+		}
+		for rows.Next() {
+			var id string
+			var docContent string
+			var source, score int
+			if err = rows.Scan(&id, &docContent, &source, &score); err != nil {
+				t.Fatal(err)
+			}
+			ids = append(ids, id)
+			sources = append(sources, source)
+			scores = append(scores, score)
+		}
+		if err = rows.Close(); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
+
+	ids, sources, scores := queryResult("从这里 会员", []string{"从这里", "会员"}, 0, 32)
+	if !slices.Equal(ids, []string{"direct", "path-only"}) {
+		t.Fatalf("默认排序应优先返回直接命中关键词的文档：%v", ids)
+	}
+	if !slices.Equal(sources, []int{1, 1}) || !slices.Equal(scores, []int{1, 0}) {
+		t.Fatalf("路径辅助文档直接命中分数错误：sources=%v, scores=%v", sources, scores)
+	}
+
+	ids, _, _ = queryResult("从这里 会员特权", []string{"从这里", "会员特权"}, 0, 32)
+	if !slices.Equal(ids, []string{"direct", "path-only"}) {
+		t.Fatalf("完整文档关键词应优先返回直接命中的文档：%v", ids)
+	}
+
+	ids, _, _ = queryResult("从这里 会员", []string{"从这里", "会员"}, 0, 1)
+	if !slices.Equal(ids, []string{"direct"}) {
+		t.Fatalf("分页选择应优先包含直接命中关键词的文档：%v", ids)
+	}
+
+	ids, _, _ = queryResult("从这里 会员", []string{"从这里", "会员"}, 2, 32)
+	if !slices.Equal(ids, []string{"path-only", "direct"}) {
+		t.Fatalf("按创建时间降序时应保持时间优先：%v", ids)
+	}
 }
 
 func TestDocumentSearchFieldMatchesMultipleHPathLevels(t *testing.T) {
@@ -498,6 +610,7 @@ func TestDocumentSearchFieldMatchesMultipleHPathLevels(t *testing.T) {
 	insertSearchHPathTestBlock(t, testDB, "20260729121000-child01", "20260729121000-child01", "/Project/Parent/Child", "Child", "d")
 	insertSearchHPathTestBlock(t, testDB, "20260729121001-block01", "20260729121000-child01", "/Project/Parent/Child", "Body keyword", "p")
 	insertSearchHPathTestBlock(t, testDB, "20260729121002-content", "20260729121002-content", "/Other", "Project Parent keyword", "d")
+	insertSearchHPathTestBlock(t, testDB, "20260729121003-mixed01", "20260729121003-mixed01", "/Project/Parent/keyword", "keyword", "d")
 
 	contentField := columnConcat()
 	keywords := []string{"Project", "Parent", "keyword"}
@@ -523,31 +636,41 @@ func TestDocumentSearchFieldMatchesMultipleHPathLevels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	matchScore := "((docContent LIKE '%Project%') + (docContent LIKE '%Parent%') + (docContent LIKE '%keyword%'))"
-	sourceStmt := "SELECT root_id, CASE WHEN " + contentFilter + " THEN 0 ELSE 1 END AS matchSource, " +
-		"MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent FROM blocks " +
-		"WHERE type IN ('d', 'p') GROUP BY root_id HAVING " + filter + buildDocumentMatchOrderBy(matchScore, 0)
+	docContentField := "MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END)"
+	matchScore := buildDocumentMatchScore(docContentField, keywords)
+	docBlocksStmt := "SELECT root_id, CASE WHEN " + contentFilter + " THEN 0 ELSE 1 END AS matchSource, " +
+		docContentField + " AS docContent, " + matchScore + " AS docMatchScore, " +
+		"MAX(created) AS docCreated, MAX(updated) AS docUpdated FROM blocks " +
+		"WHERE type IN ('d', 'p') GROUP BY root_id HAVING " + filter
+	sourceStmt := "WITH docBlocks AS (" + docBlocksStmt + ") " +
+		"SELECT root_id AS docRootID, matchSource, docContent, docMatchScore, docCreated, docUpdated FROM docBlocks" +
+		buildDocumentMatchOrderBy("docMatchScore", 0)
 	rows, err = testDB.Query(sourceStmt)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var sources []int
+	var scores []int
 	var sourceRootIDs []string
 	for rows.Next() {
 		var source int
+		var score int
 		var docContent string
-		if err = rows.Scan(&rootID, &source, &docContent); err != nil {
+		var docCreated, docUpdated string
+		if err = rows.Scan(&rootID, &source, &docContent, &score, &docCreated, &docUpdated); err != nil {
 			t.Fatal(err)
 		}
 		sourceRootIDs = append(sourceRootIDs, rootID)
 		sources = append(sources, source)
+		scores = append(scores, score)
 	}
 	if err = rows.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Equal(sources, []int{0, 1}) ||
-		!slices.Equal(sourceRootIDs, []string{"20260729121002-content", "20260729121000-child01"}) {
-		t.Fatalf("正文与路径辅助文档排序错误：roots=%v, sources=%v", sourceRootIDs, sources)
+	if !slices.Equal(sources, []int{0, 1, 1}) ||
+		!slices.Equal(scores, []int{3, 1, 0}) ||
+		!slices.Equal(sourceRootIDs, []string{"20260729121002-content", "20260729121003-mixed01", "20260729121000-child01"}) {
+		t.Fatalf("正文与路径辅助文档排序错误：roots=%v, sources=%v, scores=%v", sourceRootIDs, sources, scores)
 	}
 
 	contentOnlyFilter := buildSearchDocumentLikeFilter("GROUP_CONCAT("+contentField+")", keywords)
@@ -560,7 +683,7 @@ func TestDocumentSearchFieldMatchesMultipleHPathLevels(t *testing.T) {
 	}
 
 	Conf.Search.SetHanSensitive(false)
-	insertSearchHPathTestBlock(t, testDB, "20260729121003-child02", "20260729121003-child02", "/詩經/Child", "Child", "d")
+	insertSearchHPathTestBlock(t, testDB, "20260729121004-child02", "20260729121004-child02", "/詩經/Child", "Child", "d")
 	hPathField = "MAX(CASE WHEN type = 'd' THEN " + normalizedHPathSearchField("hpath") + " ELSE '' END)"
 	filter = buildSearchDocumentLikeFilterWithHPath("GROUP_CONCAT("+contentField+")", hPathField, []string{"诗经", "Child"})
 	if err = testDB.QueryRow("SELECT COUNT(*) FROM (SELECT root_id FROM blocks WHERE type = 'd' GROUP BY root_id HAVING " + filter + ")").Scan(&count); err != nil {

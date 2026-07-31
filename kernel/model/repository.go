@@ -213,8 +213,37 @@ func GetRepoFile(fileID string) (ret []byte, p string, err error) {
 	}
 
 	ret, err = repo.OpenFile(file)
+	if err != nil {
+		return
+	}
+	ret, err = decryptRepoDataIfNeeded(ret, file.Path)
 	p = file.Path
 	return
+}
+
+// ResolveRepoFileBoxID 返回仓库文件路径中明确记录的加密笔记本 ID。
+func ResolveRepoFileBoxID(fileID string) (boxID string, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		return "", errors.New(Conf.Language(26))
+	}
+	repo, err := newRepository()
+	if err != nil {
+		return "", err
+	}
+	file, err := repo.GetFile(fileID)
+	if err != nil {
+		return "", err
+	}
+	return encryptedBoxIDFromRepoPath(file.Path), nil
+}
+
+func encryptedBoxIDFromRepoPath(repoPath string) string {
+	repoPath = strings.TrimPrefix(filepath.ToSlash(repoPath), "/")
+	parts := strings.SplitN(repoPath, "/", 2)
+	if len(parts) == 2 && ast.IsNodeIDPattern(parts[0]) && IsEncryptedBox(parts[0]) {
+		return parts[0]
+	}
+	return ""
 }
 
 func RollbackRepoSnapshotFile(fileID string) (err error) {
@@ -260,10 +289,9 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 	from := filepath.Join(tempRepoDiffDir, f)
 	// 加密笔记本的快照数据是密文，写入临时文件前先解密
 	if strings.HasSuffix(file.Path, ".sy") {
-		boxID := strings.TrimPrefix(file.Path, "/")
-		boxID = strings.Split(boxID, "/")[0]
-		if IsEncryptedBox(boxID) {
-			data = decryptRepoDataIfNeeded(data, file.Path)
+		data, err = decryptRepoDataIfNeeded(data, file.Path)
+		if err != nil {
+			return
 		}
 	}
 	if err = os.WriteFile(from, data, 0644); nil != err {
@@ -386,10 +414,24 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 	}
 
 	updated = file.Updated
+	repoPath := strings.TrimPrefix(file.Path, "/")
+	repoPathParts := strings.SplitN(repoPath, "/", 2)
+	payloadBoxID := ""
+	if len(repoPathParts) == 2 && ast.IsNodeIDPattern(repoPathParts[0]) {
+		payloadBoxID = repoPathParts[0]
+	}
+	if (util.IsCiphertext(data) || bytes.HasPrefix(data, encryptedAssetMagic)) &&
+		(payloadBoxID == "" || !IsEncryptedBox(payloadBoxID)) {
+		err = errors.New("encrypted repository data is missing valid notebook context")
+		return
+	}
 
 	if strings.HasSuffix(file.Path, ".sy") {
 		// 加密笔记本的 .sy 在仓库里是密文，按路径提取 boxID 解密
-		data = decryptRepoDataIfNeeded(data, file.Path)
+		data, err = decryptRepoDataIfNeeded(data, file.Path)
+		if err != nil {
+			return
+		}
 		luteEngine := NewLute()
 		var snapshotTree *parse.Tree
 		displayInText, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)
@@ -454,11 +496,11 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 						data = plainData
 					} else {
 						logging.LogWarnf("decrypt repo snapshot AV [%s] failed: %s", file.Path, decErr)
-						content = file.Path
+						err = decErr
 						return
 					}
 				} else {
-					content = file.Path
+					err = errors.New(Conf.Language(314))
 					return
 				}
 			}
@@ -486,11 +528,11 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 							data = plainData
 						} else {
 							logging.LogWarnf("decrypt repo snapshot asset [%s] failed: %s", file.Path, decErr)
-							content = file.Path
+							err = decErr
 							return
 						}
 					} else {
-						content = file.Path
+						err = errors.New(Conf.Language(314))
 						return
 					}
 				}
@@ -576,10 +618,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 	luteEngine := NewLute()
 	for _, removeRight := range diff.RemovesRight {
-		title, _, _ := parseTitleInSnapshot(removeRight.ID, repo, luteEngine)
-		if "" == title {
-			continue
-		}
+		title, _ := parseTitleInSnapshotForListing(removeRight, repo, luteEngine)
 
 		ret.AddsLeft = append(ret.AddsLeft, &DiffFile{
 			FileID:  removeRight.ID,
@@ -594,10 +633,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 
 	for _, addLeft := range diff.AddsLeft {
-		title, _, _ := parseTitleInSnapshot(addLeft.ID, repo, luteEngine)
-		if "" == title {
-			continue
-		}
+		title, _ := parseTitleInSnapshotForListing(addLeft, repo, luteEngine)
 
 		ret.RemovesRight = append(ret.RemovesRight, &DiffFile{
 			FileID:  addLeft.ID,
@@ -612,10 +648,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 
 	for _, updateLeft := range diff.UpdatesLeft {
-		title, _, _ := parseTitleInSnapshot(updateLeft.ID, repo, luteEngine)
-		if "" == title {
-			continue
-		}
+		title, _ := parseTitleInSnapshotForListing(updateLeft, repo, luteEngine)
 
 		ret.UpdatesLeft = append(ret.UpdatesLeft, &DiffFile{
 			FileID:  updateLeft.ID,
@@ -630,10 +663,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 
 	for _, updateRight := range diff.UpdatesRight {
-		title, _, _ := parseTitleInSnapshot(updateRight.ID, repo, luteEngine)
-		if "" == title {
-			continue
-		}
+		title, _ := parseTitleInSnapshotForListing(updateRight, repo, luteEngine)
 
 		ret.UpdatesRight = append(ret.UpdatesRight, &DiffFile{
 			FileID:  updateRight.ID,
@@ -645,6 +675,20 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 	if 1 > len(ret.UpdatesRight) {
 		ret.UpdatesRight = []*DiffFile{}
+	}
+	return
+}
+
+func parseTitleInSnapshotForListing(file *entity.File, repo *dejavu.Repo, luteEngine *lute.Lute) (title, rootID string) {
+	if file == nil {
+		return
+	}
+	if encryptedBoxIDFromRepoPath(file.Path) != "" {
+		return path.Base(file.Path), ""
+	}
+	title, rootID, err := parseTitleInSnapshot(file.ID, repo, luteEngine)
+	if err != nil || title == "" {
+		return path.Base(file.Path), ""
 	}
 	return
 }
@@ -666,7 +710,10 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		}
 
 		// 加密笔记本的 .sy 在仓库里是密文，按路径提取 boxID 解密
-		data = decryptRepoDataIfNeeded(data, file.Path)
+		data, err = decryptRepoDataIfNeeded(data, file.Path)
+		if err != nil {
+			return
+		}
 
 		var tree *parse.Tree
 		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
@@ -684,26 +731,30 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 // decryptRepoDataIfNeeded 判断仓库数据是否属于加密笔记本，如果是则按路径类型分流解密。
 // file.Path 格式：/<boxID>/...
 // .sy → DecryptFile，assets/* → DecryptAsset，storage/av/*.json → av.DecryptAVData。
-// 其他文件或解锁失败时返回原数据（调用方 fallback）。
-func decryptRepoDataIfNeeded(data []byte, filePath string) []byte {
+// 密文缺少有效路径上下文、笔记本未解锁或认证失败时返回错误，不允许调用方按明文继续处理。
+func decryptRepoDataIfNeeded(data []byte, filePath string) ([]byte, error) {
 	relPath := strings.TrimPrefix(filePath, "/")
 	parts := strings.SplitN(relPath, "/", 2)
-	if len(parts) < 1 || !ast.IsNodeIDPattern(parts[0]) {
-		return data
+	encryptedPayload := util.IsCiphertext(data) || bytes.HasPrefix(data, encryptedAssetMagic)
+	if len(parts) < 2 || !ast.IsNodeIDPattern(parts[0]) {
+		if encryptedPayload {
+			return nil, errors.New("encrypted repository data is missing notebook context")
+		}
+		return data, nil
 	}
 	boxID := parts[0]
 	if !IsEncryptedBox(boxID) {
-		return data
+		if encryptedPayload {
+			return nil, fmt.Errorf("encrypted repository data has no matching notebook [%s]", boxID)
+		}
+		return data, nil
 	}
 	// 持读锁，防止 LockBox 在解密期间清 DEK/缓存
 	HoldBoxReadLock(boxID)
 	defer ReleaseBoxReadLock(boxID)
 	dek, err := GetDEKIfUnlocked(boxID)
 	if err != nil {
-		return data // 加密笔记本未解锁：返回原数据
-	}
-	if len(parts) < 2 {
-		return data
+		return nil, errors.New(Conf.Language(314))
 	}
 	boxRelPath := parts[1]
 	// 按路径类型分流
@@ -711,30 +762,29 @@ func decryptRepoDataIfNeeded(data []byte, filePath string) []byte {
 		diskName := filepath.Base(boxRelPath)
 		plain, decErr := DecryptAsset(boxID, diskName, dek, data)
 		if decErr != nil {
-			return data
+			return nil, decErr
 		}
-		return plain
+		return plain, nil
 	}
 	if strings.HasPrefix(boxRelPath, "storage/av/") && strings.HasSuffix(boxRelPath, ".json") {
 		avID := strings.TrimSuffix(filepath.Base(boxRelPath), ".json")
 		plain, decErr := av.DecryptAVDataLocked(boxID, avID, data)
 		if decErr != nil {
-			return data
+			return nil, decErr
 		}
-		return plain
+		return plain, nil
 	}
 	// .sy 和其他文件用 file 子密钥 + 相对路径 AAD
 	plain, decErr := DecryptFile(boxID, boxRelPath, dek, data)
 	if decErr != nil {
-		return data
+		return nil, decErr
 	}
-	return plain
+	return plain, nil
 }
 
 func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
 	isLargeDoc = 1024*1024*1 <= len(data)
-	// data 可能是加密笔记本的密文，但 parseTreeInSnapshot 没有 file.Path 上下文
-	// 密文解析会失败返回 err，调用方会 fallback 到文件名
+	// 调用方必须先根据快照路径完成解密，解析层不处理密文。
 	tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
@@ -766,10 +816,7 @@ func SearchRepoFile(keyword string, page int) (ret []*DiffFile, pageCount, total
 
 	luteEngine := NewLute()
 	for _, file := range files {
-		title, rootID, parseErr := parseTitleInSnapshot(file.ID, repo, luteEngine)
-		if "" == title || nil != parseErr {
-			title = path.Base(file.Path)
-		}
+		title, rootID := parseTitleInSnapshotForListing(file, repo, luteEngine)
 
 		var hpath string
 		if "" != rootID && treenode.ExistBlockTree(rootID) {
@@ -810,10 +857,7 @@ func GetRepoDocHistory(id string, page int) (ret []*RepoDocHistory, pageCount, t
 
 	luteEngine := NewLute()
 	for _, file := range files {
-		title, _, parseErr := parseTitleInSnapshot(file.ID, repo, luteEngine)
-		if "" == title || nil != parseErr {
-			title = path.Base(file.Path)
-		}
+		title, _ := parseTitleInSnapshotForListing(file, repo, luteEngine)
 		ret = append(ret, &RepoDocHistory{
 			FileID:  file.ID,
 			IndexID: fileIndexIDs[file.ID],
@@ -846,16 +890,13 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 		return
 	}
 
-	repoRel := strings.TrimPrefix(file.Path, "/")
-	repoParts := strings.SplitN(repoRel, "/", 2)
-	var encryptedBoxID string
-	if len(repoParts) >= 1 && ast.IsNodeIDPattern(repoParts[0]) && IsEncryptedBox(repoParts[0]) {
-		encryptedBoxID = repoParts[0]
-	}
+	encryptedBoxID := encryptedBoxIDFromRepoPath(file.Path)
 
 	// 加密笔记本的 .sy 在仓库里是密文，按路径提取 boxID 解密
-	data = decryptRepoDataIfNeeded(data, file.Path)
-	// 如果加密 box 已锁定，decryptRepoDataIfNeeded 返回原密文，应拒绝导出
+	data, err = decryptRepoDataIfNeeded(data, file.Path)
+	if err != nil {
+		return
+	}
 	if encryptedBoxID != "" {
 		HoldBoxReadLock(encryptedBoxID)
 		defer ReleaseBoxReadLock(encryptedBoxID)
@@ -2161,7 +2202,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				if IsEncryptedBox(boxID) {
 					raw, readErr := os.ReadFile(absPath)
 					if readErr == nil {
-						data := decryptRepoDataIfNeeded(raw, file.Path)
+						data, decryptErr := decryptRepoDataIfNeeded(raw, file.Path)
+						if decryptErr != nil {
+							logging.LogErrorf("decrypt conflicted file [%s] failed: %s", absPath, decryptErr)
+							continue
+						}
 						if writeErr := os.WriteFile(absPath, data, 0644); writeErr != nil {
 							logging.LogErrorf("decrypt conflicted file [%s] failed: %s", absPath, writeErr)
 							continue

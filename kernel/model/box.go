@@ -61,8 +61,9 @@ type Box struct {
 	DueFlashcardCount int `json:"dueFlashcardCount"`
 	FlashcardCount    int `json:"flashcardCount"`
 
-	Encrypted bool `json:"encrypted"` // 是否为加密笔记本
-	Unlocked  bool `json:"unlocked"`  // 加密笔记本是否已解锁（DEK 在内存），非加密笔记本恒为 false
+	Encrypted bool              `json:"encrypted"` // 是否为加密笔记本
+	Unlocked  bool              `json:"unlocked"`  // 加密笔记本是否已解锁（DEK 在内存），非加密笔记本恒为 false
+	State     EncryptedBoxState `json:"state,omitempty"`
 }
 
 func StatJob() {
@@ -157,6 +158,11 @@ func ListNotebooks() (ret []*Box, err error) {
 				continue
 			}
 		}
+		if boxConf.Encrypted {
+			if metadataErr := revealBoxMetadataIfUnlocked(id, boxConf); metadataErr != nil {
+				logging.LogErrorf("decrypt encrypted notebook metadata [%s] failed: %s", id, metadataErr)
+			}
+		}
 
 		box := &Box{
 			ID:        id,
@@ -167,6 +173,9 @@ func ListNotebooks() (ret []*Box, err error) {
 			Closed:    boxConf.Closed,
 			Encrypted: boxConf.Encrypted,
 			Unlocked:  IsBoxUnlocked(id),
+		}
+		if box.Encrypted {
+			box.State = GetEncryptedBoxState(id)
 		}
 
 		if !isExistConf {
@@ -226,27 +235,53 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 		return
 	}
 
-	ret.Icon = filterBoxIcon(ret.Icon)
+	if ret.Encrypted {
+		if err = revealBoxMetadataIfUnlocked(box.ID, ret); err != nil {
+			logging.LogErrorf("decrypt encrypted notebook metadata [%s] failed: %s", box.ID, err)
+		}
+	} else {
+		ret.Icon = filterBoxIcon(ret.Icon)
+	}
 	return
 }
 
 func (box *Box) SaveConf(conf *conf.BoxConf) error {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
-	newData, err := gulu.JSON.MarshalIndentJSON(conf, "", "  ")
+	persisted, err := prepareBoxConfForSave(box.ID, conf)
+	if err != nil {
+		return fmt.Errorf("prepare box conf [%s] failed: %w", confPath, err)
+	}
+	newData, err := gulu.JSON.MarshalIndentJSON(persisted, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal box conf [%s] failed: %w", confPath, err)
 	}
 
 	oldData, err := filelock.ReadFile(confPath)
 	if err != nil {
-		return box.saveConf0(newData)
+		if err = box.saveConf0(newData); err != nil {
+			return err
+		}
+		return syncBoxConfCryptoBackup(box.ID, persisted)
 	}
 
 	if bytes.Equal(newData, oldData) {
-		return nil
+		return syncBoxConfCryptoBackup(box.ID, persisted)
 	}
 
-	return box.saveConf0(newData)
+	if err = box.saveConf0(newData); err != nil {
+		return err
+	}
+	return syncBoxConfCryptoBackup(box.ID, persisted)
+}
+
+func syncBoxConfCryptoBackup(boxID string, boxConf *conf.BoxConf) error {
+	if !boxConf.Encrypted || boxConf.BoxCrypt == nil {
+		return nil
+	}
+	if needWriteNotebookCryptBackup(boxID, boxConf.BoxCrypt) {
+		return writeNotebookCryptBackup(boxID, boxConf.BoxCrypt)
+	}
+	return nil
 }
 
 func (box *Box) saveConf0(data []byte) error {

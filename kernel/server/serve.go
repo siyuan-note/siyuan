@@ -377,6 +377,11 @@ func serveExport(ginServer *gin.Engine) {
 				c.Status(http.StatusForbidden)
 				return
 			}
+			if acquireErr := model.AcquireEncryptedBoxOperation(boxID); acquireErr != nil {
+				c.Status(http.StatusForbidden)
+				return
+			}
+			defer model.ReleaseEncryptedBoxOperation(boxID)
 			model.HoldBoxReadLock(boxID)
 			defer model.ReleaseBoxReadLock(boxID)
 			if _, dekErr := model.GetDEKIfUnlocked(boxID); dekErr != nil {
@@ -934,6 +939,11 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 		boxID := model.ExtractBoxIDFromAssetsPath(assetAbsPath)
 		var dek []byte
 		if boxID != "" && model.IsEncryptedBox(boxID) {
+			if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
+				context.Status(http.StatusForbidden)
+				return true
+			}
+			defer model.ReleaseEncryptedBoxOperation(boxID)
 			model.HoldBoxReadLock(boxID)
 			var err error
 			dek, err = model.GetDEKIfUnlocked(boxID)
@@ -998,6 +1008,11 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 	if boxID == "" || !model.IsEncryptedBox(boxID) {
 		return false // 非加密 box，走原路径
 	}
+	if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
+		context.Status(http.StatusForbidden)
+		return true
+	}
+	defer model.ReleaseEncryptedBoxOperation(boxID)
 	model.HoldBoxReadLock(boxID)
 	dek, err := model.GetDEKIfUnlocked(boxID)
 	if err != nil {
@@ -1039,9 +1054,32 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 // 否则返回 false，由调用方走原 http.ServeFile 路径。
 func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	boxID := model.ExtractBoxIDFromHistoryPath(absPath)
-	if boxID == "" || !model.IsEncryptedBox(boxID) {
+	if boxID == "" {
 		return false // 非加密 box，走原路径
 	}
+	if !model.IsEncryptedHistoryPath(absPath) {
+		source, err := os.Open(absPath)
+		if err != nil {
+			return false
+		}
+		header := make([]byte, 4)
+		n, _ := source.Read(header)
+		_ = source.Close()
+		if model.IsEncryptedNotebookData(header[:n]) {
+			context.Status(http.StatusForbidden)
+			return true
+		}
+		return false
+	}
+	if !model.IsEncryptedBox(boxID) {
+		context.Status(http.StatusForbidden)
+		return true
+	}
+	if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
+		context.Status(http.StatusForbidden)
+		return true
+	}
+	defer model.ReleaseEncryptedBoxOperation(boxID)
 	model.HoldBoxReadLock(boxID)
 	dek, err := model.GetDEKIfUnlocked(boxID)
 	if err != nil {
@@ -1140,6 +1178,11 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		// 从路径提取 boxID，加密笔记本已锁定时拒绝访问（锁定后 repo 预览解密文件仍存在磁盘上）
 		parts := strings.SplitN(strings.TrimPrefix(requestPath, "/"), "/", 2)
 		if len(parts) >= 1 && model.IsEncryptedBox(parts[0]) {
+			if err := model.AcquireEncryptedBoxOperation(parts[0]); err != nil {
+				context.Status(http.StatusForbidden)
+				return
+			}
+			defer model.ReleaseEncryptedBoxOperation(parts[0])
 			model.HoldBoxReadLock(parts[0])
 			defer model.ReleaseBoxReadLock(parts[0])
 			if _, dekErr := model.GetDEKIfUnlocked(parts[0]); dekErr != nil {

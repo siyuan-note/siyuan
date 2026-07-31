@@ -53,6 +53,9 @@ func exportCodeBlock(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, id, ret) {
+		return
+	}
 	filePath, err := model.ExportCodeBlock(id)
 	if err != nil {
 		ret.Code = 1
@@ -82,6 +85,9 @@ func exportAttributeView(c *gin.Context) {
 	) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, blockID, ret) {
+		return
+	}
 	zipPath, err := model.ExportAv2CSV(avID, blockID)
 	if err != nil {
 		ret.Code = 1
@@ -108,6 +114,9 @@ func exportEPUB(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, id, ret) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "epub", ".epub")
 	ret.Data = map[string]any{
 		"name": name,
@@ -126,6 +135,9 @@ func exportRTF(c *gin.Context) {
 
 	var id string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "rtf", ".rtf")
@@ -148,6 +160,9 @@ func exportODT(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, id, ret) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "odt", ".odt")
 	ret.Data = map[string]any{
 		"name": name,
@@ -166,6 +181,9 @@ func exportMediaWiki(c *gin.Context) {
 
 	var id string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "mediawiki", ".wiki")
@@ -188,6 +206,9 @@ func exportOrgMode(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, id, ret) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "org", ".org")
 	ret.Data = map[string]any{
 		"name": name,
@@ -206,6 +227,9 @@ func exportOPML(c *gin.Context) {
 
 	var id string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "opml", ".opml")
@@ -228,6 +252,9 @@ func exportTextile(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, id, ret) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "textile", ".textile")
 	ret.Data = map[string]any{
 		"name": name,
@@ -248,6 +275,9 @@ func exportAsciiDoc(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, id, ret) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "asciidoc", ".adoc")
 	ret.Data = map[string]any{
 		"name": name,
@@ -266,6 +296,9 @@ func exportReStructuredText(c *gin.Context) {
 
 	var id string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "rst", ".rst")
@@ -391,6 +424,11 @@ func exportNotebookMd(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
 		return
 	}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 	zipPath := model.ExportNotebookMarkdownWithOptions(notebook, model.ParseExportOptions(arg))
 	ret.Data = map[string]any{
 		"name": path.Base(zipPath),
@@ -411,6 +449,9 @@ func exportMds(c *gin.Context) {
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
+	}
+	if !holdEncryptedExportRequests(c, ids, ret) {
+		return
 	}
 
 	name, zipPath := model.ExportPandocConvertZipWithOptions(ids, "", ".md", model.ParseExportOptions(arg))
@@ -433,6 +474,9 @@ func exportMd(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, id, ret) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZipWithOptions([]string{id}, "", ".md", model.ParseExportOptions(arg))
 	ret.Data = map[string]any{
 		"name": name,
@@ -451,6 +495,11 @@ func exportNotebookSY(c *gin.Context) {
 
 	var id string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if err := holdEncryptedBoxRequest(c, id); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
 		return
 	}
 	zipPath := model.ExportNotebookSY(id)
@@ -473,6 +522,9 @@ func exportSYs(c *gin.Context) {
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
 	}
+	if !holdEncryptedExportRequests(c, ids, ret) {
+		return
+	}
 
 	zipPath := model.ExportSYs(ids)
 	ret.Data = map[string]any{
@@ -491,6 +543,9 @@ func exportSY(c *gin.Context) {
 
 	var id string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
 	zipPath := model.ExportSYs([]string{id})
@@ -513,6 +568,9 @@ func exportMdContent(c *gin.Context) {
 		return
 	}
 	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
 
@@ -575,6 +633,9 @@ func exportDocx(c *gin.Context) {
 	) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, id, ret) {
+		return
+	}
 
 	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
 	if rejectEncryptedBoxPath(savePath) {
@@ -609,6 +670,9 @@ func exportMdHTML(c *gin.Context) {
 		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("savePath", &savePath, false, false),
 	) {
+		return
+	}
+	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
 
@@ -659,6 +723,9 @@ func exportTempContent(c *gin.Context) {
 		util.BindJsonArg("content", &content, true, false),
 		util.BindJsonArg("id", &id, false, false),
 	) {
+		return
+	}
+	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
 	tmpExport := filepath.Join(util.TempDir, "export")
@@ -721,20 +788,26 @@ func exportBrowserHTML(c *gin.Context) {
 		return
 	}
 
-	tmpDir := filepath.Join(util.TempDir, "export", folder)
+	// 检测是否来自加密笔记本：folder 形如 <boxID>/<folderName>
+	boxID := ""
+	if parts := strings.SplitN(folder, "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
+		boxID = parts[0]
+	}
+	if boxID != "" {
+		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(314)
+			return
+		}
+	}
 
+	tmpDir := filepath.Join(util.TempDir, "export", folder)
 	htmlPath := filepath.Join(tmpDir, "index.html")
 	if err := filelock.WriteFile(htmlPath, []byte(htmlContent)); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = nil
 		return
-	}
-
-	// 检测是否来自加密笔记本：folder 形如 <boxID>/<folderName>
-	boxID := ""
-	if parts := strings.SplitN(folder, "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
-		boxID = parts[0]
 	}
 
 	zipFileName := util.FilterFileName(name) + ".zip"
@@ -761,6 +834,8 @@ func exportBrowserHTML(c *gin.Context) {
 
 	err = zip.AddDirectory("", tmpDir, func(string) {})
 	if err != nil {
+		_ = zip.Close()
+		_ = os.Remove(zipAbsPath)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = nil
@@ -768,6 +843,7 @@ func exportBrowserHTML(c *gin.Context) {
 	}
 
 	if err = zip.Close(); err != nil {
+		_ = os.Remove(zipAbsPath)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = nil
@@ -804,6 +880,9 @@ func exportPreviewHTML(c *gin.Context) {
 		util.BindJsonArg("merge", &merge, false, false),
 		util.BindJsonArg("image", &image, false, false),
 	) {
+		return
+	}
+	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
 	name, content, node := model.ExportHTML(id, "", true, keepFold, merge)
@@ -847,6 +926,9 @@ func exportHTML(c *gin.Context) {
 	) {
 		return
 	}
+	if !holdEncryptedExportRequest(c, id, ret) {
+		return
+	}
 
 	savePath = strings.TrimSpace(savePath)
 	if savePath == "" {
@@ -879,6 +961,28 @@ func exportHTML(c *gin.Context) {
 		"name":    name,
 		"content": content,
 	}
+}
+
+func holdEncryptedExportRequest(c *gin.Context, id string, ret *gulu.Result) bool {
+	block := treenode.GetBlockTree(id)
+	if block == nil || !model.IsEncryptedBox(block.BoxID) {
+		return true
+	}
+	if err := holdEncryptedBoxRequest(c, block.BoxID); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return false
+	}
+	return true
+}
+
+func holdEncryptedExportRequests(c *gin.Context, ids []string, ret *gulu.Result) bool {
+	for _, id := range ids {
+		if !holdEncryptedExportRequest(c, id, ret) {
+			return false
+		}
+	}
+	return true
 }
 
 func processPDF(c *gin.Context) {
@@ -1055,6 +1159,11 @@ func copyExportFile(c *gin.Context) {
 		if !ok {
 			ret.Code = -1
 			ret.Msg = "export file is not available"
+			return
+		}
+		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(314)
 			return
 		}
 		model.HoldBoxReadLock(boxID)

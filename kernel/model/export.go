@@ -2448,6 +2448,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 	// （不可 filelock.ReadFile 直接读盘，加密笔记本的磁盘 .sy 是密文）。
 	total := len(trees) + len(refTrees)
 	for _, tree := range trees {
+		if encrypted {
+			removeFlashcardAttrs(tree)
+		}
 		writePath := strings.TrimPrefix(tree.Path, rootDirPath)
 		writePath = filepath.Join(exportDir, writePath)
 		writeFolder := filepath.Dir(writePath)
@@ -2467,6 +2470,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 	count = 0
 	// 引用树放在导出文件夹根路径下
 	for treeID, tree := range refTrees {
+		if IsEncryptedBox(tree.Box) {
+			removeFlashcardAttrs(tree)
+		}
 		writePath := filepath.Join(exportDir, treeID+".sy")
 		if writeErr := os.WriteFile(writePath, treeToSYJSON(tree), 0644); nil != writeErr {
 			logging.LogErrorf("write export file [%s] failed: %s", writePath, writeErr)
@@ -2593,22 +2599,24 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 		exportAv(avID, avBoxes[avID], exportStorageAvDir, exportDir, assetPathMap)
 	}
 
-	// 导出闪卡 Export related flashcard data when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/9372
-	exportStorageRiffDir := filepath.Join(exportDir, "storage", "riff")
-	deck, loadErr := riff.LoadDeck(exportStorageRiffDir, builtinDeckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
-	if nil != loadErr {
-		logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
-	} else {
-		for _, tree := range trees {
-			cards := getTreeFlashcards(tree.ID)
+	if !IsEncryptedBox(box.ID) {
+		// 导出闪卡 Export related flashcard data when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/9372
+		exportStorageRiffDir := filepath.Join(exportDir, "storage", "riff")
+		deck, loadErr := riff.LoadDeck(exportStorageRiffDir, builtinDeckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
+		if nil != loadErr {
+			logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
+		} else {
+			for _, tree := range trees {
+				cards := getTreeFlashcards(tree.ID)
 
-			for _, card := range cards {
-				deck.AddCard(card.ID(), card.BlockID())
+				for _, card := range cards {
+					deck.AddCard(card.ID(), card.BlockID())
+				}
 			}
-		}
-		if 0 < deck.CountCards() {
-			if saveErr := deck.Save(); nil != saveErr {
-				logging.LogErrorf("save deck [%s] failed: %s", name, saveErr)
+			if 0 < deck.CountCards() {
+				if saveErr := deck.Save(); nil != saveErr {
+					logging.LogErrorf("save deck [%s] failed: %s", name, saveErr)
+				}
 			}
 		}
 	}

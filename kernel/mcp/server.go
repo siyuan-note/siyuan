@@ -123,8 +123,11 @@ func isModernRequest(request *http.Request) bool {
 }
 
 func serveHTTP(handler http.Handler) gin.HandlerFunc {
-	return func(context *gin.Context) {
-		handler.ServeHTTP(context.Writer, context.Request)
+	return func(ginContext *gin.Context) {
+		requestContext, release := model.WithEncryptedBoxOperationScope(ginContext.Request.Context())
+		defer release()
+		request := ginContext.Request.WithContext(requestContext)
+		handler.ServeHTTP(ginContext.Writer, request)
 	}
 }
 
@@ -170,6 +173,14 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 		if err := validator.ValidateInputContext(ctx, arguments); err != nil {
 			return toolErrorResult(fmt.Sprintf("invalid tool arguments: %v", err)), nil
 		}
+		releaseBoxLeases := func() {}
+		if tool.BoxLeaseResolver != nil {
+			releaseBoxLeases, err = model.AcquireEncryptedBoxOperations(ctx, tool.BoxLeaseResolver(arguments))
+			if err != nil {
+				return toolErrorResult("encrypted notebook is locked, please unlock it first"), nil
+			}
+		}
+		defer releaseBoxLeases()
 
 		var (
 			result tools.CallToolResult

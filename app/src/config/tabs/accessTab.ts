@@ -417,11 +417,10 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
     const migrationAlertElement = root.querySelector("#encryptedNotebookMigrationAlert");
     const refresh = () => {
         fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
-            const enabled = response.data.enabled;
+            const enabled = response.data.state === "Enabled";
             switchElement.checked = enabled;
             window.siyuan.config.notebookCrypto.enabled = enabled;
-            // 修改主密码/导出密钥仅在启用时可见；导入密钥仅在未启用时可见（详见设计 §4.1，
-            // 已启用时导入会用导入备份的 MasterSalt/KEKVerifier 覆盖当前配置，孤立现有 WrappedDEK）
+            // 修改主密码和导出密钥仅在配置完整时可见；Disabled 或 RecoveryRequired 状态提供导入恢复入口。
             enabledActionsElement.classList.toggle("fn__none", !enabled);
             importCryptoBackupBtnElement.classList.toggle("fn__none", enabled);
             actionsElement.classList.remove("fn__none");

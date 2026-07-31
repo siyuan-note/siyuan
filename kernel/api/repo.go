@@ -28,6 +28,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -90,6 +91,9 @@ func getRepoFile(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
+	if !holdRepoFileRequest(c, id, ret) {
+		return
+	}
 	data, p, err := model.GetRepoFile(id)
 	if err != nil {
 		ret.Code = -1
@@ -122,6 +126,9 @@ func rollbackRepoSnapshotFile(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
+	if !holdRepoFileRequest(c, id, ret) {
+		return
+	}
 
 	err := model.RollbackRepoSnapshotFile(id)
 	if nil != err {
@@ -142,6 +149,9 @@ func openRepoSnapshotFile(c *gin.Context) {
 
 	var id string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if !holdRepoFileRequest(c, id, ret) {
 		return
 	}
 
@@ -374,6 +384,13 @@ func getRepoDocHistory(c *gin.Context) {
 	) || util.InvalidIDPattern(id, ret) {
 		return
 	}
+	if block := treenode.GetBlockTree(id); block != nil {
+		if err := holdEncryptedBoxRequest(c, block.BoxID); err != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(314)
+			return
+		}
+	}
 
 	files, pageCount, totalCount, err := model.GetRepoDocHistory(id, int(page))
 	if err != nil {
@@ -404,6 +421,9 @@ func exportRepoFile(c *gin.Context) {
 	) {
 		return
 	}
+	if !holdRepoFileRequest(c, id, ret) {
+		return
+	}
 
 	exportPath, err := model.ExportRepoFile(id)
 	if err != nil {
@@ -415,6 +435,21 @@ func exportRepoFile(c *gin.Context) {
 	ret.Data = map[string]any{
 		"path": exportPath,
 	}
+}
+
+func holdRepoFileRequest(c *gin.Context, id string, ret *gulu.Result) bool {
+	boxID, err := model.ResolveRepoFileBoxID(id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return false
+	}
+	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return false
+	}
+	return true
 }
 
 func getCloudRepoSnapshots(c *gin.Context) {

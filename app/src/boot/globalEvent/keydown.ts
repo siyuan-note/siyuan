@@ -324,7 +324,8 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly) {
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) &&
+        !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
             openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title?.editElement.textContent || window.siyuan.languages.untitled);
         });

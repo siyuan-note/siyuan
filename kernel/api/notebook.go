@@ -57,6 +57,11 @@ func getNotebookInfo(c *gin.Context) {
 		ret.Msg = "notebook [" + boxID + "] not found"
 		return
 	}
+	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 
 	boxInfo := box.GetInfo()
 	ret.Data = map[string]any{
@@ -80,6 +85,11 @@ func setNotebookIcon(c *gin.Context) {
 	) {
 		return
 	}
+	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 	model.SetBoxIcon(boxID, icon)
 }
 
@@ -96,6 +106,13 @@ func changeSortNotebook(c *gin.Context) {
 	var ids []string
 	for _, p := range idsArg {
 		ids = append(ids, p.(string))
+	}
+	for _, id := range ids {
+		if err := holdEncryptedBoxRequest(c, id); err != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(314)
+			return
+		}
 	}
 	model.ChangeBoxSort(ids)
 }
@@ -117,6 +134,11 @@ func renameNotebook(c *gin.Context) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
 		return
 	}
 	err := model.RenameBox(notebook, name)
@@ -244,6 +266,11 @@ func openNotebook(c *gin.Context) {
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 
 	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
 	defer util.PushClearMsg(msgId)
@@ -339,6 +366,13 @@ func getNotebookConf(c *gin.Context) {
 		ret.Msg = "notebook [" + notebook + "] not found"
 		return
 	}
+	if model.IsBoxUnlocked(notebook) {
+		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(314)
+			return
+		}
+	}
 
 	boxConf := box.GetConf()
 	if !model.IsAdminRoleContext(c) {
@@ -370,6 +404,13 @@ func setNotebookConf(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = "notebook [" + notebook + "] not found"
 		return
+	}
+	if model.IsBoxUnlocked(notebook) {
+		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(314)
+			return
+		}
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg["conf"])
@@ -439,6 +480,16 @@ func lsNotebooks(c *gin.Context) {
 	if flashcard {
 		notebooks = model.GetFlashcardNotebooks()
 	} else {
+		for _, boxID := range model.ListAllEncryptedBoxIDs() {
+			if !model.IsBoxUnlocked(boxID) {
+				continue
+			}
+			if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+				ret.Code = -1
+				ret.Msg = model.Conf.Language(314)
+				return
+			}
+		}
 		var err error
 		notebooks, err = model.ListNotebooks()
 		if err != nil {
@@ -549,10 +600,16 @@ func createEncryptedNotebook(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if err = holdEncryptedBoxRequest(c, id); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 
 	// 创建时 DEK 已缓存 + 加密 db 已打开，此处直接挂载；失败则锁定回滚，避免 DEK 残留
 	existed, err := model.Mount(id)
 	if err != nil {
+		releaseEncryptedBoxRequest(c, id)
 		model.LockBox(id)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -612,6 +669,11 @@ func unlockNotebook(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if err = holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 }
 
 // unlockAndOpenNotebook 原子化解锁并挂载加密笔记本：UnlockBox 成功后立即 Mount，
@@ -654,12 +716,18 @@ func unlockAndOpenNotebook(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if err = holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 
 	// 解锁成功后立即挂载；失败则回滚锁定，清除 DEK 避免残留
 	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
 	defer util.PushClearMsg(msgId)
 	existed, err := model.Mount(notebook)
 	if err != nil {
+		releaseEncryptedBoxRequest(c, notebook)
 		model.LockBox(notebook)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -668,6 +736,7 @@ func unlockAndOpenNotebook(c *gin.Context) {
 
 	box := model.Conf.Box(notebook)
 	if nil == box {
+		releaseEncryptedBoxRequest(c, notebook)
 		model.LockBox(notebook)
 		ret.Code = -1
 		ret.Msg = "opened notebook [" + notebook + "] not found"
@@ -773,12 +842,12 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 
 	model.NotebookCryptoMuLock()
 	boxIDs := model.ListAllEncryptedBoxIDs()
-	enabled := model.NotebookCryptoEnabled()
 	model.NotebookCryptoMuUnlock()
 	pendingMigration, migrationBoxes := model.MasterPasswordMigrationStatus()
 	// 历史目录中是否存在已删除加密笔记本的历史快照：其恢复依赖当前密钥备份，
 	// 存在时前端禁用入口应拦截（与 DisableEncryptedNotebook 的后端检查对齐）
 	hasHistoryDependency := model.HasEncryptedNotebookHistory()
+	state := model.NotebookCryptoLifecycleState(len(boxIDs) > 0 || hasHistoryDependency)
 
 	boxes := make([]map[string]any, 0, len(boxIDs))
 	for _, id := range boxIDs {
@@ -791,11 +860,13 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 			"id":       id,
 			"name":     name,
 			"unlocked": model.IsBoxUnlocked(id),
+			"state":    model.GetEncryptedBoxState(id),
 		})
 	}
 
 	ret.Data = map[string]any{
-		"enabled":              enabled,
+		"enabled":              state == model.NotebookCryptoStateEnabled,
+		"state":                state,
 		"count":                len(boxIDs),
 		"boxes":                boxes,
 		"migrationPending":     pendingMigration,
@@ -822,7 +893,7 @@ func exportNotebookCryptoBackup(c *gin.Context) {
 }
 
 // importNotebookCryptoBackup 导入密钥备份文件，恢复加密配置。
-// 用于新设备/重装后不依赖同步、手动恢复。本机已启用时拒绝（避免覆盖孤立数据）。
+// 用于新设备、重装或 RecoveryRequired 状态下手动恢复；完整且已启用的配置拒绝覆盖。
 func importNotebookCryptoBackup(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

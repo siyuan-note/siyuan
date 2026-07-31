@@ -118,7 +118,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         return window.siyuan.menus.menu;
     }
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
-    if (!window.siyuan.config.readonly) {
+    if (!window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
         const riffCardMenu = [{
             id: "quickMakeCard",
             iconHTML: "",

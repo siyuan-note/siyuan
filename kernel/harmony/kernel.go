@@ -60,6 +60,8 @@ func ReleaseExportFile(leaseID *C.char) {
 	model.ReleaseMobileExportLease(C.GoString(leaseID))
 }
 
+// GetExportFileName 返回普通导出的资源名称；加密导出应读取 AcquireExportFile 返回的 Name。
+//
 //export GetExportFileName
 func GetExportFileName(exportPath *C.char) *C.char {
 	name := model.GetMobileExportName(C.GoString(exportPath))
@@ -206,14 +208,10 @@ func GetExportFilePath(exportPath *C.char) *C.char {
 			logging.LogWarnf("get export file path [%s] blocked: path traversal attempt [%s]", pathStr, fileName)
 			return nil
 		}
-		// 加密导出受控路径（<boxID>/<kind>/<file>）：必须经注册表校验且 box 已解锁，否则 fail-closed
+		// 加密导出需要持有覆盖原生复制过程的租约，旧路径解析接口不再返回其明文地址。
 		if model.IsManagedEncryptedExportPath(fileName) {
-			artifact, ok := model.ResolveManagedExportForMobile(fileName)
-			if !ok {
-				logging.LogWarnf("get export file path [%s] blocked: managed export not available or box locked", pathStr)
-				return nil
-			}
-			return C.CString(artifact)
+			logging.LogWarnf("get export file path [%s] blocked: use AcquireExportFile for encrypted exports", pathStr)
+			return nil
 		}
 		absPath = filepath.Join(util.TempDir, "export", fileName)
 		exportBaseDir := filepath.Join(util.TempDir, "export")

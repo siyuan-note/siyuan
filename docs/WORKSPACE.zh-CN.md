@@ -182,6 +182,8 @@ data/<boxID>/
 | `encrypted` | bool | 是否为加密笔记本 |
 | `boxCrypt` | object 或 null | 已封装的笔记本数据加密密钥及包络元数据，在加密笔记本中为非空 |
 
+加密笔记本仍以明文保存名称、关闭状态和恢复所需的密钥包络，但 `icon`、`sort`、`sortMode` 在顶层只保存中性值，真实值位于 `boxCrypt.metadata` 的认证密文中；笔记本解锁后 `GetConf` 才会在内存中恢复这些值。
+
 > ⚠️ **笔记本 ID 不在 `conf.json` 里**——ID 就是笔记本目录名本身（见 §3 的判定规则）。
 
 读写位置：`GetConf` / `SaveConf`。路径硬编码为 `<DataDir>/<boxID>/.siyuan/conf.json`。

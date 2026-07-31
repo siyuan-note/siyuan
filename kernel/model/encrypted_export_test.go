@@ -133,8 +133,30 @@ func TestMobileExportLeaseStreamsEncryptedAsset(t *testing.T) {
 		util.WorkspaceDir = originalWorkspaceDir
 	}()
 
+	dek, err := util.GenerateDEK()
+	if err != nil {
+		t.Fatal(err)
+	}
+	kek, err := util.GenerateDEK()
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrappedDEK, err := util.EncryptWithAAD(kek, dek, wrappedDEKAAD(boxID))
+	zeroAndClear(kek)
+	if err != nil {
+		t.Fatal(err)
+	}
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted = true
+	boxConf.BoxCrypt = &conf.BoxEncryption{
+		Spec:       boxEncryptionSpec,
+		WrappedDEK: wrappedDEK,
+		WrapNonce:  mustEncryptionNonce(wrappedDEK),
+		CreatedAt:  time.Now().UnixMilli(),
+	}
+	if err = encryptBoxMetadata(boxID, boxConf, dek); err != nil {
+		t.Fatal(err)
+	}
 	confDir := filepath.Join(util.DataDir, boxID, ".siyuan")
 	if err := os.MkdirAll(confDir, 0755); err != nil {
 		t.Fatal(err)
@@ -147,10 +169,6 @@ func TestMobileExportLeaseStreamsEncryptedAsset(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dek, err := util.GenerateDEK()
-	if err != nil {
-		t.Fatal(err)
-	}
 	setDEKForTest(boxID, dek)
 	diskName := "asset-20260731153001-abcdefg.bin"
 	originalName := "移动端大附件.bin"

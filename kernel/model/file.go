@@ -179,6 +179,9 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 	openedBoxes := Conf.GetOpenedBoxes()
 	boxes := map[string]*Box{}
 	for _, box := range openedBoxes {
+		if flashcard && IsEncryptedBox(box.ID) {
+			continue
+		}
 		boxes[box.ID] = box
 	}
 
@@ -346,6 +349,9 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	//defer pprof.StopCPUProfile()
 
 	ret = []*File{}
+	if flashcard && IsEncryptedBox(boxID) {
+		return nil, 0, errors.New(Conf.Language(313))
+	}
 
 	var deck *riff.Deck
 	var deckBlockIDs []string

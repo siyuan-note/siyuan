@@ -41,9 +41,7 @@ func holdEncryptedBoxRequest(c *gin.Context, boxID string) error {
 		}
 	}
 
-	model.HoldBoxReadLock(boxID)
-	if !model.IsBoxUnlocked(boxID) {
-		model.ReleaseBoxReadLock(boxID)
+	if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
 		return errors.New("encrypted notebook is locked, please unlock it first")
 	}
 	leases = append(leases, boxID)
@@ -60,10 +58,23 @@ func requestBoxLeases(c *gin.Context) []string {
 	return leases
 }
 
+func releaseEncryptedBoxRequest(c *gin.Context, boxID string) {
+	leases := requestBoxLeases(c)
+	for i := len(leases) - 1; i >= 0; i-- {
+		if leases[i] != boxID {
+			continue
+		}
+		leases = append(leases[:i], leases[i+1:]...)
+		c.Set(requestBoxLeasesKey, leases)
+		model.ReleaseEncryptedBoxOperation(boxID)
+		return
+	}
+}
+
 func releaseRequestBoxLeases(c *gin.Context) {
 	leases := requestBoxLeases(c)
 	for i := len(leases) - 1; i >= 0; i-- {
-		model.ReleaseBoxReadLock(leases[i])
+		model.ReleaseEncryptedBoxOperation(leases[i])
 	}
 	c.Set(requestBoxLeasesKey, []string{})
 }

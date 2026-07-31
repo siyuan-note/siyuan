@@ -1016,6 +1016,23 @@ func renderSnapshotAttributeView(c *gin.Context) {
 
 	index := arg["snapshot"].(string)
 	id := arg["id"].(string)
+	blockID, _ := arg["blockID"].(string)
+	if err := holdAttributeViewRequest(c, blockID, id); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
+	boxID, err := model.ResolveRepoSnapshotAttributeViewBoxID(index, id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 	view, attrView, err := model.RenderRepoSnapshotAttributeView(index, id)
 	if err != nil {
 		ret.Code = -1
@@ -1092,6 +1109,22 @@ func renderHistoryAttributeView(c *gin.Context) {
 	groupPagingArg := arg["groupPaging"]
 	if nil != groupPagingArg {
 		groupPaging = groupPagingArg.(map[string]any)
+	}
+	if err := holdAttributeViewRequest(c, blockID, id); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
+	boxID, err := model.ResolveHistoryAttributeViewBoxID(id, created)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
 	}
 
 	view, attrView, err := model.RenderHistoryAttributeView(blockID, id, viewID, query, page, pageSize, groupPaging, created)
@@ -1198,6 +1231,12 @@ func renderAttributeView(c *gin.Context) {
 	if persistViewArg := arg["persistView"]; nil != persistViewArg {
 		persistView = persistViewArg.(bool)
 	}
+	if err := holdAttributeViewRequest(c, blockID, id); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		c.JSON(http.StatusOK, ret)
+		return
+	}
 
 	readOnlyRole := model.IsReadOnlyRoleContext(c)
 	if readOnlyRole {
@@ -1227,6 +1266,18 @@ func renderAttributeView(c *gin.Context) {
 		return
 	}
 	c.Data(http.StatusOK, "application/json; charset=utf-8", marshalBytes)
+}
+
+func holdAttributeViewRequest(c *gin.Context, blockID, avID string) error {
+	if blockID != "" {
+		if block := treenode.GetBlockTree(blockID); block != nil && model.IsEncryptedBox(block.BoxID) {
+			return holdEncryptedBoxRequest(c, block.BoxID)
+		}
+	}
+	if _, boxID := av.FindAttributeViewPath(avID); boxID != "" {
+		return holdEncryptedBoxRequest(c, boxID)
+	}
+	return nil
 }
 
 func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows, persistView bool, targetItemID, targetGroupID string) (ret *gulu.Result) {

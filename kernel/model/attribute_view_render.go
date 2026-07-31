@@ -17,6 +17,7 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"os"
@@ -1007,6 +1008,84 @@ func avBoxIDFromRepoPath(repoPath string) string {
 	return ""
 }
 
+// ResolveRepoSnapshotAttributeViewBoxID 返回快照属性视图的唯一加密笔记本上下文。
+func ResolveRepoSnapshotAttributeViewBoxID(indexID, avID string) (string, error) {
+	if !ast.IsNodeIDPattern(avID) {
+		return "", ErrInvalidID
+	}
+	repo, err := newRepository()
+	if err != nil {
+		return "", err
+	}
+	index, err := repo.GetIndex(indexID)
+	if err != nil {
+		return "", err
+	}
+	files, err := repo.GetFiles(index)
+	if err != nil {
+		return "", err
+	}
+	var matches []*entity.File
+	for _, file := range files {
+		if strings.HasSuffix(file.Path, "/storage/av/"+avID+".json") {
+			matches = append(matches, file)
+		}
+	}
+	if len(matches) == 0 {
+		return "", av.ErrAttributeViewNotFound
+	}
+	if len(matches) != 1 {
+		return "", fmt.Errorf("attribute view snapshot context is ambiguous [%s]", avID)
+	}
+	boxID := avBoxIDFromRepoPath(matches[0].Path)
+	if IsEncryptedBox(boxID) {
+		return boxID, nil
+	}
+	return "", nil
+}
+
+// ResolveHistoryAttributeViewBoxID 返回历史属性视图的唯一加密笔记本上下文。
+func ResolveHistoryAttributeViewBoxID(avID, created string) (string, error) {
+	if !ast.IsNodeIDPattern(avID) {
+		return "", ErrInvalidID
+	}
+	createdUnix, err := strconv.ParseInt(created, 10, 64)
+	if err != nil {
+		return "", fmt.Errorf("parse created [%s] failed: %w", created, err)
+	}
+	dirPrefix := time.Unix(createdUnix, 0).Format("2006-01-02-150405")
+	matches, err := filepath.Glob(filepath.Join(util.HistoryDir, dirPrefix+"*"))
+	if err != nil {
+		return "", err
+	}
+	var boxIDs []string
+	for _, historyDir := range matches {
+		if gulu.File.IsExist(filepath.Join(historyDir, "storage", "av", avID+".json")) {
+			boxIDs = append(boxIDs, "")
+		}
+		entries, _ := os.ReadDir(historyDir)
+		for _, entry := range entries {
+			if !entry.IsDir() || !ast.IsNodeIDPattern(entry.Name()) {
+				continue
+			}
+			candidate := filepath.Join(historyDir, entry.Name(), "storage", "av", avID+".json")
+			if gulu.File.IsExist(candidate) {
+				boxIDs = append(boxIDs, entry.Name())
+			}
+		}
+	}
+	if len(boxIDs) == 0 {
+		return "", av.ErrAttributeViewNotFound
+	}
+	if len(boxIDs) != 1 {
+		return "", fmt.Errorf("attribute view history context is ambiguous [%s]", avID)
+	}
+	if IsEncryptedBox(boxIDs[0]) {
+		return boxIDs[0], nil
+	}
+	return "", nil
+}
+
 func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
@@ -1027,20 +1106,24 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	if err != nil {
 		return
 	}
-	var avFile *entity.File
+	var avFiles []*entity.File
 	for _, f := range files {
 		// 匹配全局 /storage/av/<avID>.json 或加密笔记本/<boxID>/storage/av/<avID>.json
 		if strings.HasSuffix(f.Path, "/storage/av/"+avID+".json") {
-			avFile = f
-			break
+			avFiles = append(avFiles, f)
 		}
 	}
 
-	if nil == avFile {
+	if len(avFiles) == 0 {
 		attrView = av.NewAttributeView(avID)
 		err = av.ErrAttributeViewNotFound
 		return
 	}
+	if len(avFiles) != 1 {
+		err = fmt.Errorf("attribute view snapshot context is ambiguous [%s]", avID)
+		return
+	}
+	avFile := avFiles[0]
 
 	data, readErr := repo.OpenFile(avFile)
 	if nil != readErr {
@@ -1049,15 +1132,10 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		return
 	}
 
-	// 加密笔记本的 AV 在快照中是密文，按路径反查 boxID 后解密
-	if histBoxID := avBoxIDFromRepoPath(avFile.Path); histBoxID != "" && IsEncryptedBox(histBoxID) {
-		dec, decErr := av.DecryptAVData(histBoxID, avID, data)
-		if decErr != nil {
-			logging.LogErrorf("decrypt snapshot attribute view [%s] failed: %s", avID, decErr)
-			err = decErr
-			return
-		}
-		data = dec
+	data, err = decryptHistoricalAttributeView(avBoxIDFromRepoPath(avFile.Path), avID, data)
+	if err != nil {
+		logging.LogErrorf("decrypt snapshot attribute view [%s] failed: %s", avID, err)
+		return
 	}
 
 	attrView = av.NewAttributeView(avID)
@@ -1095,73 +1173,48 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		return
 	}
 
-	historyDir := matches[0]
-	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
-	if !gulu.File.IsExist(avJSONPath) {
-		// 加密笔记本的 AV 定义可能在历史目录的 boxID 子目录下
+	type historyAttributeViewSource struct {
+		path  string
+		boxID string
+	}
+	var sources []historyAttributeViewSource
+	for _, historyDir := range matches {
+		globalPath := filepath.Join(historyDir, "storage", "av", avID+".json")
+		if gulu.File.IsExist(globalPath) {
+			sources = append(sources, historyAttributeViewSource{path: globalPath})
+		}
 		entries, _ := os.ReadDir(historyDir)
 		for _, entry := range entries {
 			if entry.IsDir() && ast.IsNodeIDPattern(entry.Name()) {
 				candidate := filepath.Join(historyDir, entry.Name(), "storage", "av", avID+".json")
 				if gulu.File.IsExist(candidate) {
-					avJSONPath = candidate
-					break
+					sources = append(sources, historyAttributeViewSource{path: candidate, boxID: entry.Name()})
 				}
 			}
 		}
 	}
-	if !gulu.File.IsExist(avJSONPath) {
-		logging.LogWarnf("attribute view [%s] not found in history data [%s], use current data instead", avID, historyDir)
-		// 加密笔记本的 AV 定义在 notebook 级目录
-		_, boxID := av.FindAttributeViewPath(avID)
-		if boxID != "" {
-			avJSONPath = filepath.Join(util.DataDir, boxID, "storage", "av", avID+".json")
-		} else {
-			avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
-		}
-	}
-	if !gulu.File.IsExist(avJSONPath) {
-		logging.LogWarnf("attribute view [%s] not found in current data", avID)
+	if len(sources) == 0 {
 		attrView = av.NewAttributeView(avID)
 		err = av.ErrAttributeViewNotFound
 		return
 	}
+	if len(sources) != 1 {
+		err = fmt.Errorf("attribute view history context is ambiguous [%s]", avID)
+		return
+	}
+	source := sources[0]
 
-	data, readErr := os.ReadFile(avJSONPath)
+	data, readErr := os.ReadFile(source.path)
 	if nil != readErr {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
 		err = readErr
 		return
 	}
 
-	// 加密笔记本的历史 AV 定义是密文，需要解密后才能解析。
-	// 从路径提取 boxID，提取不到时遍历所有已打开的加密笔记本尝试解密。
-	avAbsSlash := filepath.ToSlash(avJSONPath)
-	var histBoxID string
-	if idx := strings.Index(avAbsSlash, "/storage/av/"); idx > 0 {
-		prefix := avAbsSlash[:idx]
-		segs := strings.Split(prefix, "/")
-		for i := len(segs) - 1; i >= 0; i-- {
-			if ast.IsNodeIDPattern(segs[i]) {
-				histBoxID = segs[i]
-				break
-			}
-		}
-	}
-	if histBoxID != "" && IsEncryptedBox(histBoxID) {
-		data, err = av.DecryptAVData(histBoxID, avID, data)
-		if err != nil {
-			logging.LogErrorf("decrypt history AV [%s] failed: %s", avID, err)
-			return
-		}
-	} else {
-		// 路径没提取到 boxID（如历史目录无 boxID 前缀的旧路径），尝试遍历已打开的加密笔记本解密
-		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
-			if dec, decErr := av.DecryptAVData(encBoxID, avID, data); decErr == nil {
-				data = dec
-				break
-			}
-		}
+	data, err = decryptHistoricalAttributeView(source.boxID, avID, data)
+	if err != nil {
+		logging.LogErrorf("decrypt history attribute view [%s] failed: %s", avID, err)
+		return
 	}
 
 	attrView = av.NewAttributeView(avID)
@@ -1172,4 +1225,24 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 
 	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, false, false, nil, "")
 	return
+}
+
+func decryptHistoricalAttributeView(boxID, avID string, data []byte) ([]byte, error) {
+	ciphertext := util.IsCiphertext(data)
+	if boxID == "" {
+		if ciphertext {
+			return nil, errors.New("encrypted attribute view snapshot is missing notebook context")
+		}
+		return data, nil
+	}
+	if !IsEncryptedBox(boxID) {
+		if ciphertext {
+			return nil, fmt.Errorf("encrypted attribute view snapshot has no matching notebook [%s]", boxID)
+		}
+		return data, nil
+	}
+	if !ciphertext {
+		return nil, fmt.Errorf("encrypted notebook attribute view snapshot is plaintext [%s]", boxID)
+	}
+	return av.DecryptAVData(boxID, avID, data)
 }

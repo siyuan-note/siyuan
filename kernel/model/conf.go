@@ -1269,8 +1269,9 @@ func HideConfSecret(c *AppConf) {
 	c.Secrets = &conf.Secrets{}
 	c.Variables = &conf.Variables{}
 	if nil != c.NotebookCrypto {
+		enabled := c.NotebookCrypto.Enabled && notebookCryptoConfigurationComplete(c.NotebookCrypto)
 		c.NotebookCrypto = &conf.NotebookCrypto{
-			Enabled:         c.NotebookCrypto.Enabled,
+			Enabled:         enabled,
 			AutoLockMinutes: c.NotebookCrypto.AutoLockMinutes,
 		}
 	}
@@ -1496,9 +1497,13 @@ func closeUserGuide() {
 	}
 }
 
-// NotebookCryptoEnabled 返回加密笔记本功能是否已启用（线程安全）。
+// NotebookCryptoEnabled 返回加密笔记本功能是否处于可用的启用状态（线程安全）。
 func NotebookCryptoEnabled() bool {
 	Conf.m.RLock()
 	defer Conf.m.RUnlock()
-	return Conf.NotebookCrypto.Enabled
+	if nil == Conf.NotebookCrypto {
+		return false
+	}
+	notebookCrypto := *Conf.NotebookCrypto
+	return notebookCrypto.Enabled && notebookCryptoConfigurationComplete(&notebookCrypto)
 }

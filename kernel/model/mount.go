@@ -226,6 +226,7 @@ func RemoveBox(boxID string) (err error) {
 	if isEncrypted {
 		sql.RemoveEncryptedDBFile(boxID)
 		treenode.RemoveEncryptedBlockTreeDBFile(boxID)
+		removeEncryptedBoxLifecycle(boxID)
 	}
 
 	if isUserGuide {
@@ -288,24 +289,26 @@ func unmount0(boxID string) {
 		return
 	}
 
+	if IsEncryptedBox(box.ID) {
+		// 先关闭生命周期准入并等待在途操作，再保存配置和历史，避免锁定准备期间继续产生明文响应或新写入。
+		lockBoxWithPreparation(boxID, func() {
+			boxConf := box.GetConf()
+			boxConf.Closed = true
+			if err := box.SaveConf(boxConf); err != nil {
+				logging.LogErrorf("save box conf [%s] failed: %s", box.ID, err)
+			}
+			sql.FlushQueue()
+			GenerateFileHistoryForBox(box)
+		})
+		return
+	}
+
 	boxConf := box.GetConf()
 	boxConf.Closed = true
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", box.ID, err)
 	}
-	if IsEncryptedBox(box.ID) {
-		// 加密笔记本关闭：跳过 Unindex（索引 db 马上要删，逐条删是白费），
-		// 先等待事务队列和 SQL 索引队列落盘（确保 pending 写入已持久化到加密 .sy），
-		// 生成文件历史，再 ClearDEK（=LockBox）清除 DEK 并删除加密 db 文件。
-		// 加密索引可由 box.Index() 全量重建，关闭即删文件避免残留旧索引数据导致下次解锁叠加重复行。
-		FlushTxQueue()
-		sql.FlushQueue()
-		// 关闭前生成一次文件历史：锁定后定时器无法为加密笔记本生成历史（不在 GetOpenedBoxes 里）
-		GenerateFileHistoryForBox(box)
-		ClearDEK(boxID)
-	} else {
-		box.Unindex()
-	}
+	box.Unindex()
 }
 
 func Mount(boxID string) (alreadyMount bool, err error) {

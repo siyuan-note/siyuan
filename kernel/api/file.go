@@ -379,6 +379,12 @@ func copyFile(c *gin.Context) {
 	if rejectEncryptedBoxPath(src) || rejectEncryptedBoxPath(dest) {
 		if !rejectEncryptedBoxPath(dest) && !gulu.File.IsSubPath(util.WorkspaceDir, dest) {
 			// dest 在工作区外且非加密 box，允许解密后复制
+			boxID := model.ExtractBoxIDFromAssetsPath(src)
+			if err = holdEncryptedBoxRequest(c, boxID); err != nil {
+				ret.Code = -1
+				ret.Msg = model.Conf.Language(314)
+				return
+			}
 			if err = copyDecryptedAsset(src, dest); err != nil {
 				ret.Code = -1
 				ret.Msg = err.Error()

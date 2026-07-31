@@ -546,6 +546,8 @@ interface INotebook {
     flashcardCount?: string;
     sortMode: number;
     encrypted?: boolean;
+    unlocked?: boolean;
+    state?: "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error";
 }
 
 interface ISiyuan {

@@ -182,6 +182,8 @@ The `BoxConf` struct:
 | `encrypted` | bool | Whether this is an encrypted notebook |
 | `boxCrypt` | object or null | Wrapped notebook data-encryption key and envelope metadata; non-null for encrypted notebooks |
 
+An encrypted notebook still stores its name, closed state, and key-recovery envelope in plaintext, but top-level `icon`, `sort`, and `sortMode` contain only neutral values. Their real values are authenticated ciphertext in `boxCrypt.metadata` and are restored in memory by `GetConf` only after the notebook is unlocked.
+
 > ⚠️ **The notebook ID is NOT in `conf.json`** — the ID is the notebook directory name itself (see §3).
 
 Read/write sites: `GetConf` / `SaveConf`. The path is hard-coded as `<DataDir>/<boxID>/.siyuan/conf.json`.

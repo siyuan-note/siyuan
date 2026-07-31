@@ -211,7 +211,7 @@ export const newNotebook = () => {
 export const newEncryptedNotebook = () => {
     // 先检查加密功能是否已启用；未启用则提示去设置页启用
     fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
-        if (!response.data.enabled) {
+        if (response.data.state !== "Enabled") {
             showMessage(window.siyuan.languages.encryptedNotebookTip, 6000);
             return;
         }

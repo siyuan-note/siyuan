@@ -163,19 +163,6 @@ func IsManagedEncryptedExportPath(relativePath string) bool {
 	return len(parts) >= 1 && ast.IsNodeIDPattern(parts[0])
 }
 
-// ResolveManagedExportForMobile 供移动端 GetExportFilePath 调用，校验托管 token 有效且 box 已解锁。
-// 任一条件不满足返回 ("", false)（fail-closed），防止移动端绕过注册表直接读取明文导出产物。
-func ResolveManagedExportForMobile(relativePath string) (absPath string, ok bool) {
-	boxID, artifact, resolved := ResolveManagedEncryptedExport(relativePath)
-	if !resolved {
-		return "", false
-	}
-	if _, dekErr := GetDEKIfUnlocked(boxID); dekErr != nil {
-		return "", false
-	}
-	return artifact, true
-}
-
 // AcquireMobileExportLease 为移动端导出取得覆盖整个原生复制过程的生命周期租约。
 func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err error) {
 	if after, ok := strings.CutPrefix(exportPath, "/export/"); ok {
@@ -192,11 +179,15 @@ func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err 
 			if !resolved {
 				return nil, errors.New("managed export is unavailable")
 			}
+			if err = AcquireEncryptedBoxOperation(boxID); err != nil {
+				return nil, err
+			}
 			HoldBoxReadLock(boxID)
 			release := true
 			defer func() {
 				if release {
 					ReleaseBoxReadLock(boxID)
+					ReleaseEncryptedBoxOperation(boxID)
 				}
 			}()
 			_, artifact, resolved = ResolveManagedEncryptedExport(fileName)
@@ -234,11 +225,15 @@ func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err 
 		return registerMobileExportLease("", artifact, filepath.Base(artifact), "")
 	}
 
+	if err = AcquireEncryptedBoxOperation(boxID); err != nil {
+		return nil, err
+	}
 	HoldBoxReadLock(boxID)
 	release := true
 	defer func() {
 		if release {
 			ReleaseBoxReadLock(boxID)
+			ReleaseEncryptedBoxOperation(boxID)
 		}
 	}()
 	dek, dekErr := GetDEKIfUnlocked(boxID)
@@ -310,6 +305,9 @@ func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err 
 func GetMobileExportName(exportPath string) string {
 	if after, ok := strings.CutPrefix(exportPath, "/export/"); ok {
 		if decoded, err := url.PathUnescape(after); err == nil {
+			if IsManagedEncryptedExportPath(decoded) {
+				return ""
+			}
 			return util.FilterFileName(filepath.Base(decoded))
 		}
 		return ""
@@ -325,26 +323,7 @@ func GetMobileExportName(exportPath string) string {
 	if boxID == "" || !IsEncryptedBox(boxID) {
 		return util.FilterFileName(diskName)
 	}
-	HoldBoxReadLock(boxID)
-	defer ReleaseBoxReadLock(boxID)
-	dek, err := GetDEKIfUnlocked(boxID)
-	if err != nil {
-		return ""
-	}
-	artifact, err := GetAssetAbsPathInBox(relativePath, boxID)
-	if err != nil {
-		return ""
-	}
-	source, err := filelock.OpenFile(artifact, os.O_RDONLY, 0)
-	if err != nil {
-		return ""
-	}
-	defer filelock.CloseFile(source)
-	originalName, err := DecryptAssetNameFromReader(boxID, diskName, dek, source)
-	if err != nil {
-		return ""
-	}
-	return util.FilterFileName(filepath.Base(originalName))
+	return ""
 }
 
 func registerMobileExportLease(boxID, artifact, name, cleanupDir string) (*MobileExportLease, error) {
@@ -406,6 +385,7 @@ func releaseMobileExportLease(leaseID string, expired bool) {
 	}
 	if state.boxID != "" {
 		ReleaseBoxReadLock(state.boxID)
+		ReleaseEncryptedBoxOperation(state.boxID)
 	}
 	if expired {
 		logging.LogWarnf("mobile export lease [%s] expired at [%s]", leaseID, state.expiresAt.Format(time.RFC3339))

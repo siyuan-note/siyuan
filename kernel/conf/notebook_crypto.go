@@ -28,9 +28,8 @@ type NotebookCrypto struct {
 	VerifierNonce   []byte            `json:"verifierNonce"`   // verifier 的 GCM nonce（从加密信封中提取）
 	AutoLockMinutes int               `json:"autoLockMinutes"` // 加密笔记本自动锁定闲置分钟数，0 表示禁用，默认 5
 
-	// 备份完整性字段（Spec>=1）
-	// Spec 表示备份规范版本。Checksum 防损坏。KEKMAC 需主密码验证。
-	Spec      int    `json:"spec,omitempty"`      // 备份规范版本（见 CurrentNotebookCryptoSpec）
+	// 当前备份的完整性字段。Checksum 防损坏，KEKMAC 需主密码验证。
+	Spec      int    `json:"spec"`                // 当前备份规范标识（见 CurrentNotebookCryptoSpec）
 	BackupID  string `json:"backupID,omitempty"`  // 备份唯一标识（UUID）
 	CreatedAt int64  `json:"createdAt,omitempty"` // 备份创建/更新时间（unix 秒）
 	Checksum  string `json:"checksum,omitempty"`  // SHA-256 校验和
@@ -48,8 +47,3 @@ func NewNotebookCrypto() *NotebookCrypto {
 
 // CurrentNotebookCryptoSpec 是当前备份规范版本号。
 const CurrentNotebookCryptoSpec = 1
-
-// UpgradeSpec 当前不执行迁移。
-func UpgradeSpec(*NotebookCrypto) bool {
-	return false
-}

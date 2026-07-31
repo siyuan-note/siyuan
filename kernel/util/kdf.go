@@ -32,7 +32,7 @@ import (
 var encryptionMagic = [4]byte{'S', 'E', 'N', 'C'}
 
 const (
-	// EncryptionSpec 表示 AES-GCM 密文信封规范版本。旧版密文没有信封头，读取时保持兼容。
+	// EncryptionSpec 表示 AES-GCM 密文信封规范版本。
 	EncryptionSpec byte = 1
 
 	encryptionAlgorithmAES256GCM byte = 1
@@ -58,13 +58,9 @@ func DefaultArgon2Params() Argon2Params {
 	}
 }
 
-// ValidateArgon2Params 校验 Argon2id 参数是否在合理范围内。
-// KeyLength 为 0 时视为旧配置，返回默认值；非零但不合法的参数返回错误。
-// 防止恶意备份设置极大内存导致 OOM，或过弱参数降低安全性。
+// ValidateArgon2Params 校验 Argon2id 参数是否在合理范围内，防止恶意备份设置极大内存导致 OOM，
+// 或过弱参数降低安全性。
 func ValidateArgon2Params(p Argon2Params) (Argon2Params, error) {
-	if p.KeyLength == 0 {
-		return DefaultArgon2Params(), nil
-	}
 	if p.KeyLength != 32 {
 		return p, errors.New("Argon2id KeyLength must be 32")
 	}
@@ -97,34 +93,30 @@ func Encrypt(key, plaintext []byte) ([]byte, error) {
 	return encryptGCM(key, plaintext, nil, "Encrypt")
 }
 
-// Decrypt 对应 Encrypt 的解密。兼容旧版 nonce||ciphertext||tag 格式。
-// 密钥错误或密文被篡改时返回错误（GCM 自带完整性校验）。
+// Decrypt 对应 Encrypt 的解密。密钥错误、格式无效或密文被篡改时返回错误。
 func Decrypt(key, ciphertext []byte) ([]byte, error) {
 	return decryptGCM(key, ciphertext, nil, "Decrypt")
 }
 
-// EncryptionNonce 从 AES-GCM 密文中提取 nonce，兼容旧版无信封头格式。
+// EncryptionNonce 从 AES-GCM 密文信封中提取 nonce。
 func EncryptionNonce(ciphertext []byte) ([]byte, error) {
-	if hasEncryptionMagic(ciphertext) {
-		if len(ciphertext) < encryptionEnvelopeHeaderSize {
-			return nil, errors.New("encrypted envelope too short")
-		}
-		if ciphertext[len(encryptionMagic)] != EncryptionSpec {
-			return nil, errors.New("unsupported encrypted envelope spec")
-		}
-		if ciphertext[len(encryptionMagic)+1] != encryptionAlgorithmAES256GCM {
-			return nil, errors.New("unsupported encrypted envelope algorithm")
-		}
-		nonceLength := int(ciphertext[len(encryptionMagic)+2])
-		if nonceLength == 0 || len(ciphertext) < encryptionEnvelopeHeaderSize+nonceLength {
-			return nil, errors.New("invalid encrypted envelope nonce length")
-		}
-		return append([]byte(nil), ciphertext[encryptionEnvelopeHeaderSize:encryptionEnvelopeHeaderSize+nonceLength]...), nil
+	if !hasEncryptionMagic(ciphertext) {
+		return nil, errors.New("invalid encrypted envelope magic")
 	}
-	if len(ciphertext) < 12 {
-		return nil, errors.New("ciphertext too short to extract nonce")
+	if len(ciphertext) < encryptionEnvelopeHeaderSize {
+		return nil, errors.New("encrypted envelope too short")
 	}
-	return append([]byte(nil), ciphertext[:12]...), nil
+	if ciphertext[len(encryptionMagic)] != EncryptionSpec {
+		return nil, errors.New("unsupported encrypted envelope spec")
+	}
+	if ciphertext[len(encryptionMagic)+1] != encryptionAlgorithmAES256GCM {
+		return nil, errors.New("unsupported encrypted envelope algorithm")
+	}
+	nonceLength := int(ciphertext[len(encryptionMagic)+2])
+	if nonceLength == 0 || len(ciphertext) < encryptionEnvelopeHeaderSize+nonceLength {
+		return nil, errors.New("invalid encrypted envelope nonce length")
+	}
+	return append([]byte(nil), ciphertext[encryptionEnvelopeHeaderSize:encryptionEnvelopeHeaderSize+nonceLength]...), nil
 }
 
 // DeriveSubKey 用 HKDF-SHA256 从主 DEK 派生用途隔离的子密钥。
@@ -149,8 +141,7 @@ func EncryptWithAAD(key, plaintext, aad []byte) ([]byte, error) {
 	return encryptGCM(key, plaintext, aad, "EncryptWithAAD")
 }
 
-// DecryptWithAAD 对应 EncryptWithAAD 的解密，兼容旧版 nonce||ciphertext||tag 格式。
-// AAD 不匹配或密文被篡改时返回错误。
+// DecryptWithAAD 对应 EncryptWithAAD 的解密。格式无效、AAD 不匹配或密文被篡改时返回错误。
 func DecryptWithAAD(key, ciphertext, aad []byte) ([]byte, error) {
 	return decryptGCM(key, ciphertext, aad, "DecryptWithAAD")
 }
@@ -194,31 +185,27 @@ func decryptGCM(key, ciphertext, aad []byte, operation string) ([]byte, error) {
 		return nil, err
 	}
 	nonceSize := gcm.NonceSize()
-	if hasEncryptionMagic(ciphertext) {
-		if len(ciphertext) < encryptionEnvelopeHeaderSize {
-			return nil, errors.New("encrypted envelope too short")
-		}
-		if ciphertext[len(encryptionMagic)] != EncryptionSpec {
-			return nil, errors.New("unsupported encrypted envelope spec")
-		}
-		if ciphertext[len(encryptionMagic)+1] != encryptionAlgorithmAES256GCM {
-			return nil, errors.New("unsupported encrypted envelope algorithm")
-		}
-		if int(ciphertext[len(encryptionMagic)+2]) != nonceSize {
-			return nil, errors.New("invalid encrypted envelope nonce length")
-		}
-		if len(ciphertext) < encryptionEnvelopeHeaderSize+nonceSize+gcm.Overhead() {
-			return nil, errors.New("encrypted envelope too short")
-		}
-		nonce := ciphertext[encryptionEnvelopeHeaderSize : encryptionEnvelopeHeaderSize+nonceSize]
-		ct := ciphertext[encryptionEnvelopeHeaderSize+nonceSize:]
-		return gcm.Open(nil, nonce, ct, envelopeAAD(ciphertext[:encryptionEnvelopeHeaderSize], aad))
+	if !hasEncryptionMagic(ciphertext) {
+		return nil, errors.New("invalid encrypted envelope magic")
 	}
-	if len(ciphertext) < nonceSize+gcm.Overhead() {
-		return nil, errors.New("ciphertext too short")
+	if len(ciphertext) < encryptionEnvelopeHeaderSize {
+		return nil, errors.New("encrypted envelope too short")
 	}
-	nonce, ct := ciphertext[:nonceSize], ciphertext[nonceSize:]
-	return gcm.Open(nil, nonce, ct, aad)
+	if ciphertext[len(encryptionMagic)] != EncryptionSpec {
+		return nil, errors.New("unsupported encrypted envelope spec")
+	}
+	if ciphertext[len(encryptionMagic)+1] != encryptionAlgorithmAES256GCM {
+		return nil, errors.New("unsupported encrypted envelope algorithm")
+	}
+	if int(ciphertext[len(encryptionMagic)+2]) != nonceSize {
+		return nil, errors.New("invalid encrypted envelope nonce length")
+	}
+	if len(ciphertext) < encryptionEnvelopeHeaderSize+nonceSize+gcm.Overhead() {
+		return nil, errors.New("encrypted envelope too short")
+	}
+	nonce := ciphertext[encryptionEnvelopeHeaderSize : encryptionEnvelopeHeaderSize+nonceSize]
+	ct := ciphertext[encryptionEnvelopeHeaderSize+nonceSize:]
+	return gcm.Open(nil, nonce, ct, envelopeAAD(ciphertext[:encryptionEnvelopeHeaderSize], aad))
 }
 
 func hasEncryptionMagic(ciphertext []byte) bool {

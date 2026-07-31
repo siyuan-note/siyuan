@@ -107,14 +107,14 @@ MasterSalt is the global root of KEK derivation — the master password + Master
 
 **Config recovery vs key recovery, separated**: Config recovery only needs to read the backup file and load back the salt/verifier (no password required, since salt is not secret and data remains undecryptable without the password); key recovery requires the password to derive the KEK and verify against the verifier. This allows the "enabled" state to be reached automatically after sync/import, so the user can unlock by entering the master password.
 
-**Manual key export/import**: Beyond auto-sync, users can manually export/import the key backup under **Settings → Authentication → Encrypted Notebook**, as an independent recovery channel outside sync (e.g. when sync is unavailable, for cross-account migration, or offline physical transfer).
+**Manual key export/import**: Beyond auto-sync, users can manually export/import the key backup under **Settings - Authentication - Encrypted Notebook**, as an independent recovery channel outside sync (e.g. when sync is unavailable, for cross-account migration, or offline physical transfer).
 
 | Operation | Entry | Notes |
 |---|---|---|
 | Export key | Shown when enabled | Copies `notebook-crypto-backup.json` to the export directory for download; the user keeps it (API: `/api/notebook/exportNotebookCryptoBackup`) |
-| Import key | Shown when not enabled | Uploads a local backup file; after validation it is written back to `<DataDir>/.siyuan/` and the local config is restored (`Enabled=true`). Use the master password matching that key to unlock afterwards (API: `/api/notebook/importNotebookCryptoBackup`) |
+| Import key | Shown in `Disabled` or `RecoveryRequired` | Uploads a local backup file; after validation it is written back to `<DataDir>/.siyuan/` and the local config is restored (`Enabled=true`). Use the master password matching that key to unlock afterwards (API: `/api/notebook/importNotebookCryptoBackup`) |
 
-Import guard: when the local machine is already enabled, import is rejected (to avoid overwriting the existing salt and orphaning WrappedDEKs); the import entry is shown only when not enabled. The backup file itself does not contain the master password (salt is not secret, verifier is ciphertext), so export/import does not leak plaintext data; unlocking still requires the master password.
+Import guard: a complete `Enabled` configuration rejects import to avoid overwriting the existing salt and orphaning WrappedDEKs. `RecoveryRequired` permits import only when the authenticated candidate key can unwrap every live encrypted notebook and every kernel-enumerable deleted-notebook history dependency. The backup file itself does not contain the master password (salt is not secret, verifier is ciphertext), so export/import does not leak plaintext data; unlocking still requires the master password.
 
 **Fool-proof guard**: When encrypted notebooks already exist on disk (notebooks with `Encrypted=true`) or kernel-enumerable encrypted recovery artifacts exist, `EnableEncryptedNotebook` **refuses to regenerate MasterSalt** (which would orphan old WrappedDEKs) and instead recovers from backup first; only if the backup is missing does it error out and guide the user to restore `conf.json` or the backup file. Symmetrically, `DisableEncryptedNotebook` scans live notebooks, deleted-notebook history, and local recovery snapshots; it refuses to disable while a dependency exists unless the user explicitly chooses to purge those recovery artifacts permanently. Sync endpoints, offline media, and external snapshots cannot be enumerated reliably, so users who may need those copies later must retain an independently exported matching key backup before disabling.
 
@@ -266,6 +266,7 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 - `.sy` document body (encrypted)
 - assets binary files (encrypted)
 - assets filenames (desensitized, original name encrypted)
+- notebook icon, list sort weight, and sort mode (authenticated ciphertext in `BoxCrypt.Metadata`)
 - database files (columns/rows/cell values/view config/content snapshots, encrypted)
 - content SQLite database (blocks/FTS/attributes/refs, SQLCipher-encrypted)
 - blocktree SQLite database (block-tree metadata: ID/path/title, SQLCipher-encrypted)
@@ -397,6 +398,8 @@ Exports have two classes: a user-selected external destination may contain plain
 
 The in-memory `managedEncryptedExports` tokens manage download-link expiry and lifecycle; they are not a security boundary against local files, administrator APIs, or trusted plugins. Lock, delete, cancellation, failure, and normal exit revoke related tokens and best-effort remove `temp/export/<boxID>`. At application startup, entries whose first-level name is a valid boxID are at least scanned and removed; generic desktop temporary-directory initialization also clears the entire `temp/export` directory. No caller may rely on files under `temp/` surviving across processes. Deletion failure only records diagnostics without plaintext and does not prevent the notebook from entering `Locked`; exit or the next startup retries cleanup. Logs, error reports, thumbnails, OCR/conversion output, and clipboard handling contain no plaintext by default unless the user explicitly sends content to an external program.
 
+Native mobile save flows must call `AcquireExportFile` to obtain a lease containing the path, name, size, and lease ID, then call `ReleaseExportFile` from a `finally` path after copying and verification finish. Encrypted exports must not use legacy path-only or name-only interfaces because those calls cannot cover the native copy phase with a lifecycle lease.
+
 ## 21. Security Acceptance Matrix
 
 | Scenario | Expected result |
@@ -459,7 +462,7 @@ Sync recovery can validate backup integrity but cannot prove that a backup is th
 **It cannot be recovered** — by design (no backdoor). Even if the ciphertext has been synced to the cloud, it cannot be decrypted without the master password. **You must remember the master password; using a password manager is recommended.**
 
 ### Recovering from a lost key backup
-If both `conf/conf.json` and the key backup in the sync directory are lost (an extreme case), re-enabling the encrypted-notebook feature will be rejected with a prompt to restore the backup file. As long as you can recover `notebook-crypto-backup.json` from another synced device or a previously exported key file, you can import it via the "Import key" button (shown when not enabled), or manually put it back at `<workspace>/data/.siyuan/` and re-enable, then unlock with the master password matching that key.
+If both `conf/conf.json` and the key backup in the sync directory are lost (an extreme case), re-enabling the encrypted-notebook feature will be rejected with a prompt to restore the backup file. As long as you can recover `notebook-crypto-backup.json` from another synced device or a previously exported key file, you can import it via the "Import key" button shown in `Disabled` or `RecoveryRequired`, or manually put it back at `<workspace>/data/.siyuan/` and re-enable, then unlock with the master password matching that key.
 
 Restoring deleted encrypted-notebook history also requires the global key backup matching its WrappedDEK and the master password. While you still need that local recovery path, do not permanently purge either the history or its matching key backup; disabling must refuse to proceed when it discovers such a dependency.
 

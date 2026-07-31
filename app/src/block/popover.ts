@@ -20,6 +20,8 @@ let tooltipAbortController: AbortController | null = null;
 export const initBlockPopover = (app: App) => {
     let timeout: number;
     let timeoutHide: number;
+    let penTimeout: number;
+    let penTimeoutHide: number;
     // 编辑器内容块引用/backlinks/tag/bookmark/套娃中使用
     document.addEventListener("mouseover", (event: MouseEvent & { target: HTMLElement, path: HTMLElement[] }) => {
         if (!window.siyuan.config || !window.siyuan.menus ||
@@ -256,6 +258,53 @@ export const initBlockPopover = (app: App) => {
             showPopover(app);
         }, window.siyuan.config.editor.floatWindowDelay);
     });
+    if (window.JSAndroid) {
+        // Android 平板通过 Pointer Events 单独处理悬停笔浮窗。
+        document.addEventListener("pointerover", (event: PointerEvent & {
+            target: HTMLElement,
+            path: HTMLElement[]
+        }) => {
+            clearTimeout(penTimeout);
+            clearTimeout(penTimeoutHide);
+            if (event.pointerType !== "pen" || event.buttons !== 0 ||
+                !window.siyuan.config || !window.siyuan.menus ||
+                window.siyuan.dragElement || document.onmousemove ||
+                window.siyuan.config.editor.floatWindowMode !== 0 || window.siyuan.shiftIsPressed) {
+                return;
+            }
+            const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
+                hasClosestByClassName(event.target, "ariaLabel") ||
+                hasClosestByAttribute(event.target, "data-type", "tab-header") ||
+                hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
+                hasClosestByClassName(event.target, "av__calc--ashow") ||
+                hasClosestByClassName(event.target, "av__cell");
+            penTimeoutHide = window.setTimeout(() => {
+                if (!hidePopover(event)) {
+                    return;
+                }
+                if (!popoverTargetElement && !aElement) {
+                    clearTimeout(penTimeout);
+                }
+            }, Constants.TIMEOUT_INPUT);
+            penTimeout = window.setTimeout(() => {
+                if (!getTarget(event, aElement)) {
+                    return;
+                }
+                clearTimeout(penTimeoutHide);
+                clearTimeout(timeoutHide);
+                showPopover(app);
+            }, window.siyuan.config.editor.floatWindowDelay);
+        }, {capture: true, passive: true});
+        const cancelPenHover = (event: PointerEvent) => {
+            if (event.pointerType === "pen") {
+                clearTimeout(penTimeout);
+                clearTimeout(penTimeoutHide);
+            }
+        };
+        document.addEventListener("pointerout", cancelPenHover, {capture: true, passive: true});
+        document.addEventListener("pointerdown", cancelPenHover, {capture: true, passive: true});
+        document.addEventListener("pointercancel", cancelPenHover, {capture: true, passive: true});
+    }
 };
 
 const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {

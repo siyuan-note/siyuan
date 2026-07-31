@@ -802,11 +802,9 @@ type="checkbox">
     ${formatCount(resourceData.downloads)}
 </div>` : "";
         readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
-    <div class="block__icons">
-        <div class="block__logo fn__pointer fn__flex-1" data-type="goBack">
-            <svg class="block__logoicon"><use xlink:href="#iconLeft"></use></svg>
-            <span class="ft__breakword">${navTitles[bazaarType]}</span>
-        </div>
+    <div class="item__header fn__pointer" data-type="goBack">
+        <svg class="b3-list-item__graphic"><use xlink:href="#iconLeft"></use></svg>
+        <span class="b3-list-item__text ft__breakword">${navTitles[bazaarType]}</span>
     </div>
     <div class="fn__flex-1">
         <img class="item__img" src="${displayData.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'">

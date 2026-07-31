@@ -368,7 +368,24 @@
           padding: 0 16px;
 
           & > .fn__flex-1 {
-            padding-right: 8px;
+            padding: 0 8px;
+          }
+        }
+
+        &__header {
+          align-items: center;
+          display: flex;
+          flex-shrink: 0;
+          font-weight: 600;
+          height: 21px;
+          margin-bottom: 16px;
+          padding: 0 4px;
+
+          .b3-list-item__graphic {
+            flex-shrink: 0;
+            height: 16px;
+            padding: 0 6px 0 4px;
+            width: 16px;
           }
         }
 
@@ -443,7 +460,7 @@
 
         &__actions {
           flex-shrink: 0;
-          padding: 8px 8px 0 0;
+          padding: 8px 8px 0;
 
           [data-type="readme-update-slot"] .b3-button {
             width: 100% !important;

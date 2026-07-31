@@ -36,6 +36,7 @@ import {
     mergeAVBatchRelationValue,
     setAVBatchDisplayValue
 } from "./batchValue";
+import {genAVDragFillValue} from "./dragFillValue";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -1341,9 +1342,16 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 return;
             }
             // https://ld246.com/article/1707975507571 数据库下拉填充数据后异常
-            const data = JSON.parse(JSON.stringify(originData[originKeys[index % originKeys.length]][cellIndex]));
-            data.id = item.id;
             const keyID = item.colId;
+            const originValue = originData[originKeys[index % originKeys.length]]?.[cellIndex];
+            if (!originValue) {
+                return;
+            }
+            const data = genAVDragFillValue(originValue, {
+                id: item.id,
+                keyID,
+                blockID: rowID,
+            });
             if (data.type === "block") {
                 data.isDetached = true;
                 delete data.block.id;

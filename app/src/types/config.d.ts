@@ -2386,6 +2386,10 @@ declare namespace Config {
      */
     export interface IUILayoutTabSearchConfig {
         /**
+         * Whether the search contains encrypted notebook data that must not be persisted
+         */
+        sensitive?: boolean;
+        /**
          * 搜索传入的查询内容
          */
         query?: string;

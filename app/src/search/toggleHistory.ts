@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 import {Menu} from "../plugin/Menu";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
 import {escapeHtml} from "../util/escape";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Protyle} from "../protyle";
@@ -221,7 +221,10 @@ export const toggleAssetHistory = (assetElement: Element) => {
     });
 };
 
-export const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
+export const saveKeyList = (type: "keys" | "replaceKeys", value: string, config?: Config.IUILayoutTabSearchConfig) => {
+    if (isSensitiveSearchConfig(config)) {
+        return;
+    }
     let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
     list.splice(0, 0, value);
     list = Array.from(new Set(list));

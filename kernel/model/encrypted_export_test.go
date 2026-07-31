@@ -1,10 +1,13 @@
 package model
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/88250/gulu"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -24,6 +27,119 @@ func TestManagedEncryptedExportRevocation(t *testing.T) {
 	RevokeManagedEncryptedExportsForBox(boxID)
 	if _, _, ok = ResolveManagedEncryptedExport(relativePath); ok {
 		t.Fatal("revoked managed export remained downloadable")
+	}
+}
+
+func TestMobileExportLeaseLifecycle(t *testing.T) {
+	originalTempDir := util.TempDir
+	util.TempDir = t.TempDir()
+	defer func() {
+		util.TempDir = originalTempDir
+	}()
+
+	artifact := filepath.Join(util.TempDir, "export", "result.zip")
+	if err := os.MkdirAll(filepath.Dir(artifact), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(artifact, []byte("result"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	lease, err := AcquireMobileExportLease("/export/result.zip")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lease.ID == "" || lease.Path != artifact || lease.Name != "result.zip" || lease.Size != 6 {
+		t.Fatalf("unexpected mobile export lease: %#v", lease)
+	}
+	if _, ok := mobileExportLeases.leases[lease.ID]; !ok {
+		t.Fatalf("mobile export lease was not registered")
+	}
+
+	ReleaseMobileExportLease(lease.ID)
+	ReleaseMobileExportLease(lease.ID)
+	if _, ok := mobileExportLeases.leases[lease.ID]; ok {
+		t.Fatalf("mobile export lease was not released")
+	}
+	if _, err = os.Stat(artifact); err != nil {
+		t.Fatalf("releasing a normal export lease should preserve the artifact: %v", err)
+	}
+}
+
+func TestMobileExportLeaseRejectsTraversal(t *testing.T) {
+	if _, err := AcquireMobileExportLease("/export/../secret.txt"); err == nil {
+		t.Fatalf("mobile export lease should reject path traversal")
+	}
+}
+
+func TestMobileExportLeaseStreamsEncryptedAsset(t *testing.T) {
+	originalDataDir := util.DataDir
+	originalTempDir := util.TempDir
+	originalWorkspaceDir := util.WorkspaceDir
+	workspaceDir := t.TempDir()
+	util.WorkspaceDir = workspaceDir
+	util.DataDir = filepath.Join(workspaceDir, "data")
+	util.TempDir = t.TempDir()
+	boxID := "20260731153000-export1"
+	defer func() {
+		LockBox(boxID)
+		util.DataDir = originalDataDir
+		util.TempDir = originalTempDir
+		util.WorkspaceDir = originalWorkspaceDir
+	}()
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Encrypted = true
+	confDir := filepath.Join(util.DataDir, boxID, ".siyuan")
+	if err := os.MkdirAll(confDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	confData, err := gulu.JSON.MarshalIndentJSON(boxConf, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(confDir, "conf.json"), confData, 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	dek, err := util.GenerateDEK()
+	if err != nil {
+		t.Fatal(err)
+	}
+	setDEKForTest(boxID, dek)
+	diskName := "asset-20260731153001-abcdefg.bin"
+	originalName := "移动端大附件.bin"
+	plaintext := bytes.Repeat([]byte("mobile-streaming-"), encryptedAssetChunkSize/17*2+100)
+	ciphertext, err := EncryptAssetWithName(boxID, diskName, originalName, dek, plaintext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assetDir := filepath.Join(util.DataDir, boxID, "assets")
+	if err = os.MkdirAll(assetDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(assetDir, diskName), ciphertext, 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	lease, err := AcquireMobileExportLease("assets/" + diskName + "?box=" + boxID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lease.Name != originalName {
+		t.Fatalf("unexpected lease name: %q", lease.Name)
+	}
+	exported, err := os.ReadFile(lease.Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(exported, plaintext) {
+		t.Fatalf("unexpected exported content size: %d", len(exported))
+	}
+	cleanupDir := filepath.Dir(lease.Path)
+	ReleaseMobileExportLease(lease.ID)
+	if _, err = os.Stat(cleanupDir); !os.IsNotExist(err) {
+		t.Fatalf("releasing the lease should remove plaintext temp data: %v", err)
 	}
 }
 

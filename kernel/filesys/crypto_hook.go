@@ -36,6 +36,69 @@ var DEKProvider func(boxID string) ([]byte, error)
 var DEKLockAcquire func(boxID string)
 var DEKLockRelease func(boxID string)
 
+// acquireCryptoLease 在整个文件操作期间持有笔记本生命周期读锁，并返回当前笔记本的 DEK 副本。
+// 调用方必须执行 release，确保密钥副本清零且锁在缓存发布后才释放。
+func acquireCryptoLease(boxID string) (dek []byte, encrypted bool, release func(), err error) {
+	locked := false
+	release = func() {
+		for i := range dek {
+			dek[i] = 0
+		}
+		if locked && DEKLockRelease != nil {
+			DEKLockRelease(boxID)
+		}
+	}
+	if DEKProvider == nil {
+		return
+	}
+	if DEKLockAcquire != nil {
+		DEKLockAcquire(boxID)
+		locked = true
+	}
+	dek, err = DEKProvider(boxID)
+	if err != nil {
+		release()
+		release = func() {}
+		return nil, false, release, err
+	}
+	encrypted = dek != nil
+	return
+}
+
+func encryptDataWithDEK(boxID, relativePath string, data, dek []byte) ([]byte, error) {
+	if dek == nil {
+		return data, nil
+	}
+	fileKey := util.DeriveSubKey(dek, "siyuan/file")
+	defer func() {
+		for i := range fileKey {
+			fileKey[i] = 0
+		}
+	}()
+	aad, err := SyAAD(boxID, relativePath)
+	if err != nil {
+		return nil, err
+	}
+	return util.EncryptWithAAD(fileKey, data, []byte(aad))
+}
+
+func decryptDataWithDEK(boxID, relativePath string, data, dek []byte) ([]byte, error) {
+	if dek == nil {
+		return data, nil
+	}
+	fileKey := util.DeriveSubKey(dek, "siyuan/file")
+	defer func() {
+		for i := range fileKey {
+			fileKey[i] = 0
+		}
+	}()
+	aad, err := SyAAD(boxID, relativePath)
+	if err != nil {
+		return nil, err
+	}
+	return util.DecryptWithAAD(fileKey, data, []byte(aad))
+}
+
 // SyObjectBase 从 box 内相对路径提取稳定文件基名并校验合法性。
 // 接受形如 <rootID>.sy 的基名：扩展名必须是 .sy，且 stem 是合法节点 ID。
 // 非法扩展名或非节点 ID 模式返回错误，避免把任意路径当 AAD 绑定物产生不可解密的数据。
@@ -82,50 +145,22 @@ func encryptedBox(boxID string) bool {
 // encryptData 若 boxID 是已解锁的加密 box，用 fileKey（DEK 派生子密钥）加密 data，
 // AAD 绑定 boxID + 稳定文件基名（不含父目录）；非加密笔记本原样返回；加密但未解锁时返回 error，拒绝写盘（防止明文泄漏）。
 func encryptData(boxID, relativePath string, data []byte) ([]byte, error) {
-	if DEKProvider == nil {
-		return data, nil
-	}
-	if DEKLockAcquire != nil {
-		DEKLockAcquire(boxID)
-		defer DEKLockRelease(boxID)
-	}
-	dek, err := DEKProvider(boxID)
+	dek, _, release, err := acquireCryptoLease(boxID)
 	if err != nil {
 		return nil, err
 	}
-	if dek == nil {
-		return data, nil // 非加密 box
-	}
-	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	aad, err := SyAAD(boxID, relativePath)
-	if err != nil {
-		return nil, err
-	}
-	return util.EncryptWithAAD(fileKey, data, []byte(aad))
+	defer release()
+	return encryptDataWithDEK(boxID, relativePath, data, dek)
 }
 
 // decryptData 对应解密。非加密笔记本原样返回；加密但未解锁时返回 error，拒绝读盘。
 func decryptData(boxID, relativePath string, data []byte) ([]byte, error) {
-	if DEKProvider == nil {
-		return data, nil
-	}
-	if DEKLockAcquire != nil {
-		DEKLockAcquire(boxID)
-		defer DEKLockRelease(boxID)
-	}
-	dek, err := DEKProvider(boxID)
+	dek, _, release, err := acquireCryptoLease(boxID)
 	if err != nil {
 		return nil, err
 	}
-	if dek == nil {
-		return data, nil // 非加密 box
-	}
-	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	aad, err := SyAAD(boxID, relativePath)
-	if err != nil {
-		return nil, err
-	}
-	return util.DecryptWithAAD(fileKey, data, []byte(aad))
+	defer release()
+	return decryptDataWithDEK(boxID, relativePath, data, dek)
 }
 
 // docIALBoxID 从 .sy 绝对路径反推 boxID，供 DocIAL 判断是否需整体解密。

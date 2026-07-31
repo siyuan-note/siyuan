@@ -42,7 +42,8 @@ import {Wnd} from "../../../layout/Wnd";
 import {unsplitWnd} from "../../../menus/tab";
 import {openFile} from "../../../editor/util";
 import {fetchPost} from "../../../util/fetch";
-import {setStorageVal} from "../../../protyle/util/compatibility";
+import {isSensitiveSearchConfig, setStorageVal} from "../../../protyle/util/compatibility";
+import {isEncryptedBox} from "../../../util/pathName";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -151,7 +152,20 @@ export const globalCommand = (command: string, app: App) => {
         case "recentDocs":
             openRecentDocs();
             return true;
-        case "recentClosed":
+        case "recentClosed": {
+            const closedTabsLength = window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length;
+            window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] =
+                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].filter((tab: {
+                    children?: ILayoutJSON & {
+                        notebookId?: string,
+                        config?: Config.IUILayoutTabSearchConfig,
+                    }
+                }) =>
+                    !(tab.children?.instance === "Editor" && isEncryptedBox(tab.children.notebookId)) &&
+                    !(tab.children?.instance === "Search" && isSensitiveSearchConfig(tab.children.config)));
+            if (closedTabsLength !== window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length) {
+                setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
+            }
             if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > 0) {
                 const closeData = window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
                 setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
@@ -236,6 +250,7 @@ export const globalCommand = (command: string, app: App) => {
                 });
             }
             return true;
+        }
         case "toggleDock":
             toggleDockBar(document.querySelector("#barDock use"));
             return true;

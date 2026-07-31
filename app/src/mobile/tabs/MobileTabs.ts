@@ -6,6 +6,7 @@ import {escapeAttr, escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
 import {newFile} from "../../util/newFile";
+import {isEncryptedBox} from "../../util/pathName";
 import {loadMobileFileById, updateRecentDocSwitchTime} from "../editor";
 import {openModel} from "../menu/model";
 import {closeModel} from "../util/closePanel";
@@ -76,6 +77,17 @@ const normalizeTab = (value: unknown): MobileTab | undefined => {
     };
 };
 
+const sanitizeEntry = (entry?: MobileTabEntry) => entry && !isEncryptedBox(entry.notebookID) ? entry : undefined;
+
+const sanitizeTab = (tab: MobileTab): MobileTab => {
+    return {
+        ...tab,
+        current: sanitizeEntry(tab.current),
+        backStack: tab.backStack.filter((entry) => !!sanitizeEntry(entry)),
+        forwardStack: tab.forwardStack.filter((entry) => !!sanitizeEntry(entry)),
+    };
+};
+
 export class MobileTabs {
     private state: MobileTabsState;
     private navigationEpoch = 0;
@@ -84,7 +96,7 @@ export class MobileTabs {
     constructor(private readonly app: App) {
         const stored = window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] as MobileTabsState | undefined;
         const tabs = stored?.version === 1 && Array.isArray(stored.tabs) ?
-            stored.tabs.map(normalizeTab).filter((item): item is MobileTab => !!item) : [];
+            stored.tabs.map(normalizeTab).filter((item): item is MobileTab => !!item).map(sanitizeTab) : [];
         this.state = {
             version: 1,
             activeTabID: tabs.some((item) => item.id === stored?.activeTabID) ? stored.activeTabID : tabs[0]?.id,
@@ -109,8 +121,13 @@ export class MobileTabs {
     }
 
     private persist() {
-        window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] = this.state;
-        setStorageVal(Constants.LOCAL_MOBILE_TABS, this.state);
+        const persistedState: MobileTabsState = {
+            version: 1,
+            activeTabID: this.state.activeTabID,
+            tabs: this.state.tabs.map(sanitizeTab),
+        };
+        window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] = persistedState;
+        setStorageVal(Constants.LOCAL_MOBILE_TABS, persistedState);
     }
 
     private updateCounter() {
@@ -293,8 +310,9 @@ export class MobileTabs {
                 tab.activeAt = Date.now();
                 this.state.activeTabID = tab.id;
                 this.trimTabs();
-                window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id: loadID};
-                setStorageVal(Constants.LOCAL_DOCINFO, {id: loadID});
+                const docInfo = isEncryptedBox(protyle.notebookId) ? {id: ""} : {id: loadID};
+                window.siyuan.storage[Constants.LOCAL_DOCINFO] = docInfo;
+                setStorageVal(Constants.LOCAL_DOCINFO, docInfo);
                 this.persist();
                 this.updateCounter();
                 const previousRootID = options.recentPreviousRootID || previous?.rootID;

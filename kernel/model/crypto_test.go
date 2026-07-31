@@ -38,6 +38,92 @@ func setDEKForTest(boxID string, dek []byte) {
 	cachedDEKs[boxID] = dek
 }
 
+func TestEncryptedAssetV2RoundTrip(t *testing.T) {
+	boxID := "20260731103900-assetv2"
+	diskName := "asset-20260731103900-abcdefg.bin"
+	originalName := "机密附件.pdf"
+	dek := bytes.Repeat([]byte{0x42}, 32)
+	plaintext := []byte("encrypted asset content")
+
+	ciphertext, err := EncryptAssetWithName(boxID, diskName, originalName, dek, plaintext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.HasPrefix(ciphertext, encryptedAssetV2Magic) {
+		t.Fatalf("asset does not use the v2 container")
+	}
+
+	decrypted, name, v2, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !v2 || name != originalName || !bytes.Equal(decrypted, plaintext) {
+		t.Fatalf("unexpected v2 asset round trip: v2=%v name=%q content=%q", v2, name, decrypted)
+	}
+}
+
+func TestEncryptedAssetV2StreamsMultipleChunks(t *testing.T) {
+	boxID := "20260731103930-assetv2"
+	diskName := "asset-20260731103930-abcdefg.bin"
+	originalName := "large.bin"
+	dek := bytes.Repeat([]byte{0x43}, 32)
+	plaintext := bytes.Repeat([]byte("streaming-content-"), encryptedAssetChunkSize/18*2+100)
+
+	ciphertext, err := EncryptAssetWithName(boxID, diskName, originalName, dek, plaintext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var output bytes.Buffer
+	name, v2, err := DecryptAssetToWriter(boxID, diskName, dek, bytes.NewReader(ciphertext), &output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !v2 || name != originalName || !bytes.Equal(output.Bytes(), plaintext) {
+		t.Fatalf("unexpected streamed v2 asset result: v2=%v name=%q size=%d", v2, name, output.Len())
+	}
+}
+
+func TestEncryptedAssetV2AuthenticatesMetadataAndContent(t *testing.T) {
+	boxID := "20260731104000-assetv2"
+	diskName := "asset-20260731104000-abcdefg.bin"
+	dek := bytes.Repeat([]byte{0x24}, 32)
+	ciphertext, err := EncryptAssetWithName(boxID, diskName, "secret.txt", dek, []byte("secret"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	metadataTampered := append([]byte(nil), ciphertext...)
+	metadataTampered[8] ^= 1
+	if _, _, _, err = DecryptAssetWithName(boxID, diskName, dek, metadataTampered); err == nil {
+		t.Fatalf("tampered asset metadata should be rejected")
+	}
+
+	contentTampered := append([]byte(nil), ciphertext...)
+	contentTampered[len(contentTampered)-1] ^= 1
+	if _, _, _, err = DecryptAssetWithName(boxID, diskName, dek, contentTampered); err == nil {
+		t.Fatalf("tampered asset content should be rejected")
+	}
+}
+
+func TestDecryptAssetKeepsV1Compatibility(t *testing.T) {
+	boxID := "20260731104100-assetv1"
+	diskName := "asset-20260731104100-abcdefg.bin"
+	dek := bytes.Repeat([]byte{0x12}, 32)
+	plaintext := []byte("legacy asset")
+
+	ciphertext, err := EncryptAsset(boxID, diskName, dek, plaintext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decrypted, name, v2, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v2 || name != "" || !bytes.Equal(decrypted, plaintext) {
+		t.Fatalf("unexpected v1 asset result: v2=%v name=%q content=%q", v2, name, decrypted)
+	}
+}
+
 // TestIsBoxUnlockedLifecycle 验证 DEK 缓存的存在/缺失状态。
 func TestIsBoxUnlockedLifecycle(t *testing.T) {
 	LockBox("lifecycle-test-box") // 确保初始干净
@@ -361,6 +447,133 @@ func TestDeriveKEKAllowsLocalAutoLockChange(t *testing.T) {
 		t.Fatalf("deriveKEK rejected a local AutoLockMinutes change: %v", err)
 	}
 	zeroAndClear(derived)
+}
+
+func TestDeriveKEKKeepsAuthenticatedLocalCandidateWithDifferentBackup(t *testing.T) {
+	origDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() { util.DataDir = origDataDir }()
+
+	localPassword := "local-candidate-password"
+	localSalt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	localKEK := util.DeriveKey(localPassword, localSalt, params)
+	defer zeroAndClear(localKEK)
+	localVerifier, _ := util.EncryptWithAAD(localKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	local := &conf.NotebookCrypto{
+		Enabled:         true,
+		MasterSalt:      localSalt,
+		KDFParams:       params,
+		KEKVerifier:     localVerifier,
+		AutoLockMinutes: 5,
+	}
+	prepareBackupForWrite(local)
+	local.KEKMAC = computeKEKMAC(local, localKEK)
+	local.AutoLockMinutes = 30
+
+	backupPassword := "synchronized-candidate-password"
+	backupSalt, _ := util.GenerateSalt()
+	backupKEK := util.DeriveKey(backupPassword, backupSalt, params)
+	defer zeroAndClear(backupKEK)
+	backupVerifier, _ := util.EncryptWithAAD(backupKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	backup := &conf.NotebookCrypto{
+		Enabled:         true,
+		MasterSalt:      backupSalt,
+		KDFParams:       params,
+		KEKVerifier:     backupVerifier,
+		AutoLockMinutes: 5,
+	}
+	if err := writeNotebookCryptoBackupData(backup, backupKEK); err != nil {
+		t.Fatal(err)
+	}
+
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = local
+	defer func() { Conf = originalConf }()
+
+	derived, err := deriveKEK(localPassword)
+	if err != nil {
+		t.Fatalf("deriveKEK rejected the authenticated local candidate: %v", err)
+	}
+	zeroAndClear(derived)
+}
+
+func TestDeriveKEKAdoptsCompleteSynchronizedCandidate(t *testing.T) {
+	originalDataDir := util.DataDir
+	originalConfDir := util.ConfDir
+	testDir := t.TempDir()
+	util.DataDir = testDir
+	util.ConfDir = filepath.Join(testDir, "conf")
+	if err := os.MkdirAll(util.ConfDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		util.DataDir = originalDataDir
+		util.ConfDir = originalConfDir
+	}()
+
+	boxID := "20260731110000-syncbox"
+	newPassword := "new-device-password"
+	newSalt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	newKEK := util.DeriveKey(newPassword, newSalt, params)
+	defer zeroAndClear(newKEK)
+	newVerifier, _ := util.EncryptWithAAD(newKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	newConfig := &conf.NotebookCrypto{
+		Enabled:     true,
+		MasterSalt:  newSalt,
+		KDFParams:   params,
+		KEKVerifier: newVerifier,
+	}
+	if err := writeNotebookCryptoBackupData(newConfig, newKEK); err != nil {
+		t.Fatal(err)
+	}
+
+	dek, _ := util.GenerateDEK()
+	wrappedDEK, _ := util.EncryptWithAAD(newKEK, dek, wrappedDEKAAD(boxID))
+	boxConfig := conf.NewBoxConf()
+	boxConfig.Encrypted = true
+	boxConfig.BoxCrypt = &conf.BoxEncryption{Spec: boxEncryptionSpec, WrappedDEK: wrappedDEK}
+	boxConfigData, _ := gulu.JSON.MarshalIndentJSON(boxConfig, "", "  ")
+	boxConfigPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err := os.MkdirAll(filepath.Dir(boxConfigPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(boxConfigPath, boxConfigData, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	oldSalt, _ := util.GenerateSalt()
+	oldKEK := util.DeriveKey("old-device-password", oldSalt, params)
+	defer zeroAndClear(oldKEK)
+	oldVerifier, _ := util.EncryptWithAAD(oldKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	localConfig := &conf.NotebookCrypto{
+		Enabled:         true,
+		MasterSalt:      oldSalt,
+		KDFParams:       params,
+		KEKVerifier:     oldVerifier,
+		AutoLockMinutes: 30,
+	}
+	prepareBackupForWrite(localConfig)
+	localConfig.KEKMAC = computeKEKMAC(localConfig, oldKEK)
+
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = localConfig
+	defer func() { Conf = originalConf }()
+
+	derived, err := deriveKEK(newPassword)
+	if err != nil {
+		t.Fatalf("deriveKEK rejected a complete synchronized candidate: %v", err)
+	}
+	defer zeroAndClear(derived)
+	if !bytes.Equal(derived, newKEK) || !bytes.Equal(Conf.NotebookCrypto.MasterSalt, newSalt) {
+		t.Fatalf("deriveKEK did not adopt the synchronized candidate")
+	}
+	if Conf.NotebookCrypto.AutoLockMinutes != 30 {
+		t.Fatalf("deriveKEK replaced the local auto-lock policy")
+	}
 }
 
 // TestDeepCopyBoxEncryptionPreservesSpec 验证保存笔记本配置前的深拷贝不会丢失包络版本。

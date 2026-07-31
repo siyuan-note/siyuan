@@ -29,7 +29,7 @@ import {newDatabaseRowModel} from "../editor/databaseRow";
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
 import {adjustDockPadding} from "./dock/util";
 import {setTitle} from "../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
@@ -707,6 +707,21 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
         } else {
             json.children = [];
             layout.children.forEach((item: Layout | Wnd | Tab) => {
+                if (item instanceof Tab) {
+                    if (item.model instanceof Editor && isEncryptedBox(item.model.editor.protyle.notebookId)) {
+                        return;
+                    }
+                    if (item.model instanceof Search && isSensitiveSearchConfig(item.model.config)) {
+                        return;
+                    }
+                    if (!item.model && item.headElement) {
+                        const initData = JSON.parse(item.headElement.getAttribute("data-initdata") || "{}");
+                        if ((initData.instance === "Editor" && isEncryptedBox(initData.notebookId)) ||
+                            (initData.instance === "Search" && isSensitiveSearchConfig(initData.config))) {
+                            return;
+                        }
+                    }
+                }
                 const itemJSON = {};
                 json.children.push(itemJSON);
                 layoutToJSON(item, itemJSON, breakObj);

@@ -17,6 +17,7 @@
 package mobile
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -40,6 +41,31 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	_ "golang.org/x/mobile/bind"
 )
+
+// AcquireExportFile 获取移动端导出租约，返回 JSON 格式的路径、名称和租约 ID。
+func AcquireExportFile(exportPath string) string {
+	lease, err := model.AcquireMobileExportLease(exportPath)
+	if err != nil {
+		logging.LogErrorf("acquire export file [%s] failed: %s", exportPath, err)
+		return ""
+	}
+	data, err := json.Marshal(lease)
+	if err != nil {
+		model.ReleaseMobileExportLease(lease.ID)
+		return ""
+	}
+	return string(data)
+}
+
+// ReleaseExportFile 释放 AcquireExportFile 返回的租约。
+func ReleaseExportFile(leaseID string) {
+	model.ReleaseMobileExportLease(leaseID)
+}
+
+// GetExportFileName 返回移动端保存对话框使用的资源名称。
+func GetExportFileName(exportPath string) string {
+	return model.GetMobileExportName(exportPath)
+}
 
 // VerifyAppStoreTransaction 用于验证苹果 App Store 交易。
 //

@@ -115,6 +115,14 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 		return nil
 	}
 
+	if IsEncryptedBox(box.ID) {
+		HoldBoxReadLock(box.ID)
+		defer ReleaseBoxReadLock(box.ID)
+		if _, err := GetDEKIfUnlocked(box.ID); err != nil {
+			return nil
+		}
+	}
+
 	ret = cache.GetDocIALInBox(p, box.ID)
 	if nil != ret {
 		return ret

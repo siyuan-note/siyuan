@@ -18,6 +18,7 @@ package main
 
 import (
 	"C"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -37,6 +38,36 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+//export AcquireExportFile
+func AcquireExportFile(exportPath *C.char) *C.char {
+	pathStr := C.GoString(exportPath)
+	lease, err := model.AcquireMobileExportLease(pathStr)
+	if err != nil {
+		logging.LogErrorf("acquire export file [%s] failed: %s", pathStr, err)
+		return nil
+	}
+	data, err := json.Marshal(lease)
+	if err != nil {
+		model.ReleaseMobileExportLease(lease.ID)
+		return nil
+	}
+	return C.CString(string(data))
+}
+
+//export ReleaseExportFile
+func ReleaseExportFile(leaseID *C.char) {
+	model.ReleaseMobileExportLease(C.GoString(leaseID))
+}
+
+//export GetExportFileName
+func GetExportFileName(exportPath *C.char) *C.char {
+	name := model.GetMobileExportName(C.GoString(exportPath))
+	if name == "" {
+		return nil
+	}
+	return C.CString(name)
+}
 
 //export StartKernelFast
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs *C.char) {

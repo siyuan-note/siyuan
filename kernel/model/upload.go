@@ -78,17 +78,11 @@ func InsertAssetBytes(id, fileName string, data []byte) (assetPath string, creat
 	blockID := ast.NewNodeID()
 	if IsEncryptedBox(bt.BoxID) {
 		fName = encryptedAssetName(util.Ext(fName), blockID)
-		if err = writeAssetNameMapping(bt.BoxID, fName, baseName); err != nil {
-			return "", false, err
-		}
 	} else {
 		fName = util.AssetName(fName, blockID)
 	}
 	writePath := filepath.Join(assetsDirPath, fName)
-	if err = writeAssetFile(writePath, bytes.NewReader(data), bt.BoxID); err != nil {
-		if IsEncryptedBox(bt.BoxID) {
-			_ = removeAssetNameMapping(bt.BoxID, fName)
-		}
+	if err = writeAssetFile(writePath, bytes.NewReader(data), bt.BoxID, baseName); err != nil {
 		return "", false, err
 	}
 
@@ -179,12 +173,6 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 			if IsEncryptedBox(bt.BoxID) {
 				// 加密 box：磁盘文件名脱敏为 uuid-blockID.ext，原始名存加密映射
 				fName = encryptedAssetName(util.Ext(fName), blockID)
-				// 映射写入失败则不写 asset，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
-				if mapErr := writeAssetNameMapping(bt.BoxID, fName, baseName); mapErr != nil {
-					err = mapErr
-					f.Close()
-					return
-				}
 			} else {
 				fName = util.AssetName(fName, blockID)
 			}
@@ -193,7 +181,7 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 				f.Close()
 				return
 			}
-			if err = writeAssetFile(writePath, f, bt.BoxID); err != nil {
+			if err = writeAssetFile(writePath, f, bt.BoxID, baseName); err != nil {
 				f.Close()
 				return
 			}
@@ -365,13 +353,6 @@ func Upload(c *gin.Context) {
 			if IsEncryptedBox(uploadBoxID) {
 				// 加密 box：磁盘文件名脱敏为 uuid-blockID.ext，原始名存加密映射
 				fName = encryptedAssetName(util.Ext(fName), lastID)
-				// 映射写入失败则不写 asset，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
-				if mapErr := writeAssetNameMapping(uploadBoxID, fName, baseName); mapErr != nil {
-					errFiles = append(errFiles, fName)
-					ret.Msg = mapErr.Error()
-					f.Close()
-					break
-				}
 			} else {
 				fName = util.AssetName(fName, lastID)
 			}
@@ -394,7 +375,7 @@ func Upload(c *gin.Context) {
 				f.Close()
 				break
 			}
-			if err = writeAssetFile(writePath, f, uploadBoxID); err != nil {
+			if err = writeAssetFile(writePath, f, uploadBoxID, baseName); err != nil {
 				logging.LogErrorf("write file failed: %s", err)
 				errFiles = append(errFiles, fName)
 				ret.Msg = err.Error()
@@ -496,7 +477,7 @@ func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {
 // 不轻信传入的 boxID（调用方可能未传，或 assetsDirPath 指向加密笔记本但 id 为空）。
 // 加密笔记本必须已解锁（DEK 在内存）才写入；加密但未解锁返回错误（fail-closed，避免明文落盘）。
 // 非加密笔记本按 reader 直接写（走 filelock.WriteFileByReader 原路径，保留锁语义）。
-func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
+func writeAssetFile(writePath string, src io.Reader, boxID, originalName string) (err error) {
 	// 从 writePath 反查真实 boxID，与传入 boxID 交叉校验
 	pathBoxID := ExtractBoxIDFromAssetsPath(writePath)
 	// 传入 boxID 与路径 box 都非空但不一致：路径指向另一个 box，拒绝（防跨 box 写入）
@@ -524,7 +505,7 @@ func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
 		if readErr != nil {
 			return readErr
 		}
-		enc, encErr := EncryptAsset(actualBoxID, filepath.Base(writePath), dek, raw)
+		enc, encErr := EncryptAssetWithName(actualBoxID, filepath.Base(writePath), originalName, dek, raw)
 		if encErr != nil {
 			return encErr
 		}
@@ -534,7 +515,7 @@ func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
 }
 
 // StoreAssetForBox 统一资产写入入口：根据 boxID 决定加密/明文写入，返回磁盘文件名（不含路径前缀）。
-// 加密 box：生成脱敏名 → writeAssetNameMapping 记录映射 → EncryptAsset 加密 → filelock.WriteFile
+// 加密 box：生成脱敏名 → 把原始名称和内容写入 v2 加密容器 → filelock.WriteFile
 // 普通 box：util.AssetName 生成名 → filelock.WriteFile 明文写入
 // boxID 为空时按普通 box 处理（写入全局 assets）。
 func StoreAssetForBox(boxID, assetDirPath, originalName string, data []byte) (diskName string, err error) {
@@ -542,7 +523,7 @@ func StoreAssetForBox(boxID, assetDirPath, originalName string, data []byte) (di
 }
 
 // storeAssetForBox 统一资产写入入口：根据 boxID 决定加密/明文写入，返回磁盘文件名（不含路径前缀）。
-// 加密 box：生成脱敏名 → writeAssetNameMapping 记录映射 → EncryptAsset 加密 → filelock.WriteFile
+// 加密 box：生成脱敏名 → 把原始名称和内容写入 v2 加密容器 → filelock.WriteFile
 // 普通 box：util.AssetName 生成名 → filelock.WriteFile 明文写入
 // boxID 为空时按普通 box 处理（写入全局 assets）。
 func storeAssetForBox(boxID, assetDirPath, originalName string, data []byte) (diskName string, err error) {
@@ -553,16 +534,12 @@ func storeAssetForBox(boxID, assetDirPath, originalName string, data []byte) (di
 		ext := filepath.Ext(originalName)
 		blockID := ast.NewNodeID()
 		diskName = encryptedAssetName(ext, blockID)
-		// 映射写入失败则不写 asset，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
-		if mapErr := writeAssetNameMappingLocked(boxID, diskName, originalName); mapErr != nil {
-			return "", mapErr
-		}
 
 		dek, dekErr := GetDEKIfUnlocked(boxID)
 		if dekErr != nil {
 			return "", dekErr
 		}
-		enc, encErr := EncryptAsset(boxID, diskName, dek, data)
+		enc, encErr := EncryptAssetWithName(boxID, diskName, originalName, dek, data)
 		if encErr != nil {
 			return "", encErr
 		}
@@ -613,7 +590,10 @@ func writeAssetNameMappingLocked(boxID, diskName, originalName string) error {
 	mu.Lock()
 	defer mu.Unlock()
 
-	mapping := readAssetNameMappingLocked(boxID)
+	mapping, readErr := readAssetNameMappingLocked(boxID)
+	if readErr != nil {
+		return fmt.Errorf("read asset name mapping failed: %w", readErr)
+	}
 	mapping[diskName] = originalName
 	data, err := json.Marshal(mapping)
 	if err != nil {
@@ -645,7 +625,10 @@ func removeAssetNameMapping(boxID, diskName string) error {
 	mu := muI.(*sync.Mutex)
 	mu.Lock()
 	defer mu.Unlock()
-	mapping := readAssetNameMappingLocked(boxID)
+	mapping, readErr := readAssetNameMappingLocked(boxID)
+	if readErr != nil {
+		return fmt.Errorf("read asset name mapping failed: %w", readErr)
+	}
 	if _, exists := mapping[diskName]; !exists {
 		return nil
 	}
@@ -669,46 +652,72 @@ func removeAssetNameMapping(boxID, diskName string) error {
 }
 
 // readAssetNameMapping 读取加密笔记本的资源名映射（DEK 解密）。未解锁或文件不存在时返回空 map。
-func readAssetNameMapping(boxID string) map[string]string {
+func readAssetNameMapping(boxID string) (map[string]string, error) {
 	ret := map[string]string{}
 	if boxID == "" || !IsEncryptedBox(boxID) {
-		return ret
+		return ret, nil
 	}
 	HoldBoxReadLock(boxID)
 	defer ReleaseBoxReadLock(boxID)
 	return readAssetNameMappingLocked(boxID)
 }
 
-func readAssetNameMappingLocked(boxID string) map[string]string {
+func readAssetNameMappingLocked(boxID string) (map[string]string, error) {
 	ret := map[string]string{}
 	p := assetNameMappingPath(boxID)
 	enc, err := filelock.ReadFile(p)
 	if err != nil {
-		return ret
+		if os.IsNotExist(err) {
+			return ret, nil
+		}
+		return nil, err
 	}
 	dek, err := GetDEK(boxID)
 	if err != nil || dek == nil {
-		return ret
+		return nil, fmt.Errorf("get DEK for asset name mapping failed: %w", err)
 	}
 	data, err := DecryptAssetNameMapping(boxID, dek, enc)
 	if err != nil {
 		logging.LogErrorf("decrypt asset name mapping failed: %s", err)
-		return ret
+		return nil, err
 	}
 	if err = json.Unmarshal(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal asset name mapping failed: %s", err)
-		return map[string]string{}
+		return nil, err
 	}
-	return ret
+	return ret, nil
 }
 
 // LookupAssetOriginalName 查询加密笔记本资源的原始文件名（供下载 Content-Disposition 等展示用）。
 // 未找到时返回空串。
 func LookupAssetOriginalName(boxID, diskName string) string {
-	return readAssetNameMapping(boxID)[diskName]
+	if boxID == "" || !IsEncryptedBox(boxID) {
+		return ""
+	}
+	HoldBoxReadLock(boxID)
+	defer ReleaseBoxReadLock(boxID)
+	return LookupAssetOriginalNameLocked(boxID, diskName)
 }
 
 // LookupAssetOriginalNameLocked 在调用方已持有 box 读锁时查询原始资源名。
 func LookupAssetOriginalNameLocked(boxID, diskName string) string {
-	return readAssetNameMappingLocked(boxID)[diskName]
+	assetPath := filepath.Join(util.DataDir, boxID, "assets", diskName)
+	if assetFile, err := filelock.OpenFile(assetPath, os.O_RDONLY, 0); err == nil {
+		defer filelock.CloseFile(assetFile)
+		if dek, dekErr := GetDEK(boxID); dekErr == nil && dek != nil {
+			originalName, v2, nameErr := DecryptAssetNameFromReader(boxID, diskName, dek, assetFile)
+			if v2 {
+				if nameErr != nil {
+					logging.LogErrorf("decrypt asset name [%s] failed: %s", diskName, nameErr)
+					return ""
+				}
+				return originalName
+			}
+		}
+	}
+	mapping, err := readAssetNameMappingLocked(boxID)
+	if err != nil {
+		return ""
+	}
+	return mapping[diskName]
 }

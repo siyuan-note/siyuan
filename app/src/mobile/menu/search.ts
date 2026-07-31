@@ -46,7 +46,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }
-    saveKeyList("replaceKeys", replaceInputElement.value);
+    saveKeyList("replaceKeys", replaceInputElement.value, config);
     const currentLiElement: HTMLElement = searchListElement.querySelector(".b3-list-item--focus");
     if (!currentLiElement) {
         return;
@@ -345,7 +345,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
             setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         }
-        saveKeyList("keys", searchInputElement.value);
+        saveKeyList("keys", searchInputElement.value, config);
     });
     addClearButton({
         inputElement: searchInputElement,
@@ -717,10 +717,15 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
 
 export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig) => {
     const config: Config.IUILayoutTabSearchConfig = JSON.parse(JSON.stringify(window.siyuan.storage[Constants.LOCAL_SEARCHDATA]));
+    const currentEditor = getCurrentEditor();
+    if (currentEditor && isEncryptedBox(currentEditor.protyle.notebookId)) {
+        config.sensitive = true;
+    }
     if (config.method === 4 && !window.siyuan.config.ai.embedding.enabled) {
         config.method = 0;
     }
-    const rangeText = (getCurrentEditor()?.protyle.toolbar.range || (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange())).toString();
+    const rangeText = (currentEditor?.protyle.toolbar.range ||
+        (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange())).toString();
     if (rangeText) {
         config.k = rangeText;
     }

@@ -53,7 +53,12 @@ import {IDatabaseRowOpenData, openDatabaseRowByData} from "../protyle/render/av/
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();
+    const sensitive = searchData?.sensitive || (!!text && getAllModels().editor.some((item) =>
+        isEncryptedBox(item.editor.protyle.notebookId)));
     const searchModel = getAllModels().search.find((item) => {
+        if (sensitive) {
+            item.config.sensitive = true;
+        }
         item.parent.parent.switchTab(item.parent.headElement);
         item.updateSearch(text, replace);
         return true;
@@ -65,6 +70,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
     openFile({
         app,
         searchData: {
+            sensitive,
             k: text,
             r: "",
             hasReplace: false,
@@ -922,7 +928,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = JSON.parse(JSON.stringify(config));
             setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         }
-        saveKeyList("keys", searchInputElement.value);
+        saveKeyList("keys", searchInputElement.value, config);
     });
     searchInputElement.addEventListener("keydown", (event) => {
         electronUndo(event);
@@ -1007,7 +1013,9 @@ const openSearchBlockEditor = (options: {
                 zoomInId: options.protyle.block.showAll ? options.protyle.block.id : undefined,
                 scrollTop: options.protyle.contentElement.scrollTop,
             };
-            window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.protyle.block.rootID] = scrollAttr;
+            if (!isEncryptedBox(options.protyle.notebookId)) {
+                window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.protyle.block.rootID] = scrollAttr;
+            }
             if (offset.start === offset.end) {
                 currentRange = null;
             }
@@ -1308,7 +1316,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }
-    saveKeyList("replaceKeys", replaceInputElement.value);
+    saveKeyList("replaceKeys", replaceInputElement.value, config);
     const currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
     if (!currentList || currentList.dataset.type === "search-new") {
         return;

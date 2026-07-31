@@ -43,6 +43,7 @@ import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
 import type {App} from "../index";
 import {unicode2Emoji} from "../emoji";
+import {isEncryptedBox} from "../util/pathName";
 import {closeWindow} from "../window/closeWin";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {fullscreen} from "../protyle/breadcrumb/action";
@@ -772,15 +773,20 @@ export class Wnd {
             if (item.id !== id) {
                 return;
             }
+            window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] =
+                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].filter((tab: {children?: {notebookId?: string}}) =>
+                    !isEncryptedBox(tab.children?.notebookId));
             if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
                 window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
             }
-            if (item.headElement) {
+            const isEncryptedEditor = item.model instanceof Editor &&
+                isEncryptedBox(item.model.editor.protyle.notebookId);
+            if (item.headElement && !isEncryptedEditor) {
                 const tabJSON = {};
                 layoutToJSON(item, tabJSON);
                 window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);
-                setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             }
+            setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             if (item.model instanceof Custom && item.model.beforeDestroy) {
                 item.model.beforeDestroy();
             }

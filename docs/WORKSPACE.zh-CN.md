@@ -236,7 +236,7 @@ data/<boxID>/
 
 资源文件链接前缀识别：仅认 `assets/`、`emojis/`、`plugins/`、`public/`、`widgets/` 这几个前缀为合法资源文件链接。
 
-加密笔记本必须使用笔记本本地资源文件。资源文件内容和记录原始名称映射的 `.names.json` 均会加密，物理文件名采用脱敏的 `<16 位随机字符>-<blockID>.<ext>` 格式，因此直接检查磁盘无法还原原始资源文件名称。详见 [ENCRYPTED-NOTEBOOK.zh-CN.md §7](./ENCRYPTED-NOTEBOOK.zh-CN.md#7-sy--assets--数据库文件加解密)。
+加密笔记本必须使用笔记本本地资源文件。资源内容和原始名称存放在同一个加密容器中，物理文件名采用脱敏的 `<16 位随机字符>-<blockID>.<ext>` 格式，因此直接检查磁盘无法还原原始资源文件名称。详见 [ENCRYPTED-NOTEBOOK.zh-CN.md §7](./ENCRYPTED-NOTEBOOK.zh-CN.md#7-sy--assets--数据库文件加解密)。
 
 ---
 

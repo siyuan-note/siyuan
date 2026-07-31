@@ -854,14 +854,11 @@ func copyExportResource(source, destination string) error {
 	})
 }
 
-// copyExportFile 复制单个导出文件，并在加密资源存在名称映射时恢复用户可见名称。
+// copyExportFile 复制单个导出文件，并从加密资源容器恢复用户可见名称。
 func copyExportFile(source, destination string) error {
 	boxID := ExtractBoxIDFromAssetsPath(source)
 	if boxID != "" && IsEncryptedBox(boxID) {
 		diskName := filepath.Base(source)
-		if diskName == ".names.json" {
-			return nil
-		}
 		if originalName := LookupAssetOriginalName(boxID, diskName); originalName != "" {
 			fileName := util.FilterFileName(filepath.Base(originalName))
 			if fileName != "" && fileName != "." {

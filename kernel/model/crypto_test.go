@@ -38,89 +38,81 @@ func setDEKForTest(boxID string, dek []byte) {
 	cachedDEKs[boxID] = dek
 }
 
-func TestEncryptedAssetV2RoundTrip(t *testing.T) {
-	boxID := "20260731103900-assetv2"
+func TestEncryptedAssetRoundTrip(t *testing.T) {
+	boxID := "20260731103900-asset01"
 	diskName := "asset-20260731103900-abcdefg.bin"
 	originalName := "机密附件.pdf"
 	dek := bytes.Repeat([]byte{0x42}, 32)
 	plaintext := []byte("encrypted asset content")
 
-	ciphertext, err := EncryptAssetWithName(boxID, diskName, originalName, dek, plaintext)
+	ciphertext, err := EncryptAsset(boxID, diskName, originalName, dek, plaintext)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.HasPrefix(ciphertext, encryptedAssetV2Magic) {
-		t.Fatalf("asset does not use the v2 container")
+	if !bytes.HasPrefix(ciphertext, encryptedAssetMagic) {
+		t.Fatalf("asset does not use the encrypted asset container")
 	}
 
-	decrypted, name, v2, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
+	decrypted, name, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !v2 || name != originalName || !bytes.Equal(decrypted, plaintext) {
-		t.Fatalf("unexpected v2 asset round trip: v2=%v name=%q content=%q", v2, name, decrypted)
+	if name != originalName || !bytes.Equal(decrypted, plaintext) {
+		t.Fatalf("unexpected asset round trip: name=%q content=%q", name, decrypted)
 	}
 }
 
-func TestEncryptedAssetV2StreamsMultipleChunks(t *testing.T) {
-	boxID := "20260731103930-assetv2"
+func TestEncryptedAssetStreamsMultipleChunks(t *testing.T) {
+	boxID := "20260731103930-asset02"
 	diskName := "asset-20260731103930-abcdefg.bin"
 	originalName := "large.bin"
 	dek := bytes.Repeat([]byte{0x43}, 32)
 	plaintext := bytes.Repeat([]byte("streaming-content-"), encryptedAssetChunkSize/18*2+100)
 
-	ciphertext, err := EncryptAssetWithName(boxID, diskName, originalName, dek, plaintext)
+	ciphertext, err := EncryptAsset(boxID, diskName, originalName, dek, plaintext)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var output bytes.Buffer
-	name, v2, err := DecryptAssetToWriter(boxID, diskName, dek, bytes.NewReader(ciphertext), &output)
+	name, err := DecryptAssetToWriter(boxID, diskName, dek, bytes.NewReader(ciphertext), &output)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !v2 || name != originalName || !bytes.Equal(output.Bytes(), plaintext) {
-		t.Fatalf("unexpected streamed v2 asset result: v2=%v name=%q size=%d", v2, name, output.Len())
+	if name != originalName || !bytes.Equal(output.Bytes(), plaintext) {
+		t.Fatalf("unexpected streamed asset result: name=%q size=%d", name, output.Len())
 	}
 }
 
-func TestEncryptedAssetV2AuthenticatesMetadataAndContent(t *testing.T) {
-	boxID := "20260731104000-assetv2"
+func TestEncryptedAssetAuthenticatesMetadataAndContent(t *testing.T) {
+	boxID := "20260731104000-asset03"
 	diskName := "asset-20260731104000-abcdefg.bin"
 	dek := bytes.Repeat([]byte{0x24}, 32)
-	ciphertext, err := EncryptAssetWithName(boxID, diskName, "secret.txt", dek, []byte("secret"))
+	ciphertext, err := EncryptAsset(boxID, diskName, "secret.txt", dek, []byte("secret"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	metadataTampered := append([]byte(nil), ciphertext...)
 	metadataTampered[8] ^= 1
-	if _, _, _, err = DecryptAssetWithName(boxID, diskName, dek, metadataTampered); err == nil {
+	if _, _, err = DecryptAssetWithName(boxID, diskName, dek, metadataTampered); err == nil {
 		t.Fatalf("tampered asset metadata should be rejected")
 	}
 
 	contentTampered := append([]byte(nil), ciphertext...)
 	contentTampered[len(contentTampered)-1] ^= 1
-	if _, _, _, err = DecryptAssetWithName(boxID, diskName, dek, contentTampered); err == nil {
+	if _, _, err = DecryptAssetWithName(boxID, diskName, dek, contentTampered); err == nil {
 		t.Fatalf("tampered asset content should be rejected")
 	}
 }
 
-func TestDecryptAssetKeepsV1Compatibility(t *testing.T) {
-	boxID := "20260731104100-assetv1"
+func TestEncryptedAssetRejectsUnknownFormat(t *testing.T) {
+	boxID := "20260731104100-asset04"
 	diskName := "asset-20260731104100-abcdefg.bin"
 	dek := bytes.Repeat([]byte{0x12}, 32)
-	plaintext := []byte("legacy asset")
+	unknown := bytes.Repeat([]byte{0x12}, 64)
 
-	ciphertext, err := EncryptAsset(boxID, diskName, dek, plaintext)
-	if err != nil {
-		t.Fatal(err)
-	}
-	decrypted, name, v2, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if v2 || name != "" || !bytes.Equal(decrypted, plaintext) {
-		t.Fatalf("unexpected v1 asset result: v2=%v name=%q content=%q", v2, name, decrypted)
+	if _, _, err := DecryptAssetWithName(boxID, diskName, dek, unknown); err == nil {
+		t.Fatal("unknown encrypted asset format should be rejected")
 	}
 }
 

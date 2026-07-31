@@ -155,11 +155,11 @@ func TestAESGCMLegacyCiphertextCompatibility(t *testing.T) {
 	}
 }
 
-// TestAESGCMLegacyCiphertextWithAADCompatibility 验证旧版带 AAD 的文件/资源密文仍可读取。
+// TestAESGCMLegacyCiphertextWithAADCompatibility 验证旧版带 AAD 的通用密文仍可读取。
 func TestAESGCMLegacyCiphertextWithAADCompatibility(t *testing.T) {
 	key, _ := GenerateDEK()
-	plaintext := []byte("legacy encrypted asset")
-	aad := []byte("siyuan:v1:asset:box:assets/file.png")
+	plaintext := []byte("legacy encrypted data")
+	aad := []byte("siyuan:test:object")
 	legacy, err := encryptLegacyForTest(key, plaintext, aad)
 	if err != nil {
 		t.Fatalf("create legacy ciphertext failed: %v", err)

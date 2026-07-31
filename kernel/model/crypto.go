@@ -51,7 +51,7 @@ var kekVerifierMagic = []byte("siyuan-enc-v1")
 
 const boxEncryptionSpec = 1
 
-var encryptedAssetV2Magic = []byte{'S', 'Y', 'A', '2'}
+var encryptedAssetMagic = []byte{'S', 'Y', 'A', 'E'}
 
 const encryptedAssetMetadataMaxSize = 1024 * 1024
 const encryptedAssetChunkSize = 1024 * 1024
@@ -1651,16 +1651,8 @@ func DecryptFile(boxID, relativePath string, dek, ciphertext []byte) ([]byte, er
 	return util.DecryptWithAAD(fileKey, ciphertext, []byte(aad))
 }
 
-// EncryptAsset 用 assetKey（DEK 派生子密钥）加密 asset 字节，AAD 绑定 boxID + 磁盘文件名。
-// diskName 为磁盘上的脱敏文件名（加密 box）或原始文件名（普通 box）。
-func EncryptAsset(boxID, diskName string, dek, plaintext []byte) ([]byte, error) {
-	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
-	aad := "siyuan:v1:asset:" + boxID + ":assets/" + diskName
-	return util.EncryptWithAAD(assetKey, plaintext, []byte(aad))
-}
-
-// EncryptAssetWithName 生成 v2 单文件资源容器，名称元数据和内容分块分别认证加密。
-func EncryptAssetWithName(boxID, diskName, originalName string, dek, plaintext []byte) ([]byte, error) {
+// EncryptAsset 生成单文件资源容器，名称元数据和内容分块分别认证加密。
+func EncryptAsset(boxID, diskName, originalName string, dek, plaintext []byte) ([]byte, error) {
 	originalName = filepath.Base(strings.TrimSpace(originalName))
 	if originalName == "" || originalName == "." || strings.ContainsAny(originalName, `/\`) {
 		originalName = diskName
@@ -1679,7 +1671,7 @@ func EncryptAssetWithName(boxID, diskName, originalName string, dek, plaintext [
 	}
 	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
 	defer zeroAndClear(assetKey)
-	aadPrefix := "siyuan:v2:asset:" + boxID + ":assets/" + diskName
+	aadPrefix := "siyuan:asset:" + boxID + ":assets/" + diskName
 	encryptedMetadata, err := util.EncryptWithAAD(assetKey, metadata, []byte(aadPrefix+":metadata"))
 	if err != nil {
 		return nil, err
@@ -1688,7 +1680,7 @@ func EncryptAssetWithName(boxID, diskName, originalName string, dek, plaintext [
 		return nil, errors.New("encrypted asset metadata is too large")
 	}
 	ret := bytes.NewBuffer(make([]byte, 0, len(plaintext)+len(encryptedMetadata)+int(chunkCount)*64+12))
-	ret.Write(encryptedAssetV2Magic)
+	ret.Write(encryptedAssetMagic)
 	if err = binary.Write(ret, binary.BigEndian, uint32(len(encryptedMetadata))); err != nil {
 		return nil, err
 	}
@@ -1718,161 +1710,141 @@ func EncryptAssetWithName(boxID, diskName, originalName string, dek, plaintext [
 	return ret.Bytes(), nil
 }
 
-func decryptAssetV2Metadata(boxID, diskName string, dek, ciphertext []byte) (metadata *encryptedAssetMetadata, contentOffset int, v2 bool, err error) {
-	if len(ciphertext) < 8 || !bytes.Equal(ciphertext[:4], encryptedAssetV2Magic) {
-		return nil, 0, false, nil
+func decryptAssetMetadata(boxID, diskName string, dek, ciphertext []byte) (metadata *encryptedAssetMetadata, contentOffset int, err error) {
+	if len(ciphertext) < 8 || !bytes.Equal(ciphertext[:4], encryptedAssetMagic) {
+		return nil, 0, errors.New("invalid encrypted asset format")
 	}
 	metadataSize := int(binary.BigEndian.Uint32(ciphertext[4:8]))
 	if metadataSize < 1 || metadataSize > encryptedAssetMetadataMaxSize || 8+metadataSize+4 > len(ciphertext) {
-		return nil, 0, true, errors.New("invalid encrypted asset v2 metadata size")
+		return nil, 0, errors.New("invalid encrypted asset metadata size")
 	}
 	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
 	defer zeroAndClear(assetKey)
-	aadPrefix := "siyuan:v2:asset:" + boxID + ":assets/" + diskName
+	aadPrefix := "siyuan:asset:" + boxID + ":assets/" + diskName
 	plainMetadata, decryptErr := util.DecryptWithAAD(assetKey, ciphertext[8:8+metadataSize], []byte(aadPrefix+":metadata"))
 	if decryptErr != nil {
-		return nil, 0, true, decryptErr
+		return nil, 0, decryptErr
 	}
 	metadata = &encryptedAssetMetadata{}
 	if err = json.Unmarshal(plainMetadata, metadata); err != nil {
-		return nil, 0, true, err
+		return nil, 0, err
 	}
 	if metadata.OriginalName == "" || metadata.OriginalName == "." ||
 		filepath.Base(metadata.OriginalName) != metadata.OriginalName || strings.ContainsAny(metadata.OriginalName, `/\`) {
-		return nil, 0, true, errors.New("invalid encrypted asset original name")
+		return nil, 0, errors.New("invalid encrypted asset original name")
 	}
 	if metadata.Size < 0 || metadata.Chunks == 0 {
-		return nil, 0, true, errors.New("invalid encrypted asset content metadata")
+		return nil, 0, errors.New("invalid encrypted asset content metadata")
 	}
-	return metadata, 8 + metadataSize, true, nil
+	return metadata, 8 + metadataSize, nil
 }
 
-// DecryptAssetWithName 解密 v1 或 v2 资源；v1 资源不包含原始名称。
-func DecryptAssetWithName(boxID, diskName string, dek, ciphertext []byte) (plaintext []byte, originalName string, v2 bool, err error) {
+// DecryptAssetWithName 解密资源内容并返回原始名称。
+func DecryptAssetWithName(boxID, diskName string, dek, ciphertext []byte) (plaintext []byte, originalName string, err error) {
 	var output bytes.Buffer
-	originalName, v2, err = DecryptAssetToWriter(boxID, diskName, dek, bytes.NewReader(ciphertext), &output)
+	originalName, err = DecryptAssetToWriter(boxID, diskName, dek, bytes.NewReader(ciphertext), &output)
 	if err != nil {
-		return nil, "", v2, err
+		return nil, "", err
 	}
-	return output.Bytes(), originalName, v2, nil
+	return output.Bytes(), originalName, nil
 }
 
-// DecryptAssetName 只解密 v2 资源的名称元数据，不处理资源内容。
-func DecryptAssetName(boxID, diskName string, dek, ciphertext []byte) (originalName string, v2 bool, err error) {
-	metadata, _, v2, err := decryptAssetV2Metadata(boxID, diskName, dek, ciphertext)
-	if err != nil || !v2 {
-		return "", v2, err
+// DecryptAssetName 只解密资源的名称元数据，不处理资源内容。
+func DecryptAssetName(boxID, diskName string, dek, ciphertext []byte) (originalName string, err error) {
+	metadata, _, err := decryptAssetMetadata(boxID, diskName, dek, ciphertext)
+	if err != nil {
+		return "", err
 	}
-	return metadata.OriginalName, true, nil
+	return metadata.OriginalName, nil
 }
 
 // DecryptAssetNameFromReader 从资源头部解密名称元数据，不读取资源内容。
-func DecryptAssetNameFromReader(boxID, diskName string, dek []byte, reader io.Reader) (originalName string, v2 bool, err error) {
+func DecryptAssetNameFromReader(boxID, diskName string, dek []byte, reader io.Reader) (originalName string, err error) {
 	header := make([]byte, 8)
 	if _, err = io.ReadFull(reader, header); err != nil {
-		return "", false, err
+		return "", err
 	}
-	if !bytes.Equal(header[:4], encryptedAssetV2Magic) {
-		return "", false, nil
+	if !bytes.Equal(header[:4], encryptedAssetMagic) {
+		return "", errors.New("invalid encrypted asset format")
 	}
 	metadataSize := int(binary.BigEndian.Uint32(header[4:8]))
 	if metadataSize < 1 || metadataSize > encryptedAssetMetadataMaxSize {
-		return "", true, errors.New("invalid encrypted asset v2 metadata size")
+		return "", errors.New("invalid encrypted asset metadata size")
 	}
 	encryptedMetadata := make([]byte, metadataSize)
 	if _, err = io.ReadFull(reader, encryptedMetadata); err != nil {
-		return "", true, err
+		return "", err
 	}
 	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
 	defer zeroAndClear(assetKey)
-	aadPrefix := "siyuan:v2:asset:" + boxID + ":assets/" + diskName
+	aadPrefix := "siyuan:asset:" + boxID + ":assets/" + diskName
 	plainMetadata, decryptErr := util.DecryptWithAAD(assetKey, encryptedMetadata, []byte(aadPrefix+":metadata"))
 	if decryptErr != nil {
-		return "", true, decryptErr
+		return "", decryptErr
 	}
 	metadata := &encryptedAssetMetadata{}
 	if err = json.Unmarshal(plainMetadata, metadata); err != nil {
-		return "", true, err
+		return "", err
 	}
 	if metadata.OriginalName == "" || metadata.OriginalName == "." ||
 		filepath.Base(metadata.OriginalName) != metadata.OriginalName || strings.ContainsAny(metadata.OriginalName, `/\`) {
-		return "", true, errors.New("invalid encrypted asset original name")
+		return "", errors.New("invalid encrypted asset original name")
 	}
 	if metadata.Size < 0 || metadata.Chunks == 0 {
-		return "", true, errors.New("invalid encrypted asset content metadata")
+		return "", errors.New("invalid encrypted asset content metadata")
 	}
-	return metadata.OriginalName, true, nil
+	return metadata.OriginalName, nil
 }
 
-// DecryptAssetToWriter 分块解密 v2 资源到 writer，避免大资源同时驻留密文和明文。
-// v1 仅用于开发阶段兼容，仍按单个认证密文读取。
-func DecryptAssetToWriter(boxID, diskName string, dek []byte, reader io.Reader, writer io.Writer) (originalName string, v2 bool, err error) {
+// DecryptAssetToWriter 分块解密资源到 writer，避免大资源同时驻留密文和明文。
+func DecryptAssetToWriter(boxID, diskName string, dek []byte, reader io.Reader, writer io.Writer) (originalName string, err error) {
 	header := make([]byte, 8)
 	if _, err = io.ReadFull(reader, header); err != nil {
-		return "", false, err
+		return "", err
 	}
-	if !bytes.Equal(header[:4], encryptedAssetV2Magic) {
-		ciphertext, readErr := io.ReadAll(io.MultiReader(bytes.NewReader(header), reader))
-		if readErr != nil {
-			return "", false, readErr
-		}
-		assetKey := util.DeriveSubKey(dek, "siyuan/asset")
-		defer zeroAndClear(assetKey)
-		aad := "siyuan:v1:asset:" + boxID + ":assets/" + diskName
-		plaintext, decryptErr := util.DecryptWithAAD(assetKey, ciphertext, []byte(aad))
-		if decryptErr != nil {
-			return "", false, decryptErr
-		}
-		n, writeErr := writer.Write(plaintext)
-		zeroAndClear(plaintext)
-		if writeErr != nil {
-			return "", false, writeErr
-		}
-		if n != len(plaintext) {
-			return "", false, io.ErrShortWrite
-		}
-		return "", false, nil
+	if !bytes.Equal(header[:4], encryptedAssetMagic) {
+		return "", errors.New("invalid encrypted asset format")
 	}
 
 	metadataSize := int(binary.BigEndian.Uint32(header[4:8]))
 	if metadataSize < 1 || metadataSize > encryptedAssetMetadataMaxSize {
-		return "", true, errors.New("invalid encrypted asset v2 metadata size")
+		return "", errors.New("invalid encrypted asset metadata size")
 	}
 	encryptedMetadata := make([]byte, metadataSize)
 	if _, err = io.ReadFull(reader, encryptedMetadata); err != nil {
-		return "", true, err
+		return "", err
 	}
 	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
 	defer zeroAndClear(assetKey)
-	aadPrefix := "siyuan:v2:asset:" + boxID + ":assets/" + diskName
+	aadPrefix := "siyuan:asset:" + boxID + ":assets/" + diskName
 	plainMetadata, decryptErr := util.DecryptWithAAD(assetKey, encryptedMetadata, []byte(aadPrefix+":metadata"))
 	if decryptErr != nil {
-		return "", true, decryptErr
+		return "", decryptErr
 	}
 	metadata := &encryptedAssetMetadata{}
 	if err = json.Unmarshal(plainMetadata, metadata); err != nil {
-		return "", true, err
+		return "", err
 	}
 	if metadata.OriginalName == "" || metadata.OriginalName == "." ||
 		filepath.Base(metadata.OriginalName) != metadata.OriginalName || strings.ContainsAny(metadata.OriginalName, `/\`) {
-		return "", true, errors.New("invalid encrypted asset original name")
+		return "", errors.New("invalid encrypted asset original name")
 	}
 	if metadata.Size < 0 || metadata.Chunks == 0 {
-		return "", true, errors.New("invalid encrypted asset content metadata")
+		return "", errors.New("invalid encrypted asset content metadata")
 	}
 
 	var written int64
 	for chunkIndex := uint64(0); chunkIndex < metadata.Chunks; chunkIndex++ {
 		var encryptedSize uint32
 		if err = binary.Read(reader, binary.BigEndian, &encryptedSize); err != nil {
-			return "", true, err
+			return "", err
 		}
 		if encryptedSize == 0 || encryptedSize > encryptedAssetChunkMaxCiphertextSize {
-			return "", true, errors.New("invalid encrypted asset chunk size")
+			return "", errors.New("invalid encrypted asset chunk size")
 		}
 		encryptedChunk := make([]byte, int(encryptedSize))
 		if _, err = io.ReadFull(reader, encryptedChunk); err != nil {
-			return "", true, err
+			return "", err
 		}
 		plainChunk, chunkErr := util.DecryptWithAAD(
 			assetKey,
@@ -1880,48 +1852,36 @@ func DecryptAssetToWriter(boxID, diskName string, dek []byte, reader io.Reader, 
 			[]byte(fmt.Sprintf("%s:content:%d", aadPrefix, chunkIndex)),
 		)
 		if chunkErr != nil {
-			return "", true, chunkErr
+			return "", chunkErr
 		}
 		n, writeErr := writer.Write(plainChunk)
 		written += int64(n)
 		zeroAndClear(plainChunk)
 		if writeErr != nil {
-			return "", true, writeErr
+			return "", writeErr
 		}
 		if n != len(plainChunk) {
-			return "", true, io.ErrShortWrite
+			return "", io.ErrShortWrite
 		}
 	}
 	var terminator uint32
 	if err = binary.Read(reader, binary.BigEndian, &terminator); err != nil {
-		return "", true, err
+		return "", err
 	}
 	if terminator != 0 || written != metadata.Size {
-		return "", true, errors.New("invalid encrypted asset content length")
+		return "", errors.New("invalid encrypted asset content length")
 	}
 	var trailing [1]byte
 	if _, trailingErr := io.ReadFull(reader, trailing[:]); trailingErr != io.EOF {
-		return "", true, errors.New("invalid trailing encrypted asset data")
+		return "", errors.New("invalid trailing encrypted asset data")
 	}
-	return metadata.OriginalName, true, nil
+	return metadata.OriginalName, nil
 }
 
-// DecryptAsset 对应解密，兼容 v1 和 v2 资源。
+// DecryptAsset 对应解密。
 func DecryptAsset(boxID, diskName string, dek, ciphertext []byte) ([]byte, error) {
-	plaintext, _, _, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
+	plaintext, _, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
 	return plaintext, err
-}
-
-func EncryptAssetNameMapping(boxID string, dek, plaintext []byte) ([]byte, error) {
-	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
-	aad := "siyuan:v1:asset-names:" + boxID
-	return util.EncryptWithAAD(assetKey, plaintext, []byte(aad))
-}
-
-func DecryptAssetNameMapping(boxID string, dek, ciphertext []byte) ([]byte, error) {
-	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
-	aad := "siyuan:v1:asset-names:" + boxID
-	return util.DecryptWithAAD(assetKey, ciphertext, []byte(aad))
 }
 
 // notebookCryptBackupPath 返回加密笔记本的独立 BoxCrypt 备份路径。

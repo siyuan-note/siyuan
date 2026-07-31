@@ -125,7 +125,7 @@ func TestPrepareRichClipboardAssetsDecryptsEncryptedNotebook(t *testing.T) {
 	}
 	setDEKForTest(boxID, dek)
 	plaintext := []byte("encrypted image")
-	ciphertext, err := EncryptAsset(boxID, "image.png", dek, plaintext)
+	ciphertext, err := EncryptAsset(boxID, "image.png", "image.png", dek, plaintext)
 	if err != nil {
 		t.Fatal(err)
 	}

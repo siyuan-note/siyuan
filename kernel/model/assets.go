@@ -1462,7 +1462,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 
 	oldCleanPath := AssetPathWithoutQuery(oldPath)
 
-	// 加密笔记本的资源文件名已脱敏，重命名会破坏映射关系，禁止
+	// 加密笔记本的资源磁盘文件名参与 AAD，重命名需要重新封装密文，当前不支持。
 	if absPath, absErr := GetAssetAbsPathInBox(oldPath, ""); absErr == nil {
 		if IsEncryptedAssetPath(absPath) {
 			err = errors.New("renaming assets in encrypted notebooks is not supported")

@@ -275,7 +275,7 @@ func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err 
 	if createErr != nil {
 		return nil, createErr
 	}
-	originalName, _, decryptErr := DecryptAssetToWriter(boxID, diskName, dek, source, destination)
+	originalName, decryptErr := DecryptAssetToWriter(boxID, diskName, dek, source, destination)
 	sourceCloseErr := filelock.CloseFile(source)
 	sourceOpen = false
 	closeErr := destination.Close()
@@ -287,9 +287,6 @@ func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err 
 	}
 	if closeErr != nil {
 		return nil, closeErr
-	}
-	if originalName == "" {
-		originalName = LookupAssetOriginalNameLocked(boxID, diskName)
 	}
 	originalName = util.FilterFileName(filepath.Base(originalName))
 	if originalName == "" || originalName == "." {
@@ -339,9 +336,9 @@ func GetMobileExportName(exportPath string) string {
 		return ""
 	}
 	defer filelock.CloseFile(source)
-	originalName, v2, err := DecryptAssetNameFromReader(boxID, diskName, dek, source)
-	if err != nil || !v2 {
-		return util.FilterFileName(diskName)
+	originalName, err := DecryptAssetNameFromReader(boxID, diskName, dek, source)
+	if err != nil {
+		return ""
 	}
 	return util.FilterFileName(filepath.Base(originalName))
 }

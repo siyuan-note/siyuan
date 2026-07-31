@@ -110,7 +110,7 @@ func TestMobileExportLeaseStreamsEncryptedAsset(t *testing.T) {
 	diskName := "asset-20260731153001-abcdefg.bin"
 	originalName := "移动端大附件.bin"
 	plaintext := bytes.Repeat([]byte("mobile-streaming-"), encryptedAssetChunkSize/17*2+100)
-	ciphertext, err := EncryptAssetWithName(boxID, diskName, originalName, dek, plaintext)
+	ciphertext, err := EncryptAsset(boxID, diskName, originalName, dek, plaintext)
 	if err != nil {
 		t.Fatal(err)
 	}

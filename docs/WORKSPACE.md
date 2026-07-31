@@ -236,7 +236,7 @@ Two coexisting locations:
 
 Asset-link prefix recognition: only `assets/`, `emojis/`, `plugins/`, `public/`, and `widgets/` are accepted as legal asset-link prefixes.
 
-Encrypted notebooks must use notebook-local assets. Their contents and `.names.json` original-name mapping are encrypted, and their physical filenames use a desensitized `<16-random-characters>-<blockID>.<ext>` form; direct inspection does not recover the original asset name. See [ENCRYPTED-NOTEBOOK.md §7](./ENCRYPTED-NOTEBOOK.md#7-sy--assets--database-file-encryption).
+Encrypted notebooks must use notebook-local assets. Asset content and its original name reside in the same encrypted container, and physical filenames use a desensitized `<16-random-characters>-<blockID>.<ext>` form; direct inspection does not recover the original asset name. See [ENCRYPTED-NOTEBOOK.md §7](./ENCRYPTED-NOTEBOOK.md#7-sy--assets--database-file-encryption).
 
 ---
 

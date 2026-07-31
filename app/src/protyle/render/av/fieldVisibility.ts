@@ -74,11 +74,11 @@ const updateFieldViews = (views: IAVFieldView[], viewIDs: string[], hidden: bool
     });
 };
 
-const getFieldVisibilityItemsHTML = (views: IAVFieldView[], currentViewID: string, backColId: string) => {
+const getFieldVisibilityItemsHTML = (views: IAVFieldView[], backColId: string) => {
     const visibleViews = views.filter((view) => !view.hidden);
     const hiddenViews = views.filter((view) => view.hidden);
     const getViewHTML = (view: IAVFieldView) => {
-        return `<button class="b3-menu__item${view.id === currentViewID ? " b3-menu__item--selected" : ""}" data-field-visibility-view-id="${view.id}">
+        return `<button class="b3-menu__item" data-field-visibility-view-id="${view.id}">
     ${getViewIconHTML(view)}
     <span class="b3-menu__label">${escapeHtml(view.name) || "&nbsp;"}</span>
     ${view.hidden ? "" : '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>'}
@@ -247,7 +247,7 @@ export const openFieldVisibility = async (options: {
     };
 
     const render = () => {
-        itemsElement.innerHTML = getFieldVisibilityItemsHTML(views, currentViewID, options.colId);
+        itemsElement.innerHTML = getFieldVisibilityItemsHTML(views, options.colId);
         bindFieldVisibilityEvents(itemsElement, views, updateVisibility, restoreMenu);
         menu.resetPosition();
     };
@@ -297,7 +297,7 @@ export const openFieldVisibilityPanel = async (options: {
     const render = () => {
         options.menuElement.style.width = `${panelRect.width}px`;
         options.menuElement.innerHTML =
-            `<div class="b3-menu__items av__field-visibility">${getFieldVisibilityItemsHTML(views, currentViewID, options.colId)}</div>`;
+            `<div class="b3-menu__items av__field-visibility">${getFieldVisibilityItemsHTML(views, options.colId)}</div>`;
         setPosition(options.menuElement, panelRect.left, panelRect.top, 0, 0, true);
         bindFieldVisibilityEvents(options.menuElement, views, updateVisibility);
     };

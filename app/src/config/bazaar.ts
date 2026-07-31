@@ -128,9 +128,9 @@ export const bazaar = {
 <div class="fn__flex-1">
     <div class="config-bazaar__panel" data-type="downloaded" data-init="true">
         <div class="fn__flex config-bazaar__title">
+            <button data-type="myUpdate" class="b3-button b3-button--outline fn__none">${window.siyuan.languages.update}</button>
+            <div data-type="myUpdate-space" class="fn__space fn__none"></div>
             <button data-type="myPlugin" class="b3-button">${window.siyuan.languages.plugin}</button>
-            <div class="fn__space"></div>
-            <button data-type="myUpdate" class="b3-button b3-button--outline">${window.siyuan.languages.update}</button>
             <div class="fn__space"></div>
             <button data-type="myTheme" class="b3-button b3-button--outline">${window.siyuan.languages.theme}</button>
             <div class="fn__space"></div>
@@ -404,6 +404,15 @@ export const bazaar = {
     _isUpdatePanelActive() {
         return !bazaar.element.querySelector('[data-type="myUpdate"]')?.classList.contains("b3-button--outline");
     },
+    _setUpdateTabVisible(visible: boolean) {
+        const updateButton = bazaar.element.querySelector('[data-type="myUpdate"]');
+        const updateSpace = bazaar.element.querySelector('[data-type="myUpdate-space"]');
+        updateButton?.classList.toggle("fn__none", !visible);
+        updateSpace?.classList.toggle("fn__none", !visible);
+        if (!visible && this._isUpdatePanelActive()) {
+            (bazaar.element.querySelector('[data-type="myPlugin"]') as HTMLElement)?.click();
+        }
+    },
     _checkUpdate(force = false) {
         if (!force && ["loading", "loaded"].includes(this._updateState)) {
             return;
@@ -419,6 +428,7 @@ export const bazaar = {
             }
             if (response.code !== 0 || !response.data) {
                 this._updateState = "error";
+                this._setUpdateTabVisible(true);
                 if (this._isUpdatePanelActive()) {
                     this._renderUpdatePanel();
                 }
@@ -426,6 +436,7 @@ export const bazaar = {
             }
             this._data.update = response.data;
             this._updateState = "loaded";
+            this._setUpdateTabVisible(this._getUpdatedItems().length > 0);
             this._syncDownloadedUpdateButtons();
             if (this._isUpdatePanelActive()) {
                 this._renderUpdatePanel();

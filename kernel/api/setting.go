@@ -921,15 +921,10 @@ func setEmoji(c *gin.Context) {
 	}
 
 	argEmoji := arg["emoji"].([]any)
-	var emoji []string
-	seen := map[string]bool{}
+	emoji := make([]string, 0, len(argEmoji))
 	for _, ae := range argEmoji {
-		e := ae.(string)
-		if e, valid := util.FilterRecentIconValue(e); valid && !seen[e] {
-			emoji = append(emoji, e)
-			seen[e] = true
-		}
+		emoji = append(emoji, ae.(string))
 	}
 
-	model.Conf.Editor.Emoji = emoji
+	model.Conf.Editor.Emoji = util.FilterRecentIconValues(emoji)
 }

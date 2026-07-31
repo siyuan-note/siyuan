@@ -254,6 +254,18 @@ func FilterRecentIconValue(icon string) (ret string, valid bool) {
 	return u.String(), true
 }
 
+func FilterRecentIconValues(icons []string) (ret []string) {
+	ret = make([]string, 0, len(icons))
+	seen := map[string]bool{}
+	for _, icon := range icons {
+		if icon, valid := FilterRecentIconValue(icon); valid && !seen[icon] {
+			ret = append(ret, icon)
+			seen[icon] = true
+		}
+	}
+	return
+}
+
 func FilterUploadEmojiFileName(name string) string {
 	if strings.HasPrefix(name, "api/icon/") {
 		// 忽略动态图标 https://github.com/siyuan-note/siyuan/issues/15139

@@ -883,9 +883,9 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             });
             const historyElement = document.querySelector('.toolbar [data-type="history"]');
             historyElement.addEventListener("click", () => {
-                toggleSearchHistory(document.querySelector("#model"), config, undefined);
+                toggleSearchHistory(document.querySelector("#model"), config, undefined, element);
             });
-            initSearchEvent(app, element.firstElementChild, config);
+            initSearchEvent(app, element, config);
             updateSearchResult(config, element);
         }
     });

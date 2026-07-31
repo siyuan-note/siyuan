@@ -168,6 +168,45 @@ func TestQueryNoLimitInBoxContextCancellation(t *testing.T) {
 	}
 }
 
+func TestSelectBlocksRawStmtInBoxContextCancellation(t *testing.T) {
+	testDB, boxID := useEncryptedQueryTestDB(t)
+	insertEncryptedQueryTestBlock(t, testDB, "block", "", "block", "d")
+	previousDB := db
+	db = testDB
+	t.Cleanup(func() {
+		db = previousDB
+	})
+
+	for name, targetBoxID := range map[string]string{"global": "", "encrypted": boxID} {
+		t.Run(name, func(t *testing.T) {
+			ctx, cancel := context.WithCancel(context.Background())
+			done := make(chan error, 1)
+			go func() {
+				_, err := SelectBlocksRawStmtInBoxContext(ctx, `
+					WITH RECURSIVE sequence(value) AS (
+						VALUES(0)
+						UNION ALL
+						SELECT value + 1 FROM sequence WHERE value < 100000000
+					)
+					SELECT blocks.* FROM blocks
+					WHERE (SELECT COUNT(*) FROM sequence) > 0`, 1, 32, targetBoxID)
+				done <- err
+			}()
+
+			time.Sleep(10 * time.Millisecond)
+			cancel()
+			select {
+			case err := <-done:
+				if !errors.Is(err, context.Canceled) {
+					t.Fatalf("unexpected cancellation error: %v", err)
+				}
+			case <-time.After(3 * time.Second):
+				t.Fatal("SQL query was not canceled")
+			}
+		})
+	}
+}
+
 func useEncryptedQueryTestDB(t *testing.T) (*gosql.DB, string) {
 	t.Helper()
 	testDB, err := gosql.Open("sqlite3_extended", ":memory:")

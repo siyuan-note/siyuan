@@ -258,6 +258,10 @@ export class Preview {
             }, response => {
                 const oldScrollTop = protyle.preview.previewElement.scrollTop;
                 protyle.preview.previewElement.innerHTML = response.data.html;
+                /// #if MOBILE
+                protyle.preview.previewElement.querySelector(`#${CSS.escape(protyle.block.rootID)}`)
+                    ?.classList.add("protyle-preview__title");
+                /// #endif
                 processRender(protyle.preview.previewElement);
                 highlightRender(protyle.preview.previewElement);
                 avRender(protyle.preview.previewElement, protyle);

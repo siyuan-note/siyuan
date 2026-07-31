@@ -377,6 +377,7 @@ export class Title {
             if (nbsp2space(title) !== nbsp2space(inputElement.value)) {
                 inputElement.value = empty ? "" : title;
             }
+            document.getElementById("toolbarNameReadonly").textContent = inputElement.value;
         }
         /// #else
         if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {

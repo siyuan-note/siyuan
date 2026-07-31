@@ -3,6 +3,24 @@ import {getAllModels} from "../../layout/getAll";
 import {updateOutline} from "../../editor/util";
 import {resize} from "./resize";
 
+/// #if MOBILE
+export const updateMobileTitleReadonly = (protyle: IProtyle) => {
+    const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
+    const readonlyElement = document.getElementById("toolbarNameReadonly");
+    if (!inputElement || !readonlyElement) {
+        return;
+    }
+    const readonly = protyle.disabled || !protyle.preview.element.classList.contains("fn__none");
+    if (readonly && !inputElement.readOnly && document.activeElement === inputElement) {
+        inputElement.blur();
+    }
+    inputElement.readOnly = readonly;
+    readonlyElement.textContent = inputElement.value;
+    inputElement.classList.toggle("fn__none", readonly);
+    readonlyElement.classList.toggle("fn__none", !readonly);
+};
+/// #endif
+
 export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
     if (type === "preview") {
         if (!protyle.preview.element.classList.contains("fn__none")) {
@@ -35,6 +53,9 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         /// #endif
         resize(protyle);
     }
+    /// #if MOBILE
+    updateMobileTitleReadonly(protyle);
+    /// #endif
     hideElements(["gutterOnly", "toolbar", "select", "hint", "util"], protyle);
     protyle.app.plugins.forEach(item => {
         item.eventBus.emit("switch-protyle-mode", {protyle});

@@ -18,6 +18,8 @@ package api
 
 import (
 	"net/http"
+	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/88250/gulu"
@@ -161,6 +163,9 @@ func getDocHistoryContent(c *gin.Context) {
 		}
 		highlight = highlightVal
 	}
+	if !holdHistoryRequest(c, historyPath, ret) {
+		return
+	}
 	id, rootID, content, isLargeDoc, err := model.GetDocHistoryContent(historyPath, keyword, highlight)
 	if err != nil {
 		ret.Code = -1
@@ -205,6 +210,30 @@ func diffDocVersions(c *gin.Context) {
 	if !ok {
 		return
 	}
+	boxIDs := map[string]struct{}{}
+	for _, ref := range []*model.DocVersionRef{left, right} {
+		boxID, resolveErr := model.ResolveDocVersionBoxID(ref)
+		if resolveErr != nil {
+			ret.Code = -1
+			ret.Msg = resolveErr.Error()
+			return
+		}
+		if boxID != "" {
+			boxIDs[boxID] = struct{}{}
+		}
+	}
+	sortedBoxIDs := make([]string, 0, len(boxIDs))
+	for boxID := range boxIDs {
+		sortedBoxIDs = append(sortedBoxIDs, boxID)
+	}
+	sort.Strings(sortedBoxIDs)
+	for _, boxID := range sortedBoxIDs {
+		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(314)
+			return
+		}
+	}
 
 	diff, err := model.DiffDocVersions(left, right)
 	if err != nil {
@@ -243,6 +272,9 @@ func rollbackDocHistory(c *gin.Context) {
 	) {
 		return
 	}
+	if !holdHistoryRequest(c, historyPath, ret) {
+		return
+	}
 	err := model.RollbackDocHistory(historyPath)
 	if err != nil {
 		ret.Code = -1
@@ -262,6 +294,9 @@ func rollbackAssetsHistory(c *gin.Context) {
 
 	var historyPath string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, true)) {
+		return
+	}
+	if !holdHistoryRequest(c, historyPath, ret) {
 		return
 	}
 	err := model.RollbackAssetsHistory(historyPath)
@@ -306,12 +341,26 @@ func rollbackAttributeViewHistory(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, true)) {
 		return
 	}
+	if !holdHistoryRequest(c, historyPath, ret) {
+		return
+	}
 	err := model.RollbackAttributeViewHistory(historyPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+}
+
+func holdHistoryRequest(c *gin.Context, historyPath string, ret *gulu.Result) bool {
+	absolutePath := filepath.Join(util.WorkspaceDir, historyPath)
+	boxID := model.ExtractBoxIDFromHistoryPath(absolutePath)
+	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return false
+	}
+	return true
 }
 
 func createDocHistory(c *gin.Context) {

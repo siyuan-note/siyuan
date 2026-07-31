@@ -480,6 +480,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             openBacklink({
                 app: protyle.app,
                 blockId: refBlockId,
+                notebookId: protyle.notebookId,
             });
         }
     }).element);
@@ -492,6 +493,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             openGraph({
                 app: protyle.app,
                 blockId: refBlockId,
+                notebookId: protyle.notebookId,
             });
         }
     }).element);
@@ -986,7 +988,7 @@ export const zoomOut = (options: {
     }
     if (window.siyuan.mobile?.editor) {
         window.siyuan.storage[Constants.LOCAL_DOCINFO] = {
-            id: options.id,
+            id: isEncryptedBox(options.protyle.notebookId) ? "" : options.id,
         };
         setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
         if (options.isPushBack) {

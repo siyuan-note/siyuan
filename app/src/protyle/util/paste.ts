@@ -721,6 +721,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
                 clearBlockElement(e, isCutPaste); // 剪切粘贴保留引用角标
             });
+            const updated = dayjs().format("YYYYMMDDHHmmss");
+            pastedBlockElements.forEach((e) => {
+                e.setAttribute("updated", updated);
+            });
         }
         if (nodeElement.classList.contains("table")) {
             isBlock = false;

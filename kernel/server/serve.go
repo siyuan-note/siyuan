@@ -377,6 +377,11 @@ func serveExport(ginServer *gin.Engine) {
 				c.Status(http.StatusForbidden)
 				return
 			}
+			if acquireErr := model.AcquireEncryptedBoxOperation(boxID); acquireErr != nil {
+				c.Status(http.StatusForbidden)
+				return
+			}
+			defer model.ReleaseEncryptedBoxOperation(boxID)
 			model.HoldBoxReadLock(boxID)
 			defer model.ReleaseBoxReadLock(boxID)
 			if _, dekErr := model.GetDEKIfUnlocked(boxID); dekErr != nil {
@@ -931,9 +936,31 @@ func serveAssets(ginServer *gin.Engine) {
 
 func serveSVG(context *gin.Context, assetAbsPath string) bool {
 	if strings.HasSuffix(assetAbsPath, ".svg") {
-		data, err := readAssetBytes(assetAbsPath)
+		boxID := model.ExtractBoxIDFromAssetsPath(assetAbsPath)
+		var dek []byte
+		if boxID != "" && model.IsEncryptedBox(boxID) {
+			if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
+				context.Status(http.StatusForbidden)
+				return true
+			}
+			defer model.ReleaseEncryptedBoxOperation(boxID)
+			model.HoldBoxReadLock(boxID)
+			var err error
+			dek, err = model.GetDEKIfUnlocked(boxID)
+			if err != nil {
+				model.ReleaseBoxReadLock(boxID)
+				context.Status(http.StatusForbidden)
+				return true
+			}
+			defer model.ReleaseBoxReadLock(boxID)
+		}
+		data, err := readAssetBytesLocked(assetAbsPath, boxID, dek)
 		if err != nil {
 			logging.LogErrorf("read svg file failed: %s", err)
+			if boxID != "" && model.IsEncryptedBox(boxID) {
+				context.Status(http.StatusInternalServerError)
+				return true
+			}
 			return false
 		}
 
@@ -956,20 +983,13 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 	return false
 }
 
-// readAssetBytes 读取 asset 文件字节。加密笔记本的 asset 是密文，自动解密后返回明文。
-func readAssetBytes(absPath string) ([]byte, error) {
+// readAssetBytesLocked 读取 asset 文件字节；读取加密笔记本资源时调用方必须持有对应的 box 读锁。
+func readAssetBytesLocked(absPath, boxID string, dek []byte) ([]byte, error) {
 	data, err := os.ReadFile(absPath)
 	if err != nil {
 		return nil, err
 	}
-	if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" && model.IsEncryptedBox(boxID) {
-		model.HoldBoxReadLock(boxID)
-		dek, dekErr := model.GetDEKIfUnlocked(boxID)
-		if dekErr != nil {
-			model.ReleaseBoxReadLock(boxID)
-			return nil, dekErr
-		}
-		defer model.ReleaseBoxReadLock(boxID)
+	if boxID != "" && model.IsEncryptedBox(boxID) {
 		diskName := filepath.Base(absPath)
 		plain, decErr := model.DecryptAsset(boxID, diskName, dek, data)
 		if decErr != nil {
@@ -988,6 +1008,11 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 	if boxID == "" || !model.IsEncryptedBox(boxID) {
 		return false // 非加密 box，走原路径
 	}
+	if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
+		context.Status(http.StatusForbidden)
+		return true
+	}
+	defer model.ReleaseEncryptedBoxOperation(boxID)
 	model.HoldBoxReadLock(boxID)
 	dek, err := model.GetDEKIfUnlocked(boxID)
 	if err != nil {
@@ -1029,9 +1054,32 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 // 否则返回 false，由调用方走原 http.ServeFile 路径。
 func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	boxID := model.ExtractBoxIDFromHistoryPath(absPath)
-	if boxID == "" || !model.IsEncryptedBox(boxID) {
+	if boxID == "" {
 		return false // 非加密 box，走原路径
 	}
+	if !model.IsEncryptedHistoryPath(absPath) {
+		source, err := os.Open(absPath)
+		if err != nil {
+			return false
+		}
+		header := make([]byte, 4)
+		n, _ := source.Read(header)
+		_ = source.Close()
+		if model.IsEncryptedNotebookData(header[:n]) {
+			context.Status(http.StatusForbidden)
+			return true
+		}
+		return false
+	}
+	if !model.IsEncryptedBox(boxID) {
+		context.Status(http.StatusForbidden)
+		return true
+	}
+	if err := model.AcquireEncryptedBoxOperation(boxID); err != nil {
+		context.Status(http.StatusForbidden)
+		return true
+	}
+	defer model.ReleaseEncryptedBoxOperation(boxID)
 	model.HoldBoxReadLock(boxID)
 	dek, err := model.GetDEKIfUnlocked(boxID)
 	if err != nil {
@@ -1130,6 +1178,11 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		// 从路径提取 boxID，加密笔记本已锁定时拒绝访问（锁定后 repo 预览解密文件仍存在磁盘上）
 		parts := strings.SplitN(strings.TrimPrefix(requestPath, "/"), "/", 2)
 		if len(parts) >= 1 && model.IsEncryptedBox(parts[0]) {
+			if err := model.AcquireEncryptedBoxOperation(parts[0]); err != nil {
+				context.Status(http.StatusForbidden)
+				return
+			}
+			defer model.ReleaseEncryptedBoxOperation(parts[0])
 			model.HoldBoxReadLock(parts[0])
 			defer model.ReleaseBoxReadLock(parts[0])
 			if _, dekErr := model.GetDEKIfUnlocked(parts[0]); dekErr != nil {
@@ -1181,6 +1234,15 @@ func serveWebSocket(ginServer *gin.Engine) {
 
 	util.WebSocketServer.HandleConnect(func(s *melody.Session) {
 		//logging.LogInfof("ws check auth for [%s]", s.Request.RequestURI)
+
+		// 拒绝携带重复查询键的请求，避免同一 URI 表达多个会话身份
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-c8w8-3pqp-wr83
+		if util.HasDuplicateQueryValues(s.Request) {
+			s.CloseWithMsg([]byte("  invalid query"))
+			logging.LogWarnf("closed a session with duplicated query values [%s]", util.GetRemoteAddr(s.Request))
+			return
+		}
+
 		authOk := true
 
 		if "" != model.Conf.AccessAuthCode {
@@ -1219,7 +1281,10 @@ func serveWebSocket(ginServer *gin.Engine) {
 
 		if !authOk {
 			// 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-			authOk = strings.Contains(s.Request.RequestURI, "/ws?app=siyuan") && strings.Contains(s.Request.RequestURI, "&id=auth&type=auth")
+			if util.IsAuthPageKeepaliveRequest(s.Request) {
+				authOk = true
+				s.Set("authSession", true)
+			}
 		}
 
 		if !authOk {

@@ -5,7 +5,7 @@ import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 import {getDefaultSubType} from "./getDefault";
@@ -411,6 +411,9 @@ const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
 export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                               criteriaData: Config.IUILayoutTabSearchConfig[],
                               element: Element) => {
+    if (isSensitiveSearchConfig(config)) {
+        return;
+    }
     const saveDialog = new Dialog({
         title: window.siyuan.languages.saveCriterion,
         content: `<div class="b3-dialog__content">

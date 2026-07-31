@@ -31,6 +31,18 @@ import (
 	"golang.org/x/sync/singleflight"
 )
 
+type installSizeCacheEntry struct {
+	size      int64
+	expiresAt time.Time
+}
+
+var (
+	installSizeCacheMu sync.RWMutex
+	installSizeCache   = make(map[string]installSizeCacheEntry)
+	installSizeVersion = make(map[string]uint64)
+	installSizeFlight  singleflight.Group
+)
+
 // ReadInstalledPackageDirs 读取本地集市包的目录列表
 func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 	if !util.IsPathRegularDirOrSymlinkDir(basePath) {
@@ -52,7 +64,7 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 }
 
 // SetInstalledPackageMetadata 设置本地集市包的通用元数据
-func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType, frontend string, bazaarPackagesMap map[string]*Package) bool {
+func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType string) bool {
 	// 展示信息
 	pkg.IconURL = baseURLPath + "icon.png"
 	pkg.PreviewURL = baseURLPath + "preview.png"
@@ -61,54 +73,63 @@ func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType
 	pkg.PreferredReadme = getInstalledPackageREADME(installPath, baseURLPath, pkg.Readme)
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
 
-	// 更新信息
+	// 安装状态
 	pkg.Installed = true
 	pkg.DisallowInstall = isBelowRequiredAppVersion(pkg)
-	if bazaarPkg := bazaarPackagesMap[pkg.Name]; nil != bazaarPkg {
-		pkg.RepoURL = bazaarPkg.RepoURL // 更新链接使用在线数据，避免本地元数据的链接错误
-		pkg.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
-
-		if 0 > semver.Compare("v"+pkg.Version, "v"+bazaarPkg.Version) {
-			pkg.RepoHash = bazaarPkg.RepoHash
-			pkg.Outdated = true
-			disallowUpdate := isBelowRequiredAppVersion(bazaarPkg)
-			if "plugins" == pkgType {
-				disallowUpdate = disallowUpdate || IsIncompatiblePlugin(bazaarPkg, frontend)
-			}
-			pkg.DisallowUpdate = disallowUpdate
-			pkg.Updated = bazaarPkg.Updated
-			pkg.HUpdated = bazaarPkg.HUpdated
-			pkg.Size = bazaarPkg.Size
-			pkg.HSize = bazaarPkg.HSize
-			pkg.Stars = bazaarPkg.Stars
-			pkg.OpenIssues = bazaarPkg.OpenIssues
-			pkg.Downloads = bazaarPkg.Downloads
-		}
-	} else {
-		pkg.RepoURL = pkg.URL
-	}
+	pkg.RepoURL = pkg.URL
 
 	// 安装信息
 	pkg.InstallTime, pkg.UpdateTime = getPackageTimes(pkgType, pkg.Name, installPath)
 	pkg.HInstallDate = time.UnixMilli(pkg.InstallTime).Format("2006-01-02")
-	// TODO 本地安装大小的缓存改成 1 分钟有效，打开集市包 README 的时候才遍历集市包文件夹进行统计，异步返回结果到前端显示 https://github.com/siyuan-note/siyuan/issues/16983
-	// 目前优先使用在线 stage 数据：不耗时，但可能不准确，比如本地旧版本与云端最新版本的安装大小可能不一致；其次使用本地目录大小：耗时，但准确
-	// 需要分离本地安装大小和在线 stage 数据的安装大小
-	bazaarMemMu.RLock()
-	cachedSize, hit := installSizeCache[pkg.RepoURL]
-	bazaarMemMu.RUnlock()
-	if hit {
-		pkg.InstallSize = cachedSize
-	} else {
-		size, _ := util.SizeOfDirectory(installPath)
-		pkg.InstallSize = size
-		bazaarMemMu.Lock()
-		installSizeCache[pkg.RepoURL] = size
-		bazaarMemMu.Unlock()
-	}
-	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
 
 	return true
+}
+
+// GetInstalledPackageSize 获取本地集市包的安装大小，结果缓存一分钟
+func GetInstalledPackageSize(pkgType, packageName, installPath string) (size int64, hSize string, err error) {
+	cacheKey := pkgType + ":" + packageName
+	now := time.Now()
+	installSizeCacheMu.RLock()
+	cached, hit := installSizeCache[cacheKey]
+	version := installSizeVersion[cacheKey]
+	installSizeCacheMu.RUnlock()
+	if hit && now.Before(cached.expiresAt) {
+		size = cached.size
+		hSize = humanize.BytesCustomCeil(uint64(size), 2)
+		return
+	}
+
+	v, err, _ := installSizeFlight.Do(cacheKey, func() (any, error) {
+		ret, sizeErr := util.SizeOfDirectory(installPath)
+		if sizeErr != nil {
+			return int64(0), sizeErr
+		}
+		installSizeCacheMu.Lock()
+		if installSizeVersion[cacheKey] == version {
+			installSizeCache[cacheKey] = installSizeCacheEntry{
+				size:      ret,
+				expiresAt: time.Now().Add(time.Minute),
+			}
+		}
+		installSizeCacheMu.Unlock()
+		return ret, nil
+	})
+	if err != nil {
+		return
+	}
+	size = v.(int64)
+	hSize = humanize.BytesCustomCeil(uint64(size), 2)
+	return
+}
+
+// RemoveInstalledPackageSizeCache 删除本地集市包的安装大小缓存
+func RemoveInstalledPackageSizeCache(pkgType, packageName string) {
+	cacheKey := pkgType + ":" + packageName
+	installSizeCacheMu.Lock()
+	delete(installSizeCache, cacheKey)
+	installSizeVersion[cacheKey]++
+	installSizeCacheMu.Unlock()
+	installSizeFlight.Forget(cacheKey)
 }
 
 // Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330

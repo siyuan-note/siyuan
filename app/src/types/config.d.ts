@@ -2205,6 +2205,10 @@ declare namespace Config {
          */
         rootId: string;
         /**
+         * (Backlink) Notebook ID
+         */
+        notebookId?: string;
+        /**
          * (Backlink) Tab type
          * - `pin`: Pinned panel
          * - `local`: The panel of the current document
@@ -2303,6 +2307,10 @@ declare namespace Config {
          */
         blockId: string;
         /**
+         * (Graph) Notebook ID
+         */
+        notebookId?: string;
+        /**
          * Object name
          */
         instance: "Graph";
@@ -2336,6 +2344,10 @@ declare namespace Config {
          * (Outline) Block ID
          */
         blockId: string;
+        /**
+         * (Outline) Notebook ID
+         */
+        notebookId?: string;
         /**
          * Object name
          */
@@ -2385,6 +2397,10 @@ declare namespace Config {
      * SiYuan search tab configuration
      */
     export interface IUILayoutTabSearchConfig {
+        /**
+         * Whether the search contains encrypted notebook data that must not be persisted
+         */
+        sensitive?: boolean;
         /**
          * 搜索传入的查询内容
          */

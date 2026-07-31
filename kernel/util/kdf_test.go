@@ -49,6 +49,15 @@ func TestArgon2KDFDifferentPasswords(t *testing.T) {
 	}
 }
 
+// TestArgon2KDFMissingKeyLengthRejected 验证缺少密钥长度的配置不会套用隐式默认值。
+func TestArgon2KDFMissingKeyLengthRejected(t *testing.T) {
+	params := DefaultArgon2Params()
+	params.KeyLength = 0
+	if _, err := ValidateArgon2Params(params); err == nil {
+		t.Fatal("Argon2id parameters without KeyLength should be rejected")
+	}
+}
+
 // TestAESGCMRoundTrip 验证加密→解密还原原文。
 func TestAESGCMRoundTrip(t *testing.T) {
 	key, err := GenerateDEK()
@@ -138,42 +147,32 @@ func TestAESGCMInvalidKeyLength(t *testing.T) {
 	}
 }
 
-// TestAESGCMLegacyCiphertextCompatibility 验证旧 nonce||ciphertext||tag 格式仍可解密，保证升级后已有数据可读。
-func TestAESGCMLegacyCiphertextCompatibility(t *testing.T) {
+// TestAESGCMHeaderlessCiphertextRejected 验证缺少信封头的密文被拒绝。
+func TestAESGCMHeaderlessCiphertextRejected(t *testing.T) {
 	key, _ := GenerateDEK()
-	plaintext := []byte("legacy encrypted notebook data")
-	legacy, err := encryptLegacyForTest(key, plaintext, nil)
+	ciphertext, err := encryptHeaderlessForTest(key, []byte("encrypted notebook data"), nil)
 	if err != nil {
-		t.Fatalf("create legacy ciphertext failed: %v", err)
+		t.Fatalf("create headerless ciphertext failed: %v", err)
 	}
-	got, err := Decrypt(key, legacy)
-	if err != nil {
-		t.Fatalf("decrypt legacy ciphertext failed: %v", err)
-	}
-	if !bytes.Equal(got, plaintext) {
-		t.Fatalf("legacy round-trip mismatch")
+	if _, err = Decrypt(key, ciphertext); err == nil {
+		t.Fatalf("Decrypt should reject ciphertext without an envelope")
 	}
 }
 
-// TestAESGCMLegacyCiphertextWithAADCompatibility 验证旧版带 AAD 的文件/资源密文仍可读取。
-func TestAESGCMLegacyCiphertextWithAADCompatibility(t *testing.T) {
+// TestAESGCMHeaderlessCiphertextWithAADRejected 验证带 AAD 但缺少信封头的密文被拒绝。
+func TestAESGCMHeaderlessCiphertextWithAADRejected(t *testing.T) {
 	key, _ := GenerateDEK()
-	plaintext := []byte("legacy encrypted asset")
-	aad := []byte("siyuan:v1:asset:box:assets/file.png")
-	legacy, err := encryptLegacyForTest(key, plaintext, aad)
+	aad := []byte("siyuan:test:object")
+	ciphertext, err := encryptHeaderlessForTest(key, []byte("encrypted data"), aad)
 	if err != nil {
-		t.Fatalf("create legacy ciphertext failed: %v", err)
+		t.Fatalf("create headerless ciphertext failed: %v", err)
 	}
-	got, err := DecryptWithAAD(key, legacy, aad)
-	if err != nil {
-		t.Fatalf("decrypt legacy ciphertext with AAD failed: %v", err)
-	}
-	if !bytes.Equal(got, plaintext) {
-		t.Fatalf("legacy AAD round-trip mismatch")
+	if _, err = DecryptWithAAD(key, ciphertext, aad); err == nil {
+		t.Fatalf("DecryptWithAAD should reject ciphertext without an envelope")
 	}
 }
 
-func encryptLegacyForTest(key, plaintext, aad []byte) ([]byte, error) {
+func encryptHeaderlessForTest(key, plaintext, aad []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err

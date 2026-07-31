@@ -78,14 +78,10 @@ func listDocTree(c *gin.Context) {
 	}
 
 	// 加密笔记本锁定时拒绝直接列举磁盘目录，防止泄漏文档 ID、层级和数量
-	if model.IsEncryptedBox(notebook) {
-		model.HoldBoxReadLock(notebook)
-		defer model.ReleaseBoxReadLock(notebook)
-		if _, dekErr := model.GetDEKIfUnlocked(notebook); dekErr != nil {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(314)
-			return
-		}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
 	}
 
 	p := arg["path"].(string)
@@ -1368,6 +1364,11 @@ func getDoc(c *gin.Context) {
 		ret.Code = 3
 		return
 	}
+	if err := holdEncryptedBoxRequest(c, requestedNotebook); err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
 	idx := arg["index"]
 	index := 0
 	if nil != idx {
@@ -1618,22 +1619,24 @@ func authFilePublishAccess(c *gin.Context) {
 	if util.InvalidIDPattern(ID, ret) {
 		return
 	}
+	password := arg["password"].(string)
+
+	ret.Code = -1
+	ret.Msg = model.Conf.Language(285)
 	if model.IsEncryptedPublishRuntimeTarget(ID) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
 		return
 	}
-	password := arg["password"].(string)
 
 	publishAccess := model.GetPublishAccess()
 	for _, item := range publishAccess {
 		if item.ID == ID {
-			if item.Password == password {
-				model.SetPublishAuthCookie(c, ID, password)
-			} else {
-				ret.Msg = model.Conf.Language(285)
+			if item.Disable || item.Password == "" || item.Password != password {
+				return
 			}
-			break
+			model.SetPublishAuthCookie(c, ID, password)
+			ret.Code = 0
+			ret.Msg = ""
+			return
 		}
 	}
 }

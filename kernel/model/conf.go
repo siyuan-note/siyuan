@@ -168,24 +168,6 @@ func InitConf() {
 				Conf.Save()
 				logging.LogInfof("migrated AI config [%s]", confPath)
 			}
-
-			// 重启后加密笔记本的 DEK 丢失（仅内存），必须重新解锁。
-			// 强制把所有加密笔记本标记为已关闭，避免启动索引读到无法解密的密文 .sy。
-			// 使用 IsEncryptedBox 统一判定（含 backup fallback）。
-			changed := false
-			for _, box := range Conf.GetBoxes() {
-				if IsEncryptedBox(box.ID) && !box.Closed {
-					boxConf := box.GetConf()
-					boxConf.Closed = true
-					if err := box.SaveConf(boxConf); err != nil {
-						logging.LogErrorf("close encrypted notebook on boot [%s] failed: %s", box.ID, err)
-					}
-					changed = true
-				}
-			}
-			if changed {
-				logging.LogInfof("closed encrypted notebooks on boot (DEK not in memory)")
-			}
 		}
 	}
 
@@ -1269,8 +1251,9 @@ func HideConfSecret(c *AppConf) {
 	c.Secrets = &conf.Secrets{}
 	c.Variables = &conf.Variables{}
 	if nil != c.NotebookCrypto {
+		enabled := c.NotebookCrypto.Enabled && notebookCryptoConfigurationComplete(c.NotebookCrypto)
 		c.NotebookCrypto = &conf.NotebookCrypto{
-			Enabled:         c.NotebookCrypto.Enabled,
+			Enabled:         enabled,
 			AutoLockMinutes: c.NotebookCrypto.AutoLockMinutes,
 		}
 	}
@@ -1496,9 +1479,13 @@ func closeUserGuide() {
 	}
 }
 
-// NotebookCryptoEnabled 返回加密笔记本功能是否已启用（线程安全）。
+// NotebookCryptoEnabled 返回加密笔记本功能是否处于可用的启用状态（线程安全）。
 func NotebookCryptoEnabled() bool {
 	Conf.m.RLock()
 	defer Conf.m.RUnlock()
-	return Conf.NotebookCrypto.Enabled
+	if nil == Conf.NotebookCrypto {
+		return false
+	}
+	notebookCrypto := *Conf.NotebookCrypto
+	return notebookCrypto.Enabled && notebookCryptoConfigurationComplete(&notebookCrypto)
 }

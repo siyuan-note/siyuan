@@ -1,9 +1,18 @@
+let modelDestroyCallback: (() => void) | undefined;
+
+export const destroyModel = () => {
+    modelDestroyCallback?.();
+    modelDestroyCallback = undefined;
+};
+
 export const openModel = (obj: {
     html: string,
     icon?: string,
     title: string,
-    bindEvent: (element: HTMLElement) => void
+    bindEvent: (element: HTMLElement) => void,
+    destroyCallback?: () => void,
 }) => {
+    destroyModel();
     const modelElement = document.getElementById("model");
     modelElement.style.transform = "translateY(0px)";
     modelElement.style.zIndex = (++window.siyuan.zIndex).toString();
@@ -18,4 +27,5 @@ export const openModel = (obj: {
     const modelMainElement = modelElement.querySelector("#modelMain") as HTMLElement;
     modelMainElement.innerHTML = obj.html;
     obj.bindEvent(modelMainElement);
+    modelDestroyCallback = obj.destroyCallback;
 };

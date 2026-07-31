@@ -281,12 +281,18 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 	} else {
 		createdBoxID = boxID
 	}
+	encryptedTarget := IsEncryptedBox(boxID)
+	storageRiffDir := filepath.Join(unzipRootPath, "storage", "riff")
+	if encryptedTarget && gulu.File.IsExist(storageRiffDir) {
+		return createdBoxID, errors.New(Conf.Language(313))
+	}
 	toPath = normalizeBoxDocTarget(boxID, toPath)
 
 	luteEngine := util.NewLute()
 	blockIDs := map[string]string{}
 	trees := map[string]*parse.Tree{}
 	importedBoxDoc := false
+	containsFlashcardAttrs := false
 
 	// 重新生成块 ID
 	for i, syPath := range syPaths {
@@ -304,7 +310,13 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 		}
 		oldRootID := tree.Root.ID
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || "" == n.ID {
+			if !entering {
+				return ast.WalkContinue
+			}
+			if encryptedTarget && n.IsBlock() && n.IALAttr(NodeAttrRiffDecks) != "" {
+				containsFlashcardAttrs = true
+			}
+			if "" == n.ID {
 				return ast.WalkContinue
 			}
 
@@ -336,6 +348,9 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 		}
 		trees[tree.ID] = tree
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d", i+1, len(syPaths))))
+	}
+	if containsFlashcardAttrs {
+		return createdBoxID, errors.New(Conf.Language(313))
 	}
 	if importedBoxDoc {
 		if err = writeBoxDocID(boxID); err != nil {
@@ -515,7 +530,7 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 	}
 
 	// 将关联的闪卡数据合并到默认卡包 data/storage/riff/20230218211946-2kw8jgx 中
-	storageRiffDir := filepath.Join(storage, "riff")
+	storageRiffDir = filepath.Join(storage, "riff")
 	if gulu.File.IsExist(storageRiffDir) {
 		deckToImport, loadErr := riff.LoadDeck(storageRiffDir, builtinDeckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
 		if nil != loadErr {
@@ -750,17 +765,13 @@ func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (c
 					ext := filepath.Ext(originalName)
 					blockID := ast.NewNodeID()
 					diskName := encryptedAssetName(ext, blockID)
-					// 映射写入失败则不写 asset，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
-					if mapErr := writeAssetNameMapping(boxID, diskName, originalName); mapErr != nil {
-						return mapErr
-					}
 					assetNameMap[originalName] = diskName
 					// 读取明文内容 → 加密 → 写入脱敏文件名
 					src, readErr := filelock.ReadFile(path)
 					if readErr != nil {
 						return readErr
 					}
-					if err = writeAssetFile(filepath.Join(boxAssetsDir, diskName), bytes.NewReader(src), boxID); err != nil {
+					if err = writeAssetFile(filepath.Join(boxAssetsDir, diskName), bytes.NewReader(src), boxID, originalName); err != nil {
 						return err
 					}
 					return nil
@@ -1316,18 +1327,13 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 						ext := filepath.Ext(baseName)
 						blockID := ast.NewNodeID()
 						name = encryptedAssetName(ext, blockID)
-						// 映射写入失败则不写 asset，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
-						if mapErr := writeAssetNameMapping(boxID, name, baseName); mapErr != nil {
-							logging.LogErrorf("write asset name mapping for [%s] failed: %s", baseName, mapErr)
-							return ast.WalkContinue
-						}
 						assetTargetPath := filepath.Join(assetDirPath, name)
 						src, readErr := filelock.ReadFile(absolutePath)
 						if readErr != nil {
 							logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
 							return ast.WalkContinue
 						}
-						if err = writeAssetFile(assetTargetPath, bytes.NewReader(src), boxID); err != nil {
+						if err = writeAssetFile(assetTargetPath, bytes.NewReader(src), boxID, baseName); err != nil {
 							logging.LogErrorf("write encrypted asset [%s] failed: %s", assetTargetPath, err)
 							return ast.WalkContinue
 						}
@@ -1473,18 +1479,13 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					ext := filepath.Ext(baseName)
 					blockID := ast.NewNodeID()
 					name = encryptedAssetName(ext, blockID)
-					// 映射写入失败则不写 asset，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
-					if mapErr := writeAssetNameMapping(boxID, name, baseName); mapErr != nil {
-						logging.LogErrorf("write asset name mapping for [%s] failed: %s", baseName, mapErr)
-						return ast.WalkContinue
-					}
 					assetTargetPath := filepath.Join(assetDirPath, name)
 					src, readErr := filelock.ReadFile(absolutePath)
 					if readErr != nil {
 						logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
 						return ast.WalkContinue
 					}
-					if err = writeAssetFile(assetTargetPath, bytes.NewReader(src), boxID); err != nil {
+					if err = writeAssetFile(assetTargetPath, bytes.NewReader(src), boxID, baseName); err != nil {
 						logging.LogErrorf("write encrypted asset [%s] failed: %s", assetTargetPath, err)
 						return ast.WalkContinue
 					}

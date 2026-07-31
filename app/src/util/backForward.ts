@@ -58,7 +58,9 @@ const focusStack = async (app: App, stack: IBackStack) => {
                     scrollAttr.focusId = stack.id;
                     scrollAttr.focusStart = stack.position.start;
                     scrollAttr.focusEnd = stack.position.end;
-                    window.siyuan.storage[Constants.LOCAL_FILEPOSITION][stack.protyle.block.rootID] = scrollAttr;
+                    if (!isEncryptedBox(stack.protyle.notebookId)) {
+                        window.siyuan.storage[Constants.LOCAL_FILEPOSITION][stack.protyle.block.rootID] = scrollAttr;
+                    }
                     const editor = new Editor({
                         app: app,
                         tab,

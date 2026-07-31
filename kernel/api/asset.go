@@ -295,6 +295,12 @@ func setFileAnnotation(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	boxID := model.ExtractBoxIDFromAssetsPath(writePath)
+	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	if "{}" == data {
 		if err = filelock.Remove(writePath); err != nil {
 			ret.Code = -1
@@ -304,16 +310,15 @@ func setFileAnnotation(c *gin.Context) {
 	} else {
 		// 加密笔记本的 .sya 写盘前必须加密；加密笔记本未解锁时拒绝写入（fail-closed，避免明文落盘）
 		writeData := []byte(data)
-		if boxID := model.ExtractBoxIDFromAssetsPath(writePath); boxID != "" && model.IsEncryptedBox(boxID) {
-			model.HoldBoxReadLock(boxID)
-			defer model.ReleaseBoxReadLock(boxID)
+		if boxID != "" && model.IsEncryptedBox(boxID) {
 			dek, dekErr := model.GetDEKIfUnlocked(boxID)
 			if dekErr != nil {
 				ret.Code = -1
 				ret.Msg = dekErr.Error()
 				return
 			}
-			enc, encErr := model.EncryptAsset(boxID, filepath.Base(writePath), dek, writeData)
+			diskName := filepath.Base(writePath)
+			enc, encErr := model.EncryptAsset(boxID, diskName, diskName, dek, writeData)
 			if encErr != nil {
 				ret.Code = -1
 				ret.Msg = encErr.Error()
@@ -361,6 +366,12 @@ func getFileAnnotation(c *gin.Context) {
 		ret.Code = 1
 		return
 	}
+	boxID := model.ExtractBoxIDFromAssetsPath(readPath)
+	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 
 	data, err := filelock.ReadFile(readPath)
 	if err != nil {
@@ -369,9 +380,7 @@ func getFileAnnotation(c *gin.Context) {
 		return
 	}
 	// 加密笔记本的 .sya 读盘后必须解密；未解锁时拒绝返回（fail-closed，避免返回密文或误判）
-	if boxID := model.ExtractBoxIDFromAssetsPath(readPath); boxID != "" && model.IsEncryptedBox(boxID) {
-		model.HoldBoxReadLock(boxID)
-		defer model.ReleaseBoxReadLock(boxID)
+	if boxID != "" && model.IsEncryptedBox(boxID) {
 		dek, dekErr := model.GetDEKIfUnlocked(boxID)
 		if dekErr != nil {
 			ret.Code = -1

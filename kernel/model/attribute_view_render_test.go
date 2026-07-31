@@ -29,11 +29,32 @@ func TestRenderAttributeViewRejectsInvalidIDBeforeLookup(t *testing.T) {
 	invalidIDs := []string{"../outside", `..\outside`}
 	for _, invalidID := range invalidIDs {
 		t.Run(invalidID, func(t *testing.T) {
-			_, _, err := RenderAttributeView("", invalidID, "", "", 1, -1, nil, false, false)
+			_, _, err := RenderAttributeView("", invalidID, "", "", 1, -1, nil, false, false, false)
 			if !errors.Is(err, ErrInvalidID) {
 				t.Fatalf("invalid attribute view ID [%s] returned error [%v]", invalidID, err)
 			}
 		})
+	}
+}
+
+func TestGetRenderAttributeViewViewWithoutPersisting(t *testing.T) {
+	currentView := &av.View{ID: "20260731000000-current"}
+	requestedView := &av.View{ID: "20260731000000-request"}
+	attrView := &av.AttributeView{
+		ID:     "20260731000000-avtesta",
+		ViewID: currentView.ID,
+		Views:  []*av.View{currentView, requestedView},
+	}
+
+	view, err := getRenderAttributeViewView(attrView, requestedView.ID, "", false)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if view != requestedView {
+		t.Fatalf("got view [%s], want [%s]", view.ID, requestedView.ID)
+	}
+	if attrView.ViewID != currentView.ID {
+		t.Fatalf("current view changed to [%s], want [%s]", attrView.ViewID, currentView.ID)
 	}
 }
 

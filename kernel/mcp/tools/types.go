@@ -44,8 +44,9 @@ type Tool struct {
 	// ActionEffects 按 action 描述本地读写、数据外发与外部计费，供智能体精确执行确认和快照策略。
 	ActionEffects map[string]ToolEffects `json:"-"`
 
-	Handler        func(args map[string]any) (CallToolResult, error)                      `json:"-"`
-	ContextHandler func(ctx context.Context, args map[string]any) (CallToolResult, error) `json:"-"`
+	Handler          func(args map[string]any) (CallToolResult, error)                      `json:"-"`
+	ContextHandler   func(ctx context.Context, args map[string]any) (CallToolResult, error) `json:"-"`
+	BoxLeaseResolver func(args map[string]any) []string                                     `json:"-"`
 }
 
 type ToolEffects struct {

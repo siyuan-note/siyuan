@@ -30,8 +30,7 @@
     height: 100%;
     position: relative;
 
-    .textLayer,
-    .pdf__resize {
+    .textLayer {
       /* dark 蓝色、紫色背景显示不清楚，文档位于 https://github.com/siyuan-note/siyuan/issues/5351 */
       mix-blend-mode: multiply;
     }
@@ -51,7 +50,10 @@
   }
 
   &__rect {
+    --pdf-annotation-color: var(--b3-pdf-background1);
+
     cursor: pointer;
+    pointer-events: none;
 
     &--hl > div {
       transition: opacity 1500ms linear;
@@ -64,6 +66,8 @@
       box-sizing: border-box;
       position: absolute;
       z-index: 1;
+      border: 2px solid var(--pdf-annotation-color);
+      pointer-events: auto;
 
       &:first-child {
         border-bottom-left-radius: var(--b3-border-radius);
@@ -75,14 +79,32 @@
         border-bottom-right-radius: var(--b3-border-radius);
       }
     }
+
+    &:not([data-type="border"]) > div {
+      background-color: color-mix(in srgb, var(--pdf-annotation-color) 35%, transparent);
+    }
   }
 
   &__resize {
     position: fixed;
+    z-index: 3;
     border: 2px solid var(--b3-pdf-background1);
     box-sizing: border-box;
     border-radius: var(--b3-border-radius);
   }
+}
+
+.pdf__rects {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: clip;
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+
+.textLayer[hidden] ~ .pdf__rects {
+  display: none;
 }
 
 .pdf__outer--dark {
@@ -95,8 +117,7 @@
     background-color: var(--b3-pdf-dark);
   }
 
-  .textLayer,
-  .pdf__resize {
+  .textLayer {
     z-index: 2; // pdf 缩放后 canvas 会出现在末尾，导致无法选中和查看标注
     mix-blend-mode: screen;
   }

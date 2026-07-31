@@ -110,9 +110,33 @@ func fulltextSearch(args map[string]any) (CallToolResult, error) {
 		groupBy = int(v)
 	}
 
-	blocks, matchedCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(
-		query, notebooks, paths, types, subtypes, method, orderBy, groupBy, page, pageSize,
-	)
+	var blocks []*model.Block
+	var matchedCount, matchedRootCount, pageCount int
+	var docMode bool
+	encryptedNotebook := encryptedSearchNotebook(notebooks)
+	if encryptedNotebook != "" {
+		if len(notebooks) != 1 {
+			return CallToolResult{
+				Content: []ContentItem{{Type: "text", Text: "encrypted full-text search must target exactly one notebook"}},
+				IsError: true,
+			}, nil
+		}
+		model.HoldBoxReadLock(encryptedNotebook)
+		defer model.ReleaseBoxReadLock(encryptedNotebook)
+		if !model.IsBoxUnlocked(encryptedNotebook) {
+			return CallToolResult{
+				Content: []ContentItem{{Type: "text", Text: "encrypted notebook is locked, please unlock it first"}},
+				IsError: true,
+			}, nil
+		}
+		blocks, matchedCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBox(
+			query, notebooks, paths, types, subtypes, method, orderBy, groupBy, page, pageSize, encryptedNotebook,
+		)
+	} else {
+		blocks, matchedCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(
+			query, notebooks, paths, types, subtypes, method, orderBy, groupBy, page, pageSize,
+		)
+	}
 
 	if matchedCount == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "No results found."}}}, nil
@@ -156,6 +180,12 @@ func semanticSearch(args map[string]any) (CallToolResult, error) {
 	}
 
 	notebooks := parseStringSlice(args["notebook"])
+	if encryptedSearchNotebook(notebooks) != "" {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "semantic search is not available for encrypted notebooks"}},
+			IsError: true,
+		}, nil
+	}
 	paths := parseStringSlice(args["path"])
 	types := parseStringSet(args["type"])
 	subtypes := parseStringSet(args["subtype"])
@@ -304,4 +334,13 @@ func parseStringSet(v any) map[string]bool {
 		m[s] = true
 	}
 	return m
+}
+
+func encryptedSearchNotebook(notebooks []string) string {
+	for _, notebook := range notebooks {
+		if model.IsEncryptedBox(notebook) {
+			return notebook
+		}
+	}
+	return ""
 }

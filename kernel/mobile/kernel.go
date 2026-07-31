@@ -17,6 +17,7 @@
 package mobile
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -40,6 +41,31 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	_ "golang.org/x/mobile/bind"
 )
+
+// AcquireExportFile 获取移动端导出租约，返回 JSON 格式的路径、名称和租约 ID。
+func AcquireExportFile(exportPath string) string {
+	lease, err := model.AcquireMobileExportLease(exportPath)
+	if err != nil {
+		logging.LogErrorf("acquire export file [%s] failed: %s", exportPath, err)
+		return ""
+	}
+	data, err := json.Marshal(lease)
+	if err != nil {
+		model.ReleaseMobileExportLease(lease.ID)
+		return ""
+	}
+	return string(data)
+}
+
+// ReleaseExportFile 释放 AcquireExportFile 返回的租约。
+func ReleaseExportFile(leaseID string) {
+	model.ReleaseMobileExportLease(leaseID)
+}
+
+// GetExportFileName 返回普通导出的资源名称；加密导出应读取 AcquireExportFile 返回的 Name。
+func GetExportFileName(exportPath string) string {
+	return model.GetMobileExportName(exportPath)
+}
 
 // VerifyAppStoreTransaction 用于验证苹果 App Store 交易。
 //
@@ -324,14 +350,10 @@ func GetExportFilePath(exportPath string) (ret string) {
 			logging.LogWarnf("get export file path [%s] blocked: path traversal attempt [%s]", exportPath, fileName)
 			return
 		}
-		// 加密导出受控路径（<boxID>/<kind>/<file>）：必须经注册表校验且 box 已解锁，否则 fail-closed
+		// 加密导出需要持有覆盖原生复制过程的租约，旧路径解析接口不再返回其明文地址。
 		if model.IsManagedEncryptedExportPath(fileName) {
-			artifact, ok := model.ResolveManagedExportForMobile(fileName)
-			if !ok {
-				logging.LogWarnf("get export file path [%s] blocked: managed export not available or box locked", exportPath)
-				return
-			}
-			return artifact
+			logging.LogWarnf("get export file path [%s] blocked: use AcquireExportFile for encrypted exports", exportPath)
+			return
 		}
 		absPath = filepath.Join(util.TempDir, "export", fileName)
 		exportBaseDir := filepath.Join(util.TempDir, "export")

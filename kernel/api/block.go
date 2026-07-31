@@ -166,6 +166,9 @@ func getBlockTreeInfos(c *gin.Context) {
 	}
 
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	ids = filterBlockIDsByPublishAccess(c, ids, boxID)
 	ret.Data = model.GetBlockTreeInfosInBox(ids, boxID)
 }
@@ -181,6 +184,9 @@ func getBlockSiblingID(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	if !isBlockPublishAccessible(c, id, boxID) {
 		ret.Data = map[string]string{
 			"parent":   "",
@@ -209,6 +215,9 @@ func getBlockRelevantIDs(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	if !isBlockPublishAccessible(c, id, boxID) {
 		ret.Data = map[string]string{
 			"parentID":   "",
@@ -557,6 +566,9 @@ func getDocInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	if !checkBlockPublishAccessInBox(c, id, boxID, ret) {
 		return
 	}
@@ -718,6 +730,9 @@ func getRefText(c *gin.Context) {
 	}
 
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	if !isBlockPublishAccessible(c, id, boxID) {
 		ret.Data = model.ErrBlockNotFound.Error()
 		return
@@ -769,7 +784,11 @@ func getRefIDs(c *gin.Context) {
 		}
 		return
 	}
-	refDefs, originalRefBlockIDs := model.GetBlockRefsInBox(id, encryptedNotebookFromArg(arg))
+	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
+	refDefs, originalRefBlockIDs := model.GetBlockRefsInBox(id, boxID)
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		refDefs, originalRefBlockIDs = model.FilterRefDefsByPublishAccess(c, publishAccess, refDefs)
@@ -791,6 +810,9 @@ func getRefIDsByFileAnnotationID(c *gin.Context) {
 
 	id := arg["id"].(string)
 	refIDs := model.GetBlockRefIDsByFileAnnotationID(id)
+	if model.IsReadOnlyRoleContext(c) {
+		refIDs = model.FilterRefIDsByPublishAccess(c, model.GetPublishAccess(), refIDs)
+	}
 	var retRefDefs []model.RefDefs
 	for _, blockID := range refIDs {
 		retRefDefs = append(retRefDefs, model.RefDefs{RefID: blockID, DefIDs: []string{}})
@@ -848,6 +870,9 @@ func getBlockBreadcrumb(c *gin.Context) {
 	}
 
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	if !isBlockPublishAccessible(c, id, boxID) {
 		ret.Data = []*model.BlockPath{}
 		return
@@ -899,6 +924,9 @@ func getBlockBreadcrumbChildren(c *gin.Context) {
 		limit = int(limitArg.(float64))
 	}
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	if !isBlockPublishAccessible(c, id, boxID) {
 		ret.Data = &model.BlockBreadcrumbChildren{Items: []*model.BlockPath{}}
 		return
@@ -988,6 +1016,9 @@ func getBlockInfo(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	if !checkBlockPublishAccessInBox(c, id, boxID, ret) {
 		return
 	}
@@ -1120,6 +1151,9 @@ func getBlockDOM(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	dom := model.GetBlockDOMInBox(id, boxID)
 
 	if model.IsReadOnlyRoleContext(c) {
@@ -1163,6 +1197,9 @@ func getBlockDOMs(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	doms := model.GetBlockDOMsInBox(ids, boxID)
 
 	if model.IsReadOnlyRoleContext(c) {
@@ -1190,6 +1227,9 @@ func getBlockDOMWithEmbed(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	var publishAccess model.PublishAccess
 	var accessChecker model.EmbedBlockAccessChecker
@@ -1241,6 +1281,9 @@ func getBlockDOMsWithEmbed(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	var publishAccess model.PublishAccess
 	var accessChecker model.EmbedBlockAccessChecker
@@ -1266,6 +1309,15 @@ func encryptedNotebookFromArg(arg map[string]any) string {
 		return notebook
 	}
 	return ""
+}
+
+func holdBlockRequest(c *gin.Context, ret *gulu.Result, boxID string) bool {
+	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return false
+	}
+	return true
 }
 
 func isEncryptedNotebookDeniedForPublish(c *gin.Context, notebook string) bool {
@@ -1322,6 +1374,9 @@ func getBlockKramdown(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	var kramdown string
 	if boxID != "" {
 		kramdown = model.GetBlockKramdownInBox(id, mode, boxID)
@@ -1387,6 +1442,9 @@ func getBlockKramdowns(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
 	var kramdowns map[string]string
 	if boxID != "" {
 		kramdowns = model.GetBlockKramdownsInBox(ids, mode, boxID)
@@ -1434,7 +1492,11 @@ func getChildBlocks(c *gin.Context) {
 		return
 	}
 
-	ret.Data = model.GetChildBlocks(id)
+	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
+	ret.Data = model.GetChildBlocksInBox(id, boxID)
 }
 
 func getTailChildBlocks(c *gin.Context) {
@@ -1460,5 +1522,9 @@ func getTailChildBlocks(c *gin.Context) {
 		n = 7
 	}
 
-	ret.Data = model.GetTailChildBlocks(id, n)
+	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
+	ret.Data = model.GetTailChildBlocksInBox(id, n, boxID)
 }

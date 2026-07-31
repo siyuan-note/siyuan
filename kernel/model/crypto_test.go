@@ -38,10 +38,115 @@ func setDEKForTest(boxID string, dek []byte) {
 	cachedDEKs[boxID] = dek
 }
 
+func TestEncryptedBoxIdentityRejectsInvalidIDs(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() {
+		util.DataDir = oldDataDir
+	}()
+
+	backupDir := filepath.Join(util.DataDir, ".siyuan")
+	if err := os.MkdirAll(backupDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(backupDir, "notebook-crypto-backup.json"), []byte("{}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, boxID := range []string{"", ".", "..", "not-a-node-id"} {
+		if IsEncryptedBox(boxID) {
+			t.Fatalf("invalid notebook ID %q must not resolve to a backup path", boxID)
+		}
+		if _, err := readNotebookCryptBackup(boxID); err == nil {
+			t.Fatalf("invalid notebook ID %q should be rejected by backup reads", boxID)
+		}
+		if _, err := GetBoxEncryption(boxID); err == nil {
+			t.Fatalf("invalid notebook ID %q should be rejected by key lookup", boxID)
+		}
+	}
+}
+
+func TestEncryptedAssetRoundTrip(t *testing.T) {
+	boxID := "20260731103900-asset01"
+	diskName := "asset-20260731103900-abcdefg.bin"
+	originalName := "机密附件.pdf"
+	dek := bytes.Repeat([]byte{0x42}, 32)
+	plaintext := []byte("encrypted asset content")
+
+	ciphertext, err := EncryptAsset(boxID, diskName, originalName, dek, plaintext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.HasPrefix(ciphertext, encryptedAssetMagic) {
+		t.Fatalf("asset does not use the encrypted asset container")
+	}
+
+	decrypted, name, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if name != originalName || !bytes.Equal(decrypted, plaintext) {
+		t.Fatalf("unexpected asset round trip: name=%q content=%q", name, decrypted)
+	}
+}
+
+func TestEncryptedAssetStreamsMultipleChunks(t *testing.T) {
+	boxID := "20260731103930-asset02"
+	diskName := "asset-20260731103930-abcdefg.bin"
+	originalName := "large.bin"
+	dek := bytes.Repeat([]byte{0x43}, 32)
+	plaintext := bytes.Repeat([]byte("streaming-content-"), encryptedAssetChunkSize/18*2+100)
+
+	ciphertext, err := EncryptAsset(boxID, diskName, originalName, dek, plaintext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var output bytes.Buffer
+	name, err := DecryptAssetToWriter(boxID, diskName, dek, bytes.NewReader(ciphertext), &output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if name != originalName || !bytes.Equal(output.Bytes(), plaintext) {
+		t.Fatalf("unexpected streamed asset result: name=%q size=%d", name, output.Len())
+	}
+}
+
+func TestEncryptedAssetAuthenticatesMetadataAndContent(t *testing.T) {
+	boxID := "20260731104000-asset03"
+	diskName := "asset-20260731104000-abcdefg.bin"
+	dek := bytes.Repeat([]byte{0x24}, 32)
+	ciphertext, err := EncryptAsset(boxID, diskName, "secret.txt", dek, []byte("secret"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	metadataTampered := append([]byte(nil), ciphertext...)
+	metadataTampered[8] ^= 1
+	if _, _, err = DecryptAssetWithName(boxID, diskName, dek, metadataTampered); err == nil {
+		t.Fatalf("tampered asset metadata should be rejected")
+	}
+
+	contentTampered := append([]byte(nil), ciphertext...)
+	contentTampered[len(contentTampered)-1] ^= 1
+	if _, _, err = DecryptAssetWithName(boxID, diskName, dek, contentTampered); err == nil {
+		t.Fatalf("tampered asset content should be rejected")
+	}
+}
+
+func TestEncryptedAssetRejectsUnknownFormat(t *testing.T) {
+	boxID := "20260731104100-asset04"
+	diskName := "asset-20260731104100-abcdefg.bin"
+	dek := bytes.Repeat([]byte{0x12}, 32)
+	unknown := bytes.Repeat([]byte{0x12}, 64)
+
+	if _, _, err := DecryptAssetWithName(boxID, diskName, dek, unknown); err == nil {
+		t.Fatal("unknown encrypted asset format should be rejected")
+	}
+}
+
 // TestIsBoxUnlockedLifecycle 验证 DEK 缓存的存在/缺失状态。
 func TestIsBoxUnlockedLifecycle(t *testing.T) {
-	LockBox("lifecycle-test-box") // 确保初始干净
-	boxID := "lifecycle-test-box"
+	boxID := "20260731121000-lifecyc"
+	LockBox(boxID) // 确保初始干净
 	if IsBoxUnlocked(boxID) {
 		t.Fatalf("box should not be unlocked after LockBox")
 	}
@@ -59,7 +164,7 @@ func TestIsBoxUnlockedLifecycle(t *testing.T) {
 // TestGetDEKReturnsErrorAfterLock 验证 LockBox 后 GetDEK 报错。
 func TestGetDEKReturnsErrorAfterLock(t *testing.T) {
 	dek, _ := util.GenerateDEK()
-	boxID := "get-dek-test-box"
+	boxID := "20260731121001-getdekk"
 	setDEKForTest(boxID, dek)
 
 	got, err := GetDEK(boxID)
@@ -79,9 +184,10 @@ func TestGetDEKReturnsErrorAfterLock(t *testing.T) {
 // TestWrapNewDEKRoundTrip 验证用 KEK 生成 DEK → 包络 → 解包 → 还原。
 func TestWrapNewDEKRoundTrip(t *testing.T) {
 	kek, _ := util.GenerateDEK()
-	defer LockBox("wrap-roundtrip-box")
+	boxID := "20260731121002-wrapbox"
+	defer LockBox(boxID)
 
-	boxEnc, _, err := WrapNewDEK("wrap-roundtrip-box", kek)
+	boxEnc, _, err := WrapNewDEK(boxID, kek)
 	if err != nil {
 		t.Fatalf("WrapNewDEK failed: %v", err)
 	}
@@ -89,7 +195,7 @@ func TestWrapNewDEKRoundTrip(t *testing.T) {
 		t.Fatalf("BoxEncryption fields malformed: wrappedDEK=%d wrapNonce=%d", len(boxEnc.WrappedDEK), len(boxEnc.WrapNonce))
 	}
 
-	dek, err := decryptWrappedDEK("wrap-roundtrip-box", boxEnc, kek)
+	dek, err := decryptWrappedDEK(boxID, boxEnc, kek)
 	if err != nil {
 		t.Fatalf("decryptWrappedDEK failed: %v", err)
 	}
@@ -100,13 +206,14 @@ func TestWrapNewDEKRoundTrip(t *testing.T) {
 
 // TestDecryptWrappedDEKWithWrongKEK 验证用错误的 KEK 解密 WrappedDEK 失败（GCM MAC 校验）。
 func TestDecryptWrappedDEKWithWrongKEK(t *testing.T) {
+	boxID := "20260731121003-wrongkk"
 	kek1, _ := util.GenerateDEK()
-	boxEnc, _, _ := WrapNewDEK("wrong-kek-box", kek1)
+	boxEnc, _, _ := WrapNewDEK(boxID, kek1)
 
 	kek2, _ := util.GenerateDEK()
-	defer LockBox("wrong-kek-box")
+	defer LockBox(boxID)
 
-	if _, err := decryptWrappedDEK("wrong-kek-box", boxEnc, kek2); err == nil {
+	if _, err := decryptWrappedDEK(boxID, boxEnc, kek2); err == nil {
 		t.Fatalf("decryptWrappedDEK with wrong KEK should fail")
 	}
 }
@@ -114,11 +221,13 @@ func TestDecryptWrappedDEKWithWrongKEK(t *testing.T) {
 // TestWrapNewDEKProducesUniqueDEKs 验证两次调用 WrapNewDEK 生成不同的 DEK（随机性）。
 func TestWrapNewDEKProducesUniqueDEKs(t *testing.T) {
 	kek, _ := util.GenerateDEK()
-	defer LockBox("uniq-box-1")
-	defer LockBox("uniq-box-2")
+	boxID1 := "20260731121004-uniquea"
+	boxID2 := "20260731121005-uniqueb"
+	defer LockBox(boxID1)
+	defer LockBox(boxID2)
 
-	_, dek1, _ := WrapNewDEK("uniq-box-1", kek)
-	_, dek2, _ := WrapNewDEK("uniq-box-2", kek)
+	_, dek1, _ := WrapNewDEK(boxID1, kek)
+	_, dek2, _ := WrapNewDEK(boxID2, kek)
 
 	// WrapNewDEK 同时返回原始 DEK，可直接比对随机性
 	if bytes.Equal(dek1, dek2) {
@@ -133,8 +242,10 @@ func TestBoxEncryptionRoundTripViaUtil(t *testing.T) {
 
 	wrapped, _ := util.EncryptWithAAD(kek, originalDEK, wrappedDEKAAD(""))
 	boxEnc := &conf.BoxEncryption{
+		Spec:       boxEncryptionSpec,
 		WrappedDEK: wrapped,
-		WrapNonce:  wrapped[:12],
+		WrapNonce:  mustEncryptionNonce(wrapped),
+		CreatedAt:  time.Now().UnixMilli(),
 	}
 
 	recoveredDEK, err := decryptWrappedDEK("", boxEnc, kek)
@@ -146,21 +257,48 @@ func TestBoxEncryptionRoundTripViaUtil(t *testing.T) {
 	}
 }
 
+// TestBoxEncryptionMissingSpecRejected 验证缺少当前包络规范标识的密钥材料被拒绝。
+func TestBoxEncryptionMissingSpecRejected(t *testing.T) {
+	kek, _ := util.GenerateDEK()
+	dek, _ := util.GenerateDEK()
+	wrapped, _ := util.EncryptWithAAD(kek, dek, wrappedDEKAAD("missing-spec-box"))
+	boxEnc := &conf.BoxEncryption{WrappedDEK: wrapped}
+	if _, err := decryptWrappedDEK("missing-spec-box", boxEnc, kek); err == nil {
+		t.Fatal("key envelope without the current spec should be rejected")
+	}
+}
+
+func TestBoxEncryptionNonceMismatchRejected(t *testing.T) {
+	kek, _ := util.GenerateDEK()
+	dek, _ := util.GenerateDEK()
+	wrapped, _ := util.EncryptWithAAD(kek, dek, wrappedDEKAAD("nonce-mismatch-box"))
+	boxEnc := &conf.BoxEncryption{
+		Spec:       boxEncryptionSpec,
+		WrappedDEK: wrapped,
+		WrapNonce:  bytes.Repeat([]byte{0x7f}, 12),
+		CreatedAt:  time.Now().UnixMilli(),
+	}
+	if _, err := decryptWrappedDEK("nonce-mismatch-box", boxEnc, kek); err == nil {
+		t.Fatal("key envelope with a mismatched nonce should be rejected")
+	}
+}
+
 // TestUnmount0ClearsDEKForUnmountedEncryptedBox 验证安全修复：加密笔记本在
 // "已解锁（DEK 在内存）但未挂载（不在 GetOpenedBoxes）"的状态下调用 unmount0，
 // DEK 仍应被清除，否则锁定后认证 API 仍可读取明文。
 // 直接测试 clearDEKIfUnlockedEncryptedBox（unmount0 在 box==nil 分支调用的清理逻辑），
 // 避免依赖未初始化的全局 Conf。
 func TestUnmount0ClearsDEKForUnmountedEncryptedBox(t *testing.T) {
-	boxID := "unmount-unlocked-test-box"
+	boxID := "20260731120000-unmount"
 
 	// 临时替换 DataDir，创建加密 box 的 conf.json，让 IsEncryptedBox 返回 true
 	origDataDir := util.DataDir
 	tempDir := t.TempDir()
 	util.DataDir = tempDir
 	defer func() {
+		LockBox(boxID) // 测试后清理 DEK 缓存
+		forgetRuntimeEncryptedBox(boxID)
 		util.DataDir = origDataDir
-		LockBox("unmount-unlocked-test-box") // 测试后清理 DEK 缓存
 	}()
 
 	// 写入加密 box 的 conf.json
@@ -206,7 +344,7 @@ func TestBackupRejectsUnsupportedSpec(t *testing.T) {
 			defer func() { util.DataDir = origDataDir }()
 
 			backup := &conf.NotebookCrypto{Spec: spec}
-			backupPath := filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+			backupPath := filepath.Join(util.DataDir, ".siyuan", "data-crypto-backup.json")
 			if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 				t.Fatal(err)
 			}
@@ -222,6 +360,44 @@ func TestBackupRejectsUnsupportedSpec(t *testing.T) {
 	}
 }
 
+func TestCryptoBackupPathNames(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() { util.DataDir = originalDataDir }()
+
+	if got, want := dataCryptoBackupPath(), filepath.Join(util.DataDir, ".siyuan", "data-crypto-backup.json"); got != want {
+		t.Fatalf("unexpected data crypto backup path: got %q, want %q", got, want)
+	}
+	boxID := "20260731120000-abcdefg"
+	if got, want := notebookCryptoBackupPath(boxID), filepath.Join(util.DataDir, boxID, ".siyuan", "notebook-crypto-backup.json"); got != want {
+		t.Fatalf("unexpected notebook crypto backup path: got %q, want %q", got, want)
+	}
+}
+
+func TestBackupRejectsIncompleteCurrentSpec(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() { util.DataDir = originalDataDir }()
+
+	backup := conf.NewNotebookCrypto()
+	backup.Enabled = true
+	prepareBackupForWrite(backup)
+	backupPath := filepath.Join(util.DataDir, ".siyuan", "data-crypto-backup.json")
+	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	data, err := json.Marshal(backup)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(backupPath, data, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = loadNotebookCryptoBackup(); err == nil {
+		t.Fatal("incomplete current notebook crypto backup should be rejected")
+	}
+}
+
 // TestBackupChecksumCorruption 验证校验和可检测备份损坏。
 func TestBackupChecksumCorruption(t *testing.T) {
 	origDataDir := util.DataDir
@@ -229,13 +405,23 @@ func TestBackupChecksumCorruption(t *testing.T) {
 	util.DataDir = tempDir
 	defer func() { util.DataDir = origDataDir }()
 
-	// 创建有效备份
+	password := "checksum-corruption-test"
+	salt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	kek := util.DeriveKey(password, salt, params)
+	defer zeroAndClear(kek)
+	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	verifierNonce, _ := util.EncryptionNonce(verifier)
 	nc := &conf.NotebookCrypto{
-		Enabled:    true,
-		MasterSalt: []byte("corrupt-test-salt12"),
+		Enabled:       true,
+		MasterSalt:    salt,
+		KDFParams:     params,
+		KEKVerifier:   verifier,
+		VerifierNonce: verifierNonce,
 	}
 	prepareBackupForWrite(nc)
-	backupPath := filepath.Join(tempDir, ".siyuan", "notebook-crypto-backup.json")
+	nc.KEKMAC = computeKEKMAC(nc, kek)
+	backupPath := filepath.Join(tempDir, ".siyuan", "data-crypto-backup.json")
 	os.MkdirAll(filepath.Dir(backupPath), 0755)
 	data, _ := json.Marshal(nc)
 	os.WriteFile(backupPath, data, 0644)
@@ -295,18 +481,20 @@ func TestDeriveKEKRejectsTamperedBackupMAC(t *testing.T) {
 	salt, _ := util.GenerateSalt()
 	params := util.DefaultArgon2Params()
 	kek := util.DeriveKey(password, salt, params)
-	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	verifierNonce, _ := util.EncryptionNonce(verifier)
 	nc := conf.NotebookCrypto{
-		Enabled:     true,
-		MasterSalt:  salt,
-		KDFParams:   params,
-		KEKVerifier: verifier,
-		Spec:        1,
-		KEKMAC:      []byte("tampered"),
+		Enabled:       true,
+		MasterSalt:    salt,
+		KDFParams:     params,
+		KEKVerifier:   verifier,
+		VerifierNonce: verifierNonce,
+		Spec:          1,
+		KEKMAC:        bytes.Repeat([]byte{0x7f}, 32),
 	}
 	prepareBackupForWrite(&nc)
-	nc.KEKMAC = []byte("tampered")
-	backupPath := filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+	nc.KEKMAC = bytes.Repeat([]byte{0x7f}, 32)
+	backupPath := filepath.Join(util.DataDir, ".siyuan", "data-crypto-backup.json")
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -337,12 +525,14 @@ func TestDeriveKEKAllowsLocalAutoLockChange(t *testing.T) {
 	params := util.DefaultArgon2Params()
 	kek := util.DeriveKey(password, salt, params)
 	defer zeroAndClear(kek)
-	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	verifierNonce, _ := util.EncryptionNonce(verifier)
 	backup := &conf.NotebookCrypto{
 		Enabled:         true,
 		MasterSalt:      salt,
 		KDFParams:       params,
 		KEKVerifier:     verifier,
+		VerifierNonce:   verifierNonce,
 		AutoLockMinutes: 5,
 	}
 	if err := writeNotebookCryptoBackupData(backup, kek); err != nil {
@@ -363,12 +553,225 @@ func TestDeriveKEKAllowsLocalAutoLockChange(t *testing.T) {
 	zeroAndClear(derived)
 }
 
+func TestDeriveKEKRepairsIncompleteLocalConfiguration(t *testing.T) {
+	originalDataDir := util.DataDir
+	originalConfDir := util.ConfDir
+	originalConf := Conf
+	testDir := t.TempDir()
+	util.DataDir = testDir
+	util.ConfDir = filepath.Join(testDir, "conf")
+	if err := os.MkdirAll(util.ConfDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		util.DataDir = originalDataDir
+		util.ConfDir = originalConfDir
+		Conf = originalConf
+	}()
+
+	password := "repair-incomplete-configuration"
+	salt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	kek := util.DeriveKey(password, salt, params)
+	defer zeroAndClear(kek)
+	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	verifierNonce, _ := util.EncryptionNonce(verifier)
+	backup := &conf.NotebookCrypto{
+		Enabled:         true,
+		MasterSalt:      salt,
+		KDFParams:       params,
+		KEKVerifier:     verifier,
+		VerifierNonce:   verifierNonce,
+		AutoLockMinutes: 5,
+	}
+	if err := writeNotebookCryptoBackupData(backup, kek); err != nil {
+		t.Fatal(err)
+	}
+
+	local := *backup
+	local.KEKMAC = nil
+	local.AutoLockMinutes = 30
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = &local
+
+	derived, err := deriveKEK(password)
+	if err != nil {
+		t.Fatalf("deriveKEK rejected the authenticated recovery backup: %v", err)
+	}
+	zeroAndClear(derived)
+	if !notebookCryptoConfigurationComplete(Conf.NotebookCrypto) {
+		t.Fatal("deriveKEK did not repair the incomplete local configuration")
+	}
+	if Conf.NotebookCrypto.AutoLockMinutes != 30 {
+		t.Fatal("deriveKEK replaced the local auto-lock policy during repair")
+	}
+	if state := NotebookCryptoLifecycleState(false); state != NotebookCryptoStateEnabled {
+		t.Fatalf("expected Enabled after repair, got %s", state)
+	}
+}
+
+func TestDeriveKEKKeepsAuthenticatedLocalCandidateWithDifferentBackup(t *testing.T) {
+	origDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() { util.DataDir = origDataDir }()
+
+	localPassword := "local-candidate-password"
+	localSalt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	localKEK := util.DeriveKey(localPassword, localSalt, params)
+	defer zeroAndClear(localKEK)
+	localVerifier, _ := util.EncryptWithAAD(localKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	localVerifierNonce, _ := util.EncryptionNonce(localVerifier)
+	local := &conf.NotebookCrypto{
+		Enabled:         true,
+		MasterSalt:      localSalt,
+		KDFParams:       params,
+		KEKVerifier:     localVerifier,
+		VerifierNonce:   localVerifierNonce,
+		AutoLockMinutes: 5,
+	}
+	prepareBackupForWrite(local)
+	local.KEKMAC = computeKEKMAC(local, localKEK)
+	local.AutoLockMinutes = 30
+
+	backupPassword := "synchronized-candidate-password"
+	backupSalt, _ := util.GenerateSalt()
+	backupKEK := util.DeriveKey(backupPassword, backupSalt, params)
+	defer zeroAndClear(backupKEK)
+	backupVerifier, _ := util.EncryptWithAAD(backupKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	backupVerifierNonce, _ := util.EncryptionNonce(backupVerifier)
+	backup := &conf.NotebookCrypto{
+		Enabled:         true,
+		MasterSalt:      backupSalt,
+		KDFParams:       params,
+		KEKVerifier:     backupVerifier,
+		VerifierNonce:   backupVerifierNonce,
+		AutoLockMinutes: 5,
+	}
+	if err := writeNotebookCryptoBackupData(backup, backupKEK); err != nil {
+		t.Fatal(err)
+	}
+
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = local
+	defer func() { Conf = originalConf }()
+
+	derived, err := deriveKEK(localPassword)
+	if err != nil {
+		t.Fatalf("deriveKEK rejected the authenticated local candidate: %v", err)
+	}
+	zeroAndClear(derived)
+}
+
+func TestDeriveKEKAdoptsCompleteSynchronizedCandidate(t *testing.T) {
+	originalDataDir := util.DataDir
+	originalConfDir := util.ConfDir
+	testDir := t.TempDir()
+	util.DataDir = testDir
+	util.ConfDir = filepath.Join(testDir, "conf")
+	if err := os.MkdirAll(util.ConfDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		util.DataDir = originalDataDir
+		util.ConfDir = originalConfDir
+	}()
+
+	boxID := "20260731110000-syncbox"
+	newPassword := "new-device-password"
+	newSalt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	newKEK := util.DeriveKey(newPassword, newSalt, params)
+	defer zeroAndClear(newKEK)
+	newVerifier, _ := util.EncryptWithAAD(newKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	newVerifierNonce, _ := util.EncryptionNonce(newVerifier)
+	newConfig := &conf.NotebookCrypto{
+		Enabled:       true,
+		MasterSalt:    newSalt,
+		KDFParams:     params,
+		KEKVerifier:   newVerifier,
+		VerifierNonce: newVerifierNonce,
+	}
+	if err := writeNotebookCryptoBackupData(newConfig, newKEK); err != nil {
+		t.Fatal(err)
+	}
+
+	dek, _ := util.GenerateDEK()
+	wrappedDEK, _ := util.EncryptWithAAD(newKEK, dek, wrappedDEKAAD(boxID))
+	boxConfig := conf.NewBoxConf()
+	boxConfig.Encrypted = true
+	boxConfig.BoxCrypt = &conf.BoxEncryption{
+		Spec:       boxEncryptionSpec,
+		WrappedDEK: wrappedDEK,
+		WrapNonce:  mustEncryptionNonce(wrappedDEK),
+		CreatedAt:  time.Now().UnixMilli(),
+	}
+	if err := encryptBoxMetadata(boxID, boxConfig, dek); err != nil {
+		t.Fatal(err)
+	}
+	boxConfigData, _ := gulu.JSON.MarshalIndentJSON(boxConfig, "", "  ")
+	boxConfigPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err := os.MkdirAll(filepath.Dir(boxConfigPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(boxConfigPath, boxConfigData, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	oldSalt, _ := util.GenerateSalt()
+	oldKEK := util.DeriveKey("old-device-password", oldSalt, params)
+	defer zeroAndClear(oldKEK)
+	oldVerifier, _ := util.EncryptWithAAD(oldKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	oldVerifierNonce, _ := util.EncryptionNonce(oldVerifier)
+	localConfig := &conf.NotebookCrypto{
+		Enabled:         true,
+		MasterSalt:      oldSalt,
+		KDFParams:       params,
+		KEKVerifier:     oldVerifier,
+		VerifierNonce:   oldVerifierNonce,
+		AutoLockMinutes: 30,
+	}
+	prepareBackupForWrite(localConfig)
+	localConfig.KEKMAC = computeKEKMAC(localConfig, oldKEK)
+
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = localConfig
+	defer func() { Conf = originalConf }()
+
+	derived, err := deriveKEK(newPassword)
+	if err != nil {
+		t.Fatalf("deriveKEK rejected a complete synchronized candidate: %v", err)
+	}
+	defer zeroAndClear(derived)
+	if !bytes.Equal(derived, newKEK) || !bytes.Equal(Conf.NotebookCrypto.MasterSalt, newSalt) {
+		t.Fatalf("deriveKEK did not adopt the synchronized candidate")
+	}
+	if Conf.NotebookCrypto.AutoLockMinutes != 30 {
+		t.Fatalf("deriveKEK replaced the local auto-lock policy")
+	}
+}
+
 // TestDeepCopyBoxEncryptionPreservesSpec 验证保存笔记本配置前的深拷贝不会丢失包络版本。
 func TestDeepCopyBoxEncryptionPreservesSpec(t *testing.T) {
-	src := &conf.BoxEncryption{Spec: 1, WrappedDEK: []byte{1, 2}, WrapNonce: []byte{3, 4}, CreatedAt: 5}
+	src := &conf.BoxEncryption{
+		Spec:       1,
+		WrappedDEK: []byte{1, 2},
+		WrapNonce:  []byte{3, 4},
+		Metadata:   []byte{5, 6},
+		CreatedAt:  7,
+	}
 	got := DeepCopyBoxEncryption(src)
 	if got.Spec != src.Spec {
 		t.Fatalf("BoxEncryption.Spec changed during deep copy: got %d want %d", got.Spec, src.Spec)
+	}
+	if !bytes.Equal(got.Metadata, src.Metadata) {
+		t.Fatal("BoxEncryption.Metadata changed during deep copy")
+	}
+	got.Metadata[0] = 0
+	if src.Metadata[0] == 0 {
+		t.Fatal("BoxEncryption.Metadata was not deeply copied")
 	}
 }
 
@@ -393,12 +796,14 @@ func TestBackupMACRoundTrip(t *testing.T) {
 	kek := util.DeriveKey(password, salt, params)
 	defer zeroAndClear(kek)
 
-	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	verifierNonce, _ := util.EncryptionNonce(verifierCT)
 	nc := &conf.NotebookCrypto{
-		Enabled:     true,
-		MasterSalt:  salt,
-		KDFParams:   params,
-		KEKVerifier: verifierCT,
+		Enabled:       true,
+		MasterSalt:    salt,
+		KDFParams:     params,
+		KEKVerifier:   verifierCT,
+		VerifierNonce: verifierNonce,
 	}
 
 	// 通过 writeNotebookCryptoBackupData 写入（内部 prepareBackupForWrite 后计算 MAC）
@@ -418,8 +823,8 @@ func TestBackupMACRoundTrip(t *testing.T) {
 
 // TestLockBoxConcurrentReads 验证 LockBox（单 box）能与在途读锁正确串行化。
 func TestLockBoxConcurrentReads(t *testing.T) {
-	LockBox("concurrent-single-box") // 清理初始状态
-	boxID := "concurrent-single-box"
+	boxID := "20260731121006-concurr"
+	LockBox(boxID) // 清理初始状态
 	dek, _ := util.GenerateDEK()
 	setDEKForTest(boxID, dek)
 
@@ -452,7 +857,7 @@ func TestLockBoxConcurrentReads(t *testing.T) {
 
 // TestLockBoxClearsTempDirs 验证 LockBox 删除 per-box 临时目录。
 func TestLockBoxClearsTempDirs(t *testing.T) {
-	boxID := "temp-cleanup-box"
+	boxID := "20260731121007-tempcln"
 	dek, _ := util.GenerateDEK()
 	setDEKForTest(boxID, dek)
 
@@ -460,8 +865,8 @@ func TestLockBoxClearsTempDirs(t *testing.T) {
 	tempDir := t.TempDir()
 	util.TempDir = tempDir
 	defer func() {
+		LockBox(boxID)
 		util.TempDir = origTempDir
-		LockBox("temp-cleanup-box")
 	}()
 
 	// 创建模拟临时目录和文件
@@ -571,7 +976,7 @@ func TestEnabledWithoutBackupReturnsRecoveryError(t *testing.T) {
 	defer zeroAndClear(kek)
 
 	// 构造本机已启用、本机 verifier 有效的配置（主密码能派生出可用 KEK），但不写备份文件
-	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	nc := &conf.NotebookCrypto{
 		Enabled:     true,
 		MasterSalt:  salt,
@@ -594,7 +999,7 @@ func TestEnabledWithoutBackupReturnsRecoveryError(t *testing.T) {
 	}
 
 	// 关键：不在磁盘制造无效备份——备份文件应仍不存在
-	if _, statErr := os.Stat(notebookCryptoBackupPath()); !os.IsNotExist(statErr) {
+	if _, statErr := os.Stat(dataCryptoBackupPath()); !os.IsNotExist(statErr) {
 		t.Fatalf("backup file should not be generated during deriveKEK; stat err=%v", statErr)
 	}
 }

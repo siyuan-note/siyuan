@@ -6,7 +6,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
 import {hideMessage, showMessage} from "../../dialog/message";
-import {isSiYuanUriProtocol} from "../../util/pathName";
+import {isEncryptedBox, isSiYuanUriProtocol} from "../../util/pathName";
 import {isBrowser} from "../../util/functions";
 import type {App} from "../../index";
 
@@ -648,18 +648,97 @@ export const getLocalStorage = (cb: () => void) => {
             Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes).length === 0) {
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes = getDefaultSubType();
         }
+        const closedTabs = window.siyuan.storage[Constants.LOCAL_CLOSED_TABS];
+        const sanitizedClosedTabs = sanitizeClosedTabs(closedTabs);
+        if (sanitizedClosedTabs.length !== closedTabs.length) {
+            window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] = sanitizedClosedTabs;
+            setStorageVal(Constants.LOCAL_CLOSED_TABS, sanitizedClosedTabs);
+        }
         cb();
     });
+};
+
+export const isSensitiveSearchConfig = (config?: Config.IUILayoutTabSearchConfig) => {
+    if (!config) {
+        return false;
+    }
+    if (config.sensitive) {
+        return true;
+    }
+    return config.idPath?.some((item) => {
+        const boxID = item.split("/")[0];
+        return window.siyuan.notebooks?.some((notebook) => notebook.id === boxID && notebook.encrypted);
+    }) || false;
+};
+
+export const isSensitiveLayoutData = (data?: {
+    instance?: string,
+    type?: string,
+    notebookId?: string,
+    config?: Config.IUILayoutTabSearchConfig,
+}) => {
+    if (!data) {
+        return false;
+    }
+    if (data.instance === "Editor") {
+        return isEncryptedBox(data.notebookId);
+    }
+    if (data.instance === "Search") {
+        return isSensitiveSearchConfig(data.config);
+    }
+    if (data.type === "local" && ["Backlink", "Graph", "Outline"].includes(data.instance)) {
+        return !data.notebookId || isEncryptedBox(data.notebookId);
+    }
+    return false;
+};
+
+export const sanitizeClosedTabs = (tabs: Array<{children?: Parameters<typeof isSensitiveLayoutData>[0]}>) => {
+    if (!Array.isArray(tabs)) {
+        return [];
+    }
+    return tabs.filter((tab) => !isSensitiveLayoutData(tab.children));
+};
+
+const sanitizeSearchConfig = (config: Config.IUILayoutTabSearchConfig) => {
+    if (!isSensitiveSearchConfig(config)) {
+        return config;
+    }
+    const sanitized = JSON.parse(JSON.stringify(config)) as Config.IUILayoutTabSearchConfig;
+    sanitized.k = "";
+    sanitized.r = "";
+    sanitized.query = "";
+    sanitized.hPath = "";
+    sanitized.idPath = [];
+    sanitized.sensitive = false;
+    return sanitized;
+};
+
+const sanitizeFilesPaths = (filesPaths: IFilesPath[]) => {
+    if (!Array.isArray(filesPaths)) {
+        return [];
+    }
+    return filesPaths.filter((item) => !isEncryptedBox(item.notebookId));
 };
 
 export const setStorageVal = (key: string, val: any, cb?: () => void) => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
+    let storageVal = val;
+    if (key === Constants.LOCAL_SEARCHDATA) {
+        storageVal = sanitizeSearchConfig(val);
+    } else if (key === Constants.LOCAL_FILESPATHS) {
+        storageVal = sanitizeFilesPaths(val);
+    } else if (key === Constants.LOCAL_CLOSED_TABS) {
+        storageVal = sanitizeClosedTabs(val);
+    }
+    if ([Constants.LOCAL_SEARCHDATA, Constants.LOCAL_FILESPATHS, Constants.LOCAL_CLOSED_TABS].includes(key)) {
+        window.siyuan.storage[key] = storageVal;
+    }
     fetchPost("/api/storage/setLocalStorageVal", {
         app: Constants.SIYUAN_APPID,
         key,
-        val,
+        val: storageVal,
     }, () => {
         if (cb) {
             cb();

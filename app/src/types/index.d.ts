@@ -546,6 +546,8 @@ interface INotebook {
     flashcardCount?: string;
     sortMode: number;
     encrypted?: boolean;
+    unlocked?: boolean;
+    state?: "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error";
 }
 
 interface ISiyuan {
@@ -736,6 +738,7 @@ interface ILayoutJSON extends ILayoutOptions {
     page?: string
     path?: string
     blockId?: string
+    notebookId?: string
     mode?: TEditorMode
     action?: TProtyleAction
     icon?: string
@@ -983,17 +986,22 @@ interface IMenu {
 interface IBazaarItem {
     preferredName: string;
     minAppVersion: string;
+    disabledInPublish: boolean;
+    kernels: string[];
+    backends: string[];
+    frontends: string[];
+    keywords: string[];
     preferredDesc: string;
     preferredReadme: string;
     iconURL: string;
-    stars: string;
+    stars: number;
     author: string;
     updated: string;
-    downloads: string;
+    downloads: number;
     disallowInstall: boolean;
-    current: false;
-    installed: false;
-    outdated: false;
+    current: boolean;
+    installed: boolean;
+    outdated: boolean;
     name: string;
     previewURL: string;
     repoHash: string;
@@ -1014,6 +1022,16 @@ interface IBazaarItem {
     bazaarIncompatible?: boolean; // 仅 plugin
     enabled?: boolean; // 仅 plugin
     modes?: string[]; // 仅 theme
+}
+
+interface IUpdatedBazaarItem {
+    installed: IBazaarItem;
+    available: IBazaarItem;
+}
+
+interface IBazaarPackageDetail {
+    installed?: IBazaarItem;
+    available?: IBazaarItem;
 }
 
 interface IAV {

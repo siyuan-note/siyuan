@@ -18,6 +18,7 @@ package sql
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"math"
 	"regexp"
@@ -165,6 +166,15 @@ func SelectBlocksRawStmtInBox(stmt string, page, limit int, boxID string) (ret [
 	return selectBlocksRawStmtWithQuery(stmt, page, limit, queryFn)
 }
 
+func SelectBlocksRawStmtInBoxContext(ctx context.Context, stmt string, page, limit int, boxID string) (ret []*Block, err error) {
+	queryFn := func(stmt string, args ...any) (*sql.Rows, error) {
+		return queryForBoxContext(ctx, boxID, stmt, args...)
+	}
+	ret = selectBlocksRawStmtWithQuery(stmt, page, limit, queryFn)
+	err = ctx.Err()
+	return
+}
+
 // QueryRefCountInBox 按 defBlockIDs 在指定 box 的 db 里查引用计数。
 func QueryRefCountInBox(defIDs []string, boxID string) (ret map[string]int) {
 	ret = map[string]int{}
@@ -193,6 +203,10 @@ func QueryRefCountInBox(defIDs []string, boxID string) (ret map[string]int) {
 // QueryNoLimitInBox 在指定 box 的 db 里执行无 limit 的原始查询（返回 map 行）。
 func QueryNoLimitInBox(stmt, boxID string) (ret []map[string]any, err error) {
 	return queryRawStmtForBox(boxID, stmt, math.MaxInt)
+}
+
+func QueryNoLimitInBoxContext(ctx context.Context, stmt, boxID string) (ret []map[string]any, err error) {
+	return queryRawStmtForBoxContext(ctx, boxID, stmt, math.MaxInt)
 }
 
 // QueryNoLimitArgsInBox 与 QueryNoLimitInBox 一致，但支持参数化查询。
@@ -619,6 +633,45 @@ func queryRawStmtForBox(boxID, stmt string, limit int) (ret []map[string]any, er
 			break
 		}
 	}
+	return
+}
+
+func queryRawStmtForBoxContext(ctx context.Context, boxID, stmt string, limit int) (ret []map[string]any, err error) {
+	rows, err := queryForBoxContext(ctx, boxID, stmt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	if err != nil || nil == cols {
+		return nil, err
+	}
+
+	noLimit := !containsLimitClause(stmt)
+	var count int
+	for rows.Next() {
+		columns := make([]any, len(cols))
+		columnPointers := make([]any, len(cols))
+		for i := range columns {
+			columnPointers[i] = &columns[i]
+		}
+		if err = rows.Scan(columnPointers...); err != nil {
+			return nil, err
+		}
+
+		m := make(map[string]any)
+		for i, colName := range cols {
+			val := columnPointers[i].(*any)
+			m[colName] = *val
+		}
+		ret = append(ret, m)
+		count++
+		if noLimit && limit < count {
+			break
+		}
+	}
+	err = rows.Err()
 	return
 }
 

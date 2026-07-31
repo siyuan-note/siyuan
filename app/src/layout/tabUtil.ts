@@ -379,6 +379,7 @@ export const copyTab = (app: App, tab: Tab) => {
                     tab: newTab,
                     blockId: tab.model.blockId,
                     rootId: tab.model.rootId,
+                    notebookId: tab.model.notebookId,
                     type: tab.model.type,
                 });
             } else if (tab.model instanceof Files) {
@@ -391,6 +392,7 @@ export const copyTab = (app: App, tab: Tab) => {
                     app,
                     tab: newTab,
                     blockId: tab.model.blockId,
+                    notebookId: tab.model.notebookId,
                     type: tab.model.type,
                     isPreview: tab.model.isPreview
                 });
@@ -400,6 +402,7 @@ export const copyTab = (app: App, tab: Tab) => {
                     tab: newTab,
                     blockId: tab.model.blockId,
                     rootId: tab.model.rootId,
+                    notebookId: tab.model.notebookId,
                     type: tab.model.type
                 });
             } else if (tab.model instanceof Bookmark) {

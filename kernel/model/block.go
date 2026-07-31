@@ -1259,12 +1259,23 @@ type ChildBlock struct {
 }
 
 func GetChildBlocks(id string) (ret []*ChildBlock) {
+	return GetChildBlocksInBox(id, "")
+}
+
+// GetChildBlocksInBox 返回指定笔记本边界内的直接子块。
+func GetChildBlocksInBox(id, boxID string) (ret []*ChildBlock) {
 	ret = []*ChildBlock{}
 	if "" == id {
 		return
 	}
 
-	tree, err := LoadTreeByBlockID(id)
+	var tree *parse.Tree
+	var err error
+	if boxID == "" {
+		tree, err = LoadTreeByBlockID(id)
+	} else {
+		tree, err = LoadTreeByBlockIDInExactBox(id, boxID)
+	}
 	if err != nil {
 		return
 	}
@@ -1311,12 +1322,23 @@ func GetChildBlocks(id string) (ret []*ChildBlock) {
 }
 
 func GetTailChildBlocks(id string, n int) (ret []*ChildBlock) {
+	return GetTailChildBlocksInBox(id, n, "")
+}
+
+// GetTailChildBlocksInBox 返回指定笔记本边界内末尾的子块。
+func GetTailChildBlocksInBox(id string, n int, boxID string) (ret []*ChildBlock) {
 	ret = []*ChildBlock{}
 	if "" == id {
 		return
 	}
 
-	tree, err := LoadTreeByBlockID(id)
+	var tree *parse.Tree
+	var err error
+	if boxID == "" {
+		tree, err = LoadTreeByBlockID(id)
+	} else {
+		tree, err = LoadTreeByBlockIDInExactBox(id, boxID)
+	}
 	if err != nil {
 		return
 	}
@@ -1373,6 +1395,15 @@ func GetTailChildBlocks(id string, n int) (ret []*ChildBlock) {
 func GetBlock(id string, tree *parse.Tree) (ret *Block, err error) {
 	ret, err = getBlock(id, tree)
 	return
+}
+
+// GetBlockInBox 返回指定笔记本边界内的块。
+func GetBlockInBox(id, boxID string) (ret *Block, err error) {
+	tree, err := LoadTreeByBlockIDInExactBox(id, boxID)
+	if err != nil {
+		return nil, err
+	}
+	return getBlock(id, tree)
 }
 
 func getBlock(id string, tree *parse.Tree) (ret *Block, err error) {

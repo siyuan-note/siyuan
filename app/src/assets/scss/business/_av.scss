@@ -1717,6 +1717,10 @@
       min-height: 0;
     }
 
+    & > .b3-menu__item--readonly {
+      color: var(--b3-theme-on-background);
+    }
+
     &-title {
       align-items: center;
     }

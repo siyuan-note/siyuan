@@ -22,14 +22,19 @@ import "testing"
 func TestBlockCacheIsolatedByEncryptedBox(t *testing.T) {
 	originalDisabled := cacheDisabled
 	originalIsEncryptedBoxFn := IsEncryptedBoxFn
+	originalIsBoxUnlockedFn := IsBoxUnlockedFn
 	defer func() {
 		cacheDisabled = originalDisabled
 		IsEncryptedBoxFn = originalIsEncryptedBoxFn
+		IsBoxUnlockedFn = originalIsBoxUnlockedFn
 		ClearCache()
 	}()
 
 	cacheDisabled = false
 	IsEncryptedBoxFn = func(boxID string) bool {
+		return boxID == "encrypted-a" || boxID == "encrypted-b"
+	}
+	IsBoxUnlockedFn = func(boxID string) bool {
 		return boxID == "encrypted-a" || boxID == "encrypted-b"
 	}
 	ClearCache()
@@ -59,5 +64,43 @@ func TestBlockCacheIsolatedByEncryptedBox(t *testing.T) {
 	}
 	if block := getBlockCacheInBox("shared-id", "encrypted-b"); block != nil {
 		t.Fatalf("encrypted-b cache entry was not removed: %#v", block)
+	}
+}
+
+func TestEncryptedBlockCacheUnavailableAfterLock(t *testing.T) {
+	originalDisabled := cacheDisabled
+	originalIsEncryptedBoxFn := IsEncryptedBoxFn
+	originalIsBoxUnlockedFn := IsBoxUnlockedFn
+	defer func() {
+		cacheDisabled = originalDisabled
+		IsEncryptedBoxFn = originalIsEncryptedBoxFn
+		IsBoxUnlockedFn = originalIsBoxUnlockedFn
+		ClearCache()
+	}()
+
+	unlocked := true
+	cacheDisabled = false
+	IsEncryptedBoxFn = func(boxID string) bool {
+		return boxID == "encrypted"
+	}
+	IsBoxUnlockedFn = func(boxID string) bool {
+		return boxID != "encrypted" || unlocked
+	}
+	ClearCache()
+
+	putBlockCache(&Block{ID: "secret", Box: "encrypted", Content: "plaintext"})
+	blockCache.Wait()
+	if block := getBlockCacheInBox("secret", "encrypted"); block == nil {
+		t.Fatal("expected cache hit while encrypted notebook is unlocked")
+	}
+
+	unlocked = false
+	if block := getBlockCacheInBox("secret", "encrypted"); block != nil {
+		t.Fatalf("locked encrypted notebook returned cached plaintext: %#v", block)
+	}
+	putBlockCache(&Block{ID: "other", Box: "encrypted", Content: "plaintext"})
+	blockCache.Wait()
+	if block := getBlockCacheInBox("other", "encrypted"); block != nil {
+		t.Fatalf("locked encrypted notebook accepted cached plaintext: %#v", block)
 	}
 }

@@ -296,7 +296,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
         }
         return;
     }
-    window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id};
+    window.siyuan.storage[Constants.LOCAL_DOCINFO] = isEncryptedBox(notebookId) ? {id: ""} : {id};
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
     loadMobileFileById(app, id, action, scrollPosition, notebookId, afterOpen, forceReload);
 };

@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	stdhtml "html"
@@ -1634,6 +1635,10 @@ func FullTextSearchBlockInBox(query string, boxes, paths []string, types, subTyp
 
 // FullTextSearchBlockInBoxWithHPath 与 FullTextSearchBlockInBox 一致，并可控制是否搜索文档层级路径。
 func FullTextSearchBlockInBoxWithHPath(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
+	return FullTextSearchBlockInBoxWithHPathContext(context.Background(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, boxID, searchHPath)
+}
+
+func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
 	ret = []*Block{}
 	if "" == query {
 		return
@@ -1671,7 +1676,10 @@ func FullTextSearchBlockInBoxWithHPath(query string, boxes, paths []string, type
 			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 		}
 	case 2: // SQL
-		blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox(query, beforeLen, page, pageSize, boxID)
+		blocks, matchedBlockCount, matchedRootCount = searchBySQLInBoxContext(ctx, query, beforeLen, page, pageSize, boxID)
+		if ctx.Err() != nil {
+			return
+		}
 	case 3: // 正则表达式
 		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
@@ -2129,8 +2137,15 @@ func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matc
 
 // searchBySQLInBox 与 searchBySQL 一致，但按 boxID 路由到加密 db 或全局 db。
 func searchBySQLInBox(stmt string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	return searchBySQLInBoxContext(context.Background(), stmt, beforeLen, page, pageSize, boxID)
+}
+
+func searchBySQLInBoxContext(ctx context.Context, stmt string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	stmt = strings.TrimSpace(stmt)
-	blocks := sql.SelectBlocksRawStmtInBox(stmt, page, pageSize, boxID)
+	blocks, err := sql.SelectBlocksRawStmtInBoxContext(ctx, stmt, page, pageSize, boxID)
+	if err != nil {
+		return
+	}
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -2147,7 +2162,10 @@ func searchBySQLInBox(stmt string, beforeLen, page, pageSize int, boxID string) 
 		}
 	}
 	stmt = removeLimitClause(stmt)
-	result, _ := sql.QueryNoLimitInBox(stmt, boxID)
+	result, err := sql.QueryNoLimitInBoxContext(ctx, stmt, boxID)
+	if err != nil {
+		return
+	}
 	if 1 > len(result) {
 		return
 	}

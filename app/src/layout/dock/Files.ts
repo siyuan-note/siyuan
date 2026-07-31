@@ -917,9 +917,9 @@ export class Files extends Model {
                             if (!item.closed) {
                                 if (item.id === data.data.box.id) {
                                     if (previousId) {
-                                        this.element.querySelector(`.b3-list[data-url="${previousId}"]`).insertAdjacentHTML("afterend", this.genNotebook(data.data.box));
+                                        this.element.querySelector(`.b3-list[data-url="${previousId}"]`).insertAdjacentHTML("afterend", this.genNotebook(item));
                                     } else {
-                                        this.element.insertAdjacentHTML("afterbegin", this.genNotebook(data.data.box));
+                                        this.element.insertAdjacentHTML("afterbegin", this.genNotebook(item));
                                     }
                                     return true;
                                 }

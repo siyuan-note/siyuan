@@ -12,7 +12,7 @@ import {getCurrentEditor} from "../editor";
 import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
-import {isInAndroid, isInEdge, isInHarmony} from "../../protyle/util/compatibility";
+import {isInAndroid, isInEdge, isInHarmony, isInMobileApp} from "../../protyle/util/compatibility";
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
 import {callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAppUtil";
 import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
@@ -20,7 +20,33 @@ import {getMirror, getUndoRootID, hasUndoStateMirror, initMirror} from "../../pr
 
 let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
+let clearRenderGutterAfterScroll: () => void;
 let showUtil = false;
+
+const getVisibleViewportBounds = () => {
+    if (!isInMobileApp() && window.visualViewport) {
+        return {
+            top: window.visualViewport.offsetTop,
+            bottom: window.visualViewport.offsetTop + window.visualViewport.height,
+        };
+    }
+    return {
+        top: 0,
+        bottom: window.innerHeight,
+    };
+};
+
+const updateKeyboardToolbarPosition = () => {
+    if (isInMobileApp() || !window.visualViewport) {
+        return;
+    }
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    const viewportBottom = window.visualViewport.offsetTop + window.visualViewport.height;
+    const toolbarHeight = toolbarElement.getBoundingClientRect().height || 48;
+    toolbarElement.style.transform = "";
+    toolbarElement.style.bottom = "auto";
+    toolbarElement.style.top = `${viewportBottom - toolbarHeight}px`;
+};
 
 const getSlashItem = (value: string, icon: string, text: string, focus = "false") => {
     let iconHTML;
@@ -310,6 +336,7 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     }
     setTimeout(() => {
         toolbarElement.style.height = keyboardHeight + "px";
+        updateKeyboardToolbarPosition();
     }, Constants.TIMEOUT_TRANSITION); // 防止抖动
     setTimeout(() => {
         showUtil = false;
@@ -319,6 +346,7 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
 const hideKeyboardToolbarUtil = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.style.height = "";
+    updateKeyboardToolbarPosition();
     const editor = getCurrentEditor();
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = "48px";
@@ -441,6 +469,7 @@ export const showKeyboardToolbar = () => {
     }
     toolbarElement.classList.remove("fn__none");
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
+    updateKeyboardToolbarPosition();
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateY(0px)") {
         modelElement.style.paddingBottom = "48px";
@@ -456,12 +485,23 @@ export const showKeyboardToolbar = () => {
         });
     }
     clearTimeout(scrollSelectionIntoViewTimeout);
+    clearRenderGutterAfterScroll?.();
     scrollSelectionIntoViewTimeout = window.setTimeout(() => {
         if (editor?.protyle.toolbar.isMultiSelectMode()) {
             return;
         }
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
         if (contentElement) {
+            const renderGutter = () => {
+                const blockElement = hasClosestBlock(range.startContainer);
+                if (!editor?.protyle.gutter || !editor.protyle.options.render.gutter ||
+                    !blockElement || !editor.protyle.wysiwyg.element.contains(blockElement)) {
+                    return;
+                }
+                const targetElement = range.startContainer.nodeType === Node.ELEMENT_NODE ?
+                    range.startContainer as Element : range.startContainer.parentElement;
+                editor.protyle.gutter.render(editor.protyle, blockElement, targetElement);
+            };
             let cursorTop = getSelectionPosition(contentElement).top;
             if (cursorTop < 0 && window.siyuan.mobile.touchRange) {
                 const rangeBlockElement = hasClosestBlock(window.siyuan.mobile.touchRange.startContainer);
@@ -474,12 +514,30 @@ export const showKeyboardToolbar = () => {
                     cursorTop = getSelectionPosition(contentElement, window.siyuan.mobile.touchRange).top;
                 }
             }
-            if (cursorTop < window.innerHeight - 42 && cursorTop > contentElement.getBoundingClientRect().top) {
+            const viewportBounds = getVisibleViewportBounds();
+            if (cursorTop < viewportBounds.bottom - 42 &&
+                cursorTop > Math.max(contentElement.getBoundingClientRect().top, viewportBounds.top)) {
+                renderGutter();
                 return;
             }
+            const clearRenderGutter = () => {
+                contentElement.removeEventListener("scrollend", renderGutterAfterScroll);
+                contentElement.removeEventListener("touchstart", clearRenderGutter);
+                clearTimeout(renderGutterTimeout);
+                clearRenderGutterAfterScroll = undefined;
+            };
+            const renderGutterAfterScroll = () => {
+                clearRenderGutter();
+                renderGutter();
+            };
+            const renderGutterTimeout = window.setTimeout(renderGutterAfterScroll, Constants.TIMEOUT_COUNT);
+            clearRenderGutterAfterScroll = clearRenderGutter;
+            contentElement.addEventListener("scrollend", renderGutterAfterScroll, {once: true});
+            contentElement.addEventListener("touchstart", clearRenderGutter, {once: true, passive: true});
             contentElement.scroll({
-                top: cursorTop < 0 ? contentElement.scrollTop + window.innerHeight - 42 :
-                    contentElement.scrollTop + cursorTop - window.innerHeight + 42 + 26,
+                top: cursorTop < 0 ?
+                    contentElement.scrollTop + viewportBounds.bottom - viewportBounds.top - 42 :
+                    contentElement.scrollTop + cursorTop - viewportBounds.bottom + 42 + 26,
                 left: contentElement.scrollLeft,
                 behavior: "smooth"
             });
@@ -490,6 +548,7 @@ export const showKeyboardToolbar = () => {
 export const hideKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     clearTimeout(scrollSelectionIntoViewTimeout);
+    clearRenderGutterAfterScroll?.();
     window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: false}));
     if (showUtil) {
         return;
@@ -531,6 +590,22 @@ export const activeBlur = () => {
 
 export const initKeyboardToolbar = () => {
     let preventRender = false;
+    if (!isInMobileApp() && window.visualViewport) {
+        let pendingUpdate = false;
+        const viewportHandler = () => {
+            if (pendingUpdate) {
+                return;
+            }
+            pendingUpdate = true;
+            requestAnimationFrame(() => {
+                pendingUpdate = false;
+                updateKeyboardToolbarPosition();
+            });
+        };
+        window.visualViewport.addEventListener("resize", viewportHandler);
+        window.visualViewport.addEventListener("scroll", viewportHandler);
+        viewportHandler();
+    }
     document.addEventListener("selectionchange", () => {
         if (preventRender || (getCurrentEditor()?.protyle?.toolbar.isMultiSelectMode())) {
             return;

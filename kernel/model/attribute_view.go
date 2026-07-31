@@ -2769,7 +2769,31 @@ func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, cur
 }
 
 func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*AvSearchResult) {
+	searchStart := time.Now()
+	var waitSyncElapsed, readDirElapsed, getBlockRelsElapsed, scanElapsed, readNameElapsed time.Duration
+	var readFileInfoElapsed, sortElapsed, resolveElapsed, loadTreeElapsed, findNodeElapsed time.Duration
+	var readSearchInfoElapsed, resolveHPathElapsed time.Duration
+	var directoryEntryCount, validFileCount, eligibleFileCount, matchedCount int
+	var readNameCount, loadTreeCount, findNodeCount, readSearchInfoCount, resolveHPathCount int
+	var eligibleFileSize int64
+	defer func() {
+		totalElapsed := time.Since(searchStart)
+		if totalElapsed < 10*time.Millisecond {
+			return
+		}
+		logging.LogInfof("search attribute views [total=%dms, waitSync=%dms, readDir=%dms, getBlockRels=%dms, scan=%dms, readNames=%dms, readFileInfo=%dms, sort=%dms, resolve=%dms, loadTrees=%dms, findNodes=%dms, readSearchInfo=%dms, resolveHPaths=%dms, entries=%d, validFiles=%d, eligibleFiles=%d, matched=%d, results=%d, readNameCount=%d, loadTreeCount=%d, findNodeCount=%d, readSearchInfoCount=%d, resolveHPathCount=%d, eligibleSizeBytes=%d, keywordEmpty=%t, includeViewMatches=%t]",
+			totalElapsed.Milliseconds(), waitSyncElapsed.Milliseconds(), readDirElapsed.Milliseconds(),
+			getBlockRelsElapsed.Milliseconds(), scanElapsed.Milliseconds(), readNameElapsed.Milliseconds(),
+			readFileInfoElapsed.Milliseconds(), sortElapsed.Milliseconds(), resolveElapsed.Milliseconds(),
+			loadTreeElapsed.Milliseconds(), findNodeElapsed.Milliseconds(), readSearchInfoElapsed.Milliseconds(),
+			resolveHPathElapsed.Milliseconds(), directoryEntryCount, validFileCount, eligibleFileCount, matchedCount,
+			len(ret), readNameCount, loadTreeCount, findNodeCount, readSearchInfoCount, resolveHPathCount,
+			eligibleFileSize, strings.TrimSpace(options.Keyword) == "", options.IncludeViewMatches)
+	}()
+
+	waitSyncStart := time.Now()
 	waitForSyncingStorages()
+	waitSyncElapsed = time.Since(waitSyncStart)
 
 	ret = []*AvSearchResult{}
 	keyword := strings.TrimSpace(options.Keyword)
@@ -2788,17 +2812,23 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 	if boxID != "" {
 		avDir = filepath.Join(util.DataDir, boxID, "storage", "av")
 	}
+	readDirStart := time.Now()
 	entries, err := os.ReadDir(avDir)
+	readDirElapsed = time.Since(readDirStart)
 	if err != nil {
 		logging.LogErrorf("read directory [%s] failed: %s", avDir, err)
 		return
 	}
+	directoryEntryCount = len(entries)
 
+	getBlockRelsStart := time.Now()
 	avBlockRels := av.GetBlockRels()
+	getBlockRelsElapsed = time.Since(getBlockRelsStart)
 	if 1 > len(avBlockRels) {
 		return
 	}
 
+	scanStart := time.Now()
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -2808,6 +2838,7 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 		if !ast.IsNodeIDPattern(id) {
 			continue
 		}
+		validFileCount++
 
 		if gulu.Str.Contains(id, options.ExcludeAvIDs) {
 			continue
@@ -2816,20 +2847,32 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 		if nil == avBlockRels[id] {
 			continue
 		}
+		eligibleFileCount++
 
 		var searchInfo *av.AttributeViewSearchInfo
 		var name string
 		if options.IncludeViewMatches && keyword != "" {
+			readSearchInfoStart := time.Now()
 			searchInfo, _ = av.GetAttributeViewSearchInfoInBox(id, boxID)
+			readSearchInfoElapsed += time.Since(readSearchInfoStart)
+			readSearchInfoCount++
 			if searchInfo != nil {
 				name = searchInfo.Name
 			}
 		}
 		if searchInfo == nil {
+			readNameStart := time.Now()
 			name, _ = av.GetAttributeViewNameInBox(id, boxID)
+			readNameElapsed += time.Since(readNameStart)
+			readNameCount++
 		}
 
+		readFileInfoStart := time.Now()
 		info, _ := entry.Info()
+		readFileInfoElapsed += time.Since(readFileInfoStart)
+		if info != nil {
+			eligibleFileSize += info.Size()
+		}
 		if "" != keyword {
 			score, hit := matchAttributeViewSearchName(name, keywords)
 			matchedViewIDs := map[string]bool{}
@@ -2866,7 +2909,9 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 			avSearchTmpResults = append(avSearchTmpResults, a)
 		}
 	}
+	scanElapsed = time.Since(scanStart)
 
+	sortStart := time.Now()
 	if "" == keyword {
 		sort.Slice(avSearchTmpResults, func(i, j int) bool { return avSearchTmpResults[i].AvUpdated > avSearchTmpResults[j].AvUpdated })
 	} else {
@@ -2877,20 +2922,29 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 			return avSearchTmpResults[i].Score > avSearchTmpResults[j].Score
 		})
 	}
+	matchedCount = len(avSearchTmpResults)
 	if 12 <= len(avSearchTmpResults) {
 		avSearchTmpResults = avSearchTmpResults[:12]
 	}
+	sortElapsed = time.Since(sortStart)
 
+	resolveStart := time.Now()
 	for _, tmpResult := range avSearchTmpResults {
 		bIDs := avBlockRels[tmpResult.AvID]
 		var node *ast.Node
 		for _, bID := range bIDs {
+			loadTreeStart := time.Now()
 			tree, _ := loadTreeByBlockIDInBox(bID, boxID)
+			loadTreeElapsed += time.Since(loadTreeStart)
+			loadTreeCount++
 			if nil == tree {
 				continue
 			}
 
+			findNodeStart := time.Now()
 			node = treenode.GetNodeInTree(tree, bID)
+			findNodeElapsed += time.Since(findNodeStart)
+			findNodeCount++
 			if nil == node || "" == node.AttributeViewID || ast.NodeAttributeView != node.Type {
 				node = nil
 				continue
@@ -2905,13 +2959,17 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 
 		searchInfo := tmpResult.SearchInfo
 		if searchInfo == nil {
+			readSearchInfoStart := time.Now()
 			searchInfo, _ = av.GetAttributeViewSearchInfoInBox(tmpResult.AvID, boxID)
+			readSearchInfoElapsed += time.Since(readSearchInfoStart)
+			readSearchInfoCount++
 		}
 		if searchInfo == nil {
 			continue
 		}
 
 		var hPath string
+		resolveHPathStart := time.Now()
 		baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
 		if nil != baseBlock {
 			hPath = baseBlock.HPath
@@ -2920,6 +2978,8 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 		if nil != box {
 			hPath = box.Name + hPath
 		}
+		resolveHPathElapsed += time.Since(resolveHPathStart)
+		resolveHPathCount++
 
 		parent := &AvSearchResult{
 			AvID:    tmpResult.AvID,
@@ -2943,6 +3003,7 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 			parent.Children = append(parent.Children, child)
 		}
 	}
+	resolveElapsed = time.Since(resolveStart)
 	return
 }
 

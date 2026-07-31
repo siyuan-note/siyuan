@@ -1720,7 +1720,10 @@
     "pageSize": 50,
     "query": "",
     "groupPaging": {},
-    "createIfNotExist": true
+    "targetItemID": "",
+    "targetGroupID": "",
+    "createIfNotExist": true,
+    "persistView": true
   }
   ```
 
@@ -1731,7 +1734,10 @@
     * `pageSize`: 每页条目数。`-1` 或省略表示使用视图默认值（`50`）
     * `query`: 可选的主键值全文过滤关键字
     * `groupPaging`: 分组（看板）视图的可选分页配置
-    * `createIfNotExist`: 为 `true`（默认）时，若数据库不存在视图则创建默认视图
+    * `targetItemID`: 可选的待定位数据库条目 ID。指定后，返回值中包含目标定位信息
+    * `targetGroupID`: 与 `targetItemID` 配合使用的可选分组提示
+    * `createIfNotExist`: 为 `true`（默认）时，若数据库不存在则创建包含默认视图的数据库
+    * `persistView`: 是否将选中的视图保存为数据库顶层的当前视图。默认为 `true`，指定 `targetItemID` 时默认为 `false`。只读发布访问始终不会持久化选中的视图。设置为 `false` 仅阻止当前视图发生变化，不保证渲染过程没有其他写入
 * 返回值（真实响应，表格布局，展示一行）：
 
   ```json

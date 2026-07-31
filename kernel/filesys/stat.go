@@ -90,6 +90,19 @@ func StatTree(id string) (ret *util.BlockStatResult) {
 	return statTree(tree)
 }
 
+// StatTreeInBox 只统计指定笔记本边界内的文档。
+func StatTreeInBox(id, boxID string) (ret *util.BlockStatResult) {
+	bt := treenode.GetBlockTreeInExactBox(id, boxID)
+	if bt == nil {
+		return nil
+	}
+	tree, err := LoadTree(bt.BoxID, bt.Path, util.NewLute())
+	if err != nil {
+		return nil
+	}
+	return statTree(tree)
+}
+
 func statTree(tree *parse.Tree) (ret *util.BlockStatResult) {
 	blockCount := 0
 	var databaseBlockNodes []*ast.Node
@@ -117,7 +130,12 @@ func statTree(tree *parse.Tree) (ret *util.BlockStatResult) {
 			continue
 		}
 
-		attrView, _ := av.ParseAttributeView(n.AttributeViewID)
+		var attrView *av.AttributeView
+		if av.AVIsEncryptedBox != nil && av.AVIsEncryptedBox(tree.Box) {
+			attrView, _ = av.ParseAttributeViewInBox(n.AttributeViewID, tree.Box)
+		} else {
+			attrView, _ = av.ParseAttributeView(n.AttributeViewID)
+		}
 		if nil == attrView {
 			continue
 		}

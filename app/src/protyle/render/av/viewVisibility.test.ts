@@ -5,6 +5,7 @@ let visibleViewsAttribute: string;
 let currentViewAttribute: string;
 let getAVCurrentViewID: typeof import("./viewVisibility").getAVCurrentViewID;
 let getAVVisibleViewIDs: typeof import("./viewVisibility").getAVVisibleViewIDs;
+let getAVVisibleViewIDsAfterHidingAll: typeof import("./viewVisibility").getAVVisibleViewIDsAfterHidingAll;
 let setAVVisibleViewIDs: typeof import("./viewVisibility").setAVVisibleViewIDs;
 let getAVViewPageSize: typeof import("./viewVisibility").getAVViewPageSize;
 let serializeAVViewPageSizes: typeof import("./viewVisibility").serializeAVViewPageSizes;
@@ -19,6 +20,7 @@ before(async () => {
     currentViewAttribute = Constants.CUSTOM_SY_AV_VIEW;
     getAVCurrentViewID = visibility.getAVCurrentViewID;
     getAVVisibleViewIDs = visibility.getAVVisibleViewIDs;
+    getAVVisibleViewIDsAfterHidingAll = visibility.getAVVisibleViewIDsAfterHidingAll;
     setAVVisibleViewIDs = visibility.setAVVisibleViewIDs;
     getAVViewPageSize = visibility.getAVViewPageSize;
     serializeAVViewPageSizes = visibility.serializeAVViewPageSizes;
@@ -90,6 +92,13 @@ describe("database block visible views", () => {
             blockElement.getAttribute(visibleViewsAttribute),
             "view-a,view-c"
         );
+    });
+
+    it("keeps one view visible when hiding all views", () => {
+        assert.deepEqual(getAVVisibleViewIDsAfterHidingAll(["view-a", "view-b"], "view-b"), ["view-b"]);
+        assert.deepEqual(getAVVisibleViewIDsAfterHidingAll(["view-a", "view-b"], "view-c"), ["view-a"]);
+        assert.deepEqual(getAVVisibleViewIDsAfterHidingAll(["view-a"], "view-a"), ["view-a"]);
+        assert.deepEqual(getAVVisibleViewIDsAfterHidingAll([], "view-a"), []);
     });
 
     it("keeps page sizes available for hidden views", () => {

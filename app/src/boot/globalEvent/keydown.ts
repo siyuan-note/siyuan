@@ -324,7 +324,8 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly) {
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) &&
+        !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
             openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title?.editElement.textContent || window.siyuan.languages.untitled);
         });
@@ -415,6 +416,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 openBacklink({
                     app: protyle.app,
                     blockId: refElement.dataset.id,
+                    notebookId: protyle.notebookId,
                 });
                 return true;
             }
@@ -423,6 +425,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             app: protyle.app,
             blockId: protyle.block.id,
             rootId: protyle.block.rootID,
+            notebookId: protyle.notebookId,
             useBlockId: protyle.block.showAll,
             title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null,
         });
@@ -436,6 +439,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 openGraph({
                     app: protyle.app,
                     blockId: refElement.dataset.id,
+                    notebookId: protyle.notebookId,
                 });
                 return true;
             }
@@ -444,6 +448,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             app: protyle.app,
             blockId: protyle.block.id,
             rootId: protyle.block.rootID,
+            notebookId: protyle.notebookId,
             useBlockId: protyle.block.showAll,
             title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null,
         });
@@ -454,6 +459,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         openOutline({
             app,
             rootId: protyle.block.rootID,
+            notebookId: protyle.notebookId,
             title: protyle.options.render.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : "",
             isPreview: !protyle.preview.element.classList.contains("fn__none")
         });

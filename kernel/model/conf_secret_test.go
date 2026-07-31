@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -50,19 +51,23 @@ func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 	appConf := NewAppConf()
 	appConf.CookieKey = "session-cookie-signing-key"
 	appConf.System = &conf.System{}
-	appConf.NotebookCrypto = &conf.NotebookCrypto{
-		Enabled:         true,
-		MasterSalt:      []byte("master-salt"),
-		KDFParams:       util.DefaultArgon2Params(),
-		KEKVerifier:     []byte("kek-verifier"),
-		VerifierNonce:   []byte("verifier-nonce"),
-		AutoLockMinutes: 17,
-		Spec:            conf.CurrentNotebookCryptoSpec,
-		BackupID:        "backup-id",
-		CreatedAt:       123,
-		Checksum:        "checksum",
-		KEKMAC:          []byte("kek-mac"),
+	kek := bytes.Repeat([]byte{1}, 32)
+	verifier, err := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	if err != nil {
+		t.Fatal(err)
 	}
+	nonce, err := util.EncryptionNonce(verifier)
+	if err != nil {
+		t.Fatal(err)
+	}
+	appConf.NotebookCrypto = conf.NewNotebookCrypto()
+	appConf.NotebookCrypto.Enabled = true
+	appConf.NotebookCrypto.MasterSalt = bytes.Repeat([]byte{2}, 16)
+	appConf.NotebookCrypto.KEKVerifier = verifier
+	appConf.NotebookCrypto.VerifierNonce = nonce
+	appConf.NotebookCrypto.AutoLockMinutes = 17
+	prepareBackupForWrite(appConf.NotebookCrypto)
+	appConf.NotebookCrypto.KEKMAC = computeKEKMAC(appConf.NotebookCrypto, kek)
 
 	HideConfSecret(appConf)
 
@@ -86,6 +91,19 @@ func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 		"" != notebookCrypto.Checksum ||
 		0 < len(notebookCrypto.KEKMAC) {
 		t.Fatalf("notebook crypto key material was not hidden: %#v", notebookCrypto)
+	}
+}
+
+func TestHideConfSecretMasksIncompleteNotebookCryptoAsDisabled(t *testing.T) {
+	appConf := NewAppConf()
+	appConf.System = &conf.System{}
+	appConf.NotebookCrypto = conf.NewNotebookCrypto()
+	appConf.NotebookCrypto.Enabled = true
+
+	HideConfSecret(appConf)
+
+	if appConf.NotebookCrypto.Enabled {
+		t.Fatal("incomplete notebook crypto configuration should not be exposed as enabled")
 	}
 }
 

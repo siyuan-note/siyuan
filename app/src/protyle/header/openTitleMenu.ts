@@ -122,6 +122,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 openOutline({
                     app: protyle.app,
                     rootId: protyle.block.rootID,
+                    notebookId: protyle.notebookId,
                     title: protyle.options.render.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : "",
                     isPreview: !protyle.preview.element.classList.contains("fn__none")
                 });
@@ -137,6 +138,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     app: protyle.app,
                     blockId: protyle.block.id,
                     rootId: protyle.block.rootID,
+                    notebookId: protyle.notebookId,
                     useBlockId: protyle.block.showAll,
                     title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null
                 });
@@ -152,6 +154,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     app: protyle.app,
                     blockId: protyle.block.id,
                     rootId: protyle.block.rootID,
+                    notebookId: protyle.notebookId,
                     useBlockId: protyle.block.showAll,
                     title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null
                 });

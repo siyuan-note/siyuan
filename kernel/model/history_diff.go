@@ -34,6 +34,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/dataparser"
+	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -108,6 +109,41 @@ type docTextSegment struct {
 
 type docDiffLCSBudget struct {
 	remaining int
+}
+
+// ResolveDocVersionBoxID 返回文档版本引用中明确记录的加密笔记本 ID。
+func ResolveDocVersionBoxID(ref *DocVersionRef) (string, error) {
+	if ref == nil {
+		return "", errors.New("document version is required")
+	}
+	switch ref.Type {
+	case docVersionCurrent:
+		if !ast.IsNodeIDPattern(ref.ID) {
+			return "", errors.New("current document ID is invalid")
+		}
+		blockTree := treenode.GetBlockTree(ref.ID)
+		if blockTree == nil {
+			return "", ErrTreeNotFound
+		}
+		if IsEncryptedBox(blockTree.BoxID) {
+			return blockTree.BoxID, nil
+		}
+		return "", nil
+	case docVersionHistory:
+		absPath, err := validateHistoryPath(ref.Path)
+		if err != nil {
+			return "", err
+		}
+		boxID := ExtractBoxIDFromHistoryPath(absPath)
+		if IsEncryptedBox(boxID) {
+			return boxID, nil
+		}
+		return "", nil
+	case docVersionSnapshot:
+		return ResolveRepoFileBoxID(ref.ID)
+	default:
+		return "", fmt.Errorf("unsupported document version type [%s]", ref.Type)
+	}
 }
 
 // DiffDocVersions 比较同一文档的两个版本，并返回带临时差异标记的只读块 DOM。
@@ -306,27 +342,27 @@ func loadHistoryDocVersion(historyPath string) (ret *loadedDocVersion, err error
 		return nil, err
 	}
 	parts := strings.SplitN(filepath.ToSlash(relPath), "/", 3)
-	if len(parts) >= 2 && IsEncryptedBox(parts[1]) {
-		HoldBoxReadLock(parts[1])
-		defer ReleaseBoxReadLock(parts[1])
-	}
 	data, err := filelock.ReadFile(absPath)
 	if err != nil {
 		return nil, err
 	}
-	if len(parts) >= 2 && IsEncryptedBox(parts[1]) {
+	ciphertext := util.IsCiphertext(data)
+	if ciphertext {
+		if len(parts) < 3 || !ast.IsNodeIDPattern(parts[1]) || !IsEncryptedBox(parts[1]) {
+			return nil, errors.New("encrypted document history is missing valid notebook context")
+		}
+		HoldBoxReadLock(parts[1])
+		defer ReleaseBoxReadLock(parts[1])
 		dek, dekErr := GetDEKIfUnlocked(parts[1])
 		if dekErr != nil {
 			return nil, errors.New(Conf.Language(314))
 		}
-		filePath := ""
-		if len(parts) >= 3 {
-			filePath = parts[2]
-		}
-		data, err = DecryptFile(parts[1], filePath, dek, data)
+		data, err = DecryptFile(parts[1], parts[2], dek, data)
 		if err != nil {
 			return nil, err
 		}
+	} else if len(parts) >= 2 && IsEncryptedBox(parts[1]) {
+		return nil, fmt.Errorf("encrypted notebook document history is plaintext [%s]", parts[1])
 	}
 
 	rootID := strings.TrimSuffix(filepath.Base(absPath), filepath.Ext(absPath))
@@ -382,20 +418,23 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 	if err != nil {
 		return nil, err
 	}
-	if 0 < len(pathParts) && IsEncryptedBox(pathParts[0]) {
+	ciphertext := util.IsCiphertext(data)
+	if ciphertext {
+		if len(pathParts) < 2 || !ast.IsNodeIDPattern(pathParts[0]) || !IsEncryptedBox(pathParts[0]) {
+			return nil, errors.New("encrypted snapshot document is missing valid notebook context")
+		}
 		HoldBoxReadLock(pathParts[0])
 		defer ReleaseBoxReadLock(pathParts[0])
 		dek, unlockErr := GetDEKIfUnlocked(pathParts[0])
 		if unlockErr != nil {
 			return nil, errors.New(Conf.Language(314))
 		}
-		if 2 > len(pathParts) {
-			return nil, errors.New("snapshot document path is invalid")
-		}
 		data, err = DecryptFile(pathParts[0], pathParts[1], dek, data)
 		if err != nil {
 			return nil, err
 		}
+	} else if len(pathParts) > 0 && IsEncryptedBox(pathParts[0]) {
+		return nil, fmt.Errorf("encrypted notebook snapshot document is plaintext [%s]", pathParts[0])
 	}
 	rootID := strings.TrimSuffix(filepath.Base(file.Path), filepath.Ext(file.Path))
 	tree, err := parseDocVersionTree(data, rootID)
@@ -465,32 +504,20 @@ func loadDocVersionAttributeViewSignatures(ref *DocVersionRef, version *loadedDo
 		}
 	case docVersionHistory:
 		readData = func(id string) ([]byte, error) {
-			candidates := []string{}
-			if "" != version.boxID {
-				candidates = append(candidates, filepath.Join(version.history, version.boxID, "storage", "av", id+".json"))
-			}
-			candidates = append(candidates, filepath.Join(version.history, "storage", "av", id+".json"))
-			for _, candidate := range candidates {
-				data, readErr := filelock.ReadFile(candidate)
-				if nil != readErr {
-					if os.IsNotExist(readErr) {
-						continue
-					}
-					return nil, readErr
-				}
-				if "" != version.boxID && IsEncryptedBox(version.boxID) {
-					data, readErr = av.DecryptAVData(version.boxID, id, data)
-					if nil != readErr {
-						return nil, readErr
-					}
-				}
-				return data, nil
-			}
 			boxID := ""
+			candidate := filepath.Join(version.history, "storage", "av", id+".json")
 			if IsEncryptedBox(version.boxID) {
 				boxID = version.boxID
+				candidate = filepath.Join(version.history, boxID, "storage", "av", id+".json")
 			}
-			return av.ReadAttributeViewDataInBox(id, boxID)
+			data, readErr := filelock.ReadFile(candidate)
+			if nil != readErr {
+				if os.IsNotExist(readErr) {
+					return nil, nil
+				}
+				return nil, readErr
+			}
+			return decryptHistoricalAttributeView(boxID, id, data)
 		}
 	case docVersionSnapshot:
 		if "" == ref.Snapshot {
@@ -509,23 +536,24 @@ func loadDocVersionAttributeViewSignatures(ref *DocVersionRef, version *loadedDo
 			return nil, filesErr
 		}
 		readData = func(id string) ([]byte, error) {
+			var matchingFiles []*entity.File
 			for _, file := range files {
-				if !strings.HasSuffix(filepath.ToSlash(file.Path), "/storage/av/"+id+".json") {
-					continue
+				if strings.HasSuffix(filepath.ToSlash(file.Path), "/storage/av/"+id+".json") {
+					matchingFiles = append(matchingFiles, file)
 				}
-				data, readErr := repo.OpenFile(file)
-				if nil != readErr {
-					return nil, readErr
-				}
-				if boxID := avBoxIDFromRepoPath(file.Path); "" != boxID && IsEncryptedBox(boxID) {
-					data, readErr = av.DecryptAVData(boxID, id, data)
-					if nil != readErr {
-						return nil, readErr
-					}
-				}
-				return data, nil
 			}
-			return nil, nil
+			if len(matchingFiles) == 0 {
+				return nil, nil
+			}
+			if len(matchingFiles) != 1 {
+				return nil, fmt.Errorf("attribute view snapshot context is ambiguous [%s]", id)
+			}
+			file := matchingFiles[0]
+			data, readErr := repo.OpenFile(file)
+			if nil != readErr {
+				return nil, readErr
+			}
+			return decryptHistoricalAttributeView(avBoxIDFromRepoPath(file.Path), id, data)
 		}
 	}
 	if nil == readData {

@@ -52,6 +52,10 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
         return attr;
     }
 
+    if (isEncryptedBox(protyle.notebookId)) {
+        delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][protyle.block.rootID];
+        return Promise.resolve(true);
+    }
     window.siyuan.storage[Constants.LOCAL_FILEPOSITION][protyle.block.rootID] = attr;
     return new Promise(resolve => {
         setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION], () => {

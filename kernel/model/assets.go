@@ -608,18 +608,12 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 						logging.LogErrorf("open [%s] failed: %s", u, openErr)
 						continue
 					}
-					if err = writeAssetFile(writePath, f, tree.Box); err != nil {
+					if err = writeAssetFile(writePath, f, tree.Box, name); err != nil {
 						logging.LogErrorf("write encrypted asset [%s] failed: %s", writePath, err)
 						f.Close()
 						continue
 					}
 					f.Close()
-					// 映射写失败则回滚已写的 asset 密文，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
-					if mapErr := writeAssetNameMapping(tree.Box, diskName, name); mapErr != nil {
-						logging.LogErrorf("write asset name mapping for [%s] failed: %s", name, mapErr)
-						_ = filelock.Remove(writePath)
-						continue
-					}
 					name = diskName
 				} else {
 					name = util.AssetName(name, ast.NewNodeID())
@@ -742,14 +736,8 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 					name = "network-asset-" + name
 					diskName := encryptedAssetName(util.Ext(name), ast.NewNodeID())
 					writePath := filepath.Join(assetsDirPath, diskName)
-					if err = writeAssetFile(writePath, bytes.NewReader(data), tree.Box); err != nil {
+					if err = writeAssetFile(writePath, bytes.NewReader(data), tree.Box, name); err != nil {
 						logging.LogErrorf("write encrypted network asset [%s] failed: %s", writePath, err)
-						continue
-					}
-					// 映射写失败则回滚已写的 asset 密文，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
-					if mapErr := writeAssetNameMapping(tree.Box, diskName, name); mapErr != nil {
-						logging.LogErrorf("write asset name mapping for [%s] failed: %s", name, mapErr)
-						_ = filelock.Remove(writePath)
 						continue
 					}
 					name = diskName
@@ -1474,7 +1462,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 
 	oldCleanPath := AssetPathWithoutQuery(oldPath)
 
-	// 加密笔记本的资源文件名已脱敏，重命名会破坏映射关系，禁止
+	// 加密笔记本的资源磁盘文件名参与 AAD，重命名需要重新封装密文，当前不支持。
 	if absPath, absErr := GetAssetAbsPathInBox(oldPath, ""); absErr == nil {
 		if IsEncryptedAssetPath(absPath) {
 			err = errors.New("renaming assets in encrypted notebooks is not supported")

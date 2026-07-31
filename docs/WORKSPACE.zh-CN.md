@@ -23,7 +23,7 @@ SiYuan 工作区是一棵**自描述**的目录树：笔记本、文档和资源
 ├── data/                       # DataDir — 所有笔记本数据的根
 │   ├── .siyuan/                # 工作区级隐藏配置
 │   │   ├── syncignore / searchignore / embeddingignore / indexignore / refsearchignore
-│   │   └── notebook-crypto-backup.json # 可选的加密笔记本全局恢复元数据
+│   │   └── data-crypto-backup.json # 可选的加密数据全局恢复元数据
 │   ├── assets/                 # ★全局资源文件（图片/音视频/文件）
 │   ├── templates/              # 全局模板（.md）
 │   ├── widgets/                # 挂件
@@ -37,7 +37,7 @@ SiYuan 工作区是一棵**自描述**的目录树：笔记本、文档和资源
 │       │   ├── conf.json       # ★笔记本配置（BoxConf：name/icon/closed...）
 │       │   ├── sort.json       # 可选的自定义排序映射 {docID: order}
 │       │   ├── boxDoc.json     # 可选的顶层笔记本文档标记，用于 .sy.zip 导入导出
-│       │   └── notebook-crypt-backup.json # 可选的加密笔记本密钥包络备份
+│       │   └── notebook-crypto-backup.json # 可选的加密笔记本密钥包络备份
 │       ├── <boxID>.sy          # 可选的顶层笔记本文档（rootID = 笔记本 ID）
 │       ├── <docID>.sy          # 文档（JSON 树；文件名 = 文档 rootID）
 │       ├── <docID>/            # ★该文档的子文档目录（同名配对）
@@ -162,7 +162,7 @@ data/<boxID>/
 | `conf.json` | 笔记本配置（BoxConf） |
 | `sort.json` | 可选的文档自定义排序映射 `{docID: order}` |
 | `boxDoc.json` | 可选；在笔记本 `.sy.zip` 导入导出中标识顶层笔记本文档 |
-| `notebook-crypt-backup.json` | 可选；加密笔记本中已封装数据加密密钥的备份 |
+| `notebook-crypto-backup.json` | 可选；加密笔记本中已封装数据加密密钥的备份 |
 
 `BoxConf` 结构：
 
@@ -182,13 +182,15 @@ data/<boxID>/
 | `encrypted` | bool | 是否为加密笔记本 |
 | `boxCrypt` | object 或 null | 已封装的笔记本数据加密密钥及包络元数据，在加密笔记本中为非空 |
 
+加密笔记本仍以明文保存名称、关闭状态和恢复所需的密钥包络，但 `icon`、`sort`、`sortMode` 在顶层只保存中性值，真实值位于 `boxCrypt.metadata` 的认证密文中；笔记本解锁后 `GetConf` 才会在内存中恢复这些值。
+
 > ⚠️ **笔记本 ID 不在 `conf.json` 里**——ID 就是笔记本目录名本身（见 §3 的判定规则）。
 
 读写位置：`GetConf` / `SaveConf`。路径硬编码为 `<DataDir>/<boxID>/.siyuan/conf.json`。
 
 `boxDoc.json` 包含元数据规范版本和顶层文档 ID。运行时内核直接从 `box.ID` 推导该文档 ID；保留此元数据文件是为了让 `.sy.zip` 导入过程能够识别源笔记本的顶层文档，并将其重新映射为目标笔记本 ID。
 
-加密笔记本在 `conf.json` 和 `notebook-crypt-backup.json` 中保留恢复元数据，但其 `.sy`、笔记本本地资源文件和属性视图定义均以密文落盘。加密边界、数据库隔离和恢复设计详见 [ENCRYPTED-NOTEBOOK.zh-CN.md](./ENCRYPTED-NOTEBOOK.zh-CN.md)。
+加密笔记本在 `conf.json` 和 `notebook-crypto-backup.json` 中保留恢复元数据，但其 `.sy`、笔记本本地资源文件和属性视图定义均以密文落盘。加密边界、数据库隔离和恢复设计详见 [ENCRYPTED-NOTEBOOK.zh-CN.md](./ENCRYPTED-NOTEBOOK.zh-CN.md)。
 
 ---
 
@@ -218,7 +220,7 @@ data/<boxID>/
 | `refsearchignore` | 反链搜索忽略 |
 | `publishAccess.json` | 发布访问控制 |
 | `filesys_status_check/` | 文件系统一致性检查状态 |
-| `notebook-crypto-backup.json` | 用于同步和恢复的全局加密笔记本 KDF 及校验器备份 |
+| `data-crypto-backup.json` | 用于同步和恢复的全局加密数据 KDF 及校验器备份 |
 | `master-password-migration.json` | 修改主密码期间临时使用的崩溃恢复状态 |
 
 其中大多数条目都是可选的，仅在使用相应功能时创建。
@@ -236,7 +238,7 @@ data/<boxID>/
 
 资源文件链接前缀识别：仅认 `assets/`、`emojis/`、`plugins/`、`public/`、`widgets/` 这几个前缀为合法资源文件链接。
 
-加密笔记本必须使用笔记本本地资源文件。资源文件内容和记录原始名称映射的 `.names.json` 均会加密，物理文件名采用脱敏的 `<16 位随机字符>-<blockID>.<ext>` 格式，因此直接检查磁盘无法还原原始资源文件名称。详见 [ENCRYPTED-NOTEBOOK.zh-CN.md §7](./ENCRYPTED-NOTEBOOK.zh-CN.md#7-sy--assets--数据库文件加解密)。
+加密笔记本必须使用笔记本本地资源文件。资源内容和原始名称存放在同一个加密容器中，物理文件名采用脱敏的 `<16 位随机字符>-<blockID>.<ext>` 格式，因此直接检查磁盘无法还原原始资源文件名称。详见 [ENCRYPTED-NOTEBOOK.zh-CN.md §7](./ENCRYPTED-NOTEBOOK.zh-CN.md#7-sy--assets--数据库文件加解密)。
 
 ---
 

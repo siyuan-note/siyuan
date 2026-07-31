@@ -33,6 +33,7 @@ import {
     toggleReplaceHistory,
     toggleSearchHistory
 } from "../../search/toggleHistory";
+import {cancelSearchRequest, scheduleSearchRequest} from "../../search/request";
 
 const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAll: boolean) => {
     if (config.method === 2) {
@@ -46,7 +47,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }
-    saveKeyList("replaceKeys", replaceInputElement.value);
+    saveKeyList("replaceKeys", replaceInputElement.value, config);
     const currentLiElement: HTMLElement = searchListElement.querySelector(".b3-list-item--focus");
     if (!currentLiElement) {
         return;
@@ -255,71 +256,99 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
     }
 };
 
-let toolbarSearchTimeout = 0;
 export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, element: Element, rmCurrentCriteria = false,
                                    focusId?: {
                                        currentId?: string,
                                        newId?: string
                                    }) => {
-    clearTimeout(toolbarSearchTimeout);
-    toolbarSearchTimeout = window.setTimeout(() => {
-        if (rmCurrentCriteria) {
-            element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
-        }
-        const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
-        loadingElement.classList.remove("fn__none");
-        loadingElement.style.top = element.querySelector(".b3-list--background").getBoundingClientRect().top + "px";
-        const previousElement = element.querySelector('[data-type="previous"]');
-        const nextElement = element.querySelector('[data-type="next"]');
-        const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
-        config.query = inputElement.value;
-        if (config.query === "" && (!config.idPath || config.idPath.length === 0)) {
-            fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                onRecentBlocks(response.data, config, undefined, focusId);
+    if (rmCurrentCriteria) {
+        element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
+        element.querySelector("#searchList").innerHTML = "";
+        element.querySelector('[data-type="result"]').innerHTML = "";
+        element.querySelector('[data-type="previous"]').setAttribute("disabled", "disabled");
+        element.querySelector('[data-type="next"]').setAttribute("disabled", "disabled");
+    }
+    const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
+    loadingElement.classList.remove("fn__none");
+    scheduleSearchRequest({
+        element,
+        delay: Constants.TIMEOUT_INPUT,
+        onIdle: () => {
+            if (element.isConnected) {
                 loadingElement.classList.add("fn__none");
-                previousElement.setAttribute("disabled", "true");
-                nextElement.setAttribute("disabled", "true");
-            });
-        } else {
+            }
+        },
+        createTask(version) {
+            loadingElement.style.top = element.querySelector(".b3-list--background").getBoundingClientRect().top + "px";
+            const previousElement = element.querySelector('[data-type="previous"]');
+            const nextElement = element.querySelector('[data-type="next"]');
+            const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
+            config.query = inputElement.value;
             if (!config.page) {
                 config.page = 1;
             }
-            if (config.page > 1) {
+            const requestConfig = JSON.parse(JSON.stringify(config)) as Config.IUILayoutTabSearchConfig;
+            const requestFocusId = focusId ? Object.assign({}, focusId) : undefined;
+            if (requestConfig.query === "" && (!requestConfig.idPath || requestConfig.idPath.length === 0)) {
+                return {
+                    method: requestConfig.method,
+                    version,
+                    run(signal: AbortSignal, isCurrent: () => boolean) {
+                        return fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
+                            if (!isCurrent()) {
+                                return;
+                            }
+                            onRecentBlocks(response.data, requestConfig, undefined, requestFocusId);
+                            previousElement.setAttribute("disabled", "true");
+                            nextElement.setAttribute("disabled", "true");
+                        }, undefined, undefined, signal);
+                    }
+                };
+            }
+            if (requestConfig.page > 1) {
                 previousElement.removeAttribute("disabled");
             } else {
                 previousElement.setAttribute("disabled", "disabled");
             }
-            const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
+            const endpoint = requestConfig.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
             const searchParam: Record<string, any> = {
-                query: config.query,
-                method: config.method,
-                types: config.types,
-                subTypes: config.subTypes,
-                paths: config.idPath || [],
-                groupBy: config.group,
-                orderBy: config.sort,
-                page: config.page,
+                query: requestConfig.query,
+                method: requestConfig.method,
+                types: requestConfig.types,
+                subTypes: requestConfig.subTypes,
+                paths: requestConfig.idPath || [],
+                groupBy: requestConfig.group,
+                orderBy: requestConfig.sort,
+                page: requestConfig.page,
                 pageSize: 32,
             };
             // 限定在单个加密 box 内搜索时带 notebook，让内核走加密 db；跨 box 或全局搜索走原函数
-            const idPaths = config.idPath || [];
+            const idPaths = requestConfig.idPath || [];
             if (idPaths.length > 0) {
                 const box = idPaths[0].split("/")[0];
                 if (isEncryptedBox(box) && idPaths.every(p => p.split("/")[0] === box)) {
                     searchParam.notebook = box;
                 }
             }
-            fetchPost(endpoint, searchParam, (response) => {
-                onRecentBlocks(response.data.blocks, config, response, focusId);
-                loadingElement.classList.add("fn__none");
-                if (config.page < response.data.pageCount) {
-                    nextElement.removeAttribute("disabled");
-                } else {
-                    nextElement.setAttribute("disabled", "disabled");
+            return {
+                method: requestConfig.method,
+                version,
+                run(signal: AbortSignal, isCurrent: () => boolean) {
+                    return fetchPost(endpoint, searchParam, (response) => {
+                        if (!isCurrent()) {
+                            return;
+                        }
+                        onRecentBlocks(response.data.blocks, requestConfig, response, requestFocusId);
+                        if (requestConfig.page < response.data.pageCount) {
+                            nextElement.removeAttribute("disabled");
+                        } else {
+                            nextElement.setAttribute("disabled", "disabled");
+                        }
+                    }, undefined, undefined, signal);
                 }
-            });
+            };
         }
-    }, Constants.TIMEOUT_INPUT);
+    });
 };
 
 const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTabSearchConfig) => {
@@ -345,14 +374,14 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
             setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         }
-        saveKeyList("keys", searchInputElement.value);
+        saveKeyList("keys", searchInputElement.value, config);
     });
     addClearButton({
         inputElement: searchInputElement,
         className: "toolbar__icon",
         clearCB() {
             config.page = 1;
-            updateSearchResult(config, element);
+            updateSearchResult(config, element, true);
         }
     });
     const replaceInputElement = element.querySelector(".toolbar .toolbar__title") as HTMLInputElement;
@@ -717,10 +746,15 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
 
 export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig) => {
     const config: Config.IUILayoutTabSearchConfig = JSON.parse(JSON.stringify(window.siyuan.storage[Constants.LOCAL_SEARCHDATA]));
+    const currentEditor = getCurrentEditor();
+    if (currentEditor && isEncryptedBox(currentEditor.protyle.notebookId)) {
+        config.sensitive = true;
+    }
     if (config.method === 4 && !window.siyuan.config.ai.embedding.enabled) {
         config.method = 0;
     }
-    const rangeText = (getCurrentEditor()?.protyle.toolbar.range || (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange())).toString();
+    const rangeText = (currentEditor?.protyle.toolbar.range ||
+        (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange())).toString();
     if (rangeText) {
         config.k = rangeText;
     }
@@ -840,15 +874,18 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
     </div>
      <div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
+        destroyCallback() {
+            cancelSearchRequest(document.getElementById("modelMain"));
+        },
         bindEvent(element) {
             document.querySelector("#toolbarSearchNew").addEventListener("click", () => {
                 newFile(app, (document.querySelector("#toolbarSearch") as HTMLInputElement).value);
             });
             const historyElement = document.querySelector('.toolbar [data-type="history"]');
             historyElement.addEventListener("click", () => {
-                toggleSearchHistory(document.querySelector("#model"), config, undefined);
+                toggleSearchHistory(document.querySelector("#model"), config, undefined, element);
             });
-            initSearchEvent(app, element.firstElementChild, config);
+            initSearchEvent(app, element, config);
             updateSearchResult(config, element);
         }
     });

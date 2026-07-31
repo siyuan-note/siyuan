@@ -19,6 +19,9 @@ package model
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
+	"fmt"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -26,7 +29,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -41,6 +46,27 @@ var managedEncryptedExports = struct {
 	sync.Mutex
 	jobs map[string]managedEncryptedExport
 }{jobs: map[string]managedEncryptedExport{}}
+
+type MobileExportLease struct {
+	ID   string `json:"leaseID"`
+	Path string `json:"path"`
+	Name string `json:"name"`
+	Size int64  `json:"size"`
+}
+
+type mobileExportLeaseState struct {
+	boxID      string
+	cleanupDir string
+	expiresAt  time.Time
+	timer      *time.Timer
+}
+
+var mobileExportLeaseTTL = 30 * time.Minute
+
+var mobileExportLeases = struct {
+	sync.Mutex
+	leases map[string]*mobileExportLeaseState
+}{leases: map[string]*mobileExportLeaseState{}}
 
 func newManagedEncryptedExportID() (string, error) {
 	random := make([]byte, 16)
@@ -137,15 +163,231 @@ func IsManagedEncryptedExportPath(relativePath string) bool {
 	return len(parts) >= 1 && ast.IsNodeIDPattern(parts[0])
 }
 
-// ResolveManagedExportForMobile 供移动端 GetExportFilePath 调用，校验托管 token 有效且 box 已解锁。
-// 任一条件不满足返回 ("", false)（fail-closed），防止移动端绕过注册表直接读取明文导出产物。
-func ResolveManagedExportForMobile(relativePath string) (absPath string, ok bool) {
-	boxID, artifact, resolved := ResolveManagedEncryptedExport(relativePath)
-	if !resolved {
-		return "", false
+// AcquireMobileExportLease 为移动端导出取得覆盖整个原生复制过程的生命周期租约。
+func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err error) {
+	if after, ok := strings.CutPrefix(exportPath, "/export/"); ok {
+		fileName, decodeErr := url.PathUnescape(after)
+		if decodeErr != nil {
+			return nil, decodeErr
+		}
+		fileName = filepath.Clean(fileName)
+		if fileName == "." || strings.HasPrefix(fileName, "..") || filepath.IsAbs(fileName) {
+			return nil, errors.New("invalid export path")
+		}
+		if IsManagedEncryptedExportPath(fileName) {
+			boxID, artifact, resolved := ResolveManagedEncryptedExport(fileName)
+			if !resolved {
+				return nil, errors.New("managed export is unavailable")
+			}
+			if err = AcquireEncryptedBoxOperation(boxID); err != nil {
+				return nil, err
+			}
+			HoldBoxReadLock(boxID)
+			release := true
+			defer func() {
+				if release {
+					ReleaseBoxReadLock(boxID)
+					ReleaseEncryptedBoxOperation(boxID)
+				}
+			}()
+			_, artifact, resolved = ResolveManagedEncryptedExport(fileName)
+			if !resolved {
+				return nil, errors.New("managed export is unavailable")
+			}
+			if _, dekErr := GetDEKIfUnlocked(boxID); dekErr != nil {
+				return nil, dekErr
+			}
+			lease, err = registerMobileExportLease(boxID, artifact, filepath.Base(fileName), "")
+			if err == nil {
+				release = false
+			}
+			return
+		}
+		artifact := filepath.Join(util.TempDir, "export", fileName)
+		if !gulu.File.IsSubPath(filepath.Join(util.TempDir, "export"), artifact) {
+			return nil, errors.New("export path is outside export directory")
+		}
+		return registerMobileExportLease("", artifact, filepath.Base(fileName), "")
 	}
-	if _, dekErr := GetDEKIfUnlocked(boxID); dekErr != nil {
-		return "", false
+
+	if !strings.HasPrefix(exportPath, "assets/") {
+		return nil, errors.New("unsupported export path")
 	}
-	return artifact, true
+	relativePath, boxID, parseErr := assetPathAndBox(exportPath, "")
+	if parseErr != nil {
+		return nil, parseErr
+	}
+	if boxID == "" || !IsEncryptedBox(boxID) {
+		artifact, resolveErr := GetAssetAbsPath(relativePath)
+		if resolveErr != nil {
+			return nil, resolveErr
+		}
+		return registerMobileExportLease("", artifact, filepath.Base(artifact), "")
+	}
+
+	if err = AcquireEncryptedBoxOperation(boxID); err != nil {
+		return nil, err
+	}
+	HoldBoxReadLock(boxID)
+	release := true
+	defer func() {
+		if release {
+			ReleaseBoxReadLock(boxID)
+			ReleaseEncryptedBoxOperation(boxID)
+		}
+	}()
+	dek, dekErr := GetDEKIfUnlocked(boxID)
+	if dekErr != nil {
+		return nil, dekErr
+	}
+	artifact, resolveErr := GetAssetAbsPathInBox(relativePath, boxID)
+	if resolveErr != nil {
+		return nil, resolveErr
+	}
+	diskName := filepath.Base(relativePath)
+	leaseID, idErr := newManagedEncryptedExportID()
+	if idErr != nil {
+		return nil, idErr
+	}
+	cleanupDir := filepath.Join(util.TempDir, "export", boxID, "mobile", leaseID)
+	if mkErr := os.MkdirAll(cleanupDir, 0700); mkErr != nil {
+		return nil, mkErr
+	}
+	cleanup := true
+	defer func() {
+		if cleanup {
+			_ = os.RemoveAll(cleanupDir)
+		}
+	}()
+	source, openErr := filelock.OpenFile(artifact, os.O_RDONLY, 0)
+	if openErr != nil {
+		return nil, openErr
+	}
+	sourceOpen := true
+	defer func() {
+		if sourceOpen {
+			_ = filelock.CloseFile(source)
+		}
+	}()
+	plainPath := filepath.Join(cleanupDir, "artifact")
+	destination, createErr := os.OpenFile(plainPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	if createErr != nil {
+		return nil, createErr
+	}
+	originalName, decryptErr := DecryptAssetToWriter(boxID, diskName, dek, source, destination)
+	sourceCloseErr := filelock.CloseFile(source)
+	sourceOpen = false
+	closeErr := destination.Close()
+	if decryptErr != nil {
+		return nil, decryptErr
+	}
+	if sourceCloseErr != nil {
+		return nil, sourceCloseErr
+	}
+	if closeErr != nil {
+		return nil, closeErr
+	}
+	originalName = util.FilterFileName(filepath.Base(originalName))
+	if originalName == "" || originalName == "." {
+		originalName = diskName
+	}
+	lease, err = registerMobileExportLeaseWithID(leaseID, boxID, plainPath, originalName, cleanupDir)
+	if err != nil {
+		_ = os.RemoveAll(cleanupDir)
+		return nil, err
+	}
+	cleanup = false
+	release = false
+	return
+}
+
+// GetMobileExportName 返回移动端保存对话框使用的文件名，不生成明文临时文件。
+func GetMobileExportName(exportPath string) string {
+	if after, ok := strings.CutPrefix(exportPath, "/export/"); ok {
+		if decoded, err := url.PathUnescape(after); err == nil {
+			if IsManagedEncryptedExportPath(decoded) {
+				return ""
+			}
+			return util.FilterFileName(filepath.Base(decoded))
+		}
+		return ""
+	}
+	if !strings.HasPrefix(exportPath, "assets/") {
+		return ""
+	}
+	relativePath, boxID, err := assetPathAndBox(exportPath, "")
+	if err != nil {
+		return ""
+	}
+	diskName := filepath.Base(relativePath)
+	if boxID == "" || !IsEncryptedBox(boxID) {
+		return util.FilterFileName(diskName)
+	}
+	return ""
+}
+
+func registerMobileExportLease(boxID, artifact, name, cleanupDir string) (*MobileExportLease, error) {
+	leaseID, err := newManagedEncryptedExportID()
+	if err != nil {
+		return nil, err
+	}
+	return registerMobileExportLeaseWithID(leaseID, boxID, artifact, name, cleanupDir)
+}
+
+func registerMobileExportLeaseWithID(leaseID, boxID, artifact, name, cleanupDir string) (*MobileExportLease, error) {
+	info, err := os.Stat(artifact)
+	if err != nil {
+		return nil, err
+	}
+	if info.IsDir() {
+		return nil, fmt.Errorf("export artifact [%s] is a directory", artifact)
+	}
+	state := &mobileExportLeaseState{
+		boxID:      boxID,
+		cleanupDir: cleanupDir,
+		expiresAt:  time.Now().Add(mobileExportLeaseTTL),
+	}
+	mobileExportLeases.Lock()
+	if _, exists := mobileExportLeases.leases[leaseID]; exists {
+		mobileExportLeases.Unlock()
+		return nil, fmt.Errorf("mobile export lease [%s] already exists", leaseID)
+	}
+	mobileExportLeases.leases[leaseID] = state
+	state.timer = time.AfterFunc(mobileExportLeaseTTL, func() {
+		releaseMobileExportLease(leaseID, true)
+	})
+	mobileExportLeases.Unlock()
+	return &MobileExportLease{ID: leaseID, Path: artifact, Name: name, Size: info.Size()}, nil
+}
+
+// ReleaseMobileExportLease 释放移动端导出租约；重复调用不会产生副作用。
+func ReleaseMobileExportLease(leaseID string) {
+	releaseMobileExportLease(leaseID, false)
+}
+
+func releaseMobileExportLease(leaseID string, expired bool) {
+	mobileExportLeases.Lock()
+	state, ok := mobileExportLeases.leases[leaseID]
+	if ok {
+		delete(mobileExportLeases.leases, leaseID)
+	}
+	mobileExportLeases.Unlock()
+	if !ok {
+		return
+	}
+	if state.timer != nil {
+		state.timer.Stop()
+	}
+	if state.cleanupDir != "" {
+		if err := os.RemoveAll(state.cleanupDir); err != nil {
+			logging.LogWarnf("remove mobile export lease [%s] failed: %s", leaseID, err)
+		}
+	}
+	if state.boxID != "" {
+		ReleaseBoxReadLock(state.boxID)
+		ReleaseEncryptedBoxOperation(state.boxID)
+	}
+	if expired {
+		logging.LogWarnf("mobile export lease [%s] expired at [%s]", leaseID, state.expiresAt.Format(time.RFC3339))
+	}
 }

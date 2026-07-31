@@ -16,6 +16,7 @@
         <use xlink:href="#iconMenu"></use>
     </svg>
     <input class="toolbar__title fn__hidden" id="toolbarName">
+    <span class="toolbar__title toolbar__title--readonly fn__hidden fn__none" id="toolbarNameReadonly"></span>
     <svg id="toolbarSync" class="toolbar__icon toolbar__icon-deactivate fn__none">
         <use xlink:href="#iconCloudSucc"></use>
     </svg>

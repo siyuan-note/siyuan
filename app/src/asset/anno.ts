@@ -100,7 +100,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 newHeight = y - newTop;
             }
             rectResizeElement.setAttribute("style",
-                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;background-color:${moveEvent.altKey ? "var(--b3-pdf-background1)" : ""}`);
+                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;background-color:${moveEvent.altKey ? "color-mix(in srgb, var(--b3-pdf-background1) 35%, transparent)" : ""}`);
         };
         documentSelf.onmouseup = () => {
             documentSelf.onmousemove = null;
@@ -161,14 +161,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                     const annoItem = config[rectElement.getAttribute("data-node-id")];
                     annoItem.color = color;
                     element.querySelectorAll(`.pdf__rect[data-node-id="${rectElement.getAttribute("data-node-id")}"]`).forEach(rectItem => {
-                        Array.from(rectItem.children).forEach((item: HTMLElement) => {
-                            item.style.border = "2px solid " + color;
-                            if (annoItem.type === "text") {
-                                item.style.backgroundColor = color;
-                            } else {
-                                item.style.backgroundColor = "transparent";
-                            }
-                        });
+                        (rectItem as HTMLElement).style.setProperty("--pdf-annotation-color", color);
                     });
                     fetchPost("/api/asset/setFileAnnotation", {
                         path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
@@ -239,13 +232,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                     annoItem.type = "border";
                 }
                 element.querySelectorAll(`.pdf__rect[data-node-id="${rectElement.getAttribute("data-node-id")}"]`).forEach(rectItem => {
-                    Array.from(rectItem.children).forEach((item: HTMLElement) => {
-                        if (annoItem.type === "text") {
-                            item.style.backgroundColor = item.style.border.replace("2px solid ", "");
-                        } else {
-                            item.style.backgroundColor = "";
-                        }
-                    });
+                    (rectItem as HTMLElement).dataset.type = annoItem.type;
                 });
                 fetchPost("/api/asset/setFileAnnotation", {
                     path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
@@ -640,6 +627,7 @@ export const getHighlight = (element: HTMLElement) => {
     if (!pdfInstance) {
         return;
     }
+    element.parentElement.querySelector(":scope > .pdf__rects")?.remove();
     const pageIndex = parseInt(
         element.parentElement.getAttribute("data-page-number")) - 1;
     const config = getConfig(pdfInstance);
@@ -675,24 +663,30 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
     }
 
     const viewport = page.viewport.clone({rotation: 0}); // rotation https://github.com/siyuan-note/siyuan/issues/9831
-    let rectsElement = textLayerElement.querySelector(".pdf__rects");
+    const pageElement = textLayerElement.parentElement;
+    let rectsElement = pageElement.querySelector(":scope > .pdf__rects") as HTMLElement;
     if (!rectsElement) {
-        textLayerElement.insertAdjacentHTML("beforeend", "<div class='pdf__rects'></div>");
-        rectsElement = textLayerElement.querySelector(".pdf__rects");
+        rectsElement = document.createElement("div");
+        rectsElement.className = "pdf__rects";
+        pageElement.append(rectsElement);
     }
-    let html = `<div class="pdf__rect popover__block" data-node-id="${selected.id}" data-relations="${selected.ids || ""}" data-mode="${selected.mode}">`;
+    rectsElement.style.width = textLayerElement.style.width;
+    rectsElement.style.height = textLayerElement.style.height;
+    rectsElement.style.transform = textLayerElement.style.transform;
+    const mainRotation = textLayerElement.getAttribute("data-main-rotation");
+    if (mainRotation) {
+        rectsElement.setAttribute("data-main-rotation", mainRotation);
+    } else {
+        rectsElement.removeAttribute("data-main-rotation");
+    }
+    let html = `<div class="pdf__rect popover__block" data-node-id="${selected.id}" data-relations="${selected.ids || ""}" data-mode="${selected.mode}" data-type="${selected.type}" style="--pdf-annotation-color: ${selected.color}">`;
     selected.coords.forEach((rect) => {
         const bounds = viewport.convertToViewportRectangle(rect);
         const width = Math.abs(bounds[0] - bounds[2]);
         if (width <= 0) {
             return;
         }
-        let style = `border: 2px solid ${selected.color};background-color: ${selected.color};`;
-        if (selected.type === "border") {
-            style = `border: 2px solid ${selected.color};`;
-        }
-        html += `<div style="${style}
-left:${Math.min(bounds[0], bounds[2])}px;
+        html += `<div style="left:${Math.min(bounds[0], bounds[2])}px;
 top:${Math.min(bounds[1], bounds[3])}px;
 width:${width}px;
 height: ${Math.abs(bounds[1] - bounds[3])}px"></div>`;
@@ -702,7 +696,7 @@ height: ${Math.abs(bounds[1] - bounds[3])}px"></div>`;
     if (hl) {
         hlPDFRect(rectsElement, selected.id);
     }
-    return rectsElement.lastElementChild;
+    return rectsElement.lastElementChild as HTMLElement;
 };
 
 export const hlPDFRect = (element: HTMLElement, id: string) => {

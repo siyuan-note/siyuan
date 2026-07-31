@@ -18,6 +18,7 @@ package sql
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"errors"
 	"math"
@@ -723,6 +724,9 @@ func selectBlocksRawStmtWithQuery(stmt string, page, limit int, queryFn queryRow
 	stmt = strings.ReplaceAll(stmt, "from dual", "")
 	rows, err := queryFn(stmt)
 	if err != nil {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return
+		}
 		if strings.Contains(err.Error(), "syntax error") {
 			return
 		}

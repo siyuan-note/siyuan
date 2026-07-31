@@ -53,7 +53,12 @@ import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
-import {isSameDragEditor, uniqueDragIds} from "./dragDocument";
+import {
+    isSameDragEditor,
+    isSameSiblingMove,
+    replaceDragUndoOperation,
+    uniqueDragIds
+} from "./dragDocument";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
 import {setAVItemAnchor} from "../render/av/rangeSelect";
@@ -101,6 +106,24 @@ const isFoldedHeading = (element: Element) => {
 type TDragSourcePosition = {
     previousID: string,
     parentID: string
+};
+
+type TDragSourceContainerSnapshot = {
+    operation: IOperation,
+    placeholderID: string
+};
+
+const genDragListItemPlaceholder = (lute: Lute, subtype: string) => {
+    let marker = "*";
+    if (subtype === "o") {
+        marker = "1.";
+    } else if (subtype === "t") {
+        marker = "* [ ]";
+    }
+    const template = document.createElement("template");
+    // 零宽非连接符会被 Lute 保留，可确保占位列表项在事务处理中不会被规范化为空段落。
+    template.innerHTML = lute.Md2BlockDOM(`${marker} \u200C`);
+    return template.content.querySelector("[data-type='NodeListItem']");
 };
 
 const getDragSourceParentID = async (protyle: IProtyle, element: Element) => {
@@ -249,6 +272,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
 
         let copyElement;
+        let undoMoveOperation: IOperation;
         if (isCopy) {
             undoOperations.push({
                 action: "delete",
@@ -257,12 +281,13 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         } else {
             // 用 DOM 移动前预捕获的源位置构造撤销操作，避免移动后 item 的父/兄弟已变导致撤销移到错误位置
             const srcPos = sourcePositions.get(id) || {previousID: "", parentID};
-            undoOperations.push({
+            undoMoveOperation = {
                 action: "move",
                 id,
                 previousID: srcPos.previousID,
                 parentID: srcPos.parentID,
-            });
+            };
+            undoOperations.push(undoMoveOperation);
         }
         if (!isSameEditor && !isCopy) {
             // 打开两个相同的文档
@@ -307,6 +332,42 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         } else {
             let topSourceElement = getTopAloneElement(item);
             const oldSourceParentElement = getParentBlock(item);
+            const sourceContainerSnapshots = new Map<Element, TDragSourceContainerSnapshot>();
+            if (topSourceElement !== item && item.getAttribute("data-type") === "NodeListItem") {
+                let sourceContainer = oldSourceParentElement;
+                while (sourceContainer) {
+                    const sourceContainerID = sourceContainer.getAttribute("data-node-id");
+                    if (sourceContainerID) {
+                        const sourceContainerClone = sourceContainer.cloneNode(true) as Element;
+                        const movedItemClone = sourceContainerClone.querySelector(`[data-node-id="${id}"]`);
+                        if (movedItemClone) {
+                            const placeholderElement = genDragListItemPlaceholder(
+                                protyle.lute,
+                                movedItemClone.getAttribute("data-subtype")
+                            );
+                            const placeholderID = placeholderElement?.getAttribute("data-node-id");
+                            if (!placeholderElement || !placeholderID) {
+                                break;
+                            }
+                            movedItemClone.replaceWith(placeholderElement);
+                            sourceContainerSnapshots.set(sourceContainer, {
+                                operation: {
+                                    action: "insert",
+                                    data: sourceContainerClone.outerHTML,
+                                    id: sourceContainerID,
+                                    previousID: getPreviousBlockSibling(sourceContainer)?.getAttribute("data-node-id"),
+                                    parentID: await getDragSourceParentID(protyle, sourceContainer)
+                                },
+                                placeholderID
+                            });
+                        }
+                    }
+                    if (sourceContainer === topSourceElement) {
+                        break;
+                    }
+                    sourceContainer = getParentBlock(sourceContainer);
+                }
+            }
             if (item.classList.contains("li") && item.getAttribute("data-subtype") === "o") {
                 orderListElements[item.parentElement.getAttribute("data-node-id")] = item.parentElement;
             }
@@ -337,13 +398,26 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "delete",
                     id: topSourceElement.getAttribute("data-node-id"),
                 });
-                undoOperations.push({
-                    action: "insert",
-                    data: topSourceElement.outerHTML,
-                    id: topSourceElement.getAttribute("data-node-id"),
-                    previousID: getPreviousBlockSibling(topSourceElement)?.getAttribute("data-node-id"),
-                    parentID: getParentBlock(topSourceElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
-                });
+                const sourceContainerSnapshot = sourceContainerSnapshots.get(topSourceElement);
+                if (sourceContainerSnapshot && undoMoveOperation) {
+                    // 使用占位列表项保持容器快照有效，撤销时恢复容器、移回原列表项，再删除占位项。
+                    replaceDragUndoOperation(undoOperations, undoMoveOperation, [
+                        {
+                            action: "delete",
+                            id: sourceContainerSnapshot.placeholderID,
+                        },
+                        undoMoveOperation,
+                        sourceContainerSnapshot.operation
+                    ]);
+                } else {
+                    undoOperations.push({
+                        action: "insert",
+                        data: topSourceElement.outerHTML,
+                        id: topSourceElement.getAttribute("data-node-id"),
+                        previousID: getPreviousBlockSibling(topSourceElement)?.getAttribute("data-node-id"),
+                        parentID: getParentBlock(topSourceElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+                    });
+                }
                 const topSourceParentElement = topSourceElement.parentElement;
                 topSourceElement.remove();
                 if (!isSameEditor) {
@@ -687,6 +761,11 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 };
 
 const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, isCopy: boolean) => {
+    const siblingElements = Array.from(targetElement.parentElement.children)
+        .filter(item => item.hasAttribute("data-node-id"));
+    if (!isCopy && isSameSiblingMove(siblingElements, sourceElements, targetElement, isBottom)) {
+        return;
+    }
     const isSameEditor = isSameDragEditor(protyle.wysiwyg.element, sourceElements[0]);
     const focusSourceElement = sourceElements[0];
     const doOperations: IOperation[] = [];
@@ -912,7 +991,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.getAttribute("data-col-id")]}`,
                     target.outerHTML);
                 return;
-            } else if (kanbanTitleElement?.getAttribute("draggable") === "true") {
+            } else if (kanbanTitleElement && kanbanTitleElement.getAttribute("draggable") === "true") {
                 const groupElement = kanbanTitleElement.parentElement;
                 const groupRect = groupElement.getBoundingClientRect();
                 const ghostElement = document.createElement("div");

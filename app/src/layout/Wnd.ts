@@ -5,6 +5,7 @@ import {
     getInstanceById,
     getWndByLayout,
     JSONToCenter, layoutToJSON,
+    isSensitiveTab,
     newModelByInitData,
     pdfIsLoading,
     saveLayout,
@@ -50,7 +51,7 @@ import {setPadding} from "../protyle/ui/initUI";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {sanitizeClosedTabs, setStorageVal} from "../protyle/util/compatibility";
 import {setTitle} from "../util/processTitle";
 import {dragOverScroll} from "../boot/globalEvent/dragover";
 
@@ -750,8 +751,7 @@ export class Wnd {
             return;
         }
         if (model instanceof Search) {
-            model.editors.edit.destroy();
-            model.editors.unRefEdit.destroy();
+            model.destroy();
             return;
         }
         if (model instanceof Asset) {
@@ -772,15 +772,17 @@ export class Wnd {
             if (item.id !== id) {
                 return;
             }
+            window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] =
+                sanitizeClosedTabs(window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
                 window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
             }
-            if (item.headElement) {
+            if (item.headElement && !isSensitiveTab(item)) {
                 const tabJSON = {};
                 layoutToJSON(item, tabJSON);
                 window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);
-                setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             }
+            setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             if (item.model instanceof Custom && item.model.beforeDestroy) {
                 item.model.beforeDestroy();
             }

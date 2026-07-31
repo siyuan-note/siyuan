@@ -302,7 +302,6 @@
       display: flex;
       height: 24px;
       justify-content: center;
-      margin: 0;
       padding: 5px;
       width: 24px;
 
@@ -381,7 +380,6 @@
 
 .b3-menu[data-name^="breadcrumb-children-"] .b3-menu__label {
   max-width: 248px;
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }

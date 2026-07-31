@@ -24,6 +24,7 @@ import (
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
+	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 )
 
 func convertMCPToolsToOpenAI() []openai.Tool {
@@ -79,15 +80,32 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) exec
 		err    error
 	}
 	executionCh := make(chan executionResult, 1)
+	executionLifetimeDone := make(chan struct{})
+	defer close(executionLifetimeDone)
 	go func() {
 		var result tools.CallToolResult
 		var err error
+		releaseBoxLeases := func() {}
+		if t.BoxLeaseResolver != nil {
+			releaseBoxLeases, err = kernelModel.AcquireEncryptedBoxOperations(ctx, t.BoxLeaseResolver(args))
+			if err != nil {
+				executionCh <- executionResult{
+					result: tools.CallToolResult{
+						Content: []tools.ContentItem{{Type: "text", Text: "encrypted notebook is locked, please unlock it first"}},
+						IsError: true,
+					},
+				}
+				return
+			}
+		}
+		defer releaseBoxLeases()
 		if t.ContextHandler != nil {
 			result, err = t.ContextHandler(ctx, args)
 		} else {
 			result, err = t.Handler(args)
 		}
 		executionCh <- executionResult{result: result, err: err}
+		<-executionLifetimeDone
 	}()
 
 	var execution executionResult

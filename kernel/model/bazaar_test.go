@@ -1,0 +1,90 @@
+// SiYuan - Refactor your thinking
+// Copyright (c) 2020-present, b3log.org
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+package model
+
+import (
+	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/bazaar"
+)
+
+func TestBuildUpdatedPackagesKeepsInstalledAndAvailableMetadataSeparate(t *testing.T) {
+	installed := &bazaar.Package{
+		Name:          "example",
+		Version:       "1.0.0",
+		URL:           "https://github.com/old-owner/example",
+		RepoURL:       "https://github.com/old-owner/example",
+		PreferredName: "Installed name",
+		IconURL:       "/plugins/example/icon.png",
+		Current:       true,
+	}
+	online := &bazaar.Package{
+		Name:           "example",
+		Version:        "2.0.0",
+		RepoURL:        "https://github.com/new-owner/example",
+		RepoHash:       "new-hash",
+		PreferredName:  "Available name",
+		IconURL:        "https://example.com/icon.png",
+		DisallowUpdate: true,
+	}
+
+	updated := buildUpdatedPackages(
+		[]*bazaar.Package{installed},
+		map[string]*bazaar.Package{"example": online},
+	)
+
+	if len(updated) != 1 {
+		t.Fatalf("expected one updated package, got %d", len(updated))
+	}
+	if updated[0].Installed != installed {
+		t.Fatal("expected the installed package to remain unchanged")
+	}
+	if updated[0].Installed.RepoURL != "https://github.com/old-owner/example" {
+		t.Fatalf("expected installed repo URL, got %q", updated[0].Installed.RepoURL)
+	}
+	if updated[0].Available == online {
+		t.Fatal("expected a copy of the available package")
+	}
+	if updated[0].Available.RepoURL != "https://github.com/new-owner/example" ||
+		updated[0].Available.RepoHash != "new-hash" {
+		t.Fatalf("expected online download metadata, got %q@%q", updated[0].Available.RepoURL, updated[0].Available.RepoHash)
+	}
+	if !updated[0].Available.DisallowUpdate {
+		t.Fatal("expected the available package update restriction to remain unchanged")
+	}
+	if !updated[0].Available.Installed || !updated[0].Available.Outdated || !updated[0].Available.Current {
+		t.Fatal("expected available package state to describe an installed update")
+	}
+	if online.Installed || online.Outdated || online.Current {
+		t.Fatal("expected the online package cache entry to remain unchanged")
+	}
+}
+
+func TestBuildUpdatedPackagesIgnoresMissingAndCurrentPackages(t *testing.T) {
+	installedPackages := []*bazaar.Package{
+		{Name: "current", Version: "2.0.0"},
+		{Name: "missing", Version: "1.0.0"},
+	}
+	bazaarPackagesMap := map[string]*bazaar.Package{
+		"current": &bazaar.Package{Name: "current", Version: "2.0.0"},
+	}
+
+	updated := buildUpdatedPackages(installedPackages, bazaarPackagesMap)
+	if len(updated) != 0 {
+		t.Fatalf("expected no updated packages, got %d", len(updated))
+	}
+}

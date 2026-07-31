@@ -28,6 +28,9 @@ import {
 } from "./headingNumber";
 import {updateDocumentBottomEof} from "./documentRange";
 import {disabledWYSIWYG} from "./disabledWYSIWYG";
+/// #if MOBILE
+import {updateMobileTitleReadonly} from "./setEditMode";
+/// #endif
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -418,7 +421,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
         protyle.title.editElement.style.userSelect = "text";
     }
     /// #if MOBILE
-    document.getElementById("toolbarName").setAttribute("readonly", "readonly");
+    updateMobileTitleReadonly(protyle);
     /// #endif
     if (protyle.background) {
         protyle.background.element.classList.remove("protyle-background--enable");
@@ -449,7 +452,9 @@ export const enableProtyle = (protyle: IProtyle) => {
     if (isMobile()) {
         // Android 端空块输入法弹出会收起 https://ld246.com/article/1689713888289
         // iPhone，iPad 端 protyle.wysiwyg.element contenteditable 为 true 时，输入会在块中间插入 span 导致保存失败 https://ld246.com/article/1643473862873/comment/1643813765839#comments
-        document.getElementById("toolbarName").removeAttribute("readonly");
+        /// #if MOBILE
+        updateMobileTitleReadonly(protyle);
+        /// #endif
     } else {
         protyle.wysiwyg.element.setAttribute("contenteditable", "true");
         protyle.wysiwyg.element.style.userSelect = "";

@@ -5,6 +5,7 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {focusByRange} from "../protyle/util/selection";
 import {genSearch, updateConfig} from "./util";
 import type {App} from "../index";
+import {cancelSearchRequest} from "./request";
 
 export const openSearch = async (options: {
     app: App,
@@ -106,6 +107,7 @@ export const openSearch = async (options: {
             if (range && !options) {
                 focusByRange(range);
             }
+            cancelSearchRequest(dialog.element.querySelector(".b3-dialog__body"));
             dialog.editors.edit.destroy();
             dialog.editors.unRefEdit.destroy();
         },

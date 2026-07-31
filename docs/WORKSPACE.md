@@ -23,7 +23,7 @@ A SiYuan workspace is a **self-describing** directory tree: notebooks, documents
 ├── data/                       # DataDir — root of all notebook data
 │   ├── .siyuan/                # Workspace-level hidden config
 │   │   ├── syncignore / searchignore / embeddingignore / indexignore / refsearchignore
-│   │   └── notebook-crypto-backup.json # Optional encrypted-notebook global recovery metadata
+│   │   └── data-crypto-backup.json # Optional encrypted-data global recovery metadata
 │   ├── assets/                 # ★Global assets (images/audio/video/files)
 │   ├── templates/              # Global templates (.md)
 │   ├── widgets/                # Widgets
@@ -37,7 +37,7 @@ A SiYuan workspace is a **self-describing** directory tree: notebooks, documents
 │       │   ├── conf.json       # ★Notebook config (BoxConf: name/icon/closed...)
 │       │   ├── sort.json       # Optional custom sort mapping {docID: order}
 │       │   ├── boxDoc.json     # Optional top-level notebook document marker for .sy.zip import/export
-│       │   └── notebook-crypt-backup.json # Optional encrypted-notebook key-envelope backup
+│       │   └── notebook-crypto-backup.json # Optional encrypted-notebook key-envelope backup
 │       ├── <boxID>.sy          # Optional top-level notebook document (rootID = notebook ID)
 │       ├── <docID>.sy          # Document (JSON tree; filename = doc rootID)
 │       ├── <docID>/            # ★Children of that document (same-named pair)
@@ -162,7 +162,7 @@ Each notebook directory contains a `.siyuan/` hidden folder, which can contain:
 | `conf.json` | Notebook config (BoxConf) |
 | `sort.json` | Optional custom sort mapping `{docID: order}` |
 | `boxDoc.json` | Optional; identifies the top-level notebook document in `.sy.zip` notebook exports/imports |
-| `notebook-crypt-backup.json` | Optional; encrypted-notebook backup of the wrapped notebook data-encryption key |
+| `notebook-crypto-backup.json` | Optional; encrypted-notebook backup of the wrapped notebook data-encryption key |
 
 The `BoxConf` struct:
 
@@ -182,13 +182,15 @@ The `BoxConf` struct:
 | `encrypted` | bool | Whether this is an encrypted notebook |
 | `boxCrypt` | object or null | Wrapped notebook data-encryption key and envelope metadata; non-null for encrypted notebooks |
 
+An encrypted notebook still stores its name, closed state, and key-recovery envelope in plaintext, but top-level `icon`, `sort`, and `sortMode` contain only neutral values. Their real values are authenticated ciphertext in `boxCrypt.metadata` and are restored in memory by `GetConf` only after the notebook is unlocked.
+
 > ⚠️ **The notebook ID is NOT in `conf.json`** — the ID is the notebook directory name itself (see §3).
 
 Read/write sites: `GetConf` / `SaveConf`. The path is hard-coded as `<DataDir>/<boxID>/.siyuan/conf.json`.
 
 `boxDoc.json` contains a metadata spec version and the top-level document ID. At runtime the kernel derives that document ID directly from `box.ID`; the metadata file is retained so `.sy.zip` import can identify the source notebook's top-level document and remap it to the destination notebook ID.
 
-Encrypted notebooks retain recovery metadata in `conf.json` and `notebook-crypt-backup.json`, but their `.sy`, notebook-local assets, and attribute-view definitions are ciphertext. See [ENCRYPTED-NOTEBOOK.md](./ENCRYPTED-NOTEBOOK.md) for the encryption boundary, database isolation, and recovery design.
+Encrypted notebooks retain recovery metadata in `conf.json` and `notebook-crypto-backup.json`, but their `.sy`, notebook-local assets, and attribute-view definitions are ciphertext. See [ENCRYPTED-NOTEBOOK.md](./ENCRYPTED-NOTEBOOK.md) for the encryption boundary, database isolation, and recovery design.
 
 ---
 
@@ -218,7 +220,7 @@ Be careful to distinguish the two `conf.json` files:
 | `refsearchignore` | Ref-search ignore rules |
 | `publishAccess.json` | Publishing access control |
 | `filesys_status_check/` | File-system consistency-check state |
-| `notebook-crypto-backup.json` | Global encrypted-notebook KDF and verifier backup used for sync/recovery |
+| `data-crypto-backup.json` | Global encrypted-data KDF and verifier backup used for sync/recovery |
 | `master-password-migration.json` | Temporary crash-recovery state during master-password migration |
 
 Most entries are optional and are created only when the corresponding feature is used.
@@ -236,7 +238,7 @@ Two coexisting locations:
 
 Asset-link prefix recognition: only `assets/`, `emojis/`, `plugins/`, `public/`, and `widgets/` are accepted as legal asset-link prefixes.
 
-Encrypted notebooks must use notebook-local assets. Their contents and `.names.json` original-name mapping are encrypted, and their physical filenames use a desensitized `<16-random-characters>-<blockID>.<ext>` form; direct inspection does not recover the original asset name. See [ENCRYPTED-NOTEBOOK.md §7](./ENCRYPTED-NOTEBOOK.md#7-sy--assets--database-file-encryption).
+Encrypted notebooks must use notebook-local assets. Asset content and its original name reside in the same encrypted container, and physical filenames use a desensitized `<16-random-characters>-<blockID>.<ext>` form; direct inspection does not recover the original asset name. See [ENCRYPTED-NOTEBOOK.md §7](./ENCRYPTED-NOTEBOOK.md#7-sy--assets--database-file-encryption).
 
 ---
 

@@ -19,12 +19,15 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -71,6 +74,16 @@ func performTransactions(c *gin.Context) {
 		ret.Msg = "parses request failed"
 		return
 	}
+	if err = model.ValidateFlashcardTransactions(transactions); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err = holdTransactionEncryptedBoxRequests(c, transactions); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 	for _, transaction := range transactions {
 		transaction.Timestamp = timestamp
 		transaction.MarkFromAPI() // 标记来自 HTTP 入口，供全局撤销日志捕获判别
@@ -90,6 +103,71 @@ func performTransactions(c *gin.Context) {
 
 	elapsed := time.Since(start).Milliseconds()
 	c.Header("Server-Timing", fmt.Sprintf("total;dur=%d", elapsed))
+}
+
+func holdTransactionEncryptedBoxRequests(c *gin.Context, transactions []*model.Transaction) error {
+	boxIDs := map[string]struct{}{}
+	addBoxID := func(boxID string) {
+		if boxID != "" && model.IsEncryptedBox(boxID) {
+			boxIDs[boxID] = struct{}{}
+		}
+	}
+	addBlockID := func(blockID string) {
+		if blockID == "" {
+			return
+		}
+		if block := treenode.GetBlockTree(blockID); block != nil {
+			addBoxID(block.BoxID)
+			return
+		}
+		addBoxID(blockID)
+	}
+	for _, transaction := range transactions {
+		for _, operation := range transaction.DoOperations {
+			if operation == nil {
+				continue
+			}
+			for _, id := range []string{
+				operation.ID, operation.RootID, operation.ParentID, operation.PreviousID, operation.NextID, operation.BlockID,
+			} {
+				addBlockID(id)
+			}
+			for _, id := range operation.BlockIDs {
+				addBlockID(id)
+			}
+			for _, id := range operation.SrcIDs {
+				addBlockID(id)
+			}
+			for _, src := range operation.Srcs {
+				if id, ok := src["id"].(string); ok {
+					addBlockID(id)
+				}
+			}
+			if operation.Tree != nil {
+				addBoxID(operation.Tree.Box)
+			}
+			if _, boxID := av.FindAttributeViewPath(operation.AvID); boxID != "" {
+				addBoxID(boxID)
+			}
+			for _, key := range []string{"notebook", "box", "boxID", "rootID", "blockID"} {
+				if id, ok := operation.Context[key].(string); ok {
+					addBlockID(id)
+				}
+			}
+		}
+	}
+
+	sortedBoxIDs := make([]string, 0, len(boxIDs))
+	for boxID := range boxIDs {
+		sortedBoxIDs = append(sortedBoxIDs, boxID)
+	}
+	sort.Strings(sortedBoxIDs)
+	for _, boxID := range sortedBoxIDs {
+		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func pushTransactions(app, session string, transactions []*model.Transaction) {

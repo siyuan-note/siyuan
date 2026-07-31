@@ -296,6 +296,13 @@ type RecentDoc struct {
 
 var recentDocLock = sync.Mutex{}
 
+// canPersistRecentDoc 仅允许全局块树中可确认属于普通笔记本的文档进入明文最近文档存储。
+// 加密笔记本使用独立块树，未知 ID 也按敏感数据处理，避免锁定时因无法解析归属而写入明文。
+func canPersistRecentDoc(rootID string) bool {
+	bt := treenode.GetBlockTree(rootID)
+	return bt != nil && !IsEncryptedBox(bt.BoxID)
+}
+
 func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
@@ -304,6 +311,9 @@ func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 
 // UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
 func UpdateRecentDocOpenTime(rootID string) (err error) {
+	if !canPersistRecentDoc(rootID) {
+		return
+	}
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
@@ -341,6 +351,9 @@ func UpdateRecentDocOpenTime(rootID string) (err error) {
 
 // UpdateRecentDocViewTime 更新文档浏览时间
 func UpdateRecentDocViewTime(rootID string) (err error) {
+	if !canPersistRecentDoc(rootID) {
+		return
+	}
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
@@ -383,6 +396,16 @@ func UpdateRecentDocCloseTime(rootID string) (err error) {
 
 // BatchUpdateRecentDocCloseTime 批量更新文档关闭时间
 func BatchUpdateRecentDocCloseTime(rootIDs []string) (err error) {
+	if len(rootIDs) == 0 {
+		return
+	}
+	filteredRootIDs := make([]string, 0, len(rootIDs))
+	for _, rootID := range rootIDs {
+		if canPersistRecentDoc(rootID) {
+			filteredRootIDs = append(filteredRootIDs, rootID)
+		}
+	}
+	rootIDs = filteredRootIDs
 	if len(rootIDs) == 0 {
 		return
 	}
@@ -637,6 +660,9 @@ func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 	seen := make(map[string]struct{}, len(recentDocs))
 	deduplicated := make([]*RecentDoc, 0, len(recentDocs))
 	for _, doc := range recentDocs {
+		if doc == nil || !canPersistRecentDoc(doc.RootID) {
+			continue
+		}
 		if _, ok := seen[doc.RootID]; !ok {
 			seen[doc.RootID] = struct{}{}
 			deduplicated = append(deduplicated, doc)

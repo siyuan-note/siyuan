@@ -56,7 +56,7 @@ import {
 } from "./view";
 import {focusBlock} from "../../util/selection";
 import {getFieldIdByCellElement, setPageSize} from "./row";
-import {getAVVisibleViewIDs} from "./viewVisibility";
+import {getAVVisibleViewIDs, getAVVisibleViewIDsAfterHidingAll} from "./viewVisibility";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
 import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";
 import {openCalcMenu} from "./calc";
@@ -1830,6 +1830,15 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "av-view-show-all") {
                     if (setAVBlockVisibleViewIDs(options.protyle, options.blockElement, data.views.map((view) => view.id))) {
+                        rerenderSwitcher();
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "av-view-hide-all") {
+                    const visibleViewIDs = getAVVisibleViewIDs(options.blockElement, data.views);
+                    const viewIDs = getAVVisibleViewIDsAfterHidingAll(visibleViewIDs, data.viewID);
+                    if (setAVBlockVisibleViewIDs(options.protyle, options.blockElement, viewIDs)) {
                         rerenderSwitcher();
                     }
                     event.preventDefault();

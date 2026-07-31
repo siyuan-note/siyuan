@@ -134,6 +134,19 @@ export const handleTouchEnd = (event: TouchEvent) => {
     clientX = null;
     // 有些事件不经过 touchmove
 
+    const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
+    const modelElement = hasClosestByAttribute(target, "id", "model", true);
+    if (modelElement) {
+        // 面板内横向滚动内容（如数据快照操作按钮行）时不触发关闭面板
+        if (!scrollBlock && isXScroll && firstDirection === "toRight" && !lastClientX &&
+            !hasClosestByClassName(target, "protyle-wysiwyg", true) &&
+            // 划选文字时不触发关闭面板
+            (getSelection().rangeCount === 0 || getSelection().toString() === "")) {
+            closeModel();
+        }
+        return;
+    }
+
     if (scrollBlock) {
         closePanel();
         return;
@@ -146,16 +159,6 @@ export const handleTouchEnd = (event: TouchEvent) => {
         scrollEnable = true;
     }
 
-    const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
-    const modelElement = hasClosestByAttribute(target, "id", "model", true);
-    if (modelElement) {
-        if (isXScroll && firstDirection === "toRight" && !lastClientX && !hasClosestByClassName(target, "protyle-wysiwyg", true) &&
-            // 划选文字时不触发关闭面板
-            (getSelection().rangeCount === 0 || getSelection().toString() === "")) {
-            closeModel();
-        }
-        return;
-    }
     const menuElement = hasClosestByAttribute(target, "id", "menu");
     if (menuElement) {
         if (isXScroll) {
@@ -278,6 +281,23 @@ export const handleTouchStart = (event: TouchEvent) => {
 
 let previousClientX: number;
 const sideMaskElement = document.querySelector(".side-mask") as HTMLElement;
+
+const isHorizontalScrollable = (target: HTMLElement, xDiff: number) => {
+    let element: HTMLElement = target;
+    while (element && element.id !== "model") {
+        if (element.scrollWidth > element.clientWidth + 1 &&
+            ["auto", "scroll", "overlay"].includes(getComputedStyle(element).overflowX)) {
+            // 按拖动方向仍可继续滚动时视为内容横向滚动，否则继续向上查找外层滚动容器
+            if ((xDiff < 0 && element.scrollLeft > 1) ||
+                (xDiff > 0 && Math.ceil(element.clientWidth + element.scrollLeft) < element.scrollWidth)) {
+                return true;
+            }
+        }
+        element = element.parentElement;
+    }
+    return false;
+};
+
 export const handleTouchMove = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     // 位移超过阈值说明是滑动而非长按，取消进入多选的定时器
@@ -349,6 +369,10 @@ export const handleTouchMove = (event: TouchEvent) => {
     previousClientX = event.touches[0].clientX;
     if (Math.abs(xDiff) > Math.abs(yDiff)) {
         if (hasClosestByAttribute(target, "id", "model", true)) {
+            // 面板内可横向滚动的元素（如数据快照操作按钮行）由原生滚动处理，避免误触发返回手势
+            if (isHorizontalScrollable(target, xDiff)) {
+                scrollBlock = true;
+            }
             return;
         }
         if (sideMaskElement.classList.contains("fn__none")) {

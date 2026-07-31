@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 import {Menu} from "../plugin/Menu";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
 import {escapeHtml} from "../util/escape";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Protyle} from "../protyle";
@@ -78,7 +78,8 @@ export const toggleReplaceHistory = (replaceInputElement: HTMLInputElement) => {
     });
 };
 
-export const toggleSearchHistory = (searchElement: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle) => {
+export const toggleSearchHistory = (searchElement: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle,
+                                    requestElement = searchElement) => {
     const searchInputElement = searchElement.querySelector("#searchInput, #toolbarSearch") as HTMLInputElement;
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
     if (!list.keys || list.keys.length === 0 || (list.length === 1 && list[0] === searchInputElement.value)) {
@@ -125,7 +126,7 @@ export const toggleSearchHistory = (searchElement: Element, config: Config.IUILa
                             searchInputElement.value = element.textContent;
                             config.page = 1;
                             /// #if MOBILE
-                            updateSearchResult(config, searchElement, true);
+                            updateSearchResult(config, requestElement, true);
                             /// #else
                             inputEvent(searchElement, config, edit, true);
                             /// #endif
@@ -221,7 +222,10 @@ export const toggleAssetHistory = (assetElement: Element) => {
     });
 };
 
-export const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
+export const saveKeyList = (type: "keys" | "replaceKeys", value: string, config?: Config.IUILayoutTabSearchConfig) => {
+    if (isSensitiveSearchConfig(config)) {
+        return;
+    }
     let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
     list.splice(0, 0, value);
     list = Array.from(new Set(list));

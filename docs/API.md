@@ -831,13 +831,15 @@ Move documents by `id`:
   {
     "dataType": "markdown",
     "data": "foobarbaz",
-    "id": "20211230161520-querkps"
+    "id": "20211230161520-querkps",
+    "lockType": false
   }
   ```
 
     * `dataType`: The data type to be updated, the value can be `markdown` or `dom`
     * `data`: Data to be updated
     * `id`: ID of the block to be updated
+    * `lockType`: Whether to reject the update when the parsed block type differs from the existing block type; invalid parent-child structures are always rejected, while an empty paragraph can be converted to any valid block type; defaults to `false`
 * Return value
 
   ```json

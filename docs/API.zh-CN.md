@@ -826,13 +826,15 @@
   {
     "dataType": "markdown",
     "data": "foobarbaz",
-    "id": "20211230161520-querkps"
+    "id": "20211230161520-querkps",
+    "lockType": false
   }
   ```
 
     * `dataType`：待更新数据类型，值可选择 `markdown` 或者 `dom`
     * `data`：待更新的数据
     * `id`：待更新块的 ID
+    * `lockType`：解析后的块类型与原块类型不同时是否拒绝更新；非法父子结构始终会被拒绝，空段落可转换为任意有效块类型；默认为 `false`
 * 返回值
 
   ```json

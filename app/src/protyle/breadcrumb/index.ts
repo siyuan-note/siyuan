@@ -165,7 +165,6 @@ ${padHTML}
                     event.preventDefault();
                     if (target.classList.contains("block__icon--active")) {
                         zoomOut({protyle, id: protyle.options.blockId});
-                        target.classList.remove("block__icon--active");
                     } else {
                         const getDocParam: IObject = {
                             id: protyle.options.blockId,

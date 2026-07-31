@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -29,7 +28,7 @@ import (
 
 var BlockTool = &Tool{
 	Name:        "block",
-	Description: "Block operations. Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child — use after block.update when both modifying and adding, update(id, data, dataType) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated.",
+	Description: "Block operations. Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child — use after block.update when both modifying and adding, update(id, data, dataType, lockType?) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -38,6 +37,7 @@ var BlockTool = &Tool{
 			"ids":        {Type: "string", Description: "Comma-separated block IDs (for batch_get, batch_kramdown)"},
 			"data":       {Type: "string", Description: "Content (markdown or dom)"},
 			"dataType":   {Type: "string", Description: "Content type: markdown or dom", Enum: []string{"markdown", "dom"}},
+			"lockType":   {Type: "boolean", Description: "Reject update when the parsed block type differs from the existing block type; defaults to false"},
 			"parentID":   {Type: "string", Description: "Parent block ID"},
 			"nextID":     {Type: "string", Description: "Next sibling block ID (for insert)"},
 			"previousID": {Type: "string", Description: "Previous sibling block ID (for insert)"},
@@ -293,65 +293,25 @@ func blockUpdate(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 	data, dataType := getBlockData(args)
-	if data == "" {
+	if _, exists := args["data"]; !exists {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
 	}
+	lockType, _ := args["lockType"].(bool)
 
-	// markdown 转 DOM 时 Lute 会给块生成全新的随机 ID，update 前必须把原块 id 钉回去，
-	// 否则块 ID 每次更新都会变，后续按原 id 操作会报 block not found
-	data = pinBlockID(data, dataType, id)
+	_, rootIDs, err := model.PerformBlockUpdates([]model.BlockUpdateInput{{
+		ID:       id,
+		Data:     data,
+		DataType: dataType,
+		LockType: lockType,
+	}})
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
 
-	transactions := []*model.Transaction{{
-		DoOperations: []*model.Operation{{
-			Action: "update",
-			ID:     id,
-			Data:   data,
-		}},
-	}}
-
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
-
-	if bt := treenode.GetBlockTree(id); bt != nil {
-		util.PushReloadProtyle(bt.RootID)
+	for _, rootID := range rootIDs {
+		util.PushReloadProtyle(rootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block updated"}}}, nil
-}
-
-// pinBlockID 把原块 id 钉回 markdown/dom 数据，保证 update 不改变块 ID。
-// 参照 HTTP API /api/block/updateBlock 的 id 复位逻辑（block_op.go updateBlock 非 Document 分支）。
-func pinBlockID(data, dataType, id string) string {
-	luteEngine := util.NewLute()
-	if dataType == "markdown" {
-		var err error
-		data, err = markdownToBlockDOM(data)
-		if err != nil {
-			return data
-		}
-	}
-
-	tree := luteEngine.BlockDOM2Tree(data)
-	if nil == tree || nil == tree.Root || nil == tree.Root.FirstChild {
-		return data
-	}
-
-	// 更新列表项时 markdown 会渲染成 NodeList>ListItem，需要先把列表项提升到根下，渲染器才能正常工作
-	// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
-	if ast.NodeList == tree.Root.FirstChild.Type {
-		tree.Root.AppendChild(tree.Root.FirstChild.FirstChild) // 将列表下的第一个列表项移到文档结尾
-		tree.Root.FirstChild.Unlink()                          // 删除列表
-		if nil != tree.Root.FirstChild && ast.NodeKramdownBlockIAL == tree.Root.FirstChild.Type {
-			tree.Root.FirstChild.Unlink() // 继续删除列表 IAL
-		}
-	}
-
-	if nil != tree.Root.FirstChild {
-		tree.Root.FirstChild.SetIALAttr("id", id)
-	} else {
-		tree.Root.AppendChild(treenode.NewParagraph(id))
-	}
-
-	return luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 }
 
 func blockDelete(args map[string]any) (CallToolResult, error) {

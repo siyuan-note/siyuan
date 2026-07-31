@@ -75,7 +75,10 @@ export const onGet = (options: {
         } else {
             options.protyle.wysiwyg.element.lastElementChild.setAttribute("data-eof", "2");
         }
-        updateDocumentBottomEof(options.protyle.wysiwyg.element);
+        updateDocumentBottomEof(
+            options.protyle.wysiwyg.element,
+            options.action.includes(Constants.CB_GET_BEFORE)
+        );
         if (options.data.data.mode !== 4) {
             return;
         }

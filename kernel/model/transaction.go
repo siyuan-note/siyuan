@@ -68,16 +68,20 @@ func FlushTxQueue() {
 // 失败时返回原始错误（不转成推送消息），调用方据此回滚撤销栈状态。
 func PerformTxSync(tx *Transaction) (err error) {
 	defer logging.Recover()
-	// 初始化事务互斥锁（异步路径 PerformTransactions 在入队前初始化，同步路径这里补上）
-	if nil == tx.m {
-		tx.m = &sync.Mutex{}
-	}
 	flushLock.Lock()
 	isFlushing.Store(true)
 	defer func() {
 		isFlushing.Store(false)
 		flushLock.Unlock()
 	}()
+	return performTxSyncLocked(tx)
+}
+
+func performTxSyncLocked(tx *Transaction) (err error) {
+	// 初始化事务互斥锁（异步路径 PerformTransactions 在入队前初始化，同步路径这里补上）
+	if nil == tx.m {
+		tx.m = &sync.Mutex{}
+	}
 	if txErr := performTx(tx); nil != txErr {
 		return txErr
 	}
@@ -1631,6 +1635,20 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
 	}
 
+	updatedNode, resolveErr := resolveBlockUpdateNode(oldNode, subTree.Root)
+	if resolveErr != nil {
+		logging.LogErrorf("resolve updated block [%s] failed: %s", id, resolveErr)
+		return &TxErr{code: TxErrCodePushMsg, msg: resolveErr.Error(), id: id}
+	}
+	if err = treenode.ValidateBlockReplacement(oldNode, updatedNode); err != nil {
+		logging.LogErrorf("validate updated block [%s] structure failed: %s", id, err)
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: id}
+	}
+	if err = validateBlockUpdateType(oldNode, updatedNode, operation.LockType); err != nil {
+		logging.LogError(err.Error())
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: id}
+	}
+
 	// 收集引用的定义块 ID
 	oldDefIDs := getRefDefIDs(oldNode)
 	var newDefIDs []string
@@ -1696,14 +1714,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		TouchRefUsed(newRefDefIDs)
 	}
 
-	updatedNode := subTree.Root.FirstChild
-	if nil == updatedNode {
-		logging.LogErrorf("get fist node in sub tree [%s] failed", subTree.Root.ID)
-		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
-	}
-	if ast.NodeList == updatedNode.Type && ast.NodeList == oldNode.Parent.Type {
-		updatedNode = updatedNode.FirstChild
-	}
 	if ast.NodeListItem == oldNode.Type {
 		tx.markListItemFoldCandidate(oldNode, tree)
 	}
@@ -2133,6 +2143,8 @@ type Operation struct {
 
 	DeckID string      `json:"deckID"` // 用于添加/删除闪卡
 	Tree   *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
+
+	LockType bool `json:"-"` // 外部块更新是否禁止改变主类型
 
 	AvID              string           `json:"avID"`              // 属性视图 ID
 	SrcIDs            []string         `json:"srcIDs"`            // 用于从属性视图中删除行

@@ -566,9 +566,30 @@ func filterSelfHPath(blocks []*Block) {
 
 	for _, b := range blocks {
 		if b.IsDoc() {
-			b.HPath = strings.TrimSuffix(b.HPath, path.Base(b.HPath))
+			b.HPath = trimSelfHPath(b.HPath)
 		}
 	}
+}
+
+func trimSelfHPath(hPath string) string {
+	inTag := false
+	lastSlash := -1
+	for i, r := range hPath {
+		switch r {
+		case '<':
+			inTag = true
+		case '>':
+			inTag = false
+		case '/':
+			if !inTag {
+				lastSlash = i
+			}
+		}
+	}
+	if 0 > lastSlash {
+		return hPath
+	}
+	return hPath[:lastSlash+1]
 }
 
 func prependNotebookNameInHPath(blocks []*Block) {
@@ -1421,7 +1442,7 @@ func parseReplaceText(replacement string, luteEngine *lute.Lute) (ret []*ast.Nod
 	if nil == tree.Root.FirstChild {
 		return nil, "" == replacement
 	}
-	parse.NestedInlines2FlattedSpans(tree, false)
+	parse.NestedInlines2FlattedSpansHybrid(tree, false)
 	for child := tree.Root.FirstChild.FirstChild; nil != child; {
 		next := child.Next
 		child.Unlink()
@@ -2627,44 +2648,10 @@ func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxA
 	rawQuery := query
 	query = strings.ReplaceAll(query, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	keywords := strings.Split(query, " ")
-	contentField := columnConcat()
-	contentDocumentLikeFilter := buildSearchDocumentLikeFilter("GROUP_CONCAT("+contentField+")", keywords)
-	documentLikeFilter := contentDocumentLikeFilter
-	if searchHPath {
-		hPathField := "MAX(CASE WHEN type = 'd' THEN " + normalizedHPathSearchField("hpath") + " ELSE '' END)"
-		documentLikeFilter = buildSearchDocumentLikeFilterWithHPath("GROUP_CONCAT("+contentField+")", hPathField, keywords)
-	}
-	blockLikeFilter := buildSearchDocumentLikeFilter(contentField, keywords)
-	var orderByLike strings.Builder
-	orderByLike.WriteString("(")
-	for i, keyword := range keywords {
-		orderByLike.WriteString("(docContent LIKE '%" + keyword + "%')")
-		if i < len(keywords)-1 {
-			orderByLike.WriteString(" + ")
-		}
-	}
-	orderByLike.WriteString(")")
-	// box/path 过滤子句在下方 dMatchStmt 与 selectStmt 中各出现一次，绑定参数需按出现顺序收集两份。
-	// 第一份对应 CTE 内的 WHERE
+	// box/path 过滤子句在文档匹配与最终块查询中各出现一次，绑定参数需按出现顺序收集两份。
 	args := append(append([]any{}, boxArgs...), pathArgs...)
-	dMatchStmt := "SELECT root_id, MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent, " +
-		"CASE WHEN " + contentDocumentLikeFilter + " THEN 0 ELSE 1 END AS matchSource" +
-		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" GROUP BY root_id HAVING " + documentLikeFilter +
-		buildDocumentMatchOrderBy(orderByLike.String(), orderBy)
-	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
-	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	selectStmt := cteStmt + "\nSELECT *, " +
-		"(" + contentField + ") AS concatContent, " +
-		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
-		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + blockLikeFilter + ")) THEN 1 ELSE 0 END) AS blockSort, " +
-		"(SELECT matchSource FROM docBlocks WHERE docBlocks.root_id = blocks.root_id) AS matchSource" +
-		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" AND (id IN (SELECT root_id FROM docBlocks " + limit + ") OR" +
-		"  (root_id IN (SELECT root_id FROM docBlocks" + limit + ") AND (" + blockLikeFilter + ")))"
-	// 第二份对应外层 SELECT 的 WHERE
 	args = append(args, append(append([]any{}, boxArgs...), pathArgs...)...)
-	selectStmt += " " + buildDocumentSearchOrderBy(rawQuery, orderBy)
+	selectStmt := buildDocumentSearchStatement(rawQuery, keywords, typeFilter, boxFilter, pathFilter, ignoreFilter, orderBy, page, pageSize, searchHPath)
 	result, _ := sql.QueryNoLimitArgsInBox(selectStmt, boxID, args...)
 	resultBlocks := sql.ToBlocks(result)
 	if 0 < len(resultBlocks) {
@@ -2677,7 +2664,9 @@ func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxA
 	terms = strings.ReplaceAll(terms, "''", "'")
 	for i, resultBlock := range resultBlocks {
 		if 1 == result[i]["matchSource"].(int64) {
-			ret = append(ret, fromHPathSearchSQLBlock(resultBlock, terms, beforeLen))
+			docContent, _ := result[i]["docContent"].(string)
+			contentTerms := matchedSearchTerms(docContent, terms)
+			ret = append(ret, fromHPathSearchSQLBlockWithContentTerms(resultBlock, terms, contentTerms, beforeLen))
 		} else {
 			ret = append(ret, fromSQLBlock(resultBlock, terms, beforeLen))
 		}
@@ -2688,38 +2677,89 @@ func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxA
 	return
 }
 
+func buildDocumentSearchStatement(rawQuery string, keywords []string, typeFilter, boxFilter, pathFilter, ignoreFilter string, orderBy, page, pageSize int, searchHPath bool) string {
+	contentField := columnConcat()
+	contentDocumentLikeFilter := buildSearchDocumentLikeFilter("GROUP_CONCAT("+contentField+")", keywords)
+	documentLikeFilter := contentDocumentLikeFilter
+	if searchHPath {
+		hPathField := "MAX(CASE WHEN type = 'd' THEN " + normalizedHPathSearchField("hpath") + " ELSE '' END)"
+		documentLikeFilter = buildSearchDocumentLikeFilterWithHPath("GROUP_CONCAT("+contentField+")", hPathField, keywords)
+	}
+	blockLikeFilter := buildSearchDocumentLikeFilter(contentField, keywords)
+	docContentField := "MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END)"
+	docMatchScore := buildDocumentMatchScore(docContentField, keywords)
+	dMatchStmt := "SELECT root_id, " + docContentField + " AS docContent, " +
+		"CASE WHEN " + contentDocumentLikeFilter + " THEN 0 ELSE 1 END AS matchSource, " +
+		docMatchScore + " AS docMatchScore, MAX(created) AS docCreated, MAX(updated) AS docUpdated" +
+		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" GROUP BY root_id HAVING " + documentLikeFilter
+	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	pagedDocsStmt := "SELECT root_id AS docRootID, docContent, matchSource, docMatchScore, docCreated, docUpdated FROM docBlocks" +
+		buildDocumentMatchOrderBy("docMatchScore", orderBy) + limit
+	cteStmt := "WITH docBlocks AS (" + dMatchStmt + "), pagedDocs AS (" + pagedDocsStmt + ")"
+	selectStmt := cteStmt + "\nSELECT blocks.*, " +
+		"(" + contentField + ") AS concatContent, " +
+		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
+		"(CASE WHEN (" + blockLikeFilter + ") THEN 1 ELSE 0 END) AS blockSort, " +
+		"pagedDocs.docContent AS docContent, pagedDocs.matchSource AS matchSource, pagedDocs.docMatchScore AS docMatchScore" +
+		" FROM blocks JOIN pagedDocs ON pagedDocs.docRootID = blocks.root_id" +
+		" WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" AND (id = root_id OR (" + blockLikeFilter + "))"
+	selectStmt += " " + buildDocumentSearchOrderBy(rawQuery, orderBy)
+	return selectStmt
+}
+
 func buildDocumentMatchOrderBy(matchScore string, orderBy int) string {
-	stableOrder := ", root_id ASC"
+	stableOrder := ", docRootID ASC"
 	switch orderBy {
 	case 1:
-		return " ORDER BY MAX(created) ASC, matchSource ASC" + stableOrder
+		return " ORDER BY docCreated ASC, matchSource ASC, " + matchScore + " DESC" + stableOrder
 	case 2:
-		return " ORDER BY MAX(created) DESC, matchSource ASC" + stableOrder
+		return " ORDER BY docCreated DESC, matchSource ASC, " + matchScore + " DESC" + stableOrder
 	case 3:
-		return " ORDER BY MAX(updated) ASC, matchSource ASC" + stableOrder
+		return " ORDER BY docUpdated ASC, matchSource ASC, " + matchScore + " DESC" + stableOrder
 	case 4:
-		return " ORDER BY MAX(updated) DESC, matchSource ASC" + stableOrder
+		return " ORDER BY docUpdated DESC, matchSource ASC, " + matchScore + " DESC" + stableOrder
 	case 6:
-		return " ORDER BY matchSource ASC, " + matchScore + " ASC, MAX(updated) DESC" + stableOrder
+		return " ORDER BY matchSource ASC, " + matchScore + " ASC, docUpdated DESC" + stableOrder
 	default:
-		return " ORDER BY matchSource ASC, " + matchScore + " DESC, MAX(updated) DESC" + stableOrder
+		return " ORDER BY matchSource ASC, " + matchScore + " DESC, docUpdated DESC" + stableOrder
 	}
 }
 
 func buildDocumentSearchOrderBy(query string, orderBy int) string {
 	switch orderBy {
 	case 1, 2, 3, 4:
-		return buildOrderBy(query, 0, orderBy) + ", matchSource ASC, id ASC"
+		return buildOrderBy(query, 0, orderBy) + ", matchSource ASC, docMatchScore DESC, id ASC"
 	}
 
 	blockSort := "blockSort DESC"
+	matchScore := "docMatchScore DESC"
 	if 6 == orderBy {
 		blockSort = "blockSort ASC"
+		matchScore = "docMatchScore ASC"
 	}
 	ret := buildOrderBy(query, 0, 0)
-	ret = strings.Replace(ret, "ORDER BY ", "ORDER BY matchSource ASC, ", 1)
+	ret = strings.Replace(ret, "ORDER BY ", "ORDER BY matchSource ASC, "+matchScore+", ", 1)
 	ret = strings.Replace(ret, "END ASC, ", "END ASC, "+blockSort+", ", 1)
 	return ret + ", id ASC"
+}
+
+func buildDocumentMatchScore(field string, keywords []string) string {
+	var ret strings.Builder
+	ret.WriteString("(")
+	for i, keyword := range keywords {
+		ret.WriteString("(")
+		ret.WriteString(field)
+		ret.WriteString(" LIKE '%")
+		ret.WriteString(keyword)
+		ret.WriteString("%')")
+		if i < len(keywords)-1 {
+			ret.WriteString(" + ")
+		}
+	}
+	ret.WriteString(")")
+	return ret.String()
 }
 
 func buildSearchDocumentLikeFilter(field string, keywords []string) string {
@@ -2890,6 +2930,17 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 	return
 }
 
+func matchedSearchTerms(text, terms string) string {
+	var matched []string
+	for _, term := range search.SplitKeyword(terms) {
+		pos, _ := search.MarkText(text, term, -1, Conf.Search.CaseSensitive)
+		if -1 < pos {
+			matched = append(matched, term)
+		}
+	}
+	return strings.Join(matched, search.TermSep)
+}
+
 func fromSQLBlocks(sqlBlocks *[]*sql.Block, terms string, beforeLen int) (ret []*Block) {
 	for _, sqlBlock := range *sqlBlocks {
 		ret = append(ret, fromSQLBlock(sqlBlock, terms, beforeLen))
@@ -2976,8 +3027,12 @@ func markBlockHPath(block *Block, hPath, terms string, beforeLen int) {
 }
 
 func fromHPathSearchSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Block) {
-	block = fromSQLBlock(sqlBlock, "", beforeLen)
-	markBlockHPath(block, sqlBlock.HPath, terms, -1)
+	return fromHPathSearchSQLBlockWithContentTerms(sqlBlock, terms, "", beforeLen)
+}
+
+func fromHPathSearchSQLBlockWithContentTerms(sqlBlock *sql.Block, hPathTerms, contentTerms string, beforeLen int) (block *Block) {
+	block = fromSQLBlock(sqlBlock, contentTerms, beforeLen)
+	markBlockHPath(block, sqlBlock.HPath, hPathTerms, -1)
 	return
 }
 

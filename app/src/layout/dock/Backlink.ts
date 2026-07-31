@@ -239,6 +239,7 @@ export class Backlink extends Model {
         this.tree = new Tree({
             element: this.element.querySelector(".backlinkList") as HTMLElement,
             data: null,
+            titleTooltipPosition: this.type === "bottom" ? "north" : "parentE",
             click: (element) => {
                 this.toggleItem(element, false);
                 this.setFocus();
@@ -279,6 +280,7 @@ export class Backlink extends Model {
         this.mTree = new Tree({
             element: this.element.querySelector(".backlinkMList") as HTMLElement,
             data: null,
+            titleTooltipPosition: this.type === "bottom" ? "north" : "parentE",
             click: (element) => {
                 this.toggleItem(element, true);
                 this.setFocus();

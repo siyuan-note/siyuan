@@ -82,8 +82,7 @@ class TextLayerBuilder {
       });
       this.show();
       // NOTE
-      this.div.querySelector(".pdf__rects")?.remove()
-      getHighlight(this.div)
+      getHighlight(this.div);
       return;
     }
 
@@ -116,7 +115,7 @@ class TextLayerBuilder {
     this.#onAppend?.(this.div);
     this.highlighter?.enable();
     // NOTE
-    getHighlight(this.div)
+    getHighlight(this.div);
     this.accessibilityManager?.enable();
   }
 

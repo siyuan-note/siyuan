@@ -9,7 +9,7 @@ import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusBlock, focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
-import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
+import {convertFontSize, fontEvent, getFontNodeElements, getFontSizeInfo} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
 import {isInAndroid, isInEdge, isInHarmony, isInMobileApp} from "../../protyle/util/compatibility";
@@ -153,19 +153,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         });
         lastColorHTML += "</div>";
     }
-    let textElement: HTMLElement;
-    let fontSize = "16px";
-    if (nodeElements && nodeElements.length > 0) {
-        textElement = nodeElements[0] as HTMLElement;
-    } else {
-        textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
-        if (!textElement) {
-            textElement = hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "text") as HTMLElement;
-        }
-    }
-    if (textElement) {
-        fontSize = textElement.style.fontSize || "16px";
-    }
+    const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `${lastColorHTML}
 <div data-id="color" class="keyboard__slash-title">${window.siyuan.languages.color}</div>
@@ -214,23 +202,53 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </div>
 <div data-id="fontSize" class="keyboard__slash-title${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
 <div data-id="fontSizeWrap" class="keyboard__slash-block${disableFont ? " fn__none" : ""}">
-    <select class="b3-select fn__block" style="width: calc(50% - 8px);margin: 4px 0 8px 0;">
-        <option ${fontSize === "12px" ? "selected" : ""} value="12px">12px</option>
-        <option ${fontSize === "13px" ? "selected" : ""} value="13px">13px</option>
-        <option ${fontSize === "14px" ? "selected" : ""} value="14px">14px</option>
-        <option ${fontSize === "15px" ? "selected" : ""} value="15px">15px</option>
-        <option ${fontSize === "16px" ? "selected" : ""} value="16px">16px</option>
-        <option ${fontSize === "19px" ? "selected" : ""} value="19px">19px</option>
-        <option ${fontSize === "22px" ? "selected" : ""} value="22px">22px</option>
-        <option ${fontSize === "24px" ? "selected" : ""} value="24px">24px</option>
-        <option ${fontSize === "29px" ? "selected" : ""} value="29px">29px</option>
-        <option ${fontSize === "32px" ? "selected" : ""} value="32px">32px</option>
-        <option ${fontSize === "40px" ? "selected" : ""} value="40px">40px</option>
-        <option ${fontSize === "48px" ? "selected" : ""} value="48px">48px</option>
-    </select>
+    <label class="keyboard__font-size-toggle">
+        ${window.siyuan.languages.relativeFontSize}
+        <span class="fn__flex-1"></span>
+        <input class="b3-switch fn__flex-center" ${fontSize.endsWith("em") ? "checked" : ""} type="checkbox">
+    </label>
+    <label class="keyboard__font-size${fontSize.endsWith("em") ? " fn__none" : ""}">
+        <input class="b3-slider fn__flex-1" data-type="fontSizePX" max="72" min="9" step="1" type="range" value="${parseFloat(fontSize)}">
+        <span data-type="fontSizeValue">${parseFloat(fontSize)}px</span>
+    </label>
+    <label class="keyboard__font-size${fontSize.endsWith("em") ? "" : " fn__none"}">
+        <input class="b3-slider fn__flex-1" data-type="fontSizeEM" max="4.5" min="0.56" step="0.01" type="range" value="${parseFloat(fontSize)}">
+        <span data-type="fontSizeValue">${(parseFloat(fontSize) * 100).toFixed(0)}%</span>
+    </label>
 </div>`;
-    utilElement.querySelector("select").addEventListener("change", function (event: Event) {
-        fontEvent(protyle, nodeElements, "fontSize", (event.target as HTMLSelectElement).value);
+    const switchElement = utilElement.querySelector('[data-id="fontSizeWrap"] .b3-switch') as HTMLInputElement;
+    const fontSizePXElement = utilElement.querySelector('[data-type="fontSizePX"]') as HTMLInputElement;
+    const fontSizeEMElement = utilElement.querySelector('[data-type="fontSizeEM"]') as HTMLInputElement;
+    const updatePXValue = () => {
+        fontSizePXElement.nextElementSibling.textContent = fontSizePXElement.value + "px";
+    };
+    const updateEMValue = () => {
+        fontSizeEMElement.nextElementSibling.textContent = (parseFloat(fontSizeEMElement.value) * 100).toFixed(0) + "%";
+    };
+    switchElement.addEventListener("change", () => {
+        if (switchElement.checked) {
+            const em = convertFontSize(fontSizePXElement.value + "px", "em", baseFontSize);
+            fontSizeEMElement.value = parseFloat(em).toString();
+            updateEMValue();
+            fontSizePXElement.parentElement.classList.add("fn__none");
+            fontSizeEMElement.parentElement.classList.remove("fn__none");
+            fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
+        } else {
+            const px = convertFontSize(fontSizeEMElement.value + "em", "px", baseFontSize);
+            fontSizePXElement.value = parseFloat(px).toString();
+            updatePXValue();
+            fontSizePXElement.parentElement.classList.remove("fn__none");
+            fontSizeEMElement.parentElement.classList.add("fn__none");
+            fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+        }
+    });
+    fontSizePXElement.addEventListener("input", updatePXValue);
+    fontSizeEMElement.addEventListener("input", updateEMValue);
+    fontSizePXElement.addEventListener("change", () => {
+        fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+    });
+    fontSizeEMElement.addEventListener("change", () => {
+        fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
     });
 };
 
@@ -471,7 +489,7 @@ export const showKeyboardToolbar = () => {
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     updateKeyboardToolbarPosition();
     const modelElement = document.getElementById("model");
-    if (modelElement.style.transform === "translateY(0px)") {
+    if (modelElement.style.transform === "translateX(0px)") {
         modelElement.style.paddingBottom = "48px";
     }
     const range = getSelection().getRangeAt(0);
@@ -567,7 +585,7 @@ export const hideKeyboardToolbar = () => {
         }
     }
     const modelElement = document.getElementById("model");
-    if (modelElement.style.transform === "translateY(0px)") {
+    if (modelElement.style.transform === "translateX(0px)") {
         modelElement.style.paddingBottom = "";
     }
 };

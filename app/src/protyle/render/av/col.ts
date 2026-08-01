@@ -21,7 +21,7 @@ import {getFieldsByData} from "./view";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {openFieldVisibility} from "./fieldVisibility";
 import {createEmptyAVValue, genAVAttributeRowHTML} from "./attributeValue";
-import {getAVColumnTextMeasurer, getAVTableFitWidths} from "./columnWidth";
+import {getAVColumnTextMeasurer, getAVDistributedColumnWidth, getAVTableFitWidths} from "./columnWidth";
 import {getAVData} from "./virtualScroll";
 
 export const getColId = (element: Element, viewType: TAVView) => {
@@ -771,17 +771,7 @@ export const setFreezeColumn = (protyle: IProtyle, blockElement: Element, freeze
     transaction(protyle, [operation], [undoOperation]);
 };
 
-export const autoFitAVColumns = (protyle: IProtyle, blockElement: HTMLElement, columnIDs?: string[]) => {
-    const data = getAVData(blockElement);
-    if (!data || data.viewType !== "table") {
-        return;
-    }
-    const widths = getAVTableFitWidths(
-        data.view as IAVTable,
-        getCellValueText,
-        getAVColumnTextMeasurer(blockElement),
-        columnIDs,
-    );
+const setAVColumnWidths = (protyle: IProtyle, blockElement: HTMLElement, widths: Record<string, string>) => {
     const oldWidths: Record<string, string> = {};
     const newWidths: Record<string, string> = {};
     Object.entries(widths).forEach(([columnID, width]) => {
@@ -810,6 +800,103 @@ export const autoFitAVColumns = (protyle: IProtyle, blockElement: HTMLElement, c
         ...operation,
         data: oldWidths,
     }]);
+};
+
+export const autoFitAVColumns = (protyle: IProtyle, blockElement: HTMLElement, columnIDs?: string[]) => {
+    const data = getAVData(blockElement);
+    if (!data || data.viewType !== "table") {
+        return;
+    }
+    setAVColumnWidths(protyle, blockElement, getAVTableFitWidths(
+        data.view as IAVTable,
+        getCellValueText,
+        getAVColumnTextMeasurer(blockElement),
+        columnIDs,
+    ));
+};
+
+const getAVColumnElementWidth = (element: HTMLElement) => {
+    return Math.round(parseFloat(element.style.width) || element.getBoundingClientRect().width);
+};
+
+export const showAVColumnWidthMenu = (protyle: IProtyle, blockElement: HTMLElement,
+                                      widthDragElement: HTMLElement, position: IPosition) => {
+    const columnElement = widthDragElement.parentElement as HTMLElement;
+    const headerElement = hasClosestByClassName(widthDragElement, "av__row--header") as HTMLElement;
+    if (!columnElement || !headerElement) {
+        return;
+    }
+    const columnElements = Array.from(headerElement.querySelectorAll<HTMLElement>(".av__cell--header"));
+    const columnIndex = columnElements.indexOf(columnElement);
+    const columnID = columnElement.dataset.colId;
+    if (columnIndex < 0 || !columnID) {
+        return;
+    }
+    const previousElement = columnIndex > 0 ? columnElements[columnIndex - 1] : undefined;
+    const nextElement = columnIndex < columnElements.length - 1 ? columnElements[columnIndex + 1] : undefined;
+    const setCurrentColumnWidth = (sourceElement?: HTMLElement) => {
+        if (sourceElement) {
+            setAVColumnWidths(protyle, blockElement, {
+                [columnID]: `${getAVColumnElementWidth(sourceElement)}px`,
+            });
+        }
+    };
+    const menu = new Menu();
+    menu.addItem({
+        icon: "iconWidth",
+        label: window.siyuan.languages.autoFitColWidth,
+        click() {
+            autoFitAVColumns(protyle, blockElement, [columnID]);
+        }
+    });
+    menu.addItem({
+        icon: "iconInsertLeft",
+        label: window.siyuan.languages.sameWidthAsLeftColumn,
+        disabled: !previousElement,
+        click() {
+            setCurrentColumnWidth(previousElement);
+        }
+    });
+    menu.addItem({
+        icon: "iconInsertRight",
+        label: window.siyuan.languages.sameWidthAsRightColumn,
+        disabled: !nextElement,
+        click() {
+            setCurrentColumnWidth(nextElement);
+        }
+    });
+    menu.addItem({
+        icon: "iconScale",
+        label: window.siyuan.languages.distributeAllColWidths,
+        click() {
+            const width = `${getAVDistributedColumnWidth(columnElements.map(getAVColumnElementWidth))}px`;
+            setAVColumnWidths(protyle, blockElement, Object.fromEntries(columnElements.map(item => [
+                item.dataset.colId,
+                width,
+            ])));
+        }
+    });
+    menu.addSeparator();
+    menu.addItem({
+        icon: "iconWidth",
+        label: window.siyuan.languages.autoFitAllColWidths,
+        click() {
+            autoFitAVColumns(protyle, blockElement);
+        }
+    });
+    menu.addItem({
+        icon: "iconRefresh",
+        label: window.siyuan.languages.applyColWidthToOtherViews,
+        click() {
+            transaction(protyle, [{
+                action: "syncAttrViewTableColWidth",
+                keyID: columnID,
+                avID: blockElement.dataset.avId,
+                id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+            }]);
+        }
+    });
+    menu.open(position);
 };
 
 export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {
@@ -1171,7 +1258,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     });
     menu.addItem({
         icon: "iconRefresh",
-        label: window.siyuan.languages.syncColWidth,
+        label: window.siyuan.languages.applyColWidthToOtherViews,
         click() {
             transaction(protyle, [{
                 action: "syncAttrViewTableColWidth",

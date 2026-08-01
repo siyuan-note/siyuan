@@ -2,7 +2,7 @@ import {showMessage} from "../../dialog/message";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {getCurrentEditor} from "../editor";
 import {closePanel} from "./closePanel";
-import {destroyModel} from "../menu/model";
+import {backModel, destroyModel} from "../menu/model";
 
 export const clearMobileBackForward = (notebookId?: string) => {
     if (notebookId) {
@@ -32,9 +32,12 @@ export const goBack = () => {
     } else if (window.siyuan.dialogs.length !== 0) {
         window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
         return;
-    } else if (document.getElementById("model").style.transform === "translateY(0px)") {
+    } else if (document.getElementById("model").style.transform === "translateX(0px)") {
         const searchAssetsPanelElement = document.getElementById("searchAssetsPanel");
         if (!searchAssetsPanelElement || searchAssetsPanelElement.classList.contains("fn__none")) {
+            if (backModel()) {
+                return;
+            }
             destroyModel();
             document.getElementById("model").style.transform = "";
         } else {

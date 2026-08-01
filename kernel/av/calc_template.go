@@ -182,6 +182,12 @@ func pushRollupTemplateErr(err error) {
 // templateFuncMap 在 sprig 函数集基础上，补充表格计算专用的条件计数函数 countif。
 func templateFuncMap() template.FuncMap {
 	tplFuncs := sprig.TxtFuncMap()
+
+	// 因为安全原因移除一些函数，与 filesys.BuiltInTemplateFuncs 保持一致 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-v97v-gxxg-rhmq
+	delete(tplFuncs, "env")
+	delete(tplFuncs, "expandenv")
+	delete(tplFuncs, "getHostByName")
+
 	tplFuncs["countif"] = util.CountIf
 	return tplFuncs
 }

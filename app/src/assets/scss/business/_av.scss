@@ -1186,23 +1186,19 @@
     z-index: 1;
     touch-action: none;
 
-    &:hover {
+    &:hover,
+    &--active {
       background-color: var(--b3-theme-primary);
     }
   }
 
   &__width-guide {
     background-color: var(--b3-theme-primary);
-    opacity: .45;
     pointer-events: none;
     position: fixed;
+    transform: translateX(-50%);
     width: 1px;
     z-index: 1000;
-
-    &--snapped {
-      opacity: 1;
-      width: 2px;
-    }
   }
 
   &__width-tip {

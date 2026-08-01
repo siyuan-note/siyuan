@@ -34,6 +34,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -512,5 +513,49 @@ func TestGetAttributeViewAssetsLinkDestsFiltersItems(t *testing.T) {
 	want = []string{"assets/public.png", "assets/private.png", "assets/public-url.png", "assets/private-url.png"}
 	if got := getAttributeViewAssetsLinkDests(attrView, false, nil); !reflect.DeepEqual(got, want) {
 		t.Fatalf("get unfiltered attribute view asset links: got %v, want %v", got, want)
+	}
+}
+
+func TestRenameAssetClearsAttributeViewCache(t *testing.T) {
+	const avID = "20200101000000-abcdefg"
+	oldPath := "assets/old-20200101000000-abcdefg.png"
+	newPath := "assets/new-20200101000000-hijklmn.png"
+	data := []byte(`{"keyValues":[{"values":[{"mAsset":[{"type":"image","name":"","content":"` + oldPath + `"}]}]}]}`)
+	avJSONPath := filepath.Join(t.TempDir(), avID+".json")
+	if err := os.WriteFile(avJSONPath, data, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	cache.SetAVData(avID, data)
+	deadline := time.Now().Add(time.Second)
+	for {
+		if cached, ok := cache.GetAVData(avID); ok && bytes.Equal(cached, data) {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("wait for attribute view cache timed out")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	t.Cleanup(func() {
+		cache.RemoveAVData(avID)
+	})
+
+	updated, err := replaceAttributeViewAssetPath(avJSONPath, avID, oldPath, newPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !updated {
+		t.Fatal("attribute view asset path should be updated")
+	}
+	if _, ok := cache.GetAVData(avID); ok {
+		t.Fatal("renaming an asset should clear the attribute view cache")
+	}
+	updatedData, err := os.ReadFile(avJSONPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(updatedData, []byte(oldPath)) || !bytes.Contains(updatedData, []byte(newPath)) {
+		t.Fatalf("replace attribute view asset path: got %s", updatedData)
 	}
 }

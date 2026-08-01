@@ -114,7 +114,7 @@ import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 import {selectRow, stickyRow, updateHeader} from "../render/av/row";
 import {getAVSelectedItemIDs, getAVSelectedTableCells, updateAVRowSelect} from "../render/av/virtualScroll";
-import {autoFitAVColumns, setFreezeColumn, showColMenu} from "../render/av/col";
+import {autoFitAVColumns, setFreezeColumn, showAVColumnWidthMenu, showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
 import {getAVCurrentViewID} from "../render/av/viewVisibility";
 import {checkFold} from "../../util/noRelyPCFunction";
@@ -1385,7 +1385,8 @@ export class WYSIWYG {
                 const avId = nodeElement.getAttribute("data-av-id");
                 const blockID = nodeElement.dataset.nodeId;
                 const dragElement = target.parentElement as HTMLElement;
-                const oldWidth = dragElement.clientWidth;
+                const dragRect = dragElement.getBoundingClientRect();
+                const oldWidth = Math.round(parseFloat(dragElement.style.width) || dragRect.width);
                 const dragColId = dragElement.getAttribute("data-col-id");
                 const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
                 const headerElement = hasClosestByClassName(target, "av__row--header") as HTMLElement;
@@ -1395,52 +1396,95 @@ export class WYSIWYG {
                 }
                 const headerCells = Array.from(headerElement.querySelectorAll<HTMLElement>(".av__cell--header"));
                 const dragIndex = headerCells.indexOf(dragElement);
-                const previousWidth = dragIndex > 0 ? headerCells[dragIndex - 1].clientWidth : undefined;
+                const previousElement = dragIndex > 0 ? headerCells[dragIndex - 1] : undefined;
+                const previousWidth = previousElement ?
+                    Math.round(parseFloat(previousElement.style.width) || previousElement.getBoundingClientRect().width) :
+                    undefined;
+                const columnElements: HTMLElement[] = [];
+                scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
+                    const columnElement = item.querySelector<HTMLElement>(`[data-col-id="${dragColId}"]`);
+                    if (columnElement) {
+                        columnElements.push(columnElement);
+                    }
+                });
+                const initialDragRight = dragRect.right;
+                const widthScale = dragRect.width / oldWidth || 1;
+                const snapGuideThreshold = 16;
+                const snapGuideRight = previousWidth === undefined ? undefined :
+                    initialDragRight + (previousWidth - oldWidth) * widthScale;
+                const headerRect = headerElement.getBoundingClientRect();
+                const headerTop = headerRect.top;
+                const guideHeight = Math.round(headerRect.height);
                 let newWidth: number;
+                let resizeSnapped: boolean;
                 let resizeGuide: HTMLElement;
                 let resizeTip: HTMLElement;
+                let pendingResize: { width: number, snapped: boolean } | undefined;
+                let resizeAnimationFrame: number | undefined;
+                target.classList.add("av__widthdrag--active");
                 const clearResizePreview = () => {
+                    target.classList.remove("av__widthdrag--active");
                     resizeGuide?.remove();
                     resizeTip?.remove();
                 };
                 const updateResizePreview = (snapped: boolean) => {
-                    if (!resizeGuide) {
-                        resizeGuide = document.createElement("div");
-                        resizeGuide.className = "av__width-guide";
-                        document.body.appendChild(resizeGuide);
+                    if (!resizeTip) {
+                        if (snapGuideRight !== undefined) {
+                            resizeGuide = document.createElement("div");
+                            resizeGuide.className = "av__width-guide";
+                            resizeGuide.style.left = `${snapGuideRight}px`;
+                            resizeGuide.style.top = `${Math.round(headerTop)}px`;
+                            resizeGuide.style.height = `${guideHeight}px`;
+                            document.body.appendChild(resizeGuide);
+                        }
                         resizeTip = document.createElement("div");
                         resizeTip.className = "av__width-tip";
                         document.body.appendChild(resizeTip);
                     }
-                    const dragRect = dragElement.getBoundingClientRect();
-                    const headerRect = headerElement.getBoundingClientRect();
-                    const bodyRect = bodyElement.getBoundingClientRect();
-                    const guideBottom = Math.min(bodyRect.bottom, contentRect.bottom, window.innerHeight);
-                    resizeGuide.classList.toggle("av__width-guide--snapped", snapped);
-                    resizeGuide.style.left = `${Math.round(dragRect.right)}px`;
-                    resizeGuide.style.top = `${Math.round(headerRect.top)}px`;
-                    resizeGuide.style.height = `${Math.max(0, Math.round(guideBottom - headerRect.top))}px`;
-                    resizeTip.style.left = `${Math.round(dragRect.right)}px`;
-                    resizeTip.style.top = `${Math.round(headerRect.top)}px`;
-                    resizeTip.textContent = `${newWidth}px`;
+                    const showSnapGuide = !snapped && typeof previousWidth === "number" &&
+                        Math.abs(newWidth - previousWidth) <= snapGuideThreshold;
+                    resizeGuide?.classList.toggle("fn__none", !showSnapGuide);
+                    const dragRight = initialDragRight + (newWidth - oldWidth) * widthScale;
+                    resizeTip.style.left = `${dragRight}px`;
+                    resizeTip.style.top = `${Math.round(headerTop)}px`;
+                    resizeTip.textContent = `${newWidth}px${snapped ?
+                        window.siyuan.languages.sameWidthAsLeftColumnTip : ""}`;
+                };
+                const flushResize = () => {
+                    if (!pendingResize) {
+                        return;
+                    }
+                    const currentResize = pendingResize;
+                    pendingResize = undefined;
+                    if (newWidth === currentResize.width && resizeSnapped === currentResize.snapped) {
+                        return;
+                    }
+                    newWidth = currentResize.width;
+                    resizeSnapped = currentResize.snapped;
+                    columnElements.forEach(columnElement => {
+                        columnElement.style.width = newWidth + "px";
+                    });
+                    updateResizePreview(resizeSnapped);
                 };
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                    const resizeWidth = getAVColumnResizeWidth(
+                    pendingResize = getAVColumnResizeWidth(
                         oldWidth + (moveEvent.clientX - event.clientX),
                         previousWidth,
                     );
-                    newWidth = resizeWidth.width;
-                    scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
-                        const columnElement = item.querySelector<HTMLElement>(`[data-col-id="${dragColId}"]`);
-                        if (columnElement) {
-                            columnElement.style.width = newWidth + "px";
-                        }
-                    });
-                    updateResizePreview(resizeWidth.snapped);
-                    stickyRow(nodeElement, protyle.contentElement, "bottom");
+                    if (resizeAnimationFrame === undefined) {
+                        resizeAnimationFrame = requestAnimationFrame(() => {
+                            resizeAnimationFrame = undefined;
+                            flushResize();
+                        });
+                    }
                 };
 
                 documentSelf.onmouseup = () => {
+                    if (resizeAnimationFrame !== undefined) {
+                        cancelAnimationFrame(resizeAnimationFrame);
+                        resizeAnimationFrame = undefined;
+                    }
+                    flushResize();
                     clearResizePreview();
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
@@ -1450,6 +1494,7 @@ export class WYSIWYG {
                     if (!newWidth || newWidth === oldWidth) {
                         return;
                     }
+                    stickyRow(nodeElement, protyle.contentElement, "bottom");
                     const viewID = nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
                     transaction(protyle, [{
                         action: "setAttrViewColWidth",
@@ -3242,6 +3287,15 @@ export class WYSIWYG {
             const nodeElement = hasClosestBlock(target);
             if (!nodeElement) {
                 return false;
+            }
+            const widthDragElement = hasClosestByClassName(target, "av__widthdrag") as HTMLElement;
+            if (widthDragElement) {
+                if (!protyle.disabled) {
+                    showAVColumnWidthMenu(protyle, nodeElement as HTMLElement, widthDragElement, {x, y});
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                return;
             }
             const avCellElement = hasClosestByClassName(target, "av__cell");
             if (avCellElement) {

@@ -428,10 +428,10 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 
 		typeFilter := Conf.Search.TypeFilter()
 		ignoreLines := getRefSearchIgnoreLines()
-		refs := sql.QueryRefsRecentInBox(onlyDoc, typeFilter, ignoreLines, boxID)
-		// 候选已按 refs.id DESC 兜底排序，这里再按"最近引用时间"精确排序：
-		// 有记录的目标块按时间戳降序排前，无记录的（历史数据）保持兜底序排后
 		refUsed := GetRefUsed()
+		refs := sql.QueryRefsRecentInBox(onlyDoc, typeFilter, ignoreLines, sortedRefUsedIDs(refUsed), boxID)
+		// 查询阶段已将有使用记录的目标块放入候选集，这里再按最近引用时间精确排序。
+		// 无记录的历史数据保持 refs.id DESC 兜底顺序。
 		sort.SliceStable(refs, func(i, j int) bool {
 			ti, oki := refUsed[refs[i].DefBlockID]
 			tj, okj := refUsed[refs[j].DefBlockID]
@@ -2280,6 +2280,27 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
 }
 
 func buildRefUsedOrderBy(refUsed map[string]int64) string {
+	ids := sortedRefUsedIDs(refUsed)
+	if 1 > len(ids) {
+		return ""
+	}
+
+	buf := bytes.Buffer{}
+	buf.WriteString("CASE id ")
+	for i, id := range ids {
+		buf.WriteString("WHEN '")
+		buf.WriteString(id)
+		buf.WriteString("' THEN ")
+		buf.WriteString(strconv.Itoa(i))
+		buf.WriteByte(' ')
+	}
+	buf.WriteString("ELSE ")
+	buf.WriteString(strconv.Itoa(len(ids)))
+	buf.WriteString(" END ASC, ")
+	return buf.String()
+}
+
+func sortedRefUsedIDs(refUsed map[string]int64) (ret []string) {
 	type refUsedEntry struct {
 		id        string
 		timestamp int64
@@ -2291,10 +2312,6 @@ func buildRefUsedOrderBy(refUsed map[string]int64) string {
 			entries = append(entries, refUsedEntry{id: id, timestamp: timestamp})
 		}
 	}
-	if 1 > len(entries) {
-		return ""
-	}
-
 	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].timestamp == entries[j].timestamp {
 			return entries[i].id > entries[j].id
@@ -2302,19 +2319,10 @@ func buildRefUsedOrderBy(refUsed map[string]int64) string {
 		return entries[i].timestamp > entries[j].timestamp
 	})
 
-	buf := bytes.Buffer{}
-	buf.WriteString("CASE id ")
-	for i, entry := range entries {
-		buf.WriteString("WHEN '")
-		buf.WriteString(entry.id)
-		buf.WriteString("' THEN ")
-		buf.WriteString(strconv.Itoa(i))
-		buf.WriteByte(' ')
+	for _, entry := range entries {
+		ret = append(ret, entry.id)
 	}
-	buf.WriteString("ELSE ")
-	buf.WriteString(strconv.Itoa(len(entries)))
-	buf.WriteString(" END ASC, ")
-	return buf.String()
+	return
 }
 
 func extractID(content string) (ret string) {

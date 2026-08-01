@@ -592,6 +592,14 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 }
 
 func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
+	addBlockIALNodes0(tree, removeUpdated, false)
+}
+
+func addCanonicalBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
+	addBlockIALNodes0(tree, removeUpdated, true)
+}
+
+func addBlockIALNodes0(tree *parse.Tree, removeUpdated, canonical bool) {
 	var blocks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
@@ -622,7 +630,11 @@ func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
 		return ast.WalkContinue
 	})
 	for _, block := range blocks {
-		block.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(block.KramdownIAL)})
+		ial := block.KramdownIAL
+		if canonical {
+			ial = canonicalBlockKramdownIAL(ial)
+		}
+		block.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(ial)})
 	}
 }
 

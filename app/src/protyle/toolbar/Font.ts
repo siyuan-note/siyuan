@@ -29,6 +29,47 @@ export class Font extends ToolbarItem {
     }
 }
 
+export const getFontSizeInfo = (protyle: IProtyle, nodeElements?: Element[]) => {
+    let textElement: HTMLElement;
+    let fontSizeElement: HTMLElement;
+    if (nodeElements && nodeElements.length > 0) {
+        textElement = nodeElements[0] as HTMLElement;
+        fontSizeElement = textElement;
+    } else {
+        textElement = hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "text") as HTMLElement;
+        if (!textElement) {
+            textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
+        }
+        const startContainer = protyle.toolbar.range.startContainer;
+        fontSizeElement = startContainer.nodeType === Node.ELEMENT_NODE ?
+            startContainer as HTMLElement : startContainer.parentElement;
+    }
+
+    let baseFontSize = window.siyuan.config.editor.fontSize;
+    const baseElement = textElement?.isConnected ? textElement.parentElement : fontSizeElement;
+    if (baseElement) {
+        baseFontSize = parseFloat(getComputedStyle(baseElement).fontSize) || baseFontSize;
+    }
+
+    let fontSize = textElement?.style.fontSize;
+    if (!fontSize && fontSizeElement) {
+        fontSize = getComputedStyle(fontSizeElement).fontSize;
+    }
+    return {
+        fontSize: fontSize || window.siyuan.config.editor.fontSize + "px",
+        baseFontSize,
+    };
+};
+
+export const convertFontSize = (fontSize: string, unit: "px" | "em", baseFontSize: number) => {
+    const value = parseFloat(fontSize);
+    const base = baseFontSize || window.siyuan.config.editor.fontSize;
+    if (unit === "em") {
+        return fontSize.endsWith("em") ? value + "em" : parseFloat((value / base).toFixed(2)) + "em";
+    }
+    return fontSize.endsWith("px") ? Math.round(value) + "px" : Math.round(value * base) + "px";
+};
+
 export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     let colorHTML = "";
     ["", "var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
@@ -94,19 +135,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         });
         lastColorHTML += "</div>";
     }
-    let textElement: HTMLElement;
-    let fontSize = window.siyuan.config.editor.fontSize + "px";
-    if (nodeElements && nodeElements.length > 0) {
-        textElement = nodeElements[0] as HTMLElement;
-    } else {
-        textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
-        if (!textElement) {
-            textElement = hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "text") as HTMLElement;
-        }
-    }
-    if (textElement) {
-        fontSize = textElement.style.fontSize || window.siyuan.config.editor.fontSize + "px";
-    }
+    const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
 <div data-id="color">${window.siyuan.languages.color}</div>
@@ -191,18 +220,17 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     const fontSizeEMElement = element.querySelector("#fontSizeEM") as HTMLInputElement;
     switchElement.addEventListener("change", function () {
         if (switchElement.checked) {
-            // px -> em
-            const em = parseFloat((parseInt(fontSizePXElement.value) / 16).toFixed(2));
-            fontSizeEMElement.parentElement.setAttribute("aria-label", (em * 100).toString() + "%");
-            fontSizeEMElement.value = em.toString();
+            const em = convertFontSize(fontSizePXElement.value + "px", "em", baseFontSize);
+            fontSizeEMElement.parentElement.setAttribute("aria-label", (parseFloat(em) * 100).toFixed(0) + "%");
+            fontSizeEMElement.value = parseFloat(em).toString();
 
             fontSizePXElement.parentElement.classList.add("fn__none");
             fontSizeEMElement.parentElement.classList.remove("fn__none");
             fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
         } else {
-            const px = Math.round(parseFloat(fontSizeEMElement.value) * 16);
-            fontSizePXElement.parentElement.setAttribute("aria-label", px + "px");
-            fontSizePXElement.value = px.toString();
+            const px = convertFontSize(fontSizeEMElement.value + "em", "px", baseFontSize);
+            fontSizePXElement.parentElement.setAttribute("aria-label", px);
+            fontSizePXElement.value = parseFloat(px).toString();
 
             fontSizePXElement.parentElement.classList.remove("fn__none");
             fontSizeEMElement.parentElement.classList.add("fn__none");

@@ -17,6 +17,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -277,6 +278,20 @@ func getDocAssets(c *gin.Context) {
 	ret.Data = assets
 }
 
+// fileAnno 是 PDF 文件标注 .sya 的校验结构，setFileAnnotation 通过它约束客户端提交的数据结构，避免任意字符串落盘
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-fqpw-c3pj-w8g9
+type fileAnno struct {
+	Pages []struct {
+		Index     int         `json:"index"`
+		Positions [][]float64 `json:"positions"`
+	} `json:"pages"`
+	Color   string   `json:"color"`
+	Type    string   `json:"type"`
+	Content string   `json:"content"`
+	Mode    string   `json:"mode"`
+	IDs     []string `json:"ids"`
+}
+
 func setFileAnnotation(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -308,8 +323,25 @@ func setFileAnnotation(c *gin.Context) {
 			return
 		}
 	} else {
+		var annos map[string]fileAnno
+		if err = json.Unmarshal([]byte(data), &annos); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if annos == nil {
+			ret.Code = -1
+			ret.Msg = "invalid annotation"
+			return
+		}
+		normalized, err := json.Marshal(annos)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
 		// 加密笔记本的 .sya 写盘前必须加密；加密笔记本未解锁时拒绝写入（fail-closed，避免明文落盘）
-		writeData := []byte(data)
+		writeData := normalized
 		if boxID != "" && model.IsEncryptedBox(boxID) {
 			dek, dekErr := model.GetDEKIfUnlocked(boxID)
 			if dekErr != nil {

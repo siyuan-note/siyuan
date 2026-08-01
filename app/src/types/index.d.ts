@@ -486,7 +486,7 @@ interface IInbox {
 interface IPdfAnno {
     pages?: {
         index: number
-        positions: number[]
+        positions: number[][]
     }[]
     index?: number,
     color: string,
@@ -494,7 +494,7 @@ interface IPdfAnno {
     content: string,    // rect, text
     mode: string,
     id?: string,
-    coords?: number[]
+    coords?: number[][]
     ids?: string[]
 }
 

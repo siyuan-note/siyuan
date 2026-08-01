@@ -2373,6 +2373,7 @@
 		"349": "O conteúdo do Vault mudou após a análise; faça a análise novamente",
 		"350": "Não foi possível concluir a gravação ou indexação do novo caderno; ele foi marcado como incompleto",
 		"351": "Ocorreu um erro inesperado; verifique o registro do sistema para a tarefa [%s]",
-		"352": "O contexto do agente não cabe no modelo selecionado após a compactação. Mude para um modelo com uma janela de contexto maior"
+		"352": "O contexto do agente não cabe no modelo selecionado após a compactação. Mude para um modelo com uma janela de contexto maior",
+		"353": "O campo [%s] do modelo de novo item ignorou valores de opção indisponíveis [%s]"
 	}
 	}

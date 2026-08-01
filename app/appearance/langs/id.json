@@ -2373,6 +2373,7 @@
 		"349": "Isi Vault berubah setelah analisis; lakukan analisis lagi",
 		"350": "Tidak dapat menyelesaikan penulisan atau pengindeksan buku catatan baru; buku catatan telah ditandai belum lengkap",
 		"351": "Terjadi kesalahan tak terduga; periksa log sistem untuk tugas [%s]",
-		"352": "Konteks agen tidak muat dalam model yang dipilih setelah pemadatan. Beralihlah ke model dengan jendela konteks yang lebih besar"
+		"352": "Konteks agen tidak muat dalam model yang dipilih setelah pemadatan. Beralihlah ke model dengan jendela konteks yang lebih besar",
+		"353": "Bidang templat item baru [%s] mengabaikan nilai opsi yang tidak tersedia [%s]"
 	}
 	}

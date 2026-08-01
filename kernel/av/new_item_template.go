@@ -19,12 +19,20 @@ package av
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/88250/lute/ast"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// PrunedNewItemTemplateOption 描述创建条目前从模板字段值中移除的无效选项。
+type PrunedNewItemTemplateOption struct {
+	TemplateID string
+	KeyID      string
+	Values     []string
+}
 
 // SetNewItemTemplates 校验并替换数据库的新增条目模板配置。
 func (av *AttributeView) SetNewItemTemplates(config *NewItemTemplatesConfig) error {
@@ -220,7 +228,7 @@ func (av *AttributeView) RemoveNewItemTemplateRelationItems(targetAvID string, i
 }
 
 // PruneInvalidNewItemTemplateFieldValues 清理因字段结构或候选值变化而失效的模板字段值。
-func (av *AttributeView) PruneInvalidNewItemTemplateFieldValues() {
+func (av *AttributeView) PruneInvalidNewItemTemplateFieldValues() (ret []*PrunedNewItemTemplateOption) {
 	for _, itemTemplate := range av.NewItemTemplates {
 		if nil == itemTemplate || nil == itemTemplate.FieldValues {
 			continue
@@ -253,10 +261,20 @@ func (av *AttributeView) PruneInvalidNewItemTemplateFieldValues() {
 			}
 			if KeyTypeSelect == key.Type || KeyTypeMSelect == key.Type {
 				selections := normalized.MSelect[:0]
+				var invalidValues []string
 				for _, selection := range normalized.MSelect {
 					if nil != selection && nil != key.GetOption(selection.Content) {
 						selections = append(selections, selection)
+					} else if nil != selection {
+						invalidValues = append(invalidValues, selection.Content)
 					}
+				}
+				if 0 < len(invalidValues) {
+					ret = append(ret, &PrunedNewItemTemplateOption{
+						TemplateID: itemTemplate.ID,
+						KeyID:      keyID,
+						Values:     invalidValues,
+					})
 				}
 				normalized.MSelect = selections
 				if 0 == len(selections) {
@@ -270,6 +288,13 @@ func (av *AttributeView) PruneInvalidNewItemTemplateFieldValues() {
 			itemTemplate.FieldValues = nil
 		}
 	}
+	sort.Slice(ret, func(i, j int) bool {
+		if ret[i].TemplateID != ret[j].TemplateID {
+			return ret[i].TemplateID < ret[j].TemplateID
+		}
+		return ret[i].KeyID < ret[j].KeyID
+	})
+	return
 }
 
 func (av *AttributeView) normalizeNewItemTemplateFieldValues(itemTemplate *NewItemTemplate) error {
@@ -306,6 +331,13 @@ func (av *AttributeView) normalizeNewItemTemplateFieldValues(itemTemplate *NewIt
 			fieldValue.Value, err = normalizeNewItemTemplateValue(fieldValue.Value, key)
 			if nil != err {
 				return fmt.Errorf("new item template field [%s] value is invalid: %w", keyID, err)
+			}
+			if KeyTypeSelect == key.Type || KeyTypeMSelect == key.Type {
+				for _, selection := range fieldValue.Value.MSelect {
+					if nil != selection && nil == key.GetOption(selection.Content) {
+						return fmt.Errorf("new item template field [%s] option [%s] not found", keyID, selection.Content)
+					}
+				}
 			}
 		default:
 			return fmt.Errorf("invalid new item template field value mode [%s]", fieldValue.Mode)

@@ -86,6 +86,23 @@ func TestSetNewItemTemplatesRejectsInvalidConfig(t *testing.T) {
 	if nil == err {
 		t.Fatal("expected a number field without number payload to fail")
 	}
+
+	for _, keyType := range []KeyType{KeyTypeSelect, KeyTypeMSelect} {
+		selectKey := NewKey(ast.NewNodeID(), "Select", "", keyType)
+		selectKey.Options = []*SelectOption{{Name: "Available", Color: "1"}}
+		attrView.KeyValues = append(attrView.KeyValues, &KeyValues{Key: selectKey})
+		attrView.KeyIDs = append(attrView.KeyIDs, selectKey.ID)
+		err = attrView.SetNewItemTemplates(&NewItemTemplatesConfig{Templates: []*NewItemTemplate{{
+			ID: ast.NewNodeID(), Name: "Invalid", TargetType: NewItemTargetDetached,
+			FieldValues: map[string]*NewItemFieldValue{selectKey.ID: {
+				Mode:  NewItemFieldValueStatic,
+				Value: &Value{Type: keyType, MSelect: []*ValueSelect{{Content: "Unavailable", Color: "2"}}},
+			}},
+		}}})
+		if nil == err {
+			t.Fatalf("expected an unavailable %s option to fail", keyType)
+		}
+	}
 }
 
 func TestEmptyNewItemTemplatesUseVirtualDefault(t *testing.T) {
@@ -154,5 +171,58 @@ func TestMaintainNewItemTemplateFieldValues(t *testing.T) {
 	attrView.RemoveNewItemTemplateFieldValue(selectKey.ID)
 	if nil != attrView.NewItemTemplates[0].FieldValues {
 		t.Fatalf("empty field values should be nil: %+v", attrView.NewItemTemplates[0].FieldValues)
+	}
+}
+
+func TestPruneInvalidNewItemTemplateOptions(t *testing.T) {
+	mSelectKey := NewKey(ast.NewNodeID(), "Multiple Select", "", KeyTypeMSelect)
+	mSelectKey.Options = []*SelectOption{{Name: "Available", Color: "1"}}
+	selectKey := NewKey(ast.NewNodeID(), "Select", "", KeyTypeSelect)
+	selectKey.Options = []*SelectOption{{Name: "Available", Color: "1"}}
+	templateID := ast.NewNodeID()
+	attrView := &AttributeView{
+		KeyValues: []*KeyValues{{Key: mSelectKey}, {Key: selectKey}},
+		NewItemTemplates: []*NewItemTemplate{{
+			ID: templateID, Name: "Template", TargetType: NewItemTargetDetached,
+			FieldValues: map[string]*NewItemFieldValue{
+				mSelectKey.ID: {
+					Mode: NewItemFieldValueStatic,
+					Value: &Value{Type: KeyTypeMSelect, MSelect: []*ValueSelect{
+						{Content: "Available", Color: "1"}, {Content: "Unavailable", Color: "2"},
+					}},
+				},
+				selectKey.ID: {
+					Mode: NewItemFieldValueStatic,
+					Value: &Value{Type: KeyTypeSelect, MSelect: []*ValueSelect{
+						{Content: "Missing", Color: "2"},
+					}},
+				},
+			},
+		}},
+	}
+
+	pruned := attrView.PruneInvalidNewItemTemplateFieldValues()
+	if 2 != len(pruned) {
+		t.Fatalf("expected two pruned option records, got %+v", pruned)
+	}
+	prunedByKeyID := map[string]*PrunedNewItemTemplateOption{}
+	for _, item := range pruned {
+		prunedByKeyID[item.KeyID] = item
+		if templateID != item.TemplateID {
+			t.Fatalf("unexpected template ID: %q", item.TemplateID)
+		}
+	}
+	if values := prunedByKeyID[mSelectKey.ID].Values; 1 != len(values) || "Unavailable" != values[0] {
+		t.Fatalf("unexpected multiple select values: %+v", values)
+	}
+	if values := prunedByKeyID[selectKey.ID].Values; 1 != len(values) || "Missing" != values[0] {
+		t.Fatalf("unexpected select values: %+v", values)
+	}
+	selections := attrView.NewItemTemplates[0].FieldValues[mSelectKey.ID].Value.MSelect
+	if 1 != len(selections) || "Available" != selections[0].Content {
+		t.Fatalf("unexpected retained multiple select values: %+v", selections)
+	}
+	if nil != attrView.NewItemTemplates[0].FieldValues[selectKey.ID] {
+		t.Fatal("select field with no available option should be removed")
 	}
 }

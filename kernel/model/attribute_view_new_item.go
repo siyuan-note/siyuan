@@ -75,6 +75,7 @@ func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	}
 	createdAt := time.Now()
 	itemTemplate := attrView.GetNewItemTemplate(templateID)
+	var prunedOptions []*av.PrunedNewItemTemplateOption
 	if "" != templateID && nil == itemTemplate {
 		return nil, fmt.Errorf("new item template [%s] not found", templateID)
 	}
@@ -82,7 +83,7 @@ func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 		itemTemplate = &av.NewItemTemplate{TargetType: av.NewItemTargetDetached}
 	} else {
 		cloned := *attrView
-		cloned.PruneInvalidNewItemTemplateFieldValues()
+		prunedOptions = cloned.PruneInvalidNewItemTemplateFieldValues()
 		if err = cloned.SetNewItemTemplates(&av.NewItemTemplatesConfig{Templates: []*av.NewItemTemplate{itemTemplate}}); nil != err {
 			return nil, err
 		}
@@ -92,6 +93,12 @@ func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	preview, err := resolveAttributeViewNewItemTemplate(blockID, itemTemplate, createdAt)
 	if nil != err {
 		return nil, err
+	}
+	for _, prunedOption := range prunedOptions {
+		if templateID == prunedOption.TemplateID {
+			preview.Warnings = append(preview.Warnings, fmt.Sprintf(Conf.Language(353),
+				prunedOption.KeyID, strings.Join(prunedOption.Values, ", ")))
+		}
 	}
 
 	itemID := ast.NewNodeID()

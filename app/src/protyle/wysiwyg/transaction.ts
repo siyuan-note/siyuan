@@ -1453,6 +1453,50 @@ export const insertEmptyBlockquote = (protyle: IProtyle, previousElement: HTMLEl
     hideElements(["gutter"], protyle);
 };
 
+export const wrapBlockInBlockquote = async (protyle: IProtyle, blockElement: HTMLElement, options?: {
+    oldHTML: string,
+    undoContext?: Record<string, string>,
+    additionalOperations?: {
+        doOperations: IOperation[],
+        undoOperations: IOperation[],
+    },
+}) => {
+    const range = getEditorRange(protyle.wysiwyg.element);
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
+    const blockID = blockElement.getAttribute("data-node-id");
+    const operations = await turnsIntoOneTransaction({
+        protyle,
+        selectsElement: [blockElement],
+        type: "Blocks2Blockquote",
+        getOperations: true,
+    });
+    operations.undoOperations[operations.undoOperations.length - 1].context =
+        options?.undoContext || undoFocusContext;
+    if (options) {
+        operations.doOperations.unshift({
+            action: "update",
+            id: blockElement.getAttribute("data-node-id"),
+            data: blockElement.outerHTML,
+        });
+        operations.undoOperations.push({
+            action: "update",
+            id: blockElement.getAttribute("data-node-id"),
+            data: options.oldHTML,
+            context: options.undoContext,
+        });
+        if (options.additionalOperations) {
+            operations.doOperations.unshift(...options.additionalOperations.doOperations);
+            operations.undoOperations.push(...options.additionalOperations.undoOperations);
+        }
+    }
+    transaction(protyle, operations.doOperations, operations.undoOperations);
+    const currentBlockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${blockID}"]`);
+    if (currentBlockElement && !focusByWbr(currentBlockElement, document.createRange())) {
+        focusBlock(currentBlockElement);
+    }
+    hideElements(["gutter"], protyle);
+};
+
 export const turnsIntoGroupsTransaction = async (options: {
     protyle: IProtyle,
     selectsElementGroups: Element[][],

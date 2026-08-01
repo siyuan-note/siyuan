@@ -103,6 +103,16 @@ describe("getBlockquoteContext", () => {
 
         assert.equal(shouldCancelBlockquote(context!), true);
     });
+
+    it("does not cancel a blockquote when the current paragraph has a sibling block", () => {
+        const sibling = new TestElement("NodeParagraph", "sibling");
+        const paragraph = new TestElement("NodeParagraph", "paragraph");
+        const blockquote = new TestElement("NodeBlockquote", "blockquote").append(sibling, paragraph, new TestElement());
+        const editor = new TestElement().append(blockquote);
+        const context = getBlockquoteContext(asHTMLElement(paragraph), asHTMLElement(editor));
+
+        assert.equal(shouldCancelBlockquote(context!), false);
+    });
 });
 
 describe("isBlockquoteMarker", () => {

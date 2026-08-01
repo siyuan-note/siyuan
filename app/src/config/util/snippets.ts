@@ -80,7 +80,7 @@ export const openSnippets = () => {
 <div class="fn__flex-1" style="overflow:auto;padding: 16px 24px">
     <div>
         <div class="fn__flex">
-            <input data-type="css" data-action="search" type="text" placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__block">
+            <input data-type="css" data-action="search" type="text" placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block">
             <div class="fn__space"></div>
             <span aria-label="${window.siyuan.languages.addAttr} CSS" id="addCodeSnippetCSS" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
                 <svg><use xlink:href="#iconAdd"></use></svg>
@@ -92,7 +92,7 @@ export const openSnippets = () => {
     </div>
     <div class="fn__none">
         <div class="fn__flex">
-            <input data-type="js" data-action="search" type="text" placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__block">
+            <input data-type="js" data-action="search" type="text" placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block">
             <div class="fn__space"></div>
             <span aria-label="${window.siyuan.languages.addAttr} JS" id="addCodeSnippetJS" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
                 <svg><use xlink:href="#iconAdd"></use></svg>

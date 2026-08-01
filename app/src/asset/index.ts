@@ -147,7 +147,7 @@ export class Asset extends Model {
       </div>
       <div id="mainContainer">
         <div class="findbar b3-menu fn__hidden doorHanger" id="findbar">
-            <input id="findInput" class="toolbarField b3-text-field" placeholder="${window.siyuan.languages.search}">
+            <input id="findInput" class="toolbarField b3-text-field" placeholder="${window.siyuan.languages.searchPlaceholder}">
             <div class="fn__space"></div>
             <button id="findPreviousButton" class="toolbarButton findPrevious b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.previous}">
                 <svg><use xlink:href="#iconUp"></use></svg>

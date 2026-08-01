@@ -453,7 +453,7 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string, blockElement: 
 </div>${hiddenHTML}` : "";
     return `<div class="b3-menu__items fn__flex-column">
 <div class="b3-menu__item fn__flex-shrink" data-type="nobg">
-    <input class="b3-text-field fn__block" type="text" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">
+    <input class="b3-text-field fn__block" type="text" style="margin: 4px 0" placeholder="${window.siyuan.languages.searchPlaceholder}">
 </div>
 <div class="fn__flex-1" style="overflow: auto">
     ${visibleSectionHTML}

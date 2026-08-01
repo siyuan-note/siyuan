@@ -700,7 +700,7 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
 
     // 下拉面板
     const searchInput = options.length > 5
-        ? `<input class="b3-text-field" placeholder="${window.siyuan.languages.search}" data-type="filterSearch" data-path="${path}">`
+        ? `<input class="b3-text-field" placeholder="${window.siyuan.languages.searchPlaceholder}" data-type="filterSearch" data-path="${path}">`
         : "";
     const chips = options.map((option: { name: string; color: string; desc?: string }) => {
         const selected = selectedValues.some((s: IAVCellSelectValue) => s.content === option.name);
@@ -758,7 +758,7 @@ const genInlineRelationHTML = (filter: IAVFilter, colData: IAVColumn, path: stri
 ${genRelationFilterTriggerContent(avID, selectedBlockIDs, path)}<svg class="av__select-trigger-arrow"><use xlink:href="#iconDown"></use></svg></span>`;
     const dropdown = `<div class="av__select-dropdown av__relation-filter-dropdown" data-type="relationFilterDropdown" data-path="${path}" data-av-id="${escapeAttr(avID)}" data-selected="${selectedAttr}" style="display:none;">
 <div class="av__relation-filter-selected" data-type="relationFilterSelected" data-path="${path}">${genRelationFilterSelectedHTML(avID, selectedBlockIDs, path)}</div>
-<input class="b3-text-field" placeholder="${window.siyuan.languages.search}" data-type="relationFilterSearch" data-path="${path}">
+<input class="b3-text-field" placeholder="${window.siyuan.languages.searchPlaceholder}" data-type="relationFilterSearch" data-path="${path}">
 <div class="av__relation-filter-options" data-type="relationFilterOptions" data-path="${path}"></div>
 </div>`;
     return {trigger, dropdown};

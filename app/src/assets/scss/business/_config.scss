@@ -206,6 +206,10 @@
     align-items: center;
   }
 
+  &-account__payment-remaining {
+    margin-right: 8px;
+  }
+
   &-account__profile {
     align-items: center;
     min-width: 0;
@@ -256,7 +260,7 @@
     height: 48px;
     width: 48px;
     flex-shrink: 0;
-    border-radius: 50%;
+    border-radius: var(--b3-border-radius);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

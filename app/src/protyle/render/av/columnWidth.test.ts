@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getAVColumnFitWidth, getAVColumnResizeWidth, getAVTableFitWidths} from "./columnWidth";
+import {
+    getAVColumnFitWidth,
+    getAVColumnResizeWidth,
+    getAVDistributedColumnWidth,
+    getAVTableFitWidths,
+} from "./columnWidth";
 
 const measureText = (value: string) => value.length * 10;
 
@@ -81,12 +86,20 @@ describe("getAVTableFitWidths", () => {
 
 describe("getAVColumnResizeWidth", () => {
     it("snaps to the previous visible column within the threshold", () => {
-        assert.deepEqual(getAVColumnResizeWidth(194, 200), {width: 200, snapped: true});
-        assert.deepEqual(getAVColumnResizeWidth(206, 200), {width: 200, snapped: true});
-        assert.deepEqual(getAVColumnResizeWidth(207, 200), {width: 207, snapped: false});
+        assert.deepEqual(getAVColumnResizeWidth(195, 200), {width: 195, snapped: false});
+        assert.deepEqual(getAVColumnResizeWidth(196, 200), {width: 200, snapped: true});
+        assert.deepEqual(getAVColumnResizeWidth(204, 200), {width: 200, snapped: true});
+        assert.deepEqual(getAVColumnResizeWidth(205, 200), {width: 205, snapped: false});
     });
 
     it("keeps manual resizing above the minimum width", () => {
         assert.deepEqual(getAVColumnResizeWidth(10), {width: 25, snapped: false});
+    });
+});
+
+describe("getAVDistributedColumnWidth", () => {
+    it("preserves the total width while distributing columns evenly", () => {
+        assert.equal(getAVDistributedColumnWidth([120, 240, 360]), 240);
+        assert.equal(getAVDistributedColumnWidth([]), 25);
     });
 });

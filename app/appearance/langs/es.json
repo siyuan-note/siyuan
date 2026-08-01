@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "Distribuir uniformemente el ancho de todas las columnas",
+  "sameWidthAsRightColumn": "Mismo ancho que la columna derecha",
+  "sameWidthAsLeftColumn": "Mismo ancho que la columna izquierda",
+  "autoFitColWidth": "Ajustar automáticamente el ancho de la columna",
+  "sameWidthAsLeftColumnTip": ", mismo ancho que la columna izquierda",
   "autoFitAllColWidths": "Ajustar automáticamente el ancho de todas las columnas",
   "searchPlaceholder": "Buscar...",
   "visibleViews": "Vistas visibles",

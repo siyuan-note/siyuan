@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "모든 열 너비를 균등하게 분배",
+  "sameWidthAsRightColumn": "오른쪽 열과 같은 너비",
+  "sameWidthAsLeftColumn": "왼쪽 열과 같은 너비",
+  "autoFitColWidth": "열 너비 자동 맞춤",
+  "sameWidthAsLeftColumnTip": ", 왼쪽 열과 같은 너비",
   "autoFitAllColWidths": "모든 열 너비 자동 맞춤",
   "searchPlaceholder": "검색...",
   "visibleViews": "표시된 뷰",

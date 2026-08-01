@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "すべての列幅を均等にする",
+  "sameWidthAsRightColumn": "右の列と同じ幅",
+  "sameWidthAsLeftColumn": "左の列と同じ幅",
+  "autoFitColWidth": "列幅を自動調整",
+  "sameWidthAsLeftColumnTip": "、左の列と同じ幅",
   "autoFitAllColWidths": "すべての列幅を自動調整",
   "searchPlaceholder": "検索...",
   "visibleViews": "表示中のビュー",

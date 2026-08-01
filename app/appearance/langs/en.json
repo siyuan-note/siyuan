@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "Distribute all column widths evenly",
+  "sameWidthAsRightColumn": "Same width as the right column",
+  "sameWidthAsLeftColumn": "Same width as the left column",
+  "autoFitColWidth": "Auto-fit column width",
+  "sameWidthAsLeftColumnTip": ", same width as the left column",
   "autoFitAllColWidths": "Auto-fit all column widths",
   "searchPlaceholder": "Search...",
   "visibleViews": "Visible views",

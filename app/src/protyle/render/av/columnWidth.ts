@@ -33,7 +33,7 @@ export const getAVColumnFitWidth = (name: string, type: TAVCol, values: string[]
     return `${Math.ceil(Math.min(480, Math.max(64, headerWidth, contentWidth)))}px`;
 };
 
-export const getAVColumnResizeWidth = (width: number, previousWidth?: number, snapThreshold = 6) => {
+export const getAVColumnResizeWidth = (width: number, previousWidth?: number, snapThreshold = 4) => {
     const limitedWidth = Math.max(Math.round(width), 25);
     const normalizedPreviousWidth = typeof previousWidth === "number" ? Math.round(previousWidth) : undefined;
     const snapped = typeof normalizedPreviousWidth === "number" &&
@@ -42,6 +42,13 @@ export const getAVColumnResizeWidth = (width: number, previousWidth?: number, sn
         width: snapped ? normalizedPreviousWidth : limitedWidth,
         snapped,
     };
+};
+
+export const getAVDistributedColumnWidth = (widths: number[]) => {
+    if (widths.length === 0) {
+        return 25;
+    }
+    return Math.max(25, Math.round(widths.reduce((total, width) => total + width, 0) / widths.length));
 };
 
 export const getAVTableFitWidths = (

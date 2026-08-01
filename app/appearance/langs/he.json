@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "פזר את רוחב כל העמודות באופן שווה",
+  "sameWidthAsRightColumn": "רוחב זהה לעמודה הימנית",
+  "sameWidthAsLeftColumn": "רוחב זהה לעמודה השמאלית",
+  "autoFitColWidth": "התאם אוטומטית את רוחב העמודה",
+  "sameWidthAsLeftColumnTip": ", רוחב זהה לעמודה השמאלית",
   "autoFitAllColWidths": "התאם אוטומטית את רוחב כל העמודות",
   "searchPlaceholder": "חפש...",
   "visibleViews": "תצוגות גלויות",

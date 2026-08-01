@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "Répartir uniformément la largeur de toutes les colonnes",
+  "sameWidthAsRightColumn": "Même largeur que la colonne de droite",
+  "sameWidthAsLeftColumn": "Même largeur que la colonne de gauche",
+  "autoFitColWidth": "Ajuster automatiquement la largeur de la colonne",
+  "sameWidthAsLeftColumnTip": ", même largeur que la colonne de gauche",
   "autoFitAllColWidths": "Ajuster automatiquement la largeur de toutes les colonnes",
   "searchPlaceholder": "Recherche...",
   "visibleViews": "Vues visibles",

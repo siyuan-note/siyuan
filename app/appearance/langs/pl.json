@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "Rozłóż równomiernie szerokość wszystkich kolumn",
+  "sameWidthAsRightColumn": "Taka sama szerokość jak prawa kolumna",
+  "sameWidthAsLeftColumn": "Taka sama szerokość jak lewa kolumna",
+  "autoFitColWidth": "Automatycznie dopasuj szerokość kolumny",
+  "sameWidthAsLeftColumnTip": ", taka sama szerokość jak lewa kolumna",
   "autoFitAllColWidths": "Automatycznie dopasuj szerokość wszystkich kolumn",
   "searchPlaceholder": "Szukaj...",
   "visibleViews": "Widoczne widoki",

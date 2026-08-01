@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "Rovnomerne rozložiť šírku všetkých stĺpcov",
+  "sameWidthAsRightColumn": "Rovnaká šírka ako pravý stĺpec",
+  "sameWidthAsLeftColumn": "Rovnaká šírka ako ľavý stĺpec",
+  "autoFitColWidth": "Automaticky prispôsobiť šírku stĺpca",
+  "sameWidthAsLeftColumnTip": ", rovnaká šírka ako ľavý stĺpec",
   "autoFitAllColWidths": "Automaticky prispôsobiť šírku všetkých stĺpcov",
   "searchPlaceholder": "Vyhľadávanie...",
   "visibleViews": "Viditeľné zobrazenia",

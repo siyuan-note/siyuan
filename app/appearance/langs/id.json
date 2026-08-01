@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "Distribusikan semua lebar kolom secara merata",
+  "sameWidthAsRightColumn": "Sama lebar dengan kolom kanan",
+  "sameWidthAsLeftColumn": "Sama lebar dengan kolom kiri",
+  "autoFitColWidth": "Sesuaikan lebar kolom secara otomatis",
+  "sameWidthAsLeftColumnTip": ", sama lebar dengan kolom kiri",
   "autoFitAllColWidths": "Sesuaikan semua lebar kolom secara otomatis",
   "searchPlaceholder": "Cari...",
   "visibleViews": "Tampilan terlihat",

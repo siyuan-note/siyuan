@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "Рівномірно розподілити ширину всіх стовпців",
+  "sameWidthAsRightColumn": "Така сама ширина, як у стовпця праворуч",
+  "sameWidthAsLeftColumn": "Така сама ширина, як у стовпця ліворуч",
+  "autoFitColWidth": "Автоматично підібрати ширину стовпця",
+  "sameWidthAsLeftColumnTip": ", така сама ширина, як у стовпця ліворуч",
   "autoFitAllColWidths": "Автоматично підібрати ширину всіх стовпців",
   "searchPlaceholder": "Пошук...",
   "visibleViews": "Видимі подання",

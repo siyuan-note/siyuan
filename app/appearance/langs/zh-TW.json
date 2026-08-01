@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "均分所有欄寬",
+  "sameWidthAsRightColumn": "與右側欄同寬",
+  "sameWidthAsLeftColumn": "與左側欄同寬",
+  "autoFitColWidth": "自動調整欄寬",
+  "sameWidthAsLeftColumnTip": "，與左側欄同寬",
   "autoFitAllColWidths": "自動調整所有列寬",
   "searchPlaceholder": "搜索...",
   "visibleViews": "顯示視圖",

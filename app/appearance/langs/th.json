@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "กระจายความกว้างของคอลัมน์ทั้งหมดให้เท่ากัน",
+  "sameWidthAsRightColumn": "กว้างเท่ากับคอลัมน์ด้านขวา",
+  "sameWidthAsLeftColumn": "กว้างเท่ากับคอลัมน์ด้านซ้าย",
+  "autoFitColWidth": "ปรับความกว้างคอลัมน์โดยอัตโนมัติ",
+  "sameWidthAsLeftColumnTip": ", กว้างเท่ากับคอลัมน์ด้านซ้าย",
   "autoFitAllColWidths": "ปรับความกว้างของคอลัมน์ทั้งหมดโดยอัตโนมัติ",
   "searchPlaceholder": "ค้นหา...",
   "visibleViews": "มุมมองที่มองเห็น",

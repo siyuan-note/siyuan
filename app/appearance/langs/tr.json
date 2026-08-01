@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "Tüm sütun genişliklerini eşit dağıt",
+  "sameWidthAsRightColumn": "Sağdaki sütunla aynı genişlikte",
+  "sameWidthAsLeftColumn": "Soldaki sütunla aynı genişlikte",
+  "autoFitColWidth": "Sütun genişliğini otomatik ayarla",
+  "sameWidthAsLeftColumnTip": ", soldaki sütunla aynı genişlikte",
   "autoFitAllColWidths": "Tüm sütun genişliklerini otomatik ayarla",
   "searchPlaceholder": "Ara...",
   "visibleViews": "Görünür görünümler",

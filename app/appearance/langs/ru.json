@@ -1,4 +1,9 @@
 {
+  "distributeAllColWidths": "Равномерно распределить ширину всех столбцов",
+  "sameWidthAsRightColumn": "Та же ширина, что у столбца справа",
+  "sameWidthAsLeftColumn": "Та же ширина, что у столбца слева",
+  "autoFitColWidth": "Автоматически подобрать ширину столбца",
+  "sameWidthAsLeftColumnTip": ", такая же ширина, как у столбца слева",
   "autoFitAllColWidths": "Автоматически подобрать ширину всех столбцов",
   "searchPlaceholder": "Поиск...",
   "visibleViews": "Отображаемые виды",

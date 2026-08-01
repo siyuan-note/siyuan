@@ -18,6 +18,7 @@ package cache
 
 import (
 	"sync"
+	"sync/atomic"
 
 	"github.com/dgraph-io/ristretto"
 )
@@ -45,6 +46,7 @@ var avDataVersion uint64
 var avDataVersions = map[string]uint64{}
 var avSearchDataCache = map[string]*avSearchDataEntry{}
 var avSearchDataCacheLock sync.RWMutex
+var avCacheGeneration atomic.Uint64
 
 func avCacheKey(avID, boxID string) string {
 	return boxID + "\x00" + avID
@@ -143,6 +145,7 @@ func RemoveAVData(avID string) {
 }
 
 func ClearAVCache() {
+	avCacheGeneration.Add(1)
 	avCacheKeysLock.Lock()
 	avCacheKeys = map[string]map[string]struct{}{}
 	avCacheKeysLock.Unlock()
@@ -152,6 +155,10 @@ func ClearAVCache() {
 	avDataVersions = map[string]uint64{}
 	avSearchDataCache = map[string]*avSearchDataEntry{}
 	avSearchDataCacheLock.Unlock()
+}
+
+func GetAVCacheGeneration() uint64 {
+	return avCacheGeneration.Load()
 }
 
 func GetAVSearchDataInBox[T any](avID, boxID string) (ret T, ok bool) {

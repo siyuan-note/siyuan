@@ -35,6 +35,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/sync/singleflight"
 )
 
 // AttributeView 描述了属性视图的结构。
@@ -592,48 +593,70 @@ func parseAttributeViewSearchInfo(data []byte) (ret *AttributeViewSearchInfo, er
 	return
 }
 
+var attributeViewSearchInfoFlight singleflight.Group
+
 func GetAttributeViewSearchInfoInBox(avID, boxID string) (ret *AttributeViewSearchInfo, err error) {
 	avJSONPath, avBoxID := FindAttributeViewPathInBox(avID, boxID)
 	if avJSONPath == "" {
 		return
 	}
+	if cached, ok := cache.GetAVSearchDataInBox[*AttributeViewSearchInfo](avID, avBoxID); ok {
+		return cached, nil
+	}
+
+	value, err, _ := attributeViewSearchInfoFlight.Do(avBoxID+"\x00"+avID, func() (any, error) {
+		return loadAttributeViewSearchInfoInBox(avID, avJSONPath, avBoxID)
+	})
+	if value != nil {
+		ret = value.(*AttributeViewSearchInfo)
+	}
+	return
+}
+
+func loadAttributeViewSearchInfoInBox(avID, avJSONPath, avBoxID string) (ret *AttributeViewSearchInfo, err error) {
 	release, lockErr := holdAVBoxReadLock(avBoxID)
 	if lockErr != nil {
 		return nil, lockErr
 	}
 	defer release()
 
-	if cached, ok := cache.GetAVSearchDataInBox[*AttributeViewSearchInfo](avID, avBoxID); ok {
-		return cached, nil
-	}
-
-	var data []byte
-	var dataVersion uint64
-	if cached, version, ok := cache.GetAVDataWithVersionInBox(avID, avBoxID); ok {
-		data = cached
-		dataVersion = version
-	} else {
-		dataVersion = cache.EnsureAVDataVersionInBox(avID, avBoxID)
-		if data, err = filelock.ReadFile(avJSONPath); err != nil {
-			logging.LogErrorf("read attribute view [%s] failed: %s", avJSONPath, err)
-			return
+	for i := 0; i < 3; i++ {
+		if cached, ok := cache.GetAVSearchDataInBox[*AttributeViewSearchInfo](avID, avBoxID); ok {
+			return cached, nil
 		}
-		if avBoxID != "" {
-			if data, err = decryptAVDataLocked(avBoxID, avID, data); err != nil {
-				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avJSONPath, err)
+
+		var data []byte
+		var dataVersion uint64
+		if cached, version, ok := cache.GetAVDataWithVersionInBox(avID, avBoxID); ok {
+			data = cached
+			dataVersion = version
+		} else {
+			dataVersion = cache.EnsureAVDataVersionInBox(avID, avBoxID)
+			if data, err = filelock.ReadFile(avJSONPath); err != nil {
+				logging.LogErrorf("read attribute view [%s] failed: %s", avJSONPath, err)
 				return
 			}
-		} else if util.IsCiphertext(data) {
-			return
+			if avBoxID != "" {
+				if data, err = decryptAVDataLocked(avBoxID, avID, data); err != nil {
+					logging.LogErrorf("decrypt attribute view [%s] failed: %s", avJSONPath, err)
+					return
+				}
+			} else if util.IsCiphertext(data) {
+				return nil, nil
+			}
+		}
+
+		if ret, err = parseAttributeViewSearchInfo(data); err != nil {
+			logging.LogErrorf("unmarshal attribute view search info [%s] failed: %s", avID, err)
+			return nil, err
+		}
+		if cache.SetAVSearchDataInBox(avID, avBoxID, dataVersion, ret) {
+			return ret, nil
 		}
 	}
-
-	if ret, err = parseAttributeViewSearchInfo(data); err != nil {
-		logging.LogErrorf("unmarshal attribute view search info [%s] failed: %s", avID, err)
-		return nil, err
-	}
-	cache.SetAVSearchDataInBox(avID, avBoxID, dataVersion, ret)
-	return
+	err = fmt.Errorf("attribute view [%s] changed while loading search info", avID)
+	logging.LogWarnf("%s", err)
+	return nil, err
 }
 
 func GetAttributeViewContent(avID string) (content string) {

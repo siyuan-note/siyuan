@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -2743,25 +2744,106 @@ type SearchAttributeViewOptions struct {
 	IncludeViewMatches bool
 }
 
-var attributeViewSearchCacheWarmups sync.Map
+type attributeViewSearchCacheWarmup struct {
+	signature uint64
+	cancel    context.CancelFunc
+	running   bool
+}
 
-func warmAttributeViewSearchCache(boxID string, avIDs []string) {
+var attributeViewSearchCacheWarmups = struct {
+	sync.Mutex
+	states map[string]*attributeViewSearchCacheWarmup
+}{states: map[string]*attributeViewSearchCacheWarmup{}}
+
+var attributeViewSearchCacheWarmupDelay = 500 * time.Millisecond
+var loadAttributeViewSearchInfo = av.GetAttributeViewSearchInfoInBox
+
+const attributeViewSearchCacheWarmupHashOffset = uint64(1469598103934665603)
+const attributeViewSearchCacheWarmupHashPrime = uint64(1099511628211)
+
+func warmAttributeViewSearchCache(boxID string, avIDs []string, signature uint64) {
 	if len(avIDs) == 0 {
 		return
 	}
-	if _, loaded := attributeViewSearchCacheWarmups.LoadOrStore(boxID, struct{}{}); loaded {
+
+	attributeViewSearchCacheWarmups.Lock()
+	if state := attributeViewSearchCacheWarmups.states[boxID]; state != nil && state.signature == signature {
+		attributeViewSearchCacheWarmups.Unlock()
 		return
 	}
+	if state := attributeViewSearchCacheWarmups.states[boxID]; state != nil && state.cancel != nil {
+		state.cancel()
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	state := &attributeViewSearchCacheWarmup{signature: signature, cancel: cancel, running: true}
+	attributeViewSearchCacheWarmups.states[boxID] = state
+	attributeViewSearchCacheWarmups.Unlock()
+
 	ids := slices.Clone(avIDs)
+	delay := attributeViewSearchCacheWarmupDelay
+	loader := loadAttributeViewSearchInfo
 	go func() {
-		defer attributeViewSearchCacheWarmups.Delete(boxID)
+		completed := false
+		defer func() {
+			attributeViewSearchCacheWarmups.Lock()
+			defer attributeViewSearchCacheWarmups.Unlock()
+			if attributeViewSearchCacheWarmups.states[boxID] != state {
+				return
+			}
+			if completed {
+				state.cancel = nil
+				state.running = false
+			} else {
+				delete(attributeViewSearchCacheWarmups.states, boxID)
+			}
+		}()
+
+		timer := time.NewTimer(delay)
+		defer timer.Stop()
+		select {
+		case <-ctx.Done():
+			return
+		case <-timer.C:
+		}
+
 		for _, avID := range ids {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
 			if isSyncingStorages() {
 				return
 			}
-			_, _ = av.GetAttributeViewSearchInfoInBox(avID, boxID)
+			_, _ = loader(avID, boxID)
 		}
+		completed = true
 	}()
+}
+
+func stopAttributeViewSearchCacheWarmup(boxID string) {
+	attributeViewSearchCacheWarmups.Lock()
+	defer attributeViewSearchCacheWarmups.Unlock()
+	state := attributeViewSearchCacheWarmups.states[boxID]
+	if state == nil || !state.running {
+		return
+	}
+	state.cancel()
+	delete(attributeViewSearchCacheWarmups.states, boxID)
+}
+
+func updateAttributeViewSearchCacheWarmupSignature(signature uint64, avID string, info os.FileInfo) uint64 {
+	for i := 0; i < len(avID); i++ {
+		signature ^= uint64(avID[i])
+		signature *= attributeViewSearchCacheWarmupHashPrime
+	}
+	if info != nil {
+		signature ^= uint64(info.ModTime().UnixNano())
+		signature *= attributeViewSearchCacheWarmupHashPrime
+		signature ^= uint64(info.Size())
+		signature *= attributeViewSearchCacheWarmupHashPrime
+	}
+	return signature
 }
 
 func matchAttributeViewSearchName(name string, keywords []string) (score float64, hit bool) {
@@ -2779,6 +2861,23 @@ func matchAttributeViewSearchName(name string, keywords []string) (score float64
 		score += smetrics.JaroWinkler(name, keyword, 0.7, 4)
 	}
 	return
+}
+
+func sortAndLimitAttributeViewSearchResults(results []*AvSearchTempResult, keyword string) []*AvSearchTempResult {
+	if keyword == "" {
+		sort.Slice(results, func(i, j int) bool { return results[i].AvUpdated > results[j].AvUpdated })
+	} else {
+		sort.SliceStable(results, func(i, j int) bool {
+			if results[i].Score == results[j].Score {
+				return results[i].AvUpdated > results[j].AvUpdated
+			}
+			return results[i].Score > results[j].Score
+		})
+	}
+	if 12 < len(results) {
+		return results[:12]
+	}
+	return results
 }
 
 func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, currentBlockID string) []*AvSearchResult {
@@ -2823,6 +2922,9 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 
 	var avSearchTmpResults []*AvSearchTempResult
 	var warmupAvIDs []string
+	warmupSignature := attributeViewSearchCacheWarmupHashOffset
+	warmupSignature ^= cache.GetAVCacheGeneration()
+	warmupSignature *= attributeViewSearchCacheWarmupHashPrime
 	boxID := ""
 	if options.CurrentBlockID != "" {
 		if bt := treenode.GetBlockTree(options.CurrentBlockID); nil != bt && IsEncryptedBox(bt.BoxID) {
@@ -2830,6 +2932,9 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 		}
 	} else if options.CurrentAvID != "" {
 		_, boxID = av.FindAttributeViewPath(options.CurrentAvID)
+	}
+	if keyword != "" {
+		stopAttributeViewSearchCacheWarmup(boxID)
 	}
 	avDir := filepath.Join(util.DataDir, "storage", "av")
 	if boxID != "" {
@@ -2866,16 +2971,17 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 		if nil == avBlockRels[id] {
 			continue
 		}
+		readFileInfoStart := time.Now()
+		info, _ := entry.Info()
+		readFileInfoElapsed += time.Since(readFileInfoStart)
 		warmupAvIDs = append(warmupAvIDs, id)
+		warmupSignature = updateAttributeViewSearchCacheWarmupSignature(warmupSignature, id, info)
 
 		if gulu.Str.Contains(id, options.ExcludeAvIDs) {
 			continue
 		}
 		eligibleFileCount++
 
-		readFileInfoStart := time.Now()
-		info, _ := entry.Info()
-		readFileInfoElapsed += time.Since(readFileInfoStart)
 		if info != nil {
 			eligibleFileSize += info.Size()
 		}
@@ -2928,20 +3034,8 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 	scanElapsed = time.Since(scanStart)
 
 	sortStart := time.Now()
-	if "" == keyword {
-		sort.Slice(avSearchTmpResults, func(i, j int) bool { return avSearchTmpResults[i].AvUpdated > avSearchTmpResults[j].AvUpdated })
-	} else {
-		sort.SliceStable(avSearchTmpResults, func(i, j int) bool {
-			if avSearchTmpResults[i].Score == avSearchTmpResults[j].Score {
-				return avSearchTmpResults[i].AvUpdated > avSearchTmpResults[j].AvUpdated
-			}
-			return avSearchTmpResults[i].Score > avSearchTmpResults[j].Score
-		})
-	}
 	matchedCount = len(avSearchTmpResults)
-	if 12 <= len(avSearchTmpResults) {
-		avSearchTmpResults = avSearchTmpResults[:12]
-	}
+	avSearchTmpResults = sortAndLimitAttributeViewSearchResults(avSearchTmpResults, keyword)
 	sortElapsed = time.Since(sortStart)
 
 	resolveStart := time.Now()
@@ -3022,7 +3116,7 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 	}
 	resolveElapsed = time.Since(resolveStart)
 	if keyword == "" {
-		warmAttributeViewSearchCache(boxID, warmupAvIDs)
+		warmAttributeViewSearchCache(boxID, warmupAvIDs, warmupSignature)
 	}
 	return
 }

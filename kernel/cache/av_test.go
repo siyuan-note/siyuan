@@ -73,3 +73,11 @@ func TestAVSearchDataWithoutRawData(t *testing.T) {
 		t.Fatal("setting raw data should invalidate standalone search data")
 	}
 }
+
+func TestAVCacheGeneration(t *testing.T) {
+	generation := GetAVCacheGeneration()
+	ClearAVCache()
+	if current := GetAVCacheGeneration(); current != generation+1 {
+		t.Fatalf("unexpected AV cache generation: %d", current)
+	}
+}

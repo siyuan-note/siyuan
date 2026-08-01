@@ -502,6 +502,34 @@
       margin-left: 6px;
     }
   }
+
+  &__font-size {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    min-height: 48px;
+    padding-right: 8px;
+    width: 100%;
+
+    .b3-slider {
+      height: 32px;
+    }
+
+    [data-type="fontSizeValue"] {
+      flex-shrink: 0;
+      text-align: right;
+      width: 48px;
+    }
+
+    &-toggle {
+      align-items: center;
+      box-sizing: border-box;
+      display: flex;
+      min-height: 40px;
+      padding-right: 8px;
+      width: 100%;
+    }
+  }
 }
 
 #empty {

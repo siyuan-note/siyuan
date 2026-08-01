@@ -338,6 +338,16 @@
     border-spacing: 0;
     width: max-content;
 
+    &.protyle-table-control__table--add-row {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    &.protyle-table-control__table--add-column {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
     tr:nth-child(even) td {
       background-color: var(--b3-table-even-background);
     }

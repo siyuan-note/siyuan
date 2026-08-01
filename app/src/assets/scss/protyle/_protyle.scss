@@ -822,6 +822,14 @@ table + .protyle-action__table {
   &__add {
     width: 24px;
     height: 24px;
+
+    &--row {
+      border-radius: 0 0 var(--b3-border-radius-s) var(--b3-border-radius-s);
+    }
+
+    &--column {
+      border-radius: 0 var(--b3-border-radius-s) var(--b3-border-radius-s) 0;
+    }
   }
 
   &__selection {

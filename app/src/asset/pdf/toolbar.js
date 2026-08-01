@@ -30,6 +30,8 @@ import {
  * @property {HTMLSpanElement} numPages - Label that contains number of pages.
  * @property {HTMLInputElement} pageNumber - Control for display and user input
  *   of the current page number.
+ * @property {HTMLButtonElement} historyBack - PDF 历史后退按钮。
+ * @property {HTMLButtonElement} historyForward - PDF 历史前进按钮。
  * @property {HTMLSelectElement} scaleSelect - Scale selection control.
  *   Its width is adjusted, when necessary, on UI localization.
  * @property {HTMLOptionElement} customScaleOption - The item used to display
@@ -59,6 +61,8 @@ class Toolbar {
     this.#opts = options;
     this.eventBus = eventBus;
     const buttons = [
+      { element: options.historyBack, eventName: "pdfhistoryback" },
+      { element: options.historyForward, eventName: "pdfhistoryforward" },
       { element: options.previous, eventName: "previouspage" },
       { element: options.next, eventName: "nextpage" },
       { element: options.zoomIn, eventName: "zoomin" },
@@ -163,6 +167,11 @@ class Toolbar {
     this.#updateUIState(false);
   }
 
+  setHistoryState(canGoBack, canGoForward) {
+    this.#opts.historyBack.disabled = !canGoBack;
+    this.#opts.historyForward.disabled = !canGoForward;
+  }
+
   reset() {
     this.pageNumber = 0;
     this.pageLabel = null;
@@ -170,6 +179,7 @@ class Toolbar {
     this.pagesCount = 0;
     this.pageScaleValue = DEFAULT_SCALE_VALUE;
     this.pageScale = DEFAULT_SCALE;
+    this.setHistoryState(false, false);
     this.#updateUIState(true);
     this.updateLoadingIndicatorState();
 

@@ -279,7 +279,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     } else if (group.groupValue.type === "checkbox") {
         nameHTML = `<svg style="width:calc(1.625em - 12px);height:calc(1.625em - 12px)"><use xlink:href="#icon${group.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else {
-        nameHTML = group.name;
+        nameHTML = escapeHtml(group.name);
     }
     // av__group-name 为第三方需求，本应用内没有使用，但不能移除 https://github.com/siyuan-note/siyuan/issues/15736
     return `<div class="av__group-title">

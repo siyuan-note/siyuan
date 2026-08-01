@@ -288,7 +288,7 @@ export const getViewHTML = (data: IAV) => {
         </div>
         <div class="fn__none">
             <div class="fn__hr"></div>
-            <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(view.desc)}">${view.desc}</textarea>
+            <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(view.desc)}">${escapeHtml(view.desc)}</textarea>
         </div>
         <div class="fn__hr"></div>
     </div>
@@ -321,7 +321,7 @@ export const getViewHTML = (data: IAV) => {
 <button class="b3-menu__item" data-type="goGroups">
     <svg class="b3-menu__icon"><use xlink:href="#iconGroups"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.group}</span>
-    <span class="b3-menu__accelerator">${(data.view.group && data.view.group.field) ? fields.filter((item: IAVColumn) => item.id === data.view.group.field)[0].name : ""}</span>
+    <span class="b3-menu__accelerator">${escapeHtml((data.view.group && data.view.group.field) ? fields.filter((item: IAVColumn) => item.id === data.view.group.field)[0].name : "")}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>

@@ -114,7 +114,7 @@ export const getEditHTML = (options: {
         </div>
         <div class="fn__none">
             <div class="fn__hr"></div>
-            <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(colData.desc)}">${colData.desc}</textarea>
+            <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(colData.desc)}">${escapeHtml(colData.desc)}</textarea>
         </div>
         <div class="fn__hr--small"></div>
     </div>

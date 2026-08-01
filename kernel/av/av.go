@@ -560,6 +560,29 @@ type AttributeViewSearchInfo struct {
 	Views []*AttributeViewSearchView `json:"views"`
 }
 
+func newAttributeViewSearchInfo(attrView *AttributeView) *AttributeViewSearchInfo {
+	if attrView == nil {
+		return nil
+	}
+	ret := &AttributeViewSearchInfo{Spec: attrView.Spec, Name: attrView.Name}
+	for _, view := range attrView.Views {
+		if view == nil {
+			continue
+		}
+		ret.Views = append(ret.Views, &AttributeViewSearchView{
+			ID:         view.ID,
+			Name:       view.Name,
+			LayoutType: view.LayoutType,
+		})
+	}
+	return ret
+}
+
+func cacheAttributeViewData(attrView *AttributeView, boxID string, data []byte) {
+	version := cache.SetAVDataWithVersionInBox(attrView.ID, boxID, data)
+	cache.SetAVSearchDataInBox(attrView.ID, boxID, version, newAttributeViewSearchInfo(attrView))
+}
+
 func parseAttributeViewSearchInfo(data []byte) (ret *AttributeViewSearchInfo, err error) {
 	ret = &AttributeViewSearchInfo{}
 	if err = json.Unmarshal(data, ret); err != nil {
@@ -590,6 +613,7 @@ func GetAttributeViewSearchInfoInBox(avID, boxID string) (ret *AttributeViewSear
 		data = cached
 		dataVersion = version
 	} else {
+		dataVersion = cache.EnsureAVDataVersionInBox(avID, avBoxID)
 		if data, err = filelock.ReadFile(avJSONPath); err != nil {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avJSONPath, err)
 			return
@@ -602,7 +626,6 @@ func GetAttributeViewSearchInfoInBox(avID, boxID string) (ret *AttributeViewSear
 		} else if util.IsCiphertext(data) {
 			return
 		}
-		dataVersion = cache.SetAVDataWithVersionInBox(avID, avBoxID, data)
 	}
 
 	if ret, err = parseAttributeViewSearchInfo(data); err != nil {
@@ -735,8 +758,10 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 	avID = strings.TrimSuffix(avID, filepath.Ext(avID))
 
 	var data []byte
-	if cached, ok := cache.GetAVDataInBox(avID, boxID); ok {
+	var dataVersion uint64
+	if cached, version, ok := cache.GetAVDataWithVersionInBox(avID, boxID); ok {
 		data = cached
+		dataVersion = version
 	} else {
 		var readErr error
 		data, readErr = filelock.ReadFile(avJSONPath)
@@ -756,7 +781,7 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 			// 这会在加密笔记本的 AV 因路径迁移（同步、导入、历史布局）落到全局位置时发生。
 			return nil, nil
 		}
-		cache.SetAVDataInBox(avID, boxID, data)
+		dataVersion = cache.SetAVDataWithVersionInBox(avID, boxID, data)
 	}
 
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
@@ -818,6 +843,9 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 	}
 	if nil == err {
 		err = CheckSpec(ret)
+	}
+	if nil == err {
+		cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))
 	}
 	return
 }
@@ -897,8 +925,9 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		// 加密笔记本的首次创建由 handler 层通过 SetAVBoxID 预设路径
 		avJSONPath = GetAttributeViewDataPath(av.ID)
 	}
-	if cachedData, ok := cache.GetAVDataInBox(av.ID, avBoxID); ok {
+	if cachedData, version, ok := cache.GetAVDataWithVersionInBox(av.ID, avBoxID); ok {
 		if len(cachedData) == len(data) && bytes.Equal(cachedData, data) {
+			cache.SetAVSearchDataInBox(av.ID, avBoxID, version, newAttributeViewSearchInfo(av))
 			return
 		}
 	} else {
@@ -908,7 +937,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 				diskData, _ = decryptAVData(avBoxID, av.ID, diskData)
 			}
 			if len(diskData) == len(data) && bytes.Equal(diskData, data) {
-				cache.SetAVDataInBox(av.ID, avBoxID, data)
+				cacheAttributeViewData(av, avBoxID, data)
 				return
 			}
 		}
@@ -935,7 +964,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 	}
 
-	cache.SetAVDataInBox(av.ID, avBoxID, data)
+	cacheAttributeViewData(av, avBoxID, data)
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
 		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize)

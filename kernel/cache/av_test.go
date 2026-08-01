@@ -49,3 +49,27 @@ func TestAVSearchDataInvalidation(t *testing.T) {
 		t.Fatal("removing AV data should invalidate search data")
 	}
 }
+
+func TestAVSearchDataWithoutRawData(t *testing.T) {
+	const avID = "20260801120000-search"
+	const boxID = "20260801120000-box"
+
+	version := EnsureAVDataVersionInBox(avID, boxID)
+	if version == 0 || EnsureAVDataVersionInBox(avID, boxID) != version {
+		t.Fatalf("unexpected AV data version: %d", version)
+	}
+	if !SetAVSearchDataInBox(avID, boxID, version, "cached") {
+		t.Fatal("failed to cache search data without raw data")
+	}
+	if _, ok := GetAVDataInBox(avID, boxID); ok {
+		t.Fatal("caching search data should not cache raw data")
+	}
+
+	newVersion := SetAVDataWithVersionInBox(avID, boxID, []byte(`{"name":"new"}`))
+	if newVersion == version {
+		t.Fatal("setting raw data should advance the data version")
+	}
+	if _, ok := GetAVSearchDataInBox[string](avID, boxID); ok {
+		t.Fatal("setting raw data should invalidate standalone search data")
+	}
+}

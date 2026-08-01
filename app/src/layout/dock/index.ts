@@ -818,6 +818,12 @@ export class Dock {
         delete sourceDock.data[type];
         // 目标处理
         sourceElement.setAttribute("data-index", index.toString());
+        const tooltipPosition = this.getTooltipPosition();
+        if (tooltipPosition) {
+            sourceElement.setAttribute("data-position", tooltipPosition);
+        } else {
+            sourceElement.removeAttribute("data-position");
+        }
         if (previousType) {
             this.elements[index].parentElement.querySelector(`[data-type="${previousType}"]`).after(sourceElement);
         } else {
@@ -924,6 +930,7 @@ export class Dock {
 
     public genButton(data: Config.IUILayoutDockTab[], index: number, tabIndex?: number) {
         let html = "";
+        const tooltipPosition = this.getTooltipPosition();
         data.forEach(item => {
             if (typeof tabIndex === "undefined" && !TYPES.includes(item.type)) {
                 return;
@@ -934,7 +941,7 @@ export class Dock {
             } else if (item.type === "tags") {
                 item.icon = "iconTag";
             }
-            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
+            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}"${tooltipPosition ? ` data-position="${tooltipPosition}"` : ""} class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
     <svg><use xlink:href="#${item.icon}"></use></svg>
 </span>`;
             this.data[item.type] = true;
@@ -962,6 +969,16 @@ export class Dock {
             }
         }
         this.adjustSplit();
+    }
+
+    private getTooltipPosition() {
+        if (this.position === "Left") {
+            return "8east";
+        }
+        if (this.position === "Right") {
+            return "8west";
+        }
+        return "";
     }
 
     private adjustSplit() {

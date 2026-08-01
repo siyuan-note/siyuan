@@ -783,7 +783,7 @@ table + .protyle-action__table {
     color: var(--b3-theme-on-surface);
     background-color: var(--b3-theme-background);
     border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius);
+    border-radius: var(--b3-border-radius-s);
     box-shadow: var(--b3-point-shadow);
     cursor: pointer;
     pointer-events: auto;
@@ -806,7 +806,6 @@ table + .protyle-action__table {
 
     &--row,
     &--column {
-      border-radius: 0;
       cursor: grab;
     }
 
@@ -823,7 +822,6 @@ table + .protyle-action__table {
   &__add {
     width: 24px;
     height: 24px;
-    border-radius: 0;
   }
 
   &__selection {

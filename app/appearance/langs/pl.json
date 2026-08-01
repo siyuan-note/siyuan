@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "Menu i dok",
+  "entryVisibilityTip": "Wybierz wbudowane pozycje menu i ikony doku wyświetlane na komputerze",
+  "entrySimple": "Prosty",
+  "entryFull": "Pełny",
+  "entryBuiltin": "Wbudowany",
+  "entryCustom": "Niestandardowy",
+  "entryBasedOn": "Na podstawie",
+  "entryCustomProfile": "Profil niestandardowy",
+  "entryCreateProfile": "Utwórz profil",
+  "entryExportAll": "Eksportuj wszystko",
+  "entryRestoreBase": "Przywróć bazę",
+  "entryRestoreBaseConfirm": "Przywrócić wszystkie pozycje tego profilu zgodnie z profilem bazowym?",
+  "entryImportInvalid": "Nieprawidłowy plik profilu menu i doku",
   "mobileMenuQuickActions": "Szybkie działania",
   "mobileMenuCreate": "Utwórz",
   "mobileMenuDataManagement": "Zarządzanie danymi",
@@ -2373,6 +2386,7 @@
 		"349": "Zawartość Vault zmieniła się po analizie; wykonaj analizę ponownie",
 		"350": "Nie można ukończyć zapisywania lub indeksowania nowego notatnika; został oznaczony jako niekompletny",
 		"351": "Wystąpił nieoczekiwany błąd; sprawdź dziennik systemowy zadania [%s]",
-		"352": "Kontekst agenta nie mieści się w wybranym modelu po kompresji. Wybierz model z większym oknem kontekstowym"
+		"352": "Kontekst agenta nie mieści się w wybranym modelu po kompresji. Wybierz model z większym oknem kontekstowym",
+		"353": "Pole [%s] szablonu nowego elementu zignorowało niedostępne wartości opcji [%s]"
 	}
 	}

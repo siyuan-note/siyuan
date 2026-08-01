@@ -5,6 +5,9 @@ import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 import {getTopBarHeight} from "../layout/getTopBarHeight";
 import {electronUndo} from "../protyle/undo";
+/// #if !MOBILE
+import {applyMenuEntryVisibility} from "../config/entryVisibility/runtime";
+/// #endif
 
 const CUSTOM_EVENT_LOAD_SUBMENU = "load-submenu";
 
@@ -203,6 +206,9 @@ export class Menu {
     }
 
     public popup(options: IPosition) {
+        /// #if !MOBILE
+        applyMenuEntryVisibility(this.element);
+        /// #endif
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
@@ -227,6 +233,9 @@ export class Menu {
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {
+        /// #if !MOBILE
+        applyMenuEntryVisibility(this.element);
+        /// #endif
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
@@ -371,6 +380,9 @@ export class MenuItem {
                                 itemsElement.append(new MenuItem(item, menu)?.element || "");
                             });
                         }
+                        /// #if !MOBILE
+                        applyMenuEntryVisibility(menu.element);
+                        /// #endif
                         loaded = true;
                         menu.showSubMenu(submenuElement);
                         if (focusAfterLoad && this.element.classList.contains("b3-menu__item--show")) {

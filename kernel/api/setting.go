@@ -710,6 +710,9 @@ func setAppearance(c *gin.Context) {
 		return
 	}
 
+	if nil == appearance.EntryVisibility {
+		appearance.EntryVisibility = model.Conf.Appearance.EntryVisibility
+	}
 	model.Conf.Appearance = appearance
 	util.StatusBarCfg = model.Conf.Appearance.StatusBar
 	if nil == util.StatusBarCfg {
@@ -727,6 +730,33 @@ func setAppearance(c *gin.Context) {
 
 	ret.Data = model.Conf.Appearance
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
+}
+
+func setEntryVisibility(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	param, err := gulu.JSON.MarshalJSON(arg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	entryVisibility := &conf.EntryVisibility{}
+	if err = gulu.JSON.UnmarshalJSON(param, entryVisibility); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	entryVisibility = conf.NormalizeEntryVisibility(entryVisibility, conf.EntryVisibilityProfileFull)
+	model.Conf.Appearance.EntryVisibility = entryVisibility
+	model.Conf.Save()
+	ret.Data = entryVisibility
+	util.BroadcastByType("main", "setEntryVisibility", 0, "", entryVisibility)
 }
 
 func setIcon(c *gin.Context) {

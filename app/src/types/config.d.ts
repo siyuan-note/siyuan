@@ -333,6 +333,22 @@ declare namespace Config {
         themeVer: string;
         statusBar: IAppearanceStatusBar;
         notifications: IAppearanceNotifications;
+        entryVisibility: IEntryVisibility;
+    }
+
+    export type TEntryVisibilityBase = "simple" | "full";
+
+    export interface IEntryVisibilityProfile {
+        id: string;
+        name: string;
+        base: TEntryVisibilityBase;
+        entries: Record<string, boolean>;
+    }
+
+    export interface IEntryVisibility {
+        version: number;
+        active: string;
+        profiles: IEntryVisibilityProfile[];
     }
 
     export interface IAppearanceStatusBar {

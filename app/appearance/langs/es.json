@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "Menús y panel acoplable",
+  "entryVisibilityTip": "Elige qué elementos de menú e iconos del panel acoplable se muestran en el escritorio",
+  "entrySimple": "Sencillo",
+  "entryFull": "Completo",
+  "entryBuiltin": "Integrado",
+  "entryCustom": "Personalizado",
+  "entryBasedOn": "Basado en",
+  "entryCustomProfile": "Perfil personalizado",
+  "entryCreateProfile": "Crear perfil",
+  "entryExportAll": "Exportar todo",
+  "entryRestoreBase": "Restaurar base",
+  "entryRestoreBaseConfirm": "¿Restaurar todas las entradas de este perfil a su perfil base?",
+  "entryImportInvalid": "El archivo de perfil de menús y panel acoplable no es válido",
   "mobileMenuQuickActions": "Acciones rápidas",
   "mobileMenuCreate": "Crear",
   "mobileMenuDataManagement": "Gestión de datos",
@@ -2373,6 +2386,7 @@
 		"349": "El contenido del Vault cambió después del análisis; vuelva a analizarlo",
 		"350": "No se pudo terminar de escribir o indexar el nuevo cuaderno; se ha marcado como incompleto",
 		"351": "Se produjo un error inesperado; consulte el registro del sistema para la tarea [%s]",
-		"352": "El contexto del agente no cabe en el modelo seleccionado después de la compresión. Cambia a un modelo con una ventana de contexto mayor"
+		"352": "El contexto del agente no cabe en el modelo seleccionado después de la compresión. Cambia a un modelo con una ventana de contexto mayor",
+		"353": "El campo [%s] de la plantilla de nuevo elemento ignoró los valores de opción no disponibles [%s]"
 	}
 	}

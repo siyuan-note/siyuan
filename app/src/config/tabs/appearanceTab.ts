@@ -34,6 +34,9 @@ import {
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
+/// #if !MOBILE
+import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
+/// #endif
 
 interface IFontItem {
     id?: string;
@@ -747,6 +750,18 @@ const registerAppearancePersonalizationGroup = (tab: SettingTabBuilder) => {
     });
 };
 
+/// #if !MOBILE
+const registerAppearanceEntryVisibilityGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("entryVisibility", window.siyuan.languages.entryVisibility);
+    group.slot({
+        key: "entryVisibility",
+        keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip],
+        html: genEntryVisibilityHtml,
+        afterMount: mountEntryVisibility,
+    });
+};
+/// #endif
+
 const mountAppearanceCodeSnippet = (root: HTMLElement) => {
     root.querySelector("#codeSnippetCommunityShare")?.addEventListener("click", () => {
         openByMobile("https://ld246.com/tag/code-snippet");
@@ -759,6 +774,9 @@ const mountAppearanceCodeSnippet = (root: HTMLElement) => {
 export const registerAppearanceTab = (tab: SettingTabBuilder) => {
     registerAppearanceContentGroup(tab);
     registerAppearanceInterfaceGroup(tab);
+    /// #if !MOBILE
+    registerAppearanceEntryVisibilityGroup(tab);
+    /// #endif
     registerAppearanceControlsGroup(tab);
     registerAppearancePersonalizationGroup(tab);
 };

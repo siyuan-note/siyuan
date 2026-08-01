@@ -31,6 +31,7 @@ import {setBodyHighlight} from "../util/assets";
 import {reloadSync} from "../util/reloadSync";
 import {setTitle} from "../util/processTitle";
 import {ensureUILayout} from "../util/ensureUILayout";
+import {applyEntryVisibility} from "../config/entryVisibility/runtime";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -55,6 +56,9 @@ class App {
                                 break;
                             case "setAppearance":
                                 appearanceConfigApi.apply(data.data);
+                                break;
+                            case "setEntryVisibility":
+                                applyEntryVisibility(data.data);
                                 break;
                             case "setSnippet":
                                 window.siyuan.config.snippet = data.data;

@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "Menus et barre d'ancrage",
+  "entryVisibilityTip": "Choisissez les éléments de menu et les icônes de la barre d'ancrage affichés sur ordinateur",
+  "entrySimple": "Simple",
+  "entryFull": "Complet",
+  "entryBuiltin": "Intégré",
+  "entryCustom": "Personnalisé",
+  "entryBasedOn": "Basé sur",
+  "entryCustomProfile": "Profil personnalisé",
+  "entryCreateProfile": "Créer un profil",
+  "entryExportAll": "Tout exporter",
+  "entryRestoreBase": "Restaurer la base",
+  "entryRestoreBaseConfirm": "Restaurer toutes les entrées de ce profil selon son profil de base ?",
+  "entryImportInvalid": "Fichier de profil des menus et de la barre d'ancrage non valide",
   "mobileMenuQuickActions": "Actions rapides",
   "mobileMenuCreate": "Créer",
   "mobileMenuDataManagement": "Gestion des données",
@@ -2373,6 +2386,7 @@
 		"349": "Le contenu du Vault a changé après l’analyse ; relancez l’analyse",
 		"350": "Impossible de terminer l’écriture ou l’indexation du nouveau carnet ; il a été marqué comme incomplet",
 		"351": "Une erreur inattendue s’est produite ; consultez le journal système pour la tâche [%s]",
-		"352": "Le contexte de l’agent ne tient pas dans le modèle sélectionné après compression. Choisissez un modèle avec une fenêtre de contexte plus grande"
+		"352": "Le contexte de l’agent ne tient pas dans le modèle sélectionné après compression. Choisissez un modèle avec une fenêtre de contexte plus grande",
+		"353": "Le champ [%s] du modèle de nouvel élément a ignoré les valeurs d’option indisponibles [%s]"
 	}
 	}

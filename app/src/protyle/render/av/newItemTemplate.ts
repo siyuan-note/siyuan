@@ -877,7 +877,7 @@ export const createAttributeViewItem = (options: {
         }
         const warnings = (response.data?.warnings || []) as string[];
         if (warnings.length) {
-            showMessage(warnings.join("<br>"));
+            showMessage(warnings.map(item => escapeHtml(item)).join("<br>"));
         }
         options.blockElement.removeAttribute("data-render");
         avRender(options.blockElement, options.protyle);
@@ -908,7 +908,7 @@ export const createAttributeViewItemDocs = (options: {
         }
         const warnings = (response.data?.warnings || []) as string[];
         if (warnings.length) {
-            showMessage(warnings.join("<br>"));
+            showMessage(warnings.map(item => escapeHtml(item)).join("<br>"));
         }
         options.blockElement.removeAttribute("data-render");
         avRender(options.blockElement, options.protyle);

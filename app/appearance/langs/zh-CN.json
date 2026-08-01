@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "菜单与停靠栏",
+  "entryVisibilityTip": "配置桌面端内置菜单项和停靠栏图标是否显示",
+  "entrySimple": "简洁方案",
+  "entryFull": "完整方案",
+  "entryBuiltin": "内置",
+  "entryCustom": "自定义",
+  "entryBasedOn": "基于",
+  "entryCustomProfile": "自定义方案",
+  "entryCreateProfile": "新建方案",
+  "entryExportAll": "全部导出",
+  "entryRestoreBase": "恢复基础方案",
+  "entryRestoreBaseConfirm": "确定将此方案的所有入口恢复为基础方案吗？",
+  "entryImportInvalid": "菜单与停靠栏方案文件无效",
   "mobileMenuQuickActions": "快捷操作",
   "mobileMenuCreate": "创建",
   "mobileMenuDataManagement": "数据管理",
@@ -2373,6 +2386,7 @@
 		"349": "Vault 内容在分析后发生变化，请重新分析",
 		"350": "无法完成新笔记本的写入或索引，已将其标记为导入未完成",
 		"351": "发生未知错误，请在系统日志中查找任务 [%s]",
-		"352": "智能体上下文压缩后仍无法适配所选模型，请切换到上下文窗口更大的模型"
+		"352": "智能体上下文压缩后仍无法适配所选模型，请切换到上下文窗口更大的模型",
+		"353": "新增条目模板字段 [%s] 已忽略不可用的选项值 [%s]"
 	}
 	}

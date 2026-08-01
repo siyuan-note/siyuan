@@ -540,8 +540,7 @@ func isNotebookVisibleByPublishAccess(notebook *model.Box, publishAccess model.P
 	return true
 }
 
-// enableEncryptedNotebooks 启用加密笔记本功能并设置主密码。
-// 重复启用返回错误，避免覆盖现有密钥参数。
+// enableEncryptedNotebooks 先同步数据，再恢复既有配置或启用加密笔记本并设置主密码。
 func enableEncryptedNotebooks(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -556,7 +555,7 @@ func enableEncryptedNotebooks(c *gin.Context) {
 		return
 	}
 
-	if err := model.EnableEncryptedNotebook(password); err != nil {
+	if err := model.EnableEncryptedNotebookWithSync(password); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

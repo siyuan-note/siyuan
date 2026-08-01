@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "Menu's en dock",
+  "entryVisibilityTip": "Kies welke ingebouwde menu-items en dockpictogrammen op het bureaublad worden getoond",
+  "entrySimple": "Eenvoudig",
+  "entryFull": "Volledig",
+  "entryBuiltin": "Ingebouwd",
+  "entryCustom": "Aangepast",
+  "entryBasedOn": "Gebaseerd op",
+  "entryCustomProfile": "Aangepast profiel",
+  "entryCreateProfile": "Profiel maken",
+  "entryExportAll": "Alles exporteren",
+  "entryRestoreBase": "Basis herstellen",
+  "entryRestoreBaseConfirm": "Alle items in dit profiel herstellen naar het basisprofiel?",
+  "entryImportInvalid": "Ongeldig profielbestand voor menu's en dock",
   "mobileMenuQuickActions": "Snelle acties",
   "mobileMenuCreate": "Maken",
   "mobileMenuDataManagement": "Gegevensbeheer",
@@ -2373,6 +2386,7 @@
 		"349": "De inhoud van de Vault is na de analyse gewijzigd; voer de analyse opnieuw uit",
 		"350": "Het schrijven of indexeren van het nieuwe notitieboek kon niet worden voltooid; het is als onvolledig gemarkeerd",
 		"351": "Er is een onverwachte fout opgetreden; controleer het systeemlogboek voor taak [%s]",
-		"352": "De agentcontext past na compressie niet in het geselecteerde model. Kies een model met een groter contextvenster"
+		"352": "De agentcontext past na compressie niet in het geselecteerde model. Kies een model met een groter contextvenster",
+		"353": "Veld [%s] van de sjabloon voor nieuwe items heeft niet-beschikbare optiewaarden genegeerd [%s]"
 	}
 	}

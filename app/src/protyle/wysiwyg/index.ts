@@ -3449,7 +3449,9 @@ export class WYSIWYG {
                     }
                     contentMenu(protyle, nodeElement);
                     addSpellcheckMenuItems(spellcheckContext);
+                    /// #if !MOBILE
                     window.siyuan.menus.menu.popup({x, y: y + 13, h: 26});
+                    /// #endif
                     protyle.toolbar?.element.classList.add("fn__none");
                     if (nodeElement.classList.contains("table")) {
                         nodeElement.querySelector(".table__select").removeAttribute("style");

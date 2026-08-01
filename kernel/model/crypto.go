@@ -361,6 +361,7 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 	*Conf.NotebookCrypto = *nc
 	Conf.m.Unlock()
 	Conf.Save()
+	IncSync()
 	return nil
 }
 
@@ -945,6 +946,28 @@ var (
 // key: boxID, value: *atomic.Int64。UnlockBox 成功时初始化，Unmount 时清理。
 var boxLastAccess sync.Map
 
+// EnableEncryptedNotebookWithSync 在启用前先完成同步；同步恢复了既有配置时只校验原主密码。
+func EnableEncryptedNotebookWithSync(password string) error {
+	if len(password) == 0 {
+		return errors.New("password must not be empty")
+	}
+	if err := SyncDataBeforeEnableEncryptedNotebook(); err != nil {
+		return err
+	}
+
+	// 同步可能已经从其他设备恢复了完整配置。此时校验用户输入的是原主密码，不能再创建新的密钥体系。
+	if NotebookCryptoEnabled() {
+		notebookCryptoMu.Lock()
+		defer notebookCryptoMu.Unlock()
+		kek, err := deriveKEK(password)
+		if kek != nil {
+			zeroAndClear(kek)
+		}
+		return err
+	}
+	return EnableEncryptedNotebook(password)
+}
+
 // EnableEncryptedNotebook 启用加密笔记本功能：生成 MasterSalt、派生 KEK、写入校验值并持久化。
 // 重复调用（已启用）返回错误，避免覆盖现有加密笔记本的密钥参数。
 // KEK 不缓存——启用后用户需对每个加密笔记本单独调 UnlockBox 解锁。
@@ -1034,6 +1057,7 @@ func EnableEncryptedNotebook(password string) error {
 	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）。
 	// 即使配置写入失败，已落盘的备份仍可在下次启动时恢复同一套密钥材料。
 	Conf.Save()
+	IncSync()
 	return nil
 }
 
@@ -1071,6 +1095,7 @@ func DisableEncryptedNotebook() error {
 
 	Conf.Save()
 	removeNotebookCryptoBackup() // 禁用时清理备份，避免残留旧密钥材料
+	IncSync()
 	return nil
 }
 
@@ -1794,6 +1819,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 			fmt.Sprintf(Conf.Language(320), "save notebook crypto backup failed: "+err.Error()))
 	}
 	removeMasterPasswordMigration()
+	IncSync()
 	return nil
 }
 

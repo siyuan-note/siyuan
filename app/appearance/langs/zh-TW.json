@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "選單與停靠欄",
+  "entryVisibilityTip": "設定桌面端內建選單項目和停靠欄圖示是否顯示",
+  "entrySimple": "簡潔方案",
+  "entryFull": "完整方案",
+  "entryBuiltin": "內建",
+  "entryCustom": "自訂",
+  "entryBasedOn": "基於",
+  "entryCustomProfile": "自訂方案",
+  "entryCreateProfile": "新增方案",
+  "entryExportAll": "全部匯出",
+  "entryRestoreBase": "還原基礎方案",
+  "entryRestoreBaseConfirm": "確定將此方案的所有入口還原為基礎方案嗎？",
+  "entryImportInvalid": "選單與停靠欄方案檔案無效",
   "mobileMenuQuickActions": "快速操作",
   "mobileMenuCreate": "建立",
   "mobileMenuDataManagement": "資料管理",
@@ -2373,6 +2386,7 @@
 		"349": "Vault 內容在分析後發生變更，請重新分析",
 		"350": "無法完成新筆記本的寫入或索引，已將其標記為匯入未完成",
 		"351": "發生未知錯誤，請在系統日誌中尋找任務 [%s]",
-		"352": "智能體上下文壓縮後仍無法適配所選模型，請切換到上下文視窗更大的模型"
+		"352": "智能體上下文壓縮後仍無法適配所選模型，請切換到上下文視窗更大的模型",
+		"353": "新增條目範本欄位 [%s] 已忽略不可用的選項值 [%s]"
 	}
 	}

@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "메뉴 및 도크",
+  "entryVisibilityTip": "데스크톱에 표시할 기본 메뉴 항목과 도크 아이콘을 선택합니다",
+  "entrySimple": "간단",
+  "entryFull": "전체",
+  "entryBuiltin": "기본 제공",
+  "entryCustom": "사용자 지정",
+  "entryBasedOn": "기준",
+  "entryCustomProfile": "사용자 지정 프로필",
+  "entryCreateProfile": "프로필 만들기",
+  "entryExportAll": "모두 내보내기",
+  "entryRestoreBase": "기준 복원",
+  "entryRestoreBaseConfirm": "이 프로필의 모든 항목을 기준 프로필로 복원하시겠습니까?",
+  "entryImportInvalid": "메뉴 및 도크 프로필 파일이 올바르지 않습니다",
   "mobileMenuQuickActions": "빠른 작업",
   "mobileMenuCreate": "만들기",
   "mobileMenuDataManagement": "데이터 관리",
@@ -2373,6 +2386,7 @@
 		"349": "분석 후 Vault 내용이 변경되었습니다. 다시 분석하세요",
 		"350": "새 노트북 쓰기 또는 색인 생성을 완료할 수 없어 미완료로 표시했습니다",
 		"351": "예기치 않은 오류가 발생했습니다. 작업 [%s]의 시스템 로그를 확인하세요",
-		"352": "압축 후에도 에이전트 컨텍스트가 선택한 모델에 맞지 않습니다. 컨텍스트 창이 더 큰 모델로 전환하세요"
+		"352": "압축 후에도 에이전트 컨텍스트가 선택한 모델에 맞지 않습니다. 컨텍스트 창이 더 큰 모델로 전환하세요",
+		"353": "새 항목 템플릿 필드 [%s]에서 사용할 수 없는 옵션 값 [%s]을 무시했습니다"
 	}
 	}

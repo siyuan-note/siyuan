@@ -27,6 +27,7 @@ import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
 import {showMessage} from "../../dialog/message";
 import {removeZWJ} from "../util/normalizeText";
+import {isEntryVisible} from "../../config/entryVisibility/runtime";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
@@ -52,6 +53,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             iconHTML: "",
             label: window.siyuan.languages.copyDoc,
             accelerator: undefined,
+            ignore: !isEntryVisible("document.title.copy.copyDoc"),
             click: async () => {
                 const [responseHTML, responseText] = await Promise.all([
                     fetchSyncPost("/api/block/getBlockDOM", {

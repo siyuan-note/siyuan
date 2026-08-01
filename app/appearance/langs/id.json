@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "Menu dan dok",
+  "entryVisibilityTip": "Pilih item menu bawaan dan ikon dok yang ditampilkan di desktop",
+  "entrySimple": "Sederhana",
+  "entryFull": "Lengkap",
+  "entryBuiltin": "Bawaan",
+  "entryCustom": "Kustom",
+  "entryBasedOn": "Berdasarkan",
+  "entryCustomProfile": "Profil kustom",
+  "entryCreateProfile": "Buat profil",
+  "entryExportAll": "Ekspor semua",
+  "entryRestoreBase": "Pulihkan dasar",
+  "entryRestoreBaseConfirm": "Pulihkan semua entri dalam profil ini ke profil dasarnya?",
+  "entryImportInvalid": "Berkas profil menu dan dok tidak valid",
   "mobileMenuQuickActions": "Tindakan cepat",
   "mobileMenuCreate": "Buat",
   "mobileMenuDataManagement": "Pengelolaan data",
@@ -2373,6 +2386,7 @@
 		"349": "Isi Vault berubah setelah analisis; lakukan analisis lagi",
 		"350": "Tidak dapat menyelesaikan penulisan atau pengindeksan buku catatan baru; buku catatan telah ditandai belum lengkap",
 		"351": "Terjadi kesalahan tak terduga; periksa log sistem untuk tugas [%s]",
-		"352": "Konteks agen tidak muat dalam model yang dipilih setelah pemadatan. Beralihlah ke model dengan jendela konteks yang lebih besar"
+		"352": "Konteks agen tidak muat dalam model yang dipilih setelah pemadatan. Beralihlah ke model dengan jendela konteks yang lebih besar",
+		"353": "Bidang templat item baru [%s] mengabaikan nilai opsi yang tidak tersedia [%s]"
 	}
 	}

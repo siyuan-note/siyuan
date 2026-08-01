@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "Ponuky a dok",
+  "entryVisibilityTip": "Vyberte vstavané položky ponuky a ikony doku zobrazované na počítači",
+  "entrySimple": "Jednoduchý",
+  "entryFull": "Úplný",
+  "entryBuiltin": "Vstavaný",
+  "entryCustom": "Vlastný",
+  "entryBasedOn": "Založené na",
+  "entryCustomProfile": "Vlastný profil",
+  "entryCreateProfile": "Vytvoriť profil",
+  "entryExportAll": "Exportovať všetko",
+  "entryRestoreBase": "Obnoviť základ",
+  "entryRestoreBaseConfirm": "Obnoviť všetky položky tohto profilu podľa základného profilu?",
+  "entryImportInvalid": "Neplatný súbor profilu ponúk a doku",
   "mobileMenuQuickActions": "Rýchle akcie",
   "mobileMenuCreate": "Vytvoriť",
   "mobileMenuDataManagement": "Správa údajov",
@@ -2373,6 +2386,7 @@
 		"349": "Obsah Vault sa po analýze zmenil; spustite analýzu znova",
 		"350": "Zápis alebo indexovanie nového zápisníka sa nepodarilo dokončiť; bol označený ako neúplný",
 		"351": "Vyskytla sa neočakávaná chyba; skontrolujte systémový denník úlohy [%s]",
-		"352": "Kontext agenta sa ani po kompresii nezmestí do vybraného modelu. Vyberte model s väčším kontextovým oknom"
+		"352": "Kontext agenta sa ani po kompresii nezmestí do vybraného modelu. Vyberte model s väčším kontextovým oknom",
+		"353": "Pole [%s] šablóny novej položky ignorovalo nedostupné hodnoty možností [%s]"
 	}
 	}

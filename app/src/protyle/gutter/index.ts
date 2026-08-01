@@ -55,6 +55,7 @@ import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent
 import {setDragTipGhost} from "../util/dragTip";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
+import {isEntryVisible} from "../../config/entryVisibility/runtime";
 import {mathRender} from "../render/mathRender";
 import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {isEncryptedBox, movePathTo, useShell} from "../../util/pathName";
@@ -769,8 +770,15 @@ export class Gutter {
         type: string,
         level?: number,
     }) {
+        let visibilityID = options.menuId;
+        if (!visibilityID && options.type === "Blockquote2Callout") {
+            visibilityID = "callout";
+        } else if (!visibilityID && options.type === "Callout2Blockquote") {
+            visibilityID = "quote";
+        }
         return {
             id: options.menuId,
+            ignore: visibilityID ? !isEntryVisible(`gutter.single.turnInto.${visibilityID}`) : false,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -2043,7 +2051,8 @@ export class Gutter {
                     type: "submenu",
                     icon: "iconTable",
                     label: window.siyuan.languages.table,
-                    submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range).menus as IMenu[]
+                    submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range,
+                        !isEntryVisible("gutter.single.table.title")).menus as IMenu[]
                 }).element);
             }
         } else if (type === "NodeAttributeView") {
@@ -3072,6 +3081,7 @@ export class Gutter {
             copyMenu.splice(6, 0, {
                 iconHTML: "",
                 label: window.siyuan.languages.copyAVID,
+                ignore: !isEntryVisible("gutter.single.copy.copyAVID"),
                 click() {
                     writeText(nodeElement.getAttribute("data-av-id"));
                 }

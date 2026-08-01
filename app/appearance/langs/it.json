@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "Menu e barra di ancoraggio",
+  "entryVisibilityTip": "Scegli quali voci di menu e icone della barra di ancoraggio mostrare sul desktop",
+  "entrySimple": "Semplice",
+  "entryFull": "Completo",
+  "entryBuiltin": "Integrato",
+  "entryCustom": "Personalizzato",
+  "entryBasedOn": "Basato su",
+  "entryCustomProfile": "Profilo personalizzato",
+  "entryCreateProfile": "Crea profilo",
+  "entryExportAll": "Esporta tutto",
+  "entryRestoreBase": "Ripristina base",
+  "entryRestoreBaseConfirm": "Ripristinare tutte le voci di questo profilo in base al profilo di base?",
+  "entryImportInvalid": "File del profilo di menu e barra di ancoraggio non valido",
   "mobileMenuQuickActions": "Azioni rapide",
   "mobileMenuCreate": "Crea",
   "mobileMenuDataManagement": "Gestione dei dati",
@@ -2373,6 +2386,7 @@
 		"349": "Il contenuto del Vault è cambiato dopo l’analisi; esegui nuovamente l’analisi",
 		"350": "Impossibile completare la scrittura o l’indicizzazione del nuovo taccuino; è stato contrassegnato come incompleto",
 		"351": "Si è verificato un errore imprevisto; controlla il registro di sistema per l’attività [%s]",
-		"352": "Il contesto dell’agente non rientra nel modello selezionato dopo la compressione. Passa a un modello con una finestra di contesto più ampia"
+		"352": "Il contesto dell’agente non rientra nel modello selezionato dopo la compressione. Passa a un modello con una finestra di contesto più ampia",
+		"353": "Il campo [%s] del modello per nuovi elementi ha ignorato i valori di opzione non disponibili [%s]"
 	}
 	}

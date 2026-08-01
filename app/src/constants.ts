@@ -267,6 +267,7 @@ export abstract class Constants {
     public static readonly MENU_BREADCRUMB_CHILDREN = "breadcrumb-children"; // 面包屑下级块菜单
 
     public static readonly MENU_DOC_TREE_MORE = "docTreeMore"; // 侧栏文档树右键菜单
+    public static readonly MENU_DOC_TREE_PANEL_MORE = "docTreePanelMore"; // 文档树面板更多菜单
     public static readonly MENU_FROM_DOC_TREE_MORE_NOTEBOOK = "tree-notebook"; // 侧栏文档树右键菜单，单个笔记本
     public static readonly MENU_FROM_DOC_TREE_MORE_DOC = "tree-doc"; // 侧栏文档树右键菜单，单个文档
     public static readonly MENU_FROM_DOC_TREE_MORE_ITEMS = "tree-items"; // 侧栏文档树右键菜单，多个文档或笔记本

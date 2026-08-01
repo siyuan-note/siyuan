@@ -1,4 +1,17 @@
 {
+  "entryVisibility": "Menüler ve yuva",
+  "entryVisibilityTip": "Masaüstünde gösterilecek yerleşik menü öğelerini ve yuva simgelerini seçin",
+  "entrySimple": "Basit",
+  "entryFull": "Tam",
+  "entryBuiltin": "Yerleşik",
+  "entryCustom": "Özel",
+  "entryBasedOn": "Temel alınan",
+  "entryCustomProfile": "Özel profil",
+  "entryCreateProfile": "Profil oluştur",
+  "entryExportAll": "Tümünü dışa aktar",
+  "entryRestoreBase": "Temeli geri yükle",
+  "entryRestoreBaseConfirm": "Bu profildeki tüm öğeler temel profile göre geri yüklensin mi?",
+  "entryImportInvalid": "Menü ve yuva profil dosyası geçersiz",
   "mobileMenuQuickActions": "Hızlı işlemler",
   "mobileMenuCreate": "Oluştur",
   "mobileMenuDataManagement": "Veri yönetimi",
@@ -2373,6 +2386,7 @@
 		"349": "Vault içeriği analizden sonra değişti; yeniden analiz edin",
 		"350": "Yeni not defterinin yazılması veya dizine eklenmesi tamamlanamadı; eksik olarak işaretlendi",
 		"351": "Beklenmeyen bir hata oluştu; görev [%s] için sistem günlüğünü kontrol edin",
-		"352": "Ajan bağlamı sıkıştırmadan sonra seçilen modele sığmıyor. Daha büyük bağlam penceresine sahip bir modele geçin"
+		"352": "Ajan bağlamı sıkıştırmadan sonra seçilen modele sığmıyor. Daha büyük bağlam penceresine sahip bir modele geçin",
+		"353": "Yeni öğe şablonu alanı [%s] kullanılamayan seçenek değerlerini yok saydı [%s]"
 	}
 	}

@@ -221,7 +221,7 @@ data-dtype="${column.type}"
 data-date-format="${column.dateFormat || ""}"
 data-align="${column.align || ""}"
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
-style="width: ${column.width || "200px"};
+style="width: ${escapeAttr(column.width) || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
 ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat)}</div>`;
 

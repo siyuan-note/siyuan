@@ -6213,7 +6213,7 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 	case av.LayoutTypeTable:
 		for _, column := range view.Table.Columns {
 			if column.ID == operation.ID {
-				column.Width = operation.Data.(string)
+				column.Width = av.FilterWidthValue(operation.Data.(string))
 				break
 			}
 		}
@@ -6260,7 +6260,7 @@ func setAttributeViewColsWidth(operation *Operation) (err error) {
 	}
 	for _, column := range view.Table.Columns {
 		if width, found := widths[column.ID]; found {
-			column.Width = width
+			column.Width = av.FilterWidthValue(width)
 		}
 	}
 	return av.SaveAttributeView(attrView)

@@ -203,7 +203,7 @@ data-icon="${escapeAttr(column.icon)}" data-dtype="${column.type}" data-wrap="${
 data-date-format="${column.dateFormat || ""}"
 data-freeze="${freezeIndex === index}"
 data-desc="${escapeAttr(column.desc)}" data-align="${column.align || ""}" data-position="north"
-style="width: ${column.width || "200px"};">
+style="width: ${escapeAttr(column.width) || "200px"};">
     ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${escapeHtml(column.name)}</span>
     <div class="av__widthdrag"></div>
@@ -213,10 +213,10 @@ style="width: ${column.width || "200px"};">
         }
         if (column.type === "lineNumber") {
             // lineNumber type 不参与计算操作
-            calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}" class="av__calc" style="width: ${column.width || "200px"}">&nbsp;</div>`;
+            calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}" class="av__calc" style="width: ${escapeAttr(column.width) || "200px"}">&nbsp;</div>`;
         } else {
             calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}" 
-style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use xlink:href="#iconDown"></use></svg><small>${window.siyuan.languages.calc}</small>`}</div>`;
+style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || `<svg><use xlink:href="#iconDown"></use></svg><small>${window.siyuan.languages.calc}</small>`}</div>`;
         }
         if (column.calc && column.calc.operator !== "") {
             hasCalc = true;

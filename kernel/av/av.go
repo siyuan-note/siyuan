@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -274,6 +275,20 @@ func FilterColorValue(color string) string {
 	}
 	return strconv.Itoa(n)
 }
+
+// FilterWidthValue 校验列宽度值，仅允许空字符串或合法的 CSS 长度值，非法值返回空字符串，防止注入到样式属性中
+func FilterWidthValue(width string) string {
+	width = strings.TrimSpace(width)
+	if "" == width {
+		return ""
+	}
+	if !widthValuePattern.MatchString(width) {
+		return ""
+	}
+	return width
+}
+
+var widthValuePattern = regexp.MustCompile(`^\d+(\.\d+)?(px|em|rem|%)$`)
 
 // View 描述了视图的结构。
 type View struct {

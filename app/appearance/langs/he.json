@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "החל רוחב עמודה על תצוגות אחרות",
   "distributeAllColWidths": "פזר את רוחב כל העמודות באופן שווה",
   "sameWidthAsRightColumn": "רוחב זהה לעמודה הימנית",
   "sameWidthAsLeftColumn": "רוחב זהה לעמודה השמאלית",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "שבוע",
 	"groupMethodDateMonth": "חודש",
 	"groupMethodDateYear": "שנה",
-	"syncColWidth": "סנכרון רוחב עמודה",
 	"groupMethod": "שיטת קיבוץ",
 	"hideEmptyGroup": "הסתר קבוצות ריקות",
 	"groups": "קבוצות",

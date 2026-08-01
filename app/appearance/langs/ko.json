@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "열 너비를 다른 보기에 적용",
   "distributeAllColWidths": "모든 열 너비를 균등하게 분배",
   "sameWidthAsRightColumn": "오른쪽 열과 같은 너비",
   "sameWidthAsLeftColumn": "왼쪽 열과 같은 너비",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "주",
 	"groupMethodDateMonth": "월",
 	"groupMethodDateYear": "년",
-	"syncColWidth": "열 너비 동기화",
 	"groupMethod": "그룹화 방식",
 	"hideEmptyGroup": "빈 그룹 숨기기",
 	"groups": "그룹",

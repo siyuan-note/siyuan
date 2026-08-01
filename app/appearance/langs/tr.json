@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "Sütun genişliğini diğer görünümlere uygula",
   "distributeAllColWidths": "Tüm sütun genişliklerini eşit dağıt",
   "sameWidthAsRightColumn": "Sağdaki sütunla aynı genişlikte",
   "sameWidthAsLeftColumn": "Soldaki sütunla aynı genişlikte",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "Hafta",
 	"groupMethodDateMonth": "Ay",
 	"groupMethodDateYear": "Yıl",
-	"syncColWidth": "Sütun genişliğini senkronize et",
 	"groupMethod": "Gruplama yöntemi",
 	"hideEmptyGroup": "Boş grupları gizle",
 	"groups": "Gruplar",

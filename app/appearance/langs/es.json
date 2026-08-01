@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "Aplicar el ancho de columna a otras vistas",
   "distributeAllColWidths": "Distribuir uniformemente el ancho de todas las columnas",
   "sameWidthAsRightColumn": "Mismo ancho que la columna derecha",
   "sameWidthAsLeftColumn": "Mismo ancho que la columna izquierda",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "Semana",
 	"groupMethodDateMonth": "Mes",
 	"groupMethodDateYear": "Año",
-	"syncColWidth": "Sincronizar ancho de columna",
 	"groupMethod": "Método de agrupación",
 	"hideEmptyGroup": "Ocultar grupos vacíos",
 	"groups": "Grupos",

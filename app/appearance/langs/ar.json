@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "تطبيق عرض العمود على طرق العرض الأخرى",
   "distributeAllColWidths": "توزيع عرض جميع الأعمدة بالتساوي",
   "sameWidthAsRightColumn": "بنفس عرض العمود الأيمن",
   "sameWidthAsLeftColumn": "بنفس عرض العمود الأيسر",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "أسبوع",
 	"groupMethodDateMonth": "شهر",
 	"groupMethodDateYear": "سنة",
-	"syncColWidth": "مزامنة عرض العمود",
 	"groupMethod": "طريقة التجميع",
 	"hideEmptyGroup": "إخفاء المجموعات الفارغة",
 	"groups": "المجموعات",

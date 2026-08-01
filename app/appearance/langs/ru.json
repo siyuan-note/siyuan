@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "Применить ширину столбца к другим представлениям",
   "distributeAllColWidths": "Равномерно распределить ширину всех столбцов",
   "sameWidthAsRightColumn": "Та же ширина, что у столбца справа",
   "sameWidthAsLeftColumn": "Та же ширина, что у столбца слева",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "Неделя",
 	"groupMethodDateMonth": "Месяц",
 	"groupMethodDateYear": "Год",
-	"syncColWidth": "Синхронизация ширины столбца",
 	"groupMethod": "Способ группировки",
 	"hideEmptyGroup": "Скрыть пустые группы",
 	"groups": "Группы",

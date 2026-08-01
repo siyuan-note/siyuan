@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "ใช้ความกว้างคอลัมน์กับมุมมองอื่น",
   "distributeAllColWidths": "กระจายความกว้างของคอลัมน์ทั้งหมดให้เท่ากัน",
   "sameWidthAsRightColumn": "กว้างเท่ากับคอลัมน์ด้านขวา",
   "sameWidthAsLeftColumn": "กว้างเท่ากับคอลัมน์ด้านซ้าย",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "สัปดาห์",
 	"groupMethodDateMonth": "เดือน",
 	"groupMethodDateYear": "ปี",
-	"syncColWidth": "ซิงค์ความกว้างคอลัมน์",
 	"groupMethod": "วิธีการจัดกลุ่ม",
 	"hideEmptyGroup": "ซ่อนกลุ่มว่าง",
 	"groups": "กลุ่ม",

@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "Použiť šírku stĺpca na ostatné zobrazenia",
   "distributeAllColWidths": "Rovnomerne rozložiť šírku všetkých stĺpcov",
   "sameWidthAsRightColumn": "Rovnaká šírka ako pravý stĺpec",
   "sameWidthAsLeftColumn": "Rovnaká šírka ako ľavý stĺpec",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "Týždeň",
 	"groupMethodDateMonth": "Mesiac",
 	"groupMethodDateYear": "Rok",
-	"syncColWidth": "Synchronizovať šírku stĺpca",
 	"groupMethod": "Metóda zoskupovania",
 	"hideEmptyGroup": "Skryť prázdne skupiny",
 	"groups": "Skupiny",

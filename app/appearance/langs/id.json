@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "Terapkan lebar kolom ke tampilan lain",
   "distributeAllColWidths": "Distribusikan semua lebar kolom secara merata",
   "sameWidthAsRightColumn": "Sama lebar dengan kolom kanan",
   "sameWidthAsLeftColumn": "Sama lebar dengan kolom kiri",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "Minggu",
 	"groupMethodDateMonth": "Bulan",
 	"groupMethodDateYear": "Tahun",
-	"syncColWidth": "Sinkronkan lebar kolom",
 	"groupMethod": "Metode pengelompokan",
 	"hideEmptyGroup": "Sembunyikan grup kosong",
 	"groups": "Grup",

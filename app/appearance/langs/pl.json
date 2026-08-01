@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "Zastosuj szerokość kolumny do innych widoków",
   "distributeAllColWidths": "Rozłóż równomiernie szerokość wszystkich kolumn",
   "sameWidthAsRightColumn": "Taka sama szerokość jak prawa kolumna",
   "sameWidthAsLeftColumn": "Taka sama szerokość jak lewa kolumna",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "Tydzień",
 	"groupMethodDateMonth": "Miesiąc",
 	"groupMethodDateYear": "Rok",
-	"syncColWidth": "Synchronizuj szerokość kolumny",
 	"groupMethod": "Metoda grupowania",
 	"hideEmptyGroup": "Ukryj puste grupy",
 	"groups": "Grupy",

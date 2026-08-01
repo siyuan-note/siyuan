@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "应用列宽到其他视图",
   "distributeAllColWidths": "均分所有列宽",
   "sameWidthAsRightColumn": "与右侧列同宽",
   "sameWidthAsLeftColumn": "与左侧列同宽",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "周",
 	"groupMethodDateMonth": "月",
 	"groupMethodDateYear": "年",
-	"syncColWidth": "同步列宽",
 	"groupMethod": "分组方式",
 	"hideEmptyGroup": "隐藏无条目分组",
 	"groups": "分组",

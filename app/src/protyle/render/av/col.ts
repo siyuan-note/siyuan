@@ -866,7 +866,7 @@ export const showAVColumnWidthMenu = (protyle: IProtyle, blockElement: HTMLEleme
         }
     });
     menu.addItem({
-        icon: "iconSpreadEven",
+        icon: "iconScale",
         label: window.siyuan.languages.distributeAllColWidths,
         click() {
             const width = `${getAVDistributedColumnWidth(columnElements.map(getAVColumnElementWidth))}px`;
@@ -876,9 +876,17 @@ export const showAVColumnWidthMenu = (protyle: IProtyle, blockElement: HTMLEleme
             ])));
         }
     });
+    menu.addSeparator();
+    menu.addItem({
+        icon: "iconWidth",
+        label: window.siyuan.languages.autoFitAllColWidths,
+        click() {
+            autoFitAVColumns(protyle, blockElement);
+        }
+    });
     menu.addItem({
         icon: "iconRefresh",
-        label: window.siyuan.languages.syncColWidth,
+        label: window.siyuan.languages.applyColWidthToOtherViews,
         click() {
             transaction(protyle, [{
                 action: "syncAttrViewTableColWidth",
@@ -1250,7 +1258,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     });
     menu.addItem({
         icon: "iconRefresh",
-        label: window.siyuan.languages.syncColWidth,
+        label: window.siyuan.languages.applyColWidthToOtherViews,
         click() {
             transaction(protyle, [{
                 action: "syncAttrViewTableColWidth",

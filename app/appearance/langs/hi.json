@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "कॉलम की चौड़ाई अन्य दृश्यों पर लागू करें",
   "distributeAllColWidths": "सभी स्तंभों की चौड़ाई समान रूप से बाँटें",
   "sameWidthAsRightColumn": "दाएँ स्तंभ जितनी चौड़ाई",
   "sameWidthAsLeftColumn": "बाएँ स्तंभ जितनी चौड़ाई",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "सप्ताह",
 	"groupMethodDateMonth": "महीना",
 	"groupMethodDateYear": "वर्ष",
-	"syncColWidth": "कॉलम चौड़ाई सिंक करें",
 	"groupMethod": "समूहीकरण विधि",
 	"hideEmptyGroup": "खाली समूह छुपाएं",
 	"groups": "समूह",

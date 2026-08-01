@@ -1,4 +1,5 @@
 {
+  "applyColWidthToOtherViews": "Kolombreedte toepassen op andere weergaven",
   "distributeAllColWidths": "Alle kolombreedtes gelijkmatig verdelen",
   "sameWidthAsRightColumn": "Even breed als de rechterkolom",
   "sameWidthAsLeftColumn": "Even breed als de linkerkolom",
@@ -556,7 +557,6 @@
 	"groupMethodDateWeek": "Per week",
 	"groupMethodDateMonth": "Maand",
 	"groupMethodDateYear": "Jaar",
-	"syncColWidth": "Kolombreedte synchroniseren",
 	"groupMethod": "Groepeermethode",
 	"hideEmptyGroup": "Lege groepen verbergen",
 	"groups": "Groepen",

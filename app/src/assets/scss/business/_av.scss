@@ -1193,16 +1193,10 @@
 
   &__width-guide {
     background-color: var(--b3-theme-primary);
-    opacity: .45;
     pointer-events: none;
     position: fixed;
     width: 1px;
-    z-index: 1000;
-
-    &--snapped {
-      opacity: 1;
-      width: 2px;
-    }
+    z-index: 2;
   }
 
   &__width-tip {

@@ -1402,6 +1402,9 @@ export class WYSIWYG {
                     }
                 });
                 const initialDragRight = dragRect.right;
+                const widthScale = dragRect.width / oldWidth || 1;
+                const snapGuideRight = previousWidth === undefined ? undefined :
+                    Math.round(initialDragRight + (previousWidth - oldWidth) * widthScale);
                 const headerTop = headerElement.getBoundingClientRect().top;
                 const bodyBottom = bodyElement.getBoundingClientRect().bottom;
                 const guideHeight = Math.max(0,
@@ -1416,19 +1419,20 @@ export class WYSIWYG {
                     resizeTip?.remove();
                 };
                 const updateResizePreview = (snapped: boolean) => {
-                    if (!resizeGuide) {
-                        resizeGuide = document.createElement("div");
-                        resizeGuide.className = "av__width-guide";
-                        document.body.appendChild(resizeGuide);
+                    if (!resizeTip) {
+                        if (snapGuideRight !== undefined) {
+                            resizeGuide = document.createElement("div");
+                            resizeGuide.className = "av__width-guide";
+                            resizeGuide.style.left = `${snapGuideRight}px`;
+                            resizeGuide.style.top = `${Math.round(headerTop)}px`;
+                            resizeGuide.style.height = `${guideHeight}px`;
+                            document.body.appendChild(resizeGuide);
+                        }
                         resizeTip = document.createElement("div");
                         resizeTip.className = "av__width-tip";
                         document.body.appendChild(resizeTip);
                     }
-                    const dragRight = Math.round(initialDragRight + newWidth - oldWidth);
-                    resizeGuide.classList.toggle("av__width-guide--snapped", snapped);
-                    resizeGuide.style.left = `${dragRight}px`;
-                    resizeGuide.style.top = `${Math.round(headerTop)}px`;
-                    resizeGuide.style.height = `${guideHeight}px`;
+                    const dragRight = Math.round(initialDragRight + (newWidth - oldWidth) * widthScale);
                     resizeTip.style.left = `${dragRight}px`;
                     resizeTip.style.top = `${Math.round(headerTop)}px`;
                     resizeTip.textContent = `${newWidth}px${snapped ?

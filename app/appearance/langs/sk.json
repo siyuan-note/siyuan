@@ -2249,7 +2249,7 @@
 		"234": "[%d/%d] Aktualizovaných [%d] čitateľných ciest dokumentu [%s]",
 		"235": "[%d/%d] Aktualizujú sa balíčky z trhoviska...",
 		"236": "[%d/%d] Aktualizuje sa balíček z trhoviska [%s]...",
-		"237": "[%d] všetky balíčky trhu boli úspešne aktualizované",
+		"237": "Aktualizácia balíčkov z trhoviska dokončená: %d aktualizovaných, %d zlyhalo, %d nespĺňa požiadavky na aktualizáciu",
 		"238": "Aktualizácia balíčka [%s] zlyhala",
 		"239": "Operácia prebieha, skúste to neskôr",
 		"240": "Nemožno presunúť nadpis v kontajnerovom bloku",

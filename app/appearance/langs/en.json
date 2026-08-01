@@ -2249,7 +2249,7 @@
 		"234": "[%d/%d] Updated [%d] of readable paths of doc [%s]",
 		"235": "[%d/%d] is updating the marketplace package...",
 		"236": "[%d/%d] is updating the marketplace package [%s]...",
-		"237": "[%d] marketplace packages have all been updated successfully",
+		"237": "Marketplace package updates completed: %d updated, %d failed, %d did not meet update requirements",
 		"238": "Marketplace package [%s] update failed, please try again later",
 		"239": "Related operations are being processed, please try again later",
 		"240": "The current drag-and-drop heading is located in the container block and the drag-and-drop operation cannot be performed",

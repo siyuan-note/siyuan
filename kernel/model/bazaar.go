@@ -81,7 +81,7 @@ type ThemeInstallOptions struct {
 }
 
 // updatePackages 更新一组集市包；同类型批量更新时，安装后处理只执行一次
-func updatePackages(packages []*UpdatedPackage, pkgType string, successCount *int, planned int) {
+func updatePackages(packages []*UpdatedPackage, pkgType string, successCount, failedCount *int, planned int) {
 	items := make([]batchInstallItem, 0, len(packages))
 	for _, updated := range packages {
 		pkg := updated.Available
@@ -89,24 +89,27 @@ func updatePackages(packages []*UpdatedPackage, pkgType string, successCount *in
 		if err != nil {
 			logging.LogErrorf("update %s [%s] failed: %s", pkgType, pkg.Name, err)
 			util.PushErrMsg(fmt.Sprintf(Conf.language(238), pkg.Name), 5000)
+			*failedCount++
 			continue
 		}
 		items = append(items, batchInstallItem{name: pkg.Name, meta: meta})
 		*successCount++
-		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), *successCount, planned, pkg.Name))
+		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), *successCount+*failedCount, planned, pkg.Name))
 	}
 	finishInstall(pkgType, items, nil)
 }
 
 // filterUpdatableBazaarPackages 过滤出允许更新的集市包
-func filterUpdatableBazaarPackages(packages []*UpdatedPackage) []*UpdatedPackage {
-	updatable := make([]*UpdatedPackage, 0, len(packages))
+func filterUpdatableBazaarPackages(packages []*UpdatedPackage) (updatable []*UpdatedPackage, unmetRequirementCount int) {
+	updatable = make([]*UpdatedPackage, 0, len(packages))
 	for _, updated := range packages {
 		if updated.Available != nil && !updated.Available.DisallowUpdate {
 			updatable = append(updatable, updated)
+		} else {
+			unmetRequirementCount++
 		}
 	}
-	return updatable
+	return
 }
 
 // BatchUpdatePackages 更新所有集市包
@@ -115,11 +118,18 @@ func BatchUpdatePackages(frontend string) error {
 	if err != nil {
 		return err
 	}
-	plugins = filterUpdatableBazaarPackages(plugins)
-	widgets = filterUpdatableBazaarPackages(widgets)
-	icons = filterUpdatableBazaarPackages(icons)
-	themes = filterUpdatableBazaarPackages(themes)
-	templates = filterUpdatableBazaarPackages(templates)
+	unmetRequirementCount := 0
+	var count int
+	plugins, count = filterUpdatableBazaarPackages(plugins)
+	unmetRequirementCount += count
+	widgets, count = filterUpdatableBazaarPackages(widgets)
+	unmetRequirementCount += count
+	icons, count = filterUpdatableBazaarPackages(icons)
+	unmetRequirementCount += count
+	themes, count = filterUpdatableBazaarPackages(themes)
+	unmetRequirementCount += count
+	templates, count = filterUpdatableBazaarPackages(templates)
+	unmetRequirementCount += count
 
 	planned := len(plugins) + len(widgets) + len(icons) + len(themes) + len(templates)
 	if 1 > planned {
@@ -128,15 +138,14 @@ func BatchUpdatePackages(frontend string) error {
 
 	defer util.PushClearProgress()
 	successCount := 0
-	updatePackages(plugins, "plugins", &successCount, planned)
-	updatePackages(themes, "themes", &successCount, planned)
-	updatePackages(icons, "icons", &successCount, planned)
-	updatePackages(templates, "templates", &successCount, planned)
-	updatePackages(widgets, "widgets", &successCount, planned)
+	failedCount := 0
+	updatePackages(plugins, "plugins", &successCount, &failedCount, planned)
+	updatePackages(themes, "themes", &successCount, &failedCount, planned)
+	updatePackages(icons, "icons", &successCount, &failedCount, planned)
+	updatePackages(templates, "templates", &successCount, &failedCount, planned)
+	updatePackages(widgets, "widgets", &successCount, &failedCount, planned)
 
-	if 0 < successCount {
-		util.PushMsg(fmt.Sprintf(Conf.language(237), successCount), 5000)
-	}
+	util.PushMsg(fmt.Sprintf(Conf.language(237), successCount, failedCount, unmetRequirementCount), 5000)
 	return nil
 }
 

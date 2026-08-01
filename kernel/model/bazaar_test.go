@@ -88,3 +88,16 @@ func TestBuildUpdatedPackagesIgnoresMissingAndCurrentPackages(t *testing.T) {
 		t.Fatalf("expected no updated packages, got %d", len(updated))
 	}
 }
+
+func TestFilterUpdatableBazaarPackages(t *testing.T) {
+	allowed := &UpdatedPackage{Available: &bazaar.Package{Name: "allowed"}}
+	blocked := &UpdatedPackage{Available: &bazaar.Package{Name: "blocked", DisallowUpdate: true}}
+
+	updatable, unmetRequirementCount := filterUpdatableBazaarPackages([]*UpdatedPackage{allowed, blocked, &UpdatedPackage{}})
+	if len(updatable) != 1 || updatable[0] != allowed {
+		t.Fatalf("expected only the allowed package, got %#v", updatable)
+	}
+	if unmetRequirementCount != 2 {
+		t.Fatalf("expected two packages that do not meet update requirements, got %d", unmetRequirementCount)
+	}
+}

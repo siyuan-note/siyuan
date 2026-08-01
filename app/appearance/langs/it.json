@@ -2249,7 +2249,7 @@
 		"234": "[%d/%d] Aggiornato [%d] dei percorsi leggibili del documento [%s]",
 		"235": "[%d/%d] sta aggiornando il pacchetto del marketplace...",
 		"236": "[%d/%d] sta aggiornando il pacchetto del marketplace [%s]...",
-		"237": "[%d] pacchetti del marketplace sono stati aggiornati con successo",
+		"237": "Aggiornamento dei pacchetti del marketplace completato: %d aggiornati, %d non riusciti, %d non soddisfano i requisiti di aggiornamento",
 		"238": "Aggiornamento del pacchetto del marketplace [%s] fallito, si prega di riprovare più tardi",
 		"239": "Operazioni correlate sono in fase di elaborazione, si prega di riprovare più tardi",
 		"240": "L'intestazione di trascinamento attuale si trova nel blocco contenitore e l'operazione di trascinamento non può essere eseguita",

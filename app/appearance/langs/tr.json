@@ -2249,7 +2249,7 @@
 		"234": "[%d/%d] [%s] belgesinin okunabilir yolları güncellendi [%d]",
 		"235": "[%d/%d] pazar paketi güncelleniyor...",
 		"236": "[%d/%d] pazar paketi [%s] güncelleniyor...",
-		"237": "[%d] pazar paketi başarıyla güncellendi",
+		"237": "Pazar paketi güncellemeleri tamamlandı: %d güncellendi, %d başarısız oldu, %d güncelleme gereksinimlerini karşılamıyor",
 		"238": "Pazar paketi [%s] güncellenemedi, lütfen tekrar dene",
 		"239": "İlgili işlemler yürütülüyor, lütfen daha sonra tekrar dene",
 		"240": "Sürüklenen başlık bir kapsayıcı blok içinde yer alıyor, bu nedenle sürükle-bırak işlemi yapılamaz",

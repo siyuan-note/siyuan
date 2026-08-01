@@ -569,7 +569,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         }
         counterElement.classList.remove("fn__none");
         counterElement.textContent = items.length.toString();
-        installAllElement?.classList.remove("fn__none");
+        installAllElement?.classList.toggle("fn__none", !items.some(({item}) => !item.available.disallowUpdate));
         contentElement.innerHTML = items.map(({type, item}) => this._genUpdateItemHTML(item, type)).join("");
     },
     _syncDownloadedUpdateButtons() {

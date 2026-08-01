@@ -301,6 +301,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewPageSize(op)
 			case "setAttrViewColWidth":
 				ret = tx.doSetAttrViewColumnWidth(op)
+			case "setAttrViewColsWidth":
+				ret = tx.doSetAttrViewColumnsWidth(op)
 			case "setAttrViewColAlign":
 				ret = tx.doSetAttrViewColumnAlign(op)
 			case "setAttrViewColWrap":

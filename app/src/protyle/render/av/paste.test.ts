@@ -2,7 +2,6 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     getAVPasteMatrixWidth,
-    getAVPasteColumnWidth,
     getUniqueAVPasteColumnName,
     inferAVPasteColumnType,
     isAVPasteHeaderCandidate,
@@ -77,13 +76,4 @@ describe("AV paste matrix helpers", () => {
         assert.equal(shouldShowAVPasteSkeleton([Array(100)]), true);
     });
 
-    it("calculates compact widths from measured content", () => {
-        const measureText = (value: string) => value.length * 10;
-        assert.equal(getAVPasteColumnWidth("优先级", "select", ["P1", "P2", "P3"], measureText), "72px");
-        assert.equal(getAVPasteColumnWidth(
-            "URL", "url", ["https://github.com/siyuan-note/siyuan/issues/10767"], measureText), "480px");
-        assert.equal(getAVPasteColumnWidth("日期", "date", ["2026-07-30"], measureText), "120px");
-        assert.equal(getAVPasteColumnWidth(
-            "标题", "text", ["A very long title that should not make the field excessively wide"], measureText), "480px");
-    });
 });

@@ -798,8 +798,24 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             if (!cellElement || cellElement.style.width === operation.data) {
                 return;
             }
-            item.querySelectorAll(".av__row").forEach(rowItem => {
-                (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
+            item.querySelectorAll(".av__row, .av__row--footer").forEach(rowItem => {
+                const columnElement = rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement;
+                if (columnElement) {
+                    columnElement.style.width = operation.data;
+                }
+            });
+        });
+        return;
+    }
+    if (operation.action === "setAttrViewColsWidth") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            item.querySelectorAll(".av__row, .av__row--footer").forEach(rowItem => {
+                Object.entries(operation.data as Record<string, string>).forEach(([columnID, width]) => {
+                    const columnElement = rowItem.querySelector(`[data-col-id="${columnID}"]`) as HTMLElement;
+                    if (columnElement) {
+                        columnElement.style.width = width;
+                    }
+                });
             });
         });
         return;

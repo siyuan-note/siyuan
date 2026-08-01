@@ -39,9 +39,7 @@ import {setFold} from "./blockFold";
 import {removeFoldHeading} from "./heading";
 import {
     AV_PASTE_READONLY_TYPES,
-    getAVPasteColumnWidth,
     getAVPasteMatrixWidth,
-    getAVPasteTextMeasurer,
     getUniqueAVPasteColumnName,
     inferAVPasteColumnType,
     isAVPasteHeaderCandidate,
@@ -49,6 +47,7 @@ import {
     shouldShowAVPasteSkeleton,
     showAVPasteSkeleton,
 } from "../render/av/paste";
+import {getAVColumnFitWidth, getAVColumnTextMeasurer} from "../render/av/columnWidth";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
@@ -346,7 +345,7 @@ const pasteAVMatrix = async (options: {
     const usedNames = new Set(options.columns.map(column => column.name));
     const changedCellColumnIDs = new Set<string>();
     const targetColumns: IAVPasteTargetColumn[] = [];
-    const measureText = getAVPasteTextMeasurer(options.blockElement);
+    const measureText = getAVColumnTextMeasurer(options.blockElement);
     let previousColumnID = visibleColumns[visibleColumns.length - 1].id;
 
     for (let sourceIndex = 0; sourceIndex < sourceWidth; sourceIndex++) {
@@ -364,7 +363,7 @@ const pasteAVMatrix = async (options: {
                 ? inferredType
                 : currentColumn.type;
             const compactWidth = options.header && (!oldColumn.width || oldColumn.width === "200px")
-                ? getAVPasteColumnWidth(nextName, nextType, sourceValues, measureText)
+                ? getAVColumnFitWidth(nextName, nextType, sourceValues, measureText)
                 : oldColumn.width;
             const typeChanged = oldColumn.type !== nextType;
             currentColumn.name = nextName;
@@ -435,7 +434,7 @@ const pasteAVMatrix = async (options: {
         const name = headerName ? headerName : getUniqueAVPasteColumnName(baseName, usedNames);
         const type = options.header ? inferredType : "text";
         const column = genAVPasteColumn(id, name, type);
-        column.width = getAVPasteColumnWidth(name, type, sourceValues, measureText);
+        column.width = getAVColumnFitWidth(name, type, sourceValues, measureText);
         const previousIndex = view.columns.findIndex(item => item.id === previousColumnID);
         view.columns.splice(previousIndex + 1, 0, column);
         rows.forEach(row => {

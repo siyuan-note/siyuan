@@ -31,6 +31,7 @@ type TOperation =
     | "setAttrViewColHidden"
     | "setAttrViewColWrap"
     | "setAttrViewColWidth"
+    | "setAttrViewColsWidth"
     | "setAttrViewColAlign"
     | "updateAttrViewColOptions"
     | "removeAttrViewColOption"

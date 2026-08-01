@@ -2,7 +2,7 @@ import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {getDefaultOperatorByType, getEditableFilters, hasFilterForColumn} from "./filter";
-import {genCellValue, renderCell} from "./cell";
+import {genCellValue, getCellValueText, renderCell} from "./cell";
 import {getPropertiesHTML, openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
 import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
@@ -21,6 +21,8 @@ import {getFieldsByData} from "./view";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {openFieldVisibility} from "./fieldVisibility";
 import {createEmptyAVValue, genAVAttributeRowHTML} from "./attributeValue";
+import {getAVColumnTextMeasurer, getAVTableFitWidths} from "./columnWidth";
+import {getAVData} from "./virtualScroll";
 
 export const getColId = (element: Element, viewType: TAVView) => {
     if (viewType === "table" || hasClosestByClassName(element, "custom-attr")) {
@@ -1119,6 +1121,49 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             }
         });
     }
+    menu.addItem({
+        icon: "iconWidth",
+        label: window.siyuan.languages.autoFitAllColWidths,
+        click() {
+            const data = getAVData(blockElement as HTMLElement);
+            if (!data || data.viewType !== "table") {
+                return;
+            }
+            const widths = getAVTableFitWidths(
+                data.view as IAVTable,
+                getCellValueText,
+                getAVColumnTextMeasurer(blockElement as HTMLElement),
+            );
+            const oldWidths: Record<string, string> = {};
+            const newWidths: Record<string, string> = {};
+            Object.entries(widths).forEach(([columnID, width]) => {
+                const headerElement = blockElement.querySelector<HTMLElement>(
+                    `.av__row--header .av__cell[data-col-id="${columnID}"]`,
+                );
+                if (!headerElement || headerElement.style.width === width) {
+                    return;
+                }
+                oldWidths[columnID] = headerElement.style.width || "200px";
+                newWidths[columnID] = width;
+            });
+            if (Object.keys(newWidths).length === 0) {
+                return;
+            }
+            const operation = {
+                action: "setAttrViewColsWidth" as TOperation,
+                avID,
+                blockID,
+                viewID,
+            };
+            transaction(protyle, [{
+                ...operation,
+                data: newWidths,
+            }], [{
+                ...operation,
+                data: oldWidths,
+            }]);
+        }
+    });
     menu.addItem({
         icon: "iconRefresh",
         label: window.siyuan.languages.syncColWidth,

@@ -80,41 +80,6 @@ export const shouldShowAVPasteSkeleton = (rows: unknown[][]) => {
     return rows.reduce((count, row) => count + row.length, 0) >= 100;
 };
 
-const getEstimatedTextWidth = (value: string) => {
-    return Array.from(value.trim().replace(/[\r\n]+/g, " ")).reduce((width, character) => {
-        if (/[\u2E80-\u9FFF\uAC00-\uD7AF]/u.test(character)) {
-            return width + 14;
-        }
-        if (/\s/u.test(character)) {
-            return width + 4;
-        }
-        if (/[A-ZMW@#%&]/u.test(character)) {
-            return width + 9;
-        }
-        return width + 7;
-    }, 0);
-};
-
-export const getAVPasteTextMeasurer = (blockElement: HTMLElement) => {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    const cellElement = blockElement.querySelector<HTMLElement>(".av__cell");
-    if (!context || !cellElement) {
-        return getEstimatedTextWidth;
-    }
-    const style = getComputedStyle(cellElement);
-    context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-    return (value: string) => context.measureText(value.trim().replace(/[\r\n]+/g, " ")).width;
-};
-
-export const getAVPasteColumnWidth = (name: string, type: TAVCol, values: string[],
-                                      measureText = getEstimatedTextWidth) => {
-    const headerWidth = measureText(name) + 42;
-    const contentPadding = type === "select" ? 32 : 20;
-    const contentWidth = values.reduce((width, value) => Math.max(width, measureText(value) + contentPadding), 0);
-    return `${Math.ceil(Math.min(480, Math.max(64, headerWidth, contentWidth)))}px`;
-};
-
 export const showAVPasteSkeleton = (blockElement: HTMLElement, columnCount: number) => {
     if (blockElement.querySelector(".av__paste-skeleton")) {
         return false;

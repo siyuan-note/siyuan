@@ -6111,6 +6111,47 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doSetAttrViewColumnsWidth(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColsWidth(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColsWidth(operation *Operation) (err error) {
+	widthData, ok := operation.Data.(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid attribute view column widths")
+	}
+	widths := map[string]string{}
+	for id, value := range widthData {
+		width, valueOK := value.(string)
+		if !valueOK {
+			return fmt.Errorf("invalid width for attribute view column [%s]", id)
+		}
+		widths[id] = width
+	}
+
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return err
+	}
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return err
+	}
+	if av.LayoutTypeTable != view.LayoutType {
+		return nil
+	}
+	for _, column := range view.Table.Columns {
+		if width, found := widths[column.ID]; found {
+			column.Width = width
+		}
+	}
+	return av.SaveAttributeView(attrView)
+}
+
 func (tx *Transaction) doSetAttrViewColumnAlign(operation *Operation) (ret *TxErr) {
 	err := setAttributeViewColAlign(operation)
 	if err != nil {

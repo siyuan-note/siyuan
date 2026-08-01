@@ -1194,7 +1194,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     return text;
 };
 
-const getCellValueText = (value: IAVCellValue, column?: IAVColumn, rowIndex = 0) => {
+export const getCellValueText = (value: IAVCellValue, column?: IAVColumn, rowIndex = 0) => {
     const cellElement = document.createElement("div");
     cellElement.innerHTML = renderCell(value, rowIndex, true, "table", column?.options, column?.dateFormat);
     return getCellText(cellElement);

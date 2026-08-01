@@ -130,7 +130,6 @@ const profileCard = (
     builtin: boolean,
     active: boolean,
 ) => `<div class="b3-card${active ? " b3-card--current" : ""}" data-profile-id="${escapeAttr(id)}">
-    <div class="b3-card__img"><span><svg class="b3-card__icon"><use xlink:href="#${builtin ? "iconSettings" : "iconMenu"}"></use></svg></span></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             <div class="fn__ellipsis config-name">${escapeHtml(name)}</div>

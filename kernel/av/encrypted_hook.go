@@ -309,7 +309,8 @@ func avBoxIDFromPath(absPath string) string {
 	}
 	boxID := parts[0]
 	// 全局路径的第一段是 "storage"，加密笔记本路径的第一段是 boxID（节点 ID 格式）
-	if boxID == "storage" {
+	// 历史等路径的第一段不是节点 ID，不视为 boxID，避免以错误身份触发解密
+	if boxID == "storage" || !ast.IsNodeIDPattern(boxID) {
 		return ""
 	}
 	return boxID

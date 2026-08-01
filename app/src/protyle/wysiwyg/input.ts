@@ -1,7 +1,7 @@
-import {focusBlock, focusByWbr} from "../util/selection";
+import {focusBlock, focusByOffset, focusByWbr, getSelectionOffset} from "../util/selection";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
-import {transaction, updateTransaction} from "./transaction";
+import {insertEmptyBlockquote, transaction, turnsOneInto, updateTransaction} from "./transaction";
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
 import {
@@ -23,6 +23,7 @@ import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 import {updateAVName} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {nbsp2space} from "../util/normalizeText";
+import {getBlockquoteContext, isBlockquoteMarker, shouldCancelBlockquote} from "./blockquote";
 
 interface IInputOperations {
     doOperations: IOperation[];
@@ -145,6 +146,47 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         editElement.innerHTML.indexOf("\n》<wbr>") > -1
     )) {
         editElement.innerHTML = editElement.innerHTML.replace("》<wbr>", "><wbr>");
+    }
+    const blockquoteContext = type === "NodeParagraph" ?
+        getBlockquoteContext(blockElement, protyle.wysiwyg.element) : undefined;
+    const currentWbrElement = editElement.querySelector("wbr") as HTMLElement;
+    if (blockquoteContext && currentWbrElement) {
+        const markerPrefixRange = document.createRange();
+        markerPrefixRange.setStart(editElement, 0);
+        markerPrefixRange.setEndBefore(currentWbrElement);
+        const markerPrefix = nbsp2space(markerPrefixRange.toString()).split(Constants.ZWSP).join("");
+        const marker = markerPrefix.substring(markerPrefix.lastIndexOf("\n") + 1);
+        if (isBlockquoteMarker(marker)) {
+            const markerEnd = getSelectionOffset(editElement, undefined, markerPrefixRange, true).end;
+            const markerRange = focusByOffset(editElement, markerEnd - marker.length, markerEnd, false, true);
+            if (!markerRange) {
+                return;
+            }
+            const oldChildHTML = protyle.wysiwyg.lastHTMLs[id] || blockElement.outerHTML;
+            markerRange.deleteContents();
+            if (shouldCancelBlockquote(blockquoteContext)) {
+                await turnsOneInto({
+                    protyle,
+                    nodeElement: blockquoteContext.blockquoteElement,
+                    id: blockquoteContext.blockquoteElement.dataset.nodeId,
+                    type: "CancelBlockquote",
+                    undoElement: {
+                        id,
+                        html: oldChildHTML,
+                    },
+                    additionalOperations: inputOperations,
+                });
+            } else {
+                currentWbrElement.remove();
+                insertEmptyBlockquote(protyle, blockquoteContext.childElement, {
+                    updateElement: blockElement,
+                    oldHTML: oldChildHTML,
+                    undoContext: inputOperations?.undoContext,
+                    additionalOperations: inputOperations,
+                });
+            }
+            return;
+        }
     }
     const trimStartHTML = editElement.innerHTML.trimStart();
     const trimStartText = editElement.textContent.trimStart();

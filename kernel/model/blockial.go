@@ -472,6 +472,11 @@ func normalizeIconValue(value string) string {
 		}
 	}
 	if allASCII {
+		if !util.IsValidIconUnicode(value) {
+			// 非法图标值，置空以删除该属性，防止存储可执行标记
+			// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-vx5w-qrvp-mmcq
+			return ""
+		}
 		return value
 	}
 
@@ -479,7 +484,11 @@ func normalizeIconValue(value string) string {
 	for _, r := range value {
 		parts = append(parts, strconv.FormatInt(int64(r), 16))
 	}
-	return strings.Join(parts, "-")
+	ret := strings.Join(parts, "-")
+	if !util.IsValidIconUnicode(ret) {
+		return ""
+	}
+	return ret
 }
 
 func pushBlockAttrs(oldAttrs map[string]string, node *ast.Node) {

@@ -160,7 +160,9 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 		}
 	}
 	ret.SubFileCount = subFileCount
-	ret.Icon = tree.Root.IALAttr("icon")
+	if icon, ok := util.FilterIconValue(tree.Root.IALAttr("icon")); ok {
+		ret.Icon = icon
+	}
 	return
 }
 
@@ -268,7 +270,9 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 			}
 		}
 		ret.SubFileCount = subFileCount
-		ret.Icon = tree.Root.IALAttr("icon")
+		if icon, ok := util.FilterIconValue(tree.Root.IALAttr("icon")); ok {
+			ret.Icon = icon
+		}
 
 		rets = append(rets, ret)
 
@@ -346,6 +350,11 @@ func getNodeAvBlockText(node *ast.Node, avID string) (icon, content string) {
 	}
 
 	icon = node.IALAttr("icon")
+	if filteredIcon, valid := util.FilterIconValue(icon); valid {
+		icon = filteredIcon
+	} else {
+		icon = ""
+	}
 	if name := node.IALAttr("name"); "" != name {
 		name = strings.TrimSpace(name)
 		name = util.EscapeHTML(name)

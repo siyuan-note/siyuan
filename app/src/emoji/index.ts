@@ -49,12 +49,13 @@ export const unicode2Emoji = (unicode: string, className = "", needSpan = false,
                     emoji += String.fromCodePoint(parseInt(item, 16));
                 }
             });
-            if (needSpan) {
-                emoji = `<span class="${className}">${emoji}</span>`;
-            }
         } catch (e) {
             // 自定义表情搜索报错 https://github.com/siyuan-note/siyuan/issues/5883
             // 这里忽略错误不做处理
+        }
+        emoji = Lute.Sanitize(emoji);
+        if (needSpan) {
+            emoji = `<span class="${className}">${emoji}</span>`;
         }
     }
     return emoji;

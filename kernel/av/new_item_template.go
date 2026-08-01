@@ -22,6 +22,8 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // SetNewItemTemplates 校验并替换数据库的新增条目模板配置。
@@ -43,6 +45,13 @@ func (av *AttributeView) SetNewItemTemplates(config *NewItemTemplatesConfig) err
 		}
 		itemTemplate.Name = strings.TrimSpace(itemTemplate.Name)
 		itemTemplate.Icon = strings.TrimSpace(itemTemplate.Icon)
+		if filteredIcon, valid := util.FilterIconValue(itemTemplate.Icon); valid {
+			itemTemplate.Icon = filteredIcon
+		} else {
+			// 非法图标值置空，防止存储可执行标记
+			// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-vx5w-qrvp-mmcq
+			itemTemplate.Icon = ""
+		}
 		if "" == itemTemplate.Name {
 			return errors.New("new item template name is empty")
 		}

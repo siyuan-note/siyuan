@@ -46,8 +46,10 @@ import * as dayjs from "dayjs";
 import {mergeSameInlineElement} from "../toolbar/util";
 import {
     getBlockRefCheckElementChain,
+    getCrossBlockNestedListMergeContext,
     getCrossBlockMergeRemoveElement,
-    isEntireBlockContentSelected
+    isEntireBlockContentSelected,
+    mergeCrossBlockNestedLists
 } from "./removeRange";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 
@@ -271,8 +273,54 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
         }
     }
 
-    const undoFocusContext = getUndoFocusContext(editorElement, selectedRange, true);
-    if (undoFocusContext) {
+    const nestedListMergeContext = getCrossBlockNestedListMergeContext(editorElement, selectedRange,
+        ranges[0]?.blockElement || startElement, ranges[ranges.length - 1]?.blockElement || endElement);
+    const removeStartListItem = !!nestedListMergeContext && (!!nestedListMergeContext.replacementListItemElement ||
+        nestedListMergeContext.startTextFullySelected && nestedListMergeContext.startTrailingListItems.length > 0);
+    const startRemoveListItemElement = nestedListMergeContext?.replacementListItemElement ||
+        (removeStartListItem ? nestedListMergeContext?.startListItemElement : undefined);
+    const movedListPreviousID = startRemoveListItemElement && !nestedListMergeContext.replacementListItemElement ?
+        startRemoveListItemElement.previousElementSibling?.getAttribute("data-node-id") :
+        nestedListMergeContext?.startListItemElement.getAttribute("data-node-id");
+    const nestedListRemoveElements = nestedListMergeContext ? [
+        ...(startRemoveListItemElement ? [startRemoveListItemElement] : []),
+        ...nestedListMergeContext.startTrailingListItems,
+        nestedListMergeContext.endOuterListItemElement,
+    ] : [];
+    if (nestedListMergeContext) {
+        for (let i = removeElements.length - 1; i >= 0; i--) {
+            if (nestedListRemoveElements.some(element => element.contains(removeElements[i]))) {
+                removeElements.splice(i, 1);
+            }
+        }
+        nestedListRemoveElements.forEach(element => {
+            if (!removeElements.some(item => item === element || item.contains(element))) {
+                removeElements.push(element);
+            }
+        });
+        removeElements.sort((a, b) => a === b ? 0 :
+            a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+        rangesByBlock.forEach((value, element) => {
+            if (nestedListRemoveElements.some(removeElement => removeElement.contains(element))) {
+                rangesByBlock.delete(element);
+            }
+        });
+        for (let i = updateElements.length - 1; i >= 0; i--) {
+            if (nestedListRemoveElements.some(element => element.contains(updateElements[i]))) {
+                updateElements.splice(i, 1);
+            }
+        }
+    }
+
+    let undoRange = selectedRange;
+    if (nestedListMergeContext && ranges.length > 0) {
+        undoRange = document.createRange();
+        undoRange.setStart(ranges[0].range.startContainer, ranges[0].range.startOffset);
+        const lastRange = ranges[ranges.length - 1].range;
+        undoRange.setEnd(lastRange.endContainer, lastRange.endOffset);
+    }
+    const undoFocusContext = getUndoFocusContext(editorElement, undoRange, true);
+    if (undoFocusContext && !nestedListMergeContext) {
         undoFocusContext.undoFocusCollapseToEnd = "true";
     }
     const undoOperations: IOperation[] = updateElements.map(item => ({
@@ -312,7 +360,8 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
             fixAdjacentTags(item.editableElement);
         });
     });
-    if (removeEndElement) {
+    const movedListItems = nestedListMergeContext ? mergeCrossBlockNestedLists(nestedListMergeContext) : [];
+    if (removeEndElement && !nestedListMergeContext) {
         const firstEndNode = endEditableElement.firstChild;
         while (endEditableElement.firstChild) {
             startEditableElement.append(endEditableElement.firstChild);
@@ -335,6 +384,17 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
         action: "delete",
         id: item.getAttribute("data-node-id")
     }));
+    let previousID = movedListPreviousID;
+    movedListItems.forEach(item => {
+        doOperations.push({
+            action: "insert",
+            id: item.getAttribute("data-node-id"),
+            data: item.outerHTML,
+            previousID,
+            parentID: nestedListMergeContext.startListElement.getAttribute("data-node-id")
+        });
+        previousID = item.getAttribute("data-node-id");
+    });
     orderListElements.forEach(item => {
         const oldListItems = new Map(Array.from(item.querySelectorAll<HTMLElement>(":scope > .li")).map(listItem => {
             return [listItem.getAttribute("data-node-id"), listItem.outerHTML];
@@ -371,14 +431,22 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
             data: item.outerHTML
         });
     });
-    const crossBlockUndoOperations = undoOperations.concat(insertOperations);
+    const movedUndoOperations: IOperation[] = movedListItems.map(item => ({
+        action: "delete",
+        id: item.getAttribute("data-node-id")
+    }));
+    const crossBlockUndoOperations = undoOperations.concat(movedUndoOperations, insertOperations);
     if (crossBlockUndoOperations[0]) {
         crossBlockUndoOperations[0].context = undoFocusContext;
     }
     transaction(protyle, doOperations, crossBlockUndoOperations);
 
     const firstRange = ranges.find(item => item.editableElement.isConnected);
-    if (firstRange) {
+    const movedEditableElement = removeStartListItem && movedListItems[0] ?
+        getContenteditableElement(movedListItems[0]) : undefined;
+    if (movedEditableElement) {
+        focusByOffset(movedEditableElement, 0, 0);
+    } else if (firstRange) {
         focusByOffset(firstRange.editableElement, firstRange.start, firstRange.start);
     }
     updateElements.forEach(item => {

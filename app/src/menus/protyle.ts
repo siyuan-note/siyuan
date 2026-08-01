@@ -2178,7 +2178,8 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     return subMenus;
 };
 
-export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLTableCellElement, range: Range) => {
+export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLTableCellElement, range: Range,
+                          hideTitle = false) => {
     const otherMenus: IMenu[] = [];
     const colIndex = getColIndex(cellElement);
     if (cellElement.rowSpan > 1 || cellElement.colSpan > 1) {
@@ -2272,6 +2273,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     otherMenus.push({
         icon: "iconHeadings",
         label: window.siyuan.languages.title,
+        ignore: hideTitle,
         click: () => {
             updateTableTitle(protyle, nodeElement);
         }

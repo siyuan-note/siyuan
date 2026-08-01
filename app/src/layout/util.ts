@@ -33,6 +33,7 @@ import {isSensitiveLayoutData, isSensitiveSearchConfig, setStorageVal} from "../
 import {adjustDockPadding} from "./dock/util";
 import {setTitle} from "../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
+import {applyDockEntryVisibility} from "../config/entryVisibility/runtime";
 
 const isBuiltInCustomModel = (type: string) => {
     return type === "siyuan-card" || type === "siyuan-database-row";
@@ -334,6 +335,7 @@ const JSONToDock = (json: any, app: App) => {
     window.siyuan.layout.rightDock = new Dock({position: "Right", data: json.right, app});
     window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom, app});
     adjustDockPadding();
+    applyDockEntryVisibility();
 };
 
 const removedTabs: Tab[] = [];

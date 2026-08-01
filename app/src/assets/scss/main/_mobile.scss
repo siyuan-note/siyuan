@@ -330,15 +330,41 @@
   box-sizing: border-box;
 
   .config--mobile {
+    box-sizing: border-box;
     height: 100%;
+    overflow: auto;
+
+    &:has(> .config-group) {
+      background-color: var(--b3-theme-surface);
+      padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+    }
   }
 
   .config-group {
-    margin: 24px 0;
+    margin: 0 0 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 
   .config-title {
-    margin: 24px 24px 16px 24px;
+    color: var(--b3-theme-on-surface);
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 20px;
+    margin: 0;
+    padding: 8px;
+  }
+
+  .config-items {
+    background-color: var(--b3-theme-background);
+    overflow: hidden;
+
+    .b3-label:not(.b3-label--inner) {
+      margin: 0 16px;
+      padding: 16px 0;
+    }
   }
 
   .config-assets {

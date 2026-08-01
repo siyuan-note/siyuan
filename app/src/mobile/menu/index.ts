@@ -45,18 +45,13 @@ const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>) 
             void getSettingTab(settingTabDef.id).mount(root, undefined, app);
         },
         backCallback() {
-            openMobileSetting(app);
+            openSettingMenu(app, "back");
         },
+        transition: "forward",
     });
 };
 
-export const openMobileSetting = (app: App, tab?: TSettingTab) => {
-    activeBlur();
-    const settingTabDef = tab ? getSettingTabDefs().find(def => def.id === tab) : undefined;
-    if (settingTabDef) {
-        openSettingTab(app, settingTabDef);
-        return;
-    }
+const openSettingMenu = (app: App, transition?: "back") => {
     openModel({
         title: window.siyuan.languages.config,
         icon: "iconLeft",
@@ -76,7 +71,18 @@ export const openMobileSetting = (app: App, tab?: TSettingTab) => {
         backCallback() {
             closeModel();
         },
+        transition,
     });
+};
+
+export const openMobileSetting = (app: App, tab?: TSettingTab) => {
+    activeBlur();
+    const settingTabDef = tab ? getSettingTabDefs().find(def => def.id === tab) : undefined;
+    if (settingTabDef) {
+        openSettingTab(app, settingTabDef);
+        return;
+    }
+    openSettingMenu(app);
 };
 
 export const popMenu = () => {

@@ -489,7 +489,7 @@ export const showKeyboardToolbar = () => {
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     updateKeyboardToolbarPosition();
     const modelElement = document.getElementById("model");
-    if (modelElement.style.transform === "translateY(0px)") {
+    if (modelElement.style.transform === "translateX(0px)") {
         modelElement.style.paddingBottom = "48px";
     }
     const range = getSelection().getRangeAt(0);
@@ -585,7 +585,7 @@ export const hideKeyboardToolbar = () => {
         }
     }
     const modelElement = document.getElementById("model");
-    if (modelElement.style.transform === "translateY(0px)") {
+    if (modelElement.style.transform === "translateX(0px)") {
         modelElement.style.paddingBottom = "";
     }
 };

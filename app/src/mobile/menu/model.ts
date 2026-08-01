@@ -24,10 +24,12 @@ export const openModel = (obj: {
     bindEvent: (element: HTMLElement) => void,
     destroyCallback?: () => void,
     backCallback?: () => void,
+    transition?: "forward" | "back",
 }) => {
     destroyModel();
     const modelElement = document.getElementById("model");
-    modelElement.style.transform = "translateY(0px)";
+    const isOpen = modelElement.style.transform === "translateX(0px)";
+    modelElement.style.transform = "translateX(0px)";
     modelElement.style.zIndex = (++window.siyuan.zIndex).toString();
     const iconElement = modelElement.querySelector(".toolbar__icon") as HTMLElement;
     if(obj.icon) {
@@ -41,6 +43,16 @@ export const openModel = (obj: {
     const modelMainElement = modelElement.querySelector("#modelMain") as HTMLElement;
     modelMainElement.innerHTML = obj.html;
     obj.bindEvent(modelMainElement);
+    if (isOpen && obj.transition) {
+        modelMainElement.getAnimations().forEach(animation => animation.cancel());
+        modelMainElement.animate([
+            {transform: `translateX(${obj.transition === "forward" ? "100%" : "-100%"})`},
+            {transform: "translateX(0)"},
+        ], {
+            duration: 150,
+            easing: "cubic-bezier(0, 0, .2, 1)",
+        });
+    }
     modelDestroyCallback = obj.destroyCallback;
     modelBackCallback = obj.backCallback;
 };

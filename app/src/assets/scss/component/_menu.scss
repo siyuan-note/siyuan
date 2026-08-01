@@ -199,6 +199,10 @@
       &:not(.fn__none):has(~ .b3-menu__item:not(.fn__none)) {
         border-bottom: .5px solid var(--b3-theme-background-light);
       }
+
+      &:first-child {
+        border-top: 0;
+      }
     }
 
     .b3-menu__label {

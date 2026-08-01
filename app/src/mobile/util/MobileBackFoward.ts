@@ -32,7 +32,7 @@ export const goBack = () => {
     } else if (window.siyuan.dialogs.length !== 0) {
         window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
         return;
-    } else if (document.getElementById("model").style.transform === "translateY(0px)") {
+    } else if (document.getElementById("model").style.transform === "translateX(0px)") {
         const searchAssetsPanelElement = document.getElementById("searchAssetsPanel");
         if (!searchAssetsPanelElement || searchAssetsPanelElement.classList.contains("fn__none")) {
             if (backModel()) {

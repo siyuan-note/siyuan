@@ -65,7 +65,7 @@
     box-shadow: var(--b3-dialog-shadow);
     border: 1px solid var(--b3-theme-surface-lighter);
     background-color: var(--b3-menu-background);
-    z-index: 5;
+    z-index: 7;
     overflow: auto;
     max-height: min(402px, 40vh);
     // 不能使用，否则 hint emoji 出现双滚动条 box-sizing: border-box;

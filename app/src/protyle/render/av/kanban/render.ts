@@ -29,7 +29,7 @@ const getKanbanTitleHTML = (group: IAVView, counter: number, draggable: boolean)
     } else if (group.groupValue.type === "checkbox") {
         nameHTML = `<svg style="width:calc(1.625em - 12px);height:calc(1.625em - 12px);margin: 4px 0;float: left;"><use xlink:href="#icon${group.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else {
-        nameHTML = group.name;
+        nameHTML = escapeHtml(group.name);
     }
     // av__group-name 为第三方需求，本应用内没有使用，但不能移除 https://github.com/siyuan-note/siyuan/issues/15736
     return `<div class="av__group-title"${draggable ? ' draggable="true"' : ""}>

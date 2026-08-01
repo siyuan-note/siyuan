@@ -8,7 +8,6 @@
   "entryBasedOn": "基於",
   "entryCustomProfile": "自訂方案",
   "entryCreateProfile": "新增方案",
-  "entryExportAll": "全部匯出",
   "entryRestoreBase": "還原基礎方案",
   "entryRestoreBaseConfirm": "確定將此方案的所有入口還原為基礎方案嗎？",
   "entryImportInvalid": "選單與停靠欄方案檔案無效",

@@ -8,7 +8,6 @@
   "entryBasedOn": "Temel alınan",
   "entryCustomProfile": "Özel profil",
   "entryCreateProfile": "Profil oluştur",
-  "entryExportAll": "Tümünü dışa aktar",
   "entryRestoreBase": "Temeli geri yükle",
   "entryRestoreBaseConfirm": "Bu profildeki tüm öğeler temel profile göre geri yüklensin mi?",
   "entryImportInvalid": "Menü ve yuva profil dosyası geçersiz",

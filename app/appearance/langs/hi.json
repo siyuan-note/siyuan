@@ -8,7 +8,6 @@
   "entryBasedOn": "इस पर आधारित",
   "entryCustomProfile": "कस्टम प्रोफ़ाइल",
   "entryCreateProfile": "प्रोफ़ाइल बनाएँ",
-  "entryExportAll": "सभी निर्यात करें",
   "entryRestoreBase": "आधार पुनर्स्थापित करें",
   "entryRestoreBaseConfirm": "क्या इस प्रोफ़ाइल की सभी प्रविष्टियाँ आधार प्रोफ़ाइल के अनुसार पुनर्स्थापित करनी हैं?",
   "entryImportInvalid": "मेनू और डॉक प्रोफ़ाइल फ़ाइल अमान्य है",

@@ -8,7 +8,6 @@
   "entryBasedOn": "Na podstawie",
   "entryCustomProfile": "Profil niestandardowy",
   "entryCreateProfile": "Utwórz profil",
-  "entryExportAll": "Eksportuj wszystko",
   "entryRestoreBase": "Przywróć bazę",
   "entryRestoreBaseConfirm": "Przywrócić wszystkie pozycje tego profilu zgodnie z profilem bazowym?",
   "entryImportInvalid": "Nieprawidłowy plik profilu menu i doku",

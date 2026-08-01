@@ -8,7 +8,6 @@
   "entryBasedOn": "На основі",
   "entryCustomProfile": "Користувацький профіль",
   "entryCreateProfile": "Створити профіль",
-  "entryExportAll": "Експортувати все",
   "entryRestoreBase": "Відновити основу",
   "entryRestoreBaseConfirm": "Відновити всі елементи цього профілю відповідно до базового профілю?",
   "entryImportInvalid": "Недійсний файл профілю меню та док-панелі",

@@ -8,7 +8,6 @@
   "entryBasedOn": "Basato su",
   "entryCustomProfile": "Profilo personalizzato",
   "entryCreateProfile": "Crea profilo",
-  "entryExportAll": "Esporta tutto",
   "entryRestoreBase": "Ripristina base",
   "entryRestoreBaseConfirm": "Ripristinare tutte le voci di questo profilo in base al profilo di base?",
   "entryImportInvalid": "File del profilo di menu e barra di ancoraggio non valido",

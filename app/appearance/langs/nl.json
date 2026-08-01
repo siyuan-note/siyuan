@@ -8,7 +8,6 @@
   "entryBasedOn": "Gebaseerd op",
   "entryCustomProfile": "Aangepast profiel",
   "entryCreateProfile": "Profiel maken",
-  "entryExportAll": "Alles exporteren",
   "entryRestoreBase": "Basis herstellen",
   "entryRestoreBaseConfirm": "Alle items in dit profiel herstellen naar het basisprofiel?",
   "entryImportInvalid": "Ongeldig profielbestand voor menu's en dock",

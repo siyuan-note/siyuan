@@ -8,7 +8,6 @@
   "entryBasedOn": "ベース",
   "entryCustomProfile": "カスタムプロファイル",
   "entryCreateProfile": "プロファイルを作成",
-  "entryExportAll": "すべてエクスポート",
   "entryRestoreBase": "ベースを復元",
   "entryRestoreBaseConfirm": "このプロファイルのすべての項目をベースプロファイルに戻しますか？",
   "entryImportInvalid": "メニューとドックのプロファイルファイルが無効です",

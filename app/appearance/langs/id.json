@@ -8,7 +8,6 @@
   "entryBasedOn": "Berdasarkan",
   "entryCustomProfile": "Profil kustom",
   "entryCreateProfile": "Buat profil",
-  "entryExportAll": "Ekspor semua",
   "entryRestoreBase": "Pulihkan dasar",
   "entryRestoreBaseConfirm": "Pulihkan semua entri dalam profil ini ke profil dasarnya?",
   "entryImportInvalid": "Berkas profil menu dan dok tidak valid",

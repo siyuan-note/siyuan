@@ -8,7 +8,6 @@
   "entryBasedOn": "Basé sur",
   "entryCustomProfile": "Profil personnalisé",
   "entryCreateProfile": "Créer un profil",
-  "entryExportAll": "Tout exporter",
   "entryRestoreBase": "Restaurer la base",
   "entryRestoreBaseConfirm": "Restaurer toutes les entrées de ce profil selon son profil de base ?",
   "entryImportInvalid": "Fichier de profil des menus et de la barre d'ancrage non valide",

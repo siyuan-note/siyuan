@@ -8,7 +8,6 @@
   "entryBasedOn": "Basado en",
   "entryCustomProfile": "Perfil personalizado",
   "entryCreateProfile": "Crear perfil",
-  "entryExportAll": "Exportar todo",
   "entryRestoreBase": "Restaurar base",
   "entryRestoreBaseConfirm": "¿Restaurar todas las entradas de este perfil a su perfil base?",
   "entryImportInvalid": "El archivo de perfil de menús y panel acoplable no es válido",

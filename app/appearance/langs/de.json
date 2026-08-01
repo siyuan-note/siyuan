@@ -8,7 +8,6 @@
   "entryBasedOn": "Basierend auf",
   "entryCustomProfile": "Benutzerdefiniertes Profil",
   "entryCreateProfile": "Profil erstellen",
-  "entryExportAll": "Alle exportieren",
   "entryRestoreBase": "Basis wiederherstellen",
   "entryRestoreBaseConfirm": "Alle Einträge dieses Profils auf das Basisprofil zurücksetzen?",
   "entryImportInvalid": "Ungültige Menü- und Dock-Profildatei",

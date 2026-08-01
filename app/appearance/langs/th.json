@@ -8,7 +8,6 @@
   "entryBasedOn": "อ้างอิงจาก",
   "entryCustomProfile": "โปรไฟล์กำหนดเอง",
   "entryCreateProfile": "สร้างโปรไฟล์",
-  "entryExportAll": "ส่งออกทั้งหมด",
   "entryRestoreBase": "คืนค่าพื้นฐาน",
   "entryRestoreBaseConfirm": "คืนค่ารายการทั้งหมดในโปรไฟล์นี้ตามโปรไฟล์พื้นฐานหรือไม่?",
   "entryImportInvalid": "ไฟล์โปรไฟล์เมนูและแถบเชื่อมต่อไม่ถูกต้อง",

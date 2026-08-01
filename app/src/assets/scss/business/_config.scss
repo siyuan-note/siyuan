@@ -551,7 +551,8 @@
     }
   }
 
-  &-ai-provider__view {
+  &-ai-provider__view,
+  &-entry-visibility__view {
     flex-direction: column;
   }
 }

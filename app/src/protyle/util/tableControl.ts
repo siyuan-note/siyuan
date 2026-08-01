@@ -128,7 +128,7 @@ export class TableControl {
     private cellHandle: HTMLButtonElement;
     private addRowButton: HTMLButtonElement;
     private addColumnButton: HTMLButtonElement;
-    private addControlTable: HTMLTableElement;
+    private joinedControlTable: HTMLTableElement;
     private dropIndicator: HTMLElement;
     private selection: ITableSelection;
     private hoverCell: HTMLTableCellElement;
@@ -190,7 +190,7 @@ export class TableControl {
         this.abortController.abort();
         this.observer.disconnect();
         cancelAnimationFrame(this.frame);
-        this.clearAddControlTable();
+        this.clearJoinedControlTable();
         this.element.remove();
     }
 
@@ -395,7 +395,7 @@ export class TableControl {
         event.preventDefault();
         event.stopPropagation();
         if (type === "add-row" || type === "add-column") {
-            this.clearAddControlTable();
+            this.clearJoinedControlTable();
             this.addAtEnd(type);
             return;
         }
@@ -782,7 +782,7 @@ export class TableControl {
     }
 
     private render() {
-        this.clearAddControlTable();
+        this.clearJoinedControlTable();
         const cell = this.hoverCell?.isConnected ? this.hoverCell : this.selection?.activeCell;
         const node = getTableNode(cell);
         const table = cell?.closest("table") as HTMLTableElement;
@@ -817,9 +817,15 @@ export class TableControl {
                 this.rowHandle.style.width = `${TABLE_HANDLE_THICKNESS}px`;
                 this.rowHandle.style.height = `${visibleRowRect.height}px`;
                 const firstRow = rowIndex === 0;
+                const lastRow = rowIndex === table.rows.length - 1;
+                this.rowHandle.classList.toggle("protyle-table-control__handle--row-first", firstRow && !lastRow);
                 this.setPosition(this.rowHandle, viewportRect.left +
                     (firstRow ? TABLE_HANDLE_THICKNESS / 2 : -TABLE_HANDLE_THICKNESS / 2),
                     visibleRowRect.top + visibleRowRect.height / 2);
+                if (!firstRow && lastRow) {
+                    table.classList.add("protyle-table-control__table--handle-row-end");
+                    this.joinedControlTable = table;
+                }
             }
             if (this.hoverType === "column" && visibleColumnRect?.width > 0 && viewportRect.height > 0) {
                 this.columnHandle.classList.remove("fn__none");
@@ -827,6 +833,14 @@ export class TableControl {
                 this.columnHandle.style.height = `${TABLE_HANDLE_THICKNESS}px`;
                 this.setPosition(this.columnHandle, visibleColumnRect.left + visibleColumnRect.width / 2,
                     viewportRect.top - TABLE_HANDLE_THICKNESS / 2);
+                if (columnIndex === 0) {
+                    table.classList.add("protyle-table-control__table--handle-column-start");
+                    this.joinedControlTable = table;
+                }
+                if (columnIndex === grid.columnCount - 1) {
+                    table.classList.add("protyle-table-control__table--handle-column-end");
+                    this.joinedControlTable = table;
+                }
             }
             if (this.hoverType === "cell" && visibleCellRect.width > 0 && visibleCellRect.height > 0) {
                 this.cellHandle.classList.remove("fn__none");
@@ -841,7 +855,7 @@ export class TableControl {
                 this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2,
                     tableRect.bottom + TABLE_ADD_CONTROL_THICKNESS / 2);
                 table.classList.add("protyle-table-control__table--add-row");
-                this.addControlTable = table;
+                this.joinedControlTable = table;
             }
             if (this.hoverType === "add-column" && viewportRect.height > 0 &&
                 tableRect.right <= viewportRect.right + 1 &&
@@ -852,7 +866,7 @@ export class TableControl {
                 this.setPosition(this.addColumnButton, tableRect.right + TABLE_ADD_CONTROL_THICKNESS / 2,
                     viewportRect.top + viewportRect.height / 2);
                 table.classList.add("protyle-table-control__table--add-column");
-                this.addControlTable = table;
+                this.joinedControlTable = table;
             }
         }
         this.selectionElementIndex = 0;
@@ -914,13 +928,15 @@ export class TableControl {
         }
     }
 
-    private clearAddControlTable() {
-        if (!this.addControlTable) {
+    private clearJoinedControlTable() {
+        if (!this.joinedControlTable) {
             return;
         }
-        this.addControlTable.classList.remove("protyle-table-control__table--add-row",
-            "protyle-table-control__table--add-column");
-        this.addControlTable = undefined;
+        this.joinedControlTable.classList.remove("protyle-table-control__table--add-row",
+            "protyle-table-control__table--add-column", "protyle-table-control__table--handle-row-end",
+            "protyle-table-control__table--handle-column-start",
+            "protyle-table-control__table--handle-column-end");
+        this.joinedControlTable = undefined;
     }
 
     private openMenu(x: number, y: number) {
@@ -1571,6 +1587,7 @@ export class TableControl {
         const state = this.dragState;
         this.dropIndicator.classList.add("fn__none");
         if (state.dragging && state.target >= 0) {
+            this.clearJoinedControlTable();
             this.moveSelection(state.target);
             event.preventDefault();
         }

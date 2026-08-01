@@ -809,6 +809,18 @@ table + .protyle-action__table {
       cursor: grab;
     }
 
+    &--row {
+      border-radius: var(--b3-border-radius-s) 0 0 var(--b3-border-radius-s);
+    }
+
+    &--row-first {
+      border-bottom-left-radius: 0;
+    }
+
+    &--column {
+      border-radius: var(--b3-border-radius-s) var(--b3-border-radius-s) 0 0;
+    }
+
     &--drag-disabled {
       cursor: pointer;
     }

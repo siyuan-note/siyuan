@@ -348,6 +348,18 @@
       border-bottom-right-radius: 0;
     }
 
+    &.protyle-table-control__table--handle-row-end {
+      border-bottom-left-radius: 0;
+    }
+
+    &.protyle-table-control__table--handle-column-start {
+      border-top-left-radius: 0;
+    }
+
+    &.protyle-table-control__table--handle-column-end {
+      border-top-right-radius: 0;
+    }
+
     tr:nth-child(even) td {
       background-color: var(--b3-table-even-background);
     }

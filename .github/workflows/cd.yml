@@ -243,6 +243,9 @@ jobs:
         if: matrix.config.e2e_shards != ''
         run: |
           pnpm run typecheck
+          # 每个 E2E job 只配置自己的 shard，校验脚本需要全量 shard 列表
+          # 才能验证三个 shard 的并集覆盖全部测试且无重复
+          unset SIYUAN_E2E_SHARDS
           pnpm run test:shards
         working-directory: ${{ github.workspace }}/siyuan-testing
 

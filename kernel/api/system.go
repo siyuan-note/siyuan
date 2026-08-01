@@ -863,7 +863,7 @@ func setAccessAuthCode(c *gin.Context) {
 	// 仅校验新设置的密码，掩码回填的已有密码和清空（禁用锁屏）不做长度限制，避免用户被锁定 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-w3xh-mmmh-r54v
 	if !masked && 0 < len(aac) && 8 > len(aac) {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(333)
+		ret.Msg = model.Conf.Language(355)
 		return
 	}
 

@@ -25,6 +25,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -1608,15 +1609,15 @@ func getPublishAccess(c *gin.Context) {
 
 func authFilePublishAccess(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
+		c.JSON(http.StatusOK, ret)
 		return
 	}
 
 	ID := arg["id"].(string)
 	if util.InvalidIDPattern(ID, ret) {
+		c.JSON(http.StatusOK, ret)
 		return
 	}
 	password := arg["password"].(string)
@@ -1624,19 +1625,41 @@ func authFilePublishAccess(c *gin.Context) {
 	ret.Code = -1
 	ret.Msg = model.Conf.Language(285)
 	if model.IsEncryptedPublishRuntimeTarget(ID) {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	// 按来源 IP 对发布密码认证进行限流，防止无限次暴力破解密码 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-v362-968x-gp2v
+	ip := c.ClientIP()
+	if retryAfter := util.AuthThrottleCheck(ip); 0 < retryAfter {
+		// 锁定期间持续记录失败，不断延长锁定时间
+		util.AuthThrottleFail(ip)
+		c.Header("Retry-After", strconv.Itoa(retryAfter))
+		ret.Msg = model.Conf.Language(354)
+		c.JSON(http.StatusTooManyRequests, ret)
 		return
 	}
 
 	publishAccess := model.GetPublishAccess()
 	for _, item := range publishAccess {
-		if item.ID == ID {
-			if item.Disable || item.Password == "" || item.Password != password {
-				return
-			}
-			model.SetPublishAuthCookie(c, ID, password)
-			ret.Code = 0
-			ret.Msg = ""
+		if item.ID != ID {
+			continue
+		}
+		if item.Disable || item.Password == "" || !util.AuthCodeEquals(item.Password, password) {
+			// 恒定时间比较，避免通过响应时间差异猜测密码
+			util.AuthThrottleFail(ip)
+			c.JSON(http.StatusOK, ret)
 			return
 		}
+		util.AuthThrottleReset(ip)
+		model.SetPublishAuthCookie(c, ID, password)
+		ret.Code = 0
+		ret.Msg = ""
+		c.JSON(http.StatusOK, ret)
+		return
 	}
+
+	// 目标 ID 不在发布配置中，同样记录失败以限制尝试次数
+	util.AuthThrottleFail(ip)
+	c.JSON(http.StatusOK, ret)
 }

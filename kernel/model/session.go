@@ -338,7 +338,7 @@ func CheckAuth(c *gin.Context) {
 			// 锁定期间持续记录失败，防止暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-w3xh-mmmh-r54v
 			util.AuthThrottleFail(ip)
 			c.Header("Retry-After", strconv.Itoa(retryAfter))
-			c.JSON(http.StatusTooManyRequests, map[string]any{"code": -1, "msg": Conf.Language(332)})
+			c.JSON(http.StatusTooManyRequests, map[string]any{"code": -1, "msg": Conf.Language(354)})
 			c.Abort()
 			return
 		}

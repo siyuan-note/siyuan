@@ -18,6 +18,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -129,7 +130,7 @@ func TestAuthFilePublishAccessReturnsUniformFailure(t *testing.T) {
 
 	engine := gin.New()
 	engine.POST("/api/filetree/authFilePublishAccess", authFilePublishAccess)
-	post := func(ID, inputPassword string) *httptest.ResponseRecorder {
+	post := func(ip, ID, inputPassword string) *httptest.ResponseRecorder {
 		recorder := httptest.NewRecorder()
 		request := httptest.NewRequest(
 			http.MethodPost,
@@ -137,6 +138,7 @@ func TestAuthFilePublishAccessReturnsUniformFailure(t *testing.T) {
 			strings.NewReader(`{"id":"`+ID+`","password":"`+inputPassword+`"}`),
 		)
 		request.Header.Set("Content-Type", "application/json")
+		request.RemoteAddr = ip + ":1234"
 		engine.ServeHTTP(recorder, request)
 		return recorder
 	}
@@ -156,9 +158,10 @@ func TestAuthFilePublishAccessReturnsUniformFailure(t *testing.T) {
 		{name: "encrypted notebook", ID: encryptedBoxID},
 	}
 	var failureBody string
-	for _, test := range failures {
+	for i, test := range failures {
 		t.Run(test.name, func(t *testing.T) {
-			recorder := post(test.ID, test.password)
+			// 每个失败用例使用独立的来源 IP，避免触发限流影响失败响应一致性断言
+			recorder := post(fmt.Sprintf("192.0.2.%d", 10+i), test.ID, test.password)
 			if cookies := recorder.Header().Values("Set-Cookie"); len(cookies) != 0 {
 				t.Fatalf("failed publish authentication set cookies: %v", cookies)
 			}
@@ -188,9 +191,9 @@ func TestAuthFilePublishAccessReturnsUniformFailure(t *testing.T) {
 		{name: "protected", ID: protectedID},
 		{name: "private", ID: privateID},
 	}
-	for _, test := range successes {
+	for i, test := range successes {
 		t.Run(test.name+" success", func(t *testing.T) {
-			recorder := post(test.ID, password)
+			recorder := post(fmt.Sprintf("192.0.2.%d", 100+i), test.ID, password)
 			response := &struct {
 				Code int    `json:"code"`
 				Msg  string `json:"msg"`
@@ -206,6 +209,134 @@ func TestAuthFilePublishAccessReturnsUniformFailure(t *testing.T) {
 				t.Fatalf("unexpected successful publish authentication cookies: %v", cookies)
 			}
 		})
+	}
+}
+
+func TestAuthFilePublishAccessThrottlesBruteForce(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const (
+		protectedID    = "20260731000003-protect"
+		password       = "secret"
+		passwordWrong  = "wrong"
+		passwordLocked = "Too many failed authentication attempts, please try again later"
+	)
+
+	oldDataDir := util.DataDir
+	oldPublishAccess := model.PublishAccess{}
+	if oldDataDir != "" {
+		oldPublishAccess = model.GetPublishAccess()
+	}
+	oldConf := model.Conf
+	oldLangs := util.Langs
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Lang = "test"
+	util.Langs = map[string]map[int]string{
+		"test": {285: "Password is incorrect", 354: passwordLocked},
+		"en":   {285: "Password is incorrect", 354: passwordLocked},
+	}
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+		model.Conf = oldConf
+		util.Langs = oldLangs
+		if oldDataDir != "" {
+			if err := model.SetPublishAccess(oldPublishAccess); err != nil {
+				t.Errorf("restore publish access failed: %v", err)
+			}
+		}
+	})
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: protectedID, Visible: true, Password: password},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.POST("/api/filetree/authFilePublishAccess", authFilePublishAccess)
+	post := func(password string) *httptest.ResponseRecorder {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(
+			http.MethodPost,
+			"/api/filetree/authFilePublishAccess",
+			strings.NewReader(`{"id":"`+protectedID+`","password":"`+password+`"}`),
+		)
+		request.Header.Set("Content-Type", "application/json")
+		request.RemoteAddr = "192.0.2.200:1234"
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	const attackerIP = "192.0.2.200"
+	defer util.AuthThrottleReset(attackerIP)
+
+	// 前 5 次失败为普通失败响应，第 6 次失败触发锁定但本次仍返回普通响应（与 util.AuthThrottleFail 语义一致）
+	for i := 0; i < 6; i++ {
+		recorder := post(passwordWrong)
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("attempt %d expected %d, got %d", i+1, http.StatusOK, recorder.Code)
+		}
+		response := &struct {
+			Code int    `json:"code"`
+			Msg  string `json:"msg"`
+		}{}
+		if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+			t.Fatalf("unmarshal response failed: %v", err)
+		}
+		if response.Code != -1 || response.Msg != "Password is incorrect" {
+			t.Fatalf("unexpected failed publish authentication response: %s", recorder.Body.String())
+		}
+	}
+
+	// 超过阈值后返回 429 并携带 Retry-After，不再设置认证 Cookie
+	recorder := post(passwordWrong)
+	if recorder.Code != http.StatusTooManyRequests {
+		t.Fatalf("throttled attempt expected %d, got %d", http.StatusTooManyRequests, recorder.Code)
+	}
+	if "" == recorder.Header().Get("Retry-After") {
+		t.Fatal("throttled attempt should set Retry-After header")
+	}
+	response := &struct {
+		Code int    `json:"code"`
+		Msg  string `json:"msg"`
+	}{}
+	if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	if response.Code != -1 || response.Msg != passwordLocked {
+		t.Fatalf("unexpected throttled publish authentication response: %s", recorder.Body.String())
+	}
+	if cookies := recorder.Result().Cookies(); 0 < len(cookies) {
+		t.Fatalf("throttled publish authentication set cookies: %v", cookies)
+	}
+
+	// 锁定期间即使密码正确也会被拒绝
+	recorder = post(password)
+	if recorder.Code != http.StatusTooManyRequests {
+		t.Fatalf("correct password during lock expected %d, got %d", http.StatusTooManyRequests, recorder.Code)
+	}
+	if cookies := recorder.Result().Cookies(); 0 < len(cookies) {
+		t.Fatalf("correct password during lock set cookies: %v", cookies)
+	}
+
+	// 锁定解除后正确密码可认证成功
+	util.AuthThrottleReset(attackerIP)
+	recorder = post(password)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("post-lock success expected %d, got %d", http.StatusOK, recorder.Code)
+	}
+	response = &struct {
+		Code int    `json:"code"`
+		Msg  string `json:"msg"`
+	}{}
+	if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	if response.Code != 0 || response.Msg != "" {
+		t.Fatalf("unexpected post-lock publish authentication response: %s", recorder.Body.String())
+	}
+	if cookies := recorder.Result().Cookies(); len(cookies) != 1 || cookies[0].Name != "publish-auth-"+protectedID {
+		t.Fatalf("unexpected post-lock publish authentication cookies: %v", cookies)
 	}
 }
 

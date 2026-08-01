@@ -47,6 +47,7 @@ import {clearTableCell, fixTable} from "../util/table";
 import {
     transaction,
     insertEmptyBlockquote,
+    isEmptyParagraph,
     turnsIntoOneTransaction,
     turnsIntoTransaction,
     turnsOneInto,
@@ -55,7 +56,15 @@ import {
 } from "./transaction";
 import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
 import {fontEvent} from "../toolbar/Font";
-import {addSubList, listIndent, listOutdent, toggleTaskListItem} from "./list";
+import {
+    addSubList,
+    insertEmptyChildList,
+    insertEmptyListItem,
+    listIndent,
+    listOutdent,
+    toggleTaskListItem
+} from "./list";
+import {getListContext, getListConversionType, getListShortcutAction, type TListSubtype} from "./listContext";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {cancelSB, insertEmptyBlock, jumpToParent} from "../../block/util";
 import {isEncryptedBox, isLocalPath} from "../../util/pathName";
@@ -1806,7 +1815,35 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         protyle.hint.fill(">" + Lute.Caret, protyle);
                     }
                 } else {
-                    if (type === "NodeParagraph") {
+                    const targetSubtype: TListSubtype = isMatchCheck ? "t" : (isMatchList ? "u" : "o");
+                    const listContext = hasBlockSelection ? undefined :
+                        getListContext(selectsElement[0], protyle.wysiwyg.element);
+                    if (listContext) {
+                        const isListItemFocused = Boolean(protyle.block.showAll &&
+                            protyle.block.id === listContext.listItemElement.dataset.nodeId);
+                        const action = getListShortcutAction(listContext, targetSubtype,
+                            listContext.childElements.length === 1 && isEmptyParagraph(listContext.childElements[0]),
+                            isListItemFocused);
+                        if (action === "cancelList" || action === "convertList") {
+                            const conversionType = action === "convertList" ?
+                                getListConversionType(listContext.subtype, targetSubtype) : "CancelList";
+                            if (listContext.listElement && conversionType) {
+                                const focusRange = range.cloneRange();
+                                focusRange.collapse(true);
+                                focusRange.insertNode(document.createElement("wbr"));
+                                turnsOneInto({
+                                    protyle,
+                                    nodeElement: listContext.listElement,
+                                    id: listContext.listElement.dataset.nodeId,
+                                    type: conversionType,
+                                });
+                            }
+                        } else if (action === "insertListItem") {
+                            insertEmptyListItem(protyle, listContext.listItemElement, range);
+                        } else {
+                            insertEmptyChildList(protyle, listContext.childElement, targetSubtype, range);
+                        }
+                    } else if (type === "NodeParagraph") {
                         turnsIntoOneTransaction({
                             protyle,
                             selectsElement,
@@ -1814,26 +1851,23 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         });
                     } else if (type === "NodeList") {
                         const id = selectsElement[0].dataset.nodeId;
-                        if (subType === "o" && (isMatchList || isMatchCheck)) {
+                        const currentSubtype = ["u", "o", "t"].includes(subType) ?
+                            subType as TListSubtype : undefined;
+                        const conversionType = currentSubtype ?
+                            getListConversionType(currentSubtype, targetSubtype) : undefined;
+                        if (currentSubtype === targetSubtype) {
                             turnsOneInto({
                                 protyle,
                                 nodeElement: selectsElement[0],
                                 id,
-                                type: isMatchCheck ? "UL2TL" : "OL2UL",
+                                type: "CancelList",
                             });
-                        } else if (subType === "t" && (isMatchList || isMatchOList)) {
+                        } else if (conversionType) {
                             turnsOneInto({
                                 protyle,
                                 nodeElement: selectsElement[0],
                                 id,
-                                type: isMatchList ? "TL2UL" : "TL2OL",
-                            });
-                        } else if (subType === "u" && (isMatchCheck || isMatchOList)) {
-                            turnsOneInto({
-                                protyle,
-                                nodeElement: selectsElement[0],
-                                id,
-                                type: isMatchCheck ? "OL2TL" : "UL2OL",
+                                type: conversionType,
                             });
                         }
                     } else {

@@ -1,4 +1,4 @@
-import {focusByWbr} from "../util/selection";
+import {focusByWbr, getUndoFocusContext} from "../util/selection";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
 import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";
@@ -8,6 +8,8 @@ import {hasClosestByClassName, isBlockElement} from "../util/hasClosest";
 import {getEmbedChildOperationContext, getParentBlock, getPreviousBlockSibling} from "./getBlock";
 import {setFold} from "../util/blockFold";
 import {scrollCenter} from "../../util/highlightById";
+import {getFollowingOrderedListMarkerUpdates, type TListSubtype} from "./listContext";
+import {fetchSyncPost} from "../../util/fetch";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -88,6 +90,160 @@ export const genListItemElement = (listItemElement: Element, offset = 0, wbr = f
         element.innerHTML = `<div data-marker="*" data-subtype="u" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
     }
     return element.content.firstElementChild as HTMLElement;
+};
+
+const getFocusedOrderedListUpdates = async (protyle: IProtyle, listItemElement: HTMLElement) => {
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    if (listItemElement.getAttribute("data-subtype") !== "o" || !protyle.block.parentID) {
+        return {doOperations, undoOperations};
+    }
+
+    try {
+        const response = await fetchSyncPost("/api/block/getBlockDOM", {
+            id: protyle.block.parentID,
+            notebook: protyle.notebookId,
+        });
+        const template = document.createElement("template");
+        template.innerHTML = response.data?.dom || "";
+        const listElement = template.content.firstElementChild as HTMLElement;
+        if (listElement?.getAttribute("data-type") !== "NodeList" ||
+            listElement.getAttribute("data-subtype") !== "o") {
+            return {doOperations, undoOperations};
+        }
+
+        const listItemElements = Array.from(listElement.children).filter((item) =>
+            item.getAttribute("data-type") === "NodeListItem") as HTMLElement[];
+        const currentIndex = listItemElements.findIndex((item) =>
+            item.getAttribute("data-node-id") === listItemElement.getAttribute("data-node-id"));
+        if (currentIndex < 0) {
+            return {doOperations, undoOperations};
+        }
+
+        const followingElements = listItemElements.slice(currentIndex + 1);
+        const markerUpdates = getFollowingOrderedListMarkerUpdates(
+            listItemElements[currentIndex].getAttribute("data-marker"),
+            followingElements.map((item) => item.getAttribute("data-marker")));
+        followingElements.forEach((item, index) => {
+            const marker = markerUpdates[index];
+            if (!marker) {
+                return;
+            }
+            const id = item.getAttribute("data-node-id");
+            undoOperations.push({
+                action: "update",
+                id,
+                data: item.outerHTML,
+            });
+            item.setAttribute("data-marker", marker);
+            const actionElement = item.querySelector(".protyle-action--order");
+            if (actionElement) {
+                actionElement.textContent = marker;
+            }
+            doOperations.push({
+                action: "update",
+                id,
+                data: item.outerHTML,
+            });
+        });
+    } catch (error) {
+        console.warn("get focused ordered list failed", error);
+    }
+    return {doOperations, undoOperations};
+};
+
+const insertingFocusedListItems = new WeakSet<IProtyle>();
+
+export const insertEmptyListItem = async (protyle: IProtyle, listItemElement: HTMLElement, range: Range) => {
+    const listElement = listItemElement.parentElement;
+    if (!listElement) {
+        return;
+    }
+
+    const newListItemElement = genListItemElement(listItemElement, 0, true);
+    const id = newListItemElement.getAttribute("data-node-id");
+    if (listElement.classList.contains("protyle-wysiwyg")) {
+        if (insertingFocusedListItems.has(protyle)) {
+            return;
+        }
+        insertingFocusedListItems.add(protyle);
+        try {
+            const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
+            const orderOperations = await getFocusedOrderedListUpdates(protyle, listItemElement);
+            if (!listItemElement.isConnected) {
+                return;
+            }
+            listItemElement.insertAdjacentElement("afterend", newListItemElement);
+            transaction(protyle, [{
+                action: "insert",
+                id,
+                data: newListItemElement.outerHTML,
+                previousID: listItemElement.getAttribute("data-node-id"),
+            }, ...orderOperations.doOperations], [{
+                action: "delete",
+                id,
+                context: undoFocusContext,
+            }, ...orderOperations.undoOperations]);
+            focusByWbr(newListItemElement, range);
+            scrollCenter(protyle, newListItemElement);
+        } finally {
+            insertingFocusedListItems.delete(protyle);
+        }
+        return;
+    }
+
+    const oldHTML = listElement.outerHTML;
+    listItemElement.insertAdjacentElement("afterend", newListItemElement);
+    updateListOrder(listElement);
+    updateTransaction(protyle, listElement, oldHTML);
+    focusByWbr(newListItemElement, range);
+    scrollCenter(protyle, newListItemElement);
+};
+
+export const insertEmptyChildList = (protyle: IProtyle, previousElement: HTMLElement,
+                                     subtype: TListSubtype, range: Range) => {
+    const parentElement = previousElement.parentElement;
+    if (!parentElement) {
+        return;
+    }
+    const marker = subtype === "t" ? "- [ ] " : (subtype === "u" ? "- " : "1. ");
+    const template = document.createElement("template");
+    template.innerHTML = protyle.lute.SpinBlockDOM(marker + Lute.Caret);
+    const listElement = template.content.firstElementChild as HTMLElement;
+    if (!listElement || listElement.getAttribute("data-type") !== "NodeList" ||
+        listElement.getAttribute("data-subtype") !== subtype) {
+        return;
+    }
+
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
+    const id = listElement.getAttribute("data-node-id");
+    const doOperations: IOperation[] = [{
+        action: "insert",
+        id,
+        data: listElement.outerHTML,
+        previousID: previousElement.getAttribute("data-node-id"),
+        parentID: parentElement.getAttribute("data-node-id"),
+    }];
+    const undoOperations: IOperation[] = [{
+        action: "delete",
+        id,
+        context: undoFocusContext,
+    }];
+    [previousElement, parentElement].forEach((item) => {
+        if (item.getAttribute("fold") !== "1") {
+            return;
+        }
+        const foldData = setFold(protyle, item, true, false, false, true);
+        if (foldData?.doOperations?.length > 0) {
+            doOperations.push(...foldData.doOperations);
+            undoOperations.push(...foldData.undoOperations);
+        }
+    });
+
+    previousElement.insertAdjacentElement("afterend", listElement);
+    transaction(protyle, doOperations, undoOperations);
+    focusByWbr(listElement, range);
+    scrollCenter(protyle, listElement);
 };
 
 export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range) => {

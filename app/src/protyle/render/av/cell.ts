@@ -1116,7 +1116,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
             const tooltip = desc ?
                 ` data-position="north" aria-label="${escapeAriaLabel(item.content)}<div class='ft__on-surface'>${escapeAriaLabel(desc)}</div>"` :
                 "";
-            text += `<span class="b3-chip${desc ? " ariaLabel" : ""}"${tooltip} style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
+            text += `<span class="b3-chip${desc ? " ariaLabel" : ""}"${tooltip} style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">${escapeHtml(item.content)}</span>`;
         });
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;

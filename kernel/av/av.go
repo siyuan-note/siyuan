@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -258,6 +259,19 @@ type SelectOption struct {
 	Name  string `json:"name"`  // 选项名称
 	Color string `json:"color"` // 选项颜色
 	Desc  string `json:"desc"`  // 选项描述
+}
+
+// FilterColorValue 校验选项颜色值，仅允许空字符串或 1-14 的调色板索引，非法值返回空字符串
+func FilterColorValue(color string) string {
+	color = strings.TrimSpace(color)
+	if "" == color {
+		return ""
+	}
+	n, err := strconv.Atoi(color)
+	if nil != err || 1 > n || 14 < n {
+		return ""
+	}
+	return strconv.Itoa(n)
 }
 
 // View 描述了视图的结构。

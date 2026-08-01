@@ -37,10 +37,10 @@ const filterSelectHTML = (key: string, options: {
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
                 const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : "";
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${item.color}">
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${escapeAttr(item.color)}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
-        <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
@@ -728,7 +728,7 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
     visibleValues?.forEach((item) => {
         const option = colData.options?.find((colOption) => colOption.name === item.content);
         selected.push(item.content);
-        selectedHTML += `<div class="b3-chip b3-chip--middle${canSort ? " fn__grab" : " b3-chip--pointer"}" data-content="${escapeAttr(item.content)}" data-name="${escapeAttr(item.content)}" data-desc="${escapeAttr(option?.desc || "")}" data-color="${escapeAttr(option?.color || item.color)}" data-value-color="${escapeAttr(item.color)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconClose"></use></svg></div>`;
+        selectedHTML += `<div class="b3-chip b3-chip--middle${canSort ? " fn__grab" : " b3-chip--pointer"}" data-content="${escapeAttr(item.content)}" data-name="${escapeAttr(item.content)}" data-desc="${escapeAttr(option?.desc || "")}" data-color="${escapeAttr(option?.color || item.color)}" data-value-color="${escapeAttr(item.color)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconClose"></use></svg></div>`;
     });
 
     return `<div class="b3-menu__items" style="display: flex;flex-direction: column;flex: 1;">

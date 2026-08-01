@@ -1586,24 +1586,16 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		}
 
 		for _, entry := range entries {
-			if !strings.HasSuffix(entry.Name(), ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(entry.Name(), ".json")) {
+			avID := strings.TrimSuffix(entry.Name(), ".json")
+			if !strings.HasSuffix(entry.Name(), ".json") || !ast.IsNodeIDPattern(avID) {
 				continue
 			}
 
-			data, readDataErr := filelock.ReadFile(filepath.Join(util.DataDir, "storage", "av", entry.Name()))
-			if nil != readDataErr {
-				logging.LogErrorf("read file [%s] failed: %s", entry.Name(), readDataErr)
-				err = readDataErr
+			avJSONPath := filepath.Join(storageAvDir, entry.Name())
+			if _, replaceErr := replaceAttributeViewAssetPath(avJSONPath, avID, oldPath, newPath); nil != replaceErr {
+				logging.LogErrorf("replace asset path in attribute view [%s] failed: %s", entry.Name(), replaceErr)
+				err = replaceErr
 				return
-			}
-
-			if bytes.Contains(data, []byte(oldPath)) {
-				data = bytes.ReplaceAll(data, []byte(oldPath), []byte(newPath))
-				if writeDataErr := filelock.WriteFile(filepath.Join(util.DataDir, "storage", "av", entry.Name()), data); nil != writeDataErr {
-					logging.LogErrorf("write file [%s] failed: %s", entry.Name(), writeDataErr)
-					err = writeDataErr
-					return
-				}
 			}
 
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(entry.Name())))
@@ -1616,6 +1608,21 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	}
 
 	IncSync()
+	return
+}
+
+func replaceAttributeViewAssetPath(avJSONPath, avID, oldPath, newPath string) (updated bool, err error) {
+	data, err := filelock.ReadFile(avJSONPath)
+	if nil != err || !bytes.Contains(data, []byte(oldPath)) {
+		return
+	}
+
+	data = bytes.ReplaceAll(data, []byte(oldPath), []byte(newPath))
+	if err = filelock.WriteFile(avJSONPath, data); nil != err {
+		return
+	}
+	cache.RemoveAVData(avID)
+	updated = true
 	return
 }
 

@@ -84,7 +84,7 @@ jobs:
     name: ${{ matrix.config.name }}
     needs: [prepare]
     env:
-      SIYUAN_E2E_SHARDS: "main:6806 editor:6807 attribute-view:6808"
+      SIYUAN_E2E_SHARDS: ${{ matrix.config.e2e_shards }}
     strategy:
       matrix:
         config:
@@ -97,6 +97,7 @@ jobs:
             goos: "linux"
             goarch: "amd64"
             suffix: "linux"
+            e2e_shards: ""
           - os: macos-latest
             name: macos build mac.dmg
             kernel_path: "../app/kernel-darwin/SiYuan-Kernel"
@@ -106,6 +107,7 @@ jobs:
             goos: "darwin"
             goarch: "amd64"
             suffix: "mac.dmg"
+            e2e_shards: "main:6806"
           - os: macos-latest
             name: macos build mac-arm64.dmg
             kernel_path: "../app/kernel-darwin-arm64/SiYuan-Kernel"
@@ -115,6 +117,7 @@ jobs:
             goos: "darwin"
             goarch: "arm64"
             suffix: "mac-arm64.dmg"
+            e2e_shards: "editor:6807"
           - os: windows-latest
             name: windows build win.exe
             kernel_path: "../app/kernel/SiYuan-Kernel.exe"
@@ -126,6 +129,7 @@ jobs:
             mingwsys: "MINGW64"
             goarch: "amd64"
             suffix: "win.exe"
+            e2e_shards: "attribute-view:6808"
 
     steps:
       - uses: actions/checkout@v6
@@ -206,8 +210,22 @@ jobs:
           GOPATH: ${{ github.workspace }}/go
           GOARCH: ${{ matrix.config.goarch }}
 
+      - name: Start Building Electron App (Background)
+        if: matrix.config.e2e_shards != ''
+        shell: bash
+        run: |
+          (
+            set +e
+            pnpm run ${{ matrix.config.electron_args }}
+            exit_code="$?"
+            echo "${exit_code}" > "${RUNNER_TEMP}/electron-build.exit"
+            exit "${exit_code}"
+          ) > "${RUNNER_TEMP}/electron-build.log" 2>&1 < /dev/null &
+          echo "$!" > "${RUNNER_TEMP}/electron-build.pid"
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
       - name: Checkout siyuan-testing
-        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        if: matrix.config.e2e_shards != ''
         continue-on-error: true
         uses: actions/checkout@v6
         with:
@@ -216,25 +234,25 @@ jobs:
           path: ${{ github.workspace }}/siyuan-testing
 
       - name: Install End-to-End Test Dependencies
-        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        if: matrix.config.e2e_shards != ''
         continue-on-error: true
         run: pnpm install --frozen-lockfile
         working-directory: ${{ github.workspace }}/siyuan-testing
 
       - name: Validate End-to-End Test Shards
-        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        if: matrix.config.e2e_shards != ''
         run: |
           pnpm run typecheck
           pnpm run test:shards
         working-directory: ${{ github.workspace }}/siyuan-testing
 
       - name: Start Kernel for End-to-End Tests
-        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        if: matrix.config.e2e_shards != ''
         continue-on-error: true
         shell: bash
         run: |
           APP_DIR="${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app"
-          KERNEL_PATH="${APP_DIR}/kernel-darwin-arm64/SiYuan-Kernel"
+          KERNEL_PATH="${{ matrix.config.kernel_path }}"
           for shard_config in ${SIYUAN_E2E_SHARDS}; do
             shard="${shard_config%:*}"
             port="${shard_config#*:}"
@@ -244,9 +262,10 @@ jobs:
               > "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel-console.log" 2>&1 &
             echo "$!" > "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid"
           done
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
 
       - name: Wait for End-to-End Test Kernels
-        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        if: matrix.config.e2e_shards != ''
         continue-on-error: true
         shell: bash
         run: |
@@ -276,7 +295,7 @@ jobs:
           done
 
       - name: Run End-to-End Tests
-        if: matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        if: matrix.config.e2e_shards != ''
         continue-on-error: true
         timeout-minutes: 30
         shell: bash
@@ -296,7 +315,18 @@ jobs:
               pnpm exec playwright test --config=playwright.focused.config.ts \
                 --reporter=line,html --output="test-results-${shard}"
             ) &
-            TEST_PIDS+=("$!")
+            TEST_PID=$!
+            # 单个 shard 超时保护：测试 worker 卡死时强制结束，避免拖累整个 job
+            (
+              sleep 600
+              if kill -0 "${TEST_PID}" 2>/dev/null; then
+                echo "::error title=End-to-End shard timed out::${shard} killed after 600s"
+                kill -KILL "${TEST_PID}" 2>/dev/null || true
+              fi
+            ) &
+            WATCHDOG_PID=$!
+            TEST_PIDS+=("${TEST_PID}")
+            TEST_WATCHDOG_PIDS+=("${WATCHDOG_PID}")
             TEST_SHARDS+=("${shard}")
           done
           TEST_STATUS=0
@@ -310,11 +340,15 @@ jobs:
             fi
           done
           set -e
+          # 测试已全部结束，主动终止仍处于休眠的超时监控进程，避免孤儿进程
+          for watchdog_pid in "${TEST_WATCHDOG_PIDS[@]}"; do
+            kill "${watchdog_pid}" 2>/dev/null || true
+          done
           exit "${TEST_STATUS}"
         working-directory: ${{ github.workspace }}/siyuan-testing
 
       - name: Stop End-to-End Test Kernels
-        if: always() && matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        if: always() && matrix.config.e2e_shards != ''
         continue-on-error: true
         shell: bash
         run: |
@@ -341,11 +375,11 @@ jobs:
           done
 
       - name: Upload End-to-End Test Results
-        if: always() && matrix.config.goos == 'darwin' && matrix.config.goarch == 'arm64'
+        if: always() && matrix.config.e2e_shards != ''
         continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
-          name: siyuan-e2e-macos-arm64
+          name: siyuan-e2e-${{ matrix.config.suffix }}
           path: |
             ${{ github.workspace }}/siyuan-testing/playwright-report-*
             ${{ github.workspace }}/siyuan-testing/test-results-*
@@ -354,11 +388,43 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      - name: Wait for Electron Packaging
+        if: always() && matrix.config.e2e_shards != ''
+        shell: bash
+        run: |
+          pid="$(cat "${RUNNER_TEMP}/electron-build.pid" 2>/dev/null)"
+          exit_code=""
+          for attempt in {1..120}; do
+            if [ -f "${RUNNER_TEMP}/electron-build.exit" ]; then
+              exit_code="$(cat "${RUNNER_TEMP}/electron-build.exit")"
+              break
+            fi
+            if ! kill -0 "${pid}" 2>/dev/null; then
+              cat "${RUNNER_TEMP}/electron-build.log"
+              echo "::error::Electron packaging process exited unexpectedly"
+              exit 1
+            fi
+            sleep 5
+          done
+          if [ -z "${exit_code}" ]; then
+            cat "${RUNNER_TEMP}/electron-build.log"
+            echo "::error::Electron packaging timed out"
+            kill -KILL "${pid}" 2>/dev/null || true
+            exit 1
+          fi
+          if [ "${exit_code}" -ne 0 ]; then
+            cat "${RUNNER_TEMP}/electron-build.log"
+          else
+            tail -n 20 "${RUNNER_TEMP}/electron-build.log"
+          fi
+          exit "${exit_code}"
+
       - name: Install RPM build tools
         if: matrix.config.goos == 'linux'
         run: sudo apt-get install -y rpm
 
       - name: Building Electron App
+        if: matrix.config.e2e_shards == ''
         run: pnpm run ${{ matrix.config.electron_args }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 

@@ -218,13 +218,10 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         </div>
     </div>
     <div class="config-group">
-        <div class="config-title config-title--action">
-            <span>${window.siyuan.languages.entryVisibility}</span>
-            <span class="fn__space fn__flex-1"></span>
-            <button class="b3-button b3-button--outline" data-action="restore">${window.siyuan.languages.entryRestoreBase}</button>
-        </div>
         <div class="fn__flex">
             <input class="b3-text-field fn__flex-1" data-type="entry-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
+            <span class="fn__space"></span>
+            <button class="b3-button b3-button--outline" data-action="restore">${window.siyuan.languages.entryRestoreBase}</button>
         </div>
     </div>
     <div data-type="entry-sections"></div>

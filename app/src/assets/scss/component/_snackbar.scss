@@ -30,8 +30,13 @@
       transform: translate3d(0, 0, 0) !important;
     }
 
-    & > .fn__flex-1::-webkit-scrollbar {
-      display: none;
+    & > .fn__flex-1 {
+      margin: -8px;
+      padding: 8px;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
   }
 

@@ -69,11 +69,11 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
             logsHTML += `<li class="b3-list-item b3-list-item--hide-action" data-created="${item}">
     <span class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
-        <svg><use xlink:href="#iconUncheck"></use></svg>
-    </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
+    </span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
+        <svg><use xlink:href="#iconUncheck"></use></svg>
     </span>
 </li>`;
         });

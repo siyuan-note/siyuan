@@ -33,14 +33,14 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
             html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}" data-title="${escapeAttr(item.title)}">
     <span class="b3-list-item__text">${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}</span>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
-        <svg><use xlink:href="#iconUncheck"></use></svg>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+        <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
-        <svg><use xlink:href="#iconUndo"></use></svg>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
+        <svg><use xlink:href="#iconUncheck"></use></svg>
     </span>
 </li>`;
             return;

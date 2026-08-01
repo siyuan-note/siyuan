@@ -294,7 +294,7 @@
   transition: transform .15s cubic-bezier(0, 0, .2, 1) 0ms;
 
   &--all {
-    transform: translateY(-200vh);
+    transform: translateX(100vw);
   }
 
   // 窄屏下 dock 图标过多时左侧可横向滚动，关闭按钮固定在右侧始终可触达

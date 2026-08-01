@@ -205,33 +205,11 @@ export class TableControl {
 
     private bindEvents() {
         const signal = this.abortController.signal;
-        this.wysiwygElement.addEventListener("pointermove", event => {
-            const targetCell = getCell(event.target);
-            const targetTable = targetCell?.closest("table") as HTMLTableElement;
-            const targetViewportRect = targetTable ? this.getTableViewportRect(targetTable) : undefined;
-            const edgeHover = !targetCell || (targetViewportRect &&
-                event.clientX <= targetViewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE) ?
-                this.getEdgeHover(event.clientX, event.clientY) : undefined;
-            const cell = edgeHover?.cell || targetCell;
-            if (cell && getTableNode(cell) && !this.protyle.disabled) {
-                const hoverType = edgeHover?.type || "cell";
-                const hoverIndex = edgeHover?.index;
-                if (cell === this.hoverCell && hoverType === this.hoverType && hoverIndex === this.hoverIndex) {
-                    return;
-                }
-                this.hoverCell = cell;
-                this.hoverType = hoverType;
-                this.hoverIndex = hoverIndex;
-                this.scheduleRender();
-            } else {
-                if (this.hoverCell) {
-                    this.hoverCell = undefined;
-                    this.hoverType = undefined;
-                    this.hoverIndex = undefined;
-                    this.scheduleRender();
-                }
-            }
-        }, {signal});
+        this.wysiwygElement.addEventListener("pointermove", event => this.handleTablePointerMove(event, false), {signal});
+        // 手柄和添加按钮（pointer-events: auto）会截获鼠标事件，导致 wysiwygElement 收不到
+        // pointermove，边缘 hover 检测被卡住（例如鼠标停在 cell 手柄上时无法触发 add-column）。
+        // 控件容器位于事件冒泡路径上，在这里兜底执行相同的边缘检测
+        this.element.addEventListener("pointermove", event => this.handleTablePointerMove(event, true), {signal});
         this.wysiwygElement.addEventListener("pointerleave", event => {
             if (this.element.contains(event.relatedTarget as Node)) {
                 return;
@@ -335,6 +313,36 @@ export class TableControl {
             this.hoverIndex = undefined;
             this.scheduleRender();
         }, {signal});
+    }
+
+    private handleTablePointerMove(event: PointerEvent, fromControl: boolean) {
+        const targetCell = getCell(event.target);
+        const targetTable = targetCell?.closest("table") as HTMLTableElement;
+        const targetViewportRect = targetTable ? this.getTableViewportRect(targetTable) : undefined;
+        const edgeHover = !targetCell || (targetViewportRect &&
+            event.clientX <= targetViewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE) ?
+            this.getEdgeHover(event.clientX, event.clientY) : undefined;
+        const cell = edgeHover?.cell || targetCell;
+        if (cell && getTableNode(cell) && !this.protyle.disabled) {
+            const hoverType = edgeHover?.type || "cell";
+            const hoverIndex = edgeHover?.index;
+            if (cell === this.hoverCell && hoverType === this.hoverType && hoverIndex === this.hoverIndex) {
+                return;
+            }
+            this.hoverCell = cell;
+            this.hoverType = hoverType;
+            this.hoverIndex = hoverIndex;
+            this.scheduleRender();
+            return;
+        }
+        // 控件按钮（手柄/添加按钮）上的事件不会到达 wysiwygElement，这里只在
+        // 非控件来源时清空 hover 状态，避免鼠标悬停在按钮上时状态被错误清除
+        if (!fromControl && this.hoverCell) {
+            this.hoverCell = undefined;
+            this.hoverType = undefined;
+            this.hoverIndex = undefined;
+            this.scheduleRender();
+        }
     }
 
     private handlePointerDown(event: PointerEvent) {

@@ -241,6 +241,7 @@ jobs:
 
       - name: Validate End-to-End Test Shards
         if: matrix.config.e2e_shards != ''
+        shell: bash
         run: |
           pnpm run typecheck
           # 每个 E2E job 只配置自己的 shard，校验脚本需要全量 shard 列表

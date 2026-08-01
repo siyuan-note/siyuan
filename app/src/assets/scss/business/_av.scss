@@ -134,6 +134,7 @@
     align-items: center;
     box-shadow: 0 -1px inset var(--b3-theme-background-light);
     font-size: 87.5%;
+    position: relative;
 
     &--fixed {
       background-color: var(--b3-parent-background);
@@ -250,11 +251,10 @@
   &__selection-toolbar {
     align-items: center;
     display: none;
-    flex: 1;
     gap: 4px;
-    height: 32px;
+    inset: 0;
     min-width: 0;
-    font-size: 87.5%;
+    position: absolute;
 
     .block__icon {
       opacity: 1;
@@ -262,14 +262,17 @@
   }
 
   &__selection-count {
+    color: var(--b3-theme-primary);
     flex-shrink: 0;
     padding: 0 5px;
     white-space: nowrap;
   }
 
   &__views--selection {
-    > :not(.av__selection-toolbar) {
-      display: none;
+    > :not(.av__selection-toolbar),
+    > :not(.av__selection-toolbar) * {
+      transition: none;
+      visibility: hidden;
     }
 
     > .av__selection-toolbar {

@@ -45,6 +45,18 @@ export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement) => {
     }
 };
 
+export const normalizeVirtualBlockRef = (element: HTMLElement) => {
+    element.querySelectorAll<HTMLElement>('[data-type~="virtual-block-ref"]').forEach(item => {
+        const types = (item.getAttribute("data-type") || "").split(" ")
+            .filter(type => type && type !== "virtual-block-ref");
+        if (types.length > 0) {
+            item.setAttribute("data-type", types.join(" "));
+        } else {
+            item.replaceWith(...Array.from(item.childNodes));
+        }
+    });
+};
+
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
     let refText = "";
@@ -649,10 +661,21 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (startRangeBlockElement && endRangeBlockElement && startRangeBlockElement !== endRangeBlockElement) {
             const selectedElement = document.createElement("div");
             selectedElement.append(range.cloneContents());
-            selectedElement.querySelectorAll(".protyle-attr").forEach(item => {
-                item.textContent = Constants.ZWSP;
-            });
-            if (selectedElement.isEqualNode(tempElement)) {
+            let pastedElement: HTMLElement = tempElement;
+            if (startRangeBlockElement.parentElement === endRangeBlockElement.parentElement &&
+                startRangeBlockElement.getAttribute("data-type") === "NodeParagraph" &&
+                endRangeBlockElement.getAttribute("data-type") === "NodeParagraph") {
+                pastedElement = tempElement.cloneNode(true) as HTMLElement;
+                [selectedElement, pastedElement].forEach(element => {
+                    normalizeVirtualBlockRef(element);
+                    element.querySelectorAll(".protyle-attr").forEach(item => item.remove());
+                });
+            } else {
+                selectedElement.querySelectorAll(".protyle-attr").forEach(item => {
+                    item.textContent = Constants.ZWSP;
+                });
+            }
+            if (selectedElement.isEqualNode(pastedElement)) {
                 range.collapse(false);
                 getSelection().removeAllRanges();
                 getSelection().addRange(range);

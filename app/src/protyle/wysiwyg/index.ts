@@ -4,6 +4,7 @@ import {
     enableLuteMarkdownSyntax,
     getPlainText,
     getTextStar,
+    normalizeVirtualBlockRef,
     paste,
     restoreLuteMarkdownSyntax
 } from "../util/paste";
@@ -463,15 +464,7 @@ export class WYSIWYG {
     }
 
     private normalizeCrossBlockCopy(element: HTMLElement, range: Range) {
-        element.querySelectorAll<HTMLElement>('[data-type~="virtual-block-ref"]').forEach(item => {
-            const types = (item.getAttribute("data-type") || "").split(" ")
-                .filter(type => type && type !== "virtual-block-ref");
-            if (types.length > 0) {
-                item.setAttribute("data-type", types.join(" "));
-            } else {
-                item.replaceWith(...Array.from(item.childNodes));
-            }
-        });
+        normalizeVirtualBlockRef(element);
         let firstElement = element.firstElementChild as HTMLElement;
         while (firstElement?.getAttribute("data-type") === "NodeListItem") {
             const childBlocks = Array.from(firstElement.children).filter(item =>
@@ -3678,7 +3671,7 @@ export class WYSIWYG {
             }
             const context = getCrossBlockNestedListMergeContext(
                 protyle.wysiwyg.element, range, startElement, endElement);
-            if (!context || context.endOuterListItemElement.previousElementSibling !== context.startOuterListItemElement) {
+            if (!context) {
                 return;
             }
             event.preventDefault();
@@ -3692,6 +3685,18 @@ export class WYSIWYG {
             const oldEndOuterHTML = context.endOuterListItemElement.outerHTML;
             const parentID = context.endOuterListItemElement.parentElement.getAttribute("data-node-id");
             const previousID = context.endOuterListItemElement.previousElementSibling?.getAttribute("data-node-id");
+            const middleOuterData: { element: HTMLElement; oldHTML: string; previousID?: string }[] = [];
+            let middleOuterElement = context.startOuterListItemElement.nextElementSibling as HTMLElement;
+            while (middleOuterElement && middleOuterElement !== context.endOuterListItemElement) {
+                if (middleOuterElement.hasAttribute("data-node-id")) {
+                    middleOuterData.push({
+                        element: middleOuterElement,
+                        oldHTML: middleOuterElement.outerHTML,
+                        previousID: middleOuterElement.previousElementSibling?.getAttribute("data-node-id"),
+                    });
+                }
+                middleOuterElement = middleOuterElement.nextElementSibling as HTMLElement;
+            }
             const replacementData = context.replacementListItemElement ? {
                 element: context.replacementListItemElement,
                 parentID: context.replacementListItemElement.parentElement.getAttribute("data-node-id"),
@@ -3725,17 +3730,17 @@ export class WYSIWYG {
             }
             const movedListItems = mergeCrossBlockNestedLists(context);
             context.startTrailingListItems.forEach(item => item.remove());
+            middleOuterData.forEach(item => item.element.remove());
             context.endOuterListItemElement.remove();
             if (replacementData) {
-                startElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 const startID = startElement.getAttribute("data-node-id");
                 const replacementID = replacementData.element.getAttribute("data-node-id");
-                const doOperations: IOperation[] = [{
-                    action: "update",
-                    id: startID,
-                    data: startElement.outerHTML,
-                }];
+                const doOperations: IOperation[] = [];
                 replacementData.removedBlocks.forEach(item => doOperations.push({
+                    action: "delete",
+                    id: item.element.getAttribute("data-node-id"),
+                }));
+                middleOuterData.forEach(item => doOperations.push({
                     action: "delete",
                     id: item.element.getAttribute("data-node-id"),
                 }));
@@ -3748,8 +3753,9 @@ export class WYSIWYG {
                 let movedPreviousID = replacementID;
                 movedListItems.forEach(item => {
                     doOperations.push({
-                        action: "move",
+                        action: "insert",
                         id: item.getAttribute("data-node-id"),
+                        data: item.outerHTML,
                         previousID: movedPreviousID,
                         parentID: context.startListElement.getAttribute("data-node-id"),
                     });
@@ -3760,11 +3766,6 @@ export class WYSIWYG {
                     id: context.endOuterListItemElement.getAttribute("data-node-id"),
                 });
                 const undoOperations: IOperation[] = [{
-                    action: "update",
-                    id: startID,
-                    data: oldStartHTML,
-                    context: undoContext,
-                }, {
                     action: "move",
                     id: replacementID,
                     previousID: replacementData.previousID,
@@ -3781,6 +3782,13 @@ export class WYSIWYG {
                     action: "delete",
                     id: item.getAttribute("data-node-id"),
                 }));
+                middleOuterData.forEach(item => undoOperations.push({
+                    action: "insert",
+                    id: item.element.getAttribute("data-node-id"),
+                    data: item.oldHTML,
+                    previousID: item.previousID,
+                    parentID,
+                }));
                 undoOperations.push({
                     action: "insert",
                     id: context.endOuterListItemElement.getAttribute("data-node-id"),
@@ -3788,16 +3796,18 @@ export class WYSIWYG {
                     previousID,
                     parentID,
                 });
-                protyle.wysiwyg.lastHTMLs[startID] = startElement.outerHTML;
-                transaction(protyle, doOperations, undoOperations, {
-                    callback() {
-                        const currentBlockElement = protyle.wysiwyg.element.querySelector(
-                            `[data-node-id="${startID}"]`
-                        );
-                        focusByOffset(currentBlockElement, event.data.length, event.data.length, true, true);
-                    }
+                protyle.wysiwyg.lastHTMLs[startID] = oldStartHTML;
+                input(protyle, startElement, range, true, /^\d{1}$/.test(event.data) ? undefined : event, {
+                    doOperations,
+                    undoOperations,
+                    undoContext,
                 });
-                focusByRange(range);
+                this.scheduleInput(() => {
+                    const currentBlockElement = protyle.wysiwyg.element.querySelector(
+                        `[data-node-id="${startID}"]`
+                    );
+                    focusByOffset(currentBlockElement, event.data.length, event.data.length, true, true);
+                }, 0, false);
                 return;
             }
             const doOperations: IOperation[] = startTrailingData.map(item => ({
@@ -3808,6 +3818,10 @@ export class WYSIWYG {
                 action: "delete",
                 id: context.endOuterListItemElement.getAttribute("data-node-id")
             });
+            middleOuterData.forEach(item => doOperations.push({
+                action: "delete",
+                id: item.element.getAttribute("data-node-id")
+            }));
             let movedPreviousID = context.startListItemElement.getAttribute("data-node-id");
             movedListItems.forEach(item => {
                 doOperations.push({
@@ -3832,6 +3846,13 @@ export class WYSIWYG {
                     parentID: item.parentID
                 });
             });
+            middleOuterData.forEach(item => undoOperations.push({
+                action: "insert",
+                id: item.element.getAttribute("data-node-id"),
+                data: item.oldHTML,
+                previousID: item.previousID,
+                parentID,
+            }));
             undoOperations.push({
                 action: "insert",
                 id: context.endOuterListItemElement.getAttribute("data-node-id"),

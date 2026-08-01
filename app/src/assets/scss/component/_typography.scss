@@ -331,9 +331,10 @@
 
   table {
     border-collapse: collapse;
+    border-radius: var(--b3-border-radius-s);
     empty-cells: show;
     margin: 0;
-    overflow: auto;
+    overflow: hidden;
     border-spacing: 0;
     width: max-content;
 

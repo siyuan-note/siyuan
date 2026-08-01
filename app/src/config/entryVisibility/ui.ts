@@ -137,11 +137,11 @@ const profileCard = (
     base: Config.TEntryVisibilityBase,
     builtin: boolean,
     active: boolean,
-) => `<div class="b3-card${active ? " b3-card--current" : ""}" data-profile-id="${escapeAttr(id)}" data-action="edit">
+) => `<div class="b3-card${active ? " b3-card--current" : ""}" data-profile-id="${escapeAttr(id)}"${builtin ? "" : ' data-action="edit"'}>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             <div class="fn__ellipsis config-name">${escapeHtml(name)}</div>
-            <div class="b3-card__desc">${builtin ? window.siyuan.languages.entryBuiltin : window.siyuan.languages.entryCustom} · ${window.siyuan.languages.entryBasedOn} ${baseLabel(base)}${active ? ` · ${window.siyuan.languages.current}` : ""}</div>
+            <div class="b3-card__desc">${builtin ? window.siyuan.languages.entryBuiltin : `${window.siyuan.languages.entryCustom} · ${window.siyuan.languages.entryBasedOn} ${baseLabel(base)}`}${active ? ` · ${window.siyuan.languages.current}` : ""}</div>
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
@@ -190,16 +190,11 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     const existing = profileID
         ? window.siyuan.config.appearance.entryVisibility.profiles.find((item) => item.id === profileID)
         : undefined;
-    const builtinBase = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL
-        ? profileID
-        : undefined;
     const draft = existing
         ? JSON.parse(JSON.stringify(existing)) as Config.IEntryVisibilityProfile
-        : createProfile(builtinBase || ENTRY_PROFILE_SIMPLE, false,
-            builtinBase ? `${baseLabel(builtinBase)} ${window.siyuan.languages.duplicate}` : undefined);
+        : createProfile(ENTRY_PROFILE_SIMPLE);
     const initialJSON = JSON.stringify(draft);
     const creating = !existing;
-    const activateOnSave = Boolean(builtinBase);
     const view = createEntryView(root);
     const body = view.querySelector<HTMLElement>(".b3-dialog__body");
     body.innerHTML = `<div class="b3-dialog__content" style="height:100%;box-sizing:border-box;overflow:auto;padding:0">
@@ -320,9 +315,6 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
                 config.profiles = config.profiles.map((item) => item.id === existing.id ? draft : item);
             } else {
                 config.profiles.push(draft);
-                if (activateOnSave) {
-                    config.active = draft.id;
-                }
             }
             saveEntryVisibility(config);
             renderProfileCards(root);
@@ -384,7 +376,7 @@ const importProfiles = async (root: HTMLElement, file: File) => {
 };
 
 export const genEntryVisibilityHtml = () => `<div class="b3-label config-item" data-type="entry-visibility">
-    <div class="fn__flex b3-label config-item config-wrap b3-label--noborder">
+    <div class="fn__flex config-wrap">
         <div><div class="config-name">${window.siyuan.languages.entryVisibility}</div><div class="b3-label__text">${window.siyuan.languages.entryVisibilityTip}</div></div>
         <span class="fn__space fn__flex-1"></span>
         <button class="b3-button b3-button--outline" data-action="import"><svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.import}</button>

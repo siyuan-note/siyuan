@@ -451,6 +451,12 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("controls", window.siyuan.languages.configGroupControls);
 
     /// #if !MOBILE
+    group.slot({
+        key: "entryVisibility",
+        keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip],
+        html: genEntryVisibilityHtml,
+        afterMount: mountEntryVisibility,
+    });
     group.select("editor.floatWindowMode", {
         title: window.siyuan.languages.floatWindowMode,
         desc: window.siyuan.languages.floatWindowModeTip,
@@ -750,18 +756,6 @@ const registerAppearancePersonalizationGroup = (tab: SettingTabBuilder) => {
     });
 };
 
-/// #if !MOBILE
-const registerAppearanceEntryVisibilityGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("entryVisibility", window.siyuan.languages.entryVisibility);
-    group.slot({
-        key: "entryVisibility",
-        keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip],
-        html: genEntryVisibilityHtml,
-        afterMount: mountEntryVisibility,
-    });
-};
-/// #endif
-
 const mountAppearanceCodeSnippet = (root: HTMLElement) => {
     root.querySelector("#codeSnippetCommunityShare")?.addEventListener("click", () => {
         openByMobile("https://ld246.com/tag/code-snippet");
@@ -774,9 +768,6 @@ const mountAppearanceCodeSnippet = (root: HTMLElement) => {
 export const registerAppearanceTab = (tab: SettingTabBuilder) => {
     registerAppearanceContentGroup(tab);
     registerAppearanceInterfaceGroup(tab);
-    /// #if !MOBILE
-    registerAppearanceEntryVisibilityGroup(tab);
-    /// #endif
     registerAppearanceControlsGroup(tab);
     registerAppearancePersonalizationGroup(tab);
 };

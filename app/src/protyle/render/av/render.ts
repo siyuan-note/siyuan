@@ -199,7 +199,7 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
             return;
         }
         contentHTML += `<div class="av__cell av__cell--header" data-col-id="${column.id}"  draggable="true" 
-data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
+data-icon="${escapeAttr(column.icon)}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
 data-date-format="${column.dateFormat || ""}"
 data-freeze="${freezeIndex === index}"
 data-desc="${escapeAttr(column.desc)}" data-align="${column.align || ""}" data-position="north"

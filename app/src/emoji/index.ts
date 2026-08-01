@@ -252,7 +252,7 @@ const renderEmojiContent = (previousIndex: string, previousContentElement: Eleme
     }
     let html = "";
     window.siyuan.emojis[parseInt(previousIndex)].items.forEach(emoji => {
-        html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
+        html += `<button data-unicode="${escapeAttr(emoji.unicode)}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
     });
     previousContentElement.innerHTML = html;
     previousContentElement.removeAttribute("data-index");

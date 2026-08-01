@@ -22,6 +22,7 @@ import (
 	"database/sql"
 	"math"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/siyuan-note/logging"
@@ -402,7 +403,7 @@ func QueryRefsByDefIDRefIDInBox(defBlockID, refBlockID, boxID string) (ret []*Re
 }
 
 // QueryRefsRecentInBox 按 boxID 路由查最近引用，用于加密笔记本内的块引搜索。
-func QueryRefsRecentInBox(onlyDoc bool, typeFilter string, ignoreLines []string, boxID string) (ret []*Ref) {
+func QueryRefsRecentInBox(onlyDoc bool, typeFilter string, ignoreLines, recentDefBlockIDs []string, boxID string) (ret []*Ref) {
 	stmt := "SELECT r.* FROM refs AS r, blocks AS b WHERE b.id = r.def_block_id AND b.type IN " + typeFilter
 	if onlyDoc {
 		stmt = "SELECT r.* FROM refs AS r, blocks AS b WHERE b.id = r.def_block_id AND b.type = 'd'"
@@ -415,8 +416,9 @@ func QueryRefsRecentInBox(onlyDoc bool, typeFilter string, ignoreLines []string,
 		}
 		stmt += buf.String()
 	}
-	stmt += " GROUP BY r.def_block_id ORDER BY r.id DESC LIMIT 32"
-	rows, err := queryForBox(boxID, stmt)
+	orderBy, args := buildRefsRecentOrderBy(recentDefBlockIDs)
+	stmt += " GROUP BY r.def_block_id ORDER BY " + orderBy + " LIMIT 32"
+	rows, err := queryForBox(boxID, stmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
@@ -427,6 +429,25 @@ func QueryRefsRecentInBox(onlyDoc bool, typeFilter string, ignoreLines []string,
 		ret = append(ret, ref)
 	}
 	return
+}
+
+func buildRefsRecentOrderBy(recentDefBlockIDs []string) (ret string, args []any) {
+	if 1 > len(recentDefBlockIDs) {
+		return "r.id DESC", nil
+	}
+
+	buf := bytes.Buffer{}
+	buf.WriteString("CASE r.def_block_id ")
+	for i, id := range recentDefBlockIDs {
+		buf.WriteString("WHEN ? THEN ")
+		buf.WriteString(strconv.Itoa(i))
+		buf.WriteByte(' ')
+		args = append(args, id)
+	}
+	buf.WriteString("ELSE ")
+	buf.WriteString(strconv.Itoa(len(recentDefBlockIDs)))
+	buf.WriteString(" END ASC, r.id DESC")
+	return buf.String(), args
 }
 
 // QueryChildRefDefIDsByRootDefIDInBox 按 rootDefID 查子引用定义，按 boxID 路由。

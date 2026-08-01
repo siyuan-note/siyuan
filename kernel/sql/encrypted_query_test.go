@@ -62,6 +62,23 @@ func TestQueryRefsByDefIDInBoxContainsChildren(t *testing.T) {
 	}
 }
 
+func TestQueryRefsRecentInBoxPrioritizesUsageBeforeLimit(t *testing.T) {
+	testDB, boxID := useEncryptedQueryTestDB(t)
+	for i := 0; i < 40; i++ {
+		defID := fmt.Sprintf("def-%02d", i)
+		insertEncryptedQueryTestBlock(t, testDB, defID, "", defID, "d")
+		insertEncryptedQueryTestRef(t, testDB, fmt.Sprintf("ref-%02d", i), defID, defID)
+	}
+
+	refs := QueryRefsRecentInBox(true, "('d')", nil, []string{"def-00"}, boxID)
+	if 32 != len(refs) {
+		t.Fatalf("最近引用查询数量错误：%d", len(refs))
+	}
+	if "def-00" != refs[0].DefBlockID {
+		t.Fatalf("最近引用的文档未排在候选列表首位：%s", refs[0].DefBlockID)
+	}
+}
+
 func TestExistRefByDefIDsSearchesGlobalAndEncryptedIndexes(t *testing.T) {
 	globalDB, err := gosql.Open("sqlite3_extended", ":memory:")
 	if nil != err {

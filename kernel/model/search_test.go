@@ -210,6 +210,23 @@ func TestBuildRefUsedOrderByEmpty(t *testing.T) {
 	}
 }
 
+func TestSortedRefUsedIDs(t *testing.T) {
+	newestID := "20260714120000-newest1"
+	higherID := "20260714110000-older01"
+	lowerID := "20260714110000-newer01"
+	ids := sortedRefUsedIDs(map[string]int64{
+		lowerID:      100,
+		newestID:     200,
+		higherID:     100,
+		"invalid-id": 300,
+	})
+
+	expected := []string{newestID, higherID, lowerID}
+	if !slices.Equal(ids, expected) {
+		t.Fatalf("最近引用块 ID 排序错误：%v", ids)
+	}
+}
+
 func TestBuildOrderByPrioritizesExactDocumentAndHeading(t *testing.T) {
 	setSearchCaseSensitive(t, true)
 

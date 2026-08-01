@@ -374,6 +374,68 @@ func TestCryptoBackupPathNames(t *testing.T) {
 	}
 }
 
+func TestRestoreNotebookCryptoConfigFromExistingBackup(t *testing.T) {
+	originalDataDir := util.DataDir
+	originalConfDir := util.ConfDir
+	originalConf := Conf
+	rootDir := t.TempDir()
+	util.DataDir = filepath.Join(rootDir, "data")
+	util.ConfDir = filepath.Join(rootDir, "conf")
+	if err := os.MkdirAll(util.DataDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(util.ConfDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	defer func() {
+		Conf = originalConf
+		util.DataDir = originalDataDir
+		util.ConfDir = originalConfDir
+	}()
+
+	password := "restore-existing-sync-backup"
+	salt, err := util.GenerateSalt()
+	if err != nil {
+		t.Fatal(err)
+	}
+	params := util.DefaultArgon2Params()
+	kek := util.DeriveKey(password, salt, params)
+	defer zeroAndClear(kek)
+	verifier, err := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	backup := &conf.NotebookCrypto{
+		Enabled:       true,
+		MasterSalt:    salt,
+		KDFParams:     params,
+		KEKVerifier:   verifier,
+		VerifierNonce: mustEncryptionNonce(verifier),
+	}
+	if err = writeNotebookCryptoBackupData(backup, kek); err != nil {
+		t.Fatal(err)
+	}
+
+	restoreNotebookCryptoConfigFromBackup()
+	Conf.m.RLock()
+	restored := *Conf.NotebookCrypto
+	Conf.m.RUnlock()
+	if !restored.Enabled || !notebookCryptoConfigurationComplete(&restored) {
+		t.Fatal("existing synchronized backup should restore the encrypted notebook configuration")
+	}
+	if !bytes.Equal(restored.MasterSalt, salt) {
+		t.Fatal("restored encrypted notebook configuration should keep the synchronized master salt")
+	}
+	if err = EnableEncryptedNotebookWithSync(password); err != nil {
+		t.Fatalf("enable after synchronized recovery should accept the original master password: %v", err)
+	}
+	if err = EnableEncryptedNotebookWithSync("incorrect-master-password"); err == nil {
+		t.Fatal("enable after synchronized recovery should reject a different master password")
+	}
+}
+
 func TestBackupRejectsIncompleteCurrentSpec(t *testing.T) {
 	originalDataDir := util.DataDir
 	util.DataDir = t.TempDir()

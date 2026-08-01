@@ -159,6 +159,31 @@ func SyncData(byHand bool) {
 	syncData(false, byHand)
 }
 
+// SyncDataBeforeEnableEncryptedNotebook 在启用加密笔记本前执行一次完整同步。
+// 未启用数据同步时直接返回；已启用数据同步时，任何同步失败都会阻止继续创建新的密钥体系。
+func SyncDataBeforeEnableEncryptedNotebook() error {
+	if !Conf.Sync.Enabled {
+		return nil
+	}
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+		return errors.New(Conf.Language(123))
+	}
+	if !checkSync(false, false, true) {
+		return errors.New(Conf.Language(53))
+	}
+
+	// 不复用请求合并状态，确保调用返回前确实完成了一次由当前启用操作发起的完整同步。
+	lockSync()
+	defer unlockSync()
+	if err := syncDataLocked(false, true); err != nil {
+		if Conf.Sync.Stat != "" {
+			return errors.New(Conf.Sync.Stat)
+		}
+		return err
+	}
+	return nil
+}
+
 func lockSync() {
 	syncLock.Lock()
 	isSyncing.Store(true)
@@ -208,7 +233,10 @@ func syncData(exit, byHand bool) {
 		return
 	}
 	defer unlock()
+	_ = syncDataLocked(exit, byHand)
+}
 
+func syncDataLocked(exit, byHand bool) error {
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	if exit {
 		ExitSyncSucc = 0
@@ -248,7 +276,7 @@ func syncData(exit, byHand bool) {
 			logging.LogErrorf("write websocket message failed: %v", writeErr)
 		}
 	}
-	return
+	return err
 }
 
 func checkSync(boot, exit, byHand bool) bool {

@@ -2263,7 +2263,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	dataChangePluginSet := hashset.New() // 插件存储数据变更 data/storage/petal/
 	needUnindexBoxes, needIndexBoxes := map[string]bool{}, map[string]bool{}
 	removedBoxConfs, removedBoxCryptoBackups := map[string]bool{}, map[string]bool{}
-	needRestoreNotebookCrypto := false // 加密笔记本备份文件随同步到达，需恢复本机启用状态
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
@@ -2290,10 +2289,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				needUnindexBoxes[boxID] = true
 				needIndexBoxes[boxID] = true
 			}
-		}
-
-		if file.Path == "/.siyuan/data-crypto-backup.json" {
-			needRestoreNotebookCrypto = true
 		}
 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
@@ -2330,11 +2325,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		}
 	}
 
-	// 加密笔记本备份文件随同步到达：若本机未启用，自动把配置装回 conf.json（不需主密码），
-	// 让本机进入"已启用"状态，用户输主密码即可解锁。仅本机 Enabled=false 时生效，不覆盖已启用配置。
-	if needRestoreNotebookCrypto {
-		restoreNotebookCryptoConfigFromBackup()
-	}
+	// 每次同步后都按磁盘实际状态尝试恢复，不能只依赖本轮合并结果是否包含备份文件。
+	// 备份可能在此前同步中已经落盘，或因冲突等原因未出现在 Upserts 中。
+	restoreNotebookCryptoConfigFromBackup()
 
 	removeWidgetDirSet, unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New(), hashset.New()
 	for _, file := range mergeResult.Removes {

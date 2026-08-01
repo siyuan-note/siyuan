@@ -1,5 +1,5 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {focusBlock, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
+import {focusBlock, focusByWbr, focusSideBlock, getEditorRange, getUndoFocusContext} from "../util/selection";
 import {
     getContenteditableElement,
     getEmbedChildOperationContext,
@@ -1389,6 +1389,114 @@ export const turnsIntoOneTransaction = async (options: {
     hideElements(["gutter"], options.protyle);
 };
 
+export const insertEmptyBlockquote = (protyle: IProtyle, previousElement: HTMLElement, options?: {
+    updateElement: HTMLElement,
+    oldHTML: string,
+    undoContext?: Record<string, string>,
+    additionalOperations?: {
+        doOperations: IOperation[],
+        undoOperations: IOperation[],
+    },
+}) => {
+    const range = getEditorRange(protyle.wysiwyg.element);
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
+    const template = document.createElement("template");
+    template.innerHTML = protyle.lute.SpinBlockDOM(">" + Lute.Caret);
+    const blockquoteElement = template.content.firstElementChild as HTMLElement;
+    if (!blockquoteElement || blockquoteElement.getAttribute("data-type") !== "NodeBlockquote") {
+        return;
+    }
+
+    let foldData;
+    if (previousElement.getAttribute("data-type") === "NodeHeading" && previousElement.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, previousElement, true, false, false, true);
+    }
+
+    const id = blockquoteElement.getAttribute("data-node-id");
+    const doOperations: IOperation[] = [{
+        action: "insert",
+        id,
+        data: blockquoteElement.outerHTML,
+        previousID: previousElement.getAttribute("data-node-id"),
+        parentID: previousElement.parentElement.getAttribute("data-node-id"),
+    }];
+    const undoOperations: IOperation[] = [{
+        action: "delete",
+        id,
+        context: options ? options.undoContext : undoFocusContext,
+    }];
+    if (options) {
+        doOperations.unshift({
+            action: "update",
+            id: options.updateElement.getAttribute("data-node-id"),
+            data: options.updateElement.outerHTML,
+        });
+        undoOperations.push({
+            action: "update",
+            id: options.updateElement.getAttribute("data-node-id"),
+            data: options.oldHTML,
+            context: options.undoContext,
+        });
+        if (options.additionalOperations) {
+            doOperations.unshift(...options.additionalOperations.doOperations);
+            undoOperations.push(...options.additionalOperations.undoOperations);
+        }
+    }
+    if (foldData?.doOperations?.length > 0) {
+        doOperations.push(...foldData.doOperations);
+        undoOperations.push(...foldData.undoOperations);
+    }
+
+    previousElement.insertAdjacentElement("afterend", blockquoteElement);
+    transaction(protyle, doOperations, undoOperations);
+    focusByWbr(blockquoteElement, range);
+    hideElements(["gutter"], protyle);
+};
+
+export const wrapBlockInBlockquote = async (protyle: IProtyle, blockElement: HTMLElement, options?: {
+    oldHTML: string,
+    undoContext?: Record<string, string>,
+    additionalOperations?: {
+        doOperations: IOperation[],
+        undoOperations: IOperation[],
+    },
+}) => {
+    const range = getEditorRange(protyle.wysiwyg.element);
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
+    const blockID = blockElement.getAttribute("data-node-id");
+    const operations = await turnsIntoOneTransaction({
+        protyle,
+        selectsElement: [blockElement],
+        type: "Blocks2Blockquote",
+        getOperations: true,
+    });
+    operations.undoOperations[operations.undoOperations.length - 1].context =
+        options?.undoContext || undoFocusContext;
+    if (options) {
+        operations.doOperations.unshift({
+            action: "update",
+            id: blockElement.getAttribute("data-node-id"),
+            data: blockElement.outerHTML,
+        });
+        operations.undoOperations.push({
+            action: "update",
+            id: blockElement.getAttribute("data-node-id"),
+            data: options.oldHTML,
+            context: options.undoContext,
+        });
+        if (options.additionalOperations) {
+            operations.doOperations.unshift(...options.additionalOperations.doOperations);
+            operations.undoOperations.push(...options.additionalOperations.undoOperations);
+        }
+    }
+    transaction(protyle, operations.doOperations, operations.undoOperations);
+    const currentBlockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${blockID}"]`);
+    if (currentBlockElement && !focusByWbr(currentBlockElement, document.createRange())) {
+        focusBlock(currentBlockElement);
+    }
+    hideElements(["gutter"], protyle);
+};
+
 export const turnsIntoGroupsTransaction = async (options: {
     protyle: IProtyle,
     selectsElementGroups: Element[][],
@@ -1792,7 +1900,15 @@ export const turnsOneInto = async (options: {
     nodeElement: Element,
     id: string,
     type: string,
-    level?: number
+    level?: number,
+    undoElement?: {
+        id: string,
+        html: string,
+    },
+    additionalOperations?: {
+        doOperations: IOperation[],
+        undoOperations: IOperation[],
+    },
 }) => {
     if (!options.nodeElement.querySelector("wbr")) {
         getContenteditableElement(options.nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
@@ -1801,7 +1917,15 @@ export const turnsOneInto = async (options: {
     if (["CancelBlockquote", "CancelList", "CancelCallout"].includes(options.type)) {
         foldOperations = await unfoldListHeadings(options.protyle, [options.nodeElement]);
     }
-    const oldHTML = options.nodeElement.outerHTML;
+    let oldHTML = options.nodeElement.outerHTML;
+    if (options.undoElement) {
+        const oldElement = options.nodeElement.cloneNode(true) as HTMLElement;
+        const undoElement = oldElement.querySelector(`[data-node-id="${options.undoElement.id}"]`);
+        if (undoElement) {
+            undoElement.outerHTML = options.undoElement.html;
+            oldHTML = oldElement.outerHTML;
+        }
+    }
     const previousBlockElement = getPreviousBlockSibling(options.nodeElement);
     let previousId = previousBlockElement?.getAttribute("data-node-id");
     if (!previousBlockElement && options.protyle.block.showAll) {
@@ -1849,6 +1973,10 @@ export const turnsOneInto = async (options: {
             previousID: previousId,
             parentID: parentId
         });
+        if (options.additionalOperations) {
+            doOperations.unshift(...options.additionalOperations.doOperations);
+            undoOperations.push(...options.additionalOperations.undoOperations);
+        }
         const doFoldOperations = foldOperations.map((operation) => ({...operation}));
         const undoFoldOperations = foldOperations.map((operation) => ({...operation}));
         transaction(options.protyle, doOperations.concat(doFoldOperations), undoOperations.concat(undoFoldOperations));

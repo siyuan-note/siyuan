@@ -82,7 +82,9 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.Size = uint64(fileInfo.size)
 	ret.Name = ial["title"]
 	ret.TitleEmpty = ial[NodeAttrTitleEmpty] == "true"
-	ret.Icon = ial["icon"]
+	if icon, ok := util.FilterIconValue(ial["icon"]); ok {
+		ret.Icon = icon
+	}
 	ret.ID = ial["id"]
 	ret.Name1 = ial["name"]
 	ret.Alias = ial["alias"]

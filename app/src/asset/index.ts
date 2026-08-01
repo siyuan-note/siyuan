@@ -147,7 +147,7 @@ export class Asset extends Model {
       </div>
       <div id="mainContainer">
         <div class="findbar b3-menu fn__hidden doorHanger" id="findbar">
-            <input id="findInput" class="toolbarField b3-text-field" placeholder="${window.siyuan.languages.search}">
+            <input id="findInput" class="toolbarField b3-text-field" placeholder="${window.siyuan.languages.searchPlaceholder}">
             <div class="fn__space"></div>
             <button id="findPreviousButton" class="toolbarButton findPrevious b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.previous}">
                 <svg><use xlink:href="#iconUp"></use></svg>
@@ -299,6 +299,12 @@ export class Asset extends Model {
                 <input type="number" id="pageNumber" class="toolbarField pageNumber b3-text-field" value="1" size="4" min="1" autocomplete="off">
                 <span id="numPages"></span>
                 <div class="fn__flex-1"></div>
+                <button id="pdfHistoryBack" class="toolbarButton b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.goBack}" disabled>
+                  <svg><use xlink:href="#iconBack"></use></svg>
+                </button>
+                <button id="pdfHistoryForward" class="toolbarButton b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.goForward}" disabled>
+                  <svg><use xlink:href="#iconForward"></use></svg>
+                </button>
                 <span id="scaleSelectContainer" class="dropdownToolbarButton">
                   <select id="scaleSelect" class="b3-select">
                     <option id="pageAutoOption" value="auto" selected="selected">${window.siyuan.languages.pageScaleAuto}</option>

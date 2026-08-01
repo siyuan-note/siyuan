@@ -1997,7 +1997,7 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 					for _, valOpt := range v.MSelect {
 						if opt := key.GetOption(valOpt.Content); nil == opt {
 							// 不存在的选项新建保存
-							opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+							opt = &av.SelectOption{Name: valOpt.Content, Color: av.FilterColorValue(valOpt.Color)}
 							key.Options = append(key.Options, opt)
 						} else {
 							// 已经存在的选项颜色需要保持不变
@@ -2109,7 +2109,7 @@ func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, 
 			if 0 < len(newVal.MSelect) {
 				for _, valOpt := range newVal.MSelect {
 					if opt := keyValues.Key.GetOption(valOpt.Content); nil == opt {
-						opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+						opt = &av.SelectOption{Name: valOpt.Content, Color: av.FilterColorValue(valOpt.Color)}
 						keyValues.Key.Options = append(keyValues.Key.Options, opt)
 					} else {
 						valOpt.Color = opt.Color
@@ -4865,12 +4865,21 @@ func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) 
 		return &TxErr{code: TxErrHandleAttributeView, id: viewID}
 	}
 
-	view.Icon = operation.Data.(string)
+	view.Icon = filterAttrViewIconValue(operation.Data.(string))
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
 	}
 	return
+}
+
+// filterAttrViewIconValue 过滤属性视图图标值，非法值置空，防止存储可执行标记
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-vx5w-qrvp-mmcq
+func filterAttrViewIconValue(icon string) string {
+	if filtered, valid := util.FilterIconValue(icon); valid {
+		return filtered
+	}
+	return ""
 }
 
 func (tx *Transaction) doSetAttrViewViewDesc(operation *Operation) (ret *TxErr) {
@@ -6340,7 +6349,7 @@ func setAttributeViewColIcon(operation *Operation) (err error) {
 
 	for _, keyValues := range attrView.KeyValues {
 		if keyValues.Key.ID == operation.ID {
-			keyValues.Key.Icon = operation.Data.(string)
+			keyValues.Key.Icon = filterAttrViewIconValue(operation.Data.(string))
 			break
 		}
 	}
@@ -6700,7 +6709,7 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
 		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
 
-		key := av.NewKey(keyID, keyName, keyIcon, keyTyp)
+		key := av.NewKey(keyID, keyName, filterAttrViewIconValue(keyIcon), keyTyp)
 		if av.KeyTypeDate == keyTyp || av.KeyTypeCreated == keyTyp || av.KeyTypeUpdated == keyTyp {
 			if !dateFormat.IsValid() {
 				return errors.New("invalid date display format")
@@ -7438,7 +7447,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 			for _, valOpt := range val.MSelect {
 				if opt := key.GetOption(valOpt.Content); nil == opt {
 					// 不存在的选项新建保存
-					color := valOpt.Color
+					color := av.FilterColorValue(valOpt.Color)
 					if "" == color {
 						color = fmt.Sprintf("%d", 1+rand.Intn(14))
 					}
@@ -7815,13 +7824,13 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 	for _, opt := range options {
 		if existingOpt, exists := existingOptions[opt.Name]; exists {
 			// 如果选项已经存在则更新颜色和描述
-			existingOpt.Color = opt.Color
+			existingOpt.Color = av.FilterColorValue(opt.Color)
 			existingOpt.Desc = opt.Desc
 		} else {
 			// 如果选项不存在则添加新选项
 			selectKey.Options = append(selectKey.Options, &av.SelectOption{
 				Name:  opt.Name,
-				Color: opt.Color,
+				Color: av.FilterColorValue(opt.Color),
 				Desc:  opt.Desc,
 			})
 			addNew = true
@@ -7945,7 +7954,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	oldName := strings.TrimSpace(data["oldName"].(string))
 	newName := strings.TrimSpace(data["newName"].(string))
 	newDesc := strings.TrimSpace(data["newDesc"].(string))
-	newColor := data["newColor"].(string)
+	newColor := av.FilterColorValue(data["newColor"].(string))
 
 	found := false
 	if oldName != newName {

@@ -235,7 +235,45 @@ func FilterIconValue(icon string) (ret string, valid bool) {
 	if strings.Contains(ret, ".") {
 		ret = FilterUploadEmojiFileName(ret)
 	}
+	if !strings.ContainsAny(ret, "./") && !IsValidIconUnicode(ret) {
+		return "", false
+	}
 	return ret, true
+}
+
+// IsValidIconUnicode 校验图标值是否为合法的十六进制码点序列（连字符分隔）：
+// 解码后不允许包含 HTML 元字符，防止图标值被渲染为可执行标记
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-vx5w-qrvp-mmcq
+func IsValidIconUnicode(icon string) bool {
+	parts := strings.Split(icon, "-")
+	if 32 < len(parts) {
+		return false
+	}
+	isHexSequence := true
+	for _, part := range parts {
+		if "" == part || 6 < len(part) {
+			return false
+		}
+		if _, parseErr := strconv.ParseUint(part, 16, 32); nil != parseErr {
+			isHexSequence = false
+			break
+		}
+	}
+	if !isHexSequence {
+		// 不是十六进制码点序列，比如直接存储的 emoji 字符，保持原有行为
+		return true
+	}
+	for _, part := range parts {
+		n, _ := strconv.ParseUint(part, 16, 32)
+		if 0x10FFFF < n || (0xD800 <= n && 0xDFFF >= n) {
+			return false
+		}
+		r := rune(n)
+		if '<' == r || '>' == r || '"' == r || '\'' == r || '&' == r {
+			return false
+		}
+	}
+	return true
 }
 
 func FilterRecentIconValue(icon string) (ret string, valid bool) {

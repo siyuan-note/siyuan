@@ -272,7 +272,7 @@ const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[]) 
         iconHTML: "",
         type: "empty",
         label: `<div class="fn__flex-column b3-menu__filter">
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
+    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
         ${models.map((model) => `<div class="b3-list-item b3-list-item--narrow" data-model="${escapeHTML(model)}">

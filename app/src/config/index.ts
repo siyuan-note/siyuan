@@ -40,7 +40,7 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
                 <svg class="b3-list-item__graphic"><use xlink:href="#iconSettings"></use></svg>
                 <span class="b3-list-item__text">${window.siyuan.languages.config}</span>
             </div>
-            <input placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__block">
+            <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block">
         </div>
         <ul class="config__tab-scroll">
             ${tabListItems.join("")}

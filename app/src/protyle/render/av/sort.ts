@@ -3,6 +3,7 @@ import {getColIconByType} from "./col";
 import {transaction} from "../../wysiwyg/transaction";
 import {setPosition} from "../../../util/setPosition";
 import {unicode2Emoji} from "../../../emoji";
+import {escapeHtml} from "../../../util/escape";
 import {getFieldsByData} from "./view";
 import {Constants} from "../../../constants";
 
@@ -119,7 +120,7 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
     const genSortItem = (id: string) => {
         let sortHTML = "";
         columns.forEach((item) => {
-            sortHTML += `<option value="${item.id}" ${item.id === id ? "selected" : ""}>${item.icon && unicode2Emoji(item.icon)}${item.name}</option>`;
+            sortHTML += `<option value="${item.id}" ${item.id === id ? "selected" : ""}>${item.icon && unicode2Emoji(item.icon)}${escapeHtml(item.name)}</option>`;
         });
         return sortHTML;
     };

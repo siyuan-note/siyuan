@@ -1,6 +1,6 @@
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
-import {escapeHtml} from "../../../util/escape";
+import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
 import {getFieldsByData} from "./view";
 import {fetchSyncPost} from "../../../util/fetch";
@@ -198,7 +198,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
                 let titleHTML = `<div class="b3-menu__label fn__flex-1 fn__ellipsis">${item.name || ""}</div>`;
                 if (item.groupValue?.mSelect?.length > 0) {
                     titleHTML = `<div class="fn__flex-1">
-        <span class="b3-chip" style="background-color:var(--b3-font-background${item.groupValue.mSelect[0].color});color:var(--b3-font-color${item.groupValue.mSelect[0].color})">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(item.groupValue.mSelect[0].color)});color:var(--b3-font-color${escapeAttr(item.groupValue.mSelect[0].color)})">
             <span class="fn__ellipsis">${escapeHtml(item.groupValue.mSelect[0].content)}</span>
         </span>
     </div>`;

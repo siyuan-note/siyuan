@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {escapeAttr} from "../../util/escape";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -100,7 +101,7 @@ export class Hint {
                     if (index) {
                         let html = "";
                         window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
+                            html += `<button data-unicode="${escapeAttr(emoji.unicode)}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                         });
                         titleElement.nextElementSibling.innerHTML = html;

@@ -464,7 +464,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                     <div class="fn__flex-1"></div>
                     <div class="b3-form__icon">
                         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                        <input class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}" placeholder="${window.siyuan.languages.search}">
+                        <input class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}" placeholder="${window.siyuan.languages.searchPlaceholder}">
                     </div>
                     <span class="fn__space"></span>
                     <select data-type="typeselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">

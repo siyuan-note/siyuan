@@ -397,7 +397,7 @@ const openContentTemplateMenu = (target: HTMLElement) => {
     menu.addItem({
         type: "empty",
         label: `<div data-menu="true" style="padding:4px;width:360px">
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
+    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
     <div class="b3-list b3-list--background" style="margin-top:4px;max-height:240px;overflow:auto"></div>
 </div>`,
         bind: menuElement => {

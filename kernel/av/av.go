@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -258,6 +259,19 @@ type SelectOption struct {
 	Name  string `json:"name"`  // 选项名称
 	Color string `json:"color"` // 选项颜色
 	Desc  string `json:"desc"`  // 选项描述
+}
+
+// FilterColorValue 校验选项颜色值，仅允许空字符串或 1-14 的调色板索引，非法值返回空字符串
+func FilterColorValue(color string) string {
+	color = strings.TrimSpace(color)
+	if "" == color {
+		return ""
+	}
+	n, err := strconv.Atoi(color)
+	if nil != err || 1 > n || 14 < n {
+		return ""
+	}
+	return strconv.Itoa(n)
 }
 
 // View 描述了视图的结构。
@@ -609,6 +623,9 @@ func GetAttributeViewContent(avID string) (content string) {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
+	if nil == attrView {
+		return
+	}
 	return getAttributeViewContent0(attrView)
 }
 
@@ -616,6 +633,9 @@ func GetAttributeViewContentByPath(avJSONPath string) (content string) {
 	attrView, err := ParseAttributeViewByPath(avJSONPath)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avJSONPath, err)
+		return
+	}
+	if nil == attrView {
 		return
 	}
 	return getAttributeViewContent0(attrView)
@@ -722,19 +742,19 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 		data, readErr = filelock.ReadFile(avJSONPath)
 		if nil != readErr {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-			return
+			return nil, readErr
 		}
 		// 加密笔记本的 AV 定义是密文，按路径反查 boxID 后解密
 		if boxID != "" {
 			data, readErr = decryptAVDataLocked(boxID, avID, data)
 			if readErr != nil {
 				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, readErr)
-				return
+				return nil, readErr
 			}
 		} else if util.IsCiphertext(data) {
 			// 历史等无法取得 boxID/DEK 的全局路径上读到密文：无法解密，返回空内容而非按 JSON 解析报错。
 			// 这会在加密笔记本的 AV 因路径迁移（同步、导入、历史布局）落到全局位置时发生。
-			return
+			return nil, nil
 		}
 		cache.SetAVDataInBox(avID, boxID, data)
 	}

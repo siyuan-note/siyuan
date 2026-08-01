@@ -44,7 +44,7 @@ import {
 } from "../../menus/protyle";
 import * as dayjs from "dayjs";
 import {dropEvent} from "../util/editorCommonEvent";
-import {input} from "./input";
+import {beforeBlockquoteInput, input} from "./input";
 import {
     getContenteditableElement,
     getFirstBlock,
@@ -3546,6 +3546,12 @@ export class WYSIWYG {
                     }
                 }
                 compositionRange = undefined;
+            }
+        });
+
+        this.element.addEventListener("beforeinput", (event: InputEvent) => {
+            if (!isComposition) {
+                beforeBlockquoteInput(protyle, event);
             }
         });
 

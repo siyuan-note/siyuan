@@ -299,7 +299,7 @@ const genAccountPaymentHTML = () => {
         const actionsHtmlParts: string[] = [];
         const daysLeft = Math.max(0, Math.floor((expireTime - Date.now()) / (24 * 60 * 60 * 1000)));
         // 剩余天数
-        actionsHtmlParts.push(`<div class="ft__on-surface">${window.siyuan.languages.account6} ${daysLeft} ${window.siyuan.languages.day}</div><span class="fn__space"></span>`);
+        actionsHtmlParts.push(`<div class="ft__on-surface config-account__payment-remaining">${window.siyuan.languages.account6} ${daysLeft} ${window.siyuan.languages.day}</div><span class="fn__space"></span>`);
         // 续费订阅
         actionsHtmlParts.push(isIOS
             ? `<button type="button" class="b3-button b3-button--text" data-action="iOSPay" data-type="subscribe">${window.siyuan.languages.clickMeToRenew}</button>`
@@ -307,10 +307,10 @@ const genAccountPaymentHTML = () => {
         );
         if (!isOnetimePaid) {
             // 购买功能特性
-            actionsHtmlParts.push(isIOS
+            const onepayAction = isIOS
                 ? `<button type="button" class="b3-button b3-button--text" data-action="iOSPay" data-type="function">${window.siyuan.languages.onepay}</button>`
-                : `<a class="b3-button b3-button--text" href="${getIndexURL("pricing.html")}" target="_blank">${window.siyuan.languages.onepay}</a>`
-            );
+                : `<a class="b3-button b3-button--text" href="${getIndexURL("pricing.html")}" target="_blank">${window.siyuan.languages.onepay}</a>`;
+            actionsHtmlParts.push(`<span class="fn__space"></span>${onepayAction}`);
         }
         actionsHTML = actionsHtmlParts.join("");
     } else if (window.siyuan.user.userSiYuanSubscriptionStatus === 2) {

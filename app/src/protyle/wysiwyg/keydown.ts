@@ -46,12 +46,14 @@ import {enter, softEnter} from "./enter";
 import {clearTableCell, fixTable} from "../util/table";
 import {
     transaction,
+    insertEmptyBlockquote,
     turnsIntoOneTransaction,
     turnsIntoTransaction,
     turnsOneInto,
     updateBatchTransaction,
     updateTransaction
 } from "./transaction";
+import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
 import {fontEvent} from "../toolbar/Font";
 import {addSubList, listIndent, listOutdent, toggleTaskListItem} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
@@ -1763,14 +1765,36 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         const isMatchQuote = matchHotKey(window.siyuan.config.keymap.editor.insert.quote.custom, event);
         if ((isMatchList || isMatchOList || isMatchCheck || isMatchQuote) && !isInEmbedBlock(nodeElement)) {
             const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectsElement.length === 0) {
+            const hasBlockSelection = selectsElement.length > 0;
+            if (!hasBlockSelection) {
                 selectsElement.push(nodeElement);
             }
             if (selectsElement.length === 1) {
                 const subType = selectsElement[0].dataset.subtype;
                 const type = selectsElement[0].dataset.type;
                 if (isMatchQuote) {
-                    if (["NodeHeading", "NodeParagraph", "NodeList"].includes(type)) {
+                    const blockquoteContext = hasBlockSelection ? undefined :
+                        getBlockquoteContext(selectsElement[0], protyle.wysiwyg.element);
+                    if (hasBlockSelection && type === "NodeBlockquote") {
+                        turnsOneInto({
+                            protyle,
+                            nodeElement: selectsElement[0],
+                            id: selectsElement[0].dataset.nodeId,
+                            type: "CancelBlockquote",
+                        });
+                    } else if (blockquoteContext && shouldCancelBlockquote(blockquoteContext)) {
+                        const focusRange = range.cloneRange();
+                        focusRange.collapse(true);
+                        focusRange.insertNode(document.createElement("wbr"));
+                        turnsOneInto({
+                            protyle,
+                            nodeElement: blockquoteContext.blockquoteElement,
+                            id: blockquoteContext.blockquoteElement.dataset.nodeId,
+                            type: "CancelBlockquote",
+                        });
+                    } else if (blockquoteContext) {
+                        insertEmptyBlockquote(protyle, blockquoteContext.childElement);
+                    } else if (["NodeHeading", "NodeParagraph", "NodeList"].includes(type)) {
                         turnsIntoOneTransaction({
                             protyle,
                             selectsElement,

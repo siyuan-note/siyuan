@@ -532,7 +532,9 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	for rootID, doc := range mergedDocs {
 		if ial, ok := attrs[rootID]; ok {
 			if icon, ok := ial["icon"]; ok && icon != "" {
-				doc.Icon = icon
+				if filteredIcon, valid := util.FilterIconValue(icon); valid {
+					doc.Icon = filteredIcon
+				}
 			}
 		}
 		ret = append(ret, doc)

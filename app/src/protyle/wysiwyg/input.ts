@@ -1,7 +1,7 @@
-import {focusBlock, focusByWbr} from "../util/selection";
+import {focusBlock, focusByOffset, focusByWbr, getEditorRange, getSelectionOffset} from "../util/selection";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
-import {transaction, updateTransaction} from "./transaction";
+import {transaction, turnsOneInto, updateTransaction, wrapBlockInBlockquote} from "./transaction";
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
 import {
@@ -17,18 +17,82 @@ import {
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";
-import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 import {updateAVName} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {nbsp2space} from "../util/normalizeText";
+import {getBlockquoteContext, isBlockquoteMarker, shouldCancelBlockquote} from "./blockquote";
 
 interface IInputOperations {
     doOperations: IOperation[];
     undoOperations: IOperation[];
     undoContext?: Record<string, string>;
 }
+
+export const beforeBlockquoteInput = (protyle: IProtyle, event: InputEvent) => {
+    if (event.isComposing || !event.cancelable || (event.data !== ">" && event.data !== "》")) {
+        return false;
+    }
+    const range = getEditorRange(protyle.wysiwyg.element);
+    if (!range.collapsed) {
+        return false;
+    }
+    const blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
+    if (!blockElement || blockElement.getAttribute("data-type") !== "NodeParagraph") {
+        return false;
+    }
+    const editElement = getContenteditableElement(blockElement) as HTMLElement;
+    const blockquoteContext = getBlockquoteContext(blockElement, protyle.wysiwyg.element);
+    if (!editElement || !blockquoteContext || !editElement.contains(range.startContainer)) {
+        return false;
+    }
+    const markerPrefixRange = range.cloneRange();
+    markerPrefixRange.setStart(editElement, 0);
+    const markerPrefix = nbsp2space(markerPrefixRange.toString()).split(Constants.ZWSP).join("");
+    const marker = markerPrefix.substring(markerPrefix.lastIndexOf("\n") + 1) + event.data;
+    if (!isBlockquoteMarker(marker)) {
+        return false;
+    }
+    const markerStart = getSelectionOffset(editElement, undefined, markerPrefixRange, true).end - marker.length + 1;
+    const markerRange = marker.length > 1 ?
+        focusByOffset(editElement, markerStart, markerStart + marker.length - 1, false, true) : range.cloneRange();
+    if (!markerRange) {
+        return false;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const id = blockElement.dataset.nodeId;
+    const oldChildHTML = blockElement.outerHTML;
+    const hasLeadingSpaces = marker.length > 1;
+    if (hasLeadingSpaces) {
+        markerRange.deleteContents();
+        blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+    }
+    if (shouldCancelBlockquote(blockquoteContext)) {
+        markerRange.collapse(true);
+        markerRange.insertNode(document.createElement("wbr"));
+        turnsOneInto({
+            protyle,
+            nodeElement: blockquoteContext.blockquoteElement,
+            id: blockquoteContext.blockquoteElement.dataset.nodeId,
+            type: "CancelBlockquote",
+            undoElement: hasLeadingSpaces ? {
+                id,
+                html: oldChildHTML,
+            } : undefined,
+        });
+    } else {
+        markerRange.collapse(true);
+        markerRange.insertNode(document.createElement("wbr"));
+        wrapBlockInBlockquote(protyle, blockElement, hasLeadingSpaces ? {
+            oldHTML: oldChildHTML,
+        } : undefined);
+    }
+    return true;
+};
 
 export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true,
                             event?: InputEvent, inputOperations?: IInputOperations) => {
@@ -145,6 +209,45 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         editElement.innerHTML.indexOf("\n》<wbr>") > -1
     )) {
         editElement.innerHTML = editElement.innerHTML.replace("》<wbr>", "><wbr>");
+    }
+    const blockquoteContext = type === "NodeParagraph" ?
+        getBlockquoteContext(blockElement, protyle.wysiwyg.element) : undefined;
+    const currentWbrElement = editElement.querySelector("wbr") as HTMLElement;
+    if (blockquoteContext && currentWbrElement) {
+        const markerPrefixRange = document.createRange();
+        markerPrefixRange.setStart(editElement, 0);
+        markerPrefixRange.setEndBefore(currentWbrElement);
+        const markerPrefix = nbsp2space(markerPrefixRange.toString()).split(Constants.ZWSP).join("");
+        const marker = markerPrefix.substring(markerPrefix.lastIndexOf("\n") + 1);
+        if (isBlockquoteMarker(marker)) {
+            const markerEnd = getSelectionOffset(editElement, undefined, markerPrefixRange, true).end;
+            const markerRange = focusByOffset(editElement, markerEnd - marker.length, markerEnd, false, true);
+            if (!markerRange) {
+                return;
+            }
+            const oldChildHTML = protyle.wysiwyg.lastHTMLs[id] || blockElement.outerHTML;
+            markerRange.deleteContents();
+            if (shouldCancelBlockquote(blockquoteContext)) {
+                await turnsOneInto({
+                    protyle,
+                    nodeElement: blockquoteContext.blockquoteElement,
+                    id: blockquoteContext.blockquoteElement.dataset.nodeId,
+                    type: "CancelBlockquote",
+                    undoElement: {
+                        id,
+                        html: oldChildHTML,
+                    },
+                    additionalOperations: inputOperations,
+                });
+            } else {
+                await wrapBlockInBlockquote(protyle, blockElement, {
+                    oldHTML: oldChildHTML,
+                    undoContext: inputOperations?.undoContext,
+                    additionalOperations: inputOperations,
+                });
+            }
+            return;
+        }
     }
     const trimStartHTML = editElement.innerHTML.trimStart();
     const trimStartText = editElement.textContent.trimStart();

@@ -36,7 +36,7 @@ export const getRecentDocs = (app: App) => {
             icon: "iconList",
             html: `<div class="fn__flex-column" style="height: 100%">
     <div class="toolbar toolbar--border" style="padding: 8px">
-        <input placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__flex-1" autocomplete="off" autocorrect="off" spellcheck="false">
+        <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__flex-1" autocomplete="off" autocorrect="off" spellcheck="false">
         <span class="fn__space"></span>
         <select class="b3-select" id="recentDocsSort">
             <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>

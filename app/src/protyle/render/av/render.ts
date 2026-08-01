@@ -140,7 +140,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </button>
             <div style="position: relative" class="fn__flex">
-                <div contenteditable="plaintext-only" style="${showSearch ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}"></div>
+                <div contenteditable="plaintext-only" style="${showSearch ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.searchPlaceholder}"></div>
             </div>
             <div class="fn__space"></div>
             <span data-type="av-more" aria-label="${window.siyuan.languages.config}" data-position="8south" class="ariaLabel block__icon">
@@ -199,7 +199,7 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
             return;
         }
         contentHTML += `<div class="av__cell av__cell--header" data-col-id="${column.id}"  draggable="true" 
-data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
+data-icon="${escapeAttr(column.icon)}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
 data-date-format="${column.dateFormat || ""}"
 data-freeze="${freezeIndex === index}"
 data-desc="${escapeAttr(column.desc)}" data-align="${column.align || ""}" data-position="north"
@@ -274,7 +274,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     let nameHTML = "";
     if (["mSelect", "select"].includes(group.groupValue.type)) {
         group.groupValue.mSelect.forEach((item) => {
-            nameHTML += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
+            nameHTML += `<span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">${escapeHtml(item.content)}</span>`;
         });
     } else if (group.groupValue.type === "checkbox") {
         nameHTML = `<svg style="width:calc(1.625em - 12px);height:calc(1.625em - 12px)"><use xlink:href="#icon${group.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;

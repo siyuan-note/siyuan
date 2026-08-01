@@ -49,12 +49,13 @@ export const unicode2Emoji = (unicode: string, className = "", needSpan = false,
                     emoji += String.fromCodePoint(parseInt(item, 16));
                 }
             });
-            if (needSpan) {
-                emoji = `<span class="${className}">${emoji}</span>`;
-            }
         } catch (e) {
             // 自定义表情搜索报错 https://github.com/siyuan-note/siyuan/issues/5883
             // 这里忽略错误不做处理
+        }
+        emoji = Lute.Sanitize(emoji);
+        if (needSpan) {
+            emoji = `<span class="${className}">${emoji}</span>`;
         }
     }
     return emoji;
@@ -251,7 +252,7 @@ const renderEmojiContent = (previousIndex: string, previousContentElement: Eleme
     }
     let html = "";
     window.siyuan.emojis[parseInt(previousIndex)].items.forEach(emoji => {
-        html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
+        html += `<button data-unicode="${escapeAttr(emoji.unicode)}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
     });
     previousContentElement.innerHTML = html;
     previousContentElement.removeAttribute("data-index");
@@ -338,7 +339,7 @@ export const openEmojiPanel = (
                 <span class="fn__space"></span>
                 <label class="b3-form__icon fn__flex-1" style="overflow:initial;">
                     <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                    <input class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
+                    <input class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
                 </label>
                 <span class="fn__space"></span>
                 <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconRefresh"></use></svg></span>

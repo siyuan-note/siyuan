@@ -50,6 +50,8 @@ function getViewerConfiguration(element) {
       container: element.querySelector("#toolbarContainer"),
       numPages: element.querySelector("#numPages"),
       pageNumber: element.querySelector("#pageNumber"),
+      historyBack: element.querySelector("#pdfHistoryBack"),
+      historyForward: element.querySelector("#pdfHistoryForward"),
       scaleSelect: element.querySelector("#scaleSelect"),
       customScaleOption: element.querySelector("#customScaleOption"),
       previous: element.querySelector("#previous"),

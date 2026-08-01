@@ -1188,6 +1188,35 @@
     }
   }
 
+  &__width-guide {
+    background-color: var(--b3-theme-primary);
+    opacity: .45;
+    pointer-events: none;
+    position: fixed;
+    width: 1px;
+    z-index: 1000;
+
+    &--snapped {
+      opacity: 1;
+      width: 2px;
+    }
+  }
+
+  &__width-tip {
+    background-color: var(--b3-tooltips-background);
+    border-radius: var(--b3-border-radius);
+    color: var(--b3-tooltips-color);
+    font-size: 12px;
+    line-height: 20px;
+    padding: 0 6px;
+    pointer-events: none;
+    position: fixed;
+    transform: translate(-50%, calc(-100% - 6px));
+    user-select: none;
+    white-space: nowrap;
+    z-index: 1001;
+  }
+
   &__panel {
     position: relative;
 

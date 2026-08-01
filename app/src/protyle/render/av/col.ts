@@ -771,6 +771,47 @@ export const setFreezeColumn = (protyle: IProtyle, blockElement: Element, freeze
     transaction(protyle, [operation], [undoOperation]);
 };
 
+export const autoFitAVColumns = (protyle: IProtyle, blockElement: HTMLElement, columnIDs?: string[]) => {
+    const data = getAVData(blockElement);
+    if (!data || data.viewType !== "table") {
+        return;
+    }
+    const widths = getAVTableFitWidths(
+        data.view as IAVTable,
+        getCellValueText,
+        getAVColumnTextMeasurer(blockElement),
+        columnIDs,
+    );
+    const oldWidths: Record<string, string> = {};
+    const newWidths: Record<string, string> = {};
+    Object.entries(widths).forEach(([columnID, width]) => {
+        const headerElement = blockElement.querySelector<HTMLElement>(
+            `.av__row--header .av__cell[data-col-id="${columnID}"]`,
+        );
+        if (!headerElement || headerElement.style.width === width) {
+            return;
+        }
+        oldWidths[columnID] = headerElement.style.width || "200px";
+        newWidths[columnID] = width;
+    });
+    if (Object.keys(newWidths).length === 0) {
+        return;
+    }
+    const operation = {
+        action: "setAttrViewColsWidth" as TOperation,
+        avID: blockElement.dataset.avId,
+        blockID: blockElement.dataset.nodeId,
+        viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+    };
+    transaction(protyle, [{
+        ...operation,
+        data: newWidths,
+    }], [{
+        ...operation,
+        data: oldWidths,
+    }]);
+};
+
 export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
@@ -1125,43 +1166,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         icon: "iconWidth",
         label: window.siyuan.languages.autoFitAllColWidths,
         click() {
-            const data = getAVData(blockElement as HTMLElement);
-            if (!data || data.viewType !== "table") {
-                return;
-            }
-            const widths = getAVTableFitWidths(
-                data.view as IAVTable,
-                getCellValueText,
-                getAVColumnTextMeasurer(blockElement as HTMLElement),
-            );
-            const oldWidths: Record<string, string> = {};
-            const newWidths: Record<string, string> = {};
-            Object.entries(widths).forEach(([columnID, width]) => {
-                const headerElement = blockElement.querySelector<HTMLElement>(
-                    `.av__row--header .av__cell[data-col-id="${columnID}"]`,
-                );
-                if (!headerElement || headerElement.style.width === width) {
-                    return;
-                }
-                oldWidths[columnID] = headerElement.style.width || "200px";
-                newWidths[columnID] = width;
-            });
-            if (Object.keys(newWidths).length === 0) {
-                return;
-            }
-            const operation = {
-                action: "setAttrViewColsWidth" as TOperation,
-                avID,
-                blockID,
-                viewID,
-            };
-            transaction(protyle, [{
-                ...operation,
-                data: newWidths,
-            }], [{
-                ...operation,
-                data: oldWidths,
-            }]);
+            autoFitAVColumns(protyle, blockElement as HTMLElement);
         }
     });
     menu.addItem({

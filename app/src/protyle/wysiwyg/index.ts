@@ -108,7 +108,7 @@ import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 import {selectRow, stickyRow, updateHeader} from "../render/av/row";
 import {getAVSelectedItemIDs, getAVSelectedTableCells, updateAVRowSelect} from "../render/av/virtualScroll";
-import {setFreezeColumn, showColMenu} from "../render/av/col";
+import {autoFitAVColumns, setFreezeColumn, showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
 import {getAVCurrentViewID} from "../render/av/viewVisibility";
 import {checkFold} from "../../util/noRelyPCFunction";
@@ -158,6 +158,7 @@ import {
     setAVDragItemAnchor,
     setAVItemAnchor,
 } from "../render/av/rangeSelect";
+import {getAVColumnResizeWidth} from "../render/av/columnWidth";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -1377,20 +1378,64 @@ export class WYSIWYG {
                 }
                 const avId = nodeElement.getAttribute("data-av-id");
                 const blockID = nodeElement.dataset.nodeId;
-                const dragElement = target.parentElement;
+                const dragElement = target.parentElement as HTMLElement;
                 const oldWidth = dragElement.clientWidth;
                 const dragColId = dragElement.getAttribute("data-col-id");
-                let newWidth: number;
+                const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
+                const headerElement = hasClosestByClassName(target, "av__row--header") as HTMLElement;
                 const scrollElement = nodeElement.querySelector(".av__scroll");
+                if (!dragColId || !bodyElement || !headerElement || !scrollElement) {
+                    return;
+                }
+                const headerCells = Array.from(headerElement.querySelectorAll<HTMLElement>(".av__cell--header"));
+                const dragIndex = headerCells.indexOf(dragElement);
+                const previousWidth = dragIndex > 0 ? headerCells[dragIndex - 1].clientWidth : undefined;
+                let newWidth: number;
+                let resizeGuide: HTMLElement;
+                let resizeTip: HTMLElement;
+                const clearResizePreview = () => {
+                    resizeGuide?.remove();
+                    resizeTip?.remove();
+                };
+                const updateResizePreview = (snapped: boolean) => {
+                    if (!resizeGuide) {
+                        resizeGuide = document.createElement("div");
+                        resizeGuide.className = "av__width-guide";
+                        document.body.appendChild(resizeGuide);
+                        resizeTip = document.createElement("div");
+                        resizeTip.className = "av__width-tip";
+                        document.body.appendChild(resizeTip);
+                    }
+                    const dragRect = dragElement.getBoundingClientRect();
+                    const headerRect = headerElement.getBoundingClientRect();
+                    const bodyRect = bodyElement.getBoundingClientRect();
+                    const guideBottom = Math.min(bodyRect.bottom, contentRect.bottom, window.innerHeight);
+                    resizeGuide.classList.toggle("av__width-guide--snapped", snapped);
+                    resizeGuide.style.left = `${Math.round(dragRect.right)}px`;
+                    resizeGuide.style.top = `${Math.round(headerRect.top)}px`;
+                    resizeGuide.style.height = `${Math.max(0, Math.round(guideBottom - headerRect.top))}px`;
+                    resizeTip.style.left = `${Math.round(dragRect.right)}px`;
+                    resizeTip.style.top = `${Math.round(headerRect.top)}px`;
+                    resizeTip.textContent = `${newWidth}px`;
+                };
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                    newWidth = Math.max(oldWidth + (moveEvent.clientX - event.clientX), 25);
+                    const resizeWidth = getAVColumnResizeWidth(
+                        oldWidth + (moveEvent.clientX - event.clientX),
+                        previousWidth,
+                    );
+                    newWidth = resizeWidth.width;
                     scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
-                        (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth + "px";
+                        const columnElement = item.querySelector<HTMLElement>(`[data-col-id="${dragColId}"]`);
+                        if (columnElement) {
+                            columnElement.style.width = newWidth + "px";
+                        }
                     });
+                    updateResizePreview(resizeWidth.snapped);
                     stickyRow(nodeElement, protyle.contentElement, "bottom");
                 };
 
                 documentSelf.onmouseup = () => {
+                    clearResizePreview();
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;
@@ -1416,6 +1461,9 @@ export class WYSIWYG {
                         viewID
                     }]);
                 };
+                documentSelf.ondragstart = () => false;
+                documentSelf.onselectstart = () => false;
+                documentSelf.onselect = () => false;
                 this.preventClick = true;
                 event.preventDefault();
                 return;
@@ -3718,6 +3766,16 @@ export class WYSIWYG {
                 return;
             }
             const target = event.target as HTMLElement;
+            if (!protyle.disabled && target.classList.contains("av__widthdrag")) {
+                const blockElement = hasClosestBlock(target) as HTMLElement;
+                const columnID = target.parentElement?.getAttribute("data-col-id");
+                if (blockElement && columnID) {
+                    autoFitAVColumns(protyle, blockElement, [columnID]);
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             // 双击超级块拖拽手柄，均分所有列宽
             if (target.classList.contains("sb__resize")) {
                 const doOperations: IOperation[] = [];

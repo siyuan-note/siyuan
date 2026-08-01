@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getAVColumnFitWidth, getAVTableFitWidths} from "./columnWidth";
+import {getAVColumnFitWidth, getAVColumnResizeWidth, getAVTableFitWidths} from "./columnWidth";
 
 const measureText = (value: string) => value.length * 10;
 
@@ -67,5 +67,26 @@ describe("getAVTableFitWidths", () => {
             priority: "72px",
             number: "70px",
         });
+
+        assert.deepEqual(getAVTableFitWidths(
+            view,
+            value => value.text?.content || "",
+            measureText,
+            ["priority"],
+        ), {
+            priority: "72px",
+        });
+    });
+});
+
+describe("getAVColumnResizeWidth", () => {
+    it("snaps to the previous visible column within the threshold", () => {
+        assert.deepEqual(getAVColumnResizeWidth(194, 200), {width: 200, snapped: true});
+        assert.deepEqual(getAVColumnResizeWidth(206, 200), {width: 200, snapped: true});
+        assert.deepEqual(getAVColumnResizeWidth(207, 200), {width: 207, snapped: false});
+    });
+
+    it("keeps manual resizing above the minimum width", () => {
+        assert.deepEqual(getAVColumnResizeWidth(10), {width: 25, snapped: false});
     });
 });

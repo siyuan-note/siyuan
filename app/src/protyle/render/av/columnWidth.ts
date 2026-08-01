@@ -33,12 +33,26 @@ export const getAVColumnFitWidth = (name: string, type: TAVCol, values: string[]
     return `${Math.ceil(Math.min(480, Math.max(64, headerWidth, contentWidth)))}px`;
 };
 
+export const getAVColumnResizeWidth = (width: number, previousWidth?: number, snapThreshold = 6) => {
+    const limitedWidth = Math.max(Math.round(width), 25);
+    const normalizedPreviousWidth = typeof previousWidth === "number" ? Math.round(previousWidth) : undefined;
+    const snapped = typeof normalizedPreviousWidth === "number" &&
+        Math.abs(limitedWidth - normalizedPreviousWidth) <= snapThreshold;
+    return {
+        width: snapped ? normalizedPreviousWidth : limitedWidth,
+        snapped,
+    };
+};
+
 export const getAVTableFitWidths = (
     view: IAVTable,
     getValueText: (value: IAVCellValue, column: IAVColumn, rowIndex: number) => string,
     measureText = getEstimatedTextWidth,
+    columnIDs?: string[],
 ) => {
-    const visibleColumns = view.columns.filter(column => !column.hidden);
+    const targetColumnIDs = columnIDs ? new Set(columnIDs) : undefined;
+    const visibleColumns = view.columns.filter(column =>
+        !column.hidden && (!targetColumnIDs || targetColumnIDs.has(column.id)));
     const values = new Map(visibleColumns.map(column => [column.id, [] as string[]]));
     const collect = (table: IAVTable) => {
         if (table.groups?.length > 0) {

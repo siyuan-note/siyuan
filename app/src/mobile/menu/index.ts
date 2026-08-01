@@ -1,5 +1,5 @@
 import {popSearch} from "./search";
-import {closePanel} from "../util/closePanel";
+import {closeModel, closePanel} from "../util/closePanel";
 import {mountHelp, newDailyNote, newEncryptedNotebook, newNotebook} from "../../util/mount";
 import {exitSiYuan, lockScreen, processSync} from "../../dialog/processSystem";
 import {openHistory} from "../../history/history";
@@ -59,7 +59,7 @@ export const openMobileSetting = (app: App, tab?: TSettingTab) => {
     }
     openModel({
         title: window.siyuan.languages.config,
-        icon: "iconSettings",
+        icon: "iconLeft",
         html: `<div class="b3-menu__groups">
     <div class="b3-menu__group">
         <div class="b3-menu__group-items">${getSettingTabsMenuHTML()}</div>
@@ -72,6 +72,9 @@ export const openMobileSetting = (app: App, tab?: TSettingTab) => {
                     openSettingTab(app, def);
                 }
             });
+        },
+        backCallback() {
+            closeModel();
         },
     });
 };

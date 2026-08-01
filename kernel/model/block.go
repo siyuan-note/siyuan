@@ -1230,8 +1230,7 @@ func GetBlockKramdownsInBox(ids []string, mode, boxID string) (ret map[string]st
 }
 
 func getBlockKramdown0(tree *parse.Tree, id, mode string, luteEngine *lute.Lute) (ret string) {
-	canonicalizeBlockKramdownIAL(tree)
-	addBlockIALNodes(tree, false)
+	addCanonicalBlockIALNodes(tree, false)
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
 		return
@@ -1267,18 +1266,17 @@ var blockKramdownIALAttrPriority = map[string]int{
 	"fold":      12,
 }
 
-// canonicalizeBlockKramdownIAL 规范化 Kramdown API 导出树中的块级 IAL 属性顺序。
-func canonicalizeBlockKramdownIAL(tree *parse.Tree) {
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() || 2 > len(n.KramdownIAL) {
-			return ast.WalkContinue
-		}
+// canonicalBlockKramdownIAL 返回按 Kramdown API 输出规则排序的块级 IAL 副本。
+func canonicalBlockKramdownIAL(ial [][]string) (ret [][]string) {
+	ret = slices.Clone(ial)
+	if 2 > len(ret) {
+		return
+	}
 
-		slices.SortStableFunc(n.KramdownIAL, func(a, b []string) int {
-			return compareBlockKramdownIALAttrNames(a[0], b[0])
-		})
-		return ast.WalkContinue
+	slices.SortStableFunc(ret, func(a, b []string) int {
+		return compareBlockKramdownIALAttrNames(a[0], b[0])
 	})
+	return
 }
 
 func compareBlockKramdownIALAttrNames(a, b string) int {

@@ -18,37 +18,74 @@ package model
 
 import (
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestCanonicalizeBlockKramdownIAL(t *testing.T) {
-	root := &ast.Node{Type: ast.NodeDocument, KramdownIAL: testBlockKramdownIAL(
+func TestCanonicalBlockKramdownIAL(t *testing.T) {
+	ial := testBlockKramdownIAL(
 		"custom-z", "title-img", "fold", "style", "icon", "tags", "bookmark", "memo", "alias", "name", "title",
 		"type", "updated", "id", "custom-sy-readonly", "custom-riff-decks", "custom-reminder-wechat",
 		"custom-heading-mode", "custom-avs", "unknown", "heading-fold", "custom-a",
-	)}
-	paragraph := &ast.Node{Type: ast.NodeParagraph, KramdownIAL: testBlockKramdownIAL(
-		"custom-b", "updated", "id", "custom-sy-heading-number", "custom-a",
-	)}
-	textMark := &ast.Node{Type: ast.NodeTextMark, KramdownIAL: testBlockKramdownIAL("z", "a")}
-	paragraph.AppendChild(textMark)
-	root.AppendChild(paragraph)
-	tree := &parse.Tree{Root: root}
+	)
+	originalNames := blockKramdownIALAttrNames(ial)
 
-	canonicalizeBlockKramdownIAL(tree)
+	canonical := canonicalBlockKramdownIAL(ial)
 
-	assertBlockKramdownIALAttrNames(t, root.KramdownIAL, []string{
+	assertBlockKramdownIALAttrNames(t, canonical, []string{
 		"id", "updated", "type", "title", "name", "alias", "memo", "bookmark", "tags", "icon", "title-img", "style",
 		"fold", "custom-avs", "custom-heading-mode", "custom-reminder-wechat", "custom-riff-decks", "custom-sy-readonly",
 		"custom-a", "custom-z", "heading-fold", "unknown",
 	})
-	assertBlockKramdownIALAttrNames(t, paragraph.KramdownIAL, []string{
-		"id", "updated", "custom-sy-heading-number", "custom-a", "custom-b",
-	})
-	assertBlockKramdownIALAttrNames(t, textMark.KramdownIAL, []string{"z", "a"})
+	assertBlockKramdownIALAttrNames(t, ial, originalNames)
+}
+
+func TestGetBlockKramdownCanonicalBlockIAL(t *testing.T) {
+	for _, mode := range []string{"md", "textmark"} {
+		t.Run(mode, func(t *testing.T) {
+			id := "20260730230437-v4c93el"
+			ial := [][]string{
+				{"custom-z", "z"},
+				{"updated", "20260731125712"},
+				{"custom-sy-readonly", "true"},
+				{"id", id},
+				{"custom-a", "a"},
+			}
+			originalNames := blockKramdownIALAttrNames(ial)
+			root := &ast.Node{Type: ast.NodeDocument}
+			paragraph := &ast.Node{Type: ast.NodeParagraph, ID: id, KramdownIAL: ial}
+			paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("content")})
+			root.AppendChild(paragraph)
+			tree := &parse.Tree{Root: root}
+
+			kramdown := getBlockKramdown0(tree, id, mode, util.NewLute())
+
+			expectedIAL := `{: id="20260730230437-v4c93el" updated="20260731125712" ` +
+				`custom-sy-readonly="true" custom-a="a" custom-z="z"}`
+			if !strings.Contains(kramdown, expectedIAL) {
+				t.Fatalf("unexpected Kramdown IAL: %q", kramdown)
+			}
+			assertBlockKramdownIALAttrNames(t, paragraph.KramdownIAL, originalNames)
+		})
+	}
+}
+
+func TestAddCanonicalBlockIALNodesIncludesChildBlocks(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument}
+	blockquote := &ast.Node{Type: ast.NodeBlockquote, KramdownIAL: testBlockKramdownIAL("custom-z", "updated", "id")}
+	paragraph := &ast.Node{Type: ast.NodeParagraph, KramdownIAL: testBlockKramdownIAL("custom-b", "updated", "id", "custom-a")}
+	blockquote.AppendChild(paragraph)
+	root.AppendChild(blockquote)
+	tree := &parse.Tree{Root: root}
+
+	addCanonicalBlockIALNodes(tree, false)
+
+	assertBlockKramdownIALAttrNames(t, parse.Tokens2IAL(blockquote.Next.Tokens), []string{"id", "updated", "custom-z"})
+	assertBlockKramdownIALAttrNames(t, parse.Tokens2IAL(paragraph.Next.Tokens), []string{"id", "updated", "custom-a", "custom-b"})
 }
 
 func testBlockKramdownIAL(names ...string) (ret [][]string) {
@@ -58,12 +95,16 @@ func testBlockKramdownIAL(names ...string) (ret [][]string) {
 	return
 }
 
+func blockKramdownIALAttrNames(ial [][]string) (ret []string) {
+	for _, attr := range ial {
+		ret = append(ret, attr[0])
+	}
+	return
+}
+
 func assertBlockKramdownIALAttrNames(t *testing.T, ial [][]string, expected []string) {
 	t.Helper()
-	var actual []string
-	for _, attr := range ial {
-		actual = append(actual, attr[0])
-	}
+	actual := blockKramdownIALAttrNames(ial)
 	if !slices.Equal(actual, expected) {
 		t.Fatalf("unexpected IAL attribute order: got %v, want %v", actual, expected)
 	}

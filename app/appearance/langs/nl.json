@@ -2249,7 +2249,7 @@
 		"234": "[%d/%d] [%d] leesbare paden bijgewerkt [%s]",
 		"235": "[%d/%d] Marktplaatspakket bijwerken...",
 		"236": "[%d/%d] Marktplaatspakket [%s] bijwerken...",
-		"237": "Updates van marktplaatspakketten voltooid: %d bijgewerkt, %d mislukt, %d voldoen niet aan de updatevereisten",
+		"237": "Updates van marktplaatspakketten voltooid: [%d] bijgewerkt, [%d] mislukt, [%d] voldoen niet aan de updatevereisten",
 		"238": "Marktplaatspakket [%s] update mislukt",
 		"239": "Gerelateerde bewerkingen worden verwerkt",
 		"240": "De huidige sleep-en-neerzet-kop bevindt zich in het containerblok en de sleep-en-neerzet-bewerking kan niet worden uitgevoerd",

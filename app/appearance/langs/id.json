@@ -2249,7 +2249,7 @@
 		"234": "[%d/%d] Memperbarui [%d] jalur dokumen yang dapat dibaca [%s]",
 		"235": "[%d/%d] sedang memperbarui paket pasar...",
 		"236": "[%d/%d] sedang memperbarui paket pasar [%s]...",
-		"237": "Pembaruan paket pasar selesai: %d berhasil diperbarui, %d gagal, %d tidak memenuhi persyaratan pembaruan",
+		"237": "Pembaruan paket pasar selesai: [%d] berhasil diperbarui, [%d] gagal, [%d] tidak memenuhi persyaratan pembaruan",
 		"238": "Pembaruan paket pasar [%s] gagal, silakan coba lagi nanti",
 		"239": "Operasi terkait sedang diproses, silakan coba lagi nanti",
 		"240": "Judul yang sedang diseret saat ini berada di blok wadah dan operasi seret-lepas tidak dapat dilakukan",

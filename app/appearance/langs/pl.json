@@ -2249,7 +2249,7 @@
 		"234": "[%d/%d] Zaktualizowano [%d] czytelnych ścieżek dokumentu [%s]",
 		"235": "[%d/%d] aktualizuje zanotowany pakiet...",
 		"236": "[%d/%d] aktualizuje zanotowany pakiet [%s]...",
-		"237": "Aktualizacja pakietów rynkowych zakończona: %d zaktualizowano, %d nie powiodło się, %d nie spełnia wymagań aktualizacji",
+		"237": "Aktualizacja pakietów rynkowych zakończona: [%d] zaktualizowano, [%d] nie powiodło się, [%d] nie spełnia wymagań aktualizacji",
 		"238": "Aktualizacja pakietu rynkowego [%s] nie powiodła się, proszę spróbować ponownie później",
 		"239": "Powiązane operacje są przetwarzane, proszę spróbować ponownie później",
 		"240": "Bieżący nagłówek przeciągania i upuszczania znajduje się w bloku kontenera i nie można wykonać operacji przeciągania",

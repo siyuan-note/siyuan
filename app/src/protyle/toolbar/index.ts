@@ -21,6 +21,7 @@ import {transaction, updateBatchTransaction, updateTransaction} from "../wysiwyg
 import {Constants} from "../../constants";
 import {
     copyPlainText,
+    isNotCtrl,
     readClipboard,
     saveExportFile,
     setStorageVal
@@ -1183,6 +1184,10 @@ export class Toolbar {
                 setPosition(this.subElement, nodeRect.right, bottom);
             }
         };
+        const closeRender = () => {
+            this.subElement.querySelector('[data-type="pin"]').setAttribute("aria-label", window.siyuan.languages.pin);
+            hideElements(["util"], protyle);
+        };
         const headerElement = this.subElement.querySelector(".block__icons");
         headerElement.addEventListener("click", (event: MouseEvent) => {
             const target = event.target as HTMLElement;
@@ -1205,8 +1210,7 @@ export class Toolbar {
             event.stopPropagation();
             switch (btnElement.getAttribute("data-type")) {
                 case "close":
-                    this.subElement.querySelector('[data-type="pin"]').setAttribute("aria-label", window.siyuan.languages.pin);
-                    hideElements(["util"], protyle);
+                    closeRender();
                     break;
                 case "pin":
                     if (btnElement.getAttribute("aria-label") === window.siyuan.languages.unpin) {
@@ -1272,6 +1276,7 @@ export class Toolbar {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-content") || "");
         }
         const oldTextValue = textElement.value;
+        let focusBeforeRender = false;
         textElement.addEventListener("input", (event) => {
             if (!renderElement.parentElement) {
                 return;
@@ -1314,8 +1319,14 @@ export class Toolbar {
                 return;
             }
             if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
-                this.subElement.querySelector('[data-type="pin"]').setAttribute("aria-label", window.siyuan.languages.pin);
-                hideElements(["util"], protyle);
+                closeRender();
+            } else if (types.includes("inline-math") && !event.altKey && !event.shiftKey && isNotCtrl(event) &&
+                textElement.selectionStart === textElement.selectionEnd &&
+                ((event.key === "ArrowLeft" && textElement.selectionStart === 0) ||
+                    (event.key === "ArrowRight" && textElement.selectionEnd === textElement.value.length))) {
+                focusBeforeRender = event.key === "ArrowLeft";
+                closeRender();
+                event.preventDefault();
             } else if (event.key === "Tab") {
                 // https://github.com/siyuan-note/siyuan/issues/5270
                 document.execCommand("insertText", false, "\t");
@@ -1413,7 +1424,11 @@ export class Toolbar {
                             focusByWbr(nodeElement, this.range);
                         }
                     } else if (renderElement.parentElement) {
-                        this.range.setStartAfter(renderElement);
+                        if (focusBeforeRender) {
+                            this.range.setStartBefore(renderElement);
+                        } else {
+                            this.range.setStartAfter(renderElement);
+                        }
                         this.range.collapse(true);
                         focusByRange(this.range);
                     }

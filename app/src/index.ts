@@ -274,7 +274,6 @@ export class App {
             altIsPressed: false,
             ws: mainWs,
         };
-
         const notebookPromise = setNoteBook();
         fetchPost("/api/system/getConf", {}, async (response) => {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");

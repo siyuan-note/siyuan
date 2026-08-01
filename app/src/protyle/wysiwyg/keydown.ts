@@ -143,6 +143,48 @@ const showSelectAllTip = () => {
     });
 };
 
+const getAdjacentInlineMath = (range: Range, editableElement: Element, previous: boolean): HTMLElement | undefined => {
+    if (range.startContainer !== editableElement && !editableElement.contains(range.startContainer)) {
+        return;
+    }
+
+    let currentNode: Node | null = range.startContainer;
+    let adjacentNode: Node | false;
+    if (currentNode.nodeType === Node.TEXT_NODE) {
+        const text = currentNode.textContent || "";
+        const adjacentText = previous ? text.substring(0, range.startOffset) : text.substring(range.startOffset);
+        if (adjacentText.split(Constants.ZWSP).join("") !== "") {
+            return;
+        }
+        adjacentNode = previous ? hasPreviousSibling(currentNode) : hasNextSibling(currentNode);
+    } else {
+        adjacentNode = currentNode.childNodes[previous ? range.startOffset - 1 : range.startOffset] || false;
+    }
+
+    while (currentNode) {
+        while (adjacentNode &&
+            ((adjacentNode.nodeType === Node.TEXT_NODE &&
+                (adjacentNode.textContent || "").split(Constants.ZWSP).join("") === "") ||
+                (adjacentNode.nodeType === Node.ELEMENT_NODE && (adjacentNode as Element).tagName === "WBR"))) {
+            adjacentNode = previous ? hasPreviousSibling(adjacentNode) : hasNextSibling(adjacentNode);
+        }
+        if (adjacentNode) {
+            if (adjacentNode.nodeType === Node.ELEMENT_NODE &&
+                (adjacentNode as Element).matches("[data-type~='inline-math']")) {
+                return adjacentNode as HTMLElement;
+            }
+            return;
+        }
+        if (currentNode === editableElement) {
+            return;
+        }
+        currentNode = currentNode.parentNode;
+        if (currentNode) {
+            adjacentNode = previous ? hasPreviousSibling(currentNode) : hasNextSibling(currentNode);
+        }
+    }
+};
+
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
@@ -704,6 +746,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
             const nodeEditableElement = (tdElement || getContenteditableElement(nodeElement) || nodeElement) as HTMLElement;
+            // 光标移向相邻行内公式时直接打开编辑框 https://github.com/siyuan-note/siyuan/issues/14938
+            const inlineMathElement = range.collapsed && (event.key === "ArrowLeft" || event.key === "ArrowRight") ?
+                getAdjacentInlineMath(range, nodeEditableElement, event.key === "ArrowLeft") : undefined;
+            if (inlineMathElement) {
+                event.stopPropagation();
+                event.preventDefault();
+                range.selectNode(inlineMathElement);
+                protyle.toolbar.range = range;
+                focusByRange(range);
+                protyle.toolbar.showRender(protyle, inlineMathElement);
+                return;
+            }
             const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
             if (nodeElement.classList.contains("code-block") && position.end === nodeEditableElement.innerText.length) {
                 // 代码块换最后一个 /n 肉眼是无法区分是否在其后的，因此统一在之前

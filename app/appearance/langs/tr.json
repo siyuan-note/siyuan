@@ -2387,6 +2387,8 @@
 		"350": "Yeni not defterinin yazılması veya dizine eklenmesi tamamlanamadı; eksik olarak işaretlendi",
 		"351": "Beklenmeyen bir hata oluştu; görev [%s] için sistem günlüğünü kontrol edin",
 		"352": "Ajan bağlamı sıkıştırmadan sonra seçilen modele sığmıyor. Daha büyük bağlam penceresine sahip bir modele geçin",
-		"353": "Yeni öğe şablonu alanı [%s] kullanılamayan seçenek değerlerini yok saydı [%s]"
+		"353": "Yeni öğe şablonu alanı [%s] kullanılamayan seçenek değerlerini yok saydı [%s]",
+		"354": "Çok fazla başarısız kimlik doğrulama denemesi, lütfen daha sonra tekrar deneyin",
+		"355": "Kilit ekranı parolası en az 8 karakter olmalıdır"
 	}
 	}

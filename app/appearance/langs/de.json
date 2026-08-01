@@ -2387,6 +2387,8 @@
 		"350": "Das Schreiben oder Indizieren des neuen Notizbuchs konnte nicht abgeschlossen werden; es wurde als unvollständig markiert",
 		"351": "Ein unerwarteter Fehler ist aufgetreten; prüfen Sie das Systemprotokoll für die Aufgabe [%s]",
 		"352": "Der Agentenkontext passt auch nach der Komprimierung nicht in das ausgewählte Modell. Wechseln Sie zu einem Modell mit größerem Kontextfenster",
-		"353": "Das Feld [%s] der Vorlage für neue Einträge hat nicht verfügbare Optionswerte ignoriert [%s]"
+		"353": "Das Feld [%s] der Vorlage für neue Einträge hat nicht verfügbare Optionswerte ignoriert [%s]",
+		"354": "Zu viele fehlgeschlagene Authentifizierungsversuche, bitte versuchen Sie es später erneut",
+		"355": "Das Bildschirmsperr-Passwort muss mindestens 8 Zeichen lang sein"
 	}
 	}

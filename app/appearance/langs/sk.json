@@ -2387,6 +2387,8 @@
 		"350": "Zápis alebo indexovanie nového zápisníka sa nepodarilo dokončiť; bol označený ako neúplný",
 		"351": "Vyskytla sa neočakávaná chyba; skontrolujte systémový denník úlohy [%s]",
 		"352": "Kontext agenta sa ani po kompresii nezmestí do vybraného modelu. Vyberte model s väčším kontextovým oknom",
-		"353": "Pole [%s] šablóny novej položky ignorovalo nedostupné hodnoty možností [%s]"
+		"353": "Pole [%s] šablóny novej položky ignorovalo nedostupné hodnoty možností [%s]",
+		"354": "Príliš veľa neúspešných pokusov o overenie, skúste to znova neskôr",
+		"355": "Heslo uzamknutej obrazovky musí mať aspoň 8 znakov"
 	}
 	}

@@ -113,7 +113,7 @@ func LoginAuth(c *gin.Context) {
 	authCode = util.RemoveInvalid(authCode)
 	authCode = strings.TrimSpace(authCode)
 
-	if Conf.AccessAuthCode != authCode {
+	if !util.AuthCodeEquals(Conf.AccessAuthCode, authCode) {
 		ret.Code = -1
 		ret.Msg = Conf.Language(83)
 		logging.LogWarnf("invalid auth code [ip=%s]", util.GetRemoteAddr(c.Request))
@@ -136,6 +136,7 @@ func LoginAuth(c *gin.Context) {
 
 	workspaceSession.AccessAuthCode = authCode
 	util.WrongAuthCount = 0
+	util.AuthThrottleReset(c.ClientIP())
 	workspaceSession.Captcha = gulu.Rand.String(7)
 
 	maxAge := 0 // Default session expiration (browser session)
@@ -332,11 +333,23 @@ func CheckAuth(c *gin.Context) {
 	// 通过 BasicAuth (header: Authorization)
 	if username, password, ok := c.Request.BasicAuth(); ok {
 		// 使用锁屏密码作为密码
-		if util.WorkspaceName == username && Conf.AccessAuthCode == password {
+		ip := c.ClientIP()
+		if retryAfter := util.AuthThrottleCheck(ip); 0 < retryAfter {
+			// 锁定期间持续记录失败，防止暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-w3xh-mmmh-r54v
+			util.AuthThrottleFail(ip)
+			c.Header("Retry-After", strconv.Itoa(retryAfter))
+			c.JSON(http.StatusTooManyRequests, map[string]any{"code": -1, "msg": Conf.Language(332)})
+			c.Abort()
+			return
+		}
+		if util.WorkspaceName == username && util.AuthCodeEquals(Conf.AccessAuthCode, password) {
+			util.AuthThrottleReset(ip)
 			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return
 		}
+		logging.LogWarnf("invalid auth code [ip=%s]", ip)
+		util.AuthThrottleFail(ip)
 	}
 
 	// WebDAV BasicAuth Authenticate

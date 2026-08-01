@@ -2387,6 +2387,8 @@
 		"350": "Het schrijven of indexeren van het nieuwe notitieboek kon niet worden voltooid; het is als onvolledig gemarkeerd",
 		"351": "Er is een onverwachte fout opgetreden; controleer het systeemlogboek voor taak [%s]",
 		"352": "De agentcontext past na compressie niet in het geselecteerde model. Kies een model met een groter contextvenster",
-		"353": "Veld [%s] van de sjabloon voor nieuwe items heeft niet-beschikbare optiewaarden genegeerd [%s]"
+		"353": "Veld [%s] van de sjabloon voor nieuwe items heeft niet-beschikbare optiewaarden genegeerd [%s]",
+		"354": "Te veel mislukte verificatiepogingen, probeer het later opnieuw",
+		"355": "Het wachtwoord van het vergrendelscherm moet minimaal 8 tekens bevatten"
 	}
 	}

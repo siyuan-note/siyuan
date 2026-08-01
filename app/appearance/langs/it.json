@@ -2387,6 +2387,8 @@
 		"350": "Impossibile completare la scrittura o l’indicizzazione del nuovo taccuino; è stato contrassegnato come incompleto",
 		"351": "Si è verificato un errore imprevisto; controlla il registro di sistema per l’attività [%s]",
 		"352": "Il contesto dell’agente non rientra nel modello selezionato dopo la compressione. Passa a un modello con una finestra di contesto più ampia",
-		"353": "Il campo [%s] del modello per nuovi elementi ha ignorato i valori di opzione non disponibili [%s]"
+		"353": "Il campo [%s] del modello per nuovi elementi ha ignorato i valori di opzione non disponibili [%s]",
+		"354": "Troppi tentativi di autenticazione falliti, riprova più tardi",
+		"355": "La password della schermata di blocco deve contenere almeno 8 caratteri"
 	}
 	}

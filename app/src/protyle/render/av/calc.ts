@@ -6,6 +6,7 @@ import {getFieldsByData} from "./view";
 import {Constants} from "../../../constants";
 import {Dialog} from "../../../dialog";
 import {escapeAttr} from "../../../util/escape";
+import {getAVTemplateHTML} from "./attributeValue";
 
 const calcItem = (options: {
     menu: Menu,
@@ -582,7 +583,7 @@ export const getCalcValue = (column: IAVColumn) => {
             value = `<span>${resultCalc.formattedContent}</span><small>${window.siyuan.languages.percentUnchecked}</small>`;
             break;
         case  "Template":
-            value = `<span>${resultCalc.formattedContent ?? resultCalc.content}</span><small>${window.siyuan.languages.calcResultTemplate}</small>`;
+            value = `<span>${getAVTemplateHTML(resultCalc.formattedContent ?? resultCalc.content)}</span><small>${window.siyuan.languages.calcResultTemplate}</small>`;
             break;
     }
     return value;

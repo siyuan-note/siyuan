@@ -1230,6 +1230,7 @@ func GetBlockKramdownsInBox(ids []string, mode, boxID string) (ret map[string]st
 }
 
 func getBlockKramdown0(tree *parse.Tree, id, mode string, luteEngine *lute.Lute) (ret string) {
+	canonicalizeBlockKramdownIAL(tree)
 	addBlockIALNodes(tree, false)
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
@@ -1248,6 +1249,65 @@ func getBlockKramdown0(tree *parse.Tree, id, mode string, luteEngine *lute.Lute)
 		ret = string(formatRenderer.Render())
 	}
 	return
+}
+
+var blockKramdownIALAttrPriority = map[string]int{
+	"id":        0,
+	"updated":   1,
+	"type":      2,
+	"title":     3,
+	"name":      4,
+	"alias":     5,
+	"memo":      6,
+	"bookmark":  7,
+	"tags":      8,
+	"icon":      9,
+	"title-img": 10,
+	"style":     11,
+	"fold":      12,
+}
+
+// canonicalizeBlockKramdownIAL 规范化 Kramdown API 导出树中的块级 IAL 属性顺序。
+func canonicalizeBlockKramdownIAL(tree *parse.Tree) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() || 2 > len(n.KramdownIAL) {
+			return ast.WalkContinue
+		}
+
+		slices.SortStableFunc(n.KramdownIAL, func(a, b []string) int {
+			return compareBlockKramdownIALAttrNames(a[0], b[0])
+		})
+		return ast.WalkContinue
+	})
+}
+
+func compareBlockKramdownIALAttrNames(a, b string) int {
+	aPriority, aBuiltIn := blockKramdownIALAttrPriority[a]
+	bPriority, bBuiltIn := blockKramdownIALAttrPriority[b]
+	if aBuiltIn && bBuiltIn {
+		return aPriority - bPriority
+	}
+	if aBuiltIn {
+		return -1
+	}
+	if bBuiltIn {
+		return 1
+	}
+
+	aSystemManaged := isSystemManagedBlockKramdownIALAttr(a)
+	bSystemManaged := isSystemManagedBlockKramdownIALAttr(b)
+	if aSystemManaged && !bSystemManaged {
+		return -1
+	}
+	if !aSystemManaged && bSystemManaged {
+		return 1
+	}
+	return strings.Compare(a, b)
+}
+
+func isSystemManagedBlockKramdownIALAttr(name string) bool {
+	return "custom-avs" == name || "custom-heading-mode" == name || "custom-reminder-wechat" == name ||
+		strings.HasPrefix(name, "custom-riff-") || strings.HasPrefix(name, "custom-sy-")
 }
 
 type ChildBlock struct {

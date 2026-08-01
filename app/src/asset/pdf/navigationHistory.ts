@@ -122,7 +122,9 @@ export class PDFNavigationHistory {
     private appendInitialPosition = false;
     private awaitingLanding = false;
     private navigationStartHash: string;
+    private navigationTarget: PDFNavigationEntry;
     private navigationTimeout: ReturnType<typeof setTimeout>;
+    private readonly navigationTimeoutMs: number;
     private position: PDFNavigationEntry;
     private restoring = false;
 
@@ -130,10 +132,12 @@ export class PDFNavigationHistory {
         eventBus: PDFNavigationEventBus,
         linkService: PDFNavigationLinkService,
         limit: number,
+        navigationTimeoutMs?: number,
     }) {
         this.eventBus = options.eventBus;
         this.linkService = options.linkService;
         this.stack = new PDFNavigationStack(options.limit);
+        this.navigationTimeoutMs = options.navigationTimeoutMs ?? 1000;
     }
 
     public get initialBookmark(): string | null {
@@ -168,6 +172,7 @@ export class PDFNavigationHistory {
         this.appendInitialPosition = false;
         this.awaitingLanding = false;
         this.navigationStartHash = undefined;
+        this.navigationTarget = undefined;
         this.restoring = false;
         this.dispatchState();
     }
@@ -200,6 +205,7 @@ export class PDFNavigationHistory {
         }
         const current = this.stack.current;
         this.stack.replace({
+            ...current,
             ...this.position,
             key: current?.key,
             landingHash: current?.landingHash,
@@ -265,6 +271,7 @@ export class PDFNavigationHistory {
         this.stack.push(entry, () => false);
         this.awaitingLanding = true;
         this.navigationStartHash = this.position?.hash;
+        this.navigationTarget = entry;
         this.startNavigationTimeout();
         this.dispatchState();
     }
@@ -275,6 +282,7 @@ export class PDFNavigationHistory {
         }
         const current = this.stack.current;
         this.stack.replace({
+            ...current,
             ...this.position,
             key: current?.key,
             landingHash: current?.landingHash,
@@ -284,17 +292,18 @@ export class PDFNavigationHistory {
     private async restore(entry: PDFNavigationEntry) {
         this.restoring = true;
         this.navigationStartHash = this.position?.hash;
+        this.navigationTarget = entry;
         this.dispatchState();
         try {
+            if (Number.isInteger(entry.rotation)) {
+                this.linkService.rotation = entry.rotation;
+            }
             if (entry.dest) {
                 await this.linkService.goToDestination(entry.dest);
             } else if (entry.hash) {
                 this.linkService.setHash(entry.hash);
             } else if (entry.page) {
                 this.linkService.page = entry.page;
-            }
-            if (Number.isInteger(entry.rotation)) {
-                this.linkService.rotation = entry.rotation;
             }
         } finally {
             if (this.restoring) {
@@ -308,14 +317,19 @@ export class PDFNavigationHistory {
         if (!hash) {
             return;
         }
-        this.position = {
+        const position = {
             hash,
             page: this.linkService.page || event.location.pageNumber,
             rotation: event.location.rotation,
         };
         if (!this.initialized) {
+            this.position = position;
             return;
         }
+        if ((this.awaitingLanding || this.restoring) && !this.isNavigationTarget(position)) {
+            return;
+        }
+        this.position = position;
 
         const current = this.stack.current;
         if (!current) {
@@ -325,39 +339,48 @@ export class PDFNavigationHistory {
             this.appendInitialPosition = false;
         } else if (this.awaitingLanding || this.restoring) {
             this.stack.replace({
+                ...current,
                 ...this.position,
                 key: current.key,
                 landingHash: this.awaitingLanding ? hash : current.landingHash,
             });
-        }
-
-        if (this.awaitingLanding || this.restoring) {
             this.awaitingLanding = false;
             this.restoring = false;
             this.navigationStartHash = undefined;
+            this.navigationTarget = undefined;
             this.clearNavigationTimeout();
         }
         this.dispatchState();
     }
 
+    private isNavigationTarget(position: PDFNavigationEntry) {
+        if (!this.navigationTarget) {
+            return false;
+        }
+        if (Number.isInteger(this.navigationTarget.rotation) &&
+            position.rotation !== this.navigationTarget.rotation) {
+            return false;
+        }
+        if (this.navigationTarget.hash?.includes("&zoom=")) {
+            return position.hash === this.navigationTarget.hash;
+        }
+        if (this.navigationTarget.page && position.page !== this.navigationTarget.page) {
+            return false;
+        }
+        return position.hash !== this.navigationStartHash;
+    }
+
     private startNavigationTimeout() {
         this.clearNavigationTimeout();
         this.navigationTimeout = setTimeout(() => {
-            if (this.position && this.position.hash !== this.navigationStartHash &&
-                (this.awaitingLanding || this.restoring)) {
-                const current = this.stack.current;
-                this.stack.replace({
-                    ...this.position,
-                    key: current?.key,
-                    landingHash: this.awaitingLanding ? this.position.hash : current?.landingHash,
-                });
-            }
+            this.position = undefined;
             this.awaitingLanding = false;
             this.restoring = false;
             this.navigationStartHash = undefined;
+            this.navigationTarget = undefined;
             this.navigationTimeout = undefined;
             this.dispatchState();
-        }, 1000);
+        }, this.navigationTimeoutMs);
     }
 
     private clearNavigationTimeout() {

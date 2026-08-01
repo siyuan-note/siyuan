@@ -708,9 +708,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     const range = getEditorRange(nodeElement);
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_INLINE_CONTEXT);
-    /// #if MOBILE
-    protyle.toolbar.showContent(protyle, range, nodeElement);
-    /// #else
+    /// #if !MOBILE
     const oldHTML = nodeElement.outerHTML;
     const captionElement = hasClosestByTag(range.startContainer, "CAPTION");
     if (range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji")) {
@@ -910,8 +908,9 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         }
     }
     /// #endif
+    let pluginMenus: IMenu[] = [];
     if (protyle?.app?.plugins) {
-        emitOpenMenu({
+        pluginMenus = emitOpenMenu({
             plugins: protyle.app.plugins,
             type: "open-menu-content",
             detail: {
@@ -920,8 +919,12 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                 element: nodeElement,
             },
             separatorPosition: "top",
+            appendToMenu: !isMobile(),
         });
     }
+    /// #if MOBILE
+    protyle.toolbar.showContent(protyle, range, nodeElement, pluginMenus);
+    /// #endif
 };
 
 export const enterBack = (protyle: IProtyle, id: string) => {

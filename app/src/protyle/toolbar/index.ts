@@ -1916,7 +1916,7 @@ export class Toolbar {
         genList(true);
     }
 
-    public showContent(protyle: IProtyle, range: Range, nodeElement: Element) {
+    public showContent(protyle: IProtyle, range: Range, nodeElement: Element, pluginMenus: IMenu[] = []) {
         this.range = range;
         hideElements(["hint"], protyle);
         this.clearSubElement();
@@ -1934,6 +1934,9 @@ export class Toolbar {
         if (!protyle.disabled) {
             html += `<button class="keyboard__action" data-action="paste"><svg><use xlink:href="#iconPaste"></use></svg></button>
 <button class="keyboard__action" data-action="select"><svg><use xlink:href="#iconSelect"></use></svg></button>`;
+        }
+        if (pluginMenus.length > 0) {
+            html += `<button class="keyboard__action" data-action="plugin" data-menu="true" aria-label="${window.siyuan.languages.plugin}"><svg><use xlink:href="#iconPlugin"></use></svg></button>`;
         }
         if (hasCopy || !protyle.disabled) {
             html += '<button class="keyboard__action" data-action="more"><svg><use xlink:href="#iconMore"></use></svg></button>';
@@ -1992,6 +1995,17 @@ export class Toolbar {
                 this.subElement.classList.add("fn__none");
             } else if (action === "back") {
                 this.subElement.lastElementChild.innerHTML = html;
+            } else if (action === "plugin") {
+                window.siyuan.menus.menu.remove();
+                pluginMenus.forEach(item => window.siyuan.menus.menu.addItem({...item, index: undefined}));
+                const triggerRect = btnElemen.getBoundingClientRect();
+                const selectionRect = this.range.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({
+                    x: triggerRect.left,
+                    y: selectionRect.bottom + 8,
+                    h: selectionRect.height + 8,
+                });
+                this.subElement.classList.add("fn__none");
             } else if (action === "more") {
                 this.subElement.lastElementChild.innerHTML = `<button class="keyboard__action${hasCopy ? "" : " fn__none"}" data-action="copyPlainText"><span>${window.siyuan.languages.copyPlainText}</span></button>
 <div class="keyboard__split${hasCopy ? "" : " fn__none"}"></div>

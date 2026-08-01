@@ -18,7 +18,6 @@ import {ipcRenderer} from "electron";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
-import {settingTabToMenuId} from "../config/setting/tabs";
 import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
 import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
@@ -250,7 +249,7 @@ export class Plugin {
         }
         if (isMobile() && window.siyuan.storage) {
             if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
-                document.querySelector("#" + settingTabToMenuId("about"))?.after(iconElement);
+                document.getElementById("menuPluginTopBar")?.after(iconElement);
             }
         } else if (!isWindow() && window.siyuan.storage) {
             if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {

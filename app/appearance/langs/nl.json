@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Snelle acties",
+  "mobileMenuCreate": "Maken",
+  "mobileMenuDataManagement": "Gegevensbeheer",
+  "mobileMenuSettingsAndHelp": "Instellingen en hulp",
   "applyColWidthToOtherViews": "Kolombreedte toepassen op andere weergaven",
   "distributeAllColWidths": "Alle kolombreedtes gelijkmatig verdelen",
   "sameWidthAsRightColumn": "Even breed als de rechterkolom",

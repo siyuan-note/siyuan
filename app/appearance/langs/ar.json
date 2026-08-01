@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "إجراءات سريعة",
+  "mobileMenuCreate": "إنشاء",
+  "mobileMenuDataManagement": "إدارة البيانات",
+  "mobileMenuSettingsAndHelp": "الإعدادات والمساعدة",
   "applyColWidthToOtherViews": "تطبيق عرض العمود على طرق العرض الأخرى",
   "distributeAllColWidths": "توزيع عرض جميع الأعمدة بالتساوي",
   "sameWidthAsRightColumn": "بنفس عرض العمود الأيمن",

@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Швидкі дії",
+  "mobileMenuCreate": "Створення",
+  "mobileMenuDataManagement": "Керування даними",
+  "mobileMenuSettingsAndHelp": "Налаштування та довідка",
   "applyColWidthToOtherViews": "Застосувати ширину стовпця до інших подань",
   "distributeAllColWidths": "Рівномірно розподілити ширину всіх стовпців",
   "sameWidthAsRightColumn": "Така сама ширина, як у стовпця праворуч",

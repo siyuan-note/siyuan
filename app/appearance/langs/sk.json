@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Rýchle akcie",
+  "mobileMenuCreate": "Vytvoriť",
+  "mobileMenuDataManagement": "Správa údajov",
+  "mobileMenuSettingsAndHelp": "Nastavenia a pomoc",
   "applyColWidthToOtherViews": "Použiť šírku stĺpca na ostatné zobrazenia",
   "distributeAllColWidths": "Rovnomerne rozložiť šírku všetkých stĺpcov",
   "sameWidthAsRightColumn": "Rovnaká šírka ako pravý stĺpec",

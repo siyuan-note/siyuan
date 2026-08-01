@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "การดำเนินการด่วน",
+  "mobileMenuCreate": "สร้าง",
+  "mobileMenuDataManagement": "การจัดการข้อมูล",
+  "mobileMenuSettingsAndHelp": "การตั้งค่าและความช่วยเหลือ",
   "applyColWidthToOtherViews": "ใช้ความกว้างคอลัมน์กับมุมมองอื่น",
   "distributeAllColWidths": "กระจายความกว้างของคอลัมน์ทั้งหมดให้เท่ากัน",
   "sameWidthAsRightColumn": "กว้างเท่ากับคอลัมน์ด้านขวา",

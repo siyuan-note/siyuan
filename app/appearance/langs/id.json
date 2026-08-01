@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Tindakan cepat",
+  "mobileMenuCreate": "Buat",
+  "mobileMenuDataManagement": "Pengelolaan data",
+  "mobileMenuSettingsAndHelp": "Pengaturan dan bantuan",
   "applyColWidthToOtherViews": "Terapkan lebar kolom ke tampilan lain",
   "distributeAllColWidths": "Distribusikan semua lebar kolom secara merata",
   "sameWidthAsRightColumn": "Sama lebar dengan kolom kanan",

@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "빠른 작업",
+  "mobileMenuCreate": "만들기",
+  "mobileMenuDataManagement": "데이터 관리",
+  "mobileMenuSettingsAndHelp": "설정 및 도움말",
   "applyColWidthToOtherViews": "열 너비를 다른 보기에 적용",
   "distributeAllColWidths": "모든 열 너비를 균등하게 분배",
   "sameWidthAsRightColumn": "오른쪽 열과 같은 너비",

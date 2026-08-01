@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Szybkie działania",
+  "mobileMenuCreate": "Utwórz",
+  "mobileMenuDataManagement": "Zarządzanie danymi",
+  "mobileMenuSettingsAndHelp": "Ustawienia i pomoc",
   "applyColWidthToOtherViews": "Zastosuj szerokość kolumny do innych widoków",
   "distributeAllColWidths": "Rozłóż równomiernie szerokość wszystkich kolumn",
   "sameWidthAsRightColumn": "Taka sama szerokość jak prawa kolumna",

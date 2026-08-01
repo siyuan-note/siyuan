@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "クイック操作",
+  "mobileMenuCreate": "作成",
+  "mobileMenuDataManagement": "データ管理",
+  "mobileMenuSettingsAndHelp": "設定とヘルプ",
   "applyColWidthToOtherViews": "列幅を他のビューに適用",
   "distributeAllColWidths": "すべての列幅を均等にする",
   "sameWidthAsRightColumn": "右の列と同じ幅",

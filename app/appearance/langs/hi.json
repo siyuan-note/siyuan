@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "त्वरित कार्रवाइयाँ",
+  "mobileMenuCreate": "बनाएँ",
+  "mobileMenuDataManagement": "डेटा प्रबंधन",
+  "mobileMenuSettingsAndHelp": "सेटिंग्स और सहायता",
   "applyColWidthToOtherViews": "कॉलम की चौड़ाई अन्य दृश्यों पर लागू करें",
   "distributeAllColWidths": "सभी स्तंभों की चौड़ाई समान रूप से बाँटें",
   "sameWidthAsRightColumn": "दाएँ स्तंभ जितनी चौड़ाई",

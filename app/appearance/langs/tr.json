@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Hızlı işlemler",
+  "mobileMenuCreate": "Oluştur",
+  "mobileMenuDataManagement": "Veri yönetimi",
+  "mobileMenuSettingsAndHelp": "Ayarlar ve yardım",
   "applyColWidthToOtherViews": "Sütun genişliğini diğer görünümlere uygula",
   "distributeAllColWidths": "Tüm sütun genişliklerini eşit dağıt",
   "sameWidthAsRightColumn": "Sağdaki sütunla aynı genişlikte",

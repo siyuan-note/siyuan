@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Quick actions",
+  "mobileMenuCreate": "Create",
+  "mobileMenuDataManagement": "Data management",
+  "mobileMenuSettingsAndHelp": "Settings and help",
   "applyColWidthToOtherViews": "Apply column width to other views",
   "distributeAllColWidths": "Distribute all column widths evenly",
   "sameWidthAsRightColumn": "Same width as the right column",

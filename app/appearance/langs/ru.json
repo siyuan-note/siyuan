@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Быстрые действия",
+  "mobileMenuCreate": "Создание",
+  "mobileMenuDataManagement": "Управление данными",
+  "mobileMenuSettingsAndHelp": "Настройки и помощь",
   "applyColWidthToOtherViews": "Применить ширину столбца к другим представлениям",
   "distributeAllColWidths": "Равномерно распределить ширину всех столбцов",
   "sameWidthAsRightColumn": "Та же ширина, что у столбца справа",

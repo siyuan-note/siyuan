@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "快捷操作",
+  "mobileMenuCreate": "创建",
+  "mobileMenuDataManagement": "数据管理",
+  "mobileMenuSettingsAndHelp": "设置与帮助",
   "applyColWidthToOtherViews": "应用列宽到其他视图",
   "distributeAllColWidths": "均分所有列宽",
   "sameWidthAsRightColumn": "与右侧列同宽",

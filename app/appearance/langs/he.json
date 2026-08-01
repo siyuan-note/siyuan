@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "פעולות מהירות",
+  "mobileMenuCreate": "יצירה",
+  "mobileMenuDataManagement": "ניהול נתונים",
+  "mobileMenuSettingsAndHelp": "הגדרות ועזרה",
   "applyColWidthToOtherViews": "החל רוחב עמודה על תצוגות אחרות",
   "distributeAllColWidths": "פזר את רוחב כל העמודות באופן שווה",
   "sameWidthAsRightColumn": "רוחב זהה לעמודה הימנית",

@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Schnellaktionen",
+  "mobileMenuCreate": "Erstellen",
+  "mobileMenuDataManagement": "Datenverwaltung",
+  "mobileMenuSettingsAndHelp": "Einstellungen und Hilfe",
   "applyColWidthToOtherViews": "Spaltenbreite auf andere Ansichten anwenden",
   "distributeAllColWidths": "Alle Spaltenbreiten gleichmäßig verteilen",
   "sameWidthAsRightColumn": "Genauso breit wie die rechte Spalte",

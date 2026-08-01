@@ -1,4 +1,8 @@
 {
+  "mobileMenuQuickActions": "Ações rápidas",
+  "mobileMenuCreate": "Criar",
+  "mobileMenuDataManagement": "Gerenciamento de dados",
+  "mobileMenuSettingsAndHelp": "Configurações e ajuda",
   "applyColWidthToOtherViews": "Aplicar largura da coluna a outras visualizações",
   "distributeAllColWidths": "Distribuir uniformemente a largura de todas as colunas",
   "sameWidthAsRightColumn": "Mesma largura da coluna à direita",

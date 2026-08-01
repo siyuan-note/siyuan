@@ -1404,7 +1404,7 @@ export class WYSIWYG {
                 const initialDragRight = dragRect.right;
                 const widthScale = dragRect.width / oldWidth || 1;
                 const snapGuideRight = previousWidth === undefined ? undefined :
-                    Math.round(initialDragRight + (previousWidth - oldWidth) * widthScale);
+                    initialDragRight + (previousWidth - oldWidth) * widthScale;
                 const headerTop = headerElement.getBoundingClientRect().top;
                 const bodyBottom = bodyElement.getBoundingClientRect().bottom;
                 const guideHeight = Math.max(0,
@@ -1432,7 +1432,8 @@ export class WYSIWYG {
                         resizeTip.className = "av__width-tip";
                         document.body.appendChild(resizeTip);
                     }
-                    const dragRight = Math.round(initialDragRight + (newWidth - oldWidth) * widthScale);
+                    resizeGuide?.classList.toggle("fn__none", snapped);
+                    const dragRight = initialDragRight + (newWidth - oldWidth) * widthScale;
                     resizeTip.style.left = `${dragRight}px`;
                     resizeTip.style.top = `${Math.round(headerTop)}px`;
                     resizeTip.textContent = `${newWidth}px${snapped ?

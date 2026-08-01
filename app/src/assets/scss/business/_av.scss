@@ -1195,6 +1195,7 @@
     background-color: var(--b3-theme-primary);
     pointer-events: none;
     position: fixed;
+    transform: translateX(-50%);
     width: 1px;
     z-index: 2;
   }

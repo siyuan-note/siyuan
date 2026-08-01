@@ -1403,18 +1403,20 @@ export class WYSIWYG {
                 });
                 const initialDragRight = dragRect.right;
                 const widthScale = dragRect.width / oldWidth || 1;
+                const snapGuideThreshold = 16;
                 const snapGuideRight = previousWidth === undefined ? undefined :
                     initialDragRight + (previousWidth - oldWidth) * widthScale;
-                const headerTop = headerElement.getBoundingClientRect().top;
-                const bodyBottom = bodyElement.getBoundingClientRect().bottom;
-                const guideHeight = Math.max(0,
-                    Math.round(Math.min(bodyBottom, contentRect.bottom, window.innerHeight) - headerTop));
+                const headerRect = headerElement.getBoundingClientRect();
+                const headerTop = headerRect.top;
+                const guideHeight = Math.round(headerRect.height);
                 let newWidth: number;
                 let resizeGuide: HTMLElement;
                 let resizeTip: HTMLElement;
                 let pendingResize: { width: number, snapped: boolean } | undefined;
                 let resizeAnimationFrame: number | undefined;
+                target.classList.add("av__widthdrag--active");
                 const clearResizePreview = () => {
+                    target.classList.remove("av__widthdrag--active");
                     resizeGuide?.remove();
                     resizeTip?.remove();
                 };
@@ -1432,7 +1434,9 @@ export class WYSIWYG {
                         resizeTip.className = "av__width-tip";
                         document.body.appendChild(resizeTip);
                     }
-                    resizeGuide?.classList.toggle("fn__none", snapped);
+                    const showSnapGuide = !snapped && typeof previousWidth === "number" &&
+                        Math.abs(newWidth - previousWidth) <= snapGuideThreshold;
+                    resizeGuide?.classList.toggle("fn__none", !showSnapGuide);
                     const dragRight = initialDragRight + (newWidth - oldWidth) * widthScale;
                     resizeTip.style.left = `${dragRight}px`;
                     resizeTip.style.top = `${Math.round(headerTop)}px`;

@@ -1186,7 +1186,8 @@
     z-index: 1;
     touch-action: none;
 
-    &:hover {
+    &:hover,
+    &--active {
       background-color: var(--b3-theme-primary);
     }
   }
@@ -1197,7 +1198,7 @@
     position: fixed;
     transform: translateX(-50%);
     width: 1px;
-    z-index: 2;
+    z-index: 1000;
   }
 
   &__width-tip {

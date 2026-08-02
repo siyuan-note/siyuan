@@ -1,7 +1,8 @@
 import {MenuItem} from "../../menus/Menu";
 import {updateTransaction} from "../wysiwyg/transaction";
-import {encodeBase64, isMac} from "./compatibility";
+import {encodeBase64, isMac, readClipboard} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
+import {paste} from "./paste";
 import {focusByRange, getEditorRange} from "./selection";
 import {
     buildTableGrid,
@@ -115,6 +116,42 @@ const replaceCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
 };
 
 const getCellText = (cell: HTMLTableCellElement) => cell.innerText.replace(/\n+$/g, "");
+
+export const getCommonTableCellStyle = (cells: HTMLTableCellElement[], property: string) => {
+    if (cells.length === 0) {
+        return undefined;
+    }
+    const value = cells[0].style.getPropertyValue(property);
+    return cells.every(cell => cell.style.getPropertyValue(property) === value) ? value : undefined;
+};
+
+export const setTableCellStyle = (protyle: IProtyle, node: HTMLElement, cells: HTMLTableCellElement[],
+                                  property: string, value: string) => {
+    const oldHTML = node.outerHTML;
+    cells.forEach(cell => {
+        if (value) {
+            cell.style.setProperty(property, value);
+        } else {
+            cell.style.removeProperty(property);
+            if (!cell.getAttribute("style")) {
+                cell.removeAttribute("style");
+            }
+        }
+    });
+    updateTransaction(protyle, node, oldHTML);
+};
+
+export const getTableCellBackgroundMenus = (cells: HTMLTableCellElement[], onChange: (color: string) => void) => {
+    const backgroundColor = getCommonTableCellStyle(cells, "background-color");
+    const colors = ["", ...Array.from({length: 13}, (_, index) => `var(--b3-font-background${index + 1})`)];
+    return colors.map((color, index) => ({
+        label: index === 0 ? window.siyuan.languages.default : `${window.siyuan.languages.colorPrimary} ${index}`,
+        iconHTML: `<span class="protyle-table-control__color" style="${color ? `background-color: ${color}` : ""}"></span>`,
+        checked: backgroundColor === color,
+        click: () => onChange(color),
+    }));
+};
+
 const TABLE_HANDLE_THICKNESS = 16;
 const TABLE_ADD_CONTROL_THICKNESS = 16;
 const TABLE_EDGE_CONTROL_TRIGGER_SIZE = 8;
@@ -962,8 +999,20 @@ export class TableControl {
                 this.selection.mode !== "cell" && merged ? window.siyuan.languages.cancelMerged : undefined,
             click: () => this.execClipboardCommand("cut"),
         }).element);
-        menu.append(new MenuItem({type: "separator"}).element);
+        if (!this.protyle.disabled && this.selection.mode === "cell") {
+            menu.append(new MenuItem({
+                icon: "iconPaste",
+                label: window.siyuan.languages.paste,
+                click: () => this.paste(),
+            }).element);
+            menu.append(new MenuItem({
+                icon: "iconTrashcan",
+                label: window.siyuan.languages.clear,
+                click: () => this.clearCells(),
+            }).element);
+        }
         if (!this.protyle.disabled) {
+            menu.append(new MenuItem({type: "separator"}).element);
             this.appendInsertMenus();
             if (this.selection.mode !== "cell") {
                 menu.append(new MenuItem({
@@ -1154,6 +1203,27 @@ export class TableControl {
         document.execCommand(command);
     }
 
+    private async paste() {
+        if (!this.selection?.activeCell.isConnected) {
+            return;
+        }
+        const cell = this.selection.activeCell;
+        const range = getEditorRange(cell);
+        range.selectNodeContents(cell);
+        range.collapse(true);
+        focusByRange(range);
+        if (document.queryCommandSupported("paste")) {
+            document.execCommand("paste");
+        } else {
+            try {
+                const text = await readClipboard();
+                paste(this.protyle, Object.assign(text, {target: cell}));
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    }
+
     private appendCellMenus(rectangle: boolean) {
         this.appendAlignmentMenus();
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -1179,24 +1249,11 @@ export class TableControl {
             click: () => this.setCellStyle("vertical-align", ""),
         }).element);
         const cells = this.getSelectedCells();
-        const mergedCell = cells.length === 1 && (cells[0].rowSpan > 1 || cells[0].colSpan > 1);
-        if (mergedCell || cells.length > 1) {
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: mergedCell ? window.siyuan.languages.cancelMerged : window.siyuan.languages.mergeCell,
-                disabled: !mergedCell && (!rectangle || !this.isSelectionInOneSection()),
-                accelerator: !mergedCell && !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
-                click: () => mergedCell ? this.splitCell(cells[0]) : this.mergeCells(),
-            }).element);
-        }
         const rowSelection = getTableFullRowSelection(this.selection.table, cells);
         const columnSelection = getTableFullColumnSelection(this.selection.table, cells);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconClear",
-            label: window.siyuan.languages.clear,
-            click: () => this.clearCells(),
-        }).element);
+        if (rowSelection.indexes.length > 0 || columnSelection.indexes.length > 0) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        }
         if (rowSelection.indexes.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
@@ -1221,6 +1278,17 @@ export class TableControl {
                         this.clear();
                     }
                 },
+            }).element);
+        }
+        const mergedCell = cells.length === 1 && (cells[0].rowSpan > 1 || cells[0].colSpan > 1);
+        if (mergedCell || cells.length > 1) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: mergedCell ? "iconTableCellsSplit" : "iconTableCellsMerge",
+                label: mergedCell ? window.siyuan.languages.cancelMerged : window.siyuan.languages.mergeCell,
+                disabled: !mergedCell && (!rectangle || !this.isSelectionInOneSection()),
+                accelerator: !mergedCell && !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
+                click: () => mergedCell ? this.splitCell(cells[0]) : this.mergeCells(),
             }).element);
         }
     }
@@ -1254,12 +1322,7 @@ export class TableControl {
     }
 
     private getCommonCellStyle(property: string) {
-        const cells = this.getSelectedCells();
-        if (cells.length === 0) {
-            return undefined;
-        }
-        const value = cells[0].style.getPropertyValue(property);
-        return cells.every(cell => cell.style.getPropertyValue(property) === value) ? value : undefined;
+        return getCommonTableCellStyle(this.getSelectedCells(), property);
     }
 
     private isSelectionInOneSection() {
@@ -1268,32 +1331,14 @@ export class TableControl {
     }
 
     private getBackgroundMenus(): IMenu[] {
-        const backgroundColor = this.getCommonCellStyle("background-color");
-        const colors = ["", ...Array.from({length: 13}, (_, index) => `var(--b3-font-background${index + 1})`)];
-        return colors.map((color, index) => ({
-            label: index === 0 ? window.siyuan.languages.default : `${window.siyuan.languages.colorPrimary} ${index}`,
-            iconHTML: `<span class="protyle-table-control__color" style="${color ? `background-color: ${color}` : ""}"></span>`,
-            checked: backgroundColor === color,
-            click: () => this.setCellStyle("background-color", color),
-        }));
+        return getTableCellBackgroundMenus(this.getSelectedCells(), color => this.setCellStyle("background-color", color));
     }
 
     private setCellStyle(property: string, value: string) {
         if (!this.selection) {
             return;
         }
-        const oldHTML = this.selection.node.outerHTML;
-        this.getSelectedCells().forEach(cell => {
-            if (value) {
-                cell.style.setProperty(property, value);
-            } else {
-                cell.style.removeProperty(property);
-                if (!cell.getAttribute("style")) {
-                    cell.removeAttribute("style");
-                }
-            }
-        });
-        updateTransaction(this.protyle, this.selection.node, oldHTML);
+        setTableCellStyle(this.protyle, this.selection.node, this.getSelectedCells(), property, value);
         this.scheduleRender();
     }
 

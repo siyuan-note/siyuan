@@ -2185,6 +2185,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     if (cellElement.rowSpan > 1 || cellElement.colSpan > 1) {
         otherMenus.push({
             id: "cancelMerged",
+            icon: "iconTableCellsSplit",
             label: window.siyuan.languages.cancelMerged,
             click: () => {
                 const oldHTML = nodeElement.outerHTML;

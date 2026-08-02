@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "לא נמצא מסד נתונים זמין. יש ליצור מסד נתונים או לפתוח את המחברת שמכילה אותו",
+  "noAvailableDatabase": "לא נמצא מסד נתונים זמין. יש ליצור תחילה מסד נתונים",
   "apiKeyRequired": "נדרש מפתח API",
   "openAICompatibleProvider": "ספק תואם OpenAI",
   "entryDocPanel": "לוח המסמכים",

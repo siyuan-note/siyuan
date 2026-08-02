@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "No available database found. Create a database or open the notebook containing it",
+  "noAvailableDatabase": "No available database found. Create a database first",
   "apiKeyRequired": "API Key is required",
   "openAICompatibleProvider": "OpenAI-compatible provider",
   "entryDocPanel": "Document panel",

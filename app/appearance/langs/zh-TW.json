@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "找不到可用的資料庫，請先建立資料庫或開啟資料庫所在的筆記本",
+  "noAvailableDatabase": "找不到可用的資料庫，請先建立資料庫",
   "apiKeyRequired": "請先填寫 API Key",
   "openAICompatibleProvider": "OpenAI 規範提供商",
   "entryDocPanel": "文件面板",

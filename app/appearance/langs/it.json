@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Nessun database disponibile trovato. Crea un database o apri il taccuino che lo contiene",
+  "noAvailableDatabase": "Nessun database disponibile trovato. Crea prima un database",
   "apiKeyRequired": "È richiesta una chiave API",
   "openAICompatibleProvider": "Provider compatibile con OpenAI",
   "entryDocPanel": "Pannello documenti",

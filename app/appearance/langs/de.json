@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Keine verfügbare Datenbank gefunden; erstelle eine Datenbank oder öffne das Notizbuch, das sie enthält",
+  "noAvailableDatabase": "Keine verfügbare Datenbank gefunden; erstelle zuerst eine Datenbank",
   "apiKeyRequired": "API-Schlüssel ist erforderlich",
   "openAICompatibleProvider": "OpenAI-kompatibler Anbieter",
   "entryDocPanel": "Dokument-Panel",

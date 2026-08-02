@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Tidak ada basis data yang tersedia. Buat basis data atau buka buku catatan yang memuatnya",
+  "noAvailableDatabase": "Tidak ada basis data yang tersedia. Buat basis data terlebih dahulu",
   "apiKeyRequired": "API Key diperlukan",
   "openAICompatibleProvider": "Penyedia yang kompatibel dengan OpenAI",
   "entryDocPanel": "Panel dokumen",

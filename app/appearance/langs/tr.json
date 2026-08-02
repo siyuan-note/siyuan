@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Kullanılabilir veritabanı bulunamadı. Bir veritabanı oluşturun veya veritabanının bulunduğu not defterini açın",
+  "noAvailableDatabase": "Kullanılabilir veritabanı bulunamadı. Önce bir veritabanı oluşturun",
   "apiKeyRequired": "API Key gereklidir",
   "openAICompatibleProvider": "OpenAI uyumlu sağlayıcı",
   "entryDocPanel": "Belge paneli",

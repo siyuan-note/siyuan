@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "कोई उपलब्ध डेटाबेस नहीं मिला। डेटाबेस बनाएँ या वह नोटबुक खोलें जिसमें वह मौजूद है",
+  "noAvailableDatabase": "कोई उपलब्ध डेटाबेस नहीं मिला। पहले डेटाबेस बनाएँ",
   "apiKeyRequired": "API Key आवश्यक है",
   "openAICompatibleProvider": "OpenAI-संगत प्रदाता",
   "entryDocPanel": "दस्तावेज़ पैनल",

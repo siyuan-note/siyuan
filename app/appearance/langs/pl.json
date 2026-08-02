@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Nie znaleziono dostępnej bazy danych. Utwórz bazę danych lub otwórz notatnik, który ją zawiera",
+  "noAvailableDatabase": "Nie znaleziono dostępnej bazy danych. Najpierw utwórz bazę danych",
   "apiKeyRequired": "Klucz API jest wymagany",
   "openAICompatibleProvider": "Dostawca zgodny z OpenAI",
   "entryDocPanel": "Panel dokumentów",

@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "لم يتم العثور على قواعد بيانات متاحة، أنشئ قاعدة بيانات أو افتح دفتر الملاحظات الذي يحتوي عليها",
+  "noAvailableDatabase": "لم يتم العثور على قواعد بيانات متاحة، أنشئ قاعدة بيانات أولاً",
   "apiKeyRequired": "مفتاح API مطلوب",
   "openAICompatibleProvider": "موفر متوافق مع مواصفات OpenAI",
   "entryDocPanel": "لوحة المستندات",

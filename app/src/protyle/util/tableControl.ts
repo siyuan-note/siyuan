@@ -204,10 +204,10 @@ export class TableControl {
         this.element = document.createElement("div");
         this.element.className = "protyle-table-control";
         this.element.setAttribute("contenteditable", "false");
-        this.element.innerHTML = `<button type="button" class="protyle-table-control__handle protyle-table-control__handle--row b3-tooltips b3-tooltips__e fn__none" data-type="row" aria-label="${window.siyuan.languages.row}">
+        this.element.innerHTML = `<button type="button" class="protyle-table-control__handle protyle-table-control__handle--row fn__none" data-type="row" aria-label="${window.siyuan.languages.row}">
     <svg><use xlink:href="#iconDrag"></use></svg>
 </button>
-<button type="button" class="protyle-table-control__handle protyle-table-control__handle--column b3-tooltips b3-tooltips__s fn__none" data-type="column" aria-label="${window.siyuan.languages.column}">
+<button type="button" class="protyle-table-control__handle protyle-table-control__handle--column fn__none" data-type="column" aria-label="${window.siyuan.languages.column}">
     <svg><use xlink:href="#iconDrag"></use></svg>
 </button>
 <button type="button" class="protyle-table-control__handle protyle-table-control__handle--cell b3-tooltips b3-tooltips__n fn__none" data-type="cell" aria-label="${window.siyuan.languages.more}">
@@ -1719,7 +1719,6 @@ export class TableControl {
         const translate = `${Math.round(offsetX)}px ${Math.round(offsetY)}px`;
         const handle = state.mode === "row" ? this.rowHandle : this.columnHandle;
         handle.style.translate = translate;
-        handle.classList.remove("b3-tooltips");
         this.cellHandle.classList.add("fn__none");
         this.selectionElements.slice(0, this.selectionElementIndex).forEach(item => {
             item.classList.add("protyle-table-control__selection--dragging");
@@ -1729,8 +1728,6 @@ export class TableControl {
     private clearDragPreview() {
         this.rowHandle.style.removeProperty("translate");
         this.columnHandle.style.removeProperty("translate");
-        this.rowHandle.classList.add("b3-tooltips");
-        this.columnHandle.classList.add("b3-tooltips");
         this.selectionElements.forEach(item => {
             item.classList.remove("protyle-table-control__selection--dragging");
         });

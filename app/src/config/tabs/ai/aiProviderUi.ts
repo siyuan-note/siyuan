@@ -134,7 +134,7 @@ const createProviderView = (root: HTMLElement, backLabel: string, stacked = fals
 };
 
 export const genProviderCardsHtml = (): string => `<div class="b3-label config-item" id="aiProviderCardsBlock">
-    <div class="fn__flex b3-label config-item config-wrap b3-label--noborder">
+    <div class="fn__flex config-wrap">
         <div class="config-name">${window.siyuan.languages.apiProviderTip}</div>
         <span class="fn__space fn__flex-1"></span>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-action="addProvider">

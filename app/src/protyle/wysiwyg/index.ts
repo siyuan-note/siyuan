@@ -3468,6 +3468,8 @@ export class WYSIWYG {
 
         // 输入法测试点 https://github.com/siyuan-note/siyuan/issues/3027
         let isComposition = false; // for iPhone
+        // 原生软换行在 input 触发前已经修改 DOM，需预存选区供撤销恢复。
+        let lineBreakUndoContext: Record<string, string>;
         // 仅矫正从数据库外进入的占位光标，避免重置数据库内部的方向键导航。
         let arrowStartElement: false | HTMLElement | undefined;
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -3553,6 +3555,9 @@ export class WYSIWYG {
                 beforeBlockquoteInput(protyle, event);
             }
             const selection = getSelection();
+            lineBreakUndoContext = !event.defaultPrevented && event.inputType === "insertLineBreak" &&
+                selection.rangeCount > 0 ?
+                getUndoFocusContext(protyle.wysiwyg.element, selection.getRangeAt(0)) : undefined;
             if (event.defaultPrevented || event.inputType !== "insertText" || !event.data ||
                 selection.rangeCount === 0) {
                 return;
@@ -3766,6 +3771,15 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("input", (event: InputEvent) => {
+            let lineBreakInputOperations: Parameters<typeof input>[5];
+            if (event.inputType === "insertLineBreak" && lineBreakUndoContext) {
+                lineBreakInputOperations = {
+                    doOperations: [],
+                    undoOperations: [],
+                    undoContext: lineBreakUndoContext,
+                };
+            }
+            lineBreakUndoContext = undefined;
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
                 return;
@@ -3816,7 +3830,7 @@ export class WYSIWYG {
                     }, Constants.TIMEOUT_INPUT, false);
                 } else {
                     this.scheduleInput(() => {
-                        input(protyle, blockElement, range, true, event);
+                        input(protyle, blockElement, range, true, event, lineBreakInputOperations);
                     });
                 }
             }

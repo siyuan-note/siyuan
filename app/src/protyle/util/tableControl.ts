@@ -781,22 +781,21 @@ export class TableControl {
                     const rect = intersectRects(row.getBoundingClientRect(), viewportRect);
                     return rect.height > 0 && clientY >= rect.top && clientY <= rect.bottom;
                 });
-                const firstRow = rowIndex === 0;
-                const rowControlHovered = firstRow ?
-                    clientX >= viewportRect.left &&
-                    clientX <= Math.min(viewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE, viewportRect.right) :
-                    clientX >= viewportRect.left - TABLE_HANDLE_THICKNESS && clientX <= viewportRect.left;
+                const rowControlHovered = clientX >= viewportRect.left - TABLE_EDGE_CONTROL_TRIGGER_SIZE / 2 &&
+                    clientX <= Math.min(viewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE / 2,
+                        viewportRect.right);
                 const cell = rowControlHovered ? grid.grid[rowIndex]?.find(item => item) : undefined;
                 if (cell && rowIndex > -1) {
                     candidates.push({
                         cell,
                         type: "row",
-                        distance: firstRow ? clientX - viewportRect.left : viewportRect.left - clientX,
+                        distance: Math.abs(viewportRect.left - clientX),
                         index: rowIndex,
                     });
                 }
             }
-            if (clientY >= viewportRect.top - TABLE_HANDLE_THICKNESS && clientY <= viewportRect.top &&
+            if (clientY >= viewportRect.top - TABLE_EDGE_CONTROL_TRIGGER_SIZE / 2 &&
+                clientY <= viewportRect.top + TABLE_EDGE_CONTROL_TRIGGER_SIZE / 2 &&
                 clientX >= viewportRect.left && clientX <= viewportRect.right) {
                 let columnIndex = -1;
                 for (let index = 0; index < grid.columnCount; index++) {
@@ -815,7 +814,7 @@ export class TableControl {
                     candidates.push({
                         cell,
                         type: "column",
-                        distance: viewportRect.top - clientY,
+                        distance: Math.abs(viewportRect.top - clientY),
                         index: columnIndex,
                     });
                 }
@@ -902,40 +901,30 @@ export class TableControl {
                 (this.selection?.table === table && this.selection.mode === "row" &&
                     this.selection.indexes.size > 1 && this.selection.indexes.has(0)));
             this.columnHandle.classList.toggle("protyle-table-control__handle--drag-disabled", merged);
-            if (this.hoverType === "row" && visibleRowRect?.width > 0 && visibleRowRect.height > 0) {
+            if ((this.hoverType === "row" || this.hoverType === "cell") &&
+                visibleRowRect?.width > 0 && visibleRowRect.height > 0) {
                 this.rowHandle.classList.remove("fn__none");
                 this.rowHandle.style.width = `${TABLE_HANDLE_THICKNESS}px`;
                 this.rowHandle.style.height = `${visibleRowRect.height}px`;
-                const firstRow = rowIndex === 0;
-                const lastRow = rowIndex === table.rows.length - 1;
-                this.rowHandle.classList.toggle("protyle-table-control__handle--row-first", firstRow && !lastRow);
-                this.setPosition(this.rowHandle, viewportRect.left +
-                    (firstRow ? TABLE_HANDLE_THICKNESS / 2 : -TABLE_HANDLE_THICKNESS / 2),
+                this.setPosition(this.rowHandle, viewportRect.left,
                     visibleRowRect.top + visibleRowRect.height / 2);
-                if (!firstRow && lastRow) {
-                    table.classList.add("protyle-table-control__table--handle-row-end");
-                    this.joinedControlTable = table;
-                }
             }
-            if (this.hoverType === "column" && visibleColumnRect?.width > 0 && viewportRect.height > 0) {
+            if ((this.hoverType === "column" || this.hoverType === "cell") &&
+                visibleColumnRect?.width > 0 && viewportRect.height > 0) {
                 this.columnHandle.classList.remove("fn__none");
                 this.columnHandle.style.width = `${visibleColumnRect.width}px`;
                 this.columnHandle.style.height = `${TABLE_HANDLE_THICKNESS}px`;
                 this.setPosition(this.columnHandle, visibleColumnRect.left + visibleColumnRect.width / 2,
-                    viewportRect.top - TABLE_HANDLE_THICKNESS / 2);
-                if (columnIndex === 0) {
-                    table.classList.add("protyle-table-control__table--handle-column-start");
-                    this.joinedControlTable = table;
-                }
-                if (columnIndex === grid.columnCount - 1) {
-                    table.classList.add("protyle-table-control__table--handle-column-end");
-                    this.joinedControlTable = table;
-                }
+                    viewportRect.top);
             }
             if (!this.dragState && this.hoverType === "cell" &&
                 visibleCellRect.width > 0 && visibleCellRect.height > 0) {
                 this.cellHandle.classList.remove("fn__none");
-                this.setPosition(this.cellHandle, visibleCellRect.right - 3, visibleCellRect.top + 3);
+                const nextToAddColumn = Math.abs(visibleCellRect.right - tableRect.right) <= 1 &&
+                    tableRect.right <= viewportRect.right + 1;
+                this.setPosition(this.cellHandle, visibleCellRect.right -
+                    (nextToAddColumn ? TABLE_EDGE_CONTROL_TRIGGER_SIZE / 2 : 0),
+                    visibleCellRect.top + visibleCellRect.height / 2);
             }
             if (this.hoverType === "add-row" && viewportRect.width > 0 &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1) {
@@ -1023,9 +1012,7 @@ export class TableControl {
             return;
         }
         this.joinedControlTable.classList.remove("protyle-table-control__table--add-row",
-            "protyle-table-control__table--add-column", "protyle-table-control__table--handle-row-end",
-            "protyle-table-control__table--handle-column-start",
-            "protyle-table-control__table--handle-column-end");
+            "protyle-table-control__table--add-column");
         this.joinedControlTable = undefined;
     }
 

@@ -780,29 +780,49 @@ table + .protyle-action__table {
     justify-content: center;
     box-sizing: border-box;
     padding: 0;
-    color: var(--b3-theme-on-surface);
-    background-color: var(--b3-theme-background);
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius-s);
-    box-shadow: var(--b3-point-shadow);
     cursor: pointer;
     pointer-events: auto;
     transform: translate(-50%, -50%);
-
-    svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    &:hover {
-      color: var(--b3-theme-primary);
-      background-image: linear-gradient(var(--b3-list-hover), var(--b3-list-hover));
-    }
   }
 
   &__handle {
     width: 24px;
     height: 24px;
+    color: var(--b3-theme-on-primary);
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+
+    &::before {
+      position: absolute;
+      content: "";
+      background-color: var(--b3-theme-on-surface-light);
+      border-radius: var(--b3-border-radius-b);
+      pointer-events: none;
+    }
+
+    svg {
+      box-sizing: border-box;
+      width: 16px;
+      height: 20px;
+      padding: 2px;
+      opacity: 0;
+      background-color: var(--b3-theme-primary);
+      border-radius: var(--b3-border-radius-s);
+      box-shadow: var(--b3-point-shadow);
+      transition: opacity 150ms linear;
+    }
+
+    &:hover,
+    &:focus-visible {
+      &::before {
+        opacity: 0;
+      }
+
+      svg {
+        opacity: 1;
+      }
+    }
 
     &--row,
     &--column {
@@ -810,15 +830,19 @@ table + .protyle-action__table {
     }
 
     &--row {
-      border-radius: var(--b3-border-radius-s) 0 0 var(--b3-border-radius-s);
-    }
-
-    &--row-first {
-      border-bottom-left-radius: 0;
+      &::before {
+        width: 3px;
+        height: 16px;
+        max-height: calc(100% - 4px);
+      }
     }
 
     &--column {
-      border-radius: var(--b3-border-radius-s) var(--b3-border-radius-s) 0 0;
+      &::before {
+        width: 16px;
+        max-width: calc(100% - 4px);
+        height: 3px;
+      }
 
       svg {
         transform: rotate(90deg);
@@ -830,14 +854,34 @@ table + .protyle-action__table {
     }
 
     &--cell {
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 24px;
+
+      &::before {
+        width: 3px;
+        height: 16px;
+      }
     }
   }
 
   &__add {
     width: 24px;
     height: 24px;
+    color: var(--b3-theme-on-surface);
+    background-color: var(--b3-theme-background);
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius-s);
+    box-shadow: var(--b3-point-shadow);
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    &:hover {
+      color: var(--b3-theme-primary);
+      background-image: linear-gradient(var(--b3-list-hover), var(--b3-list-hover));
+    }
 
     &--row {
       border-radius: 0 0 var(--b3-border-radius-s) var(--b3-border-radius-s);

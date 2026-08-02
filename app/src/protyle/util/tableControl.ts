@@ -861,8 +861,6 @@ export class TableControl {
         selectionElement.style.top = `${visibleRect.top}px`;
         selectionElement.style.width = `${visibleRect.width}px`;
         selectionElement.style.height = `${visibleRect.height}px`;
-        selectionElement.classList.toggle("protyle-table-control__selection--dragging",
-            !!this.dragState?.dragging);
     }
 
     private render() {
@@ -1724,9 +1722,6 @@ export class TableControl {
         const handle = state.mode === "row" ? this.rowHandle : this.columnHandle;
         handle.style.translate = translate;
         this.cellHandle.classList.add("fn__none");
-        this.selectionElements.slice(0, this.selectionElementIndex).forEach(item => {
-            item.classList.add("protyle-table-control__selection--dragging");
-        });
         return {
             position: state.handleCenter + offset,
             viewportRect,
@@ -1736,9 +1731,6 @@ export class TableControl {
     private clearDragPreview() {
         this.rowHandle.style.removeProperty("translate");
         this.columnHandle.style.removeProperty("translate");
-        this.selectionElements.forEach(item => {
-            item.classList.remove("protyle-table-control__selection--dragging");
-        });
     }
 
     private getMoveTarget(target: number) {

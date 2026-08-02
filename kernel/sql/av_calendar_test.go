@@ -79,3 +79,30 @@ func TestFilterNotFoundAttrViewItemsForCalendar(t *testing.T) {
 		t.Fatalf("expected only the detached item to survive, got %d entries", len(keyValuesMap))
 	}
 }
+
+// TestFillAttributeViewBaseValueCalendarCallShape 回归测试：日历卡片渲染必须按当前的
+// fillAttributeViewBaseValue 签名调用（第 5 个参数是 DateFormat、第 6 个是模板内容），
+// 否则日期字段会丢失视图配置的显示格式，模板字段会被错误填充。
+func TestFillAttributeViewBaseValueCalendarCallShape(t *testing.T) {
+	dateValue := &av.BaseValue{ID: "v-date", ValueType: av.KeyTypeDate}
+	dateValue.Value = &av.Value{
+		ID: "v-date", KeyID: "date", BlockID: "item1", Type: av.KeyTypeDate,
+		Date: &av.ValueDate{Content: 1709625600000, IsNotEmpty: true, IsNotTime: true},
+	}
+	fillAttributeViewBaseValue(dateValue, "date", "item1", av.NumberFormatNone, av.DateDisplayFormatDayMonthYear, "", false)
+	if nil == dateValue.Value || nil == dateValue.Value.Date {
+		t.Fatal("date value must survive fillAttributeViewBaseValue")
+	}
+	if want := "05/03/2024"; want != dateValue.Value.Date.FormattedContent {
+		t.Fatalf("date display format not applied: got %q want %q", dateValue.Value.Date.FormattedContent, want)
+	}
+
+	templateValue := &av.BaseValue{ID: "v-tpl", ValueType: av.KeyTypeTemplate}
+	fillAttributeViewBaseValue(templateValue, "tpl", "item1", av.NumberFormatNone, av.DateDisplayFormatDefault, "template content", false)
+	if nil == templateValue.Value || nil == templateValue.Value.Template {
+		t.Fatal("template value must be filled by fillAttributeViewBaseValue")
+	}
+	if "template content" != templateValue.Value.Template.Content {
+		t.Fatalf("template content mismatch: got %q", templateValue.Value.Template.Content)
+	}
+}

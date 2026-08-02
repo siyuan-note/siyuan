@@ -225,6 +225,22 @@ func (e *TxErr) Code() int {
 	return e.code
 }
 
+// collectConsecutiveUpdateAttrViewCellOps 从 ops[startIndex] 开始收集连续的 updateAttrViewCell 操作
+// （要求 AvID 相同），返回的切片至少包含 ops[startIndex] 本身。批量执行时通过返回的切片数量
+// 推进外层遍历下标，保证每个单元格操作恰好执行一次。
+func collectConsecutiveUpdateAttrViewCellOps(ops []*Operation, startIndex int) []*Operation {
+	op := ops[startIndex]
+	operations := []*Operation{op}
+	for nextIndex := startIndex + 1; nextIndex < len(ops); nextIndex++ {
+		nextOperation := ops[nextIndex]
+		if "updateAttrViewCell" != nextOperation.Action || op.AvID != nextOperation.AvID {
+			break
+		}
+		operations = append(operations, nextOperation)
+	}
+	return operations
+}
+
 func performTx(tx *Transaction) (ret *TxErr) {
 	if 1 > len(tx.DoOperations) {
 		return
@@ -356,21 +372,13 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			case "sortAttrViewKey":
 				ret = tx.doSortAttrViewKey(op)
 			case "updateAttrViewCell":
-				operations := []*Operation{op}
-				for nextIndex := operationIndex + 1; nextIndex < len(tx.DoOperations); nextIndex++ {
-					nextOperation := tx.DoOperations[nextIndex]
-					if "updateAttrViewCell" != nextOperation.Action || op.AvID != nextOperation.AvID {
-						break
-					}
-					operations = append(operations, nextOperation)
-				}
+				operations := collectConsecutiveUpdateAttrViewCellOps(tx.DoOperations, operationIndex)
 				if 1 == len(operations) {
 					ret = tx.doUpdateAttrViewCell(op)
 				} else {
 					ret = tx.doBatchUpdateAttrViewCells(operations)
 					operationIndex += len(operations) - 1
 				}
-				ret = tx.doUpdateAttrViewCell(op)
 			case "updateAttributeViewItem":
 				ret = tx.doUpdateAttributeViewItem(op)
 			case "updateAttrViewColOptions":

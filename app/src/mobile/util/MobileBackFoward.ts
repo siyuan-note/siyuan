@@ -53,7 +53,14 @@ export const goBack = () => {
         closePanel();
         return;
     }
-    void window.siyuan.mobile.tabs?.goBack().then((handled) => {
+    const tabs = window.siyuan.mobile.tabs;
+    if (!tabs) {
+        return;
+    }
+    void tabs.goBack().then(async (handled) => {
+        if (!handled) {
+            handled = await tabs.switchPreviousTab();
+        }
         if (handled || !(window.JSAndroid || window.JSHarmony)) {
             return;
         }

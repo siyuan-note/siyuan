@@ -371,6 +371,9 @@ export class TableControl {
     }
 
     private handleTablePointerMove(event: PointerEvent, fromControl: boolean) {
+        if (event.buttons !== 0 && !this.dragState) {
+            return;
+        }
         const targetCell = getCell(event.target);
         const targetTable = targetCell?.closest("table") as HTMLTableElement;
         const targetViewportRect = targetTable ? this.getTableViewportRect(targetTable) : undefined;

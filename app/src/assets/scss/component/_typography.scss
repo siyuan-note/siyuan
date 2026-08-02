@@ -335,6 +335,8 @@
     empty-cells: show;
     margin: 0;
     overflow: hidden;
+    outline: 1px solid var(--b3-theme-surface-lighter);
+    outline-offset: -1px;
     border-spacing: 0;
     width: max-content;
 

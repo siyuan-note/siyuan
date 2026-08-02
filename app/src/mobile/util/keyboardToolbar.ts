@@ -22,6 +22,16 @@ let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
 let clearRenderGutterAfterScroll: () => void;
 let showUtil = false;
+let preventRender = false;
+let preventRenderTimeout: number;
+
+const preventKeyboardToolbarRender = () => {
+    preventRender = true;
+    clearTimeout(preventRenderTimeout);
+    preventRenderTimeout = window.setTimeout(() => {
+        preventRender = false;
+    }, 1000);
+};
 
 const getVisibleViewportBounds = () => {
     if (!isInMobileApp() && window.visualViewport) {
@@ -225,30 +235,36 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     const updateEMValue = () => {
         fontSizeEMElement.nextElementSibling.textContent = (parseFloat(fontSizeEMElement.value) * 100).toFixed(0) + "%";
     };
+    [switchElement, fontSizePXElement, fontSizeEMElement].forEach(item => {
+        item.addEventListener("pointerdown", preventKeyboardToolbarRender);
+    });
     switchElement.addEventListener("change", () => {
+        preventKeyboardToolbarRender();
         if (switchElement.checked) {
             const em = convertFontSize(fontSizePXElement.value + "px", "em", baseFontSize);
             fontSizeEMElement.value = parseFloat(em).toString();
             updateEMValue();
             fontSizePXElement.parentElement.classList.add("fn__none");
             fontSizeEMElement.parentElement.classList.remove("fn__none");
-            fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
+            fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em", false);
         } else {
             const px = convertFontSize(fontSizeEMElement.value + "em", "px", baseFontSize);
             fontSizePXElement.value = parseFloat(px).toString();
             updatePXValue();
             fontSizePXElement.parentElement.classList.remove("fn__none");
             fontSizeEMElement.parentElement.classList.add("fn__none");
-            fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+            fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px", false);
         }
     });
     fontSizePXElement.addEventListener("input", updatePXValue);
     fontSizeEMElement.addEventListener("input", updateEMValue);
     fontSizePXElement.addEventListener("change", () => {
-        fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+        preventKeyboardToolbarRender();
+        fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px", false);
     });
     fontSizeEMElement.addEventListener("change", () => {
-        fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
+        preventKeyboardToolbarRender();
+        fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em", false);
     });
 };
 
@@ -607,7 +623,6 @@ export const activeBlur = () => {
 };
 
 export const initKeyboardToolbar = () => {
-    let preventRender = false;
     if (!isInMobileApp() && window.visualViewport) {
         let pendingUpdate = false;
         const viewportHandler = () => {

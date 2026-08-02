@@ -31,6 +31,14 @@ const renderedAVData = new WeakMap<HTMLElement, IAV>();
 const highlightTokens = new WeakMap<HTMLElement, symbol>();
 const highlightStates = new WeakMap<HTMLElement, {element: HTMLElement, className: string, timer: number}>();
 
+const addLocatedHighlight = (element: HTMLElement, className: string) => {
+    element.classList.add(className);
+};
+
+const removeLocatedHighlight = (element: HTMLElement, className: string) => {
+    element.classList.remove(className);
+};
+
 const clearLocatedHighlight = (blockElement: HTMLElement) => {
     highlightTokens.delete(blockElement);
     const state = highlightStates.get(blockElement);
@@ -38,8 +46,18 @@ const clearLocatedHighlight = (blockElement: HTMLElement) => {
         return;
     }
     window.clearTimeout(state.timer);
-    state.element.classList.remove(state.className);
+    removeLocatedHighlight(state.element, state.className);
     highlightStates.delete(blockElement);
+};
+
+const getLocatedItemQuery = (viewType: TAVView, itemID: string) => {
+    if (viewType === "table") {
+        return `.av__row[data-id="${itemID}"]`;
+    }
+    if (viewType === "calendar") {
+        return `.av__calendar-event[data-id="${itemID}"]`;
+    }
+    return `.av__gallery-item[data-id="${itemID}"]`;
 };
 
 const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, viewType: TAVView,
@@ -47,8 +65,9 @@ const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, view
     clearLocatedHighlight(blockElement);
     const token = Symbol();
     highlightTokens.set(blockElement, token);
-    const className = viewType === "table" ? "av__row--locate" : "av__gallery-item--locate";
-    const targetQuery = viewType === "table" ? `.av__row[data-id="${itemID}"]` : `.av__gallery-item[data-id="${itemID}"]`;
+    const isCalendar = viewType === "calendar";
+    const className = viewType === "table" ? "av__row--locate" : (isCalendar ? "av__calendar-event--locate" : "av__gallery-item--locate");
+    const targetQuery = getLocatedItemQuery(viewType, itemID);
     requestAnimationFrame(() => {
         if (!blockElement.isConnected || highlightTokens.get(blockElement) !== token) {
             return;
@@ -58,15 +77,15 @@ const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, view
             highlightTokens.delete(blockElement);
             return;
         }
-        blockElement.querySelectorAll(`.${className}`).forEach(item => item.classList.remove(className));
+        blockElement.querySelectorAll(`.${className}`).forEach((item: HTMLElement) => removeLocatedHighlight(item, className));
         if (viewType === "table") {
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl").forEach(item => {
                 item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
             });
         }
-        targetElement.classList.add(className);
+        addLocatedHighlight(targetElement, className);
         const timer = window.setTimeout(() => {
-            targetElement.classList.remove(className);
+            removeLocatedHighlight(targetElement, className);
             if (highlightStates.get(blockElement)?.timer === timer) {
                 highlightStates.delete(blockElement);
             }
@@ -92,8 +111,8 @@ const getLocalAVLocateData = (data: IAV | undefined, request: IAVLocateRequest) 
     if (!data || (request.viewID && request.viewID !== data.viewID)) {
         return;
     }
-    const findTarget = (view: IAVTable | IAVGallery | IAVKanban, groupID = "") => {
-        const items = data.viewType === "table" ? (view as IAVTable).rows : (view as IAVGallery | IAVKanban).cards;
+    const findTarget = (view: IAVTable | IAVGallery | IAVKanban | IAVCalendar, groupID = "") => {
+        const items = data.viewType === "table" ? (view as IAVTable).rows : (view as IAVGallery | IAVKanban | IAVCalendar).cards;
         const localIndex = items?.findIndex(item => item.id === request.itemID) ?? -1;
         if (localIndex < 0) {
             return;
@@ -108,14 +127,14 @@ const getLocalAVLocateData = (data: IAV | undefined, request: IAVLocateRequest) 
             pageSize: view.pageSize,
         };
     };
-    const view = data.view as IAVTable | IAVGallery | IAVKanban;
+    const view = data.view as IAVTable | IAVGallery | IAVKanban | IAVCalendar;
     let target: IAVRenderTarget | undefined;
     if (view.groups?.length > 0) {
         const groups = request.groupID ? [
             ...view.groups.filter(group => group.id === request.groupID),
             ...view.groups.filter(group => group.id !== request.groupID),
         ] : view.groups;
-        for (const group of groups as Array<IAVTable | IAVGallery | IAVKanban>) {
+        for (const group of groups as Array<IAVTable | IAVGallery | IAVKanban | IAVCalendar>) {
             target = findTarget(group, group.id);
             if (target) {
                 break;
@@ -245,6 +264,11 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
     if (!blockElement.isConnected || !request || !data.target || data.target.itemID !== request.itemID) {
         return;
     }
+    if (data.viewType === "calendar") {
+        // 日历不分页也不虚拟滚动，条目是否可见由日历渲染器按日期范围决定，
+        // 因此这里不预留渲染窗口，也不提前报“已被过滤”，交给 finishAVLocate 按 DOM 判断
+        return;
+    }
     if (data.target.status !== "visible") {
         if (!request.messageShown) {
             request.messageShown = true;
@@ -331,18 +355,28 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
             return;
         }
     }
-    if (data.target?.status !== "visible") {
+    const groupQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";
+    // 日历渲染路径不参与内核分页，target.status 不会被置为 visible，
+    // 因此按已渲染的 DOM 判断条目是否可见（未渲染时下面统一提示未找到）
+    const isCalendarVisible = data.viewType === "calendar" &&
+        !!blockElement.querySelector(getLocatedItemQuery(data.viewType, request.itemID));
+    if (data.target?.status !== "visible" && !isCalendarVisible) {
         clearAVLocateRequest(blockElement, request);
+        if (data.viewType === "calendar" && !request.messageShown) {
+            request.messageShown = true;
+            showMessage(data.target?.status === "filtered" ? window.siyuan.languages.databaseItemFiltered : window.siyuan.languages.databaseItemNotFound);
+        }
         return;
     }
-    const groupQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";
     const bodyElement = blockElement.querySelector(groupQuery) as HTMLElement;
     if (bodyElement?.classList.contains("fn__none")) {
         bodyElement.classList.remove("fn__none");
         bodyElement.previousElementSibling?.querySelector("[data-type=\"av-group-fold\"] svg")?.classList.add("av__group-arrow--open");
     }
     let targetElement: HTMLElement;
-    if (data.viewType === "table") {
+    if (data.viewType === "calendar") {
+        targetElement = blockElement.querySelector(getLocatedItemQuery(data.viewType, request.itemID)) as HTMLElement;
+    } else if (data.viewType === "table") {
         const rowElement = bodyElement?.querySelector(`.av__row[data-id="${request.itemID}"]`) as HTMLElement;
         targetElement = rowElement?.querySelector(".av__cell[data-dtype=\"block\"]") as HTMLElement;
         if (targetElement && request.select !== false) {
@@ -370,6 +404,23 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         protyle.contentElement.scrollTop += blockElement.getBoundingClientRect().top - contentRect.top;
     } else {
         scrollCenter(protyle, targetElement, "center");
+    }
+    if (data.viewType === "calendar") {
+        // 日历的时间网格与 av__scroll 是独立滚动容器，页面滚动无法把事件带进视口
+        [".av__calendar-time-grid", ".av__scroll"].forEach(selector => {
+            const scrollElement = targetElement.closest(selector) as HTMLElement;
+            if (!scrollElement) {
+                return;
+            }
+            const scrollRect = scrollElement.getBoundingClientRect();
+            const targetRect = targetElement.getBoundingClientRect();
+            if (targetRect.top < scrollRect.top || targetRect.bottom > scrollRect.bottom) {
+                scrollElement.scrollTop += targetRect.top + targetRect.height / 2 - (scrollRect.top + scrollRect.height / 2);
+            }
+            if (targetRect.left < scrollRect.left || targetRect.right > scrollRect.right) {
+                scrollElement.scrollLeft += targetRect.left + targetRect.width / 2 - (scrollRect.left + scrollRect.width / 2);
+            }
+        });
     }
     if (data.viewType === "kanban") {
         const kanbanElement = blockElement.querySelector(".av__kanban") as HTMLElement;

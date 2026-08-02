@@ -1194,8 +1194,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             "setAttrViewWrapField", "setAttrViewGroup", "removeAttrViewGroup", "hideAttrViewGroup", "sortAttrViewGroup",
             "foldAttrViewGroup", "foldAttrViewGroups", "hideAttrViewAllGroups", "setAttrViewFitImage", "setAttrViewDisplayFieldName", "setAttrViewDisplayEmptyFields",
             "insertAttrViewBlock", "setAttrViewColDateFillSpecificTime", "setAttrViewFillColBackgroundColor", "setAttrViewUpdatedIncludeTime",
-            "setAttrViewCreatedIncludeTime"].includes(operation.action)) {
-            protyle.databaseAttributePanel?.refreshForOperation(operation);
+            "setAttrViewCreatedIncludeTime", "setAttrViewCalendarDateField", "setAttrViewCalendarViewMode",
+            "setAttrViewCalendarWeekStart", "setAttrViewCalendarNewItemTarget", "setAttrViewCalendarFieldMapping"].includes(operation.action)) {
             // 撤销 transaction 会进行推送，需使用推送来进行刷新最新数据 https://github.com/siyuan-note/siyuan/issues/13607
             if (!isUndo) {
                 refreshAV(protyle, operation);

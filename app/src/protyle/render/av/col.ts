@@ -27,7 +27,7 @@ import {getAVData} from "./virtualScroll";
 export const getColId = (element: Element, viewType: TAVView) => {
     if (viewType === "table" || hasClosestByClassName(element, "custom-attr")) {
         return element.getAttribute("data-col-id");
-    } else if (["gallery", "kanban"].includes(viewType)) {
+    } else if (["gallery", "kanban", "calendar"].includes(viewType)) {
         return element.getAttribute("data-field-id");
     }
 };
@@ -1482,6 +1482,7 @@ export const removeCol = (options: {
     blockElement: Element
     avPanelElement: Element
     tabRect: DOMRect,
+    viewType?: string,
     isTwoWay: boolean
 }) => {
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");

@@ -9,6 +9,7 @@ import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
 import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "../virtualScroll";
 import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "../row";
+import {renderCalendar} from "../calendar/render";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 import {getCardStyle} from "./style";
 import {setGroupFoldedStates} from "../groupFold";
@@ -283,6 +284,17 @@ export const renderGallery = async (options: {
     if (data.viewType === "kanban") {
         options.blockElement.setAttribute("data-av-type", data.viewType);
         renderKanban({
+            blockElement: options.blockElement,
+            protyle: options.protyle,
+            cb: options.cb,
+            renderAll: options.renderAll,
+            data
+        });
+        return;
+    }
+    if (data.viewType === "calendar") {
+        options.blockElement.setAttribute("data-av-type", data.viewType);
+        renderCalendar({
             blockElement: options.blockElement,
             protyle: options.protyle,
             cb: options.cb,

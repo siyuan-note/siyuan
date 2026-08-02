@@ -1,6 +1,8 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
+import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchSyncPost} from "../../../util/fetch";
+import {showMessage} from "../../../dialog/message";
 import {setPosition} from "../../../util/setPosition";
 import {getCardAspectRatioLabel, getCardAspectRatioValue, getCardWidth} from "./gallery/style";
 import {getFieldsByData} from "./view";
@@ -117,6 +119,11 @@ export const getLayoutHTML = (data: IAV) => {
                 <div class="fn__hr"></div>
                 <div>${window.siyuan.languages.gallery}</div>
             </div>
+            <div data-type="set-layout" data-view-type="calendar" class="av__layout-item${data.viewType === "calendar" ? " av__layout-item--select" : ""}">
+                <svg><use xlink:href="#iconCalendar"></use></svg>
+                <div class="fn__hr"></div>
+                <div>${window.siyuan.languages.calendar || "Calendar"}</div>
+            </div>
         </div>
     </button>
     <label class="b3-menu__item">
@@ -141,6 +148,66 @@ export const getLayoutHTML = (data: IAV) => {
     <span class="fn__space fn__flex-1"></span>
     <input data-type="toggle-kanban-bg" type="checkbox" class="b3-switch b3-switch--menu" ${view.fillColBackgroundColor ? "checked" : ""}>
 </label>`;
+    }
+    if (data.viewType === "calendar") {
+        const calendarView = data.view as IAVCalendar;
+        const textFields = getFieldsByData(data).filter(field => field.type === "text");
+        const buildOptions = (selected: string, fields: IAVColumn[]) => {
+            let options = `<option value="">${escapeHtml(window.siyuan.languages.none || "None")}</option>`;
+            if (selected && !fields.some(field => field.id === selected)) {
+                options += `<option value="${escapeAttr(selected)}" selected disabled>${escapeHtml(window.siyuan.languages.calendarStaleMapping || "Missing or invalid field")}</option>`;
+            }
+            fields.forEach(field => {
+                options += `<option value="${escapeAttr(field.id)}"${field.id === selected ? " selected" : ""}>${escapeHtml(field.name)}</option>`;
+            });
+            return options;
+        };
+        const buildDateOptions = () => {
+            const matched = getFieldsByData(data).filter(field => field.type === "date");
+            return buildOptions(calendarView.dateFieldID || "", matched);
+        };
+        const effectiveMapping = getCalendarFieldMapping(calendarView);
+        html += `<div class="b3-menu__item" data-type="nobg">
+    <div class="fn__block">
+        <label class="ft__on-surface">${window.siyuan.languages.dateField || "Date Field"}</label>
+        <select class="b3-select fn__block" data-type="calendar-date-field">
+            ${buildDateOptions()}
+        </select>
+        <div class="fn__hr"></div>
+        <label class="ft__on-surface">${window.siyuan.languages.calendarWeekStart || "Week starts on"}</label>
+        <select class="b3-select fn__block" data-type="calendar-week-start">
+            <option value="0"${(calendarView.weekStart || 0) === 0 ? " selected" : ""}>${escapeHtml(getWeekdayLabel(0))}</option>
+            <option value="1"${calendarView.weekStart === 1 ? " selected" : ""}>${escapeHtml(getWeekdayLabel(1))}</option>
+        </select>
+        <div class="fn__hr"></div>
+        <div class="av__calendar-config-row">
+            <label class="ft__on-surface" for="av-calendar-new-item-target">${escapeHtml(window.siyuan.languages.newRow)}</label>
+            <select class="b3-select fn__block av__calendar-new-item-target" id="av-calendar-new-item-target" data-type="calendar-new-item-target">
+                <option value="${CALENDAR_NEW_ITEM_TARGET_DOCUMENT}"${getCalendarNewItemTarget(calendarView) === CALENDAR_NEW_ITEM_TARGET_DOCUMENT ? " selected" : ""}>${escapeHtml(window.siyuan.languages.doc)}</option>
+                <option value="${CALENDAR_NEW_ITEM_TARGET_ROW}"${getCalendarNewItemTarget(calendarView) === CALENDAR_NEW_ITEM_TARGET_DOCUMENT ? "" : " selected"}>${escapeHtml(window.siyuan.languages.row)}</option>
+            </select>
+        </div>
+        <div class="fn__hr"></div>
+        <label class="ft__on-surface">${escapeHtml(window.siyuan.languages.fields || "Fields")}</label>
+        <div class="av__calendar-visible-fields">
+            ${textFields.filter(field => ![effectiveMapping.recurrenceFieldID, effectiveMapping.exceptionFieldID].includes(field.id) && !isCalendarRecurrenceStorageField(field)).map(field => `<label class="b3-list-item b3-list-item--narrow"><input type="checkbox" data-type="calendar-visible-field" data-field-id="${escapeAttr(field.id)}"${field.hidden ? "" : " checked"}><span class="b3-list-item__text">${escapeHtml(field.name)}</span></label>`).join("")}
+        </div>
+        <div class="fn__flex av__calendar-add-field">
+            <input class="b3-text-field fn__flex-1" data-type="calendar-new-field-name" placeholder="${escapeAttr(window.siyuan.languages.addField || window.siyuan.languages.fields || "Add field")}">
+            <button class="b3-button b3-button--outline" type="button" data-type="calendar-add-visible-field">+</button>
+        </div>
+        <div class="fn__hr"></div>
+        <button class="b3-button b3-button--outline fn__block" type="button" data-type="calendar-import-ics-button" style="position: relative">
+            <input class="b3-form__upload" type="file" accept=".ics,text/calendar" data-type="calendar-import-ics" aria-label="${escapeAttr(`${window.siyuan.languages.import || "Import"} ICS`)}">
+            <svg><use xlink:href="#iconDownload"></use></svg>${escapeHtml(window.siyuan.languages.import || "Import")} ICS
+        </button>
+        <div class="ft__on-surface ft__smaller" data-type="calendar-import-ics-status" aria-live="polite"></div>
+    </div>
+</div>`;
+    }
+    if (data.viewType === "calendar") {
+        // 日历渲染始终请求整个数据库（pageSize -1），分页项对它无效，不展示。
+        return html + "</div>";
     }
     return html + `<button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
@@ -226,7 +293,7 @@ export const bindLayoutEvent = (options: {
         options.data.view.wrapField = checked;
     });
     if (options.data.viewType === "table") {
-        return;
+        return options.data;
     }
     const cardLayoutElement = options.menuElement.querySelector('select[data-type="set-card-layout"]') as HTMLSelectElement;
     cardLayoutElement.addEventListener("change", () => {
@@ -277,7 +344,7 @@ export const bindLayoutEvent = (options: {
         });
     });
     const toggleFitElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-fit"]') as HTMLInputElement;
-    toggleFitElement.addEventListener("change", () => {
+    toggleFitElement?.addEventListener("change", () => {
         const checked = toggleFitElement.checked;
         transaction(options.protyle, [{
             action: "setAttrViewFitImage",
@@ -295,7 +362,7 @@ export const bindLayoutEvent = (options: {
         (options.data.view as IAVGallery).fitImage = checked;
     });
     const toggleNameElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-name"]') as HTMLInputElement;
-    toggleNameElement.addEventListener("change", () => {
+    toggleNameElement?.addEventListener("change", () => {
         const checked = toggleNameElement.checked;
         transaction(options.protyle, [{
             action: "setAttrViewDisplayFieldName",
@@ -331,8 +398,12 @@ export const bindLayoutEvent = (options: {
         }]);
         (options.data.view as IAVGallery | IAVKanban).displayEmptyFields = checked;
     });
+    if (options.data.viewType === "calendar") {
+        bindCalendarLayoutEvent(options, avID, blockID, viewID);
+        return options.data;
+    }
     if (options.data.viewType === "gallery") {
-        return;
+        return options.data;
     }
     const toggleBgElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-kanban-bg"]') as HTMLInputElement;
     toggleBgElement?.addEventListener("change", () => {
@@ -351,6 +422,239 @@ export const bindLayoutEvent = (options: {
             viewID
         }]);
         (options.data.view as IAVKanban).fillColBackgroundColor = checked;
+    });
+};
+
+const importCalendarICS = async (options: {
+    protyle: IProtyle,
+    data: IAV,
+    menuElement: HTMLElement
+    blockElement: Element
+}, avID: string, blockID: string, viewID: string, input: HTMLInputElement) => {
+    const file = input.files?.[0];
+    if (!file) {
+        return;
+    }
+    const button = input.closest('[data-type="calendar-import-ics-button"]') as HTMLButtonElement;
+    const status = options.menuElement.querySelector('[data-type="calendar-import-ics-status"]') as HTMLElement;
+    input.disabled = true;
+    if (button) {
+        button.disabled = true;
+    }
+    try {
+        const events = parseICSCalendar(decodeICSBytes(await file.arrayBuffer()));
+        if (events.length === 0) {
+            const message = `${window.siyuan.languages.import || "Import"}: ${window.siyuan.languages.empty || "Empty"}`;
+            status.textContent = message;
+            showMessage(message, 6000, "error");
+            return;
+        }
+        const calendarView = options.data.view as IAVCalendar;
+        let mapping = getCalendarFieldMapping(calendarView);
+        if (!mapping.dateFieldID) {
+            const message = window.siyuan.languages.calendarNeedDateField || window.siyuan.languages.dateField || "Calendar requires a date field";
+            status.textContent = message;
+            showMessage(message, 6000, "error");
+            return;
+        }
+        const needsRecurrenceStorage = events.some(event => event.draft.recurrenceRaw || event.draft.recurrenceExceptionRaw);
+        mapping = await ensureCalendarRecurrenceStorage({
+            protyle: options.protyle,
+            calendarData: calendarView,
+            mapping,
+            avID,
+            blockID,
+            viewID,
+            storageRequired: needsRecurrenceStorage,
+        });
+        if (needsRecurrenceStorage && (!mapping.recurrenceFieldID || !mapping.exceptionFieldID)) {
+            const message = window.siyuan.languages.calendarCreateFailed || "Create failed.";
+            status.textContent = message;
+            showMessage(message, 6000, "error");
+            return;
+        }
+        const createsDocuments = getCalendarNewItemTarget(calendarView) === CALENDAR_NEW_ITEM_TARGET_DOCUMENT;
+        let imported = 0;
+        for (const event of events) {
+            const createOptions: ICalendarCreateOptions = {
+                protyle: options.protyle,
+                avID,
+                blockID,
+                viewID,
+                dateFieldID: mapping.dateFieldID,
+                fields: calendarView.fields,
+                mapping,
+                draft: {
+                    ...event.draft,
+                    title: event.draft.title || window.siyuan.languages.untitled,
+                },
+                previousUpdated: options.blockElement.getAttribute("updated") || "",
+            };
+            const created = createsDocuments ?
+                Boolean(await createCalendarEventAsDocument({...createOptions, templateID: options.data.defaultTemplateID || ""})) :
+                await createCalendarEvent(createOptions);
+            if (created) {
+                imported++;
+            }
+            status.textContent = `${window.siyuan.languages.import || "Import"}: ${imported}/${events.length}`;
+        }
+        options.blockElement.removeAttribute("data-render");
+        const message = `${window.siyuan.languages.imported || "Import completed"}: ${imported}/${events.length}`;
+        status.textContent = message;
+        showMessage(message, imported === events.length ? 3000 : 6000, imported === events.length ? undefined : "error");
+    } catch (error) {
+        console.error("Importing ICS failed", error);
+        const message = window.siyuan.languages.calendarCreateFailed || "Create failed.";
+        status.textContent = message;
+        showMessage(message, 6000, "error");
+    } finally {
+        input.value = "";
+        input.disabled = false;
+        if (button) {
+            button.disabled = false;
+        }
+    }
+};
+
+const bindCalendarLayoutEvent = (options: {
+    protyle: IProtyle,
+    data: IAV,
+    menuElement: HTMLElement
+    blockElement: Element
+}, avID: string, blockID: string, viewID: string) => {
+    const calendarView = options.data.view as IAVCalendar;
+    const dateFieldElement = options.menuElement.querySelector('select[data-type="calendar-date-field"]') as HTMLSelectElement;
+    dateFieldElement?.addEventListener("change", () => {
+        const previous = calendarView.dateFieldID || "";
+        const current = dateFieldElement.value;
+        transaction(options.protyle, [{
+            action: "setAttrViewCalendarDateField",
+            avID,
+            blockID,
+            keyID: current,
+            data: current,
+            viewID
+        }], [{
+            action: "setAttrViewCalendarDateField",
+            avID,
+            blockID,
+            keyID: previous,
+            data: previous,
+            viewID
+        }]);
+        calendarView.dateFieldID = current;
+    });
+    const weekStartElement = options.menuElement.querySelector('select[data-type="calendar-week-start"]') as HTMLSelectElement;
+    weekStartElement?.addEventListener("change", () => {
+        const previous = calendarView.weekStart || 0;
+        const current = parseInt(weekStartElement.value, 10);
+        transaction(options.protyle, [{
+            action: "setAttrViewCalendarWeekStart",
+            avID,
+            blockID,
+            data: current,
+            viewID
+        }], [{
+            action: "setAttrViewCalendarWeekStart",
+            avID,
+            blockID,
+            data: previous,
+            viewID
+        }]);
+        calendarView.weekStart = current;
+    });
+    // "New entries": Page creates a real SiYuan document per entry and binds the
+    // row to it; Row only keeps the historic detached row. Mirrors the week-start
+    // setter, including viewID, because the target is per view.
+    const newItemTargetElement = options.menuElement.querySelector('select[data-type="calendar-new-item-target"]') as HTMLSelectElement;
+    newItemTargetElement?.addEventListener("change", () => {
+        // The undo value is the RAW persisted one: "" (a pre-upgrade view) is a
+        // valid target for the kernel and must not be normalised to "row" here,
+        // or undo would rewrite av.json with a value the view never had.
+        const previous = getCalendarNewItemTarget(calendarView);
+        const current = newItemTargetElement.value === CALENDAR_NEW_ITEM_TARGET_DOCUMENT ?
+            CALENDAR_NEW_ITEM_TARGET_DOCUMENT : CALENDAR_NEW_ITEM_TARGET_ROW;
+        if (current === previous) {
+            return;
+        }
+        // Cast: TOperation in app/src/types/index.d.ts does not list
+        // "setAttrViewCalendarNewItemTarget" yet (that file belongs to another
+        // agent in this change). The kernel already routes it -
+        // kernel/model/transaction.go:417 -> doSetAttrViewCalendarNewItemTarget.
+        // Drop the casts once the union gains the member.
+        transaction(options.protyle, [{
+            action: "setAttrViewCalendarNewItemTarget",
+            avID,
+            blockID,
+            data: current,
+            viewID
+        }], [{
+            action: "setAttrViewCalendarNewItemTarget",
+            avID,
+            blockID,
+            data: previous,
+            viewID
+        }]);
+        calendarView.newItemTarget = current;
+        // The panel holds its own copy of the view, and
+        // "setAttrViewCalendarNewItemTarget" is not in the refresh list of
+        // app/src/protyle/wysiwyg/transaction.ts (not our file), so the rendered
+        // calendar would keep creating with the old target until something else
+        // re-rendered it. This override is what calendar/render.ts reads until
+        // the kernel confirms the new value.
+        options.blockElement.setAttribute("data-calendar-new-item-target", current);
+    });
+    const bindVisibleField = (checkbox: HTMLInputElement) => {
+        checkbox.addEventListener("change", () => {
+            const fieldID = checkbox.dataset.fieldId;
+            const field = calendarView.fields.find(candidate => candidate.id === fieldID);
+            if (!fieldID || !field) return;
+            transaction(options.protyle, [{
+                action: "setAttrViewColHidden", id: fieldID, avID, blockID, viewID, data: !checkbox.checked,
+            }], [{
+                action: "setAttrViewColHidden", id: fieldID, avID, blockID, viewID, data: checkbox.checked,
+            }]);
+            field.hidden = !checkbox.checked;
+        });
+    };
+    options.menuElement.querySelectorAll('[data-type="calendar-visible-field"]').forEach(item => bindVisibleField(item as HTMLInputElement));
+    const addFieldButton = options.menuElement.querySelector('[data-type="calendar-add-visible-field"]') as HTMLButtonElement;
+    const newFieldInput = options.menuElement.querySelector('[data-type="calendar-new-field-name"]') as HTMLInputElement;
+    const addVisibleField = () => {
+        const name = newFieldInput?.value.trim();
+        if (!name) return;
+        const id = Lute.NewNodeID();
+        const previousID = getFieldsByData(options.data).at(-1)?.id || "";
+        transaction(options.protyle, [{action: "addAttrViewCol", avID, name, type: "text", id, previousID}], [{action: "removeAttrViewCol", avID, id}]);
+        calendarView.fields.push({id, name, type: "text", hidden: false, icon: "", wrap: calendarView.wrapField, desc: "", calc: undefined, numberFormat: "", template: "", pin: false, width: "", align: ""});
+        newFieldInput.value = "";
+        const list = options.menuElement.querySelector(".av__calendar-visible-fields");
+        if (list) {
+            const label = document.createElement("label");
+            label.className = "b3-list-item b3-list-item--narrow";
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.dataset.type = "calendar-visible-field";
+            checkbox.dataset.fieldId = id;
+            checkbox.checked = true;
+            const text = document.createElement("span");
+            text.className = "b3-list-item__text";
+            text.textContent = name;
+            label.append(checkbox, text);
+            list.append(label);
+            bindVisibleField(checkbox);
+        }
+    };
+    addFieldButton?.addEventListener("click", addVisibleField);
+    newFieldInput?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            addVisibleField();
+        }
+    });
+    const importICSInput = options.menuElement.querySelector('[data-type="calendar-import-ics"]') as HTMLInputElement;
+    importICSInput?.addEventListener("change", () => {
+        void importCalendarICS(options, avID, blockID, viewID, importICSInput);
     });
 };
 

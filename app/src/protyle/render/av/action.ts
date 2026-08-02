@@ -323,6 +323,19 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add-more" && !protyle.disabled) {
+            if (viewType === "calendar") {
+                // insertRows/模板新建出来的条目在日历日期字段上没有值，条目虽已创建但在日历里不可见，
+                // 因此改走日历自己的新建流程（默认落在当前锚定日期，锚点无效时为今天）
+                const calendarNewElement = blockElement.querySelector<HTMLElement>('.av__calendar-toolbar [data-type="calendar-new"]');
+                if (calendarNewElement) {
+                    calendarNewElement.click();
+                } else {
+                    showMessage(window.siyuan.languages.calendarNeedDateField || window.siyuan.languages.dateField || "Calendar requires a date field");
+                }
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            }
             const templateID = blockElement.querySelector<HTMLElement>(".av__header")?.dataset.defaultTemplateId;
             if (templateID) {
                 createAttributeViewItem({blockElement, protyle, templateID});
@@ -338,7 +351,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-add-template" && !protyle.disabled) {
+        } else if (type === "av-add-template" && !protyle.disabled && viewType !== "calendar") {
             openNewItemTemplateMenu({protyle, blockElement, target});
             event.preventDefault();
             event.stopPropagation();

@@ -3,6 +3,10 @@
   box-sizing: border-box;
   display: flex;
   max-width: 100%;
+
+  &[data-av-type="calendar"] > .av__container {
+    width: 100%;
+  }
   margin-top: 4px !important;
   margin-bottom: 4px !important;
 
@@ -2283,5 +2287,1877 @@ img.av__cellassetimg {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+}
+
+.sy__calendar {
+    min-width: 260px;
+
+    .av__calendar-dock-content {
+        overflow: auto;
+        padding: 8px;
+    }
+
+    .av__calendar-dock-month {
+        display: grid;
+        gap: 4px;
+    }
+
+    .av__calendar-dock-database-picker {
+        margin-bottom: 8px;
+        position: relative;
+
+        > button {
+            align-items: center;
+            display: flex;
+            gap: 6px;
+            justify-content: space-between;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            svg {
+                flex: 0 0 auto;
+                height: 12px;
+                width: 12px;
+            }
+        }
+    }
+
+    .av__calendar-dock-sources {
+        background: var(--b3-menu-background);
+        border: 1px solid var(--b3-border-color);
+        border-radius: var(--b3-border-radius);
+        box-shadow: var(--b3-dialog-shadow);
+        display: grid;
+        gap: 4px;
+        max-height: 240px;
+        overflow: auto;
+        padding: 4px;
+        position: absolute;
+        width: 100%;
+        z-index: 4;
+    }
+
+    .b3-list-item__text {
+        min-width: 0;
+
+        small {
+            color: var(--b3-theme-on-surface-light);
+            display: block;
+            font-weight: 400;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+    .av__calendar-dock-views {
+        display: grid;
+        gap: 4px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 8px;
+
+        .b3-button {
+            justify-content: center;
+            min-width: 0;
+            padding-left: 6px;
+            padding-right: 6px;
+        }
+    }
+
+    .av__calendar-dock-period {
+        color: var(--b3-theme-on-surface);
+        font-size: 12px;
+        font-weight: 600;
+        margin: 4px 0 8px;
+        text-align: center;
+    }
+
+    .av__calendar-dock-events,
+    .av__calendar-dock-agenda {
+        display: grid;
+        gap: 4px;
+    }
+
+    .av__calendar-dock-event {
+        align-items: flex-start;
+        border: 0;
+        height: auto;
+        min-height: 38px;
+        text-align: left;
+        width: 100%;
+
+        .b3-list-item__text {
+            display: block;
+            -webkit-line-clamp: unset;
+            overflow: visible;
+            overflow-wrap: anywhere;
+            white-space: normal;
+            text-overflow: clip;
+        }
+
+        .av__calendar-dock-event-title {
+            overflow-wrap: anywhere;
+        }
+    }
+
+    .av__calendar-dock-event-dot {
+        flex: 0 0 auto;
+        font-size: 10px;
+        line-height: 20px;
+    }
+
+    .av__calendar-dock-event-date {
+        color: var(--b3-theme-on-surface-light);
+        margin-right: 4px;
+    }
+
+    .av__calendar-dock-date {
+        align-items: center;
+        background: transparent;
+        border: 0;
+        color: inherit;
+        cursor: pointer;
+        display: grid;
+        gap: 2px;
+        grid-template-columns: 1fr auto;
+        margin-bottom: 8px;
+        padding: 8px;
+        text-align: left;
+        width: 100%;
+
+        &:hover {
+            background-color: var(--b3-list-hover);
+        }
+
+        span,
+        small {
+            color: var(--b3-theme-on-surface-light);
+        }
+
+        strong {
+            font-size: 32px;
+            grid-row: 1 / span 2;
+            line-height: 1;
+        }
+    }
+
+    .av__calendar-dock-mini {
+        margin-bottom: 8px;
+
+        .av__calendar-mini-day {
+            aspect-ratio: 1 / 1;
+            height: 24px;
+            justify-self: center;
+            min-height: 24px;
+            padding: 0;
+            width: 24px;
+        }
+
+        .av__calendar-mini-day--has-events::after {
+            background-color: currentColor;
+            border-radius: 50%;
+            bottom: 2px;
+            content: "";
+            height: 3px;
+            position: absolute;
+            width: 3px;
+        }
+    }
+
+    .av__calendar-dock-selected-day {
+        border-top: 1px solid var(--b3-border-color);
+        margin: 8px 0 4px;
+        padding-top: 8px;
+    }
+
+    .av__calendar-dock-agenda-day {
+        display: grid;
+        gap: 3px;
+    }
+
+    .av__calendar-dock-agenda-date {
+        background: transparent;
+        border: 0;
+        color: var(--b3-theme-on-surface);
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 8px 2px;
+        text-align: left;
+    }
+
+    .av__calendar-dock-agenda-today {
+        border-top: 1px solid var(--b3-theme-primary);
+        margin-top: 4px;
+        padding-top: 4px;
+
+        .av__calendar-dock-agenda-date {
+            color: var(--b3-theme-primary);
+        }
+    }
+
+    .av__calendar-dock-empty {
+        padding: 18px 8px;
+        text-align: center;
+    }
+}
+
+.av__calendar {
+  min-width: 320px;
+  padding: 8px;
+
+  &:focus-visible {
+    outline: 2px solid var(--b3-theme-primary);
+    outline-offset: 2px;
+  }
+
+  &--empty {
+    min-width: 240px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  &-setup {
+    margin-top: 12px;
+    min-width: 220px;
+  }
+
+  &-toolbar {
+    align-items: center;
+    background-color: var(--b3-theme-background);
+    border-bottom: 1px solid var(--b3-border-color);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 0 8px;
+    position: sticky;
+    top: 0;
+    z-index: 8;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sidebar + main.
+  //
+  // The mini month must never cost the main view its width. The pane, not the
+  // window, is what is narrow here (a calendar lives inside a dock or a split),
+  // so this is a CONTAINER query, not a media query - and it sits on
+  // &-body rather than on .av__calendar, because container-type also makes the
+  // element a containing block for absolutely positioned descendants and
+  // .av__calendar is the offsetParent the toolbar's quick-create popover is
+  // measured against.
+  //
+  // Below the threshold the sidebar is simply not there, which matches the rest
+  // of this file's responsive idiom (min-width floors + the horizontal scroll of
+  // .av__scroll) and leaves the narrow pane exactly as usable as it was before
+  // the navigator existed. Schedule view is the intended narrow-pane view.
+  // ---------------------------------------------------------------------------
+  &-body {
+    align-items: flex-start;
+    container-type: inline-size;
+    display: flex;
+    gap: 12px;
+  }
+
+  &-main {
+    flex: 1 1 auto;
+    // Without this the flex item refuses to go below its content's min-content
+    // width and the sidebar would be squeezed out instead of the grid scrolling.
+    min-width: 0;
+  }
+
+  &-sidebar {
+    display: block;
+    flex: 0 0 var(--calendar-sidebar-width, 196px);
+    width: var(--calendar-sidebar-width, 196px);
+  }
+
+  &[data-view-mode="4"] {
+    .av__calendar-sidebar {
+      display: none;
+    }
+
+    .av__calendar-body {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+
+  &-title-control {
+    align-items: center;
+    display: flex;
+    flex: 1 1 180px;
+    gap: 8px;
+    justify-content: center;
+    min-width: 160px;
+    position: relative;
+  }
+
+  &-title {
+    align-items: center;
+    color: var(--b3-theme-on-background);
+    display: inline-flex;
+    font-size: 15px;
+    font-weight: 600;
+    gap: 6px;
+    text-align: center;
+
+    svg {
+      height: 13px;
+      opacity: .64;
+      width: 13px;
+    }
+  }
+
+  &-week-number {
+    color: var(--b3-theme-on-surface);
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  &-search-control {
+    flex: 0 1 192px;
+    max-width: 192px;
+    min-width: 120px;
+    position: relative;
+  }
+
+  &-search {
+    min-width: 120px;
+    padding-right: 30px;
+    width: 100%;
+  }
+
+  &-search-toggle {
+    height: 28px;
+    margin-top: -14px;
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    width: 28px;
+
+    svg {
+      height: 12px;
+      transition: transform 120ms ease;
+      width: 12px;
+    }
+
+    &[aria-expanded="true"] svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  &-search-dropdown {
+    background-color: var(--b3-menu-background);
+    border: 1px solid var(--b3-theme-surface-lighter);
+    border-radius: var(--b3-border-radius-b);
+    box-shadow: var(--b3-dialog-shadow);
+    left: 0;
+    min-width: 100%;
+    padding: 4px;
+    position: absolute;
+    top: calc(100% + 4px);
+    z-index: 4;
+
+    .b3-menu__item {
+      width: 100%;
+    }
+  }
+
+  &-search-count {
+    color: var(--b3-theme-on-surface);
+    flex: 0 0 auto;
+    font-size: 12px;
+    margin-left: 4px;
+    min-width: 44px;
+    text-align: right;
+  }
+
+  &-jump {
+    height: 1px;
+    left: 50%;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 100%;
+    width: 1px;
+  }
+
+  &-view-trigger {
+    align-items: center;
+    background-color: var(--b3-list-hover);
+    color: var(--b3-theme-on-background);
+    display: flex;
+    gap: 4px;
+    white-space: nowrap;
+
+    svg {
+      height: 12px;
+      width: 12px;
+    }
+  }
+
+  &-year {
+    display: grid;
+    gap: 40px 72px;
+    grid-template-columns: repeat(4, minmax(220px, 1fr));
+    min-width: 1000px;
+    padding: 12px 20px 32px;
+  }
+
+  &-year-month {
+    min-width: 0;
+
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 18px;
+      text-align: left;
+    }
+  }
+
+  &-year-weekdays,
+  &-year-week {
+    display: grid;
+    gap: 2px;
+    grid-template-columns: 28px repeat(7, minmax(26px, 1fr));
+  }
+
+  &-year-weekdays {
+    color: var(--b3-theme-on-surface);
+    font-size: 13px;
+    line-height: 28px;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  &-year-weeks {
+    display: grid;
+    gap: 2px;
+  }
+
+  &-year-week-number {
+    align-items: center;
+    background-color: var(--b3-theme-surface);
+    color: var(--b3-theme-on-surface);
+    display: flex;
+    font-size: 12px;
+    justify-content: center;
+    min-height: 30px;
+  }
+
+  &-year-week:first-child &-year-week-number {
+    border-radius: 4px 4px 0 0;
+  }
+
+  &-year-week:last-child &-year-week-number {
+    border-radius: 0 0 4px 4px;
+  }
+
+  &-year-day {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-size: 13px;
+    height: 30px;
+    justify-content: center;
+    min-width: 30px;
+    padding: 0;
+    position: relative;
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      background-color: var(--b3-list-hover);
+      outline: 2px solid var(--b3-theme-primary-light);
+      outline-offset: -2px;
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+
+    &--outside {
+      color: var(--b3-theme-on-surface);
+      opacity: .48;
+    }
+
+    &--today {
+      background-color: var(--b3-theme-primary);
+      color: var(--b3-theme-on-primary);
+    }
+
+    &--selected:not(.av__calendar-year-day--today) {
+      box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
+    }
+
+    i {
+      background-color: currentColor;
+      border-radius: 50%;
+      bottom: 2px;
+      height: 3px;
+      position: absolute;
+      width: 3px;
+    }
+  }
+
+  @media (max-width: 1240px) {
+    .av__calendar-year {
+      gap-inline: 40px;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      min-width: 760px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .av__calendar-year {
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      min-width: 520px;
+    }
+  }
+
+  &-weekdays,
+  &-month {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  &-weekdays {
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+    padding-bottom: 4px;
+    text-align: center;
+  }
+
+  &-day {
+    border-bottom: 1px solid var(--b3-border-color);
+    border-right: 1px solid var(--b3-border-color);
+    min-height: 104px;
+    padding: 3px;
+
+    &:nth-child(-n + 7) {
+      border-top: 1px solid var(--b3-border-color);
+    }
+
+    &:nth-child(7n + 1) {
+      border-left: 1px solid var(--b3-border-color);
+    }
+
+    &--muted {
+      background-color: var(--b3-theme-surface);
+      color: var(--b3-theme-on-surface);
+      opacity: .62;
+    }
+
+    &--today {
+      box-shadow: none;
+
+      .av__calendar-daynum {
+        background-color: var(--b3-theme-primary);
+        border-radius: 50%;
+        color: var(--b3-theme-on-primary);
+        height: 24px;
+        min-width: 24px;
+        text-align: center;
+      }
+    }
+
+    &--dragover {
+      background-color: var(--b3-theme-primary-light);
+      box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
+    }
+  }
+
+  &-daynum,
+  &-list-title {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 2px 4px;
+    text-align: left;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.72;
+    }
+  }
+
+  &-events,
+  &-list-events {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &-event {
+    align-items: center;
+    background-color: var(--b3-theme-primary-light);
+    border: 0;
+    border-radius: 6px;
+    color: var(--b3-theme-primary);
+    cursor: pointer;
+    display: flex;
+    gap: 5px;
+    font-size: 12px;
+    line-height: 16px;
+    overflow: hidden;
+    padding: 2px 6px;
+    text-align: left;
+    white-space: nowrap;
+
+    &[draggable="false"] {
+      cursor: default;
+    }
+
+    &--readonly {
+      cursor: pointer;
+    }
+
+    &--locate {
+      box-shadow: 0 0 0 2px var(--b3-theme-primary);
+    }
+
+    &--selected {
+      box-shadow: inset 3px 0 0 var(--calendar-event-accent, var(--b3-theme-primary));
+    }
+
+    &:hover,
+    &--selected {
+      filter: brightness(1.03);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: -1px;
+    }
+
+    &--month,
+    &--list {
+      --calendar-event-accent: var(--b3-theme-primary);
+      background-color: transparent;
+      color: var(--b3-theme-on-background);
+
+      &::before {
+        background-color: var(--calendar-event-accent);
+        border-radius: 999px;
+        content: "";
+        flex: 0 0 3px;
+        height: 12px;
+      }
+
+      &:hover,
+      &.av__calendar-event--selected {
+        background-color: var(--b3-list-hover);
+      }
+    }
+
+    &--timed {
+      align-items: flex-start;
+      background-color: var(--calendar-event-fill, var(--b3-theme-primary));
+      color: var(--b3-theme-on-primary);
+      padding: 4px 7px;
+    }
+
+    &--short {
+      padding-bottom: 1px;
+      padding-top: 1px;
+
+      .av__calendar-event-time,
+      .av__calendar-event-meta {
+        display: none;
+      }
+    }
+
+    &--tall .av__calendar-event-meta {
+      display: block;
+    }
+
+    &--all-day {
+      background-color: var(--calendar-event-fill, var(--b3-theme-primary));
+      color: var(--b3-theme-on-primary);
+      font-weight: 500;
+
+      .av__calendar-event-title {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+
+    &--continues-before {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+    }
+
+    &--continues-after {
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
+    }
+  }
+
+  &-event-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &-event-title,
+  &-event-time,
+  &-event-meta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-event-title {
+    color: inherit;
+    font-weight: 600;
+  }
+
+  &-event-time {
+    color: inherit;
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+    opacity: .92;
+  }
+
+  &-event-meta {
+    display: none;
+    font-size: 11px;
+    opacity: .72;
+  }
+
+  // The source marker remains in the scheduling dialog. The redundant marker
+  // inside a Termin chip is no longer rendered because the whole chip opens it.
+  &-source {
+    align-items: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 10px;
+    height: 16px;
+    justify-content: center;
+    line-height: 14px;
+    opacity: .75;
+    width: 16px;
+  }
+
+  &-event-source {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: var(--b3-theme-on-surface);
+    cursor: pointer;
+    display: flex;
+    gap: 6px;
+    justify-content: flex-start;
+    max-width: 100%;
+    padding: 4px 0;
+    text-align: left;
+    width: auto;
+
+    code {
+      background-color: var(--b3-theme-surface);
+      border-radius: var(--b3-border-radius);
+      font-size: 11px;
+      min-width: 0;
+      overflow: hidden;
+      padding: 1px 4px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &-dialog {
+    position: relative;
+  }
+
+  &-dialog--pending {
+    opacity: .78;
+    pointer-events: none;
+  }
+
+  // Also worn by the optimistic chip a page create paints before the kernel
+  // answers: it is a preview, so it must never look interactive.
+  &-event--pending {
+    cursor: default;
+    opacity: .72;
+    pointer-events: none;
+    position: relative;
+  }
+
+  &-event--pending::after {
+    animation: av__calendar-pending 1.2s ease-in-out infinite;
+    background: var(--b3-theme-primary);
+    border-radius: 999px;
+    bottom: 2px;
+    content: "";
+    height: 3px;
+    left: 6px;
+    position: absolute;
+    right: 6px;
+  }
+
+  // A bound entry opens its page on click; keep that promise visible on hover.
+  &-event--page:hover {
+    box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
+  }
+
+  // "New entries" decides whether an entry is a page at all, so it is set apart
+  // from the field-mapping rows above it while keeping their stacked rhythm.
+  &-config-row {
+    border-top: 1px solid var(--b3-border-color);
+    padding-top: 8px;
+
+    label {
+      display: block;
+    }
+  }
+
+  &-new-item-target {
+    margin-top: 2px;
+  }
+
+  &-dialog-close {
+    line-height: 1;
+    min-width: 24px;
+    padding: 4px 6px;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+  }
+
+  &-dialog-schedule {
+    display: grid;
+    gap: 8px;
+  }
+
+  &-dialog-endpoint {
+    align-items: center;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  &-dialog-endpoint-label {
+    color: var(--b3-theme-on-surface);
+    font-size: 85%;
+  }
+
+  &-dialog-endpoint-fields {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) minmax(96px, .55fr);
+    min-width: 0;
+
+    > .b3-text-field {
+      min-width: 0;
+    }
+  }
+
+  &-dialog-schedule--all-day &-dialog-time {
+    display: none;
+  }
+
+  &-dialog-schedule--all-day &-dialog-endpoint-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  &-dialog-all-day {
+    justify-self: end;
+  }
+
+  &-dialog-footer {
+    display: grid;
+    gap: 8px;
+    padding-inline: 0;
+  }
+
+  &-dialog-footer-secondary,
+  &-dialog-footer-primary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &-dialog-footer-secondary {
+    justify-content: flex-start;
+  }
+
+  &-dialog-footer-primary {
+    justify-content: flex-end;
+  }
+
+  &-resize {
+    border-left: 1px solid currentColor;
+    cursor: ew-resize;
+    flex-shrink: 0;
+    opacity: 0.72;
+    padding-left: 4px;
+  }
+
+  &-recurrence {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px 0 4px;
+  }
+
+  &-recurrence-row {
+    align-items: center;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(110px, 1fr) 72px minmax(120px, 1fr);
+  }
+
+  &-recurrence-weekly {
+    display: grid;
+    gap: 10px;
+  }
+
+  &-recurrence-end {
+    border: 0;
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+
+    legend {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    label {
+      align-items: center;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 18px max-content minmax(96px, 1fr) max-content;
+    }
+
+    .b3-text-field {
+      min-width: 0;
+    }
+  }
+
+  &-weekday {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    grid-column: 1 / -1;
+  }
+
+  &-weekday-item {
+    align-items: center;
+    display: inline-flex;
+    gap: 4px;
+    min-height: 24px;
+  }
+
+  &-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &-list-day {
+    align-items: start;
+    border-bottom: 1px solid var(--b3-border-color);
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(88px, 112px) minmax(0, 1fr);
+    padding: 5px 0;
+
+    &.av__calendar-day--today {
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    .av__calendar-list-title {
+      color: var(--b3-theme-on-surface);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 18px;
+      text-transform: uppercase;
+    }
+  }
+
+  &-list-events {
+    gap: 1px;
+
+    .av__calendar-event--list {
+      display: grid;
+      grid-template-columns: 3px minmax(72px, 96px) minmax(0, 1fr) auto;
+      min-height: 26px;
+      padding: 4px 6px;
+    }
+  }
+
+  &-week {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Week / Day time grid.
+  //
+  // ONE scroll container. The day-header row, the all-day lane and the body all
+  // use the very same --calendar-grid-columns track, which is the whole point:
+  // the previous markup gave the headers their own grid (repeat(7,...) plus an
+  // 8px gap) while the body was 56px + repeat(7,...), so a header never sat
+  // above its column. Geometry (hour height, day height, ruling spacing,
+  // business-hour percentages) arrives as custom properties written by
+  // time-grid.ts from time-geometry.ts; nothing here re-derives it.
+  // ---------------------------------------------------------------------------
+  &-time-grid {
+    --calendar-grid-columns: var(--calendar-gutter-width, 72px) repeat(var(--calendar-day-count, 7), minmax(var(--calendar-day-min-width, 104px), 1fr));
+    --calendar-off-hours-color: rgba(127, 127, 127, .07);
+    --calendar-weekend-tint: rgba(127, 127, 127, .05);
+    --calendar-now-color: var(--b3-theme-error, #d23f31);
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+    height: clamp(420px, calc(100vh - 230px), 760px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    position: relative;
+    scrollbar-gutter: stable;
+  }
+
+  &-grid-header {
+    background-color: var(--b3-theme-background);
+    border-bottom: 1px solid var(--b3-border-color);
+    display: grid;
+    grid-template-columns: var(--calendar-grid-columns);
+    height: var(--calendar-header-height, 34px);
+    min-width: min-content;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  &-grid-corner {
+    background-color: var(--b3-theme-background);
+    left: 0;
+    position: sticky;
+    z-index: 1;
+  }
+
+  &-day-header {
+    align-items: center;
+    background-color: var(--b3-theme-background);
+    border-left: 1px solid var(--b3-border-color);
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+
+    &.av__calendar-time-day--weekend {
+      background-color: var(--b3-theme-surface);
+    }
+
+    // The generic today ring would draw a box around the header cell; the day
+    // number badge below is the clearer signal.
+    &.av__calendar-day--today {
+      box-shadow: none;
+    }
+  }
+
+  &-day-header-button {
+    align-items: baseline;
+    background: transparent;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    gap: 4px;
+    min-width: 0;
+    padding: 2px 8px;
+
+    &:disabled {
+      cursor: default;
+      opacity: .72;
+    }
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      background-color: var(--b3-list-hover);
+    }
+  }
+
+  &-day-header-weekday {
+    color: var(--b3-theme-on-surface);
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+
+  &-day-header-number {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 22px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  &-day-header.av__calendar-day--today &-day-header-number {
+    background-color: var(--b3-theme-primary);
+    border-radius: 50%;
+    color: var(--b3-theme-on-primary);
+  }
+
+  // Sticky all-day lane: a Tue-Thu event is ONE bar spanning three columns.
+  &-allday-row {
+    background-color: var(--b3-theme-background);
+    border-bottom: 1px solid var(--b3-border-color);
+    display: grid;
+    grid-template-columns: var(--calendar-grid-columns);
+    min-width: min-content;
+    position: sticky;
+    top: var(--calendar-header-height, 34px);
+    z-index: 4;
+  }
+
+  &-allday-gutter {
+    background-color: var(--b3-theme-background);
+    color: var(--b3-theme-on-surface);
+    font-size: 11px;
+    left: 0;
+    line-height: 22px;
+    overflow: visible;
+    padding: 0 8px;
+    position: sticky;
+    text-align: right;
+    white-space: nowrap;
+    z-index: 1;
+  }
+
+  &-allday-lanes {
+    display: grid;
+    grid-auto-rows: 22px;
+    grid-column: 2 / -1;
+    grid-template-columns: repeat(var(--calendar-day-count, 7), minmax(var(--calendar-day-min-width, 104px), 1fr));
+    min-height: 24px;
+    padding-bottom: 2px;
+  }
+
+  &-allday-cell {
+    border-left: 1px solid var(--b3-border-color);
+    cursor: cell;
+    min-width: 0;
+
+    &.av__calendar-time-day--weekend {
+      background-color: var(--calendar-weekend-tint);
+    }
+
+    &.av__calendar-day--today {
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: -2px;
+      z-index: 3;
+    }
+  }
+
+  &-allday-bar {
+    display: flex;
+    min-width: 0;
+    padding: 0 3px;
+    z-index: 1;
+
+    .av__calendar-event {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &-allday-more {
+    background: transparent;
+    border: 0;
+    color: var(--b3-theme-primary);
+    cursor: pointer;
+    font-size: 11px;
+    overflow: hidden;
+    padding: 1px 5px;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  &-grid-body {
+    display: grid;
+    grid-template-columns: var(--calendar-grid-columns);
+    // Without this the sticky rows would be only as wide as the scrollport and
+    // would clip when the week is scrolled horizontally; with it all three rows
+    // are exactly as wide as the column track they share.
+    min-width: min-content;
+  }
+
+  &-time-gutter {
+    background-color: var(--b3-theme-background);
+    border-right: 1px solid var(--b3-border-color);
+    left: 0;
+    position: sticky;
+    z-index: 3;
+  }
+
+  &-time-label {
+    color: var(--b3-theme-on-surface);
+    font-size: 11px;
+    line-height: 1;
+    padding-right: 6px;
+    position: absolute;
+    right: 0;
+    transform: translateY(-50%);
+    white-space: nowrap;
+
+    &[data-minute="0"] {
+      transform: none;
+    }
+  }
+
+  &-time-columns {
+    display: grid;
+    grid-column: 2 / -1;
+    grid-template-columns: repeat(var(--calendar-day-count, 7), minmax(var(--calendar-day-min-width, 104px), 1fr));
+    // Gesture rects are measured from this layer. Keep it as the containing
+    // block too, otherwise a columns-local left value is applied from the grid
+    // body's origin and every ghost shifts left by the sticky time gutter.
+    position: relative;
+  }
+
+  &-quick-create {
+    background: var(--b3-theme-background);
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+    box-shadow: var(--b3-dialog-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    left: 6px;
+    min-width: 220px;
+    padding: 10px;
+    position: absolute;
+    right: 6px;
+    top: var(--calendar-quick-create-top, 4px);
+    z-index: 2;
+  }
+
+  &-quick-create-check {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+  }
+
+  &-quick-create-title {
+    width: 100%;
+  }
+
+  &-quick-create-summary {
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+  }
+
+  &-quick-create-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  // The 30-minute ruling survives only as background lines; the events on top of
+  // it are absolutely positioned from real minutes (G3/G6).
+  &-time-day {
+    background-image:
+      linear-gradient(to right,
+        var(--b3-theme-surface-lighter) 0 1px,
+        transparent 1px),
+      repeating-linear-gradient(to bottom,
+        var(--b3-border-color) 0 1px,
+        transparent 1px var(--calendar-hour-height, 48px)),
+      repeating-linear-gradient(to bottom,
+        var(--b3-border-color-trans, rgba(127, 127, 127, .16)) 0 1px,
+        transparent 1px var(--calendar-ruling-height, 24px)),
+      linear-gradient(to bottom,
+        var(--calendar-off-hours-color) 0 var(--calendar-business-start, 37.5%),
+        transparent var(--calendar-business-start, 37.5%) var(--calendar-business-end, 75%),
+        var(--calendar-off-hours-color) var(--calendar-business-end, 75%) 100%);
+    min-width: 0;
+    position: relative;
+
+    &--weekend {
+      background-color: var(--calendar-weekend-tint);
+    }
+
+    &.av__calendar-day--today {
+      background-color: transparent;
+      box-shadow: none;
+    }
+  }
+
+  // Empty-space create surface: one per day column instead of 48 slot buttons.
+  // It is only rendered for editable calendars, so a read-only / query-embed
+  // calendar has no create gesture at all.
+  &-time-create {
+    cursor: cell;
+    inset: 0 0 auto 0;
+    position: absolute;
+    z-index: 0;
+
+    &:hover {
+      background-color: var(--b3-theme-primary-lightest, rgba(66, 133, 244, .08));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: -2px;
+    }
+  }
+
+  &-timed-events {
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 1;
+  }
+
+  // top/height/left/width all arrive inline, in exact pixels and percentages.
+  &-timed-event {
+    box-sizing: border-box;
+    display: flex;
+    min-width: 0;
+    padding: 0 3px 2px;
+    pointer-events: auto;
+    position: absolute;
+
+    .av__calendar-event {
+      align-items: flex-start;
+      flex: 1;
+      height: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    &--continues-before .av__calendar-event {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    &--continues-after .av__calendar-event {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  &-week--single &-time-grid {
+    margin-inline: auto;
+    max-width: 820px;
+    width: 100%;
+  }
+
+  // Edge handles replace the old inline -15m/+15m text buttons. They are inert
+  // markup here: the pointer gesture module binds them (see render.ts).
+  &-resize-handle {
+    cursor: ns-resize;
+    height: 7px;
+    left: 0;
+    position: absolute;
+    right: 2px;
+    z-index: 2;
+
+    &--start {
+      top: -3px;
+    }
+
+    &--end {
+      bottom: -2px;
+    }
+
+    &::after {
+      background-color: currentColor;
+      border-radius: 999px;
+      content: "";
+      display: block;
+      height: 3px;
+      margin: 2px auto;
+      opacity: 0;
+      transition: opacity .12s ease;
+      width: 28px;
+    }
+  }
+
+  // Coarse pointers cannot reveal hover-only handles and need enough surface to
+  // hold an event edge without covering the event content with visible chrome.
+  @media (pointer: coarse) {
+    &-event,
+    &-resize-handle {
+      touch-action: none;
+    }
+
+    &-resize-handle {
+      height: 21px;
+
+      &--start {
+        top: -10px;
+      }
+
+      &--end {
+        bottom: -10px;
+      }
+
+      &::after {
+        margin: 9px auto;
+        opacity: .6;
+      }
+    }
+
+    &--gesturing {
+      user-select: none;
+    }
+  }
+
+  &-timed-event:hover &-resize-handle::after,
+  &-timed-event:focus-within &-resize-handle::after {
+    opacity: .6;
+  }
+
+  // Empty-space sweep preview (event-chip.ts buildCalendarGhost). Existing timed
+  // event move/resize previews are applied directly to their rendered wrapper.
+  &-ghost {
+    background-color: var(--b3-theme-primary-lighter);
+    border: 1px dashed var(--b3-theme-primary);
+    border-radius: var(--b3-border-radius);
+    box-sizing: border-box;
+    color: var(--b3-theme-on-background);
+    font-size: 12px;
+    line-height: 15px;
+    overflow: hidden;
+    padding: 1px 5px;
+    pointer-events: none;
+    position: absolute;
+    z-index: 4;
+  }
+
+  &-ghost-label {
+    display: block;
+    font-weight: 600;
+  }
+
+  &-ghost-title {
+    display: block;
+    opacity: .8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-now-indicator {
+    align-items: center;
+    display: flex;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    transform: translateY(-50%);
+    z-index: 3;
+  }
+
+  &-now-dot {
+    background-color: var(--calendar-now-color, #d23f31);
+    border-radius: 50%;
+    flex: 0 0 auto;
+    height: 9px;
+    margin-left: -4px;
+    width: 9px;
+  }
+
+  &-now-line {
+    background-color: var(--calendar-now-color, #d23f31);
+    flex: 1;
+    height: 2px;
+  }
+
+  &-all-day,
+  &-timed {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 28px;
+    min-width: 0;
+    padding-top: 6px;
+  }
+
+  &-all-day {
+    border-bottom: 1px solid var(--b3-border-color);
+    padding-bottom: 6px;
+  }
+
+  &-list-day {
+    border-bottom: 1px solid var(--b3-border-color);
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 120px 1fr;
+    min-height: 32px;
+    padding: 8px 0;
+  }
+
+  &-no-results {
+    border: 1px dashed var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+    margin-bottom: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  &-day--selected {
+    box-shadow: inset 0 0 0 2px var(--b3-theme-primary-lighter);
+  }
+
+
+
+  &-more {
+    background: transparent;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    color: var(--b3-theme-on-surface);
+    cursor: pointer;
+    display: block;
+    font-size: 85%;
+    padding: 0 4px;
+    text-align: left;
+    width: 100%;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--b3-list-hover);
+    }
+  }
+
+  &-dialog {
+    padding: 16px;
+  }
+
+  &-scope {
+    padding: 16px;
+  }
+
+  &-scope-option {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 8px;
+    text-align: left;
+    width: 100%;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: .65;
+    }
+  }
+
+  &-scope-title {
+    font-weight: 600;
+  }
+
+  &-scope-desc {
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  &-check {
+    gap: 6px;
+    margin-left: 12px;
+  }
+
+  &-time-sep {
+    line-height: 28px;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Mini month navigator (mini-month.ts).
+  //
+  // Deliberately dense: it is a map of the month, not a second calendar. Keep the
+  // selected / in-range / today states, but do not duplicate event indicators
+  // from the main calendar.
+  // ---------------------------------------------------------------------------
+  &-mini {
+    font-size: 12px;
+    user-select: none;
+  }
+
+  &-mini-header {
+    align-items: center;
+    display: flex;
+    gap: 2px;
+    justify-content: space-between;
+    padding-bottom: 4px;
+  }
+
+  &-mini-title {
+    flex: 1;
+    font-weight: 600;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-mini-weekdays,
+  &-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  &-mini-weekdays {
+    color: var(--b3-theme-on-surface);
+    font-size: 10px;
+    text-align: center;
+
+    span {
+      line-height: 18px;
+    }
+  }
+
+  &-mini-grid {
+    gap: 1px;
+  }
+
+  &-mini-day {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    font: inherit;
+    gap: 1px;
+    justify-content: center;
+    line-height: 1;
+    min-height: 24px;
+    padding: 2px 0;
+    position: relative;
+
+    &:hover {
+      background-color: var(--b3-list-hover);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: -2px;
+    }
+
+    &--outside {
+      color: var(--b3-theme-on-surface);
+      opacity: .6;
+    }
+
+    // The span the MAIN view is currently showing. A tint, not a ring: the ring
+    // belongs to today and the fill belongs to the selected day, and all three
+    // states have to be readable at the same time.
+    &--in-range {
+      background-color: var(--b3-theme-primary-lightest, rgba(66, 133, 244, .08));
+      border-radius: 0;
+    }
+
+    &--today {
+      box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
+      color: var(--b3-theme-primary);
+      font-weight: 600;
+    }
+
+    &--selected {
+      background-color: var(--b3-theme-primary);
+      border-radius: 50%;
+      color: var(--b3-theme-on-primary);
+
+      &:hover {
+        background-color: var(--b3-theme-primary);
+      }
+    }
+  }
+
+  &-mini-day-number {
+    line-height: 16px;
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // The "?" keyboard shortcut sheet (keymap.ts).
+  // ---------------------------------------------------------------------------
+  &-shortcuts {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 60vh;
+    overflow: auto;
+    padding: 16px;
+  }
+
+  &-shortcuts-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &-shortcuts-title {
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  &-shortcuts-row {
+    align-items: baseline;
+    display: flex;
+    gap: 12px;
+    line-height: 22px;
+  }
+
+  &-shortcuts-keys {
+    display: flex;
+    flex: 0 0 108px;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    kbd {
+      background-color: var(--b3-theme-surface);
+      border: 1px solid var(--b3-border-color);
+      border-bottom-width: 2px;
+      border-radius: var(--b3-border-radius);
+      color: var(--b3-theme-on-background);
+      font-family: var(--b3-font-family-code);
+      font-size: 11px;
+      line-height: 16px;
+      min-width: 18px;
+      padding: 0 5px;
+      text-align: center;
+    }
+  }
+
+  &-shortcuts-label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Chip context menu (context-menu.ts).
+  //
+  // Parented to <body> and positioned inline from the pointer, so only its own
+  // look lives here. It is never built at all on a read-only / query-embed
+  // calendar.
+  // ---------------------------------------------------------------------------
+  &-menu {
+    background-color: var(--b3-menu-background);
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius-b, var(--b3-border-radius));
+    box-shadow: var(--b3-dialog-shadow);
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    min-width: 184px;
+    overflow: auto;
+    padding: 4px;
+  }
+
+  &-menu-item {
+    background: transparent;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    color: var(--b3-theme-on-background);
+    cursor: pointer;
+    font: inherit;
+    line-height: 24px;
+    padding: 2px 10px;
+    text-align: left;
+    white-space: nowrap;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--b3-list-hover);
+      outline: none;
+    }
+
+    &--separated {
+      border-top: 1px solid var(--b3-border-color);
+      margin-top: 4px;
+      padding-top: 4px;
+    }
+
+    &--danger {
+      color: var(--b3-theme-error);
+    }
+  }
+  // Mobile uses the same Calendar renderer and transaction path as desktop.
+  // Keep these overrides last so the desktop base rules above cannot win by
+  // source order at SiYuan's existing narrow-screen breakpoint.
+  @media (max-width: 750px) {
+    &-toolbar {
+      align-items: stretch;
+
+      & > .block__icon,
+      & > .b3-button {
+        min-height: 42px;
+      }
+    }
+
+    &-title-control {
+      flex: 1 1 calc(100% - 144px);
+      min-height: 42px;
+      min-width: 0;
+    }
+
+    &-search-control {
+      flex: 1 1 100%;
+      max-width: none;
+    }
+
+    &-sidebar {
+      display: none;
+    }
+
+    &-body {
+      display: block;
+    }
+
+    &-main {
+      overflow-x: auto;
+    }
+  }
+}
+
+// The in-flight bar under an optimistic / pending calendar chip.
+@keyframes av__calendar-pending {
+  0%,
+  100% {
+    opacity: .35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .av__calendar-event--pending::after {
+    animation: none;
   }
 }

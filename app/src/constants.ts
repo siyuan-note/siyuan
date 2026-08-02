@@ -178,6 +178,7 @@ export abstract class Constants {
     public static readonly LOCAL_SESSION_FIRSTLOAD = "local-session-firstload";
     public static readonly LOCAL_OUTLINE = "local-outline";
     public static readonly LOCAL_PLUGIN_DOCKS = "local-plugin-docks";
+    public static readonly LOCAL_CALENDAR_DOCK = "local-calendar-dock";
     public static readonly LOCAL_IMAGES = "local-images";
     public static readonly LOCAL_EMOJIS = "local-emojis";
     public static readonly LOCAL_MOVE_PATH = "local-move-path";
@@ -748,6 +749,11 @@ export abstract class Constants {
                     show: false,
                     icon: "iconTag",
                     hotkeyLangId: "tag",
+                }, {
+                    type: "calendar",
+                    size: {width: 320, height: 0},
+                    show: false,
+                    icon: "iconCalendar",
                 }]
             ]
         },

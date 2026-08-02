@@ -1104,7 +1104,7 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "newCol") {
+                                } else if (type === "newCol" && data.viewType !== "calendar") {
                     avPanelElement.remove();
                     const addMenu = addCol(options.protyle, options.blockElement);
                     addMenu.open({
@@ -1658,6 +1658,7 @@ export const openMenuPanel = (options: {
                                         isCustomAttr,
                                         blockElement: options.blockElement,
                                         avPanelElement,
+                                        viewType: data.viewType,
                                         tabRect,
                                         isTwoWay: true
                                     });
@@ -1673,6 +1674,7 @@ export const openMenuPanel = (options: {
                                         isCustomAttr,
                                         blockElement: options.blockElement,
                                         avPanelElement,
+                                        viewType: data.viewType,
                                         tabRect,
                                         isTwoWay: false
                                     });
@@ -1696,6 +1698,7 @@ export const openMenuPanel = (options: {
                             isCustomAttr,
                             blockElement: options.blockElement,
                             avPanelElement,
+                            viewType: data.viewType,
                             tabRect,
                             isTwoWay: false
                         });
@@ -2188,10 +2191,10 @@ ${hideHTML}`;
 </button>
 ${showHTML}
 ${hideHTML}
-<button class="b3-menu__separator"></button>
+${viewType === "calendar" ? "" : `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="newCol">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.new}</span>
-</button>
+</button>`}
 </div>`;
 };

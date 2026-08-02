@@ -405,7 +405,8 @@ export const insertAttrViewBlockAnimation = (options: {
     // 有排序需要加入最后一行
     const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");
     if (hasSort) {
-        previousElement = options.blockElement.querySelector(groupQuery + ".av__row--util").previousElementSibling;
+        // 日历等布局不渲染 .av__row--util，缺失时保持原有插入位置。
+        previousElement = options.blockElement.querySelector(groupQuery + ".av__row--util")?.previousElementSibling || previousElement;
     }
     const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.groupID}"] `);
     if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&

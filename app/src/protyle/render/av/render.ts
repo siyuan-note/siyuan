@@ -18,6 +18,7 @@ import {getPageSize} from "./groups";
 import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
+import {renderCalendar} from "./calendar/render";
 import {bindAvSearch} from "./search";
 import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
 import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate, setAVLocateRequest} from "./locate";
@@ -106,6 +107,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     const defaultTemplate = data.newItemTemplates?.find(item => item.id === data.defaultTemplateID);
     const defaultTemplateID = defaultTemplate && (defaultTemplate.targetType !== "detached" ||
         defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
+    const calendarHeaderSearchClass = data.viewType === "calendar" ? " fn__none" : "";
     return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-current-view-id="${escapeAttr(data.viewID)}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
         <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
             <div class="av__selection-toolbar">
@@ -136,10 +138,10 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <button data-type="av-search-icon" aria-label="${window.siyuan.languages.search}" data-position="8south" class="ariaLabel block__icon">
+            <button data-type="av-search-icon" aria-label="${window.siyuan.languages.search}" data-position="8south" class="ariaLabel block__icon${calendarHeaderSearchClass}">
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </button>
-            <div style="position: relative" class="fn__flex">
+            <div style="position: relative" class="fn__flex${calendarHeaderSearchClass}">
                 <div contenteditable="plaintext-only" style="${showSearch ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.searchPlaceholder}"></div>
             </div>
             <div class="fn__space"></div>
@@ -488,6 +490,10 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             await renderKanban({blockElement: e, protyle, cb, renderAll});
             continue;
         }
+        if (e.getAttribute("data-av-type") === "calendar") {
+            await renderCalendar({blockElement: e, protyle, cb, renderAll});
+            continue;
+        }
 
         let selectCellId;
         const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
@@ -615,6 +621,11 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         if (data.viewType === "kanban") {
             e.setAttribute("data-av-type", data.viewType);
             await renderKanban({blockElement: e, protyle, cb, renderAll, data});
+            continue;
+        }
+        if (data.viewType === "calendar") {
+            e.setAttribute("data-av-type", data.viewType);
+            await renderCalendar({blockElement: e, protyle, cb, renderAll, data});
             continue;
         }
         const view = data.view as IAVTable;

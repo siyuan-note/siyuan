@@ -5,6 +5,7 @@ import {Constants} from "../../../../constants";
 import {avRender, genTabHeaderHTML} from "../render";
 import {afterRenderGallery, renderGallery} from "../gallery/render";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
+import {renderCalendar} from "../calendar/render";
 import {getRowHTML} from "../row";
 import {getAVSelectedItemPoints, getBodyVirtualData} from "../virtualScroll";
 import {beginAVRender, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
@@ -167,6 +168,17 @@ export const renderKanban = async (options: {
     if (data.viewType === "gallery") {
         options.blockElement.setAttribute("data-av-type", data.viewType);
         renderGallery({
+            blockElement: options.blockElement,
+            protyle: options.protyle,
+            cb: options.cb,
+            renderAll: options.renderAll,
+            data
+        });
+        return;
+    }
+    if (data.viewType === "calendar") {
+        options.blockElement.setAttribute("data-av-type", data.viewType);
+        renderCalendar({
             blockElement: options.blockElement,
             protyle: options.protyle,
             cb: options.cb,

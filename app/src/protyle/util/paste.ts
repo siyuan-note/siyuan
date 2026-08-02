@@ -352,7 +352,10 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
     const endBlockElement = isTextBlockPaste ? lastRootElement :
         Array.from(pastedContainerElement.querySelectorAll<HTMLElement>(
             '[data-type="NodeParagraph"], [data-type="NodeHeading"]'
-        )).reverse().find(item => !item.querySelector(":scope > .protyle-attr"));
+        )).reverse().find(item => {
+            const attrElement = item.querySelector(":scope > .protyle-attr");
+            return !attrElement || (attrElement.textContent || "").replace(/\u200b/g, "") === "";
+        });
     let targetChildElement: HTMLElement = targetBlockElement;
     if (pastedContainerElement) {
         while (targetChildElement.parentElement && targetChildElement.parentElement !== targetContentElement) {
@@ -661,20 +664,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (startRangeBlockElement && endRangeBlockElement && startRangeBlockElement !== endRangeBlockElement) {
             const selectedElement = document.createElement("div");
             selectedElement.append(range.cloneContents());
-            let pastedElement: HTMLElement = tempElement;
-            if (startRangeBlockElement.parentElement === endRangeBlockElement.parentElement &&
-                startRangeBlockElement.getAttribute("data-type") === "NodeParagraph" &&
-                endRangeBlockElement.getAttribute("data-type") === "NodeParagraph") {
-                pastedElement = tempElement.cloneNode(true) as HTMLElement;
-                [selectedElement, pastedElement].forEach(element => {
-                    normalizeVirtualBlockRef(element);
-                    element.querySelectorAll(".protyle-attr").forEach(item => item.remove());
-                });
-            } else {
-                selectedElement.querySelectorAll(".protyle-attr").forEach(item => {
-                    item.textContent = Constants.ZWSP;
-                });
-            }
+            const pastedElement = tempElement.cloneNode(true) as HTMLElement;
+            [selectedElement, pastedElement].forEach(element => {
+                normalizeVirtualBlockRef(element);
+                element.querySelectorAll(".protyle-attr").forEach(item => item.remove());
+            });
             if (selectedElement.isEqualNode(pastedElement)) {
                 range.collapse(false);
                 getSelection().removeAllRanges();

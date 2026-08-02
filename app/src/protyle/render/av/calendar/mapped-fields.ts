@@ -75,4 +75,3 @@ export const getMappedMetadata = (card: IAVGalleryItem, mapping: ICalendarFieldM
         colorContent: color.colorContent,
     };
 };
-

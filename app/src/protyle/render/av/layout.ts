@@ -8,8 +8,28 @@ import {getCardAspectRatioLabel, getCardAspectRatioValue, getCardWidth} from "./
 import {getFieldsByData} from "./view";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
-import {escapeHtml} from "../../../util/escape";
 import {CARD_LAYOUT_COMPACT, CARD_LAYOUT_LIST} from "./gallery/cardLayout";
+
+import {decodeICSBytes, parseICSCalendar} from "./calendar/ics";
+import {getCalendarFieldMapping, isCalendarRecurrenceStorageField} from "./calendar/mapped-fields";
+import {ensureCalendarRecurrenceStorage} from "./calendar/recurrence-storage";
+import {createCalendarEvent, createCalendarEventAsDocument, ICalendarCreateOptions} from "./calendar/transactions";
+
+const getCalendarLocale = () => window.siyuan.config.lang;
+
+// 与 ./calendar/render.ts 保持一致。这里本地声明而不是导入，是因为 layout.ts 会经由
+// av/render.ts -> openMenuPanel.ts 被 calendar/render.ts 间接引用，反向导入会形成循环依赖。
+// 取值与内核一致（kernel/av/layout_calendar.go 的 CalendarNewItemTarget）。
+const CALENDAR_NEW_ITEM_TARGET_DOCUMENT = "document";
+const CALENDAR_NEW_ITEM_TARGET_ROW = "row";
+
+const getCalendarNewItemTarget = (calendar: IAVCalendar) =>
+    calendar.newItemTarget || "";
+
+const getWeekdayLabel = (day: 0 | 1) => {
+    return new Intl.DateTimeFormat(getCalendarLocale(), {weekday: "long"}).format(new Date(2020, 5, 7 + day));
+};
+
 
 const getCardLayoutHTML = (view: IAVGallery | IAVKanban) => {
     let fullRowHTML = "";

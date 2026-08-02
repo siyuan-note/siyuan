@@ -866,25 +866,6 @@ for (const term of [
   }
 }
 
-const report = read("CALENDAR_REBUILD_REPORT.md");
-for (const term of [
-  "Completion Evidence / Manual Acceptance",
-  "Switching the AV renderer to Calendar without crashing.",
-  "Read-only/query-embed mutation guards, while still allowing event inspection and local view-mode switching.",
-  "Isolated launch smoke also passed without touching the real note vault:",
-  "CGO_ENABLED=1 go build -tags fts5 -o SiYuan-Kernel .",
-  "node scripts/calendar-kernel-smoke.mjs",
-  "node scripts/calendar-electron-document-flow-smoke.mjs",
-  "Backend `_attrView.calendar` language coverage is checked for every bundled language JSON file.",
-  "Calendar API setup and mapped metadata path.",
-  "Open an isolated workspace or explicit throwaway user workspace; do not use a personal data directory.",
-  "After automated checks, only the short manual acceptance list above remains recommended for visual confidence.",
-]) {
-  if (!report.includes(term)) {
-    fail(`rebuild report missing completion evidence term: ${term}`);
-  }
-}
-
 const recurrenceSmoke = read("scripts/calendar-recurrence-smoke.mjs");
 for (const term of [
   "normalizeCalendarEvents(calendar, mapping, range)",

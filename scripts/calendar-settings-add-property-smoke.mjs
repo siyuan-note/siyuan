@@ -32,7 +32,7 @@ const blockAttr = read("app/src/protyle/render/av/blockAttr.ts");
 
 // 1. The properties panel must know the active view type so it can drop the
 //    add-property button for calendar only.
-assert(openMenuPanel.includes("export const getPropertiesHTML = (fields: IAVColumn[], viewType?: string)"),
+assert(openMenuPanel.includes("export const getPropertiesHTML = (fields: IAVColumn[], viewType: TAVView)"),
   "getPropertiesHTML must accept the active view type");
 assert(openMenuPanel.includes('viewType === "calendar" ? "" : `<button class="b3-menu__separator"></button>'),
   "the add-property (newCol) button must be suppressed for calendar views");
@@ -42,7 +42,7 @@ const threadedCalls = openMenuPanel.split("getPropertiesHTML(fields, data.viewTy
 assert(threadedCalls === 7, `all 7 openMenuPanel call sites must pass data.viewType (found ${threadedCalls})`);
 assert(!openMenuPanel.includes("getPropertiesHTML(fields)"),
   "no openMenuPanel call site may render the properties panel without the view type");
-assert(col.includes("getPropertiesHTML(options.fields, options.viewType)"),
+assert(col.includes('options.blockElement.getAttribute("data-av-type") as TAVView'),
   "removeCol must re-render the properties panel with the view type");
 assert(!col.includes("getPropertiesHTML(options.fields)"),
   "removeCol may not re-render the properties panel without the view type");

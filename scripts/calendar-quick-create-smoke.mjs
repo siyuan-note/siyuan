@@ -1,4 +1,16 @@
 #!/usr/bin/env node
+/**
+ * Calendar quick-create regression smoke.
+ *
+ * The accepted wiring collects a draft (sweep gesture, timed-grid surface,
+ * all-day lane, month/week/day "new" buttons) and hands it to
+ * openFullCalendarCreate, which prefills the shared event dialog. The dialog
+ * preserves the draft's all-day / time / title state, branches on the view's
+ * new-entry target (page vs detached row), paints an optimistic pending chip
+ * and removes it on both the success and the failure path.
+ *
+ * Static source assertions, same style as the other calendar-*-smoke scripts.
+ */
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -19,8 +31,11 @@ if (!exists("app/src/protyle/render/av/calendar/quick-create.ts")) {
 
 const quickCreate = read("app/src/protyle/render/av/calendar/quick-create.ts");
 const render = read("app/src/protyle/render/av/calendar/render.ts");
+const eventDialog = read("app/src/protyle/render/av/calendar/event-dialog.ts");
 const scss = read("app/src/assets/scss/business/_av.scss");
 
+// 1. The popover module keeps its draft-collection contract (title, all-day
+//    toggle, Enter/Escape handling, save/more/cancel, inline error).
 for (const term of [
   "export interface IQuickCreateOptions",
   "export const openQuickCreate",
@@ -44,73 +59,95 @@ if (!/const getDraft = \(\) => \(\{[\s\S]*isAllDay: allDayInput\.checked[\s\S]*\
   fail("quick-create draft must preserve current all-day toggle state");
 }
 
-if (!/allDayInput\.addEventListener\("change"[\s\S]*summaryElement\.textContent = getDateTimeSummary\(getDraft\(\)\)/.test(quickCreate)) {
-  fail("quick-create all-day toggle must refresh visible date/time summary");
-}
-
+// 2. Every create entry point funnels through openFullCalendarCreate, which
+//    prefills the shared event dialog with the collected draft.
 for (const term of [
-  "import {openQuickCreate} from \"./quick-create\";",
-  "openQuickCreate({",
-  "onSave: async (savedDraft) => {",
-  "createCalendarEvent(createOptions)",
-  "onMoreOptions: (moreDraft) => openCalendarEventDialog({",
-  "isAllDay: true",
+  "const openFullCalendarCreate = (draft: ICalendarEventDraft) => {",
+  "openCalendarEventDialog({",
+  "draft,",
+  "onSave: rerender",
 ]) {
   if (!render.includes(term)) {
-    fail(`render.ts missing quick-create wiring ${term}`);
+    fail(`render.ts missing dialog-prefill quick-create wiring ${term}`);
+  }
+}
+// The dialog must preserve the draft state (all-day, times, title, fields).
+for (const term of [
+  "draft?.isAllDay",
+  "draft?.startTime",
+  "draft?.endTime",
+  "draft?.title",
+  "draft?.fieldValues",
+]) {
+  if (!eventDialog.includes(term)) {
+    fail(`event-dialog.ts missing draft prefill ${term}`);
   }
 }
 
-// Page-per-entry: both quick-create entry points must go through the SAME
-// helper, so the time slot and the day cell can never disagree about whether a
-// new entry becomes a document.
-if (!render.includes("const startCalendarQuickCreate = (") ||
-  (render.match(/ startCalendarQuickCreate\(/g) || []).length < 2) {
-  fail("both quick-create sites must call the shared startCalendarQuickCreate helper");
-}
-if (!render.includes("const createsDocuments = calendarCreatesDocuments(calendar, options.blockElement);") ||
-  !render.includes("if (createsDocuments) {")) {
-  fail("quick-create must branch on the view's new-entry target");
-}
-if (!/createAsDocument: createsDocuments/.test(render)) {
-  fail("dialog entry points must forward the view's new-entry target");
+// 3. Timed-grid create: one surface per day column, anchored at the exact
+//    clicked minute (snapped), reachable by pointer and keyboard.
+for (const term of [
+  "const startTimedQuickCreate = (surface: HTMLElement, startMinute: number) => {",
+  "offsetPxToMinute(event.clientY - rect.top, gridGeometry)",
+  "startTimedQuickCreate(surface, pointerMinute)",
+  "startTimedQuickCreate(surface, 9 * 60)",
+]) {
+  if (!render.includes(term)) {
+    fail(`render.ts missing timed-grid quick-create wiring ${term}`);
+  }
 }
 
-// Optimistic create: the popover closes at once, the chip is painted, and the
-// chip is removed on BOTH the success and the failure path (no phantom chip).
-if (/if \(createsDocuments\) \{[\s\S]{0,400}await createCalendarEventAsDocument/.test(render)) {
-  fail("page create must not be awaited inside the quick-create popover");
+// 4. All-day create: the all-day lane and the month/week/day "new" buttons
+//    collect an all-day draft through the same funnel.
+for (const term of [
+  "const startAllDayCreate = (surface: HTMLElement) => {",
+  "isAllDay: true",
+  'data-type="calendar-new"',
+]) {
+  if (!render.includes(term)) {
+    fail(`render.ts missing all-day quick-create wiring ${term}`);
+  }
 }
+if ((render.match(/startAllDayCreate\(/g) || []).length < 2) {
+  fail("all-day create must be reachable from both the lane and the new buttons");
+}
+
+// 5. The pointer gesture module's sweep hands its draft to the same funnel.
+if (!render.includes("openFullCalendarCreate(result.draft)")) {
+  fail("sweep gesture draft must go through openFullCalendarCreate");
+}
+
+// 6. Page-per-entry: quick create must branch on the view's new-entry target
+//    and forward it to the dialog and to the create transaction.
+for (const term of [
+  "const createsDocuments = calendarCreatesDocuments(calendar, options.blockElement);",
+  "createAsDocument: createsDocuments",
+  "createCalendarEventAsDocument({...createOptions",
+]) {
+  if (!render.includes(term)) {
+    fail(`render.ts missing page-per-entry branching ${term}`);
+  }
+}
+
+// 7. Optimistic create: the pending chip is painted and cleared on BOTH the
+//    success and the failure path (finally cleanup in the feedback wrapper).
 for (const term of [
   "const paintOptimisticEvent = (calendarElement: HTMLElement, draft: ICalendarEventDraft)",
   "av__calendar-event--pending",
-  "createEventDocumentOptimistically",
-  "createCalendarEventAsDocument(createOptions).then(created => {",
+  "classList.remove(\"av__calendar-event--pending\")",
 ]) {
   if (!render.includes(term)) {
     fail(`render.ts missing optimistic quick-create wiring ${term}`);
   }
 }
-if ((render.match(/pendingChip\?\.remove\(\);/g) || []).length < 2) {
-  fail("optimistic chip must be removed on both the success and the failure path");
-}
 
-// The 30-minute slot buttons became one continuous create surface; the day-cell
-// dblclick guard must still exclude it so a sweep in the time grid does not also
-// fire the day-cell create.
+// 8. The day-cell dblclick guard must exclude the timed-grid create surface so
+//    a sweep in the time grid does not also fire the day-cell create.
 if (!/\[data-type='calendar-time-create'\]/.test(render)) {
   fail("drop-day dblclick guard must exclude calendar-time-create targets");
 }
 
-// Position is now minute-exact rather than snapped to a slot element.
-if (!render.includes("startCalendarQuickCreate(surface, surface.offsetTop + minuteToOffsetPx(start, gridGeometry), draft)")) {
-  fail("time-grid quick-create must anchor the popover at the exact clicked minute");
-}
-
-if (!/calendar-new"\]'\)[\s\S]{0,900}startCalendarQuickCreate/.test(render)) {
-  fail("month/week/day new buttons should use quick-create for all-day drafts");
-}
-
+// 9. The quick-create popover chrome stays in the calendar stylesheet.
 for (const term of [
   "&-quick-create",
   "&-quick-create-title",

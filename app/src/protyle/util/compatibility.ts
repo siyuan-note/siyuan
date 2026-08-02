@@ -183,11 +183,13 @@ export const saveExportFile = async (uri: string, msgId?: string): Promise<TSave
     /// #else
     try {
         let result: TSaveExportFileResult;
+        let hasCompletionResult = false;
         if (isInAndroid()) {
             if (window.JSAndroid.saveExportFileV2) {
                 result = await waitMobileExportFile((requestID) => {
                     window.JSAndroid.saveExportFileV2(uri, requestID);
                 });
+                hasCompletionResult = true;
             } else {
                 window.JSAndroid.saveExportFile(uri);
                 result = {status: "success"};
@@ -197,6 +199,7 @@ export const saveExportFile = async (uri: string, msgId?: string): Promise<TSave
                 result = await waitMobileExportFile((requestID) => {
                     window.webkit.messageHandlers.saveExportFileV2.postMessage({uri, requestID});
                 });
+                hasCompletionResult = true;
             } else {
                 window.webkit.messageHandlers.saveExportFile.postMessage(uri);
                 result = {status: "success"};
@@ -206,6 +209,7 @@ export const saveExportFile = async (uri: string, msgId?: string): Promise<TSave
                 result = await waitMobileExportFile((requestID) => {
                     window.JSHarmony.saveExportFileV2(uri, requestID);
                 });
+                hasCompletionResult = true;
             } else {
                 window.JSHarmony.saveExportFile(uri);
                 result = {status: "success"};
@@ -218,6 +222,9 @@ export const saveExportFile = async (uri: string, msgId?: string): Promise<TSave
         }
         if (msgId) {
             hideMessage(msgId);
+        }
+        if (hasCompletionResult && result.status === "success") {
+            showMessage(window.siyuan.languages.exported);
         }
         return result;
     } catch (e) {

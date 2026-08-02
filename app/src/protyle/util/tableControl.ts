@@ -1142,12 +1142,20 @@ export class TableControl {
         });
     }
 
+    private getTableHTMLWithCaret(node: HTMLElement) {
+        const marker = document.createElement("wbr");
+        getEditorRange(node).insertNode(marker);
+        const html = node.outerHTML;
+        marker.remove();
+        return html;
+    }
+
     private insertRowAt(node: HTMLElement, table: HTMLTableElement, index: number) {
         const grid = buildTableGrid(table);
         if (!this.canInsertAtBoundary(grid, "row", index)) {
             return;
         }
-        const oldHTML = node.outerHTML;
+        const oldHTML = this.getTableHTMLWithCaret(node);
         const row = document.createElement("tr");
         const headRowCount = table.tHead?.rows.length || 0;
         const tag = index < headRowCount || index === 0 ? "th" : "td";
@@ -1184,7 +1192,7 @@ export class TableControl {
         if (!this.canInsertAtBoundary(grid, "column", index)) {
             return;
         }
-        const oldHTML = node.outerHTML;
+        const oldHTML = this.getTableHTMLWithCaret(node);
         let focusCell: HTMLTableCellElement;
         Array.from(table.rows).forEach(row => {
             const cell = document.createElement(row.parentElement.tagName === "THEAD" ? "th" : "td");

@@ -1178,15 +1178,17 @@ export class TableControl {
             checked: verticalAlign === "",
             click: () => this.setCellStyle("vertical-align", ""),
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         const cells = this.getSelectedCells();
         const mergedCell = cells.length === 1 && (cells[0].rowSpan > 1 || cells[0].colSpan > 1);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: mergedCell ? window.siyuan.languages.cancelMerged : window.siyuan.languages.mergeCell,
-            disabled: !mergedCell && (!rectangle || cells.length < 2 || !this.isSelectionInOneSection()),
-            accelerator: !mergedCell && !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
-            click: () => mergedCell ? this.splitCell(cells[0]) : this.mergeCells(),
-        }).element);
+        if (mergedCell || cells.length > 1) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: mergedCell ? window.siyuan.languages.cancelMerged : window.siyuan.languages.mergeCell,
+                disabled: !mergedCell && (!rectangle || !this.isSelectionInOneSection()),
+                accelerator: !mergedCell && !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
+                click: () => mergedCell ? this.splitCell(cells[0]) : this.mergeCells(),
+            }).element);
+        }
         const rowSelection = getTableFullRowSelection(this.selection.table, cells);
         const columnSelection = getTableFullColumnSelection(this.selection.table, cells);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

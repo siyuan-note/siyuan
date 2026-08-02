@@ -22,6 +22,7 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
 import {updateListOrder} from "../wysiwyg/list";
 import {refreshSbAndPersistWidth} from "../../block/util";
+import {hasBlockSelectionPasteMarker} from "./pasteSource";
 
 export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement) => {
     // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
@@ -659,6 +660,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else {
             tempElement.innerHTML = siyuanHTML;
         }
+        const isBlockSelectionPaste = hasBlockSelectionPasteMarker(tempElement.children);
         const startRangeBlockElement = hasClosestBlock(range.startContainer);
         const endRangeBlockElement = hasClosestBlock(range.endContainer);
         if (startRangeBlockElement && endRangeBlockElement && startRangeBlockElement !== endRangeBlockElement) {
@@ -752,8 +754,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         });
         const hasHeadingChildren = Array.from(tempElement.children).some(item =>
             item.hasAttribute("parent-heading"));
-        // 标题及下方块需要保留块类型和折叠关系，交由 insertHTML 处理 https://github.com/siyuan-note/siyuan/issues/18419
-        if (isBlock && !hasHeadingChildren && pasteCrossBlockRange(protyle, tempElement, range)) {
+        // 完整块选择以及标题下方块需要保留块结构，交由 insertHTML 处理 https://github.com/siyuan-note/siyuan/issues/18419
+        if (isBlock && !isBlockSelectionPaste && !hasHeadingChildren && pasteCrossBlockRange(protyle, tempElement, range)) {
             blockRender(protyle, protyle.wysiwyg.element);
             processRender(protyle.wysiwyg.element);
             highlightRender(protyle.wysiwyg.element);

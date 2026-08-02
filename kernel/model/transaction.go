@@ -68,9 +68,25 @@ func FlushTxQueue() {
 // 失败时返回原始错误（不转成推送消息），调用方据此回滚撤销栈状态。
 func PerformTxSync(tx *Transaction) (err error) {
 	defer logging.Recover()
+	// 初始化事务互斥锁（異步路徑 PerformTransactions 在入隊前初始化，同步路徑這裡補上）
+	if nil == tx.m {
+		tx.m = &sync.Mutex{}
+	}
 	flushLock.Lock()
 	isFlushing.Store(true)
 	defer func() {
+		if recovered := recover(); recovered != nil {
+			if tx.calendarJournalBoxID != "" {
+				if recoverErr := recoverCalendarItemCommitJournal(tx.calendarJournalBoxID); recoverErr != nil {
+					logging.LogErrorf("recover panicked calendar item transaction for box [%s] failed: %s", tx.calendarJournalBoxID, recoverErr)
+				}
+			}
+			state := tx.state.Load()
+			if 1 == state {
+				tx.rollback()
+			}
+			err = txErrFromPanic(state, recovered)
+		}
 		isFlushing.Store(false)
 		flushLock.Unlock()
 	}()
@@ -231,14 +247,22 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	defer func() {
 		if e := recover(); nil != e {
-			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, logging.ShortStack())
+			msg := fmt.Sprintf("PANIC RECOVERED: %v\n	%s\n", e, logging.ShortStack())
 			logging.LogError(msg)
+			recoverErr := recoverCalendarItemTransactionAfterPanic(tx)
+			if tx.calendarJournalBoxID != "" && recoverErr != nil {
+				logging.LogErrorf("recover panicked calendar item transaction for box [%s] failed: %s", tx.calendarJournalBoxID, recoverErr)
+			}
 
 			state := tx.state.Load()
 			if 1 == state {
 				tx.rollback()
 			}
-			ret = txErrFromPanic(state, e)
+			if recoverErr != nil {
+				ret = &TxErr{code: TxErrCodePushMsg, msg: fmt.Sprintf("transaction panic: %v; recovery failed: %s", e, recoverErr)}
+			} else {
+				ret = txErrFromPanic(state, e)
+			}
 		}
 	}()
 
@@ -346,6 +370,9 @@ func performTx(tx *Transaction) (ret *TxErr) {
 					ret = tx.doBatchUpdateAttrViewCells(operations)
 					operationIndex += len(operations) - 1
 				}
+				ret = tx.doUpdateAttrViewCell(op)
+			case "updateAttributeViewItem":
+				ret = tx.doUpdateAttributeViewItem(op)
 			case "updateAttrViewColOptions":
 				ret = tx.doUpdateAttrViewColOptions(op)
 			case "removeAttrViewColOption":
@@ -448,6 +475,16 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doRemoveAttrViewGroup(op)
 			case "sortAttrViewGroup":
 				ret = tx.doSortAttrViewGroup(op)
+			case "setAttrViewCalendarDateField":
+				ret = tx.doSetAttrViewCalendarDateField(op)
+			case "setAttrViewCalendarViewMode":
+				ret = tx.doSetAttrViewCalendarViewMode(op)
+			case "setAttrViewCalendarWeekStart":
+				ret = tx.doSetAttrViewCalendarWeekStart(op)
+			case "setAttrViewCalendarFieldMapping":
+				ret = tx.doSetAttrViewCalendarFieldMapping(op)
+			case "setAttrViewCalendarNewItemTarget":
+				ret = tx.doSetAttrViewCalendarNewItemTarget(op)
 			}
 
 			if nil != ret {
@@ -464,6 +501,11 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
+		if tx.calendarJournalBoxID != "" {
+			if recoverErr := recoverCalendarItemCommitJournal(tx.calendarJournalBoxID); recoverErr != nil {
+				logging.LogErrorf("recover failed calendar item transaction for box [%s] failed: %s", tx.calendarJournalBoxID, recoverErr)
+			}
+		}
 		if 1 == tx.state.Load() {
 			tx.rollback()
 		}
@@ -477,6 +519,13 @@ func txErrFromPanic(state int32, recovered any) *TxErr {
 		return nil
 	}
 	return &TxErr{code: TxErrCodePushMsg, msg: fmt.Sprintf("transaction panic: %v", recovered)}
+}
+
+func recoverCalendarItemTransactionAfterPanic(tx *Transaction) error {
+	if tx == nil || tx.calendarJournalBoxID == "" {
+		return nil
+	}
+	return recoverCalendarItemJournal(tx.calendarJournalBoxID)
 }
 
 func (tx *Transaction) processLargeDelete() bool {
@@ -1314,15 +1363,37 @@ func deleteAttrView(n *ast.Node, changedAvIDs []string) []string {
 			continue
 		}
 
+		removedItemID := ""
 		for i, blockValue := range blockValues.Values {
 			if nil == blockValue.Block {
 				continue
 			}
 
 			if blockValue.Block.ID == n.ID {
+				removedItemID = blockValue.BlockID
 				blockValues.Values = append(blockValues.Values[:i], blockValues.Values[i+1:]...)
 				changedAv = true
 				break
+			}
+		}
+
+		if "" != removedItemID {
+			// 条目 ID 与绑定块 ID 自 v3.7.3 起不同，只删主键值会把该条目其余字段的值留成孤儿：
+			// 它们不再属于任何行，界面上看不见也无法恢复。这里一并清掉。
+			for _, keyValues := range attrView.KeyValues {
+				if nil == keyValues || keyValues == blockValues {
+					continue
+				}
+				values := keyValues.Values[:0]
+				for i, value := range keyValues.Values {
+					if nil == value || value.BlockID != removedItemID {
+						values = append(values, keyValues.Values[i])
+					}
+				}
+				keyValues.Values = values
+			}
+			for _, view := range attrView.Views {
+				view.ItemIDs = gulu.Str.RemoveElem(view.ItemIDs, removedItemID)
 			}
 		}
 
@@ -2169,11 +2240,16 @@ type Transaction struct {
 	changedRootIDs []string               // 变更的树 ID 列表（包含了变更定义块后影响的动态锚文本所在的树）
 	boxIcons       map[string]string      // 事务提交后需要同步的笔记本图标
 
-	isGlobalAssetsInit  bool   // 是否初始化过全局资源判断
-	isGlobalAssets      bool   // 是否属于全局资源
-	assetsDir           string // 资源目录路径
-	removedCreatedDocs  []*parse.Tree
-	restoredCreatedDocs []*parse.Tree
+	isGlobalAssetsInit   bool   // 是否初始化过全局资源判断
+	isGlobalAssets       bool   // 是否属于全局资源
+	assetsDir            string // 资源目录路径
+	removedCreatedDocs   []*parse.Tree
+	restoredCreatedDocs  []*parse.Tree
+	deferredAttrViews    map[string]*av.AttributeView
+	deferAttrViewSave    bool
+	originalTrees        map[string]*parse.Tree
+	renamedTrees         map[string]*parse.Tree
+	calendarJournalBoxID string
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
@@ -2214,6 +2290,11 @@ func (tx *Transaction) GetMutatedRootIDs() (ret []string) {
 	for t := range tx.trees {
 		ret = append(ret, t)
 	}
+	// Atomic bound AV updates may only change calendar fields while keeping the
+	// document title unchanged. They still belong to that document's undo stack.
+	for t := range tx.originalTrees {
+		ret = append(ret, t)
+	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }
@@ -2236,6 +2317,11 @@ func (tx *Transaction) begin() (err error) {
 	tx.restoredCreatedDocs = nil
 	tx.listItemFoldCandidates = nil
 	tx.listItemFoldCandidateIDs = map[string]struct{}{}
+	tx.deferredAttrViews = map[string]*av.AttributeView{}
+	tx.deferAttrViewSave = false
+	tx.originalTrees = map[string]*parse.Tree{}
+	tx.renamedTrees = map[string]*parse.Tree{}
+	tx.calendarJournalBoxID = ""
 	tx.luteEngine = util.NewLute()
 	tx.m.Lock()
 	tx.state.Store(1)
@@ -2243,6 +2329,17 @@ func (tx *Transaction) begin() (err error) {
 }
 
 func (tx *Transaction) commit() (err error) {
+	var calendarJournal *calendarItemCommitJournal
+	if len(tx.originalTrees) > 0 {
+		calendarJournal, err = buildCalendarItemCommitJournal(tx)
+		if err != nil {
+			return err
+		}
+		if err = persistCalendarItemCommitJournal(calendarJournal); err != nil {
+			return err
+		}
+		tx.calendarJournalBoxID = calendarJournal.BoxID
+	}
 	for _, tree := range tx.trees {
 		if err = writeTreeUpsertQueue(tree); err != nil {
 			return
@@ -2270,14 +2367,45 @@ func (tx *Transaction) commit() (err error) {
 
 	tx.relatedAvIDs = gulu.Str.RemoveDuplicatedElem(tx.relatedAvIDs)
 	for _, avID := range tx.relatedAvIDs {
-		destAv, _ := av.ParseAttributeView(avID)
+		destAv := tx.deferredAttrViews[avID]
+		if nil == destAv {
+			destAv, _ = av.ParseAttributeView(avID)
+		}
 		if nil == destAv {
 			continue
 		}
 
 		regenAttrViewGroups(destAv)
-		av.SaveAttributeView(destAv)
+		if err = av.SaveAttributeView(destAv); err != nil {
+			return err
+		}
 		ReloadAttrView(avID)
+	}
+	for _, tree := range tx.renamedTrees {
+		box := Conf.Box(tree.Box)
+		if box == nil {
+			return ErrBoxNotFound
+		}
+		for _, subFile := range box.ListFiles(tree.Path) {
+			if !strings.HasSuffix(subFile.path, ".sy") {
+				continue
+			}
+			subTree, loadErr := filesys.LoadTree(box.ID, subFile.path, tx.luteEngine)
+			if loadErr != nil {
+				continue
+			}
+			treenode.SetBlockTreePath(subTree)
+			sql.RenameTreeQueue(subTree)
+		}
+		updateRefTextRenameDoc(tree)
+		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
+		evt.Data = map[string]any{
+			"box": tree.Box, "id": tree.Root.ID, "path": tree.Path,
+			"title":   tree.Root.IALAttr("title"),
+			"empty":   tree.Root.IALAttr(NodeAttrTitleEmpty) == "true",
+			"refText": getNodeRefText(tree.Root),
+		}
+		util.PushEvent(evt)
 	}
 	for _, tree := range tx.removedCreatedDocs {
 		box := Conf.Box(tree.Box)
@@ -2300,6 +2428,11 @@ func (tx *Transaction) commit() (err error) {
 	}
 
 	IncSync()
+	if calendarJournal != nil {
+		if err = finalizeCalendarItemCommitJournal(calendarJournal.BoxID); err != nil {
+			return err
+		}
+	}
 	tx.state.Store(2)
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
 	GlobalUndoLog.Record(tx)

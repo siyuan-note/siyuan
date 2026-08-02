@@ -1183,7 +1183,13 @@ func (conf *AppConf) language(num int) (ret string) {
 func InitBoxes() {
 	blockCount := treenode.CountBlocks()
 	initialized := 0 < blockCount
+	if err := recoverCalendarItemCommitJournal(""); err != nil {
+		logging.LogErrorf("recover global calendar item transaction failed: %s", err)
+	}
 	for _, box := range Conf.GetOpenedBoxes() {
+		if err := recoverCalendarItemCommitJournal(box.ID); err != nil {
+			logging.LogErrorf("recover calendar item transaction for box [%s] failed: %s", box.ID, err)
+		}
 		if _, err := EnsureBoxDoc(box.ID); nil != err {
 			logging.LogErrorf("ensure box document [%s] failed: %s", box.ID, err)
 		}

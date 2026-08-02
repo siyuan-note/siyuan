@@ -643,6 +643,8 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			groupView.Gallery.CardFields = nil
 		case av.LayoutTypeKanban:
 			groupView.Kanban.Fields = nil
+		case av.LayoutTypeCalendar:
+			groupView.Calendar.Fields = nil
 		}
 	}
 	viewable.SetGroups(groups)
@@ -897,6 +899,13 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 			targetOffset = start
 		}
 		kanban.Cards = kanban.Cards[start:end]
+	case av.LayoutTypeCalendar:
+		calendar := viewable.(*av.Calendar)
+		// 日历不分页（前端始终请求整个数据库），但仍要解析定位目标，
+		// 否则 siyuan://blocks/...?avItemID= 跳转拿不到 target 状态。
+		targetIndex = findAttributeViewTargetIndex(targetItemID, len(calendar.Cards), func(index int) string { return calendar.Cards[index].ID })
+		calendar.CardCount = len(calendar.Cards)
+		calendar.PageSize = view.PageSize
 	}
 	return
 }

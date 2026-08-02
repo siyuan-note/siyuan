@@ -1459,6 +1459,10 @@ func unlockBoxHeld(boxID string, password string, boxEnc *conf.BoxEncryption) (e
 		}
 	}
 	finalState = EncryptedBoxStateUnlocked
+	if err = recoverCalendarItemCommitJournal(boxID); err != nil {
+		logging.LogErrorf("recover calendar item transaction after unlocking box [%s] failed: %s", boxID, err)
+		return err
+	}
 	return nil
 }
 

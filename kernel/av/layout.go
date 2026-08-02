@@ -84,6 +84,9 @@ func NewViewBaseInstance(view *View) *BaseInstance {
 	case LayoutTypeKanban:
 		showIcon = view.Kanban.ShowIcon
 		wrapField = view.Kanban.WrapField
+	case LayoutTypeCalendar:
+		showIcon = view.Calendar.ShowIcon
+		wrapField = view.Calendar.WrapField
 	}
 	return &BaseInstance{
 		ID:               view.ID,

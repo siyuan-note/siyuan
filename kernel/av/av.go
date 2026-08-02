@@ -292,19 +292,20 @@ var widthValuePattern = regexp.MustCompile(`^\d+(\.\d+)?(px|em|rem|%)$`)
 
 // View 描述了视图的结构。
 type View struct {
-	ID               string         `json:"id"`                // 视图 ID
-	Icon             string         `json:"icon"`              // 视图图标
-	Name             string         `json:"name"`              // 视图名称
-	HideAttrViewName bool           `json:"hideAttrViewName"`  // 是否隐藏属性视图名称
-	Desc             string         `json:"desc"`              // 视图描述
-	Filters          []*ViewFilter  `json:"filters,omitempty"` // 过滤规则
-	Sorts            []*ViewSort    `json:"sorts,omitempty"`   // 排序规则
-	PageSize         int            `json:"pageSize"`          // 每页条目数
-	LayoutType       LayoutType     `json:"type"`              // 当前布局类型
-	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
-	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
-	Kanban           *LayoutKanban  `json:"kanban,omitempty"`  // 看板布局
-	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
+	ID               string          `json:"id"`                 // 视图 ID
+	Icon             string          `json:"icon"`               // 视图图标
+	Name             string          `json:"name"`               // 视图名称
+	HideAttrViewName bool            `json:"hideAttrViewName"`   // 是否隐藏属性视图名称
+	Desc             string          `json:"desc"`               // 视图描述
+	Filters          []*ViewFilter   `json:"filters,omitempty"`  // 过滤规则
+	Sorts            []*ViewSort     `json:"sorts,omitempty"`    // 排序规则
+	PageSize         int             `json:"pageSize"`           // 每页条目数
+	LayoutType       LayoutType      `json:"type"`               // 当前布局类型
+	Table            *LayoutTable    `json:"table,omitempty"`    // 表格布局
+	Gallery          *LayoutGallery  `json:"gallery,omitempty"`  // 卡片布局
+	Kanban           *LayoutKanban   `json:"kanban,omitempty"`   // 看板布局
+	Calendar         *LayoutCalendar `json:"calendar,omitempty"` // 日历布局
+	ItemIDs          []string        `json:"itemIds,omitempty"`  // 项目 ID 列表，用于维护所有项目
 
 	Group        *ViewGroup `json:"group,omitempty"`     // 分组规则
 	GroupCreated int64      `json:"groupCreated"`        // 分组生成时间戳
@@ -405,9 +406,10 @@ type GroupCalc struct {
 type LayoutType string
 
 const (
-	LayoutTypeTable   LayoutType = "table"   // 属性视图类型 - 表格
-	LayoutTypeGallery LayoutType = "gallery" // 属性视图类型 - 卡片
-	LayoutTypeKanban  LayoutType = "kanban"  // 属性视图类型 - 看板
+	LayoutTypeTable    LayoutType = "table"    // 属性视图类型 - 表格
+	LayoutTypeGallery  LayoutType = "gallery"  // 属性视图类型 - 卡片
+	LayoutTypeKanban   LayoutType = "kanban"   // 属性视图类型 - 看板
+	LayoutTypeCalendar LayoutType = "calendar" // 属性视图类型 - 日历
 )
 
 const (
@@ -466,6 +468,18 @@ func NewKanbanView() (ret *View) {
 		PageSize:   ViewDefaultPageSize,
 		LayoutType: LayoutTypeKanban,
 		Kanban:     NewLayoutKanban(),
+	}
+}
+
+func NewCalendarView() (ret *View) {
+	return &View{
+		ID:         ast.NewNodeID(),
+		Name:       GetAttributeViewI18n("calendar"),
+		Filters:    []*ViewFilter{},
+		Sorts:      []*ViewSort{},
+		PageSize:   ViewDefaultPageSize,
+		LayoutType: LayoutTypeCalendar,
+		Calendar:   NewLayoutCalendar(),
 	}
 }
 
@@ -1266,6 +1280,19 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 			view.Kanban.ID = ast.NewNodeID()
 			for _, field := range view.Kanban.Fields {
 				field.ID = keyIDMap[field.ID]
+			}
+		case LayoutTypeCalendar:
+			view.Calendar.ID = ast.NewNodeID()
+			view.Calendar.DateFieldID = keyIDMap[view.Calendar.DateFieldID]
+			for _, field := range view.Calendar.Fields {
+				field.ID = keyIDMap[field.ID]
+			}
+			if nil != view.Calendar.FieldMapping {
+				view.Calendar.FieldMapping.RecurrenceFieldID = keyIDMap[view.Calendar.FieldMapping.RecurrenceFieldID]
+				view.Calendar.FieldMapping.ExceptionFieldID = keyIDMap[view.Calendar.FieldMapping.ExceptionFieldID]
+				view.Calendar.FieldMapping.LocationFieldID = keyIDMap[view.Calendar.FieldMapping.LocationFieldID]
+				view.Calendar.FieldMapping.DescriptionFieldID = keyIDMap[view.Calendar.FieldMapping.DescriptionFieldID]
+				view.Calendar.FieldMapping.ColorFieldID = keyIDMap[view.Calendar.FieldMapping.ColorFieldID]
 			}
 		}
 		view.ItemIDs = []string{}

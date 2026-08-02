@@ -4489,6 +4489,13 @@ func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (
 		for _, field := range view.Kanban.Fields {
 			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
 		}
+	case av.LayoutTypeCalendar:
+		view.Table = av.NewLayoutTable()
+		if nil != view.Calendar {
+			for _, field := range view.Calendar.Fields {
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
+			}
+		}
 	}
 
 	depth := 1

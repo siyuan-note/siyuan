@@ -865,7 +865,7 @@ func syncAttrViewTableColWidth(operation *Operation) (err error) {
 				break
 			}
 		}
-	case av.LayoutTypeGallery, av.LayoutTypeKanban:
+	case av.LayoutTypeGallery, av.LayoutTypeKanban, av.LayoutTypeCalendar:
 		return
 	}
 
@@ -1364,7 +1364,7 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 
 	switch newLayout {
 	case av.LayoutTypeTable:
-		if view.Name == av.GetAttributeViewI18n("gallery") || view.Name == av.GetAttributeViewI18n("kanban") {
+		if view.Name == av.GetAttributeViewI18n("gallery") || view.Name == av.GetAttributeViewI18n("kanban") || view.Name == av.GetAttributeViewI18n("calendar") {
 			view.Name = av.GetAttributeViewI18n("table")
 		}
 
@@ -1382,9 +1382,13 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 			for _, field := range view.Kanban.Fields {
 				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
 			}
+		case av.LayoutTypeCalendar:
+			for _, field := range view.Calendar.Fields {
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
+			}
 		}
 	case av.LayoutTypeGallery:
-		if view.Name == av.GetAttributeViewI18n("table") || view.Name == av.GetAttributeViewI18n("kanban") {
+		if view.Name == av.GetAttributeViewI18n("table") || view.Name == av.GetAttributeViewI18n("kanban") || view.Name == av.GetAttributeViewI18n("calendar") {
 			view.Name = av.GetAttributeViewI18n("gallery")
 		}
 
@@ -1402,9 +1406,13 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 			for _, field := range view.Kanban.Fields {
 				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: field.ID}})
 			}
+		case av.LayoutTypeCalendar:
+			for _, field := range view.Calendar.Fields {
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: field.ID}})
+			}
 		}
 	case av.LayoutTypeKanban:
-		if view.Name == av.GetAttributeViewI18n("table") || view.Name == av.GetAttributeViewI18n("gallery") {
+		if view.Name == av.GetAttributeViewI18n("table") || view.Name == av.GetAttributeViewI18n("gallery") || view.Name == av.GetAttributeViewI18n("calendar") {
 			view.Name = av.GetAttributeViewI18n("kanban")
 		}
 
@@ -1422,12 +1430,42 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 			for _, field := range view.Gallery.CardFields {
 				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
 			}
+		case av.LayoutTypeCalendar:
+			for _, field := range view.Calendar.Fields {
+				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
+			}
 		}
 
 		if !view.IsGroupView() {
 			preferredGroupKey := getKanbanPreferredGroupKey(attrView)
 			group := &av.ViewGroup{Field: preferredGroupKey.ID}
 			setAttributeViewGroup(attrView, view, group)
+		}
+	case av.LayoutTypeCalendar:
+		if view.Name == av.GetAttributeViewI18n("table") || view.Name == av.GetAttributeViewI18n("gallery") || view.Name == av.GetAttributeViewI18n("kanban") {
+			view.Name = av.GetAttributeViewI18n("calendar")
+		}
+
+		if nil == view.Calendar {
+			view.Calendar = av.NewLayoutCalendar()
+			switch oldLayout {
+			case av.LayoutTypeTable:
+				for _, col := range view.Table.Columns {
+					view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{BaseField: &av.BaseField{ID: col.ID}})
+				}
+			case av.LayoutTypeGallery:
+				for _, field := range view.Gallery.CardFields {
+					view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{BaseField: &av.BaseField{ID: field.ID}})
+				}
+			case av.LayoutTypeKanban:
+				for _, field := range view.Kanban.Fields {
+					view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{BaseField: &av.BaseField{ID: field.ID}})
+				}
+			}
+		}
+		setDefaultCalendarDateField(attrView, view)
+		if av.CalendarNewItemTargetDocument == view.Calendar.NewItemTarget {
+			ensureCalendarNewItemDocumentTemplate(attrView)
 		}
 	}
 	return
@@ -1469,6 +1507,11 @@ func setAttrViewWrapField(operation *Operation) (err error) {
 		for _, field := range view.Kanban.Fields {
 			field.Wrap = allFieldWrap
 		}
+	case av.LayoutTypeCalendar:
+		view.Calendar.WrapField = allFieldWrap
+		for _, field := range view.Calendar.Fields {
+			field.Wrap = allFieldWrap
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1501,6 +1544,8 @@ func setAttrViewShowIcon(operation *Operation) (err error) {
 		view.Gallery.ShowIcon = operation.Data.(bool)
 	case av.LayoutTypeKanban:
 		view.Kanban.ShowIcon = operation.Data.(bool)
+	case av.LayoutTypeCalendar:
+		view.Calendar.ShowIcon = operation.Data.(bool)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1581,6 +1626,8 @@ func setAttrViewDisplayFieldName(operation *Operation) (err error) {
 		view.Gallery.DisplayFieldName = operation.Data.(bool)
 	case av.LayoutTypeKanban:
 		view.Kanban.DisplayFieldName = operation.Data.(bool)
+	case av.LayoutTypeCalendar:
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1903,6 +1950,105 @@ func (tx *Transaction) doSetAttrViewCardCoverPosition(operation *Operation) (ret
 	return
 }
 
+func (tx *Transaction) doSetAttrViewCalendarDateField(operation *Operation) (ret *TxErr) {
+	err := setAttrViewCalendarDateField(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+// resolveAttrViewViewByOperation 优先使用 operation.ViewID 定位视图，这样同一个数据库块存在多个视图时写入不会落到错误的视图上。
+// 旧版前端只发送 blockID，此时回退到按块上的当前视图解析。
+func resolveAttrViewViewByOperation(attrView *av.AttributeView, operation *Operation) (ret *av.View, err error) {
+	if "" != operation.ViewID {
+		ret = attrView.GetView(operation.ViewID)
+		if nil == ret {
+			return nil, av.ErrViewNotFound
+		}
+		return
+	}
+	return getAttrViewViewByBlockID(attrView, operation.BlockID)
+}
+
+func setAttrViewCalendarDateField(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := resolveAttrViewViewByOperation(attrView, operation)
+	if err != nil {
+		return
+	}
+
+	if av.LayoutTypeCalendar != view.LayoutType || nil == view.Calendar {
+		return fmt.Errorf("view is not a calendar layout")
+	}
+
+	dateFieldID, err := calendarDateFieldFromOperationData(attrView, operation)
+	if err != nil {
+		return
+	}
+	if "" == dateFieldID {
+		view.Calendar.DateFieldID = ""
+		err = av.SaveAttributeView(attrView)
+		ReloadAttrView(attrView.ID)
+		return
+	}
+
+	view.Calendar.DateFieldID = dateFieldID
+	err = av.SaveAttributeView(attrView)
+	ReloadAttrView(attrView.ID)
+	return
+}
+
+func calendarDateFieldFromOperationData(attrView *av.AttributeView, operation *Operation) (dateFieldID string, err error) {
+	dateFieldID = operation.KeyID
+	if "" == dateFieldID {
+		dataStr, ok := operation.Data.(string)
+		if !ok {
+			return "", fmt.Errorf("calendar date field data must be a string")
+		}
+		dateFieldID = dataStr
+	}
+	if "" == dateFieldID {
+		return
+	}
+	key, getErr := attrView.GetKey(dateFieldID)
+	if nil != getErr {
+		return "", fmt.Errorf("calendar date field [%s] not found: %w", dateFieldID, getErr)
+	}
+	if av.KeyTypeDate != key.Type {
+		return "", fmt.Errorf("calendar date field [%s] is not a date type", dateFieldID)
+	}
+	return
+}
+
+func setDefaultCalendarDateField(attrView *av.AttributeView, view *av.View) {
+	if nil == view.Calendar || "" != view.Calendar.DateFieldID {
+		return
+	}
+	for _, field := range view.Calendar.Fields {
+		key, err := attrView.GetKey(field.ID)
+		if nil != err {
+			continue
+		}
+		if av.KeyTypeDate == key.Type {
+			view.Calendar.DateFieldID = key.ID
+			return
+		}
+	}
+}
+
+func (tx *Transaction) doSetAttrViewCalendarViewMode(operation *Operation) (ret *TxErr) {
+	err := setAttrViewCalendarViewMode(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
 func setAttrViewCardCoverPosition(operation *Operation) (err error) {
 	dataJSON, err := json.Marshal(operation.Data)
 	if nil != err {
@@ -1959,6 +2105,326 @@ func setAttrViewCardCoverPosition(operation *Operation) (err error) {
 	attrView.SetCardCoverPosition(operation.RowID, data.Source, data.Position)
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+func setAttrViewCalendarViewMode(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := resolveAttrViewViewByOperation(attrView, operation)
+	if err != nil {
+		return
+	}
+
+	if av.LayoutTypeCalendar != view.LayoutType || nil == view.Calendar {
+		return fmt.Errorf("view is not a calendar layout")
+	}
+
+	viewMode, err := calendarViewModeFromOperationData(operation.Data)
+	if err != nil {
+		return
+	}
+
+	view.Calendar.ViewMode = viewMode
+	err = av.SaveAttributeView(attrView)
+	ReloadAttrView(attrView.ID)
+	return
+}
+
+func calendarNumberFromOperationData(data any, name string) (number int, err error) {
+	if dataFloat, ok := data.(float64); ok {
+		number = int(dataFloat)
+		if dataFloat != float64(number) {
+			return number, fmt.Errorf("calendar %s data must be an integer", name)
+		}
+		return
+	}
+	if dataInt, ok := data.(int); ok {
+		number = dataInt
+		return
+	}
+	return number, fmt.Errorf("calendar %s data must be a number", name)
+}
+
+func calendarViewModeFromOperationData(data any) (viewMode av.ViewMode, err error) {
+	number, err := calendarNumberFromOperationData(data, "view mode")
+	if err != nil {
+		return
+	}
+	viewMode = av.ViewMode(number)
+	if av.ViewModeMonth != viewMode && av.ViewModeWeek != viewMode && av.ViewModeDay != viewMode && av.ViewModeSchedule != viewMode &&
+		av.ViewModeYear != viewMode && av.ViewModeFiveDay != viewMode {
+		return viewMode, fmt.Errorf("calendar view mode [%d] is invalid", viewMode)
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewCalendarWeekStart(operation *Operation) (ret *TxErr) {
+	err := setAttrViewCalendarWeekStart(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewCalendarWeekStart(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := resolveAttrViewViewByOperation(attrView, operation)
+	if err != nil {
+		return
+	}
+
+	if av.LayoutTypeCalendar != view.LayoutType || nil == view.Calendar {
+		return fmt.Errorf("view is not a calendar layout")
+	}
+
+	weekStart, err := calendarWeekStartFromOperationData(operation.Data)
+	if err != nil {
+		return
+	}
+
+	view.Calendar.WeekStart = weekStart
+	err = av.SaveAttributeView(attrView)
+	ReloadAttrView(attrView.ID)
+	return
+}
+
+func calendarWeekStartFromOperationData(data any) (weekStart av.WeekStart, err error) {
+	number, err := calendarNumberFromOperationData(data, "week start")
+	if err != nil {
+		return
+	}
+	weekStart = av.WeekStart(number)
+	if av.WeekStartSunday != weekStart && av.WeekStartMonday != weekStart {
+		return weekStart, fmt.Errorf("calendar week start [%d] is invalid", weekStart)
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewCalendarNewItemTarget(operation *Operation) (ret *TxErr) {
+	err := setAttrViewCalendarNewItemTarget(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+// setAttrViewCalendarNewItemTarget 设置日历视图新建条目的目标：创建页面（文档）还是只创建游离行。
+func setAttrViewCalendarNewItemTarget(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := resolveAttrViewViewByOperation(attrView, operation)
+	if err != nil {
+		return
+	}
+
+	if av.LayoutTypeCalendar != view.LayoutType || nil == view.Calendar {
+		return fmt.Errorf("view is not a calendar layout")
+	}
+
+	target, err := calendarNewItemTargetFromOperationData(operation.Data)
+	if err != nil {
+		return
+	}
+
+	view.Calendar.NewItemTarget = target
+	if av.CalendarNewItemTargetDocument == target {
+		ensureCalendarNewItemDocumentTemplate(attrView)
+	}
+	err = av.SaveAttributeView(attrView)
+	ReloadAttrView(attrView.ID)
+	return
+}
+
+func calendarNewItemTargetFromOperationData(data any) (target av.CalendarNewItemTarget, err error) {
+	dataStr, ok := data.(string)
+	if !ok {
+		return "", fmt.Errorf("calendar new item target data must be a string")
+	}
+	if !av.IsCalendarNewItemTargetValid(dataStr) {
+		return "", fmt.Errorf("calendar new item target [%s] is invalid", dataStr)
+	}
+	return dataStr, nil
+}
+
+// calendarNewItemTemplateName 返回日历条目页面模板的名称。
+// 只复用已有的 _attrView.calendar 词条，避免为了一个模板名去改动 21 个 langs 文件。
+func calendarNewItemTemplateName() string {
+	if langs, ok := util.AttrViewLangs[util.Lang]; ok {
+		if name, ok := langs["calendar"].(string); ok && "" != strings.TrimSpace(name) {
+			return strings.TrimSpace(name)
+		}
+	}
+	return "Calendar"
+}
+
+// ensureCalendarNewItemDocumentTemplate 在数据库还没有任何「文档」类型的新增条目模板时补一个，
+// 这样日历视图新建的条目就是一篇真正的页面。空 BoxID/PathTemplate 会解析成数据库块自己的笔记本与根文档，
+// 也就是说条目页面成为放置该日历的文档的子文档。已有的文档类型模板不会被覆盖。
+func ensureCalendarNewItemDocumentTemplate(attrView *av.AttributeView) (ret *av.NewItemTemplate) {
+	if nil == attrView {
+		return
+	}
+	for _, itemTemplate := range attrView.NewItemTemplates {
+		if nil != itemTemplate && av.NewItemTargetDocument == itemTemplate.TargetType {
+			return itemTemplate
+		}
+	}
+
+	ret = &av.NewItemTemplate{
+		ID:           ast.NewNodeID(),
+		Name:         calendarNewItemTemplateName(),
+		TargetType:   av.NewItemTargetDocument,
+		SaveLocation: &av.NewItemSaveLocation{BoxID: "", PathTemplate: ""},
+	}
+	attrView.NewItemTemplates = append(attrView.NewItemTemplates, ret)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewCalendarFieldMapping(operation *Operation) (ret *TxErr) {
+	err := setAttrViewCalendarFieldMapping(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewCalendarFieldMapping(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := resolveAttrViewViewByOperation(attrView, operation)
+	if err != nil {
+		return
+	}
+	if av.LayoutTypeCalendar != view.LayoutType || nil == view.Calendar {
+		return fmt.Errorf("view is not a calendar layout")
+	}
+
+	mapping, err := calendarFieldMappingFromOperationData(attrView, view.Calendar.FieldMapping, operation.Data)
+	if err != nil {
+		return
+	}
+
+	view.Calendar.FieldMapping = mapping
+	err = av.SaveAttributeView(attrView)
+	ReloadAttrView(attrView.ID)
+	return
+}
+
+func calendarFieldMappingFromOperationData(attrView *av.AttributeView, existing *av.CalendarFieldMapping, data any) (mapping *av.CalendarFieldMapping, err error) {
+	next := av.CalendarFieldMapping{}
+	if nil != existing {
+		next = *existing
+	}
+	dataMap, ok := data.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("calendar field mapping data must be an object")
+	}
+	if val, exists := dataMap["recurrenceFieldID"]; exists {
+		if fieldID, ok := val.(string); ok {
+			if err = validateCalendarMappingField(attrView, fieldID, "recurrenceFieldID", av.KeyTypeText); err != nil {
+				return
+			}
+			next.RecurrenceFieldID = fieldID
+		} else if nil != val {
+			return nil, fmt.Errorf("recurrenceFieldID must be a string")
+		}
+	}
+	if val, exists := dataMap["exceptionFieldID"]; exists {
+		if fieldID, ok := val.(string); ok {
+			if err = validateCalendarMappingField(attrView, fieldID, "exceptionFieldID", av.KeyTypeText); err != nil {
+				return
+			}
+			next.ExceptionFieldID = fieldID
+		} else if nil != val {
+			return nil, fmt.Errorf("exceptionFieldID must be a string")
+		}
+	}
+	if val, exists := dataMap["locationFieldID"]; exists {
+		if fieldID, ok := val.(string); ok {
+			if err = validateCalendarMappingField(attrView, fieldID, "locationFieldID", av.KeyTypeText); err != nil {
+				return
+			}
+			next.LocationFieldID = fieldID
+		} else if nil != val {
+			return nil, fmt.Errorf("locationFieldID must be a string")
+		}
+	}
+	if val, exists := dataMap["descriptionFieldID"]; exists {
+		if fieldID, ok := val.(string); ok {
+			if err = validateCalendarMappingField(attrView, fieldID, "descriptionFieldID", av.KeyTypeText); err != nil {
+				return
+			}
+			next.DescriptionFieldID = fieldID
+		} else if nil != val {
+			return nil, fmt.Errorf("descriptionFieldID must be a string")
+		}
+	}
+	if val, exists := dataMap["colorFieldID"]; exists {
+		if fieldID, ok := val.(string); ok {
+			if err = validateCalendarMappingField(attrView, fieldID, "colorFieldID", av.KeyTypeSelect, av.KeyTypeMSelect); err != nil {
+				return
+			}
+			next.ColorFieldID = fieldID
+		} else if nil != val {
+			return nil, fmt.Errorf("colorFieldID must be a string")
+		}
+	}
+	if err = validateCalendarFieldMappingUnique(&next); err != nil {
+		return nil, err
+	}
+	return &next, nil
+}
+
+func validateCalendarFieldMappingUnique(mapping *av.CalendarFieldMapping) (err error) {
+	if nil == mapping {
+		return
+	}
+	seen := map[string]string{}
+	fields := map[string]string{
+		"recurrenceFieldID":  mapping.RecurrenceFieldID,
+		"exceptionFieldID":   mapping.ExceptionFieldID,
+		"locationFieldID":    mapping.LocationFieldID,
+		"descriptionFieldID": mapping.DescriptionFieldID,
+	}
+	for name, fieldID := range fields {
+		if "" == fieldID {
+			continue
+		}
+		if previous, exists := seen[fieldID]; exists {
+			return fmt.Errorf("calendar metadata field [%s] duplicates [%s]", name, previous)
+		}
+		seen[fieldID] = name
+	}
+	return
+}
+
+func validateCalendarMappingField(attrView *av.AttributeView, fieldID, fieldName string, allowedTypes ...av.KeyType) (err error) {
+	if "" == fieldID {
+		return
+	}
+	key, err := attrView.GetKey(fieldID)
+	if nil != err {
+		return fmt.Errorf("calendar mapping field [%s=%s] not found: %w", fieldName, fieldID, err)
+	}
+	for _, allowedType := range allowedTypes {
+		if key.Type == allowedType {
+			return nil
+		}
+	}
+	return fmt.Errorf("calendar mapping field [%s=%s] has invalid type [%s]", fieldName, fieldID, key.Type)
 }
 
 func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*av.Value) (err error) {
@@ -3687,6 +4153,11 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		return
 	}
 
+	if av.LayoutTypeCalendar == view.LayoutType {
+		// 日历视图不支持分组，静默忽略而不是反复输出警告日志
+		return
+	}
+
 	groupStates := getAttrViewGroupStates(view)
 
 	group := view.Group
@@ -3873,6 +4344,9 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		case av.LayoutTypeKanban:
 			v = av.NewKanbanView()
 			v.Kanban = av.NewLayoutKanban()
+		case av.LayoutTypeCalendar:
+			v = av.NewCalendarView()
+			v.Calendar = av.NewLayoutCalendar()
 		default:
 			logging.LogWarnf("unknown layout type [%s] for group view", view.LayoutType)
 			return
@@ -4405,6 +4879,8 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 				v.Gallery.CardFields = append(v.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: operation.BackRelationKeyID}})
 			case av.LayoutTypeKanban:
 				v.Kanban.Fields = append(v.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: operation.BackRelationKeyID}})
+			case av.LayoutTypeCalendar:
+				v.Calendar.Fields = append(v.Calendar.Fields, &av.ViewCalendarCardField{BaseField: &av.BaseField{ID: operation.BackRelationKeyID}})
 			}
 		}
 
@@ -4709,30 +5185,10 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID}
 	}
 
-	visibleViewIDs := attrView.GetVisibleViewIDs(node.IALAttr(av.NodeAttrVisibleViewIDs))
-	visibleViewIDs = append(visibleViewIDs, operation.ID)
-	if err = freezeOtherAttrViewBlockVisibleViews(attrView, operation.BlockID, tree); nil != err {
-		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
-	}
-
-	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[av.NodeAttrView] = operation.ID
-	attrs[av.NodeAttrVisibleViewIDs] = strings.Join(visibleViewIDs, ",")
-	node.AttributeViewType = string(masterView.LayoutType)
-	err = setNodeAttrs(node, tree, attrs)
-	if err != nil {
-		logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
-		return
-	}
-
-	var view *av.View
-	switch masterView.LayoutType {
-	case av.LayoutTypeTable:
-		view = av.NewTableView()
-	case av.LayoutTypeGallery:
-		view = av.NewGalleryView()
-	case av.LayoutTypeKanban:
-		view = av.NewKanbanView()
+	view := newAttrViewViewByLayoutType(masterView.LayoutType)
+	if nil == view {
+		logging.LogErrorf("wrong layout type [%s] for attribute view [%s]", masterView.LayoutType, avID)
+		return &TxErr{code: TxErrHandleAttributeView, id: avID, msg: av.ErrWrongLayoutType.Error()}
 	}
 
 	view.ID = operation.ID
@@ -4756,6 +5212,55 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		})
 	}
 
+	copyAttrViewViewLayout(view, masterView)
+
+	view.ItemIDs = masterView.ItemIDs
+
+	if nil != masterView.Group {
+		view.Group = &av.ViewGroup{}
+		if copyErr := copier.Copy(view.Group, masterView.Group); nil != copyErr {
+			logging.LogErrorf("copy group failed: %s", copyErr)
+			return &TxErr{code: TxErrHandleAttributeView, id: avID, msg: copyErr.Error()}
+		}
+
+		view.GroupItemIDs = masterView.GroupItemIDs
+		regenAttrViewGroups(attrView)
+	}
+
+	// 视图构建成功后才把块指向新视图，否则失败时块会指向一个不存在的视图
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	attrs[av.NodeAttrView] = operation.ID
+	node.AttributeViewType = string(masterView.LayoutType)
+	err = setNodeAttrs(node, tree, attrs)
+	if err != nil {
+		logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
+		return
+	}
+
+	if err = av.SaveAttributeView(attrView); err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
+	}
+	return
+}
+
+// newAttrViewViewByLayoutType 按布局类型创建视图，未知布局返回 nil。
+func newAttrViewViewByLayoutType(layoutType av.LayoutType) (ret *av.View) {
+	switch layoutType {
+	case av.LayoutTypeTable:
+		ret = av.NewTableView()
+	case av.LayoutTypeGallery:
+		ret = av.NewGalleryView()
+	case av.LayoutTypeKanban:
+		ret = av.NewKanbanView()
+	case av.LayoutTypeCalendar:
+		ret = av.NewCalendarView()
+	}
+	return
+}
+
+// copyAttrViewViewLayout 把主视图的布局配置复制到新视图上。
+func copyAttrViewViewLayout(view, masterView *av.View) {
 	switch masterView.LayoutType {
 	case av.LayoutTypeTable:
 		for _, col := range masterView.Table.Columns {
@@ -4826,26 +5331,31 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		view.Kanban.FillColBackgroundColor = masterView.Kanban.FillColBackgroundColor
 		view.Kanban.ShowIcon = masterView.Kanban.ShowIcon
 		view.Kanban.WrapField = masterView.Kanban.WrapField
-	}
-
-	view.ItemIDs = masterView.ItemIDs
-
-	if nil != masterView.Group {
-		view.Group = &av.ViewGroup{}
-		if copyErr := copier.Copy(view.Group, masterView.Group); nil != copyErr {
-			logging.LogErrorf("copy group failed: %s", copyErr)
-			return &TxErr{code: TxErrHandleAttributeView, id: avID, msg: copyErr.Error()}
+	case av.LayoutTypeCalendar:
+		for _, field := range masterView.Calendar.Fields {
+			view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{
+				BaseField: &av.BaseField{
+					ID:     field.ID,
+					Wrap:   field.Wrap,
+					Hidden: field.Hidden,
+					Desc:   field.Desc,
+				},
+			})
 		}
 
-		view.GroupItemIDs = masterView.GroupItemIDs
-		regenAttrViewGroups(attrView)
+		view.Calendar.DateFieldID = masterView.Calendar.DateFieldID
+		view.Calendar.ViewMode = masterView.Calendar.ViewMode
+		view.Calendar.WeekStart = masterView.Calendar.WeekStart
+		// 复制视图沿用源视图的「新建条目目标」，包括源视图是历史视图时的 ""（只建行）。
+		view.Calendar.NewItemTarget = masterView.Calendar.NewItemTarget
+		if nil != masterView.Calendar.FieldMapping {
+			// 复制值而不是指针，避免复制出来的视图和原视图共享映射 https://github.com/siyuan-note/siyuan/issues/15587
+			mapping := *masterView.Calendar.FieldMapping
+			view.Calendar.FieldMapping = &mapping
+		}
+		view.Calendar.ShowIcon = masterView.Calendar.ShowIcon
+		view.Calendar.WrapField = masterView.Calendar.WrapField
 	}
-
-	if err = av.SaveAttributeView(attrView); err != nil {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
-	}
-	return
 }
 
 func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
@@ -4897,6 +5407,10 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 			for _, field := range firstView.Kanban.Fields {
 				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
 			}
+		case av.LayoutTypeCalendar:
+			for _, field := range firstView.Calendar.Fields {
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
+			}
 		}
 	case av.LayoutTypeGallery:
 		view = av.NewGalleryView()
@@ -4911,6 +5425,10 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 			}
 		case av.LayoutTypeKanban:
 			for _, field := range firstView.Kanban.Fields {
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: field.ID}})
+			}
+		case av.LayoutTypeCalendar:
+			for _, field := range firstView.Calendar.Fields {
 				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: field.ID}})
 			}
 		}
@@ -4929,6 +5447,36 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 			for _, field := range firstView.Kanban.Fields {
 				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
 			}
+		case av.LayoutTypeCalendar:
+			for _, field := range firstView.Calendar.Fields {
+				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
+			}
+		}
+	case av.LayoutTypeCalendar:
+		view = av.NewCalendarView()
+		switch firstView.LayoutType {
+		case av.LayoutTypeTable:
+			for _, col := range firstView.Table.Columns {
+				view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{BaseField: &av.BaseField{ID: col.ID}})
+			}
+		case av.LayoutTypeGallery:
+			for _, field := range firstView.Gallery.CardFields {
+				view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{BaseField: &av.BaseField{ID: field.ID}})
+			}
+		case av.LayoutTypeKanban:
+			for _, field := range firstView.Kanban.Fields {
+				view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{BaseField: &av.BaseField{ID: field.ID}})
+			}
+		case av.LayoutTypeCalendar:
+			for _, field := range firstView.Calendar.Fields {
+				view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{BaseField: &av.BaseField{ID: field.ID}})
+			}
+			if nil != firstView.Calendar.FieldMapping {
+				mapping := *firstView.Calendar.FieldMapping
+				view.Calendar.FieldMapping = &mapping
+			}
+			view.Calendar.ViewMode = firstView.Calendar.ViewMode
+			view.Calendar.WeekStart = firstView.Calendar.WeekStart
 		}
 	default:
 		err = av.ErrWrongLayoutType
@@ -4956,6 +5504,21 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 		preferredGroupKey := getKanbanPreferredGroupKey(attrView)
 		group := &av.ViewGroup{Field: preferredGroupKey.ID}
 		setAttributeViewGroup(attrView, view, group)
+	}
+
+	if av.LayoutTypeCalendar == layout {
+		if "" == view.Calendar.DateFieldID {
+			view.Calendar.DateFieldID = getCalendarPreferredDateKey(attrView).ID
+		}
+		if av.CalendarNewItemTargetDocument == view.Calendar.NewItemTarget {
+			ensureCalendarNewItemDocumentTemplate(attrView)
+		}
+	}
+
+	node, tree, _ := getNodeByBlockID(nil, blockID)
+	if nil == node {
+		logging.LogErrorf("get node by block ID [%s] failed", blockID)
+		return
 	}
 
 	node.AttributeViewType = string(view.LayoutType)
@@ -5002,6 +5565,50 @@ func getKanbanPreferredGroupKey(attrView *av.AttributeView) (ret *av.Key) {
 			if nil != view.Kanban {
 				newField.Wrap = view.Kanban.WrapField
 				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: newField})
+			}
+
+			if nil != view.Calendar {
+				newField.Wrap = view.Calendar.WrapField
+				view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{BaseField: newField})
+			}
+		}
+	}
+	return
+}
+
+// getCalendarPreferredDateKey 返回日历布局可用的日期字段，没有时新建一个并同步到所有视图。
+func getCalendarPreferredDateKey(attrView *av.AttributeView) (ret *av.Key) {
+	for _, kv := range attrView.KeyValues {
+		if av.KeyTypeDate == kv.Key.Type {
+			ret = kv.Key
+			break
+		}
+	}
+
+	if nil == ret {
+		name := av.GetAttributeViewI18n("date")
+		ret = av.NewKey(ast.NewNodeID(), name, "", av.KeyTypeDate)
+		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: ret})
+		for _, view := range attrView.Views {
+			newField := &av.BaseField{ID: ret.ID}
+			if nil != view.Table {
+				newField.Wrap = view.Table.WrapField
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: newField})
+			}
+
+			if nil != view.Gallery {
+				newField.Wrap = view.Gallery.WrapField
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: newField})
+			}
+
+			if nil != view.Kanban {
+				newField.Wrap = view.Kanban.WrapField
+				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: newField})
+			}
+
+			if nil != view.Calendar {
+				newField.Wrap = view.Calendar.WrapField
+				view.Calendar.Fields = append(view.Calendar.Fields, &av.ViewCalendarCardField{BaseField: newField})
 			}
 		}
 	}
@@ -6252,6 +6859,22 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 					break
 				}
 			}
+		case av.LayoutTypeCalendar:
+			for i, field := range view.Calendar.Fields {
+				if field.ID == key.ID {
+					view.Calendar.Fields = append(view.Calendar.Fields[:i+1], append([]*av.ViewCalendarCardField{
+						{
+							BaseField: &av.BaseField{
+								ID:     copyKey.ID,
+								Wrap:   field.Wrap,
+								Hidden: field.Hidden,
+								Desc:   field.Desc,
+							},
+						},
+					}, view.Calendar.Fields[i+1:]...)...)
+					break
+				}
+			}
 		}
 	}
 
@@ -6420,6 +7043,14 @@ func setAttributeViewColWrap(operation *Operation) (err error) {
 			allFieldWrap = allFieldWrap && field.Wrap
 		}
 		view.Kanban.WrapField = allFieldWrap
+	case av.LayoutTypeCalendar:
+		for _, field := range view.Calendar.Fields {
+			if field.ID == operation.ID {
+				field.Wrap = newWrap
+			}
+			allFieldWrap = allFieldWrap && field.Wrap
+		}
+		view.Calendar.WrapField = allFieldWrap
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -6518,6 +7149,13 @@ func getAttributeViewField(view *av.View, keyID string) (ret *av.BaseField) {
 		for _, field := range view.Kanban.Fields {
 			if field.ID == keyID {
 				return field.BaseField
+			}
+		}
+	case av.LayoutTypeCalendar:
+		for _, field := range view.Calendar.Fields {
+			if field.ID == operation.ID {
+				field.Hidden = operation.Data.(bool)
+				break
 			}
 		}
 	}
@@ -6820,6 +7458,27 @@ func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err e
 			}
 		}
 		view.Kanban.Fields = util.InsertElem(view.Kanban.Fields, previousIndex, field)
+	case av.LayoutTypeCalendar:
+		var field *av.ViewCalendarCardField
+		for i, calendarField := range view.Calendar.Fields {
+			if calendarField.ID == keyID {
+				field = calendarField
+				curIndex = i
+				break
+			}
+		}
+		if nil == field {
+			return
+		}
+
+		view.Calendar.Fields = append(view.Calendar.Fields[:curIndex], view.Calendar.Fields[curIndex+1:]...)
+		for i, calendarField := range view.Calendar.Fields {
+			if calendarField.ID == previousKeyID {
+				previousIndex = i + 1
+				break
+			}
+		}
+		view.Calendar.Fields = util.InsertElem(view.Calendar.Fields, previousIndex, field)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -7012,6 +7671,10 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 					}
 				}
 			}
+
+			if nil != view.Calendar {
+				addCalendarField(view.Calendar, newField, previousKeyID)
+			}
 		}
 	default:
 		return fmt.Errorf("unsupported attribute view key type [%s]", keyType)
@@ -7019,6 +7682,21 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+func addCalendarField(calendar *av.LayoutCalendar, field *av.BaseField, previousKeyID string) {
+	field.Wrap = calendar.WrapField
+	if "" == previousKeyID {
+		calendar.Fields = append(calendar.Fields, &av.ViewCalendarCardField{BaseField: field})
+		return
+	}
+	for i, existing := range calendar.Fields {
+		if existing.ID == previousKeyID {
+			calendar.Fields = append(calendar.Fields[:i+1], append([]*av.ViewCalendarCardField{{BaseField: field}}, calendar.Fields[i+1:]...)...)
+			return
+		}
+	}
+	calendar.Fields = append(calendar.Fields, &av.ViewCalendarCardField{BaseField: field})
 }
 
 func (tx *Transaction) doUpdateAttrViewColTemplate(operation *Operation) (ret *TxErr) {
@@ -7167,6 +7845,9 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 				if groupKey := view.GetGroupKey(attrView); nil != groupKey && groupKey.ID == operation.ID {
 					removeAttributeViewGroup0(view)
 				}
+			}
+			if nil != view.Calendar {
+				pruneCalendarFieldReferencesByType(view.Calendar, operation.ID, colType)
 			}
 		}
 		removeAttrViewColumnFromFieldFilters(attrView, attrView.ID, operation.ID)
@@ -7349,6 +8030,10 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 				}
 			}
 		}
+
+		if nil != view.Calendar {
+			removeCalendarFieldReferences(view.Calendar, keyID)
+		}
 	}
 
 	for _, view := range attrView.Views {
@@ -7394,6 +8079,68 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 		ReloadAttrView(destAv.ID)
 	}
 	return
+}
+
+// pruneCalendarFieldReferencesByType 在字段类型变更后清理日历视图中不再兼容的字段引用，
+// 避免残留的映射阻塞后续 setAttrViewCalendarFieldMapping 校验。
+func pruneCalendarFieldReferencesByType(calendar *av.LayoutCalendar, keyID string, keyType av.KeyType) {
+	if nil == calendar {
+		return
+	}
+	if calendar.DateFieldID == keyID && av.KeyTypeDate != keyType {
+		calendar.DateFieldID = ""
+	}
+	if nil == calendar.FieldMapping {
+		return
+	}
+	// 模板字段由内核计算，不能作为可写的日历元数据映射目标。
+	textLike := av.KeyTypeText == keyType
+	if calendar.FieldMapping.RecurrenceFieldID == keyID && !textLike {
+		calendar.FieldMapping.RecurrenceFieldID = ""
+	}
+	if calendar.FieldMapping.ExceptionFieldID == keyID && !textLike {
+		calendar.FieldMapping.ExceptionFieldID = ""
+	}
+	if calendar.FieldMapping.LocationFieldID == keyID && !textLike {
+		calendar.FieldMapping.LocationFieldID = ""
+	}
+	if calendar.FieldMapping.DescriptionFieldID == keyID && !textLike {
+		calendar.FieldMapping.DescriptionFieldID = ""
+	}
+	selectLike := av.KeyTypeSelect == keyType || av.KeyTypeMSelect == keyType
+	if calendar.FieldMapping.ColorFieldID == keyID && !selectLike {
+		calendar.FieldMapping.ColorFieldID = ""
+	}
+}
+
+func removeCalendarFieldReferences(calendar *av.LayoutCalendar, keyID string) {
+	if calendar.DateFieldID == keyID {
+		calendar.DateFieldID = ""
+	}
+	for i, field := range calendar.Fields {
+		if field.ID == keyID {
+			calendar.Fields = append(calendar.Fields[:i], calendar.Fields[i+1:]...)
+			break
+		}
+	}
+	if nil == calendar.FieldMapping {
+		return
+	}
+	if calendar.FieldMapping.RecurrenceFieldID == keyID {
+		calendar.FieldMapping.RecurrenceFieldID = ""
+	}
+	if calendar.FieldMapping.ExceptionFieldID == keyID {
+		calendar.FieldMapping.ExceptionFieldID = ""
+	}
+	if calendar.FieldMapping.LocationFieldID == keyID {
+		calendar.FieldMapping.LocationFieldID = ""
+	}
+	if calendar.FieldMapping.DescriptionFieldID == keyID {
+		calendar.FieldMapping.DescriptionFieldID = ""
+	}
+	if calendar.FieldMapping.ColorFieldID == keyID {
+		calendar.FieldMapping.ColorFieldID = ""
+	}
 }
 
 func (tx *Transaction) doReplaceAttrViewBlock(operation *Operation) (ret *TxErr) {
@@ -7559,9 +8306,18 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (
 }
 
 func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueData any) (val *av.Value, err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if err != nil {
-		return
+	var attrView *av.AttributeView
+	if tx != nil && tx.deferAttrViewSave {
+		attrView = tx.deferredAttrViews[avID]
+	}
+	if attrView == nil {
+		attrView, err = av.ParseAttributeView(avID)
+		if err != nil {
+			return
+		}
+		if tx != nil && tx.deferAttrViewSave {
+			tx.deferredAttrViews[avID] = attrView
+		}
 	}
 
 	val, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData, true)
@@ -7626,6 +8382,13 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	if err != nil {
 		logging.LogErrorf("marshal value [%+v] failed: %s", valueData, err)
 		return
+	}
+	// Decode into a clean value. JSON omits empty slices/pointers, so decoding
+	// directly over the existing cell would preserve stale nested data and make
+	// undoing a first-time field value impossible.
+	*val = av.Value{
+		ID: val.ID, KeyID: keyID, BlockID: itemID, Type: val.Type,
+		CreatedAt: val.CreatedAt, UpdatedAt: val.UpdatedAt,
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &val); err != nil {
 		logging.LogErrorf("unmarshal data [%s] failed: %s", data, err)
@@ -7757,7 +8520,10 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 
 	if save {
 		regenAttrViewGroups(attrView)
-		if err = av.SaveAttributeView(attrView); nil != err {
+		if tx != nil && tx.deferAttrViewSave {
+			tx.deferredAttrViews[avID] = attrView
+			tx.relatedAvIDs = append(tx.relatedAvIDs, avID)
+		} else if err = av.SaveAttributeView(attrView); nil != err {
 			return
 		}
 	}

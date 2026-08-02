@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -415,13 +416,17 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 	page := 1
 	pageArg := arg["page"]
 	if nil != pageArg {
-		page = int(pageArg.(float64))
+		if pageFloat, ok := pageArg.(float64); ok {
+			page = int(pageFloat)
+		}
 	}
 
 	pageSize := -1
 	pageSizeArg := arg["pageSize"]
 	if nil != pageSizeArg {
-		pageSize = int(pageSizeArg.(float64))
+		if pageSizeFloat, ok := pageSizeArg.(float64); ok {
+			pageSize = int(pageSizeFloat)
+		}
 	}
 
 	keyword := ""
@@ -882,7 +887,7 @@ func createAttributeViewItem(c *gin.Context) {
 	if !ok {
 		return
 	}
-	var avID, blockID, viewID, templateID, previousID, groupID, app, session string
+	var avID, blockID, viewID, templateID, previousID, groupID, primaryKey, app, session string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("avID", &avID, true, false),
 		util.BindJsonArg("blockID", &blockID, true, false),
@@ -890,12 +895,37 @@ func createAttributeViewItem(c *gin.Context) {
 		util.BindJsonArg("templateID", &templateID, false, false),
 		util.BindJsonArg("previousID", &previousID, false, false),
 		util.BindJsonArg("groupID", &groupID, false, false),
+		util.BindJsonArg("primaryKey", &primaryKey, false, false),
 		util.BindJsonArg("app", &app, false, false),
 		util.BindJsonArg("session", &session, false, false),
 	) {
 		return
 	}
-	result, err := model.CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID)
+
+	// fieldValues 是 {keyID: IAVCellValue} 形式的对象，BindJsonArg 只处理标量，这里单独反序列化。
+	fieldValues := map[string]*av.Value{}
+	if rawFieldValues, exists := arg["fieldValues"]; exists && nil != rawFieldValues {
+		rawMap, isMap := rawFieldValues.(map[string]any)
+		if !isMap {
+			ret.Code = -1
+			ret.Msg = "fieldValues must be an object"
+			return
+		}
+		data, marshalErr := gulu.JSON.MarshalJSON(rawMap)
+		if nil != marshalErr {
+			ret.Code = -1
+			ret.Msg = marshalErr.Error()
+			return
+		}
+		if unmarshalErr := gulu.JSON.UnmarshalJSON(data, &fieldValues); nil != unmarshalErr {
+			ret.Code = -1
+			ret.Msg = unmarshalErr.Error()
+			return
+		}
+	}
+
+	result, err := model.CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID,
+		&model.CreateItemOptions{PrimaryKey: primaryKey, FieldValues: fieldValues})
 	if nil != err {
 		if errors.Is(err, model.ErrBoxNotFound) {
 			ret.Code = 1
@@ -966,6 +996,50 @@ func createAttributeViewItemDocs(c *gin.Context) {
 	if nil != result.Transaction {
 		pushTransactions(app, session, []*model.Transaction{result.Transaction})
 	}
+}
+
+func updateAttributeViewItem(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var avID, blockID, itemID, boundBlockID, primaryKey, app, session string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("avID", &avID, true, false),
+		util.BindJsonArg("blockID", &blockID, true, false),
+		util.BindJsonArg("itemID", &itemID, true, false),
+		util.BindJsonArg("boundBlockID", &boundBlockID, true, false),
+		util.BindJsonArg("primaryKey", &primaryKey, false, false),
+		util.BindJsonArg("app", &app, false, false),
+		util.BindJsonArg("session", &session, false, false)) {
+		return
+	}
+	fieldValues := map[string]*av.Value{}
+	if raw := arg["fieldValues"]; raw != nil {
+		data, err := gulu.JSON.MarshalJSON(raw)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if err = gulu.JSON.UnmarshalJSON(data, &fieldValues); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+	tx := &model.Transaction{DoOperations: []*model.Operation{{Action: "updateAttributeViewItem", AvID: avID, ID: itemID, Data: &model.AttributeViewItemUpdateData{AvID: avID, ItemID: itemID, BoundBlockID: boundBlockID, PrimaryKey: primaryKey, FieldValues: fieldValues}}}, Timestamp: time.Now().UnixMilli()}
+	tx.MarkFromAPI()
+	if err := model.PerformTxSync(tx); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{"itemID": itemID, "blockID": boundBlockID, "content": primaryKey}
+	model.FlushTxQueue()
+	pushTransactions(app, session, []*model.Transaction{tx})
 }
 
 func searchAttributeView(c *gin.Context) {

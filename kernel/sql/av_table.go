@@ -35,6 +35,11 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		Rows:         []*av.TableRow{},
 	}
 
+	if nil == view.Table {
+		// 非表格布局（如日历）在导出等场景下会临时合成表格布局，缺失时兜底避免空指针
+		view.Table = av.NewLayoutTable()
+	}
+
 	// 组装列
 	for _, col := range view.Table.Columns {
 		key, getErr := attrView.GetKey(col.ID)

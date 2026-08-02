@@ -575,6 +575,32 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 				kanban.Groups[i] = FilterViewByPublishAccess(c, publishAccess, viewable)
 			}
 		}
+	case av.LayoutTypeCalendar:
+		calendar := ret.(*av.Calendar)
+		filteredCards := []*av.CalendarCard{}
+		for _, card := range calendar.Cards {
+			// 默认第一个属性是文档块
+			var bt *treenode.BlockTree
+			if len(card.Values) > 0 && nil != card.Values[0].Value {
+				if card.Values[0].Value.Block != nil {
+					id := card.Values[0].Value.Block.ID
+					if id != "" {
+						bt = treenode.GetBlockTree(id)
+					}
+				}
+			}
+			if bt != nil {
+				// 不显示禁止文档
+				if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+					card = nil
+				}
+			}
+			if card != nil {
+				filteredCards = append(filteredCards, card)
+			}
+		}
+		calendar.Cards = filteredCards
+		calendar.CardCount = len(calendar.Cards)
 	}
 	return
 }

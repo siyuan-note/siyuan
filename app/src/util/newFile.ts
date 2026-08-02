@@ -91,7 +91,8 @@ export const newFileInTree = (app: App, notebookId: string, currentPath: string,
     });
 };
 
-const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, id: string, refText: string) => {
+const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, id: string, refText: string,
+                          refSubtype: "d" | "s") => {
     if (!isNewFileSelectionValid(protyle, context)) {
         return;
     }
@@ -99,9 +100,10 @@ const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, i
     const currentRange = selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : undefined;
     const selectionMoved = currentRange && !isSameRange(currentRange, context.range);
     protyle.toolbar.range = context.range;
+    const anchorText = refSubtype === "s" ? getBlockRefAnchorText(context.text) : refText;
     const refElements = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
         type: "id",
-        color: `${id}${Constants.ZWSP}d${Constants.ZWSP}${refText}`
+        color: `${id}${Constants.ZWSP}${refSubtype}${Constants.ZWSP}${anchorText}`
     }, false);
     if (!refElements?.[0]) {
         return;
@@ -119,7 +121,7 @@ const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, i
 };
 
 export const newFileBySelect = (protyle: IProtyle, newFileName: string, context: NewFileSelectionContext,
-                                pathDir: string, targetNotebookId: string) => {
+                                pathDir: string, targetNotebookId: string, refSubtype: "d" | "s" = "d") => {
     if (!isNewFileSelectionValid(protyle, context)) {
         return;
     }
@@ -130,7 +132,7 @@ export const newFileBySelect = (protyle: IProtyle, newFileName: string, context:
     }, (idResponse) => {
         const refText = getBlockRefAnchorText(newFileName);
         if (idResponse.data && idResponse.data.length > 0) {
-            insertNewFileRef(protyle, context, idResponse.data[0], refText);
+            insertNewFileRef(protyle, context, idResponse.data[0], refText, refSubtype);
         } else {
             if (!isNewFileSelectionValid(protyle, context)) {
                 return;
@@ -142,13 +144,14 @@ export const newFileBySelect = (protyle: IProtyle, newFileName: string, context:
                 markdown: "",
                 titleEmpty: newFileName === "",
             }, response => {
-                insertNewFileRef(protyle, context, response.data, refText);
+                insertNewFileRef(protyle, context, response.data, refText, refSubtype);
             });
         }
     });
 };
 
-export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "subDoc" | "configured") => {
+export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "subDoc" | "configured",
+                                     refSubtype: "d" | "s" = "d", name?: string) => {
     const nodeElement = hasClosestBlock(range.startContainer);
     if (!nodeElement) {
         return;
@@ -169,18 +172,19 @@ export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "s
     }
     const sourceNotebookId = selectionContext.notebookId;
     const sourcePath = selectionContext.path;
-    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() :
-        protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim());
+    const fileName = name === undefined ? (selectText.trim() ||
+        protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim()) : name.trim();
+    const newFileName = replaceFileName(fileName);
     if (target === "subDoc") {
         fetchPost("/api/filetree/getHPathByPath", {
             notebook: sourceNotebookId,
             path: sourcePath,
         }, (response) => {
-            newFileBySelect(protyle, newFileName, selectionContext, response.data, sourceNotebookId);
+            newFileBySelect(protyle, newFileName, selectionContext, response.data, sourceNotebookId, refSubtype);
         });
     } else {
         getRefCreateSavePath(sourceNotebookId, sourcePath, (targetNotebookId, hPath) => {
-            newFileBySelect(protyle, newFileName, selectionContext, hPath, targetNotebookId);
+            newFileBySelect(protyle, newFileName, selectionContext, hPath, targetNotebookId, refSubtype);
         });
     }
     hideElements(["toolbar"], protyle);

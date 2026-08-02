@@ -106,7 +106,6 @@ export class Options {
             "inline-memo",
         ] : [
             "block-ref",
-            "new-sub-doc-ref",
             "a",
             "|",
             "text",

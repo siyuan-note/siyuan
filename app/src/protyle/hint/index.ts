@@ -20,6 +20,7 @@ import {
     getBlockRefAnchorText,
     getDocCreateTemplatePath,
     newFileByRefHint,
+    newFileBySelectRange,
     newFileInProtyle
 } from "../../util/newFile";
 import {isAbnormalItem, upDownHint} from "../../util/upDownHint";
@@ -280,13 +281,10 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         if (this.source !== "hint") {
             hintsHTML = '<input style="margin:0 8px 4px 8px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
         }
+        const focusIndex = data.findIndex(item => item.focus);
         data.forEach((hintData, i) => {
             // https://github.com/siyuan-note/siyuan/issues/1229 提示时，新建文件不应默认选中
-            let focusClass = "";
-            if ((i === 1 && data[i].focus) ||
-                (i === 0 && (data.length === 1 || !data[1].focus))) {
-                focusClass = " b3-list-item--focus";
-            }
+            const focusClass = i === (focusIndex > -1 ? focusIndex : 0) ? " b3-list-item--focus" : "";
             if (hintData.html === "separator") {
                 hintsHTML += `<button data-id="${hintData.id || ""}" class="b3-menu__separator"></button>`;
             } else {
@@ -394,6 +392,12 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`;
                 searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
+                if (source === "search") {
+                    const newFileName = Lute.UnEscapeHTMLStr(response.data.k);
+                    const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div></button>`;
+                }
             }
             response.data.blocks.forEach((item: IBlock, index: number) => {
                 let blockRefHTML;
@@ -593,6 +597,14 @@ ${genHintItemHTML(item)}
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
             focusByRange(range);
+        }
+        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newSubDoc ") &&
+            value.endsWith(`${Lute.Caret}'))`)) {
+            const prefix = "((newSubDoc ";
+            const fileNames = value.substring(prefix.length, value.length - 4).split(`"${Constants.ZWSP}'`);
+            const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
+            newFileBySelectRange(protyle, range, "subDoc", refIsS ? "s" : "d", realFileName);
+            return;
         }
         // 新建文件
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {

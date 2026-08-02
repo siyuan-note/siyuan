@@ -4,7 +4,6 @@ import {focusByRange, focusByWbr} from "../util/selection";
 import {writeText} from "../util/compatibility";
 import {isArrayEqual} from "../../util/functions";
 import {hasSameTextStyle} from "./Font";
-import {newFileBySelectRange} from "../../util/newFile";
 
 export const previewTemplate = (pathString: string, element: Element, parentId: string) => {
     if (!pathString) {
@@ -139,15 +138,6 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         lang: "ref",
         icon: "iconRef",
         tipPosition: "ne",
-    }, {
-        name: "new-sub-doc-ref",
-        hotkey: window.siyuan.config.keymap.editor.general.newNameFile.custom,
-        lang: "newSubDocRef",
-        icon: "iconFile",
-        tipPosition: "n",
-        click: (protyle) => {
-            newFileBySelectRange(protyle.protyle, protyle.protyle.toolbar.range, "subDoc");
-        },
     }, {
         name: "a",
         hotkey: window.siyuan.config.keymap.editor.insert.link.custom,

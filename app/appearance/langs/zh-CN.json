@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "未找到可用的数据库，请先创建数据库",
+  "noAvailableDatabase": "未找到可用的数据库，请先在一个文档中创建数据库块",
   "apiKeyRequired": "请先填写 API Key",
   "openAICompatibleProvider": "OpenAI 规范提供商",
   "entryDocPanel": "文档面板",

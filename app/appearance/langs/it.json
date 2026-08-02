@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Nessun database disponibile trovato. Crea prima un database",
+  "noAvailableDatabase": "Nessun database disponibile trovato. Crea prima un blocco database in un documento",
   "apiKeyRequired": "È richiesta una chiave API",
   "openAICompatibleProvider": "Provider compatibile con OpenAI",
   "entryDocPanel": "Pannello documenti",

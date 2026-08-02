@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Geen beschikbare database gevonden. Maak eerst een database",
+  "noAvailableDatabase": "Geen beschikbare database gevonden. Maak eerst een databaseblok in een document",
   "apiKeyRequired": "Een API-sleutel is vereist",
   "openAICompatibleProvider": "OpenAI-compatibele provider",
   "entryDocPanel": "Documentpaneel",

@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "لم يتم العثور على قواعد بيانات متاحة، أنشئ قاعدة بيانات أولاً",
+  "noAvailableDatabase": "لم يتم العثور على قواعد بيانات متاحة، أنشئ أولاً كتلة قاعدة بيانات في مستند",
   "apiKeyRequired": "مفتاح API مطلوب",
   "openAICompatibleProvider": "موفر متوافق مع مواصفات OpenAI",
   "entryDocPanel": "لوحة المستندات",

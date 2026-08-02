@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Доступная база данных не найдена. Сначала создайте базу данных",
+  "noAvailableDatabase": "Доступная база данных не найдена. Сначала создайте блок базы данных в документе",
   "apiKeyRequired": "Требуется API-ключ",
   "openAICompatibleProvider": "OpenAI-совместимый поставщик",
   "entryDocPanel": "Панель документов",

@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "No se encontró ninguna base de datos disponible. Crea primero una base de datos",
+  "noAvailableDatabase": "No se encontró ninguna base de datos disponible. Crea primero un bloque de base de datos en un documento",
   "apiKeyRequired": "Se requiere una clave de API",
   "openAICompatibleProvider": "Proveedor compatible con OpenAI",
   "entryDocPanel": "Panel de documentos",

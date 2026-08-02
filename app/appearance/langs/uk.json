@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Доступну базу даних не знайдено. Спочатку створіть базу даних",
+  "noAvailableDatabase": "Доступну базу даних не знайдено. Спочатку створіть блок бази даних у документі",
   "apiKeyRequired": "Потрібен ключ API",
   "openAICompatibleProvider": "OpenAI-сумісний постачальник",
   "entryDocPanel": "Панель документів",

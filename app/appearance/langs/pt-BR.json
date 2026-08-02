@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "Nenhum banco de dados disponível foi encontrado. Crie um banco de dados primeiro",
+  "noAvailableDatabase": "Nenhum banco de dados disponível foi encontrado. Primeiro, crie um bloco de banco de dados em um documento",
   "apiKeyRequired": "Uma chave de API é obrigatória",
   "openAICompatibleProvider": "Provedor compatível com OpenAI",
   "entryDocPanel": "Painel de documentos",

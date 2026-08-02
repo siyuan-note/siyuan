@@ -1,5 +1,5 @@
 {
-  "noAvailableDatabase": "利用可能なデータベースが見つかりません。先にデータベースを作成してください",
+  "noAvailableDatabase": "利用可能なデータベースが見つかりません。先にドキュメント内にデータベースブロックを作成してください",
   "apiKeyRequired": "API Key が必要です",
   "openAICompatibleProvider": "OpenAI 互換プロバイダー",
   "entryDocPanel": "ドキュメントパネル",

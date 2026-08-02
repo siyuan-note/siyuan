@@ -1,4 +1,5 @@
 {
+  "noAvailableDatabase": "사용 가능한 데이터베이스를 찾을 수 없습니다. 데이터베이스를 만들거나 데이터베이스가 있는 노트북을 여세요",
   "apiKeyRequired": "API Key가 필요합니다",
   "openAICompatibleProvider": "OpenAI 호환 제공자",
   "entryDocPanel": "문서 패널",

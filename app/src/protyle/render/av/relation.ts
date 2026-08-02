@@ -93,6 +93,11 @@ const genSearchList = (element: Element, keyword: string, options: IOpenSearchAV
                 html += "</div>";
             }
         });
+        if (results.length === 0) {
+            const emptyText = showViews && keyword.trim() === "" ?
+                window.siyuan.languages.noAvailableDatabase : window.siyuan.languages.emptyContent;
+            html = `<div class="b3-list--empty">${emptyText}</div>`;
+        }
         element.innerHTML = html;
         if (cb) {
             cb();

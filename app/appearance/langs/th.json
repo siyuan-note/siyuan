@@ -1,4 +1,5 @@
 {
+  "noAvailableDatabase": "ไม่พบฐานข้อมูลที่พร้อมใช้งาน โปรดสร้างฐานข้อมูลหรือเปิดสมุดบันทึกที่มีฐานข้อมูลนั้น",
   "apiKeyRequired": "จำเป็นต้องใช้ API Key",
   "openAICompatibleProvider": "ผู้ให้บริการที่เข้ากันได้กับ OpenAI",
   "entryDocPanel": "แผงเอกสาร",

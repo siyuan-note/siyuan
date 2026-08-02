@@ -1,4 +1,5 @@
 {
+  "noAvailableDatabase": "Nenašla sa žiadna dostupná databáza. Vytvorte databázu alebo otvorte zápisník, ktorý ju obsahuje",
   "apiKeyRequired": "Vyžaduje sa kľúč API",
   "openAICompatibleProvider": "Poskytovateľ kompatibilný s OpenAI",
   "entryDocPanel": "Panel dokumentov",

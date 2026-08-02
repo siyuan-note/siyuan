@@ -1,4 +1,5 @@
 {
+  "noAvailableDatabase": "Доступная база данных не найдена. Создайте базу данных или откройте блокнот, в котором она находится",
   "apiKeyRequired": "Требуется API-ключ",
   "openAICompatibleProvider": "OpenAI-совместимый поставщик",
   "entryDocPanel": "Панель документов",

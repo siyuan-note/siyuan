@@ -1120,52 +1120,54 @@ export class TableControl {
             const below = indexes[indexes.length - 1] + 1;
             const canInsertAbove = this.canInsertAtBoundary(grid, "row", above);
             const canInsertBelow = this.canInsertAtBoundary(grid, "row", below);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconAdd",
-                label: window.siyuan.languages.insertRowAbove,
-                disabled: !canInsertAbove,
-                action: canInsertAbove ? undefined : "iconInfo",
-                actionLabel: canInsertAbove ? undefined : window.siyuan.languages.splitMergedCellTip,
-                click: () => {
-                    this.insertRowAt(selection.node, selection.table, above);
-                },
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconAdd",
-                label: window.siyuan.languages.insertRowBelow,
-                disabled: !canInsertBelow,
-                action: canInsertBelow ? undefined : "iconInfo",
-                actionLabel: canInsertBelow ? undefined : window.siyuan.languages.splitMergedCellTip,
-                click: () => {
-                    this.insertRowAt(selection.node, selection.table, below);
-                },
-            }).element);
+            this.appendInsertMenu("iconBefore", window.siyuan.languages.insertRowBefore, canInsertAbove, count => {
+                this.insertRowAt(selection.node, selection.table, above, count);
+            });
+            this.appendInsertMenu("iconAfter", window.siyuan.languages.insertRowAfter, canInsertBelow, count => {
+                this.insertRowAt(selection.node, selection.table, below, count);
+            });
         } else if (this.selection.mode === "column") {
             const left = indexes[0];
             const right = indexes[indexes.length - 1] + 1;
             const canInsertLeft = this.canInsertAtBoundary(grid, "column", left);
             const canInsertRight = this.canInsertAtBoundary(grid, "column", right);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconAdd",
-                label: window.siyuan.languages.insertColumnLeft,
-                disabled: !canInsertLeft,
-                action: canInsertLeft ? undefined : "iconInfo",
-                actionLabel: canInsertLeft ? undefined : window.siyuan.languages.splitMergedCellTip,
-                click: () => {
-                    this.insertColumnAt(selection.node, selection.table, left);
-                },
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconAdd",
-                label: window.siyuan.languages.insertColumnRight,
-                disabled: !canInsertRight,
-                action: canInsertRight ? undefined : "iconInfo",
-                actionLabel: canInsertRight ? undefined : window.siyuan.languages.splitMergedCellTip,
-                click: () => {
-                    this.insertColumnAt(selection.node, selection.table, right);
-                },
-            }).element);
+            this.appendInsertMenu("iconInsertLeft", window.siyuan.languages.insertColumnLeft1, canInsertLeft,
+                count => {
+                    this.insertColumnAt(selection.node, selection.table, left, count);
+                });
+            this.appendInsertMenu("iconInsertRight", window.siyuan.languages.insertColumnRight1, canInsertRight,
+                count => {
+                    this.insertColumnAt(selection.node, selection.table, right, count);
+                });
         }
+    }
+
+    private appendInsertMenu(icon: string, label: string, canInsert: boolean, insert: (count: number) => void) {
+        const inputHTML = `<span class="fn__space"></span><input type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size"><span class="fn__space"></span>`;
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon,
+            label: `<div class="fn__flex" style="align-items: center;">${label.replace("${x}", inputHTML)}</div>`,
+            disabled: !canInsert,
+            action: canInsert ? undefined : "iconInfo",
+            actionLabel: canInsert ? undefined : window.siyuan.languages.splitMergedCellTip,
+            bind: element => {
+                const inputElement = element.querySelector("input") as HTMLInputElement;
+                const runInsert = () => {
+                    insert(Math.max(1, parseInt(inputElement.value) || 1));
+                    window.siyuan.menus.menu.remove();
+                };
+                element.addEventListener("click", () => {
+                    if (document.activeElement !== inputElement) {
+                        runInsert();
+                    }
+                });
+                inputElement.addEventListener("keydown", event => {
+                    if (!event.isComposing && event.key === "Enter") {
+                        runInsert();
+                    }
+                });
+            },
+        }).element);
     }
 
     private canInsertAtBoundary(grid: ITableGrid, mode: "row" | "column", index: number) {
@@ -1184,36 +1186,41 @@ export class TableControl {
         return html;
     }
 
-    private insertRowAt(node: HTMLElement, table: HTMLTableElement, index: number) {
+    private insertRowAt(node: HTMLElement, table: HTMLTableElement, index: number, count = 1) {
         const grid = buildTableGrid(table);
         if (!this.canInsertAtBoundary(grid, "row", index)) {
             return;
         }
+        count = Number.isFinite(count) ? Math.max(1, Math.floor(count)) : 1;
         const oldHTML = this.getTableHTMLWithCaret(node);
-        const row = document.createElement("tr");
         const headRowCount = table.tHead?.rows.length || 0;
         const tag = index < headRowCount || index === 0 ? "th" : "td";
         const sourceRow = Math.min(index, Math.max(0, grid.rowCount - 1));
-        for (let column = 0; column < grid.columnCount; column++) {
-            const cell = document.createElement(tag);
-            const align = grid.grid[sourceRow]?.[column]?.getAttribute("align");
-            if (align) {
-                cell.setAttribute("align", align);
+        const rows: HTMLTableRowElement[] = [];
+        for (let rowIndex = 0; rowIndex < count; rowIndex++) {
+            const row = document.createElement("tr");
+            for (let column = 0; column < grid.columnCount; column++) {
+                const cell = document.createElement(tag);
+                const align = grid.grid[sourceRow]?.[column]?.getAttribute("align");
+                if (align) {
+                    cell.setAttribute("align", align);
+                }
+                row.append(cell);
             }
-            row.append(cell);
+            rows.push(row);
         }
         const reference = table.rows[index];
         if (reference) {
-            reference.before(row);
+            reference.before(...rows);
         } else {
-            (table.tBodies[0] || table.createTBody()).append(row);
+            (table.tBodies[0] || table.createTBody()).append(...rows);
         }
         if (index === 0) {
             this.normalizeTableSections(table);
         }
-        if (row.cells[0]) {
+        if (rows[0]?.cells[0]) {
             const range = document.createRange();
-            range.selectNodeContents(row.cells[0]);
+            range.selectNodeContents(rows[0].cells[0]);
             range.collapse(true);
             focusByRange(range);
         }
@@ -1221,34 +1228,39 @@ export class TableControl {
         this.clear();
     }
 
-    private insertColumnAt(node: HTMLElement, table: HTMLTableElement, index: number) {
+    private insertColumnAt(node: HTMLElement, table: HTMLTableElement, index: number, count = 1) {
         const grid = buildTableGrid(table);
         if (!this.canInsertAtBoundary(grid, "column", index)) {
             return;
         }
+        count = Number.isFinite(count) ? Math.max(1, Math.floor(count)) : 1;
         const oldHTML = this.getTableHTMLWithCaret(node);
         let focusCell: HTMLTableCellElement;
         Array.from(table.rows).forEach(row => {
-            const cell = document.createElement(row.parentElement.tagName === "THEAD" ? "th" : "td");
             const reference = row.cells[index];
-            if (reference) {
-                reference.before(cell);
-            } else {
-                row.append(cell);
-            }
-            if (!focusCell) {
-                focusCell = cell;
+            for (let columnIndex = 0; columnIndex < count; columnIndex++) {
+                const cell = document.createElement(row.parentElement.tagName === "THEAD" ? "th" : "td");
+                if (reference) {
+                    reference.before(cell);
+                } else {
+                    row.append(cell);
+                }
+                if (!focusCell) {
+                    focusCell = cell;
+                }
             }
         });
         const colgroup = table.querySelector(":scope > colgroup");
         if (colgroup) {
-            const column = document.createElement("col");
-            column.style.minWidth = "60px";
             const reference = colgroup.children[index];
-            if (reference) {
-                reference.before(column);
-            } else {
-                colgroup.append(column);
+            for (let columnIndex = 0; columnIndex < count; columnIndex++) {
+                const column = document.createElement("col");
+                column.style.minWidth = "60px";
+                if (reference) {
+                    reference.before(column);
+                } else {
+                    colgroup.append(column);
+                }
             }
         }
         if (focusCell) {

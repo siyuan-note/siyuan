@@ -883,6 +883,10 @@
 
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[data-readonly="false"] {
+  caption {
+    cursor: pointer;
+  }
+
   span[data-type~="inline-math"],
   .protyle-action__language,
   .render-node:not([data-type="NodeBlockQueryEmbed"]) {
@@ -938,6 +942,10 @@
 
 .protyle-wysiwyg:not([contenteditable]),
 .protyle-wysiwyg[data-readonly="true"] {
+  caption {
+    cursor: default;
+  }
+
   .img:hover .protyle-icons {
     display: none;
   }

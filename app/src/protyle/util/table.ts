@@ -833,6 +833,9 @@ export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement
 };
 
 export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
+    if (protyle.disabled) {
+        return;
+    }
     const captionElement = nodeElement.querySelector("caption");
     window.siyuan.menus.menu.remove();
     const dialog = new Dialog({

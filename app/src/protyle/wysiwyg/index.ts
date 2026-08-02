@@ -4105,7 +4105,7 @@ export class WYSIWYG {
                     event.stopPropagation();
                 }
             });
-            if (tableElement) {
+            if (tableElement && !protyle.disabled) {
                 if (hasClosestByTag(event.target, "CAPTION")) {
                     updateTableTitle(protyle, tableElement);
                     return;

@@ -661,11 +661,24 @@
   display: flex;
   gap: 8px;
   margin-top: 8px;
+  min-width: 0;
+}
+
+.agent-chat__button-options {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  min-width: 0;
   overflow: auto;
 
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+.agent-chat__send,
+.agent-chat__stop {
+  flex-shrink: 0;
 }
 
 // 思考强度：iconBrain 图标嵌入原生 select 左侧，与旁边的模型 select 外观一致。

@@ -717,6 +717,10 @@ export class TableControl {
         return intersectRects(tableRect, wrapperRect, contentRect);
     }
 
+    private getTableAddRowEdge(table: HTMLTableElement) {
+        return Math.max(table.getBoundingClientRect().bottom, table.parentElement.getBoundingClientRect().bottom);
+    }
+
     private getTableSelectionViewportRect(table: HTMLTableElement) {
         const viewportRect = this.getTableViewportRect(table);
         const rowRects = Array.from(table.rows).map(row => row.getBoundingClientRect()).filter(rect => rect.height > 0);
@@ -768,6 +772,8 @@ export class TableControl {
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
             const tableRect = table.getBoundingClientRect();
             const viewportRect = this.getTableViewportRect(table);
+            const addRowEdge = this.getTableAddRowEdge(table);
+            const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const grid = buildTableGrid(table);
             if (clientY >= viewportRect.top && clientY <= viewportRect.bottom) {
                 const rows = Array.from(table.rows);
@@ -826,15 +832,15 @@ export class TableControl {
                     });
                 }
             }
-            if (tableRect.bottom <= viewportRect.bottom + 1 &&
-                clientY >= tableRect.bottom && clientY <= tableRect.bottom + TABLE_ADD_CONTROL_THICKNESS &&
+            if (addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1 &&
+                clientY >= addRowEdge && clientY <= addRowEdge + TABLE_ADD_CONTROL_THICKNESS &&
                 clientX >= viewportRect.left && clientX <= viewportRect.right) {
                 const cell = grid.cellInfos[0]?.cell;
                 if (cell) {
                     candidates.push({
                         cell,
                         type: "add-row",
-                        distance: clientY - tableRect.bottom,
+                        distance: clientY - addRowEdge,
                     });
                 }
             }
@@ -876,6 +882,8 @@ export class TableControl {
             const cellRect = cell.getBoundingClientRect();
             const tableRect = table.getBoundingClientRect();
             const viewportRect = this.getTableViewportRect(table);
+            const addRowEdge = this.getTableAddRowEdge(table);
+            const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const visibleCellRect = intersectRects(cellRect, viewportRect);
             const grid = this.selection?.table === table && this.selectionGrid ?
                 this.selectionGrid : buildTableGrid(table);
@@ -930,13 +938,12 @@ export class TableControl {
                 this.setPosition(this.cellHandle, visibleCellRect.right - 3, visibleCellRect.top + 3);
             }
             if (this.hoverType === "add-row" && viewportRect.width > 0 &&
-                tableRect.bottom <= viewportRect.bottom + 1 &&
-                tableRect.bottom >= viewportRect.top) {
+                addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1) {
                 this.addRowButton.classList.remove("fn__none");
                 this.addRowButton.style.width = `${viewportRect.width}px`;
                 this.addRowButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
                 this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2,
-                    tableRect.bottom + TABLE_ADD_CONTROL_THICKNESS / 2);
+                    addRowEdge + TABLE_ADD_CONTROL_THICKNESS / 2);
                 table.classList.add("protyle-table-control__table--add-row");
                 this.joinedControlTable = table;
             }

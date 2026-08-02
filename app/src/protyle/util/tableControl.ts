@@ -34,6 +34,8 @@ interface IDragState {
     startY: number;
     target: number;
     dragging: boolean;
+    handleCenter: number;
+    handleSize: number;
     cellInfos: Map<HTMLTableCellElement, ITableCellInfo>;
 }
 
@@ -268,7 +270,7 @@ export class TableControl {
         // 控件容器位于事件冒泡路径上，在这里兜底执行相同的边缘检测
         this.element.addEventListener("pointermove", event => this.handleTablePointerMove(event, true), {signal});
         this.wysiwygElement.addEventListener("pointerleave", event => {
-            if (this.element.contains(event.relatedTarget as Node)) {
+            if (this.dragState || this.element.contains(event.relatedTarget as Node)) {
                 return;
             }
             this.hoverCell = undefined;
@@ -362,7 +364,7 @@ export class TableControl {
             this.openMenu(event.clientX, event.clientY);
         }, {signal});
         this.element.addEventListener("pointerleave", event => {
-            if (this.wysiwygElement.contains(event.relatedTarget as Node)) {
+            if (this.dragState || this.wysiwygElement.contains(event.relatedTarget as Node)) {
                 return;
             }
             this.hoverCell = undefined;
@@ -427,12 +429,16 @@ export class TableControl {
             (type === "row" && this.selection.indexes.size > 1 && this.selection.indexes.has(0))) {
             return;
         }
+        const handleRect = (type === "row" ? this.rowHandle : this.columnHandle).getBoundingClientRect();
         this.dragState = {
             mode: type,
             startX: event.clientX,
             startY: event.clientY,
             target: -1,
             dragging: false,
+            handleCenter: type === "row" ? handleRect.top + handleRect.height / 2 :
+                handleRect.left + handleRect.width / 2,
+            handleSize: type === "row" ? handleRect.height : handleRect.width,
             cellInfos: new Map(grid.cellInfos.map(info => [info.cell, info])),
         };
         const move = (moveEvent: PointerEvent) => this.handleDragMove(moveEvent);
@@ -711,6 +717,24 @@ export class TableControl {
         return intersectRects(tableRect, wrapperRect, contentRect);
     }
 
+    private getTableSelectionViewportRect(table: HTMLTableElement) {
+        const viewportRect = this.getTableViewportRect(table);
+        const rowRects = Array.from(table.rows).map(row => row.getBoundingClientRect()).filter(rect => rect.height > 0);
+        if (rowRects.length === 0) {
+            return viewportRect;
+        }
+        const top = Math.min(...rowRects.map(rect => rect.top));
+        const bottom = Math.max(...rowRects.map(rect => rect.bottom));
+        return intersectRects(viewportRect, {
+            left: viewportRect.left,
+            top,
+            right: viewportRect.right,
+            bottom,
+            width: viewportRect.width,
+            height: bottom - top,
+        });
+    }
+
     private getColumnRect(table: HTMLTableElement, grid: ITableGrid, index: number) {
         const column = table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col")[index];
         const columnRect = column?.getBoundingClientRect();
@@ -902,7 +926,8 @@ export class TableControl {
                     this.joinedControlTable = table;
                 }
             }
-            if (this.hoverType === "cell" && visibleCellRect.width > 0 && visibleCellRect.height > 0) {
+            if (!this.dragState && this.hoverType === "cell" &&
+                visibleCellRect.width > 0 && visibleCellRect.height > 0) {
                 this.cellHandle.classList.remove("fn__none");
                 this.setPosition(this.cellHandle, visibleCellRect.right - 3, visibleCellRect.top + 3);
             }
@@ -937,7 +962,7 @@ export class TableControl {
             this.selectedCells = [];
             return;
         }
-        const selectionViewportRect = this.getTableViewportRect(this.selection.table);
+        const selectionViewportRect = this.getTableSelectionViewportRect(this.selection.table);
         if (this.selection.mode === "row") {
             const rows = Array.from(this.selection.table.rows);
             getIndexGroups(this.selection.indexes).forEach(group => {
@@ -1677,14 +1702,25 @@ export class TableControl {
 
     private updateDragPreview(event: PointerEvent) {
         const state = this.dragState;
-        if (!state) {
+        if (!state || !this.selection) {
             return;
         }
-        const offsetX = state.mode === "column" ? event.clientX - state.startX : 0;
-        const offsetY = state.mode === "row" ? event.clientY - state.startY : 0;
+        const viewportRect = this.getTableSelectionViewportRect(this.selection.table);
+        const start = state.mode === "column" ? viewportRect.left : viewportRect.top;
+        const end = state.mode === "column" ? viewportRect.right : viewportRect.bottom;
+        const minCenter = start + state.handleSize / 2;
+        const maxCenter = end - state.handleSize / 2;
+        const pointerOffset = state.mode === "column" ? event.clientX - state.startX : event.clientY - state.startY;
+        const targetCenter = state.handleCenter + pointerOffset;
+        const center = minCenter <= maxCenter ? Math.min(Math.max(targetCenter, minCenter), maxCenter) :
+            (start + end) / 2;
+        const offsetX = state.mode === "column" ? center - state.handleCenter : 0;
+        const offsetY = state.mode === "row" ? center - state.handleCenter : 0;
         const translate = `${Math.round(offsetX)}px ${Math.round(offsetY)}px`;
         const handle = state.mode === "row" ? this.rowHandle : this.columnHandle;
         handle.style.translate = translate;
+        handle.classList.remove("b3-tooltips");
+        this.cellHandle.classList.add("fn__none");
         this.selectionElements.slice(0, this.selectionElementIndex).forEach(item => {
             item.classList.add("protyle-table-control__selection--dragging");
         });
@@ -1693,6 +1729,8 @@ export class TableControl {
     private clearDragPreview() {
         this.rowHandle.style.removeProperty("translate");
         this.columnHandle.style.removeProperty("translate");
+        this.rowHandle.classList.add("b3-tooltips");
+        this.columnHandle.classList.add("b3-tooltips");
         this.selectionElements.forEach(item => {
             item.classList.remove("protyle-table-control__selection--dragging");
         });

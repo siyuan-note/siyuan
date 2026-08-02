@@ -2499,6 +2499,10 @@ func readBoxEncryptionFile(backupPath string) (*conf.BoxEncryption, error) {
 // 若 srcPath 在已解锁的加密笔记本下，读密文→解密→写明文到 destPath（导出目录）；
 // 否则走 filelock.Copy 原路径（字节级复制，密文/明文均可）。
 func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
+	if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+		return err
+	}
+
 	boxID := ExtractBoxIDFromAssetsPath(srcPath)
 	if boxID != "" && IsEncryptedBox(boxID) {
 		HoldBoxReadLock(boxID)

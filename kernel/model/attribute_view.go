@@ -1354,7 +1354,7 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 	}
 
 	switch newLayout {
-	case av.LayoutTypeTable, av.LayoutTypeGallery, av.LayoutTypeKanban:
+	case av.LayoutTypeTable, av.LayoutTypeGallery, av.LayoutTypeKanban, av.LayoutTypeCalendar:
 	default:
 		return av.ErrWrongLayoutType
 	}

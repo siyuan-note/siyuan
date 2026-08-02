@@ -652,3 +652,63 @@ func TestCreateItemOptionsPrimaryKeyOverride(t *testing.T) {
 		t.Fatalf("no options must merge to the zero value, got %#v", merged)
 	}
 }
+
+// TestChangeAttrViewLayoutAcceptsCalendar 回归测试：
+// /api/av/changeAttrViewLayout 的后端校验必须接受日历布局，否则切换到日历视图会被
+// av.ErrWrongLayoutType 拒绝；切换后布局、名称、字段迁移和日期字段选择都必须正确，
+// 非法布局仍然必须被拒绝。
+func TestChangeAttrViewLayoutAcceptsCalendar(t *testing.T) {
+	oldLangs := util.AttrViewLangs[util.Lang]
+	util.AttrViewLangs[util.Lang] = map[string]any{
+		"table":    "table",
+		"gallery":  "gallery",
+		"kanban":   "kanban",
+		"calendar": "calendar",
+	}
+	t.Cleanup(func() {
+		util.AttrViewLangs[util.Lang] = oldLangs
+	})
+
+	attrView := &av.AttributeView{
+		KeyValues: []*av.KeyValues{
+			{Key: &av.Key{ID: "date", Type: av.KeyTypeDate}},
+		},
+	}
+	view := &av.View{
+		ID:         "view1",
+		Name:       av.GetAttributeViewI18n("table"),
+		LayoutType: av.LayoutTypeTable,
+		Table: &av.LayoutTable{
+			Columns: []*av.ViewTableColumn{
+				{BaseField: &av.BaseField{ID: "date"}},
+			},
+		},
+	}
+
+	if err := changeAttrViewLayout(attrView, view, av.LayoutTypeCalendar); nil != err {
+		t.Fatalf("calendar layout must be accepted: %v", err)
+	}
+	if av.LayoutTypeCalendar != view.LayoutType {
+		t.Fatalf("expected calendar layout, got %s", view.LayoutType)
+	}
+	if nil == view.Calendar {
+		t.Fatal("expected calendar layout instance")
+	}
+	if av.GetAttributeViewI18n("calendar") != view.Name {
+		t.Fatalf("expected view name to switch to calendar, got %s", view.Name)
+	}
+	if 1 != len(view.Calendar.Fields) || "date" != view.Calendar.Fields[0].ID {
+		t.Fatalf("expected the table column to migrate into calendar fields, got %v", view.Calendar.Fields)
+	}
+	if "date" != view.Calendar.DateFieldID {
+		t.Fatalf("expected the date field to be selected as calendar date field, got %s", view.Calendar.DateFieldID)
+	}
+
+	// 切换到相同布局必须是无操作，非法布局仍然必须被拒绝
+	if err := changeAttrViewLayout(attrView, view, av.LayoutTypeCalendar); nil != err {
+		t.Fatalf("switching to the same layout should be a no-op: %v", err)
+	}
+	if err := changeAttrViewLayout(attrView, view, av.LayoutType("bogus")); av.ErrWrongLayoutType != err {
+		t.Fatalf("invalid layout must still be rejected, got %v", err)
+	}
+}

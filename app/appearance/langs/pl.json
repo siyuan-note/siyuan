@@ -2325,7 +2325,7 @@
 		"286": "[%s] został cofnięty",
 		"287": "Hasło blokady ekranu nie może składać się wyłącznie ze spacji. Aby je wyłączyć, po prostu wyczyść pole wprowadzania",
 		"288": " (Domyślny)",
-		"289": "Wyeksportowano do Pobrane",
+		"289": "Wyeksportowano",
 		"290": "Eksport nie powiódł się",
 		"291": "Plik nie znaleziony lub pusty",
 		"292": "Nie można utworzyć pliku",
@@ -2392,6 +2392,10 @@
 		"353": "Pole [%s] szablonu nowego elementu zignorowało niedostępne wartości opcji [%s]",
 		"354": "Zbyt wiele nieudanych prób uwierzytelnienia, spróbuj ponownie później",
 		"355": "Hasło ekranu blokady musi mieć co najmniej 8 znaków",
-		"356": "Token API musi mieć co najmniej 8 znaków"
+		"356": "Token API musi mieć co najmniej 8 znaków",
+		"357": "Otwórz plik",
+		"358": "Nie można otworzyć pliku",
+		"359": "Wyeksportowano [%s]",
+		"360": "Wyeksportowano do [%s]"
 	}
 	}

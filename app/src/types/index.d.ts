@@ -270,6 +270,7 @@ interface Window {
         nativeCallbacks: { [key: string]: (id: number) => void },
         messageHandlers: {
             saveExportFile: { postMessage: (url: string) => void }
+            saveExportFileV2?: { postMessage: (data: {uri: string, requestID: string}) => void }
             openLink: { postMessage: (url: string) => void }
             startKernelFast: { postMessage: (url: string) => void }
             changeStatusBar: { postMessage: (url: string) => void }
@@ -299,6 +300,7 @@ interface Window {
         openExternal(url: string): void
         exportByDefault(url: string): void
         saveExportFile(url: string): void
+        saveExportFileV2?(url: string, requestID: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
@@ -323,6 +325,7 @@ interface Window {
         openExternal(url: string): void
         exportByDefault(url: string): void
         saveExportFile(url: string): void
+        saveExportFileV2?(url: string, requestID: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
@@ -339,6 +342,7 @@ interface Window {
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
     };
+    handleSaveExportFileResult(requestID: string, resultJSON: string): void
 
     Protyle: import("../protyle/method").default;
 

@@ -2325,7 +2325,7 @@
 		"286": "[%s] ya ha sido revertido",
 		"287": "La contraseña de bloqueo de pantalla no puede contener solo espacios. Si desea desactivarlo, simplemente borre el cuadro de entrada",
 		"288": " (Por defecto)",
-		"289": "Exportado a Descargas",
+		"289": "Exportado",
 		"290": "Error al exportar",
 		"291": "Archivo no encontrado o vacío",
 		"292": "No se puede crear el archivo",
@@ -2392,6 +2392,10 @@
 		"353": "El campo [%s] de la plantilla de nuevo elemento ignoró los valores de opción no disponibles [%s]",
 		"354": "Demasiados intentos de autenticación fallidos, inténtelo de nuevo más tarde",
 		"355": "La contraseña de la pantalla de bloqueo debe tener al menos 8 caracteres",
-		"356": "El token de la API debe tener al menos 8 caracteres"
+		"356": "El token de la API debe tener al menos 8 caracteres",
+		"357": "Abrir archivo",
+		"358": "No se puede abrir el archivo",
+		"359": "Se exportó [%s]",
+		"360": "Se exportó a [%s]"
 	}
 	}

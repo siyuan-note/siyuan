@@ -2325,7 +2325,7 @@
 		"286": "[%s] è già stato ripristinato",
 		"287": "La password di blocco schermo non può contenere solo spazi. Per disabilitarlo, svuota direttamente il campo di input",
 		"288": " (Predefinito)",
-		"289": "Esportato in Download",
+		"289": "Esportato",
 		"290": "Esportazione fallita",
 		"291": "File non trovato o vuoto",
 		"292": "Impossibile creare il file",
@@ -2392,6 +2392,10 @@
 		"353": "Il campo [%s] del modello per nuovi elementi ha ignorato i valori di opzione non disponibili [%s]",
 		"354": "Troppi tentativi di autenticazione falliti, riprova più tardi",
 		"355": "La password della schermata di blocco deve contenere almeno 8 caratteri",
-		"356": "Il token dell'API deve contenere almeno 8 caratteri"
+		"356": "Il token dell'API deve contenere almeno 8 caratteri",
+		"357": "Apri file",
+		"358": "Impossibile aprire il file",
+		"359": "Esportato [%s]",
+		"360": "Esportato in [%s]"
 	}
 	}

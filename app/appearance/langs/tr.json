@@ -2325,7 +2325,7 @@
 		"286": "[%s] geri alındı",
 		"287": "Erişim yetkilendirme kodu yalnızca boşluklardan oluşamaz. Devre dışı bırakmak için giriş kutusunu doğrudan temizleyin",
 		"288": " (Varsayılan)",
-		"289": "İndirilenlere aktarıldı",
+		"289": "Dışa aktarıldı",
 		"290": "Dışa aktarma başarısız",
 		"291": "Dosya bulunamadı veya boş",
 		"292": "Dosya oluşturulamadı",
@@ -2392,6 +2392,10 @@
 		"353": "Yeni öğe şablonu alanı [%s] kullanılamayan seçenek değerlerini yok saydı [%s]",
 		"354": "Çok fazla başarısız kimlik doğrulama denemesi, lütfen daha sonra tekrar deneyin",
 		"355": "Kilit ekranı parolası en az 8 karakter olmalıdır",
-		"356": "API belirteci en az 8 karakter olmalıdır"
+		"356": "API belirteci en az 8 karakter olmalıdır",
+		"357": "Dosyayı aç",
+		"358": "Dosya açılamıyor",
+		"359": "[%s] dışa aktarıldı",
+		"360": "[%s] konumuna aktarıldı"
 	}
 	}

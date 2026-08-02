@@ -2325,7 +2325,7 @@
 		"286": "[%s] has already been rolled back",
 		"287": "The lock screen password cannot contain only spaces. To disable it, just clear the input box",
 		"288": " (Default)",
-		"289": "Exported to Downloads",
+		"289": "Exported",
 		"290": "Export failed",
 		"291": "File not found or empty",
 		"292": "Cannot create file",
@@ -2392,6 +2392,10 @@
 		"353": "New item template field [%s] ignored unavailable option values [%s]",
 		"354": "Too many failed authentication attempts, please try again later",
 		"355": "The lock screen password must be at least 8 characters",
-		"356": "The API token must be at least 8 characters"
+		"356": "The API token must be at least 8 characters",
+		"357": "Open file",
+		"358": "Unable to open file",
+		"359": "Exported [%s]",
+		"360": "Exported to [%s]"
 	}
 	}

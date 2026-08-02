@@ -2325,7 +2325,7 @@
 		"286": "[%s] bol vrátený",
 		"287": "Heslo zámku obrazovky nemôže obsahovať iba medzery. Ak ho chcete zakázať, jednoducho vymažte vstupné pole",
 		"288": " (Predvolené)",
-		"289": "Exportované do Prevzatia",
+		"289": "Exportované",
 		"290": "Export zlyhal",
 		"291": "Súbor nebol nájdený alebo je prázdny",
 		"292": "Súbor sa nedá vytvoriť",
@@ -2392,6 +2392,10 @@
 		"353": "Pole [%s] šablóny novej položky ignorovalo nedostupné hodnoty možností [%s]",
 		"354": "Príliš veľa neúspešných pokusov o overenie, skúste to znova neskôr",
 		"355": "Heslo uzamknutej obrazovky musí mať aspoň 8 znakov",
-		"356": "Token API musí mať aspoň 8 znakov"
+		"356": "Token API musí mať aspoň 8 znakov",
+		"357": "Otvoriť súbor",
+		"358": "Súbor sa nedá otvoriť",
+		"359": "Exportované [%s]",
+		"360": "Exportované do [%s]"
 	}
 	}

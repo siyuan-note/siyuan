@@ -2325,7 +2325,7 @@
 		"286": "[%s] já foi revertido",
 		"287": "A senha de bloqueio de tela não pode conter apenas espaços. Para desativá-la, basta limpar o campo de entrada",
 		"288": " (Padrão)",
-		"289": "Exportado para Downloads",
+		"289": "Exportado",
 		"290": "Falha na exportação",
 		"291": "Arquivo não encontrado ou vazio",
 		"292": "Não foi possível criar o arquivo",
@@ -2392,6 +2392,10 @@
 		"353": "O campo [%s] do modelo de novo item ignorou valores de opção indisponíveis [%s]",
 		"354": "Muitas tentativas de autenticação falharam, tente novamente mais tarde",
 		"355": "A senha da tela de bloqueio deve ter pelo menos 8 caracteres",
-		"356": "O token da API deve ter pelo menos 8 caracteres"
+		"356": "O token da API deve ter pelo menos 8 caracteres",
+		"357": "Abrir arquivo",
+		"358": "Não foi possível abrir o arquivo",
+		"359": "[%s] exportado",
+		"360": "Exportado para [%s]"
 	}
 	}

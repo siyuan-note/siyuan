@@ -2325,7 +2325,7 @@
 		"286": "[%s] a déjà été restauré",
 		"287": "Le mot de passe de verrouillage d'écran ne peut pas contenir uniquement des espaces. Pour le désactiver, effacez directement le champ de saisie",
 		"288": " (Default)",
-		"289": "Exporté vers Téléchargements",
+		"289": "Exporté",
 		"290": "Échec de l'exportation",
 		"291": "Fichier introuvable ou vide",
 		"292": "Impossible de créer le fichier",
@@ -2392,6 +2392,10 @@
 		"353": "Le champ [%s] du modèle de nouvel élément a ignoré les valeurs d’option indisponibles [%s]",
 		"354": "Trop de tentatives d'authentification échouées, veuillez réessayer plus tard",
 		"355": "Le mot de passe de l'écran de verrouillage doit comporter au moins 8 caractères",
-		"356": "Le jeton de l'API doit comporter au moins 8 caractères"
+		"356": "Le jeton de l'API doit comporter au moins 8 caractères",
+		"357": "Ouvrir le fichier",
+		"358": "Impossible d'ouvrir le fichier",
+		"359": "[%s] exporté",
+		"360": "Exporté vers [%s]"
 	}
 	}

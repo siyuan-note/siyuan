@@ -2325,7 +2325,7 @@
 		"286": "[%s] wurde bereits zurückgesetzt",
 		"287": "Das Bildschirmsperrpasswort darf nicht nur aus Leerzeichen bestehen. Um es zu deaktivieren, leeren Sie das Eingabefeld direkt",
 		"288": " (Standard)",
-		"289": "In Downloads exportiert",
+		"289": "Exportiert",
 		"290": "Export fehlgeschlagen",
 		"291": "Datei nicht gefunden oder leer",
 		"292": "Datei kann nicht erstellt werden",
@@ -2392,6 +2392,10 @@
 		"353": "Das Feld [%s] der Vorlage für neue Einträge hat nicht verfügbare Optionswerte ignoriert [%s]",
 		"354": "Zu viele fehlgeschlagene Authentifizierungsversuche, bitte versuchen Sie es später erneut",
 		"355": "Das Bildschirmsperr-Passwort muss mindestens 8 Zeichen lang sein",
-		"356": "Der API-Token muss mindestens 8 Zeichen lang sein"
+		"356": "Der API-Token muss mindestens 8 Zeichen lang sein",
+		"357": "Datei öffnen",
+		"358": "Datei kann nicht geöffnet werden",
+		"359": "[%s] exportiert",
+		"360": "Nach [%s] exportiert"
 	}
 	}

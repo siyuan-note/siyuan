@@ -2325,7 +2325,7 @@
 		"286": "[%s] is al teruggedraaid",
 		"287": "Het schermvergrendelingswachtwoord mag niet alleen uit spaties bestaan. Laat het invoerveld leeg om het uit te schakelen",
 		"288": " (Standaard)",
-		"289": "Geëxporteerd naar Downloads",
+		"289": "Geëxporteerd",
 		"290": "Export mislukt",
 		"291": "Bestand niet gevonden of leeg",
 		"292": "Kan bestand niet aanmaken",
@@ -2392,6 +2392,10 @@
 		"353": "Veld [%s] van de sjabloon voor nieuwe items heeft niet-beschikbare optiewaarden genegeerd [%s]",
 		"354": "Te veel mislukte verificatiepogingen, probeer het later opnieuw",
 		"355": "Het wachtwoord van het vergrendelscherm moet minimaal 8 tekens bevatten",
-		"356": "De API-token moet minimaal 8 tekens bevatten"
+		"356": "De API-token moet minimaal 8 tekens bevatten",
+		"357": "Bestand openen",
+		"358": "Kan bestand niet openen",
+		"359": "[%s] geëxporteerd",
+		"360": "Geëxporteerd naar [%s]"
 	}
 	}

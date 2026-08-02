@@ -1,4 +1,5 @@
 {
+  "openAICompatibleProvider": "Provedor compatível com OpenAI",
   "entryDocPanel": "Painel de documentos",
   "entryDocumentMenu": "Menu do documento no canto superior direito",
   "entryDocumentMoreMenu": "Menu Mais do documento",
@@ -1053,7 +1054,7 @@
 	"apiVersion": "Versão da API",
 	"apiVersionTip": "Obrigatório apenas ao usar o serviço Azure OpenAI",
 	"apiProvider": "Provedor da API",
-	"apiProviderTip": "Gerencie os provedores de modelos de IA e seus modelos. Provedores compatíveis com a API Chat Completions (ex. DeepSeek, Kimi, MiniMax) podem ser usados",
+	"apiProviderTip": "Provedores compatíveis com a API Chat Completions (ex. DeepSeek, Kimi, MiniMax) podem ser usados",
 	"skip": "Pular",
 	"nextRound": "Próxima rodada",
 	"save": "Salvar",

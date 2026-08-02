@@ -1,4 +1,5 @@
 {
+  "openAICompatibleProvider": "Penyedia yang kompatibel dengan OpenAI",
   "entryDocPanel": "Panel dokumen",
   "entryDocumentMenu": "Menu dokumen kanan atas",
   "entryDocumentMoreMenu": "Menu Lainnya dokumen",
@@ -1053,7 +1054,7 @@
 	"apiVersion": "Versi API",
 	"apiVersionTip": "Hanya diperlukan saat menggunakan layanan Azure OpenAI",
 	"apiProvider": "Penyedia API",
-	"apiProviderTip": "Kelola penyedia model AI dan model-modelnya. Penyedia yang kompatibel dengan API Chat Completions (mis., DeepSeek, Kimi, MiniMax) dapat digunakan",
+	"apiProviderTip": "Penyedia yang kompatibel dengan API Chat Completions (mis., DeepSeek, Kimi, MiniMax) dapat digunakan",
 	"skip": "Lewati",
 	"nextRound": "Putaran berikutnya",
 	"save": "Simpan",

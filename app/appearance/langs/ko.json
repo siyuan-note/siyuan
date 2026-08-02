@@ -1,4 +1,5 @@
 {
+  "openAICompatibleProvider": "OpenAI 호환 제공자",
   "entryDocPanel": "문서 패널",
   "entryDocumentMenu": "오른쪽 위 문서 메뉴",
   "entryDocumentMoreMenu": "문서 더보기 메뉴",
@@ -1053,7 +1054,7 @@
 	"apiVersion": "API 버전",
 	"apiVersionTip": "Azure OpenAI 서비스를 사용할 때만 필요합니다",
 	"apiProvider": "API 제공자",
-	"apiProviderTip": "AI 모델 제공자와 해당 모델을 관리합니다. Chat Completions API와 호환되는 제공자(예: DeepSeek, Kimi, MiniMax)를 모두 사용할 수 있습니다",
+	"apiProviderTip": "Chat Completions API와 호환되는 제공자(예: DeepSeek, Kimi, MiniMax)를 사용할 수 있습니다",
 	"skip": "건너뛰기",
 	"nextRound": "다음 라운드",
 	"save": "저장",

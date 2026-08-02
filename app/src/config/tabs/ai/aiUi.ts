@@ -14,6 +14,7 @@ type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
 
 export const getProvidersBlockKeywords = (): string[] => [
     window.siyuan.languages.apiProvider,
+    window.siyuan.languages.openAICompatibleProvider,
     window.siyuan.languages.apiProviderTip,
     window.siyuan.languages.aiProviderOfficial,
     window.siyuan.languages.aiProviderAggregator,

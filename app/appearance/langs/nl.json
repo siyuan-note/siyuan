@@ -1,4 +1,5 @@
 {
+  "openAICompatibleProvider": "OpenAI-compatibele provider",
   "entryDocPanel": "Documentpaneel",
   "entryDocumentMenu": "Documentmenu rechtsboven",
   "entryDocumentMoreMenu": "Menu Meer van het document",
@@ -1053,7 +1054,7 @@
 	"apiVersion": "API-versie",
 	"apiVersionTip": "Alleen nodig voor Azure OpenAI",
 	"apiProvider": "API-provider",
-	"apiProviderTip": "Beheer AI-modelproviders en hun modellen. Providers die compatibel zijn met de Chat Completions API (bijv. DeepSeek, Kimi, MiniMax) kunnen allemaal worden gebruikt",
+	"apiProviderTip": "Providers die compatibel zijn met de Chat Completions API (bijv. DeepSeek, Kimi, MiniMax) kunnen worden gebruikt",
 	"skip": "Overslaan",
 	"nextRound": "Volgende ronde",
 	"save": "Opslaan",

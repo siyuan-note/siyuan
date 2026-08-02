@@ -1,4 +1,5 @@
 {
+  "openAICompatibleProvider": "OpenAI uyumlu sağlayıcı",
   "entryDocPanel": "Belge paneli",
   "entryDocumentMenu": "Sağ üst belge menüsü",
   "entryDocumentMoreMenu": "Belge Diğer menüsü",
@@ -1053,7 +1054,7 @@
 	"apiVersion": "API sürümü",
 	"apiVersionTip": "Yalnızca Azure OpenAI hizmeti kullanıldığında gereklidir",
 	"apiProvider": "API Sağlayıcısı",
-	"apiProviderTip": "AI model sağlayıcılarını ve modellerini yönetin. Chat Completions API ile uyumlu sağlayıcılar (örn. DeepSeek, Kimi, MiniMax) kullanılabilir",
+	"apiProviderTip": "Chat Completions API ile uyumlu sağlayıcılar (örn. DeepSeek, Kimi, MiniMax) kullanılabilir",
 	"skip": "Geç",
 	"nextRound": "Sonraki tur",
 	"save": "Kaydet",

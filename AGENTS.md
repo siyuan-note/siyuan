@@ -55,6 +55,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
      - For capabilities that did not previously exist, write the title from a support perspective and prefer `Support ...`
    - If no applicable label is available, infer the perspective from the issue content
 8. **LD246:** When accessing `ld246.com`, set the HTTP `User-Agent` header to `SiYuan-Coding-Agent`
+9. **Configurable entries:** When adding, removing, renaming, moving, or changing the `data-id` / `data-type` of a desktop menu item or dock entry covered by entry visibility, update `app/src/config/entryVisibility/catalog.ts` in the same change, including its hierarchy, label, and Simple profile default, and update the related tests. Keep parent and child paths aligned with the actual menu hierarchy. The menu `ignore` option controls conditional rendering and must not be used to opt an entry out of visibility configuration
 
 ---
 

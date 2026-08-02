@@ -22,6 +22,7 @@ import {
     focusByRange,
     focusByWbr,
     focusSideBlock,
+    getBlockRangeSelectElements,
     getBlockRanges,
     getEditorRange,
     getSelectionOffset,
@@ -973,73 +974,11 @@ export class WYSIWYG {
                 }
                 // shift 多选
                 if (startElement && endElement && startElement !== endElement) {
-                    let toDown = true;
-                    const startRect = startElement.getBoundingClientRect();
-                    const endRect = endElement.getBoundingClientRect();
-                    let startTop = startRect.top;
-                    let endTop = endRect.top;
-                    if (startTop === endTop) {
-                        // 横排 https://ld246.com/article/1663036247544
-                        startTop = startRect.left;
-                        endTop = endRect.left;
-                    }
-                    if (startTop > endTop) {
-                        const tempElement = endElement;
-                        endElement = startElement;
-                        startElement = tempElement;
-                        const tempTop = endTop;
-                        endTop = startTop;
-                        startTop = tempTop;
-                        toDown = false;
-                    }
-                    let selectElements: Element[] = [];
-                    let currentElement: HTMLElement = startElement;
-                    let hasJump = false;
-                    while (currentElement) {
-                        if (currentElement.classList.contains("protyle-breadcrumb__bar")) {
-                            currentElement = currentElement.nextElementSibling as HTMLElement;
-                        }
-                        if (currentElement && !currentElement.classList.contains("protyle-attr")) {
-                            const currentRect = currentElement.getBoundingClientRect();
-                            if (startRect.top === endRect.top ? (currentRect.left <= endTop) : (currentRect.top <= endTop)) {
-                                if (hasJump) {
-                                    // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
-                                    if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
-                                        const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect();
-                                        if (startRect.top === endRect.top ?
-                                            (currentNextRect.left <= endTop && currentNextRect.bottom <= endRect.bottom) :
-                                            (currentNextRect.top <= endTop)) {
-                                            selectElements = [currentElement];
-                                            currentElement = currentElement.nextElementSibling as HTMLElement;
-                                            hasJump = false;
-                                        } else if (currentElement.parentElement.classList.contains("sb")) {
-                                            currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                                            hasJump = true;
-                                        } else {
-                                            break;
-                                        }
-                                    } else {
-                                        currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                                        hasJump = true;
-                                    }
-                                } else {
-                                    if (!currentElement.classList.contains("sb__resize")) {
-                                        selectElements.push(currentElement);
-                                    }
-                                    currentElement = currentElement.nextElementSibling as HTMLElement;
-                                }
-                            } else if (currentElement.parentElement.classList.contains("sb")) {
-                                // 跳出超级块横向排版中的未选中元素
-                                currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                                hasJump = true;
-                            } else {
-                                break;
-                            }
-                        } else {
-                            currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                            hasJump = true;
-                        }
-                    }
+                    const blockRange = getBlockRangeSelectElements(startElement, endElement);
+                    startElement = blockRange.startElement;
+                    endElement = blockRange.endElement;
+                    const selectElements = blockRange.selectElements;
+                    const toDown = blockRange.toDown;
                     if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
                         !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
                         !selectElements[0].classList.contains("sb")) {

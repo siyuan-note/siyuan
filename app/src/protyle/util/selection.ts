@@ -2,7 +2,6 @@ import {
     getContenteditableElement,
     getNextBlock,
     getPreviousBlock,
-    getTopAloneElement,
     hasPreviousSibling,
     isContainerBlock,
     isEndOfBlock,
@@ -136,17 +135,95 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     return false;
 };
 
-export const selectBlocksByRange = (protyle: IProtyle, range: Range) => {
-    const selectElements: HTMLElement[] = [];
-    protyle.wysiwyg.element.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
-        if (!item.querySelector("[data-node-id]") && range.intersectsNode(item)) {
-            const embedElement = isInEmbedBlock(item);
-            const selectElement = getTopAloneElement(embedElement || item) as HTMLElement;
-            if (!selectElements.includes(selectElement)) {
-                selectElements.push(selectElement);
-                selectElement.classList.add("protyle-wysiwyg--select");
-            }
+export const getBlockRangeSelectElements = (rangeStartElement: HTMLElement, rangeEndElement: HTMLElement) => {
+    let startElement = rangeStartElement;
+    let endElement = rangeEndElement;
+    let toDown = true;
+    const startRect = startElement.getBoundingClientRect();
+    const endRect = endElement.getBoundingClientRect();
+    let startTop = startRect.top;
+    let endTop = endRect.top;
+    if (startTop === endTop) {
+        // 横排 https://ld246.com/article/1663036247544
+        startTop = startRect.left;
+        endTop = endRect.left;
+    }
+    if (startTop > endTop) {
+        const tempElement = endElement;
+        endElement = startElement;
+        startElement = tempElement;
+        const tempTop = endTop;
+        endTop = startTop;
+        startTop = tempTop;
+        toDown = false;
+    }
+    let selectElements: HTMLElement[] = [];
+    let currentElement: HTMLElement = startElement;
+    let hasJump = false;
+    while (currentElement) {
+        if (currentElement.classList.contains("protyle-breadcrumb__bar")) {
+            currentElement = currentElement.nextElementSibling as HTMLElement;
         }
+        if (currentElement && !currentElement.classList.contains("protyle-attr")) {
+            const currentRect = currentElement.getBoundingClientRect();
+            if (startRect.top === endRect.top ? currentRect.left <= endTop : currentRect.top <= endTop) {
+                if (hasJump) {
+                    // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
+                    if (currentElement.nextElementSibling &&
+                        !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
+                        const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect();
+                        if (startRect.top === endRect.top ?
+                            currentNextRect.left <= endTop && currentNextRect.bottom <= endRect.bottom :
+                            currentNextRect.top <= endTop) {
+                            selectElements = [currentElement];
+                            currentElement = currentElement.nextElementSibling as HTMLElement;
+                            hasJump = false;
+                        } else if (currentElement.parentElement.classList.contains("sb")) {
+                            currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+                            hasJump = true;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+                        hasJump = true;
+                    }
+                } else {
+                    if (!currentElement.classList.contains("sb__resize")) {
+                        selectElements.push(currentElement);
+                    }
+                    currentElement = currentElement.nextElementSibling as HTMLElement;
+                }
+            } else if (currentElement.parentElement.classList.contains("sb")) {
+                // 跳出超级块横向排版中的未选中元素
+                currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+                hasJump = true;
+            } else {
+                break;
+            }
+        } else {
+            currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+            hasJump = true;
+        }
+    }
+    return {endElement, selectElements, startElement, toDown};
+};
+
+export const selectBlocksByRange = (protyle: IProtyle, range: Range) => {
+    const startBlockElement = hasClosestBlock(range.startContainer);
+    const endBlockElement = hasClosestBlock(range.endContainer);
+    if (!startBlockElement || !endBlockElement) {
+        return;
+    }
+    const startElement = (isInEmbedBlock(startBlockElement) || startBlockElement) as HTMLElement;
+    const endElement = (isInEmbedBlock(endBlockElement) || endBlockElement) as HTMLElement;
+    const selectElements = startElement === endElement ? [startElement] :
+        getBlockRangeSelectElements(startElement, endElement).selectElements;
+    selectElements.forEach(selectElement => {
+        selectElement.classList.add("protyle-wysiwyg--select");
+        selectElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+            item.classList.remove("protyle-wysiwyg--select");
+        });
     });
     range.collapse(false);
     countBlockWord(selectElements.map(item => item.getAttribute("data-node-id")), protyle.block.rootID);

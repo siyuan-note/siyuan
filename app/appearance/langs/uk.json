@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "Панель документів",
+  "entryDocumentMenu": "Меню документа у правому верхньому куті",
+  "entryDocumentMoreMenu": "Меню «Більше» документа",
+  "entryGutterMenu": "Меню значка блоку",
+  "entryInlineMenu": "Меню рядкових елементів",
+  "entrySubmenu": "Підменю",
   "splitMergedCellTip": "Спочатку розділіть об’єднані комірки",
   "entryVisibility": "Меню та док-панель",
   "entryVisibilityTip": "Виберіть вбудовані пункти меню та піктограми док-панелі, що відображаються на комп'ютері",

@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "Panel dokumen",
+  "entryDocumentMenu": "Menu dokumen kanan atas",
+  "entryDocumentMoreMenu": "Menu Lainnya dokumen",
+  "entryGutterMenu": "Menu ikon blok",
+  "entryInlineMenu": "Menu elemen sebaris",
+  "entrySubmenu": "Submenu",
   "splitMergedCellTip": "Pisahkan sel yang digabungkan terlebih dahulu",
   "entryVisibility": "Menu dan dok",
   "entryVisibilityTip": "Pilih item menu bawaan dan ikon dok yang ditampilkan di desktop",

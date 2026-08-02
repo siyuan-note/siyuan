@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "दस्तावेज़ पैनल",
+  "entryDocumentMenu": "ऊपरी-दाएँ दस्तावेज़ मेनू",
+  "entryDocumentMoreMenu": "दस्तावेज़ का अधिक मेनू",
+  "entryGutterMenu": "ब्लॉक आइकन मेनू",
+  "entryInlineMenu": "इनलाइन तत्व मेनू",
+  "entrySubmenu": "उपमेनू",
   "splitMergedCellTip": "पहले मर्ज किए गए सेल विभाजित करें",
   "entryVisibility": "मेनू और डॉक",
   "entryVisibilityTip": "डेस्कटॉप पर दिखाए जाने वाले अंतर्निहित मेनू आइटम और डॉक आइकन चुनें",

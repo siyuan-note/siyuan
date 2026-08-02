@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "Panel de documentos",
+  "entryDocumentMenu": "Menú del documento de la esquina superior derecha",
+  "entryDocumentMoreMenu": "Menú Más del documento",
+  "entryGutterMenu": "Menú del icono de bloque",
+  "entryInlineMenu": "Menú de elementos en línea",
+  "entrySubmenu": "Submenú",
   "splitMergedCellTip": "Primero hay que dividir las celdas combinadas",
   "entryVisibility": "Menús y panel acoplable",
   "entryVisibilityTip": "Elige qué elementos de menú e iconos del panel acoplable se muestran en el escritorio",

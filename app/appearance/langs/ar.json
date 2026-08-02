@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "لوحة المستندات",
+  "entryDocumentMenu": "قائمة المستند أعلى اليمين",
+  "entryDocumentMoreMenu": "قائمة المزيد للمستند",
+  "entryGutterMenu": "قائمة أيقونة الكتلة",
+  "entryInlineMenu": "قائمة العناصر السطرية",
+  "entrySubmenu": "قائمة فرعية",
   "splitMergedCellTip": "يجب تقسيم الخلايا المدمجة أولاً",
   "entryVisibility": "القوائم وشريط الإرساء",
   "entryVisibilityTip": "اختر عناصر القوائم المضمنة وأيقونات شريط الإرساء التي تظهر على سطح المكتب",

@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "Documentpaneel",
+  "entryDocumentMenu": "Documentmenu rechtsboven",
+  "entryDocumentMoreMenu": "Menu Meer van het document",
+  "entryGutterMenu": "Blokpictogrammenu",
+  "entryInlineMenu": "Menu voor inline-elementen",
+  "entrySubmenu": "Submenu",
   "splitMergedCellTip": "Splits eerst de samengevoegde cellen",
   "entryVisibility": "Menu's en dock",
   "entryVisibilityTip": "Kies welke ingebouwde menu-items en dockpictogrammen op het bureaublad worden getoond",

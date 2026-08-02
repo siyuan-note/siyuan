@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "ドキュメントパネル",
+  "entryDocumentMenu": "右上のドキュメントメニュー",
+  "entryDocumentMoreMenu": "ドキュメントの「その他」メニュー",
+  "entryGutterMenu": "ブロックアイコンメニュー",
+  "entryInlineMenu": "インライン要素メニュー",
+  "entrySubmenu": "サブメニュー",
   "splitMergedCellTip": "先に結合セルを分割する必要があります",
   "entryVisibility": "メニューとドック",
   "entryVisibilityTip": "デスクトップで表示する組み込みメニュー項目とドックアイコンを選択します",

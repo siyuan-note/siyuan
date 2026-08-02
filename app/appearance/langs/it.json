@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "Pannello documenti",
+  "entryDocumentMenu": "Menu documento in alto a destra",
+  "entryDocumentMoreMenu": "Menu Altro del documento",
+  "entryGutterMenu": "Menu dell'icona del blocco",
+  "entryInlineMenu": "Menu degli elementi in linea",
+  "entrySubmenu": "Sottomenu",
   "splitMergedCellTip": "Prima dividi le celle unite",
   "entryVisibility": "Menu e barra di ancoraggio",
   "entryVisibilityTip": "Scegli quali voci di menu e icone della barra di ancoraggio mostrare sul desktop",

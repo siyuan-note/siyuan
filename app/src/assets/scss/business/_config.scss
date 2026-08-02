@@ -555,6 +555,20 @@
   &-entry-visibility__view {
     flex-direction: column;
   }
+
+  &-entry-visibility {
+    &__groups {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    &__group-title {
+      background-color: transparent;
+      color: var(--b3-theme-on-surface);
+    }
+  }
 }
 
 .config-about__logo {

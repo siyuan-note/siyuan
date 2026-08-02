@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "แผงเอกสาร",
+  "entryDocumentMenu": "เมนูเอกสารมุมขวาบน",
+  "entryDocumentMoreMenu": "เมนูเพิ่มเติมของเอกสาร",
+  "entryGutterMenu": "เมนูไอคอนบล็อก",
+  "entryInlineMenu": "เมนูองค์ประกอบอินไลน์",
+  "entrySubmenu": "เมนูย่อย",
   "splitMergedCellTip": "ต้องแยกเซลล์ที่ผสานก่อน",
   "entryVisibility": "เมนูและแถบเชื่อมต่อ",
   "entryVisibilityTip": "เลือกรายการเมนูและไอคอนแถบเชื่อมต่อในตัวที่จะแสดงบนเดสก์ท็อป",

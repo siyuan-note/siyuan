@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "לוח המסמכים",
+  "entryDocumentMenu": "תפריט המסמך בפינה הימנית העליונה",
+  "entryDocumentMoreMenu": "תפריט 'עוד' של המסמך",
+  "entryGutterMenu": "תפריט סמל הבלוק",
+  "entryInlineMenu": "תפריט רכיבים בשורה",
+  "entrySubmenu": "תפריט משנה",
   "splitMergedCellTip": "יש לפצל תחילה תאים ממוזגים",
   "entryVisibility": "תפריטים וסרגל עגינה",
   "entryVisibilityTip": "בחירת פריטי התפריט וסמלי סרגל העגינה המובנים שיוצגו במחשב",

@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "文档面板",
+  "entryDocumentMenu": "右上角文档菜单",
+  "entryDocumentMoreMenu": "文档更多菜单",
+  "entryGutterMenu": "块标菜单",
+  "entryInlineMenu": "行级元素菜单",
+  "entrySubmenu": "子菜单",
   "splitMergedCellTip": "需要先拆分合并的单元格",
   "entryVisibility": "菜单与停靠栏",
   "entryVisibilityTip": "配置桌面端内置菜单项和停靠栏图标是否显示",

@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "Dokument-Panel",
+  "entryDocumentMenu": "Dokumentmenü oben rechts",
+  "entryDocumentMoreMenu": "Menü ‚Mehr‘ des Dokuments",
+  "entryGutterMenu": "Blocksymbol-Menü",
+  "entryInlineMenu": "Inline-Element-Menü",
+  "entrySubmenu": "Untermenü",
   "splitMergedCellTip": "Zusammengeführte Zellen müssen zuerst geteilt werden",
   "entryVisibility": "Menüs und Dock",
   "entryVisibilityTip": "Wählen Sie, welche integrierten Menüeinträge und Dock-Symbole auf dem Desktop angezeigt werden",

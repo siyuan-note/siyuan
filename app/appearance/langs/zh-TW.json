@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "文件面板",
+  "entryDocumentMenu": "右上角文檔菜單",
+  "entryDocumentMoreMenu": "文檔更多菜單",
+  "entryGutterMenu": "區塊標菜單",
+  "entryInlineMenu": "行級元素菜單",
+  "entrySubmenu": "子菜單",
   "splitMergedCellTip": "需要先拆分合併的單元格",
   "entryVisibility": "選單與停靠欄",
   "entryVisibilityTip": "設定桌面端內建選單項目和停靠欄圖示是否顯示",

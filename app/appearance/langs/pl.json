@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "Panel dokumentów",
+  "entryDocumentMenu": "Menu dokumentu w prawym górnym rogu",
+  "entryDocumentMoreMenu": "Menu Więcej dokumentu",
+  "entryGutterMenu": "Menu ikony bloku",
+  "entryInlineMenu": "Menu elementów wbudowanych",
+  "entrySubmenu": "Podmenu",
   "splitMergedCellTip": "Najpierw podziel scalone komórki",
   "entryVisibility": "Menu i dok",
   "entryVisibilityTip": "Wybierz wbudowane pozycje menu i ikony doku wyświetlane na komputerze",

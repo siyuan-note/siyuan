@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "Панель документов",
+  "entryDocumentMenu": "Меню документа в правом верхнем углу",
+  "entryDocumentMoreMenu": "Меню «Ещё» документа",
+  "entryGutterMenu": "Меню значка блока",
+  "entryInlineMenu": "Меню строчных элементов",
+  "entrySubmenu": "Подменю",
   "splitMergedCellTip": "Сначала разделите объединённые ячейки",
   "entryVisibility": "Меню и док-панель",
   "entryVisibilityTip": "Выберите встроенные пункты меню и значки док-панели, отображаемые на компьютере",

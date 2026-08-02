@@ -13,6 +13,7 @@ export interface IEntryCatalogSection {
 
 const lang = (key: string) => () => window.siyuan.languages[key] || key;
 const literal = (value: string) => () => value;
+const location = (...labels: Array<() => string>) => () => labels.map((label) => label()).join(" - ");
 const node = (key: string, label: () => string, simple = true, children?: IEntryCatalogNode[]): IEntryCatalogNode => ({
     key,
     label,
@@ -284,7 +285,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "docTree.panel",
-        label: lang("fileTree"),
+        label: location(lang("entryDocPanel"), lang("more")),
         children: [
             node("newNotebook", lang("newNotebook")),
             node("newEncryptedNotebook", lang("newEncryptedNotebook")),
@@ -295,7 +296,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "docTree.notebook",
-        label: lang("agentCatNotebook"),
+        label: location(lang("entryDocPanel"), lang("agentCatNotebook"), lang("more")),
         children: [
             node("openDocument", lang("openDocument")),
             node("rename", lang("rename")),
@@ -316,7 +317,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "docTree.document",
-        label: lang("doc"),
+        label: location(lang("entryDocPanel"), lang("doc"), lang("more")),
         children: [
             node("openDocument", lang("openDocument")),
             node("newDocAbove", lang("newDocAbove")),
@@ -332,12 +333,12 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "docTree.multi",
-        label: lang("multiSelect"),
+        label: location(lang("entryDocPanel"), lang("multiSelect"), lang("more")),
         children: docTreeCommon(true),
     },
     {
         key: "document.title",
-        label: lang("doc"),
+        label: location(lang("editor"), lang("entryDocumentMenu")),
         children: [
             node("copy", lang("copy"), true, [...copyChildren(), node("copyMarkdown", lang("copyMarkdown")), node("copyDoc", lang("copyDoc"), false)]),
             node("move", lang("move")),
@@ -367,7 +368,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "document.more",
-        label: lang("more"),
+        label: location(lang("editor"), lang("entryDocumentMoreMenu")),
         children: [
             node("insertImage", lang("insertImage")),
             node("insertAsset", lang("insertAsset")),
@@ -402,11 +403,19 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("docInfo", lang("blockCount"), false),
         ],
     },
-    {key: "gutter.single", label: lang("blockCount"), children: gutterCommon()},
-    {key: "gutter.multi", label: lang("multiSelect"), children: gutterCommon()},
+    {
+        key: "gutter.single",
+        label: location(lang("editor"), lang("entryGutterMenu"), lang("blockCount")),
+        children: gutterCommon(),
+    },
+    {
+        key: "gutter.multi",
+        label: location(lang("editor"), lang("entryGutterMenu"), lang("multiSelect")),
+        children: gutterCommon(),
+    },
     {
         key: "inline.text",
-        label: lang("text"),
+        label: location(lang("editor"), lang("entryInlineMenu"), lang("text")),
         children: [
             node("copy", lang("copy")),
             node("copyRichText", lang("copyRichText")),
@@ -440,7 +449,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "inline.image",
-        label: lang("image"),
+        label: location(lang("editor"), lang("entryInlineMenu"), lang("image")),
         children: [
             node("imageUrlAndTitleAndTooltipText", () => `${window.siyuan.languages.imageURL} / ${window.siyuan.languages.title} / ${window.siyuan.languages.tooltipText}`),
             node("copy", lang("copy")),
@@ -483,7 +492,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "inline.ref",
-        label: lang("ref"),
+        label: location(lang("editor"), lang("entryInlineMenu"), lang("ref")),
         children: [
             node("anchor", lang("anchor")),
             node("openBy", lang("openBy")),
@@ -511,7 +520,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "inline.link",
-        label: lang("hyperlink"),
+        label: location(lang("editor"), lang("entryInlineMenu"), lang("hyperlink")),
         children: [
             node("linkAndAnchorAndTitle", () => `${window.siyuan.languages.hyperlink} / ${window.siyuan.languages.text} / ${window.siyuan.languages.title}`),
             node("copy", lang("copy")),
@@ -528,7 +537,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "inline.fileAnnotation",
-        label: lang("export5"),
+        label: location(lang("editor"), lang("entryInlineMenu"), lang("export5")),
         children: [
             node("idAndAnchor", () => `ID / ${window.siyuan.languages.anchor}`),
             node("turnInto", lang("turnInto"), true, [
@@ -540,7 +549,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "inline.tag",
-        label: lang("tag"),
+        label: location(lang("editor"), lang("entryInlineMenu"), lang("tag")),
         children: [
             node("tag", lang("tag")),
             node("search", lang("search")),
@@ -553,7 +562,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "inline.math",
-        label: lang("math"),
+        label: location(lang("editor"), lang("entryInlineMenu"), lang("math")),
         children: [node("copy", lang("copy")), node("cut", lang("cut")), node("remove", lang("remove"))],
     },
 ];

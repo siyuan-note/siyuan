@@ -1,4 +1,10 @@
 {
+  "entryDocPanel": "Panel dokumentov",
+  "entryDocumentMenu": "Ponuka dokumentu vpravo hore",
+  "entryDocumentMoreMenu": "Ponuka Viac dokumentu",
+  "entryGutterMenu": "Ponuka ikony bloku",
+  "entryInlineMenu": "Ponuka vnorených prvkov",
+  "entrySubmenu": "Podponuka",
   "splitMergedCellTip": "Najprv rozdeľte zlúčené bunky",
   "entryVisibility": "Ponuky a dok",
   "entryVisibilityTip": "Vyberte vstavané položky ponuky a ikony doku zobrazované na počítači",

@@ -2390,6 +2390,7 @@
 		"352": "O contexto do agente não cabe no modelo selecionado após a compactação. Mude para um modelo com uma janela de contexto maior",
 		"353": "O campo [%s] do modelo de novo item ignorou valores de opção indisponíveis [%s]",
 		"354": "Muitas tentativas de autenticação falharam, tente novamente mais tarde",
-		"355": "A senha da tela de bloqueio deve ter pelo menos 8 caracteres"
+		"355": "A senha da tela de bloqueio deve ter pelo menos 8 caracteres",
+		"356": "O token da API deve ter pelo menos 8 caracteres"
 	}
 	}

@@ -2390,6 +2390,7 @@
 		"352": "The agent context cannot fit the selected model after compaction. Switch to a model with a larger context window",
 		"353": "New item template field [%s] ignored unavailable option values [%s]",
 		"354": "Too many failed authentication attempts, please try again later",
-		"355": "The lock screen password must be at least 8 characters"
+		"355": "The lock screen password must be at least 8 characters",
+		"356": "The API token must be at least 8 characters"
 	}
 	}

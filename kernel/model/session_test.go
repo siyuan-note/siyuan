@@ -22,7 +22,71 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// TestAuthByAPITokenThrottle 验证 API token 认证路径的限流与授权行为。
+func TestAuthByAPITokenThrottle(t *testing.T) {
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.Api = conf.NewAPI()
+	t.Cleanup(func() { Conf = originalConf })
+	Conf.Api.Token = "test-api-token-123"
+
+	engine := gin.New()
+	engine.GET("/api/test", CheckAuth, func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+
+	newRequest := func(ip, token string) *httptest.ResponseRecorder {
+		request := httptest.NewRequest(http.MethodGet, "/api/test?token="+token, nil)
+		request.RemoteAddr = ip
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	t.Run("correct token grants admin", func(t *testing.T) {
+		ip := "192.0.2.10:1234"
+		defer util.AuthThrottleReset(ip)
+		if recorder := newRequest(ip, "test-api-token-123"); recorder.Code != http.StatusNoContent {
+			t.Fatalf("status = %d, want %d", recorder.Code, http.StatusNoContent)
+		}
+	})
+
+	t.Run("wrong tokens trigger lockout", func(t *testing.T) {
+		ip := "192.0.2.11:1234"
+		defer util.AuthThrottleReset(ip)
+		for i := 0; i < 5; i++ {
+			if recorder := newRequest(ip, "wrong-token"); recorder.Code != http.StatusUnauthorized {
+				t.Fatalf("guess %d status = %d, want %d", i+1, recorder.Code, http.StatusUnauthorized)
+			}
+		}
+		// 第 6 次失败触发锁定，本次仍返回普通失败
+		if recorder := newRequest(ip, "wrong-token"); recorder.Code != http.StatusUnauthorized {
+			t.Fatalf("guess 6 status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+		}
+		// 锁定期间即使提交正确 token 也返回 429
+		if recorder := newRequest(ip, "test-api-token-123"); recorder.Code != http.StatusTooManyRequests {
+			t.Fatalf("locked status = %d, want %d", recorder.Code, http.StatusTooManyRequests)
+		}
+	})
+
+	t.Run("lockout is per IP", func(t *testing.T) {
+		attackerIP := "192.0.2.12:1234"
+		defer util.AuthThrottleReset(attackerIP)
+		for i := 0; i < 6; i++ {
+			if recorder := newRequest(attackerIP, "wrong-token"); recorder.Code != http.StatusUnauthorized {
+				t.Fatalf("guess %d status = %d, want %d", i+1, recorder.Code, http.StatusUnauthorized)
+			}
+		}
+		// 其他 IP 不受影响，仍可用正确 token 通过
+		if recorder := newRequest("192.0.2.13:1234", "test-api-token-123"); recorder.Code != http.StatusNoContent {
+			t.Fatalf("other ip status = %d, want %d", recorder.Code, http.StatusNoContent)
+		}
+	})
+}
 
 func TestIsLocalRequest(t *testing.T) {
 	tests := []struct {

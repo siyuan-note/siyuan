@@ -2390,6 +2390,7 @@
 		"352": "Kontekst agenta nie mieści się w wybranym modelu po kompresji. Wybierz model z większym oknem kontekstowym",
 		"353": "Pole [%s] szablonu nowego elementu zignorowało niedostępne wartości opcji [%s]",
 		"354": "Zbyt wiele nieudanych prób uwierzytelnienia, spróbuj ponownie później",
-		"355": "Hasło ekranu blokady musi mieć co najmniej 8 znaków"
+		"355": "Hasło ekranu blokady musi mieć co najmniej 8 znaków",
+		"356": "Token API musi mieć co najmniej 8 znaków"
 	}
 	}

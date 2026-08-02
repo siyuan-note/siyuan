@@ -229,29 +229,13 @@ func CheckAuth(c *gin.Context) {
 			token = after
 		}
 
-		if "" != token {
-			if Conf.Api.Token == token {
-				c.Set(RoleContextKey, RoleAdministrator)
-				c.Next()
-				return
-			}
-
-			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed [header: Authorization]"})
-			c.Abort()
+		if authByAPIToken(c, "header: Authorization", token) {
 			return
 		}
 	}
 
 	// 通过 API token (query-params: token)
-	if token := c.Query("token"); "" != token {
-		if Conf.Api.Token == token {
-			c.Set(RoleContextKey, RoleAdministrator)
-			c.Next()
-			return
-		}
-
-		c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed [query: token]"})
-		c.Abort()
+	if authByAPIToken(c, "query: token", c.Query("token")) {
 		return
 	}
 
@@ -394,6 +378,35 @@ func CheckAuth(c *gin.Context) {
 
 	c.Set(RoleContextKey, RoleAdministrator)
 	c.Next()
+}
+
+// authByAPIToken 校验 API token，成功时赋予管理员角色并返回 true；
+// 校验失败或触发限流时直接结束请求并返回 true，token 为空时不处理并返回 false。
+func authByAPIToken(c *gin.Context, source, token string) (handled bool) {
+	if "" == token {
+		return
+	}
+
+	ip := c.ClientIP()
+	if retryAfter := util.AuthThrottleCheck(ip); 0 < retryAfter {
+		// 锁定期间持续记录失败，防止暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-m6w6-p7pc-fpg2
+		util.AuthThrottleFail(ip)
+		c.Header("Retry-After", strconv.Itoa(retryAfter))
+		c.JSON(http.StatusTooManyRequests, map[string]any{"code": -1, "msg": Conf.Language(354)})
+		c.Abort()
+		return true
+	}
+	if util.AuthCodeEquals(Conf.Api.Token, token) {
+		util.AuthThrottleReset(ip)
+		c.Set(RoleContextKey, RoleAdministrator)
+		c.Next()
+		return true
+	}
+	logging.LogWarnf("invalid api token [ip=%s]", ip)
+	util.AuthThrottleFail(ip)
+	c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed [" + source + "]"})
+	c.Abort()
+	return true
 }
 
 // IsLocalRequest 判断请求是否由本机客户端直接发起或经可信本机代理转发。

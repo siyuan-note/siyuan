@@ -2390,6 +2390,7 @@
 		"352": "Le contexte de l’agent ne tient pas dans le modèle sélectionné après compression. Choisissez un modèle avec une fenêtre de contexte plus grande",
 		"353": "Le champ [%s] du modèle de nouvel élément a ignoré les valeurs d’option indisponibles [%s]",
 		"354": "Trop de tentatives d'authentification échouées, veuillez réessayer plus tard",
-		"355": "Le mot de passe de l'écran de verrouillage doit comporter au moins 8 caractères"
+		"355": "Le mot de passe de l'écran de verrouillage doit comporter au moins 8 caractères",
+		"356": "Le jeton de l'API doit comporter au moins 8 caractères"
 	}
 	}

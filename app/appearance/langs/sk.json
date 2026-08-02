@@ -2390,6 +2390,7 @@
 		"352": "Kontext agenta sa ani po kompresii nezmestí do vybraného modelu. Vyberte model s väčším kontextovým oknom",
 		"353": "Pole [%s] šablóny novej položky ignorovalo nedostupné hodnoty možností [%s]",
 		"354": "Príliš veľa neúspešných pokusov o overenie, skúste to znova neskôr",
-		"355": "Heslo uzamknutej obrazovky musí mať aspoň 8 znakov"
+		"355": "Heslo uzamknutej obrazovky musí mať aspoň 8 znakov",
+		"356": "Token API musí mať aspoň 8 znakov"
 	}
 	}

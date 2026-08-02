@@ -2390,6 +2390,7 @@
 		"352": "El contexto del agente no cabe en el modelo seleccionado después de la compresión. Cambia a un modelo con una ventana de contexto mayor",
 		"353": "El campo [%s] de la plantilla de nuevo elemento ignoró los valores de opción no disponibles [%s]",
 		"354": "Demasiados intentos de autenticación fallidos, inténtelo de nuevo más tarde",
-		"355": "La contraseña de la pantalla de bloqueo debe tener al menos 8 caracteres"
+		"355": "La contraseña de la pantalla de bloqueo debe tener al menos 8 caracteres",
+		"356": "El token de la API debe tener al menos 8 caracteres"
 	}
 	}

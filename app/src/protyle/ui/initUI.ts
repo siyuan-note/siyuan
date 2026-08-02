@@ -354,11 +354,12 @@ export const setPadding = (protyle: IProtyle) => {
     const backlinkBottomVisible = backlinkBottomElement &&
         !backlinkBottomElement.classList.contains("fn__none") &&
         !backlinkBottomElement.classList.contains("sy__backlink--pending");
+    const backlinkBottomGap = 128;
 
     if (protyle.options.backlinkData) {
         protyle.wysiwyg.element.style.padding = `4px ${paddingRight}px 4px ${paddingLeft}px`;
     } else {
-        const paddingBottom = backlinkBottomVisible && protyle.options.typewriterMode ? 16 : padding.bottom;
+        const paddingBottom = backlinkBottomVisible && protyle.options.typewriterMode ? backlinkBottomGap : padding.bottom;
         protyle.wysiwyg.element.style.padding = `${padding.top}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`;
     }
     if (protyle.options.render.background) {
@@ -374,7 +375,7 @@ export const setPadding = (protyle: IProtyle) => {
     if (backlinkBottomElement) {
         backlinkBottomElement.style.padding = `0 ${paddingRight}px 16px ${paddingLeft}px`;
         backlinkBottomElement.style.marginBottom = backlinkBottomVisible && protyle.options.typewriterMode ?
-            `${Math.max(padding.bottom - 16, 0)}px` : "";
+            `${Math.max(padding.bottom - backlinkBottomGap, 0)}px` : "";
     }
 
     // https://github.com/siyuan-note/siyuan/issues/15021

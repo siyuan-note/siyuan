@@ -155,15 +155,20 @@ export const initRightMenu = (app: App) => {
         </div>
     </div>
     <div class="b3-menu__group">
+        <div class="b3-menu__group-title">${window.siyuan.languages.extensions}</div>
+        <div class="b3-menu__group-items">
+            <div class="b3-menu__item" id="menuPlugin">
+                <svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>
+            </div>
+            <div id="menuPluginTopBar" class="fn__none"></div>
+        </div>
+    </div>
+    <div class="b3-menu__group">
         <div class="b3-menu__group-title">${window.siyuan.languages.mobileMenuSettingsAndHelp}</div>
         <div class="b3-menu__group-items">
             <div class="b3-menu__item" id="menuSettings">
                 <svg class="b3-menu__icon"><use xlink:href="#iconSettings"></use></svg><span class="b3-menu__label">${window.siyuan.languages.config}</span>
             </div>
-            <div class="b3-menu__item" id="menuPlugin">
-                <svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>
-            </div>
-            <div id="menuPluginTopBar" class="fn__none"></div>
             <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHelp">
                 <svg class="b3-menu__icon"><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.userGuide}</span>
             </div>

@@ -1,5 +1,5 @@
 import {showMessage} from "../dialog/message";
-import {hasTopClosestByTag} from "../protyle/util/hasClosest";
+import {hasClosestBlock, hasTopClosestByTag} from "../protyle/util/hasClosest";
 /// #if !MOBILE
 import {Files} from "../layout/dock/Files";
 import {Editor} from "../editor";
@@ -14,13 +14,15 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
 import {NewDocTargetByHPath, NewDocTargetSubDoc, getNewDocTargetFromSavePath, getNewDocTargetFromTree} from "./parseNewDocTarget";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange, selectAll} from "../protyle/util/selection";
 import {
+    createNewFileSelectionContext,
     isNewFileSelectionValid,
     isRangeInEditor,
     isSameRange,
     NewFileSelectionContext
 } from "./newFileSelection";
+import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 
 export const getBlockRefAnchorText = (title: string) => {
     const trimmed = (title || "").trim();
@@ -144,6 +146,44 @@ export const newFileBySelect = (protyle: IProtyle, newFileName: string, context:
             });
         }
     });
+};
+
+export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "subDoc" | "configured") => {
+    const nodeElement = hasClosestBlock(range.startContainer);
+    if (!nodeElement) {
+        return;
+    }
+    const selectText = range.toString();
+    if (!selectText.trim() && (nodeElement.querySelector("tr") || nodeElement.querySelector("span"))) {
+        // 没选中时，都是纯文本就创建子文档 https://ld246.com/article/1663073488381/comment/1664804353295#comments
+        return;
+    }
+    if (!selectText.trim() &&
+        getContenteditableElement(nodeElement).textContent // https://github.com/siyuan-note/siyuan/issues/8099
+    ) {
+        selectAll(protyle, nodeElement, range);
+    }
+    const selectionContext = createNewFileSelectionContext(protyle, range);
+    if (!selectionContext) {
+        return;
+    }
+    const sourceNotebookId = selectionContext.notebookId;
+    const sourcePath = selectionContext.path;
+    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() :
+        protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim());
+    if (target === "subDoc") {
+        fetchPost("/api/filetree/getHPathByPath", {
+            notebook: sourceNotebookId,
+            path: sourcePath,
+        }, (response) => {
+            newFileBySelect(protyle, newFileName, selectionContext, response.data, sourceNotebookId);
+        });
+    } else {
+        getRefCreateSavePath(sourceNotebookId, sourcePath, (targetNotebookId, hPath) => {
+            newFileBySelect(protyle, newFileName, selectionContext, hPath, targetNotebookId);
+        });
+    }
+    hideElements(["toolbar"], protyle);
 };
 
 export const getRefCreateSavePath = (notebookId: string, currentPath: string, cb: (targetNotebookId: string, hPath: string) => void) => {

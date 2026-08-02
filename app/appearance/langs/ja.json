@@ -1,4 +1,6 @@
 {
+  "apiKeyRequired": "API Key が必要です",
+  "openAICompatibleProvider": "OpenAI 互換プロバイダー",
   "entryDocPanel": "ドキュメントパネル",
   "entryDocumentMenu": "右上のドキュメントメニュー",
   "entryDocumentMoreMenu": "ドキュメントの「その他」メニュー",
@@ -1053,7 +1055,7 @@
 	"apiVersion": "API バージョン",
 	"apiVersionTip": "Azure OpenAI サービスを使用する場合にのみ必要です",
 	"apiProvider": "API プロバイダー",
-	"apiProviderTip": "AI モデルプロバイダーとそのモデルを管理します。Chat Completions API と互換性のあるプロバイダー（DeepSeek、Kimi、MiniMax など）をすべて利用できます",
+	"apiProviderTip": "Chat Completions API と互換性のあるプロバイダー（DeepSeek、Kimi、MiniMax など）を利用できます",
 	"skip": "スキップ",
 	"nextRound": "次のラウンド",
 	"save": "保存",

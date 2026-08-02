@@ -1,4 +1,6 @@
 {
+  "apiKeyRequired": "API Key आवश्यक है",
+  "openAICompatibleProvider": "OpenAI-संगत प्रदाता",
   "entryDocPanel": "दस्तावेज़ पैनल",
   "entryDocumentMenu": "ऊपरी-दाएँ दस्तावेज़ मेनू",
   "entryDocumentMoreMenu": "दस्तावेज़ का अधिक मेनू",
@@ -1053,7 +1055,7 @@
 	"apiVersion": "API संस्करण",
 	"apiVersionTip": "केवल Azure OpenAI सेवा का उपयोग करते समय आवश्यक",
 	"apiProvider": "API प्रदाता",
-	"apiProviderTip": "AI मॉडल प्रदाताओं और उनके मॉडल का प्रबंधन करें। Chat Completions API के साथ संगत प्रदाता (जैसे DeepSeek, Kimi, MiniMax) सभी का उपयोग किया जा सकता है",
+	"apiProviderTip": "Chat Completions API के साथ संगत प्रदाताओं (जैसे DeepSeek, Kimi, MiniMax) का उपयोग किया जा सकता है",
 	"skip": "छोड़ें",
 	"nextRound": "अगला दौर",
 	"save": "सहेजें",

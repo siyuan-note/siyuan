@@ -60,6 +60,11 @@ const normalizeBaseURL = (value: string) => value.trim().replace(/\/+$/, "").toL
 const findPreset = (provider: Config.IProvider) =>
     PROVIDER_PRESETS.find((preset) => preset.baseURL && normalizeBaseURL(preset.baseURL) === normalizeBaseURL(provider.baseURL));
 
+const requiresAPIKey = (provider: Config.IProvider) => {
+    const preset = findPreset(provider);
+    return preset?.category === "official" || preset?.category === "aggregator";
+};
+
 const getProviderName = (provider: Config.IProvider) =>
     provider.displayName || findPreset(provider)?.name || provider.baseURL;
 
@@ -146,8 +151,8 @@ const createProviderView = (root: HTMLElement, backLabel: string, stacked = fals
 
 export const genProviderCardsHtml = (): string => `<div class="b3-label config-item" id="aiProviderCardsBlock">
     <div class="fn__flex config-wrap">
-        <div class="config-name">${window.siyuan.languages.apiProviderTip}</div>
-        <span class="fn__space fn__flex-1"></span>
+        ${genConfigItemMainHtml(window.siyuan.languages.openAICompatibleProvider, window.siyuan.languages.apiProviderTip)}
+        <span class="fn__space"></span>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-action="addProvider">
             <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
             <span>${window.siyuan.languages.addAiProvider}</span>
@@ -461,6 +466,14 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     let availableModelContextLengths: Record<string, number> = {};
     let hasFetchedModels = false;
     let fetchingModels = false;
+    const validateAPIKey = () => {
+        if (!requiresAPIKey(draft) || draft.apiKey.trim() !== "") {
+            return true;
+        }
+        view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
+        showMessage(window.siyuan.languages.apiKeyRequired, undefined, "error");
+        return false;
+    };
     const getAvailableModelContextLength = (name: string) =>
         availableModelContextLengths[name] || availableModelContextLengths[name.toLowerCase()] || 0;
     const updateModelActionButtons = () => {
@@ -494,6 +507,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         if (!draft.baseURL.trim()) {
             view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
             showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
+            return;
+        }
+        if (!validateAPIKey()) {
             return;
         }
         hasFetchedModels = true;
@@ -654,6 +670,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "addModel") {
+            if (!validateAPIKey()) {
+                return;
+            }
             if (!hasFetchedModels) {
                 const modelCount = draft.models.length;
                 fetchModels(() => {
@@ -685,6 +704,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             if (!draft.baseURL.trim()) {
                 view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
                 showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
+                return;
+            }
+            if (!validateAPIKey()) {
                 return;
             }
             if (!model.name.trim()) {

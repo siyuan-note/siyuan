@@ -1,4 +1,6 @@
 {
+  "apiKeyRequired": "请先填写 API Key",
+  "openAICompatibleProvider": "OpenAI 规范提供商",
   "entryDocPanel": "文档面板",
   "entryDocumentMenu": "右上角文档菜单",
   "entryDocumentMoreMenu": "文档更多菜单",
@@ -1053,7 +1055,7 @@
 	"apiVersion": "API 版本",
 	"apiVersionTip": "仅在使用 Azure OpenAI 服务时需要设置",
 	"apiProvider": "API 提供商",
-	"apiProviderTip": "管理 AI 模型提供商及其模型。兼容 Chat Completions API 接口的提供商（如 DeepSeek、Kimi、MiniMax）均可使用",
+	"apiProviderTip": "兼容 Chat Completions API 接口的提供商（如 DeepSeek、Kimi、MiniMax）均可使用",
 	"skip": "跳过",
 	"nextRound": "下一轮",
 	"save": "保存",

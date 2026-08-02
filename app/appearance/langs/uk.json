@@ -1,4 +1,6 @@
 {
+  "apiKeyRequired": "Потрібен ключ API",
+  "openAICompatibleProvider": "OpenAI-сумісний постачальник",
   "entryDocPanel": "Панель документів",
   "entryDocumentMenu": "Меню документа у правому верхньому куті",
   "entryDocumentMoreMenu": "Меню «Більше» документа",
@@ -1053,7 +1055,7 @@
 	"apiVersion": "Версія API",
 	"apiVersionTip": "Потрібно лише при використанні Azure OpenAI",
 	"apiProvider": "Провайдер API",
-	"apiProviderTip": "Керуйте постачальниками моделей ШІ та їхніми моделями. Постачальники, сумісні з Chat Completions API (напр. DeepSeek, Kimi, MiniMax), можуть використовуватися",
+	"apiProviderTip": "Постачальники, сумісні з Chat Completions API (напр. DeepSeek, Kimi, MiniMax), можуть використовуватися",
 	"skip": "Пропустити",
 	"nextRound": "Наступний раунд",
 	"save": "Зберегти",

@@ -1,4 +1,6 @@
 {
+  "apiKeyRequired": "Vyžaduje sa kľúč API",
+  "openAICompatibleProvider": "Poskytovateľ kompatibilný s OpenAI",
   "entryDocPanel": "Panel dokumentov",
   "entryDocumentMenu": "Ponuka dokumentu vpravo hore",
   "entryDocumentMoreMenu": "Ponuka Viac dokumentu",
@@ -1053,7 +1055,7 @@
 	"apiVersion": "Verzia API",
 	"apiVersionTip": "Vyžadované len pre Azure OpenAI",
 	"apiProvider": "Poskytovateľ API",
-	"apiProviderTip": "Spravujte poskytovateľov modelov AI a ich modely. Poskytovatelia kompatibilní s Chat Completions API (napr. DeepSeek, Kimi, MiniMax) môžu byť použité",
+	"apiProviderTip": "Poskytovatelia kompatibilní s Chat Completions API (napr. DeepSeek, Kimi, MiniMax) môžu byť použité",
 	"skip": "Preskočiť",
 	"nextRound": "Ďalšie kolo",
 	"save": "Uložiť",

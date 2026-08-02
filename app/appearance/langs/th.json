@@ -1,4 +1,6 @@
 {
+  "apiKeyRequired": "จำเป็นต้องใช้ API Key",
+  "openAICompatibleProvider": "ผู้ให้บริการที่เข้ากันได้กับ OpenAI",
   "entryDocPanel": "แผงเอกสาร",
   "entryDocumentMenu": "เมนูเอกสารมุมขวาบน",
   "entryDocumentMoreMenu": "เมนูเพิ่มเติมของเอกสาร",
@@ -1053,7 +1055,7 @@
 	"apiVersion": "เวอร์ชัน API",
 	"apiVersionTip": "เฉพาะ Azure OpenAI",
 	"apiProvider": "ผู้ให้ API",
-	"apiProviderTip": "จัดการผู้ให้บริการโมเดล AI และโมเดลของพวกเขา ผู้ให้บริการที่รองรับ Chat Completions API (เช่น DeepSeek, Kimi, MiniMax) สามารถใช้งานได้ทั้งหมด",
+	"apiProviderTip": "สามารถใช้ผู้ให้บริการที่รองรับ Chat Completions API (เช่น DeepSeek, Kimi, MiniMax) ได้",
 	"skip": "ข้าม",
 	"nextRound": "รอบถัดไป",
 	"save": "บันทึก",

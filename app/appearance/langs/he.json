@@ -1,4 +1,6 @@
 {
+  "apiKeyRequired": "נדרש מפתח API",
+  "openAICompatibleProvider": "ספק תואם OpenAI",
   "entryDocPanel": "לוח המסמכים",
   "entryDocumentMenu": "תפריט המסמך בפינה הימנית העליונה",
   "entryDocumentMoreMenu": "תפריט 'עוד' של המסמך",
@@ -1053,7 +1055,7 @@
 	"apiVersion": "גרסת API",
 	"apiVersionTip": "נדרש רק כשמשתמשים בשירות Azure OpenAI",
 	"apiProvider": "ספק API",
-	"apiProviderTip": "נהל ספקי מודלי AI ואת המודלים שלהם. ניתן להשתמש בכל הספקים התואמים ל-Chat Completions API (למשל DeepSeek, Kimi, MiniMax)",
+	"apiProviderTip": "ניתן להשתמש בספקים התואמים ל-Chat Completions API (למשל DeepSeek, Kimi, MiniMax)",
 	"skip": "דלג",
 	"nextRound": "סיבוב הבא",
 	"save": "שמור",

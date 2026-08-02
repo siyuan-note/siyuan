@@ -7967,7 +7967,6 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 		optionSorts[opt.Name] = i
 	}
 
-	addNew := false
 	selectKey, _ := attrView.GetKey(operation.ID)
 	if nil == selectKey {
 		return
@@ -7988,19 +7987,35 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 				Color: av.FilterColorValue(opt.Color),
 				Desc:  opt.Desc,
 			})
-			addNew = true
 		}
 	}
 
-	if !addNew {
-		sort.SliceStable(selectKey.Options, func(i, j int) bool {
-			return optionSorts[selectKey.Options[i].Name] < optionSorts[selectKey.Options[j].Name]
-		})
-	}
+	sortAttributeViewColumnOptions(selectKey.Options, optionSorts)
 
 	regenAttrViewGroups(attrView)
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+func sortAttributeViewColumnOptions(options []*av.SelectOption, optionSorts map[string]int) {
+	var sortableOptions []*av.SelectOption
+	for _, opt := range options {
+		if _, ok := optionSorts[opt.Name]; ok {
+			sortableOptions = append(sortableOptions, opt)
+		}
+	}
+	sort.SliceStable(sortableOptions, func(i, j int) bool {
+		return optionSorts[sortableOptions[i].Name] < optionSorts[sortableOptions[j].Name]
+	})
+
+	// 仅重排请求中包含的选项，避免过期请求扰动其他请求新增的选项。
+	sortableIndex := 0
+	for i, opt := range options {
+		if _, ok := optionSorts[opt.Name]; ok {
+			options[i] = sortableOptions[sortableIndex]
+			sortableIndex++
+		}
+	}
 }
 
 func (tx *Transaction) doRemoveAttrViewColOption(operation *Operation) (ret *TxErr) {

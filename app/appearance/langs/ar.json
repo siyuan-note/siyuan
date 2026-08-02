@@ -1,4 +1,6 @@
 {
+  "apiKeyRequired": "مفتاح API مطلوب",
+  "openAICompatibleProvider": "موفر متوافق مع مواصفات OpenAI",
   "entryDocPanel": "لوحة المستندات",
   "entryDocumentMenu": "قائمة المستند أعلى اليمين",
   "entryDocumentMoreMenu": "قائمة المزيد للمستند",
@@ -1053,7 +1055,7 @@
 	"apiVersion": "‫إصدار API‬",
 	"apiVersionTip": "‫مطلوب فقط عند استخدام خدمة Azure OpenAI‬",
 	"apiProvider": "‫موفر API‬",
-	"apiProviderTip": "أدر مزودي نماذج الذكاء الاصطناعي ونماذجهم. يمكن استخدام المزودين المتوافقين مع واجهة Chat Completions API (مثل DeepSeek وKimi وMiniMax)",
+	"apiProviderTip": "يمكن استخدام الموفرين المتوافقين مع واجهة Chat Completions API (مثل DeepSeek وKimi وMiniMax)",
 	"skip": "تخطى",
 	"nextRound": "الجولة التالية",
 	"save": "حفظ",

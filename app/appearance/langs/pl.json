@@ -1,4 +1,6 @@
 {
+  "apiKeyRequired": "Klucz API jest wymagany",
+  "openAICompatibleProvider": "Dostawca zgodny z OpenAI",
   "entryDocPanel": "Panel dokumentów",
   "entryDocumentMenu": "Menu dokumentu w prawym górnym rogu",
   "entryDocumentMoreMenu": "Menu Więcej dokumentu",
@@ -1053,7 +1055,7 @@
 	"apiVersion": "Wersja API",
 	"apiVersionTip": "Wymagane tylko podczas korzystania z usługi Azure OpenAI",
 	"apiProvider": "Dostawca API",
-	"apiProviderTip": "Zarządzaj dostawcami modeli AI i ich modelami. Dostawcy zgodni z API Chat Completions (np. DeepSeek, Kimi, MiniMax) mogą być używani",
+	"apiProviderTip": "Dostawcy zgodni z API Chat Completions (np. DeepSeek, Kimi, MiniMax) mogą być używani",
 	"skip": "Pomiń",
 	"nextRound": "Następna runda",
 	"save": "Zapisz",

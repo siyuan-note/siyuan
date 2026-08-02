@@ -1,4 +1,5 @@
 {
+  "splitMergedCellTip": "需要先拆分合并的单元格",
   "entryVisibility": "菜单与停靠栏",
   "entryVisibilityTip": "配置桌面端内置菜单项和停靠栏图标是否显示",
   "entrySimple": "简洁方案",

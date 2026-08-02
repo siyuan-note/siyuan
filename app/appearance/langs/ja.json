@@ -1,4 +1,5 @@
 {
+  "splitMergedCellTip": "先に結合セルを分割する必要があります",
   "entryVisibility": "メニューとドック",
   "entryVisibilityTip": "デスクトップで表示する組み込みメニュー項目とドックアイコンを選択します",
   "entrySimple": "シンプル",

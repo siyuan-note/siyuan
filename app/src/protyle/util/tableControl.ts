@@ -999,6 +999,7 @@ export class TableControl {
         const menu = window.siyuan.menus.menu;
         menu.remove();
         const merged = buildTableGrid(this.selection.table).cellInfos.some(info => info.rowspan > 1 || info.colspan > 1);
+        const mergedSelection = this.selection.mode !== "cell" && merged;
         const rectangle = this.selection.mode !== "cell" || this.isRectangle();
         menu.append(new MenuItem({
             icon: "iconCopy",
@@ -1010,9 +1011,10 @@ export class TableControl {
         menu.append(new MenuItem({
             icon: "iconCut",
             label: window.siyuan.languages.cut,
-            disabled: this.protyle.disabled || !rectangle || (this.selection.mode !== "cell" && merged),
-            accelerator: !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired :
-                this.selection.mode !== "cell" && merged ? window.siyuan.languages.cancelMerged : undefined,
+            disabled: this.protyle.disabled || !rectangle || mergedSelection,
+            accelerator: !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
+            action: mergedSelection ? "iconInfo" : undefined,
+            actionLabel: mergedSelection ? window.siyuan.languages.splitMergedCellTip : undefined,
             click: () => this.execClipboardCommand("cut"),
         }).element);
         if (!this.protyle.disabled && this.selection.mode === "cell") {
@@ -1035,7 +1037,8 @@ export class TableControl {
                     icon: "iconCopy",
                     label: window.siyuan.languages.duplicate,
                     disabled: merged,
-                    accelerator: merged ? window.siyuan.languages.cancelMerged : undefined,
+                    action: merged ? "iconInfo" : undefined,
+                    actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                     click: () => this.duplicateRowsOrColumns(),
                 }).element);
                 menu.append(new MenuItem({type: "separator"}).element);
@@ -1062,7 +1065,8 @@ export class TableControl {
                     label: this.selection.mode === "row" ? window.siyuan.languages["delete-row"] :
                         window.siyuan.languages["delete-column"],
                     disabled: merged,
-                    accelerator: merged ? window.siyuan.languages.cancelMerged : undefined,
+                    action: merged ? "iconInfo" : undefined,
+                    actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                     click: () => this.deleteSelection(false),
                 }).element);
             }
@@ -1083,7 +1087,8 @@ export class TableControl {
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertRowAbove,
                 disabled: !canInsertAbove,
-                accelerator: canInsertAbove ? undefined : window.siyuan.languages.cancelMerged,
+                action: canInsertAbove ? undefined : "iconInfo",
+                actionLabel: canInsertAbove ? undefined : window.siyuan.languages.splitMergedCellTip,
                 click: () => {
                     this.insertRowAt(selection.node, selection.table, above);
                 },
@@ -1092,7 +1097,8 @@ export class TableControl {
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertRowBelow,
                 disabled: !canInsertBelow,
-                accelerator: canInsertBelow ? undefined : window.siyuan.languages.cancelMerged,
+                action: canInsertBelow ? undefined : "iconInfo",
+                actionLabel: canInsertBelow ? undefined : window.siyuan.languages.splitMergedCellTip,
                 click: () => {
                     this.insertRowAt(selection.node, selection.table, below);
                 },
@@ -1106,7 +1112,8 @@ export class TableControl {
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertColumnLeft,
                 disabled: !canInsertLeft,
-                accelerator: canInsertLeft ? undefined : window.siyuan.languages.cancelMerged,
+                action: canInsertLeft ? undefined : "iconInfo",
+                actionLabel: canInsertLeft ? undefined : window.siyuan.languages.splitMergedCellTip,
                 click: () => {
                     this.insertColumnAt(selection.node, selection.table, left);
                 },
@@ -1115,7 +1122,8 @@ export class TableControl {
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertColumnRight,
                 disabled: !canInsertRight,
-                accelerator: canInsertRight ? undefined : window.siyuan.languages.cancelMerged,
+                action: canInsertRight ? undefined : "iconInfo",
+                actionLabel: canInsertRight ? undefined : window.siyuan.languages.splitMergedCellTip,
                 click: () => {
                     this.insertColumnAt(selection.node, selection.table, right);
                 },
@@ -1275,7 +1283,8 @@ export class TableControl {
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-row"],
                 disabled: rowSelection.merged,
-                accelerator: rowSelection.merged ? window.siyuan.languages.cancelMerged : undefined,
+                action: rowSelection.merged ? "iconInfo" : undefined,
+                actionLabel: rowSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
                     if (deleteTableRows(this.protyle, this.selection.node, rowSelection.indexes)) {
                         this.clear();
@@ -1288,7 +1297,8 @@ export class TableControl {
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-column"],
                 disabled: columnSelection.merged,
-                accelerator: columnSelection.merged ? window.siyuan.languages.cancelMerged : undefined,
+                action: columnSelection.merged ? "iconInfo" : undefined,
+                actionLabel: columnSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
                     if (deleteTableColumns(this.protyle, this.selection.node, columnSelection.indexes)) {
                         this.clear();

@@ -1,4 +1,5 @@
 {
+  "splitMergedCellTip": "Split merged cells first",
   "entryVisibility": "Menus and dock",
   "entryVisibilityTip": "Choose which built-in menu items and dock icons are shown on desktop",
   "entrySimple": "Simple",

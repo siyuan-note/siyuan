@@ -1,4 +1,5 @@
 {
+  "splitMergedCellTip": "Les cellules fusionnées doivent d'abord être fractionnées",
   "entryVisibility": "Menus et barre d'ancrage",
   "entryVisibilityTip": "Choisissez les éléments de menu et les icônes de la barre d'ancrage affichés sur ordinateur",
   "entrySimple": "Simple",

@@ -2593,7 +2593,9 @@ export class WYSIWYG {
                                     icon: "iconTrashcan",
                                     label: window.siyuan.languages["delete-row"],
                                     disabled: rowSelection.merged,
-                                    accelerator: rowSelection.merged ? window.siyuan.languages.cancelMerged : undefined,
+                                    action: rowSelection.merged ? "iconInfo" : undefined,
+                                    actionLabel: rowSelection.merged ?
+                                        window.siyuan.languages.splitMergedCellTip : undefined,
                                     click() {
                                         tableSelectElement.removeAttribute("style");
                                         deleteTableRows(protyle, tableBlockElement as HTMLElement,
@@ -2607,8 +2609,9 @@ export class WYSIWYG {
                                     icon: "iconTrashcan",
                                     label: window.siyuan.languages["delete-column"],
                                     disabled: columnSelection.merged,
-                                    accelerator: columnSelection.merged ?
-                                        window.siyuan.languages.cancelMerged : undefined,
+                                    action: columnSelection.merged ? "iconInfo" : undefined,
+                                    actionLabel: columnSelection.merged ?
+                                        window.siyuan.languages.splitMergedCellTip : undefined,
                                     click() {
                                         tableSelectElement.removeAttribute("style");
                                         deleteTableColumns(protyle, tableBlockElement as HTMLElement,

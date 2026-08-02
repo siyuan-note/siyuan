@@ -5,6 +5,7 @@ import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 import {getTopBarHeight} from "../layout/getTopBarHeight";
 import {electronUndo} from "../protyle/undo";
+import {escapeAttr} from "../util/escape";
 /// #if !MOBILE
 import {applyMenuEntryVisibility} from "../config/entryVisibility/runtime";
 /// #endif
@@ -326,7 +327,9 @@ export class MenuItem {
                 html += `<span class="b3-menu__accelerator b3-menu__accelerator--hotkey">${updateHotkeyTip(options.accelerator)}</span>`;
             }
             if (options.action) {
-                html += `<svg class="b3-menu__action${options.action === "iconCloseRound" ? " b3-menu__action--close" : ""}"><use xlink:href="#${options.action}"></use></svg>`;
+                const actionLabel = options.actionLabel ?
+                    ` aria-label="${escapeAttr(options.actionLabel)}" data-position="west"` : "";
+                html += `<svg class="b3-menu__action${options.action === "iconCloseRound" ? " b3-menu__action--close" : ""}${options.actionLabel ? " b3-menu__action--show ariaLabel" : ""}"${actionLabel}><use xlink:href="#${options.action}"></use></svg>`;
             }
             if (options.checked) {
                 html += '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>';

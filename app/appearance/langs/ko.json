@@ -1,4 +1,5 @@
 {
+  "splitMergedCellTip": "먼저 병합된 셀을 분할해야 합니다",
   "entryVisibility": "메뉴 및 도크",
   "entryVisibilityTip": "데스크톱에 표시할 기본 메뉴 항목과 도크 아이콘을 선택합니다",
   "entrySimple": "간단",

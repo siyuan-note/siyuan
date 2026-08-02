@@ -970,6 +970,7 @@ interface IMenu {
     type?: "separator" | "submenu" | "readonly" | "empty",
     accelerator?: string,
     action?: string,
+    actionLabel?: string,
     id?: string,
     submenu?: IMenu[]
     loadSubmenu?: () => Promise<IMenu[]>

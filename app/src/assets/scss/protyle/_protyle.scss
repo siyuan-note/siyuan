@@ -819,6 +819,10 @@ table + .protyle-action__table {
 
     &--column {
       border-radius: var(--b3-border-radius-s) var(--b3-border-radius-s) 0 0;
+
+      svg {
+        transform: rotate(90deg);
+      }
     }
 
     &--drag-disabled {

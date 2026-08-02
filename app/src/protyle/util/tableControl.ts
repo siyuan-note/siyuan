@@ -1636,14 +1636,17 @@ export class TableControl {
             return;
         }
         this.dragState.dragging = true;
-        this.updateDragPreview(event);
+        const preview = this.updateDragPreview(event);
+        if (!preview) {
+            return;
+        }
+        const {position, viewportRect} = preview;
         const grid = this.selectionGrid || buildTableGrid(this.selection.table);
-        const viewportRect = this.getTableViewportRect(this.selection.table);
         let cell: HTMLTableCellElement;
         if (this.dragState.mode === "row") {
             const rowIndex = Array.from(this.selection.table.rows).findIndex(row => {
                 const rect = intersectRects(row.getBoundingClientRect(), viewportRect);
-                return rect.height > 0 && event.clientY >= rect.top && event.clientY <= rect.bottom;
+                return rect.height > 0 && position >= rect.top && position <= rect.bottom;
             });
             cell = grid.grid[rowIndex]?.find(item => item);
         } else {
@@ -1652,7 +1655,7 @@ export class TableControl {
                     return false;
                 }
                 const rect = intersectRects(item.getBoundingClientRect(), viewportRect);
-                return rect.width > 0 && event.clientX >= rect.left && event.clientX <= rect.right;
+                return rect.width > 0 && position >= rect.left && position <= rect.right;
             });
         }
         if (!cell) {
@@ -1671,8 +1674,8 @@ export class TableControl {
             this.dropIndicator.classList.add("fn__none");
             return;
         }
-        const after = this.dragState.mode === "row" ? event.clientY > rect.top + rect.height / 2 :
-            event.clientX > rect.left + rect.width / 2;
+        const after = this.dragState.mode === "row" ? position > rect.top + rect.height / 2 :
+            position > rect.left + rect.width / 2;
         const target = (this.dragState.mode === "row" ? info.row : info.col) + (after ? 1 : 0);
         if (!this.getMoveTarget(target)) {
             this.dragState.target = -1;
@@ -1714,15 +1717,20 @@ export class TableControl {
         const targetCenter = state.handleCenter + pointerOffset;
         const center = minCenter <= maxCenter ? Math.min(Math.max(targetCenter, minCenter), maxCenter) :
             (start + end) / 2;
-        const offsetX = state.mode === "column" ? center - state.handleCenter : 0;
-        const offsetY = state.mode === "row" ? center - state.handleCenter : 0;
-        const translate = `${Math.round(offsetX)}px ${Math.round(offsetY)}px`;
+        const offset = Math.round(center - state.handleCenter);
+        const offsetX = state.mode === "column" ? offset : 0;
+        const offsetY = state.mode === "row" ? offset : 0;
+        const translate = `${offsetX}px ${offsetY}px`;
         const handle = state.mode === "row" ? this.rowHandle : this.columnHandle;
         handle.style.translate = translate;
         this.cellHandle.classList.add("fn__none");
         this.selectionElements.slice(0, this.selectionElementIndex).forEach(item => {
             item.classList.add("protyle-table-control__selection--dragging");
         });
+        return {
+            position: state.handleCenter + offset,
+            viewportRect,
+        };
     }
 
     private clearDragPreview() {

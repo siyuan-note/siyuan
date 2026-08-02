@@ -6,6 +6,48 @@ export interface IFileTreeMove {
     newPath: string;
 }
 
+export interface IDocumentTabDragData {
+    rootId: string;
+    tabId: string;
+    title: string;
+}
+
+const BLOCK_ID_PATTERN = /^\d{14}-[0-9a-z]{7}$/;
+
+export const parseDocumentTabDragData = (data: string) => {
+    try {
+        const result = JSON.parse(data) as IDocumentTabDragData;
+        if (!BLOCK_ID_PATTERN.test(result.rootId) || typeof result.tabId !== "string" ||
+            typeof result.title !== "string") {
+            return;
+        }
+        return result;
+    } catch (e) {
+        console.warn("parse document tab drop data failed", e);
+    }
+};
+
+const getDocumentIDFromPath = (path: string) => {
+    const fileName = path.slice(path.lastIndexOf("/") + 1);
+    return fileName.endsWith(".sy") ? fileName.slice(0, -3) : fileName;
+};
+
+export const insertDocumentSortPath = (
+    siblingPaths: string[],
+    sourceID: string,
+    newPath: string,
+    targetPath: string,
+    insertAfter: boolean
+) => {
+    const paths = siblingPaths.filter((path) => getDocumentIDFromPath(path) !== sourceID);
+    const targetIndex = paths.indexOf(targetPath);
+    if (targetIndex === -1) {
+        return;
+    }
+    paths.splice(targetIndex + (insertAfter ? 1 : 0), 0, newPath);
+    return paths;
+};
+
 export const findMovedFileTreeItem = (treeElement: Element, move: IFileTreeMove) => {
     const sourceElement = treeElement.querySelector<HTMLElement>(
         `ul[data-url="${move.fromNotebook}"] li[data-path="${move.fromPath}"]`

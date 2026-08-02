@@ -50,9 +50,20 @@ export class Tab {
                 const tabElement = hasClosestByTag(event.target, "LI");
                 if (tabElement) {
                     event.dataTransfer.setData("text/html", tabElement.outerHTML);
-                    const modeJSON = {id: this.id};
+                    const modeJSON = {id: this.id} as ILayoutJSON & {id: string};
                     layoutToJSON(this, modeJSON);
                     event.dataTransfer.setData(Constants.SIYUAN_DROP_TAB, JSON.stringify(modeJSON));
+                    const editorJSON = Array.isArray(modeJSON.children) ? undefined : modeJSON.children;
+                    delete tabElement.dataset.dragDocumentId;
+                    if (editorJSON?.instance === "Editor" && editorJSON.rootId) {
+                        event.dataTransfer.setData(Constants.SIYUAN_DROP_DOCUMENT_TAB, JSON.stringify({
+                            rootId: editorJSON.rootId,
+                            tabId: this.id,
+                            title: this.title,
+                        }));
+                        tabElement.dataset.dragDocumentId = editorJSON.rootId;
+                        window.siyuan.dragTitle = this.title;
+                    }
                     event.dataTransfer.dropEffect = "move";
                     tabElement.style.opacity = "0.38";
                     window.siyuan.dragElement = this.headElement;
@@ -65,6 +76,7 @@ export class Tab {
                 const tabElement = hasClosestByTag(event.target, "LI");
                 if (tabElement) {
                     tabElement.style.opacity = "1";
+                    delete tabElement.dataset.dragDocumentId;
                 }
                 /// #if !BROWSER
                 // 拖拽到屏幕外
@@ -86,16 +98,7 @@ export class Tab {
                 window.siyuan.dragElement = undefined;
                 if (event.dataTransfer.dropEffect === "none") {
                     // 按 esc 取消的时候应该还原在 dragover 时交换的 tab
-                    this.parent.children.forEach((item, index) => {
-                        const currentElement = this.headElement.parentElement.children[index];
-                        if (item.headElement !== currentElement) {
-                            if (index === 0) {
-                                this.headElement.parentElement.firstElementChild.before(item.headElement);
-                            } else {
-                                this.headElement.parentElement.children[index - 1].after(item.headElement);
-                            }
-                        }
-                    });
+                    this.restoreHeadElementOrder();
                 }
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "addRegionStyle"});
@@ -107,6 +110,23 @@ export class Tab {
         this.panelElement.classList.add("fn__flex-1");
         this.panelElement.innerHTML = options.panel || "";
         this.panelElement.setAttribute("data-id", this.id);
+    }
+
+    public restoreHeadElementOrder() {
+        const headersElement = this.headElement?.parentElement;
+        if (!headersElement) {
+            return;
+        }
+        this.parent.children.forEach((item, index) => {
+            const currentElement = headersElement.children[index];
+            if (item.headElement !== currentElement) {
+                if (index === 0) {
+                    headersElement.firstElementChild.before(item.headElement);
+                } else {
+                    headersElement.children[index - 1].after(item.headElement);
+                }
+            }
+        });
     }
 
     public updateTitle(title: string) {

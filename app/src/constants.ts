@@ -28,6 +28,7 @@ export abstract class Constants {
     public static readonly SIYUAN_DROP_GUTTER: string = "application/siyuan-gutter";
     public static readonly SIYUAN_DROP_BLOCK_REF: string = "application/siyuan-block-ref";
     public static readonly SIYUAN_DROP_TAB: string = "application/siyuan-tab";
+    public static readonly SIYUAN_DROP_DOCUMENT_TAB: string = "application/siyuan-document-tab";
     public static readonly SIYUAN_DROP_EDITOR: string = "application/siyuan-editor";
 
     // 渲染进程调主进程

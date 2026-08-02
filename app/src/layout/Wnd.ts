@@ -319,6 +319,12 @@ export class Wnd {
         this.element.addEventListener("dragenter", (event: DragEvent & { target: HTMLElement }) => {
             elementDragCounter++;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
+                if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENT_TAB) &&
+                    hasClosestByClassName(event.target, "sy__file")) {
+                    dragElement.classList.add("fn__none");
+                    dragElement.removeAttribute("style");
+                    return;
+                }
                 const tabHeadersElement = hasClosestByClassName(event.target, "layout-tab-bar");
                 if (tabHeadersElement) {
                     return;

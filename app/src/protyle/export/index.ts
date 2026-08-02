@@ -384,7 +384,7 @@ ${getIconScript(servePath)}
 <script src="${servePath}stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
     const previewElement = document.getElementById('preview');
-    const fixBlockWidth = () => {
+    const fixBlockWidth = async () => {
         const isLandscape = document.querySelector("#landscape").checked;
         let width = 800
         let height = 1131
@@ -438,7 +438,7 @@ ${getIconScript(servePath)}
         previewElement.querySelectorAll('[data-type="NodeCodeBlock"][data-subtype="mermaid"] svg').forEach((item) => {
             item.style.maxHeight = height + "px";
         })
-        Protyle.mathRender(previewElement, "${servePath}stage/protyle", true);
+        await Protyle.mathRender(previewElement, "${servePath}stage/protyle", true);
         previewElement.querySelectorAll("table").forEach(item => {
             if (item.clientWidth > item.parentElement.clientWidth) {
                 item.style.zoom = (item.parentElement.clientWidth / item.clientWidth).toFixed(2) - 0.01;
@@ -712,7 +712,7 @@ ${getIconScript(servePath)}
             document.body.classList.add("exporting");
             previewElement.style.zoom = "";
             previewElement.style.padding = "6px 0 0 0";
-            fixBlockWidth();
+            await fixBlockWidth();
             actionElement.remove();
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", exportConfig);
         });

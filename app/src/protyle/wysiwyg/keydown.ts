@@ -85,7 +85,7 @@ import {countBlockWord} from "../../layout/status";
 import {moveToDown, moveToUp} from "./move";
 import {beforePaste, pasteAsPlainText} from "../util/paste";
 import {preventScroll} from "../scroll/preventScroll";
-import {getRefCreateSavePath, newFileBySelect} from "../../util/newFile";
+import {newFileBySelectRange} from "../../util/newFile";
 import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
 import {checkFold} from "../../util/noRelyPCFunction";
@@ -1424,48 +1424,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         const isNewNameFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile.custom, event);
         if (isNewNameFile || matchHotKey(window.siyuan.config.keymap.editor.general.newNameSettingFile.custom, event)) {
-            if (!selectText.trim() && (nodeElement.querySelector("tr") || nodeElement.querySelector("span"))) {
-                // 没选中时，都是纯文本就创建子文档 https://ld246.com/article/1663073488381/comment/1664804353295#comments
-            } else {
-                if (!selectText.trim() &&
-                    getContenteditableElement(nodeElement).textContent  // https://github.com/siyuan-note/siyuan/issues/8099
-                ) {
-                    selectAll(protyle, nodeElement, range);
-                }
-                // 固定触发时的文档和选区，异步创建完成后仅修改原位置 https://github.com/siyuan-note/siyuan/issues/16972
-                const selectionRange = range.cloneRange();
-                const startBlockElement = hasClosestBlock(selectionRange.startContainer);
-                const endBlockElement = hasClosestBlock(selectionRange.endContainer);
-                if (startBlockElement && endBlockElement) {
-                    const sourceNotebookId = protyle.notebookId;
-                    const sourceRootID = protyle.block.rootID;
-                    const sourcePath = protyle.path;
-                    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() :
-                        protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim());
-                    const selectionContext = {
-                        range: selectionRange,
-                        notebookId: sourceNotebookId,
-                        rootID: sourceRootID,
-                        path: sourcePath,
-                        startBlockID: startBlockElement.getAttribute("data-node-id"),
-                        endBlockID: endBlockElement.getAttribute("data-node-id"),
-                        text: selectionRange.toString(),
-                    };
-                    if (isNewNameFile) {
-                        fetchPost("/api/filetree/getHPathByPath", {
-                            notebook: sourceNotebookId,
-                            path: sourcePath,
-                        }, (response) => {
-                            newFileBySelect(protyle, newFileName, selectionContext, response.data, sourceNotebookId);
-                        });
-                    } else {
-                        getRefCreateSavePath(sourceNotebookId, sourcePath, (targetNotebookId, hPath) => {
-                            newFileBySelect(protyle, newFileName, selectionContext, hPath, targetNotebookId);
-                        });
-                    }
-                }
-                hideElements(["toolbar"], protyle);
-            }
+            newFileBySelectRange(protyle, range, isNewNameFile ? "subDoc" : "configured");
             event.preventDefault();
             event.stopPropagation();
             return;

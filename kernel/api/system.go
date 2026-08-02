@@ -824,6 +824,16 @@ func setAPIToken(c *gin.Context) {
 	}
 
 	token := arg["token"].(string)
+	token = util.RemoveInvalid(token)
+	token = strings.TrimSpace(token)
+
+	// 仅校验新设置的 token，清空（禁用 API token 鉴权）不做长度限制 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-m6w6-p7pc-fpg2
+	if 0 < len(token) && 8 > len(token) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(356)
+		return
+	}
+
 	model.Conf.Api.Token = token
 	model.Conf.Save()
 }

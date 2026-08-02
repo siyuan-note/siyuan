@@ -9,6 +9,47 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {isEncryptedBox, isSiYuanUriProtocol} from "../../util/pathName";
 import {isBrowser} from "../../util/functions";
 import type {App} from "../../index";
+import {genUUID} from "../../util/genID";
+
+export type TSaveExportFileResult = {
+    status: "success" | "canceled" | "error";
+    name?: string;
+    message?: string;
+};
+
+const mobileExportFileRequests = new Map<string, (result: TSaveExportFileResult) => void>();
+
+window.handleSaveExportFileResult = (requestID: string, resultJSON: string) => {
+    const resolve = mobileExportFileRequests.get(requestID);
+    if (!resolve) {
+        return;
+    }
+    mobileExportFileRequests.delete(requestID);
+    try {
+        const result = JSON.parse(resultJSON) as TSaveExportFileResult;
+        if (["success", "canceled", "error"].includes(result.status)) {
+            resolve(result);
+            return;
+        }
+    } catch (e) {
+        console.error("parse saveExportFile result failed:", e);
+    }
+    resolve({status: "error"});
+};
+
+const waitMobileExportFile = (callback: (requestID: string) => void) => {
+    return new Promise<TSaveExportFileResult>((resolve) => {
+        const requestID = genUUID();
+        mobileExportFileRequests.set(requestID, resolve);
+        try {
+            callback(requestID);
+        } catch (e) {
+            mobileExportFileRequests.delete(requestID);
+            console.error("saveExportFile failed:", e);
+            resolve({status: "error", message: String(e)});
+        }
+    });
+};
 
 export const isPhablet = () => {
     return /Android|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) || isIPhone() || isIPad();
@@ -66,9 +107,9 @@ export const getTextSiyuanFromTextHTML = (html: string) => {
     };
 };
 
-export const saveExportFile = async (uri: string, msgId?: string) => {
+export const saveExportFile = async (uri: string, msgId?: string): Promise<TSaveExportFileResult> => {
     if (!uri) {
-        return;
+        return {status: "error"};
     }
     /// #if !BROWSER
     let saveErrorMsgId: string | undefined;
@@ -98,7 +139,7 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
                 if (saveErrorMsgId) {
                     hideMessage(saveErrorMsgId);
                 }
-                return;
+                return {status: "canceled"};
             }
             const copyResponse = await (await fetch("/api/export/copyExportFile", {
                 method: "POST",
@@ -126,7 +167,7 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
             hideMessage(saveErrorMsgId);
         }
         showMessage(window.siyuan.languages.exported);
-        return;
+        return {status: "success", name: fileName};
     } catch (e) {
         if (msgId) {
             hideMessage(msgId);
@@ -137,41 +178,61 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
         } else {
             showMessage(window.siyuan.languages.exportFileSaveFailed, 0, "error");
         }
+        return {status: "error", message: String(e)};
     }
     /// #else
     try {
+        let result: TSaveExportFileResult;
+        let hasCompletionResult = false;
         if (isInAndroid()) {
-            window.JSAndroid.saveExportFile(uri);
-            if (msgId) {
-                hideMessage(msgId);
+            if (window.JSAndroid.saveExportFileV2) {
+                result = await waitMobileExportFile((requestID) => {
+                    window.JSAndroid.saveExportFileV2(uri, requestID);
+                });
+                hasCompletionResult = true;
+            } else {
+                window.JSAndroid.saveExportFile(uri);
+                result = {status: "success"};
             }
-            return;
-        }
-        if (isInIOS()) {
-            window.webkit.messageHandlers.saveExportFile.postMessage(uri);
-            if (msgId) {
-                hideMessage(msgId);
+        } else if (isInIOS()) {
+            if (window.webkit.messageHandlers.saveExportFileV2) {
+                result = await waitMobileExportFile((requestID) => {
+                    window.webkit.messageHandlers.saveExportFileV2.postMessage({uri, requestID});
+                });
+                hasCompletionResult = true;
+            } else {
+                window.webkit.messageHandlers.saveExportFile.postMessage(uri);
+                result = {status: "success"};
             }
-            return;
-        }
-        if (isInHarmony()) {
-            window.JSHarmony.saveExportFile(uri);
-            if (msgId) {
-                hideMessage(msgId);
+        } else if (isInHarmony()) {
+            if (window.JSHarmony.saveExportFileV2) {
+                result = await waitMobileExportFile((requestID) => {
+                    window.JSHarmony.saveExportFileV2(uri, requestID);
+                });
+                hasCompletionResult = true;
+            } else {
+                window.JSHarmony.saveExportFile(uri);
+                result = {status: "success"};
             }
-            return;
+        } else {
+            const openUrl = new URL(uri, `${location.origin}/`);
+            openUrl.searchParams.set("download", "true");
+            window.open(openUrl.href);
+            result = {status: "success"};
         }
-        const openUrl = new URL(uri, `${location.origin}/`);
-        openUrl.searchParams.set("download", "true");
-        window.open(openUrl.href);
         if (msgId) {
             hideMessage(msgId);
         }
+        if (hasCompletionResult && result.status === "success") {
+            showMessage(window.siyuan.languages.exported);
+        }
+        return result;
     } catch (e) {
         if (msgId) {
             hideMessage(msgId);
         }
         showMessage("saveExportFile failed: " + e);
+        return {status: "error", message: String(e)};
     }
     /// #endif
 };

@@ -494,6 +494,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     }
     fetchPost("/api/search/searchRefBlock", refParam, (response) => {
         const dataList: IHintData[] = [];
+        let createItemCount = 0;
         if (response.data.newDoc) {
             const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
             dataList.push({
@@ -501,6 +502,15 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                 html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div>`,
             });
+            createItemCount++;
+            if (source === "search") {
+                dataList.push({
+                    value: `((newSubDoc "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
+                    html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div>`,
+                });
+                createItemCount++;
+            }
         }
         response.data.blocks.forEach((item: IBlock) => {
             let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "")}</span>`;
@@ -527,8 +537,8 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                 value: "",
                 html: window.siyuan.languages.emptyContent,
             });
-        } else if (response.data.newDoc && dataList.length > 1) {
-            dataList[1].focus = true;
+        } else if (createItemCount > 0 && dataList.length > createItemCount) {
+            dataList[createItemCount].focus = true;
         }
         protyle.hint.genHTML(dataList, protyle, true, source);
     });

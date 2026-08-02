@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {unicode2Emoji} from "../../emoji";
 import type {App} from "../../index";
 import {saveScroll} from "../../protyle/scroll/saveScroll";
 import {setStorageVal} from "../../protyle/util/compatibility";
@@ -20,6 +21,7 @@ export type MobileTabEntry = {
     notebookID: string;
     path: string;
     title: string;
+    icon?: string;
     action: TProtyleAction[];
     scroll?: IScrollAttr;
 };
@@ -49,6 +51,7 @@ type OpenOptions = {
     scroll?: IScrollAttr;
     tabID?: string;
     recentPreviousRootID?: string;
+    recordActivation?: boolean;
 };
 
 type MobileTabOpenResult = "success" | "cancelled" | "invalid" | "failed";
@@ -56,11 +59,17 @@ type MobileTabOpenResult = "success" | "cancelled" | "invalid" | "failed";
 class InvalidMobileTabTargetError extends Error {
 }
 
-const isEntry = (value: unknown): value is MobileTabEntry => {
+const normalizeEntry = (value: unknown): MobileTabEntry | undefined => {
     const entry = value as MobileTabEntry;
-    return !!entry && typeof entry.id === "string" && typeof entry.rootID === "string" &&
-        typeof entry.notebookID === "string" && typeof entry.path === "string" &&
-        typeof entry.title === "string" && Array.isArray(entry.action);
+    if (!entry || typeof entry.id !== "string" || typeof entry.rootID !== "string" ||
+        typeof entry.notebookID !== "string" || typeof entry.path !== "string" ||
+        typeof entry.title !== "string" || !Array.isArray(entry.action)) {
+        return;
+    }
+    return {
+        ...entry,
+        icon: typeof entry.icon === "string" ? entry.icon : undefined,
+    };
 };
 
 const normalizeTab = (value: unknown): MobileTab | undefined => {
@@ -70,9 +79,11 @@ const normalizeTab = (value: unknown): MobileTab | undefined => {
     }
     return {
         id: tab.id,
-        current: isEntry(tab.current) ? tab.current : undefined,
-        backStack: Array.isArray(tab.backStack) ? tab.backStack.filter(isEntry).slice(-MAX_HISTORY) : [],
-        forwardStack: Array.isArray(tab.forwardStack) ? tab.forwardStack.filter(isEntry).slice(-MAX_HISTORY) : [],
+        current: normalizeEntry(tab.current),
+        backStack: Array.isArray(tab.backStack) ?
+            tab.backStack.map(normalizeEntry).filter((item): item is MobileTabEntry => !!item).slice(-MAX_HISTORY) : [],
+        forwardStack: Array.isArray(tab.forwardStack) ?
+            tab.forwardStack.map(normalizeEntry).filter((item): item is MobileTabEntry => !!item).slice(-MAX_HISTORY) : [],
         activeAt: typeof tab.activeAt === "number" ? tab.activeAt : 0,
     };
 };
@@ -92,6 +103,7 @@ export class MobileTabs {
     private state: MobileTabsState;
     private navigationEpoch = 0;
     private abortController?: AbortController;
+    private activationBackStack: string[] = [];
 
     constructor(private readonly app: App) {
         const stored = window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] as MobileTabsState | undefined;
@@ -118,6 +130,20 @@ export class MobileTabs {
     private cancelNavigation() {
         this.abortController?.abort();
         this.navigationEpoch++;
+    }
+
+    private recordActivation(tabID?: string) {
+        if (!tabID || this.activationBackStack[this.activationBackStack.length - 1] === tabID) {
+            return;
+        }
+        this.activationBackStack.push(tabID);
+        if (this.activationBackStack.length > MAX_HISTORY) {
+            this.activationBackStack.splice(0, this.activationBackStack.length - MAX_HISTORY);
+        }
+    }
+
+    private removeActivation(tabID: string) {
+        this.activationBackStack = this.activationBackStack.filter((item) => item !== tabID);
     }
 
     private persist() {
@@ -148,6 +174,7 @@ export class MobileTabs {
             tab.current.id = protyle.block.showAll ? protyle.block.id : protyle.block.rootID;
             tab.current.notebookID = protyle.notebookId;
             tab.current.path = protyle.path;
+            tab.current.icon = protyle.background?.ial?.icon || "";
             tab.current.action = protyle.block.action;
         }
     }
@@ -159,6 +186,7 @@ export class MobileTabs {
             notebookID: protyle.notebookId,
             path: protyle.path,
             title: (document.getElementById("toolbarName") as HTMLInputElement)?.value || window.siyuan.languages.untitled,
+            icon: protyle.background?.ial?.icon || "",
             action,
             scroll: saveScroll(protyle, true) as IScrollAttr | undefined,
         };
@@ -201,6 +229,7 @@ export class MobileTabs {
                 break;
             }
             this.state.tabs.splice(this.state.tabs.indexOf(inactive), 1);
+            this.removeActivation(inactive.id);
             if (inactive.current?.rootID) {
                 fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: inactive.current.rootID});
             }
@@ -232,6 +261,8 @@ export class MobileTabs {
             tab.forwardStack = tab.forwardStack.filter((entry) => !missingRootIDs.has(entry.rootID));
         });
         this.state.tabs = this.state.tabs.filter((tab) => !tab.current || !missingRootIDs.has(tab.current.rootID));
+        this.activationBackStack = this.activationBackStack.filter((tabID) =>
+            this.state.tabs.some((tab) => tab.id === tabID));
         if (!this.state.tabs.some((tab) => tab.id === activeTabID)) {
             this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
         }
@@ -292,7 +323,9 @@ export class MobileTabs {
                 .filter((item) => item.current?.rootID === info.rootID)
                 .sort((a, b) => b.activeAt - a.activeAt)[0];
         }
-        tab ||= this.activeTab;
+        if (!tab && !options.newTab && (!this.activeTab?.current || this.maxTabs === 1)) {
+            tab = this.activeTab;
+        }
         const switchedExisting = !!tab && tab.id !== activeBefore?.id && !options.newTab;
         const createOnSuccess = options.newTab || !tab;
         if (createOnSuccess) {
@@ -340,6 +373,9 @@ export class MobileTabs {
                 }
                 tab.current = this.entryFromProtyle(loadID, loadAction, protyle);
                 tab.activeAt = Date.now();
+                if (options.recordActivation !== false && activeBefore?.id !== tab.id) {
+                    this.recordActivation(activeBefore?.id);
+                }
                 this.state.activeTabID = tab.id;
                 this.trimTabs();
                 const docInfo = isEncryptedBox(protyle.notebookId) ? {id: ""} : {id: loadID};
@@ -431,7 +467,7 @@ export class MobileTabs {
         this.updateCounter();
     }
 
-    async switchTo(tabID: string) {
+    async switchTo(tabID: string, recordActivation = true) {
         const tab = this.state.tabs.find((item) => item.id === tabID);
         if (!tab || tab.id === this.state.activeTabID) {
             closeModel();
@@ -446,6 +482,7 @@ export class MobileTabs {
                 replace: true,
                 scroll: tab.current.scroll,
                 tabID: tab.id,
+                recordActivation,
             });
             if (result === "invalid" || result === "failed") {
                 await this.restore();
@@ -453,6 +490,9 @@ export class MobileTabs {
             }
         } else {
             this.cancelNavigation();
+            if (recordActivation) {
+                this.recordActivation(this.state.activeTabID);
+            }
             this.state.activeTabID = tab.id;
             tab.activeAt = Date.now();
             setEmpty(this.app);
@@ -461,6 +501,18 @@ export class MobileTabs {
         }
         closeModel();
         return true;
+    }
+
+    async switchPreviousTab(): Promise<boolean> {
+        while (this.activationBackStack.length > 0) {
+            const tabID = this.activationBackStack.pop();
+            if (tabID !== this.state.activeTabID && this.state.tabs.some((tab) => tab.id === tabID)) {
+                if (await this.switchTo(tabID, false)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     async goBack(): Promise<boolean> {
@@ -483,6 +535,7 @@ export class MobileTabs {
             scroll: target.scroll,
             tabID: tab.id,
             recentPreviousRootID: previousRootID,
+            recordActivation: false,
         });
         if (result === "invalid" || result === "failed") {
             tab.current = previous;
@@ -516,6 +569,7 @@ export class MobileTabs {
             scroll: target.scroll,
             tabID: tab.id,
             recentPreviousRootID: previousRootID,
+            recordActivation: false,
         });
         if (result === "invalid" || result === "failed") {
             tab.current = previous;
@@ -540,6 +594,7 @@ export class MobileTabs {
         }
         const closedRootID = this.state.tabs[index].current?.rootID;
         this.state.tabs.splice(index, 1);
+        this.removeActivation(tabID);
         if (closedRootID) {
             fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: closedRootID});
         }
@@ -547,7 +602,7 @@ export class MobileTabs {
             this.state.activeTabID = undefined;
             const next = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0];
             if (next?.current) {
-                const opened = await this.switchTo(next.id);
+                const opened = await this.switchTo(next.id, false);
                 if (!opened) {
                     setEmpty(this.app);
                 }
@@ -576,6 +631,7 @@ export class MobileTabs {
             }
         });
         this.state = {version: 1, tabs: []};
+        this.activationBackStack = [];
         setEmpty(this.app);
         this.persist();
         this.updateCounter();
@@ -611,6 +667,8 @@ export class MobileTabs {
             tab.forwardStack = tab.forwardStack.filter(predicate);
         });
         this.state.tabs = this.state.tabs.filter((tab) => !tab.current || predicate(tab.current));
+        this.activationBackStack = this.activationBackStack.filter((tabID) =>
+            this.state.tabs.some((tab) => tab.id === tabID));
         if (!this.state.tabs.some((tab) => tab.id === activeTabID)) {
             this.cancelNavigation();
             this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
@@ -641,14 +699,23 @@ export class MobileTabs {
     }
 
     openOverview() {
+        this.snapshot();
+        this.persist();
         const active = this.state.activeTabID;
-        const rows = this.state.tabs.map((tab) => `<div class="mobile-tabs__item${tab.id === active ? " mobile-tabs__item--active" : ""}" data-tab-id="${escapeAttr(tab.id)}">
-    <svg class="mobile-tabs__item-icon"><use xlink:href="#iconFile"></use></svg>
+        const rows = this.state.tabs.map((tab) => {
+            const iconHTML = tab.current ? unicode2Emoji(
+                tab.current.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file,
+                "mobile-tabs__item-icon",
+                true,
+            ) : '<svg class="mobile-tabs__item-icon"><use xlink:href="#iconFile"></use></svg>';
+            return `<div class="mobile-tabs__item${tab.id === active ? " mobile-tabs__item--active" : ""}" data-tab-id="${escapeAttr(tab.id)}">
+    ${iconHTML}
     <span class="mobile-tabs__item-title">${escapeHtml(tab.current?.title || window.siyuan.languages.newTab)}</span>
     <button class="b3-button b3-button--text mobile-tabs__close" data-action="close" aria-label="${escapeAttr(window.siyuan.languages.close)}">
         <svg><use xlink:href="#iconClose"></use></svg>
     </button>
-</div>`).join("");
+</div>`;
+        }).join("");
         const tab = this.activeTab;
         openModel({
             title: `${window.siyuan.languages.mobileTabs} ${this.state.tabs.length}`,

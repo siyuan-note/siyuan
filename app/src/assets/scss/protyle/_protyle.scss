@@ -796,7 +796,7 @@ table + .protyle-action__table {
 
     &:hover {
       color: var(--b3-theme-primary);
-      background-color: var(--b3-list-hover);
+      background-image: linear-gradient(var(--b3-list-hover), var(--b3-list-hover));
     }
   }
 
@@ -819,6 +819,10 @@ table + .protyle-action__table {
 
     &--column {
       border-radius: var(--b3-border-radius-s) var(--b3-border-radius-s) 0 0;
+
+      svg {
+        transform: rotate(90deg);
+      }
     }
 
     &--drag-disabled {
@@ -851,6 +855,10 @@ table + .protyle-action__table {
     background-color: var(--b3-theme-primary-lightest);
     border: 1px solid var(--b3-theme-primary);
     pointer-events: none;
+
+    &--dragging {
+      opacity: 0;
+    }
   }
 
   &__drop {
@@ -858,16 +866,5 @@ table + .protyle-action__table {
     z-index: 3;
     background-color: var(--b3-theme-primary);
     pointer-events: none;
-  }
-
-  &__color {
-    display: inline-block;
-    align-self: center;
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
-    border: 1px solid var(--b3-border-color);
-    border-radius: 50%;
   }
 }

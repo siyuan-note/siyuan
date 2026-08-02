@@ -304,6 +304,65 @@ func TestCopyExportResourceDirectory(t *testing.T) {
 	}
 }
 
+func TestCopyEncryptedAssetCreatesExportDirectory(t *testing.T) {
+	originalWorkspaceDir := util.WorkspaceDir
+	originalDataDir := util.DataDir
+	workspaceDir := t.TempDir()
+	util.WorkspaceDir = workspaceDir
+	util.DataDir = filepath.Join(workspaceDir, "data")
+	boxID := "20260802120000-abcdefg"
+	defer func() {
+		LockBox(boxID)
+		util.WorkspaceDir = originalWorkspaceDir
+		util.DataDir = originalDataDir
+	}()
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Encrypted = true
+	confData, err := gulu.JSON.MarshalIndentJSON(boxConf, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	confPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err = os.MkdirAll(filepath.Dir(confPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(confPath, confData, 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	dek, err := util.GenerateDEK()
+	if err != nil {
+		t.Fatal(err)
+	}
+	setDEKForTest(boxID, dek)
+	plaintext := []byte("encrypted export asset")
+	diskName := "asset-20260802120001-abcdefg.png"
+	ciphertext, err := EncryptAsset(boxID, diskName, "image.png", dek, plaintext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(util.DataDir, boxID, "assets", diskName)
+	if err = os.MkdirAll(filepath.Dir(source), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(source, ciphertext, 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	destination := filepath.Join(t.TempDir(), "export", "assets", diskName)
+	if err = copyAssetDecryptIfEncrypted(source, destination); err != nil {
+		t.Fatal(err)
+	}
+	exported, err := os.ReadFile(destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(exported, plaintext) {
+		t.Fatalf("unexpected exported asset content: %q", exported)
+	}
+}
+
 func TestUniqueExportFilePath(t *testing.T) {
 	destination := filepath.Join(t.TempDir(), "resource.txt")
 	if err := os.WriteFile(destination, []byte("first"), 0600); err != nil {

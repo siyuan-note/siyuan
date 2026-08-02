@@ -439,8 +439,10 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                 showMessage(response.msg, 6000, "error");
                 return;
             }
-            await saveExportFile(response.data.file);
-            showMessage(window.siyuan.languages.exportNotebookCryptoBackupTip);
+            const result = await saveExportFile(response.data.file);
+            if (result.status === "success") {
+                showMessage(window.siyuan.languages.exportNotebookCryptoBackupTip);
+            }
         });
     });
 

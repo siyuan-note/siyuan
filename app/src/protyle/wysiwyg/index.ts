@@ -102,10 +102,14 @@ import {
     getTableFullRowSelection,
     getTableRangeHTML,
     isIncludeCell,
-    setTableAlign,
     updateTableTitle,
 } from "../util/table";
-import {TableControl} from "../util/tableControl";
+import {
+    getCommonTableCellStyle,
+    getTableCellBackgroundMenus,
+    setTableCellStyle,
+    TableControl,
+} from "../util/tableControl";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
@@ -2279,9 +2283,30 @@ export class WYSIWYG {
                             getSelection().getRangeAt(0).collapse(false);
                         }
                         window.siyuan.menus.menu.remove();
+                        const tableElement = tableBlockElement.querySelector("table");
+                        const selectedCellElements: HTMLTableCellElement[] = [];
+                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                        const scrollTop = tableElement.scrollTop;
+                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                            if (!item.classList.contains("fn__none") && isIncludeCell({
+                                tableSelectElement,
+                                scrollLeft,
+                                scrollTop,
+                                item,
+                            })) {
+                                selectedCellElements.push(item);
+                            }
+                        });
+                        const setSelectedCellStyle = (property: string, value: string) => {
+                            tableSelectElement.removeAttribute("style");
+                            setTableCellStyle(protyle, tableBlockElement as HTMLElement, selectedCellElements,
+                                property, value);
+                        };
+                        let mergeCellMenuElement: HTMLElement;
                         if (!protyle.disabled) {
-                            window.siyuan.menus.menu.append(new MenuItem({
+                            mergeCellMenuElement = new MenuItem({
                                 id: "mergeCell",
+                                icon: "iconTableCellsMerge",
                                 label: window.siyuan.languages.mergeCell,
                                 click: () => {
                                     if (tableBlockElement) {
@@ -2407,118 +2432,20 @@ export class WYSIWYG {
                                         });
                                     }
                                 }
-                            }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                id: "separator_1",
-                                type: "separator"
-                            }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                id: "alignLeft",
-                                icon: "iconAlignLeft",
-                                accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
-                                label: window.siyuan.languages.alignLeft,
-                                click: () => {
-                                    if (tableBlockElement) {
-                                        const selectCellElements: HTMLTableCellElement[] = [];
-                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
-                                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                            if (!item.classList.contains("fn__none") &&
-                                                isIncludeCell({
-                                                    tableSelectElement,
-                                                    scrollLeft,
-                                                    scrollTop,
-                                                    item,
-                                                }) && (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
-                                                selectCellElements.push(item);
-                                            }
-                                        });
-                                        tableSelectElement.removeAttribute("style");
-                                        setTableAlign(protyle, selectCellElements, tableBlockElement, "left", getEditorRange(tableBlockElement));
-                                    }
-                                }
-                            }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                id: "alignCenter",
-                                icon: "iconAlignCenter",
-                                accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
-                                label: window.siyuan.languages.alignCenter,
-                                click: () => {
-                                    if (tableBlockElement) {
-                                        const selectCellElements: HTMLTableCellElement[] = [];
-                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
-                                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                            if (!item.classList.contains("fn__none") && isIncludeCell({
-                                                    tableSelectElement,
-                                                    scrollLeft,
-                                                    scrollTop,
-                                                    item,
-                                                }) &&
-                                                (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
-                                                selectCellElements.push(item);
-                                            }
-                                        });
-                                        tableSelectElement.removeAttribute("style");
-                                        setTableAlign(protyle, selectCellElements, tableBlockElement, "center", getEditorRange(tableBlockElement));
-                                    }
-                                }
-                            }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                id: "alignRight",
-                                icon: "iconAlignRight",
-                                accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
-                                label: window.siyuan.languages.alignRight,
-                                click: () => {
-                                    if (tableBlockElement) {
-                                        const selectCellElements: HTMLTableCellElement[] = [];
-                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
-                                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                            if (!item.classList.contains("fn__none") && isIncludeCell({
-                                                tableSelectElement,
-                                                scrollLeft,
-                                                scrollTop,
-                                                item,
-                                            }) && (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
-                                                selectCellElements.push(item);
-                                            }
-                                        });
-                                        tableSelectElement.removeAttribute("style");
-                                        setTableAlign(protyle, selectCellElements, tableBlockElement, "right", getEditorRange(tableBlockElement));
-                                    }
-                                }
-                            }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                id: "useDefaultAlign",
-                                icon: "",
-                                label: window.siyuan.languages.useDefaultAlign,
-                                click: () => {
-                                    if (tableBlockElement) {
-                                        const selectCellElements: HTMLTableCellElement[] = [];
-                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
-                                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                            if (!item.classList.contains("fn__none") && isIncludeCell({
-                                                    tableSelectElement,
-                                                    scrollLeft,
-                                                    scrollTop,
-                                                    item,
-                                                }) &&
-                                                (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
-                                                selectCellElements.push(item);
-                                            }
-                                        });
-                                        tableSelectElement.removeAttribute("style");
-                                        setTableAlign(protyle, selectCellElements, tableBlockElement, "", getEditorRange(tableBlockElement));
-                                    }
-                                }
-                            }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                id: "separator_2",
-                                type: "separator"
-                            }).element);
+                            }).element;
                         }
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "copy",
+                            icon: "iconCopy",
+                            accelerator: "⌘C",
+                            label: window.siyuan.languages.copy,
+                            click() {
+                                if (tableBlockElement) {
+                                    focusByRange(getEditorRange(tableBlockElement));
+                                    document.execCommand("copy");
+                                }
+                            }
+                        }).element);
                         /// #if !MOBILE
                         window.siyuan.menus.menu.append(new MenuItem({
                             id: "copyRichText",
@@ -2537,42 +2464,16 @@ export class WYSIWYG {
                             label: window.siyuan.languages.copyPlainText,
                             click() {
                                 if (tableBlockElement) {
-                                    const selectCellElements: HTMLTableCellElement[] = [];
-                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                    const scrollTop = tableBlockElement.querySelector("table").scrollTop;
-                                    const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
-                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                        if (!item.classList.contains("fn__none") && isIncludeCell({
-                                            tableSelectElement,
-                                            scrollLeft,
-                                            scrollTop,
-                                            item,
-                                        })) {
-                                            selectCellElements.push(item);
-                                        }
-                                    });
                                     let textPlain = "";
-                                    selectCellElements.forEach((item, index) => {
+                                    selectedCellElements.forEach((item, index) => {
                                         textPlain += item.textContent.trim() + "\t";
-                                        if (!item.nextElementSibling || !selectCellElements[index + 1] ||
-                                            item.nextElementSibling !== selectCellElements[index + 1]) {
+                                        if (!item.nextElementSibling || !selectedCellElements[index + 1] ||
+                                            item.nextElementSibling !== selectedCellElements[index + 1]) {
                                             textPlain = textPlain.slice(0, -1) + "\n";
                                         }
                                     });
                                     copyPlainText(textPlain.slice(0, -1));
                                     focusBlock(tableBlockElement);
-                                }
-                            }
-                        }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            id: "copy",
-                            icon: "iconCopy",
-                            accelerator: "⌘C",
-                            label: window.siyuan.languages.copy,
-                            click() {
-                                if (tableBlockElement) {
-                                    focusByRange(getEditorRange(tableBlockElement));
-                                    document.execCommand("copy");
                                 }
                             }
                         }).element);
@@ -2595,9 +2496,13 @@ export class WYSIWYG {
                                 icon: "iconPaste",
                                 accelerator: "⌘V",
                                 async click() {
+                                    if (!tableBlockElement) {
+                                        return;
+                                    }
+                                    focusByRange(getEditorRange(tableBlockElement));
                                     if (document.queryCommandSupported("paste")) {
                                         document.execCommand("paste");
-                                    } else if (tableBlockElement) {
+                                    } else {
                                         try {
                                             const text = await readClipboard();
                                             paste(protyle, Object.assign(text, {target: tableBlockElement as HTMLElement}));
@@ -2608,10 +2513,6 @@ export class WYSIWYG {
                                 }
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({
-                                id: "deleteRowsSeparator",
-                                type: "separator",
-                            }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({
                                 id: "clear",
                                 label: window.siyuan.languages.clear,
                                 icon: "iconTrashcan",
@@ -2620,29 +2521,81 @@ export class WYSIWYG {
                                     clearTableCell(protyle, tableBlockElement as HTMLElement);
                                 }
                             }).element);
-                            const tableElement = tableBlockElement.querySelector("table");
-                            const selectedCellElements: HTMLTableCellElement[] = [];
-                            const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                            const scrollTop = tableElement.scrollTop;
-                            tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                if (!item.classList.contains("fn__none") && isIncludeCell({
-                                    tableSelectElement,
-                                    scrollLeft,
-                                    scrollTop,
-                                    item,
-                                })) {
-                                    selectedCellElements.push(item);
-                                }
-                            });
+                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                icon: "iconTheme",
+                                label: window.siyuan.languages.colorPrimary,
+                                submenu: getTableCellBackgroundMenus(selectedCellElements,
+                                    color => setSelectedCellStyle("background-color", color)),
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            const textAlign = getCommonTableCellStyle(selectedCellElements, "text-align");
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                id: "alignLeft",
+                                icon: "iconAlignLeft",
+                                accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
+                                label: window.siyuan.languages.alignLeft,
+                                checked: textAlign === "left",
+                                click: () => setSelectedCellStyle("text-align", "left"),
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                id: "alignCenter",
+                                icon: "iconAlignCenter",
+                                accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
+                                label: window.siyuan.languages.alignCenter,
+                                checked: textAlign === "center",
+                                click: () => setSelectedCellStyle("text-align", "center"),
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                id: "alignRight",
+                                icon: "iconAlignRight",
+                                accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
+                                label: window.siyuan.languages.alignRight,
+                                checked: textAlign === "right",
+                                click: () => setSelectedCellStyle("text-align", "right"),
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                id: "useDefaultHorizontalAlign",
+                                label: window.siyuan.languages.useDefaultHorizontalAlign,
+                                checked: textAlign === "",
+                                click: () => setSelectedCellStyle("text-align", ""),
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            const verticalAlign = getCommonTableCellStyle(selectedCellElements, "vertical-align");
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                label: window.siyuan.languages.alignTop,
+                                checked: verticalAlign === "top",
+                                click: () => setSelectedCellStyle("vertical-align", "top"),
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                label: window.siyuan.languages.alignMiddle,
+                                checked: verticalAlign === "middle",
+                                click: () => setSelectedCellStyle("vertical-align", "middle"),
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                label: window.siyuan.languages.alignBottom,
+                                checked: verticalAlign === "bottom",
+                                click: () => setSelectedCellStyle("vertical-align", "bottom"),
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                label: window.siyuan.languages.useDefaultVerticalAlign,
+                                checked: verticalAlign === "",
+                                click: () => setSelectedCellStyle("vertical-align", ""),
+                            }).element);
                             const rowSelection = getTableFullRowSelection(tableElement, selectedCellElements);
                             const columnSelection = getTableFullColumnSelection(tableElement, selectedCellElements);
+                            if (rowSelection.indexes.length > 0 || columnSelection.indexes.length > 0) {
+                                window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            }
                             if (rowSelection.indexes.length > 0) {
                                 window.siyuan.menus.menu.append(new MenuItem({
                                     id: "deleteRows",
                                     icon: "iconTrashcan",
                                     label: window.siyuan.languages["delete-row"],
                                     disabled: rowSelection.merged,
-                                    accelerator: rowSelection.merged ? window.siyuan.languages.cancelMerged : undefined,
+                                    action: rowSelection.merged ? "iconInfo" : undefined,
+                                    actionLabel: rowSelection.merged ?
+                                        window.siyuan.languages.splitMergedCellTip : undefined,
                                     click() {
                                         tableSelectElement.removeAttribute("style");
                                         deleteTableRows(protyle, tableBlockElement as HTMLElement,
@@ -2656,8 +2609,9 @@ export class WYSIWYG {
                                     icon: "iconTrashcan",
                                     label: window.siyuan.languages["delete-column"],
                                     disabled: columnSelection.merged,
-                                    accelerator: columnSelection.merged ?
-                                        window.siyuan.languages.cancelMerged : undefined,
+                                    action: columnSelection.merged ? "iconInfo" : undefined,
+                                    actionLabel: columnSelection.merged ?
+                                        window.siyuan.languages.splitMergedCellTip : undefined,
                                     click() {
                                         tableSelectElement.removeAttribute("style");
                                         deleteTableColumns(protyle, tableBlockElement as HTMLElement,
@@ -2665,6 +2619,8 @@ export class WYSIWYG {
                                     },
                                 }).element);
                             }
+                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            window.siyuan.menus.menu.append(mergeCellMenuElement);
                         }
                         window.siyuan.menus.menu.popup({x: mouseUpEvent.clientX - 8, y: mouseUpEvent.clientY - 16});
                     }
@@ -4149,7 +4105,7 @@ export class WYSIWYG {
                     event.stopPropagation();
                 }
             });
-            if (tableElement) {
+            if (tableElement && !protyle.disabled) {
                 if (hasClosestByTag(event.target, "CAPTION")) {
                     updateTableTitle(protyle, tableElement);
                     return;

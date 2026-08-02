@@ -1,5 +1,5 @@
 import {showMessage} from "../dialog/message";
-import {hasTopClosestByTag} from "../protyle/util/hasClosest";
+import {hasClosestBlock, hasTopClosestByTag} from "../protyle/util/hasClosest";
 /// #if !MOBILE
 import {Files} from "../layout/dock/Files";
 import {Editor} from "../editor";
@@ -14,13 +14,15 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
 import {NewDocTargetByHPath, NewDocTargetSubDoc, getNewDocTargetFromSavePath, getNewDocTargetFromTree} from "./parseNewDocTarget";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange, selectAll} from "../protyle/util/selection";
 import {
+    createNewFileSelectionContext,
     isNewFileSelectionValid,
     isRangeInEditor,
     isSameRange,
     NewFileSelectionContext
 } from "./newFileSelection";
+import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 
 export const getBlockRefAnchorText = (title: string) => {
     const trimmed = (title || "").trim();
@@ -89,7 +91,8 @@ export const newFileInTree = (app: App, notebookId: string, currentPath: string,
     });
 };
 
-const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, id: string, refText: string) => {
+const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, id: string, refText: string,
+                          refSubtype: "d" | "s") => {
     if (!isNewFileSelectionValid(protyle, context)) {
         return;
     }
@@ -97,9 +100,10 @@ const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, i
     const currentRange = selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : undefined;
     const selectionMoved = currentRange && !isSameRange(currentRange, context.range);
     protyle.toolbar.range = context.range;
+    const anchorText = refSubtype === "s" ? getBlockRefAnchorText(context.text) : refText;
     const refElements = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
         type: "id",
-        color: `${id}${Constants.ZWSP}d${Constants.ZWSP}${refText}`
+        color: `${id}${Constants.ZWSP}${refSubtype}${Constants.ZWSP}${anchorText}`
     }, false);
     if (!refElements?.[0]) {
         return;
@@ -117,7 +121,7 @@ const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, i
 };
 
 export const newFileBySelect = (protyle: IProtyle, newFileName: string, context: NewFileSelectionContext,
-                                pathDir: string, targetNotebookId: string) => {
+                                pathDir: string, targetNotebookId: string, refSubtype: "d" | "s" = "d") => {
     if (!isNewFileSelectionValid(protyle, context)) {
         return;
     }
@@ -128,7 +132,7 @@ export const newFileBySelect = (protyle: IProtyle, newFileName: string, context:
     }, (idResponse) => {
         const refText = getBlockRefAnchorText(newFileName);
         if (idResponse.data && idResponse.data.length > 0) {
-            insertNewFileRef(protyle, context, idResponse.data[0], refText);
+            insertNewFileRef(protyle, context, idResponse.data[0], refText, refSubtype);
         } else {
             if (!isNewFileSelectionValid(protyle, context)) {
                 return;
@@ -140,10 +144,50 @@ export const newFileBySelect = (protyle: IProtyle, newFileName: string, context:
                 markdown: "",
                 titleEmpty: newFileName === "",
             }, response => {
-                insertNewFileRef(protyle, context, response.data, refText);
+                insertNewFileRef(protyle, context, response.data, refText, refSubtype);
             });
         }
     });
+};
+
+export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "subDoc" | "configured",
+                                     refSubtype: "d" | "s" = "d", name?: string) => {
+    const nodeElement = hasClosestBlock(range.startContainer);
+    if (!nodeElement) {
+        return;
+    }
+    const selectText = range.toString();
+    if (!selectText.trim() && (nodeElement.querySelector("tr") || nodeElement.querySelector("span"))) {
+        // 没选中时，都是纯文本就创建子文档 https://ld246.com/article/1663073488381/comment/1664804353295#comments
+        return;
+    }
+    if (!selectText.trim() &&
+        getContenteditableElement(nodeElement).textContent // https://github.com/siyuan-note/siyuan/issues/8099
+    ) {
+        selectAll(protyle, nodeElement, range);
+    }
+    const selectionContext = createNewFileSelectionContext(protyle, range);
+    if (!selectionContext) {
+        return;
+    }
+    const sourceNotebookId = selectionContext.notebookId;
+    const sourcePath = selectionContext.path;
+    const fileName = name === undefined ? (selectText.trim() ||
+        protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "").trim()) : name.trim();
+    const newFileName = replaceFileName(fileName);
+    if (target === "subDoc") {
+        fetchPost("/api/filetree/getHPathByPath", {
+            notebook: sourceNotebookId,
+            path: sourcePath,
+        }, (response) => {
+            newFileBySelect(protyle, newFileName, selectionContext, response.data, sourceNotebookId, refSubtype);
+        });
+    } else {
+        getRefCreateSavePath(sourceNotebookId, sourcePath, (targetNotebookId, hPath) => {
+            newFileBySelect(protyle, newFileName, selectionContext, hPath, targetNotebookId, refSubtype);
+        });
+    }
+    hideElements(["toolbar"], protyle);
 };
 
 export const getRefCreateSavePath = (notebookId: string, currentPath: string, cb: (targetNotebookId: string, hPath: string) => void) => {

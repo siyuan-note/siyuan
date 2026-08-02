@@ -1,7 +1,8 @@
 import {MenuItem} from "../../menus/Menu";
 import {updateTransaction} from "../wysiwyg/transaction";
-import {encodeBase64, isMac} from "./compatibility";
+import {encodeBase64, isMac, readClipboard} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
+import {paste} from "./paste";
 import {focusByRange, getEditorRange} from "./selection";
 import {
     buildTableGrid,
@@ -33,6 +34,8 @@ interface IDragState {
     startY: number;
     target: number;
     dragging: boolean;
+    handleCenter: number;
+    handleSize: number;
     cellInfos: Map<HTMLTableCellElement, ITableCellInfo>;
 }
 
@@ -115,6 +118,58 @@ const replaceCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
 };
 
 const getCellText = (cell: HTMLTableCellElement) => cell.innerText.replace(/\n+$/g, "");
+
+export const getCommonTableCellStyle = (cells: HTMLTableCellElement[], property: string) => {
+    if (cells.length === 0) {
+        return undefined;
+    }
+    const value = cells[0].style.getPropertyValue(property);
+    return cells.every(cell => cell.style.getPropertyValue(property) === value) ? value : undefined;
+};
+
+export const setTableCellStyle = (protyle: IProtyle, node: HTMLElement, cells: HTMLTableCellElement[],
+                                  property: string, value: string) => {
+    const oldHTML = node.outerHTML;
+    cells.forEach(cell => {
+        if (value) {
+            cell.style.setProperty(property, value);
+        } else {
+            cell.style.removeProperty(property);
+            if (!cell.getAttribute("style")) {
+                cell.removeAttribute("style");
+            }
+        }
+    });
+    updateTransaction(protyle, node, oldHTML);
+};
+
+export const getTableCellBackgroundMenus = (cells: HTMLTableCellElement[],
+                                             onChange: (color: string) => void): IMenu[] => {
+    const backgroundColor = getCommonTableCellStyle(cells, "background-color");
+    const colors = ["", ...Array.from({length: 13}, (_, index) => `var(--b3-font-background${index + 1})`)];
+    const colorHTML = colors.map(color => {
+        const currentClass = backgroundColor === color ? " color__square--current" : "";
+        const defaultClass = color ? "" : " ariaLabel";
+        const attributes = color ? ` style="background-color:${color}"` :
+            ` aria-label="${window.siyuan.languages.default}" data-position="3south"`;
+        return `<button type="button" data-color="${color}" class="color__square${currentClass}${defaultClass}"${attributes}></button>`;
+    }).join("");
+    return [{
+        type: "empty",
+        label: `<div class="fn__flex fn__flex-wrap" style="width: 238px">${colorHTML}</div>`,
+        bind: element => {
+            element.addEventListener("click", event => {
+                const colorTarget = (event.target as Element).closest<HTMLElement>(".color__square");
+                if (!colorTarget || !element.contains(colorTarget)) {
+                    return;
+                }
+                onChange(colorTarget.dataset.color);
+                window.siyuan.menus.menu.remove();
+            });
+        },
+    }];
+};
+
 const TABLE_HANDLE_THICKNESS = 16;
 const TABLE_ADD_CONTROL_THICKNESS = 16;
 const TABLE_EDGE_CONTROL_TRIGGER_SIZE = 8;
@@ -149,13 +204,13 @@ export class TableControl {
         this.element = document.createElement("div");
         this.element.className = "protyle-table-control";
         this.element.setAttribute("contenteditable", "false");
-        this.element.innerHTML = `<button type="button" class="protyle-table-control__handle protyle-table-control__handle--row b3-tooltips b3-tooltips__e fn__none" data-type="row" aria-label="${window.siyuan.languages.row}">
+        this.element.innerHTML = `<button type="button" class="protyle-table-control__handle protyle-table-control__handle--row fn__none" data-type="row" aria-label="${window.siyuan.languages.row}">
     <svg><use xlink:href="#iconDrag"></use></svg>
 </button>
-<button type="button" class="protyle-table-control__handle protyle-table-control__handle--column b3-tooltips b3-tooltips__s fn__none" data-type="column" aria-label="${window.siyuan.languages.column}">
+<button type="button" class="protyle-table-control__handle protyle-table-control__handle--column fn__none" data-type="column" aria-label="${window.siyuan.languages.column}">
     <svg><use xlink:href="#iconDrag"></use></svg>
 </button>
-<button type="button" class="protyle-table-control__handle protyle-table-control__handle--cell b3-tooltips b3-tooltips__w fn__none" data-type="cell" aria-label="${window.siyuan.languages.more}">
+<button type="button" class="protyle-table-control__handle protyle-table-control__handle--cell b3-tooltips b3-tooltips__n fn__none" data-type="cell" aria-label="${window.siyuan.languages.more}">
     <svg><use xlink:href="#iconMore"></use></svg>
 </button>
 <button type="button" class="protyle-table-control__add protyle-table-control__add--row b3-tooltips b3-tooltips__n fn__none" data-type="add-row" aria-label="${window.siyuan.languages.insertRowBelow}">
@@ -195,6 +250,8 @@ export class TableControl {
     }
 
     public clear() {
+        this.clearDragPreview();
+        this.dragState = undefined;
         this.selection = undefined;
         this.selectionGrid = undefined;
         this.selectedCells = [];
@@ -213,7 +270,7 @@ export class TableControl {
         // 控件容器位于事件冒泡路径上，在这里兜底执行相同的边缘检测
         this.element.addEventListener("pointermove", event => this.handleTablePointerMove(event, true), {signal});
         this.wysiwygElement.addEventListener("pointerleave", event => {
-            if (this.element.contains(event.relatedTarget as Node)) {
+            if (this.dragState || this.element.contains(event.relatedTarget as Node)) {
                 return;
             }
             this.hoverCell = undefined;
@@ -307,7 +364,7 @@ export class TableControl {
             this.openMenu(event.clientX, event.clientY);
         }, {signal});
         this.element.addEventListener("pointerleave", event => {
-            if (this.wysiwygElement.contains(event.relatedTarget as Node)) {
+            if (this.dragState || this.wysiwygElement.contains(event.relatedTarget as Node)) {
                 return;
             }
             this.hoverCell = undefined;
@@ -318,6 +375,9 @@ export class TableControl {
     }
 
     private handleTablePointerMove(event: PointerEvent, fromControl: boolean) {
+        if (event.buttons !== 0) {
+            return;
+        }
         const targetCell = getCell(event.target);
         const targetTable = targetCell?.closest("table") as HTMLTableElement;
         const targetViewportRect = targetTable ? this.getTableViewportRect(targetTable) : undefined;
@@ -369,12 +429,16 @@ export class TableControl {
             (type === "row" && this.selection.indexes.size > 1 && this.selection.indexes.has(0))) {
             return;
         }
+        const handleRect = (type === "row" ? this.rowHandle : this.columnHandle).getBoundingClientRect();
         this.dragState = {
             mode: type,
             startX: event.clientX,
             startY: event.clientY,
             target: -1,
             dragging: false,
+            handleCenter: type === "row" ? handleRect.top + handleRect.height / 2 :
+                handleRect.left + handleRect.width / 2,
+            handleSize: type === "row" ? handleRect.height : handleRect.width,
             cellInfos: new Map(grid.cellInfos.map(info => [info.cell, info])),
         };
         const move = (moveEvent: PointerEvent) => this.handleDragMove(moveEvent);
@@ -653,6 +717,24 @@ export class TableControl {
         return intersectRects(tableRect, wrapperRect, contentRect);
     }
 
+    private getTableSelectionViewportRect(table: HTMLTableElement) {
+        const viewportRect = this.getTableViewportRect(table);
+        const rowRects = Array.from(table.rows).map(row => row.getBoundingClientRect()).filter(rect => rect.height > 0);
+        if (rowRects.length === 0) {
+            return viewportRect;
+        }
+        const top = Math.min(...rowRects.map(rect => rect.top));
+        const bottom = Math.max(...rowRects.map(rect => rect.bottom));
+        return intersectRects(viewportRect, {
+            left: viewportRect.left,
+            top,
+            right: viewportRect.right,
+            bottom,
+            width: viewportRect.width,
+            height: bottom - top,
+        });
+    }
+
     private getColumnRect(table: HTMLTableElement, grid: ITableGrid, index: number) {
         const column = table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col")[index];
         const columnRect = column?.getBoundingClientRect();
@@ -779,6 +861,8 @@ export class TableControl {
         selectionElement.style.top = `${visibleRect.top}px`;
         selectionElement.style.width = `${visibleRect.width}px`;
         selectionElement.style.height = `${visibleRect.height}px`;
+        selectionElement.classList.toggle("protyle-table-control__selection--dragging",
+            !!this.dragState?.dragging);
     }
 
     private render() {
@@ -842,9 +926,10 @@ export class TableControl {
                     this.joinedControlTable = table;
                 }
             }
-            if (this.hoverType === "cell" && visibleCellRect.width > 0 && visibleCellRect.height > 0) {
+            if (!this.dragState && this.hoverType === "cell" &&
+                visibleCellRect.width > 0 && visibleCellRect.height > 0) {
                 this.cellHandle.classList.remove("fn__none");
-                this.setPosition(this.cellHandle, visibleCellRect.right - 5, visibleCellRect.top + 5);
+                this.setPosition(this.cellHandle, visibleCellRect.right - 3, visibleCellRect.top + 3);
             }
             if (this.hoverType === "add-row" && viewportRect.width > 0 &&
                 tableRect.bottom <= viewportRect.bottom + 1 &&
@@ -877,7 +962,7 @@ export class TableControl {
             this.selectedCells = [];
             return;
         }
-        const selectionViewportRect = this.getTableViewportRect(this.selection.table);
+        const selectionViewportRect = this.getTableSelectionViewportRect(this.selection.table);
         if (this.selection.mode === "row") {
             const rows = Array.from(this.selection.table.rows);
             getIndexGroups(this.selection.indexes).forEach(group => {
@@ -946,6 +1031,7 @@ export class TableControl {
         const menu = window.siyuan.menus.menu;
         menu.remove();
         const merged = buildTableGrid(this.selection.table).cellInfos.some(info => info.rowspan > 1 || info.colspan > 1);
+        const mergedSelection = this.selection.mode !== "cell" && merged;
         const rectangle = this.selection.mode !== "cell" || this.isRectangle();
         menu.append(new MenuItem({
             icon: "iconCopy",
@@ -957,20 +1043,34 @@ export class TableControl {
         menu.append(new MenuItem({
             icon: "iconCut",
             label: window.siyuan.languages.cut,
-            disabled: this.protyle.disabled || !rectangle || (this.selection.mode !== "cell" && merged),
-            accelerator: !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired :
-                this.selection.mode !== "cell" && merged ? window.siyuan.languages.cancelMerged : undefined,
+            disabled: this.protyle.disabled || !rectangle || mergedSelection,
+            accelerator: !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
+            action: mergedSelection ? "iconInfo" : undefined,
+            actionLabel: mergedSelection ? window.siyuan.languages.splitMergedCellTip : undefined,
             click: () => this.execClipboardCommand("cut"),
         }).element);
-        menu.append(new MenuItem({type: "separator"}).element);
+        if (!this.protyle.disabled && this.selection.mode === "cell") {
+            menu.append(new MenuItem({
+                icon: "iconPaste",
+                label: window.siyuan.languages.paste,
+                click: () => this.paste(),
+            }).element);
+            menu.append(new MenuItem({
+                icon: "iconTrashcan",
+                label: window.siyuan.languages.clear,
+                click: () => this.clearCells(),
+            }).element);
+        }
         if (!this.protyle.disabled) {
+            menu.append(new MenuItem({type: "separator"}).element);
             this.appendInsertMenus();
             if (this.selection.mode !== "cell") {
                 menu.append(new MenuItem({
                     icon: "iconCopy",
                     label: window.siyuan.languages.duplicate,
                     disabled: merged,
-                    accelerator: merged ? window.siyuan.languages.cancelMerged : undefined,
+                    action: merged ? "iconInfo" : undefined,
+                    actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                     click: () => this.duplicateRowsOrColumns(),
                 }).element);
                 menu.append(new MenuItem({type: "separator"}).element);
@@ -997,7 +1097,8 @@ export class TableControl {
                     label: this.selection.mode === "row" ? window.siyuan.languages["delete-row"] :
                         window.siyuan.languages["delete-column"],
                     disabled: merged,
-                    accelerator: merged ? window.siyuan.languages.cancelMerged : undefined,
+                    action: merged ? "iconInfo" : undefined,
+                    actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                     click: () => this.deleteSelection(false),
                 }).element);
             }
@@ -1018,7 +1119,8 @@ export class TableControl {
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertRowAbove,
                 disabled: !canInsertAbove,
-                accelerator: canInsertAbove ? undefined : window.siyuan.languages.cancelMerged,
+                action: canInsertAbove ? undefined : "iconInfo",
+                actionLabel: canInsertAbove ? undefined : window.siyuan.languages.splitMergedCellTip,
                 click: () => {
                     this.insertRowAt(selection.node, selection.table, above);
                 },
@@ -1027,7 +1129,8 @@ export class TableControl {
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertRowBelow,
                 disabled: !canInsertBelow,
-                accelerator: canInsertBelow ? undefined : window.siyuan.languages.cancelMerged,
+                action: canInsertBelow ? undefined : "iconInfo",
+                actionLabel: canInsertBelow ? undefined : window.siyuan.languages.splitMergedCellTip,
                 click: () => {
                     this.insertRowAt(selection.node, selection.table, below);
                 },
@@ -1041,7 +1144,8 @@ export class TableControl {
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertColumnLeft,
                 disabled: !canInsertLeft,
-                accelerator: canInsertLeft ? undefined : window.siyuan.languages.cancelMerged,
+                action: canInsertLeft ? undefined : "iconInfo",
+                actionLabel: canInsertLeft ? undefined : window.siyuan.languages.splitMergedCellTip,
                 click: () => {
                     this.insertColumnAt(selection.node, selection.table, left);
                 },
@@ -1050,7 +1154,8 @@ export class TableControl {
                 icon: "iconAdd",
                 label: window.siyuan.languages.insertColumnRight,
                 disabled: !canInsertRight,
-                accelerator: canInsertRight ? undefined : window.siyuan.languages.cancelMerged,
+                action: canInsertRight ? undefined : "iconInfo",
+                actionLabel: canInsertRight ? undefined : window.siyuan.languages.splitMergedCellTip,
                 click: () => {
                     this.insertColumnAt(selection.node, selection.table, right);
                 },
@@ -1066,12 +1171,20 @@ export class TableControl {
         });
     }
 
+    private getTableHTMLWithCaret(node: HTMLElement) {
+        const marker = document.createElement("wbr");
+        getEditorRange(node).insertNode(marker);
+        const html = node.outerHTML;
+        marker.remove();
+        return html;
+    }
+
     private insertRowAt(node: HTMLElement, table: HTMLTableElement, index: number) {
         const grid = buildTableGrid(table);
         if (!this.canInsertAtBoundary(grid, "row", index)) {
             return;
         }
-        const oldHTML = node.outerHTML;
+        const oldHTML = this.getTableHTMLWithCaret(node);
         const row = document.createElement("tr");
         const headRowCount = table.tHead?.rows.length || 0;
         const tag = index < headRowCount || index === 0 ? "th" : "td";
@@ -1108,7 +1221,7 @@ export class TableControl {
         if (!this.canInsertAtBoundary(grid, "column", index)) {
             return;
         }
-        const oldHTML = node.outerHTML;
+        const oldHTML = this.getTableHTMLWithCaret(node);
         let focusCell: HTMLTableCellElement;
         Array.from(table.rows).forEach(row => {
             const cell = document.createElement(row.parentElement.tagName === "THEAD" ? "th" : "td");
@@ -1154,6 +1267,27 @@ export class TableControl {
         document.execCommand(command);
     }
 
+    private async paste() {
+        if (!this.selection?.activeCell.isConnected) {
+            return;
+        }
+        const cell = this.selection.activeCell;
+        const range = getEditorRange(cell);
+        range.selectNodeContents(cell);
+        range.collapse(true);
+        focusByRange(range);
+        if (document.queryCommandSupported("paste")) {
+            document.execCommand("paste");
+        } else {
+            try {
+                const text = await readClipboard();
+                paste(this.protyle, Object.assign(text, {target: cell}));
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    }
+
     private appendCellMenus(rectangle: boolean) {
         this.appendAlignmentMenus();
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -1178,29 +1312,19 @@ export class TableControl {
             checked: verticalAlign === "",
             click: () => this.setCellStyle("vertical-align", ""),
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         const cells = this.getSelectedCells();
-        const mergedCell = cells.length === 1 && (cells[0].rowSpan > 1 || cells[0].colSpan > 1);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: mergedCell ? window.siyuan.languages.cancelMerged : window.siyuan.languages.mergeCell,
-            disabled: !mergedCell && (!rectangle || cells.length < 2 || !this.isSelectionInOneSection()),
-            accelerator: !mergedCell && !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
-            click: () => mergedCell ? this.splitCell(cells[0]) : this.mergeCells(),
-        }).element);
         const rowSelection = getTableFullRowSelection(this.selection.table, cells);
         const columnSelection = getTableFullColumnSelection(this.selection.table, cells);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconClear",
-            label: window.siyuan.languages.clear,
-            click: () => this.clearCells(),
-        }).element);
+        if (rowSelection.indexes.length > 0 || columnSelection.indexes.length > 0) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        }
         if (rowSelection.indexes.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-row"],
                 disabled: rowSelection.merged,
-                accelerator: rowSelection.merged ? window.siyuan.languages.cancelMerged : undefined,
+                action: rowSelection.merged ? "iconInfo" : undefined,
+                actionLabel: rowSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
                     if (deleteTableRows(this.protyle, this.selection.node, rowSelection.indexes)) {
                         this.clear();
@@ -1213,12 +1337,24 @@ export class TableControl {
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-column"],
                 disabled: columnSelection.merged,
-                accelerator: columnSelection.merged ? window.siyuan.languages.cancelMerged : undefined,
+                action: columnSelection.merged ? "iconInfo" : undefined,
+                actionLabel: columnSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
                     if (deleteTableColumns(this.protyle, this.selection.node, columnSelection.indexes)) {
                         this.clear();
                     }
                 },
+            }).element);
+        }
+        const mergedCell = cells.length === 1 && (cells[0].rowSpan > 1 || cells[0].colSpan > 1);
+        if (mergedCell || cells.length > 1) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: mergedCell ? "iconTableCellsSplit" : "iconTableCellsMerge",
+                label: mergedCell ? window.siyuan.languages.cancelMerged : window.siyuan.languages.mergeCell,
+                disabled: !mergedCell && (!rectangle || !this.isSelectionInOneSection()),
+                accelerator: !mergedCell && !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
+                click: () => mergedCell ? this.splitCell(cells[0]) : this.mergeCells(),
             }).element);
         }
     }
@@ -1252,12 +1388,7 @@ export class TableControl {
     }
 
     private getCommonCellStyle(property: string) {
-        const cells = this.getSelectedCells();
-        if (cells.length === 0) {
-            return undefined;
-        }
-        const value = cells[0].style.getPropertyValue(property);
-        return cells.every(cell => cell.style.getPropertyValue(property) === value) ? value : undefined;
+        return getCommonTableCellStyle(this.getSelectedCells(), property);
     }
 
     private isSelectionInOneSection() {
@@ -1266,32 +1397,14 @@ export class TableControl {
     }
 
     private getBackgroundMenus(): IMenu[] {
-        const backgroundColor = this.getCommonCellStyle("background-color");
-        const colors = ["", ...Array.from({length: 13}, (_, index) => `var(--b3-font-background${index + 1})`)];
-        return colors.map((color, index) => ({
-            label: index === 0 ? window.siyuan.languages.default : `${window.siyuan.languages.colorPrimary} ${index}`,
-            iconHTML: `<span class="protyle-table-control__color" style="${color ? `background-color: ${color}` : ""}"></span>`,
-            checked: backgroundColor === color,
-            click: () => this.setCellStyle("background-color", color),
-        }));
+        return getTableCellBackgroundMenus(this.getSelectedCells(), color => this.setCellStyle("background-color", color));
     }
 
     private setCellStyle(property: string, value: string) {
         if (!this.selection) {
             return;
         }
-        const oldHTML = this.selection.node.outerHTML;
-        this.getSelectedCells().forEach(cell => {
-            if (value) {
-                cell.style.setProperty(property, value);
-            } else {
-                cell.style.removeProperty(property);
-                if (!cell.getAttribute("style")) {
-                    cell.removeAttribute("style");
-                }
-            }
-        });
-        updateTransaction(this.protyle, this.selection.node, oldHTML);
+        setTableCellStyle(this.protyle, this.selection.node, this.getSelectedCells(), property, value);
         this.scheduleRender();
     }
 
@@ -1523,6 +1636,7 @@ export class TableControl {
             return;
         }
         this.dragState.dragging = true;
+        this.updateDragPreview(event);
         const grid = this.selectionGrid || buildTableGrid(this.selection.table);
         const viewportRect = this.getTableViewportRect(this.selection.table);
         let cell: HTMLTableCellElement;
@@ -1559,7 +1673,13 @@ export class TableControl {
         }
         const after = this.dragState.mode === "row" ? event.clientY > rect.top + rect.height / 2 :
             event.clientX > rect.left + rect.width / 2;
-        this.dragState.target = (this.dragState.mode === "row" ? info.row : info.col) + (after ? 1 : 0);
+        const target = (this.dragState.mode === "row" ? info.row : info.col) + (after ? 1 : 0);
+        if (!this.getMoveTarget(target)) {
+            this.dragState.target = -1;
+            this.dropIndicator.classList.add("fn__none");
+            return;
+        }
+        this.dragState.target = target;
         this.dropIndicator.classList.remove("fn__none");
         if (this.dragState.mode === "row") {
             this.dropIndicator.classList.add("protyle-table-control__drop--row");
@@ -1580,11 +1700,66 @@ export class TableControl {
         }
     }
 
+    private updateDragPreview(event: PointerEvent) {
+        const state = this.dragState;
+        if (!state || !this.selection) {
+            return;
+        }
+        const viewportRect = this.getTableSelectionViewportRect(this.selection.table);
+        const start = state.mode === "column" ? viewportRect.left : viewportRect.top;
+        const end = state.mode === "column" ? viewportRect.right : viewportRect.bottom;
+        const minCenter = start + state.handleSize / 2;
+        const maxCenter = end - state.handleSize / 2;
+        const pointerOffset = state.mode === "column" ? event.clientX - state.startX : event.clientY - state.startY;
+        const targetCenter = state.handleCenter + pointerOffset;
+        const center = minCenter <= maxCenter ? Math.min(Math.max(targetCenter, minCenter), maxCenter) :
+            (start + end) / 2;
+        const offsetX = state.mode === "column" ? center - state.handleCenter : 0;
+        const offsetY = state.mode === "row" ? center - state.handleCenter : 0;
+        const translate = `${Math.round(offsetX)}px ${Math.round(offsetY)}px`;
+        const handle = state.mode === "row" ? this.rowHandle : this.columnHandle;
+        handle.style.translate = translate;
+        this.cellHandle.classList.add("fn__none");
+        this.selectionElements.slice(0, this.selectionElementIndex).forEach(item => {
+            item.classList.add("protyle-table-control__selection--dragging");
+        });
+    }
+
+    private clearDragPreview() {
+        this.rowHandle.style.removeProperty("translate");
+        this.columnHandle.style.removeProperty("translate");
+        this.selectionElements.forEach(item => {
+            item.classList.remove("protyle-table-control__selection--dragging");
+        });
+    }
+
+    private getMoveTarget(target: number) {
+        if (!this.selection || this.selection.mode === "cell") {
+            return;
+        }
+        const selected = Array.from(this.selection.indexes).sort((a, b) => a - b);
+        if (this.selection.mode === "row" && selected.length > 1 && (selected.includes(0) || target === 0)) {
+            return;
+        }
+        const adjustedTarget = target - selected.filter(index => index < target).length;
+        const itemCount = this.selection.mode === "row" ? this.selection.table.rows.length :
+            this.selection.table.rows[0]?.cells.length || 0;
+        const indexes = Array.from({length: itemCount}, (_, index) => index);
+        const moving = indexes.filter(index => selected.includes(index));
+        const remaining = indexes.filter(index => !selected.includes(index));
+        remaining.splice(Math.max(0, adjustedTarget), 0, ...moving);
+        if (remaining.every((index, position) => index === position)) {
+            return;
+        }
+        return {selected, adjustedTarget};
+    }
+
     private handleDragEnd(event: PointerEvent) {
         if (!this.dragState) {
             return;
         }
         const state = this.dragState;
+        this.clearDragPreview();
         this.dropIndicator.classList.add("fn__none");
         if (state.dragging && state.target >= 0) {
             this.clearJoinedControlTable();
@@ -1597,14 +1772,11 @@ export class TableControl {
     }
 
     private moveSelection(target: number) {
-        if (!this.selection || this.selection.mode === "cell") {
+        const moveTarget = this.getMoveTarget(target);
+        if (!moveTarget || !this.selection) {
             return;
         }
-        const selected = Array.from(this.selection.indexes).sort((a, b) => a - b);
-        if (this.selection.mode === "row" && selected.length > 1 && (selected.includes(0) || target === 0)) {
-            return;
-        }
-        const adjustedTarget = target - selected.filter(index => index < target).length;
+        const {selected, adjustedTarget} = moveTarget;
         const oldHTML = this.selection.node.outerHTML;
         if (this.selection.mode === "row") {
             const rows = Array.from(this.selection.table.rows);

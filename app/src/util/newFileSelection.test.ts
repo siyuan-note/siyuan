@@ -1,6 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    createNewFileSelectionContext,
     isNewFileSelectionValid,
     isRangeInEditor,
     isSameRange,
@@ -75,6 +76,7 @@ const createRange = (start: TestText, end: TestText, text = "selected") => ({
     endContainer: asNode(end),
     endOffset: text.length,
     toString: () => text,
+    cloneRange: () => createRange(start, end, text),
 }) as unknown as Range;
 
 const createFixture = () => {
@@ -103,6 +105,20 @@ const createFixture = () => {
 };
 
 describe("new document selection context", () => {
+    it("captures the selected document and block boundaries", () => {
+        const {protyle, range} = createFixture();
+
+        const context = createNewFileSelectionContext(protyle, range);
+
+        assert.notEqual(context?.range, range);
+        assert.equal(context?.notebookId, "notebook");
+        assert.equal(context?.rootID, "root");
+        assert.equal(context?.path, "/root.sy");
+        assert.equal(context?.startBlockID, "start");
+        assert.equal(context?.endBlockID, "end");
+        assert.equal(context?.text, "selected");
+    });
+
     it("keeps a connected selection in the original document valid", () => {
         const {context, protyle} = createFixture();
 

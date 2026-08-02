@@ -328,8 +328,10 @@ export class MenuItem {
             }
             if (options.action) {
                 const actionLabel = options.actionLabel ?
-                    ` aria-label="${escapeAttr(options.actionLabel)}" data-position="west"` : "";
-                html += `<svg class="b3-menu__action${options.action === "iconCloseRound" ? " b3-menu__action--close" : ""}${options.actionLabel ? " b3-menu__action--show ariaLabel" : ""}"${actionLabel}><use xlink:href="#${options.action}"></use></svg>`;
+                    ` aria-label="${escapeAttr(options.actionLabel)}"` : "";
+                const actionClass = options.action === "iconCloseRound" ? " b3-menu__action--close" :
+                    options.action === "iconInfo" ? " b3-menu__action--hint" : "";
+                html += `<svg class="b3-menu__action${actionClass}${options.actionLabel ? " b3-menu__action--show ariaLabel" : ""}"${actionLabel}><use xlink:href="#${options.action}"></use></svg>`;
             }
             if (options.checked) {
                 html += '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>';

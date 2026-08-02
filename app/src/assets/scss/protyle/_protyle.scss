@@ -851,6 +851,10 @@ table + .protyle-action__table {
     background-color: var(--b3-theme-primary-lightest);
     border: 1px solid var(--b3-theme-primary);
     pointer-events: none;
+
+    &--dragging {
+      opacity: 0;
+    }
   }
 
   &__drop {

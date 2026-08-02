@@ -248,6 +248,8 @@ export class TableControl {
     }
 
     public clear() {
+        this.clearDragPreview();
+        this.dragState = undefined;
         this.selection = undefined;
         this.selectionGrid = undefined;
         this.selectedCells = [];
@@ -371,7 +373,7 @@ export class TableControl {
     }
 
     private handleTablePointerMove(event: PointerEvent, fromControl: boolean) {
-        if (event.buttons !== 0 && !this.dragState) {
+        if (event.buttons !== 0) {
             return;
         }
         const targetCell = getCell(event.target);
@@ -835,6 +837,8 @@ export class TableControl {
         selectionElement.style.top = `${visibleRect.top}px`;
         selectionElement.style.width = `${visibleRect.width}px`;
         selectionElement.style.height = `${visibleRect.height}px`;
+        selectionElement.classList.toggle("protyle-table-control__selection--dragging",
+            !!this.dragState?.dragging);
     }
 
     private render() {
@@ -1607,6 +1611,7 @@ export class TableControl {
             return;
         }
         this.dragState.dragging = true;
+        this.updateDragPreview(event);
         const grid = this.selectionGrid || buildTableGrid(this.selection.table);
         const viewportRect = this.getTableViewportRect(this.selection.table);
         let cell: HTMLTableCellElement;
@@ -1643,7 +1648,13 @@ export class TableControl {
         }
         const after = this.dragState.mode === "row" ? event.clientY > rect.top + rect.height / 2 :
             event.clientX > rect.left + rect.width / 2;
-        this.dragState.target = (this.dragState.mode === "row" ? info.row : info.col) + (after ? 1 : 0);
+        const target = (this.dragState.mode === "row" ? info.row : info.col) + (after ? 1 : 0);
+        if (!this.getMoveTarget(target)) {
+            this.dragState.target = -1;
+            this.dropIndicator.classList.add("fn__none");
+            return;
+        }
+        this.dragState.target = target;
         this.dropIndicator.classList.remove("fn__none");
         if (this.dragState.mode === "row") {
             this.dropIndicator.classList.add("protyle-table-control__drop--row");
@@ -1664,11 +1675,56 @@ export class TableControl {
         }
     }
 
+    private updateDragPreview(event: PointerEvent) {
+        const state = this.dragState;
+        if (!state) {
+            return;
+        }
+        const offsetX = state.mode === "column" ? event.clientX - state.startX : 0;
+        const offsetY = state.mode === "row" ? event.clientY - state.startY : 0;
+        const translate = `${Math.round(offsetX)}px ${Math.round(offsetY)}px`;
+        const handle = state.mode === "row" ? this.rowHandle : this.columnHandle;
+        handle.style.translate = translate;
+        this.selectionElements.slice(0, this.selectionElementIndex).forEach(item => {
+            item.classList.add("protyle-table-control__selection--dragging");
+        });
+    }
+
+    private clearDragPreview() {
+        this.rowHandle.style.removeProperty("translate");
+        this.columnHandle.style.removeProperty("translate");
+        this.selectionElements.forEach(item => {
+            item.classList.remove("protyle-table-control__selection--dragging");
+        });
+    }
+
+    private getMoveTarget(target: number) {
+        if (!this.selection || this.selection.mode === "cell") {
+            return;
+        }
+        const selected = Array.from(this.selection.indexes).sort((a, b) => a - b);
+        if (this.selection.mode === "row" && selected.length > 1 && (selected.includes(0) || target === 0)) {
+            return;
+        }
+        const adjustedTarget = target - selected.filter(index => index < target).length;
+        const itemCount = this.selection.mode === "row" ? this.selection.table.rows.length :
+            this.selection.table.rows[0]?.cells.length || 0;
+        const indexes = Array.from({length: itemCount}, (_, index) => index);
+        const moving = indexes.filter(index => selected.includes(index));
+        const remaining = indexes.filter(index => !selected.includes(index));
+        remaining.splice(Math.max(0, adjustedTarget), 0, ...moving);
+        if (remaining.every((index, position) => index === position)) {
+            return;
+        }
+        return {selected, adjustedTarget};
+    }
+
     private handleDragEnd(event: PointerEvent) {
         if (!this.dragState) {
             return;
         }
         const state = this.dragState;
+        this.clearDragPreview();
         this.dropIndicator.classList.add("fn__none");
         if (state.dragging && state.target >= 0) {
             this.clearJoinedControlTable();
@@ -1681,14 +1737,11 @@ export class TableControl {
     }
 
     private moveSelection(target: number) {
-        if (!this.selection || this.selection.mode === "cell") {
+        const moveTarget = this.getMoveTarget(target);
+        if (!moveTarget || !this.selection) {
             return;
         }
-        const selected = Array.from(this.selection.indexes).sort((a, b) => a - b);
-        if (this.selection.mode === "row" && selected.length > 1 && (selected.includes(0) || target === 0)) {
-            return;
-        }
-        const adjustedTarget = target - selected.filter(index => index < target).length;
+        const {selected, adjustedTarget} = moveTarget;
         const oldHTML = this.selection.node.outerHTML;
         if (this.selection.mode === "row") {
             const rows = Array.from(this.selection.table.rows);

@@ -943,10 +943,6 @@
 
 .protyle-wysiwyg:not([contenteditable]),
 .protyle-wysiwyg[data-readonly="true"] {
-  caption {
-    cursor: default;
-  }
-
   .img:hover .protyle-icons {
     display: none;
   }

@@ -39,6 +39,7 @@ import {
     renderWelcomeHTML
 } from "./AgentMessageRenderer";
 import {getAgentReasoningEffortOptions} from "./AgentReasoning";
+import {mountGroupedModelPicker, type IGroupedModelPicker} from "../../../config/tabs/ai/aiProviderUi";
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -148,7 +149,8 @@ export class AgentChat extends Model {
     private pendingConfirms: SessionEntry[] = [];
     private renderedToolNames: Record<string, boolean> = {};
     private hasInterveningCard = false;
-    private modelSelect: HTMLSelectElement;
+    private modelSelect: HTMLButtonElement;
+    private groupedModelPicker?: IGroupedModelPicker;
     private selectedModel: string;
     private modelOptions: Array<{ id: string; name: string }> = [];
     // 推理努力度（iconBrain + 原生 select），仅实例记忆，刷新后回到默认。
@@ -279,7 +281,7 @@ export class AgentChat extends Model {
             '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
             "</svg>" +
             "</span>" +
-            '<select class="b3-select b3-select--noborder" tabindex="0"></select>' +
+            '<button class="b3-select b3-select--noborder" data-type="groupedModelPicker" data-group="agent" data-model-id="" data-menu="true" type="button"></button>' +
             '<div class="b3-form__icon ariaLabel" aria-label="' + (L.reasoningEffortTooltip || "Reasoning effort") + '"><svg class="b3-form__icon-icon"><use xlink:href="#iconBrain"></use></svg><select class="b3-select b3-select--noborder b3-form__icon-input" tabindex="0"></select></div>' +
             "</div>" +
             '<button class="agent-chat__send b3-button b3-button--icon b3-button--text ariaLabel" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
@@ -297,7 +299,7 @@ export class AgentChat extends Model {
         this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
-        this.modelSelect = panel.querySelector(".b3-select") as HTMLSelectElement;
+        this.modelSelect = panel.querySelector('[data-type="groupedModelPicker"]') as HTMLButtonElement;
         this.reasoningEffortSelect = panel.querySelector(".b3-form__icon-input") as HTMLSelectElement;
         this.initReasoningEffortSelect();
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
@@ -386,34 +388,35 @@ export class AgentChat extends Model {
 
     private initModelSelect() {
         this.refreshModelOptions();
-        // 选中模型变更：原生 select 的 change 事件，无需自定义菜单逻辑。
-        this.modelSelect.addEventListener("change", () => {
-            const nextModel = this.modelSelect.value;
-            const previousModel = this.selectedModel;
-            if (!nextModel || nextModel === previousModel) {
-                return;
-            }
-            if (!hasAgentModelSpecificContext(this.entries)) {
-                this.selectedModel = nextModel;
-                return;
-            }
-            const sessionID = this.sessionId;
-            this.modelSelect.value = previousModel;
-            confirmDialog(window.siyuan.languages.confirm,
-                window.siyuan.languages.agentModelSwitchWarning,
-                () => {
-                    if (this.sessionId !== sessionID || this.selectedModel !== previousModel ||
-                        !this.modelOptions.some(option => option.id === nextModel)) {
-                        this.updateModelLabel();
-                        return;
-                    }
+        this.groupedModelPicker = mountGroupedModelPicker(this.parent.panelElement, "agent", {
+            menuId: "agent-chat-model-picker",
+            getSelectedModelId: () => this.selectedModel,
+            onSelect: (nextModel) => {
+                const previousModel = this.selectedModel;
+                if (!nextModel || nextModel === previousModel) {
+                    return;
+                }
+                if (!hasAgentModelSpecificContext(this.entries)) {
                     this.selectedModel = nextModel;
-                    this.modelSelect.value = nextModel;
-                }, () => {
-                    this.modelSelect.value = this.selectedModel;
-                });
+                    return;
+                }
+                const sessionID = this.sessionId;
+                confirmDialog(window.siyuan.languages.confirm,
+                    window.siyuan.languages.agentModelSwitchWarning,
+                    () => {
+                        if (this.sessionId !== sessionID || this.selectedModel !== previousModel ||
+                            !this.modelOptions.some(option => option.id === nextModel)) {
+                            this.updateModelLabel();
+                            return;
+                        }
+                        this.selectedModel = nextModel;
+                        this.updateModelLabel();
+                    }, () => {
+                        this.updateModelLabel();
+                    });
+            },
         });
-        // 无模型时拦截下拉展开，改为打开设置-人工智能面板（动态 import 避免循环依赖）。
+        // 无模型时拦截下拉展开，改为打开设置 - 人工智能面板（动态 import 避免循环依赖）。
         this.modelSelect.addEventListener("mousedown", (e: MouseEvent) => {
             if (this.modelOptions.length > 0) {
                 return;
@@ -472,28 +475,14 @@ export class AgentChat extends Model {
     }
 
     private updateModelLabel() {
-        // 重建 <option> 列表。无可用模型时插入一个占位项，点击 select 打开设置-人工智能。
-        let html = "";
-        if (this.modelOptions.length === 0) {
-            const placeholder = window.siyuan.languages.noModelConfigured || "No model configured";
-            html = '<option value="" selected>' + escapeHtml(placeholder) + "</option>";
-            this.modelSelect.innerHTML = html;
-            this.modelSelect.disabled = true;
-            return;
-        }
-        this.modelSelect.disabled = false;
-        for (const o of this.modelOptions) {
-            html += '<option value="' + escapeHtml(o.id) + '">' + escapeHtml(o.name) + "</option>";
-        }
-        this.modelSelect.innerHTML = html;
-        this.modelSelect.value = this.selectedModel;
+        this.groupedModelPicker?.update();
     }
 
     private getSelectedModel(): string {
         return this.selectedModel;
     }
 
-    // 初始化思考强度原生 select：提供各供应商使用的标准档位并绑定 change，模式与 initModelSelect 一致。
+    // 初始化思考强度原生 select：提供各供应商使用的标准档位，选择结果仅在当前实例中生效。
     private initReasoningEffortSelect() {
         const options = getAgentReasoningEffortOptions(window.siyuan.languages);
         this.reasoningEffortSelect.innerHTML = options
@@ -519,7 +508,7 @@ export class AgentChat extends Model {
         const hasModel = this.modelOptions.length > 0;
         this.messagesContainer.innerHTML = renderWelcomeHTML(hasModel);
         if (!hasModel) {
-            // 无模型：绑定「去配置」按钮，点击打开设置-人工智能面板。
+            // 无模型：绑定「去配置」按钮，点击打开设置 - 人工智能面板。
             const goBtn = this.messagesContainer.querySelector(".agent-welcome__go-setting");
             if (goBtn) {
                 goBtn.addEventListener("click", () => {

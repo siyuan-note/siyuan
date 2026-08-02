@@ -7,6 +7,17 @@ import {Menu} from "../../../plugin/Menu";
 import {upDownHint} from "../../../util/upDownHint";
 
 type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
+type GroupedModelPickerElement = HTMLInputElement | HTMLButtonElement;
+
+export interface IGroupedModelPickerOptions {
+    menuId?: string;
+    getSelectedModelId?: () => string;
+    onSelect?: (modelId: string) => void;
+}
+
+export interface IGroupedModelPicker {
+    update: () => void;
+}
 
 interface IProviderPreset {
     id: string;
@@ -788,37 +799,56 @@ const getModelPickerLabel = (modelId: string) => {
     return window.siyuan.languages.noModelConfigured;
 };
 
-const updateGroupedModelPicker = (input: HTMLInputElement, group: ModelPickerGroup) => {
-    const selectedModelId = getSelectedModelId(group);
-    input.dataset.modelId = selectedModelId;
-    input.value = getModelPickerLabel(selectedModelId);
-    input.disabled = getEnabledModelGroups().length === 0;
+const setGroupedModelPickerLabel = (element: GroupedModelPickerElement, label: string) => {
+    if (element instanceof HTMLInputElement) {
+        element.value = label;
+    } else {
+        element.textContent = label;
+    }
 };
 
-const getGroupedModelMenuId = (group: ModelPickerGroup) => `ai-model-picker-${group}`;
+const updateGroupedModelPicker = (element: GroupedModelPickerElement, selectedModelId: string) => {
+    element.dataset.modelId = selectedModelId;
+    setGroupedModelPickerLabel(element, getModelPickerLabel(selectedModelId));
+    element.disabled = getEnabledModelGroups().length === 0;
+};
 
-const isGroupedModelMenuOpen = (group: ModelPickerGroup) => {
+const getGroupedModelMenuId = (group: ModelPickerGroup, options?: IGroupedModelPickerOptions) =>
+    options?.menuId || `ai-model-picker-${group}`;
+
+const isGroupedModelMenuOpen = (menuId: string) => {
     const menuElement = window.siyuan.menus.menu.element;
     return !menuElement.classList.contains("fn__none") &&
-        menuElement.getAttribute("data-name") === getGroupedModelMenuId(group);
+        menuElement.getAttribute("data-name") === menuId;
 };
 
-const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group: ModelPickerGroup) => {
-    if (input.disabled) {
+const openGroupedModelMenu = (
+    root: HTMLElement,
+    element: GroupedModelPickerElement,
+    group: ModelPickerGroup,
+    options: IGroupedModelPickerOptions,
+    update: () => void,
+) => {
+    if (element.disabled) {
         return;
     }
     const modelGroups = getEnabledModelGroups();
-    const selectedModelId = input.dataset.modelId || "";
-    const menu = new Menu(getGroupedModelMenuId(group));
+    const selectedModelId = options.getSelectedModelId ? options.getSelectedModelId() : getSelectedModelId(group);
+    const menu = new Menu(getGroupedModelMenuId(group, options));
     if (menu.isOpen) {
         return;
     }
     const selectModel = (modelId: string, label: string) => {
-        if (modelId === input.dataset.modelId) {
+        if (modelId === selectedModelId) {
             return;
         }
-        input.dataset.modelId = modelId;
-        input.value = label;
+        if (options.onSelect) {
+            options.onSelect(modelId);
+            update();
+            return;
+        }
+        element.dataset.modelId = modelId;
+        setGroupedModelPickerLabel(element, label);
         aiConfigApi.patch(`${group}.modelId`, modelId, () => syncGroupedModelPickers(root));
     };
     const optional = group === "imageGeneration";
@@ -850,7 +880,7 @@ const openGroupedModelMenu = (root: HTMLElement, input: HTMLInputElement, group:
             });
         });
     });
-    const rect = input.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
     menu.element.style.minWidth = `${rect.width}px`;
     menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
 };
@@ -861,7 +891,7 @@ const syncGroupedModelPickers = (root: HTMLElement) => {
         if (!input) {
             return;
         }
-        updateGroupedModelPicker(input, group);
+        updateGroupedModelPicker(input, getSelectedModelId(group));
     });
 };
 
@@ -884,20 +914,32 @@ export const genGroupedModelPickerHtml = (group: ModelPickerGroup): string => {
 </div>`;
 };
 
-export const mountGroupedModelPicker = (root: HTMLElement, group: ModelPickerGroup) => {
-    const input = root.querySelector<HTMLInputElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
-    if (!input) {
+export const mountGroupedModelPicker = (
+    root: HTMLElement,
+    group: ModelPickerGroup,
+    options: IGroupedModelPickerOptions = {},
+): IGroupedModelPicker | undefined => {
+    const element = root.querySelector<GroupedModelPickerElement>(`[data-type="groupedModelPicker"][data-group="${group}"]`);
+    if (!element) {
         return;
     }
-    input.addEventListener("click", () => openGroupedModelMenu(root, input, group));
-    input.addEventListener("keydown", (event) => {
+    const menuId = getGroupedModelMenuId(group, options);
+    const update = () => updateGroupedModelPicker(
+        element,
+        options.getSelectedModelId ? options.getSelectedModelId() : getSelectedModelId(group),
+    );
+    const openMenu = () => openGroupedModelMenu(root, element, group, options, update);
+    update();
+    element.addEventListener("click", openMenu);
+    element.addEventListener("keydown", (event: KeyboardEvent) => {
         if (!["Enter", " ", "ArrowDown"].includes(event.key)) {
             return;
         }
-        if (isGroupedModelMenuOpen(group)) {
+        if (isGroupedModelMenuOpen(menuId)) {
             return;
         }
         event.preventDefault();
-        openGroupedModelMenu(root, input, group);
+        openMenu();
     });
+    return {update};
 };

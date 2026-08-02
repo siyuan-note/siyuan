@@ -305,6 +305,28 @@ const ensureAgentChatDock = (layout: Pick<Config.IUiLayout, "left" | "right" | "
     }
 };
 
+const ensureCalendarDock = (layout: Pick<Config.IUiLayout, "left" | "right" | "bottom">) => {
+    for (const key of DOCK_KEYS) {
+        if (layout[key]?.data.some(section => section?.some(item => item?.type === "calendar"))) {
+            return;
+        }
+    }
+    for (const key of DOCK_KEYS) {
+        const sourceSections = Constants.SIYUAN_EMPTY_LAYOUT[key]?.data;
+        const targetSections = layout[key]?.data;
+        if (!sourceSections || !targetSections) {
+            continue;
+        }
+        for (let sectionIndex = 0; sectionIndex < sourceSections.length; sectionIndex++) {
+            const source = sourceSections[sectionIndex]?.find(item => item?.type === "calendar");
+            if (source && targetSections[sectionIndex]) {
+                targetSections[sectionIndex].push({...source, show: false});
+                return;
+            }
+        }
+    }
+};
+
 const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
     dockItem.forEach((existSubItem, index) => {
         if (window.siyuan.isPublish && (existSubItem.type === "inbox" || existSubItem.type === "agentChat")) {
@@ -315,12 +337,15 @@ const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
             const km = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId];
             existSubItem.hotkey = km ? km.custom : "";
+        } else if (existSubItem.type === "calendar") {
+            existSubItem.title = window.siyuan.languages.calendar || "Calendar";
         }
     });
 };
 
 const JSONToDock = (json: any, app: App) => {
     ensureAgentChatDock(json);
+    ensureCalendarDock(json);
     json.left.data.forEach((existItem: Config.IUILayoutDockTab[]) => {
         initInternalDock(existItem);
     });

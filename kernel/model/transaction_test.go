@@ -311,6 +311,8 @@ func TestCalendarItemJournalClearsOnlyAfterIndexFlush(t *testing.T) {
 // TestCollectConsecutiveUpdateAttrViewCellOpsExecutesEachCellOnce 回归测试：
 // 连续（同 AvID）的 updateAttrViewCell 操作必须被收集为同一个批量分组，不同 AvID 或
 // 非单元格操作必须中断分组；按分组的长度推进遍历下标后，每个单元格操作恰好执行一次。
+// 夹具中的三个连续 av1 单元格必须同属第一个分组，其后依次为单独执行的
+// sortAttrViewRow、av2 单元格以及再次出现的 av1 单元格。
 func TestCollectConsecutiveUpdateAttrViewCellOpsExecutesEachCellOnce(t *testing.T) {
 	ops := []*Operation{
 		{Action: "updateAttrViewCell", AvID: "av1", KeyID: "k1", RowID: "r1"},
@@ -335,26 +337,20 @@ func TestCollectConsecutiveUpdateAttrViewCellOpsExecutesEachCellOnce(t *testing.
 		}
 	}
 	for _, op := range ops {
-		if "updateAttrViewCell" != op.Action {
-			continue
-		}
 		if 1 != seen[op] {
-			t.Fatalf("cell operation %s/%s executed %d times, want exactly once", op.KeyID, op.RowID, seen[op])
+			t.Fatalf("operation %s/%s/%s executed %d times, want exactly once", op.Action, op.KeyID, op.RowID, seen[op])
 		}
 	}
-	if 2 != len(groups[0]) {
-		t.Fatalf("first group must batch the two av1 cells, got %d", len(groups[0]))
+	if 3 != len(groups[0]) || "k1" != groups[0][0].KeyID || "k3" != groups[0][2].KeyID {
+		t.Fatalf("first group must batch the three consecutive av1 cells, got %d", len(groups[0]))
 	}
-	if 1 != len(groups[1]) || "r2" != groups[1][0].RowID {
-		t.Fatal("same-AvID but non-consecutive cell must form its own single group")
-	}
-	if "sortAttrViewRow" != groups[2][0].Action {
+	if 1 != len(groups[1]) || "sortAttrViewRow" != groups[1][0].Action {
 		t.Fatal("non-cell operation must break the batch and execute singly")
 	}
-	if 1 != len(groups[3]) || "av2" != groups[3][0].AvID {
+	if 1 != len(groups[2]) || "av2" != groups[2][0].AvID {
 		t.Fatal("different AvID must break the batch")
 	}
-	if 1 != len(groups[4]) || "r3" != groups[4][0].RowID {
+	if 1 != len(groups[3]) || "r3" != groups[3][0].RowID {
 		t.Fatal("later same-AvID cell must form its own group")
 	}
 }

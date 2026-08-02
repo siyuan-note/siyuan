@@ -155,7 +155,7 @@ export class TableControl {
 <button type="button" class="protyle-table-control__handle protyle-table-control__handle--column b3-tooltips b3-tooltips__s fn__none" data-type="column" aria-label="${window.siyuan.languages.column}">
     <svg><use xlink:href="#iconDrag"></use></svg>
 </button>
-<button type="button" class="protyle-table-control__handle protyle-table-control__handle--cell b3-tooltips b3-tooltips__w fn__none" data-type="cell" aria-label="${window.siyuan.languages.more}">
+<button type="button" class="protyle-table-control__handle protyle-table-control__handle--cell b3-tooltips b3-tooltips__n fn__none" data-type="cell" aria-label="${window.siyuan.languages.more}">
     <svg><use xlink:href="#iconMore"></use></svg>
 </button>
 <button type="button" class="protyle-table-control__add protyle-table-control__add--row b3-tooltips b3-tooltips__n fn__none" data-type="add-row" aria-label="${window.siyuan.languages.insertRowBelow}">
@@ -844,7 +844,7 @@ export class TableControl {
             }
             if (this.hoverType === "cell" && visibleCellRect.width > 0 && visibleCellRect.height > 0) {
                 this.cellHandle.classList.remove("fn__none");
-                this.setPosition(this.cellHandle, visibleCellRect.right - 5, visibleCellRect.top + 5);
+                this.setPosition(this.cellHandle, visibleCellRect.right - 3, visibleCellRect.top + 3);
             }
             if (this.hoverType === "add-row" && viewportRect.width > 0 &&
                 tableRect.bottom <= viewportRect.bottom + 1 &&

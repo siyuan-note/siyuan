@@ -162,13 +162,13 @@ export const insertEmptyListItem = async (protyle: IProtyle, listItemElement: HT
 
     const newListItemElement = genListItemElement(listItemElement, 0, true);
     const id = newListItemElement.getAttribute("data-node-id");
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
     if (listElement.classList.contains("protyle-wysiwyg")) {
         if (insertingFocusedListItems.has(protyle)) {
             return;
         }
         insertingFocusedListItems.add(protyle);
         try {
-            const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
             const orderOperations = await getFocusedOrderedListUpdates(protyle, listItemElement);
             if (!listItemElement.isConnected) {
                 return;
@@ -195,7 +195,7 @@ export const insertEmptyListItem = async (protyle: IProtyle, listItemElement: HT
     const oldHTML = listElement.outerHTML;
     listItemElement.insertAdjacentElement("afterend", newListItemElement);
     updateListOrder(listElement);
-    updateTransaction(protyle, listElement, oldHTML);
+    updateTransaction(protyle, listElement, oldHTML, undoFocusContext);
     focusByWbr(newListItemElement, range);
     scrollCenter(protyle, newListItemElement);
 };

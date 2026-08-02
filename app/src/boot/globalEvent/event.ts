@@ -84,8 +84,10 @@ export const initWindowEvent = (app: App) => {
     let scrollTarget: HTMLElement | false;
     window.addEventListener("dragstart", clearDragTipGhost, true);
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
-        if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
-            if (!hasClosestByClassName(event.target, "layout-tab-bar")) {
+        const isDocumentTab = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENT_TAB);
+        const tabBarElement = hasClosestByClassName(event.target, "layout-tab-bar");
+        if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB) && (!isDocumentTab || tabBarElement)) {
+            if (!tabBarElement) {
                 stopScrollAnimation();
             }
             return;
@@ -102,7 +104,7 @@ export const initWindowEvent = (app: App) => {
         if (event.dataTransfer.types.includes("text/plain")) {
             return;
         }
-        // 拖拽标题/列表项块标时，按浮窗模型控制文档树所在浮动 dock 的显隐：
+        // 拖拽文档页签或标题/列表项块标时，按浮窗模型控制文档树所在浮动 dock 的显隐：
         // 鼠标在边缘触发区或面板内则展开，离开则收起 https://github.com/siyuan-note/siyuan/issues/18043
         if (!isWindow() &&
             (!window.siyuan.layout.leftDock.pin || !window.siyuan.layout.rightDock.pin || !window.siyuan.layout.bottomDock.pin)) {
@@ -117,7 +119,7 @@ export const initWindowEvent = (app: App) => {
                         break;
                     }
                 }
-                if (["nodeheading", "nodelistitem"].includes(gutterBlockType)) {
+                if (isDocumentTab || ["nodeheading", "nodelistitem"].includes(gutterBlockType)) {
                     const statusHeight = document.getElementById("status")?.clientHeight || 0;
                     const toolbarHeight = document.getElementById("toolbar")?.clientHeight || 0;
                     const inYRange = event.clientY > toolbarHeight && event.clientY < window.innerHeight - statusHeight;
@@ -145,6 +147,10 @@ export const initWindowEvent = (app: App) => {
         }
         const fileElement = hasClosestByClassName(event.target, "sy__file");
         const protyleElement = hasClosestByClassName(event.target, "protyle", true);
+        if (isDocumentTab && !fileElement) {
+            stopScrollAnimation();
+            return;
+        }
         // 光标不在编辑器也不在文档树内时，隐藏拖拽提示（避免卡在无效区域）
         if (!fileElement && !protyleElement) {
             document.querySelector(".drag-tip")?.remove();

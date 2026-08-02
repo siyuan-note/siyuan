@@ -1,7 +1,7 @@
 import {escapeAriaLabel, escapeHtml, escapeLessThans} from "../../util/escape";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
-import {setPanelFocus} from "../util";
+import {getInstanceById, setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
@@ -42,7 +42,10 @@ import {
     collectExpandedDocIDs,
     findMovedFileTreeItem,
     getFileTreeChildList,
+    IDocumentTabDragData,
     IFileTreeMove,
+    insertDocumentSortPath,
+    parseDocumentTabDragData,
     restoreMovedExpandedDocItems,
     updateMovedSubtree
 } from "../../util/fileTreeMove";
@@ -528,7 +531,9 @@ export class Files extends Model {
             /// #endif
         });
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
-            if (window.siyuan.config.readonly || !window.siyuan.dragElement || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
+            const isDocumentTab = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENT_TAB);
+            if (window.siyuan.config.readonly || !window.siyuan.dragElement ||
+                (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB) && !isDocumentTab)) {
                 event.preventDefault();
                 return;
             }
@@ -573,14 +578,19 @@ export class Files extends Model {
                             event.preventDefault();
                             return;
                         }
-                    } else if (liElement.classList.contains("b3-list-item--focus")) {
+                    } else if (isDocumentTab && liElement.dataset.nodeId ===
+                        window.siyuan.dragElement.dataset.dragDocumentId) {
+                        hideDragTip();
+                        event.preventDefault();
+                        return;
+                    } else if (!isDocumentTab && liElement.classList.contains("b3-list-item--focus")) {
                         // 选中的文档不能拖拽到自己上，但允许标题拖拽到文档树的选中文档上 https://github.com/siyuan-note/siyuan/issues/6552
                         hideDragTip();
                         event.preventDefault();
                         return;
                     }
 
-                    dragOverLastObj.sourceOnlyRoot = gutterType ? false : true;
+                    dragOverLastObj.sourceOnlyRoot = gutterType || isDocumentTab ? false : true;
                     if (dragOverLastObj.sourceOnlyRoot) {
                         const focusItems = this.element.querySelectorAll(".b3-list-item--focus");
                         for (let i = 0; i < focusItems.length; i++) {
@@ -665,6 +675,7 @@ export class Files extends Model {
                     }
                 }
                 event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
             });
             event.preventDefault();
         });
@@ -686,7 +697,11 @@ export class Files extends Model {
             counter = 0;
             hideDragTip();
             window.siyuan.dragTitle = "";
-            const newElement = this.element.querySelector(".dragover, .dragover__bottom, .dragover__top");
+            const documentTabData = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENT_TAB) ?
+                parseDocumentTabDragData(event.dataTransfer.getData(Constants.SIYUAN_DROP_DOCUMENT_TAB)) : undefined;
+            const sourceTab = documentTabData ? getInstanceById(documentTabData.tabId) as Tab : undefined;
+            sourceTab?.restoreHeadElementOrder();
+            const newElement = this.element.querySelector<HTMLElement>(".dragover, .dragover__bottom, .dragover__top");
             if (!newElement) {
                 return;
             }
@@ -697,6 +712,13 @@ export class Files extends Model {
             const oldScrollTop = this.element.scrollTop;
             const toURL = newUlElement.getAttribute("data-url");
             const toPath = newElement.getAttribute("data-path");
+            if (documentTabData) {
+                event.preventDefault();
+                event.stopPropagation();
+                window.siyuan.dragElement = undefined;
+                await this.dropDocumentTab(documentTabData, newElement, newUlElement, oldScrollTop);
+                return;
+            }
             let gutterType = "";
             for (const item of event.dataTransfer.items) {
                 if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
@@ -897,6 +919,104 @@ export class Files extends Model {
             newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
         });
         this.init();
+    }
+
+    private async dropDocumentTab(
+        documentTabData: IDocumentTabDragData,
+        targetElement: HTMLElement,
+        notebookElement: HTMLElement,
+        oldScrollTop: number
+    ) {
+        const moveAsChild = targetElement.classList.contains("dragover");
+        const insertAfter = targetElement.classList.contains("dragover__bottom");
+        const insertBefore = targetElement.classList.contains("dragover__top");
+        const targetNotebook = notebookElement.getAttribute("data-url");
+        const targetPath = targetElement.getAttribute("data-path");
+        targetElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+        if (!targetNotebook || !targetPath || (!moveAsChild && !insertAfter && !insertBefore)) {
+            return;
+        }
+
+        const pathResponse = await fetchSyncPost("/api/filetree/getPathByID", {id: documentTabData.rootId});
+        if (pathResponse.code !== 0 || !pathResponse.data?.path || !pathResponse.data?.notebook) {
+            return;
+        }
+        const sourcePath = pathResponse.data.path as string;
+        const sourceNotebook = pathResponse.data.notebook as string;
+        if (!isMoveTargetAllowed([sourceNotebook], targetNotebook)) {
+            showMessage(window.siyuan.languages._kernel[313]);
+            return;
+        }
+        if (sourceNotebook === targetNotebook) {
+            const sourceDirectory = sourcePath.endsWith(".sy") ? sourcePath.slice(0, -3) : sourcePath;
+            if (targetPath === sourcePath || targetPath.startsWith(sourceDirectory + "/")) {
+                return;
+            }
+        }
+
+        if (moveAsChild) {
+            const sourceParentDirectory = pathPosix().dirname(sourcePath);
+            const sourceParentPath = sourceParentDirectory === "/" ? "/" : sourceParentDirectory + ".sy";
+            if (sourceNotebook === targetNotebook && sourceParentPath === targetPath) {
+                return;
+            }
+            await fetchSyncPost("/api/filetree/moveDocs", {
+                toNotebook: targetNotebook,
+                fromPaths: [sourcePath],
+                toPath: targetPath,
+            });
+            return;
+        }
+
+        const notebookSort = notebookElement.getAttribute("data-sortmode");
+        if (notebookSort !== "6" && !(window.siyuan.config.fileTree.sort === 6 && notebookSort === "15")) {
+            return;
+        }
+        const targetDirectory = pathPosix().dirname(targetPath);
+        const newPath = pathPosix().join(targetDirectory, documentTabData.rootId + ".sy");
+        const siblingPaths: string[] = [];
+        Array.from(targetElement.parentElement.children).forEach((item) => {
+            const path = item.getAttribute("data-path");
+            if (item.tagName === "LI" && path) {
+                siblingPaths.push(path);
+            }
+        });
+        const sortedPaths = insertDocumentSortPath(
+            siblingPaths,
+            documentTabData.rootId,
+            newPath,
+            targetPath,
+            insertAfter
+        );
+        if (!sortedPaths || (sortedPaths.length === siblingPaths.length &&
+            sortedPaths.every((path, index) => path === siblingPaths[index]))) {
+            return;
+        }
+        const targetParentPath = targetDirectory === "/" ? "/" : targetDirectory + ".sy";
+        const moveResponse = await fetchSyncPost("/api/filetree/moveDocs", {
+            toNotebook: targetNotebook,
+            fromPaths: [sourcePath],
+            toPath: targetParentPath,
+            callback: Constants.CB_MOVE_NOLIST,
+        });
+        if (moveResponse.code !== 0) {
+            return;
+        }
+        const sortResponse = await fetchSyncPost("/api/filetree/changeSort", {
+            paths: sortedPaths,
+            notebook: targetNotebook,
+        });
+        if (sortResponse.code !== 0) {
+            return;
+        }
+        const listResponse = await fetchSyncPost("/api/filetree/listDocsByPath", {
+            notebook: targetNotebook,
+            path: targetParentPath,
+            app: Constants.SIYUAN_APPID,
+        });
+        if (listResponse.code === 0 && listResponse.data?.files?.length > 0) {
+            this.onLsHTML(listResponse.data, oldScrollTop);
+        }
     }
 
     private handleMsgCallback(data: IWebSocketData) {

@@ -3,10 +3,66 @@ import * as assert from "node:assert/strict";
 import {
     findMovedFileTreeItem,
     IFileTreeMove,
+    insertDocumentSortPath,
+    parseDocumentTabDragData,
     remapMovedPath,
     restoreMovedExpandedDocItems,
     updateMovedSubtree
 } from "./fileTreeMove";
+
+describe("parseDocumentTabDragData", () => {
+    it("parses a document tab payload", () => {
+        assert.deepEqual(parseDocumentTabDragData(JSON.stringify({
+            rootId: "20260802120000-abcdefg",
+            tabId: "tab-id",
+            title: "Document",
+        })), {
+            rootId: "20260802120000-abcdefg",
+            tabId: "tab-id",
+            title: "Document",
+        });
+    });
+
+    it("rejects non-document payloads", () => {
+        assert.equal(parseDocumentTabDragData(JSON.stringify({
+            rootId: "invalid",
+            tabId: "tab-id",
+            title: "Document",
+        })), undefined);
+    });
+});
+
+describe("insertDocumentSortPath", () => {
+    it("inserts a document from another parent before the target", () => {
+        assert.deepEqual(insertDocumentSortPath(
+            ["/target-a.sy", "/target-b.sy"],
+            "20260802120000-abcdefg",
+            "/20260802120000-abcdefg.sy",
+            "/target-b.sy",
+            false
+        ), ["/target-a.sy", "/20260802120000-abcdefg.sy", "/target-b.sy"]);
+    });
+
+    it("reorders a document already under the target parent", () => {
+        assert.deepEqual(insertDocumentSortPath(
+            ["/a.sy", "/20260802120000-abcdefg.sy", "/b.sy"],
+            "20260802120000-abcdefg",
+            "/20260802120000-abcdefg.sy",
+            "/b.sy",
+            true
+        ), ["/a.sy", "/b.sy", "/20260802120000-abcdefg.sy"]);
+    });
+
+    it("returns undefined when the target is missing", () => {
+        assert.equal(insertDocumentSortPath(
+            ["/a.sy"],
+            "20260802120000-abcdefg",
+            "/20260802120000-abcdefg.sy",
+            "/missing.sy",
+            false
+        ), undefined);
+    });
+});
 
 const move: IFileTreeMove = {
     fromNotebook: "source-notebook",

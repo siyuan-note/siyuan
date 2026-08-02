@@ -5,6 +5,7 @@ import {
     getListContext,
     getListConversionType,
     getListShortcutAction,
+    shouldIgnoreListShortcut,
     type TListSubtype
 } from "./listContext";
 
@@ -172,6 +173,14 @@ describe("getFollowingOrderedListMarkerUpdates", () => {
 
     it("ignores an invalid current marker", () => {
         assert.deepEqual(getFollowingOrderedListMarkerUpdates("*", ["2."]), [undefined]);
+    });
+});
+
+describe("shouldIgnoreListShortcut", () => {
+    it("ignores only a selected list item", () => {
+        assert.equal(shouldIgnoreListShortcut(true, "NodeListItem"), true);
+        assert.equal(shouldIgnoreListShortcut(true, "NodeList"), false);
+        assert.equal(shouldIgnoreListShortcut(false, "NodeListItem"), false);
     });
 });
 

@@ -64,7 +64,13 @@ import {
     listOutdent,
     toggleTaskListItem
 } from "./list";
-import {getListContext, getListConversionType, getListShortcutAction, type TListSubtype} from "./listContext";
+import {
+    getListContext,
+    getListConversionType,
+    getListShortcutAction,
+    shouldIgnoreListShortcut,
+    type TListSubtype
+} from "./listContext";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {cancelSB, insertEmptyBlock, jumpToParent} from "../../block/util";
 import {isEncryptedBox, isLocalPath} from "../../util/pathName";
@@ -1794,6 +1800,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectsElement.length === 1) {
                 const subType = selectsElement[0].dataset.subtype;
                 const type = selectsElement[0].dataset.type;
+                if (!isMatchQuote && shouldIgnoreListShortcut(hasBlockSelection, type)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 if (isMatchQuote) {
                     const blockquoteContext = hasBlockSelection ? undefined :
                         getBlockquoteContext(selectsElement[0], protyle.wysiwyg.element);

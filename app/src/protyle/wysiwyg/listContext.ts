@@ -81,6 +81,10 @@ export const getFollowingOrderedListMarkerUpdates = (currentMarker: string, foll
     });
 };
 
+export const shouldIgnoreListShortcut = (hasBlockSelection: boolean, selectedType?: string) => {
+    return hasBlockSelection && selectedType === "NodeListItem";
+};
+
 export const getListConversionType = (sourceSubtype: TListSubtype, targetSubtype: TListSubtype) => {
     if (sourceSubtype === targetSubtype) {
         return;

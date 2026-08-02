@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Escolha quais itens de menu e ícones do dock integrados são exibidos no computador",
   "entrySimple": "Simples",
   "entryFull": "Completo",
+  "entrySimpleTip": "Mostra os itens mais usados para começar rapidamente",
+  "entryFullTip": "Mostra todos os itens para acessar o conjunto completo de recursos",
   "entryBuiltin": "Integrado",
   "entryCustom": "Personalizado",
   "entryBasedOn": "Baseado em",

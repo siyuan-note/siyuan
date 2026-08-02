@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Kies welke ingebouwde menu-items en dockpictogrammen op het bureaublad worden getoond",
   "entrySimple": "Eenvoudig",
   "entryFull": "Volledig",
+  "entrySimpleTip": "Toont veelgebruikte items om snel aan de slag te gaan",
+  "entryFullTip": "Toont alle items voor toegang tot de volledige functionaliteit",
   "entryBuiltin": "Ingebouwd",
   "entryCustom": "Aangepast",
   "entryBasedOn": "Gebaseerd op",

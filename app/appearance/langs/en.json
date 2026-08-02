@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Choose which built-in menu items and dock icons are shown on desktop",
   "entrySimple": "Simple",
   "entryFull": "Full",
+  "entrySimpleTip": "Shows commonly used entries for getting started quickly",
+  "entryFullTip": "Shows all entries for access to the complete feature set",
   "entryBuiltin": "Built-in",
   "entryCustom": "Custom",
   "entryBasedOn": "Based on",

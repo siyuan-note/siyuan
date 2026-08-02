@@ -3,6 +3,8 @@
   "entryVisibilityTip": "配置桌面端内置菜单项和停靠栏图标是否显示",
   "entrySimple": "简洁方案",
   "entryFull": "完整方案",
+  "entrySimpleTip": "显示常用入口，适合新用户快速上手",
+  "entryFullTip": "显示全部入口，适合需要完整功能的用户",
   "entryBuiltin": "内置",
   "entryCustom": "自定义",
   "entryBasedOn": "基于",

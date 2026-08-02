@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Vyberte vstavané položky ponuky a ikony doku zobrazované na počítači",
   "entrySimple": "Jednoduchý",
   "entryFull": "Úplný",
+  "entrySimpleTip": "Zobrazuje často používané položky na rýchle začatie práce",
+  "entryFullTip": "Zobrazuje všetky položky na prístup ku všetkým funkciám",
   "entryBuiltin": "Vstavaný",
   "entryCustom": "Vlastný",
   "entryBasedOn": "Založené na",

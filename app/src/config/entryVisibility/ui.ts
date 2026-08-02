@@ -141,7 +141,7 @@ const profileCard = (
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             <div class="fn__ellipsis config-name">${escapeHtml(name)}</div>
-            <div class="b3-card__desc">${builtin ? window.siyuan.languages.entryBuiltin : `${window.siyuan.languages.entryCustom} · ${window.siyuan.languages.entryBasedOn} ${baseLabel(base)}`}${active ? ` · ${window.siyuan.languages.current}` : ""}</div>
+            <div class="b3-card__desc">${builtin ? window.siyuan.languages.entryBuiltin : `${window.siyuan.languages.entryCustom} · ${window.siyuan.languages.entryBasedOn} ${baseLabel(base)}`}${active ? ` · ${window.siyuan.languages.current}` : ""}${builtin ? ` · ${base === ENTRY_PROFILE_SIMPLE ? window.siyuan.languages.entrySimpleTip : window.siyuan.languages.entryFullTip}` : ""}</div>
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">

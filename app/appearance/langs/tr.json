@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Masaüstünde gösterilecek yerleşik menü öğelerini ve yuva simgelerini seçin",
   "entrySimple": "Basit",
   "entryFull": "Tam",
+  "entrySimpleTip": "Yeni kullanıcıların hızlıca başlayabilmesi için sık kullanılan öğeleri gösterir",
+  "entryFullTip": "Tüm özelliklere erişim için bütün öğeleri gösterir",
   "entryBuiltin": "Yerleşik",
   "entryCustom": "Özel",
   "entryBasedOn": "Temel alınan",

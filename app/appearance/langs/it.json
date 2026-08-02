@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Scegli quali voci di menu e icone della barra di ancoraggio mostrare sul desktop",
   "entrySimple": "Semplice",
   "entryFull": "Completo",
+  "entrySimpleTip": "Mostra le voci usate più spesso per iniziare rapidamente",
+  "entryFullTip": "Mostra tutte le voci per accedere a tutte le funzionalità",
   "entryBuiltin": "Integrato",
   "entryCustom": "Personalizzato",
   "entryBasedOn": "Basato su",

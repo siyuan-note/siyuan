@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Choisissez les éléments de menu et les icônes de la barre d'ancrage affichés sur ordinateur",
   "entrySimple": "Simple",
   "entryFull": "Complet",
+  "entrySimpleTip": "Affiche les entrées courantes pour démarrer rapidement",
+  "entryFullTip": "Affiche toutes les entrées pour accéder à l’ensemble des fonctionnalités",
   "entryBuiltin": "Intégré",
   "entryCustom": "Personnalisé",
   "entryBasedOn": "Basé sur",

@@ -3,6 +3,8 @@
   "entryVisibilityTip": "設定桌面端內建選單項目和停靠欄圖示是否顯示",
   "entrySimple": "簡潔方案",
   "entryFull": "完整方案",
+  "entrySimpleTip": "顯示常用入口，適合新使用者快速上手",
+  "entryFullTip": "顯示全部入口，適合需要完整功能的使用者",
   "entryBuiltin": "內建",
   "entryCustom": "自訂",
   "entryBasedOn": "基於",

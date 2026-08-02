@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Wählen Sie, welche integrierten Menüeinträge und Dock-Symbole auf dem Desktop angezeigt werden",
   "entrySimple": "Einfach",
   "entryFull": "Vollständig",
+  "entrySimpleTip": "Zeigt häufig verwendete Einträge für einen schnellen Einstieg",
+  "entryFullTip": "Zeigt alle Einträge für den Zugriff auf den vollständigen Funktionsumfang",
   "entryBuiltin": "Integriert",
   "entryCustom": "Benutzerdefiniert",
   "entryBasedOn": "Basierend auf",

@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Pilih item menu bawaan dan ikon dok yang ditampilkan di desktop",
   "entrySimple": "Sederhana",
   "entryFull": "Lengkap",
+  "entrySimpleTip": "Menampilkan entri yang umum digunakan agar pengguna baru dapat memulai dengan cepat",
+  "entryFullTip": "Menampilkan semua entri untuk mengakses rangkaian fitur lengkap",
   "entryBuiltin": "Bawaan",
   "entryCustom": "Kustom",
   "entryBasedOn": "Berdasarkan",

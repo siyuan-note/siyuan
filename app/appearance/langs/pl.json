@@ -3,6 +3,8 @@
   "entryVisibilityTip": "Wybierz wbudowane pozycje menu i ikony doku wyświetlane na komputerze",
   "entrySimple": "Prosty",
   "entryFull": "Pełny",
+  "entrySimpleTip": "Wyświetla często używane pozycje, aby ułatwić szybki start",
+  "entryFullTip": "Wyświetla wszystkie pozycje, zapewniając dostęp do pełnego zestawu funkcji",
   "entryBuiltin": "Wbudowany",
   "entryCustom": "Niestandardowy",
   "entryBasedOn": "Na podstawie",

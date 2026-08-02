@@ -3,6 +3,8 @@
   "entryVisibilityTip": "בחירת פריטי התפריט וסמלי סרגל העגינה המובנים שיוצגו במחשב",
   "entrySimple": "פשוט",
   "entryFull": "מלא",
+  "entrySimpleTip": "מציג פריטים נפוצים כדי לעזור למשתמשים חדשים להתחיל במהירות",
+  "entryFullTip": "מציג את כל הפריטים לגישה למכלול התכונות",
   "entryBuiltin": "מובנה",
   "entryCustom": "מותאם אישית",
   "entryBasedOn": "מבוסס על",

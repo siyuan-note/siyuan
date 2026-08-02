@@ -1,4 +1,5 @@
 {
+  "apiKeyRequired": "API Key が必要です",
   "openAICompatibleProvider": "OpenAI 互換プロバイダー",
   "entryDocPanel": "ドキュメントパネル",
   "entryDocumentMenu": "右上のドキュメントメニュー",

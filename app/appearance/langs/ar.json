@@ -1,4 +1,5 @@
 {
+  "apiKeyRequired": "مفتاح API مطلوب",
   "openAICompatibleProvider": "موفر متوافق مع مواصفات OpenAI",
   "entryDocPanel": "لوحة المستندات",
   "entryDocumentMenu": "قائمة المستند أعلى اليمين",

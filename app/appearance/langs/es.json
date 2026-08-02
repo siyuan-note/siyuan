@@ -1,4 +1,5 @@
 {
+  "apiKeyRequired": "Se requiere una clave de API",
   "openAICompatibleProvider": "Proveedor compatible con OpenAI",
   "entryDocPanel": "Panel de documentos",
   "entryDocumentMenu": "Menú del documento de la esquina superior derecha",

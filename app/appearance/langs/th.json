@@ -1,4 +1,5 @@
 {
+  "apiKeyRequired": "จำเป็นต้องใช้ API Key",
   "openAICompatibleProvider": "ผู้ให้บริการที่เข้ากันได้กับ OpenAI",
   "entryDocPanel": "แผงเอกสาร",
   "entryDocumentMenu": "เมนูเอกสารมุมขวาบน",

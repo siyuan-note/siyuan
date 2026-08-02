@@ -13,6 +13,7 @@ import {shell} from "electron";
 type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
 
 export const getProvidersBlockKeywords = (): string[] => [
+    window.siyuan.languages.apiKeyRequired,
     window.siyuan.languages.apiProvider,
     window.siyuan.languages.openAICompatibleProvider,
     window.siyuan.languages.apiProviderTip,

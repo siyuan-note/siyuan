@@ -49,6 +49,11 @@ const normalizeBaseURL = (value: string) => value.trim().replace(/\/+$/, "").toL
 const findPreset = (provider: Config.IProvider) =>
     PROVIDER_PRESETS.find((preset) => preset.baseURL && normalizeBaseURL(preset.baseURL) === normalizeBaseURL(provider.baseURL));
 
+const requiresAPIKey = (provider: Config.IProvider) => {
+    const preset = findPreset(provider);
+    return preset?.category === "official" || preset?.category === "aggregator";
+};
+
 const getProviderName = (provider: Config.IProvider) =>
     provider.displayName || findPreset(provider)?.name || provider.baseURL;
 
@@ -485,6 +490,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
             return;
         }
+        if (requiresAPIKey(draft) && !draft.apiKey.trim()) {
+            view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
+            showMessage(window.siyuan.languages.apiKeyRequired, undefined, "error");
+            return;
+        }
         hasFetchedModels = true;
         fetchingModels = true;
         const icon = fetchModelsButton.querySelector<SVGSVGElement>(".b3-button__icon");
@@ -643,7 +653,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "addModel") {
-            if (!hasFetchedModels) {
+            if (!hasFetchedModels && (!requiresAPIKey(draft) || draft.apiKey.trim() !== "")) {
                 const modelCount = draft.models.length;
                 fetchModels(() => {
                     if (draft.models.length === modelCount) {
@@ -674,6 +684,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             if (!draft.baseURL.trim()) {
                 view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
                 showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
+                return;
+            }
+            if (requiresAPIKey(draft) && !draft.apiKey.trim()) {
+                view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();
+                showMessage(window.siyuan.languages.apiKeyRequired, undefined, "error");
                 return;
             }
             if (!model.name.trim()) {

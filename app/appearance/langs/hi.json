@@ -1,4 +1,5 @@
 {
+  "apiKeyRequired": "API Key आवश्यक है",
   "openAICompatibleProvider": "OpenAI-संगत प्रदाता",
   "entryDocPanel": "दस्तावेज़ पैनल",
   "entryDocumentMenu": "ऊपरी-दाएँ दस्तावेज़ मेनू",

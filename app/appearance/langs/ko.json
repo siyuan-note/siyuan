@@ -1,4 +1,5 @@
 {
+  "apiKeyRequired": "API Key가 필요합니다",
   "openAICompatibleProvider": "OpenAI 호환 제공자",
   "entryDocPanel": "문서 패널",
   "entryDocumentMenu": "오른쪽 위 문서 메뉴",

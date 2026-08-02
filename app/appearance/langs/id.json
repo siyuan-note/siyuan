@@ -1,4 +1,5 @@
 {
+  "apiKeyRequired": "API Key diperlukan",
   "openAICompatibleProvider": "Penyedia yang kompatibel dengan OpenAI",
   "entryDocPanel": "Panel dokumen",
   "entryDocumentMenu": "Menu dokumen kanan atas",

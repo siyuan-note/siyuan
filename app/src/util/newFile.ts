@@ -416,6 +416,22 @@ export const newFileByRefHint = (
     });
 };
 
+/** 在当前文档下新建子文档，创建后仅回调插入引用或绑定数据库条目 */
+export const newSubDocByRefHint = (
+    protyle: IProtyle,
+    name: string,
+    onCreated?: (id: string, title: string) => void,
+    presetId?: string,
+) => {
+    const target = getNewDocTargetFromTree({
+        templatePath: "",
+        currentNotebookId: protyle.notebookId,
+        currentPath: protyle.path,
+        name: replaceFileName(name.trim()),
+    });
+    createRefDocAsSubDoc(target, onCreated, presetId);
+};
+
 function createRefDocByHPath(
     protyle: IProtyle,
     target: NewDocTargetByHPath,

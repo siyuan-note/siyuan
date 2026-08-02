@@ -1,4 +1,5 @@
 {
+  "noAvailableDatabase": "Keine verfügbare Datenbank gefunden; erstelle zuerst einen Datenbankblock in einem Dokument",
   "apiKeyRequired": "API-Schlüssel ist erforderlich",
   "openAICompatibleProvider": "OpenAI-kompatibler Anbieter",
   "entryDocPanel": "Dokument-Panel",
@@ -2281,7 +2282,7 @@
 		"234": "[%d/%d] Aktualisiert [%d] der lesbaren Pfade des Dokuments [%s]",
 		"235": "[%d/%d] aktualisiert das Marktplatzpaket...",
 		"236": "[%d/%d] aktualisiert das Marktplatzpaket [%s]...",
-		"237": "Aktualisierung der Marktplatzpakete abgeschlossen: [%d] aktualisiert, [%d] fehlgeschlagen, [%d] erfüllen die Aktualisierungsanforderungen nicht",
+		"237": "Aktualisierung der Marktplatzpakete abgeschlossen: %d aktualisiert, %d fehlgeschlagen, %d erfüllen die Aktualisierungsanforderungen nicht",
 		"238": "Aktualisierung des Marktplatzpakets [%s] fehlgeschlagen, bitte versuchen Sie es später erneut",
 		"239": "Verwandte Vorgänge werden verarbeitet, bitte versuchen Sie es später erneut",
 		"240": "Die aktuelle Drag-and-Drop-Überschrift befindet sich im Containerblock, und die Drag-and-Drop-Operation kann nicht ausgeführt werden",

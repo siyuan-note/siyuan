@@ -1,4 +1,5 @@
 {
+  "noAvailableDatabase": "Aucune base de données disponible n'a été trouvée. Créez d'abord un bloc de base de données dans un document",
   "apiKeyRequired": "Une clé API est requise",
   "openAICompatibleProvider": "Fournisseur compatible avec OpenAI",
   "entryDocPanel": "Panneau de documents",
@@ -2281,7 +2282,7 @@
 		"234": "[%d/%d] Mise à jour de [%d] des chemins lisibles du document [%s]",
 		"235": "[%d/%d] met à jour le package Marketplace...",
 		"236": "[%d/%d] met à jour le package Marketplace [%s]...",
-		"237": "Mise à jour des packages Marketplace terminée : [%d] mis à jour, [%d] échecs, [%d] ne remplissent pas les conditions de mise à jour",
+		"237": "Mise à jour des packages Marketplace terminée : %d mis à jour, %d échecs, %d ne remplissent pas les conditions de mise à jour",
 		"238": "La mise à jour du package Marketplace [%s] a échoué, veuillez réessayer plus tard",
 		"239": "Les opérations associées sont en cours de traitement, veuillez réessayer plus tard",
 		"240": "L'en-tête du glisser-déposer actuel se trouve dans le bloc conteneur et l'opération de glisser-déposer ne peut pas être effectuée",

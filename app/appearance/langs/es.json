@@ -1,4 +1,5 @@
 {
+  "noAvailableDatabase": "No se encontró ninguna base de datos disponible. Crea primero un bloque de base de datos en un documento",
   "apiKeyRequired": "Se requiere una clave de API",
   "openAICompatibleProvider": "Proveedor compatible con OpenAI",
   "entryDocPanel": "Panel de documentos",
@@ -2281,7 +2282,7 @@
 		"234": "[%d/%d] Actualizado [%d] de rutas legibles del documento [%s]",
 		"235": "[%d/%d] está actualizando el paquete del mercado...",
 		"236": "[%d/%d] está actualizando el paquete del mercado [%s]...",
-		"237": "Actualización de paquetes del mercado completada: [%d] actualizados, [%d] fallidos, [%d] no cumplen los requisitos de actualización",
+		"237": "Actualización de paquetes del mercado completada: %d actualizados, %d fallidos, %d no cumplen los requisitos de actualización",
 		"238": "Error en la actualización del paquete Marketplace [%s], inténtalo de nuevo más tarde",
 		"239": "Las operaciones relacionadas se están procesando, inténtalo de nuevo más tarde",
 		"240": "El encabezado actual de arrastrar y soltar está ubicado en el bloque contenedor y la operación de arrastrar y soltar no se puede realizar",

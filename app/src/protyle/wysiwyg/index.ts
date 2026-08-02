@@ -1351,8 +1351,8 @@ export class WYSIWYG {
                 const headerRect = headerElement.getBoundingClientRect();
                 const headerTop = headerRect.top;
                 const guideHeight = Math.round(headerRect.height);
-                let newWidth: number;
-                let resizeSnapped: boolean;
+                let newWidth = oldWidth;
+                let resizeSnapped = false;
                 let resizeGuide: HTMLElement;
                 let resizeTip: HTMLElement;
                 let pendingResize: { width: number, snapped: boolean } | undefined;
@@ -1386,6 +1386,7 @@ export class WYSIWYG {
                     resizeTip.textContent = `${newWidth}px${snapped ?
                         window.siyuan.languages.sameWidthAsLeftColumnTip : ""}`;
                 };
+                updateResizePreview(resizeSnapped);
                 const flushResize = () => {
                     if (!pendingResize) {
                         return;

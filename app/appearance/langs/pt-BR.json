@@ -1,4 +1,5 @@
 {
+  "noAvailableDatabase": "Nenhum banco de dados disponível foi encontrado. Primeiro, crie um bloco de banco de dados em um documento",
   "apiKeyRequired": "Uma chave de API é obrigatória",
   "openAICompatibleProvider": "Provedor compatível com OpenAI",
   "entryDocPanel": "Painel de documentos",
@@ -2281,7 +2282,7 @@
 		"234": "[%d/%d] Atualizados [%d] caminhos legíveis do documento [%s]",
 		"235": "[%d/%d] está atualizando o pacote do marketplace...",
 		"236": "[%d/%d] está atualizando o pacote do marketplace [%s]...",
-		"237": "Atualização dos pacotes do marketplace concluída: [%d] atualizados, [%d] falharam, [%d] não atendem aos requisitos de atualização",
+		"237": "Atualização dos pacotes do marketplace concluída: %d atualizados, %d falharam, %d não atendem aos requisitos de atualização",
 		"238": "Falha na atualização do pacote do marketplace [%s], por favor tente novamente mais tarde",
 		"239": "Operações relacionadas estão sendo processadas, por favor tente novamente mais tarde",
 		"240": "O cabeçalho atual arrastado está localizado no bloco de contêiner e a operação de arrastar não pode ser realizada",

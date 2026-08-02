@@ -356,6 +356,11 @@
     &--close:hover {
       background-color: transparent;
     }
+
+    &--hint:hover {
+      color: var(--b3-theme-on-surface-light);
+      background-color: transparent;
+    }
   }
 
   &__label {

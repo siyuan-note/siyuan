@@ -221,7 +221,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         <div class="fn__flex">
             <input class="b3-text-field fn__flex-1" data-type="entry-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
             <span class="fn__space"></span>
-            <button class="b3-button b3-button--outline" data-action="restore">${window.siyuan.languages.entryRestoreBase}</button>
+            <button class="b3-button b3-button--outline" data-action="restore">${window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base))}</button>
         </div>
     </div>
     <div data-type="entry-sections"></div>
@@ -233,6 +233,10 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
 </div>`;
     const sections = view.querySelector<HTMLElement>("[data-type='entry-sections']");
     const searchInput = view.querySelector<HTMLInputElement>("[data-type='entry-search']");
+    const restoreButton = view.querySelector<HTMLButtonElement>("[data-action='restore']");
+    const updateRestoreButton = () => {
+        restoreButton.textContent = window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base));
+    };
     const renderSections = () => {
         sections.innerHTML = entryCatalog.map((section) => `<div class="config-group" data-entry-section>
     <div class="config-title">${escapeHtml(section.label())}</div>
@@ -286,6 +290,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
                 draft.entries[path] = isEntryVisible(path);
             });
         }
+        updateRestoreButton();
         renderSections();
         filterSections();
     });
@@ -294,7 +299,9 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         if (action === "back" || action === "cancel") {
             closeEditor();
         } else if (action === "restore") {
-            confirmDialog(window.siyuan.languages.entryRestoreBase, window.siyuan.languages.entryRestoreBaseConfirm, () => {
+            const restoreTarget = baseLabel(draft.base);
+            confirmDialog(window.siyuan.languages.entryRestoreBase.replace("${x}", restoreTarget),
+                window.siyuan.languages.entryRestoreBaseConfirm.replace("${x}", restoreTarget), () => {
                 draft.entries = createEntryProfileSnapshot(draft.base);
                 renderSections();
                 filterSections();

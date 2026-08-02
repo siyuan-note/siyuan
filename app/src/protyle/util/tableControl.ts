@@ -141,15 +141,31 @@ export const setTableCellStyle = (protyle: IProtyle, node: HTMLElement, cells: H
     updateTransaction(protyle, node, oldHTML);
 };
 
-export const getTableCellBackgroundMenus = (cells: HTMLTableCellElement[], onChange: (color: string) => void) => {
+export const getTableCellBackgroundMenus = (cells: HTMLTableCellElement[],
+                                             onChange: (color: string) => void): IMenu[] => {
     const backgroundColor = getCommonTableCellStyle(cells, "background-color");
     const colors = ["", ...Array.from({length: 13}, (_, index) => `var(--b3-font-background${index + 1})`)];
-    return colors.map((color, index) => ({
-        label: index === 0 ? window.siyuan.languages.default : `${window.siyuan.languages.colorPrimary} ${index}`,
-        iconHTML: `<span class="protyle-table-control__color" style="${color ? `background-color: ${color}` : ""}"></span>`,
-        checked: backgroundColor === color,
-        click: () => onChange(color),
-    }));
+    const colorHTML = colors.map(color => {
+        const currentClass = backgroundColor === color ? " color__square--current" : "";
+        const defaultClass = color ? "" : " ariaLabel";
+        const attributes = color ? ` style="background-color:${color}"` :
+            ` aria-label="${window.siyuan.languages.default}" data-position="3south"`;
+        return `<button type="button" data-color="${color}" class="color__square${currentClass}${defaultClass}"${attributes}></button>`;
+    }).join("");
+    return [{
+        type: "empty",
+        label: `<div class="fn__flex fn__flex-wrap" style="width: 238px">${colorHTML}</div>`,
+        bind: element => {
+            element.addEventListener("click", event => {
+                const colorTarget = (event.target as Element).closest<HTMLElement>(".color__square");
+                if (!colorTarget || !element.contains(colorTarget)) {
+                    return;
+                }
+                onChange(colorTarget.dataset.color);
+                window.siyuan.menus.menu.remove();
+            });
+        },
+    }];
 };
 
 const TABLE_HANDLE_THICKNESS = 16;

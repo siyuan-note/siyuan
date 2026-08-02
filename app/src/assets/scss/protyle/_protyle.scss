@@ -859,15 +859,4 @@ table + .protyle-action__table {
     background-color: var(--b3-theme-primary);
     pointer-events: none;
   }
-
-  &__color {
-    display: inline-block;
-    align-self: center;
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
-    border: 1px solid var(--b3-border-color);
-    border-radius: 50%;
-  }
 }

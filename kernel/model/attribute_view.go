@@ -5515,12 +5515,6 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 		}
 	}
 
-	node, tree, _ := getNodeByBlockID(nil, blockID)
-	if nil == node {
-		logging.LogErrorf("get node by block ID [%s] failed", blockID)
-		return
-	}
-
 	node.AttributeViewType = string(view.LayoutType)
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[av.NodeAttrView] = viewID
@@ -7152,10 +7146,12 @@ func getAttributeViewField(view *av.View, keyID string) (ret *av.BaseField) {
 			}
 		}
 	case av.LayoutTypeCalendar:
+		if nil == view.Calendar {
+			return
+		}
 		for _, field := range view.Calendar.Fields {
-			if field.ID == operation.ID {
-				field.Hidden = operation.Data.(bool)
-				break
+			if field.ID == keyID {
+				return field.BaseField
 			}
 		}
 	}

@@ -6,6 +6,22 @@ import {hasClosestBlock} from "../util/hasClosest";
 import {looseJsonParse} from "../../util/functions";
 import {genRenderFrame} from "./util";
 
+const fitMathWidth = (mathElement: HTMLElement, blockElement: HTMLElement | false, isBlock: boolean) => {
+    return new Promise<void>((resolve) => {
+        setTimeout(() => {
+            if (isBlock) {
+                const katexElement = mathElement.querySelector(".katex-display") as HTMLElement;
+                if (katexElement && katexElement.clientWidth < katexElement.scrollWidth) {
+                    katexElement.firstElementChild?.setAttribute("style", `font-size:${katexElement.clientWidth * 100 / katexElement.scrollWidth}%`);
+                }
+            } else if (blockElement && mathElement.offsetWidth > blockElement.clientWidth) {
+                mathElement.firstElementChild?.setAttribute("style", `font-size:${blockElement.clientWidth * 100 / mathElement.offsetWidth}%`);
+            }
+            resolve();
+        });
+    });
+};
+
 export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWidth = false) => {
     let mathElements: Element[] | NodeListOf<Element> = [];
     if (element.getAttribute("data-subtype") === "math" && element.getAttribute("data-render") !== "true") {
@@ -17,8 +33,9 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
         return;
     }
     addStyle(`${cdn}/js/katex/katex.min.css?v=0.16.9`, "protyleKatexStyle");
-    addScript(`${cdn}/js/katex/katex.min.js?v=0.16.9`, "protyleKatexScript").then(() => {
-        addScript(`${cdn}/js/katex/mhchem.min.js?v=0.16.9`, "protyleKatexMhchemScript").then(() => {
+    return addScript(`${cdn}/js/katex/katex.min.js?v=0.16.9`, "protyleKatexScript").then(() => {
+        return addScript(`${cdn}/js/katex/mhchem.min.js?v=0.16.9`, "protyleKatexMhchemScript").then(() => {
+            const resizePromises: Promise<void>[] = [];
             mathElements.forEach((mathElement: HTMLElement) => {
                 mathElement.setAttribute("data-render", "true");
                 let macros = {};
@@ -101,20 +118,9 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                         }
                     }
 
-                    // export pdf
+                    // 导出 PDF 时等待公式完成宽度适配后再继续
                     if (maxWidth) {
-                        setTimeout(() => {
-                            if (isBlock) {
-                                const katexElement = mathElement.querySelector(".katex-display");
-                                if (katexElement.clientWidth < katexElement.scrollWidth) {
-                                    katexElement.firstElementChild.setAttribute("style", `font-size:${katexElement.clientWidth * 100 / katexElement.scrollWidth}%`);
-                                }
-                            } else {
-                                if (blockElement && mathElement.offsetWidth > blockElement.clientWidth) {
-                                    mathElement.firstElementChild.setAttribute("style", `font-size:${blockElement.clientWidth * 100 / mathElement.offsetWidth}%`);
-                                }
-                            }
-                        });
+                        resizePromises.push(fitMathWidth(mathElement, blockElement, isBlock));
                     }
                 } catch (e) {
                     if (isBlock) {
@@ -128,6 +134,7 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                     }
                 }
             });
+            return Promise.all(resizePromises).then(() => undefined);
         });
     });
 };

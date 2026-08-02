@@ -21,7 +21,8 @@ import {
     getDocCreateTemplatePath,
     newFileByRefHint,
     newFileBySelectRange,
-    newFileInProtyle
+    newFileInProtyle,
+    newSubDocByRefHint
 } from "../../util/newFile";
 import {isAbnormalItem, upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
@@ -392,12 +393,10 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`;
                 searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
-                if (source === "search") {
-                    const newFileName = Lute.UnEscapeHTMLStr(response.data.k);
-                    const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
-                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+                const newFileName = Lute.UnEscapeHTMLStr(response.data.k);
+                const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div></button>`;
-                }
             }
             response.data.blocks.forEach((item: IBlock, index: number) => {
                 let blockRefHTML;
@@ -502,11 +501,13 @@ ${genHintItemHTML(item)}
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
-            if (value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
-                const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
+            const isNewSubDoc = value.startsWith("((newSubDoc ") && value.endsWith(`${Lute.Caret}'))`);
+            if ((value.startsWith("((newFile ") || isNewSubDoc) && value.endsWith(`${Lute.Caret}'))`)) {
+                const prefix = isNewSubDoc ? "((newSubDoc " : "((newFile ";
+                const fileNames = value.substring(prefix.length, value.length - 4).split(`"${Constants.ZWSP}'`);
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 const newID = Lute.NewNodeID();
-                newFileByRefHint(protyle, realFileName, () => {
+                const bindNewDoc = () => {
                     transaction(protyle, [{
                         action: "replaceAttrViewBlock",
                         avID,
@@ -523,7 +524,12 @@ ${genHintItemHTML(item)}
                         blockID: nodeElement.dataset.nodeId,
                         context: {protyleID: protyle.id},
                     }]);
-                }, newID);
+                };
+                if (isNewSubDoc) {
+                    newSubDocByRefHint(protyle, realFileName, bindNewDoc, newID);
+                } else {
+                    newFileByRefHint(protyle, realFileName, bindNewDoc, newID);
+                }
                 updateAttrViewCellAnimation(cellElement, {
                     type: "block",
                     isDetached: false,

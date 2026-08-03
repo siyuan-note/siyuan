@@ -514,13 +514,10 @@ export const JSONToCenter = (
 export const JSONToLayout = (app: App, isStart: boolean) => {
     JSONToCenter(app, window.siyuan.config.uiLayout.layout, undefined);
     JSONToDock(window.siyuan.config.uiLayout, app);
-    let applyTabStartupMode = isStart;
-    /// #if BROWSER
-    applyTabStartupMode = !sessionStorage.getItem(Constants.LOCAL_SESSION_FIRSTLOAD);
+    const applyTabStartupMode = isStart || !sessionStorage.getItem(Constants.LOCAL_SESSION_FIRSTLOAD);
     if (applyTabStartupMode) {
         sessionStorage.setItem(Constants.LOCAL_SESSION_FIRSTLOAD, "true");
     }
-    /// #endif
     // 关闭已打开页签时保留钉住的页签
     if (applyTabStartupMode && window.siyuan.config.fileTree.tabStartupMode === 2) {
         getAllTabs().forEach(item => {
@@ -581,8 +578,21 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
                 item.removeAttribute("data-init-active");
             });
             const wnd = getWndByLayout(window.siyuan.layout.centerLayout);
-            if (wnd && !wnd.children.some((item) => !item.headElement)) {
-                wnd.addTab(newCenterEmptyTab(app), false, false);
+            if (wnd) {
+                let blankTab = wnd.children.find((item) => !item.headElement);
+                if (blankTab) {
+                    wnd.children.forEach((item) => {
+                        item.headElement?.classList.remove("item--focus");
+                        item.panelElement.classList.toggle("fn__none", item !== blankTab);
+                    });
+                    const removedIndex = removedTabs.indexOf(blankTab);
+                    if (removedIndex > -1) {
+                        removedTabs.splice(removedIndex, 1);
+                    }
+                } else {
+                    blankTab = newCenterEmptyTab(app);
+                    wnd.addTab(blankTab, false, false);
+                }
             }
         }
         let latestTabHeaderElement: HTMLElement;

@@ -4,6 +4,7 @@
 
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)
+    * [Behavior semantics](#Behavior-semantics)
     * [Authentication](#Authentication)
 * [Notebooks](#Notebooks)
     * [List notebooks](#List-notebooks)
@@ -111,6 +112,15 @@
     * `code`: non-zero for exceptions
     * `msg`: an empty string under normal circumstances, an error text will be returned under abnormal conditions
     * `data`: may be `{}`, `[]` or `NULL`, depending on the interface
+
+### Behavior semantics
+
+* Only interfaces with dedicated interface sections in this document are public APIs. Other kernel routes and `/api/transactions` operations are internal implementations and provide no compatibility or behavioral stability guarantees unless otherwise stated
+* `code: 0` means the interface reported no error while handling the request. It guarantees only the outcome explicitly documented for that interface; it does not mean that related indexes, caches, WebSocket broadcasts, or sync state have all been updated
+* The meanings of omitted fields, `null`, empty objects, and empty arrays are interface-specific. Whether an object or array replaces, merges with, or partially updates existing state, and whether its order is significant, are also defined by each interface
+* An interface may trim, ignore, complete, or transform input. When its documentation states that a normalized result is returned, callers should use the returned `data` as the actual accepted result
+* Do not infer that an operation is read-only from its name. Persistent side effects and their scope are described by each interface when applicable
+* Repeating the same request is idempotent or safe to retry only when explicitly documented. If a response is interrupted or otherwise indeterminate, read the current state before retrying whenever possible
 
 ### Authentication
 
@@ -1015,6 +1025,8 @@ Move documents by `id`:
     }
   }
   ```
+
+* Determinism: The returned Kramdown canonicalizes block-level IAL attribute ordering; the order remains stable while the block content and attributes are unchanged
 
 ### Get child blocks
 

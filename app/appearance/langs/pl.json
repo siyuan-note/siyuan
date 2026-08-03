@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Informacje o pakiecie",
+	"bazaarPackageName": "Nazwa pakietu",
+	"bazaarFunding": "Finansowanie",
 	"entryBuiltinReadonlyTip": "Profile wbudowane są tylko do odczytu. Utwórz kopię, aby je dostosować",
 	"tableHeaderRow": "Wiersz nagłówka",
 	"tableHeaderColumn": "Kolumna nagłówka",

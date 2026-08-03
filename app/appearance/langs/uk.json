@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Інформація про пакунок",
+	"bazaarPackageName": "Назва пакунка",
+	"bazaarFunding": "Фінансування",
 	"entryBuiltinReadonlyTip": "Вбудовані профілі доступні лише для читання. Створіть копію, щоб налаштувати їх",
 	"tableHeaderRow": "Рядок заголовка",
 	"tableHeaderColumn": "Стовпець заголовка",

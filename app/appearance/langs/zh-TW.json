@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "集市套件資訊",
+	"bazaarPackageName": "套件名稱",
+	"bazaarFunding": "贊助管道",
 	"entryBuiltinReadonlyTip": "內建方案僅供檢視，如需調整請先建立副本",
 	"tableHeaderRow": "標題列",
 	"tableHeaderColumn": "標題欄",

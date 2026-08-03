@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "패키지 정보",
+	"bazaarPackageName": "패키지 이름",
+	"bazaarFunding": "후원",
 	"entryBuiltinReadonlyTip": "기본 제공 프로필은 읽기 전용입니다. 사용자 지정하려면 사본을 만드세요",
 	"tableHeaderRow": "머리글 행",
 	"tableHeaderColumn": "머리글 열",

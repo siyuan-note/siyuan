@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Informasi paket",
+	"bazaarPackageName": "Nama paket",
+	"bazaarFunding": "Pendanaan",
 	"entryBuiltinReadonlyTip": "Profil bawaan bersifat hanya-baca. Buat salinan untuk menyesuaikannya",
 	"tableHeaderRow": "Baris tajuk",
 	"tableHeaderColumn": "Kolom tajuk",

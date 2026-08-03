@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "パッケージ情報",
+	"bazaarPackageName": "パッケージ名",
+	"bazaarFunding": "資金提供",
 	"entryBuiltinReadonlyTip": "組み込みプロファイルは読み取り専用です。カスタマイズするには複製を作成してください",
 	"tableHeaderRow": "見出し行",
 	"tableHeaderColumn": "見出し列",

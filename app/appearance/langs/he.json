@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "פרטי החבילה",
+	"bazaarPackageName": "שם החבילה",
+	"bazaarFunding": "מימון",
 	"entryBuiltinReadonlyTip": "הפרופילים המובנים הם לקריאה בלבד. יש ליצור עותק כדי להתאים אותם אישית",
 	"tableHeaderRow": "שורת כותרת",
 	"tableHeaderColumn": "עמודת כותרת",

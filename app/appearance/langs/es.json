@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Información del paquete",
+	"bazaarPackageName": "Nombre del paquete",
+	"bazaarFunding": "Financiación",
 	"entryBuiltinReadonlyTip": "Los perfiles integrados son de solo lectura. Crea una copia para personalizarlos",
 	"tableHeaderRow": "Fila de encabezado",
 	"tableHeaderColumn": "Columna de encabezado",

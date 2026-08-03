@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Package information",
+	"bazaarPackageName": "Package name",
+	"bazaarFunding": "Funding",
 	"entryBuiltinReadonlyTip": "Built-in profiles are read-only. Create a copy to customize one",
 	"tableHeaderRow": "Header row",
 	"tableHeaderColumn": "Header column",

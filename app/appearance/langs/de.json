@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Paketinformationen",
+	"bazaarPackageName": "Paketname",
+	"bazaarFunding": "Finanzierung",
 	"entryBuiltinReadonlyTip": "Integrierte Profile sind schreibgeschützt. Erstellen Sie zum Anpassen eine Kopie",
 	"tableHeaderRow": "Kopfzeile",
 	"tableHeaderColumn": "Kopfspalte",

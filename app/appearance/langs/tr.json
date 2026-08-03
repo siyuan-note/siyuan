@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Paket bilgileri",
+	"bazaarPackageName": "Paket adı",
+	"bazaarFunding": "Finansman",
 	"entryBuiltinReadonlyTip": "Yerleşik profiller salt okunurdur. Özelleştirmek için bir kopya oluşturun",
 	"tableHeaderRow": "Başlık satırı",
 	"tableHeaderColumn": "Başlık sütunu",

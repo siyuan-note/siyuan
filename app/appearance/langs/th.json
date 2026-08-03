@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "ข้อมูลแพ็กเกจ",
+	"bazaarPackageName": "ชื่อแพ็กเกจ",
+	"bazaarFunding": "การสนับสนุนเงินทุน",
 	"entryBuiltinReadonlyTip": "โปรไฟล์ในตัวเป็นแบบอ่านอย่างเดียว โปรดสร้างสำเนาเพื่อปรับแต่ง",
 	"tableHeaderRow": "แถวส่วนหัว",
 	"tableHeaderColumn": "คอลัมน์ส่วนหัว",

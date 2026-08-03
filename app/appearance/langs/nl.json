@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Pakketinformatie",
+	"bazaarPackageName": "Pakketnaam",
+	"bazaarFunding": "Financiering",
 	"entryBuiltinReadonlyTip": "Ingebouwde profielen zijn alleen-lezen. Maak een kopie om ze aan te passen",
 	"tableHeaderRow": "Koprij",
 	"tableHeaderColumn": "Kopkolom",

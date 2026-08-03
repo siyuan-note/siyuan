@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "معلومات الحزمة",
+	"bazaarPackageName": "اسم الحزمة",
+	"bazaarFunding": "التمويل",
 	"entryBuiltinReadonlyTip": "ملفات التعريف المضمنة للقراءة فقط. أنشئ نسخة لتخصيصها",
 	"tableHeaderRow": "صف الرأس",
 	"tableHeaderColumn": "عمود الرأس",

@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "集市包信息",
+	"bazaarPackageName": "包名",
+	"bazaarFunding": "赞助渠道",
 	"entryBuiltinReadonlyTip": "内置方案仅供查看，如需调整请先创建副本",
 	"tableHeaderRow": "标题行",
 	"tableHeaderColumn": "标题列",

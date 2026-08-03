@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Informácie o balíku",
+	"bazaarPackageName": "Názov balíka",
+	"bazaarFunding": "Financovanie",
 	"entryBuiltinReadonlyTip": "Vstavané profily sú iba na čítanie. Ak ich chcete prispôsobiť, vytvorte kópiu",
 	"tableHeaderRow": "Riadok hlavičky",
 	"tableHeaderColumn": "Stĺpec hlavičky",

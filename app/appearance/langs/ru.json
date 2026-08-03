@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "Информация о пакете",
+	"bazaarPackageName": "Имя пакета",
+	"bazaarFunding": "Финансирование",
 	"entryBuiltinReadonlyTip": "Встроенные профили доступны только для чтения. Создайте копию, чтобы настроить их",
 	"tableHeaderRow": "Строка заголовка",
 	"tableHeaderColumn": "Столбец заголовка",

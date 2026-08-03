@@ -1,4 +1,7 @@
 {
+	"bazaarPackageInfo": "पैकेज जानकारी",
+	"bazaarPackageName": "पैकेज का नाम",
+	"bazaarFunding": "वित्तपोषण",
 	"entryBuiltinReadonlyTip": "अंतर्निहित प्रोफ़ाइल केवल पढ़ने के लिए हैं। अनुकूलित करने के लिए एक प्रतिलिपि बनाएँ",
 	"tableHeaderRow": "शीर्षलेख पंक्ति",
 	"tableHeaderColumn": "शीर्षलेख स्तंभ",

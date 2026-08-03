@@ -452,7 +452,7 @@
         }
 
         &__title {
-          font-size: 24px;
+          font-size: 20px;
           word-break: break-all;
           color: var(--b3-theme-on-background);
         }
@@ -460,17 +460,17 @@
         &__img {
           height: 96px;
           width: 96px;
-          margin: 32px auto 32px;
+          margin: 24px auto 16px;
           border-radius: var(--b3-border-radius);
           flex-shrink: 0;
         }
 
         &__meta {
-          margin-top: 24px;
+          margin-top: 16px;
           text-align: left;
 
           &-section {
-            padding: 16px 0;
+            padding: 8px 0;
           }
 
           &-title {

@@ -120,7 +120,8 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 		!profileIDs[entryVisibility.Active] {
 		entryVisibility.Active = fallback
 	}
-	if entryVisibility.Active != EntryVisibilityProfileSimple && entryVisibility.Active != EntryVisibilityProfileFull {
+	if entryVisibility.Active != EntryVisibilityProfileSimple && entryVisibility.Active != EntryVisibilityProfileFull &&
+		!profileIDs[entryVisibility.Active] {
 		entryVisibility.Active = EntryVisibilityProfileFull
 	}
 	return entryVisibility

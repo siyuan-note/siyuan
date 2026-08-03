@@ -5,7 +5,7 @@ import {windowKeyDown} from "./keydown";
 import {globalClick} from "./click";
 import {goBack, goForward} from "../../util/backForward";
 import {Constants} from "../../constants";
-import {hasClosestByClassName, isInEmbedBlock} from "../../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../../protyle/util/hasClosest";
 import {hideTooltip} from "../../dialog/tooltip";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
@@ -209,7 +209,18 @@ export const initWindowEvent = (app: App) => {
         }
     });
 
-    window.addEventListener("mousedown", (event) => {
+    window.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
+        const tabBarElement = hasClosestByClassName(event.target, "layout-tab-bar", true);
+        const isWindowTabBar = tabBarElement && Array.from(tabBarElement.parentElement.children).some((item) =>
+            item.classList.contains("layout-tab-bar--readonly"));
+        // 避免从融合顶栏或页签空白处拖动时跨区域选中编辑器内容
+        if (event.button === 0 && (
+            hasClosestByClassName(event.target, "toolbar", true) ||
+            hasClosestByClassName(event.target, "toolbar__window", true) ||
+            (isWindowTabBar && !hasClosestByAttribute(event.target, "data-type", "tab-header", true))
+        )) {
+            event.preventDefault();
+        }
         // protyle.toolbar 点击空白处时进行隐藏
         if (!hasClosestByClassName(event.target as Element, "protyle-toolbar")) {
             hideAllElements(["toolbar"]);

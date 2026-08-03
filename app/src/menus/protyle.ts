@@ -15,11 +15,13 @@ import {
     insertColumn,
     insertRow,
     insertRowAbove,
+    isTableHeaderEnabled,
     moveColumnToLeft,
     moveColumnToRight,
     moveRowToDown,
     moveRowToUp,
     setTableAlign,
+    toggleTableHeader,
     updateTableTitle
 } from "../protyle/util/table";
 import {mathRender} from "../protyle/render/mathRender";
@@ -2274,30 +2276,14 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     otherMenus.push({
         id: "tableHeaderRow",
         label: window.siyuan.languages.tableHeaderRow,
-        checked: nodeElement.getAttribute("custom-table-header-row") !== "false",
-        click: () => {
-            const html = nodeElement.outerHTML;
-            if (nodeElement.getAttribute("custom-table-header-row") === "false") {
-                nodeElement.removeAttribute("custom-table-header-row");
-            } else {
-                nodeElement.setAttribute("custom-table-header-row", "false");
-            }
-            updateTransaction(protyle, nodeElement, html);
-        }
+        checked: isTableHeaderEnabled(nodeElement, "row"),
+        click: () => toggleTableHeader(protyle, nodeElement, "row")
     });
     otherMenus.push({
         id: "tableHeaderColumn",
         label: window.siyuan.languages.tableHeaderColumn,
-        checked: nodeElement.getAttribute("custom-table-header-column") === "true",
-        click: () => {
-            const html = nodeElement.outerHTML;
-            if (nodeElement.getAttribute("custom-table-header-column") === "true") {
-                nodeElement.removeAttribute("custom-table-header-column");
-            } else {
-                nodeElement.setAttribute("custom-table-header-column", "true");
-            }
-            updateTransaction(protyle, nodeElement, html);
-        }
+        checked: isTableHeaderEnabled(nodeElement, "column"),
+        click: () => toggleTableHeader(protyle, nodeElement, "column")
     });
     otherMenus.push({
         icon: "iconHeadings",

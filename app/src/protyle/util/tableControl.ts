@@ -11,8 +11,10 @@ import {
     getTableFullColumnSelection,
     getTableFullRowSelection,
     getTableRangeHTML,
+    isTableHeaderEnabled,
     ITableCellInfo,
     ITableGrid,
+    toggleTableHeader,
 } from "./table";
 import {
     constrainTableResizeCount,
@@ -1204,6 +1206,16 @@ export class TableControl {
                     actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                     click: () => this.duplicateRowsOrColumns(),
                 }).element);
+                if (this.selection.indexes.size === 1 && this.selection.indexes.has(0)) {
+                    const headerType = this.selection.mode === "row" ? "row" : "column";
+                    menu.append(new MenuItem({
+                        id: headerType === "row" ? "tableHeaderRow" : "tableHeaderColumn",
+                        label: headerType === "row" ? window.siyuan.languages.tableHeaderRow :
+                            window.siyuan.languages.tableHeaderColumn,
+                        checked: isTableHeaderEnabled(this.selection.node, headerType),
+                        click: () => toggleTableHeader(this.protyle, this.selection.node, headerType),
+                    }).element);
+                }
                 menu.append(new MenuItem({type: "separator"}).element);
             }
             menu.append(new MenuItem({

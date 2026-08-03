@@ -32,8 +32,8 @@
     }
 
     & > .fn__flex-1 {
-      margin: -8px;
-      padding: 8px;
+      margin: -8px -8px -10px;
+      padding: 8px 8px 10px;
 
       &::-webkit-scrollbar {
         display: none;

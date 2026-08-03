@@ -27,7 +27,7 @@ import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {renderSnippet} from "../config/util/snippets";
-import {setBodyHighlight} from "../util/assets";
+import {refreshThemeStyle, setBodyHighlight} from "../util/assets";
 import {reloadSync} from "../util/reloadSync";
 import {setTitle} from "../util/processTitle";
 import {ensureUILayout} from "../util/ensureUILayout";
@@ -166,11 +166,7 @@ class App {
                                 progressBackgroundTask(data.data.tasks);
                                 break;
                             case "refreshtheme":
-                                if ((window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark !== "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight !== "daylight")) {
-                                    (document.getElementById("themeStyle") as HTMLLinkElement).href = data.data.theme;
-                                } else {
-                                    (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = data.data.theme;
-                                }
+                                refreshThemeStyle(data.data.theme);
                                 break;
                             case "openFileById":
                                 openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});

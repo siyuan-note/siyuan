@@ -6,7 +6,9 @@ import {exportLayout} from "../../layout/util";
 import {syncHideToolbarLayout, updateBarModeIcon} from "../../layout/topBar";
 /// #endif
 import {fetchPost} from "../../util/fetch";
-import {loadAssets} from "../../util/assets";
+import {loadAssets, unloadThemeScript} from "../../util/assets";
+import {getFrontend} from "../../util/functions";
+import {shouldUnloadThemeScript} from "../../util/themeCompatibility";
 import {remountOpenSettingTab} from "../setting/mount";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 
@@ -48,38 +50,21 @@ const applyAppearanceConfig = async (data: Config.IAppearance) => {
         return;
     }
 
-    if (window.siyuan.config.appearance.themeJS) {
-        if (data.mode !== window.siyuan.config.appearance.mode ||
-            (data.mode === window.siyuan.config.appearance.mode && (
-                (data.mode === 0 && window.siyuan.config.appearance.themeLight !== data.themeLight) ||
-                (data.mode === 1 && window.siyuan.config.appearance.themeDark !== data.themeDark))
-            )
-        ) {
-            if (window.destroyTheme) {
-                try {
-                    await window.destroyTheme();
-                    window.destroyTheme = undefined;
-                    document.getElementById("themeScript").remove();
-                } catch (e) {
-                    console.error("destroyTheme error: " + e);
-                }
-            } else {
-                /// #if MOBILE
-                void reloadUI();
-                /// #else
-                void exportLayout({
-                    errorExit: false,
-                    cb() {
-                        window.location.reload();
-                    },
-                });
-                /// #endif
-                return;
-            }
-        }
+    const prevAppearance = window.siyuan.config.appearance;
+    if (shouldUnloadThemeScript(prevAppearance, data, getFrontend()) && !await unloadThemeScript()) {
+        /// #if MOBILE
+        void reloadUI();
+        /// #else
+        void exportLayout({
+            errorExit: false,
+            cb() {
+                window.location.reload();
+            },
+        });
+        /// #endif
+        return;
     }
 
-    const prevAppearance = window.siyuan.config.appearance;
     window.siyuan.config.appearance = data;
 
     document.getElementById("status")?.classList.toggle("fn__none", data.hideStatusBar);

@@ -132,8 +132,9 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 }
 
 type AppearanceTheme struct {
-	Name  string `json:"name"`  // daylight
-	Label string `json:"label"` // i18n display name
+	Name      string   `json:"name"`                // daylight
+	Label     string   `json:"label"`               // i18n display name
+	Frontends []string `json:"frontends,omitempty"` // 支持的前端
 }
 
 type AppearanceIcon struct {

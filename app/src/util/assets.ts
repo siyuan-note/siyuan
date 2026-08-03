@@ -22,6 +22,7 @@ import {setCodeTheme} from "../protyle/render/util";
 import {getBackend, getFrontend} from "./functions";
 import {getWorkspaceName} from "./processTitle";
 import {ensureSelectedCustomFont} from "./customFont";
+import {isCurrentThemeSupported, shouldUnloadThemeScript} from "./themeCompatibility";
 
 let headingNumberMeasurementRefreshTimer: number;
 const DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE = "U+25fd-25fe, U+2614-2615, U+2648-2653, U+267f, U+2693, U+26a1, " +
@@ -42,6 +43,49 @@ const scheduleHeadingNumberMeasurementRefresh = (styleElements: HTMLLinkElement[
         item.addEventListener("error", () => schedule(), {once: true});
     });
     schedule(styleElements.length > 0 ? Constants.TIMEOUT_LOAD : 0);
+};
+
+const getThemeScriptElements = () => Array.from(document.querySelectorAll<HTMLScriptElement>(
+    "script[src*='/appearance/themes/'][src*='/theme.js']"
+));
+
+const removeThemeScriptElements = () => {
+    getThemeScriptElements().forEach((item) => item.remove());
+};
+
+export const unloadThemeScript = async () => {
+    const themeScriptElement = document.getElementById("themeScript");
+    const themeScriptElements = getThemeScriptElements();
+    if (!themeScriptElement && !window.destroyTheme) {
+        themeScriptElements.forEach((item) => item.remove());
+        return true;
+    }
+    if (!window.destroyTheme) {
+        return false;
+    }
+    try {
+        await window.destroyTheme();
+        window.destroyTheme = undefined;
+        themeScriptElement?.remove();
+        removeThemeScriptElements();
+        return true;
+    } catch (error) {
+        console.error("destroyTheme error: " + error);
+        return false;
+    }
+};
+
+export const refreshThemeStyle = (themeAddress: string) => {
+    const appearance = window.siyuan.config.appearance;
+    if (!isCurrentThemeSupported(appearance, getFrontend())) {
+        return;
+    }
+    const isCustomTheme = (appearance.mode === 1 && appearance.themeDark !== "midnight") ||
+        (appearance.mode === 0 && appearance.themeLight !== "daylight");
+    const styleElement = document.getElementById(isCustomTheme ? "themeStyle" : "themeDefaultStyle") as HTMLLinkElement;
+    if (styleElement) {
+        styleElement.href = themeAddress;
+    }
 };
 
 export const loadAssets = (data: Config.IAppearance) => {
@@ -86,7 +130,9 @@ export const loadAssets = (data: Config.IAppearance) => {
         themeStylesChanged = true;
     }
     const styleElement = document.getElementById("themeStyle");
-    if ((data.mode === 1 && data.themeDark !== "midnight") || (data.mode === 0 && data.themeLight !== "daylight")) {
+    const themeSupported = isCurrentThemeSupported(data, getFrontend());
+    if (themeSupported && ((data.mode === 1 && data.themeDark !== "midnight") ||
+        (data.mode === 0 && data.themeLight !== "daylight"))) {
         const themeAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.css?v=${data.themeVer}`;
         if (styleElement) {
             if (!styleElement.getAttribute("href").startsWith(themeAddress)) {
@@ -135,14 +181,13 @@ export const loadAssets = (data: Config.IAppearance) => {
     /// #endif
     setCodeTheme();
 
-    const themeScriptElement = document.getElementById("themeScript");
     const themeScriptAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.js?v=${data.themeVer}`;
-    if (themeScriptElement) {
-        if (!themeScriptElement.getAttribute("src").startsWith(themeScriptAddress)) {
-            themeScriptElement.remove();
-            addScript(themeScriptAddress, "themeScript");
-        }
-    } else {
+    const themeScriptURL = new URL(themeScriptAddress, window.location.href).href;
+    const themeScriptElements = getThemeScriptElements();
+    if (!data.themeJS || !themeSupported) {
+        removeThemeScriptElements();
+    } else if (!themeScriptElements.some((item) => item.src === themeScriptURL)) {
+        removeThemeScriptElements();
         addScript(themeScriptAddress, "themeScript");
     }
 
@@ -203,31 +248,23 @@ export const initAssets = () => {
         fetchPost("/api/system/setAppearanceMode", {
             mode: OSTheme === "light" ? 0 : 1
         }, async response => {
-            if (window.siyuan.config.appearance.themeJS) {
-                if (window.destroyTheme) {
-                    try {
-                        await window.destroyTheme();
-                        window.destroyTheme = undefined;
-                        document.getElementById("themeScript").remove();
-                    } catch (e) {
-                        console.error("destroyTheme error: " + e);
-                    }
-                } else {
-                    /// #if !MOBILE
-                    exportLayout({
-                        cb() {
-                            window.location.reload();
-                        },
-                        errorExit: false,
-                    });
-                    /// #else
-                    window.location.reload();
-                    /// #endif
-                    return;
-                }
+            const nextAppearance = response.data.appearance as Config.IAppearance;
+            if (shouldUnloadThemeScript(window.siyuan.config.appearance, nextAppearance, getFrontend()) &&
+                !await unloadThemeScript()) {
+                /// #if !MOBILE
+                exportLayout({
+                    cb() {
+                        window.location.reload();
+                    },
+                    errorExit: false,
+                });
+                /// #else
+                window.location.reload();
+                /// #endif
+                return;
             }
-            window.siyuan.config.appearance = response.data.appearance;
-            loadAssets(response.data.appearance);
+            window.siyuan.config.appearance = nextAppearance;
+            loadAssets(nextAppearance);
         });
     });
 };

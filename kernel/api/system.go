@@ -1114,11 +1114,7 @@ func setAppearanceMode(c *gin.Context) {
 
 	mode := int(arg["mode"].(float64))
 	model.Conf.Appearance.Mode = mode
-	if 0 == mode {
-		model.Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, model.Conf.Appearance.ThemeLight, "theme.js"))
-	} else {
-		model.Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, model.Conf.Appearance.ThemeDark, "theme.js"))
-	}
+	model.LoadThemes()
 	model.Conf.Save()
 
 	ret.Data = map[string]any{

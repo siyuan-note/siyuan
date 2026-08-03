@@ -285,6 +285,17 @@ export const bazaar = {
             return `<span class="fn__space--small"></span><span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
         }
     },
+    _genReadmeFundingHTML(funding: string): string {
+        try {
+            const url = new URL(funding);
+            if (!["http:", "https:", "mailto:"].includes(url.protocol)) {
+                throw new Error("not an allowed URL protocol");
+            }
+            return `<a target="_blank" href="${escapeAttr(funding)}">${escapeHtml(funding)}</a>`;
+        } catch (e) {
+            return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="ft__primary fn__pointer">${escapeHtml(funding)}</span>`;
+        }
+    },
     _genIncompatibleChipHTML(item: IBazaarItem, source: "installed" | "bazaar") {
         const incompatible = source === "installed" ? item.installedIncompatible : item.bazaarIncompatible;
         if (!incompatible) {
@@ -467,7 +478,8 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             return "";
         }
         const ariaLabel = item ? this._genUpdateButtonAriaLabel(item) : window.siyuan.languages.update;
-        return `<div data-type="readme-update-slot" class="${item?.outdated ? "" : "fn__hidden"}">
+        return `<div data-type="readme-update-slot" class="${item?.outdated ? "" : "fn__none"}">
+    ${reserveSpace ? '<div class="fn__hr"></div>' : ""}
     <button ${item?.disallowUpdate ? `disabled aria-label="${ariaLabel}" data-position="north"` : ""} class="b3-button ariaLabel" style="width: 168px" data-type="install-t">${window.siyuan.languages.update}</button>
 </div>`;
     },
@@ -801,6 +813,12 @@ type="checkbox">
     <span class="fn__space--small"></span>
     ${formatCount(resourceData.downloads)}
 </div>` : "";
+        const packageSection = `<section class="item__meta-section">
+    <div class="item__meta-title">${window.siyuan.languages.bazaarPackageInfo}</div>
+    ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPackageName, displayData.name)}
+    ${displayData.author ? bazaar._genReadmeMetaRow(window.siyuan.languages.author, `<a href="${escapeAttr(urls.join("/"))}" target="_blank" title="Creator">${escapeHtml(displayData.author)}</a>`, true) : ""}
+    ${resourceData.preferredFunding ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarFunding, bazaar._genReadmeFundingHTML(resourceData.preferredFunding), true) : ""}
+</section>`;
         readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
     <div class="item__header fn__pointer" data-type="goBack">
         <svg class="b3-list-item__graphic"><use xlink:href="#iconLeft"></use></svg>
@@ -809,23 +827,10 @@ type="checkbox">
     <div class="fn__flex-1">
         <img class="item__img" src="${displayData.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
         <div>
-            <a href="${resourceData.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${escapeHtml(displayData.preferredName)}</a>
-        </div>
-        <div class="fn__hr"></div>
-        <div>
-            <a href="${resourceData.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${escapeHtml(displayData.name)}</a>
-        </div>
-        <div class="block__icons">
-            <span class="fn__flex-1"></span>
-            ${resourceData.preferredFunding ?
-                bazaar._genFundingHTML(resourceData.preferredFunding) :
-                '<span class="block__icon block__icon--show block__icon--text" style="cursor: default"><svg><use xlink:href="#iconAccount"></use></svg></span>'
-            }
-            <span class="fn__space"></span>
-            <a href="${urls.join("/")}" target="_blank" title="Creator">${escapeHtml(displayData.author)}</a>
-            <span class="fn__flex-1"></span>
+            <span class="item__title">${escapeHtml(displayData.preferredName)}</span>
         </div>
         <div class="item__meta">
+            ${packageSection}
             ${installSection}
             ${marketSection}
             ${compatibilitySection}
@@ -843,7 +848,6 @@ type="checkbox">
     </div>
     <div class="item__actions">
         ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
-        ${installed ? '<div class="fn__hr"></div>' : ""}
         ${bazaar._genReadmeUpdateButtonHTML(available, Boolean(installed))}
     </div>
 </div>

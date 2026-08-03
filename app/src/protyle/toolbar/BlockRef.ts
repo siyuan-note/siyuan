@@ -1,6 +1,7 @@
 import {ToolbarItem} from "./ToolbarItem";
 import {hintRef} from "../hint/extend";
 import {fixTableRange} from "../util/selection";
+import {isSameBlockRange} from "../../util/newFileSelection";
 
 export class BlockRef extends ToolbarItem {
     public element: HTMLElement;
@@ -9,10 +10,13 @@ export class BlockRef extends ToolbarItem {
         super(protyle, menuItem);
         // 不能用 getEventName，否则会导致光标位置变动到点击的文档中
         this.element.addEventListener("click", (event: MouseEvent & { changedTouches: MouseEvent[] }) => {
-            if (protyle.toolbar.range.toString() === "") {
+            if (protyle.toolbar.range.toString() === "" || this.element.hasAttribute("disabled")) {
                 return;
             }
             fixTableRange(protyle.toolbar.range);
+            if (!isSameBlockRange(protyle.toolbar.range)) {
+                return;
+            }
             hintRef(protyle.toolbar.range.toString(), protyle, "search");
             protyle.toolbar.element.classList.add("fn__none");
             event.stopPropagation();

@@ -1,6 +1,13 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
-import {entryCatalog, getEntryCatalogNode, getEntryParentPath, getEntryPaths} from "./catalog";
+import {
+    entryCatalog,
+    getEntryCatalogNode,
+    getEntryCatalogPathChain,
+    getEntryCatalogSection,
+    getEntryParentPath,
+    getEntryPaths,
+} from "./catalog";
 
 test("entry catalog paths are unique and indexed", () => {
     const paths: string[] = [];
@@ -27,6 +34,14 @@ test("simple profile follows the reviewed defaults", () => {
         "document.title.export.exportImage",
         "gutter.single.addToAgent",
         "gutter.single.turnInto.code",
+        "gutter.single.table.tableHeaderRow",
+        "gutter.single.table.tableHeaderColumn",
+        "gutter.single.table.alignTop",
+        "gutter.single.table.alignMiddle",
+        "gutter.single.table.alignBottom",
+        "gutter.single.table.useDefaultVerticalAlign",
+        "inline.text.more.tableHeaderRow",
+        "inline.text.more.tableHeaderColumn",
         "document.more.keepLazyLoad",
         "document.more.headingNumber",
         "docTree.notebook.sort.fileNameNatASC",
@@ -45,4 +60,17 @@ test("simple profile follows the reviewed defaults", () => {
     ];
     shown.forEach((path) => assert.equal(getEntryCatalogNode(path)?.simple, true, path));
     hidden.forEach((path) => assert.equal(getEntryCatalogNode(path)?.simple, false, path));
+});
+
+test("entry catalog resolves navigation columns for deeply nested entries", () => {
+    assert.equal(getEntryCatalogSection("gutter.single"), entryCatalog.find((item) => item.key === "gutter.single"));
+    assert.deepEqual(getEntryCatalogPathChain("gutter.single",
+        "gutter.single.turnInto.includeSublists.recursiveParagraph"), [
+        "gutter.single.turnInto",
+        "gutter.single.turnInto.includeSublists",
+        "gutter.single.turnInto.includeSublists.recursiveParagraph",
+    ]);
+    assert.deepEqual(getEntryCatalogPathChain("document.title",
+        "gutter.single.turnInto.includeSublists.recursiveParagraph"), []);
+    assert.deepEqual(getEntryCatalogPathChain("gutter.single", "gutter.single.missing"), []);
 });

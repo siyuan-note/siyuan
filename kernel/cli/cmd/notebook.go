@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -77,10 +78,23 @@ var notebookCreateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		if _, err = model.Mount(id); err != nil {
+			return fmt.Errorf("notebook [%s] was created but could not be opened: %w", id, err)
+		}
 		model.AppendPushReloadFiletreeEntry()
 		fmt.Println(id)
 		return nil
 	},
+}
+
+func formatNotebookWriteError(boxID string, err error) error {
+	if errors.Is(err, model.ErrBoxClosed) {
+		return fmt.Errorf("notebook [%s] is closed; run `notebook open --id %s` first", boxID, boxID)
+	}
+	if errors.Is(err, model.ErrBoxNotFound) {
+		return fmt.Errorf("notebook [%s] not found", boxID)
+	}
+	return err
 }
 
 var notebookRemoveCmd = &cobra.Command{

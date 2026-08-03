@@ -831,6 +831,34 @@ func setAssetsAttachmentDisposition(c *gin.Context, pathForBaseName string) {
 	c.Header("Content-Disposition", formatContentDispositionAttachment(filepath.Base(pathForBaseName)))
 }
 
+// assetScriptCapableExts 为可执行脚本的资产扩展名，禁止浏览器内联渲染，必须强制以附件形式返回
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-mjf3-jwmf-r6wf
+var assetScriptCapableExts = map[string]bool{
+	".cjs": true, ".htm": true, ".html": true, ".js": true, ".mjs": true,
+	".shtml": true, ".svg": true, ".xhtml": true, ".xml": true,
+}
+
+// isAssetInlineUnsafe 判断资产是否禁止浏览器内联渲染：
+// 可执行脚本的扩展名，或标准库无法识别 Content-Type 的扩展名（http.ServeFile 会内容嗅探，可能识别为 text/html 执行脚本）
+func isAssetInlineUnsafe(absPath string) bool {
+	ext := strings.ToLower(filepath.Ext(absPath))
+	if assetScriptCapableExts[ext] {
+		return true
+	}
+	return mime.TypeByExtension(ext) == ""
+}
+
+// secureAssetContentHeaders 统一为资产响应设置安全头：
+// 无条件加 X-Content-Type-Options: nosniff，可执行脚本的类型无条件强制附件下载；
+// absPath 用于判断内容类型，dispositionName 用于 Content-Disposition 文件名（加密笔记本场景为原始文件名）
+func secureAssetContentHeaders(context *gin.Context, absPath, dispositionName string) {
+	setAssetsAttachmentDisposition(context, dispositionName)
+	context.Header("X-Content-Type-Options", "nosniff")
+	if isAssetInlineUnsafe(absPath) {
+		context.Header("Content-Disposition", formatContentDispositionAttachment(filepath.Base(dispositionName)))
+	}
+}
+
 func isValidAssetRequestPath(requestPath string) bool {
 	relativePath := strings.TrimPrefix(requestPath, "/")
 	if relativePath == "" || relativePath == "." {
@@ -921,7 +949,7 @@ func serveAssets(ginServer *gin.Engine) {
 		}
 
 		// 返回原始文件
-		setAssetsAttachmentDisposition(context, p)
+		secureAssetContentHeaders(context, p, p)
 		http.ServeFile(context.Writer, context.Request, p)
 	})
 
@@ -931,6 +959,7 @@ func serveAssets(ginServer *gin.Engine) {
 		if serveEncryptedHistory(context, p) {
 			return
 		}
+		secureAssetContentHeaders(context, p, p)
 		http.ServeFile(context.Writer, context.Request, p)
 	})
 }
@@ -1036,11 +1065,11 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 		return true
 	}
 	// 下载时用原始文件名（查加密映射），查不到则退回磁盘名
+	dispositionName := absPath
 	if originalName := model.LookupAssetOriginalNameLocked(boxID, diskName); originalName != "" {
-		setAssetsAttachmentDisposition(context, originalName)
-	} else {
-		setAssetsAttachmentDisposition(context, absPath)
+		dispositionName = originalName
 	}
+	secureAssetContentHeaders(context, absPath, dispositionName)
 	contentType := mime.TypeByExtension(filepath.Ext(absPath))
 	if contentType == "" {
 		contentType = "application/octet-stream"
@@ -1119,6 +1148,7 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 		context.Status(http.StatusInternalServerError)
 		return true
 	}
+	secureAssetContentHeaders(context, absPath, absPath)
 	contentType := mime.TypeByExtension(filepath.Ext(absPath))
 	if contentType == "" {
 		contentType = "application/octet-stream"
@@ -1161,7 +1191,7 @@ func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool
 			}
 		}
 
-		setAssetsAttachmentDisposition(context, assetAbsPath)
+		secureAssetContentHeaders(context, assetAbsPath, assetAbsPath)
 		http.ServeFile(context.Writer, context.Request, thumbnailPath)
 		return true
 	}
@@ -1201,26 +1231,30 @@ func serveRepoDiff(ginServer *gin.Engine) {
 }
 
 func serveDebug(ginServer *gin.Engine) {
-	if "prod" == util.Mode {
-		// The production environment will no longer register `/debug/pprof/` https://github.com/siyuan-note/siyuan/issues/10152
+	// 调试端点默认不注册，仅 --enable-pprof 显式开启；即使开启也要求管理员鉴权 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-9cqq-p2hw-mj3f
+	if !util.EnablePprof {
 		return
 	}
 
-	ginServer.GET("/debug/pprof/", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/allocs", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/block", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/goroutine", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/heap", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/mutex", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/threadcreate", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/cmdline", gin.WrapF(pprof.Cmdline))
-	ginServer.GET("/debug/pprof/profile", gin.WrapF(pprof.Profile))
-	ginServer.GET("/debug/pprof/symbol", gin.WrapF(pprof.Symbol))
-	ginServer.GET("/debug/pprof/trace", gin.WrapF(pprof.Trace))
+	ginServer.GET("/debug/pprof/", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/allocs", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/block", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/goroutine", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/heap", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/mutex", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/threadcreate", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/cmdline", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Cmdline))
+	ginServer.GET("/debug/pprof/profile", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Profile))
+	ginServer.GET("/debug/pprof/symbol", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Symbol))
+	ginServer.GET("/debug/pprof/trace", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Trace))
 }
 
 func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer = melody.New()
+	// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
+	util.WebSocketServer.Upgrader.CheckOrigin = func(r *http.Request) bool {
+		return util.IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+	}
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
 
 	ginServer.GET("/ws", func(c *gin.Context) {

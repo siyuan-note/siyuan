@@ -7,7 +7,7 @@
 		"id": "20240530101000-gc0tuyd",
 		"title": "データバックアップ",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260803165036"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"Properties": {
 				"ID": "20240530101000-8fowrbc",
 				"id": "20240530101000-k3k2ztd",
-				"updated": "20240530101000"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 			"Properties": {
 				"ID": "20240530101000-0xlt5lu",
 				"id": "20240530101000-t8xga8c",
-				"updated": "20240530101000"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -133,7 +133,7 @@
 					"Properties": {
 						"ID": "20240530101000-ho2ujhs",
 						"id": "20240530101000-236te0m",
-						"updated": "20240530101000"
+						"updated": "20260803165036"
 					},
 					"Children": [
 						{
@@ -142,12 +142,12 @@
 							"Properties": {
 								"ID": "20240530101000-sa1nf4z",
 								"id": "20240530101000-ao85v8q",
-								"updated": "20240530101000"
+								"updated": "20260803165036"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -165,7 +165,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ タブを開き、バックアップしたいスナップショットを選択して "
+									"Data": " ​ タブを開き、バックアップしたいスナップショットを選択して "
 								},
 								{
 									"Type": "NodeTextMark",

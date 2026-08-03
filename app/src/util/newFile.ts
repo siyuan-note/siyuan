@@ -6,19 +6,26 @@ import {Editor} from "../editor";
 import {openFileById} from "../editor/util";
 import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #endif
-import {fetchPost} from "./fetch";
+import {fetchPost, fetchSyncPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
 import {Constants} from "../constants";
 import {replaceFileName, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
-import {NewDocTargetByHPath, NewDocTargetSubDoc, getNewDocTargetFromSavePath, getNewDocTargetFromTree} from "./parseNewDocTarget";
+import {
+    NewDocTargetByHPath,
+    NewDocTargetSubDoc,
+    getNewDocTargetFromSavePath,
+    getNewDocTargetFromTree,
+    isCurrentDocSubDocTarget
+} from "./parseNewDocTarget";
 import {focusByRange, selectAll} from "../protyle/util/selection";
 import {
     createNewFileSelectionContext,
     isNewFileSelectionValid,
     isRangeInEditor,
+    isSameBlockRange,
     isSameRange,
     NewFileSelectionContext
 } from "./newFileSelection";
@@ -152,6 +159,9 @@ export const newFileBySelect = (protyle: IProtyle, newFileName: string, context:
 
 export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "subDoc" | "configured",
                                      refSubtype: "d" | "s" = "d", name?: string) => {
+    if (!isSameBlockRange(range)) {
+        return;
+    }
     const nodeElement = hasClosestBlock(range.startContainer);
     if (!nodeElement) {
         return;
@@ -286,6 +296,55 @@ function getNewDocHPath(targetNotebookId: string, currentNotebookId: string, cur
         callback(hPathResponse.data);
     });
 }
+
+/** 判断配置的新建位置是否与在当前文档下直接创建子文档等价 */
+export const isConfiguredCreateTargetCurrentSubDoc = async (
+    protyle: IProtyle,
+    type: "doc" | "ref",
+) => {
+    if (!protyle.notebookId || !protyle.path) {
+        return false;
+    }
+    const savePathResponse = await fetchSyncPost(
+        type === "doc" ? "/api/filetree/getDocCreateSavePath" : "/api/filetree/getRefCreateSavePath",
+        {notebook: protyle.notebookId},
+    );
+    if (savePathResponse.code !== 0 || !savePathResponse.data) {
+        return false;
+    }
+    const targetNotebookId = savePathResponse.data.box as string;
+    if (targetNotebookId !== protyle.notebookId) {
+        return false;
+    }
+    const templatePath = (savePathResponse.data.path as string || "").trim();
+    if (!templatePath) {
+        return true;
+    }
+    const hPathResponse = await fetchSyncPost("/api/filetree/getHPathByPath", {
+        notebook: protyle.notebookId,
+        path: protyle.path,
+    });
+    if (hPathResponse.code !== 0 || typeof hPathResponse.data !== "string") {
+        return false;
+    }
+    const title = type === "ref" ? "__siyuan_ref_target__" : "";
+    const target = getNewDocTargetFromSavePath({
+        templatePath,
+        hPath: hPathResponse.data || "/",
+        targetNotebookId,
+        currentNotebookId: protyle.notebookId,
+        name: title || undefined,
+        hasFocusTarget: true,
+        currentPath: protyle.path,
+    });
+    return isCurrentDocSubDocTarget({
+        target,
+        currentNotebookId: protyle.notebookId,
+        currentPath: protyle.path,
+        currentHPath: hPathResponse.data || "/",
+        title,
+    });
+};
 
 function createNewDoc(request: NewDocRequest, templatePath: string, docCreateTemplatePath: string,
                       targetNotebookId: string, hPath: string) {

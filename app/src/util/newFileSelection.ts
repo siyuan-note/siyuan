@@ -33,6 +33,11 @@ export const isSameRange = (range: Range, targetRange: Range) => range.startCont
     range.startOffset === targetRange.startOffset && range.endContainer === targetRange.endContainer &&
     range.endOffset === targetRange.endOffset;
 
+export const isSameBlockRange = (range: Range) => {
+    const startBlockElement = hasClosestBlock(range.startContainer);
+    return !!startBlockElement && startBlockElement === hasClosestBlock(range.endContainer);
+};
+
 export const isRangeInEditor = (editorElement: Element, range: Range) => range.startContainer.isConnected &&
     range.endContainer.isConnected && editorElement.contains(range.startContainer) && editorElement.contains(range.endContainer);
 

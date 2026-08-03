@@ -452,7 +452,7 @@
         }
 
         &__title {
-          font-size: 24px;
+          font-size: 20px;
           word-break: break-all;
           color: var(--b3-theme-on-background);
         }
@@ -460,17 +460,17 @@
         &__img {
           height: 96px;
           width: 96px;
-          margin: 32px auto 32px;
+          margin: 24px auto 16px;
           border-radius: var(--b3-border-radius);
           flex-shrink: 0;
         }
 
         &__meta {
-          margin-top: 24px;
+          margin-top: 16px;
           text-align: left;
 
           &-section {
-            padding: 16px 0;
+            padding: 8px 0;
           }
 
           &-title {
@@ -557,16 +557,164 @@
   }
 
   &-entry-visibility {
-    &__groups {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 12px;
-      align-items: start;
+    &__view > .b3-dialog__header {
+      padding-left: 12px;
     }
 
-    &__group-title {
+    &__content {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    &__view .config-title {
+      margin: 0 0 16px;
+    }
+
+    &__content > .config-group + .config-group {
+      margin-top: 0;
+    }
+
+    &__browser {
+      background-color: var(--b3-theme-background);
+      border: 1px solid var(--b3-border-color);
+      border-radius: var(--b3-border-radius-b);
+      flex: 1;
+      margin: 0 24px 24px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    &__columns {
+      display: flex;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    &__column {
+      background-color: var(--b3-theme-surface);
+      border-right: 1px solid var(--b3-border-color);
+      display: flex;
+      flex: 0 0 clamp(260px, 24vw, 320px);
+      flex-direction: column;
+      min-width: 0;
+
+      &-title {
+        align-items: center;
+        border-bottom: 1px solid var(--b3-border-color);
+        box-sizing: border-box;
+        display: flex;
+        flex-shrink: 0;
+        font-weight: 600;
+        height: 40px;
+        overflow: hidden;
+        padding: 0 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      &-list {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+      }
+    }
+
+    &__location {
+      border-bottom: 1px solid var(--b3-border-color);
+      border-radius: 0;
+      box-sizing: border-box;
+      margin: 0;
+      min-height: 40px;
+      padding: 6px 12px;
+      width: 100%;
+
+      &--current {
+        background-color: var(--b3-theme-primary-lightest);
+        color: var(--b3-theme-primary);
+        font-weight: 600;
+      }
+    }
+
+    &__row {
+      align-items: center;
+      border-bottom: 1px solid var(--b3-border-color);
+      box-sizing: border-box;
+      display: flex;
+      min-height: 40px;
+      padding: 6px 8px 6px 12px;
+
+      &:hover {
+        background-color: var(--b3-list-hover);
+      }
+
+      &--current {
+        background-color: var(--b3-theme-primary-lightest);
+        color: var(--b3-theme-primary);
+        font-weight: 600;
+      }
+
+      &--navigable {
+        cursor: pointer;
+      }
+
+      &--toggleable {
+        cursor: pointer;
+
+        &:has([data-entry-readonly]),
+        &.config-entry-visibility__row--disabled {
+          cursor: not-allowed;
+        }
+      }
+
+      &--disabled .config-entry-visibility__navigate,
+      &--disabled .config-entry-visibility__label {
+        opacity: .54;
+      }
+    }
+
+    &__navigate {
       background-color: transparent;
-      color: var(--b3-theme-on-surface);
+      border: 0;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      min-width: 0;
+      padding: 0;
+      text-align: left;
+    }
+
+    &__navigate,
+    &__label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__row .b3-switch {
+      margin-left: 8px;
+    }
+
+    &__arrow {
+      margin-left: 4px;
+    }
+
+    &__arrow-space {
+      flex: 0 0 28px;
+    }
+
+    &__view [data-entry-readonly] {
+      cursor: not-allowed;
+      opacity: 1;
+    }
+
+    &__row--disabled [data-entry-readonly] {
+      opacity: .38;
     }
   }
 }

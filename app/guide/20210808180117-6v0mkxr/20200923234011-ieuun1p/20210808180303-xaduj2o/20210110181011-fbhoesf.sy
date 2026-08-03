@@ -6,7 +6,7 @@
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
 		"type": "doc",
-		"updated": "20260614204928"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180619-15jwt8e",
-				"updated": "20260613180619"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -187,7 +187,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180619-9fh070b",
-				"updated": "20260614204928"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -201,12 +201,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613180619-om57ubp",
-				"updated": "20260613180619"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Right-click a notebook and open \"Settings\", then configure under the new diary settings:"
+					"Data": "Right-click a notebook and open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, then configure under the new diary settings:"
 				}
 			]
 		},

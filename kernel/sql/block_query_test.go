@@ -68,3 +68,27 @@ func TestQueryLikeEscape(t *testing.T) {
 		}
 	}
 }
+
+func TestQueryPreservesOriginalErrorWithLimit(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatalf("open test database failed: %s", err)
+	}
+	testDB.SetMaxOpenConns(1)
+	defer testDB.Close()
+
+	if _, err = testDB.Exec("CREATE TABLE blocks (id TEXT)"); err != nil {
+		t.Fatalf("create blocks table failed: %s", err)
+	}
+
+	previousDB := db
+	db = testDB
+	defer func() {
+		db = previousDB
+	}()
+
+	_, err = Query("SELECT id, previous_id, next_id FROM blocks LIMIT 2", 10)
+	if err == nil || "no such column: previous_id" != err.Error() {
+		t.Fatalf("unexpected query error: %v", err)
+	}
+}

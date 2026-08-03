@@ -6,7 +6,7 @@
 		"id": "20211226122523-rl8356a",
 		"title": "在瀏覽器上使用",
 		"type": "doc",
-		"updated": "20221025093344"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122545-a65v8e1",
-				"updated": "20211225220755"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221025093315-nlguzfi",
-				"updated": "20221025093344"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -70,7 +70,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 後就可以直接在瀏覽器上使用了，如果需要在區域網內使用，將 "
+					"Data": " ​ 後就可以直接在瀏覽器上使用了，如果需要在區域網內使用，將 "
 				},
 				{
 					"Type": "NodeTextMark",

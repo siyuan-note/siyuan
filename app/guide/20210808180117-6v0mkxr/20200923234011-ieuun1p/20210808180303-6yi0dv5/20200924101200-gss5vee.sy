@@ -6,7 +6,7 @@
 		"id": "20200924101200-gss5vee",
 		"title": "Navigate in the Content Block",
 		"type": "doc",
-		"updated": "20250115164053"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -305,7 +305,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20200924101210-3qfiiat"
+				"id": "20200924101210-3qfiiat",
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -418,7 +419,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210106204950-gjw62fp"
+				"id": "20210106204950-gjw62fp",
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -436,7 +438,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210106204954-rpwfh3i",
-				"updated": "20221026221426"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{

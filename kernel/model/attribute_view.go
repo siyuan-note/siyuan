@@ -53,6 +53,11 @@ import (
 )
 
 func RemoveUnusedAttributeView(id string) {
+	// 防御性校验：ID 必须是合法的节点 ID 格式，防止通过路径穿越读取或删除任意文件
+	if !ast.IsNodeIDPattern(id) {
+		return
+	}
+
 	base := filepath.Join(util.DataDir, "storage", "av")
 	absPath := filepath.Join(base, id+".json")
 	if !filelock.IsExist(absPath) {

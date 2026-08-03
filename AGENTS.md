@@ -27,6 +27,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 1. **i18n:**
    - New keys go at the **top** of each `langs/*.json` object; add to every language file (reference `en.json`)
+   - Indent `langs/*.json` with tabs, using one tab per nesting level; do not use spaces for indentation
    - Exception: inside the `_kernel` object, append new entries at the **end** using the next incremental numeric key
    - Each language must be properly translated — do NOT copy the same text across all language files
    - Use three ASCII periods (`...`) for ellipses in all localized strings; do not use Unicode ellipsis characters (`…` or `……`)
@@ -43,6 +44,10 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 3. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
 4. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
    - When a feature adds or changes shortcuts, update the shortcut documentation in the user guide in the same change; if the appropriate section is unclear, ask the user where it should be placed
+   - Represent in-app UI navigation paths as segmented `kbd` text marks: use one `NodeTextMark` with `TextMarkType: "kbd"` per navigation level, and place a plain `NodeText` containing ` - ` between adjacent levels
+   - When a `kbd` path is embedded in prose, use exactly one ASCII space outside the path on each side when adjacent ordinary text exists; do not add an outer space at the start or end of a block
+   - Omit the left outer space when the first `kbd` immediately follows full-width punctuation (for example, `，` or `、`); apply this rule to every language, including Chinese and Japanese, but do not apply it to half-width punctuation
+   - Omit the right outer space when `kbd` is immediately followed by punctuation, whether full-width or half-width; keep the internal ` - ` separators of segmented UI paths unchanged
 5. **Git:**
    - When explicitly asked to commit, follow the style of recent commits (gitmoji prefix + subject, in English)
    - Append the full issue/PR URL to the end of the commit title (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; never put the URL in the commit body, and do not fabricate one

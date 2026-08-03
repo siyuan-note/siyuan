@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260613194213"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -2907,7 +2907,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240818174922-r0eubvc",
-				"updated": "20260613194213"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -2926,7 +2926,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818175612-1oygtbw",
-				"updated": "20250115145238"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -2949,7 +2949,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ ."
+					"Data": "​."
 				}
 			]
 		},

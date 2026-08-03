@@ -62,6 +62,7 @@ import {getEditableAVFields, openAVFieldEditor, updateAVFieldValue} from "./batc
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
 import {isMobile} from "../../../util/functions";
 import {getAVCurrentViewID} from "./viewVisibility";
+import {formatAVItemLinks, genAVItemLink} from "./itemLink";
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
@@ -761,6 +762,15 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
         return false;
     }
     const ids = primaryRows.map(item => item.blockID);
+    const databaseItemLinks = selectedItemInfos.map((item, index) => ({
+        content: primaryRows[index].content,
+        link: genAVItemLink(
+            blockElement.dataset.nodeId || "",
+            getAVCurrentViewID(blockElement),
+            item.itemID,
+            item.groupID,
+        ),
+    }));
     if (selectedItemInfos.length === 1 && !primaryRows[0].isDetached) {
         /// #if !MOBILE
         const blockId = ids[0];
@@ -812,20 +822,14 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
         iconHTML: "",
         label: window.siyuan.languages.copyDatabaseItemLink,
         click() {
-            const databaseBlockID = blockElement.dataset.nodeId;
-            const viewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
-                blockElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") || "";
-            const links = selectedItemInfos.map(item => {
-                const params = new URLSearchParams({
-                    avViewID: viewID,
-                    avItemID: item.itemID,
-                });
-                if (item.groupID) {
-                    params.set("avGroupID", item.groupID);
-                }
-                return `siyuan://blocks/${databaseBlockID}?${params.toString()}`;
-            });
-            writeText(links.join("\n"));
+            writeText(formatAVItemLinks(databaseItemLinks, false));
+        }
+    }, {
+        id: "copyDatabaseItemLinkInMd",
+        iconHTML: "",
+        label: window.siyuan.languages.copyDatabaseItemLinkInMd,
+        click() {
+            writeText(formatAVItemLinks(databaseItemLinks, true));
         }
     }];
     if (hasBlock) {

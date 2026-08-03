@@ -6,7 +6,7 @@
 		"id": "20230506211210-1roopyo",
 		"title": "插件",
 		"type": "doc",
-		"updated": "20250115152340"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -77,7 +77,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506211224-q293o5x",
-				"updated": "20250115152340"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -91,7 +91,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506211224-uqq704u",
-				"updated": "20250115152340"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -141,7 +141,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中啟用或禁用插件。"
+					"Data": " ​ 中啟用或禁用插件。"
 				}
 			]
 		},

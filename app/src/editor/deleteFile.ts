@@ -61,6 +61,12 @@ export const deleteFiles = async (liElements: Element[]) => {
                 deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"));
             } else {
                 const isHelpNotebook = Object.values(Constants.HELP_PATH).includes(itemNotebookId);
+                if (isHelpNotebook) {
+                    fetchPost("/api/notebook/removeNotebook", {
+                        notebook: itemNotebookId,
+                    });
+                    return;
+                }
                 const hasRef = await checkBlockRef({
                     scope: "notebook",
                     notebook: itemNotebookId,
@@ -68,13 +74,13 @@ export const deleteFiles = async (liElements: Element[]) => {
                 if (hasRef === undefined) {
                     return;
                 }
-                let tip = isHelpNotebook ? "" : `${window.siyuan.languages.confirmDeleteTip.replace("${x}", Lute.EscapeHTMLStr(getNotebookName(itemNotebookId)))}
+                let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", Lute.EscapeHTMLStr(getNotebookName(itemNotebookId)))}
 <div class="fn__hr"></div>
 <div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
                 if (hasRef) {
                     tip += getBlockRefWarningHTML();
                 }
-                confirmDialog(isHelpNotebook ? "" : window.siyuan.languages.deleteOpConfirm,
+                confirmDialog(window.siyuan.languages.deleteOpConfirm,
                     tip, () => {
                         fetchPost("/api/notebook/removeNotebook", {
                             notebook: itemNotebookId,

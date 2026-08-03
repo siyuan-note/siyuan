@@ -52,3 +52,16 @@ func TestNormalizeEntryVisibilityProfiles(t *testing.T) {
 		t.Fatalf("unexpected normalized profile: %+v", profile)
 	}
 }
+
+func TestNormalizeEntryVisibilityActiveCustomProfile(t *testing.T) {
+	entryVisibility := NormalizeEntryVisibility(&EntryVisibility{
+		Active: "custom",
+		Profiles: []*EntryVisibilityProfile{
+			{ID: "custom", Name: "Custom", Base: EntryVisibilityProfileSimple},
+		},
+	}, EntryVisibilityProfileFull)
+
+	if entryVisibility.Active != "custom" {
+		t.Fatalf("unexpected active profile: %s", entryVisibility.Active)
+	}
+}

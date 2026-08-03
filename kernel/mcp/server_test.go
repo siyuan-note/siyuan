@@ -129,6 +129,64 @@ func TestModernProtocolClient(t *testing.T) {
 	}
 }
 
+func TestToolOutputSchemaSerialization(t *testing.T) {
+	server, httpServer := newTestHTTPServer(t)
+	syncTool(server, "structured", &tools.Tool{
+		Name:         "structured",
+		Description:  "Return structured content",
+		InputSchema:  tools.ToolSchema{Type: "object"},
+		OutputSchema: &tools.ToolSchema{Type: "object"},
+		Handler: func(map[string]any) (tools.CallToolResult, error) {
+			return tools.CallToolResult{}, nil
+		},
+	})
+
+	body := `{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}`
+	response := postMCP(t, httpServer.URL, body, map[string]string{
+		"MCP-Protocol-Version": protocolVersion20260728,
+		"Mcp-Method":           "tools/list",
+	})
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("unexpected status: %d", response.StatusCode)
+	}
+	var listResponse struct {
+		Result struct {
+			Tools []map[string]json.RawMessage `json:"tools"`
+		} `json:"result"`
+	}
+	decodeResponse(t, response, &listResponse)
+
+	found := map[string]bool{}
+	for _, listedTool := range listResponse.Result.Tools {
+		var name string
+		if err := json.Unmarshal(listedTool["name"], &name); err != nil {
+			t.Fatal(err)
+		}
+		found[name] = true
+		outputSchema, hasOutputSchema := listedTool["outputSchema"]
+		switch name {
+		case "echo":
+			if hasOutputSchema {
+				t.Fatalf("tool without output schema exposed outputSchema: %s", outputSchema)
+			}
+		case "structured":
+			if !hasOutputSchema || string(outputSchema) == "null" {
+				t.Fatalf("tool output schema was not exposed: %s", outputSchema)
+			}
+			var schema map[string]any
+			if err := json.Unmarshal(outputSchema, &schema); err != nil {
+				t.Fatal(err)
+			}
+			if schema["type"] != "object" {
+				t.Fatalf("unexpected output schema: %#v", schema)
+			}
+		}
+	}
+	if !found["echo"] || !found["structured"] {
+		t.Fatalf("expected tools were not listed: %#v", found)
+	}
+}
+
 func TestInvalidDynamicToolDoesNotCrashServer(t *testing.T) {
 	server, httpServer := newTestHTTPServer(t)
 	syncTool(server, "invalid", &tools.Tool{

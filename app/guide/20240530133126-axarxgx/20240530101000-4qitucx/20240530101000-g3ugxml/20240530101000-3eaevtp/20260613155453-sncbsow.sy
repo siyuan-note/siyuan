@@ -6,7 +6,7 @@
 		"id": "20260613155453-sncbsow",
 		"title": "フィールドタイプ",
 		"type": "doc",
-		"updated": "20260715112109"
+		"updated": "20260803170332"
 	},
 	"Children": [
 		{
@@ -4697,7 +4697,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-wkp7gx0",
-				"updated": "20260613155453"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -4736,7 +4736,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-w7y2gve",
-				"updated": "20260613155453"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -4872,7 +4872,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-bi2ilu7",
-						"updated": "20260613155453"
+						"updated": "20260803170332"
 					},
 					"Children": [
 						{
@@ -4880,7 +4880,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-vdj6lin",
-								"updated": "20260715112109"
+								"updated": "20260803170332"
 							},
 							"Children": [
 								{
@@ -4890,7 +4890,43 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：「テンプレートスニペット」とは異なり、このテンプレートはデータベースエントリのデフォルト値入力のみに作用します。テンプレートフィールド内の HTML コンテンツはデフォルトでサニタイズされます。スクリプトを実行するには、「設定 - エディタ - 高度 - HTML コンテンツ内のスクリプトの実行を許可」を有効にしてください。ただし、クロスサイトスクリプティング（XSS）攻撃を避けるため、コードが安全であることを確認してから有効にしてください。"
+									"Data": "：「テンプレートスニペット」とは異なり、このテンプレートはデータベースエントリのデフォルト値入力のみに作用します。テンプレートフィールド内の HTML コンテンツはデフォルトでサニタイズされます。スクリプトを実行するには、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エディタ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "高度"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "HTML コンテンツ内のスクリプトの実行を許可"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " ​を有効にしてください。ただし、クロスサイトスクリプティング（XSS）攻撃を避けるため、コードが安全であることを確認してから有効にしてください。"
 								}
 							]
 						}

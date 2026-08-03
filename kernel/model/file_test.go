@@ -145,6 +145,20 @@ func TestValidateCreateDocDoesNotWrite(t *testing.T) {
 	}
 }
 
+func TestValidateCreateDocReportsClosedNotebook(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	boxConf := fixture.box.GetConf()
+	boxConf.Closed = true
+	if err := fixture.box.SaveConf(boxConf); err != nil {
+		t.Fatalf("close test notebook failed: %v", err)
+	}
+
+	err := ValidateCreateDoc(fixture.box.ID, "/20260718000003-abcdefg.sy", "Closed notebook document")
+	if !errors.Is(err, ErrBoxClosed) {
+		t.Fatalf("expected closed notebook to return ErrBoxClosed, got [%v]", err)
+	}
+}
+
 func TestGetBoxesByPathsStrictRejectsInvalidPaths(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	tests := []struct {

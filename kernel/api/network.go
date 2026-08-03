@@ -501,7 +501,10 @@ func wsProxy(c *gin.Context) {
 		forwardResponseHeaders(upgradeHeaders, targetResp.Header)
 	}
 	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool { return true },
+		// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
+		CheckOrigin: func(r *http.Request) bool {
+			return util.IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+		},
 	}
 	clientConn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, upgradeHeaders)
 	if upgradeErr != nil {

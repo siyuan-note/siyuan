@@ -418,6 +418,7 @@ func QueryNoLimitArgs(stmt string, args ...any) (ret []map[string]any, err error
 
 func Query(stmt string, limit int) (ret []map[string]any, err error) {
 	originalStmt := stmt
+	fallbackStmt := originalStmt
 	// Kernel API `/api/query/sql` support `||` operator https://github.com/siyuan-note/siyuan/issues/9662
 	// 这里为了支持 || 操作符，使用了另一个 sql 解析器，但是这个解析器无法处理 UNION https://github.com/siyuan-note/siyuan/issues/8226
 	// 考虑到 UNION 的使用场景不多，这里还是以支持 || 操作符为主
@@ -433,14 +434,20 @@ func Query(stmt string, limit int) (ret []map[string]any, err error) {
 
 			switch parsedStmt.(type) {
 			case *sqlparser.Select:
-				limitClause := getLimitClause(parsedStmt, limit)
 				slct := parsedStmt.(*sqlparser.Select)
+				if nil == slct.Limit || nil == slct.Limit.Rowcount {
+					fallbackStmt += " LIMIT " + strconv.Itoa(limit)
+				}
+				limitClause := getLimitClause(parsedStmt, limit)
 				slct.Limit = limitClause
 				stmt = sqlparser.String(slct)
 			case *sqlparser.Union:
 				// Kernel API `/api/query/sql` support `UNION` statement https://github.com/siyuan-note/siyuan/issues/8226
-				limitClause := getLimitClause(parsedStmt, limit)
 				union := parsedStmt.(*sqlparser.Union)
+				if nil == union.Limit || nil == union.Limit.Rowcount {
+					fallbackStmt += " LIMIT " + strconv.Itoa(limit)
+				}
+				limitClause := getLimitClause(parsedStmt, limit)
 				union.Limit = limitClause
 				stmt = sqlparser.String(union)
 			default:
@@ -454,6 +461,7 @@ func Query(stmt string, limit int) (ret []map[string]any, err error) {
 		case *sqlparser2.SelectStatement:
 			slct := parsedStmt2.(*sqlparser2.SelectStatement)
 			if nil == slct.LimitExpr {
+				fallbackStmt += " LIMIT " + strconv.Itoa(limit)
 				slct.LimitExpr = &sqlparser2.NumberLit{Value: strconv.Itoa(limit)}
 				serialized, ok := stringifySelectStatement(slct)
 				if !ok {
@@ -467,13 +475,15 @@ func Query(stmt string, limit int) (ret []map[string]any, err error) {
 	}
 
 	ret = []map[string]any{}
-	rows, err := query(stmt)
+	queryStmt := stmt
+	rows, err := query(queryStmt)
+	if err != nil && queryStmt != fallbackStmt {
+		queryStmt = fallbackStmt
+		rows, err = query(queryStmt)
+	}
 	if err != nil {
-		rows, err = query(originalStmt + " LIMIT " + strconv.Itoa(limit))
-		if err != nil {
-			logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
-			return
-		}
+		logging.LogWarnf("sql query [%s] failed: %s", queryStmt, err)
+		return
 	}
 	defer rows.Close()
 

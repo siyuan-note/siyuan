@@ -7,7 +7,7 @@
 		"id": "20240530101000-uxno1yp",
 		"title": "コンテンツブロックの参照",
 		"type": "doc",
-		"updated": "20250115145444"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -274,7 +274,7 @@
 			"Properties": {
 				"ID": "20240530101000-j9s9jy7",
 				"id": "20240530101000-k5rp4xa",
-				"updated": "20250115145444"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -305,7 +305,7 @@
 			"Properties": {
 				"ID": "20240530101000-8aawvbp",
 				"id": "20240530101000-1g2xgik",
-				"updated": "20240530101000"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -353,7 +353,7 @@
 					"Properties": {
 						"ID": "20240530101000-rtfyrw5",
 						"id": "20240530101000-wv6tqfe",
-						"updated": "20240530101000"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -362,7 +362,7 @@
 							"Properties": {
 								"ID": "20240530101000-icz4tux",
 								"id": "20240530101000-o9hcbto",
-								"updated": "20240530101000"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
@@ -399,7 +399,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ で設定できます (最大 "
+									"Data": " ​ で設定できます (最大 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -689,7 +689,7 @@
 			"Properties": {
 				"ID": "20240530101000-mhi5yzq",
 				"id": "20240530101000-ycwkmzo",
-				"updated": "20240530101000"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -704,12 +704,12 @@
 			"Properties": {
 				"ID": "20240530101000-7gm83g3",
 				"id": "20240530101000-trz1fni",
-				"updated": "20240530101000"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "​ "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -727,7 +727,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で "
+					"Data": " ​ で "
 				},
 				{
 					"Type": "NodeTextMark",

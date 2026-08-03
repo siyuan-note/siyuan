@@ -6,7 +6,7 @@
 		"id": "20260613211829-rjgkboa",
 		"title": "內容統計",
 		"type": "doc",
-		"updated": "20260613211902"
+		"updated": "20260803160439"
 	},
 	"Children": [
 		{
@@ -201,7 +201,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613211901-0d3goo1",
-				"updated": "20260613211901"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613211901-h26l8at",
-				"updated": "20260613211901"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -224,7 +224,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "︙"
 				},
 				{

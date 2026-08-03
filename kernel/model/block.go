@@ -793,10 +793,14 @@ func GetHeadingChildrenIDs(id string) (ret []string) {
 	if nil == heading || ast.NodeHeading != heading.Type {
 		return
 	}
+	return headingChildrenIDs(heading)
+}
 
-	children := treenode.HeadingChildren(heading)
-	nodes := append([]*ast.Node{}, children...)
-	for _, n := range nodes {
+func headingChildrenIDs(heading *ast.Node) (ret []string) {
+	for _, n := range treenode.HeadingChildren(heading) {
+		if !n.IsBlock() {
+			continue
+		}
 		ret = append(ret, n.ID)
 	}
 	return
@@ -1337,7 +1341,11 @@ func GetChildBlocksInBox(id, boxID string) (ret []*ChildBlock) {
 	if err != nil {
 		return
 	}
+	return getChildBlocksFromTree(id, tree)
+}
 
+func getChildBlocksFromTree(id string, tree *parse.Tree) (ret []*ChildBlock) {
+	ret = []*ChildBlock{}
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
 		return
@@ -1346,14 +1354,9 @@ func GetChildBlocksInBox(id, boxID string) (ret []*ChildBlock) {
 	if ast.NodeHeading == node.Type {
 		children := treenode.HeadingChildren(node)
 		for _, c := range children {
-			block := sql.BuildBlockFromNode(c, tree)
-			ret = append(ret, &ChildBlock{
-				ID:       c.ID,
-				Type:     treenode.TypeAbbr(c.Type.String()),
-				SubType:  treenode.SubTypeAbbr(c),
-				Content:  block.Content,
-				Markdown: block.Markdown,
-			})
+			if childBlock := childBlockFromNode(c, tree); nil != childBlock {
+				ret = append(ret, childBlock)
+			}
 		}
 		return
 	}
@@ -1363,20 +1366,26 @@ func GetChildBlocksInBox(id, boxID string) (ret []*ChildBlock) {
 	}
 
 	for c := node.FirstChild; nil != c; c = c.Next {
-		if !c.IsBlock() {
-			continue
+		if childBlock := childBlockFromNode(c, tree); nil != childBlock {
+			ret = append(ret, childBlock)
 		}
-
-		block := sql.BuildBlockFromNode(c, tree)
-		ret = append(ret, &ChildBlock{
-			ID:       c.ID,
-			Type:     treenode.TypeAbbr(c.Type.String()),
-			SubType:  treenode.SubTypeAbbr(c),
-			Content:  block.Content,
-			Markdown: block.Markdown,
-		})
 	}
 	return
+}
+
+func childBlockFromNode(node *ast.Node, tree *parse.Tree) *ChildBlock {
+	if !node.IsBlock() {
+		return nil
+	}
+
+	block := sql.BuildBlockFromNode(node, tree)
+	return &ChildBlock{
+		ID:       node.ID,
+		Type:     treenode.TypeAbbr(node.Type.String()),
+		SubType:  treenode.SubTypeAbbr(node),
+		Content:  block.Content,
+		Markdown: block.Markdown,
+	}
 }
 
 func GetTailChildBlocks(id string, n int) (ret []*ChildBlock) {
@@ -1400,7 +1409,11 @@ func GetTailChildBlocksInBox(id string, n int, boxID string) (ret []*ChildBlock)
 	if err != nil {
 		return
 	}
+	return getTailChildBlocksFromTree(id, n, tree)
+}
 
+func getTailChildBlocksFromTree(id string, n int, tree *parse.Tree) (ret []*ChildBlock) {
+	ret = []*ChildBlock{}
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
 		return
@@ -1410,14 +1423,11 @@ func GetTailChildBlocksInBox(id string, n int, boxID string) (ret []*ChildBlock)
 		children := treenode.HeadingChildren(node)
 		for i := len(children) - 1; 0 <= i; i-- {
 			c := children[i]
-			block := sql.BuildBlockFromNode(c, tree)
-			ret = append(ret, &ChildBlock{
-				ID:       c.ID,
-				Type:     treenode.TypeAbbr(c.Type.String()),
-				SubType:  treenode.SubTypeAbbr(c),
-				Content:  block.Content,
-				Markdown: block.Markdown,
-			})
+			childBlock := childBlockFromNode(c, tree)
+			if nil == childBlock {
+				continue
+			}
+			ret = append(ret, childBlock)
 			if n == len(ret) {
 				return
 			}
@@ -1430,18 +1440,11 @@ func GetTailChildBlocksInBox(id string, n int, boxID string) (ret []*ChildBlock)
 	}
 
 	for c := node.LastChild; nil != c; c = c.Previous {
-		if !c.IsBlock() {
+		childBlock := childBlockFromNode(c, tree)
+		if nil == childBlock {
 			continue
 		}
-
-		block := sql.BuildBlockFromNode(c, tree)
-		ret = append(ret, &ChildBlock{
-			ID:       c.ID,
-			Type:     treenode.TypeAbbr(c.Type.String()),
-			SubType:  treenode.SubTypeAbbr(c),
-			Content:  block.Content,
-			Markdown: block.Markdown,
-		})
+		ret = append(ret, childBlock)
 
 		if n == len(ret) {
 			return

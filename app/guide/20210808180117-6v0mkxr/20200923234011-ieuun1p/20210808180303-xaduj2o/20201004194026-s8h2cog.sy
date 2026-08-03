@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20231022211844"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -14,7 +14,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091447-8iiuxlt"
+				"id": "20210104091447-8iiuxlt",
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -28,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221025092947-gd0wmbi",
-				"updated": "20221025093054"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -194,7 +195,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104091447-dluat0m"
+				"id": "20210104091447-dluat0m",
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -212,7 +214,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091447-3vmymbk",
-				"updated": "20210522214406"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{

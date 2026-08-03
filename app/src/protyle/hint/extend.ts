@@ -30,7 +30,8 @@ const getHotkeyOrMarker = (hotkey: string, marker: string) => {
     return "";
 };
 
-export const hintSlash = (key: string, protyle: IProtyle) => {
+export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
+    const hideConfiguredCreate = typeof sourceOrHideConfiguredCreate === "boolean" && sourceOrHideConfiguredCreate;
     const allList: IHintData[] = [{
         filter: [window.siyuan.languages.template, "template", "模板", "moban", "muban", "mb"],
         id: "template",
@@ -382,10 +383,11 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     if (!hasPlugin) {
         allList.pop();
     }
+    const visibleList = hideConfiguredCreate ? allList.filter((item) => item.id !== "newFileRef") : allList;
     if (key === "") {
-        return allList;
+        return visibleList;
     }
-    return allList.filter((item) => {
+    return visibleList.filter((item) => {
         if (!item.filter) {
             return false;
         }
@@ -472,6 +474,7 @@ export const genHintItemHTML = (item: IBlock) => {
 
 export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
+    const createTarget = protyle.hint.prepareCreateTarget(protyle, "ref");
     protyle.hint.genLoading(protyle);
     let refParam: IObject;
     if (protyle.lite) {
@@ -493,52 +496,59 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
         refParam.notebook = protyle.notebookId;
     }
     fetchPost("/api/search/searchRefBlock", refParam, (response) => {
-        const dataList: IHintData[] = [];
-        let createItemCount = 0;
-        if (response.data.newDoc) {
-            const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
-            dataList.push({
-                value: `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
-                html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div>`,
-            });
-            createItemCount++;
-            dataList.push({
-                value: `((newSubDoc "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
-                html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div>`,
-            });
-            createItemCount++;
-        }
-        response.data.blocks.forEach((item: IBlock) => {
-            let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "")}</span>`;
-            if (source === "search") {
-                value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${key}${Constants.ZWSP}${item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "")}</span>`;
-            } else if (source === "av") {
-                let refText = item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
-                if (nodeElement) {
-                    refText = item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || refText;
-                }
-                value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
+        createTarget.promise.then((hideConfiguredCreate) => {
+            if (!createTarget.isCurrent()) {
+                return;
             }
-            dataList.push({
-                value,
-                html: genHintItemHTML(item),
+            const dataList: IHintData[] = [];
+            let createItemCount = 0;
+            if (response.data.newDoc) {
+                const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
+                if (!hideConfiguredCreate) {
+                    dataList.push({
+                        value: `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
+                        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div>`,
+                    });
+                    createItemCount++;
+                }
+                dataList.push({
+                    value: `((newSubDoc "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
+                    html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div>`,
+                });
+                createItemCount++;
+            }
+            response.data.blocks.forEach((item: IBlock) => {
+                let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "")}</span>`;
+                if (source === "search") {
+                    value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${key}${Constants.ZWSP}${item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "")}</span>`;
+                } else if (source === "av") {
+                    let refText = item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
+                    if (nodeElement) {
+                        refText = item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || refText;
+                    }
+                    value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
+                }
+                dataList.push({
+                    value,
+                    html: genHintItemHTML(item),
+                });
             });
+            if (source === "search") {
+                protyle.hint.splitChar = "((";
+                protyle.hint.lastIndex = -1;
+            }
+            if (dataList.length === 0) {
+                dataList.push({
+                    value: "",
+                    html: window.siyuan.languages.emptyContent,
+                });
+            } else if (createItemCount > 0 && dataList.length > createItemCount) {
+                dataList[createItemCount].focus = true;
+            }
+            protyle.hint.genHTML(dataList, protyle, true, source);
         });
-        if (source === "search") {
-            protyle.hint.splitChar = "((";
-            protyle.hint.lastIndex = -1;
-        }
-        if (dataList.length === 0) {
-            dataList.push({
-                value: "",
-                html: window.siyuan.languages.emptyContent,
-            });
-        } else if (createItemCount > 0 && dataList.length > createItemCount) {
-            dataList[createItemCount].focus = true;
-        }
-        protyle.hint.genHTML(dataList, protyle, true, source);
     });
     return [];
 };

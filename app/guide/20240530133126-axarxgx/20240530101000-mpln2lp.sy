@@ -8,7 +8,7 @@
 		"id": "20240530101000-mpln2lp",
 		"title": "用語集",
 		"type": "doc",
-		"updated": "20260614111442"
+		"updated": "20260803170332"
 	},
 	"Children": [
 		{
@@ -73,7 +73,7 @@
 			"Properties": {
 				"ID": "20240530101000-232agxh",
 				"id": "20240530101000-fidycup",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -594,7 +594,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111408-8a0yvi6",
-				"updated": "20260614111408"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -636,12 +636,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111408-guewqrn",
-				"updated": "20260614111408"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源では、仮想参照はコンテンツブロックの名前、エイリアス、アンカーテキストに基づいて自動的に検出され、エディタでは破線の下線で表示されます。ホバーすると対応するコンテンツブロックのプレビューが表示され、クリックすると正式なブロック参照に変換できます。[設定 - エディタ - 双方向リンク - 仮想参照] でオン/オフを切り替えられます。"
+					"Data": "思源では、仮想参照はコンテンツブロックの名前、エイリアス、アンカーテキストに基づいて自動的に検出され、エディタでは破線の下線で表示されます。ホバーすると対応するコンテンツブロックのプレビューが表示され、クリックすると正式なブロック参照に変換できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "双方向リンク"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "仮想参照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ でオン/オフを切り替えられます。"
 				}
 			]
 		},

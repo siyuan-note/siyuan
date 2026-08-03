@@ -34,6 +34,32 @@ export type NewDocTargetSubDoc = {
 
 export type NewDocTarget = NewDocTargetByHPath | NewDocTargetSubDoc;
 
+/** 判断配置路径的解析结果是否与在当前文档下直接创建子文档等价 */
+export const isCurrentDocSubDocTarget = (request: {
+    target: NewDocTarget;
+    currentNotebookId: string;
+    currentPath: string;
+    currentHPath: string;
+    title: string;
+}) => {
+    const {target} = request;
+    if (target.targetNotebookId !== request.currentNotebookId || target.title !== request.title) {
+        return false;
+    }
+    if (target.kind === "subDoc") {
+        return target.parentPath === request.currentPath;
+    }
+
+    const segments = target.hPath.split("/").filter(Boolean);
+    if (target.title) {
+        segments.pop();
+    }
+    const parentHPath = segments.length === 0 ? "/" : "/" + segments.join("/");
+    const currentHPathSegments = mergePathSegments([], request.currentHPath.split("/").filter(Boolean));
+    const currentHPath = currentHPathSegments.length === 0 ? "/" : "/" + currentHPathSegments.join("/");
+    return parentHPath === currentHPath;
+};
+
 /** 按保存路径配置解析新建目标 */
 export const getNewDocTargetFromSavePath = (request: {
     templatePath: string;

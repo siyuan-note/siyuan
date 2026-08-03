@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260715112109"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -1216,7 +1216,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20250330192531"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1305,7 +1305,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-d5t39y5",
-				"updated": "20250330192535"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1356,7 +1356,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240513101855-sh0lm1f",
-				"updated": "20240513102037"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1726,7 +1726,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429115218-ydwuros",
-				"updated": "20251230141912"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1773,7 +1773,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240427231112-lcwev4m",
-				"updated": "20240427231144"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1785,7 +1785,7 @@
 					},
 					"Properties": {
 						"id": "20240427231112-q60pwo8",
-						"updated": "20240427231144"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -1793,7 +1793,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427231112-e7j3mqt",
-								"updated": "20260715112109"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{

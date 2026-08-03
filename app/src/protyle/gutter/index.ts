@@ -2052,7 +2052,7 @@ export class Gutter {
                     icon: "iconTable",
                     label: window.siyuan.languages.table,
                     submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range,
-                        !isEntryVisible("gutter.single.table.title")).menus as IMenu[]
+                        !isEntryVisible("gutter.single.table.title"), true).menus as IMenu[]
                 }).element);
             }
         } else if (type === "NodeAttributeView") {

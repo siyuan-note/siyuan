@@ -5,21 +5,17 @@
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 package server
 
 import (
+	"mime"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -91,5 +87,89 @@ func TestAssetRequestPathURLDecoding(t *testing.T) {
 				t.Fatalf("GET %q returned %d, want %d", test.requestURL, recorder.Code, test.wantStatus)
 			}
 		})
+	}
+}
+
+func TestSecureAssetContentHeadersForcesAttachmentOnScriptCapableAssets(t *testing.T) {
+	// 可执行脚本的资产必须强制附件下载，禁止浏览器同源内联渲染
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-mjf3-jwmf-r6wf
+	cases := map[string]string{
+		"test.html":  "<script>fetch('/api/system/getConf')</script>",
+		"test.xhtml": "<script>fetch('/api/system/getConf')</script>",
+		"test.js":    "fetch('/api/system/getConf')",
+		"test.svg":   "<svg xmlns='http://www.w3.org/2000/svg'><script>fetch('/api/system/getConf')</script></svg>",
+	}
+	for name, content := range cases {
+		recorder := httptest.NewRecorder()
+		context, _ := gin.CreateTestContext(recorder)
+		context.Request = httptest.NewRequest(http.MethodGet, "/assets/"+name, nil)
+		assetPath := filepath.Join(t.TempDir(), name)
+		if err := os.WriteFile(assetPath, []byte(content), 0644); err != nil {
+			t.Fatalf("write test asset failed: %v", err)
+		}
+		secureAssetContentHeaders(context, assetPath, assetPath)
+		if !strings.HasPrefix(recorder.Header().Get("Content-Disposition"), "attachment") {
+			t.Fatalf("asset [%s] must be forced to download, got Content-Disposition %q", name, recorder.Header().Get("Content-Disposition"))
+		}
+		if recorder.Header().Get("X-Content-Type-Options") != "nosniff" {
+			t.Fatalf("asset [%s] missing X-Content-Type-Options header", name)
+		}
+	}
+}
+
+func TestSecureAssetContentHeadersAllowsInlineSafeAssets(t *testing.T) {
+	// 图片、音视频、PDF 等安全类型保持内联渲染，但仍需 nosniff
+	cases := []string{"test.png", "test.jpg", "test.webp", "test.mp4", "test.mp3", "test.pdf", "test.txt"}
+	for _, name := range cases {
+		recorder := httptest.NewRecorder()
+		context, _ := gin.CreateTestContext(recorder)
+		context.Request = httptest.NewRequest(http.MethodGet, "/assets/"+name, nil)
+		assetPath := filepath.Join(t.TempDir(), name)
+		if err := os.WriteFile(assetPath, []byte("test"), 0644); err != nil {
+			t.Fatalf("write test asset failed: %v", err)
+		}
+		secureAssetContentHeaders(context, assetPath, assetPath)
+		if cd := recorder.Header().Get("Content-Disposition"); strings.HasPrefix(cd, "attachment") {
+			t.Fatalf("safe asset [%s] must stay inline, got Content-Disposition %q", name, cd)
+		}
+		if recorder.Header().Get("X-Content-Type-Options") != "nosniff" {
+			t.Fatalf("safe asset [%s] missing X-Content-Type-Options header", name)
+		}
+	}
+}
+
+func TestSecureAssetContentHeadersForcesAttachmentOnUnknownExtension(t *testing.T) {
+	// 无法识别 Content-Type 的扩展名会触发内容嗅探，可能被识别为 text/html，因此必须强制附件下载
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+	context.Request = httptest.NewRequest(http.MethodGet, "/assets/payload.xyz", nil)
+	assetPath := filepath.Join(t.TempDir(), "payload.xyz")
+	if err := os.WriteFile(assetPath, []byte("<script>alert(1)</script>"), 0644); err != nil {
+		t.Fatalf("write test asset failed: %v", err)
+	}
+	if mime.TypeByExtension(".xyz") != "" {
+		t.Fatalf("test precondition failed: .xyz unexpectedly has a MIME type")
+	}
+	secureAssetContentHeaders(context, assetPath, assetPath)
+	if !strings.HasPrefix(recorder.Header().Get("Content-Disposition"), "attachment") {
+		t.Fatalf("unknown-extension asset must be forced to download, got Content-Disposition %q", recorder.Header().Get("Content-Disposition"))
+	}
+	if recorder.Header().Get("X-Content-Type-Options") != "nosniff" {
+		t.Fatalf("unknown-extension asset missing X-Content-Type-Options header")
+	}
+}
+
+func TestSecureAssetContentHeadersKeepsExplicitDownload(t *testing.T) {
+	// 显式携带 download=true 时安全类型也应返回 attachment
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+	context.Request = httptest.NewRequest(http.MethodGet, "/assets/test.png?download=true", nil)
+	assetPath := filepath.Join(t.TempDir(), "test.png")
+	if err := os.WriteFile(assetPath, []byte("png"), 0644); err != nil {
+		t.Fatalf("write test asset failed: %v", err)
+	}
+	secureAssetContentHeaders(context, assetPath, assetPath)
+	if !strings.HasPrefix(recorder.Header().Get("Content-Disposition"), "attachment") {
+		t.Fatalf("explicit download=true must return attachment, got Content-Disposition %q", recorder.Header().Get("Content-Disposition"))
 	}
 }

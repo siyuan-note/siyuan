@@ -200,6 +200,7 @@ func loadTreeByData(localPath string, data []byte, luteEngine *lute.Lute) (ret *
 
 var (
 	ErrBoxNotFound   = errors.New("notebook not found")
+	ErrBoxClosed     = errors.New("notebook closed")
 	ErrBlockNotFound = errors.New("block not found")
 	ErrTreeNotFound  = errors.New("tree not found")
 	ErrIndexing      = errors.New("indexing")

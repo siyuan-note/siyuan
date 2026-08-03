@@ -47,6 +47,16 @@ func GetBoxByName(name string) (ret *Box) {
 	return
 }
 
+func getOpenedBox(boxID string) (ret *Box, err error) {
+	if ret = Conf.Box(boxID); nil != ret {
+		return
+	}
+	if nil != Conf.GetBox(boxID) {
+		return nil, ErrBoxClosed
+	}
+	return nil, ErrBoxNotFound
+}
+
 func CreateBox(name string) (id string, err error) {
 	return createBox(name, true)
 }

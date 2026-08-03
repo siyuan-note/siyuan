@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20260720201253"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -154,7 +154,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120326-oxyzckb",
-				"updated": "20220615120330"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -169,7 +169,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120326-dopr4db",
-				"updated": "20220615120326"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135308-30uwxvd",
-				"updated": "20240402174245"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -196,7 +196,7 @@
 					},
 					"Properties": {
 						"id": "20220501135308-kwaramc",
-						"updated": "20220831210614"
+						"updated": "20260803163440"
 					},
 					"Children": [
 						{
@@ -204,7 +204,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135308-yr7v67z",
-								"updated": "20220831210614"
+								"updated": "20260803163440"
 							},
 							"Children": [
 								{
@@ -244,7 +244,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ make adjustments), and the suffix of the history folder is "
+									"Data": " ​ make adjustments), and the suffix of the history folder is "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -680,7 +680,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091559-kgrtuyh",
-				"updated": "20220615120446"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -995,7 +995,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-rhii2c7",
-				"updated": "20220615120602"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1009,7 +1009,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-mjy7por",
-				"updated": "20220615120602"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1050,7 +1050,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-3fqyf3h",
-				"updated": "20260720201253"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1119,7 +1119,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120602-drz9hwc",
-				"updated": "20220615120658"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1134,7 +1134,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-iya2886",
-				"updated": "20220615120602"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1148,7 +1148,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-wipwu6g",
-				"updated": "20220615120742"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1573,7 +1573,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-nhnnujh",
-				"updated": "20230422102056"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -1588,7 +1588,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422101614-mdijztr",
-				"updated": "20230422102255"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -1600,7 +1600,7 @@
 					},
 					"Properties": {
 						"id": "20230422101614-5lwp8u3",
-						"updated": "20230422102255"
+						"updated": "20260803163440"
 					},
 					"Children": [
 						{
@@ -1608,12 +1608,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422101614-5kvwhn7",
-								"updated": "20230422102255"
+								"updated": "20260803163440"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1640,7 +1640,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ will delete all unreferenced snapshots and related data objects. \"Referenced snapshots\" refer to snapshots pointed to under repo/refs/:"
+									"Data": " ​ will delete all unreferenced snapshots and related data objects. \"Referenced snapshots\" refer to snapshots pointed to under repo/refs/:"
 								}
 							]
 						},

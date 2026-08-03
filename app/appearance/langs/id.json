@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "Profil bawaan bersifat hanya-baca. Buat salinan untuk menyesuaikannya",
 	"tableHeaderRow": "Baris tajuk",
 	"tableHeaderColumn": "Kolom tajuk",
 	"copyDatabaseItemLinkInMd": "Salin tautan Markdown item",

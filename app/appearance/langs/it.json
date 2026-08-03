@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "I profili integrati sono di sola lettura. Creane una copia per personalizzarli",
 	"tableHeaderRow": "Riga di intestazione",
 	"tableHeaderColumn": "Colonna di intestazione",
 	"copyDatabaseItemLinkInMd": "Copia collegamento Markdown dell’elemento",

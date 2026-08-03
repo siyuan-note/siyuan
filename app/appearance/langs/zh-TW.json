@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "內建方案僅供檢視，如需調整請先建立副本",
 	"tableHeaderRow": "標題列",
 	"tableHeaderColumn": "標題欄",
 	"copyDatabaseItemLinkInMd": "複製條目 Markdown 連結",

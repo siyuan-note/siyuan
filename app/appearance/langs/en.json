@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "Built-in profiles are read-only. Create a copy to customize one",
 	"tableHeaderRow": "Header row",
 	"tableHeaderColumn": "Header column",
 	"copyDatabaseItemLinkInMd": "Copy item Markdown link",

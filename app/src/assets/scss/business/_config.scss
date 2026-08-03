@@ -557,6 +557,15 @@
   }
 
   &-entry-visibility {
+    &__view > .b3-dialog__header {
+      padding-left: 12px;
+    }
+
+    &__view .config-title {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
     &__groups {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -567,6 +576,15 @@
     &__group-title {
       background-color: transparent;
       color: var(--b3-theme-on-surface);
+    }
+
+    &__view [data-entry-readonly] {
+      cursor: not-allowed;
+      opacity: 1;
+    }
+
+    &__view label:has(> [data-entry-readonly]) {
+      cursor: not-allowed !important;
     }
   }
 }

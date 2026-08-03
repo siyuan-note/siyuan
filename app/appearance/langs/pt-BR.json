@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "Os perfis integrados são somente leitura. Crie uma cópia para personalizá-los",
 	"tableHeaderRow": "Linha de cabeçalho",
 	"tableHeaderColumn": "Coluna de cabeçalho",
 	"copyDatabaseItemLinkInMd": "Copiar link Markdown do item",

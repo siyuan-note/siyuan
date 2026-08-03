@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "内置方案仅供查看，如需调整请先创建副本",
 	"tableHeaderRow": "标题行",
 	"tableHeaderColumn": "标题列",
 	"copyDatabaseItemLinkInMd": "复制条目 Markdown 链接",

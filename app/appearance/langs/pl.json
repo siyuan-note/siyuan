@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "Profile wbudowane są tylko do odczytu. Utwórz kopię, aby je dostosować",
 	"tableHeaderRow": "Wiersz nagłówka",
 	"tableHeaderColumn": "Kolumna nagłówka",
 	"copyDatabaseItemLinkInMd": "Kopiuj link Markdown elementu",

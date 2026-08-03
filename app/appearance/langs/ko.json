@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "기본 제공 프로필은 읽기 전용입니다. 사용자 지정하려면 사본을 만드세요",
 	"tableHeaderRow": "머리글 행",
 	"tableHeaderColumn": "머리글 열",
 	"copyDatabaseItemLinkInMd": "항목 Markdown 링크 복사",

@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "Los perfiles integrados son de solo lectura. Crea una copia para personalizarlos",
 	"tableHeaderRow": "Fila de encabezado",
 	"tableHeaderColumn": "Columna de encabezado",
 	"copyDatabaseItemLinkInMd": "Copiar enlace Markdown del elemento",

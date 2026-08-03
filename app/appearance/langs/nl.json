@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "Ingebouwde profielen zijn alleen-lezen. Maak een kopie om ze aan te passen",
 	"tableHeaderRow": "Koprij",
 	"tableHeaderColumn": "Kopkolom",
 	"copyDatabaseItemLinkInMd": "Markdown-link van item kopiëren",

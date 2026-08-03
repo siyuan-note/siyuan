@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "Yerleşik profiller salt okunurdur. Özelleştirmek için bir kopya oluşturun",
 	"tableHeaderRow": "Başlık satırı",
 	"tableHeaderColumn": "Başlık sütunu",
 	"copyDatabaseItemLinkInMd": "Öğe Markdown bağlantısını kopyala",

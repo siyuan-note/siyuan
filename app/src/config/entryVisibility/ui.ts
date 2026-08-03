@@ -137,7 +137,7 @@ const profileCard = (
     base: Config.TEntryVisibilityBase,
     builtin: boolean,
     active: boolean,
-) => `<div class="b3-card${active ? " b3-card--current" : ""}" data-profile-id="${escapeAttr(id)}"${builtin ? "" : ' data-action="edit"'}>
+) => `<div class="b3-card${active ? " b3-card--current" : ""}" data-profile-id="${escapeAttr(id)}" data-action="${builtin ? "view" : "edit"}">
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             <div class="fn__ellipsis config-name">${escapeHtml(name)}</div>
@@ -170,7 +170,8 @@ const renderProfileCards = (root: HTMLElement) => {
 };
 
 const renderEntryRow = (profile: Config.IEntryVisibilityProfile, prefix: string, item: IEntryCatalogNode,
-                        entryLocation: string, groupHeader = false, parentPath?: string): string => {
+                        entryLocation: string, groupHeader = false, parentPath?: string,
+                        readOnly = false): string => {
     const path = `${prefix}.${item.key}`;
     const label = item.label();
     const checked = typeof profile.entries[path] === "boolean"
@@ -182,30 +183,35 @@ const renderEntryRow = (profile: Config.IEntryVisibilityProfile, prefix: string,
         ${groupHeader ? `<span class="b3-label__text">${window.siyuan.languages.entrySubmenu}</span>` : ""}
         <span class="b3-label__text fn__none" data-entry-location>${escapeHtml(entryLocation)}</span>
     </span>
-    <input class="b3-switch" type="checkbox" data-entry-path="${escapeAttr(path)}"${parentPath ? ` data-entry-parent-path="${escapeAttr(parentPath)}"` : ""}${checked ? " checked" : ""}>
+    <input class="b3-switch" type="checkbox" data-entry-path="${escapeAttr(path)}"${parentPath ? ` data-entry-parent-path="${escapeAttr(parentPath)}"` : ""}${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}${checked ? " checked" : ""}>
 </label>`;
 };
 
 const renderSubmenuGroups = (profile: Config.IEntryVisibilityProfile, prefix: string, item: IEntryCatalogNode,
-                             sectionLabel: string, parents: string[] = [], parentPath?: string): string => {
+                             sectionLabel: string, parents: string[] = [], parentPath?: string,
+                             readOnly = false): string => {
     const path = `${prefix}.${item.key}`;
     const label = item.label();
     const locationParts = [sectionLabel, ...parents, label];
     const directChildren = item.children?.filter((child) => !child.children) || [];
     const nestedChildren = item.children?.filter((child) => child.children) || [];
     const group = `<div class="config-items" data-entry-group>
-    ${renderEntryRow(profile, prefix, item, locationParts.join(" - "), true, parentPath)}
+    ${renderEntryRow(profile, prefix, item, locationParts.join(" - "), true, parentPath, readOnly)}
     ${directChildren.map((child) => renderEntryRow(profile, path, child,
-        [...locationParts, child.label()].join(" - "), false, path)).join("")}
+        [...locationParts, child.label()].join(" - "), false, path, readOnly)).join("")}
 </div>`;
     return `${group}${nestedChildren.map((child) => renderSubmenuGroups(profile, path, child, sectionLabel,
-        [...parents, label], path)).join("")}`;
+        [...parents, label], path, readOnly)).join("")}`;
 };
 
 const updateEntryDependencies = (sections: HTMLElement) => {
     const switches = Array.from(sections.querySelectorAll<HTMLInputElement>("[data-entry-path]"));
     const switchesByPath = new Map(switches.map((item) => [item.dataset.entryPath, item]));
     switches.forEach((item) => {
+        if (item.hasAttribute("data-entry-readonly")) {
+            item.disabled = false;
+            return;
+        }
         const parentPath = item.dataset.entryParentPath;
         if (!parentPath) {
             item.disabled = false;
@@ -216,7 +222,8 @@ const updateEntryDependencies = (sections: HTMLElement) => {
     });
 };
 
-const renderEntryGroups = (profile: Config.IEntryVisibilityProfile, section: typeof entryCatalog[number]) => {
+const renderEntryGroups = (profile: Config.IEntryVisibilityProfile, section: typeof entryCatalog[number],
+                           readOnly = false) => {
     const sectionLabel = section.label();
     const mainMenu = window.siyuan.languages.mainMenu;
     const groups: string[] = [];
@@ -230,14 +237,14 @@ const renderEntryGroups = (profile: Config.IEntryVisibilityProfile, section: typ
         <div class="config-name">${mainMenu}</div>
     </div>
     ${mainItems.map((item) => renderEntryRow(profile, section.key, item,
-        [sectionLabel, mainMenu, item.label()].join(" - "))).join("")}
+        [sectionLabel, mainMenu, item.label()].join(" - "), false, undefined, readOnly)).join("")}
 </div>`);
         mainItems = [];
     };
     section.children.forEach((item) => {
         if (item.children) {
             flushMainItems();
-            groups.push(renderSubmenuGroups(profile, section.key, item, sectionLabel));
+            groups.push(renderSubmenuGroups(profile, section.key, item, sectionLabel, [], undefined, readOnly));
         } else {
             mainItems.push(item);
         }
@@ -247,18 +254,26 @@ const renderEntryGroups = (profile: Config.IEntryVisibilityProfile, section: typ
 };
 
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
+    const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
     const existing = profileID
         ? window.siyuan.config.appearance.entryVisibility.profiles.find((item) => item.id === profileID)
         : undefined;
-    const draft = existing
+    const draft: Config.IEntryVisibilityProfile = builtin
+        ? {
+            id: profileID,
+            name: baseLabel(profileID),
+            base: profileID,
+            entries: createEntryProfileSnapshot(profileID),
+        }
+        : existing
         ? JSON.parse(JSON.stringify(existing)) as Config.IEntryVisibilityProfile
         : createProfile(ENTRY_PROFILE_SIMPLE);
     const initialJSON = JSON.stringify(draft);
-    const creating = !existing;
+    const creating = !builtin && !existing;
     const view = createEntryView(root);
     const body = view.querySelector<HTMLElement>(".b3-dialog__body");
     body.innerHTML = `<div class="b3-dialog__content" style="height:100%;box-sizing:border-box;overflow:auto;padding:0">
-    <div class="config-group">
+    ${builtin ? "" : `<div class="config-group">
         <div class="config-title">${creating ? window.siyuan.languages.entryCreateProfile : escapeHtml(draft.name)}</div>
         <div class="config-items">
             <label class="fn__flex b3-label config-item config-wrap">
@@ -276,31 +291,34 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
                 </select>` : `<div class="fn__size200">${baseLabel(draft.base)}</div>`}
             </label>
         </div>
-    </div>
+    </div>`}
     <div class="config-group">
+        ${builtin ? `<div class="config-title">${escapeHtml(draft.name)}</div>` : ""}
         <div class="fn__flex">
             <input class="b3-text-field fn__flex-1" data-type="entry-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
-            <span class="fn__space"></span>
-            <button class="b3-button b3-button--outline" data-action="restore">${window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base))}</button>
+            ${builtin ? "" : `<span class="fn__space"></span>
+            <button class="b3-button b3-button--outline" data-action="restore">${window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base))}</button>`}
         </div>
     </div>
     <div data-type="entry-sections"></div>
 </div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button>
+    ${builtin ? `<button class="b3-button b3-button--text" data-action="cancel">${window.siyuan.languages.close}</button>` : `<button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button>
     <span class="fn__space"></span>
-    <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>
+    <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>`}
 </div>`;
     const sections = view.querySelector<HTMLElement>("[data-type='entry-sections']");
     const searchInput = view.querySelector<HTMLInputElement>("[data-type='entry-search']");
     const restoreButton = view.querySelector<HTMLButtonElement>("[data-action='restore']");
     const updateRestoreButton = () => {
-        restoreButton.textContent = window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base));
+        if (restoreButton) {
+            restoreButton.textContent = window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base));
+        }
     };
     const renderSections = () => {
         sections.innerHTML = entryCatalog.map((section) => `<div class="config-group" data-entry-section>
     <div class="config-title">${escapeHtml(section.label())}</div>
-    <div class="config-entry-visibility__groups">${renderEntryGroups(draft, section)}</div>
+    <div class="config-entry-visibility__groups">${renderEntryGroups(draft, section, builtin)}</div>
 </div>`).join("");
         updateEntryDependencies(sections);
     };
@@ -334,12 +352,18 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     renderSections();
     searchInput.addEventListener("input", filterSections);
     view.addEventListener("input", (event) => {
+        if (builtin) {
+            return;
+        }
         const target = event.target as HTMLInputElement;
         if (target.dataset.profileField === "name") {
             draft.name = target.value;
         }
     });
     view.addEventListener("change", (event) => {
+        if (builtin) {
+            return;
+        }
         const target = event.target as HTMLInputElement | HTMLSelectElement;
         if (target.matches("[data-entry-path]")) {
             draft.entries[(target as HTMLInputElement).dataset.entryPath] = (target as HTMLInputElement).checked;
@@ -362,10 +386,16 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         filterSections();
     });
     view.addEventListener("click", (event) => {
+        const readOnlySwitch = (event.target as HTMLElement).closest<HTMLInputElement>("[data-entry-readonly]");
+        if (readOnlySwitch) {
+            event.preventDefault();
+            showMessage(window.siyuan.languages.entryBuiltinReadonlyTip);
+            return;
+        }
         const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]")?.dataset.action;
         if (action === "back" || action === "cancel") {
             closeEditor();
-        } else if (action === "restore") {
+        } else if (!builtin && action === "restore") {
             const restoreTarget = baseLabel(draft.base);
             confirmDialog(window.siyuan.languages.entryRestoreBase.replace("${x}", restoreTarget),
                 window.siyuan.languages.entryRestoreBaseConfirm.replace("${x}", restoreTarget), () => {
@@ -373,7 +403,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
                 renderSections();
                 filterSections();
             });
-        } else if (action === "confirm") {
+        } else if (!builtin && action === "confirm") {
             const nameInput = view.querySelector<HTMLInputElement>("[data-profile-field='name']");
             const name = draft.name.trim();
             if (!name) {
@@ -393,7 +423,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         }
     });
     const nameInput = view.querySelector<HTMLInputElement>("[data-profile-field='name']");
-    if (creating) {
+    if (creating && nameInput) {
         nameInput.select();
     }
 };
@@ -487,7 +517,7 @@ export const mountEntryVisibility = (root: HTMLElement) => {
             config.active = id;
             saveEntryVisibility(config);
             renderProfileCards(root);
-        } else if (action === "edit") {
+        } else if (action === "edit" || action === "view") {
             openProfileEditor(root, id);
         } else if (action === "duplicate") {
             const copy = profile ? duplicateProfile(profile) : createProfile(id as Config.TEntryVisibilityBase, false,

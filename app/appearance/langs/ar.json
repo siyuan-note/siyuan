@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "ملفات التعريف المضمنة للقراءة فقط. أنشئ نسخة لتخصيصها",
 	"tableHeaderRow": "صف الرأس",
 	"tableHeaderColumn": "عمود الرأس",
 	"copyDatabaseItemLinkInMd": "نسخ رابط Markdown للعنصر",

@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "הפרופילים המובנים הם לקריאה בלבד. יש ליצור עותק כדי להתאים אותם אישית",
 	"tableHeaderRow": "שורת כותרת",
 	"tableHeaderColumn": "עמודת כותרת",
 	"copyDatabaseItemLinkInMd": "העתק קישור Markdown לפריט",

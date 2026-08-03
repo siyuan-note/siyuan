@@ -1,4 +1,5 @@
 {
+	"entryBuiltinReadonlyTip": "Integrierte Profile sind schreibgeschützt. Erstellen Sie zum Anpassen eine Kopie",
 	"tableHeaderRow": "Kopfzeile",
 	"tableHeaderColumn": "Kopfspalte",
 	"copyDatabaseItemLinkInMd": "Markdown-Link des Eintrags kopieren",

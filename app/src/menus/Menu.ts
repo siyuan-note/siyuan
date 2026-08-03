@@ -47,6 +47,13 @@ const updateMenuItemGroupClasses = (itemsElement: Element) => {
     updateGroup();
 };
 
+const applyMenuConfig = (menuElement: HTMLElement) => {
+    /// #if !MOBILE
+    applyMenuEntryVisibility(menuElement);
+    menuElement.querySelectorAll(".b3-menu__items").forEach(updateMenuItemGroupClasses);
+    /// #endif
+};
+
 export class Menu {
     public element: HTMLElement;
     public data: any;   // 用于记录当前菜单的数据
@@ -467,9 +474,7 @@ export class Menu {
     }
 
     public popup(options: IPosition) {
-        /// #if !MOBILE
-        applyMenuEntryVisibility(this.element);
-        /// #endif
+        applyMenuConfig(this.element);
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
@@ -494,9 +499,7 @@ export class Menu {
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {
-        /// #if !MOBILE
-        applyMenuEntryVisibility(this.element);
-        /// #endif
+        applyMenuConfig(this.element);
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
@@ -668,9 +671,7 @@ export class MenuItem {
                             });
                         }
                         updateMenuItemGroupClasses(itemsElement);
-                        /// #if !MOBILE
-                        applyMenuEntryVisibility(menu.element);
-                        /// #endif
+                        applyMenuConfig(menu.element);
                         loaded = true;
                         menu.showSubMenu(submenuElement);
                         if (focusAfterLoad && this.element.classList.contains("b3-menu__item--show")) {

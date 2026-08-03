@@ -61,7 +61,7 @@ func NewAppearance() *Appearance {
 }
 
 const (
-	EntryVisibilityVersion       = 1
+	EntryVisibilityVersion       = 2
 	EntryVisibilityProfileSimple = "simple"
 	EntryVisibilityProfileFull   = "full"
 )
@@ -73,10 +73,11 @@ type EntryVisibility struct {
 }
 
 type EntryVisibilityProfile struct {
-	ID      string          `json:"id"`
-	Name    string          `json:"name"`
-	Base    string          `json:"base"`
-	Entries map[string]bool `json:"entries"`
+	ID      string              `json:"id"`
+	Name    string              `json:"name"`
+	Base    string              `json:"base"`
+	Entries map[string]bool     `json:"entries"`
+	Orders  map[string][]string `json:"orders"`
 }
 
 func NewEntryVisibility(active string) *EntryVisibility {
@@ -111,6 +112,9 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 		}
 		if nil == profile.Entries {
 			profile.Entries = map[string]bool{}
+		}
+		if nil == profile.Orders {
+			profile.Orders = map[string][]string{}
 		}
 		profileIDs[profile.ID] = true
 		profiles = append(profiles, profile)

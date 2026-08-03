@@ -1,8 +1,15 @@
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
-import {getEntryCatalogNode, getEntryParentPath, getEntryPaths} from "./catalog";
+import {
+    getEntryCatalogChildren,
+    getEntryCatalogNode,
+    getEntryOrderParents,
+    getEntryParentPath,
+    getEntryPaths,
+} from "./catalog";
+import {reorderEntrySlots, resolveEntryOrder} from "./order";
 
-export const ENTRY_VISIBILITY_VERSION = 1;
+export const ENTRY_VISIBILITY_VERSION = 2;
 export const ENTRY_PROFILE_SIMPLE = "simple";
 export const ENTRY_PROFILE_FULL = "full";
 
@@ -49,6 +56,22 @@ export const createEntryProfileSnapshot = (base: Config.TEntryVisibilityBase) =>
         return entries;
     }, {});
 };
+
+export const getEntryOrder = (parentPath: string, profile = getActiveEntryProfile()) => {
+    const nodes = getEntryCatalogChildren(parentPath) || [];
+    const defaultOrder = nodes.map((item) => item.key);
+    const separatorKeys = new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key));
+    return resolveEntryOrder(defaultOrder, profile?.orders?.[parentPath], separatorKeys);
+};
+
+export const createEntryOrderSnapshot = (current = false) => getEntryOrderParents()
+    .reduce<Record<string, string[]>>((orders, parentPath) => {
+        const nodes = getEntryCatalogChildren(parentPath) || [];
+        orders[parentPath] = current
+            ? getEntryOrder(parentPath)
+            : nodes.map((item) => item.key);
+        return orders;
+    }, {});
 
 let savePending: Config.IEntryVisibility | undefined;
 let saveRunning = false;
@@ -146,6 +169,25 @@ const normalizeSeparators = (itemsElement: Element) => {
     });
 };
 
+const sortMenuItems = (itemsElement: Element, prefix: string) => {
+    const catalogNodes = getEntryCatalogChildren(prefix);
+    if (catalogNodes) {
+        const children = Array.from(itemsElement.children);
+        reorderEntrySlots(children, getEntryOrder(prefix), (item) => item.getAttribute("data-id"))
+            .forEach((item) => itemsElement.append(item));
+    }
+    Array.from(itemsElement.children).forEach((item) => {
+        if (!item.classList.contains("b3-menu__item")) {
+            return;
+        }
+        const id = item.getAttribute("data-id");
+        const submenu = item.querySelector(":scope > .b3-menu__submenu > .b3-menu__items");
+        if (id && submenu && getEntryCatalogNode(`${prefix}.${id}`)) {
+            sortMenuItems(submenu, `${prefix}.${id}`);
+        }
+    });
+};
+
 const filterMenuItems = (itemsElement: Element, prefix: string) => {
     Array.from(itemsElement.children).forEach((item) => {
         if (!item.classList.contains("b3-menu__item")) {
@@ -174,6 +216,7 @@ export const applyMenuEntryVisibility = (menuElement: HTMLElement) => {
     if (!itemsElement) {
         return;
     }
+    sortMenuItems(itemsElement, scope);
     filterMenuItems(itemsElement, scope);
     normalizeSeparators(itemsElement);
     /// #endif

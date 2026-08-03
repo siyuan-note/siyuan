@@ -343,6 +343,7 @@ declare namespace Config {
         name: string;
         base: TEntryVisibilityBase;
         entries: Record<string, boolean>;
+        orders: Record<string, string[]>;
     }
 
     export interface IEntryVisibility {

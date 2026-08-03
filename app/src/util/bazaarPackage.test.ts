@@ -1,6 +1,49 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {isValidBazaarPackageName} from "./bazaarPackage";
+import {
+    getBazaarCompatibilityFieldVisibility,
+    getBazaarThemeModeLabels,
+    isValidBazaarPackageName,
+} from "./bazaarPackage";
+
+describe("getBazaarCompatibilityFieldVisibility", () => {
+    it("shows shared and dedicated compatibility fields for each package type", () => {
+        assert.deepEqual(getBazaarCompatibilityFieldVisibility("plugins"), {
+            frontends: true,
+            systems: true,
+            disabledInPublish: true,
+            modes: false,
+        });
+        assert.deepEqual(getBazaarCompatibilityFieldVisibility("themes"), {
+            frontends: true,
+            systems: false,
+            disabledInPublish: false,
+            modes: true,
+        });
+        ["icons", "templates", "widgets"].forEach((packageType) => {
+            assert.deepEqual(getBazaarCompatibilityFieldVisibility(packageType), {
+                frontends: false,
+                systems: false,
+                disabledInPublish: false,
+                modes: false,
+            });
+        });
+    });
+});
+
+describe("getBazaarThemeModeLabels", () => {
+    it("localizes known modes and preserves unknown modes", () => {
+        assert.deepEqual(
+            getBazaarThemeModeLabels(["light", "dark", "green"], "Light", "Dark"),
+            ["Light", "Dark", "green"],
+        );
+    });
+
+    it("removes duplicate and empty modes", () => {
+        assert.deepEqual(getBazaarThemeModeLabels(["dark", "", "dark"], "Light", "Dark"), ["Dark"]);
+        assert.deepEqual(getBazaarThemeModeLabels(undefined, "Light", "Dark"), []);
+    });
+});
 
 describe("isValidBazaarPackageName", () => {
     it("accepts valid package names", () => {

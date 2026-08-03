@@ -19,6 +19,10 @@ import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
 import {useShell} from "../util/pathName";
 import {switchSettingPanelSubTab} from "./setting/mount";
 import {isThemeFrontendSupported} from "../util/themeCompatibility";
+import {
+    getBazaarCompatibilityFieldVisibility,
+    getBazaarThemeModeLabels,
+} from "../util/bazaarPackage";
 
 /** 集市 Tab 侧栏 / 全局搜索索引文案 */
 export const collectBazaarTabSearchStrings = (): string[] => [
@@ -774,8 +778,15 @@ type="checkbox">
         bazaar._setPackageDetail(bazaarType, data.name, {installed, available});
         const urls = resourceData.repoURL.split("/");
         urls.pop();
-        const frontendLabels = bazaar._getFrontendLabels(compatibilityData.frontends);
-        const systemLabels = bazaar._getSystemLabels(compatibilityData);
+        const compatibilityFieldVisibility = getBazaarCompatibilityFieldVisibility(bazaarType);
+        const frontendLabels = compatibilityFieldVisibility.frontends ?
+            bazaar._getFrontendLabels(compatibilityData.frontends) : [];
+        const systemLabels = compatibilityFieldVisibility.systems ? bazaar._getSystemLabels(compatibilityData) : [];
+        const modeLabels = compatibilityFieldVisibility.modes ? getBazaarThemeModeLabels(
+            compatibilityData.modes,
+            window.siyuan.languages.themeLight,
+            window.siyuan.languages.themeDark,
+        ) : [];
         const installSection = installed ? `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarInstallInfo}</div>
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.version, `v${installed.version}`)}
@@ -785,9 +796,10 @@ type="checkbox">
         const compatibilitySection = `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarCompatibility}</div>
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarMinAppVersion, compatibilityData.minAppVersion ? `v${compatibilityData.minAppVersion}` : "-")}
-    ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPlatforms, bazaar._genReadmeChips(frontendLabels, true), true)}
-    ${bazaarType === "plugins" ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarSystems, bazaar._genReadmeChips(systemLabels, true), true) : ""}
-    ${bazaarType === "plugins" ? bazaar._genReadmeMetaRow(window.siyuan.languages.publishService, compatibilityData.disabledInPublish ? window.siyuan.languages.disable : window.siyuan.languages.enable) : ""}
+    ${compatibilityFieldVisibility.frontends ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPlatforms, bazaar._genReadmeChips(frontendLabels, true), true) : ""}
+    ${compatibilityFieldVisibility.systems ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarSystems, bazaar._genReadmeChips(systemLabels, true), true) : ""}
+    ${compatibilityFieldVisibility.disabledInPublish ? bazaar._genReadmeMetaRow(window.siyuan.languages.publishService, compatibilityData.disabledInPublish ? window.siyuan.languages.disable : window.siyuan.languages.enable) : ""}
+    ${compatibilityFieldVisibility.modes ? bazaar._genReadmeMetaRow(window.siyuan.languages.appearanceMode, modeLabels.length ? bazaar._genReadmeChips(modeLabels) : "-", true) : ""}
 </section>`;
         const marketSection = available ? `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarMarketInfo}</div>

@@ -4,6 +4,31 @@ const reservedWindowsDeviceNames = new Set([
     "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
 ]);
 
+export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
+    const isPlugin = packageType === "plugins";
+    const isTheme = packageType === "themes";
+    return {
+        frontends: isPlugin || isTheme,
+        systems: isPlugin,
+        disabledInPublish: isPlugin,
+        modes: isTheme,
+    };
+};
+
+export const getBazaarThemeModeLabels = (
+    modes: string[] | null | undefined,
+    lightLabel: string,
+    darkLabel: string,
+) => Array.from(new Set((modes || []).filter(Boolean).map((mode) => {
+    if (mode === "light") {
+        return lightLabel;
+    }
+    if (mode === "dark") {
+        return darkLabel;
+    }
+    return mode;
+})));
+
 export const isValidBazaarPackageName = (name: string) => {
     if (!/^[\x20-\x7E]{1,255}$/.test(name) || /^[. ]/.test(name) || /[. ]$/.test(name)) {
         return false;

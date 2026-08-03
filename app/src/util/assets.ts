@@ -24,7 +24,8 @@ import {getWorkspaceName} from "./processTitle";
 import {ensureSelectedCustomFont} from "./customFont";
 
 let headingNumberMeasurementRefreshTimer: number;
-const EMOJI_EMOTICONS_UNICODE_RANGE = "U+1f600-1f64f";
+const DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE = "U+25fd-25fe, U+2614-2615, U+2648-2653, U+267f, U+2693, U+26a1, " +
+    "U+26aa-26ab, U+1f0cf, U+1f311-1f318, U+1f42d-1f42e, U+1f431, U+1f435, U+1f600-1f64f";
 
 export const refreshHeadingNumberMeasurements = () => {
     invalidateHeadingNumberMeasurements();
@@ -253,7 +254,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   U+260e, U+2611, U+261d, U+2639, U+263a, U+2640, U+2642, U+2660, U+2663, U+2665, U+2666, U+2668, U+267b, U+26aa, U+26ab, 
   U+2702, U+2708, U+2934, U+2935, U+1f170, U+1f171, U+1f17e, U+1f17f, U+1f202, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, 
   U+1f251, U+1fae4, U+2049, U+203c, U+3030, U+303d, U+24c2, U+26a0, U+26a1, U+26be, U+27a1, U+2b05-2b07, U+3297, U+3299, U+a9, U+ae,
-  ${EMOJI_EMOTICONS_UNICODE_RANGE};
+  ${DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE};
   size-adjust: 115%;
 }
 @font-face {
@@ -277,7 +278,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   src: local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
   unicode-range: U+263a, U+21a9, U+2642, U+303d, U+2197, U+2198, U+2199, U+2196, U+2195, U+2194, U+2660, U+2665, U+2666,
-  U+2663, U+3030, U+21aa, U+25b6, U+25c0, U+2640, U+203c, U+a9, U+ae, U+2122, ${EMOJI_EMOTICONS_UNICODE_RANGE};
+  U+2663, U+3030, U+21aa, U+25b6, U+25c0, U+2640, U+203c, U+a9, U+ae, U+2122, ${DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE};
   size-adjust: 85%;
 }
 @font-face {
@@ -291,7 +292,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   font-family: "Emojis Reset";
   src: url(${servePath}appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1f170-1f171, U+1f17e, U+1f17f, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, U+1f251, U+1f32b, U+1f3bc,
-  U+1f411, U+1f42d, U+1f42e, U+1f431, U+1f435, U+1f441, U+1f4a8, U+1f4ab, U+1f525, ${EMOJI_EMOTICONS_UNICODE_RANGE},
+  U+1f411, U+1f42d, U+1f42e, U+1f431, U+1f435, U+1f441, U+1f4a8, U+1f4ab, U+1f525, ${DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE},
   U+1f79, U+1f8f, U+1fa79, U+1fae4, U+1fae9, U+1fac6, U+1fabe, U+1fadf,
   U+200d, U+203c, U+2049, U+2122, U+2139, U+2194-2199, U+21a9, U+21aa, U+23cf, U+25aa, U+25ab, U+25b6, U+25c0, U+25fb-25fe,
   U+2611, U+2615, U+2618, U+261d, U+2620, U+2622, U+2623, U+2626, U+262a, U+262e, U+2638-263a, U+2640, U+2642, U+2648-2653,

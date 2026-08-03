@@ -1171,6 +1171,10 @@ func ImportData(zipPath string) (err error) {
 }
 
 func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
+	box, err := getOpenedBox(boxID)
+	if nil != err {
+		return err
+	}
 	toPath = normalizeBoxDocTarget(boxID, toPath)
 	util.PushEndlessProgress(Conf.Language(73))
 	defer func() {
@@ -1623,7 +1627,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		convertWikiLinksAndTags()
 		mergeTextAndHandlerNestedInlines()
 
-		box := Conf.Box(boxID)
 		for i, tree := range importTrees {
 			indexWriteTreeIndexQueue(tree)
 			if 0 == i%4 {

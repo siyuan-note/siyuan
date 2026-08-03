@@ -16,7 +16,14 @@
 
 package model
 
-import "testing"
+import (
+	"errors"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
 
 func TestIsSYNotebookExport(t *testing.T) {
 	tests := []struct {
@@ -36,6 +43,37 @@ func TestIsSYNotebookExport(t *testing.T) {
 				t.Fatalf("isSYNotebookExport() = %v, want %v", got, test.want)
 			}
 		})
+	}
+}
+
+func TestImportFromLocalPathRejectsClosedNotebookBeforeWriting(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	boxConf := fixture.box.GetConf()
+	boxConf.Closed = true
+	if err := fixture.box.SaveConf(boxConf); err != nil {
+		t.Fatalf("close test notebook failed: %v", err)
+	}
+
+	markdownPath := filepath.Join(t.TempDir(), "document.md")
+	if err := os.WriteFile(markdownPath, []byte("# Document"), 0644); err != nil {
+		t.Fatalf("write Markdown fixture failed: %v", err)
+	}
+	pattern := filepath.Join(util.DataDir, fixture.box.ID, "*.sy")
+	before, err := filepath.Glob(pattern)
+	if err != nil {
+		t.Fatalf("list documents before import failed: %v", err)
+	}
+
+	err = ImportFromLocalPath(fixture.box.ID, markdownPath, "/")
+	if !errors.Is(err, ErrBoxClosed) {
+		t.Fatalf("expected closed notebook import to return ErrBoxClosed, got [%v]", err)
+	}
+	after, err := filepath.Glob(pattern)
+	if err != nil {
+		t.Fatalf("list documents after import failed: %v", err)
+	}
+	if len(after) != len(before) {
+		t.Fatalf("closed notebook import wrote documents: before=%d, after=%d", len(before), len(after))
 	}
 }
 

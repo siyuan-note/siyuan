@@ -96,12 +96,18 @@ func notebookCreate(args map[string]any) (CallToolResult, error) {
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "create notebook failed: " + err.Error()}}, IsError: true}, nil
 	}
-
-	if box := model.Conf.Box(id); nil != box {
-		evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
-		evt.Data = map[string]any{"box": box}
-		util.PushEvent(evt)
+	existed, err := model.Mount(id)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("notebook created but opening failed: %s (id: %s)", err, id)}}, IsError: true}, nil
 	}
+
+	box := model.Conf.Box(id)
+	if nil == box {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook created but opened notebook not found: " + id}}, IsError: true}, nil
+	}
+	evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
+	evt.Data = map[string]any{"box": box, "existed": existed}
+	util.PushEvent(evt)
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook created: " + name + " (id: " + id + ")"}}}, nil
 }

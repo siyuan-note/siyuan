@@ -56,7 +56,7 @@ var importMdCmd = &cobra.Command{
 		}
 
 		if err := model.ImportFromLocalPath(notebook, absPath, resolvePath(notebook, toPath, hpath)); err != nil {
-			return err
+			return formatNotebookWriteError(notebook, err)
 		}
 		model.AppendPushReloadFiletreeEntry()
 		fmt.Println("ok")

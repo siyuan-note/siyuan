@@ -1283,9 +1283,8 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
-	box := Conf.Box(boxID)
-	if nil == box {
-		err = errors.New(Conf.Language(0))
+	box, err := getOpenedBox(boxID)
+	if nil != err {
 		return
 	}
 
@@ -2215,9 +2214,9 @@ func validateCreateDoc(boxID, p, title string, titleEmpty bool) (ret *createDocV
 		return nil, errors.New(Conf.Language(13))
 	}
 
-	box := Conf.Box(boxID)
-	if nil == box {
-		return nil, errors.New(Conf.Language(0))
+	box, boxErr := getOpenedBox(boxID)
+	if nil != boxErr {
+		return nil, boxErr
 	}
 
 	folder := path.Dir(p)

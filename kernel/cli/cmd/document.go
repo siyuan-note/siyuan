@@ -79,7 +79,7 @@ var documentCreateCmd = &cobra.Command{
 		id := ast.NewNodeID()
 		docPath := path.Join(dir, id+".sy")
 		if err := model.ValidateCreateDoc(notebook, docPath, title); err != nil {
-			return err
+			return formatNotebookWriteError(notebook, err)
 		}
 
 		if dryRun {
@@ -89,7 +89,7 @@ var documentCreateCmd = &cobra.Command{
 
 		_, err := model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
 		if err != nil {
-			return err
+			return formatNotebookWriteError(notebook, err)
 		}
 		model.AppendPushCreateEntry(notebook, docPath)
 		fmt.Println(id)

@@ -23,6 +23,7 @@ import {
     isTableResizeControlVisible,
 } from "./tableResize";
 import {applyTableCellStyleHotkey, getTableCellTextStyleMenus} from "../toolbar/tableCell";
+import {getTableCellsInRectangle} from "./tableSelection";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -660,7 +661,7 @@ export class TableControl {
         if (mode === "cell") {
             if (extend && this.selection.anchor instanceof HTMLTableCellElement) {
                 const anchorInfo = grid.cellInfos.find(item => item.cell === this.selection.anchor);
-                const selected = this.getCellsInRectangle(grid.cellInfos, anchorInfo, info);
+                const selected = getTableCellsInRectangle(grid.cellInfos, anchorInfo, info).map(item => item.cell);
                 if (!toggle) {
                     this.selection.cells.clear();
                 }
@@ -748,37 +749,6 @@ export class TableControl {
             });
         }
         return indexes;
-    }
-
-    private getCellsInRectangle(cellInfos: ITableCellInfo[], start: ITableCellInfo, end: ITableCellInfo) {
-        if (!start || !end) {
-            return [];
-        }
-        let rowStart = Math.min(start.row, end.row);
-        let rowEnd = Math.max(start.row + start.rowspan - 1, end.row + end.rowspan - 1);
-        let colStart = Math.min(start.col, end.col);
-        let colEnd = Math.max(start.col + start.colspan - 1, end.col + end.colspan - 1);
-        let changed = true;
-        while (changed) {
-            changed = false;
-            cellInfos.forEach(info => {
-                if (info.row <= rowEnd && info.row + info.rowspan - 1 >= rowStart &&
-                    info.col <= colEnd && info.col + info.colspan - 1 >= colStart) {
-                    const nextRowStart = Math.min(rowStart, info.row);
-                    const nextRowEnd = Math.max(rowEnd, info.row + info.rowspan - 1);
-                    const nextColStart = Math.min(colStart, info.col);
-                    const nextColEnd = Math.max(colEnd, info.col + info.colspan - 1);
-                    changed = nextRowStart !== rowStart || nextRowEnd !== rowEnd ||
-                        nextColStart !== colStart || nextColEnd !== colEnd;
-                    rowStart = nextRowStart;
-                    rowEnd = nextRowEnd;
-                    colStart = nextColStart;
-                    colEnd = nextColEnd;
-                }
-            });
-        }
-        return cellInfos.filter(info => info.row <= rowEnd && info.row + info.rowspan - 1 >= rowStart &&
-            info.col <= colEnd && info.col + info.colspan - 1 >= colStart).map(info => info.cell);
     }
 
     private isCellInSelection(cell: HTMLTableCellElement) {

@@ -92,6 +92,7 @@ import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} 
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {
+    buildTableGrid,
     clearTableCell,
     deleteTableColumns,
     deleteTableRows,
@@ -100,6 +101,7 @@ import {
     isIncludeCell,
     updateTableTitle,
 } from "../util/table";
+import {getTableCellsInRectangle} from "../util/tableSelection";
 import {
     getTableCellAlignmentMenus,
     getTableCellBackgroundMenus,
@@ -1683,6 +1685,10 @@ export class WYSIWYG {
                     hideElements(["toolbar"], protyle);
                     if (target.classList.contains("table__select")) {
                         target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+                        const cellElement = hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD");
+                        if (cellElement) {
+                            target = cellElement;
+                        }
                         nodeElement = hasClosestBlock(target) as HTMLElement;
                     }
                     event.stopPropagation();
@@ -1960,51 +1966,70 @@ export class WYSIWYG {
                                     bottom: rect.bottom - tableRect.top,
                                 };
                             };
-                            const targetRect = getCellRect(target);
-                            const moveTargetRect = getCellRect(moveTarget);
-                            let left = Math.min(targetRect.left, moveTargetRect.left);
-                            let top = Math.min(targetRect.top, moveTargetRect.top);
-                            let right = Math.max(targetRect.right, moveTargetRect.right);
-                            let bottom = Math.max(targetRect.bottom, moveTargetRect.bottom);
-                            if (targetRect.left === moveTargetRect.left) {
-                                right = left + Math.max(targetRect.right - targetRect.left,
-                                    moveTargetRect.right - moveTargetRect.left);
-                            }
-                            if (targetRect.top === moveTargetRect.top) {
-                                bottom = top + Math.max(targetRect.bottom - targetRect.top,
-                                    moveTargetRect.bottom - moveTargetRect.top);
-                            }
-                            // https://github.com/siyuan-note/insider/issues/1015
-                            Array.from(tableBlockElement.querySelectorAll("th, td")).find((item: HTMLElement) => {
-                                const itemRect = getCellRect(item);
-                                const updateRight = itemRect.left < right && itemRect.right > right;
-                                const updateLeft = itemRect.left < left && itemRect.right > left;
-                                if (itemRect.top < top && itemRect.bottom > top) {
-                                    if ((itemRect.left + 6 > left && itemRect.right - 6 < right) || updateRight || updateLeft) {
-                                        top = itemRect.top;
-                                    }
-                                    if (updateRight) {
-                                        right = itemRect.right;
-                                    }
-                                    if (updateLeft) {
-                                        left = itemRect.left;
-                                    }
-                                } else if (itemRect.top < bottom && itemRect.bottom > bottom) {
-                                    if ((itemRect.left + 6 > left && itemRect.right - 6 < right) || updateRight || updateLeft) {
-                                        bottom = itemRect.bottom;
-                                    }
-                                    if (updateRight) {
-                                        right = itemRect.right;
-                                    }
-                                    if (updateLeft) {
-                                        left = itemRect.left;
-                                    }
-                                } else if (updateLeft && itemRect.top + 6 > top && itemRect.bottom - 6 < bottom) {
-                                    left = itemRect.left;
-                                } else if (updateRight && itemRect.top + 6 > top && itemRect.bottom - 6 < bottom) {
-                                    right = itemRect.right;
+                            let selectionRects: ReturnType<typeof getCellRect>[] = [];
+                            let logicalSelection = false;
+                            if (target.tagName === "TH" || target.tagName === "TD") {
+                                const grid = buildTableGrid(tableElement);
+                                const targetInfo = grid.cellInfos.find(item => item.cell === target);
+                                const moveTargetInfo = grid.cellInfos.find(item => item.cell === moveTarget);
+                                const selectedInfos = getTableCellsInRectangle(grid.cellInfos, targetInfo, moveTargetInfo);
+                                if (selectedInfos.length > 0) {
+                                    selectionRects = selectedInfos.map(item => getCellRect(item.cell));
+                                    logicalSelection = true;
                                 }
-                            });
+                            }
+                            if (!logicalSelection) {
+                                const targetRect = getCellRect(target);
+                                const moveTargetRect = getCellRect(moveTarget);
+                                let left = Math.min(targetRect.left, moveTargetRect.left);
+                                let top = Math.min(targetRect.top, moveTargetRect.top);
+                                let right = Math.max(targetRect.right, moveTargetRect.right);
+                                let bottom = Math.max(targetRect.bottom, moveTargetRect.bottom);
+                                if (targetRect.left === moveTargetRect.left) {
+                                    right = left + Math.max(targetRect.right - targetRect.left,
+                                        moveTargetRect.right - moveTargetRect.left);
+                                }
+                                if (targetRect.top === moveTargetRect.top) {
+                                    bottom = top + Math.max(targetRect.bottom - targetRect.top,
+                                        moveTargetRect.bottom - moveTargetRect.top);
+                                }
+                                // https://github.com/siyuan-note/insider/issues/1015
+                                Array.from(tableBlockElement.querySelectorAll("th, td")).find((item: HTMLElement) => {
+                                    const itemRect = getCellRect(item);
+                                    const updateRight = itemRect.left < right && itemRect.right > right;
+                                    const updateLeft = itemRect.left < left && itemRect.right > left;
+                                    if (itemRect.top < top && itemRect.bottom > top) {
+                                        if ((itemRect.left + 6 > left && itemRect.right - 6 < right) || updateRight || updateLeft) {
+                                            top = itemRect.top;
+                                        }
+                                        if (updateRight) {
+                                            right = itemRect.right;
+                                        }
+                                        if (updateLeft) {
+                                            left = itemRect.left;
+                                        }
+                                    } else if (itemRect.top < bottom && itemRect.bottom > bottom) {
+                                        if ((itemRect.left + 6 > left && itemRect.right - 6 < right) || updateRight || updateLeft) {
+                                            bottom = itemRect.bottom;
+                                        }
+                                        if (updateRight) {
+                                            right = itemRect.right;
+                                        }
+                                        if (updateLeft) {
+                                            left = itemRect.left;
+                                        }
+                                    } else if (updateLeft && itemRect.top + 6 > top && itemRect.bottom - 6 < bottom) {
+                                        left = itemRect.left;
+                                    } else if (updateRight && itemRect.top + 6 > top && itemRect.bottom - 6 < bottom) {
+                                        right = itemRect.right;
+                                    }
+                                });
+                                selectionRects = [{left, top, right, bottom}];
+                            }
+                            const left = Math.min(...selectionRects.map(rect => rect.left));
+                            const top = Math.min(...selectionRects.map(rect => rect.top));
+                            const right = Math.max(...selectionRects.map(rect => rect.right));
+                            const bottom = Math.max(...selectionRects.map(rect => rect.bottom));
                             protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
                             const radius = "var(--b3-border-radius-s)";
                             const touches = (edge: number, gridEdge: number) => Math.abs(edge - gridEdge) < 1;

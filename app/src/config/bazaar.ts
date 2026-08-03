@@ -18,6 +18,7 @@ import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
 import {useShell} from "../util/pathName";
 import {switchSettingPanelSubTab} from "./setting/mount";
+import {isThemeFrontendSupported} from "../util/themeCompatibility";
 
 /** 集市 Tab 侧栏 / 全局搜索索引文案 */
 export const collectBazaarTabSearchStrings = (): string[] => [
@@ -296,12 +297,15 @@ export const bazaar = {
             return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="ft__primary fn__pointer">${escapeHtml(funding)}</span>`;
         }
     },
-    _genIncompatibleChipHTML(item: IBazaarItem, source: "installed" | "bazaar") {
-        const incompatible = source === "installed" ? item.installedIncompatible : item.bazaarIncompatible;
+    _genIncompatibleChipHTML(item: IBazaarItem, source: "installed" | "bazaar", bazaarType: TBazaarType) {
+        const incompatible = bazaarType === "themes" ?
+            !isThemeFrontendSupported(item.frontends, getFrontend()) :
+            source === "installed" ? item.installedIncompatible : item.bazaarIncompatible;
         if (!incompatible) {
             return "";
         }
-        return `<span class="fn__space"></span><span data-position="north" class="fn__flex-center ariaLabel b3-chip b3-chip--error b3-chip--small" aria-label="${window.siyuan.languages.incompatiblePluginTip}">${window.siyuan.languages.incompatible}</span>`;
+        const tip = bazaarType === "themes" ? window.siyuan.languages.incompatible : window.siyuan.languages.incompatiblePluginTip;
+        return `<span class="fn__space"></span><span data-position="north" class="fn__flex-center ariaLabel b3-chip b3-chip--error b3-chip--small" aria-label="${tip}">${window.siyuan.languages.incompatible}</span>`;
     },
     _getDetailKey(bazaarType: TBazaarType, packageName: string) {
         return `${bazaarType}:${packageName}`;
@@ -430,7 +434,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 <span class="b3-card__author">${escapeHtml(item.author)}</span>
             </span>
             ${bazaar._genFundingHTML(item.preferredFunding)}
-            ${bazaar._genIncompatibleChipHTML(item, "bazaar")}
+            ${bazaar._genIncompatibleChipHTML(item, "bazaar", bazaarType)}
             <span class="fn__space--small"></span>
             <div class="fn__flex-1"></div>
             <div class="fn__space--small${showSwitch ? "" : " fn__none"}"></div>
@@ -495,7 +499,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
-        ${bazaar._genIncompatibleChipHTML(available, "bazaar")}
+        ${bazaar._genIncompatibleChipHTML(available, "bazaar", bazaarType)}
         ${bazaar._genFundingHTML(installed.preferredFunding)}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
@@ -661,7 +665,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${bazaar._genUpdateButtonHTML(available, true)}
-        ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed")}
+        ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed", bazaarType)}
         ${bazaar._genFundingHTML(bazaarItem.preferredFunding)}
         ${hasSetting ? `<span data-position="north" class="ariaLabel block__icon block__icon--show${window.siyuan.config.bazaar.petalDisabled ? " fn__none" : ""}" data-type="setting" aria-label="${window.siyuan.languages.config}">
             <svg><use xlink:href="#iconSettings"></use></svg>

@@ -2186,7 +2186,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
 };
 
 export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLTableCellElement, range: Range,
-                          hideTitle = false, alignWholeTable = false) => {
+                          alignWholeTable = false) => {
     const otherMenus: IMenu[] = [];
     const colIndex = getColIndex(cellElement);
     const tableElement = nodeElement.querySelector("table");
@@ -2292,9 +2292,9 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         click: () => toggleTableHeader(protyle, nodeElement, "column")
     });
     otherMenus.push({
+        id: "title",
         icon: "iconHeadings",
         label: window.siyuan.languages.title,
-        ignore: hideTitle,
         click: () => {
             updateTableTitle(protyle, nodeElement);
         }

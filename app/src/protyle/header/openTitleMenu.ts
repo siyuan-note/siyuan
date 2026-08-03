@@ -27,7 +27,6 @@ import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
 import {showMessage} from "../../dialog/message";
 import {removeZWJ} from "../util/normalizeText";
-import {isEntryVisible} from "../../config/entryVisibility/runtime";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
@@ -50,10 +49,10 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
         window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover-" + from : "app-" + from);
         const submenu = copySubMenu([protyle.block.rootID], true, undefined, protyle.block.showAll ? protyle.block.id : protyle.block.rootID);
         submenu.push({
+            id: "copyDoc",
             iconHTML: "",
             label: window.siyuan.languages.copyDoc,
             accelerator: undefined,
-            ignore: !isEntryVisible("document.title.copy.copyDoc"),
             click: async () => {
                 const [responseHTML, responseText] = await Promise.all([
                     fetchSyncPost("/api/block/getBlockDOM", {

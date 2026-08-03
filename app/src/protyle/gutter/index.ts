@@ -55,7 +55,6 @@ import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent
 import {setDragTipGhost} from "../util/dragTip";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
-import {isEntryVisible} from "../../config/entryVisibility/runtime";
 import {mathRender} from "../render/mathRender";
 import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {isEncryptedBox, movePathTo, useShell} from "../../util/pathName";
@@ -777,8 +776,7 @@ export class Gutter {
             visibilityID = "quote";
         }
         return {
-            id: options.menuId,
-            ignore: visibilityID ? !isEntryVisible(`gutter.single.turnInto.${visibilityID}`) : false,
+            id: visibilityID,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -2052,7 +2050,7 @@ export class Gutter {
                     icon: "iconTable",
                     label: window.siyuan.languages.table,
                     submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range,
-                        !isEntryVisible("gutter.single.table.title"), true).menus as IMenu[]
+                        true).menus as IMenu[]
                 }).element);
             }
         } else if (type === "NodeAttributeView") {
@@ -3082,9 +3080,9 @@ export class Gutter {
         }
         if (type === "NodeAttributeView") {
             copyMenu.splice(6, 0, {
+                id: "copyAVID",
                 iconHTML: "",
                 label: window.siyuan.languages.copyAVID,
-                ignore: !isEntryVisible("gutter.single.copy.copyAVID"),
                 click() {
                     writeText(nodeElement.getAttribute("data-av-id"));
                 }

@@ -49,7 +49,6 @@ import {
     restoreMovedExpandedDocItems,
     updateMovedSubtree
 } from "../../util/fileTreeMove";
-import {isEntryVisible} from "../../config/entryVisibility/runtime";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -1886,18 +1885,18 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_PANEL_MORE);
         if (!window.siyuan.config.readonly) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "newNotebook",
                 icon: "iconNewNoteBook",
                 label: window.siyuan.languages.newNotebook,
-                ignore: !isEntryVisible("docTree.panel.newNotebook"),
                 click: () => {
                     newNotebook();
                 }
             }).element);
             if (window.siyuan.config.notebookCrypto?.enabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "newEncryptedNotebook",
                     icon: "iconLock",
                     label: window.siyuan.languages.newEncryptedNotebook,
-                    ignore: !isEntryVisible("docTree.panel.newEncryptedNotebook"),
                     click: () => {
                         newEncryptedNotebook();
                     }
@@ -1905,9 +1904,9 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
             }
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "rebuildDataIndex",
             icon: "iconRefresh",
             label: window.siyuan.languages.rebuildDataIndex,
-            ignore: !isEntryVisible("docTree.panel.rebuildDataIndex"),
             click: () => {
                 if (!this.element.getAttribute("disabled")) {
                     this.element.setAttribute("disabled", "disabled");
@@ -1930,24 +1929,19 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     });
                 });
             });
-            subMenu.forEach((item) => {
-                if (item.type !== "separator") {
-                    item.ignore = !isEntryVisible(`docTree.panel.sort.${item.id}`);
-                }
-            });
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "sort",
                 icon: "iconSort",
                 label: window.siyuan.languages.sort,
                 type: "submenu",
                 submenu: subMenu,
-                ignore: !isEntryVisible("docTree.panel.sort"),
             }).element);
         }
         if (!window.siyuan.config.readonly && window.siyuan.config.publish.enable) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "publishAccess",
                 icon: "iconEye",
                 label: window.siyuan.languages.publishAccess,
-                ignore: !isEntryVisible("docTree.panel.publishAccess"),
                 checked: this.element.classList.contains("file-tree__publish-access--active"),
                 click: () => {
                     this.element.classList.toggle("file-tree__publish-access--active");

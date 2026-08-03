@@ -1059,7 +1059,8 @@
 
     &:hover .block__icon {
       opacity: 1;
-      background-color: var(--b3-theme-background-light) !important;
+      background-color: var(--b3-theme-background) !important;
+      background-image: linear-gradient(var(--b3-theme-background-light), var(--b3-theme-background-light));
     }
 
     .b3-chip {

@@ -352,7 +352,12 @@ func HandleRpcWebSocket(c *gin.Context) {
 		}
 	}
 
-	upgrader := gws.NewUpgrader(h, &gws.ServerOption{})
+	upgrader := gws.NewUpgrader(h, &gws.ServerOption{
+		// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
+		Authorize: func(r *http.Request, _ gws.SessionStorage) bool {
+			return util.IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+		},
+	})
 	socket, err := upgrader.Upgrade(c.Writer, c.Request)
 	if err != nil {
 		logging.LogErrorf("[plugin:%s] RPC WebSocket upgrade failed: %s", name, err)

@@ -1221,6 +1221,10 @@ func serveDebug(ginServer *gin.Engine) {
 
 func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer = melody.New()
+	// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
+	util.WebSocketServer.Upgrader.CheckOrigin = func(r *http.Request) bool {
+		return util.IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+	}
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
 
 	ginServer.GET("/ws", func(c *gin.Context) {

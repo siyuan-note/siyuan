@@ -1,4 +1,5 @@
 {
+	"entrySeparator": "Separador",
 	"tableAddColumnTip": "Clique para inserir uma coluna à direita<br>Arraste para inserir ou excluir várias colunas",
 	"tableAddRowTip": "Clique para inserir uma linha abaixo<br>Arraste para inserir ou excluir várias linhas",
 	"bazaarPackageInfo": "Informações do pacote",

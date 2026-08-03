@@ -1,4 +1,5 @@
 {
+	"entrySeparator": "Separador",
 	"tableAddColumnTip": "Haz clic para insertar una columna a la derecha<br>Arrastra para insertar o eliminar varias columnas",
 	"tableAddRowTip": "Haz clic para insertar una fila debajo<br>Arrastra para insertar o eliminar varias filas",
 	"bazaarPackageInfo": "Información del paquete",

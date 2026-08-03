@@ -218,7 +218,7 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
             return `<div class="config-entry-visibility__row config-entry-visibility__row--separator"
                 data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}">
                 ${draggable ? '<span class="config-entry-visibility__drag" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></span>' : ""}
-                <span class="config-entry-visibility__separator"></span>
+                <span class="config-entry-visibility__label">${window.siyuan.languages.entrySeparator}</span>
             </div>`;
         }
         const label = item.label();

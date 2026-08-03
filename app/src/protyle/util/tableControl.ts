@@ -17,6 +17,7 @@ import {
 } from "./table";
 import {
     constrainTableResizeCount,
+    getTableResizeControlCenter,
     getTableResizeCount,
     isTableCellContentEmpty,
 } from "./tableResize";
@@ -1031,13 +1032,17 @@ export class TableControl {
         const tableRect = state.table.getBoundingClientRect();
         const viewportRect = this.getTableViewportRect(state.table);
         const addRowEdge = this.getTableAddRowEdge(state.table);
+        const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
+        const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
+            TABLE_ADD_CONTROL_THICKNESS);
+        const columnControlCenter = getTableResizeControlCenter(tableRect.right, contentRect.left,
+            contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
         if (state.mode === "row" || state.mode === "both") {
             this.addRowButton.classList.remove("fn__none");
             this.addRowButton.classList.add("protyle-table-control__add--active");
             this.addRowButton.style.width = `${Math.max(0, viewportRect.width)}px`;
             this.addRowButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2,
-                addRowEdge + TABLE_ADD_CONTROL_THICKNESS / 2);
+            this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2, rowControlCenter);
             state.table.classList.add("protyle-table-control__table--add-row");
         }
         if (state.mode === "column" || state.mode === "both") {
@@ -1045,7 +1050,7 @@ export class TableControl {
             this.addColumnButton.classList.add("protyle-table-control__add--active");
             this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
             this.addColumnButton.style.height = `${Math.max(0, viewportRect.height)}px`;
-            this.setPosition(this.addColumnButton, tableRect.right + TABLE_ADD_CONTROL_THICKNESS / 2,
+            this.setPosition(this.addColumnButton, columnControlCenter,
                 viewportRect.top + viewportRect.height / 2);
             state.table.classList.add("protyle-table-control__table--add-column");
         }
@@ -1054,8 +1059,7 @@ export class TableControl {
             this.addBothButton.classList.add("protyle-table-control__add--active");
             this.addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
             this.addBothButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.setPosition(this.addBothButton, tableRect.right + TABLE_ADD_CONTROL_THICKNESS / 2,
-                addRowEdge + TABLE_ADD_CONTROL_THICKNESS / 2);
+            this.setPosition(this.addBothButton, columnControlCenter, rowControlCenter);
         }
         this.joinedControlTable = state.table;
         this.resizeLabel.textContent = `${state.targetRows} × ${state.targetColumns}`;

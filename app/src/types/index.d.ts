@@ -1025,8 +1025,8 @@ interface IBazaarItem {
     preferredFunding: string;
     disallowUpdate: boolean;
     updateRequiredMinAppVer?: string;
-    installedIncompatible?: boolean; // 仅 plugin
-    bazaarIncompatible?: boolean; // 仅 plugin
+    installedIncompatible?: boolean; // 仅插件/主题
+    bazaarIncompatible?: boolean; // 仅插件/主题
     enabled?: boolean; // 仅 plugin
     modes?: string[]; // 仅 theme
 }

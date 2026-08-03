@@ -620,13 +620,16 @@ func getBazaarTheme(c *gin.Context) {
 		return
 	}
 
-	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
+	var frontend, keyword string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("frontend", &frontend, false, false),
+		util.BindJsonArg("keyword", &keyword, false, false),
+	) {
 		return
 	}
 
 	ret.Data = map[string]any{
-		"packages": model.GetBazaarPackages("themes", "", keyword),
+		"packages": model.GetBazaarPackages("themes", frontend, keyword),
 	}
 }
 
@@ -639,13 +642,16 @@ func getInstalledTheme(c *gin.Context) {
 		return
 	}
 
-	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
+	var frontend, keyword string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("frontend", &frontend, false, false),
+		util.BindJsonArg("keyword", &keyword, false, false),
+	) {
 		return
 	}
 
 	ret.Data = map[string]any{
-		"packages": model.GetInstalledPackages("themes", "", keyword),
+		"packages": model.GetInstalledPackages("themes", frontend, keyword),
 	}
 }
 
@@ -658,8 +664,9 @@ func installBazaarTheme(c *gin.Context) {
 		return
 	}
 
-	var keyword, repoURL, repoHash, packageName string
+	var frontend, keyword, repoURL, repoHash, packageName string
 	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("frontend", &frontend, false, false),
 		util.BindJsonArg("keyword", &keyword, false, false),
 		util.BindJsonArg("repoURL", &repoURL, true, true),
 		util.BindJsonArg("repoHash", &repoHash, true, true),
@@ -703,7 +710,7 @@ func installBazaarTheme(c *gin.Context) {
 
 	util.PushMsg(model.Conf.Language(69), 3000)
 	ret.Data = map[string]any{
-		"packages":   model.GetBazaarPackages("themes", "", keyword),
+		"packages":   model.GetBazaarPackages("themes", frontend, keyword),
 		"appearance": model.Conf.Appearance,
 	}
 }
@@ -717,8 +724,9 @@ func uninstallBazaarTheme(c *gin.Context) {
 		return
 	}
 
-	var keyword, packageName string
+	var frontend, keyword, packageName string
 	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("frontend", &frontend, false, false),
 		util.BindJsonArg("keyword", &keyword, false, false),
 		util.BindJsonArg("packageName", &packageName, true, true),
 	) {
@@ -732,7 +740,7 @@ func uninstallBazaarTheme(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"packages":   model.GetBazaarPackages("themes", "", keyword),
+		"packages":   model.GetBazaarPackages("themes", frontend, keyword),
 		"appearance": model.Conf.Appearance,
 	}
 }

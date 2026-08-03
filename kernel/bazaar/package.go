@@ -87,8 +87,8 @@ type Package struct {
 	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer,omitempty"` // 升级目标要求的最小应用版本
 
 	// 专用字段，nil 时不序列化
-	InstalledIncompatible *bool     `json:"installedIncompatible,omitempty"` // Plugin：本地已安装版本是否不兼容
-	BazaarIncompatible    *bool     `json:"bazaarIncompatible,omitempty"`    // Plugin：在线集市版本是否不兼容
+	InstalledIncompatible *bool     `json:"installedIncompatible,omitempty"` // 插件/主题：本地已安装版本是否不兼容
+	BazaarIncompatible    *bool     `json:"bazaarIncompatible,omitempty"`    // 插件/主题：在线集市版本是否不兼容
 	Enabled               *bool     `json:"enabled,omitempty"`               // Plugin：是否启用
 	Modes                 *[]string `json:"modes,omitempty"`                 // Theme：支持的模式列表
 }

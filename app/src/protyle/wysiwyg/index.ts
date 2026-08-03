@@ -77,10 +77,6 @@ import {
     removeBlock,
     removeCrossBlockRange
 } from "./remove";
-import {
-    getCrossBlockNestedListMergeContext,
-    mergeCrossBlockNestedLists
-} from "./removeRange";
 import {highlightRender} from "../render/highlightRender";
 import {openAttr} from "../../menus/commonMenuItem";
 import {blockRender} from "../render/blockRender";
@@ -3550,7 +3546,7 @@ export class WYSIWYG {
             }
         });
 
-        this.element.addEventListener("beforeinput", (event: InputEvent) => {
+        this.element.addEventListener("beforeinput", async (event: InputEvent) => {
             if (!isComposition) {
                 beforeBlockquoteInput(protyle, event);
             }
@@ -3572,202 +3568,16 @@ export class WYSIWYG {
             if (!startElement || !endElement || startElement === endElement) {
                 return;
             }
-            const context = getCrossBlockNestedListMergeContext(
-                protyle.wysiwyg.element, range, startElement, endElement);
-            if (!context) {
+            if (startElement.closest('[data-type="NodeListItem"]') ||
+                endElement.closest('[data-type="NodeListItem"]')) {
+                event.preventDefault();
+                event.stopPropagation();
+                await removeCrossBlockRange(protyle, range, startElement, endElement, false, {
+                    event: /^\d{1}$/.test(event.data) ? undefined : event,
+                    text: event.data,
+                });
                 return;
             }
-            event.preventDefault();
-            event.stopPropagation();
-            const undoRange = document.createRange();
-            undoRange.setStart(blockRanges[0].range.startContainer, blockRanges[0].range.startOffset);
-            const lastBlockRange = blockRanges[blockRanges.length - 1].range;
-            undoRange.setEnd(lastBlockRange.endContainer, lastBlockRange.endOffset);
-            const undoContext = getUndoFocusContext(protyle.wysiwyg.element, undoRange, true);
-            const oldStartHTML = startElement.outerHTML;
-            const oldEndOuterHTML = context.endOuterListItemElement.outerHTML;
-            const parentID = context.endOuterListItemElement.parentElement.getAttribute("data-node-id");
-            const previousID = context.endOuterListItemElement.previousElementSibling?.getAttribute("data-node-id");
-            const middleOuterData: { element: HTMLElement; oldHTML: string; previousID?: string }[] = [];
-            let middleOuterElement = context.startOuterListItemElement.nextElementSibling as HTMLElement;
-            while (middleOuterElement && middleOuterElement !== context.endOuterListItemElement) {
-                if (middleOuterElement.hasAttribute("data-node-id")) {
-                    middleOuterData.push({
-                        element: middleOuterElement,
-                        oldHTML: middleOuterElement.outerHTML,
-                        previousID: middleOuterElement.previousElementSibling?.getAttribute("data-node-id"),
-                    });
-                }
-                middleOuterElement = middleOuterElement.nextElementSibling as HTMLElement;
-            }
-            const replacementData = context.replacementListItemElement ? {
-                element: context.replacementListItemElement,
-                parentID: context.replacementListItemElement.parentElement.getAttribute("data-node-id"),
-                previousID: context.replacementListItemElement.previousElementSibling?.getAttribute("data-node-id"),
-                removedBlocks: Array.from(context.replacementListItemElement.children).filter(item =>
-                    item.hasAttribute("data-node-id") && item !== startElement).map((item: HTMLElement) => ({
-                    element: item,
-                    oldHTML: item.outerHTML,
-                    previousID: item.previousElementSibling?.getAttribute("data-node-id"),
-                })),
-            } : undefined;
-            const startTrailingData = context.startTrailingListItems.map(element => ({
-                element,
-                oldHTML: element.outerHTML,
-                parentID: context.startListElement.getAttribute("data-node-id"),
-                previousID: element.previousElementSibling?.getAttribute("data-node-id"),
-            }));
-            const startEditableElement = getContenteditableElement(startElement);
-            if (!startEditableElement.contains(range.startContainer)) {
-                range.setStart(startEditableElement, 0);
-            }
-            range.setEnd(startEditableElement, startEditableElement.childNodes.length);
-            range.deleteContents();
-            const textNode = document.createTextNode(event.data);
-            range.insertNode(textNode);
-            range.setStartAfter(textNode);
-            range.collapse(true);
-            if (replacementData) {
-                replacementData.removedBlocks.forEach(item => item.element.remove());
-                context.startListElement.lastElementChild.before(replacementData.element);
-            }
-            const movedListItems = mergeCrossBlockNestedLists(context);
-            context.startTrailingListItems.forEach(item => item.remove());
-            middleOuterData.forEach(item => item.element.remove());
-            context.endOuterListItemElement.remove();
-            if (replacementData) {
-                const startID = startElement.getAttribute("data-node-id");
-                const replacementID = replacementData.element.getAttribute("data-node-id");
-                const doOperations: IOperation[] = [];
-                replacementData.removedBlocks.forEach(item => doOperations.push({
-                    action: "delete",
-                    id: item.element.getAttribute("data-node-id"),
-                }));
-                middleOuterData.forEach(item => doOperations.push({
-                    action: "delete",
-                    id: item.element.getAttribute("data-node-id"),
-                }));
-                doOperations.push({
-                    action: "move",
-                    id: replacementID,
-                    previousID: context.startListItemElement.getAttribute("data-node-id"),
-                    parentID: context.startListElement.getAttribute("data-node-id"),
-                });
-                let movedPreviousID = replacementID;
-                movedListItems.forEach(item => {
-                    doOperations.push({
-                        action: "insert",
-                        id: item.getAttribute("data-node-id"),
-                        data: item.outerHTML,
-                        previousID: movedPreviousID,
-                        parentID: context.startListElement.getAttribute("data-node-id"),
-                    });
-                    movedPreviousID = item.getAttribute("data-node-id");
-                });
-                doOperations.push({
-                    action: "delete",
-                    id: context.endOuterListItemElement.getAttribute("data-node-id"),
-                });
-                const undoOperations: IOperation[] = [{
-                    action: "move",
-                    id: replacementID,
-                    previousID: replacementData.previousID,
-                    parentID: replacementData.parentID,
-                }];
-                replacementData.removedBlocks.forEach(item => undoOperations.push({
-                    action: "insert",
-                    id: item.element.getAttribute("data-node-id"),
-                    data: item.oldHTML,
-                    previousID: item.previousID,
-                    parentID: replacementID,
-                }));
-                movedListItems.forEach(item => undoOperations.push({
-                    action: "delete",
-                    id: item.getAttribute("data-node-id"),
-                }));
-                middleOuterData.forEach(item => undoOperations.push({
-                    action: "insert",
-                    id: item.element.getAttribute("data-node-id"),
-                    data: item.oldHTML,
-                    previousID: item.previousID,
-                    parentID,
-                }));
-                undoOperations.push({
-                    action: "insert",
-                    id: context.endOuterListItemElement.getAttribute("data-node-id"),
-                    data: oldEndOuterHTML,
-                    previousID,
-                    parentID,
-                });
-                protyle.wysiwyg.lastHTMLs[startID] = oldStartHTML;
-                input(protyle, startElement, range, true, /^\d{1}$/.test(event.data) ? undefined : event, {
-                    doOperations,
-                    undoOperations,
-                    undoContext,
-                });
-                this.scheduleInput(() => {
-                    const currentBlockElement = protyle.wysiwyg.element.querySelector(
-                        `[data-node-id="${startID}"]`
-                    );
-                    focusByOffset(currentBlockElement, event.data.length, event.data.length, true, true);
-                }, 0, false);
-                return;
-            }
-            const doOperations: IOperation[] = startTrailingData.map(item => ({
-                action: "delete",
-                id: item.element.getAttribute("data-node-id")
-            }));
-            doOperations.push({
-                action: "delete",
-                id: context.endOuterListItemElement.getAttribute("data-node-id")
-            });
-            middleOuterData.forEach(item => doOperations.push({
-                action: "delete",
-                id: item.element.getAttribute("data-node-id")
-            }));
-            let movedPreviousID = context.startListItemElement.getAttribute("data-node-id");
-            movedListItems.forEach(item => {
-                doOperations.push({
-                    action: "insert",
-                    id: item.getAttribute("data-node-id"),
-                    data: item.outerHTML,
-                    previousID: movedPreviousID,
-                    parentID: context.startListElement.getAttribute("data-node-id")
-                });
-                movedPreviousID = item.getAttribute("data-node-id");
-            });
-            const undoOperations: IOperation[] = movedListItems.map(item => ({
-                action: "delete",
-                id: item.getAttribute("data-node-id")
-            }));
-            startTrailingData.forEach(item => {
-                undoOperations.push({
-                    action: "insert",
-                    id: item.element.getAttribute("data-node-id"),
-                    data: item.oldHTML,
-                    previousID: item.previousID,
-                    parentID: item.parentID
-                });
-            });
-            middleOuterData.forEach(item => undoOperations.push({
-                action: "insert",
-                id: item.element.getAttribute("data-node-id"),
-                data: item.oldHTML,
-                previousID: item.previousID,
-                parentID,
-            }));
-            undoOperations.push({
-                action: "insert",
-                id: context.endOuterListItemElement.getAttribute("data-node-id"),
-                data: oldEndOuterHTML,
-                previousID,
-                parentID
-            });
-            input(protyle, startElement, range, true, /^\d{1}$/.test(event.data) ? undefined : event, {
-                doOperations,
-                undoOperations,
-                undoContext,
-            });
         });
 
         this.element.addEventListener("input", (event: InputEvent) => {

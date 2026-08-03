@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {
     getBlockRefCheckElementChain,
     getCrossBlockMergeRemoveElement,
+    getCrossBlockSiblingListItemMergeContext,
     isEntireBlockContentSelected
 } from "./removeRange";
 
@@ -177,5 +178,44 @@ describe("getCrossBlockMergeRemoveElement", () => {
             asHTMLElement(editor), asHTMLElement(start), asHTMLElement(end));
 
         assert.equal(result, asHTMLElement(end));
+    });
+});
+
+describe("getCrossBlockSiblingListItemMergeContext", () => {
+    it("保留终点列表项中未选中的子列表", () => {
+        const start = block("start", "NodeParagraph");
+        const selectedChildList = block("selectedChildList", "NodeList");
+        const startItem = block("startItem", "NodeListItem", start, selectedChildList, attr("startAttr"));
+        const end = block("end", "NodeParagraph");
+        const trailingChildList = block("trailingChildList", "NodeList");
+        const endItem = block("endItem", "NodeListItem", end, trailingChildList, attr("endAttr"));
+        const list = block("list", "NodeList", startItem, endItem, attr("listAttr"));
+        const editor = new TestElement("editor").append(list);
+
+        const context = getCrossBlockSiblingListItemMergeContext(
+            asHTMLElement(editor), asHTMLElement(start), asHTMLElement(end));
+
+        assert.equal(context?.startListItemElement, asHTMLElement(startItem));
+        assert.equal(context?.endListItemElement, asHTMLElement(endItem));
+        assert.deepEqual(context?.trailingEndBlockElements, [asHTMLElement(trailingChildList)]);
+    });
+
+    it("合并不同列表中的边界列表项", () => {
+        const start = block("start", "NodeParagraph");
+        const startItem = block("startItem", "NodeListItem", start, attr("startAttr"));
+        const startList = block("startList", "NodeList", startItem, attr("startListAttr"));
+        const end = block("end", "NodeParagraph");
+        const trailingChildList = block("trailingChildList", "NodeList");
+        const endItem = block("endItem", "NodeListItem", end, trailingChildList, attr("endAttr"));
+        const endList = block("endList", "NodeList", endItem, attr("endListAttr"));
+        const editor = new TestElement("editor").append(startList, endList);
+
+        const context = getCrossBlockSiblingListItemMergeContext(
+            asHTMLElement(editor), asHTMLElement(start), asHTMLElement(end));
+
+        assert.equal(context?.startListElement, asHTMLElement(startList));
+        assert.equal(context?.endListElement, asHTMLElement(endList));
+        assert.equal(context?.removeEndElement, asHTMLElement(endList));
+        assert.deepEqual(context?.trailingEndBlockElements, [asHTMLElement(trailingChildList)]);
     });
 });

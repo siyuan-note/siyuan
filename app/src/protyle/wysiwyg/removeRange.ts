@@ -19,13 +19,100 @@ const getListItemElement = (element: HTMLElement, editorElement: HTMLElement) =>
 export interface ICrossBlockNestedListMergeContext {
     endListItemElement: HTMLElement;
     endOuterListItemElement: HTMLElement;
+    newListData?: string;
+    newListParentElement?: HTMLElement;
     replacementListItemElement?: HTMLElement;
     startListElement: HTMLElement;
-    startListItemElement: HTMLElement;
+    startListItemElement?: HTMLElement;
     startOuterListItemElement: HTMLElement;
     startTextFullySelected: boolean;
     startTrailingListItems: HTMLElement[];
 }
+
+export interface ICrossBlockSiblingListItemMergeContext {
+    endListElement: HTMLElement;
+    endListItemElement: HTMLElement;
+    removeEndElement: HTMLElement;
+    startListElement: HTMLElement;
+    startListItemElement: HTMLElement;
+    trailingEndBlockElements: HTMLElement[];
+    trailingEndListItemElements: HTMLElement[];
+}
+
+export const getCrossBlockSiblingListItemMergeContext = (editorElement: HTMLElement,
+                                                          startElement: HTMLElement,
+                                                          endElement: HTMLElement):
+ICrossBlockSiblingListItemMergeContext | undefined => {
+    const startListItemElement = getListItemElement(startElement, editorElement);
+    const endListItemElement = getListItemElement(endElement, editorElement);
+    const startListElement = startListItemElement?.parentElement;
+    const endListElement = endListItemElement?.parentElement;
+    const blockType = startElement.getAttribute("data-type");
+    if (blockType !== endElement.getAttribute("data-type") ||
+        !["NodeParagraph", "NodeHeading"].includes(blockType)) {
+        return;
+    }
+    if (!startListItemElement || !endListItemElement || !startListElement || !endListElement ||
+        startListItemElement === endListItemElement || startElement.parentElement !== startListItemElement ||
+        endElement.parentElement !== endListItemElement || startListElement.getAttribute("data-type") !== "NodeList" ||
+        endListElement.getAttribute("data-type") !== "NodeList" ||
+        startListElement.getAttribute("data-subtype") !== endListElement.getAttribute("data-subtype")) {
+        return;
+    }
+    const sameList = startListElement === endListElement;
+    if (!sameList && startListElement.parentElement !== endListElement.parentElement) {
+        return;
+    }
+    let siblingElement = sameList ? startListItemElement.nextElementSibling : startListElement.nextElementSibling;
+    const endSiblingElement = sameList ? endListItemElement : endListElement;
+    while (siblingElement && siblingElement !== endSiblingElement) {
+        siblingElement = siblingElement.nextElementSibling;
+    }
+    if (siblingElement !== endSiblingElement) {
+        return;
+    }
+    const trailingEndBlockElements: HTMLElement[] = [];
+    siblingElement = endElement.nextElementSibling;
+    while (siblingElement) {
+        if (siblingElement.hasAttribute("data-node-id")) {
+            trailingEndBlockElements.push(siblingElement as HTMLElement);
+        }
+        siblingElement = siblingElement.nextElementSibling;
+    }
+    if (trailingEndBlockElements.length === 0) {
+        return;
+    }
+    const trailingEndListItemElements: HTMLElement[] = [];
+    if (!sameList) {
+        let trailingListItemElement = endListItemElement.nextElementSibling as HTMLElement;
+        while (trailingListItemElement?.getAttribute("data-type") === "NodeListItem") {
+            trailingEndListItemElements.push(trailingListItemElement);
+            trailingListItemElement = trailingListItemElement.nextElementSibling as HTMLElement;
+        }
+    }
+    return {
+        endListElement,
+        endListItemElement,
+        removeEndElement: sameList ? endListItemElement : endListElement,
+        startListElement,
+        startListItemElement,
+        trailingEndBlockElements,
+        trailingEndListItemElements,
+    };
+};
+
+export const mergeCrossBlockSiblingListItems = (context: ICrossBlockSiblingListItemMergeContext) => {
+    context.trailingEndBlockElements.forEach(item => {
+        context.startListItemElement.lastElementChild.before(item);
+    });
+    context.trailingEndListItemElements.forEach(item => {
+        context.startListElement.lastElementChild.before(item);
+    });
+    return {
+        movedEndBlocks: context.trailingEndBlockElements,
+        movedEndListItems: context.trailingEndListItemElements,
+    };
+};
 
 export const getCrossBlockNestedListMergeContext = (editorElement: HTMLElement, selectedRange: Range,
                                                      startElement: HTMLElement, endElement: HTMLElement):
@@ -67,18 +154,36 @@ ICrossBlockNestedListMergeContext | undefined => {
     let startListElement = boundaryStartListElement;
     let startMergeListItemElement = startListItemElement;
     let startOuterListItemElement = getListItemElement(boundaryStartListElement, editorElement);
+    let newListData: string;
+    let newListParentElement: HTMLElement;
     let replacementListItemElement: HTMLElement;
     if (!startOuterListItemElement) {
         startOuterListItemElement = startListItemElement;
         const previousOuterListItemElement = startOuterListItemElement.previousElementSibling as HTMLElement;
         startListElement = Array.from(previousOuterListItemElement?.children || []).find(item =>
             item.getAttribute("data-type") === "NodeList") as HTMLElement;
-        startMergeListItemElement = Array.from(startListElement?.children || []).reverse().find(item =>
-            item.getAttribute("data-type") === "NodeListItem") as HTMLElement;
-        if (!startListElement || !startMergeListItemElement ||
-            !isTextContentSelected(startOuterListItemElement) ||
+        if (!previousOuterListItemElement || !isTextContentSelected(startOuterListItemElement) ||
             startOuterListItemElement.parentElement !== endOuterListItemElement.parentElement) {
             return;
+        }
+        if (startListElement) {
+            startMergeListItemElement = Array.from(startListElement.children).reverse().find(item =>
+                item.getAttribute("data-type") === "NodeListItem") as HTMLElement;
+            if (!startMergeListItemElement) {
+                return;
+            }
+        } else {
+            const newListID = Lute.NewNodeID();
+            startListElement = document.createElement("div");
+            startListElement.className = "list";
+            startListElement.setAttribute("data-node-id", newListID);
+            startListElement.setAttribute("data-subtype", endListElement.getAttribute("data-subtype"));
+            startListElement.setAttribute("data-type", "NodeList");
+            startListElement.setAttribute("updated", newListID.split("-")[0]);
+            startListElement.innerHTML = '<div class="protyle-attr" contenteditable="false">\u200b</div>';
+            newListData = startListElement.outerHTML;
+            newListParentElement = previousOuterListItemElement;
+            startMergeListItemElement = undefined;
         }
         replacementListItemElement = startOuterListItemElement;
     }
@@ -90,9 +195,9 @@ ICrossBlockNestedListMergeContext | undefined => {
         return;
     }
     const endItemBlocks = Array.from(endListItemElement.children).filter(item => item.hasAttribute("data-node-id"));
-    const startTrailingListItems = Array.from(startListElement.children).filter(item =>
+    const startTrailingListItems = startMergeListItemElement ? Array.from(startListElement.children).filter(item =>
         item.getAttribute("data-type") === "NodeListItem" &&
-        !!(startMergeListItemElement.compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING)) as HTMLElement[];
+        !!(startMergeListItemElement.compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING)) as HTMLElement[] : [];
     const trailingItems = Array.from(endListElement.children).filter(item =>
         item.getAttribute("data-type") === "NodeListItem" &&
         !!(endListItemElement.compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING));
@@ -116,6 +221,8 @@ ICrossBlockNestedListMergeContext | undefined => {
     return {
         endListItemElement,
         endOuterListItemElement,
+        newListData,
+        newListParentElement,
         replacementListItemElement,
         startListElement,
         startListItemElement: startMergeListItemElement,
@@ -133,6 +240,9 @@ export const mergeCrossBlockNestedLists = (context: ICrossBlockNestedListMergeCo
         context.startListElement.lastElementChild.before(item);
         movedItems.push(item);
         item = nextItem;
+    }
+    if (context.newListParentElement) {
+        context.newListParentElement.lastElementChild.before(context.startListElement);
     }
     return movedItems;
 };

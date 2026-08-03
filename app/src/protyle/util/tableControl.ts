@@ -1,6 +1,6 @@
 import {MenuItem} from "../../menus/Menu";
 import {updateTransaction} from "../wysiwyg/transaction";
-import {encodeBase64, isMac, readClipboard} from "./compatibility";
+import {copyPlainText, encodeBase64, isMac, readClipboard} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
 import {paste} from "./paste";
 import {focusByRange, getEditorRange} from "./selection";
@@ -93,8 +93,9 @@ interface ITableEdgeHover {
     index?: number;
 }
 
-const getCell = (target: EventTarget) => {
-    return (target as Element)?.closest?.("th, td") as HTMLTableCellElement;
+const getCell = (target: EventTarget | Node) => {
+    const element = target instanceof Element ? target : (target as Node)?.parentElement;
+    return element?.closest?.("th, td") as HTMLTableCellElement;
 };
 
 const getTableNode = (cell: HTMLTableCellElement) => {
@@ -294,6 +295,7 @@ export class TableControl {
     private dropIndicator: HTMLElement;
     private selection: ITableSelection;
     private hoverCell: HTMLTableCellElement;
+    private caretCell: HTMLTableCellElement;
     private hoverType: TableControlType;
     private hoverIndex: number;
     private selectionElements: HTMLElement[] = [];
@@ -304,6 +306,7 @@ export class TableControl {
     private dragState: IDragState;
     private resizeState: IResizeState;
     private suppressAddClick = false;
+    private bypassClipboardEvent = false;
     private observer: MutationObserver;
     private abortController = new AbortController();
 
@@ -347,12 +350,23 @@ export class TableControl {
             if (this.resizeState && !this.resizeState.node.isConnected) {
                 this.resizeState = undefined;
                 this.resizeLabel.classList.add("fn__none");
-            } else if (this.selection && !this.selection.node.isConnected) {
+            }
+            if (this.selection && (!this.selection.node.isConnected || !this.selection.activeCell.isConnected)) {
                 this.clear();
-            } else if (this.hoverCell && !this.hoverCell.isConnected) {
+                return;
+            }
+            let render = false;
+            if (this.hoverCell && !this.hoverCell.isConnected) {
                 this.hoverCell = undefined;
                 this.hoverType = undefined;
                 this.hoverIndex = undefined;
+                render = true;
+            }
+            if (this.caretCell && !this.caretCell.isConnected) {
+                this.caretCell = undefined;
+                render = true;
+            }
+            if (render) {
                 this.scheduleRender();
             }
         });
@@ -387,8 +401,47 @@ export class TableControl {
         this.element.classList.toggle("fn__none", hidden);
     }
 
+    public selectCellRange(anchorCell: HTMLTableCellElement, activeCell: HTMLTableCellElement) {
+        const node = getTableNode(anchorCell);
+        const table = anchorCell?.closest("table") as HTMLTableElement;
+        if (!node || !table || getTableNode(activeCell) !== node || activeCell.closest("table") !== table) {
+            return false;
+        }
+        const grid = buildTableGrid(table);
+        const anchorInfo = grid.cellInfos.find(item => item.cell === anchorCell);
+        const activeInfo = grid.cellInfos.find(item => item.cell === activeCell);
+        const cells = getTableCellsInRectangle(grid.cellInfos, anchorInfo, activeInfo).map(item => item.cell);
+        if (cells.length === 0) {
+            return false;
+        }
+        node.querySelector(".table__select")?.removeAttribute("style");
+        this.selection = {
+            node,
+            table,
+            mode: "cell",
+            indexes: new Set(),
+            cells: new Set(cells),
+            anchor: anchorCell,
+            activeCell,
+        };
+        this.caretCell = undefined;
+        this.updateSelectedCells(grid);
+        getSelection()?.removeAllRanges();
+        this.scheduleRender();
+        return true;
+    }
+
     private bindEvents() {
         const signal = this.abortController.signal;
+        document.addEventListener("selectionchange", () => {
+            const selection = getSelection();
+            const cell = selection?.isCollapsed ? getCell(selection.focusNode) : undefined;
+            const caretCell = cell && this.wysiwygElement.contains(cell) ? cell : undefined;
+            if (caretCell !== this.caretCell) {
+                this.caretCell = caretCell;
+                this.scheduleRender();
+            }
+        }, {signal});
         this.wysiwygElement.addEventListener("pointermove", event => this.handleTablePointerMove(event, false), {signal});
         // 手柄和添加按钮（pointer-events: auto）会截获鼠标事件，导致 wysiwygElement 收不到
         // pointermove，边缘 hover 检测被卡住（例如鼠标停在 cell 手柄上时无法触发 add-column）。
@@ -426,8 +479,17 @@ export class TableControl {
             this.openMenu(event.clientX, event.clientY);
         }, {capture: true, signal});
         document.addEventListener("keydown", event => {
-            if (this.selection && !this.protyle.disabled &&
-                applyTableCellStyleHotkey(this.protyle, this.getSelectedCells(), event, () => this.scheduleRender())) {
+            if (!this.selection || this.protyle.disabled) {
+                return;
+            }
+            if (!event.isComposing && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
+                (event.key === "Backspace" || event.key === "Delete")) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                this.deleteSelection(true);
+                return;
+            }
+            if (applyTableCellStyleHotkey(this.protyle, this.getSelectedCells(), event, () => this.scheduleRender())) {
                 return;
             }
         }, {capture: true, signal});
@@ -442,10 +504,14 @@ export class TableControl {
             }
         }, {signal});
         document.addEventListener("pointerdown", event => {
+            const target = event.target as Node;
             if (!this.selection) {
+                if (this.caretCell && !this.element.contains(target) && !this.wysiwygElement.contains(target)) {
+                    this.caretCell = undefined;
+                    this.scheduleRender();
+                }
                 return;
             }
-            const target = event.target as Node;
             if (this.element.contains(target) || this.selection.node.contains(target) ||
                 document.getElementById("commonMenu")?.contains(target)) {
                 return;
@@ -453,7 +519,7 @@ export class TableControl {
             this.clear();
         }, {capture: true, signal});
         document.addEventListener("copy", event => {
-            if (!this.selection) {
+            if (!this.selection || this.bypassClipboardEvent) {
                 return;
             }
             this.writeClipboard(event);
@@ -461,7 +527,7 @@ export class TableControl {
             event.stopImmediatePropagation();
         }, {capture: true, signal});
         document.addEventListener("cut", event => {
-            if (!this.selection) {
+            if (!this.selection || this.bypassClipboardEvent) {
                 return;
             }
             event.preventDefault();
@@ -472,6 +538,19 @@ export class TableControl {
             if (this.writeClipboard(event)) {
                 this.deleteSelection(true);
             }
+        }, {capture: true, signal});
+        document.addEventListener("paste", () => {
+            if (!this.selection || this.protyle.disabled) {
+                return;
+            }
+            const cell = this.getSelectedCells()[0];
+            if (!cell) {
+                return;
+            }
+            const range = getEditorRange(cell);
+            range.selectNodeContents(cell);
+            range.collapse(true);
+            focusByRange(range);
         }, {capture: true, signal});
         this.protyle.element.addEventListener("scroll", () => this.scheduleRender(), {capture: true, signal});
         window.addEventListener("resize", () => this.scheduleRender(), {signal});
@@ -489,11 +568,13 @@ export class TableControl {
         this.element.addEventListener("click", event => this.handleClick(event), {signal});
         this.element.addEventListener("contextmenu", event => {
             const type = (event.target as Element).closest<HTMLElement>("[data-type]")?.dataset.type;
-            if (!this.hoverCell || (type !== "row" && type !== "column" && type !== "cell")) {
+            const cell = this.getControlCell(type);
+            if (!cell || (type !== "row" && type !== "column" && type !== "cell")) {
                 return;
             }
-            if (!this.selection || this.selection.mode !== type || !this.isCellInSelection(this.hoverCell)) {
-                this.selectFromCell(type, this.hoverCell, false, false, this.hoverIndex);
+            if (!this.selection || this.selection.mode !== type || !this.isCellInSelection(cell)) {
+                this.selectFromCell(type, cell, false, false,
+                    cell === this.hoverCell ? this.hoverIndex : undefined);
             }
             event.preventDefault();
             event.stopPropagation();
@@ -543,9 +624,21 @@ export class TableControl {
         }
     }
 
+    private getControlCell(type?: string) {
+        if (type === "cell") {
+            return this.selection?.mode === "cell" ? this.selection.activeCell : this.caretCell;
+        }
+        if (type === "add-row" || type === "add-column" || type === "add-both") {
+            return this.hoverCell;
+        }
+        return this.hoverCell || this.caretCell ||
+            (this.selection?.mode === type ? this.selection.activeCell : undefined);
+    }
+
     private handlePointerDown(event: PointerEvent) {
         const type = (event.target as Element).closest<HTMLElement>("[data-type]")?.dataset.type;
-        if (!type || !this.hoverCell) {
+        const cell = this.getControlCell(type);
+        if (!type || !cell) {
             return;
         }
         if (event.button !== 0) {
@@ -560,7 +653,8 @@ export class TableControl {
         if (type !== "row" && type !== "column") {
             return;
         }
-        this.selectFromCell(type, this.hoverCell, isPrimaryModifier(event), event.shiftKey, this.hoverIndex);
+        this.selectFromCell(type, cell, isPrimaryModifier(event), event.shiftKey,
+            cell === this.hoverCell ? this.hoverIndex : undefined);
         if (!this.selection) {
             return;
         }
@@ -593,7 +687,8 @@ export class TableControl {
 
     private handleClick(event: MouseEvent) {
         const type = (event.target as Element).closest<HTMLElement>("[data-type]")?.dataset.type;
-        if (!type || !this.hoverCell) {
+        const cell = this.getControlCell(type);
+        if (!type || !cell) {
             return;
         }
         event.preventDefault();
@@ -621,7 +716,9 @@ export class TableControl {
             }
             return;
         }
-        this.selectFromCell(type, this.hoverCell, isPrimaryModifier(event), event.shiftKey);
+        if (!this.selection || this.selection.mode !== "cell" || !this.isCellInSelection(cell)) {
+            this.selectFromCell(type, cell, isPrimaryModifier(event), event.shiftKey);
+        }
         if (!isPrimaryModifier(event) && !event.shiftKey) {
             const rect = this.cellHandle.getBoundingClientRect();
             this.openMenu(rect.right, rect.bottom);
@@ -781,7 +878,7 @@ export class TableControl {
         grid = grid || buildTableGrid(this.selection.table);
         this.selectionGrid = grid;
         if (this.selection.mode === "cell") {
-            this.selectedCells = Array.from(this.selection.cells);
+            this.selectedCells = grid.cellInfos.filter(info => this.selection.cells.has(info.cell)).map(info => info.cell);
             return;
         }
         this.selectedCells = grid.cellInfos.filter(info => {
@@ -833,22 +930,27 @@ export class TableControl {
         return Math.max(table.getBoundingClientRect().bottom, table.parentElement.getBoundingClientRect().bottom);
     }
 
-    private getTableGridViewportRect(table: HTMLTableElement) {
-        const viewportRect = this.getTableViewportRect(table);
+    private getTableGridRect(table: HTMLTableElement) {
         const rowRects = Array.from(table.rows).map(row => row.getBoundingClientRect()).filter(rect => rect.height > 0);
         if (rowRects.length === 0) {
-            return viewportRect;
+            return table.getBoundingClientRect();
         }
+        const left = Math.min(...rowRects.map(rect => rect.left));
         const top = Math.min(...rowRects.map(rect => rect.top));
+        const right = Math.max(...rowRects.map(rect => rect.right));
         const bottom = Math.max(...rowRects.map(rect => rect.bottom));
-        return intersectRects(viewportRect, {
-            left: viewportRect.left,
+        return {
+            left,
             top,
-            right: viewportRect.right,
+            right,
             bottom,
-            width: viewportRect.width,
+            width: right - left,
             height: bottom - top,
-        });
+        };
+    }
+
+    private getTableGridViewportRect(table: HTMLTableElement) {
+        return intersectRects(this.getTableViewportRect(table), this.getTableGridRect(table));
     }
 
     private getColumnRect(table: HTMLTableElement, grid: ITableGrid, index: number) {
@@ -975,7 +1077,8 @@ export class TableControl {
         return candidates[0];
     }
 
-    private appendSelectionRect(rect: ITableControlRect, viewportRect: ITableControlRect) {
+    private appendSelectionRect(rect: ITableControlRect, viewportRect: ITableControlRect,
+                                gridRect: ITableControlRect) {
         const visibleRect = intersectRects(rect, viewportRect);
         if (visibleRect.width === 0 || visibleRect.height === 0) {
             return;
@@ -993,6 +1096,32 @@ export class TableControl {
         selectionElement.style.top = `${visibleRect.top}px`;
         selectionElement.style.width = `${visibleRect.width}px`;
         selectionElement.style.height = `${visibleRect.height}px`;
+        const radius = "var(--b3-border-radius-s)";
+        const touches = (edge: number, target: number) => Math.abs(edge - target) < 1;
+        const top = touches(rect.top, gridRect.top) && touches(visibleRect.top, rect.top);
+        const right = touches(rect.right, gridRect.right) && touches(visibleRect.right, rect.right);
+        const bottom = touches(rect.bottom, gridRect.bottom) && touches(visibleRect.bottom, rect.bottom);
+        const left = touches(rect.left, gridRect.left) && touches(visibleRect.left, rect.left);
+        selectionElement.style.borderRadius = [
+            top && left ? radius : "0",
+            top && right ? radius : "0",
+            bottom && right ? radius : "0",
+            bottom && left ? radius : "0",
+        ].join(" ");
+    }
+
+    private positionCellHandle(rect: ITableControlRect, gridRect: ITableControlRect,
+                               viewportRect: ITableControlRect) {
+        const visibleRect = intersectRects(rect, viewportRect);
+        if (visibleRect.width === 0 || visibleRect.height === 0) {
+            return;
+        }
+        this.cellHandle.classList.remove("fn__none");
+        const nextToAddColumn = Math.abs(rect.right - gridRect.right) <= 1 &&
+            gridRect.right <= viewportRect.right + 1;
+        this.setPosition(this.cellHandle, visibleRect.right -
+            (nextToAddColumn ? TABLE_EDGE_CONTROL_TRIGGER_SIZE / 2 : 0),
+            visibleRect.top + visibleRect.height / 2);
     }
 
     private renderResize() {
@@ -1052,7 +1181,12 @@ export class TableControl {
             this.renderResize();
             return;
         }
-        const cell = this.hoverCell?.isConnected ? this.hoverCell : this.selection?.activeCell;
+        const hoverCell = this.hoverCell?.isConnected ? this.hoverCell : undefined;
+        const caretCell = this.caretCell?.isConnected ? this.caretCell : undefined;
+        const selectionCell = this.selection?.mode !== "cell" && this.selection?.activeCell?.isConnected ?
+            this.selection.activeCell : undefined;
+        const cell = hoverCell || caretCell || selectionCell;
+        const controlType = hoverCell ? this.hoverType : caretCell ? "cell" : this.selection?.mode;
         const node = getTableNode(cell);
         const table = cell?.closest("table") as HTMLTableElement;
         const visible = !!cell && !!node && !!table && !this.protyle.disabled;
@@ -1063,14 +1197,12 @@ export class TableControl {
         });
         this.resizeLabel.classList.add("fn__none");
         if (visible) {
-            const cellRect = cell.getBoundingClientRect();
             const tableRect = table.getBoundingClientRect();
             const viewportRect = this.getTableGridViewportRect(table);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
                 isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
-            const visibleCellRect = intersectRects(cellRect, viewportRect);
             const grid = this.selection?.table === table && this.selectionGrid ?
                 this.selectionGrid : buildTableGrid(table);
             const cellInfo = grid.cellInfos.find(item => item.cell === cell);
@@ -1088,7 +1220,7 @@ export class TableControl {
                 (this.selection?.table === table && this.selection.mode === "row" &&
                     this.selection.indexes.size > 1 && this.selection.indexes.has(0)));
             this.columnHandle.classList.toggle("protyle-table-control__handle--drag-disabled", merged);
-            if ((this.hoverType === "row" || this.hoverType === "cell") &&
+            if ((controlType === "row" || (controlType === "cell" && cellInfo?.col === 0)) &&
                 visibleRowRect?.width > 0 && visibleRowRect.height > 0) {
                 this.rowHandle.classList.remove("fn__none");
                 this.rowHandle.style.width = `${TABLE_HANDLE_THICKNESS}px`;
@@ -1096,22 +1228,13 @@ export class TableControl {
                 this.setPosition(this.rowHandle, viewportRect.left,
                     visibleRowRect.top + visibleRowRect.height / 2);
             }
-            if ((this.hoverType === "column" || this.hoverType === "cell") &&
+            if ((controlType === "column" || (controlType === "cell" && cellInfo?.row === 0)) &&
                 visibleColumnRect?.width > 0 && viewportRect.height > 0) {
                 this.columnHandle.classList.remove("fn__none");
                 this.columnHandle.style.width = `${visibleColumnRect.width}px`;
                 this.columnHandle.style.height = `${TABLE_HANDLE_THICKNESS}px`;
                 this.setPosition(this.columnHandle, visibleColumnRect.left + visibleColumnRect.width / 2,
                     viewportRect.top);
-            }
-            if (!this.dragState && this.hoverType === "cell" &&
-                visibleCellRect.width > 0 && visibleCellRect.height > 0) {
-                this.cellHandle.classList.remove("fn__none");
-                const nextToAddColumn = Math.abs(visibleCellRect.right - tableRect.right) <= 1 &&
-                    tableRect.right <= viewportRect.right + 1;
-                this.setPosition(this.cellHandle, visibleCellRect.right -
-                    (nextToAddColumn ? TABLE_EDGE_CONTROL_TRIGGER_SIZE / 2 : 0),
-                    visibleCellRect.top + visibleCellRect.height / 2);
             }
             if ((this.hoverType === "add-row" || this.hoverType === "add-both") && viewportRect.width > 0 &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1) {
@@ -1143,6 +1266,14 @@ export class TableControl {
                     addRowEdge + TABLE_ADD_CONTROL_THICKNESS / 2);
             }
         }
+        if (!this.dragState && !this.selection && caretCell) {
+            const table = caretCell.closest("table") as HTMLTableElement;
+            const gridRect = table ? this.getTableGridRect(table) : undefined;
+            const viewportRect = table ? this.getTableGridViewportRect(table) : undefined;
+            if (gridRect && viewportRect) {
+                this.positionCellHandle(caretCell.getBoundingClientRect(), gridRect, viewportRect);
+            }
+        }
         this.selectionElementIndex = 0;
         this.selectionElements.forEach(item => item.classList.add("fn__none"));
         if (!this.selection?.node.isConnected) {
@@ -1151,7 +1282,9 @@ export class TableControl {
             this.selectedCells = [];
             return;
         }
-        const selectionViewportRect = this.getTableGridViewportRect(this.selection.table);
+        const selectionGridRect = this.getTableGridRect(this.selection.table);
+        const selectionViewportRect = intersectRects(
+            this.getTableViewportRect(this.selection.table), selectionGridRect);
         if (this.selection.mode === "row") {
             const rows = Array.from(this.selection.table.rows);
             getIndexGroups(this.selection.indexes).forEach(group => {
@@ -1159,13 +1292,13 @@ export class TableControl {
                 const endRect = rows[group.end]?.getBoundingClientRect();
                 if (startRect && endRect) {
                     this.appendSelectionRect({
-                        left: selectionViewportRect.left,
+                        left: selectionGridRect.left,
                         top: startRect.top,
-                        right: selectionViewportRect.right,
+                        right: selectionGridRect.right,
                         bottom: endRect.bottom,
-                        width: selectionViewportRect.width,
+                        width: selectionGridRect.width,
                         height: endRect.bottom - startRect.top,
-                    }, selectionViewportRect);
+                    }, selectionViewportRect, selectionGridRect);
                 }
             });
         } else if (this.selection.mode === "column") {
@@ -1176,12 +1309,12 @@ export class TableControl {
                 if (startRect && endRect) {
                     this.appendSelectionRect({
                         left: startRect.left,
-                        top: selectionViewportRect.top,
+                        top: selectionGridRect.top,
                         right: endRect.right,
-                        bottom: selectionViewportRect.bottom,
+                        bottom: selectionGridRect.bottom,
                         width: endRect.right - startRect.left,
-                        height: selectionViewportRect.height,
-                    }, selectionViewportRect);
+                        height: selectionGridRect.height,
+                    }, selectionViewportRect, selectionGridRect);
                 }
             });
         } else if (this.isRectangle()) {
@@ -1192,13 +1325,20 @@ export class TableControl {
                 const top = Math.min(...rects.map(rect => rect.top));
                 const right = Math.max(...rects.map(rect => rect.right));
                 const bottom = Math.max(...rects.map(rect => rect.bottom));
-                this.appendSelectionRect({left, top, right, bottom, width: right - left, height: bottom - top},
-                    selectionViewportRect);
+                const rect = {left, top, right, bottom, width: right - left, height: bottom - top};
+                this.appendSelectionRect(rect, selectionViewportRect, selectionGridRect);
+                if (!this.dragState) {
+                    this.positionCellHandle(rect, selectionGridRect, selectionViewportRect);
+                }
             }
         } else {
             this.getSelectedCells().forEach(item => {
-                this.appendSelectionRect(item.getBoundingClientRect(), selectionViewportRect);
+                this.appendSelectionRect(item.getBoundingClientRect(), selectionViewportRect, selectionGridRect);
             });
+            if (!this.dragState && this.selection.mode === "cell") {
+                this.positionCellHandle(this.selection.activeCell.getBoundingClientRect(), selectionGridRect,
+                    selectionViewportRect);
+            }
         }
     }
 
@@ -1227,6 +1367,24 @@ export class TableControl {
             accelerator: rectangle ? undefined : window.siyuan.languages.tableRectangleSelectionRequired,
             click: () => this.execClipboardCommand("copy"),
         }).element);
+        if (this.selection.mode === "cell" && rectangle && this.getSelectedCells().length > 1) {
+            menu.append(new MenuItem({
+                id: "copyRichText",
+                label: window.siyuan.languages.copyRichText,
+                accelerator: window.siyuan.config.keymap.editor.general.copyRichText.custom,
+                click: () => this.copySelectionAsRichText(),
+            }).element);
+            menu.append(new MenuItem({
+                id: "copyPlainText",
+                label: window.siyuan.languages.copyPlainText,
+                click: () => {
+                    const content = this.getSelectionClipboardContent();
+                    if (content) {
+                        copyPlainText(content.text);
+                    }
+                },
+            }).element);
+        }
         menu.append(new MenuItem({
             icon: "iconCut",
             label: window.siyuan.languages.cut,
@@ -1479,11 +1637,31 @@ export class TableControl {
         document.execCommand(command);
     }
 
+    private copySelectionAsRichText() {
+        const cells = this.getSelectedCells();
+        const first = cells[0];
+        const last = cells[cells.length - 1];
+        if (!first || !last) {
+            return;
+        }
+        const range = document.createRange();
+        range.setStart(first, 0);
+        range.setEnd(last, last.childNodes.length);
+        focusByRange(range);
+        this.bypassClipboardEvent = true;
+        try {
+            this.protyle.wysiwyg.copyRichText();
+        } finally {
+            this.bypassClipboardEvent = false;
+            getSelection()?.removeAllRanges();
+        }
+    }
+
     private async paste() {
         if (!this.selection?.activeCell.isConnected) {
             return;
         }
-        const cell = this.selection.activeCell;
+        const cell = this.getSelectedCells()[0] || this.selection.activeCell;
         const range = getEditorRange(cell);
         range.selectNodeContents(cell);
         range.collapse(true);
@@ -2253,9 +2431,9 @@ export class TableControl {
         this.scheduleRender();
     }
 
-    private writeClipboard(event: ClipboardEvent) {
-        if (!this.selection || !event.clipboardData) {
-            return false;
+    private getSelectionClipboardContent() {
+        if (!this.selection) {
+            return;
         }
         let html = "";
         if (this.selection.mode === "cell") {
@@ -2273,7 +2451,7 @@ export class TableControl {
             html = this.getCompressedTableHTML();
         }
         if (!html) {
-            return false;
+            return;
         }
         const container = document.createElement("div");
         container.innerHTML = html;
@@ -2282,9 +2460,20 @@ export class TableControl {
             !cell.classList.contains("fn__none")).map(cell => getCellText(cell as HTMLTableCellElement)).join("\t")).join("\n");
         const textSiyuan = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
         const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${removeZWJ(textSiyuan)}`;
-        event.clipboardData.setData("text/plain", text);
-        event.clipboardData.setData("text/siyuan", textSiyuan);
-        event.clipboardData.setData("text/html", textHTML);
+        return {text, textSiyuan, textHTML};
+    }
+
+    private writeClipboard(event: ClipboardEvent) {
+        if (!event.clipboardData) {
+            return false;
+        }
+        const content = this.getSelectionClipboardContent();
+        if (!content) {
+            return false;
+        }
+        event.clipboardData.setData("text/plain", content.text);
+        event.clipboardData.setData("text/siyuan", content.textSiyuan);
+        event.clipboardData.setData("text/html", content.textHTML);
         return true;
     }
 

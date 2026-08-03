@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "클릭하여 오른쪽에 열 삽입<br>드래그하여 여러 열 삽입 또는 삭제",
+	"tableAddRowTip": "클릭하여 아래에 행 삽입<br>드래그하여 여러 행 삽입 또는 삭제",
 	"bazaarPackageInfo": "패키지 정보",
 	"bazaarPackageName": "패키지 이름",
 	"bazaarFunding": "후원",

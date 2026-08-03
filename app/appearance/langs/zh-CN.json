@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "点击在右侧插入一列<br>拖拽插入或删除多列",
+	"tableAddRowTip": "点击在下方插入一行<br>拖拽插入或删除多行",
 	"bazaarPackageInfo": "集市包信息",
 	"bazaarPackageName": "包名",
 	"bazaarFunding": "赞助渠道",

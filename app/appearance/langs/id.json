@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "Klik untuk menyisipkan kolom di sebelah kanan<br>Seret untuk menyisipkan atau menghapus beberapa kolom",
+	"tableAddRowTip": "Klik untuk menyisipkan baris di bawah<br>Seret untuk menyisipkan atau menghapus beberapa baris",
 	"bazaarPackageInfo": "Informasi paket",
 	"bazaarPackageName": "Nama paket",
 	"bazaarFunding": "Pendanaan",

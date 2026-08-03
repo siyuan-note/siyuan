@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "انقر لإدراج عمود إلى اليمين<br>اسحب لإدراج أعمدة متعددة أو حذفها",
+	"tableAddRowTip": "انقر لإدراج صف في الأسفل<br>اسحب لإدراج صفوف متعددة أو حذفها",
 	"bazaarPackageInfo": "معلومات الحزمة",
 	"bazaarPackageName": "اسم الحزمة",
 	"bazaarFunding": "التمويل",

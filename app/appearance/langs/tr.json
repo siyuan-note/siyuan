@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "Sağa bir sütun eklemek için tıklayın<br>Birden fazla sütun eklemek veya silmek için sürükleyin",
+	"tableAddRowTip": "Aşağıya bir satır eklemek için tıklayın<br>Birden fazla satır eklemek veya silmek için sürükleyin",
 	"bazaarPackageInfo": "Paket bilgileri",
 	"bazaarPackageName": "Paket adı",
 	"bazaarFunding": "Finansman",

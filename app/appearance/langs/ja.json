@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "クリックして右側に列を挿入<br>ドラッグして複数の列を挿入または削除",
+	"tableAddRowTip": "クリックして下に行を挿入<br>ドラッグして複数の行を挿入または削除",
 	"bazaarPackageInfo": "パッケージ情報",
 	"bazaarPackageName": "パッケージ名",
 	"bazaarFunding": "資金提供",

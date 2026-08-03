@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "Click to insert a column on the right<br>Drag to insert or delete multiple columns",
+	"tableAddRowTip": "Click to insert a row below<br>Drag to insert or delete multiple rows",
 	"bazaarPackageInfo": "Package information",
 	"bazaarPackageName": "Package name",
 	"bazaarFunding": "Funding",

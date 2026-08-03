@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "Klicken, um rechts eine Spalte einzufügen<br>Ziehen, um mehrere Spalten einzufügen oder zu löschen",
+	"tableAddRowTip": "Klicken, um unten eine Zeile einzufügen<br>Ziehen, um mehrere Zeilen einzufügen oder zu löschen",
 	"bazaarPackageInfo": "Paketinformationen",
 	"bazaarPackageName": "Paketname",
 	"bazaarFunding": "Finanzierung",

@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "לחצו כדי להוסיף עמודה מימין<br>גררו כדי להוסיף או למחוק עמודות מרובות",
+	"tableAddRowTip": "לחצו כדי להוסיף שורה למטה<br>גררו כדי להוסיף או למחוק שורות מרובות",
 	"bazaarPackageInfo": "פרטי החבילה",
 	"bazaarPackageName": "שם החבילה",
 	"bazaarFunding": "מימון",

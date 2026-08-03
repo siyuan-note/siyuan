@@ -318,10 +318,10 @@ export class TableControl {
 <button type="button" class="protyle-table-control__handle protyle-table-control__handle--cell b3-tooltips b3-tooltips__n fn__none" data-type="cell" aria-label="${window.siyuan.languages.more}">
     <svg><use xlink:href="#iconMore"></use></svg>
 </button>
-<button type="button" class="protyle-table-control__add protyle-table-control__add--row b3-tooltips b3-tooltips__n fn__none" data-type="add-row" aria-label="${window.siyuan.languages.insertRowBelow}">
+<button type="button" class="protyle-table-control__add protyle-table-control__add--row ariaLabel fn__none" data-type="add-row" data-position="north" aria-label="${window.siyuan.languages.tableAddRowTip}">
     <svg><use xlink:href="#iconAdd"></use></svg>
 </button>
-<button type="button" class="protyle-table-control__add protyle-table-control__add--column b3-tooltips b3-tooltips__w fn__none" data-type="add-column" aria-label="${window.siyuan.languages.insertColumnRight}">
+<button type="button" class="protyle-table-control__add protyle-table-control__add--column ariaLabel fn__none" data-type="add-column" data-position="west" aria-label="${window.siyuan.languages.tableAddColumnTip}">
     <svg><use xlink:href="#iconAdd"></use></svg>
 </button>
 <button type="button" class="protyle-table-control__add protyle-table-control__add--both fn__none" data-type="add-both" aria-label="${window.siyuan.languages.insertRowBelow} ${window.siyuan.languages.insertColumnRight}">

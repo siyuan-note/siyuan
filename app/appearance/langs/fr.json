@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "Cliquez pour insérer une colonne à droite<br>Faites glisser pour insérer ou supprimer plusieurs colonnes",
+	"tableAddRowTip": "Cliquez pour insérer une ligne en dessous<br>Faites glisser pour insérer ou supprimer plusieurs lignes",
 	"bazaarPackageInfo": "Informations sur le paquet",
 	"bazaarPackageName": "Nom du paquet",
 	"bazaarFunding": "Financement",

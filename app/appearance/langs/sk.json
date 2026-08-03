@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "Kliknutím vložíte stĺpec napravo<br>Potiahnutím vložíte alebo odstránite viacero stĺpcov",
+	"tableAddRowTip": "Kliknutím vložíte riadok nižšie<br>Potiahnutím vložíte alebo odstránite viacero riadkov",
 	"bazaarPackageInfo": "Informácie o balíku",
 	"bazaarPackageName": "Názov balíka",
 	"bazaarFunding": "Financovanie",

@@ -1,4 +1,6 @@
 {
+	"tableAddColumnTip": "Kliknij, aby wstawić kolumnę po prawej<br>Przeciągnij, aby wstawić lub usunąć wiele kolumn",
+	"tableAddRowTip": "Kliknij, aby wstawić wiersz poniżej<br>Przeciągnij, aby wstawić lub usunąć wiele wierszy",
 	"bazaarPackageInfo": "Informacje o pakiecie",
 	"bazaarPackageName": "Nazwa pakietu",
 	"bazaarFunding": "Finansowanie",

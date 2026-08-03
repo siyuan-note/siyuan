@@ -6,7 +6,7 @@
 		"id": "20230422120504-ns837kr",
 		"title": "Data Availability Guarantee",
 		"type": "doc",
-		"updated": "20230422122821"
+		"updated": "20260803165036"
 	},
 	"Children": [
 		{
@@ -223,7 +223,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230422120505-kest28r",
-				"updated": "20230422120505"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -279,7 +279,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422120505-g2ke8sd",
-				"updated": "20230422122724"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -319,7 +319,7 @@
 					},
 					"Properties": {
 						"id": "20230422120505-5ca5hhc",
-						"updated": "20230422122629"
+						"updated": "20260803163440"
 					},
 					"Children": [
 						{
@@ -342,7 +342,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230422120505-hxty2gi",
-								"updated": "20230422122629"
+								"updated": "20260803163440"
 							},
 							"Children": [
 								{
@@ -382,7 +382,7 @@
 									},
 									"Properties": {
 										"id": "20230422120505-68rfrop",
-										"updated": "20230422122629"
+										"updated": "20260803163440"
 									},
 									"Children": [
 										{
@@ -390,12 +390,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230422120505-5n9yyyk",
-												"updated": "20230422122629"
+												"updated": "20260803163440"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "You can also enable  "
+											"Data": "You can also enable "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -422,7 +422,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​"
+													"Data": " ​"
 												}
 											]
 										}
@@ -441,7 +441,7 @@
 					},
 					"Properties": {
 						"id": "20230422120505-48cniaa",
-						"updated": "20230422122724"
+						"updated": "20260803165036"
 					},
 					"Children": [
 						{
@@ -449,7 +449,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422120505-9w5jgvm",
-								"updated": "20230422122724"
+								"updated": "20260803165036"
 							},
 							"Children": [
 								{
@@ -481,7 +481,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " ​"
 								}
 							]
 						}

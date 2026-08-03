@@ -7,7 +7,7 @@
 		"id": "20240530101000-scr2p21",
 		"title": "デイリーノート",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163243"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180757-9fax3mg",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -188,7 +188,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180757-yov9hyx",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -202,12 +202,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613180757-8kulpid",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ノートブックを右クリックして"
+					"Data": "ノートブックを右クリックして "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -216,7 +216,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​を開き、日記の新規作成設定で以下を構成します："
+					"Data": " ​を開き、日記の新規作成設定で以下を構成します："
 				}
 			]
 		},

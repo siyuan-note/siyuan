@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20260730184353"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -1245,7 +1245,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-esm6f20",
-				"updated": "20260730184353"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1331,7 +1331,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-itzspnv",
-				"updated": "20260730184353"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1382,7 +1382,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240513102059-ttfrx4f",
-				"updated": "20240513102142"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1414,7 +1414,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 後，整體的標題層級在匯出時才符合正常邏輯。"
+					"Data": " ​ 後，整體的標題層級在匯出時才符合正常邏輯。"
 				}
 			]
 		},
@@ -1753,7 +1753,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429114938-37kksd9",
-				"updated": "20260730184353"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1800,7 +1800,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240427230732-snprakd",
-				"updated": "20241018105334"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1812,7 +1812,7 @@
 					},
 					"Properties": {
 						"id": "20240427230732-tgvmt21",
-						"updated": "20241018105334"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -1820,7 +1820,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427230732-p75fah5",
-								"updated": "20260730184353"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
@@ -1852,7 +1852,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，但請確認程式碼安全後再開啟，以免遭遇跨站腳本攻擊（XSS）"
+									"Data": " ​，但請確認程式碼安全後再開啟，以免遭遇跨站腳本攻擊（XSS）"
 								}
 							]
 						}

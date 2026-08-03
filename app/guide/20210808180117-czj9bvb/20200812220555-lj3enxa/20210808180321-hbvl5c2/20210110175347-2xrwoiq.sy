@@ -6,7 +6,7 @@
 		"id": "20210110175347-2xrwoiq",
 		"title": "日记",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163440"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180438-q02mnqc",
-				"updated": "20260803161608"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -187,7 +187,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180438-konhms4",
-				"updated": "20260803161608"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -201,12 +201,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613180438-ctys2ye",
-				"updated": "20260803161608"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在笔记本右键菜单中打开"
+					"Data": "在笔记本右键菜单中打开 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -215,7 +215,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​，在新建日记设置中配置："
+					"Data": " ​，在新建日记设置中配置："
 				}
 			]
 		},

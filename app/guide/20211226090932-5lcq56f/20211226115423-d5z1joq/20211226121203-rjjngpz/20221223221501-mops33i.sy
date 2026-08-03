@@ -7,7 +7,7 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194439-91xd3o2",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194439-33ewrfo",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -220,7 +220,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-xknxlzy",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -243,7 +243,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中調整。"
+					"Data": " ​ 中調整。"
 				}
 			]
 		},
@@ -757,7 +757,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194439-dfoesdf",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -771,7 +771,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-02gn3hw",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -794,7 +794,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中可以調整閃卡相關的全域設定，其中"
+					"Data": " ​ 中可以調整閃卡相關的全域設定，其中"
 				},
 				{
 					"Type": "NodeTextMark",

@@ -7,7 +7,7 @@
 		"id": "20230429114837-70asb4j",
 		"title": "术语表",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163243"
 	},
 	"Children": [
 		{
@@ -94,7 +94,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429114837-ua8g2lw",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -592,7 +592,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111005-6sdm2sp",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -634,7 +634,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111005-4emt0wz",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -675,7 +675,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中开启或关闭。"
+					"Data": " ​ 中开启或关闭。"
 				}
 			]
 		},

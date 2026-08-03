@@ -8,7 +8,7 @@
 		"id": "20240530101000-ynpmvl7",
 		"title": "フラッシュカード",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -46,7 +46,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194342-wa0impz",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -61,7 +61,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194342-ubj6k3j",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -221,7 +221,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194342-j0b2uqb",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -244,7 +244,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で調整できます。"
+					"Data": " ​ で調整できます。"
 				}
 			]
 		},
@@ -758,7 +758,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194342-lme1lzb",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -772,7 +772,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194342-ym036b7",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -791,7 +791,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ では、フラッシュカードのグローバル設定を調整できます。"
+					"Data": " ​ では、フラッシュカードのグローバル設定を調整できます。"
 				},
 				{
 					"Type": "NodeTextMark",

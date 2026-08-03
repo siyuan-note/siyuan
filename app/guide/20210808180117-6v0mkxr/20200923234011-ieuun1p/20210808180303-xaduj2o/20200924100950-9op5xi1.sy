@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163440"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133532-44ubczo",
-				"updated": "20260504121841"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -40,7 +40,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20260715225615"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -1455,7 +1455,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -1509,7 +1509,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -1563,7 +1563,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -1617,7 +1617,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -1671,7 +1671,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -1725,7 +1725,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -1737,7 +1737,7 @@
 					"Children": [
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "Switch left/right/bottom panel layout"}]},
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "-"}]},
-						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "Go to "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Settings"}, {"Type": "NodeText", "Data": "​ - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Shortcuts"}, {"Type": "NodeText", "Data": "​ to configure them separately"}]}
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "Go to "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Settings"}, {"Type": "NodeText", "Data": "​ - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Shortcuts"}, {"Type": "NodeText", "Data": " ​ to configure them separately"}]}
 					]
 				},
 				{
@@ -2799,7 +2799,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -2853,7 +2853,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -2907,7 +2907,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -2921,7 +2921,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183314-2tdx7d1",
-				"updated": "20260426175817"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -2941,7 +2941,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210826183314-axmylf4",
-				"updated": "20250115160409"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -3686,7 +3686,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -3740,7 +3740,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -3754,7 +3754,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260803161608"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -3773,7 +3773,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20260517211235"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -3793,7 +3793,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20260728202615"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -8134,7 +8134,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure, and the cursor needs to stay within the referenced element"
+									"Data": " ​ to configure, and the cursor needs to stay within the referenced element"
 								}
 							]
 						}
@@ -8188,7 +8188,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8242,7 +8242,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								},
 								{
 									"Type": "NodeBr",
@@ -8300,7 +8300,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8354,7 +8354,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8408,7 +8408,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8462,7 +8462,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8516,7 +8516,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8579,7 +8579,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8633,7 +8633,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8687,7 +8687,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8741,7 +8741,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8795,7 +8795,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8849,7 +8849,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8903,7 +8903,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -8957,7 +8957,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -9011,7 +9011,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -9065,7 +9065,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -9119,7 +9119,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -9173,7 +9173,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -11678,7 +11678,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-jeh8w1g",
-				"updated": "20251024173311"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -11724,7 +11724,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20210106154319-otreidg",
-				"updated": "20251024173311"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -11797,7 +11797,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -11841,7 +11841,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -11885,7 +11885,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}
@@ -11929,7 +11929,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to configure"
+									"Data": " ​ to configure"
 								}
 							]
 						}

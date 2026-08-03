@@ -7,7 +7,7 @@
 		"id": "20230429115711-ejbts4s",
 		"title": "Glossary",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163243"
 	},
 	"Children": [
 		{
@@ -68,7 +68,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115740-s72e6yy",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -560,7 +560,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111229-xhhdmql",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -602,7 +602,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111229-2a1poix",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -643,7 +643,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": " ​."
 				}
 			]
 		},

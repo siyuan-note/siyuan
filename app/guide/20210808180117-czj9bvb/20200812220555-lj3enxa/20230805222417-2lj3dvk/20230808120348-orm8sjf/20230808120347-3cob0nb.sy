@@ -6,7 +6,7 @@
 		"id": "20230808120347-3cob0nb",
 		"title": "数据同步",
 		"type": "doc",
-		"updated": "20260614203347"
+		"updated": "20260803163440"
 	},
 	"Children": [
 		{
@@ -290,7 +290,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230808120347-buiv5yn",
-				"updated": "20230219120246"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -304,7 +304,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230808120347-fwrmpx3",
-				"updated": "20230219120420"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -336,7 +336,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中支持三种同步模式："
+					"Data": " ​ 中支持三种同步模式："
 				}
 			]
 		},

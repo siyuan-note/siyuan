@@ -6,7 +6,7 @@
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
 		"type": "doc",
-		"updated": "20260720201253"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -154,7 +154,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120005-e50u8z7",
-				"updated": "20220615120005"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -169,7 +169,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120005-zarefxu",
-				"updated": "20220615120005"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135134-p6jpw7s",
-				"updated": "20240402174257"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -196,7 +196,7 @@
 					},
 					"Properties": {
 						"id": "20220501135134-8h6nsrg",
-						"updated": "20220831210559"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -204,7 +204,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135134-wmi0mal",
-								"updated": "20220831210559"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
@@ -236,7 +236,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 進行調整），歷史文件夾後綴為 "
+									"Data": " ​ 進行調整），歷史文件夾後綴為 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -648,7 +648,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122720-u1qd8zw",
-				"updated": "20220615120035"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -963,7 +963,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-r88wlzt",
-				"updated": "20220615120134"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1018,7 +1018,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120134-aiy219j",
-				"updated": "20260720201253"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1050,7 +1050,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，或者手動刪除 "
+					"Data": " ，或者手動刪除 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1087,7 +1087,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120134-cdqs2gt",
-				"updated": "20220615120134"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1541,7 +1541,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-5vxnykd",
-				"updated": "20220615120134"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1556,7 +1556,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422102151-dz30xx1",
-				"updated": "20230422102220"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1568,7 +1568,7 @@
 					},
 					"Properties": {
 						"id": "20230422102151-cvrozwk",
-						"updated": "20230422102220"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -1576,12 +1576,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422102151-21jkic1",
-								"updated": "20230422102220"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1608,7 +1608,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 將刪除所有未引用的快照和相關資料對象。“引用的快照”指的是 repo/refs/ 下指向的快照："
+									"Data": " ​ 將刪除所有未引用的快照和相關資料對象。“引用的快照”指的是 repo/refs/ 下指向的快照："
 								}
 							]
 						},

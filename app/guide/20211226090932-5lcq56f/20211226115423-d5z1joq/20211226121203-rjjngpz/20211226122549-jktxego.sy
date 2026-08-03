@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-0t4c1qf",
-				"updated": "20260504121645"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -36,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-4e9hm9i",
-				"updated": "20260715225615"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1447,7 +1447,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -1501,7 +1501,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -1555,7 +1555,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -1609,7 +1609,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -1663,7 +1663,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -1717,7 +1717,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -1729,7 +1729,7 @@
 					"Children": [
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "切換左側/右側/底部面板佈局"}]},
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "-"}]},
-						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "可前往 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "設定"}, {"Type": "NodeText", "Data": "​ - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "快捷鍵"}, {"Type": "NodeText", "Data": "​ 中分別配置"}]}
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "可前往 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "設定"}, {"Type": "NodeText", "Data": "​ - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "快捷鍵"}, {"Type": "NodeText", "Data": " ​ 中分別配置"}]}
 					]
 				},
 				{
@@ -2791,7 +2791,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -2845,7 +2845,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -2899,7 +2899,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -2913,7 +2913,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-3q2xsbj",
-				"updated": "20260426180202"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -2933,7 +2933,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-eu9085n",
-				"updated": "20260730184353"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -3678,7 +3678,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -3732,7 +3732,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -3746,7 +3746,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -3761,7 +3761,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20260517165355"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -3781,7 +3781,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20260730184353"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -8179,7 +8179,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置，游標需停留在引用元素內"
+									"Data": " ​ 中配置，游標需停留在引用元素內"
 								}
 							]
 						}
@@ -8233,7 +8233,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8287,7 +8287,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8341,7 +8341,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8409,7 +8409,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8463,7 +8463,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8517,7 +8517,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8580,7 +8580,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8634,7 +8634,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8688,7 +8688,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8742,7 +8742,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8796,7 +8796,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8850,7 +8850,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8904,7 +8904,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -8958,7 +8958,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -9012,7 +9012,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -9066,7 +9066,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -9120,7 +9120,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -9174,7 +9174,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -10665,7 +10665,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-wez4zj6",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -10684,7 +10684,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226122652-ws33j83",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -11183,7 +11183,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "預設為空，可在"
+									"Data": "預設為空，可在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -11210,7 +11210,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​中設定"
+									"Data": " ​中設定"
 								}
 							]
 						}
@@ -11236,7 +11236,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "預設為空，可在"
+									"Data": "預設為空，可在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -11263,7 +11263,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​中設定"
+									"Data": " ​中設定"
 								}
 							]
 						}
@@ -11682,7 +11682,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-x2dmpab",
-				"updated": "20251024173052"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -11728,7 +11728,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226122652-n2r88dm",
-				"updated": "20251024173052"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -11801,7 +11801,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -11845,7 +11845,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -11889,7 +11889,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}
@@ -11933,7 +11933,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中配置"
+									"Data": " ​ 中配置"
 								}
 							]
 						}

@@ -6,7 +6,7 @@
 		"id": "20260614104715-xe51jlk",
 		"title": "ネットワークプロキシ",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104730-7u2gg5k",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614104730-tbz888i",
-				"updated": "20260803161608"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -95,7 +95,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で設定します："
+					"Data": " ​ で設定します："
 				}
 			]
 		},

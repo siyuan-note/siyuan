@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20260720201253"
+		"updated": "20260803163440"
 	},
 	"Children": [
 		{
@@ -307,7 +307,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210115224203-q8bj2gd",
-				"updated": "20241027164345"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -471,7 +471,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210115224203-e03wglt",
-				"updated": "20210512160530"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -494,7 +494,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", you can clean up unreferenced assets by one-click. If you need to retrieve files that have been deleted by mistake, please via "
+					"Data": " , you can clean up unreferenced assets by one-click. If you need to retrieve files that have been deleted by mistake, please via "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -538,7 +538,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230604120616-qjigoyt",
-				"updated": "20230604120623"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -552,7 +552,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120616-95dv931",
-				"updated": "20230604120637"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -575,7 +575,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, and you can find the references in the global search after copying the path."
+					"Data": " ​, and you can find the references in the global search after copying the path."
 				}
 			]
 		},
@@ -584,7 +584,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120616-tjs4mx0",
-				"updated": "20230604120806"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -634,7 +634,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": " ​."
 				}
 			]
 		},

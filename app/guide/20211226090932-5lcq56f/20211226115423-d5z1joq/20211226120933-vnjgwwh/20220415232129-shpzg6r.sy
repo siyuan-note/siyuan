@@ -6,7 +6,7 @@
 		"id": "20220415232129-shpzg6r",
 		"title": "查詢語法",
 		"type": "doc",
-		"updated": "20260613193329"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -962,7 +962,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232130-1juhjxd",
-				"updated": "20260613193329"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1000,7 +1000,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-kdii2n4",
-				"updated": "20250115150514"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1069,7 +1069,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 生成的。"
+					"Data": " ​ 生成的。"
 				}
 			]
 		},

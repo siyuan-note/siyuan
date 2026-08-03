@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803165036"
 	},
 	"Children": [
 		{
@@ -347,7 +347,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110513-f0ouee1",
-				"updated": "20240113110513"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -375,7 +375,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113110513-bta55b6",
-				"updated": "20240113110550"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -398,7 +398,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​，然後在桌面端瀏覽器上存取配置。"
+					"Data": " ​，然後在桌面端瀏覽器上存取配置。"
 				}
 			]
 		},
@@ -774,7 +774,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174315-dz9gat0",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -895,7 +895,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174315-uerjb05",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -909,7 +909,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613174315-nlwy3go",
-				"updated": "20260803161608"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -950,7 +950,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中設定速記的存放位置："
+					"Data": " ​ 中設定速記的存放位置："
 				}
 			]
 		},

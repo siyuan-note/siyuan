@@ -7,7 +7,7 @@
 		"id": "20240530101000-ei5t6tt",
 		"title": "人工知能",
 		"type": "doc",
-		"updated": "20250115153833"
+		"updated": "20260803163243"
 	},
 	"Children": [
 		{
@@ -58,7 +58,7 @@
 			"Properties": {
 				"ID": "20240530101000-9rofw67",
 				"id": "20240530101000-78iawbc",
-				"updated": "20250115153833"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -76,7 +76,7 @@
 			"Properties": {
 				"ID": "20240530101000-1kqjrxs",
 				"id": "20240530101000-ag9sb0b",
-				"updated": "20250115153833"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -123,7 +123,7 @@
 					"Properties": {
 						"ID": "20240530101000-jjn6r2u",
 						"id": "20240530101000-vnybgmg",
-						"updated": "20240530101000"
+						"updated": "20260803163243"
 					},
 					"Children": [
 						{
@@ -132,12 +132,12 @@
 							"Properties": {
 								"ID": "20240530101000-n02ui98",
 								"id": "20240530101000-pr2uplh",
-								"updated": "20240530101000"
+								"updated": "20260803163243"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -155,7 +155,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ で設定を行います"
+									"Data": " ​ で設定を行います"
 								}
 							]
 						}

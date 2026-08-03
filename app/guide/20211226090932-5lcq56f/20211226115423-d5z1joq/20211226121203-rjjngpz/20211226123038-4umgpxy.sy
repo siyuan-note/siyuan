@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20260720201253"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -523,7 +523,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230604120454-cxz64oc",
-				"updated": "20250115152754"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -537,7 +537,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120454-k7wee90",
-				"updated": "20250115152754"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -560,7 +560,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​中可以查看丟失的資源，複製路徑後可以在全域搜索中找到引用處。"
+					"Data": " ​中可以查看丟失的資源，複製路徑後可以在全域搜索中找到引用處。"
 				}
 			]
 		},
@@ -569,7 +569,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120454-m6jtopr",
-				"updated": "20230604120825"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -619,7 +619,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​。"
+					"Data": " ​。"
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20200923234011-ieuun1p",
 		"title": "Please Start Here",
 		"type": "doc",
-		"updated": "20260803160439"
+		"updated": "20260803165036"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"Type": "NodeCallout",
 			"Properties": {
 				"id": "20251209212043-iea22ml",
-				"updated": "20260315155722"
+				"updated": "20260803165036"
 			},
 			"CalloutType": "TIP",
 			"CalloutTitle": "Tip",
@@ -26,7 +26,7 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20251209212048-wngov6k",
-						"updated": "20260315155722"
+						"updated": "20260803165036"
 					},
 					"Children": [
 						{
@@ -49,7 +49,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ to view it again"
+							"Data": " ​ to view it again"
 						}
 					]
 				}
@@ -75,7 +75,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225220954-keui8uy",
-				"updated": "20260803160439"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201225220954-dlgzk1o",
-				"updated": "20260803160439"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -102,7 +102,7 @@
 					},
 					"Properties": {
 						"id": "20201225220954-e913snx",
-						"updated": "20260803160439"
+						"updated": "20260803165036"
 					},
 					"Children": [
 						{
@@ -110,7 +110,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131161940-kfs31q6",
-								"updated": "20260803160439"
+								"updated": "20260803165036"
 							},
 							"Children": [
 								{
@@ -142,7 +142,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​. Then create a new document under the notebook"
+									"Data": " ​. Then create a new document under the notebook"
 								}
 							]
 						}

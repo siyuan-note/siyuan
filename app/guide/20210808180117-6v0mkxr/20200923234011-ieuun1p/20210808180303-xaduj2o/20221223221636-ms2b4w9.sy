@@ -7,7 +7,7 @@
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
 		"type": "doc",
-		"updated": "20260803161608"
+		"updated": "20260803163440"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194307-zktvfds",
-				"updated": "20260803161608"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194307-cejt9yo",
-				"updated": "20260803161608"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -216,7 +216,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194307-ddinnwg",
-				"updated": "20260803161608"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -239,7 +239,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": " ​."
 				}
 			]
 		},
@@ -753,7 +753,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194307-1u8cbe6",
-				"updated": "20260803161608"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -767,7 +767,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194307-81s55ey",
-				"updated": "20260803161608"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -790,7 +790,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, you can adjust global flashcard settings. The "
+					"Data": " ​, you can adjust global flashcard settings. The "
 				},
 				{
 					"Type": "NodeTextMark",

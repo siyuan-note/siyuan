@@ -815,7 +815,7 @@ type="checkbox">
 </div>` : "";
         const packageSection = `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarPackageInfo}</div>
-    ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPackageName, `<a href="${escapeAttr(resourceData.repoURL)}" target="_blank" title="GitHub Repo">${escapeHtml(displayData.name)}</a>`, true)}
+    ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPackageName, displayData.name)}
     ${displayData.author ? bazaar._genReadmeMetaRow(window.siyuan.languages.author, `<a href="${escapeAttr(urls.join("/"))}" target="_blank" title="Creator">${escapeHtml(displayData.author)}</a>`, true) : ""}
     ${resourceData.preferredFunding ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarFunding, bazaar._genReadmeFundingHTML(resourceData.preferredFunding), true) : ""}
 </section>`;
@@ -827,7 +827,7 @@ type="checkbox">
     <div class="fn__flex-1">
         <img class="item__img" src="${displayData.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
         <div>
-            <a href="${resourceData.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${escapeHtml(displayData.preferredName)}</a>
+            <span class="item__title">${escapeHtml(displayData.preferredName)}</span>
         </div>
         <div class="item__meta">
             ${packageSection}

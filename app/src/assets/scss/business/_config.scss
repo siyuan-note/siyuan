@@ -362,8 +362,8 @@
       row-gap: 8px;
 
       &--downloaded {
-        flex-direction: column;
-        align-items: stretch;
+        align-items: center;
+        column-gap: 8px;
       }
     }
 
@@ -372,6 +372,15 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 8px;
+    }
+
+    &__tabs {
+      flex: 0 0 auto;
+    }
+
+    &__tools {
+      flex: 1 1 480px;
+      min-width: 0;
     }
 
     &__filter {

@@ -197,14 +197,39 @@ func getPreferredFunding(funding *Funding) string {
 	if v := normalizeFundingURL(funding.GitHub, "https://github.com/sponsors/"); "" != v {
 		return v
 	}
-	if 0 < len(funding.Custom) {
-		v := funding.Custom[0]
-		if strings.HasPrefix(v, "https://") || strings.HasPrefix(v, "http://") || strings.HasPrefix(v, "mailto:") {
+	for _, v := range funding.Custom {
+		if !unsafeFundingURI(v) && "" != strings.TrimSpace(v) {
 			return v
 		}
-		return ""
 	}
 	return ""
+}
+
+// unsafeFundingURI 判断自定义赞助信息是否包含危险或不受支持的 URI 协议。
+func unsafeFundingURI(s string) bool {
+	s = strings.TrimSpace(strings.ToLower(s))
+	if "" == s || strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "mailto:") {
+		return false
+	}
+
+	i := strings.IndexByte(s, ':')
+	if i <= 0 {
+		return false
+	}
+	scheme := s[:i]
+	for _, r := range scheme {
+		if (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != '+' && r != '-' && r != '.' {
+			return false
+		}
+	}
+	if scheme[0] < 'a' || scheme[0] > 'z' {
+		return false
+	}
+	switch scheme {
+	case "javascript", "data", "file", "vbscript", "blob":
+		return true
+	}
+	return strings.HasPrefix(s[i:], "://")
 }
 
 func normalizeFundingURL(s, base string) string {

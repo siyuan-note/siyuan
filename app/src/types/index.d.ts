@@ -990,6 +990,13 @@ interface IMenu {
     warning?: boolean
 }
 
+interface IBazaarFunding {
+    openCollective?: string;
+    patreon?: string;
+    github?: string;
+    custom?: string[];
+}
+
 interface IBazaarItem {
     preferredName: string;
     minAppVersion: string;
@@ -1022,6 +1029,7 @@ interface IBazaarItem {
     updateTime: number;
     hInstallDate: string;
     hUpdated: string;
+    funding?: IBazaarFunding;
     preferredFunding: string;
     disallowUpdate: boolean;
     updateRequiredMinAppVer?: string;

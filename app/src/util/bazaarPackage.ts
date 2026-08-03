@@ -29,6 +29,28 @@ export const getBazaarThemeModeLabels = (
     return mode;
 })));
 
+const normalizeBazaarFundingURL = (value: string | undefined, base: string) => {
+    if (!value) {
+        return "";
+    }
+    if (value.startsWith("https://") || value.startsWith("http://")) {
+        return value;
+    }
+    return `${base}${value}`;
+};
+
+export const getBazaarFundingItems = (funding: IBazaarFunding | null | undefined) => {
+    if (!funding) {
+        return [];
+    }
+    return [
+        normalizeBazaarFundingURL(funding.openCollective, "https://opencollective.com/"),
+        normalizeBazaarFundingURL(funding.patreon, "https://www.patreon.com/"),
+        normalizeBazaarFundingURL(funding.github, "https://github.com/sponsors/"),
+        ...(funding.custom || []),
+    ].filter(Boolean);
+};
+
 export const isValidBazaarPackageName = (name: string) => {
     if (!/^[\x20-\x7E]{1,255}$/.test(name) || /^[. ]/.test(name) || /[. ]$/.test(name)) {
         return false;

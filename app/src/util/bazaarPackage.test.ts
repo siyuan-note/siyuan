@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     getBazaarCompatibilityFieldVisibility,
+    getBazaarFundingItems,
     getBazaarThemeModeLabels,
     isValidBazaarPackageName,
 } from "./bazaarPackage";
@@ -42,6 +43,29 @@ describe("getBazaarThemeModeLabels", () => {
     it("removes duplicate and empty modes", () => {
         assert.deepEqual(getBazaarThemeModeLabels(["dark", "", "dark"], "Light", "Dark"), ["Dark"]);
         assert.deepEqual(getBazaarThemeModeLabels(undefined, "Light", "Dark"), []);
+    });
+});
+
+describe("getBazaarFundingItems", () => {
+    it("normalizes platform values and preserves custom item order", () => {
+        assert.deepEqual(getBazaarFundingItems({
+            openCollective: "collective",
+            patreon: "https://example.com/patreon",
+            github: "sponsor",
+            custom: ["custom text", "https://example.com/custom", "custom text"],
+        }), [
+            "https://opencollective.com/collective",
+            "https://example.com/patreon",
+            "https://github.com/sponsors/sponsor",
+            "custom text",
+            "https://example.com/custom",
+            "custom text",
+        ]);
+    });
+
+    it("removes empty values without discarding later custom items", () => {
+        assert.deepEqual(getBazaarFundingItems({custom: ["", "https://example.com"]}), ["https://example.com"]);
+        assert.deepEqual(getBazaarFundingItems(undefined), []);
     });
 });
 

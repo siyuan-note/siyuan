@@ -21,6 +21,7 @@ import {switchSettingPanelSubTab} from "./setting/mount";
 import {isThemeFrontendSupported} from "../util/themeCompatibility";
 import {
     getBazaarCompatibilityFieldVisibility,
+    getBazaarFundingItems,
     getBazaarThemeModeLabels,
 } from "../util/bazaarPackage";
 
@@ -824,11 +825,15 @@ type="checkbox">
     <span class="fn__space--small"></span>
     ${formatCount(resourceData.downloads)}
 </div>` : "";
+        const fundingItems = getBazaarFundingItems(resourceData.funding);
+        if (fundingItems.length === 0 && resourceData.preferredFunding) {
+            fundingItems.push(resourceData.preferredFunding);
+        }
         const packageSection = `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarPackageInfo}</div>
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPackageName, displayData.name)}
     ${displayData.author ? bazaar._genReadmeMetaRow(window.siyuan.languages.author, `<a href="${escapeAttr(urls.join("/"))}" target="_blank" title="Creator">${escapeHtml(displayData.author)}</a>`, true) : ""}
-    ${resourceData.preferredFunding ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarFunding, bazaar._genReadmeFundingHTML(resourceData.preferredFunding), true) : ""}
+    ${fundingItems.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarFunding, fundingItems.map((item) => bazaar._genReadmeFundingHTML(item)).join("<br>"), true) : ""}
 </section>`;
         readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
     <div class="item__header fn__pointer" data-type="goBack">

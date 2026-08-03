@@ -123,6 +123,30 @@ func IsLocalOrigin(origin string) bool {
 	return false
 }
 
+// IsSessionOriginAllowed 校验会话 Cookie 认证请求的 Origin，防止跨站请求伪造
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
+func IsSessionOriginAllowed(origin, host string) bool {
+	if "" == origin {
+		// 浏览器发起的跨站请求都会携带 Origin，未携带时视为非浏览器客户端，按原行为放行
+		return true
+	}
+	if IsLocalOrigin(origin) {
+		return true
+	}
+	// 已设置锁屏密码的远程访问场景：Origin 必须与 Host 一致，否则视为跨站请求
+	return originHostEquals(origin, host)
+}
+
+func originHostEquals(origin, host string) bool {
+	u, err := url.Parse(origin)
+	if nil != err {
+		return false
+	}
+	originHost := strings.ToLower(strings.TrimSuffix(strings.TrimSuffix(u.Host, ":80"), ":443"))
+	host = strings.ToLower(strings.TrimSuffix(strings.TrimSuffix(strings.TrimSpace(host), ":80"), ":443"))
+	return "" != originHost && originHost == host
+}
+
 // SSRFSafeDialer returns a net.Dialer whose Control hook blocks private, loopback, link-local and unspecified IPs.
 func SSRFSafeDialer(timeout time.Duration) *net.Dialer {
 	return &net.Dialer{

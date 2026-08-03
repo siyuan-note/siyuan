@@ -309,6 +309,13 @@ func CheckAuth(c *gin.Context) {
 	session := util.GetSession(c)
 	workspaceSession := util.GetWorkspaceSession(session)
 	if workspaceSession.AccessAuthCode == Conf.AccessAuthCode {
+		// 校验 Origin 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
+		if !util.IsSessionOriginAllowed(c.GetHeader("Origin"), c.GetHeader("Host")) {
+			logging.LogWarnf("invalid Origin [%s] for session auth [ip=%s]", c.GetHeader("Origin"), c.ClientIP())
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid Origin"})
+			c.Abort()
+			return
+		}
 		c.Set(RoleContextKey, RoleAdministrator)
 		c.Next()
 		return

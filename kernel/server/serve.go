@@ -160,6 +160,7 @@ func Serve(fastMode bool, cookieKey string) {
 		Secure: util.SSL,
 		//MaxAge:   60 * 60 * 24 * 7, // 默认是 Session
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode, // 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
 	})
 	ginServer.Use(sessions.Sessions("siyuan", sessionStore))
 

@@ -1866,7 +1866,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const isListItemFocused = Boolean(protyle.block.showAll &&
                             protyle.block.id === listContext.listItemElement.dataset.nodeId);
                         const action = getListShortcutAction(listContext, targetSubtype,
-                            listContext.childElements.length === 1 && isEmptyParagraph(listContext.childElements[0]),
+                            isEmptyParagraph(listContext.childElement),
                             isListItemFocused);
                         if (action === "cancelList" || action === "convertList") {
                             const conversionType = action === "convertList" ?
@@ -1884,6 +1884,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             }
                         } else if (action === "insertListItem") {
                             insertEmptyListItem(protyle, listContext.listItemElement, range);
+                        } else if (action === "convertChildToList") {
+                            turnsIntoOneTransaction({
+                                protyle,
+                                selectsElement: [listContext.childElement],
+                                type: isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs")
+                            });
                         } else {
                             insertEmptyChildList(protyle, listContext.childElement, targetSubtype, range);
                         }

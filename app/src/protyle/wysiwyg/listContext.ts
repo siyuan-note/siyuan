@@ -1,6 +1,7 @@
 export type TListSubtype = "u" | "o" | "t";
 
-export type TListShortcutAction = "cancelList" | "convertList" | "insertListItem" | "insertChildList";
+export type TListShortcutAction = "cancelList" | "convertList" | "convertChildToList" | "insertListItem" |
+    "insertChildList";
 
 export type TListContext = {
     listElement?: HTMLElement,
@@ -66,6 +67,9 @@ export const getListShortcutAction = (context: TListContext, targetSubtype: TLis
     }
     if (context.childElements.length === 1 && isSameSubtype && !hasFoldedHeading) {
         return "insertListItem";
+    }
+    if (context.childElements.length > 1 && isEmptyChild) {
+        return "convertChildToList";
     }
     return "insertChildList";
 };

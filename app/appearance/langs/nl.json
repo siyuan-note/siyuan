@@ -1,4 +1,7 @@
 {
+	"hideInFileTree": "Verbergen in de documentboom",
+	"newItemTemplateSubDoc": "Subdocument van het document met het huidige databaseblok",
+	"newItemTemplateSubDocTip": "Bij maken vanuit een gespiegelde database wordt het document met het huidige gespiegelde databaseblok gebruikt",
 	"entrySeparator": "Scheidingslijn",
 	"tableAddColumnTip": "Klik om rechts een kolom in te voegen<br>Sleep om meerdere kolommen in te voegen of te verwijderen",
 	"tableAddRowTip": "Klik om hieronder een rij in te voegen<br>Sleep om meerdere rijen in te voegen of te verwijderen",

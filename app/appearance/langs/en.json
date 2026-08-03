@@ -1,4 +1,7 @@
 {
+	"hideInFileTree": "Hide in document tree",
+	"newItemTemplateSubDoc": "Child document of the document containing the current database block",
+	"newItemTemplateSubDocTip": "When creating from a mirror database, the document containing the current mirror database block is used",
 	"entrySeparator": "Separator",
 	"tableAddColumnTip": "Click to insert a column on the right<br>Drag to insert or delete multiple columns",
 	"tableAddRowTip": "Click to insert a row below<br>Drag to insert or delete multiple rows",

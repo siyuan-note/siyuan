@@ -365,9 +365,7 @@ func resolveAttributeViewItemDocument(blockID, primary string, itemTemplate *av.
 	if nil == blockTree {
 		return nil, ErrBlockNotFound
 	}
-	preview := &NewItemTemplatePreview{}
 	primary = normalizeDocTitle(primary)
-	preview.PrimaryKey = primary
 
 	boxID, pathTemplate, inherited, err := resolveNewItemSaveConfig(blockTree.BoxID, itemTemplate.SaveLocation)
 	if nil != err {
@@ -378,6 +376,11 @@ func resolveAttributeViewItemDocument(blockID, primary string, itemTemplate *av.
 		return nil, err
 	}
 	renderedPath = util.TrimSpaceInPath(strings.TrimSpace(renderedPath))
+	return newItemDocumentPreview(blockTree, boxID, renderedPath, primary, inherited), nil
+}
+
+func newItemDocumentPreview(blockTree *treenode.BlockTree, boxID, renderedPath, primary string, inherited bool) *NewItemTemplatePreview {
+	preview := &NewItemTemplatePreview{PrimaryKey: primary, BoxID: boxID}
 	if boxID != blockTree.BoxID && "" != renderedPath && !strings.HasPrefix(renderedPath, "/") {
 		renderedPath = "/" + renderedPath
 	}
@@ -406,11 +409,10 @@ func resolveAttributeViewItemDocument(blockID, primary string, itemTemplate *av.
 	} else {
 		preview.HPath = path.Join(parentHPath, primary)
 	}
-	preview.BoxID = boxID
 	if inherited && boxID != blockTree.BoxID {
 		preview.parentID = ""
 	}
-	return preview, nil
+	return preview
 }
 
 func createAttributeViewItemDocument(preview *NewItemTemplatePreview, itemTemplate *av.NewItemTemplate) (docID string, tree *parse.Tree, err error) {
@@ -431,13 +433,29 @@ func createAttributeViewItemDocument(preview *NewItemTemplatePreview, itemTempla
 		err = newItemCreationError(err, removeCreatedNewItemDoc(docID))
 		return
 	}
-	if "" != itemTemplate.Icon {
-		tree.Root.SetIALAttr("icon", itemTemplate.Icon)
+	if applyNewItemDocumentAttrs(tree, itemTemplate) {
 		if err = indexWriteTreeUpsertQueue(tree); nil != err {
 			err = newItemCreationError(err, removeCreatedNewItemDoc(docID))
 			return
 		}
 		FlushTxQueue()
+	}
+	return
+}
+
+func applyNewItemDocumentAttrs(tree *parse.Tree, itemTemplate *av.NewItemTemplate) (changed bool) {
+	if "" != itemTemplate.Icon && tree.Root.IALAttr("icon") != itemTemplate.Icon {
+		tree.Root.SetIALAttr("icon", itemTemplate.Icon)
+		changed = true
+	}
+	if itemTemplate.HideInFileTree {
+		if "true" != tree.Root.IALAttr(DocHiddenAttr) {
+			tree.Root.SetIALAttr(DocHiddenAttr, "true")
+			changed = true
+		}
+	} else if "" != tree.Root.IALAttr(DocHiddenAttr) {
+		tree.Root.RemoveIALAttr(DocHiddenAttr)
+		changed = true
 	}
 	return
 }
@@ -458,24 +476,7 @@ func resolveNewItemSaveConfig(currentBoxID string, location *av.NewItemSaveLocat
 	}
 
 	inherited = true
-	boxID = currentBoxID
-	pathTemplate = Conf.FileTree.DocCreateSavePath
-	if box := Conf.Box(currentBoxID); nil != box {
-		boxConf := box.GetConf()
-		if "" != boxConf.DocCreateSaveBox || "" != boxConf.DocCreateSavePath {
-			boxID = boxConf.DocCreateSaveBox
-			pathTemplate = boxConf.DocCreateSavePath
-		}
-	}
-	if "" == boxID {
-		boxID = Conf.FileTree.DocCreateSaveBox
-	}
-	if "" == boxID || nil == Conf.Box(boxID) {
-		boxID = currentBoxID
-	}
-	if "" == pathTemplate {
-		pathTemplate = Conf.FileTree.DocCreateSavePath
-	}
+	boxID, pathTemplate = ResolveDocCreateSaveLocation(currentBoxID)
 	err = validateNewItemSaveBox(currentBoxID, boxID)
 	return
 }

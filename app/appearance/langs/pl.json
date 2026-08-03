@@ -1,4 +1,7 @@
 {
+	"hideInFileTree": "Ukryj w drzewie dokumentów",
+	"newItemTemplateSubDoc": "Dokument podrzędny dokumentu zawierającego bieżący blok bazy danych",
+	"newItemTemplateSubDocTip": "Podczas tworzenia z lustrzanej bazy danych używany jest dokument zawierający bieżący lustrzany blok bazy danych",
 	"entrySeparator": "Separator",
 	"tableAddColumnTip": "Kliknij, aby wstawić kolumnę po prawej<br>Przeciągnij, aby wstawić lub usunąć wiele kolumn",
 	"tableAddRowTip": "Kliknij, aby wstawić wiersz poniżej<br>Przeciągnij, aby wstawić lub usunąć wiele wierszy",

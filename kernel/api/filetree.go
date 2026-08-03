@@ -998,32 +998,13 @@ func getDocCreateSavePath(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	box := model.Conf.Box(notebook)
-	var docCreateSaveBox string
-	docCreateSavePathTpl := model.Conf.FileTree.DocCreateSavePath
+	docCreateSaveBox, docCreateSavePathTpl := model.ResolveDocCreateSaveLocation(notebook)
 	docCreateTemplatePath := model.Conf.FileTree.DocCreateTemplatePath
-	if nil != box {
+	if box := model.Conf.Box(notebook); nil != box {
 		boxConf := box.GetConf()
-		docCreateSaveBox = boxConf.DocCreateSaveBox
-		docCreateSavePathTpl = boxConf.DocCreateSavePath
 		if "" != boxConf.DocCreateTemplatePath {
 			docCreateTemplatePath = boxConf.DocCreateTemplatePath
 		}
-	}
-	if "" == docCreateSaveBox && "" == docCreateSavePathTpl {
-		docCreateSaveBox = model.Conf.FileTree.DocCreateSaveBox
-	}
-	if "" != docCreateSaveBox {
-		if nil == model.Conf.Box(docCreateSaveBox) {
-			// 如果配置的笔记本未打开或者不存在，则使用当前笔记本
-			docCreateSaveBox = notebook
-		}
-	}
-	if "" == docCreateSaveBox {
-		docCreateSaveBox = notebook
-	}
-	if "" == docCreateSavePathTpl {
-		docCreateSavePathTpl = model.Conf.FileTree.DocCreateSavePath
 	}
 	docCreateSavePathTpl = strings.TrimSpace(docCreateSavePathTpl)
 

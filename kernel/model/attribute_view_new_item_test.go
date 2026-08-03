@@ -14,6 +14,9 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestNewItemParentPathTemplate(t *testing.T) {
@@ -39,6 +42,24 @@ func TestNewItemPathTitleFallback(t *testing.T) {
 	}
 	if "" != newItemTitleFromPath("/Daily Notes/") {
 		t.Fatal("a save path ending with a slash should not provide a document title")
+	}
+}
+
+func TestNewItemDocumentPreviewUsesCurrentDatabaseInstance(t *testing.T) {
+	boxID := ast.NewNodeID()
+	template := &av.NewItemTemplate{TargetType: av.NewItemTargetDocument, SaveLocation: &av.NewItemSaveLocation{}}
+	for name, blockTree := range map[string]*treenode.BlockTree{
+		"original": {ID: ast.NewNodeID(), RootID: ast.NewNodeID(), BoxID: boxID, HPath: "/Original"},
+		"mirror":   {ID: ast.NewNodeID(), RootID: ast.NewNodeID(), BoxID: boxID, HPath: "/Mirror"},
+	} {
+		preview := newItemDocumentPreview(blockTree, boxID, template.SaveLocation.PathTemplate, "Child", false)
+		expectedHPath := "/Original/Child"
+		if "mirror" == name {
+			expectedHPath = "/Mirror/Child"
+		}
+		if expectedHPath != preview.HPath || blockTree.RootID != preview.parentID {
+			t.Fatalf("%s database instance resolved to unexpected parent: %+v", name, preview)
+		}
 	}
 }
 
@@ -99,6 +120,110 @@ func TestAttributeViewItemDocumentTemplate(t *testing.T) {
 	if _, err = attributeViewItemDocumentTemplate(attrView, "invalid"); nil == err {
 		t.Fatal("an invalid save mode should be rejected")
 	}
+}
+
+func TestApplyNewItemDocumentAttrs(t *testing.T) {
+	tree := treenode.NewTree(ast.NewNodeID(), "/"+ast.NewNodeID()+".sy", "/Document", "Document")
+	tree.Root.SetIALAttr(DocHiddenAttr, "true")
+	template := &av.NewItemTemplate{TargetType: av.NewItemTargetDocument, Icon: "1f4c4"}
+	if !applyNewItemDocumentAttrs(tree, template) {
+		t.Fatal("item template attributes should update the document")
+	}
+	if "1f4c4" != tree.Root.IALAttr("icon") {
+		t.Fatalf("unexpected document icon: %q", tree.Root.IALAttr("icon"))
+	}
+	if "" != tree.Root.IALAttr(DocHiddenAttr) {
+		t.Fatal("the disabled visibility option should override the content template attribute")
+	}
+
+	template.HideInFileTree = true
+	if !applyNewItemDocumentAttrs(tree, template) {
+		t.Fatal("enabling the visibility option should update the document")
+	}
+	if "true" != tree.Root.IALAttr(DocHiddenAttr) {
+		t.Fatal("the enabled visibility option should hide the document")
+	}
+	if applyNewItemDocumentAttrs(tree, template) {
+		t.Fatal("applying unchanged item template attributes should be a no-op")
+	}
+}
+
+func TestRemoveNodeAvIDKeepsHiddenAttr(t *testing.T) {
+	avID := ast.NewNodeID()
+	node := &ast.Node{Type: ast.NodeDocument, ID: ast.NewNodeID()}
+	node.SetIALAttr(av.NodeAttrNameAvs, avID)
+	node.SetIALAttr(DocHiddenAttr, "true")
+	attrs := removeNodeAvIDAttrs(node, avID)
+	if "true" != attrs[DocHiddenAttr] || "true" != node.IALAttr(DocHiddenAttr) {
+		t.Fatal("removing a database binding should preserve the document visibility setting")
+	}
+	if "" != attrs[av.NodeAttrNameAvs] {
+		t.Fatalf("the removed database ID should be cleared: %q", attrs[av.NodeAttrNameAvs])
+	}
+}
+
+func TestResolveDocCreateSaveLocation(t *testing.T) {
+	originalConf, originalDataDir := Conf, util.DataDir
+	util.DataDir = t.TempDir()
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	Conf.Sync = conf.NewSync()
+	t.Cleanup(func() {
+		Conf = originalConf
+		util.DataDir = originalDataDir
+	})
+
+	currentBoxID, globalBoxID, localBoxID := ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID()
+	currentBoxConf, globalBoxConf, localBoxConf := conf.NewBoxConf(), conf.NewBoxConf(), conf.NewBoxConf()
+	currentBoxConf.Name, currentBoxConf.Closed = "Current", false
+	globalBoxConf.Name, globalBoxConf.Closed = "Global", false
+	localBoxConf.Name, localBoxConf.Closed = "Local", false
+	for boxID, boxConf := range map[string]*conf.BoxConf{
+		currentBoxID: currentBoxConf,
+		globalBoxID:  globalBoxConf,
+		localBoxID:   localBoxConf,
+	} {
+		if err := (&Box{ID: boxID}).SaveConf(boxConf); nil != err {
+			t.Fatalf("save notebook config failed: %s", err)
+		}
+	}
+	Conf.FileTree.DocCreateSaveBox = globalBoxID
+	Conf.FileTree.DocCreateSavePath = "/Global/{{now | date \"200601\"}}"
+
+	assertLocation := func(expectedBoxID, expectedPath string) {
+		t.Helper()
+		boxID, pathTemplate := ResolveDocCreateSaveLocation(currentBoxID)
+		if expectedBoxID != boxID || expectedPath != pathTemplate {
+			t.Fatalf("unexpected save location: box=%q path=%q", boxID, pathTemplate)
+		}
+	}
+	assertLocation(globalBoxID, Conf.FileTree.DocCreateSavePath)
+
+	currentBoxConf.DocCreateSavePath = "Local/{{now | date \"200601\"}}"
+	if err := (&Box{ID: currentBoxID}).SaveConf(currentBoxConf); nil != err {
+		t.Fatal(err)
+	}
+	assertLocation(currentBoxID, currentBoxConf.DocCreateSavePath)
+
+	currentBoxConf.DocCreateSavePath = ""
+	currentBoxConf.DocCreateSaveBox = localBoxID
+	if err := (&Box{ID: currentBoxID}).SaveConf(currentBoxConf); nil != err {
+		t.Fatal(err)
+	}
+	assertLocation(localBoxID, Conf.FileTree.DocCreateSavePath)
+
+	currentBoxConf.DocCreateSavePath = "/Local"
+	if err := (&Box{ID: currentBoxID}).SaveConf(currentBoxConf); nil != err {
+		t.Fatal(err)
+	}
+	assertLocation(localBoxID, currentBoxConf.DocCreateSavePath)
+
+	localBoxConf.Closed = true
+	if err := (&Box{ID: localBoxID}).SaveConf(localBoxConf); nil != err {
+		t.Fatal(err)
+	}
+	assertLocation(currentBoxID, currentBoxConf.DocCreateSavePath)
 }
 
 func TestNewBoundAttributeViewItemValueUsesDynamicAnchorText(t *testing.T) {

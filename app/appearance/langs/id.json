@@ -1,4 +1,7 @@
 {
+	"hideInFileTree": "Sembunyikan di pohon dokumen",
+	"newItemTemplateSubDoc": "Subdokumen dari dokumen yang berisi blok basis data saat ini",
+	"newItemTemplateSubDocTip": "Saat membuat melalui basis data cermin, dokumen yang berisi blok basis data cermin saat ini akan digunakan",
 	"entrySeparator": "Pemisah",
 	"tableAddColumnTip": "Klik untuk menyisipkan kolom di sebelah kanan<br>Seret untuk menyisipkan atau menghapus beberapa kolom",
 	"tableAddRowTip": "Klik untuk menyisipkan baris di bawah<br>Seret untuk menyisipkan atau menghapus beberapa baris",

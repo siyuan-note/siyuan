@@ -75,6 +75,7 @@ func (av *AttributeView) SetNewItemTemplates(config *NewItemTemplatesConfig) err
 		}
 		if NewItemTargetDocument != itemTemplate.TargetType {
 			itemTemplate.Icon = ""
+			itemTemplate.HideInFileTree = false
 		}
 		itemTemplate.ContentTemplatePath = strings.TrimSpace(itemTemplate.ContentTemplatePath)
 		if nil != itemTemplate.SaveLocation {
@@ -475,6 +476,7 @@ func cloneNewItemTemplate(itemTemplate *NewItemTemplate) *NewItemTemplate {
 		TargetType:          itemTemplate.TargetType,
 		PrimaryKeyTemplate:  itemTemplate.PrimaryKeyTemplate,
 		ContentTemplatePath: itemTemplate.ContentTemplatePath,
+		HideInFileTree:      itemTemplate.HideInFileTree,
 	}
 	if nil != itemTemplate.SaveLocation {
 		ret.SaveLocation = &NewItemSaveLocation{

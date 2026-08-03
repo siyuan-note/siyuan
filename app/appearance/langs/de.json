@@ -1,4 +1,7 @@
 {
+	"hideInFileTree": "Im Dokumentenbaum ausblenden",
+	"newItemTemplateSubDoc": "Unterdokument des Dokuments mit dem aktuellen Datenbankblock",
+	"newItemTemplateSubDocTip": "Beim Erstellen über eine gespiegelte Datenbank wird das Dokument mit dem aktuellen gespiegelten Datenbankblock verwendet",
 	"entrySeparator": "Trennlinie",
 	"tableAddColumnTip": "Klicken, um rechts eine Spalte einzufügen<br>Ziehen, um mehrere Spalten einzufügen oder zu löschen",
 	"tableAddRowTip": "Klicken, um unten eine Zeile einzufügen<br>Ziehen, um mehrere Zeilen einzufügen oder zu löschen",

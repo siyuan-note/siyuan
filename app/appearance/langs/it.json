@@ -1,4 +1,7 @@
 {
+	"hideInFileTree": "Nascondi nell’albero dei documenti",
+	"newItemTemplateSubDoc": "Sottodocumento del documento che contiene il blocco database corrente",
+	"newItemTemplateSubDocTip": "Quando si crea da un database speculare, viene usato il documento che contiene il blocco database speculare corrente",
 	"entrySeparator": "Separatore",
 	"tableAddColumnTip": "Fai clic per inserire una colonna a destra<br>Trascina per inserire o eliminare più colonne",
 	"tableAddRowTip": "Fai clic per inserire una riga sotto<br>Trascina per inserire o eliminare più righe",

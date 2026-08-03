@@ -1,4 +1,7 @@
 {
+	"hideInFileTree": "在文档树中隐藏",
+	"newItemTemplateSubDoc": "当前数据库块所在文档的子文档",
+	"newItemTemplateSubDocTip": "通过镜像数据库创建时，以当前镜像数据库块所在文档为准",
 	"entrySeparator": "分隔线",
 	"tableAddColumnTip": "点击在右侧插入一列<br>拖拽插入或删除多列",
 	"tableAddRowTip": "点击在下方插入一行<br>拖拽插入或删除多行",

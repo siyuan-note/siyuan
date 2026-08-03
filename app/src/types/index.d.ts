@@ -1093,6 +1093,7 @@ interface IAVNewItemTemplate {
     fieldValues?: Record<string, IAVNewItemFieldValue>;
     saveLocation?: IAVNewItemSaveLocation;
     contentTemplatePath?: string;
+    hideInFileTree?: boolean;
 }
 
 interface IAVView {

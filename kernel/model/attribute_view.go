@@ -6126,11 +6126,21 @@ func removeRelatedRelationItems(avID string, itemIDs []string) (err error) {
 }
 
 func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tree) (err error) {
-	attrs := parse.IAL2Map(node.KramdownIAL)
-	if ast.NodeDocument == node.Type && !IsBoxDoc(tree.Box, tree.ID) {
-		delete(attrs, DocHiddenAttr)
-		node.RemoveIALAttr(DocHiddenAttr)
+	attrs := removeNodeAvIDAttrs(node, avID)
+	if nil != tx {
+		if err = setNodeAttrsWithTx(tx, node, tree, attrs); err != nil {
+			return
+		}
+	} else {
+		if err = setNodeAttrs(node, tree, attrs); err != nil {
+			return
+		}
 	}
+	return
+}
+
+func removeNodeAvIDAttrs(node *ast.Node, avID string) map[string]string {
+	attrs := parse.IAL2Map(node.KramdownIAL)
 
 	if avs := attrs[av.NodeAttrNameAvs]; "" != avs {
 		avIDs := strings.Split(avs, ",")
@@ -6152,17 +6162,7 @@ func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tr
 			attrs[av.NodeAttrViewNames] = avNames
 		}
 	}
-
-	if nil != tx {
-		if err = setNodeAttrsWithTx(tx, node, tree, attrs); err != nil {
-			return
-		}
-	} else {
-		if err = setNodeAttrs(node, tree, attrs); err != nil {
-			return
-		}
-	}
-	return
+	return attrs
 }
 
 func (tx *Transaction) doDuplicateAttrViewKey(operation *Operation) (ret *TxErr) {

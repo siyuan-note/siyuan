@@ -1,4 +1,7 @@
 {
+	"hideInFileTree": "ドキュメントツリーで非表示",
+	"newItemTemplateSubDoc": "現在のデータベースブロックがあるドキュメントのサブドキュメント",
+	"newItemTemplateSubDocTip": "ミラーデータベースから作成する場合は、現在のミラーデータベースブロックがあるドキュメントを使用します",
 	"entrySeparator": "区切り線",
 	"tableAddColumnTip": "クリックして右側に列を挿入<br>ドラッグして複数の列を挿入または削除",
 	"tableAddRowTip": "クリックして下に行を挿入<br>ドラッグして複数の行を挿入または削除",

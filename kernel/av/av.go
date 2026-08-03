@@ -97,6 +97,7 @@ type NewItemTemplate struct {
 	FieldValues         map[string]*NewItemFieldValue `json:"fieldValues,omitempty"`
 	SaveLocation        *NewItemSaveLocation          `json:"saveLocation,omitempty"`
 	ContentTemplatePath string                        `json:"contentTemplatePath,omitempty"`
+	HideInFileTree      bool                          `json:"hideInFileTree,omitempty"`
 }
 
 // NewItemTemplatesConfig 描述一次完整的新增条目模板配置修改。

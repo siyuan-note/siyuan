@@ -2082,7 +2082,7 @@ export class AgentChat extends Model {
         cancel.textContent = window.siyuan.languages.cancel;
         const submit = document.createElement("button");
         submit.className = "b3-button b3-button--small b3-button--text";
-        submit.textContent = window.siyuan.languages.confirm;
+        submit.textContent = window.siyuan.languages.agentSend;
         actions.append(cancel, submit);
 
         const restore = () => {

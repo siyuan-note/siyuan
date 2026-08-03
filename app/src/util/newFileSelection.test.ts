@@ -4,6 +4,7 @@ import {
     createNewFileSelectionContext,
     isNewFileSelectionValid,
     isRangeInEditor,
+    isSameBlockRange,
     isSameRange,
     NewFileSelectionContext
 } from "./newFileSelection";
@@ -149,5 +150,13 @@ describe("new document selection context", () => {
         assert.equal(isSameRange(range, range), true);
         assert.equal(isSameRange(range, movedRange), false);
         assert.equal(isRangeInEditor(asElement(editor), movedRange), true);
+    });
+
+    it("distinguishes single-block and cross-block selections", () => {
+        const {range, startText} = createFixture();
+
+        assert.equal(isSameBlockRange(createRange(startText, startText)), true);
+        assert.equal(isSameBlockRange(range), false);
+        assert.equal(isSameBlockRange(createRange(new TestText(), startText)), false);
     });
 });

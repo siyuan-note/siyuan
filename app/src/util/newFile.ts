@@ -19,6 +19,7 @@ import {
     createNewFileSelectionContext,
     isNewFileSelectionValid,
     isRangeInEditor,
+    isSameBlockRange,
     isSameRange,
     NewFileSelectionContext
 } from "./newFileSelection";
@@ -152,6 +153,9 @@ export const newFileBySelect = (protyle: IProtyle, newFileName: string, context:
 
 export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "subDoc" | "configured",
                                      refSubtype: "d" | "s" = "d", name?: string) => {
+    if (!isSameBlockRange(range)) {
+        return;
+    }
     const nodeElement = hasClosestBlock(range.startContainer);
     if (!nodeElement) {
         return;

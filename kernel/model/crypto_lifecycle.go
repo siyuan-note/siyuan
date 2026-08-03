@@ -149,7 +149,7 @@ func AcquireEncryptedBoxOperation(boxID string) error {
 		lifecycle.condition.Broadcast()
 	}
 	if lifecycle.state != EncryptedBoxStateUnlocked {
-		return errors.New("encrypted notebook is not unlocked")
+		return ErrEncryptedBoxNotUnlocked
 	}
 	lifecycle.activeOperations++
 	return nil
@@ -188,6 +188,13 @@ type encryptedBoxOperationScope struct {
 
 type encryptedBoxOperationScopeKey struct{}
 
+var (
+	// ErrEncryptedBoxNotUnlocked 表示加密笔记本当前未解锁。
+	ErrEncryptedBoxNotUnlocked = errors.New("encrypted notebook is not unlocked")
+	// ErrEncryptedBoxOperationScopeClosed 表示响应级操作作用域已经关闭。
+	ErrEncryptedBoxOperationScopeClosed = errors.New("encrypted notebook operation scope is closed")
+)
+
 // WithEncryptedBoxOperationScope 创建覆盖整个外层响应过程的租约作用域。
 func WithEncryptedBoxOperationScope(ctx context.Context) (context.Context, func()) {
 	scope := &encryptedBoxOperationScope{boxIDSet: map[string]struct{}{}}
@@ -208,6 +215,9 @@ func AcquireEncryptedBoxOperations(ctx context.Context, boxIDs []string) (releas
 		sortedBoxIDs = append(sortedBoxIDs, boxID)
 	}
 	sort.Strings(sortedBoxIDs)
+	if len(sortedBoxIDs) == 0 {
+		return func() {}, nil
+	}
 
 	if scope, ok := ctx.Value(encryptedBoxOperationScopeKey{}).(*encryptedBoxOperationScope); ok {
 		err = scope.acquire(sortedBoxIDs)
@@ -235,7 +245,7 @@ func (scope *encryptedBoxOperationScope) acquire(boxIDs []string) error {
 	scope.lock.Lock()
 	defer scope.lock.Unlock()
 	if scope.closed {
-		return errors.New("encrypted notebook operation scope is closed")
+		return ErrEncryptedBoxOperationScopeClosed
 	}
 	for _, boxID := range boxIDs {
 		if _, exists := scope.boxIDSet[boxID]; exists {

@@ -165,7 +165,7 @@ func LoadThemes() {
 			modes = *themeConf.Modes
 		}
 		for _, mode := range modes {
-			t := &conf.AppearanceTheme{Name: name}
+			t := &conf.AppearanceTheme{Name: name, Frontends: themeConf.Frontends}
 			if isBuiltInTheme(name) {
 				t.Label = name + Conf.Language(281)
 			} else {

@@ -300,11 +300,11 @@ declare namespace Config {
         /**
          * List of installed light themes
          */
-        lightThemes: { label: string; name: string }[];
+        lightThemes: IAppearanceTheme[];
         /**
          * List of installed dark themes
          */
-        darkThemes: { label: string; name: string }[];
+        darkThemes: IAppearanceTheme[];
         /**
          * The current theme mode
          * - `0`: Light theme
@@ -336,6 +336,12 @@ declare namespace Config {
         entryVisibility: IEntryVisibility;
     }
 
+    export interface IAppearanceTheme {
+        label: string;
+        name: string;
+        frontends?: string[];
+    }
+
     export type TEntryVisibilityBase = "simple" | "full";
 
     export interface IEntryVisibilityProfile {
@@ -343,6 +349,7 @@ declare namespace Config {
         name: string;
         base: TEntryVisibilityBase;
         entries: Record<string, boolean>;
+        orders: Record<string, string[]>;
     }
 
     export interface IEntryVisibility {

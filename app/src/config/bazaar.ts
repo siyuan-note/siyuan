@@ -129,7 +129,7 @@ export const bazaar = {
     <div class="config-bazaar__panel" data-type="downloaded" data-init="true">
         <div class="fn__flex config-bazaar__title config-bazaar__title--downloaded">
             <div class="fn__flex config-bazaar__tabs">
-                <button data-type="myUpdate" class="b3-button b3-button--outline fn__none">${window.siyuan.languages.update}</button>
+                <button data-type="myUpdate" class="b3-button b3-button--outline">${window.siyuan.languages.update}</button>
                 <button data-type="myPlugin" class="b3-button">${window.siyuan.languages.plugin}</button>
                 <button data-type="myTheme" class="b3-button b3-button--outline">${window.siyuan.languages.theme}</button>
                 <button data-type="myIcon" class="b3-button b3-button--outline">${window.siyuan.languages.icon}</button>
@@ -517,13 +517,6 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     _isUpdatePanelActive() {
         return !bazaar.element.querySelector('[data-type="myUpdate"]')?.classList.contains("b3-button--outline");
     },
-    _setUpdateTabVisible(visible: boolean) {
-        const updateButton = bazaar.element.querySelector('[data-type="myUpdate"]');
-        updateButton?.classList.toggle("fn__none", !visible);
-        if (!visible && this._isUpdatePanelActive()) {
-            (bazaar.element.querySelector('[data-type="myPlugin"]') as HTMLElement)?.click();
-        }
-    },
     _checkUpdate(force = false) {
         if (!force && ["loading", "loaded"].includes(this._updateState)) {
             return;
@@ -539,7 +532,6 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             }
             if (response.code !== 0 || !response.data) {
                 this._updateState = "error";
-                this._setUpdateTabVisible(true);
                 if (this._isUpdatePanelActive()) {
                     this._renderUpdatePanel();
                 }
@@ -547,7 +539,6 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             }
             this._data.update = response.data;
             this._updateState = "loaded";
-            this._setUpdateTabVisible(this._getUpdatedItems().length > 0);
             this._syncDownloadedUpdateButtons();
             if (this._isUpdatePanelActive()) {
                 this._renderUpdatePanel();
@@ -561,7 +552,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         installAllElement?.classList.add("fn__none");
         if (this._updateState === "loading" || this._updateState === "idle") {
             counterElement.classList.add("fn__none");
-            contentElement.innerHTML = "<div class=\"fn__flex-center\" style=\"height: 96px\"><img src=\"/stage/loading-pure.svg\"></div>";
+            contentElement.innerHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
             return;
         }
         if (this._updateState === "error") {
@@ -1314,8 +1305,10 @@ type="checkbox">
                     event.stopPropagation();
                     break;
                 } else if (["myTheme", "myTemplate", "myIcon", "myWidget", "myPlugin", "myUpdate"].includes(type)) {
+                    const downloadedLoading = bazaar.element.querySelector("#configBazaarDownloaded")
+                        .getAttribute("data-loading");
                     if (target.classList.contains("b3-button--outline") &&
-                        !bazaar.element.querySelector("#configBazaarDownloaded").getAttribute("data-loading")) {
+                        (type === "myUpdate" || !downloadedLoading)) {
                         target.parentElement.querySelectorAll('.b3-button[data-type^="my"]').forEach((item: HTMLElement) => {
                             item.classList.add("b3-button--outline");
                         });

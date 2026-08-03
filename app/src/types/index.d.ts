@@ -318,6 +318,7 @@ interface Window {
         setWebViewFocusable(enable: boolean): void
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
+        logInputEvent?(details: string): void
     };
     JSHarmony: {
         showKeyboard(): void

@@ -145,7 +145,16 @@ describe("getListShortcutAction", () => {
         assert.equal(getListShortcutAction(context, "u", false, false), "insertChildList");
     });
 
-    it("inserts a child list when the list item has multiple children", () => {
+    it("converts an empty child in a list item with multiple children", () => {
+        const secondChild = new TestElement("NodeParagraph", "second");
+        const {paragraph, editor} = createList("o", secondChild);
+        const context = getListContext(asHTMLElement(paragraph), asHTMLElement(editor))!;
+
+        assert.equal(getListShortcutAction(context, "o", true, false), "convertChildToList");
+        assert.equal(getListShortcutAction(context, "u", true, false), "convertChildToList");
+    });
+
+    it("inserts a child list after a non-empty child in a list item with multiple children", () => {
         const secondChild = new TestElement("NodeParagraph", "second");
         const {paragraph, editor} = createList("o", secondChild);
         const context = getListContext(asHTMLElement(paragraph), asHTMLElement(editor))!;

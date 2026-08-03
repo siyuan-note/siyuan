@@ -36,7 +36,8 @@ func TestNormalizeEntryVisibilityProfiles(t *testing.T) {
 			nil,
 			{ID: "", Name: "missing-id"},
 			{ID: EntryVisibilityProfileSimple, Name: "Reserved"},
-			{ID: "custom", Name: "Custom", Base: "invalid", Entries: map[string]bool{"future.entry": false}},
+			{ID: "custom", Name: "Custom", Base: "invalid", Entries: map[string]bool{"future.entry": false},
+				Orders: map[string][]string{"future": {"entry"}}},
 			{ID: "custom", Name: "Duplicate"},
 		},
 	}, EntryVisibilityProfileFull)
@@ -51,6 +52,9 @@ func TestNormalizeEntryVisibilityProfiles(t *testing.T) {
 	if profile.Base != EntryVisibilityProfileFull || profile.Entries["future.entry"] {
 		t.Fatalf("unexpected normalized profile: %+v", profile)
 	}
+	if len(profile.Orders["future"]) != 1 || profile.Orders["future"][0] != "entry" {
+		t.Fatalf("unexpected normalized profile orders: %+v", profile.Orders)
+	}
 }
 
 func TestNormalizeEntryVisibilityActiveCustomProfile(t *testing.T) {
@@ -63,5 +67,8 @@ func TestNormalizeEntryVisibilityActiveCustomProfile(t *testing.T) {
 
 	if entryVisibility.Active != "custom" {
 		t.Fatalf("unexpected active profile: %s", entryVisibility.Active)
+	}
+	if nil == entryVisibility.Profiles[0].Orders {
+		t.Fatal("profile orders should be initialized")
 	}
 }

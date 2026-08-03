@@ -20,8 +20,10 @@ import {
     getTableResizeControlCenter,
     getTableResizeCount,
     isTableCellContentEmpty,
+    isTableResizeControlVisible,
 } from "./tableResize";
 import {applyTableCellStyleHotkey, getTableCellTextStyleMenus} from "../toolbar/tableCell";
+import {getTableCellsInRectangle} from "./tableSelection";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -381,6 +383,10 @@ export class TableControl {
         this.scheduleRender();
     }
 
+    public setHidden(hidden: boolean) {
+        this.element.classList.toggle("fn__none", hidden);
+    }
+
     private bindEvents() {
         const signal = this.abortController.signal;
         this.wysiwygElement.addEventListener("pointermove", event => this.handleTablePointerMove(event, false), {signal});
@@ -510,7 +516,7 @@ export class TableControl {
         }
         const targetCell = getCell(event.target);
         const targetTable = targetCell?.closest("table") as HTMLTableElement;
-        const targetViewportRect = targetTable ? this.getTableViewportRect(targetTable) : undefined;
+        const targetViewportRect = targetTable ? this.getTableGridViewportRect(targetTable) : undefined;
         const edgeHover = !targetCell || (targetViewportRect &&
             event.clientX <= targetViewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE) ?
             this.getEdgeHover(event.clientX, event.clientY) : undefined;
@@ -655,7 +661,7 @@ export class TableControl {
         if (mode === "cell") {
             if (extend && this.selection.anchor instanceof HTMLTableCellElement) {
                 const anchorInfo = grid.cellInfos.find(item => item.cell === this.selection.anchor);
-                const selected = this.getCellsInRectangle(grid.cellInfos, anchorInfo, info);
+                const selected = getTableCellsInRectangle(grid.cellInfos, anchorInfo, info).map(item => item.cell);
                 if (!toggle) {
                     this.selection.cells.clear();
                 }
@@ -745,37 +751,6 @@ export class TableControl {
         return indexes;
     }
 
-    private getCellsInRectangle(cellInfos: ITableCellInfo[], start: ITableCellInfo, end: ITableCellInfo) {
-        if (!start || !end) {
-            return [];
-        }
-        let rowStart = Math.min(start.row, end.row);
-        let rowEnd = Math.max(start.row + start.rowspan - 1, end.row + end.rowspan - 1);
-        let colStart = Math.min(start.col, end.col);
-        let colEnd = Math.max(start.col + start.colspan - 1, end.col + end.colspan - 1);
-        let changed = true;
-        while (changed) {
-            changed = false;
-            cellInfos.forEach(info => {
-                if (info.row <= rowEnd && info.row + info.rowspan - 1 >= rowStart &&
-                    info.col <= colEnd && info.col + info.colspan - 1 >= colStart) {
-                    const nextRowStart = Math.min(rowStart, info.row);
-                    const nextRowEnd = Math.max(rowEnd, info.row + info.rowspan - 1);
-                    const nextColStart = Math.min(colStart, info.col);
-                    const nextColEnd = Math.max(colEnd, info.col + info.colspan - 1);
-                    changed = nextRowStart !== rowStart || nextRowEnd !== rowEnd ||
-                        nextColStart !== colStart || nextColEnd !== colEnd;
-                    rowStart = nextRowStart;
-                    rowEnd = nextRowEnd;
-                    colStart = nextColStart;
-                    colEnd = nextColEnd;
-                }
-            });
-        }
-        return cellInfos.filter(info => info.row <= rowEnd && info.row + info.rowspan - 1 >= rowStart &&
-            info.col <= colEnd && info.col + info.colspan - 1 >= colStart).map(info => info.cell);
-    }
-
     private isCellInSelection(cell: HTMLTableCellElement) {
         if (!this.selection) {
             return false;
@@ -858,7 +833,7 @@ export class TableControl {
         return Math.max(table.getBoundingClientRect().bottom, table.parentElement.getBoundingClientRect().bottom);
     }
 
-    private getTableSelectionViewportRect(table: HTMLTableElement) {
+    private getTableGridViewportRect(table: HTMLTableElement) {
         const viewportRect = this.getTableViewportRect(table);
         const rowRects = Array.from(table.rows).map(row => row.getBoundingClientRect()).filter(rect => rect.height > 0);
         if (rowRects.length === 0) {
@@ -908,11 +883,13 @@ export class TableControl {
         const candidates: ITableEdgeHover[] = [];
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
             const tableRect = table.getBoundingClientRect();
-            const viewportRect = this.getTableViewportRect(table);
+            const viewportRect = this.getTableGridViewportRect(table);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const grid = buildTableGrid(table);
-            if (tableRect.right <= viewportRect.right + 1 && tableRect.right >= viewportRect.left &&
+            const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
+                isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
+            if (columnControlVisible && tableRect.right >= viewportRect.left &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1 &&
                 clientX >= tableRect.right && clientX <= tableRect.right + TABLE_ADD_CONTROL_THICKNESS &&
                 clientY >= addRowEdge && clientY <= addRowEdge + TABLE_ADD_CONTROL_THICKNESS) {
@@ -969,7 +946,7 @@ export class TableControl {
                     });
                 }
             }
-            if (tableRect.right <= viewportRect.right + 1 &&
+            if (columnControlVisible &&
                 clientX >= tableRect.right && clientX <= tableRect.right + TABLE_ADD_CONTROL_THICKNESS &&
                 clientY >= viewportRect.top && clientY <= viewportRect.bottom) {
                 const cell = grid.cellInfos[0]?.cell;
@@ -1030,13 +1007,13 @@ export class TableControl {
         });
         this.selectionElements.forEach(item => item.classList.add("fn__none"));
         const tableRect = state.table.getBoundingClientRect();
-        const viewportRect = this.getTableViewportRect(state.table);
+        const viewportRect = this.getTableGridViewportRect(state.table);
         const addRowEdge = this.getTableAddRowEdge(state.table);
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
         const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
             TABLE_ADD_CONTROL_THICKNESS);
-        const columnControlCenter = getTableResizeControlCenter(tableRect.right, contentRect.left,
-            contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
+        const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
+            isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
         if (state.mode === "row" || state.mode === "both") {
             this.addRowButton.classList.remove("fn__none");
             this.addRowButton.classList.add("protyle-table-control__add--active");
@@ -1045,21 +1022,22 @@ export class TableControl {
             this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2, rowControlCenter);
             state.table.classList.add("protyle-table-control__table--add-row");
         }
-        if (state.mode === "column" || state.mode === "both") {
+        if ((state.mode === "column" || state.mode === "both") && columnControlVisible) {
             this.addColumnButton.classList.remove("fn__none");
             this.addColumnButton.classList.add("protyle-table-control__add--active");
             this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
             this.addColumnButton.style.height = `${Math.max(0, viewportRect.height)}px`;
-            this.setPosition(this.addColumnButton, columnControlCenter,
+            this.setPosition(this.addColumnButton, tableRect.right + TABLE_ADD_CONTROL_THICKNESS / 2,
                 viewportRect.top + viewportRect.height / 2);
             state.table.classList.add("protyle-table-control__table--add-column");
         }
-        if (state.mode === "both") {
+        if (state.mode === "both" && columnControlVisible) {
             this.addBothButton.classList.remove("fn__none");
             this.addBothButton.classList.add("protyle-table-control__add--active");
             this.addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
             this.addBothButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.setPosition(this.addBothButton, columnControlCenter, rowControlCenter);
+            this.setPosition(this.addBothButton, tableRect.right + TABLE_ADD_CONTROL_THICKNESS / 2,
+                rowControlCenter);
         }
         this.joinedControlTable = state.table;
         this.resizeLabel.textContent = `${state.targetRows} × ${state.targetColumns}`;
@@ -1087,9 +1065,11 @@ export class TableControl {
         if (visible) {
             const cellRect = cell.getBoundingClientRect();
             const tableRect = table.getBoundingClientRect();
-            const viewportRect = this.getTableViewportRect(table);
+            const viewportRect = this.getTableGridViewportRect(table);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
+            const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
+                isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
             const visibleCellRect = intersectRects(cellRect, viewportRect);
             const grid = this.selection?.table === table && this.selectionGrid ?
                 this.selectionGrid : buildTableGrid(table);
@@ -1144,7 +1124,7 @@ export class TableControl {
                 this.joinedControlTable = table;
             }
             if ((this.hoverType === "add-column" || this.hoverType === "add-both") && viewportRect.height > 0 &&
-                tableRect.right <= viewportRect.right + 1 &&
+                columnControlVisible &&
                 tableRect.right >= viewportRect.left) {
                 this.addColumnButton.classList.remove("fn__none");
                 this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
@@ -1154,7 +1134,7 @@ export class TableControl {
                 table.classList.add("protyle-table-control__table--add-column");
                 this.joinedControlTable = table;
             }
-            if (this.hoverType === "add-both" && tableRect.right <= viewportRect.right + 1 &&
+            if (this.hoverType === "add-both" && columnControlVisible &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1) {
                 this.addBothButton.classList.remove("fn__none");
                 this.addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
@@ -1171,7 +1151,7 @@ export class TableControl {
             this.selectedCells = [];
             return;
         }
-        const selectionViewportRect = this.getTableSelectionViewportRect(this.selection.table);
+        const selectionViewportRect = this.getTableGridViewportRect(this.selection.table);
         if (this.selection.mode === "row") {
             const rows = Array.from(this.selection.table.rows);
             getIndexGroups(this.selection.indexes).forEach(group => {
@@ -2162,7 +2142,7 @@ export class TableControl {
         if (!state || !this.selection) {
             return;
         }
-        const viewportRect = this.getTableSelectionViewportRect(this.selection.table);
+        const viewportRect = this.getTableGridViewportRect(this.selection.table);
         const start = state.mode === "column" ? viewportRect.left : viewportRect.top;
         const end = state.mode === "column" ? viewportRect.right : viewportRect.bottom;
         const minCenter = start + state.handleSize / 2;

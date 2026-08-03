@@ -4,6 +4,7 @@ import {
     constrainTableResizeCount,
     getTableResizeControlCenter,
     getTableResizeCount,
+    isTableResizeControlVisible,
     isTableCellContentEmpty,
 } from "./tableResize";
 
@@ -55,5 +56,13 @@ describe("getTableResizeControlCenter", () => {
     it("keeps the whole control inside the editor viewport", () => {
         assert.equal(getTableResizeControlCenter(395, 0, 400, 16), 392);
         assert.equal(getTableResizeControlCenter(450, 0, 400, 16), 392);
+    });
+});
+
+describe("isTableResizeControlVisible", () => {
+    it("requires enough viewport space for the whole control", () => {
+        assert.equal(isTableResizeControlVisible(384, 400, 16), true);
+        assert.equal(isTableResizeControlVisible(395, 400, 16), false);
+        assert.equal(isTableResizeControlVisible(450, 400, 16), false);
     });
 });

@@ -1,4 +1,5 @@
 {
+	"entrySeparator": "分隔線",
 	"tableAddColumnTip": "點擊在右側插入一欄<br>拖曳插入或刪除多欄",
 	"tableAddRowTip": "點擊在下方插入一列<br>拖曳插入或刪除多列",
 	"bazaarPackageInfo": "集市套件資訊",

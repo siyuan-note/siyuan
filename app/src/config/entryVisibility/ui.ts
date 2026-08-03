@@ -4,6 +4,7 @@ import {escapeAttr, escapeHtml} from "../../util/escape";
 import {genUUID} from "../../util/genID";
 import {
     entryCatalog,
+    getEntryCatalogChildren,
     getEntryCatalogPathChain,
     getEntryPaths,
     IEntryCatalogNode,
@@ -11,6 +12,7 @@ import {
 } from "./catalog";
 import {
     createEntryProfileSnapshot,
+    createEntryOrderSnapshot,
     ENTRY_PROFILE_FULL,
     ENTRY_PROFILE_SIMPLE,
     ENTRY_VISIBILITY_VERSION,
@@ -18,6 +20,7 @@ import {
     isEntryVisible,
     saveEntryVisibility,
 } from "./runtime";
+import {moveEntryOrder, resolveEntryOrder} from "./order";
 
 type TImportFile = {
     type: "siyuan-entry-profile" | "siyuan-entry-profile-bundle";
@@ -86,6 +89,7 @@ const createProfile = (base: Config.TEntryVisibilityBase, current = false, name?
         name: uniqueName(name || window.siyuan.languages.entryCustomProfile),
         base,
         entries: createEntryProfileSnapshot(base),
+        orders: createEntryOrderSnapshot(current),
     };
     if (current) {
         getEntryPaths().forEach((path) => {
@@ -95,11 +99,13 @@ const createProfile = (base: Config.TEntryVisibilityBase, current = false, name?
     return profile;
 };
 
-const duplicateProfile = (profile: Config.IEntryVisibilityProfile) => ({
-    ...JSON.parse(JSON.stringify(profile)) as Config.IEntryVisibilityProfile,
-    id: genUUID(),
-    name: uniqueName(`${profile.name} ${window.siyuan.languages.duplicate}`),
-});
+const duplicateProfile = (profile: Config.IEntryVisibilityProfile) => {
+    const copy = JSON.parse(JSON.stringify(profile)) as Config.IEntryVisibilityProfile;
+    copy.id = genUUID();
+    copy.name = uniqueName(`${profile.name} ${window.siyuan.languages.duplicate}`);
+    copy.orders ||= createEntryOrderSnapshot();
+    return copy;
+};
 
 const getEntryViewHost = (root: HTMLElement) => root.closest<HTMLElement>(".config__tab-container") || root;
 
@@ -180,6 +186,20 @@ const isEntryChecked = (profile: Config.IEntryVisibilityProfile, path: string, i
         ? profile.entries[path]
         : profile.base === ENTRY_PROFILE_FULL || item.simple;
 
+const getProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
+                              nodes = getEntryCatalogChildren(parentPath) || []) => {
+    const defaultOrder = nodes.map((item) => item.key);
+    return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath],
+        new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)));
+};
+
+const orderEntryNodes = (profile: Config.IEntryVisibilityProfile, parentPath: string,
+                         nodes: IEntryCatalogNode[]) => {
+    const indexes = new Map(getProfileEntryOrder(profile, parentPath, nodes).map((key, index) => [key, index]));
+    return [...nodes].sort((itemA, itemB) =>
+        (indexes.get(itemA.key) ?? Number.MAX_SAFE_INTEGER) - (indexes.get(itemB.key) ?? Number.MAX_SAFE_INTEGER));
+};
+
 const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string, item: IEntryCatalogNode,
                            parentEnabled: boolean, readOnly: boolean) => `<input class="b3-switch" type="checkbox"
     aria-label="${escapeAttr(item.label())}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
@@ -187,18 +207,27 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
 
 const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
                            nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
-                           parentEnabled: boolean, readOnly: boolean) => `<section class="config-entry-visibility__column"
+                           parentEnabled: boolean, readOnly: boolean, sortable: boolean) => `<section class="config-entry-visibility__column"
     data-entry-column data-entry-depth="${depth}">
     <div class="config-entry-visibility__column-title" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
     <div class="config-entry-visibility__column-list">
         ${nodes.map((item) => {
         const path = `${prefix}.${item.key}`;
+        const draggable = sortable && parentEnabled;
+        if (item.type === "separator") {
+            return `<div class="config-entry-visibility__row config-entry-visibility__row--separator"
+                data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}">
+                ${draggable ? '<span class="config-entry-visibility__drag" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></span>' : ""}
+                <span class="config-entry-visibility__label">${window.siyuan.languages.entrySeparator}</span>
+            </div>`;
+        }
         const label = item.label();
         const hasChildren = Boolean(item.children?.length);
         const selected = selectedPaths[depth] === path;
         const rowTag = hasChildren ? "div" : "label";
         return `<${rowTag} class="config-entry-visibility__row config-entry-visibility__row--${hasChildren ? "navigable" : "toggleable"}${selected ? " config-entry-visibility__row--current" : ""}${parentEnabled ? "" : " config-entry-visibility__row--disabled"}"
-            data-entry-row data-entry-path-row="${escapeAttr(path)}"${hasChildren ? ` data-action="navigate-entry" data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}"` : ""}>
+            data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}" data-entry-path-row="${escapeAttr(path)}"${hasChildren ? ` data-action="navigate-entry" data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}"` : ""}>
+            ${draggable ? '<span class="config-entry-visibility__drag" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></span>' : ""}
             ${hasChildren ? `<button class="config-entry-visibility__navigate" data-action="navigate-entry"
                 data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}" title="${escapeAttr(label)}">
                 <span>${escapeHtml(label)}</span>
@@ -237,14 +266,15 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     let parentEnabled = true;
     let depth = 0;
     while (nodes.length > 0) {
+        const orderedNodes = orderEntryNodes(profile, prefix, nodes);
         const columnNodes = visiblePaths
-            ? nodes.filter((item) => visiblePaths.has(`${prefix}.${item.key}`))
-            : nodes;
+            ? orderedNodes.filter((item) => item.type !== "separator" && visiblePaths.has(`${prefix}.${item.key}`))
+            : orderedNodes;
         if (columnNodes.length === 0) {
             break;
         }
         columns.push(renderEntryColumn(profile, title, prefix, columnNodes, depth, selectedPaths,
-            parentEnabled, readOnly));
+            parentEnabled, readOnly, !visiblePaths && section.sortable !== false && !readOnly));
         const selectedPath = selectedPaths[depth];
         const selectedNode = selectedPath && columnNodes.find((item) => `${prefix}.${item.key}` === selectedPath);
         if (!selectedNode?.children?.length) {
@@ -270,6 +300,9 @@ const getEntrySearchResults = (query: string) => {
     const results: IEntrySearchResult[] = [];
     const visit = (section: IEntryCatalogSection, prefix: string, nodes: IEntryCatalogNode[], labels: string[]) => {
         nodes.forEach((item) => {
+            if (item.type === "separator") {
+                return;
+            }
             const path = `${prefix}.${item.key}`;
             const itemLabels = [...labels, item.label()];
             if (itemLabels.join(" - ").toLowerCase().includes(query)) {
@@ -306,10 +339,12 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             name: baseLabel(profileID),
             base: profileID,
             entries: createEntryProfileSnapshot(profileID),
+            orders: createEntryOrderSnapshot(),
         }
         : existing
         ? JSON.parse(JSON.stringify(existing)) as Config.IEntryVisibilityProfile
         : createProfile(ENTRY_PROFILE_SIMPLE);
+    draft.orders ||= createEntryOrderSnapshot();
     const initialJSON = JSON.stringify(draft);
     const creating = !builtin && !existing;
     const view = createEntryView(root);
@@ -355,6 +390,12 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     let selectedSectionKey = entryCatalog[0].key;
     let selectedPaths: string[] = [];
     let previousQuery = "";
+    let dragging: {parentPath: string; sourceKey: string; order?: string[]} | undefined;
+    const clearDropTarget = () => {
+        browser.querySelectorAll(".config-entry-visibility__row--drop-before, .config-entry-visibility__row--drop-after")
+            .forEach((item) => item.classList.remove("config-entry-visibility__row--drop-before",
+                "config-entry-visibility__row--drop-after"));
+    };
     const updateRestoreButton = () => {
         if (restoreButton) {
             restoreButton.textContent = window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base));
@@ -414,6 +455,62 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     };
     renderBrowser();
     searchInput.addEventListener("input", () => renderBrowser());
+    browser.addEventListener("dragstart", (event: DragEvent) => {
+        if (builtin || searchInput.value.trim()) {
+            event.preventDefault();
+            return;
+        }
+        const handle = (event.target as Element).closest<HTMLElement>(".config-entry-visibility__drag");
+        const row = handle?.closest<HTMLElement>("[data-entry-row]");
+        if (!row?.dataset.entryParent || !row.dataset.entryKey) {
+            event.preventDefault();
+            return;
+        }
+        dragging = {parentPath: row.dataset.entryParent, sourceKey: row.dataset.entryKey};
+        row.classList.add("config-entry-visibility__row--dragging");
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", row.dataset.entryKey);
+    });
+    browser.addEventListener("dragover", (event: DragEvent) => {
+        if (!dragging) {
+            return;
+        }
+        const row = (event.target as Element).closest<HTMLElement>("[data-entry-row]");
+        if (!row || row.dataset.entryParent !== dragging.parentPath || !row.dataset.entryKey) {
+            clearDropTarget();
+            dragging.order = undefined;
+            return;
+        }
+        const nodes = getEntryCatalogChildren(dragging.parentPath) || [];
+        const order = getProfileEntryOrder(draft, dragging.parentPath, nodes);
+        const after = event.clientY >= row.getBoundingClientRect().top + row.offsetHeight / 2;
+        const movedOrder = moveEntryOrder(order, dragging.sourceKey, row.dataset.entryKey, after,
+            new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)));
+        clearDropTarget();
+        dragging.order = movedOrder;
+        if (!movedOrder) {
+            return;
+        }
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        row.classList.add(`config-entry-visibility__row--drop-${after ? "after" : "before"}`);
+    });
+    browser.addEventListener("drop", (event: DragEvent) => {
+        if (!dragging?.order) {
+            return;
+        }
+        event.preventDefault();
+        draft.orders ||= {};
+        draft.orders[dragging.parentPath] = dragging.order;
+        dragging = undefined;
+        renderBrowser();
+    });
+    browser.addEventListener("dragend", () => {
+        dragging = undefined;
+        clearDropTarget();
+        browser.querySelector(".config-entry-visibility__row--dragging")?.classList.remove(
+            "config-entry-visibility__row--dragging");
+    });
     view.addEventListener("input", (event) => {
         if (builtin) {
             return;
@@ -439,6 +536,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         const selection = target.value;
         draft.base = selection === "current" ? getCurrentBase() : selection as Config.TEntryVisibilityBase;
         draft.entries = createEntryProfileSnapshot(draft.base);
+        draft.orders = createEntryOrderSnapshot(selection === "current");
         if (selection === "current") {
             getEntryPaths().forEach((path) => {
                 draft.entries[path] = isEntryVisible(path);
@@ -448,6 +546,10 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         renderBrowser();
     });
     view.addEventListener("click", (event) => {
+        if ((event.target as Element).closest(".config-entry-visibility__drag")) {
+            event.preventDefault();
+            return;
+        }
         const entrySwitch = (event.target as HTMLElement).closest<HTMLInputElement>("input[data-entry-path]");
         if (entrySwitch) {
             if (entrySwitch.hasAttribute("data-entry-readonly")) {
@@ -474,6 +576,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             confirmDialog(window.siyuan.languages.entryRestoreBase.replace("${x}", restoreTarget),
                 window.siyuan.languages.entryRestoreBaseConfirm.replace("${x}", restoreTarget), () => {
                 draft.entries = createEntryProfileSnapshot(draft.base);
+                draft.orders = createEntryOrderSnapshot();
                 renderBrowser();
             });
         } else if (!builtin && action === "confirm") {
@@ -504,7 +607,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
 const importProfiles = async (root: HTMLElement, file: File) => {
     try {
         const data = JSON.parse(await file.text()) as TImportFile;
-        if (data.version !== ENTRY_VISIBILITY_VERSION) {
+        if (data.version !== 1 && data.version !== ENTRY_VISIBILITY_VERSION) {
             throw new Error("unsupported version");
         }
         let imported: Config.IEntryVisibilityProfile[];
@@ -529,11 +632,20 @@ const importProfiles = async (root: HTMLElement, file: File) => {
                 }
                 return result;
             }, {});
+            const orders = item.orders && !Array.isArray(item.orders)
+                ? Object.entries(item.orders).reduce<Record<string, string[]>>((result, [path, order]) => {
+                    if (Array.isArray(order)) {
+                        result[path] = order.filter((key): key is string => typeof key === "string");
+                    }
+                    return result;
+                }, {})
+                : createEntryOrderSnapshot();
             config.profiles.push({
                 id: genUUID(),
                 name: uniqueName(item.name, config.profiles),
                 base: item.base,
                 entries,
+                orders,
             });
             importedCount++;
         });

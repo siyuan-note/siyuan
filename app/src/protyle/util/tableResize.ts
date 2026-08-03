@@ -45,3 +45,7 @@ export const getTableResizeControlCenter = (edge: number, viewportStart: number,
     }
     return Math.min(Math.max(edge + halfSize, min), max);
 };
+
+export const isTableResizeControlVisible = (edge: number, viewportEnd: number, controlSize: number) => {
+    return edge + controlSize <= viewportEnd + 1;
+};

@@ -334,12 +334,9 @@
     --b3-table-border-radius-top-right: var(--b3-border-radius-s);
     --b3-table-border-radius-bottom-right: var(--b3-border-radius-s);
     --b3-table-border-radius-bottom-left: var(--b3-border-radius-s);
-    border-collapse: collapse;
-    border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right)
-      var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
+    border-collapse: separate;
     empty-cells: show;
     margin: 0;
-    overflow: hidden;
     border-spacing: 0;
     width: max-content;
 
@@ -353,6 +350,7 @@
         z-index: 1;
         border-right: 1px solid var(--b3-theme-surface-lighter);
         border-left: 1px solid var(--b3-theme-surface-lighter);
+        box-sizing: border-box;
         content: "";
         pointer-events: none;
       }
@@ -368,14 +366,20 @@
       border-radius: 0 0 var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
     }
 
-    tbody:not(:has(> tr))::after {
-      content: none;
+    thead > tr:first-child > :first-child {
+      border-top-left-radius: var(--b3-table-border-radius-top-left);
     }
 
-    &:not(:has(> tbody > tr)) thead::after {
-      border-bottom: 1px solid var(--b3-theme-surface-lighter);
-      border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right)
-        var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
+    thead > tr:first-child > :nth-last-child(1 of :not(.fn__none)) {
+      border-top-right-radius: var(--b3-table-border-radius-top-right);
+    }
+
+    tbody:last-of-type > tr:last-child > :first-child {
+      border-bottom-left-radius: var(--b3-table-border-radius-bottom-left);
+    }
+
+    tbody:last-of-type > tr:last-child > :nth-last-child(1 of :not(.fn__none)) {
+      border-bottom-right-radius: var(--b3-table-border-radius-bottom-right);
     }
 
     &.protyle-table-control__table--add-row {
@@ -391,7 +395,9 @@
     td,
     th {
       padding: 4px 8px;
-      border: 1px solid var(--b3-theme-surface-lighter);
+      border: 0;
+      border-right: 1px solid var(--b3-theme-surface-lighter);
+      border-bottom: 1px solid var(--b3-theme-surface-lighter);
       box-sizing: border-box;
       max-width: 620px;
       word-wrap: break-word;

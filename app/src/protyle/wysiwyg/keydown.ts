@@ -1699,13 +1699,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             nodeElement.querySelector(".table__select") as HTMLElement : undefined;
         if (tableSelectElement?.clientHeight > 0) {
             const selectedCellElements: HTMLTableCellElement[] = [];
-            const scrollLeft = nodeElement.firstElementChild.scrollLeft;
-            const scrollTop = nodeElement.querySelector("table").scrollTop;
             nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
                 if (!item.classList.contains("fn__none") && isIncludeCell({
                     tableSelectElement,
-                    scrollLeft,
-                    scrollTop,
                     item,
                 })) {
                     selectedCellElements.push(item);
@@ -1870,7 +1866,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const isListItemFocused = Boolean(protyle.block.showAll &&
                             protyle.block.id === listContext.listItemElement.dataset.nodeId);
                         const action = getListShortcutAction(listContext, targetSubtype,
-                            listContext.childElements.length === 1 && isEmptyParagraph(listContext.childElements[0]),
+                            isEmptyParagraph(listContext.childElement),
                             isListItemFocused);
                         if (action === "cancelList" || action === "convertList") {
                             const conversionType = action === "convertList" ?
@@ -1888,6 +1884,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             }
                         } else if (action === "insertListItem") {
                             insertEmptyListItem(protyle, listContext.listItemElement, range);
+                        } else if (action === "convertChildToList") {
+                            turnsIntoOneTransaction({
+                                protyle,
+                                selectsElement: [listContext.childElement],
+                                type: isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs")
+                            });
                         } else {
                             insertEmptyChildList(protyle, listContext.childElement, targetSubtype, range);
                         }

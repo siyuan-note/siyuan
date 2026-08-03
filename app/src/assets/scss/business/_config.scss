@@ -402,6 +402,10 @@
 
     &__content {
       margin: 1px 16px;
+
+      > .b3-list > .b3-list--empty {
+        padding-inline: 0;
+      }
     }
 
     &__readme {

@@ -2405,6 +2405,9 @@
 		"357": "Abrir arquivo",
 		"358": "Não foi possível abrir o arquivo",
 		"359": "[%s] exportado",
-		"360": "Exportado para [%s]"
+		"360": "Exportado para [%s]",
+		"361": "O nome de usuário da conta do serviço de publicação não pode ficar vazio",
+		"362": "O nome de usuário da conta do serviço de publicação está duplicado",
+		"363": "A senha da conta do serviço de publicação deve ter pelo menos 8 caracteres"
 	}
 	}

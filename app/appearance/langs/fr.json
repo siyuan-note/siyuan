@@ -2405,6 +2405,9 @@
 		"357": "Ouvrir le fichier",
 		"358": "Impossible d'ouvrir le fichier",
 		"359": "[%s] exporté",
-		"360": "Exporté vers [%s]"
+		"360": "Exporté vers [%s]",
+		"361": "Le nom d'utilisateur du compte du service de publication ne peut pas être vide",
+		"362": "Le nom d'utilisateur du compte du service de publication est dupliqué",
+		"363": "Le mot de passe du compte du service de publication doit comporter au moins 8 caractères"
 	}
 	}

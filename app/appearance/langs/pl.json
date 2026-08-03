@@ -2405,6 +2405,9 @@
 		"357": "Otwórz plik",
 		"358": "Nie można otworzyć pliku",
 		"359": "Wyeksportowano [%s]",
-		"360": "Wyeksportowano do [%s]"
+		"360": "Wyeksportowano do [%s]",
+		"361": "Nazwa użytkownika konta usługi publikowania nie może być pusta",
+		"362": "Nazwa użytkownika konta usługi publikowania jest zduplikowana",
+		"363": "Hasło konta usługi publikowania musi mieć co najmniej 8 znaków"
 	}
 	}

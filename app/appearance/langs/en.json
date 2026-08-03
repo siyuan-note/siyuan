@@ -2405,6 +2405,9 @@
 		"357": "Open file",
 		"358": "Unable to open file",
 		"359": "Exported [%s]",
-		"360": "Exported to [%s]"
+		"360": "Exported to [%s]",
+		"361": "The publish service account username cannot be empty",
+		"362": "The publish service account username is duplicated",
+		"363": "The publish service account password must be at least 8 characters"
 	}
 	}

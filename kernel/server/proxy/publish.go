@@ -24,6 +24,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"strconv"
 	"time"
 
 	"github.com/siyuan-note/logging"
@@ -164,6 +165,28 @@ func rewrite(r *httputil.ProxyRequest) {
 	// r.Out.Host = r.In.Host // if desired
 }
 
+// publishAuthRejectResponse 构造发布服务认证拒绝响应，retryAfter 大于 0 时附加 Retry-After 头。
+func publishAuthRejectResponse(request *http.Request, statusCode, retryAfter int) *http.Response {
+	header := http.Header{
+		model.BasicAuthHeaderKey: {model.BasicAuthHeaderValue},
+	}
+	if 0 < retryAfter {
+		header.Set("Retry-After", strconv.Itoa(retryAfter))
+	}
+	return &http.Response{
+		StatusCode:    statusCode,
+		Status:        http.StatusText(statusCode),
+		Proto:         request.Proto,
+		ProtoMajor:    request.ProtoMajor,
+		ProtoMinor:    request.ProtoMinor,
+		Request:       request,
+		Header:        header,
+		Body:          http.NoBody,
+		Close:         false,
+		ContentLength: -1,
+	}
+}
+
 func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.Response, err error) {
 	if model.Conf.Publish.Auth.Enable {
 		// Session Auth
@@ -187,27 +210,29 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 
 		// Basic Auth
 		username, password, ok := request.BasicAuth()
-		account := model.GetBasicAuthAccount(username)
-		if !ok ||
-			account == nil ||
-			account.Username == "" || // 匿名用户
-			account.Password != password {
-
-			return &http.Response{
-				StatusCode: http.StatusUnauthorized,
-				Status:     http.StatusText(http.StatusUnauthorized),
-				Proto:      request.Proto,
-				ProtoMajor: request.ProtoMajor,
-				ProtoMinor: request.ProtoMinor,
-				Request:    request,
-				Header: http.Header{
-					model.BasicAuthHeaderKey: {model.BasicAuthHeaderValue},
-				},
-				Body:          http.NoBody,
-				Close:         false,
-				ContentLength: -1,
-			}, nil
+		if !ok || "" == username {
+			// 未提供凭据，返回 401 提示输入，不计入失败次数
+			return publishAuthRejectResponse(request, http.StatusUnauthorized, 0), nil
 		}
+
+		// 按来源 IP 与账户名限流，防止暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phg7-xcr4-q5wg
+		ip := util.GetRemoteAddr(request)
+		throttleKey := ip + ":" + username
+		if retryAfter := util.AuthThrottleCheck(throttleKey); 0 < retryAfter {
+			// 锁定期间持续记录失败，以延长锁定时间
+			util.AuthThrottleFail(throttleKey)
+			logging.LogWarnf("publish service auth throttled [ip=%s, username=%s]", ip, username)
+			return publishAuthRejectResponse(request, http.StatusTooManyRequests, retryAfter), nil
+		}
+
+		account := model.GetBasicAuthAccount(username)
+		if account == nil ||
+			"" == account.Username || // 匿名用户
+			!util.AuthCodeEquals(account.Password, password) { // 恒定时间比较，避免时序侧信道 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phg7-xcr4-q5wg
+			util.AuthThrottleFail(throttleKey)
+			return publishAuthRejectResponse(request, http.StatusUnauthorized, 0), nil
+		}
+		util.AuthThrottleReset(throttleKey)
 
 		// set session cookie
 		sessionID := model.GetNewSessionID()

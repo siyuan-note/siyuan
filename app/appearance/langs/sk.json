@@ -2405,6 +2405,9 @@
 		"357": "Otvoriť súbor",
 		"358": "Súbor sa nedá otvoriť",
 		"359": "Exportované [%s]",
-		"360": "Exportované do [%s]"
+		"360": "Exportované do [%s]",
+		"361": "Používateľské meno účtu služby publikovania nemôže byť prázdne",
+		"362": "Používateľské meno účtu služby publikovania je duplicitné",
+		"363": "Heslo účtu služby publikovania musí mať aspoň 8 znakov"
 	}
 	}

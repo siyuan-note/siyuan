@@ -2405,6 +2405,9 @@
 		"357": "Bestand openen",
 		"358": "Kan bestand niet openen",
 		"359": "[%s] geëxporteerd",
-		"360": "Geëxporteerd naar [%s]"
+		"360": "Geëxporteerd naar [%s]",
+		"361": "De gebruikersnaam van het publicatieservice-account mag niet leeg zijn",
+		"362": "De gebruikersnaam van het publicatieservice-account is gedupliceerd",
+		"363": "Het wachtwoord van het publicatieservice-account moet minimaal 8 tekens bevatten"
 	}
 	}

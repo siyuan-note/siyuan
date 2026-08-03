@@ -2405,6 +2405,9 @@
 		"357": "Apri file",
 		"358": "Impossibile aprire il file",
 		"359": "Esportato [%s]",
-		"360": "Esportato in [%s]"
+		"360": "Esportato in [%s]",
+		"361": "Il nome utente dell'account del servizio di pubblicazione non può essere vuoto",
+		"362": "Il nome utente dell'account del servizio di pubblicazione è duplicato",
+		"363": "La password dell'account del servizio di pubblicazione deve contenere almeno 8 caratteri"
 	}
 	}

@@ -2405,6 +2405,9 @@
 		"357": "Dosyayı aç",
 		"358": "Dosya açılamıyor",
 		"359": "[%s] dışa aktarıldı",
-		"360": "[%s] konumuna aktarıldı"
+		"360": "[%s] konumuna aktarıldı",
+		"361": "Yayınlama hizmeti hesabının kullanıcı adı boş olamaz",
+		"362": "Yayınlama hizmeti hesabının kullanıcı adı yineleniyor",
+		"363": "Yayınlama hizmeti hesabının parolası en az 8 karakter olmalıdır"
 	}
 	}

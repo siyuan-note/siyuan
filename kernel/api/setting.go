@@ -859,6 +859,30 @@ func setPublish(c *gin.Context) {
 		return
 	}
 
+	// 认证启用时校验发布服务账户：用户名非空且不重复、密码至少 8 位，
+	// 防止弱密码或无密码账户被暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phg7-xcr4-q5wg
+	if publish.Auth.Enable {
+		usernames := map[string]bool{}
+		for _, account := range publish.Auth.Accounts {
+			if nil == account || "" == account.Username {
+				ret.Code = -1
+				ret.Msg = model.Conf.Language(361)
+				return
+			}
+			if usernames[account.Username] {
+				ret.Code = -1
+				ret.Msg = model.Conf.Language(362)
+				return
+			}
+			usernames[account.Username] = true
+			if 8 > len(account.Password) {
+				ret.Code = -1
+				ret.Msg = model.Conf.Language(363)
+				return
+			}
+		}
+	}
+
 	model.Conf.Publish = publish
 	model.Conf.Save()
 

@@ -2405,6 +2405,9 @@
 		"357": "Buka file",
 		"358": "Tidak dapat membuka file",
 		"359": "[%s] diekspor",
-		"360": "Diekspor ke [%s]"
+		"360": "Diekspor ke [%s]",
+		"361": "Nama pengguna akun layanan publikasi tidak boleh kosong",
+		"362": "Nama pengguna akun layanan publikasi duplikat",
+		"363": "Kata sandi akun layanan publikasi harus terdiri dari minimal 8 karakter"
 	}
 	}

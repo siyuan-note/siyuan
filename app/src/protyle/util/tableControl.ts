@@ -20,6 +20,7 @@ import {
     getTableResizeControlCenter,
     getTableResizeCount,
     isTableCellContentEmpty,
+    isTableResizeControlVisible,
 } from "./tableResize";
 import {applyTableCellStyleHotkey, getTableCellTextStyleMenus} from "../toolbar/tableCell";
 
@@ -912,7 +913,9 @@ export class TableControl {
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const grid = buildTableGrid(table);
-            if (tableRect.right <= viewportRect.right + 1 && tableRect.right >= viewportRect.left &&
+            const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
+                isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
+            if (columnControlVisible && tableRect.right >= viewportRect.left &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1 &&
                 clientX >= tableRect.right && clientX <= tableRect.right + TABLE_ADD_CONTROL_THICKNESS &&
                 clientY >= addRowEdge && clientY <= addRowEdge + TABLE_ADD_CONTROL_THICKNESS) {
@@ -969,7 +972,7 @@ export class TableControl {
                     });
                 }
             }
-            if (tableRect.right <= viewportRect.right + 1 &&
+            if (columnControlVisible &&
                 clientX >= tableRect.right && clientX <= tableRect.right + TABLE_ADD_CONTROL_THICKNESS &&
                 clientY >= viewportRect.top && clientY <= viewportRect.bottom) {
                 const cell = grid.cellInfos[0]?.cell;
@@ -1035,8 +1038,8 @@ export class TableControl {
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
         const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
             TABLE_ADD_CONTROL_THICKNESS);
-        const columnControlCenter = getTableResizeControlCenter(tableRect.right, contentRect.left,
-            contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
+        const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
+            isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
         if (state.mode === "row" || state.mode === "both") {
             this.addRowButton.classList.remove("fn__none");
             this.addRowButton.classList.add("protyle-table-control__add--active");
@@ -1045,21 +1048,22 @@ export class TableControl {
             this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2, rowControlCenter);
             state.table.classList.add("protyle-table-control__table--add-row");
         }
-        if (state.mode === "column" || state.mode === "both") {
+        if ((state.mode === "column" || state.mode === "both") && columnControlVisible) {
             this.addColumnButton.classList.remove("fn__none");
             this.addColumnButton.classList.add("protyle-table-control__add--active");
             this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
             this.addColumnButton.style.height = `${Math.max(0, viewportRect.height)}px`;
-            this.setPosition(this.addColumnButton, columnControlCenter,
+            this.setPosition(this.addColumnButton, tableRect.right + TABLE_ADD_CONTROL_THICKNESS / 2,
                 viewportRect.top + viewportRect.height / 2);
             state.table.classList.add("protyle-table-control__table--add-column");
         }
-        if (state.mode === "both") {
+        if (state.mode === "both" && columnControlVisible) {
             this.addBothButton.classList.remove("fn__none");
             this.addBothButton.classList.add("protyle-table-control__add--active");
             this.addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
             this.addBothButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.setPosition(this.addBothButton, columnControlCenter, rowControlCenter);
+            this.setPosition(this.addBothButton, tableRect.right + TABLE_ADD_CONTROL_THICKNESS / 2,
+                rowControlCenter);
         }
         this.joinedControlTable = state.table;
         this.resizeLabel.textContent = `${state.targetRows} × ${state.targetColumns}`;
@@ -1090,6 +1094,8 @@ export class TableControl {
             const viewportRect = this.getTableViewportRect(table);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
+            const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
+                isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS);
             const visibleCellRect = intersectRects(cellRect, viewportRect);
             const grid = this.selection?.table === table && this.selectionGrid ?
                 this.selectionGrid : buildTableGrid(table);
@@ -1144,7 +1150,7 @@ export class TableControl {
                 this.joinedControlTable = table;
             }
             if ((this.hoverType === "add-column" || this.hoverType === "add-both") && viewportRect.height > 0 &&
-                tableRect.right <= viewportRect.right + 1 &&
+                columnControlVisible &&
                 tableRect.right >= viewportRect.left) {
                 this.addColumnButton.classList.remove("fn__none");
                 this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
@@ -1154,7 +1160,7 @@ export class TableControl {
                 table.classList.add("protyle-table-control__table--add-column");
                 this.joinedControlTable = table;
             }
-            if (this.hoverType === "add-both" && tableRect.right <= viewportRect.right + 1 &&
+            if (this.hoverType === "add-both" && columnControlVisible &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1) {
                 this.addBothButton.classList.remove("fn__none");
                 this.addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;

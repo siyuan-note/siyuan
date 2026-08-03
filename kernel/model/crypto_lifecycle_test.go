@@ -18,6 +18,8 @@ package model
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -27,6 +29,30 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAcquireEncryptedBoxOperationsAllowsEmptyClosedScope(t *testing.T) {
+	ctx, closeScope := WithEncryptedBoxOperationScope(context.Background())
+	closeScope()
+	release, err := AcquireEncryptedBoxOperations(ctx, nil)
+	if err != nil {
+		t.Fatalf("empty encrypted notebook operation set was rejected: %v", err)
+	}
+	release()
+}
+
+func TestAcquireEncryptedBoxOperationsReportsClosedScope(t *testing.T) {
+	boxID := "20260803190000-abcdefg"
+	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)
+	defer cleanup()
+	setEncryptedBoxState(boxID, EncryptedBoxStateUnlocked)
+
+	ctx, closeScope := WithEncryptedBoxOperationScope(context.Background())
+	closeScope()
+	_, err := AcquireEncryptedBoxOperations(ctx, []string{boxID})
+	if !errors.Is(err, ErrEncryptedBoxOperationScopeClosed) {
+		t.Fatalf("closed encrypted notebook operation scope returned unexpected error: %v", err)
+	}
+}
 
 func TestEncryptedBoxLifecycleWaitsForActiveOperations(t *testing.T) {
 	boxID := "20260731160000-abcdefg"

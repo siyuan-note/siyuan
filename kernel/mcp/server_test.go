@@ -33,8 +33,9 @@ func newTestHTTPServer(t *testing.T) (*mcpsdk.Server, *httptest.Server) {
 	t.Helper()
 	server := newServer()
 	syncTool(server, "echo", &tools.Tool{
-		Name:        "echo",
-		Description: "Echo text",
+		Name:             "echo",
+		Description:      "Echo text",
+		BoxLeaseResolver: func(map[string]any) []string { return nil },
 		InputSchema: tools.ToolSchema{
 			Type: "object",
 			Properties: map[string]tools.Property{
@@ -46,7 +47,7 @@ func newTestHTTPServer(t *testing.T) (*mcpsdk.Server, *httptest.Server) {
 			return tools.CallToolResult{Content: []tools.ContentItem{{Type: "text", Text: text}}}, nil
 		},
 	})
-	httpServer := httptest.NewServer(newHTTPHandler(server))
+	httpServer := httptest.NewServer(withEncryptedBoxOperationScope(newHTTPHandler(server)))
 	t.Cleanup(httpServer.Close)
 	return server, httpServer
 }
@@ -412,56 +413,82 @@ func TestModernProtocolHeadersAndResult(t *testing.T) {
 }
 
 func TestLegacyProtocolSession(t *testing.T) {
-	_, httpServer := newTestHTTPServer(t)
-	initialize := `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"legacy","version":"1.0.0"}}}`
-	response := postMCP(t, httpServer.URL, initialize, nil)
-	if response.StatusCode != http.StatusOK {
-		t.Fatalf("unexpected initialize status: %d", response.StatusCode)
-	}
-	sessionID := response.Header.Get("Mcp-Session-Id")
-	if sessionID == "" {
-		t.Fatal("legacy initialize did not create a session ID")
-	}
-	var initializeResponse struct {
-		Result struct {
-			ProtocolVersion string `json:"protocolVersion"`
-		} `json:"result"`
-	}
-	decodeResponse(t, response, &initializeResponse)
-	if initializeResponse.Result.ProtocolVersion != "2025-11-25" {
-		t.Fatalf("unexpected legacy protocol version: %q", initializeResponse.Result.ProtocolVersion)
-	}
+	for _, protocolVersion := range []string{"2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"} {
+		t.Run(protocolVersion, func(t *testing.T) {
+			_, httpServer := newTestHTTPServer(t)
+			initialize := `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"` + protocolVersion + `","capabilities":{},"clientInfo":{"name":"legacy","version":"1.0.0"}}}`
+			response := postMCP(t, httpServer.URL, initialize, nil)
+			if response.StatusCode != http.StatusOK {
+				t.Fatalf("unexpected initialize status: %d", response.StatusCode)
+			}
+			sessionID := response.Header.Get("Mcp-Session-Id")
+			if sessionID == "" {
+				t.Fatal("legacy initialize did not create a session ID")
+			}
+			var initializeResponse struct {
+				Result struct {
+					ProtocolVersion string `json:"protocolVersion"`
+				} `json:"result"`
+			}
+			decodeResponse(t, response, &initializeResponse)
+			if initializeResponse.Result.ProtocolVersion != protocolVersion {
+				t.Fatalf("unexpected legacy protocol version: %q", initializeResponse.Result.ProtocolVersion)
+			}
 
-	response = postMCP(t, httpServer.URL,
-		`{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}`,
-		map[string]string{
-			"MCP-Protocol-Version": "2025-11-25",
-			"Mcp-Session-Id":       sessionID,
-		})
-	if response.StatusCode != http.StatusAccepted {
-		t.Fatalf("unexpected initialized status: %d", response.StatusCode)
-	}
-	response.Body.Close()
+			response = postMCP(t, httpServer.URL,
+				`{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}`,
+				map[string]string{
+					"MCP-Protocol-Version": protocolVersion,
+					"Mcp-Session-Id":       sessionID,
+				})
+			if response.StatusCode != http.StatusAccepted {
+				t.Fatalf("unexpected initialized status: %d", response.StatusCode)
+			}
+			response.Body.Close()
 
-	response = postMCP(t, httpServer.URL,
-		`{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`,
-		map[string]string{
-			"MCP-Protocol-Version": "2025-11-25",
-			"Mcp-Session-Id":       sessionID,
+			response = postMCP(t, httpServer.URL,
+				`{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`,
+				map[string]string{
+					"MCP-Protocol-Version": protocolVersion,
+					"Mcp-Session-Id":       sessionID,
+				})
+			if response.StatusCode != http.StatusOK {
+				t.Fatalf("unexpected tools/list status: %d", response.StatusCode)
+			}
+			var listResponse struct {
+				Result struct {
+					Tools []struct {
+						Name string `json:"name"`
+					} `json:"tools"`
+				} `json:"result"`
+			}
+			decodeResponse(t, response, &listResponse)
+			if len(listResponse.Result.Tools) != 1 || listResponse.Result.Tools[0].Name != "echo" {
+				t.Fatalf("unexpected legacy tool list: %#v", listResponse.Result.Tools)
+			}
+
+			response = postMCP(t, httpServer.URL,
+				`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"echo","arguments":{"text":"hello"}}}`,
+				map[string]string{
+					"MCP-Protocol-Version": protocolVersion,
+					"Mcp-Session-Id":       sessionID,
+				})
+			if response.StatusCode != http.StatusOK {
+				t.Fatalf("unexpected tools/call status: %d", response.StatusCode)
+			}
+			var callResponse struct {
+				Result struct {
+					Content []struct {
+						Text string `json:"text"`
+					} `json:"content"`
+					IsError bool `json:"isError"`
+				} `json:"result"`
+			}
+			decodeResponse(t, response, &callResponse)
+			if callResponse.Result.IsError || len(callResponse.Result.Content) != 1 || callResponse.Result.Content[0].Text != "hello" {
+				t.Fatalf("unexpected legacy tool result: %#v", callResponse.Result)
+			}
 		})
-	if response.StatusCode != http.StatusOK {
-		t.Fatalf("unexpected tools/list status: %d", response.StatusCode)
-	}
-	var listResponse struct {
-		Result struct {
-			Tools []struct {
-				Name string `json:"name"`
-			} `json:"tools"`
-		} `json:"result"`
-	}
-	decodeResponse(t, response, &listResponse)
-	if len(listResponse.Result.Tools) != 1 || listResponse.Result.Tools[0].Name != "echo" {
-		t.Fatalf("unexpected legacy tool list: %#v", listResponse.Result.Tools)
 	}
 }
 

@@ -19,6 +19,7 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"sync"
@@ -123,11 +124,9 @@ func isModernRequest(request *http.Request) bool {
 }
 
 func serveHTTP(handler http.Handler) gin.HandlerFunc {
+	scopedHandler := withEncryptedBoxOperationScope(handler)
 	return func(ginContext *gin.Context) {
-		requestContext, release := model.WithEncryptedBoxOperationScope(ginContext.Request.Context())
-		defer release()
-		request := ginContext.Request.WithContext(requestContext)
-		handler.ServeHTTP(ginContext.Writer, request)
+		scopedHandler.ServeHTTP(ginContext.Writer, ginContext.Request)
 	}
 }
 
@@ -177,9 +176,18 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 		}
 		releaseBoxLeases := func() {}
 		if tool.BoxLeaseResolver != nil {
-			releaseBoxLeases, err = model.AcquireEncryptedBoxOperations(ctx, tool.BoxLeaseResolver(arguments))
+			leaseContext, contextErr := requestOperationContext(ctx, request)
+			if contextErr != nil {
+				logging.LogWarnf("mcp: acquire request operation scope for tool [%s] failed: %v", name, contextErr)
+				return toolErrorResult(contextErr.Error()), nil
+			}
+			releaseBoxLeases, err = model.AcquireEncryptedBoxOperations(leaseContext, tool.BoxLeaseResolver(arguments))
 			if err != nil {
-				return toolErrorResult("encrypted notebook is locked, please unlock it first"), nil
+				if errors.Is(err, model.ErrEncryptedBoxNotUnlocked) {
+					return toolErrorResult("encrypted notebook is locked, please unlock it first"), nil
+				}
+				logging.LogWarnf("mcp: acquire encrypted notebook operations for tool [%s] failed: %v", name, err)
+				return toolErrorResult(err.Error()), nil
 			}
 		}
 		defer releaseBoxLeases()

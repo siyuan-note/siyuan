@@ -883,13 +883,44 @@ table + .protyle-action__table {
       background-image: linear-gradient(var(--b3-list-hover), var(--b3-list-hover));
     }
 
+    &--active,
+    &--active:hover {
+      color: var(--b3-theme-on-primary);
+      background-color: var(--b3-theme-primary);
+      background-image: none;
+
+      &::after {
+        display: none;
+      }
+    }
+
     &--row {
       border-radius: 0 0 var(--b3-border-radius-s) var(--b3-border-radius-s);
+      cursor: row-resize;
     }
 
     &--column {
       border-radius: 0 var(--b3-border-radius-s) var(--b3-border-radius-s) 0;
+      cursor: col-resize;
     }
+
+    &--both {
+      border-radius: 0 0 var(--b3-border-radius-s) 0;
+      cursor: nwse-resize;
+    }
+  }
+
+  &__size {
+    position: fixed;
+    z-index: 4;
+    padding: 2px 6px;
+    color: var(--b3-tooltips-color);
+    font-size: 12px;
+    line-height: 20px;
+    white-space: nowrap;
+    background-color: var(--b3-tooltips-background);
+    border-radius: var(--b3-border-radius-s);
+    pointer-events: none;
   }
 
   &__selection {

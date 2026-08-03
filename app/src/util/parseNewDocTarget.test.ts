@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getNewDocTargetFromSavePath, getNewDocTargetFromTree, NewDocTarget} from "./parseNewDocTarget";
+import {
+    getNewDocTargetFromSavePath,
+    getNewDocTargetFromTree,
+    isCurrentDocSubDocTarget,
+    NewDocTarget
+} from "./parseNewDocTarget";
 
 const assertSubDoc = (target: NewDocTarget, expected: {
     targetNotebookId?: string;
@@ -286,6 +291,74 @@ describe("getNewDocTargetFromSavePath", () => {
             const target = getNewDocTargetFromSavePath({...crossNotebook, templatePath: "", name: "docName2"});
             assertHPath(target, {targetNotebookId: "box-b", hPath: "/docName2", title: "docName2"});
         });
+    });
+});
+
+describe("isCurrentDocSubDocTarget", () => {
+    const currentNotebookId = "nb";
+    const currentPath = "/20260628041644-ndcuikw/20260628040939-kkaajwr.sy";
+    const currentHPath = "/parent1/parent2/docName";
+
+    const isCurrentSubDoc = (target: NewDocTarget, title: string) => isCurrentDocSubDocTarget({
+        target,
+        currentNotebookId,
+        currentPath,
+        currentHPath,
+        title,
+    });
+
+    it("直接创建当前文档的空标题子文档", () => {
+        assert.equal(isCurrentSubDoc({
+            kind: "subDoc",
+            targetNotebookId: currentNotebookId,
+            parentPath: currentPath,
+            title: "",
+        }, ""), true);
+    });
+
+    it("配置路径解析为当前文档下的命名子文档", () => {
+        assert.equal(isCurrentSubDoc({
+            kind: "hPath",
+            targetNotebookId: currentNotebookId,
+            hPath: currentHPath + "/target",
+            title: "target",
+        }, "target"), true);
+    });
+
+    it("空标题的容器路径解析为当前文档", () => {
+        assert.equal(isCurrentSubDoc({
+            kind: "hPath",
+            targetNotebookId: currentNotebookId,
+            hPath: currentHPath + "/",
+            title: "",
+        }, ""), true);
+    });
+
+    it("标题不同时不等价", () => {
+        assert.equal(isCurrentSubDoc({
+            kind: "hPath",
+            targetNotebookId: currentNotebookId,
+            hPath: currentHPath + "/configured-title",
+            title: "configured-title",
+        }, ""), false);
+    });
+
+    it("父路径不是当前文档时不等价", () => {
+        assert.equal(isCurrentSubDoc({
+            kind: "hPath",
+            targetNotebookId: currentNotebookId,
+            hPath: currentHPath + "/child/target",
+            title: "target",
+        }, "target"), false);
+    });
+
+    it("目标笔记本不同时不等价", () => {
+        assert.equal(isCurrentSubDoc({
+            kind: "hPath",
+            targetNotebookId: "other-nb",
+            hPath: currentHPath + "/target",
+            title: "target",
+        }, "target"), false);
     });
 });
 

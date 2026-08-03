@@ -19,6 +19,7 @@ import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
 import {
     getBlockRefAnchorText,
     getDocCreateTemplatePath,
+    isConfiguredCreateTargetCurrentSubDoc,
     newFileByRefHint,
     newFileBySelectRange,
     newFileInProtyle,
@@ -67,6 +68,21 @@ const genEmojiInsertHTML = (value: string) => {
     return unicode2Emoji(value, kind === "dynamic" || kind === "network" ? "emoji" : "") + " ";
 };
 
+type TCreateTargetType = "doc" | "ref";
+
+type TCreateTargetState = {
+    promise: Promise<boolean>;
+    result?: boolean;
+};
+
+type TCreateTargetSession = {
+    id: number;
+    notebookId: string;
+    path: string;
+    renderID: number;
+    targets: Partial<Record<TCreateTargetType, TCreateTargetState>>;
+};
+
 export class Hint {
     public timeId: number;
     public element: HTMLDivElement;
@@ -76,6 +92,9 @@ export class Hint {
     public splitChar = "";
     public lastIndex = -1;
     private source: THintSource;
+    private createTargetSessionID = 0;
+    private createTargetRenderID = 0;
+    private createTargetSession?: TCreateTargetSession;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -137,6 +156,44 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 }
             }
         });
+    }
+
+    public prepareCreateTarget(protyle: IProtyle, type: TCreateTargetType) {
+        const notebookId = protyle.notebookId || "";
+        const path = protyle.path || "";
+        if (this.element.classList.contains("fn__none") || !this.createTargetSession ||
+            this.createTargetSession.notebookId !== notebookId || this.createTargetSession.path !== path) {
+            this.createTargetSession = {
+                id: ++this.createTargetSessionID,
+                notebookId,
+                path,
+                renderID: 0,
+                targets: {},
+            };
+        }
+        const session = this.createTargetSession;
+        const renderID = ++this.createTargetRenderID;
+        session.renderID = renderID;
+        let targetState = session.targets[type];
+        if (!targetState) {
+            const sessionID = session.id;
+            targetState = {
+                promise: isConfiguredCreateTargetCurrentSubDoc(protyle, type).catch(() => false),
+            };
+            session.targets[type] = targetState;
+            targetState.promise.then((result) => {
+                if (this.createTargetSession?.id === sessionID) {
+                    targetState.result = result;
+                }
+            });
+        }
+        return {
+            result: targetState.result,
+            promise: targetState.promise,
+            isCurrent: () => this.createTargetSession === session && session.renderID === renderID &&
+                session.notebookId === protyle.notebookId && session.path === protyle.path &&
+                !this.element.classList.contains("fn__none"),
+        };
     }
 
     public render(protyle: IProtyle) {
@@ -217,7 +274,17 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             } else {
                 const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
                 if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
-                    this.genHTML(hintSlash(key, protyle), protyle, false, "hint");
+                    const createTarget = this.prepareCreateTarget(protyle, "doc");
+                    if (createTarget.result !== undefined) {
+                        this.genHTML(hintSlash(key, protyle, createTarget.result), protyle, false, "hint");
+                    } else {
+                        this.genLoading(protyle);
+                        createTarget.promise.then((isCurrentSubDoc) => {
+                            if (createTarget.isCurrent()) {
+                                this.genHTML(hintSlash(key, protyle, isCurrentSubDoc), protyle, false, "hint");
+                            }
+                        });
+                    }
                 }
             }
             return;
@@ -255,7 +322,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 setPosition(this.element, 0, 0);
                 /// #endif
             }
-        } else {
+        } else if (!this.element.querySelector(".fn__loading")) {
             this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>');
         }
     }
@@ -376,6 +443,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     }
 
     private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement, oldValue: string, source: THintSource) {
+        const createTarget = this.prepareCreateTarget(protyle, "ref");
         this.element.lastElementChild.innerHTML = '<div class="ft__center"><img style="height:32px;width:32px;" src="/stage/loading-pure.svg"></div>';
         const searchParam: IObject = {
             k: searchElement.value,
@@ -388,37 +456,44 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             searchParam.notebook = protyle.notebookId;
         }
         fetchPost("/api/search/searchRefBlock", searchParam, (response) => {
-            let searchHTML = "";
-            if (response.data.newDoc) {
-                const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`;
-                searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
-                const newFileName = Lute.UnEscapeHTMLStr(response.data.k);
-                const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
-                searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
-<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div></button>`;
-            }
-            response.data.blocks.forEach((item: IBlock, index: number) => {
-                let blockRefHTML;
-                if (source === "av") {
-                    // av 搜索时需要获取值 https://github.com/siyuan-note/siyuan/issues/12020
-                    let refText = item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
-                    if (nodeElement) {
-                        refText = item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || refText;
-                    }
-                    blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
-                } else {
-                    blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
+            createTarget.promise.then((hideConfiguredCreate) => {
+                if (!createTarget.isCurrent()) {
+                    return;
                 }
-                searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">
+                let searchHTML = "";
+                if (response.data.newDoc && !hideConfiguredCreate) {
+                    const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`;
+                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
+                }
+                if (response.data.newDoc) {
+                    const newFileName = Lute.UnEscapeHTMLStr(response.data.k);
+                    const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${hideConfiguredCreate && response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.data.k}</mark></span></div></button>`;
+                }
+                response.data.blocks.forEach((item: IBlock, index: number) => {
+                    let blockRefHTML;
+                    if (source === "av") {
+                        // av 搜索时需要获取值 https://github.com/siyuan-note/siyuan/issues/12020
+                        let refText = item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
+                        if (nodeElement) {
+                            refText = item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || refText;
+                        }
+                        blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
+                    } else {
+                        blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
+                    }
+                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">
 ${genHintItemHTML(item)}
 </button>`;
+                });
+                if (searchHTML === "") {
+                    searchHTML = `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="">${window.siyuan.languages.emptyContent}</button>`;
+                }
+                this.element.lastElementChild.innerHTML = searchHTML;
+                setPosition(this.element, parseInt(this.element.style.left), parseInt(this.element.style.right));
             });
-            if (searchHTML === "") {
-                searchHTML = `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="">${window.siyuan.languages.emptyContent}</button>`;
-            }
-            this.element.lastElementChild.innerHTML = searchHTML;
-            setPosition(this.element, parseInt(this.element.style.left), parseInt(this.element.style.right));
         });
     }
 

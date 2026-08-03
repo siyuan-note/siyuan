@@ -87,11 +87,20 @@ const goPreviousCell = (cellElement: HTMLElement, range: Range, isSelected = tru
     return previousElement;
 };
 
-export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], nodeElement: Element, type: string, range: Range) => {
+export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], nodeElement: Element, type: string,
+                              range: Range, clearCellStyle = false) => {
     range.insertNode(document.createElement("wbr"));
     const html = nodeElement.outerHTML;
 
     const tableElement = nodeElement.querySelector("table");
+    if (clearCellStyle) {
+        tableElement.querySelectorAll<HTMLElement>("th, td").forEach(cell => {
+            cell.style.removeProperty("text-align");
+            if (!cell.getAttribute("style")) {
+                cell.removeAttribute("style");
+            }
+        });
+    }
     const columnCnt = tableElement.rows[0].cells.length;
     const rowCnt = tableElement.rows.length;
     const currentColumns: number[] = [];

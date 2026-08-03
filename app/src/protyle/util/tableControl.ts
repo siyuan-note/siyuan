@@ -209,7 +209,6 @@ export const getTableCellAlignmentMenus = (
     onChange: (property: string, value: string) => void,
 ): IMenu[] => {
     const textAlign = getCommonTableCellStyle(cells, "text-align");
-    const verticalAlign = getCommonTableCellStyle(cells, "vertical-align");
     return [{
         id: "alignLeft",
         icon: "iconAlignLeft",
@@ -238,19 +237,31 @@ export const getTableCellAlignmentMenus = (
         click: () => onChange("text-align", ""),
     }, {
         type: "separator",
-    }, {
+    }, ...getTableCellVerticalAlignmentMenus(cells, onChange)];
+};
+
+export const getTableCellVerticalAlignmentMenus = (
+    cells: HTMLTableCellElement[],
+    onChange: (property: string, value: string) => void,
+): IMenu[] => {
+    const verticalAlign = getCommonTableCellStyle(cells, "vertical-align");
+    return [{
+        id: "alignTop",
         label: window.siyuan.languages.alignTop,
         checked: verticalAlign === "top",
         click: () => onChange("vertical-align", "top"),
     }, {
+        id: "alignMiddle",
         label: window.siyuan.languages.alignMiddle,
         checked: verticalAlign === "middle",
         click: () => onChange("vertical-align", "middle"),
     }, {
+        id: "alignBottom",
         label: window.siyuan.languages.alignBottom,
         checked: verticalAlign === "bottom",
         click: () => onChange("vertical-align", "bottom"),
     }, {
+        id: "useDefaultVerticalAlign",
         label: window.siyuan.languages.useDefaultVerticalAlign,
         checked: verticalAlign === "",
         click: () => onChange("vertical-align", ""),
@@ -1280,6 +1291,8 @@ export class TableControl {
             } else {
                 if (this.selection.mode === "column") {
                     this.appendAlignmentMenus();
+                } else {
+                    this.appendVerticalAlignmentMenus();
                 }
                 menu.append(new MenuItem({type: "separator"}).element);
                 menu.append(new MenuItem({
@@ -1577,6 +1590,14 @@ export class TableControl {
             checked: textAlign === "",
             click: () => this.setCellStyle("text-align", ""),
         }).element);
+    }
+
+    private appendVerticalAlignmentMenus() {
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        getTableCellVerticalAlignmentMenus(this.getSelectedCells(),
+            (property, value) => this.setCellStyle(property, value)).forEach(item => {
+            window.siyuan.menus.menu.append(new MenuItem(item).element);
+        });
     }
 
     private getCommonCellStyle(property: string) {

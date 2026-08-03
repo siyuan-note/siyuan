@@ -7,6 +7,7 @@ import {
     isInEmbedBlock
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
+import {getTableCellVerticalAlignmentMenus, setTableCellStyle} from "../protyle/util/tableControl";
 import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
 import {
     deleteColumn,
@@ -2181,9 +2182,10 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
 };
 
 export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLTableCellElement, range: Range,
-                          hideTitle = false) => {
+                          hideTitle = false, alignWholeTable = false) => {
     const otherMenus: IMenu[] = [];
     const colIndex = getColIndex(cellElement);
+    const tableElement = nodeElement.querySelector("table");
     if (cellElement.rowSpan > 1 || cellElement.colSpan > 1) {
         otherMenus.push({
             id: "cancelMerged",
@@ -2294,13 +2296,14 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         }
     });
     otherMenus.push({id: "separator_1", type: "separator"});
+    const horizontalCells = alignWholeTable ? Array.from(tableElement.rows[0].cells) : [cellElement];
     otherMenus.push({
         id: "alignLeft",
         icon: "iconAlignLeft",
         accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
         label: window.siyuan.languages.alignLeft,
         click: () => {
-            setTableAlign(protyle, [cellElement], nodeElement, "left", range);
+            setTableAlign(protyle, horizontalCells, nodeElement, "left", range, alignWholeTable);
         }
     });
     otherMenus.push({
@@ -2309,7 +2312,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         label: window.siyuan.languages.alignCenter,
         accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
         click: () => {
-            setTableAlign(protyle, [cellElement], nodeElement, "center", range);
+            setTableAlign(protyle, horizontalCells, nodeElement, "center", range, alignWholeTable);
         }
     });
     otherMenus.push({
@@ -2318,7 +2321,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         label: window.siyuan.languages.alignRight,
         accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
         click: () => {
-            setTableAlign(protyle, [cellElement], nodeElement, "right", range);
+            setTableAlign(protyle, horizontalCells, nodeElement, "right", range, alignWholeTable);
         }
     });
     otherMenus.push({
@@ -2326,15 +2329,21 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         icon: "",
         label: window.siyuan.languages.useDefaultAlign,
         click: () => {
-            setTableAlign(protyle, [cellElement], nodeElement, "", range);
+            setTableAlign(protyle, horizontalCells, nodeElement, "", range, alignWholeTable);
         }
     });
+    if (alignWholeTable) {
+        otherMenus.push({id: "separator_verticalAlign", type: "separator"});
+        const cells = Array.from(tableElement.querySelectorAll<HTMLTableCellElement>("th, td"));
+        otherMenus.push(...getTableCellVerticalAlignmentMenus(cells, (property, value) => {
+            setTableCellStyle(protyle, nodeElement as HTMLElement, cells, property, value);
+        }));
+    }
     const menus: IMenu[] = [];
     menus.push(...otherMenus);
     menus.push({
         type: "separator"
     });
-    const tableElement = nodeElement.querySelector("table");
     const hasNone = cellElement.parentElement.querySelector(".fn__none");
     let hasColSpan = false;
     let hasRowSpan = false;

@@ -24,6 +24,63 @@ let clearRenderGutterAfterScroll: () => void;
 let showUtil = false;
 let preventRender = false;
 let preventRenderTimeout: number;
+let restoringAndroidReadonlySelection = false;
+let lastAndroidReadonlySelection: {
+    container: HTMLElement,
+    anchorNode: Node,
+    anchorOffset: number,
+    focusNode: Node,
+    focusOffset: number,
+};
+
+const preserveAndroidReadonlySelection = () => {
+    if (!isInAndroid() || restoringAndroidReadonlySelection) {
+        return false;
+    }
+    const protyle = getCurrentEditor()?.protyle;
+    const previewVisible = protyle && !protyle.preview.element.classList.contains("fn__none");
+    if (!protyle || (!protyle.disabled && !previewVisible)) {
+        lastAndroidReadonlySelection = undefined;
+        return false;
+    }
+    const selection = getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed ||
+        !selection.anchorNode || !selection.focusNode) {
+        lastAndroidReadonlySelection = undefined;
+        return false;
+    }
+    const container = previewVisible ? protyle.preview.previewElement : protyle.wysiwyg.element;
+    const contains = (node: Node) => node === container || container.contains(node);
+    const anchorInside = contains(selection.anchorNode);
+    const focusInside = contains(selection.focusNode);
+    if (anchorInside && focusInside) {
+        lastAndroidReadonlySelection = {
+            container,
+            anchorNode: selection.anchorNode,
+            anchorOffset: selection.anchorOffset,
+            focusNode: selection.focusNode,
+            focusOffset: selection.focusOffset,
+        };
+        return false;
+    }
+    const previous = lastAndroidReadonlySelection;
+    if (!previous || previous.container !== container || anchorInside === focusInside ||
+        !previous.anchorNode.isConnected || !previous.focusNode.isConnected) {
+        lastAndroidReadonlySelection = undefined;
+        return false;
+    }
+    restoringAndroidReadonlySelection = true;
+    selection.setBaseAndExtent(
+        anchorInside ? selection.anchorNode : previous.anchorNode,
+        anchorInside ? selection.anchorOffset : previous.anchorOffset,
+        focusInside ? selection.focusNode : previous.focusNode,
+        focusInside ? selection.focusOffset : previous.focusOffset,
+    );
+    window.setTimeout(() => {
+        restoringAndroidReadonlySelection = false;
+    });
+    return true;
+};
 
 const preventKeyboardToolbarRender = () => {
     preventRender = true;
@@ -640,6 +697,9 @@ export const initKeyboardToolbar = () => {
         viewportHandler();
     }
     document.addEventListener("selectionchange", () => {
+        if (preserveAndroidReadonlySelection()) {
+            return;
+        }
         if (preventRender || (getCurrentEditor()?.protyle?.toolbar.isMultiSelectMode())) {
             return;
         }

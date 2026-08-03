@@ -396,8 +396,8 @@ Notes:
 
 - **Has no `Children`.**
 - `AttributeViewID` points to the AV table data (stored in a separate `.json` — **don't** fabricate this ID).
-- `AttributeViewType`: `table` / `kanban` / `gallery`, etc.
-- Optional `custom-sy-av-view` records the current view ID; it may be absent when no explicit current view is stored.
+- `AttributeViewType`: `table` / `kanban` / `gallery`, etc. This value is derived from the layout of the view bound to the block and is not an independent view selector.
+- Optional `custom-sy-av-view` records the current view ID. When it is absent or does not identify a view in the referenced AttributeView, the AttributeView's current view or first available view is used as the fallback.
 
 > AI is advised **not to create new AttributeView blocks**, since the table data is not in the `.sy` — it requires accompanying files.
 

@@ -2342,6 +2342,70 @@ func SetDatabaseBlockView(blockID, avID, viewID string) (err error) {
 	return
 }
 
+// normalizeDatabaseBlockView 使数据库载体绑定的视图和布局保持一致，不修改数据库顶层当前视图。
+func normalizeDatabaseBlockView(node *ast.Node, attrView *av.AttributeView) (changed bool) {
+	if nil == node || nil == attrView || ast.NodeAttributeView != node.Type {
+		return
+	}
+
+	viewID := node.IALAttr(av.NodeAttrView)
+	var view *av.View
+	if "" != viewID {
+		view = attrView.GetView(viewID)
+	}
+	if nil == view {
+		view, _ = attrView.GetCurrentView("")
+	}
+	if nil == view {
+		return
+	}
+
+	layout := string(view.LayoutType)
+	if layout != node.AttributeViewType {
+		node.AttributeViewType = layout
+		changed = true
+	}
+	if view.ID != viewID {
+		node.SetIALAttr(av.NodeAttrView, view.ID)
+		changed = true
+	}
+	return
+}
+
+func normalizeDatabaseBlockViews(node *ast.Node, boxID string, attrViews map[string]*av.AttributeView) (changed bool) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeAttributeView != n.Type {
+			return ast.WalkContinue
+		}
+
+		attrView := cachedAttributeViewForBox(n.AttributeViewID, boxID, attrViews)
+		if normalizeDatabaseBlockView(n, attrView) {
+			changed = true
+		}
+		return ast.WalkContinue
+	})
+	return
+}
+
+func cachedAttributeViewForBox(avID, boxID string, attrViews map[string]*av.AttributeView) (ret *av.AttributeView) {
+	cacheKey := boxID + "\x00" + avID
+	if ret, ok := attrViews[cacheKey]; ok {
+		return ret
+	}
+
+	var err error
+	if IsEncryptedBox(boxID) {
+		ret, err = av.ParseAttributeViewInBox(avID, boxID)
+	} else {
+		ret, err = av.ParseAttributeView(avID)
+	}
+	if nil != err {
+		ret = nil
+	}
+	attrViews[cacheKey] = ret
+	return
+}
+
 func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, page, pageSize int) (attributeViewName string, databaseBlockIDs []string, keyValues *av.KeyValues, total int, err error) {
 	waitForSyncingStorages()
 

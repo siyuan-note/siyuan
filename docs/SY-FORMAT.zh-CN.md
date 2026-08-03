@@ -397,8 +397,8 @@ NodeList                        NodeList
 
 - **没有 Children**。
 - `AttributeViewID` 指向 AV 表数据，该数据存放在单独的 `.json` 中；**不要**凭空构造此 ID。
-- `AttributeViewType`：`table` / `kanban` / `gallery` 等。
-- 可选的 `custom-sy-av-view` 记录当前视图 ID；没有显式保存当前视图时可以缺失。
+- `AttributeViewType`：`table` / `kanban` / `gallery` 等。该值由载体绑定视图的布局派生，不是独立的视图选择器。
+- 可选的 `custom-sy-av-view` 记录当前视图 ID。缺失或未指向所引用 AttributeView 中的视图时，回退到 AttributeView 的当前视图或首个可用视图。
 
 > 建议 AI **不要创建新的 AttributeView 块**，因为表数据不在 `.sy` 中，还需要配套文件。
 

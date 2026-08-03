@@ -829,6 +829,10 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 			toInserts = append(toInserts, toInsert)
 		}
 	}
+	attrViews := map[string]*av.AttributeView{}
+	if normalizeDatabaseBlockViews(subTree.Root, tree.Box, attrViews) {
+		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+	}
 
 	node := treenode.GetNodeInTree(tree, operation.ParentID)
 	if nil == node {
@@ -927,6 +931,10 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 			}
 			toInserts = append(toInserts, toInsert)
 		}
+	}
+	attrViews := map[string]*av.AttributeView{}
+	if normalizeDatabaseBlockViews(subTree.Root, tree.Box, attrViews) {
+		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
 	}
 
 	node := treenode.GetNodeInTree(tree, operation.ParentID)
@@ -1431,6 +1439,10 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 			insertedNode.AttributeViewID = ast.NewNodeID()
 		}
 	}
+	attrViews := map[string]*av.AttributeView{}
+	if normalizeDatabaseBlockViews(subTree.Root, tree.Box, attrViews) {
+		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+	}
 
 	var node *ast.Node
 	nextID := operation.NextID
@@ -1536,27 +1548,12 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	if ast.NodeAttributeView == insertedNode.Type {
 		// 插入数据库块时需要重新绑定其中已经存在的块
 		// 比如剪切操作时，会先进行 delete 数据库解绑块，这里需要重新绑定 https://github.com/siyuan-note/siyuan/issues/13031
-		attrView, parseErr := av.ParseAttributeView(insertedNode.AttributeViewID)
-		if nil == parseErr {
+		attrView := cachedAttributeViewForBox(insertedNode.AttributeViewID, tree.Box, attrViews)
+		if nil != attrView {
 			trees, toBindNodes := tx.getAttrViewBoundNodes(attrView)
 			for _, toBindNode := range toBindNodes {
 				t := trees[toBindNode.ID]
 				bindBlockAv0(tx, insertedNode.AttributeViewID, toBindNode, t)
-			}
-
-			// 设置视图 https://github.com/siyuan-note/siyuan/issues/15279
-			v := attrView.GetView(attrView.ViewID)
-			if nil != v {
-				insertedNode.AttributeViewType = string(v.LayoutType)
-				attrs := parse.IAL2Map(insertedNode.KramdownIAL)
-				if "" == attrs[av.NodeAttrView] {
-					attrs[av.NodeAttrView] = v.ID
-					err := setNodeAttrs(insertedNode, tree, attrs)
-					if err != nil {
-						logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
-						return
-					}
-				}
 			}
 		}
 	}
@@ -1649,6 +1646,11 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	if err = validateBlockUpdateType(oldNode, updatedNode, operation.LockType); err != nil {
 		logging.LogError(err.Error())
 		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: id}
+	}
+	attrViews := map[string]*av.AttributeView{}
+	if normalizeDatabaseBlockViews(updatedNode, tree.Box, attrViews) {
+		data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = data
 	}
 
 	// 收集引用的定义块 ID
@@ -1793,25 +1795,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	upsertAvBlockRel(updatedNode)
 
-	if ast.NodeAttributeView == updatedNode.Type {
-		// 设置视图 https://github.com/siyuan-note/siyuan/issues/15279
-		attrView, parseErr := av.ParseAttributeView(updatedNode.AttributeViewID)
-		if nil == parseErr {
-			v := attrView.GetView(attrView.ViewID)
-			if nil != v {
-				updatedNode.AttributeViewType = string(v.LayoutType)
-				attrs := parse.IAL2Map(updatedNode.KramdownIAL)
-				if "" == attrs[av.NodeAttrView] {
-					attrs[av.NodeAttrView] = v.ID
-					err = setNodeAttrs(updatedNode, tree, attrs)
-					if err != nil {
-						logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
-						return &TxErr{code: TxErrCodeBlockNotFound, id: id}
-					}
-				}
-			}
-		}
-	}
 	return
 }
 

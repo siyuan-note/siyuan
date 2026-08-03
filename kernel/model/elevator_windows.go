@@ -66,8 +66,17 @@ func AddMicrosoftDefenderExclusion() (err error) {
 		return
 	}
 
-	ps := []string{"powershell"}
-	ps = append(ps, []string{"-Command", "Add-MpPreference", "-ExclusionPath", installPath, ",", util.WorkspaceDir}...)
+	// 工作空间路径由用户自由指定，这里校验并转义，避免路径中的 cmd.exe 元字符导致提权后命令注入
+	if err = validateExclusionPath(installPath); nil != err {
+		logging.LogWarnf("invalid Windows Defender exclusion path [%s]: %s", installPath, err)
+		return
+	}
+	if err = validateExclusionPath(util.WorkspaceDir); nil != err {
+		logging.LogWarnf("invalid Windows Defender exclusion path [%s]: %s", util.WorkspaceDir, err)
+		return
+	}
+
+	ps := []string{"add-defender-exclusion", syscall.EscapeArg(installPath), syscall.EscapeArg(util.WorkspaceDir)}
 	verbPtr, _ := syscall.UTF16PtrFromString("runas")
 	exePtr, _ := syscall.UTF16PtrFromString(elevator)
 	cwdPtr, _ := syscall.UTF16PtrFromString(util.WorkingDir)
@@ -117,6 +126,17 @@ func isUsingMicrosoftDefender() bool {
 	cmd := exec.Command("powershell", "-Command", "Get-MpPreference")
 	gulu.CmdAttr(cmd)
 	return cmd.Run() == nil
+}
+
+// validateExclusionPath 校验用于添加到 Windows Defender 排除项的路径，
+// 拒绝包含 cmd.exe 或 PowerShell 元字符的路径，防止通过未转义的路径字符串实现命令注入
+func validateExclusionPath(path string) error {
+	for _, c := range path {
+		if strings.ContainsRune("&|<>^%!\"'$`", c) {
+			return fmt.Errorf("path contains invalid character [%s]", string(c))
+		}
+	}
+	return nil
 }
 
 func getElevatorBin() string {

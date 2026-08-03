@@ -60,7 +60,13 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
      - For capabilities that did not previously exist, write the title from a support perspective and prefer `Support ...`
    - If no applicable label is available, infer the perspective from the issue content
 8. **LD246:** When accessing `ld246.com`, set the HTTP `User-Agent` header to `SiYuan-Coding-Agent`
-9. **Configurable entries:** When adding, removing, renaming, moving, or changing the `data-id` / `data-type` of a desktop menu item or dock entry covered by entry visibility, update `app/src/config/entryVisibility/catalog.ts` in the same change, including its hierarchy, label, and Simple profile default, and update the related tests. Keep parent and child paths aligned with the actual menu hierarchy. The menu `ignore` option controls conditional rendering and must not be used to opt an entry out of visibility configuration
+9. **Configurable entries:**
+   - Treat the `data-id` of a configurable desktop menu item and the `data-type` of a configurable dock entry as persisted configuration identifiers. Do not rename or reuse them unless the same change migrates existing visibility and order configuration
+   - When adding, removing, renaming, or moving a configurable desktop menu item or dock entry, or changing its `data-id` / `data-type`, update `app/src/config/entryVisibility/catalog.ts` in the same change, including its type, hierarchy, label, Simple profile default, and default position, and update the related tests
+   - Give every configurable desktop menu separator a stable `data-id` and register it in the catalog as a `separator`. Keep the catalog order aligned with the actual menu declaration order because it defines the built-in order and where new entries are merged into existing custom profiles
+   - Keep parent and child paths aligned with the actual menu hierarchy. Dock entries support visibility only and must not be included in sorting
+   - Cover catalog consistency, separator placement, order migration, and plugin-slot preservation in the related tests. Configured menus must not produce leading, trailing, or consecutive separators
+   - The menu `ignore` option controls conditional rendering and must not be used to opt an entry out of visibility or order configuration
 
 ---
 

@@ -997,63 +997,28 @@ export const buildTableGrid = (tableElement: HTMLElement): ITableGrid => {
     };
 };
 
-export const getTableFullRowSelection = (
+export const getTableCellSelectionIndexes = (
     tableElement: HTMLTableElement,
     cellElements: HTMLTableCellElement[],
 ) => {
     const grid = buildTableGrid(tableElement);
     const selectedCells = new Set(cellElements);
-    const indexes: number[] = [];
-    let hasPartialRow = false;
-    for (let row = 0; row < grid.rowCount; row++) {
-        const cells = grid.grid[row] || [];
-        const selectedSlots = cells.filter(cell => cell && selectedCells.has(cell)).length;
-        if (selectedSlots === 0) {
-            continue;
+    const rowIndexes = new Set<number>();
+    const columnIndexes = new Set<number>();
+    grid.cellInfos.forEach(info => {
+        if (!selectedCells.has(info.cell)) {
+            return;
         }
-        if (cells.length !== grid.columnCount || selectedSlots !== grid.columnCount) {
-            hasPartialRow = true;
-            break;
+        for (let row = info.row; row < info.row + info.rowspan; row++) {
+            rowIndexes.add(row);
         }
-        indexes.push(row);
-    }
+        for (let column = info.col; column < info.col + info.colspan; column++) {
+            columnIndexes.add(column);
+        }
+    });
     return {
-        indexes: hasPartialRow ? [] : indexes,
-        merged: grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1),
-    };
-};
-
-export const getTableFullColumnSelection = (
-    tableElement: HTMLTableElement,
-    cellElements: HTMLTableCellElement[],
-) => {
-    const grid = buildTableGrid(tableElement);
-    const selectedCells = new Set(cellElements);
-    const indexes: number[] = [];
-    let hasPartialColumn = false;
-    for (let column = 0; column < grid.columnCount; column++) {
-        let slotCount = 0;
-        let selectedSlotCount = 0;
-        for (let row = 0; row < grid.rowCount; row++) {
-            const cell = grid.grid[row]?.[column];
-            if (cell) {
-                slotCount++;
-                if (selectedCells.has(cell)) {
-                    selectedSlotCount++;
-                }
-            }
-        }
-        if (selectedSlotCount === 0) {
-            continue;
-        }
-        if (slotCount !== grid.rowCount || selectedSlotCount !== grid.rowCount) {
-            hasPartialColumn = true;
-            break;
-        }
-        indexes.push(column);
-    }
-    return {
-        indexes: hasPartialColumn ? [] : indexes,
+        rowIndexes: Array.from(rowIndexes).sort((a, b) => a - b),
+        columnIndexes: Array.from(columnIndexes).sort((a, b) => a - b),
         merged: grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1),
     };
 };

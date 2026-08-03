@@ -8,8 +8,7 @@ import {
     buildTableGrid,
     deleteTableColumns,
     deleteTableRows,
-    getTableFullColumnSelection,
-    getTableFullRowSelection,
+    getTableCellSelectionIndexes,
     getTableRangeHTML,
     isTableHeaderEnabled,
     ITableCellInfo,
@@ -202,6 +201,59 @@ export const getTableCellBackgroundMenus = (cells: HTMLTableCellElement[],
                 window.siyuan.menus.menu.remove();
             });
         },
+    }];
+};
+
+export const getTableCellAlignmentMenus = (
+    cells: HTMLTableCellElement[],
+    onChange: (property: string, value: string) => void,
+): IMenu[] => {
+    const textAlign = getCommonTableCellStyle(cells, "text-align");
+    const verticalAlign = getCommonTableCellStyle(cells, "vertical-align");
+    return [{
+        id: "alignLeft",
+        icon: "iconAlignLeft",
+        accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
+        label: window.siyuan.languages.alignLeft,
+        checked: textAlign === "left",
+        click: () => onChange("text-align", "left"),
+    }, {
+        id: "alignCenter",
+        icon: "iconAlignCenter",
+        accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
+        label: window.siyuan.languages.alignCenter,
+        checked: textAlign === "center",
+        click: () => onChange("text-align", "center"),
+    }, {
+        id: "alignRight",
+        icon: "iconAlignRight",
+        accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
+        label: window.siyuan.languages.alignRight,
+        checked: textAlign === "right",
+        click: () => onChange("text-align", "right"),
+    }, {
+        id: "useDefaultHorizontalAlign",
+        label: window.siyuan.languages.useDefaultHorizontalAlign,
+        checked: textAlign === "",
+        click: () => onChange("text-align", ""),
+    }, {
+        type: "separator",
+    }, {
+        label: window.siyuan.languages.alignTop,
+        checked: verticalAlign === "top",
+        click: () => onChange("vertical-align", "top"),
+    }, {
+        label: window.siyuan.languages.alignMiddle,
+        checked: verticalAlign === "middle",
+        click: () => onChange("vertical-align", "middle"),
+    }, {
+        label: window.siyuan.languages.alignBottom,
+        checked: verticalAlign === "bottom",
+        click: () => onChange("vertical-align", "bottom"),
+    }, {
+        label: window.siyuan.languages.useDefaultVerticalAlign,
+        checked: verticalAlign === "",
+        click: () => onChange("vertical-align", ""),
     }];
 };
 
@@ -1444,58 +1496,43 @@ export class TableControl {
     }
 
     private appendCellMenus(rectangle: boolean) {
-        this.appendAlignmentMenus();
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        const verticalAlign = this.getCommonCellStyle("vertical-align");
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.alignTop,
-            checked: verticalAlign === "top",
-            click: () => this.setCellStyle("vertical-align", "top"),
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.alignMiddle,
-            checked: verticalAlign === "middle",
-            click: () => this.setCellStyle("vertical-align", "middle"),
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.alignBottom,
-            checked: verticalAlign === "bottom",
-            click: () => this.setCellStyle("vertical-align", "bottom"),
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.useDefaultVerticalAlign,
-            checked: verticalAlign === "",
-            click: () => this.setCellStyle("vertical-align", ""),
-        }).element);
         const cells = this.getSelectedCells();
-        const rowSelection = getTableFullRowSelection(this.selection.table, cells);
-        const columnSelection = getTableFullColumnSelection(this.selection.table, cells);
-        if (rowSelection.indexes.length > 0 || columnSelection.indexes.length > 0) {
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "alignment",
+            icon: "iconAlignSettings",
+            label: window.siyuan.languages.alignment,
+            type: "submenu",
+            submenu: getTableCellAlignmentMenus(cells,
+                (property, value) => this.setCellStyle(property, value)),
+        }).element);
+        const cellSelection = getTableCellSelectionIndexes(this.selection.table, cells);
+        if (cellSelection.rowIndexes.length > 0 || cellSelection.columnIndexes.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
-        if (rowSelection.indexes.length > 0) {
+        if (cellSelection.rowIndexes.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-row"],
-                disabled: rowSelection.merged,
-                action: rowSelection.merged ? "iconInfo" : undefined,
-                actionLabel: rowSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
+                disabled: cellSelection.merged,
+                action: cellSelection.merged ? "iconInfo" : undefined,
+                actionLabel: cellSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
-                    if (deleteTableRows(this.protyle, this.selection.node, rowSelection.indexes)) {
+                    if (deleteTableRows(this.protyle, this.selection.node, cellSelection.rowIndexes)) {
                         this.clear();
                     }
                 },
             }).element);
         }
-        if (columnSelection.indexes.length > 0) {
+        if (cellSelection.columnIndexes.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-column"],
-                disabled: columnSelection.merged,
-                action: columnSelection.merged ? "iconInfo" : undefined,
-                actionLabel: columnSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
+                disabled: cellSelection.merged,
+                action: cellSelection.merged ? "iconInfo" : undefined,
+                actionLabel: cellSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
-                    if (deleteTableColumns(this.protyle, this.selection.node, columnSelection.indexes)) {
+                    if (deleteTableColumns(this.protyle, this.selection.node, cellSelection.columnIndexes)) {
                         this.clear();
                     }
                 },

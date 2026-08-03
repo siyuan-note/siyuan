@@ -42,13 +42,13 @@ export const getColIndex = (cellElement: HTMLElement) => {
 };
 
 export const isTableHeaderEnabled = (nodeElement: Element, type: "row" | "column") => {
-    return type === "row" ? nodeElement.getAttribute("custom-table-header-row") !== "false" :
-        nodeElement.getAttribute("custom-table-header-column") === "true";
+    return type === "row" ? nodeElement.getAttribute("custom-sy-table-header-row") !== "false" :
+        nodeElement.getAttribute("custom-sy-table-header-column") === "true";
 };
 
 export const toggleTableHeader = (protyle: IProtyle, nodeElement: Element, type: "row" | "column") => {
     const html = nodeElement.outerHTML;
-    const attribute = `custom-table-header-${type}`;
+    const attribute = `custom-sy-table-header-${type}`;
     if (isTableHeaderEnabled(nodeElement, type)) {
         if (type === "row") {
             nodeElement.setAttribute(attribute, "false");

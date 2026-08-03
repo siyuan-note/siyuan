@@ -66,7 +66,7 @@
 	"modelContextLength": "Longitud del contexto del modelo (Tokens)",
 	"newTab": "Nueva pestaña",
 	"mobileTabs": "Pestañas",
-	"tabStartupClose": "Cerrar las pestañas abiertas anteriormente",
+	"tabStartupClose": "Cerrar todas las pestañas abiertas anteriormente",
 	"tabStartupNew": "Abrir una pestaña en blanco",
 	"tabStartupRestore": "Restaurar las pestañas abiertas anteriormente",
 	"tabStartupModeTip": "Elige cómo se gestionan las pestañas abiertas anteriormente al volver a entrar en la interfaz",

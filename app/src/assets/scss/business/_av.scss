@@ -1745,15 +1745,11 @@
       min-height: 0;
     }
 
-    & > .b3-menu__item--readonly {
-      color: var(--b3-theme-on-background);
-    }
-
     &-title {
       align-items: center;
     }
 
-    & > .b3-menu__item:not(.b3-menu__item--readonly):hover {
+    & > .b3-menu__item:not([data-type="nobg"]):hover {
       background-color: var(--b3-list-hover);
     }
 

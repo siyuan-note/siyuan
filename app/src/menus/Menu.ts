@@ -112,7 +112,8 @@ export class Menu {
             if (!itemElement) {
                 return;
             }
-            if (itemElement.classList.contains("b3-menu__item--readonly")) {
+            if (itemElement.classList.contains("b3-menu__item--readonly") ||
+                itemElement.getAttribute("data-type") === "nobg") {
                 return;
             }
             const subMenuElement = itemElement.querySelector(":scope > .b3-menu__submenu") as HTMLElement;

@@ -84,18 +84,18 @@ const getFieldVisibilityItemsHTML = (views: IAVFieldView[], backColId: string) =
     ${view.hidden ? "" : '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>'}
 </button>`;
     };
-    const titleIconHTML = `<span class="block__icon block__icon--show" style="padding: 8px;margin-left: -4px;" data-type="editCol" data-id="${backColId}">
+    const titleIconHTML = `<span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="editCol" data-id="${backColId}">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>`;
-    let html = `<button class="b3-menu__item b3-menu__item--readonly av__field-visibility-title" data-type="nobg">
+    let html = `<button class="b3-menu__item av__field-visibility-title" data-type="nobg">
     ${titleIconHTML}
     <span class="b3-menu__label ft__center">${window.siyuan.languages.fieldVisibility}</span>
 </button>`;
     if (visibleViews.length > 0) {
         html += `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item b3-menu__item--readonly" data-type="nobg">
+<button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages.showCol}</span>
-    <span class="block__icon block__icon--show" data-field-visibility-action="hideAll">
+    <span class="block__icon" data-field-visibility-action="hideAll">
         ${window.siyuan.languages.hideInAllViews}
         <span class="fn__space"></span>
         <svg><use xlink:href="#iconEyeoff"></use></svg>
@@ -105,9 +105,9 @@ ${visibleViews.map(getViewHTML).join("")}`;
     }
     if (hiddenViews.length > 0) {
         html += `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item b3-menu__item--readonly" data-type="nobg">
+<button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages.hideCol}</span>
-    <span class="block__icon block__icon--show" data-field-visibility-action="showAll">
+    <span class="block__icon" data-field-visibility-action="showAll">
         ${window.siyuan.languages.showInAllViews}
         <span class="fn__space"></span>
         <svg><use xlink:href="#iconEye"></use></svg>

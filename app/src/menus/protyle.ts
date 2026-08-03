@@ -267,7 +267,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
             });
         }
     }).element);
-    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+    window.siyuan.menus.menu.append(new MenuItem({id: "separator_turnInto", type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
         id: "turnInto",
         label: window.siyuan.languages.turnInto,
@@ -821,6 +821,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                     }).element);
                 }
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "separator_paste",
                     type: "separator",
                 }).element);
             }
@@ -1277,6 +1278,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     });
                 }
             }, {
+                id: "separator_reOCR",
                 type: "separator"
             }, {
                 id: "reOCR",
@@ -2127,6 +2129,7 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
     const iframeSrc = iframeElement.getAttribute("src");
     if (iframeSrc) {
         subMenus.push({
+            id: "separator_openBy",
             type: "separator"
         });
         return subMenus.concat(openMenu(protyle.app, iframeSrc, true, false) as IMenu[]);
@@ -2155,6 +2158,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     const src = videoElement.getAttribute("src");
     if (src && src.startsWith("assets/")) {
         subMenus.push({
+            id: "separator_rename",
             type: "separator"
         });
         subMenus.push({
@@ -2342,6 +2346,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     const menus: IMenu[] = [];
     menus.push(...otherMenus);
     menus.push({
+        id: "separator_insert",
         type: "separator"
     });
     const hasNone = cellElement.parentElement.querySelector(".fn__none");
@@ -2579,6 +2584,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     if ((cellElement.parentElement.parentElement.tagName !== "THEAD" &&
         ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan))) || colIsPure) {
         menus.push({
+            id: "separator_delete",
             type: "separator"
         });
     }

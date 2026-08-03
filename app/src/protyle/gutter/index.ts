@@ -2136,6 +2136,7 @@ export class Gutter {
                         protyle.toolbar.showRender(protyle, nodeElement);
                     }
                 }, {
+                    id: "separator_breadcrumb",
                     type: "separator"
                 }, {
                     id: "embedBlockBreadcrumb",
@@ -2923,6 +2924,7 @@ export class Gutter {
             });
         });
         styles.push({
+            id: "separator_1",
             type: "separator"
         });
         const height = firstElement.style.height.endsWith("%") ? parseInt(firstElement.style.height) : 0;
@@ -2945,6 +2947,7 @@ export class Gutter {
                     this.updateNodeElements(nodeElements, protyle, rangeElement);
                 }
             }, {
+                id: "separator_2",
                 type: "separator"
             }, {
                 id: "default",

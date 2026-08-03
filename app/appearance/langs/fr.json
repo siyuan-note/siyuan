@@ -66,7 +66,7 @@
 	"modelContextLength": "Longueur du contexte du modèle (Tokens)",
 	"newTab": "Nouvel onglet",
 	"mobileTabs": "Onglets",
-	"tabStartupClose": "Fermer les onglets précédemment ouverts",
+	"tabStartupClose": "Fermer tous les onglets précédemment ouverts",
 	"tabStartupNew": "Ouvrir un onglet vide",
 	"tabStartupRestore": "Restaurer les onglets précédemment ouverts",
 	"tabStartupModeTip": "Choisissez comment les onglets précédemment ouverts sont gérés lors de la réouverture de l’interface",

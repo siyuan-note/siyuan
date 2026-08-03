@@ -66,7 +66,7 @@
 	"modelContextLength": "Model Context Length (Tokens)",
 	"newTab": "New Tab",
 	"mobileTabs": "Tabs",
-	"tabStartupClose": "Close Previously Opened Tabs",
+	"tabStartupClose": "Close All Previously Opened Tabs",
 	"tabStartupNew": "Open a Blank Tab",
 	"tabStartupRestore": "Restore Previously Opened Tabs",
 	"tabStartupModeTip": "Choose how previously opened tabs are handled when reopening the interface",

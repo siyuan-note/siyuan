@@ -66,7 +66,7 @@
 	"modelContextLength": "मॉडल संदर्भ लंबाई (Tokens)",
 	"newTab": "नया टैब",
 	"mobileTabs": "टैब",
-	"tabStartupClose": "पहले खुले टैब बंद करें",
+	"tabStartupClose": "पहले खुले सभी टैब बंद करें",
 	"tabStartupNew": "एक खाली टैब खोलें",
 	"tabStartupRestore": "पहले खुले टैब पुनर्स्थापित करें",
 	"tabStartupModeTip": "इंटरफ़ेस में दोबारा प्रवेश करते समय पहले खुले टैब प्रबंधित करने का तरीका चुनें",

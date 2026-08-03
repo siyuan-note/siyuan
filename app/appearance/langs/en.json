@@ -67,7 +67,7 @@
 	"newTab": "New Tab",
 	"mobileTabs": "Tabs",
 	"tabStartupClose": "Close All Previously Opened Tabs",
-	"tabStartupNew": "Open a Blank Tab",
+	"tabStartupNew": "Open the Start Screen",
 	"tabStartupRestore": "Restore Previously Opened Tabs",
 	"tabStartupModeTip": "Choose how previously opened tabs are handled when reopening the interface",
 	"tabStartupMode": "Startup Behavior",

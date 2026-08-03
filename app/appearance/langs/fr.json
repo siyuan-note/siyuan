@@ -67,7 +67,7 @@
 	"newTab": "Nouvel onglet",
 	"mobileTabs": "Onglets",
 	"tabStartupClose": "Fermer tous les onglets précédemment ouverts",
-	"tabStartupNew": "Ouvrir un onglet vide",
+	"tabStartupNew": "Ouvrir l’écran de démarrage",
 	"tabStartupRestore": "Restaurer les onglets précédemment ouverts",
 	"tabStartupModeTip": "Choisissez comment les onglets précédemment ouverts sont gérés lors de la réouverture de l’interface",
 	"tabStartupMode": "Comportement au démarrage",

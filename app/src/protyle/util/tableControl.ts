@@ -1305,11 +1305,7 @@ export class TableControl {
             if (this.selection.mode === "cell") {
                 this.appendCellMenus(rectangle);
             } else {
-                if (this.selection.mode === "column") {
-                    this.appendAlignmentMenus();
-                } else {
-                    this.appendVerticalAlignmentMenus();
-                }
+                this.appendAlignmentMenu();
                 menu.append(new MenuItem({type: "separator"}).element);
                 menu.append(new MenuItem({
                     icon: "iconClear",
@@ -1526,15 +1522,7 @@ export class TableControl {
 
     private appendCellMenus(rectangle: boolean) {
         const cells = this.getSelectedCells();
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "alignment",
-            icon: "iconAlignSettings",
-            label: window.siyuan.languages.alignment,
-            type: "submenu",
-            submenu: getTableCellAlignmentMenus(cells,
-                (property, value) => this.setCellStyle(property, value)),
-        }).element);
+        this.appendAlignmentMenu();
         const cellSelection = getTableCellSelectionIndexes(this.selection.table, cells);
         if (cellSelection.rowIndexes.length > 0 || cellSelection.columnIndexes.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -1580,44 +1568,16 @@ export class TableControl {
         }
     }
 
-    private appendAlignmentMenus() {
+    private appendAlignmentMenu() {
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        const textAlign = this.getCommonCellStyle("text-align");
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconAlignLeft",
-            label: window.siyuan.languages.alignLeft,
-            checked: textAlign === "left",
-            click: () => this.setCellStyle("text-align", "left"),
+            id: "alignment",
+            icon: "iconAlignSettings",
+            label: window.siyuan.languages.alignment,
+            type: "submenu",
+            submenu: getTableCellAlignmentMenus(this.getSelectedCells(),
+                (property, value) => this.setCellStyle(property, value)),
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconAlignCenter",
-            label: window.siyuan.languages.alignCenter,
-            checked: textAlign === "center",
-            click: () => this.setCellStyle("text-align", "center"),
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconAlignRight",
-            label: window.siyuan.languages.alignRight,
-            checked: textAlign === "right",
-            click: () => this.setCellStyle("text-align", "right"),
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.useDefaultHorizontalAlign,
-            checked: textAlign === "",
-            click: () => this.setCellStyle("text-align", ""),
-        }).element);
-    }
-
-    private appendVerticalAlignmentMenus() {
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        getTableCellVerticalAlignmentMenus(this.getSelectedCells(),
-            (property, value) => this.setCellStyle(property, value)).forEach(item => {
-            window.siyuan.menus.menu.append(new MenuItem(item).element);
-        });
-    }
-
-    private getCommonCellStyle(property: string) {
-        return getCommonTableCellStyle(this.getSelectedCells(), property);
     }
 
     private isSelectionInOneSection() {

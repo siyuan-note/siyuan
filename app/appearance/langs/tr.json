@@ -67,7 +67,7 @@
 	"newTab": "Yeni sekme",
 	"mobileTabs": "Sekmeler",
 	"tabStartupClose": "Tüm sekmeleri kapat",
-	"tabStartupNew": "Başlangıç sayfasını göster",
+	"tabStartupNew": "Tüm sekmeleri geri yükle ve başlangıç sayfasını göster",
 	"tabStartupRestore": "Tüm sekmeleri geri yükle",
 	"tabStartupModeTip": "Arayüze yeniden girildiğinde daha önce açılmış sekmelerin nasıl işleneceğini seçin",
 	"tabStartupMode": "Başlangıç davranışı",

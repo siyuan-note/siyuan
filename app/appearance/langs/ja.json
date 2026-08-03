@@ -67,7 +67,7 @@
 	"newTab": "新しいタブ",
 	"mobileTabs": "タブ",
 	"tabStartupClose": "すべてのタブを閉じる",
-	"tabStartupNew": "スタートページを表示",
+	"tabStartupNew": "すべてのタブを復元してスタートページを表示",
 	"tabStartupRestore": "すべてのタブを復元",
 	"tabStartupModeTip": "画面を再度開いたときに前回のタブをどのように処理するかを選択します",
 	"tabStartupMode": "起動時の動作",

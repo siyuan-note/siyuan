@@ -67,7 +67,7 @@
 	"newTab": "새 탭",
 	"mobileTabs": "탭",
 	"tabStartupClose": "모든 탭 닫기",
-	"tabStartupNew": "시작 페이지 표시",
+	"tabStartupNew": "모든 탭 복원 및 시작 페이지 표시",
 	"tabStartupRestore": "모든 탭 복원",
 	"tabStartupModeTip": "인터페이스에 다시 들어갈 때 이전에 열었던 탭을 처리하는 방식을 선택합니다",
 	"tabStartupMode": "시작 동작",

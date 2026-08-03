@@ -67,7 +67,7 @@
 	"newTab": "Nova aba",
 	"mobileTabs": "Abas",
 	"tabStartupClose": "Fechar todas as abas",
-	"tabStartupNew": "Mostrar a página inicial",
+	"tabStartupNew": "Restaurar todas as abas e mostrar a página inicial",
 	"tabStartupRestore": "Restaurar todas as abas",
 	"tabStartupModeTip": "Escolha como as abas abertas anteriormente são tratadas ao reabrir a interface",
 	"tabStartupMode": "Comportamento ao iniciar",

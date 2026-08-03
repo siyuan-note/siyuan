@@ -67,7 +67,7 @@
 	"newTab": "新增頁籤",
 	"mobileTabs": "頁籤",
 	"tabStartupClose": "關閉所有頁籤",
-	"tabStartupNew": "顯示起始頁",
+	"tabStartupNew": "還原所有頁籤並顯示起始頁",
 	"tabStartupRestore": "還原所有頁籤",
 	"tabStartupModeTip": "設定重新進入介面後如何處理上次開啟的頁籤",
 	"tabStartupMode": "啟動行為",

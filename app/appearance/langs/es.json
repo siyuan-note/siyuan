@@ -67,7 +67,7 @@
 	"newTab": "Nueva pestaña",
 	"mobileTabs": "Pestañas",
 	"tabStartupClose": "Cerrar todas las pestañas",
-	"tabStartupNew": "Mostrar la página de inicio",
+	"tabStartupNew": "Restaurar todas las pestañas y mostrar la página de inicio",
 	"tabStartupRestore": "Restaurar todas las pestañas",
 	"tabStartupModeTip": "Elige cómo se gestionan las pestañas abiertas anteriormente al volver a entrar en la interfaz",
 	"tabStartupMode": "Comportamiento de inicio",

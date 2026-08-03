@@ -269,6 +269,7 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "show-random" && !protyle.disabled) {
+                    window.siyuan.menus.menu.remove();
                     // 内置题头图对话框：优先展示封面图片，加载失败时回退到 CSS 图案
                     const dialog = new Dialog({
                         title: window.siyuan.languages.builtIn,

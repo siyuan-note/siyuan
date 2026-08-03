@@ -27,6 +27,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 1. **i18n:**
    - New keys go at the **top** of each `langs/*.json` object; add to every language file (reference `en.json`)
+   - Indent `langs/*.json` with tabs, using one tab per nesting level; do not use spaces for indentation
    - Exception: inside the `_kernel` object, append new entries at the **end** using the next incremental numeric key
    - Each language must be properly translated — do NOT copy the same text across all language files
    - Use three ASCII periods (`...`) for ellipses in all localized strings; do not use Unicode ellipsis characters (`…` or `……`)

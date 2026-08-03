@@ -57,10 +57,7 @@ export const goBack = () => {
     if (!tabs) {
         return;
     }
-    void tabs.goBack().then(async (handled) => {
-        if (!handled) {
-            handled = await tabs.switchPreviousTab();
-        }
+    void tabs.goBack().then((handled) => {
         if (handled || !(window.JSAndroid || window.JSHarmony)) {
             return;
         }

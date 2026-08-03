@@ -511,7 +511,7 @@ export class TableControl {
         }
         const targetCell = getCell(event.target);
         const targetTable = targetCell?.closest("table") as HTMLTableElement;
-        const targetViewportRect = targetTable ? this.getTableViewportRect(targetTable) : undefined;
+        const targetViewportRect = targetTable ? this.getTableGridViewportRect(targetTable) : undefined;
         const edgeHover = !targetCell || (targetViewportRect &&
             event.clientX <= targetViewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE) ?
             this.getEdgeHover(event.clientX, event.clientY) : undefined;
@@ -859,7 +859,7 @@ export class TableControl {
         return Math.max(table.getBoundingClientRect().bottom, table.parentElement.getBoundingClientRect().bottom);
     }
 
-    private getTableSelectionViewportRect(table: HTMLTableElement) {
+    private getTableGridViewportRect(table: HTMLTableElement) {
         const viewportRect = this.getTableViewportRect(table);
         const rowRects = Array.from(table.rows).map(row => row.getBoundingClientRect()).filter(rect => rect.height > 0);
         if (rowRects.length === 0) {
@@ -909,7 +909,7 @@ export class TableControl {
         const candidates: ITableEdgeHover[] = [];
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
             const tableRect = table.getBoundingClientRect();
-            const viewportRect = this.getTableViewportRect(table);
+            const viewportRect = this.getTableGridViewportRect(table);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const grid = buildTableGrid(table);
@@ -1033,7 +1033,7 @@ export class TableControl {
         });
         this.selectionElements.forEach(item => item.classList.add("fn__none"));
         const tableRect = state.table.getBoundingClientRect();
-        const viewportRect = this.getTableViewportRect(state.table);
+        const viewportRect = this.getTableGridViewportRect(state.table);
         const addRowEdge = this.getTableAddRowEdge(state.table);
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
         const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
@@ -1091,7 +1091,7 @@ export class TableControl {
         if (visible) {
             const cellRect = cell.getBoundingClientRect();
             const tableRect = table.getBoundingClientRect();
-            const viewportRect = this.getTableViewportRect(table);
+            const viewportRect = this.getTableGridViewportRect(table);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
@@ -1177,7 +1177,7 @@ export class TableControl {
             this.selectedCells = [];
             return;
         }
-        const selectionViewportRect = this.getTableSelectionViewportRect(this.selection.table);
+        const selectionViewportRect = this.getTableGridViewportRect(this.selection.table);
         if (this.selection.mode === "row") {
             const rows = Array.from(this.selection.table.rows);
             getIndexGroups(this.selection.indexes).forEach(group => {
@@ -2168,7 +2168,7 @@ export class TableControl {
         if (!state || !this.selection) {
             return;
         }
-        const viewportRect = this.getTableSelectionViewportRect(this.selection.table);
+        const viewportRect = this.getTableGridViewportRect(this.selection.table);
         const start = state.mode === "column" ? viewportRect.left : viewportRect.top;
         const end = state.mode === "column" ? viewportRect.right : viewportRect.bottom;
         const minCenter = start + state.handleSize / 2;

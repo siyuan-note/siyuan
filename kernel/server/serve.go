@@ -1231,22 +1231,22 @@ func serveRepoDiff(ginServer *gin.Engine) {
 }
 
 func serveDebug(ginServer *gin.Engine) {
-	if "prod" == util.Mode {
-		// The production environment will no longer register `/debug/pprof/` https://github.com/siyuan-note/siyuan/issues/10152
+	// 调试端点默认不注册，仅 --enable-pprof 显式开启；即使开启也要求管理员鉴权 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-9cqq-p2hw-mj3f
+	if !util.EnablePprof {
 		return
 	}
 
-	ginServer.GET("/debug/pprof/", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/allocs", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/block", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/goroutine", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/heap", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/mutex", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/threadcreate", gin.WrapF(pprof.Index))
-	ginServer.GET("/debug/pprof/cmdline", gin.WrapF(pprof.Cmdline))
-	ginServer.GET("/debug/pprof/profile", gin.WrapF(pprof.Profile))
-	ginServer.GET("/debug/pprof/symbol", gin.WrapF(pprof.Symbol))
-	ginServer.GET("/debug/pprof/trace", gin.WrapF(pprof.Trace))
+	ginServer.GET("/debug/pprof/", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/allocs", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/block", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/goroutine", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/heap", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/mutex", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/threadcreate", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
+	ginServer.GET("/debug/pprof/cmdline", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Cmdline))
+	ginServer.GET("/debug/pprof/profile", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Profile))
+	ginServer.GET("/debug/pprof/symbol", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Symbol))
+	ginServer.GET("/debug/pprof/trace", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Trace))
 }
 
 func serveWebSocket(ginServer *gin.Engine) {

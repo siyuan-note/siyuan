@@ -382,6 +382,10 @@ export class TableControl {
         this.scheduleRender();
     }
 
+    public setHidden(hidden: boolean) {
+        this.element.classList.toggle("fn__none", hidden);
+    }
+
     private bindEvents() {
         const signal = this.abortController.signal;
         this.wysiwygElement.addEventListener("pointermove", event => this.handleTablePointerMove(event, false), {signal});

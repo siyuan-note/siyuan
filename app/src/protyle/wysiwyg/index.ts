@@ -1914,6 +1914,11 @@ export class WYSIWYG {
                 // table cell select
                 if (tableBlockElement &&
                     !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
+                    this.tableControl?.setHidden(true);
+                    const tableControlElement = hasClosestByClassName(moveTarget, "protyle-table-control");
+                    if (tableControlElement) {
+                        moveTarget = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY) as HTMLElement;
+                    }
                     if (tableBlockElement.contains(moveTarget)) {
                         if (hasLeftTableBlock) {
                             clearDragSelectBlocks();
@@ -2211,6 +2216,7 @@ export class WYSIWYG {
                 // 多选块后 shift+左 选中的文字无法显示选中背景，因此需移除
                 protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                 this.element.classList.remove("fn__pointer-none");
+                this.tableControl?.setHidden(false);
                 if (startsFromPadding) {
                     if (avDragSelectMode !== undefined) {
                         getSelection().removeAllRanges();

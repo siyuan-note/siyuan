@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "העתק קישור Markdown לפריט",
   "noAvailableDatabase": "לא נמצא מסד נתונים זמין. יש ליצור תחילה בלוק מסד נתונים במסמך",
   "apiKeyRequired": "נדרש מפתח API",
   "openAICompatibleProvider": "ספק תואם OpenAI",
@@ -164,7 +165,7 @@
 	"newTemplate": "תבנית חדשה",
 	"itemTemplate": "תבנית פריט",
 	"databaseItemFiltered": "הפריט מסונן. יש להסיר את המסנן או את הגדרות הקיבוץ כדי להציג אותו.",
-	"copyDatabaseItemLink": "העתק קישור לפריט",
+	"copyDatabaseItemLink": "העתק היפר-קישור לפריט",
 	"databaseViewNotFound": "תצוגת מסד הנתונים לא נמצאה",
 	"databaseItemNotFound": "פריט מסד הנתונים לא נמצא",
 	"alignment": "יישור",

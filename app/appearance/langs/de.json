@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "Markdown-Link des Eintrags kopieren",
   "noAvailableDatabase": "Keine verfügbare Datenbank gefunden; erstelle zuerst einen Datenbankblock in einem Dokument",
   "apiKeyRequired": "API-Schlüssel ist erforderlich",
   "openAICompatibleProvider": "OpenAI-kompatibler Anbieter",
@@ -164,7 +165,7 @@
 	"newTemplate": "Neue Vorlage",
 	"itemTemplate": "Eintragsvorlage",
 	"databaseItemFiltered": "Der Eintrag wird gefiltert. Entferne den Filter oder die Gruppierungseinstellungen, um ihn anzuzeigen.",
-	"copyDatabaseItemLink": "Eintragslink kopieren",
+	"copyDatabaseItemLink": "Eintrags-Hyperlink kopieren",
 	"databaseViewNotFound": "Datenbankansicht nicht gefunden",
 	"databaseItemNotFound": "Datenbankeintrag nicht gefunden",
 	"alignment": "Ausrichtung",

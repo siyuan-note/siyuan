@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "項目の Markdown リンクをコピー",
   "noAvailableDatabase": "利用可能なデータベースが見つかりません。先にドキュメント内にデータベースブロックを作成してください",
   "apiKeyRequired": "API Key が必要です",
   "openAICompatibleProvider": "OpenAI 互換プロバイダー",
@@ -164,7 +165,7 @@
 	"newTemplate": "新規テンプレート",
 	"itemTemplate": "項目テンプレート",
 	"databaseItemFiltered": "項目はフィルターされています。表示するには、フィルターまたはグループ設定を解除してください。",
-	"copyDatabaseItemLink": "項目のリンクをコピー",
+	"copyDatabaseItemLink": "項目のハイパーリンクをコピー",
 	"databaseViewNotFound": "データベースビューが見つかりません",
 	"databaseItemNotFound": "データベース項目が見つかりません",
 	"alignment": "揃え",

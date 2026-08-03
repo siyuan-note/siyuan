@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "आइटम Markdown लिंक कॉपी करें",
   "noAvailableDatabase": "कोई उपलब्ध डेटाबेस नहीं मिला। पहले किसी दस्तावेज़ में डेटाबेस ब्लॉक बनाएँ",
   "apiKeyRequired": "API Key आवश्यक है",
   "openAICompatibleProvider": "OpenAI-संगत प्रदाता",
@@ -164,7 +165,7 @@
 	"newTemplate": "नया टेम्पलेट",
 	"itemTemplate": "आइटम टेम्पलेट",
 	"databaseItemFiltered": "आइटम फ़िल्टर किया गया है। इसे देखने के लिए फ़िल्टर या समूहीकरण सेटिंग हटाएँ।",
-	"copyDatabaseItemLink": "आइटम लिंक कॉपी करें",
+	"copyDatabaseItemLink": "आइटम हाइपरलिंक कॉपी करें",
 	"databaseViewNotFound": "डेटाबेस दृश्य नहीं मिला",
 	"databaseItemNotFound": "डेटाबेस आइटम नहीं मिला",
 	"alignment": "संरेखण",

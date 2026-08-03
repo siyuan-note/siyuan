@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "คัดลอกลิงก์ Markdown ของรายการ",
   "noAvailableDatabase": "ไม่พบฐานข้อมูลที่พร้อมใช้งาน โปรดสร้างบล็อกฐานข้อมูลในเอกสารก่อน",
   "apiKeyRequired": "จำเป็นต้องใช้ API Key",
   "openAICompatibleProvider": "ผู้ให้บริการที่เข้ากันได้กับ OpenAI",
@@ -164,7 +165,7 @@
 	"newTemplate": "เทมเพลตใหม่",
 	"itemTemplate": "เทมเพลตรายการ",
 	"databaseItemFiltered": "รายการถูกกรองอยู่ โปรดนำตัวกรองหรือการตั้งค่าการจัดกลุ่มออกเพื่อดูรายการ",
-	"copyDatabaseItemLink": "คัดลอกลิงก์รายการ",
+	"copyDatabaseItemLink": "คัดลอกไฮเปอร์ลิงก์รายการ",
 	"databaseViewNotFound": "ไม่พบมุมมองฐานข้อมูล",
 	"databaseItemNotFound": "ไม่พบรายการฐานข้อมูล",
 	"alignment": "การจัดแนว",

@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "Copier le lien Markdown de l’élément",
   "noAvailableDatabase": "Aucune base de données disponible n'a été trouvée. Créez d'abord un bloc de base de données dans un document",
   "apiKeyRequired": "Une clé API est requise",
   "openAICompatibleProvider": "Fournisseur compatible avec OpenAI",
@@ -164,7 +165,7 @@
 	"newTemplate": "Nouveau modèle",
 	"itemTemplate": "Modèle d'élément",
 	"databaseItemFiltered": "L’élément est filtré. Supprimez le filtre ou les paramètres de regroupement pour l’afficher.",
-	"copyDatabaseItemLink": "Copier le lien de l’élément",
+	"copyDatabaseItemLink": "Copier l’hyperlien de l’élément",
 	"databaseViewNotFound": "Vue de base de données introuvable",
 	"databaseItemNotFound": "Élément de base de données introuvable",
 	"alignment": "Alignement",

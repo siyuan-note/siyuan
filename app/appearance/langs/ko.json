@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "항목 Markdown 링크 복사",
   "noAvailableDatabase": "사용 가능한 데이터베이스를 찾을 수 없습니다. 먼저 문서에 데이터베이스 블록을 만드세요",
   "apiKeyRequired": "API Key가 필요합니다",
   "openAICompatibleProvider": "OpenAI 호환 제공자",
@@ -164,7 +165,7 @@
 	"newTemplate": "새 템플릿",
 	"itemTemplate": "항목 템플릿",
 	"databaseItemFiltered": "항목이 필터링되었습니다. 보려면 필터 또는 그룹 설정을 해제하세요.",
-	"copyDatabaseItemLink": "항목 링크 복사",
+	"copyDatabaseItemLink": "항목 하이퍼링크 복사",
 	"databaseViewNotFound": "데이터베이스 보기를 찾을 수 없습니다",
 	"databaseItemNotFound": "데이터베이스 항목을 찾을 수 없습니다",
 	"alignment": "맞춤",

@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "Markdown-link van item kopiëren",
   "noAvailableDatabase": "Geen beschikbare database gevonden. Maak eerst een databaseblok in een document",
   "apiKeyRequired": "Een API-sleutel is vereist",
   "openAICompatibleProvider": "OpenAI-compatibele provider",
@@ -164,7 +165,7 @@
 	"newTemplate": "Nieuwe sjabloon",
 	"itemTemplate": "Itemsjabloon",
 	"databaseItemFiltered": "Het item is gefilterd. Verwijder het filter of de groeperingsinstellingen om het te bekijken.",
-	"copyDatabaseItemLink": "Itemkoppeling kopiëren",
+	"copyDatabaseItemLink": "Itemhyperlink kopiëren",
 	"databaseViewNotFound": "Databaseweergave niet gevonden",
 	"databaseItemNotFound": "Database-item niet gevonden",
 	"alignment": "Uitlijning",

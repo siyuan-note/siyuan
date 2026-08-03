@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "複製條目 Markdown 連結",
   "noAvailableDatabase": "找不到可用的資料庫，請先在一個文檔中建立資料庫區塊",
   "apiKeyRequired": "請先填寫 API Key",
   "openAICompatibleProvider": "OpenAI 規範提供商",
@@ -164,7 +165,7 @@
 	"newTemplate": "新增範本",
 	"itemTemplate": "條目範本",
 	"databaseItemFiltered": "條目已被篩選，可取消篩選或分組設定後進行檢視",
-	"copyDatabaseItemLink": "複製條目連結",
+	"copyDatabaseItemLink": "複製條目超連結",
 	"databaseViewNotFound": "找不到資料庫檢視",
 	"databaseItemNotFound": "找不到資料庫條目",
 	"alignment": "對齊方式",

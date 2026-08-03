@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "复制条目 Markdown 链接",
   "noAvailableDatabase": "未找到可用的数据库，请先在一个文档中创建数据库块",
   "apiKeyRequired": "请先填写 API Key",
   "openAICompatibleProvider": "OpenAI 规范提供商",
@@ -164,7 +165,7 @@
 	"newTemplate": "新建模板",
 	"itemTemplate": "条目模板",
 	"databaseItemFiltered": "条目已被过滤，可取消过滤或分组设置后进行查看",
-	"copyDatabaseItemLink": "复制条目链接",
+	"copyDatabaseItemLink": "复制条目超链接",
 	"databaseViewNotFound": "未找到数据库视图",
 	"databaseItemNotFound": "未找到数据库条目",
 	"alignment": "对齐方式",

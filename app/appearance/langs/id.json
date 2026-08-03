@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "Salin tautan Markdown item",
   "noAvailableDatabase": "Tidak ada basis data yang tersedia. Buat blok basis data di dokumen terlebih dahulu",
   "apiKeyRequired": "API Key diperlukan",
   "openAICompatibleProvider": "Penyedia yang kompatibel dengan OpenAI",
@@ -164,7 +165,7 @@
 	"newTemplate": "Templat baru",
 	"itemTemplate": "Templat item",
 	"databaseItemFiltered": "Item difilter. Hapus filter atau pengaturan pengelompokan untuk melihatnya.",
-	"copyDatabaseItemLink": "Salin tautan item",
+	"copyDatabaseItemLink": "Salin pranala item",
 	"databaseViewNotFound": "Tampilan basis data tidak ditemukan",
 	"databaseItemNotFound": "Item basis data tidak ditemukan",
 	"alignment": "Perataan",

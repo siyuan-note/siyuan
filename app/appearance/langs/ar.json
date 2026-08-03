@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "نسخ رابط Markdown للعنصر",
   "noAvailableDatabase": "لم يتم العثور على قواعد بيانات متاحة، أنشئ أولاً كتلة قاعدة بيانات في مستند",
   "apiKeyRequired": "مفتاح API مطلوب",
   "openAICompatibleProvider": "موفر متوافق مع مواصفات OpenAI",
@@ -164,7 +165,7 @@
 	"newTemplate": "قالب جديد",
 	"itemTemplate": "قالب العنصر",
 	"databaseItemFiltered": "تمت تصفية العنصر. أزل عامل التصفية أو إعدادات التجميع لعرضه.",
-	"copyDatabaseItemLink": "نسخ رابط العنصر",
+	"copyDatabaseItemLink": "نسخ الارتباط التشعبي للعنصر",
 	"databaseViewNotFound": "تعذر العثور على عرض قاعدة البيانات",
 	"databaseItemNotFound": "تعذر العثور على عنصر قاعدة البيانات",
 	"alignment": "طريقة المحاذاة",

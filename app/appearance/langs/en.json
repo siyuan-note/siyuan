@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "Copy item Markdown link",
   "noAvailableDatabase": "No available database found. Create a database block in a document first",
   "apiKeyRequired": "API Key is required",
   "openAICompatibleProvider": "OpenAI-compatible provider",
@@ -164,7 +165,7 @@
 	"newTemplate": "New template",
 	"itemTemplate": "Item template",
 	"databaseItemFiltered": "The item is filtered. Remove the filter or grouping settings to view it.",
-	"copyDatabaseItemLink": "Copy item link",
+	"copyDatabaseItemLink": "Copy item hyperlink",
 	"databaseViewNotFound": "Database view not found",
 	"databaseItemNotFound": "Database item not found",
 	"alignment": "Alignment",

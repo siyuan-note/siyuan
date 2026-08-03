@@ -1,4 +1,5 @@
 {
+	"copyDatabaseItemLinkInMd": "Копировать Markdown-ссылку элемента",
   "noAvailableDatabase": "Доступная база данных не найдена. Сначала создайте блок базы данных в документе",
   "apiKeyRequired": "Требуется API-ключ",
   "openAICompatibleProvider": "OpenAI-совместимый поставщик",
@@ -164,7 +165,7 @@
 	"newTemplate": "Новый шаблон",
 	"itemTemplate": "Шаблон элемента",
 	"databaseItemFiltered": "Элемент отфильтрован. Удалите фильтр или настройки группировки, чтобы просмотреть его.",
-	"copyDatabaseItemLink": "Копировать ссылку на элемент",
+	"copyDatabaseItemLink": "Копировать гиперссылку элемента",
 	"databaseViewNotFound": "Представление базы данных не найдено",
 	"databaseItemNotFound": "Элемент базы данных не найден",
 	"alignment": "Выравнивание",

@@ -10,16 +10,39 @@ const MAX_RECENT_FONT_STYLES = 14;
 
 const getRecentFontSizeDisplay = (fontSize: string) => {
     if (fontSize.endsWith("em")) {
-        const percentage = (parseFloat(fontSize) * 100).toFixed(0);
+        const percentage = `${(parseFloat(fontSize) * 100).toFixed(0)}%`;
         return {
             label: percentage,
-            tooltip: `${window.siyuan.languages.fontSize} ${percentage}%`,
+            tooltip: `${window.siyuan.languages.fontSize} ${percentage}`,
         };
     }
     return {
-        label: fontSize.endsWith("px") ? fontSize.slice(0, -2) : fontSize,
+        label: fontSize,
         tooltip: `${window.siyuan.languages.fontSize} ${fontSize}`,
     };
+};
+
+export const limitRecentFontStyleRows = (element: HTMLElement) => {
+    const wrapElement = element.querySelector('[data-id="lastUsedWrap"]');
+    if (!wrapElement) {
+        return;
+    }
+    const itemElements = Array.from(wrapElement.children) as HTMLElement[];
+    let rowCount = 0;
+    let lastTop: number;
+    let overflowIndex = itemElements.length;
+    itemElements.find((item, index) => {
+        if (item.offsetTop !== lastTop) {
+            rowCount++;
+            lastTop = item.offsetTop;
+        }
+        if (rowCount > 2) {
+            overflowIndex = index;
+            return true;
+        }
+        return false;
+    });
+    itemElements.slice(overflowIndex).forEach(item => item.classList.add("fn__none"));
 };
 
 export class Font extends ToolbarItem {
@@ -33,9 +56,11 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
             protyle.toolbar.subElement.style.padding = "";
-            protyle.toolbar.subElement.append(appearanceMenu(protyle, getFontNodeElements(protyle)));
+            const appearanceElement = appearanceMenu(protyle, getFontNodeElements(protyle));
+            protyle.toolbar.subElement.append(appearanceElement);
             protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
             protyle.toolbar.subElement.classList.remove("fn__none");
+            limitRecentFontStyleRows(appearanceElement);
             protyle.toolbar.subElementCloseCB = undefined;
             focusByRange(protyle.toolbar.range);
             /// #if !MOBILE
@@ -140,7 +165,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                 case "fontSize":
                     if (!disableFont) {
                         const fontSizeDisplay = getRecentFontSizeDisplay(lastFontStatus[1]);
-                        lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style ariaLabel" data-position="3south" aria-label="${fontSizeDisplay.tooltip}">${fontSizeDisplay.label}</button>`;
+                        lastColorHTML += `<button data-type="${lastFontStatus[0]}" data-value="${lastFontStatus[1]}" class="protyle-font__style ariaLabel" data-position="3south" aria-label="${fontSizeDisplay.tooltip}">${fontSizeDisplay.label}</button>`;
                     }
                     break;
                 case "style1":
@@ -223,7 +248,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                 if (dataType === "style1") {
                     applyFontStyle(dataType, target.style.backgroundColor + Constants.ZWSP + target.style.color);
                 } else if (dataType === "fontSize") {
-                    applyFontStyle(dataType, target.textContent.trim());
+                    applyFontStyle(dataType, target.getAttribute("data-value"));
                 } else if (dataType === "backgroundColor") {
                     applyFontStyle(dataType, target.style.backgroundColor);
                 } else if (dataType === "color") {

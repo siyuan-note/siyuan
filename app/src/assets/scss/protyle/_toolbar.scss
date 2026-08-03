@@ -114,10 +114,6 @@
     overflow: auto;
     max-height: calc(80vh - 24px);
 
-    [data-id="lastUsedWrap"] > :nth-child(n + 8) {
-      display: none;
-    }
-
     &__style {
       background-color: var(--b3-theme-background);
       margin: 4px;

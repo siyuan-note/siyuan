@@ -1,5 +1,5 @@
 import {setPosition} from "../../util/setPosition";
-import {appearanceMenu, fontEvent} from "./Font";
+import {appearanceMenu, fontEvent, limitRecentFontStyleRows} from "./Font";
 import {toolbarKeyToMenu} from "./util";
 import {matchHotKey} from "../util/hotKey";
 
@@ -26,12 +26,14 @@ export const openTableCellAppearance = (protyle: IProtyle, cellElements: HTMLTab
     protyle.toolbar.subElement.style.width = "";
     protyle.toolbar.subElement.style.padding = "";
     const fontElement = cells[0].querySelector('[data-type~="text"]') || cells[0];
-    protyle.toolbar.subElement.append(appearanceMenu(protyle, [fontElement], (type, color) => {
+    const appearanceElement = appearanceMenu(protyle, [fontElement], (type, color) => {
         applyTableCellFontStyle(protyle, cells, type, color);
         onApply?.();
-    }));
+    });
+    protyle.toolbar.subElement.append(appearanceElement);
     protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
     protyle.toolbar.subElement.classList.remove("fn__none");
+    limitRecentFontStyleRows(appearanceElement);
     protyle.toolbar.subElementCloseCB = undefined;
     const rect = cells[0].getBoundingClientRect();
     setPosition(protyle.toolbar.subElement, rect.left, rect.top);

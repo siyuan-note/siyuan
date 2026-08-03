@@ -6,6 +6,22 @@ import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {updateBatchTransaction} from "../wysiwyg/transaction";
 import {lineNumberRender} from "../render/highlightRender";
 
+const MAX_RECENT_FONT_STYLES = 14;
+
+const getRecentFontSizeDisplay = (fontSize: string) => {
+    if (fontSize.endsWith("em")) {
+        const percentage = (parseFloat(fontSize) * 100).toFixed(0);
+        return {
+            label: percentage,
+            tooltip: `${window.siyuan.languages.fontSize} ${percentage}%`,
+        };
+    }
+    return {
+        label: fontSize.endsWith("px") ? fontSize.slice(0, -2) : fontSize,
+        tooltip: `${window.siyuan.languages.fontSize} ${fontSize}`,
+    };
+};
+
 export class Font extends ToolbarItem {
     public element: HTMLElement;
 
@@ -116,14 +132,15 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                     lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.colorPrimary}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}"></button>`;
                     break;
                 case "style2":
-                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>`;
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.hollow}" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">A</button>`;
                     break;
                 case "style4":
-                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>`;
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.shadow}" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">A</button>`;
                     break;
                 case "fontSize":
                     if (!disableFont) {
-                        lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style">${lastFontStatus[1]}</button>`;
+                        const fontSizeDisplay = getRecentFontSizeDisplay(lastFontStatus[1]);
+                        lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style ariaLabel" data-position="3south" aria-label="${fontSizeDisplay.tooltip}">${fontSizeDisplay.label}</button>`;
                     }
                     break;
                 case "style1":
@@ -167,8 +184,8 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 <div data-id="fontStyle">${window.siyuan.languages.fontStyle}</div>
 <div class="fn__hr--small"></div>
 <div data-id="fontStyleWrap" class="fn__flex">
-    <button data-type="style2" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>
-    <button data-type="style4" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>
+    <button data-type="style2" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.hollow}" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">A</button>
+    <button data-type="style4" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.shadow}" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">A</button>
 </div>
 <div class="fn__hr${disableFont ? " fn__none" : ""}"></div>
 <div data-id="fontSize" class="fn__flex${disableFont ? " fn__none" : ""}">
@@ -260,11 +277,8 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                           focusRange = true, onChange?: (type: string, color?: string) => void) => {
     let localFontStyles = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (type) {
-        localFontStyles.splice(0, 0, `${type}${Constants.ZWSP}${color}`);
-        localFontStyles = [...new Set(localFontStyles)];
-        if (localFontStyles.length > 8) {
-            localFontStyles.splice(8, 1);
-        }
+        localFontStyles = [...new Set([`${type}${Constants.ZWSP}${color}`, ...localFontStyles])]
+            .slice(0, MAX_RECENT_FONT_STYLES);
         window.siyuan.storage[Constants.LOCAL_FONTSTYLES] = localFontStyles;
         setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
     } else {

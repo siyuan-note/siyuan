@@ -110,10 +110,14 @@
   &-font {
     font-size: 12px;
     padding: 4px 8px;
-    max-width: 248px;
+    max-width: 256px;
     overflow: auto;
     max-height: calc(80vh - 24px);
     scrollbar-gutter: stable;
+
+    [data-id="lastUsedWrap"] > :nth-child(n + 8) {
+      display: none;
+    }
 
     &__style {
       background-color: var(--b3-theme-background);

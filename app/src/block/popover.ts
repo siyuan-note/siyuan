@@ -27,8 +27,35 @@ export const initBlockPopover = (app: App) => {
     let timeoutHide: number;
     let penTimeout: number;
     let penTimeoutHide: number;
+    let lastPointerMoveLogTime = 0;
+    const logAndroidInputEvent = (event: MouseEvent | PointerEvent) => {
+        if (!window.JSAndroid?.logInputEvent) {
+            return;
+        }
+        const target = event.target instanceof Element ? event.target : undefined;
+        const pointerEvent = event as PointerEvent;
+        const targetClasses = target?.getAttribute("class")?.trim().split(/\s+/).slice(0, 4).join(".") || "";
+        const targetDetails = target ? [
+            target.tagName.toLowerCase(),
+            target.getAttribute("data-type") ? `data-type=${target.getAttribute("data-type")}` : "",
+            targetClasses ? `class=${targetClasses}` : "",
+        ].filter(Boolean).join(" ") : "unknown";
+        window.JSAndroid.logInputEvent([
+            `type=${event.type}`,
+            `pointerType=${pointerEvent.pointerType || "unavailable"}`,
+            `buttons=${event.buttons}`,
+            `button=${event.button}`,
+            `pressure=${typeof pointerEvent.pressure === "number" ? pointerEvent.pressure : "unavailable"}`,
+            `primary=${typeof pointerEvent.isPrimary === "boolean" ? pointerEvent.isPrimary : "unavailable"}`,
+            `client=(${Math.round(event.clientX)},${Math.round(event.clientY)})`,
+            `target=${targetDetails}`,
+            `touchDevice=${isTouchDevice()}`,
+            `floatWindowMode=${window.siyuan.config?.editor.floatWindowMode ?? "unavailable"}`,
+        ].join(", "));
+    };
     // 编辑器内容块引用/backlinks/tag/bookmark/套娃中使用
     document.addEventListener("mouseover", (event: MouseEvent & { target: HTMLElement, path: HTMLElement[] }) => {
+        logAndroidInputEvent(event);
         if (!window.siyuan.config || !window.siyuan.menus ||
             // 拖拽时禁止
             window.siyuan.dragElement || document.onmousemove) {
@@ -269,6 +296,7 @@ export const initBlockPopover = (app: App) => {
             target: HTMLElement,
             path: HTMLElement[]
         }) => {
+            logAndroidInputEvent(event);
             clearTimeout(penTimeout);
             clearTimeout(penTimeoutHide);
             if (event.pointerType !== "pen" || event.buttons !== 0 ||
@@ -300,13 +328,23 @@ export const initBlockPopover = (app: App) => {
                 showPopover(app);
             }, window.siyuan.config.editor.floatWindowDelay);
         }, {capture: true, passive: true});
+        document.addEventListener("pointermove", (event: PointerEvent) => {
+            const now = performance.now();
+            if (now - lastPointerMoveLogTime < 250) {
+                return;
+            }
+            lastPointerMoveLogTime = now;
+            logAndroidInputEvent(event);
+        }, {capture: true, passive: true});
         const cancelPenHover = (event: PointerEvent) => {
+            logAndroidInputEvent(event);
             if (event.pointerType === "pen") {
                 clearTimeout(penTimeout);
                 clearTimeout(penTimeoutHide);
             }
         };
         const handlePenPointerDown = (event: PointerEvent & { path: HTMLElement[] }) => {
+            logAndroidInputEvent(event);
             if (event.pointerType !== "pen") {
                 return;
             }

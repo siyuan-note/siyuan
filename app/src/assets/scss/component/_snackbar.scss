@@ -5,6 +5,7 @@
   justify-self: end;
   font-size: var(--b3-font-size);
   pointer-events: auto;
+  app-region: no-drag;
 
   &:not(:first-child) {
     margin-top: 16px;

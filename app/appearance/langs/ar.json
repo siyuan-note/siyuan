@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "صف الرأس",
+	"tableHeaderColumn": "عمود الرأس",
 	"copyDatabaseItemLinkInMd": "نسخ رابط Markdown للعنصر",
   "noAvailableDatabase": "لم يتم العثور على قواعد بيانات متاحة، أنشئ أولاً كتلة قاعدة بيانات في مستند",
   "apiKeyRequired": "مفتاح API مطلوب",

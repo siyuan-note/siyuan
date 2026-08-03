@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Fila de encabezado",
+	"tableHeaderColumn": "Columna de encabezado",
 	"copyDatabaseItemLinkInMd": "Copiar enlace Markdown del elemento",
   "noAvailableDatabase": "No se encontró ninguna base de datos disponible. Crea primero un bloque de base de datos en un documento",
   "apiKeyRequired": "Se requiere una clave de API",

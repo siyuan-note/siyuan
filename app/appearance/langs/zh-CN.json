@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "标题行",
+	"tableHeaderColumn": "标题列",
 	"copyDatabaseItemLinkInMd": "复制条目 Markdown 链接",
   "noAvailableDatabase": "未找到可用的数据库，请先在一个文档中创建数据库块",
   "apiKeyRequired": "请先填写 API Key",

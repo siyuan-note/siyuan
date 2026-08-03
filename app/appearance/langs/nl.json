@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Koprij",
+	"tableHeaderColumn": "Kopkolom",
 	"copyDatabaseItemLinkInMd": "Markdown-link van item kopiëren",
   "noAvailableDatabase": "Geen beschikbare database gevonden. Maak eerst een databaseblok in een document",
   "apiKeyRequired": "Een API-sleutel is vereist",

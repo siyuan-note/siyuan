@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "見出し行",
+	"tableHeaderColumn": "見出し列",
 	"copyDatabaseItemLinkInMd": "項目の Markdown リンクをコピー",
   "noAvailableDatabase": "利用可能なデータベースが見つかりません。先にドキュメント内にデータベースブロックを作成してください",
   "apiKeyRequired": "API Key が必要です",

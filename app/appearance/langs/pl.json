@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Wiersz nagłówka",
+	"tableHeaderColumn": "Kolumna nagłówka",
 	"copyDatabaseItemLinkInMd": "Kopiuj link Markdown elementu",
   "noAvailableDatabase": "Nie znaleziono dostępnej bazy danych. Najpierw utwórz blok bazy danych w dokumencie",
   "apiKeyRequired": "Klucz API jest wymagany",

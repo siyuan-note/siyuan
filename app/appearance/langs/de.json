@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Kopfzeile",
+	"tableHeaderColumn": "Kopfspalte",
 	"copyDatabaseItemLinkInMd": "Markdown-Link des Eintrags kopieren",
   "noAvailableDatabase": "Keine verfügbare Datenbank gefunden; erstelle zuerst einen Datenbankblock in einem Dokument",
   "apiKeyRequired": "API-Schlüssel ist erforderlich",

@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Riadok hlavičky",
+	"tableHeaderColumn": "Stĺpec hlavičky",
 	"copyDatabaseItemLinkInMd": "Kopírovať Markdown odkaz položky",
   "noAvailableDatabase": "Nenašla sa žiadna dostupná databáza. Najprv vytvorte databázový blok v dokumente",
   "apiKeyRequired": "Vyžaduje sa kľúč API",

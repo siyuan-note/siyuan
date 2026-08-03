@@ -380,6 +380,16 @@
     }
   }
 
+  [data-type="NodeTable"][custom-table-header-row="false"] thead th,
+  [data-type="NodeTable"][custom-table-header-row="false"] thead td {
+    font-weight: normal;
+  }
+
+  [data-type="NodeTable"][custom-table-header-column="true"] tr > th:first-child,
+  [data-type="NodeTable"][custom-table-header-column="true"] tr > td:first-child {
+    font-weight: 600;
+  }
+
   code:not(.hljs),
   span[data-type~="code"] {
     @extend .fn__code;

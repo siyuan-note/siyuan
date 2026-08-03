@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Baris tajuk",
+	"tableHeaderColumn": "Kolom tajuk",
 	"copyDatabaseItemLinkInMd": "Salin tautan Markdown item",
   "noAvailableDatabase": "Tidak ada basis data yang tersedia. Buat blok basis data di dokumen terlebih dahulu",
   "apiKeyRequired": "API Key diperlukan",

@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Başlık satırı",
+	"tableHeaderColumn": "Başlık sütunu",
 	"copyDatabaseItemLinkInMd": "Öğe Markdown bağlantısını kopyala",
   "noAvailableDatabase": "Kullanılabilir veritabanı bulunamadı. Önce bir belgede veritabanı bloğu oluşturun",
   "apiKeyRequired": "API Key gereklidir",

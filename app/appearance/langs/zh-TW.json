@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "標題列",
+	"tableHeaderColumn": "標題欄",
 	"copyDatabaseItemLinkInMd": "複製條目 Markdown 連結",
   "noAvailableDatabase": "找不到可用的資料庫，請先在一個文檔中建立資料庫區塊",
   "apiKeyRequired": "請先填寫 API Key",

@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "머리글 행",
+	"tableHeaderColumn": "머리글 열",
 	"copyDatabaseItemLinkInMd": "항목 Markdown 링크 복사",
   "noAvailableDatabase": "사용 가능한 데이터베이스를 찾을 수 없습니다. 먼저 문서에 데이터베이스 블록을 만드세요",
   "apiKeyRequired": "API Key가 필요합니다",

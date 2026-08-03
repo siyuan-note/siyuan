@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Header row",
+	"tableHeaderColumn": "Header column",
 	"copyDatabaseItemLinkInMd": "Copy item Markdown link",
   "noAvailableDatabase": "No available database found. Create a database block in a document first",
   "apiKeyRequired": "API Key is required",

@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Riga di intestazione",
+	"tableHeaderColumn": "Colonna di intestazione",
 	"copyDatabaseItemLinkInMd": "Copia collegamento Markdown dell’elemento",
   "noAvailableDatabase": "Nessun database disponibile trovato. Crea prima un blocco database in un documento",
   "apiKeyRequired": "È richiesta una chiave API",

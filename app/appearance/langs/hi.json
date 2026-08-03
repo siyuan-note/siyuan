@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "शीर्षलेख पंक्ति",
+	"tableHeaderColumn": "शीर्षलेख स्तंभ",
 	"copyDatabaseItemLinkInMd": "आइटम Markdown लिंक कॉपी करें",
   "noAvailableDatabase": "कोई उपलब्ध डेटाबेस नहीं मिला। पहले किसी दस्तावेज़ में डेटाबेस ब्लॉक बनाएँ",
   "apiKeyRequired": "API Key आवश्यक है",

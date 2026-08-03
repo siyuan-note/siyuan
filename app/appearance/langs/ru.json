@@ -1,4 +1,6 @@
 {
+	"tableHeaderRow": "Строка заголовка",
+	"tableHeaderColumn": "Столбец заголовка",
 	"copyDatabaseItemLinkInMd": "Копировать Markdown-ссылку элемента",
   "noAvailableDatabase": "Доступная база данных не найдена. Сначала создайте блок базы данных в документе",
   "apiKeyRequired": "Требуется API-ключ",

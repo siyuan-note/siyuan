@@ -330,24 +330,62 @@
   }
 
   table {
+    --b3-table-border-radius-top-left: var(--b3-border-radius-s);
+    --b3-table-border-radius-top-right: var(--b3-border-radius-s);
+    --b3-table-border-radius-bottom-right: var(--b3-border-radius-s);
+    --b3-table-border-radius-bottom-left: var(--b3-border-radius-s);
     border-collapse: collapse;
-    border-radius: var(--b3-border-radius-s);
+    border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right)
+      var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
     empty-cells: show;
     margin: 0;
     overflow: hidden;
-    outline: 1px solid var(--b3-theme-surface-lighter);
-    outline-offset: -1px;
     border-spacing: 0;
     width: max-content;
 
+    thead,
+    tbody {
+      position: relative;
+
+      &::after {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        border-right: 1px solid var(--b3-theme-surface-lighter);
+        border-left: 1px solid var(--b3-theme-surface-lighter);
+        content: "";
+        pointer-events: none;
+      }
+    }
+
+    thead::after {
+      border-top: 1px solid var(--b3-theme-surface-lighter);
+      border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) 0 0;
+    }
+
+    tbody:last-of-type::after {
+      border-bottom: 1px solid var(--b3-theme-surface-lighter);
+      border-radius: 0 0 var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
+    }
+
+    tbody:not(:has(> tr))::after {
+      content: none;
+    }
+
+    &:not(:has(> tbody > tr)) thead::after {
+      border-bottom: 1px solid var(--b3-theme-surface-lighter);
+      border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right)
+        var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
+    }
+
     &.protyle-table-control__table--add-row {
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
+      --b3-table-border-radius-bottom-right: 0;
+      --b3-table-border-radius-bottom-left: 0;
     }
 
     &.protyle-table-control__table--add-column {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
+      --b3-table-border-radius-top-right: 0;
+      --b3-table-border-radius-bottom-right: 0;
     }
 
     td,

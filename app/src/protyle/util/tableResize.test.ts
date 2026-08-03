@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {
     constrainTableResizeCount,
+    getTableResizeControlCenter,
     getTableResizeCount,
     isTableCellContentEmpty,
 } from "./tableResize";
@@ -43,5 +44,16 @@ describe("constrainTableResizeCount", () => {
 
     it("does not constrain growth", () => {
         assert.equal(constrainTableResizeCount(8, 5, 4, new Set([4])), 8);
+    });
+});
+
+describe("getTableResizeControlCenter", () => {
+    it("keeps the control after a visible table edge", () => {
+        assert.equal(getTableResizeControlCenter(240, 0, 400, 16), 248);
+    });
+
+    it("keeps the whole control inside the editor viewport", () => {
+        assert.equal(getTableResizeControlCenter(395, 0, 400, 16), 392);
+        assert.equal(getTableResizeControlCenter(450, 0, 400, 16), 392);
     });
 });

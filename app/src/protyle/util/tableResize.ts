@@ -34,3 +34,14 @@ export const constrainTableResizeCount = (requestedCount: number, startCount: nu
     }
     return startCount;
 };
+
+export const getTableResizeControlCenter = (edge: number, viewportStart: number, viewportEnd: number,
+                                            controlSize: number) => {
+    const halfSize = controlSize / 2;
+    const min = viewportStart + halfSize;
+    const max = viewportEnd - halfSize;
+    if (min > max) {
+        return (viewportStart + viewportEnd) / 2;
+    }
+    return Math.min(Math.max(edge + halfSize, min), max);
+};

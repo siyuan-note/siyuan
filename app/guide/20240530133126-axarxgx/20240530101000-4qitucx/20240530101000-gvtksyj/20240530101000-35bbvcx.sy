@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260803170332"
 	},
 	"Children": [
 		{
@@ -1302,7 +1302,7 @@
 			"Properties": {
 				"ID": "20240530101000-rjjxxn8",
 				"id": "20240530101000-p035stn",
-				"updated": "20260803163402"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -1780,7 +1780,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20240530101000-3b4bvhu",
-				"updated": "20260803163402"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -1838,7 +1838,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-jplysif",
-				"updated": "20260803163402"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -1850,7 +1850,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-veodkk2",
-						"updated": "20260803163402"
+						"updated": "20260803170332"
 					},
 					"Children": [
 						{
@@ -1858,12 +1858,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-u4lkzdu",
-								"updated": "20260803163402"
+								"updated": "20260803170332"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "HTML ブロックを使用する場合、ブロック内のコードはデフォルトでサニタイズされます。サニタイズが不要な場合は、 "
+									"Data": "HTML ブロックを使用する場合、ブロック内のコードはデフォルトでサニタイズされます。サニタイズが不要な場合は、"
 								},
 								{
 									"Type": "NodeTextMark",

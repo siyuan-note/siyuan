@@ -7,7 +7,7 @@
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
 		"type": "doc",
-		"updated": "20260803165036"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -439,7 +439,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220808181824-pwnc2gx",
-				"updated": "20260803165036"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -507,7 +507,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220619172140-cq7i3di",
-				"updated": "20260803165036"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -519,7 +519,7 @@
 					},
 					"Properties": {
 						"id": "20220619172140-8tsb58k",
-						"updated": "20260803163243"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -527,12 +527,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172140-fk0wiay",
-								"updated": "20260803163243"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "桌面端： "
+									"Data": "桌面端："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -559,7 +559,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ / "
+									"Data": "​/ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -583,7 +583,7 @@
 					},
 					"Properties": {
 						"id": "20220619172140-s4joicq",
-						"updated": "20260803165036"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -591,12 +591,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172140-9qv0epp",
-								"updated": "20260803165036"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "移動端： "
+									"Data": "移動端："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -623,7 +623,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ / "
+									"Data": "​/ "
 								},
 								{
 									"Type": "NodeTextMark",

@@ -6,7 +6,7 @@
 		"id": "20210613191509-cbkxcbz",
 		"title": "Content Block Attribute",
 		"type": "doc",
-		"updated": "20251201102407"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -214,7 +214,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613191548-65gd8yo",
-				"updated": "20251201102407"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -228,7 +228,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20251201102224-5uvilvm",
-				"updated": "20251201102407"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -242,7 +242,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ -"
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",

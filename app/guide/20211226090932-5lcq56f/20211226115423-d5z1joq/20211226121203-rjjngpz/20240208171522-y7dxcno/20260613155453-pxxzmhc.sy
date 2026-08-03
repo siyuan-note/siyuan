@@ -6,7 +6,7 @@
 		"id": "20260613155453-pxxzmhc",
 		"title": "字段類型",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -4697,7 +4697,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-shwhovg",
-				"updated": "20260803163402"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -4736,7 +4736,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-aw35j3j",
-				"updated": "20260803163402"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -4872,7 +4872,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-s098jmc",
-						"updated": "20260803163402"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -4880,7 +4880,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-gpfnad8",
-								"updated": "20260803163402"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
@@ -4926,7 +4926,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​，但請確認程式碼安全後再開啟，以免遭遇跨站腳本攻擊（XSS）"
+									"Data": "​，但請確認程式碼安全後再開啟，以免遭遇跨站腳本攻擊（XSS）"
 								}
 							]
 						}

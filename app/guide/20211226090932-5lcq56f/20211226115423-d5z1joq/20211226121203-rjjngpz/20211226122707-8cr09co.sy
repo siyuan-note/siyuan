@@ -6,7 +6,7 @@
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -648,7 +648,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122720-u1qd8zw",
-				"updated": "20260803163402"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -963,7 +963,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-r88wlzt",
-				"updated": "20260803163402"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1018,7 +1018,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120134-aiy219j",
-				"updated": "20260803163402"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1050,7 +1050,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ，或者手動刪除 "
+					"Data": "，或者手動刪除 "
 				},
 				{
 					"Type": "NodeTextMark",

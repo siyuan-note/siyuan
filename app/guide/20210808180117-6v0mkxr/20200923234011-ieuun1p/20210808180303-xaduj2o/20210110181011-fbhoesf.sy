@@ -6,7 +6,7 @@
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
 		"type": "doc",
-		"updated": "20260803163440"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180619-15jwt8e",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -187,7 +187,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180619-9fh070b",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -201,7 +201,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613180619-om57ubp",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​, then configure under the new diary settings:"
+					"Data": "​, then configure under the new diary settings:"
 				}
 			]
 		},

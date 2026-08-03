@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20260803163440"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -680,7 +680,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091559-kgrtuyh",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -995,7 +995,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-rhii2c7",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1009,7 +1009,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-mjy7por",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1041,7 +1041,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " . History will be automatically deleted."
+					"Data": ". History will be automatically deleted."
 				}
 			]
 		},
@@ -1050,7 +1050,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-3fqyf3h",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1082,7 +1082,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " , or manually delete the "
+					"Data": ", or manually delete the "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1119,7 +1119,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120602-drz9hwc",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1134,7 +1134,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-iya2886",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1148,7 +1148,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-wipwu6g",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1180,7 +1180,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ."
+					"Data": "."
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20200923234011-ieuun1p",
 		"title": "Please Start Here",
 		"type": "doc",
-		"updated": "20260803165036"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -75,7 +75,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225220954-keui8uy",
-				"updated": "20260803165036"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201225220954-dlgzk1o",
-				"updated": "20260803165036"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -102,7 +102,7 @@
 					},
 					"Properties": {
 						"id": "20201225220954-e913snx",
-						"updated": "20260803165036"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -110,7 +110,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131161940-kfs31q6",
-								"updated": "20260803165036"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
@@ -142,7 +142,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​. Then create a new document under the notebook"
+									"Data": "​. Then create a new document under the notebook"
 								}
 							]
 						}

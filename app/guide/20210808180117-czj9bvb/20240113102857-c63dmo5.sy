@@ -7,7 +7,7 @@
 		"id": "20240113102857-c63dmo5",
 		"title": "移动端 App",
 		"type": "doc",
-		"updated": "20260803165036"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -347,7 +347,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113104101-rz1z8en",
-				"updated": "20260803165036"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -375,7 +375,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113104506-ko5m727",
-				"updated": "20260803165036"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -398,7 +398,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​，然后在桌面端浏览器上访问配置。"
+					"Data": "​，然后在桌面端浏览器上访问配置。"
 				}
 			]
 		},

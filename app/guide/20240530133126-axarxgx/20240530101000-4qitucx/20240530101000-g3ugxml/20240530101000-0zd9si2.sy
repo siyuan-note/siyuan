@@ -7,7 +7,7 @@
 		"id": "20240530101000-0zd9si2",
 		"title": "仮想参照",
 		"type": "doc",
-		"updated": "20260803163243"
+		"updated": "20260803170332"
 	},
 	"Children": [
 		{
@@ -106,7 +106,7 @@
 			"Properties": {
 				"ID": "20240530101000-ruqlipv",
 				"id": "20240530101000-flxygac",
-				"updated": "20260803163243"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -136,12 +136,12 @@
 			"Properties": {
 				"ID": "20240530101000-r1ni4dp",
 				"id": "20240530101000-eb0j7c2",
-				"updated": "20260803163243"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "キーワードの検索範囲は、 "
+					"Data": "キーワードの検索範囲は、"
 				},
 				{
 					"Type": "NodeTextMark",

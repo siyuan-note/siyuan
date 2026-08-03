@@ -6,7 +6,7 @@
 		"id": "20210505164949-c085p1d",
 		"title": "Web Clipping",
 		"type": "doc",
-		"updated": "20260803163440"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -47,7 +47,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210505165011-h715v6a",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -138,7 +138,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210531181045-0x2syfg",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -155,7 +155,7 @@
 			},
 			"Properties": {
 				"id": "20210820171625-1k4iq6x",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -169,7 +169,7 @@
 					},
 					"Properties": {
 						"id": "20210820171625-vjo1bcb",
-						"updated": "20260803163440"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -177,7 +177,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210820171625-cerwawc",
-								"updated": "20260803163440"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
@@ -209,7 +209,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​)"
+									"Data": "​)"
 								}
 							]
 						}

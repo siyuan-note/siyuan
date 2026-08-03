@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20260803165036"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -442,7 +442,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220808181753-3ligpvz",
-				"updated": "20260803165036"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -510,7 +510,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220619172044-z4myy48",
-				"updated": "20260803165036"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -522,7 +522,7 @@
 					},
 					"Properties": {
 						"id": "20220619172044-451fqpf",
-						"updated": "20260803163243"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -530,7 +530,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172044-bx4v3iz",
-								"updated": "20260803163243"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
@@ -562,7 +562,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​​ / "
+									"Data": "​​/ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -586,7 +586,7 @@
 					},
 					"Properties": {
 						"id": "20220619172044-r6xfdvm",
-						"updated": "20260803165036"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -594,7 +594,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172044-ccusmko",
-								"updated": "20260803165036"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
@@ -626,7 +626,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ / "
+									"Data": "​/ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -692,7 +692,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220909100946-x94gyft",
-				"updated": "20260803163243"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -707,7 +707,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220909100946-nieof3y",
-				"updated": "20260803163243"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -747,7 +747,7 @@
 					},
 					"Properties": {
 						"id": "20220909100946-ej9yi4j",
-						"updated": "20260803163243"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -755,7 +755,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220909100946-n3d5619",
-								"updated": "20260803163243"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
@@ -787,7 +787,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " , so that SiYuan will automatically download The latest version of the installation package and prompts to install"
+									"Data": ", so that SiYuan will automatically download The latest version of the installation package and prompts to install"
 								}
 							]
 						}
@@ -828,7 +828,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100946-9eyc3uh",
-				"updated": "20260803163243"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -869,7 +869,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​, or pay attention to "
+					"Data": "​, or pay attention to "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -889,7 +889,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501231348-sx3l5qp",
-				"updated": "20220501231357"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -903,7 +903,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501231348-bfslmf5",
-				"updated": "20220501231419"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -917,7 +917,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ."
+					"Data": "."
 				}
 			]
 		},

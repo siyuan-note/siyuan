@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20260803163440"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193423-4fjlvrg",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193423-qw5e4r0",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -91,7 +91,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​. Disabled by default, meaning searching "
+					"Data": "​. Disabled by default, meaning searching "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -119,7 +119,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193423-1oey891",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -133,7 +133,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193423-f3tgfru",
-				"updated": "20260803163440"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -165,7 +165,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​. Enabled by default, meaning searching \"经济\" will not match \"經濟\". When disabled, searching \"经济\" matches both \"经济\" and \"經濟\". After toggling this option, you must wait for index rebuilding to complete before it takes effect."
+					"Data": "​. Enabled by default, meaning searching \"经济\" will not match \"經濟\". When disabled, searching \"经济\" matches both \"经济\" and \"經濟\". After toggling this option, you must wait for index rebuilding to complete before it takes effect."
 				}
 			]
 		},

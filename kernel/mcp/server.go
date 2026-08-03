@@ -150,11 +150,13 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 	}()
 
 	sdkTool := &mcpsdk.Tool{
-		Name:         name,
-		Title:        tool.Title,
-		Description:  tool.Description,
-		InputSchema:  tool.InputSchema,
-		OutputSchema: tool.OutputSchema,
+		Name:        name,
+		Title:       tool.Title,
+		Description: tool.Description,
+		InputSchema: tool.InputSchema,
+	}
+	if tool.OutputSchema != nil {
+		sdkTool.OutputSchema = tool.OutputSchema
 	}
 	if tool.ReadOnlyHint {
 		sdkTool.Annotations = &mcpsdk.ToolAnnotations{ReadOnlyHint: true}

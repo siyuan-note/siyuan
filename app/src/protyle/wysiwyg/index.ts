@@ -110,6 +110,7 @@ import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
 import {removeSearchMark} from "../toolbar/util";
+import {getTableCellTextStyleMenus} from "../toolbar/tableCell";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
@@ -2457,6 +2458,13 @@ export class WYSIWYG {
                                 }
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                icon: "iconFont",
+                                label: window.siyuan.languages.fontStyle,
+                                submenu: getTableCellTextStyleMenus(protyle, selectedCellElements, () => {
+                                    tableSelectElement.removeAttribute("style");
+                                }),
+                            }).element);
                             window.siyuan.menus.menu.append(new MenuItem({
                                 icon: "iconTheme",
                                 label: window.siyuan.languages.colorPrimary,

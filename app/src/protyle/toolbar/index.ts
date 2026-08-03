@@ -12,6 +12,7 @@ import {
     getSelectionOffset,
     getSelectionPosition,
     getUndoFocusContext,
+    IBlockRange,
     selectAll
 } from "../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
@@ -227,6 +228,11 @@ export class Toolbar {
         const nodeElement = hasClosestBlock(range.startContainer);
         const endElement = hasClosestBlock(range.endContainer);
         const isCrossBlock = !!nodeElement && !!endElement && nodeElement !== endElement;
+        const startCellElement = hasClosestByTag(range.startContainer, "TD") ||
+            hasClosestByTag(range.startContainer, "TH");
+        const endCellElement = hasClosestByTag(range.endContainer, "TD") ||
+            hasClosestByTag(range.endContainer, "TH");
+        const isCrossCell = !!startCellElement && !!endCellElement && startCellElement !== endCellElement;
         if (isMobile() || !nodeElement || protyle.disabled || (!isCrossBlock && (
             nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
             nodeElement.classList.contains("av") ||
@@ -267,8 +273,8 @@ export class Toolbar {
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
             item.classList.remove("protyle-toolbar__item--current");
         });
-        this.element.querySelector('[data-type="a"]')?.toggleAttribute("disabled", isCrossBlock);
-        this.element.querySelector('[data-type="block-ref"]')?.toggleAttribute("disabled", isCrossBlock);
+        this.element.querySelector('[data-type="a"]')?.toggleAttribute("disabled", isCrossBlock || isCrossCell);
+        this.element.querySelector('[data-type="block-ref"]')?.toggleAttribute("disabled", isCrossBlock || isCrossCell);
         const types = this.getCurrentType();
         types.forEach(item => {
             if (["search-mark", "a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math",
@@ -353,7 +359,11 @@ export class Toolbar {
         if (!endElement) {
             return;
         }
-        if (nodeElement !== endElement) {
+        const startCellElement = hasClosestByTag(this.range.startContainer, "TD") ||
+            hasClosestByTag(this.range.startContainer, "TH");
+        const endCellElement = hasClosestByTag(this.range.endContainer, "TD") ||
+            hasClosestByTag(this.range.endContainer, "TH");
+        if (nodeElement !== endElement || (startCellElement && endCellElement && startCellElement !== endCellElement)) {
             if (type === "a") {
                 return;
             }
@@ -375,11 +385,64 @@ export class Toolbar {
             ["NodeCodeBlock", "NodeAttributeView"]).filter(item =>
             !(startsAtBlockEnd && item.editableElement.contains(selectedRange.startContainer)) &&
             item.range.toString().split(Constants.ZWSP).join(""));
+        const preserveStart = !ranges.some(item => item.editableElement.contains(selectedRange.startContainer));
+        const preserveEnd = !ranges.some(item => item.editableElement.contains(selectedRange.endContainer));
+
+        return this.setRangesInlineMark(protyle, ranges, type, action, textObj, {
+            focusRange,
+            preserveEnd,
+            preserveStart,
+            selectedRange,
+        });
+    }
+
+    private getTableCellRanges(cellElements: HTMLTableCellElement[]) {
+        const ranges: IBlockRange[] = [];
+        new Set(cellElements).forEach(cellElement => {
+            if (!cellElement.isConnected || cellElement.classList.contains("fn__none")) {
+                return;
+            }
+            const blockElement = hasClosestBlock(cellElement) as HTMLElement;
+            if (!blockElement || blockElement.getAttribute("data-type") !== "NodeTable") {
+                return;
+            }
+            const range = document.createRange();
+            range.selectNodeContents(cellElement);
+            if (!range.toString().split(Constants.ZWSP).join("")) {
+                return;
+            }
+            const position = getSelectionOffset(cellElement, undefined, range);
+            ranges.push({
+                blockElement,
+                editableElement: cellElement,
+                range,
+                start: position.start,
+                end: position.end,
+            });
+        });
+        return ranges;
+    }
+
+    public hasTableCellsInlineMark(cellElements: HTMLTableCellElement[], type: string) {
+        const ranges = this.getTableCellRanges(cellElements);
+        return ranges.length > 0 && ranges.every(item => this.hasInlineMark(item.editableElement, item.range, type));
+    }
+
+    public setTableCellsInlineMark(protyle: IProtyle, cellElements: HTMLTableCellElement[], type: string,
+                                   textObj?: ITextOption) {
+        return this.setRangesInlineMark(protyle, this.getTableCellRanges(cellElements), type, "range", textObj);
+    }
+
+    private setRangesInlineMark(protyle: IProtyle, ranges: IBlockRange[], type: string, action: "range" | "toolbar",
+                                textObj?: ITextOption, options?: {
+            focusRange?: boolean,
+            preserveEnd?: boolean,
+            preserveStart?: boolean,
+            selectedRange?: Range,
+        }) {
         if (ranges.length === 0) {
             return;
         }
-        const preserveStart = !ranges.some(item => item.editableElement.contains(selectedRange.startContainer));
-        const preserveEnd = !ranges.some(item => item.editableElement.contains(selectedRange.endContainer));
 
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const remove = type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
@@ -425,16 +488,16 @@ export class Toolbar {
                 }
                 newNodes.push(...connectedNodes);
             });
-        }, getUndoFocusContext(protyle.wysiwyg.element, selectedRange, true));
-        if (selectionRange) {
-            if (preserveStart) {
-                selectionRange.setStart(selectedRange.startContainer, selectedRange.startOffset);
+        }, options?.selectedRange ? getUndoFocusContext(protyle.wysiwyg.element, options.selectedRange, true) : undefined);
+        if (selectionRange && options?.selectedRange) {
+            if (options.preserveStart) {
+                selectionRange.setStart(options.selectedRange.startContainer, options.selectedRange.startOffset);
             }
-            if (preserveEnd) {
-                selectionRange.setEnd(selectedRange.endContainer, selectedRange.endOffset);
+            if (options.preserveEnd) {
+                selectionRange.setEnd(options.selectedRange.endContainer, options.selectedRange.endOffset);
             }
             this.range = selectionRange;
-            if (focusRange) {
+            if (options.focusRange) {
                 focusByRange(this.range);
             }
         }

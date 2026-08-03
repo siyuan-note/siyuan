@@ -20,6 +20,7 @@ import {
     getTableResizeCount,
     isTableCellContentEmpty,
 } from "./tableResize";
+import {applyTableCellStyleHotkey, getTableCellTextStyleMenus} from "../toolbar/tableCell";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -416,6 +417,12 @@ export class TableControl {
             event.preventDefault();
             event.stopImmediatePropagation();
             this.openMenu(event.clientX, event.clientY);
+        }, {capture: true, signal});
+        document.addEventListener("keydown", event => {
+            if (this.selection && !this.protyle.disabled &&
+                applyTableCellStyleHotkey(this.protyle, this.getSelectedCells(), event, () => this.scheduleRender())) {
+                return;
+            }
         }, {capture: true, signal});
         document.addEventListener("keydown", event => {
             if (event.key !== "Escape") {
@@ -1281,6 +1288,11 @@ export class TableControl {
                 }
                 menu.append(new MenuItem({type: "separator"}).element);
             }
+            menu.append(new MenuItem({
+                icon: "iconFont",
+                label: window.siyuan.languages.fontStyle,
+                submenu: getTableCellTextStyleMenus(this.protyle, this.getSelectedCells(), () => this.scheduleRender()),
+            }).element);
             menu.append(new MenuItem({
                 icon: "iconTheme",
                 label: window.siyuan.languages.colorPrimary,

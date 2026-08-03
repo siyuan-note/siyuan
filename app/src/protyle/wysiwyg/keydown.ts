@@ -43,7 +43,7 @@ import {
 } from "./getBlock";
 import {isIncludesHotKey, matchHotKey} from "../util/hotKey";
 import {enter, softEnter} from "./enter";
-import {clearTableCell, fixTable} from "../util/table";
+import {clearTableCell, fixTable, isIncludeCell} from "../util/table";
 import {
     transaction,
     insertEmptyBlockquote,
@@ -56,6 +56,7 @@ import {
 } from "./transaction";
 import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
 import {fontEvent} from "../toolbar/Font";
+import {applyTableCellStyleHotkey} from "../toolbar/tableCell";
 import {
     addSubList,
     insertEmptyChildList,
@@ -1694,6 +1695,29 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // toolbar action
+        const tableSelectElement = nodeType === "NodeTable" ?
+            nodeElement.querySelector(".table__select") as HTMLElement : undefined;
+        if (tableSelectElement?.clientHeight > 0) {
+            const selectedCellElements: HTMLTableCellElement[] = [];
+            const scrollLeft = nodeElement.firstElementChild.scrollLeft;
+            const scrollTop = nodeElement.querySelector("table").scrollTop;
+            nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                if (!item.classList.contains("fn__none") && isIncludeCell({
+                    tableSelectElement,
+                    scrollLeft,
+                    scrollTop,
+                    item,
+                })) {
+                    selectedCellElements.push(item);
+                }
+            });
+            if (applyTableCellStyleHotkey(protyle, selectedCellElements, event, () => {
+                tableSelectElement.removeAttribute("style");
+            })) {
+                protyle.wysiwyg.preventKeyup = true;
+                return true;
+            }
+        }
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.lastUsed.custom, event)) {
             protyle.toolbar.range = range;
             const selectElements: Element[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));

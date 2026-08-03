@@ -70,7 +70,8 @@ export const convertFontSize = (fontSize: string, unit: "px" | "em", baseFontSiz
     return fontSize.endsWith("px") ? Math.round(value) + "px" : Math.round(value * base) + "px";
 };
 
-export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
+export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
+                               onChange?: (type: string, color?: string) => void) => {
     let colorHTML = "";
     ["", "var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
         "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
@@ -136,6 +137,9 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         lastColorHTML += "</div>";
     }
     const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
+    const applyFontStyle = (type: string, color?: string) => {
+        fontEvent(protyle, nodeElements, type, color, true, onChange);
+    };
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
 <div data-id="color">${window.siyuan.languages.color}</div>
@@ -200,15 +204,15 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
             const dataType = target.getAttribute("data-type");
             if (target.tagName === "BUTTON") {
                 if (dataType === "style1") {
-                    fontEvent(protyle, nodeElements, dataType, target.style.backgroundColor + Constants.ZWSP + target.style.color);
+                    applyFontStyle(dataType, target.style.backgroundColor + Constants.ZWSP + target.style.color);
                 } else if (dataType === "fontSize") {
-                    fontEvent(protyle, nodeElements, dataType, target.textContent.trim());
+                    applyFontStyle(dataType, target.textContent.trim());
                 } else if (dataType === "backgroundColor") {
-                    fontEvent(protyle, nodeElements, dataType, target.style.backgroundColor);
+                    applyFontStyle(dataType, target.style.backgroundColor);
                 } else if (dataType === "color") {
-                    fontEvent(protyle, nodeElements, dataType, target.style.color);
+                    applyFontStyle(dataType, target.style.color);
                 } else {
-                    fontEvent(protyle, nodeElements, dataType);
+                    applyFontStyle(dataType);
                 }
                 break;
             }
@@ -226,7 +230,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
 
             fontSizePXElement.parentElement.classList.add("fn__none");
             fontSizeEMElement.parentElement.classList.remove("fn__none");
-            fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
+            applyFontStyle("fontSize", fontSizeEMElement.value + "em");
         } else {
             const px = convertFontSize(fontSizeEMElement.value + "em", "px", baseFontSize);
             fontSizePXElement.parentElement.setAttribute("aria-label", px);
@@ -234,14 +238,14 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
 
             fontSizePXElement.parentElement.classList.remove("fn__none");
             fontSizeEMElement.parentElement.classList.add("fn__none");
-            fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+            applyFontStyle("fontSize", fontSizePXElement.value + "px");
         }
     });
     fontSizePXElement.addEventListener("change", function () {
-        fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+        applyFontStyle("fontSize", fontSizePXElement.value + "px");
     });
     fontSizeEMElement.addEventListener("change", function () {
-        fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
+        applyFontStyle("fontSize", fontSizeEMElement.value + "em");
     });
     fontSizePXElement.addEventListener("input", function () {
         fontSizePXElement.parentElement.setAttribute("aria-label", fontSizePXElement.value + "px");
@@ -253,7 +257,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
 };
 
 export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: string, color?: string,
-                          focusRange = true) => {
+                          focusRange = true, onChange?: (type: string, color?: string) => void) => {
     let localFontStyles = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (type) {
         localFontStyles.splice(0, 0, `${type}${Constants.ZWSP}${color}`);
@@ -272,6 +276,10 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
             type = fontStyles.splice(0, 1)[0];
             color = fontStyles.join(Constants.ZWSP);
         }
+    }
+    if (onChange) {
+        onChange(type, color);
+        return;
     }
     if (nodeElements && nodeElements.length > 0) {
         updateBatchTransaction(nodeElements, protyle, (e: HTMLElement) => {

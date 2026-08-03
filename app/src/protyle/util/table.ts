@@ -816,14 +816,12 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
 
 export const isIncludeCell = (options: {
     tableSelectElement: HTMLElement,
-    scrollLeft: number,
-    scrollTop: number,
     item: HTMLTableCellElement,
 }) => {
-    if (options.item.offsetLeft + 6 > options.tableSelectElement.offsetLeft + options.scrollLeft &&
-        options.item.offsetLeft + options.item.clientWidth - 6 < options.tableSelectElement.offsetLeft + options.scrollLeft + options.tableSelectElement.clientWidth &&
-        options.item.offsetTop + 6 > options.tableSelectElement.offsetTop + options.scrollTop &&
-        options.item.offsetTop + options.item.clientHeight - 6 < options.tableSelectElement.offsetTop + options.scrollTop + options.tableSelectElement.clientHeight) {
+    const itemRect = options.item.getBoundingClientRect();
+    const selectRect = options.tableSelectElement.getBoundingClientRect();
+    if (itemRect.left + 6 > selectRect.left && itemRect.right - 6 < selectRect.right &&
+        itemRect.top + 6 > selectRect.top && itemRect.bottom - 6 < selectRect.bottom) {
         return true;
     }
     return false;
@@ -835,13 +833,9 @@ export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement
     }
     const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
     const selectCellElements: HTMLTableCellElement[] = [];
-    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-    const scrollTop = tableBlockElement.querySelector("table").scrollTop;
     tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
         if (!item.classList.contains("fn__none") && isIncludeCell({
             tableSelectElement,
-            scrollLeft,
-            scrollTop,
             item,
         })) {
             selectCellElements.push(item);

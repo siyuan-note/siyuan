@@ -1699,13 +1699,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             nodeElement.querySelector(".table__select") as HTMLElement : undefined;
         if (tableSelectElement?.clientHeight > 0) {
             const selectedCellElements: HTMLTableCellElement[] = [];
-            const scrollLeft = nodeElement.firstElementChild.scrollLeft;
-            const scrollTop = nodeElement.querySelector("table").scrollTop;
             nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
                 if (!item.classList.contains("fn__none") && isIncludeCell({
                     tableSelectElement,
-                    scrollLeft,
-                    scrollTop,
                     item,
                 })) {
                     selectedCellElements.push(item);

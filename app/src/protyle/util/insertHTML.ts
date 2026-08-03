@@ -819,8 +819,6 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
         return false;
     }
     const tableElement = blockElement.querySelector("table") as HTMLTableElement;
-    const scrollLeft = blockElement.firstElementChild.scrollLeft;
-    const scrollTop = tableElement.scrollTop;
     const tableSelectElement = blockElement.querySelector(".table__select") as HTMLElement;
     const targetCells = getTableRangeCells(tableElement);
     let anchorCell: HTMLTableCellElement | undefined;
@@ -828,8 +826,6 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
         const selectedCell = targetCells.find(item =>
             !item.cell.classList.contains("fn__none") && isIncludeCell({
                 tableSelectElement,
-                scrollLeft,
-                scrollTop,
                 item: item.cell,
             }));
         if (selectedCell) {

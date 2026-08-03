@@ -708,8 +708,6 @@ export class WYSIWYG {
                     html = html.substring(0, html.length - 1) + "]";
                 }
             } else if (selectTableElement) {
-                const scrollLeft = nodeElement.firstElementChild.scrollLeft;
-                const scrollTop = nodeElement.querySelector("table").scrollTop;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
                 const tableElement = nodeElement.querySelector("table");
                 // 通过框选几何范围确定 startCell/endCell，复用 getTableRangeHTML 的网格映射逻辑
@@ -721,7 +719,7 @@ export class WYSIWYG {
                     if (item.classList.contains("fn__none")) {
                         return;
                     }
-                    if (isIncludeCell({tableSelectElement, scrollLeft, scrollTop, item})) {
+                    if (isIncludeCell({tableSelectElement, item})) {
                         if (!startCell) {
                             startCell = item;
                         }
@@ -1939,58 +1937,64 @@ export class WYSIWYG {
                             (!moveCellElement || moveCellElement !== moveTarget)) {
                             // @ts-ignore
                             tableBlockElement.firstElementChild.style.webkitUserModify = "read-only";
-                            let width = target.offsetLeft + target.clientWidth - moveTarget.offsetLeft;
-                            let left = moveTarget.offsetLeft;
-                            if (target.offsetLeft === moveTarget.offsetLeft) {
-                                width = Math.max(target.clientWidth, moveTarget.clientWidth);
-                            } else if (target.offsetLeft < moveTarget.offsetLeft) {
-                                width = moveTarget.offsetLeft + moveTarget.clientWidth - target.offsetLeft;
-                                left = target.offsetLeft;
+                            const tableElement = tableBlockElement.querySelector("table");
+                            const tableRect = tableElement.getBoundingClientRect();
+                            const getCellRect = (cell: HTMLElement) => {
+                                const rect = cell.getBoundingClientRect();
+                                return {
+                                    left: rect.left - tableRect.left,
+                                    top: rect.top - tableRect.top,
+                                    right: rect.right - tableRect.left,
+                                    bottom: rect.bottom - tableRect.top,
+                                };
+                            };
+                            const targetRect = getCellRect(target);
+                            const moveTargetRect = getCellRect(moveTarget);
+                            let left = Math.min(targetRect.left, moveTargetRect.left);
+                            let top = Math.min(targetRect.top, moveTargetRect.top);
+                            let right = Math.max(targetRect.right, moveTargetRect.right);
+                            let bottom = Math.max(targetRect.bottom, moveTargetRect.bottom);
+                            if (targetRect.left === moveTargetRect.left) {
+                                right = left + Math.max(targetRect.right - targetRect.left,
+                                    moveTargetRect.right - moveTargetRect.left);
                             }
-                            let height = target.offsetTop + target.clientHeight - moveTarget.offsetTop;
-                            let top = moveTarget.offsetTop;
-                            if (target.offsetTop === moveTarget.offsetTop) {
-                                height = Math.max(target.clientHeight, moveTarget.clientHeight);
-                            } else if (target.offsetTop < moveTarget.offsetTop) {
-                                height = moveTarget.offsetTop + moveTarget.clientHeight - target.offsetTop;
-                                top = target.offsetTop;
+                            if (targetRect.top === moveTargetRect.top) {
+                                bottom = top + Math.max(targetRect.bottom - targetRect.top,
+                                    moveTargetRect.bottom - moveTargetRect.top);
                             }
                             // https://github.com/siyuan-note/insider/issues/1015
                             Array.from(tableBlockElement.querySelectorAll("th, td")).find((item: HTMLElement) => {
-                                const updateWidth = item.offsetLeft < left + width && item.offsetLeft + item.clientWidth > left + width;
-                                const updateWidth2 = item.offsetLeft < left && item.offsetLeft + item.clientWidth > left;
-                                if (item.offsetTop < top && item.offsetTop + item.clientHeight > top) {
-                                    if ((item.offsetLeft + 6 > left && item.offsetLeft + item.clientWidth - 6 < left + width) || updateWidth || updateWidth2) {
-                                        height = top + height - item.offsetTop;
-                                        top = item.offsetTop;
+                                const itemRect = getCellRect(item);
+                                const updateRight = itemRect.left < right && itemRect.right > right;
+                                const updateLeft = itemRect.left < left && itemRect.right > left;
+                                if (itemRect.top < top && itemRect.bottom > top) {
+                                    if ((itemRect.left + 6 > left && itemRect.right - 6 < right) || updateRight || updateLeft) {
+                                        top = itemRect.top;
                                     }
-                                    if (updateWidth) {
-                                        width = item.offsetLeft + item.clientWidth - left;
+                                    if (updateRight) {
+                                        right = itemRect.right;
                                     }
-                                    if (updateWidth2) {
-                                        width = left + width - item.offsetLeft;
-                                        left = item.offsetLeft;
+                                    if (updateLeft) {
+                                        left = itemRect.left;
                                     }
-                                } else if (item.offsetTop < top + height && item.offsetTop + item.clientHeight > top + height) {
-                                    if ((item.offsetLeft + 6 > left && item.offsetLeft + item.clientWidth - 6 < left + width) || updateWidth || updateWidth2) {
-                                        height = item.clientHeight + item.offsetTop - top;
+                                } else if (itemRect.top < bottom && itemRect.bottom > bottom) {
+                                    if ((itemRect.left + 6 > left && itemRect.right - 6 < right) || updateRight || updateLeft) {
+                                        bottom = itemRect.bottom;
                                     }
-                                    if (updateWidth) {
-                                        width = item.offsetLeft + item.clientWidth - left;
+                                    if (updateRight) {
+                                        right = itemRect.right;
                                     }
-                                    if (updateWidth2) {
-                                        width = left + width - item.offsetLeft;
-                                        left = item.offsetLeft;
+                                    if (updateLeft) {
+                                        left = itemRect.left;
                                     }
-                                } else if (updateWidth2 && item.offsetTop + 6 > top && item.offsetTop + item.clientHeight - 6 < top + height) {
-                                    width = left + width - item.offsetLeft;
-                                    left = item.offsetLeft;
-                                } else if (updateWidth && item.offsetTop + 6 > top && item.offsetTop + item.clientHeight - 6 < top + height) {
-                                    width = item.offsetLeft + item.clientWidth - left;
+                                } else if (updateLeft && itemRect.top + 6 > top && itemRect.bottom - 6 < bottom) {
+                                    left = itemRect.left;
+                                } else if (updateRight && itemRect.top + 6 > top && itemRect.bottom - 6 < bottom) {
+                                    right = itemRect.right;
                                 }
                             });
                             protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
-                            tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top - tableBlockElement.querySelector("table").scrollTop}px;height:${height}px;width:${width + 1}px;`);
+                            tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top - tableElement.scrollTop}px;height:${bottom - top}px;width:${right - left}px;`);
                             moveCellElement = moveTarget;
                         }
                         return;
@@ -2221,13 +2225,9 @@ export class WYSIWYG {
                         window.siyuan.menus.menu.remove();
                         const tableElement = tableBlockElement.querySelector("table");
                         const selectedCellElements: HTMLTableCellElement[] = [];
-                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                        const scrollTop = tableElement.scrollTop;
                         tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
                             if (!item.classList.contains("fn__none") && isIncludeCell({
                                 tableSelectElement,
-                                scrollLeft,
-                                scrollTop,
                                 item,
                             })) {
                                 selectedCellElements.push(item);
@@ -2250,8 +2250,6 @@ export class WYSIWYG {
                                         const colIndexList: number[] = [];
                                         const colCount = tableBlockElement.querySelectorAll("th").length;
                                         let fnNoneMax = 0;
-                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
                                         let isTHead = false;
                                         let isTBody = false;
                                         tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement, index: number) => {
@@ -2277,8 +2275,6 @@ export class WYSIWYG {
                                             } else {
                                                 if (isIncludeCell({
                                                     tableSelectElement,
-                                                    scrollLeft,
-                                                    scrollTop,
                                                     item,
                                                 })) {
                                                     selectCellElements.push(item);
@@ -2846,15 +2842,11 @@ export class WYSIWYG {
                 textPlain = cellsValue.text;
             } else if (selectTableElement) {
                 const selectCellElements: HTMLTableCellElement[] = [];
-                const scrollLeft = nodeElement.firstElementChild.scrollLeft;
-                const scrollTop = nodeElement.querySelector("table").scrollTop;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
                 const tableElement = nodeElement.querySelector("table");
                 nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
                     if (!item.classList.contains("fn__none") && isIncludeCell({
                         tableSelectElement,
-                        scrollLeft,
-                        scrollTop,
                         item,
                     })) {
                         selectCellElements.push(item);

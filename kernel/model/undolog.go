@@ -384,8 +384,49 @@ func replaceReplayOperationID(operation *Operation, replacements map[string]stri
 	return true
 }
 
-func existingReplayBlockIDs(ids []string) map[string]bool {
+func replayOperationBlockIndexes(operations []*Operation) (insertIndexes, deleteIndexes map[string]int) {
+	insertIndexes, deleteIndexes = map[string]int{}, map[string]int{}
+	recordFirstIndex := func(indexes map[string]int, id string, index int) {
+		if !ast.IsNodeIDPattern(id) {
+			return
+		}
+		if _, exists := indexes[id]; !exists {
+			indexes[id] = index
+		}
+	}
+	for index, operation := range operations {
+		switch operation.Action {
+		case "delete":
+			recordFirstIndex(deleteIndexes, operation.ID, index)
+		case "insert":
+			recordFirstIndex(insertIndexes, operation.ID, index)
+			data, ok := operation.Data.(string)
+			if !ok {
+				continue
+			}
+			for _, match := range dataNodeIDPattern.FindAllStringSubmatch(data, -1) {
+				recordFirstIndex(insertIndexes, match[1], index)
+			}
+		}
+	}
+	return
+}
+
+func replayBlockIDConflicts(node *ast.Node, insertIndex int, deleteIndexes map[string]int) bool {
+	for current := node; nil != current; current = current.Parent {
+		if deleteIndex, exists := deleteIndexes[current.ID]; exists && deleteIndex < insertIndex {
+			return false
+		}
+	}
+	return true
+}
+
+func existingReplayBlockIDs(insertIndexes, deleteIndexes map[string]int) map[string]bool {
 	ret := map[string]bool{}
+	ids := make([]string, 0, len(insertIndexes))
+	for id := range insertIndexes {
+		ids = append(ids, id)
+	}
 	blockTrees := treenode.GetBlockTrees(ids)
 	loadedTrees := map[string]*parse.Tree{}
 	loadFailed := map[string]bool{}
@@ -407,63 +448,41 @@ func existingReplayBlockIDs(ids []string) map[string]bool {
 				loadedTrees[key] = tree
 			}
 		}
-		ret[id] = loadFailed[key] || nil != tree && nil != treenode.GetNodeInTree(tree, id)
+		if loadFailed[key] {
+			ret[id] = true
+			continue
+		}
+		node := treenode.GetNodeInTree(tree, id)
+		ret[id] = nil != node && replayBlockIDConflicts(node, insertIndexes[id], deleteIndexes)
 	}
 	return ret
 }
 
 // ResolveReplayDuplicateIds 在 undo/redo 重放事务前解决块 ID 冲突。
 // 场景：剪切块 X 后粘贴到别处（保留原 ID），再撤销剪切会 insert X，而 X 已存在于粘贴处，产生重复 ID。
-// 这里对即将重放的 insert 操作做检查——若其引入的 ID 在块树中已存在，则在正反向操作及关联字段
-// （ID/ParentID/PreviousID/NextID 与 Data 内联 ID）上统一替换为新 ID。
-// 替换同时作用于 do/undo 两套操作：重放只执行 doOperations，但若不同步改 undoOperations，
-// 随后对同一 entry 的 redo 会沿用旧 ID 再次撞库。
+// 这里检查实际重放的 insert 操作；若其引入的 ID 在块树中已存在，且不会被前置 delete 清理，
+// 则在当前重放操作的 ID、ParentID、PreviousID、NextID 与 Data 内联 ID 中统一替换为新 ID。
 func ResolveReplayDuplicateIds(tx *Transaction) {
 	if nil == tx || !tx.isReplay {
 		return
 	}
 
-	// 收集所有 insert 操作引入的块 ID（op.ID + Data 内联的 data-node-id）
-	ids := map[string]struct{}{}
-	collect := func(ops []*Operation) {
-		for _, op := range ops {
-			if "insert" != op.Action {
-				continue
-			}
-			if "" != op.ID && ast.IsNodeIDPattern(op.ID) {
-				ids[op.ID] = struct{}{}
-			}
-			data, ok := op.Data.(string)
-			if !ok {
-				continue
-			}
-			for _, m := range dataNodeIDPattern.FindAllStringSubmatch(data, -1) {
-				if ast.IsNodeIDPattern(m[1]) {
-					ids[m[1]] = struct{}{}
-				}
-			}
-		}
-	}
-	collect(tx.DoOperations)
+	insertIndexes, deleteIndexes := replayOperationBlockIndexes(tx.DoOperations)
 	// 注意：只检测 DoOperations（实际执行的操作），不检测 UndoOperations。
 	// UndoOperations 在 redo 时会作为新的 DoOperations 再次过 ResolveReplayDuplicateIds。
 	// 若 undo 时也检测 UndoOperations 的 insert，会把 redo 用的 ID 换新，
 	// 污染 DoOperations 的对应 delete（do/undo 共享 replacements），导致撤销删除错误 ID。
-	if 0 == len(ids) {
+	if 0 == len(insertIndexes) {
 		return
 	}
 
-	idList := make([]string, 0, len(ids))
-	for id := range ids {
-		idList = append(idList, id)
-	}
 	// blocktree 索引异步更新，立即撤销时可能仍残留已删除容器的记录，必须以当前 .sy 树为准。
-	exist := existingReplayBlockIDs(idList)
+	exist := existingReplayBlockIDs(insertIndexes, deleteIndexes)
 
 	// 已存在的 ID 生成替换
 	replacements := map[string]string{}
-	for _, id := range idList {
-		if exist[id] {
+	for id, exists := range exist {
+		if exists {
 			replacements[id] = ast.NewNodeID()
 		}
 	}

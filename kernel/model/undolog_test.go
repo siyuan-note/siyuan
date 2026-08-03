@@ -16,7 +16,11 @@
 
 package model
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/88250/lute/ast"
+)
 
 func TestReplaceReplayOperationID(t *testing.T) {
 	replacements := map[string]string{"old": "new"}
@@ -38,6 +42,51 @@ func TestReplaceReplayOperationID(t *testing.T) {
 			}
 			if operation.ID != test.want {
 				t.Fatalf("expected operation ID %q, got %q", test.want, operation.ID)
+			}
+		})
+	}
+}
+
+func TestReplayOperationBlockIndexes(t *testing.T) {
+	containerID := "20260803120000-contain"
+	childID := "20260803120001-childid"
+	operations := []*Operation{
+		{Action: "delete", ID: childID},
+		{Action: "insert", ID: containerID, Data: `<div data-node-id="` + containerID + `"><div data-node-id="` + childID + `"></div></div>`},
+	}
+
+	insertIndexes, deleteIndexes := replayOperationBlockIndexes(operations)
+	if 1 != insertIndexes[containerID] || 1 != insertIndexes[childID] {
+		t.Fatalf("unexpected insert indexes: %#v", insertIndexes)
+	}
+	if 0 != deleteIndexes[childID] {
+		t.Fatalf("unexpected delete indexes: %#v", deleteIndexes)
+	}
+}
+
+func TestReplayBlockIDConflicts(t *testing.T) {
+	document := &ast.Node{Type: ast.NodeDocument, ID: "20260803120000-documen"}
+	container := &ast.Node{Type: ast.NodeBlockquote, ID: "20260803120001-contain"}
+	child := &ast.Node{Type: ast.NodeParagraph, ID: "20260803120002-childid"}
+	document.AppendChild(container)
+	container.AppendChild(child)
+
+	tests := []struct {
+		name          string
+		insertIndex   int
+		deleteIndexes map[string]int
+		want          bool
+	}{
+		{name: "real duplicate", insertIndex: 1, deleteIndexes: map[string]int{}, want: true},
+		{name: "direct preceding delete", insertIndex: 1, deleteIndexes: map[string]int{child.ID: 0}, want: false},
+		{name: "ancestor preceding delete", insertIndex: 1, deleteIndexes: map[string]int{container.ID: 0}, want: false},
+		{name: "later delete", insertIndex: 1, deleteIndexes: map[string]int{container.ID: 2}, want: true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := replayBlockIDConflicts(child, test.insertIndex, test.deleteIndexes); test.want != got {
+				t.Fatalf("unexpected conflict result: got %v, want %v", got, test.want)
 			}
 		})
 	}

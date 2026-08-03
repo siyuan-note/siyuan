@@ -11,6 +11,8 @@ import {applyMenuEntryVisibility} from "../config/entryVisibility/runtime";
 /// #endif
 
 const CUSTOM_EVENT_LOAD_SUBMENU = "load-submenu";
+let fullscreenCloseTimeout: number;
+let fullscreenScrimHideTimeout: number;
 
 export class Menu {
     public element: HTMLElement;
@@ -18,6 +20,12 @@ export class Menu {
     public removeCB: () => void;
     private wheelEvent: string;
     private position: IPosition;
+    private sheetTouchStartX: number | undefined;
+    private sheetTouchStartY: number | undefined;
+    private sheetTouchStartTime: number | undefined;
+    private sheetCanDrag = false;
+    private sheetDragging = false;
+    private suppressSheetClick = false;
 
     constructor(element?: HTMLElement) {
         this.wheelEvent = "onwheel" in document.createElement("div") ? "wheel" : "mousewheel";
@@ -25,7 +33,24 @@ export class Menu {
 
         this.element = element || document.getElementById("commonMenu");
         this.element.querySelector(".b3-menu__title .b3-menu__label").innerHTML = window.siyuan.languages.back;
+        if (isMobile()) {
+            this.element.addEventListener("touchstart", this.handleSheetTouchStart, {passive: true});
+            this.element.addEventListener("touchmove", this.handleSheetTouchMove, {passive: false});
+            this.element.addEventListener("touchend", this.handleSheetTouchEnd);
+            this.element.addEventListener("touchcancel", this.handleSheetTouchCancel);
+            if (this.element.id === "commonMenu") {
+                document.getElementById("commonMenuScrim")?.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    this.closeSheet();
+                });
+            }
+        }
         this.element.addEventListener(isMobile() ? "click" : "mouseover", (event) => {
+            if (isMobile() && this.suppressSheetClick && typeof event.detail !== "string") {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return;
+            }
             const target = event.target as Element;
             if (isMobile()) {
                 const titleElement = hasClosestByClassName(target, "b3-menu__title");
@@ -33,11 +58,11 @@ export class Menu {
                     const lastShowElements = this.element.querySelectorAll(".b3-menu__item--show");
                     if (lastShowElements.length > 0) {
                         lastShowElements[lastShowElements.length - 1].classList.remove("b3-menu__item--show");
+                        if (this.element.classList.contains("b3-menu--sheet")) {
+                            this.setSheetHeight(this.element.dataset.position === "bottom" ? "bottom" : "all");
+                        }
                     } else {
-                        this.element.style.transform = "";
-                        setTimeout(() => {
-                            this.remove();
-                        }, Constants.TIMEOUT_DBLCLICK);
+                        this.closeSheet();
                     }
                     return;
                 }
@@ -69,10 +94,194 @@ export class Menu {
                 return;
             }
             itemElement.classList.add("b3-menu__item--show");
-            if (!isSubMenuShown && !this.element.classList.contains("b3-menu--fullscreen")) {
-                this.showSubMenu(subMenuElement);
+            if (!isSubMenuShown) {
+                if (this.element.classList.contains("b3-menu--sheet")) {
+                    this.setSheetHeight(this.element.dataset.position === "bottom" ? "bottom" : "all");
+                } else if (!this.element.classList.contains("b3-menu--fullscreen")) {
+                    this.showSubMenu(subMenuElement);
+                }
             }
         });
+    }
+
+    private getFullscreenScrim() {
+        if (this.element.id !== "commonMenu") {
+            return;
+        }
+        return document.getElementById("commonMenuScrim");
+    }
+
+    private showFullscreenScrim() {
+        const scrimElement = this.getFullscreenScrim();
+        if (!scrimElement) {
+            return;
+        }
+        clearTimeout(fullscreenScrimHideTimeout);
+        scrimElement.style.opacity = "";
+        scrimElement.style.zIndex = (++window.siyuan.zIndex).toString();
+        scrimElement.classList.remove("fn__none");
+        requestAnimationFrame(() => {
+            if (this.element.classList.contains("b3-menu--sheet") &&
+                !this.element.classList.contains("fn__none")) {
+                scrimElement.classList.add("b3-menu__scrim--open");
+            }
+        });
+    }
+
+    private hideFullscreenScrim() {
+        const scrimElement = this.getFullscreenScrim();
+        if (!scrimElement) {
+            return;
+        }
+        scrimElement.style.opacity = "";
+        scrimElement.classList.remove("b3-menu__scrim--open");
+        clearTimeout(fullscreenScrimHideTimeout);
+        fullscreenScrimHideTimeout = window.setTimeout(() => {
+            if (!scrimElement.classList.contains("b3-menu__scrim--open")) {
+                scrimElement.classList.add("fn__none");
+                scrimElement.style.zIndex = "";
+            }
+        }, Constants.TIMEOUT_DBLCLICK);
+    }
+
+    private canDragSheet(target: HTMLElement) {
+        if (target.closest("input, textarea, select, [contenteditable=\"true\"]")) {
+            return false;
+        }
+        if (target.closest(".b3-menu__title")) {
+            return true;
+        }
+        if (!target.closest(".b3-menu__items")) {
+            return false;
+        }
+        let element: HTMLElement = target;
+        while (element && element !== this.element) {
+            const style = getComputedStyle(element);
+            if (element.scrollHeight > element.clientHeight + 1 &&
+                ["auto", "scroll", "overlay"].includes(style.overflowY) && element.scrollTop > 0) {
+                return false;
+            }
+            element = element.parentElement;
+        }
+        return true;
+    }
+
+    private handleSheetTouchStart = (event: TouchEvent) => {
+        if (!this.element.classList.contains("b3-menu--sheet") || event.touches.length !== 1) {
+            return;
+        }
+        const touch = event.touches[0];
+        this.sheetTouchStartX = touch.clientX;
+        this.sheetTouchStartY = touch.clientY;
+        this.sheetTouchStartTime = performance.now();
+        this.sheetCanDrag = this.canDragSheet(event.target as HTMLElement);
+        this.sheetDragging = false;
+    };
+
+    private handleSheetTouchMove = (event: TouchEvent) => {
+        if (!this.sheetCanDrag || typeof this.sheetTouchStartX !== "number" ||
+            typeof this.sheetTouchStartY !== "number" || event.touches.length !== 1) {
+            return;
+        }
+        const touch = event.touches[0];
+        const xDiff = touch.clientX - this.sheetTouchStartX;
+        const yDiff = touch.clientY - this.sheetTouchStartY;
+        if (!this.sheetDragging && (yDiff <= 0 || Math.abs(xDiff) > Math.abs(yDiff))) {
+            return;
+        }
+        const offset = Math.max(0, yDiff);
+        this.sheetDragging = true;
+        this.element.style.transition = "none";
+        this.element.style.transform = `translateY(${offset}px)`;
+        const scrimElement = this.getFullscreenScrim();
+        if (scrimElement) {
+            scrimElement.style.opacity = Math.max(0, .4 * (1 - offset / this.element.clientHeight)).toString();
+        }
+        if (event.cancelable) {
+            event.preventDefault();
+        }
+    };
+
+    private finishSheetTouch() {
+        this.sheetTouchStartX = undefined;
+        this.sheetTouchStartY = undefined;
+        this.sheetTouchStartTime = undefined;
+        this.sheetCanDrag = false;
+        this.sheetDragging = false;
+    }
+
+    private handleSheetTouchEnd = (event: TouchEvent) => {
+        if (!this.sheetDragging || typeof this.sheetTouchStartY !== "number" ||
+            typeof this.sheetTouchStartTime !== "number") {
+            this.finishSheetTouch();
+            return;
+        }
+        const touch = event.changedTouches[0];
+        const offset = Math.max(0, touch.clientY - this.sheetTouchStartY);
+        const duration = Math.max(performance.now() - this.sheetTouchStartTime, 1);
+        const velocity = offset / duration;
+        const shouldClose = offset > Math.min(120, this.element.clientHeight * .25) ||
+            (offset > 20 && velocity > .6);
+        this.element.style.transition = "";
+        void this.element.offsetHeight;
+        if (shouldClose) {
+            this.closeSheet();
+        } else {
+            this.element.style.transform = "translateY(0px)";
+            const scrimElement = this.getFullscreenScrim();
+            if (scrimElement) {
+                scrimElement.style.opacity = "";
+            }
+        }
+        this.suppressSheetClick = true;
+        window.setTimeout(() => {
+            this.suppressSheetClick = false;
+        }, 300);
+        this.finishSheetTouch();
+    };
+
+    private handleSheetTouchCancel = () => {
+        if (this.sheetDragging) {
+            this.element.style.transition = "";
+            void this.element.offsetHeight;
+            this.element.style.transform = "translateY(0px)";
+            const scrimElement = this.getFullscreenScrim();
+            if (scrimElement) {
+                scrimElement.style.opacity = "";
+            }
+        }
+        this.finishSheetTouch();
+    };
+
+    private closeSheet() {
+        if (!this.element.classList.contains("b3-menu--sheet")) {
+            this.element.style.transform = "";
+            window.setTimeout(() => this.remove(), Constants.TIMEOUT_DBLCLICK);
+            return;
+        }
+        clearTimeout(fullscreenCloseTimeout);
+        this.element.style.transition = "";
+        void this.element.offsetHeight;
+        this.element.style.transform = "translateY(100%)";
+        this.hideFullscreenScrim();
+        fullscreenCloseTimeout = window.setTimeout(() => this.removeImmediately(), Constants.TIMEOUT_DBLCLICK);
+    }
+
+    private setSheetHeight(position: "bottom" | "all") {
+        if (position === "bottom") {
+            this.element.style.height = "50vh";
+            return;
+        }
+        let itemsElement = this.element.lastElementChild;
+        const shownItems = this.element.querySelectorAll(".b3-menu__item--show");
+        if (shownItems.length > 0) {
+            itemsElement = shownItems[shownItems.length - 1]
+                .querySelector(":scope > .b3-menu__submenu > .b3-menu__items") || itemsElement;
+        }
+        const maxHeight = window.innerHeight * .9;
+        const titleHeight = this.element.firstElementChild.getBoundingClientRect().height;
+        const contentHeight = itemsElement.scrollHeight;
+        this.element.style.height = Math.min(maxHeight, Math.max(160, titleHeight + contentHeight)) + "px";
     }
 
     public showSubMenu(subMenuElement: HTMLElement) {
@@ -80,6 +289,10 @@ export class Menu {
         if (itemsMenuElement) {
             itemsMenuElement.style.maxHeight = "";
         } else {
+            return;
+        }
+        if (this.element.classList.contains("b3-menu--sheet")) {
+            this.setSheetHeight(this.element.dataset.position === "bottom" ? "bottom" : "all");
             return;
         }
         const itemRect = subMenuElement.parentElement.getBoundingClientRect();
@@ -172,9 +385,19 @@ export class Menu {
                 subElement.classList.remove("b3-menu__item--show");
                 subElement.classList.add("b3-menu__item--current");
                 subElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
+                if (this.element.classList.contains("b3-menu--sheet")) {
+                    this.setSheetHeight(this.element.dataset.position === "bottom" ? "bottom" : "all");
+                }
                 return;
             }
         }
+        this.removeImmediately();
+    }
+
+    private removeImmediately() {
+        clearTimeout(fullscreenCloseTimeout);
+        this.hideFullscreenScrim();
+        this.finishSheetTouch();
         if (this.removeCB) {
             const removeCB = this.removeCB;
             this.removeCB = undefined;
@@ -185,10 +408,11 @@ export class Menu {
         this.element.lastElementChild.innerHTML = "";
         this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
         this.element.classList.add("fn__none");
-        this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
+        this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
         this.element.removeAttribute("data-from");    // 标识菜单入口
+        this.element.removeAttribute("data-position");
         this.data = undefined;    // 移除数据
     }
 
@@ -240,18 +464,37 @@ export class Menu {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
-        this.element.classList.add("b3-menu--fullscreen");
+        if (!isMobile()) {
+            this.element.classList.add("b3-menu--fullscreen");
+            this.element.style.zIndex = (++window.siyuan.zIndex).toString();
+            this.element.firstElementChild.classList.remove("fn__none");
+            this.element.classList.remove("fn__none");
+            window.addEventListener("touchmove", this.preventDefault, {passive: false});
+            setTimeout(() => {
+                if (position === "bottom") {
+                    this.element.style.transform = "translateY(-50vh)";
+                    this.element.style.height = "50vh";
+                } else {
+                    this.element.style.transform = "translateY(-100%)";
+                }
+            });
+            this.element.lastElementChild.scrollTop = 0;
+            return;
+        }
+        clearTimeout(fullscreenCloseTimeout);
+        this.element.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
+        this.element.dataset.position = position;
+        this.element.style.transform = "translateY(100%)";
+        this.showFullscreenScrim();
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.firstElementChild.classList.remove("fn__none");
         this.element.classList.remove("fn__none");
         window.addEventListener("touchmove", this.preventDefault, {passive: false});
-
-        setTimeout(() => {
-            if (position === "bottom") {
-                this.element.style.transform = "translateY(-50vh)";
-                this.element.style.height = "50vh";
-            } else {
-                this.element.style.transform = "translateY(-100%)";
+        this.setSheetHeight(position);
+        void this.element.offsetHeight;
+        requestAnimationFrame(() => {
+            if (this.element.classList.contains("b3-menu--sheet")) {
+                this.element.style.transform = "translateY(0px)";
             }
         });
         this.element.lastElementChild.scrollTop = 0;

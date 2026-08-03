@@ -64,6 +64,7 @@
     </div>
     <div id="modelMain" class="fn__flex-1"></div>
 </div>
+<div id="commonMenuScrim" class="b3-menu__scrim fn__none" aria-hidden="true"></div>
 <div id="commonMenu" class="b3-menu fn__none">
     <div class="b3-menu__title fn__none">
         <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>

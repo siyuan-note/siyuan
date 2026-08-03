@@ -14,6 +14,39 @@ const CUSTOM_EVENT_LOAD_SUBMENU = "load-submenu";
 let fullscreenCloseTimeout: number;
 let fullscreenScrimHideTimeout: number;
 
+const updateMenuItemGroupClasses = (itemsElement: Element) => {
+    const itemElements = Array.from(itemsElement.children).filter((element) =>
+        element.classList.contains("b3-menu__item")) as HTMLElement[];
+    itemElements.forEach((element) => {
+        element.classList.remove("b3-menu__item--group-first", "b3-menu__item--group-last");
+    });
+    if (itemElements.length === 0) {
+        itemsElement.classList.remove("b3-menu__items--menu");
+        return;
+    }
+    itemsElement.classList.add("b3-menu__items--menu");
+    let groupElements: HTMLElement[] = [];
+    const updateGroup = () => {
+        if (groupElements.length === 0) {
+            return;
+        }
+        groupElements[0].classList.add("b3-menu__item--group-first");
+        groupElements[groupElements.length - 1].classList.add("b3-menu__item--group-last");
+        groupElements = [];
+    };
+    Array.from(itemsElement.children).forEach((element: HTMLElement) => {
+        if (element.classList.contains("fn__none")) {
+            return;
+        }
+        if (element.classList.contains("b3-menu__separator")) {
+            updateGroup();
+        } else if (element.classList.contains("b3-menu__item")) {
+            groupElements.push(element);
+        }
+    });
+    updateGroup();
+};
+
 export class Menu {
     public element: HTMLElement;
     public data: any;   // 用于记录当前菜单的数据
@@ -406,6 +439,7 @@ export class Menu {
         this.removeScrollEvent();
         this.element.firstElementChild.classList.add("fn__none");
         this.element.lastElementChild.innerHTML = "";
+        this.element.lastElementChild.classList.remove("b3-menu__items--menu");
         this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
         this.element.classList.add("fn__none");
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet");
@@ -424,10 +458,12 @@ export class Menu {
             const insertElement = this.element.querySelectorAll(".b3-menu__items > .b3-menu__separator")[index];
             if (insertElement) {
                 insertElement.before(element);
+                updateMenuItemGroupClasses(this.element.lastElementChild);
                 return;
             }
         }
         this.element.lastElementChild.append(element);
+        updateMenuItemGroupClasses(this.element.lastElementChild);
     }
 
     public popup(options: IPosition) {
@@ -482,6 +518,8 @@ export class Menu {
             return;
         }
         clearTimeout(fullscreenCloseTimeout);
+        this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
+            .forEach(updateMenuItemGroupClasses);
         this.element.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
         this.element.dataset.position = position;
         this.element.style.transform = "translateY(100%)";
@@ -598,6 +636,7 @@ export class MenuItem {
             }]).forEach((item: IMenu) => {
                 submenuElement.firstElementChild.append(new MenuItem(item, menu)?.element || "");
             });
+            updateMenuItemGroupClasses(submenuElement.firstElementChild);
             this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>');
             this.element.append(submenuElement);
             if (options.loadSubmenu) {
@@ -628,6 +667,7 @@ export class MenuItem {
                                 itemsElement.append(new MenuItem(item, menu)?.element || "");
                             });
                         }
+                        updateMenuItemGroupClasses(itemsElement);
                         /// #if !MOBILE
                         applyMenuEntryVisibility(menu.element);
                         /// #endif
@@ -652,6 +692,7 @@ export class MenuItem {
                             type: "readonly",
                             label: window.siyuan.languages.emptyContent,
                         }, menu).element);
+                        updateMenuItemGroupClasses(submenuElement.firstElementChild);
                         focusAfterLoad = false;
                     }).finally(() => {
                         loading = false;

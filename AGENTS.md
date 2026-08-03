@@ -73,7 +73,8 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 5. **UI paths:** In all contexts, including code comments, UI text, i18n, user guides, documentation, issue/PR content, and responses, separate navigation levels with a hyphen surrounded by spaces (for example, `设置 - 快捷键 - 通用`); do not use arrow symbols such as `→`
 6. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
 7. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
-8. **Go:** Format with `gofmt` after editing
+8. **CSS:** Do not use the `:has()` selector because of its performance impact
+9. **Go:** Format with `gofmt` after editing
 
 ---
 

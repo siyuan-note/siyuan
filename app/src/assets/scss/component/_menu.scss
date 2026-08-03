@@ -148,35 +148,31 @@
       }
     }
 
-    & > .b3-menu__items:has(> .b3-menu__item),
-    .b3-menu__submenu > .b3-menu__items:has(> .b3-menu__item) {
+    & > .b3-menu__items--menu,
+    .b3-menu__submenu > .b3-menu__items--menu {
       box-sizing: border-box;
       padding: 8px 16px max(16px, env(safe-area-inset-bottom));
     }
 
-    & > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item,
-    .b3-menu__submenu > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item {
+    & > .b3-menu__items--menu > .b3-menu__item,
+    .b3-menu__submenu > .b3-menu__items--menu > .b3-menu__item {
       border: 0;
       margin: 0;
     }
 
-    & > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item:not(:last-child):not(:has(+ .b3-menu__separator)),
-    .b3-menu__submenu > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item:not(:last-child):not(:has(+ .b3-menu__separator)) {
+    & > .b3-menu__items--menu > .b3-menu__item:not(.b3-menu__item--group-last),
+    .b3-menu__submenu > .b3-menu__items--menu > .b3-menu__item:not(.b3-menu__item--group-last) {
       border-bottom: .5px solid var(--b3-theme-background-light);
     }
 
-    & > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item:first-child,
-    & > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__separator + .b3-menu__item,
-    .b3-menu__submenu > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item:first-child,
-    .b3-menu__submenu > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__separator + .b3-menu__item {
+    & > .b3-menu__items--menu > .b3-menu__item--group-first,
+    .b3-menu__submenu > .b3-menu__items--menu > .b3-menu__item--group-first {
       border-top-left-radius: var(--b3-border-radius-b);
       border-top-right-radius: var(--b3-border-radius-b);
     }
 
-    & > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item:last-child,
-    & > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item:has(+ .b3-menu__separator),
-    .b3-menu__submenu > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item:last-child,
-    .b3-menu__submenu > .b3-menu__items:has(> .b3-menu__item) > .b3-menu__item:has(+ .b3-menu__separator) {
+    & > .b3-menu__items--menu > .b3-menu__item--group-last,
+    .b3-menu__submenu > .b3-menu__items--menu > .b3-menu__item--group-last {
       border-bottom: 0;
       border-bottom-left-radius: var(--b3-border-radius-b);
       border-bottom-right-radius: var(--b3-border-radius-b);
@@ -270,9 +266,6 @@
       margin-bottom: 0;
     }
 
-    &:not(:has(.b3-menu__item:not(.fn__none))) {
-      display: none;
-    }
   }
 
   &__group-title {
@@ -294,8 +287,8 @@
       line-height: 42px;
       margin: 0;
 
-      &:not(.fn__none):has(~ .b3-menu__item:not(.fn__none)) {
-        border-bottom: .5px solid var(--b3-theme-background-light);
+      &:not(.fn__none) ~ .b3-menu__item:not(.fn__none) {
+        border-top: .5px solid var(--b3-theme-background-light);
       }
 
       &:first-child {

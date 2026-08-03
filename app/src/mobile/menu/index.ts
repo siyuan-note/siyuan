@@ -123,7 +123,7 @@ export const initRightMenu = (app: App) => {
             </div>
         </div>
     </div>
-    <div class="b3-menu__group">
+    <div class="b3-menu__group${window.siyuan.config.readonly ? " fn__none" : ""}">
         <div class="b3-menu__group-title">${window.siyuan.languages.mobileMenuCreate}</div>
         <div class="b3-menu__group-items">
             <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuNewDoc">
@@ -140,7 +140,7 @@ export const initRightMenu = (app: App) => {
             </div>
         </div>
     </div>
-    <div class="b3-menu__group">
+    <div class="b3-menu__group${window.siyuan.config.readonly ? " fn__none" : ""}">
         <div class="b3-menu__group-title">${window.siyuan.languages.mobileMenuDataManagement}</div>
         <div class="b3-menu__group-items">
             <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuSyncNow">

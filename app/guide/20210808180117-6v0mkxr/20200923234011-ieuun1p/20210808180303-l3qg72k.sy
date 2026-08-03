@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20260613193423"
+		"updated": "20260803161608"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193423-4fjlvrg",
-				"updated": "20260613193423"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -59,12 +59,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193423-qw5e4r0",
-				"updated": "20260613193423"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Configurable in Settings - Search - Case Sensitive. Disabled by default, meaning searching "
+					"Data": "Configurable in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Case Sensitive"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. Disabled by default, meaning searching "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -92,7 +119,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193423-1oey891",
-				"updated": "20260613193423"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -106,12 +133,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193423-f3tgfru",
-				"updated": "20260613193423"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Configurable in Settings - Search - Distinguish Simplified/Traditional. Enabled by default, meaning searching \"经济\" will not match \"經濟\". When disabled, searching \"经济\" matches both \"经济\" and \"經濟\". After toggling this option, you must wait for index rebuilding to complete before it takes effect."
+					"Data": "Configurable in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Distinguish Simplified/Traditional"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. Enabled by default, meaning searching \"经济\" will not match \"經濟\". When disabled, searching \"经济\" matches both \"经济\" and \"經濟\". After toggling this option, you must wait for index rebuilding to complete before it takes effect."
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20230429115206-ob8nl8t",
 		"title": "術語表",
 		"type": "doc",
-		"updated": "20260614111516"
+		"updated": "20260803161608"
 	},
 	"Children": [
 		{
@@ -68,7 +68,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115345-lqayfnx",
-				"updated": "20230429115345"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -560,7 +560,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111457-xqubcvr",
-				"updated": "20260614111457"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -602,12 +602,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111457-xntm6ad",
-				"updated": "20260730184353"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，虛擬參照基於內容區塊的命名、別名和錨文字進行自動探測，在編輯器中以虛線底線標識。滑鼠懸浮可預覽對應的內容區塊，點擊可轉換為正式的區塊參照。可在 [設定 - 編輯器 - 雙向連結 - 虛擬引用] 中開啟或關閉。"
+					"Data": "在思源中，虛擬參照基於內容區塊的命名、別名和錨文字進行自動探測，在編輯器中以虛線底線標識。滑鼠懸浮可預覽對應的內容區塊，點擊可轉換為正式的區塊參照。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雙向連結"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "虛擬引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中開啟或關閉。"
 				}
 			]
 		},

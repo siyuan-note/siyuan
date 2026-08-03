@@ -6,7 +6,7 @@
 		"id": "20260613212028-gozdm4e",
 		"title": "Content Statistics",
 		"type": "doc",
-		"updated": "20260613212056"
+		"updated": "20260803160439"
 	},
 	"Children": [
 		{
@@ -201,7 +201,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613212037-w3f5b5t",
-				"updated": "20260613212037"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613212037-gnhm9wu",
-				"updated": "20260613212037"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -224,7 +224,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "︙"
 				},
 				{

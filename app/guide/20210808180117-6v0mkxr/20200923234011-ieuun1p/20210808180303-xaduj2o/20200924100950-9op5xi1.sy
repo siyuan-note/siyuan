@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260730104311"
+		"updated": "20260803161608"
 	},
 	"Children": [
 		{
@@ -3754,7 +3754,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260517211235"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -10653,7 +10653,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-6lhdzmm",
-				"updated": "20250115160859"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -10676,7 +10676,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20210106154319-kc7vf20",
-				"updated": "20250115160859"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -11179,7 +11179,30 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Unassigned by default; configure in Settings - Keymap - Editor"
+									"Data": "Unassigned by default; configure in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
 								}
 							]
 						}
@@ -11205,7 +11228,30 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Unassigned by default; configure in Settings - Keymap - Editor"
+									"Data": "Unassigned by default; configure in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
 								}
 							]
 						}

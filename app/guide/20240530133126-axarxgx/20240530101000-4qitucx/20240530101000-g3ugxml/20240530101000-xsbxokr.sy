@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260730104311"
+		"updated": "20260803161608"
 	},
 	"Children": [
 		{
@@ -3702,7 +3702,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20260517165255"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -10563,7 +10563,7 @@
 			"Properties": {
 				"ID": "20240530101000-xpeqztf",
 				"id": "20240530101000-emapwbq",
-				"updated": "20250115161758"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -10592,7 +10592,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20240530101000-x5nggv1",
-				"updated": "20250115161758"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -11091,7 +11091,34 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デフォルトでは未設定です。設定 - ショートカット - エディタで設定できます"
+									"Data": "デフォルトでは未設定です。"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ショートカット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エディタ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​で設定できます"
 								}
 							]
 						}
@@ -11117,7 +11144,34 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デフォルトでは未設定です。設定 - ショートカット - エディタで設定できます"
+									"Data": "デフォルトでは未設定です。"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ショートカット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エディタ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​で設定できます"
 								}
 							]
 						}

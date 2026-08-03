@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20260613204604"
+		"updated": "20260803161608"
 	},
 	"Children": [
 		{
@@ -280,7 +280,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613204526-buhhsds",
-				"updated": "20260613204526"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -309,7 +309,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204526-wdd1lbj",
-				"updated": "20260613204526"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -387,7 +387,7 @@
 					},
 					"Properties": {
 						"id": "20260613204526-swad9qh",
-						"updated": "20260613204526"
+						"updated": "20260803161608"
 					},
 					"Children": [
 						{
@@ -395,7 +395,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204526-d85bynq",
-								"updated": "20260613204526"
+								"updated": "20260803161608"
 							},
 							"Children": [
 								{
@@ -405,7 +405,21 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Right-click a tab and select \"Unsplit\", or configure a shortcut for unsplit in Settings - Keymap"
+									"Data": ": Right-click a tab and select \"Unsplit\", or configure a shortcut for unsplit in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
 								}
 							]
 						}

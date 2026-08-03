@@ -7,7 +7,7 @@
 		"id": "20240530101000-7yv4y5z",
 		"title": "ウィンドウとタブ",
 		"type": "doc",
-		"updated": "20260613204554"
+		"updated": "20260803161608"
 	},
 	"Children": [
 		{
@@ -281,7 +281,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613204552-u19ss69",
-				"updated": "20260613204552"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -310,7 +310,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204552-or56k0p",
-				"updated": "20260613204552"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -388,7 +388,7 @@
 					},
 					"Properties": {
 						"id": "20260613204552-oejq4sv",
-						"updated": "20260613204552"
+						"updated": "20260803161608"
 					},
 					"Children": [
 						{
@@ -396,7 +396,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204552-q7b2nof",
-								"updated": "20260613204552"
+								"updated": "20260803161608"
 							},
 							"Children": [
 								{
@@ -406,7 +406,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：タブを右クリックして「分割解除」を選択、または設定 - キーマップで分割解除のショートカットを設定"
+									"Data": "：タブを右クリックして「分割解除」を選択、または"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "キーマップ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​で分割解除のショートカットを設定"
 								}
 							]
 						}

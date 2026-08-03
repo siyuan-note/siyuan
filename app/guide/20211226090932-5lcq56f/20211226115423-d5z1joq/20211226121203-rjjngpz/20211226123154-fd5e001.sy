@@ -6,7 +6,7 @@
 		"id": "20211226123154-fd5e001",
 		"title": "日記",
 		"type": "doc",
-		"updated": "20260614204949"
+		"updated": "20260803161608"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613181022-74zgp84",
-				"updated": "20260613181022"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -187,7 +187,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613181022-txx9v8s",
-				"updated": "20260614204949"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -201,12 +201,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613181022-rroumoc",
-				"updated": "20260613181022"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在筆記本右鍵選單中打開「設定」，在新建日記設定中設定："
+					"Data": "在筆記本右鍵選單中打開"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，在新建日記設定中設定："
 				}
 			]
 		},

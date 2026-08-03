@@ -7,7 +7,7 @@
 		"id": "20200923234011-ieuun1p",
 		"title": "Please Start Here",
 		"type": "doc",
-		"updated": "20260729220614"
+		"updated": "20260803160439"
 	},
 	"Children": [
 		{
@@ -75,7 +75,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225220954-keui8uy",
-				"updated": "20260729215152"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201225220954-dlgzk1o",
-				"updated": "20260729215152"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -102,7 +102,7 @@
 					},
 					"Properties": {
 						"id": "20201225220954-e913snx",
-						"updated": "20260426175923"
+						"updated": "20260803160439"
 					},
 					"Children": [
 						{
@@ -110,21 +110,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131161940-kfs31q6",
-								"updated": "20260426175923"
+								"updated": "20260803160439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Create a new notebook in the "
+									"Data": "On desktop, create a new notebook from the "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "More"
+									"TextMarkTextContent": "︙"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ menu of the doc panel, and create a new doc under the notebook"
+									"Data": "​ menu in the document panel. On mobile, create a new notebook from "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Right Sidebar"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Create"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. Then create a new document under the notebook"
 								}
 							]
 						}

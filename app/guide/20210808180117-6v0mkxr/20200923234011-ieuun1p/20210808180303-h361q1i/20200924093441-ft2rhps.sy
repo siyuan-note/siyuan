@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260730103436"
+		"updated": "20260803161608"
 	},
 	"Children": [
 		{
@@ -1016,7 +1016,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604225720-p4ywemu",
-				"updated": "20220312123245"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -1044,12 +1044,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260730103436-r4m7z1k",
-				"updated": "20260730103436"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The shortcuts for these two operations are unassigned by default and can be configured in Settings - Keymap - Editor."
+					"Data": "The shortcuts for these two operations are unassigned by default and can be configured in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Keymap"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},

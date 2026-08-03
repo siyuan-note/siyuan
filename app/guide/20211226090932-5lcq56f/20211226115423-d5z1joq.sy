@@ -7,7 +7,7 @@
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"type": "doc",
-		"updated": "20260729225925"
+		"updated": "20260803160439"
 	},
 	"Children": [
 		{
@@ -75,7 +75,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226115745-zr6pkjl",
-				"updated": "20260729215152"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115745-f8vrixq",
-				"updated": "20260729215152"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -102,7 +102,7 @@
 					},
 					"Properties": {
 						"id": "20211226115745-5043oh9",
-						"updated": "20260426180215"
+						"updated": "20260803160439"
 					},
 					"Children": [
 						{
@@ -110,21 +110,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115745-n838dky",
-								"updated": "20260426180215"
+								"updated": "20260803160439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在文檔面板的 "
+									"Data": "桌面端在文檔面板的 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "更多"
+									"TextMarkTextContent": "︙"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 選單中新筆記本，在筆記本下新建文檔"
+									"Data": "​ 選單中新建筆記本，移動端在"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "右側欄"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "建立"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中新建筆記本，然後在筆記本下新建文檔"
 								}
 							]
 						}

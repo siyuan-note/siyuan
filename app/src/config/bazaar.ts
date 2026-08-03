@@ -304,8 +304,10 @@ export const bazaar = {
         if (!incompatible) {
             return "";
         }
-        const tip = bazaarType === "themes" ? window.siyuan.languages.incompatible : window.siyuan.languages.incompatiblePluginTip;
-        return `<span class="fn__space"></span><span data-position="north" class="fn__flex-center ariaLabel b3-chip b3-chip--error b3-chip--small" aria-label="${tip}">${window.siyuan.languages.incompatible}</span>`;
+        const tooltip = bazaarType === "themes" ? "" :
+            ` data-position="north" aria-label="${window.siyuan.languages.incompatiblePluginTip}"`;
+        const tooltipClass = bazaarType === "themes" ? "" : " ariaLabel";
+        return `<span class="fn__space"></span><span${tooltip} class="fn__flex-center${tooltipClass} b3-chip b3-chip--error b3-chip--small">${window.siyuan.languages.incompatible}</span>`;
     },
     _getDetailKey(bazaarType: TBazaarType, packageName: string) {
         return `${bazaarType}:${packageName}`;

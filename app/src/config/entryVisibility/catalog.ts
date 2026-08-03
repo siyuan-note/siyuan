@@ -577,6 +577,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
 
 const entryMap = new Map<string, IEntryCatalogNode>();
 const parentMap = new Map<string, string>();
+const sectionMap = new Map(entryCatalog.map((section) => [section.key, section]));
 
 const indexNodes = (prefix: string, nodes: IEntryCatalogNode[]) => {
     nodes.forEach((item) => {
@@ -594,3 +595,16 @@ entryCatalog.forEach((section) => indexNodes(section.key, section.children));
 export const getEntryCatalogNode = (path: string) => entryMap.get(path);
 export const getEntryParentPath = (path: string) => parentMap.get(path);
 export const getEntryPaths = () => Array.from(entryMap.keys());
+export const getEntryCatalogSection = (key: string) => sectionMap.get(key);
+export const getEntryCatalogPathChain = (sectionKey: string, path: string) => {
+    const chain: string[] = [];
+    let current: string | undefined = path;
+    while (current && current !== sectionKey) {
+        if (!getEntryCatalogNode(current)) {
+            return [];
+        }
+        chain.unshift(current);
+        current = getEntryParentPath(current);
+    }
+    return current === sectionKey ? chain : [];
+};

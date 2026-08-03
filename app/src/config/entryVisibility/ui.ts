@@ -2,7 +2,13 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {genUUID} from "../../util/genID";
-import {entryCatalog, getEntryPaths, IEntryCatalogNode} from "./catalog";
+import {
+    entryCatalog,
+    getEntryCatalogPathChain,
+    getEntryPaths,
+    IEntryCatalogNode,
+    IEntryCatalogSection,
+} from "./catalog";
 import {
     createEntryProfileSnapshot,
     ENTRY_PROFILE_FULL,
@@ -169,88 +175,124 @@ const renderProfileCards = (root: HTMLElement) => {
     container.innerHTML = `<div class="b3-cards b3-cards--nowrap">${cards.join("")}</div>`;
 };
 
-const renderEntryRow = (profile: Config.IEntryVisibilityProfile, prefix: string, item: IEntryCatalogNode,
-                        entryLocation: string, groupHeader = false, parentPath?: string,
-                        readOnly = false): string => {
-    const path = `${prefix}.${item.key}`;
-    const label = item.label();
-    const checked = typeof profile.entries[path] === "boolean"
+const isEntryChecked = (profile: Config.IEntryVisibilityProfile, path: string, item: IEntryCatalogNode) =>
+    typeof profile.entries[path] === "boolean"
         ? profile.entries[path]
         : profile.base === ENTRY_PROFILE_FULL || item.simple;
-    return `<label class="b3-label config-item config-wrap fn__flex${groupHeader ? " config-entry-visibility__group-title" : ""}" data-entry-row${groupHeader ? " data-entry-group-header" : ""} data-search="${escapeAttr(entryLocation.toLowerCase())}">
-    <span class="fn__flex-1">
-        <span${groupHeader ? ' class="config-name"' : ""}>${escapeHtml(label)}</span>
-        ${groupHeader ? `<span class="b3-label__text">${window.siyuan.languages.entrySubmenu}</span>` : ""}
-        <span class="b3-label__text fn__none" data-entry-location>${escapeHtml(entryLocation)}</span>
-    </span>
-    <input class="b3-switch" type="checkbox" data-entry-path="${escapeAttr(path)}"${parentPath ? ` data-entry-parent-path="${escapeAttr(parentPath)}"` : ""}${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}${checked ? " checked" : ""}>
-</label>`;
-};
 
-const renderSubmenuGroups = (profile: Config.IEntryVisibilityProfile, prefix: string, item: IEntryCatalogNode,
-                             sectionLabel: string, parents: string[] = [], parentPath?: string,
-                             readOnly = false): string => {
-    const path = `${prefix}.${item.key}`;
-    const label = item.label();
-    const locationParts = [sectionLabel, ...parents, label];
-    const directChildren = item.children?.filter((child) => !child.children) || [];
-    const nestedChildren = item.children?.filter((child) => child.children) || [];
-    const group = `<div class="config-items" data-entry-group>
-    ${renderEntryRow(profile, prefix, item, locationParts.join(" - "), true, parentPath, readOnly)}
-    ${directChildren.map((child) => renderEntryRow(profile, path, child,
-        [...locationParts, child.label()].join(" - "), false, path, readOnly)).join("")}
-</div>`;
-    return `${group}${nestedChildren.map((child) => renderSubmenuGroups(profile, path, child, sectionLabel,
-        [...parents, label], path, readOnly)).join("")}`;
-};
+const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string, item: IEntryCatalogNode,
+                           parentEnabled: boolean, readOnly: boolean) => `<input class="b3-switch" type="checkbox"
+    aria-label="${escapeAttr(item.label())}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
+    ${!parentEnabled && !readOnly ? " disabled" : ""}${isEntryChecked(profile, path, item) ? " checked" : ""}>`;
 
-const updateEntryDependencies = (sections: HTMLElement) => {
-    const switches = Array.from(sections.querySelectorAll<HTMLInputElement>("[data-entry-path]"));
-    const switchesByPath = new Map(switches.map((item) => [item.dataset.entryPath, item]));
-    switches.forEach((item) => {
-        if (item.hasAttribute("data-entry-readonly")) {
-            item.disabled = false;
-            return;
-        }
-        const parentPath = item.dataset.entryParentPath;
-        if (!parentPath) {
-            item.disabled = false;
-            return;
-        }
-        const parent = switchesByPath.get(parentPath);
-        item.disabled = !parent || parent.disabled || !parent.checked;
-    });
-};
-
-const renderEntryGroups = (profile: Config.IEntryVisibilityProfile, section: typeof entryCatalog[number],
-                           readOnly = false) => {
-    const sectionLabel = section.label();
-    const mainMenu = window.siyuan.languages.mainMenu;
-    const groups: string[] = [];
-    let mainItems: IEntryCatalogNode[] = [];
-    const flushMainItems = () => {
-        if (mainItems.length === 0) {
-            return;
-        }
-        groups.push(`<div class="config-items" data-entry-group>
-    <div class="b3-label config-item config-wrap config-entry-visibility__group-title">
-        <div class="config-name">${mainMenu}</div>
+const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
+                           nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
+                           parentEnabled: boolean, readOnly: boolean) => `<section class="config-entry-visibility__column"
+    data-entry-column data-entry-depth="${depth}">
+    <div class="config-entry-visibility__column-title" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+    <div class="config-entry-visibility__column-list">
+        ${nodes.map((item) => {
+        const path = `${prefix}.${item.key}`;
+        const label = item.label();
+        const hasChildren = Boolean(item.children?.length);
+        const selected = selectedPaths[depth] === path;
+        const rowTag = hasChildren ? "div" : "label";
+        return `<${rowTag} class="config-entry-visibility__row config-entry-visibility__row--${hasChildren ? "navigable" : "toggleable"}${selected ? " config-entry-visibility__row--current" : ""}${parentEnabled ? "" : " config-entry-visibility__row--disabled"}"
+            data-entry-row data-entry-path-row="${escapeAttr(path)}"${hasChildren ? ` data-action="navigate-entry" data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}"` : ""}>
+            ${hasChildren ? `<button class="config-entry-visibility__navigate" data-action="navigate-entry"
+                data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}" title="${escapeAttr(label)}">
+                <span>${escapeHtml(label)}</span>
+            </button>` : `<span class="config-entry-visibility__label" title="${escapeAttr(label)}">${escapeHtml(label)}</span>`}
+            ${renderEntrySwitch(profile, path, item, parentEnabled, readOnly)}
+            ${hasChildren ? `<button class="block__icon block__icon--show config-entry-visibility__arrow" data-action="navigate-entry"
+                data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}" aria-label="${escapeAttr(window.siyuan.languages.expand)}">
+                <svg><use xlink:href="#iconRight"></use></svg>
+            </button>` : '<span class="config-entry-visibility__arrow-space"></span>'}
+        </${rowTag}>`;
+    }).join("")}
     </div>
-    ${mainItems.map((item) => renderEntryRow(profile, section.key, item,
-        [sectionLabel, mainMenu, item.label()].join(" - "), false, undefined, readOnly)).join("")}
-</div>`);
-        mainItems = [];
-    };
-    section.children.forEach((item) => {
-        if (item.children) {
-            flushMainItems();
-            groups.push(renderSubmenuGroups(profile, section.key, item, sectionLabel, [], undefined, readOnly));
-        } else {
-            mainItems.push(item);
+</section>`;
+
+const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey: string,
+                            selectedPaths: string[], readOnly: boolean, visiblePaths?: Set<string>,
+                            visibleSectionKeys?: Set<string>) => {
+    const sections = visibleSectionKeys
+        ? entryCatalog.filter((item) => visibleSectionKeys.has(item.key))
+        : entryCatalog;
+    const section = sections.find((item) => item.key === sectionKey) || sections[0] || entryCatalog[0];
+    const locationColumn = `<section class="config-entry-visibility__column config-entry-visibility__column--locations" data-entry-column>
+    <div class="config-entry-visibility__column-title">${window.siyuan.languages.position}</div>
+    <div class="config-entry-visibility__column-list">
+        ${sections.map((item) => `<button class="b3-list-item config-entry-visibility__location${item.key === section.key ? " config-entry-visibility__location--current" : ""}"
+            data-action="select-entry-section" data-entry-section="${escapeAttr(item.key)}" title="${escapeAttr(item.label())}">
+            <span class="b3-list-item__text">${escapeHtml(item.label())}</span>
+            <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+        </button>`).join("")}
+    </div>
+</section>`;
+    const columns = [locationColumn];
+    let nodes = section.children;
+    let prefix = section.key;
+    let title = section.label();
+    let parentEnabled = true;
+    let depth = 0;
+    while (nodes.length > 0) {
+        const columnNodes = visiblePaths
+            ? nodes.filter((item) => visiblePaths.has(`${prefix}.${item.key}`))
+            : nodes;
+        if (columnNodes.length === 0) {
+            break;
         }
+        columns.push(renderEntryColumn(profile, title, prefix, columnNodes, depth, selectedPaths,
+            parentEnabled, readOnly));
+        const selectedPath = selectedPaths[depth];
+        const selectedNode = selectedPath && columnNodes.find((item) => `${prefix}.${item.key}` === selectedPath);
+        if (!selectedNode?.children?.length) {
+            break;
+        }
+        parentEnabled = parentEnabled && isEntryChecked(profile, selectedPath, selectedNode);
+        nodes = selectedNode.children;
+        prefix = selectedPath;
+        title = selectedNode.label();
+        depth++;
+    }
+    return `<div class="config-entry-visibility__columns">${columns.join("")}</div>`;
+};
+
+interface IEntrySearchResult {
+    section: IEntryCatalogSection;
+    item: IEntryCatalogNode;
+    path: string;
+    labels: string[];
+}
+
+const getEntrySearchResults = (query: string) => {
+    const results: IEntrySearchResult[] = [];
+    const visit = (section: IEntryCatalogSection, prefix: string, nodes: IEntryCatalogNode[], labels: string[]) => {
+        nodes.forEach((item) => {
+            const path = `${prefix}.${item.key}`;
+            const itemLabels = [...labels, item.label()];
+            if (itemLabels.join(" - ").toLowerCase().includes(query)) {
+                results.push({section, item, path, labels: itemLabels});
+            }
+            if (item.children) {
+                visit(section, path, item.children, itemLabels);
+            }
+        });
+    };
+    entryCatalog.forEach((section) => visit(section, section.key, section.children, [section.label()]));
+    return results;
+};
+
+const getEntrySearchFilter = (query: string) => {
+    const results = getEntrySearchResults(query);
+    const visiblePaths = new Set<string>();
+    const visibleSectionKeys = new Set<string>();
+    results.forEach((result) => {
+        visibleSectionKeys.add(result.section.key);
+        getEntryCatalogPathChain(result.section.key, result.path).forEach((path) => visiblePaths.add(path));
     });
-    flushMainItems();
-    return groups.join("");
+    return {results, visiblePaths, visibleSectionKeys};
 };
 
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
@@ -272,7 +314,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     const creating = !builtin && !existing;
     const view = createEntryView(root);
     const body = view.querySelector<HTMLElement>(".b3-dialog__body");
-    body.innerHTML = `<div class="b3-dialog__content" style="height:100%;box-sizing:border-box;overflow:auto;padding:0">
+    body.innerHTML = `<div class="b3-dialog__content config-entry-visibility__content">
     ${builtin ? "" : `<div class="config-group">
         <div class="config-title">${creating ? window.siyuan.languages.entryCreateProfile : escapeHtml(draft.name)}</div>
         <div class="config-items">
@@ -300,46 +342,67 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             <button class="b3-button b3-button--outline" data-action="restore">${window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base))}</button>`}
         </div>
     </div>
-    <div data-type="entry-sections"></div>
+    <div class="config-entry-visibility__browser" data-type="entry-browser"></div>
 </div>
 <div class="b3-dialog__action">
     ${builtin ? `<button class="b3-button b3-button--text" data-action="cancel">${window.siyuan.languages.close}</button>` : `<button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button>
     <span class="fn__space"></span>
     <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>`}
 </div>`;
-    const sections = view.querySelector<HTMLElement>("[data-type='entry-sections']");
+    const browser = view.querySelector<HTMLElement>("[data-type='entry-browser']");
     const searchInput = view.querySelector<HTMLInputElement>("[data-type='entry-search']");
     const restoreButton = view.querySelector<HTMLButtonElement>("[data-action='restore']");
+    let selectedSectionKey = entryCatalog[0].key;
+    let selectedPaths: string[] = [];
+    let previousQuery = "";
     const updateRestoreButton = () => {
         if (restoreButton) {
             restoreButton.textContent = window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base));
         }
     };
-    const renderSections = () => {
-        sections.innerHTML = entryCatalog.map((section) => `<div class="config-group" data-entry-section>
-    <div class="config-title">${escapeHtml(section.label())}</div>
-    <div class="config-entry-visibility__groups">${renderEntryGroups(draft, section, builtin)}</div>
-</div>`).join("");
-        updateEntryDependencies(sections);
-    };
-    const filterSections = () => {
-        const value = searchInput.value.trim().toLowerCase();
-        sections.querySelectorAll<HTMLElement>("[data-entry-location]").forEach((locationElement) => {
-            locationElement.classList.toggle("fn__none", !value);
+    const renderBrowser = (scrollToEnd = false, resetEntryColumns = false, revealSelection = false) => {
+        const oldColumns = Array.from(browser.querySelectorAll<HTMLElement>("[data-entry-column]"));
+        const oldScrollTops = oldColumns.map((column) => column.querySelector<HTMLElement>(
+            ".config-entry-visibility__column-list")?.scrollTop || 0);
+        const oldColumnsContainer = browser.querySelector<HTMLElement>(".config-entry-visibility__columns");
+        const oldScrollLeft = oldColumnsContainer?.scrollLeft || 0;
+        const query = searchInput.value.trim().toLowerCase();
+        const queryChanged = query !== previousQuery;
+        const filter = query ? getEntrySearchFilter(query) : undefined;
+        if (filter && filter.results.length === 0) {
+            browser.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
+            previousQuery = query;
+            return;
+        }
+        if (filter && queryChanged) {
+            const target = filter.results.find((item) => item.section.key === selectedSectionKey) || filter.results[0];
+            selectedSectionKey = target.section.key;
+            selectedPaths = getEntryCatalogPathChain(target.section.key, target.path);
+            scrollToEnd = true;
+            resetEntryColumns = true;
+            revealSelection = true;
+        }
+        browser.innerHTML = renderEntryColumns(draft, selectedSectionKey, selectedPaths, builtin,
+            filter?.visiblePaths, filter?.visibleSectionKeys);
+        previousQuery = query;
+        const columnsContainer = browser.querySelector<HTMLElement>(".config-entry-visibility__columns");
+        const columns = Array.from(browser.querySelectorAll<HTMLElement>("[data-entry-column]"));
+        columns.forEach((column, index) => {
+            const list = column.querySelector<HTMLElement>(".config-entry-visibility__column-list");
+            if (list) {
+                list.scrollTop = resetEntryColumns && index > 0 ? 0 : oldScrollTops[index] || 0;
+                if (revealSelection) {
+                    const current = list.querySelector<HTMLElement>(
+                        ".config-entry-visibility__location--current, .config-entry-visibility__row--current");
+                    if (current) {
+                        list.scrollTop = Math.max(0, current.offsetTop - list.clientHeight / 2);
+                    }
+                }
+            }
         });
-        sections.querySelectorAll<HTMLElement>("[data-entry-group]").forEach((group) => {
-            const rows = Array.from(group.querySelectorAll<HTMLElement>("[data-entry-row]"));
-            const matches = rows.map((row) => !value || row.dataset.search.includes(value));
-            const groupVisible = matches.some(Boolean);
-            group.classList.toggle("fn__none", !groupVisible);
-            rows.forEach((row, index) => {
-                row.classList.toggle("fn__none", !groupVisible ||
-                    (Boolean(value) && !matches[index] && !row.hasAttribute("data-entry-group-header")));
-            });
-        });
-        sections.querySelectorAll<HTMLElement>("[data-entry-section]").forEach((section) => {
-            section.classList.toggle("fn__none", !section.querySelector("[data-entry-group]:not(.fn__none)"));
-        });
+        if (columnsContainer) {
+            columnsContainer.scrollLeft = scrollToEnd ? columnsContainer.scrollWidth : oldScrollLeft;
+        }
     };
     const leaveEditor = () => removeEntryView(root, view);
     const closeEditor = () => {
@@ -349,8 +412,8 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         }
         leaveEditor();
     };
-    renderSections();
-    searchInput.addEventListener("input", filterSections);
+    renderBrowser();
+    searchInput.addEventListener("input", () => renderBrowser());
     view.addEventListener("input", (event) => {
         if (builtin) {
             return;
@@ -367,7 +430,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         const target = event.target as HTMLInputElement | HTMLSelectElement;
         if (target.matches("[data-entry-path]")) {
             draft.entries[(target as HTMLInputElement).dataset.entryPath] = (target as HTMLInputElement).checked;
-            updateEntryDependencies(sections);
+            renderBrowser();
             return;
         }
         if (target.dataset.profileField !== "base") {
@@ -382,26 +445,36 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             });
         }
         updateRestoreButton();
-        renderSections();
-        filterSections();
+        renderBrowser();
     });
     view.addEventListener("click", (event) => {
-        const readOnlySwitch = (event.target as HTMLElement).closest<HTMLInputElement>("[data-entry-readonly]");
-        if (readOnlySwitch) {
-            event.preventDefault();
-            showMessage(window.siyuan.languages.entryBuiltinReadonlyTip);
+        const entrySwitch = (event.target as HTMLElement).closest<HTMLInputElement>("input[data-entry-path]");
+        if (entrySwitch) {
+            if (entrySwitch.hasAttribute("data-entry-readonly")) {
+                event.preventDefault();
+                showMessage(window.siyuan.languages.entryBuiltinReadonlyTip);
+            }
             return;
         }
-        const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]")?.dataset.action;
+        const actionElement = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
+        const action = actionElement?.dataset.action;
         if (action === "back" || action === "cancel") {
             closeEditor();
+        } else if (action === "select-entry-section") {
+            selectedSectionKey = actionElement.dataset.entrySection;
+            selectedPaths = [];
+            renderBrowser(true, true);
+        } else if (action === "navigate-entry") {
+            const depth = Number(actionElement.dataset.entryDepth);
+            selectedPaths = selectedPaths.slice(0, depth);
+            selectedPaths[depth] = actionElement.dataset.entryPath;
+            renderBrowser(true);
         } else if (!builtin && action === "restore") {
             const restoreTarget = baseLabel(draft.base);
             confirmDialog(window.siyuan.languages.entryRestoreBase.replace("${x}", restoreTarget),
                 window.siyuan.languages.entryRestoreBaseConfirm.replace("${x}", restoreTarget), () => {
                 draft.entries = createEntryProfileSnapshot(draft.base);
-                renderSections();
-                filterSections();
+                renderBrowser();
             });
         } else if (!builtin && action === "confirm") {
             const nameInput = view.querySelector<HTMLInputElement>("[data-profile-field='name']");

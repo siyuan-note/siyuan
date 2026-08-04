@@ -146,26 +146,86 @@ const mountOIDCButton = (root: HTMLElement) => {
         <div class="fn__hr"></div>
         <textarea data-field="claimRules" class="b3-text-field fn__block" rows="5" style="resize: vertical;">${escape(JSON.stringify(config.claimRules, null, 2))}</textarea>
     </div>
+    <div class="b3-label__text fn__none" data-section="validationStatus">${window.siyuan.languages.oidcVerificationTip}</div>
 </div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
             width: isMobile() ? "92vw" : "620px",
             height: "80vh",
         });
         const form = dialog.element.querySelector<HTMLElement>("#oidcConfigForm");
+        const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
+        let validationPollTimer = 0;
+        let validationWindow: Window | null = null;
+        let validationCancelled = false;
         const refreshSections = () => {
             const provider = form.querySelector<HTMLSelectElement>('[data-field="provider"]').value;
+            const enabled = form.querySelector<HTMLInputElement>('[data-field="enabled"]').checked;
             const allowAll = form.querySelector<HTMLInputElement>('[data-field="allowAll"]').checked;
             form.querySelector<HTMLElement>('[data-section="issuer"]').classList.toggle("fn__none",
                 provider !== "custom" && provider !== "microsoft");
             form.querySelector<HTMLElement>('[data-section="mobileCallbackWarning"]').classList.toggle("fn__none",
                 provider !== "google");
             form.querySelector<HTMLElement>('[data-section="claimRules"]').classList.toggle("fn__none", allowAll);
+            buttons[1].textContent = enabled ? window.siyuan.languages.oidcVerifyAndSave : window.siyuan.languages.confirm;
         };
         form.querySelector<HTMLSelectElement>('[data-field="provider"]').addEventListener("change", refreshSections);
+        form.querySelector<HTMLInputElement>('[data-field="enabled"]').addEventListener("change", refreshSections);
         form.querySelector<HTMLInputElement>('[data-field="allowAll"]').addEventListener("change", refreshSections);
         refreshSections();
-        const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
-        buttons[0].addEventListener("click", () => dialog.destroy());
+        const stopValidation = () => {
+            window.clearInterval(validationPollTimer);
+            validationPollTimer = 0;
+        };
+        const setValidationPending = (pending: boolean) => {
+            buttons[1].disabled = pending;
+            form.querySelector<HTMLElement>('[data-section="validationStatus"]').classList.toggle("fn__none", !pending);
+            if (!pending) {
+                refreshSections();
+            }
+        };
+        const validationFailed = (message?: string) => {
+            stopValidation();
+            validationWindow?.close();
+            validationWindow = null;
+            setValidationPending(false);
+            showMessage(message || window.siyuan.languages.oidcVerificationFailed, 6000, "error");
+        };
+        const openValidationURL = (url: string) => {
+            if (validationWindow) {
+                validationWindow.location.href = url;
+                return;
+            }
+            /// #if !BROWSER
+            void shell.openExternal(url).catch((error: Error) => validationFailed(error.message));
+            /// #else
+            openByMobile(url);
+            /// #endif
+        };
+        const pollValidation = async (pollToken: string) => {
+            try {
+                const response = await fetchSyncPost("/api/system/oidc/validatePoll", {pollToken}, undefined, false);
+                if (response.code !== 0) {
+                    validationFailed(response.msg);
+                    return;
+                }
+                if (response.data.status !== "completed") {
+                    return;
+                }
+                stopValidation();
+                validationWindow?.close();
+                window.siyuan.config.oidc = response.data.config;
+                showMessage(window.siyuan.languages.oidcVerificationSuccess);
+                dialog.destroy();
+            } catch (error) {
+                validationFailed(error instanceof Error ? error.message : String(error));
+            }
+        };
+        buttons[0].addEventListener("click", () => {
+            validationCancelled = true;
+            stopValidation();
+            validationWindow?.close();
+            dialog.destroy();
+        });
         buttons[1].addEventListener("click", () => {
             try {
                 const field = <T extends HTMLElement>(name: string) => form.querySelector<T>(`[data-field="${name}"]`);
@@ -183,6 +243,34 @@ const mountOIDCButton = (root: HTMLElement) => {
                     allowAll: field<HTMLInputElement>("allowAll").checked,
                     claimRules,
                 };
+                if (nextConfig.enabled) {
+                    validationCancelled = false;
+                    setValidationPending(true);
+                    buttons[1].textContent = window.siyuan.languages.oidcVerifying;
+                    if (isBrowser() && !isInMobileApp()) {
+                        validationWindow = window.open("about:blank", "_blank");
+                        if (!validationWindow) {
+                            validationFailed();
+                            return;
+                        }
+                        validationWindow.opener = null;
+                    }
+                    void fetchSyncPost("/api/system/oidc/validate", nextConfig, undefined, false).then((response) => {
+                        if (validationCancelled || !dialog.element.isConnected) {
+                            validationWindow?.close();
+                            return;
+                        }
+                        if (response.code !== 0) {
+                            validationFailed(response.msg);
+                            return;
+                        }
+                        openValidationURL(response.data.authURL);
+                        validationPollTimer = window.setInterval(() => {
+                            void pollValidation(response.data.pollToken);
+                        }, 1000);
+                    }).catch((error) => validationFailed(error instanceof Error ? error.message : String(error)));
+                    return;
+                }
                 fetchPost("/api/system/setOIDC", nextConfig, (response) => {
                     window.siyuan.config.oidc = response.data;
                     dialog.destroy();

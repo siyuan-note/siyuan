@@ -1,4 +1,9 @@
 {
+	"oidcVerificationFailed": "Overenie konfigurácie OIDC zlyhalo",
+	"oidcVerificationSuccess": "Konfigurácia OIDC bola overená a uložená",
+	"oidcVerificationTip": "Dokončite prihlásenie OIDC v otvorenom okne prehliadača; aktuálna konfigurácia zostane aktívna, kým overenie nebude úspešné",
+	"oidcVerifying": "Čaká sa na overenie...",
+	"oidcVerifyAndSave": "Overiť a uložiť",
 	"oidcClearClientSecretTip": "Ak chcete uložené tajomstvo zachovať, nechajte pole hesla prázdne, alebo zapnite túto možnosť a odstráňte ho",
 	"oidcClearClientSecret": "Vymazať uložené tajomstvo klienta OIDC",
 	"oidcConfigInvalid": "Neplatná konfigurácia pravidiel deklarácií OIDC",

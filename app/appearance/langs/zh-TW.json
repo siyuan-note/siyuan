@@ -1,4 +1,9 @@
 {
+	"oidcVerificationFailed": "OIDC 設定驗證失敗",
+	"oidcVerificationSuccess": "OIDC 設定驗證成功並已儲存",
+	"oidcVerificationTip": "請在開啟的瀏覽器視窗中完成 OIDC 登入；驗證成功前目前設定將繼續生效",
+	"oidcVerifying": "等待驗證...",
+	"oidcVerifyAndSave": "驗證並儲存",
 	"oidcClearClientSecretTip": "密碼欄留空時保留已儲存的密鑰，啟用此項後確認將刪除該密鑰",
 	"oidcClearClientSecret": "清除已儲存的 OIDC 用戶端密鑰",
 	"oidcConfigInvalid": "OIDC 宣告規則設定無效",

@@ -916,8 +916,14 @@ func setOIDC(c *gin.Context) {
 		logging.LogErrorf("validate OIDC configuration change failed [ip=%s]: %s", c.ClientIP(), err)
 		return
 	}
-	model.Conf.SetOIDC(config)
 	configurationChanged := !reflect.DeepEqual(currentConfig, config)
+	if configurationChanged && config.Enabled {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(369)
+		logging.LogWarnf("reject unverified OIDC configuration change [ip=%s]", c.ClientIP())
+		return
+	}
+	model.Conf.SetOIDC(config)
 	masked, err := model.GetMaskedConf()
 	if err != nil {
 		ret.Code = -1

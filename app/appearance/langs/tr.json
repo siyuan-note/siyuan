@@ -1,4 +1,9 @@
 {
+	"oidcVerificationFailed": "OIDC yapılandırması doğrulanamadı",
+	"oidcVerificationSuccess": "OIDC yapılandırması doğrulandı ve kaydedildi",
+	"oidcVerificationTip": "Açılan tarayıcı penceresinde OIDC oturum açma işlemini tamamlayın; doğrulama başarılı olana kadar mevcut yapılandırma etkin kalır",
+	"oidcVerifying": "Doğrulama bekleniyor...",
+	"oidcVerifyAndSave": "Doğrula ve kaydet",
 	"oidcClearClientSecretTip": "Kaydedilmiş gizli anahtarı korumak için parola alanını boş bırakın veya silmek için bu seçeneği etkinleştirin",
 	"oidcClearClientSecret": "Kaydedilmiş OIDC istemci gizli anahtarını temizle",
 	"oidcConfigInvalid": "Geçersiz OIDC talep kuralı yapılandırması",

@@ -1,4 +1,9 @@
 {
+	"oidcVerificationFailed": "Weryfikacja konfiguracji OIDC nie powiodła się",
+	"oidcVerificationSuccess": "Konfiguracja OIDC została zweryfikowana i zapisana",
+	"oidcVerificationTip": "Dokończ logowanie OIDC w otwartym oknie przeglądarki; bieżąca konfiguracja pozostanie aktywna do czasu pomyślnej weryfikacji",
+	"oidcVerifying": "Oczekiwanie na weryfikację...",
+	"oidcVerifyAndSave": "Zweryfikuj i zapisz",
 	"oidcClearClientSecretTip": "Pozostaw pole hasła puste, aby zachować zapisany sekret, lub włącz tę opcję, aby go usunąć",
 	"oidcClearClientSecret": "Wyczyść zapisany sekret klienta OIDC",
 	"oidcConfigInvalid": "Nieprawidłowa konfiguracja reguł oświadczeń OIDC",

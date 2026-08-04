@@ -1,4 +1,9 @@
 {
+	"oidcVerificationFailed": "Échec de la vérification de la configuration OIDC",
+	"oidcVerificationSuccess": "Configuration OIDC vérifiée et enregistrée",
+	"oidcVerificationTip": "Terminez la connexion OIDC dans la fenêtre de navigateur ouverte ; la configuration actuelle reste active jusqu’à la réussite de la vérification",
+	"oidcVerifying": "En attente de la vérification...",
+	"oidcVerifyAndSave": "Vérifier et enregistrer",
 	"oidcClearClientSecretTip": "Laissez le champ du mot de passe vide pour conserver le secret enregistré ou activez cette option pour le supprimer",
 	"oidcClearClientSecret": "Effacer le secret client OIDC enregistré",
 	"oidcConfigInvalid": "Configuration des règles de revendication OIDC non valide",

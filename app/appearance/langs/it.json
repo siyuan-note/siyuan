@@ -1,4 +1,9 @@
 {
+	"oidcVerificationFailed": "Verifica della configurazione OIDC non riuscita",
+	"oidcVerificationSuccess": "Configurazione OIDC verificata e salvata",
+	"oidcVerificationTip": "Completa l'accesso OIDC nella finestra del browser aperta; la configurazione attuale rimane attiva fino al completamento della verifica",
+	"oidcVerifying": "In attesa della verifica...",
+	"oidcVerifyAndSave": "Verifica e salva",
 	"oidcClearClientSecretTip": "Lascia vuoto il campo della password per mantenere il segreto salvato oppure attiva questa opzione per eliminarlo",
 	"oidcClearClientSecret": "Cancella il segreto client OIDC salvato",
 	"oidcConfigInvalid": "Configurazione delle regole di attestazione OIDC non valida",

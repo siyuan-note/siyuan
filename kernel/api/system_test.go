@@ -26,7 +26,52 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestSetOIDCRejectsUnverifiedEnabledConfiguration(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	previousConf := model.Conf
+	previousReadOnly := util.ReadOnly
+	model.Conf = model.NewAppConf()
+	model.Conf.CookieKey = "oidc-api-test-cookie-key"
+	util.ReadOnly = true
+	t.Cleanup(func() {
+		model.Conf = previousConf
+		util.ReadOnly = previousReadOnly
+	})
+
+	candidate := conf.NewOIDC()
+	candidate.Enabled = true
+	candidate.Provider = conf.OIDCProviderGitHub
+	candidate.ClientID = "client-id"
+	candidate.ClientSecret = "client-secret"
+	candidate.AllowAll = true
+	body, err := json.Marshal(candidate)
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	engine.POST("/api/system/setOIDC", setOIDC)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/api/system/setOIDC", strings.NewReader(string(body)))
+	request.RemoteAddr = "127.0.0.1:1234"
+	request.Header.Set("Content-Type", "application/json")
+	engine.ServeHTTP(recorder, request)
+
+	response := &struct {
+		Code int `json:"code"`
+	}{}
+	if err = json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+		t.Fatalf("unmarshal setOIDC response failed: %v", err)
+	}
+	if response.Code != -1 {
+		t.Fatalf("unverified OIDC configuration was accepted: %s", recorder.Body.String())
+	}
+	if model.Conf.GetOIDC().Enabled {
+		t.Fatal("unverified OIDC configuration changed the active configuration")
+	}
+}
 
 func TestGetConfUILayoutByRole(t *testing.T) {
 	gin.SetMode(gin.TestMode)

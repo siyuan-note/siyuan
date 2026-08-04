@@ -1,4 +1,9 @@
 {
+	"oidcVerificationFailed": "فشل التحقق من إعداد OIDC",
+	"oidcVerificationSuccess": "تم التحقق من إعداد OIDC وحفظه",
+	"oidcVerificationTip": "أكمل تسجيل الدخول إلى OIDC في نافذة المتصفح المفتوحة؛ سيظل الإعداد الحالي فعالًا حتى ينجح التحقق",
+	"oidcVerifying": "في انتظار التحقق...",
+	"oidcVerifyAndSave": "تحقق واحفظ",
 	"oidcClearClientSecretTip": "اترك حقل كلمة المرور فارغًا للاحتفاظ بالسر المحفوظ، أو فعّل هذا الخيار لحذفه",
 	"oidcClearClientSecret": "مسح سر عميل OIDC المحفوظ",
 	"oidcConfigInvalid": "إعداد قواعد مطالبات OIDC غير صالح",

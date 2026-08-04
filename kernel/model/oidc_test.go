@@ -141,11 +141,11 @@ func TestAuthorizeOIDCClaimsCombinesRulesWithAnd(t *testing.T) {
 		{Claim: "email_verified", Operator: conf.OIDCClaimOperatorEquals, Values: []string{"true"}},
 	}
 	claims := map[string]any{"email": "b@example.com", "groups": []any{"users", "siyuan-admins"}, "email_verified": true}
-	if err := authorizeOIDCClaims(claims); err != nil {
+	if err := authorizeOIDCClaims(Conf.GetOIDC(), claims); err != nil {
 		t.Fatalf("allowed claims were rejected: %s", err)
 	}
 	claims["groups"] = []any{"users"}
-	if err := authorizeOIDCClaims(claims); err == nil {
+	if err := authorizeOIDCClaims(Conf.GetOIDC(), claims); err == nil {
 		t.Fatal("expected all claim rules to be required")
 	}
 }
@@ -182,7 +182,7 @@ func TestOIDCTransactionUsesSeparateBoundPollToken(t *testing.T) {
 
 func TestOIDCTransactionCanOnlyBeClaimedOnceConcurrently(t *testing.T) {
 	setupOIDCTest(t)
-	transaction := &oidcTransaction{State: "concurrent", Binding: "binding", ConfigVersion: oidcSessionVersion(),
+	transaction := &oidcTransaction{State: "concurrent", Binding: "binding", ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()),
 		ExpiresAt: time.Now().Add(time.Minute)}
 	if err := storeOIDCTransaction(transaction); err != nil {
 		t.Fatal(err)
@@ -226,7 +226,7 @@ func TestOIDCTransactionCanOnlyBeClaimedOnceConcurrently(t *testing.T) {
 func TestRepeatedOIDCTransactionRequiresOriginalBinding(t *testing.T) {
 	setupOIDCTest(t)
 	transaction := &oidcTransaction{State: "bound-repeat", Binding: "binding-a", Flow: oidcFlowWeb,
-		ConfigVersion: oidcSessionVersion(), ExpiresAt: time.Now().Add(time.Minute)}
+		ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()), ExpiresAt: time.Now().Add(time.Minute)}
 	if err := storeOIDCTransaction(transaction); err != nil {
 		t.Fatal(err)
 	}
@@ -246,7 +246,7 @@ func TestRepeatedOIDCTransactionRequiresOriginalBinding(t *testing.T) {
 func TestCompletedWebAndMobileTransactionsAreRetainedBriefly(t *testing.T) {
 	setupOIDCTest(t)
 	for _, flow := range []string{oidcFlowWeb, oidcFlowMobile} {
-		transaction := &oidcTransaction{State: flow, Flow: flow, ConfigVersion: oidcSessionVersion(),
+		transaction := &oidcTransaction{State: flow, Flow: flow, ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()),
 			ExpiresAt: time.Now().Add(time.Minute)}
 		if err := storeOIDCTransaction(transaction); err != nil {
 			t.Fatal(err)
@@ -269,6 +269,64 @@ func TestCompletedWebAndMobileTransactionsAreRetainedBriefly(t *testing.T) {
 	}
 }
 
+func TestActivateOIDCValidationAppliesCandidateOnce(t *testing.T) {
+	setupOIDCTest(t)
+	previousReadOnly := util.ReadOnly
+	util.ReadOnly = true
+	t.Cleanup(func() { util.ReadOnly = previousReadOnly })
+	candidate := Conf.GetOIDC()
+	candidate.ClientID = "validated-client-id"
+	transaction := &oidcTransaction{
+		State:         "validation-state",
+		PollToken:     "validation-poll-token",
+		Binding:       "validation-binding",
+		Flow:          oidcFlowValidate,
+		ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()),
+		Completed:     true,
+		Success:       true,
+		Config:        candidate,
+		ExpiresAt:     time.Now().Add(time.Minute),
+	}
+	if err := storeOIDCTransaction(transaction); err != nil {
+		t.Fatal(err)
+	}
+	activated, err := activateOIDCValidation(transaction.PollToken, transaction.Binding)
+	if err != nil || !activated {
+		t.Fatalf("validated OIDC configuration was not activated: activated=%v, err=%v", activated, err)
+	}
+	if Conf.GetOIDC().ClientID != candidate.ClientID {
+		t.Fatal("validated OIDC configuration was not applied")
+	}
+	activated, err = activateOIDCValidation(transaction.PollToken, transaction.Binding)
+	if err != nil || activated {
+		t.Fatalf("validated OIDC configuration was applied more than once: activated=%v, err=%v", activated, err)
+	}
+}
+
+func TestActivateOIDCValidationRejectsChangedConfiguration(t *testing.T) {
+	setupOIDCTest(t)
+	candidate := Conf.GetOIDC()
+	candidate.ClientID = "validated-client-id"
+	transaction := &oidcTransaction{
+		State:         "stale-validation-state",
+		PollToken:     "stale-validation-poll-token",
+		Binding:       "validation-binding",
+		Flow:          oidcFlowValidate,
+		ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()),
+		Completed:     true,
+		Success:       true,
+		Config:        candidate,
+		ExpiresAt:     time.Now().Add(time.Minute),
+	}
+	if err := storeOIDCTransaction(transaction); err != nil {
+		t.Fatal(err)
+	}
+	Conf.OIDC.ClientID = "concurrently-changed-client-id"
+	if activated, err := activateOIDCValidation(transaction.PollToken, transaction.Binding); err == nil || activated {
+		t.Fatalf("stale OIDC validation was activated: activated=%v, err=%v", activated, err)
+	}
+}
+
 func TestApplyOIDCEnvironmentOverridesStoredConfiguration(t *testing.T) {
 	t.Setenv("SIYUAN_OIDC_ENABLED", "true")
 	t.Setenv("SIYUAN_OIDC_PROVIDER", conf.OIDCProviderGitHub)
@@ -287,7 +345,7 @@ func TestApplyOIDCEnvironmentOverridesStoredConfiguration(t *testing.T) {
 func TestOIDCTransactionExpiryAndSafeRedirect(t *testing.T) {
 	setupOIDCTest(t)
 	transaction := &oidcTransaction{
-		State: "expired", Binding: "binding", ConfigVersion: oidcSessionVersion(), ExpiresAt: time.Now().Add(-time.Second),
+		State: "expired", Binding: "binding", ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()), ExpiresAt: time.Now().Add(-time.Second),
 	}
 	if err := storeOIDCTransaction(transaction); err != nil {
 		t.Fatal(err)
@@ -329,7 +387,7 @@ func TestOIDCTransactionLimitsRejectWithoutEviction(t *testing.T) {
 	setupOIDCTest(t)
 	newTransaction := func(state, binding, clientIP string) *oidcTransaction {
 		return &oidcTransaction{State: state, Binding: binding, ClientIP: clientIP,
-			ConfigVersion: oidcSessionVersion(), ExpiresAt: time.Now().Add(time.Minute)}
+			ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()), ExpiresAt: time.Now().Add(time.Minute)}
 	}
 	for i := 0; i < oidcTransactionPerBind; i++ {
 		if err := storeOIDCTransaction(newTransaction(fmt.Sprintf("binding-%d", i), "same-binding", "")); err != nil {
@@ -454,5 +512,18 @@ func TestOIDCSessionVersionInvalidatesOnConfigurationChange(t *testing.T) {
 	workspaceSession.AccessAuthCode = "access-code"
 	if !IsWorkspaceSessionAuthenticated(workspaceSession) {
 		t.Fatal("valid access-code session should remain available as an independent login method")
+	}
+}
+
+func TestOIDCConfigurationVersionTracksDisabledConfiguration(t *testing.T) {
+	setupOIDCTest(t)
+	Conf.OIDC.Enabled = false
+	first := oidcConfigurationVersion(Conf.GetOIDC())
+	if first == "" || oidcSessionVersion() != "" {
+		t.Fatal("disabled OIDC configuration did not retain an internal configuration version")
+	}
+	Conf.OIDC.ClientID = "changed-disabled-client-id"
+	if second := oidcConfigurationVersion(Conf.GetOIDC()); second == first {
+		t.Fatal("disabled OIDC configuration change did not invalidate pending validation")
 	}
 }

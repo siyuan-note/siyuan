@@ -1,4 +1,9 @@
 {
+	"oidcVerificationFailed": "אימות תצורת OIDC נכשל",
+	"oidcVerificationSuccess": "תצורת OIDC אומתה ונשמרה",
+	"oidcVerificationTip": "השלם את ההתחברות ל-OIDC בחלון הדפדפן שנפתח; התצורה הנוכחית תישאר פעילה עד שהאימות יצליח",
+	"oidcVerifying": "ממתין לאימות...",
+	"oidcVerifyAndSave": "אמת ושמור",
 	"oidcClearClientSecretTip": "השאר את שדה הסיסמה ריק כדי לשמור את הסוד הקיים, או הפעל אפשרות זו כדי למחוק אותו",
 	"oidcClearClientSecret": "מחיקת סוד לקוח OIDC השמור",
 	"oidcConfigInvalid": "תצורת כללי תביעות OIDC אינה תקינה",

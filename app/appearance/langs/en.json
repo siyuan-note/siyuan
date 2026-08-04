@@ -1,4 +1,9 @@
 {
+	"oidcVerificationFailed": "OIDC configuration verification failed",
+	"oidcVerificationSuccess": "OIDC configuration verified and saved",
+	"oidcVerificationTip": "Complete OIDC login in the opened browser window; the current configuration remains active until verification succeeds",
+	"oidcVerifying": "Waiting for verification...",
+	"oidcVerifyAndSave": "Verify and save",
 	"oidcClearClientSecretTip": "Leave the password field empty to keep the saved secret, or enable this option to delete it",
 	"oidcClearClientSecret": "Clear saved OIDC client secret",
 	"oidcConfigInvalid": "Invalid OIDC claim rule configuration",

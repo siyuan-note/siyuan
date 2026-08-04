@@ -17,6 +17,7 @@ import (
 	"github.com/88250/gulu"
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -62,6 +63,13 @@ func oidcSessionVersion() string {
 	}
 	config := Conf.GetOIDC()
 	if !config.Enabled {
+		return ""
+	}
+	return oidcConfigurationVersion(config)
+}
+
+func oidcConfigurationVersion(config *conf.OIDC) string {
+	if Conf == nil || Conf.CookieKey == "" || config == nil {
 		return ""
 	}
 	data, err := gulu.JSON.MarshalJSON(config)

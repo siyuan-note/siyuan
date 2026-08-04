@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "Deixe o campo de senha vazio para manter o segredo salvo ou ative esta opção para excluí-lo",
+	"oidcClearClientSecret": "Limpar segredo do cliente OIDC salvo",
 	"oidcConfigInvalid": "Configuração inválida das regras de declaração OIDC",
 	"oidcClaimRulesTip": "Matriz JSON; os valores de uma regra usam OU, enquanto as regras usam E",
 	"oidcClaimRules": "Regras de declaração OIDC",

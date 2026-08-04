@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "Ak chcete uložené tajomstvo zachovať, nechajte pole hesla prázdne, alebo zapnite túto možnosť a odstráňte ho",
+	"oidcClearClientSecret": "Vymazať uložené tajomstvo klienta OIDC",
 	"oidcConfigInvalid": "Neplatná konfigurácia pravidiel deklarácií OIDC",
 	"oidcClaimRulesTip": "Pole JSON; hodnoty v pravidle používajú ALEBO a pravidlá používajú A",
 	"oidcClaimRules": "Pravidlá deklarácií OIDC",

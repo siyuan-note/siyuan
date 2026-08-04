@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "密码框留空时保留已保存的密钥，开启此项后确认将删除该密钥",
+	"oidcClearClientSecret": "清空已保存的 OIDC 客户端密钥",
 	"oidcConfigInvalid": "OIDC 声明规则配置无效",
 	"oidcClaimRulesTip": "JSON 数组；同一规则内的值为或关系，不同规则之间为与关系",
 	"oidcClaimRules": "OIDC 声明规则",

@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "Deje vacío el campo de contraseña para conservar el secreto guardado o active esta opción para eliminarlo",
+	"oidcClearClientSecret": "Borrar el secreto del cliente OIDC guardado",
 	"oidcConfigInvalid": "Configuración de reglas de notificaciones OIDC no válida",
 	"oidcClaimRulesTip": "Matriz JSON; los valores de una regla usan O y las reglas usan Y",
 	"oidcClaimRules": "Reglas de notificaciones OIDC",

@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "Lascia vuoto il campo della password per mantenere il segreto salvato oppure attiva questa opzione per eliminarlo",
+	"oidcClearClientSecret": "Cancella il segreto client OIDC salvato",
 	"oidcConfigInvalid": "Configurazione delle regole di attestazione OIDC non valida",
 	"oidcClaimRulesTip": "Array JSON; i valori in una regola usano OR, mentre le regole usano AND",
 	"oidcClaimRules": "Regole di attestazione OIDC",

@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "비밀번호 입력란을 비워 두면 저장된 비밀이 유지되며, 이 옵션을 켜고 확인하면 삭제됩니다",
+	"oidcClearClientSecret": "저장된 OIDC 클라이언트 비밀 삭제",
 	"oidcConfigInvalid": "OIDC 클레임 규칙 구성이 올바르지 않습니다",
 	"oidcClaimRulesTip": "JSON 배열이며 한 규칙 안의 값은 OR, 규칙 사이는 AND로 평가됩니다",
 	"oidcClaimRules": "OIDC 클레임 규칙",

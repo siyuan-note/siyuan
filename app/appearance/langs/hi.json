@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "सहेजे गए सीक्रेट को बनाए रखने के लिए पासवर्ड फ़ील्ड खाली छोड़ें, या उसे हटाने के लिए यह विकल्प चालू करें",
+	"oidcClearClientSecret": "सहेजा गया OIDC क्लाइंट सीक्रेट साफ़ करें",
 	"oidcConfigInvalid": "OIDC क्लेम नियम कॉन्फ़िगरेशन अमान्य है",
 	"oidcClaimRulesTip": "JSON सरणी; एक नियम के मान OR और अलग नियम AND का उपयोग करते हैं",
 	"oidcClaimRules": "OIDC क्लेम नियम",

@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "Laissez le champ du mot de passe vide pour conserver le secret enregistré ou activez cette option pour le supprimer",
+	"oidcClearClientSecret": "Effacer le secret client OIDC enregistré",
 	"oidcConfigInvalid": "Configuration des règles de revendication OIDC non valide",
 	"oidcClaimRulesTip": "Tableau JSON ; les valeurs d’une règle utilisent OU, tandis que les règles utilisent ET",
 	"oidcClaimRules": "Règles de revendication OIDC",

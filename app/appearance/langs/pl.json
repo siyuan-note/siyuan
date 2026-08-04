@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "Pozostaw pole hasła puste, aby zachować zapisany sekret, lub włącz tę opcję, aby go usunąć",
+	"oidcClearClientSecret": "Wyczyść zapisany sekret klienta OIDC",
 	"oidcConfigInvalid": "Nieprawidłowa konfiguracja reguł oświadczeń OIDC",
 	"oidcClaimRulesTip": "Tablica JSON; wartości w regule są łączone operatorem LUB, a reguły operatorem I",
 	"oidcClaimRules": "Reguły oświadczeń OIDC",

@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "Laat het wachtwoordveld leeg om het opgeslagen geheim te behouden of schakel deze optie in om het te verwijderen",
+	"oidcClearClientSecret": "Opgeslagen OIDC-clientgeheim wissen",
 	"oidcConfigInvalid": "Ongeldige configuratie van OIDC-claimregels",
 	"oidcClaimRulesTip": "JSON-array; waarden binnen een regel gebruiken OF en regels gebruiken EN",
 	"oidcClaimRules": "OIDC-claimregels",

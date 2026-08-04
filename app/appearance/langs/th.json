@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "เว้นช่องรหัสผ่านว่างไว้เพื่อเก็บรหัสลับที่บันทึกไว้ หรือเปิดตัวเลือกนี้เพื่อลบรหัสลับ",
+	"oidcClearClientSecret": "ล้างรหัสลับไคลเอนต์ OIDC ที่บันทึกไว้",
 	"oidcConfigInvalid": "การกำหนดค่ากฎเคลม OIDC ไม่ถูกต้อง",
 	"oidcClaimRulesTip": "อาร์เรย์ JSON; ค่าในกฎเดียวกันใช้ OR และระหว่างกฎใช้ AND",
 	"oidcClaimRules": "กฎเคลม OIDC",

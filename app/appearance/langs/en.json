@@ -1,4 +1,6 @@
 {
+	"oidcClearClientSecretTip": "Leave the password field empty to keep the saved secret, or enable this option to delete it",
+	"oidcClearClientSecret": "Clear saved OIDC client secret",
 	"oidcConfigInvalid": "Invalid OIDC claim rule configuration",
 	"oidcClaimRulesTip": "JSON array; values within a rule use OR, while rules use AND",
 	"oidcClaimRules": "OIDC claim rules",

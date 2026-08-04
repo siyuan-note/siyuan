@@ -118,7 +118,10 @@ const mountOIDCButton = (root: HTMLElement) => {
         <input data-field="clientSecret" type="password" class="b3-text-field fn__block" spellcheck="false" placeholder="${config.clientSecretConfigured ? "********" : ""}">
     </div>
     <label class="b3-label b3-label--inner fn__flex${config.clientSecretConfigured ? "" : " fn__none"}" data-section="clearClientSecret">
-        <div class="fn__flex-1"><div class="config-name">${window.siyuan.languages.clear}</div></div>
+        <div class="fn__flex-1">
+            <div class="config-name">${window.siyuan.languages.oidcClearClientSecret}</div>
+            <div class="b3-label__text">${window.siyuan.languages.oidcClearClientSecretTip}</div>
+        </div>
         <span class="fn__space"></span>
         <input type="checkbox" data-field="clearClientSecret" class="b3-switch fn__flex-center">
     </label>

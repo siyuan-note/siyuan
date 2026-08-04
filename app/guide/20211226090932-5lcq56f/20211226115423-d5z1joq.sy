@@ -7,7 +7,7 @@
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"type": "doc",
-		"updated": "20260803165036"
+		"updated": "20260804194000"
 	},
 	"Children": [
 		{
@@ -1552,7 +1552,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729215152-3ap0gw3",
-				"updated": "20260729225925"
+				"updated": "20260804194000"
 			},
 			"Children": [
 				{
@@ -1567,7 +1567,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-2w9opfh",
-				"updated": "20260729215152"
+				"updated": "20260804194000"
 			},
 			"Children": [
 				{
@@ -1596,6 +1596,37 @@
 									"TextMarkBlockRefID": "20211226122523-rl8356a",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "在瀏覽器上使用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804193501-oidcli2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804193501-oidcli2",
+						"updated": "20260804194000"
+					},
+					"Children": [
+						{
+							"ID": "20260804193505-oidcp02",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804193505-oidcp02",
+								"updated": "20260804194000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804190001-oidctw1",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "OIDC 登入"
 								}
 							]
 						}

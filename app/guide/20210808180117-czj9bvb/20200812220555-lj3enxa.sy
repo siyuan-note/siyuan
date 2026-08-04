@@ -7,7 +7,7 @@
 		"id": "20200812220555-lj3enxa",
 		"title": "请从这里开始",
 		"type": "doc",
-		"updated": "20260803165036"
+		"updated": "20260804194000"
 	},
 	"Children": [
 		{
@@ -1544,7 +1544,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729213849-17vjx77",
-				"updated": "20260729225925"
+				"updated": "20260804194000"
 			},
 			"Children": [
 				{
@@ -1559,7 +1559,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729213849-38zyz2l",
-				"updated": "20260729213849"
+				"updated": "20260804194000"
 			},
 			"Children": [
 				{
@@ -1588,6 +1588,37 @@
 									"TextMarkBlockRefID": "20201004184819-nj8ibyg",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "在浏览器上使用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804193500-oidcli1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804193500-oidcli1",
+						"updated": "20260804194000"
+					},
+					"Children": [
+						{
+							"ID": "20260804193504-oidcp01",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804193504-oidcp01",
+								"updated": "20260804194000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804190000-oidccn1",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "OIDC 登录"
 								}
 							]
 						}

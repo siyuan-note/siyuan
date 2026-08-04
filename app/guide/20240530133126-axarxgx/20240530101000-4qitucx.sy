@@ -8,7 +8,7 @@
 		"id": "20240530101000-4qitucx",
 		"title": "スタートガイド",
 		"type": "doc",
-		"updated": "20260803170332"
+		"updated": "20260804194000"
 	},
 	"Children": [
 		{
@@ -1587,7 +1587,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729215152-390ratq",
-				"updated": "20260729225925"
+				"updated": "20260804194000"
 			},
 			"Children": [
 				{
@@ -1602,7 +1602,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-1quwm31",
-				"updated": "20260729215152"
+				"updated": "20260804194000"
 			},
 			"Children": [
 				{
@@ -1632,6 +1632,37 @@
 									"TextMarkBlockRefID": "20240530101000-40hohog",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "ブラウザ"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804193503-oidcli4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804193503-oidcli4",
+						"updated": "20260804194000"
+					},
+					"Children": [
+						{
+							"ID": "20260804193507-oidcp04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804193507-oidcp04",
+								"updated": "20260804194000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804190003-oidcja1",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "OIDC ログイン"
 								}
 							]
 						}

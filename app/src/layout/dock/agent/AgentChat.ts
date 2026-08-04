@@ -38,6 +38,7 @@ import {
 import {getAgentReasoningEffortOptions} from "./AgentReasoning";
 import {mountGroupedModelPicker, type IGroupedModelPicker} from "../../../config/tabs/ai/aiProviderUi";
 import {isEncryptedBox} from "../../../util/pathName";
+import {Menu} from "../../../plugin/Menu";
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -167,8 +168,8 @@ export class AgentChat extends Model {
     private groupedModelPicker?: IGroupedModelPicker;
     private selectedModel: string;
     private modelOptions: Array<{ id: string; name: string }> = [];
-    // 推理努力度（iconBrain + 原生 select），仅实例记忆，刷新后回到默认。
-    private reasoningEffortSelect: HTMLSelectElement;
+    // 推理努力度（iconBrain + 菜单），仅实例记忆，刷新后回到默认。
+    private reasoningEffortButton: HTMLButtonElement;
     private selectedReasoningEffort = "";
     private userScrolledUp = false;
     private programmaticScroll = false;
@@ -269,6 +270,8 @@ export class AgentChat extends Model {
 
         panel.innerHTML = '<div class="agent-chat fn__flex-column fn__flex-1">' +
             '<div class="block__icons fn__hidescrollbar">' +
+            (this.host.mobile ? '<span data-type="back" class="block__icon ariaLabel" aria-label="' + L.back + '">' +
+                '<svg><use xlink:href="#iconLeft"></use></svg></span>' : "") +
             '<div class="block__logo fn__flex-1 agent-chat__title">' + (L.agentChat || "Agent") + "</div>" +
             '<span data-type="new-session" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.agentNewSession || "New Session") + '">' +
             '<svg><use xlink:href="#iconAdd"></use></svg>' +
@@ -299,8 +302,14 @@ export class AgentChat extends Model {
             '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
             "</svg>" +
             "</span>" +
-            '<button class="b3-select b3-select--noborder" data-type="groupedModelPicker" data-group="agent" data-model-id="" data-menu="true" type="button"></button>' +
-            '<div class="b3-form__icon ariaLabel" aria-label="' + (L.reasoningEffortTooltip || "Reasoning effort") + '"><svg class="b3-form__icon-icon"><use xlink:href="#iconBrain"></use></svg><select class="b3-select b3-select--noborder b3-form__icon-input" tabindex="0"></select></div>' +
+            '<button class="b3-select b3-select--noborder agent-chat__model-picker" data-type="groupedModelPicker" data-group="agent" data-model-id="" data-menu="true" type="button">' +
+            '<span class="agent-chat__model-picker-label" data-type="groupedModelPickerLabel"></span>' +
+            '<svg class="agent-chat__model-picker-arrow"><use xlink:href="#iconDown"></use></svg></button>' +
+            '<button class="b3-select b3-select--noborder agent-chat__reasoning-effort ariaLabel" data-menu="true" aria-label="' +
+            (L.reasoningEffortTooltip || "Reasoning effort") + '" type="button">' +
+            '<svg class="agent-chat__reasoning-effort-icon"><use xlink:href="#iconBrain"></use></svg>' +
+            '<span class="agent-chat__reasoning-effort-label"></span>' +
+            '<svg class="agent-chat__reasoning-effort-arrow"><use xlink:href="#iconDown"></use></svg></button>' +
             "</div>" +
             '<button class="agent-chat__send b3-button b3-button--icon b3-button--text ariaLabel" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none ariaLabel" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
@@ -318,8 +327,8 @@ export class AgentChat extends Model {
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
         this.modelSelect = panel.querySelector('[data-type="groupedModelPicker"]') as HTMLButtonElement;
-        this.reasoningEffortSelect = panel.querySelector(".b3-form__icon-input") as HTMLSelectElement;
-        this.initReasoningEffortSelect();
+        this.reasoningEffortButton = panel.querySelector(".agent-chat__reasoning-effort") as HTMLButtonElement;
+        this.initReasoningEffortMenu();
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
             const {scrollTop, scrollHeight, clientHeight} = this.messagesContainer;
@@ -383,6 +392,7 @@ export class AgentChat extends Model {
                     }
                     await SessionStore.rename(id, title);
                 },
+                onClose: this.host.mobile ? this.host.close : undefined,
             },
             !!this.host.mobile,
         );
@@ -521,15 +531,34 @@ export class AgentChat extends Model {
         return this.selectedModel;
     }
 
-    // 初始化思考强度原生 select：提供各供应商使用的标准档位，选择结果仅在当前实例中生效。
-    private initReasoningEffortSelect() {
+    // 初始化思考强度菜单：提供各供应商使用的标准档位，选择结果仅在当前实例中生效。
+    private initReasoningEffortMenu() {
         const options = getAgentReasoningEffortOptions(window.siyuan.languages);
-        this.reasoningEffortSelect.innerHTML = options
-            .map(o => '<option value="' + escapeHtml(o.value) + '">' + escapeHtml(o.label) + "</option>")
-            .join("");
-        this.reasoningEffortSelect.value = this.selectedReasoningEffort;
-        this.reasoningEffortSelect.addEventListener("change", () => {
-            this.selectedReasoningEffort = this.reasoningEffortSelect.value;
+        const updateLabel = () => {
+            const selected = options.find(option => option.value === this.selectedReasoningEffort) || options[0];
+            this.reasoningEffortButton.querySelector(".agent-chat__reasoning-effort-label").textContent = selected.label;
+        };
+        updateLabel();
+        this.reasoningEffortButton.addEventListener("click", (event: MouseEvent) => {
+            event.stopPropagation();
+            const menu = new Menu("agent-chat-reasoning-effort");
+            if (menu.isOpen) {
+                return;
+            }
+            options.forEach(option => {
+                menu.addItem({
+                    iconHTML: "",
+                    label: escapeHtml(option.label),
+                    current: option.value === this.selectedReasoningEffort,
+                    click: () => {
+                        this.selectedReasoningEffort = option.value;
+                        updateLabel();
+                    },
+                });
+            });
+            const rect = this.reasoningEffortButton.getBoundingClientRect();
+            menu.element.style.minWidth = `${Math.max(rect.width, 120)}px`;
+            menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
         });
     }
 
@@ -752,6 +781,11 @@ export class AgentChat extends Model {
             while (target && !target.isEqualNode(this.panelElement)) {
                 if (target.classList.contains("block__icon")) {
                     const type = target.getAttribute("data-type");
+                    if (type === "back") {
+                        e.stopPropagation();
+                        this.host.close();
+                        return;
+                    }
                     if (type === "min" || type === "close") {
                         e.stopPropagation();
                         this.host.close();
@@ -781,6 +815,9 @@ export class AgentChat extends Model {
             }
         });
         this.scrollBottomBtn.addEventListener("click", () => {
+            // 程序化滚动期间会忽略 scroll 事件，点击时需主动退出“用户已向上滚动”状态并隐藏按钮。
+            this.userScrolledUp = false;
+            this.scrollBottomBtn.classList.remove("agent-chat__scroll-bottom--visible");
             this.scrollToBottom(true, true);
         });
     }

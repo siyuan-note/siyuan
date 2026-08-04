@@ -4,6 +4,7 @@ import {
     focusBlock,
     focusByRange,
     focusByWbr,
+    getBlockRanges,
     getEditorRange,
     getSelectionOffset,
     getSelectionPosition,
@@ -190,6 +191,29 @@ const getAdjacentInlineMath = (range: Range, editableElement: Element, previous:
             adjacentNode = previous ? hasPreviousSibling(currentNode) : hasNextSibling(currentNode);
         }
     }
+};
+
+const getRangeListItemElements = (editorElement: HTMLElement, range: Range) => {
+    const listItemElements: HTMLElement[] = [];
+    const blockRanges = getBlockRanges(editorElement, range);
+    for (const blockRange of blockRanges) {
+        const listItemElement = blockRange.blockElement.closest<HTMLElement>('[data-type="NodeListItem"]');
+        if (!listItemElement || !editorElement.contains(listItemElement)) {
+            return [];
+        }
+        if (!listItemElements.includes(listItemElement)) {
+            listItemElements.push(listItemElement);
+        }
+    }
+    if (listItemElements.length < 2) {
+        return [];
+    }
+    const listElement = listItemElements[0].parentElement;
+    if (listItemElements.some((item, index) => item.parentElement !== listElement ||
+        index > 0 && item.previousElementSibling !== listItemElements[index - 1])) {
+        return [];
+    }
+    return listItemElements;
 };
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
@@ -1756,7 +1780,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             }
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.list.outdent.custom, event)) {
+        const isListOutdent = matchHotKey(window.siyuan.config.keymap.editor.list.outdent.custom, event);
+        const isListIndent = matchHotKey(window.siyuan.config.keymap.editor.list.indent.custom, event);
+        const rangeListItemElements = (isListOutdent || isListIndent) && isCrossBlock && selectText !== "" ?
+            getRangeListItemElements(protyle.wysiwyg.element, range) : [];
+        if (isListOutdent) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 let isContinuous = true;
@@ -1774,6 +1802,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
+            } else if (rangeListItemElements.length > 0) {
+                listOutdent(protyle, rangeListItemElements, range);
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
             } else if (nodeElement.parentElement.classList.contains("li") && nodeType !== "NodeCodeBlock") {
                 listOutdent(protyle, [nodeElement.parentElement], range);
                 event.preventDefault();
@@ -1782,7 +1815,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.list.indent.custom, event)) {
+        if (isListIndent) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 let isContinuous = true;
@@ -1797,6 +1830,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
                     listIndent(protyle, Array.from(selectElements), range);
                 }
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            } else if (rangeListItemElements.length > 0) {
+                listIndent(protyle, rangeListItemElements, range);
                 event.preventDefault();
                 event.stopPropagation();
                 return true;

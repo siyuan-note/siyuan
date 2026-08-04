@@ -1482,7 +1482,52 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		sql.FlushQueue()
 	}
 
+	addDailyNoteToDatabase(boxConf.DailyNoteDatabaseID, id)
+
 	return
+}
+
+// addDailyNoteToDatabase 将新建的日记文档作为行添加到笔记本配置的目标数据库（属性视图）中。
+// 该功能为尽力而为：配置无效或插入失败时仅记录警告，不影响日记创建。
+func addDailyNoteToDatabase(dbBlockID, docID string) {
+	if "" == dbBlockID {
+		return
+	}
+
+	bt := treenode.GetBlockTree(dbBlockID)
+	if nil == bt {
+		logging.LogWarnf("daily note database block [%s] not found, skip adding daily note [%s] to database", dbBlockID, docID)
+		return
+	}
+
+	tree, err := LoadTreeByBlockID(bt.RootID)
+	if err != nil {
+		logging.LogWarnf("load tree of daily note database block [%s] failed: %s", bt.RootID, err)
+		return
+	}
+	node := treenode.GetNodeInTree(tree, dbBlockID)
+	if nil == node || ast.NodeAttributeView != node.Type {
+		logging.LogWarnf("daily note database block [%s] is not an attribute view block, skip adding daily note [%s] to database", dbBlockID, docID)
+		return
+	}
+	avID := node.AttributeViewID
+	if "" == avID {
+		logging.LogWarnf("daily note database block [%s] has no attribute view id, skip adding daily note [%s] to database", dbBlockID, docID)
+		return
+	}
+
+	// 幂等：文档已经绑定到该数据库时不再重复添加
+	if itemID := GetAttributeViewItemIDs(avID, []string{docID})[docID]; "" != itemID {
+		return
+	}
+
+	srcs := []map[string]any{{"id": docID, "isDetached": false}}
+	if err = AddAttributeViewBlock(nil, srcs, avID, dbBlockID, "", "", "", true); err != nil {
+		logging.LogWarnf("add daily note [%s] to database [%s] failed: %s", docID, avID, err)
+		return
+	}
+	ReloadAttrView(avID)
+	logging.LogInfof("daily note [%s] added to database [%s]", docID, avID)
 }
 
 func GetHPathByPath(boxID, p string) (hPath string, err error) {

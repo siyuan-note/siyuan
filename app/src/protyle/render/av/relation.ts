@@ -4,7 +4,7 @@ import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml, escapeLessThans} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {renderCell, updateCellsValue} from "./cell";
+import {getCellValueText, renderCell, updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
@@ -17,6 +17,7 @@ import {showMessage} from "../../../dialog/message";
 import {writeText} from "../../util/compatibility";
 import {Constants} from "../../../constants";
 import {openDatabaseRowByData} from "./openDatabaseRow";
+import {getAVColumnTextMeasurer, getAVTableFitWidths} from "./columnWidth";
 
 interface IAVItem {
     avID: string;
@@ -382,13 +383,15 @@ const updateCopyRelatedItems = (menuElement: Element) => {
     }
 };
 
-const getRelationGridTemplate = (columns: IAVColumn[]) => {
-    return `32px ${columns.map((column, index) => {
-        if (index === 0) {
-            return "240px";
-        }
-        return ["relation", "rollup", "mAsset"].includes(column.type) ? "200px" : "160px";
-    }).join(" ")}`;
+const getRelationGridTemplate = (columns: IAVColumn[], rows: IAVRow[],
+                                 measureText: (value: string) => number) => {
+    const widths = getAVTableFitWidths({
+        columns,
+        rows,
+        groups: [],
+        rowCount: rows.length,
+    } as IAVTable, getCellValueText, measureText);
+    return `32px ${columns.map((column) => widths[column.id] || "64px").join(" ")}`;
 };
 
 const getRelationPrimaryCell = (row: IAVRow) => {
@@ -483,6 +486,7 @@ export const bindRelationEvent = (options: {
 }) => {
     const inputElement = options.menuElement.querySelector("input");
     const listElement = options.menuElement.querySelector(".b3-menu__items") as HTMLElement;
+    const measureText = getAVColumnTextMeasurer(options.blockElement as HTMLElement);
     const state = {
         page: 0,
         total: 0,
@@ -490,6 +494,7 @@ export const bindRelationEvent = (options: {
         loading: false,
         loaderVisible: false,
         columns: [] as IAVColumn[],
+        gridTemplate: "",
         controller: undefined as AbortController | undefined,
     };
     let searchTimer: number;
@@ -608,7 +613,11 @@ export const bindRelationEvent = (options: {
         rows: IAVRow[]
     }, reset: boolean) => {
         state.columns = data.columns || state.columns;
-        const gridTemplate = getRelationGridTemplate(state.columns);
+        if (reset || !state.gridTemplate) {
+            state.gridTemplate = getRelationGridTemplate(state.columns,
+                [...(data.selectedRows || []), ...(data.rows || [])], measureText);
+        }
+        const gridTemplate = state.gridTemplate;
         const excludedIDs = new Set(Array.from(listElement.querySelectorAll(
             '[data-relation-type="selected"], [data-relation-type="candidate"]'
         )).map((item: HTMLElement) => item.dataset.rowId));

@@ -31,6 +31,7 @@ type BoxConf struct {
 	DocCreateTemplatePath string         `json:"docCreateTemplatePath"` // 新建文档使用的模板路径
 	DailyNoteSavePath     string         `json:"dailyNoteSavePath"`     // 新建日记存储路径
 	DailyNoteTemplatePath string         `json:"dailyNoteTemplatePath"` // 新建日记使用的模板路径
+	DailyNoteDatabaseID   string         `json:"dailyNoteDatabaseID"`   // 新建日记自动添加到的目标数据库（属性视图）块 ID
 	SortMode              int            `json:"sortMode"`              // 排序方式
 	Encrypted             bool           `json:"encrypted"`             // 是否为加密笔记本
 	BoxCrypt              *BoxEncryption `json:"boxCrypt"`              // 笔记本加密参数，仅 Encrypted=true 时有值
@@ -51,6 +52,7 @@ func NewBoxConf() *BoxConf {
 		Closed:                true,
 		DailyNoteSavePath:     "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}",
 		DailyNoteTemplatePath: "",
+		DailyNoteDatabaseID:   "",
 		SortMode:              util.SortModeFileTree,
 		Encrypted:             false,
 	}

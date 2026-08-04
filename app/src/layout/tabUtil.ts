@@ -460,7 +460,7 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
     if (type === "closeOthers") {
         for (let index = 0; index < tab.parent.children.length; index++) {
             const item = tab.parent.children[index];
-            if (item.id !== tab.id && !item.headElement.classList.contains("item--pin")) {
+            if (item.id !== tab.id && item.headElement && !item.headElement.classList.contains("item--pin")) {
                 pushRootID(rootIDs, item);
                 item.parent.removeTab(item.id, true, false);
                 index--;
@@ -469,7 +469,7 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
     } else if (type === "closeAll") {
         for (let index = 0; index < tab.parent.children.length; index++) {
             const item = tab.parent.children[index];
-            if (!item.headElement.classList.contains("item--pin")) {
+            if (item.headElement && !item.headElement.classList.contains("item--pin")) {
                 pushRootID(rootIDs, item);
                 item.parent.removeTab(item.id, true);
                 index--;
@@ -477,8 +477,9 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
         }
     } else if (tabs.length > 0) {
         for (let index = 0; index < tabs.length; index++) {
-            if (!tabs[index].headElement.classList.contains("item--pin")) {
-                tabs[index].parent.removeTab(tabs[index].id);
+            const item = tabs[index];
+            if (item.headElement && !item.headElement.classList.contains("item--pin")) {
+                item.parent.removeTab(item.id);
             }
         }
     }
@@ -486,9 +487,15 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
     if (rootIDs.length > 0) {
         fetchPost("/api/storage/batchUpdateRecentDocCloseTime", {rootIDs});
     }
-    if (tab.headElement.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
+    if (tab.headElement?.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
         tab.parent.switchTab(tab.headElement, true);
-    } else if (tab.parent.children.length > 0) {
-        tab.parent.switchTab(tab.parent.children[tab.parent.children.length - 1].headElement, true);
+    } else {
+        for (let index = tab.parent.children.length - 1; index >= 0; index--) {
+            const item = tab.parent.children[index];
+            if (item.headElement) {
+                tab.parent.switchTab(item.headElement, true);
+                break;
+            }
+        }
     }
 };

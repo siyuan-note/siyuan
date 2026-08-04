@@ -6,7 +6,7 @@
 		"id": "20260804171007-semnt04",
 		"title": "意味検索",
 		"type": "doc",
-		"updated": "20260804180000"
+		"updated": "20260804205607"
 	},
 	"Children": [
 		{
@@ -504,7 +504,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170150-exvr4wl",
-				"updated": "20260804180000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -519,7 +519,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260804170151-uh7xhwv",
-				"updated": "20260804180000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -627,7 +627,7 @@
 					},
 					"Properties": {
 						"id": "20260804170158-9opcrm9",
-						"updated": "20260804180000"
+						"updated": "20260804205607"
 					},
 					"Children": [
 						{
@@ -635,12 +635,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804170159-llclpib",
-								"updated": "20260804180000"
+								"updated": "20260804205607"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "7 文字未満または 12000 文字を超えるブロックには埋め込みベクトルが生成されません"
+									"Data": "UTF-8 エンコード後に 7 バイト未満または 12000 バイトを超えるブロックには埋め込みベクトルが生成されません"
 								}
 							]
 						}

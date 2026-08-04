@@ -6,7 +6,7 @@
 		"id": "20260804190000-oidccn1",
 		"title": "OIDC 登录",
 		"type": "doc",
-		"updated": "20260804193000"
+		"updated": "20260804205607"
 	},
 	"Children": [
 		{
@@ -972,7 +972,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804100052-cn0001h",
-				"updated": "20260804193000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -987,7 +987,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260804100053-cn0001i",
-				"updated": "20260804193000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -1036,7 +1036,7 @@
 					},
 					"Properties": {
 						"id": "20260804100056-cn0001l",
-						"updated": "20260804193000"
+						"updated": "20260804205607"
 					},
 					"Children": [
 						{
@@ -1044,12 +1044,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804100057-cn0001m",
-								"updated": "20260804193000"
+								"updated": "20260804205607"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "发现提供商失败：检查 Custom 或 Microsoft 的签发者地址是否正确、是否使用 HTTPS，以及思源能否访问 Discovery 地址"
+									"Data": "身份提供商发现失败：检查 Custom 或 Microsoft 的签发者地址是否正确、是否使用 HTTPS，以及思源能否访问 Discovery 地址"
 								}
 							]
 						}

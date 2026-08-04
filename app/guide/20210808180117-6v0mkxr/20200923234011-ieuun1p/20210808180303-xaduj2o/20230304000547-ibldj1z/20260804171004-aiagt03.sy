@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20260804180000"
+		"updated": "20260804205607"
 	},
 	"Children": [
 		{
@@ -995,7 +995,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170109-sbl6g5j",
-				"updated": "20260804180000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -1009,12 +1009,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170110-f3ewu2w",
-				"updated": "20260804180000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before the first data write in a task turn, the agent automatically creates a data snapshot, with at most one snapshot per turn. If the result is not acceptable, use the rollback action on the snapshot notice in the session."
+					"Data": "Before the first write to workspace data in a task turn, the agent automatically creates a data snapshot, with at most one snapshot per turn. If the result is not acceptable, use the rollback action on the snapshot notice in the session."
 				}
 			]
 		},
@@ -1023,12 +1023,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170111-loi92zi",
-				"updated": "20260804180000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The snapshot covers workspace data. Regenerating an answer, stopping a task, or deleting a session does not automatically undo completed write operations."
+					"Data": "The snapshot covers workspace data, but not changes made to external systems by external MCP services or plugins. Regenerating an answer, stopping a task, or deleting a session also does not automatically undo completed write operations."
 				}
 			]
 		},

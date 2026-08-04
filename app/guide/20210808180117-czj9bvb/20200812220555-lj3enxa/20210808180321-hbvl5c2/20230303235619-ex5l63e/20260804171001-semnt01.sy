@@ -6,7 +6,7 @@
 		"id": "20260804171001-semnt01",
 		"title": "语义搜索",
 		"type": "doc",
-		"updated": "20260804180000"
+		"updated": "20260804205607"
 	},
 	"Children": [
 		{
@@ -512,7 +512,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170150-77qg5c8",
-				"updated": "20260804180000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -527,7 +527,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260804170151-yffwizq",
-				"updated": "20260804180000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -635,7 +635,7 @@
 					},
 					"Properties": {
 						"id": "20260804170158-v9o3v8k",
-						"updated": "20260804180000"
+						"updated": "20260804205607"
 					},
 					"Children": [
 						{
@@ -643,12 +643,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804170159-vrkpb5k",
-								"updated": "20260804180000"
+								"updated": "20260804205607"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "少于 7 个字符或超过 12000 个字符的内容块不会生成嵌入向量"
+									"Data": "UTF-8 编码后少于 7 个字节或超过 12000 个字节的内容块不会生成嵌入向量"
 								}
 							]
 						}

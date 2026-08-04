@@ -6,7 +6,7 @@
 		"id": "20260804190001-oidctw1",
 		"title": "OIDC 登入",
 		"type": "doc",
-		"updated": "20260804193000"
+		"updated": "20260804205607"
 	},
 	"Children": [
 		{
@@ -972,7 +972,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804130052-tw0001h",
-				"updated": "20260804193000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -987,7 +987,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260804130053-tw0001i",
-				"updated": "20260804193000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -1036,7 +1036,7 @@
 					},
 					"Properties": {
 						"id": "20260804130056-tw0001l",
-						"updated": "20260804193000"
+						"updated": "20260804205607"
 					},
 					"Children": [
 						{
@@ -1044,12 +1044,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804130057-tw0001m",
-								"updated": "20260804193000"
+								"updated": "20260804205607"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "發現提供者失敗：檢查 Custom 或 Microsoft 的簽發者位址是否正確、是否使用 HTTPS，以及思源能否存取 Discovery 位址"
+									"Data": "身分提供者探索失敗：檢查 Custom 或 Microsoft 的簽發者位址是否正確、是否使用 HTTPS，以及思源能否存取 Discovery 位址"
 								}
 							]
 						}

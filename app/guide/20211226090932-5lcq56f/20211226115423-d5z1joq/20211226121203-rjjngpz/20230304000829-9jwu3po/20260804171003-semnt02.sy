@@ -6,7 +6,7 @@
 		"id": "20260804171003-semnt02",
 		"title": "語意搜尋",
 		"type": "doc",
-		"updated": "20260804180000"
+		"updated": "20260804205607"
 	},
 	"Children": [
 		{
@@ -512,7 +512,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170150-jzf9x5u",
-				"updated": "20260804180000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -527,7 +527,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260804170151-nasyjhs",
-				"updated": "20260804180000"
+				"updated": "20260804205607"
 			},
 			"Children": [
 				{
@@ -635,7 +635,7 @@
 					},
 					"Properties": {
 						"id": "20260804170158-4y9az7z",
-						"updated": "20260804180000"
+						"updated": "20260804205607"
 					},
 					"Children": [
 						{
@@ -643,12 +643,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804170159-bpjyo41",
-								"updated": "20260804180000"
+								"updated": "20260804205607"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "少於 7 個字元或超過 12000 個字元的區塊不會產生嵌入向量"
+									"Data": "UTF-8 編碼後少於 7 個位元組或超過 12000 個位元組的區塊不會產生嵌入向量"
 								}
 							]
 						}

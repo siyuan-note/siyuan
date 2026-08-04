@@ -7,7 +7,7 @@
 		"id": "20240530101000-40hohog",
 		"title": "ブラウザ",
 		"type": "doc",
-		"updated": "20260803163243"
+		"updated": "20260804165003"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-vn1tvf6",
 				"id": "20240530101000-yllodqo",
-				"updated": "20260803163243"
+				"updated": "20260804165003"
 			},
 			"Children": [
 				{
@@ -268,6 +268,67 @@
 				"ID": "20240530101000-83ekc6g",
 				"id": "20240530101000-4ocdywp"
 			}
+		},
+		{
+			"ID": "20260804120301-oidclog",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804120301-oidclog",
+				"updated": "20260804165003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC ログイン"
+				}
+			]
+		},
+		{
+			"ID": "20260804120302-oidcset",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804120302-oidcset",
+				"updated": "20260804165003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC ログインは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で設定します。リモートブラウザからアクセスする場合は、/api/system/oidc/callback で終わる公開 HTTPS コールバック URL が必要です。SiYuan のローカル待受アドレスはローカルブラウザでのログインにのみ使用でき、リモートブラウザやモバイルアプリの固定コールバック URL には使用できません。Custom および Microsoft プロバイダーでは発行者 URL が必要で、GitHub ではクライアントシークレットが必要です。許可ルールを満たすすべての ID には管理者権限が付与されます。可能な限り、認証済みのすべてのユーザーに管理者権限を付与するオプションは無効にし、完全一致のクレームルールを使用してください。メールアドレスによるルールには通常、email_verified が true であるという条件も追加します。「検証して保存」では、設定を有効にする前にプロバイダーで実際のログインを完了します。Docker では SIYUAN_OIDC_ENABLED、SIYUAN_OIDC_PROVIDER、SIYUAN_OIDC_CLIENT_ID を設定し、必要に応じて SIYUAN_OIDC_ISSUER_URL、SIYUAN_OIDC_CLIENT_SECRET、SIYUAN_OIDC_SCOPES、SIYUAN_OIDC_REDIRECT_URL、SIYUAN_OIDC_ALLOW_ALL、SIYUAN_OIDC_CLAIM_RULES を設定します。"
+				}
+			]
+		},
+		{
+			"ID": "20260804120303-oidcmob",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804120303-oidcmob",
+				"updated": "20260804165003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ネイティブモバイルアプリでは常に siyuan:/oidc-callback を使用します。ID プロバイダーにこの文字列をそのまま登録してください。モバイルでの設定検証にも同じコールバックを使用し、SiYuan に正常に戻るまで設定は保存されません。Google はこの形式のモバイルコールバックを受け付けないため、Google ログインはブラウザ版とデスクトップ版でのみ利用できます。redirect_uri の不一致は通常、登録したコールバックのスキーム、スラッシュ、パス、またはポートが完全に一致していないことを示します。プロバイダーの検出に失敗する場合は通常、発行者 URL が正しくないかプロバイダーにアクセスできません。認可コードの交換に失敗する場合は通常、クライアント ID またはクライアントシークレットが正しくありません。"
+				}
+			]
 		}
 	]
 }

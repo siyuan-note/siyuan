@@ -104,7 +104,7 @@
 	"copyViewMirror": "Ansicht als Spiegel kopieren",
 	"hideViewTab": "Ansichtsregisterkarte ausblenden",
 	"showViewTab": "Ansichtsregisterkarte anzeigen",
-	"deleteRefConfirm": "Der zu löschende oder auszuschneidende Inhalt enthält referenzierte Blöcke. Möchten Sie fortfahren?",
+	"deleteRefConfirm": "Der zu löschende oder auszuschneidende Inhalt enthält referenzierte oder an eine Datenbank gebundene Blöcke. Möchten Sie fortfahren?",
 	"previousDifference": "Vorheriger Unterschied",
 	"nextDifference": "Nächster Unterschied",
 	"pluginGlobalDisabledTip": "Derzeit sind alle Plugins deaktiviert; dieses Plugin kann auch nach dem Aktivieren nicht verwendet werden",

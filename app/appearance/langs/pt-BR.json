@@ -104,7 +104,7 @@
 	"copyViewMirror": "Copiar espelho da visualização",
 	"hideViewTab": "Ocultar aba da visualização",
 	"showViewTab": "Mostrar aba da visualização",
-	"deleteRefConfirm": "O conteúdo a ser excluído ou recortado contém blocos referenciados. Deseja continuar?",
+	"deleteRefConfirm": "O conteúdo a ser excluído ou recortado contém blocos referenciados ou vinculados a um banco de dados. Deseja continuar?",
 	"previousDifference": "Diferença anterior",
 	"nextDifference": "Próxima diferença",
 	"pluginGlobalDisabledTip": "Todos os plugins estão desativados no momento; este plugin continuará indisponível mesmo depois de ser ativado",

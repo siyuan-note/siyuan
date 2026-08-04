@@ -37,8 +37,43 @@ func TestCheckBlockRefInBoxRejectsMissingBlockTrees(t *testing.T) {
 		}
 	})
 
-	_, err := CheckBlockRefInBox([]string{"20260730000000-missing"}, nil, "")
+	_, err := CheckBlockRefInBox([]string{"20260730000000-missing"}, nil, nil, "")
 	if !errors.Is(err, ErrBlockNotFound) {
 		t.Fatalf("expected a missing block tree to return ErrBlockNotFound, got %v", err)
+	}
+}
+
+func TestHasSurvivingAttributeViewBlock(t *testing.T) {
+	group := newBlockRefCheckGroup()
+	group.deletedBlockIDs["20260804000000-deleted-db"] = struct{}{}
+	group.deletedRootIDs["20260804000000-deleted-root"] = struct{}{}
+	boundAVIDs := map[string][]string{
+		"20260804000000-bound": {"20260804000000-av"},
+	}
+	avBlockRels := map[string][]string{
+		"20260804000000-av": {
+			"20260804000000-deleted-db",
+			"20260804000000-deleted-root-db",
+			"20260804000000-external-db",
+		},
+	}
+	blockTrees := map[string]*treenode.BlockTree{
+		"20260804000000-deleted-db": {
+			ID: "20260804000000-deleted-db", RootID: "20260804000000-surviving-root",
+		},
+		"20260804000000-deleted-root-db": {
+			ID: "20260804000000-deleted-root-db", RootID: "20260804000000-deleted-root",
+		},
+		"20260804000000-external-db": {
+			ID: "20260804000000-external-db", RootID: "20260804000000-external-root",
+		},
+	}
+
+	if !hasSurvivingAttributeViewBlock(group, boundAVIDs, avBlockRels, blockTrees) {
+		t.Fatal("an external database mirror should require confirmation")
+	}
+	delete(blockTrees, "20260804000000-external-db")
+	if hasSurvivingAttributeViewBlock(group, boundAVIDs, avBlockRels, blockTrees) {
+		t.Fatal("database mirrors deleted with the bound block should not require confirmation")
 	}
 }

@@ -2749,7 +2749,7 @@ export class WYSIWYG {
             let cutClipboardWritten = false;
             if (selectedStateElements.length === 0 && (!range.collapsed || selectImgElement) &&
                 !selectAVElement && !selectTableElement) {
-                let checkTargets: IBlockRefCheckTargets = {elements: [], exactIDs: []};
+                let checkTargets: IBlockRefCheckTargets = {elements: [], exactIDs: [], deletedIDs: []};
                 if (selectImgElement) {
                     checkTargets = getImageBlockRefCheckTargets(nodeElement, selectImgElement);
                 } else if (endElement) {
@@ -2763,6 +2763,7 @@ export class WYSIWYG {
                         scope: "blocks",
                         ids: checkIDs,
                         exactIDs: checkTargets.exactIDs,
+                        deletedIDs: checkTargets.deletedIDs,
                         notebook: protyle.notebookId,
                     }, protyle)) {
                         return;
@@ -2868,9 +2869,11 @@ export class WYSIWYG {
                         html += itemHTML;
                     }
                 }
+                const uniqueCheckIDs = Array.from(new Set(checkIDs.filter(Boolean)));
                 if (!await confirmBlockRef({
                     scope: "blocks",
-                    ids: Array.from(new Set(checkIDs.filter(Boolean))),
+                    ids: uniqueCheckIDs,
+                    deletedIDs: uniqueCheckIDs,
                     notebook: protyle.notebookId,
                 }, protyle)) {
                     if (autoSelectedBlock) {

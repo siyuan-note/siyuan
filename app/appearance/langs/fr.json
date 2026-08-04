@@ -104,7 +104,7 @@
 	"copyViewMirror": "Copier le miroir de la vue",
 	"hideViewTab": "Masquer l’onglet de vue",
 	"showViewTab": "Afficher l’onglet de vue",
-	"deleteRefConfirm": "Le contenu à supprimer ou à couper contient des blocs référencés. Voulez-vous continuer ?",
+	"deleteRefConfirm": "Le contenu à supprimer ou à couper contient des blocs référencés ou liés à une base de données. Voulez-vous continuer ?",
 	"previousDifference": "Différence précédente",
 	"nextDifference": "Différence suivante",
 	"pluginGlobalDisabledTip": "Tous les plugins sont actuellement désactivés ; ce plugin restera inutilisable même après son activation",

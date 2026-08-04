@@ -104,7 +104,7 @@
 	"copyViewMirror": "보기 미러 복사",
 	"hideViewTab": "보기 탭 숨기기",
 	"showViewTab": "보기 탭 표시",
-	"deleteRefConfirm": "삭제하거나 잘라낼 내용에 참조된 블록이 있습니다. 계속하시겠습니까?",
+	"deleteRefConfirm": "삭제하거나 잘라낼 콘텐츠에 참조된 블록 또는 데이터베이스에 바인딩된 블록이 포함되어 있습니다. 계속하시겠습니까?",
 	"previousDifference": "이전 차이",
 	"nextDifference": "다음 차이",
 	"pluginGlobalDisabledTip": "현재 모든 플러그인이 비활성화되어 있어 이 플러그인을 활성화해도 사용할 수 없습니다",

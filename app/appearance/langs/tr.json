@@ -104,7 +104,7 @@
 	"copyViewMirror": "Görünüm aynasını kopyala",
 	"hideViewTab": "Görünüm sekmesini gizle",
 	"showViewTab": "Görünüm sekmesini göster",
-	"deleteRefConfirm": "Silinecek veya kesilecek içerik, başvurulan bloklar içeriyor. Devam etmek istiyor musunuz?",
+	"deleteRefConfirm": "Silinecek veya kesilecek içerik, başvurulan ya da bir veritabanına bağlı bloklar içeriyor. Devam etmek istiyor musunuz?",
 	"previousDifference": "Önceki fark",
 	"nextDifference": "Sonraki fark",
 	"pluginGlobalDisabledTip": "Şu anda tüm eklentiler devre dışı; bu eklenti etkinleştirildikten sonra da kullanılamaz",

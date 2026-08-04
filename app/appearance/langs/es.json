@@ -104,7 +104,7 @@
 	"copyViewMirror": "Copiar espejo de vista",
 	"hideViewTab": "Ocultar pestaña de vista",
 	"showViewTab": "Mostrar pestaña de vista",
-	"deleteRefConfirm": "El contenido que se va a eliminar o cortar contiene bloques referenciados. ¿Desea continuar?",
+	"deleteRefConfirm": "El contenido que se eliminará o cortará contiene bloques referenciados o vinculados a una base de datos. ¿Desea continuar?",
 	"previousDifference": "Diferencia anterior",
 	"nextDifference": "Diferencia siguiente",
 	"pluginGlobalDisabledTip": "Actualmente todos los complementos están deshabilitados; este complemento seguirá sin poder utilizarse después de habilitarlo",

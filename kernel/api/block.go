@@ -69,6 +69,13 @@ func checkBlockRef(c *gin.Context) {
 				return
 			}
 		}
+		var deletedIDs []string
+		if _, exists := arg["deletedIDs"]; exists {
+			deletedIDs, parsed = parseBlockRefStringArray(arg, "deletedIDs", ret, false)
+			if !parsed {
+				return
+			}
+		}
 		for _, id := range ids {
 			if util.InvalidIDPattern(id, ret) {
 				return
@@ -88,6 +95,16 @@ func checkBlockRef(c *gin.Context) {
 				return
 			}
 		}
+		for _, id := range deletedIDs {
+			if util.InvalidIDPattern(id, ret) {
+				return
+			}
+			if _, exists := idSet[id]; !exists {
+				ret.Code = -1
+				ret.Msg = "Field [deletedIDs] should be a subset of field [ids]"
+				return
+			}
+		}
 		notebook, valid := util.ParseJsonArg[string]("notebook", arg, ret, false, false)
 		if !valid {
 			return
@@ -100,8 +117,9 @@ func checkBlockRef(c *gin.Context) {
 		}
 		ids = filterBlockIDsByPublishAccess(c, ids, notebook)
 		exactIDs = filterBlockIDsByPublishAccess(c, exactIDs, notebook)
+		deletedIDs = filterBlockIDsByPublishAccess(c, deletedIDs, notebook)
 		var err error
-		ret.Data, err = model.CheckBlockRefInBox(ids, exactIDs, notebook)
+		ret.Data, err = model.CheckBlockRefInBox(ids, exactIDs, deletedIDs, notebook)
 		if err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()

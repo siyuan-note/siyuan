@@ -4,6 +4,7 @@ import {
     getBlockRefCheckElementChain,
     getCrossBlockMergeRemoveElement,
     getCrossBlockSiblingListItemMergeContext,
+    getDeletedBlockElements,
     isEntireBlockContentSelected
 } from "./removeRange";
 
@@ -53,6 +54,23 @@ class TestElement {
         }
         return false;
     }
+
+    querySelectorAll(selector: string) {
+        if (selector !== "[data-node-id]") {
+            return [];
+        }
+        const result: TestElement[] = [];
+        const collect = (element: TestElement) => {
+            element.children.forEach(child => {
+                if (child.hasAttribute("data-node-id")) {
+                    result.push(child);
+                }
+                collect(child);
+            });
+        };
+        collect(this);
+        return result;
+    }
 }
 
 const block = (name: string, type: string, ...children: TestElement[]) =>
@@ -92,6 +110,21 @@ describe("getBlockRefCheckElementChain", () => {
             asHTMLElement(nestedList),
         ]);
         assert.equal(result.includes(asHTMLElement(parentItem)), false);
+    });
+});
+
+describe("getDeletedBlockElements", () => {
+    it("排除将被移动的子树并阻止从其祖先继续展开", () => {
+        const deletedChild = block("deletedChild", "NodeParagraph");
+        const retainedGrandchild = block("retainedGrandchild", "NodeParagraph");
+        const retainedChild = block("retainedChild", "NodeListItem", retainedGrandchild);
+        const root = block("root", "NodeList", deletedChild, retainedChild);
+
+        const result = getDeletedBlockElements(
+            [asHTMLElement(root)], [asHTMLElement(retainedChild)]);
+
+        assert.deepEqual(result.elements, [asHTMLElement(root), asHTMLElement(deletedChild)]);
+        assert.deepEqual(Array.from(result.expansionStopIDs), ["root"]);
     });
 });
 

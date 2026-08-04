@@ -202,6 +202,93 @@ func ExistRefByDefIDs(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs []stri
 	return
 }
 
+// QueryBoundBlockAVIDsInBox 查询删除集合中绑定块所属的属性视图。
+func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret map[string][]string, err error) {
+	const batchSize = 900
+
+	ret = map[string][]string{}
+	queryByColumn := func(column string, ids []string) error {
+		for start := 0; start < len(ids); start += batchSize {
+			end := start + batchSize
+			if len(ids) < end {
+				end = len(ids)
+			}
+			batch := ids[start:end]
+			placeholders := strings.TrimSuffix(strings.Repeat("?,", len(batch)), ",")
+			args := make([]any, 0, len(batch))
+			for _, id := range batch {
+				args = append(args, id)
+			}
+			rows, queryErr := queryForBox(boxID, "SELECT id, ial FROM blocks WHERE "+column+" IN ("+placeholders+") AND instr(ial, 'custom-avs=') > 0", args...)
+			if nil != queryErr {
+				return queryErr
+			}
+			for rows.Next() {
+				var blockID, ialContent string
+				if scanErr := rows.Scan(&blockID, &ialContent); nil != scanErr {
+					rows.Close()
+					return scanErr
+				}
+				ialContent = strings.TrimPrefix(ialContent, "{:")
+				ialContent = strings.TrimSuffix(ialContent, "}")
+				for _, kv := range parse.Tokens2IAL([]byte(ialContent)) {
+					if 2 > len(kv) || "custom-avs" != kv[0] {
+						continue
+					}
+					for avID := range strings.SplitSeq(kv[1], ",") {
+						avID = strings.TrimSpace(avID)
+						if "" != avID && !gulu.Str.Contains(avID, ret[blockID]) {
+							ret[blockID] = append(ret[blockID], avID)
+						}
+					}
+				}
+			}
+			if rowsErr := rows.Err(); nil != rowsErr {
+				rows.Close()
+				return rowsErr
+			}
+			if closeErr := rows.Close(); nil != closeErr {
+				return closeErr
+			}
+		}
+		return nil
+	}
+
+	if err = queryByColumn("id", blockIDs); nil != err {
+		return
+	}
+	err = queryByColumn("root_id", rootIDs)
+	return
+}
+
+// QueryBoundBlockAVIDs 查询全局库及所有已打开加密库中删除集合内的数据库绑定块。
+func QueryBoundBlockAVIDs(blockIDs, rootIDs []string) (ret map[string][]string, err error) {
+	ret = map[string][]string{}
+	merge := func(boxID string) error {
+		boxRet, queryErr := QueryBoundBlockAVIDsInBox(blockIDs, rootIDs, boxID)
+		if nil != queryErr {
+			return queryErr
+		}
+		for blockID, avIDs := range boxRet {
+			for _, avID := range avIDs {
+				if !gulu.Str.Contains(avID, ret[blockID]) {
+					ret[blockID] = append(ret[blockID], avID)
+				}
+			}
+		}
+		return nil
+	}
+	if err = merge(""); nil != err {
+		return
+	}
+	for _, boxID := range GetEncryptedBoxIDs() {
+		if err = merge(boxID); nil != err {
+			return
+		}
+	}
+	return
+}
+
 func QueryRootChildrenRefCount(defRootID string) (ret map[string]int) {
 	ret = map[string]int{}
 	rows, err := query("SELECT def_block_id, COUNT(*) AS ref_cnt FROM refs WHERE def_block_root_id = ? GROUP BY def_block_id", defRootID)

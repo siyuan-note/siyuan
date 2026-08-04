@@ -104,7 +104,7 @@
 	"copyViewMirror": "Kopírovať zrkadlo zobrazenia",
 	"hideViewTab": "Skryť kartu zobrazenia",
 	"showViewTab": "Zobraziť kartu zobrazenia",
-	"deleteRefConfirm": "Obsah určený na odstránenie alebo vystrihnutie obsahuje bloky, na ktoré vedú odkazy. Chcete pokračovať?",
+	"deleteRefConfirm": "Obsah určený na odstránenie alebo vystrihnutie obsahuje odkazované bloky alebo bloky prepojené s databázou. Chcete pokračovať?",
 	"previousDifference": "Predchádzajúci rozdiel",
 	"nextDifference": "Nasledujúci rozdiel",
 	"pluginGlobalDisabledTip": "Všetky pluginy sú momentálne vypnuté, takže tento plugin nemožno používať ani po jeho zapnutí",

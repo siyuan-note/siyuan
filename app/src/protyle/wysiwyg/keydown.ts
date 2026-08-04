@@ -986,7 +986,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             matchHotKey("⌃D", event)) {
             const rangeCheckTargets = !range.collapsed && endElement ?
                 getRangeBlockRefCheckTargets(protyle.wysiwyg.element, range, nodeElement, endElement, true) :
-                {elements: [], exactIDs: []};
+                {elements: [], exactIDs: [], deletedIDs: []};
             if (endElement && ((isCrossBlock && selectText !== "") || rangeCheckTargets.elements.length > 0)) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -1044,6 +1044,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             scope: "blocks",
                             ids: checkIDs,
                             exactIDs: checkTargets.exactIDs,
+                            deletedIDs: checkTargets.deletedIDs,
                             notebook: protyle.notebookId,
                         }, protyle) || checkTargets.elements.some(item => !item.isConnected)) {
                             return;

@@ -559,6 +559,7 @@
       table {
         max-height: 50vh;
         overflow: auto;
+        border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
         box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
 
         &::-webkit-scrollbar-track:vertical,
@@ -569,9 +570,9 @@
 
       thead {
         position: sticky;
-        top: 1px;
+        top: 0;
         z-index: 2;
-        box-shadow: 0 -1px 0 var(--b3-border-color) inset, 0 -1px 0 0 var(--b3-border-color);
+        box-shadow: 0 -1px 0 var(--b3-border-color) inset;
         background-color: var(--b3-parent-background);
 
         th {

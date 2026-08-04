@@ -939,8 +939,8 @@ export class TableControl {
         };
     }
 
-    private getTableGridViewportRect(table: HTMLTableElement) {
-        return intersectRects(this.getTableViewportRect(table), this.getTableGridRect(table));
+    private getTableGridViewportRect(table: HTMLTableElement, gridRect = this.getTableGridRect(table)) {
+        return intersectRects(this.getTableViewportRect(table), gridRect);
     }
 
     private getColumnRect(table: HTMLTableElement, grid: ITableGrid, index: number) {
@@ -974,18 +974,19 @@ export class TableControl {
     private getEdgeHover(clientX: number, clientY: number) {
         const candidates: ITableEdgeHover[] = [];
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
-            const tableRect = table.getBoundingClientRect();
-            const viewportRect = this.getTableGridViewportRect(table);
+            const gridRect = this.getTableGridRect(table);
+            const addColumnEdge = gridRect.right;
+            const viewportRect = this.getTableGridViewportRect(table, gridRect);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const grid = buildTableGrid(table);
-            const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
-                isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
+            const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
+                isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
                     TABLE_ADD_CONTROL_GAP);
-            if (columnControlVisible && tableRect.right >= viewportRect.left &&
+            if (columnControlVisible && addColumnEdge >= viewportRect.left &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1 &&
-                clientX >= tableRect.right &&
-                clientX <= tableRect.right + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS &&
+                clientX >= addColumnEdge &&
+                clientX <= addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS &&
                 clientY >= addRowEdge &&
                 clientY <= addRowEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS) {
                 const cell = grid.cellInfos[0]?.cell;
@@ -998,15 +999,15 @@ export class TableControl {
                 }
             }
             if (columnControlVisible &&
-                clientX >= tableRect.right &&
-                clientX <= tableRect.right + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS &&
+                clientX >= addColumnEdge &&
+                clientX <= addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS &&
                 clientY >= viewportRect.top && clientY <= viewportRect.bottom) {
                 const cell = grid.cellInfos[0]?.cell;
                 if (cell) {
                     candidates.push({
                         cell,
                         type: "add-column",
-                        distance: clientX - tableRect.right,
+                        distance: clientX - addColumnEdge,
                     });
                 }
             }
@@ -1081,14 +1082,15 @@ export class TableControl {
             item.classList.remove("protyle-table-control__add--active");
         });
         this.selectionElements.forEach(item => item.classList.add("fn__none"));
-        const tableRect = state.table.getBoundingClientRect();
-        const viewportRect = this.getTableGridViewportRect(state.table);
+        const gridRect = this.getTableGridRect(state.table);
+        const addColumnEdge = gridRect.right;
+        const viewportRect = this.getTableGridViewportRect(state.table, gridRect);
         const addRowEdge = this.getTableAddRowEdge(state.table);
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
         const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
             TABLE_ADD_CONTROL_THICKNESS, TABLE_ADD_CONTROL_GAP);
-        const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
-            isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
+        const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
+            isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
                 TABLE_ADD_CONTROL_GAP);
         if (state.mode === "row" || state.mode === "both") {
             this.addRowButton.classList.remove("fn__none");
@@ -1103,7 +1105,7 @@ export class TableControl {
             this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
             this.addColumnButton.style.height = `${Math.max(0, viewportRect.height)}px`;
             this.setPosition(this.addColumnButton,
-                tableRect.right + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
+                addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
                 viewportRect.top + viewportRect.height / 2);
         }
         if (state.mode === "both" && columnControlVisible) {
@@ -1112,7 +1114,7 @@ export class TableControl {
             this.addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
             this.addBothButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
             this.setPosition(this.addBothButton,
-                tableRect.right + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
+                addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
                 rowControlCenter);
         }
         this.resizeLabel.textContent = `${state.targetRows} × ${state.targetColumns}`;
@@ -1141,14 +1143,15 @@ export class TableControl {
         });
         this.resizeLabel.classList.add("fn__none");
         if (visible) {
-            const tableRect = table.getBoundingClientRect();
-            const viewportRect = this.getTableGridViewportRect(table);
+            const gridRect = this.getTableGridRect(table);
+            const addColumnEdge = gridRect.right;
+            const viewportRect = this.getTableGridViewportRect(table, gridRect);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
                 TABLE_ADD_CONTROL_THICKNESS, TABLE_ADD_CONTROL_GAP);
-            const columnControlVisible = tableRect.right <= viewportRect.right + 1 &&
-                isTableResizeControlVisible(tableRect.right, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
+            const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
+                isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
                     TABLE_ADD_CONTROL_GAP);
             const grid = this.selection?.table === table && this.selectionGrid ?
                 this.selectionGrid : buildTableGrid(table);
@@ -1190,12 +1193,12 @@ export class TableControl {
             }
             if ((this.hoverType === "add-column" || this.hoverType === "add-both") && viewportRect.height > 0 &&
                 columnControlVisible &&
-                tableRect.right >= viewportRect.left) {
+                addColumnEdge >= viewportRect.left) {
                 this.addColumnButton.classList.remove("fn__none");
                 this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
                 this.addColumnButton.style.height = `${viewportRect.height}px`;
                 this.setPosition(this.addColumnButton,
-                    tableRect.right + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
+                    addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
                     viewportRect.top + viewportRect.height / 2);
             }
             if (this.hoverType === "add-both" && columnControlVisible &&
@@ -1204,7 +1207,7 @@ export class TableControl {
                 this.addBothButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
                 this.addBothButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
                 this.setPosition(this.addBothButton,
-                    tableRect.right + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
+                    addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
                     rowControlCenter);
             }
         }

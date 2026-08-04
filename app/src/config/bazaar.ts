@@ -160,7 +160,7 @@ export const bazaar = {
                 </div>
                 <div class="fn__flex config-bazaar__actions">
                     <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>
-                    <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch fn__flex-center">
+                    <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" data-position="north" type="checkbox" class="b3-switch fn__flex-center ariaLabel" aria-label="${window.siyuan.languages[window.siyuan.config.bazaar.petalDisabled ? "enable" : "disableAll"]}">
                     <div class="counter counter--bg fn__none fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
                 </div>
             </div>
@@ -680,7 +680,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
         <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
         <input ${((bazaarItem.disallowInstall && !bazaarItem.enabled) || bazaarItem.installedIncompatible) ? "disabled" : ""} 
-aria-label="${(bazaarItem.disallowInstall && !bazaarItem.enabled) ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", bazaarItem.minAppVersion) : ""}" 
+aria-label="${(bazaarItem.disallowInstall && !bazaarItem.enabled) ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", bazaarItem.minAppVersion) : window.siyuan.languages[bazaarItem.enabled ? "disable" : "enable"]}"
 data-position="north" class="ariaLabel b3-switch fn__flex-center${bazaarType === "plugins" ? "" : " fn__none"}" 
 ${bazaarItem.enabled ? "checked" : ""} 
 data-type="plugin-enable" 
@@ -1524,6 +1524,9 @@ type="checkbox">
                         window.siyuan.config.bazaar.petalDisabled = !(target as HTMLInputElement).checked;
                         fetchPost("/api/setting/setBazaar", window.siyuan.config.bazaar, () => {
                             target.removeAttribute("disabled");
+                            target.setAttribute("aria-label", window.siyuan.languages[
+                                window.siyuan.config.bazaar.petalDisabled ? "enable" : "disableAll"
+                            ]);
                             if (window.siyuan.config.bazaar.petalDisabled) {
                                 bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach(item => {
                                     item.querySelector('[data-type="setting"]')?.classList.add("fn__none");

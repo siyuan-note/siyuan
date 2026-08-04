@@ -1,4 +1,5 @@
 {
+	"disableAll": "Zakázať všetko",
 	"bazaarKernelPlugin": "Doplnok jadra",
 	"newItemTemplateDefaultTip": "Použije predvolenú cestu ukladania nových dokumentov z aktuálneho zápisníka",
 	"hideInFileTree": "Skryť v strome dokumentov",

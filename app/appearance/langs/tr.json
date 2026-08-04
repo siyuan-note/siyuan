@@ -1,4 +1,5 @@
 {
+	"disableAll": "Tümünü devre dışı bırak",
 	"bazaarKernelPlugin": "Çekirdek eklentisi",
 	"newItemTemplateDefaultTip": "Geçerli not defterinin yeni belgeler için varsayılan kaydetme yolunu kullanır",
 	"hideInFileTree": "Belge ağacında gizle",

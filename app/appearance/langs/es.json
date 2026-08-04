@@ -1,4 +1,5 @@
 {
+	"disableAll": "Desactivar todo",
 	"bazaarKernelPlugin": "Complemento del núcleo",
 	"newItemTemplateDefaultTip": "Usa la ruta de guardado predeterminada para documentos nuevos del cuaderno actual",
 	"hideInFileTree": "Ocultar en el árbol de documentos",

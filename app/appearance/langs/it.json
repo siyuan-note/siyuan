@@ -1,4 +1,5 @@
 {
+	"disableAll": "Disabilita tutto",
 	"bazaarKernelPlugin": "Plugin del kernel",
 	"newItemTemplateDefaultTip": "Usa il percorso di salvataggio predefinito per i nuovi documenti del taccuino corrente",
 	"hideInFileTree": "Nascondi nell’albero dei documenti",

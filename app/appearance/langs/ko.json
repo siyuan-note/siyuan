@@ -1,4 +1,5 @@
 {
+	"disableAll": "모두 비활성화",
 	"bazaarKernelPlugin": "커널 플러그인",
 	"newItemTemplateDefaultTip": "현재 노트북의 새 문서 기본 저장 경로를 사용합니다",
 	"hideInFileTree": "문서 트리에서 숨기기",

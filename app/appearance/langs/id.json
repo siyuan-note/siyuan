@@ -1,4 +1,5 @@
 {
+	"disableAll": "Nonaktifkan semua",
 	"bazaarKernelPlugin": "Plugin kernel",
 	"newItemTemplateDefaultTip": "Menggunakan jalur penyimpanan bawaan untuk dokumen baru di buku catatan saat ini",
 	"hideInFileTree": "Sembunyikan di pohon dokumen",

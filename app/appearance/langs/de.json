@@ -1,4 +1,5 @@
 {
+	"disableAll": "Alle deaktivieren",
 	"bazaarKernelPlugin": "Kernel-Plugin",
 	"newItemTemplateDefaultTip": "Verwendet den Standardspeicherpfad für neue Dokumente im aktuellen Notizbuch",
 	"hideInFileTree": "Im Dokumentenbaum ausblenden",

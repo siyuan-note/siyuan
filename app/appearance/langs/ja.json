@@ -1,4 +1,5 @@
 {
+	"disableAll": "すべて無効化",
 	"bazaarKernelPlugin": "カーネルプラグイン",
 	"newItemTemplateDefaultTip": "現在のノートブックの新規ドキュメントのデフォルト保存先を使用します",
 	"hideInFileTree": "ドキュメントツリーで非表示",

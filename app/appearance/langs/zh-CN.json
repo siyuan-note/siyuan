@@ -1,4 +1,5 @@
 {
+	"disableAll": "全部禁用",
 	"bazaarKernelPlugin": "内核插件",
 	"newItemTemplateDefaultTip": "使用当前笔记本的新建文档默认存放路径",
 	"hideInFileTree": "在文档树中隐藏",

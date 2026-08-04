@@ -1,4 +1,5 @@
 {
+	"disableAll": "Tout désactiver",
 	"bazaarKernelPlugin": "Plugin du noyau",
 	"newItemTemplateDefaultTip": "Utilise le chemin d’enregistrement par défaut des nouveaux documents du carnet actuel",
 	"hideInFileTree": "Masquer dans l’arborescence des documents",

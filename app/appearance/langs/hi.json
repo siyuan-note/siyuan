@@ -1,4 +1,5 @@
 {
+	"disableAll": "सभी अक्षम करें",
 	"bazaarKernelPlugin": "कर्नेल प्लगइन",
 	"newItemTemplateDefaultTip": "वर्तमान नोटबुक के नए दस्तावेज़ों के लिए डिफ़ॉल्ट सहेजने के पथ का उपयोग करता है",
 	"hideInFileTree": "दस्तावेज़ ट्री में छिपाएँ",

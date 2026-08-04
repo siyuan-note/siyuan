@@ -1,4 +1,5 @@
 {
+	"disableAll": "Desativar tudo",
 	"bazaarKernelPlugin": "Plugin do kernel",
 	"newItemTemplateDefaultTip": "Usa o caminho de salvamento padrão para novos documentos do caderno atual",
 	"hideInFileTree": "Ocultar na árvore de documentos",

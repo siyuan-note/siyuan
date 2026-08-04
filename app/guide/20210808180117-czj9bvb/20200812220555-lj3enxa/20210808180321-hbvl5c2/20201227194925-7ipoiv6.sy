@@ -6,7 +6,7 @@
 		"id": "20201227194925-7ipoiv6",
 		"title": "内核 API",
 		"type": "doc",
-		"updated": "20260804230000"
+		"updated": "20260804235500"
 	},
 	"Children": [
 		{
@@ -14,12 +14,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210822163618-m0zvvbe",
-				"updated": "20230820185829"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "请浏览 API 文档 (github repo: siyuan-note/siyuan)。"
+					"Data": "请浏览 API 文档 (GitHub repo: siyuan-note/siyuan)。"
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20200922102318-oz84yu3",
 		"title": "主题",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260804235500"
 	},
 	"Children": [
 		{
@@ -1040,7 +1040,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201225202158-upmhxlh"
+				"id": "20201225202158-upmhxlh",
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -1067,7 +1068,7 @@
 			},
 			"Properties": {
 				"id": "20201225202158-gbr4pfn",
-				"updated": "20230821210751"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -1183,7 +1184,7 @@
 					},
 					"Properties": {
 						"id": "20201225202158-cz8s9wp",
-						"updated": "20230821210751"
+						"updated": "20260804235500"
 					},
 					"Children": [
 						{
@@ -1191,7 +1192,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20201225202158-z2lern7",
-								"updated": "20230821210751"
+								"updated": "20260804235500"
 							},
 							"Children": [
 								{
@@ -1232,7 +1233,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 文件，具体示例请参考 github repo: siyuan-note/theme-sample"
+									"Data": "​ 文件，具体示例请参考 GitHub repo: siyuan-note/theme-sample"
 								}
 							]
 						}

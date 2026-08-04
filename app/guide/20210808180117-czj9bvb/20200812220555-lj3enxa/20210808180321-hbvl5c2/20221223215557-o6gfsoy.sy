@@ -7,7 +7,7 @@
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
 		"type": "doc",
-		"updated": "20260804230000"
+		"updated": "20260804235500"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194151-5atwbsj",
-				"updated": "20260614194151"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194151-4z6xzmg",
-				"updated": "20260614194151"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "将内容块设置为闪卡后，系统会通过间隔重复算法 FSRS (github repo: open-spaced-repetition/free-spaced-repetition-scheduler) 自动安排复习，在遗忘临界点提醒复习，帮助将短期记忆转化为长期记忆。"
+					"Data": "将内容块设置为闪卡后，系统会通过间隔重复算法 FSRS (GitHub repo: open-spaced-repetition/free-spaced-repetition-scheduler) 自动安排复习，在遗忘临界点提醒复习，帮助将短期记忆转化为长期记忆。"
 				}
 			]
 		},

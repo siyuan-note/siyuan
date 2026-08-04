@@ -6,7 +6,7 @@
 		"id": "20200924100110-vcg96wy",
 		"title": "Icon",
 		"type": "doc",
-		"updated": "20260803163440"
+		"updated": "20260804235500"
 	},
 	"Children": [
 		{
@@ -391,7 +391,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104091404-5ele7ot"
+				"id": "20210104091404-5ele7ot",
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -417,7 +418,7 @@
 			},
 			"Properties": {
 				"id": "20210104091404-07yula4",
-				"updated": "20230821210709"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -531,7 +532,7 @@
 					},
 					"Properties": {
 						"id": "20210104091404-wdwknqi",
-						"updated": "20230821210709"
+						"updated": "20260804235500"
 					},
 					"Children": [
 						{
@@ -539,7 +540,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210104091404-0errb7b",
-								"updated": "20230821210709"
+								"updated": "20260804235500"
 							},
 							"Children": [
 								{
@@ -580,7 +581,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, for specific examples, please refer to github repo: siyuan-note/icon-sample"
+									"Data": "​, for specific examples, please refer to GitHub repo: siyuan-note/icon-sample"
 								}
 							]
 						}

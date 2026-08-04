@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260804235500"
 	},
 	"Children": [
 		{
@@ -1011,7 +1011,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201225174048-3qumvw6"
+				"id": "20201225174048-3qumvw6",
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -1037,7 +1038,7 @@
 			},
 			"Properties": {
 				"id": "20201225174048-zqtzaox",
-				"updated": "20230821210921"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -1152,7 +1153,7 @@
 					},
 					"Properties": {
 						"id": "20201225174048-92haint",
-						"updated": "20230821210921"
+						"updated": "20260804235500"
 					},
 					"Children": [
 						{
@@ -1160,7 +1161,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20201225174048-fh16r64",
-								"updated": "20230821210921"
+								"updated": "20260804235500"
 							},
 							"Children": [
 								{
@@ -1201,7 +1202,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, for specific examples, please refer to github repo: siyuan-note/theme-sample\n"
+									"Data": "​, for specific examples, please refer to GitHub repo: siyuan-note/theme-sample\n"
 								}
 							]
 						}

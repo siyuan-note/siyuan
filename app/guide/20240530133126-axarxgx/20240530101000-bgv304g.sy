@@ -8,7 +8,7 @@
 		"id": "20240530101000-bgv304g",
 		"title": "拡張機能の開発",
 		"type": "doc",
-		"updated": "20260714132012"
+		"updated": "20260804235500"
 	},
 	"Children": [
 		{
@@ -256,7 +256,7 @@
 			"Properties": {
 				"ID": "20240530101000-b2725rd",
 				"id": "20240530101000-qnks6ak",
-				"updated": "20240530101000"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -344,7 +344,7 @@
 					"Properties": {
 						"ID": "20240530101000-zxgq11b",
 						"id": "20240530101000-10khdl7",
-						"updated": "20240530101000"
+						"updated": "20260804235500"
 					},
 					"Children": [
 						{
@@ -368,7 +368,7 @@
 							"Properties": {
 								"ID": "20240530101000-hdmojvl",
 								"id": "20240530101000-kkp18xy",
-								"updated": "20240530101000"
+								"updated": "20260804235500"
 							},
 							"Children": [
 								{
@@ -381,12 +381,12 @@
 									"Properties": {
 										"ID": "20240530101000-v3xpnln",
 										"id": "20240530101000-8vs5yaq",
-										"updated": "20240530101000"
+										"updated": "20260804235500"
 									},
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "詳細は Github Issue #9807 を参照してください"
+											"Data": "詳細は GitHub Issue #9807 を参照してください"
 										}
 									]
 								}

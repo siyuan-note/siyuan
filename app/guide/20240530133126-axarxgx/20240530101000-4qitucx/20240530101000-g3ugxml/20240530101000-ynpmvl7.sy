@@ -8,7 +8,7 @@
 		"id": "20240530101000-ynpmvl7",
 		"title": "フラッシュカード",
 		"type": "doc",
-		"updated": "20260804230000"
+		"updated": "20260804235500"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194342-abyxmop",
-				"updated": "20260614194342"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -31,12 +31,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194342-xzu9gq7",
-				"updated": "20260614194342"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "コンテンツブロックをフラッシュカードとして設定すると、システムは間隔反復アルゴリズムFSRS（github repo: open-spaced-repetition/free-spaced-repetition-scheduler）によって自動的に復習をスケジュールし、忘却の臨界点で復習を促して短期記憶を長期記憶に変換します。"
+					"Data": "コンテンツブロックをフラッシュカードとして設定すると、システムは間隔反復アルゴリズムFSRS（GitHub repo: open-spaced-repetition/free-spaced-repetition-scheduler）によって自動的に復習をスケジュールし、忘却の臨界点で復習を促して短期記憶を長期記憶に変換します。"
 				}
 			]
 		},

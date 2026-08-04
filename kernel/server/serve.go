@@ -1301,7 +1301,12 @@ func serveWebSocket(ginServer *gin.Engine) {
 						logging.LogErrorf("unmarshal cookie failed: %s", err)
 					} else {
 						workspaceSess := util.GetWorkspaceSession(sess)
-						authOk = model.IsWorkspaceSessionAuthenticated(workspaceSess)
+						accessCodeAuth := model.IsAccessCodeSessionAuthenticated(workspaceSess)
+						oidcAuth := model.IsOIDCSessionAuthenticated(workspaceSess)
+						authOk = accessCodeAuth || oidcAuth
+						if oidcAuth && !accessCodeAuth {
+							s.Set("oidcSessionVersion", workspaceSess.OIDCSessionVersion)
+						}
 					}
 				}
 			}
@@ -1367,6 +1372,13 @@ func serveWebSocket(ginServer *gin.Engine) {
 
 		if util.IsAuthSession(s) {
 			return
+		}
+		if value, ok := s.Get("oidcSessionVersion"); ok {
+			version, valid := value.(string)
+			if !valid || !model.IsOIDCSessionVersionCurrent(version) {
+				s.CloseWithMsg([]byte("  OIDC session expired"))
+				return
+			}
 		}
 
 		request := map[string]any{}

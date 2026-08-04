@@ -11,7 +11,6 @@ package model
 import (
 	"context"
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -38,7 +37,11 @@ const (
 
 	oidcMobileRedirectURL  = "siyuan:/oidc-callback"
 	oidcTransactionMax     = 512
+	oidcTransactionPerIP   = 32
+	oidcTransactionPerBind = 8
 	oidcTransactionTimeout = 10 * time.Minute
+	oidcProviderTimeout    = 10 * time.Second
+	oidcExchangeTimeout    = 20 * time.Second
 	oidcProviderCacheMax   = 8
 )
 
@@ -48,6 +51,7 @@ type oidcTransaction struct {
 	CodeVerifier  string
 	PollToken     string
 	Binding       string
+	ClientIP      string
 	Flow          string
 	RedirectURL   string
 	To            string
@@ -92,13 +96,14 @@ func OIDCStart(c *gin.Context) {
 
 	if err := validateOIDCConfiguration(); err != nil {
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = oidcUserMessage()
+		logging.LogErrorf("invalid OIDC login configuration: %s", err)
 		return
 	}
 	input := &oidcStartInput{}
 	if err := c.ShouldBindJSON(input); err != nil {
 		ret.Code = -1
-		ret.Msg = "Invalid OIDC login request"
+		ret.Msg = oidcUserMessage()
 		return
 	}
 	if input.Flow == "" {
@@ -106,7 +111,13 @@ func OIDCStart(c *gin.Context) {
 	}
 	if input.Flow != oidcFlowWeb && input.Flow != oidcFlowDesktop && input.Flow != oidcFlowMobile {
 		ret.Code = -1
-		ret.Msg = "Invalid OIDC login flow"
+		ret.Msg = oidcUserMessage()
+		return
+	}
+	if input.Flow == oidcFlowMobile && Conf.GetOIDC().Provider == conf.OIDCProviderGoogle {
+		ret.Code = -1
+		ret.Msg = oidcLanguage(368, "This OIDC provider does not support the SiYuan mobile callback URI")
+		logging.LogWarn("Google does not support the fixed SiYuan mobile OIDC callback URI")
 		return
 	}
 
@@ -117,26 +128,30 @@ func OIDCStart(c *gin.Context) {
 		workspaceSession.OIDCBinding, err = secureRandomToken(32)
 		if err != nil {
 			ret.Code = -1
-			ret.Msg = "Create OIDC login binding failed"
+			ret.Msg = oidcUserMessage()
+			logging.LogErrorf("create OIDC login binding failed: %s", err)
 			return
 		}
 	}
 	redirectURL, err := effectiveOIDCRedirectURL(c, input.Flow)
 	if err != nil {
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = oidcUserMessage()
+		logging.LogErrorf("resolve OIDC redirect URL failed: %s", err)
 		return
 	}
-	transaction, err := newOIDCTransaction(input, workspaceSession.OIDCBinding, redirectURL)
+	transaction, err := newOIDCTransaction(input, workspaceSession.OIDCBinding, c.ClientIP(), redirectURL)
 	if err != nil {
 		ret.Code = -1
-		ret.Msg = "Create OIDC login transaction failed"
+		ret.Msg = oidcUserMessage()
+		logging.LogErrorf("create OIDC login transaction failed: %s", err)
 		return
 	}
 	provider, err := getOIDCProvider(c.Request.Context(), redirectURL)
 	if err != nil {
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = oidcUserMessage()
+		logging.LogErrorf("create OIDC provider failed: %s", err)
 		return
 	}
 	if err = session.Save(c); err != nil {
@@ -144,8 +159,13 @@ func OIDCStart(c *gin.Context) {
 		ret.Msg = Conf.Language(258)
 		return
 	}
-	storeOIDCTransaction(transaction)
-	authURL := provider.AuthURL(transaction.State, transaction.Nonce, pkceChallenge(transaction.CodeVerifier))
+	if err = storeOIDCTransaction(transaction); err != nil {
+		ret.Code = -1
+		ret.Msg = oidcUserMessage()
+		logging.LogWarnf("store OIDC login transaction failed [ip=%s]: %s", c.ClientIP(), err)
+		return
+	}
+	authURL := provider.AuthURL(transaction.State, transaction.Nonce, transaction.CodeVerifier)
 	ret.Data = map[string]any{"authURL": authURL, "expiresIn": int(oidcTransactionTimeout.Seconds())}
 	if input.Flow == oidcFlowDesktop {
 		ret.Data.(map[string]any)["pollToken"] = transaction.PollToken
@@ -157,40 +177,44 @@ func OIDCCallback(c *gin.Context) {
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	transaction, err := claimOIDCTransaction(state, workspaceSession.OIDCBinding, true)
 	if err != nil {
-		writeOIDCCallbackPage(c, false, err.Error())
+		logging.LogWarnf("claim OIDC callback transaction failed: %s", err)
+		writeOIDCCallbackPage(c, false, oidcUserMessage())
 		return
 	}
 	if transaction.Flow == oidcFlowMobile {
-		completeOIDCTransaction(transaction.State, false, "The mobile OIDC callback must be returned to the SiYuan app")
-		writeOIDCCallbackPage(c, false, "The mobile OIDC callback must be returned to the SiYuan app")
+		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
+		writeOIDCCallbackPage(c, false, oidcUserMessage())
 		return
 	}
 	if transaction.Flow == oidcFlowWeb {
 		if workspaceSession.OIDCBinding == "" || workspaceSession.OIDCBinding != transaction.Binding {
-			completeOIDCTransaction(transaction.State, false, "OIDC login binding does not match")
-			writeOIDCCallbackPage(c, false, "OIDC login binding does not match")
+			logging.LogWarn("OIDC login binding does not match")
+			completeOIDCTransaction(transaction.State, false, oidcUserMessage())
+			writeOIDCCallbackPage(c, false, oidcUserMessage())
 			return
 		}
 	}
 	if providerError := c.Query("error"); providerError != "" {
-		message := "OIDC provider rejected the login: " + providerError
+		logging.LogWarnf("OIDC provider rejected the login: %s", providerError)
+		message := oidcUserMessage()
 		completeOIDCTransaction(transaction.State, false, message)
 		writeOIDCCallbackPage(c, false, message)
 		return
 	}
 	if err = finishOIDCExchange(c, transaction, c.Query("code")); err != nil {
-		completeOIDCTransaction(transaction.State, false, err.Error())
-		writeOIDCCallbackPage(c, false, err.Error())
+		logging.LogErrorf("finish OIDC authorization code exchange failed: %s", err)
+		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
+		writeOIDCCallbackPage(c, false, oidcUserMessage())
 		return
 	}
 	if transaction.Flow == oidcFlowDesktop {
 		completeOIDCTransaction(transaction.State, true, "")
-		writeOIDCCallbackPage(c, true, "You can close this window and return to SiYuan")
+		writeOIDCCallbackPage(c, true, oidcLanguage(367, "You can close this window and return to SiYuan"))
 		return
 	}
 	if err = authenticateOIDCSession(c, transaction.RememberMe); err != nil {
-		completeOIDCTransaction(transaction.State, false, err.Error())
-		writeOIDCCallbackPage(c, false, err.Error())
+		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
+		writeOIDCCallbackPage(c, false, oidcUserMessage())
 		return
 	}
 	completeOIDCTransaction(transaction.State, true, "")
@@ -203,42 +227,46 @@ func OIDCMobileCallback(c *gin.Context) {
 	input := &oidcMobileCallbackInput{}
 	if err := c.ShouldBindJSON(input); err != nil {
 		ret.Code = -1
-		ret.Msg = "Invalid OIDC callback request"
+		ret.Msg = oidcUserMessage()
 		return
 	}
 	callbackURL, err := url.Parse(input.CallbackURL)
 	if err != nil || callbackURL.Scheme != "siyuan" || callbackURL.Host != "" || callbackURL.Path != "/oidc-callback" {
 		ret.Code = -1
-		ret.Msg = "Invalid mobile OIDC callback URL"
+		ret.Msg = oidcUserMessage()
 		return
 	}
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	transaction, err := claimOIDCTransaction(callbackURL.Query().Get("state"), workspaceSession.OIDCBinding, false)
 	if err != nil {
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = oidcUserMessage()
+		logging.LogWarnf("claim mobile OIDC callback transaction failed: %s", err)
 		return
 	}
 	if transaction.Flow != oidcFlowMobile {
 		ret.Code = -1
-		ret.Msg = "OIDC login flow does not match"
+		ret.Msg = oidcUserMessage()
+		completeOIDCTransaction(transaction.State, false, ret.Msg)
 		return
 	}
 	if providerError := callbackURL.Query().Get("error"); providerError != "" {
+		logging.LogWarnf("OIDC provider rejected the mobile login: %s", providerError)
 		ret.Code = -1
-		ret.Msg = "OIDC provider rejected the login: " + providerError
+		ret.Msg = oidcUserMessage()
 		completeOIDCTransaction(transaction.State, false, ret.Msg)
 		return
 	}
 	if err = finishOIDCExchange(c, transaction, callbackURL.Query().Get("code")); err != nil {
+		logging.LogErrorf("finish mobile OIDC authorization code exchange failed: %s", err)
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = oidcUserMessage()
 		completeOIDCTransaction(transaction.State, false, ret.Msg)
 		return
 	}
 	if err = authenticateOIDCSession(c, transaction.RememberMe); err != nil {
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = oidcUserMessage()
 		completeOIDCTransaction(transaction.State, false, ret.Msg)
 		return
 	}
@@ -252,14 +280,14 @@ func OIDCPoll(c *gin.Context) {
 	input := &oidcPollInput{}
 	if err := c.ShouldBindJSON(input); err != nil || input.PollToken == "" {
 		ret.Code = -1
-		ret.Msg = "Invalid OIDC poll request"
+		ret.Msg = oidcUserMessage()
 		return
 	}
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	transaction, found := pollOIDCTransaction(input.PollToken, workspaceSession.OIDCBinding)
 	if !found {
 		ret.Code = -1
-		ret.Msg = "OIDC login transaction was not found or has expired"
+		ret.Msg = oidcUserMessage()
 		return
 	}
 	if !transaction.Completed {
@@ -274,7 +302,7 @@ func OIDCPoll(c *gin.Context) {
 	}
 	if err := authenticateOIDCSession(c, transaction.RememberMe); err != nil {
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = oidcUserMessage()
 		return
 	}
 	ret.Data = map[string]any{"status": "completed", "to": safeOIDCRedirectTarget(transaction.To)}
@@ -328,6 +356,39 @@ func ValidateOIDCConfiguration(config *conf.OIDC) error {
 	return nil
 }
 
+func ValidateOIDCProviderConfiguration(ctx context.Context, config *conf.OIDC) error {
+	if err := ValidateOIDCConfiguration(config); err != nil {
+		return err
+	}
+	redirectURL := "http://127.0.0.1:6806/api/system/oidc/callback"
+	if config.RedirectURL != "" {
+		var err error
+		if redirectURL, err = validatePublicOIDCRedirectURL(config.RedirectURL); err != nil {
+			return err
+		}
+	}
+	validationContext, cancel := context.WithTimeout(ctx, oidcProviderTimeout)
+	defer cancel()
+	_, err := oidc_provider.New(validationContext, config, redirectURL)
+	return err
+}
+
+func ValidateOIDCConfigurationChange(ctx context.Context, config *conf.OIDC, requireRemoteRedirect,
+	hasAlternativeAuthentication, bypassAuthentication bool) error {
+	if config == nil || !config.Enabled {
+		if requireRemoteRedirect && !hasAlternativeAuthentication && !bypassAuthentication {
+			return errors.New("remote access requires at least one authentication method")
+		}
+		return nil
+	}
+	if requireRemoteRedirect {
+		if _, err := validatePublicOIDCRedirectURL(config.RedirectURL); err != nil {
+			return err
+		}
+	}
+	return ValidateOIDCProviderConfiguration(ctx, config)
+}
+
 func effectiveOIDCRedirectURL(c *gin.Context, flow string) (string, error) {
 	if flow == oidcFlowMobile {
 		return oidcMobileRedirectURL, nil
@@ -377,7 +438,9 @@ func getOIDCProvider(ctx context.Context, redirectURL string) (*oidc_provider.Pr
 		return provider, nil
 	}
 	oidcProviders.Unlock()
-	provider, err := oidc_provider.New(ctx, Conf.GetOIDC(), redirectURL)
+	discoveryContext, cancel := context.WithTimeout(ctx, oidcProviderTimeout)
+	defer cancel()
+	provider, err := oidc_provider.New(discoveryContext, Conf.GetOIDC(), redirectURL)
 	if err != nil {
 		return nil, err
 	}
@@ -396,7 +459,7 @@ func getOIDCProvider(ctx context.Context, redirectURL string) (*oidc_provider.Pr
 	return provider, nil
 }
 
-func newOIDCTransaction(input *oidcStartInput, binding, redirectURL string) (*oidcTransaction, error) {
+func newOIDCTransaction(input *oidcStartInput, binding, clientIP, redirectURL string) (*oidcTransaction, error) {
 	state, err := secureRandomToken(32)
 	if err != nil {
 		return nil, err
@@ -417,29 +480,35 @@ func newOIDCTransaction(input *oidcStartInput, binding, redirectURL string) (*oi
 		}
 	}
 	return &oidcTransaction{State: state, Nonce: nonce, CodeVerifier: verifier, PollToken: pollToken, Binding: binding,
-		Flow: input.Flow, RedirectURL: redirectURL, To: input.To, ConfigVersion: oidcSessionVersion(), RememberMe: input.RememberMe,
+		ClientIP: clientIP,
+		Flow:     input.Flow, RedirectURL: redirectURL, To: input.To, ConfigVersion: oidcSessionVersion(), RememberMe: input.RememberMe,
 		ExpiresAt: time.Now().Add(oidcTransactionTimeout)}, nil
 }
 
-func storeOIDCTransaction(transaction *oidcTransaction) {
+func storeOIDCTransaction(transaction *oidcTransaction) error {
 	oidcTransactions.Lock()
 	defer oidcTransactions.Unlock()
 	cleanupOIDCTransactionsLocked()
 	if len(oidcTransactions.byState) >= oidcTransactionMax {
-		var oldest *oidcTransaction
-		for _, candidate := range oidcTransactions.byState {
-			if oldest == nil || candidate.ExpiresAt.Before(oldest.ExpiresAt) {
-				oldest = candidate
-			}
+		return errors.New("OIDC login transaction capacity reached")
+	}
+	perIP, perBinding := 0, 0
+	for _, candidate := range oidcTransactions.byState {
+		if transaction.ClientIP != "" && candidate.ClientIP == transaction.ClientIP {
+			perIP++
 		}
-		if oldest != nil {
-			deleteOIDCTransactionLocked(oldest.State)
+		if transaction.Binding != "" && candidate.Binding == transaction.Binding {
+			perBinding++
 		}
+	}
+	if perIP >= oidcTransactionPerIP || perBinding >= oidcTransactionPerBind {
+		return errors.New("too many pending OIDC login transactions")
 	}
 	oidcTransactions.byState[transaction.State] = transaction
 	if transaction.PollToken != "" {
 		oidcTransactions.byPoll[transaction.PollToken] = transaction.State
 	}
+	return nil
 }
 
 func claimOIDCTransaction(state, binding string, allowDesktopWithoutBinding bool) (*oidcTransaction, error) {
@@ -476,12 +545,13 @@ func completeOIDCTransaction(state string, success bool, message string) {
 	if transaction == nil {
 		return
 	}
+	if transaction.Flow != oidcFlowDesktop {
+		deleteOIDCTransactionLocked(state)
+		return
+	}
 	transaction.Completed = true
 	transaction.Success = success
 	transaction.Message = message
-	if transaction.Flow != oidcFlowDesktop {
-		deleteOIDCTransactionLocked(state)
-	}
 }
 
 func pollOIDCTransaction(pollToken, binding string) (*oidcTransaction, bool) {
@@ -527,7 +597,9 @@ func finishOIDCExchange(c *gin.Context, transaction *oidcTransaction, code strin
 	if err != nil {
 		return err
 	}
-	claims, err := provider.Exchange(c.Request.Context(), code, transaction.CodeVerifier, transaction.Nonce)
+	exchangeContext, cancel := context.WithTimeout(c.Request.Context(), oidcExchangeTimeout)
+	defer cancel()
+	claims, err := provider.Exchange(exchangeContext, code, transaction.CodeVerifier, transaction.Nonce)
 	if err != nil {
 		return err
 	}
@@ -535,6 +607,19 @@ func finishOIDCExchange(c *gin.Context, transaction *oidcTransaction, code strin
 		return err
 	}
 	return nil
+}
+
+func oidcUserMessage() string {
+	return oidcLanguage(365, "OIDC login failed")
+}
+
+func oidcLanguage(number int, fallback string) string {
+	if Conf != nil {
+		if message := Conf.Language(number); message != "" {
+			return message
+		}
+	}
+	return fallback
 }
 
 func authorizeOIDCClaims(claims map[string]any) error {
@@ -613,11 +698,6 @@ func secureRandomToken(size int) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(buffer), nil
 }
 
-func pkceChallenge(verifier string) string {
-	digest := sha256.Sum256([]byte(verifier))
-	return base64.RawURLEncoding.EncodeToString(digest[:])
-}
-
 func safeOIDCRedirectTarget(target string) string {
 	parsed, err := url.Parse(target)
 	if err != nil || parsed.IsAbs() || strings.HasPrefix(target, "//") || !strings.HasPrefix(target, "/") ||
@@ -628,13 +708,14 @@ func safeOIDCRedirectTarget(target string) string {
 }
 
 func writeOIDCCallbackPage(c *gin.Context, success bool, message string) {
-	title := "OIDC login failed"
+	title := oidcUserMessage()
 	if success {
-		title = "OIDC login completed"
+		title = oidcLanguage(366, "OIDC login completed")
 	}
 	c.Header("Content-Type", "text/html; charset=utf-8")
 	c.Header("Cache-Control", "no-store")
 	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'")
+	c.Header("Referrer-Policy", "no-referrer")
 	c.Header("X-Content-Type-Options", "nosniff")
 	c.String(http.StatusOK, "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" "+
 		"content=\"width=device-width,initial-scale=1\"><title>%s</title></head><body><main><h1>%s</h1><p>%s</p></main></body></html>",

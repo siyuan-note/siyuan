@@ -9,10 +9,16 @@
 package model
 
 import (
+	"context"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -87,6 +93,45 @@ func TestValidatePublicOIDCRedirectURL(t *testing.T) {
 	}
 }
 
+func TestEffectiveOIDCRedirectURLForLocalAndRemoteFlows(t *testing.T) {
+	setupOIDCTest(t)
+	gin.SetMode(gin.TestMode)
+	contextFor := func(remoteAddress, host string, headers map[string]string) *gin.Context {
+		context, _ := gin.CreateTestContext(httptest.NewRecorder())
+		context.Request = httptest.NewRequest(http.MethodPost, "http://"+host+"/api/system/oidc/start", nil)
+		context.Request.RemoteAddr = remoteAddress
+		for key, value := range headers {
+			context.Request.Header.Set(key, value)
+		}
+		return context
+	}
+
+	local := contextFor("127.0.0.1:12345", "127.0.0.1:6806", nil)
+	if redirect, err := effectiveOIDCRedirectURL(local, oidcFlowWeb); err != nil ||
+		redirect != "http://127.0.0.1:6806/api/system/oidc/callback" {
+		t.Fatalf("local OIDC redirect was not derived from the loopback listener: %q, %v", redirect, err)
+	}
+	if redirect, err := effectiveOIDCRedirectURL(local, oidcFlowMobile); err != nil || redirect != oidcMobileRedirectURL {
+		t.Fatalf("mobile OIDC redirect changed: %q, %v", redirect, err)
+	}
+
+	Conf.OIDC.RedirectURL = "https://notes.example.com/api/system/oidc/callback"
+	remote := contextFor("203.0.113.2:12345", "notes.example.com", nil)
+	if redirect, err := effectiveOIDCRedirectURL(remote, oidcFlowWeb); err != nil || redirect != Conf.OIDC.RedirectURL {
+		t.Fatalf("remote browser OIDC redirect was not taken from configuration: %q, %v", redirect, err)
+	}
+	if _, err := effectiveOIDCRedirectURL(remote, oidcFlowDesktop); err == nil {
+		t.Fatal("remote desktop OIDC flow was accepted without a loopback listener")
+	}
+
+	proxiedRemote := contextFor("127.0.0.1:12345", "127.0.0.1:6806", map[string]string{
+		"X-Forwarded-For": "203.0.113.3",
+	})
+	if redirect, err := effectiveOIDCRedirectURL(proxiedRemote, oidcFlowWeb); err != nil || redirect != Conf.OIDC.RedirectURL {
+		t.Fatalf("proxied remote OIDC request was treated as local: %q, %v", redirect, err)
+	}
+}
+
 func TestAuthorizeOIDCClaimsCombinesRulesWithAnd(t *testing.T) {
 	setupOIDCTest(t)
 	Conf.OIDC.AllowAll = false
@@ -107,14 +152,17 @@ func TestAuthorizeOIDCClaimsCombinesRulesWithAnd(t *testing.T) {
 
 func TestOIDCTransactionUsesSeparateBoundPollToken(t *testing.T) {
 	setupOIDCTest(t)
-	transaction, err := newOIDCTransaction(&oidcStartInput{Flow: oidcFlowDesktop}, "binding-a", "http://127.0.0.1:6806/api/system/oidc/callback")
+	transaction, err := newOIDCTransaction(&oidcStartInput{Flow: oidcFlowDesktop}, "binding-a", "127.0.0.1",
+		"http://127.0.0.1:6806/api/system/oidc/callback")
 	if err != nil {
 		t.Fatalf("create transaction failed: %s", err)
 	}
 	if transaction.State == transaction.PollToken || transaction.State == transaction.CodeVerifier || transaction.PollToken == "" {
 		t.Fatal("OIDC state, PKCE verifier, and poll token must be independent")
 	}
-	storeOIDCTransaction(transaction)
+	if err = storeOIDCTransaction(transaction); err != nil {
+		t.Fatal(err)
+	}
 	claimed, err := claimOIDCTransaction(transaction.State, "", true)
 	if err != nil || claimed.State != transaction.State {
 		t.Fatalf("desktop callback could not claim transaction: %v", err)
@@ -131,12 +179,78 @@ func TestOIDCTransactionUsesSeparateBoundPollToken(t *testing.T) {
 	}
 }
 
+func TestOIDCTransactionCanOnlyBeClaimedOnceConcurrently(t *testing.T) {
+	setupOIDCTest(t)
+	transaction := &oidcTransaction{State: "concurrent", Binding: "binding", ConfigVersion: oidcSessionVersion(),
+		ExpiresAt: time.Now().Add(time.Minute)}
+	if err := storeOIDCTransaction(transaction); err != nil {
+		t.Fatal(err)
+	}
+	const workers = 16
+	results := make(chan bool, workers)
+	var waitGroup sync.WaitGroup
+	for i := 0; i < workers; i++ {
+		waitGroup.Add(1)
+		go func() {
+			defer waitGroup.Done()
+			_, err := claimOIDCTransaction(transaction.State, transaction.Binding, false)
+			results <- err == nil
+		}()
+	}
+	waitGroup.Wait()
+	close(results)
+	successes := 0
+	for success := range results {
+		if success {
+			successes++
+		}
+	}
+	if successes != 1 {
+		t.Fatalf("OIDC transaction was claimed %d times", successes)
+	}
+}
+
+func TestCompletedWebAndMobileTransactionsAreRemoved(t *testing.T) {
+	setupOIDCTest(t)
+	for _, flow := range []string{oidcFlowWeb, oidcFlowMobile} {
+		transaction := &oidcTransaction{State: flow, Flow: flow, ConfigVersion: oidcSessionVersion(),
+			ExpiresAt: time.Now().Add(time.Minute)}
+		if err := storeOIDCTransaction(transaction); err != nil {
+			t.Fatal(err)
+		}
+		completeOIDCTransaction(transaction.State, true, "")
+		oidcTransactions.Lock()
+		stored := oidcTransactions.byState[transaction.State]
+		oidcTransactions.Unlock()
+		if stored != nil {
+			t.Fatalf("completed %s OIDC transaction was retained", flow)
+		}
+	}
+}
+
+func TestApplyOIDCEnvironmentOverridesStoredConfiguration(t *testing.T) {
+	t.Setenv("SIYUAN_OIDC_ENABLED", "true")
+	t.Setenv("SIYUAN_OIDC_PROVIDER", conf.OIDCProviderGitHub)
+	t.Setenv("SIYUAN_OIDC_CLIENT_ID", "environment-client")
+	t.Setenv("SIYUAN_OIDC_SCOPES", "read:user, repo")
+	t.Setenv("SIYUAN_OIDC_ALLOW_ALL", "true")
+	t.Setenv("SIYUAN_OIDC_CLAIM_RULES", `[{"claim":"login","operator":"equals","values":["alice"]}]`)
+	config := &conf.OIDC{Provider: conf.OIDCProviderCustom, ClientID: "stored-client"}
+	applyOIDCEnvironment(config)
+	if !config.Enabled || config.Provider != conf.OIDCProviderGitHub || config.ClientID != "environment-client" ||
+		!config.AllowAll || len(config.Scopes) != 2 || len(config.ClaimRules) != 1 || config.ClaimRules[0].Claim != "login" {
+		t.Fatalf("OIDC environment did not override stored configuration: %#v", config)
+	}
+}
+
 func TestOIDCTransactionExpiryAndSafeRedirect(t *testing.T) {
 	setupOIDCTest(t)
 	transaction := &oidcTransaction{
 		State: "expired", Binding: "binding", ConfigVersion: oidcSessionVersion(), ExpiresAt: time.Now().Add(-time.Second),
 	}
-	storeOIDCTransaction(transaction)
+	if err := storeOIDCTransaction(transaction); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := claimOIDCTransaction(transaction.State, "binding", false); err == nil {
 		t.Fatal("expired OIDC transaction was accepted")
 	}
@@ -147,6 +261,101 @@ func TestOIDCTransactionExpiryAndSafeRedirect(t *testing.T) {
 	}
 	if target := safeOIDCRedirectTarget("/stage/build/mobile/"); target != "/stage/build/mobile/" {
 		t.Fatalf("safe redirect target was changed: %s", target)
+	}
+}
+
+func TestOIDCTransactionLimitsRejectWithoutEviction(t *testing.T) {
+	setupOIDCTest(t)
+	newTransaction := func(state, binding, clientIP string) *oidcTransaction {
+		return &oidcTransaction{State: state, Binding: binding, ClientIP: clientIP,
+			ConfigVersion: oidcSessionVersion(), ExpiresAt: time.Now().Add(time.Minute)}
+	}
+	for i := 0; i < oidcTransactionPerBind; i++ {
+		if err := storeOIDCTransaction(newTransaction(fmt.Sprintf("binding-%d", i), "same-binding", "")); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := storeOIDCTransaction(newTransaction("binding-overflow", "same-binding", "")); err == nil {
+		t.Fatal("expected the per-binding transaction limit to reject a new transaction")
+	}
+	if len(oidcTransactions.byState) != oidcTransactionPerBind {
+		t.Fatal("rejected transaction evicted an existing transaction")
+	}
+
+	oidcTransactions.Lock()
+	oidcTransactions.byState = map[string]*oidcTransaction{}
+	oidcTransactions.byPoll = map[string]string{}
+	oidcTransactions.Unlock()
+	for i := 0; i < oidcTransactionPerIP; i++ {
+		if err := storeOIDCTransaction(newTransaction(fmt.Sprintf("ip-%d", i), fmt.Sprintf("binding-%d", i), "192.0.2.1")); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := storeOIDCTransaction(newTransaction("ip-overflow", "another-binding", "192.0.2.1")); err == nil {
+		t.Fatal("expected the per-IP transaction limit to reject a new transaction")
+	}
+
+	oidcTransactions.Lock()
+	oidcTransactions.byState = map[string]*oidcTransaction{}
+	oidcTransactions.byPoll = map[string]string{}
+	oidcTransactions.Unlock()
+	for i := 0; i < oidcTransactionMax; i++ {
+		if err := storeOIDCTransaction(newTransaction(fmt.Sprintf("capacity-%d", i), "", "")); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := storeOIDCTransaction(newTransaction("capacity-overflow", "", "")); err == nil {
+		t.Fatal("expected the global transaction capacity to reject a new transaction")
+	}
+	if oidcTransactions.byState["capacity-0"] == nil || len(oidcTransactions.byState) != oidcTransactionMax {
+		t.Fatal("reaching transaction capacity evicted an active transaction")
+	}
+}
+
+func TestValidateOIDCConfigurationChangePreventsRemoteLockout(t *testing.T) {
+	setupOIDCTest(t)
+	disabled := conf.NewOIDC()
+	if err := ValidateOIDCConfigurationChange(context.Background(), disabled, true, false, false); err == nil {
+		t.Fatal("expected disabling the last remote authentication method to be rejected")
+	}
+	if err := ValidateOIDCConfigurationChange(context.Background(), disabled, true, true, false); err != nil {
+		t.Fatalf("alternative access authentication was rejected: %s", err)
+	}
+	if err := ValidateOIDCConfigurationChange(context.Background(), disabled, true, false, true); err != nil {
+		t.Fatalf("explicit authentication bypass was rejected: %s", err)
+	}
+	if err := ValidateOIDCConfigurationChange(context.Background(), disabled, false, false, false); err != nil {
+		t.Fatalf("disabling authentication for local access was rejected: %s", err)
+	}
+}
+
+func TestValidateOIDCProviderConfigurationDiscoversProvider(t *testing.T) {
+	setupOIDCTest(t)
+	var providerURL string
+	provider := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/.well-known/openid-configuration" {
+			http.NotFound(writer, request)
+			return
+		}
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprintf(writer, `{"issuer":%q,"authorization_endpoint":%q,"token_endpoint":%q,"jwks_uri":%q}`,
+			providerURL, providerURL+"/authorize", providerURL+"/token", providerURL+"/keys")
+	}))
+	defer provider.Close()
+	providerURL = provider.URL
+	config := Conf.GetOIDC()
+	config.IssuerURL = provider.URL
+	if err := ValidateOIDCProviderConfiguration(context.Background(), config); err != nil {
+		t.Fatalf("valid OIDC provider discovery was rejected: %s", err)
+	}
+
+	unavailable := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		http.Error(writer, "unavailable", http.StatusServiceUnavailable)
+	}))
+	unavailable.Close()
+	config.IssuerURL = unavailable.URL
+	if err := ValidateOIDCProviderConfiguration(context.Background(), config); err == nil {
+		t.Fatal("unavailable OIDC provider was accepted")
 	}
 }
 
@@ -170,9 +379,15 @@ func TestOIDCSessionVersionInvalidatesOnConfigurationChange(t *testing.T) {
 	if !IsWorkspaceSessionAuthenticated(workspaceSession) {
 		t.Fatal("current OIDC session version was rejected")
 	}
+	if !IsOIDCSessionVersionCurrent(workspaceSession.OIDCSessionVersion) {
+		t.Fatal("current OIDC WebSocket session version was rejected")
+	}
 	Conf.OIDC.ClientID = "changed-client-id"
 	if IsWorkspaceSessionAuthenticated(workspaceSession) {
 		t.Fatal("OIDC session survived an authentication configuration change")
+	}
+	if IsOIDCSessionVersionCurrent(workspaceSession.OIDCSessionVersion) {
+		t.Fatal("OIDC WebSocket session survived an authentication configuration change")
 	}
 	Conf.AccessAuthCode = "access-code"
 	workspaceSession.AccessAuthCode = "access-code"

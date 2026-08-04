@@ -16,12 +16,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/go-jose/go-jose/v4"
 	"github.com/go-jose/go-jose/v4/jwt"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"golang.org/x/oauth2"
 )
 
 func TestGitHubAuthURLUsesPKCEAndSeparateState(t *testing.T) {
@@ -30,12 +32,13 @@ func TestGitHubAuthURLUsesPKCEAndSeparateState(t *testing.T) {
 		ClientID: "client-id",
 		Scopes:   []string{"openid", "profile", "email"},
 	}, "siyuan:/oidc-callback")
-	authURL, err := url.Parse(provider.AuthURL("state-value", "nonce-must-not-be-sent", "pkce-challenge"))
+	const verifier = "0123456789012345678901234567890123456789012"
+	authURL, err := url.Parse(provider.AuthURL("state-value", "nonce-must-not-be-sent", verifier))
 	if err != nil {
 		t.Fatal(err)
 	}
 	query := authURL.Query()
-	if query.Get("state") != "state-value" || query.Get("code_challenge") != "pkce-challenge" ||
+	if query.Get("state") != "state-value" || query.Get("code_challenge") != oauth2.S256ChallengeFromVerifier(verifier) ||
 		query.Get("code_challenge_method") != "S256" {
 		t.Fatalf("GitHub authorization URL is missing state or PKCE: %s", authURL.String())
 	}
@@ -44,6 +47,28 @@ func TestGitHubAuthURLUsesPKCEAndSeparateState(t *testing.T) {
 	}
 	if query.Get("scope") != "read:user user:email" {
 		t.Fatalf("GitHub preset scopes were not applied: %q", query.Get("scope"))
+	}
+}
+
+func TestGitHubScopesPreserveCustomValues(t *testing.T) {
+	provider := newGitHub(&conf.OIDC{
+		Provider: conf.OIDCProviderGitHub,
+		ClientID: "client-id",
+		Scopes:   []string{"openid", "profile", "email", "read:org"},
+	}, "siyuan:/oidc-callback")
+	const verifier = "0123456789012345678901234567890123456789012"
+	authURL, err := url.Parse(provider.AuthURL("state-value", "", verifier))
+	if err != nil {
+		t.Fatal(err)
+	}
+	scopes := authURL.Query().Get("scope")
+	for _, expected := range []string{"read:user", "user:email", "read:org"} {
+		if !strings.Contains(scopes, expected) {
+			t.Fatalf("GitHub authorization URL lost scope %q: %q", expected, scopes)
+		}
+	}
+	if strings.Contains(scopes, "openid") || strings.Contains(scopes, "profile") {
+		t.Fatalf("GitHub authorization URL retained OIDC-only scopes: %q", scopes)
 	}
 }
 
@@ -103,11 +128,12 @@ func TestOIDCProviderVerifiesNonceAndPKCE(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create test provider failed: %s", err)
 	}
-	authURL, err := url.Parse(provider.AuthURL("test-state", nonce, "test-challenge"))
+	authURL, err := url.Parse(provider.AuthURL("test-state", nonce, verifier))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if authURL.Query().Get("state") != "test-state" || authURL.Query().Get("nonce") != nonce ||
+		authURL.Query().Get("code_challenge") != oauth2.S256ChallengeFromVerifier(verifier) ||
 		authURL.Query().Get("code_challenge_method") != "S256" {
 		t.Fatalf("OIDC authorization URL is missing security parameters: %s", authURL.String())
 	}

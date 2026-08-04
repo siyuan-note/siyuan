@@ -2439,6 +2439,10 @@
 		"362": "O nome de usuário da conta do serviço de publicação está duplicado",
 		"363": "A senha da conta do serviço de publicação deve ter pelo menos 8 caracteres",
 		"364": "Entrar com OIDC",
-		"365": "Falha no login OIDC"
+		"365": "Falha no login OIDC",
+		"366": "Login OIDC concluído",
+		"367": "Você pode fechar esta janela e voltar ao SiYuan",
+		"368": "Este provedor OIDC não oferece suporte ao URI de retorno móvel do SiYuan",
+		"369": "Configuração OIDC inválida"
 	}
 	}

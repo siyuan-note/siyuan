@@ -2439,6 +2439,10 @@
 		"362": "Der Benutzername des Veröffentlichungsdienst-Kontos ist bereits vergeben",
 		"363": "Das Passwort des Veröffentlichungsdienst-Kontos muss mindestens 8 Zeichen lang sein",
 		"364": "Mit OIDC anmelden",
-		"365": "OIDC-Anmeldung fehlgeschlagen"
+		"365": "OIDC-Anmeldung fehlgeschlagen",
+		"366": "OIDC-Anmeldung abgeschlossen",
+		"367": "Sie können dieses Fenster schließen und zu SiYuan zurückkehren",
+		"368": "Dieser OIDC-Anbieter unterstützt die mobile SiYuan-Rückruf-URI nicht",
+		"369": "Ungültige OIDC-Konfiguration"
 	}
 	}

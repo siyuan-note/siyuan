@@ -2439,6 +2439,10 @@
 		"362": "Nama pengguna akun layanan publikasi duplikat",
 		"363": "Kata sandi akun layanan publikasi harus terdiri dari minimal 8 karakter",
 		"364": "Masuk dengan OIDC",
-		"365": "Login OIDC gagal"
+		"365": "Login OIDC gagal",
+		"366": "Login OIDC selesai",
+		"367": "Anda dapat menutup jendela ini dan kembali ke SiYuan",
+		"368": "Penyedia OIDC ini tidak mendukung URI panggilan balik seluler SiYuan",
+		"369": "Konfigurasi OIDC tidak valid"
 	}
 	}

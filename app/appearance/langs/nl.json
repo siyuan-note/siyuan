@@ -2439,6 +2439,10 @@
 		"362": "De gebruikersnaam van het publicatieservice-account is gedupliceerd",
 		"363": "Het wachtwoord van het publicatieservice-account moet minimaal 8 tekens bevatten",
 		"364": "Aanmelden met OIDC",
-		"365": "OIDC-aanmelding mislukt"
+		"365": "OIDC-aanmelding mislukt",
+		"366": "OIDC-aanmelding voltooid",
+		"367": "U kunt dit venster sluiten en terugkeren naar SiYuan",
+		"368": "Deze OIDC-provider ondersteunt de mobiele callback-URI van SiYuan niet",
+		"369": "Ongeldige OIDC-configuratie"
 	}
 	}

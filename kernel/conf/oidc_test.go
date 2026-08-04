@@ -31,3 +31,11 @@ func TestOIDCClientSecretDecryptPreservesPlaintextAndMalformedValues(t *testing.
 		}
 	}
 }
+
+func TestOIDCNormalizePreservesIssuerIdentifier(t *testing.T) {
+	config := &OIDC{IssuerURL: "  https://issuer.example.com/  "}
+	config.Normalize()
+	if config.IssuerURL != "https://issuer.example.com/" {
+		t.Fatalf("OIDC issuer identifier was changed: %q", config.IssuerURL)
+	}
+}

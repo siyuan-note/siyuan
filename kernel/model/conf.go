@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha1"
 	"fmt"
 	"os"
@@ -814,14 +815,10 @@ func InitConf() {
 	}
 
 	if util.ContainerDocker == util.Container && Conf.AccessAuthCode == "" && !util.SiYuanAccessAuthCodeBypass {
-		if err := ValidateOIDCConfiguration(Conf.OIDC); err != nil {
+		if err := ValidateOIDCConfigurationChange(context.Background(), Conf.OIDC, true, false, false); err != nil {
 			fmt.Println("the access authorization code or a valid OIDC configuration must be set when deploying via Docker")
 			fmt.Println("set SIYUAN_ACCESS_AUTH_CODE, configure OIDC, or explicitly set SIYUAN_ACCESS_AUTH_CODE_BYPASS=true")
 			logging.LogErrorf("Docker access authentication configuration is invalid: %s", err)
-			os.Exit(logging.ExitCodeSecurityRisk)
-		}
-		if _, err := validatePublicOIDCRedirectURL(Conf.OIDC.RedirectURL); err != nil {
-			logging.LogErrorf("Docker OIDC redirect configuration is invalid: %s", err)
 			os.Exit(logging.ExitCodeSecurityRisk)
 		}
 	}

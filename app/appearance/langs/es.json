@@ -2439,6 +2439,10 @@
 		"362": "El nombre de usuario de la cuenta del servicio de publicación está duplicado",
 		"363": "La contraseña de la cuenta del servicio de publicación debe tener al menos 8 caracteres",
 		"364": "Iniciar sesión con OIDC",
-		"365": "Error al iniciar sesión con OIDC"
+		"365": "Error al iniciar sesión con OIDC",
+		"366": "Inicio de sesión OIDC completado",
+		"367": "Puede cerrar esta ventana y volver a SiYuan",
+		"368": "Este proveedor OIDC no admite el URI de devolución de llamada móvil de SiYuan",
+		"369": "Configuración OIDC no válida"
 	}
 	}

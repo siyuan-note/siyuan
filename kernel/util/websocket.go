@@ -621,6 +621,26 @@ func ClosePublishServiceSessions() {
 	}
 }
 
+// CloseOIDCSessions 关闭仅通过 OIDC 认证的 WebSocket 连接。
+func CloseOIDCSessions() {
+	var oidcSessions []*melody.Session
+	sessions.Range(func(key, value any) bool {
+		appSessions := value.(*sync.Map)
+		appSessions.Range(func(key, value any) bool {
+			session := value.(*melody.Session)
+			if _, ok := session.Get("oidcSessionVersion"); ok {
+				oidcSessions = append(oidcSessions, session)
+			}
+			return true
+		})
+		return true
+	})
+	for _, session := range oidcSessions {
+		session.CloseWithMsg([]byte("  OIDC session expired"))
+		RemovePushChan(session)
+	}
+}
+
 var (
 	// lastActivityNs 记录最近一次用户写操作（前端发送 /api/transactions* 请求）的纳秒时间戳。
 	lastActivityNs atomic.Int64

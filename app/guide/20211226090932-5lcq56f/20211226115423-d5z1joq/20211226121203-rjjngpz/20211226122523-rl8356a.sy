@@ -6,7 +6,7 @@
 		"id": "20211226122523-rl8356a",
 		"title": "在瀏覽器上使用",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260804120200"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122545-a65v8e1",
-				"updated": "20260803163402"
+				"updated": "20260804120200"
 			},
 			"Children": [
 				{
@@ -230,6 +230,67 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中可配置瀏覽器鎖屏密碼，留空表示不啟用。這在開放網絡（比如辦公場所和公網）會比較有用，只有密碼驗證通過後才能進入工作空間。"
+				}
+			]
+		},
+		{
+			"ID": "20260804120201-oidclog",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804120201-oidclog",
+				"updated": "20260804120201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC 登入"
+				}
+			]
+		},
+		{
+			"ID": "20260804120202-oidcset",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804120202-oidcset",
+				"updated": "20260804120202"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鑑權"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定 OIDC 登入。遠端瀏覽器存取必須設定以 /api/system/oidc/callback 結尾的公開 HTTPS 回呼位址；思源的本機監聽位址僅適用於本機瀏覽器登入，不能作為遠端瀏覽器或行動端的固定回呼位址。"
+				}
+			]
+		},
+		{
+			"ID": "20260804120203-oidcmob",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804120203-oidcmob",
+				"updated": "20260804120203"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "原生行動端固定使用 siyuan:/oidc-callback，請在身分提供者中原樣註冊。Google 不接受此行動回呼格式，因此 Google 僅支援瀏覽器和桌面端登入。"
 				}
 			]
 		}

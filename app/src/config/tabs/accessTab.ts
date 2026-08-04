@@ -66,7 +66,7 @@ const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
             save: (value) => sendAppSetting("system.lockScreenMode", value),
         });
     }
-    if (!window.siyuan.config.readonly && !onWeb) {
+    if (!window.siyuan.config.readonly) {
         group.button({
             id: "oidcConfig",
             title: window.siyuan.languages.oidcLogin,
@@ -93,19 +93,32 @@ const mountOIDCButton = (root: HTMLElement) => {
             content: `<div class="b3-dialog__content" id="oidcConfigForm">
     <label class="fn__flex b3-label"><span class="fn__flex-1">${window.siyuan.languages.oidcEnabled}</span><input type="checkbox" data-field="enabled" class="b3-switch"${config.enabled ? " checked" : ""}></label>
     <label class="b3-label">${window.siyuan.languages.oidcProvider}<select data-field="provider" class="b3-select fn__block"><option value="custom"${config.provider === "custom" ? " selected" : ""}>${window.siyuan.languages.custom}</option><option value="google"${config.provider === "google" ? " selected" : ""}>Google</option><option value="microsoft"${config.provider === "microsoft" ? " selected" : ""}>Microsoft</option><option value="github"${config.provider === "github" ? " selected" : ""}>GitHub</option></select></label>
-    <label class="b3-label">${window.siyuan.languages.oidcIssuerURL}<input data-field="issuerURL" class="b3-text-field fn__block" value="${escape(config.issuerURL)}"></label>
+    <div class="b3-label__text${config.provider === "google" ? "" : " fn__none"}" data-section="mobileCallbackWarning">${window.siyuan.languages["_kernel"]["368"]}</div>
+    <label class="b3-label" data-section="issuer">${window.siyuan.languages.oidcIssuerURL}<input data-field="issuerURL" class="b3-text-field fn__block" value="${escape(config.issuerURL)}"></label>
     <label class="b3-label">${window.siyuan.languages.oidcClientID}<input data-field="clientID" class="b3-text-field fn__block" value="${escape(config.clientID)}"></label>
     <label class="b3-label">${window.siyuan.languages.oidcClientSecret}<input data-field="clientSecret" type="password" class="b3-text-field fn__block" placeholder="${config.clientSecretConfigured ? "********" : ""}"></label>
-    <label class="fn__flex b3-label"><span class="fn__flex-1">${window.siyuan.languages.clear}</span><input type="checkbox" data-field="clearClientSecret" class="b3-switch"></label>
+    <label class="fn__flex b3-label${config.clientSecretConfigured ? "" : " fn__none"}" data-section="clearClientSecret"><span class="fn__flex-1">${window.siyuan.languages.clear}</span><input type="checkbox" data-field="clearClientSecret" class="b3-switch"></label>
     <label class="b3-label">${window.siyuan.languages.oidcScopes}<input data-field="scopes" class="b3-text-field fn__block" value="${escape(config.scopes.join(", "))}"></label>
     <label class="b3-label">${window.siyuan.languages.oidcRedirectURL}<input data-field="redirectURL" class="b3-text-field fn__block" value="${escape(config.redirectURL)}"></label>
     <label class="fn__flex b3-label"><span class="fn__flex-1">${window.siyuan.languages.oidcAllowAll}</span><input type="checkbox" data-field="allowAll" class="b3-switch"${config.allowAll ? " checked" : ""}></label>
-    <label class="b3-label">${window.siyuan.languages.oidcClaimRules}<textarea data-field="claimRules" class="b3-text-field fn__block" rows="6">${escape(JSON.stringify(config.claimRules, null, 2))}</textarea><div class="b3-label__text">${window.siyuan.languages.oidcClaimRulesTip}</div></label>
+    <label class="b3-label" data-section="claimRules">${window.siyuan.languages.oidcClaimRules}<textarea data-field="claimRules" class="b3-text-field fn__block" rows="6">${escape(JSON.stringify(config.claimRules, null, 2))}</textarea><div class="b3-label__text">${window.siyuan.languages.oidcClaimRulesTip}</div></label>
 </div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
             width: isMobile() ? "92vw" : "620px",
         });
         const form = dialog.element.querySelector<HTMLElement>("#oidcConfigForm");
+        const refreshSections = () => {
+            const provider = form.querySelector<HTMLSelectElement>('[data-field="provider"]').value;
+            const allowAll = form.querySelector<HTMLInputElement>('[data-field="allowAll"]').checked;
+            form.querySelector<HTMLElement>('[data-section="issuer"]').classList.toggle("fn__none",
+                provider !== "custom" && provider !== "microsoft");
+            form.querySelector<HTMLElement>('[data-section="mobileCallbackWarning"]').classList.toggle("fn__none",
+                provider !== "google");
+            form.querySelector<HTMLElement>('[data-section="claimRules"]').classList.toggle("fn__none", allowAll);
+        };
+        form.querySelector<HTMLSelectElement>('[data-field="provider"]').addEventListener("change", refreshSections);
+        form.querySelector<HTMLInputElement>('[data-field="allowAll"]').addEventListener("change", refreshSections);
+        refreshSections();
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
         buttons[0].addEventListener("click", () => dialog.destroy());
         buttons[1].addEventListener("click", () => {

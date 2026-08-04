@@ -2439,6 +2439,10 @@
 		"362": "Používateľské meno účtu služby publikovania je duplicitné",
 		"363": "Heslo účtu služby publikovania musí mať aspoň 8 znakov",
 		"364": "Prihlásiť sa cez OIDC",
-		"365": "Prihlásenie OIDC zlyhalo"
+		"365": "Prihlásenie OIDC zlyhalo",
+		"366": "Prihlásenie OIDC bolo dokončené",
+		"367": "Toto okno môžete zavrieť a vrátiť sa do SiYuan",
+		"368": "Tento poskytovateľ OIDC nepodporuje mobilný URI spätného volania SiYuan",
+		"369": "Neplatná konfigurácia OIDC"
 	}
 	}

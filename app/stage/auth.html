@@ -535,7 +535,7 @@
         }, 1000)
     }
 
-    const handleOIDCCallback = (callbackURL) => {
+    const handleOIDCCallback = (callbackURL, retryCount = 0) => {
         fetch('/api/system/oidc/mobileCallback', {
             method: 'POST',
             body: JSON.stringify({callbackURL}),
@@ -545,7 +545,13 @@
             } else {
                 showOIDCError(response.msg)
             }
-        }).catch(() => showOIDCError('{{.l13}}'))
+        }).catch(() => {
+            if (retryCount < 4) {
+                setTimeout(() => handleOIDCCallback(callbackURL, retryCount + 1), 1000 * (retryCount + 1))
+                return
+            }
+            showOIDCError('{{.l13}}')
+        })
     }
     window.handleOIDCCallback = handleOIDCCallback
     window.handleOidcCallbackLink = handleOIDCCallback

@@ -25,14 +25,20 @@ func IsAccessAuthRequired() bool {
 }
 
 func IsWorkspaceSessionAuthenticated(workspaceSession *util.WorkspaceSession) bool {
-	if workspaceSession == nil {
-		return false
-	}
-	if Conf.AccessAuthCode != "" && util.AuthCodeEquals(Conf.AccessAuthCode, workspaceSession.AccessAuthCode) {
-		return true
-	}
-	return Conf.GetOIDC().Enabled && workspaceSession.OIDCSessionVersion != "" &&
-		hmac.Equal([]byte(workspaceSession.OIDCSessionVersion), []byte(oidcSessionVersion()))
+	return IsAccessCodeSessionAuthenticated(workspaceSession) || IsOIDCSessionAuthenticated(workspaceSession)
+}
+
+func IsAccessCodeSessionAuthenticated(workspaceSession *util.WorkspaceSession) bool {
+	return workspaceSession != nil && Conf.AccessAuthCode != "" &&
+		util.AuthCodeEquals(Conf.AccessAuthCode, workspaceSession.AccessAuthCode)
+}
+
+func IsOIDCSessionAuthenticated(workspaceSession *util.WorkspaceSession) bool {
+	return workspaceSession != nil && IsOIDCSessionVersionCurrent(workspaceSession.OIDCSessionVersion)
+}
+
+func IsOIDCSessionVersionCurrent(version string) bool {
+	return version != "" && Conf.GetOIDC().Enabled && hmac.Equal([]byte(version), []byte(oidcSessionVersion()))
 }
 
 func applyAuthenticatedSession(c *gin.Context, workspaceSession *util.WorkspaceSession, rememberMe bool) {

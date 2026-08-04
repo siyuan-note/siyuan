@@ -2439,6 +2439,10 @@
 		"362": "Nazwa użytkownika konta usługi publikowania jest zduplikowana",
 		"363": "Hasło konta usługi publikowania musi mieć co najmniej 8 znaków",
 		"364": "Zaloguj się przez OIDC",
-		"365": "Logowanie OIDC nie powiodło się"
+		"365": "Logowanie OIDC nie powiodło się",
+		"366": "Logowanie OIDC zakończone",
+		"367": "Możesz zamknąć to okno i wrócić do SiYuan",
+		"368": "Ten dostawca OIDC nie obsługuje mobilnego identyfikatora URI wywołania zwrotnego SiYuan",
+		"369": "Nieprawidłowa konfiguracja OIDC"
 	}
 	}

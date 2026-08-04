@@ -81,11 +81,11 @@ func New(ctx context.Context, config *conf.OIDC, redirectURL string) (*Provider,
 	}, nil
 }
 
-func (p *Provider) AuthURL(state, nonce, codeChallenge string) string {
+func (p *Provider) AuthURL(state, nonce, codeVerifier string) string {
 	if p.kind == conf.OIDCProviderGitHub {
-		return p.oauth2Config.AuthCodeURL(state, oauth2.S256ChallengeOption(codeChallenge))
+		return p.oauth2Config.AuthCodeURL(state, oauth2.S256ChallengeOption(codeVerifier))
 	}
-	return p.oauth2Config.AuthCodeURL(state, oidc.Nonce(nonce), oauth2.S256ChallengeOption(codeChallenge))
+	return p.oauth2Config.AuthCodeURL(state, oidc.Nonce(nonce), oauth2.S256ChallengeOption(codeVerifier))
 }
 
 func (p *Provider) Exchange(ctx context.Context, code, codeVerifier, nonce string) (map[string]any, error) {
@@ -116,8 +116,22 @@ func (p *Provider) Exchange(ctx context.Context, code, codeVerifier, nonce strin
 
 func newGitHub(config *conf.OIDC, redirectURL string) *Provider {
 	scopes := append([]string{}, config.Scopes...)
-	if len(scopes) == 0 || contains(scopes, oidc.ScopeOpenID) {
+	if len(scopes) == 0 || isDefaultOIDCScopes(scopes) {
 		scopes = []string{"read:user", "user:email"}
+	} else {
+		filtered := scopes[:0]
+		for _, scope := range scopes {
+			if scope != oidc.ScopeOpenID && scope != "profile" && scope != "email" {
+				filtered = append(filtered, scope)
+			}
+		}
+		scopes = filtered
+		if !contains(scopes, "read:user") {
+			scopes = append([]string{"read:user"}, scopes...)
+		}
+		if !contains(scopes, "user:email") {
+			scopes = append(scopes, "user:email")
+		}
 	}
 	return &Provider{
 		kind: conf.OIDCProviderGitHub,
@@ -132,6 +146,13 @@ func newGitHub(config *conf.OIDC, redirectURL string) *Provider {
 			Scopes:      scopes,
 		},
 	}
+}
+
+func isDefaultOIDCScopes(scopes []string) bool {
+	if len(scopes) != 3 {
+		return false
+	}
+	return contains(scopes, oidc.ScopeOpenID) && contains(scopes, "profile") && contains(scopes, "email")
 }
 
 func exchangeGitHubClaims(ctx context.Context, token *oauth2.Token) (map[string]any, error) {

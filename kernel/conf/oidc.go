@@ -59,7 +59,7 @@ func (o *OIDC) Normalize() {
 		return
 	}
 	o.Provider = strings.ToLower(strings.TrimSpace(o.Provider))
-	o.IssuerURL = strings.TrimRight(strings.TrimSpace(o.IssuerURL), "/")
+	o.IssuerURL = strings.TrimSpace(o.IssuerURL)
 	o.ClientID = strings.TrimSpace(o.ClientID)
 	if o.ClientSecret != "" {
 		o.ClientSecretConfigured = true

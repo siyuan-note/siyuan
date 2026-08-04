@@ -2439,6 +2439,10 @@
 		"362": "Le nom d'utilisateur du compte du service de publication est dupliqué",
 		"363": "Le mot de passe du compte du service de publication doit comporter au moins 8 caractères",
 		"364": "Se connecter avec OIDC",
-		"365": "Échec de la connexion OIDC"
+		"365": "Échec de la connexion OIDC",
+		"366": "Connexion OIDC terminée",
+		"367": "Vous pouvez fermer cette fenêtre et revenir à SiYuan",
+		"368": "Ce fournisseur OIDC ne prend pas en charge l'URI de rappel mobile de SiYuan",
+		"369": "Configuration OIDC non valide"
 	}
 	}

@@ -7,7 +7,7 @@
 		"id": "20200812220555-lj3enxa",
 		"title": "请从这里开始",
 		"type": "doc",
-		"updated": "20260804194000"
+		"updated": "20260804233500"
 	},
 	"Children": [
 		{
@@ -1275,7 +1275,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729213849-1tej5ia",
-				"updated": "20260729213849"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1290,7 +1290,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729213849-1ksoqc7",
-				"updated": "20260729213849"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1381,6 +1381,37 @@
 									"TextMarkBlockRefID": "20230303235619-ex5l63e",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "人工智能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804233300-mcpcnli",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804233300-mcpcnli",
+						"updated": "20260804233500"
+					},
+					"Children": [
+						{
+							"ID": "20260804233301-mcpcnpa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804233301-mcpcnpa",
+								"updated": "20260804233500"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804223000-mcpsv01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "MCP 服务"
 								}
 							]
 						}
@@ -1544,7 +1575,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729213849-17vjx77",
-				"updated": "20260804194000"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1559,7 +1590,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729213849-38zyz2l",
-				"updated": "20260804194000"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1836,6 +1867,37 @@
 									"TextMarkBlockRefID": "20260614104254-4ifhixg",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "网络代理"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804233302-seccnli",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804233302-seccnli",
+						"updated": "20260804233500"
+					},
+					"Children": [
+						{
+							"ID": "20260804233303-seccnpa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804233303-seccnpa",
+								"updated": "20260804233500"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804185000-secvr01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "密钥和变量"
 								}
 							]
 						}

@@ -6,7 +6,7 @@
 		"id": "20240530101000-ei5t6tt",
 		"title": "人工知能",
 		"type": "doc",
-		"updated": "20260804180000"
+		"updated": "20260804233000"
 	},
 	"Children": [
 		{
@@ -311,6 +311,46 @@
 					"TextMarkType": "block-ref",
 					"TextMarkTextContent": "意味検索",
 					"TextMarkBlockRefID": "20260804171007-semnt04",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804233230-mcpjah1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804233230-mcpjah1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP サービス"
+				}
+			]
+		},
+		{
+			"ID": "20260804233231-mcpjap1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804233231-mcpjap1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP サービスを使用すると、MCP 対応クライアントから標準プロトコル経由で SiYuan が提供するツールを呼び出せます。設定方法と使用方法については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "MCP サービス",
+					"TextMarkBlockRefID": "20260804223003-mcpsv04",
 					"TextMarkBlockRefSubtype": "s"
 				},
 				{

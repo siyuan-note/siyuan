@@ -6,7 +6,7 @@
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20260804180000"
+		"updated": "20260804233000"
 	},
 	"Children": [
 		{
@@ -323,6 +323,46 @@
 					"TextMarkType": "block-ref",
 					"TextMarkTextContent": "语义搜索",
 					"TextMarkBlockRefID": "20260804171001-semnt01",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260804233200-mcpchn1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804233200-mcpchn1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP 服务"
+				}
+			]
+		},
+		{
+			"ID": "20260804233201-mcpcnp1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804233201-mcpcnp1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP 服务允许支持 MCP 的客户端通过标准协议调用思源提供的工具。配置和使用方式请参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "MCP 服务",
+					"TextMarkBlockRefID": "20260804223000-mcpsv01",
 					"TextMarkBlockRefSubtype": "s"
 				},
 				{

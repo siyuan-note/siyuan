@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20260804230000"
+		"updated": "20260804233000"
 	},
 	"Children": [
 		{
@@ -726,7 +726,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-1c4wqjk",
-				"updated": "20260804230000"
+				"updated": "20260804233000"
 			},
 			"Children": [
 				{
@@ -796,7 +796,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170056-8tp1qi0",
-				"updated": "20260804230000"
+				"updated": "20260804233000"
 			},
 			"Children": [
 				{
@@ -824,7 +824,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20260804224002-secvr03",
+					"TextMarkBlockRefID": "20260804185002-secvr03",
 					"TextMarkBlockRefSubtype": "s",
 					"TextMarkTextContent": "Secrets and Variables"
 				},

@@ -7,7 +7,7 @@
 		"id": "20200923234011-ieuun1p",
 		"title": "Please Start Here",
 		"type": "doc",
-		"updated": "20260804194000"
+		"updated": "20260804233500"
 	},
 	"Children": [
 		{
@@ -1275,7 +1275,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729215152-9xgtctk",
-				"updated": "20260729215152"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1290,7 +1290,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-14dakmz",
-				"updated": "20260729215152"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1381,6 +1381,37 @@
 									"TextMarkBlockRefID": "20230304000547-ibldj1z",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "Artificial Intelligence"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804233320-mcpenli",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804233320-mcpenli",
+						"updated": "20260804233500"
+					},
+					"Children": [
+						{
+							"ID": "20260804233321-mcpenpa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804233321-mcpenpa",
+								"updated": "20260804233500"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804223002-mcpsv03",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "MCP Service"
 								}
 							]
 						}
@@ -1544,7 +1575,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729215152-q5y6yiz",
-				"updated": "20260804194000"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1559,7 +1590,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-1mtl70f",
-				"updated": "20260804194000"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1836,6 +1867,37 @@
 									"TextMarkBlockRefID": "20260614104204-staofnm",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "Network Proxy"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804233322-secenli",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804233322-secenli",
+						"updated": "20260804233500"
+					},
+					"Children": [
+						{
+							"ID": "20260804233323-secenpa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804233323-secenpa",
+								"updated": "20260804233500"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804185002-secvr03",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "Secrets and Variables"
 								}
 							]
 						}

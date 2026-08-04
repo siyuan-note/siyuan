@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20260804180000"
+		"updated": "20260804233000"
 	},
 	"Children": [
 		{
@@ -320,6 +320,46 @@
 				{
 					"Type": "NodeText",
 					"Data": " for configuration and usage."
+				}
+			]
+		},
+		{
+			"ID": "20260804233220-mcpenh1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804233220-mcpenh1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP Service"
+				}
+			]
+		},
+		{
+			"ID": "20260804233221-mcpenp1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804233221-mcpenp1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The MCP service allows MCP-compatible clients to call tools provided by SiYuan through the standard protocol. For configuration and usage, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "MCP Service",
+					"TextMarkBlockRefID": "20260804223002-mcpsv03",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20230304000829-9jwu3po",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20260804180000"
+		"updated": "20260804233000"
 	},
 	"Children": [
 		{
@@ -323,6 +323,46 @@
 					"TextMarkType": "block-ref",
 					"TextMarkTextContent": "語意搜尋",
 					"TextMarkBlockRefID": "20260804171003-semnt02",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260804233210-mcptwh1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804233210-mcptwh1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP 服務"
+				}
+			]
+		},
+		{
+			"ID": "20260804233211-mcptwp1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804233211-mcptwp1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP 服務可讓支援 MCP 的用戶端透過標準協定呼叫思源提供的工具。設定與使用方式請參閱 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "MCP 服務",
+					"TextMarkBlockRefID": "20260804223001-mcpsv02",
 					"TextMarkBlockRefSubtype": "s"
 				},
 				{

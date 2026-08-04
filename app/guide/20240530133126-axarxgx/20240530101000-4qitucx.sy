@@ -8,7 +8,7 @@
 		"id": "20240530101000-4qitucx",
 		"title": "スタートガイド",
 		"type": "doc",
-		"updated": "20260804194000"
+		"updated": "20260804233500"
 	},
 	"Children": [
 		{
@@ -1311,7 +1311,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729215152-25hv1aw",
-				"updated": "20260729215152"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1326,7 +1326,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-1svfseh",
-				"updated": "20260729215152"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1420,6 +1420,37 @@
 									"TextMarkBlockRefID": "20240530101000-ei5t6tt",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "人工知能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804233330-mcpjali",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804233330-mcpjali",
+						"updated": "20260804233500"
+					},
+					"Children": [
+						{
+							"ID": "20260804233331-mcpjapa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804233331-mcpjapa",
+								"updated": "20260804233500"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804223003-mcpsv04",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "MCP サービス"
 								}
 							]
 						}
@@ -1587,7 +1618,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729215152-390ratq",
-				"updated": "20260804194000"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1602,7 +1633,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-1quwm31",
-				"updated": "20260804194000"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1883,6 +1914,37 @@
 									"TextMarkBlockRefID": "20260614104715-xe51jlk",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "ネットワークプロキシ"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804233332-secjali",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804233332-secjali",
+						"updated": "20260804233500"
+					},
+					"Children": [
+						{
+							"ID": "20260804233333-secjapa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804233333-secjapa",
+								"updated": "20260804233500"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804185003-secvr04",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "シークレットと変数"
 								}
 							]
 						}

@@ -7,7 +7,7 @@
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"type": "doc",
-		"updated": "20260804194000"
+		"updated": "20260804233500"
 	},
 	"Children": [
 		{
@@ -1283,7 +1283,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729215152-irh2bda",
-				"updated": "20260729215152"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1298,7 +1298,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-26gutzj",
-				"updated": "20260729215152"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1389,6 +1389,37 @@
 									"TextMarkBlockRefID": "20230304000829-9jwu3po",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "人工智能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804233310-mcptwli",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804233310-mcptwli",
+						"updated": "20260804233500"
+					},
+					"Children": [
+						{
+							"ID": "20260804233311-mcptwpa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804233311-mcptwpa",
+								"updated": "20260804233500"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804223001-mcpsv02",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "MCP 服務"
 								}
 							]
 						}
@@ -1552,7 +1583,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729215152-3ap0gw3",
-				"updated": "20260804194000"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1567,7 +1598,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-2w9opfh",
-				"updated": "20260804194000"
+				"updated": "20260804233500"
 			},
 			"Children": [
 				{
@@ -1844,6 +1875,37 @@
 									"TextMarkBlockRefID": "20260614104322-shrqj15",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "網路代理"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804233312-sectwli",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260804233312-sectwli",
+						"updated": "20260804233500"
+					},
+					"Children": [
+						{
+							"ID": "20260804233313-sectwpa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804233313-sectwpa",
+								"updated": "20260804233500"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260804185001-secvr02",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "金鑰和變數"
 								}
 							]
 						}

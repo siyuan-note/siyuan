@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20260804230000"
+		"updated": "20260804233000"
 	},
 	"Children": [
 		{
@@ -714,7 +714,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-qfoixg9",
-				"updated": "20260804230000"
+				"updated": "20260804233000"
 			},
 			"Children": [
 				{
@@ -784,7 +784,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170056-7d7fak1",
-				"updated": "20260804230000"
+				"updated": "20260804233000"
 			},
 			"Children": [
 				{
@@ -812,7 +812,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20260804224003-secvr04",
+					"TextMarkBlockRefID": "20260804185003-secvr04",
 					"TextMarkBlockRefSubtype": "s",
 					"TextMarkTextContent": "シークレットと変数"
 				},

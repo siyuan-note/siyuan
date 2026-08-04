@@ -1,5 +1,5 @@
 import {Dialog} from "../dialog";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {escapeHtml} from "../util/escape";
 import {writeText} from "../protyle/util/compatibility";
@@ -18,6 +18,7 @@ declare interface INotebookConf {
         docCreateSaveBox: string;
         docCreateTemplatePath: string;
         dailyNoteTemplatePath: string
+        dailyNoteDatabaseID: string
     }
 }
 
@@ -86,6 +87,13 @@ export const onGetnotebookconf = (data: INotebookConf) => {
     <div class="b3-label__text">${window.siyuan.languages.fileTree15}</div>
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" id="dailyNoteTemplatePath" value="${data.conf.dailyNoteTemplatePath}">
+    <div class="fn__hr"></div>
+    <div class="b3-label__text">${window.siyuan.languages.dailyNoteDatabaseIdHint}</div>
+    <div class="fn__hr"></div>
+    <div class="fn__flex" style="align-items: center; gap: 8px">
+        <input class="b3-text-field fn__flex-1" id="dailyNoteDatabaseId" value="" readonly placeholder="${window.siyuan.languages.dailyNoteDatabaseId}">
+        <button class="b3-button b3-button--outline" id="dailyNoteDatabasePick">${window.siyuan.languages.dailyNoteDatabasePick}</button>
+    </div>
 </div></div>`;
     if (isMobile()) {
         openModel({
@@ -122,19 +130,69 @@ const bindSettingEvent = (contentElement: Element, data: INotebookConf) => {
     refCreateSavePathElement.value = data.conf.refCreateSavePath;
     const dailyNoteTemplatePathElement = contentElement.querySelector("#dailyNoteTemplatePath") as HTMLInputElement;
     dailyNoteTemplatePathElement.value = data.conf.dailyNoteTemplatePath;
+    const dailyNoteDatabaseIdElement = contentElement.querySelector("#dailyNoteDatabaseId") as HTMLInputElement;
+    dailyNoteDatabaseIdElement.dataset.id = data.conf.dailyNoteDatabaseID || "";
+    if (data.conf.dailyNoteDatabaseID) {
+        fetchSyncPost("/api/av/searchAttributeView", {keyword: "", avID: "", blockID: "", excludes: []}).then((response) => {
+            const results = (response?.data?.results || []) as Array<{avID: string, avName: string, blockID: string, hPath: string}>;
+            const result = results.find((item) => item.blockID === data.conf.dailyNoteDatabaseID);
+            if (result) {
+                dailyNoteDatabaseIdElement.value = `${result.avName}${result.hPath ? " · " + result.hPath : ""}`;
+            } else {
+                dailyNoteDatabaseIdElement.value = data.conf.dailyNoteDatabaseID;
+            }
+        });
+    }
+    const dailyNoteDatabasePickElement = contentElement.querySelector("#dailyNoteDatabasePick") as HTMLButtonElement;
+    const saveConf = () => {
+        fetchPost("/api/notebook/setNotebookConf", {
+            notebook: data.box,
+            conf: {
+                refCreateSavePath: refCreateSavePathElement.value,
+                refCreateSaveBox: (contentElement.querySelector("#refCreateSaveBox") as HTMLInputElement).value,
+                docCreateSaveBox: (contentElement.querySelector("#docCreateSaveBox") as HTMLInputElement).value,
+                docCreateSavePath: docCreateSavePathElement.value,
+                docCreateTemplatePath: docCreateTemplatePathElement.value,
+                dailyNoteSavePath: dailyNoteSavePathElement.value,
+                dailyNoteTemplatePath: dailyNoteTemplatePathElement.value,
+                dailyNoteDatabaseID: dailyNoteDatabaseIdElement.dataset.id || "",
+            }
+        });
+    };
     contentElement.querySelectorAll("input, select").forEach((item) => {
         item.addEventListener("change", () => {
-            fetchPost("/api/notebook/setNotebookConf", {
-                notebook: data.box,
-                conf: {
-                    refCreateSavePath: refCreateSavePathElement.value,
-                    refCreateSaveBox: (contentElement.querySelector("#refCreateSaveBox") as HTMLInputElement).value,
-                    docCreateSaveBox: (contentElement.querySelector("#docCreateSaveBox") as HTMLInputElement).value,
-                    docCreateSavePath: docCreateSavePathElement.value,
-                    docCreateTemplatePath: docCreateTemplatePathElement.value,
-                    dailyNoteSavePath: dailyNoteSavePathElement.value,
-                    dailyNoteTemplatePath: dailyNoteTemplatePathElement.value,
-                }
+            saveConf();
+        });
+    });
+    dailyNoteDatabasePickElement.addEventListener("click", () => {
+        fetchSyncPost("/api/av/searchAttributeView", {keyword: "", avID: "", blockID: "", excludes: []}).then((response) => {
+            const results = (response?.data?.results || []) as Array<{avID: string, avName: string, blockID: string, hPath: string}>;
+            const nameById = new Map(results.map(item => [item.blockID, item.avName]));
+            const listHTML = results.map((item) => {
+                const location = item.hPath ? `<span class="b3-list-item__meta">${escapeHtml(item.hPath)}</span>` : "";
+                return `<div class="b3-list-item b3-list-item--outline fn__pointer" data-id="${item.blockID}" role="button" tabindex="0">
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg>
+    <span class="b3-list-item__text">${escapeHtml(item.avName)}${location}</span>
+</div>`;
+            }).join("");
+            const picker = new Dialog({
+                title: window.siyuan.languages.dailyNoteDatabaseId,
+                content: `<div class="b3-dialog__content"><div class="b3-list b3-list--background">
+<div class="b3-list-item b3-list-item--outline fn__pointer" data-id="" role="button" tabindex="0">
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconClose"></use></svg>
+    <span class="b3-list-item__text">${window.siyuan.languages.clear}</span>
+</div>${listHTML}</div></div>`,
+                width: isMobile() ? "92vw" : "640px",
+            });
+            picker.element.setAttribute("data-key", "dialog-dailynote-database");
+            picker.element.querySelectorAll(".b3-list-item").forEach((item) => {
+                item.addEventListener("click", () => {
+                    const blockID = item.getAttribute("data-id") || "";
+                    dailyNoteDatabaseIdElement.dataset.id = blockID;
+                    dailyNoteDatabaseIdElement.value = blockID ? (nameById.get(blockID) || blockID) : "";
+                    saveConf();
+                    picker.destroy();
+                });
             });
         });
     });

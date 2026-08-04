@@ -274,6 +274,13 @@ export const getDeletedBlockElements = (removedElements: HTMLElement[], retained
     const expansionStopIDs = new Set<string>();
     removedElements.forEach(item => {
         [item, ...Array.from(item.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(element => {
+            let currentElement: HTMLElement | null = element;
+            while (currentElement && !currentElement.classList.contains("protyle-wysiwyg__embed")) {
+                currentElement = currentElement.parentElement;
+            }
+            if (currentElement) {
+                return;
+            }
             if (retainedElements.some(retainedElement =>
                 retainedElement === element || retainedElement.contains(element))) {
                 return;

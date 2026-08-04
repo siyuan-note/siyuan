@@ -18,7 +18,6 @@ package model
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"html"
 	"path"
@@ -307,55 +306,22 @@ func existBoundBlockGroup(group *blockRefCheckGroup) (ret bool, err error) {
 		return false, err
 	}
 
-	validBoundAVIDs := map[string][]string{}
-	for blockID, avIDs := range boundAVIDs {
+	avIDSet := map[string]struct{}{}
+	for _, avIDs := range boundAVIDs {
 		for _, avID := range avIDs {
-			if !ast.IsNodeIDPattern(avID) {
-				continue
-			}
-			attrView, parseErr := av.ParseAttributeView(avID)
-			if errors.Is(parseErr, av.ErrViewNotFound) {
-				continue
-			}
-			if nil != parseErr {
-				return false, parseErr
-			}
-			if nil == attrView {
-				return false, fmt.Errorf("attribute view [%s] is unavailable", avID)
-			}
-			blockValues := attrView.GetBlockKeyValues()
-			if nil == blockValues {
-				continue
-			}
-			for _, blockValue := range blockValues.Values {
-				if nil != blockValue && !blockValue.IsDetached && nil != blockValue.Block &&
-					blockID == blockValue.Block.ID {
-					validBoundAVIDs[blockID] = append(validBoundAVIDs[blockID], avID)
-					break
-				}
-			}
+			avIDSet[avID] = struct{}{}
 		}
 	}
-	if 0 == len(validBoundAVIDs) {
-		return false, nil
+	avIDs := make([]string, 0, len(avIDSet))
+	for avID := range avIDSet {
+		avIDs = append(avIDs, avID)
 	}
-
-	validAVIDSet := map[string]struct{}{}
-	for _, avIDs := range validBoundAVIDs {
-		for _, avID := range avIDs {
-			validAVIDSet[avID] = struct{}{}
-		}
-	}
-	validAVIDs := make([]string, 0, len(validAVIDSet))
-	for avID := range validAVIDSet {
-		validAVIDs = append(validAVIDs, avID)
-	}
-	avBlockRels, err := av.GetBlockRelsByAVIDs(validAVIDs)
+	avBlockRels, err := av.GetBlockRelsByAVIDs(avIDs)
 	if nil != err {
 		return false, err
 	}
 	avBlockIDSet := map[string]struct{}{}
-	for _, avIDs := range validBoundAVIDs {
+	for _, avIDs := range boundAVIDs {
 		for _, avID := range avIDs {
 			for _, blockID := range avBlockRels[avID] {
 				avBlockIDSet[blockID] = struct{}{}
@@ -366,7 +332,7 @@ func existBoundBlockGroup(group *blockRefCheckGroup) (ret bool, err error) {
 	for id := range avBlockIDSet {
 		avBlockIDs = append(avBlockIDs, id)
 	}
-	return hasSurvivingAttributeViewBlock(group, validBoundAVIDs, avBlockRels, treenode.GetBlockTrees(avBlockIDs)), nil
+	return hasSurvivingAttributeViewBlock(group, boundAVIDs, avBlockRels, treenode.GetBlockTrees(avBlockIDs)), nil
 }
 
 func hasSurvivingAttributeViewBlock(group *blockRefCheckGroup, boundAVIDs, avBlockRels map[string][]string,

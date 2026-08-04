@@ -454,6 +454,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				tx.rollback()
 				return
 			}
+			if "delete" != op.Action || operationIndex == len(tx.DoOperations)-1 ||
+				"delete" != tx.DoOperations[operationIndex+1].Action {
+				tx.flushDeletedAttributeViewBlocks()
+			}
 		}
 	}
 
@@ -503,6 +507,7 @@ func (tx *Transaction) processLargeDelete() bool {
 	}
 
 	tx.doLargeDelete(deleteOps)
+	tx.flushDeletedAttributeViewBlocks()
 	return true
 }
 
@@ -539,10 +544,12 @@ func (tx *Transaction) processLargeInsert() bool {
 
 	if nil != firstDeleteOp {
 		tx.doDelete(firstDeleteOp)
+		tx.flushDeletedAttributeViewBlocks()
 	}
 	tx.doLargeInsert(insertOps)
 	if nil != lastDeleteOp {
 		tx.doDelete(lastDeleteOp)
+		tx.flushDeletedAttributeViewBlocks()
 	}
 	return true
 }
@@ -1214,12 +1221,8 @@ func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) (delete
 }
 
 func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, delChildrenWhenDelParent bool, tx *Transaction) {
-	changedAvIDs := syncDelete2AttributeView(node, delChildrenWhenDelParent)
-	avIDs := tx.syncDelete2Block(node, nodeTree)
-	changedAvIDs = append(changedAvIDs, avIDs...)
-	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
-
-	for _, avID := range changedAvIDs {
+	tx.collectDeletedAttributeViewBlocks(node, delChildrenWhenDelParent)
+	for _, avID := range tx.syncDelete2Block(node, nodeTree) {
 		ReloadAttrView(avID)
 	}
 }
@@ -1276,63 +1279,69 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 	return
 }
 
-func syncDelete2AttributeView(node *ast.Node, delChildrenWhenDelParent bool) (changedAvIDs []string) {
+func (tx *Transaction) collectDeletedAttributeViewBlocks(node *ast.Node, delChildrenWhenDelParent bool) {
+	collect := func(n *ast.Node) {
+		avs := n.IALAttr(av.NodeAttrNameAvs)
+		if "" == avs {
+			return
+		}
+		for avID := range strings.SplitSeq(avs, ",") {
+			blockIDs := tx.deletedAttrViewBlockIDs[avID]
+			if nil == blockIDs {
+				blockIDs = map[string]struct{}{}
+				tx.deletedAttrViewBlockIDs[avID] = blockIDs
+			}
+			blockIDs[n.ID] = struct{}{}
+		}
+	}
 	if !delChildrenWhenDelParent {
-		changedAvIDs = deleteAttrView(node, changedAvIDs)
+		collect(node)
 		return
 	}
-
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() {
-			return ast.WalkContinue
+		if entering && n.IsBlock() {
+			collect(n)
 		}
-
-		changedAvIDs = append(changedAvIDs, deleteAttrView(n, changedAvIDs)...)
 		return ast.WalkContinue
 	})
-
-	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
-	return
 }
 
-func deleteAttrView(n *ast.Node, changedAvIDs []string) []string {
-	avs := n.IALAttr(av.NodeAttrNameAvs)
-	if "" == avs {
-		return nil
+func (tx *Transaction) flushDeletedAttributeViewBlocks() {
+	for avID, deletedBlockIDs := range tx.deletedAttrViewBlockIDs {
+		attrView, err := av.ParseAttributeView(avID)
+		if nil != err || !removeAttributeViewBoundBlocks(attrView, deletedBlockIDs) {
+			continue
+		}
+		regenAttrViewGroups(attrView)
+		av.SaveAttributeView(attrView)
+		ReloadAttrView(avID)
+	}
+	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
+}
+
+func removeAttributeViewBoundBlocks(attrView *av.AttributeView, deletedBlockIDs map[string]struct{}) (changed bool) {
+	if nil == attrView {
+		return false
 	}
 
-	avIDs := strings.SplitSeq(avs, ",")
-	for avID := range avIDs {
-		attrView, parseErr := av.ParseAttributeView(avID)
-		if nil != parseErr {
-			continue
-		}
-
-		changedAv := false
-		blockValues := attrView.GetBlockKeyValues()
-		if nil == blockValues {
-			continue
-		}
-
-		for i, blockValue := range blockValues.Values {
-			if nil == blockValue.Block {
+	blockValues := attrView.GetBlockKeyValues()
+	if nil == blockValues {
+		return false
+	}
+	values := make([]*av.Value, 0, len(blockValues.Values))
+	for _, blockValue := range blockValues.Values {
+		if nil != blockValue && nil != blockValue.Block {
+			if _, deleted := deletedBlockIDs[blockValue.Block.ID]; deleted {
+				changed = true
 				continue
 			}
-
-			if blockValue.Block.ID == n.ID {
-				blockValues.Values = append(blockValues.Values[:i], blockValues.Values[i+1:]...)
-				changedAv = true
-				break
-			}
 		}
-
-		if changedAv {
-			regenAttrViewGroups(attrView)
-			av.SaveAttributeView(attrView)
-			changedAvIDs = append(changedAvIDs, avID)
-		}
+		values = append(values, blockValue)
 	}
-	return changedAvIDs
+	if changed {
+		blockValues.Values = values
+	}
+	return
 }
 
 func (tx *Transaction) doLargeInsert(operations []*Operation) {
@@ -2180,6 +2189,7 @@ type Transaction struct {
 
 	listItemFoldCandidates   []listItemFoldCandidate
 	listItemFoldCandidateIDs map[string]struct{}
+	deletedAttrViewBlockIDs  map[string]map[string]struct{}
 
 	luteEngine *lute.Lute
 	m          *sync.Mutex
@@ -2236,6 +2246,7 @@ func (tx *Transaction) begin() (err error) {
 	tx.restoredCreatedDocs = nil
 	tx.listItemFoldCandidates = nil
 	tx.listItemFoldCandidateIDs = map[string]struct{}{}
+	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
 	tx.luteEngine = util.NewLute()
 	tx.m.Lock()
 	tx.state.Store(1)
@@ -2310,6 +2321,7 @@ func (tx *Transaction) commit() (err error) {
 func (tx *Transaction) rollback() {
 	tx.trees, tx.nodes, tx.boxIcons, tx.removedCreatedDocs, tx.restoredCreatedDocs = nil, nil, nil, nil, nil
 	tx.listItemFoldCandidates, tx.listItemFoldCandidateIDs = nil, nil
+	tx.deletedAttrViewBlockIDs = nil
 	tx.state.Store(3)
 	tx.m.Unlock()
 	return

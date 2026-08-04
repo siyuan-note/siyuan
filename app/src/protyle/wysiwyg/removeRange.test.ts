@@ -12,6 +12,9 @@ class TestElement {
     parentElement: TestElement | null = null;
     children: TestElement[] = [];
     private attributes = new Map<string, string>();
+    classList = {
+        contains: (name: string) => this.attributes.get("class")?.split(/\s+/).includes(name) || false,
+    };
 
     constructor(public name: string, type?: string) {
         if (type) {
@@ -25,6 +28,11 @@ class TestElement {
             element.parentElement = this;
             this.children.push(element);
         });
+        return this;
+    }
+
+    addClass(name: string) {
+        this.attributes.set("class", name);
         return this;
     }
 
@@ -125,6 +133,17 @@ describe("getDeletedBlockElements", () => {
 
         assert.deepEqual(result.elements, [asHTMLElement(root), asHTMLElement(deletedChild)]);
         assert.deepEqual(Array.from(result.expansionStopIDs), ["root"]);
+    });
+
+    it("排除查询嵌入块的渲染结果", () => {
+        const renderedBlock = block("renderedBlock", "NodeParagraph");
+        const renderedResult = new TestElement("renderedResult").addClass("protyle-wysiwyg__embed")
+            .append(renderedBlock);
+        const embed = block("embed", "NodeBlockQueryEmbed", renderedResult);
+
+        const result = getDeletedBlockElements([asHTMLElement(embed)], []);
+
+        assert.deepEqual(result.elements, [asHTMLElement(embed)]);
     });
 });
 

@@ -763,6 +763,32 @@ table + .protyle-action__table {
     transition: var(--b3-transition);
     z-index: 3;
   }
+
+  .table[custom-pinthead="true"] &::before {
+    --b3-table-frame-radius: var(--b3-border-radius-s);
+    position: absolute;
+    left: var(--b3-table-frame-left);
+    top: var(--b3-table-frame-top);
+    z-index: 2;
+    width: var(--b3-table-frame-width);
+    height: var(--b3-table-frame-height);
+    background-image: radial-gradient(circle var(--b3-table-frame-radius) at bottom right, transparent calc(100% - 1px), var(--b3-theme-surface-lighter) calc(100% - .5px), var(--b3-parent-background) 100%),
+      radial-gradient(circle var(--b3-table-frame-radius) at bottom left, transparent calc(100% - 1px), var(--b3-theme-surface-lighter) calc(100% - .5px), var(--b3-parent-background) 100%),
+      radial-gradient(circle var(--b3-table-frame-radius) at top right, transparent calc(100% - 1px), var(--b3-theme-surface-lighter) calc(100% - .5px), var(--b3-parent-background) 100%),
+      radial-gradient(circle var(--b3-table-frame-radius) at top left, transparent calc(100% - 1px), var(--b3-theme-surface-lighter) calc(100% - .5px), var(--b3-parent-background) 100%);
+    background-repeat: no-repeat;
+    background-position: top left, top right, bottom left, bottom right;
+    background-size: var(--b3-table-frame-radius) var(--b3-table-frame-radius);
+    content: "";
+    pointer-events: none;
+  }
+}
+
+.protyle-wysiwyg--select,
+.protyle-wysiwyg--hl {
+  .protyle-action__table::before {
+    display: none;
+  }
 }
 
 .protyle-table-control {

@@ -800,6 +800,16 @@ export class MobileTabs {
                         }
                     });
                 });
+                requestAnimationFrame(() => {
+                    const listElement = element.querySelector<HTMLElement>(".mobile-tabs__list");
+                    const activeElement = listElement?.querySelector<HTMLElement>(".mobile-tabs__item--active");
+                    if (!listElement || !activeElement) {
+                        return;
+                    }
+                    const listRect = listElement.getBoundingClientRect();
+                    const activeRect = activeElement.getBoundingClientRect();
+                    listElement.scrollTop += activeRect.top - listRect.top - (listRect.height - activeRect.height) / 2;
+                });
             },
         });
     }

@@ -1,5 +1,6 @@
 {
 	"bazaarKernelPlugin": "Doplnok jadra",
+	"newItemTemplateDefaultTip": "Použije predvolenú cestu ukladania nových dokumentov z aktuálneho zápisníka",
 	"hideInFileTree": "Skryť v strome dokumentov",
 	"newItemTemplateSubDoc": "Podradený dokument dokumentu obsahujúceho aktuálny blok databázy",
 	"newItemTemplateSubDocTip": "Pri vytváraní zo zrkadlenej databázy sa použije dokument obsahujúci aktuálny blok zrkadlenej databázy",

@@ -1,5 +1,6 @@
 {
 	"bazaarKernelPlugin": "Kernelplug-in",
+	"newItemTemplateDefaultTip": "Gebruikt het standaardopslagpad voor nieuwe documenten van het huidige notitieboek",
 	"hideInFileTree": "Verbergen in de documentboom",
 	"newItemTemplateSubDoc": "Subdocument van het document met het huidige databaseblok",
 	"newItemTemplateSubDocTip": "Bij maken vanuit een gespiegelde database wordt het document met het huidige gespiegelde databaseblok gebruikt",

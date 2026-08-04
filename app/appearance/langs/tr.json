@@ -1,5 +1,6 @@
 {
 	"bazaarKernelPlugin": "Çekirdek eklentisi",
+	"newItemTemplateDefaultTip": "Geçerli not defterinin yeni belgeler için varsayılan kaydetme yolunu kullanır",
 	"hideInFileTree": "Belge ağacında gizle",
 	"newItemTemplateSubDoc": "Geçerli veritabanı bloğunu içeren belgenin alt belgesi",
 	"newItemTemplateSubDocTip": "Yansıtılmış bir veritabanından oluştururken geçerli yansıtılmış veritabanı bloğunu içeren belge kullanılır",

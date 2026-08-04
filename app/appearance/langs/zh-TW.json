@@ -1,5 +1,6 @@
 {
 	"bazaarKernelPlugin": "Kernel 插件",
+	"newItemTemplateDefaultTip": "使用目前筆記本的新建文檔預設存放路徑",
 	"hideInFileTree": "在文檔樹中隱藏",
 	"newItemTemplateSubDoc": "目前資料庫區塊所在文檔的子文檔",
 	"newItemTemplateSubDocTip": "透過鏡像資料庫建立時，以目前鏡像資料庫區塊所在文檔為準",

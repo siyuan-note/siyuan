@@ -513,6 +513,7 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
         (!savedNotebook || savedNotebook.closed) ? itemTemplate.saveLocation.boxID : "";
     const unavailableNotebookOption = unavailableNotebookID ?
         `<option value="${escapeAttr(unavailableNotebookID)}" data-unavailable="true" selected disabled>${escapeHtml(savedNotebook?.name || unavailableNotebookID)}</option>` : "";
+    const isDefault = !forceCurrentNotebook && !itemTemplate.saveLocation;
     const isSubDoc = !!itemTemplate.saveLocation && !itemTemplate.saveLocation.boxID && !itemTemplate.saveLocation.pathTemplate;
     const currentNotebookSelected = !isSubDoc && (forceCurrentNotebook || !!itemTemplate.saveLocation &&
         (!itemTemplate.saveLocation.boxID || itemTemplate.saveLocation.boxID === currentNotebookID));
@@ -544,11 +545,11 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
             </div>
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon ariaLabel" data-position="parentE" aria-label="${escapeAttr(`${window.siyuan.languages.fileTree14}<br>${window.siyuan.languages.fileTree13}`)}"><svg class="block__logoicon"><use xlink:href="#iconFolder"></use></svg><span>${window.siyuan.languages.savePath}</span></div>
-                <div class="fn__flex-1 custom-attr__avvalue"><div class="fn__flex" style="align-items:center"><select class="b3-select" data-role="box-id" style="width:${showPath ? "160px" : "100%"}">${notebookOptions}</select><span class="fn__space${showPath ? "" : " fn__none"}" data-role="path-space"></span><input class="b3-text-field fn__flex-1${showPath ? "" : " fn__none"}" data-role="path-template" value="${escapeAttr(itemTemplate.saveLocation?.pathTemplate || "")}"${showPath ? "" : " disabled"}></div><div class="b3-label__text${isSubDoc ? "" : " fn__none"}" data-role="subdoc-tip" style="margin-top:4px">${window.siyuan.languages.newItemTemplateSubDocTip}</div></div>
+                <div class="fn__flex-1 custom-attr__avvalue"><div class="fn__flex" style="align-items:center"><select class="b3-select" data-role="box-id" style="width:${showPath ? "160px" : "100%"}">${notebookOptions}</select><span class="fn__space${showPath ? "" : " fn__none"}" data-role="path-space"></span><input class="b3-text-field fn__flex-1${showPath ? "" : " fn__none"}" data-role="path-template" value="${escapeAttr(itemTemplate.saveLocation?.pathTemplate || "")}"${showPath ? "" : " disabled"}></div><div class="b3-label__text${isDefault ? "" : " fn__none"}" data-role="default-tip" style="margin-top:4px">${window.siyuan.languages.newItemTemplateDefaultTip}</div><div class="b3-label__text${isSubDoc ? "" : " fn__none"}" data-role="subdoc-tip" style="margin-top:4px">${window.siyuan.languages.newItemTemplateSubDocTip}</div></div>
             </div>
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconEyeoff"></use></svg><span>${window.siyuan.languages.hideInFileTree}</span></div>
-                <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center;justify-content:flex-end"><input class="b3-switch" data-role="hide-in-file-tree" type="checkbox"${itemTemplate.hideInFileTree ? " checked" : ""}></div>
+                <div class="fn__flex-1 fn__flex custom-attr__avvalue custom-attr__avvalue--readonly" style="align-items:center;justify-content:flex-end"><input class="b3-switch fn__flex-center" data-role="hide-in-file-tree" type="checkbox"${itemTemplate.hideInFileTree ? " checked" : ""}></div>
             </div>
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconFile"></use></svg><span>${window.siyuan.languages.contentTemplate}</span></div>
@@ -637,6 +638,7 @@ export const openNewItemTemplateDialog = (options: {
             pathElement.classList.toggle("fn__none", !showPath);
             boxIDElement.style.width = showPath ? "160px" : "100%";
             hostElement.querySelector('[data-role="path-space"]')?.classList.toggle("fn__none", !showPath);
+            hostElement.querySelector('[data-role="default-tip"]')?.classList.toggle("fn__none", boxIDElement.value !== SAVE_LOCATION_DEFAULT);
             hostElement.querySelector('[data-role="subdoc-tip"]')?.classList.toggle("fn__none", boxIDElement.value !== SAVE_LOCATION_SUB_DOC);
         });
         hostElement.querySelector<HTMLElement>('[data-role="content-template"]')?.addEventListener("click", event => {

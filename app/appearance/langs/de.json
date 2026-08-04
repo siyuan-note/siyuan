@@ -1,5 +1,6 @@
 {
 	"bazaarKernelPlugin": "Kernel-Plugin",
+	"newItemTemplateDefaultTip": "Verwendet den Standardspeicherpfad für neue Dokumente im aktuellen Notizbuch",
 	"hideInFileTree": "Im Dokumentenbaum ausblenden",
 	"newItemTemplateSubDoc": "Unterdokument des Dokuments mit dem aktuellen Datenbankblock",
 	"newItemTemplateSubDocTip": "Beim Erstellen über eine gespiegelte Datenbank wird das Dokument mit dem aktuellen gespiegelten Datenbankblock verwendet",

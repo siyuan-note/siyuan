@@ -1,5 +1,6 @@
 {
 	"bazaarKernelPlugin": "תוסף ליבה",
+	"newItemTemplateDefaultTip": "שימוש בנתיב ברירת המחדל לשמירת מסמכים חדשים במחברת הנוכחית",
 	"hideInFileTree": "הסתרה בעץ המסמכים",
 	"newItemTemplateSubDoc": "מסמך משנה של המסמך המכיל את בלוק מסד הנתונים הנוכחי",
 	"newItemTemplateSubDocTip": "בעת יצירה ממסד נתונים משוקף, ייעשה שימוש במסמך המכיל את בלוק מסד הנתונים המשוקף הנוכחי",

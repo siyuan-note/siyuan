@@ -1,5 +1,6 @@
 {
 	"bazaarKernelPlugin": "커널 플러그인",
+	"newItemTemplateDefaultTip": "현재 노트북의 새 문서 기본 저장 경로를 사용합니다",
 	"hideInFileTree": "문서 트리에서 숨기기",
 	"newItemTemplateSubDoc": "현재 데이터베이스 블록이 있는 문서의 하위 문서",
 	"newItemTemplateSubDocTip": "미러 데이터베이스에서 만들 때 현재 미러 데이터베이스 블록이 있는 문서를 사용합니다",

@@ -1,4 +1,17 @@
 {
+	"oidcConfigInvalid": "Configuração inválida das regras de declaração OIDC",
+	"oidcClaimRulesTip": "Matriz JSON; os valores de uma regra usam OU, enquanto as regras usam E",
+	"oidcClaimRules": "Regras de declaração OIDC",
+	"oidcAllowAll": "Permitir todos os usuários autenticados",
+	"oidcRedirectURL": "URL de redirecionamento OIDC",
+	"oidcScopes": "Escopos OIDC",
+	"oidcClientSecret": "Segredo do cliente OIDC",
+	"oidcClientID": "ID do cliente OIDC",
+	"oidcIssuerURL": "URL do emissor OIDC",
+	"oidcProvider": "Provedor OIDC",
+	"oidcEnabled": "Ativar login OIDC",
+	"oidcLoginTip": "Configure o login único por meio de um provedor OpenID Connect",
+	"oidcLogin": "Login OIDC",
 	"disableAll": "Desativar tudo",
 	"bazaarKernelPlugin": "Plugin do kernel",
 	"newItemTemplateDefaultTip": "Usa o caminho de salvamento padrão para novos documentos do caderno atual",
@@ -2424,6 +2437,8 @@
 		"360": "Exportado para [%s]",
 		"361": "O nome de usuário da conta do serviço de publicação não pode ficar vazio",
 		"362": "O nome de usuário da conta do serviço de publicação está duplicado",
-		"363": "A senha da conta do serviço de publicação deve ter pelo menos 8 caracteres"
+		"363": "A senha da conta do serviço de publicação deve ter pelo menos 8 caracteres",
+		"364": "Entrar com OIDC",
+		"365": "Falha no login OIDC"
 	}
 	}

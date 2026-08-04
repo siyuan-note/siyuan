@@ -44,7 +44,7 @@ func LogoutAuth(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	if "" == Conf.AccessAuthCode {
+	if !IsAccessAuthRequired() {
 		ret.Code = -1
 		ret.Msg = Conf.Language(86)
 		ret.Data = map[string]any{"closeTimeout": 5000}
@@ -113,7 +113,7 @@ func LoginAuth(c *gin.Context) {
 	authCode = util.RemoveInvalid(authCode)
 	authCode = strings.TrimSpace(authCode)
 
-	if !util.AuthCodeEquals(Conf.AccessAuthCode, authCode) {
+	if Conf.AccessAuthCode == "" || !util.AuthCodeEquals(Conf.AccessAuthCode, authCode) {
 		ret.Code = -1
 		ret.Msg = Conf.Language(83)
 		logging.LogWarnf("invalid auth code [ip=%s]", util.GetRemoteAddr(c.Request))
@@ -135,6 +135,7 @@ func LoginAuth(c *gin.Context) {
 	}
 
 	workspaceSession.AccessAuthCode = authCode
+	workspaceSession.OIDCSessionVersion = ""
 	util.WrongAuthCount = 0
 	util.AuthThrottleReset(c.ClientIP())
 	workspaceSession.Captcha = gulu.Rand.String(7)
@@ -149,6 +150,7 @@ func LoginAuth(c *gin.Context) {
 		Secure:   util.SSL,
 		MaxAge:   maxAge,
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	})
 
 	logging.LogInfof("auth success [ip=%s, maxAge=%d]", util.GetRemoteAddr(c.Request), maxAge)
@@ -243,7 +245,7 @@ func CheckAuth(c *gin.Context) {
 	localhost := IsLocalRequest(c)
 
 	// 未设置锁屏密码
-	if "" == Conf.AccessAuthCode {
+	if !IsAccessAuthRequired() {
 		// Skip the empty access authorization code check https://github.com/siyuan-note/siyuan/issues/9709
 		if util.SiYuanAccessAuthCodeBypass {
 			c.Set(RoleContextKey, RoleAdministrator)
@@ -308,7 +310,7 @@ func CheckAuth(c *gin.Context) {
 	// 通过 Cookie
 	session := util.GetSession(c)
 	workspaceSession := util.GetWorkspaceSession(session)
-	if workspaceSession.AccessAuthCode == Conf.AccessAuthCode {
+	if IsWorkspaceSessionAuthenticated(workspaceSession) {
 		// 校验 Origin 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
 		if !util.IsSessionOriginAllowed(c.GetHeader("Origin"), c.GetHeader("Host")) {
 			logging.LogWarnf("invalid Origin [%s] for session auth [ip=%s]", c.GetHeader("Origin"), c.ClientIP())
@@ -322,25 +324,27 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	// 通过 BasicAuth (header: Authorization)
-	if username, password, ok := c.Request.BasicAuth(); ok {
-		// 使用锁屏密码作为密码
-		ip := c.ClientIP()
-		if retryAfter := util.AuthThrottleCheck(ip); 0 < retryAfter {
-			// 锁定期间持续记录失败，防止暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-w3xh-mmmh-r54v
+	if Conf.AccessAuthCode != "" {
+		if username, password, ok := c.Request.BasicAuth(); ok {
+			// 使用锁屏密码作为密码
+			ip := c.ClientIP()
+			if retryAfter := util.AuthThrottleCheck(ip); 0 < retryAfter {
+				// 锁定期间持续记录失败，防止暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-w3xh-mmmh-r54v
+				util.AuthThrottleFail(ip)
+				c.Header("Retry-After", strconv.Itoa(retryAfter))
+				c.JSON(http.StatusTooManyRequests, map[string]any{"code": -1, "msg": Conf.Language(354)})
+				c.Abort()
+				return
+			}
+			if util.WorkspaceName == username && util.AuthCodeEquals(Conf.AccessAuthCode, password) {
+				util.AuthThrottleReset(ip)
+				c.Set(RoleContextKey, RoleAdministrator)
+				c.Next()
+				return
+			}
+			logging.LogWarnf("invalid auth code [ip=%s]", ip)
 			util.AuthThrottleFail(ip)
-			c.Header("Retry-After", strconv.Itoa(retryAfter))
-			c.JSON(http.StatusTooManyRequests, map[string]any{"code": -1, "msg": Conf.Language(354)})
-			c.Abort()
-			return
 		}
-		if util.WorkspaceName == username && util.AuthCodeEquals(Conf.AccessAuthCode, password) {
-			util.AuthThrottleReset(ip)
-			c.Set(RoleContextKey, RoleAdministrator)
-			c.Next()
-			return
-		}
-		logging.LogWarnf("invalid auth code [ip=%s]", ip)
-		util.AuthThrottleFail(ip)
 	}
 
 	// WebDAV BasicAuth Authenticate
@@ -358,7 +362,7 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	if workspaceSession.AccessAuthCode != Conf.AccessAuthCode {
+	if !IsWorkspaceSessionAuthenticated(workspaceSession) {
 		userAgentHeader := c.GetHeader("User-Agent")
 		if strings.HasPrefix(userAgentHeader, "SiYuan/") || strings.HasPrefix(userAgentHeader, "Mozilla/") {
 			if "GET" != c.Request.Method || c.IsWebsocket() {

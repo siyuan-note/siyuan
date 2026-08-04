@@ -64,6 +64,7 @@ type AppConf struct {
 	ReadOnly       bool                 `json:"readonly"`       // 是否是以只读模式运行
 	ServerAddrs    []string             `json:"serverAddrs"`    // 本地服务器地址列表
 	AccessAuthCode string               `json:"accessAuthCode"` // 锁屏密码
+	OIDC           *conf.OIDC           `json:"oidc"`           // OpenID Connect 登录
 	System         *conf.System         `json:"system"`         // 系统配置
 	Keymap         *conf.Keymap         `json:"keymap"`         // 快捷键配置
 	Sync           *conf.Sync           `json:"sync"`           // 同步配置
@@ -94,8 +95,48 @@ type AppConf struct {
 func NewAppConf() *AppConf {
 	return &AppConf{
 		LogLevel: "debug",
+		OIDC:     conf.NewOIDC(),
 		m:        &sync.RWMutex{},
 		userLock: &sync.RWMutex{},
+	}
+}
+
+func applyOIDCEnvironment(config *conf.OIDC) {
+	if config == nil {
+		return
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_ENABLED"); ok {
+		config.Enabled, _ = strconv.ParseBool(value)
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_PROVIDER"); ok {
+		config.Provider = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_ISSUER_URL"); ok {
+		config.IssuerURL = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_CLIENT_ID"); ok {
+		config.ClientID = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_CLIENT_SECRET"); ok {
+		config.ClientSecret = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_SCOPES"); ok {
+		config.Scopes = strings.FieldsFunc(value, func(r rune) bool { return r == ',' || r == ' ' })
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_REDIRECT_URL"); ok {
+		config.RedirectURL = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_ALLOW_ALL"); ok {
+		config.AllowAll, _ = strconv.ParseBool(value)
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_CLAIM_RULES"); ok {
+		rules := []*conf.OIDCClaimRule{}
+		if err := gulu.JSON.UnmarshalJSON([]byte(value), &rules); err != nil {
+			config.ClaimRules = nil
+			logging.LogErrorf("parse SIYUAN_OIDC_CLAIM_RULES failed: %s", err)
+		} else {
+			config.ClaimRules = rules
+		}
 	}
 }
 
@@ -110,6 +151,34 @@ func (conf *AppConf) SetMCPOAuth(value string) {
 	conf.MCPOAuth = value
 	conf.m.Unlock()
 	conf.Save()
+}
+
+func (appConf *AppConf) GetOIDC() *conf.OIDC {
+	appConf.m.RLock()
+	defer appConf.m.RUnlock()
+	if appConf.OIDC == nil {
+		return conf.NewOIDC()
+	}
+	ret := *appConf.OIDC
+	ret.Scopes = append([]string{}, appConf.OIDC.Scopes...)
+	ret.ClaimRules = make([]*conf.OIDCClaimRule, 0, len(appConf.OIDC.ClaimRules))
+	for _, rule := range appConf.OIDC.ClaimRules {
+		if rule == nil {
+			ret.ClaimRules = append(ret.ClaimRules, nil)
+			continue
+		}
+		clonedRule := *rule
+		clonedRule.Values = append([]string{}, rule.Values...)
+		ret.ClaimRules = append(ret.ClaimRules, &clonedRule)
+	}
+	return &ret
+}
+
+func (appConf *AppConf) SetOIDC(config *conf.OIDC) {
+	appConf.m.Lock()
+	appConf.OIDC = config
+	appConf.m.Unlock()
+	appConf.Save()
 }
 
 func (conf *AppConf) SetAI(ai *conf.AI) {
@@ -670,6 +739,14 @@ func InitConf() {
 	Conf.AI.Normalize()
 	Conf.AI.ReconcileModelIDs()
 
+	if nil == Conf.OIDC {
+		Conf.OIDC = conf.NewOIDC()
+	} else {
+		Conf.OIDC.DecryptClientSecret()
+	}
+	applyOIDCEnvironment(Conf.OIDC)
+	Conf.OIDC.Normalize()
+
 	if nil == Conf.Secrets {
 		Conf.Secrets = conf.NewSecrets()
 	} else {
@@ -734,6 +811,19 @@ func InitConf() {
 			Conf.CookieKey = gulu.Rand.String(16)
 		}
 		writeCookieKey(Conf.CookieKey)
+	}
+
+	if util.ContainerDocker == util.Container && Conf.AccessAuthCode == "" && !util.SiYuanAccessAuthCodeBypass {
+		if err := ValidateOIDCConfiguration(Conf.OIDC); err != nil {
+			fmt.Println("the access authorization code or a valid OIDC configuration must be set when deploying via Docker")
+			fmt.Println("set SIYUAN_ACCESS_AUTH_CODE, configure OIDC, or explicitly set SIYUAN_ACCESS_AUTH_CODE_BYPASS=true")
+			logging.LogErrorf("Docker access authentication configuration is invalid: %s", err)
+			os.Exit(logging.ExitCodeSecurityRisk)
+		}
+		if _, err := validatePublicOIDCRedirectURL(Conf.OIDC.RedirectURL); err != nil {
+			logging.LogErrorf("Docker OIDC redirect configuration is invalid: %s", err)
+			os.Exit(logging.ExitCodeSecurityRisk)
+		}
 	}
 
 	Conf.Save()
@@ -1042,6 +1132,9 @@ func (conf *AppConf) Save() {
 	if snapshot.AI != nil {
 		snapshot.AI.EncryptAPIKeys()
 	}
+	if snapshot.OIDC != nil {
+		snapshot.OIDC.EncryptClientSecret()
+	}
 	if snapshot.Secrets != nil {
 		snapshot.Secrets.Encrypt()
 	}
@@ -1241,6 +1334,10 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	if "" != ret.AccessAuthCode {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
+	if ret.OIDC != nil {
+		ret.OIDC.ClientSecretConfigured = ret.OIDC.ClientSecret != ""
+		ret.OIDC.ClientSecret = ""
+	}
 	return
 }
 
@@ -1248,6 +1345,7 @@ func GetMaskedConf() (ret *AppConf, err error) {
 // REF: https://github.com/siyuan-note/siyuan/issues/11364
 func HideConfSecret(c *AppConf) {
 	c.AI = &conf.AI{}
+	c.OIDC = &conf.OIDC{}
 	c.MCPOAuth = ""
 	c.CookieKey = ""
 	c.Api = &conf.API{}

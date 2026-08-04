@@ -891,6 +891,38 @@ func setAccessAuthCode(c *gin.Context) {
 	return
 }
 
+func setOIDC(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	config := conf.NewOIDC()
+	if err := c.ShouldBindJSON(config); err != nil {
+		ret.Code = -1
+		ret.Msg = "invalid OIDC configuration"
+		return
+	}
+	currentConfig := model.Conf.GetOIDC()
+	if config.ClientSecret == "" && config.ClientSecretConfigured {
+		config.ClientSecret = currentConfig.ClientSecret
+	}
+	config.Normalize()
+	if config.Enabled {
+		if err := model.ValidateOIDCConfiguration(config); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+	model.Conf.SetOIDC(config)
+	masked, err := model.GetMaskedConf()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = masked.OIDC
+}
+
 func setFollowSystemLockScreen(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

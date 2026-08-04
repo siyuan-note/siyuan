@@ -1,4 +1,17 @@
 {
+	"oidcConfigInvalid": "Configurazione delle regole di attestazione OIDC non valida",
+	"oidcClaimRulesTip": "Array JSON; i valori in una regola usano OR, mentre le regole usano AND",
+	"oidcClaimRules": "Regole di attestazione OIDC",
+	"oidcAllowAll": "Consenti tutti gli utenti autenticati",
+	"oidcRedirectURL": "URL di reindirizzamento OIDC",
+	"oidcScopes": "Ambiti OIDC",
+	"oidcClientSecret": "Segreto client OIDC",
+	"oidcClientID": "ID client OIDC",
+	"oidcIssuerURL": "URL dell'emittente OIDC",
+	"oidcProvider": "Provider OIDC",
+	"oidcEnabled": "Abilita accesso OIDC",
+	"oidcLoginTip": "Configura il Single Sign-On tramite un provider OpenID Connect",
+	"oidcLogin": "Accesso OIDC",
 	"disableAll": "Disabilita tutto",
 	"bazaarKernelPlugin": "Plugin del kernel",
 	"newItemTemplateDefaultTip": "Usa il percorso di salvataggio predefinito per i nuovi documenti del taccuino corrente",
@@ -2424,6 +2437,8 @@
 		"360": "Esportato in [%s]",
 		"361": "Il nome utente dell'account del servizio di pubblicazione non può essere vuoto",
 		"362": "Il nome utente dell'account del servizio di pubblicazione è duplicato",
-		"363": "La password dell'account del servizio di pubblicazione deve contenere almeno 8 caratteri"
+		"363": "La password dell'account del servizio di pubblicazione deve contenere almeno 8 caratteri",
+		"364": "Accedi con OIDC",
+		"365": "Accesso OIDC non riuscito"
 	}
 	}

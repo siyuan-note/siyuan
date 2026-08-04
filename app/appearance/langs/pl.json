@@ -1,4 +1,17 @@
 {
+	"oidcConfigInvalid": "Nieprawidłowa konfiguracja reguł oświadczeń OIDC",
+	"oidcClaimRulesTip": "Tablica JSON; wartości w regule są łączone operatorem LUB, a reguły operatorem I",
+	"oidcClaimRules": "Reguły oświadczeń OIDC",
+	"oidcAllowAll": "Zezwalaj wszystkim uwierzytelnionym użytkownikom",
+	"oidcRedirectURL": "Adres URL przekierowania OIDC",
+	"oidcScopes": "Zakresy OIDC",
+	"oidcClientSecret": "Sekret klienta OIDC",
+	"oidcClientID": "Identyfikator klienta OIDC",
+	"oidcIssuerURL": "Adres URL wystawcy OIDC",
+	"oidcProvider": "Dostawca OIDC",
+	"oidcEnabled": "Włącz logowanie OIDC",
+	"oidcLoginTip": "Skonfiguruj logowanie jednokrotne za pomocą dostawcy OpenID Connect",
+	"oidcLogin": "Logowanie OIDC",
 	"disableAll": "Wyłącz wszystko",
 	"bazaarKernelPlugin": "Wtyczka jądra",
 	"newItemTemplateDefaultTip": "Używa domyślnej ścieżki zapisu nowych dokumentów z bieżącego notatnika",
@@ -2424,6 +2437,8 @@
 		"360": "Wyeksportowano do [%s]",
 		"361": "Nazwa użytkownika konta usługi publikowania nie może być pusta",
 		"362": "Nazwa użytkownika konta usługi publikowania jest zduplikowana",
-		"363": "Hasło konta usługi publikowania musi mieć co najmniej 8 znaków"
+		"363": "Hasło konta usługi publikowania musi mieć co najmniej 8 znaków",
+		"364": "Zaloguj się przez OIDC",
+		"365": "Logowanie OIDC nie powiodło się"
 	}
 	}

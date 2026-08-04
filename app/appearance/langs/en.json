@@ -1,4 +1,17 @@
 {
+	"oidcConfigInvalid": "Invalid OIDC claim rule configuration",
+	"oidcClaimRulesTip": "JSON array; values within a rule use OR, while rules use AND",
+	"oidcClaimRules": "OIDC claim rules",
+	"oidcAllowAll": "Allow all authenticated users",
+	"oidcRedirectURL": "OIDC redirect URL",
+	"oidcScopes": "OIDC scopes",
+	"oidcClientSecret": "OIDC client secret",
+	"oidcClientID": "OIDC client ID",
+	"oidcIssuerURL": "OIDC issuer URL",
+	"oidcProvider": "OIDC provider",
+	"oidcEnabled": "Enable OIDC login",
+	"oidcLoginTip": "Configure single sign-on through an OpenID Connect provider",
+	"oidcLogin": "OIDC login",
 	"disableAll": "Disable all",
 	"bazaarKernelPlugin": "Kernel plugin",
 	"newItemTemplateDefaultTip": "Uses the current notebook's default save path for new documents",
@@ -2424,6 +2437,8 @@
 		"360": "Exported to [%s]",
 		"361": "The publish service account username cannot be empty",
 		"362": "The publish service account username is duplicated",
-		"363": "The publish service account password must be at least 8 characters"
+		"363": "The publish service account password must be at least 8 characters",
+		"364": "Sign in with OIDC",
+		"365": "OIDC login failed"
 	}
 	}

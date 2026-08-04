@@ -1,4 +1,17 @@
 {
+	"oidcConfigInvalid": "OIDC 宣告規則設定無效",
+	"oidcClaimRulesTip": "JSON 陣列；同一規則內的值為或關係，不同規則之間為與關係",
+	"oidcClaimRules": "OIDC 宣告規則",
+	"oidcAllowAll": "允許所有已驗證使用者",
+	"oidcRedirectURL": "OIDC 回呼位址",
+	"oidcScopes": "OIDC 授權範圍",
+	"oidcClientSecret": "OIDC 用戶端密鑰",
+	"oidcClientID": "OIDC 用戶端 ID",
+	"oidcIssuerURL": "OIDC 簽發者位址",
+	"oidcProvider": "OIDC 提供者",
+	"oidcEnabled": "啟用 OIDC 登入",
+	"oidcLoginTip": "透過 OpenID Connect 提供者設定單一登入",
+	"oidcLogin": "OIDC 登入",
 	"disableAll": "全部禁用",
 	"bazaarKernelPlugin": "Kernel 插件",
 	"newItemTemplateDefaultTip": "使用目前筆記本的新建文檔預設存放路徑",
@@ -2424,6 +2437,8 @@
 		"360": "已匯出至 [%s]",
 		"361": "發佈服務帳戶用戶名不能為空",
 		"362": "發佈服務帳戶用戶名重複",
-		"363": "發佈服務帳戶密碼長度不能少於 8 個字元"
+		"363": "發佈服務帳戶密碼長度不能少於 8 個字元",
+		"364": "使用 OIDC 登入",
+		"365": "OIDC 登入失敗"
 	}
 	}

@@ -41,6 +41,10 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/loginAuth", model.LoginAuth)
 	ginServer.Handle("POST", "/api/system/logoutAuth", model.LogoutAuth)
 	ginServer.Handle("GET", "/api/system/getCaptcha", model.GetCaptcha)
+	ginServer.Handle("POST", "/api/system/oidc/start", model.OIDCStart)
+	ginServer.Handle("GET", "/api/system/oidc/callback", model.OIDCCallback)
+	ginServer.Handle("POST", "/api/system/oidc/mobileCallback", model.OIDCMobileCallback)
+	ginServer.Handle("POST", "/api/system/oidc/poll", model.OIDCPoll)
 	ginServer.Handle("GET", "/api/ai/mcp/oauth/callback/:flowID", mcpOAuthCallback)
 	// 需要鉴权
 
@@ -50,6 +54,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/addCustomEmoji", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addCustomEmoji)
 	ginServer.Handle("POST", "/api/system/setAPIToken", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAPIToken)
 	ginServer.Handle("POST", "/api/system/setAccessAuthCode", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAccessAuthCode)
+	ginServer.Handle("POST", "/api/system/setOIDC", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setOIDC)
 	ginServer.Handle("POST", "/api/system/setFollowSystemLockScreen", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFollowSystemLockScreen)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkServe)
 	ginServer.Handle("POST", "/api/system/setNetworkServeTLS", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkServeTLS)

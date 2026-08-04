@@ -1,4 +1,17 @@
 {
+	"oidcConfigInvalid": "Configuración de reglas de notificaciones OIDC no válida",
+	"oidcClaimRulesTip": "Matriz JSON; los valores de una regla usan O y las reglas usan Y",
+	"oidcClaimRules": "Reglas de notificaciones OIDC",
+	"oidcAllowAll": "Permitir a todos los usuarios autenticados",
+	"oidcRedirectURL": "URL de redirección OIDC",
+	"oidcScopes": "Ámbitos OIDC",
+	"oidcClientSecret": "Secreto del cliente OIDC",
+	"oidcClientID": "ID de cliente OIDC",
+	"oidcIssuerURL": "URL del emisor OIDC",
+	"oidcProvider": "Proveedor OIDC",
+	"oidcEnabled": "Activar inicio de sesión OIDC",
+	"oidcLoginTip": "Configurar el inicio de sesión único mediante un proveedor OpenID Connect",
+	"oidcLogin": "Inicio de sesión OIDC",
 	"disableAll": "Desactivar todo",
 	"bazaarKernelPlugin": "Complemento del núcleo",
 	"newItemTemplateDefaultTip": "Usa la ruta de guardado predeterminada para documentos nuevos del cuaderno actual",
@@ -2424,6 +2437,8 @@
 		"360": "Se exportó a [%s]",
 		"361": "El nombre de usuario de la cuenta del servicio de publicación no puede estar vacío",
 		"362": "El nombre de usuario de la cuenta del servicio de publicación está duplicado",
-		"363": "La contraseña de la cuenta del servicio de publicación debe tener al menos 8 caracteres"
+		"363": "La contraseña de la cuenta del servicio de publicación debe tener al menos 8 caracteres",
+		"364": "Iniciar sesión con OIDC",
+		"365": "Error al iniciar sesión con OIDC"
 	}
 	}

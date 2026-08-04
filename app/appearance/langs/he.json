@@ -1,4 +1,17 @@
 {
+	"oidcConfigInvalid": "תצורת כללי תביעות OIDC אינה תקינה",
+	"oidcClaimRulesTip": "מערך JSON; ערכים בתוך כלל משתמשים ב-OR וכללים משתמשים ב-AND",
+	"oidcClaimRules": "כללי תביעות OIDC",
+	"oidcAllowAll": "אפשר לכל המשתמשים המאומתים",
+	"oidcRedirectURL": "כתובת הפניה של OIDC",
+	"oidcScopes": "טווחי OIDC",
+	"oidcClientSecret": "סוד לקוח OIDC",
+	"oidcClientID": "מזהה לקוח OIDC",
+	"oidcIssuerURL": "כתובת מנפיק OIDC",
+	"oidcProvider": "ספק OIDC",
+	"oidcEnabled": "אפשר כניסה באמצעות OIDC",
+	"oidcLoginTip": "הגדר כניסה יחידה באמצעות ספק OpenID Connect",
+	"oidcLogin": "כניסה באמצעות OIDC",
 	"disableAll": "נטרל הכל",
 	"bazaarKernelPlugin": "תוסף ליבה",
 	"newItemTemplateDefaultTip": "שימוש בנתיב ברירת המחדל לשמירת מסמכים חדשים במחברת הנוכחית",
@@ -2424,6 +2437,8 @@
 		"360": "יוצא אל [%s]",
 		"361": "שם המשתמש של חשבון שירות הפרסום לא יכול להיות ריק",
 		"362": "שם המשתמש של חשבון שירות הפרסום כפול",
-		"363": "סיסמת חשבון שירות הפרסום חייבת להכיל לפחות 8 תווים"
+		"363": "סיסמת חשבון שירות הפרסום חייבת להכיל לפחות 8 תווים",
+		"364": "כניסה באמצעות OIDC",
+		"365": "הכניסה באמצעות OIDC נכשלה"
 	}
 	}

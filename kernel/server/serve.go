@@ -792,6 +792,10 @@ func serveAuthPage(c *gin.Context) {
 		"l9":                     model.Conf.Language(83),
 		"l10":                    model.Conf.Language(257),
 		"l11":                    model.Conf.Language(282),
+		"l12":                    model.Conf.Language(364),
+		"l13":                    model.Conf.Language(365),
+		"accessAuthCodeEnabled":  model.Conf.AccessAuthCode != "",
+		"oidcEnabled":            model.Conf.GetOIDC().Enabled,
 		"appearanceMode":         model.Conf.Appearance.Mode,
 		"appearanceModeOS":       model.Conf.Appearance.ModeOS,
 		"workspace":              util.WorkspaceName,
@@ -1278,9 +1282,9 @@ func serveWebSocket(ginServer *gin.Engine) {
 			return
 		}
 
-		authOk := true
+		authOk := !model.IsAccessAuthRequired()
 
-		if "" != model.Conf.AccessAuthCode {
+		if model.IsAccessAuthRequired() {
 			session, err := sessionStore.Get(s.Request, "siyuan")
 			if err != nil {
 				authOk = false
@@ -1297,7 +1301,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 						logging.LogErrorf("unmarshal cookie failed: %s", err)
 					} else {
 						workspaceSess := util.GetWorkspaceSession(sess)
-						authOk = workspaceSess.AccessAuthCode == model.Conf.AccessAuthCode
+						authOk = model.IsWorkspaceSessionAuthenticated(workspaceSess)
 					}
 				}
 			}

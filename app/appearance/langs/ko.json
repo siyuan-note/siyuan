@@ -1,4 +1,17 @@
 {
+	"oidcConfigInvalid": "OIDC 클레임 규칙 구성이 올바르지 않습니다",
+	"oidcClaimRulesTip": "JSON 배열이며 한 규칙 안의 값은 OR, 규칙 사이는 AND로 평가됩니다",
+	"oidcClaimRules": "OIDC 클레임 규칙",
+	"oidcAllowAll": "인증된 모든 사용자 허용",
+	"oidcRedirectURL": "OIDC 리디렉션 URL",
+	"oidcScopes": "OIDC 범위",
+	"oidcClientSecret": "OIDC 클라이언트 비밀",
+	"oidcClientID": "OIDC 클라이언트 ID",
+	"oidcIssuerURL": "OIDC 발급자 URL",
+	"oidcProvider": "OIDC 공급자",
+	"oidcEnabled": "OIDC 로그인 사용",
+	"oidcLoginTip": "OpenID Connect 공급자를 통한 통합 로그인을 구성합니다",
+	"oidcLogin": "OIDC 로그인",
 	"disableAll": "모두 비활성화",
 	"bazaarKernelPlugin": "커널 플러그인",
 	"newItemTemplateDefaultTip": "현재 노트북의 새 문서 기본 저장 경로를 사용합니다",
@@ -2424,6 +2437,8 @@
 		"360": "[%s](으)로 내보내기 완료",
 		"361": "게시 서비스 계정의 사용자 이름은 비워 둘 수 없습니다",
 		"362": "게시 서비스 계정의 사용자 이름이 중복되었습니다",
-		"363": "게시 서비스 계정의 비밀번호는 8자 이상이어야 합니다"
+		"363": "게시 서비스 계정의 비밀번호는 8자 이상이어야 합니다",
+		"364": "OIDC로 로그인",
+		"365": "OIDC 로그인 실패"
 	}
 	}

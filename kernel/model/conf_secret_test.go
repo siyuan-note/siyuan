@@ -34,6 +34,7 @@ func TestGetMaskedConfHidesCookieKey(t *testing.T) {
 
 	Conf = NewAppConf()
 	Conf.CookieKey = cookieKey
+	Conf.OIDC.ClientSecret = "oidc-client-secret"
 
 	maskedConf, err := GetMaskedConf()
 	if err != nil {
@@ -44,6 +45,12 @@ func TestGetMaskedConfHidesCookieKey(t *testing.T) {
 	}
 	if cookieKey != Conf.CookieKey {
 		t.Fatalf("cookie key in the runtime configuration was changed: %q", Conf.CookieKey)
+	}
+	if maskedConf.OIDC.ClientSecret != "" || !maskedConf.OIDC.ClientSecretConfigured {
+		t.Fatalf("OIDC client secret state was not safely represented: %#v", maskedConf.OIDC)
+	}
+	if Conf.OIDC.ClientSecret != "oidc-client-secret" {
+		t.Fatalf("OIDC client secret in runtime configuration was changed: %q", Conf.OIDC.ClientSecret)
 	}
 }
 

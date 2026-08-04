@@ -25,7 +25,7 @@ import (
 	"testing"
 )
 
-func TestAuthPageHidesLockScreenHelpForOIDCOnly(t *testing.T) {
+func TestAuthPageActionLayout(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join("..", "..", "app", "stage", "auth.html"))
 	if err != nil {
 		t.Fatal(err)
@@ -39,7 +39,6 @@ func TestAuthPageHidesLockScreenHelpForOIDCOnly(t *testing.T) {
 		if err = pageTemplate.Execute(&output, map[string]any{
 			"accessAuthCodeEnabled": accessAuthCodeEnabled,
 			"oidcEnabled":           true,
-			"l2":                    "lock-screen-help-marker",
 		}); err != nil {
 			t.Fatal(err)
 		}
@@ -47,12 +46,17 @@ func TestAuthPageHidesLockScreenHelpForOIDCOnly(t *testing.T) {
 	}
 
 	oidcOnlyPage := render(false)
-	if strings.Contains(oidcOnlyPage, "lock-screen-help-marker") ||
-		!strings.Contains(oidcOnlyPage, `id="oidcLogin"`) ||
+	if !strings.Contains(oidcOnlyPage, `id="oidcLogin"`) ||
 		!strings.Contains(oidcOnlyPage, `class="auth-actions"`) {
-		t.Fatal("OIDC-only authentication page contains lock screen help or omits the OIDC action layout")
+		t.Fatal("OIDC-only authentication page omits the OIDC action layout")
 	}
-	if !strings.Contains(render(true), "lock-screen-help-marker") {
-		t.Fatal("lock screen authentication page omits lock screen help")
+	if strings.Index(oidcOnlyPage, `id="rememberMe"`) < strings.Index(oidcOnlyPage, `id="oidcLogin"`) {
+		t.Fatal("OIDC-only authentication page renders remember me before the login action")
+	}
+	lockScreenPage := render(true)
+	rememberMeIndex := strings.Index(lockScreenPage, `id="rememberMe"`)
+	if rememberMeIndex < strings.Index(lockScreenPage, `onclick="submitAuth()"`) ||
+		rememberMeIndex < strings.Index(lockScreenPage, `id="oidcLogin"`) {
+		t.Fatal("combined authentication page renders remember me before a login action")
 	}
 }

@@ -2251,7 +2251,7 @@
 		"169": "Uploading data repo file %v/%v",
 		"170": "Uploading data repo chunk %v/%v",
 		"171": "Uploading data repo reference %s",
-		"172": "If you forget the lock screen password, please find help <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">here</a>",
+		"172": "",
 		"173": "Please enter the lock screen password",
 		"174": "Unlock access",
 		"175": "Please enter the verification code",

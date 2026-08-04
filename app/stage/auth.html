@@ -180,6 +180,10 @@
             flex-direction: column;
             align-items: center;
         }
+
+        .auth-actions > .b3-button {
+            margin: 16px 0 0;
+        }
     </style>
 </head>
 <body>
@@ -193,16 +197,13 @@
             <input id="captcha" class="b3-text-field" placeholder="{{.l3}}">
         </div>
     </div>
-    <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
-        <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
-        <label for="rememberMe" style="color: var(--b3-theme-on-surface); font-size: 14px;">{{.l10}}</label>
-    </div>
     <div class="auth-actions">
         {{if .accessAuthCodeEnabled}}<button class="b3-button" onclick="submitAuth()">{{.l1}}</button>{{end}}
         {{if .oidcEnabled}}<button class="b3-button" id="oidcLogin" onclick="startOIDC()">{{.l12}}</button>{{end}}
-        {{if .accessAuthCodeEnabled}}<div class="ft__on-surface">
-            {{.l2}}
-        </div>{{end}}
+        <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
+            <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
+            <label for="rememberMe" style="color: var(--b3-theme-on-surface); font-size: 14px;">{{.l10}}</label>
+        </div>
         <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
     </div>
     <div class="ft__on-surface">

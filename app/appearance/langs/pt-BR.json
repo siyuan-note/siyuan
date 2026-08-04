@@ -1160,7 +1160,7 @@
 	"searchMethod": "Método de Pesquisa",
 	"regex": "Regex",
 	"semanticSearch": "Busca semântica",
-	"semanticSearchTip": "Configure e ative o modelo de embedding para usar a busca semântica na busca de texto completo (recurso experimental, pode ser lento e custoso)",
+	"semanticSearchTip": "Configure e ative o modelo de embedding para usar a busca semântica na busca de texto completo (pode ser lenta e custosa)",
 	"keywordsLimit": "Limite de Palavras-chave",
 	"exportAsImage": "Exportar como imagem",
 	"proFeature": "Este recurso requer pagamento (assinantes não precisam pagar separadamente), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">pagamento único pode ser usado por toda a vida</a>",

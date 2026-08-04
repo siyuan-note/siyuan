@@ -1160,7 +1160,7 @@
 	"searchMethod": "Zoekmethode",
 	"regex": "Reguliere expressie",
 	"semanticSearch": "Semantisch zoeken",
-	"semanticSearchTip": "Configureer en activeer het embedding-model om semantisch zoeken te gebruiken in full-text zoekopdrachten (experimentele functie, kan traag en kostbaar zijn)",
+	"semanticSearchTip": "Configureer en activeer het embedding-model om semantisch zoeken te gebruiken in full-text zoekopdrachten (kan traag en kostbaar zijn)",
 	"keywordsLimit": "Trefwoordenlimiet",
 	"exportAsImage": "Als afbeelding exporteren",
 	"proFeature": "Deze functie vereist betaling (abonnees hoeven niet apart te betalen), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">eenmalige betaling, levenslang gebruik</a>",

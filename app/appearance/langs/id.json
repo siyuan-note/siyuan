@@ -1160,7 +1160,7 @@
 	"searchMethod": "Metode Pencarian",
 	"regex": "Regex",
 	"semanticSearch": "Pencarian semantik",
-	"semanticSearchTip": "Konfigurasikan dan aktifkan model embedding untuk menggunakan pencarian semantik dalam pencarian teks penuh (fitur eksperimental, mungkin lambat dan mahal)",
+	"semanticSearchTip": "Konfigurasikan dan aktifkan model embedding untuk menggunakan pencarian semantik dalam pencarian teks penuh (mungkin lambat dan mahal)",
 	"keywordsLimit": "Batas Kata Kunci",
 	"exportAsImage": "Ekspor sebagai gambar",
 	"proFeature": "Fitur ini memerlukan pembayaran (anggota yang berlangganan tidak perlu membayar terpisah), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">pembayaran satu kali dapat digunakan seumur hidup</a>",

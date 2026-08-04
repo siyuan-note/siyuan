@@ -315,7 +315,6 @@ export class AgentChat extends Model {
             '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none ariaLabel" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
             "</div>" +
-            '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
             "</div>";
 
         this.messagesContainer = panel.querySelector(".agent-chat__messages") as HTMLElement;

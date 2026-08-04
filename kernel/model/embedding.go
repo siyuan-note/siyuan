@@ -384,6 +384,13 @@ func getEmbeddingIgnoreMatcher() *ignore.GitIgnore {
 	return embeddingIgnoreMatcher
 }
 
+func resetEmbeddingIgnoreMatcher() {
+	embeddingIgnoreLock.Lock()
+	defer embeddingIgnoreLock.Unlock()
+	embeddingIgnoreLoaded = false
+	embeddingIgnoreMatcher = nil
+}
+
 func cosineSimilarity(a, b []float32) float32 {
 	if len(a) != len(b) || len(a) == 0 {
 		return 0
@@ -640,6 +647,7 @@ func fullReindexEmbedding() {
 		logging.LogWarnf("block_embeddings table not available, skip reindex")
 		return
 	}
+	resetEmbeddingIgnoreMatcher()
 	if err := sql.Exec("DELETE FROM block_embeddings"); err != nil {
 		logging.LogErrorf("clear block_embeddings failed: %s", err)
 		return

@@ -1160,7 +1160,7 @@
 	"searchMethod": "Metoda wyszukiwania",
 	"regex": "Wyrażenie regularne",
 	"semanticSearch": "Wyszukiwanie semantyczne",
-	"semanticSearchTip": "Skonfiguruj i włącz model osadzania, aby używać wyszukiwania semantycznego w wyszukiwaniu pełnotekstowym (funkcja eksperymentalna, może być wolna i kosztowna)",
+	"semanticSearchTip": "Skonfiguruj i włącz model osadzania, aby używać wyszukiwania semantycznego w wyszukiwaniu pełnotekstowym (może być wolne i kosztowne)",
 	"keywordsLimit": "Limit słów kluczowych",
 	"exportAsImage": "Eksportuj jako obraz",
 	"proFeature": "Ta funkcja wymaga płatności (subskrybujący członkowie nie muszą płacić osobno), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">jednorazowa płatność może być używana przez całe życie</a>",

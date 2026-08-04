@@ -34,7 +34,7 @@ const getSettingTabsMenuHTML = () => getSettingTabDefs().map(def =>
         <span class="b3-menu__label">${def.title}</span>
     </div>`).join("");
 
-const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>) => {
+const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, returnCallback?: () => void) => {
     openModel({
         title: settingTabDef.title,
         icon: "iconLeft",
@@ -45,13 +45,17 @@ const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>) 
             void getSettingTab(settingTabDef.id).mount(root, undefined, app);
         },
         backCallback() {
-            openSettingMenu(app, "back");
+            if (returnCallback) {
+                returnCallback();
+            } else {
+                openSettingMenu(app, "back");
+            }
         },
         transition: "forward",
     });
 };
 
-const openSettingMenu = (app: App, transition?: "back") => {
+const openSettingMenu = (app: App, transition?: "back", returnCallback?: () => void) => {
     openModel({
         title: window.siyuan.languages.config,
         icon: "iconLeft",
@@ -64,25 +68,29 @@ const openSettingMenu = (app: App, transition?: "back") => {
             modelMainElement.addEventListener("click", (event) => {
                 const def = getSettingTabFromMenuTarget(event.target as HTMLElement);
                 if (def) {
-                    openSettingTab(app, def);
+                    openSettingTab(app, def, () => openSettingMenu(app, "back", returnCallback));
                 }
             });
         },
         backCallback() {
-            closeModel();
+            if (returnCallback) {
+                returnCallback();
+            } else {
+                closeModel();
+            }
         },
         transition,
     });
 };
 
-export const openMobileSetting = (app: App, tab?: TSettingTab) => {
+export const openMobileSetting = (app: App, tab?: TSettingTab, returnCallback?: () => void) => {
     activeBlur();
     const settingTabDef = tab ? getSettingTabDefs().find(def => def.id === tab) : undefined;
     if (settingTabDef) {
-        openSettingTab(app, settingTabDef);
+        openSettingTab(app, settingTabDef, returnCallback);
         return;
     }
-    openSettingMenu(app);
+    openSettingMenu(app, undefined, returnCallback);
 };
 
 export const popMenu = () => {
@@ -108,6 +116,11 @@ export const initRightMenu = (app: App) => {
             </div>
             <div id="menuSearch" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconSearch"></use></svg><span class="b3-menu__label">${window.siyuan.languages.search}</span>
+            </div>
+            <div id="menuAgentChat" class="b3-menu__item${window.siyuan.config.readonly || window.siyuan.isPublish ? " fn__none" : ""}">
+                <svg class="b3-menu__icon"><use xlink:href="#iconSparkles"></use></svg>
+                <span class="b3-menu__label">${window.siyuan.languages.agentChat}</span>
+                <span data-type="agent-status" class="b3-menu__accelerator fn__none"></span>
             </div>
             <div id="menuCommand" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconTerminal"></use></svg><span class="b3-menu__label">${window.siyuan.languages.commandPanel}</span>
@@ -179,6 +192,7 @@ export const initRightMenu = (app: App) => {
         </div>
     </div>
 </div>`;
+    window.siyuan.mobile.agentChatController?.refreshStatus();
     processSync();
     afterLayoutReady(app);
     // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628
@@ -197,6 +211,11 @@ export const initRightMenu = (app: App) => {
                 break;
             } else if (target.id === "menuSearch") {
                 popSearch(app);
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuAgentChat") {
+                void import("../agent/MobileAgentChat").then(({openMobileAgent}) => openMobileAgent(app));
                 event.preventDefault();
                 event.stopPropagation();
                 break;

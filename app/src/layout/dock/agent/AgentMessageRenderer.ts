@@ -260,7 +260,7 @@ const createCopyButton = (getText: () => string): HTMLElement => {
     return btn;
 };
 
-export const postRender = (container: HTMLElement, app?: App): void => {
+export const postRender = (container: HTMLElement, app?: App, onNavigate?: () => void): void => {
     container.querySelectorAll(".language-math").forEach((el) => {
         if (el.hasAttribute("data-subtype")) {
             return;
@@ -366,6 +366,7 @@ export const postRender = (container: HTMLElement, app?: App): void => {
         if (refID && container.contains(ref)) {
             event.preventDefault();
             event.stopPropagation();
+            onNavigate?.();
             void processSiYuanUri(app, "siyuan://blocks/" + refID);
             return;
         }
@@ -374,6 +375,7 @@ export const postRender = (container: HTMLElement, app?: App): void => {
         if (fileID && container.contains(fileRef)) {
             event.preventDefault();
             event.stopPropagation();
+            onNavigate?.();
             openLink(app, fileID, event, event.ctrlKey || event.metaKey);
             return;
         }
@@ -381,6 +383,7 @@ export const postRender = (container: HTMLElement, app?: App): void => {
         if (tag && container.contains(tag)) {
             event.preventDefault();
             event.stopPropagation();
+            onNavigate?.();
             /// #if !MOBILE
             openGlobalSearch(app, `#${tag.textContent}#`, true, {method: 0});
             /// #else
@@ -404,6 +407,7 @@ export const postRender = (container: HTMLElement, app?: App): void => {
         if (href) {
             event.preventDefault();
             event.stopPropagation();
+            onNavigate?.();
             if (!processSiYuanUri(app, href)) {
                 openLink(app, href, event, event.ctrlKey || event.metaKey);
             }

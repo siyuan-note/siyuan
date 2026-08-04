@@ -634,7 +634,11 @@ export class Dock {
                     case "agentChat":
                         tab = new Tab({
                             callback: (tab: Tab) => {
-                                tab.addModel(new AgentChat(this.app, tab));
+                                tab.addModel(new AgentChat(this.app, {
+                                    element: tab.panelElement,
+                                    close: () => this.toggleModel("agentChat", false, true),
+                                    focus: () => setPanelFocus(tab.panelElement),
+                                }));
                             }
                         });
                         break;

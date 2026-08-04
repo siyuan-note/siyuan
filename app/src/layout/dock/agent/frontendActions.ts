@@ -135,4 +135,85 @@ registerAction({
         return {result: query ? `Opened search dialog with query "${query}".` : "Opened search dialog."};
     },
 });
+/// #else
+registerAction({
+    name: "open_setting",
+    handler: async (args, app) => {
+        const query = (args.query as string | undefined)?.trim();
+        const [{hideMobileAgent, reopenMobileAgent}, {openMobileSetting}] = await Promise.all([
+            import("../../../mobile/agent/MobileAgentChat"),
+            import("../../../mobile/menu"),
+        ]);
+        hideMobileAgent();
+        openMobileSetting(app, undefined, reopenMobileAgent);
+        return {result: query ? `Opened mobile settings for "${query}".` : "Opened mobile settings."};
+    },
+});
+
+registerAction({
+    name: "focus_block",
+    handler: async (args) => {
+        const id = args.id as string | undefined;
+        if (!id) {
+            return {error: "missing required argument: id"};
+        }
+        const [{getCurrentEditor}, {hideMobileAgent}] = await Promise.all([
+            import("../../../mobile/editor"),
+            import("../../../mobile/agent/MobileAgentChat"),
+        ]);
+        const editor = getCurrentEditor();
+        const block = editor?.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement | null;
+        if (!block) {
+            return {error: `Block ${id} is not loaded in the current editor. Use open_document to open it first.`};
+        }
+        hideMobileAgent();
+        block.scrollIntoView({behavior: "smooth", block: "center"});
+        block.classList.add("protyle-wysiwyg--hl");
+        setTimeout(() => block.classList.remove("protyle-wysiwyg--hl"), 2000);
+        return {result: `Focused block ${id} in the active editor.`};
+    },
+});
+
+registerAction({
+    name: "open_document",
+    handler: async (args, app) => {
+        const id = args.id as string | undefined;
+        if (!id) {
+            return {error: "missing required argument: id"};
+        }
+        try {
+            const [{openMobileFileById}, {hideMobileAgent}, {Constants}] = await Promise.all([
+                import("../../../mobile/editor"),
+                import("../../../mobile/agent/MobileAgentChat"),
+                import("../../../constants"),
+            ]);
+            hideMobileAgent();
+            openMobileFileById(app, id, [Constants.CB_GET_FOCUS]);
+            return {result: `Opened document ${id}.`};
+        } catch (e) {
+            return {error: `Failed to open document ${id}: ${(e as Error).message}`};
+        }
+    },
+});
+
+registerAction({
+    name: "open_search",
+    handler: async (args, app) => {
+        const query = (args.query as string | undefined)?.trim();
+        const [{popSearch}, {hideMobileAgent}] = await Promise.all([
+            import("../../../mobile/menu/search"),
+            import("../../../mobile/agent/MobileAgentChat"),
+        ]);
+        hideMobileAgent();
+        popSearch(app);
+        if (query) {
+            const input = document.getElementById("toolbarSearch") as HTMLInputElement | null;
+            if (input) {
+                input.value = query;
+                input.dispatchEvent(new InputEvent("input", {bubbles: true}));
+            }
+        }
+        return {result: query ? `Opened mobile search with query "${query}".` : "Opened mobile search."};
+    },
+});
 /// #endif

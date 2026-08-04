@@ -1076,3 +1076,91 @@
   max-height: 120px;
   overflow-y: auto;
 }
+
+#model.model--agent {
+  > .toolbar {
+    display: none;
+  }
+
+  #modelMain {
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+.sy__agentChat--mobile {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  background: var(--b3-theme-background);
+
+  .block__icons {
+    min-height: 48px;
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(4px, env(safe-area-inset-right));
+    border-bottom: .5px solid var(--b3-theme-background-light);
+  }
+
+  .block__icon {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .agent-chat__messages {
+    padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
+    scrollbar-gutter: auto;
+  }
+
+  .agent-chat__msg-actions {
+    opacity: 1;
+  }
+
+  .agent-chat__body .protyle-icons {
+    opacity: .86;
+  }
+
+  .agent-chat__nav-rail {
+    display: none;
+  }
+
+  .agent-chat__input-area {
+    margin: 0 max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .agent-chat__composer-host {
+    max-height: min(120px, 30vh);
+  }
+
+  .agent-chat__button-options {
+    gap: 4px;
+  }
+
+  .agent-chat__confirm-actions,
+  .agent-chat__question-submit {
+    flex-wrap: wrap;
+
+    .b3-button {
+      min-height: 40px;
+    }
+  }
+
+  .agent-session-popup--mobile {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: var(--b3-theme-background);
+
+    .agent-session-popup__search {
+      margin: 8px;
+      min-height: 36px;
+    }
+
+    .b3-list-item {
+      min-height: 44px;
+    }
+  }
+}
+
+.agent-menu-status--warning {
+  color: var(--b3-theme-error);
+}

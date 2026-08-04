@@ -2153,57 +2153,44 @@ func ParseExportOptions(arg map[string]any) (opts *ExportOptions) {
 	opts = &ExportOptions{}
 	// 通用部分
 	if nil != arg["addTitle"] {
-		v := arg["addTitle"].(bool)
-		opts.AddTitle = &v
+		opts.AddTitle = new(arg["addTitle"].(bool))
 	}
 	if nil != arg["inlineMemo"] {
-		v := arg["inlineMemo"].(bool)
-		opts.InlineMemo = &v
+		opts.InlineMemo = new(arg["inlineMemo"].(bool))
 	}
 	if nil != arg["blockRefMode"] {
-		v := int(arg["blockRefMode"].(float64))
-		opts.BlockRefMode = &v
+		opts.BlockRefMode = new(int(arg["blockRefMode"].(float64)))
 	}
 	if nil != arg["blockEmbedMode"] {
-		v := int(arg["blockEmbedMode"].(float64))
-		opts.BlockEmbedMode = &v
+		opts.BlockEmbedMode = new(int(arg["blockEmbedMode"].(float64)))
 	}
 	if nil != arg["fileAnnotationRefMode"] {
-		v := int(arg["fileAnnotationRefMode"].(float64))
-		opts.FileAnnotationRefMode = &v
+		opts.FileAnnotationRefMode = new(int(arg["fileAnnotationRefMode"].(float64)))
 	}
 	if nil != arg["blockRefTextLeft"] {
-		v := arg["blockRefTextLeft"].(string)
-		opts.BlockRefTextLeft = &v
+		opts.BlockRefTextLeft = new(arg["blockRefTextLeft"].(string))
 	}
 	if nil != arg["blockRefTextRight"] {
-		v := arg["blockRefTextRight"].(string)
-		opts.BlockRefTextRight = &v
+		opts.BlockRefTextRight = new(arg["blockRefTextRight"].(string))
 	}
 	if nil != arg["tagOpenMarker"] {
-		v := arg["tagOpenMarker"].(string)
-		opts.TagOpenMarker = &v
+		opts.TagOpenMarker = new(arg["tagOpenMarker"].(string))
 	}
 	if nil != arg["tagCloseMarker"] {
-		v := arg["tagCloseMarker"].(string)
-		opts.TagCloseMarker = &v
+		opts.TagCloseMarker = new(arg["tagCloseMarker"].(string))
 	}
 	// Markdown 专属部分
 	if nil != arg["includeSubDocs"] {
-		v := arg["includeSubDocs"].(bool)
-		opts.IncludeSubDocs = &v
+		opts.IncludeSubDocs = new(arg["includeSubDocs"].(bool))
 	}
 	if nil != arg["includeRelatedDocs"] {
-		v := arg["includeRelatedDocs"].(bool)
-		opts.IncludeRelatedDocs = &v
+		opts.IncludeRelatedDocs = new(arg["includeRelatedDocs"].(bool))
 	}
 	if nil != arg["markdownYFM"] {
-		v := arg["markdownYFM"].(bool)
-		opts.MarkdownYFM = &v
+		opts.MarkdownYFM = new(arg["markdownYFM"].(bool))
 	}
 	if nil != arg["removeAssetsID"] {
-		v := arg["removeAssetsID"].(bool)
-		opts.RemoveAssetsID = &v
+		opts.RemoveAssetsID = new(arg["removeAssetsID"].(bool))
 	}
 	return
 }

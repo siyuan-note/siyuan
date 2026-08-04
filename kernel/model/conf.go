@@ -429,7 +429,7 @@ func InitConf() {
 	}
 	util.LargeFileWarningSize = Conf.FileTree.LargeFileWarningSize
 	if nil == Conf.FileTree.CreateDocAtTop { // v3.4.0 之前的版本没有该字段，设置默认值为 true，即在顶部创建新文档，不改变用户习惯
-		Conf.FileTree.CreateDocAtTop = func() *bool { b := true; return &b }()
+		Conf.FileTree.CreateDocAtTop = new(true)
 	}
 	if nil == Conf.FileTree.BoxDocEnabled {
 		// 配置缺失时默认关闭顶层笔记本文档。
@@ -490,8 +490,7 @@ func InitConf() {
 		Conf.Editor.HistoryRetentionDays = 3650
 	}
 	if nil == Conf.Editor.FloatWindowDelay {
-		v := 620
-		Conf.Editor.FloatWindowDelay = &v
+		Conf.Editor.FloatWindowDelay = new(620)
 	} else {
 		*Conf.Editor.FloatWindowDelay = max(0, min(2000, *Conf.Editor.FloatWindowDelay))
 	}

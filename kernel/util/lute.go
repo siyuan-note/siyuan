@@ -35,7 +35,7 @@ var MarkdownSettings = &Markdown{
 	InlineMath:          true,
 	InlineStrikethrough: true,
 	InlineMark:          true,
-	CodeBlockMiddleDot:  func() *bool { value := true; return &value }(),
+	CodeBlockMiddleDot:  new(true),
 }
 
 type Markdown struct {

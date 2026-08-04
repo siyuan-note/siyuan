@@ -39,10 +39,6 @@ func marshalSession(t *testing.T, value any) []byte {
 	return data
 }
 
-func stringPointer(value string) *string {
-	return &value
-}
-
 func TestSaveSessionRevisionConflictAndUnknownFields(t *testing.T) {
 	useTestDataDir(t)
 	base := map[string]any{
@@ -345,7 +341,7 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 		}},
 	}
 	emptyReferences := []Reference{}
-	turn.UserBlockHTML = stringPointer(editedBlockHTML)
+	turn.UserBlockHTML = new(editedBlockHTML)
 	turn.UserReferences = &emptyReferences
 	turn.UserEditorContext = &EditorContext{ActiveDocID: "new-doc"}
 	if err := beginRuntimeTurn(testSessionID, turn, false); err != nil {
@@ -689,7 +685,7 @@ func TestApplyRegenerateRuntimeReplacesUserContent(t *testing.T) {
 		Mode:          "regenerate",
 		UserEntryID:   "user-1",
 		UserContent:   "edited prompt",
-		UserBlockHTML: stringPointer(editedBlockHTML),
+		UserBlockHTML: new(editedBlockHTML),
 		UpdatedAt:     1,
 		Delta: []AgentMessage{{
 			Role:    "assistant",
@@ -754,7 +750,7 @@ func TestApplyRegenerateRuntimeClearsEditedUserBlockHTML(t *testing.T) {
 		Mode:          "regenerate",
 		UserEntryID:   "user-1",
 		UserContent:   "edited prompt",
-		UserBlockHTML: stringPointer(""),
+		UserBlockHTML: new(""),
 		UpdatedAt:     1,
 	}
 	if err := applyRuntimeTurnToSessionLocked(session, turn); err != nil {

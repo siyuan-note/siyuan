@@ -83,8 +83,7 @@ var (
 // the commandline parameter itself.
 func coalesceToEnvVar(fromCLI *string, envVarName string) *string {
 	if fromCLI == nil || "" == *fromCLI {
-		ret := os.Getenv(envVarName)
-		return &ret
+		return new(os.Getenv(envVarName))
 	}
 	return fromCLI
 }

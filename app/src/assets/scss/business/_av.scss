@@ -229,6 +229,17 @@
     }
   }
 
+  &__template-editor .custom-attr__avvalue.av__template-switch {
+    cursor: default;
+    flex: 1;
+    min-width: 0;
+    overflow: visible;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
   &__template-editor .custom-attr .block__logo:not(.popover__block) {
     cursor: default;
 

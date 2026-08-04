@@ -549,7 +549,7 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
             </div>
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconEyeoff"></use></svg><span>${window.siyuan.languages.hideInFileTree}</span></div>
-                <div class="fn__flex-1 fn__flex custom-attr__avvalue custom-attr__avvalue--readonly" style="align-items:center;justify-content:flex-end"><input class="b3-switch fn__flex-center" data-role="hide-in-file-tree" type="checkbox"${itemTemplate.hideInFileTree ? " checked" : ""}></div>
+                <div class="fn__flex custom-attr__avvalue av__template-switch" style="align-items:center;justify-content:flex-end"><input class="b3-switch" data-role="hide-in-file-tree" type="checkbox"${itemTemplate.hideInFileTree ? " checked" : ""}></div>
             </div>
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconFile"></use></svg><span>${window.siyuan.languages.contentTemplate}</span></div>

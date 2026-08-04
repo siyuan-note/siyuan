@@ -15,7 +15,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html"
 	"net/http"
 	"net/url"
 	"strings"
@@ -783,12 +782,13 @@ func writeOIDCCallbackPage(c *gin.Context, success bool, message string) {
 	if success {
 		title = oidcLanguage(366, "OIDC login completed")
 	}
-	c.Header("Content-Type", "text/html; charset=utf-8")
 	c.Header("Cache-Control", "no-store")
-	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'")
+	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'")
 	c.Header("Referrer-Policy", "no-referrer")
 	c.Header("X-Content-Type-Options", "nosniff")
-	c.String(http.StatusOK, "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" "+
-		"content=\"width=device-width,initial-scale=1\"><title>%s</title></head><body><main><h1>%s</h1><p>%s</p></main></body></html>",
-		html.EscapeString(title), html.EscapeString(title), html.EscapeString(message))
+	lang := "en"
+	if Conf != nil {
+		lang = util.LangToBCP47(Conf.Lang)
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", util.RenderOAuthCallbackPage(lang, title, message, success))
 }

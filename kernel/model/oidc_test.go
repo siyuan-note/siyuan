@@ -305,6 +305,26 @@ func TestOIDCTransactionExpiryAndSafeRedirect(t *testing.T) {
 	}
 }
 
+func TestWriteOIDCCallbackPageUsesSharedOAuthStyle(t *testing.T) {
+	setupOIDCTest(t)
+	Conf.Lang = "zh_CN"
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+
+	writeOIDCCallbackPage(context, false, "登录失败<script>")
+
+	page := recorder.Body.String()
+	for _, expected := range []string{`lang="zh-CN"`, `class="mark mark--error"`, "登录失败&lt;script&gt;"} {
+		if !strings.Contains(page, expected) {
+			t.Fatalf("OIDC callback page does not contain %q: %s", expected, page)
+		}
+	}
+	if !strings.Contains(recorder.Header().Get("Content-Security-Policy"), "frame-ancestors 'none'") {
+		t.Fatalf("OIDC callback page has an incomplete content security policy: %s",
+			recorder.Header().Get("Content-Security-Policy"))
+	}
+}
+
 func TestOIDCTransactionLimitsRejectWithoutEviction(t *testing.T) {
 	setupOIDCTest(t)
 	newTransaction := func(state, binding, clientIP string) *oidcTransaction {

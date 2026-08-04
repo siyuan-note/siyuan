@@ -1293,10 +1293,12 @@ func listDocsByPath(c *gin.Context) {
 	// 过滤掉发布不可见的文件
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
+		publishInvisible := model.GetInvisiblePublishAccess(publishAccess)
+		publishDisable := model.GetDisablePublishAccess(publishAccess)
 		tempFiles := []*model.File{}
 		for _, file := range files {
-			if model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishIgnore) {
+			if model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishInvisible) &&
+				model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishDisable) {
 				tempFiles = append(tempFiles, file)
 			}
 		}

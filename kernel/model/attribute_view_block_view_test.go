@@ -33,18 +33,15 @@ func TestNormalizeDatabaseBlockView(t *testing.T) {
 	tests := []struct {
 		name            string
 		blockViewID     string
-		currentViewID   string
 		views           []*av.View
 		initialLayout   string
 		expectedViewID  string
 		expectedLayout  string
-		expectedCurrent string
 		expectedChanged bool
 	}{
 		{
-			name:          "valid block view takes precedence",
-			blockViewID:   "gallery-view",
-			currentViewID: "table-view",
+			name:        "valid block view takes precedence",
+			blockViewID: "gallery-view",
 			views: []*av.View{
 				{ID: "table-view", LayoutType: av.LayoutTypeTable},
 				{ID: "gallery-view", LayoutType: av.LayoutTypeGallery},
@@ -52,26 +49,22 @@ func TestNormalizeDatabaseBlockView(t *testing.T) {
 			initialLayout:   string(av.LayoutTypeTable),
 			expectedViewID:  "gallery-view",
 			expectedLayout:  string(av.LayoutTypeGallery),
-			expectedCurrent: "table-view",
 			expectedChanged: true,
 		},
 		{
-			name:          "missing block view uses current view",
-			currentViewID: "gallery-view",
+			name: "missing block view uses first view",
 			views: []*av.View{
 				{ID: "table-view", LayoutType: av.LayoutTypeTable},
 				{ID: "gallery-view", LayoutType: av.LayoutTypeGallery},
 			},
 			initialLayout:   string(av.LayoutTypeTable),
-			expectedViewID:  "gallery-view",
-			expectedLayout:  string(av.LayoutTypeGallery),
-			expectedCurrent: "gallery-view",
+			expectedViewID:  "table-view",
+			expectedLayout:  string(av.LayoutTypeTable),
 			expectedChanged: true,
 		},
 		{
-			name:          "invalid block view uses current view",
-			blockViewID:   "missing-view",
-			currentViewID: "table-view",
+			name:        "invalid block view uses first view",
+			blockViewID: "missing-view",
 			views: []*av.View{
 				{ID: "table-view", LayoutType: av.LayoutTypeTable},
 				{ID: "gallery-view", LayoutType: av.LayoutTypeGallery},
@@ -79,13 +72,11 @@ func TestNormalizeDatabaseBlockView(t *testing.T) {
 			initialLayout:   string(av.LayoutTypeGallery),
 			expectedViewID:  "table-view",
 			expectedLayout:  string(av.LayoutTypeTable),
-			expectedCurrent: "table-view",
 			expectedChanged: true,
 		},
 		{
-			name:          "invalid current view uses first view",
-			blockViewID:   "missing-block-view",
-			currentViewID: "missing-current-view",
+			name:        "invalid block view uses first view",
+			blockViewID: "missing-block-view",
 			views: []*av.View{
 				{ID: "table-view", LayoutType: av.LayoutTypeTable},
 				{ID: "gallery-view", LayoutType: av.LayoutTypeGallery},
@@ -93,13 +84,11 @@ func TestNormalizeDatabaseBlockView(t *testing.T) {
 			initialLayout:   string(av.LayoutTypeGallery),
 			expectedViewID:  "table-view",
 			expectedLayout:  string(av.LayoutTypeTable),
-			expectedCurrent: "missing-current-view",
 			expectedChanged: true,
 		},
 		{
-			name:          "view ID distinguishes views with the same layout",
-			blockViewID:   "second-table-view",
-			currentViewID: "first-table-view",
+			name:        "view ID distinguishes views with the same layout",
+			blockViewID: "second-table-view",
 			views: []*av.View{
 				{ID: "first-table-view", LayoutType: av.LayoutTypeTable},
 				{ID: "second-table-view", LayoutType: av.LayoutTypeTable},
@@ -107,30 +96,25 @@ func TestNormalizeDatabaseBlockView(t *testing.T) {
 			initialLayout:   string(av.LayoutTypeGallery),
 			expectedViewID:  "second-table-view",
 			expectedLayout:  string(av.LayoutTypeTable),
-			expectedCurrent: "first-table-view",
 			expectedChanged: true,
 		},
 		{
-			name:            "missing views keep block unchanged",
-			blockViewID:     "missing-view",
-			currentViewID:   "missing-current-view",
-			initialLayout:   string(av.LayoutTypeGallery),
-			expectedViewID:  "missing-view",
-			expectedLayout:  string(av.LayoutTypeGallery),
-			expectedCurrent: "missing-current-view",
+			name:           "missing views keep block unchanged",
+			blockViewID:    "missing-view",
+			initialLayout:  string(av.LayoutTypeGallery),
+			expectedViewID: "missing-view",
+			expectedLayout: string(av.LayoutTypeGallery),
 		},
 		{
-			name:          "normalized block stays unchanged",
-			blockViewID:   "gallery-view",
-			currentViewID: "table-view",
+			name:        "normalized block stays unchanged",
+			blockViewID: "gallery-view",
 			views: []*av.View{
 				{ID: "table-view", LayoutType: av.LayoutTypeTable},
 				{ID: "gallery-view", LayoutType: av.LayoutTypeGallery},
 			},
-			initialLayout:   string(av.LayoutTypeGallery),
-			expectedViewID:  "gallery-view",
-			expectedLayout:  string(av.LayoutTypeGallery),
-			expectedCurrent: "table-view",
+			initialLayout:  string(av.LayoutTypeGallery),
+			expectedViewID: "gallery-view",
+			expectedLayout: string(av.LayoutTypeGallery),
 		},
 	}
 
@@ -140,7 +124,7 @@ func TestNormalizeDatabaseBlockView(t *testing.T) {
 			if "" != test.blockViewID {
 				node.SetIALAttr(av.NodeAttrView, test.blockViewID)
 			}
-			attrView := &av.AttributeView{ViewID: test.currentViewID, Views: test.views}
+			attrView := &av.AttributeView{Views: test.views}
 
 			changed := normalizeDatabaseBlockView(node, attrView)
 
@@ -149,9 +133,6 @@ func TestNormalizeDatabaseBlockView(t *testing.T) {
 			}
 			if test.expectedLayout != node.AttributeViewType {
 				t.Fatalf("unexpected block layout: %s", node.AttributeViewType)
-			}
-			if test.expectedCurrent != attrView.ViewID {
-				t.Fatalf("attribute view current view changed: %s", attrView.ViewID)
 			}
 			if test.expectedChanged != changed {
 				t.Fatalf("unexpected normalization result: %t", changed)
@@ -164,10 +145,8 @@ func TestNormalizeDatabaseBlockViewsUsesStoredBlockView(t *testing.T) {
 	setupAttributeViewValidationTest(t)
 
 	attrView := av.NewAttributeView("20260803090000-blockvw")
-	tableView := attrView.Views[0]
 	galleryView := &av.View{ID: ast.NewNodeID(), LayoutType: av.LayoutTypeGallery}
 	attrView.Views = append(attrView.Views, galleryView)
-	attrView.ViewID = tableView.ID
 	if err := av.SaveAttributeView(attrView); nil != err {
 		t.Fatalf("save attribute view failed: %s", err)
 	}
@@ -202,13 +181,6 @@ func TestNormalizeDatabaseBlockViewsUsesStoredBlockView(t *testing.T) {
 	}
 	if 1 != len(attrViews) {
 		t.Fatalf("attribute view should be parsed once, cache size: %d", len(attrViews))
-	}
-	parsed, err := av.ParseAttributeView(attrView.ID)
-	if nil != err {
-		t.Fatalf("parse attribute view failed: %s", err)
-	}
-	if tableView.ID != parsed.ViewID {
-		t.Fatalf("attribute view current view changed: %s", parsed.ViewID)
 	}
 	if !changed {
 		t.Fatal("stored block view should normalize the block")
@@ -333,7 +305,6 @@ func setupDatabaseBlockTransactionTest(t *testing.T, initialDatabase bool) *data
 	tableView := attrView.Views[0]
 	galleryView := &av.View{ID: ast.NewNodeID(), LayoutType: av.LayoutTypeGallery}
 	attrView.Views = append(attrView.Views, galleryView)
-	attrView.ViewID = tableView.ID
 	if err := av.SaveAttributeView(attrView); nil != err {
 		t.Fatalf("save attribute view failed: %s", err)
 	}
@@ -399,11 +370,4 @@ func assertNormalizedDatabaseBlock(
 			operationNode.IALAttr(av.NodeAttrView), operationNode.AttributeViewType)
 	}
 
-	parsed, err := av.ParseAttributeView(fixture.attrView.ID)
-	if nil != err {
-		t.Fatalf("parse attribute view failed: %s", err)
-	}
-	if fixture.tableView.ID != parsed.ViewID {
-		t.Fatalf("attribute view current view changed: %s", parsed.ViewID)
-	}
 }

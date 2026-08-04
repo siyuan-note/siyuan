@@ -1,4 +1,5 @@
 {
+	"disableAll": "Alles uitschakelen",
 	"bazaarKernelPlugin": "Kernelplug-in",
 	"newItemTemplateDefaultTip": "Gebruikt het standaardopslagpad voor nieuwe documenten van het huidige notitieboek",
 	"hideInFileTree": "Verbergen in de documentboom",

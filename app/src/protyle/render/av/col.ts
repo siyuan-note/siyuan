@@ -1092,6 +1092,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             click() {
                 fetchPost("/api/av/renderAttributeView", {
                     id: avID,
+                    blockID,
                 }, (response) => {
                     transaction(protyle, [{
                         action: "setAttrViewSorts",
@@ -1117,6 +1118,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             click() {
                 fetchPost("/api/av/renderAttributeView", {
                     id: avID,
+                    blockID,
                 }, (response) => {
                     transaction(protyle, [{
                         action: "setAttrViewSorts",
@@ -1320,6 +1322,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 click() {
                     fetchPost("/api/av/renderAttributeView", {
                         id: avID,
+                        blockID,
                     }, (response) => {
                         duplicateCol({
                             blockElement,

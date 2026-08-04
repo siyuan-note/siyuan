@@ -1063,7 +1063,7 @@ interface IAV {
 }
 
 interface IAVRenderTarget {
-    status: "visible" | "filtered" | "itemNotFound" | "viewNotFound" | "groupHidden";
+    status: "visible" | "filtered" | "itemNotFound" | "groupHidden";
     itemID: string;
     groupID?: string;
     index: number;

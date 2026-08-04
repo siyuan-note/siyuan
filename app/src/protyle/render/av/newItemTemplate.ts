@@ -886,7 +886,6 @@ export const createAttributeViewItem = (options: {
     fetchPost("/api/av/createAttributeViewItem", {
         avID: options.blockElement.dataset.avId,
         blockID: options.blockElement.dataset.nodeId,
-        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
         templateID: options.templateID || "",
         previousID: options.position?.previousID || "",
         groupID: options.position?.groupID || "",
@@ -1073,7 +1072,7 @@ const openBlankTemplateActionMenu = (options: {
 export const openNewItemTemplateMenu = (options: {protyle: IProtyle, blockElement: HTMLElement, target: HTMLElement}) => {
     fetchPost("/api/av/renderAttributeView", {
         id: options.blockElement.dataset.avId,
-        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+        blockID: options.blockElement.dataset.nodeId,
         ignoreRows: true,
     }, response => {
         const data = response.data as IAV;

@@ -2301,7 +2301,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     });
     otherMenus.push({id: "separator_1", type: "separator"});
     const horizontalCells = alignWholeTable ? Array.from(tableElement.rows[0].cells) : [cellElement];
-    otherMenus.push({
+    const alignmentMenus: IMenu[] = [{
         id: "alignLeft",
         icon: "iconAlignLeft",
         accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
@@ -2309,8 +2309,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         click: () => {
             setTableAlign(protyle, horizontalCells, nodeElement, "left", range, alignWholeTable);
         }
-    });
-    otherMenus.push({
+    }, {
         id: "alignCenter",
         icon: "iconAlignCenter",
         label: window.siyuan.languages.alignCenter,
@@ -2318,8 +2317,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         click: () => {
             setTableAlign(protyle, horizontalCells, nodeElement, "center", range, alignWholeTable);
         }
-    });
-    otherMenus.push({
+    }, {
         id: "alignRight",
         icon: "iconAlignRight",
         label: window.siyuan.languages.alignRight,
@@ -2327,21 +2325,29 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         click: () => {
             setTableAlign(protyle, horizontalCells, nodeElement, "right", range, alignWholeTable);
         }
-    });
-    otherMenus.push({
+    }, {
         id: "useDefaultAlign",
         icon: "",
         label: window.siyuan.languages.useDefaultAlign,
         click: () => {
             setTableAlign(protyle, horizontalCells, nodeElement, "", range, alignWholeTable);
         }
-    });
+    }];
     if (alignWholeTable) {
-        otherMenus.push({id: "separator_verticalAlign", type: "separator"});
+        alignmentMenus.push({id: "separator_verticalAlign", type: "separator"});
         const cells = Array.from(tableElement.querySelectorAll<HTMLTableCellElement>("th, td"));
-        otherMenus.push(...getTableCellVerticalAlignmentMenus(cells, (property, value) => {
+        alignmentMenus.push(...getTableCellVerticalAlignmentMenus(cells, (property, value) => {
             setTableCellStyle(protyle, nodeElement as HTMLElement, cells, property, value);
         }));
+        otherMenus.push({
+            id: "alignment",
+            icon: "iconAlignSettings",
+            label: window.siyuan.languages.alignment,
+            type: "submenu",
+            submenu: alignmentMenus,
+        });
+    } else {
+        otherMenus.push(...alignmentMenus);
     }
     const menus: IMenu[] = [];
     menus.push(...otherMenus);

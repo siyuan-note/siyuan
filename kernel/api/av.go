@@ -126,6 +126,7 @@ func getAttributeViewAddingBlockDefaultValues(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
+	blockID, _ := arg["blockID"].(string)
 	var viewID string
 	if viewIDArg := arg["viewID"]; nil != viewIDArg {
 		viewID = viewIDArg.(string)
@@ -143,7 +144,12 @@ func getAttributeViewAddingBlockDefaultValues(c *gin.Context) {
 		addingBlockID = arg["addingBlockID"].(string)
 	}
 
-	values := model.GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousID, addingBlockID)
+	values, err := model.GetAttrViewAddingBlockDefaultValues(avID, blockID, viewID, groupID, previousID, addingBlockID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	if 1 > len(values) {
 		values = nil
 	}
@@ -218,7 +224,7 @@ func setAttrViewGroup(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, false, "", "")
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, "", "")
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)
@@ -295,7 +301,7 @@ func changeAttrViewLayout(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, false, "", "")
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, "", "")
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)
@@ -637,13 +643,14 @@ func addAttributeViewKey(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
+	blockID, _ := arg["blockID"].(string)
 	keyID := arg["keyID"].(string)
 	keyName := arg["keyName"].(string)
 	keyType := arg["keyType"].(string)
 	keyIcon := arg["keyIcon"].(string)
 	previousKeyID := arg["previousKeyID"].(string)
 
-	err := model.AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID, av.DateDisplayFormatFull)
+	err := model.AddAttributeViewKey(avID, blockID, keyID, keyName, keyType, keyIcon, previousKeyID, av.DateDisplayFormatFull)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -795,7 +802,7 @@ func getAttributeView(c *gin.Context) {
 
 	id := arg["id"].(string)
 	ret.Data = map[string]any{
-		"av": model.GetAttributeView(id),
+		"av": model.NewAttributeViewData(model.GetAttributeView(id)),
 	}
 }
 
@@ -1017,6 +1024,8 @@ func renderSnapshotAttributeView(c *gin.Context) {
 	index := arg["snapshot"].(string)
 	id := arg["id"].(string)
 	blockID, _ := arg["blockID"].(string)
+	viewID, _ := arg["viewID"].(string)
+	carrierViewID, _ := arg["carrierViewID"].(string)
 	if err := holdAttributeViewRequest(c, blockID, id); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
@@ -1033,7 +1042,7 @@ func renderSnapshotAttributeView(c *gin.Context) {
 		ret.Msg = model.Conf.Language(314)
 		return
 	}
-	view, attrView, err := model.RenderRepoSnapshotAttributeView(index, id)
+	view, attrView, err := model.RenderRepoSnapshotAttributeView(index, id, viewID, carrierViewID)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -1087,6 +1096,7 @@ func renderHistoryAttributeView(c *gin.Context) {
 	if nil != viewIDArg {
 		viewID = viewIDArg.(string)
 	}
+	carrierViewID, _ := arg["carrierViewID"].(string)
 	page := 1
 	pageArg := arg["page"]
 	if nil != pageArg {
@@ -1127,7 +1137,7 @@ func renderHistoryAttributeView(c *gin.Context) {
 		return
 	}
 
-	view, attrView, err := model.RenderHistoryAttributeView(blockID, id, viewID, query, page, pageSize, groupPaging, created)
+	view, attrView, err := model.RenderHistoryAttributeView(id, viewID, carrierViewID, query, page, pageSize, groupPaging, created)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -1227,10 +1237,6 @@ func renderAttributeView(c *gin.Context) {
 	if targetGroupIDArg := arg["targetGroupID"]; nil != targetGroupIDArg {
 		targetGroupID = targetGroupIDArg.(string)
 	}
-	persistView := targetItemID == ""
-	if persistViewArg := arg["persistView"]; nil != persistViewArg {
-		persistView = persistViewArg.(bool)
-	}
 	if err := holdAttributeViewRequest(c, blockID, id); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
@@ -1239,9 +1245,6 @@ func renderAttributeView(c *gin.Context) {
 	}
 
 	readOnlyRole := model.IsReadOnlyRoleContext(c)
-	if readOnlyRole {
-		persistView = false
-	}
 	publishAccess := model.PublishAccess(nil)
 	if readOnlyRole {
 		publishAccess = model.GetPublishAccess()
@@ -1253,7 +1256,7 @@ func renderAttributeView(c *gin.Context) {
 		}
 	}
 
-	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, persistView, targetItemID, targetGroupID)
+	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
 	if ret.Code == 0 && readOnlyRole {
 		retDataMap := ret.Data.(map[string]any)
 		retDataMap["view"] = model.FilterAttributeViewByPublishAccess(c, publishAccess, id, blockID, retDataMap["view"].(av.Viewable))
@@ -1280,15 +1283,18 @@ func holdAttributeViewRequest(c *gin.Context, blockID, avID string) error {
 	return nil
 }
 
-func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows, persistView bool, targetItemID, targetGroupID string) (ret *gulu.Result) {
+func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (ret *gulu.Result) {
 	ret = gulu.Ret.NewResult()
-	view, attrView, target, err := model.RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, persistView, targetItemID, targetGroupID)
+	view, attrView, target, err := model.RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID)
 	if err != nil {
 		ret.Code = -1
 		if errors.Is(err, av.ErrSpecTooNew) {
 			ret.Msg = model.Conf.Language(215)
 		} else {
 			ret.Msg = err.Error()
+		}
+		if errors.Is(err, av.ErrViewNotFound) {
+			ret.Data = map[string]any{"error": "viewNotFound"}
 		}
 		return
 	}

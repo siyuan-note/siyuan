@@ -27,8 +27,7 @@ func TestGetAttrViewOperationView(t *testing.T) {
 	first := &av.View{ID: "20260727120000-first"}
 	second := &av.View{ID: "20260727120001-second"}
 	attrView := &av.AttributeView{
-		ViewID: first.ID,
-		Views:  []*av.View{first, second},
+		Views: []*av.View{first, second},
 	}
 
 	got, err := getAttrViewOperationView(attrView, &Operation{ViewID: second.ID})

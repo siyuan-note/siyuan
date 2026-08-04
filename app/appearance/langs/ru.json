@@ -1,4 +1,5 @@
 {
+	"disableAll": "Отключить все",
 	"bazaarKernelPlugin": "Плагин ядра",
 	"newItemTemplateDefaultTip": "Используется путь сохранения новых документов по умолчанию из текущего блокнота",
 	"hideInFileTree": "Скрыть в дереве документов",

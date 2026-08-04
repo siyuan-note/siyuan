@@ -6,6 +6,7 @@ import {clearSelect} from "../../util/clear";
 import {scrollCenter} from "../../../util/highlightById";
 import {setAVCellAnchor, setAVItemAnchor} from "./rangeSelect";
 import {updateAVRowSelect} from "./virtualScroll";
+import {getAVLocateViewChange} from "./locateView";
 
 export interface IAVLocateRequest {
     itemID: string;
@@ -233,8 +234,48 @@ export const getAVLocateParams = (blockElement: HTMLElement, enabled = true) => 
     return request ? {
         targetItemID: request.itemID,
         targetGroupID: request.groupID || "",
-        viewID: request.viewID || blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+        viewID: request.viewID || "",
     } : undefined;
+};
+
+export const applyAVRenderContext = (blockElement: HTMLElement, data: IAV) => {
+    blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, data.viewID);
+    blockElement.setAttribute("data-av-type", data.viewType);
+};
+
+export const persistAVLocateView = (blockElement: HTMLElement, protyle: IProtyle, data: IAV) => {
+    const request = getAVLocateRequest(blockElement);
+    if (!request || !data.target || data.target.itemID !== request.itemID || !blockElement.isConnected) {
+        return false;
+    }
+    const currentViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ?? request.previousViewID ?? data.viewID;
+    const change = getAVLocateViewChange(request, currentViewID, protyle.disabled);
+    if (!change) {
+        return false;
+    }
+    blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, change.viewID);
+    blockElement.setAttribute("data-av-type", data.viewType);
+    transaction(protyle, [{
+        action: "setAttrViewBlockView",
+        blockID: blockElement.dataset.nodeId,
+        id: change.viewID,
+        avID: blockElement.dataset.avId,
+    }], [{
+        action: "setAttrViewBlockView",
+        blockID: blockElement.dataset.nodeId,
+        id: change.previousViewID,
+        avID: blockElement.dataset.avId,
+    }]);
+    return true;
+};
+
+export const failAVRender = (blockElement: HTMLElement, response: IWebSocketData) => {
+    const request = getAVLocateRequest(blockElement);
+    if (request) {
+        clearAVLocateRequest(blockElement, request);
+    }
+    const viewNotFound = request?.viewID && response.data?.error === "viewNotFound";
+    showMessage(viewNotFound ? window.siyuan.languages.databaseViewNotFound : response.msg);
 };
 
 export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData: {
@@ -250,8 +291,6 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
             request.messageShown = true;
             if (data.target.status === "filtered" || data.target.status === "groupHidden") {
                 showMessage(window.siyuan.languages.databaseItemFiltered);
-            } else if (data.target.status === "viewNotFound") {
-                showMessage(window.siyuan.languages.databaseViewNotFound);
             } else {
                 showMessage(window.siyuan.languages.databaseItemNotFound);
             }
@@ -262,9 +301,6 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
         clearSelect(["row", "galleryItem"], blockElement);
     }
     const key = data.target.groupID || "all";
-    if (request.persistView === false && request.viewID) {
-        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, request.viewID);
-    }
     const view = (data.target.groupID ? data.view.groups?.find(item => item.id === data.target.groupID) : data.view) as IAVTable | IAVGallery | IAVKanban;
     const itemLength = data.viewType === "table" ? (view as IAVTable).rows.length : (view as IAVGallery | IAVKanban).cards.length;
     const offset = data.target.offset || 0;
@@ -312,24 +348,6 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
     if (!blockElement.isConnected) {
         locateRequests.delete(blockElement);
         return;
-    }
-    const currentViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ?? request.previousViewID ?? data.viewID;
-    if (data.target?.status !== "viewNotFound" && request.viewID && request.viewID !== currentViewID) {
-        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, request.viewID);
-        if (!protyle.disabled && request.persistView !== false) {
-            transaction(protyle, [{
-                action: "setAttrViewBlockView",
-                blockID: blockElement.dataset.nodeId,
-                id: request.viewID,
-                avID: blockElement.dataset.avId,
-            }], [{
-                action: "setAttrViewBlockView",
-                blockID: blockElement.dataset.nodeId,
-                id: currentViewID,
-                avID: blockElement.dataset.avId,
-            }]);
-            return;
-        }
     }
     if (data.target?.status !== "visible") {
         clearAVLocateRequest(blockElement, request);

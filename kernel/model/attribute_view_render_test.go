@@ -19,6 +19,8 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -29,7 +31,7 @@ func TestRenderAttributeViewRejectsInvalidIDBeforeLookup(t *testing.T) {
 	invalidIDs := []string{"../outside", `..\outside`}
 	for _, invalidID := range invalidIDs {
 		t.Run(invalidID, func(t *testing.T) {
-			_, _, err := RenderAttributeView("", invalidID, "", "", 1, -1, nil, false, false, false)
+			_, _, err := RenderAttributeView("", invalidID, "", "", 1, -1, nil, false, false)
 			if !errors.Is(err, ErrInvalidID) {
 				t.Fatalf("invalid attribute view ID [%s] returned error [%v]", invalidID, err)
 			}
@@ -37,24 +39,72 @@ func TestRenderAttributeViewRejectsInvalidIDBeforeLookup(t *testing.T) {
 	}
 }
 
-func TestGetRenderAttributeViewViewWithoutPersisting(t *testing.T) {
-	currentView := &av.View{ID: "20260731000000-current"}
+func TestGetRenderAttributeViewViewUsesExplicitView(t *testing.T) {
+	firstView := &av.View{ID: "20260731000000-current"}
 	requestedView := &av.View{ID: "20260731000000-request"}
 	attrView := &av.AttributeView{
-		ID:     "20260731000000-avtesta",
-		ViewID: currentView.ID,
-		Views:  []*av.View{currentView, requestedView},
+		ID:    "20260731000000-avtesta",
+		Views: []*av.View{firstView, requestedView},
 	}
 
-	view, err := getRenderAttributeViewView(attrView, requestedView.ID, "", false)
+	view, err := getRenderAttributeViewView(attrView, requestedView.ID, "", "", false)
 	if nil != err {
 		t.Fatal(err)
 	}
 	if view != requestedView {
 		t.Fatalf("got view [%s], want [%s]", view.ID, requestedView.ID)
 	}
-	if attrView.ViewID != currentView.ID {
-		t.Fatalf("current view changed to [%s], want [%s]", attrView.ViewID, currentView.ID)
+	if _, err = getRenderAttributeViewView(attrView, "20260731000000-missing", "", "", false); !errors.Is(err, av.ErrViewNotFound) {
+		t.Fatalf("missing explicit view returned error [%v]", err)
+	}
+}
+
+func TestResolveAttributeViewViewFallbacks(t *testing.T) {
+	firstView := &av.View{ID: "20260731000000-first"}
+	carrierView := &av.View{ID: "20260731000000-carrier"}
+	attrView := &av.AttributeView{Views: []*av.View{firstView, carrierView}}
+
+	view, err := resolveAttributeViewView(attrView, "", carrierView.ID, "")
+	if nil != err || view != carrierView {
+		t.Fatalf("carrier view resolution failed: %+v, %v", view, err)
+	}
+	view, err = resolveAttributeViewView(attrView, "", "20260731000000-missing", "")
+	if nil != err || view != firstView {
+		t.Fatalf("invalid carrier view should fall back to first view: %+v, %v", view, err)
+	}
+}
+
+func TestImmutableAttributeViewRenderDoesNotWrite(t *testing.T) {
+	setupAttributeViewValidationTest(t)
+
+	attrView := av.NewAttributeView("20260731000000-readonly")
+	attrView.Spec = 6
+	view, err := renderAttributeView(attrView, "", "", attrView.Views[0].ID, "", 1, -1, nil, true, false, nil, "")
+	if nil != err {
+		t.Fatal(err)
+	}
+	if view.GetID() != attrView.Views[0].ID || attrView.Spec != av.CurrentSpec {
+		t.Fatalf("unexpected immutable render result: %s, spec %d", view.GetID(), attrView.Spec)
+	}
+	path := filepath.Join(util.DataDir, "storage", "av", attrView.ID+".json")
+	if _, err = os.Stat(path); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("immutable render wrote attribute view file [%s]: %v", path, err)
+	}
+}
+
+func TestAttributeViewDataCompatibilityViewID(t *testing.T) {
+	firstView := &av.View{ID: "20260731000000-first"}
+	data, err := json.Marshal(NewAttributeViewData(&av.AttributeView{Views: []*av.View{nil, firstView}}))
+	if nil != err {
+		t.Fatal(err)
+	}
+	var fields map[string]json.RawMessage
+	if err = json.Unmarshal(data, &fields); nil != err {
+		t.Fatal(err)
+	}
+	var viewID string
+	if err = json.Unmarshal(fields["viewID"], &viewID); nil != err || viewID != firstView.ID {
+		t.Fatalf("unexpected compatibility viewID: %s, %v", viewID, err)
 	}
 }
 
@@ -95,10 +145,6 @@ func TestNewAttributeViewWithLayout(t *testing.T) {
 			if view.LayoutType != test.expected {
 				t.Fatalf("expected layout [%s], got [%s]", test.expected, view.LayoutType)
 			}
-			if attrView.ViewID != view.ID {
-				t.Fatalf("expected current view [%s], got [%s]", view.ID, attrView.ViewID)
-			}
-
 			blockKeyID := attrView.KeyValues[0].Key.ID
 			selectKeyID := attrView.KeyValues[1].Key.ID
 			switch test.expected {

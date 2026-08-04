@@ -577,7 +577,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         if (type === "template") {
             fetchPost("/api/av/renderAttributeView", {
                 id: blockElement.dataset.avId,
-                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
+                blockID: blockElement.dataset.nodeId,
             }, (response) => {
                 getFieldsByData(response.data).find((item: IAVColumn) => {
                     if (item.id === getColId(cellElements[0], viewType)) {

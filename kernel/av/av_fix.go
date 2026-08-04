@@ -43,7 +43,7 @@ func UpgradeSpec(av *AttributeView) {
 
 func CheckSpec(av *AttributeView) (err error) {
 	if CurrentSpec < av.Spec {
-		logging.LogErrorf("attribute view spec [%d] is newer than current [%d]", av.Spec, CurrentSpec)
+		logging.LogErrorf("attribute view [%s] spec [%d] is newer than current [%d]", av.ID, av.Spec, CurrentSpec)
 		err = ErrSpecTooNew
 		return
 	}

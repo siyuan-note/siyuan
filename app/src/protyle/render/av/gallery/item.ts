@@ -1,7 +1,6 @@
 import {genCellValue, getTypeByCellElement, renderCell, renderCellAttr} from "../cell";
 import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
-import {Constants} from "../../../../constants";
 import {clearSelect} from "../../../util/clear";
 
 export const insertGalleryItemAnimation = (options: {
@@ -76,7 +75,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
     }
     fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
         avID: options.blockElement.getAttribute("data-av-id"),
-        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+        blockID: options.blockElement.dataset.nodeId,
         groupID: options.groupID,
         previousID: options.previousId,
     }, (response) => {

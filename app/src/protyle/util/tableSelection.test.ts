@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
-import {getTableCellsInRectangle} from "./tableSelection";
+import {getTableCellsInRectangle, getTableDragEdge} from "./tableSelection";
 
 interface ITestCellInfo {
     id: string;
@@ -51,5 +51,18 @@ describe("getTableCellsInRectangle", () => {
         const cells = [createCell("a", 0, 0)];
 
         assert.deepEqual(getTableCellsInRectangle(cells, cells[0]), []);
+    });
+});
+
+describe("getTableDragEdge", () => {
+    it("allows dropping at both clamped table edges", () => {
+        assert.equal(getTableDragEdge(50, 50, 250), "start");
+        assert.equal(getTableDragEdge(250, 50, 250), "end");
+    });
+
+    it("keeps positions inside the table on cell-based targeting", () => {
+        assert.equal(getTableDragEdge(51, 50, 250), undefined);
+        assert.equal(getTableDragEdge(249, 50, 250), undefined);
+        assert.equal(getTableDragEdge(100, 150, 50), undefined);
     });
 });

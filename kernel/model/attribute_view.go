@@ -331,7 +331,7 @@ func GetAttributeViewBoundBlockIDs(avID string, itemIDs []string) (ret map[strin
 	return
 }
 
-func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {
+func GetAttrViewAddingBlockDefaultValues(avID, blockID, viewID, groupID, previousBlockID, addingBlockID string) (ret map[string]*av.Value, err error) {
 	ret = map[string]*av.Value{}
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -340,7 +340,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 		return
 	}
 
-	view, _ := attrView.GetCurrentView(viewID)
+	view, err := resolveAttributeViewView(attrView, viewID, "", blockID)
 	if nil == view {
 		logging.LogErrorf("view [%s] not found in attribute view [%s]", viewID, avID)
 		return
@@ -1318,7 +1318,6 @@ func ChangeAttrViewLayout(blockID, avID string, newLayout av.LayoutType) (err er
 		if blockID == bID { // 当前操作的镜像库
 			attrs[av.NodeAttrView] = view.ID
 			node.AttributeViewType = string(view.LayoutType)
-			attrView.ViewID = view.ID
 			changed = true
 		} else {
 			if view.ID == attrs[av.NodeAttrView] {
@@ -2324,13 +2323,6 @@ func SetDatabaseBlockView(blockID, avID, viewID string) (err error) {
 		return
 	}
 
-	if attrView.ViewID != viewID {
-		attrView.ViewID = viewID
-		if err = av.SaveAttributeView(attrView); err != nil {
-			return
-		}
-	}
-
 	node, tree, err := getNodeByBlockID(nil, blockID)
 	if err != nil {
 		return
@@ -2347,7 +2339,7 @@ func SetDatabaseBlockView(blockID, avID, viewID string) (err error) {
 	return
 }
 
-// normalizeDatabaseBlockView 使数据库载体绑定的视图和布局保持一致，不修改数据库顶层当前视图。
+// normalizeDatabaseBlockView 使数据库载体绑定的视图和布局保持一致。
 func normalizeDatabaseBlockView(node *ast.Node, attrView *av.AttributeView) (changed bool) {
 	if nil == node || nil == attrView || ast.NodeAttributeView != node.Type {
 		return
@@ -2359,7 +2351,7 @@ func normalizeDatabaseBlockView(node *ast.Node, attrView *av.AttributeView) (cha
 		view = attrView.GetView(viewID)
 	}
 	if nil == view {
-		view, _ = attrView.GetCurrentView("")
+		view, _ = attrView.GetFirstView()
 	}
 	if nil == view {
 		return
@@ -2685,12 +2677,9 @@ func GetAttributeViewFilterSort(avID, blockID string) (filters []*av.ViewFilter,
 	}
 
 	view, err := getAttrViewViewByBlockID(attrView, blockID)
-	if nil == view {
-		view, err = attrView.GetCurrentView(attrView.ViewID)
-		if nil == view || err != nil {
-			logging.LogErrorf("get current view failed: %s", err)
-			return
-		}
+	if nil == view || err != nil {
+		logging.LogErrorf("get current view failed: %s", err)
+		return
 	}
 
 	filters = view.Filters
@@ -2748,6 +2737,35 @@ func GetAttributeView(avID string) (ret *av.AttributeView) {
 	waitForSyncingStorages()
 
 	ret, _ = av.ParseAttributeView(avID)
+	return
+}
+
+// AttributeViewData 是面向外部接口的兼容数据，不参与数据库文件持久化。
+type AttributeViewData struct {
+	Spec               int                                         `json:"spec"`
+	ID                 string                                      `json:"id"`
+	Name               string                                      `json:"name"`
+	KeyValues          []*av.KeyValues                             `json:"keyValues"`
+	KeyIDs             []string                                    `json:"keyIDs"`
+	ViewID             string                                      `json:"viewID"`
+	Views              []*av.View                                  `json:"views"`
+	NewItemTemplates   []*av.NewItemTemplate                       `json:"newItemTemplates,omitempty"`
+	DefaultTemplateID  string                                      `json:"defaultTemplateID,omitempty"`
+	CardCoverPositions map[string]map[string]*av.CardCoverPosition `json:"cardCoverPositions,omitempty"`
+}
+
+func NewAttributeViewData(attrView *av.AttributeView) (ret *AttributeViewData) {
+	if nil == attrView {
+		return
+	}
+	ret = &AttributeViewData{
+		Spec: attrView.Spec, ID: attrView.ID, Name: attrView.Name, KeyValues: attrView.KeyValues, KeyIDs: attrView.KeyIDs,
+		Views: attrView.Views, NewItemTemplates: attrView.NewItemTemplates, DefaultTemplateID: attrView.DefaultTemplateID,
+		CardCoverPositions: attrView.CardCoverPositions,
+	}
+	if view, _ := attrView.GetFirstView(); nil != view {
+		ret.ViewID = view.ID
+	}
 	return
 }
 
@@ -3514,7 +3532,7 @@ func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttribu
 		return
 	}
 
-	view, err := getRenderAttributeViewView(attrView, "", "", true)
+	view, err := getRenderAttributeViewView(attrView, "", "", "", true)
 	if nil != err {
 		return
 	}
@@ -3593,7 +3611,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		itemID := blockVal.BlockID
-		view, err := getRenderAttributeViewView(attrView, "", nodeID, true)
+		view, err := getRenderAttributeViewView(attrView, "", "", nodeID, true)
 		if nil != err {
 			continue
 		}
@@ -4000,10 +4018,9 @@ func GetCurrentAttributeViewImages(c *gin.Context, avID, viewID, query string) (
 	}
 	var view *av.View
 
-	if "" != viewID {
-		view, _ = attrView.GetCurrentView(viewID)
-	} else {
-		view = attrView.GetView(attrView.ViewID)
+	view, err = resolveAttributeViewView(attrView, viewID, "", "")
+	if nil != err {
+		return
 	}
 
 	cachedAttrViews := map[string]*av.AttributeView{}
@@ -4538,7 +4555,6 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 
 	view = attrView.Views[index]
-	attrView.ViewID = view.ID
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
@@ -4737,7 +4753,6 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 	view.ID = operation.ID
 	attrView.Views = append(attrView.Views, view)
-	attrView.ViewID = view.ID
 
 	view.Icon = masterView.Icon
 	view.Name = util.GetDuplicateName(masterView.Name)
@@ -4948,7 +4963,6 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 	}
 
 	view.ItemIDs = firstView.ItemIDs
-	attrView.ViewID = viewID
 	view.ID = viewID
 	attrView.Views = append(attrView.Views, view)
 
@@ -6905,7 +6919,7 @@ func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
 	if nil != operation.Data {
 		icon = operation.Data.(string)
 	}
-	err := AddAttributeViewKey(operation.AvID, operation.ID, operation.Name, operation.Typ, icon, operation.PreviousID,
+	err := AddAttributeViewKey(operation.AvID, operation.BlockID, operation.ID, operation.Name, operation.Typ, icon, operation.PreviousID,
 		av.DateDisplayFormat(operation.Format))
 
 	if err != nil {
@@ -6914,13 +6928,13 @@ func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
 	return
 }
 
-func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID string, dateFormat av.DateDisplayFormat) (err error) {
+func AddAttributeViewKey(avID, blockID, keyID, keyName, keyType, keyIcon, previousKeyID string, dateFormat av.DateDisplayFormat) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
 	}
 
-	currentView, err := attrView.GetCurrentView(attrView.ViewID)
+	currentView, err := getAttrViewViewByBlockID(attrView, blockID)
 	if nil != err {
 		return
 	}
@@ -8328,16 +8342,35 @@ func setAttributeViewColumnOptionDesc(operation *Operation) (err error) {
 	return
 }
 
-func getAttrViewViewByBlockID(attrView *av.AttributeView, blockID string) (ret *av.View, err error) {
-	var viewID string
-	var node *ast.Node
+func resolveAttributeViewView(attrView *av.AttributeView, viewID, carrierViewID, blockID string) (ret *av.View, err error) {
+	if "" != viewID {
+		ret = attrView.GetView(viewID)
+		if nil == ret {
+			return nil, av.ErrViewNotFound
+		}
+		return
+	}
+
+	if "" != carrierViewID {
+		if ret = attrView.GetView(carrierViewID); nil != ret {
+			return
+		}
+	}
+
 	if "" != blockID {
-		node, _, _ = getNodeByBlockID(nil, blockID)
+		node, _, _ := getNodeByBlockID(nil, blockID)
+		if nil != node && ast.NodeAttributeView == node.Type && attrView.ID == node.AttributeViewID {
+			if ret = attrView.GetView(node.IALAttr(av.NodeAttrView)); nil != ret {
+				return
+			}
+		}
 	}
-	if nil != node {
-		viewID = node.IALAttr(av.NodeAttrView)
-	}
-	return attrView.GetCurrentView(viewID)
+
+	return attrView.GetFirstView()
+}
+
+func getAttrViewViewByBlockID(attrView *av.AttributeView, blockID string) (ret *av.View, err error) {
+	return resolveAttributeViewView(attrView, "", "", blockID)
 }
 
 func getAttrViewName(attrView *av.AttributeView) string {

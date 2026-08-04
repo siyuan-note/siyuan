@@ -1,4 +1,5 @@
 {
+	"disableAll": "Wyłącz wszystko",
 	"bazaarKernelPlugin": "Wtyczka jądra",
 	"newItemTemplateDefaultTip": "Używa domyślnej ścieżki zapisu nowych dokumentów z bieżącego notatnika",
 	"hideInFileTree": "Ukryj w drzewie dokumentów",

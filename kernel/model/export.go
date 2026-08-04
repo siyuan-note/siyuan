@@ -172,7 +172,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 			return nodeErr
 		}
 		viewID := node.IALAttr(av.NodeAttrView)
-		view, viewErr := attrView.GetCurrentView(viewID)
+		view, viewErr := resolveAttributeViewView(attrView, viewID, "", "")
 		if viewErr != nil {
 			return viewErr
 		}
@@ -3407,7 +3407,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 
 		viewID := n.IALAttr(av.NodeAttrView)
-		view, err := attrView.GetCurrentView(viewID)
+		view, err := resolveAttributeViewView(attrView, viewID, "", "")
 		if err != nil {
 			logging.LogErrorf("get attribute view [%s] failed: %s", avID, err)
 			return ast.WalkContinue

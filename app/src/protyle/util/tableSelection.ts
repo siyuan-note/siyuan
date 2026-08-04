@@ -5,6 +5,18 @@ interface ITableSelectionCellInfo {
     colspan: number;
 }
 
+export const getTableDragEdge = (targetCenter: number, minCenter: number, maxCenter: number) => {
+    if (minCenter > maxCenter) {
+        return;
+    }
+    if (targetCenter <= minCenter) {
+        return "start" as const;
+    }
+    if (targetCenter >= maxCenter) {
+        return "end" as const;
+    }
+};
+
 export const getTableCellsInRectangle = <T extends ITableSelectionCellInfo>(cellInfos: T[], start?: T, end?: T) => {
     if (!start || !end) {
         return [];

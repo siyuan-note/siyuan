@@ -221,7 +221,7 @@ func TestAddAttributeViewKeyRejectsUnsupportedTypes(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := AddAttributeViewKey(avID, ast.NewNodeID(), "Test", test.keyType, "", "", av.DateDisplayFormatFull)
+			err := AddAttributeViewKey(avID, "", ast.NewNodeID(), "Test", test.keyType, "", "", av.DateDisplayFormatFull)
 			if nil == err || !strings.Contains(err.Error(), test.errMessage) {
 				t.Fatalf("expected error containing [%s], got [%v]", test.errMessage, err)
 			}

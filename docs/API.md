@@ -1748,8 +1748,8 @@ The field types (`keyType`) are:
   ```
 
     * `id`: Database ID
-    * `blockID`: The database block that embeds this database. Used to resolve the active view and publish access. Omit when rendering a detached database.
-    * `viewID`: The view to render. When omitted, the current view (`viewID` field) is used
+    * `blockID`: The database block that embeds this database. Used to resolve the active view and publish access. If its `custom-sy-av-view` is missing or invalid, the first available view is used. Omit when rendering a detached database
+    * `viewID`: An explicit view to render. An invalid value returns an error. When omitted, the view is resolved from `blockID`, then falls back to the first available view
     * `page`: Page number, 1-based. Defaults to `1`
     * `pageSize`: Items per page. `-1` or omitted means use the view's default (`50`)
     * `query`: Optional full-text filter for the primary-key values
@@ -1757,7 +1757,7 @@ The field types (`keyType`) are:
     * `targetItemID`: Optional database item ID to locate. When specified, the response includes target-location metadata
     * `targetGroupID`: Optional group hint used with `targetItemID`
     * `createIfNotExist`: When `true` (default), create a database with a default view if the database does not exist
-    * `persistView`: Whether to save the selected view as the database's top-level current view. Defaults to `true`, or `false` when `targetItemID` is specified. Read-only publish access never persists the selected view. Setting this to `false` only prevents the current view from changing; it does not guarantee that rendering performs no other writes
+    * `persistView`: Deprecated compatibility parameter. It is accepted but ignored because the database definition no longer stores a top-level current view
 * Return value (real response, table layout, one row shown):
 
   ```json
@@ -1944,7 +1944,7 @@ The field types (`keyType`) are:
   }
   ```
 
-    * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), current view (`viewID`), and all views with their raw layout config (`table`/`gallery`/`kanban`) and item ordering (`itemIds`). Returns the raw definition (no rendered rows or pagination); use [Render](#Render) for computed rows
+    * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`gallery`/`kanban`) and item ordering (`itemIds`). The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; use [Render](#Render) for computed rows
 
 ### Get primary key values
 
@@ -2159,7 +2159,7 @@ Adds one or more items (rows). Each source can either bind an existing block (`i
 
     * `avID`: Database ID
     * `blockID`: The database block that owns this database (resolves target view/group)
-    * `viewID`: Target view. When omitted, the current view is used
+    * `viewID`: Explicit target view. When omitted, the view selected by `blockID` is used, then the first available view
     * `groupID`: Target group ID for kanban views. Omit for table/gallery
     * `previousID`: Insert after this item ID. Empty means append to the end
     * `srcs[].id`: For bound blocks (`isDetached: false`), the block ID to bind. Must match the node ID pattern
@@ -2207,7 +2207,7 @@ Removes one or more items (rows). Detached rows are deleted; bound blocks are un
 
 ### Change layout
 
-Switches the layout type of the current view between `table`, `gallery`, and `kanban`. On success the server re-renders the view and returns it (same shape as [Render](#Render)).
+Switches the layout type of the view selected by the database block between `table`, `gallery`, and `kanban`. On success the server re-renders the view and returns it (same shape as [Render](#Render)).
 
 * `/api/av/changeAttrViewLayout`
 * Parameters
@@ -2521,7 +2521,7 @@ Reorders a column within a single view's layout (e.g. a table's column order), w
   ```
 
     * `avID`: Database ID
-    * `viewID`: Target view. When empty, uses the current view
+    * `viewID`: Target view. When empty, uses the first available view
     * `keyID`: Field ID to move
     * `previousKeyID`: Field ID after which `keyID` should be placed. Empty string moves it to the first position
 * Return value

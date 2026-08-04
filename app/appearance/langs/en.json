@@ -1,4 +1,5 @@
 {
+	"disableAll": "Disable all",
 	"bazaarKernelPlugin": "Kernel plugin",
 	"newItemTemplateDefaultTip": "Uses the current notebook's default save path for new documents",
 	"hideInFileTree": "Hide in document tree",

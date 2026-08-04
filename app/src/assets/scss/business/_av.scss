@@ -2255,6 +2255,10 @@ img.av__cellassetimg {
     display: contents;
   }
 
+  .av__relation-table-selected:empty + .b3-menu__separator {
+    display: none;
+  }
+
   .av__relation-table-footer {
     border-radius: 0;
     margin: 0;

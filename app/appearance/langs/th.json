@@ -1,4 +1,5 @@
 {
+	"disableAll": "ปิดใช้ทั้งหมด",
 	"bazaarKernelPlugin": "ปลั๊กอินเคอร์เนล",
 	"newItemTemplateDefaultTip": "ใช้เส้นทางบันทึกเริ่มต้นสำหรับเอกสารใหม่ของสมุดบันทึกปัจจุบัน",
 	"hideInFileTree": "ซ่อนในแผนผังเอกสาร",

@@ -34,6 +34,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// maxSpinBlockDOMBytes 限制 spinBlockDOM 输入 DOM 的最大字节数。
+const maxSpinBlockDOMBytes = 1024 * 1024
+
 func copyStdMarkdown(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -242,6 +245,12 @@ func spinBlockDOM(c *gin.Context) {
 
 	var dom string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("dom", &dom, true, false)) {
+		return
+	}
+	if len(dom) > maxSpinBlockDOMBytes {
+		// 限制输入大小，避免解析超大 DOM 导致资源消耗
+		ret.Code = http.StatusRequestEntityTooLarge
+		ret.Msg = "dom input exceeds the maximum permitted size"
 		return
 	}
 	luteEngine := model.NewLute()

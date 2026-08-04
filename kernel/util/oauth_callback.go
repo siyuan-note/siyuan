@@ -28,9 +28,10 @@ func RenderOAuthCallbackPage(lang, title, message string, success bool) []byte {
 		`<meta name="viewport" content="width=device-width,initial-scale=1"><title>` + html.EscapeString(title) + `</title>` +
 		`<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f5f5f5;color:#202124;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}` +
 		`main{box-sizing:border-box;width:min(480px,calc(100vw - 32px));padding:40px 32px;text-align:center;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 24px #00000014}` +
+		`.brand{margin:0 0 28px;font-size:28px;font-weight:700;letter-spacing:-.5px}` +
 		`.mark{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 24px;border-radius:50%;background:#2e7d32;color:#fff;font-size:32px}.mark--error{background:#c62828}` +
 		`h1{margin:0 0 12px;font-size:24px;font-weight:600}p{margin:0;color:#5f6368;font-size:15px;line-height:1.7}` +
 		`@media(prefers-color-scheme:dark){body{background:#171717;color:#eee}main{background:#242424;border-color:#3c3c3c;box-shadow:none}p{color:#bbb}}</style>` +
-		`</head><body><main><div class="mark` + markClass + `" aria-hidden="true">` + mark + `</div><h1>` + html.EscapeString(title) +
+		`</head><body><main><div class="brand">SiYuan</div><div class="mark` + markClass + `" aria-hidden="true">` + mark + `</div><h1>` + html.EscapeString(title) +
 		`</h1><p>` + html.EscapeString(message) + `</p></main></body></html>`)
 }

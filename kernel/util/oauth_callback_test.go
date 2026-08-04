@@ -23,7 +23,7 @@ import (
 
 func TestRenderOAuthCallbackPage(t *testing.T) {
 	page := string(RenderOAuthCallbackPage("zh-CN", "已收到<script>", "返回思源 & 查看状态", true))
-	for _, expected := range []string{`lang="zh-CN"`, "已收到&lt;script&gt;", "返回思源 &amp; 查看状态", `class="mark"`} {
+	for _, expected := range []string{`lang="zh-CN"`, "已收到&lt;script&gt;", "返回思源 &amp; 查看状态", `class="brand">SiYuan</div>`, `class="mark"`} {
 		if !strings.Contains(page, expected) {
 			t.Fatalf("OAuth callback page does not contain %q: %s", expected, page)
 		}

@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Неприпустима конфігурація правил тверджень OIDC",
 	"oidcClaimRulesTip": "Масив JSON; значення в правилі поєднуються АБО, а правила — І",
 	"oidcClaimRules": "Правила тверджень OIDC",
-	"oidcAllowAll": "Дозволити всіх автентифікованих користувачів",
+	"oidcAllowAll": "Надати права адміністратора всім автентифікованим користувачам",
 	"oidcRedirectURL": "URL-адреса переспрямування OIDC",
 	"oidcScopes": "Області OIDC",
 	"oidcClientSecret": "Секрет клієнта OIDC",

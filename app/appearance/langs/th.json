@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "การกำหนดค่ากฎเคลม OIDC ไม่ถูกต้อง",
 	"oidcClaimRulesTip": "อาร์เรย์ JSON; ค่าในกฎเดียวกันใช้ OR และระหว่างกฎใช้ AND",
 	"oidcClaimRules": "กฎเคลม OIDC",
-	"oidcAllowAll": "อนุญาตผู้ใช้ที่ยืนยันตัวตนแล้วทั้งหมด",
+	"oidcAllowAll": "ให้สิทธิ์ผู้ดูแลระบบแก่ผู้ใช้ที่ยืนยันตัวตนแล้วทั้งหมด",
 	"oidcRedirectURL": "URL เปลี่ยนเส้นทาง OIDC",
 	"oidcScopes": "ขอบเขต OIDC",
 	"oidcClientSecret": "รหัสลับไคลเอนต์ OIDC",

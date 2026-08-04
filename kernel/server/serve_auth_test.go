@@ -47,8 +47,10 @@ func TestAuthPageHidesLockScreenHelpForOIDCOnly(t *testing.T) {
 	}
 
 	oidcOnlyPage := render(false)
-	if strings.Contains(oidcOnlyPage, "lock-screen-help-marker") || !strings.Contains(oidcOnlyPage, `id="oidcLogin"`) {
-		t.Fatal("OIDC-only authentication page contains lock screen help or omits OIDC login")
+	if strings.Contains(oidcOnlyPage, "lock-screen-help-marker") ||
+		!strings.Contains(oidcOnlyPage, `id="oidcLogin"`) ||
+		!strings.Contains(oidcOnlyPage, `class="auth-actions"`) {
+		t.Fatal("OIDC-only authentication page contains lock screen help or omits the OIDC action layout")
 	}
 	if !strings.Contains(render(true), "lock-screen-help-marker") {
 		t.Fatal("lock screen authentication page omits lock screen help")

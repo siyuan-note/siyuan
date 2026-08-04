@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20260804120100"
+		"updated": "20260804165000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091447-8iiuxlt",
-				"updated": "20260804120100"
+				"updated": "20260804165000"
 			},
 			"Children": [
 				{
@@ -254,7 +254,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804120101-oidclog",
-				"updated": "20260804120101"
+				"updated": "20260804165000"
 			},
 			"Children": [
 				{
@@ -268,7 +268,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804120102-oidcset",
-				"updated": "20260804120102"
+				"updated": "20260804165000"
 			},
 			"Children": [
 				{
@@ -291,7 +291,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". Remote browser access requires a public HTTPS callback URL ending in /api/system/oidc/callback. SiYuan's local listening address is valid only for a local browser login and cannot be used as the fixed callback for remote browsers or mobile apps."
+					"Data": ". Remote browser access requires a public HTTPS callback URL ending in /api/system/oidc/callback. SiYuan's local listening address is valid only for a local browser login and cannot be used as the fixed callback for remote browsers or mobile apps. Custom and Microsoft providers require an issuer URL, and GitHub requires a client secret. Every accepted identity receives administrator access. Keep the option that grants all authenticated users administrator access disabled when possible and use exact claim rules; an email rule should normally be combined with email_verified equal to true. Verify and save completes an actual provider login before activating the configuration. For Docker, configure SIYUAN_OIDC_ENABLED, SIYUAN_OIDC_PROVIDER, SIYUAN_OIDC_CLIENT_ID, and the applicable SIYUAN_OIDC_ISSUER_URL, SIYUAN_OIDC_CLIENT_SECRET, SIYUAN_OIDC_SCOPES, SIYUAN_OIDC_REDIRECT_URL, SIYUAN_OIDC_ALLOW_ALL, and SIYUAN_OIDC_CLAIM_RULES variables."
 				}
 			]
 		},
@@ -300,12 +300,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804120103-oidcmob",
-				"updated": "20260804120103"
+				"updated": "20260804165000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Native mobile apps always use siyuan:/oidc-callback; register it exactly as written with the identity provider. Google does not accept this mobile callback form, so Google login is available only in browser and desktop flows."
+					"Data": "Native mobile apps always use siyuan:/oidc-callback; register it exactly as written with the identity provider. Mobile configuration verification uses the same callback and is not saved unless the callback succeeds. Google does not accept this mobile callback form, so Google login is available only in browser and desktop flows. A redirect_uri mismatch usually means that the registered callback differs in scheme, slash, path, or port. Discovery failures usually indicate an incorrect issuer URL or an unreachable provider, while exchange failures commonly indicate an incorrect client ID or client secret."
 				}
 			]
 		}

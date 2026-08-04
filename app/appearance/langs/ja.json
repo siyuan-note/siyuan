@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "OIDC クレームルールの設定が無効です",
 	"oidcClaimRulesTip": "JSON 配列。同一ルール内の値は OR、ルール間は AND として評価されます",
 	"oidcClaimRules": "OIDC クレームルール",
-	"oidcAllowAll": "認証済みのすべてのユーザーを許可",
+	"oidcAllowAll": "認証済みのすべてのユーザーに管理者権限を付与",
 	"oidcRedirectURL": "OIDC リダイレクト URL",
 	"oidcScopes": "OIDC スコープ",
 	"oidcClientSecret": "OIDC クライアントシークレット",

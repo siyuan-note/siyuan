@@ -877,6 +877,22 @@ func setAccessAuthCode(c *gin.Context) {
 		ret.Msg = model.Conf.Language(355)
 		return
 	}
+	if aac == "" {
+		currentOIDC := model.Conf.GetOIDC()
+		var err error
+		if util.IsMobileContainer() {
+			err = model.ValidateOIDCMobileConfiguration(currentOIDC)
+		} else if !model.IsLocalRequest(c) {
+			err = model.ValidateOIDCConfigurationChange(c.Request.Context(), currentOIDC, true, false,
+				util.SiYuanAccessAuthCodeBypass)
+		}
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(369)
+			logging.LogWarnf("reject clearing the last usable access authentication method [ip=%s]: %s", c.ClientIP(), err)
+			return
+		}
+	}
 
 	model.Conf.AccessAuthCode = aac
 	model.Conf.Save()

@@ -8,7 +8,7 @@ import {showMessage} from "../../dialog/message";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
-import {isInMobileApp, saveExportFile} from "../../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, isInMobileApp, saveExportFile} from "../../protyle/util/compatibility";
 import {openByMobile} from "../../editor/openLink";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
 import {renderPublishAuthAccounts, savePublish, sendAccessSetting, updatePublishConfig} from "./accessRuntime";
@@ -88,6 +88,7 @@ const mountOIDCButton = (root: HTMLElement) => {
     root.querySelector("#oidcConfig")?.addEventListener("click", () => {
         const config = window.siyuan.config.oidc;
         const escape = (value: string) => Lute.EscapeHTMLStr(value);
+        let destroyOIDCDialog: () => void = () => undefined;
         const dialog = new Dialog({
             title: window.siyuan.languages.oidcLogin,
             content: `<div class="b3-dialog__content" id="oidcConfigForm">
@@ -131,7 +132,7 @@ const mountOIDCButton = (root: HTMLElement) => {
         <input data-field="redirectURL" class="b3-text-field fn__block" spellcheck="false" value="${escape(config.redirectURL)}">
     </div>
     <label class="b3-label b3-label--inner fn__flex">
-        <div class="fn__flex-1"><div class="config-name">${window.siyuan.languages.oidcAllowAll}</div></div>
+        <div class="fn__flex-1"><div class="config-name ft__error">${window.siyuan.languages.oidcAllowAll}</div></div>
         <span class="fn__space"></span>
         <input type="checkbox" data-field="allowAll" class="b3-switch fn__flex-center"${config.allowAll ? " checked" : ""}>
     </label>
@@ -146,6 +147,8 @@ const mountOIDCButton = (root: HTMLElement) => {
 <div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
             width: isMobile() ? "92vw" : "620px",
             height: "80vh",
+            disableClose: true,
+            destroyCallback: () => destroyOIDCDialog(),
         });
         const form = dialog.element.querySelector<HTMLElement>("#oidcConfigForm");
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
@@ -154,6 +157,12 @@ const mountOIDCButton = (root: HTMLElement) => {
         let validationPollTimer = 0;
         let validationWindow: Window | null = null;
         let validationCancelled = false;
+        let validationPollToken = "";
+        let validationPollInFlight = false;
+        let validationActivating = false;
+        let mobileCallbackInstalled = false;
+        let previousMobileCallback: ((callbackURL: string) => void) | undefined;
+        let previousMobileAuthError: ((message: string) => void) | undefined;
         const refreshSections = () => {
             const provider = form.querySelector<HTMLSelectElement>('[data-field="provider"]').value;
             const enabled = form.querySelector<HTMLInputElement>('[data-field="enabled"]').checked;
@@ -173,6 +182,30 @@ const mountOIDCButton = (root: HTMLElement) => {
             window.clearInterval(validationPollTimer);
             validationPollTimer = 0;
         };
+        const restoreMobileCallback = () => {
+            if (!mobileCallbackInstalled) {
+                return;
+            }
+            window.handleOIDCCallback = previousMobileCallback;
+            window.handleOIDCAuthError = previousMobileAuthError;
+            previousMobileCallback = undefined;
+            previousMobileAuthError = undefined;
+            mobileCallbackInstalled = false;
+        };
+        const cancelValidation = () => {
+            validationCancelled = true;
+            stopValidation();
+            validationWindow?.close();
+            validationWindow = null;
+            restoreMobileCallback();
+            if (validationPollToken && !validationActivating) {
+                void fetchSyncPost("/api/system/oidc/validateCancel", {
+                    pollToken: validationPollToken,
+                }, undefined, false).catch(() => undefined);
+            }
+            validationPollToken = "";
+        };
+        destroyOIDCDialog = cancelValidation;
         const setValidationPending = (pending: boolean) => {
             buttons[1].disabled = pending;
             form.querySelector<HTMLElement>('[data-section="validationStatus"]').classList.toggle("fn__none", !pending);
@@ -181,15 +214,58 @@ const mountOIDCButton = (root: HTMLElement) => {
             }
         };
         const validationFailed = (message?: string) => {
-            stopValidation();
-            validationWindow?.close();
-            validationWindow = null;
-            setValidationPending(false);
+            validationActivating = false;
+            buttons[0].disabled = false;
+            cancelValidation();
+            if (dialog.element.isConnected) {
+                setValidationPending(false);
+            }
             showMessage(message || window.siyuan.languages.oidcVerificationFailed, 6000, "error");
+        };
+        const installMobileCallback = () => {
+            if (!isInMobileApp() || mobileCallbackInstalled) {
+                return;
+            }
+            previousMobileCallback = window.handleOIDCCallback;
+            previousMobileAuthError = window.handleOIDCAuthError;
+            mobileCallbackInstalled = true;
+            const handleMobileCallback = (callbackURL: string, retryCount = 0) => {
+                if (validationCancelled || !dialog.element.isConnected) {
+                    return;
+                }
+                void fetchSyncPost("/api/system/oidc/mobileCallback", {callbackURL}, undefined, false).then((response) => {
+                    if (validationCancelled || !dialog.element.isConnected) {
+                        return;
+                    }
+                    if (response.code !== 0) {
+                        validationFailed(response.msg);
+                    }
+                }).catch((error) => {
+                    if (retryCount < 4 && !validationCancelled && dialog.element.isConnected) {
+                        window.setTimeout(() => handleMobileCallback(callbackURL, retryCount + 1), 1000 * (retryCount + 1));
+                        return;
+                    }
+                    validationFailed(error instanceof Error ? error.message : String(error));
+                });
+            };
+            window.handleOIDCCallback = handleMobileCallback;
+            window.handleOIDCAuthError = (message: string) => validationFailed(message);
         };
         const openValidationURL = (url: string) => {
             if (validationWindow) {
                 validationWindow.location.href = url;
+                return;
+            }
+            if (isInAndroid()) {
+                window.JSAndroid.openAuthURL(url);
+                return;
+            }
+            if (isInIOS()) {
+                window.webkit.messageHandlers.openAuthURL.postMessage(url);
+                return;
+            }
+            if (isInHarmony()) {
+                window.JSHarmony.openAuthURL(url);
                 return;
             }
             /// #if !BROWSER
@@ -199,8 +275,15 @@ const mountOIDCButton = (root: HTMLElement) => {
             /// #endif
         };
         const pollValidation = async (pollToken: string) => {
+            if (validationCancelled || validationPollInFlight || validationActivating) {
+                return;
+            }
+            validationPollInFlight = true;
             try {
                 const response = await fetchSyncPost("/api/system/oidc/validatePoll", {pollToken}, undefined, false);
+                if (validationCancelled || !dialog.element.isConnected) {
+                    return;
+                }
                 if (response.code !== 0) {
                     validationFailed(response.msg);
                     return;
@@ -210,17 +293,26 @@ const mountOIDCButton = (root: HTMLElement) => {
                 }
                 stopValidation();
                 validationWindow?.close();
-                window.siyuan.config.oidc = response.data.config;
+                validationActivating = true;
+                buttons[0].disabled = true;
+                const activation = await fetchSyncPost("/api/system/oidc/validateActivate", {pollToken}, undefined, false);
+                if (activation.code !== 0) {
+                    validationFailed(activation.msg);
+                    return;
+                }
+                validationPollToken = "";
+                restoreMobileCallback();
+                window.siyuan.config.oidc = activation.data.config;
                 showMessage(window.siyuan.languages.oidcVerificationSuccess);
                 dialog.destroy();
             } catch (error) {
                 validationFailed(error instanceof Error ? error.message : String(error));
+            } finally {
+                validationPollInFlight = false;
             }
         };
         buttons[0].addEventListener("click", () => {
-            validationCancelled = true;
-            stopValidation();
-            validationWindow?.close();
+            cancelValidation();
             dialog.destroy();
         });
         buttons[1].addEventListener("click", () => {
@@ -240,6 +332,7 @@ const mountOIDCButton = (root: HTMLElement) => {
                 };
                 if (nextConfig.enabled) {
                     validationCancelled = false;
+                    validationActivating = false;
                     setValidationPending(true);
                     buttons[1].textContent = window.siyuan.languages.oidcVerifying;
                     if (isBrowser() && !isInMobileApp()) {
@@ -253,12 +346,19 @@ const mountOIDCButton = (root: HTMLElement) => {
                     void fetchSyncPost("/api/system/oidc/validate", nextConfig, undefined, false).then((response) => {
                         if (validationCancelled || !dialog.element.isConnected) {
                             validationWindow?.close();
+                            if (response.code === 0 && response.data.pollToken) {
+                                void fetchSyncPost("/api/system/oidc/validateCancel", {
+                                    pollToken: response.data.pollToken,
+                                }, undefined, false).catch(() => undefined);
+                            }
                             return;
                         }
                         if (response.code !== 0) {
                             validationFailed(response.msg);
                             return;
                         }
+                        validationPollToken = response.data.pollToken;
+                        installMobileCallback();
                         openValidationURL(response.data.authURL);
                         validationPollTimer = window.setInterval(() => {
                             void pollValidation(response.data.pollToken);

@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Konfigurasi aturan klaim OIDC tidak valid",
 	"oidcClaimRulesTip": "Larik JSON; nilai dalam satu aturan memakai ATAU, sedangkan antaraturan memakai DAN",
 	"oidcClaimRules": "Aturan klaim OIDC",
-	"oidcAllowAll": "Izinkan semua pengguna terautentikasi",
+	"oidcAllowAll": "Berikan akses administrator kepada semua pengguna terautentikasi",
 	"oidcRedirectURL": "URL pengalihan OIDC",
 	"oidcScopes": "Cakupan OIDC",
 	"oidcClientSecret": "Rahasia klien OIDC",

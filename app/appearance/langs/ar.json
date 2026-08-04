@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "إعداد قواعد مطالبات OIDC غير صالح",
 	"oidcClaimRulesTip": "مصفوفة JSON؛ القيم داخل القاعدة مرتبطة بـ OR والقواعد مرتبطة بـ AND",
 	"oidcClaimRules": "قواعد مطالبات OIDC",
-	"oidcAllowAll": "السماح لجميع المستخدمين المصادق عليهم",
+	"oidcAllowAll": "منح صلاحيات المسؤول لجميع المستخدمين المصادق عليهم",
 	"oidcRedirectURL": "عنوان URL لإعادة توجيه OIDC",
 	"oidcScopes": "نطاقات OIDC",
 	"oidcClientSecret": "سر عميل OIDC",

@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Configuration des règles de revendication OIDC non valide",
 	"oidcClaimRulesTip": "Tableau JSON ; les valeurs d’une règle utilisent OU, tandis que les règles utilisent ET",
 	"oidcClaimRules": "Règles de revendication OIDC",
-	"oidcAllowAll": "Autoriser tous les utilisateurs authentifiés",
+	"oidcAllowAll": "Accorder l’accès administrateur à tous les utilisateurs authentifiés",
 	"oidcRedirectURL": "URL de redirection OIDC",
 	"oidcScopes": "Portées OIDC",
 	"oidcClientSecret": "Secret client OIDC",

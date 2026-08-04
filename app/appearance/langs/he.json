@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "תצורת כללי תביעות OIDC אינה תקינה",
 	"oidcClaimRulesTip": "מערך JSON; ערכים בתוך כלל משתמשים ב-OR וכללים משתמשים ב-AND",
 	"oidcClaimRules": "כללי תביעות OIDC",
-	"oidcAllowAll": "אפשר לכל המשתמשים המאומתים",
+	"oidcAllowAll": "הענק גישת מנהל לכל המשתמשים המאומתים",
 	"oidcRedirectURL": "כתובת הפניה של OIDC",
 	"oidcScopes": "טווחי OIDC",
 	"oidcClientSecret": "סוד לקוח OIDC",

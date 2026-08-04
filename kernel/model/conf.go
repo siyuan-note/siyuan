@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"sort"
 	"strconv"
@@ -180,6 +181,28 @@ func (appConf *AppConf) SetOIDC(config *conf.OIDC) {
 	appConf.OIDC = config
 	appConf.m.Unlock()
 	appConf.Save()
+}
+
+// CompareAndSetOIDC 仅在当前配置版本仍与预期一致时写入 OIDC 配置。
+func (appConf *AppConf) CompareAndSetOIDC(expectedVersion string, config *conf.OIDC) (changed, swapped bool) {
+	appConf.m.Lock()
+	current := appConf.OIDC
+	if current == nil {
+		current = conf.NewOIDC()
+	}
+	if oidcConfigurationVersionWithKey(appConf.CookieKey, current) != expectedVersion {
+		appConf.m.Unlock()
+		return false, false
+	}
+	changed = !reflect.DeepEqual(current, config)
+	if changed {
+		appConf.OIDC = config
+	}
+	appConf.m.Unlock()
+	if changed {
+		appConf.Save()
+	}
+	return changed, true
 }
 
 func (conf *AppConf) SetAI(ai *conf.AI) {

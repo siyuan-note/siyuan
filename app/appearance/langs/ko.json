@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "OIDC 클레임 규칙 구성이 올바르지 않습니다",
 	"oidcClaimRulesTip": "JSON 배열이며 한 규칙 안의 값은 OR, 규칙 사이는 AND로 평가됩니다",
 	"oidcClaimRules": "OIDC 클레임 규칙",
-	"oidcAllowAll": "인증된 모든 사용자 허용",
+	"oidcAllowAll": "인증된 모든 사용자에게 관리자 권한 부여",
 	"oidcRedirectURL": "OIDC 리디렉션 URL",
 	"oidcScopes": "OIDC 범위",
 	"oidcClientSecret": "OIDC 클라이언트 비밀",

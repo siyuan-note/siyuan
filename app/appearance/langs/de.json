@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Ungültige Konfiguration der OIDC-Anspruchsregeln",
 	"oidcClaimRulesTip": "JSON-Array; Werte innerhalb einer Regel sind ODER-verknüpft, Regeln sind UND-verknüpft",
 	"oidcClaimRules": "OIDC-Anspruchsregeln",
-	"oidcAllowAll": "Alle authentifizierten Benutzer zulassen",
+	"oidcAllowAll": "Allen authentifizierten Benutzern Administratorzugriff gewähren",
 	"oidcRedirectURL": "OIDC-Weiterleitungs-URL",
 	"oidcScopes": "OIDC-Bereiche",
 	"oidcClientSecret": "OIDC-Client-Geheimnis",

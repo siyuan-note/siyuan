@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Configuração inválida das regras de declaração OIDC",
 	"oidcClaimRulesTip": "Matriz JSON; os valores de uma regra usam OU, enquanto as regras usam E",
 	"oidcClaimRules": "Regras de declaração OIDC",
-	"oidcAllowAll": "Permitir todos os usuários autenticados",
+	"oidcAllowAll": "Conceder acesso de administrador a todos os usuários autenticados",
 	"oidcRedirectURL": "URL de redirecionamento OIDC",
 	"oidcScopes": "Escopos OIDC",
 	"oidcClientSecret": "Segredo do cliente OIDC",

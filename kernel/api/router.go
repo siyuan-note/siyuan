@@ -57,6 +57,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setAccessAuthCode", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAccessAuthCode)
 	ginServer.Handle("POST", "/api/system/setOIDC", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setOIDC)
 	ginServer.Handle("POST", "/api/system/oidc/validate", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.OIDCValidateStart)
+	ginServer.Handle("POST", "/api/system/oidc/validateActivate", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.OIDCValidateActivate)
+	ginServer.Handle("POST", "/api/system/oidc/validateCancel", model.CheckAuth, model.CheckAdminRole, model.OIDCValidateCancel)
 	ginServer.Handle("POST", "/api/system/setFollowSystemLockScreen", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFollowSystemLockScreen)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkServe)
 	ginServer.Handle("POST", "/api/system/setNetworkServeTLS", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkServeTLS)

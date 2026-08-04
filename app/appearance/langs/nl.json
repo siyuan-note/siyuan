@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Ongeldige configuratie van OIDC-claimregels",
 	"oidcClaimRulesTip": "JSON-array; waarden binnen een regel gebruiken OF en regels gebruiken EN",
 	"oidcClaimRules": "OIDC-claimregels",
-	"oidcAllowAll": "Alle geverifieerde gebruikers toestaan",
+	"oidcAllowAll": "Alle geverifieerde gebruikers beheerderstoegang geven",
 	"oidcRedirectURL": "OIDC-omleidings-URL",
 	"oidcScopes": "OIDC-bereiken",
 	"oidcClientSecret": "OIDC-clientgeheim",

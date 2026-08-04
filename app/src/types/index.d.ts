@@ -195,6 +195,8 @@ interface CSSStyleDeclarationElectron extends CSSStyleDeclaration {
 }
 
 interface Window {
+    handleOIDCCallback?: (callbackURL: string) => void;
+    handleOIDCAuthError?: (message: string) => void;
     DOMPurify: {
         sanitize(dirty: string, options?: any): string;
     };
@@ -272,6 +274,7 @@ interface Window {
             saveExportFile: { postMessage: (url: string) => void }
             saveExportFileV2?: { postMessage: (data: {uri: string, requestID: string}) => void }
             openLink: { postMessage: (url: string) => void }
+            openAuthURL: { postMessage: (url: string) => void }
             startKernelFast: { postMessage: (url: string) => void }
             changeStatusBar: { postMessage: (url: string) => void }
             setClipboard: { postMessage: (url: string) => void }
@@ -296,6 +299,7 @@ interface Window {
     };
     siyuan: ISiyuan;
     JSAndroid: {
+        openAuthURL(url: string): void
         returnDesktop(): void
         openExternal(url: string): void
         exportByDefault(url: string): void
@@ -321,6 +325,7 @@ interface Window {
         logInputEvent?(details: string): void
     };
     JSHarmony: {
+        openAuthURL(url: string): void
         showKeyboard(): void
         hideKeyboard(): void
         openExternal(url: string): void

@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Invalid OIDC claim rule configuration",
 	"oidcClaimRulesTip": "JSON array; values within a rule use OR, while rules use AND",
 	"oidcClaimRules": "OIDC claim rules",
-	"oidcAllowAll": "Allow all authenticated users",
+	"oidcAllowAll": "Grant administrator access to all authenticated users",
 	"oidcRedirectURL": "OIDC redirect URL",
 	"oidcScopes": "OIDC scopes",
 	"oidcClientSecret": "OIDC client secret",

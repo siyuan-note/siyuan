@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "OIDC क्लेम नियम कॉन्फ़िगरेशन अमान्य है",
 	"oidcClaimRulesTip": "JSON सरणी; एक नियम के मान OR और अलग नियम AND का उपयोग करते हैं",
 	"oidcClaimRules": "OIDC क्लेम नियम",
-	"oidcAllowAll": "सभी प्रमाणित उपयोगकर्ताओं को अनुमति दें",
+	"oidcAllowAll": "सभी प्रमाणित उपयोगकर्ताओं को व्यवस्थापक पहुँच दें",
 	"oidcRedirectURL": "OIDC रीडायरेक्ट URL",
 	"oidcScopes": "OIDC स्कोप",
 	"oidcClientSecret": "OIDC क्लाइंट सीक्रेट",

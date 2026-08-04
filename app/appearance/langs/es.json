@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Configuración de reglas de notificaciones OIDC no válida",
 	"oidcClaimRulesTip": "Matriz JSON; los valores de una regla usan O y las reglas usan Y",
 	"oidcClaimRules": "Reglas de notificaciones OIDC",
-	"oidcAllowAll": "Permitir a todos los usuarios autenticados",
+	"oidcAllowAll": "Conceder acceso de administrador a todos los usuarios autenticados",
 	"oidcRedirectURL": "URL de redirección OIDC",
 	"oidcScopes": "Ámbitos OIDC",
 	"oidcClientSecret": "Secreto del cliente OIDC",

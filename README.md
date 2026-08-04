@@ -221,9 +221,9 @@ docker run -d \
   - `SIYUAN_OIDC_CLIENT_SECRET`: Optional client secret for OpenID Connect providers; required by the GitHub OAuth adapter. Every authorization-code flow also uses PKCE
   - `SIYUAN_OIDC_SCOPES`: Comma- or space-separated scopes; `openid` is always included
   - `SIYUAN_OIDC_REDIRECT_URL`: Public HTTPS callback URL ending in `/api/system/oidc/callback`, required for remote browser access
-  - `SIYUAN_OIDC_ALLOW_ALL`: Explicitly allow every identity authenticated by the provider
-  - `SIYUAN_OIDC_CLAIM_RULES`: JSON array of claim rules used when allow-all is disabled, for example `[{"claim":"email","operator":"equals","values":["user@example.com"]}]`; values within a rule use OR, while rules use AND
-  - Native mobile apps use the fixed callback URI `siyuan:/oidc-callback`; register it exactly as written. Custom providers, Microsoft, and GitHub can be used only when their application registration accepts this callback URI. Google does not accept this private-use URI for its Android client type, so Google login is limited to browser and desktop flows
+  - `SIYUAN_OIDC_ALLOW_ALL`: Explicitly grant SiYuan administrator access to every identity authenticated by the provider
+  - `SIYUAN_OIDC_CLAIM_RULES`: JSON array of claim rules used when allow-all is disabled, for example `[{"claim":"email","operator":"equals","values":["user@example.com"]},{"claim":"email_verified","operator":"equals","values":["true"]}]`; values within a rule use OR, while rules use AND
+  - Native mobile apps use the fixed callback URI `siyuan:/oidc-callback`; register it exactly as written. Mobile configuration verification uses this callback before saving. Custom providers, Microsoft, and GitHub can be used only when their application registration accepts this callback URI. Google does not accept this private-use URI for its Android client type, so Google login is limited to browser and desktop flows
 - `SIYUAN_LANG`: Interface language (optional, defaults to `en` if unset in Docker). Accepts BCP 47 tags like `zh-CN`/`zh-TW`/`en`/`ja`/`pt-BR`; legacy underscore values like `zh_CN`/`en_US` are also accepted for backward compatibility. Omit it if you want the language chosen in **Settings** to persist across restarts; if set, it is applied on every startup and overrides the saved setting
   - Alternatively, use the `--lang` command-line parameter. If both are set, the command-line takes priority
 

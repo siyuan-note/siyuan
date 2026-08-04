@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "OIDC 声明规则配置无效",
 	"oidcClaimRulesTip": "JSON 数组；同一规则内的值为或关系，不同规则之间为与关系",
 	"oidcClaimRules": "OIDC 声明规则",
-	"oidcAllowAll": "允许所有已认证用户",
+	"oidcAllowAll": "授予所有已认证用户管理员权限",
 	"oidcRedirectURL": "OIDC 回调地址",
 	"oidcScopes": "OIDC 授权范围",
 	"oidcClientSecret": "OIDC 客户端密钥",

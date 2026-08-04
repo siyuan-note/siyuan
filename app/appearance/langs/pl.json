@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Nieprawidłowa konfiguracja reguł oświadczeń OIDC",
 	"oidcClaimRulesTip": "Tablica JSON; wartości w regule są łączone operatorem LUB, a reguły operatorem I",
 	"oidcClaimRules": "Reguły oświadczeń OIDC",
-	"oidcAllowAll": "Zezwalaj wszystkim uwierzytelnionym użytkownikom",
+	"oidcAllowAll": "Przyznaj dostęp administratora wszystkim uwierzytelnionym użytkownikom",
 	"oidcRedirectURL": "Adres URL przekierowania OIDC",
 	"oidcScopes": "Zakresy OIDC",
 	"oidcClientSecret": "Sekret klienta OIDC",

@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Geçersiz OIDC talep kuralı yapılandırması",
 	"oidcClaimRulesTip": "JSON dizisi; bir kural içindeki değerler VEYA, kurallar ise VE kullanır",
 	"oidcClaimRules": "OIDC talep kuralları",
-	"oidcAllowAll": "Kimliği doğrulanmış tüm kullanıcılara izin ver",
+	"oidcAllowAll": "Kimliği doğrulanmış tüm kullanıcılara yönetici erişimi ver",
 	"oidcRedirectURL": "OIDC yönlendirme URL'si",
 	"oidcScopes": "OIDC kapsamları",
 	"oidcClientSecret": "OIDC istemci gizli anahtarı",

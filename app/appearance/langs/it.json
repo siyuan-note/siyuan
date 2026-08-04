@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Configurazione delle regole di attestazione OIDC non valida",
 	"oidcClaimRulesTip": "Array JSON; i valori in una regola usano OR, mentre le regole usano AND",
 	"oidcClaimRules": "Regole di attestazione OIDC",
-	"oidcAllowAll": "Consenti tutti gli utenti autenticati",
+	"oidcAllowAll": "Concedi l’accesso amministratore a tutti gli utenti autenticati",
 	"oidcRedirectURL": "URL di reindirizzamento OIDC",
 	"oidcScopes": "Ambiti OIDC",
 	"oidcClientSecret": "Segreto client OIDC",

@@ -72,11 +72,18 @@ func oidcConfigurationVersion(config *conf.OIDC) string {
 	if Conf == nil || Conf.CookieKey == "" || config == nil {
 		return ""
 	}
+	return oidcConfigurationVersionWithKey(Conf.CookieKey, config)
+}
+
+func oidcConfigurationVersionWithKey(cookieKey string, config *conf.OIDC) string {
+	if cookieKey == "" || config == nil {
+		return ""
+	}
 	data, err := gulu.JSON.MarshalJSON(config)
 	if err != nil {
 		return ""
 	}
-	mac := hmac.New(sha256.New, []byte(Conf.CookieKey))
+	mac := hmac.New(sha256.New, []byte(cookieKey))
 	_, _ = mac.Write(data)
 	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 }

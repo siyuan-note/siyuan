@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -48,26 +47,27 @@ const (
 )
 
 type oidcTransaction struct {
-	State         string
-	Nonce         string
-	CodeVerifier  string
-	PollToken     string
-	Binding       string
-	ClientIP      string
-	Flow          string
-	RedirectURL   string
-	To            string
-	ConfigVersion string
-	RememberMe    bool
-	Claimed       bool
-	Completed     bool
-	Success       bool
-	Message       string
-	ExpiresAt     time.Time
-	Done          chan struct{}
-	Config        *conf.OIDC
-	Provider      *oidc_provider.Provider
-	Activated     bool
+	State            string
+	Nonce            string
+	CodeVerifier     string
+	PollToken        string
+	Binding          string
+	ClientIP         string
+	Flow             string
+	RedirectURL      string
+	To               string
+	ConfigVersion    string
+	RememberMe       bool
+	Claimed          bool
+	Completed        bool
+	Success          bool
+	Message          string
+	ExpiresAt        time.Time
+	Done             chan struct{}
+	Config           *conf.OIDC
+	Provider         *oidc_provider.Provider
+	Activated        bool
+	MobileValidation bool
 }
 
 var oidcTransactions = struct {
@@ -107,6 +107,13 @@ func OIDCValidateStart(c *gin.Context) {
 		return
 	}
 	config.Normalize()
+	mobileValidation := util.IsMobileContainer()
+	if mobileValidation && config.Provider == conf.OIDCProviderGoogle {
+		ret.Code = -1
+		ret.Msg = oidcLanguage(368, "This OIDC provider does not support the SiYuan mobile callback URI")
+		logging.LogErrorf("validate mobile OIDC candidate configuration failed [ip=%s]: Google does not support the fixed SiYuan mobile OIDC callback URI", c.ClientIP())
+		return
+	}
 	requireRemoteAuthentication := util.ContainerDocker == util.Container || !IsLocalRequest(c)
 	if err := ValidateOIDCConfigurationChange(c.Request.Context(), config, requireRemoteAuthentication,
 		Conf.AccessAuthCode != "", util.SiYuanAccessAuthCodeBypass); err != nil {
@@ -115,7 +122,7 @@ func OIDCValidateStart(c *gin.Context) {
 		logging.LogErrorf("validate OIDC candidate configuration failed [ip=%s]: %s", c.ClientIP(), err)
 		return
 	}
-	redirectURL, err := oidcValidationRedirectURL(c, config)
+	redirectURL, err := oidcValidationRedirectURL(c, config, mobileValidation)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
@@ -150,6 +157,7 @@ func OIDCValidateStart(c *gin.Context) {
 	}
 	transaction.Config = config
 	transaction.Provider = provider
+	transaction.MobileValidation = mobileValidation
 	if err = session.Save(c); err != nil {
 		ret.Code = -1
 		ret.Msg = Conf.Language(258)
@@ -263,7 +271,7 @@ func OIDCCallback(c *gin.Context) {
 		respondRepeatedOIDCCallback(c, transaction)
 		return
 	}
-	if transaction.Flow == oidcFlowMobile {
+	if transaction.Flow == oidcFlowMobile || (transaction.Flow == oidcFlowValidate && transaction.MobileValidation) {
 		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
 		writeOIDCCallbackPage(c, false, oidcUserMessage())
 		return
@@ -333,6 +341,10 @@ func OIDCMobileCallback(c *gin.Context) {
 		return
 	}
 	if repeated {
+		if transaction.Flow == oidcFlowValidate && transaction.MobileValidation && transaction.Success {
+			ret.Data = map[string]any{"validation": true}
+			return
+		}
 		if transaction.Flow != oidcFlowMobile || !transaction.Success {
 			ret.Code = -1
 			ret.Msg = oidcUserMessage()
@@ -346,7 +358,7 @@ func OIDCMobileCallback(c *gin.Context) {
 		ret.Data = map[string]any{"to": safeOIDCRedirectTarget(transaction.To)}
 		return
 	}
-	if transaction.Flow != oidcFlowMobile {
+	if transaction.Flow != oidcFlowMobile && !(transaction.Flow == oidcFlowValidate && transaction.MobileValidation) {
 		ret.Code = -1
 		ret.Msg = oidcUserMessage()
 		completeOIDCTransaction(transaction.State, false, ret.Msg)
@@ -364,6 +376,11 @@ func OIDCMobileCallback(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = oidcUserMessage()
 		completeOIDCTransaction(transaction.State, false, ret.Msg)
+		return
+	}
+	if transaction.Flow == oidcFlowValidate {
+		completeOIDCTransaction(transaction.State, true, "")
+		ret.Data = map[string]any{"validation": true}
 		return
 	}
 	if err = authenticateOIDCSession(c, transaction.RememberMe); err != nil {
@@ -434,6 +451,19 @@ func OIDCValidatePoll(c *gin.Context) {
 		ret.Msg = transaction.Message
 		return
 	}
+	ret.Data = map[string]any{"status": "completed"}
+}
+
+func OIDCValidateActivate(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	input := &oidcPollInput{}
+	if err := c.ShouldBindJSON(input); err != nil || input.PollToken == "" {
+		ret.Code = -1
+		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+		return
+	}
+	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	activated, err := activateOIDCValidation(input.PollToken, workspaceSession.OIDCBinding)
 	if err != nil {
 		ret.Code = -1
@@ -456,6 +486,22 @@ func OIDCValidatePoll(c *gin.Context) {
 		return
 	}
 	ret.Data = map[string]any{"status": "completed", "config": masked.OIDC}
+}
+
+func OIDCValidateCancel(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	input := &oidcPollInput{}
+	if err := c.ShouldBindJSON(input); err != nil || input.PollToken == "" {
+		ret.Code = -1
+		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+		return
+	}
+	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
+	if !cancelOIDCValidation(input.PollToken, workspaceSession.OIDCBinding) {
+		ret.Code = -1
+		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+	}
 }
 
 func validateOIDCConfiguration() error {
@@ -501,6 +547,16 @@ func ValidateOIDCConfiguration(config *conf.OIDC) error {
 				return errors.New("OIDC claim rule values cannot be empty")
 			}
 		}
+	}
+	return nil
+}
+
+func ValidateOIDCMobileConfiguration(config *conf.OIDC) error {
+	if err := ValidateOIDCConfiguration(config); err != nil {
+		return err
+	}
+	if config.Provider == conf.OIDCProviderGoogle {
+		return errors.New("Google does not support the fixed SiYuan mobile OIDC callback URI")
 	}
 	return nil
 }
@@ -559,7 +615,10 @@ func effectiveOIDCRedirectURL(c *gin.Context, flow string) (string, error) {
 	return scheme + "://" + host + "/api/system/oidc/callback", nil
 }
 
-func oidcValidationRedirectURL(c *gin.Context, config *conf.OIDC) (string, error) {
+func oidcValidationRedirectURL(c *gin.Context, config *conf.OIDC, mobile bool) (string, error) {
+	if mobile {
+		return oidcMobileRedirectURL, nil
+	}
 	if config.RedirectURL != "" {
 		return validatePublicOIDCRedirectURL(config.RedirectURL)
 	}
@@ -776,17 +835,28 @@ func activateOIDCValidation(pollToken, binding string) (activated bool, err erro
 	if transaction.Config == nil {
 		return false, errors.New("OIDC validation configuration is missing")
 	}
-	if transaction.ConfigVersion != oidcConfigurationVersion(Conf.GetOIDC()) {
+	configurationChanged, swapped := Conf.CompareAndSetOIDC(transaction.ConfigVersion, transaction.Config)
+	if !swapped {
 		deleteOIDCTransactionLocked(state)
 		return false, errors.New("OIDC configuration changed during validation")
-	}
-	configurationChanged := !reflect.DeepEqual(Conf.GetOIDC(), transaction.Config)
-	if configurationChanged {
-		Conf.SetOIDC(transaction.Config)
 	}
 	transaction.Config = nil
 	transaction.Activated = true
 	return configurationChanged, nil
+}
+
+func cancelOIDCValidation(pollToken, binding string) bool {
+	oidcTransactions.Lock()
+	defer oidcTransactions.Unlock()
+	cleanupOIDCTransactionsLocked()
+	state := oidcTransactions.byPoll[pollToken]
+	transaction := oidcTransactions.byState[state]
+	if transaction == nil || transaction.Flow != oidcFlowValidate || transaction.Activated || transaction.Binding == "" ||
+		binding == "" || transaction.Binding != binding {
+		return false
+	}
+	deleteOIDCTransactionLocked(state)
+	return true
 }
 
 func deleteOIDCTransactionLocked(state string) {

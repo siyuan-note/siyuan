@@ -18,6 +18,8 @@ import (
 	"testing"
 	"time"
 
+	ginSessions "github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -80,6 +82,21 @@ func TestValidateOIDCConfigurationRejectsInsecureIssuer(t *testing.T) {
 	}
 }
 
+func TestValidateOIDCMobileConfigurationRejectsUnsupportedProvider(t *testing.T) {
+	setupOIDCTest(t)
+	config := Conf.GetOIDC()
+	config.Provider = conf.OIDCProviderGoogle
+	config.IssuerURL = ""
+	if err := ValidateOIDCMobileConfiguration(config); err == nil {
+		t.Fatal("Google was accepted for the fixed mobile OIDC callback")
+	}
+	config.Provider = conf.OIDCProviderCustom
+	config.IssuerURL = "https://issuer.example.com"
+	if err := ValidateOIDCMobileConfiguration(config); err != nil {
+		t.Fatalf("custom OIDC provider was rejected for mobile validation: %s", err)
+	}
+}
+
 func TestValidatePublicOIDCRedirectURL(t *testing.T) {
 	valid := "https://notes.example.com/api/system/oidc/callback"
 	if redirect, err := validatePublicOIDCRedirectURL(valid); err != nil || redirect != valid {
@@ -113,6 +130,9 @@ func TestEffectiveOIDCRedirectURLForLocalAndRemoteFlows(t *testing.T) {
 	}
 	if redirect, err := effectiveOIDCRedirectURL(local, oidcFlowMobile); err != nil || redirect != oidcMobileRedirectURL {
 		t.Fatalf("mobile OIDC redirect changed: %q, %v", redirect, err)
+	}
+	if redirect, err := oidcValidationRedirectURL(local, Conf.GetOIDC(), true); err != nil || redirect != oidcMobileRedirectURL {
+		t.Fatalf("mobile OIDC validation did not use the native callback: %q, %v", redirect, err)
 	}
 
 	Conf.OIDC.RedirectURL = "https://notes.example.com/api/system/oidc/callback"
@@ -327,6 +347,56 @@ func TestActivateOIDCValidationRejectsChangedConfiguration(t *testing.T) {
 	}
 }
 
+func TestCancelOIDCValidationPreventsActivation(t *testing.T) {
+	setupOIDCTest(t)
+	candidate := Conf.GetOIDC()
+	candidate.ClientID = "cancelled-client-id"
+	transaction := &oidcTransaction{
+		State:         "cancelled-validation-state",
+		PollToken:     "cancelled-validation-poll-token",
+		Binding:       "validation-binding",
+		Flow:          oidcFlowValidate,
+		ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()),
+		Completed:     true,
+		Success:       true,
+		Config:        candidate,
+		ExpiresAt:     time.Now().Add(time.Minute),
+	}
+	if err := storeOIDCTransaction(transaction); err != nil {
+		t.Fatal(err)
+	}
+	if !cancelOIDCValidation(transaction.PollToken, transaction.Binding) {
+		t.Fatal("bound OIDC validation could not be cancelled")
+	}
+	if activated, err := activateOIDCValidation(transaction.PollToken, transaction.Binding); err == nil || activated {
+		t.Fatalf("cancelled OIDC validation was activated: activated=%v, err=%v", activated, err)
+	}
+	if Conf.GetOIDC().ClientID == candidate.ClientID {
+		t.Fatal("cancelled OIDC validation changed the active configuration")
+	}
+}
+
+func TestCompareAndSetOIDCRejectsStaleVersion(t *testing.T) {
+	setupOIDCTest(t)
+	previousReadOnly := util.ReadOnly
+	util.ReadOnly = true
+	t.Cleanup(func() { util.ReadOnly = previousReadOnly })
+	expectedVersion := oidcConfigurationVersion(Conf.GetOIDC())
+	first := Conf.GetOIDC()
+	first.ClientID = "first-client-id"
+	if changed, swapped := Conf.CompareAndSetOIDC(expectedVersion, first); !changed || !swapped {
+		t.Fatalf("current OIDC configuration was not swapped: changed=%v, swapped=%v", changed, swapped)
+	}
+	stale := Conf.GetOIDC()
+	stale.ClientID = "stale-client-id"
+	if changed, swapped := Conf.CompareAndSetOIDC(expectedVersion, stale); changed || swapped {
+		t.Fatalf("stale OIDC configuration was swapped: changed=%v, swapped=%v", changed, swapped)
+	}
+	if Conf.GetOIDC().ClientID != first.ClientID {
+		t.Fatal("stale OIDC configuration overwrote the current configuration")
+	}
+}
+
 func TestApplyOIDCEnvironmentOverridesStoredConfiguration(t *testing.T) {
 	t.Setenv("SIYUAN_OIDC_ENABLED", "true")
 	t.Setenv("SIYUAN_OIDC_PROVIDER", conf.OIDCProviderGitHub)
@@ -512,6 +582,36 @@ func TestOIDCSessionVersionInvalidatesOnConfigurationChange(t *testing.T) {
 	workspaceSession.AccessAuthCode = "access-code"
 	if !IsWorkspaceSessionAuthenticated(workspaceSession) {
 		t.Fatal("valid access-code session should remain available as an independent login method")
+	}
+}
+
+func TestApplyAuthenticatedSessionRememberMeCookie(t *testing.T) {
+	setupOIDCTest(t)
+	gin.SetMode(gin.TestMode)
+	renderCookie := func(rememberMe bool) string {
+		engine := gin.New()
+		store := cookie.NewStore([]byte("oidc-remember-me-test-key"))
+		engine.Use(ginSessions.Sessions("siyuan", store))
+		engine.POST("/login", func(c *gin.Context) {
+			session := util.GetSession(c)
+			workspaceSession := util.GetWorkspaceSession(session)
+			applyAuthenticatedSession(c, workspaceSession, rememberMe)
+			if err := session.Save(c); err != nil {
+				c.Status(http.StatusInternalServerError)
+				return
+			}
+			c.Status(http.StatusNoContent)
+		})
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/login", nil)
+		engine.ServeHTTP(recorder, request)
+		return recorder.Header().Get("Set-Cookie")
+	}
+	if remembered := renderCookie(true); !strings.Contains(remembered, "Max-Age=2592000") {
+		t.Fatalf("remembered OIDC session cookie has no 30-day lifetime: %s", remembered)
+	}
+	if sessionOnly := renderCookie(false); strings.Contains(sessionOnly, "Max-Age=") {
+		t.Fatalf("session-only OIDC cookie unexpectedly has a persistent lifetime: %s", sessionOnly)
 	}
 }
 

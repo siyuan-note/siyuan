@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Neplatná konfigurácia pravidiel deklarácií OIDC",
 	"oidcClaimRulesTip": "Pole JSON; hodnoty v pravidle používajú ALEBO a pravidlá používajú A",
 	"oidcClaimRules": "Pravidlá deklarácií OIDC",
-	"oidcAllowAll": "Povoliť všetkých overených používateľov",
+	"oidcAllowAll": "Udeliť prístup správcu všetkým overeným používateľom",
 	"oidcRedirectURL": "Adresa URL presmerovania OIDC",
 	"oidcScopes": "Rozsahy OIDC",
 	"oidcClientSecret": "Tajomstvo klienta OIDC",

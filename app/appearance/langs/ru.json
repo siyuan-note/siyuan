@@ -7,7 +7,7 @@
 	"oidcConfigInvalid": "Недопустимая конфигурация правил утверждений OIDC",
 	"oidcClaimRulesTip": "Массив JSON; значения внутри правила объединяются ИЛИ, а правила — И",
 	"oidcClaimRules": "Правила утверждений OIDC",
-	"oidcAllowAll": "Разрешить всех прошедших проверку пользователей",
+	"oidcAllowAll": "Предоставить права администратора всем прошедшим проверку пользователям",
 	"oidcRedirectURL": "URL-адрес перенаправления OIDC",
 	"oidcScopes": "Области OIDC",
 	"oidcClientSecret": "Секрет клиента OIDC",

@@ -163,14 +163,15 @@ func TestOIDCTransactionUsesSeparateBoundPollToken(t *testing.T) {
 	if err = storeOIDCTransaction(transaction); err != nil {
 		t.Fatal(err)
 	}
-	claimed, err := claimOIDCTransaction(transaction.State, "", true)
-	if err != nil || claimed.State != transaction.State {
+	claimed, repeated, err := claimOIDCTransaction(context.Background(), transaction.State, "", true)
+	if err != nil || repeated || claimed.State != transaction.State {
 		t.Fatalf("desktop callback could not claim transaction: %v", err)
 	}
-	if _, err = claimOIDCTransaction(transaction.State, "", true); err == nil {
-		t.Fatal("OIDC state was accepted more than once")
-	}
 	completeOIDCTransaction(transaction.State, true, "")
+	claimed, repeated, err = claimOIDCTransaction(context.Background(), transaction.State, "", true)
+	if err != nil || !repeated || !claimed.Success {
+		t.Fatalf("repeated desktop callback did not reuse the completed result: %#v, %v", claimed, err)
+	}
 	if _, found := pollOIDCTransaction(transaction.PollToken, "binding-b"); found {
 		t.Fatal("poll token was accepted with the wrong WebView binding")
 	}
@@ -187,30 +188,62 @@ func TestOIDCTransactionCanOnlyBeClaimedOnceConcurrently(t *testing.T) {
 		t.Fatal(err)
 	}
 	const workers = 16
-	results := make(chan bool, workers)
+	type claimResult struct {
+		repeated bool
+		err      error
+	}
+	results := make(chan claimResult, workers)
 	var waitGroup sync.WaitGroup
 	for i := 0; i < workers; i++ {
 		waitGroup.Add(1)
 		go func() {
 			defer waitGroup.Done()
-			_, err := claimOIDCTransaction(transaction.State, transaction.Binding, false)
-			results <- err == nil
+			_, repeated, err := claimOIDCTransaction(context.Background(), transaction.State, transaction.Binding, false)
+			results <- claimResult{repeated: repeated, err: err}
 		}()
 	}
+	first := <-results
+	if first.err != nil || first.repeated {
+		t.Fatalf("first OIDC transaction claim failed: %#v", first)
+	}
+	completeOIDCTransaction(transaction.State, true, "")
 	waitGroup.Wait()
 	close(results)
-	successes := 0
-	for success := range results {
-		if success {
-			successes++
+	repeatedClaims := 0
+	for result := range results {
+		if result.err != nil {
+			t.Fatalf("repeated OIDC transaction claim failed: %s", result.err)
+		}
+		if result.repeated {
+			repeatedClaims++
 		}
 	}
-	if successes != 1 {
-		t.Fatalf("OIDC transaction was claimed %d times", successes)
+	if repeatedClaims != workers-1 {
+		t.Fatalf("OIDC transaction returned %d repeated claims", repeatedClaims)
 	}
 }
 
-func TestCompletedWebAndMobileTransactionsAreRemoved(t *testing.T) {
+func TestRepeatedOIDCTransactionRequiresOriginalBinding(t *testing.T) {
+	setupOIDCTest(t)
+	transaction := &oidcTransaction{State: "bound-repeat", Binding: "binding-a", Flow: oidcFlowWeb,
+		ConfigVersion: oidcSessionVersion(), ExpiresAt: time.Now().Add(time.Minute)}
+	if err := storeOIDCTransaction(transaction); err != nil {
+		t.Fatal(err)
+	}
+	if _, repeated, err := claimOIDCTransaction(context.Background(), transaction.State, "binding-a", false); err != nil || repeated {
+		t.Fatalf("initial bound OIDC transaction claim failed: repeated=%v, err=%v", repeated, err)
+	}
+	completeOIDCTransaction(transaction.State, true, "")
+	if _, _, err := claimOIDCTransaction(context.Background(), transaction.State, "binding-b", false); err == nil {
+		t.Fatal("repeated OIDC transaction accepted a different binding")
+	}
+	result, repeated, err := claimOIDCTransaction(context.Background(), transaction.State, "binding-a", false)
+	if err != nil || !repeated || !result.Success {
+		t.Fatalf("repeated OIDC transaction rejected its original binding: %#v, %v", result, err)
+	}
+}
+
+func TestCompletedWebAndMobileTransactionsAreRetainedBriefly(t *testing.T) {
 	setupOIDCTest(t)
 	for _, flow := range []string{oidcFlowWeb, oidcFlowMobile} {
 		transaction := &oidcTransaction{State: flow, Flow: flow, ConfigVersion: oidcSessionVersion(),
@@ -221,9 +254,17 @@ func TestCompletedWebAndMobileTransactionsAreRemoved(t *testing.T) {
 		completeOIDCTransaction(transaction.State, true, "")
 		oidcTransactions.Lock()
 		stored := oidcTransactions.byState[transaction.State]
-		oidcTransactions.Unlock()
 		if stored != nil {
-			t.Fatalf("completed %s OIDC transaction was retained", flow)
+			stored.ExpiresAt = time.Now().Add(-time.Second)
+			cleanupOIDCTransactionsLocked()
+		}
+		removed := oidcTransactions.byState[transaction.State] == nil
+		oidcTransactions.Unlock()
+		if stored == nil || !stored.Completed || !stored.Success {
+			t.Fatalf("completed %s OIDC transaction was not retained for a repeated callback", flow)
+		}
+		if !removed {
+			t.Fatalf("expired completed %s OIDC transaction was retained", flow)
 		}
 	}
 }
@@ -251,7 +292,7 @@ func TestOIDCTransactionExpiryAndSafeRedirect(t *testing.T) {
 	if err := storeOIDCTransaction(transaction); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := claimOIDCTransaction(transaction.State, "binding", false); err == nil {
+	if _, _, err := claimOIDCTransaction(context.Background(), transaction.State, "binding", false); err == nil {
 		t.Fatal("expired OIDC transaction was accepted")
 	}
 	for _, unsafe := range []string{"https://example.com", "//example.com", "/\\example.com", "javascript:alert(1)", ""} {

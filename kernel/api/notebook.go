@@ -452,6 +452,9 @@ func setNotebookConf(c *gin.Context) {
 
 	boxConf.DailyNoteTemplatePath = util.NormalizeTemplatePath(boxConf.DailyNoteTemplatePath)
 
+	// 目标数据库（属性视图）块 ID，仅去除首尾空白，允许为空，不在此处校验块是否存在
+	boxConf.DailyNoteDatabaseID = strings.TrimSpace(boxConf.DailyNoteDatabaseID)
+
 	if err := box.SaveConf(boxConf); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

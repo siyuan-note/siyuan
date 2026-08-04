@@ -102,10 +102,11 @@ const emojiCategoryIcons: Record<string, string> = {
     flags: "1f6a9",
 };
 
-const genEmojiSection = (title: string, content: string, groupName?: string) => {
+const genEmojiSection = (title: string, content: string, groupName?: string, categoryID?: string) => {
     const groupAttribute = typeof groupName === "string" ? ` data-group="${escapeAttr(escapeHtml(groupName))}"` : "";
+    const categoryAttribute = categoryID ? ` data-category="${escapeAttr(categoryID)}"` : "";
     const titleHTML = title ? `<div class="emojis__title">${escapeHtml(title)}</div>` : "";
-    return `<div class="emojis__section"${groupAttribute}>${titleHTML}<div class="emojis__content">${content}</div></div>`;
+    return `<div class="emojis__section"${groupAttribute}${categoryAttribute}>${titleHTML}<div class="emojis__content">${content}</div></div>`;
 };
 
 const getRecentEmojiButtons = (key: string, options: TEmojiPanelOptions) => {
@@ -191,9 +192,21 @@ export class EmojiPanelController {
     private customOffset = 0;
     private customObserver?: IntersectionObserver;
     private imageObserver?: IntersectionObserver;
+    private resizeObserver: ResizeObserver;
     private searchMode = false;
+    private scrollFrame = 0;
+    private categoryOffsets: {id: string, top: number, element: HTMLElement}[] = [];
 
     constructor(private panelElement: HTMLElement, private typeElement: HTMLElement, private options: TEmojiPanelOptions) {
+        this.panelElement.addEventListener("scroll", this.handleScroll, {passive: true});
+        this.resizeObserver = new ResizeObserver(() => {
+            if (!this.searchMode && this.categoryID !== "custom") {
+                this.updateBuiltInPlaceholders();
+                this.updateCategoryOffsets();
+                this.updateVirtualCategories();
+            }
+        });
+        this.resizeObserver.observe(this.panelElement);
     }
 
     public setOptions(options: TEmojiPanelOptions) {
@@ -212,6 +225,19 @@ export class EmojiPanelController {
             this.renderInitial();
             return;
         }
+
+        if (category?.id !== "custom") {
+            const targetElement = this.getCategoryElement(categoryID);
+            if (!this.searchMode && targetElement) {
+                this.categoryID = categoryID;
+                this.updateCurrentType();
+                this.scrollToCategory(targetElement);
+                return;
+            }
+            this.renderCommonPage(categoryID);
+            return;
+        }
+
         this.disconnectObservers();
         this.panelElement.innerHTML = "";
         this.panelElement.scrollTop = 0;
@@ -220,21 +246,12 @@ export class EmojiPanelController {
         this.typeElement.classList.remove("fn__none");
         this.updateCurrentType();
 
-        if (categoryID === "recent") {
-            const html = getRecentEmojiButtons("", this.options);
-            this.panelElement.innerHTML = html ? genEmojiSection(window.siyuan.languages.recentEmoji, html) :
-                `<div class="emojis__section"><div class="emojis__title">${window.siyuan.languages.emptyContent}</div></div>`;
-        } else if (category.id === "custom") {
-            if (category.items.length === 0) {
-                this.panelElement.innerHTML = `<div class="emojis__section"><div class="emojis__title">${window.siyuan.languages.setEmojiTip}</div></div>`;
-            } else {
-                this.customGroups = groupCustomEmojiItems(category.items);
-                this.customOffset = 0;
-                this.loadMoreCustomEmojis();
-            }
+        if (category.items.length === 0) {
+            this.panelElement.innerHTML = `<div class="emojis__section"><div class="emojis__title">${window.siyuan.languages.setEmojiTip}</div></div>`;
         } else {
-            const html = category.items.map((item) => genEmojiButton(item.unicode, getEmojiDesc(item), true)).join("");
-            this.panelElement.innerHTML = genEmojiSection(getEmojiTitle(window.siyuan.emojis.indexOf(category)), html);
+            this.customGroups = groupCustomEmojiItems(category.items);
+            this.customOffset = 0;
+            this.loadMoreCustomEmojis();
         }
         this.observeImages(this.panelElement);
         this.selectFirst();
@@ -312,7 +329,153 @@ export class EmojiPanelController {
 
     public destroy() {
         this.disconnectObservers();
+        this.resizeObserver.disconnect();
+        this.panelElement.removeEventListener("scroll", this.handleScroll);
+        if (this.scrollFrame) {
+            cancelAnimationFrame(this.scrollFrame);
+        }
     }
+
+    private renderCommonPage(categoryID: string) {
+        this.disconnectObservers();
+        const sections: string[] = [];
+        const recentHTML = getRecentEmojiButtons("", this.options);
+        if (recentHTML) {
+            sections.push(genEmojiSection(window.siyuan.languages.recentEmoji, recentHTML, undefined, "recent"));
+        }
+        window.siyuan.emojis.forEach((item, index) => {
+            if (item.id === "custom") {
+                return;
+            }
+            sections.push(genEmojiSection(getEmojiTitle(index), "", undefined, item.id));
+        });
+        this.panelElement.innerHTML = sections.join("") ||
+            `<div class="emojis__section"><div class="emojis__title">${window.siyuan.languages.emptyContent}</div></div>`;
+        this.panelElement.scrollTop = 0;
+        this.updateBuiltInPlaceholders();
+        this.updateCategoryOffsets();
+        this.categoryID = this.getCategoryElement(categoryID)?.dataset.category ||
+            this.panelElement.querySelector<HTMLElement>(".emojis__section[data-category]")?.dataset.category || "recent";
+        this.searchMode = false;
+        this.typeElement.classList.remove("fn__none");
+        this.updateCurrentType();
+        this.observeImages(this.panelElement);
+        const targetElement = this.getCategoryElement(this.categoryID);
+        if (targetElement) {
+            this.loadBuiltInCategory(targetElement);
+            this.scrollToCategory(targetElement);
+            this.updateVirtualCategories();
+        } else {
+            this.selectFirst();
+        }
+    }
+
+    private getCategoryElement(categoryID: string) {
+        return Array.from(this.panelElement.querySelectorAll<HTMLElement>(".emojis__section[data-category]"))
+            .find((item) => item.dataset.category === categoryID);
+    }
+
+    private scrollToCategory(targetElement: HTMLElement) {
+        this.loadBuiltInCategory(targetElement);
+        this.panelElement.querySelector(".emojis__item--current")?.classList.remove("emojis__item--current");
+        targetElement.querySelector(".emojis__item")?.classList.add("emojis__item--current");
+        const categoryOffset = this.categoryOffsets.find((item) => item.id === targetElement.dataset.category);
+        if (categoryOffset) {
+            this.panelElement.scrollTop = categoryOffset.top;
+        }
+    }
+
+    private updateCategoryOffsets() {
+        const panelTop = this.panelElement.getBoundingClientRect().top;
+        this.categoryOffsets = Array.from(this.panelElement.querySelectorAll<HTMLElement>(".emojis__section[data-category]"))
+            .map((item) => ({
+                id: item.dataset.category || "",
+                top: item.getBoundingClientRect().top - panelTop + this.panelElement.scrollTop,
+                element: item,
+            }));
+    }
+
+    private updateBuiltInPlaceholders() {
+        this.panelElement.querySelectorAll<HTMLElement>(".emojis__section[data-category]").forEach((sectionElement) => {
+            const category = window.siyuan.emojis.find((item) => item.id === sectionElement.dataset.category && item.id !== "custom");
+            const contentElement = sectionElement.querySelector<HTMLElement>(".emojis__content");
+            if (!category || !contentElement || contentElement.clientWidth === 0) {
+                return;
+            }
+            const columnCount = Math.max(1, Math.floor(contentElement.clientWidth / 34));
+            contentElement.style.height = `${Math.ceil(category.items.length / columnCount) * 34}px`;
+        });
+    }
+
+    private loadBuiltInCategory(sectionElement: HTMLElement) {
+        const category = window.siyuan.emojis.find((item) => item.id === sectionElement.dataset.category && item.id !== "custom");
+        const contentElement = sectionElement.querySelector<HTMLElement>(".emojis__content");
+        if (!category || !contentElement || contentElement.childElementCount > 0) {
+            return;
+        }
+        contentElement.innerHTML = category.items
+            .map((item) => genEmojiButton(item.unicode, getEmojiDesc(item), true)).join("");
+        this.observeImages(contentElement);
+    }
+
+    private unloadBuiltInCategory(sectionElement: HTMLElement) {
+        const category = window.siyuan.emojis.find((item) => item.id === sectionElement.dataset.category && item.id !== "custom");
+        const contentElement = sectionElement.querySelector<HTMLElement>(".emojis__content");
+        if (!category || !contentElement || contentElement.childElementCount === 0) {
+            return;
+        }
+        contentElement.querySelectorAll("img[data-src]").forEach((item) => this.imageObserver?.unobserve(item));
+        contentElement.innerHTML = "";
+    }
+
+    private updateVirtualCategories() {
+        const viewportHeight = this.panelElement.clientHeight;
+        if (viewportHeight === 0 || this.categoryOffsets.length === 0) {
+            return;
+        }
+        const renderStart = Math.max(0, this.panelElement.scrollTop - viewportHeight);
+        const renderEnd = this.panelElement.scrollTop + viewportHeight * 2;
+        this.categoryOffsets.forEach((item, index) => {
+            const category = window.siyuan.emojis.find((emoji) => emoji.id === item.id && emoji.id !== "custom");
+            if (!category) {
+                return;
+            }
+            const sectionEnd = this.categoryOffsets[index + 1]?.top ?? this.panelElement.scrollHeight;
+            if (item.top <= renderEnd && sectionEnd >= renderStart) {
+                this.loadBuiltInCategory(item.element);
+            } else {
+                this.unloadBuiltInCategory(item.element);
+            }
+        });
+    }
+
+    private handleScroll = () => {
+        if (this.searchMode || this.categoryID === "custom" || this.scrollFrame) {
+            return;
+        }
+        this.scrollFrame = requestAnimationFrame(() => {
+            this.scrollFrame = 0;
+            if (this.categoryOffsets.length === 0) {
+                return;
+            }
+            let currentCategory = this.categoryOffsets[0];
+            this.categoryOffsets.some((item) => {
+                if (item.top > this.panelElement.scrollTop + 1) {
+                    return true;
+                }
+                currentCategory = item;
+                return false;
+            });
+            if (this.panelElement.scrollTop + this.panelElement.clientHeight >= this.panelElement.scrollHeight - 1) {
+                currentCategory = this.categoryOffsets[this.categoryOffsets.length - 1];
+            }
+            if (currentCategory.id !== this.categoryID) {
+                this.categoryID = currentCategory.id;
+                this.updateCurrentType();
+            }
+            this.updateVirtualCategories();
+        });
+    };
 
     private selectFirst() {
         this.panelElement.querySelector(".emojis__item")?.classList.add("emojis__item--current");
@@ -513,11 +676,11 @@ export const openEmojiPanel = (
                     <input class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
                 </label>
                 <span class="fn__space"></span>
-                <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
+                <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconDices"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
             <div class="emojis__panel"></div>
-            <div class="fn__flex">${genEmojiCategoryButtons(options?.custom)}</div>
+            <div class="emojis__types">${genEmojiCategoryButtons(options?.custom)}</div>
         </div>
         <div class="fn__none" data-type="tab-dynamic">
             <div class="fn__flex emoji__dynamic-color">

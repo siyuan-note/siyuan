@@ -493,7 +493,7 @@ ${genHintItemHTML(item)}
             // max-height：min(402px,40vh) 和 .protyle-hint 保持一致，否则 emoji 不显示底部导航
             this.element.innerHTML = `<div style="padding:0;max-height:min(402px,40vh);width:366px" class="emojis">
 <div class="emojis__panel"></div>
-<div class="fn__flex">${genEmojiCategoryButtons()}</div>
+<div class="emojis__types">${genEmojiCategoryButtons()}</div>
 </div>`;
             panelElement = this.element.querySelector(".emojis__panel") as HTMLElement;
             this.emojiPanel = new EmojiPanelController(

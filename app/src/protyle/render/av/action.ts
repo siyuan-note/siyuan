@@ -1362,19 +1362,30 @@ export const duplicateCompletely = (protyle: IProtyle, nodeElement: HTMLElement)
         if (visibleViewIDs) {
             cloneElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, visibleViewIDs);
         }
+        cloneElement.setAttribute("data-av-type", nodeElement.getAttribute("data-av-type") || "table");
+        const blockDOM = cloneElement.outerHTML;
+        cloneElement.setAttribute("data-render", "true");
         nodeElement.after(cloneElement);
-        avRender(cloneElement, protyle, () => {
-            focusBlock(cloneElement);
-            scrollCenter(protyle);
-        });
+        // 首次渲染需等待插入事务完成，内核才能通过新块 ID 解析复制的载体视图。
         transaction(protyle, [{
             action: "insert",
-            data: cloneElement.outerHTML,
+            data: blockDOM,
             id: response.data.blockID,
             previousID: nodeElement.dataset.nodeId,
         }], [{
             action: "delete",
             id: response.data.blockID,
-        }]);
+        }], {
+            callback: () => {
+                cloneElement.removeAttribute("data-render");
+                if (!cloneElement.isConnected) {
+                    return;
+                }
+                avRender(cloneElement, protyle, () => {
+                    focusBlock(cloneElement);
+                    scrollCenter(protyle);
+                });
+            }
+        });
     });
 };

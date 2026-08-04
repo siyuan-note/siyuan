@@ -899,6 +899,11 @@ table + .protyle-action__table {
     border-radius: var(--b3-border-radius-s);
     box-shadow: var(--b3-point-shadow);
 
+    &--row,
+    &--column {
+      background-color: var(--b3-table-even-background);
+    }
+
     svg {
       width: 14px;
       height: 14px;
@@ -907,6 +912,11 @@ table + .protyle-action__table {
     &:hover {
       color: var(--b3-theme-primary);
       background-image: linear-gradient(var(--b3-list-hover), var(--b3-list-hover));
+    }
+
+    &--row:hover,
+    &--column:hover {
+      color: var(--b3-theme-on-surface);
     }
 
     &--active,

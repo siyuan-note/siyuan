@@ -309,13 +309,7 @@ export class WYSIWYG {
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
         this.element.setAttribute("spellcheck", "false");
-        if (isMobile()) {
-            // iPhone，iPad 端输入 contenteditable 为 true 时会在块中间插入 span
-            // Android 端空块输入法弹出会收起 https://ld246.com/article/1689713888289
-            this.element.setAttribute("contenteditable", "false");
-        } else {
-            this.element.setAttribute("contenteditable", "true");
-        }
+        this.element.setAttribute("contenteditable", "true");
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
@@ -3554,7 +3548,7 @@ export class WYSIWYG {
             }
             const selection = getSelection();
             lineBreakUndoContext = !event.defaultPrevented && event.inputType === "insertLineBreak" &&
-                selection.rangeCount > 0 ?
+            selection.rangeCount > 0 ?
                 getUndoFocusContext(protyle.wysiwyg.element, selection.getRangeAt(0)) : undefined;
             if (event.defaultPrevented || event.inputType !== "insertText" || !event.data ||
                 selection.rangeCount === 0) {
@@ -3890,7 +3884,7 @@ export class WYSIWYG {
             }
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513
             const templateLinkElement = templateInteractiveElement &&
-                isAVTemplateLink(templateInteractiveElement) ? templateInteractiveElement : undefined;
+            isAVTemplateLink(templateInteractiveElement) ? templateInteractiveElement : undefined;
             const aElement = hasClosestByAttribute(event.target, "data-type", "a") ||
                 hasClosestByClassName(event.target, "av__celltext--url") ||   // 数据库中资源文件、链接、电话、邮箱单元格
                 templateLinkElement;

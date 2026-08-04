@@ -31,7 +31,7 @@ export const canInput = (element: Element) => {
     }
     const wysiwygElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
     if (wysiwygElement && wysiwygElement.getAttribute("data-readonly") === "false") {
-        return hasClosestByAttribute(element, "contenteditable", "true");
+        return hasClosestByAttribute(element, "contenteditable", "true", true);
     }
     return false;
 };

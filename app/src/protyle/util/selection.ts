@@ -685,45 +685,40 @@ Record<string, string> | undefined => {
     };
 };
 
-// 在撤销或重做操作全部应用后，根据保存的位置重建选区。
-export const restoreUndoFocus = (protyle: IProtyle, operations: IOperation[]) => {
-    const operation = operations.find(item => item.context?.undoFocusId);
-    if (!operation) {
-        return false;
-    }
-    const start = Number(operation.context.undoFocusStart);
-    const end = Number(operation.context.undoFocusEnd);
+export const restoreFocusContext = (protyle: IProtyle, context: Record<string, string>) => {
+    const start = Number(context.undoFocusStart);
+    const end = Number(context.undoFocusEnd);
     if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < 0) {
         return false;
     }
     const startBlockElements = Array.from(protyle.wysiwyg.element.querySelectorAll(
-        `[data-node-id="${operation.context.undoFocusId}"]`
+        `[data-node-id="${context.undoFocusId}"]`
     ));
-    const startIndex = Number(operation.context.undoFocusIndex);
+    const startIndex = Number(context.undoFocusIndex);
     const indexedStartElement = Number.isInteger(startIndex) && startIndex >= 0 ?
         startBlockElements[startIndex] : undefined;
     const startBlockElement = indexedStartElement ||
         startBlockElements.find(item => !isInEmbedBlock(item, false)) || startBlockElements[0];
-    const endBlockElements = operation.context.undoFocusEndId === operation.context.undoFocusId ?
+    const endBlockElements = context.undoFocusEndId === context.undoFocusId ?
         startBlockElements : Array.from(protyle.wysiwyg.element.querySelectorAll(
-            `[data-node-id="${operation.context.undoFocusEndId || operation.context.undoFocusId}"]`
+            `[data-node-id="${context.undoFocusEndId || context.undoFocusId}"]`
         ));
-    const endIndex = Number(operation.context.undoFocusEndIndex);
+    const endIndex = Number(context.undoFocusEndIndex);
     const indexedEndElement = Number.isInteger(endIndex) && endIndex >= 0 ? endBlockElements[endIndex] : undefined;
     const endBlockElement = indexedEndElement ||
         endBlockElements.find(item => !isInEmbedBlock(item, false)) || endBlockElements[0];
     if (!startBlockElement || !endBlockElement) {
         return false;
     }
-    const ignoreZWSP = operation.context.undoFocusIgnoreZWSP === "true";
-    if (operation.context.undoFocusCollapseToEnd === "true") {
+    const ignoreZWSP = context.undoFocusIgnoreZWSP === "true";
+    if (context.undoFocusCollapseToEnd === "true") {
         return !!focusByOffset(endBlockElement, end, end, true, ignoreZWSP);
     }
     if (startBlockElement === endBlockElement) {
         return !!focusByOffset(startBlockElement, start, end, true, ignoreZWSP);
     }
     let startRange: Range;
-    if (operation.context.undoFocusStartAtEnd === "true") {
+    if (context.undoFocusStartAtEnd === "true") {
         startRange = document.createRange();
         setLastNodeRange(getContenteditableElement(startBlockElement) || startBlockElement, startRange);
         startRange.collapse(true);
@@ -753,6 +748,12 @@ export const restoreUndoFocus = (protyle: IProtyle, operations: IOperation[]) =>
     }
     focusByRange(range);
     return true;
+};
+
+// 在撤销或重做操作全部应用后，根据保存的位置重建选区。
+export const restoreUndoFocus = (protyle: IProtyle, operations: IOperation[]) => {
+    const operation = operations.find(item => item.context?.undoFocusId);
+    return operation ? restoreFocusContext(protyle, operation.context) : false;
 };
 
 const searchNode = (

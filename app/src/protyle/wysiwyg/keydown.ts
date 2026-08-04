@@ -8,6 +8,8 @@ import {
     getEditorRange,
     getSelectionOffset,
     getSelectionPosition,
+    getUndoFocusContext,
+    restoreFocusContext,
     selectAll,
     selectBlocksByRange,
     setFirstNodeRange,
@@ -1784,6 +1786,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         const isListIndent = matchHotKey(window.siyuan.config.keymap.editor.list.indent.custom, event);
         const rangeListItemElements = (isListOutdent || isListIndent) && isCrossBlock && selectText !== "" ?
             getRangeListItemElements(protyle.wysiwyg.element, range) : [];
+        const rangeListItemFocusContext = rangeListItemElements.length > 0 ?
+            getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
         if (isListOutdent) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
@@ -1803,9 +1807,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.stopPropagation();
                 return true;
             } else if (rangeListItemElements.length > 0) {
-                listOutdent(protyle, rangeListItemElements, range);
                 event.preventDefault();
                 event.stopPropagation();
+                await listOutdent(protyle, rangeListItemElements, range);
+                if (rangeListItemFocusContext) {
+                    restoreFocusContext(protyle, rangeListItemFocusContext);
+                }
                 return true;
             } else if (nodeElement.parentElement.classList.contains("li") && nodeType !== "NodeCodeBlock") {
                 listOutdent(protyle, [nodeElement.parentElement], range);
@@ -1835,6 +1842,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             } else if (rangeListItemElements.length > 0) {
                 listIndent(protyle, rangeListItemElements, range);
+                if (rangeListItemFocusContext) {
+                    restoreFocusContext(protyle, rangeListItemFocusContext);
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 return true;

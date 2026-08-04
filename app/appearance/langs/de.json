@@ -4,8 +4,6 @@
 	"oidcVerificationTip": "Schließen Sie die OIDC-Anmeldung im geöffneten Browserfenster ab; die aktuelle Konfiguration bleibt bis zur erfolgreichen Überprüfung aktiv",
 	"oidcVerifying": "Warten auf Überprüfung...",
 	"oidcVerifyAndSave": "Überprüfen und speichern",
-	"oidcClearClientSecretTip": "Lassen Sie das Passwortfeld leer, um das gespeicherte Geheimnis beizubehalten, oder aktivieren Sie diese Option, um es zu löschen",
-	"oidcClearClientSecret": "Gespeichertes OIDC-Client-Geheimnis löschen",
 	"oidcConfigInvalid": "Ungültige Konfiguration der OIDC-Anspruchsregeln",
 	"oidcClaimRulesTip": "JSON-Array; Werte innerhalb einer Regel sind ODER-verknüpft, Regeln sind UND-verknüpft",
 	"oidcClaimRules": "OIDC-Anspruchsregeln",

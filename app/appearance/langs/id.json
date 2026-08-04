@@ -4,8 +4,6 @@
 	"oidcVerificationTip": "Selesaikan login OIDC di jendela browser yang terbuka; konfigurasi saat ini tetap aktif hingga verifikasi berhasil",
 	"oidcVerifying": "Menunggu verifikasi...",
 	"oidcVerifyAndSave": "Verifikasi dan simpan",
-	"oidcClearClientSecretTip": "Biarkan kolom kata sandi kosong untuk mempertahankan rahasia yang tersimpan, atau aktifkan opsi ini untuk menghapusnya",
-	"oidcClearClientSecret": "Hapus rahasia klien OIDC yang tersimpan",
 	"oidcConfigInvalid": "Konfigurasi aturan klaim OIDC tidak valid",
 	"oidcClaimRulesTip": "Larik JSON; nilai dalam satu aturan memakai ATAU, sedangkan antaraturan memakai DAN",
 	"oidcClaimRules": "Aturan klaim OIDC",

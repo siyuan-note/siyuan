@@ -10,7 +10,7 @@ import {shell} from "electron";
 /// #endif
 import {isInMobileApp, saveExportFile} from "../../protyle/util/compatibility";
 import {openByMobile} from "../../editor/openLink";
-import {genConfigItemMainHtml} from "../render/fragments";
+import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
 import {renderPublishAuthAccounts, savePublish, sendAccessSetting, updatePublishConfig} from "./accessRuntime";
 import {sendAppSetting} from "./appRuntime";
 import zxcvbn = require("zxcvbn");
@@ -88,6 +88,7 @@ const mountOIDCButton = (root: HTMLElement) => {
     root.querySelector("#oidcConfig")?.addEventListener("click", () => {
         const config = window.siyuan.config.oidc;
         const escape = (value: string) => Lute.EscapeHTMLStr(value);
+        const maskedClientSecret = "********";
         const dialog = new Dialog({
             title: window.siyuan.languages.oidcLogin,
             content: `<div class="b3-dialog__content" id="oidcConfigForm">
@@ -115,16 +116,11 @@ const mountOIDCButton = (root: HTMLElement) => {
     <div class="b3-label b3-label--inner">
         <div class="config-name">${window.siyuan.languages.oidcClientSecret}</div>
         <div class="fn__hr"></div>
-        <input data-field="clientSecret" type="password" class="b3-text-field fn__block" spellcheck="false" placeholder="${config.clientSecretConfigured ? "********" : ""}">
-    </div>
-    <label class="b3-label b3-label--inner fn__flex${config.clientSecretConfigured ? "" : " fn__none"}" data-section="clearClientSecret">
-        <div class="fn__flex-1">
-            <div class="config-name">${window.siyuan.languages.oidcClearClientSecret}</div>
-            <div class="b3-label__text">${window.siyuan.languages.oidcClearClientSecretTip}</div>
+        <div class="b3-form__icona fn__block">
+            <input id="oidcClientSecret" data-field="clientSecret" type="password" class="b3-text-field b3-form__icona-input" spellcheck="false" autocomplete="off" value="${config.clientSecretConfigured ? maskedClientSecret : ""}">
+            <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
         </div>
-        <span class="fn__space"></span>
-        <input type="checkbox" data-field="clearClientSecret" class="b3-switch fn__flex-center">
-    </label>
+    </div>
     <div class="b3-label b3-label--inner">
         <div class="config-name">${window.siyuan.languages.oidcScopes}</div>
         <div class="fn__hr"></div>
@@ -154,6 +150,9 @@ const mountOIDCButton = (root: HTMLElement) => {
         });
         const form = dialog.element.querySelector<HTMLElement>("#oidcConfigForm");
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
+        const clientSecretInput = form.querySelector<HTMLInputElement>('[data-field="clientSecret"]');
+        bindPasswordIconaToggle(form, "oidcClientSecret");
+        let clientSecretEdited = false;
         let validationPollTimer = 0;
         let validationWindow: Window | null = null;
         let validationCancelled = false;
@@ -171,6 +170,16 @@ const mountOIDCButton = (root: HTMLElement) => {
         form.querySelector<HTMLSelectElement>('[data-field="provider"]').addEventListener("change", refreshSections);
         form.querySelector<HTMLInputElement>('[data-field="enabled"]').addEventListener("change", refreshSections);
         form.querySelector<HTMLInputElement>('[data-field="allowAll"]').addEventListener("change", refreshSections);
+        const selectMaskedClientSecret = () => {
+            if (config.clientSecretConfigured && !clientSecretEdited) {
+                clientSecretInput.select();
+            }
+        };
+        clientSecretInput.addEventListener("focus", selectMaskedClientSecret);
+        clientSecretInput.addEventListener("click", selectMaskedClientSecret);
+        clientSecretInput.addEventListener("input", () => {
+            clientSecretEdited = true;
+        });
         refreshSections();
         const stopValidation = () => {
             window.clearInterval(validationPollTimer);
@@ -230,14 +239,15 @@ const mountOIDCButton = (root: HTMLElement) => {
             try {
                 const field = <T extends HTMLElement>(name: string) => form.querySelector<T>(`[data-field="${name}"]`);
                 const claimRules = JSON.parse(field<HTMLTextAreaElement>("claimRules").value) as Config.IOIDCClaimRule[];
+                const initialClientSecret = config.clientSecretConfigured ? maskedClientSecret : "";
+                const clientSecretChanged = clientSecretEdited || clientSecretInput.value !== initialClientSecret;
                 const nextConfig: Config.IOIDC = {
                     enabled: field<HTMLInputElement>("enabled").checked,
                     provider: field<HTMLSelectElement>("provider").value as Config.IOIDC["provider"],
                     issuerURL: field<HTMLInputElement>("issuerURL").value,
                     clientID: field<HTMLInputElement>("clientID").value,
-                    clientSecret: field<HTMLInputElement>("clientSecret").value,
-                    clientSecretConfigured: Boolean(field<HTMLInputElement>("clientSecret").value) ||
-                        config.clientSecretConfigured && !field<HTMLInputElement>("clearClientSecret").checked,
+                    clientSecret: clientSecretChanged ? clientSecretInput.value : "",
+                    clientSecretConfigured: clientSecretChanged ? Boolean(clientSecretInput.value) : config.clientSecretConfigured,
                     scopes: field<HTMLInputElement>("scopes").value.split(/[ ,]+/).filter(Boolean),
                     redirectURL: field<HTMLInputElement>("redirectURL").value,
                     allowAll: field<HTMLInputElement>("allowAll").checked,

@@ -193,9 +193,9 @@
     </div>
     {{if .accessAuthCodeEnabled}}<button class="b3-button" onclick="submitAuth()">{{.l1}}</button>{{end}}
     {{if .oidcEnabled}}<button class="b3-button" id="oidcLogin" onclick="startOIDC()">{{.l12}}</button>{{end}}
-    <div class="ft__on-surface">
+    {{if .accessAuthCodeEnabled}}<div class="ft__on-surface">
         {{.l2}}
-    </div>
+    </div>{{end}}
     <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
     <div class="ft__on-surface">
         {{.l7}}

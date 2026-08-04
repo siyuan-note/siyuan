@@ -4,8 +4,6 @@
 	"oidcVerificationTip": "開いたブラウザーウィンドウで OIDC ログインを完了してください。検証が成功するまで現在の設定が有効なまま維持されます",
 	"oidcVerifying": "検証を待機中...",
 	"oidcVerifyAndSave": "検証して保存",
-	"oidcClearClientSecretTip": "パスワード欄を空のままにすると保存済みのシークレットが保持され、この項目を有効にして確定すると削除されます",
-	"oidcClearClientSecret": "保存済みの OIDC クライアントシークレットを消去",
 	"oidcConfigInvalid": "OIDC クレームルールの設定が無効です",
 	"oidcClaimRulesTip": "JSON 配列。同一ルール内の値は OR、ルール間は AND として評価されます",
 	"oidcClaimRules": "OIDC クレームルール",

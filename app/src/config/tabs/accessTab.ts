@@ -91,20 +91,62 @@ const mountOIDCButton = (root: HTMLElement) => {
         const dialog = new Dialog({
             title: window.siyuan.languages.oidcLogin,
             content: `<div class="b3-dialog__content" id="oidcConfigForm">
-    <label class="fn__flex b3-label"><span class="fn__flex-1">${window.siyuan.languages.oidcEnabled}</span><input type="checkbox" data-field="enabled" class="b3-switch"${config.enabled ? " checked" : ""}></label>
-    <label class="b3-label">${window.siyuan.languages.oidcProvider}<select data-field="provider" class="b3-select fn__block"><option value="custom"${config.provider === "custom" ? " selected" : ""}>${window.siyuan.languages.custom}</option><option value="google"${config.provider === "google" ? " selected" : ""}>Google</option><option value="microsoft"${config.provider === "microsoft" ? " selected" : ""}>Microsoft</option><option value="github"${config.provider === "github" ? " selected" : ""}>GitHub</option></select></label>
-    <div class="b3-label__text${config.provider === "google" ? "" : " fn__none"}" data-section="mobileCallbackWarning">${window.siyuan.languages["_kernel"]["368"]}</div>
-    <label class="b3-label" data-section="issuer">${window.siyuan.languages.oidcIssuerURL}<input data-field="issuerURL" class="b3-text-field fn__block" value="${escape(config.issuerURL)}"></label>
-    <label class="b3-label">${window.siyuan.languages.oidcClientID}<input data-field="clientID" class="b3-text-field fn__block" value="${escape(config.clientID)}"></label>
-    <label class="b3-label">${window.siyuan.languages.oidcClientSecret}<input data-field="clientSecret" type="password" class="b3-text-field fn__block" placeholder="${config.clientSecretConfigured ? "********" : ""}"></label>
-    <label class="fn__flex b3-label${config.clientSecretConfigured ? "" : " fn__none"}" data-section="clearClientSecret"><span class="fn__flex-1">${window.siyuan.languages.clear}</span><input type="checkbox" data-field="clearClientSecret" class="b3-switch"></label>
-    <label class="b3-label">${window.siyuan.languages.oidcScopes}<input data-field="scopes" class="b3-text-field fn__block" value="${escape(config.scopes.join(", "))}"></label>
-    <label class="b3-label">${window.siyuan.languages.oidcRedirectURL}<input data-field="redirectURL" class="b3-text-field fn__block" value="${escape(config.redirectURL)}"></label>
-    <label class="fn__flex b3-label"><span class="fn__flex-1">${window.siyuan.languages.oidcAllowAll}</span><input type="checkbox" data-field="allowAll" class="b3-switch"${config.allowAll ? " checked" : ""}></label>
-    <label class="b3-label" data-section="claimRules">${window.siyuan.languages.oidcClaimRules}<textarea data-field="claimRules" class="b3-text-field fn__block" rows="6">${escape(JSON.stringify(config.claimRules, null, 2))}</textarea><div class="b3-label__text">${window.siyuan.languages.oidcClaimRulesTip}</div></label>
+    <label class="b3-label b3-label--inner fn__flex">
+        <div class="fn__flex-1"><div class="config-name">${window.siyuan.languages.oidcEnabled}</div></div>
+        <span class="fn__space"></span>
+        <input type="checkbox" data-field="enabled" class="b3-switch fn__flex-center"${config.enabled ? " checked" : ""}>
+    </label>
+    <div class="b3-label b3-label--inner">
+        <div class="config-name">${window.siyuan.languages.oidcProvider}</div>
+        <div class="fn__hr"></div>
+        <select data-field="provider" class="b3-select fn__block"><option value="custom"${config.provider === "custom" ? " selected" : ""}>${window.siyuan.languages.custom}</option><option value="google"${config.provider === "google" ? " selected" : ""}>Google</option><option value="microsoft"${config.provider === "microsoft" ? " selected" : ""}>Microsoft</option><option value="github"${config.provider === "github" ? " selected" : ""}>GitHub</option></select>
+        <div class="b3-label__text ft__error${config.provider === "google" ? "" : " fn__none"}" data-section="mobileCallbackWarning">${window.siyuan.languages["_kernel"]["368"]}</div>
+    </div>
+    <div class="b3-label b3-label--inner" data-section="issuer">
+        <div class="config-name">${window.siyuan.languages.oidcIssuerURL}</div>
+        <div class="fn__hr"></div>
+        <input data-field="issuerURL" class="b3-text-field fn__block" spellcheck="false" value="${escape(config.issuerURL)}">
+    </div>
+    <div class="b3-label b3-label--inner">
+        <div class="config-name">${window.siyuan.languages.oidcClientID}</div>
+        <div class="fn__hr"></div>
+        <input data-field="clientID" class="b3-text-field fn__block" spellcheck="false" value="${escape(config.clientID)}">
+    </div>
+    <div class="b3-label b3-label--inner">
+        <div class="config-name">${window.siyuan.languages.oidcClientSecret}</div>
+        <div class="fn__hr"></div>
+        <input data-field="clientSecret" type="password" class="b3-text-field fn__block" spellcheck="false" placeholder="${config.clientSecretConfigured ? "********" : ""}">
+    </div>
+    <label class="b3-label b3-label--inner fn__flex${config.clientSecretConfigured ? "" : " fn__none"}" data-section="clearClientSecret">
+        <div class="fn__flex-1"><div class="config-name">${window.siyuan.languages.clear}</div></div>
+        <span class="fn__space"></span>
+        <input type="checkbox" data-field="clearClientSecret" class="b3-switch fn__flex-center">
+    </label>
+    <div class="b3-label b3-label--inner">
+        <div class="config-name">${window.siyuan.languages.oidcScopes}</div>
+        <div class="fn__hr"></div>
+        <input data-field="scopes" class="b3-text-field fn__block" spellcheck="false" value="${escape(config.scopes.join(", "))}">
+    </div>
+    <div class="b3-label b3-label--inner">
+        <div class="config-name">${window.siyuan.languages.oidcRedirectURL}</div>
+        <div class="fn__hr"></div>
+        <input data-field="redirectURL" class="b3-text-field fn__block" spellcheck="false" value="${escape(config.redirectURL)}">
+    </div>
+    <label class="b3-label b3-label--inner fn__flex">
+        <div class="fn__flex-1"><div class="config-name">${window.siyuan.languages.oidcAllowAll}</div></div>
+        <span class="fn__space"></span>
+        <input type="checkbox" data-field="allowAll" class="b3-switch fn__flex-center"${config.allowAll ? " checked" : ""}>
+    </label>
+    <div class="b3-label b3-label--inner" data-section="claimRules">
+        <div class="config-name">${window.siyuan.languages.oidcClaimRules}</div>
+        <div class="b3-label__text">${window.siyuan.languages.oidcClaimRulesTip}</div>
+        <div class="fn__hr"></div>
+        <textarea data-field="claimRules" class="b3-text-field fn__block" rows="5" style="resize: vertical;">${escape(JSON.stringify(config.claimRules, null, 2))}</textarea>
+    </div>
 </div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
             width: isMobile() ? "92vw" : "620px",
+            height: "80vh",
         });
         const form = dialog.element.querySelector<HTMLElement>("#oidcConfigForm");
         const refreshSections = () => {

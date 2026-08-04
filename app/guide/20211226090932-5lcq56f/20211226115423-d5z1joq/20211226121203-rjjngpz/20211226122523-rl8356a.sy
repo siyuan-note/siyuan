@@ -6,7 +6,7 @@
 		"id": "20211226122523-rl8356a",
 		"title": "在瀏覽器上使用",
 		"type": "doc",
-		"updated": "20260804165002"
+		"updated": "20260804193000"
 	},
 	"Children": [
 		{
@@ -239,7 +239,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804120201-oidclog",
-				"updated": "20260804165002"
+				"updated": "20260804193000"
 			},
 			"Children": [
 				{
@@ -249,48 +249,27 @@
 			]
 		},
 		{
-			"ID": "20260804120202-oidcset",
+			"ID": "20260804190501-oidcrf2",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260804120202-oidcset",
-				"updated": "20260804165002"
+				"id": "20260804190501-oidcrf2",
+				"updated": "20260804193000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 "
+					"Data": "有關提供者、回呼位址、准入規則、多端登入、Docker 設定和疑難排解的完整說明，請參閱 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190001-oidctw1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC 登入"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "鑑權"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中設定 OIDC 登入。遠端瀏覽器存取必須設定以 /api/system/oidc/callback 結尾的公開 HTTPS 回呼位址；思源的本機監聽位址僅適用於本機瀏覽器登入，不能作為遠端瀏覽器或行動端的固定回呼位址。Custom 和 Microsoft 提供者需要填寫簽發者位址，GitHub 需要填寫用戶端密鑰。通過準入規則的身分都會獲得管理員權限，請盡量不要授予所有已驗證使用者管理員權限，並優先使用精確比對規則；按電子郵件準入時通常還應要求 email_verified 等於 true。設定只有在「驗證並儲存」完成一次真實的提供者登入後才會生效。Docker 部署需要設定 SIYUAN_OIDC_ENABLED、SIYUAN_OIDC_PROVIDER、SIYUAN_OIDC_CLIENT_ID，以及按需設定 SIYUAN_OIDC_ISSUER_URL、SIYUAN_OIDC_CLIENT_SECRET、SIYUAN_OIDC_SCOPES、SIYUAN_OIDC_REDIRECT_URL、SIYUAN_OIDC_ALLOW_ALL 和 SIYUAN_OIDC_CLAIM_RULES。"
-				}
-			]
-		},
-		{
-			"ID": "20260804120203-oidcmob",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260804120203-oidcmob",
-				"updated": "20260804165002"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "原生行動端固定使用 siyuan:/oidc-callback，請在身分提供者中原樣註冊；行動端設定驗證也會使用此回呼，只有成功返回思源後才會儲存。Google 不接受此行動回呼格式，因此 Google 僅支援瀏覽器和桌面端登入。出現 redirect_uri 不相符通常表示註冊的回呼在通訊協定、斜線、路徑或連接埠上不完全一致；發現提供者失敗通常表示簽發者位址錯誤或無法存取，交換授權碼失敗則通常需要檢查用戶端 ID 和用戶端密鑰。"
+					"Data": "。"
 				}
 			]
 		}

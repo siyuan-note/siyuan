@@ -6,7 +6,7 @@
 		"id": "20201004184819-nj8ibyg",
 		"title": "在浏览器上使用",
 		"type": "doc",
-		"updated": "20260804165001"
+		"updated": "20260804193000"
 	},
 	"Children": [
 		{
@@ -253,7 +253,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804120001-oidclog",
-				"updated": "20260804165001"
+				"updated": "20260804193000"
 			},
 			"Children": [
 				{
@@ -263,48 +263,27 @@
 			]
 		},
 		{
-			"ID": "20260804120002-oidcset",
+			"ID": "20260804190500-oidcrf1",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260804120002-oidcset",
-				"updated": "20260804165001"
+				"id": "20260804190500-oidcrf1",
+				"updated": "20260804193000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 "
+					"Data": "有关提供商、回调地址、准入规则、多端登录、Docker 配置和排障的完整说明，请参阅 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190000-oidccn1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC 登录"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "鉴权"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中配置 OIDC 登录。远程浏览器访问必须配置以 /api/system/oidc/callback 结尾的公网 HTTPS 回调地址；思源的本机监听地址仅适用于本机浏览器登录，不能作为远程浏览器或移动端的固定回调地址。Custom 和 Microsoft 提供商需要填写签发者地址，GitHub 需要填写客户端密钥。通过准入规则的身份都会获得管理员权限，请尽量不要授予所有已认证用户管理员权限，并优先使用精确匹配规则；按邮箱准入时通常还应要求 email_verified 等于 true。配置只有在“验证并保存”完成一次真实的提供商登录后才会生效。Docker 部署需要配置 SIYUAN_OIDC_ENABLED、SIYUAN_OIDC_PROVIDER、SIYUAN_OIDC_CLIENT_ID，以及按需配置 SIYUAN_OIDC_ISSUER_URL、SIYUAN_OIDC_CLIENT_SECRET、SIYUAN_OIDC_SCOPES、SIYUAN_OIDC_REDIRECT_URL、SIYUAN_OIDC_ALLOW_ALL 和 SIYUAN_OIDC_CLAIM_RULES。"
-				}
-			]
-		},
-		{
-			"ID": "20260804120003-oidcmob",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260804120003-oidcmob",
-				"updated": "20260804165001"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "原生移动端固定使用 siyuan:/oidc-callback，请在身份提供商中原样注册；移动端配置验证也会使用该回调，只有成功返回思源后才会保存。Google 不接受该移动回调格式，因此 Google 仅支持浏览器和桌面端登录。出现 redirect_uri 不匹配通常表示注册的回调在协议、斜线、路径或端口上不完全一致；发现提供商失败通常表示签发者地址错误或无法访问，交换授权码失败则通常需要检查客户端 ID 和客户端密钥。"
+					"Data": "。"
 				}
 			]
 		}

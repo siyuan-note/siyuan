@@ -299,7 +299,7 @@ const gutterSingle = () => [
     node("exportCSV", () => `${window.siyuan.languages.export} CSV`),
     node("showDatabaseInFolder", lang("showInFolder")),
     separator("separator_VideoOrAudio"),
-    node("assetVideo", lang("assets"), true, [
+    node("assetVideo", location(lang("video"), lang("assets")), true, [
         node("asset", lang("assets")),
         separator("separator_rename"),
         node("rename", lang("rename")),
@@ -307,7 +307,7 @@ const gutterSingle = () => [
         node("export", lang("export")),
         node("copyFile", lang("copyFile")),
     ]),
-    node("assetAudio", lang("assets"), true, [
+    node("assetAudio", location(lang("audio"), lang("assets")), true, [
         node("asset", lang("assets")),
         separator("separator_rename"),
         node("rename", lang("rename")),
@@ -316,7 +316,7 @@ const gutterSingle = () => [
         node("copyFile", lang("copyFile")),
     ]),
     separator("separator_IFrame"),
-    node("assetIFrame", lang("assets"), true, [
+    node("assetIFrame", location(literal("IFrame"), lang("assets")), true, [
         node("asset", lang("assets")),
         separator("separator_openBy"),
         node("openBy", lang("openBy")),

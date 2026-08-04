@@ -31,6 +31,33 @@ test("entry catalog paths are unique and indexed", () => {
     assert.deepEqual(new Set(getEntryPaths()), new Set(paths));
 });
 
+test("conditional block resource menus have distinct configuration labels", () => {
+    const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: {
+            siyuan: {
+                languages: {
+                    assets: "Assets",
+                    audio: "Audio",
+                    video: "Video",
+                },
+            },
+        },
+    });
+    try {
+        assert.equal(getEntryCatalogNode("gutter.single.assetVideo")?.label(), "Video - Assets");
+        assert.equal(getEntryCatalogNode("gutter.single.assetAudio")?.label(), "Audio - Assets");
+        assert.equal(getEntryCatalogNode("gutter.single.assetIFrame")?.label(), "IFrame - Assets");
+    } finally {
+        if (windowDescriptor) {
+            Object.defineProperty(globalThis, "window", windowDescriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});
+
 test("sortable entry catalog groups contain valid separator positions", () => {
     getEntryOrderParents().forEach((parentPath) => {
         const children = getEntryCatalogChildren(parentPath);

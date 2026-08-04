@@ -7,7 +7,15 @@ import {afterRenderGallery, renderGallery} from "../gallery/render";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getRowHTML} from "../row";
 import {getAVSelectedItemPoints, getBodyVirtualData} from "../virtualScroll";
-import {applyAVRenderContext, beginAVRender, failAVRender, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
+import {
+    applyAVRenderContext,
+    beginAVRender,
+    failAVRender,
+    getAVLocateParams,
+    isCurrentAVRender,
+    persistAVLocateView,
+    prepareAVLocate
+} from "../locate";
 import {getCardStyle} from "../gallery/style";
 
 interface IIds {
@@ -165,6 +173,9 @@ export const renderKanban = async (options: {
         data = response.data;
     }
     if (!isCurrentAVRender(options.blockElement, renderToken)) {
+        return;
+    }
+    if (persistAVLocateView(options.blockElement, options.protyle, data)) {
         return;
     }
     applyAVRenderContext(options.blockElement, data);

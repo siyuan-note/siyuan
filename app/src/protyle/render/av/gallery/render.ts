@@ -16,6 +16,7 @@ import {
     finishAVLocate,
     getAVLocateParams,
     isCurrentAVRender,
+    persistAVLocateView,
     prepareAVLocate
 } from "../locate";
 import {getCardStyle} from "./style";
@@ -289,6 +290,9 @@ export const renderGallery = async (options: {
         data = response.data;
     }
     if (!isCurrentAVRender(options.blockElement, renderToken)) {
+        return;
+    }
+    if (persistAVLocateView(options.blockElement, options.protyle, data)) {
         return;
     }
     applyAVRenderContext(options.blockElement, data);

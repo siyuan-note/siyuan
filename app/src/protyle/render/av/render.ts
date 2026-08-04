@@ -27,6 +27,7 @@ import {
     finishAVLocate,
     getAVLocateParams,
     isCurrentAVRender,
+    persistAVLocateView,
     prepareAVLocate,
     setAVLocateRequest
 } from "./locate";
@@ -615,6 +616,9 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             data = avData;
         }
         if (!isCurrentAVRender(e, renderToken)) {
+            continue;
+        }
+        if (persistAVLocateView(e, protyle, data)) {
             continue;
         }
         applyAVRenderContext(e, data);

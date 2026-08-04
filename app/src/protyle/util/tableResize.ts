@@ -36,16 +36,16 @@ export const constrainTableResizeCount = (requestedCount: number, startCount: nu
 };
 
 export const getTableResizeControlCenter = (edge: number, viewportStart: number, viewportEnd: number,
-                                            controlSize: number) => {
+                                            controlSize: number, controlGap = 0) => {
     const halfSize = controlSize / 2;
     const min = viewportStart + halfSize;
     const max = viewportEnd - halfSize;
     if (min > max) {
         return (viewportStart + viewportEnd) / 2;
     }
-    return Math.min(Math.max(edge + halfSize, min), max);
+    return Math.min(Math.max(edge + controlGap + halfSize, min), max);
 };
 
-export const isTableResizeControlVisible = (edge: number, viewportEnd: number, controlSize: number) => {
-    return edge + controlSize <= viewportEnd + 1;
+export const isTableResizeControlVisible = (edge: number, viewportEnd: number, controlSize: number, controlGap = 0) => {
+    return edge + controlGap + controlSize <= viewportEnd + 1;
 };

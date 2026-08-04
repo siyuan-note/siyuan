@@ -895,17 +895,14 @@ table + .protyle-action__table {
     }
 
     &--row {
-      border-radius: 0 0 var(--b3-border-radius-s) var(--b3-border-radius-s);
       cursor: row-resize;
     }
 
     &--column {
-      border-radius: 0 var(--b3-border-radius-s) var(--b3-border-radius-s) 0;
       cursor: col-resize;
     }
 
     &--both {
-      border-radius: 0 0 var(--b3-border-radius-s) 0;
       cursor: nwse-resize;
     }
   }

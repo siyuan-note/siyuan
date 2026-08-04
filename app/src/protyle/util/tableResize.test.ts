@@ -51,6 +51,7 @@ describe("constrainTableResizeCount", () => {
 describe("getTableResizeControlCenter", () => {
     it("keeps the control after a visible table edge", () => {
         assert.equal(getTableResizeControlCenter(240, 0, 400, 16), 248);
+        assert.equal(getTableResizeControlCenter(240, 0, 400, 16, 10), 258);
     });
 
     it("keeps the whole control inside the editor viewport", () => {
@@ -62,6 +63,8 @@ describe("getTableResizeControlCenter", () => {
 describe("isTableResizeControlVisible", () => {
     it("requires enough viewport space for the whole control", () => {
         assert.equal(isTableResizeControlVisible(384, 400, 16), true);
+        assert.equal(isTableResizeControlVisible(374, 400, 16, 10), true);
+        assert.equal(isTableResizeControlVisible(384, 400, 16, 10), false);
         assert.equal(isTableResizeControlVisible(395, 400, 16), false);
         assert.equal(isTableResizeControlVisible(450, 400, 16), false);
     });

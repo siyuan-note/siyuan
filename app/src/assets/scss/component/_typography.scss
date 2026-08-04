@@ -382,16 +382,6 @@
       border-bottom-right-radius: var(--b3-table-border-radius-bottom-right);
     }
 
-    &.protyle-table-control__table--add-row {
-      --b3-table-border-radius-bottom-right: 0;
-      --b3-table-border-radius-bottom-left: 0;
-    }
-
-    &.protyle-table-control__table--add-column {
-      --b3-table-border-radius-top-right: 0;
-      --b3-table-border-radius-bottom-right: 0;
-    }
-
     td,
     th {
       padding: 4px 8px;

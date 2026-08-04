@@ -146,6 +146,109 @@ type docBlocksOrdersResponse struct {
 	Data json.RawMessage `json:"data"`
 }
 
+func TestBlockPublishAccessGuards(t *testing.T) {
+	const (
+		boxID             = "20260724000000-boxid03"
+		publicID          = "20260724000020-public3"
+		disabledID        = "20260724000021-disable"
+		protectedID       = "20260724000022-protect"
+		protectedPassword = "password"
+	)
+
+	previousBlockTreeDBPath := util.BlockTreeDBPath
+	previousDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	previousPublishAccess := model.GetPublishAccess()
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: disabledID, Visible: true, Disable: true},
+		{ID: protectedID, Visible: true, Password: protectedPassword},
+	}); err != nil {
+		t.Fatalf("set publish access failed: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = model.SetPublishAccess(previousPublishAccess)
+		treenode.CloseDatabase()
+		util.BlockTreeDBPath = previousBlockTreeDBPath
+		util.DataDir = previousDataDir
+	})
+
+	for _, id := range []string{publicID, disabledID, protectedID} {
+		treenode.IndexBlockTree(&parse.Tree{
+			ID:   id,
+			Box:  boxID,
+			Path: "/" + id + ".sy",
+			Root: &ast.Node{ID: id, Type: ast.NodeDocument},
+		})
+	}
+
+	blockGuardRequest := func(role any, body string, handler gin.HandlerFunc) map[string]any {
+		gin.SetMode(gin.TestMode)
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) {
+			c.Set(model.RoleContextKey, role)
+			c.Next()
+		})
+		engine.POST("/api/block/block", handler)
+
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodPost, "/api/block/block", strings.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		engine.ServeHTTP(recorder, request)
+
+		var response map[string]any
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+			t.Fatalf("unmarshal response failed: %v", err)
+		}
+		return response
+	}
+
+	t.Run("reader", func(t *testing.T) {
+		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, checkBlockExist); response["data"].(bool) {
+			t.Fatalf("disabled block should be hidden from the reader, got %v", response["data"])
+		}
+		if response := blockGuardRequest(model.RoleReader, `{"id":"`+publicID+`"}`, checkBlockExist); !response["data"].(bool) {
+			t.Fatalf("public block should be visible to the reader, got %v", response["data"])
+		}
+		response := blockGuardRequest(model.RoleReader, `{"ids":["`+publicID+`","`+disabledID+`"]}`, checkBlocksExist)
+		if !response["data"].(map[string]any)[publicID].(bool) {
+			t.Fatalf("unexpected block existence for the reader: %v", response["data"])
+		}
+		if _, exists := response["data"].(map[string]any)[disabledID]; exists {
+			t.Fatalf("disabled block existence should be hidden from the reader: %v", response["data"])
+		}
+		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, checkBlockFold); response["data"].(map[string]any)["isFolded"].(bool) ||
+			response["data"].(map[string]any)["isRoot"].(bool) {
+			t.Fatalf("fold state of a disabled block should be hidden from the reader: %v", response["data"])
+		}
+		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, getUnfoldedParentID); "" != response["data"].(map[string]any)["parentID"].(string) {
+			t.Fatalf("unfolded parent of a disabled block should be hidden from the reader: %v", response["data"])
+		}
+		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, getBlockIndex); 0 != int(response["data"].(float64)) {
+			t.Fatalf("index of a disabled block should be hidden from the reader: %v", response["data"])
+		}
+		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, getTreeStat); nil != response["data"].(map[string]any)["stat"] {
+			t.Fatalf("tree stat of a disabled block should be hidden from the reader: %v", response["data"])
+		}
+		if response := blockGuardRequest(model.RoleReader, `{"ids":["`+publicID+`","`+disabledID+`"]}`, getBlocksWordCount); 0 != int(response["code"].(float64)) {
+			t.Fatalf("word count of disabled blocks should not error, got %v", response)
+		}
+		if response := blockGuardRequest(model.RoleReader, `{"ids":["`+publicID+`","`+disabledID+`"]}`, getBlocksIndexes); nil != response["data"].(map[string]any)[disabledID] {
+			t.Fatalf("indexes of disabled blocks should be hidden from the reader: %v", response["data"])
+		}
+		if response := blockGuardRequest(model.RoleReader, `{"ids":["`+disabledID+`"]}`, checkBlockRef); response["data"].(bool) {
+			t.Fatalf("ref check of a disabled block should be hidden from the reader: %v", response["data"])
+		}
+	})
+
+	t.Run("administrator", func(t *testing.T) {
+		if response := blockGuardRequest(model.RoleAdministrator, `{"id":"`+disabledID+`"}`, checkBlockExist); !response["data"].(bool) {
+			t.Fatalf("disabled block should be visible to the administrator, got %v", response["data"])
+		}
+	})
+}
+
 func postDocBlocksOrders(t *testing.T, body string) *docBlocksOrdersResponse {
 	t.Helper()
 

@@ -1,5 +1,14 @@
 document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsLitheness" style="position: absolute; width: 0; height: 0; overflow: hidden;">
 <defs>
+  <symbol id="iconAlignTop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="rotate(90 12 12)"><path d="M21 5H3"/><path d="M15 12H3"/><path d="M17 19H3"/></g>
+  </symbol>
+  <symbol id="iconAlignMiddle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="rotate(90 12 12)"><path d="M21 5H3"/><path d="M17 12H7"/><path d="M19 19H5"/></g>
+  </symbol>
+  <symbol id="iconAlignBottom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="rotate(90 12 12)"><path d="M21 5H3"/><path d="M21 12H9"/><path d="M21 19H7"/></g>
+  </symbol>
   <symbol id="iconTableCellsSplit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     <path d="M12 15V9"/><path d="M3 15h18"/><path d="M3 9h18"/><rect width="18" height="18" x="3" y="3" rx="2"/>
   </symbol>

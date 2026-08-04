@@ -252,16 +252,19 @@ export const getTableCellVerticalAlignmentMenus = (
     const verticalAlign = getCommonTableCellStyle(cells, "vertical-align");
     return [{
         id: "alignTop",
+        icon: "iconAlignTop",
         label: window.siyuan.languages.alignTop,
         checked: verticalAlign === "top",
         click: () => onChange("vertical-align", "top"),
     }, {
         id: "alignMiddle",
+        icon: "iconAlignMiddle",
         label: window.siyuan.languages.alignMiddle,
         checked: verticalAlign === "middle",
         click: () => onChange("vertical-align", "middle"),
     }, {
         id: "alignBottom",
+        icon: "iconAlignBottom",
         label: window.siyuan.languages.alignBottom,
         checked: verticalAlign === "bottom",
         click: () => onChange("vertical-align", "bottom"),

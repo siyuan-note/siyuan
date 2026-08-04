@@ -260,9 +260,10 @@ export const windowMouseMove = (event: MouseEvent) => {
             }
 
             if (tableElement.getAttribute("contenteditable") === "true") {
-                const tableHeight = blockElement.querySelector("colgroup").clientHeight;
                 const captionElement = blockElement.querySelector("caption");
                 const captionHeight = (captionElement && captionElement.style.captionSide !== "bottom") ? captionElement.clientHeight : 0;
+                const tableHeight = Math.min(blockElement.querySelector("colgroup").clientHeight,
+                    tableElement.clientHeight - captionHeight);
                 const rect = cellElement.getBoundingClientRect();
                 if (rect.right - event.clientX < 3 && rect.right - event.clientX > 0) {
                     resizeElement.setAttribute("data-col-index", (getColIndex(cellElement) + cellElement.colSpan - 1).toString());

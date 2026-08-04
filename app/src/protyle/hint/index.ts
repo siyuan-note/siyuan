@@ -38,7 +38,6 @@ import {
     addEmoji,
     EmojiPanelController,
     genEmojiCategoryButtons,
-    moveEmojiSelection,
     unicode2Emoji,
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
@@ -139,6 +138,14 @@ export class Hint {
                 }
             }
         });
+    }
+
+    public deactivateEmojiPanel() {
+        this.emojiPanel?.deactivate();
+    }
+
+    public destroy() {
+        this.destroyEmojiPanel();
     }
 
     public prepareCreateTarget(protyle: IProtyle, type: TCreateTargetType) {
@@ -284,6 +291,7 @@ export class Hint {
     }
 
     public genLoading(protyle: IProtyle) {
+        this.destroyEmojiPanel();
         if (this.element.classList.contains("fn__none")) {
             this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
             this.element.classList.remove("fn__none");
@@ -347,6 +355,7 @@ export class Hint {
 
     public genHTML(data: IHintData[], protyle: IProtyle, hide = false, source: THintSource) {
         this.source = source;
+        this.destroyEmojiPanel();
         if (data.length === 0) {
             if (!this.element.querySelector(".fn__loading") || hide) {
                 this.element.classList.add("fn__none");
@@ -488,8 +497,8 @@ ${genHintItemHTML(item)}
         const targetElement = hasClosestBlock(protyle.toolbar.range?.startContainer);
         const targetID = targetElement ? targetElement.getAttribute("data-node-id") : protyle.block.rootID;
         let panelElement = this.element.querySelector(".emojis__panel") as HTMLElement;
-        if (!panelElement) {
-            this.emojiPanel?.destroy();
+        if (!panelElement || !this.emojiPanel) {
+            this.destroyEmojiPanel();
             // max-height：min(402px,40vh) 和 .protyle-hint 保持一致，否则 emoji 不显示底部导航
             this.element.innerHTML = `<div style="padding:0;max-height:min(402px,40vh);width:366px" class="emojis">
 <div class="emojis__panel"></div>
@@ -506,6 +515,7 @@ ${genHintItemHTML(item)}
         }
         this.emojiBrowseMode = value === "";
         this.emojiPanel.renderSearch(value, 256);
+        this.emojiPanel.activate();
         const firstEmojiElement = this.element.querySelector(".emojis__item");
         if (firstEmojiElement) {
             this.element.classList.remove("fn__none");
@@ -514,6 +524,12 @@ ${genHintItemHTML(item)}
         } else {
             this.element.classList.add("fn__none");
         }
+    }
+
+    private destroyEmojiPanel() {
+        this.emojiPanel?.destroy();
+        this.emojiPanel = undefined;
+        this.emojiBrowseMode = false;
     }
 
     public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false) {
@@ -1051,7 +1067,7 @@ ${genHintItemHTML(item)}
         }
         if (event.key === "Enter") {
             if (isEmojiPanel) {
-                const currentElement = this.element.querySelector(".emojis__item--current");
+                const currentElement = this.emojiPanel?.getCurrentElement();
                 if (!currentElement) {
                     return false;
                 }
@@ -1083,14 +1099,10 @@ ${genHintItemHTML(item)}
             return true;
         }
         if (isEmojiPanel) {
-            if (!this.element.querySelector(".emojis__item--current")) {
+            if (!this.emojiPanel?.getCurrentElement()) {
                 return false;
             }
-            moveEmojiSelection(
-                this.element.querySelector(".emojis__panel") as HTMLElement,
-                event.key,
-                () => this.emojiPanel?.loadMoreCustomEmojis() || false,
-            );
+            this.emojiPanel.moveSelection(event.key);
             event.preventDefault();
             event.stopPropagation();
             return true;

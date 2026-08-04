@@ -15,6 +15,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
     }
     if (panels.includes("hint")) {
         clearTimeout(protyle.hint.timeId);
+        protyle.hint.deactivateEmojiPanel();
         protyle.hint.element.classList.add("fn__none");
     }
     if (protyle.gutter && panels.includes("gutter")) {

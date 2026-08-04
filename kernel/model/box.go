@@ -805,35 +805,15 @@ func ClearTempFiles() {
 		util.PushUpdateMsg(msgId, msg, 7000)
 	}()
 
-	bazaarTmp := filepath.Join(util.TempDir, "bazaar")
-	clearTempDir(bazaarTmp, &count, &size)
+	clearTempFiles(&count, &size)
+}
 
-	exportTmp := filepath.Join(util.TempDir, "export")
-	clearTempDir(exportTmp, &count, &size)
-
-	importTmp := filepath.Join(util.TempDir, "import")
-	clearTempDir(importTmp, &count, &size)
-
-	convertTmp := filepath.Join(util.TempDir, "convert")
-	clearTempDir(convertTmp, &count, &size)
-
-	osTmp := filepath.Join(util.TempDir, "os")
-	clearTempDir(osTmp, &count, &size)
-
-	base64Tmp := filepath.Join(util.TempDir, "base64")
-	clearTempDir(base64Tmp, &count, &size)
-
-	installTmp := filepath.Join(util.TempDir, "install")
-	clearTempDir(installTmp, &count, &size)
-
-	thumbnailsTmp := filepath.Join(util.TempDir, "thumbnails")
-	clearTempDir(thumbnailsTmp, &count, &size)
-
-	repoTmp := filepath.Join(util.TempDir, "repo")
-	clearTempDir(repoTmp, &count, &size)
-
-	clipboardTmp := filepath.Join(util.TempDir, "clipboard")
-	clearTempDir(clipboardTmp, &count, &size)
+func clearTempFiles(count *int, size *int64) {
+	for _, name := range []string{
+		"bazaar", "export", "import", "convert", "pandoc", "os", "base64", "install", "thumbnails", "repo", "clipboard",
+	} {
+		clearTempDir(filepath.Join(util.TempDir, name), count, size)
+	}
 }
 
 func clearTempDir(dir string, count *int, size *int64) {

@@ -1461,6 +1461,7 @@ func clearWorkspaceTemp(preserveInstallPkgs bool) {
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
 	os.RemoveAll(filepath.Join(util.TempDir, "convert"))
+	os.RemoveAll(filepath.Join(util.TempDir, "pandoc"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	ClearRichClipboard()
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))

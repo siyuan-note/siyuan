@@ -24,7 +24,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestGetMaskedConfHidesCookieKey(t *testing.T) {
+func TestGetMaskedConfHidesCookieKeyAndPreservesOIDCSecret(t *testing.T) {
 	const cookieKey = "session-cookie-signing-key"
 
 	originalConf := Conf
@@ -46,8 +46,8 @@ func TestGetMaskedConfHidesCookieKey(t *testing.T) {
 	if cookieKey != Conf.CookieKey {
 		t.Fatalf("cookie key in the runtime configuration was changed: %q", Conf.CookieKey)
 	}
-	if maskedConf.OIDC.ClientSecret != "" || !maskedConf.OIDC.ClientSecretConfigured {
-		t.Fatalf("OIDC client secret state was not safely represented: %#v", maskedConf.OIDC)
+	if maskedConf.OIDC.ClientSecret != "oidc-client-secret" {
+		t.Fatalf("OIDC client secret was not preserved: %#v", maskedConf.OIDC)
 	}
 	if Conf.OIDC.ClientSecret != "oidc-client-secret" {
 		t.Fatalf("OIDC client secret in runtime configuration was changed: %q", Conf.OIDC.ClientSecret)

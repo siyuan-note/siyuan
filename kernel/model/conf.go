@@ -1331,10 +1331,6 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	if "" != ret.AccessAuthCode {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
-	if ret.OIDC != nil {
-		ret.OIDC.ClientSecretConfigured = ret.OIDC.ClientSecret != ""
-		ret.OIDC.ClientSecret = ""
-	}
 	return
 }
 

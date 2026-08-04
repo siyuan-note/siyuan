@@ -106,10 +106,6 @@ func OIDCValidateStart(c *gin.Context) {
 		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
 		return
 	}
-	currentConfig := Conf.GetOIDC()
-	if config.ClientSecret == "" && config.ClientSecretConfigured {
-		config.ClientSecret = currentConfig.ClientSecret
-	}
 	config.Normalize()
 	requireRemoteAuthentication := util.ContainerDocker == util.Container || !IsLocalRequest(c)
 	if err := ValidateOIDCConfigurationChange(c.Request.Context(), config, requireRemoteAuthentication,

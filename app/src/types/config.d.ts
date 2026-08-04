@@ -127,7 +127,6 @@ declare namespace Config {
         issuerURL: string;
         clientID: string;
         clientSecret: string;
-        clientSecretConfigured: boolean;
         scopes: string[];
         redirectURL: string;
         allowAll: boolean;

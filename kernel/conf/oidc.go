@@ -27,16 +27,15 @@ const (
 
 // OIDC 保存工作空间的 OpenID Connect 登录配置。
 type OIDC struct {
-	Enabled                bool             `json:"enabled"`
-	Provider               string           `json:"provider"`
-	IssuerURL              string           `json:"issuerURL"`
-	ClientID               string           `json:"clientID"`
-	ClientSecret           string           `json:"clientSecret"`
-	ClientSecretConfigured bool             `json:"clientSecretConfigured"`
-	Scopes                 []string         `json:"scopes"`
-	RedirectURL            string           `json:"redirectURL"`
-	AllowAll               bool             `json:"allowAll"`
-	ClaimRules             []*OIDCClaimRule `json:"claimRules"`
+	Enabled      bool             `json:"enabled"`
+	Provider     string           `json:"provider"`
+	IssuerURL    string           `json:"issuerURL"`
+	ClientID     string           `json:"clientID"`
+	ClientSecret string           `json:"clientSecret"`
+	Scopes       []string         `json:"scopes"`
+	RedirectURL  string           `json:"redirectURL"`
+	AllowAll     bool             `json:"allowAll"`
+	ClaimRules   []*OIDCClaimRule `json:"claimRules"`
 }
 
 // OIDCClaimRule 描述一条身份声明准入规则。同一规则的 Values 为或关系，不同规则之间为与关系。
@@ -61,9 +60,6 @@ func (o *OIDC) Normalize() {
 	o.Provider = strings.ToLower(strings.TrimSpace(o.Provider))
 	o.IssuerURL = strings.TrimSpace(o.IssuerURL)
 	o.ClientID = strings.TrimSpace(o.ClientID)
-	if o.ClientSecret != "" {
-		o.ClientSecretConfigured = true
-	}
 	o.RedirectURL = strings.TrimSpace(o.RedirectURL)
 	if len(o.Scopes) == 0 {
 		o.Scopes = []string{"openid", "profile", "email"}

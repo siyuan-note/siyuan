@@ -904,9 +904,6 @@ func setOIDC(c *gin.Context) {
 		return
 	}
 	currentConfig := model.Conf.GetOIDC()
-	if config.ClientSecret == "" && config.ClientSecretConfigured {
-		config.ClientSecret = currentConfig.ClientSecret
-	}
 	config.Normalize()
 	requireRemoteAuthentication := util.ContainerDocker == util.Container || !model.IsLocalRequest(c)
 	if err := model.ValidateOIDCConfigurationChange(c.Request.Context(), config, requireRemoteAuthentication,

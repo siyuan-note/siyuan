@@ -23,6 +23,13 @@ import {
 } from "./iconValue";
 import {showMessage} from "../dialog/message";
 import {escapeAttr, escapeHtml} from "../util/escape";
+import {
+    collectEmojiMatches,
+    getCustomEmojiBatch,
+    getEmojiItemMap,
+    groupCustomEmojiItems,
+    TCustomEmojiGroup,
+} from "./panel";
 
 export const getRandomEmoji = () => {
     const emojis = window.siyuan.emojis[getRandom(0, window.siyuan.emojis.length - 1)];
@@ -68,41 +75,6 @@ const genEmojiButton = (unicode: string, label: string, lazy = false) => {
 ${unicode2Emoji(unicode, "", false, lazy)}</button>`;
 };
 
-export const lazyLoadEmoji = (element: HTMLElement) => {
-    const emojiIntersectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entrie: IntersectionObserverEntry & { target: HTMLImageElement }) => {
-            const index = entrie.target.getAttribute("data-index");
-            if ((typeof entrie.isIntersecting === "undefined" ? entrie.intersectionRatio !== 0 : entrie.isIntersecting) && index) {
-                let html = "";
-                window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                    html += genEmojiButton(emoji.unicode, getEmojiDesc(emoji));
-                });
-                entrie.target.innerHTML = html;
-                entrie.target.removeAttribute("data-index");
-                entrie.target.style.minHeight = "";
-            }
-        });
-    });
-    element.querySelectorAll(".emojis__content").forEach((panelElement) => {
-        emojiIntersectionObserver.observe(panelElement);
-    });
-};
-
-export const lazyLoadEmojiImg = (element: Element) => {
-    const emojiIntersectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entrie: IntersectionObserverEntry & { target: HTMLImageElement }) => {
-            const src = entrie.target.getAttribute("data-src");
-            if ((typeof entrie.isIntersecting === "undefined" ? entrie.intersectionRatio !== 0 : entrie.isIntersecting) && src) {
-                entrie.target.src = src;
-                entrie.target.removeAttribute("data-src");
-            }
-        });
-    });
-    element.querySelectorAll("img").forEach((panelElement) => {
-        emojiIntersectionObserver.observe(panelElement);
-    });
-};
-
 const isEmojiMatched = (emoji: IEmojiItem, key: string) => {
     const lowerKey = key.toLowerCase();
     return unicode2Emoji(emoji.unicode) === key ||
@@ -112,73 +84,33 @@ const isEmojiMatched = (emoji: IEmojiItem, key: string) => {
         emoji.description_ja_jp.toLowerCase().includes(lowerKey);
 };
 
-export const filterEmoji = (key = "", max?: number, hideCustom = false, options?: {
+type TEmojiPanelOptions = {
     targetID?: string,
     hideDynamic?: boolean,
-}) => {
+    hideCustom?: boolean,
+};
+
+const emojiCategoryIcons: Record<string, string> = {
+    custom: "1f527",
+    people: "1f60d",
+    nature: "1f433",
+    food: "1f96a",
+    activity: "1f3a8",
+    travel: "1f3dd-fe0f",
+    objects: "1f52e",
+    symbols: "267e-fe0f",
+    flags: "1f6a9",
+};
+
+const genEmojiSection = (title: string, content: string, groupName?: string) => {
+    const groupAttribute = typeof groupName === "string" ? ` data-group="${escapeAttr(escapeHtml(groupName))}"` : "";
+    const titleHTML = title ? `<div class="emojis__title">${escapeHtml(title)}</div>` : "";
+    return `<div class="emojis__section"${groupAttribute}>${titleHTML}<div class="emojis__content">${content}</div></div>`;
+};
+
+const getRecentEmojiButtons = (key: string, options: TEmojiPanelOptions) => {
+    const recentEmojiMap = getEmojiItemMap(window.siyuan.emojis, options.hideCustom);
     let html = "";
-    const recentEmojiMap = new Map<string, IEmojiItem>();
-    if (key) {
-        html = `<div class="emojis__title">${window.siyuan.languages.emoji}</div><div class="emojis__content">`;
-    }
-    let maxCount = 0;
-    let keyHTML = "";
-    const customStore: IEmojiItem[] = [];
-    window.siyuan.emojis.forEach((category, index) => {
-        if (hideCustom && category.id === "custom") {
-            return;
-        }
-        if (!key) {
-            html += `<div class="emojis__title" data-type="${index + 1}">${getEmojiTitle(index)}</div><div style="min-height:${index === 0 ? "30px" : "300px"}" class="emojis__content"${index > 1 ? ' data-index="' + index + '"' : ""}>`;
-        }
-        if (category.items.length === 0 && index === 0 && !key) {
-            html += `<div style="margin-left: 4px">${window.siyuan.languages.setEmojiTip}</div>`;
-        }
-
-        category.items.forEach(emoji => {
-            recentEmojiMap.set(emoji.unicode, emoji);
-            if (key) {
-                if (max && maxCount > max) {
-                    return;
-                }
-                if (isEmojiMatched(emoji, key)) {
-                    if (category.id === "custom") {
-                        customStore.push(emoji);
-                    } else {
-                        keyHTML += genEmojiButton(emoji.unicode, getEmojiDesc(emoji), true);
-                    }
-                    maxCount++;
-                }
-            } else if (index < 2) {
-                html += genEmojiButton(emoji.unicode, getEmojiDesc(emoji), true);
-            }
-        });
-        if (!key) {
-            html += "</div>";
-        }
-    });
-    if (key) {
-        customStore.sort((a, b) => {
-            const aKeywords = a.keywords.split("/");
-            const bKeywords = b.keywords.split("/");
-            if (aKeywords[aKeywords.length - 1].toLowerCase().indexOf(key.toLowerCase()) < bKeywords[bKeywords.length - 1].toLowerCase().indexOf(key.toLowerCase())) {
-                return -1;
-            }
-            return 0;
-        }).sort((a, b) => {
-            const aKeywords = a.keywords.split("/");
-            const bKeywords = b.keywords.split("/");
-            if (aKeywords[aKeywords.length - 1].toLowerCase().indexOf(key.toLowerCase()) === bKeywords[bKeywords.length - 1].toLowerCase().indexOf(key.toLowerCase()) && aKeywords[aKeywords.length - 1].length < bKeywords[bKeywords.length - 1].length) {
-                return -1;
-            }
-            return 0;
-        }).forEach(item => {
-            html += genEmojiButton(item.unicode, getEmojiDesc(item), true);
-        });
-        html = html + keyHTML + "</div>";
-    }
-
-    let recentItemsHTML = "";
     const renderedRecentValues = new Set<string>();
     window.siyuan.config.editor.emoji.forEach((value) => {
         const recentValue = normalizeRecentIconValue(value);
@@ -189,7 +121,7 @@ export const filterEmoji = (key = "", max?: number, hideCustom = false, options?
         const emoji = recentEmojiMap.get(recentValue);
         if (emoji) {
             if (!key || isEmojiMatched(emoji, key)) {
-                recentItemsHTML += genEmojiButton(emoji.unicode, getEmojiDesc(emoji), true);
+                html += genEmojiButton(emoji.unicode, getEmojiDesc(emoji), true);
             }
             return;
         }
@@ -203,15 +135,263 @@ export const filterEmoji = (key = "", max?: number, hideCustom = false, options?
         }
         const displayValue = bindDynamicIconTarget(recentValue, options?.targetID);
         const label = kind === "dynamic" ? window.siyuan.languages.dynamicIcon : recentValue;
-        recentItemsHTML += genEmojiButton(displayValue, label, true);
+        html += genEmojiButton(displayValue, label, true);
     });
-    const recentHTML = recentItemsHTML ?
-        `<div class="emojis__title" data-type="0">${window.siyuan.languages.recentEmoji}</div><div class="emojis__content">${recentItemsHTML}</div>` : "";
+    return html;
+};
 
-    if (recentHTML + html === "") {
-        return `<div class="emojis__title">${window.siyuan.languages.emptyContent}</div>`;
+const genEmojiSearchHTML = (key: string, max: number | undefined, options: TEmojiPanelOptions) => {
+    const {customItems, builtInItems} = collectEmojiMatches(
+        window.siyuan.emojis,
+        (item) => isEmojiMatched(item, key),
+        max,
+        options.hideCustom,
+    );
+    customItems.sort((a, b) => {
+        const lowerKey = key.toLowerCase();
+        const aName = a.keywords.split("/").pop().toLowerCase();
+        const bName = b.keywords.split("/").pop().toLowerCase();
+        const positionDiff = aName.indexOf(lowerKey) - bName.indexOf(lowerKey);
+        return positionDiff || aName.length - bName.length;
+    });
+    const resultHTML = [...customItems, ...builtInItems]
+        .map((item) => genEmojiButton(item.unicode, getEmojiDesc(item), true)).join("");
+    const recentHTML = getRecentEmojiButtons(key, options);
+    if (!recentHTML && !resultHTML) {
+        return `<div class="emojis__section"><div class="emojis__title">${window.siyuan.languages.emptyContent}</div></div>`;
     }
-    return recentHTML + html;
+    return (recentHTML ? genEmojiSection(window.siyuan.languages.recentEmoji, recentHTML) : "") +
+        (resultHTML ? genEmojiSection(window.siyuan.languages.emoji, resultHTML) : "");
+};
+
+export const genEmojiCategoryButtons = (hideCustom = false) => {
+    const categories = [{
+        id: "recent",
+        unicode: "2b50",
+        title: window.siyuan.languages.recentEmoji,
+    }];
+    window.siyuan.emojis.forEach((category, index) => {
+        if (hideCustom && category.id === "custom") {
+            return;
+        }
+        categories.push({
+            id: category.id,
+            unicode: emojiCategoryIcons[category.id] || "2753",
+            title: getEmojiTitle(index),
+        });
+    });
+    return categories.map((category) =>
+        `<button data-type="${escapeAttr(category.id)}" class="emojis__type ariaLabel" aria-label="${escapeAttr(escapeHtml(category.title))}">${unicode2Emoji(category.unicode)}</button>`
+    ).join("");
+};
+
+export class EmojiPanelController {
+    private categoryID = "";
+    private customGroups: TCustomEmojiGroup[] = [];
+    private customOffset = 0;
+    private customObserver?: IntersectionObserver;
+    private imageObserver?: IntersectionObserver;
+    private searchMode = false;
+
+    constructor(private panelElement: HTMLElement, private typeElement: HTMLElement, private options: TEmojiPanelOptions) {
+    }
+
+    public setOptions(options: TEmojiPanelOptions) {
+        this.options = options;
+    }
+
+    public renderInitial() {
+        const recentHTML = getRecentEmojiButtons("", this.options);
+        const firstBuiltIn = window.siyuan.emojis.find((category) => category.id !== "custom");
+        this.renderCategory(recentHTML ? "recent" : firstBuiltIn?.id || "recent");
+    }
+
+    public renderCategory(categoryID: string) {
+        const category = window.siyuan.emojis.find((item) => item.id === categoryID);
+        if (categoryID !== "recent" && (!category || (this.options.hideCustom && category.id === "custom"))) {
+            this.renderInitial();
+            return;
+        }
+        this.disconnectObservers();
+        this.panelElement.innerHTML = "";
+        this.panelElement.scrollTop = 0;
+        this.categoryID = categoryID;
+        this.searchMode = false;
+        this.typeElement.classList.remove("fn__none");
+        this.updateCurrentType();
+
+        if (categoryID === "recent") {
+            const html = getRecentEmojiButtons("", this.options);
+            this.panelElement.innerHTML = html ? genEmojiSection(window.siyuan.languages.recentEmoji, html) :
+                `<div class="emojis__section"><div class="emojis__title">${window.siyuan.languages.emptyContent}</div></div>`;
+        } else if (category.id === "custom") {
+            if (category.items.length === 0) {
+                this.panelElement.innerHTML = `<div class="emojis__section"><div class="emojis__title">${window.siyuan.languages.setEmojiTip}</div></div>`;
+            } else {
+                this.customGroups = groupCustomEmojiItems(category.items);
+                this.customOffset = 0;
+                this.loadMoreCustomEmojis();
+            }
+        } else {
+            const html = category.items.map((item) => genEmojiButton(item.unicode, getEmojiDesc(item), true)).join("");
+            this.panelElement.innerHTML = genEmojiSection(getEmojiTitle(window.siyuan.emojis.indexOf(category)), html);
+        }
+        this.observeImages(this.panelElement);
+        this.selectFirst();
+    }
+
+    public renderSearch(key: string, max?: number) {
+        if (!key) {
+            if (this.categoryID) {
+                this.renderCategory(this.categoryID);
+            } else {
+                this.renderInitial();
+            }
+            return;
+        }
+        this.disconnectObservers();
+        this.searchMode = true;
+        this.panelElement.innerHTML = genEmojiSearchHTML(key, max, this.options);
+        this.panelElement.scrollTop = 0;
+        this.typeElement.classList.add("fn__none");
+        this.observeImages(this.panelElement);
+        this.selectFirst();
+    }
+
+    public loadMoreCustomEmojis() {
+        if (this.searchMode || this.categoryID !== "custom" || this.customGroups.length === 0) {
+            return false;
+        }
+        this.customObserver?.disconnect();
+        this.panelElement.querySelector(".emojis__load")?.remove();
+        const batch = getCustomEmojiBatch(this.customGroups, this.customOffset);
+        batch.groups.forEach((group) => {
+            const itemsHTML = group.items.map((item) => genEmojiButton(item.unicode, getEmojiDesc(item), true)).join("");
+            const lastSection = this.panelElement.querySelector(".emojis__section:last-of-type") as HTMLElement;
+            if (lastSection?.dataset.group === group.name) {
+                lastSection.querySelector(".emojis__content").insertAdjacentHTML("beforeend", itemsHTML);
+            } else {
+                this.panelElement.insertAdjacentHTML("beforeend", genEmojiSection(group.name, itemsHTML, group.name));
+            }
+        });
+        this.customOffset = batch.nextOffset;
+        this.observeImages(this.panelElement);
+        if (batch.hasMore) {
+            this.panelElement.insertAdjacentHTML("beforeend", '<div class="emojis__load"></div>');
+            const loadElement = this.panelElement.lastElementChild;
+            this.customObserver = new IntersectionObserver((entries) => {
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    this.loadMoreCustomEmojis();
+                }
+            }, {root: this.panelElement, rootMargin: "128px"});
+            this.customObserver.observe(loadElement);
+        }
+        return batch.groups.length > 0;
+    }
+
+    public deactivate() {
+        this.disconnectObservers();
+    }
+
+    public activate() {
+        if (!this.categoryID || this.panelElement.childElementCount === 0) {
+            this.renderInitial();
+            return;
+        }
+        this.observeImages(this.panelElement);
+        const loadElement = this.panelElement.querySelector(".emojis__load");
+        if (loadElement) {
+            this.customObserver = new IntersectionObserver((entries) => {
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    this.loadMoreCustomEmojis();
+                }
+            }, {root: this.panelElement, rootMargin: "128px"});
+            this.customObserver.observe(loadElement);
+        }
+    }
+
+    public destroy() {
+        this.disconnectObservers();
+    }
+
+    private selectFirst() {
+        this.panelElement.querySelector(".emojis__item")?.classList.add("emojis__item--current");
+    }
+
+    private updateCurrentType() {
+        this.typeElement.querySelectorAll(".emojis__type").forEach((item: HTMLElement) => {
+            item.classList.toggle("emojis__type--current", item.dataset.type === this.categoryID);
+        });
+    }
+
+    private observeImages(element: Element) {
+        if (!this.imageObserver) {
+            this.imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    }
+                    const imageElement = entry.target as HTMLImageElement;
+                    const src = imageElement.dataset.src;
+                    if (src) {
+                        imageElement.src = src;
+                        imageElement.removeAttribute("data-src");
+                    }
+                    this.imageObserver?.unobserve(imageElement);
+                });
+            }, {root: this.panelElement, rootMargin: "64px"});
+        }
+        element.querySelectorAll("img[data-src]").forEach((item) => this.imageObserver.observe(item));
+    }
+
+    private disconnectObservers() {
+        this.customObserver?.disconnect();
+        this.customObserver = undefined;
+        this.imageObserver?.disconnect();
+        this.imageObserver = undefined;
+    }
+}
+
+export const moveEmojiSelection = (panelElement: HTMLElement, key: string, loadMore?: () => boolean) => {
+    let items = Array.from(panelElement.querySelectorAll<HTMLElement>(".emojis__item"));
+    const currentElement = panelElement.querySelector<HTMLElement>(".emojis__item--current") || items[0];
+    if (!currentElement || !key.startsWith("Arrow")) {
+        return;
+    }
+    let currentIndex = items.indexOf(currentElement);
+    const columnCount = Math.max(1, Math.floor(panelElement.clientWidth / 34));
+    if ((key === "ArrowRight" && currentIndex === items.length - 1) ||
+        (key === "ArrowDown" && currentIndex + columnCount >= items.length)) {
+        if (loadMore?.()) {
+            items = Array.from(panelElement.querySelectorAll<HTMLElement>(".emojis__item"));
+            currentIndex = items.indexOf(currentElement);
+        }
+    }
+    let nextIndex = currentIndex;
+    if (key === "ArrowLeft") {
+        nextIndex--;
+    } else if (key === "ArrowRight") {
+        nextIndex++;
+    } else if (key === "ArrowUp") {
+        nextIndex -= columnCount;
+    } else if (key === "ArrowDown") {
+        nextIndex += columnCount;
+    }
+    nextIndex = Math.max(0, Math.min(items.length - 1, nextIndex));
+    const nextElement = items[nextIndex];
+    if (nextElement === currentElement) {
+        return currentElement;
+    }
+    currentElement.classList.remove("emojis__item--current");
+    nextElement.classList.add("emojis__item--current");
+    const panelRect = panelElement.getBoundingClientRect();
+    const itemRect = nextElement.getBoundingClientRect();
+    if (itemRect.top < panelRect.top + 32) {
+        panelElement.scrollTop -= panelRect.top + 32 - itemRect.top;
+    } else if (itemRect.bottom > panelRect.bottom) {
+        panelElement.scrollTop += itemRect.bottom - panelRect.bottom;
+    }
+    return nextElement;
 };
 
 export const addEmoji = (unicode: string) => {
@@ -244,19 +424,6 @@ const genWeekdayOptions = (lang: string, weekdayType: string) => {
 <option value="2" ${weekdayType === "2" ? " selected" : ""}>${dynamicWeekdayLang[2][currentLang]}</option>
 <option value="3" ${weekdayType === "3" ? " selected" : ""}>${dynamicWeekdayLang[3][currentLang]}</option>
 <option value="4" ${weekdayType === "4" ? " selected" : ""}>${dynamicWeekdayLang[4][currentLang]}</option>`;
-};
-
-const renderEmojiContent = (previousIndex: string, previousContentElement: Element) => {
-    if (!previousIndex) {
-        return;
-    }
-    let html = "";
-    window.siyuan.emojis[parseInt(previousIndex)].items.forEach(emoji => {
-        html += `<button data-unicode="${escapeAttr(emoji.unicode)}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
-    });
-    previousContentElement.innerHTML = html;
-    previousContentElement.removeAttribute("data-index");
-    previousContentElement.removeAttribute("style");
 };
 
 export const openEmojiPanel = (
@@ -307,6 +474,7 @@ export const openEmojiPanel = (
     );
     let pastedCustomIconFile: File | undefined;
     let pastedCustomIconObjectURL = "";
+    const emojiPanelState: {controller?: EmojiPanelController} = {};
     const clearPastedCustomIcon = () => {
         pastedCustomIconFile = undefined;
         if (pastedCustomIconObjectURL) {
@@ -321,7 +489,10 @@ export const openEmojiPanel = (
         hideCloseIcon: true,
         width: isMobile() ? "80vw" : "368px",
         height: "50vh",
-        destroyCallback: clearPastedCustomIcon,
+        destroyCallback: () => {
+            clearPastedCustomIcon();
+            emojiPanelState.controller?.destroy();
+        },
         content: `<div class="emojis">
     <div class="emojis__tabheader">
         <div data-type="tab-emoji" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.emoji}"><svg><use xlink:href="#iconEmoji"></use></svg></div>
@@ -345,29 +516,8 @@ export const openEmojiPanel = (
                 <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
-            <div class="emojis__panel">${filterEmoji("", null, options?.custom, {
-        targetID,
-        hideDynamic: options?.dynamic,
-    })}</div>
-            <div class="fn__flex">
-                ${[
-            ["2b50", window.siyuan.languages.recentEmoji],
-            ["1f527", getEmojiTitle(0)],
-            ["1f60d", getEmojiTitle(1)],
-            ["1f433", getEmojiTitle(2)],
-            ["1f96a", getEmojiTitle(3)],
-            ["1f3a8", getEmojiTitle(4)],
-            ["1f3dd-fe0f", getEmojiTitle(5)],
-            ["1f52e", getEmojiTitle(6)],
-            ["267e-fe0f", getEmojiTitle(7)],
-            ["1f6a9", getEmojiTitle(8)],
-        ].map(([unicode, title], index) => {
-            if (options?.custom && index === 1) {
-                return "";
-            }
-            return `<div data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</div>`;
-        }).join("")}
-            </div>
+            <div class="emojis__panel"></div>
+            <div class="fn__flex">${genEmojiCategoryButtons(options?.custom)}</div>
         </div>
         <div class="fn__none" data-type="tab-dynamic">
             <div class="fn__flex emoji__dynamic-color">
@@ -503,7 +653,6 @@ export const openEmojiPanel = (
     dialog.element.querySelector(`.emojis__tabheader [data-type="tab-${currentTab}"]`).classList.add("block__icon--active");
     dialog.element.querySelector(`.emojis__tabbody [data-type="tab-${currentTab}"]`).classList.remove("fn__none");
     setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
-    dialog.element.querySelector(".emojis__item").classList.add("emojis__item--current");
     const networkIconInputElement = dialog.element.querySelector('[data-type="network-icon-url"]') as HTMLTextAreaElement;
     const customIconFileElement = dialog.element.querySelector('[data-type="custom-icon-file"]') as HTMLInputElement;
     const customIconNameElement = dialog.element.querySelector('[data-type="custom-icon-name"]') as HTMLInputElement;
@@ -696,43 +845,24 @@ export const openEmojiPanel = (
     });
     renderNetworkIconPreview();
     const emojiSearchInputElement = dialog.element.querySelector('[data-type="tab-emoji"] .b3-text-field') as HTMLInputElement;
-    const emojisContentElement = dialog.element.querySelector(".emojis__panel");
-    emojiSearchInputElement.addEventListener("compositionend", () => {
-        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, options?.custom, {
+    const emojisContentElement = dialog.element.querySelector(".emojis__panel") as HTMLElement;
+    const emojiPanelController = new EmojiPanelController(
+        emojisContentElement,
+        emojisContentElement.nextElementSibling as HTMLElement,
+        {
             targetID,
             hideDynamic: options?.dynamic,
-        });
-        if (emojiSearchInputElement.value) {
-            emojisContentElement.nextElementSibling.classList.add("fn__none");
-        } else {
-            emojisContentElement.nextElementSibling.classList.remove("fn__none");
-        }
-        emojisContentElement.scrollTop = 0;
-        dialog.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
-        if (emojiSearchInputElement.value === "") {
-            lazyLoadEmoji(dialog.element);
-        }
-        lazyLoadEmojiImg(dialog.element);
-    });
+            hideCustom: options?.custom,
+        },
+    );
+    emojiPanelState.controller = emojiPanelController;
+    const renderEmojiSearch = () => emojiPanelController.renderSearch(emojiSearchInputElement.value);
+    emojiSearchInputElement.addEventListener("compositionend", renderEmojiSearch);
     emojiSearchInputElement.addEventListener("input", (event: InputEvent) => {
         if (event.isComposing) {
             return;
         }
-        emojisContentElement.innerHTML = filterEmoji(emojiSearchInputElement.value, null, options?.custom, {
-            targetID,
-            hideDynamic: options?.dynamic,
-        });
-        if (emojiSearchInputElement.value) {
-            emojisContentElement.nextElementSibling.classList.add("fn__none");
-        } else {
-            emojisContentElement.nextElementSibling.classList.remove("fn__none");
-        }
-        emojisContentElement.scrollTop = 0;
-        dialog.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
-        if (emojiSearchInputElement.value === "") {
-            lazyLoadEmoji(dialog.element);
-        }
-        lazyLoadEmojiImg(dialog.element);
+        renderEmojiSearch();
     });
     emojiSearchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
@@ -746,129 +876,29 @@ export const openEmojiPanel = (
             return;
         }
         if (event.key === "Enter") {
-            const unicode = currentElement.getAttribute("data-unicode");
-            if (type === "notebook") {
-                fetchPost("/api/notebook/setNotebookIcon", {
-                    notebook: id,
-                    icon: unicode
-                }, () => {
-                    dialog.destroy();
-                    updateFileTreeEmoji(unicode, id, "iconNewNoteBook");
-                });
-            } else if (type === "doc") {
-                fetchPost("/api/attr/setBlockAttrs", {
-                    id,
-                    attrs: {"icon": unicode}
-                }, () => {
-                    dialog.destroy();
-                    updateFileTreeEmoji(unicode, id);
-                    updateOutlineEmoji(unicode, id);
-                });
-            }
-            if (callback) {
-                callback(unicode);
-            }
-            addEmoji(unicode);
+            applyLinkIcon(currentElement.getAttribute("data-unicode"));
             event.preventDefault();
             event.stopPropagation();
             return;
         }
-        let newCurrentElement: HTMLElement;
-        if (event.key === "ArrowLeft") {
-            if (currentElement.previousElementSibling) {
-                currentElement.classList.remove("emojis__item--current");
-                newCurrentElement = currentElement.previousElementSibling as HTMLElement;
-                event.preventDefault();
-                event.stopPropagation();
-            } else if (currentElement.parentElement.previousElementSibling?.previousElementSibling) {
-                currentElement.classList.remove("emojis__item--current");
-                newCurrentElement = currentElement.parentElement.previousElementSibling.previousElementSibling.lastElementChild as HTMLElement;
-                event.preventDefault();
-                event.stopPropagation();
-            }
-        } else if (event.key === "ArrowRight") {
-            if (currentElement.nextElementSibling) {
-                currentElement.classList.remove("emojis__item--current");
-                newCurrentElement = currentElement.nextElementSibling as HTMLElement;
-                event.preventDefault();
-                event.stopPropagation();
-            } else if (currentElement.parentElement.nextElementSibling?.nextElementSibling) {
-                currentElement.classList.remove("emojis__item--current");
-                newCurrentElement = currentElement.parentElement.nextElementSibling.nextElementSibling.firstElementChild as HTMLElement;
-                event.preventDefault();
-                event.stopPropagation();
-            }
-        } else if (event.key === "ArrowDown") {
-            if (!currentElement.nextElementSibling) {
-                const nextContentElement = currentElement.parentElement.nextElementSibling?.nextElementSibling;
-                if (nextContentElement) {
-                    newCurrentElement = nextContentElement.firstElementChild as HTMLElement;
-                    currentElement.classList.remove("emojis__item--current");
-                }
-            } else {
-                currentElement.classList.remove("emojis__item--current");
-                let counter = Math.floor(currentElement.parentElement.clientWidth / (currentElement.clientWidth + 2));
-                newCurrentElement = currentElement;
-                while (newCurrentElement.nextElementSibling && counter > 0) {
-                    newCurrentElement = newCurrentElement.nextElementSibling as HTMLElement;
-                    counter--;
-                }
-            }
-            event.preventDefault();
-            event.stopPropagation();
-        } else if (event.key === "ArrowUp") {
-            if (!currentElement.previousElementSibling) {
-                const prevContentElement = currentElement.parentElement.previousElementSibling?.previousElementSibling;
-                if (prevContentElement) {
-                    newCurrentElement = prevContentElement.lastElementChild as HTMLElement;
-                    currentElement.classList.remove("emojis__item--current");
-                }
-            } else {
-                currentElement.classList.remove("emojis__item--current");
-                let counter = Math.floor(currentElement.parentElement.clientWidth / (currentElement.clientWidth + 2));
-                newCurrentElement = currentElement;
-                while (newCurrentElement.previousElementSibling && counter > 0) {
-                    newCurrentElement = newCurrentElement.previousElementSibling as HTMLElement;
-                    counter--;
-                }
-            }
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        if (newCurrentElement) {
-            newCurrentElement.classList.add("emojis__item--current");
-            const inputHeight = emojiSearchInputElement.clientHeight + 6;
-            if (newCurrentElement.offsetTop - inputHeight < emojisContentElement.scrollTop) {
-                emojisContentElement.scrollTop = newCurrentElement.offsetTop - inputHeight - 6;
-            } else if (newCurrentElement.offsetTop - inputHeight - emojisContentElement.clientHeight + newCurrentElement.clientHeight > emojisContentElement.scrollTop) {
-                emojisContentElement.scrollTop = newCurrentElement.offsetTop - inputHeight - emojisContentElement.clientHeight + newCurrentElement.clientHeight;
-            }
-        }
+        moveEmojiSelection(emojisContentElement, event.key, () => emojiPanelController.loadMoreCustomEmojis());
+        event.preventDefault();
+        event.stopPropagation();
     });
+    if (currentTab === "emoji") {
+        emojiPanelController.activate();
+    }
     if (!isMobile() && currentTab === "emoji") {
         emojiSearchInputElement.focus();
     } else if (!isMobile() && currentTab === "link") {
         linkIconElement.focus();
     }
-    lazyLoadEmoji(dialog.element);
-    lazyLoadEmojiImg(dialog.element);
     // 不能使用 getEventName 否则 https://github.com/siyuan-note/siyuan/issues/5472
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && target !== dialog.element) {
             if (target.classList.contains("emojis__type")) {
-                const titleElement = emojisContentElement.querySelector(`[data-type="${target.getAttribute("data-type")}"]`) as HTMLElement;
-                if (titleElement) {
-                    const index = titleElement.nextElementSibling.getAttribute("data-index");
-                    if (index) {
-                        renderEmojiContent(titleElement.previousElementSibling?.getAttribute("data-index"), titleElement.previousElementSibling);
-                        renderEmojiContent(index, titleElement.nextElementSibling);
-                    }
-                    emojisContentElement.scrollTo({
-                        top: titleElement.offsetTop - 77,
-                        // behavior: "smooth"  不能使用，否则无法定位
-                    });
-                }
+                emojiPanelController.renderCategory(target.dataset.type);
                 break;
             } else if (target.getAttribute("data-action") === "select-custom-icon") {
                 customIconFileElement.value = "";
@@ -973,6 +1003,14 @@ export const openEmojiPanel = (
                 });
                 window.siyuan.storage[Constants.LOCAL_EMOJIS].currentTab = target.dataset.type.replace("tab-", "");
                 setStorageVal(Constants.LOCAL_EMOJIS, window.siyuan.storage[Constants.LOCAL_EMOJIS]);
+                if (target.dataset.type === "tab-emoji") {
+                    emojiPanelController.activate();
+                    if (!isMobile()) {
+                        emojiSearchInputElement.focus();
+                    }
+                } else {
+                    emojiPanelController.deactivate();
+                }
                 if (target.dataset.type === "tab-link" && !isMobile()) {
                     linkIconElement.focus();
                 }

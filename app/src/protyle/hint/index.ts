@@ -1,5 +1,4 @@
 import {Constants} from "../../constants";
-import {escapeAttr} from "../../util/escape";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -37,12 +36,10 @@ import {fetchPost} from "../../util/fetch";
 import {getDisplayName, isEncryptedBox, pathPosix} from "../../util/pathName";
 import {
     addEmoji,
-    filterEmoji,
-    getEmojiDesc,
-    getEmojiTitle,
-    lazyLoadEmoji,
-    lazyLoadEmojiImg,
-    unicode2Emoji
+    EmojiPanelController,
+    genEmojiCategoryButtons,
+    moveEmojiSelection,
+    unicode2Emoji,
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
 import {uploadFiles} from "../upload";
@@ -95,6 +92,8 @@ export class Hint {
     private createTargetSessionID = 0;
     private createTargetRenderID = 0;
     private createTargetSession?: TCreateTargetSession;
+    private emojiPanel?: EmojiPanelController;
+    private emojiBrowseMode = false;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -113,33 +112,15 @@ export class Hint {
                 event.stopPropagation(); // https://github.com/siyuan-note/siyuan/issues/3710
                 return;
             }
-            const emojisContentElement = this.element.querySelector(".emojis__panel");
             const typeElement = hasClosestByClassName(eventTarget, "emojis__type");
             if (typeElement) {
-                const titleElement = emojisContentElement.querySelector(`[data-type="${typeElement.getAttribute("data-type")}"]`) as HTMLElement;
-                if (titleElement) {
-                    const index = titleElement.nextElementSibling.getAttribute("data-index");
-                    if (index) {
-                        let html = "";
-                        window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                            html += `<button data-unicode="${escapeAttr(emoji.unicode)}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
-${unicode2Emoji(emoji.unicode)}</button>`;
-                        });
-                        titleElement.nextElementSibling.innerHTML = html;
-                        titleElement.nextElementSibling.removeAttribute("data-index");
-                    }
-
-                    emojisContentElement.scrollTo({
-                        top: titleElement.offsetTop,
-                        // behavior: "smooth"  不能使用，否则无法定位
-                    });
-                }
+                this.emojiPanel?.renderCategory(typeElement.dataset.type);
                 return;
             }
             const emojiElement = hasClosestByClassName(eventTarget, "emojis__item");
             if (emojiElement) {
                 const unicode = emojiElement.getAttribute("data-unicode");
-                if (this.element.querySelectorAll(".emojis__title").length > 2) {
+                if (this.emojiBrowseMode) {
                     // /emoji 后会自动添加冒号，导致 range 无法计算，因此不依赖 this.fill
                     const range = getSelection().getRangeAt(0);
                     if (range.endContainer.nodeType !== 3) {
@@ -151,7 +132,9 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     addEmoji(unicode);
                     insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle, false, true);
                     this.element.classList.add("fn__none");
+                    this.emojiPanel?.deactivate();
                 } else {
+                    this.emojiPanel?.deactivate();
                     this.fill(unicode, protyle);
                 }
             }
@@ -504,46 +487,30 @@ ${genHintItemHTML(item)}
 
         const targetElement = hasClosestBlock(protyle.toolbar.range?.startContainer);
         const targetID = targetElement ? targetElement.getAttribute("data-node-id") : protyle.block.rootID;
-        const panelElement = this.element.querySelector(".emojis__panel");
-        if (panelElement) {
-            panelElement.innerHTML = filterEmoji(value, 256, false, {targetID});
-            if (value) {
-                panelElement.nextElementSibling.classList.add("fn__none");
-            } else {
-                panelElement.nextElementSibling.classList.remove("fn__none");
-            }
-            lazyLoadEmojiImg(panelElement);
-        } else {
+        let panelElement = this.element.querySelector(".emojis__panel") as HTMLElement;
+        if (!panelElement) {
+            this.emojiPanel?.destroy();
             // max-height：min(402px,40vh) 和 .protyle-hint 保持一致，否则 emoji 不显示底部导航
             this.element.innerHTML = `<div style="padding:0;max-height:min(402px,40vh);width:366px" class="emojis">
-<div class="emojis__panel">${filterEmoji(value, 256, false, {targetID})}</div>
-<div class="fn__flex${value ? " fn__none" : ""}">
-    ${[
-                ["2b50", window.siyuan.languages.recentEmoji],
-                ["1f527", getEmojiTitle(0)],
-                ["1f60d", getEmojiTitle(1)],
-                ["1f433", getEmojiTitle(2)],
-                ["1f96a", getEmojiTitle(3)],
-                ["1f3a8", getEmojiTitle(4)],
-                ["1f3dd-fe0f", getEmojiTitle(5)],
-                ["1f52e", getEmojiTitle(6)],
-                ["267e-fe0f", getEmojiTitle(7)],
-                ["1f6a9", getEmojiTitle(8)],
-            ].map(([unicode, title], index) =>
-                `<button data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</button>`
-            ).join("")}
-</div>
+<div class="emojis__panel"></div>
+<div class="fn__flex">${genEmojiCategoryButtons()}</div>
 </div>`;
-            lazyLoadEmoji(this.element);
-            lazyLoadEmojiImg(this.element);
+            panelElement = this.element.querySelector(".emojis__panel") as HTMLElement;
+            this.emojiPanel = new EmojiPanelController(
+                panelElement,
+                panelElement.nextElementSibling as HTMLElement,
+                {targetID},
+            );
+        } else {
+            this.emojiPanel.setOptions({targetID});
         }
+        this.emojiBrowseMode = value === "";
+        this.emojiPanel.renderSearch(value, 256);
         const firstEmojiElement = this.element.querySelector(".emojis__item");
         if (firstEmojiElement) {
-            firstEmojiElement.classList.add("emojis__item--current");
             this.element.classList.remove("fn__none");
             const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
-            this.element.querySelector(".emojis__panel").scrollTop = 0;
         } else {
             this.element.classList.add("fn__none");
         }
@@ -1089,7 +1056,7 @@ ${genHintItemHTML(item)}
                     return false;
                 }
                 const unicode = currentElement.getAttribute("data-unicode");
-                if (this.element.querySelectorAll(".emojis__title").length > 2) {
+                if (this.emojiBrowseMode) {
                     // /emoji 后会自动添加冒号，导致 range 无法计算，因此不依赖 this.fill
                     const range = getSelection().getRangeAt(0);
                     if (range.endContainer.nodeType !== 3) {
@@ -1098,7 +1065,9 @@ ${genHintItemHTML(item)}
                     addEmoji(unicode);
                     insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle);
                     this.element.classList.add("fn__none");
+                    this.emojiPanel?.deactivate();
                 } else {
+                    this.emojiPanel?.deactivate();
                     this.fill(unicode, protyle);
                 }
             } else {
@@ -1114,76 +1083,14 @@ ${genHintItemHTML(item)}
             return true;
         }
         if (isEmojiPanel) {
-            const currentElement: HTMLElement = this.element.querySelector(".emojis__item--current");
-            if (!currentElement) {
+            if (!this.element.querySelector(".emojis__item--current")) {
                 return false;
             }
-            let newCurrentElement: HTMLElement;
-            if (event.key === "ArrowLeft") {
-                if (currentElement.previousElementSibling) {
-                    currentElement.classList.remove("emojis__item--current");
-                    newCurrentElement = currentElement.previousElementSibling as HTMLElement;
-                } else if (currentElement.parentElement.previousElementSibling?.previousElementSibling) {
-                    currentElement.classList.remove("emojis__item--current");
-                    newCurrentElement = currentElement.parentElement.previousElementSibling.previousElementSibling.lastElementChild as HTMLElement;
-                }
-            } else if (event.key === "ArrowRight") {
-                if (currentElement.nextElementSibling) {
-                    currentElement.classList.remove("emojis__item--current");
-                    newCurrentElement = currentElement.nextElementSibling as HTMLElement;
-                } else if (currentElement.parentElement.nextElementSibling?.nextElementSibling) {
-                    currentElement.classList.remove("emojis__item--current");
-                    newCurrentElement = currentElement.parentElement.nextElementSibling.nextElementSibling.firstElementChild as HTMLElement;
-                }
-            } else if (event.key === "ArrowDown") {
-                if (!currentElement.nextElementSibling) {
-                    const nextContentElement = currentElement.parentElement.nextElementSibling?.nextElementSibling;
-                    if (nextContentElement) {
-                        newCurrentElement = nextContentElement.firstElementChild as HTMLElement;
-                        currentElement.classList.remove("emojis__item--current");
-                    }
-                } else {
-                    currentElement.classList.remove("emojis__item--current");
-                    let counter = Math.floor(currentElement.parentElement.clientWidth / (currentElement.clientWidth + 2));
-                    newCurrentElement = currentElement;
-                    while (newCurrentElement.nextElementSibling && counter > 0) {
-                        newCurrentElement = newCurrentElement.nextElementSibling as HTMLElement;
-                        counter--;
-                    }
-                }
-                event.preventDefault();
-                event.stopPropagation();
-            } else if (event.key === "ArrowUp") {
-                if (!currentElement.previousElementSibling) {
-                    const prevContentElement = currentElement.parentElement.previousElementSibling?.previousElementSibling;
-                    if (prevContentElement) {
-                        newCurrentElement = prevContentElement.lastElementChild as HTMLElement;
-                        currentElement.classList.remove("emojis__item--current");
-                    }
-                } else {
-                    currentElement.classList.remove("emojis__item--current");
-                    let counter = Math.floor(currentElement.parentElement.clientWidth / (currentElement.clientWidth + 2));
-                    newCurrentElement = currentElement;
-                    while (newCurrentElement.previousElementSibling && counter > 0) {
-                        newCurrentElement = newCurrentElement.previousElementSibling as HTMLElement;
-                        counter--;
-                    }
-                }
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            if (newCurrentElement) {
-                newCurrentElement.classList.add("emojis__item--current");
-                const emojisContentElement = this.element.querySelector(".emojis__panel");
-                if (newCurrentElement.offsetTop - 8 < emojisContentElement.scrollTop) {
-                    emojisContentElement.scrollTop = newCurrentElement.offsetTop - 8;
-                } else {
-                    const topHeight = emojisContentElement.nextElementSibling.classList.contains("fn__none") ? 8 : 36;
-                    if (newCurrentElement.offsetTop + topHeight - this.element.clientHeight + newCurrentElement.clientHeight > emojisContentElement.scrollTop) {
-                        emojisContentElement.scrollTop = newCurrentElement.offsetTop + topHeight - this.element.clientHeight + newCurrentElement.clientHeight;
-                    }
-                }
-            }
+            moveEmojiSelection(
+                this.element.querySelector(".emojis__panel") as HTMLElement,
+                event.key,
+                () => this.emojiPanel?.loadMoreCustomEmojis() || false,
+            );
             event.preventDefault();
             event.stopPropagation();
             return true;

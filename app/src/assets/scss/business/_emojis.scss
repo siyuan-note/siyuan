@@ -75,8 +75,16 @@
   }
 
   &__title {
+    position: sticky;
+    z-index: 1;
+    top: 0;
     color: var(--b3-theme-on-surface);
+    background-color: var(--b3-theme-background);
     padding: 8px 4px 4px 4px;
+  }
+
+  &__section {
+    position: relative;
   }
 
   &__panel {
@@ -215,6 +223,10 @@
     flex-wrap: wrap;
   }
 
+  &__load {
+    height: 1px;
+  }
+
   &__type {
     cursor: pointer;
     flex: 1;
@@ -231,6 +243,7 @@
     font-family: var(--b3-font-family-emoji);
     font-variant-emoji: emoji;
 
+    &--current,
     &:hover {
       background-color: var(--b3-theme-surface-lighter);
     }

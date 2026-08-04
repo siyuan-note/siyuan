@@ -20,7 +20,16 @@ import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
 import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
-import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate, setAVLocateRequest} from "./locate";
+import {
+    applyAVRenderContext,
+    beginAVRender,
+    failAVRender,
+    finishAVLocate,
+    getAVLocateParams,
+    isCurrentAVRender,
+    prepareAVLocate,
+    setAVLocateRequest
+} from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {updateHotkeyTip} from "../../util/compatibility";
 import {inspectAVInsertedItem} from "./filteredTip";
@@ -576,6 +585,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const created = protyle.options.history?.created;
         const snapshot = protyle.options.history?.snapshot;
         const locateParams = getAVLocateParams(e, !created && !snapshot);
+        const historical = !!created || !!snapshot;
         let data: IAV;
         if (!avData) {
             const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
@@ -584,14 +594,22 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 snapshot,
                 pageSize: avPageSize.unGroupPageSize,
                 groupPaging: avPageSize.groupPageSize,
-                viewID: locateParams?.viewID || e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+                viewID: locateParams?.viewID || "",
+                ...(historical ? {carrierViewID: e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || ""} : {}),
                 query: resetData.query.trim(),
                 blockID: e.getAttribute("data-node-id"),
                 initialLayout: e.getAttribute("data-av-type"),
                 createIfNotExist: !protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE),
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",
-            });
+            }, undefined, false);
+            if (!isCurrentAVRender(e, renderToken)) {
+                continue;
+            }
+            if (response.code !== 0) {
+                failAVRender(e, response);
+                continue;
+            }
             data = response.data;
         } else {
             data = avData;
@@ -599,21 +617,16 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         if (!isCurrentAVRender(e, renderToken)) {
             continue;
         }
-        const currentViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
-        if (currentViewID && !data.views.some((view) => view.id === currentViewID)) {
-            e.setAttribute(Constants.CUSTOM_SY_AV_VIEW, data.viewID);
-        }
+        applyAVRenderContext(e, data);
         if (e.hasAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS)) {
             setAVVisibleViewIDs(e, getAVVisibleViewIDs(e, data.views));
         }
         prepareAVLocate(e, data, resetData);
         if (data.viewType === "gallery") {
-            e.setAttribute("data-av-type", data.viewType);
             await renderGallery({blockElement: e, protyle, cb, renderAll, data});
             continue;
         }
         if (data.viewType === "kanban") {
-            e.setAttribute("data-av-type", data.viewType);
             await renderKanban({blockElement: e, protyle, cb, renderAll, data});
             continue;
         }

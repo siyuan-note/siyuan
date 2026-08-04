@@ -7,7 +7,7 @@ import {afterRenderGallery, renderGallery} from "../gallery/render";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getRowHTML} from "../row";
 import {getAVSelectedItemPoints, getBodyVirtualData} from "../virtualScroll";
-import {beginAVRender, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
+import {applyAVRenderContext, beginAVRender, failAVRender, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
 import {getCardStyle} from "../gallery/style";
 
 interface IIds {
@@ -140,32 +140,40 @@ export const renderKanban = async (options: {
     if (!data) {
         const avPageSize = getPageSize(options.blockElement);
         const locateParams = getAVLocateParams(options.blockElement, !created && !snapshot);
+        const historical = !!created || !!snapshot;
         const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
             id: options.blockElement.getAttribute("data-av-id"),
             created,
             snapshot,
             pageSize: avPageSize.unGroupPageSize,
             groupPaging: avPageSize.groupPageSize,
-            viewID: locateParams?.viewID || options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+            viewID: locateParams?.viewID || "",
+            ...(historical ? {carrierViewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || ""} : {}),
             query: resetData.query.trim(),
             blockID: options.blockElement.getAttribute("data-node-id"),
             initialLayout: options.blockElement.getAttribute("data-av-type"),
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
-        });
+        }, undefined, false);
+        if (!isCurrentAVRender(options.blockElement, renderToken)) {
+            return;
+        }
+        if (response.code !== 0) {
+            failAVRender(options.blockElement, response);
+            return;
+        }
         data = response.data;
     }
     if (!isCurrentAVRender(options.blockElement, renderToken)) {
         return;
     }
+    applyAVRenderContext(options.blockElement, data);
     prepareAVLocate(options.blockElement, data, resetData);
     if (data.viewType === "table") {
-        options.blockElement.setAttribute("data-av-type", "table");
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
         return;
     }
     if (data.viewType === "gallery") {
-        options.blockElement.setAttribute("data-av-type", data.viewType);
         renderGallery({
             blockElement: options.blockElement,
             protyle: options.protyle,

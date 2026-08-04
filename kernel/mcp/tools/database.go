@@ -156,7 +156,7 @@ func databaseRender(args map[string]any) (CallToolResult, error) {
 		pageSize = int(v)
 	}
 
-	viewable, _, err := model.RenderAttributeView("", id, viewID, query, page, pageSize, nil, false, false, false)
+	viewable, _, err := model.RenderAttributeView("", id, viewID, query, page, pageSize, nil, false, false)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "render failed: " + err.Error()}}, IsError: true}, nil
 	}
@@ -204,7 +204,7 @@ func databaseKeyAdd(args map[string]any) (CallToolResult, error) {
 	icon, _ := args["icon"].(string)
 	prev, _ := args["prev"].(string)
 	keyID := ast.NewNodeID()
-	if err := model.AddAttributeViewKey(id, keyID, name, keyType, icon, prev, av.DateDisplayFormatFull); err != nil {
+	if err := model.AddAttributeViewKey(id, "", keyID, name, keyType, icon, prev, av.DateDisplayFormatFull); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "add key failed: " + err.Error()}}, IsError: true}, nil
 	}
 	model.ReloadAttrView(id)

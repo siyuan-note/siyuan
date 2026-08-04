@@ -33,7 +33,7 @@ export const getAVItemRenderStatus = async (blockElement: HTMLElement, itemID: s
     const searchInputElement = blockElement.querySelector('[data-type="av-search"]');
     const response = await fetchSyncPost("/api/av/renderAttributeView", {
         id: blockElement.dataset.avId,
-        viewID: viewID || getAVViewID(blockElement),
+        viewID: viewID || "",
         query: searchInputElement?.textContent?.trim() || "",
         blockID: blockElement.dataset.nodeId,
         initialLayout: blockElement.dataset.avType,

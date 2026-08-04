@@ -46,7 +46,6 @@ type AttributeView struct {
 	Name              string             `json:"name"`                        // 属性视图名称
 	KeyValues         []*KeyValues       `json:"keyValues"`                   // 属性视图属性键值
 	KeyIDs            []string           `json:"keyIDs"`                      // 属性视图属性键 ID，用于排序
-	ViewID            string             `json:"viewID"`                      // 当前视图 ID
 	Views             []*View            `json:"views"`                       // 视图
 	NewItemTemplates  []*NewItemTemplate `json:"newItemTemplates,omitempty"`  // 新增条目模板
 	DefaultTemplateID string             `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
@@ -506,7 +505,6 @@ func NewAttributeView(id string) (ret *AttributeView) {
 		Spec:              CurrentSpec,
 		ID:                id,
 		KeyValues:         []*KeyValues{{Key: blockKey}, {Key: selectKey}},
-		ViewID:            view.ID,
 		Views:             []*View{view},
 		RenderedViewables: map[string]Viewable{},
 	}
@@ -1014,7 +1012,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 func (av *AttributeView) GetView(viewID string) (ret *View) {
 	for _, v := range av.Views {
-		if v.ID == viewID {
+		if nil != v && v.ID == viewID {
 			ret = v
 			return
 		}
@@ -1027,7 +1025,9 @@ func (av *AttributeView) GetVisibleViewIDs(value string) (ret []string) {
 	value = strings.TrimSpace(value)
 	if "" == value {
 		for _, view := range av.Views {
-			ret = append(ret, view.ID)
+			if nil != view && "" != view.ID {
+				ret = append(ret, view.ID)
+			}
 		}
 		return
 	}
@@ -1040,37 +1040,25 @@ func (av *AttributeView) GetVisibleViewIDs(value string) (ret []string) {
 		}
 	}
 	for _, view := range av.Views {
-		if visible[view.ID] {
+		if nil != view && visible[view.ID] {
 			ret = append(ret, view.ID)
 		}
 	}
-	if 1 > len(ret) && 0 < len(av.Views) {
-		ret = append(ret, av.Views[0].ID)
+	if 1 > len(ret) {
+		if view, _ := av.GetFirstView(); nil != view {
+			ret = append(ret, view.ID)
+		}
 	}
 	return
 }
 
-func (av *AttributeView) GetCurrentView(viewID string) (ret *View, err error) {
-	if "" != viewID {
-		ret = av.GetView(viewID)
-		if nil != ret {
-			return
+func (av *AttributeView) GetFirstView() (ret *View, err error) {
+	for _, view := range av.Views {
+		if nil != view && "" != view.ID {
+			return view, nil
 		}
 	}
-
-	for _, v := range av.Views {
-		if v.ID == av.ViewID {
-			ret = v
-			return
-		}
-	}
-
-	if 1 > len(av.Views) {
-		err = ErrViewNotFound
-		return
-	}
-	ret = av.Views[0]
-	return
+	return nil, ErrViewNotFound
 }
 
 func (av *AttributeView) ExistBoundBlock(nodeID string) bool {
@@ -1272,7 +1260,6 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		view.ItemIDs = []string{}
 	}
 	ret.CardCoverPositions = nil
-	ret.ViewID = ret.Views[0].ID
 
 	ret.KeyIDs = nil
 	for _, oldKeyID := range oldKeyIDs {

@@ -114,7 +114,7 @@ export const openMenuPanel = (options: {
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
         pageSize: avPageSize.unGroupPageSize,
         groupPaging: avPageSize.groupPageSize,
-        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+        blockID: options.blockElement.getAttribute("data-node-id"),
         ignoreRows,
     };
     // 接收视图数据并构建面板 DOM、绑定事件。fetch 回调与 options.data 复用两条路径都走这里

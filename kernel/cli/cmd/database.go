@@ -66,7 +66,7 @@ var databaseGetCmd = &cobra.Command{
 		}
 		switch outputFormat {
 		case "json":
-			data, _ := json.MarshalIndent(attrView, "", "  ")
+			data, _ := json.MarshalIndent(model.NewAttributeViewData(attrView), "", "  ")
 			fmt.Println(string(data))
 		default:
 			fmt.Printf("ID:    %s\n", attrView.ID)
@@ -97,7 +97,7 @@ var databaseRenderCmd = &cobra.Command{
 			size = 50
 		}
 
-		_, attrView, err := model.RenderAttributeView("", avID, viewID, query, page, size, nil, false, false, false)
+		_, attrView, err := model.RenderAttributeView("", avID, viewID, query, page, size, nil, false, false)
 		if err != nil {
 			return err
 		}
@@ -164,7 +164,7 @@ var databaseKeyAddCmd = &cobra.Command{
 		}
 
 		keyID := ast.NewNodeID()
-		if err := model.AddAttributeViewKey(avID, keyID, name, keyType, icon, prev, av.DateDisplayFormatFull); err != nil {
+		if err := model.AddAttributeViewKey(avID, "", keyID, name, keyType, icon, prev, av.DateDisplayFormatFull); err != nil {
 			return err
 		}
 		model.AppendPushReloadAttrViewEntry(avID)

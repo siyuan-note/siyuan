@@ -451,7 +451,7 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
     previousElement.insertAdjacentHTML("afterend", html);
     fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
         avID: options.blockElement.getAttribute("data-av-id"),
-        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+        blockID: options.blockElement.getAttribute("data-node-id"),
         groupID: options.groupID,
         previousID: options.previousId,
     }, (response) => {

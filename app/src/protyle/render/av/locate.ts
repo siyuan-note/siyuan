@@ -233,8 +233,22 @@ export const getAVLocateParams = (blockElement: HTMLElement, enabled = true) => 
     return request ? {
         targetItemID: request.itemID,
         targetGroupID: request.groupID || "",
-        viewID: request.viewID || blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+        viewID: request.viewID || "",
     } : undefined;
+};
+
+export const applyAVRenderContext = (blockElement: HTMLElement, data: IAV) => {
+    blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, data.viewID);
+    blockElement.setAttribute("data-av-type", data.viewType);
+};
+
+export const failAVRender = (blockElement: HTMLElement, response: IWebSocketData) => {
+    const request = getAVLocateRequest(blockElement);
+    if (request) {
+        clearAVLocateRequest(blockElement, request);
+    }
+    const viewNotFound = request?.viewID && response.data?.error === "viewNotFound";
+    showMessage(viewNotFound ? window.siyuan.languages.databaseViewNotFound : response.msg);
 };
 
 export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData: {
@@ -250,8 +264,6 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
             request.messageShown = true;
             if (data.target.status === "filtered" || data.target.status === "groupHidden") {
                 showMessage(window.siyuan.languages.databaseItemFiltered);
-            } else if (data.target.status === "viewNotFound") {
-                showMessage(window.siyuan.languages.databaseViewNotFound);
             } else {
                 showMessage(window.siyuan.languages.databaseItemNotFound);
             }
@@ -314,7 +326,7 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         return;
     }
     const currentViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ?? request.previousViewID ?? data.viewID;
-    if (data.target?.status !== "viewNotFound" && request.viewID && request.viewID !== currentViewID) {
+    if (request.viewID && request.viewID !== currentViewID) {
         blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, request.viewID);
         if (!protyle.disabled && request.persistView !== false) {
             transaction(protyle, [{

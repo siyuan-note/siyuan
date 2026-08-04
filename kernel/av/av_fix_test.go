@@ -17,6 +17,7 @@
 package av
 
 import (
+	"encoding/json"
 	"math"
 	"testing"
 )
@@ -52,5 +53,27 @@ func TestUpgradeSpec6CardConfiguration(t *testing.T) {
 	}
 	if math.Abs(2.0/3.0-attrView.Views[0].Kanban.CardAspectRatioValue) > 1e-9 {
 		t.Fatalf("unexpected kanban aspect ratio %v", attrView.Views[0].Kanban.CardAspectRatioValue)
+	}
+}
+
+func TestUpgradeSpec7RemovesPersistedCurrentView(t *testing.T) {
+	attrView := &AttributeView{}
+	if err := json.Unmarshal([]byte(`{"spec":6,"viewID":"legacy-view","views":[]}`), attrView); nil != err {
+		t.Fatal(err)
+	}
+	UpgradeSpec(attrView)
+	if 7 != attrView.Spec {
+		t.Fatalf("expected spec 7, got %d", attrView.Spec)
+	}
+	data, err := json.Marshal(attrView)
+	if nil != err {
+		t.Fatal(err)
+	}
+	var fields map[string]json.RawMessage
+	if err = json.Unmarshal(data, &fields); nil != err {
+		t.Fatal(err)
+	}
+	if _, ok := fields["viewID"]; ok {
+		t.Fatalf("legacy viewID was persisted: %s", data)
 	}
 }

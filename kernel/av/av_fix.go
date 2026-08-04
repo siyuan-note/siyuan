@@ -24,7 +24,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const CurrentSpec = 6
+const CurrentSpec = 7
 
 const MaxFilterNestingDepth = 3
 
@@ -39,6 +39,7 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec4(av)
 	upgradeSpec5(av)
 	upgradeSpec6(av)
+	upgradeSpec7(av)
 }
 
 func CheckSpec(av *AttributeView) (err error) {
@@ -48,6 +49,15 @@ func CheckSpec(av *AttributeView) (err error) {
 		return
 	}
 	return
+}
+
+// upgradeSpec7 移除数据库级当前视图，当前视图由数据库块属性或调用上下文决定。
+func upgradeSpec7(av *AttributeView) {
+	if 7 <= av.Spec {
+		return
+	}
+
+	av.Spec = 7
 }
 
 // upgradeSpec6 将卡片和看板的预设尺寸转换为可连续调节的实际宽度和宽高比。

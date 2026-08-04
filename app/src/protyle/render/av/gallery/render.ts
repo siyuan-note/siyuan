@@ -9,7 +9,15 @@ import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
 import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "../virtualScroll";
 import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "../row";
-import {beginAVRender, finishAVLocate, getAVLocateParams, isCurrentAVRender, prepareAVLocate} from "../locate";
+import {
+    applyAVRenderContext,
+    beginAVRender,
+    failAVRender,
+    finishAVLocate,
+    getAVLocateParams,
+    isCurrentAVRender,
+    prepareAVLocate
+} from "../locate";
 import {getCardStyle} from "./style";
 import {setGroupFoldedStates} from "../groupFold";
 
@@ -256,32 +264,40 @@ export const renderGallery = async (options: {
     if (!data) {
         const avPageSize = getPageSize(options.blockElement);
         const locateParams = getAVLocateParams(options.blockElement, !created && !snapshot);
+        const historical = !!created || !!snapshot;
         const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
             id: options.blockElement.getAttribute("data-av-id"),
             created,
             snapshot,
             pageSize: avPageSize.unGroupPageSize,
             groupPaging: avPageSize.groupPageSize,
-            viewID: locateParams?.viewID || options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+            viewID: locateParams?.viewID || "",
+            ...(historical ? {carrierViewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || ""} : {}),
             query: resetData.query.trim(),
             blockID: options.blockElement.getAttribute("data-node-id"),
             initialLayout: options.blockElement.getAttribute("data-av-type"),
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
-        });
+        }, undefined, false);
+        if (!isCurrentAVRender(options.blockElement, renderToken)) {
+            return;
+        }
+        if (response.code !== 0) {
+            failAVRender(options.blockElement, response);
+            return;
+        }
         data = response.data;
     }
     if (!isCurrentAVRender(options.blockElement, renderToken)) {
         return;
     }
+    applyAVRenderContext(options.blockElement, data);
     prepareAVLocate(options.blockElement, data, resetData);
     if (data.viewType === "table") {
-        options.blockElement.setAttribute("data-av-type", data.viewType);
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
         return;
     }
     if (data.viewType === "kanban") {
-        options.blockElement.setAttribute("data-av-type", data.viewType);
         renderKanban({
             blockElement: options.blockElement,
             protyle: options.protyle,

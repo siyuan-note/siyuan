@@ -6,7 +6,7 @@
 		"id": "20260804190002-oidcen1",
 		"title": "OIDC login",
 		"type": "doc",
-		"updated": "20260804193000"
+		"updated": "20260804211502"
 	},
 	"Children": [
 		{
@@ -435,7 +435,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260804160025-en0000q",
-				"updated": "20260804193000"
+				"updated": "20260804211502"
 			},
 			"Children": [
 				{
@@ -449,7 +449,7 @@
 					},
 					"Properties": {
 						"id": "20260804160026-en0000r",
-						"updated": "20260804193000"
+						"updated": "20260804211502"
 					},
 					"Children": [
 						{
@@ -457,12 +457,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804160027-en0000s",
-								"updated": "20260804193000"
+								"updated": "20260804211502"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Local browser and desktop: typically use "
+									"Data": "Local browser and desktop: the callback uses SiYuan's current local access scheme. With HTTPS enabled, use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://127.0.0.1:<port>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; without HTTPS, use "
 								},
 								{
 									"Type": "NodeTextMark",

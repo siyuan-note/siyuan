@@ -6,7 +6,7 @@
 		"id": "20260804190000-oidccn1",
 		"title": "OIDC 登录",
 		"type": "doc",
-		"updated": "20260804205607"
+		"updated": "20260804211500"
 	},
 	"Children": [
 		{
@@ -435,7 +435,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260804100025-cn0000q",
-				"updated": "20260804193000"
+				"updated": "20260804211500"
 			},
 			"Children": [
 				{
@@ -449,7 +449,7 @@
 					},
 					"Properties": {
 						"id": "20260804100026-cn0000r",
-						"updated": "20260804193000"
+						"updated": "20260804211500"
 					},
 					"Children": [
 						{
@@ -457,12 +457,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804100027-cn0000s",
-								"updated": "20260804193000"
+								"updated": "20260804211500"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "本机浏览器和桌面端：通常使用 "
+									"Data": "本机浏览器和桌面端：回调地址使用思源当前本机访问协议；启用 HTTPS 时为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://127.0.0.1:<端口>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，未启用 HTTPS 时为 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -471,7 +480,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "；身份提供商中登记的地址必须与实际协议、主机、端口、路径和斜线完全一致"
+									"Data": "。身份提供商中登记的地址必须与实际协议、主机、端口、路径和斜线完全一致"
 								}
 							]
 						}

@@ -6,7 +6,7 @@
 		"id": "20260804190003-oidcja1",
 		"title": "OIDC ログイン",
 		"type": "doc",
-		"updated": "20260804193000"
+		"updated": "20260804211503"
 	},
 	"Children": [
 		{
@@ -431,7 +431,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260804190025-ja0000q",
-				"updated": "20260804193000"
+				"updated": "20260804211503"
 			},
 			"Children": [
 				{
@@ -445,7 +445,7 @@
 					},
 					"Properties": {
 						"id": "20260804190026-ja0000r",
-						"updated": "20260804193000"
+						"updated": "20260804211503"
 					},
 					"Children": [
 						{
@@ -453,12 +453,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804190027-ja0000s",
-								"updated": "20260804193000"
+								"updated": "20260804211503"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ローカルブラウザとデスクトップ：通常は "
+									"Data": "ローカルブラウザとデスクトップ：コールバックには SiYuan への現在のローカルアクセスと同じスキームを使用します。HTTPS が有効な場合は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://127.0.0.1:<ポート>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、HTTPS が無効な場合は "
 								},
 								{
 									"Type": "NodeTextMark",

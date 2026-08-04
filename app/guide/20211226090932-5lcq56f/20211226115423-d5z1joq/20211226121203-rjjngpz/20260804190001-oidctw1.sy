@@ -6,7 +6,7 @@
 		"id": "20260804190001-oidctw1",
 		"title": "OIDC 登入",
 		"type": "doc",
-		"updated": "20260804205607"
+		"updated": "20260804211501"
 	},
 	"Children": [
 		{
@@ -435,7 +435,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260804130025-tw0000q",
-				"updated": "20260804193000"
+				"updated": "20260804211501"
 			},
 			"Children": [
 				{
@@ -449,7 +449,7 @@
 					},
 					"Properties": {
 						"id": "20260804130026-tw0000r",
-						"updated": "20260804193000"
+						"updated": "20260804211501"
 					},
 					"Children": [
 						{
@@ -457,12 +457,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804130027-tw0000s",
-								"updated": "20260804193000"
+								"updated": "20260804211501"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "本機瀏覽器和桌面端：通常使用 "
+									"Data": "本機瀏覽器和桌面端：回呼位址使用思源目前的本機存取通訊協定；啟用 HTTPS 時為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://127.0.0.1:<連接埠>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，未啟用 HTTPS 時為 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -471,7 +480,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "；身分提供者中登記的位址必須與實際通訊協定、主機、連接埠、路徑和斜線完全一致"
+									"Data": "。身分提供者中登記的位址必須與實際通訊協定、主機、連接埠、路徑和斜線完全一致"
 								}
 							]
 						}

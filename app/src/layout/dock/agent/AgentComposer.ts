@@ -34,6 +34,7 @@ interface ComposerOptions {
     initialContent?: string;
     initialBlockHTML?: string;
     submitMode?: "enter" | "mod-enter";
+    placeholder?: string;
     onCancel?: () => void;
     enableHistory?: boolean;
 }
@@ -192,7 +193,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         wysiwyg.element.innerHTML = "";
         const emptyElement = genEmptyElement(false, false);
         emptyElement.firstElementChild.classList.add("protyle-wysiwyg--empty");
-        emptyElement.firstElementChild.setAttribute("placeholder", L.agentInputPlaceholder);
+        emptyElement.firstElementChild.setAttribute("placeholder", options.placeholder || L.agentInputPlaceholder);
         wysiwyg.element.appendChild(emptyElement);
     };
     if (options.initialBlockHTML) {

@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "OIDC 設定の検証に失敗しました",
+	"oidcVerificationSuccess": "OIDC 設定を検証して保存しました",
+	"oidcVerificationTip": "開いたブラウザーウィンドウで OIDC ログインを完了してください。検証が成功するまで現在の設定が有効なまま維持されます",
+	"oidcVerifying": "検証を待機中...",
+	"oidcVerifyAndSave": "検証して保存",
+	"oidcConfigInvalid": "OIDC クレームルールの設定が無効です",
+	"oidcClaimRulesTip": "JSON 配列。同一ルール内の値は OR、ルール間は AND として評価されます",
+	"oidcClaimRules": "OIDC クレームルール",
+	"oidcAllowAll": "認証済みのすべてのユーザーを許可",
+	"oidcRedirectURL": "OIDC リダイレクト URL",
+	"oidcScopes": "OIDC スコープ",
+	"oidcClientSecret": "OIDC クライアントシークレット",
+	"oidcClientID": "OIDC クライアント ID",
+	"oidcIssuerURL": "OIDC 発行者 URL",
+	"oidcProvider": "OIDC プロバイダー",
+	"oidcEnabled": "OIDC ログインを有効化",
+	"oidcLoginTip": "OpenID Connect プロバイダーによるシングルサインオンを設定します",
+	"oidcLogin": "OIDC ログイン",
 	"disableAll": "すべて無効化",
 	"bazaarKernelPlugin": "カーネルプラグイン",
 	"newItemTemplateDefaultTip": "現在のノートブックの新規ドキュメントのデフォルト保存先を使用します",
@@ -2424,6 +2442,12 @@
 		"360": "[%s] にエクスポートしました",
 		"361": "公開サービスのアカウントのユーザー名は空にできません",
 		"362": "公開サービスのアカウントのユーザー名が重複しています",
-		"363": "公開サービスのアカウントのパスワードは 8 文字以上である必要があります"
+		"363": "公開サービスのアカウントのパスワードは 8 文字以上である必要があります",
+		"364": "OIDC でログイン",
+		"365": "OIDC ログインに失敗しました",
+		"366": "OIDC ログインが完了しました",
+		"367": "このウィンドウを閉じて SiYuan に戻ることができます",
+		"368": "この OIDC プロバイダーは SiYuan モバイルコールバック URI をサポートしていません",
+		"369": "OIDC 設定が無効です"
 	}
 	}

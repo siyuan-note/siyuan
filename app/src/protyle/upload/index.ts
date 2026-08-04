@@ -2,6 +2,7 @@ import {insertHTML} from "../util/insertHTML";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 import {destroy} from "../util/destroy";
+import {escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {getEditorRange} from "../util/selection";
 import {pathPosix} from "../../util/pathName";
@@ -47,7 +48,7 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
         }
 
         if (file.size > protyle.options.upload.max) {
-            errorTip += `<li>${file.name} ${window.siyuan.languages.over} ${protyle.options.upload.max / 1024 / 1024}M</li>`;
+            errorTip += `<li>${escapeHtml(file.name)} ${window.siyuan.languages.over} ${protyle.options.upload.max / 1024 / 1024}M</li>`;
             validate = false;
         }
 
@@ -71,14 +72,14 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
             });
 
             if (!isAccept) {
-                errorTip += `<li>${file.name} ${window.siyuan.languages.fileTypeError}</li>`;
+                errorTip += `<li>${escapeHtml(file.name)} ${window.siyuan.languages.fileTypeError}</li>`;
                 validate = false;
             }
         }
 
         if (validate) {
             uploadFileList.push(file);
-            uploadingStr += `<li>${filename} ${window.siyuan.languages.uploading}</li>`;
+            uploadingStr += `<li>${escapeHtml(filename)} ${window.siyuan.languages.uploading}</li>`;
         }
     }
     let msgId;
@@ -94,7 +95,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
     let errorTip = "";
 
     if (response.code === 1) {
-        errorTip = `${response.msg}`;
+        errorTip = `${escapeHtml(String(response.msg))}`;
     }
 
     if (response.data.errFiles && response.data.errFiles.length > 0) {
@@ -102,7 +103,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
         response.data.errFiles.forEach((data: string) => {
             const lastIndex = data.lastIndexOf(".");
             const filename = lastIndex === -1 ? data : (protyle.options.upload.filename(data.substr(0, lastIndex)) + data.substr(lastIndex));
-            errorTip += `<li>${filename} ${window.siyuan.languages.uploadError}</li>`;
+            errorTip += `<li>${escapeHtml(filename)} ${window.siyuan.languages.uploadError}</li>`;
         });
         errorTip += "</ul>";
     }
@@ -272,7 +273,7 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
     const assetPaths: string[] = [];
     files.forEach(item => {
         if (item.size && Constants.SIZE_UPLOAD_TIP_SIZE <= item.size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", filesize(item.size, {standard: "iec"})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", escapeHtml(item.path)).replace("${y}", filesize(item.size, {standard: "iec"})) + "<br>";
         }
         assetPaths.push(item.path);
     });
@@ -292,7 +293,7 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
                 }
             });
             if (tip) {
-                showMessage(window.siyuan.languages.dndFolderTip.replace("${x}", `<b>${tip.substring(0, tip.length - 2)}</b>`));
+                showMessage(window.siyuan.languages.dndFolderTip.replace("${x}", `<b>${escapeHtml(tip.substring(0, tip.length - 2))}</b>`));
             }
             genUploadedLabel(JSON.stringify(response), protyle);
         });
@@ -369,7 +370,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
     for (let i = 0, iMax = validateResult.files.length; i < iMax; i++) {
         formData.append(protyle.options.upload.fieldName, validateResult.files[i]);
         if (Constants.SIZE_UPLOAD_TIP_SIZE <= validateResult.files[i].size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", validateResult.files[i].name).replace("${y}", filesize(validateResult.files[i].size, {standard: "iec"})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", escapeHtml(validateResult.files[i].name)).replace("${y}", filesize(validateResult.files[i].size, {standard: "iec"})) + "<br>";
         }
     }
     if (protyle.lite) {

@@ -56,13 +56,14 @@ func TestUpgradeSpec6CardConfiguration(t *testing.T) {
 	}
 }
 
-func TestLegacyCurrentViewIsNotPersisted(t *testing.T) {
+func TestUpgradeSpec7RemovesPersistedCurrentView(t *testing.T) {
 	attrView := &AttributeView{}
 	if err := json.Unmarshal([]byte(`{"spec":6,"viewID":"legacy-view","views":[]}`), attrView); nil != err {
 		t.Fatal(err)
 	}
-	if CurrentSpec != attrView.Spec {
-		t.Fatalf("expected spec %d, got %d", CurrentSpec, attrView.Spec)
+	UpgradeSpec(attrView)
+	if 7 != attrView.Spec {
+		t.Fatalf("expected spec 7, got %d", attrView.Spec)
 	}
 	data, err := json.Marshal(attrView)
 	if nil != err {

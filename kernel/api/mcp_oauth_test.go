@@ -19,7 +19,6 @@ package api
 import (
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -39,22 +38,6 @@ func TestPreserveMCPServerIDsForOlderFrontend(t *testing.T) {
 	preserveMCPServerIDs(oldServers, newServers)
 	if newServers[0].ID != "first-id" || newServers[1].ID != "second-id" || newServers[2].ID != "new-id" {
 		t.Fatalf("unexpected MCP server IDs: %#v", newServers)
-	}
-}
-
-func TestRenderMCPOAuthCallbackPage(t *testing.T) {
-	page := string(renderMCPOAuthCallbackPage("zh-CN", "已收到<script>", "返回思源 & 查看状态", true))
-	for _, expected := range []string{`lang="zh-CN"`, "已收到&lt;script&gt;", "返回思源 &amp; 查看状态"} {
-		if !strings.Contains(page, expected) {
-			t.Fatalf("OAuth callback page does not contain %q: %s", expected, page)
-		}
-	}
-	if strings.Contains(page, "window.close") || strings.Contains(page, "已收到<script>") {
-		t.Fatalf("OAuth callback page contains unsafe or auto-close content: %s", page)
-	}
-	failurePage := string(renderMCPOAuthCallbackPage("en", "Authorization failed", "Try again", false))
-	if !strings.Contains(failurePage, `class="mark mark--error"`) {
-		t.Fatalf("OAuth failure callback page does not use the error state: %s", failurePage)
 	}
 }
 

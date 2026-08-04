@@ -681,26 +681,51 @@
   flex-shrink: 0;
 }
 
-// 思考强度：iconBrain 图标嵌入原生 select 左侧，与旁边的模型 select 外观一致。
-.agent-chat__reasoning-effort {
-  position: relative;
+.agent-chat__model-picker {
   display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  min-width: 0;
 
-  // iconBrain 绝对定位到 select 左内侧，不拦截 select 点击。
-  & > svg {
-    position: absolute;
-    left: 6px;
-    top: 50%;
-    transform: translateY(-50%);
+  &-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &-arrow {
+    width: 10px;
+    height: 10px;
+    color: var(--b3-theme-on-surface-light);
+    flex-shrink: 0;
+  }
+}
+
+// 思考强度：使用菜单按钮，避免底部原生 select 向视口外展开。
+.agent-chat__reasoning-effort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &-icon {
     height: 14px;
     width: 14px;
     color: var(--b3-theme-on-surface);
-    pointer-events: none;
   }
 
-  // 文字右移让出图标空间（b3-select 原始左 padding 为 8px）。
-  .agent-chat__reasoning-effort-select {
-    padding-left: 26px;
+  &-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &-arrow {
+    width: 10px;
+    height: 10px;
+    color: var(--b3-theme-on-surface-light);
   }
 }
 
@@ -1075,4 +1100,120 @@
   min-height: 24px;
   max-height: 120px;
   overflow-y: auto;
+}
+
+#model.model--agent {
+  > .toolbar {
+    display: none;
+  }
+
+  #modelMain {
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+.sy__agentChat--mobile {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  background: var(--b3-theme-background);
+
+  .block__icons {
+    min-height: 48px;
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(4px, env(safe-area-inset-right));
+    border-bottom: .5px solid var(--b3-theme-background-light);
+  }
+
+  .agent-chat__title {
+    min-height: 30px;
+    font-size: 17px;
+    font-weight: normal;
+    line-height: 30px;
+  }
+
+  .block__icon {
+    box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    opacity: 1;
+  }
+
+  .agent-chat__messages {
+    padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
+    scrollbar-gutter: auto;
+  }
+
+  .agent-chat__msg-actions {
+    opacity: 1;
+  }
+
+  .agent-chat__body .protyle-icons {
+    opacity: .86;
+  }
+
+  .agent-chat__nav-rail {
+    display: none;
+  }
+
+  .agent-chat__input-area {
+    margin: 0 max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .agent-chat__composer-host {
+    max-height: min(120px, 30vh);
+  }
+
+  .agent-chat__button-options {
+    gap: 4px;
+  }
+
+  .agent-chat__confirm-actions,
+  .agent-chat__question-submit {
+    flex-wrap: wrap;
+
+    .b3-button {
+      min-height: 40px;
+    }
+  }
+
+  .agent-session-popup--mobile {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: none;
+    z-index: 20;
+    background: var(--b3-theme-background);
+
+    .agent-session-popup__search {
+      margin: 8px;
+      min-height: 36px;
+    }
+
+    .agent-session-popup__close {
+      width: 16px;
+      height: 16px;
+      padding: 12px;
+    }
+
+    .b3-list-item {
+      min-height: 44px;
+    }
+
+    > .b3-list {
+      min-height: 0;
+      overflow-y: auto;
+    }
+  }
+}
+
+.agent-menu-status--warning {
+  color: var(--b3-theme-error);
 }

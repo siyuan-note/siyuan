@@ -78,14 +78,40 @@ func TestSanitizeSVGPreservesStaticSVG(t *testing.T) {
 	}
 }
 
+func TestSanitizeSVGAllowsBenignDoctype(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+	}{
+		{"drawio style", `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">` +
+			`<svg xmlns="http://www.w3.org/2000/svg"></svg>`},
+		{"short", `<!DOCTYPE svg><svg xmlns="http://www.w3.org/2000/svg"></svg>`},
+		{"system id", `<!DOCTYPE svg SYSTEM "svg.dtd"><svg xmlns="http://www.w3.org/2000/svg"></svg>`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			output, err := SanitizeSVG(test.input)
+			if err != nil {
+				t.Fatalf("sanitize failed: %v", err)
+			}
+			if strings.Contains(strings.ToLower(output), "<!doctype") {
+				t.Fatalf("doctype was not dropped from %q", output)
+			}
+		})
+	}
+}
+
 func TestSanitizeSVGRejectsInvalidInput(t *testing.T) {
 	tests := []string{
 		`<html></html>`,
 		`<svg><path></svg>`,
 		`<svg><script><path></script></path></svg>`,
 		`<svg></svg><svg></svg>`,
-		`<!DOCTYPE svg><svg></svg>`,
 		`text<svg></svg>`,
+		`<!DOCTYPE svg [ <!ENTITY x "y"> ]><svg></svg>`,
+		`<!ENTITY x "y"><svg></svg>`,
+		`<!DOCTYPE html><svg></svg>`,
 	}
 	for _, input := range tests {
 		if output, err := SanitizeSVG(input); err == nil {

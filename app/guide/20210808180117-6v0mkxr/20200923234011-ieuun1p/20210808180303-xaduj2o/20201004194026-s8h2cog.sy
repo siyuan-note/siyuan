@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260804120100"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091447-8iiuxlt",
-				"updated": "20260803171606"
+				"updated": "20260804120100"
 			},
 			"Children": [
 				{
@@ -247,6 +247,67 @@
 			"Properties": {
 				"id": "20210117211053-tq2km4f"
 			}
+		},
+		{
+			"ID": "20260804120101-oidclog",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804120101-oidclog",
+				"updated": "20260804120101"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC login"
+				}
+			]
+		},
+		{
+			"ID": "20260804120102-oidcset",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804120102-oidcset",
+				"updated": "20260804120102"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configure OIDC login in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Authentication"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Remote browser access requires a public HTTPS callback URL ending in /api/system/oidc/callback. SiYuan's local listening address is valid only for a local browser login and cannot be used as the fixed callback for remote browsers or mobile apps."
+				}
+			]
+		},
+		{
+			"ID": "20260804120103-oidcmob",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804120103-oidcmob",
+				"updated": "20260804120103"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Native mobile apps always use siyuan:/oidc-callback; register it exactly as written with the identity provider. Google does not accept this mobile callback form, so Google login is available only in browser and desktop flows."
+				}
+			]
 		}
 	]
 }

@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"time"
 
@@ -889,6 +890,48 @@ func setAccessAuthCode(c *gin.Context) {
 		util.ReloadUI()
 	}()
 	return
+}
+
+func setOIDC(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	config := conf.NewOIDC()
+	if err := c.ShouldBindJSON(config); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(369)
+		logging.LogWarnf("bind OIDC configuration failed [ip=%s]: %s", c.ClientIP(), err)
+		return
+	}
+	currentConfig := model.Conf.GetOIDC()
+	config.Normalize()
+	requireRemoteAuthentication := util.ContainerDocker == util.Container || !model.IsLocalRequest(c)
+	if err := model.ValidateOIDCConfigurationChange(c.Request.Context(), config, requireRemoteAuthentication,
+		model.Conf.AccessAuthCode != "", util.SiYuanAccessAuthCodeBypass); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(369)
+		logging.LogErrorf("validate OIDC configuration change failed [ip=%s]: %s", c.ClientIP(), err)
+		return
+	}
+	configurationChanged := !reflect.DeepEqual(currentConfig, config)
+	if configurationChanged && config.Enabled {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(369)
+		logging.LogWarnf("reject unverified OIDC configuration change [ip=%s]", c.ClientIP())
+		return
+	}
+	model.Conf.SetOIDC(config)
+	masked, err := model.GetMaskedConf()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(369)
+		logging.LogErrorf("get masked configuration after setting OIDC failed: %s", err)
+		return
+	}
+	ret.Data = masked.OIDC
+	if configurationChanged {
+		util.CloseOIDCSessions()
+	}
 }
 
 func setFollowSystemLockScreen(c *gin.Context) {

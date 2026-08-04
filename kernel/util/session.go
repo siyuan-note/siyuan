@@ -122,8 +122,10 @@ type SessionData struct {
 }
 
 type WorkspaceSession struct {
-	AccessAuthCode string
-	Captcha        string
+	AccessAuthCode     string
+	OIDCSessionVersion string
+	OIDCBinding        string
+	Captcha            string
 }
 
 func (sd *SessionData) Clear(c *gin.Context) {

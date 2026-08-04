@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "Échec de la vérification de la configuration OIDC",
+	"oidcVerificationSuccess": "Configuration OIDC vérifiée et enregistrée",
+	"oidcVerificationTip": "Terminez la connexion OIDC dans la fenêtre de navigateur ouverte ; la configuration actuelle reste active jusqu’à la réussite de la vérification",
+	"oidcVerifying": "En attente de la vérification...",
+	"oidcVerifyAndSave": "Vérifier et enregistrer",
+	"oidcConfigInvalid": "Configuration des règles de revendication OIDC non valide",
+	"oidcClaimRulesTip": "Tableau JSON ; les valeurs d’une règle utilisent OU, tandis que les règles utilisent ET",
+	"oidcClaimRules": "Règles de revendication OIDC",
+	"oidcAllowAll": "Autoriser tous les utilisateurs authentifiés",
+	"oidcRedirectURL": "URL de redirection OIDC",
+	"oidcScopes": "Portées OIDC",
+	"oidcClientSecret": "Secret client OIDC",
+	"oidcClientID": "ID client OIDC",
+	"oidcIssuerURL": "URL de l’émetteur OIDC",
+	"oidcProvider": "Fournisseur OIDC",
+	"oidcEnabled": "Activer la connexion OIDC",
+	"oidcLoginTip": "Configurer l’authentification unique via un fournisseur OpenID Connect",
+	"oidcLogin": "Connexion OIDC",
 	"disableAll": "Tout désactiver",
 	"bazaarKernelPlugin": "Plugin du noyau",
 	"newItemTemplateDefaultTip": "Utilise le chemin d’enregistrement par défaut des nouveaux documents du carnet actuel",
@@ -2424,6 +2442,12 @@
 		"360": "Exporté vers [%s]",
 		"361": "Le nom d'utilisateur du compte du service de publication ne peut pas être vide",
 		"362": "Le nom d'utilisateur du compte du service de publication est dupliqué",
-		"363": "Le mot de passe du compte du service de publication doit comporter au moins 8 caractères"
+		"363": "Le mot de passe du compte du service de publication doit comporter au moins 8 caractères",
+		"364": "Se connecter avec OIDC",
+		"365": "Échec de la connexion OIDC",
+		"366": "Connexion OIDC terminée",
+		"367": "Vous pouvez fermer cette fenêtre et revenir à SiYuan",
+		"368": "Ce fournisseur OIDC ne prend pas en charge l'URI de rappel mobile de SiYuan",
+		"369": "Configuration OIDC non valide"
 	}
 	}

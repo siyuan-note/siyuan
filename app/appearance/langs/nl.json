@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "Verificatie van de OIDC-configuratie is mislukt",
+	"oidcVerificationSuccess": "OIDC-configuratie geverifieerd en opgeslagen",
+	"oidcVerificationTip": "Voltooi de OIDC-aanmelding in het geopende browservenster; de huidige configuratie blijft actief totdat de verificatie slaagt",
+	"oidcVerifying": "Wachten op verificatie...",
+	"oidcVerifyAndSave": "Verifiëren en opslaan",
+	"oidcConfigInvalid": "Ongeldige configuratie van OIDC-claimregels",
+	"oidcClaimRulesTip": "JSON-array; waarden binnen een regel gebruiken OF en regels gebruiken EN",
+	"oidcClaimRules": "OIDC-claimregels",
+	"oidcAllowAll": "Alle geverifieerde gebruikers toestaan",
+	"oidcRedirectURL": "OIDC-omleidings-URL",
+	"oidcScopes": "OIDC-bereiken",
+	"oidcClientSecret": "OIDC-clientgeheim",
+	"oidcClientID": "OIDC-client-ID",
+	"oidcIssuerURL": "OIDC-uitgever-URL",
+	"oidcProvider": "OIDC-provider",
+	"oidcEnabled": "OIDC-aanmelding inschakelen",
+	"oidcLoginTip": "Eenmalige aanmelding configureren via een OpenID Connect-provider",
+	"oidcLogin": "OIDC-aanmelding",
 	"disableAll": "Alles uitschakelen",
 	"bazaarKernelPlugin": "Kernelplug-in",
 	"newItemTemplateDefaultTip": "Gebruikt het standaardopslagpad voor nieuwe documenten van het huidige notitieboek",
@@ -2424,6 +2442,12 @@
 		"360": "Geëxporteerd naar [%s]",
 		"361": "De gebruikersnaam van het publicatieservice-account mag niet leeg zijn",
 		"362": "De gebruikersnaam van het publicatieservice-account is gedupliceerd",
-		"363": "Het wachtwoord van het publicatieservice-account moet minimaal 8 tekens bevatten"
+		"363": "Het wachtwoord van het publicatieservice-account moet minimaal 8 tekens bevatten",
+		"364": "Aanmelden met OIDC",
+		"365": "OIDC-aanmelding mislukt",
+		"366": "OIDC-aanmelding voltooid",
+		"367": "U kunt dit venster sluiten en terugkeren naar SiYuan",
+		"368": "Deze OIDC-provider ondersteunt de mobiele callback-URI van SiYuan niet",
+		"369": "Ongeldige OIDC-configuratie"
 	}
 	}

@@ -28,8 +28,14 @@ export class AgentSessionPanel {
             onSwitch: (id: string) => Promise<void>;
             onDelete: (id: string) => Promise<void>;
             onRename: (id: string, title: string) => Promise<void>;
-        }
+            onClose?: () => void;
+        },
+        private mobile = false,
     ) {
+    }
+
+    isOpen() {
+        return !!this.popup;
     }
 
     toggle() {
@@ -45,6 +51,7 @@ export class AgentSessionPanel {
 
     close() {
         this.closeAllSubmenus();
+        this.popup?.remove();
         document.querySelectorAll(".agent-session-popup").forEach(function (el) {
             el.remove();
         });
@@ -73,11 +80,17 @@ export class AgentSessionPanel {
             this.page = 1;
 
             this.popup = document.createElement("div");
-            this.popup.className = "agent-session-popup b3-menu";
+            this.popup.className = this.mobile ?
+                "agent-session-popup agent-session-popup--mobile fn__flex-column" :
+                "agent-session-popup b3-menu";
 
             const L = window.siyuan.languages;
 
-            let html = '<input class="b3-text-field agent-session-popup__search" placeholder="' + L.agentSessionSearch + '">';
+            let html = this.mobile ? '<div class="toolbar toolbar--border">' +
+                '<svg class="toolbar__icon" data-type="back"><use xlink:href="#iconLeft"></use></svg>' +
+                '<span class="toolbar__text">' + L.manageSessions + "</span>" +
+                '<svg class="toolbar__icon agent-session-popup__close" data-type="close"><use xlink:href="#iconCloseRound"></use></svg></div>' : "";
+            html += '<input class="b3-text-field agent-session-popup__search" placeholder="' + L.agentSessionSearch + '">';
             html += '<div class="b3-list b3-list--background fn__flex-1"></div>';
 
             this.popup.innerHTML = html;
@@ -85,6 +98,11 @@ export class AgentSessionPanel {
             const itemsContainer = this.popup.querySelector(".b3-list") as HTMLElement;
             this.renderItems(itemsContainer, result.sessions, false);
             const searchInput = this.popup.querySelector(".agent-session-popup__search") as HTMLInputElement;
+            this.popup.querySelector('[data-type="back"]')?.addEventListener("click", () => this.close());
+            this.popup.querySelector('[data-type="close"]')?.addEventListener("click", () => {
+                this.close();
+                this.callbacks.onClose?.();
+            });
             searchInput.addEventListener("input", (event: InputEvent) => {
                 event.stopPropagation();
                 if (event.isComposing) {
@@ -116,8 +134,10 @@ export class AgentSessionPanel {
             this.host.appendChild(this.popup);
             this.popup.style.zIndex = (++window.siyuan.zIndex).toString();
 
-            const btnRect = this.triggerBtn.getBoundingClientRect();
-            setPosition(this.popup, btnRect.right - 280, btnRect.bottom, btnRect.height, btnRect.width);
+            if (!this.mobile) {
+                const btnRect = this.triggerBtn.getBoundingClientRect();
+                setPosition(this.popup, btnRect.right - 280, btnRect.bottom, btnRect.height, btnRect.width);
+            }
 
             this.popup.addEventListener("click", (e: MouseEvent) => {
                 e.stopPropagation();
@@ -134,7 +154,9 @@ export class AgentSessionPanel {
             setTimeout(() => {
                 document.addEventListener("click", closeOut);
             }, 10);
-            searchInput.focus();
+            if (!this.mobile) {
+                searchInput.focus();
+            }
         } finally {
             this.isRendering = false;
         }
@@ -155,7 +177,8 @@ export class AgentSessionPanel {
             for (let i = 0; i < listItems.length; i++) {
                 const s = listItems[i];
                 const isActive = s.id === currentId;
-                html += '<div class="b3-list-item  b3-list-item--hide-action' + (isActive ? " b3-list-item--focus" : "") + '" data-id="' + s.id + '">' +
+                html += '<div class="b3-list-item' + (this.mobile ? "" : " b3-list-item--hide-action") +
+                    (isActive ? " b3-list-item--focus" : "") + '" data-id="' + s.id + '">' +
                     '<span class="b3-list-item__text ariaLabel" data-position="parentW" aria-label="' + escapeHtml(s.title || defaultTitle) + '">' + escapeHtml(s.title || defaultTitle) + "</span>" +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><svg><use xlink:href="#iconEdit"></use></svg></span>' +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw agent-session-more" data-id="' + s.id + '" aria-label="' + (L.more || "More") + '">' +

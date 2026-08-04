@@ -825,7 +825,12 @@ const setGroupedModelPickerLabel = (element: GroupedModelPickerElement, label: s
     if (element instanceof HTMLInputElement) {
         element.value = label;
     } else {
-        element.textContent = label;
+        const labelElement = element.querySelector('[data-type="groupedModelPickerLabel"]');
+        if (labelElement) {
+            labelElement.textContent = label;
+        } else {
+            element.textContent = label;
+        }
     }
 };
 

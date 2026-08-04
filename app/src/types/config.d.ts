@@ -25,6 +25,7 @@ declare namespace Config {
          * Access authorization code
          */
         accessAuthCode: TAccessAuthCode;
+        oidc: IOIDC;
         account: IAccount;
         ai: IAI;
         api: IAPI;
@@ -113,6 +114,24 @@ declare namespace Config {
      * Access authorization code
      */
     export type TAccessAuthCode = "" | "*******";
+
+    export interface IOIDCClaimRule {
+        claim: string;
+        operator: "equals" | "contains";
+        values: string[];
+    }
+
+    export interface IOIDC {
+        enabled: boolean;
+        provider: "custom" | "google" | "microsoft" | "github";
+        issuerURL: string;
+        clientID: string;
+        clientSecret: string;
+        scopes: string[];
+        redirectURL: string;
+        allowAll: boolean;
+        claimRules: IOIDCClaimRule[];
+    }
 
     /**
      * Account configuration

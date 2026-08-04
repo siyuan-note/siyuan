@@ -170,3 +170,122 @@ func TestDataBlockDOMEmptyData(t *testing.T) {
 		t.Fatal("empty markdown should produce a blank paragraph")
 	}
 }
+
+const (
+	updateTestBoxID = "20260804000000-box0001"
+	updateTestRoot  = "20260804000001-root001"
+	updateTestList  = "20260804000002-list001"
+	updateTestItem1 = "20260804000003-item001"
+	updateTestPara1 = "20260804000004-para001"
+	updateTestItem2 = "20260804000005-item002"
+	updateTestPara2 = "20260804000006-para002"
+)
+
+func TestBuildBlockUpdateOperationsPinsDescendantIDs(t *testing.T) {
+	testCases := []struct {
+		name     string
+		id       string
+		data     string
+		wantKeep map[string]bool
+		wantAll  bool
+	}{
+		{
+			name: "structure preserved on text edit",
+			id:   updateTestList,
+			data: "- edited a\n- edited b",
+			wantKeep: map[string]bool{
+				updateTestList: true, updateTestItem1: true, updateTestPara1: true,
+				updateTestItem2: true, updateTestPara2: true,
+			},
+			wantAll: true,
+		},
+		{
+			name: "appended item keeps surviving IDs",
+			id:   updateTestList,
+			data: "- a\n- b\n- c",
+			wantKeep: map[string]bool{
+				updateTestList: true, updateTestItem1: true, updateTestPara1: true,
+				updateTestItem2: true, updateTestPara2: true,
+			},
+			wantAll: false,
+		},
+		{
+			name: "nested list inserted mid keeps surviving IDs",
+			id:   updateTestList,
+			data: "- a\n  - a1\n- b",
+			wantKeep: map[string]bool{
+				updateTestList: true, updateTestItem1: true, updateTestPara1: true,
+				updateTestItem2: true, updateTestPara2: true,
+			},
+			wantAll: false,
+		},
+		{
+			name: "list item update pins item and its paragraph",
+			id:   updateTestItem1,
+			data: "- edited a",
+			wantKeep: map[string]bool{
+				updateTestItem1: true, updateTestPara1: true,
+			},
+			wantAll: false,
+		},
+	}
+	for _, tc := range testCases {
+		operations, _, err := buildTestBlockUpdateOperations(tc.id, tc.data)
+		if err != nil {
+			t.Fatalf("%s: build block update operations failed: %s", tc.name, err)
+		}
+		if 1 != len(operations) {
+			t.Fatalf("%s: expected one operation, got [%d]", tc.name, len(operations))
+		}
+		data, ok := operations[0].Data.(string)
+		if !ok {
+			t.Fatalf("%s: operation data is not a string", tc.name)
+		}
+		ids := parseBlockUpdateDOMIDs(t, tc.name, data)
+		if tc.wantAll && len(ids) != len(tc.wantKeep) {
+			t.Fatalf("%s: expected [%d] block IDs, got [%d] [%v]", tc.name, len(tc.wantKeep), len(ids), ids)
+		}
+		for wantID := range tc.wantKeep {
+			if _, ok := ids[wantID]; !ok {
+				t.Fatalf("%s: block ID [%s] was not preserved, got [%v]", tc.name, wantID, ids)
+			}
+		}
+	}
+}
+
+func buildTestBlockUpdateOperations(id, data string) ([]*Operation, []string, error) {
+	root := &ast.Node{Type: ast.NodeDocument, ID: updateTestRoot}
+	list := &ast.Node{Type: ast.NodeList, ID: updateTestList}
+	firstItem := &ast.Node{Type: ast.NodeListItem, ID: updateTestItem1}
+	firstItem.AppendChild(&ast.Node{Type: ast.NodeParagraph, ID: updateTestPara1})
+	secondItem := &ast.Node{Type: ast.NodeListItem, ID: updateTestItem2}
+	secondItem.AppendChild(&ast.Node{Type: ast.NodeParagraph, ID: updateTestPara2})
+	list.AppendChild(firstItem)
+	list.AppendChild(secondItem)
+	root.AppendChild(list)
+	tree := &parse.Tree{ID: updateTestRoot, Box: updateTestBoxID, Root: root}
+
+	return buildBlockUpdateOperations([]BlockUpdateInput{{
+		ID: id, Data: data, DataType: "markdown",
+	}}, func(blockID string) *treenode.BlockTree {
+		return &treenode.BlockTree{ID: blockID, RootID: updateTestRoot, BoxID: updateTestBoxID}
+	}, func(blockID string) (*parse.Tree, error) {
+		return tree, nil
+	})
+}
+
+func parseBlockUpdateDOMIDs(t *testing.T, name, data string) map[string]bool {
+	tree := util.NewLute().BlockDOM2Tree(data)
+	if nil == tree || nil == tree.Root {
+		t.Fatalf("%s: parse block DOM failed", name)
+	}
+	ids := map[string]bool{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() || ast.NodeKramdownBlockIAL == n.Type || "" == n.ID {
+			return ast.WalkContinue
+		}
+		ids[n.ID] = true
+		return ast.WalkContinue
+	})
+	return ids
+}

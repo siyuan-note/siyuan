@@ -4,6 +4,7 @@ import {showMessage} from "../../../dialog/message";
 import {Constants} from "../../../constants";
 import {isMobile} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
+import {escapeHtml} from "../../../util/escape";
 import {aiConfigApi} from "./aiRuntime";
 import {openByMobile} from "../../../editor/openLink";
 /// #if !BROWSER
@@ -237,7 +238,7 @@ export const mountEmbeddingTestBtn = (root: HTMLElement) => {
             }
             showMessage(
                 data.msg
-                    ? window.siyuan.languages.testConnectionFailMsg.replace("${msg}", data.msg)
+                    ? window.siyuan.languages.testConnectionFailMsg.replace("${msg}", escapeHtml(String(data.msg)))
                     : window.siyuan.languages.testConnectionFail,
                 undefined, "error",
             );
@@ -278,7 +279,7 @@ export const mountRerankTestBtn = (root: HTMLElement) => {
             }
             showMessage(
                 data.msg
-                    ? window.siyuan.languages.testConnectionFailMsg.replace("${msg}", data.msg)
+                    ? window.siyuan.languages.testConnectionFailMsg.replace("${msg}", escapeHtml(String(data.msg)))
                     : window.siyuan.languages.testConnectionFail,
                 undefined, "error",
             );

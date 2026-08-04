@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "Overenie konfigurácie OIDC zlyhalo",
+	"oidcVerificationSuccess": "Konfigurácia OIDC bola overená a uložená",
+	"oidcVerificationTip": "Dokončite prihlásenie OIDC v otvorenom okne prehliadača; aktuálna konfigurácia zostane aktívna, kým overenie nebude úspešné",
+	"oidcVerifying": "Čaká sa na overenie...",
+	"oidcVerifyAndSave": "Overiť a uložiť",
+	"oidcConfigInvalid": "Neplatná konfigurácia pravidiel deklarácií OIDC",
+	"oidcClaimRulesTip": "Pole JSON; hodnoty v pravidle používajú ALEBO a pravidlá používajú A",
+	"oidcClaimRules": "Pravidlá deklarácií OIDC",
+	"oidcAllowAll": "Povoliť všetkých overených používateľov",
+	"oidcRedirectURL": "Adresa URL presmerovania OIDC",
+	"oidcScopes": "Rozsahy OIDC",
+	"oidcClientSecret": "Tajomstvo klienta OIDC",
+	"oidcClientID": "ID klienta OIDC",
+	"oidcIssuerURL": "Adresa URL vydavateľa OIDC",
+	"oidcProvider": "Poskytovateľ OIDC",
+	"oidcEnabled": "Povoliť prihlásenie OIDC",
+	"oidcLoginTip": "Nakonfigurujte jednotné prihlásenie cez poskytovateľa OpenID Connect",
+	"oidcLogin": "Prihlásenie OIDC",
 	"disableAll": "Zakázať všetko",
 	"bazaarKernelPlugin": "Doplnok jadra",
 	"newItemTemplateDefaultTip": "Použije predvolenú cestu ukladania nových dokumentov z aktuálneho zápisníka",
@@ -2424,6 +2442,12 @@
 		"360": "Exportované do [%s]",
 		"361": "Používateľské meno účtu služby publikovania nemôže byť prázdne",
 		"362": "Používateľské meno účtu služby publikovania je duplicitné",
-		"363": "Heslo účtu služby publikovania musí mať aspoň 8 znakov"
+		"363": "Heslo účtu služby publikovania musí mať aspoň 8 znakov",
+		"364": "Prihlásiť sa cez OIDC",
+		"365": "Prihlásenie OIDC zlyhalo",
+		"366": "Prihlásenie OIDC bolo dokončené",
+		"367": "Toto okno môžete zavrieť a vrátiť sa do SiYuan",
+		"368": "Tento poskytovateľ OIDC nepodporuje mobilný URI spätného volania SiYuan",
+		"369": "Neplatná konfigurácia OIDC"
 	}
 	}

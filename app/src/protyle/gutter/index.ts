@@ -1263,7 +1263,6 @@ export class Gutter {
                     addEditorToDatabase(protyle, getEditorRange(selectsElement[0]));
                 }
             }).element);
-            /// #if !MOBILE
             // 加密笔记本中的块不暴露该菜单：避免把受保护内容引入智能体会话。
             if (!isEncryptedBox(protyle.notebookId)) {
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -1275,7 +1274,6 @@ export class Gutter {
                     }
                 }).element);
             }
-            /// #endif
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "delete",
                 label: window.siyuan.languages.delete,
@@ -1845,7 +1843,6 @@ export class Gutter {
         }
         this.appendAddToDatabaseMenu(protyle, nodeElement);
         if (!protyle.disabled) {
-            /// #if !MOBILE
             // 加密笔记本中的块不暴露该菜单：避免把受保护内容引入智能体会话。
             if (!isEncryptedBox(protyle.notebookId)) {
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -1857,7 +1854,6 @@ export class Gutter {
                     }
                 }).element);
             }
-            /// #endif
         }
         if (allowRemoval) {
             window.siyuan.menus.menu.append(new MenuItem({
@@ -3437,14 +3433,30 @@ interface AgentChatLike {
     insertBlockMentions: (mentions: Array<{ id: string; label: string }>) => void;
 }
 
-// 将选中的块以 @ 引用形式追加到智能体会话发送框末尾，等价于拖拽块到发送框或在框内 @ 搜索选块。
-// 仅桌面端可用：智能体面板（dock）在移动端不存在。
-/// #if !MOBILE
+// 将选中的块以区块引用形式追加到智能体会话发送框末尾，等价于拖拽块到发送框或在框内搜索选块。
 export const addBlockToAgent = async (blockIds: string[]) => {
     const ids = blockIds.filter(Boolean);
     if (ids.length === 0) {
         return;
     }
+    // 用 getRefText API 并行获取每个块的引用文本作为 label（与输入框搜索、拖拽一致），失败时回退到 blockId。
+    // Promise.all 按输入顺序返回结果，确保多选块的引用顺序稳定。
+    const mentions = await Promise.all(ids.map(async (id) => {
+        let label = id;
+        try {
+            const resp = await fetchSyncPost("/api/block/getRefText", {id});
+            if (resp && resp.data) {
+                label = resp.data;
+            }
+        } catch {
+            label = id;
+        }
+        return {id, label};
+    }));
+    /// #if MOBILE
+    const {insertMobileAgentMentions} = await import("../../mobile/agent/MobileAgentChat");
+    insertMobileAgentMentions(window.siyuan.ws.app, mentions);
+    /// #else
     const dock = getDockByType("agentChat");
     if (!dock) {
         return;
@@ -3465,20 +3477,6 @@ export const addBlockToAgent = async (blockIds: string[]) => {
         // 极端情况下实例仍未就绪，放弃插入避免报错。
         return;
     }
-    // 用 getRefText API 并行获取每个块的引用文本作为 label（与 @ 搜索、拖拽一致），失败时回退到 blockId。
-    const mentions: Array<{ id: string; label: string }> = [];
-    await Promise.all(ids.map(async (id) => {
-        let label = id;
-        try {
-            const resp = await fetchSyncPost("/api/block/getRefText", {id});
-            if (resp && resp.data) {
-                label = resp.data;
-            }
-        } catch {
-            label = id;
-        }
-        mentions.push({id, label});
-    }));
     agentChat.insertBlockMentions(mentions);
+    /// #endif
 };
-/// #endif

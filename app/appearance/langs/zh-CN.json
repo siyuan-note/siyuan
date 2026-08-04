@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "OIDC 配置验证失败",
+	"oidcVerificationSuccess": "OIDC 配置验证成功并已保存",
+	"oidcVerificationTip": "请在打开的浏览器窗口中完成 OIDC 登录；验证成功前当前配置将继续生效",
+	"oidcVerifying": "等待验证...",
+	"oidcVerifyAndSave": "验证并保存",
+	"oidcConfigInvalid": "OIDC 声明规则配置无效",
+	"oidcClaimRulesTip": "JSON 数组；同一规则内的值为或关系，不同规则之间为与关系",
+	"oidcClaimRules": "OIDC 声明规则",
+	"oidcAllowAll": "允许所有已认证用户",
+	"oidcRedirectURL": "OIDC 回调地址",
+	"oidcScopes": "OIDC 授权范围",
+	"oidcClientSecret": "OIDC 客户端密钥",
+	"oidcClientID": "OIDC 客户端 ID",
+	"oidcIssuerURL": "OIDC 签发者地址",
+	"oidcProvider": "OIDC 提供商",
+	"oidcEnabled": "启用 OIDC 登录",
+	"oidcLoginTip": "通过 OpenID Connect 提供商配置单点登录",
+	"oidcLogin": "OIDC 登录",
 	"disableAll": "全部禁用",
 	"bazaarKernelPlugin": "内核插件",
 	"newItemTemplateDefaultTip": "使用当前笔记本的新建文档默认存放路径",
@@ -2424,6 +2442,12 @@
 		"360": "已导出到 [%s]",
 		"361": "发布服务账户用户名不能为空",
 		"362": "发布服务账户用户名重复",
-		"363": "发布服务账户密码长度不能少于 8 个字符"
+		"363": "发布服务账户密码长度不能少于 8 个字符",
+		"364": "使用 OIDC 登录",
+		"365": "OIDC 登录失败",
+		"366": "OIDC 登录完成",
+		"367": "可以关闭此窗口并返回思源",
+		"368": "此 OIDC 提供商不支持思源移动端回调 URI",
+		"369": "OIDC 配置无效"
 	}
 	}

@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "Verifikasi konfigurasi OIDC gagal",
+	"oidcVerificationSuccess": "Konfigurasi OIDC telah diverifikasi dan disimpan",
+	"oidcVerificationTip": "Selesaikan login OIDC di jendela browser yang terbuka; konfigurasi saat ini tetap aktif hingga verifikasi berhasil",
+	"oidcVerifying": "Menunggu verifikasi...",
+	"oidcVerifyAndSave": "Verifikasi dan simpan",
+	"oidcConfigInvalid": "Konfigurasi aturan klaim OIDC tidak valid",
+	"oidcClaimRulesTip": "Larik JSON; nilai dalam satu aturan memakai ATAU, sedangkan antaraturan memakai DAN",
+	"oidcClaimRules": "Aturan klaim OIDC",
+	"oidcAllowAll": "Izinkan semua pengguna terautentikasi",
+	"oidcRedirectURL": "URL pengalihan OIDC",
+	"oidcScopes": "Cakupan OIDC",
+	"oidcClientSecret": "Rahasia klien OIDC",
+	"oidcClientID": "ID klien OIDC",
+	"oidcIssuerURL": "URL penerbit OIDC",
+	"oidcProvider": "Penyedia OIDC",
+	"oidcEnabled": "Aktifkan login OIDC",
+	"oidcLoginTip": "Konfigurasikan akses masuk tunggal melalui penyedia OpenID Connect",
+	"oidcLogin": "Login OIDC",
 	"disableAll": "Nonaktifkan semua",
 	"bazaarKernelPlugin": "Plugin kernel",
 	"newItemTemplateDefaultTip": "Menggunakan jalur penyimpanan bawaan untuk dokumen baru di buku catatan saat ini",
@@ -2424,6 +2442,12 @@
 		"360": "Diekspor ke [%s]",
 		"361": "Nama pengguna akun layanan publikasi tidak boleh kosong",
 		"362": "Nama pengguna akun layanan publikasi duplikat",
-		"363": "Kata sandi akun layanan publikasi harus terdiri dari minimal 8 karakter"
+		"363": "Kata sandi akun layanan publikasi harus terdiri dari minimal 8 karakter",
+		"364": "Masuk dengan OIDC",
+		"365": "Login OIDC gagal",
+		"366": "Login OIDC selesai",
+		"367": "Anda dapat menutup jendela ini dan kembali ke SiYuan",
+		"368": "Penyedia OIDC ini tidak mendukung URI panggilan balik seluler SiYuan",
+		"369": "Konfigurasi OIDC tidak valid"
 	}
 	}

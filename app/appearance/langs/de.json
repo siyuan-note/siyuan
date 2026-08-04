@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "Überprüfung der OIDC-Konfiguration fehlgeschlagen",
+	"oidcVerificationSuccess": "OIDC-Konfiguration überprüft und gespeichert",
+	"oidcVerificationTip": "Schließen Sie die OIDC-Anmeldung im geöffneten Browserfenster ab; die aktuelle Konfiguration bleibt bis zur erfolgreichen Überprüfung aktiv",
+	"oidcVerifying": "Warten auf Überprüfung...",
+	"oidcVerifyAndSave": "Überprüfen und speichern",
+	"oidcConfigInvalid": "Ungültige Konfiguration der OIDC-Anspruchsregeln",
+	"oidcClaimRulesTip": "JSON-Array; Werte innerhalb einer Regel sind ODER-verknüpft, Regeln sind UND-verknüpft",
+	"oidcClaimRules": "OIDC-Anspruchsregeln",
+	"oidcAllowAll": "Alle authentifizierten Benutzer zulassen",
+	"oidcRedirectURL": "OIDC-Weiterleitungs-URL",
+	"oidcScopes": "OIDC-Bereiche",
+	"oidcClientSecret": "OIDC-Client-Geheimnis",
+	"oidcClientID": "OIDC-Client-ID",
+	"oidcIssuerURL": "OIDC-Aussteller-URL",
+	"oidcProvider": "OIDC-Anbieter",
+	"oidcEnabled": "OIDC-Anmeldung aktivieren",
+	"oidcLoginTip": "Einmalanmeldung über einen OpenID-Connect-Anbieter konfigurieren",
+	"oidcLogin": "OIDC-Anmeldung",
 	"disableAll": "Alle deaktivieren",
 	"bazaarKernelPlugin": "Kernel-Plugin",
 	"newItemTemplateDefaultTip": "Verwendet den Standardspeicherpfad für neue Dokumente im aktuellen Notizbuch",
@@ -2424,6 +2442,12 @@
 		"360": "Nach [%s] exportiert",
 		"361": "Der Benutzername des Veröffentlichungsdienst-Kontos darf nicht leer sein",
 		"362": "Der Benutzername des Veröffentlichungsdienst-Kontos ist bereits vergeben",
-		"363": "Das Passwort des Veröffentlichungsdienst-Kontos muss mindestens 8 Zeichen lang sein"
+		"363": "Das Passwort des Veröffentlichungsdienst-Kontos muss mindestens 8 Zeichen lang sein",
+		"364": "Mit OIDC anmelden",
+		"365": "OIDC-Anmeldung fehlgeschlagen",
+		"366": "OIDC-Anmeldung abgeschlossen",
+		"367": "Sie können dieses Fenster schließen und zu SiYuan zurückkehren",
+		"368": "Dieser OIDC-Anbieter unterstützt die mobile SiYuan-Rückruf-URI nicht",
+		"369": "Ungültige OIDC-Konfiguration"
 	}
 	}

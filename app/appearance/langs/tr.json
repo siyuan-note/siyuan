@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "OIDC yapılandırması doğrulanamadı",
+	"oidcVerificationSuccess": "OIDC yapılandırması doğrulandı ve kaydedildi",
+	"oidcVerificationTip": "Açılan tarayıcı penceresinde OIDC oturum açma işlemini tamamlayın; doğrulama başarılı olana kadar mevcut yapılandırma etkin kalır",
+	"oidcVerifying": "Doğrulama bekleniyor...",
+	"oidcVerifyAndSave": "Doğrula ve kaydet",
+	"oidcConfigInvalid": "Geçersiz OIDC talep kuralı yapılandırması",
+	"oidcClaimRulesTip": "JSON dizisi; bir kural içindeki değerler VEYA, kurallar ise VE kullanır",
+	"oidcClaimRules": "OIDC talep kuralları",
+	"oidcAllowAll": "Kimliği doğrulanmış tüm kullanıcılara izin ver",
+	"oidcRedirectURL": "OIDC yönlendirme URL'si",
+	"oidcScopes": "OIDC kapsamları",
+	"oidcClientSecret": "OIDC istemci gizli anahtarı",
+	"oidcClientID": "OIDC istemci kimliği",
+	"oidcIssuerURL": "OIDC sağlayıcı URL'si",
+	"oidcProvider": "OIDC sağlayıcısı",
+	"oidcEnabled": "OIDC girişini etkinleştir",
+	"oidcLoginTip": "Bir OpenID Connect sağlayıcısı üzerinden tek oturum açmayı yapılandırın",
+	"oidcLogin": "OIDC girişi",
 	"disableAll": "Tümünü devre dışı bırak",
 	"bazaarKernelPlugin": "Çekirdek eklentisi",
 	"newItemTemplateDefaultTip": "Geçerli not defterinin yeni belgeler için varsayılan kaydetme yolunu kullanır",
@@ -2424,6 +2442,12 @@
 		"360": "[%s] konumuna aktarıldı",
 		"361": "Yayınlama hizmeti hesabının kullanıcı adı boş olamaz",
 		"362": "Yayınlama hizmeti hesabının kullanıcı adı yineleniyor",
-		"363": "Yayınlama hizmeti hesabının parolası en az 8 karakter olmalıdır"
+		"363": "Yayınlama hizmeti hesabının parolası en az 8 karakter olmalıdır",
+		"364": "OIDC ile giriş yap",
+		"365": "OIDC girişi başarısız oldu",
+		"366": "OIDC girişi tamamlandı",
+		"367": "Bu pencereyi kapatıp SiYuan'a dönebilirsiniz",
+		"368": "Bu OIDC sağlayıcısı SiYuan mobil geri çağırma URI'sini desteklemiyor",
+		"369": "Geçersiz OIDC yapılandırması"
 	}
 	}

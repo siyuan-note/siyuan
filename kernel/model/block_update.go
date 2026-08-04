@@ -158,6 +158,7 @@ func buildBlockUpdateOperations(inputs []BlockUpdateInput, resolveTree blockUpda
 		}
 
 		updatedNode.SetIALAttr("id", input.ID)
+		pinDescendantBlockIDs(oldNode, updatedNode)
 		data = luteEngine.Tree2BlockDOM(normalizedTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		operations = append(operations, &Operation{
 			Action:   "update",
@@ -248,6 +249,50 @@ func resolveBlockUpdateNode(oldNode, root *ast.Node) (updatedNode *ast.Node, err
 			return nil, errors.New("list block has no list item")
 		}
 		updatedNode = listItem
+	}
+	return
+}
+
+// pinDescendantBlockIDs 把旧块子树中对应位置的子块 ID 钉回新块，避免更新容器块时 Lute 重新生成
+// 子块 ID，导致指向子块的块引用、反链、闪卡等失效。
+// 匹配规则：按同级内容块顺序对齐，类型一致才沿用旧 ID；类型不一致时向后查找同类型的旧子块重新
+// 对齐，这样插入或删除子块后其余子块仍能匹配上旧 ID，新增的子块保持新生成的 ID。
+func pinDescendantBlockIDs(oldNode, updatedNode *ast.Node) {
+	oldChildren := blockChildrenOf(oldNode)
+	oldIndex := 0
+	for _, newChild := range blockChildrenOf(updatedNode) {
+		if oldIndex >= len(oldChildren) {
+			break
+		}
+		if oldChildren[oldIndex].Type != newChild.Type {
+			if aligned := alignBlockUpdateChild(oldChildren, oldIndex, newChild.Type); 0 > aligned {
+				continue
+			} else {
+				oldIndex = aligned
+			}
+		}
+		newChild.SetIALAttr("id", oldChildren[oldIndex].ID)
+		pinDescendantBlockIDs(oldChildren[oldIndex], newChild)
+		oldIndex++
+	}
+}
+
+// alignBlockUpdateChild 从 start 起向后查找第一个指定类型的旧子块，返回其下标；找不到返回 -1。
+func alignBlockUpdateChild(oldChildren []*ast.Node, start int, childType ast.NodeType) int {
+	for i := start; i < len(oldChildren); i++ {
+		if oldChildren[i].Type == childType {
+			return i
+		}
+	}
+	return -1
+}
+
+// blockChildrenOf 返回节点的直接内容块子节点，不含行级块 IAL。
+func blockChildrenOf(parent *ast.Node) (ret []*ast.Node) {
+	for child := parent.FirstChild; nil != child; child = child.Next {
+		if child.IsBlock() && ast.NodeKramdownBlockIAL != child.Type {
+			ret = append(ret, child)
+		}
 	}
 	return
 }

@@ -587,6 +587,11 @@ interface ISiyuan {
         editor?: import("../protyle").Protyle
         popEditor?: import("../protyle").Protyle
         tabs?: import("../mobile/tabs/MobileTabs").MobileTabs
+        agentChat?: import("../layout/dock/agent/AgentChat").AgentChat
+        agentChatController?: {
+            handleBack: () => boolean
+            refreshStatus: () => void
+        }
         docks?: {
             outline: import("../mobile/dock/MobileOutline").MobileOutline | null,
             file: import("../mobile/dock/MobileFiles").MobileFiles | null,

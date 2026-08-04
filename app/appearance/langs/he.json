@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "אימות תצורת OIDC נכשל",
+	"oidcVerificationSuccess": "תצורת OIDC אומתה ונשמרה",
+	"oidcVerificationTip": "השלם את ההתחברות ל-OIDC בחלון הדפדפן שנפתח; התצורה הנוכחית תישאר פעילה עד שהאימות יצליח",
+	"oidcVerifying": "ממתין לאימות...",
+	"oidcVerifyAndSave": "אמת ושמור",
+	"oidcConfigInvalid": "תצורת כללי תביעות OIDC אינה תקינה",
+	"oidcClaimRulesTip": "מערך JSON; ערכים בתוך כלל משתמשים ב-OR וכללים משתמשים ב-AND",
+	"oidcClaimRules": "כללי תביעות OIDC",
+	"oidcAllowAll": "אפשר לכל המשתמשים המאומתים",
+	"oidcRedirectURL": "כתובת הפניה של OIDC",
+	"oidcScopes": "טווחי OIDC",
+	"oidcClientSecret": "סוד לקוח OIDC",
+	"oidcClientID": "מזהה לקוח OIDC",
+	"oidcIssuerURL": "כתובת מנפיק OIDC",
+	"oidcProvider": "ספק OIDC",
+	"oidcEnabled": "אפשר כניסה באמצעות OIDC",
+	"oidcLoginTip": "הגדר כניסה יחידה באמצעות ספק OpenID Connect",
+	"oidcLogin": "כניסה באמצעות OIDC",
 	"disableAll": "נטרל הכל",
 	"bazaarKernelPlugin": "תוסף ליבה",
 	"newItemTemplateDefaultTip": "שימוש בנתיב ברירת המחדל לשמירת מסמכים חדשים במחברת הנוכחית",
@@ -2424,6 +2442,12 @@
 		"360": "יוצא אל [%s]",
 		"361": "שם המשתמש של חשבון שירות הפרסום לא יכול להיות ריק",
 		"362": "שם המשתמש של חשבון שירות הפרסום כפול",
-		"363": "סיסמת חשבון שירות הפרסום חייבת להכיל לפחות 8 תווים"
+		"363": "סיסמת חשבון שירות הפרסום חייבת להכיל לפחות 8 תווים",
+		"364": "כניסה באמצעות OIDC",
+		"365": "הכניסה באמצעות OIDC נכשלה",
+		"366": "הכניסה באמצעות OIDC הושלמה",
+		"367": "אפשר לסגור חלון זה ולחזור אל SiYuan",
+		"368": "ספק OIDC זה אינו תומך ב-URI של החזרת הקריאה לנייד של SiYuan",
+		"369": "תצורת OIDC אינה תקינה"
 	}
 	}

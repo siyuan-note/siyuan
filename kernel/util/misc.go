@@ -437,7 +437,10 @@ func SanitizeSVG(svgInput string) (string, error) {
 				}
 			}
 		case xml.Directive:
-			return "", fmt.Errorf("svg directives are not allowed")
+			if !isBenignSVGDoctype(string(typed)) {
+				return "", fmt.Errorf("svg directives are not allowed")
+			}
+			// 良性 DOCTYPE 声明不写入输出，与 XML 声明（ProcInst）的处理方式一致，不影响浏览器渲染
 		case xml.ProcInst:
 			// XML 声明和处理指令不影响 SVG 图像内容，输出时统一省略。
 		}
@@ -458,6 +461,23 @@ func preserveXMLName(name xml.Name) xml.Name {
 		name.Space = ""
 	}
 	return name
+}
+
+// isBenignSVGDoctype 判断 DOCTYPE 是否仅为 svg 根元素的无内部子集声明。
+// Go 的 xml.Directive 是 <! 与 > 之间的内容；内部子集 [...] 内可声明实体，存在 XXE 风险，一律拒绝。
+func isBenignSVGDoctype(d string) bool {
+	d = strings.TrimSpace(d)
+	if !strings.HasPrefix(strings.ToLower(d), "doctype") {
+		return false
+	}
+	if strings.ContainsAny(d, "[]") {
+		return false
+	}
+	fields := strings.Fields(strings.TrimSpace(d[len("DOCTYPE"):]))
+	if len(fields) == 0 {
+		return false
+	}
+	return strings.EqualFold(fields[0], "svg")
 }
 
 func sanitizeSVGAttributes(attrs []xml.Attr) []xml.Attr {

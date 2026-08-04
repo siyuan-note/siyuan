@@ -1,4 +1,22 @@
 {
+	"oidcVerificationFailed": "OIDC configuration verification failed",
+	"oidcVerificationSuccess": "OIDC configuration verified and saved",
+	"oidcVerificationTip": "Complete OIDC login in the opened browser window; the current configuration remains active until verification succeeds",
+	"oidcVerifying": "Waiting for verification...",
+	"oidcVerifyAndSave": "Verify and save",
+	"oidcConfigInvalid": "Invalid OIDC claim rule configuration",
+	"oidcClaimRulesTip": "JSON array; values within a rule use OR, while rules use AND",
+	"oidcClaimRules": "OIDC claim rules",
+	"oidcAllowAll": "Allow all authenticated users",
+	"oidcRedirectURL": "OIDC redirect URL",
+	"oidcScopes": "OIDC scopes",
+	"oidcClientSecret": "OIDC client secret",
+	"oidcClientID": "OIDC client ID",
+	"oidcIssuerURL": "OIDC issuer URL",
+	"oidcProvider": "OIDC provider",
+	"oidcEnabled": "Enable OIDC login",
+	"oidcLoginTip": "Configure single sign-on through an OpenID Connect provider",
+	"oidcLogin": "OIDC login",
 	"disableAll": "Disable all",
 	"bazaarKernelPlugin": "Kernel plugin",
 	"newItemTemplateDefaultTip": "Uses the current notebook's default save path for new documents",
@@ -2424,6 +2442,12 @@
 		"360": "Exported to [%s]",
 		"361": "The publish service account username cannot be empty",
 		"362": "The publish service account username is duplicated",
-		"363": "The publish service account password must be at least 8 characters"
+		"363": "The publish service account password must be at least 8 characters",
+		"364": "Sign in with OIDC",
+		"365": "OIDC login failed",
+		"366": "OIDC login completed",
+		"367": "You can close this window and return to SiYuan",
+		"368": "This OIDC provider does not support the SiYuan mobile callback URI",
+		"369": "Invalid OIDC configuration"
 	}
 	}

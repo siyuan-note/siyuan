@@ -2645,7 +2645,7 @@ export class WYSIWYG {
     }
 
     private bindEvent(protyle: IProtyle) {
-        // 删除块时，av 头尾需重新计算位置
+        // 编辑器尺寸或内容变化时，重新计算数据库视图栏和表头、表尾位置
         protyle.observer = new ResizeObserver(() => {
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
                 if (item.querySelector(".av__scroll")) {
@@ -2657,8 +2657,8 @@ export class WYSIWYG {
                         avRender(item, protyle);
                         return;
                     }
-                    stickyRow(item, protyle.contentElement, "all");
                 }
+                stickyRow(item, protyle.contentElement, "all");
             });
         });
 

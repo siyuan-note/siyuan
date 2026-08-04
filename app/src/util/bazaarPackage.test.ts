@@ -1,8 +1,10 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getBazaarBackendSystemLabels,
     getBazaarCompatibilityFieldVisibility,
     getBazaarFundingItems,
+    getBazaarKernelSystemLabels,
     getBazaarThemeModeLabels,
     isValidBazaarPackageName,
 } from "./bazaarPackage";
@@ -12,12 +14,14 @@ describe("getBazaarCompatibilityFieldVisibility", () => {
         assert.deepEqual(getBazaarCompatibilityFieldVisibility("plugins"), {
             frontends: true,
             systems: true,
+            kernelSystems: true,
             disabledInPublish: true,
             modes: false,
         });
         assert.deepEqual(getBazaarCompatibilityFieldVisibility("themes"), {
             frontends: true,
             systems: false,
+            kernelSystems: false,
             disabledInPublish: false,
             modes: true,
         });
@@ -25,10 +29,36 @@ describe("getBazaarCompatibilityFieldVisibility", () => {
             assert.deepEqual(getBazaarCompatibilityFieldVisibility(packageType), {
                 frontends: false,
                 systems: false,
+                kernelSystems: false,
                 disabledInPublish: false,
                 modes: false,
             });
         });
+    });
+});
+
+describe("bazaar system labels", () => {
+    it("treats missing backends as all systems", () => {
+        assert.deepEqual(getBazaarBackendSystemLabels([], "All"), ["All"]);
+        assert.deepEqual(getBazaarBackendSystemLabels(undefined, "All"), ["All"]);
+    });
+
+    it("hides kernel systems when no kernel plugin is declared", () => {
+        assert.deepEqual(getBazaarKernelSystemLabels([], "All"), []);
+        assert.deepEqual(getBazaarKernelSystemLabels(undefined, "All"), []);
+    });
+
+    it("normalizes backend and kernel systems independently", () => {
+        assert.deepEqual(
+            getBazaarBackendSystemLabels(["windows", "linux", "windows", "custom"], "All"),
+            ["Windows", "Linux", "custom"],
+        );
+        assert.deepEqual(getBazaarKernelSystemLabels(["docker"], "All"), ["Docker"]);
+    });
+
+    it("treats all as unrestricted for each declared field", () => {
+        assert.deepEqual(getBazaarBackendSystemLabels(["all"], "All"), ["All"]);
+        assert.deepEqual(getBazaarKernelSystemLabels(["all"], "All"), ["All"]);
     });
 });
 

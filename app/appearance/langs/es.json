@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Complemento del núcleo",
 	"hideInFileTree": "Ocultar en el árbol de documentos",
 	"newItemTemplateSubDoc": "Subdocumento del documento que contiene el bloque de base de datos actual",
 	"newItemTemplateSubDocTip": "Al crear desde una base de datos reflejada, se usa el documento que contiene el bloque de base de datos reflejado actual",

@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Wtyczka jądra",
 	"hideInFileTree": "Ukryj w drzewie dokumentów",
 	"newItemTemplateSubDoc": "Dokument podrzędny dokumentu zawierającego bieżący blok bazy danych",
 	"newItemTemplateSubDocTip": "Podczas tworzenia z lustrzanej bazy danych używany jest dokument zawierający bieżący lustrzany blok bazy danych",

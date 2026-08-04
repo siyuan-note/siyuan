@@ -10,10 +10,33 @@ export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     return {
         frontends: isPlugin || isTheme,
         systems: isPlugin,
+        kernelSystems: isPlugin,
         disabledInPublish: isPlugin,
         modes: isTheme,
     };
 };
+
+const getBazaarSystemLabels = (systems: string[], allLabel: string) => {
+    if (!systems.length || systems.includes("all")) {
+        return [allLabel];
+    }
+    const labels: Record<string, string> = {
+        windows: "Windows",
+        linux: "Linux",
+        darwin: "macOS",
+        android: "Android",
+        ios: "iOS",
+        harmony: "HarmonyOS",
+        docker: "Docker",
+    };
+    return Array.from(new Set(systems.map((system) => labels[system] || system)));
+};
+
+export const getBazaarBackendSystemLabels = (backends: string[] | null | undefined, allLabel: string) =>
+    getBazaarSystemLabels(backends || [], allLabel);
+
+export const getBazaarKernelSystemLabels = (kernels: string[] | null | undefined, allLabel: string) =>
+    kernels?.length ? getBazaarSystemLabels(kernels, allLabel) : [];
 
 export const getBazaarThemeModeLabels = (
     modes: string[] | null | undefined,

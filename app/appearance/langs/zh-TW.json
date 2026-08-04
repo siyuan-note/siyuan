@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Kernel 插件",
 	"hideInFileTree": "在文檔樹中隱藏",
 	"newItemTemplateSubDoc": "目前資料庫區塊所在文檔的子文檔",
 	"newItemTemplateSubDocTip": "透過鏡像資料庫建立時，以目前鏡像資料庫區塊所在文檔為準",

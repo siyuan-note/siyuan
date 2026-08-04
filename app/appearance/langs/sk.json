@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Doplnok jadra",
 	"hideInFileTree": "Skryť v strome dokumentov",
 	"newItemTemplateSubDoc": "Podradený dokument dokumentu obsahujúceho aktuálny blok databázy",
 	"newItemTemplateSubDocTip": "Pri vytváraní zo zrkadlenej databázy sa použije dokument obsahujúci aktuálny blok zrkadlenej databázy",

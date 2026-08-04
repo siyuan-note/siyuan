@@ -20,8 +20,10 @@ import {useShell} from "../util/pathName";
 import {switchSettingPanelSubTab} from "./setting/mount";
 import {isThemeFrontendSupported} from "../util/themeCompatibility";
 import {
+    getBazaarBackendSystemLabels,
     getBazaarCompatibilityFieldVisibility,
     getBazaarFundingItems,
+    getBazaarKernelSystemLabels,
     getBazaarThemeModeLabels,
 } from "../util/bazaarPackage";
 
@@ -378,22 +380,6 @@ export const bazaar = {
             }
         });
         return Array.from(labels);
-    },
-    _getSystemLabels(item: IBazaarItem) {
-        const systems = [...(item.backends || []), ...(item.kernels || [])];
-        if (!systems.length || systems.includes("all")) {
-            return [window.siyuan.languages.all];
-        }
-        const labels: Record<string, string> = {
-            windows: "Windows",
-            linux: "Linux",
-            darwin: "macOS",
-            android: "Android",
-            ios: "iOS",
-            harmony: "HarmonyOS",
-            docker: "Docker",
-        };
-        return Array.from(new Set(systems.map((system) => labels[system] || system)));
     },
     _genReadmeActionsHTML(bazaarType: TBazaarType, installed?: IBazaarItem, available?: IBazaarItem) {
         if (!installed) {
@@ -784,7 +770,10 @@ type="checkbox">
         const compatibilityFieldVisibility = getBazaarCompatibilityFieldVisibility(bazaarType);
         const frontendLabels = compatibilityFieldVisibility.frontends ?
             bazaar._getFrontendLabels(compatibilityData.frontends) : [];
-        const systemLabels = compatibilityFieldVisibility.systems ? bazaar._getSystemLabels(compatibilityData) : [];
+        const systemLabels = compatibilityFieldVisibility.systems ?
+            getBazaarBackendSystemLabels(compatibilityData.backends, window.siyuan.languages.all) : [];
+        const kernelSystemLabels = compatibilityFieldVisibility.kernelSystems ?
+            getBazaarKernelSystemLabels(compatibilityData.kernels, window.siyuan.languages.all) : [];
         const modeLabels = compatibilityFieldVisibility.modes ? getBazaarThemeModeLabels(
             compatibilityData.modes,
             window.siyuan.languages.themeLight,
@@ -801,6 +790,7 @@ type="checkbox">
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarMinAppVersion, compatibilityData.minAppVersion ? `v${compatibilityData.minAppVersion}` : "-")}
     ${compatibilityFieldVisibility.frontends ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPlatforms, bazaar._genReadmeChips(frontendLabels, true), true) : ""}
     ${compatibilityFieldVisibility.systems ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarSystems, bazaar._genReadmeChips(systemLabels, true), true) : ""}
+    ${kernelSystemLabels.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarKernelPlugin, bazaar._genReadmeChips(kernelSystemLabels, true), true) : ""}
     ${compatibilityFieldVisibility.disabledInPublish ? bazaar._genReadmeMetaRow(window.siyuan.languages.publishService, compatibilityData.disabledInPublish ? window.siyuan.languages.disable : window.siyuan.languages.enable) : ""}
     ${compatibilityFieldVisibility.modes ? bazaar._genReadmeMetaRow(window.siyuan.languages.appearanceMode, modeLabels.length ? bazaar._genReadmeChips(modeLabels) : "-", true) : ""}
 </section>`;

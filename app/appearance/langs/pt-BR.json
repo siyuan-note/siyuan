@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Plugin do kernel",
 	"hideInFileTree": "Ocultar na árvore de documentos",
 	"newItemTemplateSubDoc": "Subdocumento do documento que contém o bloco de banco de dados atual",
 	"newItemTemplateSubDocTip": "Ao criar por meio de um banco de dados espelhado, será usado o documento que contém o bloco de banco de dados espelhado atual",

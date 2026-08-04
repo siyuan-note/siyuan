@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Kernel plugin",
 	"hideInFileTree": "Hide in document tree",
 	"newItemTemplateSubDoc": "Child document of the document containing the current database block",
 	"newItemTemplateSubDocTip": "When creating from a mirror database, the document containing the current mirror database block is used",

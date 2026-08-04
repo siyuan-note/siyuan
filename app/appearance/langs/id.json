@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Plugin kernel",
 	"hideInFileTree": "Sembunyikan di pohon dokumen",
 	"newItemTemplateSubDoc": "Subdokumen dari dokumen yang berisi blok basis data saat ini",
 	"newItemTemplateSubDocTip": "Saat membuat melalui basis data cermin, dokumen yang berisi blok basis data cermin saat ini akan digunakan",

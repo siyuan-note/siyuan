@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Plugin del kernel",
 	"hideInFileTree": "Nascondi nell’albero dei documenti",
 	"newItemTemplateSubDoc": "Sottodocumento del documento che contiene il blocco database corrente",
 	"newItemTemplateSubDocTip": "Quando si crea da un database speculare, viene usato il documento che contiene il blocco database speculare corrente",

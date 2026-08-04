@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "内核插件",
 	"hideInFileTree": "在文档树中隐藏",
 	"newItemTemplateSubDoc": "当前数据库块所在文档的子文档",
 	"newItemTemplateSubDocTip": "通过镜像数据库创建时，以当前镜像数据库块所在文档为准",

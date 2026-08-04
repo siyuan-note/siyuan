@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "カーネルプラグイン",
 	"hideInFileTree": "ドキュメントツリーで非表示",
 	"newItemTemplateSubDoc": "現在のデータベースブロックがあるドキュメントのサブドキュメント",
 	"newItemTemplateSubDocTip": "ミラーデータベースから作成する場合は、現在のミラーデータベースブロックがあるドキュメントを使用します",

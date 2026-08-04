@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Plugin du noyau",
 	"hideInFileTree": "Masquer dans l’arborescence des documents",
 	"newItemTemplateSubDoc": "Sous-document du document contenant le bloc de base de données actuel",
 	"newItemTemplateSubDocTip": "Lors de la création depuis une base de données miroir, le document contenant le bloc de base de données miroir actuel est utilisé",

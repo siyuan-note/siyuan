@@ -1,4 +1,5 @@
 {
+	"bazaarKernelPlugin": "Çekirdek eklentisi",
 	"hideInFileTree": "Belge ağacında gizle",
 	"newItemTemplateSubDoc": "Geçerli veritabanı bloğunu içeren belgenin alt belgesi",
 	"newItemTemplateSubDocTip": "Yansıtılmış bir veritabanından oluştururken geçerli yansıtılmış veritabanı bloğunu içeren belge kullanılır",

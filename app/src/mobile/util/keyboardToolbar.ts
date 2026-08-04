@@ -833,6 +833,14 @@ export const initKeyboardToolbar = () => {
             moved = true;
         }
     });
+    toolbarElement.addEventListener("mousedown", event => {
+        const buttonElement = hasClosestByTag(event.target as HTMLElement, "BUTTON");
+        const type = buttonElement && buttonElement.getAttribute("data-type");
+        if (type === "undo" || type === "redo") {
+            // 保持编辑器焦点，避免异步撤销或重做期间软键盘收起。
+            event.preventDefault();
+        }
+    });
     toolbarElement.addEventListener(isInAndroid() || isInHarmony() ? "touchend" : "click", (event) => {
         if (moved) {
             return;

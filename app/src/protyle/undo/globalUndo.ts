@@ -102,25 +102,23 @@ export const initMirror = (rootID: string): Promise<boolean> => {
 
 const applyUndoButtons = (protyle: IProtyle, rootID: string) => {
     const state = getMirror(rootID);
-    if (protyle.breadcrumb) {
-        const parent = protyle.breadcrumb.element.parentElement;
+    const applyState = (parent: ParentNode) => {
         const undoElement = parent.querySelector('[data-type="undo"]') as HTMLElement;
         const redoElement = parent.querySelector('[data-type="redo"]') as HTMLElement;
-        if (undoElement) {
-            if (state.canUndo) {
-                undoElement.removeAttribute("disabled");
-            } else {
-                undoElement.setAttribute("disabled", "disabled");
-            }
-        }
-        if (redoElement) {
-            if (state.canRedo) {
-                redoElement.removeAttribute("disabled");
-            } else {
-                redoElement.setAttribute("disabled", "disabled");
-            }
+        undoElement?.toggleAttribute("disabled", !state.canUndo);
+        redoElement?.toggleAttribute("disabled", !state.canRedo);
+    };
+    if (protyle.breadcrumb) {
+        applyState(protyle.breadcrumb.element.parentElement);
+    }
+    /// #if MOBILE
+    if (getCurrentEditor()?.protyle === protyle && getUndoRootID(protyle, protyle.toolbar?.range) === rootID) {
+        const keyboardToolbar = document.getElementById("keyboardToolbar");
+        if (keyboardToolbar) {
+            applyState(keyboardToolbar);
         }
     }
+    /// #endif
 };
 
 // 刷新指定 protyle 的撤销/重做按钮态；首次进入嵌入源文档时按需初始化其镜像。

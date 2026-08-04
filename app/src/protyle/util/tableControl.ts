@@ -23,7 +23,7 @@ import {
     isTableResizeControlVisible,
 } from "./tableResize";
 import {applyTableCellStyleHotkey, getTableCellTextStyleMenus} from "../toolbar/tableCell";
-import {getTableCellsInRectangle} from "./tableSelection";
+import {getTableCellsInRectangle, getTableDragEdge} from "./tableSelection";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -2252,8 +2252,35 @@ export class TableControl {
         if (!preview) {
             return;
         }
-        const {position, viewportRect} = preview;
+        const {position, viewportRect, edge} = preview;
         const grid = this.selectionGrid || buildTableGrid(this.selection.table);
+        if (edge) {
+            const target = edge === "start" ? 0 :
+                (this.dragState.mode === "row" ? grid.rowCount : grid.columnCount);
+            if (!this.getMoveTarget(target)) {
+                this.dragState.target = -1;
+                this.dropIndicator.classList.add("fn__none");
+                return;
+            }
+            this.dragState.target = target;
+            this.dropIndicator.classList.remove("fn__none");
+            if (this.dragState.mode === "row") {
+                this.dropIndicator.classList.add("protyle-table-control__drop--row");
+                this.dropIndicator.classList.remove("protyle-table-control__drop--column");
+                this.dropIndicator.style.left = `${viewportRect.left}px`;
+                this.dropIndicator.style.top = `${edge === "start" ? viewportRect.top : viewportRect.bottom}px`;
+                this.dropIndicator.style.width = `${viewportRect.width}px`;
+                this.dropIndicator.style.height = "2px";
+            } else {
+                this.dropIndicator.classList.add("protyle-table-control__drop--column");
+                this.dropIndicator.classList.remove("protyle-table-control__drop--row");
+                this.dropIndicator.style.left = `${edge === "start" ? viewportRect.left : viewportRect.right}px`;
+                this.dropIndicator.style.top = `${viewportRect.top}px`;
+                this.dropIndicator.style.width = "2px";
+                this.dropIndicator.style.height = `${viewportRect.height}px`;
+            }
+            return;
+        }
         let cell: HTMLTableCellElement;
         if (this.dragState.mode === "row") {
             const rowIndex = Array.from(this.selection.table.rows).findIndex(row => {
@@ -2329,6 +2356,7 @@ export class TableControl {
         const targetCenter = state.handleCenter + pointerOffset;
         const center = minCenter <= maxCenter ? Math.min(Math.max(targetCenter, minCenter), maxCenter) :
             (start + end) / 2;
+        const edge = getTableDragEdge(targetCenter, minCenter, maxCenter);
         const offset = Math.round(center - state.handleCenter);
         const offsetX = state.mode === "column" ? offset : 0;
         const offsetY = state.mode === "row" ? offset : 0;
@@ -2339,6 +2367,7 @@ export class TableControl {
         return {
             position: state.handleCenter + offset,
             viewportRect,
+            edge,
         };
     }
 

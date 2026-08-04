@@ -269,6 +269,16 @@ export const handleTouchStart = (event: TouchEvent) => {
         const blockElement = hasClosestBlock(target);
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
             longPressTimer = window.setTimeout(() => {
+                const selection = window.getSelection();
+                if (selection?.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    if (!range.collapsed && range.toString().replace(Constants.ZWSP, "") !== "" &&
+                        editor.protyle.wysiwyg.element.contains(range.startContainer) &&
+                        editor.protyle.wysiwyg.element.contains(range.endContainer)) {
+                        longPressTimer = undefined;
+                        return;
+                    }
+                }
                 window.getSelection()?.removeAllRanges();
                 editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
                 if (editor.protyle.options.render.gutter) {

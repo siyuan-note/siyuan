@@ -462,6 +462,7 @@ const renderKeyboardToolbar = () => {
         const range = getSelection().getRangeAt(0);
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
         const nodeElement = hasClosestBlock(range.startContainer);
+        const endNodeElement = hasClosestBlock(range.endContainer);
         if (!isProtyle || !nodeElement ||
             hasClosestByAttribute(range.startContainer, "data-type", "av-search")) {
             dynamicElements[0].classList.add("fn__none");
@@ -470,6 +471,14 @@ const renderKeyboardToolbar = () => {
         }
 
         const selectText = range.toString();
+        const startCellElement = hasClosestByTag(range.startContainer, "TD") ||
+            hasClosestByTag(range.startContainer, "TH");
+        const endCellElement = hasClosestByTag(range.endContainer, "TD") ||
+            hasClosestByTag(range.endContainer, "TH");
+        const disableLink = (!!endNodeElement && nodeElement !== endNodeElement) ||
+            (!!startCellElement && !!endCellElement && startCellElement !== endCellElement);
+        dynamicElements[1].querySelector('[data-type="a"]').toggleAttribute("disabled", disableLink);
+        dynamicElements[1].querySelector('[data-type="block-ref"]').toggleAttribute("disabled", disableLink);
 
         if (!nodeElement.classList.contains("code-block") &&
             (selectText || dynamicElements[0].querySelector('[data-type="goinline"]').classList.contains("protyle-toolbar__item--current"))) {

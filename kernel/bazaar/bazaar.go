@@ -26,7 +26,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// GetBazaarPackages 返回指定类型的在线集市包列表（plugins 类型需要传递 frontend 参数）。
+// GetBazaarPackages 返回指定类型的在线集市包列表（plugins 和 themes 类型需要传递 frontend 参数）。
 func GetBazaarPackages(pkgType string, frontend string) (packages []*Package) {
 	packages, _ = getBazaarPackages(pkgType, frontend, true)
 	return
@@ -54,7 +54,7 @@ func getBazaarPackages(pkgType, frontend string, showError bool) (packages []*Pa
 	return
 }
 
-// GetBazaarPackagesMap 返回按包名索引的在线集市包映射（plugins 类型需要传递 frontend 参数）。
+// GetBazaarPackagesMap 返回按包名索引的在线集市包映射（plugins 和 themes 类型需要传递 frontend 参数）。
 func GetBazaarPackagesMap(pkgType, frontend string) (packagesMap map[string]*Package, err error) {
 	packages, err := getBazaarPackages(pkgType, frontend, false)
 	if err != nil {
@@ -96,8 +96,11 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*baz
 	pkg.DisallowInstall = disallowVer
 	pkg.DisallowUpdate = disallowVer
 	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
-	if "plugins" == pkgType {
-		bazaarIncompatible := IsIncompatiblePlugin(&pkg, frontend)
+	if "plugins" == pkgType || "themes" == pkgType {
+		bazaarIncompatible := IsIncompatibleTheme(&pkg, frontend)
+		if "plugins" == pkgType {
+			bazaarIncompatible = IsIncompatiblePlugin(&pkg, frontend)
+		}
 		pkg.BazaarIncompatible = &bazaarIncompatible
 		if bazaarIncompatible {
 			pkg.DisallowInstall = true

@@ -27,6 +27,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -840,18 +841,21 @@ func TestFilterSearchDocsByPublishAccess(t *testing.T) {
 		hiddenBoxID       = "20260720000001-boxid02"
 		hiddenDocID       = "20260720000002-hiddend"
 		protectedDocID    = "20260720000003-protect"
+		disabledDocID     = "20260720000006-disable"
 		protectedPassword = "password"
 	)
 	publishAccess := PublishAccess{
 		{ID: hiddenBoxID, Visible: false},
 		{ID: hiddenDocID, Visible: false},
 		{ID: protectedDocID, Visible: true, Password: protectedPassword},
+		{ID: disabledDocID, Visible: true, Disable: true},
 	}
 	docs := []map[string]string{
 		{"box": boxID, "path": "/20260720000004-public1.sy"},
 		{"box": hiddenBoxID, "path": "/"},
 		{"box": boxID, "path": "/" + hiddenDocID + "/20260720000005-child01.sy"},
 		{"box": boxID, "path": "/" + protectedDocID + ".sy"},
+		{"box": boxID, "path": "/" + disabledDocID + ".sy"},
 		{"box": boxID, "path": ""},
 	}
 
@@ -879,6 +883,7 @@ func TestFilterGraphByPublishAccess(t *testing.T) {
 		protectedDocID    = "20260724000002-protect"
 		protectedBlockID  = "20260724000003-block01"
 		hiddenDocID       = "20260724000004-hidden1"
+		disabledDocID     = "20260724000005-disable"
 		protectedPassword = "password"
 		sharedTagID       = "shared"
 		protectedTagID    = "protected"
@@ -886,12 +891,14 @@ func TestFilterGraphByPublishAccess(t *testing.T) {
 	publishAccess := PublishAccess{
 		{ID: protectedDocID, Visible: true, Password: protectedPassword},
 		{ID: hiddenDocID, Visible: false},
+		{ID: disabledDocID, Visible: true, Disable: true},
 	}
 	newGraph := func() ([]*GraphNode, []*GraphLink) {
 		return []*GraphNode{
 				{ID: publicDocID, Box: boxID, Path: "/" + publicDocID + ".sy", Size: 10, Type: "NodeDocument"},
 				{ID: protectedBlockID, Box: boxID, Path: "/" + protectedDocID + "/" + protectedBlockID + ".sy", Size: 10, Type: "NodeParagraph"},
 				{ID: hiddenDocID, Box: boxID, Path: "/" + hiddenDocID + ".sy", Size: 10, Type: "NodeDocument"},
+				{ID: disabledDocID, Box: boxID, Path: "/" + disabledDocID + ".sy", Size: 10, Type: "NodeDocument"},
 				{ID: sharedTagID, Label: sharedTagID, Size: 10, Type: "NodeTag"},
 				{ID: protectedTagID, Label: protectedTagID, Size: 10, Type: "NodeTag"},
 			}, []*GraphLink{
@@ -900,6 +907,7 @@ func TestFilterGraphByPublishAccess(t *testing.T) {
 				{From: protectedTagID, To: protectedBlockID},
 				{From: publicDocID, To: protectedBlockID, Ref: true},
 				{From: publicDocID, To: hiddenDocID, Ref: true},
+				{From: publicDocID, To: disabledDocID, Ref: true},
 			}
 	}
 
@@ -1045,5 +1053,268 @@ func TestFilterEmbedBlocksByPublishAccessDropsInaccessibleResults(t *testing.T) 
 	filtered := FilterEmbedBlocksByPublishAccess(c, publishAccess, embedBlocks)
 	if 1 != len(filtered) || "20260720000005-protect" != filtered[0].Block.ID {
 		t.Fatalf("密码验证后应仅返回已授权结果：%+v", filtered)
+	}
+}
+
+func TestFilterPathsByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260804000000-boxid01"
+		publicID          = "20260804000001-public1"
+		protectedID       = "20260804000002-protect"
+		hiddenID          = "20260804000003-hidden1"
+		disabledID        = "20260804000004-disable"
+		protectedPassword = "password"
+	)
+
+	oldDataDir := util.DataDir
+	oldBlockTreeDBPath := util.BlockTreeDBPath
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.DataDir = oldDataDir
+		util.BlockTreeDBPath = oldBlockTreeDBPath
+		invalidateEncryptedPublishAccessCache()
+		if "" != oldBlockTreeDBPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+
+	for _, id := range []string{publicID, protectedID, hiddenID, disabledID} {
+		tree := treenode.NewTree(boxID, "/"+id+".sy", "/"+id, id)
+		treenode.UpsertBlockTree(tree)
+	}
+
+	newPaths := func() []*Path {
+		return []*Path{
+			{ID: publicID, Name: "/" + publicID + ".sy", HPath: "/public", Type: "path", NodeType: "NodeDocument"},
+			{ID: protectedID, Name: "/" + protectedID + ".sy", HPath: "/protected", Type: "path", NodeType: "NodeDocument"},
+			{ID: hiddenID, Name: "/" + hiddenID + ".sy", HPath: "/hidden", Type: "path", NodeType: "NodeDocument"},
+			{ID: disabledID, Name: "/" + disabledID + ".sy", HPath: "/disabled", Type: "path", NodeType: "NodeDocument"},
+		}
+	}
+	publishAccess := PublishAccess{
+		{ID: protectedID, Visible: true, Password: protectedPassword},
+		{ID: hiddenID, Visible: false},
+		{ID: disabledID, Visible: true, Disable: true},
+	}
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	filtered := FilterPathsByPublishAccess(c, publishAccess, newPaths())
+	if len(filtered) != 1 || filtered[0].ID != publicID {
+		t.Fatalf("unexpected unauthenticated backlink paths: %+v", filtered)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedID,
+		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+	})
+	filtered = FilterPathsByPublishAccess(c, publishAccess, newPaths())
+	if len(filtered) != 2 || filtered[0].ID != publicID || filtered[1].ID != protectedID {
+		t.Fatalf("unexpected authenticated backlink paths: %+v", filtered)
+	}
+}
+
+func TestFilterRecentDocsByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260804010000-boxid01"
+		publicID          = "20260804010001-public1"
+		protectedID       = "20260804010002-protect"
+		hiddenID          = "20260804010003-hidden1"
+		disabledID        = "20260804010004-disable"
+		protectedPassword = "password"
+	)
+
+	oldDataDir := util.DataDir
+	oldBlockTreeDBPath := util.BlockTreeDBPath
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.DataDir = oldDataDir
+		util.BlockTreeDBPath = oldBlockTreeDBPath
+		invalidateEncryptedPublishAccessCache()
+		if "" != oldBlockTreeDBPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+
+	for _, id := range []string{publicID, protectedID, hiddenID, disabledID} {
+		tree := treenode.NewTree(boxID, "/"+id+".sy", "/"+id, id)
+		treenode.UpsertBlockTree(tree)
+	}
+
+	newRecentDocs := func() []*RecentDoc {
+		return []*RecentDoc{
+			{RootID: publicID, Title: "Public"},
+			{RootID: protectedID, Title: "Protected"},
+			{RootID: hiddenID, Title: "Hidden"},
+			{RootID: disabledID, Title: "Disabled"},
+		}
+	}
+	publishAccess := PublishAccess{
+		{ID: protectedID, Visible: true, Password: protectedPassword},
+		{ID: hiddenID, Visible: false},
+		{ID: disabledID, Visible: true, Disable: true},
+	}
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	filtered := FilterRecentDocsByPublishAccess(c, publishAccess, newRecentDocs())
+	if len(filtered) != 1 || filtered[0].RootID != publicID {
+		t.Fatalf("unexpected unauthenticated recent docs: %+v", filtered)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedID,
+		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+	})
+	filtered = FilterRecentDocsByPublishAccess(c, publishAccess, newRecentDocs())
+	if len(filtered) != 2 || filtered[0].RootID != publicID || filtered[1].RootID != protectedID {
+		t.Fatalf("unexpected authenticated recent docs: %+v", filtered)
+	}
+}
+
+func TestFilterCriteriaByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260804020000-boxid01"
+		publicID          = "20260804020001-public1"
+		protectedID       = "20260804020002-protect"
+		hiddenID          = "20260804020003-hidden1"
+		disabledID        = "20260804020004-disable"
+		protectedPassword = "password"
+	)
+
+	oldDataDir := util.DataDir
+	oldBlockTreeDBPath := util.BlockTreeDBPath
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.DataDir = oldDataDir
+		util.BlockTreeDBPath = oldBlockTreeDBPath
+		invalidateEncryptedPublishAccessCache()
+		if "" != oldBlockTreeDBPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+
+	for _, id := range []string{publicID, protectedID, hiddenID, disabledID} {
+		tree := treenode.NewTree(boxID, "/"+id+".sy", "/"+id, id)
+		treenode.UpsertBlockTree(tree)
+	}
+
+	newCriteria := func() []*Criterion {
+		return []*Criterion{
+			{Name: "public", HPath: "/public", IDPath: []string{publicID}},
+			{Name: "protected", HPath: "/protected", IDPath: []string{protectedID}},
+			{Name: "hidden", HPath: "/hidden", IDPath: []string{hiddenID}},
+			{Name: "disabled", HPath: "/disabled", IDPath: []string{disabledID}},
+		}
+	}
+	publishAccess := PublishAccess{
+		{ID: protectedID, Visible: true, Password: protectedPassword},
+		{ID: hiddenID, Visible: false},
+		{ID: disabledID, Visible: true, Disable: true},
+	}
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	filtered := FilterCriteriaByPublishAccess(c, publishAccess, newCriteria())
+	if len(filtered) != 1 || filtered[0].Name != "public" {
+		t.Fatalf("unexpected unauthenticated criteria: %+v", filtered)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedID,
+		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+	})
+	filtered = FilterCriteriaByPublishAccess(c, publishAccess, newCriteria())
+	if len(filtered) != 2 || filtered[0].Name != "public" || filtered[1].Name != "protected" {
+		t.Fatalf("unexpected authenticated criteria: %+v", filtered)
+	}
+}
+
+func TestFilterAssetContentByPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260804030000-boxid01"
+		publicDocID       = "20260804030001-public1"
+		protectedDocID    = "20260804030002-protect"
+		hiddenDocID       = "20260804030003-hidden1"
+		disabledDocID     = "20260804030004-disable"
+		publicAsset       = "assets/public.png"
+		protectedAsset    = "assets/protected.png"
+		hiddenAsset       = "assets/hidden.png"
+		disabledAsset     = "assets/disabled.png"
+		protectedPassword = "password"
+	)
+
+	oldDataDir := util.DataDir
+	oldBlockTreeDBPath := util.BlockTreeDBPath
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.DataDir = oldDataDir
+		util.BlockTreeDBPath = oldBlockTreeDBPath
+		invalidateEncryptedPublishAccessCache()
+		if "" != oldBlockTreeDBPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+
+	newDocTree := func(docID, asset string) {
+		tree := treenode.NewTree(boxID, "/"+docID+".sy", "/"+docID, docID)
+		tree.Root.FirstChild.Unlink()
+		dom := `<div data-node-id="` + docID + `" data-type="htmlblock"><img src="` + asset + `" data-src="` + asset + `" /></div>`
+		node := util.NewLute().BlockDOM2Tree(dom).Root.FirstChild
+		tree.Root.AppendChild(node)
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+	}
+	newDocTree(publicDocID, publicAsset)
+	newDocTree(protectedDocID, protectedAsset)
+	newDocTree(hiddenDocID, hiddenAsset)
+	newDocTree(disabledDocID, disabledAsset)
+
+	newAssetContents := func() []*AssetContent {
+		return []*AssetContent{
+			{ID: publicDocID, Name: "public.png", Path: publicAsset},
+			{ID: protectedDocID, Name: "protected.png", Path: protectedAsset},
+			{ID: hiddenDocID, Name: "hidden.png", Path: hiddenAsset},
+			{ID: disabledDocID, Name: "disabled.png", Path: disabledAsset},
+		}
+	}
+	publishAccess := PublishAccess{
+		{ID: protectedDocID, Visible: true, Password: protectedPassword},
+		{ID: hiddenDocID, Visible: false},
+		{ID: disabledDocID, Visible: true, Disable: true},
+	}
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	filtered := FilterAssetContentByPublishAccess(c, publishAccess, newAssetContents())
+	if len(filtered) != 1 || filtered[0].Path != publicAsset {
+		t.Fatalf("unexpected unauthenticated asset contents: %+v", filtered)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedDocID,
+		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+	})
+	filtered = FilterAssetContentByPublishAccess(c, publishAccess, newAssetContents())
+	if len(filtered) != 2 || filtered[0].Path != publicAsset || filtered[1].Path != protectedAsset {
+		t.Fatalf("unexpected authenticated asset contents: %+v", filtered)
 	}
 }

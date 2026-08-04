@@ -1378,6 +1378,29 @@ func applyRequestedDocCreateTemplate(arg map[string]any, markdown, docID string)
 	}
 }
 
+// ResolveDocCreateSaveLocation 按笔记本配置和全局配置解析新建文档的存放位置。
+func ResolveDocCreateSaveLocation(currentBoxID string) (boxID, pathTemplate string) {
+	pathTemplate = Conf.FileTree.DocCreateSavePath
+	if box := Conf.Box(currentBoxID); nil != box {
+		boxConf := box.GetConf()
+		boxID = boxConf.DocCreateSaveBox
+		pathTemplate = boxConf.DocCreateSavePath
+	}
+	if "" == boxID && "" == pathTemplate {
+		boxID = Conf.FileTree.DocCreateSaveBox
+	}
+	if "" != boxID && nil == Conf.Box(boxID) {
+		boxID = currentBoxID
+	}
+	if "" == boxID {
+		boxID = currentBoxID
+	}
+	if "" == pathTemplate {
+		pathTemplate = Conf.FileTree.DocCreateSavePath
+	}
+	return
+}
+
 const (
 	DailyNoteAttrPrefix = "custom-dailynote-"
 	NodeAttrTitleEmpty  = "custom-sy-title-empty"

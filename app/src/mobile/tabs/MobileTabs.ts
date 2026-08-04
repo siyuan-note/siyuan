@@ -38,6 +38,8 @@ type MobileTabsState = {
     version: 1;
     activeTabID?: string;
     tabs: MobileTab[];
+    activationBackStack?: string[];
+    activationForwardStack?: string[];
 };
 
 type OpenOptions = {
@@ -104,6 +106,7 @@ export class MobileTabs {
     private navigationEpoch = 0;
     private abortController?: AbortController;
     private activationBackStack: string[] = [];
+    private activationForwardStack: string[] = [];
 
     constructor(private readonly app: App) {
         const stored = window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] as MobileTabsState | undefined;
@@ -114,6 +117,11 @@ export class MobileTabs {
             activeTabID: tabs.some((item) => item.id === stored?.activeTabID) ? stored.activeTabID : tabs[0]?.id,
             tabs,
         };
+        const tabIDs = new Set(tabs.map((tab) => tab.id));
+        this.activationBackStack = Array.isArray(stored?.activationBackStack) ?
+            stored.activationBackStack.filter((tabID) => typeof tabID === "string" && tabIDs.has(tabID)).slice(-MAX_HISTORY) : [];
+        this.activationForwardStack = Array.isArray(stored?.activationForwardStack) ?
+            stored.activationForwardStack.filter((tabID) => typeof tabID === "string" && tabIDs.has(tabID)).slice(-MAX_HISTORY) : [];
         this.trimTabs();
         this.persist();
         this.updateCounter();
@@ -132,18 +140,29 @@ export class MobileTabs {
         this.navigationEpoch++;
     }
 
-    private recordActivation(tabID?: string) {
-        if (!tabID || this.activationBackStack[this.activationBackStack.length - 1] === tabID) {
+    private pushActivation(stack: string[], tabID?: string) {
+        if (!tabID || stack[stack.length - 1] === tabID) {
             return;
         }
-        this.activationBackStack.push(tabID);
-        if (this.activationBackStack.length > MAX_HISTORY) {
-            this.activationBackStack.splice(0, this.activationBackStack.length - MAX_HISTORY);
+        stack.push(tabID);
+        if (stack.length > MAX_HISTORY) {
+            stack.splice(0, stack.length - MAX_HISTORY);
         }
+    }
+
+    private recordActivation(tabID?: string) {
+        this.pushActivation(this.activationBackStack, tabID);
+        this.activationForwardStack = [];
     }
 
     private removeActivation(tabID: string) {
         this.activationBackStack = this.activationBackStack.filter((item) => item !== tabID);
+        this.activationForwardStack = this.activationForwardStack.filter((item) => item !== tabID);
+    }
+
+    private hasActivationTarget(stack: string[]) {
+        return stack.some((tabID) => tabID !== this.state.activeTabID &&
+            this.state.tabs.some((tab) => tab.id === tabID));
     }
 
     private persist() {
@@ -151,6 +170,8 @@ export class MobileTabs {
             version: 1,
             activeTabID: this.state.activeTabID,
             tabs: this.state.tabs.map(sanitizeTab),
+            activationBackStack: this.activationBackStack,
+            activationForwardStack: this.activationForwardStack,
         };
         window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] = persistedState;
         setStorageVal(Constants.LOCAL_MOBILE_TABS, persistedState);
@@ -262,6 +283,8 @@ export class MobileTabs {
         });
         this.state.tabs = this.state.tabs.filter((tab) => !tab.current || !missingRootIDs.has(tab.current.rootID));
         this.activationBackStack = this.activationBackStack.filter((tabID) =>
+            this.state.tabs.some((tab) => tab.id === tabID));
+        this.activationForwardStack = this.activationForwardStack.filter((tabID) =>
             this.state.tabs.some((tab) => tab.id === tabID));
         if (!this.state.tabs.some((tab) => tab.id === activeTabID)) {
             this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
@@ -507,7 +530,25 @@ export class MobileTabs {
         while (this.activationBackStack.length > 0) {
             const tabID = this.activationBackStack.pop();
             if (tabID !== this.state.activeTabID && this.state.tabs.some((tab) => tab.id === tabID)) {
+                const activeTabID = this.state.activeTabID;
                 if (await this.switchTo(tabID, false)) {
+                    this.pushActivation(this.activationForwardStack, activeTabID);
+                    this.persist();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    async switchNextTab(): Promise<boolean> {
+        while (this.activationForwardStack.length > 0) {
+            const tabID = this.activationForwardStack.pop();
+            if (tabID !== this.state.activeTabID && this.state.tabs.some((tab) => tab.id === tabID)) {
+                const activeTabID = this.state.activeTabID;
+                if (await this.switchTo(tabID, false)) {
+                    this.pushActivation(this.activationBackStack, activeTabID);
+                    this.persist();
                     return true;
                 }
             }
@@ -518,7 +559,7 @@ export class MobileTabs {
     async goBack(): Promise<boolean> {
         const tab = this.activeTab;
         if (!tab?.backStack.length) {
-            return false;
+            return this.switchPreviousTab();
         }
         this.snapshot(tab);
         const target = tab.backStack.pop();
@@ -552,7 +593,7 @@ export class MobileTabs {
     async goForward(): Promise<boolean> {
         const tab = this.activeTab;
         if (!tab?.forwardStack.length) {
-            return false;
+            return this.switchNextTab();
         }
         this.snapshot(tab);
         const target = tab.forwardStack.pop();
@@ -632,6 +673,7 @@ export class MobileTabs {
         });
         this.state = {version: 1, tabs: []};
         this.activationBackStack = [];
+        this.activationForwardStack = [];
         setEmpty(this.app);
         this.persist();
         this.updateCounter();
@@ -668,6 +710,8 @@ export class MobileTabs {
         });
         this.state.tabs = this.state.tabs.filter((tab) => !tab.current || predicate(tab.current));
         this.activationBackStack = this.activationBackStack.filter((tabID) =>
+            this.state.tabs.some((tab) => tab.id === tabID));
+        this.activationForwardStack = this.activationForwardStack.filter((tabID) =>
             this.state.tabs.some((tab) => tab.id === tabID));
         if (!this.state.tabs.some((tab) => tab.id === activeTabID)) {
             this.cancelNavigation();
@@ -722,8 +766,8 @@ export class MobileTabs {
             html: `<div class="mobile-tabs">
     <div class="mobile-tabs__list">${rows || `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`}</div>
     <div class="mobile-tabs__actions">
-        <button class="b3-button b3-button--outline" data-action="back"${tab?.backStack.length ? "" : " disabled"}><svg><use xlink:href="#iconLeft"></use></svg>${window.siyuan.languages.goBack}</button>
-        <button class="b3-button b3-button--outline" data-action="forward"${tab?.forwardStack.length ? "" : " disabled"}><svg><use xlink:href="#iconRight"></use></svg>${window.siyuan.languages.goForward}</button>
+        <button class="b3-button b3-button--outline" data-action="back"${tab?.backStack.length || this.hasActivationTarget(this.activationBackStack) ? "" : " disabled"}><svg><use xlink:href="#iconLeft"></use></svg>${window.siyuan.languages.goBack}</button>
+        <button class="b3-button b3-button--outline" data-action="forward"${tab?.forwardStack.length || this.hasActivationTarget(this.activationForwardStack) ? "" : " disabled"}><svg><use xlink:href="#iconRight"></use></svg>${window.siyuan.languages.goForward}</button>
         <button class="b3-button b3-button--outline" data-action="new-doc"><svg><use xlink:href="#iconAddDoc"></use></svg>${window.siyuan.languages.newFile}</button>
         <button class="b3-button b3-button--outline" data-action="close-all"${this.state.tabs.length ? "" : " disabled"}><svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.closeAll}</button>
     </div>

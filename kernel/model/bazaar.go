@@ -151,7 +151,7 @@ func BatchUpdatePackages(frontend string) error {
 
 // GetUpdatedPackages 获取所有类型集市包的更新列表
 //
-//   - frontend 仅用于插件环境兼容性判断
+//   - frontend 仅用于插件和主题环境兼容性判断
 func GetUpdatedPackages(frontend string) (plugins, widgets, icons, themes, templates []*UpdatedPackage, err error) {
 	wg := &sync.WaitGroup{}
 	errs := make([]error, 5)
@@ -160,7 +160,7 @@ func GetUpdatedPackages(frontend string) (plugins, widgets, icons, themes, templ
 		plugins, errs[0] = getUpdatedPackages("plugins", frontend)
 	})
 	wg.Go(func() {
-		themes, errs[1] = getUpdatedPackages("themes", "")
+		themes, errs[1] = getUpdatedPackages("themes", frontend)
 	})
 	wg.Go(func() {
 		icons, errs[2] = getUpdatedPackages("icons", "")
@@ -329,6 +329,8 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 				pkg.Enabled = &enabled
 			}
 		case "themes":
+			installedIncompatible := bazaar.IsIncompatibleTheme(pkg, frontend)
+			pkg.InstalledIncompatible = &installedIncompatible
 			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
 		case "icons":
 			pkg.Current = pkg.Name == Conf.Appearance.Icon

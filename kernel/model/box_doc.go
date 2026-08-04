@@ -279,9 +279,11 @@ func BoxDocSubFileCount(boxID string) int {
 
 // BoxDocSubFileCountForPublish 返回发布访问控制下笔记本顶层文档的可见下级文档数。
 func BoxDocSubFileCountForPublish(boxID string, publishAccess PublishAccess) int {
-	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
 	return boxDocSubFileCount(boxID, func(p string) bool {
-		return CheckPathAccessableByPublishIgnore(boxID, p, publishIgnore)
+		return CheckPathAccessableByPublishIgnore(boxID, p, publishInvisible) &&
+			CheckPathAccessableByPublishIgnore(boxID, p, publishDisable)
 	})
 }
 

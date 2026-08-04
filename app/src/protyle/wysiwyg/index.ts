@@ -2263,6 +2263,13 @@ export class WYSIWYG {
                     tableBlockElement.firstElementChild.style.webkitUserModify = "";
                     const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
                     if (tableSelectElement.getAttribute("style")) {
+                        const managedSelection = (target.tagName === "TH" || target.tagName === "TD") &&
+                            moveCellElement && this.tableControl?.selectCellRange(
+                                target as HTMLTableCellElement, moveCellElement as HTMLTableCellElement);
+                        if (managedSelection) {
+                            tableSelectElement.removeAttribute("style");
+                            window.siyuan.menus.menu.remove();
+                        } else {
                         if (getSelection().rangeCount > 0) {
                             getSelection().getRangeAt(0).collapse(false);
                         }
@@ -2559,6 +2566,7 @@ export class WYSIWYG {
                             window.siyuan.menus.menu.append(mergeCellMenuElement);
                         }
                         window.siyuan.menus.menu.popup({x: mouseUpEvent.clientX - 8, y: mouseUpEvent.clientY - 16});
+                        }
                     }
                 }
 

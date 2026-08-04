@@ -16,7 +16,10 @@
 
 package util
 
-import "testing"
+import (
+	"net"
+	"testing"
+)
 
 // TestIsSessionOriginAllowed 验证会话 Cookie 认证的 Origin 校验逻辑
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
@@ -44,6 +47,91 @@ func TestIsSessionOriginAllowed(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if got := IsSessionOriginAllowed(test.origin, test.host); got != test.want {
 				t.Fatalf("IsSessionOriginAllowed(%q, %q) = %v, want %v", test.origin, test.host, got, test.want)
+			}
+		})
+	}
+}
+
+// TestIsPrivateIP 验证 isPrivateIP 对私网地址及 IPv6 过渡地址的判断
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-qq8m-8p8v-x4xg
+func TestIsPrivateIP(t *testing.T) {
+	tests := []struct {
+		name string
+		ip   string
+		want bool
+	}{
+		// IPv4
+		{name: "IPv4 loopback", ip: "127.0.0.1", want: true},
+		{name: "IPv4 private 10/8", ip: "10.0.0.1", want: true},
+		{name: "IPv4 private 172.16/12", ip: "172.16.0.1", want: true},
+		{name: "IPv4 private 192.168/16", ip: "192.168.1.1", want: true},
+		{name: "IPv4 link-local", ip: "169.254.169.254", want: true},
+		{name: "IPv4 unspecified", ip: "0.0.0.0", want: true},
+		{name: "IPv4 multicast", ip: "224.0.0.1", want: true},
+		{name: "IPv4 public", ip: "8.8.8.8", want: false},
+		// IPv6
+		{name: "IPv6 loopback", ip: "::1", want: true},
+		{name: "IPv6 ULA", ip: "fc00::1", want: true},
+		{name: "IPv6 link-local", ip: "fe80::1", want: true},
+		{name: "IPv6 unspecified", ip: "::", want: true},
+		{name: "IPv6 multicast", ip: "ff02::1", want: true},
+		{name: "IPv6 IPv4-mapped private", ip: "::ffff:192.168.1.1", want: true},
+		{name: "IPv6 documentation", ip: "2001:db8::1", want: false},
+		{name: "IPv6 public", ip: "2606:4700:4700::1111", want: false},
+		// IPv6 过渡地址
+		{name: "NAT64 loopback", ip: "64:ff9b::7f00:1", want: true},
+		{name: "NAT64 link-local", ip: "64:ff9b::a9fe:a9fe", want: true},
+		{name: "NAT64 private", ip: "64:ff9b::c0a8:101", want: true},
+		{name: "NAT64 public", ip: "64:ff9b::808:808", want: false},
+		{name: "NAT64 local-use private", ip: "64:ff9b:1::c0a8:101", want: true},
+		{name: "6to4 private", ip: "2002:c0a8:101::1", want: true},
+		{name: "6to4 loopback", ip: "2002:7f00:1::1", want: true},
+		{name: "6to4 public", ip: "2002:808:808::1", want: false},
+		{name: "Teredo private", ip: "2001:0000:0000:0000:0000:0000:3f57:fefe", want: true},
+		{name: "Teredo link-local", ip: "2001:0000:0000:0000:0000:0000:5601:5601", want: true},
+		{name: "Teredo public", ip: "2001:0000:0000:0000:0000:0000:f7f7:f7f7", want: false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ip := net.ParseIP(test.ip)
+			if nil == ip {
+				t.Fatalf("parse IP [%s] failed", test.ip)
+			}
+			if got := isPrivateIP(ip); got != test.want {
+				t.Fatalf("isPrivateIP(%q) = %v, want %v", test.ip, got, test.want)
+			}
+		})
+	}
+}
+
+// TestSSRFSafeDialerSafeMode 验证安全模式下 SSRFSafeDialer 会阻止对私网及 IPv6 过渡地址的连接
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-qq8m-8p8v-x4xg
+func TestSSRFSafeDialerSafeMode(t *testing.T) {
+	previous := SafeMode
+	SafeMode = true
+	defer func() { SafeMode = previous }()
+
+	tests := []struct {
+		name    string
+		address string
+		blocked bool
+	}{
+		{name: "loopback", address: "127.0.0.1:80", blocked: true},
+		{name: "private", address: "192.168.1.1:80", blocked: true},
+		{name: "NAT64 loopback", address: "64:ff9b::7f00:1:80", blocked: true},
+		{name: "NAT64 link-local", address: "64:ff9b::a9fe:a9fe:80", blocked: true},
+		{name: "6to4 private", address: "2002:c0a8:101::1:80", blocked: true},
+		{name: "Teredo private", address: "2001:0000:0000:0000:0000:0000:3f57:fefe:80", blocked: true},
+		{name: "public", address: "8.8.8.8:80", blocked: false},
+	}
+
+	dialer := SSRFSafeDialer(30)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := dialer.Control("tcp", test.address, nil)
+			if test.blocked != (nil != err) {
+				t.Fatalf("Control(%q) error [%v], want blocked [%v]", test.address, err, test.blocked)
 			}
 		})
 	}

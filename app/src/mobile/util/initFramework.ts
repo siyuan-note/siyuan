@@ -3,7 +3,7 @@ import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {openMobileOnboarding} from "../../onboarding";
 import {validateName} from "../../editor/rename";
-import {getEventName, isInMobileApp} from "../../protyle/util/compatibility";
+import {getEventName} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
@@ -180,8 +180,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
         window.siyuan.mobile.tabs.openOverview();
     });
     initEditorName();
-    const applyTabStartupMode = isStart || !isInMobileApp();
-    if (applyTabStartupMode && window.siyuan.config.fileTree.tabStartupMode === 2) {
+    if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
         window.siyuan.mobile.tabs.closeAll();
     } else {
         await window.siyuan.mobile.tabs.removeMissingTabs();
@@ -207,11 +206,11 @@ export const initFramework = async (app: App, isStart: boolean) => {
         if (openMobileOnboarding(app)) {
             return;
         }
-        if (applyTabStartupMode && window.siyuan.config.fileTree.tabStartupMode === 1) {
+        if (isStart && window.siyuan.config.fileTree.tabStartupMode === 1) {
             window.siyuan.mobile.tabs.activateStartupBlank();
             return;
         }
-        if (applyTabStartupMode && window.siyuan.config.fileTree.tabStartupMode === 2) {
+        if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
             return;
         }
         if (await window.siyuan.mobile.tabs.restore()) {
@@ -235,7 +234,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
         });
         return;
     }
-    if (applyTabStartupMode && window.siyuan.config.fileTree.tabStartupMode === 1) {
+    if (isStart && window.siyuan.config.fileTree.tabStartupMode === 1) {
         window.siyuan.mobile.tabs.activateStartupBlank();
     } else {
         setEmpty(app);

@@ -990,6 +990,13 @@ interface IMenu {
     warning?: boolean
 }
 
+interface IBazaarFunding {
+    openCollective?: string;
+    patreon?: string;
+    github?: string;
+    custom?: string[];
+}
+
 interface IBazaarItem {
     preferredName: string;
     minAppVersion: string;
@@ -1022,11 +1029,12 @@ interface IBazaarItem {
     updateTime: number;
     hInstallDate: string;
     hUpdated: string;
+    funding?: IBazaarFunding;
     preferredFunding: string;
     disallowUpdate: boolean;
     updateRequiredMinAppVer?: string;
-    installedIncompatible?: boolean; // 仅 plugin
-    bazaarIncompatible?: boolean; // 仅 plugin
+    installedIncompatible?: boolean; // 仅插件/主题
+    bazaarIncompatible?: boolean; // 仅插件/主题
     enabled?: boolean; // 仅 plugin
     modes?: string[]; // 仅 theme
 }
@@ -1085,6 +1093,7 @@ interface IAVNewItemTemplate {
     fieldValues?: Record<string, IAVNewItemFieldValue>;
     saveLocation?: IAVNewItemSaveLocation;
     contentTemplatePath?: string;
+    hideInFileTree?: boolean;
 }
 
 interface IAVView {

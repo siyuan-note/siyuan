@@ -1253,7 +1253,8 @@ func FilterPathsByPublishAccess(c *gin.Context, publishAccess PublishAccess, pat
 	ret = []*Path{}
 	IDs := []string{}
 
-	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
 
 	IDtoPathIndexMap := make(map[string]int)
 	for i, path := range paths {
@@ -1268,7 +1269,9 @@ func FilterPathsByPublishAccess(c *gin.Context, publishAccess PublishAccess, pat
 		pathIndex := IDtoPathIndexMap[bt.ID]
 		path := paths[pathIndex]
 		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) &&
+			CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) &&
+			(password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 			ret = append(ret, path)
 		}
 	}
@@ -1295,7 +1298,8 @@ func FilterBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, bl
 func FilterSearchDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess, docs []map[string]string) (ret []map[string]string) {
 	ret = []map[string]string{}
 
-	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
 
 	for _, doc := range docs {
 		box, docPath := doc["box"], doc["path"]
@@ -1303,7 +1307,8 @@ func FilterSearchDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess
 			continue
 		}
 		passwordID, password := GetPathPasswordByPublishAccess(box, docPath, publishAccess)
-		if CheckPathAccessableByPublishIgnore(box, docPath, publishIgnore) &&
+		if CheckPathAccessableByPublishIgnore(box, docPath, publishInvisible) &&
+			CheckPathAccessableByPublishIgnore(box, docPath, publishDisable) &&
 			(password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 			ret = append(ret, doc)
 		}
@@ -1380,7 +1385,8 @@ func FilterGraphByPublishAccess(c *gin.Context, publishAccess PublishAccess, nod
 	retNodes = []*GraphNode{}
 	retLinks = []*GraphLink{}
 
-	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
 	nodeByID := make(map[string]*GraphNode, len(nodes))
 	virtualNodeIDs := map[string]bool{}
 	nodeBaseSizes := make(map[string]float64, len(nodes))
@@ -1389,7 +1395,8 @@ func FilterGraphByPublishAccess(c *gin.Context, publishAccess PublishAccess, nod
 			nodeByID[node.ID] = node
 			virtualNodeIDs[node.ID] = true
 		} else {
-			if node.Box == "" || node.Path == "" || !CheckPathAccessableByPublishIgnore(node.Box, node.Path, publishIgnore) {
+			if node.Box == "" || node.Path == "" || !CheckPathAccessableByPublishIgnore(node.Box, node.Path, publishInvisible) ||
+				!CheckPathAccessableByPublishIgnore(node.Box, node.Path, publishDisable) {
 				continue
 			}
 			passwordID, password := GetPathPasswordByPublishAccess(node.Box, node.Path, publishAccess)
@@ -1514,12 +1521,15 @@ func FilterLocalStorageByPublishAccess(localStorage map[string]any) (ret map[str
 }
 
 func FilterAssetContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetContent []*AssetContent) (ret []*AssetContent) {
-	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
 	validAssets := []string{}
 	bts := treenode.GetBlockTreesByType("d")
 	for _, bt := range bts {
 		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) &&
+			CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) &&
+			(password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 			assets, err := DocAssets(bt.ID, false)
 			if err == nil {
 				validAssets = append(validAssets, assets...)
@@ -1543,12 +1553,15 @@ func FilterAssetContentByPublishAccess(c *gin.Context, publishAccess PublishAcce
 
 func FilterRecentDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess, recentDocs []*RecentDoc) (ret []*RecentDoc) {
 	ret = []*RecentDoc{}
-	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
 	for _, recentDoc := range recentDocs {
 		bt := treenode.GetBlockTree(recentDoc.RootID)
 		if bt != nil {
 			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-			if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (passwordID == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+			if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) &&
+				CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) &&
+				(passwordID == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 				ret = append(ret, recentDoc)
 			}
 		}
@@ -1558,7 +1571,8 @@ func FilterRecentDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess
 
 func FilterCriteriaByPublishAccess(c *gin.Context, publishAccess PublishAccess, criteria []*Criterion) (ret []*Criterion) {
 	ret = []*Criterion{}
-	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
 	// IDPath 元素可能是笔记本 ID、文档 ID，或 "笔记本ID/文档ID[.sy]" 路径串，这里统一解析出文档 ID
 	blockIDs := map[string]struct{}{}
 	for _, criterion := range criteria {
@@ -1597,7 +1611,9 @@ func FilterCriteriaByPublishAccess(c *gin.Context, publishAccess PublishAccess, 
 				break
 			}
 			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-			if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) || (passwordID != "" && !CheckPublishAuthCookie(c, passwordID, password)) {
+			if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) ||
+				!CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) ||
+				(passwordID != "" && !CheckPublishAuthCookie(c, passwordID, password)) {
 				accessible = false
 				break
 			}

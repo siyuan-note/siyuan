@@ -22,10 +22,11 @@ func TestSetNewItemTemplates(t *testing.T) {
 	templateID := ast.NewNodeID()
 	config := &NewItemTemplatesConfig{
 		Templates: []*NewItemTemplate{{
-			ID:         templateID,
-			Name:       " Document ",
-			Icon:       " 1f4c4 ",
-			TargetType: NewItemTargetDocument,
+			ID:             templateID,
+			Name:           " Document ",
+			Icon:           " 1f4c4 ",
+			TargetType:     NewItemTargetDocument,
+			HideInFileTree: true,
 			FieldValues: map[string]*NewItemFieldValue{
 				textKey.ID: {Mode: NewItemFieldValueStatic, Value: &Value{
 					ID: ast.NewNodeID(), KeyID: "old", BlockID: "old", Type: KeyTypeNumber, Text: &ValueText{Content: "value"},
@@ -44,6 +45,9 @@ func TestSetNewItemTemplates(t *testing.T) {
 	}
 	if "1f4c4" != got.Icon {
 		t.Fatalf("unexpected normalized icon: %q", got.Icon)
+	}
+	if !got.HideInFileTree {
+		t.Fatal("document template should preserve the file tree visibility setting")
 	}
 	value := got.FieldValues[textKey.ID].Value
 	if KeyTypeText != value.Type || "" != value.ID || "" != value.KeyID || "" != value.BlockID {
@@ -122,13 +126,16 @@ func TestEmptyNewItemTemplatesUseVirtualDefault(t *testing.T) {
 func TestDetachedNewItemTemplateDropsIcon(t *testing.T) {
 	attrView := &AttributeView{Spec: CurrentSpec, ID: ast.NewNodeID()}
 	config := &NewItemTemplatesConfig{Templates: []*NewItemTemplate{{
-		ID: ast.NewNodeID(), Name: "Detached", Icon: "1f4c4", TargetType: NewItemTargetDetached,
+		ID: ast.NewNodeID(), Name: "Detached", Icon: "1f4c4", TargetType: NewItemTargetDetached, HideInFileTree: true,
 	}}}
 	if err := attrView.SetNewItemTemplates(config); nil != err {
 		t.Fatalf("set detached new item template failed: %s", err)
 	}
 	if "" != attrView.NewItemTemplates[0].Icon {
 		t.Fatalf("detached template icon should be empty: %q", attrView.NewItemTemplates[0].Icon)
+	}
+	if attrView.NewItemTemplates[0].HideInFileTree {
+		t.Fatal("detached template should not preserve the file tree visibility setting")
 	}
 	if "1f4c4" != config.Templates[0].Icon {
 		t.Fatal("input icon was mutated")

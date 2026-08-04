@@ -18,6 +18,14 @@ import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
 import {useShell} from "../util/pathName";
 import {switchSettingPanelSubTab} from "./setting/mount";
+import {isThemeFrontendSupported} from "../util/themeCompatibility";
+import {
+    getBazaarBackendSystemLabels,
+    getBazaarCompatibilityFieldVisibility,
+    getBazaarFundingItems,
+    getBazaarKernelSystemLabels,
+    getBazaarThemeModeLabels,
+} from "../util/bazaarPackage";
 
 /** 集市 Tab 侧栏 / 全局搜索索引文案 */
 export const collectBazaarTabSearchStrings = (): string[] => [
@@ -296,12 +304,17 @@ export const bazaar = {
             return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="ft__primary fn__pointer">${escapeHtml(funding)}</span>`;
         }
     },
-    _genIncompatibleChipHTML(item: IBazaarItem, source: "installed" | "bazaar") {
-        const incompatible = source === "installed" ? item.installedIncompatible : item.bazaarIncompatible;
+    _genIncompatibleChipHTML(item: IBazaarItem, source: "installed" | "bazaar", bazaarType: TBazaarType) {
+        const incompatible = bazaarType === "themes" ?
+            !isThemeFrontendSupported(item.frontends, getFrontend()) :
+            source === "installed" ? item.installedIncompatible : item.bazaarIncompatible;
         if (!incompatible) {
             return "";
         }
-        return `<span class="fn__space"></span><span data-position="north" class="fn__flex-center ariaLabel b3-chip b3-chip--error b3-chip--small" aria-label="${window.siyuan.languages.incompatiblePluginTip}">${window.siyuan.languages.incompatible}</span>`;
+        const tooltip = bazaarType === "themes" ? "" :
+            ` data-position="north" aria-label="${window.siyuan.languages.incompatiblePluginTip}"`;
+        const tooltipClass = bazaarType === "themes" ? "" : " ariaLabel";
+        return `<span class="fn__space"></span><span${tooltip} class="fn__flex-center${tooltipClass} b3-chip b3-chip--error b3-chip--small">${window.siyuan.languages.incompatible}</span>`;
     },
     _getDetailKey(bazaarType: TBazaarType, packageName: string) {
         return `${bazaarType}:${packageName}`;
@@ -368,28 +381,12 @@ export const bazaar = {
         });
         return Array.from(labels);
     },
-    _getSystemLabels(item: IBazaarItem) {
-        const systems = [...(item.backends || []), ...(item.kernels || [])];
-        if (!systems.length || systems.includes("all")) {
-            return [window.siyuan.languages.all];
-        }
-        const labels: Record<string, string> = {
-            windows: "Windows",
-            linux: "Linux",
-            darwin: "macOS",
-            android: "Android",
-            ios: "iOS",
-            harmony: "HarmonyOS",
-            docker: "Docker",
-        };
-        return Array.from(new Set(systems.map((system) => labels[system] || system)));
-    },
     _genReadmeActionsHTML(bazaarType: TBazaarType, installed?: IBazaarItem, available?: IBazaarItem) {
         if (!installed) {
             if (!available || available.installed) {
                 return "";
             }
-            return `<button ${available.disallowInstall ? `disabled aria-label="${bazaar._genInstallButtonAriaLabel(available)}" data-position="north"` : ""} class="b3-button ariaLabel fn__block" data-type="install">${window.siyuan.languages.download}</button>`;
+            return `<button ${available.disallowInstall ? `disabled aria-label="${bazaar._genInstallButtonAriaLabel(available, bazaarType)}" data-position="north"` : ""} class="b3-button ariaLabel fn__block" data-type="install">${window.siyuan.languages.download}</button>`;
         }
 
         let primaryAction = "";
@@ -430,7 +427,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 <span class="b3-card__author">${escapeHtml(item.author)}</span>
             </span>
             ${bazaar._genFundingHTML(item.preferredFunding)}
-            ${bazaar._genIncompatibleChipHTML(item, "bazaar")}
+            ${bazaar._genIncompatibleChipHTML(item, "bazaar", bazaarType)}
             <span class="fn__space--small"></span>
             <div class="fn__flex-1"></div>
             <div class="fn__space--small${showSwitch ? "" : " fn__none"}"></div>
@@ -441,43 +438,45 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 <svg><use xlink:href="#iconClose"></use></svg>
             </span>
             <div class="fn__space--small${item.outdated ? "" : " fn__none"}"></div>
-            ${bazaar._genUpdateButtonHTML(item)}
+            ${bazaar._genUpdateButtonHTML(item, bazaarType)}
         </div>
     </div>
 </div>`;
     },
-    _genInstallButtonAriaLabel(item: IBazaarItem) {
+    _genInstallButtonAriaLabel(item: IBazaarItem, bazaarType: TBazaarType) {
         if (!item.disallowInstall) {
             return window.siyuan.languages.download;
         }
         if (item.bazaarIncompatible) {
-            return window.siyuan.languages.incompatiblePluginTip;
+            return bazaarType === "themes" ? window.siyuan.languages.incompatible :
+                window.siyuan.languages.incompatiblePluginTip;
         }
         return window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion || "");
     },
-    _genUpdateButtonAriaLabel(item: IBazaarItem) {
+    _genUpdateButtonAriaLabel(item: IBazaarItem, bazaarType: TBazaarType) {
         if (!item.disallowUpdate) {
             return window.siyuan.languages.update;
         }
         if (item.bazaarIncompatible) {
-            return window.siyuan.languages.incompatiblePluginTip;
+            return bazaarType === "themes" ? window.siyuan.languages.incompatible :
+                window.siyuan.languages.incompatiblePluginTip;
         }
         return window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.updateRequiredMinAppVer || "");
     },
-    _genUpdateButtonHTML(item?: IBazaarItem, reserveSpace = false) {
+    _genUpdateButtonHTML(item: IBazaarItem | undefined, bazaarType: TBazaarType, reserveSpace = false) {
         if (!item?.outdated && !reserveSpace) {
             return "";
         }
-        const ariaLabel = item ? this._genUpdateButtonAriaLabel(item) : window.siyuan.languages.update;
+        const ariaLabel = item ? this._genUpdateButtonAriaLabel(item, bazaarType) : window.siyuan.languages.update;
         return `<span data-position="north" data-type="install-t" ${item?.disallowUpdate ? "disabled" : ""} aria-label="${ariaLabel}" class="ariaLabel block__icon block__icon--show${item?.outdated ? "" : " fn__hidden"}">
     <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
 </span>`;
     },
-    _genReadmeUpdateButtonHTML(item?: IBazaarItem, reserveSpace = false) {
+    _genReadmeUpdateButtonHTML(item: IBazaarItem | undefined, bazaarType: TBazaarType, reserveSpace = false) {
         if (!item?.outdated && !reserveSpace) {
             return "";
         }
-        const ariaLabel = item ? this._genUpdateButtonAriaLabel(item) : window.siyuan.languages.update;
+        const ariaLabel = item ? this._genUpdateButtonAriaLabel(item, bazaarType) : window.siyuan.languages.update;
         return `<div data-type="readme-update-slot" class="${item?.outdated ? "" : "fn__none"}">
     ${reserveSpace ? '<div class="fn__hr"></div>' : ""}
     <button ${item?.disallowUpdate ? `disabled aria-label="${ariaLabel}" data-position="north"` : ""} class="b3-button ariaLabel" style="width: 168px" data-type="install-t">${window.siyuan.languages.update}</button>
@@ -495,12 +494,12 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
-        ${bazaar._genIncompatibleChipHTML(available, "bazaar")}
+        ${bazaar._genIncompatibleChipHTML(available, "bazaar", bazaarType)}
         ${bazaar._genFundingHTML(installed.preferredFunding)}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
-        ${bazaar._genUpdateButtonHTML(available)}
+        ${bazaar._genUpdateButtonHTML(available, bazaarType)}
     </div>
 </div>`;
     },
@@ -584,7 +583,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 return;
             }
             const available = bazaar._getUpdatedItem(type, name)?.available;
-            slot.outerHTML = bazaar._genUpdateButtonHTML(available, true);
+            slot.outerHTML = bazaar._genUpdateButtonHTML(available, type, true);
         });
         const sideElement = bazaar.element.querySelector("#configBazaarReadme.config__view--show .item__side");
         if (sideElement?.getAttribute("data-from") === "downloaded") {
@@ -593,7 +592,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             const slot = sideElement.querySelector('[data-type="readme-update-slot"]');
             const available = type && name ? bazaar._getUpdatedItem(type, name)?.available : undefined;
             if (slot) {
-                slot.outerHTML = bazaar._genReadmeUpdateButtonHTML(available, true);
+                slot.outerHTML = bazaar._genReadmeUpdateButtonHTML(available, type, true);
                 sideElement.setAttribute("data-progress-id", available?.repoURL || sideElement.getAttribute("data-repourl") || "");
             }
         }
@@ -660,8 +659,8 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
-        ${bazaar._genUpdateButtonHTML(available, true)}
-        ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed")}
+        ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
+        ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed", bazaarType)}
         ${bazaar._genFundingHTML(bazaarItem.preferredFunding)}
         ${hasSetting ? `<span data-position="north" class="ariaLabel block__icon block__icon--show${window.siyuan.config.bazaar.petalDisabled ? " fn__none" : ""}" data-type="setting" aria-label="${window.siyuan.languages.config}">
             <svg><use xlink:href="#iconSettings"></use></svg>
@@ -768,8 +767,18 @@ type="checkbox">
         bazaar._setPackageDetail(bazaarType, data.name, {installed, available});
         const urls = resourceData.repoURL.split("/");
         urls.pop();
-        const frontendLabels = bazaar._getFrontendLabels(compatibilityData.frontends);
-        const systemLabels = bazaar._getSystemLabels(compatibilityData);
+        const compatibilityFieldVisibility = getBazaarCompatibilityFieldVisibility(bazaarType);
+        const frontendLabels = compatibilityFieldVisibility.frontends ?
+            bazaar._getFrontendLabels(compatibilityData.frontends) : [];
+        const systemLabels = compatibilityFieldVisibility.systems ?
+            getBazaarBackendSystemLabels(compatibilityData.backends, window.siyuan.languages.all) : [];
+        const kernelSystemLabels = compatibilityFieldVisibility.kernelSystems ?
+            getBazaarKernelSystemLabels(compatibilityData.kernels, window.siyuan.languages.all) : [];
+        const modeLabels = compatibilityFieldVisibility.modes ? getBazaarThemeModeLabels(
+            compatibilityData.modes,
+            window.siyuan.languages.themeLight,
+            window.siyuan.languages.themeDark,
+        ) : [];
         const installSection = installed ? `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarInstallInfo}</div>
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.version, `v${installed.version}`)}
@@ -779,9 +788,11 @@ type="checkbox">
         const compatibilitySection = `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarCompatibility}</div>
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarMinAppVersion, compatibilityData.minAppVersion ? `v${compatibilityData.minAppVersion}` : "-")}
-    ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPlatforms, bazaar._genReadmeChips(frontendLabels, true), true)}
-    ${bazaarType === "plugins" ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarSystems, bazaar._genReadmeChips(systemLabels, true), true) : ""}
-    ${bazaarType === "plugins" ? bazaar._genReadmeMetaRow(window.siyuan.languages.publishService, compatibilityData.disabledInPublish ? window.siyuan.languages.disable : window.siyuan.languages.enable) : ""}
+    ${compatibilityFieldVisibility.frontends ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPlatforms, bazaar._genReadmeChips(frontendLabels, true), true) : ""}
+    ${compatibilityFieldVisibility.systems ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarSystems, bazaar._genReadmeChips(systemLabels, true), true) : ""}
+    ${kernelSystemLabels.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarKernelPlugin, bazaar._genReadmeChips(kernelSystemLabels, true), true) : ""}
+    ${compatibilityFieldVisibility.disabledInPublish ? bazaar._genReadmeMetaRow(window.siyuan.languages.publishService, compatibilityData.disabledInPublish ? window.siyuan.languages.disable : window.siyuan.languages.enable) : ""}
+    ${compatibilityFieldVisibility.modes ? bazaar._genReadmeMetaRow(window.siyuan.languages.appearanceMode, modeLabels.length ? bazaar._genReadmeChips(modeLabels) : "-", true) : ""}
 </section>`;
         const marketSection = available ? `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarMarketInfo}</div>
@@ -804,11 +815,15 @@ type="checkbox">
     <span class="fn__space--small"></span>
     ${formatCount(resourceData.downloads)}
 </div>` : "";
+        const fundingItems = getBazaarFundingItems(resourceData.funding);
+        if (fundingItems.length === 0 && resourceData.preferredFunding) {
+            fundingItems.push(resourceData.preferredFunding);
+        }
         const packageSection = `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarPackageInfo}</div>
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPackageName, displayData.name)}
     ${displayData.author ? bazaar._genReadmeMetaRow(window.siyuan.languages.author, `<a href="${escapeAttr(urls.join("/"))}" target="_blank" title="Creator">${escapeHtml(displayData.author)}</a>`, true) : ""}
-    ${resourceData.preferredFunding ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarFunding, bazaar._genReadmeFundingHTML(resourceData.preferredFunding), true) : ""}
+    ${fundingItems.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarFunding, fundingItems.map((item) => bazaar._genReadmeFundingHTML(item)).join("<br>"), true) : ""}
 </section>`;
         readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
     <div class="item__header fn__pointer" data-type="goBack">
@@ -839,7 +854,7 @@ type="checkbox">
     </div>
     <div class="item__actions">
         ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
-        ${bazaar._genReadmeUpdateButtonHTML(available, Boolean(installed))}
+        ${bazaar._genReadmeUpdateButtonHTML(available, bazaarType, Boolean(installed))}
     </div>
 </div>
 <div class="item__main">
@@ -1169,7 +1184,7 @@ type="checkbox">
                 });
                 break;
             case "theme":
-                fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
+                fetchPost("/api/bazaar/getBazaarTheme", {frontend: getFrontend()}, response => {
                     bazaar._onBazaar(response, "themes");
                     bazaar._data.themes = response.data.packages;
                 });
@@ -1602,7 +1617,7 @@ type="checkbox">
                             bazaar._data.widgets = response.data.packages;
                         });
                     } else if (type === "theme") {
-                        fetchPost("/api/bazaar/getBazaarTheme", {keyword}, response => {
+                        fetchPost("/api/bazaar/getBazaarTheme", {frontend: getFrontend(), keyword}, response => {
                             bazaar._onBazaar(response, "themes");
                             bazaar._data.themes = response.data.packages;
                         });

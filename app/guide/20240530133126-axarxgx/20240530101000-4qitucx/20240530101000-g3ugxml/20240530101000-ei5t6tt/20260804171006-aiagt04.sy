@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20260804205607"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -714,7 +714,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-qfoixg9",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -728,7 +728,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170055-a7wg3um",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -761,6 +761,21 @@
 				{
 					"Type": "NodeText",
 					"Data": " で stdio または HTTP サービスを追加し、コマンド、引数、URL、HTTP ヘッダー、タイムアウトを設定して、接続状態とツール数を確認できます。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "ここで設定するのは、エージェントが呼び出す外部 MCP サービスです。外部 MCP クライアントを SiYuan に接続する方法については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804223003-mcpsv04",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "MCP サービス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。"
 				}
 			]
 		},
@@ -769,7 +784,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170056-7d7fak1",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -792,7 +807,18 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で管理できます。外部 MCP ツールはローカルデータの送信、外部システムの変更、料金の発生を伴う場合があるため、確認カードの影響を確認してください。"
+					"Data": " で管理できます。詳しくは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804224003-secvr04",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "シークレットと変数"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。外部 MCP ツールはローカルデータの送信、外部システムの変更、料金の発生を伴う場合があるため、確認カードの影響を確認してください。"
 				}
 			]
 		},

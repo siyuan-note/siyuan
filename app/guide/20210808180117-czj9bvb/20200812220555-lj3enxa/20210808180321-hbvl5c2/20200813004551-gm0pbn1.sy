@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -3752,7 +3752,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -3767,7 +3767,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -3791,7 +3791,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -3842,7 +3842,7 @@
 					"Children": [
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "聚焦面包屑"}]},
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "​"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Alt"}, {"Type": "NodeText", "Data": "​+"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Shift"}, {"Type": "NodeText", "Data": "​+"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "B"}, {"Type": "NodeText", "Data": "​/ "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "⌥⇧B"}, {"Type": "NodeText", "Data": "​"}]},
-						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "聚焦后使用 ← / → 切换面包屑，使用 ↓ / Enter 打开下级块菜单，使用 Esc 返回编辑器"}]}
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "聚焦后使用 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "←"}, {"Type": "NodeText", "Data": " / "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "→"}, {"Type": "NodeText", "Data": " 切换面包屑，使用 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "↓"}, {"Type": "NodeText", "Data": " / "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "回车"}, {"Type": "NodeText", "Data": " 打开下级块菜单，使用 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Esc"}, {"Type": "NodeText", "Data": " 返回编辑器"}]}
 					]
 				},
 				{

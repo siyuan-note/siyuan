@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20260804205607"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -726,7 +726,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-1c4wqjk",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -740,7 +740,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170055-xr887qs",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -773,6 +773,21 @@
 				{
 					"Type": "NodeText",
 					"Data": ", configure commands, arguments, URLs, HTTP headers, and timeouts, and review connection status and tool count."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " This setting is for external MCP services called by the agent. To connect an external MCP client to SiYuan, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804223002-mcpsv03",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "MCP Service"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},
@@ -781,7 +796,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170056-8tp1qi0",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -800,6 +815,17 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Secrets and Variables"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". For details, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804224002-secvr03",
+					"TextMarkBlockRefSubtype": "s",
 					"TextMarkTextContent": "Secrets and Variables"
 				},
 				{

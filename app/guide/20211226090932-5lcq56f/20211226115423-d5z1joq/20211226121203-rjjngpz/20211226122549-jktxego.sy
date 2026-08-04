@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -3746,7 +3746,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -3761,7 +3761,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -3781,7 +3781,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -3832,7 +3832,7 @@
 					"Children": [
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "聚焦麵包屑"}]},
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "​"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Alt"}, {"Type": "NodeText", "Data": "​+"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Shift"}, {"Type": "NodeText", "Data": "​+"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "B"}, {"Type": "NodeText", "Data": "​/ "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "⌥⇧B"}, {"Type": "NodeText", "Data": "​"}]},
-						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "聚焦後使用 ← / → 切換麵包屑，使用 ↓ / Enter 開啟下級區塊選單，使用 Esc 返回編輯器"}]}
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "聚焦後使用 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "←"}, {"Type": "NodeText", "Data": " / "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "→"}, {"Type": "NodeText", "Data": " 切換麵包屑，使用 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "↓"}, {"Type": "NodeText", "Data": " / "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "回車"}, {"Type": "NodeText", "Data": " 開啟下級區塊選單，使用 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Esc"}, {"Type": "NodeText", "Data": " 返回編輯器"}]}
 					]
 				},
 				{
@@ -9188,7 +9188,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-8191vgw",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -9208,7 +9208,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-v6as45b",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -9378,7 +9378,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "回車"
 								},
 								{
 									"Type": "NodeText",

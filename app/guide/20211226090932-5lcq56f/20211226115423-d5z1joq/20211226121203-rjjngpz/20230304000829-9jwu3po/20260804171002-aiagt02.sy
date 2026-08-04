@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20260804205607"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -389,7 +389,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-1z57i1s",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -403,7 +403,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-98fzzbm",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -413,7 +413,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkTextContent": "回車"
 				},
 				{
 					"Type": "NodeText",
@@ -431,7 +431,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkTextContent": "回車"
 				},
 				{
 					"Type": "NodeText",
@@ -726,7 +726,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-vppxnqj",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -740,7 +740,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170055-yibcbj8",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -773,6 +773,21 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中可以新增 stdio 或 HTTP 服務，設定指令、參數、位址、HTTP 標頭和逾時時間，並檢視連線狀態和工具數量。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "這裡設定的是供智能體呼叫的外部 MCP 服務；如果要讓外部 MCP 用戶端連線思源，請參閱 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804223001-mcpsv02",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "MCP 服務"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},
@@ -781,7 +796,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170056-84olaaf",
-				"updated": "20260804180000"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -800,11 +815,22 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "金鑰與變數"
+					"TextMarkTextContent": "金鑰和變數"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中統一管理。呼叫外部 MCP 工具可能傳送本機資料、修改外部系統或產生費用，應根據確認卡片核對具體影響。"
+					"Data": " 中統一管理，具體說明請參閱 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804224001-secvr02",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "金鑰和變數"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。呼叫外部 MCP 工具可能傳送本機資料、修改外部系統或產生費用，應根據確認卡片核對具體影響。"
 				}
 			]
 		},

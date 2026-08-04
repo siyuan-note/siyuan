@@ -7,7 +7,7 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -267,7 +267,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194439-dpit548",
-				"updated": "20260614194439"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -418,12 +418,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-vi1i5u5",
-				"updated": "20260614194439"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "進入複習後，介面會逐張展示待複習的卡片。每張卡片先展示問題面，點擊「顯示答案」或按空格/Enter 展示答案面，然後根據自己的掌握程度選擇評級："
+					"Data": "進入複習後，介面會逐張展示待複習的卡片。每張卡片先展示問題面，點擊「顯示答案」或按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回車"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 展示答案面，然後根據自己的掌握程度選擇評級："
 				}
 			]
 		},
@@ -742,12 +760,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-mun0m8m",
-				"updated": "20260614194439"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "展示答案後，空格和 Enter 也可直接觸發「良好」評級。評級直接影響卡片的複習間隔——高評級延長下次複習時間，低評級縮短下次複習時間。系統使用 FSRS 演算法根據歷史評級資料自動最佳化每個人的複習安排。"
+					"Data": "展示答案後，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回車"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 也可直接觸發「良好」評級。評級直接影響卡片的複習間隔——高評級延長下次複習時間，低評級縮短下次複習時間。系統使用 FSRS 演算法根據歷史評級資料自動最佳化每個人的複習安排。"
 				}
 			]
 		},

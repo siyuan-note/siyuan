@@ -7,7 +7,7 @@
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -263,7 +263,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194307-emze915",
-				"updated": "20260614194307"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -414,12 +414,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194307-b74gu9u",
-				"updated": "20260614194307"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "During review, the interface displays pending cards one by one. Each card first shows the question side. Click \"Show Answer\" or press Space/Enter to reveal the answer side, then rate your recall:"
+					"Data": "During review, the interface displays pending cards one by one. Each card first shows the question side. Click \"Show Answer\" or press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reveal the answer side, then rate your recall:"
 				}
 			]
 		},
@@ -738,12 +756,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194307-s247j6d",
-				"updated": "20260614194307"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After revealing the answer, Space and Enter also trigger the \"Good\" rating. Ratings directly affect the review interval for each card — higher ratings extend the time before the next review, and lower ratings shorten it. The system uses the FSRS algorithm to automatically optimize each user's review schedule based on their rating history."
+					"Data": "After revealing the answer, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " also trigger the \"Good\" rating. Ratings directly affect the review interval for each card — higher ratings extend the time before the next review, and lower ratings shorten it. The system uses the FSRS algorithm to automatically optimize each user's review schedule based on their rating history."
 				}
 			]
 		},

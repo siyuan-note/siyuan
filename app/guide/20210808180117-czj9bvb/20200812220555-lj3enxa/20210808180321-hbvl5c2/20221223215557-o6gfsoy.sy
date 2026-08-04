@@ -7,7 +7,7 @@
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
 		"type": "doc",
-		"updated": "20260803163440"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -267,7 +267,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194151-6msabwl",
-				"updated": "20260614194151"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -418,12 +418,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194151-0bh9rx5",
-				"updated": "20260614194151"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "进入复习后，界面会逐张展示待复习的卡片。每张卡片先展示问题面，点击「显示答案」或按空格/回车展示答案面，然后根据自己的掌握程度选择评级："
+					"Data": "进入复习后，界面会逐张展示待复习的卡片。每张卡片先展示问题面，点击「显示答案」或按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 展示答案面，然后根据自己的掌握程度选择评级："
 				}
 			]
 		},
@@ -742,12 +760,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194151-gu6khf3",
-				"updated": "20260614194151"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "展示答案后，空格和回车也可直接触发「良好」评级。评级直接影响卡片的复习间隔——高评级延长下次复习时间，低评级缩短下次复习时间。系统使用 FSRS 算法根据历史评级数据自动优化每个人的复习安排。"
+					"Data": "展示答案后，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 也可直接触发「良好」评级。评级直接影响卡片的复习间隔——高评级延长下次复习时间，低评级缩短下次复习时间。系统使用 FSRS 算法根据历史评级数据自动优化每个人的复习安排。"
 				}
 			]
 		},

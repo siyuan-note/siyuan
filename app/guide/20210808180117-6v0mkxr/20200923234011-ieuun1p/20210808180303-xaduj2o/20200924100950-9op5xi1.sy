@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -3754,7 +3754,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -3773,7 +3773,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -3793,7 +3793,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20260803171606"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -3844,7 +3844,7 @@
 					"Children": [
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "Focus breadcrumb"}]},
 						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "​"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Alt"}, {"Type": "NodeText", "Data": "​+"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Shift"}, {"Type": "NodeText", "Data": "​+"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "B"}, {"Type": "NodeText", "Data": "​/ "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "⌥⇧B"}, {"Type": "NodeText", "Data": "​"}]},
-						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "After focusing, use ← / → to move between breadcrumbs, ↓ / Enter to open the child block menu, and Esc to return to the editor"}]}
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "After focusing, use "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "←"}, {"Type": "NodeText", "Data": " / "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "→"}, {"Type": "NodeText", "Data": " to move between breadcrumbs, "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "↓"}, {"Type": "NodeText", "Data": " / "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Enter"}, {"Type": "NodeText", "Data": " to open the child block menu, and "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Esc"}, {"Type": "NodeText", "Data": " to return to the editor"}]}
 					]
 				},
 				{

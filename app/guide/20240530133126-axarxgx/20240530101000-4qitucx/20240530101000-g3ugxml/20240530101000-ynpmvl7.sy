@@ -8,7 +8,7 @@
 		"id": "20240530101000-ynpmvl7",
 		"title": "フラッシュカード",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260804230000"
 	},
 	"Children": [
 		{
@@ -268,7 +268,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194342-fwtjfyw",
-				"updated": "20260614194342"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -419,12 +419,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194342-4coyfp4",
-				"updated": "20260614194342"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "復習を開始すると、画面に保留中のカードが1枚ずつ表示されます。各カードは最初に問題面を表示し、「答えを表示」をクリックするかスペース/Enterで答え面を表示して、自分の理解度に応じて評価します："
+					"Data": "復習を開始すると、画面に保留中のカードが1枚ずつ表示されます。各カードは最初に問題面を表示し、「答えを表示」をクリックするか "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スペース"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で答え面を表示して、自分の理解度に応じて評価します："
 				}
 			]
 		},
@@ -743,12 +761,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194342-ulwyhdw",
-				"updated": "20260614194342"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "答えを表示した後、スペースとEnterでも「良い」評価を直接トリガーできます。評価はカードの復習間隔に直接影響します——高い評価は次回復習までの時間を延長し、低い評価は短縮します。システムはFSRSアルゴリズムを使用して、各ユーザーの評価履歴に基づいて復習スケジュールを自動的に最適化します。"
+					"Data": "答えを表示した後、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スペース"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でも「良い」評価を直接トリガーできます。評価はカードの復習間隔に直接影響します——高い評価は次回復習までの時間を延長し、低い評価は短縮します。システムは FSRS アルゴリズムを使用して、各ユーザーの評価履歴に基づいて復習スケジュールを自動的に最適化します。"
 				}
 			]
 		},

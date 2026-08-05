@@ -389,6 +389,7 @@ func TestRestoreNotebookCryptoConfigFromExistingBackup(t *testing.T) {
 	}
 	Conf = NewAppConf()
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	Conf.Sync = conf.NewSync()
 	defer func() {
 		Conf = originalConf
 		util.DataDir = originalDataDir

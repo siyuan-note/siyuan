@@ -121,7 +121,7 @@ func flushTx(tx *Transaction) {
 	if txErr := performTx(tx); nil != txErr {
 		switch txErr.code {
 		case TxErrCodeSkipTx:
-			// 操作已跳过，提示消息已在具体函数中 PushMsg，不弹状态异常
+			// 操作已跳过，不弹状态异常
 			return
 		case TxErrCodeBlockNotFound, TxErrCodePushMsg:
 			pushMsg := txErr.msg
@@ -187,7 +187,7 @@ const (
 	TxErrCodeWriteTree       = 2
 	TxErrHandleAttributeView = 3
 	TxErrCodePushMsg         = 4
-	TxErrCodeSkipTx          = 5 // 操作被跳过（如跨加密边界移动），已 PushMsg 提示，不弹状态异常
+	TxErrCodeSkipTx          = 5 // 操作被跳过，不弹状态异常
 )
 
 type TxErr struct {
@@ -605,7 +605,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	targetParentID := operation.ParentID
 	if "" != targetPreviousID {
 		if id == targetPreviousID {
-			return
+			return &TxErr{code: TxErrCodeSkipTx}
 		}
 
 		var targetTree *parse.Tree
@@ -644,11 +644,11 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 
 		if isMovingFoldHeadingIntoSelf(targetNode, headingChildren) {
-			return
+			return &TxErr{code: TxErrCodeSkipTx}
 		}
 
 		if isMovingParentIntoChild(srcNode, targetNode) {
-			return
+			return &TxErr{code: TxErrCodeSkipTx}
 		}
 
 		if 0 < len(headingChildren) {
@@ -684,7 +684,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 
 	if id == targetParentID {
-		return
+		return &TxErr{code: TxErrCodeSkipTx}
 	}
 
 	targetTree, err := tx.loadTree(targetParentID)
@@ -709,11 +709,11 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 
 	if isMovingFoldHeadingIntoSelf(targetNode, headingChildren) {
-		return
+		return &TxErr{code: TxErrCodeSkipTx}
 	}
 
 	if isMovingParentIntoChild(srcNode, targetNode) {
-		return
+		return &TxErr{code: TxErrCodeSkipTx}
 	}
 
 	tx.markListItemFoldCandidate(srcParent, srcTree)

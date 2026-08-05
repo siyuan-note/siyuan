@@ -41,6 +41,24 @@ func TestMovingFoldHeadingIntoDescendantContainer(t *testing.T) {
 	}
 }
 
+func TestMovingParentIntoChild(t *testing.T) {
+	source := &ast.Node{Type: ast.NodeListItem, ID: "source"}
+	child := &ast.Node{Type: ast.NodeList, ID: "child"}
+	grandchild := &ast.Node{Type: ast.NodeListItem, ID: "grandchild"}
+	source.AppendChild(child)
+	child.AppendChild(grandchild)
+
+	if !isMovingParentIntoChild(source, grandchild) {
+		t.Fatal("moving a parent block into a descendant should be rejected")
+	}
+	if isMovingParentIntoChild(source, source) {
+		t.Fatal("moving a block relative to itself is handled separately")
+	}
+	if isMovingParentIntoChild(source, &ast.Node{Type: ast.NodeParagraph, ID: "unrelated"}) {
+		t.Fatal("moving a block next to an unrelated block should be allowed")
+	}
+}
+
 func TestInsertOuterSuperBlockBeforeTargetWrapper(t *testing.T) {
 	const (
 		sourceID = "20260726000000-source0"

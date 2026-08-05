@@ -197,11 +197,19 @@
 
     .b3-menu {
       &__title {
+        background-color: transparent;
+        border-bottom: 0;
         box-sizing: border-box;
+        color: var(--b3-theme-on-surface-light);
         height: 56px;
         padding-top: 8px;
         position: relative;
         touch-action: none;
+
+        & > .b3-menu__icon,
+        & > .b3-menu__label {
+          color: var(--b3-theme-on-surface-light);
+        }
 
         &::before {
           position: absolute;
@@ -213,6 +221,16 @@
           background-color: var(--b3-theme-on-surface-light);
           content: "";
           opacity: .45;
+        }
+
+        &--root {
+          height: 16px;
+          padding: 0;
+
+          & > .b3-menu__icon,
+          & > .b3-menu__label {
+            display: none;
+          }
         }
       }
 

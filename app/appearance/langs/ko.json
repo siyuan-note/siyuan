@@ -1,4 +1,7 @@
 {
+	"agentPermission": "권한",
+	"agentPermissionConfirm": "매번 확인",
+	"agentPermissionAllowSession": "자동 허용",
 	"oidcVerificationFailed": "OIDC 구성 확인에 실패했습니다",
 	"oidcVerificationSuccess": "OIDC 구성을 확인하고 저장했습니다",
 	"oidcVerificationTip": "열린 브라우저 창에서 OIDC 로그인을 완료하세요. 확인에 성공할 때까지 현재 구성이 계속 적용됩니다",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "맨 아래로 스크롤",
 	"featurePreview": "💡 이 기능은 초기 미리보기 단계로 아직 불안정합니다. 사용 전에 데이터를 백업하세요",
 	"agentSessionSearch": "세션 검색...",
-	"agentWelcomeGreeting": "뭐든 말해 봐, 내가 해결할게",
+	"agentWelcomeGreeting": "뭐든 말해 봐,\n내가 해결할게",
 	"agentExample1": "최근 회의록 검색",
 	"agentExample2": "새 일기 작성",
 	"agentExample3": "프로젝트 관련 노트 찾기",

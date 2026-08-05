@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Izin",
+	"agentPermissionConfirm": "Konfirmasi setiap kali",
+	"agentPermissionAllowSession": "Izinkan otomatis",
 	"oidcVerificationFailed": "Verifikasi konfigurasi OIDC gagal",
 	"oidcVerificationSuccess": "Konfigurasi OIDC telah diverifikasi dan disimpan",
 	"oidcVerificationTip": "Selesaikan login OIDC di jendela browser yang terbuka; konfigurasi saat ini tetap aktif hingga verifikasi berhasil",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "Gulir ke bawah",
 	"featurePreview": "💡 Fitur ini dalam pratinjau awal, masih tidak stabil. Harap cadangkan data Anda sebelum digunakan",
 	"agentSessionSearch": "Cari sesi...",
-	"agentWelcomeGreeting": "Hei, ada rencana apa? Serahkan padaku",
+	"agentWelcomeGreeting": "Hei, ada rencana apa?\nSerahkan padaku",
 	"agentExample1": "Cari catatan rapat terbaru saya",
 	"agentExample2": "Buat jurnal harian baru",
 	"agentExample3": "Temukan catatan terkait proyek",

@@ -60,6 +60,9 @@ export type ISSEResult = {
     type: "snapshot";
     snapshotID: string;
 } | {
+    type: "permission";
+    permissionMode: "confirm" | "allowSession";
+} | {
     type: "frontend_tool_call";
     callID: string;
     name: string;
@@ -271,6 +274,11 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 name: data.name as string,
                 arguments: (data.arguments || {}) as Record<string, unknown>,
                 confirmID: data.confirmID as string,
+            };
+        case "permission":
+            return {
+                type: "permission",
+                permissionMode: data.permissionMode as "confirm" | "allowSession",
             };
         case "tool_result":
             return {

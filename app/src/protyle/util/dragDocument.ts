@@ -2,6 +2,16 @@ export const isSameDragEditor = (targetEditor: Pick<Element, "contains">, source
     return targetEditor.contains(sourceElement);
 };
 
+export const isDragTargetInSource = (sourceElements: Element[], targetElement: Element) => {
+    const sourceIDs = new Set(sourceElements.map(item => item.getAttribute("data-node-id")).filter(Boolean));
+    for (let target = targetElement; target; target = target.parentElement) {
+        if (sourceIDs.has(target.getAttribute("data-node-id"))) {
+            return true;
+        }
+    }
+    return false;
+};
+
 export const uniqueDragIds = (ids: string[]) => {
     return Array.from(new Set(ids.filter(Boolean)));
 };

@@ -27,6 +27,7 @@ func useTestDataDir(t *testing.T) {
 	t.Cleanup(func() {
 		util.DataDir = original
 		sessionLocks.Delete(testSessionID)
+		sessionPermissionControllers.Delete(testSessionID)
 	})
 }
 
@@ -115,6 +116,109 @@ func TestSaveSessionRevisionConflictAndUnknownFields(t *testing.T) {
 	}
 }
 
+func TestSessionPermissionCanBeRevoked(t *testing.T) {
+	useTestDataDir(t)
+	base := map[string]any{
+		"id":          testSessionID,
+		"title":       "base",
+		"createdAt":   int64(1),
+		"updatedAt":   int64(1),
+		"alwaysAllow": true,
+		"entries":     []any{map[string]any{"id": "user-1", "type": "user", "content": "hello"}},
+	}
+	if revision, err := SaveSession(marshalSession(t, base)); err != nil || revision != 1 {
+		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
+	}
+	session, err := GetSession(testSessionID)
+	if err != nil || session["permissionMode"] != AgentPermissionAllowSession {
+		t.Fatalf("legacy session permission was not restored: session=%#v, err=%v", session, err)
+	}
+	controller, err := registerSessionPermissionController(testSessionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unregisterSessionPermissionController(testSessionID, controller)
+	if !controller.allowSession.Load() {
+		t.Fatal("legacy session permission was not registered")
+	}
+	if err = SetSessionPermissionMode(testSessionID, AgentPermissionConfirm); err != nil {
+		t.Fatal(err)
+	}
+	if controller.allowSession.Load() {
+		t.Fatal("active session permission was not revoked")
+	}
+	turn := &agentRuntimeTurn{
+		TurnID:       "20260715120001-permiss",
+		Mode:         "append",
+		UserEntryID:  "user-1",
+		BaseRevision: 1,
+		State:        "running",
+	}
+	if err = beginRuntimeTurn(testSessionID, turn); err != nil {
+		t.Fatal(err)
+	}
+	if err = saveRuntimeTurn(testSessionID, turn); err != nil {
+		t.Fatal(err)
+	}
+	session, err = GetSession(testSessionID)
+	if err != nil || session["permissionMode"] != AgentPermissionConfirm {
+		t.Fatalf("runtime checkpoint restored revoked permission: session=%#v, err=%v", session, err)
+	}
+	if err = SetSessionPermissionMode(testSessionID, AgentPermissionAllowSession); err != nil {
+		t.Fatal(err)
+	}
+	if !controller.allowSession.Load() {
+		t.Fatal("active session permission was not enabled")
+	}
+	if err = SetSessionPermissionMode(testSessionID, "invalid"); err == nil {
+		t.Fatal("invalid session permission mode was accepted")
+	}
+}
+
+func TestConfirmSessionPersistsAlwaysAllowBeforeAccepting(t *testing.T) {
+	useTestDataDir(t)
+	base := map[string]any{
+		"id":        testSessionID,
+		"title":     "base",
+		"createdAt": int64(1),
+		"updatedAt": int64(1),
+		"entries":   []any{map[string]any{"id": "user-1", "type": "user", "content": "hello"}},
+	}
+	if revision, err := SaveSession(marshalSession(t, base)); err != nil || revision != 1 {
+		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
+	}
+	controller, err := registerSessionPermissionController(testSessionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unregisterSessionPermissionController(testSessionID, controller)
+	const confirmID = "test-permission-confirm"
+	ch := make(chan confirmResult, 1)
+	confirmChannelsMu.Lock()
+	confirmChannels[confirmID] = &confirmWaiter{sessionID: testSessionID, ch: ch}
+	confirmChannelsMu.Unlock()
+	t.Cleanup(func() {
+		confirmChannelsMu.Lock()
+		delete(confirmChannels, confirmID)
+		confirmChannelsMu.Unlock()
+	})
+	accepted, err := ConfirmSession(confirmID, true, true)
+	if err != nil || !accepted {
+		t.Fatalf("session confirmation was not accepted: accepted=%v, err=%v", accepted, err)
+	}
+	if !controller.allowSession.Load() {
+		t.Fatal("session permission was not enabled before confirmation returned")
+	}
+	session, err := GetSession(testSessionID)
+	if err != nil || session["permissionMode"] != AgentPermissionAllowSession {
+		t.Fatalf("session permission was not persisted: session=%#v, err=%v", session, err)
+	}
+	result := <-ch
+	if !result.approved || !result.always {
+		t.Fatalf("unexpected confirmation result: %#v", result)
+	}
+}
+
 func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 	useTestDataDir(t)
 	base := map[string]any{
@@ -153,10 +257,10 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 			}},
 		}},
 	}
-	if err := beginRuntimeTurn(testSessionID, turn, false); err != nil {
+	if err := beginRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatal(err)
 	}
-	if err := saveRuntimeTurn(testSessionID, turn, false); err != nil {
+	if err := saveRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatal(err)
 	}
 	uncommitted, err := HasUncommittedTurn(testSessionID)
@@ -221,7 +325,7 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 		t.Fatalf("running runtime turn was committed: revision=%d, err=%v", revision, err)
 	}
 	turn.State = "interrupted"
-	if err := saveRuntimeTurn(testSessionID, turn, false); err != nil {
+	if err := saveRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatal(err)
 	}
 	recovered, err = GetSession(testSessionID)
@@ -281,7 +385,7 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 	if uncommitted, err := HasUncommittedTurn(testSessionID); err != nil || uncommitted {
 		t.Fatalf("committed runtime turn remained active: uncommitted=%v, err=%v", uncommitted, err)
 	}
-	if err := saveRuntimeTurn(testSessionID, turn, false); err != nil {
+	if err := saveRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatalf("late runtime save should be ignored after commit: %v", err)
 	}
 	committed, err = GetSession(testSessionID)
@@ -295,7 +399,7 @@ func TestRuntimeRecoveryCommitDoesNotDuplicateHistory(t *testing.T) {
 	if err := DeleteSession(testSessionID); err != nil {
 		t.Fatal(err)
 	}
-	if err := saveRuntimeTurn(testSessionID, turn, false); err == nil {
+	if err := saveRuntimeTurn(testSessionID, turn); err == nil {
 		t.Fatal("late runtime save recreated a deleted session")
 	}
 	if _, err := os.Stat(filepath.Join(sessionsDir(), testSessionID)); !os.IsNotExist(err) {
@@ -344,11 +448,11 @@ func TestRegenerateRuntimeRecoveryKeepsEditedUserContent(t *testing.T) {
 	turn.UserBlockHTML = new(editedBlockHTML)
 	turn.UserReferences = &emptyReferences
 	turn.UserEditorContext = &EditorContext{ActiveDocID: "new-doc"}
-	if err := beginRuntimeTurn(testSessionID, turn, false); err != nil {
+	if err := beginRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatal(err)
 	}
 	turn.State = "interrupted"
-	if err := saveRuntimeTurn(testSessionID, turn, false); err != nil {
+	if err := saveRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatal(err)
 	}
 
@@ -470,7 +574,7 @@ func TestBeginRuntimeTurnRejectsStaleRevision(t *testing.T) {
 		BaseRevision: 0,
 		State:        "running",
 	}
-	if err := beginRuntimeTurn(testSessionID, turn, false); !errors.Is(err, ErrSessionConflict) {
+	if err := beginRuntimeTurn(testSessionID, turn); !errors.Is(err, ErrSessionConflict) {
 		t.Fatalf("expected stale runtime revision to be rejected: %v", err)
 	}
 	if _, err := os.Stat(runtimePath(testSessionID)); !os.IsNotExist(err) {
@@ -498,7 +602,7 @@ func TestFinalizeOrphanedTurnMakesRuntimeRecoverable(t *testing.T) {
 		State:        "running",
 		DraftContent: "partial response",
 	}
-	if err := beginRuntimeTurn(testSessionID, turn, false); err != nil {
+	if err := beginRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatal(err)
 	}
 	runtimeBefore, err := loadRuntimeState(testSessionID)
@@ -540,10 +644,10 @@ func TestFinalizeOrphanedTurnMakesRuntimeRecoverable(t *testing.T) {
 func TestRuntimeRejectsInvalidSessionID(t *testing.T) {
 	useTestDataDir(t)
 	turn := &agentRuntimeTurn{TurnID: "20260715120004-abcdefg", State: "running"}
-	if err := beginRuntimeTurn("..", turn, false); err == nil {
+	if err := beginRuntimeTurn("..", turn); err == nil {
 		t.Fatal("invalid runtime session id was accepted")
 	}
-	if err := saveRuntimeTurn("..", turn, false); err == nil {
+	if err := saveRuntimeTurn("..", turn); err == nil {
 		t.Fatal("invalid runtime checkpoint session id was accepted")
 	}
 }
@@ -566,7 +670,7 @@ func TestGetSessionRejectsRuntimeWithoutUserAnchor(t *testing.T) {
 		BaseRevision: 1,
 		State:        "running",
 	}
-	if err := beginRuntimeTurn(testSessionID, turn, false); err == nil {
+	if err := beginRuntimeTurn(testSessionID, turn); err == nil {
 		t.Fatal("runtime without a user anchor was started")
 	}
 	turn.State = "interrupted"

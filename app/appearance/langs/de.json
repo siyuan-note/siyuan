@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Berechtigung",
+	"agentPermissionConfirm": "Jedes Mal bestätigen",
+	"agentPermissionAllowSession": "Automatisch erlauben",
 	"oidcVerificationFailed": "Überprüfung der OIDC-Konfiguration fehlgeschlagen",
 	"oidcVerificationSuccess": "OIDC-Konfiguration überprüft und gespeichert",
 	"oidcVerificationTip": "Schließen Sie die OIDC-Anmeldung im geöffneten Browserfenster ab; die aktuelle Konfiguration bleibt bis zur erfolgreichen Überprüfung aktiv",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "Zum Ende scrollen",
 	"featurePreview": "💡 Diese Funktion ist in der frühen Vorschau, noch instabil. Bitte sichern Sie Ihre Daten vor der Verwendung",
 	"agentSessionSearch": "Sitzungen suchen...",
-	"agentWelcomeGreeting": "Hey, was hast du vor? Ich kümmere mich drum",
+	"agentWelcomeGreeting": "Hey, was hast du vor?\nIch kümmere mich drum",
 	"agentExample1": "Durchsuche meine letzten Besprechungsnotizen",
 	"agentExample2": "Erstelle ein neues Tagebuch",
 	"agentExample3": "Finde Notizen zum Projekt",

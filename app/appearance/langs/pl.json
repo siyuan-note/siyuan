@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Uprawnienia",
+	"agentPermissionConfirm": "Potwierdzaj za każdym razem",
+	"agentPermissionAllowSession": "Zezwalaj automatycznie",
 	"oidcVerificationFailed": "Weryfikacja konfiguracji OIDC nie powiodła się",
 	"oidcVerificationSuccess": "Konfiguracja OIDC została zweryfikowana i zapisana",
 	"oidcVerificationTip": "Dokończ logowanie OIDC w otwartym oknie przeglądarki; bieżąca konfiguracja pozostanie aktywna do czasu pomyślnej weryfikacji",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "Przewiń na dół",
 	"featurePreview": "💡 Ta funkcja jest we wczesnej fazie podglądu, wciąż niestabilna. Przed użyciem wykonaj kopię zapasową danych",
 	"agentSessionSearch": "Szukaj sesji...",
-	"agentWelcomeGreeting": "Hej, co masz na myśli? Zajmę się tym",
+	"agentWelcomeGreeting": "Hej, co masz na myśli?\nZajmę się tym",
 	"agentExample1": "Wyszukaj moje ostatnie notatki ze spotkań",
 	"agentExample2": "Utwórz nowy dziennik",
 	"agentExample3": "Znajdź notatki związane z projektem",

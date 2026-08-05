@@ -1,4 +1,7 @@
 {
+	"agentPermission": "İzin",
+	"agentPermissionConfirm": "Her seferinde onayla",
+	"agentPermissionAllowSession": "Otomatik olarak izin ver",
 	"oidcVerificationFailed": "OIDC yapılandırması doğrulanamadı",
 	"oidcVerificationSuccess": "OIDC yapılandırması doğrulandı ve kaydedildi",
 	"oidcVerificationTip": "Açılan tarayıcı penceresinde OIDC oturum açma işlemini tamamlayın; doğrulama başarılı olana kadar mevcut yapılandırma etkin kalır",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "Aşağı kaydır",
 	"featurePreview": "💡 Bu özellik erken önizleme aşamasında, henüz kararsız. Lütfen kullanmadan önce verilerinizi yedekleyin",
 	"agentSessionSearch": "Oturum ara...",
-	"agentWelcomeGreeting": "Selam, aklında ne var? Hallederim",
+	"agentWelcomeGreeting": "Selam, aklında ne var?\nHallederim",
 	"agentExample1": "Son toplantı notlarımı ara",
 	"agentExample2": "Yeni bir günlük oluştur",
 	"agentExample3": "Projeyle ilgili notları bul",

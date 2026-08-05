@@ -94,6 +94,9 @@ func TestExistRefByDefIDsSearchesGlobalAndEncryptedIndexes(t *testing.T) {
 	if _, err = globalDB.Exec("INSERT INTO refs VALUES ('mixed-definition', 'mixed-root', 'internal-ref', 'internal-root'), ('mixed-definition', 'mixed-root', 'external-ref', 'external-root')"); nil != err {
 		t.Fatalf("insert mixed refs failed: %s", err)
 	}
+	if _, err = globalDB.Exec("INSERT INTO refs VALUES ('', '', 'dirty-ref', 'dirty-root'), ('dirty-source-definition', 'dirty-source-root', '', '')"); nil != err {
+		t.Fatalf("insert invalid refs failed: %s", err)
+	}
 	previousDB := db
 	db = globalDB
 	t.Cleanup(func() {
@@ -128,6 +131,12 @@ func TestExistRefByDefIDsSearchesGlobalAndEncryptedIndexes(t *testing.T) {
 		[]string{"mixed-definition"}, nil, []string{"internal-ref"}, []string{"internal-root"}); nil != queryErr || !exists {
 		t.Fatalf("reference from outside the excluded set was not found: exists=%v, err=%v", exists, queryErr)
 	}
+	if exists, queryErr := ExistRefByDefIDs([]string{"", "missing"}, []string{""}, nil, nil); nil != queryErr || exists {
+		t.Fatalf("empty definition IDs should be ignored: exists=%v, err=%v", exists, queryErr)
+	}
+	if exists, queryErr := ExistRefByDefIDs([]string{"dirty-source-definition"}, nil, nil, nil); nil != queryErr || exists {
+		t.Fatalf("references with an empty source should be ignored: exists=%v, err=%v", exists, queryErr)
+	}
 }
 
 func TestQueryBoundBlockAVIDsSearchesGlobalAndEncryptedIndexes(t *testing.T) {
@@ -141,6 +150,9 @@ func TestQueryBoundBlockAVIDsSearchesGlobalAndEncryptedIndexes(t *testing.T) {
 	}
 	if _, err = globalDB.Exec("INSERT INTO blocks VALUES ('global-bound', 'global-root', '{: id=\"global-bound\" custom-avs=\"20260804000000-global\"}'), ('false-positive', 'global-root', '{: id=\"false-positive\" memo=\"custom-avs=20260804000000-false\"}')"); nil != err {
 		t.Fatalf("insert global bound blocks failed: %s", err)
+	}
+	if _, err = globalDB.Exec("INSERT INTO blocks VALUES ('', 'dirty-root', '{: custom-avs=\"20260804000000-dirty\"}')"); nil != err {
+		t.Fatalf("insert invalid bound block failed: %s", err)
 	}
 	previousDB := db
 	db = globalDB
@@ -167,6 +179,10 @@ func TestQueryBoundBlockAVIDsSearchesGlobalAndEncryptedIndexes(t *testing.T) {
 	}
 	if _, exists := boundAVIDs["false-positive"]; exists {
 		t.Fatalf("attribute value text should not be treated as a database binding: %#v", boundAVIDs)
+	}
+	dirtyBoundAVIDs, queryErr := QueryBoundBlockAVIDs([]string{"", "missing"}, []string{"dirty-root"})
+	if nil != queryErr || 0 != len(dirtyBoundAVIDs) {
+		t.Fatalf("empty bound block IDs should be ignored: result=%#v, err=%v", dirtyBoundAVIDs, queryErr)
 	}
 }
 
@@ -296,7 +312,8 @@ func insertEncryptedQueryTestBlock(t *testing.T, testDB *gosql.DB, id, parentID,
 
 func insertEncryptedQueryTestRef(t *testing.T, testDB *gosql.DB, id, defBlockID, defRootID string) {
 	t.Helper()
-	if _, err := testDB.Exec("INSERT INTO refs (id, def_block_id, def_block_root_id) VALUES (?, ?, ?)", id, defBlockID, defRootID); nil != err {
+	if _, err := testDB.Exec("INSERT INTO refs (id, def_block_id, def_block_root_id, block_id, root_id) VALUES (?, ?, ?, ?, ?)",
+		id, defBlockID, defRootID, id+"-source", id+"-source-root"); nil != err {
 		t.Fatalf("insert ref failed: %s", err)
 	}
 }

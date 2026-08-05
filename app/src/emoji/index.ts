@@ -168,7 +168,7 @@ const genEmojiSearchHTML = (key: string, max: number | undefined, options: TEmoj
 export const genEmojiCategoryButtons = (hideCustom = false) => {
     const categories = [{
         id: "recent",
-        unicode: "2b50",
+        unicode: "1f552",
         title: window.siyuan.languages.recentEmoji,
     }];
     window.siyuan.emojis.forEach((category, index) => {
@@ -870,6 +870,9 @@ export const openEmojiPanel = (
 
     const popoverElement = options?.ownerElement?.closest<HTMLElement>(".block__popover");
     const targetID = options?.targetID || id;
+    const customCategoryIndex = window.siyuan.emojis.findIndex((item) => item.id === "custom");
+    const customEmojiLabel = customCategoryIndex > -1 ?
+        getEmojiTitle(customCategoryIndex) : window.siyuan.languages.customEmoji;
     const dynamicURL = "api/icon/getDynamicIcon?";
     const dynamicCurrentObj: Record<string, any> = {
         color: "#d23f31",
@@ -921,6 +924,8 @@ export const openEmojiPanel = (
     <div class="emojis__tabheader">
         <div data-type="tab-emoji" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.emoji}"><svg><use xlink:href="#iconEmoji"></use></svg></div>
         <div class="fn__space"></div>
+        <div data-type="tab-custom" class="ariaLabel block__icon block__icon--show${options?.custom ? " fn__none" : ""}" aria-label="${escapeAttr(escapeHtml(customEmojiLabel))}"><svg><use xlink:href="#iconStar"></use></svg></div>
+        <div class="fn__space"></div>
         <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show${options?.dynamic ? " fn__none" : ""}" aria-label="${window.siyuan.languages.dynamicIcon}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
         <div class="fn__space${type === "av" ? " fn__none" : ""}"></div>
         <div data-type="tab-link" class="ariaLabel block__icon block__icon--show${type === "av" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.upload} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconUpload"></use></svg></div>
@@ -940,8 +945,9 @@ export const openEmojiPanel = (
                 <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconDices"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
+            <div class="fn__hr"></div>
             <div class="emojis__panel"></div>
-            <div class="emojis__types">${genEmojiCategoryButtons(options?.custom)}</div>
+            <div class="emojis__types">${genEmojiCategoryButtons(true)}</div>
         </div>
         <div class="fn__none" data-type="tab-dynamic">
             <div class="fn__flex emoji__dynamic-color">
@@ -1074,8 +1080,10 @@ export const openEmojiPanel = (
     if (!currentTabElement || currentTabElement.classList.contains("fn__none")) {
         currentTab = "emoji";
     }
+    let customEmojiPage = currentTab === "custom";
+    const currentBodyTab = customEmojiPage ? "emoji" : currentTab;
     dialog.element.querySelector(`.emojis__tabheader [data-type="tab-${currentTab}"]`).classList.add("block__icon--active");
-    dialog.element.querySelector(`.emojis__tabbody [data-type="tab-${currentTab}"]`).classList.remove("fn__none");
+    dialog.element.querySelector(`.emojis__tabbody [data-type="tab-${currentBodyTab}"]`).classList.remove("fn__none");
     setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
     const networkIconInputElement = dialog.element.querySelector('[data-type="network-icon-url"]') as HTMLTextAreaElement;
     const customIconFileElement = dialog.element.querySelector('[data-type="custom-icon-file"]') as HTMLInputElement;
@@ -1101,13 +1109,12 @@ export const openEmojiPanel = (
     const renderNetworkIconPreview = () => {
         const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
         const base64Image = parseBase64Image(networkIconInputElement.value);
-        const customIcon = !!pastedCustomIconFile || !!base64Image;
         const previewSource = pastedCustomIconObjectURL ||
             (base64Image ? networkIconInputElement.value.trim() : networkURL);
         const hasIcon = !!previewSource;
         showLinkIconView(hasIcon ? "detail" : "empty");
-        customIconNameLabelElement.classList.toggle("fn__none", !customIcon);
-        linkIconSaveElement.disabled = !hasIcon || (customIcon && !customIconNameElement.value.trim());
+        customIconNameLabelElement.classList.toggle("fn__none", !hasIcon);
+        linkIconSaveElement.disabled = !hasIcon || !customIconNameElement.value.trim();
         linkIconSampleElements.forEach(item => {
             item.innerHTML = "";
             if (!previewSource) {
@@ -1147,9 +1154,7 @@ export const openEmojiPanel = (
         clearPastedCustomIcon();
         customIconNameElement.value = "";
         renderNetworkIconPreview();
-        if (parseBase64Image(networkIconInputElement.value)) {
-            customIconNameElement.focus();
-        }
+        customIconNameElement.focus();
     };
     const setCustomIconFile = (file: File) => {
         clearPastedCustomIcon();
@@ -1185,13 +1190,8 @@ export const openEmojiPanel = (
     };
     const setNetworkIcon = () => {
         const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
-        if (networkURL) {
-            applyLinkIcon(networkURL);
-            return;
-        }
-
         let customIconFile = pastedCustomIconFile;
-        if (!customIconFile) {
+        if (!networkURL && !customIconFile) {
             const base64Image = parseBase64Image(networkIconInputElement.value);
             if (base64Image) {
                 customIconFile = new File(
@@ -1201,7 +1201,7 @@ export const openEmojiPanel = (
                 );
             }
         }
-        if (!customIconFile) {
+        if (!networkURL && !customIconFile) {
             showMessage(window.siyuan.languages.invalid);
             return;
         }
@@ -1213,7 +1213,11 @@ export const openEmojiPanel = (
 
         const formData = new FormData();
         formData.append("name", customIconNameElement.value);
-        formData.append("file", customIconFile);
+        if (networkURL) {
+            formData.append("url", networkURL);
+        } else {
+            formData.append("file", customIconFile);
+        }
         fetchPost("/api/system/addCustomEmoji", formData, (response) => {
             if (typeof response?.data?.path !== "string") {
                 showMessage(window.siyuan.languages.kernelFault8);
@@ -1254,9 +1258,7 @@ export const openEmojiPanel = (
         networkIconInputElement.value = text;
         customIconNameElement.value = "";
         renderNetworkIconPreview();
-        if (parseBase64Image(text)) {
-            customIconNameElement.focus();
-        }
+        customIconNameElement.focus();
     });
     networkIconInputElement.addEventListener("input", updateLinkIconInput);
     customIconNameElement.addEventListener("input", renderNetworkIconPreview);
@@ -1309,10 +1311,13 @@ export const openEmojiPanel = (
         event.preventDefault();
         event.stopPropagation();
     });
-    if (currentTab === "emoji") {
+    if (customEmojiPage) {
+        emojiPanelController.renderCategory("custom");
+        emojiPanelController.activate();
+    } else if (currentTab === "emoji") {
         emojiPanelController.activate();
     }
-    if (!isMobile() && currentTab === "emoji") {
+    if (!isMobile() && (currentTab === "emoji" || customEmojiPage)) {
         emojiSearchInputElement.focus();
     } else if (!isMobile() && currentTab === "link") {
         linkIconElement.focus();
@@ -1322,6 +1327,11 @@ export const openEmojiPanel = (
         let target = event.target as HTMLElement;
         while (target && target !== dialog.element) {
             if (target.classList.contains("emojis__type")) {
+                customEmojiPage = false;
+                dialogElement.querySelector('[data-type="tab-custom"]')?.classList.remove("block__icon--active");
+                dialogElement.querySelector('[data-type="tab-emoji"]')?.classList.add("block__icon--active");
+                window.siyuan.storage[Constants.LOCAL_EMOJIS].currentTab = "emoji";
+                setStorageVal(Constants.LOCAL_EMOJIS, window.siyuan.storage[Constants.LOCAL_EMOJIS]);
                 emojiPanelController.renderCategory(target.dataset.type);
                 break;
             } else if (target.getAttribute("data-action") === "select-custom-icon") {
@@ -1410,7 +1420,7 @@ export const openEmojiPanel = (
                 }
                 addEmoji(unicode);
                 break;
-            } else if (target.getAttribute("data-type")?.startsWith("tab-")) {
+            } else if (target.matches(".emojis__tabheader > [data-type^='tab-']")) {
                 dialogElement.querySelectorAll('.emojis__tabheader [data-type|="tab"]').forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
                         item.classList.add("block__icon--active");
@@ -1418,8 +1428,9 @@ export const openEmojiPanel = (
                         item.classList.remove("block__icon--active");
                     }
                 });
+                const bodyType = target.dataset.type === "tab-custom" ? "tab-emoji" : target.dataset.type;
                 dialogElement.querySelectorAll(".emojis__tabbody > div").forEach((item: HTMLElement) => {
-                    if (item.dataset.type === target.dataset.type) {
+                    if (item.dataset.type === bodyType) {
                         item.classList.remove("fn__none");
                     } else {
                         item.classList.add("fn__none");
@@ -1427,7 +1438,20 @@ export const openEmojiPanel = (
                 });
                 window.siyuan.storage[Constants.LOCAL_EMOJIS].currentTab = target.dataset.type.replace("tab-", "");
                 setStorageVal(Constants.LOCAL_EMOJIS, window.siyuan.storage[Constants.LOCAL_EMOJIS]);
-                if (target.dataset.type === "tab-emoji") {
+                if (target.dataset.type === "tab-custom") {
+                    customEmojiPage = true;
+                    emojiSearchInputElement.value = "";
+                    emojiPanelController.renderCategory("custom");
+                    emojiPanelController.activate();
+                    if (!isMobile()) {
+                        emojiSearchInputElement.focus();
+                    }
+                } else if (target.dataset.type === "tab-emoji") {
+                    if (customEmojiPage) {
+                        customEmojiPage = false;
+                        emojiSearchInputElement.value = "";
+                        emojiPanelController.renderInitial();
+                    }
                     emojiPanelController.activate();
                     if (!isMobile()) {
                         emojiSearchInputElement.focus();

@@ -1,4 +1,7 @@
 {
+	"agentPermission": "สิทธิ์",
+	"agentPermissionConfirm": "ยืนยันทุกครั้ง",
+	"agentPermissionAllowSession": "อนุญาตอัตโนมัติ",
 	"oidcVerificationFailed": "การตรวจสอบการกำหนดค่า OIDC ล้มเหลว",
 	"oidcVerificationSuccess": "ตรวจสอบและบันทึกการกำหนดค่า OIDC แล้ว",
 	"oidcVerificationTip": "ลงชื่อเข้าใช้ OIDC ให้เสร็จสิ้นในหน้าต่างเบราว์เซอร์ที่เปิดอยู่ การกำหนดค่าปัจจุบันจะยังคงมีผลจนกว่าการตรวจสอบจะสำเร็จ",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "เลื่อนไปด้านล่าง",
 	"featurePreview": "💡 ฟีเจอร์นี้อยู่ในช่วงตัวอย่างเบื้องต้น ยังไม่เสถียร โปรดสำรองข้อมูลก่อนใช้งาน",
 	"agentSessionSearch": "ค้นหาเซสชัน...",
-	"agentWelcomeGreeting": "ว่าไง คิดอะไรอยู่? จัดการให้เอง",
+	"agentWelcomeGreeting": "ว่าไง คิดอะไรอยู่?\nจัดการให้เอง",
 	"agentExample1": "ค้นหาบันทึกการประชุมล่าสุดของฉัน",
 	"agentExample2": "สร้างบันทึกประจำวันใหม่",
 	"agentExample3": "ค้นหาบันทึกที่เกี่ยวข้องกับโครงการ",

@@ -1,4 +1,7 @@
 {
+	"agentPermission": "अनुमति",
+	"agentPermissionConfirm": "हर बार पुष्टि करें",
+	"agentPermissionAllowSession": "स्वचालित रूप से अनुमति दें",
 	"oidcVerificationFailed": "OIDC कॉन्फ़िगरेशन सत्यापन विफल रहा",
 	"oidcVerificationSuccess": "OIDC कॉन्फ़िगरेशन सत्यापित और सहेजा गया",
 	"oidcVerificationTip": "खुली ब्राउज़र विंडो में OIDC लॉगिन पूरा करें; सत्यापन सफल होने तक वर्तमान कॉन्फ़िगरेशन सक्रिय रहेगा",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "नीचे स्क्रॉल करें",
 	"featurePreview": "💡 यह सुविधा प्रारंभिक पूर्वावलोकन में है, अभी अस्थिर है। कृपया उपयोग से पहले डेटा का बैकअप लें",
 	"agentSessionSearch": "सत्र खोजें...",
-	"agentWelcomeGreeting": "अरे, क्या सोच रहे हो? मैं संभाल लूंगा",
+	"agentWelcomeGreeting": "अरे, क्या सोच रहे हो?\nमैं संभाल लूंगा",
 	"agentExample1": "मेरी हाल की बैठक के नोट्स खोजें",
 	"agentExample2": "एक नई डायरी बनाएं",
 	"agentExample3": "परियोजना से संबंधित नोट्स खोजें",

@@ -130,6 +130,10 @@ func QueryRefCount(defIDs []string) (ret map[string]int) {
 func ExistRefByDefIDsInBox(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs []string, boxID string) (ret bool, err error) {
 	const batchSize = 900
 
+	defIDs = filterNonEmptyRefCheckIDs(defIDs)
+	defRootIDs = filterNonEmptyRefCheckIDs(defRootIDs)
+	excludeBlockIDs = filterNonEmptyRefCheckIDs(excludeBlockIDs)
+	excludeRootIDs = filterNonEmptyRefCheckIDs(excludeRootIDs)
 	excludeBlockIDSet := map[string]struct{}{}
 	for _, id := range excludeBlockIDs {
 		excludeBlockIDSet[id] = struct{}{}
@@ -159,6 +163,9 @@ func ExistRefByDefIDsInBox(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs [
 				if scanErr := rows.Scan(&blockID, &rootID); scanErr != nil {
 					rows.Close()
 					return false, scanErr
+				}
+				if "" == strings.TrimSpace(blockID) || "" == strings.TrimSpace(rootID) {
+					continue
 				}
 				if _, excluded := excludeBlockIDSet[blockID]; excluded {
 					continue
@@ -206,6 +213,8 @@ func ExistRefByDefIDs(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs []stri
 func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret map[string][]string, err error) {
 	const batchSize = 900
 
+	blockIDs = filterNonEmptyRefCheckIDs(blockIDs)
+	rootIDs = filterNonEmptyRefCheckIDs(rootIDs)
 	ret = map[string][]string{}
 	queryByColumn := func(column string, ids []string) error {
 		for start := 0; start < len(ids); start += batchSize {
@@ -228,6 +237,9 @@ func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret ma
 				if scanErr := rows.Scan(&blockID, &ialContent); nil != scanErr {
 					rows.Close()
 					return scanErr
+				}
+				if "" == strings.TrimSpace(blockID) {
+					continue
 				}
 				ialContent = strings.TrimPrefix(ialContent, "{:")
 				ialContent = strings.TrimSuffix(ialContent, "}")
@@ -258,6 +270,22 @@ func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret ma
 		return
 	}
 	err = queryByColumn("root_id", rootIDs)
+	return
+}
+
+func filterNonEmptyRefCheckIDs(ids []string) (ret []string) {
+	seen := map[string]struct{}{}
+	for _, id := range ids {
+		id = strings.TrimSpace(id)
+		if "" == id {
+			continue
+		}
+		if _, exists := seen[id]; exists {
+			continue
+		}
+		seen[id] = struct{}{}
+		ret = append(ret, id)
+	}
 	return
 }
 

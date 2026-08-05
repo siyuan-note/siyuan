@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"image"
 	"image/png"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -85,6 +87,37 @@ func TestNormalizeCustomEmojiData(t *testing.T) {
 
 	if _, _, err = normalizeCustomEmojiData([]byte("not an image")); err == nil {
 		t.Fatalf("expected invalid image data")
+	}
+}
+
+func TestDownloadCustomEmojiData(t *testing.T) {
+	var pngData bytes.Buffer
+	if err := png.Encode(&pngData, image.NewRGBA(image.Rect(0, 0, 1, 1))); err != nil {
+		t.Fatalf("encode png failed: %s", err)
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/icon" {
+			http.NotFound(writer, request)
+			return
+		}
+		writer.Header().Set("Content-Type", "image/png")
+		_, _ = writer.Write(pngData.Bytes())
+	}))
+	t.Cleanup(server.Close)
+
+	data, err := downloadCustomEmojiData(server.URL + "/icon")
+	if err != nil {
+		t.Fatalf("download custom emoji failed: %s", err)
+	}
+	if !bytes.Equal(data, pngData.Bytes()) {
+		t.Fatal("downloaded custom emoji differs from response")
+	}
+	if _, err = downloadCustomEmojiData(server.URL + "/missing"); err == nil {
+		t.Fatal("expected HTTP error")
+	}
+	if _, err = downloadCustomEmojiData("file:///tmp/icon.png"); err == nil {
+		t.Fatal("expected invalid URL error")
 	}
 }
 

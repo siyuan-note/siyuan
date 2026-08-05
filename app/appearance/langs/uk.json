@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Дозвіл",
+	"agentPermissionConfirm": "Підтверджувати щоразу",
+	"agentPermissionAllowSession": "Дозволяти автоматично",
 	"oidcVerificationFailed": "Не вдалося перевірити конфігурацію OIDC",
 	"oidcVerificationSuccess": "Конфігурацію OIDC перевірено та збережено",
 	"oidcVerificationTip": "Завершіть вхід OIDC у відкритому вікні браузера; поточна конфігурація залишатиметься активною до успішного завершення перевірки",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "Прокрутити вниз",
 	"featurePreview": "💡 Ця функція на ранній стадії попереднього перегляду, ще нестабільна. Зробіть резервну копію даних перед використанням",
 	"agentSessionSearch": "Пошук сесій...",
-	"agentWelcomeGreeting": "Привіт, що на думці? Я все влаштую",
+	"agentWelcomeGreeting": "Привіт, що на думці?\nЯ все влаштую",
 	"agentExample1": "Знайти мої нещодавні нотатки про зустрічі",
 	"agentExample2": "Створити новий щоденник",
 	"agentExample3": "Знайти нотатки про проєкт",

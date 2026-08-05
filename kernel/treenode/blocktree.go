@@ -76,6 +76,9 @@ func initDatabase(forceRebuild bool) {
 		if _, err := db.Exec("CREATE INDEX IF NOT EXISTS idx_blocktrees_box_id ON blocktrees(box_id)"); err != nil {
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree box index failed: %s", err)
 		}
+		if err := cleanupInvalidBlockTrees(db); err != nil {
+			logging.LogErrorf("cleanup invalid blocktrees failed: %s", err)
+		}
 		return
 	}
 
@@ -109,6 +112,11 @@ func initDBTables() {
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocktrees_box_id] failed: %s", err)
 	}
+}
+
+func cleanupInvalidBlockTrees(database *sql.DB) (err error) {
+	_, err = database.Exec("DELETE FROM blocktrees WHERE COALESCE(TRIM(id), '') = '' OR COALESCE(TRIM(root_id), '') = ''")
+	return
 }
 
 func initDBConnection() {
@@ -839,6 +847,9 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 	defer stmt.Close()
 
 	for _, n := range changedNodes {
+		if nil == n || "" == strings.TrimSpace(n.ID) || "" == strings.TrimSpace(tree.ID) {
+			continue
+		}
 		var parentID string
 		if nil != n.Parent {
 			parentID = n.Parent.ID
@@ -1031,6 +1042,9 @@ func initEncryptedBlockTreeTables(boxDB *sql.DB) (err error) {
 		if _, err = boxDB.Exec(s); err != nil {
 			return
 		}
+	}
+	if err = cleanupInvalidBlockTrees(boxDB); err != nil {
+		return
 	}
 	return
 }

@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Toestemming",
+	"agentPermissionConfirm": "Elke keer bevestigen",
+	"agentPermissionAllowSession": "Automatisch toestaan",
 	"oidcVerificationFailed": "Verificatie van de OIDC-configuratie is mislukt",
 	"oidcVerificationSuccess": "OIDC-configuratie geverifieerd en opgeslagen",
 	"oidcVerificationTip": "Voltooi de OIDC-aanmelding in het geopende browservenster; de huidige configuratie blijft actief totdat de verificatie slaagt",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "Naar beneden scrollen",
 	"featurePreview": "💡 Deze functie is in vroege preview, nog instabiel. Maak een back-up van uw gegevens voor gebruik",
 	"agentSessionSearch": "Sessies zoeken...",
-	"agentWelcomeGreeting": "Hé, wat heb je in gedachten? Ik regel het",
+	"agentWelcomeGreeting": "Hé, wat heb je in gedachten?\nIk regel het",
 	"agentExample1": "Doorzoek mijn recente vergadernotities",
 	"agentExample2": "Maak een nieuw dagboek",
 	"agentExample3": "Vind notities over het project",

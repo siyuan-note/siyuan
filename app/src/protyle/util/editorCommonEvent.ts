@@ -54,6 +54,7 @@ import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 import {
+    isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
     replaceDragUndoOperation,
@@ -593,6 +594,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 
 const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean,
                       direct: "col" | "row", isCopy: boolean) => {
+    if (!isCopy && isDragTargetInSource(sourceElements, targetElement)) {
+        return;
+    }
     // 底部反链 Protyle 嵌套在正文 Protyle 中，仅 wysiwyg 包含关系能表示同一编辑器。
     const isSameEditor = isSameDragEditor(protyle.wysiwyg.element, sourceElements[0]);
     // 移动前记录源块所在的超级块，移动后刷新其手柄（移出后需重建）https://github.com/siyuan-note/siyuan/issues/9521
@@ -761,6 +765,9 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 };
 
 const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, isCopy: boolean) => {
+    if (!isCopy && isDragTargetInSource(sourceElements, targetElement)) {
+        return;
+    }
     const siblingElements = Array.from(targetElement.parentElement.children)
         .filter(item => item.hasAttribute("data-node-id"));
     if (!isCopy && isSameSiblingMove(siblingElements, sourceElements, targetElement, isBottom)) {

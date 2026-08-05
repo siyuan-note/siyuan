@@ -209,7 +209,7 @@ func TestRuntimeCompactionPersistsBesideActiveTurn(t *testing.T) {
 		State:        "running",
 		UpdatedAt:    time.Now().UnixMilli(),
 	}
-	if err := beginRuntimeTurn(testSessionID, turn, false); err != nil {
+	if err := beginRuntimeTurn(testSessionID, turn); err != nil {
 		t.Fatal(err)
 	}
 	compaction, err := newRuntimeCompaction(entries, 3, "Persisted summary")

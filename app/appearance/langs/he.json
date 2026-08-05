@@ -1,4 +1,7 @@
 {
+	"agentPermission": "הרשאה",
+	"agentPermissionConfirm": "אישור בכל פעם",
+	"agentPermissionAllowSession": "אפשר אוטומטית",
 	"oidcVerificationFailed": "אימות תצורת OIDC נכשל",
 	"oidcVerificationSuccess": "תצורת OIDC אומתה ונשמרה",
 	"oidcVerificationTip": "השלם את ההתחברות ל-OIDC בחלון הדפדפן שנפתח; התצורה הנוכחית תישאר פעילה עד שהאימות יצליח",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "גלול לתחתית",
 	"featurePreview": "💡 תכונה זו בתצוגה מקדימה מוקדמת, עדיין לא יציבה. אנא גבה את הנתונים שלך לפני השימוש",
 	"agentSessionSearch": "חיפוש הפעלות...",
-	"agentWelcomeGreeting": "היי, מה בראש? אני אטפל בזה",
+	"agentWelcomeGreeting": "היי, מה בראש?\nאני אטפל בזה",
 	"agentExample1": "חפש את הערות הפגישות האחרונות שלי",
 	"agentExample2": "צור יומן חדש",
 	"agentExample3": "מצא הערות הקשורות לפרויקט",

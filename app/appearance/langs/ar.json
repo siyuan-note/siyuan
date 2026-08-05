@@ -1,4 +1,7 @@
 {
+	"agentPermission": "الإذن",
+	"agentPermissionConfirm": "تأكيد في كل مرة",
+	"agentPermissionAllowSession": "السماح تلقائيًا",
 	"oidcVerificationFailed": "فشل التحقق من إعداد OIDC",
 	"oidcVerificationSuccess": "تم التحقق من إعداد OIDC وحفظه",
 	"oidcVerificationTip": "أكمل تسجيل الدخول إلى OIDC في نافذة المتصفح المفتوحة؛ سيظل الإعداد الحالي فعالًا حتى ينجح التحقق",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "التمرير إلى الأسفل",
 	"featurePreview": "💡 هذه الميزة في مرحلة المعاينة المبكرة، لا تزال غير مستقرة. يرجى عمل نسخة احتياطية لبياناتك قبل الاستخدام",
 	"agentSessionSearch": "البحث عن جلسات...",
-	"agentWelcomeGreeting": "مرحبًا، ما الذي يدور في ذهنك؟ سأتولى الأمر",
+	"agentWelcomeGreeting": "مرحبًا، ما الذي يدور في ذهنك؟\nسأتولى الأمر",
 	"agentExample1": "البحث عن ملاحظات الاجتماعات الأخيرة",
 	"agentExample2": "إنشاء مذكرة يومية جديدة",
 	"agentExample3": "البحث عن ملاحظات متعلقة بالمشروع",

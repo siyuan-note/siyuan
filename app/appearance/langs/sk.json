@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Povolenie",
+	"agentPermissionConfirm": "Potvrdiť zakaždým",
+	"agentPermissionAllowSession": "Povoliť automaticky",
 	"oidcVerificationFailed": "Overenie konfigurácie OIDC zlyhalo",
 	"oidcVerificationSuccess": "Konfigurácia OIDC bola overená a uložená",
 	"oidcVerificationTip": "Dokončite prihlásenie OIDC v otvorenom okne prehliadača; aktuálna konfigurácia zostane aktívna, kým overenie nebude úspešné",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "Posunúť na koniec",
 	"featurePreview": "💡 Táto funkcia je v ranom náhľade, zatiaľ nestabilná. Pred použitím si zálohujte údaje",
 	"agentSessionSearch": "Vyhľadať relácie...",
-	"agentWelcomeGreeting": "Hej, čo máš na mysli? Postarám sa o to",
+	"agentWelcomeGreeting": "Hej, čo máš na mysli?\nPostarám sa o to",
 	"agentExample1": "Vyhľadať moje nedávne poznámky zo stretnutí",
 	"agentExample2": "Vytvoriť nový denník",
 	"agentExample3": "Nájsť poznámky k projektu",

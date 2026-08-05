@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Permissão",
+	"agentPermissionConfirm": "Confirmar sempre",
+	"agentPermissionAllowSession": "Permitir automaticamente",
 	"oidcVerificationFailed": "Falha na verificação da configuração OIDC",
 	"oidcVerificationSuccess": "Configuração OIDC verificada e salva",
 	"oidcVerificationTip": "Conclua o login OIDC na janela do navegador aberta; a configuração atual permanecerá ativa até que a verificação seja concluída com sucesso",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "Rolar para o final",
 	"featurePreview": "💡 Este recurso está em pré-visualização inicial, ainda instável. Faça backup dos seus dados antes de usar",
 	"agentSessionSearch": "Pesquisar sessões...",
-	"agentWelcomeGreeting": "Ei, o que tem em mente? Deixa comigo",
+	"agentWelcomeGreeting": "Ei, o que tem em mente?\nDeixa comigo",
 	"agentExample1": "Pesquisar minhas anotações de reuniões recentes",
 	"agentExample2": "Criar um novo diário",
 	"agentExample3": "Encontrar notas do projeto",

@@ -1,4 +1,7 @@
 {
+	"agentPermission": "権限",
+	"agentPermissionConfirm": "毎回確認",
+	"agentPermissionAllowSession": "自動許可",
 	"oidcVerificationFailed": "OIDC 設定の検証に失敗しました",
 	"oidcVerificationSuccess": "OIDC 設定を検証して保存しました",
 	"oidcVerificationTip": "開いたブラウザーウィンドウで OIDC ログインを完了してください。検証が成功するまで現在の設定が有効なまま維持されます",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "最下部にスクロール",
 	"featurePreview": "💡 この機能は早期プレビュー段階で、まだ不安定です。使用前にデータをバックアップしてください",
 	"agentSessionSearch": "セッションを検索...",
-	"agentWelcomeGreeting": "ねえ、何か考えてる？任せて",
+	"agentWelcomeGreeting": "ねえ、何か考えてる？\n任せて",
 	"agentExample1": "最近の会議メモを検索",
 	"agentExample2": "新しい日記を作成",
 	"agentExample3": "プロジェクト関連のノートを検索",

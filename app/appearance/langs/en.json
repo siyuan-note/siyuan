@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Permission",
+	"agentPermissionConfirm": "Confirm every time",
+	"agentPermissionAllowSession": "Automatically allow",
 	"oidcVerificationFailed": "OIDC configuration verification failed",
 	"oidcVerificationSuccess": "OIDC configuration verified and saved",
 	"oidcVerificationTip": "Complete OIDC login in the opened browser window; the current configuration remains active until verification succeeds",
@@ -484,7 +487,7 @@
 	"scrollToBottom": "Scroll to bottom",
 	"featurePreview": "💡 This feature is in early preview, still unstable. Please back up your data before use",
 	"agentSessionSearch": "Search sessions",
-	"agentWelcomeGreeting": "Hey, what do you have in mind? I've got you covered",
+	"agentWelcomeGreeting": "Hey, what do you have in mind?\nI've got you covered",
 	"agentExample1": "Search my recent meeting notes",
 	"agentExample2": "Create a new daily journal",
 	"agentExample3": "Find notes related to the project",

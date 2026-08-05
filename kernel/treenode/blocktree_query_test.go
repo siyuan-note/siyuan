@@ -56,3 +56,26 @@ func TestGetRootBlockIDsByBoxID(t *testing.T) {
 		t.Fatalf("unexpected document root IDs: %v", rootIDs)
 	}
 }
+
+func TestCleanupInvalidBlockTrees(t *testing.T) {
+	testDB, err := sql.Open("sqlite3_extended", ":memory:")
+	if nil != err {
+		t.Fatalf("open test database failed: %s", err)
+	}
+	testDB.SetMaxOpenConns(1)
+	defer testDB.Close()
+	if _, err = testDB.Exec("CREATE TABLE blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type)"); nil != err {
+		t.Fatalf("create blocktrees table failed: %s", err)
+	}
+	if _, err = testDB.Exec("INSERT INTO blocktrees (id, root_id) VALUES ('', 'root'), ('block', ''), ('valid', 'root')"); nil != err {
+		t.Fatalf("insert blocktrees failed: %s", err)
+	}
+
+	if err = cleanupInvalidBlockTrees(testDB); nil != err {
+		t.Fatalf("cleanup invalid blocktrees failed: %s", err)
+	}
+	var count int
+	if err = testDB.QueryRow("SELECT COUNT(*) FROM blocktrees").Scan(&count); nil != err || 1 != count {
+		t.Fatalf("cleanup should retain only valid blocktrees: count=%d, err=%v", count, err)
+	}
+}

@@ -1,5 +1,5 @@
 import type {App} from "../../index";
-import {windowMouseMove} from "./mousemove";
+import {getTableResizeBounds, windowMouseMove} from "./mousemove";
 import {windowKeyUp} from "./keyup";
 import {windowKeyDown} from "./keydown";
 import {globalClick} from "./click";
@@ -61,14 +61,19 @@ export const initWindowEvent = (app: App) => {
         }
     }, {passive: true});
 
-    // 横向滚动表格时重新定位表格列宽调整手柄 https://github.com/siyuan-note/siyuan/issues/13828
+    // 滚动表格时重新定位表格列宽调整手柄 https://github.com/siyuan-note/siyuan/issues/13828
     window.addEventListener("scroll", (event: Event) => {
         const scrollElement = event.target as HTMLElement;
-        // 仅处理表格内容容器（.table 块的 firstElementChild）的滚动
-        if (!scrollElement.parentElement || !scrollElement.parentElement.classList.contains("table")) {
+        const tableBlockElement = hasClosestByClassName(scrollElement, "table");
+        if (!tableBlockElement) {
             return;
         }
-        const resizeElement = scrollElement.parentElement.querySelector(".table__resize") as HTMLElement;
+        const tableElement = tableBlockElement.querySelector("table") as HTMLTableElement;
+        if (!tableElement ||
+            (scrollElement !== tableBlockElement.firstElementChild && scrollElement !== tableElement)) {
+            return;
+        }
+        const resizeElement = tableBlockElement.querySelector(".table__resize") as HTMLElement;
         if (!resizeElement) {
             return;
         }
@@ -77,8 +82,12 @@ export const initWindowEvent = (app: App) => {
         if (baseLeft === null || !style || style.indexOf("display:block") === -1) {
             return;
         }
-        const left = parseInt(baseLeft) - scrollElement.scrollLeft;
-        resizeElement.setAttribute("style", style.replace(/left: ?-?\d+px;/, `left: ${Math.round(left)}px;`));
+        const left = parseInt(baseLeft) - (tableBlockElement.firstElementChild as HTMLElement).scrollLeft;
+        const resizeBounds = getTableResizeBounds(tableElement);
+        resizeElement.setAttribute("style", style
+            .replace(/top:-?\d+(?:\.\d+)?px;/, `top:${resizeBounds.top}px;`)
+            .replace(/height:-?\d+(?:\.\d+)?px;/, `height:${resizeBounds.height}px;`)
+            .replace(/left: ?-?\d+px;/, `left: ${Math.round(left)}px;`));
     }, true);
 
     let scrollTarget: HTMLElement | false;

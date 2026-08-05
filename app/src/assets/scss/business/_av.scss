@@ -138,7 +138,6 @@
 
     .b3-text-field {
       transition: var(--b3-width-transition);
-      outline: none;
       white-space: nowrap;
       overflow: auto;
       padding-right: 0;
@@ -276,21 +275,6 @@
     bottom: 0;
     right: 0;
     left: 0;
-
-    > textarea.b3-text-field {
-      outline: 1px solid var(--b3-border-color);
-      outline-offset: -1px;
-      box-shadow: none;
-
-      &:hover {
-        box-shadow: 0 0 0 .6px var(--b3-border-color);
-      }
-
-      &:focus {
-        outline-color: var(--b3-theme-primary-light);
-        box-shadow: 0 0 0 .6px var(--b3-theme-primary-lighter);
-      }
-    }
   }
 
   &__scroll {

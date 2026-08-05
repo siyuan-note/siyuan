@@ -188,6 +188,7 @@ export const genEmojiCategoryButtons = (hideCustom = false) => {
 
 export class EmojiPanelController {
     private categoryID = "";
+    private builtInObserver?: IntersectionObserver;
     private imageObserver?: IntersectionObserver;
     private virtualObserver?: IntersectionObserver;
     private selectionObserver?: IntersectionObserver;
@@ -218,6 +219,7 @@ export class EmojiPanelController {
                     this.renderCustomPage();
                 }
             } else if (this.pageMode === "common") {
+                this.updateBuiltInPlaceholders();
                 this.updateCategoryOffsets();
             }
         });
@@ -284,7 +286,17 @@ export class EmojiPanelController {
     }
 
     public loadMoreEmojis(direction: "previous" | "next" = "next") {
-        if (this.searchMode || this.pageMode !== "custom") {
+        if (this.searchMode) {
+            return false;
+        }
+        if (this.pageMode === "common") {
+            const currentSection = this.panelElement.querySelector(".emojis__item--current")?.closest<HTMLElement>(".emojis__section");
+            const sections = Array.from(this.panelElement.querySelectorAll<HTMLElement>(".emojis__section"));
+            const currentIndex = currentSection ? sections.indexOf(currentSection) : -1;
+            const adjacentSection = direction === "previous" ? sections[currentIndex - 1] : sections[currentIndex + 1];
+            return adjacentSection ? this.loadBuiltInCategory(adjacentSection) : false;
+        }
+        if (this.pageMode !== "custom") {
             return false;
         }
         const chunks = Array.from(this.panelElement.querySelectorAll<HTMLElement>(".emojis__chunk"));
@@ -325,7 +337,9 @@ export class EmojiPanelController {
         }
         this.observeImages(this.panelElement);
         if (this.pageMode === "common") {
+            this.updateBuiltInPlaceholders();
             this.updateCategoryOffsets();
+            this.observeBuiltInCategories();
         }
         if (this.pageMode === "custom") {
             this.observeVirtualChunks();
@@ -351,21 +365,21 @@ export class EmojiPanelController {
         this.resetVirtualState();
         this.pageMode = "common";
         this.searchMode = false;
+        this.columnCount = this.getColumnCount();
         const sections: string[] = [];
         if (recentHTML) {
             sections.push(genEmojiSection(window.siyuan.languages.recentEmoji, recentHTML, undefined, "recent"));
         }
-        // 标准表情在普通页完整保留，避免快速滚动时重建可视内容。
         window.siyuan.emojis.forEach((item, index) => {
             if (item.id === "custom") {
                 return;
             }
-            const itemsHTML = item.items.map((emoji) => this.getItemHTML(emoji)).join("");
-            sections.push(genEmojiSection(getEmojiTitle(index), itemsHTML, undefined, item.id));
+            sections.push(genEmojiSection(getEmojiTitle(index), "", undefined, item.id));
         });
         this.panelElement.innerHTML = sections.join("") ||
             `<div class="emojis__section"><div class="emojis__title">${window.siyuan.languages.emptyContent}</div></div>`;
         this.panelElement.scrollTop = 0;
+        this.updateBuiltInPlaceholders();
         this.updateCategoryOffsets();
         this.categoryID = this.getCategoryElement(categoryID)?.dataset.category ||
             this.panelElement.querySelector<HTMLElement>(".emojis__section[data-category]")?.dataset.category || "recent";
@@ -378,6 +392,7 @@ export class EmojiPanelController {
         } else {
             this.selectFirst();
         }
+        this.observeBuiltInCategories();
     }
 
     private renderCustomPage() {
@@ -424,6 +439,7 @@ export class EmojiPanelController {
     }
 
     private scrollToCategory(targetElement: HTMLElement) {
+        this.loadBuiltInCategory(targetElement);
         const firstChunk = targetElement.querySelector<HTMLElement>(".emojis__chunk");
         if (firstChunk) {
             this.renderVirtualChunk(firstChunk);
@@ -442,6 +458,59 @@ export class EmojiPanelController {
                 id: item.dataset.category || "",
                 top: item.getBoundingClientRect().top - panelTop + this.panelElement.scrollTop,
             }));
+    }
+
+    private updateBuiltInPlaceholders() {
+        this.columnCount = this.getColumnCount();
+        this.panelElement.querySelectorAll<HTMLElement>(".emojis__section[data-category]").forEach((sectionElement) => {
+            const category = window.siyuan.emojis.find((item) =>
+                item.id === sectionElement.dataset.category && item.id !== "custom"
+            );
+            const contentElement = sectionElement.querySelector<HTMLElement>(".emojis__content");
+            if (!category || !contentElement) {
+                return;
+            }
+            contentElement.style.height = `${Math.ceil(category.items.length / this.columnCount) * 34}px`;
+        });
+    }
+
+    private loadBuiltInCategory(sectionElement: HTMLElement) {
+        const category = window.siyuan.emojis.find((item) =>
+            item.id === sectionElement.dataset.category && item.id !== "custom"
+        );
+        const contentElement = sectionElement.querySelector<HTMLElement>(".emojis__content");
+        if (!category || !contentElement || contentElement.childElementCount > 0) {
+            return false;
+        }
+        contentElement.innerHTML = category.items.map((item) => this.getItemHTML(item)).join("");
+        this.observeImages(contentElement);
+        if (this.categoryID === category.id &&
+            this.panelElement.querySelector(".emojis__item--current")?.closest(".emojis__section") !== sectionElement) {
+            this.selectElement(contentElement.querySelector(".emojis__item"));
+        }
+        return contentElement.childElementCount > 0;
+    }
+
+    private observeBuiltInCategories() {
+        this.builtInObserver?.disconnect();
+        const contentElements = Array.from(
+            this.panelElement.querySelectorAll<HTMLElement>(".emojis__section[data-category] > .emojis__content:empty")
+        );
+        if (contentElements.length === 0) {
+            this.builtInObserver = undefined;
+            return;
+        }
+        this.builtInObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) {
+                    return;
+                }
+                const contentElement = entry.target as HTMLElement;
+                this.loadBuiltInCategory(contentElement.parentElement);
+                this.builtInObserver?.unobserve(contentElement);
+            });
+        }, {root: this.panelElement, rootMargin: "100% 0px"});
+        contentElements.forEach((item) => this.builtInObserver.observe(item));
     }
 
     private getColumnCount() {
@@ -578,6 +647,9 @@ export class EmojiPanelController {
         }
         const visibleChunk = Array.from(this.visibleChunks).find((item) => item.childElementCount > 0);
         const categoryElement = this.pageMode === "common" ? this.getCategoryElement(this.categoryID) : undefined;
+        if (categoryElement) {
+            this.loadBuiltInCategory(categoryElement);
+        }
         const nextElement = visibleChunk?.querySelector<HTMLElement>(".emojis__item") ||
             categoryElement?.querySelector<HTMLElement>(".emojis__item") ||
             this.panelElement.querySelector<HTMLElement>(".emojis__item");
@@ -677,6 +749,8 @@ export class EmojiPanelController {
     }
 
     private disconnectObservers() {
+        this.builtInObserver?.disconnect();
+        this.builtInObserver = undefined;
         this.virtualObserver?.disconnect();
         this.virtualObserver = undefined;
         this.selectionObserver?.disconnect();
@@ -704,13 +778,13 @@ export const moveEmojiSelection = (
     }
     let currentIndex = items.indexOf(currentElement);
     const columnCount = Math.max(1, Math.floor(currentElement.parentElement.clientWidth / 34));
-    const currentChunk = currentElement.closest<HTMLElement>(".emojis__chunk");
-    const chunkItems = currentChunk ? Array.from(currentChunk.querySelectorAll<HTMLElement>(".emojis__item")) : items;
-    const chunkIndex = chunkItems.indexOf(currentElement);
-    const direction = (key === "ArrowLeft" && chunkIndex === 0) ||
-        (key === "ArrowUp" && chunkIndex < columnCount) ? "previous" :
-        (key === "ArrowRight" && chunkIndex === chunkItems.length - 1) ||
-        (key === "ArrowDown" && chunkIndex + columnCount >= chunkItems.length) ? "next" : undefined;
+    const currentContent = currentElement.closest<HTMLElement>(".emojis__content");
+    const contentItems = currentContent ? Array.from(currentContent.querySelectorAll<HTMLElement>(".emojis__item")) : items;
+    const contentIndex = contentItems.indexOf(currentElement);
+    const direction = (key === "ArrowLeft" && contentIndex === 0) ||
+        (key === "ArrowUp" && contentIndex < columnCount) ? "previous" :
+        (key === "ArrowRight" && contentIndex === contentItems.length - 1) ||
+        (key === "ArrowDown" && contentIndex + columnCount >= contentItems.length) ? "next" : undefined;
     if (direction) {
         if (loadMore?.(direction)) {
             items = Array.from(panelElement.querySelectorAll<HTMLElement>(".emojis__item"));

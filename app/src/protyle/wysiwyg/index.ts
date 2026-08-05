@@ -1728,6 +1728,7 @@ export class WYSIWYG {
                 nodeElement.firstElementChild.style.webkitUserModify = "read-only";
                 nodeElement.style.cursor = "col-resize";
                 protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
+                this.tableControl?.setHidden(true);
                 target.removeAttribute("style");
                 const x = event.clientX;
                 const colIndex = parseInt(target.getAttribute("data-col-index"));
@@ -1756,6 +1757,7 @@ export class WYSIWYG {
                     nodeElement.firstElementChild.style.webkitUserModify = "";
                     nodeElement.style.cursor = "";
                     protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
+                    this.tableControl?.setHidden(false);
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;

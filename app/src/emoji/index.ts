@@ -1058,11 +1058,12 @@ export const openEmojiPanel = (
                     <span class="b3-label__text">${window.siyuan.languages.fileName}</span>
                     <input class="b3-text-field fn__block" data-type="custom-icon-name" placeholder="path/to/icon">
                 </label>
-                <div class="emojis__link-footer">
-                    <select class="b3-select fn__none emojis__link-mode" data-type="network-icon-mode">
-                        <option value="local">${window.siyuan.languages.netImg2LocalAsset}</option>
-                        <option value="network">${window.siyuan.languages.use} URL</option>
-                    </select>
+                <div class="fn__none emojis__link-footer emojis__link-footer--choice">
+                    <button class="b3-button b3-button--cancel emojis__link-choice-back" data-action="back-custom-icon">${window.siyuan.languages.returnLabel}</button>
+                    <button class="b3-button b3-button--cancel" data-action="use-network-icon">${window.siyuan.languages.use} URL</button>
+                    <button class="b3-button b3-button--text" data-action="localize-network-icon">${window.siyuan.languages.netImg2LocalAsset}</button>
+                </div>
+                <div class="emojis__link-footer emojis__link-footer--save">
                     <button class="b3-button b3-button--cancel" data-action="back-custom-icon">${window.siyuan.languages.returnLabel}</button>
                     <button class="b3-button b3-button--text" data-action="set-network-icon" disabled>${window.siyuan.languages.save}</button>
                 </div>
@@ -1102,8 +1103,10 @@ export const openEmojiPanel = (
     const linkIconDetailElement = dialog.element.querySelector(".emojis__link-detail");
     const linkIconSampleElements = dialog.element.querySelectorAll(".emojis__link-sample");
     const linkIconConfirmElement = dialog.element.querySelector('[data-action="confirm-custom-icon"]') as HTMLButtonElement;
-    const linkIconModeElement = dialog.element.querySelector('[data-type="network-icon-mode"]') as HTMLSelectElement;
+    const linkIconChoiceFooterElement = dialog.element.querySelector(".emojis__link-footer--choice");
+    const linkIconSaveFooterElement = dialog.element.querySelector(".emojis__link-footer--save");
     const linkIconSaveElement = dialog.element.querySelector('[data-action="set-network-icon"]') as HTMLButtonElement;
+    let localizeNetworkIcon = false;
     networkIconInputElement.value = normalizeNetworkIconURL(dynamicImgElement?.getAttribute("src") || "") || "";
     const showLinkIconView = (view: "empty" | "input" | "detail") => {
         linkIconEmptyElement.classList.toggle("fn__none", view !== "empty");
@@ -1120,9 +1123,11 @@ export const openEmojiPanel = (
         const previewSource = pastedCustomIconObjectURL ||
             (base64Image ? networkIconInputElement.value.trim() : networkURL);
         const hasIcon = !!previewSource;
-        const localIcon = hasIcon && (!networkURL || linkIconModeElement.value === "local");
+        const chooseNetworkIcon = !!networkURL && !localizeNetworkIcon;
+        const localIcon = hasIcon && !chooseNetworkIcon;
         showLinkIconView(hasIcon ? "detail" : "empty");
-        linkIconModeElement.classList.toggle("fn__none", !networkURL);
+        linkIconChoiceFooterElement.classList.toggle("fn__none", !chooseNetworkIcon);
+        linkIconSaveFooterElement.classList.toggle("fn__none", chooseNetworkIcon);
         customIconNameLabelElement.classList.toggle("fn__none", !localIcon);
         linkIconSaveElement.disabled = !hasIcon || (localIcon && !customIconNameElement.value.trim());
         linkIconSampleElements.forEach(item => {
@@ -1143,7 +1148,7 @@ export const openEmojiPanel = (
         networkIconInputElement.value = "";
         customIconFileElement.value = "";
         customIconNameElement.value = "";
-        linkIconModeElement.value = "local";
+        localizeNetworkIcon = false;
         updateLinkIconInput();
         renderNetworkIconPreview();
         linkIconElement.focus();
@@ -1153,7 +1158,7 @@ export const openEmojiPanel = (
         networkIconInputElement.value = "";
         customIconFileElement.value = "";
         customIconNameElement.value = "";
-        linkIconModeElement.value = "local";
+        localizeNetworkIcon = false;
         updateLinkIconInput();
         showLinkIconView("input");
         networkIconInputElement.focus();
@@ -1165,9 +1170,11 @@ export const openEmojiPanel = (
         }
         clearPastedCustomIcon();
         customIconNameElement.value = "";
-        linkIconModeElement.value = "local";
+        localizeNetworkIcon = false;
         renderNetworkIconPreview();
-        customIconNameElement.focus();
+        if (!normalizeNetworkIconURL(networkIconInputElement.value)) {
+            customIconNameElement.focus();
+        }
     };
     const setCustomIconFile = (file: File) => {
         clearPastedCustomIcon();
@@ -1175,7 +1182,7 @@ export const openEmojiPanel = (
         pastedCustomIconObjectURL = URL.createObjectURL(file);
         networkIconInputElement.value = "";
         customIconNameElement.value = file.name.replace(/\.[^.]+$/, "");
-        linkIconModeElement.value = "local";
+        localizeNetworkIcon = false;
         renderNetworkIconPreview();
         customIconNameElement.focus();
     };
@@ -1202,12 +1209,28 @@ export const openEmojiPanel = (
         addEmoji(unicode);
         dialog.destroy();
     };
-    const setNetworkIcon = () => {
+    const useNetworkIcon = () => {
         const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
-        if (networkURL && linkIconModeElement.value === "network") {
+        if (networkURL) {
             applyLinkIcon(networkURL);
+        }
+    };
+    const localizeNetworkIconFile = () => {
+        localizeNetworkIcon = true;
+        renderNetworkIconPreview();
+        customIconNameElement.focus();
+    };
+    const backLinkIcon = () => {
+        if (normalizeNetworkIconURL(networkIconInputElement.value) && localizeNetworkIcon) {
+            localizeNetworkIcon = false;
+            customIconNameElement.value = "";
+            renderNetworkIconPreview();
             return;
         }
+        resetLinkIcon();
+    };
+    const setNetworkIcon = () => {
+        const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
         let customIconFile = pastedCustomIconFile;
         if (!networkURL && !customIconFile) {
             const base64Image = parseBase64Image(networkIconInputElement.value);
@@ -1275,12 +1298,13 @@ export const openEmojiPanel = (
         clearPastedCustomIcon();
         networkIconInputElement.value = text;
         customIconNameElement.value = "";
-        linkIconModeElement.value = "local";
+        localizeNetworkIcon = false;
         renderNetworkIconPreview();
-        customIconNameElement.focus();
+        if (parseBase64Image(text)) {
+            customIconNameElement.focus();
+        }
     });
     networkIconInputElement.addEventListener("input", updateLinkIconInput);
-    linkIconModeElement.addEventListener("change", renderNetworkIconPreview);
     customIconNameElement.addEventListener("input", renderNetworkIconPreview);
     customIconNameElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (!event.isComposing && event.key === "Enter" && !linkIconSaveElement.disabled) {
@@ -1370,8 +1394,18 @@ export const openEmojiPanel = (
                 event.preventDefault();
                 event.stopPropagation();
                 break;
+            } else if (target.getAttribute("data-action") === "use-network-icon") {
+                useNetworkIcon();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.getAttribute("data-action") === "localize-network-icon") {
+                localizeNetworkIconFile();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
             } else if (target.getAttribute("data-action") === "back-custom-icon") {
-                resetLinkIcon();
+                backLinkIcon();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

@@ -216,12 +216,6 @@
       }
     }
 
-    &-mode {
-      width: 50%;
-      max-width: 180px;
-      margin-right: auto;
-    }
-
     &-footer {
       display: flex;
       flex-shrink: 0;
@@ -229,6 +223,14 @@
       justify-content: flex-end;
       gap: 8px;
       padding-top: 16px;
+
+      &--choice {
+        flex-wrap: wrap;
+      }
+    }
+
+    &-choice-back {
+      margin-right: auto;
     }
   }
 

@@ -9,7 +9,7 @@ import {resetLayout} from "../../layout/util";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 /// #endif
 import {desktopModeCookie} from "../../util/cookie";
-import {isMobile, objEquals} from "../../util/functions";
+import {getFrontend, isMobile, objEquals} from "../../util/functions";
 import {exitSiYuan} from "../../dialog/processSystem";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openByMobile} from "../../editor/openLink";
@@ -533,47 +533,51 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const desktopModeControl = controlBoolean("desktopMode", {
         readConfig: () => desktopModeCookie.read(),
     });
-    // https://github.com/siyuan-note/siyuan/issues/13952
-    group.composite({
-        key: "desktopMode",
-        keywords: [
-            window.siyuan.languages.desktopMode,
-            window.siyuan.languages.mobileModeTip,
-            window.siyuan.languages.reset,
-        ],
-        html: () => genStackHtml([
-            {
-                left: {kind: "title", text: window.siyuan.languages.desktopMode},
-                right: {
-                    kind: "button",
-                    id: "resetDesktopMode",
-                    label: window.siyuan.languages.reset,
-                    icon: "iconUndo",
+    // 桌面端（Electron）固定访问 /stage/build/app/，桌面模式设置仅在浏览器端和原生移动端生效
+    // https://github.com/siyuan-note/siyuan/issues/18559
+    if (!getFrontend().startsWith("desktop")) {
+        // https://github.com/siyuan-note/siyuan/issues/13952
+        group.composite({
+            key: "desktopMode",
+            keywords: [
+                window.siyuan.languages.desktopMode,
+                window.siyuan.languages.mobileModeTip,
+                window.siyuan.languages.reset,
+            ],
+            html: () => genStackHtml([
+                {
+                    left: {kind: "title", text: window.siyuan.languages.desktopMode},
+                    right: {
+                        kind: "button",
+                        id: "resetDesktopMode",
+                        label: window.siyuan.languages.reset,
+                        icon: "iconUndo",
+                    },
                 },
+                {
+                    left: {kind: "desc", text: window.siyuan.languages.mobileModeTip},
+                    right: desktopModeControl,
+                },
+                {
+                    left: {kind: "desc", text: window.siyuan.languages.desktopModeRestartTip},
+                },
+            ]),
+            controls: [{
+                control: desktopModeControl,
+                save: (value) => {
+                    desktopModeCookie.set(value as boolean);
+                    // 切换桌面/移动模式需要重启应用才能加载对应 bundle，走正常退出流程后由用户手动重启
+                    void exitSiYuan();
+                },
+            }],
+            afterMount: (root) => {
+                root.querySelector("#resetDesktopMode")?.addEventListener("click", () => {
+                    desktopModeCookie.remove();
+                    void exitSiYuan();
+                });
             },
-            {
-                left: {kind: "desc", text: window.siyuan.languages.mobileModeTip},
-                right: desktopModeControl,
-            },
-            {
-                left: {kind: "desc", text: window.siyuan.languages.desktopModeRestartTip},
-            },
-        ]),
-        controls: [{
-            control: desktopModeControl,
-            save: (value) => {
-                desktopModeCookie.set(value as boolean);
-                // 切换桌面/移动模式需要重启应用才能加载对应 bundle，走正常退出流程后由用户手动重启
-                void exitSiYuan();
-            },
-        }],
-        afterMount: (root) => {
-            root.querySelector("#resetDesktopMode")?.addEventListener("click", () => {
-                desktopModeCookie.remove();
-                void exitSiYuan();
-            });
-        },
-    });
+        });
+    }
     /// #if !MOBILE
     group.button({
         id: "resetLayout",

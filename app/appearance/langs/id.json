@@ -2235,7 +2235,7 @@
 		"147": "Membuat snapshot data baru, memakan waktu %.2fs",
 		"148": "Memeriksa snapshot data dan tidak menemukan perubahan, memakan waktu %.2fs",
 		"149": "Snapshot data telah disinkronkan, memakan waktu %.2fs",
-		"150": "file yang diunggah/diunduh %d/%d<br>&emsp;potongan yang diunggah/diunduh %d/%d<br>&emsp;byte yang dikirim/diterima %s/%s<br>&emsp;lalu lintas akselerasi LAN %s",
+		"150": "file yang diunggah/diunduh %d/%d<br>&emsp;potongan yang diunggah/diunduh %d/%d<br>&emsp;byte yang dikirim/diterima %s/%s",
 		"151": "Jangan sertakan simbol \\ / : * ? &quot; &#039; &lt; &gt; |",
 		"152": "File yang diunggah %d, potongan %d, byte yang dikirim %s",
 		"153": "File yang diunduh %d, potongan %d, byte yang diterima %s",
@@ -2454,6 +2454,7 @@
 		"366": "Login OIDC selesai",
 		"367": "Anda dapat menutup jendela ini dan kembali ke SiYuan",
 		"368": "Penyedia OIDC ini tidak mendukung URI panggilan balik seluler SiYuan",
-		"369": "Konfigurasi OIDC tidak valid"
+		"369": "Konfigurasi OIDC tidak valid",
+		"370": "lalu lintas akselerasi LAN %s"
 	}
 	}

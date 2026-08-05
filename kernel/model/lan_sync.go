@@ -244,6 +244,9 @@ func SetSyncLAN(enabled bool, maxConcurrentReqs int) {
 	}
 	Conf.Sync.LAN.Enabled = enabled
 	Conf.Sync.LAN.MaxConcurrentReqs = maxConcurrentReqs
+	if !enabled {
+		Conf.Sync.Stat = removeLANSyncTrafficStat(Conf.Sync.Stat)
+	}
 	Conf.Save()
 	refreshLANSyncManager()
 }

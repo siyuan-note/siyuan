@@ -2235,7 +2235,7 @@
 		"147": "Creato un nuovo snapshot dei dati, impiegati %.2fs",
 		"148": "Controllato lo snapshot dei dati e non sono state trovate modifiche, impiegati %.2fs",
 		"149": "Lo snapshot dei dati è stato sincronizzato, impiegati %.2fs",
-		"150": "file caricati/scaricati %d/%d<br>&emsp;blocchi caricati/scaricati %d/%d<br>&emsp;byte inviati/ricevuti %s/%s<br>&emsp;traffico accelerato LAN %s",
+		"150": "file caricati/scaricati %d/%d<br>&emsp;blocchi caricati/scaricati %d/%d<br>&emsp;byte inviati/ricevuti %s/%s",
 		"151": "Non includere simboli \\ / : * ? &quot; &#039; &lt; &gt; |",
 		"152": "File caricati %d, blocchi %d, byte inviati %s",
 		"153": "File scaricati %d, blocchi %d, byte ricevuti %s",
@@ -2454,6 +2454,7 @@
 		"366": "Accesso OIDC completato",
 		"367": "Puoi chiudere questa finestra e tornare a SiYuan",
 		"368": "Questo provider OIDC non supporta l'URI di richiamata mobile di SiYuan",
-		"369": "Configurazione OIDC non valida"
+		"369": "Configurazione OIDC non valida",
+		"370": "traffico accelerato LAN %s"
 	}
 	}

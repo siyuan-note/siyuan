@@ -2235,7 +2235,7 @@
 		"147": "Nieuwe momentopname; duurde %.2fs",
 		"148": "Geen wijzigingen; duurde %.2fs",
 		"149": "Momentopname gesynct; duurde %.2fs",
-		"150": "Bestanden %d/%d<br>&emsp;chunks %d/%d<br>&emsp;bytes %s/%s<br>&emsp;LAN-versneld verkeer %s",
+		"150": "Bestanden %d/%d<br>&emsp;chunks %d/%d<br>&emsp;bytes %s/%s",
 		"151": "Gebruik geen symbolen \\ / : * ? &quot; &#039; &lt; &gt; |",
 		"152": "Geupload: %d bestanden, %d chunks, %s bytes",
 		"153": "Gedownload: %d bestanden, %d chunks, %s bytes",
@@ -2454,6 +2454,7 @@
 		"366": "OIDC-aanmelding voltooid",
 		"367": "U kunt dit venster sluiten en terugkeren naar SiYuan",
 		"368": "Deze OIDC-provider ondersteunt de mobiele callback-URI van SiYuan niet",
-		"369": "Ongeldige OIDC-configuratie"
+		"369": "Ongeldige OIDC-configuratie",
+		"370": "LAN-versneld verkeer %s"
 	}
 	}

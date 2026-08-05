@@ -2235,7 +2235,7 @@
 		"147": "Yeni veri anlık görüntüsü oluşturuldu, %.2fs sürdü",
 		"148": "Veri anlık görüntüsünde değişiklik bulunamadı, %.2fs sürdü",
 		"149": "Veri anlık görüntüsü senkronize edildi, %.2fs sürdü",
-		"150": "Yüklenen/indirilen dosyalar %d/%d<br>&emsp;yüklü/indirilen parçalar %d/%d<br>&emsp;gönderilen/alınan bayt %s/%s<br>&emsp;LAN hızlandırılmış trafik %s",
+		"150": "Yüklenen/indirilen dosyalar %d/%d<br>&emsp;yüklü/indirilen parçalar %d/%d<br>&emsp;gönderilen/alınan bayt %s/%s",
 		"151": "Şu sembolleri içermemelidir \\ / : * ? &quot; &#039; &lt; &gt; |",
 		"152": "Yüklenen dosyalar %d, parçalar %d, gönderilen veri %s",
 		"153": "İndirilen dosyalar %d, parçalar %d, alınan veri %s",
@@ -2454,6 +2454,7 @@
 		"366": "OIDC girişi tamamlandı",
 		"367": "Bu pencereyi kapatıp SiYuan'a dönebilirsiniz",
 		"368": "Bu OIDC sağlayıcısı SiYuan mobil geri çağırma URI'sini desteklemiyor",
-		"369": "Geçersiz OIDC yapılandırması"
+		"369": "Geçersiz OIDC yapılandırması",
+		"370": "LAN hızlandırılmış trafik %s"
 	}
 	}

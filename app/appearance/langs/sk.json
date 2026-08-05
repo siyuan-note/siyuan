@@ -2235,7 +2235,7 @@
 		"147": "Nová snímka vytvorená za %.2fs",
 		"148": "Snímka bez zmien, overenie trvalo %.2fs",
 		"149": "Snímka synchronizovaná za %.2fs",
-		"150": "nahrané/stiahnuté súbory %d/%d<br>&emsp;nahrané/stiahnuté časti %d/%d<br>&emsp;odoslané/prijaté bajty %s/%s<br>&emsp;prevádzka zrýchlená cez LAN %s",
+		"150": "nahrané/stiahnuté súbory %d/%d<br>&emsp;nahrané/stiahnuté časti %d/%d<br>&emsp;odoslané/prijaté bajty %s/%s",
 		"151": "Nepovolené znaky v názve: \\ / : * ? \" < > |",
 		"152": "Nahrané súbory %d, časti %d, bajty %s",
 		"153": "Stiahnuté súbory %d, časti %d, bajty %s",
@@ -2454,6 +2454,7 @@
 		"366": "Prihlásenie OIDC bolo dokončené",
 		"367": "Toto okno môžete zavrieť a vrátiť sa do SiYuan",
 		"368": "Tento poskytovateľ OIDC nepodporuje mobilný URI spätného volania SiYuan",
-		"369": "Neplatná konfigurácia OIDC"
+		"369": "Neplatná konfigurácia OIDC",
+		"370": "prevádzka zrýchlená cez LAN %s"
 	}
 	}

@@ -2235,7 +2235,7 @@
 		"147": "Creó una nueva instantánea de datos, tomó %.2fs",
 		"148": "Se ha comprobado la instantánea de los datos y no se encontro ningún cambio, tomó %.2fs",
 		"149": "La instantánea de datos ha sido sincronizada, ha tomado %.2fs",
-		"150": "archivos cargados/descargados %d/%d<br>&emsp;fragmentos cargados/descargados %d/%d<br>&emsp;bytes enviados/recibidos %s/%s<br>&emsp;tráfico acelerado por LAN %s",
+		"150": "archivos cargados/descargados %d/%d<br>&emsp;fragmentos cargados/descargados %d/%d<br>&emsp;bytes enviados/recibidos %s/%s",
 		"151": "No incluir símbolos \\ / : * ? &quot; &#039; &lt; &gt; |",
 		"152": "Archivos cargados %d, fragmentos %d, bytes enviados %s",
 		"153": "Archivos descargados %d, fragmentos %d, bytes recibidos %s",
@@ -2454,6 +2454,7 @@
 		"366": "Inicio de sesión OIDC completado",
 		"367": "Puede cerrar esta ventana y volver a SiYuan",
 		"368": "Este proveedor OIDC no admite el URI de devolución de llamada móvil de SiYuan",
-		"369": "Configuración OIDC no válida"
+		"369": "Configuración OIDC no válida",
+		"370": "tráfico acelerado por LAN %s"
 	}
 	}

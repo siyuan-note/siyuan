@@ -1795,7 +1795,8 @@ func syncRepoDownload() (err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.PeerDownloadBytes), 2))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
+	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -1874,7 +1875,8 @@ func syncRepoUpload() (err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.PeerDownloadBytes), 2))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
+	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -2117,7 +2119,8 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.PeerDownloadBytes), 2))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
+	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -2513,6 +2516,37 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			}
 		}
 	}()
+}
+
+func appendLANSyncTrafficStat(message string, trafficStat *dejavu.TrafficStat) string {
+	if nil == Conf.Sync || nil == Conf.Sync.LAN || !Conf.Sync.LAN.Enabled {
+		return message
+	}
+	traffic := humanize.BytesCustomCeil(uint64(trafficStat.PeerDownloadBytes), 2)
+	return message + `<br data-type="lanSyncTraffic">&emsp;` + fmt.Sprintf(Conf.Language(370), traffic)
+}
+
+func removeLANSyncTrafficStat(message string) string {
+	const marker = `<br data-type="lanSyncTraffic">`
+	if index := strings.Index(message, marker); 0 <= index {
+		return message[:index]
+	}
+
+	// 兼容已保存的无标记局域网流量统计。
+	const separator = "<br>&emsp;"
+	index := strings.LastIndex(message, separator)
+	if 0 > index {
+		return message
+	}
+	lastLine := message[index+len(separator):]
+	for _, language := range util.Langs {
+		format := language[370]
+		prefix := strings.TrimSuffix(format, "%s")
+		if prefix != format && strings.HasPrefix(lastLine, prefix) {
+			return message[:index]
+		}
+	}
+	return message
 }
 
 func logSyncMergeResult(mergeResult *dejavu.MergeResult) {

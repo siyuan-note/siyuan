@@ -3289,6 +3289,7 @@ export class WYSIWYG {
                     removeSearchMark(target);
                 }
                 if (types.includes("block-ref")) {
+                    event.preventDefault();
                     refMenu(protyle, target);
                     // 阻止 popover
                     target.setAttribute("prevent-popover", "true");
@@ -3306,6 +3307,7 @@ export class WYSIWYG {
                     protyle.toolbar.showRender(protyle, target);
                     return false;
                 } else if (types.includes("a")) {
+                    event.preventDefault();
                     linkMenu(protyle, target);
                     if (window.siyuan.config.editor.floatWindowMode === 0 &&
                         target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {

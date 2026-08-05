@@ -853,6 +853,10 @@ table + .protyle-action__table {
     &--row,
     &--column {
       cursor: grab;
+
+      &::before {
+        opacity: 0;
+      }
     }
 
     &--row {

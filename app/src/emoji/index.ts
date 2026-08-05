@@ -945,6 +945,7 @@ export const openEmojiPanel = (
                 <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconDices"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
+            <div class="fn__hr"></div>
             <div class="emojis__panel"></div>
             <div class="emojis__types">${genEmojiCategoryButtons(true)}</div>
         </div>

@@ -2243,6 +2243,10 @@ img.av__cellassetimg {
   .av__relation-table-footer {
     border-radius: 0;
     margin: 0;
+
+    &.b3-list--empty {
+      padding-bottom: 8px;
+    }
   }
 
   .av__relation-table-row.dragover__top::after,

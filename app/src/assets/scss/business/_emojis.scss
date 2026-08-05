@@ -88,6 +88,10 @@
 
   &__section {
     position: relative;
+
+    &:first-child > .emojis__title {
+      padding-top: 4px;
+    }
   }
 
   &__panel {

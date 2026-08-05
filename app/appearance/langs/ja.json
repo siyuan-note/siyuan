@@ -487,7 +487,7 @@
 	"scrollToBottom": "最下部にスクロール",
 	"featurePreview": "💡 この機能は早期プレビュー段階で、まだ不安定です。使用前にデータをバックアップしてください",
 	"agentSessionSearch": "セッションを検索...",
-	"agentWelcomeGreeting": "ねえ、何か考えてる？任せて",
+	"agentWelcomeGreeting": "ねえ、何か考えてる？\n任せて",
 	"agentExample1": "最近の会議メモを検索",
 	"agentExample2": "新しい日記を作成",
 	"agentExample3": "プロジェクト関連のノートを検索",

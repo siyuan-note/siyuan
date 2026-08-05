@@ -104,6 +104,7 @@
   font-weight: 600;
   color: var(--b3-theme-on-surface);
   margin-bottom: 4px;
+  white-space: pre-line;
 }
 
 .agent-welcome__desc {
@@ -689,7 +690,7 @@
   gap: 5px;
   padding: 4px 26px 4px 8px;
   white-space: nowrap;
-  min-width: 0;
+  flex-shrink: 0;
 
   &-label {
     overflow: hidden;
@@ -703,17 +704,19 @@
   gap: 5px;
   padding: 4px 26px 4px 8px;
   white-space: nowrap;
-  flex-shrink: 0;
+  min-width: 0;
 
   &-icon {
     height: 14px;
     width: 14px;
     color: var(--b3-theme-on-surface);
+    flex-shrink: 0;
   }
 
   &-label {
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
   }
 }
 
@@ -722,7 +725,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 26px 4px 8px;
+  padding: 4px 8px;
+  background-image: none;
   white-space: nowrap;
   flex-shrink: 0;
 

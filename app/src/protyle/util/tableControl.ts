@@ -369,6 +369,14 @@ export class TableControl {
                 this.caretCell = undefined;
                 render = true;
             }
+            const controlTables = [
+                this.hoverCell?.closest("table"),
+                this.caretCell?.closest("table"),
+                this.selection?.table,
+            ].filter((table): table is HTMLTableElement => !!table?.isConnected);
+            if (mutations.some(mutation => controlTables.some(table => table.contains(mutation.target)))) {
+                render = true;
+            }
             const pinnedTableSelector = '[data-type="NodeTable"][custom-pinthead="true"]';
             if (mutations.some(mutation => mutation.type === "attributes" ||
                 (mutation.target instanceof Element && !!mutation.target.closest(pinnedTableSelector)) ||
@@ -384,6 +392,7 @@ export class TableControl {
             attributeFilter: ["custom-pinthead"],
             attributes: true,
             childList: true,
+            characterData: true,
             subtree: true,
         });
         this.scheduleRender();
@@ -457,11 +466,6 @@ export class TableControl {
             const caretCell = cell && this.wysiwygElement.contains(cell) ? cell : undefined;
             if (caretCell !== this.caretCell) {
                 this.caretCell = caretCell;
-                this.scheduleRender();
-            }
-        }, {signal});
-        this.wysiwygElement.addEventListener("input", () => {
-            if (this.caretCell?.isConnected || this.selection?.table.isConnected) {
                 this.scheduleRender();
             }
         }, {signal});

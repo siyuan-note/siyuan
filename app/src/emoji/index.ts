@@ -1183,7 +1183,7 @@ export const openEmojiPanel = (
         pastedCustomIconFile = file;
         pastedCustomIconObjectURL = URL.createObjectURL(file);
         networkIconInputElement.value = "";
-        customIconNameElement.value = file.name.replace(/\.[^.]+$/, "");
+        customIconNameElement.value = file.name;
         localizeNetworkIcon = false;
         renderNetworkIconPreview();
         customIconNameElement.focus();

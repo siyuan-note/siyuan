@@ -2059,11 +2059,14 @@ img.av__cellassetimg {
 }
 
 .av__relation-panel {
+  padding-bottom: 0;
+
   .av__relation {
     min-width: 0;
   }
 
   .av__relation-table {
+    border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
     overflow: auto;
     overscroll-behavior: contain;
     padding: 0;

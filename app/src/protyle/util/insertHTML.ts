@@ -871,7 +871,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 移动端插入嵌入块时，获取到的 range 为旧值
                            useProtyleRange = false,
                            // 在开头粘贴块则插入上方
-                           insertByCursor = false) => {
+                           insertByCursor = false,
+                           // 根据块级拖拽指示线强制插入方向
+                           insertPosition?: "before" | "after") => {
     if (html === "") {
         return;
     }
@@ -1313,8 +1315,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         keepEmptyBlock = true;
     }
     let lastElement: Element;
-    let insertBefore = false;
-    if (!range.toString() && insertByCursor) {
+    let insertBefore = insertPosition === "before";
+    if (!insertPosition && !range.toString() && insertByCursor) {
         const positon = getSelectionOffset(blockElement, protyle.wysiwyg.element, range);
         if (positon.start === 0 && editableElement.textContent !== "") {
             insertBefore = true;
@@ -1401,7 +1403,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         (emptyStartType === "NodeHeading" && blockElement.getAttribute("fold") !== "1");
     const startTextIsEmpty = editableElement &&
         editableElement.textContent.split(Constants.ZWSP).join("").replace(/\n/g, "") === "";
-    if (startTextIsEmpty && canRemoveEmptyStart && !keepEmptyBlock &&
+    if (!insertPosition && startTextIsEmpty && canRemoveEmptyStart && !keepEmptyBlock &&
         !editableElement?.querySelector("img, video, audio, iframe, canvas, .emoji")) {
         // 选中当前块所有内容粘贴再撤销会导致异常 https://ld246.com/article/1662542137636
         doOperation.find((item, index) => {

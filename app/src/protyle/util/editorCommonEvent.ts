@@ -1330,7 +1330,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement = undefined;
             return;
         }
-        let targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover__bottom--sibling, .dragover__top--sibling, .dragover__bottom--child, .dragover__top--child");
+        let targetElement = dragoverElement || editorElement.querySelector(
+            ".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover__bottom--sibling, .dragover__top--sibling, .dragover__bottom--child, .dragover__top--child");
         if (targetElement) {
             targetElement.classList.remove("dragover");
             targetElement.removeAttribute("select-start");
@@ -1341,6 +1342,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const sourceElements: Element[] = [];
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
             const selectedIds = uniqueDragIds(gutterTypes[2].split(","));
+            let insertPosition: "before" | "after";
             if (event.altKey || event.shiftKey) {
                 if (event.y > protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
                     insertEmptyBlock(protyle, "afterend", protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"));
@@ -1349,6 +1351,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
                         return;
                     } else {
+                        // 数据库和代码块的工具区不属于编辑内容，需按拖拽指示线将光标定位到可编辑区域开头或末尾。
+                        if (event.shiftKey && ["NodeAttributeView", "NodeCodeBlock"].includes(targetElement?.getAttribute("data-type"))) {
+                            const editableElement = getContenteditableElement(targetElement);
+                            const isBefore = targetElement.classList.contains("dragover__top") ||
+                                targetElement.classList.contains("dragover__left");
+                            const isAfter = targetElement.classList.contains("dragover__bottom") ||
+                                targetElement.classList.contains("dragover__right");
+                            if (editableElement && (isBefore || isAfter)) {
+                                range.selectNodeContents(editableElement);
+                                range.collapse(isBefore);
+                                insertPosition = isBefore ? "before" : "after";
+                            }
+                        }
                         focusByRange(range);
                     }
                 }
@@ -1362,7 +1377,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectedIds.forEach(item => {
                     html += `{{select * from blocks where id='${item}'}}\n`;
                 });
-                insertHTML(protyle.lute.SpinBlockDOM(html), protyle, true);
+                insertHTML(protyle.lute.SpinBlockDOM(html), protyle, true, false, false, insertPosition);
                 blockRender(protyle, protyle.wysiwyg.element);
             } else if (targetElement && targetElement.className.indexOf("dragover__") > -1) {
                 let queryClass = "";
@@ -1998,6 +2013,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         clearKanbanGroupDragover();
         kanbanGroupDragHeight = "";
         cleanupDragIndicators(document);
+        dragoverElement = undefined;
     });
     let dragoverElement: Element;
     let dragCache: { nodeId: string, indent: number, rgb: { r: number, g: number, b: number }, guides: string };
@@ -2853,6 +2869,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement && targetElement.classList.contains("av__row--header")) {
                 // 块不能拖在表头上
                 disabledPosition = "top";
+            }
+            if (dragoverElement && dragoverElement !== targetElement) {
+                cleanupDragIndicators(editorElement);
             }
             dragoverElement = targetElement;
             // 目标变化时更新缓存

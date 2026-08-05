@@ -2,6 +2,19 @@ export const isSameDragEditor = (targetEditor: Pick<Element, "contains">, source
     return targetEditor.contains(sourceElement);
 };
 
+export const isAttributeViewTitleTarget = (targetNode: Node | null) => {
+    if (!targetNode) {
+        return false;
+    }
+    const targetElement = targetNode.nodeType === 3 ? targetNode.parentElement : targetNode as Element;
+    for (let element = targetElement; element; element = element.parentElement) {
+        if (element.classList.contains("av__title")) {
+            return true;
+        }
+    }
+    return false;
+};
+
 export const isDragTargetInSource = (sourceElements: Element[], targetElement: Element) => {
     const sourceIDs = new Set(sourceElements.map(item => item.getAttribute("data-node-id")).filter(Boolean));
     for (let target = targetElement; target; target = target.parentElement) {

@@ -1,12 +1,26 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    isAttributeViewTitleTarget,
     isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
     replaceDragUndoOperation,
     uniqueDragIds
 } from "./dragDocument";
+
+const createClassElement = (classNames: string[], parentElement: Element = null) => ({
+    nodeType: 1,
+    classList: {
+        contains: (className: string) => classNames.includes(className),
+    },
+    parentElement,
+}) as unknown as Element;
+
+const createTextNode = (parentElement: Element) => ({
+    nodeType: 3,
+    parentElement,
+}) as unknown as Node;
 
 const createBlockElement = (id: string, parentElement: Element = null) => ({
     getAttribute: (name: string) => name === "data-node-id" ? id : null,
@@ -28,6 +42,25 @@ describe("isSameDragEditor", () => {
         const targetEditor = {contains: (element: Element) => element === sourceElement} as unknown as Element;
 
         assert.equal(isSameDragEditor(targetEditor, sourceElement), true);
+    });
+});
+
+describe("isAttributeViewTitleTarget", () => {
+    it("recognizes the database title and its descendants", () => {
+        const title = createClassElement(["av__title"]);
+        const titleChild = createClassElement([], title);
+        const titleText = createTextNode(title);
+
+        assert.equal(isAttributeViewTitleTarget(title), true);
+        assert.equal(isAttributeViewTitleTarget(titleChild), true);
+        assert.equal(isAttributeViewTitleTarget(titleText), true);
+    });
+
+    it("allows other database areas", () => {
+        const database = createClassElement(["av"]);
+        const row = createClassElement(["av__row"], database);
+
+        assert.equal(isAttributeViewTitleTarget(row), false);
     });
 });
 

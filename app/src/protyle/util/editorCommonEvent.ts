@@ -54,6 +54,7 @@ import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 import {
+    isAttributeViewTitleTarget,
     isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
@@ -1119,12 +1120,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         insertHTML(protyle.lute.Md2BlockDOM(markdown), protyle);
     };
     const focusBlockRefDrop = (event: DragEvent) => {
+        if (isAttributeViewTitleTarget(event.target as Node)) {
+            return false;
+        }
         if (event.y > protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
             insertEmptyBlock(protyle, "afterend", protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"));
             return true;
         }
         const range = getRangeByPoint(event.clientX, event.clientY);
-        if (!range || hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
+        if (!range || isAttributeViewTitleTarget(range.startContainer) ||
+            hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
             return false;
         }
         focusByRange(range);
@@ -1136,8 +1141,17 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             item.removeAttribute("select-start");
             item.removeAttribute("select-end");
         });
-        if (event.y <= protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
-            const range = getRangeByPoint(event.clientX, event.clientY);
+        const isWithinEditor = event.y <= protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom;
+        const range = isWithinEditor ? getRangeByPoint(event.clientX, event.clientY) : undefined;
+        if (isAttributeViewTitleTarget(event.target as Node) ||
+            (range && isAttributeViewTitleTarget(range.startContainer))) {
+            event.dataTransfer.dropEffect = "none";
+            hideDragTip();
+            hideCaretLine();
+            event.preventDefault();
+            return;
+        }
+        if (isWithinEditor) {
             let caretLineShown = false;
             if (range && !hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
                 const rect = range.getBoundingClientRect();
@@ -1343,11 +1357,27 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
             const selectedIds = uniqueDragIds(gutterTypes[2].split(","));
             let insertPosition: "before" | "after";
+            if ((event.altKey || (event.shiftKey && protyle.lite)) &&
+                isAttributeViewTitleTarget(event.target as Node)) {
+                event.preventDefault();
+                event.stopPropagation();
+                hideCaretLine();
+                cleanupDragIndicators(editorElement);
+                return;
+            }
             if (event.altKey || event.shiftKey) {
                 if (event.y > protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
                     insertEmptyBlock(protyle, "afterend", protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"));
                 } else {
                     const range = getRangeByPoint(event.clientX, event.clientY);
+                    if ((event.altKey || (event.shiftKey && protyle.lite)) &&
+                        isAttributeViewTitleTarget(range.startContainer)) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        hideCaretLine();
+                        cleanupDragIndicators(editorElement);
+                        return;
+                    }
                     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
                         return;
                     } else {
@@ -1835,15 +1865,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 !targetElement.classList.contains("av__row") && !targetElement.classList.contains("av__gallery-item") &&
                 !targetElement.classList.contains("av__gallery-add")
             ))) {
-                if (event.y > protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
-                    insertEmptyBlock(protyle, "afterend", protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"));
-                } else {
-                    const range = getRangeByPoint(event.clientX, event.clientY);
-                    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
-                        return;
-                    } else {
-                        focusByRange(range);
-                    }
+                if (!focusBlockRefDrop(event)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    hideCaretLine();
+                    cleanupDragIndicators(editorElement);
+                    return;
                 }
                 await insertBlockRefs(ids);
             } else if (targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {

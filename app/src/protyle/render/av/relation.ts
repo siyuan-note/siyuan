@@ -391,7 +391,10 @@ const getRelationGridTemplate = (columns: IAVColumn[], rows: IAVRow[],
         groups: [],
         rowCount: rows.length,
     } as IAVTable, getCellValueText, measureText);
-    return `32px ${columns.map((column) => widths[column.id] || "64px").join(" ")}`;
+    return `32px ${columns.map((column, index) => {
+        const width = widths[column.id] || "64px";
+        return index === 0 ? `${Math.max(240, parseFloat(width))}px` : width;
+    }).join(" ")}`;
 };
 
 const getRelationPrimaryCell = (row: IAVRow) => {

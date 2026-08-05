@@ -467,9 +467,7 @@ data-id="${escapeAttr(refElement?.getAttribute("data-id") || "")}">${escapeHtml(
 </button>`;
     }
     if (!hasCandidates && !hasMore) {
-        return `<button class="b3-menu__item av__relation-table-footer" data-relation-type="empty">
-    <span class="b3-menu__label">${window.siyuan.languages.noMoreItems}</span>
-</button>`;
+        return `<div class="b3-list--empty av__relation-table-footer" data-relation-type="empty">${window.siyuan.languages.noMoreItems}</div>`;
     }
     return "";
 };

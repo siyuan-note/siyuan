@@ -1119,7 +1119,29 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         insertHTML(protyle.lute.Md2BlockDOM(markdown), protyle);
     };
+    const getAdjustedDragTarget = (event: DragEvent) => {
+        const contentRect = protyle.contentElement.getBoundingClientRect();
+        const editorLeft = contentRect.left + (parseInt(editorElement.style.paddingLeft) || 0);
+        const editorRight = contentRect.left + protyle.contentElement.clientWidth -
+            (parseInt(editorElement.style.paddingRight) || 0);
+        const x = event.clientX < editorLeft ? editorLeft :
+            (event.clientX >= editorRight ? editorRight - 6 : event.clientX);
+        return document.elementFromPoint(x, event.clientY);
+    };
+    const getAttributeViewDropTarget = (event: DragEvent) => {
+        const targets = [event.target as Node, getAdjustedDragTarget(event)];
+        const hasTargetClass = (className: string) => targets.some(item => hasClosestByClassName(item, className));
+        return {
+            isAttributeView: hasTargetClass("av"),
+            isItem: hasTargetClass("av__row") || hasTargetClass("av__row--util") ||
+                hasTargetClass("av__gallery-item") || hasTargetClass("av__gallery-add"),
+        };
+    };
     const isAttributeViewTitleDrop = (event: DragEvent, range?: Range) => {
+        const attributeViewTarget = getAttributeViewDropTarget(event);
+        if (attributeViewTarget.isAttributeView && !attributeViewTarget.isItem) {
+            return true;
+        }
         const point = {x: event.clientX, y: event.clientY};
         if (isAttributeViewTitleTarget(event.target as Node, point) ||
             isAttributeViewTitleTarget(range?.startContainer || null, point)) {
@@ -1867,11 +1889,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)?.split("-").length > 1) {
             // 文件树拖拽
             const ids = event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",");
-            const isAvItemTarget = hasClosestByClassName(event.target, "av__row") ||
-                hasClosestByClassName(event.target, "av__row--util") ||
-                hasClosestByClassName(event.target, "av__gallery-item") ||
-                hasClosestByClassName(event.target, "av__gallery-add");
-            if (!event.altKey && hasClosestByClassName(event.target, "av") && !isAvItemTarget) {
+            const attributeViewTarget = getAttributeViewDropTarget(event);
+            if (!event.altKey && attributeViewTarget.isAttributeView && !attributeViewTarget.isItem) {
                 event.preventDefault();
                 event.stopPropagation();
                 hideCaretLine();
@@ -2263,13 +2282,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             gutterTypes[0] === "nodeattributeviewrow" ||
             (gutterTypes[0] === "nodeattributeview" && ["viewtab", "col", "galleryitem", "group"].includes(gutterTypes[1] || ""));
         // 操作提示：上半=操作对象名称，下半=操作文案
-        const isAvTarget = hasClosestByClassName(event.target, "av__row") ||
-            hasClosestByClassName(event.target, "av__row--util") ||
-            hasClosestByClassName(event.target, "av__gallery-item") ||
-            hasClosestByClassName(event.target, "av__gallery-add");
+        const attributeViewTarget = getAttributeViewDropTarget(event);
+        const isAvTarget = attributeViewTarget.isItem;
         if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
             // 文档面板拖拽文档到编辑器
-            if (hasClosestByClassName(event.target, "av") && !isAvTarget) {
+            if (attributeViewTarget.isAttributeView && !isAvTarget) {
                 event.preventDefault();
                 event.dataTransfer.dropEffect = "none";
                 hideDragTip();

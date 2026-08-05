@@ -16,6 +16,7 @@ import {
     genEmojiImageHTML,
     getIconSearchText,
     getIconValueKind,
+    getNetworkIconName,
     normalizeNetworkIconURL,
     normalizeRecentIconValue,
     parseBase64Image,
@@ -1217,6 +1218,7 @@ export const openEmojiPanel = (
     };
     const localizeNetworkIconFile = () => {
         localizeNetworkIcon = true;
+        customIconNameElement.value = getNetworkIconName(networkIconInputElement.value);
         renderNetworkIconPreview();
         customIconNameElement.focus();
     };

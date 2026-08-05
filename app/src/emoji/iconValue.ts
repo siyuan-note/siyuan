@@ -31,6 +31,24 @@ export const normalizeNetworkIconURL = (value: string): string | undefined => {
     return url.href;
 };
 
+export const getNetworkIconName = (value: string): string => {
+    const normalizedURL = normalizeNetworkIconURL(value);
+    if (!normalizedURL) {
+        return "icon";
+    }
+
+    const pathSegment = new URL(normalizedURL).pathname.split("/").filter(Boolean).pop() || "";
+    let name = pathSegment;
+    try {
+        name = decodeURIComponent(pathSegment);
+    } catch {
+        // 保留 URL 中未正确编码的路径名称。
+    }
+    name = name.replace(/\.[^.]*$/, "").replace(/[\\/:*?"<>|]/g, "_");
+    name = Array.from(name, character => character.charCodeAt(0) < 32 ? "_" : character).join("").trim();
+    return name || "icon";
+};
+
 export const parseBase64Image = (value: string): IBase64Image | undefined => {
     const icon = value.trim();
     const commaIndex = icon.indexOf(",");

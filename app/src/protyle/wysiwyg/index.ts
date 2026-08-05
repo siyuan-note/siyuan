@@ -908,6 +908,31 @@ export class WYSIWYG {
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
             let nodeElement = hasClosestBlock(target) as HTMLElement;
+            let clickedTableNode = nodeElement && nodeElement.dataset.type === "NodeTable" ? nodeElement : undefined;
+            if (!nodeElement) {
+                clickedTableNode = Array.from(this.element.querySelectorAll<HTMLElement>(
+                    '[data-type="NodeTable"]')).find(item => {
+                    const table = item.querySelector("table");
+                    if (!table) {
+                        return false;
+                    }
+                    const tableRect = table.getBoundingClientRect();
+                    const nodeRect = item.getBoundingClientRect();
+                    return event.clientX > tableRect.right &&
+                        event.clientY >= nodeRect.top && event.clientY <= nodeRect.bottom;
+                });
+            }
+            const clickedTableElement = clickedTableNode?.querySelector("table");
+            if (clickedTableElement) {
+                const tableRect = clickedTableElement.getBoundingClientRect();
+                const nodeRect = clickedTableNode.getBoundingClientRect();
+                if (event.clientX > tableRect.right &&
+                    event.clientY >= nodeRect.top && event.clientY <= nodeRect.bottom) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+            }
             if (hasClosestByClassName(target, "av__selection-toolbar")) {
                 event.preventDefault();
                 event.stopPropagation();

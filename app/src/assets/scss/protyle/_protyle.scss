@@ -901,7 +901,9 @@ table + .protyle-action__table {
 
     &--row,
     &--column {
-      background-color: var(--b3-table-even-background);
+      background-color: var(--b3-parent-background);
+      border-color: var(--b3-theme-surface-lighter);
+      box-shadow: none;
     }
 
     svg {
@@ -917,6 +919,8 @@ table + .protyle-action__table {
     &--row:hover,
     &--column:hover {
       color: var(--b3-theme-on-surface);
+      background-color: var(--b3-table-even-background);
+      background-image: none;
     }
 
     &--active,

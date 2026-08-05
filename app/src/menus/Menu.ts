@@ -237,7 +237,7 @@ export class Menu {
         this.element.style.transform = `translateY(${offset}px)`;
         const scrimElement = this.getFullscreenScrim();
         if (scrimElement) {
-            scrimElement.style.opacity = Math.max(0, .4 * (1 - offset / this.element.clientHeight)).toString();
+            scrimElement.style.opacity = Math.max(0, .2 * (1 - offset / this.element.clientHeight)).toString();
         }
         if (event.cancelable) {
             event.preventDefault();
@@ -330,7 +330,7 @@ export class Menu {
     private setSheetHeight(position: "bottom" | "all") {
         this.updateSheetTitle();
         if (position === "bottom") {
-            this.element.style.height = "50vh";
+            this.element.style.height = "56vh";
             return;
         }
         let itemsElement = this.element.lastElementChild;
@@ -339,7 +339,7 @@ export class Menu {
             itemsElement = shownItems[shownItems.length - 1]
                 .querySelector(":scope > .b3-menu__submenu > .b3-menu__items") || itemsElement;
         }
-        const maxHeight = window.innerHeight * .9;
+        const maxHeight = window.innerHeight * .56;
         const titleHeight = this.element.firstElementChild.getBoundingClientRect().height;
         const contentHeight = itemsElement.scrollHeight;
         this.element.style.height = Math.min(maxHeight, Math.max(160, titleHeight + contentHeight)) + "px";

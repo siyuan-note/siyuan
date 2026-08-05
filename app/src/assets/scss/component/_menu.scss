@@ -182,8 +182,8 @@
   &--sheet {
     top: auto;
     bottom: 0;
-    left: 8px;
-    right: 8px;
+    left: 0;
+    right: 0;
     width: auto;
     height: auto;
     max-height: 90vh;
@@ -259,7 +259,7 @@
     transition: opacity 150ms linear;
 
     &--open {
-      opacity: .4;
+      opacity: .2;
       pointer-events: auto;
     }
   }

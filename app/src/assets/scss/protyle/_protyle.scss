@@ -421,6 +421,10 @@
       display: flow-root;
       position: relative;
 
+      > .protyle > .protyle-gutters {
+        z-index: 7; // 块标需高于吸顶标题以保持完整显示和可操作
+      }
+
       > .b3-list-item {
         background-color: var(--b3-theme-background);
         position: sticky;

@@ -309,13 +309,11 @@ export class AgentChat extends Model {
             "</svg>" +
             "</span>" +
             '<button class="b3-select b3-select--noborder agent-chat__model-picker" data-type="groupedModelPicker" data-group="agent" data-model-id="" data-menu="true" type="button">' +
-            '<span class="agent-chat__model-picker-label" data-type="groupedModelPickerLabel"></span>' +
-            '<svg class="agent-chat__model-picker-arrow"><use xlink:href="#iconDown"></use></svg></button>' +
+            '<span class="agent-chat__model-picker-label" data-type="groupedModelPickerLabel"></span></button>' +
             '<button class="b3-select b3-select--noborder agent-chat__reasoning-effort ariaLabel" data-menu="true" aria-label="' +
             (L.reasoningEffortTooltip || "Reasoning effort") + '" type="button">' +
             '<svg class="agent-chat__reasoning-effort-icon"><use xlink:href="#iconBrain"></use></svg>' +
-            '<span class="agent-chat__reasoning-effort-label"></span>' +
-            '<svg class="agent-chat__reasoning-effort-arrow"><use xlink:href="#iconDown"></use></svg></button>' +
+            '<span class="agent-chat__reasoning-effort-label"></span></button>' +
             "</div>" +
             '<button class="agent-chat__send b3-button b3-button--icon b3-button--text ariaLabel" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none ariaLabel" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +

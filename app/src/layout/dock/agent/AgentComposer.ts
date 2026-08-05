@@ -188,6 +188,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     // 类方法（focus/insert/destroy）在 Protyle 实例上，内部数据属性在 IProtyle 上。
     const p = protyle.protyle;
     const wysiwyg = p.wysiwyg!;
+    wysiwyg.element.setAttribute("data-readonly", "false");
 
     const setEmptyContent = () => {
         wysiwyg.element.innerHTML = "";

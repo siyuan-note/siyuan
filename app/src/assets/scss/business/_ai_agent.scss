@@ -429,6 +429,7 @@
   align-items: center;
   gap: 6px;
   padding: 4px 0;
+  font-size: 13px;
   cursor: pointer;
   color: var(--b3-theme-on-surface-light);
   user-select: none;
@@ -686,20 +687,13 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 8px;
+  padding: 4px 26px 4px 8px;
   white-space: nowrap;
   min-width: 0;
 
   &-label {
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  &-arrow {
-    width: 10px;
-    height: 10px;
-    color: var(--b3-theme-on-surface-light);
-    flex-shrink: 0;
   }
 }
 
@@ -708,7 +702,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 8px;
+  padding: 4px 26px 4px 8px;
   white-space: nowrap;
   flex-shrink: 0;
 
@@ -721,12 +715,6 @@
   &-label {
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  &-arrow {
-    width: 10px;
-    height: 10px;
-    color: var(--b3-theme-on-surface-light);
   }
 }
 
@@ -1153,7 +1141,7 @@
   }
 
   .agent-chat__input-area {
-    margin: 0 max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    margin: 0 max(8px, env(safe-area-inset-right)) max(16px, calc(env(safe-area-inset-bottom) + 8px)) max(8px, env(safe-area-inset-left));
   }
 
   .agent-chat__composer-host {

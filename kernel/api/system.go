@@ -24,6 +24,7 @@ import (
 	"image"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -262,21 +263,7 @@ func addCustomEmoji(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	fileHeader, err := c.FormFile("file")
-	if err != nil {
-		ret.Code = http.StatusBadRequest
-		ret.Msg = "Field [file] must not be empty"
-		return
-	}
-	file, err := fileHeader.Open()
-	if err != nil {
-		ret.Code = http.StatusBadRequest
-		ret.Msg = err.Error()
-		return
-	}
-	defer file.Close()
-
-	data, err := io.ReadAll(io.LimitReader(file, maxCustomEmojiSize+1))
+	data, err := readCustomEmojiData(c)
 	if err != nil {
 		ret.Code = http.StatusBadRequest
 		ret.Msg = err.Error()
@@ -318,6 +305,49 @@ func addCustomEmoji(c *gin.Context) {
 	relativePath, _ = filepath.Rel(emojisDir, emojiPath)
 	relativePath = filepath.ToSlash(relativePath)
 	ret.Data = map[string]any{"path": relativePath}
+}
+
+func readCustomEmojiData(c *gin.Context) ([]byte, error) {
+	fileHeader, fileErr := c.FormFile("file")
+	if fileErr == nil {
+		file, err := fileHeader.Open()
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+		return io.ReadAll(io.LimitReader(file, maxCustomEmojiSize+1))
+	}
+
+	rawURL := strings.TrimSpace(c.PostForm("url"))
+	if rawURL == "" {
+		return nil, fmt.Errorf("field [file] or [url] must not be empty")
+	}
+	return downloadCustomEmojiData(rawURL)
+}
+
+func downloadCustomEmojiData(rawURL string) ([]byte, error) {
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") || parsedURL.Host == "" {
+		return nil, fmt.Errorf("invalid custom emoji URL")
+	}
+
+	response, err := util.NewCustomReqClient().R().Get(parsedURL.String())
+	if err != nil {
+		return nil, fmt.Errorf("download custom emoji failed: %w", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("download custom emoji failed with status %d", response.StatusCode)
+	}
+	if response.ContentLength > maxCustomEmojiSize {
+		return nil, fmt.Errorf("custom emoji file is too large")
+	}
+
+	data, err := io.ReadAll(io.LimitReader(response.Body, maxCustomEmojiSize+1))
+	if err != nil {
+		return nil, fmt.Errorf("read custom emoji response failed: %w", err)
+	}
+	return data, nil
 }
 
 func normalizeCustomEmojiData(data []byte) (normalized []byte, ext string, err error) {

@@ -1108,13 +1108,12 @@ export const openEmojiPanel = (
     const renderNetworkIconPreview = () => {
         const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
         const base64Image = parseBase64Image(networkIconInputElement.value);
-        const customIcon = !!pastedCustomIconFile || !!base64Image;
         const previewSource = pastedCustomIconObjectURL ||
             (base64Image ? networkIconInputElement.value.trim() : networkURL);
         const hasIcon = !!previewSource;
         showLinkIconView(hasIcon ? "detail" : "empty");
-        customIconNameLabelElement.classList.toggle("fn__none", !customIcon);
-        linkIconSaveElement.disabled = !hasIcon || (customIcon && !customIconNameElement.value.trim());
+        customIconNameLabelElement.classList.toggle("fn__none", !hasIcon);
+        linkIconSaveElement.disabled = !hasIcon || !customIconNameElement.value.trim();
         linkIconSampleElements.forEach(item => {
             item.innerHTML = "";
             if (!previewSource) {
@@ -1154,9 +1153,7 @@ export const openEmojiPanel = (
         clearPastedCustomIcon();
         customIconNameElement.value = "";
         renderNetworkIconPreview();
-        if (parseBase64Image(networkIconInputElement.value)) {
-            customIconNameElement.focus();
-        }
+        customIconNameElement.focus();
     };
     const setCustomIconFile = (file: File) => {
         clearPastedCustomIcon();
@@ -1192,13 +1189,8 @@ export const openEmojiPanel = (
     };
     const setNetworkIcon = () => {
         const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
-        if (networkURL) {
-            applyLinkIcon(networkURL);
-            return;
-        }
-
         let customIconFile = pastedCustomIconFile;
-        if (!customIconFile) {
+        if (!networkURL && !customIconFile) {
             const base64Image = parseBase64Image(networkIconInputElement.value);
             if (base64Image) {
                 customIconFile = new File(
@@ -1208,7 +1200,7 @@ export const openEmojiPanel = (
                 );
             }
         }
-        if (!customIconFile) {
+        if (!networkURL && !customIconFile) {
             showMessage(window.siyuan.languages.invalid);
             return;
         }
@@ -1220,7 +1212,11 @@ export const openEmojiPanel = (
 
         const formData = new FormData();
         formData.append("name", customIconNameElement.value);
-        formData.append("file", customIconFile);
+        if (networkURL) {
+            formData.append("url", networkURL);
+        } else {
+            formData.append("file", customIconFile);
+        }
         fetchPost("/api/system/addCustomEmoji", formData, (response) => {
             if (typeof response?.data?.path !== "string") {
                 showMessage(window.siyuan.languages.kernelFault8);
@@ -1261,9 +1257,7 @@ export const openEmojiPanel = (
         networkIconInputElement.value = text;
         customIconNameElement.value = "";
         renderNetworkIconPreview();
-        if (parseBase64Image(text)) {
-            customIconNameElement.focus();
-        }
+        customIconNameElement.focus();
     });
     networkIconInputElement.addEventListener("input", updateLinkIconInput);
     customIconNameElement.addEventListener("input", renderNetworkIconPreview);

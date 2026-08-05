@@ -1141,9 +1141,49 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             let caretLineShown = false;
             if (range && !hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
                 const rect = range.getBoundingClientRect();
-                if (rect.height > 0) {
+                const eventCellElement = hasClosestByTag(event.target as Node, "TD") ||
+                    hasClosestByTag(event.target as Node, "TH");
+                const rangeCellElement = hasClosestByTag(range.startContainer, "TD") ||
+                    hasClosestByTag(range.startContainer, "TH");
+                const cellElement = (eventCellElement || rangeCellElement) as HTMLElement | false;
+                const cellRect = cellElement ? cellElement.getBoundingClientRect() : undefined;
+                // 空单元格的 Range 可能返回整张表的矩形，需要确认光标矩形仍位于目标单元格内。
+                const rectInCell = !cellRect || (
+                    rect.left >= cellRect.left - 1 && rect.left <= cellRect.right + 1 &&
+                    rect.top >= cellRect.top - 1 && rect.bottom <= cellRect.bottom + 1
+                );
+                if (rect.height > 0 && rectInCell) {
                     showCaretLine(rect.left, rect.top, rect.height);
                     caretLineShown = true;
+                } else if (cellElement && cellRect) {
+                    const cellStyle = getComputedStyle(cellElement);
+                    const paddingTop = parseFloat(cellStyle.paddingTop) || 0;
+                    const paddingRight = parseFloat(cellStyle.paddingRight) || 0;
+                    const paddingBottom = parseFloat(cellStyle.paddingBottom) || 0;
+                    const paddingLeft = parseFloat(cellStyle.paddingLeft) || 0;
+                    const contentLeft = cellRect.left + paddingLeft;
+                    const contentRight = cellRect.right - paddingRight;
+                    const contentHeight = Math.max(0, cellRect.height - paddingTop - paddingBottom);
+                    const lineHeight = parseFloat(cellStyle.lineHeight) || contentHeight;
+                    const height = Math.min(lineHeight, contentHeight);
+                    let left = contentLeft;
+                    if (cellStyle.textAlign === "center") {
+                        left = (contentLeft + contentRight) / 2;
+                    } else if (cellStyle.textAlign === "right" || cellStyle.textAlign === "-webkit-right" ||
+                        (cellStyle.textAlign === "start" && cellStyle.direction === "rtl") ||
+                        (cellStyle.textAlign === "end" && cellStyle.direction !== "rtl")) {
+                        left = contentRight - 2;
+                    }
+                    let top = cellRect.top + paddingTop;
+                    if (cellStyle.verticalAlign === "middle") {
+                        top += (contentHeight - height) / 2;
+                    } else if (cellStyle.verticalAlign === "bottom") {
+                        top += contentHeight - height;
+                    }
+                    if (height > 0) {
+                        showCaretLine(left, top, height);
+                        caretLineShown = true;
+                    }
                 } else {
                     const blockElement = hasClosestBlock(range.startContainer) || hasClosestBlock(event.target as HTMLElement);
                     const editableElement = hasClosestByAttribute(range.startContainer, "contenteditable", "true") ||

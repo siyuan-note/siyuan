@@ -312,6 +312,66 @@ export class WYSIWYG {
         }
     }
 
+    public selectByShiftClick(protyle: IProtyle, event: MouseEvent, targetBlockElement?: HTMLElement,
+                              resolveTargetByPoint = false): boolean {
+        const selection = getSelection();
+        let startElement: HTMLElement | undefined;
+        let endElement = targetBlockElement;
+        let shiftClickBlockPoint: IShiftClickBlockPoint | undefined;
+        // Electron 更新后 shift 向上点击获取的 range 不为上一个位置的 https://github.com/siyuan-note/siyuan/issues/9334
+        if (selection.rangeCount > 0) {
+            startElement = hasClosestBlock(selection.getRangeAt(0).startContainer) as HTMLElement;
+        }
+        if (startElement && (resolveTargetByPoint || !endElement)) {
+            shiftClickBlockPoint = getShiftClickBlockByPoint(this.element, startElement,
+                event.clientX, event.clientY);
+            endElement = shiftClickBlockPoint?.blockElement;
+        }
+        if (startElement && endElement && startElement !== endElement) {
+            const blockRange = getBlockRangeSelectElements(startElement, endElement);
+            startElement = blockRange.startElement;
+            endElement = blockRange.endElement;
+            const selectElements = blockRange.selectElements;
+            const toDown = blockRange.toDown;
+            if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
+                !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
+                !selectElements[0].classList.contains("sb")) {
+                // 单个 p 不选中
+            } else {
+                const ids: string[] = [];
+                const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
+                if (!hasSelectClassElement && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") &&
+                    !protyle.scroll.keepLazyLoad &&
+                    (startElement.getBoundingClientRect().top < -protyle.contentElement.clientHeight * 2 ||
+                        endElement.getBoundingClientRect().bottom > protyle.contentElement.clientHeight * 2)) {
+                    showMessage(window.siyuan.languages.crossKeepLazyLoad);
+                }
+                selectElements.forEach(item => {
+                    if (!hasClosestByClassName(item, "protyle-wysiwyg--select")) {
+                        item.classList.add("protyle-wysiwyg--select");
+                        ids.push(item.getAttribute("data-node-id"));
+                        // 清除选中的子块 https://ld246.com/article/1667826582251
+                        item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
+                            subItem.classList.remove("protyle-wysiwyg--select");
+                        });
+                    }
+                });
+                countBlockWord(ids);
+                if (toDown) {
+                    focusBlock(selectElements[selectElements.length - 1], protyle.wysiwyg.element, false);
+                } else {
+                    focusBlock(selectElements[0], protyle.wysiwyg.element, false);
+                }
+            }
+            return true;
+        }
+        if (!this.element.querySelector(".protyle-wysiwyg--select") && shiftClickBlockPoint &&
+            startElement === endElement) {
+            return extendSelectionToBlockSide(selection, endElement, shiftClickBlockPoint.toStart);
+        }
+        return false;
+    }
+
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
@@ -980,58 +1040,12 @@ export class WYSIWYG {
                     event.stopPropagation();
                     return;
                 }
-                let startElement;
-                let endElement = nodeElement;
-                let shiftClickBlockPoint: IShiftClickBlockPoint | undefined;
-                // Electron 更新后 shift 向上点击获取的 range 不为上一个位置的 https://github.com/siyuan-note/siyuan/issues/9334
-                if (getSelection().rangeCount > 0) {
-                    startElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer) as HTMLElement;
-                }
                 // 块间空白和文档末尾没有直接对应的块，需沿锚点方向解析终点
                 // https://github.com/siyuan-note/siyuan/issues/11960
-                if (startElement && (!endElement || (target === endElement && isContainerBlock(endElement)))) {
-                    shiftClickBlockPoint = getShiftClickBlockByPoint(this.element, startElement,
-                        event.clientX, event.clientY);
-                    endElement = shiftClickBlockPoint?.blockElement;
-                }
-                // shift 多选
-                if (startElement && endElement && startElement !== endElement) {
-                    const blockRange = getBlockRangeSelectElements(startElement, endElement);
-                    startElement = blockRange.startElement;
-                    endElement = blockRange.endElement;
-                    const selectElements = blockRange.selectElements;
-                    const toDown = blockRange.toDown;
-                    if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
-                        !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
-                        !selectElements[0].classList.contains("sb")) {
-                        // 单个 p 不选中
-                    } else {
-                        const ids: string[] = [];
-                        if (!hasSelectClassElement && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") && !protyle.scroll.keepLazyLoad &&
-                            (startElement.getBoundingClientRect().top < -protyle.contentElement.clientHeight * 2 || endElement.getBoundingClientRect().bottom > protyle.contentElement.clientHeight * 2)) {
-                            showMessage(window.siyuan.languages.crossKeepLazyLoad);
-                        }
-                        selectElements.forEach(item => {
-                            if (!hasClosestByClassName(item, "protyle-wysiwyg--select")) {
-                                item.classList.add("protyle-wysiwyg--select");
-                                ids.push(item.getAttribute("data-node-id"));
-                                // 清除选中的子块 https://ld246.com/article/1667826582251
-                                item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
-                                    subItem.classList.remove("protyle-wysiwyg--select");
-                                });
-                            }
-                        });
-                        countBlockWord(ids);
-                        if (toDown) {
-                            focusBlock(selectElements[selectElements.length - 1], protyle.wysiwyg.element, false);
-                        } else {
-                            focusBlock(selectElements[0], protyle.wysiwyg.element, false);
-                        }
-                    }
+                if (this.selectByShiftClick(protyle, event, nodeElement, !nodeElement || target === nodeElement)) {
+                    this.preventClick = true;
                     event.preventDefault();
-                } else if (!hasSelectClassElement && shiftClickBlockPoint && startElement === endElement &&
-                    extendSelectionToBlockSide(getSelection(), endElement, shiftClickBlockPoint.toStart)) {
-                    event.preventDefault();
+                    event.stopPropagation();
                 }
                 return;
             }

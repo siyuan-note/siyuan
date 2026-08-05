@@ -152,6 +152,25 @@ export const initUI = (protyle: IProtyle) => {
             });
         }, Constants.TIMEOUT_LOAD);
     }, {passive: true});
+    protyle.contentElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
+        if (event.button !== 0 || !event.shiftKey || event.target !== protyle.contentElement) {
+            return;
+        }
+        const eventProtyleElement = hasClosestByClassName(event.target, "protyle", true);
+        if (eventProtyleElement && eventProtyleElement !== protyle.element) {
+            return;
+        }
+        const lastElement = protyle.wysiwyg.element.lastElementChild;
+        if (!lastElement || event.clientY <= lastElement.getBoundingClientRect().bottom) {
+            return;
+        }
+        // 文档末尾空白位于 wysiwyg 外层，需在 click 聚焦末尾块之前完成 Shift 范围选择
+        // https://github.com/siyuan-note/siyuan/issues/11960
+        if (protyle.wysiwyg.selectByShiftClick(protyle, event, undefined, true)) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    });
     protyle.contentElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
         const eventProtyleElement = hasClosestByClassName(event.target, "protyle", true);
         if (eventProtyleElement && eventProtyleElement !== protyle.element) {

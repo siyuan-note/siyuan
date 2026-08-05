@@ -212,12 +212,10 @@ export class EmojiPanelController {
             if (!this.active || this.pageMode === "search" || this.panelElement.clientWidth === 0) {
                 return;
             }
-            const columnCount = this.getColumnCount();
-            if (columnCount !== this.columnCount) {
-                if (this.pageMode === "custom") {
+            if (this.pageMode === "custom") {
+                const columnCount = this.getColumnCount();
+                if (columnCount !== this.columnCount) {
                     this.renderCustomPage();
-                } else {
-                    this.renderCommonPage(this.categoryID);
                 }
             } else if (this.pageMode === "common") {
                 this.updateCategoryOffsets();
@@ -286,7 +284,7 @@ export class EmojiPanelController {
     }
 
     public loadMoreEmojis(direction: "previous" | "next" = "next") {
-        if (this.searchMode || (this.pageMode !== "common" && this.pageMode !== "custom")) {
+        if (this.searchMode || this.pageMode !== "custom") {
             return false;
         }
         const chunks = Array.from(this.panelElement.querySelectorAll<HTMLElement>(".emojis__chunk"));
@@ -329,7 +327,7 @@ export class EmojiPanelController {
         if (this.pageMode === "common") {
             this.updateCategoryOffsets();
         }
-        if (this.pageMode === "common" || this.pageMode === "custom") {
+        if (this.pageMode === "custom") {
             this.observeVirtualChunks();
         }
         this.ensureCurrentSelection();
@@ -353,16 +351,17 @@ export class EmojiPanelController {
         this.resetVirtualState();
         this.pageMode = "common";
         this.searchMode = false;
-        this.columnCount = this.getColumnCount();
         const sections: string[] = [];
         if (recentHTML) {
             sections.push(genEmojiSection(window.siyuan.languages.recentEmoji, recentHTML, undefined, "recent"));
         }
+        // 标准表情在普通页完整保留，避免快速滚动时重建可视内容。
         window.siyuan.emojis.forEach((item, index) => {
             if (item.id === "custom") {
                 return;
             }
-            sections.push(this.genVirtualSection(getEmojiTitle(index), item.items, undefined, item.id));
+            const itemsHTML = item.items.map((emoji) => this.getItemHTML(emoji)).join("");
+            sections.push(genEmojiSection(getEmojiTitle(index), itemsHTML, undefined, item.id));
         });
         this.panelElement.innerHTML = sections.join("") ||
             `<div class="emojis__section"><div class="emojis__title">${window.siyuan.languages.emptyContent}</div></div>`;
@@ -379,14 +378,6 @@ export class EmojiPanelController {
         } else {
             this.selectFirst();
         }
-        const firstVirtualChunk = this.panelElement.querySelector<HTMLElement>(".emojis__chunk");
-        if (firstVirtualChunk) {
-            this.renderVirtualChunk(firstVirtualChunk);
-            if (!this.panelElement.querySelector(".emojis__item--current")) {
-                this.selectElement(firstVirtualChunk.querySelector(".emojis__item"));
-            }
-        }
-        this.observeVirtualChunks();
     }
 
     private renderCustomPage() {
@@ -531,16 +522,18 @@ export class EmojiPanelController {
         if (!items) {
             return;
         }
-        element.innerHTML = items.map((item) => {
-            let html = this.itemHTMLCache.get(item);
-            if (!html) {
-                html = genEmojiButton(item.unicode, getEmojiDesc(item), true);
-                this.itemHTMLCache.set(item, html);
-            }
-            return html;
-        }).join("");
+        element.innerHTML = items.map((item) => this.getItemHTML(item)).join("");
         this.observeImages(element);
         this.restoreVirtualSelection(element);
+    }
+
+    private getItemHTML(item: IEmojiItem) {
+        let html = this.itemHTMLCache.get(item);
+        if (!html) {
+            html = genEmojiButton(item.unicode, getEmojiDesc(item), true);
+            this.itemHTMLCache.set(item, html);
+        }
+        return html;
     }
 
     private unloadVirtualChunk(element: HTMLElement) {
@@ -603,9 +596,11 @@ export class EmojiPanelController {
             return;
         }
         const categoryElement = this.pageMode === "common" ? this.getCategoryElement(this.categoryID) : undefined;
-        const visibleChunk = Array.from(this.visibleChunks).find((item) =>
-            item.childElementCount > 0 && (!categoryElement || categoryElement.contains(item))
-        ) || Array.from(this.visibleChunks).find((item) => item.childElementCount > 0);
+        if (categoryElement) {
+            this.selectElement(categoryElement.querySelector(".emojis__item"));
+            return;
+        }
+        const visibleChunk = Array.from(this.visibleChunks).find((item) => item.childElementCount > 0);
         if (visibleChunk) {
             this.selectElement(visibleChunk.querySelector(".emojis__item"));
         }

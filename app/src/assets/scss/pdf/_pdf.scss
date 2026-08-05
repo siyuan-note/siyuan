@@ -24,6 +24,14 @@
   }
 
   &__outer {
+    --b3-pdf-background1: var(--b3-pdf-background1-light);
+    --b3-pdf-background2: var(--b3-pdf-background2-light);
+    --b3-pdf-background3: var(--b3-pdf-background3-light);
+    --b3-pdf-background4: var(--b3-pdf-background4-light);
+    --b3-pdf-background5: var(--b3-pdf-background5-light);
+    --b3-pdf-background6: var(--b3-pdf-background6-light);
+    --b3-pdf-background7: var(--b3-pdf-background7-light);
+
     user-select: text;
     overflow: hidden;
     width: 100%;

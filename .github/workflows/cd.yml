@@ -376,6 +376,19 @@ jobs:
             fi
           done
 
+      - name: Collect End-to-End Test Logs
+        if: always() && matrix.config.e2e_shards != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          log_dir="${{ github.workspace }}/siyuan-testing/kernel-logs"
+          mkdir -p "${log_dir}"
+          cp "${RUNNER_TEMP}"/siyuan-e2e-*-kernel-console.log "${log_dir}/" 2>/dev/null || true
+          workspace="${USERPROFILE:-${HOME}}/SiYuan-Testing"
+          if [ -f "${workspace}/temp/siyuan.log" ]; then
+            cp "${workspace}/temp/siyuan.log" "${log_dir}/siyuan.log"
+          fi
+
       - name: Upload End-to-End Test Results
         if: always() && matrix.config.e2e_shards != ''
         continue-on-error: true
@@ -385,8 +398,7 @@ jobs:
           path: |
             ${{ github.workspace }}/siyuan-testing/playwright-report-*
             ${{ github.workspace }}/siyuan-testing/test-results-*
-            ${{ runner.temp }}/siyuan-e2e-*-kernel-console.log
-            ~/SiYuan-Testing/temp/siyuan.log
+            ${{ github.workspace }}/siyuan-testing/kernel-logs
           if-no-files-found: ignore
           retention-days: 14
 

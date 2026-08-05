@@ -488,7 +488,7 @@
 	"agentExample1": "Doorzoek mijn recente vergadernotities",
 	"agentExample2": "Maak een nieuw dagboek",
 	"agentExample3": "Vind notities over het project",
-	"agentConfirmDesc": "Wijzigingsoperatie <em>{category}</em>",
+	"agentConfirmDesc": "De agent voert een bewerking van het type <em>{category}</em> uit",
 	"agentCatBlock": "blok",
 	"agentCatDoc": "Document",
 	"agentCatNotebook": "notitieboek",

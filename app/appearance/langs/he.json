@@ -488,7 +488,7 @@
 	"agentExample1": "חפש את הערות הפגישות האחרונות שלי",
 	"agentExample2": "צור יומן חדש",
 	"agentExample3": "מצא הערות הקשורות לפרויקט",
-	"agentConfirmDesc": "פעולת שינוי <em>{category}</em>",
+	"agentConfirmDesc": "הסוכן יבצע פעולה מסוג <em>{category}</em>",
 	"agentCatBlock": "בלוק",
 	"agentCatDoc": "מסמך",
 	"agentCatNotebook": "מחברת",

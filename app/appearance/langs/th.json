@@ -488,7 +488,7 @@
 	"agentExample1": "ค้นหาบันทึกการประชุมล่าสุดของฉัน",
 	"agentExample2": "สร้างบันทึกประจำวันใหม่",
 	"agentExample3": "ค้นหาบันทึกที่เกี่ยวข้องกับโครงการ",
-	"agentConfirmDesc": "การดำเนินการเปลี่ยนแปลง <em>{category}</em>",
+	"agentConfirmDesc": "เอเจนต์จะดำเนินการประเภท <em>{category}</em>",
 	"agentCatBlock": "บล็อก",
 	"agentCatDoc": "เอกสาร",
 	"agentCatNotebook": "สมุดบันทึก",

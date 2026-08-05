@@ -488,7 +488,7 @@
 	"agentExample1": "搜尋最近的會議記錄",
 	"agentExample2": "幫我寫一篇日記",
 	"agentExample3": "整理一下项目相关的笔记",
-	"agentConfirmDesc": "智能體將執行<em>{category}</em>變更操作",
+	"agentConfirmDesc": "智能體將執行<em>{category}</em>操作",
 	"agentCatBlock": "內容區塊",
 	"agentCatDoc": "文檔",
 	"agentCatNotebook": "筆記本",

@@ -488,7 +488,7 @@
 	"agentExample1": "Son toplantı notlarımı ara",
 	"agentExample2": "Yeni bir günlük oluştur",
 	"agentExample3": "Projeyle ilgili notları bul",
-	"agentConfirmDesc": "<em>{category}</em> değişiklik işlemi",
+	"agentConfirmDesc": "Ajan <em>{category}</em> işlemini gerçekleştirecek",
 	"agentCatBlock": "blok",
 	"agentCatDoc": "belge",
 	"agentCatNotebook": "defter",

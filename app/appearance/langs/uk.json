@@ -488,7 +488,7 @@
 	"agentExample1": "Знайти мої нещодавні нотатки про зустрічі",
 	"agentExample2": "Створити новий щоденник",
 	"agentExample3": "Знайти нотатки про проєкт",
-	"agentConfirmDesc": "Операція зміни <em>{category}</em>",
+	"agentConfirmDesc": "Агент виконає операцію типу <em>{category}</em>",
 	"agentCatBlock": "блок",
 	"agentCatDoc": "документ",
 	"agentCatNotebook": "блокнот",

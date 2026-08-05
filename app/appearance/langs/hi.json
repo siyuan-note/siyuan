@@ -488,7 +488,7 @@
 	"agentExample1": "मेरी हाल की बैठक के नोट्स खोजें",
 	"agentExample2": "एक नई डायरी बनाएं",
 	"agentExample3": "परियोजना से संबंधित नोट्स खोजें",
-	"agentConfirmDesc": "एजेंट <em>{category}</em> परिवर्तन संचालन निष्पादित करेगा",
+	"agentConfirmDesc": "एजेंट <em>{category}</em> कार्रवाई निष्पादित करेगा",
 	"agentCatBlock": "ब्लॉक",
 	"agentCatDoc": "दस्तावेज़",
 	"agentCatNotebook": "नोटबुक",

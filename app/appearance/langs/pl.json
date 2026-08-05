@@ -488,7 +488,7 @@
 	"agentExample1": "Wyszukaj moje ostatnie notatki ze spotkań",
 	"agentExample2": "Utwórz nowy dziennik",
 	"agentExample3": "Znajdź notatki związane z projektem",
-	"agentConfirmDesc": "Operacja zmiany <em>{category}</em>",
+	"agentConfirmDesc": "Agent wykona operację typu <em>{category}</em>",
 	"agentCatBlock": "blok",
 	"agentCatDoc": "dokument",
 	"agentCatNotebook": "notatnik",

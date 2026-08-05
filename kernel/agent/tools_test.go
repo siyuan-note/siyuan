@@ -291,6 +291,25 @@ func TestQueryToolActionEffects(t *testing.T) {
 	}
 }
 
+func TestNativeReadOnlyToolActions(t *testing.T) {
+	for _, action := range []string{"open_setting", "focus_block", "open_document", "open_search"} {
+		if needsConfirm("frontend", action, nil) || needsLocalSnapshot("frontend", action) {
+			t.Errorf("built-in frontend action %q must not require confirmation or create a snapshot", action)
+		}
+	}
+	if !needsConfirm("frontend", "plugin__example__write", nil) {
+		t.Fatal("plugin frontend actions with unknown effects must require confirmation")
+	}
+	for _, action := range []string{"html", "preview"} {
+		if needsConfirm("export", action, nil) || needsLocalSnapshot("export", action) {
+			t.Errorf("read-only export action %q must not require confirmation or create a snapshot", action)
+		}
+	}
+	if !needsConfirm("export", "docx", nil) || !needsLocalSnapshot("export", "docx") {
+		t.Fatal("file-producing export actions must retain confirmation and snapshot protection")
+	}
+}
+
 func TestConfirmSessionAcceptsResponseOnce(t *testing.T) {
 	const confirmID = "test-confirm"
 	ch := make(chan confirmResult, 1)

@@ -488,7 +488,7 @@
 	"agentExample1": "Vyhľadať moje nedávne poznámky zo stretnutí",
 	"agentExample2": "Vytvoriť nový denník",
 	"agentExample3": "Nájsť poznámky k projektu",
-	"agentConfirmDesc": "Operácia zmeny <em>{category}</em>",
+	"agentConfirmDesc": "Agent vykoná operáciu typu <em>{category}</em>",
 	"agentCatBlock": "blok",
 	"agentCatDoc": "dokument",
 	"agentCatNotebook": "poznámkový blok",

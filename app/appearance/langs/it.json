@@ -488,7 +488,7 @@
 	"agentExample1": "Cerca i miei appunti delle riunioni recenti",
 	"agentExample2": "Crea un nuovo diario",
 	"agentExample3": "Trova appunti sul progetto",
-	"agentConfirmDesc": "Operazione di modifica <em>{category}</em>",
+	"agentConfirmDesc": "L’agente eseguirà un’operazione di tipo <em>{category}</em>",
 	"agentCatBlock": "blocco",
 	"agentCatDoc": "documento",
 	"agentCatNotebook": "taccuino",

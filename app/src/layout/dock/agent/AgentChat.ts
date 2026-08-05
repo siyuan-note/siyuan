@@ -3926,7 +3926,7 @@ export class AgentChat extends Model {
             "repo": L.agentCatRepo, "history": L.agentCatHistory,
             "sync": L.agentCatSync, "database": L.agentCatDatabase,
         };
-        return m[name] || L.agentCatDefault;
+        return m[name] || name || L.agentCatDefault;
     }
 
     private formatMessageTime(ts: number): string {

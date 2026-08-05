@@ -488,7 +488,7 @@
 	"agentExample1": "최근 회의록 검색",
 	"agentExample2": "새 일기 작성",
 	"agentExample3": "프로젝트 관련 노트 찾기",
-	"agentConfirmDesc": "<em>{category}</em> 변경 작업을 실행합니다",
+	"agentConfirmDesc": "<em>{category}</em> 작업을 실행합니다",
 	"agentCatBlock": "블록",
 	"agentCatDoc": "문서",
 	"agentCatNotebook": "노트북",

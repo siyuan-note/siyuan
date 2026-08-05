@@ -1340,6 +1340,15 @@ var safeWholeTools = map[string]bool{
 	"search": true, "sql": true,
 }
 
+var safeNativeToolActions = map[string]map[string]bool{
+	"export": {
+		"html": true, "preview": true,
+	},
+	"frontend": {
+		"open_setting": true, "focus_block": true, "open_document": true, "open_search": true,
+	},
+}
+
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
 	if alwaysAllow["*"] {
 		return false
@@ -1355,6 +1364,9 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 		// 外部 MCP 与插件工具不能复用原生工具的全局 action 白名单，否则 close/open 等同名动作
 		// 可能在外部服务中产生写入。仅工具明确声明只读时免确认，未知能力按写操作处理。
 		return !tool.ReadOnlyHint
+	}
+	if safeNativeToolActions[toolName][action] {
+		return false
 	}
 	if toolName == "http_request" && action == "" {
 		action = "get"
@@ -1384,6 +1396,9 @@ func needsLocalSnapshot(toolName, action string) bool {
 	}
 	if toolName == "http_request" && action == "" {
 		action = "get"
+	}
+	if safeNativeToolActions[toolName][action] {
+		return false
 	}
 	actionSafe := safeActions[action]
 	if toolName == "import" && action == "md" {

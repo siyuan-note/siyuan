@@ -488,7 +488,7 @@
 	"agentExample1": "最近の会議メモを検索",
 	"agentExample2": "新しい日記を作成",
 	"agentExample3": "プロジェクト関連のノートを検索",
-	"agentConfirmDesc": "<em>{category}</em>変更操作を実行します",
+	"agentConfirmDesc": "<em>{category}</em>操作を実行します",
 	"agentCatBlock": "ブロック",
 	"agentCatDoc": "ドキュメント",
 	"agentCatNotebook": "ノートブック",

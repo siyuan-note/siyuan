@@ -488,7 +488,7 @@
 	"agentExample1": "البحث عن ملاحظات الاجتماعات الأخيرة",
 	"agentExample2": "إنشاء مذكرة يومية جديدة",
 	"agentExample3": "البحث عن ملاحظات متعلقة بالمشروع",
-	"agentConfirmDesc": "عملية تغيير <em>{category}</em>",
+	"agentConfirmDesc": "سينفذ الوكيل عملية <em>{category}</em>",
 	"agentCatBlock": "كتلة",
 	"agentCatDoc": "مستند",
 	"agentCatNotebook": "دفتر",

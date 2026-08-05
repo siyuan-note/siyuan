@@ -488,7 +488,7 @@
 	"agentExample1": "Durchsuche meine letzten Besprechungsnotizen",
 	"agentExample2": "Erstelle ein neues Tagebuch",
 	"agentExample3": "Finde Notizen zum Projekt",
-	"agentConfirmDesc": "Änderungsvorgang <em>{category}</em>",
+	"agentConfirmDesc": "Der Agent führt einen Vorgang vom Typ <em>{category}</em> aus",
 	"agentCatBlock": "Block",
 	"agentCatDoc": "Dokument",
 	"agentCatNotebook": "Notizbuch",

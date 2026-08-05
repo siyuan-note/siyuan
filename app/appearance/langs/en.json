@@ -1,6 +1,6 @@
 {
 	"lanSync": "LAN sync acceleration",
-	"lanSyncTip": "Downloads encrypted data chunks faster from trusted devices on the local network while cloud storage remains the sync authority",
+	"lanSyncTip": "Downloads encrypted data chunks faster from trusted devices on the local network while cloud storage remains the sync authority; the discovered device count may take about one minute to update after a device goes offline, and unavailable LAN transfers automatically fall back to cloud storage",
 	"lanSyncDiscoveredPeers": "Discovered LAN devices: ${count}",
 	"agentPermission": "Permission",
 	"agentPermissionConfirm": "Confirm every time",

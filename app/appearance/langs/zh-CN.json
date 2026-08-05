@@ -1,6 +1,6 @@
 {
 	"lanSync": "局域网同步加速",
-	"lanSyncTip": "优先从局域网内可信设备下载加密数据分块，云端存储仍作为同步权威来源",
+	"lanSyncTip": "优先从局域网内可信设备下载加密数据分块，云端存储仍作为同步权威来源；设备离线后发现数量可能需要约一分钟更新，局域网传输不可用时会自动回退到云端存储",
 	"lanSyncDiscoveredPeers": "已发现局域网设备：${count}",
 	"agentPermission": "权限",
 	"agentPermissionConfirm": "每次确认",

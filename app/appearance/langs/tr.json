@@ -1,6 +1,6 @@
 {
 	"lanSync": "LAN eşitleme hızlandırması",
-	"lanSyncTip": "Bulut depolama eşitleme yetkilisi olarak kalırken yerel ağdaki güvenilir cihazlardan şifrelenmiş veri parçalarını daha hızlı indirir",
+	"lanSyncTip": "Bulut depolama eşitleme yetkilisi olarak kalırken yerel ağdaki güvenilir cihazlardan şifrelenmiş veri parçalarını daha hızlı indirir; bir cihaz çevrimdışı olduktan sonra keşfedilen cihaz sayısının güncellenmesi yaklaşık bir dakika sürebilir ve LAN aktarımı kullanılamadığında otomatik olarak bulut depolamaya geri dönülür",
 	"lanSyncDiscoveredPeers": "Keşfedilen LAN cihazları: ${count}",
 	"agentPermission": "İzin",
 	"agentPermissionConfirm": "Her seferinde onayla",

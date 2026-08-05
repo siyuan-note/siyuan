@@ -1,6 +1,6 @@
 {
 	"lanSync": "LAN-synchronisatieversnelling",
-	"lanSyncTip": "Downloadt versleutelde gegevensblokken sneller van vertrouwde apparaten in het lokale netwerk, terwijl cloudopslag de gezaghebbende synchronisatiebron blijft",
+	"lanSyncTip": "Downloadt versleutelde gegevensblokken sneller van vertrouwde apparaten in het lokale netwerk, terwijl cloudopslag de gezaghebbende synchronisatiebron blijft; nadat een apparaat offline gaat, kan het ongeveer een minuut duren voordat het aantal gevonden apparaten wordt bijgewerkt en bij een niet-beschikbare LAN-overdracht wordt automatisch teruggevallen op cloudopslag",
 	"lanSyncDiscoveredPeers": "Gevonden LAN-apparaten: ${count}",
 	"agentPermission": "Toestemming",
 	"agentPermissionConfirm": "Elke keer bevestigen",

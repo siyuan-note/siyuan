@@ -1,6 +1,6 @@
 {
 	"lanSync": "Akselerasi sinkronisasi LAN",
-	"lanSyncTip": "Mengunduh potongan data terenkripsi lebih cepat dari perangkat tepercaya di jaringan lokal sementara penyimpanan cloud tetap menjadi acuan sinkronisasi",
+	"lanSyncTip": "Mengunduh potongan data terenkripsi lebih cepat dari perangkat tepercaya di jaringan lokal sementara penyimpanan cloud tetap menjadi acuan sinkronisasi; jumlah perangkat yang ditemukan mungkin memerlukan sekitar satu menit untuk diperbarui setelah perangkat luring, dan transfer LAN yang tidak tersedia akan otomatis beralih ke penyimpanan cloud",
 	"lanSyncDiscoveredPeers": "Perangkat LAN yang ditemukan: ${count}",
 	"agentPermission": "Izin",
 	"agentPermissionConfirm": "Konfirmasi setiap kali",

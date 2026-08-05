@@ -1,6 +1,6 @@
 {
 	"lanSync": "LAN-Synchronisierungsbeschleunigung",
-	"lanSyncTip": "Lädt verschlüsselte Datenblöcke schneller von vertrauenswürdigen Geräten im lokalen Netzwerk herunter, während der Cloud-Speicher die maßgebliche Synchronisierungsquelle bleibt",
+	"lanSyncTip": "Lädt verschlüsselte Datenblöcke schneller von vertrauenswürdigen Geräten im lokalen Netzwerk herunter, während der Cloud-Speicher die maßgebliche Synchronisierungsquelle bleibt; nach dem Offlinegehen eines Geräts kann die Aktualisierung der erkannten Geräte etwa eine Minute dauern, und bei nicht verfügbarer LAN-Übertragung wird automatisch auf den Cloud-Speicher zurückgegriffen",
 	"lanSyncDiscoveredPeers": "Erkannte LAN-Geräte: ${count}",
 	"agentPermission": "Berechtigung",
 	"agentPermissionConfirm": "Jedes Mal bestätigen",

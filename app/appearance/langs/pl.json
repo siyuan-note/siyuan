@@ -1,6 +1,6 @@
 {
 	"lanSync": "Przyspieszenie synchronizacji w sieci LAN",
-	"lanSyncTip": "Szybciej pobiera zaszyfrowane fragmenty danych z zaufanych urządzeń w sieci lokalnej, zachowując chmurę jako nadrzędne źródło synchronizacji",
+	"lanSyncTip": "Szybciej pobiera zaszyfrowane fragmenty danych z zaufanych urządzeń w sieci lokalnej, zachowując chmurę jako nadrzędne źródło synchronizacji; po przejściu urządzenia do trybu offline aktualizacja liczby wykrytych urządzeń może potrwać około minuty, a gdy transfer LAN jest niedostępny, następuje automatyczny powrót do chmury",
 	"lanSyncDiscoveredPeers": "Wykryte urządzenia LAN: ${count}",
 	"agentPermission": "Uprawnienia",
 	"agentPermissionConfirm": "Potwierdzaj za każdym razem",

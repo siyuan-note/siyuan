@@ -1,6 +1,6 @@
 {
 	"lanSync": "Zrýchlenie synchronizácie v sieti LAN",
-	"lanSyncTip": "Sťahuje šifrované dátové bloky rýchlejšie z dôveryhodných zariadení v lokálnej sieti, pričom cloudové úložisko zostáva autoritatívnym zdrojom synchronizácie",
+	"lanSyncTip": "Sťahuje šifrované dátové bloky rýchlejšie z dôveryhodných zariadení v lokálnej sieti, pričom cloudové úložisko zostáva autoritatívnym zdrojom synchronizácie; po odpojení zariadenia môže aktualizácia počtu zistených zariadení trvať približne minútu a pri nedostupnom prenose cez LAN sa automaticky použije cloudové úložisko",
 	"lanSyncDiscoveredPeers": "Zistené zariadenia LAN: ${count}",
 	"agentPermission": "Povolenie",
 	"agentPermissionConfirm": "Potvrdiť zakaždým",

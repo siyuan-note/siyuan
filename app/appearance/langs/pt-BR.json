@@ -1,6 +1,6 @@
 {
 	"lanSync": "Aceleração da sincronização pela LAN",
-	"lanSyncTip": "Baixa blocos de dados criptografados mais rapidamente de dispositivos confiáveis na rede local enquanto o armazenamento em nuvem permanece como autoridade da sincronização",
+	"lanSyncTip": "Baixa blocos de dados criptografados mais rapidamente de dispositivos confiáveis na rede local enquanto o armazenamento em nuvem permanece como autoridade da sincronização; após um dispositivo ficar offline, a contagem de dispositivos descobertos pode levar cerca de um minuto para ser atualizada e, quando a transferência pela LAN não está disponível, o armazenamento em nuvem é usado automaticamente",
 	"lanSyncDiscoveredPeers": "Dispositivos LAN descobertos: ${count}",
 	"agentPermission": "Permissão",
 	"agentPermissionConfirm": "Confirmar sempre",

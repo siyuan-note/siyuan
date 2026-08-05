@@ -1,6 +1,6 @@
 {
 	"lanSync": "區域網路同步加速",
-	"lanSyncTip": "優先從區域網路內的可信裝置下載加密資料分塊，雲端儲存仍作為同步權威來源",
+	"lanSyncTip": "優先從區域網路內的可信裝置下載加密資料分塊，雲端儲存仍作為同步權威來源；裝置離線後發現數量可能需要約一分鐘更新，區域網路傳輸無法使用時會自動回退到雲端儲存",
 	"lanSyncDiscoveredPeers": "已發現區域網路裝置：${count}",
 	"agentPermission": "權限",
 	"agentPermissionConfirm": "每次確認",

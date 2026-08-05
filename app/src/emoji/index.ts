@@ -673,6 +673,7 @@ export class EmojiPanelController {
         }
         const categoryElement = this.pageMode === "common" ? this.getCategoryElement(this.categoryID) : undefined;
         if (categoryElement) {
+            this.loadBuiltInCategory(categoryElement);
             this.selectElement(categoryElement.querySelector(".emojis__item"));
             return;
         }

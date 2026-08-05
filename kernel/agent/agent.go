@@ -993,7 +993,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						Arguments: args,
 					})
 
-					if needsConfirm(tc.Function.Name, action, alwaysAllow) {
+					_, _, toolInputErr := validateToolCallInput(ctx, tc.Function.Name, args)
+					if toolInputErr == nil && needsConfirm(tc.Function.Name, action, alwaysAllow) {
 						confirmID := fmt.Sprintf("%s_%s_%d", turn.TurnID, tc.ID, i)
 						ch2 := make(chan confirmResult, 1)
 						confirmChannelsMu.Lock()
@@ -1084,7 +1085,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					default:
 					}
 
-					if !snapshotCreated && needsLocalSnapshot(tc.Function.Name, action) {
+					if toolInputErr == nil && !snapshotCreated && needsLocalSnapshot(tc.Function.Name, action) {
 						id, err := kernelModel.IndexRepo("AI agent auto snapshot")
 						if err != nil {
 							logging.LogErrorf("agent auto snapshot failed: %s", err)
@@ -1140,7 +1141,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					var modelAttachments []mcptools.ModelAttachment
 					isErr := false
 					executionUnknown := false
-					if tc.Function.Name == "question" {
+					if toolInputErr != nil {
+						resultStr = toolInputErr.Error()
+						isErr = true
+					} else if tc.Function.Name == "question" {
 						resultStr = handleQuestion(ctx, tc.Function.Arguments, ch, 5*time.Minute)
 					} else if tc.Function.Name == "frontend" {
 						resultStr, executionUnknown = handleFrontendTool(ctx, tc, ch, confirmTimeout)

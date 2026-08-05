@@ -166,6 +166,17 @@ func TestExecuteToolPreservesModelAttachments(t *testing.T) {
 	}
 }
 
+func TestValidateToolCallInputRejectsMissingActionBeforeConfirmation(t *testing.T) {
+	args := map[string]any{"id": "20260707184942-prjqwqo"}
+	if _, _, err := validateToolCallInput(t.Context(), "outline", args); err == nil {
+		t.Fatal("outline without its required action must fail validation before confirmation")
+	}
+	args["action"] = "get"
+	if _, _, err := validateToolCallInput(t.Context(), "outline", args); err != nil {
+		t.Fatalf("valid outline arguments were rejected: %s", err)
+	}
+}
+
 func TestNeedsConfirmScopesReadOnlyActionsByToolSource(t *testing.T) {
 	const externalWrite = "test_external_write"
 	const externalRead = "test_external_read"

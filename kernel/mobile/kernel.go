@@ -84,6 +84,11 @@ func AddLANSyncPeer(instance, address string, port int, txtJSON string) bool {
 	return model.AddLANSyncPeer(instance, address, port, txt)
 }
 
+// RemoveLANSyncPeer 将原生 Bonjour 移除的设备从内核中删除。
+func RemoveLANSyncPeer(instance string) bool {
+	return model.RemoveLANSyncPeer(instance)
+}
+
 // LANSyncActive 返回局域网同步服务是否正在运行。
 func LANSyncActive() bool {
 	return model.LANSyncActive()

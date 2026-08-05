@@ -58,7 +58,8 @@ func refreshLANSyncManager() {
 		return
 	}
 	ips := collectLANSyncIPs()
-	if 1 > len(ips) && util.ContainerIOS != util.Container {
+	nativeDiscovery := util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container
+	if 1 > len(ips) && !nativeDiscovery {
 		logging.LogWarnf("LAN sync service not started because no private network address is available")
 		scheduleLANSyncRetryLocked()
 		return
@@ -74,7 +75,7 @@ func refreshLANSyncManager() {
 		IPs:               ips,
 		IPsProvider:       collectLANSyncIPs,
 		MaxConcurrentReqs: Conf.Sync.LAN.MaxConcurrentReqs,
-		NativeDiscovery:   util.ContainerIOS == util.Container,
+		NativeDiscovery:   nativeDiscovery,
 		OnCommitHint:      handleLANSyncCommitHint,
 	})
 	if nil != err {
@@ -133,6 +134,13 @@ func AddLANSyncPeer(instance, address string, port int, txt map[string]string) b
 	manager := lanSyncManager
 	lanSyncManagerMu.RUnlock()
 	return nil != manager && manager.AddDiscoveredPeer(instance, address, port, txt)
+}
+
+func RemoveLANSyncPeer(instance string) bool {
+	lanSyncManagerMu.RLock()
+	manager := lanSyncManager
+	lanSyncManagerMu.RUnlock()
+	return nil != manager && manager.RemoveDiscoveredPeer(instance)
 }
 
 func stopLANSyncManager() {

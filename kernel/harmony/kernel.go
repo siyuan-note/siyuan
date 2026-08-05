@@ -39,6 +39,46 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// LANSyncDiscoveryInfo 返回原生 MDNS 发现需要发布的服务信息。
+//
+//export LANSyncDiscoveryInfo
+func LANSyncDiscoveryInfo() *C.char {
+	info := model.GetLANSyncDiscoveryInfo()
+	if nil == info {
+		return nil
+	}
+	data, err := json.Marshal(info)
+	if nil != err {
+		return nil
+	}
+	return C.CString(string(data))
+}
+
+// AddLANSyncPeer 将原生 MDNS 发现的设备交给内核验证。
+//
+//export AddLANSyncPeer
+func AddLANSyncPeer(instance, address *C.char, port int, txtJSON *C.char) bool {
+	txt := map[string]string{}
+	if err := json.Unmarshal([]byte(C.GoString(txtJSON)), &txt); nil != err {
+		return false
+	}
+	return model.AddLANSyncPeer(C.GoString(instance), C.GoString(address), port, txt)
+}
+
+// RemoveLANSyncPeer 将原生 MDNS 移除的设备从内核中删除。
+//
+//export RemoveLANSyncPeer
+func RemoveLANSyncPeer(instance *C.char) bool {
+	return model.RemoveLANSyncPeer(C.GoString(instance))
+}
+
+// LANSyncActive 返回局域网同步服务是否正在运行。
+//
+//export LANSyncActive
+func LANSyncActive() bool {
+	return model.LANSyncActive()
+}
+
 //export AcquireExportFile
 func AcquireExportFile(exportPath *C.char) *C.char {
 	pathStr := C.GoString(exportPath)

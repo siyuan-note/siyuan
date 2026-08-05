@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Berechtigung",
+	"agentPermissionConfirm": "Bestätigung erforderlich",
+	"agentPermissionAllowSession": "Automatisch erlauben",
 	"oidcVerificationFailed": "Überprüfung der OIDC-Konfiguration fehlgeschlagen",
 	"oidcVerificationSuccess": "OIDC-Konfiguration überprüft und gespeichert",
 	"oidcVerificationTip": "Schließen Sie die OIDC-Anmeldung im geöffneten Browserfenster ab; die aktuelle Konfiguration bleibt bis zur erfolgreichen Überprüfung aktiv",

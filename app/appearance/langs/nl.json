@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Toestemming",
+	"agentPermissionConfirm": "Bevestiging vereisen",
+	"agentPermissionAllowSession": "Automatisch toestaan",
 	"oidcVerificationFailed": "Verificatie van de OIDC-configuratie is mislukt",
 	"oidcVerificationSuccess": "OIDC-configuratie geverifieerd en opgeslagen",
 	"oidcVerificationTip": "Voltooi de OIDC-aanmelding in het geopende browservenster; de huidige configuratie blijft actief totdat de verificatie slaagt",

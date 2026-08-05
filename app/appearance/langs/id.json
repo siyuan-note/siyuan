@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Izin",
+	"agentPermissionConfirm": "Perlu konfirmasi",
+	"agentPermissionAllowSession": "Izinkan otomatis",
 	"oidcVerificationFailed": "Verifikasi konfigurasi OIDC gagal",
 	"oidcVerificationSuccess": "Konfigurasi OIDC telah diverifikasi dan disimpan",
 	"oidcVerificationTip": "Selesaikan login OIDC di jendela browser yang terbuka; konfigurasi saat ini tetap aktif hingga verifikasi berhasil",

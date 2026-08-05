@@ -128,6 +128,11 @@ type confirmResult struct {
 	always   bool
 }
 
+type confirmWaiter struct {
+	sessionID string
+	ch        chan confirmResult
+}
+
 type doomLoopTracker struct {
 	prevSig  string
 	prevName string
@@ -199,21 +204,27 @@ func buildDoomSignature(name, action string, args map[string]any) string {
 }
 
 var confirmChannelsMu sync.Mutex
-var confirmChannels = make(map[string]chan confirmResult)
+var confirmChannels = make(map[string]*confirmWaiter)
 
-func ConfirmSession(id string, approved bool, always bool) bool {
+func ConfirmSession(id string, approved bool, always bool) (bool, error) {
 	confirmChannelsMu.Lock()
 	defer confirmChannelsMu.Unlock()
-	ch, ok := confirmChannels[id]
+	always = approved && always
+	waiter, ok := confirmChannels[id]
 	if !ok {
-		return false
+		return false, nil
+	}
+	if always {
+		if err := SetSessionPermissionMode(waiter.sessionID, AgentPermissionAllowSession); err != nil {
+			return false, err
+		}
 	}
 	select {
-	case ch <- confirmResult{approved: approved, always: always}:
+	case waiter.ch <- confirmResult{approved: approved, always: always}:
 		delete(confirmChannels, id)
-		return true
+		return true, nil
 	default:
-		return false
+		return false, nil
 	}
 }
 
@@ -309,6 +320,7 @@ type AgentEvent struct {
 	RetryMax         int
 	SnapshotID       string
 	TurnID           string
+	PermissionMode   string
 	Effects          mcptools.ToolEffects
 }
 
@@ -464,6 +476,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			return
 		default:
 		}
+		permissionController, err := registerSessionPermissionController(sessionID)
+		if err != nil {
+			logging.LogErrorf("load agent session permission failed: %s", err)
+			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+			return
+		}
+		defer unregisterSessionPermissionController(sessionID, permissionController)
 
 		rawUserMessage := userMessage
 		// 变量（非敏感）在用户消息注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
@@ -476,7 +495,6 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 		var sessionEntries []SessionEntry
 		var compaction *runtimeCompaction
 		var totalPrompt, totalCompletion, lastPromptTokens, lastCachedTokens int
-		alwaysAllow := map[string]bool{}
 		var doomLoop doomLoopTracker
 		var snapshotIDs []string
 		snapshotCreated := false // 整个 AgentChat 过程最多打一次自动快照，避免多轮工具调用时每轮都打
@@ -486,14 +504,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			var runtime *agentRuntime
 			if loadedRuntime, err := loadRuntimeState(sessionID); err == nil {
 				runtime = loadedRuntime
-				if runtime != nil && runtime.AlwaysAllow {
-					alwaysAllow["*"] = true
-				}
 			}
 			if cp := loadCheckpoint(sessionID); cp != nil {
-				if cp.AlwaysAllow {
-					alwaysAllow["*"] = true
-				}
 				if len(cp.Entries) > 0 {
 					sessionEntries = append([]SessionEntry(nil), cp.Entries...)
 					contextEntries := cp.Entries
@@ -597,7 +609,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			return
 		default:
 		}
-		if err := beginRuntimeTurn(sessionID, turn, alwaysAllow["*"]); err != nil {
+		if err := beginRuntimeTurn(sessionID, turn); err != nil {
 			logging.LogErrorf("begin agent runtime failed: %s", err)
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			return
@@ -627,7 +639,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			turn.LastPromptTokens = lastPromptTokens
 			turn.CachedTokens = lastCachedTokens
 			turn.ContextLimit = contextLimit
-			if err := saveRuntimeTurn(sessionID, turn, alwaysAllow["*"]); err != nil {
+			if err := saveRuntimeTurn(sessionID, turn); err != nil {
 				logging.LogErrorf("save agent runtime failed: %s", err)
 				return false
 			} else if state != "running" {
@@ -994,11 +1006,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					})
 
 					_, _, toolInputErr := validateToolCallInput(ctx, tc.Function.Name, args)
-					if toolInputErr == nil && needsConfirm(tc.Function.Name, action, alwaysAllow) {
+					if toolInputErr == nil && !permissionController.allowSession.Load() &&
+						needsConfirm(tc.Function.Name, action, nil) {
 						confirmID := fmt.Sprintf("%s_%s_%d", turn.TurnID, tc.ID, i)
 						ch2 := make(chan confirmResult, 1)
 						confirmChannelsMu.Lock()
-						confirmChannels[confirmID] = ch2
+						confirmChannels[confirmID] = &confirmWaiter{sessionID: sessionID, ch: ch2}
 						confirmChannelsMu.Unlock()
 						effects, _ := mcptools.GetTool(tc.Function.Name).EffectsFor(action)
 						sendCriticalEvent(ctx, ch, AgentEvent{
@@ -1072,7 +1085,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						}
 
 						if result.always {
-							alwaysAllow["*"] = true
+							sendCriticalEvent(ctx, ch, AgentEvent{
+								Type: AgentEventPermission, PermissionMode: AgentPermissionAllowSession,
+							})
 						}
 						// 确认卡片会结束当前思考状态，工具执行前重新通知前端显示“思考中”。
 						sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "processing"})
@@ -1485,7 +1500,7 @@ func finishQuestionWait(questionID string, ch chan QuestionAnswer) (QuestionAnsw
 func finishConfirmWait(confirmID string, ch chan confirmResult) (confirmResult, bool) {
 	confirmChannelsMu.Lock()
 	registered, exists := confirmChannels[confirmID]
-	pending := exists && registered == ch
+	pending := exists && registered.ch == ch
 	if pending {
 		delete(confirmChannels, confirmID)
 	}

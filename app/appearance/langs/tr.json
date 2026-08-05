@@ -1,4 +1,7 @@
 {
+	"agentPermission": "İzin",
+	"agentPermissionConfirm": "Onay iste",
+	"agentPermissionAllowSession": "Otomatik olarak izin ver",
 	"oidcVerificationFailed": "OIDC yapılandırması doğrulanamadı",
 	"oidcVerificationSuccess": "OIDC yapılandırması doğrulandı ve kaydedildi",
 	"oidcVerificationTip": "Açılan tarayıcı penceresinde OIDC oturum açma işlemini tamamlayın; doğrulama başarılı olana kadar mevcut yapılandırma etkin kalır",

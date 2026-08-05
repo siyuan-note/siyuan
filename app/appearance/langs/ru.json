@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Разрешения",
+	"agentPermissionConfirm": "Требовать подтверждение",
+	"agentPermissionAllowSession": "Разрешать автоматически",
 	"oidcVerificationFailed": "Не удалось проверить конфигурацию OIDC",
 	"oidcVerificationSuccess": "Конфигурация OIDC проверена и сохранена",
 	"oidcVerificationTip": "Завершите вход OIDC в открывшемся окне браузера; текущая конфигурация останется активной до успешного завершения проверки",

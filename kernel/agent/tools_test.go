@@ -314,7 +314,7 @@ func TestConfirmSessionAcceptsResponseOnce(t *testing.T) {
 	const confirmID = "test-confirm"
 	ch := make(chan confirmResult, 1)
 	confirmChannelsMu.Lock()
-	confirmChannels[confirmID] = ch
+	confirmChannels[confirmID] = &confirmWaiter{sessionID: testSessionID, ch: ch}
 	confirmChannelsMu.Unlock()
 	t.Cleanup(func() {
 		confirmChannelsMu.Lock()
@@ -322,10 +322,11 @@ func TestConfirmSessionAcceptsResponseOnce(t *testing.T) {
 		confirmChannelsMu.Unlock()
 	})
 
-	if !ConfirmSession(confirmID, true, false) {
+	accepted, err := ConfirmSession(confirmID, true, false)
+	if err != nil || !accepted {
 		t.Fatal("registered confirmation was rejected")
 	}
-	if ConfirmSession(confirmID, false, false) {
+	if accepted, err = ConfirmSession(confirmID, false, false); err != nil || accepted {
 		t.Fatal("duplicate confirmation was accepted")
 	}
 	result, accepted := finishConfirmWait(confirmID, ch)

@@ -1,4 +1,7 @@
 {
+	"agentPermission": "권한",
+	"agentPermissionConfirm": "확인 필요",
+	"agentPermissionAllowSession": "자동 허용",
 	"oidcVerificationFailed": "OIDC 구성 확인에 실패했습니다",
 	"oidcVerificationSuccess": "OIDC 구성을 확인하고 저장했습니다",
 	"oidcVerificationTip": "열린 브라우저 창에서 OIDC 로그인을 완료하세요. 확인에 성공할 때까지 현재 구성이 계속 적용됩니다",

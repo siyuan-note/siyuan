@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -27,17 +29,122 @@ import (
 )
 
 const (
-	toolNotExecutedResult = "Tool was not executed because the turn was interrupted."
-	toolUnknownResult     = "Tool execution was interrupted; the result is unknown. Do not retry automatically."
+	toolNotExecutedResult       = "Tool was not executed because the turn was interrupted."
+	toolUnknownResult           = "Tool execution was interrupted; the result is unknown. Do not retry automatically."
+	AgentPermissionConfirm      = "confirm"
+	AgentPermissionAllowSession = "allowSession"
+	AgentEventPermission        = "permission"
 )
 
 type agentRuntime struct {
-	SchemaVersion int                `json:"schemaVersion"`
-	Revision      int64              `json:"revision"`
-	SessionID     string             `json:"sessionID"`
-	AlwaysAllow   bool               `json:"alwaysAllow,omitempty"`
-	ActiveTurn    *agentRuntimeTurn  `json:"activeTurn,omitempty"`
-	Compaction    *runtimeCompaction `json:"compaction,omitempty"`
+	SchemaVersion  int                `json:"schemaVersion"`
+	Revision       int64              `json:"revision"`
+	SessionID      string             `json:"sessionID"`
+	PermissionMode string             `json:"permissionMode,omitempty"`
+	AlwaysAllow    bool               `json:"alwaysAllow,omitempty"`
+	ActiveTurn     *agentRuntimeTurn  `json:"activeTurn,omitempty"`
+	Compaction     *runtimeCompaction `json:"compaction,omitempty"`
+}
+
+type sessionPermissionController struct {
+	allowSession atomic.Bool
+}
+
+var sessionPermissionControllers sync.Map
+
+func validAgentPermissionMode(mode string) bool {
+	return mode == AgentPermissionConfirm || mode == AgentPermissionAllowSession
+}
+
+func resolveSessionPermissionModeLocked(sessionID string, session map[string]any) (string, error) {
+	runtime, err := loadRuntimeLocked(sessionID)
+	if err != nil {
+		return "", err
+	}
+	if runtime.PermissionMode != "" {
+		if !validAgentPermissionMode(runtime.PermissionMode) {
+			return "", fmt.Errorf("invalid agent permission mode")
+		}
+		return runtime.PermissionMode, nil
+	}
+	if runtime.AlwaysAllow {
+		return AgentPermissionAllowSession, nil
+	}
+	if session == nil {
+		data, readErr := os.ReadFile(filepath.Join(sessionsDir(), sessionID, "session.json"))
+		if readErr != nil {
+			return "", readErr
+		}
+		session = map[string]any{}
+		if unmarshalErr := gulu.JSON.UnmarshalJSON(data, &session); unmarshalErr != nil {
+			return "", unmarshalErr
+		}
+	}
+	if permissionMode, _ := session["permissionMode"].(string); permissionMode != "" {
+		if !validAgentPermissionMode(permissionMode) {
+			return "", fmt.Errorf("invalid agent permission mode")
+		}
+		return permissionMode, nil
+	}
+	if alwaysAllow, _ := session["alwaysAllow"].(bool); alwaysAllow {
+		return AgentPermissionAllowSession, nil
+	}
+	return AgentPermissionConfirm, nil
+}
+
+func registerSessionPermissionController(sessionID string) (*sessionPermissionController, error) {
+	controller := &sessionPermissionController{}
+	if sessionID == "" {
+		return controller, nil
+	}
+	if !isValidSessionID(sessionID) {
+		return nil, fmt.Errorf("invalid session id")
+	}
+	lock := sessionLock(sessionID)
+	lock.Lock()
+	defer lock.Unlock()
+	mode, err := resolveSessionPermissionModeLocked(sessionID, nil)
+	if err != nil {
+		return nil, err
+	}
+	controller.allowSession.Store(mode == AgentPermissionAllowSession)
+	sessionPermissionControllers.Store(sessionID, controller)
+	return controller, nil
+}
+
+func unregisterSessionPermissionController(sessionID string, controller *sessionPermissionController) {
+	if sessionID == "" || controller == nil {
+		return
+	}
+	sessionPermissionControllers.CompareAndDelete(sessionID, controller)
+}
+
+func SetSessionPermissionMode(sessionID, mode string) error {
+	if sessionID == "" || !isValidSessionID(sessionID) {
+		return fmt.Errorf("invalid session id")
+	}
+	if !validAgentPermissionMode(mode) {
+		return fmt.Errorf("invalid agent permission mode")
+	}
+	lock := sessionLock(sessionID)
+	lock.Lock()
+	defer lock.Unlock()
+	if _, err := os.Stat(filepath.Join(sessionsDir(), sessionID, "session.json")); err != nil {
+		return err
+	}
+	runtime, err := loadRuntimeLocked(sessionID)
+	if err != nil {
+		return err
+	}
+	runtime.PermissionMode = mode
+	runtime.AlwaysAllow = false
+	if err = writeRuntimeLocked(sessionID, runtime); err != nil {
+		return err
+	}
+	if value, ok := sessionPermissionControllers.Load(sessionID); ok {
+		value.(*sessionPermissionController).allowSession.Store(mode == AgentPermissionAllowSession)
+	}
+	return nil
 }
 
 type agentRuntimeTurn struct {
@@ -134,7 +241,7 @@ func writeRuntimeLocked(sessionID string, runtime *agentRuntime) error {
 	return filelock.WriteFile(runtimePath(sessionID), data)
 }
 
-func beginRuntimeTurn(sessionID string, turn *agentRuntimeTurn, alwaysAllow bool) error {
+func beginRuntimeTurn(sessionID string, turn *agentRuntimeTurn) error {
 	if sessionID == "" || turn == nil {
 		return nil
 	}
@@ -175,7 +282,6 @@ func beginRuntimeTurn(sessionID string, turn *agentRuntimeTurn, alwaysAllow bool
 	if findRuntimeUserAnchor(session, turn.UserEntryID) < 0 {
 		return fmt.Errorf("agent runtime user entry not found")
 	}
-	runtime.AlwaysAllow = runtime.AlwaysAllow || alwaysAllow
 	runtime.ActiveTurn = turn
 	return writeRuntimeLocked(sessionID, runtime)
 }
@@ -192,7 +298,7 @@ func isTurnCommittedLocked(sessionID, turnID string) (bool, error) {
 	return meta.LastCommittedTurnID == turnID, nil
 }
 
-func saveRuntimeTurn(sessionID string, turn *agentRuntimeTurn, alwaysAllow bool) error {
+func saveRuntimeTurn(sessionID string, turn *agentRuntimeTurn) error {
 	if sessionID == "" || turn == nil {
 		return nil
 	}
@@ -216,7 +322,6 @@ func saveRuntimeTurn(sessionID string, turn *agentRuntimeTurn, alwaysAllow bool)
 	if runtime.ActiveTurn != nil && runtime.ActiveTurn.TurnID != turn.TurnID {
 		return fmt.Errorf("agent runtime turn changed")
 	}
-	runtime.AlwaysAllow = runtime.AlwaysAllow || alwaysAllow
 	turn.UpdatedAt = time.Now().UnixMilli()
 	runtime.ActiveTurn = turn
 	return writeRuntimeLocked(sessionID, runtime)

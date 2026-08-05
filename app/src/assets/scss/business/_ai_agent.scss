@@ -697,6 +697,26 @@
   }
 }
 
+.agent-chat__permission {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 26px 4px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &-icon {
+    height: 14px;
+    width: 14px;
+    color: var(--b3-theme-on-surface);
+  }
+
+  &-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 // 思考强度：使用菜单按钮，避免底部原生 select 向视口外展开。
 .agent-chat__reasoning-effort {
   display: inline-flex;

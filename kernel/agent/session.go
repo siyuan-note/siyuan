@@ -303,6 +303,11 @@ func GetSessionState(id string, includeRuntime bool) (map[string]any, error) {
 			return nil, err
 		}
 	}
+	permissionMode, err := resolveSessionPermissionModeLocked(id, session)
+	if err != nil {
+		return nil, err
+	}
+	session["permissionMode"] = permissionMode
 	return session, nil
 }
 

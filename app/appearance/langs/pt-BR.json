@@ -1,4 +1,7 @@
 {
+	"agentPermission": "Permissão",
+	"agentPermissionConfirm": "Exigir confirmação",
+	"agentPermissionAllowSession": "Permitir automaticamente",
 	"oidcVerificationFailed": "Falha na verificação da configuração OIDC",
 	"oidcVerificationSuccess": "Configuração OIDC verificada e salva",
 	"oidcVerificationTip": "Conclua o login OIDC na janela do navegador aberta; a configuração atual permanecerá ativa até que a verificação seja concluída com sucesso",

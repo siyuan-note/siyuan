@@ -1,4 +1,7 @@
 {
+	"agentPermission": "สิทธิ์",
+	"agentPermissionConfirm": "ต้องยืนยัน",
+	"agentPermissionAllowSession": "อนุญาตอัตโนมัติ",
 	"oidcVerificationFailed": "การตรวจสอบการกำหนดค่า OIDC ล้มเหลว",
 	"oidcVerificationSuccess": "ตรวจสอบและบันทึกการกำหนดค่า OIDC แล้ว",
 	"oidcVerificationTip": "ลงชื่อเข้าใช้ OIDC ให้เสร็จสิ้นในหน้าต่างเบราว์เซอร์ที่เปิดอยู่ การกำหนดค่าปัจจุบันจะยังคงมีผลจนกว่าการตรวจสอบจะสำเร็จ",

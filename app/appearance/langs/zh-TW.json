@@ -1,4 +1,7 @@
 {
+	"agentPermission": "權限",
+	"agentPermissionConfirm": "需確認",
+	"agentPermissionAllowSession": "自動允許",
 	"oidcVerificationFailed": "OIDC 設定驗證失敗",
 	"oidcVerificationSuccess": "OIDC 設定驗證成功並已儲存",
 	"oidcVerificationTip": "請在開啟的瀏覽器視窗中完成 OIDC 登入；驗證成功前目前設定將繼續生效",

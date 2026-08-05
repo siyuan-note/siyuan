@@ -206,8 +206,8 @@ func newAgentSessionDeadline(timeoutSeconds int) (*time.Timer, <-chan time.Time)
 
 func recordRunningEvent(sessionID string, running *runningSession, event agent.AgentEvent) {
 	sessionsMu.Lock()
-	defer sessionsMu.Unlock()
 	if runningSessions[sessionID] != running {
+		sessionsMu.Unlock()
 		return
 	}
 	if event.Type == "turn" {
@@ -215,6 +215,10 @@ func recordRunningEvent(sessionID string, running *runningSession, event agent.A
 	}
 	if event.Type == "done" || event.Type == "error" {
 		running.terminal = true
+	}
+	sessionsMu.Unlock()
+	if event.Type == agent.AgentEventPermission {
+		broadcastAgentSessionChanged(running.app, sessionID, "permission")
 	}
 }
 
@@ -253,13 +257,46 @@ func agentChatConfirm(c *gin.Context) {
 		return
 	}
 	ret := gulu.Ret.NewResult()
-	if !agent.ConfirmSession(req.ConfirmID, req.Approved, req.Always) {
+	accepted, err := agent.ConfirmSession(req.ConfirmID, req.Approved, req.Always)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	if !accepted {
 		ret.Code = -1
 		ret.Msg = "agent confirmation expired"
 		c.JSON(http.StatusConflict, ret)
 		return
 	}
 	c.JSON(http.StatusOK, ret)
+}
+
+type agentPermissionReq struct {
+	SessionID      string `json:"sessionID"`
+	PermissionMode string `json:"permissionMode"`
+}
+
+func setAgentSessionPermission(c *gin.Context) {
+	req := &agentPermissionReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	ret := gulu.Ret.NewResult()
+	if err := agent.SetSessionPermissionMode(req.SessionID, req.PermissionMode); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	ret.Data = map[string]string{"permissionMode": req.PermissionMode}
+	c.JSON(http.StatusOK, ret)
+	broadcastAgentSessionChanged(c.GetHeader("X-SiYuan-App-ID"), req.SessionID, "permission")
 }
 
 type agentQuestionReq struct {
@@ -610,7 +647,8 @@ func saveSession(c *gin.Context) {
 }
 
 // broadcastAgentSessionChanged 向除发起者 app 外、所有打开了 agentChat dock 的实例推送会话变更通知。
-// action: streamStart / streamEnd / update / delete。排除发起者 app（它已通过 SSE 自渲染或本地持有最新状态）。
+// action: streamStart / streamEnd / update / permission / delete。
+// 排除发起者 app，它已通过 SSE 自渲染或在本地持有最新状态。
 func broadcastAgentSessionChanged(app, sessionID, action string) {
 	if "" == app || "" == sessionID {
 		return
@@ -642,6 +680,10 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 			"arguments": event.Arguments,
 			"confirmID": event.ConfirmID,
 			"effects":   event.Effects,
+		})
+	case agent.AgentEventPermission:
+		return writeSSEEvent(c, agent.AgentEventPermission, map[string]string{
+			"permissionMode": event.PermissionMode,
 		})
 	case "tool_call":
 		return writeSSEEvent(c, "tool_call", map[string]any{

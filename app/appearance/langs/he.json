@@ -1,4 +1,7 @@
 {
+	"agentPermission": "הרשאה",
+	"agentPermissionConfirm": "דרוש אישור",
+	"agentPermissionAllowSession": "אפשר אוטומטית",
 	"oidcVerificationFailed": "אימות תצורת OIDC נכשל",
 	"oidcVerificationSuccess": "תצורת OIDC אומתה ונשמרה",
 	"oidcVerificationTip": "השלם את ההתחברות ל-OIDC בחלון הדפדפן שנפתח; התצורה הנוכחית תישאר פעילה עד שהאימות יצליח",

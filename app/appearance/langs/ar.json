@@ -1,4 +1,7 @@
 {
+	"agentPermission": "الإذن",
+	"agentPermissionConfirm": "يتطلب تأكيدًا",
+	"agentPermissionAllowSession": "السماح تلقائيًا",
 	"oidcVerificationFailed": "فشل التحقق من إعداد OIDC",
 	"oidcVerificationSuccess": "تم التحقق من إعداد OIDC وحفظه",
 	"oidcVerificationTip": "أكمل تسجيل الدخول إلى OIDC في نافذة المتصفح المفتوحة؛ سيظل الإعداد الحالي فعالًا حتى ينجح التحقق",

@@ -9,7 +9,7 @@ import {resetLayout} from "../../layout/util";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 /// #endif
 import {desktopModeCookie} from "../../util/cookie";
-import {getFrontend, isMobile, objEquals} from "../../util/functions";
+import {isBrowser, isMobile, objEquals} from "../../util/functions";
 import {exitSiYuan} from "../../dialog/processSystem";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openByMobile} from "../../editor/openLink";
@@ -533,9 +533,9 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const desktopModeControl = controlBoolean("desktopMode", {
         readConfig: () => desktopModeCookie.read(),
     });
-    // 桌面端（Electron）固定访问 /stage/build/app/，桌面模式设置仅在浏览器端和原生移动端生效
+    // Electron 桌面端固定访问 /stage/build/app/，其他客户端可切换桌面和移动界面
     // https://github.com/siyuan-note/siyuan/issues/18559
-    if (!getFrontend().startsWith("desktop")) {
+    if (isBrowser()) {
         // https://github.com/siyuan-note/siyuan/issues/13952
         group.composite({
             key: "desktopMode",

@@ -8,20 +8,6 @@ import {lineNumberRender} from "../render/highlightRender";
 
 const MAX_RECENT_FONT_STYLES = 14;
 
-const getRecentFontSizeDisplay = (fontSize: string) => {
-    if (fontSize.endsWith("em")) {
-        const percentage = `${(parseFloat(fontSize) * 100).toFixed(0)}%`;
-        return {
-            label: percentage,
-            tooltip: `${window.siyuan.languages.fontSize} ${percentage}`,
-        };
-    }
-    return {
-        label: fontSize,
-        tooltip: `${window.siyuan.languages.fontSize} ${fontSize}`,
-    };
-};
-
 export const limitRecentFontStyleRows = (element: HTMLElement) => {
     const wrapElement = element.querySelector('[data-id="lastUsedWrap"]');
     if (!wrapElement) {
@@ -164,8 +150,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                     break;
                 case "fontSize":
                     if (!disableFont) {
-                        const fontSizeDisplay = getRecentFontSizeDisplay(lastFontStatus[1]);
-                        lastColorHTML += `<button data-type="${lastFontStatus[0]}" data-value="${lastFontStatus[1]}" class="protyle-font__style ariaLabel" data-position="3south" aria-label="${fontSizeDisplay.tooltip}">${fontSizeDisplay.label}</button>`;
+                        lastColorHTML += `<button data-type="${lastFontStatus[0]}" data-value="${lastFontStatus[1]}" class="protyle-font__style ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.fontSize} ${lastFontStatus[1]}">${lastFontStatus[1]}</button>`;
                     }
                     break;
                 case "style1":

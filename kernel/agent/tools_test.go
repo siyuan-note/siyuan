@@ -166,6 +166,17 @@ func TestExecuteToolPreservesModelAttachments(t *testing.T) {
 	}
 }
 
+func TestValidateToolCallInputRejectsMissingActionBeforeConfirmation(t *testing.T) {
+	args := map[string]any{"id": "20260707184942-prjqwqo"}
+	if _, _, err := validateToolCallInput(t.Context(), "outline", args); err == nil {
+		t.Fatal("outline without its required action must fail validation before confirmation")
+	}
+	args["action"] = "get"
+	if _, _, err := validateToolCallInput(t.Context(), "outline", args); err != nil {
+		t.Fatalf("valid outline arguments were rejected: %s", err)
+	}
+}
+
 func TestNeedsConfirmScopesReadOnlyActionsByToolSource(t *testing.T) {
 	const externalWrite = "test_external_write"
 	const externalRead = "test_external_read"
@@ -277,6 +288,25 @@ func TestQueryToolActionEffects(t *testing.T) {
 		if needsLocalSnapshot(test.toolName, test.action) {
 			t.Errorf("read-only action %s::%s must not create a local snapshot", test.toolName, test.action)
 		}
+	}
+}
+
+func TestNativeReadOnlyToolActions(t *testing.T) {
+	for _, action := range []string{"open_setting", "focus_block", "open_document", "open_search"} {
+		if needsConfirm("frontend", action, nil) || needsLocalSnapshot("frontend", action) {
+			t.Errorf("built-in frontend action %q must not require confirmation or create a snapshot", action)
+		}
+	}
+	if !needsConfirm("frontend", "plugin__example__write", nil) {
+		t.Fatal("plugin frontend actions with unknown effects must require confirmation")
+	}
+	for _, action := range []string{"html", "preview"} {
+		if needsConfirm("export", action, nil) || needsLocalSnapshot("export", action) {
+			t.Errorf("read-only export action %q must not require confirmation or create a snapshot", action)
+		}
+	}
+	if !needsConfirm("export", "docx", nil) || !needsLocalSnapshot("export", "docx") {
+		t.Fatal("file-producing export actions must retain confirmation and snapshot protection")
 	}
 }
 

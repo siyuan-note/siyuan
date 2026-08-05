@@ -37,6 +37,7 @@ import {
 } from "./AgentMessageRenderer";
 import {getAgentReasoningEffortOptions} from "./AgentReasoning";
 import {mountGroupedModelPicker, type IGroupedModelPicker} from "../../../config/tabs/ai/aiProviderUi";
+import {AI_CONFIG_CHANGED_EVENT} from "../../../config/tabs/ai/aiRuntime";
 import {isEncryptedBox} from "../../../util/pathName";
 import {Menu} from "../../../plugin/Menu";
 
@@ -214,8 +215,8 @@ export class AgentChat extends Model {
             type: "agentChat",
             msgCallback: (data) => this.onWsMessage(data),
         });
-        // AI 配置保存走本地 patch（aiRuntime.ts 写 window.siyuan.config.ai）不广播 ws，
-        // 故用两种方式兜底：window focus（跨窗口）+ MutationObserver 监听设置对话框关闭（同窗口即时）。
+        // AI 配置保存后主动刷新模型列表；window focus 和设置对话框关闭监听用于兜底其他配置更新入口。
+        window.addEventListener(AI_CONFIG_CHANGED_EVENT, this.checkConfigChangedHandler);
         window.addEventListener("focus", this.checkConfigChangedHandler);
         // 设置对话框是 SiYuan 内部模态，关闭时 window 不失焦，focus 事件不触发。
         // 监听 body 子节点变化，当含 .config__panel 的设置 dialog 被移除时即时刷新。
@@ -231,12 +232,13 @@ export class AgentChat extends Model {
         this.checkConfigChanged();
     };
 
-    // 比较 window.siyuan.config.ai 实际可用模型数与缓存 modelOptions，不一致则刷新。
+    // 比较 window.siyuan.config.ai 实际可用模型与缓存 modelOptions，不一致则刷新。
     // 仅当处于欢迎页（无会话内容）时重渲染，以便从无模型提示块切回示例或反之；
     // 有会话内容时不重绘（避免破坏对话），refreshModelOptions 内已刷新 trigger 显示。
     private checkConfigChanged() {
-        const actualCount = AgentChat.countUsableModels(window.siyuan.config.ai);
-        if (actualCount === this.modelOptions.length) {
+        const actualOptions = AgentChat.getUsableModels(window.siyuan.config.ai);
+        if (actualOptions.length === this.modelOptions.length && actualOptions.every((option, index) =>
+            option.id === this.modelOptions[index].id && option.name === this.modelOptions[index].name)) {
             return;
         }
         this.refreshModelOptions();
@@ -245,20 +247,24 @@ export class AgentChat extends Model {
         }
     }
 
-    // 与 refreshModelOptions / 后端 HasAnyProvider() 一致的"可用模型"计数。
-    private static countUsableModels(aiConfig: Config.IAI): number {
-        let count = 0;
+    // 与后端 HasAnyProvider()/GetModel() 一致，仅返回已启用提供商中的已启用模型。
+    private static getUsableModels(aiConfig: Config.IAI): Array<{ id: string; name: string }> {
+        const options: Array<{ id: string; name: string }> = [];
         for (const prov of aiConfig.providers || []) {
             if (!prov.enabled) {
                 continue;
             }
             for (const m of prov.models) {
-                if (m.enabled && (m.displayName || m.name)) {
-                    count++;
+                if (!m.enabled) {
+                    continue;
+                }
+                const displayName = m.displayName || m.name;
+                if (displayName) {
+                    options.push({id: m.id || m.name, name: displayName});
                 }
             }
         }
-        return count;
+        return options;
     }
 
     private initUI() {
@@ -303,13 +309,11 @@ export class AgentChat extends Model {
             "</svg>" +
             "</span>" +
             '<button class="b3-select b3-select--noborder agent-chat__model-picker" data-type="groupedModelPicker" data-group="agent" data-model-id="" data-menu="true" type="button">' +
-            '<span class="agent-chat__model-picker-label" data-type="groupedModelPickerLabel"></span>' +
-            '<svg class="agent-chat__model-picker-arrow"><use xlink:href="#iconDown"></use></svg></button>' +
+            '<span class="agent-chat__model-picker-label" data-type="groupedModelPickerLabel"></span></button>' +
             '<button class="b3-select b3-select--noborder agent-chat__reasoning-effort ariaLabel" data-menu="true" aria-label="' +
             (L.reasoningEffortTooltip || "Reasoning effort") + '" type="button">' +
             '<svg class="agent-chat__reasoning-effort-icon"><use xlink:href="#iconBrain"></use></svg>' +
-            '<span class="agent-chat__reasoning-effort-label"></span>' +
-            '<svg class="agent-chat__reasoning-effort-arrow"><use xlink:href="#iconDown"></use></svg></button>' +
+            '<span class="agent-chat__reasoning-effort-label"></span></button>' +
             "</div>" +
             '<button class="agent-chat__send b3-button b3-button--icon b3-button--text ariaLabel" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none ariaLabel" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
@@ -495,23 +499,7 @@ export class AgentChat extends Model {
     // 与后端 HasAnyProvider()/GetModel() 判定一致：provider 和 model 均需 enabled。
     // 零模型时显式置空 selectedModel（避免 undefined 透传到后端），失效选择自动重置。
     refreshModelOptions() {
-        const aiConfig = window.siyuan.config.ai;
-        const newOptions: Array<{ id: string; name: string }> = [];
-        for (const prov of aiConfig.providers || []) {
-            if (!prov.enabled) {
-                continue;
-            }
-            for (const m of prov.models) {
-                if (!m.enabled) {
-                    continue;
-                }
-                const displayName = m.displayName || m.name;
-                if (!displayName) {
-                    continue;
-                }
-                newOptions.push({id: m.id || m.name, name: displayName});
-            }
-        }
+        const newOptions = AgentChat.getUsableModels(window.siyuan.config.ai);
         this.modelOptions = newOptions;
         // 若当前选择已失效（不在新列表中），则重置：有模型取第一个，无模型显式置空。
         const stillValid = this.selectedModel && newOptions.some(o => o.id === this.selectedModel);
@@ -3936,7 +3924,7 @@ export class AgentChat extends Model {
             "repo": L.agentCatRepo, "history": L.agentCatHistory,
             "sync": L.agentCatSync, "database": L.agentCatDatabase,
         };
-        return m[name] || L.agentCatDefault;
+        return m[name] || name || L.agentCatDefault;
     }
 
     private formatMessageTime(ts: number): string {

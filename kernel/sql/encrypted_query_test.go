@@ -130,6 +130,46 @@ func TestExistRefByDefIDsSearchesGlobalAndEncryptedIndexes(t *testing.T) {
 	}
 }
 
+func TestQueryBoundBlockAVIDsSearchesGlobalAndEncryptedIndexes(t *testing.T) {
+	globalDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if nil != err {
+		t.Fatalf("open global test database failed: %s", err)
+	}
+	globalDB.SetMaxOpenConns(1)
+	if _, err = globalDB.Exec("CREATE TABLE blocks (id TEXT, root_id TEXT, ial TEXT)"); nil != err {
+		t.Fatalf("create global blocks table failed: %s", err)
+	}
+	if _, err = globalDB.Exec("INSERT INTO blocks VALUES ('global-bound', 'global-root', '{: id=\"global-bound\" custom-avs=\"20260804000000-global\"}'), ('false-positive', 'global-root', '{: id=\"false-positive\" memo=\"custom-avs=20260804000000-false\"}')"); nil != err {
+		t.Fatalf("insert global bound blocks failed: %s", err)
+	}
+	previousDB := db
+	db = globalDB
+	t.Cleanup(func() {
+		db = previousDB
+		globalDB.Close()
+	})
+
+	encryptedDB, boxID := useEncryptedQueryTestDB(t)
+	insertEncryptedQueryTestBlock(t, encryptedDB, "encrypted-bound", "", "encrypted-root", "p")
+	if _, err = encryptedDB.Exec("UPDATE blocks SET ial = ? WHERE id = ?", "{: id=\"encrypted-bound\" custom-avs=\"20260804000000-encrypted\"}", "encrypted-bound"); nil != err {
+		t.Fatalf("update encrypted bound block failed: %s", err)
+	}
+
+	boundAVIDs, queryErr := QueryBoundBlockAVIDs([]string{"global-bound", "false-positive"}, []string{"encrypted-root"})
+	if nil != queryErr {
+		t.Fatalf("query bound blocks failed: %s", queryErr)
+	}
+	if 1 != len(boundAVIDs["global-bound"]) || "20260804000000-global" != boundAVIDs["global-bound"][0] {
+		t.Fatalf("unexpected global bound block result: %#v", boundAVIDs)
+	}
+	if 1 != len(boundAVIDs["encrypted-bound"]) || "20260804000000-encrypted" != boundAVIDs["encrypted-bound"][0] {
+		t.Fatalf("unexpected encrypted bound block result in box %s: %#v", boxID, boundAVIDs)
+	}
+	if _, exists := boundAVIDs["false-positive"]; exists {
+		t.Fatalf("attribute value text should not be treated as a database binding: %#v", boundAVIDs)
+	}
+}
+
 func TestSelectBlocksRawStmtInBoxPaginatesExistingLimit(t *testing.T) {
 	testDB, boxID := useEncryptedQueryTestDB(t)
 	for i := 1; i <= 6; i++ {

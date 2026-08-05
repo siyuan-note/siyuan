@@ -94,7 +94,8 @@ export class Menu {
             const target = event.target as Element;
             if (isMobile()) {
                 const titleElement = hasClosestByClassName(target, "b3-menu__title");
-                if (titleElement || (typeof event.detail === "string" && event.detail === "back")) {
+                const isSystemBack = typeof event.detail === "string" && event.detail === "back";
+                if ((titleElement && !titleElement.classList.contains("b3-menu__title--root")) || isSystemBack) {
                     const lastShowElements = this.element.querySelectorAll(".b3-menu__item--show");
                     if (lastShowElements.length > 0) {
                         lastShowElements[lastShowElements.length - 1].classList.remove("b3-menu__item--show");
@@ -236,7 +237,7 @@ export class Menu {
         this.element.style.transform = `translateY(${offset}px)`;
         const scrimElement = this.getFullscreenScrim();
         if (scrimElement) {
-            scrimElement.style.opacity = Math.max(0, .4 * (1 - offset / this.element.clientHeight)).toString();
+            scrimElement.style.opacity = Math.max(0, .2 * (1 - offset / this.element.clientHeight)).toString();
         }
         if (event.cancelable) {
             event.preventDefault();
@@ -308,9 +309,28 @@ export class Menu {
         fullscreenCloseTimeout = window.setTimeout(() => this.removeImmediately(), Constants.TIMEOUT_DBLCLICK);
     }
 
+    private updateSheetTitle() {
+        if (!this.element.classList.contains("b3-menu--sheet")) {
+            return;
+        }
+        const titleElement = this.element.firstElementChild as HTMLElement;
+        const labelElement = titleElement.querySelector(".b3-menu__label") as HTMLElement;
+        const shownItems = this.element.querySelectorAll(".b3-menu__item--show");
+        if (shownItems.length === 0) {
+            titleElement.classList.add("b3-menu__title--root");
+            labelElement.textContent = "";
+            return;
+        }
+        titleElement.classList.remove("b3-menu__title--root");
+        const parentLabelElement = shownItems[shownItems.length - 1]
+            .querySelector(":scope > .b3-menu__label") as HTMLElement;
+        labelElement.textContent = parentLabelElement?.textContent.trim() || window.siyuan.languages.back;
+    }
+
     private setSheetHeight(position: "bottom" | "all") {
+        this.updateSheetTitle();
         if (position === "bottom") {
-            this.element.style.height = "50vh";
+            this.element.style.height = "56vh";
             return;
         }
         let itemsElement = this.element.lastElementChild;
@@ -319,7 +339,7 @@ export class Menu {
             itemsElement = shownItems[shownItems.length - 1]
                 .querySelector(":scope > .b3-menu__submenu > .b3-menu__items") || itemsElement;
         }
-        const maxHeight = window.innerHeight * .9;
+        const maxHeight = window.innerHeight * .56;
         const titleHeight = this.element.firstElementChild.getBoundingClientRect().height;
         const contentHeight = itemsElement.scrollHeight;
         this.element.style.height = Math.min(maxHeight, Math.max(160, titleHeight + contentHeight)) + "px";
@@ -446,6 +466,9 @@ export class Menu {
         }
         this.removeScrollEvent();
         this.element.firstElementChild.classList.add("fn__none");
+        this.element.firstElementChild.classList.remove("b3-menu__title--root");
+        (this.element.firstElementChild.querySelector(".b3-menu__label") as HTMLElement).innerHTML =
+            window.siyuan.languages.back;
         this.element.lastElementChild.innerHTML = "";
         this.element.lastElementChild.classList.remove("b3-menu__items--menu");
         this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全

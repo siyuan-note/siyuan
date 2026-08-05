@@ -261,7 +261,8 @@ export const windowMouseMove = (event: MouseEvent) => {
 
             if (tableElement.getAttribute("contenteditable") === "true") {
                 const captionElement = blockElement.querySelector("caption");
-                const captionHeight = (captionElement && captionElement.style.captionSide !== "bottom") ? captionElement.clientHeight : 0;
+                const captionHeight = (captionElement && captionElement.style.captionSide !== "bottom") ?
+                    captionElement.getBoundingClientRect().height : 0;
                 const tableHeight = Math.min(blockElement.querySelector("colgroup").clientHeight,
                     tableElement.clientHeight - captionHeight);
                 const rect = cellElement.getBoundingClientRect();

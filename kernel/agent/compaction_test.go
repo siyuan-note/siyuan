@@ -374,7 +374,7 @@ func TestAgentChatRegenerateCompactionUsesTruncatedEditedHistory(t *testing.T) {
 
 	events := AgentChat(
 		context.Background(), newTestOpenAIClient(server.URL), "test-model", "", contextLimit, testSessionID,
-		"user-2", 1, editedTarget, stringPointer(editedBlockHTML), "English", nil, EditorContext{}, nil, true,
+		"user-2", 1, editedTarget, new(editedBlockHTML), "English", nil, EditorContext{}, nil, true,
 		time.Second, 0, "", time.Second, time.Second,
 	)
 	for event := range events {

@@ -49,6 +49,27 @@ func TestParseBlockRefStringArrayEmptyHandling(t *testing.T) {
 	}
 }
 
+func TestCheckBlockRefRejectsDeletedIDsOutsideIDs(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.POST("/api/block/checkBlockRef", checkBlockRef)
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/api/block/checkBlockRef", strings.NewReader(
+		`{"scope":"blocks","ids":["20260804000000-checked"],"deletedIDs":["20260804000001-deleted"]}`))
+	request.Header.Set("Content-Type", "application/json")
+	engine.ServeHTTP(recorder, request)
+
+	var response map[string]any
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); nil != err {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	if -1 != int(response["code"].(float64)) ||
+		"Field [deletedIDs] should be a subset of field [ids]" != response["msg"] {
+		t.Fatalf("unexpected response: %#v", response)
+	}
+}
+
 func TestFilterBlockAndRefIDsByPublishAccess(t *testing.T) {
 	const (
 		boxID             = "20260724000000-boxid01"

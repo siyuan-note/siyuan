@@ -38,13 +38,12 @@ type Notifications struct {
 
 // NewNotifications 创建默认全部启用的通知配置。新增内置通知时在此统一调整默认值，避免多处分散。
 func NewNotifications() *Notifications {
-	selectAllTip := true
 	return &Notifications{
 		DocTreeMaxList:       true,
 		TagMaxList:           true,
 		WorkspaceNotSSD:      true,
 		BrowserCompatibility: true,
-		SelectAllTip:         &selectAllTip,
+		SelectAllTip:         new(true),
 	}
 }
 

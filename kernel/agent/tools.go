@@ -19,6 +19,7 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"maps"
 	"strings"
 
@@ -50,22 +51,30 @@ type executedToolResult struct {
 	ExecutionUnknown bool
 }
 
-// executeTool 执行单次工具调用。
-func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) executedToolResult {
-	t, validator := tools.LookupToolWithValidator(tc.Function.Name)
+// validateToolCallInput 在确认和快照之前校验工具调用，避免无效调用被误判为写操作。
+func validateToolCallInput(ctx context.Context, toolName string, args map[string]any) (*tools.Tool, *tools.ToolValidator, error) {
+	t, validator := tools.LookupToolWithValidator(toolName)
 	if t == nil {
-		return executedToolResult{Text: "unknown tool: " + tc.Function.Name, IsError: true}
+		return nil, nil, fmt.Errorf("unknown tool: %s", toolName)
 	}
 	if t.ContextHandler == nil && t.Handler == nil {
-		return executedToolResult{Text: "tool handler unavailable: " + tc.Function.Name, IsError: true}
+		return nil, nil, fmt.Errorf("tool handler unavailable: %s", toolName)
 	}
 	if ctx.Err() != nil {
-		return executedToolResult{Text: "tool execution was cancelled before it started", IsError: true}
+		return nil, nil, fmt.Errorf("tool execution was cancelled before it started")
 	}
-
-	args := parseToolArgs(tc.Function.Arguments)
 	if err := validator.ValidateInputContext(ctx, args); err != nil {
-		return executedToolResult{Text: "invalid tool arguments: " + err.Error(), IsError: true}
+		return nil, nil, fmt.Errorf("invalid tool arguments: %w", err)
+	}
+	return t, validator, nil
+}
+
+// executeTool 执行单次工具调用。
+func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) executedToolResult {
+	args := parseToolArgs(tc.Function.Arguments)
+	t, validator, err := validateToolCallInput(ctx, tc.Function.Name, args)
+	if err != nil {
+		return executedToolResult{Text: err.Error(), IsError: true}
 	}
 	// _sessionID 和 _toolCallID 是原生工具专用的内部字段，用于关联会话状态和实现幂等操作。
 	// 仅注入给原生工具；MCP/插件工具的参数会原样转发给外部服务端，

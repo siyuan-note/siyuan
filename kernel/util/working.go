@@ -44,7 +44,7 @@ import (
 // var Mode = "dev"
 var Mode = "prod"
 
-const Ver = "3.7.4-alpha.6"
+const Ver = "3.8.0-alpha.1"
 
 // IsReleaseVer 判断是否为正式版（不含 alpha、beta、rc 等预发布标识）。
 func IsReleaseVer(ver string) bool {
@@ -83,8 +83,7 @@ var (
 // the commandline parameter itself.
 func coalesceToEnvVar(fromCLI *string, envVarName string) *string {
 	if fromCLI == nil || "" == *fromCLI {
-		ret := os.Getenv(envVarName)
-		return &ret
+		return new(os.Getenv(envVarName))
 	}
 	return fromCLI
 }

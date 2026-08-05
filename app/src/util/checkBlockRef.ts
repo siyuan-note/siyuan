@@ -7,6 +7,7 @@ export interface IBlockRefCheckOptions {
     scope: "blocks" | "documents" | "notebook";
     ids?: string[];
     exactIDs?: string[];
+    deletedIDs?: string[];
     paths?: string[];
     notebook?: string;
 }

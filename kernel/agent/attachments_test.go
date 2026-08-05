@@ -131,8 +131,6 @@ func TestDowngradeImageInputPreservesTextWithoutMutatingHistory(t *testing.T) {
 }
 
 func TestImageInputUnsupportedErrorClassification(t *testing.T) {
-	param := "messages.2.content.1.type"
-	detailParam := "messages.2.content.1.image_url.detail"
 	tests := []struct {
 		name string
 		err  error
@@ -143,7 +141,7 @@ func TestImageInputUnsupportedErrorClassification(t *testing.T) {
 			err: &openai.APIError{
 				HTTPStatusCode: 400,
 				Message:        "This model does not support image input",
-				Param:          &param,
+				Param:          new("messages.2.content.1.type"),
 			},
 			want: true,
 		},
@@ -195,7 +193,7 @@ func TestImageInputUnsupportedErrorClassification(t *testing.T) {
 			err: &openai.APIError{
 				HTTPStatusCode: 400,
 				Message:        "Unsupported parameter",
-				Param:          &detailParam,
+				Param:          new("messages.2.content.1.image_url.detail"),
 			},
 		},
 		{

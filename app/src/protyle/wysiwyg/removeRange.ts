@@ -269,6 +269,38 @@ export const getBlockRefCheckElementChain = (element: HTMLElement, topElement: H
     return elements;
 };
 
+export const getDeletedBlockElements = (removedElements: HTMLElement[], retainedElements: HTMLElement[]) => {
+    const elementsByID = new Map<string, HTMLElement>();
+    const expansionStopIDs = new Set<string>();
+    removedElements.forEach(item => {
+        [item, ...Array.from(item.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(element => {
+            let currentElement: HTMLElement | null = element;
+            while (currentElement && !currentElement.classList.contains("protyle-wysiwyg__embed")) {
+                currentElement = currentElement.parentElement;
+            }
+            if (currentElement) {
+                return;
+            }
+            if (retainedElements.some(retainedElement =>
+                retainedElement === element || retainedElement.contains(element))) {
+                return;
+            }
+            const id = element.getAttribute("data-node-id");
+            if (!id) {
+                return;
+            }
+            elementsByID.set(id, element);
+            if (retainedElements.some(retainedElement => element.contains(retainedElement))) {
+                expansionStopIDs.add(id);
+            }
+        });
+    });
+    return {
+        elements: Array.from(elementsByID.values()),
+        expansionStopIDs,
+    };
+};
+
 export const getCrossBlockMergeRemoveElement = (editorElement: HTMLElement, startElement: HTMLElement,
                                                 endElement: HTMLElement) => {
     let topElement = endElement;

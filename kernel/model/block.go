@@ -33,6 +33,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/open-spaced-repetition/go-fsrs/v3"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -116,25 +117,29 @@ type Path struct {
 }
 
 type blockRefCheckGroup struct {
-	blockIDs map[string]struct{}
-	rootIDs  map[string]struct{}
+	blockIDs        map[string]struct{}
+	rootIDs         map[string]struct{}
+	deletedBlockIDs map[string]struct{}
+	deletedRootIDs  map[string]struct{}
 }
 
 func newBlockRefCheckGroup() *blockRefCheckGroup {
 	return &blockRefCheckGroup{
-		blockIDs: map[string]struct{}{},
-		rootIDs:  map[string]struct{}{},
+		blockIDs:        map[string]struct{}{},
+		rootIDs:         map[string]struct{}{},
+		deletedBlockIDs: map[string]struct{}{},
+		deletedRootIDs:  map[string]struct{}{},
 	}
 }
 
-// CheckBlockRef 保留原有调用语义。
+// CheckBlockRef 检查将被删除的块是否被引用或绑定到仍存在的数据库。
 func CheckBlockRef(ids []string) bool {
-	ret, _ := CheckBlockRefInBox(ids, nil, "")
+	ret, _ := CheckBlockRefInBox(ids, nil, ids, "")
 	return ret
 }
 
-// CheckBlockRefInBox 检查块及其容器后代是否被引用。
-func CheckBlockRefInBox(ids, exactIDs []string, boxID string) (ret bool, err error) {
+// CheckBlockRefInBox 检查受影响块的引用，并检查实际删除块的数据库绑定。
+func CheckBlockRefInBox(ids, exactIDs, deletedIDs []string, boxID string) (ret bool, err error) {
 	sql.FlushQueue()
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	if 1 > len(ids) {
@@ -156,13 +161,24 @@ func CheckBlockRefInBox(ids, exactIDs []string, boxID string) (ret bool, err err
 	for _, id := range exactIDs {
 		exactIDSet[id] = struct{}{}
 	}
+	deletedIDSet := map[string]struct{}{}
+	for _, id := range deletedIDs {
+		deletedIDSet[id] = struct{}{}
+	}
 	selectedByRoot := map[string]map[string]map[string]struct{}{}
+	deletedByRoot := map[string]map[string]map[string]struct{}{}
 	for _, bt := range bts {
 		if "d" == bt.Type && bt.ID == bt.RootID {
 			group.rootIDs[bt.ID] = struct{}{}
+			if _, deleted := deletedIDSet[bt.ID]; deleted {
+				group.deletedRootIDs[bt.ID] = struct{}{}
+			}
 			continue
 		}
 		group.blockIDs[bt.ID] = struct{}{}
+		if _, deleted := deletedIDSet[bt.ID]; deleted {
+			group.deletedBlockIDs[bt.ID] = struct{}{}
+		}
 		if _, exact := exactIDSet[bt.ID]; exact {
 			continue
 		}
@@ -173,11 +189,21 @@ func CheckBlockRefInBox(ids, exactIDs []string, boxID string) (ret bool, err err
 			selectedByRoot[bt.BoxID][bt.RootID] = map[string]struct{}{}
 		}
 		selectedByRoot[bt.BoxID][bt.RootID][bt.ID] = struct{}{}
+		if _, deleted := deletedIDSet[bt.ID]; deleted {
+			if nil == deletedByRoot[bt.BoxID] {
+				deletedByRoot[bt.BoxID] = map[string]map[string]struct{}{}
+			}
+			if nil == deletedByRoot[bt.BoxID][bt.RootID] {
+				deletedByRoot[bt.BoxID][bt.RootID] = map[string]struct{}{}
+			}
+			deletedByRoot[bt.BoxID][bt.RootID][bt.ID] = struct{}{}
+		}
 	}
 
 	// blocktrees 的父子关系用于展开列表、引述、超级块等容器后代。
 	for treeBoxID, selectedRoots := range selectedByRoot {
 		for rootID, selected := range selectedRoots {
+			deleted := deletedByRoot[treeBoxID][rootID]
 			rootTrees := treenode.GetBlockTreesByRootIDInBox(rootID, treeBoxID)
 			byID := map[string]*treenode.BlockTree{}
 			for _, bt := range rootTrees {
@@ -185,12 +211,25 @@ func CheckBlockRefInBox(ids, exactIDs []string, boxID string) (ret bool, err err
 			}
 			for _, bt := range rootTrees {
 				current := bt
+				affectedBySelected := false
+				affectedByDeleted := false
 				for nil != current && "" != current.ParentID {
 					if _, ok := selected[current.ParentID]; ok {
-						group.blockIDs[bt.ID] = struct{}{}
+						affectedBySelected = true
+					}
+					if _, ok := deleted[current.ParentID]; ok {
+						affectedByDeleted = true
+					}
+					if affectedBySelected && affectedByDeleted {
 						break
 					}
 					current = byID[current.ParentID]
+				}
+				if affectedBySelected {
+					group.blockIDs[bt.ID] = struct{}{}
+				}
+				if affectedByDeleted {
+					group.deletedBlockIDs[bt.ID] = struct{}{}
 				}
 			}
 		}
@@ -211,10 +250,12 @@ func CheckDocsRef(paths []string) (ret bool, err error) {
 	for docPath, box := range pathsBoxes {
 		rootID := util.GetTreeID(docPath)
 		group.rootIDs[rootID] = struct{}{}
+		group.deletedRootIDs[rootID] = struct{}{}
 		childrenDir := path.Join(path.Dir(docPath), rootID)
 		for _, bt := range treenode.GetBlockTreesByPathPrefix(box.ID, childrenDir) {
 			if bt.ID == bt.RootID {
 				group.rootIDs[bt.RootID] = struct{}{}
+				group.deletedRootIDs[bt.RootID] = struct{}{}
 			}
 		}
 	}
@@ -231,6 +272,7 @@ func CheckNotebookRef(boxID string) (ret bool, err error) {
 	group := newBlockRefCheckGroup()
 	for _, rootID := range treenode.GetRootBlockIDsByBoxID(boxID) {
 		group.rootIDs[rootID] = struct{}{}
+		group.deletedRootIDs[rootID] = struct{}{}
 	}
 	return existBlockRefGroup(group)
 }
@@ -244,7 +286,75 @@ func existBlockRefGroup(group *blockRefCheckGroup) (ret bool, err error) {
 	for id := range group.rootIDs {
 		rootIDs = append(rootIDs, id)
 	}
-	return sql.ExistRefByDefIDs(blockIDs, rootIDs, blockIDs, rootIDs)
+	if ret, err = sql.ExistRefByDefIDs(blockIDs, rootIDs, blockIDs, rootIDs); nil != err || ret {
+		return
+	}
+	return existBoundBlockGroup(group)
+}
+
+func existBoundBlockGroup(group *blockRefCheckGroup) (ret bool, err error) {
+	deletedBlockIDs := make([]string, 0, len(group.deletedBlockIDs))
+	for id := range group.deletedBlockIDs {
+		deletedBlockIDs = append(deletedBlockIDs, id)
+	}
+	deletedRootIDs := make([]string, 0, len(group.deletedRootIDs))
+	for id := range group.deletedRootIDs {
+		deletedRootIDs = append(deletedRootIDs, id)
+	}
+	boundAVIDs, err := sql.QueryBoundBlockAVIDs(deletedBlockIDs, deletedRootIDs)
+	if nil != err || 0 == len(boundAVIDs) {
+		return false, err
+	}
+
+	avIDSet := map[string]struct{}{}
+	for _, avIDs := range boundAVIDs {
+		for _, avID := range avIDs {
+			avIDSet[avID] = struct{}{}
+		}
+	}
+	avIDs := make([]string, 0, len(avIDSet))
+	for avID := range avIDSet {
+		avIDs = append(avIDs, avID)
+	}
+	avBlockRels, err := av.GetBlockRelsByAVIDs(avIDs)
+	if nil != err {
+		return false, err
+	}
+	avBlockIDSet := map[string]struct{}{}
+	for _, avIDs := range boundAVIDs {
+		for _, avID := range avIDs {
+			for _, blockID := range avBlockRels[avID] {
+				avBlockIDSet[blockID] = struct{}{}
+			}
+		}
+	}
+	avBlockIDs := make([]string, 0, len(avBlockIDSet))
+	for id := range avBlockIDSet {
+		avBlockIDs = append(avBlockIDs, id)
+	}
+	return hasSurvivingAttributeViewBlock(group, boundAVIDs, avBlockRels, treenode.GetBlockTrees(avBlockIDs)), nil
+}
+
+func hasSurvivingAttributeViewBlock(group *blockRefCheckGroup, boundAVIDs, avBlockRels map[string][]string,
+	blockTrees map[string]*treenode.BlockTree) bool {
+	for _, avIDs := range boundAVIDs {
+		for _, avID := range avIDs {
+			for _, blockID := range avBlockRels[avID] {
+				bt := blockTrees[blockID]
+				if nil == bt {
+					continue
+				}
+				if _, deleted := group.deletedBlockIDs[bt.ID]; deleted {
+					continue
+				}
+				if _, deleted := group.deletedRootIDs[bt.RootID]; deleted {
+					continue
+				}
+				return true
+			}
+		}
+	}
+	return false
 }
 
 type BlockTreeInfo struct {

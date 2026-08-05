@@ -158,9 +158,7 @@ func InitPandoc(customPandocBinPath string) {
 		if pandocVer := getPandocVer(customPandocBinPath); "" != pandocVer {
 			runtimeState.BinPath = customPandocBinPath
 			logging.LogInfof("custom pandoc [ver=%s, bin=%s]", pandocVer, runtimeState.BinPath)
-			if "" != installedPandocVer {
-				removeLegacyPandocDir(tempPandocDir)
-			}
+			removeLegacyPandocDir(tempPandocDir)
 			return
 		}
 	}
@@ -172,56 +170,8 @@ func InitPandoc(customPandocBinPath string) {
 		return
 	}
 
-	runtimeState.BinPath = pandocBinPath(tempPandocDir)
-	pandocVer := getPandocVer(runtimeState.BinPath)
-	if "" != pandocVer {
-		logging.LogInfof("built-in pandoc [ver=%s, bin=%s]", pandocVer, runtimeState.BinPath)
-		return
-	}
-
-	pandocZip := filepath.Join(WorkingDir, "pandoc.zip")
-	if !gulu.File.IsExist(pandocZip) {
-		if gulu.OS.IsWindows() {
-			if "amd64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-windows-amd64.zip")
-			}
-		} else if gulu.OS.IsDarwin() {
-			if "amd64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-darwin-amd64.zip")
-			} else if "arm64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-darwin-arm64.zip")
-			}
-		} else if gulu.OS.IsLinux() {
-			if "amd64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-linux-amd64.zip")
-			} else if "arm64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-linux-arm64.zip")
-			}
-		}
-	}
-
-	if !gulu.File.IsExist(pandocZip) {
-		runtimeState.BinPath = ""
-		logging.LogErrorf("pandoc zip [%s] not found", pandocZip)
-		return
-	}
-
-	if err := gulu.Zip.Unzip(pandocZip, tempPandocDir); err != nil {
-		runtimeState.BinPath = ""
-		logging.LogErrorf("unzip pandoc failed: %s", err)
-		return
-	}
-
-	if gulu.OS.IsDarwin() || gulu.OS.IsLinux() {
-		exec.Command("chmod", "+x", runtimeState.BinPath).CombinedOutput()
-	}
-	pandocVer = getPandocVer(runtimeState.BinPath)
-	if "" == pandocVer {
-		runtimeState.BinPath = ""
-		logging.LogErrorf("initialized built-in pandoc is invalid")
-		return
-	}
-	logging.LogInfof("initialized built-in pandoc [ver=%s, bin=%s]", pandocVer, runtimeState.BinPath)
+	removeLegacyPandocDir(tempPandocDir)
+	logging.LogErrorf("built-in pandoc executable [%s] is unavailable", installedPandocBinPath)
 }
 
 func pandocBinPath(pandocDir string) string {

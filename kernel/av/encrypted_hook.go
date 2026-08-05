@@ -247,6 +247,14 @@ func mirrorBlocksPathByAvID(avID string) string {
 // readMirrorBlocks 按路径读取镜像索引（boxID 为空读全局，非空读加密 box）。
 // 加密笔记本的镜像索引是 DEK 加密的密文，读取后需解密。
 func readMirrorBlocks(boxID string) (ret map[string][]string) {
+	ret, err := readMirrorBlocksWithErr(boxID)
+	if nil != err {
+		logging.LogErrorf("read attribute view blocks failed: %s", err)
+	}
+	return
+}
+
+func readMirrorBlocksWithErr(boxID string) (ret map[string][]string, err error) {
 	ret = map[string][]string{}
 	p := mirrorBlocksPath(boxID)
 	if !filelock.IsExist(p) {
@@ -254,20 +262,18 @@ func readMirrorBlocks(boxID string) (ret map[string][]string) {
 	}
 	data, err := filelock.ReadFile(p)
 	if err != nil {
-		logging.LogErrorf("read attribute view blocks failed: %s", err)
 		return
 	}
 	if boxID != "" {
 		// 加密笔记本的镜像索引是密文，解密后再反序列化
 		dec, decErr := decryptAVData(boxID, "mirror", data)
 		if decErr != nil {
-			logging.LogErrorf("decrypt attribute view blocks failed: %s", decErr)
+			err = decErr
 			return
 		}
 		data = dec
 	}
 	if err = msgpack.Unmarshal(data, &ret); err != nil {
-		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
 		return
 	}
 	return

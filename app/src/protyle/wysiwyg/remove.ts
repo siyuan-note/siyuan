@@ -49,6 +49,7 @@ import {
     getCrossBlockNestedListMergeContext,
     getCrossBlockMergeRemoveElement,
     getCrossBlockSiblingListItemMergeContext,
+    getDeletedBlockElements,
     isEntireBlockContentSelected,
     mergeCrossBlockNestedLists,
     mergeCrossBlockSiblingListItems
@@ -59,6 +60,7 @@ import {input} from "./input";
 export interface IBlockRefCheckTargets {
     elements: HTMLElement[];
     exactIDs: string[];
+    deletedIDs: string[];
 }
 
 interface ICrossBlockReplacement {
@@ -166,6 +168,82 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
     };
 };
 
+const getCrossBlockRemovalPlan = (editorElement: HTMLElement, selectedRange: Range,
+                                   startElement: HTMLElement, endElement: HTMLElement,
+                                   mergeEndElement = true, replacement = false) => {
+    const context = getCrossBlockRemovalContext(
+        editorElement, selectedRange, startElement, endElement, mergeEndElement);
+    if (!mergeEndElement) {
+        return {
+            ...context,
+            nestedListMergeContext: undefined,
+            replacementListItemElement: undefined,
+            removeStartListItem: false,
+            startRemoveListItemElement: undefined,
+            retainedElements: [],
+        };
+    }
+    const nestedListMergeContext = getCrossBlockNestedListMergeContext(editorElement, selectedRange,
+        context.ranges[0]?.blockElement || startElement,
+        context.ranges[context.ranges.length - 1]?.blockElement || endElement);
+    const replacementListItemElement = replacement ? nestedListMergeContext?.replacementListItemElement : undefined;
+    const removeStartListItem = !replacement && !!nestedListMergeContext &&
+        (!!nestedListMergeContext.replacementListItemElement ||
+            nestedListMergeContext.startTextFullySelected && nestedListMergeContext.startTrailingListItems.length > 0);
+    const startRemoveListItemElement = (!replacement ? nestedListMergeContext?.replacementListItemElement :
+        undefined) ||
+        (removeStartListItem ? nestedListMergeContext?.startListItemElement : undefined);
+    const nestedListRemoveElements = nestedListMergeContext ? [
+        ...(startRemoveListItemElement ? [startRemoveListItemElement] : []),
+        ...nestedListMergeContext.startTrailingListItems,
+        nestedListMergeContext.endOuterListItemElement,
+    ] : [];
+    const retainedElements = [
+        ...(replacementListItemElement ? [replacementListItemElement] : []),
+        ...(context.siblingListItemMergeContext?.trailingEndBlockElements || []),
+        ...(context.siblingListItemMergeContext?.trailingEndListItemElements || []),
+    ];
+    if (nestedListMergeContext) {
+        let item = nestedListMergeContext.endListItemElement.nextElementSibling as HTMLElement;
+        while (item?.getAttribute("data-type") === "NodeListItem") {
+            retainedElements.push(item);
+            item = item.nextElementSibling as HTMLElement;
+        }
+    }
+    if (nestedListMergeContext) {
+        for (let i = context.removeElements.length - 1; i >= 0; i--) {
+            if (nestedListRemoveElements.some(element => element.contains(context.removeElements[i]))) {
+                context.removeElements.splice(i, 1);
+            }
+        }
+        nestedListRemoveElements.forEach(element => {
+            if (!context.removeElements.some(item => item === element || item.contains(element))) {
+                context.removeElements.push(element);
+            }
+        });
+        context.removeElements.sort((a, b) => a === b ? 0 :
+            a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+        context.rangesByBlock.forEach((value, element) => {
+            if (nestedListRemoveElements.some(removeElement => removeElement.contains(element))) {
+                context.rangesByBlock.delete(element);
+            }
+        });
+        for (let i = context.updateElements.length - 1; i >= 0; i--) {
+            if (nestedListRemoveElements.some(element => element.contains(context.updateElements[i]))) {
+                context.updateElements.splice(i, 1);
+            }
+        }
+    }
+    return {
+        ...context,
+        nestedListMergeContext,
+        replacementListItemElement,
+        removeStartListItem,
+        startRemoveListItemElement,
+        retainedElements,
+    };
+};
+
 const addExactRefCheckElement = (elementsByID: Map<string, HTMLElement>, exactIDs: Set<string>,
                                  element: HTMLElement) => {
     const id = element?.getAttribute("data-node-id");
@@ -206,13 +284,16 @@ const isEntireMeaningfulContentSelected = (selectedRange: Range, editableElement
 };
 
 const getBlockRefCheckTargetsFromContext = (context: ReturnType<typeof getCrossBlockRemovalContext>,
-                                            removedElements: HTMLElement[]) => {
+                                            removedElements: HTMLElement[], retainedElements: HTMLElement[] = []) => {
     const elementsByID = new Map<string, HTMLElement>();
     const exactIDs = new Set<string>();
-    removedElements.forEach(item => {
+    const deletionTargets = getDeletedBlockElements(removedElements, retainedElements);
+    const deletedIDs = new Set<string>();
+    deletionTargets.elements.forEach(item => {
         const id = item.getAttribute("data-node-id");
         if (id) {
             elementsByID.set(id, item);
+            deletedIDs.add(id);
         }
     });
     let mergedEndHasRemainingContent = false;
@@ -234,40 +315,48 @@ const getBlockRefCheckTargetsFromContext = (context: ReturnType<typeof getCrossB
         }
         addExactRefCheckElementChain(elementsByID, exactIDs, item.blockElement);
     });
-    removedElements.forEach(item => {
-        exactIDs.delete(item.getAttribute("data-node-id"));
+    deletedIDs.forEach(id => {
+        if (deletionTargets.expansionStopIDs.has(id)) {
+            exactIDs.add(id);
+        } else {
+            exactIDs.delete(id);
+        }
     });
     return {
         elements: Array.from(elementsByID.values()),
         exactIDs: Array.from(exactIDs),
+        deletedIDs: Array.from(deletedIDs),
     };
 };
 
 export const getRangeBlockRefCheckTargets = (editorElement: HTMLElement, selectedRange: Range,
                                               startElement: HTMLElement, endElement: HTMLElement,
                                               mergeEndElement = false) => {
-    const context = getCrossBlockRemovalContext(
-        editorElement, selectedRange, startElement, endElement, mergeEndElement);
+    const plan = mergeEndElement ? getCrossBlockRemovalPlan(
+        editorElement, selectedRange, startElement, endElement) : undefined;
+    const context = plan || getCrossBlockRemovalContext(
+        editorElement, selectedRange, startElement, endElement, false);
     return getBlockRefCheckTargetsFromContext(
-        context, mergeEndElement ? context.removeElements : context.rangeRemoveElements);
+        context, mergeEndElement ? context.removeElements : context.rangeRemoveElements,
+        plan?.retainedElements || []);
 };
 
 export const getImageBlockRefCheckTargets = (blockElement: HTMLElement, removeElement: Element):
 IBlockRefCheckTargets => {
     const editableElement = getContenteditableElement(blockElement);
     if (!editableElement?.contains(removeElement)) {
-        return {elements: [], exactIDs: []};
+        return {elements: [], exactIDs: [], deletedIDs: []};
     }
     const cloneElement = editableElement.cloneNode(true) as HTMLElement;
     const removeElements = Array.from(editableElement.querySelectorAll(".img"));
     const imageElement = removeElement.classList.contains("img") ? removeElement : removeElement.closest(".img");
     const removeIndex = removeElements.indexOf(imageElement);
     if (removeIndex < 0) {
-        return {elements: [], exactIDs: []};
+        return {elements: [], exactIDs: [], deletedIDs: []};
     }
     cloneElement.querySelectorAll(".img")[removeIndex]?.remove();
     if (hasMeaningfulContent(cloneElement)) {
-        return {elements: [], exactIDs: []};
+        return {elements: [], exactIDs: [], deletedIDs: []};
     }
     const elementsByID = new Map<string, HTMLElement>();
     const exactIDs = new Set<string>();
@@ -275,6 +364,7 @@ IBlockRefCheckTargets => {
     return {
         elements: Array.from(elementsByID.values()),
         exactIDs: Array.from(exactIDs),
+        deletedIDs: [],
     };
 };
 
@@ -282,7 +372,8 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
                                             startElement: HTMLElement, endElement: HTMLElement,
                                             skipRefCheck = false, replacement?: ICrossBlockReplacement) => {
     const editorElement = protyle.wysiwyg.element;
-    const context = getCrossBlockRemovalContext(editorElement, selectedRange, startElement, endElement);
+    const context = getCrossBlockRemovalPlan(
+        editorElement, selectedRange, startElement, endElement, true, !!replacement);
     const {
         ranges,
         removeElements,
@@ -296,22 +387,6 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
     if (removeElements.length === 0 && updateElements.length === 0) {
         return;
     }
-    if (!skipRefCheck) {
-        const checkTargets = getBlockRefCheckTargetsFromContext(context, context.removeElements);
-        const checkIDs = checkTargets.elements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
-        if (checkIDs.length > 0 && !await confirmBlockRef({
-            scope: "blocks",
-            ids: checkIDs,
-            exactIDs: checkTargets.exactIDs,
-            notebook: protyle.notebookId,
-        }, protyle)) {
-            return;
-        }
-        if (checkTargets.elements.some(item => !item.isConnected || item.getAttribute("data-node-id") === null)) {
-            return;
-        }
-    }
-
     const affectedListItemElements = new Set<HTMLElement>();
     ranges.forEach(item => {
         let listItemElement = item.blockElement.closest<HTMLElement>('[data-type="NodeListItem"]');
@@ -322,50 +397,30 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
     });
     const oldStartHTML = startElement.outerHTML;
 
-    const nestedListMergeContext = getCrossBlockNestedListMergeContext(editorElement, selectedRange,
-        ranges[0]?.blockElement || startElement, ranges[ranges.length - 1]?.blockElement || endElement);
-    const replacementListItemElement = replacement ? nestedListMergeContext?.replacementListItemElement : undefined;
+    const {nestedListMergeContext, replacementListItemElement, removeStartListItem,
+        startRemoveListItemElement} = context;
     const replacementListItemPosition = replacementListItemElement ? {
         parentID: replacementListItemElement.parentElement.getAttribute("data-node-id"),
         previousID: replacementListItemElement.previousElementSibling?.getAttribute("data-node-id"),
     } : undefined;
-    const removeStartListItem = !replacement && !!nestedListMergeContext &&
-        (!!nestedListMergeContext.replacementListItemElement ||
-        nestedListMergeContext.startTextFullySelected && nestedListMergeContext.startTrailingListItems.length > 0);
-    const startRemoveListItemElement = (!replacement ? nestedListMergeContext?.replacementListItemElement :
-        undefined) ||
-        (removeStartListItem ? nestedListMergeContext?.startListItemElement : undefined);
-    const movedListPreviousID = startRemoveListItemElement && !nestedListMergeContext.replacementListItemElement ?
+    const movedListPreviousID = startRemoveListItemElement && !nestedListMergeContext?.replacementListItemElement ?
         startRemoveListItemElement.previousElementSibling?.getAttribute("data-node-id") :
         replacementListItemElement?.getAttribute("data-node-id") ||
         nestedListMergeContext?.startListItemElement?.getAttribute("data-node-id");
-    const nestedListRemoveElements = nestedListMergeContext ? [
-        ...(startRemoveListItemElement ? [startRemoveListItemElement] : []),
-        ...nestedListMergeContext.startTrailingListItems,
-        nestedListMergeContext.endOuterListItemElement,
-    ] : [];
-    if (nestedListMergeContext) {
-        for (let i = removeElements.length - 1; i >= 0; i--) {
-            if (nestedListRemoveElements.some(element => element.contains(removeElements[i]))) {
-                removeElements.splice(i, 1);
-            }
+    if (!skipRefCheck) {
+        const checkTargets = getBlockRefCheckTargetsFromContext(context, removeElements, context.retainedElements);
+        const checkIDs = checkTargets.elements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
+        if (checkIDs.length > 0 && !await confirmBlockRef({
+            scope: "blocks",
+            ids: checkIDs,
+            exactIDs: checkTargets.exactIDs,
+            deletedIDs: checkTargets.deletedIDs,
+            notebook: protyle.notebookId,
+        }, protyle)) {
+            return;
         }
-        nestedListRemoveElements.forEach(element => {
-            if (!removeElements.some(item => item === element || item.contains(element))) {
-                removeElements.push(element);
-            }
-        });
-        removeElements.sort((a, b) => a === b ? 0 :
-            a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
-        rangesByBlock.forEach((value, element) => {
-            if (nestedListRemoveElements.some(removeElement => removeElement.contains(element))) {
-                rangesByBlock.delete(element);
-            }
-        });
-        for (let i = updateElements.length - 1; i >= 0; i--) {
-            if (nestedListRemoveElements.some(element => element.contains(updateElements[i]))) {
-                updateElements.splice(i, 1);
-            }
+        if (checkTargets.elements.some(item => !item.isConnected || item.getAttribute("data-node-id") === null)) {
+            return;
         }
     }
 
@@ -656,10 +711,12 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     exactIDs.push(superBlockID);
                 }
             });
+            const uniqueCheckIDs = Array.from(new Set(checkIDs));
             if (!await confirmBlockRef({
                 scope: "blocks",
-                ids: Array.from(new Set(checkIDs)),
+                ids: uniqueCheckIDs,
                 exactIDs: Array.from(new Set(exactIDs)),
+                deletedIDs: uniqueCheckIDs,
                 notebook: protyle.notebookId,
             }, protyle)) {
                 return false;
@@ -1419,6 +1476,7 @@ const confirmRefRemoval = async (protyle: IProtyle, ids: string[], elements: Ele
         scope: "blocks",
         ids,
         exactIDs,
+        deletedIDs: ids,
         notebook: protyle.notebookId,
     }, protyle);
     if (confirmed && elements.every(item => item.isConnected)) {
@@ -1559,10 +1617,14 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
     const listItemId = listItemElement.getAttribute("data-node-id");
     const listElement = listItemElement.parentElement;
     const previousListItem = listItemElement.previousElementSibling;
-    const deleteFoldedListItem = previousListItem.getAttribute("fold") !== "1" ||
-        (getContenteditableElement(blockElement).textContent.trim() === "" &&
-            blockElement.nextElementSibling.classList.contains("protyle-attr"));
-    if (deleteFoldedListItem && !await confirmRefRemoval(protyle, [listItemId], [listItemElement], [listItemId])) {
+    const deleteEmptyFoldedListItem = previousListItem.getAttribute("fold") === "1" &&
+        getContenteditableElement(blockElement).textContent.trim() === "" &&
+        blockElement.nextElementSibling.classList.contains("protyle-attr");
+    const deleteFoldedListItem = previousListItem.getAttribute("fold") !== "1" || deleteEmptyFoldedListItem;
+    const deletedListItemIDs = deleteEmptyFoldedListItem ?
+        [listItemId, blockElement.getAttribute("data-node-id")] : [listItemId];
+    if (deleteFoldedListItem && !await confirmRefRemoval(
+        protyle, deletedListItemIDs, [listItemElement], [listItemId])) {
         return;
     }
     moveToPrevious(blockElement, range, isDelete);

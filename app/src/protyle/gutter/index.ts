@@ -2279,9 +2279,12 @@ export class Gutter {
                             fetchPost("/api/block/getHeadingDeleteTransaction", {
                                 id,
                             }, async (deleteResponse) => {
+                                const deletedIDs = deleteResponse.data.doOperations.map(
+                                    (operation: IOperation) => operation.id);
                                 if (!await confirmBlockRef({
                                     scope: "blocks",
-                                    ids: deleteResponse.data.doOperations.map((operation: IOperation) => operation.id),
+                                    ids: deletedIDs,
+                                    deletedIDs,
                                     notebook: protyle.notebookId,
                                 }, protyle)) {
                                     return;
@@ -2330,9 +2333,11 @@ export class Gutter {
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
                         }, async (response) => {
+                            const deletedIDs = response.data.doOperations.map((operation: IOperation) => operation.id);
                             if (!await confirmBlockRef({
                                 scope: "blocks",
-                                ids: response.data.doOperations.map((operation: IOperation) => operation.id),
+                                ids: deletedIDs,
+                                deletedIDs,
                                 notebook: protyle.notebookId,
                             }, protyle)) {
                                 return;

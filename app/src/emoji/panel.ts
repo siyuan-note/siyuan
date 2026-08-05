@@ -1,25 +1,32 @@
-export const CUSTOM_EMOJI_BATCH_SIZE = 128;
+export const EMOJI_VIRTUAL_CHUNK_ROWS = 8;
 
 export type TCustomEmojiGroup = {
     name: string;
     items: IEmojiItem[];
 };
 
-export type TCustomEmojiBatch = {
-    groups: TCustomEmojiGroup[];
-    nextOffset: number;
-    hasMore: boolean;
-};
+const emojiItemMapCache = new WeakMap<IEmoji[], {
+    all: Map<string, IEmojiItem>;
+    builtIn: Map<string, IEmojiItem>;
+}>();
 
 export const getEmojiItemMap = (categories: IEmoji[], hideCustom = false) => {
-    const emojiMap = new Map<string, IEmojiItem>();
+    const cached = emojiItemMapCache.get(categories);
+    if (cached) {
+        return hideCustom ? cached.builtIn : cached.all;
+    }
+    const all = new Map<string, IEmojiItem>();
+    const builtIn = new Map<string, IEmojiItem>();
     categories.forEach((category) => {
-        if (hideCustom && category.id === "custom") {
-            return;
-        }
-        category.items.forEach((item) => emojiMap.set(item.unicode, item));
+        category.items.forEach((item) => {
+            all.set(item.unicode, item);
+            if (category.id !== "custom") {
+                builtIn.set(item.unicode, item);
+            }
+        });
     });
-    return emojiMap;
+    emojiItemMapCache.set(categories, {all, builtIn});
+    return hideCustom ? builtIn : all;
 };
 
 export const collectEmojiMatches = (
@@ -31,13 +38,17 @@ export const collectEmojiMatches = (
     const customItems: IEmojiItem[] = [];
     const builtInItems: IEmojiItem[] = [];
     let matchedCount = 0;
-    categories.forEach((category) => {
+    outer:
+    for (const category of categories) {
         if (hideCustom && category.id === "custom") {
-            return;
+            continue;
         }
-        category.items.forEach((item) => {
-            if ((typeof max === "number" && matchedCount >= max) || !matcher(item)) {
-                return;
+        for (const item of category.items) {
+            if (typeof max === "number" && matchedCount >= max) {
+                break outer;
+            }
+            if (!matcher(item)) {
+                continue;
             }
             if (category.id === "custom") {
                 customItems.push(item);
@@ -45,8 +56,8 @@ export const collectEmojiMatches = (
                 builtInItems.push(item);
             }
             matchedCount++;
-        });
-    });
+        }
+    }
     return {customItems, builtInItems};
 };
 
@@ -79,36 +90,36 @@ export const groupCustomEmojiItems = (items: IEmojiItem[]) => {
     return groups;
 };
 
-export const getCustomEmojiBatch = (
-    groups: TCustomEmojiGroup[],
-    offset: number,
-    limit = CUSTOM_EMOJI_BATCH_SIZE,
-): TCustomEmojiBatch => {
-    const batchGroups: TCustomEmojiGroup[] = [];
-    let skipped = 0;
-    let remaining = limit;
-    let nextOffset = offset;
-    let total = 0;
+export const getEmojiVirtualChunks = (
+    items: IEmojiItem[],
+    columnCount: number,
+    rowCount = EMOJI_VIRTUAL_CHUNK_ROWS,
+) => {
+    const chunks: IEmojiItem[][] = [];
+    const chunkSize = Math.max(1, columnCount) * Math.max(1, rowCount);
+    for (let offset = 0; offset < items.length; offset += chunkSize) {
+        chunks.push(items.slice(offset, offset + chunkSize));
+    }
+    return chunks;
+};
 
-    groups.forEach((group) => {
-        total += group.items.length;
-        if (remaining === 0 || skipped + group.items.length <= offset) {
-            skipped += group.items.length;
-            return;
+export const getActiveEmojiCategory = (
+    offsets: {id: string, top: number}[],
+    scrollTop: number,
+    isBottom = false,
+) => {
+    if (offsets.length === 0) {
+        return "";
+    }
+    if (isBottom) {
+        return offsets[offsets.length - 1].id;
+    }
+    let currentID = offsets[0].id;
+    for (const item of offsets) {
+        if (item.top > scrollTop + 1) {
+            break;
         }
-        const groupOffset = Math.max(0, offset - skipped);
-        const items = group.items.slice(groupOffset, groupOffset + remaining);
-        if (items.length > 0) {
-            batchGroups.push({name: group.name, items});
-            remaining -= items.length;
-            nextOffset += items.length;
-        }
-        skipped += group.items.length;
-    });
-
-    return {
-        groups: batchGroups,
-        nextOffset,
-        hasMore: nextOffset < total,
-    };
+        currentID = item.id;
+    }
+    return currentID;
 };

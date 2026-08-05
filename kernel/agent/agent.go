@@ -993,7 +993,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						Arguments: args,
 					})
 
-					if needsConfirm(tc.Function.Name, action, alwaysAllow) {
+					_, _, toolInputErr := validateToolCallInput(ctx, tc.Function.Name, args)
+					if toolInputErr == nil && needsConfirm(tc.Function.Name, action, alwaysAllow) {
 						confirmID := fmt.Sprintf("%s_%s_%d", turn.TurnID, tc.ID, i)
 						ch2 := make(chan confirmResult, 1)
 						confirmChannelsMu.Lock()
@@ -1084,7 +1085,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					default:
 					}
 
-					if !snapshotCreated && needsLocalSnapshot(tc.Function.Name, action) {
+					if toolInputErr == nil && !snapshotCreated && needsLocalSnapshot(tc.Function.Name, action) {
 						id, err := kernelModel.IndexRepo("AI agent auto snapshot")
 						if err != nil {
 							logging.LogErrorf("agent auto snapshot failed: %s", err)
@@ -1140,7 +1141,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					var modelAttachments []mcptools.ModelAttachment
 					isErr := false
 					executionUnknown := false
-					if tc.Function.Name == "question" {
+					if toolInputErr != nil {
+						resultStr = toolInputErr.Error()
+						isErr = true
+					} else if tc.Function.Name == "question" {
 						resultStr = handleQuestion(ctx, tc.Function.Arguments, ch, 5*time.Minute)
 					} else if tc.Function.Name == "frontend" {
 						resultStr, executionUnknown = handleFrontendTool(ctx, tc, ch, confirmTimeout)
@@ -1336,6 +1340,15 @@ var safeWholeTools = map[string]bool{
 	"search": true, "sql": true,
 }
 
+var safeNativeToolActions = map[string]map[string]bool{
+	"export": {
+		"html": true, "preview": true,
+	},
+	"frontend": {
+		"open_setting": true, "focus_block": true, "open_document": true, "open_search": true,
+	},
+}
+
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
 	if alwaysAllow["*"] {
 		return false
@@ -1351,6 +1364,9 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 		// 外部 MCP 与插件工具不能复用原生工具的全局 action 白名单，否则 close/open 等同名动作
 		// 可能在外部服务中产生写入。仅工具明确声明只读时免确认，未知能力按写操作处理。
 		return !tool.ReadOnlyHint
+	}
+	if safeNativeToolActions[toolName][action] {
+		return false
 	}
 	if toolName == "http_request" && action == "" {
 		action = "get"
@@ -1380,6 +1396,9 @@ func needsLocalSnapshot(toolName, action string) bool {
 	}
 	if toolName == "http_request" && action == "" {
 		action = "get"
+	}
+	if safeNativeToolActions[toolName][action] {
+		return false
 	}
 	actionSafe := safeActions[action]
 	if toolName == "import" && action == "md" {

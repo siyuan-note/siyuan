@@ -43,6 +43,27 @@ func GetBlockRels() (ret map[string][]string) {
 	return
 }
 
+// GetBlockRelsByAVIDs 读取指定属性视图的数据库块关系，读取失败时返回错误。
+func GetBlockRelsByAVIDs(avIDs []string) (ret map[string][]string, err error) {
+	AttributeViewBlocksLock.Lock()
+	defer AttributeViewBlocksLock.Unlock()
+
+	ret = map[string][]string{}
+	boxRels := map[string]map[string][]string{}
+	for _, avID := range avIDs {
+		_, boxID := FindAttributeViewPath(avID)
+		rels, loaded := boxRels[boxID]
+		if !loaded {
+			if rels, err = readMirrorBlocksWithErr(boxID); nil != err {
+				return
+			}
+			boxRels[boxID] = rels
+		}
+		ret[avID] = rels[avID]
+	}
+	return
+}
+
 func IsMirror(avID string) bool {
 	AttributeViewBlocksLock.Lock()
 	defer AttributeViewBlocksLock.Unlock()

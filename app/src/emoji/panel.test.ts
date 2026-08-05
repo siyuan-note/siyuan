@@ -1,6 +1,12 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {collectEmojiMatches, getCustomEmojiBatch, getEmojiItemMap, groupCustomEmojiItems} from "./panel";
+import {
+    collectEmojiMatches,
+    getActiveEmojiCategory,
+    getEmojiItemMap,
+    getEmojiVirtualChunks,
+    groupCustomEmojiItems,
+} from "./panel";
 
 const createEmoji = (unicode: string) => ({
     unicode,
@@ -28,24 +34,24 @@ describe("groupCustomEmojiItems", () => {
     });
 });
 
-describe("getCustomEmojiBatch", () => {
-    it("continues a group without duplicating its heading across batches", () => {
-        const groups = groupCustomEmojiItems([
-            createEmoji("root.png"),
-            createEmoji("animals/cat.png"),
-            createEmoji("animals/dog.png"),
-            createEmoji("games/icon.png"),
-        ]);
+describe("getEmojiVirtualChunks", () => {
+    it("splits items at complete row boundaries", () => {
+        const items = Array.from({length: 15}, (_, index) => createEmoji(index.toString()));
+        const chunks = getEmojiVirtualChunks(items, 3, 2);
+        assert.deepEqual(chunks.map((chunk) => chunk.length), [6, 6, 3]);
+    });
+});
 
-        const first = getCustomEmojiBatch(groups, 0, 2);
-        assert.deepEqual(first.groups.map((group) => [group.name, group.items.length]), [["", 1], ["animals", 1]]);
-        assert.equal(first.nextOffset, 2);
-        assert.equal(first.hasMore, true);
+describe("getActiveEmojiCategory", () => {
+    const offsets = [{id: "recent", top: 0}, {id: "people", top: 100}, {id: "nature", top: 500}];
 
-        const second = getCustomEmojiBatch(groups, first.nextOffset, 2);
-        assert.deepEqual(second.groups.map((group) => [group.name, group.items.length]), [["animals", 1], ["games", 1]]);
-        assert.equal(second.nextOffset, 4);
-        assert.equal(second.hasMore, false);
+    it("selects the section at the sticky boundary", () => {
+        assert.equal(getActiveEmojiCategory(offsets, 98), "recent");
+        assert.equal(getActiveEmojiCategory(offsets, 99), "people");
+    });
+
+    it("selects the last section at the scroll boundary", () => {
+        assert.equal(getActiveEmojiCategory(offsets, 200, true), "nature");
     });
 });
 
@@ -70,9 +76,23 @@ describe("emoji filtering", () => {
         assert.deepEqual(result.builtInItems.map((item) => item.unicode), ["1f600"]);
     });
 
+    it("stops matching after reaching the requested maximum", () => {
+        let matchCount = 0;
+        collectEmojiMatches(categories, () => {
+            matchCount++;
+            return true;
+        }, 2);
+        assert.equal(matchCount, 2);
+    });
+
     it("excludes custom items from recent lookup when custom icons are hidden", () => {
         const emojiMap = getEmojiItemMap(categories, true);
         assert.equal(emojiMap.has("custom-a.png"), false);
         assert.equal(emojiMap.has("1f600"), true);
+    });
+
+    it("reuses emoji indexes for an unchanged configuration", () => {
+        assert.equal(getEmojiItemMap(categories), getEmojiItemMap(categories));
+        assert.equal(getEmojiItemMap(categories, true), getEmojiItemMap(categories, true));
     });
 });

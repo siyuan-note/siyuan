@@ -260,7 +260,7 @@ jobs:
           for shard_config in ${SIYUAN_E2E_SHARDS}; do
             shard="${shard_config%:*}"
             port="${shard_config#*:}"
-            workspace="${RUNNER_TEMP}/siyuan-e2e-${shard}-workspace"
+            workspace="${USERPROFILE:-${HOME}}/SiYuan-Testing"
             mkdir -p "${workspace}"
             "${KERNEL_PATH}" --workspace="${workspace}" serve --wd="${APP_DIR}" --port="${port}" \
               > "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel-console.log" 2>&1 &
@@ -309,10 +309,8 @@ jobs:
           for shard_config in ${SIYUAN_E2E_SHARDS}; do
             shard="${shard_config%:*}"
             port="${shard_config#*:}"
-            workspace="${RUNNER_TEMP}/siyuan-e2e-${shard}-workspace"
             (
               SIYUAN_BASE_URL="http://127.0.0.1:${port}" \
-              SIYUAN_EXPECT_WORKSPACE="${workspace}" \
               SIYUAN_E2E_SHARD="${shard}" \
               SIYUAN_TEST_RESULTS_DIR="test-results-${shard}" \
               PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-${shard}" \
@@ -388,7 +386,7 @@ jobs:
             ${{ github.workspace }}/siyuan-testing/playwright-report-*
             ${{ github.workspace }}/siyuan-testing/test-results-*
             ${{ runner.temp }}/siyuan-e2e-*-kernel-console.log
-            ${{ runner.temp }}/siyuan-e2e-*-workspace/temp/siyuan.log
+            ~/SiYuan-Testing/temp/siyuan.log
           if-no-files-found: ignore
           retention-days: 14
 

@@ -309,6 +309,8 @@ export class TableControl {
     private suppressAddClick = false;
     private bypassClipboardEvent = false;
     private observer: MutationObserver;
+    private pinnedTableResizeObserver: ResizeObserver;
+    private pinnedTableActions = new Map<HTMLTableElement, HTMLElement>();
     private abortController = new AbortController();
 
     constructor(protyle: IProtyle, wysiwygElement: HTMLElement) {
@@ -347,7 +349,8 @@ export class TableControl {
         this.dropIndicator = this.element.querySelector(".protyle-table-control__drop");
         protyle.element.append(this.element);
         this.bindEvents();
-        this.observer = new MutationObserver(() => {
+        this.pinnedTableResizeObserver = new ResizeObserver(() => this.scheduleRender());
+        this.observer = new MutationObserver(mutations => {
             if (this.resizeState && !this.resizeState.node.isConnected) {
                 this.resizeState = undefined;
                 this.resizeLabel.classList.add("fn__none");
@@ -366,17 +369,33 @@ export class TableControl {
                 this.caretCell = undefined;
                 render = true;
             }
+            const pinnedTableSelector = '[data-type="NodeTable"][custom-pinthead="true"]';
+            if (mutations.some(mutation => mutation.type === "attributes" ||
+                (mutation.target instanceof Element && !!mutation.target.closest(pinnedTableSelector)) ||
+                [...mutation.addedNodes, ...mutation.removedNodes].some(node => node instanceof Element &&
+                    (node.matches(pinnedTableSelector) || !!node.querySelector(pinnedTableSelector))))) {
+                render = true;
+            }
             if (render) {
                 this.scheduleRender();
             }
         });
-        this.observer.observe(this.wysiwygElement, {childList: true, subtree: true});
+        this.observer.observe(this.wysiwygElement, {
+            attributeFilter: ["custom-pinthead"],
+            attributes: true,
+            childList: true,
+            subtree: true,
+        });
+        this.scheduleRender();
     }
 
     public destroy() {
         this.cancelResize();
         this.abortController.abort();
         this.observer.disconnect();
+        this.pinnedTableResizeObserver.disconnect();
+        this.pinnedTableActions.forEach(action => this.clearPinnedTableFrame(action));
+        this.pinnedTableActions.clear();
         cancelAnimationFrame(this.frame);
         this.element.remove();
     }
@@ -1123,7 +1142,50 @@ export class TableControl {
         this.resizeLabel.classList.remove("fn__none");
     }
 
+    private clearPinnedTableFrame(action: HTMLElement) {
+        ["--b3-table-frame-left", "--b3-table-frame-top", "--b3-table-frame-width",
+            "--b3-table-frame-height"].forEach(name => action.style.removeProperty(name));
+    }
+
+    private renderPinnedTableFrames() {
+        const actions = new Map<HTMLTableElement, HTMLElement>();
+        this.wysiwygElement.querySelectorAll<HTMLTableElement>(
+            '[data-type="NodeTable"][custom-pinthead="true"] table').forEach(table => {
+            const action = table.nextElementSibling as HTMLElement;
+            if (!action?.classList.contains("protyle-action__table")) {
+                return;
+            }
+            const previousAction = this.pinnedTableActions.get(table);
+            if (previousAction !== action) {
+                if (previousAction) {
+                    this.clearPinnedTableFrame(previousAction);
+                } else {
+                    this.pinnedTableResizeObserver.observe(table);
+                }
+            }
+            actions.set(table, action);
+            const tableRect = table.getBoundingClientRect();
+            const actionRect = action.getBoundingClientRect();
+            action.style.setProperty("--b3-table-frame-left",
+                `${tableRect.left + table.clientLeft - actionRect.left}px`);
+            action.style.setProperty("--b3-table-frame-top",
+                `${tableRect.top + table.clientTop - actionRect.top}px`);
+            action.style.setProperty("--b3-table-frame-width", `${table.clientWidth}px`);
+            action.style.setProperty("--b3-table-frame-height", `${table.clientHeight}px`);
+        });
+        this.pinnedTableActions.forEach((action, table) => {
+            if (actions.get(table) !== action) {
+                this.clearPinnedTableFrame(action);
+                if (!actions.has(table)) {
+                    this.pinnedTableResizeObserver.unobserve(table);
+                }
+            }
+        });
+        this.pinnedTableActions = actions;
+    }
+
     private render() {
+        this.renderPinnedTableFrames();
         if (this.resizeState?.dragging && this.resizeState.table.isConnected) {
             this.renderResize();
             return;

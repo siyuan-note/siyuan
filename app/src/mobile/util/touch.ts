@@ -13,6 +13,7 @@ import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 import {Constants} from "../../constants";
 import {getEmbedChildOperationContext} from "../../protyle/wysiwyg/getBlock";
+import {backModel} from "../menu/model";
 
 let clientX: number;
 let clientY: number;
@@ -142,7 +143,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
             !hasClosestByClassName(target, "protyle-wysiwyg", true) &&
             // 划选文字时不触发关闭面板
             (getSelection().rangeCount === 0 || getSelection().toString() === "")) {
-            closeModel();
+            if (!backModel()) {
+                closeModel();
+            }
         }
         return;
     }

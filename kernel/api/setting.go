@@ -423,8 +423,7 @@ func setEditor(c *gin.Context) {
 	}
 
 	if nil == editor.FloatWindowDelay {
-		v := 620
-		editor.FloatWindowDelay = &v
+		editor.FloatWindowDelay = new(620)
 	} else {
 		*editor.FloatWindowDelay = max(0, min(2000, *editor.FloatWindowDelay))
 	}

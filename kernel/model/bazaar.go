@@ -321,16 +321,13 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 	for _, pkg := range installedPackages {
 		switch pkgType {
 		case "plugins":
-			installedIncompatible := bazaar.IsIncompatiblePlugin(pkg, frontend)
-			pkg.InstalledIncompatible = &installedIncompatible
+			pkg.InstalledIncompatible = new(bazaar.IsIncompatiblePlugin(pkg, frontend))
 			petal := getPetalByName(pkg.Name, petals)
 			if nil != petal {
-				enabled := petal.Enabled
-				pkg.Enabled = &enabled
+				pkg.Enabled = new(petal.Enabled)
 			}
 		case "themes":
-			installedIncompatible := bazaar.IsIncompatibleTheme(pkg, frontend)
-			pkg.InstalledIncompatible = &installedIncompatible
+			pkg.InstalledIncompatible = new(bazaar.IsIncompatibleTheme(pkg, frontend))
 			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
 		case "icons":
 			pkg.Current = pkg.Name == Conf.Appearance.Icon

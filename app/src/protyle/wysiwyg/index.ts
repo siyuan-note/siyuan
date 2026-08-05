@@ -908,6 +908,31 @@ export class WYSIWYG {
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
             let nodeElement = hasClosestBlock(target) as HTMLElement;
+            let clickedTableNode = nodeElement && nodeElement.dataset.type === "NodeTable" ? nodeElement : undefined;
+            if (!nodeElement) {
+                clickedTableNode = Array.from(this.element.querySelectorAll<HTMLElement>(
+                    '[data-type="NodeTable"]')).find(item => {
+                    const table = item.querySelector("table");
+                    if (!table) {
+                        return false;
+                    }
+                    const tableRect = table.getBoundingClientRect();
+                    const nodeRect = item.getBoundingClientRect();
+                    return event.clientX > tableRect.right &&
+                        event.clientY >= nodeRect.top && event.clientY <= nodeRect.bottom;
+                });
+            }
+            const clickedTableElement = clickedTableNode?.querySelector("table");
+            if (clickedTableElement) {
+                const tableRect = clickedTableElement.getBoundingClientRect();
+                const nodeRect = clickedTableNode.getBoundingClientRect();
+                if (event.clientX > tableRect.right &&
+                    event.clientY >= nodeRect.top && event.clientY <= nodeRect.bottom) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+            }
             if (hasClosestByClassName(target, "av__selection-toolbar")) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -2749,7 +2774,7 @@ export class WYSIWYG {
             let cutClipboardWritten = false;
             if (selectedStateElements.length === 0 && (!range.collapsed || selectImgElement) &&
                 !selectAVElement && !selectTableElement) {
-                let checkTargets: IBlockRefCheckTargets = {elements: [], exactIDs: []};
+                let checkTargets: IBlockRefCheckTargets = {elements: [], exactIDs: [], deletedIDs: []};
                 if (selectImgElement) {
                     checkTargets = getImageBlockRefCheckTargets(nodeElement, selectImgElement);
                 } else if (endElement) {
@@ -2763,6 +2788,7 @@ export class WYSIWYG {
                         scope: "blocks",
                         ids: checkIDs,
                         exactIDs: checkTargets.exactIDs,
+                        deletedIDs: checkTargets.deletedIDs,
                         notebook: protyle.notebookId,
                     }, protyle)) {
                         return;
@@ -2868,9 +2894,11 @@ export class WYSIWYG {
                         html += itemHTML;
                     }
                 }
+                const uniqueCheckIDs = Array.from(new Set(checkIDs.filter(Boolean)));
                 if (!await confirmBlockRef({
                     scope: "blocks",
-                    ids: Array.from(new Set(checkIDs.filter(Boolean))),
+                    ids: uniqueCheckIDs,
+                    deletedIDs: uniqueCheckIDs,
                     notebook: protyle.notebookId,
                 }, protyle)) {
                     if (autoSelectedBlock) {

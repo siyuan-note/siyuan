@@ -1056,6 +1056,10 @@ export const openEmojiPanel = (
                     <input class="b3-text-field fn__block" data-type="custom-icon-name" placeholder="path/to/icon">
                 </label>
                 <div class="emojis__link-footer">
+                    <select class="b3-select fn__none emojis__link-mode" data-type="network-icon-mode">
+                        <option value="local">${window.siyuan.languages.netImg2LocalAsset}</option>
+                        <option value="network">${window.siyuan.languages.use} URL</option>
+                    </select>
                     <button class="b3-button b3-button--cancel" data-action="back-custom-icon">${window.siyuan.languages.returnLabel}</button>
                     <button class="b3-button b3-button--text" data-action="set-network-icon" disabled>${window.siyuan.languages.save}</button>
                 </div>
@@ -1095,6 +1099,7 @@ export const openEmojiPanel = (
     const linkIconDetailElement = dialog.element.querySelector(".emojis__link-detail");
     const linkIconSampleElements = dialog.element.querySelectorAll(".emojis__link-sample");
     const linkIconConfirmElement = dialog.element.querySelector('[data-action="confirm-custom-icon"]') as HTMLButtonElement;
+    const linkIconModeElement = dialog.element.querySelector('[data-type="network-icon-mode"]') as HTMLSelectElement;
     const linkIconSaveElement = dialog.element.querySelector('[data-action="set-network-icon"]') as HTMLButtonElement;
     networkIconInputElement.value = normalizeNetworkIconURL(dynamicImgElement?.getAttribute("src") || "") || "";
     const showLinkIconView = (view: "empty" | "input" | "detail") => {
@@ -1112,9 +1117,11 @@ export const openEmojiPanel = (
         const previewSource = pastedCustomIconObjectURL ||
             (base64Image ? networkIconInputElement.value.trim() : networkURL);
         const hasIcon = !!previewSource;
+        const localIcon = hasIcon && (!networkURL || linkIconModeElement.value === "local");
         showLinkIconView(hasIcon ? "detail" : "empty");
-        customIconNameLabelElement.classList.toggle("fn__none", !hasIcon);
-        linkIconSaveElement.disabled = !hasIcon || !customIconNameElement.value.trim();
+        linkIconModeElement.classList.toggle("fn__none", !networkURL);
+        customIconNameLabelElement.classList.toggle("fn__none", !localIcon);
+        linkIconSaveElement.disabled = !hasIcon || (localIcon && !customIconNameElement.value.trim());
         linkIconSampleElements.forEach(item => {
             item.innerHTML = "";
             if (!previewSource) {
@@ -1133,6 +1140,7 @@ export const openEmojiPanel = (
         networkIconInputElement.value = "";
         customIconFileElement.value = "";
         customIconNameElement.value = "";
+        linkIconModeElement.value = "local";
         updateLinkIconInput();
         renderNetworkIconPreview();
         linkIconElement.focus();
@@ -1142,6 +1150,7 @@ export const openEmojiPanel = (
         networkIconInputElement.value = "";
         customIconFileElement.value = "";
         customIconNameElement.value = "";
+        linkIconModeElement.value = "local";
         updateLinkIconInput();
         showLinkIconView("input");
         networkIconInputElement.focus();
@@ -1153,6 +1162,7 @@ export const openEmojiPanel = (
         }
         clearPastedCustomIcon();
         customIconNameElement.value = "";
+        linkIconModeElement.value = "local";
         renderNetworkIconPreview();
         customIconNameElement.focus();
     };
@@ -1162,6 +1172,7 @@ export const openEmojiPanel = (
         pastedCustomIconObjectURL = URL.createObjectURL(file);
         networkIconInputElement.value = "";
         customIconNameElement.value = file.name.replace(/\.[^.]+$/, "");
+        linkIconModeElement.value = "local";
         renderNetworkIconPreview();
         customIconNameElement.focus();
     };
@@ -1190,6 +1201,10 @@ export const openEmojiPanel = (
     };
     const setNetworkIcon = () => {
         const networkURL = normalizeNetworkIconURL(networkIconInputElement.value);
+        if (networkURL && linkIconModeElement.value === "network") {
+            applyLinkIcon(networkURL);
+            return;
+        }
         let customIconFile = pastedCustomIconFile;
         if (!networkURL && !customIconFile) {
             const base64Image = parseBase64Image(networkIconInputElement.value);
@@ -1257,10 +1272,12 @@ export const openEmojiPanel = (
         clearPastedCustomIcon();
         networkIconInputElement.value = text;
         customIconNameElement.value = "";
+        linkIconModeElement.value = "local";
         renderNetworkIconPreview();
         customIconNameElement.focus();
     });
     networkIconInputElement.addEventListener("input", updateLinkIconInput);
+    linkIconModeElement.addEventListener("change", renderNetworkIconPreview);
     customIconNameElement.addEventListener("input", renderNetworkIconPreview);
     customIconNameElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (!event.isComposing && event.key === "Enter" && !linkIconSaveElement.disabled) {

@@ -216,6 +216,12 @@
       }
     }
 
+    &-mode {
+      width: 50%;
+      max-width: 180px;
+      margin-right: auto;
+    }
+
     &-footer {
       display: flex;
       flex-shrink: 0;

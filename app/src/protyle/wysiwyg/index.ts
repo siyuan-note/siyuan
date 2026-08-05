@@ -318,8 +318,11 @@ export class WYSIWYG {
         let startElement: HTMLElement | undefined;
         let endElement = targetBlockElement;
         let shiftClickBlockPoint: IShiftClickBlockPoint | undefined;
-        // Electron 更新后 shift 向上点击获取的 range 不为上一个位置的 https://github.com/siyuan-note/siyuan/issues/9334
-        if (selection.rangeCount > 0) {
+        // 锚点始终表示 Shift 选择的起点，向上选择时不能使用按文档顺序排列的 range 起点
+        // https://github.com/siyuan-note/siyuan/issues/9334
+        if (selection.anchorNode) {
+            startElement = hasClosestBlock(selection.anchorNode) as HTMLElement;
+        } else if (selection.rangeCount > 0) {
             startElement = hasClosestBlock(selection.getRangeAt(0).startContainer) as HTMLElement;
         }
         if (startElement && (resolveTargetByPoint || !endElement)) {
@@ -3912,6 +3915,17 @@ export class WYSIWYG {
                 event.preventDefault();
                 event.stopPropagation();
                 return;
+            }
+            if (event.shiftKey) {
+                const selection = getSelection();
+                const focusElement = selection.focusNode && hasClosestBlock(selection.focusNode) as HTMLElement;
+                // mousedown 未命中块间空白时，浏览器会先生成跨块文字选区，在 click 阶段将其转换为块选区
+                // https://github.com/siyuan-note/siyuan/issues/11960
+                if (focusElement && this.selectByShiftClick(protyle, event, focusElement)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
             }
             if (this.preventClick) {
                 this.preventClick = false;

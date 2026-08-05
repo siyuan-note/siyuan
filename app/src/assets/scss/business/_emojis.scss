@@ -241,6 +241,7 @@
 
   &__chunk {
     overflow: hidden;
+    contain: layout paint;
   }
 
   &__types {

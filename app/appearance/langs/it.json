@@ -2235,7 +2235,7 @@
 		"147": "Creato un nuovo snapshot dei dati, impiegati %.2fs",
 		"148": "Controllato lo snapshot dei dati e non sono state trovate modifiche, impiegati %.2fs",
 		"149": "Lo snapshot dei dati è stato sincronizzato, impiegati %.2fs",
-		"150": "file caricati/scaricati %d/%d<br>&emsp;blocchi caricati/scaricati %d/%d<br>&emsp;byte inviati/ricevuti %s/%s",
+		"150": "file caricati/scaricati %d/%d<br>&emsp;blocchi caricati/scaricati %d/%d<br>&emsp;byte inviati/ricevuti %s/%s<br>&emsp;traffico accelerato LAN %s",
 		"151": "Non includere simboli \\ / : * ? &quot; &#039; &lt; &gt; |",
 		"152": "File caricati %d, blocchi %d, byte inviati %s",
 		"153": "File scaricati %d, blocchi %d, byte ricevuti %s",

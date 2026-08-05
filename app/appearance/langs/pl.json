@@ -2235,7 +2235,7 @@
 		"147": "Utworzono nowy zrzut danych, zajęło to %.2fs",
 		"148": "Sprawdzono zrzut danych i nie znaleziono zmian, zajęło to %.2fs",
 		"149": "Zrzut danych został zsynchronizowany, zajęło to %.2fs",
-		"150": "przesłane/pobrane pliki %d/%d<br>&emsp;przesłane/pobrane fragmenty %d/%d<br>&emsp;wysłane/odebrane bajty %s/%s",
+		"150": "przesłane/pobrane pliki %d/%d<br>&emsp;przesłane/pobrane fragmenty %d/%d<br>&emsp;wysłane/odebrane bajty %s/%s<br>&emsp;ruch przyspieszony przez LAN %s",
 		"151": "Nie dołączać symboli \\ / : * ? &quot; &#039; &lt; &gt; |",
 		"152": "Przesłane pliki %d, fragmenty %d, wysłane bajty %s",
 		"153": "Pobrane pliki %d, fragmenty %d, odebrane bajty %s",

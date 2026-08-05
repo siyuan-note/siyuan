@@ -2235,7 +2235,7 @@
 		"147": "Eine neue Datenmomentaufnahme erstellt, hat %.2fs gedauert",
 		"148": "Die Datenmomentaufnahme überprüft und keine Änderungen gefunden, hat %.2fs gedauert",
 		"149": "Die Datenmomentaufnahme wurde synchronisiert, hat %.2fs gedauert",
-		"150": "Hochgeladene/heruntergeladene Dateien %d/%d<br>&emsp;Chunks hochgeladen/heruntergeladen %d/%d<br>&emsp;Gesendete/erhaltene Bytes %s/%s",
+		"150": "Hochgeladene/heruntergeladene Dateien %d/%d<br>&emsp;Chunks hochgeladen/heruntergeladen %d/%d<br>&emsp;Gesendete/erhaltene Bytes %s/%s<br>&emsp;LAN-beschleunigter Datenverkehr %s",
 		"151": "Schließen Sie keine Symbole \\ / : * ? &quot; &#039; &lt; &gt; | ein",
 		"152": "Hochgeladene Dateien %d, Chunks %d, gesendete Bytes %s",
 		"153": "Heruntergeladene Dateien %d, Chunks %d, empfangene Bytes %s",

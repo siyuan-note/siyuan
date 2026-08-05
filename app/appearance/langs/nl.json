@@ -2235,7 +2235,7 @@
 		"147": "Nieuwe momentopname; duurde %.2fs",
 		"148": "Geen wijzigingen; duurde %.2fs",
 		"149": "Momentopname gesynct; duurde %.2fs",
-		"150": "Bestanden %d/%d<br>&emsp;chunks %d/%d<br>&emsp;bytes %s/%s",
+		"150": "Bestanden %d/%d<br>&emsp;chunks %d/%d<br>&emsp;bytes %s/%s<br>&emsp;LAN-versneld verkeer %s",
 		"151": "Gebruik geen symbolen \\ / : * ? &quot; &#039; &lt; &gt; |",
 		"152": "Geupload: %d bestanden, %d chunks, %s bytes",
 		"153": "Gedownload: %d bestanden, %d chunks, %s bytes",

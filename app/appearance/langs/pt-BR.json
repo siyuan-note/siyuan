@@ -2235,7 +2235,7 @@
 		"147": "Criado um novo snapshot de dados, levou %.2fs",
 		"148": "Verificado o snapshot de dados e nenhuma alteração foi encontrada, levou %.2fs",
 		"149": "Snapshot de dados sincronizado, levou %.2fs",
-		"150": "arquivos enviados/baixados %d/%d<br>&emsp;partes enviadas/baixadas %d/%d<br>&emsp;bytes enviados/recebidos %s/%s",
+		"150": "arquivos enviados/baixados %d/%d<br>&emsp;partes enviadas/baixadas %d/%d<br>&emsp;bytes enviados/recebidos %s/%s<br>&emsp;tráfego acelerado pela LAN %s",
 		"151": "Não inclua símbolos \\ / : * ? &quot; &#039; &lt; &gt; |",
 		"152": "Arquivos enviados %d, partes %d, bytes enviados %s",
 		"153": "Arquivos baixados %d, partes %d, bytes recebidos %s",

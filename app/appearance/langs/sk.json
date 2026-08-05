@@ -2235,7 +2235,7 @@
 		"147": "Nová snímka vytvorená za %.2fs",
 		"148": "Snímka bez zmien, overenie trvalo %.2fs",
 		"149": "Snímka synchronizovaná za %.2fs",
-		"150": "nahrané/stiahnuté súbory %d/%d<br>&emsp;nahrané/stiahnuté časti %d/%d<br>&emsp;odoslané/prijaté bajty %s/%s",
+		"150": "nahrané/stiahnuté súbory %d/%d<br>&emsp;nahrané/stiahnuté časti %d/%d<br>&emsp;odoslané/prijaté bajty %s/%s<br>&emsp;prevádzka zrýchlená cez LAN %s",
 		"151": "Nepovolené znaky v názve: \\ / : * ? \" < > |",
 		"152": "Nahrané súbory %d, časti %d, bajty %s",
 		"153": "Stiahnuté súbory %d, časti %d, bajty %s",

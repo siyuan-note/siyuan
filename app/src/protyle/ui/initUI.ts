@@ -153,11 +153,14 @@ export const initUI = (protyle: IProtyle) => {
         }, Constants.TIMEOUT_LOAD);
     }, {passive: true});
     protyle.contentElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
-        if (event.button !== 0 || !event.shiftKey || event.target !== protyle.contentElement) {
+        if (event.button !== 0 || !event.shiftKey) {
             return;
         }
         const eventProtyleElement = hasClosestByClassName(event.target, "protyle", true);
         if (eventProtyleElement && eventProtyleElement !== protyle.element) {
+            return;
+        }
+        if (hasClosestByClassName(event.target, "sy__backlink--bottom", true)) {
             return;
         }
         const lastElement = protyle.wysiwyg.element.lastElementChild;

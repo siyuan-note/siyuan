@@ -34,10 +34,11 @@ describe("normalizeNetworkIconURL", () => {
 });
 
 describe("getNetworkIconName", () => {
-    it("uses the decoded URL path name without its extension", () => {
-        assert.equal(getNetworkIconName("https://example.com/images/%E5%A4%B4%E5%83%8F.png?size=64"), "头像");
+    it("uses the decoded URL path name and preserves image extensions", () => {
+        assert.equal(getNetworkIconName("https://example.com/images/%E5%A4%B4%E5%83%8F.png?size=64"), "头像.png");
         assert.equal(getNetworkIconName("https://example.com/images/icon.php"), "icon");
-        assert.equal(getNetworkIconName("https://example.com/images/foo%2Fbar.webp"), "foo_bar");
+        assert.equal(getNetworkIconName("https://example.com/images/foo%2Fbar.webp"), "foo_bar.webp");
+        assert.equal(getNetworkIconName("https://example.com/images/.png"), "icon.png");
     });
 
     it("falls back when the URL has no usable path name", () => {

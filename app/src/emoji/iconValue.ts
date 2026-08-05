@@ -44,7 +44,9 @@ export const getNetworkIconName = (value: string): string => {
     } catch {
         // 保留 URL 中未正确编码的路径名称。
     }
-    name = name.replace(/\.[^.]*$/, "").replace(/[\\/:*?"<>|]/g, "_");
+    const extension = name.match(/\.(?:gif|jpe?g|png|svg|webp)$/i)?.[0] || "";
+    name = (name.replace(/\.[^.]*$/, "") || "icon") + extension;
+    name = name.replace(/[\\/:*?"<>|]/g, "_");
     name = Array.from(name, character => character.charCodeAt(0) < 32 ? "_" : character).join("").trim();
     return name || "icon";
 };

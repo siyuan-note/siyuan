@@ -450,6 +450,7 @@
 }
 
 .agent-chat__thinking-body {
+  font-size: var(--b3-font-size);
   max-height: 0;
   overflow: hidden;
   contain: layout paint;

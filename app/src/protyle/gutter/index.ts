@@ -3157,7 +3157,8 @@ export class Gutter {
         }
         // 防止划选时触碰图标导致 hl 无法移除
         const selectElement = protyle.element.querySelector(".protyle-select");
-        if (selectElement && !selectElement.classList.contains("fn__none")) {
+        if (protyle.wysiwyg.element.classList.contains("fn__pointer-none") ||
+            (selectElement && !selectElement.classList.contains("fn__none"))) {
             return;
         }
         document.querySelectorAll(".protyle-gutters").forEach(item => {

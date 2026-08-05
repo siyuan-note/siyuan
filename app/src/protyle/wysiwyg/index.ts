@@ -169,6 +169,13 @@ import {
     setAVItemAnchor,
 } from "../render/av/rangeSelect";
 import {getAVColumnResizeWidth} from "../render/av/columnWidth";
+import {
+    getBlockDragSelectBlock,
+    getBlockDragSelectProbeX,
+    isBlockDragSelectBottomReached,
+    isBlockDragSelectTopReached,
+    resolveBlockDragSelectStart
+} from "./blockDragSelect";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -1926,10 +1933,19 @@ export class WYSIWYG {
                 });
             };
             this.element.classList.add("fn__pointer-none");
+            hideElements(["gutter"], protyle);
             // 容器类元素判断（划选时 elementFromPoint 命中它们的边缘/空白需继续探测子块）
             const isContainer = (el: Element) => el.classList.contains("protyle-wysiwyg") || el.classList.contains("list") ||
-                el.classList.contains("li") || el.classList.contains("sb") ||
-                el.classList.contains("callout") || el.classList.contains("bq");
+                el.classList.contains("li") || el.classList.contains("sb") || el.classList.contains("callout") ||
+                el.classList.contains("callout-content") || el.classList.contains("bq");
+            const getDragSelectBlock = (element: Element) => getBlockDragSelectBlock(element,
+                protyle.wysiwyg.element, (item) => hasClosestBlock(item), isContainerBlock,
+                (item) => item.getAttribute("data-type") === "NodeListItem");
+            const getFirstDragSelectBlock = () => {
+                const firstTopBlock = Array.from(protyle.wysiwyg.element.children).find(item =>
+                    item.getAttribute("data-type")?.startsWith("Node"));
+                return firstTopBlock ? getDragSelectBlock(getFirstBlock(firstTopBlock)) : false;
+            };
             let lastMoveEvent: MouseEvent;
             const selectScrollEvent = () => lastMoveEvent && documentSelf.onmousemove?.(lastMoveEvent);
             if (startsFromPadding) {
@@ -2132,11 +2148,21 @@ export class WYSIWYG {
                     clearAVDragSelection(avDragSelectElement);
                 }
                 avDragSelectMode = "blocks";
-                // 矩形左边缘落在 padding 内时 elementFromPoint 会命中 wysiwyg 容器，需钳制到内容区
-                const detectX = Math.max(mostLeft, Math.min(selectRect.left, mostRight));
-                let firstElement;
+                // 从侧边开始划选时，使用矩形靠近内容的一侧动态命中块，使选区进入子块区域后可从父块切换为子块
+                const detectX = getBlockDragSelectProbeX(event.clientX, selectRect, mostLeft, mostRight);
+                let firstElement: Element | false;
                 const isDown = moveY > startY;
-                if (isDown) {
+                if (startsFromPadding) {
+                    firstElement = resolveBlockDragSelectStart({
+                        x: detectX,
+                        top: selectRect.top,
+                        bottom: selectRect.bottom,
+                        elementFromPoint: (pointX, pointY) => document.elementFromPoint(pointX, pointY),
+                        getBlock: getDragSelectBlock,
+                        isContainerSurface: isContainer,
+                        fallbackBlock: isDown ? nodeElement : getFirstDragSelectBlock(),
+                    });
+                } else if (isDown) {
                     firstElement = nodeElement;
                 } else {
                     firstElement = document.elementFromPoint(detectX, selectRect.top);
@@ -2147,7 +2173,7 @@ export class WYSIWYG {
                 }
                 // 向上划选且落点在 padding/缝隙时，elementFromPoint 易命中 wysiwyg 容器或容器类元素，
                 // 需沿 y 轴循环向下探测以定位到实际块，避免回退到文档首块导致误选上部所有块
-                if (!isDown && isContainer(firstElement)) {
+                if (!startsFromPadding && !isDown && isContainer(firstElement)) {
                     let probeY = selectRect.top;
                     while (probeY < selectRect.bottom) {
                         probeY += 8;
@@ -2177,6 +2203,25 @@ export class WYSIWYG {
                 }
                 let selectElements: Element[] = [];
                 let currentElement: Element | false = firstBlockElement;
+                const isContainerBoundaryReached = (element: Element) => {
+                    if (!["li", "sb", "callout", "bq"].some(className => element.classList.contains(className))) {
+                        return false;
+                    }
+                    const contentElement = element.classList.contains("callout") ?
+                        element.querySelector(":scope > .callout-content") : element;
+                    const childElements = contentElement ? Array.from(contentElement.children).filter(item =>
+                        item.hasAttribute("data-node-id")) : [];
+                    const firstChildElement = childElements[0];
+                    const lastChildElement = childElements[childElements.length - 1];
+                    if (!firstChildElement || !lastChildElement) {
+                        return false;
+                    }
+                    const containerRect = element.getBoundingClientRect();
+                    return isBlockDragSelectTopReached(selectRect.top, containerRect.top,
+                        firstChildElement.getBoundingClientRect().top) ||
+                        isBlockDragSelectBottomReached(selectRect.bottom, containerRect.bottom,
+                            lastChildElement.getBoundingClientRect().bottom);
+                };
 
                 if (currentElement) {
                     // 从下往上划选遇到嵌入块时，选中整个嵌入块
@@ -2213,6 +2258,9 @@ export class WYSIWYG {
                         break;
                     }
                     if (hasJump) {
+                        if (isContainerBoundaryReached(currentElement)) {
+                            selectElements = [currentElement];
+                        }
                         const nextElement = currentElement.nextElementSibling;
                         if (!nextElement || nextElement.classList.contains("protyle-attr")) {
                             currentElement = hasClosestBlock(currentElement.parentElement);

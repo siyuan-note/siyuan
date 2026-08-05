@@ -63,6 +63,36 @@ func TestFilterLocalStorageByPublishAccess(t *testing.T) {
 	}
 }
 
+func TestAssetPathFromDataRelativePath(t *testing.T) {
+	const boxID = "20260806000000-box0001"
+	tests := []struct {
+		name          string
+		relativePath  string
+		wantAssetPath string
+		wantBoxID     string
+		wantOK        bool
+	}{
+		{name: "global asset", relativePath: "assets/image.png", wantAssetPath: "assets/image.png", wantOK: true},
+		{name: "global nested asset", relativePath: "assets/images/image.png", wantAssetPath: "assets/images/image.png", wantOK: true},
+		{name: "notebook asset", relativePath: boxID + "/assets/image.png", wantAssetPath: "assets/image.png", wantBoxID: boxID, wantOK: true},
+		{name: "document asset", relativePath: boxID + "/20260806000001-doc0001/assets/image.png", wantAssetPath: "assets/image.png", wantBoxID: boxID, wantOK: true},
+		{name: "nested document asset", relativePath: boxID + "/20260806000001-doc0001/20260806000002-doc0002/assets/images/image.png", wantAssetPath: "assets/images/image.png", wantBoxID: boxID, wantOK: true},
+		{name: "nested assets directory", relativePath: boxID + "/20260806000001-doc0001/assets/images/assets/image.png", wantAssetPath: "assets/images/assets/image.png", wantBoxID: boxID, wantOK: true},
+		{name: "notebook directory", relativePath: boxID + "/assets"},
+		{name: "document", relativePath: boxID + "/20260806000001-doc0001.sy"},
+		{name: "non-notebook asset", relativePath: "storage/assets/image.png"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assetPath, actualBoxID, ok := assetPathFromDataRelativePath(test.relativePath)
+			if assetPath != test.wantAssetPath || actualBoxID != test.wantBoxID || ok != test.wantOK {
+				t.Fatalf("assetPathFromDataRelativePath(%q) = [%q, %q, %v], want [%q, %q, %v]",
+					test.relativePath, assetPath, actualBoxID, ok, test.wantAssetPath, test.wantBoxID, test.wantOK)
+			}
+		})
+	}
+}
+
 func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
 	const (
 		boxID             = "20260721000000-boxid01"

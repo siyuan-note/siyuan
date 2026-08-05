@@ -455,6 +455,22 @@ func CheckPublishAuthCookie(c *gin.Context, ID string, password string) bool {
 	return err == nil && authCookie.Value == util.SHA256Hash([]byte(ID+password))
 }
 
+func assetPathFromDataRelativePath(relPath string) (assetPath, boxID string, ok bool) {
+	pathParts := strings.Split(relPath, "/")
+	if 1 < len(pathParts) && pathParts[0] == "assets" {
+		return strings.Join(pathParts, "/"), "", true
+	}
+	if 2 >= len(pathParts) || !ast.IsNodeIDPattern(pathParts[0]) {
+		return
+	}
+	for i := 1; i < len(pathParts)-1; i++ {
+		if pathParts[i] == "assets" {
+			return strings.Join(pathParts[i:], "/"), pathParts[0], true
+		}
+	}
+	return
+}
+
 func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publishAccess PublishAccess) bool {
 	absPath = filepath.Clean(absPath)
 
@@ -475,18 +491,16 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 			return true
 		}
 
+		if assetPath, box, ok := assetPathFromDataRelativePath(relPath); ok {
+			return checkAssetPathAccessableByPublishAccess(c, publishAccess, assetPath, box)
+		}
+
 		if ast.IsNodeIDPattern(pathParts[0]) {
 			box := pathParts[0]
-			if 2 < len(pathParts) && "assets" == pathParts[1] {
-				assetPath := strings.Join(pathParts[1:], "/")
-				return checkAssetPathAccessableByPublishAccess(c, publishAccess, assetPath, box)
-			}
 			blockPath := "/" + strings.Join(pathParts[1:], "/")
 			passwordID, password := GetPathPasswordByPublishAccess(box, blockPath, publishAccess)
 			publishIgnore := GetDisablePublishAccess(publishAccess)
 			return CheckPathAccessableByPublishIgnore(box, blockPath, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
-		} else if pathParts[0] == "assets" {
-			return checkAssetPathAccessableByPublishAccess(c, publishAccess, relPath, "")
 		}
 	}
 	return false

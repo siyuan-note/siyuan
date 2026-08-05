@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type assetRequestPathTest struct {
@@ -85,6 +86,65 @@ func TestAssetRequestPathURLDecoding(t *testing.T) {
 			engine.ServeHTTP(recorder, request)
 			if recorder.Code != test.wantStatus {
 				t.Fatalf("GET %q returned %d, want %d", test.requestURL, recorder.Code, test.wantStatus)
+			}
+		})
+	}
+}
+
+func TestIsValidResolvedAssetPath(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	const (
+		boxID          = "20260806000000-box0001"
+		otherBoxID     = "20260806000001-box0002"
+		encryptedBoxID = "20260806000002-box0003"
+		docID          = "20260806000003-doc0001"
+	)
+	writeFile := func(filePath, content string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	writeFile(filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json"), `{}`)
+	writeFile(filepath.Join(util.DataDir, encryptedBoxID, ".siyuan", "conf.json"), `{"encrypted":true}`)
+	globalAssetPath := filepath.Join(util.DataDir, "assets", "global.png")
+	boxAssetPath := filepath.Join(util.DataDir, boxID, "assets", "box.png")
+	documentAssetPath := filepath.Join(util.DataDir, boxID, docID, "assets", "document.png")
+	encryptedAssetPath := filepath.Join(util.DataDir, encryptedBoxID, "assets", "encrypted.png")
+	nonAssetPath := filepath.Join(util.DataDir, boxID, docID, "document.png")
+	for _, assetPath := range []string{globalAssetPath, boxAssetPath, documentAssetPath, encryptedAssetPath, nonAssetPath} {
+		writeFile(assetPath, "image")
+	}
+
+	tests := []struct {
+		name         string
+		assetPath    string
+		requestBoxID string
+		want         bool
+	}{
+		{name: "global asset", assetPath: globalAssetPath, want: true},
+		{name: "notebook asset", assetPath: boxAssetPath, want: true},
+		{name: "document asset", assetPath: documentAssetPath, want: true},
+		{name: "explicit notebook", assetPath: boxAssetPath, requestBoxID: boxID, want: true},
+		{name: "explicit notebook rejects document asset", assetPath: documentAssetPath, requestBoxID: boxID},
+		{name: "mismatched notebook", assetPath: boxAssetPath, requestBoxID: otherBoxID},
+		{name: "encrypted asset requires notebook", assetPath: encryptedAssetPath},
+		{name: "encrypted asset with notebook", assetPath: encryptedAssetPath, requestBoxID: encryptedBoxID, want: true},
+		{name: "non-asset file", assetPath: nonAssetPath},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := isValidResolvedAssetPath(test.assetPath, test.requestBoxID); got != test.want {
+				t.Fatalf("isValidResolvedAssetPath(%q, %q) = %v, want %v", test.assetPath, test.requestBoxID, got, test.want)
 			}
 		})
 	}

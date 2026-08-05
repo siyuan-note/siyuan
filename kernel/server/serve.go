@@ -886,6 +886,26 @@ func isValidAssetRequestPath(requestPath string) bool {
 	return err == nil
 }
 
+func isValidResolvedAssetPath(assetAbsPath, requestBoxID string) bool {
+	pathBoxID := model.ExtractBoxIDFromAssetsPath(assetAbsPath)
+	if requestBoxID != "" {
+		if requestBoxID != pathBoxID {
+			return false
+		}
+		return gulu.File.IsSubPath(filepath.Join(util.DataDir, requestBoxID, "assets"), assetAbsPath)
+	}
+
+	if model.IsEncryptedAssetPath(assetAbsPath) {
+		return false
+	}
+	dataRelativePath, err := filepath.Rel(util.DataDir, assetAbsPath)
+	if err != nil {
+		return false
+	}
+	_, validatedAbsPath, err := model.ResolveDataAssetPath(filepath.ToSlash(dataRelativePath))
+	return err == nil && filepath.Clean(validatedAbsPath) == filepath.Clean(assetAbsPath)
+}
+
 func serveAssets(ginServer *gin.Engine) {
 	ginServer.POST("/upload", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.Upload)
 
@@ -924,21 +944,7 @@ func serveAssets(ginServer *gin.Engine) {
 			return
 		}
 
-		// 验证最终绝对路径必须在 data/assets 或 <boxID>/assets 下
-		boxIDFromPath := model.ExtractBoxIDFromAssetsPath(p)
-		assetsRoot := filepath.Join(util.DataDir, "assets")
-		if boxIDFromPath != "" {
-			assetsRoot = filepath.Join(util.DataDir, boxIDFromPath, "assets")
-		}
-		if boxID != "" && boxID != boxIDFromPath {
-			context.Status(http.StatusForbidden)
-			return
-		}
-		if boxID == "" && model.IsEncryptedAssetPath(p) {
-			context.Status(http.StatusForbidden)
-			return
-		}
-		if !gulu.File.IsSubPath(assetsRoot, p) {
+		if !isValidResolvedAssetPath(p, boxID) {
 			context.Status(http.StatusForbidden)
 			return
 		}

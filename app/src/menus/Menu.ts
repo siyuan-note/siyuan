@@ -514,6 +514,13 @@ export class Menu {
         if (this.element.classList.contains("fn__none")) {
             return;
         }
+        if (this.position.target?.isConnected) {
+            const rect = this.position.target.getBoundingClientRect();
+            this.position.x = this.position.isLeft ? rect.right : rect.left;
+            this.position.y = rect.bottom;
+            this.position.h = rect.height;
+            this.position.w = rect.width;
+        }
         setPosition(this.element, this.position.x - (this.position.isLeft ? this.element.clientWidth : 0), this.position.y, this.position.h, this.position.w);
         this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
         this.element.querySelectorAll(".b3-menu__item--show .b3-menu__submenu").forEach((item: HTMLElement) => {

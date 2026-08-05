@@ -402,7 +402,8 @@ interface IPosition {
     y: number,
     w?: number,
     h?: number,
-    isLeft?: boolean
+    isLeft?: boolean,
+    target?: HTMLElement
 }
 
 interface ISaveLayout {

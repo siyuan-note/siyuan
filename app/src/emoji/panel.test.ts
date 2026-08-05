@@ -5,6 +5,7 @@ import {
     getActiveEmojiCategory,
     getEmojiItemMap,
     getEmojiVirtualChunks,
+    getRandomEmojiCategories,
     groupCustomEmojiItems,
 } from "./panel";
 
@@ -94,5 +95,33 @@ describe("emoji filtering", () => {
     it("reuses emoji indexes for an unchanged configuration", () => {
         assert.equal(getEmojiItemMap(categories), getEmojiItemMap(categories));
         assert.equal(getEmojiItemMap(categories, true), getEmojiItemMap(categories, true));
+    });
+});
+
+describe("getRandomEmojiCategories", () => {
+    const categories: IEmoji[] = [{
+        id: "custom",
+        title: "Custom",
+        title_zh_cn: "自定义",
+        title_ja_jp: "カスタム",
+        items: [createEmoji("custom.png")],
+    }, {
+        id: "people",
+        title: "People",
+        title_zh_cn: "人物",
+        title_ja_jp: "人々",
+        items: [createEmoji("1f600")],
+    }, {
+        id: "empty",
+        title: "Empty",
+        title_zh_cn: "空",
+        title_ja_jp: "空",
+        items: [],
+    }];
+
+    it("keeps random choices within the selected emoji page", () => {
+        assert.deepEqual(getRandomEmojiCategories(categories, "builtIn").map((item) => item.id), ["people"]);
+        assert.deepEqual(getRandomEmojiCategories(categories, "custom").map((item) => item.id), ["custom"]);
+        assert.deepEqual(getRandomEmojiCategories(categories, "all").map((item) => item.id), ["custom", "people"]);
     });
 });

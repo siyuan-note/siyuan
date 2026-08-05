@@ -28,15 +28,18 @@ import {
     getActiveEmojiCategory,
     getEmojiItemMap,
     getEmojiVirtualChunks,
+    getRandomEmojiCategories,
     groupCustomEmojiItems,
+    type TRandomEmojiScope,
 } from "./panel";
 
-export const getRandomEmoji = () => {
-    const emojis = window.siyuan.emojis[getRandom(0, window.siyuan.emojis.length - 1)];
-    if (typeof emojis.items[getRandom(0, emojis.items.length - 1)] === "undefined") {
-        return "1f600";
+export const getRandomEmoji = (scope: TRandomEmojiScope = "all") => {
+    const categories = getRandomEmojiCategories(window.siyuan.emojis, scope);
+    if (categories.length === 0) {
+        return scope === "all" ? "1f600" : "";
     }
-    return emojis.items[getRandom(0, emojis.items.length - 1)].unicode;
+    const category = categories[getRandom(0, categories.length - 1)];
+    return category.items[getRandom(0, category.items.length - 1)].unicode;
 };
 
 export const unicode2Emoji = (unicode: string, className = "", needSpan = false, lazy = false) => {
@@ -1414,7 +1417,10 @@ export const openEmojiPanel = (
                     dialog.destroy();
                 } else {
                     // 随机
-                    unicode = getRandomEmoji();
+                    unicode = getRandomEmoji(customEmojiPage ? "custom" : "builtIn");
+                    if (!unicode) {
+                        break;
+                    }
                 }
                 if (type === "notebook") {
                     fetchPost("/api/notebook/setNotebookIcon", {

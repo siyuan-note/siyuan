@@ -5,6 +5,13 @@ export type TCustomEmojiGroup = {
     items: IEmojiItem[];
 };
 
+export type TRandomEmojiScope = "all" | "builtIn" | "custom";
+
+export const getRandomEmojiCategories = (categories: IEmoji[], scope: TRandomEmojiScope) => {
+    return categories.filter((category) => category.items.length > 0 &&
+        (scope === "all" || (category.id === "custom") === (scope === "custom")));
+};
+
 const emojiItemMapCache = new WeakMap<IEmoji[], {
     all: Map<string, IEmojiItem>;
     builtIn: Map<string, IEmojiItem>;

@@ -66,6 +66,17 @@ export class Menu {
     private sheetCanDrag = false;
     private sheetDragging = false;
     private suppressSheetClick = false;
+    private targetPositionFrame: number | undefined;
+
+    private updateTargetPosition = () => {
+        if (typeof this.targetPositionFrame === "number") {
+            cancelAnimationFrame(this.targetPositionFrame);
+        }
+        this.targetPositionFrame = requestAnimationFrame(() => {
+            this.targetPositionFrame = undefined;
+            this.resetPosition();
+        });
+    };
 
     constructor(element?: HTMLElement) {
         this.wheelEvent = "onwheel" in document.createElement("div") ? "wheel" : "mousewheel";
@@ -459,6 +470,7 @@ export class Menu {
         clearTimeout(fullscreenCloseTimeout);
         this.hideFullscreenScrim();
         this.finishSheetTouch();
+        this.stopTrackingTargetPosition();
         if (this.removeCB) {
             const removeCB = this.removeCB;
             this.removeCB = undefined;
@@ -505,13 +517,14 @@ export class Menu {
         window.addEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, {passive: false});
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
+        this.position = options;
         setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0), options.y, options.h, options.w);
         this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
-        this.position = options;
+        this.startTrackingTargetPosition();
     }
 
     public resetPosition() {
-        if (this.element.classList.contains("fn__none")) {
+        if (this.element.classList.contains("fn__none") || !this.position) {
             return;
         }
         if (this.position.target?.isConnected) {
@@ -527,6 +540,26 @@ export class Menu {
             // 可能有多层子菜单，都要重新定位
             this.showSubMenu(item);
         });
+    }
+
+    private startTrackingTargetPosition() {
+        this.stopTrackingTargetPosition();
+        if (!this.position.target) {
+            return;
+        }
+        window.addEventListener("resize", this.updateTargetPosition);
+        window.visualViewport?.addEventListener("resize", this.updateTargetPosition);
+        window.visualViewport?.addEventListener("scroll", this.updateTargetPosition);
+    }
+
+    private stopTrackingTargetPosition() {
+        window.removeEventListener("resize", this.updateTargetPosition);
+        window.visualViewport?.removeEventListener("resize", this.updateTargetPosition);
+        window.visualViewport?.removeEventListener("scroll", this.updateTargetPosition);
+        if (typeof this.targetPositionFrame === "number") {
+            cancelAnimationFrame(this.targetPositionFrame);
+            this.targetPositionFrame = undefined;
+        }
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {

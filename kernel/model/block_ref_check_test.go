@@ -77,3 +77,28 @@ func TestHasSurvivingAttributeViewBlock(t *testing.T) {
 		t.Fatal("database mirrors deleted with the bound block should not require confirmation")
 	}
 }
+
+func TestExpandBlockRefCheckDescendantsIgnoresEmptyBlockTrees(t *testing.T) {
+	group := newBlockRefCheckGroup()
+	selected := map[string]struct{}{"selected": {}}
+	deleted := map[string]struct{}{"selected": {}}
+	rootTrees := []*treenode.BlockTree{
+		{ID: "", ParentID: "selected"},
+		{ID: "valid-child", ParentID: "selected"},
+	}
+
+	expandBlockRefCheckDescendants(group, selected, deleted, rootTrees)
+
+	if _, exists := group.blockIDs[""]; exists {
+		t.Fatal("an empty blocktree ID should not enter the reference check")
+	}
+	if _, exists := group.deletedBlockIDs[""]; exists {
+		t.Fatal("an empty blocktree ID should not enter the deleted block set")
+	}
+	if _, exists := group.blockIDs["valid-child"]; !exists {
+		t.Fatal("a valid descendant should enter the reference check")
+	}
+	if _, exists := group.deletedBlockIDs["valid-child"]; !exists {
+		t.Fatal("a valid deleted descendant should enter the deleted block set")
+	}
+}

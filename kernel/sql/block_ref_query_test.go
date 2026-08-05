@@ -70,3 +70,45 @@ func TestQueryRefsByDefIDParameterizesBlockIDs(t *testing.T) {
 		t.Fatalf("query argument changed stored refs, count: %d", count)
 	}
 }
+
+func TestInvalidRefsAreNotIndexedAndAreCleaned(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if nil != err {
+		t.Fatalf("open test database failed: %s", err)
+	}
+	testDB.SetMaxOpenConns(1)
+	defer testDB.Close()
+	if _, err = testDB.Exec("CREATE TABLE refs (id TEXT, def_block_id TEXT, def_block_parent_id TEXT, def_block_root_id TEXT, def_block_path TEXT, block_id TEXT, root_id TEXT, box TEXT, path TEXT, content TEXT, markdown TEXT, type TEXT)"); nil != err {
+		t.Fatalf("create refs table failed: %s", err)
+	}
+
+	tx, err := testDB.Begin()
+	if nil != err {
+		t.Fatalf("begin transaction failed: %s", err)
+	}
+	invalidRefs := []*Ref{
+		{ID: "empty-definition", BlockID: "source", RootID: "source-root"},
+		{ID: "empty-source", DefBlockID: "definition", RootID: "source-root"},
+		{ID: "empty-source-root", DefBlockID: "definition", BlockID: "source"},
+	}
+	if err = insertBlockRefs(tx, invalidRefs); nil != err {
+		t.Fatalf("insert refs failed: %s", err)
+	}
+	if err = tx.Commit(); nil != err {
+		t.Fatalf("commit transaction failed: %s", err)
+	}
+	var count int
+	if err = testDB.QueryRow("SELECT COUNT(*) FROM refs").Scan(&count); nil != err || 0 != count {
+		t.Fatalf("invalid refs should not be indexed: count=%d, err=%v", count, err)
+	}
+
+	if _, err = testDB.Exec("INSERT INTO refs (id, def_block_id, block_id, root_id) VALUES ('invalid', '', 'source', 'source-root'), ('valid', 'definition', 'source', 'source-root')"); nil != err {
+		t.Fatalf("insert cleanup fixtures failed: %s", err)
+	}
+	if err = cleanupInvalidRefs(testDB); nil != err {
+		t.Fatalf("cleanup invalid refs failed: %s", err)
+	}
+	if err = testDB.QueryRow("SELECT COUNT(*) FROM refs").Scan(&count); nil != err || 1 != count {
+		t.Fatalf("cleanup should retain only valid refs: count=%d, err=%v", count, err)
+	}
+}

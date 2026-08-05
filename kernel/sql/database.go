@@ -124,6 +124,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureRefsDefIndexes(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create refs definition indexes failed: %s", err)
 			}
+			if err := cleanupInvalidRefs(db); err != nil {
+				logging.LogErrorf("cleanup invalid refs failed: %s", err)
+			}
 			recoverIndexQueue()
 			return
 		}
@@ -1416,6 +1419,12 @@ func ensureRefsDefIndexes(database *sql.DB) (err error) {
 	return
 }
 
+func cleanupInvalidRefs(database *sql.DB) (err error) {
+	_, err = database.Exec("DELETE FROM refs WHERE COALESCE(TRIM(def_block_id), '') = '' OR " +
+		"COALESCE(TRIM(block_id), '') = '' OR COALESCE(TRIM(root_id), '') = ''")
+	return
+}
+
 func CloseDatabase() {
 	closeIndexQueue()
 	// 退出时删除所有已打开的加密 db 文件：加密索引可由 box.Index() 全量重建，
@@ -2051,6 +2060,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		return
 	}
 	if err = ensureRefsDefIndexes(boxDB); err != nil {
+		return
+	}
+	if err = cleanupInvalidRefs(boxDB); err != nil {
 		return
 	}
 	// FTS5 external-content 虚拟表，tokenize 与全局保持一致（siyuan 分词器）

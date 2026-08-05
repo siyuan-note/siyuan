@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
@@ -141,7 +140,9 @@ func CheckBlockRef(ids []string) bool {
 // CheckBlockRefInBox 检查受影响块的引用，并检查实际删除块的数据库绑定。
 func CheckBlockRefInBox(ids, exactIDs, deletedIDs []string, boxID string) (ret bool, err error) {
 	sql.FlushQueue()
-	ids = gulu.Str.RemoveDuplicatedElem(ids)
+	ids = filterNonEmptyBlockRefCheckIDs(ids)
+	exactIDs = filterNonEmptyBlockRefCheckIDs(exactIDs)
+	deletedIDs = filterNonEmptyBlockRefCheckIDs(deletedIDs)
 	if 1 > len(ids) {
 		return
 	}
@@ -205,36 +206,63 @@ func CheckBlockRefInBox(ids, exactIDs, deletedIDs []string, boxID string) (ret b
 		for rootID, selected := range selectedRoots {
 			deleted := deletedByRoot[treeBoxID][rootID]
 			rootTrees := treenode.GetBlockTreesByRootIDInBox(rootID, treeBoxID)
-			byID := map[string]*treenode.BlockTree{}
-			for _, bt := range rootTrees {
-				byID[bt.ID] = bt
-			}
-			for _, bt := range rootTrees {
-				current := bt
-				affectedBySelected := false
-				affectedByDeleted := false
-				for nil != current && "" != current.ParentID {
-					if _, ok := selected[current.ParentID]; ok {
-						affectedBySelected = true
-					}
-					if _, ok := deleted[current.ParentID]; ok {
-						affectedByDeleted = true
-					}
-					if affectedBySelected && affectedByDeleted {
-						break
-					}
-					current = byID[current.ParentID]
-				}
-				if affectedBySelected {
-					group.blockIDs[bt.ID] = struct{}{}
-				}
-				if affectedByDeleted {
-					group.deletedBlockIDs[bt.ID] = struct{}{}
-				}
-			}
+			expandBlockRefCheckDescendants(group, selected, deleted, rootTrees)
 		}
 	}
 	return existBlockRefGroup(group)
+}
+
+func expandBlockRefCheckDescendants(group *blockRefCheckGroup, selected, deleted map[string]struct{},
+	rootTrees []*treenode.BlockTree) {
+	byID := map[string]*treenode.BlockTree{}
+	for _, bt := range rootTrees {
+		if nil == bt || "" == strings.TrimSpace(bt.ID) {
+			continue
+		}
+		byID[bt.ID] = bt
+	}
+	for _, bt := range rootTrees {
+		if nil == bt || "" == strings.TrimSpace(bt.ID) {
+			continue
+		}
+		current := bt
+		affectedBySelected := false
+		affectedByDeleted := false
+		for nil != current && "" != current.ParentID {
+			if _, ok := selected[current.ParentID]; ok {
+				affectedBySelected = true
+			}
+			if _, ok := deleted[current.ParentID]; ok {
+				affectedByDeleted = true
+			}
+			if affectedBySelected && affectedByDeleted {
+				break
+			}
+			current = byID[current.ParentID]
+		}
+		if affectedBySelected {
+			group.blockIDs[bt.ID] = struct{}{}
+		}
+		if affectedByDeleted {
+			group.deletedBlockIDs[bt.ID] = struct{}{}
+		}
+	}
+}
+
+func filterNonEmptyBlockRefCheckIDs(ids []string) (ret []string) {
+	seen := map[string]struct{}{}
+	for _, id := range ids {
+		id = strings.TrimSpace(id)
+		if "" == id {
+			continue
+		}
+		if _, exists := seen[id]; exists {
+			continue
+		}
+		seen[id] = struct{}{}
+		ret = append(ret, id)
+	}
+	return
 }
 
 // CheckDocsRef 检查文档删除时会递归移除的全部文档。

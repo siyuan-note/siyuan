@@ -324,6 +324,15 @@ func insertSpans0(tx *sql.Tx, bulk []*Span) (err error) {
 }
 
 func insertBlockRefs(tx *sql.Tx, refs []*Ref) (err error) {
+	validRefs := refs[:0]
+	for _, ref := range refs {
+		if nil == ref || "" == strings.TrimSpace(ref.DefBlockID) || "" == strings.TrimSpace(ref.BlockID) ||
+			"" == strings.TrimSpace(ref.RootID) {
+			continue
+		}
+		validRefs = append(validRefs, ref)
+	}
+	refs = validRefs
 	if 1 > len(refs) {
 		return
 	}

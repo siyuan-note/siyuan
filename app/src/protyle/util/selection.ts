@@ -209,16 +209,23 @@ export const getBlockRangeSelectElements = (rangeStartElement: HTMLElement, rang
     return {endElement, selectElements, startElement, toDown};
 };
 
-export const selectBlocksByRange = (protyle: IProtyle, range: Range) => {
+export const getBlockElementsByRange = (range: Range) => {
     const startBlockElement = hasClosestBlock(range.startContainer);
     const endBlockElement = hasClosestBlock(range.endContainer);
     if (!startBlockElement || !endBlockElement) {
-        return;
+        return [];
     }
     const startElement = (isInEmbedBlock(startBlockElement) || startBlockElement) as HTMLElement;
     const endElement = (isInEmbedBlock(endBlockElement) || endBlockElement) as HTMLElement;
-    const selectElements = startElement === endElement ? [startElement] :
+    return startElement === endElement ? [startElement] :
         getBlockRangeSelectElements(startElement, endElement).selectElements;
+};
+
+export const selectBlocksByRange = (protyle: IProtyle, range: Range) => {
+    const selectElements = getBlockElementsByRange(range);
+    if (selectElements.length === 0) {
+        return;
+    }
     selectElements.forEach(selectElement => {
         selectElement.classList.add("protyle-wysiwyg--select");
         selectElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {

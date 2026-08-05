@@ -1,7 +1,7 @@
 {
 	"lanSync": "การเร่งการซิงค์ผ่าน LAN",
 	"lanSyncTip": "ดาวน์โหลดส่วนข้อมูลที่เข้ารหัสจากอุปกรณ์ที่เชื่อถือได้ในเครือข่ายท้องถิ่นได้เร็วขึ้น โดยยังคงให้พื้นที่จัดเก็บบนคลาวด์เป็นแหล่งอ้างอิงหลักของการซิงค์",
-	"lanSyncConnectedPeers": "อุปกรณ์ LAN ที่เชื่อมต่อ: ${count}",
+	"lanSyncDiscoveredPeers": "อุปกรณ์ LAN ที่ค้นพบ: ${count}",
 	"agentPermission": "สิทธิ์",
 	"agentPermissionConfirm": "ยืนยันทุกครั้ง",
 	"agentPermissionAllowSession": "อนุญาตอัตโนมัติ",

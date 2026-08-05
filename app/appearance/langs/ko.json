@@ -1,7 +1,7 @@
 {
 	"lanSync": "LAN 동기화 가속",
 	"lanSyncTip": "클라우드 저장소를 동기화 기준으로 유지하면서 로컬 네트워크의 신뢰할 수 있는 기기에서 암호화된 데이터 청크를 더 빠르게 다운로드합니다",
-	"lanSyncConnectedPeers": "연결된 LAN 기기: ${count}",
+	"lanSyncDiscoveredPeers": "검색된 LAN 기기: ${count}",
 	"agentPermission": "권한",
 	"agentPermissionConfirm": "매번 확인",
 	"agentPermissionAllowSession": "자동 허용",

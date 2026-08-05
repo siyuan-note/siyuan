@@ -1,7 +1,7 @@
 {
 	"lanSync": "Aceleración de sincronización por LAN",
 	"lanSyncTip": "Descarga más rápido bloques de datos cifrados desde dispositivos de confianza en la red local mientras el almacenamiento en la nube sigue siendo la autoridad de sincronización",
-	"lanSyncConnectedPeers": "Dispositivos LAN conectados: ${count}",
+	"lanSyncDiscoveredPeers": "Dispositivos LAN detectados: ${count}",
 	"agentPermission": "Permiso",
 	"agentPermissionConfirm": "Confirmar cada vez",
 	"agentPermissionAllowSession": "Permitir automáticamente",

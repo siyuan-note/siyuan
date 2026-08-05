@@ -252,9 +252,11 @@ func GetSyncLANStatus() map[string]interface{} {
 	lanSyncManagerMu.RLock()
 	manager := lanSyncManager
 	lanSyncManagerMu.RUnlock()
-	count := 0
+	discoveredCount := 0
+	connectedCount := 0
 	if nil != manager {
-		count = manager.ConnectedPeerCount()
+		discoveredCount = manager.DiscoveredPeerCount()
+		connectedCount = manager.ConnectedPeerCount()
 	}
 	enabled := false
 	maxConcurrentReqs := 16
@@ -265,7 +267,8 @@ func GetSyncLANStatus() map[string]interface{} {
 	return map[string]interface{}{
 		"enabled":           enabled,
 		"active":            nil != manager,
-		"connectedPeers":    count,
+		"discoveredPeers":   discoveredCount,
+		"connectedPeers":    connectedCount,
 		"maxConcurrentReqs": maxConcurrentReqs,
 	}
 }

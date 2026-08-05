@@ -1,7 +1,7 @@
 {
 	"lanSync": "स्थानीय नेटवर्क सिंक त्वरण",
 	"lanSyncTip": "क्लाउड स्टोरेज को सिंक का प्रामाणिक स्रोत रखते हुए स्थानीय नेटवर्क के विश्वसनीय डिवाइसों से एन्क्रिप्टेड डेटा खंड तेज़ी से डाउनलोड करता है",
-	"lanSyncConnectedPeers": "कनेक्ट किए गए स्थानीय नेटवर्क डिवाइस: ${count}",
+	"lanSyncDiscoveredPeers": "खोजे गए स्थानीय नेटवर्क डिवाइस: ${count}",
 	"agentPermission": "अनुमति",
 	"agentPermissionConfirm": "हर बार पुष्टि करें",
 	"agentPermissionAllowSession": "स्वचालित रूप से अनुमति दें",

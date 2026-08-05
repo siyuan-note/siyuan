@@ -31,8 +31,8 @@ export const refreshLANSyncStatus = (root: Element) => {
     }
     fetchSyncPost("/api/sync/getSyncLANStatus", {}).then((response) => {
         if (response.code === 0 && response.data) {
-            statusElement.textContent = window.siyuan.languages.lanSyncConnectedPeers.replace(
-                "${count}", String(response.data.connectedPeers));
+            statusElement.textContent = window.siyuan.languages.lanSyncDiscoveredPeers.replace(
+                "${count}", String(response.data.discoveredPeers ?? response.data.connectedPeers ?? 0));
         }
     }).catch(() => {});
 };

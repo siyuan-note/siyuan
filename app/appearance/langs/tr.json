@@ -1,7 +1,7 @@
 {
 	"lanSync": "LAN eşitleme hızlandırması",
 	"lanSyncTip": "Bulut depolama eşitleme yetkilisi olarak kalırken yerel ağdaki güvenilir cihazlardan şifrelenmiş veri parçalarını daha hızlı indirir",
-	"lanSyncConnectedPeers": "Bağlı LAN cihazları: ${count}",
+	"lanSyncDiscoveredPeers": "Keşfedilen LAN cihazları: ${count}",
 	"agentPermission": "İzin",
 	"agentPermissionConfirm": "Her seferinde onayla",
 	"agentPermissionAllowSession": "Otomatik olarak izin ver",

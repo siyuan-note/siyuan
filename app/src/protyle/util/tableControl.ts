@@ -460,6 +460,11 @@ export class TableControl {
                 this.scheduleRender();
             }
         }, {signal});
+        this.wysiwygElement.addEventListener("input", () => {
+            if (this.caretCell?.isConnected || this.selection?.table.isConnected) {
+                this.scheduleRender();
+            }
+        }, {signal});
         this.wysiwygElement.addEventListener("pointermove", event => this.handleTablePointerMove(event, false), {signal});
         // 手柄和添加按钮（pointer-events: auto）会截获鼠标事件，导致 wysiwygElement 收不到
         // pointermove，边缘 hover 检测被卡住（例如鼠标停在 cell 手柄上时无法触发 add-column）。

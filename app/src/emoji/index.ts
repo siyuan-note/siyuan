@@ -168,7 +168,7 @@ const genEmojiSearchHTML = (key: string, max: number | undefined, options: TEmoj
 export const genEmojiCategoryButtons = (hideCustom = false) => {
     const categories = [{
         id: "recent",
-        unicode: "2b50",
+        unicode: "1f552",
         title: window.siyuan.languages.recentEmoji,
     }];
     window.siyuan.emojis.forEach((category, index) => {
@@ -924,7 +924,7 @@ export const openEmojiPanel = (
     <div class="emojis__tabheader">
         <div data-type="tab-emoji" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.emoji}"><svg><use xlink:href="#iconEmoji"></use></svg></div>
         <div class="fn__space"></div>
-        <div data-type="tab-custom" class="ariaLabel block__icon block__icon--show emojis__tab-custom${options?.custom ? " fn__none" : ""}" aria-label="${escapeAttr(escapeHtml(customEmojiLabel))}">${unicode2Emoji(emojiCategoryIcons.custom)}</div>
+        <div data-type="tab-custom" class="ariaLabel block__icon block__icon--show${options?.custom ? " fn__none" : ""}" aria-label="${escapeAttr(escapeHtml(customEmojiLabel))}"><svg><use xlink:href="#iconStar"></use></svg></div>
         <div class="fn__space"></div>
         <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show${options?.dynamic ? " fn__none" : ""}" aria-label="${window.siyuan.languages.dynamicIcon}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
         <div class="fn__space${type === "av" ? " fn__none" : ""}"></div>

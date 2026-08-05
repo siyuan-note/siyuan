@@ -304,7 +304,7 @@ export class AgentChat extends Model {
             '<div class="agent-chat__buttons">' +
             '<div class="agent-chat__button-options">' +
             '<button class="b3-select b3-select--noborder agent-chat__permission ariaLabel" data-menu="true" data-position="n" type="button">' +
-            '<svg class="agent-chat__permission-icon"><use xlink:href="#iconHand"></use></svg>' +
+            '<svg class="agent-chat__permission-icon"><use xlink:href="#iconShieldCheck"></use></svg>' +
             '<span class="agent-chat__permission-label"></span></button>' +
             '<span class="fn__flex-1"></span>' +
             '<span class="agent-chat__tokens fn__none b3-button b3-button--icon b3-button--cancel" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
@@ -314,6 +314,7 @@ export class AgentChat extends Model {
             "</svg>" +
             "</span>" +
             '<button class="b3-select b3-select--noborder agent-chat__model-picker" data-type="groupedModelPicker" data-group="agent" data-model-id="" data-menu="true" type="button">' +
+            '<svg class="agent-chat__model-picker-icon"><use xlink:href="#iconAtom"></use></svg>' +
             '<span class="agent-chat__model-picker-label" data-type="groupedModelPickerLabel"></span></button>' +
             '<button class="b3-select b3-select--noborder agent-chat__reasoning-effort ariaLabel" data-menu="true" aria-label="' +
             (L.reasoningEffortTooltip || "Reasoning effort") + '" type="button">' +

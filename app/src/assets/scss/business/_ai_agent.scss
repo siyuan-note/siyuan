@@ -688,9 +688,17 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 26px 4px 8px;
+  padding: 4px 8px;
+  background-image: none;
   white-space: nowrap;
   flex-shrink: 0;
+
+  &-icon {
+    height: 14px;
+    width: 14px;
+    color: var(--b3-theme-on-surface);
+    flex-shrink: 0;
+  }
 
   &-label {
     overflow: hidden;
@@ -702,7 +710,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 26px 4px 8px;
+  padding: 4px 8px;
+  background-image: none;
   white-space: nowrap;
   min-width: 0;
 

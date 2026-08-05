@@ -14,15 +14,15 @@ const appDir = path.join(repoRoot, "app");
 const kernelDir = path.join(repoRoot, "kernel");
 
 function usage() {
-  console.log("用法: node scripts/android-dev-run.mjs [选项]");
-  console.log("选项:");
-  console.log("  --flavor=<flavor>      渠道: cn / googleplay / huawei / official（默认 official）");
-  console.log("  --android-dir=<路径>    siyuan-android 项目路径（默认与 siyuan 同级的 siyuan-android）");
-  console.log("  --device=<serial>      指定 adb 设备（多设备连接时必填）");
-  console.log("  --skip-ui              跳过 pnpm build:mobile，使用现有的 stage/build/mobile 产物");
-  console.log("  --skip-kernel          跳过 gomobile 构建，使用现有的 kernel/kernel.aar");
-  console.log("  --skip-gradle          跳过 gradle 构建，重新安装最近一次构建的 APK");
-  console.log("  -h, --help             显示帮助");
+  console.log("Usage: node scripts/android-dev-run.mjs [options]");
+  console.log("Options:");
+  console.log("  --flavor=<flavor>      Flavor: cn / googleplay / huawei / official (default: official)");
+  console.log("  --android-dir=<path>   Path to the siyuan-android project (default: next to the siyuan project)");
+  console.log("  --device=<serial>      Specify an adb device (required when multiple devices are connected)");
+  console.log("  --skip-ui              Skip pnpm build:mobile and use the existing stage/build/mobile output");
+  console.log("  --skip-kernel          Skip the gomobile build and use the existing kernel/kernel.aar");
+  console.log("  --skip-gradle          Skip the Gradle build and reinstall the most recently built APK");
+  console.log("  -h, --help             Show help");
   process.exit(0);
 }
 
@@ -49,18 +49,18 @@ for (const arg of args) {
   } else if (arg === "--skip-gradle") {
     skipGradle = true;
   } else {
-    console.error(`未知参数: ${arg}`);
+    console.error(`Unknown argument: ${arg}`);
     usage();
   }
 }
 if (!["cn", "googleplay", "huawei", "official"].includes(flavor)) {
-  console.error(`无效的渠道: ${flavor}，可选: cn / googleplay / huawei / official`);
+  console.error(`Invalid flavor: ${flavor}. Available flavors: cn / googleplay / huawei / official`);
   process.exit(1);
 }
 const flavorUpper = flavor.charAt(0).toUpperCase() + flavor.slice(1);
 
 function fail(message) {
-  console.error(`错误: ${message}`);
+  console.error(`Error: ${message}`);
   process.exit(1);
 }
 
@@ -72,7 +72,7 @@ function run(command, cmdArgs, options = {}) {
     shell: options.shell || false,
   });
   if (result.status !== 0) {
-    fail(`${command} 执行失败（退出码 ${result.status}），请检查上方日志`);
+    fail(`${command} failed with exit code ${result.status}. Check the log above for details`);
   }
   return result;
 }
@@ -80,7 +80,7 @@ function run(command, cmdArgs, options = {}) {
 function capture(command, cmdArgs) {
   const result = spawnSync(command, cmdArgs, {encoding: "utf8"});
   if (result.status !== 0) {
-    fail(`${command} 执行失败（退出码 ${result.status}）`);
+    fail(`${command} failed with exit code ${result.status}`);
   }
   return result.stdout;
 }
@@ -98,7 +98,7 @@ function findSdkDir() {
   if (process.env.ANDROID_HOME) {
     return process.env.ANDROID_HOME;
   }
-  fail("未找到 Android SDK：请在 siyuan-android/local.properties 中配置 sdk.dir 或设置环境变量 ANDROID_HOME");
+  fail("Android SDK not found. Configure sdk.dir in siyuan-android/local.properties or set the ANDROID_HOME environment variable");
 }
 
 function findAdb(sdkDir) {
@@ -110,13 +110,13 @@ function findAdb(sdkDir) {
   if (pathAdb) {
     return pathAdb;
   }
-  fail("未找到 adb：请安装 platform-tools 或将其加入 PATH");
+  fail("adb not found. Install platform-tools or add it to PATH");
 }
 
 function findNdk(sdkDir) {
   const ndkRoot = path.join(sdkDir, "ndk");
   if (!existsSync(ndkRoot)) {
-    fail(`未找到 NDK：${ndkRoot}，请通过 sdkmanager 安装（如 28.2.13676358）`);
+    fail(`NDK not found: ${ndkRoot}. Install it using sdkmanager (for example, 28.2.13676358)`);
   }
   const versions = readdirSync(ndkRoot).filter((name) => statSync(path.join(ndkRoot, name)).isDirectory());
   versions.sort((a, b) => {
@@ -131,7 +131,7 @@ function findNdk(sdkDir) {
     return 0;
   });
   if (versions.length === 0) {
-    fail(`NDK 目录为空: ${ndkRoot}`);
+    fail(`NDK directory is empty: ${ndkRoot}`);
   }
   return path.join(ndkRoot, versions[0]);
 }
@@ -141,7 +141,7 @@ function findTool(name) {
   if (paths[0]) {
     return paths[0];
   }
-  fail(`未找到 ${name}，请安装后重试`);
+  fail(`${name} not found. Install it and try again`);
 }
 
 function deviceSerial(adb) {
@@ -157,15 +157,15 @@ function deviceSerial(adb) {
     if (devices.includes(device)) {
       return device;
     }
-    fail(`未找到设备 ${device}，当前已连接: ${devices.join(", ") || "无"}`);
+    fail(`Device ${device} not found. Connected devices: ${devices.join(", ") || "none"}`);
   }
   if (devices.length === 1) {
     return devices[0];
   }
   if (devices.length === 0) {
-    fail("未检测到已连接的设备。无线调试连接方式: 手机开启「无线调试」后执行 adb pair <ip>:<端口> <配对码>，再执行 adb connect <ip>:<端口>");
+    fail("No connected devices detected. To connect using wireless debugging, enable Wireless debugging on the device, run adb pair <ip>:<port> <pairing-code>, and then run adb connect <ip>:<port>");
   }
-  fail(`检测到多个设备: ${devices.join(", ")}，请通过 --device=<serial> 指定一个`);
+  fail(`Multiple devices detected: ${devices.join(", ")}. Specify one using --device=<serial>`);
 }
 
 const sdkDir = findSdkDir();
@@ -174,20 +174,20 @@ const ndkDir = findNdk(sdkDir);
 const serial = deviceSerial(adb);
 
 const startedAt = Date.now();
-console.log(`[1/6] 环境检查完成: sdk=${sdkDir} ndk=${ndkDir} 设备=${serial} 渠道=${flavor}`);
+console.log(`[1/6] Environment check complete: sdk=${sdkDir} ndk=${ndkDir} device=${serial} flavor=${flavor}`);
 
 if (!skipUi) {
-  console.log("[2/6] 构建 mobile 前端（pnpm run build:mobile）...");
+  console.log("[2/6] Building the mobile frontend (pnpm run build:mobile)...");
   run("pnpm", ["run", "build:mobile"], {cwd: appDir, shell: true});
 } else {
-  console.log("[2/6] 跳过前端构建，使用现有 stage/build/mobile 产物");
+  console.log("[2/6] Skipping the frontend build and using the existing stage/build/mobile output");
 }
 const mobileIndex = path.join(appDir, "stage", "build", "mobile", "index.html");
 if (!existsSync(mobileIndex)) {
-  fail(`前端产物缺失: ${mobileIndex}，请先构建（不要使用 --skip-ui）`);
+  fail(`Frontend build output is missing: ${mobileIndex}. Build it first without using --skip-ui`);
 }
 
-console.log("[3/6] 打包 app.zip ...");
+console.log("[3/6] Creating app.zip...");
 const zipPath = path.join(os.tmpdir(), "siyuan-android-app.zip");
 if (existsSync(zipPath)) {
   unlinkSync(zipPath);
@@ -201,19 +201,19 @@ for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md"]) {
   if (existsSync(path.join(repoRoot, file))) {
     tarArgs.push("-C", repoRoot, file);
   } else {
-    console.log(`警告: ${file} 不存在，已跳过`);
+    console.log(`Warning: ${file} does not exist and will be skipped`);
   }
 }
 run("tar", tarArgs);
 const androidAssets = path.join(androidDir, "app", "src", "main", "assets");
 if (!existsSync(androidAssets)) {
-  fail(`siyuan-android 目录结构异常: ${androidAssets} 不存在，请通过 --android-dir 指定正确的项目路径`);
+  fail(`Unexpected siyuan-android directory structure: ${androidAssets} does not exist. Specify the correct project path using --android-dir`);
 }
 copyFileSync(zipPath, path.join(androidAssets, "app.zip"));
-console.log(`app.zip 已复制到 ${path.join(androidAssets, "app.zip")}`);
+console.log(`app.zip copied to ${path.join(androidAssets, "app.zip")}`);
 
 if (!skipKernel) {
-  console.log("[4/6] 构建 Android 内核（gomobile bind）...");
+  console.log("[4/6] Building the Android kernel (gomobile bind)...");
   const env = {
     ...process.env,
     ANDROID_HOME: sdkDir,
@@ -226,26 +226,26 @@ if (!skipKernel) {
     env,
   });
 } else {
-  console.log("[4/6] 跳过内核构建，使用现有 kernel/kernel.aar");
+  console.log("[4/6] Skipping the kernel build and using the existing kernel/kernel.aar");
 }
 const kernelAar = path.join(kernelDir, "kernel.aar");
 if (!existsSync(kernelAar)) {
-  fail(`内核产物缺失: ${kernelAar}，请先构建（不要使用 --skip-kernel）`);
+  fail(`Kernel build output is missing: ${kernelAar}. Build it first without using --skip-kernel`);
 }
 const androidLibs = path.join(androidDir, "app", "libs");
 if (!existsSync(androidLibs)) {
-  fail(`siyuan-android 目录结构异常: ${androidLibs} 不存在`);
+  fail(`Unexpected siyuan-android directory structure: ${androidLibs} does not exist`);
 }
 copyFileSync(kernelAar, path.join(androidLibs, "kernel.aar"));
-console.log("kernel.aar 已复制到 " + path.join(androidLibs, "kernel.aar"));
+console.log("kernel.aar copied to " + path.join(androidLibs, "kernel.aar"));
 
 const apkDir = path.join(androidDir, "app", "build", "outputs", "apk", flavor, "debug");
 if (!skipGradle) {
-  console.log("[5/6] Gradle 构建 assemble" + flavorUpper + "Debug（首次构建需下载依赖，耗时较长）...");
+  console.log("[5/6] Running Gradle assemble" + flavorUpper + "Debug (the first build may take a while to download dependencies)...");
   run("gradlew.bat", [`assemble${flavorUpper}Debug`], {cwd: androidDir, shell: true});
 }
 if (!existsSync(apkDir)) {
-  fail(`未找到 APK 输出目录: ${apkDir}，请先执行 gradle 构建（不要使用 --skip-gradle）`);
+  fail(`APK output directory not found: ${apkDir}. Run the Gradle build first without using --skip-gradle`);
 }
 let apk = null;
 for (const name of readdirSync(apkDir)) {
@@ -257,14 +257,14 @@ for (const name of readdirSync(apkDir)) {
   }
 }
 if (!apk) {
-  fail(`未找到 APK 文件: ${apkDir}（需要 siyuan-*-${flavor}-debug-*.apk）`);
+  fail(`APK file not found in ${apkDir}. Expected siyuan-*-${flavor}-debug-*.apk`);
 }
 console.log("APK: " + apk);
 
-console.log("[6/6] 安装并启动应用...");
+console.log("[6/6] Installing and launching the app...");
 run(adb, ["-s", serial, "install", "-r", "-d", apk]);
 // debug 变体仅修改 applicationId（org.b3log.siyuan.debug），Activity 类仍位于 org.b3log.siyuan 包
 run(adb, ["-s", serial, "shell", "am", "start", "-n", "org.b3log.siyuan.debug/org.b3log.siyuan.BootActivity"]);
 
 const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
-console.log(`完成，耗时 ${elapsed}s`);
+console.log(`Done in ${elapsed}s`);

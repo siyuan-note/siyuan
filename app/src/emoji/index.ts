@@ -1420,7 +1420,7 @@ export const openEmojiPanel = (
                 }
                 addEmoji(unicode);
                 break;
-            } else if (target.getAttribute("data-type")?.startsWith("tab-")) {
+            } else if (target.matches(".emojis__tabheader > [data-type^='tab-']")) {
                 dialogElement.querySelectorAll('.emojis__tabheader [data-type|="tab"]').forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
                         item.classList.add("block__icon--active");

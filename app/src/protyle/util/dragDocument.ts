@@ -2,17 +2,31 @@ export const isSameDragEditor = (targetEditor: Pick<Element, "contains">, source
     return targetEditor.contains(sourceElement);
 };
 
-export const isAttributeViewTitleTarget = (targetNode: Node | null) => {
+export const isAttributeViewTitleTarget = (targetNode: Node | null, point?: {x: number, y: number}) => {
     if (!targetNode) {
         return false;
     }
     const targetElement = targetNode.nodeType === 3 ? targetNode.parentElement : targetNode as Element;
+    let attributeViewElement: Element | null = null;
     for (let element = targetElement; element; element = element.parentElement) {
         if (element.classList.contains("av__title")) {
             return true;
         }
+        if (!attributeViewElement && element.classList.contains("av")) {
+            attributeViewElement = element;
+        }
     }
-    return false;
+    if (!attributeViewElement || !point) {
+        return false;
+    }
+    const titleElement = attributeViewElement.querySelector(".av__title") as HTMLElement;
+    if (!titleElement || titleElement.classList.contains("fn__none")) {
+        return false;
+    }
+    const rect = titleElement.getBoundingClientRect();
+    const hitSlop = 12;
+    return rect.width > 0 && rect.height > 0 && point.x >= rect.left - hitSlop && point.x <= rect.right + hitSlop &&
+        point.y >= rect.top - hitSlop && point.y <= rect.bottom + hitSlop;
 };
 
 export const isDragTargetInSource = (sourceElements: Element[], targetElement: Element) => {

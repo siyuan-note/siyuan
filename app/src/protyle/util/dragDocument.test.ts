@@ -15,6 +15,7 @@ const createClassElement = (classNames: string[], parentElement: Element = null)
         contains: (className: string) => classNames.includes(className),
     },
     parentElement,
+    querySelector: (): Element | null => null,
 }) as unknown as Element;
 
 const createTextNode = (parentElement: Element) => ({
@@ -61,6 +62,25 @@ describe("isAttributeViewTitleTarget", () => {
         const row = createClassElement(["av__row"], database);
 
         assert.equal(isAttributeViewTitleTarget(row), false);
+    });
+
+    it("recognizes coordinates over the database title when the browser targets its container", () => {
+        const title = createClassElement(["av__title"]);
+        const database = createClassElement(["av"]);
+        const container = createClassElement([], database);
+        (database as HTMLElement).querySelector = () => title;
+        (title as HTMLElement).getBoundingClientRect = () => ({
+            bottom: 40,
+            height: 20,
+            left: 10,
+            right: 110,
+            top: 20,
+            width: 100,
+        }) as DOMRect;
+
+        assert.equal(isAttributeViewTitleTarget(container, {x: 50, y: 30}), true);
+        assert.equal(isAttributeViewTitleTarget(container, {x: 4, y: 30}), true);
+        assert.equal(isAttributeViewTitleTarget(container, {x: 50, y: 60}), false);
     });
 });
 

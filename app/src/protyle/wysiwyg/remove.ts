@@ -469,7 +469,16 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
                 hasClosestByTag(item.range.startContainer, "SPAN"),
                 hasClosestByTag(item.range.endContainer, "SPAN"),
             ].filter(Boolean) as HTMLElement[]);
+            const dynamicRefTexts = new Map(Array.from(boundarySpans)
+                .filter(refElement => refElement.getAttribute("data-type")?.split(" ").includes("block-ref") &&
+                    refElement.getAttribute("data-subtype") === "d")
+                .map(refElement => [refElement, refElement.textContent] as const));
             item.range.deleteContents();
+            dynamicRefTexts.forEach((text, refElement) => {
+                if (refElement.isConnected && refElement.textContent !== text) {
+                    refElement.setAttribute("data-subtype", "s");
+                }
+            });
             boundarySpans.forEach(spanElement => {
                 if (spanElement.isConnected && spanElement.textContent === "" && !spanElement.querySelector("img")) {
                     spanElement.remove();

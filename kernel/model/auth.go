@@ -25,6 +25,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
 type Account struct {
@@ -91,6 +92,14 @@ func DeleteSession(sessionID string) {
 }
 
 func InitPublishAccounts() {
+	if nil == Conf.Publish {
+		Conf.Publish = conf.NewPublish()
+	}
+	if nil == Conf.Publish.Auth {
+		// 防御 conf.json 中 auth 为 null 的历史坏配置，避免启动时解引用空指针崩溃
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rp9f-c2fj-h648
+		Conf.Publish.Auth = conf.NewPublish().Auth
+	}
 	accountsMap = AccountsMap{
 		"": &Account{}, // 匿名用户
 	}

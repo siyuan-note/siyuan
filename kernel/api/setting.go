@@ -858,6 +858,16 @@ func setPublish(c *gin.Context) {
 		return
 	}
 
+	if nil == publish.Auth {
+		// 请求体缺省 auth（如 null）时保留现有认证配置，避免把 null 写入 conf.json 导致下次启动崩溃
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rp9f-c2fj-h648
+		if nil != model.Conf.Publish.Auth {
+			publish.Auth = model.Conf.Publish.Auth
+		} else {
+			publish.Auth = conf.NewPublish().Auth
+		}
+	}
+
 	// 认证启用时校验发布服务账户：用户名非空且不重复、密码至少 8 位，
 	// 防止弱密码或无密码账户被暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phg7-xcr4-q5wg
 	if publish.Auth.Enable {

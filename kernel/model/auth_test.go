@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
 func TestIsPublishServiceToken(t *testing.T) {
@@ -73,5 +74,28 @@ func TestIsPublishServiceToken(t *testing.T) {
 				t.Fatalf("IsPublishServiceToken() = %v, want %v", actual, test.isPublish)
 			}
 		})
+	}
+}
+
+func TestInitPublishAccountsWithNilAuth(t *testing.T) {
+	originalConf := Conf
+	originalAccounts := accountsMap
+	defer func() {
+		Conf = originalConf
+		accountsMap = originalAccounts
+	}()
+
+	Conf = NewAppConf()
+	Conf.Publish = &conf.Publish{Enable: true, Port: 6808}
+
+	defer func() {
+		if e := recover(); nil != e {
+			t.Fatalf("InitPublishAccounts panicked on nil Publish.Auth: %v", e)
+		}
+	}()
+	InitPublishAccounts()
+
+	if nil == Conf.Publish.Auth {
+		t.Fatal("InitPublishAccounts should default Publish.Auth when it is nil")
 	}
 }

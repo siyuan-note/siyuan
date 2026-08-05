@@ -256,9 +256,23 @@ func Serve(fastMode bool, cookieKey string) {
 
 	go func() {
 		time.Sleep(1 * time.Second)
-		go proxy.InitFixedPortService(host, certPath, keyPath)
-		go proxy.InitPublishService()
 		// 反代服务器启动失败不影响核心服务器启动
+		go func() {
+			defer func() {
+				if e := recover(); nil != e {
+					logging.LogWarnf("boot fixed port service failed: %v", e)
+				}
+			}()
+			proxy.InitFixedPortService(host, certPath, keyPath)
+		}()
+		go func() {
+			defer func() {
+				if e := recover(); nil != e {
+					logging.LogWarnf("boot publish service failed: %v", e)
+				}
+			}()
+			proxy.InitPublishService()
+		}()
 	}()
 
 	httpHandler := ginServer.Handler()

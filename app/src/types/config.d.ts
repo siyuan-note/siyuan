@@ -1742,6 +1742,18 @@ declare namespace Config {
         synced: number;
         webdav: ISyncWebDAV;
         local: ISyncLocal;
+        lan: ISyncLAN;
+    }
+
+    export interface ISyncLAN {
+        /**
+         * Whether to enable LAN sync acceleration
+         */
+        enabled: boolean;
+        /**
+         * Maximum number of concurrent peer requests
+         */
+        maxConcurrentReqs: number;
     }
 
     /**

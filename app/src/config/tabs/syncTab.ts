@@ -10,7 +10,7 @@ import {bindSyncCloudListEvent, renderSyncCloudList, setKey} from "../../sync/sy
 import {Dialog} from "../../dialog";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {getSyncProviderConfigKeywords} from "./syncUi";
-import {patchSyncConfig} from "./syncRuntime";
+import {mountLANSyncStatus, patchSyncConfig} from "./syncRuntime";
 import {openHistory} from "../../history/history";
 
 const registerSyncGroup = (tab: SettingTabBuilder) => {
@@ -69,6 +69,12 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.syncPerception,
         desc: window.siyuan.languages.syncPerceptionTip,
         save: (value) => patchSyncConfig("sync.perception", value),
+    });
+    group.switch("sync.lan.enabled", {
+        title: window.siyuan.languages.lanSync,
+        desc: `${window.siyuan.languages.lanSyncTip}<div data-type="lanSyncStatus"></div>`,
+        save: (value) => patchSyncConfig("sync.lan.enabled", value),
+        afterMount: mountLANSyncStatus,
     });
     group.slot({
         key: "syncCloudDir",

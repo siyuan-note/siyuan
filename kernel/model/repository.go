@@ -1739,7 +1739,7 @@ func syncRepoDownload() (err error) {
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newSyncRepository()
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
@@ -1795,7 +1795,7 @@ func syncRepoDownload() (err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes), 2))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -1820,7 +1820,7 @@ func syncRepoUpload() (err error) {
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newSyncRepository()
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
@@ -1874,7 +1874,7 @@ func syncRepoUpload() (err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -1882,6 +1882,7 @@ func syncRepoUpload() (err error) {
 
 	postProcessStart := time.Now()
 	processSyncMergeResult(false, true, &dejavu.MergeResult{}, trafficStat, "u", elapsed)
+	notifyLANSyncCommit(repo)
 	logging.LogInfof("upload data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
 		indexElapsed.Seconds(), cloudElapsed.Seconds(), time.Since(postProcessStart).Seconds(), time.Since(start).Seconds())
 	return
@@ -1901,7 +1902,7 @@ func bootSyncRepo() (err error) {
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newSyncRepository()
 	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -2036,7 +2037,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newSyncRepository()
 	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -2116,7 +2117,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -2124,6 +2125,9 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()
 	processSyncMergeResult(exit, byHand, mergeResult, trafficStat, "a", elapsed)
+	if dataChanged {
+		notifyLANSyncCommit(repo)
+	}
 	postProcessElapsed := time.Since(postProcessStart)
 	logging.LogInfof("sync data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
 		indexElapsed.Seconds(), cloudElapsed.Seconds(), postProcessElapsed.Seconds(), time.Since(start).Seconds())
@@ -2172,9 +2176,10 @@ func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
 }
 
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
-	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
+	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s, pcc=%d, pb=%s, pf=%d] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
 		Conf.System.ID, KernelID, Conf.Sync.Provider, mode, byHand,
 		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2),
+		trafficStat.PeerDownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.PeerDownloadBytes), 2), trafficStat.PeerFallbackCount,
 		elapsed.Seconds(),
 		len(mergeResult.Conflicts), len(mergeResult.Upserts), len(mergeResult.Removes))
 

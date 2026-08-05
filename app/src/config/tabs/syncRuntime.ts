@@ -1,4 +1,4 @@
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processSync} from "../../dialog/processSystem";
 import {
     onSetaccount,
@@ -22,6 +22,31 @@ export const mountSyncTabExtras = (root: HTMLElement) => {
     syncTabElement = root;
     refreshSyncTabPanels(root);
     updateAccountSwitchesVisibility(root);
+};
+
+export const refreshLANSyncStatus = (root: Element) => {
+    const statusElement = root.querySelector('[data-type="lanSyncStatus"]');
+    if (!statusElement) {
+        return;
+    }
+    fetchSyncPost("/api/sync/getSyncLANStatus", {}).then((response) => {
+        if (response.code === 0 && response.data) {
+            statusElement.textContent = window.siyuan.languages.lanSyncConnectedPeers.replace(
+                "${count}", String(response.data.connectedPeers));
+        }
+    }).catch(() => {});
+};
+
+export const mountLANSyncStatus = (root: HTMLElement) => {
+    const poll = () => {
+        if (!root.isConnected) {
+            return;
+        }
+        refreshLANSyncStatus(root);
+        window.setTimeout(poll, 5000);
+    };
+    refreshLANSyncStatus(root);
+    window.setTimeout(poll, 5000);
 };
 
 /** 切换同步提供商等场景：刷新云空间相关区块并重置云目录列表 */
@@ -108,6 +133,19 @@ export const patchSyncConfig = (controlId: string, value: unknown) => {
             fetchPost("/api/sync/setSyncPerception", {enabled: perception}, () => {
                 window.siyuan.config.sync.perception = perception;
                 processSync();
+            });
+            break;
+        }
+        case "sync.lan.enabled": {
+            const enabled = Boolean(value) as Config.ISyncLAN["enabled"];
+            fetchPost("/api/sync/setSyncLAN", {
+                enabled,
+                maxConcurrentReqs: window.siyuan.config.sync.lan.maxConcurrentReqs,
+            }, () => {
+                window.siyuan.config.sync.lan.enabled = enabled;
+                if (syncTabElement) {
+                    refreshLANSyncStatus(syncTabElement);
+                }
             });
             break;
         }

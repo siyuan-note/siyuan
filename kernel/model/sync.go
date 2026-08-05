@@ -123,6 +123,7 @@ func SyncDataJob() {
 
 func BootSyncData() {
 	defer logging.Recover()
+	refreshLANSyncManager()
 
 	if Conf.Sync.Perception {
 		connectSyncWebSocket()
@@ -450,6 +451,7 @@ func SetCloudSyncDir(name string) {
 
 	Conf.Sync.CloudName = name
 	Conf.Save()
+	refreshLANSyncManager()
 }
 
 func SetSyncGenerateConflictDoc(b bool) {
@@ -460,6 +462,7 @@ func SetSyncGenerateConflictDoc(b bool) {
 func SetSyncEnable(b bool) {
 	Conf.Sync.Enabled = b
 	Conf.Save()
+	refreshLANSyncManager()
 }
 
 func SetSyncInterval(interval int) {
@@ -499,6 +502,7 @@ func SetSyncMode(mode int) {
 func SetSyncProvider(provider int) (err error) {
 	Conf.Sync.Provider = provider
 	Conf.Save()
+	refreshLANSyncManager()
 	return
 }
 
@@ -514,6 +518,7 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 
 	Conf.Sync.S3 = s3
 	Conf.Save()
+	refreshLANSyncManager()
 	return
 }
 
@@ -534,6 +539,7 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 
 	Conf.Sync.WebDAV = webdav
 	Conf.Save()
+	refreshLANSyncManager()
 	return
 }
 
@@ -573,6 +579,7 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 
 	Conf.Sync.Local = local
 	Conf.Save()
+	refreshLANSyncManager()
 	return
 }
 

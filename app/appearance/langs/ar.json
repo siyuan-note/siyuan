@@ -1,4 +1,7 @@
 {
+	"lanSync": "تسريع المزامنة عبر الشبكة المحلية",
+	"lanSyncTip": "يستخدم الأجهزة الموثوقة على الشبكة المحلية لتنزيل كتل البيانات المشفرة بشكل أسرع مع بقاء التخزين السحابي مرجع المزامنة",
+	"lanSyncConnectedPeers": "الأجهزة المتصلة على الشبكة المحلية: ${count}",
 	"agentPermission": "الإذن",
 	"agentPermissionConfirm": "تأكيد في كل مرة",
 	"agentPermissionAllowSession": "السماح تلقائيًا",

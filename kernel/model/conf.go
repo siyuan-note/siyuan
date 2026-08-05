@@ -639,6 +639,15 @@ func InitConf() {
 	Conf.Sync.Local.Endpoint = util.NormalizeLocalPath(Conf.Sync.Local.Endpoint)
 	Conf.Sync.Local.Timeout = util.NormalizeTimeout(Conf.Sync.Local.Timeout)
 	Conf.Sync.Local.ConcurrentReqs = util.NormalizeConcurrentReqs(Conf.Sync.Local.ConcurrentReqs, conf.ProviderLocal)
+	if nil == Conf.Sync.LAN {
+		Conf.Sync.LAN = &conf.LANSync{MaxConcurrentReqs: 16}
+	}
+	if 1 > Conf.Sync.LAN.MaxConcurrentReqs {
+		Conf.Sync.LAN.MaxConcurrentReqs = 16
+	}
+	if 128 < Conf.Sync.LAN.MaxConcurrentReqs {
+		Conf.Sync.LAN.MaxConcurrentReqs = 128
+	}
 
 	if util.ContainerDocker == util.Container {
 		Conf.Sync.Perception = false
@@ -994,6 +1003,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	defer exitLock.Unlock()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
+	defer stopLANSyncManager()
 
 	util.PushMsg(Conf.Language(95), 10000*60)
 	FlushTxQueue()

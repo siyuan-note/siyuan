@@ -27,12 +27,15 @@ const setSyncConfigItemVisible = (root: Element) => {
         "sync.mode",
         "sync.interval",
         "sync.perception",
+        "sync.lan.enabled",
         "syncCloudDirBlock",
         "syncCloudBackupBlock",
     ]
     .forEach((id) => {
         root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !visible);
     });
+    root.querySelector(`#${CSS.escape("sync.lan.enabled")}`)?.closest(".config-item")?.classList.toggle(
+        "fn__none", !visible || window.siyuan.config.system.container === "docker");
 };
 
 const setSyncModeRelatedConfigItemVisible = (root: Element) => {

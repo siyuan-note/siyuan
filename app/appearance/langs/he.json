@@ -1,4 +1,7 @@
 {
+	"lanSync": "האצת סנכרון ברשת המקומית",
+	"lanSyncTip": "מוריד מקטעי נתונים מוצפנים מהר יותר ממכשירים מהימנים ברשת המקומית בעוד שאחסון הענן נשאר מקור הסמכות לסנכרון",
+	"lanSyncConnectedPeers": "מכשירים מחוברים ברשת המקומית: ${count}",
 	"agentPermission": "הרשאה",
 	"agentPermissionConfirm": "אישור בכל פעם",
 	"agentPermissionAllowSession": "אפשר אוטומטית",

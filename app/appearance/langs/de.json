@@ -1,4 +1,7 @@
 {
+	"lanSync": "LAN-Synchronisierungsbeschleunigung",
+	"lanSyncTip": "Lädt verschlüsselte Datenblöcke schneller von vertrauenswürdigen Geräten im lokalen Netzwerk herunter, während der Cloud-Speicher die maßgebliche Synchronisierungsquelle bleibt",
+	"lanSyncConnectedPeers": "Verbundene LAN-Geräte: ${count}",
 	"agentPermission": "Berechtigung",
 	"agentPermissionConfirm": "Jedes Mal bestätigen",
 	"agentPermissionAllowSession": "Automatisch erlauben",

@@ -1,4 +1,7 @@
 {
+	"lanSync": "Accélération de la synchronisation sur le réseau local",
+	"lanSyncTip": "Télécharge plus rapidement les blocs de données chiffrés depuis des appareils de confiance du réseau local tout en conservant le stockage cloud comme référence de synchronisation",
+	"lanSyncConnectedPeers": "Appareils connectés sur le réseau local : ${count}",
 	"agentPermission": "Autorisation",
 	"agentPermissionConfirm": "Confirmer à chaque fois",
 	"agentPermissionAllowSession": "Autoriser automatiquement",

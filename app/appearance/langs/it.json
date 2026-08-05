@@ -1,4 +1,7 @@
 {
+	"lanSync": "Accelerazione della sincronizzazione LAN",
+	"lanSyncTip": "Scarica più velocemente i blocchi di dati cifrati dai dispositivi attendibili nella rete locale, mantenendo l'archiviazione cloud come autorità di sincronizzazione",
+	"lanSyncConnectedPeers": "Dispositivi LAN connessi: ${count}",
 	"agentPermission": "Autorizzazione",
 	"agentPermissionConfirm": "Conferma ogni volta",
 	"agentPermissionAllowSession": "Consenti automaticamente",

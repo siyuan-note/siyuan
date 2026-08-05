@@ -1,4 +1,7 @@
 {
+	"lanSync": "Akselerasi sinkronisasi LAN",
+	"lanSyncTip": "Mengunduh potongan data terenkripsi lebih cepat dari perangkat tepercaya di jaringan lokal sementara penyimpanan cloud tetap menjadi acuan sinkronisasi",
+	"lanSyncConnectedPeers": "Perangkat LAN terhubung: ${count}",
 	"agentPermission": "Izin",
 	"agentPermissionConfirm": "Konfirmasi setiap kali",
 	"agentPermissionAllowSession": "Izinkan otomatis",

@@ -62,6 +62,33 @@ func ReleaseExportFile(leaseID string) {
 	model.ReleaseMobileExportLease(leaseID)
 }
 
+// LANSyncDiscoveryInfo 返回原生 Bonjour 发现需要发布的服务信息。
+func LANSyncDiscoveryInfo() string {
+	info := model.GetLANSyncDiscoveryInfo()
+	if nil == info {
+		return ""
+	}
+	data, err := json.Marshal(info)
+	if nil != err {
+		return ""
+	}
+	return string(data)
+}
+
+// AddLANSyncPeer 将原生 Bonjour 发现的设备交给内核验证。
+func AddLANSyncPeer(instance, address string, port int, txtJSON string) bool {
+	txt := map[string]string{}
+	if err := json.Unmarshal([]byte(txtJSON), &txt); nil != err {
+		return false
+	}
+	return model.AddLANSyncPeer(instance, address, port, txt)
+}
+
+// LANSyncActive 返回局域网同步服务是否正在运行。
+func LANSyncActive() bool {
+	return model.LANSyncActive()
+}
+
 // GetExportFileName 返回普通导出的资源名称；加密导出应读取 AcquireExportFile 返回的 Name。
 func GetExportFileName(exportPath string) string {
 	return model.GetMobileExportName(exportPath)

@@ -1,4 +1,7 @@
 {
+	"lanSync": "Przyspieszenie synchronizacji w sieci LAN",
+	"lanSyncTip": "Szybciej pobiera zaszyfrowane fragmenty danych z zaufanych urządzeń w sieci lokalnej, zachowując chmurę jako nadrzędne źródło synchronizacji",
+	"lanSyncConnectedPeers": "Połączone urządzenia LAN: ${count}",
 	"agentPermission": "Uprawnienia",
 	"agentPermissionConfirm": "Potwierdzaj za każdym razem",
 	"agentPermissionAllowSession": "Zezwalaj automatycznie",

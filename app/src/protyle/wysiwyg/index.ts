@@ -2094,7 +2094,7 @@ export class WYSIWYG {
                                 touchesBottom && touchesRight ? radius : 0,
                                 touchesBottom && touchesLeft ? radius : 0,
                             ].join(" ");
-                            tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top - tableElement.scrollTop}px;height:${bottom - top}px;width:${right - left}px;border-radius:${borderRadius};`);
+                            tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top}px;height:${bottom - top}px;width:${right - left}px;border-radius:${borderRadius};`);
                             moveCellElement = moveTarget;
                         }
                         return;

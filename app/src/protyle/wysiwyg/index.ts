@@ -1042,7 +1042,13 @@ export class WYSIWYG {
                 }
                 // 块间空白和文档末尾没有直接对应的块，需沿锚点方向解析终点
                 // https://github.com/siyuan-note/siyuan/issues/11960
-                if (this.selectByShiftClick(protyle, event, nodeElement, !nodeElement || target === nodeElement)) {
+                const editableElement = nodeElement && getContenteditableElement(nodeElement);
+                const editableRect = editableElement?.getBoundingClientRect();
+                // 块的 padding 和 margin 可能仍命中内部元素，需根据实际可编辑区域判断是否使用坐标解析
+                const resolveTargetByPoint = !nodeElement || target === nodeElement || !editableRect ||
+                    event.clientX < editableRect.left || event.clientX > editableRect.right ||
+                    event.clientY < editableRect.top || event.clientY > editableRect.bottom;
+                if (this.selectByShiftClick(protyle, event, nodeElement, resolveTargetByPoint)) {
                     this.preventClick = true;
                     event.preventDefault();
                     event.stopPropagation();

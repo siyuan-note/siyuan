@@ -38,6 +38,7 @@ import {
     queueHeadingNumberRefresh
 } from "../util/headingNumber";
 import {MERMAID_LAYOUT_ATTR} from "../render/mermaidLayout";
+import {getPartialUpdateCleanupElements} from "./transactionUpdate";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -556,6 +557,10 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
 const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
     updateElements.forEach(item => {
+        // 前序局部回放可能已替换包含该块的祖先，跳过失效引用。
+        if (!item.parentElement) {
+            return;
+        }
         let isRangeBlock = false;
         if (range && item.contains(range.startContainer)) {
             isRangeBlock = true;
@@ -734,10 +739,15 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                         operation.data = newTempElement.outerHTML;
                         operation.id = newUpdateId;
                         // https://github.com/siyuan-note/siyuan/issues/14326#issuecomment-2746140335
-                        for (let i = 1; i < protyle.wysiwyg.element.childElementCount; i++) {
-                            protyle.wysiwyg.element.childNodes[i].remove();
-                            i--;
-                        }
+                        // 普通缩放编辑器只保留局部更新块；反向链接包含面包屑和其他上下文，不能清理根节点。
+                        const rootElements = Array.from(protyle.wysiwyg.element.children);
+                        const updateRootElement = rootElements.find(item =>
+                            item === newUpdateElement || item.contains(newUpdateElement));
+                        getPartialUpdateCleanupElements(
+                            rootElements,
+                            updateRootElement,
+                            Boolean(protyle.options.backlinkData),
+                        ).forEach(item => item.remove());
                     }
                 }
             }

@@ -1,6 +1,6 @@
 {
 	"agentPermission": "Дозвіл",
-	"agentPermissionConfirm": "Вимагати підтвердження",
+	"agentPermissionConfirm": "Підтверджувати щоразу",
 	"agentPermissionAllowSession": "Дозволяти автоматично",
 	"oidcVerificationFailed": "Не вдалося перевірити конфігурацію OIDC",
 	"oidcVerificationSuccess": "Конфігурацію OIDC перевірено та збережено",

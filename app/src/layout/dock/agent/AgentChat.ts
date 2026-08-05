@@ -530,7 +530,7 @@ export class AgentChat extends Model {
         const L = window.siyuan.languages;
         return mode === "allowSession" ?
             (L.agentPermissionAllowSession || "Automatically allow") :
-            (L.agentPermissionConfirm || "Require confirmation");
+            (L.agentPermissionConfirm || "Confirm every time");
     }
 
     private applyPermissionMode(mode: AgentPermissionMode) {
@@ -541,8 +541,7 @@ export class AgentChat extends Model {
             labelElement.textContent = label;
         }
         const L = window.siyuan.languages;
-        this.permissionButton.setAttribute("aria-label", mode === "allowSession" ?
-            (L.agentConfirmAlwaysDesc || label) : `${L.agentPermission || "Permission"} ${label}`);
+        this.permissionButton.setAttribute("aria-label", L.agentPermission || "Permission");
     }
 
     private async changePermissionMode(mode: AgentPermissionMode) {

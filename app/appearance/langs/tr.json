@@ -1,6 +1,6 @@
 {
 	"agentPermission": "İzin",
-	"agentPermissionConfirm": "Onay iste",
+	"agentPermissionConfirm": "Her seferinde onayla",
 	"agentPermissionAllowSession": "Otomatik olarak izin ver",
 	"oidcVerificationFailed": "OIDC yapılandırması doğrulanamadı",
 	"oidcVerificationSuccess": "OIDC yapılandırması doğrulandı ve kaydedildi",

@@ -1,6 +1,6 @@
 {
 	"agentPermission": "Autorisation",
-	"agentPermissionConfirm": "Demander confirmation",
+	"agentPermissionConfirm": "Confirmer à chaque fois",
 	"agentPermissionAllowSession": "Autoriser automatiquement",
 	"oidcVerificationFailed": "Échec de la vérification de la configuration OIDC",
 	"oidcVerificationSuccess": "Configuration OIDC vérifiée et enregistrée",

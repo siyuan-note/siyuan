@@ -1,6 +1,6 @@
 {
 	"agentPermission": "Povolenie",
-	"agentPermissionConfirm": "Vyžadovať potvrdenie",
+	"agentPermissionConfirm": "Potvrdiť zakaždým",
 	"agentPermissionAllowSession": "Povoliť automaticky",
 	"oidcVerificationFailed": "Overenie konfigurácie OIDC zlyhalo",
 	"oidcVerificationSuccess": "Konfigurácia OIDC bola overená a uložená",

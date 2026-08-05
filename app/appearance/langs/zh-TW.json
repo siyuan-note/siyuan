@@ -1,6 +1,6 @@
 {
 	"agentPermission": "權限",
-	"agentPermissionConfirm": "需確認",
+	"agentPermissionConfirm": "每次確認",
 	"agentPermissionAllowSession": "自動允許",
 	"oidcVerificationFailed": "OIDC 設定驗證失敗",
 	"oidcVerificationSuccess": "OIDC 設定驗證成功並已儲存",

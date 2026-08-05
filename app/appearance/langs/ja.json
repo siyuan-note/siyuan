@@ -1,6 +1,6 @@
 {
 	"agentPermission": "権限",
-	"agentPermissionConfirm": "確認が必要",
+	"agentPermissionConfirm": "毎回確認",
 	"agentPermissionAllowSession": "自動許可",
 	"oidcVerificationFailed": "OIDC 設定の検証に失敗しました",
 	"oidcVerificationSuccess": "OIDC 設定を検証して保存しました",

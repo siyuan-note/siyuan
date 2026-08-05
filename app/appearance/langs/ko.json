@@ -1,6 +1,6 @@
 {
 	"agentPermission": "권한",
-	"agentPermissionConfirm": "확인 필요",
+	"agentPermissionConfirm": "매번 확인",
 	"agentPermissionAllowSession": "자동 허용",
 	"oidcVerificationFailed": "OIDC 구성 확인에 실패했습니다",
 	"oidcVerificationSuccess": "OIDC 구성을 확인하고 저장했습니다",

@@ -1,6 +1,6 @@
 {
 	"agentPermission": "अनुमति",
-	"agentPermissionConfirm": "पुष्टि आवश्यक",
+	"agentPermissionConfirm": "हर बार पुष्टि करें",
 	"agentPermissionAllowSession": "स्वचालित रूप से अनुमति दें",
 	"oidcVerificationFailed": "OIDC कॉन्फ़िगरेशन सत्यापन विफल रहा",
 	"oidcVerificationSuccess": "OIDC कॉन्फ़िगरेशन सत्यापित और सहेजा गया",

@@ -1,6 +1,6 @@
 {
 	"agentPermission": "权限",
-	"agentPermissionConfirm": "需确认",
+	"agentPermissionConfirm": "每次确认",
 	"agentPermissionAllowSession": "自动允许",
 	"oidcVerificationFailed": "OIDC 配置验证失败",
 	"oidcVerificationSuccess": "OIDC 配置验证成功并已保存",

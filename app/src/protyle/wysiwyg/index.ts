@@ -2091,19 +2091,35 @@ export class WYSIWYG {
                             const right = Math.max(...selectionRects.map(rect => rect.right));
                             const bottom = Math.max(...selectionRects.map(rect => rect.bottom));
                             protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
+                            const scrollElement = tableBlockElement.firstElementChild as HTMLElement;
+                            const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
+                            const actionRect = tableSelectElement.parentElement.getBoundingClientRect();
+                            const scrollRect = scrollElement.getBoundingClientRect();
+                            const selectionRect = {
+                                left: tableRect.left + left,
+                                top: tableRect.top + top,
+                                right: tableRect.left + right,
+                                bottom: tableRect.top + bottom,
+                            };
+                            const visibleRect = {
+                                left: Math.max(selectionRect.left, tableRect.left, scrollRect.left, contentRect.left),
+                                top: Math.max(selectionRect.top, tableRect.top, scrollRect.top, contentRect.top),
+                                right: Math.min(selectionRect.right, tableRect.right, scrollRect.right, contentRect.right),
+                                bottom: Math.min(selectionRect.bottom, tableRect.bottom, scrollRect.bottom, contentRect.bottom),
+                            };
                             const radius = "var(--b3-border-radius-s)";
                             const touches = (edge: number, gridEdge: number) => Math.abs(edge - gridEdge) < 1;
-                            const touchesTop = touches(top, gridRect.top);
-                            const touchesRight = touches(right, gridRect.right);
-                            const touchesBottom = touches(bottom, gridRect.bottom);
-                            const touchesLeft = touches(left, gridRect.left);
+                            const touchesTop = touches(top, gridRect.top) && touches(visibleRect.top, selectionRect.top);
+                            const touchesRight = touches(right, gridRect.right) && touches(visibleRect.right, selectionRect.right);
+                            const touchesBottom = touches(bottom, gridRect.bottom) && touches(visibleRect.bottom, selectionRect.bottom);
+                            const touchesLeft = touches(left, gridRect.left) && touches(visibleRect.left, selectionRect.left);
                             const borderRadius = [
                                 touchesTop && touchesLeft ? radius : 0,
                                 touchesTop && touchesRight ? radius : 0,
                                 touchesBottom && touchesRight ? radius : 0,
                                 touchesBottom && touchesLeft ? radius : 0,
                             ].join(" ");
-                            tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top}px;height:${bottom - top}px;width:${right - left}px;border-radius:${borderRadius};`);
+                            tableSelectElement.setAttribute("style", `left:${visibleRect.left - actionRect.left}px;top:${visibleRect.top - actionRect.top}px;height:${Math.max(0, visibleRect.bottom - visibleRect.top)}px;width:${Math.max(0, visibleRect.right - visibleRect.left)}px;border-radius:${borderRadius};`);
                             moveCellElement = moveTarget;
                         }
                         return;

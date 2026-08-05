@@ -197,12 +197,12 @@
 
     .b3-menu {
       &__title {
-        background-color: transparent;
+        background-color: var(--b3-theme-surface);
         border-bottom: 0;
         box-sizing: border-box;
         color: var(--b3-theme-on-surface-light);
         height: 56px;
-        padding-top: 8px;
+        padding: 8px 16px 0;
         position: relative;
         touch-action: none;
 

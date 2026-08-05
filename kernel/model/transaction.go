@@ -1221,7 +1221,16 @@ func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) (delete
 }
 
 func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, delChildrenWhenDelParent bool, tx *Transaction) {
-	tx.collectDeletedAttributeViewBlocks(node, delChildrenWhenDelParent)
+	if nil == tx {
+		// 非事务调用（例如 RemoveDoc）无法批量收集，收集后立即清理已删除块的属性视图绑定行
+		// https://github.com/siyuan-note/siyuan/issues/18557
+		deletedAttrViewBlockIDs := map[string]map[string]struct{}{}
+		collectDeletedAttributeViewBlocks(node, delChildrenWhenDelParent, deletedAttrViewBlockIDs)
+		flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)
+	} else {
+		tx.collectDeletedAttributeViewBlocks(node, delChildrenWhenDelParent)
+	}
+
 	for _, avID := range tx.syncDelete2Block(node, nodeTree) {
 		ReloadAttrView(avID)
 	}
@@ -1280,16 +1289,20 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 }
 
 func (tx *Transaction) collectDeletedAttributeViewBlocks(node *ast.Node, delChildrenWhenDelParent bool) {
+	collectDeletedAttributeViewBlocks(node, delChildrenWhenDelParent, tx.deletedAttrViewBlockIDs)
+}
+
+func collectDeletedAttributeViewBlocks(node *ast.Node, delChildrenWhenDelParent bool, deletedAttrViewBlockIDs map[string]map[string]struct{}) {
 	collect := func(n *ast.Node) {
 		avs := n.IALAttr(av.NodeAttrNameAvs)
 		if "" == avs {
 			return
 		}
 		for avID := range strings.SplitSeq(avs, ",") {
-			blockIDs := tx.deletedAttrViewBlockIDs[avID]
+			blockIDs := deletedAttrViewBlockIDs[avID]
 			if nil == blockIDs {
 				blockIDs = map[string]struct{}{}
-				tx.deletedAttrViewBlockIDs[avID] = blockIDs
+				deletedAttrViewBlockIDs[avID] = blockIDs
 			}
 			blockIDs[n.ID] = struct{}{}
 		}
@@ -1307,7 +1320,12 @@ func (tx *Transaction) collectDeletedAttributeViewBlocks(node *ast.Node, delChil
 }
 
 func (tx *Transaction) flushDeletedAttributeViewBlocks() {
-	for avID, deletedBlockIDs := range tx.deletedAttrViewBlockIDs {
+	flushDeletedAttributeViewBlocks(tx.deletedAttrViewBlockIDs)
+	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
+}
+
+func flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs map[string]map[string]struct{}) {
+	for avID, deletedBlockIDs := range deletedAttrViewBlockIDs {
 		attrView, err := av.ParseAttributeView(avID)
 		if nil != err || !removeAttributeViewBoundBlocks(attrView, deletedBlockIDs) {
 			continue
@@ -1316,7 +1334,6 @@ func (tx *Transaction) flushDeletedAttributeViewBlocks() {
 		av.SaveAttributeView(attrView)
 		ReloadAttrView(avID)
 	}
-	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
 }
 
 func removeAttributeViewBoundBlocks(attrView *av.AttributeView, deletedBlockIDs map[string]struct{}) (changed bool) {

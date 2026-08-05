@@ -19,7 +19,9 @@ package model
 import (
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
 func TestRemoveAttributeViewBoundBlocks(t *testing.T) {
@@ -52,5 +54,40 @@ func TestRemoveAttributeViewBoundBlocks(t *testing.T) {
 	}
 	if removeAttributeViewBoundBlocks(attrView, map[string]struct{}{"20260805000000-missing": {}}) {
 		t.Fatal("an unrelated block ID should not change the attribute view")
+	}
+}
+
+func TestCollectDeletedAttributeViewBlocks(t *testing.T) {
+	avID1 := "20260805000000-av1"
+	avID2 := "20260805000000-av2"
+	root := treenode.NewParagraph(ast.NewNodeID())
+	root.SetIALAttr(av.NodeAttrNameAvs, avID1)
+	child := treenode.NewParagraph(ast.NewNodeID())
+	child.SetIALAttr(av.NodeAttrNameAvs, avID1+","+avID2)
+	root.AppendChild(child)
+
+	deletedAttrViewBlockIDs := map[string]map[string]struct{}{}
+	collectDeletedAttributeViewBlocks(root, true, deletedAttrViewBlockIDs)
+	if 2 != len(deletedAttrViewBlockIDs) {
+		t.Fatalf("expected 2 attribute views, got %d", len(deletedAttrViewBlockIDs))
+	}
+	if blockIDs, ok := deletedAttrViewBlockIDs[avID1]; !ok || 2 != len(blockIDs) {
+		t.Fatalf("expected 2 blocks bound to [%s], got %#v", avID1, blockIDs)
+	}
+	if blockIDs, ok := deletedAttrViewBlockIDs[avID2]; !ok || 1 != len(blockIDs) {
+		if _, ok := blockIDs[child.ID]; !ok {
+			t.Fatalf("expected child block bound to [%s], got %#v", avID2, blockIDs)
+		}
+	}
+
+	deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
+	collectDeletedAttributeViewBlocks(root, false, deletedAttrViewBlockIDs)
+	if blockIDs, ok := deletedAttrViewBlockIDs[avID1]; !ok || 1 != len(blockIDs) {
+		if _, ok := blockIDs[root.ID]; !ok {
+			t.Fatalf("expected only root block bound to [%s], got %#v", avID1, blockIDs)
+		}
+	}
+	if _, ok := deletedAttrViewBlockIDs[avID2]; ok {
+		t.Fatal("child block should not be collected when delChildrenWhenDelParent is false")
 	}
 }

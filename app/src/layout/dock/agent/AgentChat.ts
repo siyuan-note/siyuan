@@ -588,7 +588,7 @@ export class AgentChat extends Model {
                 });
             });
             const rect = this.permissionButton.getBoundingClientRect();
-            menu.element.style.minWidth = `${Math.max(rect.width, 160)}px`;
+            menu.element.style.minWidth = `${rect.width}px`;
             menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
         });
     }

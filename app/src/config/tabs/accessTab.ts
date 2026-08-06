@@ -708,7 +708,7 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
 <div class="b3-label config-item fn__none" id="encryptedNotebookActions">
     <div class="fn__flex fn__flex-center config-wrap">
         <div class="fn__flex-1"></div>
-        <div class="fn__flex fn__flex-center" id="encryptedNotebookEnabledActions">
+        <div class="fn__flex fn__flex-center config-wrap" id="encryptedNotebookEnabledActions">
             <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="changeMasterPasswordBtn">
                 <svg class="svg"><use xlink:href="#iconLock"></use></svg>
                 ${window.siyuan.languages.changeMasterPassword}

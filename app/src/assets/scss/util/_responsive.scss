@@ -1,4 +1,9 @@
 @media (max-width: 750px) {
+  #encryptedNotebookEnabledActions {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
   .config-about__motto {
     display: none;
   }

@@ -2226,7 +2226,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 clearKanbanGroupDragover();
                 return;
             }
-            let position: "left" | "right" = "left";
             if (!targetGroupElement) {
                 const sourceRect = sourceElement.getBoundingClientRect();
                 if (event.clientX >= sourceRect.left && event.clientX <= sourceRect.right) {
@@ -2237,16 +2236,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     .filter(item => item !== sourceElement) as HTMLElement[];
                 targetGroupElement = groupElements.find(item => {
                     const rect = item.getBoundingClientRect();
-                    return event.clientX <= rect.right;
+                    return event.clientX < rect.left + rect.width / 2;
                 }) || groupElements[groupElements.length - 1];
-                if (targetGroupElement && event.clientX > targetGroupElement.getBoundingClientRect().right) {
-                    position = "right";
-                }
             }
             if (!targetGroupElement) {
                 clearKanbanGroupDragover();
                 return;
             }
+            const targetRect = targetGroupElement.getBoundingClientRect();
+            const position = event.clientX < targetRect.left + targetRect.width / 2 ? "left" : "right";
             const oldVisiblePreviousID = (sourceElement.previousElementSibling as HTMLElement)?.dataset.groupId || "";
             let visiblePreviousID = position === "left" ?
                 (targetGroupElement.previousElementSibling as HTMLElement)?.dataset.groupId || "" :

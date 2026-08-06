@@ -280,6 +280,8 @@
 
   &__scroll {
     overflow: auto hidden;
+    position: relative;
+    z-index: 2;
   }
 
   &__spacer {
@@ -341,10 +343,6 @@
 
     &--header {
       z-index: 3;
-
-      &.av__row--header--fixed {
-        z-index: 2;
-      }
 
       & > .block__icons > .block__icon svg {
         height: 1em;

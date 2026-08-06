@@ -2,7 +2,7 @@
 	"lanSyncInactive": "El servicio de aceleración de sincronización por LAN está inactivo",
 	"lanSyncConnectedPeers": "Dispositivos LAN autenticados: ${count}",
 	"lanSync": "Aceleración de sincronización por LAN",
-	"lanSyncTip": "Los dispositivos de confianza usan la misma clave del repositorio de datos y el mismo destino de sincronización en la nube; los objetos de datos cifrados se descargan primero desde ellos mientras la nube sigue siendo la autoridad de sincronización, y las transferencias LAN no disponibles recurren automáticamente a la nube; los recuentos de detección y autenticación pueden tardar alrededor de un minuto en actualizarse cuando un dispositivo queda sin conexión",
+	"lanSyncTip": "Los dispositivos de confianza usan la misma clave del repositorio de datos y el mismo destino de sincronización en la nube; los objetos de datos cifrados se descargan primero desde ellos mientras la nube sigue siendo la autoridad de sincronización, y las transferencias LAN no disponibles recurren automáticamente a la nube; los dispositivos se detectan automáticamente al conectarse y solo se cuentan como autenticados después de que una solicitud de sincronización por LAN supere la autenticación; cuando un dispositivo queda sin conexión, los recuentos correspondientes pueden tardar alrededor de un minuto en actualizarse",
 	"lanSyncDiscoveredPeers": "Dispositivos LAN detectados: ${count}",
 	"agentPermission": "Permiso",
 	"agentPermissionConfirm": "Confirmar cada vez",

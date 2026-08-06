@@ -2,7 +2,7 @@
 	"lanSyncInactive": "De LAN-synchronisatieversnelling is niet actief",
 	"lanSyncConnectedPeers": "Geverifieerde LAN-apparaten: ${count}",
 	"lanSync": "LAN-synchronisatieversnelling",
-	"lanSyncTip": "Vertrouwde apparaten gebruiken dezelfde sleutel voor de gegevensopslagplaats en hetzelfde cloudsynchronisatiedoel; versleutelde gegevensobjecten worden eerst vanaf deze apparaten gedownload terwijl cloudopslag de gezaghebbende synchronisatiebron blijft, en bij een niet-beschikbare LAN-overdracht wordt automatisch teruggevallen op de cloud; nadat een apparaat offline gaat, kan het ongeveer een minuut duren voordat de aantallen gevonden en geverifieerde apparaten zijn bijgewerkt",
+	"lanSyncTip": "Vertrouwde apparaten gebruiken dezelfde sleutel voor de gegevensopslagplaats en hetzelfde cloudsynchronisatiedoel; versleutelde gegevensobjecten worden eerst vanaf deze apparaten gedownload terwijl cloudopslag de gezaghebbende synchronisatiebron blijft, en bij een niet-beschikbare LAN-overdracht wordt automatisch teruggevallen op de cloud; apparaten worden automatisch gevonden wanneer ze online komen en pas als geverifieerd geteld nadat een LAN-synchronisatieverzoek is geverifieerd; nadat een apparaat offline gaat, kan het ongeveer een minuut duren voordat de bijbehorende aantallen zijn bijgewerkt",
 	"lanSyncDiscoveredPeers": "Gevonden LAN-apparaten: ${count}",
 	"agentPermission": "Toestemming",
 	"agentPermissionConfirm": "Elke keer bevestigen",

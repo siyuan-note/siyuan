@@ -2,7 +2,7 @@
 	"lanSyncInactive": "Usługa przyspieszania synchronizacji w sieci LAN jest nieaktywna",
 	"lanSyncConnectedPeers": "Uwierzytelnione urządzenia LAN: ${count}",
 	"lanSync": "Przyspieszenie synchronizacji w sieci LAN",
-	"lanSyncTip": "Zaufane urządzenia używają tego samego klucza repozytorium danych i tego samego celu synchronizacji w chmurze; zaszyfrowane obiekty danych są najpierw pobierane z tych urządzeń, a chmura pozostaje nadrzędnym źródłem synchronizacji i jest automatycznie używana, gdy transfer LAN jest niedostępny; po przejściu urządzenia do trybu offline aktualizacja liczby wykrytych i uwierzytelnionych urządzeń może potrwać około minuty",
+	"lanSyncTip": "Zaufane urządzenia używają tego samego klucza repozytorium danych i tego samego celu synchronizacji w chmurze; zaszyfrowane obiekty danych są najpierw pobierane z tych urządzeń, a chmura pozostaje nadrzędnym źródłem synchronizacji i jest automatycznie używana, gdy transfer LAN jest niedostępny; urządzenia są automatycznie wykrywane po przejściu do trybu online i liczone jako uwierzytelnione dopiero po pomyślnym uwierzytelnieniu żądania synchronizacji LAN; po przejściu urządzenia do trybu offline aktualizacja odpowiednich liczb może potrwać około minuty",
 	"lanSyncDiscoveredPeers": "Wykryte urządzenia LAN: ${count}",
 	"agentPermission": "Uprawnienia",
 	"agentPermissionConfirm": "Potwierdzaj za każdym razem",

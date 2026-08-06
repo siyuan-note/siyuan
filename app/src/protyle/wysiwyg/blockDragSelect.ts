@@ -62,7 +62,7 @@ const getDirectDescendantBlock = (containerBlock: Element, block: Element,
 export const resolveBlockDragSelectStart = (options: TResolveDragSelectBlockOptions) => {
     const firstPointElement = options.elementFromPoint(options.x, options.top);
     if (!firstPointElement) {
-        return false;
+        return options.fallbackBlock || false;
     }
     const firstBlock = options.getBlock(firstPointElement);
     if (!options.isContainerSurface(firstPointElement)) {

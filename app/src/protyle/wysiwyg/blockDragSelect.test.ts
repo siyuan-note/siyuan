@@ -133,6 +133,12 @@ describe("isBlockDragSelectTopReached", () => {
 });
 
 describe("resolveBlockDragSelectStart", () => {
+    it("keeps the fallback block after the selection start scrolls outside the viewport", () => {
+        const fallback = new TestElement("fallback", true);
+
+        assert.equal(resolve(new Map(), 0, 12, fallback), asElement(fallback));
+    });
+
     it("keeps the parent block while the selection only covers its side", () => {
         const parent = new TestElement("parent", true, true);
 

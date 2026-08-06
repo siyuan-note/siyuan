@@ -476,7 +476,6 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 	}
 
 	// 当前 turn 的 assistant 内容以 runtime 为权威；前端只补充 thinking/confirm/question 等 UI 条目。
-	// 用权威 assistant 逐个替换前端占位可尽量保留 UI 条目的相对位置；缺少占位时再追加到末尾。
 	authoritative := make([]any, 0, len(turn.Delta)+1)
 	for i, message := range turn.Delta {
 		if message.Role != "assistant" {

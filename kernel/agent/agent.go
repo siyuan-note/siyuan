@@ -432,12 +432,13 @@ type SessionEntry struct {
 	SnapshotID    string             `json:"snapshotID,omitempty"`
 }
 
-// SessionEntryStep 描述一次思考步骤。工具调用只保留名字列表，过程正文保存在 Content，
+// SessionEntryStep 描述一次思考步骤。工具调用只保留名字与调用 ID 列表，过程正文保存在 Content，
 // arguments/result 仅在所属 assistant entry 的 ToolCalls 中存储，避免重复。
 type SessionEntryStep struct {
 	Reasoning        string   `json:"reasoning"`
 	ReasoningContent string   `json:"reasoningContent,omitempty"`
 	ToolNames        []string `json:"toolNames,omitempty"`
+	ToolCallIDs      []string `json:"toolCallIDs,omitempty"`
 	Content          string   `json:"content,omitempty"`
 	RoundID          string   `json:"roundID,omitempty"`
 }

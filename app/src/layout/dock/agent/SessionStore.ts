@@ -66,13 +66,14 @@ export interface AgentSession {
             selectedBlockIDs?: string[];
             visibleBlockIDs?: string[];
         };
-        // thinking step：新格式只含 reasoning/reasoningContent/roundID/toolNames/content；
+        // thinking step：新格式只含 reasoning/reasoningContent/roundID/toolNames/toolCallIDs/content；
         // text/toolCalls 仅为读取老数据而保留为可选（渲染时归一化）。
         steps?: Array<{
             reasoning: string;
             reasoningContent: string;
             roundID?: string;
             toolNames?: string[];
+            toolCallIDs?: string[];
             content?: string;
             text?: string;
             toolCalls?: Array<{name: string; result?: string}>

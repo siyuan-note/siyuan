@@ -80,6 +80,7 @@ type SessionEntry =
         reasoningContent: string;
         roundID?: string;
         toolNames?: string[];
+        toolCallIDs?: string[];
         content?: string
     }>;
     duration?: number
@@ -101,6 +102,7 @@ type SessionEntry =
 })
     | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; effects?: IToolEffects; status?: string })
     | (EntryBase & { type: "question"; questionID: string; questions: Array<Record<string, unknown>>; status?: string; answers?: string[] })
+    | (EntryBase & { type: "todo"; result: string; callID?: string; roundID?: string })
     | (EntryBase & { type: "snapshot"; snapshotID: string })
     | (EntryBase & { type: "rollback"; snapshotID: string });
 
@@ -161,13 +163,14 @@ export class AgentChat extends Model {
     private editingUserEntryID = "";
     private editingComposer: ReturnType<typeof mountComposer> | null = null;
     private pendingEditDraft: { entryID: string; data: AgentComposerData } | null = null;
-    // thinking step 只保留工具名列表（去重：arguments/result 仅在 assistant entry 存一份），
+    // thinking step 只保留工具名与调用 ID（去重：arguments/result 仅在 assistant entry 存一份），
     // 不再保存 text（"已思考：Xs" 由 i18n 在渲染时从 duration 生成）。
     private currentThinkingSteps: Array<{
         reasoning: string;
         reasoningContent: string;
         roundID?: string;
         toolNames?: string[];
+        toolCallIDs?: string[];
         content?: string
     }> = [];
     // 当前请求的思考耗时（秒）。持久化为 entry.duration，"已思考"文本不落盘。
@@ -1337,6 +1340,23 @@ export class AgentChat extends Model {
         this.addCopyButton(el, content, timestamp);
     }
 
+    private createTodoElement(result: string, entryId?: string) {
+        const el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--tool";
+        if (entryId) {
+            el.setAttribute("data-message-id", entryId);
+        }
+        el.innerHTML = renderTodoList(result);
+        return el;
+    }
+
+    private appendPersistedTodo(result: string, entryId?: string) {
+        if (!result) {
+            return;
+        }
+        this.messagesContainer.appendChild(this.createTodoElement(result, entryId));
+    }
+
     private appendPersistedToolCalls(content: string, toolCalls: Array<{
         name: string;
         arguments: Record<string, unknown>;
@@ -1346,12 +1366,9 @@ export class AgentChat extends Model {
         for (let i = 0; i < toolCalls.length; i++) {
             const tc = toolCalls[i];
             if (tc.result && tc.name === "todo_write") {
-                const rel = document.createElement("div");
-                rel.className = "agent-chat__msg agent-chat__msg--tool";
                 // todo 卡片是 assistant entry 的附属展示，不单独持有 entryId
                 // （entryId 属于后续的 AI 消息元素），避免多个 todo 共享同一 id。
-                rel.innerHTML = renderTodoList(tc.result);
-                this.messagesContainer.appendChild(rel);
+                this.appendPersistedTodo(tc.result);
                 hasRendered = true;
             }
         }
@@ -1536,6 +1553,9 @@ export class AgentChat extends Model {
                     }
                     break;
                 }
+                case "todo":
+                    this.appendPersistedTodo((entry as { result: string }).result, entryId);
+                    break;
                 case "confirm":
                     this.appendPersistedConfirm(entry as unknown as {
                         id?: string;
@@ -2479,10 +2499,7 @@ export class AgentChat extends Model {
             return;
         }
 
-        const el = document.createElement("div");
-        el.className = "agent-chat__msg agent-chat__msg--tool";
-        el.setAttribute("data-message-id", SessionStore.newSessionId());
-        el.innerHTML = renderTodoList(result);
+        const el = this.createTodoElement(result, SessionStore.newSessionId());
         this.insertBeforeAI(el);
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
@@ -2497,11 +2514,14 @@ export class AgentChat extends Model {
             const toolNames = this.currentToolCalls.slice(this.lastStepToolCount).map(function (t) {
                 return t.name;
             });
+            const toolCallIDs = this.currentToolCalls.slice(this.lastStepToolCount)
+                .map(toolCall => toolCall.id || "").filter(Boolean);
             this.currentThinkingSteps.push({
                 reasoning: this.currentThinkingReasoning,
                 reasoningContent: this.currentThinkingReasoningContent,
                 roundID: this.currentRoundID || undefined,
                 toolNames: toolNames.length > 0 ? toolNames : undefined,
+                toolCallIDs: toolCallIDs.length > 0 ? toolCallIDs : undefined,
             });
             this.lastStepToolCount = this.currentToolCalls.length;
         }
@@ -3035,11 +3055,14 @@ export class AgentChat extends Model {
             const toolNames = this.currentToolCalls.slice(this.lastStepToolCount).map(function (t) {
                 return t.name;
             });
+            const toolCallIDs = this.currentToolCalls.slice(this.lastStepToolCount)
+                .map(toolCall => toolCall.id || "").filter(Boolean);
             this.currentThinkingSteps.push({
                 reasoning: this.currentThinkingReasoning,
                 reasoningContent: this.currentThinkingReasoningContent,
                 roundID: this.currentRoundID || undefined,
                 toolNames: toolNames.length > 0 ? toolNames : undefined,
+                toolCallIDs: toolCallIDs.length > 0 ? toolCallIDs : undefined,
                 content: this.currentThinkingStepContent || undefined,
             });
             this.lastStepToolCount = this.currentToolCalls.length;

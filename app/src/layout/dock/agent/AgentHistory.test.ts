@@ -257,4 +257,85 @@ describe("AgentHistory", () => {
         assert.equal(display.filter(entry => entry.type === "thinking").length, 1);
         assert.equal(display.find(entry => entry.roundID === "round-1")?.content, undefined);
     });
+
+    it("keeps todo results after their corresponding thinking card", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "work"},
+            {
+                id: "thinking-1",
+                type: "thinking",
+                steps: [{roundID: "round-1", toolNames: ["todo_write"], toolCallIDs: ["call-todo"]}],
+            },
+            {
+                id: "thinking-2",
+                type: "thinking",
+                steps: [{roundID: "round-2", reasoningContent: "continue"}],
+            },
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "round-1",
+                toolCalls: [{id: "call-todo", name: "todo_write", result: "todo result"}],
+            },
+            {id: "assistant-2", type: "assistant", roundID: "round-2", content: "Done"},
+        ]);
+        assert.deepEqual(display.map(entry => entry.type), [
+            "user", "thinking", "todo", "thinking", "assistant", "assistant",
+        ]);
+        assert.equal(display[2].result, "todo result");
+        assert.deepEqual(display.find(entry => entry.id === "assistant-1")?.toolCalls, []);
+    });
+
+    it("uses tool call IDs to preserve tools split by confirmations in one round", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "work"},
+            {
+                id: "thinking-1",
+                type: "thinking",
+                steps: [{roundID: "round-1", toolNames: ["old-a"], toolCallIDs: ["call-a"]}],
+            },
+            {id: "confirm-1", type: "confirm"},
+            {
+                id: "thinking-2",
+                type: "thinking",
+                steps: [{roundID: "round-1", toolNames: ["old-b"], toolCallIDs: ["call-b"]}],
+            },
+            {id: "confirm-2", type: "confirm"},
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "round-1",
+                toolCalls: [{id: "call-a", name: "write-a"}, {id: "call-b", name: "write-b"}],
+            },
+            {id: "assistant-2", type: "assistant", roundID: "round-2", content: "Done"},
+        ]);
+        const thinkingEntries = display.filter(entry => entry.type === "thinking");
+        assert.deepEqual(thinkingEntries.map(entry => entry.steps?.[0].toolNames), [["write-a"], ["write-b"]]);
+    });
+
+    it("preserves legacy tool subsets when confirmations split one round", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "work"},
+            {
+                id: "thinking-1",
+                type: "thinking",
+                steps: [{roundID: "round-1", toolNames: ["write-a"]}],
+            },
+            {id: "confirm-1", type: "confirm"},
+            {
+                id: "thinking-2",
+                type: "thinking",
+                steps: [{roundID: "round-1", toolNames: ["write-b"]}],
+            },
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "round-1",
+                toolCalls: [{name: "write-a"}, {name: "write-b"}],
+            },
+            {id: "assistant-2", type: "assistant", roundID: "round-2", content: "Done"},
+        ]);
+        const thinkingEntries = display.filter(entry => entry.type === "thinking");
+        assert.deepEqual(thinkingEntries.map(entry => entry.steps?.[0].toolNames), [["write-a"], ["write-b"]]);
+    });
 });

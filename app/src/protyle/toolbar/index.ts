@@ -55,7 +55,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
 import {escapeHtml} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
-import {activeBlur} from "../../mobile/util/keyboardToolbar";
+import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardToolbar";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -104,7 +104,6 @@ export class Toolbar {
         this.subElement.className = "protyle-util fn__none";
         /// #endif
         this.toolbarHeight = 29;
-        const inlineToolbarElement = document.querySelector('#keyboardToolbar .keyboard__action[data-type="inline-memo"]')?.parentElement;
         protyle.app.plugins.forEach(item => {
             const pluginToolbar = filterPluginToolbar(item.updateProtyleToolbar(options.toolbar), protyle.lite);
             pluginToolbar.forEach(toolbarItem => {
@@ -117,17 +116,6 @@ export class Toolbar {
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
                 }
-                /// #if MOBILE
-                if (inlineToolbarElement) {
-                    const itemElement = new ToolbarItem(protyle, toolbarItem).element;
-                    itemElement.className = "keyboard__action";
-                    const oldItemElement = inlineToolbarElement.querySelector(`[data-type="${toolbarItem.name}"]`);
-                    if (!oldItemElement) {
-                        inlineToolbarElement.insertAdjacentHTML("beforeend",
-                            `<button class="keyboard__action" data-type="${toolbarItem.name}"><svg><use xlink:href="#${toolbarItem.icon}"></use></svg></button>`);
-                    }
-                }
-                /// #endif
             });
             options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
@@ -135,6 +123,9 @@ export class Toolbar {
             const itemElement = this.genItem(protyle, menuItem);
             this.element.appendChild(itemElement);
         });
+        /// #if MOBILE
+        updateMobilePluginToolbar(protyle);
+        /// #endif
     }
 
     public update(protyle: IProtyle) {
@@ -192,6 +183,9 @@ export class Toolbar {
             const itemElement = this.genItem(protyle, menuItem);
             this.element.appendChild(itemElement);
         });
+        /// #if MOBILE
+        updateMobilePluginToolbar(protyle);
+        /// #endif
     }
 
     public setSelectionElementPosition(protyle: IProtyle, element: HTMLElement, triggerRect?: DOMRect) {

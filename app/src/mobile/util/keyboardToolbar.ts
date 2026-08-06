@@ -17,6 +17,7 @@ import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
 import {callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAppUtil";
 import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
 import {getMirror, getUndoRootID, hasUndoStateMirror, initMirror} from "../../protyle/undo/globalUndo";
+import {getMobilePluginToolbarItems} from "./pluginToolbar";
 
 let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
@@ -31,6 +32,31 @@ let lastAndroidReadonlySelection: {
     anchorOffset: number,
     focusNode: Node,
     focusOffset: number,
+};
+
+export const updateMobilePluginToolbar = (protyle: IProtyle) => {
+    const currentProtyle = getCurrentEditor()?.protyle;
+    if (currentProtyle && currentProtyle !== protyle) {
+        return;
+    }
+    const inlineToolbarElement = document.querySelector<HTMLElement>(
+        '#keyboardToolbar .keyboard__action[data-type="inline-memo"]')?.parentElement;
+    if (!inlineToolbarElement) {
+        return;
+    }
+    inlineToolbarElement.querySelectorAll('[data-plugin-toolbar="true"]').forEach(item => item.remove());
+    getMobilePluginToolbarItems(protyle.options.toolbar, Constants.INLINE_TYPE).forEach(toolbarItem => {
+        const itemElement = document.createElement("button");
+        itemElement.className = "keyboard__action";
+        itemElement.dataset.type = toolbarItem.name;
+        itemElement.dataset.pluginToolbar = "true";
+        itemElement.innerHTML = `<svg><use xlink:href="#${toolbarItem.icon}"></use></svg>`;
+        const label = toolbarItem.tip || (toolbarItem.lang ? window.siyuan.languages[toolbarItem.lang] : "");
+        if (label) {
+            itemElement.setAttribute("aria-label", label);
+        }
+        inlineToolbarElement.append(itemElement);
+    });
 };
 
 const preserveAndroidReadonlySelection = () => {

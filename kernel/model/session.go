@@ -255,7 +255,7 @@ func CheckAuth(c *gin.Context) {
 
 		// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
 		clientIP := c.ClientIP()
-		host := c.GetHeader("Host")
+		host := c.Request.Host
 		origin := c.GetHeader("Origin")
 		forwardedHost := c.GetHeader("X-Forwarded-Host")
 		if !localhost ||
@@ -312,7 +312,7 @@ func CheckAuth(c *gin.Context) {
 	workspaceSession := util.GetWorkspaceSession(session)
 	if IsWorkspaceSessionAuthenticated(workspaceSession) {
 		// 校验 Origin 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
-		if !util.IsSessionOriginAllowed(c.GetHeader("Origin"), c.GetHeader("Host")) {
+		if !util.IsSessionOriginAllowed(c.GetHeader("Origin"), c.Request.Host) {
 			logging.LogWarnf("invalid Origin [%s] for session auth [ip=%s]", c.GetHeader("Origin"), c.ClientIP())
 			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid Origin"})
 			c.Abort()

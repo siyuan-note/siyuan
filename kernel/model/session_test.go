@@ -21,6 +21,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	ginSessions "github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -134,5 +136,62 @@ func TestIsLocalRequest(t *testing.T) {
 				t.Fatalf("status = %d, want %d", recorder.Code, wantStatus)
 			}
 		})
+	}
+}
+
+// TestCheckAuthRemoteSessionOrigin 验证局域网浏览器登录后，同源 POST 请求可通过会话鉴权。
+func TestCheckAuthRemoteSessionOrigin(t *testing.T) {
+	originalConf := Conf
+	originalWorkspaceDir := util.WorkspaceDir
+	Conf = NewAppConf()
+	Conf.AccessAuthCode = "test-access-auth-code"
+	util.WorkspaceDir = "test-workspace"
+	t.Cleanup(func() {
+		Conf = originalConf
+		util.WorkspaceDir = originalWorkspaceDir
+	})
+
+	engine := gin.New()
+	store := cookie.NewStore([]byte("test-session-cookie-key"))
+	engine.Use(ginSessions.Sessions("siyuan", store))
+	engine.GET("/login", func(c *gin.Context) {
+		session := util.GetSession(c)
+		workspaceSession := util.GetWorkspaceSession(session)
+		workspaceSession.AccessAuthCode = Conf.AccessAuthCode
+		if err := session.Save(c); err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		c.Status(http.StatusNoContent)
+	})
+	engine.POST("/api/notebook/lsNotebooks", CheckAuth, func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+
+	loginRequest := httptest.NewRequest(http.MethodGet, "http://192.0.2.1:6806/login", nil)
+	loginRequest.RemoteAddr = "192.0.2.2:1234"
+	loginRecorder := httptest.NewRecorder()
+	engine.ServeHTTP(loginRecorder, loginRequest)
+	if loginRecorder.Code != http.StatusNoContent {
+		t.Fatalf("login status = %d, want %d", loginRecorder.Code, http.StatusNoContent)
+	}
+
+	request := func(origin string) *httptest.ResponseRecorder {
+		request := httptest.NewRequest(http.MethodPost, "http://192.0.2.1:6806/api/notebook/lsNotebooks", nil)
+		request.RemoteAddr = "192.0.2.2:1234"
+		request.Header.Set("Origin", origin)
+		for _, responseCookie := range loginRecorder.Result().Cookies() {
+			request.AddCookie(responseCookie)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	if recorder := request("http://192.0.2.1:6806"); recorder.Code != http.StatusNoContent {
+		t.Fatalf("same-origin status = %d, want %d, body = %s", recorder.Code, http.StatusNoContent, recorder.Body.String())
+	}
+	if recorder := request("https://evil.example"); recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("cross-origin status = %d, want %d", recorder.Code, http.StatusUnauthorized)
 	}
 }

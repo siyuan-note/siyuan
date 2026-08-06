@@ -82,7 +82,7 @@
 
       &__item {
         border-bottom: .5px solid var(--b3-theme-background-light);
-        line-height: 42px;
+        line-height: 36px;
         background-color: var(--b3-theme-background);
         text-decoration: none;
         border-radius: 0;
@@ -128,10 +128,10 @@
       }
 
       &__label {
-        font-size: 18px;
+        font-size: 16px;
         white-space: break-spaces;
-        line-height: 26px;
-        margin: 8px 0;
+        line-height: 24px;
+        margin: 6px 0;
         // 移动端面包屑过长
         word-wrap: break-word;
       }
@@ -302,7 +302,7 @@
       background-color: var(--b3-theme-background);
       border: 0;
       border-radius: 0;
-      line-height: 42px;
+      line-height: 36px;
       margin: 0;
 
       &:not(.fn__none) ~ .b3-menu__item:not(.fn__none) {
@@ -315,9 +315,9 @@
     }
 
     .b3-menu__label {
-      font-size: 18px;
-      line-height: 26px;
-      margin: 8px 0;
+      font-size: 16px;
+      line-height: 24px;
+      margin: 6px 0;
       white-space: break-spaces;
       word-wrap: break-word;
     }

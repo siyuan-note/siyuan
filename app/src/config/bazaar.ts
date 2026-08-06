@@ -823,7 +823,7 @@ type="checkbox">
         const packageSection = `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarPackageInfo}</div>
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPackageName, displayData.name)}
-    ${displayData.author ? bazaar._genReadmeMetaRow(window.siyuan.languages.author, `<a href="${escapeAttr(urls.join("/"))}" target="_blank" title="Creator">${escapeHtml(displayData.author)}</a>`, true) : ""}
+    ${displayData.author ? bazaar._genReadmeMetaRow(window.siyuan.languages.author, `<a href="${escapeAttr(urls.join("/"))}" target="_blank" title="${escapeAttr(urls.join("/"))}">${escapeHtml(displayData.author)}</a>`, true) : ""}
     ${fundingItems.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarFunding, fundingItems.map((item) => bazaar._genReadmeFundingHTML(item)).join("<br>"), true) : ""}
 </section>`;
         readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
@@ -844,7 +844,7 @@ type="checkbox">
             <section class="item__meta-section item__resources">
                 <div class="item__meta-title">${window.siyuan.languages.bazaarResources}</div>
                 <div class="fn__flex">
-                    <a href="${resourceData.repoURL}" target="_blank" title="GitHub Repo">GitHub</a>
+                    <a href="${resourceData.repoURL}" target="_blank" title="${escapeAttr(resourceData.repoURL)}">GitHub</a>
                     <span class="fn__space"></span>
                     <a href="${resourceData.repoURL}/issues" target="_blank" title="Feedback via GitHub Issues" data-type="feedback">${window.siyuan.languages.feedback}</a>
                 </div>

@@ -1131,7 +1131,20 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 (range.startContainer as HTMLElement).remove();
             }
         } else {
+            // 跨块删除时浏览器会连块内最后一个 protyle-attr 一起移除，这里提前保存并在删除后恢复
+            const preserveAttrElements = [
+                blockElement,
+                rangeEndBlockElement,
+            ].filter((item): item is HTMLElement => Boolean(item)).map(item => ({
+                element: item,
+                attrHTML: item.querySelector(":scope > .protyle-attr")?.outerHTML || "",
+            }));
             range.deleteContents();
+            preserveAttrElements.forEach(({element, attrHTML}) => {
+                if (attrHTML && !element.querySelector(":scope > .protyle-attr") && element.isConnected) {
+                    element.insertAdjacentHTML("beforeend", attrHTML);
+                }
+            });
         }
         range.insertNode(document.createElement("wbr"));
         blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");

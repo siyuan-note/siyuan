@@ -892,8 +892,8 @@
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[data-readonly="false"] {
   &[contenteditable="true"] [data-node-id].table {
-    padding-right: 20px;
-    padding-bottom: 20px;
+    padding-right: 30px;
+    padding-bottom: 30px;
   }
 
   caption {

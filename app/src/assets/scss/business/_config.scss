@@ -499,6 +499,15 @@
             justify-content: space-between;
             line-height: 24px;
 
+            .item__meta-funding {
+              display: inline-block;
+              max-width: 100%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              vertical-align: bottom;
+              white-space: nowrap;
+            }
+
             & > span:first-child {
               color: var(--b3-theme-on-surface);
               flex-shrink: 0;

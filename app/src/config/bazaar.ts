@@ -299,9 +299,10 @@ export const bazaar = {
             if (!["http:", "https:", "mailto:"].includes(url.protocol)) {
                 throw new Error("not an allowed URL protocol");
             }
-            return `<a target="_blank" href="${escapeAttr(funding)}">${escapeHtml(funding)}</a>`;
+            const displayFunding = url.host || url.pathname || funding;
+            return `<a target="_blank" href="${escapeAttr(funding)}" title="${escapeAttr(funding)}" class="item__meta-funding">${escapeHtml(displayFunding)}</a>`;
         } catch (e) {
-            return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="ft__primary fn__pointer">${escapeHtml(funding)}</span>`;
+            return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" title="${escapeAttr(funding)}" class="item__meta-funding ft__primary fn__pointer">${escapeHtml(funding)}</span>`;
         }
     },
     _genIncompatibleChipHTML(item: IBazaarItem, source: "installed" | "bazaar", bazaarType: TBazaarType) {

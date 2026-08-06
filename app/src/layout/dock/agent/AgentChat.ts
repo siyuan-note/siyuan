@@ -22,6 +22,7 @@ import {
     applyAgentUserEdit,
     buildAgentPresentationEntries,
     findAgentUserEntryIndex,
+    getAgentThinkingDisplaySeconds,
     getAgentThinkingToolGroups,
     hasAgentExecutedToolsAfter,
     hasAgentModelSpecificContext,
@@ -2584,15 +2585,12 @@ export class AgentChat extends Model {
         }
 
         if (reasoning === "processing" && this.hasInterveningCard) {
-            const L = window.siyuan.languages;
             // 与 finishActiveThinking 对齐：先把本张思考卡片的耗时算出来，
             // 既用于 DOM 显示「已思考 Xs」，也用于落盘 entry.duration（重载后仍能显示正确耗时）。
             const durSec = this.currentThinkingDuration ||
                 (this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0);
             this.currentThinkingDuration = durSec;
-            const doneText = durSec > 0
-                ? (L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(durSec) + "s") : (L.agentThinking || "Thinking"))
-                : (L.agentThinking || "Thinking");
+            const doneText = this.formatThinkingHeader(durSec);
             const oldCards = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)");
             for (let i = 0; i < oldCards.length; i++) {
                 const card = oldCards[i] as HTMLElement;
@@ -3643,8 +3641,9 @@ export class AgentChat extends Model {
     // 由 duration 经 i18n 生成"已思考：Xs"标题文本；无 duration 时回退到"思考中..."。
     private formatThinkingHeader(duration?: number): string {
         const L = window.siyuan.languages;
-        if (duration && duration > 0) {
-            return L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(duration) + "s") : (L.agentThinking || "Thinking");
+        const displaySeconds = getAgentThinkingDisplaySeconds(duration);
+        if (displaySeconds !== undefined) {
+            return L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", displaySeconds + "s") : (L.agentThinking || "Thinking");
         }
         return L.agentThinking || "Thinking";
     }
@@ -3880,13 +3879,10 @@ export class AgentChat extends Model {
 
     private finishActiveThinking() {
         this.stopThinkingTimer();
-        const L = window.siyuan.languages;
         // 耗时存为数值（用于持久化 entry.duration），"已思考：Xs" 文本只在 DOM 显示、不落盘。
         const durSec = this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0;
         this.currentThinkingDuration = durSec;
-        const doneText = durSec > 0
-            ? (L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(durSec) + "s") : (L.agentThinking || "Thinking"))
-            : (L.agentThinking || "Thinking");
+        const doneText = this.formatThinkingHeader(durSec);
 
         const items = this.messagesContainer.querySelectorAll(
             ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"

@@ -4,6 +4,7 @@ import {
     applyAgentUserEdit,
     buildAgentPresentationEntries,
     findAgentUserEntryIndex,
+    getAgentThinkingDisplaySeconds,
     getAgentThinkingToolGroups,
     hasAgentExecutedToolsAfter,
     hasAgentModelSpecificContext,
@@ -23,6 +24,16 @@ describe("AgentHistory", () => {
         assert.equal(findAgentUserEntryIndex(entries, "user-2"), 2);
         assert.equal(findAgentUserEntryIndex(entries), 2);
         assert.equal(findAgentUserEntryIndex(entries, "missing"), -1);
+    });
+
+    it("displays every positive thinking duration as at least one second", () => {
+        assert.equal(getAgentThinkingDisplaySeconds(undefined), undefined);
+        assert.equal(getAgentThinkingDisplaySeconds(0), undefined);
+        assert.equal(getAgentThinkingDisplaySeconds(-0.1), undefined);
+        assert.equal(getAgentThinkingDisplaySeconds(0.001), 1);
+        assert.equal(getAgentThinkingDisplaySeconds(0.499), 1);
+        assert.equal(getAgentThinkingDisplaySeconds(1.499), 1);
+        assert.equal(getAgentThinkingDisplaySeconds(1.5), 2);
     });
 
     it("detects executed tools after the selected user entry", () => {

@@ -32,6 +32,13 @@ export const getAgentThinkingToolGroups = (steps: AgentHistoryThinkingStep[]): s
     return steps.map(step => (step.toolNames || []).filter(Boolean));
 };
 
+export const getAgentThinkingDisplaySeconds = (duration?: number): number | undefined => {
+    if (duration === undefined || !Number.isFinite(duration) || duration <= 0) {
+        return undefined;
+    }
+    return Math.max(1, Math.round(duration));
+};
+
 export type AgentHistoryReference = { id: string; title: string };
 
 export type AgentHistoryUserEntry = {

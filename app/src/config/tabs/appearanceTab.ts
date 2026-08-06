@@ -30,7 +30,6 @@ import {
     isNativeMobileContainer,
     loadCustomFonts,
     registerCustomFont,
-    registerCustomFonts,
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
@@ -140,11 +139,6 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
         ).join("");
         const canManageCustomFonts = nativeMobile && !window.siyuan.config.readonly;
         const customFontsByID = new Map(customFonts.map((font) => [font.id, font]));
-        let limitFontPreviews = false;
-        /// #if !BROWSER
-        limitFontPreviews = process.platform === "linux" &&
-            (process.env.XDG_SESSION_TYPE === "wayland" || Boolean(process.env.WAYLAND_DISPLAY));
-        /// #endif
         let fontPreviewObserver: IntersectionObserver;
         const fontMenu = new Menu(undefined, () => fontPreviewObserver?.disconnect());
         fontMenu.addItem({
@@ -163,61 +157,37 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
             bind(element) {
                 const listElement = element.querySelector<HTMLElement>(".b3-list");
                 const inputElement = element.querySelector<HTMLInputElement>('[data-type="font-search"]');
-                if (!limitFontPreviews) {
+                if ("IntersectionObserver" in window) {
+                    fontPreviewObserver = new IntersectionObserver((entries) => {
+                        entries.forEach((entry) => {
+                            const itemElement = entry.target as HTMLElement;
+                            const labelElement = itemElement.querySelector<HTMLElement>(".b3-menu__label");
+                            if (!entry.isIntersecting || !labelElement?.dataset.family) {
+                                labelElement?.style.removeProperty("font-family");
+                                labelElement?.style.removeProperty("font-weight");
+                                return;
+                            }
+                            const customFont = itemElement.dataset.id ? customFontsByID.get(itemElement.dataset.id) : undefined;
+                            if (customFont) {
+                                registerCustomFont(customFont);
+                            }
+                            labelElement.style.fontFamily = labelElement.dataset.family;
+                            labelElement.style.fontWeight = labelElement.dataset.weight;
+                        });
+                    }, {
+                        root: listElement,
+                    });
+                    listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
+                        fontPreviewObserver.observe(item);
+                    });
+                } else {
                     listElement.querySelectorAll<HTMLElement>(".b3-menu__label").forEach((item) => {
                         item.style.fontFamily = item.dataset.family;
                         item.style.fontWeight = item.dataset.weight;
                     });
-                    if (!window.siyuan.config.system.safeMode && "IntersectionObserver" in window) {
-                        fontPreviewObserver = new IntersectionObserver((entries) => {
-                            const visibleFonts: ICustomFont[] = [];
-                            entries.forEach((entry) => {
-                                if (!entry.isIntersecting) {
-                                    return;
-                                }
-                                const id = (entry.target as HTMLElement).dataset.id;
-                                const font = customFontsByID.get(id);
-                                if (font) {
-                                    visibleFonts.push(font);
-                                }
-                                fontPreviewObserver.unobserve(entry.target);
-                            });
-                            registerCustomFonts(visibleFonts);
-                        }, {
-                            rootMargin: "96px 0px",
-                        });
-                        listElement.querySelectorAll<HTMLElement>(".b3-list-item[data-id]").forEach((item) => {
-                            if (item.dataset.id) {
-                                fontPreviewObserver.observe(item);
-                            }
-                        });
-                    }
+                    customFonts.forEach(registerCustomFont);
                 }
-                let previewLabelElement: HTMLElement | undefined;
-                const previewFontItem = (itemElement?: HTMLElement) => {
-                    if (!limitFontPreviews) {
-                        return;
-                    }
-                    const labelElement = itemElement?.querySelector<HTMLElement>(".b3-menu__label");
-                    if (previewLabelElement === labelElement) {
-                        return;
-                    }
-                    previewLabelElement?.style.removeProperty("font-family");
-                    previewLabelElement?.style.removeProperty("font-weight");
-                    previewLabelElement = labelElement;
-                    if (!itemElement || !labelElement?.dataset.family) {
-                        return;
-                    }
-                    const customFont = itemElement.dataset.id ? customFontsByID.get(itemElement.dataset.id) : undefined;
-                    if (customFont) {
-                        registerCustomFont(customFont);
-                    }
-                    labelElement.style.fontFamily = labelElement.dataset.family;
-                    labelElement.style.fontWeight = labelElement.dataset.weight;
-                };
-                const initialItemElement = listElement.firstElementChild as HTMLElement;
-                initialItemElement.classList.add("b3-list-item--focus");
-                previewFontItem(initialItemElement);
+                listElement.firstElementChild.classList.add("b3-list-item--focus");
                 const filterFontList = () => {
                     const value = inputElement.value.toLowerCase().trim();
                     listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
@@ -237,28 +207,14 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
                             );
                         }
                     });
-                    const focusedItemElement = listElement.querySelector<HTMLElement>(".b3-list-item:not(.fn__none)");
-                    focusedItemElement?.classList.add("b3-list-item--focus");
-                    previewFontItem(focusedItemElement);
+                    listElement.querySelector(".b3-list-item:not(.fn__none)")?.classList.add("b3-list-item--focus");
                 };
-                if (limitFontPreviews) {
-                    // Wayland 下按需预览字体，避免 Chromium 同时加载大量系统字体
-                    listElement.addEventListener("pointerover", (event) => {
-                        const itemElement = (event.target as HTMLElement).closest<HTMLElement>(".b3-list-item");
-                        if (itemElement?.parentElement === listElement) {
-                            previewFontItem(itemElement);
-                        }
-                    });
-                }
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     event.stopPropagation();
                     if (event.isComposing) {
                         return;
                     }
-                    const focusedItemElement = upDownHint(listElement, event);
-                    if (focusedItemElement) {
-                        previewFontItem(focusedItemElement);
-                    }
+                    upDownHint(listElement, event);
                     if (event.key === "Enter") {
                         const itemEl = listElement.querySelector<HTMLElement>(".b3-list-item--focus .b3-menu__label");
                         if (itemEl) {

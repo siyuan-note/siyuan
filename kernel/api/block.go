@@ -1138,7 +1138,20 @@ func getBlockInfo(c *gin.Context) {
 	if !holdBlockRequest(c, ret, boxID) {
 		return
 	}
-	if !checkBlockPublishAccessInBox(c, id, boxID, ret) {
+	blockTree, publishAccessRequired, publishMetadataVisible, publishAccessible := getBlockInfoPublishAccess(c, id, boxID)
+	if !publishAccessible {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+		return
+	}
+	if publishAccessRequired && !publishMetadataVisible {
+		ret.Data = map[string]any{
+			"rootID":                blockTree.RootID,
+			"rootTitle":             "",
+			"rootTitleEmpty":        true,
+			"rootIcon":              "",
+			"publishAccessRequired": true,
+		}
 		return
 	}
 
@@ -1183,6 +1196,26 @@ func getBlockInfo(c *gin.Context) {
 		return
 	}
 
+	root, err := model.GetBlock(block.RootID, tree)
+	if errors.Is(err, model.ErrIndexing) {
+		ret.Code = 3
+		ret.Data = model.Conf.Language(56)
+		return
+	}
+	rootTitle := root.IAL["title"]
+	rootTitle = html.UnescapeString(rootTitle)
+	icon := html.UnescapeString(root.IAL["icon"])
+	if publishAccessRequired {
+		ret.Data = map[string]any{
+			"rootID":                block.RootID,
+			"rootTitle":             rootTitle,
+			"rootTitleEmpty":        root.IAL[model.NodeAttrTitleEmpty] == "true",
+			"rootIcon":              icon,
+			"publishAccessRequired": true,
+		}
+		return
+	}
+
 	var rootChildID string
 	b := block
 	for range 128 {
@@ -1197,15 +1230,6 @@ func getBlockInfo(c *gin.Context) {
 		}
 	}
 
-	root, err := model.GetBlock(block.RootID, tree)
-	if errors.Is(err, model.ErrIndexing) {
-		ret.Code = 3
-		ret.Data = model.Conf.Language(56)
-		return
-	}
-	rootTitle := root.IAL["title"]
-	rootTitle = html.UnescapeString(rootTitle)
-	icon := html.UnescapeString(root.IAL["icon"])
 	ret.Data = map[string]any{
 		"box":            block.Box,
 		"path":           block.Path,
@@ -1215,6 +1239,25 @@ func getBlockInfo(c *gin.Context) {
 		"rootChildID":    rootChildID,
 		"rootIcon":       icon,
 	}
+}
+
+func getBlockInfoPublishAccess(c *gin.Context, id, boxID string) (blockTree *treenode.BlockTree, passwordRequired, metadataVisible, accessible bool) {
+	if !model.IsReadOnlyRoleContext(c) {
+		return nil, false, true, true
+	}
+
+	blockTree = treenode.GetBlockTreeInBox(id, boxID)
+	publishAccess := model.GetPublishAccess()
+	switch model.GetBlockTreePublishAccessStatus(c, publishAccess, blockTree) {
+	case model.PublishAccessAllowed:
+		return blockTree, false, true, true
+	case model.PublishAccessPasswordRequired:
+		metadataVisible = model.CheckBlockTreeDiscoverableByPublishAccess(publishAccess, blockTree)
+		if metadataVisible || blockTree.ID == blockTree.RootID {
+			return blockTree, true, metadataVisible, true
+		}
+	}
+	return blockTree, false, false, false
 }
 
 func checkBlockPublishAccess(c *gin.Context, id string, ret *gulu.Result) bool {

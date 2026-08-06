@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -107,11 +108,17 @@ func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
 
+	if status := GetBlockTreePublishAccessStatus(c, PublishAccess{{ID: docID, Disable: true}}, bt); status != PublishAccessDenied {
+		t.Fatalf("publish-disabled document status = %d, want denied", status)
+	}
 	if checkBlockTreeAccessableByPublishAccess(c, PublishAccess{{ID: docID, Disable: true}}, bt) {
 		t.Fatal("publish-disabled document should not be accessible")
 	}
 
 	protectedAccess := PublishAccess{{ID: docID, Visible: true, Password: protectedPassword}}
+	if status := GetBlockTreePublishAccessStatus(c, protectedAccess, bt); status != PublishAccessPasswordRequired {
+		t.Fatalf("password-protected document status = %d, want password required", status)
+	}
 	if checkBlockTreeAccessableByPublishAccess(c, protectedAccess, bt) {
 		t.Fatal("password-protected document should not be accessible without authorization")
 	}
@@ -120,12 +127,53 @@ func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
 		Name:  "publish-auth-" + docID,
 		Value: util.SHA256Hash([]byte(docID + protectedPassword)),
 	})
+	if status := GetBlockTreePublishAccessStatus(c, protectedAccess, bt); status != PublishAccessAllowed {
+		t.Fatalf("authorized document status = %d, want allowed", status)
+	}
 	if !checkBlockTreeAccessableByPublishAccess(c, protectedAccess, bt) {
 		t.Fatal("password-protected document should be accessible after authorization")
 	}
 
 	if !checkBlockTreeAccessableByPublishAccess(c, PublishAccess{{ID: docID, Visible: false}}, bt) {
 		t.Fatal("hidden document should remain directly accessible")
+	}
+}
+
+func TestFilterContentByPublishAccessWithStatus(t *testing.T) {
+	const (
+		boxID    = "20260806000010-box0010"
+		docID    = "20260806000011-doc0010"
+		password = "password"
+		content  = `<div data-node-id="20260806000012-block10">private content</div>`
+	)
+
+	oldConf := Conf
+	Conf = NewAppConf()
+	t.Cleanup(func() {
+		Conf = oldConf
+	})
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	protectedAccess := PublishAccess{{ID: docID, Visible: true, Password: password}}
+	filtered, status := FilterContentByPublishAccessWithStatus(c, protectedAccess, boxID, "/"+docID+".sy", content, false)
+	if status != PublishAccessPasswordRequired || filtered == content || strings.Contains(filtered, "private content") {
+		t.Fatalf("unexpected protected content filter result: status=%d, content=%q", status, filtered)
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + docID,
+		Value: util.SHA256Hash([]byte(docID + password)),
+	})
+	filtered, status = FilterContentByPublishAccessWithStatus(c, protectedAccess, boxID, "/"+docID+".sy", content, false)
+	if status != PublishAccessAllowed || filtered != content {
+		t.Fatalf("unexpected authorized content filter result: status=%d, content=%q", status, filtered)
+	}
+
+	filtered, status = FilterContentByPublishAccessWithStatus(c, PublishAccess{{ID: docID, Disable: true}}, boxID,
+		"/"+docID+".sy", content, false)
+	if status != PublishAccessDenied || strings.Contains(filtered, "private content") {
+		t.Fatalf("unexpected disabled content filter result: status=%d, content=%q", status, filtered)
 	}
 }
 

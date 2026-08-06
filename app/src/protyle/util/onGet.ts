@@ -138,6 +138,23 @@ export const onGet = (options: {
         return;
     }
 
+    if (options.data.data.publishAccessRequired) {
+        setHTML({
+            content: options.data.data.content,
+            eof: options.data.data.eof,
+            expand: options.data.data.isBacklinkExpand,
+            action: options.action,
+            scrollAttr: options.scrollAttr,
+            updateReadonly: options.updateReadonly,
+            isSyncing: options.data.data.isSyncing,
+            refreshHeadingNumbers,
+            afterCB: options.afterCB,
+            scrollPosition: options.scrollPosition
+        }, options.protyle);
+        removeLoading(options.protyle);
+        return;
+    }
+
     const docInfoParam: IObject = {
         id: options.protyle.block.rootID
     };

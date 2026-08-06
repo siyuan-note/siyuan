@@ -1452,9 +1452,11 @@ func getDoc(c *gin.Context) {
 	// 判断是否正在同步中 https://github.com/siyuan-note/siyuan/issues/6290
 	isSyncing := model.IsSyncingFile(rootID)
 
+	publishAccessRequired := false
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		newContent := model.FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content, false)
+		newContent, publishAccessStatus := model.FilterContentByPublishAccessWithStatus(c, publishAccess, boxID, docPath, content, false)
+		publishAccessRequired = publishAccessStatus == model.PublishAccessPasswordRequired
 		if newContent != content {
 			content = newContent
 			headingNumbers = nil
@@ -1463,23 +1465,24 @@ func getDoc(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"id":               id,
-		"mode":             mode,
-		"parentID":         parentID,
-		"parent2ID":        parent2ID,
-		"rootID":           rootID,
-		"type":             typ,
-		"content":          content,
-		"blockCount":       blockCount,
-		"eof":              eof,
-		"scroll":           scroll,
-		"box":              boxID,
-		"path":             docPath,
-		"isSyncing":        isSyncing,
-		"isBacklinkExpand": isBacklinkExpand,
-		"keywords":         keywords,
-		"headingNumbers":   headingNumbers,
-		"reqId":            arg["reqId"],
+		"id":                    id,
+		"mode":                  mode,
+		"parentID":              parentID,
+		"parent2ID":             parent2ID,
+		"rootID":                rootID,
+		"type":                  typ,
+		"content":               content,
+		"blockCount":            blockCount,
+		"eof":                   eof,
+		"scroll":                scroll,
+		"box":                   boxID,
+		"path":                  docPath,
+		"isSyncing":             isSyncing,
+		"isBacklinkExpand":      isBacklinkExpand,
+		"keywords":              keywords,
+		"headingNumbers":        headingNumbers,
+		"publishAccessRequired": publishAccessRequired,
+		"reqId":                 arg["reqId"],
 	}
 }
 

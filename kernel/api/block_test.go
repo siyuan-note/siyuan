@@ -139,6 +139,91 @@ func TestFilterBlockAndRefIDsByPublishAccess(t *testing.T) {
 	}
 }
 
+func TestGetBlockInfoPublishAccess(t *testing.T) {
+	const (
+		boxID             = "20260806000020-box0020"
+		protectedID       = "20260806000021-protect"
+		privateID         = "20260806000022-private"
+		privateChildID    = "20260806000023-child20"
+		disabledID        = "20260806000024-disable"
+		protectedPassword = "protected-password"
+		privatePassword   = "private-password"
+	)
+
+	previousBlockTreeDBPath := util.BlockTreeDBPath
+	previousDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	previousPublishAccess := model.GetPublishAccess()
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: protectedID, Visible: true, Password: protectedPassword},
+		{ID: privateID, Visible: false, Password: privatePassword},
+		{ID: disabledID, Visible: true, Disable: true},
+	}); err != nil {
+		t.Fatalf("set publish access failed: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = model.SetPublishAccess(previousPublishAccess)
+		treenode.CloseDatabase()
+		util.BlockTreeDBPath = previousBlockTreeDBPath
+		util.DataDir = previousDataDir
+	})
+
+	for _, id := range []string{protectedID, disabledID} {
+		treenode.IndexBlockTree(&parse.Tree{
+			ID:   id,
+			Box:  boxID,
+			Path: "/" + id + ".sy",
+			Root: &ast.Node{ID: id, Type: ast.NodeDocument},
+		})
+	}
+	privateRoot := &ast.Node{ID: privateID, Type: ast.NodeDocument}
+	privateRoot.AppendChild(&ast.Node{ID: privateChildID, Type: ast.NodeParagraph})
+	treenode.IndexBlockTree(&parse.Tree{
+		ID:   privateID,
+		Box:  boxID,
+		Path: "/" + privateID + ".sy",
+		Root: privateRoot,
+	})
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodPost, "/", nil)
+	c.Set(model.RoleContextKey, model.RoleReader)
+
+	_, passwordRequired, metadataVisible, accessible := getBlockInfoPublishAccess(c, protectedID, "")
+	if !passwordRequired || !metadataVisible || !accessible {
+		t.Fatalf("protected document gate = [%v, %v, %v], want password required with visible metadata",
+			passwordRequired, metadataVisible, accessible)
+	}
+
+	_, passwordRequired, metadataVisible, accessible = getBlockInfoPublishAccess(c, privateID, "")
+	if !passwordRequired || metadataVisible || !accessible {
+		t.Fatalf("private document gate = [%v, %v, %v], want password required without visible metadata",
+			passwordRequired, metadataVisible, accessible)
+	}
+
+	_, _, _, accessible = getBlockInfoPublishAccess(c, privateChildID, "")
+	if accessible {
+		t.Fatal("private child block should not open the password gate before authorization")
+	}
+
+	_, _, _, accessible = getBlockInfoPublishAccess(c, disabledID, "")
+	if accessible {
+		t.Fatal("publish-disabled document should not open the password gate")
+	}
+
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + privateID,
+		Value: util.SHA256Hash([]byte(privateID + privatePassword)),
+	})
+	_, passwordRequired, metadataVisible, accessible = getBlockInfoPublishAccess(c, privateChildID, "")
+	if passwordRequired || !metadataVisible || !accessible {
+		t.Fatalf("authorized private child gate = [%v, %v, %v], want normal access",
+			passwordRequired, metadataVisible, accessible)
+	}
+}
+
 func TestGetDocBlocksOrdersArguments(t *testing.T) {
 	tests := []struct {
 		name string

@@ -50,6 +50,14 @@ type PublishAccessItem struct {
 
 type PublishAccess []*PublishAccessItem
 
+type PublishAccessStatus int
+
+const (
+	PublishAccessAllowed PublishAccessStatus = iota
+	PublishAccessPasswordRequired
+	PublishAccessDenied
+)
+
 var (
 	publishAccessLastModified int64
 	publishAccess             PublishAccess
@@ -428,14 +436,25 @@ func CheckBlockTreeDiscoverableByPublishAccess(publishAccess PublishAccess, bt *
 		CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable)
 }
 
-func checkBlockTreeAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) bool {
+func GetBlockTreePublishAccessStatus(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) PublishAccessStatus {
 	if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) {
-		return false
+		return PublishAccessDenied
 	}
 
-	publishIgnore := filterDisablePublishAccess(publishAccess)
+	publishDisable := filterDisablePublishAccess(publishAccess)
+	if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) {
+		return PublishAccessDenied
+	}
+
 	passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-	return CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
+	if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
+		return PublishAccessPasswordRequired
+	}
+	return PublishAccessAllowed
+}
+
+func checkBlockTreeAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) bool {
+	return GetBlockTreePublishAccessStatus(c, publishAccess, bt) == PublishAccessAllowed
 }
 
 func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
@@ -1185,13 +1204,20 @@ func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess PublishAccess,
 	return
 }
 
-func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, box string, docPath string, content string, onlyIcon bool) (ret string) {
+func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, box string, docPath string, content string, onlyIcon bool) string {
+	ret, _ := FilterContentByPublishAccessWithStatus(c, publishAccess, box, docPath, content, onlyIcon)
+	return ret
+}
+
+func FilterContentByPublishAccessWithStatus(c *gin.Context, publishAccess PublishAccess, box string, docPath string, content string, onlyIcon bool) (ret string, status PublishAccessStatus) {
 	ret = content
+	status = PublishAccessAllowed
 
 	// 密码访问
 	passwordID, password := GetPathPasswordByPublishAccess(box, docPath, publishAccess)
 	if password != "" {
 		if !CheckPublishAuthCookie(c, passwordID, password) {
+			status = PublishAccessPasswordRequired
 			if onlyIcon {
 				passwordHTML := `<div class="protyle-password protyle-password--alert" data-node-id="%s">
 	<span class="protyle-password__logo">🔒</span>
@@ -1218,6 +1244,7 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, b
 	}
 	publishIgnore := GetDisablePublishAccess(publishAccess)
 	if !CheckPathAccessableByPublishIgnore(box, docPath, publishIgnore) {
+		status = PublishAccessDenied
 		if onlyIcon {
 			forbiddenHTML := `<div class="protyle-password protyle-password--alert" data-node-id="%s">
 	<span class="protyle-password__logo">🚫</span>

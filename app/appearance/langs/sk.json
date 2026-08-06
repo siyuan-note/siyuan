@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "Cesta k šablóne nového dokumentu (napríklad <code class='fn__code'>document.md</code>; ak chcete použiť globálne nastavenie, nechajte pole prázdne; súbor musí byť umiestnený v workspace/data/templates/)",
 	"cardLayout": "Rozloženie karty",
 	"compact": "Kompaktné",
-	"fullRow": "Celý riadok",
+	"fullRow": "Polia zaberajúce celý riadok",
 	"editFields": "Upraviť polia",
 	"startDate": "Dátum začiatku",
 	"addToDictionary": "Pridať do slovníka",

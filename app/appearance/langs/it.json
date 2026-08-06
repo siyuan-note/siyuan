@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "Percorso del modello per i nuovi documenti (ad esempio, <code class='fn__code'>document.md</code>; lascia vuoto per usare l'impostazione globale; il file deve trovarsi in workspace/data/templates/)",
 	"cardLayout": "Layout scheda",
 	"compact": "Compatto",
-	"fullRow": "Riga intera",
+	"fullRow": "Campi che occupano l'intera riga",
 	"editFields": "Modifica campi",
 	"startDate": "Data di inizio",
 	"addToDictionary": "Aggiungi al dizionario",

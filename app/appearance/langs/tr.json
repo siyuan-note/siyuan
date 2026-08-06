@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "Yeni belge şablonu yolu (örneğin <code class='fn__code'>document.md</code>; genel ayarı kullanmak için boş bırakın; dosya workspace/data/templates/ altında bulunmalıdır)",
 	"cardLayout": "Kart düzeni",
 	"compact": "Kompakt",
-	"fullRow": "Tam satır",
+	"fullRow": "Tam satırı kaplayan alanlar",
 	"editFields": "Alanları düzenle",
 	"startDate": "Başlangıç tarihi",
 	"addToDictionary": "Sözlüğe ekle",

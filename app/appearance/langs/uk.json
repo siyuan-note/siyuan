@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "Шлях до шаблону нового документа (наприклад, <code class='fn__code'>document.md</code>; залиште порожнім, щоб використовувати глобальне налаштування; файл має бути розміщений у workspace/data/templates/)",
 	"cardLayout": "Макет картки",
 	"compact": "Компактний",
-	"fullRow": "Увесь рядок",
+	"fullRow": "Поля, що займають увесь рядок",
 	"editFields": "Редагувати поля",
 	"startDate": "Дата початку",
 	"addToDictionary": "Додати до словника",

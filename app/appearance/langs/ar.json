@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "مسار قالب المستند الجديد (على سبيل المثال، <code class='fn__code'>document.md</code>؛ اتركه فارغًا لاستخدام الإعداد العام؛ يجب وضع الملف ضمن workspace/data/templates/)",
 	"cardLayout": "تخطيط البطاقة",
 	"compact": "مضغوط",
-	"fullRow": "صف كامل",
+	"fullRow": "الحقول التي تشغل صفًا كاملًا",
 	"editFields": "تحرير الحقول",
 	"startDate": "تاريخ البدء",
 	"addToDictionary": "إضافة إلى القاموس",

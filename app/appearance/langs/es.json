@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "Ruta de la plantilla para documentos nuevos (por ejemplo, <code class='fn__code'>document.md</code>; déjela en blanco para usar la configuración global; el archivo debe colocarse en workspace/data/templates/)",
 	"cardLayout": "Diseño de tarjeta",
 	"compact": "Compacto",
-	"fullRow": "Fila completa",
+	"fullRow": "Campos que ocupan toda la fila",
 	"editFields": "Editar campos",
 	"startDate": "Fecha de inicio",
 	"addToDictionary": "Añadir al diccionario",

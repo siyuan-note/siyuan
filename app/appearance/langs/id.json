@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "Jalur templat dokumen baru (misalnya, <code class='fn__code'>document.md</code>; biarkan kosong untuk menggunakan pengaturan global; file harus ditempatkan di workspace/data/templates/)",
 	"cardLayout": "Tata letak kartu",
 	"compact": "Ringkas",
-	"fullRow": "Baris penuh",
+	"fullRow": "Bidang yang memenuhi seluruh baris",
 	"editFields": "Edit bidang",
 	"startDate": "Tanggal mulai",
 	"addToDictionary": "Tambahkan ke kamus",

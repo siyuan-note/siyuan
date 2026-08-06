@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "נתיב תבנית למסמך חדש (לדוגמה, <code class='fn__code'>document.md</code>; יש להשאיר ריק כדי להשתמש בהגדרה הכללית; הקובץ צריך להימצא תחת workspace/data/templates/)",
 	"cardLayout": "פריסת כרטיס",
 	"compact": "קומפקטי",
-	"fullRow": "שורה מלאה",
+	"fullRow": "שדות שתופסים שורה מלאה",
 	"editFields": "עריכת שדות",
 	"startDate": "תאריך התחלה",
 	"addToDictionary": "הוספה למילון",

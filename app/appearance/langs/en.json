@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "New document template path (for example, <code class='fn__code'>document.md</code>; leave blank to use the global setting; the file needs to be placed under workspace/data/templates/)",
 	"cardLayout": "Card layout",
 	"compact": "Compact",
-	"fullRow": "Full row",
+	"fullRow": "Full-row fields",
 	"editFields": "Edit fields",
 	"startDate": "Start date",
 	"addToDictionary": "Add to dictionary",

@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "새 문서 템플릿 경로(예: <code class='fn__code'>document.md</code>, 전역 설정을 사용하려면 비워 두세요. 파일은 workspace/data/templates/ 아래에 있어야 합니다)",
 	"cardLayout": "카드 레이아웃",
 	"compact": "컴팩트",
-	"fullRow": "전체 행",
+	"fullRow": "전체 행을 차지하는 필드",
 	"editFields": "필드 편집",
 	"startDate": "시작일",
 	"addToDictionary": "사전에 추가",

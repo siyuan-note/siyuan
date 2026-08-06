@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "新建文件範本路徑（例如 <code class='fn__code'>document.md</code>，留空時使用全域設定，需要將該檔放置於工作空間/data/templates/ 下）",
 	"cardLayout": "卡片版面配置",
 	"compact": "緊湊",
-	"fullRow": "獨佔整行",
+	"fullRow": "獨佔整行的欄位",
 	"editFields": "編輯欄位",
 	"startDate": "開始日期",
 	"addToDictionary": "加入字典",

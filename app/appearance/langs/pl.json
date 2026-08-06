@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "Ścieżka szablonu nowego dokumentu (na przykład <code class='fn__code'>document.md</code>; pozostaw puste, aby użyć ustawienia globalnego; plik musi znajdować się w workspace/data/templates/)",
 	"cardLayout": "Układ karty",
 	"compact": "Kompaktowy",
-	"fullRow": "Pełny wiersz",
+	"fullRow": "Pola zajmujące cały wiersz",
 	"editFields": "Edytuj pola",
 	"startDate": "Data rozpoczęcia",
 	"addToDictionary": "Dodaj do słownika",

@@ -8,16 +8,15 @@ import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
 import {escapeHtml} from "../../../util/escape";
 import {CARD_LAYOUT_COMPACT, CARD_LAYOUT_LIST} from "./gallery/cardLayout";
+import {Menu} from "../../../plugin/Menu";
 
 const getCardLayoutHTML = (view: IAVGallery | IAVKanban) => {
-    return `<label class="b3-menu__item">
+    return `<button class="b3-menu__item" data-type="set-card-layout">
     <span class="fn__flex-center">${window.siyuan.languages.cardLayout}</span>
-    <span class="fn__space fn__flex-1"></span>
-    <select data-type="set-card-layout" class="b3-select b3-select--noborder av__card-layout-select">
-        <option value="${CARD_LAYOUT_LIST}"${view.cardLayout === CARD_LAYOUT_LIST ? " selected" : ""}>${window.siyuan.languages.list1}</option>
-        <option value="${CARD_LAYOUT_COMPACT}"${view.cardLayout === CARD_LAYOUT_COMPACT ? " selected" : ""}>${window.siyuan.languages.compact}</option>
-    </select>
-</label>
+    <span class="fn__flex-1"></span>
+    <span class="b3-menu__accelerator">${view.cardLayout === CARD_LAYOUT_COMPACT ? window.siyuan.languages.compact : window.siyuan.languages.list1}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
 ${view.cardLayout === CARD_LAYOUT_COMPACT ? `<button class="b3-menu__item" data-type="go-card-full-row">
     <span class="fn__flex-center">${window.siyuan.languages.fullRow}</span>
     <span class="fn__flex-1"></span>
@@ -269,26 +268,48 @@ export const bindLayoutEvent = (options: {
     if (options.data.viewType === "table") {
         return;
     }
-    const cardLayoutElement = options.menuElement.querySelector('select[data-type="set-card-layout"]') as HTMLSelectElement;
-    cardLayoutElement.addEventListener("change", () => {
+    const cardLayoutElement = options.menuElement.querySelector('[data-type="set-card-layout"]') as HTMLButtonElement;
+    cardLayoutElement.addEventListener("click", (event) => {
         const view = options.data.view as IAVGallery | IAVKanban;
         const oldLayout = view.cardLayout;
-        const cardLayout = parseInt(cardLayoutElement.value);
-        transaction(options.protyle, [{
-            action: "setAttrViewCardLayout",
-            avID,
-            blockID,
-            data: cardLayout,
-            viewID
-        }], [{
-            action: "setAttrViewCardLayout",
-            avID,
-            blockID,
-            data: oldLayout,
-            viewID
-        }]);
-        view.cardLayout = cardLayout;
-        rerender();
+        const menu = new Menu();
+        [{
+            layout: CARD_LAYOUT_LIST,
+            label: window.siyuan.languages.list1
+        }, {
+            layout: CARD_LAYOUT_COMPACT,
+            label: window.siyuan.languages.compact
+        }].forEach((item) => {
+            menu.addItem({
+                iconHTML: "",
+                checked: oldLayout === item.layout,
+                label: item.label,
+                click() {
+                    if (item.layout === oldLayout) {
+                        return;
+                    }
+                    transaction(options.protyle, [{
+                        action: "setAttrViewCardLayout",
+                        avID,
+                        blockID,
+                        data: item.layout,
+                        viewID
+                    }], [{
+                        action: "setAttrViewCardLayout",
+                        avID,
+                        blockID,
+                        data: oldLayout,
+                        viewID
+                    }]);
+                    view.cardLayout = item.layout;
+                    rerender();
+                }
+            });
+        });
+        const rect = cardLayoutElement.getBoundingClientRect();
+        menu.open({x: rect.left, y: rect.bottom});
+        event.preventDefault();
+        event.stopPropagation();
     });
     options.menuElement.querySelector('[data-type="go-card-full-row"]')?.addEventListener("click", (event) => {
         const view = options.data.view as IAVGallery | IAVKanban;

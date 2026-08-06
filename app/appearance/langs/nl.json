@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "Sjabloonpad voor nieuwe documenten (bijvoorbeeld <code class='fn__code'>document.md</code>; laat leeg om de algemene instelling te gebruiken; het bestand moet in workspace/data/templates/ worden geplaatst)",
 	"cardLayout": "Kaartindeling",
 	"compact": "Compact",
-	"fullRow": "Volledige rij",
+	"fullRow": "Velden die de volledige rij innemen",
 	"editFields": "Velden bewerken",
 	"startDate": "Begindatum",
 	"addToDictionary": "Toevoegen aan woordenboek",

@@ -148,7 +148,7 @@
 	"docCreateTemplatePathInheritTip": "เส้นทางเทมเพลตเอกสารใหม่ (เช่น <code class='fn__code'>document.md</code> เว้นว่างไว้เพื่อใช้การตั้งค่าส่วนกลาง และต้องวางไฟล์ไว้ใน workspace/data/templates/)",
 	"cardLayout": "เค้าโครงการ์ด",
 	"compact": "กะทัดรัด",
-	"fullRow": "เต็มแถว",
+	"fullRow": "ฟิลด์ที่ใช้พื้นที่เต็มแถว",
 	"editFields": "แก้ไขฟิลด์",
 	"startDate": "วันที่เริ่มต้น",
 	"addToDictionary": "เพิ่มลงในพจนานุกรม",

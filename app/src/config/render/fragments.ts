@@ -4,7 +4,7 @@ export const genConfigItemName = (title: string): string =>
 
 /** 配置项左侧区域（标题 + 描述） */
 export const genConfigItemMainHtml = (title: string, desc?: string): string =>
-    `<div class="fn__flex-1">
+    `<div class="fn__flex-1 config-item__main">
     ${genConfigItemName(title)}
     ${desc ? `<div class="b3-label__text">${desc}</div>` : ""}
 </div>`;
@@ -22,7 +22,7 @@ export const genSwitchRow = (id: string, title: string, desc: string | undefined
 /** 列表项开关（`b3-list-item` 布局） */
 export const genListSwitchItemHtml = (id: string, label: string, checked: boolean): string =>
     `<label class="b3-list-item">
-    <div class="fn__flex-1 ft__on-surface">${label}</div>
+    <div class="fn__flex-1 config-item__main ft__on-surface">${label}</div>
     <span class="fn__space"></span>
     ${genSwitchInputHtml(id, checked)}
 </label>`;

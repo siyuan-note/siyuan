@@ -866,6 +866,8 @@ export const initKeyboardToolbar = () => {
             event.stopPropagation();
             if (dataValue === "((" || dataValue === "{{") {
                 // (( / {{ 的候选列表无输入框，需保持键盘不收起，否则无法继续输入筛选 https://github.com/siyuan-note/siyuan/issues/17877
+                // 关闭插入菜单，保留光标和软键盘用于输入查询条件
+                hideKeyboardToolbarUtil();
                 callMobileAppShowKeyboard();
                 if (isInHarmony() || isInAndroid()) {
                     setTimeout(() => focusByRange(protyle.toolbar.range), Constants.TIMEOUT_TRANSITION);

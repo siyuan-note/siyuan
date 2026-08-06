@@ -33,23 +33,22 @@ const getImportButton = (type: string, accept: string) => `<button class="b3-but
 const openRepoKeyImport = (onComplete?: () => void) => {
     const dialog = new Dialog({
         title: `🔑 ${window.siyuan.languages.key}`,
-        content: `<div class="b3-dialog__content" style="display:flex">
-    <textarea spellcheck="false" style="resize:none;flex:1" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}"></textarea>
+        content: `<div class="b3-dialog__content">
+    <input type="text" spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}">
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         width: "520px",
-        height: "260px",
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
-    const textAreaElement = dialog.element.querySelector("textarea") as HTMLTextAreaElement;
+    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
     const buttons = dialog.element.querySelectorAll(".b3-button");
-    textAreaElement.focus();
+    inputElement.focus();
     buttons[0].addEventListener("click", () => dialog.destroy());
     buttons[1].addEventListener("click", () => {
-        fetchPost("/api/repo/importRepoKey", {key: textAreaElement.value}, (response) => {
+        fetchPost("/api/repo/importRepoKey", {key: inputElement.value}, (response) => {
             window.siyuan.config.repo.key = response.data.key;
             dialog.destroy();
             showMessage(window.siyuan.languages.imported);

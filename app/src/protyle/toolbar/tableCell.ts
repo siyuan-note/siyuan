@@ -36,7 +36,16 @@ export const openTableCellAppearance = (protyle: IProtyle, cellElements: HTMLTab
     limitRecentFontStyleRows(appearanceElement);
     protyle.toolbar.subElementCloseCB = undefined;
     const rect = cells[0].getBoundingClientRect();
-    setPosition(protyle.toolbar.subElement, rect.left, rect.top);
+    const gap = 4;
+    const top = rect.bottom + gap;
+    const availableHeight = Math.max(0, window.innerHeight - top);
+    appearanceElement.style.maxHeight = `${availableHeight}px`;
+    const overflowHeight = Math.max(0, protyle.toolbar.subElement.offsetHeight - availableHeight);
+    if (overflowHeight > 0) {
+        appearanceElement.style.maxHeight = `${Math.max(0, appearanceElement.offsetHeight - overflowHeight)}px`;
+    }
+    setPosition(protyle.toolbar.subElement, rect.left, top);
+    protyle.toolbar.subElement.style.top = `${top}px`;
 };
 
 export const getTableCellTextStyleMenus = (protyle: IProtyle, cellElements: HTMLTableCellElement[],

@@ -123,6 +123,7 @@
     &--fixed {
       background-color: var(--b3-parent-background);
       box-sizing: border-box;
+      box-shadow: 0 -1px inset var(--b3-theme-background-light), 0 0 0 1px var(--b3-parent-background);
       position: fixed;
       z-index: 3;
     }
@@ -340,6 +341,10 @@
 
     &--header {
       z-index: 3;
+
+      &.av__row--header--fixed {
+        z-index: 2;
+      }
 
       & > .block__icons > .block__icon svg {
         height: 1em;

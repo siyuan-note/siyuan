@@ -1096,7 +1096,8 @@ export class TableControl {
             return;
         }
         this.cellHandle.classList.remove("fn__none");
-        this.setPosition(this.cellHandle, visibleRect.right, visibleRect.top + visibleRect.height / 2);
+        this.cellHandle.style.left = `${visibleRect.right - 0.5}px`;
+        this.cellHandle.style.top = `${Math.round(visibleRect.top + visibleRect.height / 2)}px`;
     }
 
     private renderResize() {

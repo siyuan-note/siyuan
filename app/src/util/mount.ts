@@ -211,6 +211,7 @@ export const newNotebook = () => {
             formData.append("file", file);
             formData.append("notebook", notebookID);
             formData.append("toPath", "/");
+            formData.append("skipRoot", "true");
             fetchPost("/api/import/importZipMd", formData);
         });
     });
@@ -232,6 +233,7 @@ export const newNotebook = () => {
                 notebook: notebookID,
                 localPath: sourcePath,
                 toPath: "/",
+                skipRoot: !isFile,
             });
         });
     };

@@ -440,6 +440,7 @@ func importStdMd(c *gin.Context) {
 	notebook := arg["notebook"].(string)
 	localPath := arg["localPath"].(string)
 	toPath := arg["toPath"].(string)
+	skipRoot, _ := arg["skipRoot"].(bool)
 
 	if gulu.File.IsSubPath(util.WorkingDir, localPath) {
 		msg := fmt.Sprintf("import from local path [%s] failed: local path is sub path of working dir", localPath)
@@ -457,7 +458,12 @@ func importStdMd(c *gin.Context) {
 		return
 	}
 
-	err := model.ImportFromLocalPath(notebook, localPath, toPath)
+	var err error
+	if skipRoot {
+		err = model.ImportFromLocalPathSkipRoot(notebook, localPath, toPath)
+	} else {
+		err = model.ImportFromLocalPath(notebook, localPath, toPath)
+	}
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -555,6 +561,7 @@ func importZipMd(c *gin.Context) {
 
 	notebook := form.Value["notebook"][0]
 	toPath := form.Value["toPath"][0]
+	skipRoot := len(form.Value["skipRoot"]) > 0 && form.Value["skipRoot"][0] == "true"
 
 	// 准备解压路径
 	filenameMain := strings.TrimSuffix(file.Filename, filepath.Ext(file.Filename))
@@ -572,7 +579,11 @@ func importZipMd(c *gin.Context) {
 	}
 
 	// 调用本地导入逻辑
-	err = model.ImportFromLocalPath(notebook, unzipPath, toPath)
+	if skipRoot {
+		err = model.ImportFromLocalPathSkipRoot(notebook, unzipPath, toPath)
+	} else {
+		err = model.ImportFromLocalPath(notebook, unzipPath, toPath)
+	}
 
 	if err != nil {
 		ret.Code = -1

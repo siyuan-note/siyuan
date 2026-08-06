@@ -1171,6 +1171,15 @@ func ImportData(zipPath string) (err error) {
 }
 
 func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
+	return importFromLocalPath(boxID, localPath, toPath, false)
+}
+
+// ImportFromLocalPathSkipRoot 导入本地路径，但不将来源根目录转换为文档。
+func ImportFromLocalPathSkipRoot(boxID, localPath string, toPath string) (err error) {
+	return importFromLocalPath(boxID, localPath, toPath, true)
+}
+
+func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) (err error) {
 	box, err := getOpenedBox(boxID)
 	if nil != err {
 		return err
@@ -1268,8 +1277,16 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			id := ast.NewNodeID()
 
 			curRelPath := filepath.ToSlash(strings.TrimPrefix(currentPath, localPath))
+			if skipRoot && "" == curRelPath && d.IsDir() {
+				targetPaths["/"] = baseTargetPath
+				return nil
+			}
 			targetPath := path.Join(baseTargetPath, id)
-			hPath := path.Join(baseHPath, filepath.Base(localPath), filepath.ToSlash(strings.TrimPrefix(currentPath, localPath)))
+			hPathRoot := filepath.Base(localPath)
+			if skipRoot {
+				hPathRoot = ""
+			}
+			hPath := path.Join(baseHPath, hPathRoot, filepath.ToSlash(strings.TrimPrefix(currentPath, localPath)))
 			hPath = strings.TrimSuffix(hPath, ext)
 			if "" == curRelPath {
 				curRelPath = "/"

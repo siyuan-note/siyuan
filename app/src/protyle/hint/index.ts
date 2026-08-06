@@ -56,6 +56,7 @@ import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
+import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -150,8 +151,7 @@ export class Hint {
     }
 
     public prepareCreateTarget(protyle: IProtyle, type: TCreateTargetType) {
-        const notebookId = protyle.notebookId || "";
-        const path = protyle.path || "";
+        const {notebookId, path} = getCreateTargetContext(protyle);
         if (this.element.classList.contains("fn__none") || !this.createTargetSession ||
             this.createTargetSession.notebookId !== notebookId || this.createTargetSession.path !== path) {
             this.createTargetSession = {
@@ -182,7 +182,7 @@ export class Hint {
             result: targetState.result,
             promise: targetState.promise,
             isCurrent: () => this.createTargetSession === session && session.renderID === renderID &&
-                session.notebookId === protyle.notebookId && session.path === protyle.path &&
+                isSameCreateTargetContext(session, protyle) &&
                 !this.element.classList.contains("fn__none"),
         };
     }

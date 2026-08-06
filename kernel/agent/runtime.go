@@ -160,6 +160,7 @@ type agentRuntimeTurn struct {
 	State             string         `json:"state"`
 	Delta             []AgentMessage `json:"delta,omitempty"`
 	DraftContent      string         `json:"draftContent,omitempty"`
+	DraftRoundID      string         `json:"draftRoundID,omitempty"`
 	SnapshotIDs       []string       `json:"snapshotIDs,omitempty"`
 	PromptTokens      int            `json:"promptTokens,omitempty"`
 	CompletionTokens  int            `json:"completionTokens,omitempty"`
@@ -492,6 +493,9 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 		if message.ReasoningContent != "" {
 			entry["reasoningContent"] = message.ReasoningContent
 		}
+		if message.RoundID != "" {
+			entry["roundID"] = message.RoundID
+		}
 		if len(message.ToolCalls) > 0 {
 			calls := make([]map[string]any, 0, len(message.ToolCalls))
 			for _, call := range message.ToolCalls {
@@ -525,31 +529,31 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 		authoritative = append(authoritative, entry)
 	}
 	if turn.DraftContent != "" {
-		authoritative = append(authoritative, map[string]any{
+		draft := map[string]any{
 			"id":        fmt.Sprintf("runtime_draft_%s", turn.TurnID),
 			"type":      "assistant",
 			"content":   turn.DraftContent,
 			"timestamp": turn.UpdatedAt,
-		})
+		}
+		if turn.DraftRoundID != "" {
+			draft["roundID"] = turn.DraftRoundID
+		}
+		authoritative = append(authoritative, draft)
 	}
 
 	// regenerate 在启动前已经把旧回答截断到目标 user，因此 user 之后的 UI 条目都属于当前 turn。
+	// assistant 是模型协议消息，数量与前端展示占位并非一一对应。保留 UI 条目后按运行时顺序追加
+	// 权威 assistant，避免按占位序号替换造成思考卡片与中间回复错位。
 	merged := append([]any(nil), entries[:anchor+1]...)
-	authoritativeIndex := 0
 	for _, raw := range entries[anchor+1:] {
 		entry, _ := raw.(map[string]any)
 		typeName, _ := entry["type"].(string)
 		switch typeName {
-		case "assistant":
-			if authoritativeIndex < len(authoritative) {
-				merged = append(merged, authoritative[authoritativeIndex])
-				authoritativeIndex++
-			}
 		case "thinking", "confirm", "question", "snapshot", "rollback":
 			merged = append(merged, raw)
 		}
 	}
-	merged = append(merged, authoritative[authoritativeIndex:]...)
+	merged = append(merged, authoritative...)
 
 	existingSnapshots := map[string]bool{}
 	for _, raw := range merged {

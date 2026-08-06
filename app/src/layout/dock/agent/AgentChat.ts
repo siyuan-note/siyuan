@@ -20,6 +20,7 @@ import * as dayjs from "dayjs";
 import {sendNotification} from "../../../plugin/platformUtils";
 import {
     applyAgentUserEdit,
+    buildAgentPresentationEntries,
     findAgentUserEntryIndex,
     hasAgentExecutedToolsAfter,
     hasAgentModelSpecificContext,
@@ -77,6 +78,7 @@ type SessionEntry =
     steps: Array<{
         reasoning: string;
         reasoningContent: string;
+        roundID?: string;
         toolNames?: string[];
         content?: string
     }>;
@@ -86,6 +88,7 @@ type SessionEntry =
     type: "assistant";
     content?: string;
     reasoningContent?: string;
+    roundID?: string;
     toolCalls?: Array<{
         id?: string;
         name: string;
@@ -123,6 +126,7 @@ export class AgentChat extends Model {
     private currentAssistantEntryId = "";
     private currentThinkingEntryId = "";
     private currentTurnID = "";
+    private currentRoundID = "";
     private recoveryCommitTurnIDs = new Map<string, string>();
     private pendingRecoverySessionIDs = new Set<string>();
     private recoveryInFlightSessionIDs = new Set<string>();
@@ -142,7 +146,13 @@ export class AgentChat extends Model {
     private requestStartTime = 0;
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
-    private currentToolCalls: Array<{ name: string; arguments: Record<string, unknown>; result?: string }> = [];
+    private currentToolCalls: Array<{
+        id?: string;
+        name: string;
+        roundID?: string;
+        arguments: Record<string, unknown>;
+        result?: string
+    }> = [];
     private toolCallStartedAt = new Map<string, number>();
     private abortController: AbortController | null = null;
     private currentThinkingText = "";
@@ -156,6 +166,7 @@ export class AgentChat extends Model {
     private currentThinkingSteps: Array<{
         reasoning: string;
         reasoningContent: string;
+        roundID?: string;
         toolNames?: string[];
         content?: string
     }> = [];
@@ -674,6 +685,7 @@ export class AgentChat extends Model {
                     this.requestStartTime = Date.now();
                     this.currentThinkingDuration = 0;
                     this.currentTurnID = "";
+                    this.currentRoundID = "";
                     await fetchAgentSSE(text, window.siyuan.config.appearance.lang, [],
                         (event: ISSEResult) => {
                             if (this.sessionId !== requestSessionId) {
@@ -1063,6 +1075,7 @@ export class AgentChat extends Model {
             this.currentContent = "";
             this.fullContent = "";
             this.currentToolCalls = [];
+            this.currentRoundID = "";
             this.pendingConfirms = [];
             this.currentThinkingSteps = [];
             this.currentThinkingEntryId = "";
@@ -1214,6 +1227,7 @@ export class AgentChat extends Model {
         this.entries = [];
         this.sessionId = SessionStore.newSessionId();
         this.currentTurnID = "";
+        this.currentRoundID = "";
         this.sessionCreatedAt = Date.now();
         this.sessionTitle = this.defaultTitle;
         this.pendingSessionTitle = null;
@@ -1259,6 +1273,7 @@ export class AgentChat extends Model {
         }
         this.sessionId = session.id;
         this.currentTurnID = "";
+        this.currentRoundID = "";
         if (session.recoveryTurnID) {
             this.recoveryCommitTurnIDs.set(session.id, session.recoveryTurnID);
         } else {
@@ -1389,19 +1404,29 @@ export class AgentChat extends Model {
     // 持久化前精简 toolCalls：question 工具的完整 questions 参数已由独立的 question entry 存储，
     // assistant entry 的 toolCalls 里只需保留工具名和结果（供 LLM 上下文恢复），避免重复存储。
     private slimToolCallsForPersistence(toolCalls: Array<{
+        id?: string;
+        name: string;
+        roundID?: string;
+        arguments: Record<string, unknown>;
+        result?: string
+    }>): Array<{
+        id?: string;
         name: string;
         arguments: Record<string, unknown>;
         result?: string
-    }>): Array<{ name: string; arguments: Record<string, unknown>; result?: string }> {
+    }> {
         return toolCalls.map(tc => {
+            let args = tc.arguments;
             if (tc.name === "question" && tc.arguments && tc.arguments.questions) {
-                const slim = {...tc};
-                const slimArgs = {...tc.arguments};
-                delete slimArgs.questions;
-                slim.arguments = slimArgs;
-                return slim;
+                args = {...tc.arguments};
+                delete args.questions;
             }
-            return tc;
+            return {
+                id: tc.id,
+                name: tc.name,
+                arguments: args,
+                result: tc.result,
+            };
         });
     }
 
@@ -1450,8 +1475,9 @@ export class AgentChat extends Model {
 
     private renderLoadedSession(session: AgentSession) {
         this.destroyEditingComposer();
-        for (let i = 0; i < session.entries.length; i++) {
-            const entry = session.entries[i];
+        const displayEntries = buildAgentPresentationEntries(session.entries || []) as SessionEntry[];
+        for (let i = 0; i < displayEntries.length; i++) {
+            const entry = displayEntries[i];
             const entryId = (entry as { id?: string }).id;
             switch (entry.type) {
                 case "user":
@@ -1466,6 +1492,7 @@ export class AgentChat extends Model {
                             steps: Array<{
                                 reasoning: string;
                                 reasoningContent?: string;
+                                roundID?: string;
                                 toolNames?: string[];
                                 toolCalls?: Array<{ name: string; result?: string }>;
                                 text?: string;
@@ -1476,6 +1503,7 @@ export class AgentChat extends Model {
                         const normSteps = rawEntry.steps.map(s => ({
                             reasoning: s.reasoning || "",
                             reasoningContent: s.reasoningContent || "",
+                            roundID: s.roundID,
                             toolNames: (s.toolNames && s.toolNames.length > 0)
                                 ? s.toolNames
                                 : (s.toolCalls ? s.toolCalls.map(t => t.name) : undefined),
@@ -1589,6 +1617,7 @@ export class AgentChat extends Model {
         }
         this.sessionId = SessionStore.newSessionId();
         this.currentTurnID = "";
+        this.currentRoundID = "";
         this.sessionCreatedAt = Date.now();
         if (this.composer) {
             this.composer.clearHistory();
@@ -1678,6 +1707,7 @@ export class AgentChat extends Model {
         this.setStreaming(true);
         this.clearThinking();
         this.hasInterveningCard = false;
+        this.currentRoundID = "";
         this.composer.clear();
 
         const userEntryId = SessionStore.newSessionId();
@@ -1711,6 +1741,7 @@ export class AgentChat extends Model {
         this.requestStartTime = Date.now();
         this.currentThinkingDuration = 0;
         this.currentTurnID = "";
+        this.currentRoundID = "";
 
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;
@@ -1975,10 +2006,15 @@ export class AgentChat extends Model {
                     this.appendToken(event.token);
                     break;
                 case "thinking":
-                    this.appendThinking(event.reasoning);
+                    this.appendThinking(event.reasoning, event.roundID || "");
                     break;
                 case "tool_call":
-                    this.currentToolCalls.push({name: event.name, arguments: event.arguments});
+                    this.currentToolCalls.push({
+                        id: event.callID,
+                        name: event.name,
+                        roundID: event.roundID || this.currentRoundID || undefined,
+                        arguments: event.arguments,
+                    });
                     this.appendToolCall(event.name);
                     break;
                 case "confirm":
@@ -1990,7 +2026,8 @@ export class AgentChat extends Model {
                     break;
                 case "tool_result":
                     {
-                        const toolCall = this.currentToolCalls.find((item) => item.name === event.name && item.result === undefined);
+                        const toolCall = this.currentToolCalls.find((item) =>
+                            item.result === undefined && (event.callID ? item.id === event.callID : item.name === event.name));
                         if (toolCall) {
                             toolCall.result = event.result;
                         }
@@ -2451,7 +2488,7 @@ export class AgentChat extends Model {
         this.hasInterveningCard = true;
     }
 
-    private appendThinking(reasoning: string) {
+    private appendThinking(reasoning: string, roundID: string) {
         const L = window.siyuan.languages;
         if (this.currentThinkingText) {
             // step 不保存 text（渲染时由 duration 经 i18n 生成）。
@@ -2463,6 +2500,7 @@ export class AgentChat extends Model {
             this.currentThinkingSteps.push({
                 reasoning: this.currentThinkingReasoning,
                 reasoningContent: this.currentThinkingReasoningContent,
+                roundID: this.currentRoundID || undefined,
                 toolNames: toolNames.length > 0 ? toolNames : undefined,
             });
             this.lastStepToolCount = this.currentToolCalls.length;
@@ -2470,6 +2508,7 @@ export class AgentChat extends Model {
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
+        this.currentRoundID = roundID;
         const text = L.agentThinking || "Thinking";
 
         this.currentThinkingText = text;
@@ -2557,6 +2596,7 @@ export class AgentChat extends Model {
                 this.entries.push({
                     id: SessionStore.newSessionId(),
                     type: "assistant",
+                    roundID: this.currentToolCalls[0].roundID,
                     toolCalls: this.slimToolCallsForPersistence(this.currentToolCalls)
                 });
                 this.currentToolCalls = [];
@@ -2788,6 +2828,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.currentRoundID = "";
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         this.hasInterveningCard = false;
@@ -2804,6 +2845,7 @@ export class AgentChat extends Model {
         this.requestStartTime = Date.now();
         this.currentThinkingDuration = 0;
         this.currentTurnID = "";
+        this.currentRoundID = "";
         const lastUserEntry = targetEntry;
         const lastUserText = lastUserEntry.content;
         const editorContext = this.captureEditorContext();
@@ -2916,6 +2958,7 @@ export class AgentChat extends Model {
                 id: this.currentAssistantEntryId || undefined,
                 type: "assistant",
                 content: this.currentContent,
+                roundID: this.currentRoundID || undefined,
                 toolCalls: this.currentToolCalls.length > 0 ? this.slimToolCallsForPersistence(this.currentToolCalls) : undefined,
                 timestamp: ts,
             });
@@ -2923,6 +2966,7 @@ export class AgentChat extends Model {
             this.entries.push({
                 id: SessionStore.newSessionId(),
                 type: "assistant",
+                roundID: this.currentToolCalls[0].roundID,
                 toolCalls: this.slimToolCallsForPersistence(this.currentToolCalls)
             });
         }
@@ -2932,6 +2976,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.currentRoundID = "";
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         if (this.requestStartTime) {
@@ -2993,6 +3038,7 @@ export class AgentChat extends Model {
             this.currentThinkingSteps.push({
                 reasoning: this.currentThinkingReasoning,
                 reasoningContent: this.currentThinkingReasoningContent,
+                roundID: this.currentRoundID || undefined,
                 toolNames: toolNames.length > 0 ? toolNames : undefined,
                 content: this.currentThinkingStepContent || undefined,
             });
@@ -3172,6 +3218,7 @@ export class AgentChat extends Model {
                 id: this.currentAssistantEntryId || undefined,
                 type: "assistant",
                 content: this.currentContent,
+                roundID: this.currentRoundID || undefined,
                 toolCalls: this.currentToolCalls.length > 0 ? this.slimToolCallsForPersistence(this.currentToolCalls) : undefined,
                 timestamp: ts,
             });
@@ -3182,6 +3229,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.currentRoundID = "";
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         if (this.requestStartTime) {

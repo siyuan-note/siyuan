@@ -149,6 +149,7 @@ func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
 		Type:          "assistant",
 		Content:       "Let me search for that.",
 		ReasoningCont: "I need to use the search tool.",
+		RoundID:       "round-1",
 		ToolCalls: []AgentToolCall{{
 			ID:            "call-original",
 			Name:          "search",
@@ -160,7 +161,8 @@ func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
 	}}
 
 	checkpoint := entriesToAgentMessages(entries)
-	if len(checkpoint) != 1 || checkpoint[0].ReasoningContent != entries[0].ReasoningCont {
+	if len(checkpoint) != 1 || checkpoint[0].ReasoningContent != entries[0].ReasoningCont ||
+		checkpoint[0].RoundID != entries[0].RoundID {
 		t.Fatalf("assistant reasoning was not restored into checkpoint: %#v", checkpoint)
 	}
 	if len(checkpoint[0].ToolCalls) != 1 || checkpoint[0].ToolCalls[0].ID != "call-original" ||
@@ -184,6 +186,7 @@ func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
 
 	roundTripped := agentMessagesToEntries(checkpoint)
 	if len(roundTripped) != 1 || roundTripped[0].ReasoningCont != entries[0].ReasoningCont ||
+		roundTripped[0].RoundID != entries[0].RoundID ||
 		len(roundTripped[0].ToolCalls) != 1 || roundTripped[0].ToolCalls[0].ID != "call-original" ||
 		roundTripped[0].ToolCalls[0].ArgumentsJSON != argumentsJSON {
 		t.Fatalf("assistant context changed during checkpoint round trip: %#v", roundTripped)

@@ -731,7 +731,7 @@ func TestGetSessionRejectsIncompatibleRuntimeMetadata(t *testing.T) {
 	}
 }
 
-func TestApplyRuntimePreservesUIOrderAndReplacesAssistant(t *testing.T) {
+func TestApplyRuntimePreservesUIOrderAndAppendsAuthoritativeAssistants(t *testing.T) {
 	session := map[string]any{
 		"entries": []any{
 			map[string]any{"id": "user-1", "type": "user", "content": "hello"},
@@ -755,7 +755,7 @@ func TestApplyRuntimePreservesUIOrderAndReplacesAssistant(t *testing.T) {
 		t.Fatal(err)
 	}
 	entries := session["entries"].([]any)
-	wantTypes := []string{"user", "thinking", "assistant", "confirm", "assistant", "rollback"}
+	wantTypes := []string{"user", "thinking", "confirm", "rollback", "assistant", "assistant"}
 	if len(entries) != len(wantTypes) {
 		t.Fatalf("unexpected merged entry count: %#v", entries)
 	}
@@ -765,9 +765,56 @@ func TestApplyRuntimePreservesUIOrderAndReplacesAssistant(t *testing.T) {
 			t.Fatalf("entry %d type: got=%v, want=%s", i, entry["type"], wantType)
 		}
 	}
-	if entries[2].(map[string]any)["content"] != "server one" ||
-		entries[4].(map[string]any)["content"] != "server two" {
+	if entries[4].(map[string]any)["content"] != "server one" ||
+		entries[5].(map[string]any)["content"] != "server two" {
 		t.Fatalf("client assistant content was not replaced: %#v", entries)
+	}
+}
+
+func TestApplyRuntimeDoesNotDependOnAssistantPlaceholderCount(t *testing.T) {
+	session := map[string]any{
+		"entries": []any{
+			map[string]any{"id": "user-1", "type": "user", "content": "hello"},
+			map[string]any{"id": "snapshot-1", "type": "snapshot"},
+			map[string]any{"id": "thinking-1", "type": "thinking"},
+			map[string]any{"id": "client-assistant-1", "type": "assistant"},
+			map[string]any{"id": "thinking-2", "type": "thinking"},
+			map[string]any{"id": "client-assistant-2", "type": "assistant", "content": "client final"},
+		},
+	}
+	turn := &agentRuntimeTurn{
+		TurnID:      "20260806190742-abcdefg",
+		UserEntryID: "user-1",
+		UpdatedAt:   1,
+		Delta: []AgentMessage{
+			{Role: "assistant", RoundID: "round-0", ToolCalls: []AgentToolCall{{Name: "block"}}},
+			{Role: "assistant", RoundID: "round-1", Content: "first", ToolCalls: []AgentToolCall{{Name: "block"}}},
+			{Role: "assistant", RoundID: "round-2", Content: "retry", ToolCalls: []AgentToolCall{{Name: "block"}}},
+			{Role: "assistant", RoundID: "round-3", Content: "done"},
+		},
+	}
+	if err := applyRuntimeTurnToSessionLocked(session, turn); err != nil {
+		t.Fatal(err)
+	}
+	entries := session["entries"].([]any)
+	wantTypes := []string{"user", "snapshot", "thinking", "thinking", "assistant", "assistant", "assistant", "assistant"}
+	if len(entries) != len(wantTypes) {
+		t.Fatalf("unexpected merged entry count: %#v", entries)
+	}
+	for i, wantType := range wantTypes {
+		entry := entries[i].(map[string]any)
+		if entry["type"] != wantType {
+			t.Fatalf("entry %d type: got=%v, want=%s", i, entry["type"], wantType)
+		}
+	}
+	for i, roundID := range []string{"round-0", "round-1", "round-2", "round-3"} {
+		entry := entries[i+4].(map[string]any)
+		if entry["roundID"] != roundID {
+			t.Fatalf("authoritative assistant %d round: got=%v, want=%s", i, entry["roundID"], roundID)
+		}
+		if entry["id"] == "client-assistant-1" || entry["id"] == "client-assistant-2" {
+			t.Fatalf("client assistant placeholder was retained: %#v", entry)
+		}
 	}
 }
 

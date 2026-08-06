@@ -14,9 +14,12 @@ export type ISSEResult = {
 } | {
     type: "thinking";
     reasoning: string;
+    roundID?: string;
 } | {
     type: "tool_call";
     name: string;
+    callID?: string;
+    roundID?: string;
     arguments: Record<string, unknown>;
 } | {
     type: "confirm";
@@ -27,6 +30,8 @@ export type ISSEResult = {
 } | {
     type: "tool_result";
     name: string;
+    callID?: string;
+    roundID?: string;
     result: string;
 } | {
     type: "error";
@@ -261,11 +266,17 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
         case "content":
             return {type: "content", token: data.token as string};
         case "thinking":
-            return {type: "thinking", reasoning: data.reasoning as string};
+            return {
+                type: "thinking",
+                reasoning: data.reasoning as string,
+                roundID: data.roundID as string || undefined,
+            };
         case "tool_call":
             return {
                 type: "tool_call",
                 name: data.name as string,
+                callID: data.callID as string || undefined,
+                roundID: data.roundID as string || undefined,
                 arguments: (data.arguments || {}) as Record<string, unknown>,
             };
         case "confirm":
@@ -284,6 +295,8 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
             return {
                 type: "tool_result",
                 name: data.name as string,
+                callID: data.callID as string || undefined,
+                roundID: data.roundID as string || undefined,
                 result: data.result as string,
             };
         case "error":

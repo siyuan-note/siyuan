@@ -303,6 +303,8 @@ type AgentEvent struct {
 	Type             string
 	Token            string
 	Name             string
+	RoundID          string
+	ToolCallID       string
 	Arguments        map[string]any
 	Result           string
 	Reasoning        string
@@ -328,6 +330,7 @@ type AgentMessage struct {
 	Role             string          `json:"role"`
 	Content          string          `json:"content"`
 	ReasoningContent string          `json:"reasoningContent,omitempty"`
+	RoundID          string          `json:"roundID,omitempty"`
 	References       []Reference     `json:"references,omitempty"`
 	EditorContext    *EditorContext  `json:"editorContext,omitempty"`
 	ToolCalls        []AgentToolCall `json:"toolCalls,omitempty"`
@@ -418,6 +421,7 @@ type SessionEntry struct {
 	CompletionTok int                `json:"completionTokens,omitempty"`
 	Timestamp     int64              `json:"timestamp,omitempty"`
 	ReasoningCont string             `json:"reasoningContent,omitempty"`
+	RoundID       string             `json:"roundID,omitempty"`
 	Name          string             `json:"name,omitempty"`
 	Args          map[string]any     `json:"args,omitempty"`
 	ConfirmID     string             `json:"confirmID,omitempty"`
@@ -428,12 +432,14 @@ type SessionEntry struct {
 	SnapshotID    string             `json:"snapshotID,omitempty"`
 }
 
-// SessionEntryStep 描述一次思考步骤。工具调用只保留名字列表，
+// SessionEntryStep 描述一次思考步骤。工具调用只保留名字列表，过程正文保存在 Content，
 // arguments/result 仅在所属 assistant entry 的 ToolCalls 中存储，避免重复。
 type SessionEntryStep struct {
 	Reasoning        string   `json:"reasoning"`
 	ReasoningContent string   `json:"reasoningContent,omitempty"`
 	ToolNames        []string `json:"toolNames,omitempty"`
+	Content          string   `json:"content,omitempty"`
+	RoundID          string   `json:"roundID,omitempty"`
 }
 
 type agentCheckpoint struct {
@@ -774,10 +780,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			default:
 			}
 
+			roundID := fmt.Sprintf("%s_%d", turn.TurnID, modelRound)
 			if modelRound == 0 {
-				sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "analyzing"})
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "analyzing", RoundID: roundID})
 			} else {
-				sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "processing"})
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "processing", RoundID: roundID})
 			}
 			modelRound++
 
@@ -868,8 +875,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					logging.LogErrorf("agent stream error: %s", recvErr.Error())
 					content := contentBuilder.String()
 					if content != "" || reasoningBuilder.String() != "" {
-						checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
+						checkpointMsgs = append(checkpointMsgs, AgentMessage{
+							Role:             "assistant",
+							Content:          content,
+							ReasoningContent: reasoningBuilder.String(),
+							RoundID:          roundID,
+						})
 						turn.DraftContent = ""
+						turn.DraftRoundID = ""
 					}
 					finalized := saveTurn("interrupted")
 					stream.Close()
@@ -883,6 +896,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 				select {
 				case <-ctx.Done():
 					turn.DraftContent = contentBuilder.String()
+					turn.DraftRoundID = roundID
 					saveTurn("interrupted")
 					stream.Close()
 					roundCancel()
@@ -921,6 +935,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 				}
 				if contentBuilder.Len() > 0 && time.Since(lastDraftCheckpoint) >= time.Second {
 					turn.DraftContent = contentBuilder.String()
+					turn.DraftRoundID = roundID
 					saveTurn("running")
 					lastDraftCheckpoint = time.Now()
 				}
@@ -941,6 +956,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			stream.Close()
 			roundCancel()
 			turn.DraftContent = ""
+			turn.DraftRoundID = ""
 
 			if len(aggregatedToolCalls) > 0 {
 				filtered := make([]openai.ToolCall, 0, len(aggregatedToolCalls))
@@ -963,6 +979,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					Role:             "assistant",
 					Content:          contentBuilder.String(),
 					ReasoningContent: reasoningBuilder.String(),
+					RoundID:          roundID,
 				}
 				parsedArgs := make([]map[string]any, len(aggregatedToolCalls))
 				var roundAttachments []AgentAttachment
@@ -983,7 +1000,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					for j := start; j < len(aggregatedToolCalls); j++ {
 						checkpointMsgs[assistantIdx].ToolCalls[j].Result = result
 						checkpointMsgs[assistantIdx].ToolCalls[j].State = "skipped"
-						sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: result})
+						sendEvent(ch, AgentEvent{
+							Type:       "tool_result",
+							Name:       aggregatedToolCalls[j].Function.Name,
+							RoundID:    roundID,
+							ToolCallID: aggregatedToolCalls[j].ID,
+							Result:     result,
+						})
 					}
 				}
 				// 在展示确认框前记录模型提出的整批调用。此时都尚未执行，崩溃恢复可以明确区分
@@ -1000,9 +1023,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					}
 
 					sendEvent(ch, AgentEvent{
-						Type:      "tool_call",
-						Name:      tc.Function.Name,
-						Arguments: args,
+						Type:       "tool_call",
+						Name:       tc.Function.Name,
+						RoundID:    roundID,
+						ToolCallID: tc.ID,
+						Arguments:  args,
 					})
 
 					_, _, toolInputErr := validateToolCallInput(ctx, tc.Function.Name, args)
@@ -1040,7 +1065,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 								Content:    wrapToolOutput(cancelMsg),
 								ToolCallID: tc.ID,
 							})
-							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: cancelMsg})
+							sendEvent(ch, AgentEvent{
+								Type:       "tool_result",
+								Name:       tc.Function.Name,
+								RoundID:    roundID,
+								ToolCallID: tc.ID,
+								Result:     cancelMsg,
+							})
 
 							for j := i + 1; j < len(aggregatedToolCalls); j++ {
 								checkpointMsgs[assistantIdx].ToolCalls[j].Result = cancelMsg
@@ -1050,7 +1081,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 									Content:    wrapToolOutput(cancelMsg),
 									ToolCallID: aggregatedToolCalls[j].ID,
 								})
-								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: cancelMsg})
+								sendEvent(ch, AgentEvent{
+									Type:       "tool_result",
+									Name:       aggregatedToolCalls[j].Function.Name,
+									RoundID:    roundID,
+									ToolCallID: aggregatedToolCalls[j].ID,
+									Result:     cancelMsg,
+								})
 							}
 							if !saveTurn("interrupted") {
 								return
@@ -1063,13 +1100,25 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 							}
 							timedOut = true
 							rejectionMsg = "Confirmation timed out, operation skipped automatically"
-							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg})
+							sendEvent(ch, AgentEvent{
+								Type:       "tool_result",
+								Name:       tc.Function.Name,
+								RoundID:    roundID,
+								ToolCallID: tc.ID,
+								Result:     rejectionMsg,
+							})
 						}
 
 						if timedOut || !result.approved {
 							if rejectionMsg == "" {
 								rejectionMsg = "User rejected this operation"
-								sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg})
+								sendEvent(ch, AgentEvent{
+									Type:       "tool_result",
+									Name:       tc.Function.Name,
+									RoundID:    roundID,
+									ToolCallID: tc.ID,
+									Result:     rejectionMsg,
+								})
 							}
 							messages = append(messages, openai.ChatCompletionMessage{
 								Role:       openai.ChatMessageRoleTool,
@@ -1090,7 +1139,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 							})
 						}
 						// 确认卡片会结束当前思考状态，工具执行前重新通知前端显示“思考中”。
-						sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "processing"})
+						sendCriticalEvent(ctx, ch, AgentEvent{
+							Type: "thinking", Reasoning: "processing", RoundID: roundID,
+						})
 					}
 					select {
 					case <-ctx.Done():
@@ -1124,9 +1175,21 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 							if !saveTurn("interrupted") {
 								return
 							}
-							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: abortMsg})
+							sendEvent(ch, AgentEvent{
+								Type:       "tool_result",
+								Name:       tc.Function.Name,
+								RoundID:    roundID,
+								ToolCallID: tc.ID,
+								Result:     abortMsg,
+							})
 							for j := i + 1; j < len(aggregatedToolCalls); j++ {
-								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: abortMsg})
+								sendEvent(ch, AgentEvent{
+									Type:       "tool_result",
+									Name:       aggregatedToolCalls[j].Function.Name,
+									RoundID:    roundID,
+									ToolCallID: aggregatedToolCalls[j].ID,
+									Result:     abortMsg,
+								})
 							}
 							sendCriticalEvent(ctx, ch, AgentEvent{
 								Type:  "error",
@@ -1188,9 +1251,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					resultStr = wrapToolOutput(resultStr)
 
 					sendEvent(ch, AgentEvent{
-						Type:   "tool_result",
-						Name:   tc.Function.Name,
-						Result: resultStr,
+						Type:       "tool_result",
+						Name:       tc.Function.Name,
+						RoundID:    roundID,
+						ToolCallID: tc.ID,
+						Result:     resultStr,
 					})
 
 					messages = append(messages, openai.ChatCompletionMessage{
@@ -1273,6 +1338,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					Role:             "assistant",
 					Content:          content,
 					ReasoningContent: reasoningBuilder.String(),
+					RoundID:          roundID,
 				})
 			}
 			if content == "" {
@@ -1812,6 +1878,7 @@ func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 				Role:             "assistant",
 				Content:          e.Content,
 				ReasoningContent: e.ReasoningCont,
+				RoundID:          e.RoundID,
 				EntryID:          e.ID,
 			}
 			if len(e.ToolCalls) > 0 {
@@ -1973,6 +2040,7 @@ func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 				Type:          "assistant",
 				Content:       m.Content,
 				ReasoningCont: m.ReasoningContent,
+				RoundID:       m.RoundID,
 				ToolCalls:     m.ToolCalls,
 			}
 			entries = append(entries, e)

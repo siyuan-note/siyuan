@@ -297,9 +297,12 @@ export const initBlockPopover = (app: App) => {
             path: HTMLElement[]
         }) => {
             logAndroidInputEvent(event);
+            if (event.pointerType !== "pen") {
+                return;
+            }
             clearTimeout(penTimeout);
             clearTimeout(penTimeoutHide);
-            if (event.pointerType !== "pen" || event.buttons !== 0 ||
+            if (event.buttons !== 0 ||
                 !window.siyuan.config || !window.siyuan.menus ||
                 window.siyuan.dragElement || document.onmousemove ||
                 window.siyuan.config.editor.floatWindowMode !== 0 || window.siyuan.shiftIsPressed) {

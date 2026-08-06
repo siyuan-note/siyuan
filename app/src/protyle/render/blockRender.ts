@@ -23,6 +23,10 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
         return;
     }
     blockElements.forEach((item: HTMLElement) => {
+        const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
+        if (!content.trim()) {
+            return;
+        }
         // 需置于请求返回前，否则快速滚动会导致重复加载 https://ld246.com/article/1666857862494?r=88250
         item.setAttribute("data-render", "true");
         genRenderFrame(item);
@@ -35,7 +39,6 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
                 }
             }
         }
-        const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         let breadcrumb: boolean | string = item.getAttribute("breadcrumb");
         if (breadcrumb) {
             breadcrumb = breadcrumb === "true";

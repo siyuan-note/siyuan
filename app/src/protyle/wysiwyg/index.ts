@@ -88,7 +88,16 @@ import {openGlobalSearch} from "../../search/util";
 /// #else
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
-import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
+import {
+    copyPlainText,
+    encodeBase64,
+    isInAndroid,
+    isInHarmony,
+    isInIOS,
+    isMac,
+    isOnlyMeta,
+    readClipboard
+} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {
@@ -586,6 +595,7 @@ export class WYSIWYG {
         }));
         const textPlain = clipboardData.getData("text/plain");
         const textHTML = clipboardData.getData("text/html");
+        const textSiyuan = clipboardData.getData("text/siyuan");
         if (!textPlain && !textHTML) {
             showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
             return false;
@@ -598,7 +608,25 @@ export class WYSIWYG {
             clipboardItem["text/html"] = textHTML;
         }
         try {
-            if (navigator.clipboard?.write) {
+            if (isInAndroid()) {
+                if (textSiyuan) {
+                    window.JSAndroid.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
+                } else if (textHTML) {
+                    window.JSAndroid.writeHTMLClipboard(textPlain, textHTML);
+                } else {
+                    window.JSAndroid.writeClipboard(textPlain);
+                }
+            } else if (isInHarmony()) {
+                if (textSiyuan) {
+                    window.JSHarmony.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
+                } else if (textHTML) {
+                    window.JSHarmony.writeHTMLClipboard(textPlain, textHTML);
+                } else {
+                    window.JSHarmony.writeClipboard(textPlain);
+                }
+            } else if (isInIOS()) {
+                window.webkit.messageHandlers.setClipboard.postMessage(textPlain);
+            } else if (navigator.clipboard?.write) {
                 await navigator.clipboard.write([new ClipboardItem(clipboardItem)]);
             } else if (navigator.clipboard?.writeText) {
                 await navigator.clipboard.writeText(textPlain || textHTML);

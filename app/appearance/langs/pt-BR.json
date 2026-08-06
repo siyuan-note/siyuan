@@ -1,6 +1,8 @@
 {
+	"lanSyncInactive": "O serviço de aceleração da sincronização pela LAN está inativo",
+	"lanSyncConnectedPeers": "Dispositivos LAN autenticados: ${count}",
 	"lanSync": "Aceleração da sincronização pela LAN",
-	"lanSyncTip": "Baixa blocos de dados criptografados mais rapidamente de dispositivos confiáveis na rede local enquanto o armazenamento em nuvem permanece como autoridade da sincronização; após um dispositivo ficar offline, a contagem de dispositivos descobertos pode levar cerca de um minuto para ser atualizada e, quando a transferência pela LAN não está disponível, o armazenamento em nuvem é usado automaticamente",
+	"lanSyncTip": "Dispositivos confiáveis usam a mesma chave do repositório de dados e o mesmo destino de sincronização na nuvem; os objetos de dados criptografados são baixados primeiro desses dispositivos enquanto a nuvem permanece como autoridade da sincronização, e transferências LAN indisponíveis recorrem automaticamente à nuvem; as contagens de descoberta e autenticação podem levar cerca de um minuto para serem atualizadas após um dispositivo ficar offline",
 	"lanSyncDiscoveredPeers": "Dispositivos LAN descobertos: ${count}",
 	"agentPermission": "Permissão",
 	"agentPermissionConfirm": "Confirmar sempre",

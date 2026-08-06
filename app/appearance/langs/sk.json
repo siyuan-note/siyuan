@@ -1,6 +1,8 @@
 {
+	"lanSyncInactive": "Služba zrýchlenia synchronizácie v sieti LAN nie je aktívna",
+	"lanSyncConnectedPeers": "Overené zariadenia LAN: ${count}",
 	"lanSync": "Zrýchlenie synchronizácie v sieti LAN",
-	"lanSyncTip": "Sťahuje šifrované dátové bloky rýchlejšie z dôveryhodných zariadení v lokálnej sieti, pričom cloudové úložisko zostáva autoritatívnym zdrojom synchronizácie; po odpojení zariadenia môže aktualizácia počtu zistených zariadení trvať približne minútu a pri nedostupnom prenose cez LAN sa automaticky použije cloudové úložisko",
+	"lanSyncTip": "Dôveryhodné zariadenia používajú rovnaký kľúč dátového úložiska a rovnaký cieľ cloudovej synchronizácie; šifrované dátové objekty sa najprv sťahujú z týchto zariadení, pričom cloud zostáva autoritatívnym zdrojom synchronizácie a pri nedostupnom prenose cez LAN sa použije automaticky; po odpojení zariadenia môže aktualizácia počtu zistených a overených zariadení trvať približne minútu",
 	"lanSyncDiscoveredPeers": "Zistené zariadenia LAN: ${count}",
 	"agentPermission": "Povolenie",
 	"agentPermissionConfirm": "Potvrdiť zakaždým",

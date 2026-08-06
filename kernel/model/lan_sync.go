@@ -53,7 +53,7 @@ func refreshLANSyncManager() {
 	if lanSyncShuttingDown {
 		return
 	}
-	if nil == Conf.Sync || nil == Conf.Sync.LAN || !Conf.Sync.LAN.Enabled || !Conf.Sync.Enabled ||
+	if nil == Conf || nil == Conf.Sync || nil == Conf.Sync.LAN || !Conf.Sync.LAN.Enabled || !Conf.Sync.Enabled ||
 		1 > len(Conf.Repo.Key) || util.ContainerDocker == util.Container {
 		return
 	}
@@ -150,6 +150,12 @@ func stopLANSyncManager() {
 	stopLANSyncManagerLocked()
 }
 
+func suspendLANSyncManager() {
+	lanSyncLifecycleMu.Lock()
+	defer lanSyncLifecycleMu.Unlock()
+	stopLANSyncManagerLocked()
+}
+
 func stopLANSyncManagerLocked() {
 	if nil != lanSyncRetryTimer {
 		lanSyncRetryTimer.Stop()
@@ -170,7 +176,7 @@ func scheduleLANSyncRetryLocked() {
 
 func collectLANSyncIPs() (ret []net.IP) {
 	added := map[string]bool{}
-	for _, address := range append(util.GetPrivateIPv4s(), util.LocalIPs...) {
+	for _, address := range append(util.GetPrivateIPv4s(), util.GetLocalIPs()...) {
 		ipAddress := address
 		if index := strings.LastIndex(ipAddress, "%"); 0 < index {
 			ipAddress = ipAddress[:index]
@@ -183,6 +189,14 @@ func collectLANSyncIPs() (ret []net.IP) {
 		ret = append(ret, ip)
 	}
 	return
+}
+
+// RefreshLANSyncNetwork 在原生容器报告网络地址变化后重启局域网同步服务。
+func RefreshLANSyncNetwork() {
+	if nil == Conf {
+		return
+	}
+	refreshLANSyncManager()
 }
 
 func newSyncRepository() (ret *dejavu.Repo, err error) {

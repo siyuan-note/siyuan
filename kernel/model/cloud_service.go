@@ -331,6 +331,10 @@ func refreshAnnouncement() {
 }
 
 func RefreshUser(token string) {
+	previousUserID := ""
+	if previousUser := Conf.GetUser(); nil != previousUser {
+		previousUserID = previousUser.UserId
+	}
 	threeDaysAfter := util.CurrentTimeMillis() + 1000*60*60*24*3
 	if "" == token {
 		user := Conf.GetUser()
@@ -338,6 +342,9 @@ func RefreshUser(token string) {
 			user = loadUserFromConf()
 			if nil != user {
 				Conf.SetUser(user)
+				if previousUserID != user.UserId {
+					refreshLANSyncManager()
+				}
 			}
 		}
 		if nil == user {
@@ -392,6 +399,9 @@ Net:
 	data, _ := gulu.JSON.MarshalJSON(user)
 	Conf.UserData = util.AESEncrypt(string(data))
 	Conf.Save()
+	if previousUserID != user.UserId {
+		refreshLANSyncManager()
+	}
 
 	if elapsed := time.Since(start).Milliseconds(); 3000 < elapsed {
 		logging.LogInfof("get cloud user elapsed [%dms]", elapsed)
@@ -640,9 +650,13 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 }
 
 func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Result) {
+	previousCloudRegion := util.CurrentCloudRegion
 	Conf.CloudRegion = cloudRegion
 	Conf.Save()
 	util.CurrentCloudRegion = cloudRegion
+	if previousCloudRegion != cloudRegion {
+		refreshLANSyncManager()
+	}
 
 	result := map[string]any{}
 	request := httpclient.NewCloudRequest30s()
@@ -696,7 +710,11 @@ func Login2fa(token, code string) (map[string]any, error) {
 }
 
 func LogoutUser() {
+	hadUser := nil != Conf.GetUser()
 	Conf.UserData = ""
 	Conf.SetUser(nil)
 	Conf.Save()
+	if hadUser {
+		refreshLANSyncManager()
+	}
 }

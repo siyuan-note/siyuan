@@ -1,6 +1,8 @@
 {
+	"lanSyncInactive": "LAN sync acceleration service is inactive",
+	"lanSyncConnectedPeers": "Authenticated LAN devices: ${count}",
 	"lanSync": "LAN sync acceleration",
-	"lanSyncTip": "Downloads encrypted data chunks faster from trusted devices on the local network while cloud storage remains the sync authority; the discovered device count may take about one minute to update after a device goes offline, and unavailable LAN transfers automatically fall back to cloud storage",
+	"lanSyncTip": "Trusted devices use the same data repository key and cloud sync target; encrypted data objects are downloaded from them first while cloud storage remains the sync authority, and unavailable LAN transfers automatically fall back to cloud storage; discovery and authentication counts may take about one minute to update after a device goes offline",
 	"lanSyncDiscoveredPeers": "Discovered LAN devices: ${count}",
 	"agentPermission": "Permission",
 	"agentPermissionConfirm": "Confirm every time",

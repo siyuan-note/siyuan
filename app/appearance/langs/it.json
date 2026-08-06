@@ -1,6 +1,8 @@
 {
+	"lanSyncInactive": "Il servizio di accelerazione della sincronizzazione LAN non è attivo",
+	"lanSyncConnectedPeers": "Dispositivi LAN autenticati: ${count}",
 	"lanSync": "Accelerazione della sincronizzazione LAN",
-	"lanSyncTip": "Scarica più velocemente i blocchi di dati cifrati dai dispositivi attendibili nella rete locale, mantenendo l'archiviazione cloud come autorità di sincronizzazione; dopo che un dispositivo passa offline, il conteggio dei dispositivi rilevati può richiedere circa un minuto per aggiornarsi e, se il trasferimento LAN non è disponibile, viene usata automaticamente l'archiviazione cloud",
+	"lanSyncTip": "I dispositivi attendibili usano la stessa chiave del repository dati e la stessa destinazione di sincronizzazione cloud; gli oggetti dati cifrati vengono scaricati prima da questi dispositivi mentre il cloud resta l'autorità di sincronizzazione, e i trasferimenti LAN non disponibili passano automaticamente al cloud; i conteggi di rilevamento e autenticazione possono richiedere circa un minuto per aggiornarsi dopo che un dispositivo passa offline",
 	"lanSyncDiscoveredPeers": "Dispositivi LAN rilevati: ${count}",
 	"agentPermission": "Autorizzazione",
 	"agentPermissionConfirm": "Conferma ogni volta",

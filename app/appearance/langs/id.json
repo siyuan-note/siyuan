@@ -1,6 +1,8 @@
 {
+	"lanSyncInactive": "Layanan akselerasi sinkronisasi LAN tidak aktif",
+	"lanSyncConnectedPeers": "Perangkat LAN terautentikasi: ${count}",
 	"lanSync": "Akselerasi sinkronisasi LAN",
-	"lanSyncTip": "Mengunduh potongan data terenkripsi lebih cepat dari perangkat tepercaya di jaringan lokal sementara penyimpanan cloud tetap menjadi acuan sinkronisasi; jumlah perangkat yang ditemukan mungkin memerlukan sekitar satu menit untuk diperbarui setelah perangkat luring, dan transfer LAN yang tidak tersedia akan otomatis beralih ke penyimpanan cloud",
+	"lanSyncTip": "Perangkat tepercaya menggunakan kunci repositori data dan tujuan sinkronisasi cloud yang sama; objek data terenkripsi diunduh terlebih dahulu dari perangkat tersebut sementara cloud tetap menjadi acuan sinkronisasi, dan transfer LAN yang tidak tersedia akan otomatis beralih ke cloud; jumlah penemuan dan autentikasi mungkin memerlukan sekitar satu menit untuk diperbarui setelah perangkat luring",
 	"lanSyncDiscoveredPeers": "Perangkat LAN yang ditemukan: ${count}",
 	"agentPermission": "Izin",
 	"agentPermissionConfirm": "Konfirmasi setiap kali",

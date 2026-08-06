@@ -1105,6 +1105,7 @@ func ImportRepoKey(base64Key string) (retKey string, err error) {
 		return "", errors.New(Conf.Language(157))
 	}
 
+	suspendLANSyncManager()
 	Conf.Repo.Key = key
 	Conf.Save()
 	logging.LogInfof("imported repo key [%x]", sha1.Sum(Conf.Repo.Key))
@@ -1117,12 +1118,14 @@ func ImportRepoKey(base64Key string) (retKey string, err error) {
 	}
 
 	initDataRepo()
+	refreshLANSyncManager()
 	return
 }
 
 func ResetRepo() (err error) {
 	logging.LogInfof("resetting data repo...")
 	msgId := util.PushMsg(Conf.Language(144), 1000*60)
+	suspendLANSyncManager()
 
 	repo, err := newRepository()
 	if err != nil {
@@ -1138,6 +1141,7 @@ func ResetRepo() (err error) {
 	Conf.Repo.Key = nil
 	Conf.Sync.Enabled = false
 	Conf.Save()
+	refreshLANSyncManager()
 
 	util.PushUpdateMsg(msgId, Conf.Language(145), 3000)
 	task.AppendAsyncTaskWithDelay(task.ReloadUI, 2*time.Second, util.ReloadUI)
@@ -1198,6 +1202,7 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 	}
 
 	util.PushMsg(Conf.Language(136), 3000)
+	suspendLANSyncManager()
 	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); err != nil {
 		return
 	}
@@ -1225,11 +1230,13 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 	logging.LogInfof("inited repo key [%x]", sha1.Sum(Conf.Repo.Key))
 
 	initDataRepo()
+	refreshLANSyncManager()
 	return
 }
 
 func InitRepoKey() (err error) {
 	util.PushMsg(Conf.Language(136), 3000)
+	suspendLANSyncManager()
 
 	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); err != nil {
 		return
@@ -1262,6 +1269,7 @@ func InitRepoKey() (err error) {
 	logging.LogInfof("inited repo key [%x]", sha1.Sum(Conf.Repo.Key))
 
 	initDataRepo()
+	refreshLANSyncManager()
 	return
 }
 
@@ -1958,10 +1966,11 @@ func bootSyncRepo() (err error) {
 	}
 
 	var fetchedFiles []*entity.File
+	var prefetchTraffic *dejavu.DownloadTrafficStat
 	if nil == err {
 		start := time.Now()
 		syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-		fetchedFiles, err = repo.GetSyncCloudFiles(cloudLatest, syncContext)
+		fetchedFiles, prefetchTraffic, err = repo.GetSyncCloudFilesWithTraffic(cloudLatest, syncContext)
 		logging.LogInfof("boot get sync cloud files elapsed [%.2fs]", time.Since(start).Seconds())
 	}
 
@@ -2012,7 +2021,7 @@ func bootSyncRepo() (err error) {
 			logging.LogInfof("syncing prepared boot data repo [device=%s, kernel=%s, provider=%d]", Conf.System.ID, KernelID, Conf.Sync.Provider)
 			var syncErr error
 			if indexStable && indexChangeGen == syncDataChangeGen.Load() {
-				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, beforeIndex, afterIndex, bootStart, indexElapsed)
+				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, beforeIndex, afterIndex, bootStart, indexElapsed, prefetchTraffic)
 			} else {
 				_, syncErr = syncRepoWithDNSRetry(false, false)
 			}
@@ -2074,11 +2083,11 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
-	dataChanged, err = syncIndexedRepo(repo, exit, byHand, beforeIndex, afterIndex, start, indexElapsed, false)
+	dataChanged, err = syncIndexedRepo(repo, exit, byHand, beforeIndex, afterIndex, start, indexElapsed, false, nil)
 	return
 }
 
-func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration, skipCloudPreflight bool) (dataChanged bool, err error) {
+func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration, skipCloudPreflight bool, prefetchTraffic *dejavu.DownloadTrafficStat) (dataChanged bool, err error) {
 	beforeSyncPetals := getPetals()
 
 	syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
@@ -2114,6 +2123,13 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 		}
 		return
 	}
+	if nil != prefetchTraffic {
+		trafficStat.DownloadFileCount += prefetchTraffic.DownloadFileCount
+		trafficStat.DownloadBytes += prefetchTraffic.DownloadBytes
+		trafficStat.PeerDownloadFileCount += prefetchTraffic.PeerDownloadFileCount
+		trafficStat.PeerDownloadBytes += prefetchTraffic.PeerDownloadBytes
+		trafficStat.PeerFallbackCount += prefetchTraffic.PeerFallbackCount
+	}
 
 	dataChanged = nil == beforeIndex || beforeIndex.ID != afterIndex.ID || mergeResult.DataChanged()
 
@@ -2146,8 +2162,8 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 	return
 }
 
-func syncIndexedRepoAfterBootWithDNSRetry(repo *dejavu.Repo, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration) (err error) {
-	_, err = syncIndexedRepo(repo, false, false, beforeIndex, afterIndex, start, indexElapsed, true)
+func syncIndexedRepoAfterBootWithDNSRetry(repo *dejavu.Repo, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration, prefetchTraffic *dejavu.DownloadTrafficStat) (err error) {
+	_, err = syncIndexedRepo(repo, false, false, beforeIndex, afterIndex, start, indexElapsed, true, prefetchTraffic)
 	if nil != err && flushAndRetryOnDNSError(err) {
 		_, err = syncRepo(false, false)
 	}
@@ -2179,10 +2195,10 @@ func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
 }
 
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
-	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s, pcc=%d, pb=%s, pf=%d] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
+	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s, pfc=%d, pcc=%d, pb=%s, pf=%d] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
 		Conf.System.ID, KernelID, Conf.Sync.Provider, mode, byHand,
 		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2),
-		trafficStat.PeerDownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.PeerDownloadBytes), 2), trafficStat.PeerFallbackCount,
+		trafficStat.PeerDownloadFileCount, trafficStat.PeerDownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.PeerDownloadBytes), 2), trafficStat.PeerFallbackCount,
 		elapsed.Seconds(),
 		len(mergeResult.Conflicts), len(mergeResult.Upserts), len(mergeResult.Removes))
 

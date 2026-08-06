@@ -1,6 +1,8 @@
 {
+	"lanSyncInactive": "Le service d’accélération de synchronisation sur le réseau local est inactif",
+	"lanSyncConnectedPeers": "Appareils authentifiés sur le réseau local : ${count}",
 	"lanSync": "Accélération de la synchronisation sur le réseau local",
-	"lanSyncTip": "Télécharge plus rapidement les blocs de données chiffrés depuis des appareils de confiance du réseau local tout en conservant le stockage cloud comme référence de synchronisation ; après la déconnexion d’un appareil, le nombre d’appareils détectés peut prendre environ une minute à s’actualiser, et les transferts indisponibles sur le réseau local basculent automatiquement vers le stockage cloud",
+	"lanSyncTip": "Les appareils de confiance utilisent la même clé de dépôt de données et la même cible de synchronisation cloud ; les objets de données chiffrés sont téléchargés en priorité depuis ces appareils tandis que le cloud reste la référence de synchronisation, et les transferts indisponibles sur le réseau local basculent automatiquement vers le cloud ; les nombres de détections et d’authentifications peuvent prendre environ une minute à s’actualiser après la déconnexion d’un appareil",
 	"lanSyncDiscoveredPeers": "Appareils détectés sur le réseau local : ${count}",
 	"agentPermission": "Autorisation",
 	"agentPermissionConfirm": "Confirmer à chaque fois",

@@ -94,6 +94,12 @@ func LANSyncActive() bool {
 	return model.LANSyncActive()
 }
 
+// UpdateLocalIPs 更新原生容器提供的局域网地址并刷新局域网同步服务。
+func UpdateLocalIPs(localIPs string) {
+	util.SetLocalIPs(strings.Split(localIPs, ","))
+	model.RefreshLANSyncNetwork()
+}
+
 // GetExportFileName 返回普通导出的资源名称；加密导出应读取 AcquireExportFile 返回的 Name。
 func GetExportFileName(exportPath string) string {
 	return model.GetMobileExportName(exportPath)
@@ -264,7 +270,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
 	util.MobileOSVer = osVer
-	util.LocalIPs = strings.Split(localIPs, ",")
+	util.SetLocalIPs(strings.Split(localIPs, ","))
 	util.BootMobile(container, appDir, workspaceBaseDir, lang)
 
 	model.InitConf()

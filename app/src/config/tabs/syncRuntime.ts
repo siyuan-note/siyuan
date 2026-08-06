@@ -31,8 +31,15 @@ export const refreshLANSyncStatus = (root: Element) => {
     }
     fetchSyncPost("/api/sync/getSyncLANStatus", {}).then((response) => {
         if (response.code === 0 && response.data) {
-            statusElement.textContent = window.siyuan.languages.lanSyncDiscoveredPeers.replace(
-                "${count}", String(response.data.discoveredPeers ?? response.data.connectedPeers ?? 0));
+            if (!response.data.active) {
+                statusElement.textContent = window.siyuan.languages.lanSyncInactive;
+                return;
+            }
+            const discovered = window.siyuan.languages.lanSyncDiscoveredPeers.replace(
+                "${count}", String(response.data.discoveredPeers ?? 0));
+            const connected = window.siyuan.languages.lanSyncConnectedPeers.replace(
+                "${count}", String(response.data.connectedPeers ?? 0));
+            statusElement.replaceChildren(discovered, document.createElement("br"), connected);
         }
     }).catch(() => {});
 };

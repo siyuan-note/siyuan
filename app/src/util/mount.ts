@@ -12,6 +12,7 @@ import type {App} from "../index";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import {importObsidianVault} from "../menus/importObsidian";
+import * as path from "path";
 /// #endif
 
 export const fetchNewDailyNote = (app: App, notebook: string) => {
@@ -107,19 +108,22 @@ export const mountHelp = () => {
 };
 
 export const newNotebook = () => {
-    let importObsidianHTML = "";
+    let nativeImportHTML = "";
     /// #if !BROWSER
-    importObsidianHTML = "<div class=\"b3-list-item fn__pointer\" data-type=\"import-obsidian\" role=\"button\" tabindex=\"0\"><svg class=\"b3-list-item__graphic\"><use xlink:href=\"#iconObsidian\"></use></svg><span class=\"b3-list-item__text\">Obsidian Vault</span></div>";
+    nativeImportHTML = `<div class="b3-list-item fn__pointer" data-type="import-markdown-file" role="button" tabindex="0"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">Markdown ${window.siyuan.languages.doc}</span></div>
+        <div class="b3-list-item fn__pointer" data-type="import-markdown-folder" role="button" tabindex="0"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg><span class="b3-list-item__text">Markdown ${window.siyuan.languages.folder}</span></div>
+        <div class="b3-list-item fn__pointer" data-type="import-obsidian" role="button" tabindex="0"><svg class="b3-list-item__graphic"><use xlink:href="#iconObsidian"></use></svg><span class="b3-list-item__text">Obsidian Vault</span></div>`;
     /// #endif
     const dialog = new Dialog({
         title: window.siyuan.languages.newNotebook,
         content: `<div class="b3-dialog__content">
-    <input placeholder="${window.siyuan.languages.notebookName}" class="b3-text-field fn__block">
+    <input placeholder="${window.siyuan.languages.notebookName}" class="b3-text-field fn__block" data-type="notebook-name">
     <div class="fn__hr"></div>
     <div class="b3-label__text fn__pointer fn__flex" style="align-items: center;gap: 4px" data-type="toggle-import" role="button" tabindex="0" aria-expanded="false"><svg class="b3-list-item__arrow" style="display: block;flex: none;height: 14px;width: 14px" data-type="import-arrow"><use xlink:href="#iconRight"></use></svg><span style="line-height: 20px">${window.siyuan.languages.importFromMoreApps}</span></div>
     <div class="b3-list--background fn__none" data-type="import-options" style="padding-top: 8px">
         <label class="b3-list-item fn__pointer" data-type="import-sy"><svg class="b3-list-item__graphic"><use xlink:href="#iconSiYuan"></use></svg><span class="b3-list-item__text">SiYuan .sy.zip</span><input class="b3-form__upload" type="file" accept="application/zip"></label>
-        ${importObsidianHTML}
+        <label class="b3-list-item fn__pointer" data-type="import-markdown-zip"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">Markdown .zip</span><input class="b3-form__upload" type="file" accept="application/zip"></label>
+        ${nativeImportHTML}
     </div>
 </div>
 <div class="b3-dialog__action">
@@ -131,14 +135,15 @@ export const newNotebook = () => {
     dialog.element.setAttribute("data-key", Constants.DIALOG_CREATENOTEBOOK);
     const cancelElement = dialog.element.querySelector('[data-type="cancel"]');
     const confirmElement = dialog.element.querySelector('[data-type="confirm"]');
-    dialog.bindInput(dialog.element.querySelector("input"), () => {
+    const notebookNameElement = dialog.element.querySelector('[data-type="notebook-name"]') as HTMLInputElement;
+    dialog.bindInput(notebookNameElement, () => {
         confirmElement.dispatchEvent(new CustomEvent("click"));
     });
     cancelElement.addEventListener("click", () => {
         dialog.destroy();
     });
     confirmElement.addEventListener("click", () => {
-        let name = dialog.element.querySelector("input").value;
+        let name = notebookNameElement.value;
         if (!validateName(name)) {
             return false;
         }
@@ -148,6 +153,25 @@ export const newNotebook = () => {
         });
         dialog.destroy();
     });
+    const createNotebookForImport = (fallbackName: string, callback: (notebookID: string) => void) => {
+        let name = notebookNameElement.value.trim();
+        if (!name) {
+            name = fallbackName;
+            notebookNameElement.value = name;
+        }
+        if (!validateName(name)) {
+            notebookNameElement.focus();
+            return;
+        }
+        fetchPost("/api/notebook/createNotebook", {name: replaceFileName(name)}, (response) => {
+            const notebookID = response.data?.notebook?.id as string | undefined;
+            if (!notebookID) {
+                return;
+            }
+            dialog.destroy();
+            callback(notebookID);
+        });
+    };
     const toggleImportElement = dialog.element.querySelector('[data-type="toggle-import"]') as HTMLElement;
     const importOptionsElement = dialog.element.querySelector('[data-type="import-options"]') as HTMLElement;
     const importArrowElement = toggleImportElement.querySelector('[data-type="import-arrow"]') as SVGElement;
@@ -174,7 +198,58 @@ export const newNotebook = () => {
         dialog.destroy();
         fetchPost("/api/import/importSYNotebook", formData);
     });
+    dialog.element.querySelector('[data-type="import-markdown-zip"] .b3-form__upload').addEventListener("change", (event: InputEvent & {
+        target: HTMLInputElement
+    }) => {
+        const file = event.target.files?.[0];
+        if (!file) {
+            return;
+        }
+        event.target.value = "";
+        createNotebookForImport(file.name.replace(/\.zip$/i, ""), (notebookID) => {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("notebook", notebookID);
+            formData.append("toPath", "/");
+            fetchPost("/api/import/importZipMd", formData);
+        });
+    });
     /// #if !BROWSER
+    const importMarkdown = async (isFile: boolean) => {
+        const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "showOpenDialog",
+            defaultPath: window.siyuan.config.system.homeDir,
+            filters: isFile ? [{name: "Markdown", extensions: ["md", "markdown"]}] : [],
+            properties: [isFile ? "openFile" : "openDirectory"],
+        });
+        if (localPath.filePaths.length === 0) {
+            return;
+        }
+        const sourcePath = localPath.filePaths[0];
+        const fallbackName = isFile ? path.basename(sourcePath, path.extname(sourcePath)) : path.basename(sourcePath);
+        createNotebookForImport(fallbackName, (notebookID) => {
+            fetchPost("/api/import/importStdMd", {
+                notebook: notebookID,
+                localPath: sourcePath,
+                toPath: "/",
+            });
+        });
+    };
+    const bindImportMarkdown = (type: string, isFile: boolean) => {
+        const element = dialog.element.querySelector(`[data-type="${type}"]`) as HTMLElement;
+        const selectMarkdown = (): void => {
+            void importMarkdown(isFile);
+        };
+        element.addEventListener("click", selectMarkdown);
+        element.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                selectMarkdown();
+            }
+        });
+    };
+    bindImportMarkdown("import-markdown-file", true);
+    bindImportMarkdown("import-markdown-folder", false);
     const importObsidianElement = dialog.element.querySelector('[data-type="import-obsidian"]') as HTMLElement;
     let selectingObsidianVault = false;
     const selectObsidianVault = async () => {

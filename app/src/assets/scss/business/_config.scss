@@ -91,6 +91,11 @@
     align-items: center;
   }
 
+  &-item__main {
+    min-height: auto;
+    overflow: visible;
+  }
+
   &-cloud-space {
     position: relative;
     flex-wrap: wrap;

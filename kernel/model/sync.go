@@ -50,17 +50,41 @@ func SyncDataDownload() {
 		return
 	}
 
+	scope := lanSyncScope()
+	latestID := getSyncCloudLatestID()
+	if "" != latestID {
+		_, _ = syncRemoteRequests.do(scope, latestID, func() error {
+			lockSync()
+			defer unlockSync()
+			if syncRemoteRequests.isCompleted(scope, latestID) {
+				return nil
+			}
+			err := syncDataDownloadLocked()
+			if nil == err {
+				completeCurrentSyncRemoteRequest(scope)
+			}
+			return err
+		})
+		return
+	}
+
 	unlock, ok := lockSyncRequest(&syncDownloadRequests)
 	if !ok {
 		return
 	}
 	defer unlock()
+	if err := syncDataDownloadLocked(); nil == err {
+		completeCurrentSyncRemoteRequest(scope)
+	}
+}
+
+func syncDataDownloadLocked() (err error) {
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 
-	err := syncRepoDownloadWithDNSRetry()
+	err = syncRepoDownloadWithDNSRetry()
 	code := 1
 	if err != nil {
 		code = 2
@@ -69,6 +93,40 @@ func SyncDataDownload() {
 	if 1 == code {
 		consumeShorthands()
 	}
+	return
+}
+
+func getSyncCloudLatestID() (ret string) {
+	// 同步感知消息不包含云端提交 ID，需要先读取最新索引，以便和局域网提交提示使用同一个去重键。
+	repo, err := newSyncRepository()
+	if nil != err {
+		logging.LogWarnf("create repo before perceived sync failed: %s", err)
+		return
+	}
+	latest, err := repo.GetCloudLatest(map[string]interface{}{})
+	if nil != err {
+		logging.LogWarnf("get cloud latest before perceived sync failed: %s", err)
+		return
+	}
+	if nil != latest {
+		ret = latest.ID
+	}
+	return
+}
+
+func completeCurrentSyncRemoteRequest(scope string) {
+	// 完整同步可能在合并本地变更后生成新的最新索引，同时记录实际结果可覆盖两类通知到达顺序相反的情况。
+	repo, err := newRepository()
+	if nil != err {
+		logging.LogWarnf("create repo after remote sync failed: %s", err)
+		return
+	}
+	latest, err := repo.Latest()
+	if nil != err {
+		logging.LogWarnf("get local latest after remote sync failed: %s", err)
+		return
+	}
+	syncRemoteRequests.complete(scope, latest.ID)
 }
 
 func SyncDataUpload() {

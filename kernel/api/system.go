@@ -910,7 +910,7 @@ func setAccessAuthCode(c *gin.Context) {
 	if aac == "" {
 		currentOIDC := model.Conf.GetOIDC()
 		var err error
-		if util.IsMobileContainer() {
+		if util.IsMobileContainer() && currentOIDC.Enabled {
 			err = model.ValidateOIDCMobileConfiguration(currentOIDC)
 		} else if !model.IsLocalRequest(c) {
 			err = model.ValidateOIDCConfigurationChange(c.Request.Context(), currentOIDC, true, false,

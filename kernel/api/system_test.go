@@ -23,6 +23,8 @@ import (
 	"strings"
 	"testing"
 
+	ginSessions "github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -145,6 +147,44 @@ func TestSetAccessAuthCodeRejectsUnsupportedMobileOIDC(t *testing.T) {
 	}
 	if response.Code != -1 || model.Conf.AccessAuthCode != "existing-code" {
 		t.Fatalf("unsupported mobile OIDC lockout was accepted: %s", recorder.Body.String())
+	}
+}
+
+func TestSetAccessAuthCodeAllowsClearingOnMobileWithoutOIDC(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	previousConf := model.Conf
+	previousReadOnly := util.ReadOnly
+	previousContainer := util.Container
+	model.Conf = model.NewAppConf()
+	model.Conf.CookieKey = "mobile-clear-access-auth-api-test-cookie-key"
+	model.Conf.AccessAuthCode = "existing-code"
+	util.ReadOnly = true
+	util.Container = util.ContainerAndroid
+	t.Cleanup(func() {
+		model.Conf = previousConf
+		util.ReadOnly = previousReadOnly
+		util.Container = previousContainer
+	})
+
+	engine := gin.New()
+	store := cookie.NewStore([]byte("mobile-clear-access-auth-api-test-session-key"))
+	engine.Use(ginSessions.Sessions("siyuan", store))
+	engine.POST("/api/system/setAccessAuthCode", setAccessAuthCode)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/api/system/setAccessAuthCode",
+		strings.NewReader(`{"accessAuthCode":""}`))
+	request.RemoteAddr = "127.0.0.1:1234"
+	request.Header.Set("Content-Type", "application/json")
+	engine.ServeHTTP(recorder, request)
+
+	response := &struct {
+		Code int `json:"code"`
+	}{}
+	if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+		t.Fatalf("unmarshal mobile setAccessAuthCode response failed: %v", err)
+	}
+	if response.Code != 0 || model.Conf.AccessAuthCode != "" {
+		t.Fatalf("clearing mobile access authentication without OIDC failed: %s", recorder.Body.String())
 	}
 }
 

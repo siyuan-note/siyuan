@@ -243,8 +243,28 @@ func handleLANSyncCommitHint(latestID string) {
 	delay := time.Second + time.Duration(binary.BigEndian.Uint32(hash[:4])%5000)*time.Millisecond
 	time.AfterFunc(delay, func() {
 		if nil != Conf.Sync && nil != Conf.Sync.LAN && Conf.Sync.LAN.Enabled && Conf.Sync.Enabled && 1 == Conf.Sync.Mode {
-			SyncData(false)
+			syncDataFromLAN(latestID)
 		}
+	})
+}
+
+func syncDataFromLAN(latestID string) {
+	defer logging.Recover()
+	if !checkSync(false, false, false) {
+		return
+	}
+	scope := lanSyncScope()
+	_, _ = syncRemoteRequests.do(scope, latestID, func() error {
+		lockSync()
+		defer unlockSync()
+		if syncRemoteRequests.isCompleted(scope, latestID) {
+			return nil
+		}
+		err := syncDataLocked(false, false)
+		if nil == err {
+			completeCurrentSyncRemoteRequest(scope)
+		}
+		return err
 	})
 }
 

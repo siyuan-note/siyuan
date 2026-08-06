@@ -1126,7 +1126,7 @@
     display: flex;
     background-color: var(--b3-parent-background);
 
-    &:has(> .av__cell, > .av__calc) {
+    &--freeze {
       box-shadow: inset -1px 0 0 var(--b3-border-color);
     }
   }

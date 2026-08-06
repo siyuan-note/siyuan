@@ -471,6 +471,13 @@ const promiseTransaction = (options: {
                 if (operation.action === "setAttrs") {
                     syncFoldAndStyleAttrs(protyle.wysiwyg.element, operation);
                 }
+                // 冻结范围依赖列的 DOM 分组，新增列事务落盘后使用完整数据重建分组。
+                if (operation.action === "addAttrViewCol" &&
+                    protyle.wysiwyg.element.querySelector(
+                        `.av[data-av-id="${operation.avID}"] [data-freeze="true"]`
+                    )) {
+                    refreshAV(protyle, operation);
+                }
             });
         }
         // 事务提交后再渲染嵌入块，避免其查询请求早于写入到达内核而拿到旧数据

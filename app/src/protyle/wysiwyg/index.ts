@@ -148,7 +148,6 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
-import {avRender} from "../render/av/render";
 import {reloadProtyle} from "../util/reload";
 import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
@@ -2765,16 +2764,6 @@ export class WYSIWYG {
         // 编辑器尺寸或内容变化时，重新计算数据库视图栏和表头、表尾位置
         protyle.observer = new ResizeObserver(() => {
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-                if (item.querySelector(".av__scroll")) {
-                    const width = Math.round(item.clientWidth);
-                    if (item.querySelector('[data-freeze="true"]') &&
-                        parseInt(item.dataset.freezeWidth) !== width) {
-                        item.dataset.freezeWidth = width.toString();
-                        item.removeAttribute("data-render");
-                        avRender(item, protyle);
-                        return;
-                    }
-                }
                 stickyRow(item, protyle.contentElement, "all");
             });
         });

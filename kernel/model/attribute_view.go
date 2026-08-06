@@ -7626,6 +7626,14 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		}
 		break
 	}
+	if nil == val {
+		err = av.ErrKeyNotFound
+		return
+	}
+
+	valueID := val.ID
+	valueType := val.Type
+	valueCreatedAt := val.CreatedAt
 
 	isUpdatingBlockKey := av.KeyTypeBlock == val.Type
 	var oldRelationBlockIDs []string
@@ -7641,10 +7649,15 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		logging.LogErrorf("marshal value [%+v] failed: %s", valueData, err)
 		return
 	}
-	if err = gulu.JSON.UnmarshalJSON(data, &val); err != nil {
+	if err = gulu.JSON.UnmarshalJSON(data, val); err != nil {
 		logging.LogErrorf("unmarshal data [%s] failed: %s", data, err)
 		return
 	}
+	val.ID = valueID
+	val.KeyID = keyID
+	val.BlockID = itemID
+	val.Type = valueType
+	val.CreatedAt = valueCreatedAt
 
 	key, _ := attrView.GetKey(keyID)
 

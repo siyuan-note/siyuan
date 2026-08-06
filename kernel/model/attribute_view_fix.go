@@ -80,6 +80,10 @@ func checkAttrView(attrView *av.AttributeView, view *av.View) (changed bool) {
 	// 订正字段类型
 	for _, kv := range attrView.KeyValues {
 		for _, v := range kv.Values {
+			if v.KeyID != kv.Key.ID {
+				v.KeyID = kv.Key.ID
+				changed = true
+			}
 			if v.Type != kv.Key.Type {
 				v.Type = kv.Key.Type
 				if av.KeyTypeBlock == v.Type && nil == v.Block {

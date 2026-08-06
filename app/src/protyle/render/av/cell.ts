@@ -36,7 +36,7 @@ import {
     mergeAVBatchRelationValue,
     setAVBatchDisplayValue
 } from "./batchValue";
-import {genAVDragFillValue} from "./dragFillValue";
+import {genAVDragFillValue, rebindAVCellValue} from "./dragFillValue";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -940,7 +940,11 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         } else {
             cellValue = genCellValue(type, newValue, column?.dateFormat);
         }
-        cellValue.id = cellId;
+        cellValue = rebindAVCellValue(cellValue, {
+            id: cellId,
+            keyID: colId,
+            blockID: rowID,
+        });
         if ((cellValue.type === "date" && typeof cellValue.date === "string") ||
             (cellValue.type === "relation" && typeof cellValue.relation === "string")) {
             break;

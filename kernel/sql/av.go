@@ -784,6 +784,10 @@ func fillAttributeViewKeyValues(attrView *av.AttributeView, collection av.Collec
 	}
 	for keyID, values := range fieldValues {
 		keyValues, _ := attrView.GetKeyValues(keyID)
+		if nil == keyValues {
+			logging.LogWarnf("attribute view [%s] key [%s] not found while filling values", attrView.ID, keyID)
+			continue
+		}
 		existingIDs := map[string]bool{}
 		for _, kv := range keyValues.Values {
 			existingIDs[kv.ID] = true

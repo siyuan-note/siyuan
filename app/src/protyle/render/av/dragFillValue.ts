@@ -1,10 +1,10 @@
-interface IAVDragFillTarget {
+interface IAVCellValueTarget {
     id: string;
     keyID: string;
     blockID: string;
 }
 
-export const genAVDragFillValue = (source: IAVCellValue, target: IAVDragFillTarget) => {
+export const rebindAVCellValue = (source: IAVCellValue, target: IAVCellValueTarget) => {
     const value = JSON.parse(JSON.stringify(source)) as IAVCellValue & {
         createdAt?: number;
         updatedAt?: number;
@@ -16,3 +16,5 @@ export const genAVDragFillValue = (source: IAVCellValue, target: IAVDragFillTarg
     delete value.updatedAt;
     return value;
 };
+
+export const genAVDragFillValue = rebindAVCellValue;

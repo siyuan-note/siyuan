@@ -64,6 +64,7 @@ export type ISSEResult = {
 } | {
     type: "snapshot";
     snapshotID: string;
+    roundID?: string;
 } | {
     type: "permission";
     permissionMode: "confirm" | "allowSession";
@@ -330,7 +331,11 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
         case "reasoning":
             return {type: "reasoning", token: data.token as string};
         case "snapshot":
-            return {type: "snapshot", snapshotID: data.snapshotID as string};
+            return {
+                type: "snapshot",
+                snapshotID: data.snapshotID as string,
+                roundID: data.roundID as string || undefined,
+            };
         case "frontend_tool_call":
             return {
                 type: "frontend_tool_call",

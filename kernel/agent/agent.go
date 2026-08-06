@@ -73,6 +73,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 
 ## Formatting
 - Inline formatting uses standard markdown: **bold**, *italic*, ~~strikethrough~~, ==mark==, and "code" (backticks).
+- Block references in markdown must use ((<blockID> "<anchor text>")); never use [[<blockID>]], which is not block-reference syntax.
 - For text styling that markdown cannot express (color, background, font size), use SiYuan text marks.
   The syntax requires a leading data-type="text" attribute — WITHOUT it the HTML is escaped and shown as literal text:
   - Text color:      <span data-type="text" style="color: #ff0000;">red text</span>
@@ -1200,7 +1201,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						}
 						snapshotIDs = append(snapshotIDs, id)
 						snapshotCreated = true
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "snapshot", SnapshotID: id})
+						sendCriticalEvent(ctx, ch, AgentEvent{Type: "snapshot", RoundID: roundID, SnapshotID: id})
 					}
 
 					// 工具执行前先持久化“即将执行”状态。若落盘失败则禁止执行，避免外部写操作已经发生，

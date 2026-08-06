@@ -28,6 +28,10 @@ export type AgentHistoryThinkingStep = {
     content?: string;
 };
 
+export const getAgentThinkingToolGroups = (steps: AgentHistoryThinkingStep[]): string[][] => {
+    return steps.map(step => (step.toolNames || []).filter(Boolean));
+};
+
 export type AgentHistoryReference = { id: string; title: string };
 
 export type AgentHistoryUserEntry = {
@@ -309,6 +313,30 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
             const sourceIndex = prepared.indexOf(item.sourceEntry);
             prepared.splice(sourceIndex >= 0 ? sourceIndex : prepared.length, 0, item.todoEntry);
         }
+    }
+
+    // snapshot 事件先于当前思考卡片落盘。按 roundID 将其移到对应思考卡片之后；
+    // 老数据没有 roundID 时，优先使用原位置之后的第一张思考卡片。
+    for (const snapshot of prepared.filter(entry => entry.type === "snapshot")) {
+        const snapshotIndex = prepared.indexOf(snapshot);
+        const thinkingEntries = prepared.filter(entry => entry.type === "thinking" && entry.steps?.length);
+        let anchorEntry: AgentHistoryEntry | undefined;
+        if (snapshot.roundID) {
+            for (let i = thinkingEntries.length - 1; i >= 0; i--) {
+                if (thinkingEntries[i].steps?.some(step => step.roundID === snapshot.roundID)) {
+                    anchorEntry = thinkingEntries[i];
+                    break;
+                }
+            }
+        }
+        if (!anchorEntry) {
+            anchorEntry = thinkingEntries.find(entry => prepared.indexOf(entry) > snapshotIndex) || thinkingEntries[0];
+        }
+        if (!anchorEntry) {
+            continue;
+        }
+        prepared.splice(snapshotIndex, 1);
+        prepared.splice(prepared.indexOf(anchorEntry) + 1, 0, snapshot);
     }
     return prepared;
 };

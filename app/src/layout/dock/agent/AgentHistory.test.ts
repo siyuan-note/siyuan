@@ -4,6 +4,7 @@ import {
     applyAgentUserEdit,
     buildAgentPresentationEntries,
     findAgentUserEntryIndex,
+    getAgentThinkingToolGroups,
     hasAgentExecutedToolsAfter,
     hasAgentModelSpecificContext,
     isAgentRegenerateStateCurrent
@@ -337,5 +338,57 @@ describe("AgentHistory", () => {
         ]);
         const thinkingEntries = display.filter(entry => entry.type === "thinking");
         assert.deepEqual(thinkingEntries.map(entry => entry.steps?.[0].toolNames), [["write-a"], ["write-b"]]);
+    });
+
+    it("moves a legacy snapshot after the thinking that triggered it", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "create a reference"},
+            {id: "snapshot-1", type: "snapshot"},
+            {
+                id: "thinking-1",
+                type: "thinking",
+                steps: [
+                    {roundID: "round-0", toolNames: ["block", "block"]},
+                    {roundID: "round-1", toolNames: ["block"]},
+                ],
+            },
+            {
+                id: "thinking-2",
+                type: "thinking",
+                steps: [{roundID: "round-2", reasoningContent: "done"}],
+            },
+            {
+                id: "assistant-0",
+                type: "assistant",
+                roundID: "round-0",
+                toolCalls: [{name: "block"}, {name: "block"}],
+            },
+            {id: "assistant-1", type: "assistant", roundID: "round-1", toolCalls: [{name: "block"}]},
+            {id: "assistant-2", type: "assistant", roundID: "round-2", content: "Done"},
+        ]);
+        assert.deepEqual(display.map(entry => entry.type), [
+            "user", "thinking", "snapshot", "thinking", "assistant", "assistant", "assistant",
+        ]);
+        assert.deepEqual(getAgentThinkingToolGroups(display[1].steps || []), [["block", "block"], ["block"]]);
+    });
+
+    it("places a round snapshot after the last matching thinking card", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "write"},
+            {id: "thinking-1", type: "thinking", steps: [{roundID: "round-1", toolNames: ["write"]}]},
+            {id: "confirm-1", type: "confirm"},
+            {id: "snapshot-1", type: "snapshot", roundID: "round-1"},
+            {id: "thinking-2", type: "thinking", steps: [{roundID: "round-1"}]},
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "round-1",
+                toolCalls: [{name: "write"}],
+            },
+            {id: "assistant-2", type: "assistant", roundID: "round-2", content: "Done"},
+        ]);
+        assert.deepEqual(display.map(entry => entry.type), [
+            "user", "thinking", "confirm", "thinking", "snapshot", "assistant", "assistant",
+        ]);
     });
 });

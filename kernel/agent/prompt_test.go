@@ -47,6 +47,15 @@ func TestTurnContextStaysInUserMessage(t *testing.T) {
 	}
 }
 
+func TestSystemPromptDocumentsBlockReferenceSyntax(t *testing.T) {
+	if !strings.Contains(systemPrompt, `((<blockID> "<anchor text>"))`) {
+		t.Fatal("system prompt is missing the SiYuan block-reference syntax")
+	}
+	if !strings.Contains(systemPrompt, `never use [[<blockID>]]`) {
+		t.Fatal("system prompt does not reject bracketed block IDs")
+	}
+}
+
 func TestSystemPromptSortsPluginActions(t *testing.T) {
 	actions := []PluginAction{
 		{Name: "plugin__z__run", Description: "Run Z"},

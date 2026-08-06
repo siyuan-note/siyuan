@@ -628,6 +628,12 @@
     font-size: 14px;
   }
 
+  // 属性中的零宽空格不参与跨块文本选择
+  &-wysiwyg .protyle-attr {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   // iPhone 右上角属性中对不齐
   &-wysiwyg--attr .protyle-attr > div:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
     max-width: 26vw;

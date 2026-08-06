@@ -177,6 +177,71 @@ func TestNormalizeMissingAssetLinkDest(t *testing.T) {
 	}
 }
 
+func TestLookupAssetPath(t *testing.T) {
+	assetsPathMap := map[string]string{
+		"assets/file":    "file",
+		"assets/folder/": "folder",
+		"assets/shared":  "shared-file",
+		"assets/shared/": "shared-folder",
+	}
+	tests := []struct {
+		name        string
+		dest        string
+		wantDest    string
+		wantAbsPath string
+		wantFound   bool
+	}{
+		{name: "file", dest: "assets/file", wantDest: "assets/file", wantAbsPath: "file", wantFound: true},
+		{name: "folder alias", dest: "assets/folder", wantDest: "assets/folder/", wantAbsPath: "folder", wantFound: true},
+		{name: "folder", dest: "assets/folder/", wantDest: "assets/folder/", wantAbsPath: "folder", wantFound: true},
+		{name: "exact file before folder alias", dest: "assets/shared", wantDest: "assets/shared", wantAbsPath: "shared-file", wantFound: true},
+		{name: "folder does not match file", dest: "assets/file/"},
+		{name: "missing", dest: "assets/missing"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			gotDest, gotAbsPath, gotFound := lookupAssetPath(assetsPathMap, test.dest)
+			if gotDest != test.wantDest || gotAbsPath != test.wantAbsPath || gotFound != test.wantFound {
+				t.Fatalf("lookup asset path: got [%q, %q, %v], want [%q, %q, %v]",
+					gotDest, gotAbsPath, gotFound, test.wantDest, test.wantAbsPath, test.wantFound)
+			}
+		})
+	}
+}
+
+func TestRemoveReferencedAssetPathsWithFolderAlias(t *testing.T) {
+	assetsPathMap := map[string]string{
+		"assets/ch4/":         "ch4",
+		"assets/ch4/notes.md": "notes.md",
+		"assets/ch4/demo.js":  "demo.js",
+		"assets/ch40/":        "ch40",
+	}
+	linkDestFilePaths := removeReferencedAssetPaths(assetsPathMap, map[string]bool{"assets/ch4": true})
+	if 0 != len(linkDestFilePaths) {
+		t.Fatalf("folder alias should not be classified as a file: %v", linkDestFilePaths)
+	}
+	expected := map[string]string{"assets/ch40/": "ch40"}
+	if !reflect.DeepEqual(assetsPathMap, expected) {
+		t.Fatalf("unexpected assets after removing referenced folder: got %#v, want %#v", assetsPathMap, expected)
+	}
+}
+
+func TestMissingAssetItemsWithFolderAlias(t *testing.T) {
+	referenceBlockIDs := map[missingAssetReference]map[string]bool{}
+	addAssetLinkDestBlockID(referenceBlockIDs, "20260806120000-abcdefg", false, "assets/existing-folder", "20260806120001-hijklmn")
+	addAssetLinkDestBlockID(referenceBlockIDs, "20260806120000-abcdefg", false, "assets/missing-folder", "20260806120002-opqrstu")
+
+	items := missingAssetItems(referenceBlockIDs, map[string]string{"assets/existing-folder/": "existing-folder"})
+	expected := []*UnusedItem{{
+		Item:     "assets/missing-folder",
+		Name:     "missing-folder",
+		BlockIDs: []string{"20260806120002-opqrstu"},
+	}}
+	if !reflect.DeepEqual(items, expected) {
+		t.Fatalf("unexpected missing folder assets: got %#v, want %#v", items, expected)
+	}
+}
+
 func TestMissingAssetItemsAreScopedToEncryptedNotebook(t *testing.T) {
 	originalDataDir, originalWorkspaceDir := util.DataDir, util.WorkspaceDir
 	originalConf, originalLangs := Conf, util.Langs

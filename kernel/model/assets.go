@@ -1641,6 +1641,65 @@ type missingAssetReference struct {
 	encrypted bool
 }
 
+func lookupAssetPath(assetsPathMap map[string]string, dest string) (resolvedDest, absPath string, found bool) {
+	if absPath, found = assetsPathMap[dest]; found {
+		return dest, absPath, true
+	}
+	if strings.HasSuffix(dest, "/") {
+		return "", "", false
+	}
+
+	resolvedDest = dest + "/"
+	absPath, found = assetsPathMap[resolvedDest]
+	if found {
+		return resolvedDest, absPath, true
+	}
+	return "", "", false
+}
+
+func removeReferencedAssetPaths(assetsPathMap map[string]string, dests map[string]bool) (linkDestFilePaths []string) {
+	var linkDestFolderPaths []string
+	for dest := range dests {
+		if !strings.HasPrefix(dest, "assets/") {
+			continue
+		}
+
+		if idx := strings.Index(dest, "?"); 0 < idx {
+			// `pdf?page` 资源文件链接会被判定为未引用资源 https://github.com/siyuan-note/siyuan/issues/5649
+			dest = dest[:idx]
+		}
+
+		resolvedDest, _, found := lookupAssetPath(assetsPathMap, dest)
+		if !found {
+			continue
+		}
+		if strings.HasSuffix(resolvedDest, "/") {
+			linkDestFolderPaths = append(linkDestFolderPaths, resolvedDest)
+		} else {
+			linkDestFilePaths = append(linkDestFilePaths, resolvedDest)
+		}
+	}
+
+	// 排除文件夹链接
+	var toRemoves []string
+	for asset := range assetsPathMap {
+		for _, linkDestFolder := range linkDestFolderPaths {
+			if strings.HasPrefix(asset, linkDestFolder) {
+				toRemoves = append(toRemoves, asset)
+			}
+		}
+		for _, linkDestPath := range linkDestFilePaths {
+			if strings.HasPrefix(linkDestPath, asset) {
+				toRemoves = append(toRemoves, asset)
+			}
+		}
+	}
+	for _, toRemove := range toRemoves {
+		delete(assetsPathMap, toRemove)
+	}
+	return
+}
+
 func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	defer logging.Recover()
 	ret = []*UnusedItem{}
@@ -1694,44 +1753,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 			}
 		}
 
-		var linkDestFolderPaths, linkDestFilePaths []string
-		for dest := range dests {
-			if !strings.HasPrefix(dest, "assets/") {
-				continue
-			}
-
-			if idx := strings.Index(dest, "?"); 0 < idx {
-				// `pdf?page` 资源文件链接会被判定为未引用资源 https://github.com/siyuan-note/siyuan/issues/5649
-				dest = dest[:idx]
-			}
-
-			if "" == assetsPathMap[dest] {
-				continue
-			}
-			if strings.HasSuffix(dest, "/") {
-				linkDestFolderPaths = append(linkDestFolderPaths, dest)
-			} else {
-				linkDestFilePaths = append(linkDestFilePaths, dest)
-			}
-		}
-
-		// 排除文件夹链接
-		var toRemoves []string
-		for asset := range assetsPathMap {
-			for _, linkDestFolder := range linkDestFolderPaths {
-				if strings.HasPrefix(asset, linkDestFolder) {
-					toRemoves = append(toRemoves, asset)
-				}
-			}
-			for _, linkDestPath := range linkDestFilePaths {
-				if strings.HasPrefix(linkDestPath, asset) {
-					toRemoves = append(toRemoves, asset)
-				}
-			}
-		}
-		for _, toRemove := range toRemoves {
-			delete(assetsPathMap, toRemove)
-		}
+		linkDestFilePaths := removeReferencedAssetPaths(assetsPathMap, dests)
 
 		for _, dest := range linkDestFilePaths {
 			linkDestMap[dest] = true
@@ -1940,7 +1962,7 @@ func assetReferenceExists(reference missingAssetReference, assetsPathMap map[str
 	if _, _, err := assetPathAndBox(reference.rawDest, reference.boxID); nil != err {
 		return false
 	}
-	if "" != assetsPathMap[reference.dest] {
+	if _, _, found := lookupAssetPath(assetsPathMap, reference.dest); found {
 		return true
 	}
 	if strings.HasPrefix(reference.dest, "assets/.") {

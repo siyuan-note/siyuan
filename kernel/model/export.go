@@ -2546,7 +2546,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 				srcPath, _ = GetAssetAbsPathInBox(asset, tree.Box)
 			}
 			if "" == srcPath {
-				srcPath = assetPathMap[cleanAsset]
+				_, srcPath, _ = lookupAssetPath(assetPathMap, cleanAsset)
 			}
 			if "" == srcPath {
 				logging.LogWarnf("get asset [%s] abs path failed", asset)
@@ -2782,7 +2782,7 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 						srcPath, _ = GetAssetAbsPathInBox(asset.Content, boxID)
 					}
 					if "" == srcPath {
-						srcPath = assetPathMap[AssetPathWithoutQuery(asset.Content)]
+						_, srcPath, _ = lookupAssetPath(assetPathMap, AssetPathWithoutQuery(asset.Content))
 					}
 					if "" == srcPath {
 						logging.LogWarnf("get asset [%s] abs path failed", asset.Content)
@@ -4168,7 +4168,7 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths, defBlockIDs 
 				srcPath, _ = GetAssetAbsPathInBox(spaceDecodedOldAsset, treeBoxID)
 			}
 			if "" == srcPath {
-				srcPath = assetsPathMap[AssetPathWithoutQuery(spaceDecodedOldAsset)]
+				_, srcPath, _ = lookupAssetPath(assetsPathMap, AssetPathWithoutQuery(spaceDecodedOldAsset))
 			}
 			if "" == srcPath {
 				logging.LogWarnf("get asset [%s] abs path failed", spaceDecodedOldAsset)

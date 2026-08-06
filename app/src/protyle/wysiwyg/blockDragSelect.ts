@@ -46,6 +46,13 @@ export const isBlockDragSelectBottomReached = (selectBottom: number, containerBo
 export const isBlockDragSelectTopReached = (selectTop: number, containerTop: number, firstChildTop: number) =>
     selectTop < Math.max(containerTop, firstChildTop);
 
+export const clampBlockDragSelectY = (clientY: number, viewportTop: number, viewportBottom: number,
+                                      wysiwygTop: number, wysiwygBottom: number) => {
+    const top = Math.max(viewportTop, wysiwygTop);
+    const bottom = Math.min(viewportBottom, wysiwygBottom);
+    return Math.max(top, Math.min(clientY, bottom));
+};
+
 const getDirectDescendantBlock = (containerBlock: Element, block: Element,
                                   getBlock: TResolveDragSelectBlockOptions["getBlock"]) => {
     let directBlock = block;

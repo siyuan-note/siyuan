@@ -178,6 +178,7 @@ import {
 } from "../render/av/rangeSelect";
 import {getAVColumnResizeWidth} from "../render/av/columnWidth";
 import {
+    clampBlockDragSelectY,
     getBlockDragSelectBlock,
     getBlockDragSelectProbeX,
     isBlockDragSelectBottomReached,
@@ -1045,6 +1046,7 @@ export class WYSIWYG {
             const startsFromPadding = event.clientX < mostLeft - 1 || event.clientX > mostRight + 2 ||
                 event.clientY < wysiwygRect.top + (parseFloat(wysiwygStyle.paddingTop) || 0) ||
                 event.clientY > wysiwygRect.bottom - (parseFloat(wysiwygStyle.paddingBottom) || 0);
+            const isBottomBacklink = !!protyle.element.closest(".sy__backlink--bottom");
             // 按住 Ctrl/Command 从边缘空白处划选时，以按下时的选区为基线切换块
             // https://github.com/siyuan-note/siyuan/issues/15006
             const isToggleBlockDrag = isOnlyMeta(event) && !event.shiftKey && !event.altKey && startsFromPadding;
@@ -1830,6 +1832,11 @@ export class WYSIWYG {
                 return;
             }
 
+            // 编辑器底部反链仅用于浏览和编辑，不参与块、数据库或表格框选
+            if (isBottomBacklink && (startsFromPadding || tableBlockElement)) {
+                return;
+            }
+
             // 内容区域使用浏览器原生选区，跨块选择时保留各行内元素自身的选中样式。
             if (!startsFromPadding && !tableBlockElement) {
                 documentSelf.onmouseup = (mouseUpEvent) => {
@@ -2161,7 +2168,9 @@ export class WYSIWYG {
                 }
                 const scrollTop = protyle.contentElement.scrollTop;
                 const startY = y + selectStartScrollTop;
-                const moveY = Math.max(mostTop, Math.min(moveEvent.clientY, mostBottom)) + scrollTop;
+                const wysiwygMoveRect = protyle.wysiwyg.element.getBoundingClientRect();
+                const moveY = clampBlockDragSelectY(moveEvent.clientY, mostTop, mostBottom,
+                    wysiwygMoveRect.top, wysiwygMoveRect.bottom) + scrollTop;
                 const isAVItemMode = avDragSelectRange &&
                     Math.min(startY, moveY) >= avDragSelectRange.top &&
                     Math.max(startY, moveY) <= avDragSelectRange.bottom;
@@ -2364,14 +2373,22 @@ export class WYSIWYG {
                 syncDragSelectBlocks(selectElements);
             };
 
-            documentSelf.onmouseup = (mouseUpEvent) => {
+            let dragSelectFinished = false;
+            const finishDragSelect = (mouseUpEvent: MouseEvent) => {
+                if (dragSelectFinished) {
+                    return;
+                }
+                dragSelectFinished = true;
+                documentSelf.removeEventListener("mouseup", finishDragSelect, true);
+                if (documentSelf.onmouseup === finishDragSelect) {
+                    documentSelf.onmouseup = null;
+                }
                 protyle.contentElement.removeEventListener("scroll", selectScrollEvent);
                 flushAVDragSelect();
                 if (startsFromPadding) {
                     stopScrollAnimation();
                 }
                 documentSelf.onmousemove = null;
-                documentSelf.onmouseup = null;
                 documentSelf.ondragstart = null;
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
@@ -2785,6 +2802,9 @@ export class WYSIWYG {
                     }
                 }
             };
+            // 底部反链包含嵌套编辑器，捕获阶段结束框选，避免内部事件阻断后选区无法清理
+            documentSelf.onmouseup = finishDragSelect;
+            documentSelf.addEventListener("mouseup", finishDragSelect, {capture: true, once: true});
         });
     }
 

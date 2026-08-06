@@ -1,6 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    clampBlockDragSelectY,
     getBlockDragSelectBlock,
     getBlockDragSelectProbeX,
     isBlockDragSelectBottomReached,
@@ -129,6 +130,20 @@ describe("isBlockDragSelectTopReached", () => {
 
     it("keeps child selection after the top padding", () => {
         assert.equal(isBlockDragSelectTopReached(100, 90, 100), false);
+    });
+});
+
+describe("clampBlockDragSelectY", () => {
+    it("stops upward selection at the editor top", () => {
+        assert.equal(clampBlockDragSelectY(120, 50, 700, 200, 650), 200);
+    });
+
+    it("stops downward selection at the editor bottom", () => {
+        assert.equal(clampBlockDragSelectY(680, 50, 700, 200, 650), 650);
+    });
+
+    it("keeps selection inside the editor unchanged", () => {
+        assert.equal(clampBlockDragSelectY(400, 50, 700, 200, 650), 400);
     });
 });
 

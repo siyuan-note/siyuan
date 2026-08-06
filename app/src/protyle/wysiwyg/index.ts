@@ -1155,6 +1155,8 @@ export class WYSIWYG {
                     !nextElement || sbElement.getAttribute("data-sb-layout") !== "col") {
                     return;
                 }
+                hideElements(["gutter"], protyle);
+                this.tableControl?.setHidden(true);
                 const oldHTMLs = {
                     prev: previousElement.outerHTML,
                     next: nextElement.outerHTML,
@@ -1255,6 +1257,7 @@ export class WYSIWYG {
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
+                    this.tableControl?.setHidden(false);
                     // 仅点击未拖拽，不产生 transaction，避免无意义的更新
                     if (Math.abs(x - mouseupEvent.clientX) <= 0) {
                         return;

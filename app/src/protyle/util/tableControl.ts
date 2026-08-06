@@ -426,6 +426,9 @@ export class TableControl {
 
     public setHidden(hidden: boolean) {
         this.element.classList.toggle("fn__none", hidden);
+        if (!hidden) {
+            this.scheduleRender();
+        }
     }
 
     public selectCellRange(anchorCell: HTMLTableCellElement, activeCell: HTMLTableCellElement) {

@@ -1,6 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getAVRowDropTarget,
     getSameSuperBlockEdgeTarget,
     getTopListDragTarget,
     isAttributeViewTitleTarget,
@@ -114,6 +115,22 @@ describe("isAttributeViewTitleTarget", () => {
 describe("uniqueDragIds", () => {
     it("removes empty and duplicate block IDs while preserving their order", () => {
         assert.deepEqual(uniqueDragIds(["a", "", "b", "a", "b", "c"]), ["a", "b", "c"]);
+    });
+});
+
+describe("getAVRowDropTarget", () => {
+    it("uses the preceding row for the table utility row", () => {
+        const row = createClassElement(["av__row"]);
+        const utilityRow = createClassElement(["av__row--util"]);
+        Object.defineProperty(utilityRow, "previousElementSibling", {value: row});
+
+        assert.equal(getAVRowDropTarget(utilityRow as HTMLElement), row);
+    });
+
+    it("keeps regular rows unchanged", () => {
+        const row = createClassElement(["av__row"]);
+
+        assert.equal(getAVRowDropTarget(row as HTMLElement), row);
     });
 });
 

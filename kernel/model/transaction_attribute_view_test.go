@@ -91,3 +91,24 @@ func TestCollectDeletedAttributeViewBlocks(t *testing.T) {
 		t.Fatal("child block should not be collected when delChildrenWhenDelParent is false")
 	}
 }
+
+func TestGroupDeletedAttributeViewBlocks(t *testing.T) {
+	deletedAttrViewBlockIDs := groupDeletedAttributeViewBlocks(map[string][]string{
+		"20260807000000-block1": {"20260807000000-av1", "20260807000000-av2", "20260807000000-av1"},
+		"20260807000000-block2": {"20260807000000-av1", ""},
+		"":                      {"20260807000000-av3"},
+	})
+
+	if 2 != len(deletedAttrViewBlockIDs) {
+		t.Fatalf("expected 2 attribute views, got %#v", deletedAttrViewBlockIDs)
+	}
+	if blockIDs := deletedAttrViewBlockIDs["20260807000000-av1"]; 2 != len(blockIDs) {
+		t.Fatalf("expected 2 blocks for av1, got %#v", blockIDs)
+	}
+	if blockIDs := deletedAttrViewBlockIDs["20260807000000-av2"]; 1 != len(blockIDs) {
+		t.Fatalf("expected 1 block for av2, got %#v", blockIDs)
+	}
+	if _, exists := deletedAttrViewBlockIDs["20260807000000-av3"]; exists {
+		t.Fatal("an empty block ID should be ignored")
+	}
+}

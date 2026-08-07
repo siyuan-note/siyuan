@@ -43,6 +43,13 @@ export const uniqueDragIds = (ids: string[]) => {
     return Array.from(new Set(ids.filter(Boolean)));
 };
 
+export const getAVRowDropTarget = (targetElement: HTMLElement | false): HTMLElement | false => {
+    if (!targetElement || !targetElement.classList.contains("av__row--util")) {
+        return targetElement;
+    }
+    return targetElement.previousElementSibling as HTMLElement || targetElement;
+};
+
 export const isSameSiblingMove = <T>(siblings: T[], sources: T[], target: T, isBottom: boolean) => {
     if (sources.length === 0 || sources.includes(target)) {
         return sources.includes(target);

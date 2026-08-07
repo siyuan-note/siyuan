@@ -171,6 +171,18 @@ func removeBoxDir(p string) (err error) {
 	return
 }
 
+func collectBoxDeletedAttributeViewBlocks(boxID string) (ret map[string]map[string]struct{}, err error) {
+	rootIDs := treenode.GetRootBlockIDsByBoxID(boxID)
+	if 1 > len(rootIDs) {
+		return map[string]map[string]struct{}{}, nil
+	}
+	boundAVIDs, err := sql.QueryBoundBlockAVIDsInBox(nil, rootIDs, boxID)
+	if nil != err {
+		return nil, err
+	}
+	return groupDeletedAttributeViewBlocks(boundAVIDs), nil
+}
+
 func RemoveBox(boxID string) (err error) {
 	if !ast.IsNodeIDPattern(boxID) {
 		return errors.New("invalid notebook ID")
@@ -186,6 +198,12 @@ func RemoveBox(boxID string) (err error) {
 	}
 
 	FlushTxQueue()
+	sql.FlushQueue()
+	// 索引和笔记本目录删除后无法再读取 custom-avs，需提前收集；实际删除成功后再清理绑定行。
+	deletedAttrViewBlockIDs, err := collectBoxDeletedAttributeViewBlocks(boxID)
+	if nil != err {
+		return fmt.Errorf("query database-bound blocks in notebook [%s] failed: %w", boxID, err)
+	}
 	isUserGuide := IsUserGuide(boxID)
 	localPath := filepath.Join(util.DataDir, boxID)
 	if !filelock.IsExist(localPath) {
@@ -250,6 +268,8 @@ func RemoveBox(boxID string) (err error) {
 	if err = removeBoxDir(localPath); err != nil {
 		return
 	}
+	// 目录删除成功后再清理，避免删除失败时提前移除数据库条目。
+	flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)
 	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
 	if isEncrypted {
 		sql.RemoveEncryptedDBFile(boxID)

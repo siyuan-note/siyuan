@@ -36,7 +36,7 @@ import {
     updateTransaction
 } from "../wysiwyg/transaction";
 import {removeBlock} from "../wysiwyg/remove";
-import {focusBlock, focusByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
+import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
@@ -74,7 +74,7 @@ import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
-import {getMultiSelectGutterTarget, isGutterInsertStateMatched} from "./multiSelect";
+import {getGutterSelection, getGutterSelectionTarget, isGutterInsertStateMatched} from "./multiSelect";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
@@ -114,6 +114,19 @@ const getBlockTypeName = (type: string) => {
     }
     // 未知类型兜底，与拖拽 ghost 文案保持一致
     return getLangByType(type);
+};
+
+const getCrossBlockTextRange = (protyle: IProtyle) => {
+    const range = protyle.toolbar.range;
+    if (!range || range.collapsed || !protyle.wysiwyg.element.contains(range.startContainer) ||
+        !protyle.wysiwyg.element.contains(range.endContainer)) {
+        return;
+    }
+    const startElement = hasClosestBlock(range.startContainer);
+    const endElement = hasClosestBlock(range.endContainer);
+    if (startElement && endElement && startElement !== endElement) {
+        return range;
+    }
 };
 
 export class Gutter {
@@ -632,8 +645,9 @@ export class Gutter {
             if (protyle.disabled || !lineBefore || !lineAfter || !plusBefore || !plusAfter) {
                 return;
             }
-            // 多选时不显示插入框线与加号 https://github.com/siyuan-note/siyuan/issues/18592
-            if (protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length > 1) {
+            // 多选或跨块文本选择时不显示插入框线与加号 https://github.com/siyuan-note/siyuan/issues/18592
+            if (protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length > 1 ||
+                getCrossBlockTextRange(protyle)) {
                 hideInsert();
                 return;
             }
@@ -3233,10 +3247,12 @@ export class Gutter {
                 item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
             }
         });
-        // 多选时只显示命中位置所属的选中块块标 https://github.com/siyuan-note/siyuan/issues/18592
-        const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-        const isMultiSelect = selectElements.length > 1;
-        const selectedElement = getMultiSelectGutterTarget(selectElements, element);
+        // 多选或跨块文本选择时只显示命中位置所属的选中块块标 https://github.com/siyuan-note/siyuan/issues/18592
+        const blockSelectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+        const crossBlockTextRange = getCrossBlockTextRange(protyle);
+        const rangeSelectElements = crossBlockTextRange ? getBlockElementsByRange(crossBlockTextRange) : [];
+        const {isMultiSelect, selectElements} = getGutterSelection(blockSelectElements, rangeSelectElements);
+        const selectedElement = isMultiSelect ? getGutterSelectionTarget(selectElements, element) : undefined;
         if (isMultiSelect && !selectedElement) {
             hideElements(["gutter"], protyle);
             return;

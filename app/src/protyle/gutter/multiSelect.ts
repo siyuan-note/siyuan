@@ -1,7 +1,14 @@
-export const getMultiSelectGutterTarget = (selectElements: Element[], element: Element) => {
-    if (selectElements.length <= 1) {
-        return;
+export const getGutterSelection = (blockSelectElements: Element[], rangeSelectElements: Element[]) => {
+    if (blockSelectElements.length > 1) {
+        return {isMultiSelect: true, selectElements: blockSelectElements};
     }
+    if (rangeSelectElements.length > 0) {
+        return {isMultiSelect: true, selectElements: rangeSelectElements};
+    }
+    return {isMultiSelect: false, selectElements: blockSelectElements};
+};
+
+export const getGutterSelectionTarget = (selectElements: Element[], element: Element) => {
     const selectElementSet = new Set(selectElements);
     let currentElement: Element | null = element;
     while (currentElement) {

@@ -3637,8 +3637,8 @@ export class WYSIWYG {
                 arrowStartElement = hasClosestBlock(getEditorRange(this.element).startContainer);
             }
         });
-        // 记录组合开始时的光标位置，用于取消组合后恢复光标（输入法删空候选词触发 compositionend 时浏览器会把光标移出可编辑单元格）
-        let compositionRange: { cell: HTMLElement; offset: number };
+        // 记录组合开始时的光标位置，用于取消组合后恢复光标（输入法删空候选词会导致浏览器移动光标）
+        let compositionRange: { range: Range; cell?: HTMLElement; offset?: number };
         this.element.addEventListener("compositionstart", (event) => {
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
@@ -3649,16 +3649,12 @@ export class WYSIWYG {
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
             const range = getEditorRange(protyle.wysiwyg.element);
             const nodeElement = hasClosestBlock(range.startContainer);
-            // 记录组合开始时光标所在的可编辑单元格与偏移，供取消组合时恢复光标
             if (nodeElement) {
                 const startCell = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+                compositionRange = {range: range.cloneRange()};
                 if (startCell) {
-                    compositionRange = {
-                        cell: startCell,
-                        offset: getSelectionOffset(startCell as HTMLElement, nodeElement, range).start,
-                    };
-                } else {
-                    compositionRange = undefined;
+                    compositionRange.cell = startCell as HTMLElement;
+                    compositionRange.offset = getSelectionOffset(startCell, nodeElement, range).start;
                 }
             } else {
                 compositionRange = undefined;
@@ -3694,14 +3690,10 @@ export class WYSIWYG {
                 }
                 // https://github.com/siyuan-note/siyuan/issues/17584
                 if (compositionRange) {
-                    const selection = getSelection();
-                    if (selection.rangeCount > 0) {
-                        const afterRange = selection.getRangeAt(0);
-                        const currentCell = hasClosestByTag(afterRange.startContainer, "TD") || hasClosestByTag(afterRange.startContainer, "TH");
-                        if (!currentCell || currentCell !== compositionRange.cell) {
-                            focusByOffset(compositionRange.cell, compositionRange.offset, compositionRange.offset);
-                        }
-                    } else {
+                    if (this.element.contains(compositionRange.range.startContainer)) {
+                        // https://github.com/siyuan-note/siyuan/issues/14667
+                        focusByRange(compositionRange.range);
+                    } else if (compositionRange.cell?.isConnected) {
                         focusByOffset(compositionRange.cell, compositionRange.offset, compositionRange.offset);
                     }
                 }

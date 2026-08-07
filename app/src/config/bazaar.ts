@@ -152,7 +152,6 @@ export const bazaar = {
                 <button data-type="myWidget" class="b3-button b3-button--outline">${window.siyuan.languages.widget}</button>
             </div>
             <div class="fn__flex config-bazaar__tools">
-                <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
                 <div class="fn__flex config-bazaar__sort">
                     <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
                     <select class="b3-select" data-type="downloaded-sort">
@@ -165,6 +164,7 @@ export const bazaar = {
                         <option ${localSort.downloadedPlugin === "6" ? "selected" : ""} data-plugin-only="true" value="6">${window.siyuan.languages.sortByDisabledFirst}</option>
                     </select>
                 </div>
+                <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
                 <div class="fn__flex config-bazaar__actions">
                     <label class="b3-button b3-button--outline config-bazaar__local-package" data-type="install-local-package">
                         <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.installLocalBazaarPackage}

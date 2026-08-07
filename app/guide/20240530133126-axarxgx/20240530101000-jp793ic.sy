@@ -8,7 +8,7 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260807094000"
 	},
 	"Children": [
 		{
@@ -986,6 +986,101 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ でブロックメニューを呼び出してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-a1s2e3j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260807094000-a1s2e3j",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ノート内の画像やファイルを削除しても、アセットが残るのはなぜですか？"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqja01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqja01",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ノートに挿入された画像やファイルは、アセットへの参照です。ノート内のコンテンツを削除しても、その場所の参照だけが削除され、対応するアセットは削除されません。同じアセットがほかのドキュメント、データベース、ドキュメントのタイトル画像、HTML などから参照されている可能性があるためです。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqja02",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqja02",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アセットが完全に使用されていないことを確認するには、ワークスペース全体を検査する必要があります。参照を削除するたびに検査すると、編集パフォーマンスに影響します。また、アセットの自動削除は、元に戻す操作や複数デバイス間の同期を不安定にし、誤削除につながる可能性があります。そのため、SiYuan はコンテンツ内の参照を削除してもアセットを自動では削除せず、自動削除を有効にするオプションも提供していません。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqja03",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqja03",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "これらのファイルが不要であることを確認したら、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "参照されていないアセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で確認してクリーンアップできます。クリーンアップ操作は"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-txrc7z1",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "データ履歴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "に記録されます。誤って削除した場合は、データ履歴でアセットを選択してロールバックできます。"
 				}
 			]
 		},

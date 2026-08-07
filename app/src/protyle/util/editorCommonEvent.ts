@@ -54,6 +54,7 @@ import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 import {
+    getSameSuperBlockEdgeTarget,
     isAttributeViewTitleTarget,
     isDragTargetInSource,
     isSameDragEditor,
@@ -1798,6 +1799,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     const hasContentBlockSource = sourceElements.some(item =>
                         !["NodeList", "NodeListItem"].includes(item.getAttribute("data-type")));
+                    const isRightSuperBlockEdge = targetClass.includes("dragover__right");
+                    const sameSuperBlockEdgeTarget = targetClass.includes("dragover__left") || isRightSuperBlockEdge ?
+                        getSameSuperBlockEdgeTarget(sourceElements, targetElement, isRightSuperBlockEdge) : undefined;
 
                     // 非列表项源（如段落）拖到子列表首项上方间隙：列表只能包含列表项，段落无法成为 .li 的同级，
                     // 而该间隙的语义实为"插入到父列表项内容末尾（子列表之前）"，故锚点改为父列表项，
@@ -1857,6 +1861,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 dragSame(protyle, sourceElements, targetElement, isBottom, isCopyDrag);
                             }
                         }
+                    } else if (sameSuperBlockEdgeTarget) {
+                        dragSame(protyle, sourceElements, sameSuperBlockEdgeTarget, isRightSuperBlockEdge, isCopyDrag);
                     } else if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
                         targetElement.parentElement.getAttribute("data-sb-layout") === "col") {
                         if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {

@@ -2457,6 +2457,7 @@
 		"367": "Bu pencereyi kapatıp SiYuan'a dönebilirsiniz",
 		"368": "Bu OIDC sağlayıcısı SiYuan mobil geri çağırma URI'sini desteklemiyor",
 		"369": "Geçersiz OIDC yapılandırması",
-		"370": "LAN hızlandırılmış trafik %s"
+		"370": "LAN hızlandırılmış trafik %s",
+		"371": "Defter zaten mevcut"
 	}
 	}

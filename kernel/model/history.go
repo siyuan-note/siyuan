@@ -602,18 +602,42 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	if err != nil {
 		return
 	}
+	boxID, err := validateNotebookHistoryPath(historyPath)
+	if err != nil {
+		return
+	}
+	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
+		return errors.New(Conf.Language(239))
+	}
+	defer boxLock.Delete(boxID)
 
 	from := historyPath
-	to := filepath.Join(util.DataDir, filepath.Base(historyPath))
+	to := filepath.Join(util.DataDir, boxID)
+	if filelock.IsExist(to) {
+		return errors.New(Conf.Language(371))
+	}
 
 	if err = filelock.CopyNewtimes(from, to); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
 
-	FullReindex(true)
 	IncSync()
+	util.ReloadUIResetScroll()
 	return nil
+}
+
+func validateNotebookHistoryPath(historyPath string) (boxID string, err error) {
+	rel, err := filepath.Rel(util.HistoryDir, historyPath)
+	if err != nil {
+		return "", fmt.Errorf("invalid notebook history path [%s]", historyPath)
+	}
+	parts := strings.Split(filepath.ToSlash(rel), "/")
+	if len(parts) != 2 || !strings.HasSuffix(parts[0], "-"+HistoryOpDelete) || !ast.IsNodeIDPattern(parts[1]) ||
+		!gulu.File.IsDir(historyPath) || !filelock.IsExist(filepath.Join(historyPath, ".siyuan", "conf.json")) {
+		return "", fmt.Errorf("invalid notebook history path [%s]", historyPath)
+	}
+	return parts[1], nil
 }
 
 func RollbackAttributeViewHistory(historyPath string) (err error) {

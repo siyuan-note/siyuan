@@ -2457,6 +2457,7 @@
 		"367": "Toto okno môžete zavrieť a vrátiť sa do SiYuan",
 		"368": "Tento poskytovateľ OIDC nepodporuje mobilný URI spätného volania SiYuan",
 		"369": "Neplatná konfigurácia OIDC",
-		"370": "prevádzka zrýchlená cez LAN %s"
+		"370": "prevádzka zrýchlená cez LAN %s",
+		"371": "Zápisník už existuje"
 	}
 	}

@@ -2457,6 +2457,7 @@
 		"367": "Você pode fechar esta janela e voltar ao SiYuan",
 		"368": "Este provedor OIDC não oferece suporte ao URI de retorno móvel do SiYuan",
 		"369": "Configuração OIDC inválida",
-		"370": "tráfego acelerado pela LAN %s"
+		"370": "tráfego acelerado pela LAN %s",
+		"371": "O caderno já existe"
 	}
 	}

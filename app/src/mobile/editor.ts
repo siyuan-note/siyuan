@@ -106,6 +106,10 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             } else {
                 scrollCenter(protyle, blockElement, scrollPosition);
             }
+            if (!protyle.block.showAll) {
+                protyle.block.id = protyle.block.rootID;
+                protyle.wysiwyg.element.setAttribute("data-doc-type", "NodeDocument");
+            }
             closePanel();
             // 更新文档浏览时间
             const rootID = protyle.block.rootID;
@@ -141,7 +145,10 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
         const isRootFocus = id === data.data.rootID &&
             action.includes(Constants.CB_GET_ALL) &&
             action.includes(Constants.CB_GET_FOCUS);
-        const actionList = isRootFocus ? action.filter((item) => item !== Constants.CB_GET_ALL) : action;
+        const actionList = isRootFocus ? action.filter((item) => item !== Constants.CB_GET_ALL) : [...action];
+        if (!actionList.includes(Constants.CB_GET_ALL) && !actionList.includes(Constants.CB_GET_SETID)) {
+            actionList.push(Constants.CB_GET_SETID);
+        }
         const previousRootID = window.siyuan.mobile.editor?.protyle.block.rootID;
         const protyleOptions: IProtyleOptions = {
             databaseAttr: true,

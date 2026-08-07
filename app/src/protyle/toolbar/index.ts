@@ -194,6 +194,8 @@ export class Toolbar {
             return;
         }
         const protyleRect = protyle.element.getBoundingClientRect();
+        const topBoundary = protyleRect.top + 30;
+        const bottomBoundary = Math.min(protyleRect.bottom, window.innerHeight);
         const rangeRects = this.range.getClientRects();
         const rangeRect = (typeof this.rangePosition.rectIndex === "number" ?
             rangeRects[this.rangePosition.rectIndex] : undefined) ||
@@ -202,22 +204,22 @@ export class Toolbar {
         const gap = this.isMultipleClick ? 2 : 4;
         if (scrollElement) {
             const availableHeight = Math.max(
-                rangeRect.top - protyleRect.top - 30 - gap,
-                protyleRect.bottom - rangeRect.bottom - gap,
+                rangeRect.top - topBoundary - gap,
+                bottomBoundary - rangeRect.bottom - gap,
                 0
             );
-            const overflowHeight = Math.max(0, element.offsetHeight - availableHeight);
-            if (overflowHeight > 0) {
-                scrollElement.style.maxHeight = `${Math.max(0, scrollElement.offsetHeight - overflowHeight)}px`;
+            if (element.offsetHeight > availableHeight) {
+                const outerHeight = element.offsetHeight - scrollElement.offsetHeight;
+                scrollElement.style.maxHeight = `${Math.max(0, availableHeight - outerHeight)}px`;
             }
         }
-        const above = rangeRect.top - element.clientHeight - gap;
+        const above = rangeRect.top - element.offsetHeight - gap;
         const below = rangeRect.bottom + gap;
         const y = this.rangePosition.isBottom ?
-            (below + element.clientHeight <= protyleRect.bottom ?
-                below : Math.max(above, protyleRect.top + 30)) :
-            (above >= protyleRect.top + 30 ?
-                above : Math.min(below, protyleRect.bottom - element.clientHeight));
+            (below + element.offsetHeight <= bottomBoundary ?
+                below : Math.max(above, topBoundary)) :
+            (above >= topBoundary ?
+                above : Math.min(below, bottomBoundary - element.offsetHeight));
         const horizontalDivisor = this.isMultipleClick ? 3 : 4;
         // 子面板与触发按钮水平居中，垂直方向继续避让选区
         const left = triggerRect ?

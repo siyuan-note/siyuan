@@ -54,6 +54,7 @@ import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 import {
+    getAVRowDropTarget,
     getSameSuperBlockEdgeTarget,
     getTopListDragTarget,
     isAttributeViewTitleTarget,
@@ -2376,6 +2377,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         targetElement = hasClosestByClassName(event.target, "av__gallery-item") || hasClosestByClassName(event.target, "av__gallery-add") ||
             hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") ||
             hasClosestBlock(event.target);
+        targetElement = getAVRowDropTarget(targetElement);
         const directTargetElement = targetElement;
         if (targetElement && ["gallery", "kanban"].includes(targetElement.getAttribute("data-av-type")) && event.target.classList.contains("av__gallery")) {
             // 拖拽到属性视图 gallery 内，但没选中 item
@@ -2844,8 +2846,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             } else if (targetElement.classList.contains("av__row--header")) {
                 targetElement.classList.add("dragover__bottom");
-            } else if (targetElement.classList.contains("av__row--util")) {
-                targetElement.previousElementSibling.classList.add("dragover__bottom");
             } else {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2 && disabledPosition !== "bottom") {
                     targetElement.classList.add("dragover__bottom");

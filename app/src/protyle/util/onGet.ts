@@ -347,8 +347,9 @@ const setHTML = (options: {
 
     focusElementById(protyle, options.action, options.scrollAttr, options.scrollPosition);
 
-    if (options.action.includes(Constants.CB_GET_SETID)) {
-        // 点击大纲后，如果需要动态加载，在定位后，需要重置 block.id https://github.com/siyuan-note/siyuan/issues/4487
+    if (options.action.includes(Constants.CB_GET_SETID) ||
+        (protyle.model && !protyle.block.showAll)) {
+        // 完整文档在定位后需将 block.id 恢复为 rootID，聚焦状态下则保留聚焦块 ID
         protyle.block.id = protyle.block.rootID;
         protyle.wysiwyg.element.setAttribute("data-doc-type", "NodeDocument");
     }

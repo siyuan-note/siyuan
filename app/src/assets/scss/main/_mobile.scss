@@ -672,6 +672,10 @@
       flex: 0 1 auto;
     }
   }
+
+  .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"][custom-sy-super-block-vertical-align] {
+    align-items: stretch;
+  }
 }
 
 .protyle-db-attr__toggle {

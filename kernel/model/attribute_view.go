@@ -7587,48 +7587,30 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueD
 
 func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID, itemID string, valueData any, save bool) (val *av.Value, err error) {
 	avID := attrView.ID
-	var blockVal *av.Value
-	for _, kv := range attrView.KeyValues {
-		if av.KeyTypeBlock == kv.Key.Type {
-			for _, v := range kv.Values {
-				if itemID == v.BlockID {
-					blockVal = v
-					break
-				}
-			}
+	keyValues, err := attrView.GetKeyValues(keyID)
+	if nil != err {
+		return
+	}
+	blockVal := attrView.GetBlockValue(itemID)
+	if nil == blockVal {
+		err = av.ErrItemNotFound
+		return
+	}
+
+	now := time.Now().UnixMilli()
+	oldIsDetached := blockVal.IsDetached
+	oldBoundBlockID := blockVal.Block.ID
+	for _, value := range keyValues.Values {
+		if itemID == value.BlockID {
+			val = value
+			val.Type = keyValues.Key.Type
 			break
 		}
 	}
 
-	now := time.Now().UnixMilli()
-	oldIsDetached := true
-	var oldBoundBlockID string
-	if nil != blockVal {
-		oldIsDetached = blockVal.IsDetached
-		oldBoundBlockID = blockVal.Block.ID
-	}
-	for _, keyValues := range attrView.KeyValues {
-		if keyID != keyValues.Key.ID {
-			continue
-		}
-
-		for _, value := range keyValues.Values {
-			if itemID == value.BlockID {
-				val = value
-				val.Type = keyValues.Key.Type
-				break
-			}
-		}
-
-		if nil == val {
-			val = &av.Value{ID: ast.NewNodeID(), KeyID: keyID, BlockID: itemID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
-			keyValues.Values = append(keyValues.Values, val)
-		}
-		break
-	}
 	if nil == val {
-		err = av.ErrKeyNotFound
-		return
+		val = &av.Value{ID: ast.NewNodeID(), KeyID: keyID, BlockID: itemID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
+		keyValues.Values = append(keyValues.Values, val)
 	}
 
 	valueID := val.ID

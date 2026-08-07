@@ -2,12 +2,34 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     getBazaarBackendSystemLabels,
+    getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
     getBazaarThemeModeLabels,
     isValidBazaarPackageName,
 } from "./bazaarPackage";
+
+describe("getBazaarCompatibilityData", () => {
+    const installed = {source: "installed"};
+    const available = {source: "available"};
+    const fallback = {source: "fallback"};
+
+    it("uses installed metadata for downloaded packages", () => {
+        assert.equal(getBazaarCompatibilityData("downloaded", installed, available, fallback), installed);
+    });
+
+    it("uses available metadata for update and marketplace packages", () => {
+        assert.equal(getBazaarCompatibilityData("updated", installed, available, fallback), available);
+        assert.equal(getBazaarCompatibilityData("bazaar", installed, available, fallback), available);
+    });
+
+    it("falls back without changing the selected source semantics", () => {
+        assert.equal(getBazaarCompatibilityData("downloaded", undefined, available, fallback), fallback);
+        assert.equal(getBazaarCompatibilityData("updated", installed, undefined, fallback), installed);
+        assert.equal(getBazaarCompatibilityData("bazaar", undefined, undefined, fallback), fallback);
+    });
+});
 
 describe("getBazaarCompatibilityFieldVisibility", () => {
     it("shows shared and dedicated compatibility fields for each package type", () => {

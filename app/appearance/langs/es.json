@@ -2457,6 +2457,7 @@
 		"367": "Puede cerrar esta ventana y volver a SiYuan",
 		"368": "Este proveedor OIDC no admite el URI de devolución de llamada móvil de SiYuan",
 		"369": "Configuración OIDC no válida",
-		"370": "tráfico acelerado por LAN %s"
+		"370": "tráfico acelerado por LAN %s",
+		"371": "El cuaderno ya existe"
 	}
 	}

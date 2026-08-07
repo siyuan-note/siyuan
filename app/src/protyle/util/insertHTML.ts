@@ -39,6 +39,8 @@ import {setFold} from "./blockFold";
 import {removeFoldHeading} from "./heading";
 import {
     AV_PASTE_READONLY_TYPES,
+    getAVPasteCellValue,
+    getAVPasteValueForType,
     getAVPasteMatrixWidth,
     getUniqueAVPasteColumnName,
     inferAVPasteColumnType,
@@ -350,9 +352,18 @@ const pasteAVMatrix = async (options: {
 
     for (let sourceIndex = 0; sourceIndex < sourceWidth; sourceIndex++) {
         const headerName = options.header?.[sourceIndex]?.trim() || "";
-        const sourceValues = options.values.flatMap(row =>
-            sourceIndex < row.length && typeof row[sourceIndex] === "string" ? [row[sourceIndex] as string] : []);
-        const inferredType = options.header ? inferAVPasteColumnType(sourceValues) : "text";
+        const sourceCellValues = options.values.flatMap(row =>
+            sourceIndex < row.length ? [row[sourceIndex]] : []);
+        const sourceValues = sourceCellValues.flatMap(value => {
+            if (typeof value === "string") {
+                return [value];
+            }
+            if (value.type === "mAsset") {
+                return [(value.mAsset || []).map(item => item.name || item.content).join(", ")];
+            }
+            return [];
+        });
+        const inferredType = options.header ? inferAVPasteColumnType(sourceCellValues) : "text";
         const currentColumn = availableColumns[sourceIndex];
         if (currentColumn) {
             const readonly = AV_PASTE_READONLY_TYPES.has(currentColumn.type);
@@ -546,7 +557,8 @@ const pasteAVMatrix = async (options: {
                     continue;
                 }
                 const isNewRow = newRowIDSet.has(pasteRows[i].id);
-                const operations = await updateCellsValue(options.protyle, options.blockElement, options.values[i][j],
+                const pasteValue = getAVPasteValueForType(options.values[i][j], targetColumn.column.type);
+                const operations = await updateCellsValue(options.protyle, options.blockElement, pasteValue,
                     [cellElement], options.columns, options.cellHTML?.[i]?.[j] || options.html,
                     true, isNewRow || targetColumn.isNew || targetColumn.typeChanged, true, undefined, false);
                 if (operations.doOperations.length > 0) {
@@ -649,11 +661,19 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             if (item.closest("table") !== tableElement) {
                 return;
             }
-            const rowValues: string[] = [];
+            const rowValues: TAVPasteValue[] = [];
             const rowHTML: string[] = [];
             Array.from(item.children).forEach(cell => {
                 if (cell.tagName === "TD" || cell.tagName === "TH") {
-                    rowValues.push(cell.textContent);
+                    const links = Array.from(cell.querySelectorAll<HTMLElement>(
+                        'a[href], [data-type~="a"][data-href]',
+                    )).map(link => ({
+                        content: link.textContent,
+                        href: link.getAttribute("data-href") || link.getAttribute("href") || "",
+                    }));
+                    const unlinkedCell = cell.cloneNode(true) as HTMLElement;
+                    unlinkedCell.querySelectorAll('a[href], [data-type~="a"][data-href]').forEach(link => link.remove());
+                    rowValues.push(getAVPasteCellValue(cell.textContent, links, unlinkedCell.textContent));
                     rowHTML.push(cell.outerHTML);
                 }
             });

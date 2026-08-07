@@ -4,6 +4,13 @@ const reservedWindowsDeviceNames = new Set([
     "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
 ]);
 
+export const getBazaarCompatibilityData = <T extends object>(
+    source: "downloaded" | "updated" | "bazaar",
+    installed: T | undefined,
+    available: T | undefined,
+    fallback: T,
+) => source === "downloaded" ? installed ?? fallback : available ?? installed ?? fallback;
+
 export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     const isPlugin = packageType === "plugins";
     const isTheme = packageType === "themes";

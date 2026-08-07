@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -106,4 +107,76 @@ func TestGetRollbackDocPathPreservesOrdinaryParent(t *testing.T) {
 	if parentHPath != "/Target" {
 		t.Fatalf("unexpected rollback parent human-readable path: got %q, want %q", parentHPath, "/Target")
 	}
+}
+
+func TestRollbackNotebookHistoryKeepsNotebookClosed(t *testing.T) {
+	historyPath, boxID := setupNotebookHistoryRollbackTest(t)
+	if err := RollbackNotebookHistory(historyPath); err != nil {
+		t.Fatalf("rollback notebook history failed: %v", err)
+	}
+
+	restoredConf := (&Box{ID: boxID}).GetConf()
+	if !restoredConf.Closed {
+		t.Fatal("restored notebook should remain closed")
+	}
+	if !filelock.IsExist(filepath.Join(util.DataDir, boxID, "20260807000001-abcdefg.sy")) {
+		t.Fatal("restored notebook document does not exist")
+	}
+}
+
+func TestRollbackNotebookHistoryRejectsExistingNotebook(t *testing.T) {
+	historyPath, boxID := setupNotebookHistoryRollbackTest(t)
+	destination := filepath.Join(util.DataDir, boxID)
+	if err := os.MkdirAll(destination, 0755); err != nil {
+		t.Fatalf("create existing notebook failed: %v", err)
+	}
+	markerPath := filepath.Join(destination, "marker")
+	if err := os.WriteFile(markerPath, []byte("existing"), 0644); err != nil {
+		t.Fatalf("write existing notebook marker failed: %v", err)
+	}
+
+	if err := RollbackNotebookHistory(historyPath); err == nil {
+		t.Fatal("rollback should reject an existing notebook")
+	}
+	data, err := os.ReadFile(markerPath)
+	if err != nil {
+		t.Fatalf("read existing notebook marker failed: %v", err)
+	}
+	if string(data) != "existing" {
+		t.Fatalf("existing notebook was modified: %q", data)
+	}
+}
+
+func setupNotebookHistoryRollbackTest(t *testing.T) (historyPath, boxID string) {
+	originalConf := Conf
+	originalWorkspaceDir := util.WorkspaceDir
+	originalDataDir := util.DataDir
+	originalHistoryDir := util.HistoryDir
+	tempDir := t.TempDir()
+	util.WorkspaceDir = tempDir
+	util.DataDir = filepath.Join(tempDir, "data")
+	util.HistoryDir = filepath.Join(tempDir, "history")
+	Conf = NewAppConf()
+	Conf.Sync = conf.NewSync()
+	t.Cleanup(func() {
+		Conf = originalConf
+		util.WorkspaceDir = originalWorkspaceDir
+		util.DataDir = originalDataDir
+		util.HistoryDir = originalHistoryDir
+	})
+
+	boxID = "20260807000000-abcdefg"
+	relHistoryPath := filepath.Join("history", "2026-08-07-120000-delete", boxID)
+	historyPath = filepath.Join(util.WorkspaceDir, relHistoryPath)
+	if err := os.MkdirAll(filepath.Join(historyPath, ".siyuan"), 0755); err != nil {
+		t.Fatalf("create notebook history failed: %v", err)
+	}
+	boxConf := []byte(`{"name":"Rollback test","closed":true}`)
+	if err := os.WriteFile(filepath.Join(historyPath, ".siyuan", "conf.json"), boxConf, 0644); err != nil {
+		t.Fatalf("write notebook history configuration failed: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(historyPath, "20260807000001-abcdefg.sy"), []byte("{}"), 0644); err != nil {
+		t.Fatalf("write notebook history document failed: %v", err)
+	}
+	return filepath.ToSlash(strings.TrimPrefix(historyPath, util.WorkspaceDir)), boxID
 }

@@ -24,8 +24,15 @@ import {getDisplayName, getNotebookName, getTopPaths, movePathTo, moveToPath, pa
 import {hintMoveBlock} from "../../../protyle/hint/extend";
 import {fetchSyncPost} from "../../../util/fetch";
 import {focusByRange} from "../../../protyle/util/selection";
+import {matchHotKey} from "../../../protyle/util/hotKey";
 
 export const commandPanel = (app: App) => {
+    const openCommandPanelDialog = window.siyuan.dialogs.find(item =>
+        item.element.getAttribute("data-key") === Constants.DIALOG_COMMANDPANEL);
+    if (openCommandPanelDialog) {
+        openCommandPanelDialog.destroy();
+        return;
+    }
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
     const dialog = new Dialog({
         width: isMobile() ? "92vw" : "80vw",
@@ -125,6 +132,11 @@ export const commandPanel = (app: App) => {
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         event.stopPropagation();
         if (event.isComposing) {
+            return;
+        }
+        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.general.commandPanel.custom, event)) {
+            dialog.destroy();
+            event.preventDefault();
             return;
         }
         upDownHint(listElement, event);

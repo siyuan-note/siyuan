@@ -1319,6 +1319,29 @@ func collectDeletedAttributeViewBlocks(node *ast.Node, delChildrenWhenDelParent 
 	})
 }
 
+func groupDeletedAttributeViewBlocks(boundAVIDs map[string][]string) (ret map[string]map[string]struct{}) {
+	ret = map[string]map[string]struct{}{}
+	for blockID, avIDs := range boundAVIDs {
+		blockID = strings.TrimSpace(blockID)
+		if "" == blockID {
+			continue
+		}
+		for _, avID := range avIDs {
+			avID = strings.TrimSpace(avID)
+			if "" == avID {
+				continue
+			}
+			blockIDs := ret[avID]
+			if nil == blockIDs {
+				blockIDs = map[string]struct{}{}
+				ret[avID] = blockIDs
+			}
+			blockIDs[blockID] = struct{}{}
+		}
+	}
+	return
+}
+
 func (tx *Transaction) flushDeletedAttributeViewBlocks() {
 	flushDeletedAttributeViewBlocks(tx.deletedAttrViewBlockIDs)
 	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}

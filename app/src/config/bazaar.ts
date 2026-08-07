@@ -21,6 +21,7 @@ import {switchSettingPanelSubTab} from "./setting/mount";
 import {isThemeFrontendSupported} from "../util/themeCompatibility";
 import {
     getBazaarBackendSystemLabels,
+    getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
@@ -763,7 +764,7 @@ type="checkbox">
         const available = detail?.available || updatedDetail?.available ||
             (from === "downloaded" ? bazaar._getUpdatedItem(bazaarType, data.name)?.available : data);
         const displayData = from === "downloaded" ? installed || data : available || data;
-        const compatibilityData = available || installed || data;
+        const compatibilityData = getBazaarCompatibilityData(from, installed, available, data);
         const resourceData = available || displayData;
         bazaar._setPackageDetail(bazaarType, data.name, {installed, available});
         const urls = resourceData.repoURL.split("/");

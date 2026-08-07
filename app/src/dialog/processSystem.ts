@@ -457,17 +457,17 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
     if (data?.code === 1) {
         window.dispatchEvent(new CustomEvent("siyuan-sync-success"));
     }
+    const syncDisabled = !window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""));
     /// #if MOBILE
     const menuSyncUseElement = document.querySelector("#menuSyncNow use");
     const barSyncUseElement = document.querySelector("#toolbarSync use");
     if (!data) {
-        if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
-            menuSyncUseElement?.setAttribute("xlink:href", "#iconCloudOff");
-            barSyncUseElement.setAttribute("xlink:href", "#iconCloudOff");
-        } else {
-            menuSyncUseElement?.setAttribute("xlink:href", "#iconCloudSucc");
-            barSyncUseElement.setAttribute("xlink:href", "#iconCloudSucc");
+        if (barSyncUseElement?.parentElement?.classList.contains("fn__rotate")) {
+            // 同步进行中时保持旋转状态，待同步完成后由同步结果消息更新图标 https://github.com/siyuan-note/siyuan/issues/18597
+            return;
         }
+        menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        barSyncUseElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
         return;
     }
     menuSyncUseElement?.parentElement.classList.remove("fn__rotate");
@@ -478,11 +478,11 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
         menuSyncUseElement?.setAttribute("xlink:href", "#iconRefresh");
         barSyncUseElement.setAttribute("xlink:href", "#iconRefresh");
     } else if (data.code === 2) {    // error
-        menuSyncUseElement?.setAttribute("xlink:href", "#iconCloudError");
-        barSyncUseElement.setAttribute("xlink:href", "#iconCloudError");
+        menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
+        barSyncUseElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
     } else if (data.code === 1) {   // success
-        menuSyncUseElement?.setAttribute("xlink:href", "#iconCloudSucc");
-        barSyncUseElement.setAttribute("xlink:href", "#iconCloudSucc");
+        menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        barSyncUseElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
     }
     /// #else
     const iconElement = document.querySelector("#barSync");
@@ -491,12 +491,12 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
     }
     const useElement = iconElement.querySelector("use");
     if (!data) {
-        iconElement.classList.remove("toolbar__item--active");
-        if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
-            useElement.setAttribute("xlink:href", "#iconCloudOff");
-        } else {
-            useElement.setAttribute("xlink:href", "#iconCloudSucc");
+        if (iconElement.classList.contains("toolbar__item--active")) {
+            // 同步进行中时保持旋转状态，待同步完成后由同步结果消息更新图标 https://github.com/siyuan-note/siyuan/issues/18597
+            return;
         }
+        iconElement.classList.remove("toolbar__item--active");
+        useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
         return;
     }
     iconElement.firstElementChild.classList.remove("fn__rotate");
@@ -506,10 +506,10 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
         useElement.setAttribute("xlink:href", "#iconRefresh");
     } else if (data.code === 2) {    // error
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", "#iconCloudError");
+        useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
     } else if (data.code === 1) {   // success
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", "#iconCloudSucc");
+        useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
     }
     /// #endif
     plugins.forEach((item) => {

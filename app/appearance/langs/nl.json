@@ -2462,6 +2462,7 @@
 		"368": "Deze OIDC-provider ondersteunt de mobiele callback-URI van SiYuan niet",
 		"369": "Ongeldige OIDC-configuratie",
 		"370": "LAN-versneld verkeer %s",
-		"371": "Het notitieboek bestaat al"
+		"371": "Het notitieboek bestaat al",
+		"372": "Het notitieboek is hersteld en blijft gesloten"
 	}
 	}

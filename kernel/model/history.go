@@ -623,7 +623,8 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	}
 
 	IncSync()
-	util.ReloadUIResetScroll()
+	ReloadFiletree()
+	util.PushMsg(Conf.Language(372), 3000)
 	return nil
 }
 

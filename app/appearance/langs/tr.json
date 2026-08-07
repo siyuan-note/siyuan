@@ -2462,6 +2462,7 @@
 		"368": "Bu OIDC sağlayıcısı SiYuan mobil geri çağırma URI'sini desteklemiyor",
 		"369": "Geçersiz OIDC yapılandırması",
 		"370": "LAN hızlandırılmış trafik %s",
-		"371": "Defter zaten mevcut"
+		"371": "Defter zaten mevcut",
+		"372": "Defter geri yüklendi ve kapalı kalacak"
 	}
 	}

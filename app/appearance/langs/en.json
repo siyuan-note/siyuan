@@ -2462,6 +2462,7 @@
 		"368": "This OIDC provider does not support the SiYuan mobile callback URI",
 		"369": "Invalid OIDC configuration",
 		"370": "LAN accelerated traffic %s",
-		"371": "The notebook already exists"
+		"371": "The notebook already exists",
+		"372": "The notebook has been restored and remains closed"
 	}
 	}

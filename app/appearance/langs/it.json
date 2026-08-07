@@ -2462,6 +2462,7 @@
 		"368": "Questo provider OIDC non supporta l'URI di richiamata mobile di SiYuan",
 		"369": "Configurazione OIDC non valida",
 		"370": "traffico accelerato LAN %s",
-		"371": "Il taccuino esiste già"
+		"371": "Il taccuino esiste già",
+		"372": "Il taccuino è stato ripristinato e rimane chiuso"
 	}
 	}

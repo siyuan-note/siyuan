@@ -2462,6 +2462,7 @@
 		"368": "Ce fournisseur OIDC ne prend pas en charge l'URI de rappel mobile de SiYuan",
 		"369": "Configuration OIDC non valide",
 		"370": "trafic accéléré par le réseau local %s",
-		"371": "Le carnet existe déjà"
+		"371": "Le carnet existe déjà",
+		"372": "Le carnet a été restauré et reste fermé"
 	}
 	}

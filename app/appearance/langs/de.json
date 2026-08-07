@@ -2462,6 +2462,7 @@
 		"368": "Dieser OIDC-Anbieter unterstützt die mobile SiYuan-Rückruf-URI nicht",
 		"369": "Ungültige OIDC-Konfiguration",
 		"370": "LAN-beschleunigter Datenverkehr %s",
-		"371": "Das Notizbuch ist bereits vorhanden"
+		"371": "Das Notizbuch ist bereits vorhanden",
+		"372": "Das Notizbuch wurde wiederhergestellt und bleibt geschlossen"
 	}
 	}

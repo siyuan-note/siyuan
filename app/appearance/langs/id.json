@@ -2462,6 +2462,7 @@
 		"368": "Penyedia OIDC ini tidak mendukung URI panggilan balik seluler SiYuan",
 		"369": "Konfigurasi OIDC tidak valid",
 		"370": "lalu lintas akselerasi LAN %s",
-		"371": "Buku catatan sudah ada"
+		"371": "Buku catatan sudah ada",
+		"372": "Buku catatan telah dipulihkan dan tetap ditutup"
 	}
 	}

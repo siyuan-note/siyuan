@@ -2462,6 +2462,7 @@
 		"368": "Ten dostawca OIDC nie obsługuje mobilnego identyfikatora URI wywołania zwrotnego SiYuan",
 		"369": "Nieprawidłowa konfiguracja OIDC",
 		"370": "ruch przyspieszony przez LAN %s",
-		"371": "Notatnik już istnieje"
+		"371": "Notatnik już istnieje",
+		"372": "Notatnik został przywrócony i pozostaje zamknięty"
 	}
 	}

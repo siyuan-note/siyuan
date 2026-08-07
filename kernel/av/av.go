@@ -1295,6 +1295,7 @@ var (
 	ErrInvalidBoxID           = errors.New("invalid box id")
 	ErrViewNotFound           = errors.New("view not found")
 	ErrKeyNotFound            = errors.New("key not found")
+	ErrItemNotFound           = errors.New("item not found")
 	ErrWrongLayoutType        = errors.New("wrong layout type")
 	ErrInvalidColumnAlign     = errors.New("invalid column align")
 	ErrSpecTooNew             = errors.New("attribute view spec is too new")

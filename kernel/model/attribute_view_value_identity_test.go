@@ -81,14 +81,84 @@ func TestUpdateAttributeViewValuePreservesTargetIdentity(t *testing.T) {
 }
 
 func TestUpdateAttributeViewValueRejectsMissingKey(t *testing.T) {
-	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{{
-		Key: &av.Key{ID: "20260806000000-existing", Type: av.KeyTypeText},
-	}}}
+	const itemID = "20260806000002-item001"
+	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
+		{
+			Key: &av.Key{ID: "20260806000000-existing", Type: av.KeyTypeBlock},
+			Values: []*av.Value{{
+				BlockID: itemID,
+				Type:    av.KeyTypeBlock,
+				Block:   &av.ValueBlock{},
+			}},
+		},
+	}}
 
-	_, err := updateAttributeViewValue(nil, attrView, "20260806000001-missing", "20260806000002-item001",
+	_, err := updateAttributeViewValue(nil, attrView, "20260806000001-missing", itemID,
 		&av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "source"}}, false)
 	if !errors.Is(err, av.ErrKeyNotFound) {
 		t.Fatalf("missing key returned error [%v]", err)
+	}
+}
+
+func TestUpdateAttributeViewValueRejectsMissingItem(t *testing.T) {
+	const (
+		blockKeyID  = "20260806000000-blockky"
+		selectKeyID = "20260806000001-selectk"
+		itemID      = "20260806000002-item001"
+		missingID   = "20260806000003-missing"
+	)
+	selectKeyValues := &av.KeyValues{Key: &av.Key{ID: selectKeyID, Type: av.KeyTypeSelect}}
+	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
+		{
+			Key: &av.Key{ID: blockKeyID, Type: av.KeyTypeBlock},
+			Values: []*av.Value{{
+				BlockID: itemID,
+				Type:    av.KeyTypeBlock,
+				Block:   &av.ValueBlock{},
+			}},
+		},
+		selectKeyValues,
+	}}
+
+	_, err := updateAttributeViewValue(nil, attrView, selectKeyID, missingID,
+		&av.Value{Type: av.KeyTypeSelect, MSelect: []*av.ValueSelect{{Content: "Closed", Color: "4"}}}, false)
+	if !errors.Is(err, av.ErrItemNotFound) {
+		t.Fatalf("missing item returned error [%v]", err)
+	}
+	if 0 != len(selectKeyValues.Values) {
+		t.Fatalf("missing item created an orphan value: %+v", selectKeyValues.Values)
+	}
+}
+
+func TestUpdateAttributeViewValueCreatesMissingCellForExistingItem(t *testing.T) {
+	const (
+		blockKeyID = "20260806000000-blockky"
+		textKeyID  = "20260806000001-textkey"
+		itemID     = "20260806000002-item001"
+	)
+	textKeyValues := &av.KeyValues{Key: &av.Key{ID: textKeyID, Type: av.KeyTypeText}}
+	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
+		{
+			Key: &av.Key{ID: blockKeyID, Type: av.KeyTypeBlock},
+			Values: []*av.Value{{
+				BlockID: itemID,
+				Type:    av.KeyTypeBlock,
+				Block:   &av.ValueBlock{},
+			}},
+		},
+		textKeyValues,
+	}}
+
+	updated, err := updateAttributeViewValue(nil, attrView, textKeyID, itemID,
+		&av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "source"}}, false)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if 1 != len(textKeyValues.Values) || textKeyValues.Values[0] != updated {
+		t.Fatalf("missing cell was not created: %+v", textKeyValues.Values)
+	}
+	if itemID != updated.BlockID || textKeyID != updated.KeyID || nil == updated.Text || "source" != updated.Text.Content {
+		t.Fatalf("created cell is invalid: %+v", updated)
 	}
 }
 

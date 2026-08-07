@@ -951,20 +951,19 @@ ${genHintItemHTML(item)}
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     }
-                    // 列表项内创建列表时保留空段落，避免 ID 冲突和 li>list 非法结构 https://github.com/siyuan-note/siyuan/issues/17890
-                    const keepEmptyInLi2 = hasClosestByClassName(nodeElement, "li") &&
+                    // 列表项内创建列表时保留原内容块，避免 ID 冲突和 li>list 非法结构 https://github.com/siyuan-note/siyuan/issues/17890
+                    const insertListInLi = hasClosestByClassName(nodeElement, "li") &&
                         (() => {
                             const tc = document.createElement("div");
                             tc.innerHTML = newHTML;
                             return tc.firstElementChild?.getAttribute("data-type") === "NodeList";
                         })();
-                    if (keepEmptyInLi2) {
+                    if (insertListInLi) {
                         const newListId = Lute.NewNodeID();
                         const tc = document.createElement("div");
                         tc.innerHTML = newHTML;
                         tc.firstElementChild.setAttribute("data-node-id", newListId);
                         newHTML = tc.innerHTML;
-                        editableElement.innerHTML = "";
                         nodeElement.insertAdjacentHTML("afterend", newHTML);
                         const newListEl = nodeElement.nextElementSibling as HTMLElement;
                         transaction(protyle, [{

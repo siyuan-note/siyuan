@@ -281,9 +281,17 @@ const gutterMultiple = () => [
 const gutterSingle = () => [
     ...gutterBase(false),
     separator("separator_cancelSuperBlock"),
-    node("cancelSuperBlock", () => `${window.siyuan.languages.cancel} ${window.siyuan.languages.superBlock}`),
-    node("turnIntoVLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.vLayout}`),
-    node("turnIntoHLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.hLayout}`),
+    node("superBlock", lang("superBlock"), true, [
+        node("cancelSuperBlock", () => `${window.siyuan.languages.cancel} ${window.siyuan.languages.superBlock}`),
+        node("turnIntoVLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.vLayout}`),
+        node("turnIntoHLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.hLayout}`),
+        node("superBlockAlignment", lang("alignment"), true, [
+            node("alignTop", lang("alignTop")),
+            node("alignMiddle", lang("alignMiddle")),
+            node("alignBottom", lang("alignBottom")),
+            node("useDefaultVerticalAlign", lang("useDefaultVerticalAlign")),
+        ]),
+    ]),
     separator("separator_code"),
     node("code", lang("code"), true, [
         node("md31", lang("md31")),

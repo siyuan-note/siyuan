@@ -1879,8 +1879,9 @@ export class Gutter {
                 type: "separator"
             }).element);
             const isCol = nodeElement.getAttribute("data-sb-layout") === "col";
+            const superBlockSubmenu: IMenu[] = [];
             if (allowStructuralMutation) {
-                window.siyuan.menus.menu.append(new MenuItem({
+                superBlockSubmenu.push({
                     id: "cancelSuperBlock",
                     label: window.siyuan.languages.cancel + " " + window.siyuan.languages.superBlock,
                     accelerator: window.siyuan.config.keymap.editor.general[isCol ? "hLayout" : "vLayout"].custom,
@@ -1891,9 +1892,9 @@ export class Gutter {
                             protyle.wysiwyg.element.querySelector(`[data-node-id="${sbData.previousId}"]`));
                         hideElements(["gutter"], protyle);
                     }
-                }).element);
+                });
             }
-            window.siyuan.menus.menu.append(new MenuItem({
+            superBlockSubmenu.push({
                 id: "turnInto" + (isCol ? "VLayout" : "HLayout"),
                 accelerator: window.siyuan.config.keymap.editor.general[isCol ? "vLayout" : "hLayout"].custom,
                 label: window.siyuan.languages.turnInto + " " + window.siyuan.languages[isCol ? "vLayout" : "hLayout"],
@@ -1909,6 +1910,60 @@ export class Gutter {
                     focusByRange(protyle.toolbar.range);
                     hideElements(["gutter"], protyle);
                 }
+            });
+            const verticalAlign = nodeElement.getAttribute(Constants.CUSTOM_SY_SUPER_BLOCK_VERTICAL_ALIGN) || "";
+            const setVerticalAlign = (value: "" | "top" | "middle" | "bottom") => {
+                if (verticalAlign === value) {
+                    return;
+                }
+                const oldHTML = nodeElement.outerHTML;
+                if (value) {
+                    nodeElement.setAttribute(Constants.CUSTOM_SY_SUPER_BLOCK_VERTICAL_ALIGN, value);
+                } else {
+                    nodeElement.removeAttribute(Constants.CUSTOM_SY_SUPER_BLOCK_VERTICAL_ALIGN);
+                }
+                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                updateTransaction(protyle, nodeElement, oldHTML);
+                focusByRange(protyle.toolbar.range);
+                hideElements(["gutter"], protyle);
+            };
+            superBlockSubmenu.push({
+                id: "superBlockAlignment",
+                icon: "iconAlignSettings",
+                label: window.siyuan.languages.alignment,
+                type: "submenu",
+                ignore: !isCol,
+                submenu: [{
+                    id: "alignTop",
+                    icon: "iconAlignTop",
+                    label: window.siyuan.languages.alignTop,
+                    checked: verticalAlign === "top",
+                    click: () => setVerticalAlign("top"),
+                }, {
+                    id: "alignMiddle",
+                    icon: "iconAlignMiddle",
+                    label: window.siyuan.languages.alignMiddle,
+                    checked: verticalAlign === "middle",
+                    click: () => setVerticalAlign("middle"),
+                }, {
+                    id: "alignBottom",
+                    icon: "iconAlignBottom",
+                    label: window.siyuan.languages.alignBottom,
+                    checked: verticalAlign === "bottom",
+                    click: () => setVerticalAlign("bottom"),
+                }, {
+                    id: "useDefaultVerticalAlign",
+                    label: window.siyuan.languages.useDefaultVerticalAlign,
+                    checked: !["top", "middle", "bottom"].includes(verticalAlign),
+                    click: () => setVerticalAlign(""),
+                }]
+            });
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "superBlock",
+                icon: "iconSuper",
+                label: window.siyuan.languages.superBlock,
+                type: "submenu",
+                submenu: superBlockSubmenu,
             }).element);
         } else if (type === "NodeCodeBlock" && !nodeElement.getAttribute("data-subtype")) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_code", type: "separator"}).element);

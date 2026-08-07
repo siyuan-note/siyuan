@@ -72,3 +72,53 @@ func TestNormalizeEntryVisibilityActiveCustomProfile(t *testing.T) {
 		t.Fatal("profile orders should be initialized")
 	}
 }
+
+func TestNormalizeEntryVisibilityMigratesSuperBlockMenu(t *testing.T) {
+	entryVisibility := NormalizeEntryVisibility(&EntryVisibility{
+		Version: 2,
+		Active:  "custom",
+		Profiles: []*EntryVisibilityProfile{{
+			ID:   "custom",
+			Name: "Custom",
+			Base: EntryVisibilityProfileFull,
+			Entries: map[string]bool{
+				"gutter.single.cancelSuperBlock":                            false,
+				"gutter.single.superBlockAlignment.alignTop":                false,
+				"gutter.single.superBlockAlignment.useDefaultVerticalAlign": true,
+			},
+			Orders: map[string][]string{
+				"gutter.single":                     {"copy", "turnIntoHLayout", "cancelSuperBlock", "delete"},
+				"gutter.single.superBlockAlignment": {"alignBottom", "alignTop"},
+			},
+		}},
+	}, EntryVisibilityProfileFull)
+
+	profile := entryVisibility.Profiles[0]
+	if _, ok := profile.Entries["gutter.single.cancelSuperBlock"]; ok {
+		t.Fatal("old super block entry path should be removed")
+	}
+	if visible, ok := profile.Entries["gutter.single.superBlock.cancelSuperBlock"]; !ok || visible {
+		t.Fatalf("unexpected migrated entries: %+v", profile.Entries)
+	}
+	if visible, ok := profile.Entries["gutter.single.superBlock.superBlockAlignment.alignTop"]; !ok || visible {
+		t.Fatalf("unexpected migrated entries: %+v", profile.Entries)
+	}
+	if !profile.Entries["gutter.single.superBlock.superBlockAlignment.useDefaultVerticalAlign"] {
+		t.Fatalf("unexpected migrated entries: %+v", profile.Entries)
+	}
+	rootOrder := profile.Orders["gutter.single"]
+	if len(rootOrder) != 3 || rootOrder[0] != "copy" || rootOrder[1] != "superBlock" || rootOrder[2] != "delete" {
+		t.Fatalf("unexpected migrated root order: %+v", rootOrder)
+	}
+	superBlockOrder := profile.Orders["gutter.single.superBlock"]
+	if len(superBlockOrder) != 2 || superBlockOrder[0] != "turnIntoHLayout" || superBlockOrder[1] != "cancelSuperBlock" {
+		t.Fatalf("unexpected migrated super block order: %+v", superBlockOrder)
+	}
+	if _, ok := profile.Orders["gutter.single.superBlockAlignment"]; ok {
+		t.Fatal("old super block alignment order should be removed")
+	}
+	alignmentOrder := profile.Orders["gutter.single.superBlock.superBlockAlignment"]
+	if len(alignmentOrder) != 2 || alignmentOrder[0] != "alignBottom" || alignmentOrder[1] != "alignTop" {
+		t.Fatalf("unexpected migrated alignment order: %+v", alignmentOrder)
+	}
+}

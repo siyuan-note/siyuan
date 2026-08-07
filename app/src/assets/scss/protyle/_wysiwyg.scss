@@ -372,6 +372,18 @@
         flex-wrap: nowrap;
         justify-content: flex-start;
 
+        &[custom-sy-super-block-vertical-align="top"] {
+          align-items: flex-start;
+        }
+
+        &[custom-sy-super-block-vertical-align="middle"] {
+          align-items: center;
+        }
+
+        &[custom-sy-super-block-vertical-align="bottom"] {
+          align-items: flex-end;
+        }
+
         & > div {
           // 默认 1 1 0：未拖拽的子块均分填满超级块；容器缩窄时也可收缩
           // 拖拽后由 inline style 覆盖为 flex:0 1 auto + calc(%)，锁定比例

@@ -16,7 +16,11 @@
 
 package conf
 
-import "github.com/siyuan-note/siyuan/kernel/util"
+import (
+	"strings"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
 
 type Appearance struct {
 	Mode                int                 `json:"mode"`                // 模式：0：明亮，1：暗黑
@@ -120,6 +124,7 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 		profiles = append(profiles, profile)
 	}
 	entryVisibility.Profiles = profiles
+	migrateSuperBlockEntryVisibility(entryVisibility)
 	if entryVisibility.Active != EntryVisibilityProfileSimple && entryVisibility.Active != EntryVisibilityProfileFull &&
 		!profileIDs[entryVisibility.Active] {
 		entryVisibility.Active = fallback
@@ -129,6 +134,65 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 		entryVisibility.Active = EntryVisibilityProfileFull
 	}
 	return entryVisibility
+}
+
+func migrateSuperBlockEntryVisibility(entryVisibility *EntryVisibility) {
+	const oldPrefix = "gutter.single."
+	const newPrefix = "gutter.single.superBlock."
+	movedKeys := map[string]bool{
+		"cancelSuperBlock":    true,
+		"turnIntoVLayout":     true,
+		"turnIntoHLayout":     true,
+		"superBlockAlignment": true,
+	}
+	for _, profile := range entryVisibility.Profiles {
+		if nil == profile {
+			continue
+		}
+		for path, visible := range profile.Entries {
+			if !strings.HasPrefix(path, oldPrefix) {
+				continue
+			}
+			suffix := strings.TrimPrefix(path, oldPrefix)
+			if movedKeys[suffix] || strings.HasPrefix(suffix, "superBlockAlignment.") {
+				profile.Entries[newPrefix+suffix] = visible
+				delete(profile.Entries, path)
+			}
+		}
+		if alignmentOrder, ok := profile.Orders[oldPrefix+"superBlockAlignment"]; ok {
+			profile.Orders[newPrefix+"superBlockAlignment"] = alignmentOrder
+			delete(profile.Orders, oldPrefix+"superBlockAlignment")
+		}
+		rootOrder, ok := profile.Orders["gutter.single"]
+		if !ok {
+			continue
+		}
+		migratedRootOrder := make([]string, 0, len(rootOrder))
+		superBlockOrder := make([]string, 0, len(movedKeys))
+		parentInserted := false
+		for _, key := range rootOrder {
+			if key == "superBlock" {
+				if !parentInserted {
+					migratedRootOrder = append(migratedRootOrder, key)
+					parentInserted = true
+				}
+				continue
+			}
+			if !movedKeys[key] {
+				migratedRootOrder = append(migratedRootOrder, key)
+				continue
+			}
+			superBlockOrder = append(superBlockOrder, key)
+			if !parentInserted {
+				migratedRootOrder = append(migratedRootOrder, "superBlock")
+				parentInserted = true
+			}
+		}
+		profile.Orders["gutter.single"] = migratedRootOrder
+		if len(superBlockOrder) > 0 {
+			profile.Orders["gutter.single.superBlock"] = superBlockOrder
+		}
+	}
 }
 
 type AppearanceTheme struct {

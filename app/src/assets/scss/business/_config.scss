@@ -350,7 +350,10 @@
   }
 
   &-bazaar {
-    position: relative;
+    &__main {
+      min-height: 0;
+      position: relative;
+    }
 
     &__drop {
       align-items: center;

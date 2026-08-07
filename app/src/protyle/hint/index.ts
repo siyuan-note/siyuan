@@ -983,7 +983,7 @@ ${genHintItemHTML(item)}
                             action: "delete",
                             id: newListId
                         }]);
-                        focusBlock(newListEl);
+                        focusByWbr(newListEl, range);
                         return;
                     }
                     const oldHTML = nodeElement.outerHTML;

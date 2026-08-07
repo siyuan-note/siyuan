@@ -68,6 +68,22 @@ export const getSameSuperBlockEdgeTarget = (sourceElements: Element[], targetEle
     return childBlocks[isRight ? childBlocks.length - 1 : 0];
 };
 
+export const getTopListDragTarget = (targetElement: Element) => {
+    let topList = targetElement;
+    while (topList.parentElement?.classList.contains("li") ||
+           topList.parentElement?.classList.contains("list")) {
+        topList = topList.parentElement;
+        if (topList.classList.contains("list") && !topList.parentElement?.classList.contains("li")) {
+            break;
+        }
+    }
+    return topList;
+};
+
+export const shouldKeepListBlockDragTarget = (sourceType: string, isHorizontalDrop: boolean,
+                                               isColumnSuperBlockChild: boolean) =>
+    sourceType === "nodelist" && (isHorizontalDrop || isColumnSuperBlockChild);
+
 export const replaceDragUndoOperation = <T>(operations: T[], operation: T, replacements: T[]) => {
     const index = operations.indexOf(operation);
     if (index < 0) {

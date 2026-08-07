@@ -55,11 +55,13 @@ import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 import {
     getSameSuperBlockEdgeTarget,
+    getTopListDragTarget,
     isAttributeViewTitleTarget,
     isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
     replaceDragUndoOperation,
+    shouldKeepListBlockDragTarget,
     uniqueDragIds
 } from "./dragDocument";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
@@ -1766,13 +1768,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
 
-                    // 拖拽整个列表块（NodeList）到列表项时，展开为其下的列表项，避免形成 list>list 非法嵌套
-                    // 但当目标是超级块（col 布局）内的列表块时，列表块本身是超级块的一个列单元，
-                    // 应走列重排（dragSame）而非展开，否则 targetElement 被改写为 .li 后无法命中列重排分支
+                    // 列表块横向拖拽或在横排超级块内重排时，目标列表本身是列单元，需保留完整列表。
                     const isColSbChildList = targetElement.parentElement?.getAttribute("data-type") === "NodeSuperBlock" &&
                         targetElement.parentElement?.getAttribute("data-sb-layout") === "col";
+                    const isHorizontalDrop = targetClass.includes("dragover__left") ||
+                        targetClass.includes("dragover__right");
+                    const keepListBlockTarget = shouldKeepListBlockDragTarget(gutterTypes[0], isHorizontalDrop,
+                        isColSbChildList);
                     if (isListItemSource && targetElement.classList.contains("list") &&
-                        !(gutterTypes[0] === "nodelist" && isColSbChildList)) {
+                        !keepListBlockTarget) {
                         const targetListItem = getTargetListItem(targetElement, isBottom);
                         if (targetListItem) {
                             targetElement = targetListItem;
@@ -2671,14 +2675,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 列表项目标无论是否命中优化分支都需立即处理，避免拖到列表标记符（.protyle-action）上时提示和插入点缺失
         if (liTarget) {
             // 向上找顶层列表容器，用于判断整个列表的左右边缘（而非子列表）
-            let topList: Element = liTarget as HTMLElement;
-            while (topList.parentElement?.classList.contains("li") ||
-                   topList.parentElement?.classList.contains("list")) {
-                topList = topList.parentElement;
-                if (topList.classList.contains("list") && !topList.parentElement?.classList.contains("li")) {
-                    break;
-                }
-            }
+            const topList = getTopListDragTarget(liTarget as HTMLElement) as HTMLElement;
             const topListRect = topList.getBoundingClientRect();
             const isLeftEdge = event.clientX < topListRect.left + 32;
             const isRightEdge = event.clientX > topListRect.right - 32;
@@ -2693,6 +2690,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 非列表项源：边缘不进入 applyLiTarget，清空 liTarget 让后续通用分支处理横向超级块
             if (isLeftEdge || isRightEdge) {
+                targetElement = topList;
                 liTarget = null;
             } else {
                 applyLiTarget(liTarget as HTMLElement, event, !isContentBlockSource);

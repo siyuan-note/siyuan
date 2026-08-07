@@ -2,11 +2,13 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     getSameSuperBlockEdgeTarget,
+    getTopListDragTarget,
     isAttributeViewTitleTarget,
     isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
     replaceDragUndoOperation,
+    shouldKeepListBlockDragTarget,
     uniqueDragIds
 } from "./dragDocument";
 
@@ -179,6 +181,38 @@ describe("getSameSuperBlockEdgeTarget", () => {
         const {blocks, superBlock} = createSuperBlock("row");
 
         assert.equal(getSameSuperBlockEdgeTarget([blocks[1]], superBlock, false), undefined);
+    });
+});
+
+describe("getTopListDragTarget", () => {
+    it("uses the complete list when a list item is hit at the outer edge", () => {
+        const list = createClassElement(["list"]);
+        const listItem = createClassElement(["li"], list);
+
+        assert.equal(getTopListDragTarget(listItem), list);
+    });
+
+    it("uses the outer list when a nested list item is hit", () => {
+        const outerList = createClassElement(["list"]);
+        const parentItem = createClassElement(["li"], outerList);
+        const nestedList = createClassElement(["list"], parentItem);
+        const nestedItem = createClassElement(["li"], nestedList);
+
+        assert.equal(getTopListDragTarget(nestedItem), outerList);
+    });
+});
+
+describe("shouldKeepListBlockDragTarget", () => {
+    it("keeps both complete lists when forming a horizontal super block", () => {
+        assert.equal(shouldKeepListBlockDragTarget("nodelist", true, false), true);
+    });
+
+    it("allows a list block to expand into list items for a regular list drop", () => {
+        assert.equal(shouldKeepListBlockDragTarget("nodelist", false, false), false);
+    });
+
+    it("keeps a list block when reordering columns", () => {
+        assert.equal(shouldKeepListBlockDragTarget("nodelist", false, true), true);
     });
 });
 

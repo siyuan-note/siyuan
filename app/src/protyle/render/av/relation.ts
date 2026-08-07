@@ -526,6 +526,14 @@ export const bindRelationEvent = (options: {
         listElement.style.maxHeight = maxHeightValue;
         return true;
     };
+    const updateListNaturalMaxHeight = (allowInitialize = true) => {
+        const naturalHeight = listElement.scrollHeight;
+        if (naturalHeight <= listNaturalMaxHeight || (listNaturalMaxHeight < 1 && !allowInitialize)) {
+            return false;
+        }
+        listNaturalMaxHeight = naturalHeight;
+        return updateListMaxHeight();
+    };
     const positionMenu = (reset = false) => {
         if (reset) {
             resetPosition();
@@ -537,6 +545,13 @@ export const bindRelationEvent = (options: {
     const resize = () => {
         updateListMaxHeight();
         positionMenu(true);
+    };
+    const resizeList = () => {
+        const listHeightChanged = updateListNaturalMaxHeight();
+        if (listHeightChanged) {
+            resetPosition();
+        }
+        positionMenu();
     };
 
     const clearLoaderTimer = () => {
@@ -716,13 +731,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
                 rows,
             }, reset);
             setLoading(false);
-            let listHeightChanged = false;
-            if (listNaturalMaxHeight < 1 && (keyword === "" || rows.length === RELATION_PAGE_SIZE)) {
-                listNaturalMaxHeight = listElement.scrollHeight;
-                if (listNaturalMaxHeight > 0) {
-                    listHeightChanged = updateListMaxHeight();
-                }
-            }
+            const listHeightChanged = updateListNaturalMaxHeight(keyword === "" || rows.length === RELATION_PAGE_SIZE);
             if (!positionInitialized || listHeightChanged) {
                 resetPosition();
             }
@@ -812,6 +821,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
         loadPage(true);
     };
     options.menuElement.addEventListener("relationrefresh", refresh);
+    options.menuElement.addEventListener("relationresize", resizeList);
     options.menuElement.querySelector('[data-type="copyRelatedItems"]').addEventListener("click", () => {
         let copyText = "";
         const selectedElements = options.menuElement.querySelectorAll('.b3-menu__item[draggable="true"]');
@@ -837,6 +847,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
         state.controller?.abort();
         window.removeEventListener("resize", resize);
         options.menuElement.removeEventListener("relationrefresh", refresh);
+        options.menuElement.removeEventListener("relationresize", resizeList);
         clearLoaderTimer();
         if (searchTimer) {
             clearTimeout(searchTimer);
@@ -971,4 +982,5 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
         }
     }
     updateCopyRelatedItems(menuElement);
+    menuElement.dispatchEvent(new CustomEvent("relationresize"));
 };

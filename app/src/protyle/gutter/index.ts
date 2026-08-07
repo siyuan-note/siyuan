@@ -74,6 +74,7 @@ import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
+import {getMultiSelectGutterTarget, isGutterInsertStateMatched} from "./multiSelect";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
@@ -629,6 +630,11 @@ export class Gutter {
             const plusBefore = this.element.querySelector('.protyle-gutters__plus[data-type="gutterPlusBefore"]') as HTMLElement;
             const plusAfter = this.element.querySelector('.protyle-gutters__plus[data-type="gutterPlusAfter"]') as HTMLElement;
             if (protyle.disabled || !lineBefore || !lineAfter || !plusBefore || !plusAfter) {
+                return;
+            }
+            // 多选时不显示插入框线与加号 https://github.com/siyuan-note/siyuan/issues/18592
+            if (protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length > 1) {
+                hideInsert();
                 return;
             }
             // 情况A：鼠标在框线或+号上 → 显示对应+号，框线设透明（视觉隐藏但保留命中区，避免 display:none 导致脱离触发重置闪烁）
@@ -3172,14 +3178,22 @@ export class Gutter {
                 item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
             }
         });
+        // 多选时只显示命中位置所属的选中块块标 https://github.com/siyuan-note/siyuan/issues/18592
+        const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+        const isMultiSelect = selectElements.length > 1;
+        const selectedElement = getMultiSelectGutterTarget(selectElements, element);
+        if (isMultiSelect && !selectedElement) {
+            hideElements(["gutter"], protyle);
+            return;
+        }
         let html = "";
-        let nodeElement = element;
+        let nodeElement = selectedElement || element;
         let space = 0;
         let index = 0;
         let listItem;
         let hideParent = false;
-        const embedContext = getEmbedChildOperationContext(element);
-        const embedElement = embedContext ? isInEmbedBlock(element, false) : false;
+        const embedContext = getEmbedChildOperationContext(nodeElement);
+        const embedElement = embedContext ? isInEmbedBlock(nodeElement, false) : false;
         const embedID = embedElement ? embedElement.getAttribute("data-node-id") : undefined;
         while (nodeElement) {
             let parentElement = hasClosestBlock(nodeElement.parentElement);
@@ -3192,7 +3206,7 @@ export class Gutter {
                     type = nodeElement.getAttribute("data-type");
                 }
                 let dataNodeId = nodeElement.getAttribute("data-node-id");
-                if (type === "NodeAttributeView" && target && !embedContext) {
+                if (type === "NodeAttributeView" && target && !embedContext && !isMultiSelect) {
                     const rowElement = hasClosestByClassName(target, "av__row");
                     if (rowElement && !rowElement.classList.contains("av__row--header") && rowElement.dataset.id) {
                         element = rowElement;
@@ -3212,7 +3226,7 @@ export class Gutter {
                 }
                 if (index === 0) {
                     // 不单独显示，要不然在块的间隔中，gutter 会跳来跳去的
-                    if (["NodeBlockquote", "NodeList", "NodeCallout", "NodeSuperBlock"].includes(type)) {
+                    if (!isMultiSelect && ["NodeBlockquote", "NodeList", "NodeCallout", "NodeSuperBlock"].includes(type)) {
                         if (target && type === "NodeCallout") {
                             // Callout 标题需显示
                             const calloutInfoElement = hasTopClosestByClassName(target, "callout-info");
@@ -3226,7 +3240,7 @@ export class Gutter {
                         }
                     }
 
-                    let topElement = getTopAloneElement(nodeElement);
+                    let topElement = selectedElement || getTopAloneElement(nodeElement);
                     if (embedContext && !embedContext.boundaryElement.contains(topElement)) {
                         // 单独查询列表项时，渲染器生成的无 ID 列表包装节点不属于可操作边界。
                         topElement = embedContext.targetElement || nodeElement;
@@ -3328,6 +3342,10 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                 }
             }
 
+            if (isMultiSelect && nodeElement === selectedElement) {
+                break;
+            }
+
             if (embedContext && parentElement && !embedContext.boundaryElement.contains(parentElement)) {
                 parentElement = false;
             }
@@ -3337,7 +3355,13 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                 break;
             }
         }
-        let match = true;
+        if (isMultiSelect && !html) {
+            hideElements(["gutter"], protyle);
+            return;
+        }
+        const shouldRenderInsert = !embedContext && !isMultiSelect;
+        const insertElementCount = this.element.querySelectorAll(".protyle-gutters__line, .protyle-gutters__plus").length;
+        let match = isGutterInsertStateMatched(insertElementCount, shouldRenderInsert);
         // 统计时排除块标边缘框线与+号元素，它们由 render 末尾单独追加，不参与防抖比较
         const buttonsElement = this.element.querySelectorAll("button:not(.protyle-gutters__line):not(.protyle-gutters__plus)");
         if (buttonsElement.length !== html.split("</button>").length - 1) {
@@ -3427,7 +3451,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
         // 追加块标边缘悬浮触发的插入元素（默认隐藏，悬浮块标显示线条，悬浮线条变+号），由 mousemove 定位
         // 追加块标边缘的框线（悬浮块标显示）与+号（悬浮框线显示），默认隐藏，由 mousemove 定位
         // 双元素：框线贴块标边缘不移动（避免闪烁），+号独立定位在外偏位置，tooltip 基于+号元素对齐
-        if (!embedContext) {
+        if (shouldRenderInsert) {
             this.element.insertAdjacentHTML("beforeend", `<button class="protyle-gutters__line" data-type="gutterLineBefore" style="display:none"></button><button class="protyle-gutters__line" data-type="gutterLineAfter" style="display:none"></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusBefore" data-position="4west" aria-label="${window.siyuan.languages.insertBefore}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusAfter" data-position="4west" aria-label="${window.siyuan.languages.insertAfter}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button>`);
         }
     }

@@ -1,6 +1,8 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getAVPasteCellValue,
+    getAVPasteValueForType,
     getAVPasteMatrixWidth,
     getUniqueAVPasteColumnName,
     inferAVPasteColumnType,
@@ -52,6 +54,74 @@ describe("inferAVPasteColumnType", () => {
 });
 
 describe("AV paste matrix helpers", () => {
+    it("preserves link names and URLs as assets when links fill the table cell", () => {
+        assert.deepEqual(getAVPasteCellValue("Issue 18354", [{
+            content: "Issue 18354",
+            href: "https://github.com/siyuan-note/siyuan/issues/18354",
+        }]), {
+            type: "mAsset",
+            mAsset: [{
+                type: "file",
+                content: "https://github.com/siyuan-note/siyuan/issues/18354",
+                name: "Issue 18354",
+            }],
+        });
+        assert.deepEqual(getAVPasteCellValue("#18354、 #11928", [{
+            content: "#18354",
+            href: "https://github.com/siyuan-note/siyuan/issues/18354",
+        }, {
+            content: "#11928",
+            href: "https://github.com/siyuan-note/siyuan/issues/11928",
+        }], "、 "), {
+            type: "mAsset",
+            mAsset: [{
+                type: "file",
+                content: "https://github.com/siyuan-note/siyuan/issues/18354",
+                name: "#18354",
+            }, {
+                type: "file",
+                content: "https://github.com/siyuan-note/siyuan/issues/11928",
+                name: "#11928",
+            }],
+        });
+        assert.deepEqual(getAVPasteCellValue("#15049 click-editorcontent 返回错误 ID", [{
+            content: "#15049 ",
+            href: "https://github.com/siyuan-note/siyuan/issues/15049",
+        }, {
+            content: "\u200Bclick-editorcontent",
+            href: "https://github.com/siyuan-note/siyuan/issues/15049",
+        }, {
+            content: " 返回错误 ID",
+            href: "https://github.com/siyuan-note/siyuan/issues/15049",
+        }], "\u200B"), {
+            type: "mAsset",
+            mAsset: [{
+                type: "file",
+                content: "https://github.com/siyuan-note/siyuan/issues/15049",
+                name: "#15049 click-editorcontent 返回错误 ID",
+            }],
+        });
+        assert.equal(getAVPasteCellValue("See Issue 18354", [{
+            content: "Issue 18354",
+            href: "https://github.com/siyuan-note/siyuan/issues/18354",
+        }], "See "), "See Issue 18354");
+        assert.equal(getAVPasteCellValue("Email", [{
+            content: "Email",
+            href: "mailto:test@example.com",
+        }]), "Email");
+    });
+
+    it("infers asset columns from rich link values", () => {
+        const value: IAVCellValue = {
+            type: "mAsset",
+            mAsset: [{type: "file", content: "https://example.com", name: "Example"}],
+        };
+        assert.equal(inferAVPasteColumnType(["", "https://example.org", value]), "mAsset");
+        assert.deepEqual(getAVPasteValueForType(value, "mAsset"), value);
+        assert.equal(getAVPasteValueForType(value, "url"), "https://example.com");
+        assert.equal(getAVPasteValueForType(value, "text"), "Example");
+    });
+
     it("uses the widest header or data row", () => {
         assert.equal(getAVPasteMatrixWidth([["1"], ["2", "3"]], ["a", "b", "c"]), 3);
         assert.equal(getAVPasteMatrixWidth([["1", "2", "3"]], ["a"]), 3);

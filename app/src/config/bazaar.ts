@@ -75,6 +75,7 @@ export const bazaar = {
     element: undefined as Element,
     _updateState: "idle" as "idle" | "loading" | "loaded" | "error",
     _updateRequestID: 0,
+    _localPackageUploading: false,
     genHTML() {
         if (!window.siyuan.config.bazaar.trust) {
             return `<div class="fn__flex-column" style="margin: 0 48px;">
@@ -125,7 +126,11 @@ export const bazaar = {
         }
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
         const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
-        return `<div class="fn__flex-column" style="height: 100%">
+        return `<div class="config-bazaar fn__flex-column" style="height: 100%">
+<div class="config-bazaar__drop fn__none">
+    <svg><use xlink:href="#iconUpload"></use></svg>
+    <div>${window.siyuan.languages.dropLocalBazaarPackage}</div>
+</div>
 <div class="layout-tab-bar fn__flex">
     <div data-type="downloaded" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.downloaded}</span><span class="fn__flex-1"></span></div>
     <div data-type="plugin" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.plugin}</span><span class="fn__flex-1"></span></div>
@@ -160,6 +165,10 @@ export const bazaar = {
                     </select>
                 </div>
                 <div class="fn__flex config-bazaar__actions">
+                    <label class="b3-button b3-button--outline config-bazaar__local-package" data-type="install-local-package">
+                        <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.installLocalBazaarPackage}
+                        <input class="b3-form__upload" data-type="local-package-file" type="file" accept=".zip,application/zip">
+                    </label>
                     <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>
                     <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" data-position="north" type="checkbox" class="b3-switch fn__flex-center ariaLabel" aria-label="${window.siyuan.languages[window.siyuan.config.bazaar.petalDisabled ? "enable" : "disableAll"]}">
                     <div class="counter counter--bg fn__none fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
@@ -1238,6 +1247,139 @@ type="checkbox">
             }
         }
     },
+    _setLocalPackageUploading(uploading: boolean) {
+        bazaar._localPackageUploading = uploading;
+        const labelElement = bazaar.element.querySelector('[data-type="install-local-package"]');
+        const inputElement = labelElement?.querySelector('input[type="file"]') as HTMLInputElement;
+        labelElement?.classList.toggle("b3-button--progress", uploading);
+        if (inputElement) {
+            inputElement.disabled = uploading;
+        }
+    },
+    _installLocalPackage(file: File, app: App, overwrite = false) {
+        if (bazaar._localPackageUploading) {
+            return;
+        }
+        bazaar._setLocalPackageUploading(true);
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("frontend", getFrontend());
+        formData.append("overwrite", overwrite.toString());
+        fetchPost("/api/bazaar/installLocalBazaarPackage", formData, (response) => {
+            const data = response.data as {
+                reason?: string;
+                packageType?: TBazaarType;
+                packageName?: string;
+                minAppVersion?: string;
+                updated?: boolean;
+            };
+            if (response.code !== 0) {
+                if (data?.reason === "package-exists" && data.packageName) {
+                    confirmDialog("⚠️ " + window.siyuan.languages.update,
+                        window.siyuan.languages.confirmOverwriteLocalBazaarPackage.replace("${name}", data.packageName), () => {
+                            bazaar._installLocalPackage(file, app, true);
+                        });
+                } else if (data?.reason === "package-incompatible") {
+                    showMessage(data.minAppVersion ?
+                        window.siyuan.languages.bazaarNeedVersion.replace("${x}", data.minAppVersion) :
+                        window.siyuan.languages.incompatible);
+                } else {
+                    showMessage(escapeHtml(response.msg));
+                }
+                return;
+            }
+            if (!data?.packageType || !data.packageName) {
+                showMessage(window.siyuan.languages.uploadError);
+                return;
+            }
+            bazaar.element.querySelector("#configBazaarReadme")?.classList.remove("config__view--show");
+            bazaar._data.details.delete(bazaar._getDetailKey(data.packageType, data.packageName));
+            bazaar._data.update[data.packageType] = bazaar._data.update[data.packageType].filter((item) =>
+                item.installed.name !== data.packageName);
+            bazaar.switchBazaarTab(app, data.packageType, "downloaded");
+            if (data.packageType === "plugins" && !data.updated) {
+                if (window.siyuan.config.bazaar.petalDisabled) {
+                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
+                } else {
+                    confirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
+                        fetchPost("/api/petal/setPetalEnabled", {
+                            packageName: data.packageName,
+                            enabled: true,
+                            app: Constants.SIYUAN_APPID,
+                        }, (enableResponse) => {
+                            loadPlugin(app, enableResponse.data).then(() => {
+                                bazaar._genMyHTML("plugins", app, false);
+                            });
+                        });
+                    });
+                }
+            }
+        }).finally(() => {
+            bazaar._setLocalPackageUploading(false);
+        });
+    },
+    _getLocalPackageFile(files: FileList | null) {
+        if (files?.length !== 1 || !files[0].name.toLowerCase().endsWith(".zip")) {
+            showMessage(window.siyuan.languages.localBazaarPackageFileError);
+            return;
+        }
+        return files[0];
+    },
+    _bindLocalPackageEvent(app: App) {
+        const inputElement = bazaar.element.querySelector('[data-type="local-package-file"]') as HTMLInputElement;
+        inputElement?.addEventListener("change", () => {
+            const file = bazaar._getLocalPackageFile(inputElement.files);
+            inputElement.value = "";
+            if (file) {
+                bazaar._installLocalPackage(file, app);
+            }
+        });
+
+        const dropTarget = bazaar.element.firstElementChild as HTMLElement;
+        const dropElement = dropTarget.querySelector(".config-bazaar__drop");
+        let dragDepth = 0;
+        const isFileDrag = (event: DragEvent) => Array.from(event.dataTransfer?.types || []).includes("Files");
+        dropTarget.addEventListener("dragenter", (event: DragEvent) => {
+            if (!isFileDrag(event)) {
+                return;
+            }
+            dragDepth++;
+            dropElement.classList.remove("fn__none");
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        dropTarget.addEventListener("dragover", (event: DragEvent) => {
+            if (!isFileDrag(event)) {
+                return;
+            }
+            event.dataTransfer.dropEffect = "copy";
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        dropTarget.addEventListener("dragleave", (event: DragEvent) => {
+            if (dragDepth === 0) {
+                return;
+            }
+            dragDepth = Math.max(0, dragDepth - 1);
+            if (dragDepth === 0) {
+                dropElement.classList.add("fn__none");
+            }
+            event.stopPropagation();
+        });
+        dropTarget.addEventListener("drop", (event: DragEvent) => {
+            if (!isFileDrag(event)) {
+                return;
+            }
+            dragDepth = 0;
+            dropElement.classList.add("fn__none");
+            event.preventDefault();
+            event.stopPropagation();
+            const file = bazaar._getLocalPackageFile(event.dataTransfer.files);
+            if (file) {
+                bazaar._installLocalPackage(file, app);
+            }
+        });
+    },
     bindEvent(app: App) {
         if (!window.siyuan.config.bazaar.trust) {
             bazaar.element.querySelector("button").addEventListener("click", () => {
@@ -1260,6 +1402,7 @@ type="checkbox">
         });
         this._genMyHTML("plugins", app);
         this._checkUpdate(true);
+        this._bindLocalPackageEvent(app);
         bazaar.element.firstElementChild.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             const packageElement = hasClosestByAttribute(target, "data-name", null);

@@ -17,10 +17,34 @@
 package model
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 )
+
+func TestIsValidPackageName(t *testing.T) {
+	valid := []string{"plugin-sample", "plugin.sample_1", "plugin sample (v1) + beta!", "CON.123", strings.Repeat("a", 255)}
+	for _, name := range valid {
+		if !isValidPackageName(name) {
+			t.Fatalf("expected package name %q to be valid", name)
+		}
+	}
+
+	invalid := []string{"", strings.Repeat("a", 256), ".hidden", " leading-space", "trailing-space ",
+		"trailing-period.", "plugin/sample", "plugin..sample", "插件", "CON", "com1", "LPT9"}
+	for _, name := range invalid {
+		if isValidPackageName(name) {
+			t.Fatalf("expected package name %q to be invalid", name)
+		}
+	}
+}
+
+func TestIsBuiltInAppearancePackageIgnoresCase(t *testing.T) {
+	if !isBuiltInTheme("Daylight") || !isBuiltInTheme("MIDNIGHT") || !isBuiltInIcon("Litheness") {
+		t.Fatal("expected built-in appearance package names to be case-insensitive")
+	}
+}
 
 func TestBuildUpdatedPackagesKeepsInstalledAndAvailableMetadataSeparate(t *testing.T) {
 	installed := &bazaar.Package{

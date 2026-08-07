@@ -146,6 +146,11 @@ func isBelowRequiredAppVersion(pkg *Package) bool {
 	return false
 }
 
+// IsBelowRequiredAppVersion 判断集市包要求的最低应用版本是否高于当前版本。
+func IsBelowRequiredAppVersion(pkg *Package) bool {
+	return isBelowRequiredAppVersion(pkg)
+}
+
 // BazaarInfo 集市的持久化信息
 type BazaarInfo struct {
 	Packages map[string]map[string]*PackageInfo `json:"packages"`

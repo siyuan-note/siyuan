@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "패키지 [${name}]이(가) 이미 설치되어 있습니다. 선택한 로컬 패키지로 업데이트할까요?",
+	"localBazaarPackageFileError": "로컬 마켓플레이스 패키지 .zip 파일 하나를 선택하세요",
+	"dropLocalBazaarPackage": "로컬 마켓플레이스 패키지 .zip 파일을 여기에 놓으세요",
+	"installLocalBazaarPackage": "로컬 패키지 설치",
 	"lanSyncInactive": "LAN 동기화 가속 서비스가 실행 중이 아닙니다",
 	"lanSyncConnectedPeers": "인증된 LAN 기기: ${count}",
 	"lanSync": "LAN 동기화 가속",

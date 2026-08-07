@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "ติดตั้งแพ็กเกจ [${name}] แล้ว ต้องการอัปเดตด้วยแพ็กเกจภายในเครื่องที่เลือกหรือไม่?",
+	"localBazaarPackageFileError": "โปรดเลือกไฟล์ .zip ของแพ็กเกจตลาดภายในเครื่องหนึ่งไฟล์",
+	"dropLocalBazaarPackage": "วางไฟล์ .zip ของแพ็กเกจตลาดภายในเครื่องที่นี่",
+	"installLocalBazaarPackage": "ติดตั้งแพ็กเกจภายในเครื่อง",
 	"lanSyncInactive": "บริการเร่งการซิงค์ผ่าน LAN ไม่ทำงาน",
 	"lanSyncConnectedPeers": "อุปกรณ์ LAN ที่ยืนยันตัวตนแล้ว: ${count}",
 	"lanSync": "การเร่งการซิงค์ผ่าน LAN",

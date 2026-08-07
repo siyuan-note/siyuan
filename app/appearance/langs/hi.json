@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "पैकेज [${name}] पहले से इंस्टॉल है। क्या इसे चुने गए स्थानीय पैकेज से अपडेट करना है?",
+	"localBazaarPackageFileError": "कृपया स्थानीय बाज़ार पैकेज की एक .zip फ़ाइल चुनें",
+	"dropLocalBazaarPackage": "स्थानीय बाज़ार पैकेज की .zip फ़ाइल यहाँ छोड़ें",
+	"installLocalBazaarPackage": "स्थानीय पैकेज इंस्टॉल करें",
 	"lanSyncInactive": "स्थानीय नेटवर्क सिंक त्वरण सेवा सक्रिय नहीं है",
 	"lanSyncConnectedPeers": "प्रमाणित स्थानीय नेटवर्क डिवाइस: ${count}",
 	"lanSync": "स्थानीय नेटवर्क सिंक त्वरण",

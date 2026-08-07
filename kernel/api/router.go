@@ -500,6 +500,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/bazaar/getUpdatedPackage", model.CheckAuth, getUpdatedPackage)
 	ginServer.Handle("POST", "/api/bazaar/updateBazaarPackage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updateBazaarPackage)
 	ginServer.Handle("POST", "/api/bazaar/batchUpdatePackage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchUpdatePackage)
+	ginServer.Handle("POST", "/api/bazaar/installLocalBazaarPackage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, installLocalBazaarPackage)
 
 	ginServer.Handle("POST", "/api/repo/initRepoKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, initRepoKey)
 	ginServer.Handle("POST", "/api/repo/initRepoKeyFromPassphrase", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, initRepoKeyFromPassphrase)

@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "集市包 [${name}] 已安装，是否使用所选本地包更新？",
+	"localBazaarPackageFileError": "请选择一个本地集市包 .zip 文件",
+	"dropLocalBazaarPackage": "拖放本地集市包 .zip 文件到这里",
+	"installLocalBazaarPackage": "安装本地包",
 	"lanSyncInactive": "局域网同步加速服务未运行",
 	"lanSyncConnectedPeers": "已认证局域网设备：${count}",
 	"lanSync": "局域网同步加速",

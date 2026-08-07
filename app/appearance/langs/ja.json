@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "パッケージ [${name}] はすでにインストールされています。選択したローカルパッケージで更新しますか？",
+	"localBazaarPackageFileError": "ローカルマーケットプレイスパッケージの .zip ファイルを1つ選択してください",
+	"dropLocalBazaarPackage": "ローカルマーケットプレイスパッケージの .zip ファイルをここにドロップ",
+	"installLocalBazaarPackage": "ローカルパッケージをインストール",
 	"lanSyncInactive": "LAN 同期アクセラレーションサービスは停止しています",
 	"lanSyncConnectedPeers": "認証済み LAN デバイス：${count}",
 	"lanSync": "LAN 同期アクセラレーション",

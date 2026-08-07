@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "الحزمة [${name}] مثبتة بالفعل. هل تريد تحديثها بالحزمة المحلية المحددة؟",
+	"localBazaarPackageFileError": "يرجى تحديد ملف .zip واحد لحزمة السوق المحلية",
+	"dropLocalBazaarPackage": "أفلت ملف .zip لحزمة السوق المحلية هنا",
+	"installLocalBazaarPackage": "تثبيت حزمة محلية",
 	"lanSyncInactive": "خدمة تسريع المزامنة عبر الشبكة المحلية غير نشطة",
 	"lanSyncConnectedPeers": "أجهزة الشبكة المحلية المصادق عليها: ${count}",
 	"lanSync": "تسريع المزامنة عبر الشبكة المحلية",

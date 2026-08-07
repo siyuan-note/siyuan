@@ -17,10 +17,15 @@
 package api
 
 import (
+	"errors"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -31,6 +36,85 @@ var validPackageTypes = map[string]bool{
 	"icons":     true,
 	"templates": true,
 	"widgets":   true,
+}
+
+func installLocalBazaarPackage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, bazaar.MaxLocalPackageArchiveSize+1024*1024)
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		ret.Code = 1
+		ret.Msg = "Marketplace package file is required"
+		return
+	}
+	if fileHeader.Size > bazaar.MaxLocalPackageArchiveSize {
+		ret.Code = 1
+		ret.Msg = "Marketplace package file is too large"
+		return
+	}
+
+	tempDir := filepath.Join(util.TempDir, "bazaar", "upload", gulu.Rand.String(7))
+	if err = os.MkdirAll(tempDir, 0755); err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	defer os.RemoveAll(tempDir)
+	archivePath := filepath.Join(tempDir, "package.zip")
+	uploaded, err := fileHeader.Open()
+	if err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	defer uploaded.Close()
+	target, err := os.OpenFile(archivePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	written, copyErr := io.Copy(target, io.LimitReader(uploaded, bazaar.MaxLocalPackageArchiveSize+1))
+	closeErr := target.Close()
+	if copyErr != nil {
+		ret.Code = 1
+		ret.Msg = copyErr.Error()
+		return
+	}
+	if closeErr != nil {
+		ret.Code = 1
+		ret.Msg = closeErr.Error()
+		return
+	}
+	if written > bazaar.MaxLocalPackageArchiveSize {
+		ret.Code = 1
+		ret.Msg = "Marketplace package file is too large"
+		return
+	}
+
+	result, installErr := model.InstallLocalBazaarPackage(archivePath, c.PostForm("frontend"), c.PostForm("overwrite") == "true")
+	if installErr != nil {
+		ret.Code = 1
+		ret.Msg = installErr.Error()
+		if result != nil {
+			reason := "install-failed"
+			if errors.Is(installErr, model.ErrLocalBazaarPackageExists) {
+				reason = "package-exists"
+			} else if errors.Is(installErr, model.ErrLocalBazaarPackageIncompatible) {
+				reason = "package-incompatible"
+			}
+			ret.Data = map[string]any{
+				"reason":        reason,
+				"packageType":   result.PackageType,
+				"packageName":   result.PackageName,
+				"minAppVersion": result.MinAppVersion,
+			}
+		}
+		return
+	}
+	ret.Data = result
 }
 
 func batchUpdatePackage(c *gin.Context) {

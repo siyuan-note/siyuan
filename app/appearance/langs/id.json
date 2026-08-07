@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "Paket [${name}] sudah terpasang. Perbarui dengan paket lokal yang dipilih?",
+	"localBazaarPackageFileError": "Pilih satu berkas .zip paket pasar lokal",
+	"dropLocalBazaarPackage": "Letakkan berkas .zip paket pasar lokal di sini",
+	"installLocalBazaarPackage": "Pasang paket lokal",
 	"lanSyncInactive": "Layanan akselerasi sinkronisasi LAN tidak aktif",
 	"lanSyncConnectedPeers": "Perangkat LAN terautentikasi: ${count}",
 	"lanSync": "Akselerasi sinkronisasi LAN",

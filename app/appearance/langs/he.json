@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "החבילה [${name}] כבר מותקנת. לעדכן אותה באמצעות החבילה המקומית שנבחרה?",
+	"localBazaarPackageFileError": "יש לבחור קובץ .zip אחד של חבילה מקומית מהשוק",
+	"dropLocalBazaarPackage": "יש לשחרר כאן קובץ .zip של חבילה מקומית מהשוק",
+	"installLocalBazaarPackage": "התקנת חבילה מקומית",
 	"lanSyncInactive": "שירות האצת הסנכרון ברשת המקומית אינו פעיל",
 	"lanSyncConnectedPeers": "מכשירים מאומתים ברשת המקומית: ${count}",
 	"lanSync": "האצת סנכרון ברשת המקומית",

@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "Balík [${name}] je už nainštalovaný. Aktualizovať ho vybraným lokálnym balíkom?",
+	"localBazaarPackageFileError": "Vyberte jeden súbor .zip lokálneho balíka z trhoviska",
+	"dropLocalBazaarPackage": "Sem presuňte súbor .zip lokálneho balíka z trhoviska",
+	"installLocalBazaarPackage": "Nainštalovať lokálny balík",
 	"lanSyncInactive": "Služba zrýchlenia synchronizácie v sieti LAN nie je aktívna",
 	"lanSyncConnectedPeers": "Overené zariadenia LAN: ${count}",
 	"lanSync": "Zrýchlenie synchronizácie v sieti LAN",

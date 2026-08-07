@@ -120,11 +120,13 @@ func installPackage(data []byte, installPath string) (err error) {
 	}
 	name := gulu.Rand.String(7)
 	tmp := filepath.Join(tmpPackage, name+".zip")
+	defer os.RemoveAll(tmp)
 	if err = os.WriteFile(tmp, data, 0644); err != nil {
 		return
 	}
 
 	unzipPath := filepath.Join(tmpPackage, name)
+	defer os.RemoveAll(unzipPath)
 	if err = gulu.Zip.Unzip(tmp, unzipPath); err != nil {
 		logging.LogErrorf("write file [%s] failed: %s", installPath, err)
 		return
@@ -142,6 +144,58 @@ func installPackage(data []byte, installPath string) (err error) {
 
 	if err = filelock.Copy(srcPath, installPath); err != nil {
 		return
+	}
+	return
+}
+
+// InstallLocalPackage 从已解压并验证的目录安装本地集市包。
+func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, update bool) (err error) {
+	if err = os.MkdirAll(filepath.Dir(installPath), 0755); err != nil {
+		return
+	}
+
+	var fallbackInstallTime time.Time
+	if info, statErr := os.Stat(installPath); statErr == nil {
+		fallbackInstallTime = info.ModTime()
+	}
+	operationPath := filepath.Join(filepath.Dir(installPath), ".siyuan-package-install-"+gulu.Rand.String(7))
+	stagingPath := filepath.Join(operationPath, "staging")
+	backupPath := filepath.Join(operationPath, "backup")
+	preserveOperationPath := false
+	defer func() {
+		if !preserveOperationPath {
+			_ = os.RemoveAll(operationPath)
+		}
+	}()
+	if err = filelock.Copy(sourcePath, stagingPath); err != nil {
+		return
+	}
+
+	if update {
+		if err = os.Rename(installPath, backupPath); err != nil {
+			return
+		}
+	}
+	if err = os.Rename(stagingPath, installPath); err != nil {
+		if update {
+			if rollbackErr := os.Rename(backupPath, installPath); rollbackErr != nil {
+				preserveOperationPath = true
+				return fmt.Errorf("install local marketplace package failed: %w; rollback failed: %s", err, rollbackErr)
+			}
+		}
+		return
+	}
+	if update {
+		if removeErr := os.RemoveAll(operationPath); removeErr != nil {
+			logging.LogWarnf("remove local package backup [%s] failed: %s", backupPath, removeErr)
+		}
+	}
+
+	RemoveInstalledPackageSizeCache(pkgType, packageName)
+	now := time.Now()
+	recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update)
+	if chtimesErr := os.Chtimes(installPath, now, now); chtimesErr != nil {
+		logging.LogWarnf("set package [%s] folder mtime failed: %s", packageName, chtimesErr)
 	}
 	return
 }

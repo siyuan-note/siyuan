@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "Das Paket [${name}] ist bereits installiert. Mit dem ausgewählten lokalen Paket aktualisieren?",
+	"localBazaarPackageFileError": "Bitte genau eine .zip-Datei eines lokalen Marktplatzpakets auswählen",
+	"dropLocalBazaarPackage": ".zip-Datei eines lokalen Marktplatzpakets hier ablegen",
+	"installLocalBazaarPackage": "Lokales Paket installieren",
 	"lanSyncInactive": "Der Dienst zur LAN-Synchronisierungsbeschleunigung ist nicht aktiv",
 	"lanSyncConnectedPeers": "Authentifizierte LAN-Geräte: ${count}",
 	"lanSync": "LAN-Synchronisierungsbeschleunigung",

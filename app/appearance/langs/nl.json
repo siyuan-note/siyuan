@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "Pakket [${name}] is al geïnstalleerd. Bijwerken met het geselecteerde lokale pakket?",
+	"localBazaarPackageFileError": "Selecteer één .zip-bestand van een lokaal marktplaatspakket",
+	"dropLocalBazaarPackage": "Zet hier een .zip-bestand van een lokaal marktplaatspakket neer",
+	"installLocalBazaarPackage": "Lokaal pakket installeren",
 	"lanSyncInactive": "De LAN-synchronisatieversnelling is niet actief",
 	"lanSyncConnectedPeers": "Geverifieerde LAN-apparaten: ${count}",
 	"lanSync": "LAN-synchronisatieversnelling",

@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "[${name}] paketi zaten yüklü. Seçilen yerel paketle güncellensin mi?",
+	"localBazaarPackageFileError": "Lütfen tek bir yerel mağaza paketi .zip dosyası seçin",
+	"dropLocalBazaarPackage": "Yerel mağaza paketi .zip dosyasını buraya bırakın",
+	"installLocalBazaarPackage": "Yerel paket yükle",
 	"lanSyncInactive": "LAN eşitleme hızlandırma hizmeti etkin değil",
 	"lanSyncConnectedPeers": "Kimliği doğrulanmış LAN cihazları: ${count}",
 	"lanSync": "LAN eşitleme hızlandırması",

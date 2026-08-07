@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "Package [${name}] is already installed. Update it with the selected local package?",
+	"localBazaarPackageFileError": "Please select one local marketplace package in .zip format",
+	"dropLocalBazaarPackage": "Drop a local marketplace package in .zip format here",
+	"installLocalBazaarPackage": "Install local package",
 	"lanSyncInactive": "LAN sync acceleration service is inactive",
 	"lanSyncConnectedPeers": "Authenticated LAN devices: ${count}",
 	"lanSync": "LAN sync acceleration",

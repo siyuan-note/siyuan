@@ -350,6 +350,35 @@
   }
 
   &-bazaar {
+    position: relative;
+
+    &__drop {
+      align-items: center;
+      backdrop-filter: blur(8px);
+      background-color: color-mix(in srgb, var(--b3-theme-background) 88%, transparent);
+      color: var(--b3-theme-primary);
+      display: flex;
+      flex-direction: column;
+      font-size: 18px;
+      font-weight: 600;
+      gap: 16px;
+      inset: 0;
+      justify-content: center;
+      pointer-events: none;
+      position: absolute;
+      z-index: 8;
+
+      svg {
+        height: 48px;
+        width: 48px;
+      }
+    }
+
+    &__local-package {
+      overflow: hidden;
+      position: relative;
+    }
+
     &__panel {
       height: 100%;
       overflow: auto;

@@ -46,10 +46,31 @@ type UpdatedPackage struct {
 	Available *bazaar.Package `json:"available"`
 }
 
+var reservedPackageNames = map[string]bool{
+	"CON": true, "PRN": true, "AUX": true, "NUL": true,
+	"COM1": true, "COM2": true, "COM3": true, "COM4": true, "COM5": true,
+	"COM6": true, "COM7": true, "COM8": true, "COM9": true,
+	"LPT1": true, "LPT2": true, "LPT3": true, "LPT4": true, "LPT5": true,
+	"LPT6": true, "LPT7": true, "LPT8": true, "LPT9": true,
+}
+
+func isValidPackageName(packageName string) bool {
+	if len(packageName) < 1 || len(packageName) > 255 || packageName[0] == '.' || packageName[0] == ' ' ||
+		packageName[len(packageName)-1] == '.' || packageName[len(packageName)-1] == ' ' || strings.Contains(packageName, "..") {
+		return false
+	}
+	for _, char := range []byte(packageName) {
+		if char < 0x20 || char > 0x7E || strings.ContainsRune(`<>&'":/\|?*`, rune(char)) {
+			return false
+		}
+	}
+	return !reservedPackageNames[strings.ToUpper(packageName)]
+}
+
 func getPackageInstallPath(pkgType, packageName string) (string, string, error) {
 	// 校验包名必须是合法的目录名，不能包含路径分隔符或 ..，防止路径遍历
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-wr4w-7vjm-mmx3
-	if "" == packageName || strings.ContainsAny(packageName, `/\`) || strings.Contains(packageName, "..") {
+	if !isValidPackageName(packageName) {
 		return "", "", errors.New("invalid package name")
 	}
 
@@ -94,6 +115,20 @@ type ThemeInstallOptions struct {
 	ModeOS bool
 }
 
+// LocalBazaarPackageInstallResult 描述本地集市包的识别和安装结果。
+type LocalBazaarPackageInstallResult struct {
+	PackageType   string `json:"packageType"`
+	PackageName   string `json:"packageName"`
+	MinAppVersion string `json:"minAppVersion,omitempty"`
+	Updated       bool   `json:"updated"`
+}
+
+var (
+	ErrLocalBazaarPackageExists       = errors.New("marketplace package already exists")
+	ErrLocalBazaarPackageIncompatible = errors.New("marketplace package is incompatible")
+	localBazaarInstallLock            sync.Mutex
+)
+
 // updatePackages 更新一组集市包；同类型批量更新时，安装后处理只执行一次
 func updatePackages(packages []*UpdatedPackage, pkgType string, successCount, failedCount *int, planned int) {
 	items := make([]batchInstallItem, 0, len(packages))
@@ -110,7 +145,7 @@ func updatePackages(packages []*UpdatedPackage, pkgType string, successCount, fa
 		*successCount++
 		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), *successCount+*failedCount, planned, pkg.Name))
 	}
-	finishInstall(pkgType, items, nil)
+	finishInstall(pkgType, items, nil, true)
 }
 
 // filterUpdatableBazaarPackages 过滤出允许更新的集市包
@@ -447,7 +482,8 @@ func installBazaarPackage(pkgType, repoURL, repoHash, packageName string) (meta 
 // finishInstall 集市包安装后的处理（刷新外观、推送插件重载等）；批量更新时同类型只执行一次
 //
 //   - themeOptions：仅在新安装主题（meta.update 为 false）时写入外观；批量覆盖更新不会用到
-func finishInstall(pkgType string, items []batchInstallItem, themeOptions *ThemeInstallOptions) {
+//   - applyNewAppearance：控制新安装图标是否自动应用；本地安装不自动应用
+func finishInstall(pkgType string, items []batchInstallItem, themeOptions *ThemeInstallOptions, applyNewAppearance bool) {
 	if 1 > len(items) {
 		return
 	}
@@ -509,7 +545,7 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	case "icons":
 		for _, item := range items {
-			if !item.meta.update {
+			if !item.meta.update && applyNewAppearance {
 				// 新安装图标时才自动切换
 				Conf.Appearance.Icon = item.name
 				Conf.Save()
@@ -526,8 +562,53 @@ func InstallBazaarPackage(pkgType, repoURL, repoHash, packageName string, themeO
 	if err != nil {
 		return err
 	}
-	finishInstall(pkgType, []batchInstallItem{{name: packageName, meta: meta}}, themeOptions)
+	finishInstall(pkgType, []batchInstallItem{{name: packageName, meta: meta}}, themeOptions, true)
 	return nil
+}
+
+// InstallLocalBazaarPackage 安装上传的本地集市包。
+func InstallLocalBazaarPackage(archivePath, frontend string, overwrite bool) (result *LocalBazaarPackageInstallResult, err error) {
+	pkgType, pkg, sourcePath, cleanup, err := bazaar.ExtractLocalPackage(archivePath)
+	if err != nil {
+		return nil, err
+	}
+	defer cleanup()
+
+	result = &LocalBazaarPackageInstallResult{
+		PackageType:   pkgType,
+		PackageName:   pkg.Name,
+		MinAppVersion: pkg.MinAppVersion,
+	}
+	installPath, _, err := getPackageInstallPath(pkgType, pkg.Name)
+	if err != nil {
+		return result, err
+	}
+	if (pkgType == "themes" && isBuiltInTheme(pkg.Name)) || (pkgType == "icons" && isBuiltInIcon(pkg.Name)) {
+		return result, errors.New("built-in marketplace package cannot be overwritten")
+	}
+	if bazaar.IsBelowRequiredAppVersion(pkg) {
+		return result, fmt.Errorf("%w: SiYuan %s or later is required", ErrLocalBazaarPackageIncompatible, pkg.MinAppVersion)
+	}
+	if (pkgType == "plugins" && bazaar.IsIncompatiblePlugin(pkg, frontend)) ||
+		(pkgType == "themes" && bazaar.IsIncompatibleTheme(pkg, frontend)) {
+		return result, ErrLocalBazaarPackageIncompatible
+	}
+
+	localBazaarInstallLock.Lock()
+	defer localBazaarInstallLock.Unlock()
+	_, statErr := os.Lstat(installPath)
+	if statErr != nil && !os.IsNotExist(statErr) {
+		return result, statErr
+	}
+	result.Updated = statErr == nil
+	if result.Updated && !overwrite {
+		return result, ErrLocalBazaarPackageExists
+	}
+	if err = bazaar.InstallLocalPackage(sourcePath, installPath, pkgType, pkg.Name, result.Updated); err != nil {
+		return result, fmt.Errorf(Conf.Language(46), pkg.Name, err)
+	}
+	finishInstall(pkgType, []batchInstallItem{{name: pkg.Name, meta: installMeta{update: result.Updated}}}, nil, false)
+	return result, nil
 }
 
 // UpdateBazaarPackage 使用在线集市数据更新本地集市包
@@ -594,10 +675,10 @@ func UninstallPackage(pkgType, packageName string) error {
 
 // isBuiltInTheme 通过包名或目录名判断是否为内置主题
 func isBuiltInTheme(name string) bool {
-	return "daylight" == name || "midnight" == name
+	return strings.EqualFold("daylight", name) || strings.EqualFold("midnight", name)
 }
 
 // isBuiltInIcon 通过包名或目录名判断是否为内置图标
 func isBuiltInIcon(name string) bool {
-	return "litheness" == name
+	return strings.EqualFold("litheness", name)
 }

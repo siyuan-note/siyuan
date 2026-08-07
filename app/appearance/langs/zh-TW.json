@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "集市套件 [${name}] 已安裝，是否使用所選本機套件更新？",
+	"localBazaarPackageFileError": "請選擇一個本機集市套件 .zip 檔案",
+	"dropLocalBazaarPackage": "將本機集市套件 .zip 檔案拖放到這裡",
+	"installLocalBazaarPackage": "安裝本機套件",
 	"lanSyncInactive": "區域網路同步加速服務未執行",
 	"lanSyncConnectedPeers": "已認證區域網路裝置：${count}",
 	"lanSync": "區域網路同步加速",

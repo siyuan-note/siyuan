@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "Пакет [${name}] уже встановлено. Оновити його вибраним локальним пакетом?",
+	"localBazaarPackageFileError": "Виберіть один .zip-файл локального пакета маркетплейсу",
+	"dropLocalBazaarPackage": "Перетягніть сюди .zip-файл локального пакета маркетплейсу",
+	"installLocalBazaarPackage": "Установити локальний пакет",
 	"lanSyncInactive": "Служба прискорення синхронізації локальною мережею неактивна",
 	"lanSyncConnectedPeers": "Автентифіковані пристрої в локальній мережі: ${count}",
 	"lanSync": "Прискорення синхронізації локальною мережею",

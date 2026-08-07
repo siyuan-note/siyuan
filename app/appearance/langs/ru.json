@@ -1,4 +1,8 @@
 {
+	"confirmOverwriteLocalBazaarPackage": "Пакет [${name}] уже установлен. Обновить его выбранным локальным пакетом?",
+	"localBazaarPackageFileError": "Выберите один .zip-файл локального пакета магазина",
+	"dropLocalBazaarPackage": "Перетащите сюда .zip-файл локального пакета магазина",
+	"installLocalBazaarPackage": "Установить локальный пакет",
 	"lanSyncInactive": "Служба ускорения синхронизации по локальной сети неактивна",
 	"lanSyncConnectedPeers": "Аутентифицированные устройства в локальной сети: ${count}",
 	"lanSync": "Ускорение синхронизации по локальной сети",

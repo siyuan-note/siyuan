@@ -108,6 +108,9 @@ const handleTouchStart = (e: TouchEvent) => {
         const draggable = getDraggableAncestor(target);
         if (draggable) {
             dragState = createDragState(draggable, touch, "touch", isMouseInput(touch));
+            // WebKit 会接管 draggable 元素的长按并取消触摸序列，临时关闭原生拖拽以保留 touchend。
+            draggable.setAttribute("draggable", "false");
+            dragState.restoreDraggable = true;
             return;
         }
     }
@@ -213,6 +216,15 @@ const handleTouchEnd = (e: TouchEvent) => {
     if (!manualState) return;
     // 派发 mouseup 触发组件（如 Outline.bindSort）注册的 onmouseup 清理回调，并复位状态
     cancelManualTouch();
+};
+
+const handleContextMenu = (event: MouseEvent) => {
+    // WebView 会在手指仍按住时派发原生长按菜单，菜单遮罩会截获后续 drop。
+    // 松手后由 event.ts 合成的 contextmenu 不是可信事件，需要保留以打开正常的长按菜单。
+    if (event.isTrusted && (dragState || manualState)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }
 };
 
 const getDraggableAncestor = (el: Element): HTMLElement | null => {
@@ -368,7 +380,14 @@ const startBridgeDrag = (touch: DragPoint) => {
         dataTransfer: dt,
         view: window,
     });
+    if (dragState.restoreDraggable) {
+        // 部分拖拽处理会在 dragstart 中再次检查 draggable 属性，派发合成事件时短暂恢复。
+        dragState.draggableElement.setAttribute("draggable", "true");
+    }
     dragState.draggableElement.dispatchEvent(dragStartEvent);
+    if (dragState.restoreDraggable) {
+        dragState.draggableElement.setAttribute("draggable", "false");
+    }
 
     dragState.ghostElement = window.siyuan.touchDragGhost || null;
     if (dragState.ghostElement) {
@@ -536,4 +555,5 @@ export const initTouchDragBridge = () => {
     document.addEventListener("touchmove", handleTouchMove, {passive: false});
     document.addEventListener("touchend", handleTouchEnd);
     document.addEventListener("touchcancel", handleCancel);
+    document.addEventListener("contextmenu", handleContextMenu, {capture: true});
 };

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/88250/gulu"
@@ -46,21 +47,34 @@ type UpdatedPackage struct {
 }
 
 func getPackageInstallPath(pkgType, packageName string) (string, string, error) {
+	// 校验包名必须是合法的目录名，不能包含路径分隔符或 ..，防止路径遍历
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-wr4w-7vjm-mmx3
+	if "" == packageName || strings.ContainsAny(packageName, `/\`) || strings.Contains(packageName, "..") {
+		return "", "", errors.New("invalid package name")
+	}
+
+	var baseDir, jsonFileName string
 	switch pkgType {
 	case "plugins":
-		return filepath.Join(util.DataDir, "plugins", packageName), "plugin.json", nil
+		baseDir, jsonFileName = filepath.Join(util.DataDir, "plugins"), "plugin.json"
 	case "themes":
-		return filepath.Join(util.ThemesPath, packageName), "theme.json", nil
+		baseDir, jsonFileName = util.ThemesPath, "theme.json"
 	case "icons":
-		return filepath.Join(util.IconsPath, packageName), "icon.json", nil
+		baseDir, jsonFileName = util.IconsPath, "icon.json"
 	case "templates":
-		return filepath.Join(util.DataDir, "templates", packageName), "template.json", nil
+		baseDir, jsonFileName = filepath.Join(util.DataDir, "templates"), "template.json"
 	case "widgets":
-		return filepath.Join(util.DataDir, "widgets", packageName), "widget.json", nil
+		baseDir, jsonFileName = filepath.Join(util.DataDir, "widgets"), "widget.json"
 	default:
 		logging.LogErrorf("invalid package type: %s", pkgType)
 		return "", "", errors.New("invalid package type")
 	}
+
+	installPath := filepath.Join(baseDir, packageName)
+	if !gulu.File.IsSubPath(baseDir, installPath) {
+		return "", "", errors.New("invalid package name")
+	}
+	return installPath, jsonFileName, nil
 }
 
 // installMeta 记录安装前后的状态，供安装后处理使用

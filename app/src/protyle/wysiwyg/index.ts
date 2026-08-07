@@ -3638,7 +3638,20 @@ export class WYSIWYG {
             }
         });
         // 记录组合开始时的光标位置，用于取消组合后恢复光标（输入法删空候选词会导致浏览器移动光标）
-        let compositionRange: { range: Range; cell?: HTMLElement; offset?: number };
+        let compositionRange: { range: Range } | { cell: HTMLElement; offset: number };
+        const isAfterInlineMath = (range: Range) => {
+            let previousNode: Node;
+            if (range.startContainer.nodeType === Node.TEXT_NODE) {
+                if (!/^[\n\u200B\uFEFF]*$/.test(range.startContainer.textContent.slice(0, range.startOffset))) {
+                    return false;
+                }
+                previousNode = range.startContainer.previousSibling;
+            } else {
+                previousNode = range.startContainer.childNodes[range.startOffset - 1];
+            }
+            return previousNode?.nodeType === Node.ELEMENT_NODE &&
+                (previousNode as Element).getAttribute("data-type")?.split(" ").includes("inline-math");
+        };
         this.element.addEventListener("compositionstart", (event) => {
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
@@ -3651,10 +3664,13 @@ export class WYSIWYG {
             const nodeElement = hasClosestBlock(range.startContainer);
             if (nodeElement) {
                 const startCell = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
-                compositionRange = {range: range.cloneRange()};
-                if (startCell) {
-                    compositionRange.cell = startCell as HTMLElement;
-                    compositionRange.offset = getSelectionOffset(startCell, nodeElement, range).start;
+                if (startCell && !isAfterInlineMath(range)) {
+                    compositionRange = {
+                        cell: startCell as HTMLElement,
+                        offset: getSelectionOffset(startCell, nodeElement, range).start,
+                    };
+                } else {
+                    compositionRange = {range: range.cloneRange()};
                 }
             } else {
                 compositionRange = undefined;
@@ -3690,11 +3706,23 @@ export class WYSIWYG {
                 }
                 // https://github.com/siyuan-note/siyuan/issues/17584
                 if (compositionRange) {
-                    if (this.element.contains(compositionRange.range.startContainer)) {
+                    if ("range" in compositionRange) {
                         // https://github.com/siyuan-note/siyuan/issues/14667
-                        focusByRange(compositionRange.range);
-                    } else if (compositionRange.cell?.isConnected) {
-                        focusByOffset(compositionRange.cell, compositionRange.offset, compositionRange.offset);
+                        if (this.element.contains(compositionRange.range.startContainer)) {
+                            focusByRange(compositionRange.range);
+                        }
+                    } else {
+                        const selection = getSelection();
+                        if (selection.rangeCount > 0) {
+                            const afterRange = selection.getRangeAt(0);
+                            const currentCell = hasClosestByTag(afterRange.startContainer, "TD") ||
+                                hasClosestByTag(afterRange.startContainer, "TH");
+                            if (!currentCell || currentCell !== compositionRange.cell) {
+                                focusByOffset(compositionRange.cell, compositionRange.offset, compositionRange.offset);
+                            }
+                        } else {
+                            focusByOffset(compositionRange.cell, compositionRange.offset, compositionRange.offset);
+                        }
                     }
                 }
                 compositionRange = undefined;

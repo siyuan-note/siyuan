@@ -38,6 +38,7 @@ export class Font extends ToolbarItem {
         super(protyle, menuItem);
         this.element.addEventListener("click", () => {
             const triggerRect = this.element.getBoundingClientRect();
+            const visibleTriggerRect = triggerRect.width > 0 && triggerRect.height > 0 ? triggerRect : undefined;
             protyle.toolbar.element.classList.add("fn__none");
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
@@ -50,7 +51,9 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElementCloseCB = undefined;
             focusByRange(protyle.toolbar.range);
             /// #if !MOBILE
-            protyle.toolbar.setSelectionElementPosition(protyle, protyle.toolbar.subElement, triggerRect);
+            protyle.toolbar.setSelectionElementPosition(
+                protyle, protyle.toolbar.subElement, visibleTriggerRect, appearanceElement
+            );
             /// #endif
         });
     }

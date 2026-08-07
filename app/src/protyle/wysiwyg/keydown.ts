@@ -1818,6 +1818,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (matchHotKey(menuItem.hotkey, event)) {
                     // 设置 lastHTMLs 会导致  protyle.toolbar.range 和 range 不一致，需重置一下 https://github.com/siyuan-note/siyuan/issues/10933
                     protyle.toolbar.range = range;
+                    if (menuItem.name === "text") {
+                        protyle.toolbar.rangePosition = getSelectionPosition(nodeElement, range, true);
+                    }
                     if (["block-ref"].includes(menuItem.name) && protyle.toolbar.range.toString() === "") {
                         return true;
                     }

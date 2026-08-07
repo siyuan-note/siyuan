@@ -188,7 +188,8 @@ export class Toolbar {
         /// #endif
     }
 
-    public setSelectionElementPosition(protyle: IProtyle, element: HTMLElement, triggerRect?: DOMRect) {
+    public setSelectionElementPosition(protyle: IProtyle, element: HTMLElement, triggerRect?: DOMRect,
+                                       scrollElement?: HTMLElement) {
         if (!this.rangePosition || !this.range) {
             return;
         }
@@ -199,6 +200,17 @@ export class Toolbar {
             (this.rangePosition.isBottom ? rangeRects[rangeRects.length - 1] : rangeRects[0]) ||
             this.range.getBoundingClientRect();
         const gap = this.isMultipleClick ? 2 : 4;
+        if (scrollElement) {
+            const availableHeight = Math.max(
+                rangeRect.top - protyleRect.top - 30 - gap,
+                protyleRect.bottom - rangeRect.bottom - gap,
+                0
+            );
+            const overflowHeight = Math.max(0, element.offsetHeight - availableHeight);
+            if (overflowHeight > 0) {
+                scrollElement.style.maxHeight = `${Math.max(0, scrollElement.offsetHeight - overflowHeight)}px`;
+            }
+        }
         const above = rangeRect.top - element.clientHeight - gap;
         const below = rangeRect.bottom + gap;
         const y = this.rangePosition.isBottom ?

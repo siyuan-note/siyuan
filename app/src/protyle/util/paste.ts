@@ -23,6 +23,7 @@ import * as dayjs from "dayjs";
 import {updateListOrder} from "../wysiwyg/list";
 import {refreshSbAndPersistWidth} from "../../block/util";
 import {shouldPreservePastedBlockStructure} from "./pasteSource";
+import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
 
 export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement) => {
     // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
@@ -254,14 +255,7 @@ export const enableLuteMarkdownSyntax = (protyle: IProtyle) => {
 };
 
 export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
-    protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
-    protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
-    protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
-    protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
-    protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
-    protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
-    protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
-    protyle.lute.SetMark(window.siyuan.config.editor.markdown.inlineMark);
+    applyLuteMarkdownSyntax(protyle.lute, window.siyuan.config.editor.markdown);
 };
 
 const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[]) => {

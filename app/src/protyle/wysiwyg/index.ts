@@ -307,10 +307,10 @@ export class WYSIWYG {
     private preventInput: boolean;
     private copyAsRichText = false;
     private inputTimeout: number;
-    private pendingInputTimeouts = new Map<number, () => void>();
+    private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
     public tableControl: TableControl;
 
-    private scheduleInput(callback: () => void, delay = 0, replace = true) {
+    private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
             clearTimeout(this.inputTimeout);
             this.pendingInputTimeouts.delete(this.inputTimeout);
@@ -320,7 +320,7 @@ export class WYSIWYG {
             if (this.inputTimeout === timeout) {
                 this.inputTimeout = undefined;
             }
-            callback();
+            void callback();
         }, delay);
         this.pendingInputTimeouts.set(timeout, callback);
         if (replace) {
@@ -328,12 +328,12 @@ export class WYSIWYG {
         }
     }
 
-    public flushPendingInput() {
+    public async flushPendingInput() {
         const callbacks = Array.from(this.pendingInputTimeouts.values());
         this.pendingInputTimeouts.forEach((callback, timeout) => clearTimeout(timeout));
         this.pendingInputTimeouts.clear();
         this.inputTimeout = undefined;
-        callbacks.forEach(callback => callback());
+        await Promise.all(callbacks.map(callback => callback()));
     }
 
     public copyRichText() {
@@ -3930,19 +3930,15 @@ export class WYSIWYG {
                 // 百度输入法中文反双引号 https://github.com/siyuan-note/siyuan/issues/9686
                 event.data === "”" ||
                 event.data === "「")) {
-                this.scheduleInput(() => {
-                    // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
-                    input(protyle, blockElement, range, true);
-                });
+                // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
+                this.scheduleInput(() => input(protyle, blockElement, range, true));
             } else {
                 if (isMac() && event.data === "【】") {
-                    this.scheduleInput(() => {
-                        input(protyle, blockElement, range, true, event);
-                    }, Constants.TIMEOUT_INPUT, false);
+                    this.scheduleInput(() => input(protyle, blockElement, range, true, event),
+                        Constants.TIMEOUT_INPUT, false);
                 } else {
-                    this.scheduleInput(() => {
-                        input(protyle, blockElement, range, true, event, lineBreakInputOperations);
-                    });
+                    this.scheduleInput(() => input(protyle, blockElement, range, true, event,
+                        lineBreakInputOperations));
                 }
             }
             event.stopPropagation();

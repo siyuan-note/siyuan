@@ -26,7 +26,7 @@ linux:
   desktop: {
     entry: {
       Name: "SiYuan",
-      Comment: "Refactor your thinking",
+      Comment: "From thought to insight, with agents",
       Type: "Application",
       Categories: "Utility;"
     }

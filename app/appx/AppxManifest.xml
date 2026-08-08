@@ -13,7 +13,7 @@
     <Properties>
         <DisplayName>SiYuan</DisplayName>
         <PublisherDisplayName>云南链滴科技有限公司</PublisherDisplayName>
-        <Description>Refactor your thinking</Description>
+        <Description>From thought to insight, with agents</Description>
         <Logo>assets\StoreLogo.png</Logo>
     </Properties>
     <Resources>
@@ -44,7 +44,7 @@
                     DisplayName="SiYuan"
                     Square150x150Logo="assets\Square150x150Logo.png"
                     Square44x44Logo="assets\Square44x44Logo.png"
-                    Description="Refactor your thinking">
+                    Description="From thought to insight, with agents">
                 <uap:DefaultTile Wide310x150Logo="assets\Wide310x150Logo.png"/>
             </uap:VisualElements>
 

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // 本文件为加密笔记本的 AV 定义提供笔记本级存储与 DEK 加解密支持。

@@ -17,6 +17,7 @@ import {
     setInsertWbrHTML,
     setLastNodeRange,
 } from "../util/selection";
+import {selectTextToEditorBoundary} from "../util/selectionBoundary";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -96,7 +97,7 @@ import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
 import {highlightRender} from "../render/highlightRender";
-import {countBlockWord} from "../../layout/status";
+import {countBlockWord, countSelectWord} from "../../layout/status";
 import {moveToDown, moveToUp} from "./move";
 import {beforePaste, pasteAsPlainText} from "../util/paste";
 import {preventScroll} from "../scroll/preventScroll";
@@ -640,6 +641,29 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 command: "enterBack",
                 previousRange: range,
             });
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
+        let selectToPageStart: boolean | undefined;
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.selectToPageStart.custom, event)) {
+            selectToPageStart = true;
+        } else if (matchHotKey(window.siyuan.config.keymap.editor.general.selectToPageEnd.custom, event)) {
+            selectToPageStart = false;
+        }
+        if (selectToPageStart !== undefined) {
+            hideElements(["hint", "select"], protyle);
+            const selectedRange = selectTextToEditorBoundary(protyle.wysiwyg.element, selectToPageStart);
+            if (selectedRange) {
+                if (selectToPageStart) {
+                    protyle.wysiwyg.element.firstElementChild?.scrollIntoView();
+                } else {
+                    protyle.wysiwyg.element.lastElementChild?.scrollIntoView(false);
+                }
+                protyle.toolbar.render(protyle, selectedRange);
+                countSelectWord(selectedRange, protyle.block.rootID);
+            }
             event.preventDefault();
             event.stopPropagation();
             return;

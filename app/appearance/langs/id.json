@@ -1,4 +1,6 @@
 {
+	"selectToPageStart": "Pilih teks dari kursor hingga awal halaman",
+	"selectToPageEnd": "Pilih teks dari kursor hingga akhir halaman",
 	"appendListItem": "Tambahkan item daftar ke akhir daftar saat ini",
 	"secretAllowedHosts": "Host yang diizinkan",
 	"secretAllowedHostsTip": "Nama host yang boleh menerima rahasia ini, dipisahkan koma, mis. api.example.com; biarkan kosong untuk menolak semua permintaan, dan rahasia tidak pernah disisipkan ke URL permintaan",

@@ -1,4 +1,6 @@
 {
+	"selectToPageStart": "Select text from the cursor to the beginning of the page",
+	"selectToPageEnd": "Select text from the cursor to the end of the page",
 	"appendListItem": "Add a list item to the end of the current list",
 	"secretAllowedHosts": "Allowed hosts",
 	"secretAllowedHostsTip": "Hostnames this secret may be sent to, separated by commas, e.g. api.example.com; leave empty to deny all requests, and secrets are never interpolated into the request URL",

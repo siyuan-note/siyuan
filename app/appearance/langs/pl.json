@@ -1,4 +1,6 @@
 {
+	"selectToPageStart": "Zaznacz tekst od kursora do początku strony",
+	"selectToPageEnd": "Zaznacz tekst od kursora do końca strony",
 	"appendListItem": "Dodaj element na końcu bieżącej listy",
 	"secretAllowedHosts": "Dozwolone hosty",
 	"secretAllowedHostsTip": "Nazwy hostów, do których można wysłać ten sekret, oddzielone przecinkami, np. api.example.com; pozostaw puste, aby odrzucać wszystkie żądania, a sekrety nigdy nie są interpolowane do adresu URL żądania",

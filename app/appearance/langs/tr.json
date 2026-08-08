@@ -1,4 +1,6 @@
 {
+	"selectToPageStart": "İmleçten sayfanın başına kadar metni seç",
+	"selectToPageEnd": "İmleçten sayfanın sonuna kadar metni seç",
 	"appendListItem": "Geçerli listenin sonuna liste öğesi ekle",
 	"secretAllowedHosts": "İzin verilen sunucular",
 	"secretAllowedHostsTip": "Bu sırrın gönderilebileceği, virgülle ayrılmış sunucu adları, ör. api.example.com; tüm istekleri reddetmek için boş bırakın ve sırlar istek URL'sine asla eklenmez",

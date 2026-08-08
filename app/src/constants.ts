@@ -566,6 +566,8 @@ export abstract class Constants {
                 jumpToParent: {default: "⇧⌘J", custom: "⇧⌘J"},
                 moveToUp: {default: "⇧⌘↑", custom: "⇧⌘↑"},
                 moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
+                selectToPageStart: {default: "", custom: ""},
+                selectToPageEnd: {default: "", custom: ""},
                 duplicateCompletely: {default: "", custom: ""},
                 copyRichText: {default: "", custom: ""},
                 copyPlainText: {default: "", custom: ""},

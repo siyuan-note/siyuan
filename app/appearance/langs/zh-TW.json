@@ -1,4 +1,6 @@
 {
+	"selectToPageStart": "選取游標至頁首的文字",
+	"selectToPageEnd": "選取游標至頁尾的文字",
 	"appendListItem": "在目前列表末尾新增列表項",
 	"secretAllowedHosts": "允許的主機",
 	"secretAllowedHostsTip": "允許傳送此金鑰的主機名稱，以逗號分隔，例如 api.example.com；留空則拒絕所有要求，且金鑰永遠不會被插入到要求 URL 中",

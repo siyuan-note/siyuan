@@ -57,7 +57,7 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
-import {getBlockHintCloseLength} from "./blockHintRange";
+import {getBlockHintRangeAdjustment} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -661,20 +661,27 @@ ${genHintItemHTML(item)}
         // 前后有标记符的情况 https://github.com/siyuan-note/siyuan/issues/2511
         const endSplit = Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar];
         // 仅移除当前提示所属的闭合符号，保留触发范围外的原有符号
+        let triggerStartOffset = this.lastIndex;
+        let removeOpenLength = this.splitChar.length;
+        let removeCloseLength = 0;
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && endSplit && this.lastIndex > -1 &&
             range.startContainer.nodeType === 3) {
             const textNode = range.startContainer as Text;
             const caretOffset = getWholeTextOffset(textNode, range.startOffset);
             const triggerOffset = getWholeTextOffset(textNode, this.lastIndex);
-            const closeLength = getBlockHintCloseLength(textNode.wholeText.substring(0, triggerOffset),
-                textNode.wholeText.substring(caretOffset), this.splitChar, endSplit);
-            if (closeLength > 0) {
-                setRangeEndByWholeTextOffset(range, textNode, caretOffset + closeLength);
+            const adjustment = getBlockHintRangeAdjustment(textNode.wholeText.substring(0, triggerOffset),
+                textNode.wholeText.substring(triggerOffset, caretOffset), textNode.wholeText.substring(caretOffset),
+                this.splitChar, endSplit);
+            triggerStartOffset += adjustment.preserveOpenLength;
+            removeOpenLength = adjustment.removeOpenLength;
+            removeCloseLength = adjustment.closeLength;
+            if (adjustment.closeLength > 0) {
+                setRangeEndByWholeTextOffset(range, textNode, caretOffset + adjustment.closeLength);
             }
         }
 
-        if (this.lastIndex > -1) {
-            range.setStart(range.startContainer, this.lastIndex);
+        if (triggerStartOffset > -1) {
+            range.setStart(range.startContainer, triggerStartOffset);
             focusByRange(range);
         }
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newSubDoc ") &&
@@ -716,7 +723,9 @@ ${genHintItemHTML(item)}
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
             if (refIsS) {
-                const staticText = range.toString().replace(this.splitChar, "");
+                const selectedText = range.toString();
+                const staticText = selectedText.substring(removeOpenLength,
+                    Math.max(removeOpenLength, selectedText.length - removeCloseLength));
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");
                     tempElement.innerText = staticText;

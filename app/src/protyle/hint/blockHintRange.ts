@@ -16,9 +16,5 @@ export const getBlockHintCloseLength = (textBeforeTrigger: string, textAfterCare
         }
     }
 
-    let closeRunLength = 0;
-    while (textAfterCaret.substring(closeRunLength, closeRunLength + 1) === closeChar) {
-        closeRunLength++;
-    }
-    return Math.min(endSplit.length, Math.max(0, closeRunLength - unmatchedOpenCount));
+    return unmatchedOpenCount === 0 ? endSplit.length : 0;
 };

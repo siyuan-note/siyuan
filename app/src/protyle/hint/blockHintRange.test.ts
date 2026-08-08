@@ -3,7 +3,7 @@ import * as assert from "node:assert/strict";
 import {getBlockHintCloseLength} from "./blockHintRange";
 
 describe("getBlockHintCloseLength", () => {
-    it("keeps the outer closing bracket when creating a reference inside nested brackets", () => {
+    it("preserves brackets outside the trigger range", () => {
         const text = "[[[]]";
         const triggerOffset = 1;
         const caretOffset = 3;
@@ -11,7 +11,7 @@ describe("getBlockHintCloseLength", () => {
             text.substring(caretOffset), "[[", "]]");
 
         assert.equal(text.substring(0, triggerOffset) + "reference" +
-            text.substring(caretOffset + closeLength), "[reference]");
+            text.substring(caretOffset + closeLength), "[reference]]");
     });
 
     it("removes an automatically completed closing marker", () => {
@@ -19,10 +19,10 @@ describe("getBlockHintCloseLength", () => {
         assert.equal(getBlockHintCloseLength("text", "））tail", "（（", "））"), 2);
     });
 
-    it("preserves closing markers belonging to outer pairs", () => {
-        assert.equal(getBlockHintCloseLength("[", "]]", "[[", "]]"), 1);
-        assert.equal(getBlockHintCloseLength("[[", "]]]", "[[", "]]"), 1);
-        assert.equal(getBlockHintCloseLength("【", "】】", "【【", "】】"), 1);
+    it("does not remove closing markers after an unmatched opening marker", () => {
+        assert.equal(getBlockHintCloseLength("[", "]]", "[[", "]]"), 0);
+        assert.equal(getBlockHintCloseLength("[[", "]]]", "[[", "]]"), 0);
+        assert.equal(getBlockHintCloseLength("【", "】】", "【【", "】】"), 0);
     });
 
     it("does not remove unrelated closing markers", () => {

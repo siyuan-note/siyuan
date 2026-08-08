@@ -660,7 +660,7 @@ ${genHintItemHTML(item)}
         // QQ 拼音输入法自动补全需移除补全内容 https://github.com/siyuan-note/siyuan/issues/320
         // 前后有标记符的情况 https://github.com/siyuan-note/siyuan/issues/2511
         const endSplit = Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar];
-        // 仅移除当前提示所属的闭合符号，保留外层配对和后续文本中的同名符号
+        // 仅移除当前提示所属的闭合符号，保留触发范围外的原有符号
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && endSplit && this.lastIndex > -1 &&
             range.startContainer.nodeType === 3) {
             const textNode = range.startContainer as Text;

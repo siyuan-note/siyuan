@@ -7,10 +7,15 @@ import {getCloudURL} from "../util/about";
 
 /** 按当前配置刷新同步 Tab 可见性与动态面板（供 syncRuntime 调用） */
 export const refreshSyncTabPanels = (root: Element) => {
-    setSyncConfigItemVisible(root);
-    setSyncModeRelatedConfigItemVisible(root);
+    refreshSyncEnabledRelatedItems(root);
     renderProviderConfig(root);
     renderCloudSpace(root);
+};
+
+/** 切换同步总开关后刷新下方设置项 */
+export const refreshSyncEnabledRelatedItems = (root: Element) => {
+    setSyncConfigItemVisible(root);
+    setSyncModeRelatedConfigItemVisible(root);
 };
 
 /** 仅刷新与同步模式相关的配置项可见性（供 syncRuntime 调用） */
@@ -23,19 +28,24 @@ const setSyncConfigItemVisible = (root: Element) => {
     [
         "cloudSpace",
         "sync.enabled",
+    ]
+    .forEach((id) => {
+        root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !visible);
+    });
+    const syncSettingsVisible = visible && window.siyuan.config.sync.enabled;
+    [
         "sync.generateConflictDoc",
         "sync.mode",
         "sync.interval",
         "sync.perception",
         "sync.lan.enabled",
         "syncCloudDirBlock",
-        "syncCloudBackupBlock",
     ]
     .forEach((id) => {
-        root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !visible);
+        root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !syncSettingsVisible);
     });
     root.querySelector(`#${CSS.escape("sync.lan.enabled")}`)?.closest(".config-item")?.classList.toggle(
-        "fn__none", !visible || window.siyuan.config.system.container === "docker");
+        "fn__none", !syncSettingsVisible || window.siyuan.config.system.container === "docker");
 };
 
 const setSyncModeRelatedConfigItemVisible = (root: Element) => {
@@ -44,7 +54,7 @@ const setSyncModeRelatedConfigItemVisible = (root: Element) => {
         return;
     }
     const syncMode: Config.ISync["mode"] = Number(syncModeElement.value);
-    const isProviderOfficialAutoSync = syncMode === 1 && !needSubscribe("");
+    const isProviderOfficialAutoSync = window.siyuan.config.sync.enabled && syncMode === 1 && !needSubscribe("");
     root.querySelector(`#${CSS.escape("sync.interval")}`)?.closest(".config-item")?.classList.toggle("fn__none", !isProviderOfficialAutoSync);
     root.querySelector(`#${CSS.escape("sync.perception")}`)?.closest(".config-item")?.classList.toggle("fn__none", !(isProviderOfficialAutoSync && window.siyuan.config.sync.provider === 0 && window.siyuan.config.system.container !== "docker"));
 };

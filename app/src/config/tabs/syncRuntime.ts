@@ -5,6 +5,7 @@ import {
     updateAccountSwitchesVisibility,
 } from "./accountUi";
 import {
+    refreshSyncEnabledRelatedItems,
     refreshSyncModeRelatedItems,
     refreshSyncTabPanels,
 } from "./syncUi";
@@ -106,6 +107,9 @@ export const patchSyncConfig = (controlId: string, value: unknown) => {
             const enabled = Boolean(value) as Config.ISync["enabled"];
             fetchPost("/api/sync/setSyncEnable", {enabled}, () => {
                 window.siyuan.config.sync.enabled = enabled;
+                if (syncTabElement) {
+                    refreshSyncEnabledRelatedItems(syncTabElement);
+                }
                 processSync();
             });
             break;

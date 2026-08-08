@@ -4,8 +4,11 @@ import {
     collapseAVCellSelectionToAnchor,
     findAVItemPointIndex,
     getAVCellSelection,
+    getAVItemSelection,
     reconcileAVSelectedItemIDs,
     setAVCellSelection,
+    setAVItemAnchorState,
+    setAVItemSelectionState,
 } from "./selectionState";
 
 describe("database range selection helpers", () => {
@@ -63,6 +66,50 @@ describe("database range selection helpers", () => {
             anchor,
             focus: anchor,
             cells: [anchorCell],
+        });
+    });
+
+    it("clears the cell selection when an item selection starts", () => {
+        const blockElement = {} as HTMLElement;
+        const point = {groupID: "group-a", rowID: "row-1", colID: "col-1"};
+        setAVCellSelection(blockElement, {
+            anchor: point,
+            focus: point,
+            cells: [],
+        });
+
+        setAVItemAnchorState(blockElement, "row-2", "group-a");
+
+        assert.equal(getAVCellSelection(blockElement), undefined);
+        assert.deepEqual(getAVItemSelection(blockElement), {
+            anchorID: "row-2",
+            anchorGroupID: "group-a",
+            focusID: "row-2",
+            focusGroupID: "group-a",
+        });
+    });
+
+    it("clears the item selection when a cell selection starts", () => {
+        const blockElement = {} as HTMLElement;
+        setAVItemSelectionState(blockElement, {
+            anchorID: "row-1",
+            anchorGroupID: "group-a",
+            focusID: "row-2",
+            focusGroupID: "group-a",
+        });
+        const point = {groupID: "group-a", rowID: "row-1", colID: "col-1"};
+
+        setAVCellSelection(blockElement, {
+            anchor: point,
+            focus: point,
+            cells: [],
+        });
+
+        assert.equal(getAVItemSelection(blockElement), undefined);
+        assert.deepEqual(getAVCellSelection(blockElement), {
+            anchor: point,
+            focus: point,
+            cells: [],
         });
     });
 });

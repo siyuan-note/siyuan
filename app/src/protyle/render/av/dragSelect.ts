@@ -2,6 +2,7 @@ import {resetAVRowSelect} from "./virtualScroll";
 import {updateAVSelectionStatus} from "./row";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {clearAVItemSelectionState} from "./selectionState";
+import {clearAVCellRange} from "./rangeSelect";
 
 const isRectIntersecting = (rect: DOMRect, selectRect: DOMRect, clipRect?: DOMRect) => {
     const top = Math.max(rect.top, clipRect?.top ?? rect.top);
@@ -48,6 +49,10 @@ export const applyAVDragSelection = (blockElement: HTMLElement, selectRect: DOMR
             selectedIdsByBody.get(bodyElement)?.add(item.dataset.id);
         }
     });
+
+    if (Array.from(selectedIdsByBody.values()).some(ids => ids.size > 0)) {
+        clearAVCellRange(blockElement);
+    }
 
     selectedIdsByBody.forEach((ids, bodyElement) => {
         resetAVRowSelect(bodyElement, Array.from(ids));
